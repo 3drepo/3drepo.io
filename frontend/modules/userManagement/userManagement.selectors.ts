@@ -16,14 +16,18 @@
  */
 
 import { pick, values } from 'lodash';
+import { orderBy } from 'lodash';
 import * as queryString from 'query-string';
 import { matchPath } from 'react-router';
 import { createSelector } from 'reselect';
 import { ROUTES } from '../../constants/routes';
+import { sortByField } from '../../helpers/sorting';
 import { selectCurrentUser } from '../currentUser';
 import { selectLocation } from '../router/router.selectors';
 import { selectModels as selectModelsMap, selectProjectsList, selectTeamspaces } from '../teamspaces';
 import { getExtendedModelPermissions, getExtendedProjectPermissions, prepareUserData } from './userManagement.helpers';
+
+const orderByFullName = (users) => orderBy(users, (user) => user.lastName + ' ' + user. firstName, 'asc');
 
 export const selectUserManagementDomain = (state) => ({ ...state.userManagement });
 
@@ -40,7 +44,7 @@ export const selectCurrentTeamspace = createSelector(
 
 export const selectUsers = createSelector(
 	selectUserManagementDomain, selectCurrentTeamspace, selectCurrentUser,
-		({users}, teamspace, {username}) => users.map(prepareUserData.bind(null, teamspace, username))
+		({users}, teamspace, {username}) => orderByFullName(users).map(prepareUserData.bind(null, teamspace, username))
 );
 
 export const selectUsersSuggestions = createSelector(
@@ -57,29 +61,42 @@ export const selectProjectPermissions = createSelector(
 	getExtendedProjectPermissions
 );
 
-export const selectModels = createSelector(
-	selectUserManagementDomain, selectModelsMap, (state, modelsMap) => {
-		return values(pick(modelsMap, (state.models || [])));
+export const selectSelectedModels = createSelector(
+	selectUserManagementDomain, (state) => state.models || []
+);
+
+const  mergeEqualPermissions = (permissionsA, permissionsB: any[]) => {
+	const mergedPermission =  permissionsA.reduce((totalPermissions, currPermission) => {
+			const permissionBValue = permissionsB.find( (perm) => perm.user === currPermission.user);
+			if ((permissionBValue || {}).permission  === currPermission.permission) {
+				totalPermissions.push(currPermission);
+			}
+
+			return totalPermissions;
+		} , []);
+
+	return mergedPermission;
+};
+
+const selectUnifiedModelPermissions = createSelector(
+	selectSelectedModels, (models) => {
+		const firstPermissions = (models[0] || {}).permissions || [];
+		return models.reduce((permissions, model) => mergeEqualPermissions(permissions, model.permissions), firstPermissions);
 	}
 );
 
-// export const selectCurrentModels = createSelector(
-// 	selectUserManagementDomain, (state) => state.currentProject.currentModels || []
-// );
-
-// export const selectModelsPermissions = createSelector(
-// 	selectUserManagementDomain, (state) => state.currentProject.modelsPermissions
-// );
-
-// export const selectExtendedModelPermissions = createSelector(
-// 	selectExtendedProjectPermissions,
-// 	selectModelsPermissions,
-// 	getExtendedModelPermissions
-// );
+export const selectModelsPermissions = createSelector(
+	selectProjectPermissions,
+	selectUnifiedModelPermissions,
+	getExtendedModelPermissions
+);
 
 export const selectProjects = createSelector(
 	selectProjectsList, selectCurrentTeamspace,
-		(projects,  currentTeamspace) => projects.filter(({teamspace}) =>  teamspace === currentTeamspace)
+		(projects,  currentTeamspace) => {
+			const currentTeamspaceProjects = projects.filter(({teamspace}) =>  teamspace === currentTeamspace);
+			return sortByField(currentTeamspaceProjects , { order: 'asc', config: { field: 'name' } });
+		}
 );
 
 export const selectUrlQueryProject = createSelector(
@@ -87,6 +104,16 @@ export const selectUrlQueryProject = createSelector(
 		const { project} = queryString.parse(location.search);
 		const projectFound = projects.find(({ name }) => name === project);
 		return projectFound ? project : null;
+	}
+);
+
+export const selectProjectModels = createSelector(
+	selectProject, selectModelsMap, (project, modelsMap) => {
+		if (!project) {
+			return [];
+		}
+
+		return values(modelsMap).filter((m) => m.projectName === project._id);
 	}
 );
 

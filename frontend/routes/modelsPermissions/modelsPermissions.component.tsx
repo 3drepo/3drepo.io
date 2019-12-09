@@ -58,8 +58,7 @@ const getModelsTableRows = memoizeOne((models = [], selectedModels = []) => {
 interface IProps {
 	location: any;
 	models: any[];
-	// modelsMap: any;
-	// selectedModels: any[];
+	selectedModels: any[];
 	permissions: any[];
 	onSelectionChange: (selectedModels) => void;
 	onPermissionsChange: (modelsWithPermissions, updatedPermissions) => void;
@@ -86,9 +85,8 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 	};
 
 	public hasDisabledPermissions = (row) => {
-		const {currentUser} = this.state as IState;
-		// const {selectedModels} = this.props;
-		const selectedModels = [];
+		const { currentUser } = this.state as IState;
+		const { selectedModels } = this.props;
 
 		const hasSelectedModels = selectedModels.length;
 		const passBaseValidation = !hasSelectedModels || row.disabled || row.isOwner || row.isAdmin || row.isCurrentUser;
@@ -125,44 +123,38 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 	}
 
 	public handlePermissionsChange = (permissions) => {
-		// if (this.props.onPermissionsChange) {
-		// 	const modelsWithPermissions = this.props.selectedModels.map((selectedModel) => {
-		// 		const newPermissions = selectedModel.permissions.map((currentPermission) => {
-		// 			const memberPermission = permissions.find(({user}) => user === currentPermission.user);
-		// 			return {
-		// 				user: currentPermission.user,
-		// 				permission: memberPermission ? memberPermission.key : currentPermission.permission
-		// 			};
-		// 		}).filter(({ permission }) => permission);
+		if (this.props.onPermissionsChange) {
+			const modelsWithPermissions = this.props.selectedModels.map((selectedModel) => {
+				const newPermissions = selectedModel.permissions.map((currentPermission) => {
+					const memberPermission = permissions.find(({user}) => user === currentPermission.user);
+					return {
+						user: currentPermission.user,
+						permission: memberPermission ? memberPermission.key : currentPermission.permission
+					};
+				}).filter(({ permission }) => permission);
 
-		// 		return {
-		// 			...pick(selectedModel, ['name', 'model', 'federate', 'subModels']),
-		// 			permissions: newPermissions
-		// 		};
-		// 	});
+				return {
+					...pick(selectedModel, ['name', 'model', 'federate', 'subModels']),
+					permissions: newPermissions
+				};
+			});
 
-		// 	this.props.onPermissionsChange(modelsWithPermissions, permissions);
-		// }
-	}
-
-	public componentDidMount() {
-		// this.setState({
-		// 	modelRows: getModelsTableRows(this.props.models, this.props.selectedModels)
-		// });
+			this.props.onPermissionsChange(modelsWithPermissions, permissions);
+		}
 	}
 
 	public componentDidUpdate(prevProps) {
 		const changes = {} as IState;
 
-		if (prevProps.models.length !== this.props.models.length) {
-				const queryParams = queryString.parse(this.props.location.search);
-				if (queryParams.modelId) {
-						const selectedModel = this.props.models.find(({ model }) => model === queryParams.modelId);
-						if (selectedModel) {
-							this.props.onSelectionChange([selectedModel]);
-						}
-				}
-		}
+		// if (prevProps.models.length !== this.props.models.length) {
+		// 		const queryParams = queryString.parse(this.props.location.search);
+		// 		if (queryParams.modelId) {
+		// 				const selectedModel = this.props.models.find(({ model }) => model === queryParams.modelId);
+		// 				if (selectedModel) {
+		// 					this.props.onSelectionChange([selectedModel]);
+		// 				}
+		// 		}
+		// }
 
 		// const modelsSelectionChanged = prevProps.selectedModels.length !== this.props.selectedModels.length;
 		// if (modelsSelectionChanged) {
@@ -175,8 +167,8 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { models, permissions } = this.props;
-		const { modelRows, permissionsRevision } = this.state;
+		const { models, permissions, selectedModels } = this.props;
+		const { permissionsRevision } = this.state;
 
 		return (
 			<Container
@@ -187,7 +179,7 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 				<ModelsContainer item>
 					<CustomTable
 						cells={MODEL_TABLE_CELLS}
-						rows={modelRows}
+						rows={getModelsTableRows(models, selectedModels)}
 						onSelectionChange={this.props.onSelectionChange}
 						onSearch={this.handleModelsSearch}
 					/>
@@ -205,9 +197,9 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 								rowStateInterceptor={this.hasDisabledPermissions}
 							/>
 					{
-						// !selectedModels.length ?
-						// 	<TextOverlay content="Select a model to view the users' permissions" /> :
-						// 	null
+						!selectedModels.length ?
+							<TextOverlay content="Select a model to view the users' permissions" /> :
+							null
 					}
 				</PermissionsContainer>
 			</Container>
