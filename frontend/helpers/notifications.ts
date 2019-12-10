@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,31 +14,21 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { groupBy, sortBy, toArray } from 'lodash';
 
-import React, { ReactNodeArray } from 'react';
+/**
+ * Gets the date of the sunday thats away from the offset .
+ * If offsets == 0 is last sunday (if today is sunday returns today)
+ * If offset > 0 , the sundays from next week on
+ * If offset < 0 , the sundays before the current week
+ */
+export const getSunday = (offset: number = 0) => {
+	const sunday = new Date();
+	sunday.setDate(sunday.getDate() - sunday.getDay() + offset * 7);
+	sunday.setHours(0, 0, 0, 0);
+	return sunday;
+};
 
-import { Container, Content, Footer } from './userManagementTab.styles';
-
-interface IProps {
-	children: React.ReactChild;
-	footerLabel?: string | ReactNodeArray;
-	withHeader?: boolean;
-}
-
-export const UserManagementTab = (props: IProps) => {
-	const {footerLabel, children} = props;
-	return (
-		<>
-			<Container
-				container
-				direction="column"
-				alignItems="stretch"
-				wrap="nowrap"
-				justify="space-between"
-			>
-				<Content item header={props.withHeader}>{children}</Content>
-				{footerLabel && (<Footer item>{footerLabel}</Footer>)}
-			</Container>
-		</>
-	);
+export const groupByTeamSpace = (notifications) => {
+	return toArray(groupBy(sortBy(notifications, 'teamSpace'), 'teamSpace'));
 };

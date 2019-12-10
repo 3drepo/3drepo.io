@@ -15,7 +15,13 @@ const model = new schema.Entity('models', {}, {
 const project = new schema.Entity('projects', {
 	models: [model]
 }, {
-	idAttribute: idAttribute('_id')
+	idAttribute: idAttribute('_id'),
+	processStrategy: (value, parent) => {
+		return {
+			...value,
+			teamspace: parent.account
+		};
+	}
 });
 
 export const teamspacesSchema = new schema.Entity('teamspaces', {

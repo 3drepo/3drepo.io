@@ -129,8 +129,19 @@ const difference = (set, setsTosubtract) => {
 	return set;
 };
 
+const contains = (setA, setB) => {
+	for (const elem of setB) {
+		if (!setA.has(elem)) {
+			return false;
+		}
+	}
+
+	return true;
+};
+
 module.exports = {
 	union,
 	intersection,
-	difference
+	difference,
+	contains
 };

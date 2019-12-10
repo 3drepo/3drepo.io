@@ -18,11 +18,13 @@
 import RemoveCircle from '@material-ui/icons/RemoveCircle';
 import {
 	cond,
+	filter,
 	isEmpty,
 	isEqual,
 	isNumber,
 	matches,
 	pick,
+	pickBy,
 	values
 } from 'lodash';
 import React from 'react';
@@ -37,10 +39,13 @@ import {
 	TableButton
 } from '../components/customTable/customTable.component';
 import { FloatingActionPanel } from '../components/floatingActionPanel/floatingActionPanel.component';
+import InvitationDialog from '../components/invitationDialog/invitationDialog.container';
+import InvitationsDialog from '../components/invitationsDialog/invitationsDialog.container';
 import { JobItem } from '../components/jobItem/jobItem.component';
 import { NewUserForm } from '../components/newUserForm/newUserForm.component';
 import { UserItem } from '../components/userItem/userItem.component';
 import { UserManagementTab } from '../components/userManagementTab/userManagementTab.component';
+import { PendingInvites } from './users.styles';
 
 const USERS_TABLE_CELLS = [
 	{
@@ -76,14 +81,21 @@ const getPreparedJobs = (jobs) => {
 interface IProps {
 	users: any[];
 	usersSuggestions: any[];
+	projects: any[];
+	models: any;
 	limit: any;
 	jobs: any[];
+	licencesCount: number;
+	invitationsCount: number;
+	userNotExists?: boolean;
+	currentTeamspace?: string;
 	addUser: (user) => void;
 	removeUser: (username) => void;
 	updateJob: (username, job) => void;
 	updatePermissions: (permissions) => void;
 	onUsersSearch: (searchText) => void;
 	clearUsersSuggestions: () => void;
+	showDialog: (config: any) => void;
 }
 
 interface IState {
@@ -103,6 +115,7 @@ const teamspacePermissions = values(TEAMSPACE_PERMISSIONS).map(
 );
 
 export class Users extends React.PureComponent<IProps, IState> {
+	public formRef = React.createRef<any>();
 	public static defaultProps = {
 		jobs: [],
 		users: []
@@ -211,22 +224,47 @@ export class Users extends React.PureComponent<IProps, IState> {
 			changes.limit = this.props.limit;
 		}
 
+		const userNotExitstsChanged = prevProps.userNotExists !== this.props.userNotExists;
+		if (userNotExitstsChanged && this.formRef.current) {
+			this.formRef.current.setUserNotExists(this.props.userNotExists);
+		}
+
 		if (!isEmpty(changes)) {
 			this.setState(changes);
 		}
 	}
 
+	public handleInvitationOpen = (email, job, isAdmin, permissions = []) => {
+		this.props.showDialog({
+			title: 'Invite user',
+			template: InvitationDialog,
+			data: {
+				email,
+				job,
+				isAdmin,
+				jobs: this.state.jobs,
+				projects: pickBy(this.props.projects, ({ teamspace }) => teamspace === this.props.currentTeamspace),
+				models: this.props.models,
+				permissions,
+			},
+			DialogProps: {
+				maxWidth: false,
+			}
+		});
+	}
+
 	public renderNewUserFormPanel = ({ closePanel }) => {
-		const { limit } = this.state;
-		const { users, usersSuggestions, clearUsersSuggestions, onUsersSearch } = this.props;
+		const { usersSuggestions, clearUsersSuggestions, onUsersSearch } = this.props;
 
 		const formProps = {
-			title: this.getFooterLabel(users, limit),
+			ref: this.formRef,
+			title: this.getFooterLabel(),
 			jobs: this.state.jobs,
 			users: usersSuggestions,
 			onSave: this.onSave,
 			clearSuggestions: clearUsersSuggestions,
-			getUsersSuggestions: onUsersSearch
+			getUsersSuggestions: onUsersSearch,
+			onInvitationOpen: this.handleInvitationOpen
 		};
 		return <NewUserForm {...formProps} onCancel={closePanel} />;
 	}
@@ -250,25 +288,49 @@ export class Users extends React.PureComponent<IProps, IState> {
 		);
 	}
 
+	public renderPendingInvites = () => {
+		const { invitationsCount, showDialog } = this.props;
+		const onClick = (e: any) => {
+			e.preventDefault();
+			e.stopPropagation();
+			showDialog({
+				title: 'Invitations',
+				template: InvitationsDialog,
+				data: {
+					onInvitationOpen: this.handleInvitationOpen,
+					projects: filter(this.props.projects, ({ teamspace }) => teamspace === this.props.currentTeamspace),
+				}
+			});
+		};
+		return ['(', <PendingInvites key="pending" onClick={onClick}>{invitationsCount} pending</PendingInvites>, ')'];
+	}
+
 	/**
 	 * Generate licences summary
 	 */
-	public getFooterLabel = (users = [], limit = 0) => {
-		if (!users) {
+	public getFooterLabel = (withInvitations = false) => {
+		const { licencesCount, users } = this.props;
+		const { limit } = this.state;
+
+		if (!licencesCount) {
 			return '';
 		}
 
 		const limitValue = isNumber(limit) ? limit : 'unlimited';
-		return `Assigned licences: ${users.length} out of ${limitValue}`;
+
+		return [
+			`Assigned licences: ${users.length} `,
+			withInvitations ? this.renderPendingInvites() : null,
+			` out of ${limitValue}`
+		];
 	}
 
 	public render() {
-		const { rows, containerElement, limit } = this.state;
-		const { users } = this.props;
+		const { rows, containerElement } = this.state;
 
 		return (
 			<>
-				<UserManagementTab footerLabel={this.getFooterLabel(users, limit)}>
+				<UserManagementTab footerLabel={this.getFooterLabel(true)}>
 					<CustomTable cells={USERS_TABLE_CELLS} rows={rows} />
 				</UserManagementTab>
 				{containerElement && this.renderNewUserForm(containerElement)}

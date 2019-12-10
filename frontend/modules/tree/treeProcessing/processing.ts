@@ -417,7 +417,7 @@ export class Processing {
 					}
 				});
 			} else {
-				const meshes = this.meshesByNodeId[node.namespacedId][node._id];
+				const meshes = this.meshesByNodeId[node.namespacedId] ? this.meshesByNodeId[node.namespacedId][node._id] : [];
 				if (meshes && meshes.length) {
 					if (!meshList[node.namespacedId]) {
 						meshList[node.namespacedId] = {

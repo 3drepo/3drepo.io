@@ -16,5 +16,6 @@ export * from './groups';
 export * from './meta';
 export * from './issues';
 export * from './tree';
+export * from './invitations';
 
 export default API;

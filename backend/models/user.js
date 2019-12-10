@@ -428,6 +428,7 @@ schema.statics.updatePassword = function (logger, username, oldPassword, token, 
 schema.statics.usernameRegExp = /^[a-zA-Z][\w]{1,63}$/;
 
 schema.statics.createUser = function (logger, username, password, customData, tokenExpiryTime) {
+	const Invitations =  require("./invitations");
 
 	if (customData) {
 		const validityChecks = [
@@ -502,7 +503,7 @@ schema.statics.createUser = function (logger, username, password, customData, to
 				}).then(user => {
 					user.customData.billing.billingInfo.changeBillingAddress(billingInfo);
 					return user.save();
-				}).then(() => {
+				}).then(user => Invitations.unpack(user)).then(() => {
 					return Promise.resolve(cleanedCustomData.emailVerifyToken);
 				});
 			});
@@ -1176,10 +1177,8 @@ schema.methods.removeTeamMember = function (username, cascadeRemove) {
 };
 
 schema.methods.addTeamMember = function (user, job, permissions) {
-	return User.getAllUsersInTeamspace(this.user).then((userArr) => {
-		const limits = this.customData.billing.getSubscriptionLimits();
-
-		if (limits.collaboratorLimit !== "unlimited" && userArr.length >= limits.collaboratorLimit) {
+	return  this.hasReachedLicenceLimit().then((reachedLimit) => {
+		if (reachedLimit) {
 			return Promise.reject(responseCodes.LICENCE_LIMIT_REACHED);
 		} else {
 			return User.findByUserName(user).then((userEntry) => {
@@ -1235,6 +1234,19 @@ schema.statics.getQuotaInfo = function (teamspace) {
 	});
 };
 
+schema.methods.hasReachedLicenceLimit = async function () {
+	const Invitations =  require("./invitations");
+	const [userArr, invitations] = await Promise.all([
+		User.getAllUsersInTeamspace(this.user),
+		Invitations.getInvitationsByTeamspace(this.user)
+	]);
+
+	const limits = this.customData.billing.getSubscriptionLimits();
+
+	const seatedLicences = userArr.length + invitations.length;
+	return (limits.collaboratorLimit !== "unlimited" &&  seatedLicences >= limits.collaboratorLimit);
+};
+
 schema.statics.getMembers = function (teamspace) {
 	const promises = [];
 
@@ -1273,7 +1285,7 @@ schema.statics.getMembers = function (teamspace) {
 schema.statics.getAllUsersInTeamspace = function (teamspace) {
 	return this.findUsersInTeamspace(teamspace, {user: 1}).then(users => {
 		const results = users.map(({user}) => user);
-		return Promise.resolve(results);
+		return results;
 	});
 };
 

@@ -15,20 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { pick, take, values } from 'lodash';
+import { isEmpty, pick, values } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { selectCurrentUser } from '../currentUser';
-import { DialogActions } from '../dialog/dialog.redux';
+import { DialogActions } from '../dialog';
 import { JobsActions } from '../jobs';
 import { SnackbarActions } from '../snackbar';
-import { selectModels, selectProjects, selectTeamspacesWithAdminAccess, TeamspacesTypes } from '../teamspaces';
+import { selectProjects, selectTeamspacesWithAdminAccess } from '../teamspaces';
 import {
 	selectCurrentProject,
 	selectCurrentTeamspace,
+	selectInvitations,
+	selectUserNotExists,
 	UserManagementActions,
-	UserManagementTypes
+	UserManagementTypes,
 } from '../userManagement';
 
 import {
@@ -44,8 +46,9 @@ export function* fetchTeamspaceDetails({ teamspace }) {
 		const teamspaceDetails = teamspaces.find(({ account }) => account === teamspace) || {};
 		const currentUser = yield select(selectCurrentUser);
 
-		const [users, quota] = yield all([
+		const [users, invitations, quota] = yield all([
 			API.fetchUsers(teamspace),
+			API.fetchInvitations(teamspace),
 			API.getQuotaInfo(teamspace),
 			put(JobsActions.fetchJobs(teamspace)),
 			put(JobsActions.fetchJobsColors(teamspace))
@@ -57,6 +60,7 @@ export function* fetchTeamspaceDetails({ teamspace }) {
 		yield put(UserManagementActions.fetchTeamspaceDetailsSuccess(
 			teamspaceDetails,
 			users.data,
+			invitations.data,
 			currentUser.username,
 			quota.data.collaboratorLimit
 		));
@@ -68,6 +72,11 @@ export function* fetchTeamspaceDetails({ teamspace }) {
 
 export function* addUser({ user }) {
 	try {
+		const isUserNotExists = yield select(selectUserNotExists);
+		if (isUserNotExists) {
+			yield put(UserManagementActions.setUserNotExists(false));
+		}
+
 		const teamspace = yield select(selectCurrentTeamspace);
 		const { data } = yield API.addUser(teamspace, user);
 		const currentUser = yield select(selectCurrentUser);
@@ -75,7 +84,58 @@ export function* addUser({ user }) {
 		yield put(UserManagementActions.addUserSuccess(data, currentUser.username));
 		yield put(SnackbarActions.show('User added'));
 	} catch (error) {
-		yield put(DialogActions.showEndpointErrorDialog('add', 'licence', error));
+		if (error.response.status === 404) {
+			yield put(UserManagementActions.setUserNotExists(true));
+		} else {
+			yield put(DialogActions.showEndpointErrorDialog('add', 'licence', error));
+		}
+	}
+}
+
+export function* sendInvitation({ email, job, isAdmin, permissions, onFinish, onError }) {
+	try {
+		const invitation = { email, job } as any;
+		invitation.permissions = {};
+
+		if (isAdmin) {
+			invitation.permissions.teamspace_admin = true;
+		} else {
+			invitation.permissions.projects = permissions.map(({ project, models, isAdmin: isProjectAdmin }) => {
+				const projectPermissions = { project } as any;
+				if (isProjectAdmin) {
+					projectPermissions.project_admin = true;
+					return projectPermissions;
+				}
+
+				projectPermissions.models = models.map(({ model, key: permission }) => ({
+					model, permission
+				}));
+				return projectPermissions;
+			});
+		}
+
+		const teamspace = yield select(selectCurrentTeamspace);
+		const pendingInvitations = yield select(selectInvitations);
+		const isInvitationNotOnPendingList = isEmpty(pendingInvitations.filter((item) => (item.email === invitation.email)));
+		const actionMessage = isInvitationNotOnPendingList ? 'Invitation sent' : 'Invitation updated';
+		const { data: savedInvitation } = yield API.sendInvitation(teamspace, invitation);
+		onFinish();
+		yield put(UserManagementActions.sendInvitationSuccess(savedInvitation));
+		yield put(SnackbarActions.show(actionMessage));
+	} catch (error) {
+		onError();
+		yield put(DialogActions.showEndpointErrorDialog('sent', 'invitation', error));
+	}
+}
+
+export function* removeInvitation({ email }) {
+	try {
+		const teamspace = yield select(selectCurrentTeamspace);
+		yield API.removeInvitation(teamspace, email);
+		yield put(UserManagementActions.removeInvitationSuccess(email));
+		yield put(SnackbarActions.show('Invitation removed'));
+	} catch (error) {
+		yield put(DialogActions.showEndpointErrorDialog('remove', 'invitation', error));
 	}
 }
 
@@ -268,6 +328,8 @@ export default function* UserManagementSaga() {
 	yield takeLatest(UserManagementTypes.UPDATE_PERMISSIONS, updatePermissions);
 	yield takeLatest(UserManagementTypes.GET_USERS_SUGGESTIONS, getUsersSuggestions);
 	yield takeLatest(UserManagementTypes.UPDATE_JOB, updateUserJob);
+	yield takeLatest(UserManagementTypes.REMOVE_INVITATION, removeInvitation);
+	yield takeLatest(UserManagementTypes.SEND_INVITATION, sendInvitation);
 
 	// Models
 	yield takeLatest(UserManagementTypes.FETCH_MODELS_PERMISSIONS, fetchModelsPermissions);

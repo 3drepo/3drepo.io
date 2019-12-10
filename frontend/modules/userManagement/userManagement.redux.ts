@@ -23,13 +23,14 @@ import { sortByField } from '../../helpers/sorting';
 
 export const { Types: UserManagementTypes, Creators: UserManagementActions } = createActions({
 	fetchTeamspaceDetails: ['teamspace'],
-	fetchTeamspaceDetailsSuccess: ['teamspace', 'users', 'currentUser', 'collaboratorLimit'],
+	fetchTeamspaceDetailsSuccess: ['teamspace', 'users', 'invitations', 'currentUser', 'collaboratorLimit'],
 	setPendingState: ['isPending'],
 	addUser: ['user'],
 	addUserSuccess: ['user', 'currentUser'],
 	removeUser: ['username'],
 	removeUserCascade: ['username'],
 	removeUserSuccess: ['username'],
+	setUserNotExists: ['userNotExists'],
 	setTeamspace: ['teamspace'],
 	updateJob: ['username', 'job'],
 	updateUserJobSuccess: ['username', 'job'],
@@ -46,7 +47,12 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	fetchModelPermissionsSuccess: ['selectedModels'],
 	updateModelsPermissions: ['modelsWithPermissions', 'permissions'],
 	updateModelsPermissionsPre: ['modelsWithPermissions', 'permissions'],
-	updateModelPermissionsSuccess: ['updatedModels', 'permissions']
+	updateModelPermissionsSuccess: ['updatedModels', 'permissions'],
+	sendInvitation: ['email', 'job', 'isAdmin', 'permissions', 'onFinish', 'onError'],
+	removeInvitationSuccess: ['email'],
+	removeInvitation: ['email'],
+	sendInvitationSuccess: ['savedInvitation']
+
 }, { prefix: 'USER_MANAGEMENT/' });
 
 export const INITIAL_STATE = {
@@ -56,6 +62,7 @@ export const INITIAL_STATE = {
 	models: [],
 	fedModels: [],
 	users: [],
+	invitations: [],
 	usersSuggestions: [],
 	usersPermissions: [],
 	jobs: [],
@@ -65,7 +72,8 @@ export const INITIAL_STATE = {
 		permissions: [],
 		modelsPermissions: [],
 		currentModels: []
-	}
+	},
+	userNotExists: false
 };
 
 /**
@@ -100,12 +108,13 @@ export const setProjectPermissionsToUsers = (state, { projectPermissions }) => {
 };
 
 export const fetchTeamspaceDetailsSuccess = (state = INITIAL_STATE, action) => {
-	const { teamspace, currentUser } = action;
+	const { teamspace, currentUser, invitations } = action;
 	const users = action.users.map(prepareUserData.bind(null, teamspace.name, currentUser));
 
 	return {
 		...INITIAL_STATE,
 		users,
+		invitations,
 		isPending: false,
 		...pick(teamspace, ['models', 'permissions', 'isAdmin', 'fedModels']),
 		projects: sortByField(teamspace.projects, { order: 'asc', config: { field: 'name' } }),
@@ -132,6 +141,19 @@ export const removeUserSuccess = (state = INITIAL_STATE, { username }) => {
 		return user !== username;
 	});
 	return {...state, users};
+};
+
+export const removeInvitationSuccess = (state = INITIAL_STATE, { email }) => {
+	const invitations = state.invitations.filter(({ email: inviteEmail }) => {
+		return inviteEmail !== email;
+	});
+
+	return {...state, invitations};
+};
+
+export const sendInvitationSuccess = (state = INITIAL_STATE, { savedInvitation }) => {
+	const invitations = [...state.invitations.filter(({ email }) => email !== savedInvitation.email), savedInvitation];
+	return {...state, invitations};
 };
 
 export const setTeamspace = (state = INITIAL_STATE, { teamspace }) => {
@@ -169,6 +191,10 @@ export const getUsersSuggestionsSuccess = (state = INITIAL_STATE, { suggestions 
 
 export const clearUsersSuggestions = (state = INITIAL_STATE, { suggestions }) => {
 	return {...state, usersSuggestions: []};
+};
+
+export const setUserNotExists = (state = INITIAL_STATE, { userNotExists }) => {
+	return {...state, userNotExists};
 };
 
 export const setProject = (state = INITIAL_STATE, { project }) => {
@@ -237,6 +263,9 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[UserManagementTypes.UPDATE_PERMISSIONS_SUCCESS]: updatePermissionsSuccess,
 	[UserManagementTypes.GET_USERS_SUGGESTIONS_SUCCESS]: getUsersSuggestionsSuccess,
 	[UserManagementTypes.CLEAR_USERS_SUGGESTIONS]: clearUsersSuggestions,
+	[UserManagementTypes.REMOVE_INVITATION_SUCCESS]: removeInvitationSuccess,
+	[UserManagementTypes.SEND_INVITATION_SUCCESS]: sendInvitationSuccess,
+	[UserManagementTypes.SET_USER_NOT_EXISTS]: setUserNotExists,
 
 	// Project
 	[UserManagementTypes.SET_PROJECT]: setProject,

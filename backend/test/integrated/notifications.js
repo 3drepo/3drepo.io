@@ -17,6 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { deleteNotifications, fetchNotification } = require("../helpers/notifications");
+const { loginUsers } = require("../helpers/users.js");
 const { createModel, createFederation, updateFederation } = require("../helpers/models");
 const request = require("supertest");
 const bouncerHelper = require("../helpers/bouncerHelper");
@@ -26,7 +27,7 @@ const async = require("async");
 const newId = require("uuid/v1");
 
 
-const agents = {};
+let agents = {};
 
 describe("Notifications", function() {
 	this.timeout(60000);
@@ -92,33 +93,16 @@ describe("Notifications", function() {
 			usernames.map(username => deleteNotifications(agents[username]))
 			,next);
 
-	before(function(done) {
-		server = app.listen(8080, function () {
-			async.series([
-				(next) => {
-					async.parallel(
-						usernames.map(username => next => {
-							const agent = request.agent(server);
-							agent.post("/login")
-								.send({ username, password})
-								.expect(200, function(err, res) {
-									next(err);
-								});
 
-							agents[username] = agent;
-						}),next);
-				},
-				deleteAllNotifications]
-			,done);
-		});
-	})
-
-	after(function(done) {
-		server.close(function() {
-			console.log("API test server is closed");
-			done();
-		});
+	before((done) => {
+		loginUsers(usernames, password).then(
+			loggedInAgents => {
+				agents = loggedInAgents;
+				deleteAllNotifications(done);
+			});
 	});
+
+	after(() => agents.done());
 
 	// ========================================
 	// Test suite for assign issue notification
