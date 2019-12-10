@@ -16,6 +16,8 @@
  */
 
 import * as React from 'react';
+
+import { useFocus } from '../../../../../hooks';
 import { EDITABLE_TEXTAREA_NAME, EDITABLE_TEXTAREA_PLACEHOLDER } from '../../screenshotDialog.helpers';
 import { AssistantElement, Textarea } from './editableText.styles';
 
@@ -27,12 +29,14 @@ interface IProps {
 }
 
 export const EditableText = ({ value, styles, handleTextEdit, handleTextareaKeyDown }: IProps) => {
-	const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+	// const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+	const [textareaRef, setTextareaFocus] = useFocus();
 	const assistantElementRef = React.useRef<HTMLPreElement>(null);
 	const [initialTextareaWidth, setInitialTextareaWidth] = React.useState<number>(0);
 	const [additionalStyles, setAdditionalStyles] = React.useState<object>({});
 
 	React.useEffect(() => {
+		setTextareaFocus();
 		if (textareaRef.current) {
 			const currentTextarea = textareaRef.current;
 			currentTextarea.setAttribute('size', currentTextarea.getAttribute('placeholder').length.toString());
