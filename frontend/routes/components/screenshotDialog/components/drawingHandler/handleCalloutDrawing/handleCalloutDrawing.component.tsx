@@ -17,14 +17,16 @@
 
 import { clamp, isEmpty } from 'lodash';
 import React from 'react';
-import { WHITE } from '../../../../../../styles';
+
 import { createDrawnLine, createShape } from '../../drawing/drawing.helpers';
 import { SHAPE_TYPES } from '../../shape/shape.constants';
 import {
 	HandleBaseDrawing, IHandleBaseDrawingProps, IHandleBaseDrawingStates,
 } from '../handleBaseDrawing/handleBaseDrawing.component';
+import { getLinePoints, updateTextBoxStyles } from './handleCalloutDrawing.helpers';
 
 export interface IHandleCalloutDrawingProps extends IHandleBaseDrawingProps {
+	textSize: number;
 	activeCalloutShape: number;
 	handleNewDrawnShape: (shape: number, attrs, updateState?: boolean) => void;
 	handleNewDrawnLine: (line, type?, updateState?: boolean) => void;
@@ -128,20 +130,38 @@ export class HandleCalloutDrawing
 		this.props.stage.off('mousedown', this.handleMouseDownLine);
 	}
 
-	public handleMouseDownLine = () => {
-		this.layer.clear();
-		this.layer.clearCache();
-		this.layer.destroyChildren();
-		this.layer.batchDraw();
-
+	public saveCallout = () => {
 		(async () => {
 			const normalizeShape = this.activeShape === SHAPE_TYPES.DOT ? SHAPE_TYPES.CIRCLE : this.activeShape;
 			await this.props.handleNewDrawnShape(normalizeShape, this.shape, false);
 			await this.props.handleNewDrawnLine(this.lastLine, '', false);
 			await this.props.handleNewDrawnShape(SHAPE_TYPES.RECTANGLE, this.lastShape, false);
+			this.setState({ isCurrentlyDrawn: false });
+		})();
+	}
+
+	public handleMouseDownLine = () => {
+		// this.layer.clear();
+		// this.layer.clearCache();
+		// this.layer.destroyChildren();
+		// this.layer.batchDraw();
+
+		(async () => {
+			// const normalizeShape = this.activeShape === SHAPE_TYPES.DOT ? SHAPE_TYPES.CIRCLE : this.activeShape;
+			// await this.props.handleNewDrawnShape(normalizeShape, this.shape, false);
+			// await this.props.handleNewDrawnLine(this.lastLine, '', false);
+			// await this.props.handleNewDrawnShape(SHAPE_TYPES.RECTANGLE, this.lastShape, false);
 			const updatedState = await this.props.handleNewText(this.pointerPosition, false);
 			// this.setState({ isCurrentlyDrawn: false });
-			updatedState();
+			updatedState(
+				this.lastShape,
+				() => {
+					console.warn('getLinePoints(this.shape, this.lastShape):', getLinePoints(this.shape, this.lastShape));
+					this.lastLine.points(getLinePoints(this.shape, this.lastShape));
+					this.layer.batchDraw();
+				},
+				() => this.saveCallout(),
+			);
 		})();
 	}
 
@@ -170,87 +190,11 @@ export class HandleCalloutDrawing
 				this.lastShape = createShape(SHAPE_TYPES.RECTANGLE, commonProps, initialPositionProps);
 				this.layer.add(this.lastShape);
 			} else {
-				this.lastLine.points(this.getShapePoints(this.shape, this.lastShape));
-				this.lastShape.x(this.pointerPosition.x - 10);
-				this.lastShape.y(this.pointerPosition.y - 10);
-				this.lastShape.width(210);
-				this.lastShape.height(60);
-				this.lastShape.fill(WHITE);
-
+				this.lastLine.points(getLinePoints(this.shape, this.lastShape));
+				updateTextBoxStyles(this.lastShape, this.pointerPosition, this.props.textSize);
 				this.layer.batchDraw();
 			}
-
 		}
-	}
-
-	public getShapePoints = (shapeFrom, shapeTo) => {
-		let dx;
-		let dy;
-		if (shapeFrom.getClassName() === 'Circle') {
-			dx = (shapeTo.x() + shapeTo.width() / 2) - shapeFrom.x();
-			dy = (shapeTo.y() + shapeTo.height() / 2) - shapeFrom.y();
-		} else {
-			dx = (shapeTo.x() + shapeTo.width() / 2) - (shapeFrom.x() + shapeFrom.width() / 2);
-			dy = (shapeTo.y() + shapeTo.height() / 2) - (shapeFrom.y() + shapeFrom.height() / 2);
-		}
-		const angle = Math.atan2(-dy, dx);
-		const radiusFrom = shapeFrom.attrs.radius;
-
-		let pointsFrom = [];
-		let pointsTo = [];
-
-		if (shapeFrom.getClassName() === 'Circle') {
-			pointsFrom = [
-				shapeFrom.x() + -radiusFrom * Math.cos(angle + Math.PI),
-				shapeFrom.y() + radiusFrom * Math.sin(angle + Math.PI),
-			];
-		} else {
-			if (angle <= 0.75 && angle >= -0.75) {
-				pointsFrom = [
-					shapeFrom.x(),
-					shapeFrom.y() + shapeFrom.height() / 2,
-				];
-			} else if (angle > 0.75 && angle <= 2.25) {
-				pointsFrom = [
-					shapeFrom.x() + shapeFrom.width() / 2,
-					shapeFrom.y()
-				];
-			} else if (angle < -0.75 && angle >= -2.25) {
-				pointsFrom = [
-					shapeFrom.x() + shapeFrom.width() / 2,
-					shapeFrom.y() + shapeFrom.height(),
-				];
-			} else {
-				pointsFrom = [
-					shapeFrom.x() + shapeFrom.width(),
-					shapeFrom.y() + shapeFrom.height() / 2,
-				];
-			}
-		}
-
-		if (angle <= 0.75 && angle >= -0.75) {
-			pointsTo = [
-				shapeTo.x(),
-				shapeTo.y() + shapeTo.height() / 2,
-			];
-		} else if (angle > 0.75 && angle <= 2.25) {
-			pointsTo = [
-				shapeTo.x() + shapeTo.width() / 2,
-				shapeTo.y() + shapeTo.height(),
-			];
-		} else if (angle < -0.75 && angle >= -2.25) {
-			pointsTo = [
-				shapeTo.x() + shapeTo.width() / 2,
-				shapeTo.y(),
-			];
-		} else {
-			pointsTo = [
-				shapeTo.x() + shapeTo.width(),
-				shapeTo.y() + shapeTo.height() / 2,
-			];
-		}
-
-		return [ ...pointsFrom, ...pointsTo];
 	}
 
 	// SHAPE
@@ -326,9 +270,5 @@ export class HandleCalloutDrawing
 
 		this.lastShape = createShape(this.activeShape, commonProps, initialPositionProps);
 		this.layer.add(this.lastShape);
-	}
-
-	public render() {
-		return null;
 	}
 }

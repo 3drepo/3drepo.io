@@ -99,6 +99,7 @@ export const getNewText = (color, size, position) => {
 
 export const getTextStyles = (target) => {
 	const textPosition = target.getAbsolutePosition();
+	console.warn('{target.width():', target.width());
 	const styles = {
 		color: target.attrs.fill,
 		fontSize: target.attrs.fontSize,

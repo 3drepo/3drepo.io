@@ -55,11 +55,8 @@ export class Drawing extends React.PureComponent <IProps, any> {
 	}
 
 	get isDrawingPolygonMode() {
-		return this.props.mode === MODES.POLYGON;
-	}
-
-	get isDrawingCalloutMode() {
-		return this.props.mode === MODES.CALLOUT;
+		return false;
+		// return this.props.mode === MODES.POLYGON;
 	}
 
 	get layer() {
@@ -88,7 +85,7 @@ export class Drawing extends React.PureComponent <IProps, any> {
 			}
 
 			if (this.props.mode === MODES.POLYGON && prevProps.mode !== MODES.POLYGON) {
-				this.subscribeDrawingPolygonEvents();
+				// this.subscribeDrawingPolygonEvents();
 			}
 
 			if (!this.isDrawingLineMode && (prevProps.mode === MODES.BRUSH || prevProps.mode === MODES.ERASER)) {
@@ -100,7 +97,7 @@ export class Drawing extends React.PureComponent <IProps, any> {
 			}
 
 			if (this.props.mode !== MODES.POLYGON && prevProps.mode === MODES.POLYGON) {
-				this.unsubscribeDrawingPolygonEvents();
+				// this.unsubscribeDrawingPolygonEvents();
 			}
 		}
 	}

@@ -86,6 +86,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			width: MIN_DIALOG_WIDTH,
 		},
 		selectedObjectName: '',
+		textBox: null,
 		textEditable: {
 			visible: false,
 			value: '',
@@ -342,6 +343,10 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			newState.mode = MODES.CALLOUT;
 		}
 
+		if (this.state.selectedObjectName) {
+			newState.selectedObjectName = '';
+		}
+
 		this.setState(newState);
 	}
 
@@ -402,6 +407,13 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public handleTextEdit = ({ target }) => {
+		// if (this.state.textBox) {
+		// 	const { ref, refresh, save } = this.state.textBox;
+		//
+		// 	ref.width(Math.max(textareaWidth, Number(target.dataset.width)));
+		// 	refresh();
+		// }
+
 		this.setState({
 			textEditable: {
 				...this.state.textEditable,
@@ -451,7 +463,11 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			this.setState({selectedObjectName, mode: MODES.TEXT});
 			document.body.style.cursor = 'crosshair';
 		} else {
-			return () => this.setState({selectedObjectName, mode: MODES.TEXT});
+			return (textBox, refresh, save) => this.setState({selectedObjectName, mode: MODES.TEXT, textBox: {
+				ref: textBox,
+				refresh,
+				save,
+			} });
 		}
 	}
 
@@ -573,6 +589,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 							height={this.state.stage.height}
 							width={this.state.stage.width}
 							size={this.state.strokeWidth}
+							textSize={this.state.fontSize}
 							color={this.state.color}
 							mode={this.state.mode}
 							layer={this.drawingLayerRef}

@@ -16,14 +16,14 @@
  */
 
 import React, { useMemo } from 'react';
-// import { between } from '../../../../../helpers/between';
-import { ELEMENT_TYPES, MODES } from '../../screenshotDialog.helpers';
-// import { createDrawnLine, createShape, getDrawFunction } from './drawing.helpers';
+import { MODES } from '../../screenshotDialog.helpers';
 import { HandleCalloutDrawing } from './handleCalloutDrawing/handleCalloutDrawing.component';
+import { HandlePolygonDrawing } from './handlePolygonDrawing/handlePolygonDrawing.component';
 
 interface IProps {
 	color: string;
 	size: number;
+	textSize: number;
 	mode: string;
 	height: number;
 	width: number;
@@ -35,14 +35,13 @@ interface IProps {
 	disabled: boolean;
 	handleNewDrawnShape: (shape: number, attrs, updateState?: boolean) => void;
 	handleNewDrawnLine: (line, type?, updateState?: boolean) => void;
-	handleNewText: (position, updateState?: boolean) => () => any;
+	handleNewText: (position, updateState?: boolean) => (ref: {}, refresh: () => void, save: () => void) => any;
 }
 
 const COMPONENTS_MAP = {
 	[MODES.CALLOUT]: HandleCalloutDrawing,
+	[MODES.POLYGON]: HandlePolygonDrawing,
 };
-
-const Span = (props) => (<span {...props} />);
 
 export const DrawingHandler = (props: IProps) => {
 	const { mode } = props;
