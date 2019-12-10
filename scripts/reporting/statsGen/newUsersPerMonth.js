@@ -67,8 +67,10 @@ const reportNewUsersPerMonth = async (dbConn, stream) => {
 	});
 
 	if(currentMonth !== -1) {
+		const now = new Date();
+		const targetDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 		total += currentCount;
-		writeNewUserEntry(stream, currentYear, currentMonth, currentCount, total);
+		writeNewUserEntry(stream, currentYear, currentMonth, currentCount, total, targetDate.getMonth()+1, targetDate.getFullYear());
 	}
 }
 

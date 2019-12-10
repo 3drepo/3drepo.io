@@ -95,6 +95,19 @@ const accumulateStats = (total, current) => {
 
 }
 
+const printEmptyRows = (stream, currentM, currentY, month, year) => {
+	if(currentM !== -1) {
+		let nextM = currentM === 12? 1 : currentM +1;
+		let nextY = currentM === 12? currentY + 1: currentY;
+
+		while(!(nextM === month && nextY === year)) {
+			stream.write(`${nextY},${nextM},0,0\n`);
+			nextY = nextM === 12? nextY + 1: nextY;
+			nextM = nextM === 12? 1 : nextM +1;
+		}
+	}
+}
+
 const printStats = (stream, data) => {
 	stream.write('Year,Month,#Issues,#Revisions\n');
 	let lastYear = -1, lastMonth = -1;
@@ -102,21 +115,17 @@ const printStats = (stream, data) => {
 		const year = parseInt(_year);
 		Object.keys(data[year]).forEach((_month) => {
 			const month = parseInt(_month);
-			if(lastMonth !== -1) {
-				let nextM = lastMonth === 12? 1 : lastMonth +1;
-				let nextY = lastMonth === 12? lastYear + 1: lastYear;
+			printEmptyRows(stream, lastMonth, lastYear, month, year);
 
-				while(nextM !== month && nextY !== year) {
-					stream.write(`${nextY},${nextM},0,0\n`);
-					nextY = nextM === 12? nextY + 1: nextY;
-					nextM = nextM === 12? 1 : nextM +1;
-				}
-			}
 			stream.write(`${year},${month},${data[year][month].issues},${data[year][month].revisions}\n`);
 			lastMonth = month;
 			lastYear = year;
 		});
 	});
+
+	const now = new Date();
+	const targetDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+	printEmptyRows(stream, lastMonth, lastYear, targetDate.getMonth()+1, targetDate.getFullYear());
 }
 
 const reportActivity = async (db, stream) => {

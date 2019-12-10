@@ -40,7 +40,7 @@ UserList.createUsersReport = async  (dbConn, folder) => {
 
 				const billing = user.customData.billing;
 				if(billing && billing.billingInfo) {
-					writeStream.write(`${billing.billingInfo.countryCode || ''},${billing.billingInfo.company||''},`);
+					writeStream.write(`${billing.billingInfo.countryCode || ''},'${billing.billingInfo.company||''}',`);
 				}
 				else {
 					writeStream.write(',,');
