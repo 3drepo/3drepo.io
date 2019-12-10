@@ -88,4 +88,5 @@ npm-debug.log.*
 
 submodules/tests
 scripts/reporting/statsGen/yarn.lock
-scripts/reporting/statsGen/*.csv
+scripts/reporting/statsGen/*/*.csv
+scripts/reporting/statsGen/*/*/*.csv
