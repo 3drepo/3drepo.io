@@ -2,7 +2,7 @@ const fs = require('fs');
 const Utils = require("./utils");
 
 const getNewIssuesByMonth = async (db, model) => {
-	const issues = await db.collection(`${model}.issues`).find({}, {created: 1}).toArray();
+	const issues = await db.collection(`${model}.issues`).find({}, {created: 1, _id: -1}).toArray();
 
 	const res = [];
 	issues.forEach((issue) => {
@@ -23,7 +23,7 @@ const getNewIssuesByMonth = async (db, model) => {
 }
 
 const getNewRevisionsByMonth = async (db, model) => {
-	const revs = await db.collection(`${model}.history`).find({}, {timestamp: 1}).toArray();
+	const revs = await db.collection(`${model}.history`).find({}, {timestamp: 1, _id: -1}).toArray();
 
 	const res = [];
 	revs.forEach((rev) => {
