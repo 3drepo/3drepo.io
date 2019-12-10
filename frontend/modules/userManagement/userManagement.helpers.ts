@@ -31,25 +31,25 @@ export const getExtendedModelPermissions = (currentUsers = [], modelPermissions 
 
 export const getExtendedProjectPermissions = (currentUsers = [], project  ) => {
 	const projectPermissions =  !project ? [] : project.permissions;
-	return projectPermissions.reduce((extendedPermissions, { user, permissions = [] }) => {
-		const userData = currentUsers.find((userDetails) => userDetails.user === user);
-
-		if (userData) {
+	return currentUsers.reduce((projectUsers, user) => {
+		const userPermission = projectPermissions.find((projectUser) => projectUser.user === user.user);
+		if (userPermission) {
+			const permissions = userPermission.permissions;
 			let projectPermissionsKey = PROJECT_ROLES_TYPES.UNASSIGNED;
-			if (userData.isAdmin) {
+			if (user.isAdmin) {
 				projectPermissionsKey = PROJECT_ROLES_TYPES.ADMINISTRATOR;
 			} else {
 				projectPermissionsKey = first(permissions) || PROJECT_ROLES_TYPES.UNASSIGNED;
 			}
 
-			extendedPermissions.push({
-				...userData,
+			projectUsers.push({
+				...user,
 				isProjectAdmin: projectPermissionsKey === PROJECT_ROLES_TYPES.ADMINISTRATOR,
 				permissions,
 				key: projectPermissionsKey
 			});
 		}
-		return extendedPermissions;
+		return projectUsers;
 	}, []);
 };
 
