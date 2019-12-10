@@ -34,7 +34,7 @@ const createReports = async(dbConn, folder) => {
 		files.push(await TSActivity.createTeamspaceActivityReport(dbConn, folder, ts.teamspace, ts.type));
 	}
 
-	await Utils.concatFiles(files, `${folder}/${Utils.generateFileName('dbStats')}`);
+	await Utils.concat(files, `${folder}/${Utils.generateFileName('dbStats')}`);
 
 }
 
