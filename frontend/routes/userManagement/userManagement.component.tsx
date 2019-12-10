@@ -118,14 +118,14 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 			teamspacesItems: teamspaces.map(({ account }) => ({ value: account }))
 		} as any;
 
+		changes.activeTab = location.pathname.replace(`${match.url}/`, '');
+
 		const teamspaceData = teamspaces.find(({ account }) => account === selectedTeamspace);
 
 		// Redirect to projects tab if user has not admin rights
-		if (teamspaceData && !teamspaceData.isAdmin && ADMIN_TABS.includes(activeTab)) {
+		if (teamspaceData && !teamspaceData.isAdmin && ADMIN_TABS.includes(changes.activeTab )) {
 			changes.activeTab = PROJECTS_TAB.path;
 			history.push(`${match.url}/${PROJECTS_TAB.path}`);
-		} else {
-			changes.activeTab = location.pathname.replace(`${match.url}/`, '');
 		}
 
 		this.setState(changes);
@@ -158,7 +158,6 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 			return <TextOverlay content="Select teamspace to enable settings" />;
 		}
 
-		/*
 		if (isLoadingTeamspace) {
 			const content = `Loading "${selectedTeamspace}" data...`;
 			return (
@@ -166,7 +165,7 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 					<Loader content={content} />
 				</LoaderContainer>
 			);
-		}*/
+		}
 
 		if (ADMIN_TABS.includes(activeTab) && !isTeamspaceAdmin) {
 			return <TextOverlay content="Not allowed to access this page" />;
