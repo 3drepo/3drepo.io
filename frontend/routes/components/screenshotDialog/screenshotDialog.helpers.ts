@@ -16,6 +16,7 @@
  */
 
 import { COLOR } from '../../../styles';
+import { initialBrushSize, initialTextSize} from './components/tools/tools.helpers.tsx';
 
 export const MODES = {
 	BRUSH: 'brush',
@@ -28,8 +29,8 @@ export const MODES = {
 export const INITIAL_VALUES = {
 	color: COLOR.RED,
 	brushColor: COLOR.PRIMARY_DARK,
-	brushSize: 8,
-	textSize: 36,
+	brushSize: initialBrushSize(),
+	textSize: initialTextSize(),
 	mode: MODES.BRUSH
 };
 
