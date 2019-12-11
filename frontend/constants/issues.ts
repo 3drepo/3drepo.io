@@ -61,8 +61,8 @@ export const ISSUE_COLORS = {
 		pinColor: PIN_COLORS.VIVID_NAVY
 	},
 	[PRIORITIES.LOW]: {
-		color: COLOR.LIGHT_GRAYISH_GREEN,
-		pinColor: PIN_COLORS.GREEN
+		color: COLOR.LIGHT_YELLOW,
+		pinColor: PIN_COLORS.VIVID_YELLOW
 	},
 	[PRIORITIES.MEDIUM]: {
 		color: COLOR.LIGHT_ORANGE,
@@ -71,7 +71,11 @@ export const ISSUE_COLORS = {
 	[PRIORITIES.HIGH]: {
 		color: COLOR.SOFT_RED,
 		pinColor: PIN_COLORS.VIVID_RED
-	}
+	},
+	[STATUSES.CLOSED]: {
+		color: COLOR.LIGHT_GRAYISH_GREEN,
+		pinColor: PIN_COLORS.GREEN
+	},
 };
 
 export const STATUSES_ICONS = {
