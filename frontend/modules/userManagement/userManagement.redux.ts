@@ -24,7 +24,8 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	fetchQuotaAndInvitationsSuccess: [ 'invitations', 'collaboratorLimit'],
 	fetchTeamspaceUsers: [],
 	fetchTeamspaceUsersSuccess: ['users'],
-	setPendingState: ['isPending'],
+	setUsersPending: ['isPending'],
+	setProjectsPending: ['isPending'],
 	addUser: ['user'],
 	addUserSuccess: ['user'],
 	removeUser: ['username'],
@@ -45,7 +46,7 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	updateProjectPermissionsSuccess: ['permissions'],
 	fetchModelsPermissions: ['models'],
 	fetchModelPermissionsSuccess: ['models'],
-	fetchJobsAndColors: [],
+	fetchCurrentTeamspaceJobsAndColors: [],
 	updateModelsPermissions: ['modelsWithPermissions', 'permissions'],
 	updateModelsPermissionsPre: ['modelsWithPermissions', 'permissions'],
 	updateModelPermissionsSuccess: ['updatedModels', 'permissions'],
@@ -61,7 +62,8 @@ export const INITIAL_STATE = {
 	users: [],
 	invitations: [],
 	usersSuggestions: [],
-	isPending: true,
+	usersPending: true,
+	projectsPending: true,
 	project: null,
 	userNotExists: false
 };
@@ -99,8 +101,12 @@ export const fetchTeamspaceUsersSuccess = (state = INITIAL_STATE, { users }) => 
 	return { ...state, users };
 };
 
-export const setPendingState = (state = INITIAL_STATE, { isPending }) => {
-	return {...state, isPending};
+export const setUsersPending = (state = INITIAL_STATE, { isPending }) => {
+	return {...state,  usersPending: isPending};
+};
+
+export const setProjectsPending = (state = INITIAL_STATE, { isPending }) => {
+	return {...state, projectsPending: isPending};
 };
 
 export const addUserSuccess = (state = INITIAL_STATE, { user, currentUser }) => {
@@ -200,7 +206,9 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[UserManagementTypes.FETCH_QUOTA_AND_INVITATIONS_SUCCESS]: fetchQuotaAndInvitationsSuccess,
 	[UserManagementTypes.FETCH_TEAMSPACE_USERS_SUCCESS]: fetchTeamspaceUsersSuccess,
 
-	[UserManagementTypes.SET_PENDING_STATE]: setPendingState,
+	[UserManagementTypes.SET_USERS_PENDING]: setUsersPending,
+	[UserManagementTypes.SET_PROJECTS_PENDING]: setProjectsPending,
+
 	[UserManagementTypes.ADD_USER_SUCCESS]: addUserSuccess,
 	[UserManagementTypes.REMOVE_USER_SUCCESS]: removeUserSuccess,
 	[UserManagementTypes.SET_TEAMSPACE]: setTeamspace,

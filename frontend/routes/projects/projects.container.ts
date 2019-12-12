@@ -22,6 +22,7 @@ import { createStructuredSelector } from 'reselect';
 import {
 	selectProject,
 	selectProjects,
+	selectProjectsPending,
 	selectUrlQueryProject,
 	UserManagementActions
 } from '../../modules/userManagement';
@@ -30,7 +31,8 @@ import { Projects } from './projects.component';
 const mapStateToProps = createStructuredSelector({
 	projects: selectProjects,
 	project: selectProject,
-	selectedProject: selectUrlQueryProject
+	selectedProject: selectUrlQueryProject,
+	isPending: selectProjectsPending
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

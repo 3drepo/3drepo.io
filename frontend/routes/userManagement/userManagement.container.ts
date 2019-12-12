@@ -22,7 +22,6 @@ import { createStructuredSelector } from 'reselect';
 
 import {
 	selectCurrentTeamspace,
-	selectIsPending,
 	selectIsTeamspaceAdmin,
 	UserManagementActions
 } from '../../modules/userManagement';
@@ -32,7 +31,7 @@ import {
 	selectCurrentTeamspace as selectDefaultTeamspace,
 	selectCurrentUser
 } from '../../modules/currentUser';
-import { selectTeamspacesList, TeamspacesActions } from '../../modules/teamspaces';
+import { selectIsPending, selectTeamspacesList, TeamspacesActions } from '../../modules/teamspaces';
 
 const mapStateToProps = createStructuredSelector({
 	defaultTeamspace: selectDefaultTeamspace,

@@ -59,7 +59,8 @@ export const INITIAL_STATE = {
 		activeSorting: SORTING_BY_LAST_UPDATED,
 		nameSortingDescending: true,
 		dateSortingDescending: true,
-	}
+	},
+	isPending: true
 };
 
 const fetchTeamspacesSuccess = (state = INITIAL_STATE, { entities }) => {

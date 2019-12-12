@@ -31,8 +31,12 @@ const orderByFullName = (users) => orderBy(users, (user) => user.lastName + ' ' 
 
 export const selectUserManagementDomain = (state) => ({ ...state.userManagement });
 
-export const selectIsPending = createSelector(
-	selectUserManagementDomain, (state) => state.isPending
+export const selectUsersPending = createSelector(
+	selectUserManagementDomain, (state) => state.usersPending
+);
+
+export const selectProjectsPending = createSelector(
+	selectUserManagementDomain, (state) => state.projectsPending
 );
 
 export const selectCurrentTeamspace = createSelector(

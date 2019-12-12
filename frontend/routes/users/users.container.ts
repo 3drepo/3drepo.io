@@ -24,9 +24,9 @@ import {
 	selectCollaboratorLimit,
 	selectCurrentTeamspace,
 	selectInvitationsCount,
-	selectIsPending,
 	selectLicensesCount,
 	selectUsers,
+	selectUsersPending,
 	selectUsersSuggestions,
 	selectUserNotExists,
 	UserManagementActions
@@ -49,7 +49,7 @@ const mapStateToProps = createStructuredSelector({
 	models: selectModels,
 	currentTeamspace: selectCurrentTeamspace,
 	selectedTeamspace: selectCurrentTeamspace,
-	isLoadingTeamspace: selectIsPending,
+	isPending: selectUsersPending,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

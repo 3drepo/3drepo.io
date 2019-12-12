@@ -21,6 +21,8 @@ import { sortByField } from '../../helpers/sorting';
 export const { Types: JobsTypes, Creators: JobsActions } = createActions({
 	fetchJobs: ['teamspace'],
 	fetchJobsColors: ['teamspace'],
+	setJobsPending: ['isPending'],
+	setColorsPending: ['isPending'],
 	createJob: ['teamspace', 'job'],
 	createJobSuccess: ['job'],
 	removeJob: ['teamspace', 'jobId'],
@@ -36,7 +38,9 @@ export const { Types: JobsTypes, Creators: JobsActions } = createActions({
 export const INITIAL_STATE = {
 	jobs: [],
 	colors: [],
-	myJob: {}
+	myJob: {},
+	jobsPending: true,
+	colorsPending: true
 };
 
 export const fetchJobsSuccess = (state = INITIAL_STATE, { jobs }) => {
@@ -82,6 +86,14 @@ export const removeJobSuccess = (state = INITIAL_STATE, { jobId }) => {
 
 export const getMyJobSuccess = (state = INITIAL_STATE, { myJob }) => {
 	return {...state, myJob};
+};
+
+export const setJobsPending = (state = INITIAL_STATE, { isPending }) => {
+	return {...state, jobsPending: isPending };
+};
+
+export const setColorsPending = (state = INITIAL_STATE, { isPending }) => {
+	return {...state, colorsPending: isPending };
 };
 
 export const reducer = createReducer(INITIAL_STATE, {

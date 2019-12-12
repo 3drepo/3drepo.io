@@ -34,3 +34,11 @@ export const selectJobsList = createSelector(
 export const selectMyJob = createSelector(
 	selectJobsDomain, (state) => state.myJob
 );
+
+export const selectJobsPending = createSelector(
+	selectJobsDomain, (state) => state.jobsPending
+);
+
+export const selectColorsPending = createSelector(
+	selectJobsDomain, (state) => state.colorsPending
+);
