@@ -106,7 +106,8 @@ export const ColorPointer = styled.div`
 	transform: translate(-3px, -6px);
 `;
 
-export const SelectedColor = styled.div`
+export const SelectedColor = styled(({ color, ...rest}) =>
+	React.createElement('div', {...rest, style : {backgroundColor: color} }))`
 	width: 55px;
 	height: 20px;
 	border: ${(props) => props.color && props.color !== COLOR.WHITE ? 0 : 1 }px solid ${COLOR.BLACK_6};
@@ -122,7 +123,7 @@ export const StyledStartAdornment = styled(InputAdornment)`
 	}
 `;
 
-export const SelectedHash = styled(Input)`
+export const SelectedHash = styled(({withOpacity, ...rest}) => React.createElement(Input, rest))`
 	&& {
 		margin-left: 25px;
 		font-weight: ${FONT_WEIGHT.NORMAL};

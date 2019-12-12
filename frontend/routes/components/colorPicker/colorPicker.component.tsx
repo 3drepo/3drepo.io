@@ -181,7 +181,7 @@ const ColorSelector = ({baseColor,  selectedColor, onColorChanged}) => {
 		blackGradient.addColorStop(1, COLORS.BLACK);
 		ctx.fillStyle = blackGradient;
 		ctx.fillRect(0, 0, width, height);
-	});
+	}, [baseColor]);
 
 	const setColor = ({nativeEvent}) => {
 		if (!dragging)  { return; }
