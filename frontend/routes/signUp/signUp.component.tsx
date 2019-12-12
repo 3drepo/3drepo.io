@@ -44,6 +44,8 @@ import {
 	TermLink
 } from './signUp.styles';
 
+import * as queryString from 'query-string';
+
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const PaperPropsStyle = {
@@ -170,6 +172,8 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const {isPending} = this.props;
+		const { email: defaultEmail } = queryString.parse(this.props.location.search) || '';
+		const defaultValues = { ...RegistrationInitialValues, email: defaultEmail, emailConfirm: defaultEmail};
 
 		return (
 			<Container
@@ -181,7 +185,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 					<Panel title="Sign up" hiddenScrollbars>
 						<Headline>Creating a 3D Repo account is free</Headline>
 						<Formik
-							initialValues={RegistrationInitialValues}
+							initialValues={defaultValues}
 							onSubmit={this.handleSubmit}
 							validationSchema={RegistrationSchema}
 							ref={this.form}
