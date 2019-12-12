@@ -68,7 +68,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public state = {
 		color: INITIAL_VALUES.color,
 		brushSize: INITIAL_VALUES.brushSize,
-		brushColor: INITIAL_VALUES.color,
 		textSize: INITIAL_VALUES.textSize,
 		mode: null,
 		activeShape: null,
@@ -151,7 +150,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 				height={this.state.stage.height}
 				width={this.state.stage.width}
 				size={this.state.brushSize}
-				color={this.state.brushColor}
+				color={this.state.color}
 				mode={this.state.mode}
 				layer={this.layerRef}
 				stage={this.stage}
@@ -258,50 +257,30 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		}
 	}
 
-	public handleBrushSizeChange = (event) => {
-		const newState = {} as any;
-		newState.brushSize = event.target.value;
-
-		if (this.state.selectedObjectName) {
-			const size = event.target.value;
-			const changedProperties = {} as any;
-
-			if (this.selectedElementType === ELEMENT_TYPES.TEXT) {
-				changedProperties.fontSize = size;
-			} else {
-				changedProperties.strokeWidth = size;
-			}
-			this.props.updateElement(this.state.selectedObjectName, changedProperties);
-		}
-
-		this.setState(newState);
+	public handleChangeObject = (attrs) => {
+		this.props.updateElement(attrs.name, attrs);
 	}
 
-	public handleTextSizeChange = ({ target: { value } }) => {
+	private updateProperty = (property: string, value: number) => {
 		if (this.state.selectedObjectName) {
-			this.props.updateElement(this.state.selectedObjectName, { fontSize: value });
+			this.props.updateElement(this.state.selectedObjectName, { [property]: value });
 		}
 
 		this.setState({
-			textSize: value,
+			[property]: value,
 		});
 	}
 
+	public handleBrushSizeChange = ({ target: { value } }) => {
+		this.updateProperty('strokeWidth', value);
+	}
+
+	public handleTextSizeChange = ({ target: { value } }) => {
+		this.updateProperty('fontSize', value);
+	}
+
 	public handleColorChange = (color) => {
-		const newState = {} as any;
-		newState.color = color;
-		newState.brushColor = color;
-
-		if (this.state.selectedObjectName) {
-			const changedProperties = {} as any;
-
-			if (this.selectedElementType === ELEMENT_TYPES.DRAWING) {
-				changedProperties.stroke = color;
-			}
-			changedProperties.color = color;
-			this.props.updateElement(this.state.selectedObjectName, changedProperties);
-		}
-		this.setState(newState);
+		this.updateProperty('color', color);
 	}
 
 	public clearCanvas = () => {
@@ -497,24 +476,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		}
 	}
 
-	public handleSelectObject = (object) => {
-		const newState = {
-			selectedObjectName: object.name,
-			brushColor: object.color || object.stroke,
-			color: object.color || object.stroke,
-			mode: object.type
-		} as any;
-
-		if (object.fontSize) {
-			newState.brushSize = object.fontSize;
-		}
-		this.setState(newState);
-	}
-
-	public handleChangeObject = (attrs) => {
-		this.props.updateElement(attrs.name, attrs);
-	}
-
 	public handleKeyDown = (e) => {
 		if (this.state.selectedObjectName && !this.state.textEditable.visible) {
 			if (e.keyCode === 8) {
@@ -536,17 +497,12 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			isSelected,
 			isVisible: element.type === ELEMENT_TYPES.TEXT ? !isTextEditing : true,
 			handleChange: (newAttrs) => this.handleChangeObject(newAttrs),
-			setShapeMode: () => {
-				this.setState({
-					mode: MODES.SHAPE
-				});
-			}
 		};
 
 		if (element.type === ELEMENT_TYPES.TEXT) {
 			return (<TextNode	key={index} {...commonProps} onEdit={this.handleOnEdit} />);
 		} else if (element.type === ELEMENT_TYPES.DRAWING) {
-			return(<DrawnLine key={index} {...commonProps} />);
+			return (<DrawnLine key={index} {...commonProps} />);
 		}
 		return (<Shape key={index} {...commonProps} />);
 	})
@@ -558,7 +514,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 				height={this.state.stage.height}
 				width={this.state.stage.width}
 				size={this.state.brushSize}
-				color={this.state.brushColor}
+				color={this.state.color}
 				mode={this.state.mode}
 				layer={this.drawingLayerRef}
 				stage={this.stage}
@@ -599,7 +555,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			onClick={this.handleToolsClick}
 			size={this.state.brushSize}
 			textSize={this.state.textSize}
-			color={this.state.brushColor}
+			color={this.state.color}
 			onDrawClick={this.setBrushMode}
 			onEraseClick={this.setEraserMode}
 			onTextClick={this.handleToolTextClick}

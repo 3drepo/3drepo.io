@@ -68,7 +68,7 @@ export const getNewDrawnLine = (lineAttrs, color, type = ELEMENT_TYPES.DRAWING) 
 	const newLine = {
 		type: ELEMENT_TYPES.DRAWING,
 		name,
-		stroke: color,
+		color,
 		rotation: 0,
 		points: lineAttrs.points,
 		lineCap: lineAttrs.lineCap,
