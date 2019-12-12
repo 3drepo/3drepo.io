@@ -864,7 +864,7 @@ export class UnityUtil {
 							forceReHighlight,
 							color: color ? color : UnityUtil.defaultHighlightColor
 						};
-						UnityUtil.toUnity('HighlightObjects', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+						UnityUtil.toUnity('HighlightObjects', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 						resolve();
 					} catch (error) {
 						reject(error);
