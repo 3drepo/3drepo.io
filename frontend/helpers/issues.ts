@@ -74,8 +74,8 @@ export const getStatusIcon = (priority, status) => {
 };
 
 export const getIssuePinColor = (issue: any) => {
-	const {priority} = issue;
-	const colorToUse = ISSUE_COLORS[priority] || ISSUE_COLORS[PRIORITIES.NONE];
+	const {priority, status} = issue;
+	const colorToUse = ISSUE_COLORS[status] || ISSUE_COLORS[priority] || ISSUE_COLORS[PRIORITIES.NONE];
 	return colorToUse.pinColor;
 };
 

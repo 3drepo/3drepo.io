@@ -17,7 +17,6 @@
 
 import * as React from 'react';
 import { Text, Transformer } from 'react-konva';
-import { EDITABLE_TEXTAREA_PLACEHOLDER } from '../../screenshotDialog.helpers';
 
 interface IProps {
 	element: any;
@@ -43,7 +42,7 @@ export const TextNode = ({ element, isSelected, handleChange, onEdit, isVisible 
 			<Text
 				ref={shape}
 				{...elementProps}
-				text={elementProps.text || EDITABLE_TEXTAREA_PLACEHOLDER}
+				text={elementProps.text}
 				fill={color}
 				draggable={isSelected && isVisible}
 				visible={isVisible}

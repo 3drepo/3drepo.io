@@ -68,7 +68,7 @@ export const getNewDrawnLine = (lineAttrs, color, type = ELEMENT_TYPES.DRAWING) 
 	const newLine = {
 		type: ELEMENT_TYPES.DRAWING,
 		name,
-		stroke: color,
+		color,
 		rotation: 0,
 		points: lineAttrs.points,
 		lineCap: lineAttrs.lineCap,
@@ -102,8 +102,6 @@ export const getTextStyles = (target) => {
 		color: target.attrs.fill,
 		fontSize: target.attrs.fontSize,
 		fontFamily: target.attrs.fontFamily,
-		width: `${target.width() - target.padding() * 2}px`,
-		height: `${target.height() - target.padding() * 2}px`,
 		textAlign: target.align(),
 		lineHeight: target.lineHeight(),
 		top: `${textPosition.y - 2}px`,
@@ -118,4 +116,4 @@ export const getTextStyles = (target) => {
 };
 
 export const EDITABLE_TEXTAREA_NAME = 'editable-textarea';
-export const EDITABLE_TEXTAREA_PLACEHOLDER = 'Sample text';
+export const EDITABLE_TEXTAREA_PLACEHOLDER = 'Type to change text...';

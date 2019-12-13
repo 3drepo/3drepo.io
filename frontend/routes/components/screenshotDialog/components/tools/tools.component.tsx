@@ -72,7 +72,6 @@ interface IProps {
 	onTextSizeChange: (size) => void;
 	onUndo: () => void;
 	onRedo: () => void;
-	onCancel: () => void;
 	onSave: () => void;
 }
 
@@ -299,12 +298,11 @@ export class Tools extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { disabled, onCancel, onClick } = this.props;
+		const { disabled, onClick } = this.props;
 
 		return (
 			<ToolsContainer onClick={onClick} disabled={disabled}>
 				{this.renderToolset(!disabled)}
-				<StyledButton onClick={onCancel} color="primary">Cancel</StyledButton>
 				{this.renderSaveButton(!disabled)}
 			</ToolsContainer>
 		);

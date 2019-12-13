@@ -608,7 +608,7 @@ const html = data => `
 
                         <td valign="top" class="mcnTextContent" style="padding: 0px 18px 9px; line-height: 150%; text-align: left;">
 
-                            <p style="text-align: left; line-height: 150%;"><span style="color:#888888"><em><strong>${data.name}</strong>(${data.company})</em>&nbsp;invites&nbsp;you to join their teamspace <strong><em>${data.teamspace}</em></strong>. Please click on the button&nbsp;below to sign up and start collaborating.</span></p>
+                            <p style="text-align: left; line-height: 150%;"><span style="color:#888888"><em><strong>${data.name}</strong> (${data.company})</em>&nbsp;invites&nbsp;you to join their teamspace <strong><em>${data.teamspace}</em></strong>. Please click on the button&nbsp;below to sign up and start collaborating.</span></p>
 
                         </td>
                     </tr>

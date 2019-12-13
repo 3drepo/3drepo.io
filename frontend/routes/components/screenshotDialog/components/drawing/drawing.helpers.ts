@@ -77,6 +77,8 @@ export const getDrawFunction = (shapeType, shape, initialPos, currentPos) => {
 		[SHAPE_TYPES.CLOUD]: () => {
 			const scaleX = Math.abs(initialPos.x - currentPos.x) / cloud.width;
 			const scaleY = Math.abs(initialPos.y - currentPos.y) / cloud.height;
+
+			shape.strokeScaleEnabled(false);
 			shape.scale({
 				x: currentPos.x > initialPos.x ? scaleX : -scaleX,
 				y: currentPos.y > initialPos.y ? scaleY : -scaleY
