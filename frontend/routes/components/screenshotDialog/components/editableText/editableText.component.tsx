@@ -22,12 +22,11 @@ import { AssistantElement, Textarea } from './editableText.styles';
 interface IProps {
 	value: string;
 	styles: any;
-	size: number;
 	handleTextEdit: (props: any) => void;
 	handleTextareaKeyDown: (props: any) => void;
 }
 
-export const EditableText = ({ value, styles, size, handleTextEdit, handleTextareaKeyDown }: IProps) => {
+export const EditableText = ({ value, styles, handleTextEdit, handleTextareaKeyDown }: IProps) => {
 	const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 	const assistantElementRef = React.useRef<HTMLPreElement>(null);
 	const [initialTextareaWidth, setInitialTextareaWidth] = React.useState<number>(0);
@@ -65,7 +64,6 @@ export const EditableText = ({ value, styles, size, handleTextEdit, handleTextar
 				id={EDITABLE_TEXTAREA_NAME}
 				name={EDITABLE_TEXTAREA_NAME}
 				placeholder={EDITABLE_TEXTAREA_PLACEHOLDER}
-				size={size}
 				value={value}
 				style={{
 					...styles,

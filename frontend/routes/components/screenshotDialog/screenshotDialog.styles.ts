@@ -17,7 +17,6 @@
 
 import { Stage as KonvaStage } from 'react-konva';
 import styled from 'styled-components';
-import { COLOR } from '../../../styles';
 
 export const Container = styled.div`
 	position: relative;
@@ -52,29 +51,6 @@ export const BackgroundImage = styled.img`
 
 export const Stage = styled(KonvaStage)`
 	position: absolute;
-`;
-
-export const Textarea = styled.textarea`
-	background: none;
-	position: absolute;
-	border: none;
-	padding: 0;
-	margin: 0;
-	resize: none;
-	outline: none;
-	overflow: hidden;
-	transform-origin: left top;
-	z-index: 3;
-
-	&:focus {
-		outline: none;
-	}
-`;
-
-export const TextPlaceholder = styled.span`
-	color: ${COLOR.BLACK_54};
-	position: absolute;
-	z-index: 1;
 `;
 
 export const StageContainer = styled.div`

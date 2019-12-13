@@ -42,6 +42,9 @@ import { Container, Stage, StageContainer } from './screenshotDialog.styles';
 const MIN_DIALOG_WIDTH = 860;
 const MIN_DIALOG_HEIGHT = 300;
 const INIT_DIALOG_HEIGHT = 600;
+const INIT_DIALOG_PADDING = 48;
+const HORIZONTAL_DIALOG_PADDING = 2 * INIT_DIALOG_PADDING;
+const VERTICAL_DIALOG_PADDING = 40 - 2 * INIT_DIALOG_PADDING;
 
 declare const Konva;
 
@@ -67,8 +70,8 @@ interface IProps {
 export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public state = {
 		color: INITIAL_VALUES.color,
-		brushSize: INITIAL_VALUES.brushSize,
-		textSize: INITIAL_VALUES.textSize,
+		strokeWidth: INITIAL_VALUES.brushSize,
+		fontSize: INITIAL_VALUES.textSize,
 		mode: null,
 		activeShape: null,
 		sourceImage: '',
@@ -141,7 +144,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	));
 
 	public renderIndicator = renderWhenTrue(() => (
-		<Indicator color={this.state.color} size={this.state.brushSize} />
+		<Indicator color={this.state.color} size={this.state.strokeWidth} />
 	));
 
 	public renderErasing = renderWhenTrue(() => {
@@ -149,7 +152,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			<Erasing
 				height={this.state.stage.height}
 				width={this.state.stage.width}
-				size={this.state.brushSize}
+				size={this.state.strokeWidth}
 				color={this.state.color}
 				mode={this.state.mode}
 				layer={this.layerRef}
@@ -240,13 +243,14 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 	public scaleStage = (image) => {
 		const { naturalWidth, naturalHeight } = image.attrs.image;
-		const { width: maxWidth, height: maxHeight } = viewportSize();
-
-		const { scaledWidth, scaledHeight } = aspectRatio(naturalWidth, naturalHeight, maxWidth, maxHeight);
+		const { width: viewportWidth, height: viewportHeight } = viewportSize();
+		const maxHeight = viewportHeight - VERTICAL_DIALOG_PADDING;
+		const maxWidth = viewportWidth - HORIZONTAL_DIALOG_PADDING;
 
 		if (naturalWidth < maxWidth && naturalHeight < maxHeight) {
 			this.updateDialogSizes({ height: naturalHeight, width: naturalWidth });
 		} else {
+			const { scaledWidth, scaledHeight } = aspectRatio(naturalWidth, naturalHeight, maxWidth, maxHeight);
 			image.setAttrs({
 				width: scaledWidth,
 				height: scaledHeight,
@@ -305,10 +309,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		this.props.clearHistory();
 	}
 
-	public handleClose = () => {
-		this.props.handleClose();
-	}
-
 	public handleSave = () => {
 		this.setState({ selectedObjectName: '' }, async () => {
 			const screenshot = await this.stage.toDataURL();
@@ -329,9 +329,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 	public setBrushMode = () => this.setMode(MODES.BRUSH);
 
-	public setEraserMode = () => {
-		this.setMode(MODES.ERASER);
-	}
+	public setEraserMode = () => this.setMode(MODES.ERASER);
 
 	public setShapeMode = (shape) => {
 		if (shape === SHAPE_TYPES.POLYGON) {
@@ -432,7 +430,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public addNewText = (position) => {
-		const newText = getNewText(this.state.color, this.state.textSize, position);
+		const newText = getNewText(this.state.color, this.state.fontSize, position);
 		const selectedObjectName = newText.name;
 		this.props.addElement(newText);
 		this.setState({ selectedObjectName, mode: MODES.TEXT });
@@ -516,7 +514,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 				ref={this.drawingRef}
 				height={this.state.stage.height}
 				width={this.state.stage.width}
-				size={this.state.brushSize}
+				size={this.state.strokeWidth}
 				color={this.state.color}
 				mode={this.state.mode}
 				layer={this.drawingLayerRef}
@@ -556,8 +554,8 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public renderTools = () => (
 		<Tools
 			onClick={this.handleToolsClick}
-			size={this.state.brushSize}
-			textSize={this.state.textSize}
+			size={this.state.strokeWidth}
+			textSize={this.state.fontSize}
 			color={this.state.color}
 			onDrawClick={this.setBrushMode}
 			onEraseClick={this.setEraserMode}
@@ -567,7 +565,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			onBrushSizeChange={this.handleBrushSizeChange}
 			onTextSizeChange={this.handleTextSizeChange}
 			onColorChange={this.handleColorChange}
-			onCancel={this.handleClose}
 			onUndo={this.props.undo}
 			onRedo={this.props.redo}
 			onSave={this.handleSave}
