@@ -21,7 +21,7 @@ export const Textarea = styled.textarea`
 	background: none;
 	position: absolute;
 	border: none;
-	padding: 0 0  0;
+	padding: 0;
 	margin: 0;
 	resize: none;
 	outline: none;
