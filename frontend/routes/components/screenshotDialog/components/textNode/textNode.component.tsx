@@ -17,7 +17,6 @@
 
 import * as React from 'react';
 import { Text, Transformer } from 'react-konva';
-import { EDITABLE_TEXTAREA_PLACEHOLDER } from '../../screenshotDialog.helpers';
 
 interface IProps {
 	element: any;
