@@ -17,34 +17,29 @@
 
 import * as React from 'react';
 import { EDITABLE_TEXTAREA_NAME, EDITABLE_TEXTAREA_PLACEHOLDER } from '../../screenshotDialog.helpers';
-import { Textarea, TextPlaceholder } from '../../screenshotDialog.styles';
+import { Textarea } from '../../screenshotDialog.styles';
 
 interface IProps {
 	value: string;
 	styles: any;
+	size: number;
 	handleTextEdit: (props: any) => void;
 	handleTextareaKeyDown: (props: any) => void;
 }
 
-export const EditableText = ({ value, styles, handleTextEdit, handleTextareaKeyDown }: IProps) => {
-	const { color, ...placeholderStyles } = styles;
+export const EditableText = ({ value, styles, size, handleTextEdit, handleTextareaKeyDown }: IProps) => {
+	const { color } = styles;
 	return (
-		<>
-			{
-				<Textarea
-					id={EDITABLE_TEXTAREA_NAME}
-					name={EDITABLE_TEXTAREA_NAME}
-					value={value === EDITABLE_TEXTAREA_PLACEHOLDER ? '' : value}
-					style={styles}
-					onChange={handleTextEdit}
-					onKeyDown={handleTextareaKeyDown}
-					autoFocus
-				/>
-			}
-			{
-				(value && value === EDITABLE_TEXTAREA_PLACEHOLDER)
-				&& <TextPlaceholder style={placeholderStyles}>{value}</TextPlaceholder>
-			}
-		</>
+		<Textarea
+			id={EDITABLE_TEXTAREA_NAME}
+			name={EDITABLE_TEXTAREA_NAME}
+			placeholder={EDITABLE_TEXTAREA_PLACEHOLDER}
+			size={size}
+			value={value}
+			style={styles}
+			onChange={handleTextEdit}
+			onKeyDown={handleTextareaKeyDown}
+			autoFocus
+		/>
 	);
 };
