@@ -206,10 +206,17 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		}
 	}
 
+	private get localPosition() {
+		const position = this.stage.getPointerPosition();
+		return {
+			x: position.x - this.layer.x(),
+			y: position.y - this.layer.y()
+		};
+	}
+
 	public handleStageClick = () => {
 		if (this.state.mode === MODES.TEXT && !this.state.selectedObjectName && !this.state.textEditable.visible) {
-			const position = this.stage.getPointerPosition();
-			this.addNewText(position);
+			this.addNewText(this.localPosition);
 		}
 	}
 
@@ -382,24 +389,20 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		}
 	}
 
-	public handleTextEdit = ({target: {value}}) => {
-		const [textAreaWidth] = this.state.textEditable.styles.width.split('px');
-		const width = Number(textAreaWidth);
-
+	public handleTextEdit = ({ target }) => {
 		this.setState({
 			textEditable: {
 				...this.state.textEditable,
-				value,
+				value: target.value,
 				styles: {
 					...this.state.textEditable.styles,
-					width: `${width + (this.state.textEditable.styles.fontSize * 0.7)}px`
 				}
 			}
 		});
 	}
 
 	public handleTextareaKeyDown = (e) => {
-		if (e.keyCode === 13) {
+		if (e.keyCode === 13 && !e.shiftKey) {
 			const newState = {} as any;
 			newState.textEditable = {
 				...this.state.textEditable,
@@ -618,8 +621,8 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 					<Stage ref={this.stageRef} height={stage.height} width={stage.width} onMouseDown={this.handleStageMouseDown}>
 						{this.renderLayers()}
 					</Stage>
+					{this.renderEditableTextarea(this.state.textEditable.visible)}
 				</StageContainer>
-				{this.renderEditableTextarea(this.state.textEditable.visible)}
 			</Container>
 		);
 	}
