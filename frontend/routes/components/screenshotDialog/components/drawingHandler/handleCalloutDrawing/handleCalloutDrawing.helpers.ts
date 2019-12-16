@@ -16,50 +16,50 @@
  */
 
 import { COLOR } from '../../../../../../styles';
-import { TEXT_SIZE_VALUES } from '../../tools/tools.helpers';
+// import { TEXT_SIZE_VALUES } from '../../tools/tools.helpers';
 
 export const updateTextBoxStyles = (shape, pointerPosition, textSize: number) => {
-	const PADDINGS = {
-		XL: 16,
-		L: 12,
-		M: 10,
-		S: 8,
-		XS: 8,
-	};
-	const BOX_STYLES = {
-		[TEXT_SIZE_VALUES.XL]: {
-			padding: PADDINGS.XL,
-			width: 296 + PADDINGS.XL * 2,
-			height: TEXT_SIZE_VALUES.XL + PADDINGS.XL * 2,
-		},
-		[TEXT_SIZE_VALUES.L]: {
-			padding: PADDINGS.L,
-			width: 244 + PADDINGS.L * 2,
-			height: TEXT_SIZE_VALUES.L + PADDINGS.L * 2,
-		},
-		[TEXT_SIZE_VALUES.M]: {
-			padding: PADDINGS.M,
-			width: 190 + PADDINGS.M * 2,
-			height: TEXT_SIZE_VALUES.M + PADDINGS.M * 2,
-		},
-		[TEXT_SIZE_VALUES.S]: {
-			padding: PADDINGS.S,
-			width: 130 + PADDINGS.S * 2,
-			height: TEXT_SIZE_VALUES.S + PADDINGS.S * 2,
-		},
-		[TEXT_SIZE_VALUES.XS]: {
-			padding: PADDINGS.XS,
-			width: 108 + PADDINGS.XS * 2,
-			height: TEXT_SIZE_VALUES.XS + PADDINGS.XS * 2,
-		}
-	};
+	// const PADDINGS = {
+	// 	XL: 16,
+	// 	L: 12,
+	// 	M: 10,
+	// 	S: 8,
+	// 	XS: 8,
+	// };
+	// const BOX_STYLES = {
+	// 	[TEXT_SIZE_VALUES.XL]: {
+	// 		padding: PADDINGS.XL,
+	// 		width: 296 + PADDINGS.XL * 2,
+	// 		height: TEXT_SIZE_VALUES.XL + PADDINGS.XL * 2,
+	// 	},
+	// 	[TEXT_SIZE_VALUES.L]: {
+	// 		padding: PADDINGS.L,
+	// 		width: 244 + PADDINGS.L * 2,
+	// 		height: TEXT_SIZE_VALUES.L + PADDINGS.L * 2,
+	// 	},
+	// 	[TEXT_SIZE_VALUES.M]: {
+	// 		padding: PADDINGS.M,
+	// 		width: 190 + PADDINGS.M * 2,
+	// 		height: TEXT_SIZE_VALUES.M + PADDINGS.M * 2,
+	// 	},
+	// 	[TEXT_SIZE_VALUES.S]: {
+	// 		padding: PADDINGS.S,
+	// 		width: 130 + PADDINGS.S * 2,
+	// 		height: TEXT_SIZE_VALUES.S + PADDINGS.S * 2,
+	// 	},
+	// 	[TEXT_SIZE_VALUES.XS]: {
+	// 		padding: PADDINGS.XS,
+	// 		width: 108 + PADDINGS.XS * 2,
+	// 		height: TEXT_SIZE_VALUES.XS + PADDINGS.XS * 2,
+	// 	}
+	// };
 
-	const properStyles = BOX_STYLES[textSize] || BOX_STYLES[TEXT_SIZE_VALUES.M];
+	// const properStyles = BOX_STYLES[textSize] || BOX_STYLES[TEXT_SIZE_VALUES.M];
 
-	shape.x(pointerPosition.x - properStyles.padding);
-	shape.y(pointerPosition.y - properStyles.padding);
-	shape.width(properStyles.width);
-	shape.height(properStyles.height);
+	// shape.x(pointerPosition.x - properStyles.padding);
+	// shape.y(pointerPosition.y - properStyles.padding);
+	// shape.width(properStyles.width);
+	// shape.height(properStyles.height);
 	shape.fill(COLOR.WHITE);
 };
 
