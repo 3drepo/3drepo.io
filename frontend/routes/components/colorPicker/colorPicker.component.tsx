@@ -56,7 +56,7 @@ const COLORS = {
 };
 
 const componentToHex = memoize((c) => {
-	const hex = c.toString(16);
+	const hex = c.toString(16).toUpperCase();
 	return hex.length === 1 ? '0' + hex : hex;
 });
 
@@ -82,6 +82,14 @@ const isShadeOfGrey = (color: string) => {
 	return r === g && g === b;
 };
 
+const getAlphaHex = (color) => color.slice(7);
+
+const getAlpha = (color: string) => parseInt(getAlphaHex(color) || 'ff', 16);
+
+const stripAlpha =  (color) => color.slice(0, 7);
+
+const alphaToHex = (val) => componentToHex(Math.round(val));
+
 const getCanvasColor = (event, canvasCtx) => {
 	const x = event.offsetX;
 	const y = event.offsetY;
@@ -97,22 +105,22 @@ interface IProps {
 	disabled?: boolean;
 	disableUnderline?: boolean;
 	disableButtons?: boolean;
+	opacityEnabled?: boolean;
 }
 
 interface IState {
-	sliderColor: any;
+	baseColor: any;
 	open: boolean;
 	isDragEnabled: boolean;
-	colorHash: string;
-	color: string;
+	selectedColor: string;
 	pointerTop?: number;
 	pointerLeft?: number;
 	hashInput?: string;
 	opacity: number;
-	opacitySliderVisible: boolean;
+	opacitySliderVisibility: boolean;
 }
 
-const OpenFlyoutButton = ({color, onClick, disabled}) =>
+const OpenPanelButton = ({color, onClick, disabled}) =>
 	(
 		<ColorSelect
 			container
@@ -131,7 +139,7 @@ const OpenFlyoutButton = ({color, onClick, disabled}) =>
 		</ColorSelect>
 	);
 
-const PredefinedColors = ({colors, onColorChanged}) => (
+const PredefinedColors = ({colors, onChange}) => (
 		<PredefinedColorsContainer
 			container
 			direction="row"
@@ -144,16 +152,16 @@ const PredefinedColors = ({colors, onColorChanged}) => (
 							item
 							key={index}
 							color={color}
-							onClick={(e) => onColorChanged(color)}
+							onClick={(e) => onChange(color)}
 						/>)
 			}
 		</PredefinedColorsContainer>
 );
 
-const ColorSelector = ({baseColor,  selectedColor, onColorChanged}) => {
+const ColorSquareSelector = ({value, onChange}) => {
 	const canvasRef = useRef(null);
 	const [dragging, setDrag] = useState(false);
-	const [colorPosition, setColorPosition] = useState({ x: 0 , y: 0 });
+	const [colorPosition, setColorPosition] = useState({ left: 0 , top: 0 });
 
 	useEffect(() => {
 		const blockCanvas = canvasRef.current as HTMLCanvasElement;
@@ -162,8 +170,8 @@ const ColorSelector = ({baseColor,  selectedColor, onColorChanged}) => {
 		const width = blockCanvas.width;
 		const height = blockCanvas.height;
 
-		if (!isShadeOfGrey(baseColor)) {
-			ctx.fillStyle = baseColor;
+		if (!isShadeOfGrey(value)) {
+			ctx.fillStyle = value;
 			ctx.fillRect(0, 0, width, height);
 
 			const whiteGradient = ctx.createLinearGradient(0, 0, width, 0);
@@ -181,14 +189,15 @@ const ColorSelector = ({baseColor,  selectedColor, onColorChanged}) => {
 		blackGradient.addColorStop(1, COLORS.BLACK);
 		ctx.fillStyle = blackGradient;
 		ctx.fillRect(0, 0, width, height);
-	}, [baseColor]);
+		setColorPosition({ left: 0, top: 0 });
+	}, [value]);
 
 	const setColor = ({nativeEvent}) => {
 		if (!dragging)  { return; }
 		const blockCanvas = canvasRef.current as HTMLCanvasElement;
 		const ctx = blockCanvas.getContext('2d');
-		onColorChanged(getCanvasColor(nativeEvent, ctx));
-		setColorPosition({ x: nativeEvent.offsetX, y: nativeEvent.offsetY });
+		onChange(getCanvasColor(nativeEvent, ctx));
+		setColorPosition({ left: nativeEvent.offsetX, top: nativeEvent.offsetY });
 	};
 
 	const onMouseButtonEvent = (drag) => (event) => {
@@ -207,12 +216,12 @@ const ColorSelector = ({baseColor,  selectedColor, onColorChanged}) => {
 				onMouseUp={onMouseButtonEvent(false)}
 				onMouseMove={setColor}
 			/>
-			<ColorPointer style={{top: colorPosition.y, left: colorPosition.x}} />
+			<ColorPointer style={colorPosition} />
 		</CanvasContainer>
 	);
 };
 
-const ColorSlider = ({onColorChanged}) => {
+const ColorSlider = ({ onChange }) => {
 	const canvasRef = useRef(null);
 
 	useEffect(() => {
@@ -240,7 +249,7 @@ const ColorSlider = ({onColorChanged}) => {
 		const stripCanvas = canvasRef.current as HTMLCanvasElement;
 		const ctx = stripCanvas.getContext('2d');
 		const selectedColor = getCanvasColor(event.nativeEvent, ctx);
-		onColorChanged(selectedColor);
+		onChange(selectedColor);
 	};
 
 	return (
@@ -265,12 +274,7 @@ const OpacitySlider = ({ opacity, onOpacityChanged, sliderVisible, onSliderVisib
 			alignItems="center"
 		>
 			<Grid item>
-				<CheckboxField onChange={(e, val) => {
-					onSliderVisibilityChanged(val);
-					if (!val) {
-						onOpacityChanged(100);
-					}
-				}}  />
+				<CheckboxField onChange={(e, val) => onSliderVisibilityChanged(val)}  checked={sliderVisible} />
 			</Grid>
 			<Grid item>
 				Set opacity
@@ -285,12 +289,13 @@ const OpacitySlider = ({ opacity, onOpacityChanged, sliderVisible, onSliderVisib
 			>
 				<Grid item >
 					<Slider
+						max={255}
 						style={{width: 100, paddingRight: 5 }}
 						value={opacity}
 						onChange={(e, val) => onOpacityChanged(val)} />
 				</Grid>
 				<Grid item>
-					{Math.round(opacity)}%
+					{Math.round(opacity / 2.55)}%
 				</Grid>
 		</Grid>
 		}
@@ -303,18 +308,18 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 		predefinedColors: [],
 		onChange: identity,
 		disabled: false,
-		disableButtons: false
+		disableButtons: false,
+		opacityEnabled: false
 	};
 
 	public state: IState = {
 		open: false,
 		isDragEnabled: false,
-		colorHash: '',
-		color: '',
+		selectedColor: '',
 		hashInput: '',
 		opacity: 100,
-		sliderColor: '',
-		opacitySliderVisible: false
+		baseColor: '',
+		opacitySliderVisibility: false
 	};
 
 	public colorSelectRef = React.createRef();
@@ -329,12 +334,12 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 
 	public handleClose = () => {
 		this.setState({
-			open: false
+			open: false,
 		});
 	}
 
 	public handleSave = () => {
-		this.props.onChange(this.state.colorHash);
+		this.props.onChange(this.state.selectedColor);
 		this.handleClose();
 	}
 
@@ -359,57 +364,74 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 	public componentDidUpdate(prevProps, prevState) {
 		if (prevState.open !== this.state.open && !this.state.open) {
 			if (this.props.disableButtons) {
-				this.props.onChange(this.state.colorHash);
+				this.props.onChange(this.state.selectedColor);
 			}
 			this.handleClose();
-		}
-
-		if (prevState.sliderColor !== this.state.sliderColor) {
-			this.setState({ colorHash: this.state.sliderColor });
-		}
-
-		if (prevState.colorHash !== this.state.colorHash ||
-			prevState.opacity !== this.state.opacity ||
-			prevState.opacitySliderVisible !== this.state.opacitySliderVisible) {
-
-			this.setState({ hashInput: this.color.replace('#', '')});
 		}
 	}
 
 	public onPanelOpen = () => {
-		this.setColor(this.props.value);
-		this.setState({ opacitySliderVisible: (this.props.value.length > 7) });
-	}
+		const {value} = this.props;
 
-	public handleHashInputChange = (event) => {
-		const color =  event.currentTarget.value;
-
-		this.setState({ hashInput: color }, () => {
-			const isValidColor = /(^[0-9A-F]{6}([0-9A-F]{2})?$)/i.test(color.toUpperCase());
-			if (isValidColor) {
-				this.setState({ sliderColor: '#' + color });
-			}
+		this.setState({
+			baseColor: stripAlpha(value),
+			opacitySliderVisibility: (value.length > 7),
+			opacity: getAlpha(value),
+			selectedColor: value,
+			hashInput: value
 		});
 	}
 
-	public setColor = (color) => {
-		this.setState({ sliderColor: color});
+	public handleHashInputChange = (event) => {
+		const color =  '#' + event.currentTarget.value;
+		let newState: any = { hashInput: color };
+
+		const isValidColor = /(^#[0-9A-F]{6}([0-9A-F]{2})?$)/i.test(color.toUpperCase());
+		if (isValidColor) {
+			const opacity = getAlpha(color);
+			const opacitySliderVisibility =   Boolean(opacity) && !(opacity === 255);
+			newState = {...newState, opacity, opacitySliderVisibility, baseColor: stripAlpha(color),  selectedColor: color};
+			newState = {...newState, selectedColor: this.withOpacity(newState) };
+		}
+
+		this.setState(newState);
 	}
 
-	get color() {
-		const { opacity, opacitySliderVisible, colorHash } = this.state;
-		const alphaComponent = opacitySliderVisible ? (Math.round((opacity * 255) / 100)).toString(16).toUpperCase() : '';
-		return colorHash +  alphaComponent;
+	public getSelectedColorObject = (state) => {
+		const selectedColor = this.withOpacity(state);
+		const newState = ({selectedColor, hashInput: selectedColor});
+		return newState;
+	}
+
+	public withOpacity = ({selectedColor, opacitySliderVisibility, opacity}) => {
+		if (!this.props.opacityEnabled) { return selectedColor; }
+		return stripAlpha(selectedColor) + (opacitySliderVisibility ? alphaToHex(opacity) : '');
+	}
+
+	public setBaseColor = (color) => {
+		this.setState({ baseColor: color,  ...this.getSelectedColorObject({...this.state,  selectedColor: color}) });
+	}
+
+	public setSelectedColor = (color) => {
+		this.setState(this.getSelectedColorObject({...this.state,  selectedColor: color}));
+	}
+
+	public setOpacity = (opacity) => {
+		this.setState({ opacity, ...this.getSelectedColorObject({...this.state,  opacity}) });
+	}
+
+	public setOpacityVisibility = (opacitySliderVisibility) => {
+		this.setState({ opacitySliderVisibility, ...this.getSelectedColorObject({...this.state,  opacitySliderVisibility}) });
 	}
 
 	public render() {
-		const {value, predefinedColors, disabled, disableButtons} = this.props;
-		const {open, hashInput, colorHash, sliderColor, opacity, opacitySliderVisible} = this.state;
+		const {value, predefinedColors, disabled, disableButtons, opacityEnabled} = this.props;
+		const {open, hashInput, selectedColor, baseColor, opacity, opacitySliderVisibility} = this.state;
 
 		return (
 			<>
 				<RootRef rootRef={this.colorSelectRef}>
-					<OpenFlyoutButton onClick={this.openPanel} disabled={disabled} color={value} />
+					<OpenPanelButton onClick={this.openPanel} disabled={disabled} color={value} />
 				</RootRef>
 
 				<Panel
@@ -418,23 +440,18 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 					onClose={this.handleClose}
 					onEnter={this.onPanelOpen}
 				>
-					{
-						predefinedColors.length &&
-						<PredefinedColors colors={predefinedColors} onColorChanged={this.setColor} />
-					}
-
+					{predefinedColors.length && <PredefinedColors colors={predefinedColors} onChange={this.setBaseColor} />}
 					<Grid
 						container
 						direction="row"
 						alignItems="center"
 						justify="space-between"
 					>
-						<ColorSelector
-							baseColor={sliderColor}
-							selectedColor={colorHash}
-							onColorChanged={(color) => this.setState({colorHash: color})} />
+						<ColorSquareSelector
+							value={baseColor}
+							onChange={this.setSelectedColor} />
 
-						<ColorSlider onColorChanged={this.setColor} />
+						<ColorSlider onChange={this.setBaseColor} />
 					</Grid>
 					<Grid
 						container
@@ -443,25 +460,27 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 						alignItems="center"
 					>
 						<Grid item>
-							<SelectedColor color={this.color} />
+							<SelectedColor color={selectedColor} />
 						</Grid>
 						<Grid item>
 							<FormControl>
 								<SelectedHash
-									value={hashInput}
+									value={hashInput.replace('#', '')}
 									onChange={this.handleHashInputChange}
-									withOpacity={opacitySliderVisible}
+									withOpacity={opacitySliderVisibility}
 									startAdornment={<StyledStartAdornment position="start" disableTypography>#</StyledStartAdornment>}
 								/>
 							</FormControl>
 						</Grid>
 					</Grid>
-					<OpacitySlider
-						opacity={opacity}
-						onOpacityChanged={(newOpacity) => this.setState({opacity: newOpacity})}
-						sliderVisible={opacitySliderVisible}
-						onSliderVisibilityChanged={(visible) => this.setState({opacitySliderVisible: visible})}
-					/>
+					{opacityEnabled &&
+						<OpacitySlider
+							opacity={opacity}
+							onOpacityChanged={this.setOpacity}
+							sliderVisible={opacitySliderVisibility}
+							onSliderVisibilityChanged={this.setOpacityVisibility}
+						/>
+					}
 					{!disableButtons && this.renderFooter()}
 				</Panel>
 			</>
