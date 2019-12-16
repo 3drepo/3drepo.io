@@ -104,6 +104,7 @@ export const DrawnLine = ({ element, isSelected, handleChange }: IProps) => {
 				<Rect ref={rect} />
 				<Line
 					ref={line}
+					stroke={color}
 					{...elementProps}
 					{...additionalComponentProps}
 				/>
