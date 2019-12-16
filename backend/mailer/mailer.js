@@ -180,7 +180,7 @@ function sendPaymentErrorEmail(data) {
 }
 
 function sendTeamspaceInvitation(to, data) {
-	data.url = getURL("signup");
+	data.url = `${getURL("signup")}?email=${to}`;
 
 	const template = require("./templates/invitedToTeamspace");
 	return sendEmail(template, to, data);
