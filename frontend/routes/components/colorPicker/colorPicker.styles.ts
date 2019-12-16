@@ -114,7 +114,11 @@ export const SelectedColor = styled(({ color, ...rest}) =>
 `;
 
 // tslint:disable-next-line:max-line-length
-export const SelectedColorBaackground = styled.div` background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect x="0" width="5" height="5" y="0" fill="#9e9e9e"/><rect x="5" width="5" height="5" y="5" fill="#9e9e9e"/></svg>');`;
+export const SelectedColorBackground = styled.div` background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect x="0" width="5" height="5" y="0" fill="rgb(158, 158, 158)"/><rect x="5" width="5" height="5" y="5" fill="rgb(158, 158, 158)"/></svg>');
+	width: 55px;
+	height: 20px;
+	margin-bottom: -20px;
+`;
 
 export const StyledStartAdornment = styled(InputAdornment)`
 	&& {

@@ -36,6 +36,7 @@ import {
 	PredefinedColor,
 	PredefinedColorsContainer,
 	SelectedColor,
+	SelectedColorBackground,
 	SelectedHash,
 	StyledButton,
 	StyledIconButton,
@@ -264,6 +265,15 @@ const ColorSlider = ({ onChange }) => {
 	);
 };
 
+const ColorSample = ({color}) => {
+	return (
+		<>
+			<SelectedColorBackground />
+			<SelectedColor color={color} />
+		</>
+	);
+};
+
 const OpacitySlider = ({ opacity, onOpacityChanged, sliderVisible, onSliderVisibilityChanged }) => {
 	return (
 		<>
@@ -460,7 +470,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 						alignItems="center"
 					>
 						<Grid item>
-							<SelectedColor color={selectedColor} />
+							<ColorSample color={selectedColor} />
 						</Grid>
 						<Grid item>
 							<FormControl>
