@@ -23,6 +23,7 @@ import { ROUTES } from '../../../constants/routes';
 import { aspectRatio } from '../../../helpers/aspectRatio';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { viewportSize } from '../../../helpers/viewportSize';
+import { batchGroupBy } from '../../../modules/canvasHistory/canvasHistory.helpers';
 import { LoaderContainer } from '../../board/board.styles';
 import { Loader } from '../loader/loader.component';
 import { Drawing } from './components/drawing/drawing.component';
@@ -91,7 +92,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			visible: false,
 			value: '',
 			styles: {},
-			elementName: ''
+			name: ''
 		} as any
 	};
 
@@ -371,17 +372,19 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public handleOnEdit = (target) => {
-		const styles = getTextStyles(target);
-		const visible = true;
-		const value = target.attrs.text;
-		const name = this.state.selectedObjectName;
-		this.setState({
-			textEditable: { visible, value, styles, name }
-		}, () => {
-			setTimeout(() => {
-				window.addEventListener('click', this.handleOutsideClick);
+		if (!target.text()) {
+			const styles = getTextStyles(target);
+			const visible = true;
+			const value = target.attrs.text;
+			const name = this.state.selectedObjectName;
+			this.setState({
+				textEditable: {visible, value, styles, name}
+			}, () => {
+				setTimeout(() => {
+					window.addEventListener('click', this.handleOutsideClick);
+				});
 			});
-		});
+		}
 	}
 
 	public handleOutsideClick = (e) => {
@@ -396,6 +399,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			if (this.state.textEditable.name && this.props.canvasElements.length) {
 				const text = this.state.textEditable.value;
 				this.props.updateElement(this.state.textEditable.name, { text });
+				batchGroupBy.end();
 			}
 
 			this.setState(newState, () => {
@@ -431,12 +435,13 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			newState.textEditable = {
 				...this.state.textEditable,
 				visible: false,
-				name: false
+				name: '',
 			};
 
 			if (this.state.textEditable.name && this.props.canvasElements.length) {
 				const text = this.state.textEditable.value;
 				this.props.updateElement(this.state.textEditable.name, { text });
+				batchGroupBy.end();
 			}
 
 			this.setState(newState);
@@ -458,6 +463,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public addNewText = (position, updateState: boolean = true) => {
 		const newText = getNewText(this.state.color, this.state.fontSize, position);
 		const selectedObjectName = newText.name;
+		batchGroupBy.start();
 		this.props.addElement(newText);
 		if (updateState) {
 			this.setState({selectedObjectName, mode: MODES.TEXT});
