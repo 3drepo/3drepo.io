@@ -18,6 +18,8 @@
 import styled from 'styled-components';
 
 import { media, COLOR } from '../../styles';
+import { LoaderContainer as
+	DialogLoaderContainer } from '../components/dialogContainer/components/loadingDialog/loadingDialog.styles';
 
 export const Header = styled.div`
 	background-color: ${COLOR.WHITE};
@@ -35,16 +37,6 @@ export const TeamspaceSelectContainer = styled.div`
 	padding: 24px;
 `;
 
-export const LoaderContainer = styled.div`
-	position: absolute;
-	top: 0;
-	width: 100%;
-	height: 100%;
-	background: #fafafa;
-	color: ${COLOR.BLACK_40};
-	display: flex;
-	justify-content: center;
-	align-items: flex-start;
-	padding-top: 100px;
-	box-sizing: border-box;
+export const LoaderContainer = styled(DialogLoaderContainer)`
+	height: calc(100% - 65px);
 `;

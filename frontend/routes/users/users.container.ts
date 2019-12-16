@@ -26,6 +26,7 @@ import {
 	selectInvitationsCount,
 	selectLicensesCount,
 	selectUsers,
+	selectUsersPending,
 	selectUsersSuggestions,
 	selectUserNotExists,
 	UserManagementActions
@@ -46,18 +47,21 @@ const mapStateToProps = createStructuredSelector({
 	userNotExists: selectUserNotExists,
 	projects: selectProjects,
 	models: selectModels,
-	currentTeamspace: selectCurrentTeamspace
+	currentTeamspace: selectCurrentTeamspace,
+	selectedTeamspace: selectCurrentTeamspace,
+	isPending: selectUsersPending,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	addUser: UserManagementActions.addUser,
 	removeUser: UserManagementActions.removeUser,
-	updateJob: UserManagementActions.updateJob,
+	updateUserJob: UserManagementActions.updateUserJob,
 	updatePermissions: UserManagementActions.updatePermissions,
 	onUsersSearch: UserManagementActions.getUsersSuggestions,
 	clearUsersSuggestions: UserManagementActions.clearUsersSuggestions,
 	fetchQuotaInfo: TeamspacesActions.fetchQuotaInfo,
-	showDialog: DialogActions.showDialog
+	showDialog: DialogActions.showDialog,
+	fetchQuotaAndInvitations: UserManagementActions.fetchQuotaAndInvitations
 }, dispatch);
 
 export default withRouter(

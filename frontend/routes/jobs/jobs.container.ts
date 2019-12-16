@@ -26,6 +26,7 @@ import {
 	selectJobsColors,
 	JobsActions
 } from '../../modules/jobs';
+import { UserManagementActions } from '../../modules/userManagement';
 import { selectCurrentTeamspace } from '../../modules/userManagement/userManagement.selectors';
 
 const mapStateToProps = createStructuredSelector({
@@ -37,7 +38,8 @@ const mapStateToProps = createStructuredSelector({
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	updateColor: JobsActions.updateJobColor,
 	remove: JobsActions.removeJob,
-	create: JobsActions.createJob
+	create: JobsActions.createJob,
+	fetchJobsAndColors: UserManagementActions.fetchJobsAndColors
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Jobs);

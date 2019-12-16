@@ -16,64 +16,121 @@
  */
 
 import { pick, values } from 'lodash';
+import { orderBy } from 'lodash';
+import * as queryString from 'query-string';
+import { matchPath } from 'react-router';
 import { createSelector } from 'reselect';
-import { selectModels as selectModelsMap } from '../teamspaces';
-import { getExtendedModelPermissions, getExtendedProjectPermissions } from './userManagement.helpers';
+import { ROUTES } from '../../constants/routes';
+import { sortByField } from '../../helpers/sorting';
+import { selectCurrentUser } from '../currentUser';
+import { selectLocation } from '../router/router.selectors';
+import { selectModels as selectModelsMap, selectProjectsList, selectTeamspaces } from '../teamspaces';
+import { getExtendedModelPermissions, getExtendedProjectPermissions, prepareUserData } from './userManagement.helpers';
+
+const orderByFullName = (users) => orderBy(users, (user) => user.lastName + ' ' + user. firstName, 'asc');
 
 export const selectUserManagementDomain = (state) => ({ ...state.userManagement });
 
-export const selectUsers = createSelector(
-	selectUserManagementDomain, (state) => state.users
+export const selectUsersPending = createSelector(
+	selectUserManagementDomain, (state) => state.usersPending
 );
 
-export const selectIsPending = createSelector(
-	selectUserManagementDomain, (state) => state.isPending
+export const selectProjectsPending = createSelector(
+	selectUserManagementDomain, (state) => state.projectsPending
 );
 
 export const selectCurrentTeamspace = createSelector(
-	selectUserManagementDomain, (state) => state.selectedTeamspace
+	selectLocation, (location) =>  {
+		const userManagementParams = matchPath(location.pathname, { path: ROUTES.USER_MANAGEMENT_TEAMSPACE });
+		return ((userManagementParams || {}).params || {}).teamspace;
+	}
+);
+
+export const selectUsers = createSelector(
+	selectUserManagementDomain, selectCurrentTeamspace, selectCurrentUser,
+		({users}, teamspace, {username}) => orderByFullName(users).map(prepareUserData.bind(null, teamspace, username))
 );
 
 export const selectUsersSuggestions = createSelector(
 	selectUserManagementDomain, (state) => state.usersSuggestions
 );
 
-export const selectProjects = createSelector(
-	selectUserManagementDomain, (state) => state.projects
+export const selectProject = createSelector(
+	selectUserManagementDomain, (state) => state.project
 );
 
-export const selectCurrentProject = createSelector(
-	selectUserManagementDomain, (state) => state.currentProject
-);
-
-export const selectExtendedProjectPermissions = createSelector(
+export const selectProjectPermissions = createSelector(
 	selectUsers,
-	selectCurrentProject,
+	selectProject,
 	getExtendedProjectPermissions
 );
 
-export const selectModels = createSelector(
-	selectUserManagementDomain, selectModelsMap, (state, modelsMap) => {
-		return values(pick(modelsMap, (state.currentProject.models || [])));
+export const selectSelectedModels = createSelector(
+	selectUserManagementDomain, selectProject,
+		(state, project) => {
+			if (!project) {
+				return [];
+			}
+
+			return  (state.models || []).filter((m) => project.models.includes(m.model));
+		}
+);
+
+const  mergeEqualPermissions = (permissionsA, permissionsB: any[]) => {
+	const mergedPermission =  permissionsA.reduce((totalPermissions, currPermission) => {
+			const permissionBValue = permissionsB.find( (perm) => perm.user === currPermission.user);
+			if ((permissionBValue || {}).permission  === currPermission.permission) {
+				totalPermissions.push(currPermission);
+			}
+
+			return totalPermissions;
+		} , []);
+
+	return mergedPermission;
+};
+
+const selectUnifiedModelPermissions = createSelector(
+	selectSelectedModels, (models) => {
+		const firstPermissions = (models[0] || {}).permissions || [];
+		return models.reduce((permissions, model) => mergeEqualPermissions(permissions, model.permissions), firstPermissions);
 	}
 );
 
-export const selectCurrentModels = createSelector(
-	selectUserManagementDomain, (state) => state.currentProject.currentModels || []
-);
-
 export const selectModelsPermissions = createSelector(
-	selectUserManagementDomain, (state) => state.currentProject.modelsPermissions
-);
-
-export const selectExtendedModelPermissions = createSelector(
-	selectExtendedProjectPermissions,
-	selectModelsPermissions,
+	selectProjectPermissions,
+	selectUnifiedModelPermissions,
 	getExtendedModelPermissions
 );
 
+export const selectProjects = createSelector(
+	selectProjectsList, selectCurrentTeamspace,
+		(projects,  currentTeamspace) => {
+			const currentTeamspaceProjects = projects.filter(({teamspace}) =>  teamspace === currentTeamspace);
+			return sortByField(currentTeamspaceProjects , { order: 'asc', config: { field: 'name' } });
+		}
+);
+
+export const selectUrlQueryProject = createSelector(
+	selectLocation, selectProjects , (location, projects) =>  {
+		const { project} = queryString.parse(location.search);
+		const projectFound = projects.find(({ name }) => name === project);
+		return projectFound ? project : null;
+	}
+);
+
+export const selectProjectModels = createSelector(
+	selectProject, selectModelsMap, (project, modelsMap) => {
+		if (!project) {
+			return [];
+		}
+
+		return values(modelsMap).filter((m) => m.projectName === project._id);
+	}
+);
+
 export const selectIsTeamspaceAdmin = createSelector(
-	selectUserManagementDomain, (state) => state.isTeamspaceAdmin
+	selectCurrentTeamspace, selectTeamspaces,
+		(currentTeamspace, teamspaces) => Boolean((teamspaces[currentTeamspace] || {}).isAdmin)
 );
 
 export const selectCollaboratorLimit = createSelector(
