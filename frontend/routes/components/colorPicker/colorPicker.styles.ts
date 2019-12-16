@@ -130,7 +130,7 @@ export const OpacityVisibilityCheckbox = styled(CheckboxField)`
 
 export const OpacitySlider = styled(Slider)`
 	&& {
-		width: 182px
+		width: 182px;
 		padding-right: 9px;
 	}
 `;

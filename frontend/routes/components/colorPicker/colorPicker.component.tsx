@@ -451,7 +451,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 					onClose={this.handleClose}
 					onEnter={this.onPanelOpen}
 				>
-					{predefinedColors.length && <PredefinedColors colors={predefinedColors} onChange={this.setBaseColor} />}
+					{(predefinedColors.length > 0) && <PredefinedColors colors={predefinedColors} onChange={this.setBaseColor} />}
 					<Grid
 						container
 						direction="row"

@@ -723,9 +723,11 @@ export class Viewer {
 
 	public overrideMeshColor(account, model, meshIDs, color) {
 		UnityUtil.overrideMeshColor(account, model, meshIDs, color);
+		UnityUtil.overrideMeshOpacity(account, model, meshIDs, color[3]);
 	}
 
 	public resetMeshColor(account, model, meshIDs) {
+		UnityUtil.resetMeshOpacity(account, model, meshIDs);
 		UnityUtil.resetMeshColor(account, model, meshIDs);
 	}
 
