@@ -24,7 +24,9 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import Popover from '@material-ui/core/Popover';
 import styled from 'styled-components';
 
+import Slider from '@material-ui/lab/Slider';
 import { COLOR, FONT_WEIGHT } from '../../../styles';
+import { CheckboxField } from '../customTable/customTable.component';
 
 export const ColorSelect = styled(Grid)`
 	cursor: ${(props: any) => props.disabled ? 'default' : 'pointer'};
@@ -118,6 +120,23 @@ export const SelectedColorBackground = styled.div` background-image:url('data:im
 	width: 55px;
 	height: 20px;
 	margin-bottom: -20px;
+`;
+
+export const OpacityVisibilityCheckbox = styled(CheckboxField)`
+	&& {
+		margin-left: -15px;
+	}
+`;
+
+export const OpacitySlider = styled(Slider)`
+	&& {
+		width: 182px
+		padding-right: 9px;
+	}
+`;
+
+export const OpacityValue = styled.div`
+	font-size: 14px;
 `;
 
 export const StyledStartAdornment = styled(InputAdornment)`

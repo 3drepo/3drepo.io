@@ -22,16 +22,16 @@ import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import { identity, memoize } from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
 
-import Slider from '@material-ui/lab/Slider';
-import { CheckboxField } from '../customTable/customTable.component';
 import {
-	BlockCanvas,
 	Canvas,
 	CanvasContainer,
 	ColorPointer,
 	ColorSelect,
 	Dot,
 	Footer,
+	OpacitySlider,
+	OpacityValue,
+	OpacityVisibilityCheckbox,
 	Panel,
 	PredefinedColor,
 	PredefinedColorsContainer,
@@ -274,7 +274,7 @@ const ColorSample = ({color}) => {
 	);
 };
 
-const OpacitySlider = ({ opacity, onOpacityChanged, sliderVisible, onSliderVisibilityChanged }) => {
+const OpacityControl = ({ opacity, onOpacityChanged, sliderVisible, onSliderVisibilityChanged }) => {
 	return (
 		<>
 		<Grid
@@ -284,10 +284,10 @@ const OpacitySlider = ({ opacity, onOpacityChanged, sliderVisible, onSliderVisib
 			alignItems="center"
 		>
 			<Grid item>
-				<CheckboxField onChange={(e, val) => onSliderVisibilityChanged(val)}  checked={sliderVisible} />
+				<OpacityVisibilityCheckbox onChange={(e, val) => onSliderVisibilityChanged(val)} checked={sliderVisible} />
 			</Grid>
 			<Grid item>
-				Set opacity
+				Set Opacity
 			</Grid>
 		</Grid>
 		{sliderVisible &&
@@ -298,14 +298,15 @@ const OpacitySlider = ({ opacity, onOpacityChanged, sliderVisible, onSliderVisib
 				alignItems="center"
 			>
 				<Grid item >
-					<Slider
+					<OpacitySlider
 						max={255}
-						style={{width: 100, paddingRight: 5 }}
 						value={opacity}
 						onChange={(e, val) => onOpacityChanged(val)} />
 				</Grid>
 				<Grid item>
-					{Math.round(opacity / 2.55)}%
+					<OpacityValue>
+						{Math.round(opacity / 2.55)}%
+					</OpacityValue>
 				</Grid>
 		</Grid>
 		}
@@ -484,7 +485,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 						</Grid>
 					</Grid>
 					{opacityEnabled &&
-						<OpacitySlider
+						<OpacityControl
 							opacity={opacity}
 							onOpacityChanged={this.setOpacity}
 							sliderVisible={opacitySliderVisibility}
