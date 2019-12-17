@@ -139,10 +139,11 @@ export const OpacityValue = styled.div`
 	font-size: 14px;
 `;
 
-export const StyledStartAdornment = styled(InputAdornment)`
+export const StyledAdornment = styled(InputAdornment)`
 	&& {
 		max-height: 3em;
 		margin-right: 3px;
+		margin-left: 0;
 	}
 `;
 
@@ -151,6 +152,22 @@ export const SelectedHash = styled(({withOpacity, ...rest}) => React.createEleme
 		margin-left: 25px;
 		font-weight: ${FONT_WEIGHT.NORMAL};
 		width: ${(props) => props.withOpacity ? '90' : '70'}px;
+	}
+
+	input {
+		width: 70px;
+		height: 20px;
+		color: #333333;
+		font-size: 14px;
+		margin-left: 2px;
+		outline: none;
+	}
+`;
+
+export const OpacityInput = styled(Input)`
+	&& {
+		font-weight: ${FONT_WEIGHT.NORMAL};
+		width: 70px;
 	}
 
 	input {

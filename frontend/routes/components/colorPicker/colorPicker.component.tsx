@@ -29,6 +29,7 @@ import {
 	ColorSelect,
 	Dot,
 	Footer,
+	OpacityInput,
 	OpacitySlider,
 	OpacityValue,
 	OpacityVisibilityCheckbox,
@@ -38,9 +39,9 @@ import {
 	SelectedColor,
 	SelectedColorBackground,
 	SelectedHash,
+	StyledAdornment,
 	StyledButton,
-	StyledIconButton,
-	StyledStartAdornment
+	StyledIconButton
 } from './colorPicker.styles';
 
 const COLORS = {
@@ -275,6 +276,24 @@ const ColorSample = ({color}) => {
 };
 
 const OpacityControl = ({ opacity, onOpacityChanged, sliderVisible, onSliderVisibilityChanged }) => {
+	const [inputVal, setInputVal] = useState(opacity);
+
+	useEffect(() => {
+		setInputVal(Math.ceil(opacity / 2.55));
+	},  [opacity]);
+
+	const setValidOpacity = (e) => onOpacityChanged(Math.min(Math.max(Number(e.target.value) || 1, 1), 100) * 2.55);
+
+	const onInputChanged = (e) => {
+		const val = e.target.value;
+		const numVal = parseInt(val, 10);
+		setInputVal(val);
+
+		if (!isNaN(numVal) &&  numVal >= 0 && numVal <= 100) {
+			setValidOpacity(e);
+		}
+	};
+
 	return (
 		<>
 		<Grid
@@ -297,7 +316,7 @@ const OpacityControl = ({ opacity, onOpacityChanged, sliderVisible, onSliderVisi
 				justify="flex-start"
 				alignItems="center"
 			>
-				<Grid item >
+				<Grid item>
 					<OpacitySlider
 						max={255}
 						min={1}
@@ -306,7 +325,20 @@ const OpacityControl = ({ opacity, onOpacityChanged, sliderVisible, onSliderVisi
 				</Grid>
 				<Grid item>
 					<OpacityValue>
-						{Math.ceil(opacity / 2.55)}%
+						<OpacityInput
+							value={inputVal}
+							endAdornment={<StyledAdornment position="end" disableTypography>%</StyledAdornment>}
+							inputProps={{
+											'step': 10,
+											'min': 0,
+											'max': 100,
+											'type': 'number',
+											'aria-labelledby': 'input-slider',
+										}}
+							margin="dense"
+							onChange={onInputChanged}
+							onBlur={setValidOpacity}
+						/>
 					</OpacityValue>
 				</Grid>
 		</Grid>
@@ -321,7 +353,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 		onChange: identity,
 		disabled: false,
 		disableButtons: false,
-		opacityEnabled: false
+		opacityEnabled: true
 	};
 
 	public state: IState = {
@@ -459,10 +491,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 						alignItems="center"
 						justify="space-between"
 					>
-						<ColorSquareSelector
-							value={baseColor}
-							onChange={this.setSelectedColor} />
-
+						<ColorSquareSelector value={baseColor} onChange={this.setSelectedColor} />
 						<ColorSlider onChange={this.setBaseColor} />
 					</Grid>
 					<Grid
@@ -480,7 +509,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 									value={hashInput.replace('#', '')}
 									onChange={this.handleHashInputChange}
 									withOpacity={opacitySliderVisibility}
-									startAdornment={<StyledStartAdornment position="start" disableTypography>#</StyledStartAdornment>}
+									startAdornment={<StyledAdornment position="start" disableTypography>#</StyledAdornment>}
 								/>
 							</FormControl>
 						</Grid>
