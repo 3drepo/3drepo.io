@@ -38,13 +38,16 @@ export const hexToRgba = (hex, alpha = 1) => {
 };
 
 export const rgbaToHex = (hex) => {
-	const rgb = hex.replace(/\s/g, '').match(/^rgba?\((\d+),(\d+),(\d+),(\d+(\.\d+)?)/i).slice(0, 5);
+	const rgb: any[] = hex.replace(/\s/g, '').match(/^rgba?\((\d+),(\d+),(\d+),(\d+(\.\d+)?)/i).slice(0, 5);
 
 	if (!rgb || rgb.length !== 5) {
 		throw new Error('Invalid RGB(a) colour');
 	}
 
 	rgb[4] = parseFloat(rgb[4]) * 255;
+	if ( Math.round(rgb[4]) === 255) {
+		rgb.pop();
+	}
 
 	return `#${rgb.slice(1).map((v) => (`0${parseInt(v, 10).toString(16)}`).slice(-2)).join('')}`;
 };

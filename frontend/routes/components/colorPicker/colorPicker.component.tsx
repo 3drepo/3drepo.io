@@ -300,12 +300,13 @@ const OpacityControl = ({ opacity, onOpacityChanged, sliderVisible, onSliderVisi
 				<Grid item >
 					<OpacitySlider
 						max={255}
+						min={1}
 						value={opacity}
 						onChange={(e, val) => onOpacityChanged(val)} />
 				</Grid>
 				<Grid item>
 					<OpacityValue>
-						{Math.round(opacity / 2.55)}%
+						{Math.ceil(opacity / 2.55)}%
 					</OpacityValue>
 				</Grid>
 		</Grid>
@@ -400,7 +401,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 		const isValidColor = /(^#[0-9A-F]{6}([0-9A-F]{2})?$)/i.test(color.toUpperCase());
 		if (isValidColor) {
 			const opacity = getAlpha(color);
-			const opacitySliderVisibility =   Boolean(opacity) && !(opacity === 255);
+			const opacitySliderVisibility = Boolean(opacity) && !(opacity === 255);
 			newState = {...newState, opacity, opacitySliderVisibility, baseColor: stripAlpha(color),  selectedColor: color};
 			newState = {...newState, selectedColor: this.withOpacity(newState) };
 		}
