@@ -180,10 +180,10 @@ export const OpacityInput = styled(Input)`
 `;
 
 export const OpacityInputAdornment = styled(StyledAdornment)`
-&& {
-	margin-left: -24px;
-	margin-bottom: 4px;
-}
+	&& {
+		margin-left: -24px;
+		margin-bottom: 4px;
+	}
 `;
 
 export const StyledButton = styled(Button)`
