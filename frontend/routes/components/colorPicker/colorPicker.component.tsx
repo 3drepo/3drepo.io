@@ -20,24 +20,29 @@ import Grid from '@material-ui/core/Grid';
 import RootRef from '@material-ui/core/RootRef';
 import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import { identity, memoize } from 'lodash';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import {
-	BlockCanvas,
+	Canvas,
 	CanvasContainer,
 	ColorPointer,
 	ColorSelect,
 	Dot,
 	Footer,
+	OpacityInput,
+	OpacityInputAdornment,
+	OpacitySlider,
+	OpacityValue,
+	OpacityVisibilityCheckbox,
 	Panel,
 	PredefinedColor,
 	PredefinedColorsContainer,
 	SelectedColor,
+	SelectedColorBackground,
 	SelectedHash,
-	StripCanvas,
+	StyledAdornment,
 	StyledButton,
-	StyledIconButton,
-	StyledStartAdornment
+	StyledIconButton
 } from './colorPicker.styles';
 
 const COLORS = {
@@ -54,7 +59,7 @@ const COLORS = {
 };
 
 const componentToHex = memoize((c) => {
-	const hex = c.toString(16);
+	const hex = c.toString(16).toUpperCase();
 	return hex.length === 1 ? '0' + hex : hex;
 });
 
@@ -71,30 +76,29 @@ const hexToRgba = memoize((hex) => {
 		: COLORS.BLACK;
 });
 
-const findColorPositionOnCanvas = (canvas, colorHash): { x: number, y: number } => {
-	const ctx = canvas.getContext('2d');
-	const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-	const rgbaColor = hexToRgba(colorHash);
+const isShadeOfGrey = (color: string) => {
+	color = color.replace('#', '');
+	const r = color.slice(0, 2);
+	const g = color.slice(2, 4);
+	const b = color.slice(4, 6);
 
-	const position = { x: 0, y: 0 };
-	for (let i = 0; i < data.length; i += 4) {
-		const isSameColor = `rgba(${data[i]}, ${data[i + 1]}, ${data[i + 2]}, 1)` === rgbaColor;
-		if (isSameColor) {
-			position.x = i / 4 % canvas.width;
-			position.y = (i / 4 - position.x) / canvas.width;
-			break;
-		}
-	}
-	return position;
+	return r === g && g === b;
 };
 
-const getColorObject = (colorHash = '') => {
-	const colorValue = colorHash.replace('#', '');
-	return {
-		colorHash: `${colorHash}`,
-		color: colorValue,
-		hashInput: colorValue
-	};
+const getAlphaHex = (color) => color.slice(7);
+
+const getAlpha = (color: string) => parseInt(getAlphaHex(color) || 'ff', 16);
+
+const stripAlpha =  (color) => color.slice(0, 7);
+
+const alphaToHex = (val) => componentToHex(Math.round(val));
+
+const getCanvasColor = (event, canvasCtx) => {
+	const x = event.offsetX;
+	const y = event.offsetY;
+	const imageData = canvasCtx.getImageData(x, y, 1, 1).data;
+	const rgbaColor = `rgba(${imageData[0]}, ${imageData[1]}, ${imageData[2]}, 1)`;
+	return rgbaToHex(rgbaColor).toUpperCase();
 };
 
 interface IProps {
@@ -104,40 +108,279 @@ interface IProps {
 	disabled?: boolean;
 	disableUnderline?: boolean;
 	disableButtons?: boolean;
+	opacityEnabled?: boolean;
 }
 
 interface IState {
+	baseColor: any;
 	open: boolean;
 	isDragEnabled: boolean;
-	colorHash: string;
-	color: string;
+	selectedColor: string;
 	pointerTop?: number;
 	pointerLeft?: number;
 	hashInput?: string;
+	opacity: number;
+	opacitySliderVisibility: boolean;
 }
+
+const OpenPanelButton = ({color, onClick, disabled}) =>
+	(
+		<ColorSelect
+			container
+			onClick={onClick}
+			direction="row"
+			alignItems="center"
+			justify="flex-start"
+			disabled={disabled}
+		>
+			<Dot item color={color} />
+			<Grid item>
+				<StyledIconButton aria-label="Toggle picker" disabled={disabled}>
+					<ArrowDropDown />
+				</StyledIconButton>
+			</Grid>
+		</ColorSelect>
+	);
+
+const PredefinedColors = ({colors, onChange}) => (
+		<PredefinedColorsContainer
+			container
+			direction="row"
+			alignItems="center"
+			justify="flex-start"
+		>
+			{
+				colors.slice(0, 7).map((color, index) =>
+						<PredefinedColor
+							item
+							key={index}
+							color={color}
+							onClick={(e) => onChange(color)}
+						/>)
+			}
+		</PredefinedColorsContainer>
+);
+
+const ColorSquareSelector = ({value, onChange}) => {
+	const canvasRef = useRef(null);
+	const [dragging, setDrag] = useState(false);
+	const [colorPosition, setColorPosition] = useState({ left: 0 , top: 0 });
+
+	useEffect(() => {
+		const blockCanvas = canvasRef.current as HTMLCanvasElement;
+
+		const ctx = blockCanvas.getContext('2d');
+		const width = blockCanvas.width;
+		const height = blockCanvas.height;
+
+		if (!isShadeOfGrey(value)) {
+			ctx.fillStyle = value;
+			ctx.fillRect(0, 0, width, height);
+
+			const whiteGradient = ctx.createLinearGradient(0, 0, width, 0);
+			whiteGradient.addColorStop(0, COLORS.WHITE);
+			whiteGradient.addColorStop(1, COLORS.WHITE_TRANSPARENT);
+			ctx.fillStyle = whiteGradient;
+			ctx.fillRect(0, 0, width, height);
+		} else {
+			ctx.fillStyle = COLORS.WHITE;
+			ctx.fillRect(0, 0, width, height);
+		}
+
+		const blackGradient = ctx.createLinearGradient(0, 0, 0, height);
+		blackGradient.addColorStop(0, COLORS.BLACK_TRANSPARENT);
+		blackGradient.addColorStop(1, COLORS.BLACK);
+		ctx.fillStyle = blackGradient;
+		ctx.fillRect(0, 0, width, height);
+		setColorPosition({ left: 0, top: 0 });
+	}, [value]);
+
+	const setColor = ({nativeEvent}) => {
+		if (!dragging)  { return; }
+		const blockCanvas = canvasRef.current as HTMLCanvasElement;
+		const ctx = blockCanvas.getContext('2d');
+		onChange(getCanvasColor(nativeEvent, ctx));
+		setColorPosition({ left: nativeEvent.offsetX, top: nativeEvent.offsetY });
+	};
+
+	const onMouseButtonEvent = (drag) => (event) => {
+		setColor(event);
+		setDrag(drag);
+		setColor(event);
+	};
+
+	return (
+		<CanvasContainer item>
+			<Canvas
+				ref={canvasRef}
+				width={185}
+				height={170}
+				onMouseDown={onMouseButtonEvent(true)}
+				onMouseUp={onMouseButtonEvent(false)}
+				onMouseMove={setColor}
+			/>
+			<ColorPointer style={colorPosition} />
+		</CanvasContainer>
+	);
+};
+
+const ColorSlider = ({ onChange }) => {
+	const canvasRef = useRef(null);
+
+	useEffect(() => {
+		const stripCanvas = canvasRef.current as HTMLCanvasElement;
+
+		const ctx = stripCanvas.getContext('2d');
+		const width = stripCanvas.width;
+		const height = stripCanvas.height;
+		ctx.rect(0, 0, width, height);
+
+		const gradient = ctx.createLinearGradient(0, 0, 0, height);
+		gradient.addColorStop(0, COLORS.RED);
+		gradient.addColorStop(0.17, COLORS.YELLOW);
+		gradient.addColorStop(0.34, COLORS.GREEN);
+		gradient.addColorStop(0.51, COLORS.SKY_BLUE);
+		gradient.addColorStop(0.68, COLORS.BLUE);
+		gradient.addColorStop(0.85, COLORS.PURPLE);
+		gradient.addColorStop(1, COLORS.RED);
+
+		ctx.fillStyle = gradient;
+		ctx.fill();
+	});
+
+	const onClick = (event) => {
+		const stripCanvas = canvasRef.current as HTMLCanvasElement;
+		const ctx = stripCanvas.getContext('2d');
+		const selectedColor = getCanvasColor(event.nativeEvent, ctx);
+		onChange(selectedColor);
+	};
+
+	return (
+		<CanvasContainer item>
+			<Canvas
+				ref={canvasRef}
+				width={23}
+				height={170}
+				onClick={onClick}
+			/>
+		</CanvasContainer>
+	);
+};
+
+const ColorSample = ({color}) => {
+	return (
+		<>
+			<SelectedColorBackground />
+			<SelectedColor color={color} />
+		</>
+	);
+};
+
+const OpacityControl = ({ opacity, onOpacityChanged, sliderVisible, onSliderVisibilityChanged }) => {
+	const [inputVal, setInputVal] = useState(opacity);
+
+	const toPercentage = (alpha) => Math.ceil(opacity / 2.55);
+
+	useEffect(() => {
+		setInputVal(toPercentage(opacity));
+	},  [opacity]);
+
+	const setValidOpacity = (e) => {
+		const val = Math.min(Math.max(Number(e.target.value) || 1, 1), 100) * 2.55;
+		onOpacityChanged(val);
+		return val;
+	};
+
+	const onInputBlur = (e) => {
+		const val = setValidOpacity(e);
+		setInputVal(toPercentage(val));
+	};
+
+	const onInputChanged = (e) => {
+		const val = e.target.value;
+		const numVal = parseInt(val, 10);
+		setInputVal(val);
+
+		if (!isNaN(numVal) &&  numVal >= 0 && numVal <= 100) {
+			setValidOpacity(e);
+		}
+	};
+
+	return (
+		<>
+		<Grid
+			container
+			direction="row"
+			justify="flex-start"
+			alignItems="center"
+		>
+			<Grid item>
+				<OpacityVisibilityCheckbox onChange={(e, val) => onSliderVisibilityChanged(val)} checked={sliderVisible} />
+			</Grid>
+			<Grid item>
+				Set Opacity
+			</Grid>
+		</Grid>
+		{sliderVisible &&
+			<Grid
+				container
+				direction="row"
+				justify="flex-start"
+				alignItems="center"
+			>
+				<Grid item>
+					<OpacitySlider
+						max={255}
+						min={1}
+						value={opacity}
+						onChange={(e, val) => onOpacityChanged(val)} />
+				</Grid>
+				<Grid item>
+					<OpacityValue>
+						<OpacityInput
+							value={inputVal}
+							endAdornment={<OpacityInputAdornment position="end" disableTypography>%</OpacityInputAdornment>}
+							inputProps={{
+											'step': 10,
+											'min': 0,
+											'max': 100,
+											'type': 'number',
+											'aria-labelledby': 'input-slider',
+										}}
+							margin="dense"
+							onChange={onInputChanged}
+							onBlur={onInputBlur}
+						/>
+					</OpacityValue>
+				</Grid>
+		</Grid>
+		}
+	</>
+	);
+};
 
 export class ColorPicker extends React.PureComponent<IProps, IState> {
 	public static defaultProps: IProps = {
 		predefinedColors: [],
 		onChange: identity,
 		disabled: false,
-		disableButtons: false
+		disableButtons: false,
+		opacityEnabled: false
 	};
 
 	public state: IState = {
 		open: false,
 		isDragEnabled: false,
-		colorHash: '',
-		color: '',
-		hashInput: ''
+		selectedColor: '',
+		hashInput: '',
+		opacity: 100,
+		baseColor: '',
+		opacitySliderVisibility: false
 	};
 
 	public colorSelectRef = React.createRef();
-	public blockCanvasRef = React.createRef<HTMLElement>();
-	public stripCanvasRef = React.createRef<HTMLElement>();
-	public pointerRef = React.createRef<HTMLElement>();
 
-	public handleClick = (event) => {
+	public openPanel = (event) => {
 		if (!this.props.disabled) {
 			this.setState((state) => ({
 				open: !state.open
@@ -147,12 +390,12 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 
 	public handleClose = () => {
 		this.setState({
-			open: false
+			open: false,
 		});
 	}
 
 	public handleSave = () => {
-		this.props.onChange(this.state.colorHash);
+		this.props.onChange(this.state.selectedColor);
 		this.handleClose();
 	}
 
@@ -177,191 +420,74 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 	public componentDidUpdate(prevProps, prevState) {
 		if (prevState.open !== this.state.open && !this.state.open) {
 			if (this.props.disableButtons) {
-				this.props.onChange(this.state.colorHash);
+				this.props.onChange(this.state.selectedColor);
 			}
 			this.handleClose();
 		}
 	}
 
 	public onPanelOpen = () => {
-		this.setColor(this.props.value, () => {
-			this.initialiseBlockCanvas(this.state.colorHash);
-			this.initialiseStripCanvas();
-		});
-	}
+		const {value} = this.props;
 
-	public setColor = (colorHash, callback?) => {
-		const updatedColors = getColorObject(colorHash);
-		this.setState(updatedColors, callback);
-	}
-
-	public setBlockColorPointerPosition(x, y): void {
 		this.setState({
-			pointerLeft: x,
-			pointerTop: y
-		});
-	}
-
-	public initialiseBlockCanvas(colorHash): void {
-		const blockCanvas = this.blockCanvasRef.current as HTMLCanvasElement;
-		const ctx = blockCanvas.getContext('2d');
-		const width = blockCanvas.width;
-		const height = blockCanvas.height;
-		const x = 0;
-		const y = 0;
-
-		ctx.rect(x, y, width, height);
-		this.fillBlockCanvas(colorHash);
-
-		const colorPosition = findColorPositionOnCanvas(blockCanvas, colorHash);
-		this.setBlockColorPointerPosition(colorPosition.x, colorPosition.y);
-	}
-
-	public fillBlockCanvas(color): void {
-		const blockCanvas = this.blockCanvasRef.current as HTMLCanvasElement;
-
-		const ctx = blockCanvas.getContext('2d');
-		const width = blockCanvas.width;
-		const height = blockCanvas.height;
-		ctx.fillStyle = color;
-		ctx.fillRect(0, 0, width, height);
-
-		const whiteGradient = ctx.createLinearGradient(0, 0, width, 0);
-		whiteGradient.addColorStop(0, COLORS.WHITE);
-		whiteGradient.addColorStop(1, COLORS.WHITE_TRANSPARENT);
-		ctx.fillStyle = whiteGradient;
-		ctx.fillRect(0, 0, width, height);
-
-		const blackGradient = ctx.createLinearGradient(0, 0, 0, height);
-		blackGradient.addColorStop(0, COLORS.BLACK_TRANSPARENT);
-		blackGradient.addColorStop(1, COLORS.BLACK);
-		ctx.fillStyle = blackGradient;
-		ctx.fillRect(0, 0, width, height);
-	}
-
-	public initialiseStripCanvas(): void {
-		const stripCanvas = this.stripCanvasRef.current as HTMLCanvasElement;
-
-		const ctx = stripCanvas.getContext('2d');
-		const width = stripCanvas.width;
-		const height = stripCanvas.height;
-		ctx.rect(0, 0, width, height);
-
-		this.fillStripCanvas();
-	}
-
-	public fillStripCanvas(): void {
-		const stripCanvas = this.stripCanvasRef.current as HTMLCanvasElement;
-
-		const ctx = stripCanvas.getContext('2d');
-		const width = stripCanvas.width;
-		const height = stripCanvas.height;
-
-		const gradient = ctx.createLinearGradient(0, 0, 0, height);
-		gradient.addColorStop(0, COLORS.RED);
-		gradient.addColorStop(0.17, COLORS.YELLOW);
-		gradient.addColorStop(0.34, COLORS.GREEN);
-		gradient.addColorStop(0.51, COLORS.SKY_BLUE);
-		gradient.addColorStop(0.68, COLORS.BLUE);
-		gradient.addColorStop(0.85, COLORS.PURPLE);
-		gradient.addColorStop(1, COLORS.RED);
-
-		ctx.fillStyle = gradient;
-		ctx.fill();
-	}
-
-	public onStripCanvasClick = (event): void => {
-		const stripCanvas = this.stripCanvasRef.current as HTMLCanvasElement;
-		const ctx = stripCanvas.getContext('2d');
-		this.onSelectedImageDataChange(event.nativeEvent, ctx, true);
-	}
-
-	public onBlockCanvasClick = (dragState, event): void => {
-		this.state.isDragEnabled = dragState;
-
-		if (dragState) {
-			this.onBlockCanvasMove(event);
-		}
-	}
-
-	public onBlockCanvasMove = (event): void => {
-		if (this.state.isDragEnabled) {
-			const blockCanvas = this.blockCanvasRef.current as HTMLCanvasElement;
-			const ctx = blockCanvas.getContext('2d');
-			this.onSelectedImageDataChange(event.nativeEvent, ctx);
-		}
-	}
-
-	public onSelectedImageDataChange(event, canvasCtx, shouldRefreshCanvas = false) {
-		const x = event.offsetX;
-		const y = event.offsetY;
-		const imageData = canvasCtx.getImageData(x, y, 1, 1).data;
-		const rgbaColor = `rgba(${imageData[0]}, ${imageData[1]}, ${imageData[2]}, 1)`;
-
-		this.onColorHashChange(rgbaToHex(rgbaColor).toUpperCase().replace('#', ''), { x, y }, shouldRefreshCanvas);
-	}
-
-	public onColorHashChange = (color = this.state.color, position?, shouldRefreshCanvas = false): void => {
-		const isValidColor = /(^[0-9A-F]{6}$)/i.test(color.toUpperCase());
-		const blockCanvas = this.blockCanvasRef.current as HTMLCanvasElement;
-
-		if (isValidColor) {
-				this.setColor(`#${color}`, () => {
-					if (!position || shouldRefreshCanvas) {
-						this.fillBlockCanvas(this.state.colorHash);
-					}
-
-					const colorBlockPosition = position || findColorPositionOnCanvas(blockCanvas, this.state.colorHash);
-					this.setBlockColorPointerPosition(colorBlockPosition.x, colorBlockPosition.y);
-				});
-		}
-	}
-
-	public onPredefinedColorClick = (predefinedColor) => () => {
-		this.onColorHashChange(predefinedColor.toUpperCase().replace('#', ''));
-	}
-
-	public renderPredefinedColors = (colors) => {
-		return colors.slice(0, 7).map((color, index) => {
-			return (
-				<PredefinedColor
-					item
-					key={index}
-					color={color}
-					onClick={this.onPredefinedColorClick(color)}
-				/>
-			);
+			baseColor: stripAlpha(value),
+			opacitySliderVisibility: (value.length > 7),
+			opacity: getAlpha(value),
+			selectedColor: value,
+			hashInput: value
 		});
 	}
 
 	public handleHashInputChange = (event) => {
-		this.setState({ hashInput: event.currentTarget.value }, () => {
-			this.onColorHashChange(this.state.hashInput);
-		});
+		const color =  '#' + event.currentTarget.value;
+		let newState: any = { hashInput: color };
+
+		const isValidColor = /(^#[0-9A-F]{6}([0-9A-F]{2})?$)/i.test(color.toUpperCase());
+		if (isValidColor) {
+			const opacity = getAlpha(color);
+			const opacitySliderVisibility = Boolean(opacity) && !(opacity === 255);
+			newState = {...newState, opacity, opacitySliderVisibility, baseColor: stripAlpha(color),  selectedColor: color};
+			newState = {...newState, selectedColor: this.withOpacity(newState) };
+		}
+
+		this.setState(newState);
+	}
+
+	public getSelectedColorObject = (state) => {
+		const selectedColor = this.withOpacity(state);
+		const newState = ({selectedColor, hashInput: selectedColor});
+		return newState;
+	}
+
+	public withOpacity = ({selectedColor, opacitySliderVisibility, opacity}) => {
+		if (!this.props.opacityEnabled) { return selectedColor; }
+		return stripAlpha(selectedColor) + (opacitySliderVisibility ? alphaToHex(opacity) : '');
+	}
+
+	public setBaseColor = (color) => {
+		this.setState({ baseColor: color,  ...this.getSelectedColorObject({...this.state,  selectedColor: color}) });
+	}
+
+	public setSelectedColor = (color) => {
+		this.setState(this.getSelectedColorObject({...this.state,  selectedColor: color}));
+	}
+
+	public setOpacity = (opacity) => {
+		this.setState({ opacity, ...this.getSelectedColorObject({...this.state,  opacity}) });
+	}
+
+	public setOpacityVisibility = (opacitySliderVisibility) => {
+		this.setState({ opacitySliderVisibility, ...this.getSelectedColorObject({...this.state,  opacitySliderVisibility}) });
 	}
 
 	public render() {
-		const {value, predefinedColors, disabled, disableButtons} = this.props;
-		const {open, pointerLeft, pointerTop, colorHash, hashInput} = this.state;
+		const {value, predefinedColors, disabled, disableButtons, opacityEnabled} = this.props;
+		const {open, hashInput, selectedColor, baseColor, opacity, opacitySliderVisibility} = this.state;
 
 		return (
 			<>
 				<RootRef rootRef={this.colorSelectRef}>
-					<ColorSelect
-						container
-						onClick={this.handleClick}
-						direction="row"
-						alignItems="center"
-						justify="flex-start"
-						disabled={disabled}
-					>
-						<Dot item color={value} />
-						<Grid item>
-							<StyledIconButton aria-label="Toggle picker" disabled={disabled}>
-								<ArrowDropDown />
-							</StyledIconButton>
-						</Grid>
-					</ColorSelect>
+					<OpenPanelButton onClick={this.openPanel} disabled={disabled} color={value} />
 				</RootRef>
 
 				<Panel
@@ -370,49 +496,15 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 					onClose={this.handleClose}
 					onEnter={this.onPanelOpen}
 				>
-					{
-						predefinedColors.length ? (
-							<PredefinedColorsContainer
-								container
-								direction="row"
-								alignItems="center"
-								justify="flex-start"
-							>
-								{this.renderPredefinedColors(predefinedColors)}
-							</PredefinedColorsContainer>
-						) : null
-					}
+					{(predefinedColors.length > 0) && <PredefinedColors colors={predefinedColors} onChange={this.setBaseColor} />}
 					<Grid
 						container
 						direction="row"
 						alignItems="center"
 						justify="space-between"
 					>
-						<CanvasContainer item>
-							<BlockCanvas
-								ref={this.blockCanvasRef}
-								width={185}
-								height={170}
-								onMouseDown={this.onBlockCanvasClick.bind(null, true)}
-								onMouseUp={this.onBlockCanvasClick.bind(null, false)}
-								onMouseMove={this.onBlockCanvasMove}
-							/>
-							<ColorPointer
-								ref={this.pointerRef}
-								style={{
-									top: pointerTop,
-									left: pointerLeft
-								}}
-							/>
-						</CanvasContainer>
-						<CanvasContainer item>
-							<StripCanvas
-								ref={this.stripCanvasRef}
-								width={23}
-								height={170}
-								onClick={this.onStripCanvasClick}
-							/>
-						</CanvasContainer>
+						<ColorSquareSelector value={baseColor} onChange={this.setSelectedColor} />
+						<ColorSlider onChange={this.setBaseColor} />
 					</Grid>
 					<Grid
 						container
@@ -421,18 +513,27 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 						alignItems="center"
 					>
 						<Grid item>
-							<SelectedColor color={colorHash} />
+							<ColorSample color={selectedColor} />
 						</Grid>
 						<Grid item>
 							<FormControl>
 								<SelectedHash
-									value={hashInput}
+									value={hashInput.replace('#', '')}
 									onChange={this.handleHashInputChange}
-									startAdornment={<StyledStartAdornment position="start" disableTypography>#</StyledStartAdornment>}
+									withOpacity={opacitySliderVisibility}
+									startAdornment={<StyledAdornment position="start" disableTypography>#</StyledAdornment>}
 								/>
 							</FormControl>
 						</Grid>
 					</Grid>
+					{opacityEnabled &&
+						<OpacityControl
+							opacity={opacity}
+							onOpacityChanged={this.setOpacity}
+							sliderVisible={opacitySliderVisibility}
+							onSliderVisibilityChanged={this.setOpacityVisibility}
+						/>
+					}
 					{!disableButtons && this.renderFooter()}
 				</Panel>
 			</>

@@ -215,6 +215,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 							value={this.groupData.color}
 							onChange={this.handleColorChange}
 							disabled={!this.props.canUpdate}
+							opacityEnabled
 						/>
 					</ColorPickerWrapper>
 					<TooltipButton
