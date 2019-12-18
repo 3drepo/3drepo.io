@@ -130,7 +130,7 @@ export const OpacityVisibilityCheckbox = styled(CheckboxField)`
 
 export const OpacitySlider = styled(Slider)`
 	&& {
-		width: 182px;
+		width: 165px;
 		padding-right: 9px;
 	}
 `;
@@ -143,7 +143,6 @@ export const StyledAdornment = styled(InputAdornment)`
 	&& {
 		max-height: 3em;
 		margin-right: 3px;
-		margin-left: 0;
 	}
 `;
 
@@ -167,17 +166,24 @@ export const SelectedHash = styled(({withOpacity, ...rest}) => React.createEleme
 export const OpacityInput = styled(Input)`
 	&& {
 		font-weight: ${FONT_WEIGHT.NORMAL};
-		width: 70px;
+		width: 52px;
 	}
 
 	input {
-		width: 70px;
+		width: 52px;
 		height: 20px;
 		color: #333333;
 		font-size: 14px;
 		margin-left: 2px;
 		outline: none;
 	}
+`;
+
+export const OpacityInputAdornment = styled(StyledAdornment)`
+&& {
+	margin-left: -24px;
+	margin-bottom: 4px;
+}
 `;
 
 export const StyledButton = styled(Button)`

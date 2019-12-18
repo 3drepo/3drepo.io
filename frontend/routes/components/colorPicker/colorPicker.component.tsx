@@ -30,6 +30,7 @@ import {
 	Dot,
 	Footer,
 	OpacityInput,
+	OpacityInputAdornment,
 	OpacitySlider,
 	OpacityValue,
 	OpacityVisibilityCheckbox,
@@ -278,11 +279,22 @@ const ColorSample = ({color}) => {
 const OpacityControl = ({ opacity, onOpacityChanged, sliderVisible, onSliderVisibilityChanged }) => {
 	const [inputVal, setInputVal] = useState(opacity);
 
+	const toPercentage = (alpha) => Math.ceil(opacity / 2.55);
+
 	useEffect(() => {
-		setInputVal(Math.ceil(opacity / 2.55));
+		setInputVal(toPercentage(opacity));
 	},  [opacity]);
 
-	const setValidOpacity = (e) => onOpacityChanged(Math.min(Math.max(Number(e.target.value) || 1, 1), 100) * 2.55);
+	const setValidOpacity = (e) => {
+		const val = Math.min(Math.max(Number(e.target.value) || 1, 1), 100) * 2.55;
+		onOpacityChanged(val);
+		return val;
+	};
+
+	const onInputBlur = (e) => {
+		const val = setValidOpacity(e);
+		setInputVal(toPercentage(val));
+	};
 
 	const onInputChanged = (e) => {
 		const val = e.target.value;
@@ -327,7 +339,7 @@ const OpacityControl = ({ opacity, onOpacityChanged, sliderVisible, onSliderVisi
 					<OpacityValue>
 						<OpacityInput
 							value={inputVal}
-							endAdornment={<StyledAdornment position="end" disableTypography>%</StyledAdornment>}
+							endAdornment={<OpacityInputAdornment position="end" disableTypography>%</OpacityInputAdornment>}
 							inputProps={{
 											'step': 10,
 											'min': 0,
@@ -337,7 +349,7 @@ const OpacityControl = ({ opacity, onOpacityChanged, sliderVisible, onSliderVisi
 										}}
 							margin="dense"
 							onChange={onInputChanged}
-							onBlur={setValidOpacity}
+							onBlur={onInputBlur}
 						/>
 					</OpacityValue>
 				</Grid>
@@ -353,7 +365,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 		onChange: identity,
 		disabled: false,
 		disableButtons: false,
-		opacityEnabled: true
+		opacityEnabled: false
 	};
 
 	public state: IState = {
