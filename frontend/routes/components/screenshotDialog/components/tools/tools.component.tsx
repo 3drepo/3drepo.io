@@ -63,7 +63,6 @@ interface IProps {
 	areFutureElements: boolean;
 	arePastElements: boolean;
 	mode: string;
-	onClick: () => void;
 	onDrawClick: () => void;
 	onEraseClick: () => void;
 	onTextClick: () => void;
@@ -90,7 +89,7 @@ export class Tools extends React.PureComponent<IProps, any> {
 	public renderToolset = renderWhenTrue(() => {
 		const {
 			size, textSize, color, onDrawClick, onTextClick, onClearClick, onCalloutClick,
-			onColorChange, onBrushSizeChange, onEraseClick, onTextSizeChange, onClick
+			onColorChange, onBrushSizeChange, onEraseClick, onTextSizeChange,
 		} = this.props;
 
 		return (
@@ -136,7 +135,6 @@ export class Tools extends React.PureComponent<IProps, any> {
 										Icon={ArrowDropDownIcon}
 										onClick={(e) => {
 											props.onClick(e);
-											onClick();
 										}}
 									/>
 								</ShapeMenuButton>
@@ -169,7 +167,6 @@ export class Tools extends React.PureComponent<IProps, any> {
 													Icon={ArrowDropDownIcon}
 													onClick={(e) => {
 														props.onClick(e);
-														onClick();
 													}}
 											/>
 										</ShapeMenuButton>
@@ -357,10 +354,10 @@ export class Tools extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { disabled, onClick } = this.props;
+		const { disabled } = this.props;
 
 		return (
-			<ToolsContainer onClick={onClick} disabled={disabled}>
+			<ToolsContainer disabled={disabled}>
 				{this.renderToolset(!disabled)}
 				{this.renderSaveButton(!disabled)}
 			</ToolsContainer>

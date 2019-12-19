@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import {getDrawFunction} from '../../drawing/drawing.helpers';
+import {getDrawFunction} from '../drawingHandler.helpers';
 
 export interface IHandleBaseDrawingProps {
 	color: string;
@@ -99,6 +99,14 @@ export class HandleBaseDrawing<P, S> extends React.PureComponent<IHandleBaseDraw
 	public drawShape = () => {
 		const draw = getDrawFunction(this.activeShape, this.lastShape, this.initialPointerPosition, this.pointerPosition);
 		draw();
+		this.layer.batchDraw();
+	}
+
+	public drawLine = () => {
+		const position = this.props.stage.getPointerPosition();
+
+		this.updateLastLinePoint();
+		this.lastPointerPosition = position;
 		this.layer.batchDraw();
 	}
 

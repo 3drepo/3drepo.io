@@ -36,12 +36,20 @@ export class HandlePolygonDrawing
 	public subscribeDrawingEvents = () => {
 		this.props.stage.on('mousemove', this.handleMouseMovePolygon);
 		this.props.stage.on('mousedown', this.handleMouseDownPolygon);
+		document.addEventListener('mouseup', this.handleClickCheck);
 	}
 
 	public unsubscribeDrawingEvents = () => {
 		this.props.stage.off('mousemove', this.handleMouseMovePolygon);
 		this.props.stage.off('mousedown', this.handleMouseDownPolygon);
+		document.removeEventListener('mouseup', this.handleClickCheck);
 		this.isAfterPolygonCreated = false;
+	}
+
+	public handleClickCheck = (e) => {
+		if (e.target.nodeName !== 'CANVAS') {
+			this.drawLineToFirstPoint();
+		}
 	}
 
 	public handleMouseMovePolygon = () => {

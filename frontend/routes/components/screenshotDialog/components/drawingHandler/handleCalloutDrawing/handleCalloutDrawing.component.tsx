@@ -22,7 +22,7 @@ import { batchGroupBy } from '../../../../../../modules/canvasHistory/canvasHist
 import { COLOR } from '../../../../../../styles';
 import { MODES } from '../../../screenshotDialog.helpers';
 
-import { createDrawnLine, createShape } from '../../drawing/drawing.helpers';
+import { createDrawnLine, createShape } from '../drawingHandler.helpers';
 import { SHAPE_TYPES } from '../../shape/shape.constants';
 import { TypingHandler } from '../../typingHandler/typingHandler.component';
 import {

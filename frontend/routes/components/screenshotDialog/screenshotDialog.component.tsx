@@ -25,7 +25,6 @@ import { renderWhenTrue } from '../../../helpers/rendering';
 import { viewportSize } from '../../../helpers/viewportSize';
 import { LoaderContainer } from '../../board/board.styles';
 import { Loader } from '../loader/loader.component';
-import { Drawing } from './components/drawing/drawing.component';
 import { DrawingHandler } from './components/drawingHandler/drawingHandler.component';
 import { DrawnLine } from './components/drawnLine/drawnLine.component';
 import { Erasing } from './components/erasing/erasing.component';
@@ -92,7 +91,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public layerRef = React.createRef<any>();
 	public imageLayerRef = React.createRef<any>();
 	public drawingLayerRef = React.createRef<any>();
-	public drawingRef = React.createRef<any>();
 	public stageRef = React.createRef<any>();
 
 	public lastImageCanvasWidth = null;
@@ -457,35 +455,8 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		return (<Shape key={index} {...commonProps} />);
 	})
 
-	public renderDrawing = () => {
-		return (
-			<Drawing
-				ref={this.drawingRef}
-				height={this.state.stage.height}
-				width={this.state.stage.width}
-				size={this.state.strokeWidth}
-				color={this.state.color}
-				mode={this.state.mode}
-				layer={this.drawingLayerRef}
-				stage={this.stage}
-				handleNewDrawnLine={this.addNewDrawnLine}
-				handleNewDrawnShape={this.addNewShape}
-				selected={this.state.selectedObjectName}
-				activeShape={this.state.activeShape}
-				disabled={this.props.disabled}
-			/>
-		);
-	}
-
-	public handleToolsClick = () => {
-		if (this.drawingRef.current && this.state.mode === MODES.POLYGON && this.state.activeShape === SHAPE_TYPES.POLYGON) {
-			this.drawingRef.current.drawLineToFirstPoint();
-		}
-	}
-
 	public renderDrawingHandler = () => (
 			<DrawingHandler
-					// ref={this.drawingRef}
 					height={this.state.stage.height}
 					width={this.state.stage.width}
 					size={this.state.strokeWidth}
@@ -513,9 +484,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 						{this.renderObjects()}
 						{this.renderErasing(this.isErasing)}
 					</Layer>
-					<Layer ref={this.drawingLayerRef}>
-						{this.renderDrawing()}
-					</Layer>
+					<Layer ref={this.drawingLayerRef} />
 				</>
 			);
 		}
@@ -523,7 +492,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 	public renderTools = () => (
 		<Tools
-			onClick={this.handleToolsClick}
 			size={this.state.strokeWidth}
 			textSize={this.state.fontSize}
 			color={this.state.color}
@@ -589,7 +557,13 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 				{this.renderLoader(!stage.width || !stage.height)}
 				<StageContainer height={stage.height} width={stage.width}>
 					{this.renderIndicator(!this.props.disabled && this.isDrawingMode && !this.state.selectedObjectName)}
-					<Stage ref={this.stageRef} height={stage.height} width={stage.width} onMouseDown={this.handleStageMouseDown}>
+					<Stage
+						id="stage"
+						ref={this.stageRef}
+						height={stage.height}
+						width={stage.width}
+						onMouseDown={this.handleStageMouseDown}
+					>
 						{this.renderLayers()}
 					</Stage>
 					{this.renderDrawingHandler()}

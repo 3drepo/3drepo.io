@@ -19,7 +19,9 @@ import Konva from 'konva';
 import React from 'react';
 import { MODES } from '../../screenshotDialog.helpers';
 import { HandleCalloutDrawing } from './handleCalloutDrawing/handleCalloutDrawing.component';
+import { HandleLineDrawing } from './handleLineDrawing/handleLineDrawing.component';
 import { HandlePolygonDrawing } from './handlePolygonDrawing/handlePolygonDrawing.component';
+import { HandleShapeDrawing } from './handleShapeDrawing/handleShapeDrawing.component';
 
 interface IProps {
 	color: string;
@@ -29,7 +31,7 @@ interface IProps {
 	height: number;
 	width: number;
 	layer: any;
-	stage: any;
+	stage: Konva.Stage;
 	activeShape: number;
 	activeCalloutShape: number;
 	selected: string;
@@ -42,6 +44,9 @@ interface IProps {
 const COMPONENTS_MAP = {
 	[MODES.CALLOUT]: HandleCalloutDrawing,
 	[MODES.POLYGON]: HandlePolygonDrawing,
+	[MODES.SHAPE]: HandleShapeDrawing,
+	[MODES.BRUSH]: HandleLineDrawing,
+	[MODES.ERASER]: HandleLineDrawing,
 };
 
 export const DrawingHandler = (props: IProps) => {
