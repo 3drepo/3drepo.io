@@ -147,7 +147,7 @@ export const Shape = ({ element, isSelected, handleChange }: IProps) => {
 					onDblClick={handleDoubleClick}
 					onMouseOver={handleMouseOver}
 					onMouseOut={handleMouseOut}
-					draggable={isSelected}
+					draggable={draggable && isSelected}
 			>
 				<Rect ref={rect} />
 				<Component

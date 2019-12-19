@@ -16,7 +16,7 @@
  */
 
 import { COLOR } from '../../../styles';
-import { initialBrushSize, initialTextSize} from './components/tools/tools.helpers.tsx';
+import { initialBrushSize, initialTextSize} from './components/tools/tools.helpers';
 
 export const MODES = {
 	BRUSH: 'brush',
@@ -82,11 +82,11 @@ export const getNewDrawnLine = (lineAttrs, color, type = ELEMENT_TYPES.DRAWING) 
 	return newLine;
 };
 
-export const getNewText = (color, size, position) => {
+export const getNewText = (color, size, position, text) => {
 	const name = createUniqueName(ELEMENT_TYPES.TEXT);
 	const newText = {
 		type: ELEMENT_TYPES.TEXT,
-		text: '',
+		text,
 		color,
 		name,
 		fontFamily: 'Arial',
@@ -99,7 +99,6 @@ export const getNewText = (color, size, position) => {
 
 export const getTextStyles = (target) => {
 	const textPosition = target.getAbsolutePosition();
-	console.warn('{target.width():', target.width());
 	const styles = {
 		color: target.attrs.fill,
 		fontSize: target.attrs.fontSize,

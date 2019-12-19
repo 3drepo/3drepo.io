@@ -15,51 +15,86 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Konva from 'konva';
 import * as React from 'react';
 
-import { useFocus } from '../../../../../hooks';
+import { isEmpty } from 'lodash';
+import { useFocus, useOutsideClick } from '../../../../../hooks';
 import { EDITABLE_TEXTAREA_NAME, EDITABLE_TEXTAREA_PLACEHOLDER } from '../../screenshotDialog.helpers';
 import { AssistantElement, Textarea } from './editableText.styles';
 
 interface IProps {
 	value: string;
-	styles: any;
-	handleTextEdit: (props: any) => void;
-	handleTextareaKeyDown: (props: any) => void;
+	visible: boolean;
+	styles: React.CSSProperties;
+	onTextEdit: (props: any) => void;
+	onTextareaKeyDown: (props: any) => void;
+	onAddText: () => void;
+	onRefreshDrawingLayer?: () => void;
+	boxRef?: Konva.Rect;
+	size?: number;
 }
 
-export const EditableText = ({ value, styles, handleTextEdit, handleTextareaKeyDown }: IProps) => {
-	// const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+export const EditableText = ({
+	value, visible, styles, onTextEdit, onTextareaKeyDown, boxRef, onRefreshDrawingLayer, onAddText, size
+	}: IProps) => {
 	const [textareaRef, setTextareaFocus] = useFocus();
 	const assistantElementRef = React.useRef<HTMLPreElement>(null);
 	const [initialTextareaWidth, setInitialTextareaWidth] = React.useState<number>(0);
 	const [additionalStyles, setAdditionalStyles] = React.useState<object>({});
 
 	React.useEffect(() => {
-		setTextareaFocus();
-		if (textareaRef.current) {
+		if (textareaRef.current && !value) {
 			const currentTextarea = textareaRef.current;
 			currentTextarea.setAttribute('size', currentTextarea.getAttribute('placeholder').length.toString());
-			setInitialTextareaWidth(currentTextarea.offsetWidth);
+			if (initialTextareaWidth && assistantElementRef.current) {
+				setInitialTextareaWidth(assistantElementRef.current.offsetWidth);
+			} else {
+				setInitialTextareaWidth(currentTextarea.offsetWidth);
+			}
 		}
-	}, []);
+	}, [styles.fontSize, value]);
+
+	React.useEffect(() => {
+		setTimeout(() => {
+			setTextareaFocus();
+		});
+	}, [visible, textareaRef.current]);
 
 	React.useEffect(() => {
 		if (textareaRef && assistantElementRef) {
-			if (assistantElementRef.current.offsetWidth > initialTextareaWidth) {
-				setAdditionalStyles({
-					...additionalStyles,
-					height: `${textareaRef.current.scrollHeight}px`,
-					width: `${assistantElementRef.current.offsetWidth}px`,
-				});
-			} else {
-				setAdditionalStyles({
-					...additionalStyles,
-					height: `${textareaRef.current.scrollHeight}px`,
-				});
+			const shouldExpand = assistantElementRef.current.offsetWidth > initialTextareaWidth;
+			const width = shouldExpand ? assistantElementRef.current.offsetWidth : initialTextareaWidth;
+			const height = assistantElementRef.current.offsetHeight;
+
+			if (!isEmpty(boxRef) && onRefreshDrawingLayer) {
+				boxRef.width(width +  Math.max(6, size * 2));
+				boxRef.height(height + Math.max(6, size * 2));
+				onRefreshDrawingLayer();
 			}
+
+			setAdditionalStyles({
+				...additionalStyles,
+				height: `${height}px`,
+				width: `${width}px`,
+			});
 		}
-	}, [value]);
+	}, [value, initialTextareaWidth, styles.fontSize, boxRef]);
+
+	const isFocused = () => document.activeElement === textareaRef.current;
+
+	useOutsideClick(textareaRef, () => {
+		if (visible && !isFocused()) {
+			(async () => onAddText())();
+		}
+	});
+
+	const getPlaceholder = () => {
+		if (textareaRef.current) {
+			return ` ${textareaRef.current.getAttribute('placeholder')} `;
+		}
+		return '';
+	};
 
 	return (
 		<>
@@ -73,18 +108,16 @@ export const EditableText = ({ value, styles, handleTextEdit, handleTextareaKeyD
 					...styles,
 					...additionalStyles
 				}}
-				onChange={handleTextEdit}
-				onKeyDown={handleTextareaKeyDown}
-				autoFocus
+				onChange={onTextEdit}
+				onKeyDown={onTextareaKeyDown}
 			/>
 			<AssistantElement
 				ref={assistantElementRef}
 				style={{
-					fontFamily: styles.fontFamily,
 					fontSize: styles.fontSize,
 				}}
 			>
-				{value && `_${value}_`}
+				{value ? ` ${value} ` : getPlaceholder()}
 			</AssistantElement>
 		</>
 	);

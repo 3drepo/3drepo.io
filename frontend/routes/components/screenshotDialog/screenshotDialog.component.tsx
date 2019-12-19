@@ -23,21 +23,20 @@ import { ROUTES } from '../../../constants/routes';
 import { aspectRatio } from '../../../helpers/aspectRatio';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { viewportSize } from '../../../helpers/viewportSize';
-import { batchGroupBy } from '../../../modules/canvasHistory/canvasHistory.helpers';
 import { LoaderContainer } from '../../board/board.styles';
 import { Loader } from '../loader/loader.component';
 import { Drawing } from './components/drawing/drawing.component';
 import { DrawingHandler } from './components/drawingHandler/drawingHandler.component';
 import { DrawnLine } from './components/drawnLine/drawnLine.component';
-import { EditableText } from './components/editableText/editableText.component';
 import { Erasing } from './components/erasing/erasing.component';
 import { Indicator } from './components/indicator/indicator.component';
 import { Shape } from './components/shape/shape.component';
 import { SHAPE_TYPES } from './components/shape/shape.constants';
 import { TextNode } from './components/textNode/textNode.component';
 import { Tools } from './components/tools/tools.component';
+import { TypingHandler } from './components/typingHandler/typingHandler.component';
 import {
-	getNewDrawnLine, getNewShape, getNewText, getTextStyles, EDITABLE_TEXTAREA_NAME, ELEMENT_TYPES, INITIAL_VALUES, MODES
+	getNewDrawnLine, getNewShape, getNewText, ELEMENT_TYPES, INITIAL_VALUES, MODES
 } from './screenshotDialog.helpers';
 import { Container, Stage, StageContainer } from './screenshotDialog.styles';
 
@@ -87,13 +86,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			width: MIN_DIALOG_WIDTH,
 		},
 		selectedObjectName: '',
-		textBox: null,
-		textEditable: {
-			visible: false,
-			value: '',
-			styles: {},
-			name: ''
-		} as any
 	};
 
 	public containerRef = React.createRef<any>();
@@ -138,15 +130,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		return elementType;
 	}
 
-	public renderEditableTextarea = renderWhenTrue(() => (
-		<EditableText
-			value={this.state.textEditable.value}
-			styles={this.getEditableTextareaStyles()}
-			handleTextEdit={this.handleTextEdit}
-			handleTextareaKeyDown={this.handleTextareaKeyDown}
-		/>
-	));
-
 	public renderIndicator = renderWhenTrue(() => (
 		<Indicator color={this.state.color} size={this.state.strokeWidth} />
 	));
@@ -166,7 +149,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	});
 
 	public async componentDidMount() {
-		const sourceImage = await Promise.resolve(this.props.sourceImage);
+		const sourceImage = await this.props.sourceImage;
 
 		const imageObj = new Image();
 		imageObj.onload = () => {
@@ -181,9 +164,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		};
 		imageObj.src = sourceImage;
 
-		this.setState({ sourceImage, mode: INITIAL_VALUES.mode }, () => {
-			this.stage.addEventListener('click', this.handleStageClick);
-		});
+		this.setState({ sourceImage, mode: INITIAL_VALUES.mode });
 
 		document.addEventListener('keydown', this.handleKeyDown);
 		if (this.props.pathname.includes(ROUTES.VIEWER)) {
@@ -213,18 +194,20 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		}
 	}
 
-	private get localPosition() {
-		const position = this.stage.getPointerPosition();
-		return {
-			x: position.x - this.layer.x(),
-			y: position.y - this.layer.y()
-		};
-	}
+	public handleRefreshDrawingLayer = () => this.drawingLayer.getLayer().batchDraw();
 
-	public handleStageClick = () => {
-		if (this.state.mode === MODES.TEXT && !this.state.selectedObjectName && !this.state.textEditable.visible) {
-			this.addNewText(this.localPosition);
+	public get localPosition() {
+		if (this.stage && this.layer) {
+			const position = this.stage.getPointerPosition();
+			return {
+				x: position.x - this.layer.x(),
+				y: position.y - this.layer.y()
+			};
 		}
+		return {
+			x: 0,
+			y: 0
+		};
 	}
 
 	public handleResize = () => {
@@ -371,83 +354,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		this.setState(newState);
 	}
 
-	public handleOnEdit = (target) => {
-		if (!target.text()) {
-			const styles = getTextStyles(target);
-			const visible = true;
-			const value = target.attrs.text;
-			const name = this.state.selectedObjectName;
-			this.setState({
-				textEditable: {visible, value, styles, name}
-			}, () => {
-				setTimeout(() => {
-					window.addEventListener('click', this.handleOutsideClick);
-				});
-			});
-		}
-	}
-
-	public handleOutsideClick = (e) => {
-		if (e.target.name !== EDITABLE_TEXTAREA_NAME) {
-			const newState = {} as any;
-			newState.textEditable = {
-				...this.state.textEditable,
-				visible: false,
-				name: ''
-			};
-
-			if (this.state.textEditable.name && this.props.canvasElements.length) {
-				const text = this.state.textEditable.value;
-				this.props.updateElement(this.state.textEditable.name, { text });
-				batchGroupBy.end();
-			}
-
-			this.setState(newState, () => {
-				setTimeout(() => {
-					window.removeEventListener('click', this.handleOutsideClick);
-				});
-			});
-		}
-	}
-
-	public handleTextEdit = ({ target }) => {
-		// if (this.state.textBox) {
-		// 	const { ref, refresh, save } = this.state.textBox;
-		//
-		// 	ref.width(Math.max(textareaWidth, Number(target.dataset.width)));
-		// 	refresh();
-		// }
-
-		this.setState({
-			textEditable: {
-				...this.state.textEditable,
-				value: target.value,
-				styles: {
-					...this.state.textEditable.styles,
-				}
-			}
-		});
-	}
-
-	public handleTextareaKeyDown = (e) => {
-		if (e.keyCode === 13 && !e.shiftKey) {
-			const newState = {} as any;
-			newState.textEditable = {
-				...this.state.textEditable,
-				visible: false,
-				name: '',
-			};
-
-			if (this.state.textEditable.name && this.props.canvasElements.length) {
-				const text = this.state.textEditable.value;
-				this.props.updateElement(this.state.textEditable.name, { text });
-				batchGroupBy.end();
-			}
-
-			this.setState(newState);
-		}
-	}
-
 	public handleToolTextClick = () => {
 		if (this.state.mode !==  MODES.TEXT) {
 			this.setState({ mode: MODES.TEXT }, () => {
@@ -460,20 +366,20 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		}
 	}
 
-	public addNewText = (position, updateState: boolean = true) => {
-		const newText = getNewText(this.state.color, this.state.fontSize, position);
-		const selectedObjectName = newText.name;
-		batchGroupBy.start();
-		this.props.addElement(newText);
-		if (updateState) {
-			this.setState({selectedObjectName, mode: MODES.TEXT});
+	public addNewText = (position, text?: string, updateState: boolean = true) => {
+		if (!this.state.selectedObjectName) {
+			position.y = position.y + 1;
+			const newText = getNewText(this.state.color, this.state.fontSize, position, text);
+			this.props.addElement(newText);
+
+			if (updateState) {
+				this.setState({
+					selectedObjectName: newText.name,
+					mode: MODES.TEXT,
+				});
+			}
+
 			document.body.style.cursor = 'crosshair';
-		} else {
-			return (textBox, refresh, save) => this.setState({selectedObjectName, mode: MODES.TEXT, textBox: {
-				ref: textBox,
-				refresh,
-				save,
-			} });
 		}
 	}
 
@@ -523,7 +429,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public handleKeyDown = (e) => {
-		if (this.state.selectedObjectName && !this.state.textEditable.visible) {
+		if (this.state.selectedObjectName) {
 			if (e.keyCode === 8) {
 				this.props.removeElement(this.state.selectedObjectName);
 				this.setState({
@@ -536,17 +442,15 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public renderObjects = () => this.props.canvasElements.map((element, index) => {
-		const isTextEditing = this.state.textEditable.name === element.name;
 		const isSelected = this.state.selectedObjectName === element.name;
 		const commonProps = {
 			element,
 			isSelected,
-			isVisible: element.type === ELEMENT_TYPES.TEXT ? !isTextEditing : true,
 			handleChange: (newAttrs) => this.handleChangeObject(newAttrs),
 		};
 
 		if (element.type === ELEMENT_TYPES.TEXT) {
-			return (<TextNode	key={index} {...commonProps} onEdit={this.handleOnEdit} />);
+			return (<TextNode key={index} {...commonProps} />);
 		} else if (element.type === ELEMENT_TYPES.DRAWING) {
 			return (<DrawnLine key={index} {...commonProps} />);
 		}
@@ -579,6 +483,27 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		}
 	}
 
+	public renderDrawingHandler = () => (
+			<DrawingHandler
+					// ref={this.drawingRef}
+					height={this.state.stage.height}
+					width={this.state.stage.width}
+					size={this.state.strokeWidth}
+					textSize={this.state.fontSize}
+					color={this.state.color}
+					mode={this.state.mode}
+					layer={this.drawingLayerRef}
+					stage={this.stage}
+					handleNewDrawnLine={this.addNewDrawnLine}
+					handleNewDrawnShape={this.addNewShape}
+					handleNewText={this.addNewText}
+					selected={this.state.selectedObjectName}
+					activeShape={this.state.activeShape}
+					activeCalloutShape={this.state.activeCalloutShape}
+					disabled={this.props.disabled}
+			/>
+	)
+
 	public renderLayers = () => {
 		if (this.state.stage.width && this.state.stage.height) {
 			return (
@@ -590,24 +515,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 					</Layer>
 					<Layer ref={this.drawingLayerRef}>
 						{this.renderDrawing()}
-						<DrawingHandler
-							// ref={this.drawingRef}
-							height={this.state.stage.height}
-							width={this.state.stage.width}
-							size={this.state.strokeWidth}
-							textSize={this.state.fontSize}
-							color={this.state.color}
-							mode={this.state.mode}
-							layer={this.drawingLayerRef}
-							stage={this.stage}
-							handleNewDrawnLine={this.addNewDrawnLine}
-							handleNewDrawnShape={this.addNewShape}
-							handleNewText={this.addNewText}
-							selected={this.state.selectedObjectName}
-							activeShape={this.state.activeShape}
-							activeCalloutShape={this.state.activeCalloutShape}
-							disabled={this.props.disabled}
-						/>
 					</Layer>
 				</>
 			);
@@ -653,12 +560,18 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		}
 	}
 
-	public getEditableTextareaStyles = () => {
-		return {
-			display: this.state.textEditable.visible ? 'block' : 'none',
-			...this.state.textEditable.styles
-		};
-	}
+	public renderTypingHandler = () => (
+		<TypingHandler
+			mode={this.state.mode}
+			stage={this.stage}
+			layer={this.layer}
+			color={this.state.color}
+			fontSize={this.state.fontSize}
+			onRefreshDrawingLayer={this.handleRefreshDrawingLayer}
+			onAddNewText={this.addNewText}
+			selected={this.state.selectedObjectName}
+		/>
+	)
 
 	public renderLoader = renderWhenTrue(() => (
 			<LoaderContainer>
@@ -667,15 +580,11 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	));
 
 	public render() {
-		const { stage, container, textEditable } = this.state;
+		const { stage, container } = this.state;
 
 		return (
 			<Container height={container.height} width={container.width} ref={this.containerRef}>
-				<EventListener
-					target="window"
-					onResize={this.handleResize}
-				/>
-
+				<EventListener target="window" onResize={this.handleResize} />
 				{this.renderTools()}
 				{this.renderLoader(!stage.width || !stage.height)}
 				<StageContainer height={stage.height} width={stage.width}>
@@ -683,8 +592,9 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 					<Stage ref={this.stageRef} height={stage.height} width={stage.width} onMouseDown={this.handleStageMouseDown}>
 						{this.renderLayers()}
 					</Stage>
+					{this.renderDrawingHandler()}
+					{this.renderTypingHandler()}
 				</StageContainer>
-				{this.renderEditableTextarea(textEditable.visible)}
 			</Container>
 		);
 	}

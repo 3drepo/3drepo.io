@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useMemo } from 'react';
+import Konva from 'konva';
+import React from 'react';
 import { MODES } from '../../screenshotDialog.helpers';
 import { HandleCalloutDrawing } from './handleCalloutDrawing/handleCalloutDrawing.component';
 import { HandlePolygonDrawing } from './handlePolygonDrawing/handlePolygonDrawing.component';
@@ -35,7 +36,7 @@ interface IProps {
 	disabled: boolean;
 	handleNewDrawnShape: (shape: number, attrs, updateState?: boolean) => void;
 	handleNewDrawnLine: (line, type?, updateState?: boolean) => void;
-	handleNewText: (position, updateState?: boolean) => (ref: {}, refresh: () => void, save: () => void) => any;
+	handleNewText: (position, text?: string, updateState?: boolean) => void;
 }
 
 const COMPONENTS_MAP = {
@@ -46,7 +47,7 @@ const COMPONENTS_MAP = {
 export const DrawingHandler = (props: IProps) => {
 	const { mode } = props;
 
-	const Component = useMemo(() => {
+	const Component = React.useMemo(() => {
 		return COMPONENTS_MAP[mode] || null;
 	}, [mode]);
 

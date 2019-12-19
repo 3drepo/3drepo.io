@@ -15,26 +15,32 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { clamp, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 import React from 'react';
+import {renderWhenTrue} from '../../../../../../helpers/rendering';
+import { batchGroupBy } from '../../../../../../modules/canvasHistory/canvasHistory.helpers';
+import { COLOR } from '../../../../../../styles';
+import { MODES } from '../../../screenshotDialog.helpers';
 
 import { createDrawnLine, createShape } from '../../drawing/drawing.helpers';
 import { SHAPE_TYPES } from '../../shape/shape.constants';
+import { TypingHandler } from '../../typingHandler/typingHandler.component';
 import {
 	HandleBaseDrawing, IHandleBaseDrawingProps, IHandleBaseDrawingStates,
 } from '../handleBaseDrawing/handleBaseDrawing.component';
-import { getLinePoints, updateTextBoxStyles } from './handleCalloutDrawing.helpers';
+import { getLinePoints } from './handleCalloutDrawing.helpers';
 
 export interface IHandleCalloutDrawingProps extends IHandleBaseDrawingProps {
 	textSize: number;
 	activeCalloutShape: number;
 	handleNewDrawnShape: (shape: number, attrs, updateState?: boolean) => void;
 	handleNewDrawnLine: (line, type?, updateState?: boolean) => void;
-	handleNewText: (position, updateState?: boolean) => () => any;
+	handleNewText: (position, text?: string, updateState?: boolean) => void;
 }
 
 export interface IHandleCalloutDrawingStates extends IHandleBaseDrawingStates {
 	calloutState: number;
+	lastShape: any;
 }
 
 export class HandleCalloutDrawing
@@ -47,13 +53,19 @@ export class HandleCalloutDrawing
 	public state = {
 		...super.state,
 		calloutState: 1,
+		lastShape: {},
 	};
 
 	public shape: any = {};
 
-	public componentDidUpdate(prevProps) {
+	public componentDidUpdate(prevProps, prevState) {
 		if (prevProps.activeCalloutShape !== this.props.activeCalloutShape) {
 			this.activeShape = this.props.activeCalloutShape;
+			this.unsubscribeDrawingEvents();
+			this.subscribeDrawingEvents();
+		}
+
+		if (prevState.calloutState !== this.state.calloutState) {
 			this.unsubscribeDrawingEvents();
 			this.subscribeDrawingEvents();
 		}
@@ -81,7 +93,6 @@ export class HandleCalloutDrawing
 		this.unsubscribeDotDrawingEvents();
 	}
 
-	// DOT
 	public subscribeDotDrawingEvents = () => {
 		this.props.stage.on('mouseup', this.handleMouseUpDot);
 	}
@@ -108,9 +119,9 @@ export class HandleCalloutDrawing
 		const commonProps = {
 			stroke: this.props.color,
 			fill: this.props.color,
-			strokeWidth: clamp(this.props.size * 2, 1, 8),
-			draggable: true,
-			radius: 1.1,
+			strokeWidth: this.props.size,
+			draggable: false,
+			radius: this.props.size,
 		};
 
 		this.lastShape = createShape(SHAPE_TYPES.CIRCLE, commonProps, initialPositionProps);
@@ -119,50 +130,32 @@ export class HandleCalloutDrawing
 		this.handleMouseUpShape();
 	}
 
-	// LINE
 	public subscribeLineDrawingEvents = () => {
 		this.props.stage.on('mousemove', this.handleMouseMoveLine);
-		this.props.stage.on('mousedown', this.handleMouseDownLine);
 	}
 
 	public unsubscribeLineDrawingEvents = () => {
 		this.props.stage.off('mousemove', this.handleMouseMoveLine);
-		this.props.stage.off('mousedown', this.handleMouseDownLine);
 	}
 
 	public saveCallout = () => {
-		(async () => {
-			const normalizeShape = this.activeShape === SHAPE_TYPES.DOT ? SHAPE_TYPES.CIRCLE : this.activeShape;
-			await this.props.handleNewDrawnShape(normalizeShape, this.shape, false);
-			await this.props.handleNewDrawnLine(this.lastLine, '', false);
-			await this.props.handleNewDrawnShape(SHAPE_TYPES.RECTANGLE, this.lastShape, false);
-			this.setState({ isCurrentlyDrawn: false });
-		})();
+		this.layer.clear();
+		this.layer.clearCache();
+		this.layer.destroyChildren();
+		this.layer.batchDraw();
+
+		const normalizeShape = this.activeShape === SHAPE_TYPES.DOT ? SHAPE_TYPES.CIRCLE : this.activeShape;
+		this.props.handleNewDrawnShape(normalizeShape, this.shape, false);
+		this.props.handleNewDrawnLine(this.lastLine, '', false);
+		this.props.handleNewDrawnShape(SHAPE_TYPES.RECTANGLE, this.lastShape, false);
+		this.setState({ isCurrentlyDrawn: false });
 	}
 
-	public handleMouseDownLine = () => {
-		// this.layer.clear();
-		// this.layer.clearCache();
-		// this.layer.destroyChildren();
-		// this.layer.batchDraw();
-
-		(async () => {
-			// const normalizeShape = this.activeShape === SHAPE_TYPES.DOT ? SHAPE_TYPES.CIRCLE : this.activeShape;
-			// await this.props.handleNewDrawnShape(normalizeShape, this.shape, false);
-			// await this.props.handleNewDrawnLine(this.lastLine, '', false);
-			// await this.props.handleNewDrawnShape(SHAPE_TYPES.RECTANGLE, this.lastShape, false);
-			const updatedState = await this.props.handleNewText(this.pointerPosition, false);
-			// this.setState({ isCurrentlyDrawn: false });
-			updatedState(
-				this.lastShape,
-				() => {
-					console.warn('getLinePoints(this.shape, this.lastShape):', getLinePoints(this.shape, this.lastShape));
-					this.lastLine.points(getLinePoints(this.shape, this.lastShape));
-					this.layer.batchDraw();
-				},
-				() => this.saveCallout(),
-			);
-		})();
+	public handleRefreshDrawingLayer = () => {
+		if (!isEmpty(this.lastShape)) {
+			this.lastLine.points(getLinePoints(this.shape, this.lastShape));
+			this.layer.batchDraw();
+		}
 	}
 
 	public handleMouseMoveLine = () => {
@@ -183,21 +176,23 @@ export class HandleCalloutDrawing
 
 				const commonProps = {
 					stroke: this.props.color,
-					strokeWidth: clamp(this.props.size / 2, 1, 4),
-					draggable: true
+					strokeWidth: this.props.size,
+					draggable: false,
+					fill: COLOR.WHITE_20,
 				};
 
 				this.lastShape = createShape(SHAPE_TYPES.RECTANGLE, commonProps, initialPositionProps);
 				this.layer.add(this.lastShape);
+				this.setState({
+					lastShape : this.lastShape,
+				});
 			} else {
 				this.lastLine.points(getLinePoints(this.shape, this.lastShape));
-				updateTextBoxStyles(this.lastShape, this.pointerPosition, this.props.textSize);
 				this.layer.batchDraw();
 			}
 		}
 	}
 
-	// SHAPE
 	public subscribeShapeDrawingEvents = () => {
 		this.props.stage.on('mousemove', this.handleMouseMoveShape);
 		this.props.stage.on('mouseup', this.handleMouseUpShape);
@@ -223,8 +218,6 @@ export class HandleCalloutDrawing
 		this.setState({ calloutState: 2 });
 		this.shape = this.lastShape;
 		this.lastShape = {};
-		this.unsubscribeShapeDrawingEvents();
-		this.subscribeLineDrawingEvents();
 
 		this.layer.clearBeforeDraw();
 		const { x, y } = this.pointerPosition;
@@ -234,9 +227,7 @@ export class HandleCalloutDrawing
 			y
 		};
 
-		const calloutLineSize = clamp(this.props.size / 2, 1, 4);
-
-		this.lastLine = createDrawnLine(this.props.color, calloutLineSize, this.lastPointerPosition, this.props.mode, false);
+		this.lastLine = createDrawnLine(this.props.color, this.props.size, this.lastPointerPosition, this.props.mode, false);
 		const newPoints = this.lastLine.points().concat([this.lastPointerPosition.x, this.lastPointerPosition.y]);
 
 		this.lastLine.points(newPoints);
@@ -265,10 +256,39 @@ export class HandleCalloutDrawing
 		const commonProps = {
 			stroke: this.props.color,
 			strokeWidth: this.props.size,
-			draggable: true
+			draggable: false
 		};
 
 		this.lastShape = createShape(this.activeShape, commonProps, initialPositionProps);
 		this.layer.add(this.lastShape);
+	}
+
+	public addText = (position, text) => {
+		batchGroupBy.start();
+		this.saveCallout();
+		this.props.handleNewText(position, text, false);
+		batchGroupBy.end();
+		setTimeout(() => {
+			this.setState({ calloutState: 1, isCurrentlyDrawn: false });
+		});
+	}
+
+	public renderEditableTextarea = renderWhenTrue(() => (
+		<TypingHandler
+			mode={MODES.TEXT}
+			stage={this.props.stage}
+			layer={this.layer}
+			color={this.props.color}
+			fontSize={this.props.textSize}
+			size={this.props.size}
+			onRefreshDrawingLayer={this.handleRefreshDrawingLayer}
+			onAddNewText={this.addText}
+			selected={this.props.selected}
+			boxRef={this.state.lastShape}
+		/>
+	));
+
+	public render() {
+		return this.renderEditableTextarea(this.state.calloutState === 2);
 	}
 }

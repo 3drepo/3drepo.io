@@ -15,9 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, {css} from 'styled-components';
+
+const commonStyles = css`
+	font-family: 'Arial', sans-serif;
+	line-height: 1;
+`;
 
 export const Textarea = styled.textarea`
+	${commonStyles};
 	background: none;
 	position: absolute;
 	border: none;
@@ -35,6 +41,9 @@ export const Textarea = styled.textarea`
 `;
 
 export const AssistantElement = styled.pre`
+	${commonStyles};
 	display: inline;
+	position: absolute;
 	visibility: hidden;
+	margin: 0;
 `;
