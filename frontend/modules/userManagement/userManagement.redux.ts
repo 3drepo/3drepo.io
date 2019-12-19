@@ -15,24 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {get, omit, pick} from 'lodash';
+import {get, omit} from 'lodash';
 import {createActions, createReducer} from 'reduxsauce';
 import {PROJECT_ROLES_TYPES} from '../../constants/project-permissions';
-import {TEAMSPACE_PERMISSIONS} from '../../constants/teamspace-permissions';
-import { sortByField } from '../../helpers/sorting';
 
 export const { Types: UserManagementTypes, Creators: UserManagementActions } = createActions({
-	fetchTeamspaceDetails: ['teamspace'],
-	fetchTeamspaceDetailsSuccess: ['teamspace', 'users', 'invitations', 'currentUser', 'collaboratorLimit'],
-	setPendingState: ['isPending'],
+	fetchQuotaAndInvitations: [],
+	fetchQuotaAndInvitationsSuccess: [ 'invitations', 'collaboratorLimit'],
+	fetchTeamspaceUsers: [],
+	fetchTeamspaceUsersSuccess: ['users'],
+	setUsersPending: ['isPending'],
+	setProjectsPending: ['isPending'],
 	addUser: ['user'],
-	addUserSuccess: ['user', 'currentUser'],
+	addUserSuccess: ['user'],
 	removeUser: ['username'],
 	removeUserCascade: ['username'],
 	removeUserSuccess: ['username'],
 	setUserNotExists: ['userNotExists'],
 	setTeamspace: ['teamspace'],
-	updateJob: ['username', 'job'],
+	updateUserJob: ['username', 'job'],
 	updateUserJobSuccess: ['username', 'job'],
 	updatePermissions: ['permissions'],
 	updatePermissionsSuccess: ['permissions', 'currentUser'],
@@ -40,11 +41,12 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	getUsersSuggestionsSuccess: ['suggestions'],
 	clearUsersSuggestions: [],
 	fetchProject: ['project'],
-	setProject: ['project'],
+	fetchProjectSuccess: ['project'],
 	updateProjectPermissions: ['permissions'],
 	updateProjectPermissionsSuccess: ['permissions'],
 	fetchModelsPermissions: ['models'],
-	fetchModelPermissionsSuccess: ['selectedModels'],
+	fetchModelPermissionsSuccess: ['models'],
+	fetchCurrentTeamspaceJobsAndColors: [],
 	updateModelsPermissions: ['modelsWithPermissions', 'permissions'],
 	updateModelsPermissionsPre: ['modelsWithPermissions', 'permissions'],
 	updateModelPermissionsSuccess: ['updatedModels', 'permissions'],
@@ -56,39 +58,23 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 }, { prefix: 'USER_MANAGEMENT/' });
 
 export const INITIAL_STATE = {
-	selectedTeamspace: null,
-	projects: [],
-	permissions: [],
 	models: [],
-	fedModels: [],
 	users: [],
 	invitations: [],
 	usersSuggestions: [],
-	usersPermissions: [],
-	jobs: [],
-	jobsColors: [],
-	isPending: true,
-	currentProject: {
-		permissions: [],
-		modelsPermissions: [],
-		currentModels: []
-	},
+	usersPending: true,
+	projectsPending: true,
+	project: null,
 	userNotExists: false
 };
 
-/**
- * Add additional fields to user data
- * @param users
- * @returns
- */
-const prepareUserData = (teamspaceName, currentUser, userData): object => {
-	return {
-		...userData,
-		isAdmin: userData.permissions.includes(TEAMSPACE_PERMISSIONS.admin.key),
-		isOwner: teamspaceName === userData.user,
-		isCurrentUser: currentUser === userData.user
-	};
-};
+const mergePermissions = (permissions, newPermissions) => permissions.map((currentPermissions) => {
+	const updatedPermissions = newPermissions.find(({user}) => currentPermissions.user === user);
+	if (updatedPermissions) {
+		return updatedPermissions;
+	}
+	return currentPermissions;
+});
 
 /**
  * Bind to users proper permissions` values
@@ -107,33 +93,24 @@ export const setProjectPermissionsToUsers = (state, { projectPermissions }) => {
 	return {...state, users: usersWithPermissions};
 };
 
-export const fetchTeamspaceDetailsSuccess = (state = INITIAL_STATE, action) => {
-	const { teamspace, currentUser, invitations } = action;
-	const users = action.users.map(prepareUserData.bind(null, teamspace.name, currentUser));
-
-	return {
-		...INITIAL_STATE,
-		users,
-		invitations,
-		isPending: false,
-		...pick(teamspace, ['models', 'permissions', 'isAdmin', 'fedModels']),
-		projects: sortByField(teamspace.projects, { order: 'asc', config: { field: 'name' } }),
-		selectedTeamspace: teamspace.account,
-		isTeamspaceAdmin: teamspace.isAdmin,
-		collaboratorLimit: action.collaboratorLimit
-	};
+export const fetchQuotaAndInvitationsSuccess = (state = INITIAL_STATE, {invitations, collaboratorLimit}) => {
+	return { ...state, invitations, collaboratorLimit };
 };
 
-export const setPendingState = (state = INITIAL_STATE, { isPending }) => {
-	return {...state, isPending};
+export const fetchTeamspaceUsersSuccess = (state = INITIAL_STATE, { users }) => {
+	return { ...state, users };
+};
+
+export const setUsersPending = (state = INITIAL_STATE, { isPending }) => {
+	return {...state,  usersPending: isPending};
+};
+
+export const setProjectsPending = (state = INITIAL_STATE, { isPending }) => {
+	return {...state, projectsPending: isPending};
 };
 
 export const addUserSuccess = (state = INITIAL_STATE, { user, currentUser }) => {
-	const users = [
-		...state.users,
-		prepareUserData(state.selectedTeamspace, currentUser, user)
-	];
-	return {...state, users};
+	return {...state, users: [ ...state.users, user ] };
 };
 
 export const removeUserSuccess = (state = INITIAL_STATE, { username }) => {
@@ -172,11 +149,10 @@ export const updateUserJobSuccess = (state = INITIAL_STATE, { username, job }) =
 	return {...state, users};
 };
 
-export const updatePermissionsSuccess = (state = INITIAL_STATE, { permissions, currentUser }) => {
+export const updatePermissionsSuccess = (state = INITIAL_STATE, { permissions }) => {
 	const users = [...state.users].map((userData) => {
 		if (userData.user === permissions.user) {
-			const newUserData = {...userData, ...permissions};
-			return prepareUserData(state.selectedTeamspace, currentUser, newUserData);
+			return {...userData, ...permissions};
 		}
 
 		return userData;
@@ -189,7 +165,7 @@ export const getUsersSuggestionsSuccess = (state = INITIAL_STATE, { suggestions 
 	return {...state, usersSuggestions: suggestions};
 };
 
-export const clearUsersSuggestions = (state = INITIAL_STATE, { suggestions }) => {
+export const clearUsersSuggestions = (state = INITIAL_STATE) => {
 	return {...state, usersSuggestions: []};
 };
 
@@ -197,65 +173,42 @@ export const setUserNotExists = (state = INITIAL_STATE, { userNotExists }) => {
 	return {...state, userNotExists};
 };
 
-export const setProject = (state = INITIAL_STATE, { project }) => {
-	const models = get(state.projects.find(({_id}) => project._id === _id), 'models', []);
-	project.models = [...models];
-	return {...state, currentProject: project};
+export const fetchProjectSuccess = (state = INITIAL_STATE, { project }) => {
+	return {...state, project };
 };
 
 export const updateProjectPermissionsSuccess = (state = INITIAL_STATE, { permissions }) => {
-	const currentProject = {...state.currentProject};
-
-	currentProject.permissions = [...currentProject.permissions].map((currentPermissions) => {
-		const updatedPermissions = permissions.find(({user}) => currentPermissions.user === user);
-		if (updatedPermissions) {
-			return updatedPermissions;
-		}
-		return currentPermissions;
-	});
-
-	return {...state, currentProject};
+	const project = {...state.project};
+	project.permissions = mergePermissions(project.permissions, permissions);
+	return {...state, project };
 };
 
-export const fetchModelPermissionsSuccess = (state = INITIAL_STATE, { selectedModels }) => {
-	const permissions = selectedModels.length === 1 ? selectedModels[0].permissions : [];
-	const currentProject = {
-		...omit(state.currentProject, ['currentModels']),
-		modelsPermissions: permissions,
-		currentModels: selectedModels
-	};
-	return {...state, currentProject};
+export const fetchModelPermissionsSuccess = (state = INITIAL_STATE, { models }) => {
+	return { ...state, models };
 };
 
 export const updateModelPermissionsSuccess = (state = INITIAL_STATE, { updatedModels, permissions }) => {
-	const currentProject = {
-		...state.currentProject,
-		currentModels: updatedModels
-	};
-	const onlyOneModelWasChanged = updatedModels.length === 1;
 
-	const modelPermissions = currentProject.currentModels[0].permissions.map(({ user, permission }) => {
-		let updatedPermissionKey = onlyOneModelWasChanged ? permission : 'undefined';
-		const updatedPermissionsData = permissions.find((userPermission) => userPermission.user === user);
+	const models = state.models.map((model) => {
+		const updatedModel = updatedModels.find((m) => m.model === model.model);
 
-		if (updatedPermissionsData) {
-			updatedPermissionKey = updatedPermissionsData.key;
+		if (updatedModel) {
+			return {...model, permissions: mergePermissions(model.permissions, updatedModel.permissions)};
 		}
 
-		return {
-			user,
-			permission: updatedPermissionKey
-		};
+		return model;
 	});
 
-	currentProject.modelsPermissions = modelPermissions;
-
-	return {...state, currentProject};
+	return {...state,  models};
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
-	[UserManagementTypes.FETCH_TEAMSPACE_DETAILS_SUCCESS]: fetchTeamspaceDetailsSuccess,
-	[UserManagementTypes.SET_PENDING_STATE]: setPendingState,
+	[UserManagementTypes.FETCH_QUOTA_AND_INVITATIONS_SUCCESS]: fetchQuotaAndInvitationsSuccess,
+	[UserManagementTypes.FETCH_TEAMSPACE_USERS_SUCCESS]: fetchTeamspaceUsersSuccess,
+
+	[UserManagementTypes.SET_USERS_PENDING]: setUsersPending,
+	[UserManagementTypes.SET_PROJECTS_PENDING]: setProjectsPending,
+
 	[UserManagementTypes.ADD_USER_SUCCESS]: addUserSuccess,
 	[UserManagementTypes.REMOVE_USER_SUCCESS]: removeUserSuccess,
 	[UserManagementTypes.SET_TEAMSPACE]: setTeamspace,
@@ -268,7 +221,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[UserManagementTypes.SET_USER_NOT_EXISTS]: setUserNotExists,
 
 	// Project
-	[UserManagementTypes.SET_PROJECT]: setProject,
+	[UserManagementTypes.FETCH_PROJECT_SUCCESS]: fetchProjectSuccess,
 	[UserManagementTypes.UPDATE_PROJECT_PERMISSIONS_SUCCESS]: updateProjectPermissionsSuccess,
 
 	// Models

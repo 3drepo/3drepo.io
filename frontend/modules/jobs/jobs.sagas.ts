@@ -25,19 +25,25 @@ import { JobsActions, JobsTypes } from './jobs.redux';
 
 export function* fetchJobs({ teamspace }) {
 	try {
+		yield put(JobsActions.setJobsPending(true));
 		const response = yield API.getJobs(teamspace);
 		yield put(JobsActions.fetchJobsSuccess(response.data));
+		yield put(JobsActions.setJobsPending(false));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'jobs', error));
+		yield put(JobsActions.setJobsPending(false));
 	}
 }
 
 export function* fetchJobsColors({ teamspace }) {
 	try {
+		yield put(JobsActions.setColorsPending(true));
 		const response = yield API.getJobsColors(teamspace);
 		yield put(JobsActions.fetchJobsColorsSuccess(response.data));
+		yield put(JobsActions.setColorsPending(false));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'jobs colors', error));
+		yield put(JobsActions.setColorsPending(false));
 	}
 }
 

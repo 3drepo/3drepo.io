@@ -42,9 +42,11 @@ import { FloatingActionPanel } from '../components/floatingActionPanel/floatingA
 import InvitationDialog from '../components/invitationDialog/invitationDialog.container';
 import InvitationsDialog from '../components/invitationsDialog/invitationsDialog.container';
 import { JobItem } from '../components/jobItem/jobItem.component';
+import { Loader } from '../components/loader/loader.component';
 import { NewUserForm } from '../components/newUserForm/newUserForm.component';
 import { UserItem } from '../components/userItem/userItem.component';
 import { UserManagementTab } from '../components/userManagementTab/userManagementTab.component';
+import { LoaderContainer } from '../userManagement/userManagement.styles';
 import { PendingInvites } from './users.styles';
 
 const USERS_TABLE_CELLS = [
@@ -89,13 +91,16 @@ interface IProps {
 	invitationsCount: number;
 	userNotExists?: boolean;
 	currentTeamspace?: string;
+	selectedTeamspace: string;
 	addUser: (user) => void;
 	removeUser: (username) => void;
-	updateJob: (username, job) => void;
+	updateUserJob: (username, job) => void;
 	updatePermissions: (permissions) => void;
 	onUsersSearch: (searchText) => void;
 	clearUsersSuggestions: () => void;
 	showDialog: (config: any) => void;
+	fetchQuotaAndInvitations: (teamspace) => void;
+	isPending: boolean;
 }
 
 interface IState {
@@ -146,7 +151,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleChange = (user, field) => (event, value) => cond([
-		[matches('job'), () => this.props.updateJob(user.user, value)],
+		[matches('job'), () => this.props.updateUserJob(user.user, value)],
 		[matches('permissions'), () => this.onPermissionsChange(user.user, value)]
 	])(field)
 
@@ -193,8 +198,8 @@ export class Users extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		const containerElement = (ReactDOM.findDOMNode(this) as HTMLElement)
-			.parentNode;
+		const containerElement = (ReactDOM.findDOMNode(this) as HTMLElement).parentNode;
+		this.props.fetchQuotaAndInvitations(this.props.selectedTeamspace);
 		const preparedJobs = getPreparedJobs(this.props.jobs);
 
 		this.setState({
@@ -207,6 +212,10 @@ export class Users extends React.PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps) {
 		const changes = {} as any;
+
+		if (prevProps.selectedTeamspace !== this.props.selectedTeamspace) {
+			this.props.fetchQuotaAndInvitations(this.props.selectedTeamspace);
+		}
 
 		const jobsChanged = !isEqual(prevProps.jobs, this.props.jobs);
 		if (jobsChanged) {
@@ -326,7 +335,17 @@ export class Users extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
+		const { isPending, selectedTeamspace } = this.props;
 		const { rows, containerElement } = this.state;
+
+		if (isPending) {
+			const content = `Loading "${selectedTeamspace}" users data...`;
+			return (
+				<LoaderContainer>
+					<Loader content={content} />
+				</LoaderContainer>
+			);
+		}
 
 		return (
 			<>

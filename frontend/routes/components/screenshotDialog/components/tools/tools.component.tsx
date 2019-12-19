@@ -23,7 +23,6 @@ import BorderColorIcon from '@material-ui/icons/BorderColor';
 import ClearIcon from '@material-ui/icons/Clear';
 import DotIcon from '@material-ui/icons/FiberManualRecord';
 import RedoIcon from '@material-ui/icons/Redo';
-import CalloutIcon from '@material-ui/icons/SpeakerNotesOutlined';
 import TextIcon from '@material-ui/icons/TextFields';
 import UndoIcon from '@material-ui/icons/Undo';
 
@@ -40,7 +39,8 @@ import { MODES } from '../../screenshotDialog.helpers';
 import { SHAPE_TYPES } from '../shape/shape.constants';
 import {
 	activeShapeIcon,
-	BRUSH_SIZES, CALLOUT_SHAPES_MENU,
+	BRUSH_SIZES,
+	CALLOUT_SHAPES_MENU,
 	MAX_TOOL_ICON_SIZE,
 	MIN_BRUSH_ICON_SIZE,
 	MIN_TEXT_ICON_SIZE,

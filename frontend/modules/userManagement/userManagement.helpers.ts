@@ -1,6 +1,7 @@
 import { first, get } from 'lodash';
 import { MODEL_ROLES_TYPES } from '../../constants/model-permissions';
 import { PROJECT_ROLES_TYPES } from '../../constants/project-permissions';
+import {TEAMSPACE_PERMISSIONS} from '../../constants/teamspace-permissions';
 
 /**
  * Bind model permissions with members data
@@ -28,25 +29,40 @@ export const getExtendedModelPermissions = (currentUsers = [], modelPermissions 
 	});
 };
 
-export const getExtendedProjectPermissions = (currentUsers = [], project = { permissions: [] }) => {
-	return project.permissions.reduce((extendedPermissions, { user, permissions = [] }) => {
-		const userData = currentUsers.find((userDetails) => userDetails.user === user);
-
-		if (userData) {
+export const getExtendedProjectPermissions = (currentUsers = [], project  ) => {
+	const projectPermissions =  !project ? [] : project.permissions;
+	return currentUsers.reduce((projectUsers, user) => {
+		const userPermission = projectPermissions.find((projectUser) => projectUser.user === user.user);
+		if (userPermission) {
+			const permissions = userPermission.permissions;
 			let projectPermissionsKey = PROJECT_ROLES_TYPES.UNASSIGNED;
-			if (userData.isAdmin) {
+			if (user.isAdmin) {
 				projectPermissionsKey = PROJECT_ROLES_TYPES.ADMINISTRATOR;
 			} else {
 				projectPermissionsKey = first(permissions) || PROJECT_ROLES_TYPES.UNASSIGNED;
 			}
 
-			extendedPermissions.push({
-				...userData,
+			projectUsers.push({
+				...user,
 				isProjectAdmin: projectPermissionsKey === PROJECT_ROLES_TYPES.ADMINISTRATOR,
 				permissions,
 				key: projectPermissionsKey
 			});
 		}
-		return extendedPermissions;
+		return projectUsers;
 	}, []);
+};
+
+/**
+ * Add additional fields to user data
+ * @param users
+ * @returns
+ */
+export const prepareUserData = (teamspaceName, currentUser, userData): object => {
+	return {
+		...userData,
+		isAdmin: userData.permissions.includes(TEAMSPACE_PERMISSIONS.admin.key),
+		isOwner: teamspaceName === userData.user,
+		isCurrentUser: currentUser === userData.user
+	};
 };

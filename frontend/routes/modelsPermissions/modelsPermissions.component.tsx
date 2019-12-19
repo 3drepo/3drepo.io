@@ -58,7 +58,6 @@ const getModelsTableRows = memoizeOne((models = [], selectedModels = []) => {
 interface IProps {
 	location: any;
 	models: any[];
-	modelsMap: any;
 	selectedModels: any[];
 	permissions: any[];
 	onSelectionChange: (selectedModels) => void;
@@ -72,13 +71,6 @@ interface IState {
 }
 
 export class ModelsPermissions extends React.PureComponent<IProps, IState> {
-	public static getDerivedStateFromProps(nextProps: IProps) {
-		return {
-			modelRows: getModelsTableRows(nextProps.models, nextProps.selectedModels),
-			currentUser: (nextProps.permissions || []).find(({ isCurrentUser }) => isCurrentUser) || {}
-		};
-	}
-
 	public state = {
 		modelRows: [],
 		currentUser: {},
@@ -86,8 +78,8 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 	};
 
 	public hasDisabledPermissions = (row) => {
-		const {currentUser} = this.state as IState;
-		const {selectedModels} = this.props;
+		const { currentUser } = this.state as IState;
+		const { selectedModels } = this.props;
 
 		const hasSelectedModels = selectedModels.length;
 		const passBaseValidation = !hasSelectedModels || row.disabled || row.isOwner || row.isAdmin || row.isCurrentUser;
@@ -145,37 +137,15 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		this.setState({
-			modelRows: getModelsTableRows(this.props.models, this.props.selectedModels)
-		});
-	}
-
-	public componentDidUpdate(prevProps) {
-		const changes = {} as IState;
-
-		if (prevProps.models.length !== this.props.models.length) {
-				const queryParams = queryString.parse(this.props.location.search);
-				if (queryParams.modelId) {
-						const selectedModel = this.props.models.find(({ model }) => model === queryParams.modelId);
-						if (selectedModel) {
-							this.props.onSelectionChange([selectedModel]);
-						}
-				}
-		}
-
-		const modelsSelectionChanged = prevProps.selectedModels.length !== this.props.selectedModels.length;
-		if (modelsSelectionChanged) {
-			changes.permissionsRevision = Math.random();
-		}
-
-		if (!isEmpty(changes)) {
-			this.setState(changes);
+		const queryParams = queryString.parse(this.props.location.search);
+		if (queryParams.modelId) {
+			this.props.onSelectionChange([{model: queryParams.modelId}]);
 		}
 	}
 
 	public render() {
 		const { models, permissions, selectedModels } = this.props;
-		const { modelRows, permissionsRevision } = this.state;
+		const { permissionsRevision } = this.state;
 
 		return (
 			<Container
@@ -186,7 +156,7 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 				<ModelsContainer item>
 					<CustomTable
 						cells={MODEL_TABLE_CELLS}
-						rows={modelRows}
+						rows={getModelsTableRows(models, selectedModels)}
 						onSelectionChange={this.props.onSelectionChange}
 						onSearch={this.handleModelsSearch}
 					/>

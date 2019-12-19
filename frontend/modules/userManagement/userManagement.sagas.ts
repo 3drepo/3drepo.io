@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isEmpty, pick, values } from 'lodash';
+import { isEmpty } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
@@ -23,11 +23,11 @@ import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { JobsActions } from '../jobs';
 import { SnackbarActions } from '../snackbar';
-import { selectProjects, selectTeamspacesWithAdminAccess } from '../teamspaces';
+
 import {
-	selectCurrentProject,
 	selectCurrentTeamspace,
 	selectInvitations,
+	selectProject,
 	selectUserNotExists,
 	UserManagementActions,
 	UserManagementTypes,
@@ -38,35 +38,56 @@ import {
 } from '../../routes/modelsPermissions/components/federationReminderDialog/federationReminderDialog.component';
 import { RemoveUserDialog } from '../../routes/users/components/removeUserDialog/removeUserDialog.component';
 
-export function* fetchTeamspaceDetails({ teamspace }) {
+export function* fetchQuotaAndInvitations() {
 	try {
-		yield put(UserManagementActions.setPendingState(true));
+		yield put(UserManagementActions.setUsersPending(true));
 
-		const teamspaces = yield select(selectTeamspacesWithAdminAccess);
-		const teamspaceDetails = teamspaces.find(({ account }) => account === teamspace) || {};
-		const currentUser = yield select(selectCurrentUser);
+		const teamspace = yield select(selectCurrentTeamspace);
 
-		const [users, invitations, quota] = yield all([
-			API.fetchUsers(teamspace),
+		const [{data: invitations}, {data: {collaboratorLimit}}] = yield all([
 			API.fetchInvitations(teamspace),
 			API.getQuotaInfo(teamspace),
 			put(JobsActions.fetchJobs(teamspace)),
 			put(JobsActions.fetchJobsColors(teamspace))
 		]);
 
-		const projectsMap = yield select(selectProjects);
-		teamspaceDetails.projects = values(pick(projectsMap, teamspaceDetails.projects || []));
-
-		yield put(UserManagementActions.fetchTeamspaceDetailsSuccess(
-			teamspaceDetails,
-			users.data,
-			invitations.data,
-			currentUser.username,
-			quota.data.collaboratorLimit
+		yield put(UserManagementActions.fetchQuotaAndInvitationsSuccess(
+			invitations,
+			collaboratorLimit
 		));
+
+		yield put(UserManagementActions.setUsersPending(false));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'teamspace details', error));
-		yield put(UserManagementActions.setPendingState(false));
+		yield put(UserManagementActions.setUsersPending(false));
+	}
+}
+
+export function *fetchCurrentTeamspaceJobsAndColors() {
+	const teamspace = yield select(selectCurrentTeamspace);
+
+	yield all([
+		put(JobsActions.fetchJobs(teamspace)),
+		put(JobsActions.fetchJobsColors(teamspace))
+	]);
+}
+
+export function* fetchTeamspaceUsers() {
+	try {
+		yield put(UserManagementActions.setUsersPending(true));
+		const teamspace = yield select(selectCurrentTeamspace);
+		if (!teamspace) {
+			yield put(UserManagementActions.fetchTeamspaceUsersSuccess([]));
+			yield put(UserManagementActions.setUsersPending(false));
+			return;
+		}
+
+		const {data: users} = yield API.fetchUsers(teamspace);
+		yield put(UserManagementActions.fetchTeamspaceUsersSuccess(users));
+		yield put(UserManagementActions.setUsersPending(false));
+	} catch (error) {
+		yield put(DialogActions.showEndpointErrorDialog('get', 'teamspace members', error));
+		yield put(UserManagementActions.setUsersPending(false));
 	}
 }
 
@@ -223,19 +244,29 @@ export function* getUsersSuggestions({ searchText }) {
 // Projects
 export function* fetchProject({ project }) {
 	try {
+		if (!project) {
+			yield put(UserManagementActions.fetchProjectSuccess(null));
+			return;
+		}
+
+		yield put(UserManagementActions.setProjectsPending(true));
+
 		const teamspace = yield select(selectCurrentTeamspace);
 		const { data: projectData } = yield API.fetchProject(teamspace, project);
 
-		yield put(UserManagementActions.setProject(projectData));
+		yield put(UserManagementActions.fetchProjectSuccess(projectData));
+
+		yield put(UserManagementActions.setProjectsPending(false));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'project permissions', error));
+		yield put(UserManagementActions.setProjectsPending(false));
 	}
 }
 
 export function* updateProjectPermissions({ permissions }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
-		const {name} = yield select(selectCurrentProject);
+		const {name} = yield select(selectProject);
 		const project = {name, permissions};
 		yield API.updateProject(teamspace, project.name, project);
 
@@ -249,6 +280,8 @@ export function* updateProjectPermissions({ permissions }) {
 // Models
 export function* fetchModelsPermissions({ models }) {
 	try {
+		yield put(UserManagementActions.setProjectsPending(true));
+
 		const teamspace = yield select(selectCurrentTeamspace);
 		let data = [];
 		if (models.length) {
@@ -264,14 +297,16 @@ export function* fetchModelsPermissions({ models }) {
 		}
 
 		yield put(UserManagementActions.fetchModelPermissionsSuccess(data));
+		yield put(UserManagementActions.setProjectsPending(false));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'models/federations permissions', error));
+		yield put(UserManagementActions.setProjectsPending(false));
 	}
 }
 
 export function* updateModelsPermissionsPre({ modelsWithPermissions, permissions }) {
 	try {
-		const currentProject = yield select(selectCurrentProject);
+		const currentProject = yield select(selectProject);
 		const permissionlessModels = [];
 		for (let index = 0; index < modelsWithPermissions.length; index++) {
 			const selectedModel = modelsWithPermissions[index];
@@ -321,13 +356,17 @@ export function* updateModelsPermissions({ modelsWithPermissions, permissions })
 }
 
 export default function* UserManagementSaga() {
-	yield takeLatest(UserManagementTypes.FETCH_TEAMSPACE_DETAILS, fetchTeamspaceDetails);
+	yield takeLatest(UserManagementTypes.FETCH_QUOTA_AND_INVITATIONS, fetchQuotaAndInvitations);
+	yield takeLatest(UserManagementTypes.FETCH_TEAMSPACE_USERS, fetchTeamspaceUsers);
+
+	yield takeLatest(UserManagementTypes.FETCH_CURRENT_TEAMSPACE_JOBS_AND_COLORS, fetchCurrentTeamspaceJobsAndColors);
+
 	yield takeLatest(UserManagementTypes.ADD_USER, addUser);
 	yield takeLatest(UserManagementTypes.REMOVE_USER, removeUser);
 	yield takeLatest(UserManagementTypes.REMOVE_USER_CASCADE, removeUserCascade);
 	yield takeLatest(UserManagementTypes.UPDATE_PERMISSIONS, updatePermissions);
 	yield takeLatest(UserManagementTypes.GET_USERS_SUGGESTIONS, getUsersSuggestions);
-	yield takeLatest(UserManagementTypes.UPDATE_JOB, updateUserJob);
+	yield takeLatest(UserManagementTypes.UPDATE_USER_JOB, updateUserJob);
 	yield takeLatest(UserManagementTypes.REMOVE_INVITATION, removeInvitation);
 	yield takeLatest(UserManagementTypes.SEND_INVITATION, sendInvitation);
 

@@ -26,7 +26,6 @@ import {
 import { selectStarredModels } from '../starred';
 import { getStarredModelKey } from '../starred/starred.contants';
 import { sortModels } from './teamspaces.helpers';
-import { extendTeamspacesInfo } from './teamspaces.helpers';
 
 export const selectTeamspacesDomain = (state) => ({ ...state.teamspaces });
 
@@ -261,10 +260,6 @@ export const selectFlattenTeamspaces = createSelector(
 		}
 		return flattenList;
 	}
-);
-
-export const selectTeamspacesWithAdminAccess = createSelector(
-	selectTeamspacesList, selectProjects, extendTeamspacesInfo
 );
 
 export const selectIsPending = createSelector(

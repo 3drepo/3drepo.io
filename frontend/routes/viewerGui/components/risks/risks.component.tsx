@@ -98,8 +98,10 @@ export class Risks extends React.PureComponent<IProps, any> {
 
 	public componentDidUpdate(prevProps) {
 		const {selectedRisk} = this.props;
+		const riskId = (selectedRisk || {})._id;
+		const prevRiskId = (prevProps.selectedRisk || {})._id;
 
-		if (prevProps.selectedRisk !== selectedRisk) {
+		if (riskId !== prevRiskId) {
 			this.handleSelectedIssue();
 		}
 	}
