@@ -22,6 +22,7 @@ import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import { identity, memoize } from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
 
+import { componentToHex, rgbaToHex } from '../../../helpers/colors';
 import {
 	Canvas,
 	CanvasContainer,
@@ -58,24 +59,6 @@ const COLORS = {
 	WHITE_TRANSPARENT: 'rgba(255,255,255,0)'
 };
 
-const componentToHex = memoize((c) => {
-	const hex = c.toString(16).toUpperCase();
-	return hex.length === 1 ? '0' + hex : hex;
-});
-
-const rgbaToHex = memoize((rgbaColor) => {
-	const [r, g, b] = rgbaColor.match(/[.\d]+/g).map(Number);
-	return '#' + componentToHex(r) + componentToHex(g) + componentToHex(b);
-});
-
-const hexToRgba = memoize((hex) => {
-	const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex.toLowerCase());
-
-	return result
-		? `rgba(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}, 1)`
-		: COLORS.BLACK;
-});
-
 const isShadeOfGrey = (color: string) => {
 	color = color.replace('#', '');
 	const r = color.slice(0, 2);
@@ -98,7 +81,7 @@ const getCanvasColor = (event, canvasCtx) => {
 	const y = event.offsetY;
 	const imageData = canvasCtx.getImageData(x, y, 1, 1).data;
 	const rgbaColor = `rgba(${imageData[0]}, ${imageData[1]}, ${imageData[2]}, 1)`;
-	return rgbaToHex(rgbaColor).toUpperCase();
+	return rgbaToHex(rgbaColor);
 };
 
 interface IProps {

@@ -724,7 +724,7 @@ export class Viewer {
 	public overrideMeshColor(account, model, meshIDs, color) {
 		UnityUtil.overrideMeshColor(account, model, meshIDs, color);
 
-		if ((color.length >= 4 && color[3] === 1) || color.length === 3) {
+		if (color.length <= 3) {
 			return;
 		}
 
