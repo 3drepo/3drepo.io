@@ -56,6 +56,10 @@ services:
 script:
     - cd ./../backend
     - unbuffer yarn test
+    - cd ../
+    - NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" &
+    - cd ./frontend
+    - yarn test
 
 notifications:
     email:
