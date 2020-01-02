@@ -21,17 +21,17 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import {
-	selectCurrentModels,
-	selectExtendedModelPermissions,
-	selectModels,
+	selectModelsPermissions,
+	selectProjectModels,
+	selectSelectedModels,
 	UserManagementActions
 } from '../../modules/userManagement';
 import { ModelsPermissions } from './modelsPermissions.component';
 
 const mapStateToProps = createStructuredSelector({
-	models: selectModels,
-	selectedModels: selectCurrentModels,
-	permissions: selectExtendedModelPermissions
+	models: selectProjectModels,
+	selectedModels: selectSelectedModels,
+	permissions: selectModelsPermissions
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

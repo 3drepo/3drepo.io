@@ -17,7 +17,7 @@
 
 import * as React from 'react';
 import { EDITABLE_TEXTAREA_NAME, EDITABLE_TEXTAREA_PLACEHOLDER } from '../../screenshotDialog.helpers';
-import { Textarea, TextPlaceholder } from '../../screenshotDialog.styles';
+import { AssistantElement, Textarea } from './editableText.styles';
 
 interface IProps {
 	value: string;
@@ -27,24 +27,61 @@ interface IProps {
 }
 
 export const EditableText = ({ value, styles, handleTextEdit, handleTextareaKeyDown }: IProps) => {
-	const { color, ...placeholderStyles } = styles;
+	const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+	const assistantElementRef = React.useRef<HTMLPreElement>(null);
+	const [initialTextareaWidth, setInitialTextareaWidth] = React.useState<number>(0);
+	const [additionalStyles, setAdditionalStyles] = React.useState<object>({});
+
+	React.useEffect(() => {
+		if (textareaRef.current) {
+			const currentTextarea = textareaRef.current;
+			currentTextarea.setAttribute('size', currentTextarea.getAttribute('placeholder').length.toString());
+			setInitialTextareaWidth(currentTextarea.offsetWidth);
+		}
+	}, []);
+
+	React.useEffect(() => {
+		if (textareaRef && assistantElementRef) {
+			if (assistantElementRef.current.offsetWidth > initialTextareaWidth) {
+				setAdditionalStyles({
+					...additionalStyles,
+					height: `${textareaRef.current.scrollHeight}px`,
+					width: `${assistantElementRef.current.offsetWidth}px`,
+				});
+			} else {
+				setAdditionalStyles({
+					...additionalStyles,
+					height: `${textareaRef.current.scrollHeight}px`,
+				});
+			}
+		}
+	}, [value]);
+
 	return (
 		<>
-			{
-				<Textarea
-					id={EDITABLE_TEXTAREA_NAME}
-					name={EDITABLE_TEXTAREA_NAME}
-					value={value === EDITABLE_TEXTAREA_PLACEHOLDER ? '' : value}
-					style={styles}
-					onChange={handleTextEdit}
-					onKeyDown={handleTextareaKeyDown}
-					autoFocus
-				/>
-			}
-			{
-				(value && value === EDITABLE_TEXTAREA_PLACEHOLDER)
-				&& <TextPlaceholder style={placeholderStyles}>{value}</TextPlaceholder>
-			}
+			<Textarea
+				ref={textareaRef}
+				id={EDITABLE_TEXTAREA_NAME}
+				name={EDITABLE_TEXTAREA_NAME}
+				placeholder={EDITABLE_TEXTAREA_PLACEHOLDER}
+				value={value}
+				style={{
+					...styles,
+					...additionalStyles
+				}}
+				onChange={handleTextEdit}
+				onKeyDown={handleTextareaKeyDown}
+				autoFocus
+			/>
+			<AssistantElement
+				ref={assistantElementRef}
+				style={{
+					fontFamily: styles.fontFamily,
+					fontSize: styles.fontSize,
+				}}
+			>
+				{value && `_${value}_`}
+			</AssistantElement>
 		</>
 	);
 };

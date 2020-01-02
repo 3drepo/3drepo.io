@@ -2,7 +2,8 @@ import { connectRouter } from 'connected-react-router';
 import { combineReducers } from 'redux';
 import undoable from 'redux-undo';
 
-import { CanvasHistoryTypes } from './canvasHistory/canvasHistory.redux';
+import { CanvasHistoryTypes } from './canvasHistory';
+import { batchGroupBy } from './canvasHistory/canvasHistory.helpers';
 
 import { reducer as authReducer } from './auth/auth.redux';
 import { reducer as billingReducer } from './billing/billing.redux';
@@ -38,6 +39,7 @@ export default function createReducer(history) {
 		canvasHistory: undoable(canvasHistoryReducer, {
 			undoType: CanvasHistoryTypes.UNDO,
 			redoType: CanvasHistoryTypes.REDO,
+			groupBy: batchGroupBy.init([]),
 			clearHistoryType: CanvasHistoryTypes.CLEAR_HISTORY,
 			ignoreInitialState: true
 		}),

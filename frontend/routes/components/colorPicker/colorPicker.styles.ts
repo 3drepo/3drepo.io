@@ -24,7 +24,9 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import Popover from '@material-ui/core/Popover';
 import styled from 'styled-components';
 
+import Slider from '@material-ui/lab/Slider';
 import { COLOR, FONT_WEIGHT } from '../../../styles';
+import { CheckboxField } from '../customTable/customTable.component';
 
 export const ColorSelect = styled(Grid)`
 	cursor: ${(props: any) => props.disabled ? 'default' : 'pointer'};
@@ -106,25 +108,49 @@ export const ColorPointer = styled.div`
 	transform: translate(-3px, -6px);
 `;
 
-export const SelectedColor = styled.div`
+export const SelectedColor = styled(({ color, ...rest}) =>
+	React.createElement('div', {...rest, style : {backgroundColor: color} }))`
 	width: 55px;
 	height: 20px;
-	background-color: ${(props) => props.color};
 	border: ${(props) => props.color && props.color !== COLOR.WHITE ? 0 : 1 }px solid ${COLOR.BLACK_6};
 `;
 
-export const StyledStartAdornment = styled(InputAdornment)`
+// tslint:disable-next-line:max-line-length
+export const SelectedColorBackground = styled.div` background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect x="0" width="5" height="5" y="0" fill="rgb(158, 158, 158)"/><rect x="5" width="5" height="5" y="5" fill="rgb(158, 158, 158)"/></svg>');
+	width: 55px;
+	height: 20px;
+	margin-bottom: -20px;
+`;
+
+export const OpacityVisibilityCheckbox = styled(CheckboxField)`
+	&& {
+		margin-left: -15px;
+	}
+`;
+
+export const OpacitySlider = styled(Slider)`
+	&& {
+		width: 165px;
+		padding-right: 9px;
+	}
+`;
+
+export const OpacityValue = styled.div`
+	font-size: 14px;
+`;
+
+export const StyledAdornment = styled(InputAdornment)`
 	&& {
 		max-height: 3em;
 		margin-right: 3px;
 	}
 `;
 
-export const SelectedHash = styled(Input)`
+export const SelectedHash = styled(({withOpacity, ...rest}) => React.createElement(Input, rest))`
 	&& {
 		margin-left: 25px;
 		font-weight: ${FONT_WEIGHT.NORMAL};
-		width: 70px;
+		width: ${(props) => props.withOpacity ? '90' : '70'}px;
 	}
 
 	input {
@@ -134,6 +160,29 @@ export const SelectedHash = styled(Input)`
 		font-size: 14px;
 		margin-left: 2px;
 		outline: none;
+	}
+`;
+
+export const OpacityInput = styled(Input)`
+	&& {
+		font-weight: ${FONT_WEIGHT.NORMAL};
+		width: 52px;
+	}
+
+	input {
+		width: 52px;
+		height: 20px;
+		color: #333333;
+		font-size: 14px;
+		margin-left: 2px;
+		outline: none;
+	}
+`;
+
+export const OpacityInputAdornment = styled(StyledAdornment)`
+	&& {
+		margin-left: -24px;
+		margin-bottom: 4px;
 	}
 `;
 

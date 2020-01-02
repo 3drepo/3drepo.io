@@ -88,19 +88,19 @@ export const activeShapeIcon = (activeShape) => SHAPE_ICONS[activeShape];
 export const BRUSH_SIZES = [
 	{
 		label: 'XL',
-		value: 36
+		value: 26
 	},
 	{
 		label: 'L',
-		value: 16
+		value: 14
 	},
 	{
 		label: 'M',
-		value: 8
+		value: 6
 	},
 	{
 		label: 'S',
-		value: 4
+		value: 3
 	},
 	{
 		label: 'XS',
@@ -111,25 +111,28 @@ export const BRUSH_SIZES = [
 export const TEXT_SIZES = [
 	{
 		label: 'XL',
-		value: 56
-	},
-	{
-		label: 'L',
 		value: 46
 	},
 	{
-		label: 'M',
+		label: 'L',
 		value: 36
 	},
 	{
-		label: 'S',
+		label: 'M',
 		value: 24
 	},
 	{
+		label: 'S',
+		value: 18
+	},
+	{
 		label: 'XS',
-		value: 20
+		value: 14
 	},
 ];
+
+export const initialTextSize = () => TEXT_SIZES.find((item) => item.label === 'M').value;
+export const initialBrushSize = () => BRUSH_SIZES.find((item) => item.label === 'M').value;
 
 export const MAX_TOOL_ICON_SIZE = 28;
 export const MIN_BRUSH_ICON_SIZE = 5;

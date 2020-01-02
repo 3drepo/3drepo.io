@@ -23,6 +23,7 @@ import { ROUTES } from '../../../constants/routes';
 import { aspectRatio } from '../../../helpers/aspectRatio';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { viewportSize } from '../../../helpers/viewportSize';
+import { batchGroupBy } from '../../../modules/canvasHistory/canvasHistory.helpers';
 import { LoaderContainer } from '../../board/board.styles';
 import { Loader } from '../loader/loader.component';
 import { Drawing } from './components/drawing/drawing.component';
@@ -42,6 +43,9 @@ import { Container, Stage, StageContainer } from './screenshotDialog.styles';
 const MIN_DIALOG_WIDTH = 860;
 const MIN_DIALOG_HEIGHT = 300;
 const INIT_DIALOG_HEIGHT = 600;
+const INIT_DIALOG_PADDING = 48;
+const HORIZONTAL_DIALOG_PADDING = 2 * INIT_DIALOG_PADDING;
+const VERTICAL_DIALOG_PADDING = 40 - 2 * INIT_DIALOG_PADDING;
 
 declare const Konva;
 
@@ -67,9 +71,8 @@ interface IProps {
 export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public state = {
 		color: INITIAL_VALUES.color,
-		brushSize: INITIAL_VALUES.brushSize,
-		brushColor: INITIAL_VALUES.color,
-		textSize: INITIAL_VALUES.textSize,
+		strokeWidth: INITIAL_VALUES.brushSize,
+		fontSize: INITIAL_VALUES.textSize,
 		mode: null,
 		activeShape: null,
 		sourceImage: '',
@@ -86,7 +89,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			visible: false,
 			value: '',
 			styles: {},
-			elementName: ''
+			name: ''
 		} as any
 	};
 
@@ -142,7 +145,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	));
 
 	public renderIndicator = renderWhenTrue(() => (
-		<Indicator color={this.state.color} size={this.state.brushSize} />
+		<Indicator color={this.state.color} size={this.state.strokeWidth} />
 	));
 
 	public renderErasing = renderWhenTrue(() => {
@@ -150,8 +153,8 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			<Erasing
 				height={this.state.stage.height}
 				width={this.state.stage.width}
-				size={this.state.brushSize}
-				color={this.state.brushColor}
+				size={this.state.strokeWidth}
+				color={this.state.color}
 				mode={this.state.mode}
 				layer={this.layerRef}
 				stage={this.stage}
@@ -207,10 +210,17 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		}
 	}
 
+	private get localPosition() {
+		const position = this.stage.getPointerPosition();
+		return {
+			x: position.x - this.layer.x(),
+			y: position.y - this.layer.y()
+		};
+	}
+
 	public handleStageClick = () => {
 		if (this.state.mode === MODES.TEXT && !this.state.selectedObjectName && !this.state.textEditable.visible) {
-			const position = this.stage.getPointerPosition();
-			this.addNewText(position);
+			this.addNewText(this.localPosition);
 		}
 	}
 
@@ -234,13 +244,14 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 	public scaleStage = (image) => {
 		const { naturalWidth, naturalHeight } = image.attrs.image;
-		const { width: maxWidth, height: maxHeight } = viewportSize();
-
-		const { scaledWidth, scaledHeight } = aspectRatio(naturalWidth, naturalHeight, maxWidth, maxHeight);
+		const { width: viewportWidth, height: viewportHeight } = viewportSize();
+		const maxHeight = viewportHeight - VERTICAL_DIALOG_PADDING;
+		const maxWidth = viewportWidth - HORIZONTAL_DIALOG_PADDING;
 
 		if (naturalWidth < maxWidth && naturalHeight < maxHeight) {
 			this.updateDialogSizes({ height: naturalHeight, width: naturalWidth });
 		} else {
+			const { scaledWidth, scaledHeight } = aspectRatio(naturalWidth, naturalHeight, maxWidth, maxHeight);
 			image.setAttrs({
 				width: scaledWidth,
 				height: scaledHeight,
@@ -258,50 +269,30 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		}
 	}
 
-	public handleBrushSizeChange = (event) => {
-		const newState = {} as any;
-		newState.brushSize = event.target.value;
-
-		if (this.state.selectedObjectName) {
-			const size = event.target.value;
-			const changedProperties = {} as any;
-
-			if (this.selectedElementType === ELEMENT_TYPES.TEXT) {
-				changedProperties.fontSize = size;
-			} else {
-				changedProperties.strokeWidth = size;
-			}
-			this.props.updateElement(this.state.selectedObjectName, changedProperties);
-		}
-
-		this.setState(newState);
+	public handleChangeObject = (attrs) => {
+		this.props.updateElement(attrs.name, attrs);
 	}
 
-	public handleTextSizeChange = ({ target: { value } }) => {
+	private updateProperty = (property: string, value: number) => {
 		if (this.state.selectedObjectName) {
-			this.props.updateElement(this.state.selectedObjectName, { fontSize: value });
+			this.props.updateElement(this.state.selectedObjectName, { [property]: value });
 		}
 
 		this.setState({
-			textSize: value,
+			[property]: value,
 		});
 	}
 
+	public handleBrushSizeChange = ({ target: { value } }) => {
+		this.updateProperty('strokeWidth', value);
+	}
+
+	public handleTextSizeChange = ({ target: { value } }) => {
+		this.updateProperty('fontSize', value);
+	}
+
 	public handleColorChange = (color) => {
-		const newState = {} as any;
-		newState.color = color;
-		newState.brushColor = color;
-
-		if (this.state.selectedObjectName) {
-			const changedProperties = {} as any;
-
-			if (this.selectedElementType === ELEMENT_TYPES.DRAWING) {
-				changedProperties.stroke = color;
-			}
-			changedProperties.color = color;
-			this.props.updateElement(this.state.selectedObjectName, changedProperties);
-		}
-		this.setState(newState);
+		this.updateProperty('color', color);
 	}
 
 	public clearCanvas = () => {
@@ -317,10 +308,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		// the library doesn't clear current state, only past and future
 		this.props.initHistory();
 		this.props.clearHistory();
-	}
-
-	public handleClose = () => {
-		this.props.handleClose();
 	}
 
 	public handleSave = () => {
@@ -343,9 +330,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 	public setBrushMode = () => this.setMode(MODES.BRUSH);
 
-	public setEraserMode = () => {
-		this.setMode(MODES.ERASER);
-	}
+	public setEraserMode = () => this.setMode(MODES.ERASER);
 
 	public setShapeMode = (shape) => {
 		if (shape === SHAPE_TYPES.POLYGON) {
@@ -368,17 +353,19 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public handleOnEdit = (target) => {
-		const styles = getTextStyles(target);
-		const visible = true;
-		const value = target.attrs.text;
-		const name = this.state.selectedObjectName;
-		this.setState({
-			textEditable: { visible, value, styles, name }
-		}, () => {
-			setTimeout(() => {
-				window.addEventListener('click', this.handleOutsideClick);
+		if (!target.text()) {
+			const styles = getTextStyles(target);
+			const visible = true;
+			const value = target.attrs.text;
+			const name = this.state.selectedObjectName;
+			this.setState({
+				textEditable: {visible, value, styles, name}
+			}, () => {
+				setTimeout(() => {
+					window.addEventListener('click', this.handleOutsideClick);
+				});
 			});
-		});
+		}
 	}
 
 	public handleOutsideClick = (e) => {
@@ -393,6 +380,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			if (this.state.textEditable.name && this.props.canvasElements.length) {
 				const text = this.state.textEditable.value;
 				this.props.updateElement(this.state.textEditable.name, { text });
+				batchGroupBy.end();
 			}
 
 			this.setState(newState, () => {
@@ -403,34 +391,31 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		}
 	}
 
-	public handleTextEdit = ({target: {value}}) => {
-		const [textAreaWidth] = this.state.textEditable.styles.width.split('px');
-		const width = Number(textAreaWidth);
-
+	public handleTextEdit = ({ target }) => {
 		this.setState({
 			textEditable: {
 				...this.state.textEditable,
-				value,
+				value: target.value,
 				styles: {
 					...this.state.textEditable.styles,
-					width: `${width + (this.state.textEditable.styles.fontSize * 0.7)}px`
 				}
 			}
 		});
 	}
 
 	public handleTextareaKeyDown = (e) => {
-		if (e.keyCode === 13) {
+		if (e.keyCode === 13 && !e.shiftKey) {
 			const newState = {} as any;
 			newState.textEditable = {
 				...this.state.textEditable,
 				visible: false,
-				name: false
+				name: '',
 			};
 
 			if (this.state.textEditable.name && this.props.canvasElements.length) {
 				const text = this.state.textEditable.value;
 				this.props.updateElement(this.state.textEditable.name, { text });
+				batchGroupBy.end();
 			}
 
 			this.setState(newState);
@@ -450,8 +435,9 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public addNewText = (position) => {
-		const newText = getNewText(this.state.color, this.state.textSize, position);
+		const newText = getNewText(this.state.color, this.state.fontSize, position);
 		const selectedObjectName = newText.name;
+		batchGroupBy.start();
 		this.props.addElement(newText);
 		this.setState({ selectedObjectName, mode: MODES.TEXT });
 		document.body.style.cursor = 'crosshair';
@@ -497,24 +483,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		}
 	}
 
-	public handleSelectObject = (object) => {
-		const newState = {
-			selectedObjectName: object.name,
-			brushColor: object.color || object.stroke,
-			color: object.color || object.stroke,
-			mode: object.type
-		} as any;
-
-		if (object.fontSize) {
-			newState.brushSize = object.fontSize;
-		}
-		this.setState(newState);
-	}
-
-	public handleChangeObject = (attrs) => {
-		this.props.updateElement(attrs.name, attrs);
-	}
-
 	public handleKeyDown = (e) => {
 		if (this.state.selectedObjectName && !this.state.textEditable.visible) {
 			if (e.keyCode === 8) {
@@ -536,17 +504,12 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			isSelected,
 			isVisible: element.type === ELEMENT_TYPES.TEXT ? !isTextEditing : true,
 			handleChange: (newAttrs) => this.handleChangeObject(newAttrs),
-			setShapeMode: () => {
-				this.setState({
-					mode: MODES.SHAPE
-				});
-			}
 		};
 
 		if (element.type === ELEMENT_TYPES.TEXT) {
 			return (<TextNode	key={index} {...commonProps} onEdit={this.handleOnEdit} />);
 		} else if (element.type === ELEMENT_TYPES.DRAWING) {
-			return(<DrawnLine key={index} {...commonProps} />);
+			return (<DrawnLine key={index} {...commonProps} />);
 		}
 		return (<Shape key={index} {...commonProps} />);
 	})
@@ -557,8 +520,8 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 				ref={this.drawingRef}
 				height={this.state.stage.height}
 				width={this.state.stage.width}
-				size={this.state.brushSize}
-				color={this.state.brushColor}
+				size={this.state.strokeWidth}
+				color={this.state.color}
 				mode={this.state.mode}
 				layer={this.drawingLayerRef}
 				stage={this.stage}
@@ -597,9 +560,9 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public renderTools = () => (
 		<Tools
 			onClick={this.handleToolsClick}
-			size={this.state.brushSize}
-			textSize={this.state.textSize}
-			color={this.state.brushColor}
+			size={this.state.strokeWidth}
+			textSize={this.state.fontSize}
+			color={this.state.color}
 			onDrawClick={this.setBrushMode}
 			onEraseClick={this.setEraserMode}
 			onTextClick={this.handleToolTextClick}
@@ -608,7 +571,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			onBrushSizeChange={this.handleBrushSizeChange}
 			onTextSizeChange={this.handleTextSizeChange}
 			onColorChange={this.handleColorChange}
-			onCancel={this.handleClose}
 			onUndo={this.props.undo}
 			onRedo={this.props.redo}
 			onSave={this.handleSave}
@@ -662,8 +624,8 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 					<Stage ref={this.stageRef} height={stage.height} width={stage.width} onMouseDown={this.handleStageMouseDown}>
 						{this.renderLayers()}
 					</Stage>
+					{this.renderEditableTextarea(this.state.textEditable.visible)}
 				</StageContainer>
-				{this.renderEditableTextarea(this.state.textEditable.visible)}
 			</Container>
 		);
 	}

@@ -76,26 +76,19 @@ interface IProps {
 	isLoadingTeamspace: boolean;
 	isTeamspaceAdmin: boolean;
 	currentUser: {username: string};
-	onTeamspaceChange: (teamspace) => void;
 	fetchTeamspaces: (username) => void;
+	fetchUsers: () => void;
+	selectedTeamspace: string;
 }
 
 interface IState {
 	activeTab: string;
-	selectedTeamspace: string;
 	teamspacesItems: any[];
 }
 
 export class UserManagement extends React.PureComponent<IProps, IState> {
-	public static getDerivedStateFromProps = (nextProps, prevState) => {
-		return {
-			selectedTeamspace: nextProps.match.params.teamspace || prevState.selectedTeamspace
-		};
-	}
-
 	public state = {
 		activeTab: USERS_TAB.path,
-		selectedTeamspace: '',
 		teamspacesItems: []
 	};
 
@@ -104,40 +97,35 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 	}
 
 	public onTeamspaceChange = (event, teamspace) => {
-		const { match, location, onTeamspaceChange } = this.props;
+		const { match, location } = this.props;
 		const newRoute = location.pathname.replace(match.params.teamspace, teamspace);
-
 		this.props.history.push(newRoute);
-		if (onTeamspaceChange) {
-			onTeamspaceChange(teamspace);
-		}
 	}
 
 	public componentDidMount() {
-		const { teamspaces, match, history, currentUser, onTeamspaceChange } = this.props;
+		const { teamspaces, match, history, currentUser, selectedTeamspace } = this.props;
 		const { activeTab } = this.state;
-		const selectedTeamspace = match.params.teamspace;
 
 		if (teamspaces.length === 0) {
 			this.props.fetchTeamspaces(currentUser.username);
 		}
 
 		if (selectedTeamspace) {
-			onTeamspaceChange(selectedTeamspace);
+			this.props.fetchUsers();
 		}
 
 		const changes = {
 			teamspacesItems: teamspaces.map(({ account }) => ({ value: account }))
 		} as any;
 
+		changes.activeTab = location.pathname.replace(`${match.url}/`, '');
+
 		const teamspaceData = teamspaces.find(({ account }) => account === selectedTeamspace);
 
 		// Redirect to projects tab if user has not admin rights
-		if (teamspaceData && !teamspaceData.isAdmin && ADMIN_TABS.includes(activeTab)) {
+		if (teamspaceData && !teamspaceData.isAdmin && ADMIN_TABS.includes(changes.activeTab )) {
 			changes.activeTab = PROJECTS_TAB.path;
 			history.push(`${match.url}/${PROJECTS_TAB.path}`);
-		} else {
-			changes.activeTab = location.pathname.replace(`${match.url}/`, '');
 		}
 
 		this.setState(changes);
@@ -145,13 +133,16 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps) {
 		const changes = {} as IState;
-		const {teamspaces, match, onTeamspaceChange} = this.props;
+		const {teamspaces, selectedTeamspace} = this.props;
+
+		if (prevProps.selectedTeamspace !== selectedTeamspace) {
+			this.props.fetchUsers();
+		}
 
 		const teamspacesChanged = !isEqual(teamspaces, prevProps.teamspaces);
 
 		if (teamspacesChanged) {
 			changes.teamspacesItems = teamspaces.map(({account}) => ({value: account}));
-			onTeamspaceChange(match.params.teamspace);
 		}
 
 		if (!isEmpty(changes)) {
@@ -160,8 +151,8 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderTabContent = () => {
-		const {isLoadingTeamspace, isTeamspaceAdmin, match} = this.props;
-		const {selectedTeamspace, activeTab} = this.state;
+		const {isLoadingTeamspace, isTeamspaceAdmin, match, selectedTeamspace} = this.props;
+		const { activeTab } = this.state;
 
 		if (!selectedTeamspace) {
 			return <TextOverlay content="Select teamspace to enable settings" />;
@@ -190,9 +181,8 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderUserManagementRoute = () => {
-		const { match: userManagmentMatch, isLoadingTeamspace, isTeamspaceAdmin } = this.props;
+		const { match: userManagmentMatch, isLoadingTeamspace, isTeamspaceAdmin, selectedTeamspace } = this.props;
 		const { teamspacesItems, activeTab } = this.state;
-		const selectedTeamspace = userManagmentMatch.params.teamspace;
 		const isTabDisabled = Boolean(!selectedTeamspace || isLoadingTeamspace);
 		return (
 			<>

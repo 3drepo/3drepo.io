@@ -381,7 +381,7 @@
 
 		Project.findOneAndPopulateUsers({ account: req.params.account }, {name: req.params.project}).then(project => {
 
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project.toObject());
 
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
