@@ -30,6 +30,7 @@ import { Issues } from './components/issues';
 import { PanelButton } from './components/panelButton/panelButton.component';
 import RevisionsSwitch from './components/revisionsSwitch/revisionsSwitch.container';
 import { Risks } from './components/risks';
+import Sequences from './components/sequences/sequences.container';
 import Toolbar from './components/toolbar/toolbar.container';
 import { Tree } from './components/tree';
 import { ViewerLoader } from './components/viewerLoader';
@@ -181,6 +182,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 			{visiblePanels[VIEWER_PANELS.TREE] && <Tree {...this.urlParams} />}
 			{visiblePanels[VIEWER_PANELS.COMPARE] && <Compare {...this.urlParams} />}
 			{visiblePanels[VIEWER_PANELS.GIS] && <Gis {...this.urlParams} />}
+			{visiblePanels[VIEWER_PANELS.SEQUENCES] && <Sequences {...this.urlParams} />}
 		</LeftPanels>
 	)
 
