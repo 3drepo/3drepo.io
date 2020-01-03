@@ -36,6 +36,10 @@ export const selectIsModelLoaded = createSelector(
 		state.isModelLoaded && isTreeProcessed
 );
 
+export const selectIsCoordViewActive = createSelector(
+	selectViewerGuiDomain, (state) => state.coordViewActive
+);
+
 export const selectNavigationMode = createSelector(
 	selectViewerGuiDomain, (state) => state.navigationMode
 );

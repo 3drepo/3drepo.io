@@ -718,6 +718,21 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Show x y z coordinates of current point
+	 * @category Configurations
+	 */
+	public static showCoordView() {
+		UnityUtil.toUnity('CoordViewEnable', UnityUtil.LoadingState.MODEL_LOADING, undefined);
+	}
+	/**
+	 * Hide x y z coordinates of current point
+	 * @category Configurations
+	 */
+	public static hideCoordView() {
+		UnityUtil.toUnity('CoordViewDisable', UnityUtil.LoadingState.MODEL_LOADING, undefined);
+	}
+
+	/**
 	 * Enable measuring tool. This will allow you to start measuring by clicking on the model
 	 * @category Measuring tool
 	 */
