@@ -21,7 +21,6 @@ const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
 
 const History = require("./history");
-const Task = require("./task");
 
 class Sequence {
 
@@ -44,6 +43,12 @@ class Sequence {
 			}
 		});
 
+		for (let i = 0; toClean["frames"] && i < toClean["frames"].length; i++) {
+			for (let j = 0; toClean["frames"][i]["tasks"] && j < toClean["frames"][i]["tasks"].length; j++) {
+				toClean["frames"][i]["tasks"][j] = this.clean(toClean["frames"][i]["tasks"][j]);
+			}
+		}
+
 		return toClean;
 	}
 
@@ -57,32 +62,13 @@ class Sequence {
 
 		return db.getCollection(account, model + ".sequences").then(_dbCol => {
 			return _dbCol.find({"rev_id": history._id}).toArray().then(sequences => {
-				const promises = [];
-
 				sequences.forEach((sequence) => {
 					if (cleanResponse) {
 						this.clean(sequence);
 					}
-
-					for (let i = 0; sequence["sequence"] && i < sequence["sequence"].length; i++) {
-						const tasksPromise = Task.findByIds(
-							account,
-							model,
-							sequence["sequence"][i]["tasks"],
-							cleanResponse
-						);
-
-						promises.push(tasksPromise);
-
-						tasksPromise.then((tasks) => {
-							sequence["sequence"][i]["tasks"] = tasks;
-						});
-					}
 				});
 
-				return Promise.all(promises).then(() => {
-					return sequences;
-				});
+				return sequences;
 			});
 		});
 	}
