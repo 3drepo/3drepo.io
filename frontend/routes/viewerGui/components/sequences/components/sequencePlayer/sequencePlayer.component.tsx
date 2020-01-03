@@ -15,12 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { IconButton } from '@material-ui/core';
+import { Grid, IconButton } from '@material-ui/core';
 import FastForwardIcon from '@material-ui/icons/FastForward';
 import FastRewindIcon from '@material-ui/icons/FastRewind';
-import Slider from '@material-ui/lab/Slider';
+import PlayArrow from '@material-ui/icons/PlayArrow';
+import Stop from '@material-ui/icons/Stop';
+
 import React from 'react';
-import { Value } from '../../../../../components/property/property.styles';
+import { NAMED_MONTH_DATE_FORMAT } from '../../../../../../services/formatting/formatDate';
+import { DateTime } from '../../../../../components/dateTime/dateTime.component';
+import { DateContainer, SequenceSlider } from '../../sequences.styles';
 
 const MILLI_PER_DAY = 1000 * 60 * 60 * 24;
 
@@ -33,6 +37,8 @@ interface IProps {
 
 interface IState {
 	value?: Date;
+	playing: boolean;
+	intervalId: number;
 }
 
 const getDays = (min, max) => {
@@ -48,7 +54,9 @@ const getDate = (base, days) => {
 
 export class SequencePlayer extends React.PureComponent<IProps, IState> {
 	public state: IState = {
-		value: null
+		value: null,
+		playing: false,
+		intervalId: 0
 	};
 
 	get currentDay() {
@@ -80,29 +88,88 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 		this.setValue(newValue);
 	}
 
+	public goTo = (val) => {
+		this.stop();
+		this.setDay(val);
+	}
+
 	public componentDidUpdate(prevProps) {
 		if (prevProps.value !== this.props.value) {
 			this.setState({value: this.props.value});
 		}
 	}
 
+	public onClickPlayStop = () => {
+		if (this.state.playing) {
+			this.stop();
+		} else {
+			this.play();
+		}
+	}
+
+	public nextStep = () => {
+		this.setDay(this.currentDay + 1);
+		if (this.isLastDay) {
+			this.stop();
+		}
+	}
+
+	public play() {
+		this.stop();
+		const intervalId = (setInterval(this.nextStep, 1000) as unknown) as number;
+		this.setState({
+			playing: true,
+			value: this.isLastDay ? this.props.min : this.state.value,
+			intervalId
+		});
+	}
+
+	public stop() {
+		clearInterval(this.state.intervalId);
+		this.setState({playing: false});
+	}
+
 	public componentDidMount() {
 		this.setState({value: this.props.value || this.props.min});
 	}
 
-	public rewindDay = () =>  this.setDay(this.currentDay - 1);
+	public componentWillUnmount() {
+		this.stop();
+	}
 
-	public forwardDay = () =>  this.setDay(this.currentDay + 1);
+	public rewindDay = () => this.goTo(this.currentDay - 1);
+
+	public forwardDay = () => this.goTo(this.currentDay + 1);
 
 	public render() {
-		const {value} = this.state;
+		const {value, playing} = this.state;
 		return (
-			<>
-				<IconButton disabled={this.isFirstDay} onClick={this.rewindDay}><FastRewindIcon /></IconButton>
-				{(value || '').toString()}
-				<IconButton disabled={this.isLastDay} onClick={this.forwardDay}><FastForwardIcon /></IconButton>
-				<Slider min={0} max={this.totalDays} step={1} value={this.currentDay} onChange={(e, val) => this.setDay(val)} />
-			</>
+			<Grid
+			container
+			direction="column"
+			justify="flex-start"
+			alignItems="center"
+		>
+			<DateContainer>
+				<Grid item>
+					<IconButton disabled={this.isFirstDay} onClick={this.rewindDay}><FastRewindIcon /></IconButton>
+				</Grid>
+				<Grid item>
+					<DateTime value={value} format={NAMED_MONTH_DATE_FORMAT} />
+				</Grid>
+				<Grid item>
+					<IconButton disabled={this.isLastDay} onClick={this.forwardDay}><FastForwardIcon /></IconButton>
+				</Grid>
+			</DateContainer>
+			<DateContainer>
+				<Grid item>
+					<IconButton onClick={this.onClickPlayStop} >{!playing && <PlayArrow />}{playing &&  <Stop />}</IconButton>
+				</Grid>
+				<Grid item>
+					<SequenceSlider max={this.totalDays} step={1} value={this.currentDay} onChange={(e, val) => this.goTo(val)} />
+				</Grid>
+			</DateContainer>
+		</Grid>
 		);
 	}
 }
