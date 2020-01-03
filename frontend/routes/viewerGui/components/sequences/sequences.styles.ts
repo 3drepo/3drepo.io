@@ -17,12 +17,6 @@
 
 import styled from 'styled-components';
 
-import IconButton from '@material-ui/core/IconButton';
-import Select from '@material-ui/core/Select';
-import MapIcon from '@material-ui/icons/Map';
-
-import { COLOR } from '../../../../styles/colors';
-
 import {
 	VIEWER_PANELS,
 	VIEWER_PANELS_ICONS,
