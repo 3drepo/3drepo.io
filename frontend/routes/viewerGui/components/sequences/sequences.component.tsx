@@ -17,7 +17,7 @@
 
 import React from 'react';
 
-import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
+import { SequencePlayer } from './components/sequencePlayer/sequencePlayer.component';
 import {
 	SequencesContainer, SequencesIcon,
 } from './sequences.styles';
@@ -27,14 +27,20 @@ interface IProps {
 }
 
 export class Sequences extends React.PureComponent<IProps, {}> {
+	public onChangeDate(value) {
+	}
+
 	public render() {
+		const min = new Date('December 17, 2018 03:24:00');
+		const max = new Date('December 30, 2018 03:24:00');
+
 		return (
 			<SequencesContainer
 				Icon={<SequencesIcon />}
 				renderActions={() => (<></>)}
 				pending={false}
 			>
-				Sequences Stuff
+				<SequencePlayer min={min} max={max} onChange={this.onChangeDate} />
 			</SequencesContainer>
 	);
 	}
