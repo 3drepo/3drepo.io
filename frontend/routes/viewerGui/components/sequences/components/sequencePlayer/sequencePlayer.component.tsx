@@ -21,10 +21,12 @@ import FastRewindIcon from '@material-ui/icons/FastRewind';
 import PlayArrow from '@material-ui/icons/PlayArrow';
 import Stop from '@material-ui/icons/Stop';
 
+import DayJsUtils from '@date-io/dayjs';
+
+import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 import React from 'react';
 import { NAMED_MONTH_DATE_FORMAT } from '../../../../../../services/formatting/formatDate';
-import { DateTime } from '../../../../../components/dateTime/dateTime.component';
-import { DateContainer, SequenceSlider } from '../../sequences.styles';
+import { DateContainer, DatePicker, SequenceSlider } from '../../sequences.styles';
 
 const MILLI_PER_DAY = 1000 * 60 * 60 * 24;
 
@@ -83,14 +85,21 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 		this.setState({value: newValue});
 	}
 
-	public setDay = (val) => {
-		const newValue = getDate(this.props.min, val);
+	public setDayNumber = (dayNumber) => {
+		const newValue = getDate(this.props.min, dayNumber);
 		this.setValue(newValue);
+	}
+
+	public isDateOusideRange = (date) => {
+		const {max, min} = this.props;
+		const maxDate = new Date(max).setHours(0, 0, 0, 0);
+		const minDate = new Date(min).setHours(0, 0, 0, 0);
+		return maxDate < date || minDate > date;
 	}
 
 	public goTo = (val) => {
 		this.stop();
-		this.setDay(val);
+		this.setDayNumber(val);
 	}
 
 	public componentDidUpdate(prevProps) {
@@ -108,7 +117,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 	}
 
 	public nextStep = () => {
-		this.setDay(this.currentDay + 1);
+		this.setDayNumber(this.currentDay + 1);
 		if (this.isLastDay) {
 			this.stop();
 		}
@@ -143,7 +152,9 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const {value, playing} = this.state;
+
 		return (
+			<MuiPickersUtilsProvider utils={DayJsUtils}>
 			<Grid
 			container
 			direction="column"
@@ -155,7 +166,15 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 					<IconButton disabled={this.isFirstDay} onClick={this.rewindDay}><FastRewindIcon /></IconButton>
 				</Grid>
 				<Grid item>
-					<DateTime value={value} format={NAMED_MONTH_DATE_FORMAT} />
+					<DatePicker
+						shouldDisableDate={(date) => this.isDateOusideRange(date.$d)}
+						name="date"
+						inputId="1"
+						value={value}
+						format={NAMED_MONTH_DATE_FORMAT}
+						onChange={(e) => this.setState({value: new Date(e.target.value)})}
+						placeholder="date"
+					/>
 				</Grid>
 				<Grid item>
 					<IconButton disabled={this.isLastDay} onClick={this.forwardDay}><FastForwardIcon /></IconButton>
@@ -170,6 +189,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 				</Grid>
 			</DateContainer>
 		</Grid>
+		</MuiPickersUtilsProvider>
 		);
 	}
 }

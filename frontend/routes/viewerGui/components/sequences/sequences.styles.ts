@@ -26,6 +26,7 @@ import {
 
 import { Grid } from '@material-ui/core';
 import Slider from '@material-ui/lab/Slider';
+import { DateField } from '../../../components/dateField/dateField.component';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 
 export const SequencesIcon = VIEWER_PANELS_ICONS[VIEWER_PANELS.SEQUENCES];
@@ -51,5 +52,11 @@ export const DateContainer = styled(Grid).attrs({
 })`
 	&& {
 		width: 186px;
+	}
+`;
+
+export const DatePicker = styled(DateField)`
+	&& {
+		width: 82px;
 	}
 `;
