@@ -130,21 +130,21 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 		this.setState({stepInterval});
 	}
 
-	public nextStep = () => {
+	public moveStep = (direction) => {
 		if (this.state.stepScale === 0) {
-			this.setDayNumber(this.currentDay + this.state.stepInterval);
+			this.setDayNumber(this.currentDay + this.state.stepInterval * direction);
 		}
 
 		if (this.state.stepScale === 1) {
 			const newValue = new Date(this.state.value);
-			newValue.setMonth(newValue.getMonth() + this.state.stepInterval);
+			newValue.setMonth(newValue.getMonth() + this.state.stepInterval * direction);
 
 			this.setValue(newValue);
 		}
 
 		if (this.state.stepScale === 2) {
 			const newValue = new Date(this.state.value);
-			newValue.setFullYear(newValue.getFullYear() + this.state.stepInterval);
+			newValue.setFullYear(newValue.getFullYear() + this.state.stepInterval * direction);
 			this.setValue(newValue);
 		}
 
@@ -152,6 +152,10 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 			this.stop();
 		}
 	}
+
+	public nextStep = this.moveStep.bind(this, 1);
+
+	public prevStep = this.moveStep.bind(this, -1);
 
 	public play() {
 		this.stop();
@@ -176,9 +180,15 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 		this.stop();
 	}
 
-	public rewindDay = () => this.goTo(this.currentDay - 1);
+	public rewind = () => {
+		this.stop();
+		this.prevStep();
+	}
 
-	public forwardDay = () => this.goTo(this.currentDay + 1);
+	public forward =  () => {
+		this.stop();
+		this.nextStep();
+	}
 
 	public render() {
 		const {value, playing, stepScale , stepInterval} = this.state;
@@ -193,7 +203,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 		>
 			<SequenceRow>
 				<Grid item>
-					<IconButton disabled={this.isFirstDay} onClick={this.rewindDay}><FastRewindIcon /></IconButton>
+					<IconButton disabled={this.isFirstDay} onClick={this.rewind}><FastRewindIcon /></IconButton>
 				</Grid>
 				<Grid item>
 					<DatePicker
@@ -207,7 +217,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 					/>
 				</Grid>
 				<Grid item>
-					<IconButton disabled={this.isLastDay} onClick={this.forwardDay}><FastForwardIcon /></IconButton>
+					<IconButton disabled={this.isLastDay} onClick={this.forward}><FastForwardIcon /></IconButton>
 				</Grid>
 			</SequenceRow>
 			<SequenceRow>
