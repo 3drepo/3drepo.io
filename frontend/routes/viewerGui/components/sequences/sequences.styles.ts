@@ -24,8 +24,9 @@ import {
 	VIEWER_PANELS_TITLES
 } from '../../../../constants/viewerGui';
 
-import { Grid } from '@material-ui/core';
+import { Grid, Input } from '@material-ui/core';
 import Slider from '@material-ui/lab/Slider';
+import { FONT_WEIGHT } from '../../../../styles';
 import { DateField } from '../../../components/dateField/dateField.component';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 
@@ -43,7 +44,7 @@ export const SequenceSlider = styled(Slider)`
 	}
 `;
 
-export const DateContainer = styled(Grid).attrs({
+export const SequenceRow = styled(Grid).attrs({
 	container: true,
 	direction: 'row',
 	justify: 'flex-start',
@@ -58,5 +59,27 @@ export const DateContainer = styled(Grid).attrs({
 export const DatePicker = styled(DateField)`
 	&& {
 		width: 82px;
+	}
+`;
+
+export const StepInput = styled(Input).attrs({
+	inputProps: {
+		type: 'number',
+		min: 1,
+		max: 100
+	}
+})`
+	&& {
+		font-weight: ${FONT_WEIGHT.NORMAL};
+		width: 52px;
+	}
+
+	input {
+		width: 52px;
+		height: 20px;
+		color: #333333;
+		font-size: 14px;
+		margin-left: 2px;
+		outline: none;
 	}
 `;

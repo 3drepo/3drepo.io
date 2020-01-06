@@ -32,7 +32,7 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 
 	public render() {
 		const min = new Date('December 17, 2018 03:24:00');
-		const max = new Date('December 30, 2018 03:24:00');
+		const max = new Date('December 30, 2020 03:24:00');
 
 		return (
 			<SequencesContainer

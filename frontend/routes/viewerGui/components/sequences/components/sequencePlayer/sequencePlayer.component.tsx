@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Grid, IconButton } from '@material-ui/core';
+import { Grid, IconButton, Select, MenuItem } from '@material-ui/core';
 import FastForwardIcon from '@material-ui/icons/FastForward';
 import FastRewindIcon from '@material-ui/icons/FastRewind';
 import PlayArrow from '@material-ui/icons/PlayArrow';
@@ -26,7 +26,7 @@ import DayJsUtils from '@date-io/dayjs';
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 import React from 'react';
 import { NAMED_MONTH_DATE_FORMAT } from '../../../../../../services/formatting/formatDate';
-import { DateContainer, DatePicker, SequenceSlider } from '../../sequences.styles';
+import { DatePicker, SequenceRow, SequenceSlider, StepInput } from '../../sequences.styles';
 
 const MILLI_PER_DAY = 1000 * 60 * 60 * 24;
 
@@ -41,12 +41,14 @@ interface IState {
 	value?: Date;
 	playing: boolean;
 	intervalId: number;
+	stepInterval: number;
+	stepScale: number;
 }
 
 const getDays = (min, max) => {
-	const maxDay = new Date(max).setHours(0, 0, 0, 0);
-	const minDay = new Date(min).setHours(0, 0, 0, 0);
-	return  Math.round((maxDay - minDay) / MILLI_PER_DAY);
+	const maxDate = new Date(max).setHours(0, 0, 0, 0);
+	const minDate = new Date(min).setHours(0, 0, 0, 0);
+	return  Math.round((maxDate - minDate) / MILLI_PER_DAY);
 };
 
 const getDate = (base, days) => {
@@ -58,7 +60,9 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 	public state: IState = {
 		value: null,
 		playing: false,
-		intervalId: 0
+		intervalId: 0,
+		stepInterval: 1,
+		stepScale: 0
 	};
 
 	get currentDay() {
@@ -77,7 +81,11 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 		return this.currentDay === this.totalDays;
 	}
 
-	public setValue = (newValue) => {
+	public setValue = (newValue: Date) => {
+		const maxDate = new Date(this.props.max).setHours(0, 0, 0, 0);
+		const minDate = new Date(this.props.min).setHours(0, 0, 0, 0);
+		newValue = new Date(Math.min(maxDate, Math.max(minDate, newValue.valueOf())));
+
 		if (this.props.onChange) {
 			this.props.onChange(newValue);
 		}
@@ -116,8 +124,30 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	public onChangeStepInterval = (e) => {
+		let stepInterval = parseInt(e.target.value, 10);
+		stepInterval = isNaN(stepInterval) ? 1 : Math.max(1, Math.min(100, stepInterval));
+		this.setState({stepInterval});
+	}
+
 	public nextStep = () => {
-		this.setDayNumber(this.currentDay + 1);
+		if (this.state.stepScale === 0) {
+			this.setDayNumber(this.currentDay + this.state.stepInterval);
+		}
+
+		if (this.state.stepScale === 1) {
+			const newValue = new Date(this.state.value);
+			newValue.setMonth(newValue.getMonth() + this.state.stepInterval);
+
+			this.setValue(newValue);
+		}
+
+		if (this.state.stepScale === 2) {
+			const newValue = new Date(this.state.value);
+			newValue.setFullYear(newValue.getFullYear() + this.state.stepInterval);
+			this.setValue(newValue);
+		}
+
 		if (this.isLastDay) {
 			this.stop();
 		}
@@ -151,7 +181,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 	public forwardDay = () => this.goTo(this.currentDay + 1);
 
 	public render() {
-		const {value, playing} = this.state;
+		const {value, playing, stepScale , stepInterval} = this.state;
 
 		return (
 			<MuiPickersUtilsProvider utils={DayJsUtils}>
@@ -161,7 +191,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 			justify="flex-start"
 			alignItems="center"
 		>
-			<DateContainer>
+			<SequenceRow>
 				<Grid item>
 					<IconButton disabled={this.isFirstDay} onClick={this.rewindDay}><FastRewindIcon /></IconButton>
 				</Grid>
@@ -179,15 +209,23 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 				<Grid item>
 					<IconButton disabled={this.isLastDay} onClick={this.forwardDay}><FastForwardIcon /></IconButton>
 				</Grid>
-			</DateContainer>
-			<DateContainer>
+			</SequenceRow>
+			<SequenceRow>
+				Step interval: <StepInput value={stepInterval} onChange={this.onChangeStepInterval} />
+				<Select value={stepScale} onChange={(e) => this.setState({stepScale: parseInt(e.target.value, 10)})} >
+					<MenuItem value={0}>day(s)</MenuItem>
+					<MenuItem value={1}>month(s)</MenuItem>
+					<MenuItem value={2}>year(s)</MenuItem>
+				</Select>
+			</SequenceRow>
+			<SequenceRow>
 				<Grid item>
 					<IconButton onClick={this.onClickPlayStop} >{!playing && <PlayArrow />}{playing &&  <Stop />}</IconButton>
 				</Grid>
 				<Grid item>
 					<SequenceSlider max={this.totalDays} step={1} value={this.currentDay} onChange={(e, val) => this.goTo(val)} />
 				</Grid>
-			</DateContainer>
+			</SequenceRow>
 		</Grid>
 		</MuiPickersUtilsProvider>
 		);
