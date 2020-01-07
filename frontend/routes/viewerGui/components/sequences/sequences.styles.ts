@@ -26,7 +26,7 @@ import {
 
 import { Grid, Input } from '@material-ui/core';
 import Slider from '@material-ui/lab/Slider';
-import { FONT_WEIGHT } from '../../../../styles';
+import { COLOR, FONT_WEIGHT } from '../../../../styles';
 import { DateField } from '../../../components/dateField/dateField.component';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 
@@ -40,7 +40,18 @@ export const SequencesContainer = styled(ViewerPanel).attrs({
 
 export const SequenceSlider = styled(Slider)`
 	&& {
-		width: 100px;
+		width: 305px;
+	}
+`;
+
+export const SequencePlayerContainer = styled(Grid).attrs({
+	container: true,
+	direction: 'column',
+	justify: 'flex-start',
+	alignItems: 'center'
+})`
+	&& {
+		overflow: hidden;
 	}
 `;
 
@@ -52,13 +63,26 @@ export const SequenceRow = styled(Grid).attrs({
 	item: true
 })`
 	&& {
-		width: 186px;
+		width: auto;
+	}
+`;
+
+export const IntervalRow = styled(SequenceRow)`
+	&& {
+		font-size: 14px;
+		margin-top: -10px;
+		margin-right: -15px;
 	}
 `;
 
 export const DatePicker = styled(DateField)`
 	&& {
-		width: 82px;
+		width: 113px;
+		margin-top: 0;
+	}
+
+	input {
+		font-size: 20px;
 	}
 `;
 
@@ -71,15 +95,17 @@ export const StepInput = styled(Input).attrs({
 })`
 	&& {
 		font-weight: ${FONT_WEIGHT.NORMAL};
-		width: 52px;
+		width: 40px;
 	}
 
 	input {
-		width: 52px;
+		width: 40px;
 		height: 20px;
-		color: #333333;
 		font-size: 14px;
 		margin-left: 2px;
 		outline: none;
+		color: ${COLOR.BLACK_60};
+		padding-bottom: 4px;
+		text-align: right;
 	}
 `;
