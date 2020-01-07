@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -40,7 +40,6 @@ import { SHAPE_TYPES } from '../shape/shape.constants';
 import {
 	activeShapeIcon,
 	BRUSH_SIZES,
-	CALLOUT_SHAPES_MENU,
 	MAX_TOOL_ICON_SIZE,
 	MIN_BRUSH_ICON_SIZE,
 	MIN_TEXT_ICON_SIZE,
@@ -50,7 +49,8 @@ import {
 import { Badge, IconButton, OptionsDivider, ShapeMenuButton, StyledButton, ToolsContainer } from './tools.styles';
 
 const ACTIVE_COLOR = 'secondary';
-const DEFAULT_COLOR = 'action';
+const PRIMARY_COLOR = 'primary';
+const ACTION_COLOR = 'action';
 
 interface IProps {
 	size: number;
@@ -58,7 +58,6 @@ interface IProps {
 	color: string;
 	disabled?: boolean;
 	activeShape: number;
-	activeCalloutShape: number;
 	selectedObjectName: string;
 	areFutureElements: boolean;
 	arePastElements: boolean;
@@ -67,7 +66,6 @@ interface IProps {
 	onEraseClick: () => void;
 	onTextClick: () => void;
 	onShapeClick: (shapeName?) => void;
-	onCalloutClick: (shapeName?) => void;
 	onClearClick: () => void;
 	onColorChange: (color) => void;
 	onBrushSizeChange: (size) => void;
@@ -78,17 +76,9 @@ interface IProps {
 }
 
 export class Tools extends React.PureComponent<IProps, any> {
-	public get isTextSelected() {
-		return this.props.selectedObjectName.includes('text');
-	}
-
-	public get isShapeSelected() {
-		return this.props.selectedObjectName.includes('shape');
-	}
-
 	public renderToolset = renderWhenTrue(() => {
 		const {
-			size, textSize, color, onDrawClick, onTextClick, onClearClick, onCalloutClick,
+			size, textSize, color, onDrawClick, onTextClick, onClearClick,
 			onColorChange, onBrushSizeChange, onEraseClick, onTextSizeChange,
 		} = this.props;
 
@@ -127,7 +117,7 @@ export class Tools extends React.PureComponent<IProps, any> {
 										color={this.getShapeToolColor()}
 										onClick={this.setDefaultShape}
 									>
-										<ActiveIcon {...IconProps} />
+										<ActiveIcon color={this.getShapeToolColor()} {...IconProps} />
 									</IconButton>
 								</Tooltip>
 								<ShapeMenuButton>
@@ -145,38 +135,6 @@ export class Tools extends React.PureComponent<IProps, any> {
 					PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
 					PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'center' } }}
 					ButtonProps={{ disabled: false }}
-				/>
-				<ButtonMenu
-						renderButton={({ IconProps, Icon, ...props }) => {
-							const ActiveIcon = activeShapeIcon(this.props.activeCalloutShape || SHAPE_TYPES.DOT);
-							return (
-									<>
-										<Tooltip title={'Add callout'}>
-											<IconButton
-													{...props}
-													aria-label="Show callout shapes menu"
-													aria-haspopup="true"
-													color={this.getToolColor(MODES.CALLOUT)}
-													onClick={this.setDefaultCalloutShape}
-											>
-												<ActiveIcon {...IconProps} />
-											</IconButton>
-										</Tooltip>
-										<ShapeMenuButton>
-											<SmallIconButton
-													Icon={ArrowDropDownIcon}
-													onClick={(e) => {
-														props.onClick(e);
-													}}
-											/>
-										</ShapeMenuButton>
-									</>
-							);
-						}}
-						renderContent={this.renderCalloutShapesMenu}
-						PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
-						PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'center' } }}
-						ButtonProps={{ disabled: false }}
 				/>
 				<TooltipButton
 					label="Erase"
@@ -259,28 +217,9 @@ export class Tools extends React.PureComponent<IProps, any> {
 		this.props.onShapeClick(shapeName);
 	}
 
-	public handleCalloutShapeClick = (shapeName, menu, e) => {
-		menu.close(e);
-		this.props.onCalloutClick(shapeName);
-	}
-
 	public setDefaultShape = () => {
 		this.props.onShapeClick(this.props.activeShape || SHAPE_TYPES.RECTANGLE);
 	}
-
-	public setDefaultCalloutShape = () => {
-		this.props.onCalloutClick(this.props.activeCalloutShape || SHAPE_TYPES.DOT);
-	}
-
-	public renderToolMenuItem = (value, content) => (
-			<MenuItem key={value} value={value}>
-				<IconButton disableRipple >
-					<Badge badgeContent={value} color="primary">
-						{content}
-					</Badge>
-				</IconButton>
-			</MenuItem>
-	)
 
 	public renderBrushSizes = () => BRUSH_SIZES.map(({ label, value }) => (
 		<MenuItem key={value} value={value}>
@@ -314,11 +253,11 @@ export class Tools extends React.PureComponent<IProps, any> {
 		if (this.props.mode === toolType) {
 			return ACTIVE_COLOR;
 		}
-		return DEFAULT_COLOR;
+		return ACTION_COLOR;
 	}
 
 	public getShapeToolColor = () => {
-		return [MODES.SHAPE, MODES.POLYGON].includes(this.props.mode) ? ACTIVE_COLOR : DEFAULT_COLOR;
+		return [MODES.SHAPE, MODES.POLYGON, MODES.CALLOUT].includes(this.props.mode) ? ACTIVE_COLOR : PRIMARY_COLOR;
 	}
 
 	public renderShapesMenu = (menu) =>  {
@@ -333,24 +272,6 @@ export class Tools extends React.PureComponent<IProps, any> {
 				))}
 			</MenuList>
 		);
-	}
-
-	public renderCalloutShapesMenu = (menu) =>  {
-		return(
-			<MenuList>
-				{CALLOUT_SHAPES_MENU.map(({ name, Icon }) => (
-					<SmallIconButton
-						Icon={Icon}
-						key={name}
-						onClick={(e) => this.handleCalloutShapeClick(name, menu, e)}
-					/>
-				))}
-			</MenuList>
-		);
-	}
-
-	public handleToolClick = (type, callback?) => () => {
-		this.setState({ activeTool: type }, callback);
 	}
 
 	public render() {

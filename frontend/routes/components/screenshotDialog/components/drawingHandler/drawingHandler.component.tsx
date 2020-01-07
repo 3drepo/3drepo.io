@@ -33,7 +33,6 @@ interface IProps {
 	layer: any;
 	stage: Konva.Stage;
 	activeShape: number;
-	activeCalloutShape: number;
 	selected: string;
 	disabled: boolean;
 	handleNewDrawnShape: (shape: number, attrs, updateState?: boolean) => void;

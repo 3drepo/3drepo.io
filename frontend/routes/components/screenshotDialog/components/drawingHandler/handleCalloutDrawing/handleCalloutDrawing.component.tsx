@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,16 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as React from 'react';
+
 import { isEmpty } from 'lodash';
-import React from 'react';
-import {renderWhenTrue} from '../../../../../../helpers/rendering';
+import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { batchGroupBy } from '../../../../../../modules/canvasHistory/canvasHistory.helpers';
 import { COLOR } from '../../../../../../styles';
 import { MODES } from '../../../screenshotDialog.helpers';
 
 import { SHAPE_TYPES } from '../../shape/shape.constants';
 import { TypingHandler } from '../../typingHandler/typingHandler.component';
-import { createDrawnLine, createShape } from '../drawingHandler.helpers';
+import { createDrawnLine, createShape, getDrawFunction } from '../drawingHandler.helpers';
 import {
 	HandleBaseDrawing, IHandleBaseDrawingProps, IHandleBaseDrawingStates,
 } from '../handleBaseDrawing/handleBaseDrawing.component';
@@ -32,7 +33,7 @@ import { getLinePoints } from './handleCalloutDrawing.helpers';
 
 export interface IHandleCalloutDrawingProps extends IHandleBaseDrawingProps {
 	textSize: number;
-	activeCalloutShape: number;
+	activeShape: number;
 	handleNewDrawnShape: (shape: number, attrs, updateState?: boolean) => void;
 	handleNewDrawnLine: (line, type?, updateState?: boolean) => void;
 	handleNewText: (position, text?: string, updateState?: boolean) => void;
@@ -58,9 +59,15 @@ export class HandleCalloutDrawing
 
 	public shape: any = {};
 
+	private calloutShapeNormalizedMap = {
+		[SHAPE_TYPES.CALLOUT_DOT]: SHAPE_TYPES.CIRCLE,
+		[SHAPE_TYPES.CALLOUT_CIRCLE]: SHAPE_TYPES.CIRCLE,
+		[SHAPE_TYPES.CALLOUT_RECTANGLE]: SHAPE_TYPES.RECTANGLE,
+	};
+
 	public componentDidUpdate(prevProps, prevState) {
-		if (prevProps.activeCalloutShape !== this.props.activeCalloutShape) {
-			this.activeShape = this.props.activeCalloutShape;
+		if (prevProps.activeShape !== this.props.activeShape) {
+			this.activeShape = this.props.activeShape;
 			this.unsubscribeDrawingEvents();
 			this.subscribeDrawingEvents();
 		}
@@ -73,11 +80,11 @@ export class HandleCalloutDrawing
 
 	public subscribeDrawingEvents = () => {
 		if (!this.activeShape) {
-			this.activeShape = this.props.activeCalloutShape;
+			this.activeShape = this.props.activeShape;
 		}
 
 		if (this.state.calloutState === 1) {
-			if (this.activeShape === SHAPE_TYPES.DOT) {
+			if (this.activeShape === SHAPE_TYPES.CALLOUT_DOT) {
 				this.subscribeDotDrawingEvents();
 			} else {
 				this.subscribeShapeDrawingEvents();
@@ -144,8 +151,7 @@ export class HandleCalloutDrawing
 		this.layer.destroyChildren();
 		this.layer.batchDraw();
 
-		const normalizeShape = this.activeShape === SHAPE_TYPES.DOT ? SHAPE_TYPES.CIRCLE : this.activeShape;
-		this.props.handleNewDrawnShape(normalizeShape, this.shape, false);
+		this.props.handleNewDrawnShape(this.calloutShapeNormalizedMap[this.activeShape], this.shape, false);
 		this.props.handleNewDrawnLine(this.lastLine, '', false);
 		this.props.handleNewDrawnShape(SHAPE_TYPES.RECTANGLE, this.lastShape, false);
 		this.setState({ isCurrentlyDrawn: false });
@@ -259,7 +265,7 @@ export class HandleCalloutDrawing
 			draggable: false
 		};
 
-		this.lastShape = createShape(this.activeShape, commonProps, initialPositionProps);
+		this.lastShape = createShape(this.calloutShapeNormalizedMap[this.activeShape], commonProps, initialPositionProps);
 		this.layer.add(this.lastShape);
 	}
 
@@ -271,6 +277,17 @@ export class HandleCalloutDrawing
 		setTimeout(() => {
 			this.setState({ calloutState: 1, isCurrentlyDrawn: false });
 		});
+	}
+
+	public drawShape = () => {
+		const draw = getDrawFunction(
+				this.calloutShapeNormalizedMap[this.activeShape],
+				this.lastShape,
+				this.initialPointerPosition,
+				this.pointerPosition,
+		);
+		draw();
+		this.layer.batchDraw();
 	}
 
 	public renderEditableTextarea = renderWhenTrue(() => (

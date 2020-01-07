@@ -1,37 +1,106 @@
+/**
+ *  Copyright (C) 2020 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import * as React from 'react';
 
 import SvgIcon from '@material-ui/core/SvgIcon';
 import ArrowIcon from '@material-ui/icons/ArrowRightAlt';
 import ChangeHistoryIcon from '@material-ui/icons/ChangeHistory';
 import CropSquareIcon from '@material-ui/icons/CropSquare';
-import DotIcon from '@material-ui/icons/FiberManualRecord';
 import PanoramaFishEyeIcon from '@material-ui/icons/PanoramaFishEye';
 import RemoveIcon from '@material-ui/icons/Remove';
-import { COLOR } from '../../../../../styles';
+
 import { DrawPolygon } from '../../../fontAwesomeIcon';
 import { SHAPE_TYPES } from '../shape/shape.constants';
 import { cloud } from '../shape/shape.helpers';
 
-const CloudIcon = (props) => {
+const CloudIcon = () => {
 	return (
-		<SvgIcon>
+		<SvgIcon viewBox="0 0 500 500">
 			<g>
 				<path
-					fill={'none'}
-					stroke={COLOR.BLACK_54}
+					fill="none"
+					className="stroke"
 					strokeWidth={15}
-					paintOrder={'fill stroke markers'}
+					paintOrder="fill stroke markers"
 					d={cloud.path}
-					transform="scale(0.045)"
 				/>
 			</g>
 		</SvgIcon>
 	);
 };
 
-const DOT_ITEM = {
-	name: SHAPE_TYPES.DOT,
-	Icon: DotIcon
+const CalloutDotIcon = () => {
+	return (
+		<SvgIcon viewBox="0 0 500 500">
+			<g>
+				<path d="M470,30V220H280V30H470M500,0H250V250H500V0Z" />
+				<line
+					className="stroke"
+					strokeWidth="30"
+					x1="264.6"
+					y1="235.4"
+					x2="47.8"
+					y2="452.2"
+				/>
+				<circle cx="50" cy="450" r="35" />
+				<path d="M50,430a20,20,0,1,1-20,20,20.1,20.1,0,0,1,20-20m0-30a50,50,0,1,0,50,50,50,50,0,0,0-50-50Z" />
+			</g>
+		</SvgIcon>
+	);
+};
+
+const CalloutCircleIcon = () => {
+	return (
+		<SvgIcon viewBox="0 0 500 500">
+			<g>
+				<path d="M470,30V220H280V30H470M500,0H250V250H500V0Z" />
+				<line x1="264.6" y1="235.4" x2="136.3" y2="363.7" strokeWidth="30" className="stroke" />
+				<path
+					fill="none"
+					strokeWidth="30"
+					className="stroke"
+					d="M408.5,234.4A196.6,196.6,0,0,1,415,285,199.8,199.8,0,1,1,265,91.3" />
+			</g>
+		</SvgIcon>
+	);
+};
+
+const CalloutRectangleIcon = () => {
+	return (
+		<SvgIcon viewBox="0 0 500 500">
+			<g>
+				<path d="M470,30V220H280V30H470M500,0H250V250H500V0Z" />
+				<line
+					strokeWidth="30"
+					className="stroke"
+					x1="264.6"
+					y1="235.4"
+					x2="136.3"
+					y2="363.7"
+				/>
+				<polyline
+					fill="none"
+					strokeWidth="30"
+					className="stroke"
+					points="265 85 15 85 15 485 415 485 415 235" />
+			</g>
+		</SvgIcon>
+	);
 };
 
 const RECTANGLE_ITEM = {
@@ -69,6 +138,21 @@ const POLYGON_ITEM = {
 	Icon: DrawPolygon
 };
 
+const CALLOUT_DOT_ITEM = {
+	name: SHAPE_TYPES.CALLOUT_DOT,
+	Icon: CalloutDotIcon
+};
+
+const CALLOUT_CIRCLE_ITEM = {
+	name: SHAPE_TYPES.CALLOUT_CIRCLE,
+	Icon: CalloutCircleIcon
+};
+
+const CALLOUT_RECTANGLE_ITEM = {
+	name: SHAPE_TYPES.CALLOUT_RECTANGLE,
+	Icon: CalloutRectangleIcon
+};
+
 export const SHAPES_MENU = [
 	LINE_ITEM,
 	ARROW_ITEM,
@@ -77,12 +161,9 @@ export const SHAPES_MENU = [
 	RECTANGLE_ITEM,
 	CLOUD_ITEM,
 	POLYGON_ITEM,
-];
-
-export const CALLOUT_SHAPES_MENU = [
-	DOT_ITEM,
-	RECTANGLE_ITEM,
-	CIRCLE_ITEM,
+	CALLOUT_DOT_ITEM,
+	CALLOUT_RECTANGLE_ITEM,
+	CALLOUT_CIRCLE_ITEM,
 ];
 
 const SHAPE_ICONS = {
@@ -93,7 +174,9 @@ const SHAPE_ICONS = {
 	[SHAPE_TYPES.CLOUD]: CloudIcon,
 	[SHAPE_TYPES.ARROW]: ArrowIcon,
 	[SHAPE_TYPES.POLYGON]: DrawPolygon,
-	[SHAPE_TYPES.DOT]: DotIcon,
+	[SHAPE_TYPES.CALLOUT_DOT]: CalloutDotIcon,
+	[SHAPE_TYPES.CALLOUT_CIRCLE]: CalloutCircleIcon,
+	[SHAPE_TYPES.CALLOUT_RECTANGLE]: CalloutRectangleIcon,
 };
 
 export const activeShapeIcon = (activeShape) => SHAPE_ICONS[activeShape];

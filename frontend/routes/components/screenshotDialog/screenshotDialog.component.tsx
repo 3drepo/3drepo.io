@@ -74,7 +74,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		fontSize: INITIAL_VALUES.textSize,
 		mode: null,
 		activeShape: null,
-		activeCalloutShape: null,
 		sourceImage: '',
 		stage: {
 			height: 0,
@@ -316,23 +315,15 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 	public setEraserMode = () => this.setMode(MODES.ERASER);
 
-	public setCalloutMode = (shape) => {
-		const newState = {
-			activeCalloutShape: shape
-		} as any;
-
-		if (this.state.mode !== MODES.CALLOUT) {
-			newState.mode = MODES.CALLOUT;
-		}
-
-		if (this.state.selectedObjectName) {
-			newState.selectedObjectName = '';
-		}
-
-		this.setState(newState);
-	}
-
 	public setShapeMode = (shape) => {
+		if ([SHAPE_TYPES.CALLOUT_DOT, SHAPE_TYPES.CALLOUT_CIRCLE, SHAPE_TYPES.CALLOUT_RECTANGLE].includes(shape)) {
+			this.setState({
+				activeShape: shape,
+				mode: MODES.CALLOUT,
+			});
+			return;
+		}
+
 		if (shape === SHAPE_TYPES.POLYGON) {
 			this.setState({
 				activeShape: shape,
@@ -470,7 +461,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 					handleNewText={this.addNewText}
 					selected={this.state.selectedObjectName}
 					activeShape={this.state.activeShape}
-					activeCalloutShape={this.state.activeCalloutShape}
 					disabled={this.props.disabled}
 			/>
 	)
@@ -499,7 +489,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			onEraseClick={this.setEraserMode}
 			onTextClick={this.handleToolTextClick}
 			onShapeClick={this.setShapeMode}
-			onCalloutClick={this.setCalloutMode}
 			onClearClick={this.clearCanvas}
 			onBrushSizeChange={this.handleBrushSizeChange}
 			onTextSizeChange={this.handleTextSizeChange}
@@ -510,7 +499,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			disabled={this.props.disabled}
 			mode={this.state.mode}
 			activeShape={this.state.activeShape}
-			activeCalloutShape={this.state.activeCalloutShape}
 			selectedObjectName={this.state.selectedObjectName}
 			arePastElements={this.props.arePastElements}
 			areFutureElements={this.props.areFutureElements}
