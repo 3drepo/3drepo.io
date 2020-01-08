@@ -22,11 +22,15 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	fetchSequences: [],
 	setSequencesPending: ['isPending'],
 	fetchSequencesSuccess: ['sequences'],
+	setSelectedSequence: ['sequenceId'],
+	setSelectedDate: ['date']
 }, { prefix: 'SEQUENCES/' });
 
 export const INITIAL_STATE = {
 	sequences: [],
-	sequencesPending: true
+	sequencesPending: true,
+	selectedSequence: null,
+	selectedDate: null
 };
 
 export const fetchSequencesSuccess = (state = INITIAL_STATE, { sequences }) => {
@@ -38,7 +42,17 @@ export const setSequencesPending = (state = INITIAL_STATE, { isPending }) => {
 	return {...state, sequencesPending: isPending };
 };
 
+export const setSelectedSequence = (state = INITIAL_STATE, { sequenceId }) => {
+	return {...state, selectedSequence: sequenceId };
+};
+
+export const setSelectedDate =  (state = INITIAL_STATE, { selectedDate }) => {
+	return {...state, selectedDate };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[SequencesTypes.FETCH_SEQUENCES_SUCCESS]: fetchSequencesSuccess,
-	[SequencesTypes.SET_SEQUENCES_PENDING]: setSequencesPending
+	[SequencesTypes.SET_SEQUENCES_PENDING]: setSequencesPending,
+	[SequencesTypes.SET_SELECTED_DATE]: setSelectedDate,
+	[SequencesTypes.SET_SELECTED_SEQUENCE]: setSelectedSequence
 });

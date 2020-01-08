@@ -25,19 +25,30 @@ import {
 interface IProps {
 	sequences: any;
 	fetchSequences: () => void;
+	setSelectedDate: (date: Date) => void;
+	maxDate: Date;
+	minDate: Date;
+	selectedDate: Date;
+	selectedFrame: any;
 }
 
 export class Sequences extends React.PureComponent<IProps, {}> {
-	public onChangeDate(value) {
+	public onChangeDate = (value) => {
+		this.props.setSelectedDate(value);
 	}
 
-	public componentDidMount() {
+	public componentDidMount = () => {
 		this.props.fetchSequences();
 	}
 
-	public render() {
-		const min = new Date('December 17, 2018 03:24:00');
-		const max = new Date('December 30, 2020 03:24:00');
+	public componentDidUpdate = () => {
+		console.log(this.props.selectedFrame);
+	}
+
+	public render = () => {
+		const min = this.props.minDate;
+		const max = this.props.maxDate;
+		const selectedDate =  this.props.selectedDate;
 
 		return (
 			<SequencesContainer
@@ -45,7 +56,7 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 				renderActions={() => (<></>)}
 				pending={false}
 			>
-				<SequencePlayer min={min} max={max} onChange={this.onChangeDate} />
+				<SequencePlayer min={min} max={max} onChange={this.onChangeDate} value={selectedDate} />
 			</SequencesContainer>
 
 	);
