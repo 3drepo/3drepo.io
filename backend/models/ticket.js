@@ -91,8 +91,7 @@ class Ticket {
 		if (ticketToClean.comments) {
 			ticketToClean.comments.forEach((comment) => {
 				commentIdKeys.forEach((key) => {
-					// checking for position as some issue stored the viewpoint on the comment section (old schema)
-					if (comment[key] && _.isObject(comment[key])) {
+					if (comment[key] && _.isObject(comment[key]) && !comment[key].hasOwnProperty("up")) {
 						comment[key] = utils.uuidToString(comment[key]);
 					}
 				});

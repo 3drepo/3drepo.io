@@ -34,7 +34,7 @@ const MENU_ITEMS = [
 		path: ROUTES.TEAMSPACES
 	},
 	{
-		title: 'Kanban Board',
+		title: 'Issues & Risks',
 		path: ROUTES.BOARD_MAIN
 	},
 	{

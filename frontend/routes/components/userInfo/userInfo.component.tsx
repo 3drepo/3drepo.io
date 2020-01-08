@@ -50,7 +50,7 @@ const UserInfoComponent = (props: IProps) => {
 	const name = firstName || lastName ? `${firstName || ''} ${lastName || ''}`.trim() : username;
 	return (
 		<Container>
-			<Panel title={username}>
+			<Panel title="Teamspaces">
 					<StyledList>
 						<UserContainer>
 							<Avatar
