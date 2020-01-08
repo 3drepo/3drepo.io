@@ -563,7 +563,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 
 		return (
 			<ViewerPanel
-				title="Teamspaces"
+				title="Models & Federations"
 				paperProps={{ height: '100%' }}
 				renderActions={this.renderActions}
 			>
@@ -575,8 +575,8 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 						value={Number(showStarredOnly)}
 						onChange={this.handleTabChange}
 					>
-						<Tab label="3D Models & Federations" />
-						<Tab label="Starred" />
+						<Tab label="All" />
+						<Tab label="Favourites" />
 					</Tabs>
 					<ButtonMenu
 						renderButton={this.renderMenuButton.bind(this, isPending)}

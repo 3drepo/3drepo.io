@@ -20,7 +20,7 @@ import { TitleActions, TitleContainer } from '../board.styles';
 
 export const BoardTitleComponent = ({renderActions}) => (
 	<TitleContainer>
-		Kanban Board
+		Issues & Risks
 		<TitleActions>
 			{renderActions()}
 		</TitleActions>
