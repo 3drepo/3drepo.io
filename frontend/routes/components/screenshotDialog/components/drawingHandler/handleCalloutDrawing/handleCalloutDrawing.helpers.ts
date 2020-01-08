@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,9 +15,46 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { isEmpty } from 'lodash';
+
+import { linesIntersection } from '../../../../../../helpers/linesIntersections';
+
+const getRectLines = ({ x, y, width, height }) => {
+	return [
+		{ x1: x, y1: y, x2: x + width, y2: y },
+		{ x1: x, y1: y, x2: x, y2: y + height },
+		{ x1: x, y1: y + height, x2: x + width, y2: y + height },
+		{ x1: x + width, y1: y, x2: x + width, y2: y + height },
+	];
+};
+
+const getRectIntersection = (rect, drawnLine): any => {
+	const stroke = rect.strokeWidth();
+	const isNegativeHeight = rect.height() < 0;
+	const isNegativeWidth = rect.width() < 0;
+	const { x, y, width, height } = rect.getClientRect();
+	const lines = getRectLines({
+		x: isNegativeWidth ? x - (stroke / 2) : x,
+		y: isNegativeHeight ? y - (stroke / 2) : y,
+		width: isNegativeWidth ? width + stroke : width,
+		height: isNegativeHeight ? height + stroke : height,
+	});
+
+	const intersections = lines.reduce((points, line, index, array) => {
+		const intersection = linesIntersection({ x: line.x1, y: line.y1 }, { x: line.x2, y: line.y2 },
+				{ x: drawnLine[0], y: drawnLine[1] }, { x: drawnLine[2], y: drawnLine[3] });
+
+		if (intersection) {
+			return [...points, intersection];
+		}
+
+		return [...points];
+	}, []);
+
+	return intersections[0];
+};
+
 export const getLinePoints = (shapeFrom, shapeTo) => {
-	const isNegativeHeight = shapeFrom.height() < 0;
-	const isNegativeWidth = shapeFrom.width() < 0;
 	let dx;
 	let dy;
 	if (shapeFrom.getClassName() === 'Circle') {
@@ -38,28 +75,11 @@ export const getLinePoints = (shapeFrom, shapeTo) => {
 			shapeFrom.x() + -radiusFrom * Math.cos(angle + Math.PI),
 			shapeFrom.y() + radiusFrom * Math.sin(angle + Math.PI),
 		];
-	} else {
-		if (angle <= 0.75 && angle >= -0.75) {
-			pointsFrom = [
-				isNegativeWidth ? shapeFrom.x() : shapeFrom.x() + shapeFrom.width(),
-				shapeFrom.y() + shapeFrom.height() / 2,
-			];
-		} else if (angle > 0.75 && angle <= 2.25) {
-			pointsFrom = [
-				shapeFrom.x() + shapeFrom.width() / 2,
-				isNegativeHeight ? shapeFrom.y() + shapeFrom.height() : shapeFrom.y(),
-			];
-		} else if (angle < -0.75 && angle >= -2.25) {
-			pointsFrom = [
-				shapeFrom.x() + shapeFrom.width() / 2,
-				isNegativeHeight ? shapeFrom.y() : shapeFrom.y() + shapeFrom.height(),
-			];
-		} else {
-			pointsFrom = [
-				isNegativeWidth ? shapeFrom.x() + shapeFrom.width() : shapeFrom.x(),
-				shapeFrom.y() + shapeFrom.height() / 2,
-			];
-		}
+	} else if (shapeFrom.getClassName() === 'Rect') {
+		pointsFrom = [
+			shapeFrom.x() + shapeFrom.width() / 2,
+			shapeFrom.y() + shapeFrom.height() / 2,
+		];
 	}
 
 	if (angle <= 0.75 && angle >= -0.75) {
@@ -84,5 +104,14 @@ export const getLinePoints = (shapeFrom, shapeTo) => {
 		];
 	}
 
-	return [ ...pointsFrom, ...pointsTo];
+	if (shapeFrom.getClassName() === 'Rect') {
+		const intersectionPoint = getRectIntersection(shapeFrom, [...pointsFrom, ...pointsTo]);
+		if (!isEmpty(intersectionPoint) && intersectionPoint.x && intersectionPoint.y) {
+			pointsFrom = [intersectionPoint.x, intersectionPoint.y];
+		} else {
+			return null;
+		}
+	}
+
+	return [...pointsFrom, ...pointsTo];
 };

@@ -159,8 +159,11 @@ export class HandleCalloutDrawing
 
 	public handleRefreshDrawingLayer = () => {
 		if (!isEmpty(this.lastShape)) {
-			this.lastLine.points(getLinePoints(this.shape, this.lastShape));
-			this.layer.batchDraw();
+			const linePoints = getLinePoints(this.shape, this.lastShape);
+			if (linePoints) {
+				this.lastLine.points(getLinePoints(this.shape, this.lastShape));
+				this.layer.batchDraw();
+			}
 		}
 	}
 

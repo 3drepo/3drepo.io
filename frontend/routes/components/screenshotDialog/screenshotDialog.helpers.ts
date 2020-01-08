@@ -97,24 +97,5 @@ export const getNewText = (color, size, position, text) => {
 	return newText;
 };
 
-export const getTextStyles = (target) => {
-	const textPosition = target.getAbsolutePosition();
-	const styles = {
-		color: target.attrs.fill,
-		fontSize: target.attrs.fontSize,
-		fontFamily: target.attrs.fontFamily,
-		textAlign: target.align(),
-		lineHeight: target.lineHeight(),
-		top: `${textPosition.y - 2}px`,
-		left: `${textPosition.x}px`
-	} as any;
-
-	if (target.attrs.rotation) {
-		styles.transform = `rotateZ(${target.attrs.rotation}deg)`;
-	}
-
-	return styles;
-};
-
 export const EDITABLE_TEXTAREA_NAME = 'editable-textarea';
 export const EDITABLE_TEXTAREA_PLACEHOLDER = 'Type to change text...';
