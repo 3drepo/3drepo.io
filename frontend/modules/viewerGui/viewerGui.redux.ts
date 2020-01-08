@@ -64,6 +64,7 @@ export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActio
 
 export interface IViewerGuiState {
 	visiblePanels: any;
+	panels: string[];
 	coordViewActive: boolean;
 	isModelLoaded: boolean;
 	navigationMode: string;
@@ -78,6 +79,7 @@ export interface IViewerGuiState {
 
 export const INITIAL_STATE: IViewerGuiState = {
 	visiblePanels: {},
+	panels: [],
 	isModelLoaded: false,
 	coordViewActive: false,
 	navigationMode: VIEWER_NAV_MODES.TURNTABLE,
@@ -92,7 +94,15 @@ export const INITIAL_STATE: IViewerGuiState = {
 
 export const setPanelVisibility = (state = INITIAL_STATE, { panelName, visibility }) => {
 	const visiblePanels = { ...state.visiblePanels };
-	return { ...state,  visiblePanels: {...visiblePanels, [panelName]: visibility} };
+	const panels = [...state.panels];
+	if (panels.includes(panelName)) {
+		return { ...state,  visiblePanels: {...visiblePanels, [panelName]: visibility},
+			panels: panels.filter((panel) => (panel !== panelName)) };
+	}
+	if (panels.length > 1) {
+		panels.shift();
+	}
+	return { ...state,  visiblePanels: {...visiblePanels, [panelName]: visibility}, panels: [...panels, panelName] };
 };
 
 const setNavigationModeSuccess = (state = INITIAL_STATE, { mode }) => {

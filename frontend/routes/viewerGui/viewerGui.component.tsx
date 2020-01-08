@@ -54,6 +54,7 @@ interface IProps {
 		riskId?: string;
 	};
 	visiblePanels: any;
+	panels: string[];
 	stopListenOnSelections: () => void;
 	stopListenOnModelLoaded: () => void;
 	stopListenOnClickPin: () => void;
@@ -137,7 +138,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { visiblePanels, isFocusMode, viewer } = this.props;
+		const { visiblePanels, isFocusMode, viewer, panels } = this.props;
 
 		return (
 			<GuiContainer>
@@ -146,7 +147,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 					<RevisionsSwitch />
 					<Toolbar {...this.urlParams} />
 					{this.renderLeftPanelsButtons()}
-					{this.renderLeftPanels(visiblePanels)}
+					{this.renderLeftPanels(visiblePanels, panels)}
 					{this.renderRightPanels(visiblePanels)}
 					{this.renderViewerLoader(viewer.hasInstance)}
 				</Container>
@@ -166,21 +167,28 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 					onClick={this.handleTogglePanel}
 					label={name}
 					type={type}
-					active={this.props.visiblePanels[type]}
+					active={this.props.panels.includes(type)}
 				/>
 			))}
 		</LeftPanelsButtons>
 	)
 
-	private renderLeftPanels = (visiblePanels) => (
+	private panelsMap = {
+		[VIEWER_PANELS.ISSUES]: Issues,
+		[VIEWER_PANELS.RISKS]: Risks,
+		[VIEWER_PANELS.GROUPS]: Groups,
+		[VIEWER_PANELS.VIEWS]: Views,
+		[VIEWER_PANELS.TREE]: Tree,
+		[VIEWER_PANELS.COMPARE]: Compare,
+		[VIEWER_PANELS.GIS]: Gis,
+	};
+
+	private renderLeftPanels = (visiblePanels, panels) => (
 		<LeftPanels>
-			{visiblePanels[VIEWER_PANELS.ISSUES] && <Issues {...this.urlParams} />}
-			{visiblePanels[VIEWER_PANELS.RISKS] && <Risks {...this.urlParams} />}
-			{visiblePanels[VIEWER_PANELS.GROUPS] && <Groups {...this.urlParams} />}
-			{visiblePanels[VIEWER_PANELS.VIEWS] && <Views {...this.urlParams} />}
-			{visiblePanels[VIEWER_PANELS.TREE] && <Tree {...this.urlParams} />}
-			{visiblePanels[VIEWER_PANELS.COMPARE] && <Compare {...this.urlParams} />}
-			{visiblePanels[VIEWER_PANELS.GIS] && <Gis {...this.urlParams} />}
+			{panels.map((panel) => {
+				const PanelComponent = this.panelsMap[panel];
+				return <PanelComponent key={panel} {...this.urlParams} />;
+			})}
 		</LeftPanels>
 	)
 

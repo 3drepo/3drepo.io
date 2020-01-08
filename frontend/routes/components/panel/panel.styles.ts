@@ -23,8 +23,9 @@ import { COLOR, FONT_WEIGHT } from '../../../styles';
 export const Container = styled(Paper)`
 	&& {
 		background: #fafafa;
-		height: ${(props: any) => props.height || 'auto'};
-		width: ${(props: any) => props.width || 'auto'};
+		height: 100%;
+		// height: ${(props: any) => props.height || 'auto'};
+		// width: ${(props: any) => props.width || 'auto'};
 		display: flex;
 		flex-direction: column;
 		overflow: hidden;
@@ -61,6 +62,7 @@ export const ContentWrapper = styled.div`
 	white-space: pre-line;
 	overflow: ${(props: any) => props.hiddenScrollbars ? 'hidden' : 'auto'};display: flex;
 	flex-direction: column;
+	justify-content: space-between;
 `as any;
 
 export const LoaderContainer = styled.div`

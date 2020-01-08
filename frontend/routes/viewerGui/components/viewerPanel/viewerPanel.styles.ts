@@ -18,7 +18,7 @@
 import { Button, Grid } from '@material-ui/core';
 import styled, { css } from 'styled-components';
 
-import { COLOR } from '../../../../styles/colors';
+import { COLOR } from '../../../../styles';
 import { Panel as PanelComponent } from '../../../components/panel/panel.component';
 
 interface IViewerPanelFooter {

@@ -13,4 +13,5 @@ export const IssuesContainer = styled(ReportedItems).attrs({
 	Icon: VIEWER_PANELS_ICONS[VIEWER_PANELS.ISSUES] as any
 })`
 	min-height: ${VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.ISSUES]}px;
+	height: 100%;
 ` as any;
