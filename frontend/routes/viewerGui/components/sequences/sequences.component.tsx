@@ -24,10 +24,15 @@ import {
 
 interface IProps {
 	sequences: any;
+	fetchSequences: () => void;
 }
 
 export class Sequences extends React.PureComponent<IProps, {}> {
 	public onChangeDate(value) {
+	}
+
+	public componentDidMount() {
+		this.props.fetchSequences();
 	}
 
 	public render() {
@@ -42,6 +47,7 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 			>
 				<SequencePlayer min={min} max={max} onChange={this.onChangeDate} />
 			</SequencesContainer>
+
 	);
 	}
 }

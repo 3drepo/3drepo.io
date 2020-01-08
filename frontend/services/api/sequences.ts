@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2020 3D Repo Ltd
+ *  Copyright (C) 2017 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,19 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
-import { bindActionCreators } from 'redux';
-import { createStructuredSelector } from 'reselect';
-import { selectSequences, SequencesActions } from '../../../../modules/sequences';
-import { Sequences } from './sequences.component';
+import api from './';
 
-const mapStateToProps = createStructuredSelector({
-	visibleSources: selectSequences
-});
-
-export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	fetchSequences: SequencesActions.fetchSequences
-}, dispatch);
-
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Sequences));
+/**
+ * Get sequences list
+ *
+ * @param teamspace
+ * @returns {*|promise}
+ */
+export const getSequences = (teamspace, modelId, revision): Promise<any> => {
+	return api.get(`${teamspace}/${modelId}/revision/${revision}/sequences`);
+};

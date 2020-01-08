@@ -15,19 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
-import { bindActionCreators } from 'redux';
-import { createStructuredSelector } from 'reselect';
-import { selectSequences, SequencesActions } from '../../../../modules/sequences';
-import { Sequences } from './sequences.component';
+import { createSelector } from 'reselect';
 
-const mapStateToProps = createStructuredSelector({
-	visibleSources: selectSequences
-});
+export const selectSequencesDomain = (state) => ({...state.sequences});
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	fetchSequences: SequencesActions.fetchSequences
-}, dispatch);
-
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Sequences));
+export const selectSequences = createSelector(
+	selectSequencesDomain, (state) => state.sequences
+);
