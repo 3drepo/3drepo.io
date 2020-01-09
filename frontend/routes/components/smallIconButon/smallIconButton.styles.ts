@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -23,5 +23,9 @@ export const SmallIconButtonStyled = styled(IconButton)`
 		width: 10px;
 		height: 10px;
 		z-index: 1;
+	}
+
+	svg .stroke {
+		stroke: currentColor;
 	}
 `;

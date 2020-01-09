@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -18,14 +18,12 @@
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import { DatePicker } from 'material-ui-pickers';
-import styled, { css } from 'styled-components';
-import { COLOR } from '../../../../../styles/colors';
+import styled from 'styled-components';
+import { COLOR } from '../../../../../styles';
 
 export const MenuList = styled(List)`
 	background-color: ${COLOR.WHITE};
 	width: 100%;
-	min-width: 160px;
-	max-width: 300px;
 	box-shadow: 0 1px 3px 0 ${COLOR.BLACK_20};
 	border-radius: 2px;
 

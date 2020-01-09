@@ -15,35 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, {css} from 'styled-components';
+import { MODE_OPERATION } from '../../../screenshotDialog.helpers';
 
-const commonStyles = css`
-	font-family: 'Arial', sans-serif;
-	line-height: 1;
-`;
+declare const Konva;
 
-export const Textarea = styled.textarea`
-	${commonStyles};
-	background: none;
-	position: absolute;
-	border: none;
-	padding: 0;
-	margin: 0;
-	resize: none;
-	outline: none;
-	overflow: hidden;
-	transform-origin: left top;
-	z-index: 3;
-
-	&:focus {
-		outline: none;
-	}
-`;
-
-export const AssistantElement = styled.pre`
-	${commonStyles};
-	display: inline;
-	position: absolute;
-	visibility: hidden;
-	margin: 0;
-`;
+export const createDrawnLine = (stroke, strokeWidth, position, mode, draggable = true) => {
+	return new Konva.Line({
+		stroke,
+		strokeWidth,
+		points: [position.x, position.y],
+		lineCap: 'round',
+		globalCompositeOperation: MODE_OPERATION[mode],
+		draggable,
+	});
+};

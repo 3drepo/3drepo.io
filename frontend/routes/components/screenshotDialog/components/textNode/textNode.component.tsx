@@ -21,21 +21,13 @@ import { Text, Transformer } from 'react-konva';
 interface IProps {
 	element: any;
 	isSelected: boolean;
-	isVisible: boolean;
 	handleChange: (props: any) => void;
-	onEdit: (props: any) => void;
 }
 
-export const TextNode = ({ element, isSelected, handleChange, onEdit, isVisible }: IProps) => {
+export const TextNode = ({ element, isSelected, handleChange }: IProps) => {
 	const { color, ...elementProps } = element;
 	const shape = React.useRef<any>(null);
 	const transformer = React.useRef<any>();
-
-	React.useEffect(() => {
-		if (shape.current) {
-			onEdit(shape.current);
-		}
-	}, [shape]);
 
 	return (
 		<>
@@ -44,8 +36,7 @@ export const TextNode = ({ element, isSelected, handleChange, onEdit, isVisible 
 				{...elementProps}
 				text={elementProps.text}
 				fill={color}
-				draggable={isSelected && isVisible}
-				visible={isVisible}
+				draggable={isSelected}
 				onDragEnd={(e) => {
 					handleChange({
 						...element,
@@ -72,7 +63,7 @@ export const TextNode = ({ element, isSelected, handleChange, onEdit, isVisible 
 					});
 				}}
 			/>
-			{(isVisible && isSelected) && <Transformer ref={transformer} resizeEnabled={false} />}
+			{isSelected && <Transformer ref={transformer} resizeEnabled={false} />}
 		</>
 	);
 };
