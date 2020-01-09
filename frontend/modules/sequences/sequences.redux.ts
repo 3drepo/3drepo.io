@@ -30,7 +30,9 @@ export const INITIAL_STATE = {
 	sequences: [],
 	sequencesPending: true,
 	selectedSequence: null,
-	selectedDate: null
+	selectedDate: null,
+	states: {},
+	statesPending: false
 };
 
 export const fetchSequencesSuccess = (state = INITIAL_STATE, { sequences }) => {
@@ -46,8 +48,8 @@ export const setSelectedSequence = (state = INITIAL_STATE, { sequenceId }) => {
 	return {...state, selectedSequence: sequenceId };
 };
 
-export const setSelectedDate =  (state = INITIAL_STATE, { selectedDate }) => {
-	return {...state, selectedDate };
+export const setSelectedDate =  (state = INITIAL_STATE, { date }) => {
+	return {...state, selectedDate: date};
 };
 
 export const reducer = createReducer(INITIAL_STATE, {

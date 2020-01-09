@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { sortBy } from 'lodash';
+import { sortBy, uniq } from 'lodash';
 import { createSelector } from 'reselect';
 
 export const selectSequencesDomain = (state) => ({...state.sequences});
@@ -50,16 +50,27 @@ const selectSelectedFrames = createSelector(
 		frames = frames.reduce((dict, currFrame) => {
 			const date = new Date(currFrame.dateTime);
 			date.setHours(0, 0, 0, 0);
+			const timeStamp = date.valueOf();
 
-			if (!dict[date.valueOf()]) {
-				dict[date.valueOf()] = [];
+			if (!dict[timeStamp]) {
+				dict[timeStamp] = {tasks: [], states: []};
 			}
 
-			Array.prototype.push.apply(dict[date.valueOf()], currFrame.tasks);
+			Array.prototype.push.apply(dict[timeStamp].tasks, currFrame.tasks);
+			dict[timeStamp].states.push({dateTime: currFrame.dateTime, state: currFrame.state});
+
 			return dict;
 		}, {});
 
-		return sortBy(Object.keys(frames).map((key) => ({date: new Date(parseInt(key, 10)), tasks: frames[key]})), 'date');
+		frames = Object.keys(frames).map((key) => {
+			const tasks = frames[key].tasks;
+			const states = frames[key].states;
+			const date = new Date(parseInt(key, 10));
+
+			return { date, tasks, states };
+		});
+
+		return sortBy( frames, 'date');
 	}
 );
 
@@ -82,7 +93,7 @@ export const selectSelectedFrame = createSelector(
 
 		for (let i = 0; i < lastIndex && !frame ; i++ ) {
 			if (i !== lastIndex) {
-				if ( frames[i].date < date && frames[i + 1].date > date) {
+				if ( frames[i].date <= date && frames[i + 1].date > date) {
 					frame = frames[i];
 				}
 			} else {
@@ -92,4 +103,8 @@ export const selectSelectedFrame = createSelector(
 
 		return frame;
 	}
+);
+
+export const selectSelectedStatesIds = createSelector(
+	selectSelectedFrame, (frame) => uniq(((frame || {}).states || []).map((f) => f.state))
 );

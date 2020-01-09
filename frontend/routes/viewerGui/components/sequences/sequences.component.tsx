@@ -42,7 +42,7 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 	}
 
 	public componentDidUpdate = () => {
-		console.log(this.props.selectedFrame);
+		// console.log(this.props.selectedFrame);
 	}
 
 	public render = () => {
