@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -17,12 +17,12 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 import { INITIAL_HELICOPTER_SPEED, VIEWER_NAV_MODES } from '../../constants/viewer';
-import { VIEWER_PANELS } from '../../constants/viewerGui';
+import { VIEWER_LEFT_PANELS, VIEWER_RIGHT_PANELS } from '../../constants/viewerGui';
 
 export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActions({
 	fetchData: ['teamspace', 'model'],
 	resetPanelsStates: [],
-	setPanelVisibility: ['panelName', 'visibility'],
+	setPanelVisibility: ['panelName'],
 	setMeasureVisibility: ['visible'],
 	setCoordView: ['visible'],
 	setCoordViewSuccess: ['coordViewActive'],
@@ -64,7 +64,8 @@ export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActio
 
 export interface IViewerGuiState {
 	visiblePanels: any;
-	panels: string[];
+	leftPanels: string[];
+	rightPanels: string[];
 	coordViewActive: boolean;
 	isModelLoaded: boolean;
 	navigationMode: string;
@@ -79,7 +80,8 @@ export interface IViewerGuiState {
 
 export const INITIAL_STATE: IViewerGuiState = {
 	visiblePanels: {},
-	panels: [],
+	leftPanels: [],
+	rightPanels: [],
 	isModelLoaded: false,
 	coordViewActive: false,
 	navigationMode: VIEWER_NAV_MODES.TURNTABLE,
@@ -92,17 +94,25 @@ export const INITIAL_STATE: IViewerGuiState = {
 	pinData: null
 };
 
-export const setPanelVisibility = (state = INITIAL_STATE, { panelName, visibility }) => {
-	const visiblePanels = { ...state.visiblePanels };
-	const panels = [...state.panels];
+const updatePanelsList = (panels, panelName) => {
 	if (panels.includes(panelName)) {
-		return { ...state,  visiblePanels: {...visiblePanels, [panelName]: visibility},
-			panels: panels.filter((panel) => (panel !== panelName)) };
+		return panels.filter((panel) => (panel !== panelName));
 	}
+
 	if (panels.length > 1) {
 		panels.shift();
 	}
-	return { ...state,  visiblePanels: {...visiblePanels, [panelName]: visibility}, panels: [...panels, panelName] };
+
+	return [...panels, panelName];
+};
+
+export const setPanelVisibility = (state = INITIAL_STATE, { panelName }) => {
+	const leftPanels = VIEWER_LEFT_PANELS.map(({type}) => type).includes(panelName) ?
+			updatePanelsList([...state.leftPanels], panelName) : [...state.leftPanels];
+	const rightPanels = VIEWER_RIGHT_PANELS.map(({type}) => type).includes(panelName) ?
+			updatePanelsList([...state.rightPanels], panelName) : [...state.rightPanels];
+
+	return { ...state, leftPanels, rightPanels };
 };
 
 const setNavigationModeSuccess = (state = INITIAL_STATE, { mode }) => {

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -22,16 +22,16 @@ import { selectIsTreeProcessed } from '../tree';
 
 export const selectViewerGuiDomain = (state) => ({...state.viewerGui});
 
-export const selectVisiblePanels = createSelector(
-	selectViewerGuiDomain, (state) => state.visiblePanels
+export const selectLeftPanels = createSelector(
+	selectViewerGuiDomain, (state) => state.leftPanels
 );
 
-export const selectPanels = createSelector(
-	selectViewerGuiDomain, (state) => state.panels
+export const selectRightPanels = createSelector(
+	selectViewerGuiDomain, (state) => state.rightPanels
 );
 
 export const selectIsMetadataVisible = createSelector(
-	selectVisiblePanels, Bim.selectIsPending,
+		selectRightPanels, Bim.selectIsPending,
 	(state, isPending) => state[VIEWER_PANELS.BIM] && !isPending
 );
 

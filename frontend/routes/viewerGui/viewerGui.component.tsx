@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -53,8 +53,8 @@ interface IProps {
 		issueId?: string;
 		riskId?: string;
 	};
-	visiblePanels: any;
-	panels: string[];
+	leftPanels: string[];
+	rightPanels: string[];
 	stopListenOnSelections: () => void;
 	stopListenOnModelLoaded: () => void;
 	stopListenOnClickPin: () => void;
@@ -62,7 +62,7 @@ interface IProps {
 	loadModel: () => void;
 	resetPanelsStates: () => void;
 	resetModel: () => void;
-	setPanelVisibility: (panelName, visibility) => void;
+	setPanelVisibility: (panelName) => void;
 }
 
 interface IState {
@@ -92,10 +92,10 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		viewer.init();
 
 		if (issueId || !riskId) {
-			this.props.setPanelVisibility(VIEWER_PANELS.ISSUES, true);
+			this.props.setPanelVisibility(VIEWER_PANELS.ISSUES);
 		}
 		if (riskId) {
-			this.props.setPanelVisibility(VIEWER_PANELS.RISKS, true);
+			this.props.setPanelVisibility(VIEWER_PANELS.RISKS);
 		}
 
 		MultiSelect.initKeyWatchers();
@@ -112,10 +112,10 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		const { issueId, riskId } = queryParams;
 
 		if (issueId !== prevProps.queryParams.issueId && issueId) {
-			this.props.setPanelVisibility(VIEWER_PANELS.ISSUES, true);
+			this.props.setPanelVisibility(VIEWER_PANELS.ISSUES);
 		}
 		if (riskId !== prevProps.queryParams.riskId && riskId) {
-			this.props.setPanelVisibility(VIEWER_PANELS.RISKS, true);
+			this.props.setPanelVisibility(VIEWER_PANELS.RISKS);
 		}
 
 		if (teamspaceChanged || modelChanged || revisionChanged) {
@@ -138,7 +138,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { visiblePanels, isFocusMode, viewer, panels } = this.props;
+		const { leftPanels, rightPanels, isFocusMode, viewer } = this.props;
 
 		return (
 			<GuiContainer>
@@ -147,8 +147,8 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 					<RevisionsSwitch />
 					<Toolbar {...this.urlParams} />
 					{this.renderLeftPanelsButtons()}
-					{this.renderLeftPanels(visiblePanels, panels)}
-					{this.renderRightPanels(visiblePanels)}
+					{this.renderLeftPanels(leftPanels)}
+					{this.renderRightPanels(rightPanels)}
 					{this.renderViewerLoader(viewer.hasInstance)}
 				</Container>
 			</GuiContainer>
@@ -156,7 +156,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	}
 
 	private handleTogglePanel = (panelType) => {
-		this.props.setPanelVisibility(panelType, !this.props.visiblePanels[panelType]);
+		this.props.setPanelVisibility(panelType);
 	}
 
 	private renderLeftPanelsButtons = () => (
@@ -167,7 +167,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 					onClick={this.handleTogglePanel}
 					label={name}
 					type={type}
-					active={this.props.panels.includes(type)}
+					active={this.props.leftPanels.includes(type)}
 				/>
 			))}
 		</LeftPanelsButtons>
@@ -183,7 +183,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		[VIEWER_PANELS.GIS]: Gis,
 	};
 
-	private renderLeftPanels = (visiblePanels, panels) => (
+	private renderLeftPanels = (panels) => (
 		<LeftPanels>
 			{panels.map((panel) => {
 				const PanelComponent = this.panelsMap[panel];
@@ -192,9 +192,9 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		</LeftPanels>
 	)
 
-	private renderRightPanels = (visiblePanels) => (
+	private renderRightPanels = (panels) => (
 		<RightPanels>
-			{visiblePanels[VIEWER_PANELS.BIM] && <Bim {...this.urlParams} />}
+			{panels.includes(VIEWER_PANELS.BIM) && <Bim {...this.urlParams} />}
 		</RightPanels>
 	)
 }
