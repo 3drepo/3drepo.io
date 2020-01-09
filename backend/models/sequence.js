@@ -21,14 +21,19 @@ const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
 
 const History = require("./history");
+const Ref = require("./ref");
 
 class Sequence {
 
 	clean(toClean, targetType = "[object String]") {
-		const keys = ["_id", "rev_id"];
+		const keys = ["_id", "rev_id", "model", "dateTime", "startDate", "endDate"];
 
 		keys.forEach((key) => {
-			if (toClean[key] && "[object String]" === targetType) {
+			if (toClean[key] &&
+				["dateTime", "startDate", "endDate"].includes(key) &&
+				"[object Date]" === Object.prototype.toString.call(toClean[key])) {
+				toClean[key] = new Date(toClean[key]).getTime();
+			} else if (toClean[key] && "[object String]" === targetType) {
 				if ("[object Object]" === Object.prototype.toString.call(toClean[key])) {
 					toClean[key] = utils.uuidToString(toClean[key]);
 				} else if ("[object Array]" === Object.prototype.toString.call(toClean[key])) {
@@ -44,6 +49,7 @@ class Sequence {
 		});
 
 		for (let i = 0; toClean["frames"] && i < toClean["frames"].length; i++) {
+			toClean["frames"][i] = this.clean(toClean["frames"][i]);
 			for (let j = 0; toClean["frames"][i]["tasks"] && j < toClean["frames"][i]["tasks"].length; j++) {
 				toClean["frames"][i]["tasks"][j] = this.clean(toClean["frames"][i]["tasks"][j]);
 			}
@@ -55,20 +61,35 @@ class Sequence {
 	async getList(account, model, branch, revision, cleanResponse = false) {
 
 		const history = await History.getHistory({account, model}, branch, revision);
+		let submodels = [];
+		let submodelListPromises = [];
 
 		if (!history) {
 			return Promise.reject(responseCodes.INVALID_TAG_NAME);
+		} else if (history.current) {
+			submodels = await Ref.find({account, model}, {type: "ref", _id: {"$in": history.current}}, {project:1});
+			submodels = submodels.map(r => r.project);
 		}
+
+		submodels.forEach((submodel) => {
+			submodelListPromises.push(this.getList(account, submodel, branch, revision, cleanResponse));
+		});
 
 		return db.getCollection(account, model + ".sequences").then(_dbCol => {
 			return _dbCol.find({"rev_id": history._id}).toArray().then(sequences => {
 				sequences.forEach((sequence) => {
+					sequence.teamspace = account;
+					sequence.model = model;
+
 					if (cleanResponse) {
 						this.clean(sequence);
 					}
 				});
 
-				return sequences;
+				return Promise.all(submodelListPromises).then((submodelSequences) => {
+					sequences = sequences.concat(submodelSequences.reduce((acc, val) => acc.concat(val), []));
+					return sequences;
+				});
 			});
 		});
 	}
