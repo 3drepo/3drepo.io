@@ -43,7 +43,12 @@ export const selectActiveGroupId = createSelector(
 );
 
 export const selectActiveGroupDetails = createSelector(
-	selectComponentState, (componentState) => componentState.newGroup
+	selectComponentState, (state) => state.newGroup
+);
+
+export const selectUnalteredActiveGroupDetails = createSelector(
+	selectActiveGroupId, selectGroupsMap, selectActiveGroupDetails,
+		(groupId, groupMap, defaultGroup) => groupMap[groupId] || defaultGroup
 );
 
 export const selectShowDetails = createSelector(
