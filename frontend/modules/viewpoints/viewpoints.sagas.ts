@@ -22,6 +22,7 @@ import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
 import { DialogActions } from '../dialog';
 import { dispatch } from '../store';
+import { DEFAULT_VIEWPOINTS } from './viewpoints.constants';
 import { ViewpointsActions, ViewpointsTypes } from './viewpoints.redux';
 
 export const getThumbnailUrl = (thumbnail) => API.getAPIUrl(thumbnail);
@@ -36,7 +37,7 @@ export function* fetchViewpoints({ teamspace, modelId }) {
 			}
 		});
 
-		yield put(ViewpointsActions.fetchViewpointsSuccess(viewpoints));
+		yield put(ViewpointsActions.fetchViewpointsSuccess([...DEFAULT_VIEWPOINTS, ...viewpoints]));
 		yield put(ViewpointsActions.setPendingState(false));
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'model viewpoints', e.response));
@@ -134,19 +135,25 @@ export function* unsubscribeOnViewpointChanges({ teamspace, modelId }) {
 
 export function* setCameraOnViewpoint({ teamspace, modelId, view }) {
 	if (view) {
-		if (view.viewpoint) {
-			const viewpoint = { ...view.viewpoint, account: teamspace, model: modelId };
-			yield Viewer.setCamera(viewpoint);
+
+		if (view.preset) {
+			//TODO: Call viewer
 		}
+		else {
+			if (view.viewpoint) {
+				const viewpoint = { ...view.viewpoint, account: teamspace, model: modelId };
+				yield Viewer.setCamera(viewpoint);
+			}
 
-		if (view.clippingPlanes) {
-			const clipData = {
-				clippingPlanes: view.clippingPlanes,
-				account: teamspace,
-				model: modelId
-			};
+			if (view.clippingPlanes) {
+				const clipData = {
+					clippingPlanes: view.clippingPlanes,
+					account: teamspace,
+					model: modelId
+				};
 
-			yield Viewer.updateClippingPlanes(clipData);
+				yield Viewer.updateClippingPlanes(clipData);
+			}
 		}
 	}
 }

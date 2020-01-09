@@ -1089,6 +1089,54 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Reset the viewpoint to Top down view.
+	 * @category Navigations
+	 */
+	public static topView() {
+		UnityUtil.toUnity('TopView', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Reset the viewpoint to Bottom up view.
+	 * @category Navigations
+	 */
+	public static bottomView() {
+		UnityUtil.toUnity('BottomView', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Reset the viewpoint to the left side of the model.
+	 * @category Navigations
+	 */
+	public static leftView() {
+		UnityUtil.toUnity('LeftView', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Reset the viewpoint to the right side of the model.
+	 * @category Navigations
+	 */
+	public static rightView() {
+		UnityUtil.toUnity('RightView', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Reset the viewpoint to the front of the model.
+	 * @category Navigations
+	 */
+	public static frontView() {
+		UnityUtil.toUnity('FrontView', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Reset the viewpoint to the back of the model.
+	 * @category Navigations
+	 */
+	public static backView() {
+		UnityUtil.toUnity('BackView', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
 	 * Request a screenshot. The screenshot will be returned as a JSON
 	 * object with a single field, ssByte, containing the screenshot in
 	 * base64.

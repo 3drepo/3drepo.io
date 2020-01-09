@@ -28,7 +28,6 @@ export const batchGroupBy = {
 	},
 	init(rawActions) {
 		const defaultGroupBy = groupByActionTypes(rawActions);
-		return (action, currentState, previousHistory) =>
-				this._group || defaultGroupBy(action, currentState, previousHistory);
+		return (action) => this._group || defaultGroupBy(action);
 	}
 };

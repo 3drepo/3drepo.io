@@ -67,7 +67,7 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 	public renderViewpointData = renderWhenTrue(() => (
 		<NameRow>
 			<Name>{this.props.viewpoint.name}</Name>
-			{this.props.isCommenter &&
+			{this.props.isCommenter && !this.props.viewpoint.preset &&
 				<IconsGroup disabled={this.state.isDeletePending}>
 					<StyledEditIcon onClick={this.props.onOpenEditMode} />
 					<StyledDeleteIcon onClick={this.handleDelete} />
@@ -148,8 +148,8 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 				onClick={onClick}
 				active={Number(active)}>
 				{this.renderDeleteMessage(viewpoint.willBeRemoved)}
-				{this.renderScreenshot(viewpoint)}
-				{this.renderScreenshotPlaceholder(!viewpoint.screenshot.thumbnailUrl)}
+				{this.renderScreenshot(viewpoint.screenshot)}
+				{this.renderScreenshotPlaceholder(!viewpoint.screenshot || !viewpoint.screenshot.thumbnailUrl)}
 				{this.renderViewpointForm(this.props.active && this.props.editMode)}
 				{this.renderViewpointData(this.props.active && !this.props.editMode)}
 				{this.renderViewpointName(!this.props.active)}
