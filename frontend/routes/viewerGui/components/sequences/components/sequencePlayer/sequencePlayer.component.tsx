@@ -111,6 +111,11 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 		this.setDayNumber(val);
 	}
 
+	public gotoDate = (val) => {
+		this.stop();
+		this.setValue(val);
+	}
+
 	public componentDidUpdate(prevProps) {
 		if (prevProps.value !== this.props.value) {
 			this.setState({value: this.props.value});
@@ -208,7 +213,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 								inputId="1"
 								value={value}
 								format={NAMED_MONTH_DATE_FORMAT}
-								onChange={(e) => this.setState({value: new Date(e.target.value)})}
+								onChange={(e) => this.gotoDate(new Date(e.target.value))}
 								placeholder="date"
 							/>
 						</Grid>

@@ -26,3 +26,7 @@ import api from './';
 export const getSequences = (teamspace, modelId, revision): Promise<any> => {
 	return api.get(`${teamspace}/${modelId}/revision/${revision}/sequences`);
 };
+
+export const getSequenceState = (teamspace, modelId, revision, sequenceId, stateId): Promise<any> => {
+	return api.get(`${teamspace}/${modelId}/revision/${revision}/sequences/${sequenceId}/state/${stateId}`);
+};

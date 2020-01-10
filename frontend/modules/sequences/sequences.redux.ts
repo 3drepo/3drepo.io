@@ -23,7 +23,9 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	setSequencesPending: ['isPending'],
 	fetchSequencesSuccess: ['sequences'],
 	setSelectedSequence: ['sequenceId'],
-	setSelectedDate: ['date']
+	setSelectedFrame: ['date'],
+	setSelectedDate: ['date'],
+	setStateDefinition: ['stateId', 'stateDefinition'],
 }, { prefix: 'SEQUENCES/' });
 
 export const INITIAL_STATE = {
@@ -31,7 +33,7 @@ export const INITIAL_STATE = {
 	sequencesPending: true,
 	selectedSequence: null,
 	selectedDate: null,
-	states: {},
+	stateDefinitions: {},
 	statesPending: false
 };
 
@@ -52,9 +54,14 @@ export const setSelectedDate =  (state = INITIAL_STATE, { date }) => {
 	return {...state, selectedDate: date};
 };
 
+export const setStateDefinition = (state = INITIAL_STATE, { stateId, stateDefinition}) => {
+	return {...state, stateDefinitions: {...state.stateDefinitions, [stateId]: stateDefinition}};
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[SequencesTypes.FETCH_SEQUENCES_SUCCESS]: fetchSequencesSuccess,
 	[SequencesTypes.SET_SEQUENCES_PENDING]: setSequencesPending,
 	[SequencesTypes.SET_SELECTED_DATE]: setSelectedDate,
+	[SequencesTypes.SET_STATE_DEFINITION]: setStateDefinition,
 	[SequencesTypes.SET_SELECTED_SEQUENCE]: setSelectedSequence
 });

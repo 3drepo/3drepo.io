@@ -25,16 +25,17 @@ import {
 interface IProps {
 	sequences: any;
 	fetchSequences: () => void;
-	setSelectedDate: (date: Date) => void;
+	setSelectedFrame: (date: Date) => void;
 	maxDate: Date;
 	minDate: Date;
 	selectedDate: Date;
 	selectedFrame: any;
+	transparencies: any;
 }
 
 export class Sequences extends React.PureComponent<IProps, {}> {
 	public onChangeDate = (value) => {
-		this.props.setSelectedDate(value);
+		this.props.setSelectedFrame(value);
 	}
 
 	public componentDidMount = () => {
@@ -42,7 +43,7 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 	}
 
 	public componentDidUpdate = () => {
-		// console.log(this.props.selectedFrame);
+		// console.log(this.props.transparencies);
 	}
 
 	public render = () => {

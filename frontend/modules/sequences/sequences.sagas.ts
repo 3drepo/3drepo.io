@@ -15,12 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, select, takeLatest } from 'redux-saga/effects';
+import { all, put, select, takeLatest } from 'redux-saga/effects';
 
+import { selectSelectedSequenceId, selectSelectedStatesIds, selectStateDefinitions,
+	SequencesActions, SequencesTypes } from '.';
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
 import { selectCurrentModel, selectCurrentModelTeamspace, selectCurrentRevisionId } from '../model/model.selectors';
-import { SequencesActions, SequencesTypes } from './sequences.redux';
 
 export function* fetchSequences() {
 	try {
@@ -42,6 +43,33 @@ export function* fetchSequences() {
 	}
 }
 
+export function* setSelectedFrame({date}) {
+	try {
+		yield put(SequencesActions.setSelectedDate(date));
+		const teamspace = yield select(selectCurrentModelTeamspace);
+		const revision = yield select(selectCurrentRevisionId);
+		const model = yield select(selectCurrentModel);
+		const sequenceId =  yield select(selectSelectedSequenceId);
+
+		let statesIds = yield select(selectSelectedStatesIds);
+		const loadedStates = yield select(selectStateDefinitions);
+
+		statesIds = statesIds.filter((s) => ! loadedStates[s] );
+
+		if (statesIds.length) {
+			const responses = yield all(statesIds.map((stateId) =>
+				API.getSequenceState(teamspace, model, revision, sequenceId, stateId)));
+
+			yield all(statesIds.map((stateId, i) => put(SequencesActions.setStateDefinition(stateId, responses[i].data))));
+		}
+
+	} catch (error) {
+		yield put(DialogActions.showEndpointErrorDialog('select frame', 'sequences', error));
+		yield put(SequencesActions.statesPending(false));
+	}
+}
+
 export default function* SequencesSaga() {
 	yield takeLatest(SequencesTypes.FETCH_SEQUENCES, fetchSequences);
+	yield takeLatest(SequencesTypes.SET_SELECTED_FRAME, setSelectedFrame);
 }

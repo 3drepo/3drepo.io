@@ -24,7 +24,11 @@ export const selectSequences = createSelector(
 	selectSequencesDomain, (state) => state.sequences
 );
 
-const selectSelectedSequenceId = createSelector(
+export const selectStateDefinitions = createSelector(
+	selectSequencesDomain, (state) => state.stateDefinitions
+);
+
+export const selectSelectedSequenceId = createSelector(
 	selectSequencesDomain, (state) => state.selectedSequence
 );
 
@@ -107,4 +111,94 @@ export const selectSelectedFrame = createSelector(
 
 export const selectSelectedStatesIds = createSelector(
 	selectSelectedFrame, (frame) => uniq(((frame || {}).states || []).map((f) => f.state))
+);
+
+export const selectStatesDefinitionsPending =  createSelector(
+	selectSelectedStatesIds, selectStateDefinitions, (ids: string[], definitions) => ids.some((id) => !definitions[id])
+);
+
+const convertToDictionary = (stateChanges) => {
+	return stateChanges.reduce((dict, actual) => {
+		actual.shared_ids.forEach((id) => {
+			dict[id] = actual.value;
+		});
+
+		return dict;
+	}, {});
+};
+
+const groupByValues = (dict, equals = (a, b) => a === b ) => {
+	return Object.keys(dict).reduce((values, key) => {
+		const value = dict[key];
+
+		let valuesEntry = values.find((entry) => equals(entry.value, value));
+
+		if (!valuesEntry) {
+			valuesEntry = {value, shared_ids: []};
+			values.push(valuesEntry);
+		}
+
+		valuesEntry.shared_ids.push(key);
+
+		return values;
+	}, []);
+};
+
+const selectFrameStates = createSelector(
+	selectSelectedFrame, selectStateDefinitions, selectStatesDefinitionsPending, (frame, stateDefinitions, pending) => {
+		if (pending) {
+			return [];
+		}
+
+		let statesIds = sortBy((frame || {}).states, 'dateTime');
+
+		if (statesIds.length === 0) {
+			return [];
+		}
+
+		statesIds.reverse(); // for getting the uniq to get rid of the firsts matches ins.
+		statesIds = uniq(statesIds.map((f) => f.state));
+		statesIds.reverse();
+
+		return statesIds.map((id) => stateDefinitions[id]);
+});
+
+export const selectSelectedFrameTransparencies = createSelector(
+	selectFrameStates, (frameStates) => {
+		if (frameStates.length === 0) {
+			return [];
+		}
+
+		let transparenciesDict = convertToDictionary(frameStates[0].transparency);
+
+		frameStates.forEach(({ transparency }, index) => {
+			if (index === 0 ) {
+				return;
+			}
+
+			transparenciesDict = {...transparenciesDict, ...convertToDictionary(transparency)};
+		});
+
+		return groupByValues(transparenciesDict);
+	}
+);
+
+export const selectSelectedFrameColors = createSelector(
+	selectFrameStates, (frameStates) => {
+		if (frameStates.length === 0) {
+			return [];
+		}
+
+		let colorDict = convertToDictionary(frameStates[0].color);
+
+		frameStates.forEach(({ color }, index) => {
+			if (index === 0 ) {
+				return;
+			}
+
+			colorDict = {...colorDict, ...convertToDictionary(color)};
+		});
+
+		return groupByValues(colorDict, (a, b) => a[0] === b[0] && a[1] === b[1] && a[2] === b[2]);
+	}
 );
