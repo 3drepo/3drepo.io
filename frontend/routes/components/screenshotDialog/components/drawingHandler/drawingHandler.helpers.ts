@@ -17,30 +17,30 @@ const cloudProps = {
 export const createShape = (shapeType, commonProps, initialPositionProps) => {
 	const map = {
 		[SHAPE_TYPES.CIRCLE]: new Konva.Circle({
+			...circleProps,
 			...commonProps,
 			...initialPositionProps,
-			...circleProps
 		}),
 		[SHAPE_TYPES.TRIANGLE]: new Konva.RegularPolygon({
 			...commonProps,
 			...initialPositionProps,
-			...triangleProps
+			...triangleProps,
 		}),
 		[SHAPE_TYPES.RECTANGLE]: new Konva.Rect({
 			...commonProps,
 			...initialPositionProps,
-			...rectangleProps
+			...rectangleProps,
 		}),
 		[SHAPE_TYPES.LINE]: new Konva.Line({
-			...commonProps
+			...commonProps,
 		}),
 		[SHAPE_TYPES.CLOUD]: new Konva.Path({
 			...commonProps,
 			...initialPositionProps,
-			...cloudProps
+			...cloudProps,
 		}),
 		[SHAPE_TYPES.ARROW]: new Konva.Arrow({
-			...commonProps
+			...commonProps,
 		})
 	};
 

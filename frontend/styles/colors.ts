@@ -19,6 +19,7 @@ export const COLOR = {
 	PRIMARY_MAIN_6: hexToRgba(PRIMARY_MAIN, .06),
 
 	WHITE,
+	WHITE_20: hexToRgba(WHITE, .2),
 	WHITE_87: hexToRgba(WHITE, 0.87),
 
 	TRANSPARENT : hexToRgba(WHITE, 0),

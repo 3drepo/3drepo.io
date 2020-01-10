@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -49,7 +49,8 @@ import {
 import { Badge, IconButton, OptionsDivider, ShapeMenuButton, StyledButton, ToolsContainer } from './tools.styles';
 
 const ACTIVE_COLOR = 'secondary';
-const DEFAULT_COLOR = 'action';
+const PRIMARY_COLOR = 'primary';
+const ACTION_COLOR = 'action';
 
 interface IProps {
 	size: number;
@@ -61,7 +62,6 @@ interface IProps {
 	areFutureElements: boolean;
 	arePastElements: boolean;
 	mode: string;
-	onClick: () => void;
 	onDrawClick: () => void;
 	onEraseClick: () => void;
 	onTextClick: () => void;
@@ -76,18 +76,10 @@ interface IProps {
 }
 
 export class Tools extends React.PureComponent<IProps, any> {
-	public get isTextSelected() {
-		return this.props.selectedObjectName.includes('text');
-	}
-
-	public get isShapeSelected() {
-		return this.props.selectedObjectName.includes('shape');
-	}
-
 	public renderToolset = renderWhenTrue(() => {
 		const {
 			size, textSize, color, onDrawClick, onTextClick, onClearClick,
-			onColorChange, onBrushSizeChange, onEraseClick, onTextSizeChange, onClick
+			onColorChange, onBrushSizeChange, onEraseClick, onTextSizeChange,
 		} = this.props;
 
 		return (
@@ -125,7 +117,7 @@ export class Tools extends React.PureComponent<IProps, any> {
 										color={this.getShapeToolColor()}
 										onClick={this.setDefaultShape}
 									>
-										<ActiveIcon {...IconProps} />
+										<ActiveIcon color={this.getShapeToolColor()} {...IconProps} />
 									</IconButton>
 								</Tooltip>
 								<ShapeMenuButton>
@@ -133,14 +125,13 @@ export class Tools extends React.PureComponent<IProps, any> {
 										Icon={ArrowDropDownIcon}
 										onClick={(e) => {
 											props.onClick(e);
-											onClick();
 										}}
 									/>
 								</ShapeMenuButton>
 							</>
 						);
 					}}
-					renderContent={this.renderActionsMenu}
+					renderContent={this.renderShapesMenu}
 					PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
 					PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'center' } }}
 					ButtonProps={{ disabled: false }}
@@ -230,16 +221,6 @@ export class Tools extends React.PureComponent<IProps, any> {
 		this.props.onShapeClick(this.props.activeShape || SHAPE_TYPES.RECTANGLE);
 	}
 
-	public renderToolMenuItem = (value, content) => (
-			<MenuItem key={value} value={value}>
-				<IconButton disableRipple >
-					<Badge badgeContent={value} color="primary">
-						{content}
-					</Badge>
-				</IconButton>
-			</MenuItem>
-	)
-
 	public renderBrushSizes = () => BRUSH_SIZES.map(({ label, value }) => (
 		<MenuItem key={value} value={value}>
 			<IconButton disableRipple>
@@ -272,14 +253,14 @@ export class Tools extends React.PureComponent<IProps, any> {
 		if (this.props.mode === toolType) {
 			return ACTIVE_COLOR;
 		}
-		return DEFAULT_COLOR;
+		return ACTION_COLOR;
 	}
 
 	public getShapeToolColor = () => {
-		return [MODES.SHAPE, MODES.POLYGON].includes(this.props.mode) ? ACTIVE_COLOR : DEFAULT_COLOR;
+		return [MODES.SHAPE, MODES.POLYGON, MODES.CALLOUT].includes(this.props.mode) ? ACTIVE_COLOR : PRIMARY_COLOR;
 	}
 
-	public renderActionsMenu = (menu) =>  {
+	public renderShapesMenu = (menu) =>  {
 		return(
 			<MenuList>
 				{SHAPES_MENU.map(({ name, Icon }) => (
@@ -293,15 +274,11 @@ export class Tools extends React.PureComponent<IProps, any> {
 		);
 	}
 
-	public handleToolClick = (type, callback?) => () => {
-		this.setState({ activeTool: type }, callback);
-	}
-
 	public render() {
-		const { disabled, onClick } = this.props;
+		const { disabled } = this.props;
 
 		return (
-			<ToolsContainer onClick={onClick} disabled={disabled}>
+			<ToolsContainer disabled={disabled}>
 				{this.renderToolset(!disabled)}
 				{this.renderSaveButton(!disabled)}
 			</ToolsContainer>
