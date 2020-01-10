@@ -15,21 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import LockIcon from '@material-ui/icons/Lock';
-import UnlockIcon from '@material-ui/icons/LockOpen';
-import { isEqual } from 'lodash';
 import React from 'react';
 
 import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
 import CancelIcon from '@material-ui/icons/Cancel';
 import SearchIcon from '@material-ui/icons/Search';
+import { isEqual } from 'lodash';
 
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { IViewpointsComponentState } from '../../../../modules/viewpoints/viewpoints.redux';
 import { Viewer } from '../../../../services/viewer/viewer';
+import { LockPanelButton } from '../lockPanelButton';
 import { ViewerPanelButton, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
 import { ViewItem } from './components/viewItem/viewItem.component';
 import {
@@ -62,8 +61,6 @@ interface IProps {
 	subscribeOnViewpointChanges: (teamspace, modelId) => void;
 	unsubscribeOnViewpointChanges: (teamspace, modelId) => void;
 	setState: (componentState: IViewpointsComponentState) => void;
-	lockedPanels?: string[];
-	setPanelLock: (panelName) => void;
 }
 
 export class Views extends React.PureComponent<IProps, any> {
@@ -251,12 +248,6 @@ export class Views extends React.PureComponent<IProps, any> {
 		});
 	}
 
-	public handleLockPanel = () => {
-		if (this.type) {
-			this.props.setPanelLock(this.type);
-		}
-	}
-
 	public handleOpenSearchMode = () => this.props.setState({ searchEnabled: true });
 
 	public handleCloseSearchMode = () =>
@@ -288,13 +279,6 @@ export class Views extends React.PureComponent<IProps, any> {
 		return <IconButton onClick={this.handleOpenSearchMode}><SearchIcon /></IconButton>;
 	}
 
-	public getLockPanelButton = () => {
-		if (this.props.lockedPanels.includes(this.type)) {
-			return <IconButton onClick={this.handleLockPanel}><LockIcon /></IconButton>;
-		}
-		return <IconButton onClick={this.handleLockPanel}><UnlockIcon /></IconButton>;
-	}
-
 	public renderFooterContent = () => (
 		<ViewerPanelFooter alignItems="center">
 			<ViewsCountInfo>{this.footerText}</ViewsCountInfo>
@@ -313,7 +297,7 @@ export class Views extends React.PureComponent<IProps, any> {
 	public renderActions = () => {
 		return (
 				<>
-					{this.getLockPanelButton()}
+					<LockPanelButton type={this.type} />
 					{this.getSearchButton()}
 				</>
 		);

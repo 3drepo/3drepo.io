@@ -18,8 +18,6 @@
 import { IconButton, MenuItem } from '@material-ui/core';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import BuildIcon from '@material-ui/icons/Build';
-import LockIcon from '@material-ui/icons/Lock';
-import UnlockIcon from '@material-ui/icons/LockOpen';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import { includes, isEmpty } from 'lodash';
@@ -35,6 +33,7 @@ import {
 	StyledListItem
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
+import { LockPanelButton } from '../lockPanelButton';
 import { Settings } from './components/settings/settings.component';
 import {
 	GisContainer,
@@ -62,8 +61,6 @@ interface IProps {
 	resetMap: () => void;
 	isInitialisedMap: boolean;
 	visibleSources: any[];
-	lockedPanels?: string[];
-	setPanelLock: (panelName) => void;
 }
 
 interface IState {
@@ -202,19 +199,6 @@ export class Gis extends React.PureComponent<IProps, IState> {
 		/>
 	)
 
-	public handleLockPanel = () => {
-		if (this.type) {
-			this.props.setPanelLock(this.type);
-		}
-	}
-
-	public getLockPanelButton = () => {
-		if (this.props.lockedPanels.includes(this.type)) {
-			return <IconButton onClick={this.handleLockPanel}><LockIcon /></IconButton>;
-		}
-		return <IconButton onClick={this.handleLockPanel}><UnlockIcon /></IconButton>;
-	}
-
 	public renderActions = () => {
 		if (this.state.settingsModeActive) {
 			return [];
@@ -222,7 +206,7 @@ export class Gis extends React.PureComponent<IProps, IState> {
 
 		return (
 				<>
-					{this.getLockPanelButton()}
+					<LockPanelButton type={this.type} />
 					{this.getMenuButton()}
 				</>
 		);

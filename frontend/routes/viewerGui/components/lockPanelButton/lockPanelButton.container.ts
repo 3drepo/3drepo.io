@@ -16,29 +16,18 @@
  */
 
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { selectIsInitialisedMap, selectVisibleSources, GisActions } from '../../../../modules/gis';
-import { selectIsPending, selectMaps, selectSettings, ModelActions } from '../../../../modules/model';
-import { Gis } from './gis.component';
+
+import { selectLockedPanels, ViewerGuiActions } from '../../../../modules/viewerGui';
+import { LockPanelButton } from './lockPanelButton.component';
 
 const mapStateToProps = createStructuredSelector({
-	settings: selectSettings,
-	isPending: selectIsPending,
-	mapsProviders: selectMaps,
-	isInitialisedMap: selectIsInitialisedMap,
-	visibleSources: selectVisibleSources,
+	lockedPanels: selectLockedPanels,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	fetchModelMaps: ModelActions.fetchMaps,
-	updateModelSettings: ModelActions.updateSettings,
-	initialiseMap: GisActions.initialiseMap,
-	addSource: GisActions.addSource,
-	removeSource: GisActions.removeSource,
-	resetSources: GisActions.resetSources,
-	resetMap: GisActions.resetMap,
+	setPanelLock: ViewerGuiActions.setPanelLock,
 }, dispatch);
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Gis));
+export default connect(mapStateToProps, mapDispatchToProps)(LockPanelButton);

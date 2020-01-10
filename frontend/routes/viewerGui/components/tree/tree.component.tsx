@@ -19,8 +19,6 @@ import IconButton from '@material-ui/core/IconButton';
 import CancelIcon from '@material-ui/icons/Cancel';
 import Check from '@material-ui/icons/Check';
 import TreeIcon from '@material-ui/icons/DeviceHub';
-import LockIcon from '@material-ui/icons/Lock';
-import UnlockIcon from '@material-ui/icons/LockOpen';
 import SearchIcon from '@material-ui/icons/Search';
 import * as React from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
@@ -38,6 +36,7 @@ import {
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
 import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
+import { LockPanelButton } from '../lockPanelButton';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { EmptyStateInfo } from '../views/views.styles';
 import TreeNode from './components/treeNode/treeNode.container';
@@ -63,8 +62,6 @@ interface IProps {
 	hideIfcSpaces: () => void;
 	goToRootNode: (nodeId: boolean) => void;
 	selectNodes: (nodesIds: any[]) => void;
-	lockedPanels?: string[];
-	setPanelLock: (panelName) => void;
 }
 
 interface IState {
@@ -199,25 +196,12 @@ export class Tree extends React.PureComponent<IProps, IState> {
 		this.props.setState({ selectedFilters });
 	}
 
-	public handleLockPanel = () => {
-		if (this.type) {
-			this.props.setPanelLock(this.type);
-		}
-	}
-
 	private handleCloseSearchMode = () => {
 		this.props.setState({ searchEnabled: false, selectedFilters: [] });
 	}
 
 	private handleOpenSearchMode = () => {
 		this.props.setState({ searchEnabled: true });
-	}
-
-	public getLockPanelButton = () => {
-		if (this.props.lockedPanels.includes(this.type)) {
-			return <IconButton onClick={this.handleLockPanel}><LockIcon /></IconButton>;
-		}
-		return <IconButton onClick={this.handleLockPanel}><UnlockIcon /></IconButton>;
 	}
 
 	private renderSearchButton = () => {
@@ -239,7 +223,7 @@ export class Tree extends React.PureComponent<IProps, IState> {
 
 	private renderActions = () => (
 		<>
-			{this.getLockPanelButton()}
+			<LockPanelButton type={this.type} />
 			{this.renderSearchButton()}
 			{this.renderMenuButton()}
 		</>

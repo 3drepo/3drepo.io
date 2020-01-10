@@ -22,8 +22,6 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import Check from '@material-ui/icons/Check';
 import Delete from '@material-ui/icons/Delete';
 import InvertColors from '@material-ui/icons/InvertColors';
-import LockIcon from '@material-ui/icons/Lock';
-import UnlockIcon from '@material-ui/icons/LockOpen';
 import SearchIcon from '@material-ui/icons/Search';
 import Visibility from '@material-ui/icons/VisibilityOutlined';
 import { isEmpty, isEqual, size, stubTrue } from 'lodash';
@@ -53,6 +51,7 @@ import { FilterPanel } from '../../../components/filterPanel/filterPanel.compone
 import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { ListNavigation } from '../listNavigation/listNavigation.component';
+import { LockPanelButton } from '../lockPanelButton';
 import { ListContainer, Summary } from '../risks/risks.styles';
 import { ViewerPanelButton, ViewerPanelContent, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
 import { EmptyStateInfo } from '../views/views.styles';
@@ -92,8 +91,6 @@ interface IProps {
 	resetActiveGroup: () => void;
 	subscribeOnChanges: (teamspace, modelId) => void;
 	unsubscribeFromChanges: (teamspace, modelId) => void;
-	lockedPanels?: string[];
-	setPanelLock: (panelName) => void;
 }
 
 interface IState {
@@ -287,12 +284,6 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		return overridden ? hexToRgba(color) : DEFAULT_OVERRIDE_COLOR;
 	}
 
-	public handleLockPanel = () => {
-		if (this.type) {
-			this.props.setPanelLock(this.type);
-		}
-	}
-
 	public handleCloseSearchMode = () => {
 		this.props.setState({ searchEnabled: false, selectedFilters: [] });
 	}
@@ -306,13 +297,6 @@ export class Groups extends React.PureComponent<IProps, IState> {
 			return <IconButton onClick={this.handleCloseSearchMode}><CancelIcon /></IconButton>;
 		}
 		return <IconButton onClick={this.handleOpenSearchMode}><SearchIcon /></IconButton>;
-	}
-
-	public getLockPanelButton = () => {
-		if (this.props.lockedPanels.includes(this.type)) {
-			return <IconButton onClick={this.handleLockPanel}><LockIcon /></IconButton>;
-		}
-		return <IconButton onClick={this.handleLockPanel}><UnlockIcon /></IconButton>;
 	}
 
 	public renderTitleIcon = () => {
@@ -376,7 +360,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 
 		return (
 			<>
-				{this.getLockPanelButton()}
+				<LockPanelButton type={this.type} />
 				{this.getSearchButton()}
 				{this.getMenuButton()}
 			</>

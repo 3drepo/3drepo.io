@@ -34,7 +34,6 @@ import {
 	selectVisibleTreeNodesList,
 	TreeActions
 } from '../../../../modules/tree';
-import { selectLockedPanels, ViewerGuiActions } from '../../../../modules/viewerGui';
 import { Tree } from './tree.component';
 
 const mapStateToProps = createStructuredSelector({
@@ -50,7 +49,6 @@ const mapStateToProps = createStructuredSelector({
 	isPending: selectIsPending,
 	dataRevision: selectDataRevision,
 	activeNode: selectActiveNode,
-	lockedPanels: selectLockedPanels,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -61,7 +59,6 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	handleNodesClick: TreeActions.handleNodesClick,
 	goToRootNode: TreeActions.goToRootNode,
 	selectNodes: TreeActions.selectNodes,
-	setPanelLock: ViewerGuiActions.setPanelLock,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Tree);

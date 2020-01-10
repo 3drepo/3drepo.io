@@ -19,7 +19,6 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { selectIsCommenter } from '../../../../modules/model/permissions.selectors';
-import { selectLockedPanels, ViewerGuiActions } from '../../../../modules/viewerGui';
 import {
 	selectActiveViewpoint,
 	selectEditMode,
@@ -41,7 +40,6 @@ const mapStateToProps = createStructuredSelector({
 	searchQuery: selectSearchQuery,
 	searchEnabled: selectSearchEnabled,
 	isCommenter: selectIsCommenter,
-	lockedPanels: selectLockedPanels,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -56,7 +54,6 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setNewViewpoint: ViewpointsActions.setNewViewpoint,
 	setSearchQuery: ViewpointsActions.setSearchQuery,
 	setState: ViewpointsActions.setComponentState,
-	setPanelLock: ViewerGuiActions.setPanelLock,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Views);

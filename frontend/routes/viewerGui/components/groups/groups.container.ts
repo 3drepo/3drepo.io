@@ -35,7 +35,7 @@ import {
 	GroupsActions
 } from '../../../../modules/groups';
 import { selectSettings } from '../../../../modules/model';
-import {selectIsModelLoaded, selectLockedPanels, ViewerGuiActions} from '../../../../modules/viewerGui';
+import { selectIsModelLoaded } from '../../../../modules/viewerGui';
 import { withViewer } from '../../../../services/viewer/viewer';
 import { Groups } from './groups.component';
 
@@ -53,7 +53,6 @@ const mapStateToProps = createStructuredSelector({
 	modelSettings: selectSettings,
 	isModelLoaded: selectIsModelLoaded,
 	isAllOverridden: selectIsAllOverridden,
-	lockedPanels: selectLockedPanels,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -73,7 +72,6 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	resetActiveGroup: GroupsActions.resetActiveGroup,
 	subscribeOnChanges: GroupsActions.subscribeOnChanges,
 	unsubscribeFromChanges: GroupsActions.unsubscribeFromChanges,
-	setPanelLock: ViewerGuiActions.setPanelLock,
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(Groups));

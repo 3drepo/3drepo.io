@@ -34,7 +34,7 @@ import {
 	CompareActions
 } from '../../../../modules/compare';
 import { selectIsFederation } from '../../../../modules/model';
-import { selectIsModelLoaded, selectLockedPanels, ViewerGuiActions } from '../../../../modules/viewerGui';
+import { selectIsModelLoaded } from '../../../../modules/viewerGui';
 import { Compare } from './compare.component';
 
 const mapStateToProps = createStructuredSelector({
@@ -51,7 +51,6 @@ const mapStateToProps = createStructuredSelector({
 	selectedItemsMap: selectSelectedModelsMap,
 	isCompareProcessed: selectIsCompareProcessed,
 	isAnyTargetClashModel: selectIsAnyTargetClashModel,
-	lockedPanels: selectLockedPanels,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -63,7 +62,6 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setTargetModel: CompareActions.setTargetModel,
 	setTargetRevision: CompareActions.setTargetRevision,
 	getCompareModels: CompareActions.getCompareModels,
-	setPanelLock: ViewerGuiActions.setPanelLock,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Compare);

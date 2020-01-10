@@ -16,8 +16,6 @@
  */
 
 import CheckIcon from '@material-ui/icons/Check';
-import LockIcon from '@material-ui/icons/Lock';
-import UnlockIcon from '@material-ui/icons/LockOpen';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import React from 'react';
 
@@ -44,6 +42,7 @@ import {
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { SortAmountDown, SortAmountUp } from '../../../components/fontAwesomeIcon';
 import { Loader } from '../../../components/loader/loader.component';
+import { LockPanelButton } from '../lockPanelButton';
 import { ViewerPanelButton, ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
 import {
 	CompareContainer,
@@ -86,8 +85,6 @@ interface IProps {
 	setComponentState: (state) => void;
 	setTargetRevision: (modelId, targetRevision, isDiff) => void;
 	getCompareModels: (revision) => void;
-	lockedPanels?: string[];
-	setPanelLock: (panelName) => void;
 }
 
 const MenuButton = ({ IconProps, Icon, ...props }) => (
@@ -224,27 +221,13 @@ export class Compare extends React.PureComponent<IProps, any> {
 		);
 	}
 
-
 	public renderActions = () => {
 		return (
 				<>
-					{this.getLockPanelButton()}
+					<LockPanelButton type={this.type} />
 					{this.renderHeaderButtons()}
 				</>
 		);
-	}
-
-	public handleLockPanel = () => {
-		if (this.type) {
-			this.props.setPanelLock(this.type);
-		}
-	}
-
-	public getLockPanelButton = () => {
-		if (this.props.lockedPanels.includes(this.type)) {
-			return <IconButton onClick={this.handleLockPanel}><LockIcon /></IconButton>;
-		}
-		return <IconButton onClick={this.handleLockPanel}><UnlockIcon /></IconButton>;
 	}
 
 	private renderHeaderButtons = () => (

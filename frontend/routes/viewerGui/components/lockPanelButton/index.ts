@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,17 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
-import { createStructuredSelector } from 'reselect';
-
-import { selectIsModelLoaded } from '../../../../modules/viewerGui';
-import { ReportedItems } from './reportedItems.component';
-
-const mapStateToProps = createStructuredSelector({
-	isModelLoaded: selectIsModelLoaded,
-});
-
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
-
-export default connect(mapStateToProps, mapDispatchToProps)(ReportedItems);
+export { default as LockPanelButton } from './lockPanelButton.container';
