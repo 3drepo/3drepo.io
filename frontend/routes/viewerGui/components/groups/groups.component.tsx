@@ -22,6 +22,8 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import Check from '@material-ui/icons/Check';
 import Delete from '@material-ui/icons/Delete';
 import InvertColors from '@material-ui/icons/InvertColors';
+import LockIcon from '@material-ui/icons/Lock';
+import UnlockIcon from '@material-ui/icons/LockOpen';
 import SearchIcon from '@material-ui/icons/Search';
 import Visibility from '@material-ui/icons/VisibilityOutlined';
 import { isEmpty, isEqual, size, stubTrue } from 'lodash';
@@ -35,6 +37,7 @@ import {
 } from '../../../../constants/groups';
 import { CREATE_ISSUE } from '../../../../constants/issue-permissions';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
+import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { hexToRgba } from '../../../../helpers/colors';
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -50,9 +53,9 @@ import { FilterPanel } from '../../../components/filterPanel/filterPanel.compone
 import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { ListNavigation } from '../listNavigation/listNavigation.component';
+import { ListContainer, Summary } from '../risks/risks.styles';
 import { ViewerPanelButton, ViewerPanelContent, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
 import { EmptyStateInfo } from '../views/views.styles';
-import { ListContainer, Summary } from './../risks/risks.styles';
 import { GroupDetails } from './components/groupDetails';
 import { GroupsContainer, GroupIcon, GroupListItem, StyledIcon } from './groups.styles';
 
@@ -89,6 +92,8 @@ interface IProps {
 	resetActiveGroup: () => void;
 	subscribeOnChanges: (teamspace, modelId) => void;
 	unsubscribeFromChanges: (teamspace, modelId) => void;
+	lockedPanels?: string[];
+	setPanelLock: (panelName) => void;
 }
 
 interface IState {
@@ -98,6 +103,10 @@ interface IState {
 const MenuButton = (props) => <MenuButtonComponent ariaLabel="Show groups menu" {...props} />;
 
 export class Groups extends React.PureComponent<IProps, IState> {
+
+	get type() {
+		return VIEWER_PANELS.GROUPS;
+	}
 
 	get filteredGroups() {
 		const { groups, selectedFilters } = this.props;
@@ -278,6 +287,12 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		return overridden ? hexToRgba(color) : DEFAULT_OVERRIDE_COLOR;
 	}
 
+	public handleLockPanel = () => {
+		if (this.type) {
+			this.props.setPanelLock(this.type);
+		}
+	}
+
 	public handleCloseSearchMode = () => {
 		this.props.setState({ searchEnabled: false, selectedFilters: [] });
 	}
@@ -291,6 +306,13 @@ export class Groups extends React.PureComponent<IProps, IState> {
 			return <IconButton onClick={this.handleCloseSearchMode}><CancelIcon /></IconButton>;
 		}
 		return <IconButton onClick={this.handleOpenSearchMode}><SearchIcon /></IconButton>;
+	}
+
+	public getLockPanelButton = () => {
+		if (this.props.lockedPanels.includes(this.type)) {
+			return <IconButton onClick={this.handleLockPanel}><LockIcon /></IconButton>;
+		}
+		return <IconButton onClick={this.handleLockPanel}><UnlockIcon /></IconButton>;
 	}
 
 	public renderTitleIcon = () => {
@@ -354,6 +376,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 
 		return (
 			<>
+				{this.getLockPanelButton()}
 				{this.getSearchButton()}
 				{this.getMenuButton()}
 			</>

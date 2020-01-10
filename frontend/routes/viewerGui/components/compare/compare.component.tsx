@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,6 +16,8 @@
  */
 
 import CheckIcon from '@material-ui/icons/Check';
+import LockIcon from '@material-ui/icons/Lock';
+import UnlockIcon from '@material-ui/icons/LockOpen';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import React from 'react';
 
@@ -31,6 +33,7 @@ import {
 	RENDERING_TYPES_LIST
 } from '../../../../constants/compare';
 import { SORT_ORDER_TYPES } from '../../../../constants/sorting';
+import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { ICompareComponentState } from '../../../../modules/compare/compare.redux';
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
@@ -83,6 +86,8 @@ interface IProps {
 	setComponentState: (state) => void;
 	setTargetRevision: (modelId, targetRevision, isDiff) => void;
 	getCompareModels: (revision) => void;
+	lockedPanels?: string[];
+	setPanelLock: (panelName) => void;
 }
 
 const MenuButton = ({ IconProps, Icon, ...props }) => (
@@ -96,6 +101,11 @@ const MenuButton = ({ IconProps, Icon, ...props }) => (
 );
 
 export class Compare extends React.PureComponent<IProps, any> {
+
+	get type() {
+		return VIEWER_PANELS.COMPARE;
+	}
+
 	get isDiffTabActive() {
 		return this.props.activeTab === DIFF_COMPARE_TYPE;
 	}
@@ -169,7 +179,7 @@ export class Compare extends React.PureComponent<IProps, any> {
 		return (
 			<CompareContainer
 				Icon={<CompareIcon />}
-				renderActions={this.renderHeaderButtons}
+				renderActions={this.renderActions}
 				pending={isPending}
 				empty={!isPending && !compareModels.length}
 			>
@@ -212,6 +222,29 @@ export class Compare extends React.PureComponent<IProps, any> {
 				</ViewerPanelFooter>
 			</CompareContainer>
 		);
+	}
+
+
+	public renderActions = () => {
+		return (
+				<>
+					{this.getLockPanelButton()}
+					{this.renderHeaderButtons()}
+				</>
+		);
+	}
+
+	public handleLockPanel = () => {
+		if (this.type) {
+			this.props.setPanelLock(this.type);
+		}
+	}
+
+	public getLockPanelButton = () => {
+		if (this.props.lockedPanels.includes(this.type)) {
+			return <IconButton onClick={this.handleLockPanel}><LockIcon /></IconButton>;
+		}
+		return <IconButton onClick={this.handleLockPanel}><UnlockIcon /></IconButton>;
 	}
 
 	private renderHeaderButtons = () => (

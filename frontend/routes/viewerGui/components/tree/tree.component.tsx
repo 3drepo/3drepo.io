@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -19,12 +19,15 @@ import IconButton from '@material-ui/core/IconButton';
 import CancelIcon from '@material-ui/icons/Cancel';
 import Check from '@material-ui/icons/Check';
 import TreeIcon from '@material-ui/icons/DeviceHub';
+import LockIcon from '@material-ui/icons/Lock';
+import UnlockIcon from '@material-ui/icons/LockOpen';
 import SearchIcon from '@material-ui/icons/Search';
 import * as React from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { FixedSizeList as List } from 'react-window';
 
 import { TREE_ACTIONS_ITEMS, TREE_ACTIONS_MENU, TREE_ITEM_SIZE } from '../../../../constants/tree';
+import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import {
@@ -60,6 +63,8 @@ interface IProps {
 	hideIfcSpaces: () => void;
 	goToRootNode: (nodeId: boolean) => void;
 	selectNodes: (nodesIds: any[]) => void;
+	lockedPanels?: string[];
+	setPanelLock: (panelName) => void;
 }
 
 interface IState {
@@ -70,6 +75,10 @@ interface IState {
 const MenuButton = (props) => <MenuButtonComponent ariaLabel="Show tree menu" {...props} />;
 
 export class Tree extends React.PureComponent<IProps, IState> {
+
+	get type() {
+		return VIEWER_PANELS.TREE;
+	}
 
 	get menuActionsMap() {
 		const { isolateSelectedNodes, hideIfcSpaces } = this.props;
@@ -190,12 +199,25 @@ export class Tree extends React.PureComponent<IProps, IState> {
 		this.props.setState({ selectedFilters });
 	}
 
+	public handleLockPanel = () => {
+		if (this.type) {
+			this.props.setPanelLock(this.type);
+		}
+	}
+
 	private handleCloseSearchMode = () => {
 		this.props.setState({ searchEnabled: false, selectedFilters: [] });
 	}
 
 	private handleOpenSearchMode = () => {
 		this.props.setState({ searchEnabled: true });
+	}
+
+	public getLockPanelButton = () => {
+		if (this.props.lockedPanels.includes(this.type)) {
+			return <IconButton onClick={this.handleLockPanel}><LockIcon /></IconButton>;
+		}
+		return <IconButton onClick={this.handleLockPanel}><UnlockIcon /></IconButton>;
 	}
 
 	private renderSearchButton = () => {
@@ -217,6 +239,7 @@ export class Tree extends React.PureComponent<IProps, IState> {
 
 	private renderActions = () => (
 		<>
+			{this.getLockPanelButton()}
 			{this.renderSearchButton()}
 			{this.renderMenuButton()}
 		</>

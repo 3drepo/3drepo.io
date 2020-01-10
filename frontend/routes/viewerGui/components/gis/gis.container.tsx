@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -19,8 +19,9 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { selectIsInitialisedMap, selectVisibleSources, GisActions } from './../../../../modules/gis';
-import { selectIsPending, selectMaps, selectSettings, ModelActions } from './../../../../modules/model';
+import { selectIsInitialisedMap, selectVisibleSources, GisActions } from '../../../../modules/gis';
+import { selectIsPending, selectMaps, selectSettings, ModelActions } from '../../../../modules/model';
+import { selectLockedPanels, ViewerGuiActions } from '../../../../modules/viewerGui';
 import { Gis } from './gis.component';
 
 const mapStateToProps = createStructuredSelector({
@@ -28,7 +29,8 @@ const mapStateToProps = createStructuredSelector({
 	isPending: selectIsPending,
 	mapsProviders: selectMaps,
 	isInitialisedMap: selectIsInitialisedMap,
-	visibleSources: selectVisibleSources
+	visibleSources: selectVisibleSources,
+	lockedPanels: selectLockedPanels,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -38,7 +40,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	addSource: GisActions.addSource,
 	removeSource: GisActions.removeSource,
 	resetSources: GisActions.resetSources,
-	resetMap: GisActions.resetMap
+	resetMap: GisActions.resetMap,
+	setPanelLock: ViewerGuiActions.setPanelLock,
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Gis));

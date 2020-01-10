@@ -18,10 +18,13 @@
 import { IconButton, MenuItem } from '@material-ui/core';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import BuildIcon from '@material-ui/icons/Build';
+import LockIcon from '@material-ui/icons/Lock';
+import UnlockIcon from '@material-ui/icons/LockOpen';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import { includes, isEmpty } from 'lodash';
 import React from 'react';
+import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
@@ -59,7 +62,10 @@ interface IProps {
 	resetMap: () => void;
 	isInitialisedMap: boolean;
 	visibleSources: any[];
+	lockedPanels?: string[];
+	setPanelLock: (panelName) => void;
 }
+
 interface IState {
 	settingsModeActive: boolean;
 	activeMapIndex: number;
@@ -70,6 +76,11 @@ interface IState {
 const MenuButton = (props) => <MenuButtonComponent ariaLabel="Show GIS menu" {...props} />;
 
 export class Gis extends React.PureComponent<IProps, IState> {
+
+	get type() {
+		return VIEWER_PANELS.GIS;
+	}
+
 	get surveySettings() {
 		const { settings } = this.props;
 
@@ -191,11 +202,30 @@ export class Gis extends React.PureComponent<IProps, IState> {
 		/>
 	)
 
-	public getActions = () => {
-		if (!this.state.settingsModeActive) {
-			return [this.getMenuButton()];
+	public handleLockPanel = () => {
+		if (this.type) {
+			this.props.setPanelLock(this.type);
 		}
-		return [];
+	}
+
+	public getLockPanelButton = () => {
+		if (this.props.lockedPanels.includes(this.type)) {
+			return <IconButton onClick={this.handleLockPanel}><LockIcon /></IconButton>;
+		}
+		return <IconButton onClick={this.handleLockPanel}><UnlockIcon /></IconButton>;
+	}
+
+	public renderActions = () => {
+		if (this.state.settingsModeActive) {
+			return [];
+		}
+
+		return (
+				<>
+					{this.getLockPanelButton()}
+					{this.getMenuButton()}
+				</>
+		);
 	}
 
 	public handleChangeMapProvider = (event) => {
@@ -267,7 +297,7 @@ export class Gis extends React.PureComponent<IProps, IState> {
 		return (
 			<GisContainer
 				Icon={this.getTitleIcon()}
-				renderActions={this.getActions}
+				renderActions={this.renderActions}
 				pending={this.props.isPending}
 			>
 				{settingsModeActive && (

@@ -23,6 +23,7 @@ export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActio
 	fetchData: ['teamspace', 'model'],
 	resetPanelsStates: [],
 	setPanelVisibility: ['panelName'],
+	setPanelLock: ['panelName'],
 	setMeasureVisibility: ['visible'],
 	setCoordView: ['visible'],
 	setCoordViewSuccess: ['coordViewActive'],
@@ -59,13 +60,13 @@ export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActio
 	setCamera: ['params'],
 	changePinColor: ['params'],
 	removeUnsavedPin: [],
-	resetVisiblePanels: []
+	resetPanels: []
 }, { prefix: 'VIEWER_GUI/' });
 
 export interface IViewerGuiState {
-	visiblePanels: any;
 	leftPanels: string[];
 	rightPanels: string[];
+	lockedPanels: string[];
 	coordViewActive: boolean;
 	isModelLoaded: boolean;
 	navigationMode: string;
@@ -79,9 +80,9 @@ export interface IViewerGuiState {
 }
 
 export const INITIAL_STATE: IViewerGuiState = {
-	visiblePanels: {},
 	leftPanels: [],
 	rightPanels: [],
+	lockedPanels: [],
 	isModelLoaded: false,
 	coordViewActive: false,
 	navigationMode: VIEWER_NAV_MODES.TURNTABLE,
@@ -94,12 +95,15 @@ export const INITIAL_STATE: IViewerGuiState = {
 	pinData: null
 };
 
-const updatePanelsList = (panels, panelName) => {
+const updatePanelsList = (panels, lockedPanels, panelName) => {
 	if (panels.includes(panelName)) {
 		return panels.filter((panel) => (panel !== panelName));
 	}
 
 	if (panels.length > 1) {
+		if (lockedPanels.length) {
+			return [...panels.filter((panel) => (panel === lockedPanels[0])), panelName];
+		}
 		panels.shift();
 	}
 
@@ -107,12 +111,24 @@ const updatePanelsList = (panels, panelName) => {
 };
 
 export const setPanelVisibility = (state = INITIAL_STATE, { panelName }) => {
+	const locked = [...state.lockedPanels];
 	const leftPanels = VIEWER_LEFT_PANELS.map(({type}) => type).includes(panelName) ?
-			updatePanelsList([...state.leftPanels], panelName) : [...state.leftPanels];
+			updatePanelsList([...state.leftPanels], locked, panelName) : [...state.leftPanels];
 	const rightPanels = VIEWER_RIGHT_PANELS.map(({type}) => type).includes(panelName) ?
-			updatePanelsList([...state.rightPanels], panelName) : [...state.rightPanels];
+			updatePanelsList([...state.rightPanels], locked, panelName) : [...state.rightPanels];
+	const lockedPanels = locked.includes(panelName) ? [] : locked;
 
-	return { ...state, leftPanels, rightPanels };
+	return { ...state, leftPanels, rightPanels, lockedPanels };
+};
+
+export const setPanelLock = (state = INITIAL_STATE, { panelName }) => {
+	if (state.lockedPanels.includes(panelName)) {
+		return { ...state, lockedPanels: [] };
+	}
+
+	const leftPanels = [...state.leftPanels].filter((panel) => (panel !== panelName));
+
+	return { ...state, lockedPanels: [panelName], leftPanels: [panelName, ...leftPanels] };
 };
 
 const setNavigationModeSuccess = (state = INITIAL_STATE, { mode }) => {
@@ -151,8 +167,8 @@ const setPinData = (state = INITIAL_STATE, { pinData }) => {
 	return { ...state, pinData };
 };
 
-const resetVisiblePanels = (state = INITIAL_STATE) => {
-	return { ...state, visiblePanels: INITIAL_STATE.visiblePanels };
+const resetPanels = (state = INITIAL_STATE) => {
+	return { ...state, leftPanels: INITIAL_STATE.leftPanels, lockedPanels: INITIAL_STATE.lockedPanels };
 };
 
 const setCoordViewSuccess = (state = INITIAL_STATE, { coordViewActive }) => {
@@ -161,6 +177,7 @@ const setCoordViewSuccess = (state = INITIAL_STATE, { coordViewActive }) => {
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[ViewerGuiTypes.SET_PANEL_VISIBILITY]: setPanelVisibility,
+	[ViewerGuiTypes.SET_PANEL_LOCK]: setPanelLock,
 	[ViewerGuiTypes.SET_IS_MODEL_LOADED] : setIsModelLoaded,
 	[ViewerGuiTypes.SET_NAVIGATION_MODE_SUCCESS] : setNavigationModeSuccess,
 	[ViewerGuiTypes.SET_CLIPPING_MODE_SUCCESS] : setClippingModeSuccess,
@@ -171,5 +188,5 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ViewerGuiTypes.SET_COORD_VIEW_SUCCESS] : setCoordViewSuccess,
 	[ViewerGuiTypes.SET_IS_PIN_DROP_MODE_SUCCESS]: setIsPinDropModeSuccess,
 	[ViewerGuiTypes.SET_PIN_DATA]: setPinData,
-	[ViewerGuiTypes.RESET_VISIBLE_PANELS]: resetVisiblePanels
+	[ViewerGuiTypes.RESET_PANELS]: resetPanels
 });

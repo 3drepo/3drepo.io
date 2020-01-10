@@ -19,13 +19,16 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { selectIsModelLoaded } from '../../../../modules/viewerGui';
+import { selectIsModelLoaded, selectLockedPanels, ViewerGuiActions } from '../../../../modules/viewerGui';
 import { ReportedItems } from './reportedItems.component';
 
 const mapStateToProps = createStructuredSelector({
-	isModelLoaded: selectIsModelLoaded
+	isModelLoaded: selectIsModelLoaded,
+	lockedPanels: selectLockedPanels,
 });
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	setPanelLock: ViewerGuiActions.setPanelLock,
+}, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(ReportedItems);

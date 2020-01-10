@@ -23,11 +23,15 @@ import { selectIsTreeProcessed } from '../tree';
 export const selectViewerGuiDomain = (state) => ({...state.viewerGui});
 
 export const selectLeftPanels = createSelector(
-	selectViewerGuiDomain, (state) => state.leftPanels
+	selectViewerGuiDomain, (state) => state.leftPanels || []
 );
 
 export const selectRightPanels = createSelector(
-	selectViewerGuiDomain, (state) => state.rightPanels
+	selectViewerGuiDomain, (state) => state.rightPanels || []
+);
+
+export const selectLockedPanels = createSelector(
+	selectViewerGuiDomain, (state) => state.lockedPanels || []
 );
 
 export const selectIsMetadataVisible = createSelector(

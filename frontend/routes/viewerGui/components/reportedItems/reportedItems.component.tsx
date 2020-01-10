@@ -23,6 +23,8 @@ import AddIcon from '@material-ui/icons/Add';
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import CancelIcon from '@material-ui/icons/Cancel';
 import Check from '@material-ui/icons/Check';
+import LockIcon from '@material-ui/icons/Lock';
+import UnlockIcon from '@material-ui/icons/LockOpen';
 import SearchIcon from '@material-ui/icons/Search';
 
 import { CREATE_ISSUE, VIEW_ISSUE } from '../../../../constants/issue-permissions';
@@ -71,6 +73,7 @@ interface IProps {
 	isModelLoaded: boolean;
 	title?: string;
 	isPending?: boolean;
+	lockedPanels?: string[];
 	revision?: string;
 	fetchingDetailsIsPending?: boolean;
 	showDetails?: boolean;
@@ -86,6 +89,7 @@ interface IProps {
 	onChangeFilters: (selectedFilters) => void;
 	toggleShowPins: (showPins: boolean, filteredItems) => void;
 	renderDetailsView: (statement) => React.ReactChildren[];
+	setPanelLock: (panelName) => void;
 }
 
 interface IState {
@@ -257,6 +261,12 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 	public handleOpenSearchMode = () => this.props.onToggleFilters(true);
 
+	public handleLockPanel = () => {
+		if (this.props.type) {
+			this.props.setPanelLock(this.props.type);
+		}
+	}
+
 	public handlePrevItem = () => {
 		const index = this.activeItemIndex;
 
@@ -289,6 +299,13 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 		return <IconButton onClick={this.handleOpenSearchMode}><SearchIcon /></IconButton>;
 	}
 
+	public getLockPanelButton = () => {
+		if (this.props.lockedPanels.includes(this.props.type)) {
+			return <IconButton onClick={this.handleLockPanel}><LockIcon /></IconButton>;
+		}
+		return <IconButton onClick={this.handleLockPanel}><UnlockIcon /></IconButton>;
+	}
+
 	public renderTitleIcon = () => {
 		const { showDetails, Icon } = this.props;
 		if (showDetails) {
@@ -314,7 +331,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 				return (
 					<StyledListItem key={index} button onClick={onClick}>
 						<IconWrapper>
-							{isSorting ?  this.renderSortIcon(Icon) : <Icon fontSize="small" />}
+							{isSorting ? this.renderSortIcon(Icon) : <Icon fontSize="small" />}
 						</IconWrapper>
 						<StyledItemText>
 							{label}
@@ -337,6 +354,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 		return (
 			<>
+				{this.getLockPanelButton()}
 				{this.getSearchButton()}
 				{this.getMenuButton()}
 			</>

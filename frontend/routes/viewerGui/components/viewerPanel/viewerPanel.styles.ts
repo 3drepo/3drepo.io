@@ -105,6 +105,7 @@ export const ViewerPanelContent = styled.div<IViewerPanelContent>`
 
 export const LoaderContainer = styled(ViewerPanelContent)`
 	padding: 24px;
+	height: 100%;
 `;
 
 export const ViewerPanelFooter = styled(Grid).attrs({
