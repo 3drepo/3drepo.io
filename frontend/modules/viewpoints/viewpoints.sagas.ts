@@ -22,7 +22,7 @@ import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
 import { DialogActions } from '../dialog';
 import { dispatch } from '../store';
-import { DEFAULT_VIEWPOINTS } from './viewpoints.constants';
+import { DEFAULT_VIEWPOINTS, PRESET_VIEW } from './viewpoints.constants';
 import { ViewpointsActions, ViewpointsTypes } from './viewpoints.redux';
 
 export const getThumbnailUrl = (thumbnail) => API.getAPIUrl(thumbnail);
@@ -137,9 +137,27 @@ export function* setCameraOnViewpoint({ teamspace, modelId, view }) {
 	if (view) {
 
 		if (view.preset) {
-			//TODO: Call viewer
-		}
-		else {
+			switch (view.preset) {
+				case PRESET_VIEW.TOP:
+					yield Viewer.topView();
+					break;
+				case PRESET_VIEW.BOTTOM:
+					yield Viewer.bottomView();
+					break;
+				case PRESET_VIEW.FRONT:
+					yield Viewer.frontView();
+					break;
+				case PRESET_VIEW.BACK:
+					yield Viewer.backView();
+					break;
+				case PRESET_VIEW.LEFT:
+					yield Viewer.leftView();
+					break;
+				case PRESET_VIEW.RIGHT:
+					yield Viewer.rightView();
+					break;
+			}
+		} else {
 			if (view.viewpoint) {
 				const viewpoint = { ...view.viewpoint, account: teamspace, model: modelId };
 				yield Viewer.setCamera(viewpoint);

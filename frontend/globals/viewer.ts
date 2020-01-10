@@ -470,6 +470,30 @@ export class Viewer {
 		this.currentNavMode = newNavMode;
 	}
 
+	public topView() {
+		UnityUtil.topView();
+	}
+
+	public bottomView() {
+		return UnityUtil.bottomView();
+	}
+
+	public frontView() {
+		return UnityUtil.frontView();
+	}
+
+	public backView() {
+		return UnityUtil.backView();
+	}
+
+	public leftView() {
+		return UnityUtil.leftView();
+	}
+
+	public rightView() {
+		return UnityUtil.rightView();
+	}
+
 	public setCamera(pos, viewDir, upDir, lookAt, animate, rollerCoasterMode, account, model) {
 		this.updateCamera(pos, upDir, viewDir, lookAt, animate, rollerCoasterMode, account, model);
 	}

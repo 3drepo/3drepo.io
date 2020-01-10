@@ -58,7 +58,7 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 		isDeletePending: false
 	};
 
-	public renderScreenshotPlaceholder = renderWhenTrue(() => <ThumbnailPlaceholder />);
+	public renderScreenshotPlaceholder = renderWhenTrue(() => <ThumbnailPlaceholder>No Image</ThumbnailPlaceholder>);
 
 	public renderViewpointName = renderWhenTrue(() => (
 		<Name>{this.props.viewpoint.name}</Name>
