@@ -118,6 +118,7 @@ const Sequence = require("../models/sequence");
  * 		}
  * 	]
  */
+router.get("/revision/master/head/sequences/:sequenceId/state/:stateId", middlewares.issue.canView, getSequenceState);
 router.get("/revision/:rid/sequences/:sequenceId/state/:stateId", middlewares.issue.canView, getSequenceState);
 
 /**
