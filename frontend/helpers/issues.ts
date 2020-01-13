@@ -205,7 +205,7 @@ export const getHeaderMenuItems = (
 
 	const extraItems = [];
 
-	if (showPins) {
+	if (!!toggleShowPins) {
 		extraItems.push({
 			...ISSUES_ACTIONS_MENU.SHOW_PINS,
 			enabled: showPins,
