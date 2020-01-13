@@ -22,6 +22,8 @@ const parseHex = (hex) => {
 
 export const hexToGLColor = (hex) => hexToArray(hex).map((v) => v / 255);
 
+export const GLToHexColor = (glColors) => '#' + glColors.map((c) => componentToHex( Math.round(c * 255))).join('');
+
 export const hexToArray = (hex): number[] => Object.values(parseHex(hex));
 
 export const hexToRgba = (hex, alpha = 1) => {

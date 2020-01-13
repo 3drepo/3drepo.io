@@ -24,13 +24,12 @@ import {
 
 interface IProps {
 	sequences: any;
-	fetchSequences: () => void;
+	initializeSequences: () => void;
 	setSelectedFrame: (date: Date) => void;
 	maxDate: Date;
 	minDate: Date;
 	selectedDate: Date;
-	selectedFrame: any;
-	transparencies: any;
+	colorOverrides: any;
 }
 
 export class Sequences extends React.PureComponent<IProps, {}> {
@@ -39,11 +38,11 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 	}
 
 	public componentDidMount = () => {
-		this.props.fetchSequences();
+		this.props.initializeSequences();
 	}
 
 	public componentDidUpdate = () => {
-		// console.log(this.props.transparencies);
+		// console.log(this.props.colorOverrides);
 	}
 
 	public render = () => {

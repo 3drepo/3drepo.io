@@ -17,6 +17,7 @@
 
 import { sortBy, uniq } from 'lodash';
 import { createSelector } from 'reselect';
+import { GLToHexColor } from '../../helpers/colors';
 
 export const selectSequencesDomain = (state) => ({...state.sequences});
 
@@ -49,41 +50,16 @@ const selectSelectedFrames = createSelector(
 			return [];
 		}
 
-		let frames =  sortBy(sequence.frames, 'dateTime');
-
-		frames = frames.reduce((dict, currFrame) => {
-			const date = new Date(currFrame.dateTime);
-			date.setHours(0, 0, 0, 0);
-			const timeStamp = date.valueOf();
-
-			if (!dict[timeStamp]) {
-				dict[timeStamp] = {tasks: [], states: []};
-			}
-
-			Array.prototype.push.apply(dict[timeStamp].tasks, currFrame.tasks);
-			dict[timeStamp].states.push({dateTime: currFrame.dateTime, state: currFrame.state});
-
-			return dict;
-		}, {});
-
-		frames = Object.keys(frames).map((key) => {
-			const tasks = frames[key].tasks;
-			const states = frames[key].states;
-			const date = new Date(parseInt(key, 10));
-
-			return { date, tasks, states };
-		});
-
-		return sortBy( frames, 'date');
+		return sortBy(sequence.frames, 'dateTime');
 	}
 );
 
 export const selectSelectedMinDate = createSelector(
-	selectSelectedFrames, (frames) => frames.length ? frames[0].date : null
+	selectSelectedFrames, (frames) => frames.length ? frames[0].dateTime : null
 );
 
 export const selectSelectedMaxDate = createSelector(
-	selectSelectedFrames, (frames) => frames.length ? frames[frames.length - 1].date : null
+	selectSelectedFrames, (frames) => frames.length ? frames[frames.length - 1].dateTime : null
 );
 
 export const selectSelectedDate = createSelector(
@@ -93,15 +69,12 @@ export const selectSelectedDate = createSelector(
 export const selectSelectedFrame = createSelector(
 	selectSelectedFrames, selectSelectedDate, (frames, date) => {
 		let frame = null;
-		const lastIndex = frames.length - 1;
+		date = new Date(date);
+		date.setHours(23, 59, 59, 999);
 
-		for (let i = 0; i < lastIndex && !frame ; i++ ) {
-			if (i !== lastIndex) {
-				if ( frames[i].date <= date && frames[i + 1].date > date) {
-					frame = frames[i];
-				}
-			} else {
-				frame = frames[lastIndex];
+		for (let i = frames.length - 1 ; i >= 0 && !frame; i--) {
+			if (frames[i].dateTime <= date) {
+				frame  = frames[i];
 			}
 		}
 
@@ -109,12 +82,12 @@ export const selectSelectedFrame = createSelector(
 	}
 );
 
-export const selectSelectedStatesIds = createSelector(
-	selectSelectedFrame, (frame) => uniq(((frame || {}).states || []).map((f) => f.state))
+export const selectSelectedStateId = createSelector(
+	selectSelectedFrame, (frame) =>  (frame || {}).state
 );
 
 export const selectStatesDefinitionsPending =  createSelector(
-	selectSelectedStatesIds, selectStateDefinitions, (ids: string[], definitions) => ids.some((id) => !definitions[id])
+	selectSelectedStateId, selectStateDefinitions, (stateId: string, definitions) => !definitions[stateId]
 );
 
 const convertToDictionary = (stateChanges) => {
@@ -127,78 +100,20 @@ const convertToDictionary = (stateChanges) => {
 	}, {});
 };
 
-const groupByValues = (dict, equals = (a, b) => a === b ) => {
-	return Object.keys(dict).reduce((values, key) => {
-		const value = dict[key];
-
-		let valuesEntry = values.find((entry) => equals(entry.value, value));
-
-		if (!valuesEntry) {
-			valuesEntry = {value, shared_ids: []};
-			values.push(valuesEntry);
-		}
-
-		valuesEntry.shared_ids.push(key);
-
-		return values;
-	}, []);
-};
-
-const selectFrameStates = createSelector(
+export const selectSelectedFrameColors = createSelector(
 	selectSelectedFrame, selectStateDefinitions, selectStatesDefinitionsPending, (frame, stateDefinitions, pending) => {
 		if (pending) {
-			return [];
+			return {};
 		}
 
-		let statesIds = sortBy((frame || {}).states, 'dateTime');
+		const state = stateDefinitions[frame.state];
 
-		if (statesIds.length === 0) {
-			return [];
+		try {
+			const colors = state.color.map((c) => ({...c, value: GLToHexColor(c.value)}));
+			return  convertToDictionary(colors);
+		} catch (e) {
+			return {};
 		}
 
-		statesIds.reverse(); // for getting the uniq to get rid of the firsts matches ins.
-		statesIds = uniq(statesIds.map((f) => f.state));
-		statesIds.reverse();
-
-		return statesIds.map((id) => stateDefinitions[id]);
-});
-
-export const selectSelectedFrameTransparencies = createSelector(
-	selectFrameStates, (frameStates) => {
-		if (frameStates.length === 0) {
-			return [];
-		}
-
-		let transparenciesDict = convertToDictionary(frameStates[0].transparency);
-
-		frameStates.forEach(({ transparency }, index) => {
-			if (index === 0 ) {
-				return;
-			}
-
-			transparenciesDict = {...transparenciesDict, ...convertToDictionary(transparency)};
-		});
-
-		return groupByValues(transparenciesDict);
-	}
-);
-
-export const selectSelectedFrameColors = createSelector(
-	selectFrameStates, (frameStates) => {
-		if (frameStates.length === 0) {
-			return [];
-		}
-
-		let colorDict = convertToDictionary(frameStates[0].color);
-
-		frameStates.forEach(({ color }, index) => {
-			if (index === 0 ) {
-				return;
-			}
-
-			colorDict = {...colorDict, ...convertToDictionary(color)};
-		});
-
-		return groupByValues(colorDict, (a, b) => a[0] === b[0] && a[1] === b[1] && a[2] === b[2]);
 	}
 );

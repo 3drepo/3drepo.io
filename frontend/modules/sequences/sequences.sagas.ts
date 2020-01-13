@@ -15,13 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, select, takeLatest } from 'redux-saga/effects';
+import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
-import { selectSelectedSequenceId, selectSelectedStatesIds, selectStateDefinitions,
+import { selectSelectedSequenceId, selectSelectedStateId, selectStateDefinitions,
 	SequencesActions, SequencesTypes } from '.';
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
 import { selectCurrentModel, selectCurrentModelTeamspace, selectCurrentRevisionId } from '../model/model.selectors';
+import { selectIfcSpacesHidden, TreeActions } from '../tree';
+import { selectSelectedDate } from './sequences.selectors';
 
 export function* fetchSequences() {
 	try {
@@ -51,25 +53,36 @@ export function* setSelectedFrame({date}) {
 		const model = yield select(selectCurrentModel);
 		const sequenceId =  yield select(selectSelectedSequenceId);
 
-		let statesIds = yield select(selectSelectedStatesIds);
+		const stateId = yield select(selectSelectedStateId);
 		const loadedStates = yield select(selectStateDefinitions);
 
-		statesIds = statesIds.filter((s) => ! loadedStates[s] );
-
-		if (statesIds.length) {
-			const responses = yield all(statesIds.map((stateId) =>
-				API.getSequenceState(teamspace, model, revision, sequenceId, stateId)));
-
-			yield all(statesIds.map((stateId, i) => put(SequencesActions.setStateDefinition(stateId, responses[i].data))));
+		if (!loadedStates[stateId]) {
+			const response = yield API.getSequenceState(teamspace, model, revision, sequenceId, stateId);
+			yield put(SequencesActions.setStateDefinition(stateId, response.data));
 		}
 
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('select frame', 'sequences', error));
-		yield put(SequencesActions.statesPending(false));
 	}
+}
+
+export function* initializeSequences() {
+	yield put(SequencesActions.fetchSequences());
+
+	const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
+	if (ifcSpacesHidden) {
+		yield put(TreeActions.hideIfcSpaces());
+	}
+
+	yield take(SequencesTypes.FETCH_SEQUENCES_SUCCESS);
+
+	const date = yield select(selectSelectedDate);
+	yield put(SequencesActions.setSelectedFrame(date));
 }
 
 export default function* SequencesSaga() {
 	yield takeLatest(SequencesTypes.FETCH_SEQUENCES, fetchSequences);
 	yield takeLatest(SequencesTypes.SET_SELECTED_FRAME, setSelectedFrame);
+	yield takeLatest(SequencesTypes.INITIALIZE_SEQUENCES, initializeSequences);
+
 }

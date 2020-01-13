@@ -20,6 +20,7 @@ import { sortByField } from '../../helpers/sorting';
 
 export const { Types: SequencesTypes, Creators: SequencesActions } = createActions({
 	fetchSequences: [],
+	initializeSequences: [],
 	setSequencesPending: ['isPending'],
 	fetchSequencesSuccess: ['sequences'],
 	setSelectedSequence: ['sequenceId'],

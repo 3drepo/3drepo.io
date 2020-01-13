@@ -21,6 +21,8 @@ import { createSelector } from 'reselect';
 import { NODE_TYPES, VISIBILITY_STATES } from '../../constants/tree';
 import { searchByFilters } from '../../helpers/searching';
 import { calculateTotalMeshes } from '../../helpers/tree';
+import { selectOverrides } from '../groups';
+import { selectSelectedFrameColors } from '../sequences';
 import TreeProcessing from './treeProcessing/treeProcessing';
 import { ITreeProcessingData } from './treeProcessing/treeProcessing.constants';
 
@@ -279,4 +281,9 @@ export const selectVisibleTreeNodesIds = createSelector(
 
 export const selectIsTreeProcessed = createSelector(
 	selectTreeDomain, (state) => state.isTreeProcessed
+);
+
+export const selectColorOverrides = createSelector(
+	selectOverrides, selectSelectedFrameColors,
+		(groupsOverrides, sequenceFrameOverrides ) => ({...groupsOverrides, ...sequenceFrameOverrides})
 );

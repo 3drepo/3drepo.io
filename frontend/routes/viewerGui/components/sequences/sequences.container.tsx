@@ -19,8 +19,7 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { selectSelectedDate, selectSelectedFrame,
-	selectSelectedFrameTransparencies, selectSelectedMaxDate, selectSelectedMinDate,
+import { selectSelectedDate, selectSelectedFrameColors, selectSelectedMaxDate, selectSelectedMinDate,
 	selectSequences, SequencesActions } from '../../../../modules/sequences';
 
 import { Sequences } from './sequences.component';
@@ -30,12 +29,11 @@ const mapStateToProps = createStructuredSelector({
 	minDate: selectSelectedMinDate,
 	maxDate: selectSelectedMaxDate,
 	selectedDate: selectSelectedDate,
-	selectedFrame: selectSelectedFrame,
-	transparencies: selectSelectedFrameTransparencies
+	colorOverrides: selectSelectedFrameColors
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	fetchSequences: SequencesActions.fetchSequences,
+	initializeSequences: SequencesActions.initializeSequences,
 	setSelectedFrame: SequencesActions.setSelectedFrame
 }, dispatch);
 
