@@ -61,8 +61,8 @@ class Sequence {
 	async getList(account, model, branch, revision, cleanResponse = false) {
 
 		const history = await History.getHistory({account, model}, branch, revision);
+		const submodelListPromises = [];
 		let submodels = [];
-		let submodelListPromises = [];
 
 		if (!history) {
 			return Promise.reject(responseCodes.INVALID_TAG_NAME);
