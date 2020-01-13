@@ -23,9 +23,8 @@ import { COLOR, FONT_WEIGHT } from '../../../styles';
 export const Container = styled(Paper)`
 	&& {
 		background: #fafafa;
-		height: 100%;
-		// height: ${(props: any) => props.height || 'auto'};
-		// width: ${(props: any) => props.width || 'auto'};
+		height: ${(props: any) => props.height || 'auto'};
+		width: ${(props: any) => props.width || 'auto'};
 		display: flex;
 		flex-direction: column;
 		overflow: hidden;

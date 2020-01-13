@@ -29,7 +29,7 @@ interface IProps {
 
 export class LockPanelButton extends React.PureComponent<IProps, any> {
 	get isLocked() {
-		return this.props.lockedPanels.includes(this.props.type)
+		return this.props.lockedPanels.includes(this.props.type);
 	}
 
 	private handleLockPanel = () => this.props.type && this.props.setPanelLock(this.props.type);

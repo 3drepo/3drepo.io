@@ -43,6 +43,10 @@ export const Panel = styled(PanelComponent)<IPanel>`
 	height: 100%;
 	margin-bottom: 20px;
 
+	&& {
+		height: 100%;
+	}
+
 	${(props) => props.isPending ? css`
 		min-height: 120px !important;
 	` : ''};

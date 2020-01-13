@@ -87,14 +87,15 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	public renderViewerLoader = renderWhenTrue(() => <ViewerLoader />);
 
 	public componentDidMount() {
-		const { queryParams: { issueId, riskId }, match: { params }, viewer } = this.props;
+		const { queryParams: { issueId, riskId }, match: { params }, viewer, leftPanels } = this.props;
 
 		viewer.init();
 
-		if (issueId || !riskId) {
+		if ((issueId || !riskId) && !leftPanels.includes(VIEWER_PANELS.ISSUES)) {
 			this.props.setPanelVisibility(VIEWER_PANELS.ISSUES);
 		}
-		if (riskId) {
+
+		if (riskId && !leftPanels.includes(VIEWER_PANELS.RISKS)) {
 			this.props.setPanelVisibility(VIEWER_PANELS.RISKS);
 		}
 
@@ -104,17 +105,17 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps: IProps, prevState: IState) {
 		const changes = {} as IState;
-		const { match: { params }, queryParams } = this.props;
+		const { match: { params }, queryParams, leftPanels } = this.props;
 		const teamspaceChanged = params.teamspace !== prevProps.match.params.teamspace;
 		const modelChanged = params.model !== prevProps.match.params.model;
 		const revisionChanged = params.revision !== prevProps.match.params.revision;
 
 		const { issueId, riskId } = queryParams;
 
-		if (issueId !== prevProps.queryParams.issueId && issueId) {
+		if (issueId !== prevProps.queryParams.issueId && issueId && !leftPanels.includes(VIEWER_PANELS.ISSUES)) {
 			this.props.setPanelVisibility(VIEWER_PANELS.ISSUES);
 		}
-		if (riskId !== prevProps.queryParams.riskId && riskId) {
+		if (riskId !== prevProps.queryParams.riskId && riskId && !leftPanels.includes(VIEWER_PANELS.RISKS)) {
 			this.props.setPanelVisibility(VIEWER_PANELS.RISKS);
 		}
 

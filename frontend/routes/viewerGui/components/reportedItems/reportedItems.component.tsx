@@ -257,21 +257,6 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 	public handleOpenSearchMode = () => this.props.onToggleFilters(true);
 
-	public handlePrevItem = () => {
-		const index = this.activeItemIndex;
-
-		const prevIndex = index === 0 ? this.state.filteredItems.length - 1 : index - 1;
-		this.props.onShowDetails(this.state.filteredItems[prevIndex]);
-	}
-
-	public handleNextItem = () => {
-		const index = this.activeItemIndex;
-		const lastIndex = this.state.filteredItems.length - 1;
-		const nextIndex = index === lastIndex ? 0 : index + 1;
-
-		this.props.onShowDetails(this.state.filteredItems[nextIndex]);
-	}
-
 	public getMenuButton = () => (
 		<ButtonMenu
 			renderButton={MenuButton}
