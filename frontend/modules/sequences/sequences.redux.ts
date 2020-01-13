@@ -27,6 +27,7 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	setSelectedFrame: ['date'],
 	setSelectedDate: ['date'],
 	setStateDefinition: ['stateId', 'stateDefinition'],
+	setLastLoadedSuccesfullState: ['stateId']
 }, { prefix: 'SEQUENCES/' });
 
 export const INITIAL_STATE = {
@@ -34,6 +35,7 @@ export const INITIAL_STATE = {
 	sequencesPending: true,
 	selectedSequence: null,
 	selectedDate: null,
+	lastSuccesfulStateId: null,
 	stateDefinitions: {},
 	statesPending: false
 };
@@ -59,10 +61,15 @@ export const setStateDefinition = (state = INITIAL_STATE, { stateId, stateDefini
 	return {...state, stateDefinitions: {...state.stateDefinitions, [stateId]: stateDefinition}};
 };
 
+export const setLastLoadedSuccesfullState =  (state = INITIAL_STATE, { stateId }) => {
+	return {...state, lastSuccesfulStateId: stateId};
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[SequencesTypes.FETCH_SEQUENCES_SUCCESS]: fetchSequencesSuccess,
 	[SequencesTypes.SET_SEQUENCES_PENDING]: setSequencesPending,
 	[SequencesTypes.SET_SELECTED_DATE]: setSelectedDate,
 	[SequencesTypes.SET_STATE_DEFINITION]: setStateDefinition,
-	[SequencesTypes.SET_SELECTED_SEQUENCE]: setSelectedSequence
+	[SequencesTypes.SET_SELECTED_SEQUENCE]: setSelectedSequence,
+	[SequencesTypes.SET_LAST_LOADED_SUCCESFULL_STATE]: setLastLoadedSuccesfullState
 });

@@ -82,12 +82,17 @@ export const selectSelectedFrame = createSelector(
 	}
 );
 
+export const selectLastSuccessfulStateId = createSelector(
+	selectSequencesDomain, (state) => state.lastSuccesfulStateId
+);
+
 export const selectSelectedStateId = createSelector(
 	selectSelectedFrame, (frame) =>  (frame || {}).state
 );
 
-export const selectStatesDefinitionsPending =  createSelector(
-	selectSelectedStateId, selectStateDefinitions, (stateId: string, definitions) => !definitions[stateId]
+export const selectSelectedState = createSelector(
+	selectLastSuccessfulStateId, selectSelectedStateId, selectStateDefinitions,
+		(lastStateId, stateId, stateDefinitions) => stateDefinitions[stateId] || stateDefinitions[lastStateId]
 );
 
 const convertToDictionary = (stateChanges) => {
@@ -101,12 +106,10 @@ const convertToDictionary = (stateChanges) => {
 };
 
 export const selectSelectedFrameColors = createSelector(
-	selectSelectedFrame, selectStateDefinitions, selectStatesDefinitionsPending, (frame, stateDefinitions, pending) => {
-		if (pending) {
+	selectSelectedState, (state) => {
+		if (!state) {
 			return {};
 		}
-
-		const state = stateDefinitions[frame.state];
 
 		try {
 			const colors = state.color.map((c) => ({...c, value: GLToHexColor(c.value)}));

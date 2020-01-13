@@ -59,6 +59,7 @@ export function* setSelectedFrame({date}) {
 		if (!loadedStates[stateId]) {
 			const response = yield API.getSequenceState(teamspace, model, revision, sequenceId, stateId);
 			yield put(SequencesActions.setStateDefinition(stateId, response.data));
+			yield put(SequencesActions.setLastLoadedSuccesfullState(stateId));
 		}
 
 	} catch (error) {
