@@ -280,6 +280,8 @@ function* clearCurrentlySelected() {
 	if (activeNode) {
 		yield put(TreeActions.setActiveNode(null));
 	}
+
+	yield put(TreeActions.getSelectedNodes());
 }
 
 /**
@@ -400,6 +402,7 @@ function* deselectNodes({ nodesIds = [] }) {
 		}
 
 		yield put(TreeActions.updateDataRevision());
+		yield put(TreeActions.getSelectedNodes());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('deselect', 'node', error));
 	}
@@ -443,6 +446,7 @@ function* selectNodes({ nodesIds = [], skipExpand = false, colour }) {
 
 		yield put(TreeActions.setActiveNode(lastNodeId));
 		yield put(TreeActions.updateDataRevision());
+		yield put(TreeActions.getSelectedNodes());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('select', 'nodes', error));
 	}

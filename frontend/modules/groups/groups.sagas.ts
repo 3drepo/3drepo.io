@@ -43,7 +43,8 @@ import {
 	selectIsAllOverridden,
 	selectNewGroupDetails,
 	selectSelectedFilters,
-	selectShowDetails
+	selectShowDetails,
+	selectUnalteredActiveGroupDetails
 } from './groups.selectors';
 
 function* fetchGroups({teamspace, modelId, revision}) {
@@ -229,7 +230,7 @@ function* showDetails({ group, revision }) {
 
 function* closeDetails() {
 	try {
-		const activeGroup = yield select(selectActiveGroupDetails);
+		const activeGroup = yield select(selectUnalteredActiveGroupDetails);
 		yield put(GroupsActions.highlightGroup(activeGroup));
 		yield put(GroupsActions.setComponentState({ showDetails: false }));
 
@@ -298,9 +299,7 @@ function* updateGroup({ teamspace, modelId, revision, groupId }) {
 			preparedGroup.totalSavedMeshes = groupToSave.totalSavedMeshes;
 		}
 
-		yield put(TreeActions.getSelectedNodes());
 		yield put(GroupsActions.updateGroupSuccess(preparedGroup));
-		yield put(TreeActions.clearCurrentlySelected());
 		yield put(GroupsActions.highlightGroup(preparedGroup));
 		yield put(SnackbarActions.show('Group updated'));
 	} catch (error) {
@@ -383,13 +382,11 @@ function* unsubscribeFromChanges({ teamspace, modelId }) {
 }
 
 function* resetToSavedSelection({ groupId }) {
-	const groups = yield select(selectGroupsMap);
-	const activeGroup = yield select(selectActiveGroupDetails);
-	const initialGroupState = groups[groupId] || activeGroup;
-	activeGroup.rules = (groups[groupId] || { rules: [] }).rules;
+	const activeGroup = yield select(selectUnalteredActiveGroupDetails);
+	activeGroup.rules = (activeGroup || { rules: [] }).rules;
 
 	yield all([
-		put(GroupsActions.selectGroup(initialGroupState)),
+		put(GroupsActions.selectGroup(activeGroup)),
 		put(GroupsActions.setComponentState({ newGroup: activeGroup }))
 	]);
 }

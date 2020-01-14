@@ -75,19 +75,15 @@ export const prepareRisk = (risk, jobs = []) => {
 		);
 	}
 
-	if (preparedRisk.overall_level_of_risk && preparedRisk.mitigation_status) {
-		const { Icon, color } = getRiskStatus(preparedRisk.overall_level_of_risk, preparedRisk.mitigation_status);
-		preparedRisk.StatusIconComponent = Icon;
-		preparedRisk.statusColor = color;
-	}
+	const { Icon, color } = getRiskStatus(preparedRisk.overall_level_of_risk, preparedRisk.mitigation_status);
+	preparedRisk.StatusIconComponent = Icon;
+	preparedRisk.statusColor = color;
 
 	if (preparedRisk.assigned_roles) {
 		preparedRisk.roleColor = get(jobs.find((job) => job.name === get(preparedRisk.assigned_roles, '[0]')), 'color');
 	}
 
-	if (preparedRisk.mitigation_status) {
-		preparedRisk.defaultHidden = preparedRisk.mitigation_status === RISK_LEVELS.AGREED_FULLY;
-	}
+	preparedRisk.defaultHidden = preparedRisk.mitigation_status === RISK_LEVELS.AGREED_FULLY;
 
 	return preparedRisk;
 };
@@ -243,7 +239,7 @@ export const getHeaderMenuItems = (
 		onClick: () => toggleShowPins(!showPins)
 	};
 
-	const menuItems = showPins ? [...items, {...togglePinItem}] : [...items];
+	const menuItems = !!toggleShowPins ? [...items, {...togglePinItem}] : [...items];
 
 	return menuItems;
 };
