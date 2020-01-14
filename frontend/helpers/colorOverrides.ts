@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { getState } from '../modules/store';
-import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds, selectTreeNodesList } from '../modules/tree';
+import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds,
+	selectTreeNodesList } from '../modules/tree';
 import { Viewer } from '../services/viewer/viewer';
 import { hexToGLColor } from './colors';
 
@@ -88,7 +89,14 @@ export const addOverrides = (field, valueConvert, addOverride) => async (overrid
 export const addColorOverrides = addOverrides('color', hexToGLColor, Viewer.overrideMeshColor.bind(Viewer));
 
 export const addTransparencyOverrides = addOverrides('transparency', parseFloat,
-	Viewer.overrideMeshOpacity.bind(Viewer));
+	(teamspace, modelId, meshes, transparency) => {
+		if (transparency === 0) {
+			Viewer.switchObjectVisibility(teamspace, modelId, meshes, false);
+		} else {
+			// Viewer.switchObjectVisibility(teamspace, modelId, meshes, true);
+			Viewer.overrideMeshOpacity(teamspace, modelId, meshes, transparency);
+		}
+	});
 
 export const removeOverrides = (resetMesh) => async (overrides) => {
 	if (!overrides.length) {
@@ -119,4 +127,7 @@ export const removeOverrides = (resetMesh) => async (overrides) => {
 };
 
 export const removeColorOverrides = removeOverrides(Viewer.resetMeshColor.bind(Viewer));
-export const removeTransparencyOverrides = removeOverrides(Viewer.resetMeshOpacity.bind(Viewer));
+export const removeTransparencyOverrides = removeOverrides((teamspace, modelId, meshes) => {
+	Viewer.switchObjectVisibility(teamspace, modelId, meshes, true);
+	Viewer.resetMeshOpacity(teamspace, modelId, meshes);
+});

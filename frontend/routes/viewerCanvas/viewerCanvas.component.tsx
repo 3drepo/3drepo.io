@@ -72,7 +72,7 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 			handleColorOverridesChange(colorOverrides, prevProps.colorOverrides);
 		}
 
-		if (prevProps.transparencies && !isEqual(colorOverrides, prevProps.transparencies)) {
+		if (prevProps.transparencies && !isEqual(transparencies, prevProps.transparencies)) {
 			handleTransparencyOverridesChange(transparencies, prevProps.transparencies);
 		}
 

@@ -563,11 +563,27 @@ function* handleColorOverridesChange({ currentOverrides, previousOverrides }) {
 }
 
 function* handleTransparencyOverridesChange({ currentOverrides, previousOverrides }) {
-	const toAdd = overridesTransparencyDiff(currentOverrides, previousOverrides);
-	const toRemove = overridesTransparencyDiff(previousOverrides, currentOverrides);
+	yield put (TreeActions.showAllNodes());
+	const overrides = Object.keys(currentOverrides).reduce((ov, key) => {
+		if (currentOverrides[key] === 0) {
+			ov.hidden.push(key);
+		} else {
+			ov.unhidden[key] = currentOverrides[key];
+		}
 
-	yield removeTransparencyOverrides(toRemove);
-	yield addTransparencyOverrides(toAdd);
+		return ov;
+	} , {hidden: [], unhidden: {}});
+
+	yield put (TreeActions.hideNodesBySharedIds([{shared_ids: overrides.hidden}]));
+	yield addTransparencyOverrides(overrides.unhidden);
+
+	// yield hideTreeNodes(overrides.hidden, true);
+
+	// const toAdd = overridesTransparencyDiff(currentOverrides, previousOverrides);
+	// const toRemove = overridesTransparencyDiff(previousOverrides, currentOverrides);
+
+	// yield removeTransparencyOverrides(toRemove);
+	// yield addTransparencyOverrides(currentOverrides);
 }
 
 export default function* TreeSaga() {
