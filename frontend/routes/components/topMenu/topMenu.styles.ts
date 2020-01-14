@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import InputIcon from '@material-ui/icons/Input';
+import ViewListIcon from '@material-ui/icons/ViewList';
 import styled from 'styled-components';
 import { COLOR } from '../../../styles';
 import * as LogoStyles from '../logo/logo.styles';
@@ -39,11 +39,10 @@ export const Container = styled.div`
 	}
 `;
 
-export const BackIcon = styled(InputIcon)`
+export const BackIcon = styled(ViewListIcon)`
 	&& {
 		color: ${COLOR.WHITE};
 		font-size: 26px;
 		filter: drop-shadow(0 0 2px ${COLOR.BLACK_30});
-		transform: rotate(180deg);
 	}
 `;
