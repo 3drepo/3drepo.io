@@ -15,31 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import IconButton from '@material-ui/core/IconButton';
-import React from 'react';
+import * as React from 'react';
+
+import PATIcon from '@material-ui/icons/InsertDriveFileOutlined';
 
 import { LANDING_ROUTES, STATIC_ROUTES } from '../../../../../services/staticPages';
+import { COLOR } from '../../../../../styles';
 import { ButtonMenu } from '../../../buttonMenu/buttonMenu.component';
-import {
-	BurgerIcon,
-	MenuContent,
-	MenuItem,
-	MenuText
-} from './extrasMenu.styles';
-
-const MenuButton = ({ IconProps, Icon, ...props }) => (
-	<IconButton
-		{...props}
-		aria-label="Toggle user menu"
-		aria-haspopup="true"
-	>
-		<BurgerIcon {...IconProps} size="small" />
-	</IconButton>
-);
+import { NestedMenuItem } from '../nestedMenuItem/nestedMenuItem.component';
+import { MenuContent, MenuItem, MenuText } from './extrasMenu.styles';
+import { MenuButton } from './menuButton/menuButton.component';
 
 const ExternalLink = ({ ...props }) => {
+	const Icon = props.icon || React.Fragment;
+	const iconProps = props.icon ? { style: { color: COLOR.BLACK_54 } } : {};
 	return (
 		<MenuItem button aria-label={props.label} onClick={props.onButtonClick}>
+			<Icon {...iconProps} />
 			<MenuText primary={props.label} />
 		</MenuItem>
 	);
@@ -51,20 +43,30 @@ const ExtrasMenuContent = (props) => {
 		props.close(...args);
 	};
 
-	const links = [
-		...STATIC_ROUTES,
-		...LANDING_ROUTES
-	];
+	const commonLinks = [...LANDING_ROUTES];
+	const staticLinks = [...STATIC_ROUTES];
 
 	return (
 		<MenuContent component="nav">
-			{links.map(({ path, title }, index) => (
+			{commonLinks.map(({ path, title, icon }, index) => (
 				<ExternalLink
 					key={index}
 					label={title}
+					icon={icon}
 					onButtonClick={invokeAndClose(path)}
 				/>
 			))}
+			<NestedMenuItem
+					label="Privacy & Terms"
+					icon={<PATIcon style={{ color: COLOR.BLACK_54 }} />}
+					renderContent={staticLinks.map(({ path, title }, index) => (
+							<ExternalLink
+									key={index}
+									label={title}
+									onButtonClick={invokeAndClose(path)}
+							/>
+					))}
+			/>
 		</MenuContent>
 	);
 };
@@ -79,14 +81,17 @@ export class ExtrasMenu extends React.PureComponent<any, any> {
 		return <ExtrasMenuContent {...menuContentProps} />;
 	}
 
+	private renderButton = ({ ...props }) => <MenuButton {...props} />;
+
 	public render() {
 		return (
 			<ButtonMenu
-				renderButton={MenuButton}
+				ripple
+				renderButton={this.renderButton}
 				renderContent={this.renderMenuContent}
 				PopoverProps={{
 					anchorOrigin: {
-						vertical: 'top',
+						vertical: 'bottom',
 						horizontal: 'right'
 					}
 				}}

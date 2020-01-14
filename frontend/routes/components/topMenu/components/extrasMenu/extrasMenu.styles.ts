@@ -21,7 +21,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Switch from '@material-ui/core/Switch';
 import Menu from '@material-ui/icons/Menu';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { COLOR } from '../../../../../styles';
 import * as AvatarStyles from '../../../avatar/avatar.styles';
@@ -62,6 +62,15 @@ export const MenuUser = styled(ListItem)`
 	}
 `;
 
+const menuTextWithIconStyles = css`
+	&& {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding-right: 0;
+	}
+`;
+
 export const MenuText = styled(ListItemText).attrs({
 	disableTypography: true
 })`
@@ -69,6 +78,7 @@ export const MenuText = styled(ListItemText).attrs({
 		color: ${COLOR.BLACK_60};
 		font-size: 14px;
 	}
+	${(props: any) => props.icon && menuTextWithIconStyles};
 `;
 
 export const MenuSwitch = styled(Switch)`
