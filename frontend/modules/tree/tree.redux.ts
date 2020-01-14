@@ -56,6 +56,7 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	goToRootNode: ['nodeId'],
 	zoomToHighlightedNodes: [],
 	handleColorOverridesChange: ['currentOverrides', 'previousOverrides'],
+	handleTransparencyOverridesChange: ['currentOverrides', 'previousOverrides'],
 	setIsTreeProcessed: ['isTreeProcessed']
 }, { prefix: 'TREE/' });
 

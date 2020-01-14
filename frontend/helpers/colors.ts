@@ -61,3 +61,7 @@ export const getRandomColor = () => {
 		parseInt((Math.random() * 255).toFixed(0), 10)
 	];
 };
+
+export const hasTransparency = (hex) => hex.length === 9;
+
+export const getTransparency = (hex) => parseInt(hex.slice(7), 16) / 255;

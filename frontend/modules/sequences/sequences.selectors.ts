@@ -117,6 +117,19 @@ export const selectSelectedFrameColors = createSelector(
 		} catch (e) {
 			return {};
 		}
+	}
+);
 
+export const selectSelectedFrameTransparencies = createSelector(
+	selectSelectedState, (state) => {
+		if (!state) {
+			return {};
+		}
+
+		try {
+			return  convertToDictionary(state.transparency);
+		} catch (e) {
+			return {};
+		}
 	}
 );

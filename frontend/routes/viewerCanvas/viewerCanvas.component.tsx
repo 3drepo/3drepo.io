@@ -33,9 +33,11 @@ interface IProps {
 		}
 	};
 	colorOverrides: any;
+	transparencies: any;
 	issuePins: any[];
 	riskPins: any[];
-	handleColorOverridesChange: (currentOvverides, previousOverrides) => void;
+	handleColorOverridesChange: (currentOverrides, previousOverrides) => void;
+	handleTransparencyOverridesChange: (currentOverrides, previousOverrides) => void;
 }
 
 export class ViewerCanvas extends React.PureComponent<IProps, any> {
@@ -63,9 +65,15 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		const { colorOverrides, issuePins, riskPins, handleColorOverridesChange } = this.props;
+		const { colorOverrides, transparencies, issuePins, riskPins,
+			handleColorOverridesChange, handleTransparencyOverridesChange } = this.props;
+
 		if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
 			handleColorOverridesChange(colorOverrides, prevProps.colorOverrides);
+		}
+
+		if (prevProps.transparencies && !isEqual(colorOverrides, prevProps.transparencies)) {
+			handleTransparencyOverridesChange(transparencies, prevProps.transparencies);
 		}
 
 		if (issuePins !== prevProps.issuePins && prevProps.issuePins) {

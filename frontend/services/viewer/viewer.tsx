@@ -361,6 +361,16 @@ export class ViewerService {
 		this.viewer.resetMeshColor(account, model, meshIDs);
 	}
 
+	public async overrideMeshOpacity(account, model, meshIDs, opacity) {
+		await this.isViewerReady();
+		this.viewer.overrideMeshOpacity(account, model, meshIDs, opacity);
+	}
+
+	public async resetMeshOpacity(account, model, meshIDs) {
+		await this.isViewerReady();
+		this.viewer.resetMeshOpacity(account, model, meshIDs);
+	}
+
 	public async goToExtent() {
 		await this.isViewerReady();
 		this.viewer.showAll();

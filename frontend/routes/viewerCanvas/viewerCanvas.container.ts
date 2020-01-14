@@ -21,18 +21,20 @@ import { createStructuredSelector } from 'reselect';
 
 import { selectPins as selectIssuePins } from '../../modules/issues';
 import { selectPins as selectRiskPins } from '../../modules/risks';
-import { selectColorOverrides, TreeActions } from '../../modules/tree';
+import { selectAllTransparencyOverrides, selectColorOverrides, TreeActions } from '../../modules/tree';
 import { withViewer } from '../../services/viewer/viewer';
 import { ViewerCanvas } from './viewerCanvas.component';
 
 const mapStateToProps = createStructuredSelector({
 	colorOverrides: selectColorOverrides,
+	transparencies: selectAllTransparencyOverrides,
 	issuePins: selectIssuePins,
 	riskPins: selectRiskPins,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	handleColorOverridesChange: TreeActions.handleColorOverridesChange
+	handleColorOverridesChange: TreeActions.handleColorOverridesChange,
+	handleTransparencyOverridesChange: TreeActions.handleTransparencyOverridesChange
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(ViewerCanvas));
