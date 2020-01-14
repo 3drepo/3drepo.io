@@ -62,28 +62,20 @@
 	<div class="row">
 		<div class="col-8 col-content">
 			<div class="tsd-panel tsd-typography">
-				<a href="#3drepoio-img-srchttpstravis-ciorg3drepo3drepoiosvgbranchmaster-alt" id="3drepoio-img-srchttpstravis-ciorg3drepo3drepoiosvgbranchmaster-alt" style="color: inherit; text-decoration: none;">
-					<h1>3drepo.io <img src="https://travis-ci.org/3drepo/3drepo.io.svg?branch=master" alt=""></h1>
-				</a>
+				<h1 id="3drepo-io-">3drepo.io <img src="https://travis-ci.org/3drepo/3drepo.io.svg?branch=master" alt=""></h1>
 				<p>3drepo.io a web based BIM collaboration platform. It is one of the 4 parts of the 3D Repo ecosystem. </p>
 				<p><img src="https://user-images.githubusercontent.com/11945337/44221768-60634280-a17a-11e8-989e-089a650e3710.png" alt="3drepo"></p>
-				<a href="#latest-release-amp-api" id="latest-release-amp-api" style="color: inherit; text-decoration: none;">
-					<h2>Latest Release &amp; API</h2>
-				</a>
+				<h2 id="latest-release-api">Latest Release &amp; API</h2>
 				<ul>
 					<li>Latest release: <a href="https://github.com/3drepo/3drepo.io/releases/tag/latest">https://github.com/3drepo/3drepo.io/releases/tag/latest</a></li>
 					<li>Corresponding API docs: <a href="https://3drepo.github.io/3drepo.io/">https://3drepo.github.io/3drepo.io/</a></li>
 				</ul>
-				<a href="#dependencies" id="dependencies" style="color: inherit; text-decoration: none;">
-					<h2>Dependencies</h2>
-				</a>
+				<h2 id="dependencies">Dependencies</h2>
 				<ul>
 					<li>Node.js (v 8.11.3)</li>
 					<li><a href="https://yarnpkg.com/lang/en/docs/install/">yarn</a></li>
 				</ul>
-				<a href="#setting-up-your-3d-repo-environment" id="setting-up-your-3d-repo-environment" style="color: inherit; text-decoration: none;">
-					<h2>Setting up your 3D Repo environment</h2>
-				</a>
+				<h2 id="setting-up-your-3d-repo-environment">Setting up your 3D Repo environment</h2>
 				<p>To setup the whole 3D Repo Ecosystem, you will need the following:</p>
 				<ul>
 					<li>A running MongoDB database, with an admin user created;</li>
@@ -91,9 +83,7 @@
 					<li>A running Bouncer Worker service, provided in <a href="https://github.com/3drepo/3drepobouncer">3drepobouncer</a>.</li>
 				</ul>
 				<p>Note: To generate viewable 3D models, you will need 3drepounity to create asset bundles. <strong>This is a closed source project</strong>. Please contact <a href="mailto:sales@3drepo.org">sales@3drepo.org</a> for a business license, alternatively you can use 3drepo.io version v1.12 which uses the old x3dom rendering engine.</p>
-				<a href="#installation" id="installation" style="color: inherit; text-decoration: none;">
-					<h2>Installation</h2>
-				</a>
+				<h2 id="installation">Installation</h2>
 				<p>Note: If using windows, please ensure cmd.exe was invoked as administrator (i.e. Right click -&gt; Run as Administrator).</p>
 				<ol>
 					<li>Clone the repository: <code>git clone https://github.com/3drepo/3drepo.io.git</code></li>
@@ -104,9 +94,7 @@
 					<li>Install the required frontend dependencies: <code>cd frontend &amp;&amp; yarn install</code></li>
 					<li>Compile the frontend: <code>cd frontend &amp;&amp; yarn run build</code> (for file watching/live reloading, see <code>Running the application</code> below)</li>
 				</ol>
-				<a href="#configuration" id="configuration" style="color: inherit; text-decoration: none;">
-					<h2>Configuration</h2>
-				</a>
+				<h2 id="configuration">Configuration</h2>
 				<p>The configuration files are contained in the <code>config</code> folder. Each directory in config represents a different configuration. This allows you to quickly switch between, for example, a development environment and a production environment. Each configuration folder is expected to have a config.js file, which details the configuration settings for the particular environment.</p>
 				<p>In general, to configure a new configuration enviroment called <config_name>:</p>
 				<ol>
@@ -115,9 +103,7 @@
 					<li>Copy config/sample_config.js to the new directory as config.js: <code>cp config_sample.js &lt;config_name&gt;/config.js</code></li>
 					<li>Edit config.js as described in <a href="https://github.com/3drepo/3drepo.io/wiki/Configuration-File">Configuration File</a></li>
 				</ol>
-				<a href="#running-the-application" id="running-the-application" style="color: inherit; text-decoration: none;">
-					<h2>Running the application</h2>
-				</a>
+				<h2 id="running-the-application">Running the application</h2>
 				<p>The repository includes a script <code>run_app</code> and <code>run_app.cmd</code> specifically for Windows to run the server. It has two arguments:</p>
 				<p><code>./run/run_app &lt;config&gt; [debug]</code></p>
 				<ul>
@@ -129,14 +115,10 @@
 				<ul>
 					<li><code>config</code> This is the directory under config that the configuration resides in</li>
 				</ul>
-				<a href="#file-watching-amp-live-reloading" id="file-watching-amp-live-reloading" style="color: inherit; text-decoration: none;">
-					<h2>File Watching &amp; Live Reloading</h2>
-				</a>
+				<h2 id="file-watching-live-reloading">File Watching &amp; Live Reloading</h2>
 				<p>All frontend files are observed and automatically re-compiled if you run <code>yarn run watch</code>.</p>
 				<p>For live reloading, set <code>development: true</code> in your <code>config.js</code>.</p>
-				<a href="#locally-running-the-application" id="locally-running-the-application" style="color: inherit; text-decoration: none;">
-					<h2>Locally running the application</h2>
-				</a>
+				<h2 id="locally-running-the-application">Locally running the application</h2>
 				<p>The application requires the use of cookies for tracking user authentication. Some browsers do not
 				allow the use of cookies for the <code>localhost</code> domain. To circumvent this problem, please use the loopback address (127.0.0.1) as your domain name.</p>
 				<p>Alternatively you can modify your hosts file to add a DNS entry to your loopback address. For Windows, you must use an Administrator notepad to edit the file:</p>
@@ -146,13 +128,9 @@
 				<p>Within this file you must append to, or create, a line for the entry for example:</p>
 				<p><code>127.0.0.1 localhost example.org</code></p>
 				<p>In the configuration file for the server, you then set hostname to <code>example.org</code> or whatever host you have redirected.</p>
-				<a href="#licenses" id="licenses" style="color: inherit; text-decoration: none;">
-					<h2>Licenses</h2>
-				</a>
+				<h2 id="licenses">Licenses</h2>
 				<p>This project is Copyright of <a href="http://3drepo.org">3D Repo Ltd</a>, a company registered in England and Wales No. 09014101, and is released under the open source <a href="http://www.gnu.org/licenses/agpl-3.0.en.html">GNU Affero General Public License v3</a>. Should you require a commercial license, please contact <a href="mailto:support@3drepo.org">support@3drepo.org</a>. All contributors are required to sign either the <a href="https://gist.github.com/jozefdobos/e177af804c9bcd217b73">3D Repo Individual</a> or the <a href="https://gist.github.com/jozefdobos/c7c4c1c18cfb211c45d2">3D Repo Entity</a> <a href="https://en.wikipedia.org/wiki/Contributor_License_Agreement">Contributor License Agreement (CLA)</a>.</p>
-				<a href="#contributing" id="contributing" style="color: inherit; text-decoration: none;">
-					<h2>Contributing</h2>
-				</a>
+				<h2 id="contributing">Contributing</h2>
 				<p>We very much encourage contributions to the 3D Repo project. Firstly, fork the desired repository and commit your modifications there. Once happy with the changes, you can generate a <a href="https://help.github.com/articles/using-pull-requests/">pull request</a> and our team will integrate it upstream after a review.</p>
 				<p>Your pull requests should:</p>
 				<ol>
@@ -161,9 +139,7 @@
 					<li>Rebase your branch against <a href="https://help.github.com/articles/merging-an-upstream-repository-into-your-fork/">upstream&#39;s master</a> so that we don&#39;t pull redundant commits</li>
 					<li>Sign our <a href="https://gist.github.com/jozefdobos/e177af804c9bcd217b73">3D Repo Individual CLA</a> or if you are representing a legal entity, sign the <a href="https://gist.github.com/jozefdobos/c7c4c1c18cfb211c45d2">3D Repo Entity CLA</a></li>
 				</ol>
-				<a href="#contact" id="contact" style="color: inherit; text-decoration: none;">
-					<h2>Contact</h2>
-				</a>
+				<h2 id="contact">Contact</h2>
 				<p>If you need any help or want to contribute please contact: <a href="mailto:support@3drepo.org">support@3drepo.org</a>
 				We look forward to hearing from you.</p>
 			</div>
@@ -219,7 +195,6 @@
 				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
 				<li class="tsd-kind-index-signature"><span class="tsd-kind-icon">Index signature</span></li>
 				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
-				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
 			</ul>
 			<ul class="tsd-legend">
 				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
@@ -268,7 +243,7 @@
 	</div>
 </footer>
 <div class="container tsd-generator">
-	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+	<p>Generated using <a href="http://typedoc.org/" target="_blank">TypeDoc</a></p>
 </div>
 <div class="overlay"></div>
 <script src="assets/js/main.js"></script>
