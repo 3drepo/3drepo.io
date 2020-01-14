@@ -239,7 +239,7 @@ export const getHeaderMenuItems = (
 		onClick: () => toggleShowPins(!showPins)
 	};
 
-	const menuItems = showPins ? [...items, {...togglePinItem}] : [...items];
+	const menuItems = !!toggleShowPins ? [...items, {...togglePinItem}] : [...items];
 
 	return menuItems;
 };

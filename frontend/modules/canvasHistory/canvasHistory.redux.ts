@@ -46,17 +46,19 @@ export const update = (state = INITIAL_STATE, { elementName, properties }) => {
 	const elements = [...state.elements];
 	const [elementType] = elementName.split('-');
 
-	if (elementType === ELEMENT_TYPES.SHAPE) {
-		const propertiesNotFilled = !properties.fill && elements[selectedIndex].fill !== 'transparent';
-		const elementNotFilled = properties.fill === 'transparent' && !elements[selectedIndex].fill;
-		const fill = propertiesNotFilled || elementNotFilled ? properties.color : properties.fill;
-		properties.fill = fill;
-	}
+	if (selectedIndex >= 0) {
+		if (properties && elementType === ELEMENT_TYPES.SHAPE) {
+			const propertiesNotFilled = !properties.fill && elements[selectedIndex].fill !== 'transparent';
+			const elementNotFilled = properties.fill === 'transparent' && !elements[selectedIndex].fill;
+			const fill = propertiesNotFilled || elementNotFilled ? properties.color : properties.fill;
+			properties.fill = fill;
+		}
 
-	elements[selectedIndex] = {
-		...elements[selectedIndex],
-		...properties
-	};
+		elements[selectedIndex] = {
+			...elements[selectedIndex],
+			...properties
+		};
+	}
 	return { ...state, elements };
 };
 

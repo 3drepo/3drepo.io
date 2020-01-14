@@ -24,6 +24,8 @@ export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActio
 	resetPanelsStates: [],
 	setPanelVisibility: ['panelName', 'visibility'],
 	setMeasureVisibility: ['visible'],
+	setCoordView: ['visible'],
+	setCoordViewSuccess: ['coordViewActive'],
 	startListenOnModelLoaded: [],
 	stopListenOnModelLoaded: [],
 	startListenOnClickPin: [],
@@ -62,6 +64,7 @@ export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActio
 
 export interface IViewerGuiState {
 	visiblePanels: any;
+	coordViewActive: boolean;
 	isModelLoaded: boolean;
 	navigationMode: string;
 	clippingMode: string;
@@ -76,6 +79,7 @@ export interface IViewerGuiState {
 export const INITIAL_STATE: IViewerGuiState = {
 	visiblePanels: {},
 	isModelLoaded: false,
+	coordViewActive: false,
 	navigationMode: VIEWER_NAV_MODES.TURNTABLE,
 	clippingMode: null,
 	helicopterSpeed: INITIAL_HELICOPTER_SPEED,
@@ -131,6 +135,10 @@ const resetVisiblePanels = (state = INITIAL_STATE) => {
 	return { ...state, visiblePanels: INITIAL_STATE.visiblePanels };
 };
 
+const setCoordViewSuccess = (state = INITIAL_STATE, { coordViewActive }) => {
+	return { ...state, coordViewActive };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[ViewerGuiTypes.SET_PANEL_VISIBILITY]: setPanelVisibility,
 	[ViewerGuiTypes.SET_IS_MODEL_LOADED] : setIsModelLoaded,
@@ -140,6 +148,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ViewerGuiTypes.SET_IS_FOCUS_MODE] : setIsFocusMode,
 	[ViewerGuiTypes.SET_CLIP_EDIT_SUCCESS] : setClipEditSuccess,
 	[ViewerGuiTypes.SET_CLIP_NUMBER] : setClipNumber,
+	[ViewerGuiTypes.SET_COORD_VIEW_SUCCESS] : setCoordViewSuccess,
 	[ViewerGuiTypes.SET_IS_PIN_DROP_MODE_SUCCESS]: setIsPinDropModeSuccess,
 	[ViewerGuiTypes.SET_PIN_DATA]: setPinData,
 	[ViewerGuiTypes.RESET_VISIBLE_PANELS]: resetVisiblePanels

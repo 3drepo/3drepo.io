@@ -594,6 +594,14 @@ export class Viewer {
 		}
 	}
 
+	public showCoordView() {
+		UnityUtil.showCoordView();
+	}
+
+	public hideCoordView() {
+		UnityUtil.hideCoordView();
+	}
+
 	public startAreaSelect() {
 		UnityUtil.startAreaSelection();
 	}

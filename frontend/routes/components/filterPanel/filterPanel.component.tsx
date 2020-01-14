@@ -125,7 +125,7 @@ const getFilterName = (filterLabel, valueLabel) => {
 
 const getSelectedFilterLabel = (filter) => {
 	if (filter.type !== FILTER_TYPES.QUERY) {
-		return `${filter.label}: ${filter.value.label}`;
+		return `${filter.label}: ${filter.value.label ? filter.value.label : filter.value.value}`;
 	}
 
 	return filter.label || filter.value.label;

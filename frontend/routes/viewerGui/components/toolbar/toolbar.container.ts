@@ -24,6 +24,7 @@ import {
 	selectClipNumber,
 	selectHelicopterSpeed,
 	selectIsClipEdit,
+	selectIsCoordViewActive,
 	selectIsFocusMode,
 	selectIsMetadataVisible,
 	selectNavigationMode,
@@ -50,6 +51,7 @@ const mapStateToProps = createStructuredSelector({
 	isMetadataVisible: selectIsMetadataVisible,
 	isMetadataActive: selectIsActive,
 	isMeasureActive: selectIsMeasureActive,
+	coordViewActive: selectIsCoordViewActive,
 	isMeasureDisabled: selectIsMeasureDisabled,
 	metaKeysExist: selectMetaKeysExist
 });
@@ -66,6 +68,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setClipEdit: ViewerGuiActions.setClipEdit,
 	stopListenOnNumClip: ViewerGuiActions.stopListenOnNumClip,
 	setMeasureVisibility: ViewerGuiActions.setMeasureVisibility,
+	setCoordView: ViewerGuiActions.setCoordView,
 	setPanelVisibility: ViewerGuiActions.setPanelVisibility,
 	setMetadataActive: BimActions.setIsActive,
 	showAllNodes: TreeActions.showAllNodes,

@@ -107,6 +107,20 @@ function* setMeasureVisibility({ visible }) {
 	}
 }
 
+function* setCoordView({ visible }) {
+	try {
+		if (visible) {
+			Viewer.showCoordView();
+		} else {
+			Viewer.hideCoordView();
+		}
+
+		yield put(ViewerGuiActions.setCoordViewSuccess(visible));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('set', 'coordinates visibility', error));
+	}
+}
+
 const setIsModelLoaded = () => {
 	dispatch(ViewerGuiActions.setIsModelLoaded(true));
 };
@@ -379,6 +393,7 @@ export default function* ViewerGuiSaga() {
 	yield takeLatest(ViewerGuiTypes.FETCH_DATA, fetchData);
 	yield takeLatest(ViewerGuiTypes.RESET_PANELS_STATES, resetPanelsStates);
 	yield takeLatest(ViewerGuiTypes.SET_MEASURE_VISIBILITY, setMeasureVisibility);
+	yield takeLatest(ViewerGuiTypes.SET_COORD_VIEW, setCoordView);
 	yield takeLatest(ViewerGuiTypes.START_LISTEN_ON_MODEL_LOADED, startListenOnModelLoaded);
 	yield takeLatest(ViewerGuiTypes.STOP_LISTEN_ON_MODEL_LOADED, stopListenOnModelLoaded);
 	yield takeLatest(ViewerGuiTypes.START_LISTEN_ON_CLICK_PIN, startListenOnClickPin);

@@ -123,9 +123,11 @@ export class Issues extends React.PureComponent<IProps, any> {
 	}
 
 	get headerMenuItems() {
-		return !this.props.modelSettings.federate ?
+		return this.commonHeaderMenuItems;
+		/* NOTE: We no longer supper submodel issues in federation.
+		 * return !this.props.modelSettings.federate ?
 			this.commonHeaderMenuItems :
-			[...this.commonHeaderMenuItems, this.toggleSubmodelsMenuItem];
+			[...this.commonHeaderMenuItems, this.toggleSubmodelsMenuItem];*/
 	}
 
 	get showDefaultHiddenItems() {
