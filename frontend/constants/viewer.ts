@@ -109,6 +109,7 @@ export const VIEWER_TOOLBAR_ITEMS = {
 	FOCUS: 'Focus',
 	CLIP: 'Clip',
 	MEASURE: 'Measure',
+	COORDVIEW: 'Show Coordinates',
 	BIM: 'BIM'
 };
 
