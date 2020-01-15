@@ -99,7 +99,15 @@ describe("Sequences", function () {
 						"_id":"8aca7c39-b0f2-48b8-b42f-a8be47989a8f",
 						"name":"Site Set-up/ Establishment",
 						"startDate":1446624000000,
-						"endDate":1455292800000
+						"endDate":1455292800000,
+						"tasks":[
+							{
+								"_id":"8aca7c39-b0f2-48b8-b42f-a8be47989a8f",
+								"name":"Site Set-up/ Establishment",
+								"startDate":1446624000000,
+								"endDate":1455292800000
+							}
+						]
 					}
 				]
 			}
