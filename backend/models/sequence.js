@@ -50,9 +50,10 @@ class Sequence {
 
 		for (let i = 0; toClean["frames"] && i < toClean["frames"].length; i++) {
 			toClean["frames"][i] = this.clean(toClean["frames"][i]);
-			for (let j = 0; toClean["frames"][i]["tasks"] && j < toClean["frames"][i]["tasks"].length; j++) {
-				toClean["frames"][i]["tasks"][j] = this.clean(toClean["frames"][i]["tasks"][j]);
-			}
+		}
+
+		for (let i = 0; toClean["tasks"] && i < toClean["tasks"].length; i++) {
+			toClean["tasks"][i] = this.clean(toClean["tasks"][i]);
 		}
 
 		return toClean;
