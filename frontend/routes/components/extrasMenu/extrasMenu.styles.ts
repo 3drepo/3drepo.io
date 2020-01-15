@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -20,13 +20,13 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Switch from '@material-ui/core/Switch';
-import AccountCircle from '@material-ui/icons/AccountCircle';
-import styled from 'styled-components';
+import Menu from '@material-ui/icons/Menu';
+import styled, { css } from 'styled-components';
 
-import { COLOR } from '../../../../../styles';
-import * as AvatarStyles from '../../../avatar/avatar.styles';
+import { COLOR } from '../../../styles';
+import * as AvatarStyles from '../avatar/avatar.styles';
 
-export const UserIcon = styled(AccountCircle)`
+export const BurgerIcon = styled(Menu)`
 	&& {
 		color: ${COLOR.WHITE};
 		font-size: 28px;
@@ -62,6 +62,15 @@ export const MenuUser = styled(ListItem)`
 	}
 `;
 
+const menuTextWithIconStyles = css`
+	&& {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding-right: 0;
+	}
+`;
+
 export const MenuText = styled(ListItemText).attrs({
 	disableTypography: true
 })`
@@ -69,6 +78,7 @@ export const MenuText = styled(ListItemText).attrs({
 		color: ${COLOR.BLACK_60};
 		font-size: 14px;
 	}
+	${(props: any) => props.icon && menuTextWithIconStyles};
 `;
 
 export const MenuSwitch = styled(Switch)`

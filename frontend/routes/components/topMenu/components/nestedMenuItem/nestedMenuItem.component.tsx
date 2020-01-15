@@ -28,24 +28,24 @@ interface IProps {
 }
 
 export const NestedMenuItem: React.FunctionComponent<IProps> = ({ children, label, renderContent, icon }) => {
-	const renderSubMenuContent: any = () => renderContent || children;
+	const renderSubMenuContent = () => renderContent || children;
 
 	const renderButton = ({ ...props }) => <MenuButton label={label} icon={icon} {...props} />;
 
 	return (
-			<ButtonMenu
-					renderButton={renderButton}
-					renderContent={renderSubMenuContent}
-					PopoverProps={{
-						anchorOrigin: {
-							vertical: 'top',
-							horizontal: 'left'
-						},
-						transformOrigin: {
-							vertical: 'top',
-							horizontal: 'right',
-						}
-					}}
-			/>
+		<ButtonMenu
+			renderButton={renderButton}
+			renderContent={renderSubMenuContent}
+			PopoverProps={{
+				anchorOrigin: {
+					vertical: 'top',
+					horizontal: 'left'
+				},
+				transformOrigin: {
+					vertical: 'top',
+					horizontal: 'right',
+				}
+			}}
+		/>
 	);
 };

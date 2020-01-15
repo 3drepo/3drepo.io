@@ -15,10 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import IconButton from '@material-ui/core/IconButton';
 import styled from 'styled-components';
 
-import { COLOR } from '../../../../../../styles';
+import IconButton from '@material-ui/core/IconButton';
 
 export const StyledIconButton = styled(IconButton)`
 	&& {

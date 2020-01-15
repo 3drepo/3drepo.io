@@ -30,8 +30,8 @@ interface IProps {
 	PopoverProps?: any;
 	PaperProps?: any;
 	container?: any;
-	renderButton?: (props) => JSX.Element;
-	renderContent?: (props) => JSX.Element;
+	renderButton?: (props?) => React.ReactNode;
+	renderContent?: (props?) => React.ReactNode;
 }
 
 interface IState {

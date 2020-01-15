@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -19,14 +19,14 @@ import * as React from 'react';
 
 import PATIcon from '@material-ui/icons/InsertDriveFileOutlined';
 
-import { LANDING_ROUTES, STATIC_ROUTES } from '../../../../../services/staticPages';
-import { COLOR } from '../../../../../styles';
-import { ButtonMenu } from '../../../buttonMenu/buttonMenu.component';
-import { NestedMenuItem } from '../nestedMenuItem/nestedMenuItem.component';
+import { LANDING_ROUTES, STATIC_ROUTES } from '../../../services/staticPages';
+import { COLOR } from '../../../styles';
+import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
+import { NestedMenuItem } from '../topMenu/components/nestedMenuItem/nestedMenuItem.component';
 import { MenuContent, MenuItem, MenuText } from './extrasMenu.styles';
 import { MenuButton } from './menuButton/menuButton.component';
 
-const ExternalLink = ({ ...props }) => {
+export const ExternalLink = ({ ...props }) => {
 	const Icon = props.icon || React.Fragment;
 	const iconProps = props.icon ? { style: { color: COLOR.BLACK_54 } } : {};
 	return (
@@ -60,11 +60,11 @@ const ExtrasMenuContent = (props) => {
 					label="Privacy & Terms"
 					icon={<PATIcon style={{ color: COLOR.BLACK_54 }} />}
 					renderContent={staticLinks.map(({ path, title }, index) => (
-							<ExternalLink
-									key={index}
-									label={title}
-									onButtonClick={invokeAndClose(path)}
-							/>
+						<ExternalLink
+							key={index}
+							label={title}
+							onButtonClick={invokeAndClose(path)}
+						/>
 					))}
 			/>
 		</MenuContent>

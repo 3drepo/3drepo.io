@@ -17,7 +17,7 @@
 
 import React from 'react';
 import { getStaticFile } from '../../../services/staticPages';
-import { ExtrasMenu } from '../topMenu/components/extrasMenu/extrasMenu.component';
+import { ExtrasMenu } from '../extrasMenu/extrasMenu.component';
 import { Container, Content, Header, Logo, MenuContainer, Title } from './staticPageRoute.styles';
 
 interface IProps {

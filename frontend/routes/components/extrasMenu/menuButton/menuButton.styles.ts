@@ -15,31 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import IconButton from '@material-ui/core/IconButton';
+import styled from 'styled-components';
 
-import ArrowRightIcon from '@material-ui/icons/ArrowRight';
-import { COLOR } from '../../../../../../styles';
+import { COLOR } from '../../../../styles';
 
-import { MenuItem, MenuText } from '../../../../extrasMenu/extrasMenu.styles';
-
-interface IProps {
-	IconProps?: any;
-	Icon?: any;
-	icon?: React.ReactNode;
-	label: string;
-}
-
-export const MenuButton: React.FunctionComponent<IProps> = ({ IconProps, Icon, label, icon, ...props }) => (
-	<MenuItem
-		{...props}
-		button
-		aria-label={label}
-		disableRipple
-	>
-		{icon}
-		<MenuText icon="true">
-			{label}
-		</MenuText>
-		<ArrowRightIcon style={{ color: COLOR.BLACK_54 }} {...IconProps} />
-	</MenuItem>
-);
+export const StyledIconButton = styled(IconButton)`
+	&& {
+		background-color: ${({ active }) => active ? 'rgba(0, 0, 0, 0.08)' : ''};
+	}
+`;
