@@ -15,9 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { sortBy, uniq } from 'lodash';
+import { sortBy } from 'lodash';
 import { createSelector } from 'reselect';
+import { STEP_SCALE } from '../../constants/sequences';
 import { GLToHexColor } from '../../helpers/colors';
+import { MILLI_PER_DAY } from '../../helpers/dateTime';
 
 export const selectSequencesDomain = (state) => ({...state.sequences});
 
@@ -64,6 +66,14 @@ export const selectSelectedMaxDate = createSelector(
 
 export const selectSelectedDate = createSelector(
 	selectSequencesDomain, selectSelectedMinDate, (state, minDate) => state.selectedDate || minDate
+);
+
+export const selectStepInterval = createSelector(
+	selectSequencesDomain, (state) => state.stepInterval
+);
+
+export const selectStepScale = createSelector(
+	selectSequencesDomain, (state) => state.stepScale
 );
 
 export const selectSelectedFrame = createSelector(
@@ -132,4 +142,41 @@ export const selectSelectedFrameTransparencies = createSelector(
 			return {};
 		}
 	}
+);
+
+export const selectCurrentActivities = createSelector(
+	selectSelectedDate, selectStepInterval, selectStepScale, selectSelectedSequence,
+		(selectedDate: Date, stepInterval: number, stepScale: STEP_SCALE, selectedSequence: any) => {
+			if (!selectedSequence || !selectedSequence.frames) {
+				return [];
+			}
+
+			let minSelectedDate: any = new Date(selectedDate);
+			const maxSelectedDate: any = new Date(selectedDate);
+			maxSelectedDate.setHours(23, 59, 29, 999);
+
+			if (stepScale === STEP_SCALE.DAY) {
+				minSelectedDate = new Date(minSelectedDate.valueOf() - MILLI_PER_DAY * stepInterval );
+			}
+
+			if (stepScale === STEP_SCALE.MONTH) {
+				minSelectedDate.setMonth(minSelectedDate.getMonth() - stepInterval);
+			}
+
+			if (stepScale === STEP_SCALE.MONTH) {
+				minSelectedDate.setMonth(minSelectedDate.getMonth() - stepInterval);
+			}
+
+			if (stepScale === STEP_SCALE.YEAR) {
+				minSelectedDate.setFullYear(minSelectedDate.getFullYear() - stepInterval);
+			}
+
+			return selectedSequence.frames.reduce((tasks, frame) => {
+				Array.prototype.push.apply(tasks, (frame.tasks.filter(
+					(task) => ! (task.startDate > maxSelectedDate || task.endDate < minSelectedDate)
+				)));
+
+				return tasks;
+			}, [])  ;
+		}
 );

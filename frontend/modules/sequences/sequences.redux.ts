@@ -16,6 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
+import { STEP_SCALE } from '../../constants/sequences';
 import { sortByField } from '../../helpers/sorting';
 
 export const { Types: SequencesTypes, Creators: SequencesActions } = createActions({
@@ -27,7 +28,9 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	setSelectedFrame: ['date'],
 	setSelectedDate: ['date'],
 	setStateDefinition: ['stateId', 'stateDefinition'],
-	setLastLoadedSuccesfullState: ['stateId']
+	setLastLoadedSuccesfullState: ['stateId'],
+	setStepInterval: ['stepInterval'],
+	setStepScale: ['stepScale']
 }, { prefix: 'SEQUENCES/' });
 
 export const INITIAL_STATE = {
@@ -37,7 +40,9 @@ export const INITIAL_STATE = {
 	selectedDate: null,
 	lastSuccesfulStateId: null,
 	stateDefinitions: {},
-	statesPending: false
+	statesPending: false,
+	stepInterval: 1,
+	stepScale: STEP_SCALE.DAY
 };
 
 export const fetchSequencesSuccess = (state = INITIAL_STATE, { sequences }) => {
@@ -65,11 +70,21 @@ export const setLastLoadedSuccesfullState =  (state = INITIAL_STATE, { stateId }
 	return {...state, lastSuccesfulStateId: stateId};
 };
 
+export const setStepInterval = (state = INITIAL_STATE, { stepInterval }) => {
+	return {...state, stepInterval};
+};
+
+export const setStepScale = (state = INITIAL_STATE, { stepScale }) => {
+	return {...state, stepScale};
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[SequencesTypes.FETCH_SEQUENCES_SUCCESS]: fetchSequencesSuccess,
 	[SequencesTypes.SET_SEQUENCES_PENDING]: setSequencesPending,
 	[SequencesTypes.SET_SELECTED_DATE]: setSelectedDate,
 	[SequencesTypes.SET_STATE_DEFINITION]: setStateDefinition,
 	[SequencesTypes.SET_SELECTED_SEQUENCE]: setSelectedSequence,
-	[SequencesTypes.SET_LAST_LOADED_SUCCESFULL_STATE]: setLastLoadedSuccesfullState
+	[SequencesTypes.SET_LAST_LOADED_SUCCESFULL_STATE]: setLastLoadedSuccesfullState,
+	[SequencesTypes.SET_STEP_INTERVAL]: setStepInterval,
+	[SequencesTypes.SET_STEP_SCALE]: setStepScale
 });

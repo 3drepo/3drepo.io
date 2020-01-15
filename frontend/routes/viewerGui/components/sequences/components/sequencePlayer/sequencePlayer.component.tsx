@@ -25,17 +25,21 @@ import DayJsUtils from '@date-io/dayjs';
 
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 import React from 'react';
+import { STEP_SCALE } from '../../../../../../constants/sequences';
+import { getDate, getDays } from '../../../../../../helpers/dateTime';
 import { NAMED_MONTH_DATE_FORMAT } from '../../../../../../services/formatting/formatDate';
 import { DatePicker, IntervalRow, SequencePlayerContainer,
 	SequenceRow, SequenceSlider, StepInput } from '../../sequences.styles';
-
-const MILLI_PER_DAY = 1000 * 60 * 60 * 24;
 
 interface IProps {
 	max: Date;
 	min: Date;
 	onChange?: (date: Date) => void;
 	value?: Date;
+	stepInterval?: number;
+	stepScale?: STEP_SCALE;
+	onChangeStepInterval?: (value: number) => void;
+	onChangeStepScale?: (value: STEP_SCALE) => void;
 }
 
 interface IState {
@@ -43,19 +47,8 @@ interface IState {
 	playing: boolean;
 	intervalId: number;
 	stepInterval: number;
-	stepScale: number;
+	stepScale: STEP_SCALE;
 }
-
-const getDays = (min, max) => {
-	const maxDate = new Date(max).setHours(0, 0, 0, 0);
-	const minDate = new Date(min).setHours(0, 0, 0, 0);
-	return  Math.round((maxDate - minDate) / MILLI_PER_DAY);
-};
-
-const getDate = (base, days) => {
-	const baseDate = new Date(base).setHours(0, 0, 0, 0);
-	return new Date(baseDate.valueOf() + days * MILLI_PER_DAY);
-};
 
 export class SequencePlayer extends React.PureComponent<IProps, IState> {
 	public state: IState = {
@@ -63,7 +56,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 		playing: false,
 		intervalId: 0,
 		stepInterval: 1,
-		stepScale: 0
+		stepScale: STEP_SCALE.DAY
 	};
 
 	get currentDay() {
@@ -116,9 +109,17 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 		this.setValue(val);
 	}
 
-	public componentDidUpdate(prevProps) {
+	public componentDidUpdate(prevProps: IProps) {
 		if (prevProps.value !== this.props.value) {
 			this.setState({value: this.props.value});
+		}
+
+		if (prevProps.stepScale !== this.props.stepScale) {
+			this.setState({stepScale: this.props.stepScale});
+		}
+
+		if (prevProps.stepInterval !== this.props.stepInterval) {
+			this.setState({stepInterval: this.props.stepInterval});
 		}
 	}
 
@@ -134,21 +135,32 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 		let stepInterval = parseInt(e.target.value, 10);
 		stepInterval = isNaN(stepInterval) ? 1 : Math.max(1, Math.min(100, stepInterval));
 		this.setState({stepInterval});
+		if (this.props.onChangeStepInterval) {
+			this.props.onChangeStepInterval(stepInterval);
+		}
+	}
+
+	public onChangeStepScale = (e) => {
+		const stepScale = parseInt(e.target.value, 10);
+		this.setState({ stepScale });
+		if (this.props.onChangeStepScale) {
+			this.props.onChangeStepScale(stepScale);
+		}
 	}
 
 	public moveStep = (direction) => {
-		if (this.state.stepScale === 0) {
+		if (this.state.stepScale === STEP_SCALE.DAY) {
 			this.setDayNumber(this.currentDay + this.state.stepInterval * direction);
 		}
 
-		if (this.state.stepScale === 1) {
+		if (this.state.stepScale === STEP_SCALE.MONTH) {
 			const newValue = new Date(this.state.value);
 			newValue.setMonth(newValue.getMonth() + this.state.stepInterval * direction);
 
 			this.setValue(newValue);
 		}
 
-		if (this.state.stepScale === 2) {
+		if (this.state.stepScale === STEP_SCALE.YEAR) {
 			const newValue = new Date(this.state.value);
 			newValue.setFullYear(newValue.getFullYear() + this.state.stepInterval * direction);
 			this.setValue(newValue);
@@ -179,7 +191,18 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		this.setState({value: this.props.value || this.props.min});
+		if (this.props.value) {
+			this.setState({value: this.props.value});
+		}
+
+		if (this.props.stepInterval) {
+			this.setState({stepInterval: this.props.stepInterval});
+		}
+
+		if (this.props.stepScale) {
+			this.setState({stepScale: this.props.stepScale});
+		}
+
 	}
 
 	public componentWillUnmount() {
@@ -224,10 +247,10 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 					<IntervalRow>
 						Step interval: <StepInput value={stepInterval} onChange={this.onChangeStepInterval} />
 						&nbsp;
-						<Select value={stepScale} onChange={(e) => this.setState({stepScale: parseInt(e.target.value, 10)})} >
-							<MenuItem value={0}>day(s)</MenuItem>
-							<MenuItem value={1}>month(s)</MenuItem>
-							<MenuItem value={2}>year(s)</MenuItem>
+						<Select value={stepScale} onChange={this.onChangeStepScale} >
+							<MenuItem value={STEP_SCALE.DAY}>day(s)</MenuItem>
+							<MenuItem value={STEP_SCALE.MONTH}>month(s)</MenuItem>
+							<MenuItem value={STEP_SCALE.YEAR}>year(s)</MenuItem>
 						</Select>
 					</IntervalRow>
 					<SequenceRow>

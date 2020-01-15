@@ -17,6 +17,7 @@
 
 import React from 'react';
 
+import { STEP_SCALE } from '../../../../constants/sequences';
 import { SequencePlayer } from './components/sequencePlayer/sequencePlayer.component';
 import {
 	SequencesContainer, SequencesIcon,
@@ -26,29 +27,30 @@ interface IProps {
 	sequences: any;
 	initializeSequences: () => void;
 	setSelectedFrame: (date: Date) => void;
+	setStepInterval: (interval: number) => void;
+	setStepScale: (scale: STEP_SCALE) => void;
 	maxDate: Date;
 	minDate: Date;
 	selectedDate: Date;
 	colorOverrides: any;
+	stepInterval: number;
+	stepScale: STEP_SCALE;
+	currentActivities: any[];
 }
 
 export class Sequences extends React.PureComponent<IProps, {}> {
-	public onChangeDate = (value) => {
-		this.props.setSelectedFrame(value);
-	}
-
 	public componentDidMount = () => {
 		this.props.initializeSequences();
 	}
 
 	public componentDidUpdate = () => {
-		// console.log(this.props.colorOverrides);
+		// console.log(this.props.currentActivities);
 	}
 
 	public render = () => {
-		const min = this.props.minDate;
-		const max = this.props.maxDate;
-		const selectedDate =  this.props.selectedDate;
+		const {minDate, maxDate, selectedDate,
+			setSelectedFrame, stepInterval,
+			stepScale, setStepInterval, setStepScale } = this.props;
 
 		return (
 			<SequencesContainer
@@ -56,7 +58,16 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 				renderActions={() => (<></>)}
 				pending={false}
 			>
-				<SequencePlayer min={min} max={max} onChange={this.onChangeDate} value={selectedDate} />
+				<SequencePlayer
+					min={minDate}
+					max={maxDate}
+					value={selectedDate}
+					stepInterval={stepInterval}
+					stepScale={stepScale}
+					onChange={setSelectedFrame}
+					onChangeStepScale={setStepScale}
+					onChangeStepInterval={setStepInterval}
+				/>
 			</SequencesContainer>
 
 	);
