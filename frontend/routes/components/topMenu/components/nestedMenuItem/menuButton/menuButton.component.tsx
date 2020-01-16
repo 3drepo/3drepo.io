@@ -19,8 +19,7 @@ import React from 'react';
 
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import { COLOR } from '../../../../../../styles';
-
-import { MenuItem, MenuText } from '../../../../extrasMenu/extrasMenu.styles';
+import { MenuItem, MenuText } from '../../mainMenu/menuContent/menuContent.styles';
 
 interface IProps {
 	IconProps?: any;

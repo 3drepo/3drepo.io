@@ -18,9 +18,20 @@
 import styled from 'styled-components';
 
 import IconButton from '@material-ui/core/IconButton';
+import Menu from '@material-ui/icons/Menu';
+
+import { COLOR } from '../../../../../../styles';
 
 export const StyledIconButton = styled(IconButton)`
 	&& {
 		background-color: ${({ active }) => active ? 'rgba(0, 0, 0, 0.08)' : ''};
+	}
+`;
+
+export const BurgerIcon = styled(Menu)`
+	&& {
+		color: ${COLOR.WHITE};
+		font-size: 28px;
+		filter: drop-shadow(0 0 2px ${COLOR.BLACK_30});
 	}
 `;

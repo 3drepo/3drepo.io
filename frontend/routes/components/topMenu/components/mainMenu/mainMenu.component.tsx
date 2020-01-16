@@ -17,48 +17,15 @@
 
 import * as React from 'react';
 
-import { Avatar } from '../../../avatar/avatar.component';
 import { ButtonMenu } from '../../../buttonMenu/buttonMenu.component';
-import { StyledIconButton } from './mainMenu.styles';
+import { getNormalizedUserData, ICurrentUser } from './mainMenu.helpers';
+import { MainMenuButton } from './mainMenuButton/mainMenuButton.component';
 import { MenuContent } from './menuContent/menuContent.component';
-
-interface IUserButtonProps {
-	userData: {
-		name: string,
-		avatarUrl: string,
-		username: string,
-	};
-	isMenuOpen: boolean;
-	IconProps: any;
-	Icon: React.ReactNode;
-}
-
-const UserButton: React.FunctionComponent<IUserButtonProps> =
-		({ IconProps, Icon, isMenuOpen, userData: { name, avatarUrl }, ...props }: IUserButtonProps) => (
-		<StyledIconButton
-			{...props}
-			active={Number(isMenuOpen)}
-			aria-label="Toggle user menu"
-			aria-haspopup="true"
-		>
-			<Avatar
-				name={name}
-				size={26}
-				url={avatarUrl}
-				fontSize={12}
-			/>
-		</StyledIconButton>
-);
 
 interface IProps {
 	children?: React.ReactNode;
 	isAuthenticated: boolean;
-	currentUser?: {
-		username: string,
-		avatarUrl: string,
-		firstName: string,
-		lastName: string,
-	};
+	currentUser?: ICurrentUser;
 	onTeamspacesClick?: () => void;
 	onSettingClick?: () => void;
 }
@@ -66,29 +33,24 @@ interface IProps {
 export const MainMenu: React.FunctionComponent<IProps> =
 		({ isAuthenticated, currentUser, ...mainMenuProps }) => {
 
-	const getCurrentUserData = () => {
-		const { username, avatarUrl, firstName, lastName } = currentUser;
-		const name = firstName || lastName ? `${firstName || ''} ${lastName || ''}`.trim() : username;
-
-		return {
-			name,
-			username,
-			avatarUrl,
-		};
-	};
-
 	const renderMenuContent = (props) => {
 		const menuContentProps = {
 			...props,
 			...mainMenuProps,
 			isAuthenticated,
-			userData: getCurrentUserData(),
+			userData: currentUser && getNormalizedUserData(currentUser),
 		};
 
 		return <MenuContent {...menuContentProps} />;
 	};
 
-	const renderButton = ({ ...props }) => <UserButton userData={getCurrentUserData()} {...props} />;
+	const renderButton = ({ ...props }) => (
+		<MainMenuButton
+			{...props}
+			userData={currentUser && getNormalizedUserData(currentUser)}
+			isAuthenticated={isAuthenticated}
+		/>
+	);
 
 	return (
 		<ButtonMenu

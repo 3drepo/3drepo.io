@@ -26,9 +26,20 @@ import TeamspacesIcon from '@material-ui/icons/ViewList';
 import { LANDING_ROUTES, STATIC_ROUTES } from '../../../../../../services/staticPages';
 import { COLOR } from '../../../../../../styles';
 import { Avatar } from '../../../../avatar/avatar.component';
-import { ExternalLink } from '../../../../extrasMenu/extrasMenu.component';
 import { NestedMenuItem } from '../../nestedMenuItem/nestedMenuItem.component';
+import { IUserData } from '../mainMenu.helpers';
 import { MenuIcon, MenuItem, MenuText, MenuUser } from './menuContent.styles';
+
+const ExternalLink = ({ ...props }) => {
+	const Icon = props.icon || React.Fragment;
+	const iconProps = props.icon ? { style: { color: COLOR.BLACK_54 } } : {};
+	return (
+		<MenuItem button aria-label={props.label} onClick={props.onButtonClick}>
+			<Icon {...iconProps} />
+			<MenuText primary={props.label} />
+		</MenuItem>
+	);
+};
 
 const UserMenuButton = ({ Icon, ...props }) => {
 	return (
@@ -45,11 +56,7 @@ const commonLinks = [...LANDING_ROUTES];
 const staticLinks = [...STATIC_ROUTES];
 
 interface IProps {
-	userData?: {
-		name: string,
-		avatarUrl: string,
-		username: string,
-	};
+	userData?: IUserData;
 	isAuthenticated: boolean;
 	onTeamspacesClick: () => void;
 	onSettingClick: () => void;
@@ -58,7 +65,7 @@ interface IProps {
 }
 
 export const MenuContent: React.FunctionComponent<IProps> = ({
-	isAuthenticated, userData: { name, avatarUrl, username }, onTeamspacesClick, onSettingClick, onLogout, close,
+	isAuthenticated, userData, onTeamspacesClick, onSettingClick, onLogout, close,
 }) => {
 	const invokeAndClose = (callback) => (...args) => {
 		if (typeof callback === 'string') {
@@ -76,12 +83,12 @@ export const MenuContent: React.FunctionComponent<IProps> = ({
 			<React.Fragment key="accountSettings">
 				<MenuUser>
 					<Avatar
-						name={name}
+						name={userData.name}
 						size={26}
-						url={avatarUrl}
+						url={userData.avatarUrl}
 						fontSize={12}
 					/>
-					<MenuText primary={username} />
+					<MenuText primary={userData.username} />
 				</MenuUser>
 				<Divider />
 				<UserMenuButton

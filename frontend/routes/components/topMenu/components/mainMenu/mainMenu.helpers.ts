@@ -15,13 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import IconButton from '@material-ui/core/IconButton';
-import styled from 'styled-components';
+export interface ICurrentUser {
+	username: string;
+	avatarUrl: string;
+	firstName: string;
+	lastName: string;
+}
 
-import { COLOR } from '../../../../styles';
+export interface IUserData {
+	name: string;
+	username: string;
+	avatarUrl: string;
+}
 
-export const StyledIconButton = styled(IconButton)`
-	&& {
-		background-color: ${({ active }) => active ? 'rgba(0, 0, 0, 0.08)' : ''};
-	}
-`;
+export const getNormalizedUserData = ({ username, avatarUrl, firstName, lastName }: ICurrentUser): IUserData => {
+	const name = firstName || lastName ? `${firstName || ''} ${lastName || ''}`.trim() : username;
+
+	return {
+		name,
+		username,
+		avatarUrl,
+	};
+};
