@@ -144,6 +144,60 @@ export const selectSelectedFrameTransparencies = createSelector(
 	}
 );
 
+const mergeTasks = (tasks) => {
+	// creates a dictionary indexed by the task_id
+	const taskDict = tasks.reduce((dict , task) => {
+		if (!dict[task._id]) {
+			dict[task._id] = {...task};
+		}
+
+		if (task.tasks && !dict[task._id].tasks) {
+			dict[task._id].tasks = task.tasks;
+		} else if (task.tasks && dict[task._id].tasks) {
+			Array.prototype.push.apply(dict[task._id].tasks, task.tasks);
+		}
+
+		return dict;
+	}, {});
+
+	// converts the dictionary to an array of uniq tasks with its subtasks merged
+	return Object.keys(taskDict).map((id) => {
+		const task = taskDict[id];
+		if (task.tasks) {
+			task.tasks = mergeTasks(task.tasks);
+		}
+		return task;
+	});
+};
+
+// Filters the taks by a range and its subtasks also
+const getTasksByRange = (tasks, minDate, maxDate) => {
+	return tasks.reduce((filteredTasks, task) => {
+			if (! (task.startDate > maxDate || task.endDate < minDate)) {
+				task = {...task};
+				if ( task.tasks ) {
+					task.tasks = getTasksByRange(task.tasks, minDate, maxDate);
+				}
+
+				filteredTasks.push(task);
+			}
+
+			return filteredTasks;
+		}, []);
+};
+
+const replaceDates = (tasks) => {
+	return tasks.map((t) => {
+		t.startDate = new Date(t.startDate);
+		t.endDate = new Date(t.endDate);
+		if (t.tasks) {
+			t.tasks = replaceDates(t.tasks);
+		}
+
+		return t;
+	});
+};
+
 export const selectCurrentActivities = createSelector(
 	selectSelectedDate, selectStepInterval, selectStepScale, selectSelectedSequence,
 		(selectedDate: Date, stepInterval: number, stepScale: STEP_SCALE, selectedSequence: any) => {
@@ -156,7 +210,7 @@ export const selectCurrentActivities = createSelector(
 			maxSelectedDate.setHours(23, 59, 29, 999);
 
 			if (stepScale === STEP_SCALE.DAY) {
-				minSelectedDate = new Date(minSelectedDate.valueOf() - MILLI_PER_DAY * stepInterval );
+				minSelectedDate = new Date(minSelectedDate.valueOf()  - MILLI_PER_DAY * (stepInterval - 1));
 			}
 
 			if (stepScale === STEP_SCALE.MONTH) {
@@ -171,12 +225,39 @@ export const selectCurrentActivities = createSelector(
 				minSelectedDate.setFullYear(minSelectedDate.getFullYear() - stepInterval);
 			}
 
-			return selectedSequence.frames.reduce((tasks, frame) => {
-				Array.prototype.push.apply(tasks, (frame.tasks.filter(
-					(task) => ! (task.startDate > maxSelectedDate || task.endDate < minSelectedDate)
-				)));
+			const frames = selectedSequence.frames;
+			let minIndex = frames.length - 1;
+			let maxIndex = 0;
+			let candidatesTasks = [];
 
-				return tasks;
-			}, [])  ;
+			for (let i = 0; i < frames.length ; i++) {
+				if (frames[i].dateTime >= minSelectedDate && frames[i].dateTime <= maxSelectedDate) {
+					let foundTasks =  frames[i].tasks;
+					if (minIndex > i) { // this means is the first tasks I found so they might need to be trimmed
+						minIndex = i;
+						foundTasks =  getTasksByRange(foundTasks, minSelectedDate, maxSelectedDate);
+					}
+
+					Array.prototype.push.apply(candidatesTasks, foundTasks);
+					if ( maxIndex < i) {
+						maxIndex = i;
+					}
+				}
+			}
+
+			if (minIndex > 0 && minIndex <= maxIndex ) {
+				const prevTasks = getTasksByRange(frames[minIndex - 1].tasks, minSelectedDate, maxSelectedDate);
+
+				if (prevTasks.length > 0) {
+					candidatesTasks = prevTasks.concat(candidatesTasks);
+				}
+			}
+
+			if (maxIndex < frames.length - 1 && minIndex <= maxIndex ) {
+				const nextTasks = getTasksByRange(frames[maxIndex + 1].tasks, minSelectedDate, maxSelectedDate);
+				Array.prototype.push.apply(candidatesTasks, nextTasks);
+			}
+
+			return replaceDates(mergeTasks(candidatesTasks));
 		}
 );
