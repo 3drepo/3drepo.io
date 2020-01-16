@@ -33,7 +33,7 @@ const mapStateToProps = createStructuredSelector({
 	colorOverrides: selectSelectedFrameColors,
 	stepInterval: selectStepInterval,
 	stepScale: selectStepScale,
-	currentActivities: selectCurrentActivities
+	currentTasks: selectCurrentActivities
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

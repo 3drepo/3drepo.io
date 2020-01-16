@@ -55,6 +55,19 @@ export const SequencePlayerContainer = styled(Grid).attrs({
 	}
 `;
 
+export const TasksContainer = styled(Grid)`
+	&&  {
+		font-size: 14px;
+		margin-left: 20px;
+	}
+`;
+
+export const Task = styled(Grid)`
+	&&  {
+		padding-left: ${(props) => props.hasSubTasks ? '0px' : '48px'};
+	}
+`;
+
 export const SequenceRow = styled(Grid).attrs({
 	container: true,
 	direction: 'row',

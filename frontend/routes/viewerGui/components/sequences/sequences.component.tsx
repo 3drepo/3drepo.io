@@ -19,6 +19,7 @@ import React from 'react';
 
 import { STEP_SCALE } from '../../../../constants/sequences';
 import { SequencePlayer } from './components/sequencePlayer/sequencePlayer.component';
+import { TasksList } from './components/tasksList/sequenceTasksList.component';
 import {
 	SequencesContainer, SequencesIcon,
 } from './sequences.styles';
@@ -35,7 +36,7 @@ interface IProps {
 	colorOverrides: any;
 	stepInterval: number;
 	stepScale: STEP_SCALE;
-	currentActivities: any[];
+	currentTasks: any[];
 }
 
 export class Sequences extends React.PureComponent<IProps, {}> {
@@ -50,7 +51,8 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 	public render = () => {
 		const {minDate, maxDate, selectedDate,
 			setSelectedFrame, stepInterval,
-			stepScale, setStepInterval, setStepScale } = this.props;
+			stepScale, setStepInterval, setStepScale,
+			currentTasks } = this.props;
 
 		return (
 			<SequencesContainer
@@ -68,6 +70,8 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 					onChangeStepScale={setStepScale}
 					onChangeStepInterval={setStepInterval}
 				/>
+
+				<TasksList tasks={currentTasks} />
 			</SequencesContainer>
 
 	);

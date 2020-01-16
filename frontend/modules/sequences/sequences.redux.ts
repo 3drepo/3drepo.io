@@ -30,7 +30,8 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	setStateDefinition: ['stateId', 'stateDefinition'],
 	setLastLoadedSuccesfullState: ['stateId'],
 	setStepInterval: ['stepInterval'],
-	setStepScale: ['stepScale']
+	setStepScale: ['stepScale'],
+	reset: []
 }, { prefix: 'SEQUENCES/' });
 
 export const INITIAL_STATE = {
@@ -78,6 +79,10 @@ export const setStepScale = (state = INITIAL_STATE, { stepScale }) => {
 	return {...state, stepScale};
 };
 
+export const reset = (state = INITIAL_STATE) => {
+	return {...state};
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[SequencesTypes.FETCH_SEQUENCES_SUCCESS]: fetchSequencesSuccess,
 	[SequencesTypes.SET_SEQUENCES_PENDING]: setSequencesPending,
@@ -86,5 +91,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[SequencesTypes.SET_SELECTED_SEQUENCE]: setSelectedSequence,
 	[SequencesTypes.SET_LAST_LOADED_SUCCESFULL_STATE]: setLastLoadedSuccesfullState,
 	[SequencesTypes.SET_STEP_INTERVAL]: setStepInterval,
-	[SequencesTypes.SET_STEP_SCALE]: setStepScale
+	[SequencesTypes.SET_STEP_SCALE]: setStepScale,
+	[SequencesTypes.RESET]: reset
 });

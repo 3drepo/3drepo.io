@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { sortBy } from 'lodash';
+import { merge, omit, sortBy } from 'lodash';
 import { createSelector } from 'reselect';
 import { STEP_SCALE } from '../../constants/sequences';
 import { GLToHexColor } from '../../helpers/colors';
@@ -52,7 +52,7 @@ const selectSelectedFrames = createSelector(
 			return [];
 		}
 
-		return sortBy(sequence.frames, 'dateTime');
+		return sequence.frames;
 	}
 );
 
@@ -76,19 +76,25 @@ export const selectStepScale = createSelector(
 	selectSequencesDomain, (state) => state.stepScale
 );
 
+const getFrameIndexByDate = (frames, date) => {
+	let index = 0;
+
+	for (let i = frames.length - 1 ; i >= 0 && index === 0; i--) {
+		if (frames[i].dateTime <= date) {
+			index = i;
+		}
+	}
+
+	return index;
+};
+
 export const selectSelectedFrame = createSelector(
 	selectSelectedFrames, selectSelectedDate, (frames, date) => {
-		let frame = null;
 		date = new Date(date);
 		date.setHours(23, 59, 59, 999);
 
-		for (let i = frames.length - 1 ; i >= 0 && !frame; i--) {
-			if (frames[i].dateTime <= date) {
-				frame  = frames[i];
-			}
-		}
-
-		return frame;
+		const index = getFrameIndexByDate(frames, date);
+		return frames[index];
 	}
 );
 
@@ -144,31 +150,61 @@ export const selectSelectedFrameTransparencies = createSelector(
 	}
 );
 
-const mergeTasks = (tasks) => {
-	// creates a dictionary indexed by the task_id
-	const taskDict = tasks.reduce((dict , task) => {
+const tasksArrToDict = (tasks) => {
+	return tasks.reduce((dict , task) => {
 		if (!dict[task._id]) {
-			dict[task._id] = {...task};
+			dict[task._id] = omit(task, 'tasks');
 		}
 
 		if (task.tasks && !dict[task._id].tasks) {
-			dict[task._id].tasks = task.tasks;
+			dict[task._id].tasks =  tasksArrToDict(task.tasks);
 		} else if (task.tasks && dict[task._id].tasks) {
-			Array.prototype.push.apply(dict[task._id].tasks, task.tasks);
+			dict[task._id].tasks = merge(dict[task._id].tasks, tasksArrToDict(task.tasks));
 		}
 
 		return dict;
 	}, {});
+};
 
-	// converts the dictionary to an array of uniq tasks with its subtasks merged
+const tasksDictToArr = (taskDict) => {
 	return Object.keys(taskDict).map((id) => {
 		const task = taskDict[id];
 		if (task.tasks) {
-			task.tasks = mergeTasks(task.tasks);
+			task.tasks = tasksDictToArr(task.tasks);
 		}
 		return task;
 	});
 };
+
+const mergeTasks = (tasks) => {
+	return tasksDictToArr(tasksArrToDict(tasks));
+};
+
+// const mergeTasks = (tasks) => {
+// 	// creates a dictionary indexed by the task_id
+// 	const taskDict = tasks.reduce((dict , task) => {
+// 		if (!dict[task._id]) {
+// 			dict[task._id] = {...task};
+// 		}
+
+// 		if (task.tasks && !dict[task._id].tasks) {
+// 			dict[task._id].tasks = task.tasks;
+// 		} else if (task.tasks && dict[task._id].tasks) {
+// 			Array.prototype.push.apply(dict[task._id].tasks, task.tasks);
+// 		}
+
+// 		return dict;
+// 	}, {});
+
+// 	// converts the dictionary to an array of uniq tasks with its subtasks merged
+// 	return Object.keys(taskDict).map((id) => {
+// 		const task = taskDict[id];
+// 		if (task.tasks) {
+// 			task.tasks = mergeTasks(task.tasks);
+// 		}
+// 		return task;
+// 	});
+// };
 
 // Filters the taks by a range and its subtasks also
 const getTasksByRange = (tasks, minDate, maxDate) => {
@@ -206,6 +242,8 @@ export const selectCurrentActivities = createSelector(
 			}
 
 			let minSelectedDate: any = new Date(selectedDate);
+			minSelectedDate.setHours(0, 0, 0, 0);
+
 			const maxSelectedDate: any = new Date(selectedDate);
 			maxSelectedDate.setHours(23, 59, 29, 999);
 
@@ -226,34 +264,20 @@ export const selectCurrentActivities = createSelector(
 			}
 
 			const frames = selectedSequence.frames;
-			let minIndex = frames.length - 1;
-			let maxIndex = 0;
-			let candidatesTasks = [];
+			const minIndex = getFrameIndexByDate(frames, minSelectedDate);
+			const maxIndex = getFrameIndexByDate(frames, maxSelectedDate);
+			const candidatesTasks = [];
 
-			for (let i = 0; i < frames.length ; i++) {
-				if (frames[i].dateTime >= minSelectedDate && frames[i].dateTime <= maxSelectedDate) {
-					let foundTasks =  frames[i].tasks;
-					if (minIndex > i) { // this means is the first tasks I found so they might need to be trimmed
-						minIndex = i;
-						foundTasks =  getTasksByRange(foundTasks, minSelectedDate, maxSelectedDate);
-					}
-
-					Array.prototype.push.apply(candidatesTasks, foundTasks);
-					if ( maxIndex < i) {
-						maxIndex = i;
-					}
+			for (let i = minIndex; i <= maxIndex ; i++) {
+				let foundTasks =  frames[i].tasks;
+				if (minIndex === i) { // this means is the first tasks I found so they might need to be trimmed
+					foundTasks =  getTasksByRange(foundTasks, minSelectedDate, maxSelectedDate);
 				}
+
+				Array.prototype.push.apply(candidatesTasks, foundTasks);
 			}
 
-			if (minIndex > 0 && minIndex <= maxIndex ) {
-				const prevTasks = getTasksByRange(frames[minIndex - 1].tasks, minSelectedDate, maxSelectedDate);
-
-				if (prevTasks.length > 0) {
-					candidatesTasks = prevTasks.concat(candidatesTasks);
-				}
-			}
-
-			if (maxIndex < frames.length - 1 && minIndex <= maxIndex ) {
+			if (maxIndex < frames.length - 1 ) {
 				const nextTasks = getTasksByRange(frames[maxIndex + 1].tasks, minSelectedDate, maxSelectedDate);
 				Array.prototype.push.apply(candidatesTasks, nextTasks);
 			}
