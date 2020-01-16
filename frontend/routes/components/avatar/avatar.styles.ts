@@ -34,6 +34,7 @@ export const Container = styled.div`
 	height: ${getSize}px;
 	min-width: ${getSize}px;
 	font-size: ${(props: any) => props.fontSize || DEFAULT_FONT_SIZE}px;
+	margin: -1px;
 
 	${StyledIcon} {
 		font-size: ${(props: any) => getSize(props) * 0.6}px;
@@ -47,7 +48,6 @@ export const StyledAvatar = styled(Avatar)`
 		background: #e8eaf6;
 		color: ${COLOR.PRIMARY_MAIN};
 		border: 1px solid #e8eaf6;
-		margin: -1px;
 		font-size: inherit;
 	}
 `;

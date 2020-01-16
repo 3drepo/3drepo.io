@@ -24,6 +24,7 @@ import { BurgerIcon, StyledIconButton } from './mainMenuButton.styles';
 
 interface IUserButtonProps {
 	isAuthenticated: boolean;
+	isInitialised?: boolean;
 	userData?: IUserData;
 	isMenuOpen?: boolean;
 	IconProps?: any;
@@ -31,14 +32,15 @@ interface IUserButtonProps {
 }
 
 export const MainMenuButton: React.FunctionComponent<IUserButtonProps> =
-	({ IconProps, Icon, isAuthenticated, isMenuOpen, userData, ...props }: IUserButtonProps) => {
+	({ IconProps, Icon, isAuthenticated, isInitialised, isMenuOpen, userData, ...props }: IUserButtonProps) => {
 
 	const renderAvatar = renderWhenTrue(() => (
 		<Avatar
 			name={userData.name}
 			size={26}
+			loading={!isInitialised}
 			url={userData.avatarUrl}
-			fontSize={12}
+			fontSize={13}
 		/>
 	));
 

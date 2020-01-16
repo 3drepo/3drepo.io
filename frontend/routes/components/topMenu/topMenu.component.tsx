@@ -28,6 +28,7 @@ import { BackIcon, Container } from './topMenu.styles';
 
 interface IProps {
 	currentUser: any;
+	isInitialised: boolean;
 	history: any;
 	isFocusMode: boolean;
 	isAuthenticated: boolean;

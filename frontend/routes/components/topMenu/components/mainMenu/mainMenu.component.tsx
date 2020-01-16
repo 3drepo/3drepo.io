@@ -28,10 +28,11 @@ interface IProps {
 	currentUser?: ICurrentUser;
 	onTeamspacesClick?: () => void;
 	onSettingClick?: () => void;
+	isInitialised?: boolean;
 }
 
 export const MainMenu: React.FunctionComponent<IProps> =
-		({ isAuthenticated, currentUser, ...mainMenuProps }) => {
+		({ isAuthenticated, isInitialised, currentUser, ...mainMenuProps }) => {
 
 	const renderMenuContent = (props) => {
 		const menuContentProps = {
@@ -48,6 +49,7 @@ export const MainMenu: React.FunctionComponent<IProps> =
 		<MainMenuButton
 			{...props}
 			userData={currentUser && getNormalizedUserData(currentUser)}
+			isInitialised={isInitialised}
 			isAuthenticated={isAuthenticated}
 		/>
 	);
