@@ -17,28 +17,25 @@
 
 import React from 'react';
 
-import { IconButton } from '@material-ui/core';
-import LockIcon from '@material-ui/icons/Lock';
-import UnlockIcon from '@material-ui/icons/LockOpen';
+import CancelIcon from '@material-ui/icons/Cancel';
+import SearchIcon from '@material-ui/icons/Search';
 
-interface IProps {
-	type: string;
-	lockedPanels?: string[];
-	setPanelLock: (panelName) => void;
+import { StyledIconButton } from '../lockPanelButton/lockPanelButton.styles';
+
+export interface IMenuButton {
+	hidden?: boolean;
+	enabled?: boolean;
+	onOpen?: () => void;
+	onClose?: () => void;
 }
 
-export class LockPanelButton extends React.PureComponent<IProps, any> {
-	get isLocked() {
-		return this.props.lockedPanels.includes(this.props.type);
-	}
-
-	private handleLockPanel = () => this.props.type && this.props.setPanelLock(this.props.type);
-
-	public render() {
-		return (
-			<IconButton onClick={this.handleLockPanel}>
-				{this.isLocked ? <LockIcon /> : <UnlockIcon />}
-			</IconButton>
-		);
-	}
-}
+export const SearchButton: React.FunctionComponent<IMenuButton> = ({ hidden, enabled, onOpen, onClose }) => {
+	return (
+		<StyledIconButton
+			hidden={hidden}
+			onClick={enabled ? onClose : onOpen}
+		>
+			{enabled ? <CancelIcon /> : <SearchIcon />}
+		</StyledIconButton>
+	);
+};

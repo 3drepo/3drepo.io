@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,18 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import MoreIcon from '@material-ui/icons/MoreVert';
+import styled, { css } from 'styled-components';
+
 import IconButton from '@material-ui/core/IconButton';
 
-export const MenuButton = ({
-	IconProps = {}, Icon = MoreIcon, ariaLabel = 'Show menu', ariaHasPopup = true, ...props
-}) => (
-  <IconButton
-    {...props}
-    aria-label={ariaLabel}
-    aria-haspopup={ariaHasPopup}
-  >
-    <Icon {...IconProps} />
-  </IconButton>
-);
+export const StyledIconButton = styled(IconButton)`
+	${({ hidden }) => hidden && css`
+		pointer-events: none;
+		opacity: 0.2;
+	`};
+`;

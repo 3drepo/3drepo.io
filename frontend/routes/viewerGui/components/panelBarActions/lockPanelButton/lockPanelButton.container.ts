@@ -19,7 +19,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { selectLockedPanels, ViewerGuiActions } from '../../../../modules/viewerGui';
+import { selectLockedPanels, ViewerGuiActions } from '../../../../../modules/viewerGui';
 import { LockPanelButton } from './lockPanelButton.component';
 
 const mapStateToProps = createStructuredSelector({
