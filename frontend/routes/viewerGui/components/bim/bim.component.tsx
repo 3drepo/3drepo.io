@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,25 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { IconButton, Tab } from '@material-ui/core';
-import CancelIcon from '@material-ui/icons/Cancel';
-import InfoIcon from '@material-ui/icons/Info';
-import SearchIcon from '@material-ui/icons/Search';
-import { isEmpty } from 'lodash';
 import React from 'react';
+
+import { Tab } from '@material-ui/core';
+import InfoIcon from '@material-ui/icons/Info';
+import { isEmpty } from 'lodash';
 
 import { BIM_ACTIONS_ITEMS, BIM_ACTIONS_MENU } from '../../../../constants/bim';
 import { getFilters } from '../../../../helpers/bim';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { IMetaRecord } from '../../../../modules/bim/bim.redux';
-import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import {
 	MenuList,
 	StyledItemText,
 	StyledListItem
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { FilterPanel, ISelectedFilter } from '../../../components/filterPanel/filterPanel.component';
-import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
+import { PanelBarActions } from '../panelBarActions';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
 import { Container, EmptyStateInfo, Tabs } from './bim.styles';
@@ -58,8 +56,6 @@ interface IProps {
 	removeMetaRecordFromStarred?: (key) => void;
 	showConfirmDialog: (config) => void;
 }
-
-const MenuButton = (props) => <MenuButtonComponent ariaLabel="Show BIM menu" {...props} />;
 
 export class Bim extends React.PureComponent<IProps, any> {
 	get menuActionsMap() {
@@ -124,28 +120,11 @@ export class Bim extends React.PureComponent<IProps, any> {
 		);
 	}
 
-	public getSearchButton = () => {
-		if (this.props.searchEnabled) {
-			return <IconButton onClick={this.handleCloseSearchMode}><CancelIcon /></IconButton>;
-		}
-		return <IconButton onClick={this.handleOpenSearchMode}><SearchIcon /></IconButton>;
-	}
-
 	private handleFilterChange = (selectedFilters) => {
 		this.props.setComponentState({ selectedFilters });
 	}
 
 	private getTitleIcon = () => <InfoIcon />;
-
-	private getMenuButton = () => (
-		<ButtonMenu
-			renderButton={MenuButton}
-			renderContent={this.renderActionsMenu}
-			PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
-			PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
-			ButtonProps={{ disabled: isEmpty(this.props.starredMetaMap) }}
-		/>
-	)
 
 	private handleCloseSearchMode = () => {
 		this.props.setComponentState({ searchEnabled: false, selectedFilters: [] });
@@ -221,12 +200,15 @@ export class Bim extends React.PureComponent<IProps, any> {
 		);
 	}
 
-	private renderActions = () => {
-		return (
-			<>
-				{this.getSearchButton()}
-				{this.getMenuButton()}
-			</>
-		);
-	}
+	private renderActions = () => (
+		<PanelBarActions
+			hideLock
+			menuLabel="Show BIM menu"
+			menuActions={this.renderActionsMenu}
+			menuDisabled={isEmpty(this.props.starredMetaMap)}
+			isSearchEnabled={this.props.searchEnabled}
+			onSearchOpen={this.handleOpenSearchMode}
+			onSearchClose={this.handleCloseSearchMode}
+		/>
+	)
 }

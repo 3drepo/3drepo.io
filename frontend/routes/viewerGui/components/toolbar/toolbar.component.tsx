@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -90,7 +90,7 @@ interface IProps {
 	setMeasureVisibility: (visible) => void;
 	setCoordView: (visible) => void;
 	stopListenOnNumClip: () => void;
-	setPanelVisibility: (panelName, visibility) => void;
+	setPanelVisibility: (panelName) => void;
 }
 
 interface IState {
@@ -322,14 +322,11 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 			setMetadataActive,
 			setMeasureVisibility,
 			setPanelVisibility,
-			isMetadataVisible
 		} = this.props;
 		setMetadataActive(!isMetadataActive);
-		setPanelVisibility(VIEWER_PANELS.BIM, !isMetadataVisible);
+		setPanelVisibility(VIEWER_PANELS.BIM);
 
-		if (isMetadataActive) {
-			setPanelVisibility(VIEWER_PANELS.BIM, false);
-		} else {
+		if (!isMetadataActive) {
 			setMeasureVisibility(false);
 		}
 	}
@@ -344,7 +341,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 		setMeasureVisibility(!isMeasureActive);
 
 		if (!isMeasureActive) {
-			setPanelVisibility(VIEWER_PANELS.BIM, false);
+			setPanelVisibility(VIEWER_PANELS.BIM);
 		}
 	}
 }

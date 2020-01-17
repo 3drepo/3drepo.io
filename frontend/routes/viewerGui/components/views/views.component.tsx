@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,19 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isEqual } from 'lodash';
 import React from 'react';
 
-import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
-import CancelIcon from '@material-ui/icons/Cancel';
-import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
-import SearchIcon from '@material-ui/icons/Search';
+import { isEqual } from 'lodash';
 
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
+import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { IViewpointsComponentState } from '../../../../modules/viewpoints/viewpoints.redux';
 import { Viewer } from '../../../../services/viewer/viewer';
+import { PanelBarActions } from '../panelBarActions';
 import { ViewerPanelButton, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
 import { ViewItem } from './components/viewItem/viewItem.component';
 import {
@@ -68,6 +66,10 @@ export class Views extends React.PureComponent<IProps, any> {
 	};
 
 	public containerRef = React.createRef<any>();
+
+	get type() {
+		return VIEWER_PANELS.VIEWS;
+	}
 
 	get footerText() {
 		const { searchEnabled, viewpoints } = this.props;
@@ -267,13 +269,6 @@ export class Views extends React.PureComponent<IProps, any> {
 
 	public getTitleIcon = () => <ViewsIcon />;
 
-	public getSearchButton = () => {
-		if (this.props.searchEnabled) {
-			return <IconButton onClick={this.handleCloseSearchMode}><CancelIcon /></IconButton>;
-		}
-		return <IconButton onClick={this.handleOpenSearchMode}><SearchIcon /></IconButton>;
-	}
-
 	public renderFooterContent = () => (
 		<ViewerPanelFooter alignItems="center">
 			<ViewsCountInfo>{this.footerText}</ViewsCountInfo>
@@ -289,6 +284,16 @@ export class Views extends React.PureComponent<IProps, any> {
 		</ViewerPanelFooter>
 	)
 
+	public renderActions = () => (
+		<PanelBarActions
+			type={this.type}
+			hideMenu
+			isSearchEnabled={this.props.searchEnabled}
+			onSearchOpen={this.handleOpenSearchMode}
+			onSearchClose={this.handleCloseSearchMode}
+		/>
+	)
+
 	public render() {
 		const { searchEnabled, viewpoints, newViewpoint } = this.props;
 		const hasViewpoints = Boolean(viewpoints.length);
@@ -297,7 +302,7 @@ export class Views extends React.PureComponent<IProps, any> {
 		return (
 			<ViewsContainer
 				Icon={this.getTitleIcon()}
-				renderActions={this.getSearchButton}
+				renderActions={this.renderActions}
 				pending={this.props.isPending}
 			>
 				<Container ref={this.containerRef}>

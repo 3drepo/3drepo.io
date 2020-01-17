@@ -18,7 +18,7 @@
 import { Button, Grid } from '@material-ui/core';
 import styled, { css } from 'styled-components';
 
-import { COLOR } from '../../../../styles/colors';
+import { COLOR } from '../../../../styles';
 import { Panel as PanelComponent } from '../../../components/panel/panel.component';
 
 interface IViewerPanelFooter {
@@ -42,6 +42,10 @@ interface IPanel {
 export const Panel = styled(PanelComponent)<IPanel>`
 	height: 100%;
 	margin-bottom: 20px;
+
+	&& {
+		height: 100%;
+	}
 
 	${(props) => props.isPending ? css`
 		min-height: 120px !important;
@@ -101,10 +105,12 @@ export const ViewerPanelContent = styled.div<IViewerPanelContent>`
 	display: ${(props) => props.scrollDisabled ? 'flex' : 'block'};
 	flex-direction: ${(props) => props.scrollDisabled ? 'column' : 'unset'};
 	position: relative;
+	flex: 1;
 `;
 
 export const LoaderContainer = styled(ViewerPanelContent)`
 	padding: 24px;
+	height: 100%;
 `;
 
 export const ViewerPanelFooter = styled(Grid).attrs({
