@@ -105,6 +105,7 @@ export const ViewerPanelContent = styled.div<IViewerPanelContent>`
 	display: ${(props) => props.scrollDisabled ? 'flex' : 'block'};
 	flex-direction: ${(props) => props.scrollDisabled ? 'column' : 'unset'};
 	position: relative;
+	flex: 1;
 `;
 
 export const LoaderContainer = styled(ViewerPanelContent)`

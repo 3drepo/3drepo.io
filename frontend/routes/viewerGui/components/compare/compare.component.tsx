@@ -15,11 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CheckIcon from '@material-ui/icons/Check';
-import MoreIcon from '@material-ui/icons/MoreVert';
 import React from 'react';
 
-import { IconButton, Tab, Tooltip } from '@material-ui/core';
+import { Tab, Tooltip } from '@material-ui/core';
+import CheckIcon from '@material-ui/icons/Check';
 
 import {
 	CLASH_COMPARE_TYPE,
@@ -34,7 +33,6 @@ import { SORT_ORDER_TYPES } from '../../../../constants/sorting';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { ICompareComponentState } from '../../../../modules/compare/compare.redux';
-import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import {
 	IconWrapper,
 	StyledItemText,
@@ -42,7 +40,7 @@ import {
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { SortAmountDown, SortAmountUp } from '../../../components/fontAwesomeIcon';
 import { Loader } from '../../../components/loader/loader.component';
-import { LockPanelButton } from '../lockPanelButton';
+import { PanelBarActions } from '../panelBarActions';
 import { ViewerPanelButton, ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
 import {
 	CompareContainer,
@@ -86,16 +84,6 @@ interface IProps {
 	setTargetRevision: (modelId, targetRevision, isDiff) => void;
 	getCompareModels: (revision) => void;
 }
-
-const MenuButton = ({ IconProps, Icon, ...props }) => (
-	<IconButton
-		{...props}
-		aria-label="Show filters menu"
-		aria-haspopup="true"
-	>
-		<MoreIcon {...IconProps} />
-	</IconButton>
-);
 
 export class Compare extends React.PureComponent<IProps, any> {
 
@@ -182,18 +170,18 @@ export class Compare extends React.PureComponent<IProps, any> {
 			>
 				<ViewerPanelContent scrollDisabled>
 					<Tabs
-							value={activeTab}
-							indicatorColor="secondary"
-							textColor="primary"
-							fullWidth
-							onChange={this.handleChange}
+						value={activeTab}
+						indicatorColor="secondary"
+						textColor="primary"
+						fullWidth
+						onChange={this.handleChange}
 					>
 						<Tab label={COMPARE_TABS.DIFF} value={DIFF_COMPARE_TYPE} disabled={isCompareProcessed} />
 						<Tab
-								style={{ pointerEvents: 'auto' }}
-								label={this.renderClashTabLabel()}
-								value={CLASH_COMPARE_TYPE}
-								disabled={!isFederation || isCompareProcessed}
+							style={{ pointerEvents: 'auto' }}
+							label={this.renderClashTabLabel()}
+							value={CLASH_COMPARE_TYPE}
+							disabled={!isFederation || isCompareProcessed}
 						/>
 					</Tabs>
 					<TabContent>
@@ -221,26 +209,17 @@ export class Compare extends React.PureComponent<IProps, any> {
 		);
 	}
 
-	public renderActions = () => {
-		return (
-				<>
-					<LockPanelButton type={this.type} />
-					{this.renderHeaderButtons()}
-				</>
-		);
-	}
-
-	private renderHeaderButtons = () => (
-		<ButtonMenu
-			renderButton={MenuButton}
-			renderContent={this.renderMenu}
-			PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
-			PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
-			ButtonProps={{ disabled: this.props.isCompareProcessed }}
+	private renderActions = () => (
+		<PanelBarActions
+			type={this.type}
+			menuLabel="Show filters menu"
+			menuActions={this.renderActionsMenu}
+			menuDisabled={this.props.isCompareProcessed}
+			hideSearch
 		/>
 	)
 
-	private renderMenu = () => (
+	private renderActionsMenu = () => (
 		<MenuList>
 			{this.headerMenuItems.map(({ label, onClick, sortType }, index) => {
 				const isEnabled = this.props.sortType === sortType;

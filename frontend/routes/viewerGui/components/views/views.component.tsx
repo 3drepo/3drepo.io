@@ -17,10 +17,7 @@
 
 import React from 'react';
 
-import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
-import CancelIcon from '@material-ui/icons/Cancel';
-import SearchIcon from '@material-ui/icons/Search';
 import { isEqual } from 'lodash';
 
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
@@ -28,7 +25,7 @@ import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { IViewpointsComponentState } from '../../../../modules/viewpoints/viewpoints.redux';
 import { Viewer } from '../../../../services/viewer/viewer';
-import { LockPanelButton } from '../lockPanelButton';
+import { PanelBarActions } from '../panelBarActions';
 import { ViewerPanelButton, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
 import { ViewItem } from './components/viewItem/viewItem.component';
 import {
@@ -272,13 +269,6 @@ export class Views extends React.PureComponent<IProps, any> {
 
 	public getTitleIcon = () => <ViewsIcon />;
 
-	public getSearchButton = () => {
-		if (this.props.searchEnabled) {
-			return <IconButton onClick={this.handleCloseSearchMode}><CancelIcon /></IconButton>;
-		}
-		return <IconButton onClick={this.handleOpenSearchMode}><SearchIcon /></IconButton>;
-	}
-
 	public renderFooterContent = () => (
 		<ViewerPanelFooter alignItems="center">
 			<ViewsCountInfo>{this.footerText}</ViewsCountInfo>
@@ -294,14 +284,15 @@ export class Views extends React.PureComponent<IProps, any> {
 		</ViewerPanelFooter>
 	)
 
-	public renderActions = () => {
-		return (
-				<>
-					<LockPanelButton type={this.type} />
-					{this.getSearchButton()}
-				</>
-		);
-	}
+	public renderActions = () => (
+		<PanelBarActions
+			type={this.type}
+			hideMenu
+			isSearchEnabled={this.props.searchEnabled}
+			onSearchOpen={this.handleOpenSearchMode}
+			onSearchClose={this.handleCloseSearchMode}
+		/>
+	)
 
 	public render() {
 		const { searchEnabled, viewpoints, newViewpoint } = this.props;

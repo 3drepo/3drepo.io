@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,17 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import React from 'react';
+
 import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
 import ArrowBack from '@material-ui/icons/ArrowBack';
-import CancelIcon from '@material-ui/icons/Cancel';
 import Check from '@material-ui/icons/Check';
 import Delete from '@material-ui/icons/Delete';
 import InvertColors from '@material-ui/icons/InvertColors';
-import SearchIcon from '@material-ui/icons/Search';
 import Visibility from '@material-ui/icons/VisibilityOutlined';
 import { isEmpty, isEqual, size, stubTrue } from 'lodash';
-import React from 'react';
 
 import {
 	DEFAULT_OVERRIDE_COLOR,
@@ -40,7 +39,6 @@ import { hexToRgba } from '../../../../helpers/colors';
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { searchByFilters } from '../../../../helpers/searching';
-import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import {
 	IconWrapper,
 	MenuList,
@@ -48,10 +46,9 @@ import {
 	StyledListItem
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
-import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { ListNavigation } from '../listNavigation/listNavigation.component';
-import { LockPanelButton } from '../lockPanelButton';
+import { PanelBarActions } from '../panelBarActions';
 import { ListContainer, Summary } from '../risks/risks.styles';
 import { ViewerPanelButton, ViewerPanelContent, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
 import { EmptyStateInfo } from '../views/views.styles';
@@ -96,8 +93,6 @@ interface IProps {
 interface IState {
 	filteredGroups: any[];
 }
-
-const MenuButton = (props) => <MenuButtonComponent ariaLabel="Show groups menu" {...props} />;
 
 export class Groups extends React.PureComponent<IProps, IState> {
 
@@ -292,13 +287,6 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		this.props.setState({ searchEnabled: true });
 	}
 
-	public getSearchButton = () => {
-		if (this.props.searchEnabled) {
-			return <IconButton onClick={this.handleCloseSearchMode}><CancelIcon /></IconButton>;
-		}
-		return <IconButton onClick={this.handleOpenSearchMode}><SearchIcon /></IconButton>;
-	}
-
 	public renderTitleIcon = () => {
 		if (this.props.showDetails) {
 			return (
@@ -339,16 +327,6 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		</MenuList>
 	)
 
-	public getMenuButton = () => (
-		<ButtonMenu
-			renderButton={MenuButton}
-			renderContent={this.renderActionsMenu}
-			PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
-			PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
-			ButtonProps={{ disabled: false }}
-		/>
-	)
-
 	public handleNavigationChange = (currentIndex) => {
 		this.props.showGroupDetails(this.state.filteredGroups[currentIndex], this.props.revision);
 	}
@@ -359,11 +337,14 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		}
 
 		return (
-			<>
-				<LockPanelButton type={this.type} />
-				{this.getSearchButton()}
-				{this.getMenuButton()}
-			</>
+			<PanelBarActions
+				type={this.type}
+				menuLabel="Show groups menu"
+				menuActions={this.renderActionsMenu}
+				isSearchEnabled={this.props.searchEnabled}
+				onSearchOpen={this.handleOpenSearchMode}
+				onSearchClose={this.handleCloseSearchMode}
+			/>
 		);
 	}
 

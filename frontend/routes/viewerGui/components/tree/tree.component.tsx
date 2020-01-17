@@ -15,19 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import IconButton from '@material-ui/core/IconButton';
-import CancelIcon from '@material-ui/icons/Cancel';
+import React from 'react';
+
 import Check from '@material-ui/icons/Check';
 import TreeIcon from '@material-ui/icons/DeviceHub';
-import SearchIcon from '@material-ui/icons/Search';
-import * as React from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { FixedSizeList as List } from 'react-window';
 
 import { TREE_ACTIONS_ITEMS, TREE_ACTIONS_MENU, TREE_ITEM_SIZE } from '../../../../constants/tree';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../helpers/rendering';
-import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import {
 	IconWrapper,
 	MenuList,
@@ -35,8 +32,7 @@ import {
 	StyledListItem
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
-import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
-import { LockPanelButton } from '../lockPanelButton';
+import { PanelBarActions } from '../panelBarActions';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { EmptyStateInfo } from '../views/views.styles';
 import TreeNode from './components/treeNode/treeNode.container';
@@ -68,8 +64,6 @@ interface IState {
 	isFederation?: boolean;
 	isScrollToActive: boolean;
 }
-
-const MenuButton = (props) => <MenuButtonComponent ariaLabel="Show tree menu" {...props} />;
 
 export class Tree extends React.PureComponent<IProps, IState> {
 
@@ -128,7 +122,7 @@ export class Tree extends React.PureComponent<IProps, IState> {
 		const treeNodesHeight = Math.min(maxHeight, treeHeight) + 1;
 
 		return (
-			<div style={{ height: treeNodesHeight }}>
+			<div style={{ height: treeNodesHeight, flex: 1 }}>
 				<AutoSizer>
 					{({ width, height }) => (
 						<List
@@ -204,29 +198,15 @@ export class Tree extends React.PureComponent<IProps, IState> {
 		this.props.setState({ searchEnabled: true });
 	}
 
-	private renderSearchButton = () => {
-		if (this.props.searchEnabled) {
-			return <IconButton onClick={this.handleCloseSearchMode}><CancelIcon /></IconButton>;
-		}
-		return <IconButton onClick={this.handleOpenSearchMode}><SearchIcon /></IconButton>;
-	}
-
-	private renderMenuButton = () => (
-		<ButtonMenu
-			renderButton={MenuButton}
-			renderContent={this.renderActionsMenu}
-			PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
-			PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
-			ButtonProps={{ disabled: false }}
-		/>
-	)
-
 	private renderActions = () => (
-		<>
-			<LockPanelButton type={this.type} />
-			{this.renderSearchButton()}
-			{this.renderMenuButton()}
-		</>
+		<PanelBarActions
+			type={this.type}
+			menuLabel="Show tree menu"
+			menuActions={this.renderActionsMenu}
+			isSearchEnabled={this.props.searchEnabled}
+			onSearchOpen={this.handleOpenSearchMode}
+			onSearchClose={this.handleCloseSearchMode}
+		/>
 	)
 
 	private handleScrollToTop = (index) => {

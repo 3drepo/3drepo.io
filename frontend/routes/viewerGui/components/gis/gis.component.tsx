@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,25 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import React from 'react';
+
 import { IconButton, MenuItem } from '@material-ui/core';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import BuildIcon from '@material-ui/icons/Build';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import { includes, isEmpty } from 'lodash';
-import React from 'react';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 
 import { renderWhenTrue } from '../../../../helpers/rendering';
-import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import {
 	IconWrapper,
 	MenuList,
 	StyledItemText,
 	StyledListItem
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
-import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
-import { LockPanelButton } from '../lockPanelButton';
+import { PanelBarActions } from '../panelBarActions';
 import { Settings } from './components/settings/settings.component';
 import {
 	GisContainer,
@@ -69,8 +68,6 @@ interface IState {
 	visibleSources: any[];
 	pointsExists: boolean;
 }
-
-const MenuButton = (props) => <MenuButtonComponent ariaLabel="Show GIS menu" {...props} />;
 
 export class Gis extends React.PureComponent<IProps, IState> {
 
@@ -174,7 +171,7 @@ export class Gis extends React.PureComponent<IProps, IState> {
 		return <GisIcon />;
 	}
 
-	public renderMenuContent = () => (
+	public renderActionsMenu = () => (
 		<MenuList>
 			<StyledListItem onClick={this.handleToggleSettings} button>
 				<IconWrapper><BuildIcon fontSize="small" /></IconWrapper>
@@ -185,30 +182,19 @@ export class Gis extends React.PureComponent<IProps, IState> {
 		</MenuList>
 	)
 
-	public getMenuButton = () => 	(
-		<ButtonMenu
-				key={0}
-				renderButton={MenuButton}
-				renderContent={this.renderMenuContent}
-				PopoverProps={{
-					anchorOrigin: { vertical: 'center', horizontal: 'left' }
-				}}
-				ButtonProps={{
-					disabled: this.props.isPending || this.state.settingsModeActive
-				}}
-		/>
-	)
-
 	public renderActions = () => {
 		if (this.state.settingsModeActive) {
-			return [];
+			return null;
 		}
 
 		return (
-				<>
-					<LockPanelButton type={this.type} />
-					{this.getMenuButton()}
-				</>
+			<PanelBarActions
+				type={this.type}
+				menuLabel="Show GIS menu"
+				menuActions={this.renderActionsMenu}
+				menuDisabled={this.props.isPending || this.state.settingsModeActive}
+				hideSearch
+			/>
 		);
 	}
 

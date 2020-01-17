@@ -23,10 +23,11 @@ import { SearchButton } from './searchButton';
 
 interface IProps {
 	hideLock?: boolean;
-	type: string;
+	type?: string;
 	hideMenu?: boolean;
 	menuLabel?: string;
 	menuActions?: (props?) => React.ReactNode;
+	menuDisabled?: boolean;
 	hideSearch?: boolean;
 	isSearchEnabled?: boolean;
 	onSearchOpen?: () => void;
@@ -35,14 +36,14 @@ interface IProps {
 
 export const PanelBarActions: React.FunctionComponent<IProps> = ({
 	hideLock = false, hideSearch = false, hideMenu = false, type, menuLabel, menuActions,
-	isSearchEnabled, onSearchOpen, onSearchClose
+	isSearchEnabled, onSearchOpen, onSearchClose, menuDisabled = false
 }) => {
 
 	return (
 		<>
 			<LockPanelButton hidden={hideLock} type={type} />
-			<SearchButton hidden={hideMenu} enabled={isSearchEnabled} onOpen={onSearchOpen} onClose={onSearchClose} />
-			<MenuButton hidden={hideMenu} label={menuLabel} content={menuActions} />
+			<SearchButton hidden={hideSearch} enabled={isSearchEnabled} onOpen={onSearchOpen} onClose={onSearchClose} />
+			<MenuButton hidden={hideMenu} label={menuLabel} content={menuActions} disabled={menuDisabled} />
 		</>
 	);
 };

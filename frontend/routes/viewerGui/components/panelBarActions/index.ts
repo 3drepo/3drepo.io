@@ -15,22 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
-
-import IconButton from '@material-ui/core/IconButton';
-
-const hiddenStyles = css`
-	pointer-events: none;
-	visibility: hidden;
-`;
-
-const disableGuttersStyles = css`
-	&& {
-		padding: 6px;
-	}
-`;
-
-export const StyledIconButton = styled(IconButton)`
-	${({ hidden }) => hidden && hiddenStyles};
-	${({ disableGutters }) => disableGutters && disableGuttersStyles};
-`;
+export { PanelBarActions } from './panelBarActions.component';

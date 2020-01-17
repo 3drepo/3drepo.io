@@ -16,6 +16,7 @@
  */
 
 import React from 'react';
+
 import { ButtonMenu } from '../../../../components/buttonMenu/buttonMenu.component';
 import { MenuButton as MenuButtonComponent } from '../../../../components/menuButton/menuButton.component';
 
@@ -23,11 +24,12 @@ export interface IMenuButton {
 	hidden?: boolean;
 	label?: string;
 	content?: (props?) => React.ReactNode;
+	disabled?: boolean;
 }
 
-export const MenuButton: React.FunctionComponent<IMenuButton> = ({ hidden, label, content }) => {
+export const MenuButton: React.FunctionComponent<IMenuButton> = ({ hidden, label, content, disabled = false }) => {
 
-	const renderButton = (props) => <MenuButtonComponent ariaLabel={label} hidden={hidden} {...props} />;
+	const renderButton = (props) => <MenuButtonComponent ariaLabel={label} hidden={hidden} disableGutters {...props} />;
 
 	return (
 		<ButtonMenu
@@ -35,7 +37,7 @@ export const MenuButton: React.FunctionComponent<IMenuButton> = ({ hidden, label
 			renderContent={content}
 			PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
 			PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
-			ButtonProps={{ disabled: false }}
+			ButtonProps={{ disabled }}
 		/>
 	);
 };

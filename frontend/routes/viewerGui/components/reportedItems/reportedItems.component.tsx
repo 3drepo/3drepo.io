@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,22 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isEmpty, isEqual } from 'lodash';
 import React from 'react';
 
 import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
 import ArrowBack from '@material-ui/icons/ArrowBack';
-import CancelIcon from '@material-ui/icons/Cancel';
 import Check from '@material-ui/icons/Check';
-import SearchIcon from '@material-ui/icons/Search';
+import { isEmpty, isEqual } from 'lodash';
 
 import { CREATE_ISSUE, VIEW_ISSUE } from '../../../../constants/issue-permissions';
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { searchByFilters } from '../../../../helpers/searching';
 import { sortByDate } from '../../../../helpers/sorting';
-import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import {
 	IconWrapper,
 	MenuList,
@@ -38,16 +35,13 @@ import {
 	StyledListItem
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
-import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
 import { ListNavigation } from '../listNavigation/listNavigation.component';
-import { LockPanelButton } from '../lockPanelButton';
+import { PanelBarActions } from '../panelBarActions';
 import { PreviewListItem } from '../previewListItem/previewListItem.component';
 import { ListContainer, Summary } from '../risks/risks.styles';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ViewerPanelButton, ViewerPanelContent, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
 import { EmptyStateInfo } from '../views/views.styles';
-
-const MenuButton = (props) => <MenuButtonComponent ariaLabel="Show filters menu" {...props} />;
 
 interface IHeaderMenuItem {
 	label: string;
@@ -257,23 +251,6 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 	public handleOpenSearchMode = () => this.props.onToggleFilters(true);
 
-	public getMenuButton = () => (
-		<ButtonMenu
-			renderButton={MenuButton}
-			renderContent={this.renderActionsMenu}
-			PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
-			PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
-			ButtonProps={{ disabled: false }}
-		/>
-	)
-
-	public getSearchButton = () => {
-		if (this.props.searchEnabled) {
-			return <IconButton onClick={this.handleCloseSearchMode}><CancelIcon /></IconButton>;
-		}
-		return <IconButton onClick={this.handleOpenSearchMode}><SearchIcon /></IconButton>;
-	}
-
 	public renderTitleIcon = () => {
 		const { showDetails, Icon } = this.props;
 		if (showDetails) {
@@ -321,11 +298,14 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 		}
 
 		return (
-			<>
-				<LockPanelButton type={this.props.type} />
-				{this.getSearchButton()}
-				{this.getMenuButton()}
-			</>
+			<PanelBarActions
+				type={this.props.type}
+				menuLabel="Show filters menu"
+				menuActions={this.renderActionsMenu}
+				isSearchEnabled={this.props.searchEnabled}
+				onSearchOpen={this.handleOpenSearchMode}
+				onSearchClose={this.handleCloseSearchMode}
+			/>
 		);
 	}
 
