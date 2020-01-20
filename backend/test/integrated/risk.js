@@ -59,7 +59,13 @@ describe("Risks", function () {
 		"likelihood":0,
 		"consequence":0,
 		"mitigation_status":"proposed",
-		"mitigation_desc":"Task123"
+		"mitigation_desc":"Task123",
+		"mitigation_stage":"Stage 1",
+		"mitigation_type":"Type B",
+		"element":"Doors",
+		"risk_factor":"Factor 9",
+		"scope":"Scope 3",
+		"location_desc":"Rooftop"
 	};
 
 	before(function(done) {
@@ -115,6 +121,12 @@ describe("Risks", function () {
 							expect(res.body.mitigation_status).to.equal(risk.mitigation_status);
 							expect(res.body.mitigation_desc).to.equal(risk.mitigation_desc);
 							expect(res.body.viewpoint.clippingPlanes).to.deep.equal(risk.viewpoint.clippingPlanes);
+							expect(res.body.mitigation_stage).to.equal(risk.mitigation_stage);
+							expect(res.body.mitigation_type).to.equal(risk.mitigation_type);
+							expect(res.body.element).to.equal(risk.element);
+							expect(res.body.risk_factor).to.equal(risk.risk_factor);
+							expect(res.body.scope).to.equal(risk.scope);
+							expect(res.body.location_desc).to.equal(risk.location_desc);
 
 							return done(err);
 						});
@@ -139,6 +151,12 @@ describe("Risks", function () {
 						expect(res.body.level_of_risk).to.equal(levelOfRisk);
 						expect(res.body.mitigation_status).to.equal(risk.mitigation_status);
 						expect(res.body.mitigation_desc).to.equal(risk.mitigation_desc);
+						expect(res.body.mitigation_stage).to.equal(risk.mitigation_stage);
+						expect(res.body.mitigation_type).to.equal(risk.mitigation_type);
+						expect(res.body.element).to.equal(risk.element);
+						expect(res.body.risk_factor).to.equal(risk.risk_factor);
+						expect(res.body.scope).to.equal(risk.scope);
+						expect(res.body.location_desc).to.equal(risk.location_desc);
 
 						return done(err);
 					});
