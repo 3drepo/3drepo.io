@@ -112,9 +112,9 @@ export const selectProjects = createSelector(
 
 export const selectUrlQueryProject = createSelector(
 	selectLocation, selectProjects , (location, projects) =>  {
-		const { project} = queryString.parse(location.search);
+		const { project } = queryString.parse(location.search);
 		const projectFound = projects.find(({ name }) => name === project);
-		return projectFound ? project : null;
+		return projectFound ? project : '';
 	}
 );
 

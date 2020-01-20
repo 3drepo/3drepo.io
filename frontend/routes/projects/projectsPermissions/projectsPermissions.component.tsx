@@ -32,7 +32,7 @@ interface IState {
 	selectedUsers: any[];
 }
 
-export class ProjectsPermissions extends React.PureComponent<IProps, any> {
+export class ProjectsPermissions extends React.PureComponent<IProps, IState> {
 	public state = {
 		selectedUsers: []
 	};

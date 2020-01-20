@@ -98,7 +98,7 @@ export class Projects extends React.PureComponent<IProps, IState> {
 		this.updateUrlParams({project: projectName});
 	}
 
-	public getFooterLabel = (currentView) => {
+	public getFooterLabel = () => {
 		const type = this.isProjectViewActive ? 'project' : 'model and federation';
 		return `Assign ${type} permissions`;
 	}
@@ -124,10 +124,10 @@ export class Projects extends React.PureComponent<IProps, IState> {
 	public render() {
 		const { match, projects, selectedProject } = this.props;
 		const { currentView } = this.state;
-		const footerLabel = this.getFooterLabel(currentView);
+
 		return (
 			<Container>
-				<UserManagementTab footerLabel={footerLabel} >
+				<UserManagementTab footerLabel={this.getFooterLabel()} >
 					<>
 						<Options
 							container
