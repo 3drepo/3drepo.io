@@ -42,6 +42,7 @@ const fieldTypes = {
 	"createdAt": "[object Number]",
 	"creator_role": "[object String]",
 	"desc": "[object String]",
+	"element": "[object String]",
 	"likelihood": "[object Number]",
 	"location_desc": "[object String]",
 	"mitigation_desc": "[object String]",
@@ -55,7 +56,9 @@ const fieldTypes = {
 	"residual_likelihood": "[object Number]",
 	"residual_risk": "[object String]",
 	"rev_id": "[object Object]",
+	"risk_factor": "[object String]",
 	"safetibase_id": "[object String]",
+	"scope": "[object String]",
 	"thumbnail": "[object Object]",
 	"viewpoint": "[object Object]",
 	"viewpoints": "[object Array]"
