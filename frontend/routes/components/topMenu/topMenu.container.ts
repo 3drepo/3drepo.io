@@ -21,7 +21,7 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { selectIsAuthenticated, AuthActions } from '../../../modules/auth';
-import { selectCurrentUser } from '../../../modules/currentUser';
+import { selectCurrentUser, selectIsInitialised } from '../../../modules/currentUser';
 import { DialogActions } from '../../../modules/dialog';
 import { selectSettings, ViewerActions } from '../../../modules/viewer';
 import { selectIsFocusMode } from '../../../modules/viewerGui';
@@ -29,6 +29,7 @@ import { TopMenu } from './topMenu.component';
 
 const mapStateToProps = createStructuredSelector({
 	currentUser: selectCurrentUser,
+	isInitialised: selectIsInitialised,
 	visualSettings: selectSettings,
 	isFocusMode: selectIsFocusMode,
 	isAuthenticated: selectIsAuthenticated,

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,34 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ViewListIcon from '@material-ui/icons/ViewList';
 import styled from 'styled-components';
-import { COLOR } from '../../../styles';
-import * as LogoStyles from '../logo/logo.styles';
 
-export const Container = styled.div`
-	display: flex;
-	justify-content: flex-end;
-	align-items: center;
-	position: relative;
-	padding-right: 10px;
-	height: 80px;
-	z-index: 2;
-	margin-top: 5px;
-	visibility: ${({ hidden }) => hidden ? 'hidden' : 'initial'};
+import IconButton from '@material-ui/core/IconButton';
+import Menu from '@material-ui/icons/Menu';
 
-	${LogoStyles.Image} {
-		position: absolute;
-		top: 15px;
-		left: 50%;
-		transform: translateX(-50%);
+import { COLOR } from '../../../../../../styles';
+
+export const StyledIconButton = styled(IconButton)`
+	&& {
+		background-color: ${({ active }) => active ? 'rgba(0, 0, 0, 0.08)' : ''};
 	}
 `;
 
-export const BackIcon = styled(ViewListIcon)`
+export const BurgerIcon = styled(Menu)`
 	&& {
 		color: ${COLOR.WHITE};
-		font-size: 26px;
+		font-size: 28px;
 		filter: drop-shadow(0 0 2px ${COLOR.BLACK_30});
 	}
 `;

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,34 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import List from '@material-ui/core/List';
+import styled from 'styled-components';
+
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import Switch from '@material-ui/core/Switch';
-import AccountCircle from '@material-ui/icons/AccountCircle';
-import styled from 'styled-components';
-
-import { COLOR } from '../../../../../styles';
-import * as AvatarStyles from '../../../avatar/avatar.styles';
-
-export const UserIcon = styled(AccountCircle)`
-	&& {
-		color: ${COLOR.WHITE};
-		font-size: 28px;
-		filter: drop-shadow(0 0 2px ${COLOR.BLACK_30});
-	}
-`;
-
-export const MenuContent = styled(List)`
-	&& {
-		padding-top: 0;
-	}
-
-	${AvatarStyles.Container} {
-		margin-left: -3px;
-	}
-`;
+import { COLOR } from '../../../../../../styles';
 
 export const MenuIcon = styled(ListItemIcon)`
 	&& {
@@ -68,12 +46,5 @@ export const MenuText = styled(ListItemText).attrs({
 	&& {
 		color: ${COLOR.BLACK_60};
 		font-size: 14px;
-	}
-`;
-
-export const MenuSwitch = styled(Switch)`
-	&& {
-		margin-left: -21px;
-		margin-right: -15px;
 	}
 `;

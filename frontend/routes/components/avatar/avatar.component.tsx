@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { memoize } from 'lodash';
 import React from 'react';
 
-import Person from '@material-ui/icons/Person';
-import { AvatarPlaceholder, Container, StyledAvatar, StyledIcon } from './avatar.styles';
+import { memoize } from 'lodash';
+
+import { AvatarPlaceholder, Container, StyledAvatar } from './avatar.styles';
 
 interface IProps {
 	name: string;
@@ -53,11 +53,7 @@ export class Avatar extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderPlaceholder = () => (
-		<AvatarPlaceholder>
-			<StyledIcon>
-				<Person />
-			</StyledIcon>
-		</AvatarPlaceholder>
+		<AvatarPlaceholder />
 	)
 
 	public renderInitials = (name) => (
@@ -73,12 +69,13 @@ export class Avatar extends React.PureComponent<IProps, IState> {
 	public render() {
 		const { url, name, loading, ...containerProps } = this.props;
 		const { avatarLoaded } = this.state;
+		const isImageLoading = url && loading && !avatarLoaded;
 
 		return (
 			<Container {...containerProps}>
-				{(!url || loading || !avatarLoaded) && this.renderPlaceholder()}
+				{isImageLoading && this.renderPlaceholder()}
 				{!url && this.renderInitials(name)}
-				{url && this.renderImage(url, name)}
+				{url && !isImageLoading && this.renderImage(url, name)}
 			</Container>
 		);
 	}
