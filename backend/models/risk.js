@@ -46,6 +46,7 @@ const fieldTypes = {
 	"likelihood": "[object Number]",
 	"location_desc": "[object String]",
 	"mitigation_desc": "[object String]",
+	"mitigation_detail": "[object String]",
 	"mitigation_stage": "[object String]",
 	"mitigation_status": "[object String]",
 	"mitigation_type": "[object String]",

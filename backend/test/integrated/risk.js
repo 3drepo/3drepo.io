@@ -60,6 +60,7 @@ describe("Risks", function () {
 		"consequence":0,
 		"mitigation_status":"proposed",
 		"mitigation_desc":"Task123",
+		"mitigation_detail":"Task123 - a more detailed description",
 		"mitigation_stage":"Stage 1",
 		"mitigation_type":"Type B",
 		"element":"Doors",
@@ -120,6 +121,7 @@ describe("Risks", function () {
 							expect(res.body.level_of_risk).to.equal(levelOfRisk);
 							expect(res.body.mitigation_status).to.equal(risk.mitigation_status);
 							expect(res.body.mitigation_desc).to.equal(risk.mitigation_desc);
+							expect(res.body.mitigation_detail).to.equal(risk.mitigation_detail);
 							expect(res.body.viewpoint.clippingPlanes).to.deep.equal(risk.viewpoint.clippingPlanes);
 							expect(res.body.mitigation_stage).to.equal(risk.mitigation_stage);
 							expect(res.body.mitigation_type).to.equal(risk.mitigation_type);
@@ -151,6 +153,7 @@ describe("Risks", function () {
 						expect(res.body.level_of_risk).to.equal(levelOfRisk);
 						expect(res.body.mitigation_status).to.equal(risk.mitigation_status);
 						expect(res.body.mitigation_desc).to.equal(risk.mitigation_desc);
+						expect(res.body.mitigation_detail).to.equal(risk.mitigation_detail);
 						expect(res.body.mitigation_stage).to.equal(risk.mitigation_stage);
 						expect(res.body.mitigation_type).to.equal(risk.mitigation_type);
 						expect(res.body.element).to.equal(risk.element);
