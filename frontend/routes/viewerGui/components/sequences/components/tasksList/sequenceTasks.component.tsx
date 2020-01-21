@@ -20,7 +20,14 @@ import CollapsedIcon from '@material-ui/icons/ChevronRight';
 import ExpandedIcon from '@material-ui/icons/ExpandMore';
 import React from 'react';
 import { Task, TasksContainer } from '../../sequences.styles';
-import { ITask, Tasks } from './sequenceTasks.component';
+
+export interface ITask {
+	_id: string;
+	name: string;
+	tasks?: ITask[];
+	startDate: Date;
+	endDate: Date;
+}
 
 interface IProps {
 	tasks: ITask[];
@@ -30,7 +37,12 @@ interface IState {
 	collapsed: boolean;
 }
 
-export class TasksList extends React.PureComponent<IProps, IState> {
+const CollapseButton = ({collapsed, onClick}) => {
+	const Icon = collapsed ? CollapsedIcon : ExpandedIcon;
+	return (<IconButton onClick={onClick}><Icon /></IconButton>);
+};
+
+export class Tasks extends React.PureComponent<IProps, IState> {
 	public state: IState = {
 		collapsed: true
 	};
@@ -44,9 +56,15 @@ export class TasksList extends React.PureComponent<IProps, IState> {
 		const { collapsed } = this.state;
 
 		return (
-			<div>
-				{tasks.map((t) => (<Tasks key={t._id} tasks={[t]} />))}
-			</div>
+			<TasksContainer>
+				{tasks.map((t) => (
+					<Task key={t._id} hasSubTasks={(t.tasks && t.tasks.length > 0)}>
+						{(t.tasks && t.tasks.length > 0) && <CollapseButton collapsed={collapsed} onClick={this.toggleCollapse} />}
+						{t.name}
+						{(t.tasks && !collapsed) && (<Tasks tasks={t.tasks} />)}
+					</Task>))
+				}
+			</TasksContainer>
 		);
 	}
 }
