@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -48,7 +48,7 @@ const mapStateToProps = createStructuredSelector({
 	nodesIndexesMap: selectNodesIndexesMap,
 	isPending: selectIsPending,
 	dataRevision: selectDataRevision,
-	activeNode: selectActiveNode
+	activeNode: selectActiveNode,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -58,7 +58,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setState: TreeActions.setComponentState,
 	handleNodesClick: TreeActions.handleNodesClick,
 	goToRootNode: TreeActions.goToRootNode,
-	selectNodes: TreeActions.selectNodes
+	selectNodes: TreeActions.selectNodes,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Tree);

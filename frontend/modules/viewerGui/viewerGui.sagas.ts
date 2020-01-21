@@ -88,7 +88,7 @@ function* resetPanelsStates() {
 			put(GroupsActions.resetComponentState()),
 			put(CompareActions.resetComponentState()),
 			put(BimActions.resetBimState()),
-			put(ViewerGuiActions.resetVisiblePanels()),
+			put(ViewerGuiActions.resetPanels()),
 			put(SequencesActions.reset())
 		]);
 	} catch (error) {
@@ -106,6 +106,20 @@ function* setMeasureVisibility({ visible }) {
 		yield put(MeasureActions.setMeasureActive(visible));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'measure visibility', error));
+	}
+}
+
+function* setCoordView({ visible }) {
+	try {
+		if (visible) {
+			Viewer.showCoordView();
+		} else {
+			Viewer.hideCoordView();
+		}
+
+		yield put(ViewerGuiActions.setCoordViewSuccess(visible));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('set', 'coordinates visibility', error));
 	}
 }
 
@@ -381,6 +395,7 @@ export default function* ViewerGuiSaga() {
 	yield takeLatest(ViewerGuiTypes.FETCH_DATA, fetchData);
 	yield takeLatest(ViewerGuiTypes.RESET_PANELS_STATES, resetPanelsStates);
 	yield takeLatest(ViewerGuiTypes.SET_MEASURE_VISIBILITY, setMeasureVisibility);
+	yield takeLatest(ViewerGuiTypes.SET_COORD_VIEW, setCoordView);
 	yield takeLatest(ViewerGuiTypes.START_LISTEN_ON_MODEL_LOADED, startListenOnModelLoaded);
 	yield takeLatest(ViewerGuiTypes.STOP_LISTEN_ON_MODEL_LOADED, stopListenOnModelLoaded);
 	yield takeLatest(ViewerGuiTypes.START_LISTEN_ON_CLICK_PIN, startListenOnClickPin);

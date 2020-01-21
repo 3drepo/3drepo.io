@@ -416,6 +416,16 @@ export class ViewerService {
 		this.viewer.stopClipEdit();
 	}
 
+	public async showCoordView() {
+		await this.isViewerReady();
+		this.viewer.showCoordView();
+	}
+
+	public async hideCoordView() {
+		await this.isViewerReady();
+		this.viewer.hideCoordView();
+	}
+
 	public async switchObjectVisibility(teamspace, modelId, objectIds, visibility) {
 		await this.isViewerReady();
 		this.viewer.switchObjectVisibility(teamspace, modelId, objectIds, visibility);

@@ -60,6 +60,7 @@ export const TeamspaceItem = memo((props: IProps) => {
 	} = props;
 
 	const avatarUrl = getMemoizedAvatarUrl(name);
+
 	const teamspaceInitials = name.split(' ').slice(0, 2).map((text) => text[0]).join('').trim().toUpperCase();
 
 	const handleAddNewProject = (event) => onAddProject(event, name);

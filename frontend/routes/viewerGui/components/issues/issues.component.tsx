@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import fileDialog from 'file-dialog';
 import React from 'react';
 
 import { ISSUE_FILTERS, ISSUES_ACTIONS_MENU, STATUSES } from '../../../../constants/issues';
+import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { filtersValuesMap, getHeaderMenuItems } from '../../../../helpers/issues';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import IssueDetails from './components/issueDetails/issueDetails.container';
@@ -123,9 +123,11 @@ export class Issues extends React.PureComponent<IProps, any> {
 	}
 
 	get headerMenuItems() {
-		return !this.props.modelSettings.federate ?
+		return this.commonHeaderMenuItems;
+		/* NOTE: We no longer supper submodel issues in federation.
+		 * return !this.props.modelSettings.federate ?
 			this.commonHeaderMenuItems :
-			[...this.commonHeaderMenuItems, this.toggleSubmodelsMenuItem];
+			[...this.commonHeaderMenuItems, this.toggleSubmodelsMenuItem];*/
 	}
 
 	get showDefaultHiddenItems() {
@@ -152,9 +154,9 @@ export class Issues extends React.PureComponent<IProps, any> {
 	public componentDidUpdate(prevProps: IProps) {
 		const { selectedIssue } = this.props;
 		const issueId = (selectedIssue || {})._id;
-		const previssueId = (prevProps.selectedIssue || {})._id;
+		const prevIssueId = (prevProps.selectedIssue || {})._id;
 
-		if (issueId !== previssueId) {
+		if (issueId !== prevIssueId) {
 			this.handleSelectedIssue();
 		}
 
@@ -208,7 +210,6 @@ export class Issues extends React.PureComponent<IProps, any> {
 			<IssuesContainer
 				isPending={this.props.isPending}
 				fetchingDetailsIsPending={this.props.fetchingDetailsIsPending}
-
 				items={this.props.issues}
 				showDefaultHiddenItems={this.showDefaultHiddenItems}
 				activeItemId={this.props.activeIssueId}
@@ -220,7 +221,6 @@ export class Issues extends React.PureComponent<IProps, any> {
 				selectedFilters={this.props.selectedFilters}
 				isImportingBCF={this.props.isImportingBCF}
 				sortOrder={this.props.sortOrder}
-
 				onToggleFilters={this.handleToggleFilters}
 				onChangeFilters={this.props.setFilters}
 				onActiveItem={this.setActiveIssue}
@@ -228,6 +228,7 @@ export class Issues extends React.PureComponent<IProps, any> {
 				onShowDetails={this.props.goToIssue}
 				onCloseDetails={this.closeDetails}
 				renderDetailsView={this.renderDetailsView}
+				type={VIEWER_PANELS.ISSUES}
 			/>
 		);
 	}

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -23,6 +23,7 @@ import FocusIcon from '@material-ui/icons/CenterFocusStrong';
 import ClipIcon from '@material-ui/icons/Crop';
 import HomeIcon from '@material-ui/icons/Home';
 import MetadataIcon from '@material-ui/icons/Info';
+import MyLocationIcon from '@material-ui/icons/MyLocation';
 import TurntableIcon from '@material-ui/icons/Redo';
 import MeasureIcon from '@material-ui/icons/Straighten';
 import ShowAllIcon from '@material-ui/icons/Visibility';
@@ -67,6 +68,7 @@ interface IProps {
 	clippingMode: string;
 	isClipEdit: boolean;
 	clipNumber: number;
+	coordViewActive: boolean;
 	isMetadataActive: boolean;
 	isMeasureActive: boolean;
 	isMeasureDisabled: boolean;
@@ -86,8 +88,9 @@ interface IProps {
 	setClipEdit: (isClipEdit) => void;
 	setMetadataActive: (isActive) => void;
 	setMeasureVisibility: (visible) => void;
+	setCoordView: (visible) => void;
 	stopListenOnNumClip: () => void;
-	setPanelVisibility: (panelName, visibility) => void;
+	setPanelVisibility: (panelName) => void;
 }
 
 interface IState {
@@ -213,6 +216,12 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 				active: this.props.isMeasureActive
 			},
 			{
+				label: VIEWER_TOOLBAR_ITEMS.COORDVIEW,
+				Icon: MyLocationIcon,
+				action: this.toggleCoordView,
+				active: this.props.coordViewActive
+			},
+			{
 				label: VIEWER_TOOLBAR_ITEMS.BIM,
 				Icon: MetadataIcon,
 				action: this.toggleMetadataPanel,
@@ -313,16 +322,18 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 			setMetadataActive,
 			setMeasureVisibility,
 			setPanelVisibility,
-			isMetadataVisible
 		} = this.props;
 		setMetadataActive(!isMetadataActive);
-		setPanelVisibility(VIEWER_PANELS.BIM, !isMetadataVisible);
+		setPanelVisibility(VIEWER_PANELS.BIM);
 
-		if (isMetadataActive) {
-			setPanelVisibility(VIEWER_PANELS.BIM, false);
-		} else {
+		if (!isMetadataActive) {
 			setMeasureVisibility(false);
 		}
+	}
+
+	private toggleCoordView = () => {
+		const { coordViewActive, setCoordView} = this.props;
+		setCoordView(!coordViewActive);
 	}
 
 	private toggleMeasure = () => {
@@ -330,7 +341,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 		setMeasureVisibility(!isMeasureActive);
 
 		if (!isMeasureActive) {
-			setPanelVisibility(VIEWER_PANELS.BIM, false);
+			setPanelVisibility(VIEWER_PANELS.BIM);
 		}
 	}
 }

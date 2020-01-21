@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -28,7 +28,7 @@ import {
 	selectSearchQuery,
 	selectViewpointsList,
 	ViewpointsActions
-} from './../../../../modules/viewpoints';
+} from '../../../../modules/viewpoints';
 import { Views } from './views.component';
 
 const mapStateToProps = createStructuredSelector({
@@ -39,7 +39,7 @@ const mapStateToProps = createStructuredSelector({
 	editMode: selectEditMode,
 	searchQuery: selectSearchQuery,
 	searchEnabled: selectSearchEnabled,
-	isCommenter: selectIsCommenter
+	isCommenter: selectIsCommenter,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -53,7 +53,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showViewpoint: ViewpointsActions.showViewpoint,
 	setNewViewpoint: ViewpointsActions.setNewViewpoint,
 	setSearchQuery: ViewpointsActions.setSearchQuery,
-	setState: ViewpointsActions.setComponentState
+	setState: ViewpointsActions.setComponentState,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Views);

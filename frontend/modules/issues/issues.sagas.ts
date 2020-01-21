@@ -422,7 +422,6 @@ function* setActiveIssue({ issue, revision, ignoreViewer = false }) {
 		if (issue) {
 			const {account , model, _id} = issue;
 			yield put(IssuesActions.subscribeOnIssueCommentsChanges(account, model, _id));
-			yield put(IssuesActions.fetchIssue(account , model, _id));
 		}
 
 		yield all([
