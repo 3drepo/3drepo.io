@@ -83,7 +83,7 @@ export class App extends React.PureComponent<IProps, IState> {
 	});
 
 	public renderHeader = renderWhenTrue(() => (
-		<TopMenu onLogout={this.props.logout} onLogoClick={this.handleLogoClick} />
+		<TopMenu />
 	));
 
 	constructor(props) {
@@ -126,11 +126,6 @@ export class App extends React.PureComponent<IProps, IState> {
 		if (isAnalyticsRefererRoute) {
 			analyticsService.sendPageViewReferer(location);
 		}
-	}
-
-	public handleLogoClick = () => {
-		const { history } = this.props;
-		history.push(ROUTES.HOME);
 	}
 
 	public render() {

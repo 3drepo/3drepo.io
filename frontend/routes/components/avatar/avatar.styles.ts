@@ -46,7 +46,6 @@ export const StyledAvatar = styled(Avatar)`
 		height: 100%;
 		background: #e8eaf6;
 		color: ${COLOR.PRIMARY_MAIN};
-		border: 1px solid #e8eaf6;
 		font-size: inherit;
 	}
 `;
