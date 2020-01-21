@@ -28,8 +28,8 @@ import React from 'react';
 import { STEP_SCALE } from '../../../../../../constants/sequences';
 import { getDate, getDays } from '../../../../../../helpers/dateTime';
 import { NAMED_MONTH_DATE_FORMAT } from '../../../../../../services/formatting/formatDate';
-import { DatePicker, IntervalRow, SequencePlayerContainer,
-	SequenceRow, SequenceSlider, StepInput } from '../../sequences.styles';
+import { DatePicker, IntervalRow, SequencePlayerColumn,
+	SequencePlayerContainer, SequenceRow, SequenceSlider, StepInput } from '../../sequences.styles';
 
 interface IProps {
 	max: Date;
@@ -224,44 +224,46 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 
 		return (
 			<SequencePlayerContainer>
-				<MuiPickersUtilsProvider utils={DayJsUtils}>
-					<SequenceRow>
-						<Grid item>
-							<IconButton disabled={this.isFirstDay} onClick={this.rewind}><StepBackIcon fontSize="large" /></IconButton>
-						</Grid>
-						<Grid item>
-							<DatePicker
-								shouldDisableDate={(date) => this.isDateOusideRange(date.$d)}
-								name="date"
-								inputId="1"
-								value={value}
-								format={NAMED_MONTH_DATE_FORMAT}
-								onChange={(e) => this.gotoDate(new Date(e.target.value))}
-								placeholder="date"
-							/>
-						</Grid>
-						<Grid item>
-							<IconButton disabled={this.isLastDay} onClick={this.forward}><StepForwardIcon fontSize="large" /></IconButton>
-						</Grid>
-					</SequenceRow>
-					<IntervalRow>
-						Step interval: <StepInput value={stepInterval} onChange={this.onChangeStepInterval} />
-						&nbsp;
-						<Select value={stepScale} onChange={this.onChangeStepScale} >
-							<MenuItem value={STEP_SCALE.DAY}>day(s)</MenuItem>
-							<MenuItem value={STEP_SCALE.MONTH}>month(s)</MenuItem>
-							<MenuItem value={STEP_SCALE.YEAR}>year(s)</MenuItem>
-						</Select>
-					</IntervalRow>
-					<SequenceRow>
-						<Grid item>
-							<IconButton onClick={this.onClickPlayStop} >{!playing && <PlayArrow />}{playing &&  <Stop />}</IconButton>
-						</Grid>
-						<Grid item>
-							<SequenceSlider max={this.totalDays} step={1} value={this.currentDay} onChange={(e, val) => this.goTo(val)} />
-						</Grid>
-					</SequenceRow>
-				</MuiPickersUtilsProvider>
+				<SequencePlayerColumn>
+					<MuiPickersUtilsProvider utils={DayJsUtils}>
+						<SequenceRow>
+							<Grid item>
+								<IconButton disabled={this.isFirstDay} onClick={this.rewind}><StepBackIcon fontSize="large" /></IconButton>
+							</Grid>
+							<Grid item>
+								<DatePicker
+									shouldDisableDate={(date) => this.isDateOusideRange(date.$d)}
+									name="date"
+									inputId="1"
+									value={value}
+									format={NAMED_MONTH_DATE_FORMAT}
+									onChange={(e) => this.gotoDate(new Date(e.target.value))}
+									placeholder="date"
+								/>
+							</Grid>
+							<Grid item>
+								<IconButton disabled={this.isLastDay} onClick={this.forward}><StepForwardIcon fontSize="large" /></IconButton>
+							</Grid>
+						</SequenceRow>
+						<IntervalRow>
+							Step interval: <StepInput value={stepInterval} onChange={this.onChangeStepInterval} />
+							&nbsp;
+							<Select value={stepScale} onChange={this.onChangeStepScale} >
+								<MenuItem value={STEP_SCALE.DAY}>day(s)</MenuItem>
+								<MenuItem value={STEP_SCALE.MONTH}>month(s)</MenuItem>
+								<MenuItem value={STEP_SCALE.YEAR}>year(s)</MenuItem>
+							</Select>
+						</IntervalRow>
+						<SequenceRow>
+							<Grid item>
+								<IconButton onClick={this.onClickPlayStop} >{!playing && <PlayArrow />}{playing &&  <Stop />}</IconButton>
+							</Grid>
+							<Grid item>
+								<SequenceSlider max={this.totalDays} step={1} value={this.currentDay} onChange={(e, val) => this.goTo(val)} />
+							</Grid>
+						</SequenceRow>
+					</MuiPickersUtilsProvider>
+				</SequencePlayerColumn>
 			</SequencePlayerContainer>
 		);
 	}

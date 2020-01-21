@@ -33,6 +33,7 @@ interface IProps {
 	maxDate: Date;
 	minDate: Date;
 	selectedDate: Date;
+	selectedMinDate: Date;
 	colorOverrides: any;
 	stepInterval: number;
 	stepScale: STEP_SCALE;
@@ -52,7 +53,7 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 		const {minDate, maxDate, selectedDate,
 			setSelectedFrame, stepInterval,
 			stepScale, setStepInterval, setStepScale,
-			currentTasks } = this.props;
+			currentTasks, selectedMinDate} = this.props;
 
 		return (
 			<SequencesContainer
@@ -71,7 +72,7 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 					onChangeStepInterval={setStepInterval}
 				/>
 
-				<TasksList tasks={currentTasks} />
+				<TasksList tasks={currentTasks} minDate={selectedMinDate} maxDate={selectedDate} />
 			</SequencesContainer>
 
 	);

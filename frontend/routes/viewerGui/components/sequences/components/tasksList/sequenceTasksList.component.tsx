@@ -15,20 +15,36 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { IconButton } from '@material-ui/core';
-import CollapsedIcon from '@material-ui/icons/ChevronRight';
-import ExpandedIcon from '@material-ui/icons/ExpandMore';
 import React from 'react';
-import { Task, TasksContainer } from '../../sequences.styles';
+import { formatShortDate } from '../../../../../../services/formatting/formatDate';
+import { SequenceTasksListContainer, SequenceTasksListItem } from '../../sequences.styles';
 import { ITask, Tasks } from './sequenceTasks.component';
 
 interface IProps {
 	tasks: ITask[];
+	minDate: Date;
+	maxDate: Date;
 }
 
 interface IState {
 	collapsed: boolean;
 }
+
+const equalsDate = (dateA: Date, dateB: Date) =>
+		(!dateA && !dateB) || (
+			dateA.getDate() === dateB.getDate() &&
+			dateA.getMonth() === dateB.getMonth() &&
+			dateA.getFullYear() === dateB.getFullYear()
+		)
+	;
+
+const TaskListLabel = ({minDate, maxDate}) => (
+	<>Showing activities {equalsDate(minDate, maxDate) ?
+		'on ' + formatShortDate(maxDate) :
+		'from ' + formatShortDate(minDate) + ' to ' + formatShortDate(maxDate)
+		}
+	</>
+);
 
 export class TasksList extends React.PureComponent<IProps, IState> {
 	public state: IState = {
@@ -40,13 +56,16 @@ export class TasksList extends React.PureComponent<IProps, IState> {
 	}
 
 	public render = () => {
-		const { tasks } = this.props;
-		const { collapsed } = this.state;
-
+		const { tasks, minDate, maxDate } = this.props;
 		return (
-			<div>
-				{tasks.map((t) => (<Tasks key={t._id} tasks={[t]} />))}
-			</div>
+			<SequenceTasksListContainer>
+				<TaskListLabel minDate={minDate} maxDate={maxDate}  />
+				{tasks.map((t) => (
+					<SequenceTasksListItem key={t._id}>
+						<Tasks tasks={[t]} />
+					</SequenceTasksListItem>
+				))}
+			</SequenceTasksListContainer>
 		);
 	}
 }

@@ -24,11 +24,12 @@ import {
 	VIEWER_PANELS_TITLES
 } from '../../../../constants/viewerGui';
 
-import { Grid, Input } from '@material-ui/core';
+import { Grid, IconButton, Input } from '@material-ui/core';
 import Slider from '@material-ui/lab/Slider';
 import { COLOR, FONT_WEIGHT } from '../../../../styles';
 import { DateField } from '../../../components/dateField/dateField.component';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
+import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
 
 export const SequencesIcon = VIEWER_PANELS_ICONS[VIEWER_PANELS.SEQUENCES];
 
@@ -44,7 +45,33 @@ export const SequenceSlider = styled(Slider)`
 	}
 `;
 
-export const SequencePlayerContainer = styled(Grid).attrs({
+export const SequencePlayerContainer = styled.div`
+	display: block;
+	height: 128px;
+`;
+
+export const SequenceTasksListContainer = styled(ViewerPanelContent)`
+	background-color: ${COLOR.BLACK_6};
+	font-size: 13px;
+	color: ${COLOR.BLACK_60};
+`;
+
+export const SequenceTasksListItem = styled.div`
+	margin-right: 15px;
+	margin-top: 15px;
+	margin-left: 15px;
+	background-color:  ${COLOR.WHITE};
+	padding: 5px;
+`;
+
+export const TaskButton = styled(IconButton)`
+	&& {
+		padding: 0;
+		margin-right: 5px;
+	}
+`;
+
+export const SequencePlayerColumn = styled(Grid).attrs({
 	container: true,
 	direction: 'column',
 	justify: 'flex-start',
@@ -55,18 +82,11 @@ export const SequencePlayerContainer = styled(Grid).attrs({
 	}
 `;
 
-export const TasksContainer = styled(Grid)`
-	&&  {
-		font-size: 14px;
-		margin-left: 20px;
-	}
-`;
-
 export const Task = styled(Grid)`
 	&&  {
-		padding-left: ${(props) => props.hasSubTasks ? '0px' : '48px'};
+		padding-left: ${(props) => props.padding ? '24px' : '0px'};
 	}
-`;
+` as any;
 
 export const SequenceRow = styled(Grid).attrs({
 	container: true,
