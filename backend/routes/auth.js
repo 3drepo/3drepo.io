@@ -24,6 +24,7 @@ const C = require("../constants");
 const middlewares = require("../middlewares/middlewares");
 const config = require("../config");
 const utils = require("../utils");
+const ChatEvent = require("../models/chatEvent");
 const User = require("../models/user");
 const addressMeta = require("../models/addressMeta");
 const Mailer = require("../mailer/mailer");
@@ -551,14 +552,19 @@ function createSession(place, req, res, next, user) {
 		} else {
 			req[C.REQ_REPO].logger.logDebug("Authenticated user and signed token.");
 
-			req.session[C.REPO_SESSION_USER] = user;
-			req.session.cookie.domain				 = config.cookie_domain;
+			user.webSession = false;
 
+			if (req.headers && req.headers['user-agent']) {
+				user.webSession = !!req.headers['user-agent'];
+			}
+
+			req.session[C.REPO_SESSION_USER] = user;
+			req.session.cookie.domain = config.cookie_domain;
 			if (config.cookie.maxAge) {
 				req.session.cookie.maxAge = config.cookie.maxAge;
 			}
 
-			responseCodes.respond(place, req, res, next, responseCodes.OK, {username: user.username, roles: user.roles, flags: user.flags});
+			responseCodes.respond(place, req, res, next, responseCodes.OK, user);
 		}
 	});
 }
@@ -581,6 +587,7 @@ function login(req, res, next) {
 
 			req[C.REQ_REPO].logger.logInfo("User is logged in", responseData);
 
+			// TODO Is this necessary?
 			responseData.roles = user.roles;
 			responseData.flags = {};
 
