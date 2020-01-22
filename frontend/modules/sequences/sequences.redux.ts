@@ -27,6 +27,7 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	setSelectedSequence: ['sequenceId'],
 	setSelectedFrame: ['date'],
 	setSelectedDate: ['date'],
+	fetchFrame: ['date'],
 	setStateDefinition: ['stateId', 'stateDefinition'],
 	setLastLoadedSuccesfullState: ['stateId'],
 	setStepInterval: ['stepInterval'],

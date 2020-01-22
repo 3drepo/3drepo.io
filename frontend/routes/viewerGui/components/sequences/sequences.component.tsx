@@ -28,6 +28,7 @@ interface IProps {
 	sequences: any;
 	initializeSequences: () => void;
 	setSelectedFrame: (date: Date) => void;
+	fetchFrame: (date: Date) => void;
 	setStepInterval: (interval: number) => void;
 	setStepScale: (scale: STEP_SCALE) => void;
 	maxDate: Date;
@@ -38,6 +39,7 @@ interface IProps {
 	stepInterval: number;
 	stepScale: STEP_SCALE;
 	currentTasks: any[];
+	loadingFrame: boolean;
 }
 
 export class Sequences extends React.PureComponent<IProps, {}> {
@@ -45,21 +47,17 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 		this.props.initializeSequences();
 	}
 
-	public componentDidUpdate = () => {
-		// console.log(this.props.currentActivities);
-	}
-
 	public render = () => {
 		const {minDate, maxDate, selectedDate,
 			setSelectedFrame, stepInterval,
 			stepScale, setStepInterval, setStepScale,
-			currentTasks, selectedMinDate} = this.props;
+			currentTasks, selectedMinDate, loadingFrame,
+			fetchFrame} = this.props;
 
 		return (
 			<SequencesContainer
 				Icon={<SequencesIcon />}
 				renderActions={() => (<></>)}
-				pending={false}
 			>
 				<SequencePlayer
 					min={minDate}
@@ -70,11 +68,11 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 					onChange={setSelectedFrame}
 					onChangeStepScale={setStepScale}
 					onChangeStepInterval={setStepInterval}
+					loadingFrame={loadingFrame}
+					fetchFrame={fetchFrame}
 				/>
-
-				<TasksList tasks={currentTasks} minDate={selectedMinDate} maxDate={selectedDate} />
+				<TasksList tasks={currentTasks} minDate={selectedMinDate} maxDate={selectedDate} loadingFrame={loadingFrame} />
 			</SequencesContainer>
-
-	);
+		);
 	}
 }

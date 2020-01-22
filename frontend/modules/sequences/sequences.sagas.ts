@@ -23,7 +23,15 @@ import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
 import { selectCurrentModel, selectCurrentModelTeamspace, selectCurrentRevisionId } from '../model/model.selectors';
 import { selectIfcSpacesHidden, TreeActions } from '../tree';
-import { selectSelectedDate } from './sequences.selectors';
+import { getSelectedFrame, selectFrames, selectSelectedDate } from './sequences.selectors';
+
+const delay = async (time) => {
+	return new Promise( (resolve, reject) => {
+		setTimeout(() => {
+			resolve(true);
+		}, time);
+	});
+};
 
 export function* fetchSequences() {
 	try {
@@ -45,23 +53,36 @@ export function* fetchSequences() {
 	}
 }
 
-export function* setSelectedFrame({date}) {
+export function* fetchFrame({date}) {
 	try {
-		yield put(SequencesActions.setSelectedDate(date));
 		const teamspace = yield select(selectCurrentModelTeamspace);
 		const revision = yield select(selectCurrentRevisionId);
 		const model = yield select(selectCurrentModel);
 		const sequenceId =  yield select(selectSelectedSequenceId);
 
-		const stateId = yield select(selectSelectedStateId);
 		const loadedStates = yield select(selectStateDefinitions);
+		const frames = yield select(selectFrames);
+		const frame = getSelectedFrame(frames, date);
+		if (!frame) {
+			return;
+		}
 
-		if (!loadedStates[stateId]) {
+		const stateId = frame.state;
+
+		if (!loadedStates[frame.state]) {
 			const response = yield API.getSequenceState(teamspace, model, revision, sequenceId, stateId);
 			yield put(SequencesActions.setStateDefinition(stateId, response.data));
 			yield put(SequencesActions.setLastLoadedSuccesfullState(stateId));
 		}
+	} catch (error) {
+		yield put(DialogActions.showEndpointErrorDialog('fetch frame', 'sequences', error));
+	}
+}
 
+export function* setSelectedFrame({date}) {
+	try {
+		yield put(SequencesActions.setSelectedDate(date));
+		yield put(SequencesActions.fetchFrame(date));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('select frame', 'sequences', error));
 	}
@@ -85,5 +106,6 @@ export default function* SequencesSaga() {
 	yield takeLatest(SequencesTypes.FETCH_SEQUENCES, fetchSequences);
 	yield takeLatest(SequencesTypes.SET_SELECTED_FRAME, setSelectedFrame);
 	yield takeLatest(SequencesTypes.INITIALIZE_SEQUENCES, initializeSequences);
+	yield takeLatest(SequencesTypes.FETCH_FRAME, fetchFrame);
 
 }

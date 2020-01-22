@@ -17,6 +17,7 @@
 
 import React from 'react';
 import { formatShortDate } from '../../../../../../services/formatting/formatDate';
+import { Loader } from '../../../../../components/loader/loader.component';
 import { SequenceTasksListContainer, SequenceTasksListItem, TaskListLabel } from '../../sequences.styles';
 import { ITask, Tasks } from './sequenceTasks.component';
 
@@ -24,6 +25,7 @@ interface IProps {
 	tasks: ITask[];
 	minDate: Date;
 	maxDate: Date;
+	loadingFrame: boolean;
 }
 
 interface IState {
@@ -55,15 +57,23 @@ export class TasksList extends React.PureComponent<IProps, IState> {
 	}
 
 	public render = () => {
-		const { tasks } = this.props;
+		const { tasks, loadingFrame } = this.props;
 		return (
 			<SequenceTasksListContainer>
-				<TaskListLabel>{this.durationLabel}</TaskListLabel>
-				{tasks.map((t) => (
-					<SequenceTasksListItem  key={t._id}>
-						<Tasks tasks={[t]} />
-					</SequenceTasksListItem>
-				))}
+				{loadingFrame && <Loader content="Loading frame..." />}
+
+				{!loadingFrame &&
+					<>
+						<TaskListLabel>{this.durationLabel}</TaskListLabel>
+						{
+							tasks.map((t) => (
+								<SequenceTasksListItem  key={t._id}>
+									<Tasks tasks={[t]} />
+								</SequenceTasksListItem>
+							))
+						}
+					</>
+				}
 			</SequenceTasksListContainer>
 		);
 	}

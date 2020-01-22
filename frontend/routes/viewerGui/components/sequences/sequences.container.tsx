@@ -19,9 +19,9 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { selectCurrentActivities, selectMaxDate, selectMinDate, selectSelectedDate,
-	selectSelectedFrameColors, selectSelectedMinDate, selectSequences,
-	selectStepInterval, selectStepScale, SequencesActions } from '../../../../modules/sequences';
+import { selectCurrentActivities, selectIsLoadingFrame, selectMaxDate, selectMinDate,
+	selectSelectedDate, selectSelectedFrameColors, selectSelectedMinDate,
+	selectSequences, selectStepInterval, selectStepScale, SequencesActions } from '../../../../modules/sequences';
 
 import { Sequences } from './sequences.component';
 
@@ -34,14 +34,16 @@ const mapStateToProps = createStructuredSelector({
 	colorOverrides: selectSelectedFrameColors,
 	stepInterval: selectStepInterval,
 	stepScale: selectStepScale,
-	currentTasks: selectCurrentActivities
+	currentTasks: selectCurrentActivities,
+	loadingFrame: selectIsLoadingFrame
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	initializeSequences: SequencesActions.initializeSequences,
 	setSelectedFrame: SequencesActions.setSelectedFrame,
 	setStepInterval: SequencesActions.setStepInterval,
-	setStepScale: SequencesActions.setStepScale
+	setStepScale: SequencesActions.setStepScale,
+	fetchFrame: SequencesActions.fetchFrame
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Sequences));

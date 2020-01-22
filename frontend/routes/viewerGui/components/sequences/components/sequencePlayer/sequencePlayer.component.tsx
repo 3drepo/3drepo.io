@@ -40,6 +40,8 @@ interface IProps {
 	stepScale?: STEP_SCALE;
 	onChangeStepInterval?: (value: number) => void;
 	onChangeStepScale?: (value: STEP_SCALE) => void;
+	fetchFrame: (date: Date) => void;
+	loadingFrame: boolean;
 }
 
 interface IState {
@@ -48,7 +50,26 @@ interface IState {
 	intervalId: number;
 	stepInterval: number;
 	stepScale: STEP_SCALE;
+	waitingForFrameLoad: boolean;
 }
+
+const getDateByStep = (timeStamp, stepScale, step) => {
+	const newDate = new Date(timeStamp);
+
+	if (stepScale === STEP_SCALE.DAY) {
+		newDate.setDate(newDate.getDate() + step);
+	}
+
+	if (stepScale === STEP_SCALE.MONTH) {
+		newDate.setMonth(newDate.getMonth() + step);
+	}
+
+	if (stepScale === STEP_SCALE.YEAR) {
+		newDate.setFullYear(newDate.getFullYear() + step);
+	}
+
+	return newDate;
+};
 
 export class SequencePlayer extends React.PureComponent<IProps, IState> {
 	public state: IState = {
@@ -56,7 +77,8 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 		playing: false,
 		intervalId: 0,
 		stepInterval: 1,
-		stepScale: STEP_SCALE.DAY
+		stepScale: STEP_SCALE.DAY,
+		waitingForFrameLoad: false,
 	};
 
 	get currentDay() {
@@ -121,6 +143,12 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 		if (prevProps.stepInterval !== this.props.stepInterval) {
 			this.setState({stepInterval: this.props.stepInterval});
 		}
+
+		if (prevProps.loadingFrame !== this.props.loadingFrame &&
+			!this.props.loadingFrame && this.state.waitingForFrameLoad) {
+			this.nextStep();
+			this.play();
+		}
 	}
 
 	public onClickPlayStop = () => {
@@ -149,22 +177,9 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 	}
 
 	public moveStep = (direction) => {
-		if (this.state.stepScale === STEP_SCALE.DAY) {
-			this.setDayNumber(this.currentDay + this.state.stepInterval * direction);
-		}
 
-		if (this.state.stepScale === STEP_SCALE.MONTH) {
-			const newValue = new Date(this.state.value);
-			newValue.setMonth(newValue.getMonth() + this.state.stepInterval * direction);
-
-			this.setValue(newValue);
-		}
-
-		if (this.state.stepScale === STEP_SCALE.YEAR) {
-			const newValue = new Date(this.state.value);
-			newValue.setFullYear(newValue.getFullYear() + this.state.stepInterval * direction);
-			this.setValue(newValue);
-		}
+		const {value, stepInterval, stepScale} = this.state;
+		this.setValue(getDateByStep(value, stepScale, stepInterval * direction));
 
 		if (this.isLastDay) {
 			this.stop();
@@ -175,11 +190,30 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 
 	public prevStep = this.moveStep.bind(this, -1);
 
+	public fetchNextFrameData = () => {
+		const {value, stepInterval, stepScale} = this.state;
+		const date = getDateByStep(value, stepScale, stepInterval);
+		this.props.fetchFrame(date);
+	}
+
 	public play() {
 		this.stop();
-		const intervalId = (setInterval(this.nextStep, 1000) as unknown) as number;
+		this.fetchNextFrameData();
+
+		const intervalId = (setInterval(() => {
+			if (this.props.loadingFrame && this.state.playing) {
+				clearInterval(this.state.intervalId);
+				this.setState({ waitingForFrameLoad: true});
+				return;
+			}
+
+			this.nextStep();
+			this.fetchNextFrameData();
+		}, 1000) as unknown) as number;
+
 		this.setState({
 			playing: true,
+			waitingForFrameLoad: false,
 			value: this.isLastDay ? this.props.min : this.state.value,
 			intervalId
 		});
@@ -187,7 +221,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 
 	public stop() {
 		clearInterval(this.state.intervalId);
-		this.setState({playing: false});
+		this.setState({playing: false, waitingForFrameLoad: false});
 	}
 
 	public componentDidMount() {

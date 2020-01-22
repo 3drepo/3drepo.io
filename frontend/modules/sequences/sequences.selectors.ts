@@ -46,7 +46,7 @@ export const selectSelectedSequence = createSelector(
 	}
 );
 
-const selectSelectedFrames = createSelector(
+export const selectFrames = createSelector(
 	selectSelectedSequence, (sequence) => {
 		if (!sequence) {
 			return [];
@@ -57,11 +57,11 @@ const selectSelectedFrames = createSelector(
 );
 
 export const selectMinDate = createSelector(
-	selectSelectedFrames, (frames) => frames.length ? frames[0].dateTime : null
+	selectFrames, (frames) => frames.length ? frames[0].dateTime : null
 );
 
 export const selectMaxDate = createSelector(
-	selectSelectedFrames, (frames) => frames.length ? frames[frames.length - 1].dateTime : null
+	selectFrames, (frames) => frames.length ? frames[frames.length - 1].dateTime : null
 );
 
 export const selectSelectedDate = createSelector(
@@ -99,14 +99,16 @@ const getFrameIndexByDate = (frames, date) => {
 	return index;
 };
 
-export const selectSelectedFrame = createSelector(
-	selectSelectedFrames, selectSelectedDate, (frames, date) => {
-		date = new Date(date);
-		date.setHours(23, 59, 59, 999);
+export const getSelectedFrame = (frames, date) => {
+	date = new Date(date);
+	date.setHours(23, 59, 59, 999);
 
-		const index = getFrameIndexByDate(frames, date);
-		return frames[index];
-	}
+	const index = getFrameIndexByDate(frames, date);
+	return frames[index];
+};
+
+export const selectSelectedFrame = createSelector(
+	selectFrames, selectSelectedDate, getSelectedFrame
 );
 
 export const selectLastSuccessfulStateId = createSelector(
@@ -115,6 +117,11 @@ export const selectLastSuccessfulStateId = createSelector(
 
 export const selectSelectedStateId = createSelector(
 	selectSelectedFrame, (frame) =>  (frame || {}).state
+);
+
+export const selectIsLoadingFrame = createSelector(
+	selectSelectedStateId, selectStateDefinitions,
+		(stateId, stateDefinitions) => !(stateDefinitions || {}).hasOwnProperty(stateId)
 );
 
 export const selectSelectedState = createSelector(
@@ -191,7 +198,7 @@ const mergeTasks = (tasks) => {
 	return tasksDictToArr(tasksArrToDict(tasks));
 };
 
-// Filters the tasks by range as well as it subtasks
+// Filters the tasks by range as well as it's subtasks
 const getTasksByRange = (tasks, minDate, maxDate) => {
 	return tasks.reduce((filteredTasks, task) => {
 			if (! (task.startDate > maxDate || task.endDate < minDate)) {
