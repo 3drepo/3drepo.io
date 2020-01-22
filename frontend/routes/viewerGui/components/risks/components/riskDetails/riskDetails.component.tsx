@@ -234,8 +234,9 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderDetailsForm = () => {
-		const {risk, onRemoveResource, showDialog,
-			currentUser, myJob, attachFileResources, attachLinkResources, updateSelectedRiskPin } = this.props;
+		const {
+			onRemoveResource, showDialog, currentUser, myJob, attachFileResources, attachLinkResources, updateSelectedRiskPin,
+		} = this.props;
 
 		return (
 			<RiskDetailsForm
@@ -349,6 +350,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 			updateRisk(teamspace, model, { position: risk.position });
 		}
 	}
+
 	public render() {
 		const { failedToLoad, risk, horizontal } = this.props;
 
