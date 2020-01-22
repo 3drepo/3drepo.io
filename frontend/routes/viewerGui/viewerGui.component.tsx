@@ -89,7 +89,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	public componentDidMount() {
 		const { queryParams: { issueId, riskId }, match: { params }, viewer, leftPanels } = this.props;
 
-		viewer.init();
+		// viewer.init();
 
 		if ((issueId || !riskId) && !leftPanels.includes(VIEWER_PANELS.ISSUES)) {
 			this.props.setPanelVisibility(VIEWER_PANELS.ISSUES);

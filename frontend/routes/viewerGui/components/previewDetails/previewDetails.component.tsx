@@ -106,18 +106,18 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 					const placeholder = this.props.isNew && field.value === '' ? this.props.name : 'Name';
 					return (
 						<TextField
-								{...field}
-								autoFocus
-								fullWidth
-								placeholder={placeholder}
-								onChange={this.handleNameChange(field)}
-								error={Boolean(form.errors.name) && !this.props.name}
-								helperText={form.errors.name}
-								inputProps={{
-									maxLength: 120,
-									onFocus: () => this.handleFocusName(field, form),
-									onBlur: () => this.handleBlurName(field, form)
-								}}
+							{...field}
+							autoFocus
+							fullWidth
+							placeholder={placeholder}
+							onChange={this.handleNameChange(field)}
+							error={Boolean(form.errors.name) && !this.props.name}
+							helperText={form.errors.name}
+							inputProps={{
+								maxLength: 120,
+								onFocus: () => this.handleFocusName(field, form),
+								onBlur: () => this.handleBlurName(field, form)
+							}}
 						/>
 					);
 				}} />
