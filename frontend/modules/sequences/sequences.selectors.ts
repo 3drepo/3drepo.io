@@ -220,8 +220,8 @@ const replaceDates = (tasks) => {
 };
 
 export const selectSelectedMinDate = createSelector(
-	selectSelectedDate, selectStepInterval, selectStepScale,
-		(date: Date, stepInterval: number, stepScale: STEP_SCALE) => {
+	selectSelectedDate, selectMinDate, selectStepInterval, selectStepScale,
+		(date: Date, minDate: Date, stepInterval: number, stepScale: STEP_SCALE) => {
 			if (!date) {
 				return null;
 			}
@@ -236,15 +236,11 @@ export const selectSelectedMinDate = createSelector(
 				date.setMonth(date.getMonth() - stepInterval);
 			}
 
-			if (stepScale === STEP_SCALE.MONTH) {
-				date.setMonth(date.getMonth() - stepInterval);
-			}
-
 			if (stepScale === STEP_SCALE.YEAR) {
 				date.setFullYear(date.getFullYear() - stepInterval);
 			}
 
-			return date;
+			return date < minDate ? new Date(minDate) : date;
 		}
 );
 

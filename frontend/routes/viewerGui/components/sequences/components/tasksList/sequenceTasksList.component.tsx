@@ -17,7 +17,7 @@
 
 import React from 'react';
 import { formatShortDate } from '../../../../../../services/formatting/formatDate';
-import { SequenceTasksListContainer, SequenceTasksListItem } from '../../sequences.styles';
+import { SequenceTasksListContainer, SequenceTasksListItem, TaskListLabel } from '../../sequences.styles';
 import { ITask, Tasks } from './sequenceTasks.component';
 
 interface IProps {
@@ -31,37 +31,36 @@ interface IState {
 }
 
 const equalsDate = (dateA: Date, dateB: Date) =>
-		(!dateA && !dateB) || (
-			dateA.getDate() === dateB.getDate() &&
-			dateA.getMonth() === dateB.getMonth() &&
-			dateA.getFullYear() === dateB.getFullYear()
-		)
-	;
-
-const TaskListLabel = ({minDate, maxDate}) => (
-	<>Showing activities {equalsDate(minDate, maxDate) ?
-		'on ' + formatShortDate(maxDate) :
-		'from ' + formatShortDate(minDate) + ' to ' + formatShortDate(maxDate)
-		}
-	</>
-);
+	(!dateA && !dateB) || (
+		dateA.getDate() === dateB.getDate() &&
+		dateA.getMonth() === dateB.getMonth() &&
+		dateA.getFullYear() === dateB.getFullYear()
+	);
 
 export class TasksList extends React.PureComponent<IProps, IState> {
 	public state: IState = {
 		collapsed: true
 	};
 
+	public get durationLabel() {
+		const  {  minDate, maxDate } = this.props;
+
+		return 'Showing activities ' + ( equalsDate(minDate, maxDate) ?
+			'on ' + formatShortDate(maxDate) :
+			'from ' + formatShortDate(minDate) + ' to ' + formatShortDate(maxDate));
+	}
+
 	public toggleCollapse = () => {
 		this.setState({collapsed: !this.state.collapsed});
 	}
 
 	public render = () => {
-		const { tasks, minDate, maxDate } = this.props;
+		const { tasks } = this.props;
 		return (
 			<SequenceTasksListContainer>
-				<TaskListLabel minDate={minDate} maxDate={maxDate}  />
+				<TaskListLabel>{this.durationLabel}</TaskListLabel>
 				{tasks.map((t) => (
-					<SequenceTasksListItem key={t._id}>
+					<SequenceTasksListItem  key={t._id}>
 						<Tasks tasks={[t]} />
 					</SequenceTasksListItem>
 				))}
