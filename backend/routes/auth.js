@@ -568,7 +568,7 @@ function createSession(place, req, res, next, user) {
 
 			if (user.webSession) {
 				// ChatEvent.sessionCreated(sessionId, user.username);
-				db.getCollection('admin', 'sessions').then((_dbCol) => {
+				db.getCollection("admin", "sessions").then((_dbCol) => {
 					_dbCol.remove({
 						"session.user.sessionId": { $ne: user.sessionId },
 						"session.user.username": user.username,
