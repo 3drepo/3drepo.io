@@ -24,7 +24,7 @@ const C = require("../constants");
 const middlewares = require("../middlewares/middlewares");
 const config = require("../config");
 const utils = require("../utils");
-const ChatEvent = require("../models/chatEvent");
+// const ChatEvent = require("../models/chatEvent");
 const User = require("../models/user");
 const addressMeta = require("../models/addressMeta");
 const Mailer = require("../mailer/mailer");
@@ -556,8 +556,8 @@ function createSession(place, req, res, next, user) {
 			user.sessionId = req.headers[C.HEADER_SOCKET_ID];
 			user.webSession = false;
 
-			if (req.headers && req.headers['user-agent']) {
-				user.webSession = !!req.headers['user-agent'];
+			if (req.headers && req.headers["user-agent"]) {
+				user.webSession = !!req.headers["user-agent"];
 			}
 
 			req.session[C.REPO_SESSION_USER] = user;
@@ -567,7 +567,7 @@ function createSession(place, req, res, next, user) {
 			}
 
 			if (user.webSession) {
-				//ChatEvent.sessionCreated(sessionId, user.username);
+				// ChatEvent.sessionCreated(sessionId, user.username);
 				db.getCollection('admin', 'sessions').then((_dbCol) => {
 					_dbCol.remove({
 						"session.user.sessionId": { $ne: user.sessionId },
