@@ -23,8 +23,13 @@
 	const router = express.Router({mergeParams: true});
 	const responseCodes = require("../response_codes");
 	const middlewares = require("../middlewares/middlewares");
+	const TeamspaceSettings = require("../models/teamspaceSetting");
 	const User = require("../models/user");
 	const utils = require("../utils");
+
+	router.get("/settings", middlewares.isAccountAdmin, getTeamspaceSettings);
+	router.get("/riskCategories", middlewares.isAccountAdmin, getRiskCategories);
+	router.get("/topicTypes", middlewares.isAccountAdmin, getTopicTypes);
 
 	/**
 	 *
@@ -366,6 +371,30 @@
 				responseCodes.respond(responsePlace, req, res, next,
 					err.resCode || utils.mongoErrorToResCode(err), err.resCode ? err.info : err);
 			});
+	}
+
+	function getTeamspaceSettings(req, res, next) {
+		TeamspaceSettings.getTeamspaceSettings(req.params.account).then((settings) => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, settings);
+		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+	}
+
+	function getRiskCategories(req, res, next) {
+		TeamspaceSettings.getRiskCategories(req.params.account).then((categories) => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, categories);
+		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+	}
+
+	function getTopicTypes(req, res, next) {
+		TeamspaceSettings.getTopicTypes(req.params.account).then((types) => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, types);
+		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
 	}
 
 	module.exports = router;
