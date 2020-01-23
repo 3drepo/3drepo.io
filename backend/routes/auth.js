@@ -30,6 +30,7 @@ const addressMeta = require("../models/addressMeta");
 const Mailer = require("../mailer/mailer");
 const httpsPost = require("../libs/httpsReq").post;
 
+const db = require("../handler/db");
 const multer = require("multer");
 
 /**
@@ -552,6 +553,7 @@ function createSession(place, req, res, next, user) {
 		} else {
 			req[C.REQ_REPO].logger.logDebug("Authenticated user and signed token.");
 
+			user.sessionId = req.headers[C.HEADER_SOCKET_ID];
 			user.webSession = false;
 
 			if (req.headers && req.headers['user-agent']) {
@@ -562,6 +564,17 @@ function createSession(place, req, res, next, user) {
 			req.session.cookie.domain = config.cookie_domain;
 			if (config.cookie.maxAge) {
 				req.session.cookie.maxAge = config.cookie.maxAge;
+			}
+
+			if (user.webSession) {
+				//ChatEvent.sessionCreated(sessionId, user.username);
+				db.getCollection('admin', 'sessions').then((_dbCol) => {
+					_dbCol.remove({
+						"session.user.sessionId": { $ne: user.sessionId },
+						"session.user.username": user.username,
+						"session.user.webSession": true
+					});
+				});
 			}
 
 			responseCodes.respond(place, req, res, next, responseCodes.OK, user);
