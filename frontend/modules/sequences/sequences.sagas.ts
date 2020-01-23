@@ -22,6 +22,7 @@ import { selectSelectedSequenceId, selectSelectedStateId, selectStateDefinitions
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
 import { selectCurrentModel, selectCurrentModelTeamspace, selectCurrentRevisionId } from '../model/model.selectors';
+import { dispatch } from '../store';
 import { selectIfcSpacesHidden, TreeActions } from '../tree';
 import { getSelectedFrame, selectFrames, selectSelectedDate } from './sequences.selectors';
 
@@ -63,16 +64,17 @@ export function* fetchFrame({date}) {
 		const loadedStates = yield select(selectStateDefinitions);
 		const frames = yield select(selectFrames);
 		const frame = getSelectedFrame(frames, date);
-		if (!frame) {
-			return;
-		}
 
 		const stateId = frame.state;
 
-		if (!loadedStates[frame.state]) {
-			const response = yield API.getSequenceState(teamspace, model, revision, sequenceId, stateId);
-			yield put(SequencesActions.setStateDefinition(stateId, response.data));
-			yield put(SequencesActions.setLastLoadedSuccesfullState(stateId));
+		if (!loadedStates[stateId]) {
+			// Using directly the promise and 'then' to dispatch the rest of the actions
+			// because with yield it would sometimes stop there forever even though the promise resolved
+			API.getSequenceState(teamspace, model, revision, sequenceId, stateId).then((response) => {
+				dispatch(SequencesActions.setStateDefinition(stateId, response.data));
+				dispatch(SequencesActions.setLastLoadedSuccesfullState(stateId));
+			});
+
 		}
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('fetch frame', 'sequences', error));

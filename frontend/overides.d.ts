@@ -13,6 +13,7 @@ declare global {
 		Pin: any;
 		requestIdleCallback: any;
 		__REDUX_DEVTOOLS_EXTENSION__: any;
+		__RESELECT_TOOLS__: any;
 	}
 
 	interface Document {
