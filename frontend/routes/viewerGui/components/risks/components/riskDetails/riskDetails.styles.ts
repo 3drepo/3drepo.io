@@ -110,6 +110,7 @@ export const HorizontalView = styled.div`
 	${PreviewDetails}, ${LogsContainer} {
 		min-width: 50%;
 		width: 50%;
+		min-height: 60vh;
 		max-height: 75vh;
 		position: relative;
 		overflow: auto;
@@ -134,4 +135,5 @@ export const TabContent = styled.div`
 export const Content = styled.div`
 	display: ${(props) => props.active ? 'block' : 'none'};
 	width: 100%;
+	margin-bottom: 5px;
 `;
