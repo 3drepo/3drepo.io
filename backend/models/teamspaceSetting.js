@@ -17,45 +17,17 @@
 
 "use strict";
 
+const _ = require("lodash");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
 
 const colName = "teamspace";
 
-/*const fieldTypes = {
+const fieldTypes = {
 	"_id": "[object String]",
 	"topicTypes": "[object Array]",
 	"riskCategories": "[object Array]"
-};*/
-
-const defaultRiskCategories = [
-	{ value: 'commercial', label: 'Commercial Issue' },
-	{ value: 'environmental', label: 'Environmental Issue' },
-	{ value: 'health_material_effect', label: 'Health - Material effect' },
-	{ value: 'health_mechanical_effect', label: 'Health - Mechanical effect' },
-	{ value: 'safety_fall', label: 'Safety Issue - Fall' },
-	{ value: 'safety_trapped', label: 'Safety Issue - Trapped' },
-	{ value: 'safety_event', label: 'Safety Issue - Event' },
-	{ value: 'safety_handling', label: 'Safety Issue - Handling' },
-	{ value: 'safety_struck', label: 'Safety Issue - Struck' },
-	{ value: 'safety_public', label: 'Safety Issue - Public' },
-	{ value: 'social', label: 'Social Issue' },
-	{ value: 'other', label: 'Other Issue' },
-	{ value: 'unknown', label: 'UNKNOWN' }
-];
-
-const defaultTopicTypes = [
-	{value: "clash", label: "Clash"},
-	{value: "diff", label: "Diff"},
-	{value: "rfi", label: "RFI"},
-	{value: "risk", label: "Risk"},
-	{value: "hs", label: "H&S"},
-	{value: "design", label: "Design"},
-	{value: "constructibility", label: "Constructibility"},
-	{value: "gis", label: "GIS"},
-	{value: "for_information", label: "For information"},
-	{value: "vr", label: "VR"}
-];
+};
 
 class TeamspaceSettings {
 	clean(settingsToClean) {
@@ -65,24 +37,21 @@ class TeamspaceSettings {
 		return settingsToClean;
 	}
 
+	filterFields(data, blackList) {
+		data = _.omit(data, blackList);
+		return _.pick(data, Object.keys(fieldTypes));
+	}
+
 	getTeamspaceSettingsCollection(account) {
 		return db.getCollection(account, colName);
 	}
 
 	async getTeamspaceSettings(account, noClean = false) {
-		const settings = await this.getTeamspaceSettingsCollection(account);
-		let foundSettings = await settings.findOne({ _id: account });
+		const settingsColl = await this.getTeamspaceSettingsCollection(account);
+		let foundSettings = await settingsColl.findOne({ _id: account });
 
 		if (!foundSettings) {
-			foundSettings = { _id: account };
-		}
-
-		if (!foundSettings.riskCategories) {
-			foundSettings.riskCategories = defaultRiskCategories;
-		}
-
-		if (!foundSettings.topicTypes) {
-			foundSettings.topicTypes = defaultTopicTypes;
+			return Promise.reject(responseCodes.TEAMSPACE_SETTINGS_NOT_FOUND);
 		}
 
 		if (!noClean) {
@@ -99,12 +68,6 @@ class TeamspaceSettings {
 		return riskCategories;
 	}
 
-	async addRiskCategory(account, category) {
-	}
-
-	async removeRiskCategory(account, category) {
-	}
-
 	async getTopicTypes(account) {
 		const settings = await this.getTeamspaceSettings(account, true);
 		const topicTypes = Object.assign([], settings.topicTypes);
@@ -112,11 +75,32 @@ class TeamspaceSettings {
 		return topicTypes;
 	}
 
-	async addTopicType(account, topicType) {
-	}
+	async update(account, data, noClean = false) {
+		const attributeBlacklist = [
+			"_id"
+		];
 
-	async removeTopicType(account, topicType) {
+		const oldSettings = await this.getTeamspaceSettings(account, true);
+
+		// Filter out blacklisted attributes and leave proper attrs
+		data = this.filterFields(data, attributeBlacklist);
+
+		if (_.isEmpty(data)) {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+
+		// Update the data
+		const settingsColl = await this.getTeamspaceSettingsCollection(account, true);
+		await settingsColl.update({_id: account}, {$set: data});
+
+		let updatedSettings = {...oldSettings, ...data};
+
+		if (!noClean) {
+			updatedSettings = this.clean(updatedSettings);
+		}
+
+		return updatedSettings;
 	}
-};
+}
 
 module.exports = new TeamspaceSettings();

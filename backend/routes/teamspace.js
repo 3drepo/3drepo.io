@@ -28,12 +28,9 @@
 	const utils = require("../utils");
 
 	router.get("/settings", middlewares.isAccountAdmin, getTeamspaceSettings);
+	router.put("/settings", middlewares.isAccountAdmin, updateTeamspaceSettings);
 	router.get("/riskCategories", middlewares.isAccountAdmin, getRiskCategories);
-	router.post("/riskCategories", middlewares.isAccountAdmin, addRiskCategory);
-	router.delete("/riskCategories", middlewares.isAccountAdmin, removeRiskCategory);
 	router.get("/topicTypes", middlewares.isAccountAdmin, getTopicTypes);
-	router.post("/topicTypes", middlewares.isAccountAdmin, addTopicType);
-	router.delete("/topicTypes", middlewares.isAccountAdmin, removeTopicType);
 
 	/**
 	 *
@@ -379,7 +376,14 @@
 
 	function getTeamspaceSettings(req, res, next) {
 		TeamspaceSettings.getTeamspaceSettings(req.params.account).then((settings) => {
-			console.log(settings);
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, settings);
+		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+	}
+
+	function updateTeamspaceSettings(req, res, next) {
+		TeamspaceSettings.update(req.params.account, req.body).then((settings) => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, settings);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -388,25 +392,6 @@
 
 	function getRiskCategories(req, res, next) {
 		TeamspaceSettings.getRiskCategories(req.params.account).then((categories) => {
-			console.log(categories);
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, categories);
-		}).catch(err => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		});
-	}
-
-	function addRiskCategory(req, res, next) {
-		TeamspaceSettings.addRiskCategory(req.params.account, null).then((categories) => {
-			console.log(categories);
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, categories);
-		}).catch(err => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		});
-	}
-
-	function removeRiskCategory(req, res, next) {
-		TeamspaceSettings.removeRiskCategory(req.params.account, null).then((categories) => {
-			console.log(categories);
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, categories);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -415,25 +400,6 @@
 
 	function getTopicTypes(req, res, next) {
 		TeamspaceSettings.getTopicTypes(req.params.account).then((types) => {
-			console.log(types);
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, types);
-		}).catch(err => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		});
-	}
-
-	function addTopicType(req, res, next) {
-		TeamspaceSettings.addTopicType(req.params.account, null).then((types) => {
-			console.log(types);
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, types);
-		}).catch(err => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		});
-	}
-
-	function removeTopicType(req, res, next) {
-		TeamspaceSettings.removeTopicType(req.params.account, null).then((types) => {
-			console.log(types);
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, types);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
