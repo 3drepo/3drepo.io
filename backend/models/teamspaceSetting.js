@@ -22,6 +22,41 @@ const responseCodes = require("../response_codes.js");
 
 const colName = "teamspace";
 
+/*const fieldTypes = {
+	"_id": "[object String]",
+	"topicTypes": "[object Array]",
+	"riskCategories": "[object Array]"
+};*/
+
+const defaultRiskCategories = [
+	{ value: 'commercial', label: 'Commercial Issue' },
+	{ value: 'environmental', label: 'Environmental Issue' },
+	{ value: 'health_material_effect', label: 'Health - Material effect' },
+	{ value: 'health_mechanical_effect', label: 'Health - Mechanical effect' },
+	{ value: 'safety_fall', label: 'Safety Issue - Fall' },
+	{ value: 'safety_trapped', label: 'Safety Issue - Trapped' },
+	{ value: 'safety_event', label: 'Safety Issue - Event' },
+	{ value: 'safety_handling', label: 'Safety Issue - Handling' },
+	{ value: 'safety_struck', label: 'Safety Issue - Struck' },
+	{ value: 'safety_public', label: 'Safety Issue - Public' },
+	{ value: 'social', label: 'Social Issue' },
+	{ value: 'other', label: 'Other Issue' },
+	{ value: 'unknown', label: 'UNKNOWN' }
+];
+
+const defaultTopicTypes = [
+	{value: "clash", label: "Clash"},
+	{value: "diff", label: "Diff"},
+	{value: "rfi", label: "RFI"},
+	{value: "risk", label: "Risk"},
+	{value: "hs", label: "H&S"},
+	{value: "design", label: "Design"},
+	{value: "constructibility", label: "Constructibility"},
+	{value: "gis", label: "GIS"},
+	{value: "for_information", label: "For information"},
+	{value: "vr", label: "VR"}
+];
+
 class TeamspaceSettings {
 	clean(settingsToClean) {
 		settingsToClean.teamspace = settingsToClean._id;
@@ -36,10 +71,18 @@ class TeamspaceSettings {
 
 	async getTeamspaceSettings(account, noClean = false) {
 		const settings = await this.getTeamspaceSettingsCollection(account);
-		const foundSettings = await settings.findOne({ _id: account });
+		let foundSettings = await settings.findOne({ _id: account });
 
 		if (!foundSettings) {
-			return Promise.reject(responseCodes.TEAMSPACE_SETTINGS_NOT_FOUND);
+			foundSettings = { _id: account };
+		}
+
+		if (!foundSettings.riskCategories) {
+			foundSettings.riskCategories = defaultRiskCategories;
+		}
+
+		if (!foundSettings.topicTypes) {
+			foundSettings.topicTypes = defaultTopicTypes;
 		}
 
 		if (!noClean) {
@@ -56,11 +99,23 @@ class TeamspaceSettings {
 		return riskCategories;
 	}
 
+	async addRiskCategory(account, category) {
+	}
+
+	async removeRiskCategory(account, category) {
+	}
+
 	async getTopicTypes(account) {
 		const settings = await this.getTeamspaceSettings(account, true);
 		const topicTypes = Object.assign([], settings.topicTypes);
 
 		return topicTypes;
+	}
+
+	async addTopicType(account, topicType) {
+	}
+
+	async removeTopicType(account, topicType) {
 	}
 };
 
