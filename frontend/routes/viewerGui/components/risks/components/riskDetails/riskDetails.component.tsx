@@ -131,7 +131,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 					onNameChange={this.handleNameChange}
 					onExpandChange={this.handleExpandChange}
 					renderCollapsable={this.renderDetailsForm}
-					renderNotCollapsable={!horizontal ? renderNotCollapsable : null}
+					renderNotCollapsable={!horizontal && !this.isNewRisk ? renderNotCollapsable : null}
 					handleHeaderClick={this.handleHeaderClick}
 					scrolled={this.state.scrolled && !horizontal}
 					isNew={this.isNewRisk}

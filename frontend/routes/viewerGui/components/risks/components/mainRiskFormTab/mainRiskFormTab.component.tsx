@@ -57,7 +57,6 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 	active, isNewRisk, risk, hidePin, jobs, canChangeAssigned, canEditBasicProperty,
 	renderPinButton, values,
 }) => {
-console.warn('values:', values);
 	return (
 		<Content active={active}>
 			<Container>
