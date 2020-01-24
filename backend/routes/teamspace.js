@@ -27,9 +27,323 @@
 	const User = require("../models/user");
 	const utils = require("../utils");
 
+	/**
+	 * @apiDefine Teamspace Teamspace
+	 *
+	 * @apiParam {String} teamspace Name of teamspace
+	 */
+
+	/**
+	 * @api {get} /:teamspace/settings Get teamspace settings
+	 * @apiName getTeamspaceSettings
+	 * @apiGroup Teamspace
+	 * @apiDescription Returns all teamspace settings.
+	 *
+	 * @apiUse Teamspace
+	 *
+	 * @apiExample {get} Example usage
+	 * GET /acme/settings HTTP/1.1
+	 *
+	 * @apiSuccessExample {json} Success-Response
+	 * HTTP/1.1 200 OK
+	 * {
+	 * 	"topicTypes":[
+	 * 		{
+	 * 			"value":"for_information",
+	 * 			"label":"For information"
+	 * 		},
+	 * 		{
+	 * 			"value":"vr",
+	 * 			"label":"VR"
+	 * 		},
+	 * 		{
+	 * 			"value":"clash",
+	 * 			"label":"Clash"
+	 * 		},
+	 * 		{
+	 * 			"value":"diff",
+	 * 			"label":"Diff"
+	 * 		},
+	 * 		{
+	 * 			"value":"rfi",
+	 * 			"label":"RFI"
+	 * 		},
+	 * 		{
+	 * 			"value":"risk",
+	 * 			"label":"Risk"
+	 * 		},
+	 * 		{
+	 * 			"value":"hs",
+	 * 			"label":"H&S"
+	 * 		},
+	 * 		{
+	 * 			"value":"design",
+	 * 			"label":"Design"
+	 * 		},
+	 * 		{
+	 * 			"value":"constructibility",
+	 * 			"label":"Constructibility"
+	 * 		},
+	 * 		{
+	 * 			"value":"gis",
+	 * 			"label":"GIS"
+	 * 		}
+	 * 	],
+	 * 	"riskCategories":[
+	 * 		{
+	 * 			"value":"commercial",
+	 * 			"label":"Commercial Issue"
+	 * 		},
+	 * 		{
+	 * 			"value":"environmental",
+	 * 			"label":"Environmental Issue"
+	 * 		},
+	 * 		{
+	 * 			"value":"health_material_effect",
+	 * 			"label":"Health - Material effect"
+	 * 		},
+	 * 		{
+	 * 			"value":"health_mechanical_effect",
+	 * 			"label":"Health - Mechanical effect"
+	 * 		},
+	 * 		{
+	 * 			"value":"safety_fall",
+	 * 			"label":"Safety Issue - Fall"
+	 * 		},
+	 * 		{
+	 * 			"value":"safety_trapped",
+	 * 			"label":"Safety Issue - Trapped"
+	 * 		},
+	 * 		{
+	 * 			"value":"safety_event",
+	 * 			"label":"Safety Issue - Event"
+	 * 		},
+	 * 		{
+	 * 			"value":"safety_handling",
+	 * 			"label":"Safety Issue - Handling"
+	 * 		},
+	 * 		{
+	 * 			"value":"safety_struck",
+	 * 			"label":"Safety Issue - Struck"
+	 * 		},
+	 * 		{
+	 * 			"value":"safety_public",
+	 * 			"label":"Safety Issue - Public"
+	 * 		},
+	 * 		{
+	 * 			"value":"social",
+	 * 			"label":"Social Issue"
+	 * 		},
+	 * 		{
+	 * 			"value":"other",
+	 * 			"label":"Other Issue"
+	 * 		},
+	 * 		{
+	 * 			"value":"unknown",
+	 * 			"label":"UNKNOWN"
+	 * 		}
+	 * 	],
+	 * 	"teamspace":"acme"
+	 * }
+	 */
 	router.get("/settings", middlewares.isAccountAdmin, getTeamspaceSettings);
+
+	/**
+	 * @api {put} /:teamspace/settings Update teamspace settings
+	 * @apiName updateTeamspaceSettings
+	 * @apiGroup Teamspace
+	 * @apiDescription Update teamspace settings.
+	 *
+	 * @apiUse Teamspace
+	 *
+	 * @apiParam (Request body) {Object[]} riskCategories List of risk categories
+	 * @apiParam (Request body) {Object[]} topicTypes List of issue topic types
+	 *
+	 * @apiParam (Risk category) {String} value Value of risk category
+	 * @apiParam (Risk category) {String} label Label for risk category
+	 *
+	 * @apiParam (Topic type) {String} value Value of topic type
+	 * @apiParam (Topic type) {String} label Label for topic type
+	 *
+	 * @apiExample {put} Example usage
+	 * PUT /acme/settings HTTP/1.1
+	 * {
+	 * 	"topicTypes":[
+	 * 		{
+	 * 			"value":"new_topic_1",
+	 * 			"label":"New Topic 1"
+	 * 		},
+	 * 		{
+	 * 			"value":"new_topic_2",
+	 * 			"label":"New Topic 2"
+	 * 		}
+	 * 	],
+	 * 	"riskCategories":[
+	 * 		{
+	 * 			"value":"new_category_1",
+	 * 			"label":"New Category 1"
+	 * 		},
+	 * 		{
+	 * 			"value":"new_category_2",
+	 * 			"label":"NEW CATEGORY 2"
+	 * 		}
+	 * 	]
+	 * }
+	 *
+	 * @apiSuccessExample {json} Success-Response
+	 * HTTP/1.1 200 OK
+	 * {
+	 * 	"topicTypes":[
+	 * 		{
+	 * 			"value":"new_topic_1",
+	 * 			"label":"New Topic 1"
+	 * 		},
+	 * 		{
+	 * 			"value":"new_topic_2",
+	 * 			"label":"New Topic 2"
+	 * 		}
+	 * 	],
+	 * 	"riskCategories":[
+	 * 		{
+	 * 			"value":"new_category_1",
+	 * 			"label":"New Category 1"
+	 * 		},
+	 * 		{
+	 * 			"value":"new_category_2",
+	 * 			"label":"NEW CATEGORY 2"
+	 * 		}
+	 * 	],
+	 * 	"teamspace":"acme"
+	 * }
+	 */
 	router.put("/settings", middlewares.isAccountAdmin, updateTeamspaceSettings);
+
+	/**
+	 * @api {get} /:teamspace/riskCategories Get risk categories
+	 * @apiName getRiskCategories
+	 * @apiGroup Teamspace
+	 * @apiDescription Returns all risk categories for teamspace.
+	 *
+	 * @apiUse Teamspace
+	 *
+	 * @apiExample {get} Example usage
+	 * GET /acme/riskCategories HTTP/1.1
+	 *
+	 * @apiSuccessExample {json} Success-Response
+	 * HTTP/1.1 200 OK
+	 * [
+	 * 	{
+	 * 		"value":"commercial",
+	 * 		"label":"Commercial Issue"
+	 * 	},
+	 * 	{
+	 * 		"value":"environmental",
+	 * 		"label":"Environmental Issue"
+	 * 	},
+	 * 	{
+	 * 		"value":"health_material_effect",
+	 * 		"label":"Health - Material effect"
+	 * 	},
+	 * 	{
+	 * 		"value":"health_mechanical_effect",
+	 * 		"label":"Health - Mechanical effect"
+	 * 	},
+	 * 	{
+	 * 		"value":"safety_fall",
+	 * 		"label":"Safety Issue - Fall"
+	 * 	},
+	 * 	{
+	 * 		"value":"safety_trapped",
+	 * 		"label":"Safety Issue - Trapped"
+	 * 	},
+	 * 	{
+	 * 		"value":"safety_event",
+	 * 		"label":"Safety Issue - Event"
+	 * 	},
+	 * 	{
+	 * 		"value":"safety_handling",
+	 * 		"label":"Safety Issue - Handling"
+	 * 	},
+	 * 	{
+	 * 		"value":"safety_struck",
+	 * 		"label":"Safety Issue - Struck"
+	 * 	},
+	 * 	{
+	 * 		"value":"safety_public",
+	 * 		"label":"Safety Issue - Public"
+	 * 	},
+	 * 	{
+	 * 		"value":"social",
+	 * 		"label":"Social Issue"
+	 * 	},
+	 * 	{
+	 * 		"value":"other",
+	 * 		"label":"Other Issue"
+	 * 	},
+	 * 	{
+	 * 		"value":"unknown",
+	 * 		"label":"UNKNOWN"
+	 * 	}
+	 * ]
+	 */
 	router.get("/riskCategories", middlewares.isAccountAdmin, getRiskCategories);
+
+	/**
+	 * @api {get} /:teamspace/topicTypes Get topic types
+	 * @apiName getTopicTypes
+	 * @apiGroup Teamspace
+	 * @apiDescription Returns all issue topic types for teamspace.
+	 *
+	 * @apiUse Teamspace
+	 *
+	 * @apiExample {get} Example usage
+	 * GET /acme/topicTypes HTTP/1.1
+	 *
+	 * @apiSuccessExample {json} Success-Response
+	 * HTTP/1.1 200 OK
+	 * [
+	 * 	{
+	 * 		"value":"for_information",
+	 * 		"label":"For information"
+	 * 	},
+	 * 	{
+	 * 		"value":"vr",
+	 * 		"label":"VR"
+	 * 	},
+	 * 	{
+	 * 		"value":"clash",
+	 * 		"label":"Clash"
+	 * 	},
+	 * 	{
+	 * 		"value":"diff",
+	 * 		"label":"Diff"
+	 * 	},
+	 * 	{
+	 * 		"value":"rfi",
+	 * 		"label":"RFI"
+	 * 	},
+	 * 	{
+	 * 		"value":"risk",
+	 * 		"label":"Risk"
+	 * 	},
+	 * 	{
+	 * 		"value":"hs",
+	 * 		"label":"H&S"
+	 * 	},
+	 * 	{
+	 * 		"value":"design",
+	 * 		"label":"Design"
+	 * 	},
+	 * 	{
+	 * 		"value":"constructibility",
+	 * 		"label":"Constructibility"
+	 * 	},
+	 * 	{
+	 * 		"value":"gis",
+	 * 		"label":"GIS"
+	 * 	}
+	 * ]
+	 */
 	router.get("/topicTypes", middlewares.isAccountAdmin, getTopicTypes);
 
 	/**
