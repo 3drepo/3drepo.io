@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, select, take, takeLatest } from 'redux-saga/effects';
+import { put, select, take, takeLatest } from 'redux-saga/effects';
 
 import { selectSelectedSequenceId, selectSelectedStateId, selectStateDefinitions,
 	SequencesActions, SequencesTypes } from '.';
@@ -45,8 +45,7 @@ export function* fetchSequences() {
 		yield put(SequencesActions.fetchSequencesSuccess(response.data));
 
 		// Mock up thingy, this should be deleted
-		yield put(SequencesActions.setSelectedSequence(response.data[0]._id));
-
+		// yield put(SequencesActions.setSelectedSequence(response.data[0]._id));
 		yield put(SequencesActions.setSequencesPending(false));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'sequences', error));
@@ -101,7 +100,10 @@ export function* initializeSequences() {
 	yield take(SequencesTypes.FETCH_SEQUENCES_SUCCESS);
 
 	const date = yield select(selectSelectedDate);
-	yield put(SequencesActions.setSelectedFrame(date));
+
+	if (date) {
+		yield put(SequencesActions.setSelectedFrame(date));
+	}
 }
 
 export default function* SequencesSaga() {

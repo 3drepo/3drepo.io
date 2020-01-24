@@ -227,6 +227,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 	public componentDidMount() {
 		if (this.props.value) {
 			this.setState({value: this.props.value});
+			this.props.fetchFrame(this.props.value);
 		}
 
 		if (this.props.stepInterval) {

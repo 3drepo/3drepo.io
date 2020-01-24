@@ -17,8 +17,11 @@
 
 import React from 'react';
 
+import { IconButton } from '@material-ui/core';
+import ArrowBack from '@material-ui/icons/ArrowBack';
 import { STEP_SCALE } from '../../../../constants/sequences';
 import { SequencePlayer } from './components/sequencePlayer/sequencePlayer.component';
+import { SequencesList } from './components/sequencesList/sequencesList.component';
 import { TasksList } from './components/tasksList/sequenceTasksList.component';
 import {
 	SequencesContainer, SequencesIcon,
@@ -31,6 +34,7 @@ interface IProps {
 	fetchFrame: (date: Date) => void;
 	setStepInterval: (interval: number) => void;
 	setStepScale: (scale: STEP_SCALE) => void;
+	setSelectedSequence: (id: string) => void;
 	maxDate: Date;
 	minDate: Date;
 	selectedDate: Date;
@@ -40,38 +44,57 @@ interface IProps {
 	stepScale: STEP_SCALE;
 	currentTasks: any[];
 	loadingFrame: boolean;
+	selectedSequence: any;
 }
+
+const SequenceDetails = ({ minDate, maxDate, selectedDate,
+	setSelectedFrame, stepInterval,
+	stepScale, setStepInterval, setStepScale,
+	currentTasks, selectedMinDate, loadingFrame,
+	fetchFrame }) => (
+		<>
+			<SequencePlayer
+				min={minDate}
+				max={maxDate}
+				value={selectedDate}
+				stepInterval={stepInterval}
+				stepScale={stepScale}
+				onChange={setSelectedFrame}
+				onChangeStepScale={setStepScale}
+				onChangeStepInterval={setStepInterval}
+				loadingFrame={loadingFrame}
+				fetchFrame={fetchFrame}
+			/>
+			<TasksList tasks={currentTasks} minDate={selectedMinDate} maxDate={selectedDate} loadingFrame={loadingFrame} />
+		</>
+	);
 
 export class Sequences extends React.PureComponent<IProps, {}> {
 	public componentDidMount = () => {
 		this.props.initializeSequences();
 	}
 
+	public renderTitleIcon = () => {
+		if (this.props.selectedSequence) {
+			return (
+				<IconButton onClick={() => this.props.setSelectedSequence(null)}>
+					<ArrowBack />
+				</IconButton>
+			);
+		}
+		return <SequencesIcon />;
+	}
+
 	public render = () => {
-		const {minDate, maxDate, selectedDate,
-			setSelectedFrame, stepInterval,
-			stepScale, setStepInterval, setStepScale,
-			currentTasks, selectedMinDate, loadingFrame,
-			fetchFrame} = this.props;
+		const { selectedSequence, setSelectedSequence, sequences } = this.props;
 
 		return (
 			<SequencesContainer
-				Icon={<SequencesIcon />}
+				Icon={this.renderTitleIcon()}
 				renderActions={() => (<></>)}
 			>
-				<SequencePlayer
-					min={minDate}
-					max={maxDate}
-					value={selectedDate}
-					stepInterval={stepInterval}
-					stepScale={stepScale}
-					onChange={setSelectedFrame}
-					onChangeStepScale={setStepScale}
-					onChangeStepInterval={setStepInterval}
-					loadingFrame={loadingFrame}
-					fetchFrame={fetchFrame}
-				/>
-				<TasksList tasks={currentTasks} minDate={selectedMinDate} maxDate={selectedDate} loadingFrame={loadingFrame} />
+				{selectedSequence && <SequenceDetails {...this.props} />}
+				{!selectedSequence && <SequencesList sequences={sequences} setSelectedSequence={setSelectedSequence} />}
 			</SequencesContainer>
 		);
 	}

@@ -23,8 +23,13 @@ import { MILLI_PER_DAY } from '../../helpers/dateTime';
 
 export const selectSequencesDomain = (state) => ({...state.sequences});
 
+const getMinMaxDates = ({frames}) => ({
+	minDate: (frames[0] || {}).dateTime,
+	maxDate: (frames[frames.length - 1] || {}).dateTime
+});
+
 export const selectSequences = createSelector(
-	selectSequencesDomain, (state) => state.sequences
+	selectSequencesDomain, (state) => state.sequences.map((sequence) =>  ({...sequence, ...getMinMaxDates(sequence)}))
 );
 
 export const selectStateDefinitions = createSelector(
@@ -36,14 +41,7 @@ export const selectSelectedSequenceId = createSelector(
 );
 
 export const selectSelectedSequence = createSelector(
-	selectSequences, selectSelectedSequenceId, (sequences, id) => {
-		const selectedSeq = sequences.filter((s) => s._id === id );
-		if (selectedSeq.length === 0) {
-			return null;
-		}
-
-		return selectedSeq[0];
-	}
+	selectSequences, selectSelectedSequenceId, (sequences, id) => sequences.find((s) => s._id === id )
 );
 
 export const selectFrames = createSelector(
@@ -57,11 +55,11 @@ export const selectFrames = createSelector(
 );
 
 export const selectMinDate = createSelector(
-	selectFrames, (frames) => frames.length ? frames[0].dateTime : null
+	selectSelectedSequence, (sequence) => (sequence || {}).minDate
 );
 
 export const selectMaxDate = createSelector(
-	selectFrames, (frames) => frames.length ? frames[frames.length - 1].dateTime : null
+	selectSelectedSequence, (sequence) => (sequence || {}).maxDate
 );
 
 export const selectSelectedDate = createSelector(
