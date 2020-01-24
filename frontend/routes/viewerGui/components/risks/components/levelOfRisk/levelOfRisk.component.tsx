@@ -21,21 +21,19 @@ import { getRiskStatus } from '../../../../../../helpers/risks';
 import { Container, Header, Status } from './levelOfRisk.styles';
 
 interface IProps {
-	// StatusIconComponent?: React.FunctionComponent<any>;
-	// statusColor: string;
-	mitigation_status: string;
-	overall_level_of_risk: number;
+	header: string;
+	level: number;
+	status: string;
 }
 
-export const LevelOfRisk: React.FunctionComponent<IProps> = ({
-	mitigation_status: mitigationStatus, overall_level_of_risk: overallLevelOfRisk, ...props
+export const LevelOfRisk: React.FunctionComponent<IProps> = ({ header, status, level, ...props
 }) => {
-	const { name } = LEVELS_OF_RISK.find(({ value: riskValue }) => (riskValue === overallLevelOfRisk) );
-	const { Icon, color } = getRiskStatus(overallLevelOfRisk, mitigationStatus);
+	const { name } = LEVELS_OF_RISK.find(({ value }) => (value === level) );
+	const { Icon, color } = getRiskStatus(level, status);
 
 	return (
 		<>
-			<Header>Level of Risk</Header>
+			<Header>{header}</Header>
 			<Container color={color}>
 				<Icon color="inherit" style={{ fontSize: 50 }} fontSize="inherit" />
 				<Status>

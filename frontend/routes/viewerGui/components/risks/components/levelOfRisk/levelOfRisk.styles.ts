@@ -30,7 +30,8 @@ export const Container = styled.div`
 export const Header = styled.div`
 	display: flex;
 	justify-content: center;
-	font-size: 10px;
+	font-size: 12px;
+	margin-top: 5px;
 `;
 
 export const Status = styled.div`
