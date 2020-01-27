@@ -35,7 +35,7 @@ const getModelName = (sequence, settings) => {
 	if (settings._id === sequence.model) {
 		modelName = settings.name;
 	} else {
-		const submodel = settings.subModels.find((model) => model === settings.model);
+		const submodel = settings.subModels.find((model) => model.model === sequence.model);
 		modelName = (submodel || {}).name || '';
 	}
 
@@ -58,6 +58,10 @@ export const selectSelectedSequenceId = createSelector(
 
 export const selectSelectedSequence = createSelector(
 	selectSequences, selectSelectedSequenceId, (sequences, id) => sequences.find((s) => s._id === id )
+);
+
+export const selectSequenceModel = createSelector(
+	selectSelectedSequence, (sequence) => (sequence || {}).model
 );
 
 export const selectFrames = createSelector(

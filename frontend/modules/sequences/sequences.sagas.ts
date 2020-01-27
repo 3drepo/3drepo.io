@@ -24,7 +24,7 @@ import { DialogActions } from '../dialog';
 import { selectCurrentModel, selectCurrentModelTeamspace, selectCurrentRevisionId } from '../model/model.selectors';
 import { dispatch } from '../store';
 import { selectIfcSpacesHidden, TreeActions } from '../tree';
-import { getSelectedFrame, selectFrames, selectSelectedDate } from './sequences.selectors';
+import { getSelectedFrame, selectFrames, selectSelectedDate, selectSequenceModel } from './sequences.selectors';
 
 const delay = async (time) => {
 	return new Promise( (resolve, reject) => {
@@ -57,7 +57,7 @@ export function* fetchFrame({date}) {
 	try {
 		const teamspace = yield select(selectCurrentModelTeamspace);
 		const revision = yield select(selectCurrentRevisionId);
-		const model = yield select(selectCurrentModel);
+		const model = yield select(selectSequenceModel);
 		const sequenceId =  yield select(selectSelectedSequenceId);
 
 		const loadedStates = yield select(selectStateDefinitions);

@@ -73,7 +73,7 @@ class Sequence {
 		}
 
 		submodels.forEach((submodel) => {
-			submodelListPromises.push(this.getList(account, submodel, branch, revision, cleanResponse));
+			submodelListPromises.push(this.getList(account, submodel, "master", null, cleanResponse));
 		});
 
 		return db.getCollection(account, model + ".sequences").then(_dbCol => {
