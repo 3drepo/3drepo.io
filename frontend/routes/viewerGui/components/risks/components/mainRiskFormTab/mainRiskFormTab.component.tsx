@@ -205,6 +205,9 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 						/>
 					)} />
 				</FieldsContainer>
+				<Field name="safetibase_id" render={({ field }) => (
+					<input {...field} type="hidden" name="safetibase_id" disabled />
+				)} />
 			</FieldsRow>
 		</Content>
 	);

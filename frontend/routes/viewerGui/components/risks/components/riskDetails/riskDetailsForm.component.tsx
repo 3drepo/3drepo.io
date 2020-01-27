@@ -19,7 +19,7 @@ import React from 'react';
 
 import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
-import { withFormik, Field, Form } from 'formik';
+import { withFormik, Form } from 'formik';
 import { debounce, get, isEmpty, isEqual } from 'lodash';
 import * as Yup from 'yup';
 
@@ -30,14 +30,12 @@ import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { calculateLevelOfRisk } from '../../../../../../helpers/risks';
 import { canChangeAssigned, canChangeBasicProperty, canChangeStatus } from '../../../../../../helpers/risks';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
-import { TextField } from '../../../../../components/textField/textField.component';
 import PinButton from '../../../pinButton/pinButton.container';
 import { AttachmentsFormTab } from '../attachmentsFormTab/attachmentsFormTab.component';
 import { MainRiskFormTab } from '../mainRiskFormTab/mainRiskFormTab.component';
 import { TreatmentRiskFormTab } from '../treatmentFormTab/treatmentFormTab.component';
 import {
 	Container,
-	Content,
 	DescriptionImage,
 	FieldsContainer,
 	FieldsRow,
@@ -209,22 +207,6 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	public showAttachmentsContent = (active) => (
 		<AttachmentsFormTab active={active} {...this.props} />
 	)
-
-	public showTreatmentContentOld = (active) => {
-		return (
-				<Content active={active}>
-					<Field name="safetibase_id" render={({ field }) => (
-						<TextField
-							{...field}
-							requiredConfirm={!this.isNewRisk}
-							validationSchema={RiskSchema}
-							label="SafetiBase ID"
-							disabled={!this.canEditBasicProperty}
-						/>
-					)} />
-				</Content>
-		);
-	}
 
 	public render() {
 		const { activeTab } = this.state;

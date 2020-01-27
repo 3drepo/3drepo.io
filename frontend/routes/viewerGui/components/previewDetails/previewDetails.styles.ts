@@ -124,6 +124,7 @@ export const Typography = styled(TypographyComponent)`
 		max-height: 40px;
 		overflow: hidden;
 		margin-right: 24px;
+		margin-bottom: 0;
 	}
 `;
 
