@@ -34,6 +34,23 @@
 	 */
 
 	/**
+	 * @api {get} /:teamspace/treatments.csv Download treatments file
+	 * @apiName getTreatmentsFile
+	 * @apiGroup Teamspace
+	 * @apiDescription Returns a CSV file containing all defined suggested risk treatments.
+	 *
+	 * @apiUse Teamspace
+	 *
+	 * @apiExample {get} Example usage
+	 * GET /acme/treatments.csv HTTP/1.1
+	 *
+	 * @apiSuccessExample {json} Success-Response
+	 * HTTP/1.1 200 OK
+	 * <Risk treatments CSV file>
+	 */
+	router.get("/treatments.csv", middlewares.isAccountAdmin, getTreatmentsFile);
+
+	/**
 	 * @api {get} /:teamspace/settings Get teamspace settings
 	 * @apiName getTeamspaceSettings
 	 * @apiGroup Teamspace
@@ -715,6 +732,36 @@
 	function getTopicTypes(req, res, next) {
 		TeamspaceSettings.getTopicTypes(req.params.account).then((types) => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, types);
+		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+	}
+
+	function getTreatmentsFile(req, res, next) {
+		// TODO: retrieve risk treatment suggestions
+		TeamspaceSettings.getTopicTypes(req.params.account).then((treatments) => {
+			const timestamp = (new Date()).toLocaleString();
+			const filenamePrefix = (req.params.account + "_" + timestamp + "_").replace(/\W+/g, "_");
+
+			const headers = {
+				"Content-Disposition": "attachment;filename=" + filenamePrefix + "treatments.csv",
+				"Content-Type": "text/csv"
+			};
+
+			treatments = "Treatment Title," +
+				"Treatment Details," +
+				"Treatment Stage," +
+				"Treatment Type," +
+				"Risk Category," +
+				"Risk Location," +
+				"Element Type," +
+				"Risk Factor," +
+				"Construction Scope," +
+				"Activity";
+
+			res.set(headers);
+
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, treatments);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
