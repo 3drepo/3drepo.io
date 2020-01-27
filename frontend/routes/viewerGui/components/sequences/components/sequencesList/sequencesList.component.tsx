@@ -15,20 +15,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Grid } from '@material-ui/core';
 import React from 'react';
 import { formatShortDate } from '../../../../../../services/formatting/formatDate';
+import { ViewerPanelContent } from '../../../viewerPanel/viewerPanel.styles';
+import { SequenceDatesContainer, SequenceItemContainer, SequenceItemIcon, SequenceName } from '../../sequences.styles';
 
 interface IProps {
 	sequences: any;
 	setSelectedSequence: (id: string) => void;
 }
 
-const SequenceItem = ({name, _id, model, minDate, maxDate, onClick}) => (
-	<div onClick={onClick}>
-		<div>{name}</div>
-		<div>Start: {formatShortDate(new Date(minDate))} </div>
-		<div>End: {formatShortDate(new Date(maxDate))} </div>
-	</div>
+const SequenceItem = ({name, modelName, minDate, maxDate, onClick}) => (
+	<SequenceItemContainer onClick={onClick}>
+		<Grid container direction="row" alignItems="center">
+			<SequenceItemIcon />
+			<Grid item direction="column">
+				<SequenceName>{name}</SequenceName>
+				<Grid item>{modelName}</Grid>
+				<SequenceDatesContainer>
+					<Grid item>Start: {formatShortDate(new Date(minDate))} </Grid>
+					<Grid item>End: {formatShortDate(new Date(maxDate))} </Grid>
+				</SequenceDatesContainer>
+			</Grid>
+		</Grid>
+	</SequenceItemContainer>
 );
 
 export class SequencesList extends React.PureComponent<IProps, {}> {
@@ -36,11 +47,11 @@ export class SequencesList extends React.PureComponent<IProps, {}> {
 		const {setSelectedSequence, sequences} = this.props;
 
 		return (
-			<div>
+			<ViewerPanelContent>
 				{sequences.map((sequence) => (
 					<SequenceItem key={sequence._id} {...sequence} onClick={() => setSelectedSequence(sequence._id)} />
 				))}
-			</div>
+			</ViewerPanelContent>
 		);
 	}
 }

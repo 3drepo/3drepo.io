@@ -20,6 +20,7 @@ import { createSelector } from 'reselect';
 import { STEP_SCALE } from '../../constants/sequences';
 import { GLToHexColor } from '../../helpers/colors';
 import { MILLI_PER_DAY } from '../../helpers/dateTime';
+import { selectSettings } from '../model';
 
 export const selectSequencesDomain = (state) => ({...state.sequences});
 
@@ -28,8 +29,23 @@ const getMinMaxDates = ({frames}) => ({
 	maxDate: (frames[frames.length - 1] || {}).dateTime
 });
 
+const getModelName = (sequence, settings) => {
+	let modelName = '';
+
+	if (settings._id === sequence.model) {
+		modelName = settings.name;
+	} else {
+		const submodel = settings.subModels.find((model) => model === settings.model);
+		modelName = (submodel || {}).name || '';
+	}
+
+	return { modelName };
+};
+
 export const selectSequences = createSelector(
-	selectSequencesDomain, (state) => state.sequences.map((sequence) =>  ({...sequence, ...getMinMaxDates(sequence)}))
+	selectSequencesDomain, selectSettings,
+		(state, settings) =>
+			state.sequences.map((sequence) =>  ({...sequence, ...getModelName(sequence, settings), ...getMinMaxDates(sequence)}))
 );
 
 export const selectStateDefinitions = createSelector(

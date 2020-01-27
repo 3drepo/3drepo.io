@@ -28,6 +28,7 @@ import { Grid, IconButton, Input } from '@material-ui/core';
 import Slider from '@material-ui/lab/Slider';
 import { COLOR, FONT_WEIGHT } from '../../../../styles';
 import { DateField } from '../../../components/dateField/dateField.component';
+import { MenuItemContainer } from '../previewListItem/previewListItem.styles';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
 
@@ -37,6 +38,13 @@ export const SequencesContainer = styled(ViewerPanel).attrs({
 	title: VIEWER_PANELS_TITLES[VIEWER_PANELS.SEQUENCES]
 })`
 	min-height: ${VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.SEQUENCES]}px;
+`;
+
+export const SequenceItemIcon =  styled(SequencesIcon)`
+	&& {
+		font-size: 67px;
+		margin-right: 13px;
+	}
 `;
 
 export const SequenceSlider = styled(Slider)`
@@ -148,5 +156,30 @@ export const StepInput = styled(Input).attrs({
 		color: ${COLOR.BLACK_60};
 		padding-bottom: 4px;
 		text-align: right;
+	}
+`;
+
+export const SequenceItemContainer = styled(MenuItemContainer)`
+	&& {
+		padding-left: 15px;
+	}
+`;
+
+export const SequenceName = styled(Grid).attrs({
+	item: true,
+})`
+	&& {
+		font-size: 18px;
+		font-weight: 500;
+	}
+`;
+
+export const SequenceDatesContainer = styled(Grid).attrs({
+	item: true,
+	container: true,
+	direction: 'row'
+})`
+	&& > * {
+		margin-right: 15px;
 	}
 `;
