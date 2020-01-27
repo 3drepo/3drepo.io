@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -32,6 +32,7 @@ import {
 	CollapsableContent,
 	Container,
 	Details,
+	MainInfoContainer,
 	NotCollapsableContent,
 	StyledForm,
 	Summary,
@@ -246,20 +247,22 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 					scrolled={this.props.scrolled ? 1 : 0}
 				>
 					<RoleIndicator color={roleColor} ref={this.headerRef} />
-					{this.renderNameWithCounter(!editable && number)}
-					{this.renderName(!editable && !number)}
-					{this.renderNameField(editable)}
-					{this.renderViewModel(showModelButton)}
-				</Summary>
-
-				<Collapsable onChange={this.handleToggle} expanded={this.state.expanded}>
-					<Details margin={this.headerHeight}>
+					<MainInfoContainer>
+						{this.renderNameWithCounter(!editable && number)}
+						{this.renderName(!editable && !number)}
+						{this.renderNameField(editable)}
+						{this.renderViewModel(showModelButton)}
 						<PreviewItemInfo
 							author={owner}
 							createdAt={created}
 							StatusIconComponent={StatusIconComponent}
 							statusColor={statusColor}
 						/>
+					</MainInfoContainer>
+				</Summary>
+
+				<Collapsable onChange={this.handleToggle} expanded={this.state.expanded}>
+					<Details margin={this.headerHeight}>
 						{this.renderCollapsable(Boolean(renderCollapsable))}
 					</Details>
 				</Collapsable>

@@ -126,3 +126,9 @@ export const Typography = styled(TypographyComponent)`
 		margin-right: 24px;
 	}
 `;
+
+export const MainInfoContainer = styled.div`
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+`;
