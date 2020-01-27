@@ -19,6 +19,7 @@ import React from 'react';
 
 import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
+import Tooltip from '@material-ui/core/Tooltip';
 import { withFormik, Form } from 'formik';
 import { debounce, get, isEmpty, isEqual } from 'lodash';
 import * as Yup from 'yup';
@@ -26,6 +27,7 @@ import * as Yup from 'yup';
 import {
 	ATTACHMENTS_RISK_TYPE, MAIN_RISK_TYPE, RISK_TABS, TREATMENT_RISK_TYPE,
 } from '../../../../../../constants/risks';
+import { VIEWER_PANELS_TITLES } from '../../../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { calculateLevelOfRisk } from '../../../../../../helpers/risks';
 import { canChangeAssigned, canChangeBasicProperty, canChangeStatus } from '../../../../../../helpers/risks';
@@ -208,6 +210,23 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		<AttachmentsFormTab active={active} {...this.props} />
 	)
 
+	get attachmentsProps() {
+		if (!this.isNewRisk) {
+			return {
+				label: RISK_TABS.ATTACHMENTS
+			};
+		}
+
+		return {
+			disabled: true,
+			label: (
+				<Tooltip title={`Save the ${VIEWER_PANELS_TITLES.risks} before adding an attachment`}>
+					<span>{RISK_TABS.ATTACHMENTS}</span>
+				</Tooltip>
+			)
+		};
+	};
+
 	public render() {
 		const { activeTab } = this.state;
 		return (
@@ -221,7 +240,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 				>
 					<Tab label={RISK_TABS.RISK} value={MAIN_RISK_TYPE} />
 					<Tab label={RISK_TABS.TREATMENT} value={TREATMENT_RISK_TYPE} />
-					<Tab label={RISK_TABS.ATTACHMENTS} value={ATTACHMENTS_RISK_TYPE} />
+					<Tab {...this.attachmentsProps} value={ATTACHMENTS_RISK_TYPE} />
 				</Tabs>
 				<TabContent>
 					{this.showRiskContent(activeTab === MAIN_RISK_TYPE)}
