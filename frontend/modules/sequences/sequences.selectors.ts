@@ -34,7 +34,7 @@ const getModelName = (sequence, settings) => {
 
 	if (settings._id === sequence.model) {
 		modelName = settings.name;
-	} else {
+	} else if (settings.subModels) {
 		const submodel = settings.subModels.find((model) => model.model === sequence.model);
 		modelName = (submodel || {}).name || '';
 	}
