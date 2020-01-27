@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -25,6 +25,7 @@ import { UserInfo } from '../components/userInfo/userInfo.component';
 import ModelSettings from '../modelSettings/modelSettings.container';
 import Profile from '../profile/profile.container';
 import Teamspaces from '../teamspaces/teamspaces.container';
+import { TeamspaceSettings } from '../TeamspaceSettings';
 import UserManagement from '../userManagement/userManagement.container';
 import { Container, Content, Sidebar } from './dashboard.styles';
 
@@ -82,6 +83,11 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 				exact
 				path={ROUTES.MODEL_SETTINGS}
 				component={ModelSettings}
+			/>
+			<Route
+				exact
+				path={ROUTES.TEAMSPACE_SETTINGS}
+				component={TeamspaceSettings}
 			/>
 			<Route
 				path={ROUTES.USER_MANAGEMENT_TEAMSPACE}

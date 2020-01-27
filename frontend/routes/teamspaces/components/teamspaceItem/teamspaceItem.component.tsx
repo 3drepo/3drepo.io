@@ -15,9 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { memoize } from 'lodash';
-import React, { memo } from 'react';
+import React from 'react';
 
+import { History } from 'history';
+import { memoize } from 'lodash';
+
+import { ROUTES } from '../../../../constants/routes';
 import { getAvatarUrl } from '../../../../services/api';
 import { ROW_ACTIONS } from '../../teamspaces.contants';
 import { MyTeamspaceItem } from '../myTeamspaceItem/myTeamspaceItem.component';
@@ -41,11 +44,12 @@ interface IProps {
 	onToggle: (state) => void;
 	onAddProject: (event, teamspaceName) => void;
 	onLeaveTeamspace: (event) => void;
+	history: History;
 }
 
 const getMemoizedAvatarUrl = memoize(getAvatarUrl);
 
-export const TeamspaceItem = memo((props: IProps) => {
+export const TeamspaceItem = React.memo((props: IProps) => {
 	const {
 		name,
 		projects,
@@ -56,7 +60,8 @@ export const TeamspaceItem = memo((props: IProps) => {
 		permissions,
 		disabled,
 		hasAvatar,
-		onLeaveTeamspace
+		onLeaveTeamspace,
+		history,
 	} = props;
 
 	const avatarUrl = getMemoizedAvatarUrl(name);
@@ -65,6 +70,13 @@ export const TeamspaceItem = memo((props: IProps) => {
 
 	const handleAddNewProject = (event) => onAddProject(event, name);
 
+	const handleGoToTeamspaceSetting = (event) => {
+		event.preventDefault();
+		console.warn('props.history:', history);
+		console.warn('permissions:', permissions);
+		history.push(`${ROUTES.TEAMSPACES}/${this.props.teamspace}/`);
+	};
+
 	const RenderNewProjectAction = () => renderWhenTrue(() => (
 		<TooltipButton
 			{...ROW_ACTIONS.ADD_NEW}
@@ -72,6 +84,14 @@ export const TeamspaceItem = memo((props: IProps) => {
 			action={handleAddNewProject}
 		/>
 	))(hasPermissions('create_project', permissions)) as any;
+
+	const RenderGoToTeamspaceSettingsAction = () => renderWhenTrue(() => (
+		<TooltipButton
+			{...ROW_ACTIONS.SETTINGS}
+			label="Settings"
+			action={handleGoToTeamspaceSetting}
+		/>
+	))(hasPermissions('teamspace_admin', permissions)) as any;
 
 	const RenderLeaveAction = () => renderWhenTrue(() => (
 		<TooltipButton
@@ -102,6 +122,7 @@ export const TeamspaceItem = memo((props: IProps) => {
 		>
 		{() => (
 			<>
+				<RenderGoToTeamspaceSettingsAction />
 				<RenderNewProjectAction />
 				<RenderLeaveAction />
 			</>
