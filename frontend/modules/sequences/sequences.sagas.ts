@@ -21,10 +21,12 @@ import { selectSelectedSequenceId, selectSelectedStateId, selectStateDefinitions
 	SequencesActions, SequencesTypes } from '.';
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
-import { selectCurrentModel, selectCurrentModelTeamspace, selectCurrentRevisionId } from '../model/model.selectors';
+import { selectCurrentModel, selectCurrentModelTeamspace,
+	selectCurrentRevisionId, selectSettings } from '../model/model.selectors';
 import { dispatch } from '../store';
 import { selectIfcSpacesHidden, TreeActions } from '../tree';
-import { getSelectedFrame, selectFrames, selectSelectedDate, selectSequenceModel } from './sequences.selectors';
+import { getSelectedFrame, selectFrames, selectIfcSpacesHiddenSaved,
+	selectSelectedDate, selectSequences, selectSequenceModel } from './sequences.selectors';
 
 const delay = async (time) => {
 	return new Promise( (resolve, reject) => {
@@ -85,19 +87,35 @@ export function* setSelectedFrame({date}) {
 }
 
 export function* initializeSequences() {
-	yield put(SequencesActions.fetchSequences());
-
 	const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
 	if (ifcSpacesHidden) {
 		yield put(TreeActions.hideIfcSpaces());
 	}
 
-	yield take(SequencesTypes.FETCH_SEQUENCES_SUCCESS);
+	yield put(SequencesActions.setIfcSpacesHidden(ifcSpacesHidden));
 
-	const date = yield select(selectSelectedDate);
+	const sequences = (yield select(selectSequences));
+	const modelSettings = yield select(selectSettings);
+	const areSequencesFromModel = (sequences || [])
+		.some((s) => s.model === modelSettings._id || (modelSettings.subModels || []).some((sm) => sm.model === s.model) );
 
-	if (date) {
-		yield put(SequencesActions.setSelectedFrame(date));
+	if (!sequences || !areSequencesFromModel) {
+		yield put(SequencesActions.fetchSequences());
+		yield take(SequencesTypes.FETCH_SEQUENCES_SUCCESS);
+		const date = yield select(selectSelectedDate);
+
+		if (date) {
+			yield put(SequencesActions.setSelectedFrame(date));
+		}
+	}
+}
+
+export function* restoreIfcSpacesHidden() {
+	const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
+	const ifcSpacesHiddenSaved =  yield select(selectIfcSpacesHiddenSaved);
+
+	if (ifcSpacesHiddenSaved && ifcSpacesHidden) {
+		yield put(TreeActions.hideIfcSpaces());
 	}
 }
 
@@ -106,5 +124,5 @@ export default function* SequencesSaga() {
 	yield takeLatest(SequencesTypes.SET_SELECTED_FRAME, setSelectedFrame);
 	yield takeLatest(SequencesTypes.INITIALIZE_SEQUENCES, initializeSequences);
 	yield takeLatest(SequencesTypes.FETCH_FRAME, fetchFrame);
-
+	yield takeLatest(SequencesTypes.RESTORE_IFC_SPACES_HIDDEN, restoreIfcSpacesHidden);
 }
