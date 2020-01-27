@@ -36,7 +36,6 @@ const delay = async (time) => {
 
 export function* fetchSequences() {
 	try {
-		yield put(SequencesActions.setSequencesPending(true));
 		const teamspace = yield select(selectCurrentModelTeamspace);
 		const revision = yield select(selectCurrentRevisionId);
 		const model = yield select(selectCurrentModel);
@@ -44,12 +43,8 @@ export function* fetchSequences() {
 		const response = yield API.getSequences(teamspace, model, revision);
 		yield put(SequencesActions.fetchSequencesSuccess(response.data));
 
-		// Mock up thingy, this should be deleted
-		// yield put(SequencesActions.setSelectedSequence(response.data[0]._id));
-		yield put(SequencesActions.setSequencesPending(false));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'sequences', error));
-		yield put(SequencesActions.setSequencesPending(false));
 	}
 }
 

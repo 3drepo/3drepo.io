@@ -183,3 +183,7 @@ export const SequenceDatesContainer = styled(Grid).attrs({
 		margin-right: 15px;
 	}
 `;
+
+export const LoaderContainer = styled.div`
+	padding-top: 30px;
+`;

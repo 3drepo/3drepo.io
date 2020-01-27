@@ -20,11 +20,13 @@ import React from 'react';
 import { IconButton } from '@material-ui/core';
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import { STEP_SCALE } from '../../../../constants/sequences';
+import { Loader } from '../../../components/loader/loader.component';
+import { EmptyStateInfo } from '../views/views.styles';
 import { SequencePlayer } from './components/sequencePlayer/sequencePlayer.component';
 import { SequencesList } from './components/sequencesList/sequencesList.component';
 import { TasksList } from './components/tasksList/sequenceTasksList.component';
 import {
-	SequencesContainer, SequencesIcon,
+	LoaderContainer, SequencesContainer, SequencesIcon
 } from './sequences.styles';
 
 interface IProps {
@@ -69,6 +71,8 @@ const SequenceDetails = ({ minDate, maxDate, selectedDate,
 		</>
 	);
 
+const SequencesLoader = () => (<LoaderContainer><Loader /></LoaderContainer>);
+
 export class Sequences extends React.PureComponent<IProps, {}> {
 	public componentDidMount = () => {
 		this.props.initializeSequences();
@@ -93,8 +97,18 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 				Icon={this.renderTitleIcon()}
 				renderActions={() => (<></>)}
 			>
-				{selectedSequence && <SequenceDetails {...this.props} />}
-				{!selectedSequence && <SequencesList sequences={sequences} setSelectedSequence={setSelectedSequence} />}
+
+				{!sequences && <SequencesLoader />}
+
+				{sequences && selectedSequence && sequences.length > 0 &&
+					<SequenceDetails {...this.props} />
+				}
+
+				{sequences  && !selectedSequence && sequences.length > 0 &&
+					<SequencesList sequences={sequences} setSelectedSequence={setSelectedSequence} />
+				}
+
+				{sequences && sequences.length === 0 && <EmptyStateInfo>This revision doesnt have any sequence</EmptyStateInfo>}
 			</SequencesContainer>
 		);
 	}

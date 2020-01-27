@@ -44,7 +44,7 @@ const getModelName = (sequence, settings) => {
 
 export const selectSequences = createSelector(
 	selectSequencesDomain, selectSettings,
-		(state, settings) =>
+		(state, settings) => !state.sequences ? null :
 			state.sequences.map((sequence) =>  ({...sequence, ...getModelName(sequence, settings), ...getMinMaxDates(sequence)}))
 );
 
@@ -57,7 +57,9 @@ export const selectSelectedSequenceId = createSelector(
 );
 
 export const selectSelectedSequence = createSelector(
-	selectSequences, selectSelectedSequenceId, (sequences, id) => sequences.find((s) => s._id === id )
+	selectSequences, selectSelectedSequenceId,
+		(sequences, id) => !sequences ? null :
+			sequences.find((s) => s._id === id )
 );
 
 export const selectSequenceModel = createSelector(

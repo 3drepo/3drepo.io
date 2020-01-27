@@ -22,7 +22,6 @@ import { sortByField } from '../../helpers/sorting';
 export const { Types: SequencesTypes, Creators: SequencesActions } = createActions({
 	fetchSequences: [],
 	initializeSequences: [],
-	setSequencesPending: ['isPending'],
 	fetchSequencesSuccess: ['sequences'],
 	setSelectedSequence: ['sequenceId'],
 	setSelectedFrame: ['date'],
@@ -36,7 +35,7 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 }, { prefix: 'SEQUENCES/' });
 
 export const INITIAL_STATE = {
-	sequences: [],
+	sequences: null,
 	sequencesPending: true,
 	selectedSequence: null,
 	selectedDate: null,
@@ -50,10 +49,6 @@ export const INITIAL_STATE = {
 export const fetchSequencesSuccess = (state = INITIAL_STATE, { sequences }) => {
 	sequences = sortByField([...sequences], { order: 'asc', config: { field: '_id' } });
 	return { ...state, sequences };
-};
-
-export const setSequencesPending = (state = INITIAL_STATE, { isPending }) => {
-	return {...state, sequencesPending: isPending };
 };
 
 export const setSelectedSequence = (state = INITIAL_STATE, { sequenceId }) => {
@@ -86,7 +81,6 @@ export const reset = (state = INITIAL_STATE) => {
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[SequencesTypes.FETCH_SEQUENCES_SUCCESS]: fetchSequencesSuccess,
-	[SequencesTypes.SET_SEQUENCES_PENDING]: setSequencesPending,
 	[SequencesTypes.SET_SELECTED_DATE]: setSelectedDate,
 	[SequencesTypes.SET_STATE_DEFINITION]: setStateDefinition,
 	[SequencesTypes.SET_SELECTED_SEQUENCE]: setSelectedSequence,
