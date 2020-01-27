@@ -59,6 +59,9 @@ const COLORS = {
 	WHITE_TRANSPARENT: 'rgba(255,255,255,0)'
 };
 
+const VALID_COLOR_RE =  /(^#[0-9A-F]{6}$)/i;
+const VALID_COLOR_ALPHA_RE =  /(^#[0-9A-F]{6}([0-9A-F]{2})?$)/i;
+
 const isShadeOfGrey = (color: string) => {
 	color = color.replace('#', '');
 	const r = color.slice(0, 2);
@@ -81,7 +84,7 @@ const getCanvasColor = (event, canvasCtx) => {
 	const y = event.offsetY;
 	const imageData = canvasCtx.getImageData(x, y, 1, 1).data;
 	const rgbaColor = `rgba(${imageData[0]}, ${imageData[1]}, ${imageData[2]}, 1)`;
-	return rgbaToHex(rgbaColor);
+	return rgbaToHex(rgbaColor).slice(0, -2);
 };
 
 interface IProps {
@@ -425,7 +428,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 		const color =  '#' + event.currentTarget.value;
 		let newState: any = { hashInput: color };
 
-		const isValidColor = /(^#[0-9A-F]{6}([0-9A-F]{2})?$)/i.test(color.toUpperCase());
+		const isValidColor = (this.props.opacityEnabled ? VALID_COLOR_ALPHA_RE : VALID_COLOR_RE).test(color.toUpperCase());
 		if (isValidColor) {
 			const opacity = getAlpha(color);
 			const opacitySliderVisibility = Boolean(opacity) && !(opacity === 255);
