@@ -410,7 +410,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 	}
 
 	public onPanelOpen = () => {
-		const {value} = this.props;
+		const value = this.props.value || '';
 
 		this.setState({
 			baseColor: stripAlpha(value),
