@@ -46,7 +46,7 @@ export const TreatmentRiskFormTab: React.FunctionComponent<IProps> = ({
 	return (
 		<Content active={active}>
 			<Container>
-				<Field name="mitigation_desc" render={({ field, form }) => (
+				<Field name="mitigation_desc" render={({ field }) => (
 					<TextField
 						{...field}
 						requiredConfirm={!isNewRisk}
@@ -54,6 +54,20 @@ export const TreatmentRiskFormTab: React.FunctionComponent<IProps> = ({
 						fullWidth
 						multiline
 						label="Treatment"
+						disabled={!canEditBasicProperty}
+						mutable={!isNewRisk}
+					/>
+				)} />
+			</Container>
+
+			<Container>
+				<Field name="mitigation_detail" render={({ field }) => (
+					<TextField
+						{...field}
+						requiredConfirm={!isNewRisk}
+						fullWidth
+						multiline
+						label="Treatment Details"
 						disabled={!canEditBasicProperty}
 						mutable={!isNewRisk}
 					/>
