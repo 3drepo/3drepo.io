@@ -62,7 +62,7 @@ interface IProps {
 	loadModel: () => void;
 	resetPanelsStates: () => void;
 	resetModel: () => void;
-	setPanelVisibility: (panelName, visibility) => void;
+	setPanelVisibility: (panelName, visibility?) => void;
 }
 
 interface IState {
@@ -157,7 +157,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	}
 
 	private handleTogglePanel = (panelType) => {
-		this.props.setPanelVisibility(panelType);
+		this.props.setPanelVisibility(panelType, null);
 	}
 
 	private renderLeftPanelsButtons = () => (
