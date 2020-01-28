@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,7 +16,6 @@
  */
 
 import RemoveCircle from '@material-ui/icons/RemoveCircle';
-import { isEmpty, isEqual } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
@@ -116,7 +115,7 @@ export class Jobs extends React.PureComponent<IProps, IState> {
 		const containerElement = (ReactDOM.findDOMNode(this) as HTMLElement).parentNode;
 		this.setState({ containerElement });
 
-		if (!this.props.jobs.length) {
+		if (!this.props.jobs.length || !this.props.colors.length) {
 			this.props.fetchJobsAndColors();
 		}
 	}
@@ -139,7 +138,7 @@ export class Jobs extends React.PureComponent<IProps, IState> {
 	)
 
 	public render() {
-		const {jobs, colors} =  this.props;
+		const { jobs, colors } =  this.props;
 		const { containerElement } = this.state;
 
 		return (
