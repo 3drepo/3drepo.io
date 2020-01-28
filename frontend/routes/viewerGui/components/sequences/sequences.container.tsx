@@ -46,7 +46,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setStepInterval: SequencesActions.setStepInterval,
 	setStepScale: SequencesActions.setStepScale,
 	fetchFrame: SequencesActions.fetchFrame,
-	setSelectedSequence: SequencesActions.setSelectedSequence
+	setSelectedSequence: SequencesActions.setSelectedSequence,
+	restoreIfcSpacesHidden: SequencesActions.restoreIfcSpacesHidden
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Sequences));

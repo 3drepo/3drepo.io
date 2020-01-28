@@ -37,6 +37,7 @@ interface IProps {
 	setStepInterval: (interval: number) => void;
 	setStepScale: (scale: STEP_SCALE) => void;
 	setSelectedSequence: (id: string) => void;
+	restoreIfcSpacesHidden: () => void;
 	maxDate: Date;
 	minDate: Date;
 	selectedDate: Date;
@@ -76,6 +77,10 @@ const SequencesLoader = () => (<LoaderContainer><Loader /></LoaderContainer>);
 export class Sequences extends React.PureComponent<IProps, {}> {
 	public componentDidMount = () => {
 		this.props.initializeSequences();
+	}
+
+	public componentWillUnmount = () => {
+		this.props.restoreIfcSpacesHidden();
 	}
 
 	public renderTitleIcon = () => {

@@ -114,7 +114,7 @@ export function* restoreIfcSpacesHidden() {
 	const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
 	const ifcSpacesHiddenSaved =  yield select(selectIfcSpacesHiddenSaved);
 
-	if (ifcSpacesHiddenSaved && ifcSpacesHidden) {
+	if (ifcSpacesHiddenSaved !== ifcSpacesHidden) {
 		yield put(TreeActions.hideIfcSpaces());
 	}
 }
