@@ -51,6 +51,23 @@
 	router.get("/treatments.csv", middlewares.isAccountAdmin, getTreatmentsFile);
 
 	/**
+	 * @api {post} /:teamspace/treatments.csv Upload treatments file
+	 * @apiName uploadTreatmentsFile
+	 * @apiGroup Teamspace
+	 * @apiDescription Upload a risk treatments CSV file to a teamspace.
+	 *
+	 * @apiUse Teamspace
+	 *
+	 * @apiExample {post} Example usage
+	 * POST /acme/treatments.csv HTTP/1.1
+	 * <Risk treatments CSV file>
+	 *
+	 * @apiSuccessExample {json} Success-Response
+	 * HTTP/1.1 200 OK
+	 */
+	router.post("/treatments.csv", middlewares.isAccountAdmin, uploadTreatmentsFile);
+
+	/**
 	 * @api {get} /:teamspace/settings Get teamspace settings
 	 * @apiName getTeamspaceSettings
 	 * @apiGroup Teamspace
@@ -762,6 +779,14 @@
 			res.set(headers);
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, treatments);
+		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+	}
+
+	function uploadTreatmentsFile(req, res, next) {
+		TeamspaceSettings.getTopicTypes(req.params.account).then((types) => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {"status":"ok"});
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
