@@ -18,6 +18,7 @@
 import React from 'react';
 
 import InputLabel from '@material-ui/core/InputLabel';
+import RisksIcon from '@material-ui/icons/Warning';
 import { Field } from 'formik';
 
 import {
@@ -116,7 +117,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 
 				<FieldsContainer size={'tight'}>
 					<StyledFormControl>
-						<LevelOfRisk header="Level of Risk" level={values.level_of_risk} status={values.mitigation_status} />
+						<LevelOfRisk header="Level of Risk" level={values.level_of_risk} Icon={RisksIcon} />
 						<Field name="level_of_risk" render={({ field }) => (
 							<CellSelect
 								{...field}

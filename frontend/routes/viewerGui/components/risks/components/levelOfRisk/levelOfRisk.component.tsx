@@ -16,6 +16,9 @@
  */
 
 import * as React from 'react';
+
+import { SvgIconProps } from '@material-ui/core/SvgIcon';
+
 import { LEVELS_OF_RISK } from '../../../../../../constants/risks';
 import { getRiskStatus } from '../../../../../../helpers/risks';
 import { Container, Header, Status } from './levelOfRisk.styles';
@@ -23,19 +26,21 @@ import { Container, Header, Status } from './levelOfRisk.styles';
 interface IProps {
 	header: string;
 	level: number;
-	status: string;
+	status?: string;
+	Icon?: React.ComponentType<SvgIconProps>;
 }
 
 export const LevelOfRisk: React.FunctionComponent<IProps> = ({ header, status, level, ...props
 }) => {
 	const { name } = LEVELS_OF_RISK.find(({ value }) => (value === level) );
-	const { Icon, color } = getRiskStatus(level, status);
+	const { color, Icon } = getRiskStatus(level, status);
+	const StatusIcon = props.Icon || Icon;
 
 	return (
 		<>
 			<Header>{header}</Header>
 			<Container color={color}>
-				<Icon color="inherit" style={{ fontSize: 50 }} fontSize="inherit" />
+				<StatusIcon color="inherit" style={{ fontSize: 50 }} fontSize="inherit" />
 				<Status>
 					{name}
 				</Status>
