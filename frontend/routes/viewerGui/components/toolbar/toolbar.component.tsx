@@ -90,7 +90,7 @@ interface IProps {
 	setMeasureVisibility: (visible) => void;
 	setCoordView: (visible) => void;
 	stopListenOnNumClip: () => void;
-	setPanelVisibility: (panelName) => void;
+	setPanelVisibility: (panelName, visibility) => void;
 }
 
 interface IState {
@@ -324,7 +324,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 			setPanelVisibility,
 		} = this.props;
 		setMetadataActive(!isMetadataActive);
-		setPanelVisibility(VIEWER_PANELS.BIM);
+		setPanelVisibility(VIEWER_PANELS.BIM, true);
 
 		if (!isMetadataActive) {
 			setMeasureVisibility(false);
@@ -341,7 +341,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 		setMeasureVisibility(!isMeasureActive);
 
 		if (!isMeasureActive) {
-			setPanelVisibility(VIEWER_PANELS.BIM);
+			setPanelVisibility(VIEWER_PANELS.BIM, false);
 		}
 	}
 }

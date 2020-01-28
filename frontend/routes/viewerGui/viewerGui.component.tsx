@@ -62,7 +62,7 @@ interface IProps {
 	loadModel: () => void;
 	resetPanelsStates: () => void;
 	resetModel: () => void;
-	setPanelVisibility: (panelName) => void;
+	setPanelVisibility: (panelName, visibility) => void;
 }
 
 interface IState {
@@ -92,11 +92,11 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		viewer.init();
 
 		if ((issueId || !riskId) && !leftPanels.includes(VIEWER_PANELS.ISSUES)) {
-			this.props.setPanelVisibility(VIEWER_PANELS.ISSUES);
+			this.props.setPanelVisibility(VIEWER_PANELS.ISSUES, null);
 		}
 
 		if (riskId && !leftPanels.includes(VIEWER_PANELS.RISKS)) {
-			this.props.setPanelVisibility(VIEWER_PANELS.RISKS);
+			this.props.setPanelVisibility(VIEWER_PANELS.RISKS, null);
 		}
 
 		MultiSelect.initKeyWatchers();
@@ -113,10 +113,10 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		const { issueId, riskId } = queryParams;
 
 		if (issueId !== prevProps.queryParams.issueId && issueId && !leftPanels.includes(VIEWER_PANELS.ISSUES)) {
-			this.props.setPanelVisibility(VIEWER_PANELS.ISSUES);
+			this.props.setPanelVisibility(VIEWER_PANELS.ISSUES, null);
 		}
 		if (riskId !== prevProps.queryParams.riskId && riskId && !leftPanels.includes(VIEWER_PANELS.RISKS)) {
-			this.props.setPanelVisibility(VIEWER_PANELS.RISKS);
+			this.props.setPanelVisibility(VIEWER_PANELS.RISKS, null);
 		}
 
 		if (teamspaceChanged || modelChanged || revisionChanged) {
@@ -157,7 +157,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	}
 
 	private handleTogglePanel = (panelType) => {
-		this.props.setPanelVisibility(panelType);
+		this.props.setPanelVisibility(panelType, null);
 	}
 
 	private renderLeftPanelsButtons = () => (
