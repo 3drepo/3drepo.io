@@ -113,7 +113,7 @@ export class Bim extends React.PureComponent<IProps, any> {
 				Icon={this.getTitleIcon()}
 				renderActions={this.renderActions}
 				pending={isPending}
-				flexHeight={true}
+				flexHeight
 			>
 				{this.renderFilterPanel(searchEnabled)}
 				{this.renderList()}
