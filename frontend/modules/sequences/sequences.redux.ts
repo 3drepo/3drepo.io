@@ -38,7 +38,6 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 
 export const INITIAL_STATE = {
 	sequences: null,
-	sequencesPending: true,
 	selectedSequence: null,
 	selectedDate: null,
 	lastSuccesfulStateId: null,
@@ -78,8 +77,8 @@ export const setStepScale = (state = INITIAL_STATE, { stepScale }) => {
 	return {...state, stepScale};
 };
 
-export const reset = (state = INITIAL_STATE) => {
-	return {...state};
+export const reset = () => {
+	return {...INITIAL_STATE};
 };
 
 export const setIfcSpacesHidden = (state = INITIAL_STATE, { ifcSpacesHidden }) => {
