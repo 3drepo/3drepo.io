@@ -60,9 +60,7 @@ class Sequence {
 	}
 
 	async getList(account, model, branch, revision, cleanResponse = false) {
-
 		const history = await History.getHistory({account, model}, branch, revision);
-		const submodelListPromises = [];
 		let submodels = [];
 
 		if (!history) {
@@ -72,27 +70,22 @@ class Sequence {
 			submodels = submodels.map(r => r.project);
 		}
 
-		submodels.forEach((submodel) => {
-			submodelListPromises.push(this.getList(account, submodel, "master", null, cleanResponse));
+		const dbCol = await db.getCollection(account, model + ".sequences");
+
+		const sequences = await (dbCol.find({"rev_id": history._id}).toArray());
+		sequences.forEach((sequence) => {
+			sequence.teamspace = account;
+			sequence.model = model;
+
+			if (cleanResponse) {
+				this.clean(sequence);
+			}
 		});
 
-		return db.getCollection(account, model + ".sequences").then(_dbCol => {
-			return _dbCol.find({"rev_id": history._id}).toArray().then(sequences => {
-				sequences.forEach((sequence) => {
-					sequence.teamspace = account;
-					sequence.model = model;
+		const submodelSequences = await Promise.all(submodels.map((submodel) => this.getList(account, submodel, "master", null, cleanResponse)));
+		submodelSequences.forEach((s) => sequences.push.apply(sequences,s));
 
-					if (cleanResponse) {
-						this.clean(sequence);
-					}
-				});
-
-				return Promise.all(submodelListPromises).then((submodelSequences) => {
-					sequences = sequences.concat(submodelSequences.reduce((acc, val) => acc.concat(val), []));
-					return sequences;
-				});
-			});
-		});
+		return sequences;
 	}
 }
 
