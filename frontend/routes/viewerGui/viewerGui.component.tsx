@@ -157,7 +157,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	}
 
 	private handleTogglePanel = (panelType) => {
-		this.props.setPanelVisibility(panelType, null);
+		this.props.setPanelVisibility(panelType);
 	}
 
 	private renderLeftPanelsButtons = () => (
