@@ -44,7 +44,8 @@ export const Panel = styled(PanelComponent)<IPanel>`
 	margin-bottom: 20px;
 
 	&& {
-		height: 100%;
+		${(props) => props.flexHeight ? '' :css`
+		height: 100%;` };
 	}
 
 	${(props) => props.isPending ? css`
@@ -110,7 +111,7 @@ export const ViewerPanelContent = styled.div<IViewerPanelContent>`
 
 export const LoaderContainer = styled(ViewerPanelContent)`
 	padding: 24px;
-	height: 100%;
+	${(props) => props.flexHeight ? '': css`height: 100%;`};
 `;
 
 export const ViewerPanelFooter = styled(Grid).attrs({
