@@ -69,7 +69,7 @@ export class TextField extends React.PureComponent<IProps, IState> {
 	private linkableFieldRef = React.createRef();
 
 	get isExpandable() {
-		return this.state.isLongContent && !this.state.edit;
+		return this.props.expandable && this.state.isLongContent && !this.state.edit;
 	}
 
 	get isEditMode() {
@@ -198,7 +198,7 @@ export class TextField extends React.PureComponent<IProps, IState> {
 	}
 
 	private additionalProps = () => {
-		if (!this.state.isExpanded) {
+		if (!this.state.isExpanded && this.isExpandable) {
 			return {
 				style: {
 					height: '48px',

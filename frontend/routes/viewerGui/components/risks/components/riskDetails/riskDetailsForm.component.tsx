@@ -225,7 +225,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 				</Tooltip>
 			)
 		};
-	};
+	}
 
 	public render() {
 		const { activeTab } = this.state;

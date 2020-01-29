@@ -24,7 +24,6 @@ import { renderWhenTrue } from '../../../../helpers/rendering';
 import { schema } from '../../../../services/validation';
 import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';
 import OpenInViewerButton from '../../../components/openInViewerButton/openInViewerButton.container';
-import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { PreviewItemInfo } from '../previewItemInfo/previewItemInfo.component';
 import { RoleIndicator } from '../previewListItem/previewListItem.styles';
 import {
@@ -34,12 +33,13 @@ import {
 	Details,
 	MainInfoContainer,
 	NotCollapsableContent,
+	ScrollableContainer,
 	StyledForm,
 	Summary,
 	ToggleButton,
 	ToggleButtonContainer,
 	ToggleIcon,
-	Typography
+	Typography,
 } from './previewDetails.styles';
 
 interface IProps {
@@ -74,8 +74,6 @@ interface IProps {
 const ValidationSchema = Yup.object().shape({
 	name: schema.required
 });
-
-const MIN_HEADER_HEIGHT = 38;
 
 export class PreviewDetails extends React.PureComponent<IProps, any> {
 	public state = {
@@ -147,7 +145,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	public renderNotCollapsableContent = renderWhenTrue(() => {
 		return (
 			<>
-				<ToggleButtonContainer onClick={this.handleToggle} expanded={this.state.expanded}>
+				<ToggleButtonContainer onClick={this.handleToggle}>
 					<ToggleButton>
 						{this.renderExpandIcon(!this.props.editable)}
 					</ToggleButton>
@@ -158,15 +156,6 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			</>
 		);
 	});
-
-	public get headerHeight() {
-		if (this.headerRef.current) {
-			const { height } = this.headerRef.current.getBoundingClientRect();
-			return height >= MIN_HEADER_HEIGHT ? height : MIN_HEADER_HEIGHT;
-		}
-
-		return MIN_HEADER_HEIGHT;
-	}
 
 	public componentDidMount() {
 		const { editable, defaultExpanded } = this.props;
@@ -261,12 +250,14 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 					</MainInfoContainer>
 				</Summary>
 
-				<Collapsable onChange={this.handleToggle} expanded={this.state.expanded}>
-					<Details margin={this.headerHeight}>
-						{this.renderCollapsable(Boolean(renderCollapsable))}
-					</Details>
-				</Collapsable>
-				{this.renderNotCollapsableContent(!!renderNotCollapsable)}
+				<ScrollableContainer>
+					<Collapsable onChange={this.handleToggle} expanded={this.state.expanded}>
+						<Details>
+							{this.renderCollapsable(Boolean(renderCollapsable))}
+						</Details>
+					</Collapsable>
+					{this.renderNotCollapsableContent(!!renderNotCollapsable)}
+				</ScrollableContainer>
 			</Container>
 		);
 	}
