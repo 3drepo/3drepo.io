@@ -32,7 +32,8 @@ interface IProps {
 
 export const LevelOfRisk: React.FunctionComponent<IProps> = ({ header, status, level, ...props
 }) => {
-	const { name } = LEVELS_OF_RISK.find(({ value }) => (value === level) );
+	const currentRisk = LEVELS_OF_RISK.find(({ value }) => (value === level) );
+	const name = currentRisk ? currentRisk.name : '';
 	const { color, Icon } = getRiskStatus(level, status);
 	const StatusIcon = props.Icon || Icon;
 
