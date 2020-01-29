@@ -137,3 +137,10 @@ export const Content = styled.div`
 	width: 100%;
 	margin-bottom: 5px;
 `;
+
+export const ExpandAction = styled.span`
+	font-size: 11px;
+	cursor: pointer;
+	display: block;
+	text-align: center;
+`;

@@ -19,6 +19,7 @@ import React from 'react';
 
 import InputLabel from '@material-ui/core/InputLabel';
 import { Field } from 'formik';
+
 import {
 	LEVELS_OF_RISK,
 	RISK_CONSEQUENCES,
@@ -28,8 +29,13 @@ import {
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
 import { TextField } from '../../../../../components/textField/textField.component';
 import { LevelOfRisk } from '../levelOfRisk/levelOfRisk.component';
-
-import { Container, Content, FieldsContainer, FieldsRow, StyledFormControl } from '../riskDetails/riskDetails.styles';
+import {
+	Container,
+	Content,
+	FieldsContainer,
+	FieldsRow,
+	StyledFormControl,
+} from '../riskDetails/riskDetails.styles';
 import { RiskSchema } from '../riskDetails/riskDetailsForm.component';
 
 interface IProps {
@@ -70,6 +76,7 @@ export const TreatmentRiskFormTab: React.FunctionComponent<IProps> = ({
 						label="Treatment Details"
 						disabled={!canEditBasicProperty}
 						mutable={!isNewRisk}
+						expandable={!isNewRisk && active}
 					/>
 				)} />
 			</Container>
@@ -156,7 +163,7 @@ export const TreatmentRiskFormTab: React.FunctionComponent<IProps> = ({
 			</FieldsRow>
 
 			<Container>
-				<Field name="residual_risk" render={({ field, form }) => (
+				<Field name="residual_risk" render={({ field }) => (
 					<TextField
 						{...field}
 						requiredConfirm={!isNewRisk}
