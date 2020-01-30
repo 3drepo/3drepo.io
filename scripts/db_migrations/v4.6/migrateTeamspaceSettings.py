@@ -15,7 +15,6 @@ connString = "mongodb://"+ userName + ":" + password +"@"+mongoURL + ":" + mongo
 
 ##### Enable dry run to not commit to the database #####
 dryRun = True
-overwrite = False #if there is already an entry for the filename: True = Overwrite regardless, False = Use existing entry
 
 ##### Connect to the Database #####
 db = MongoClient(connString)
@@ -35,13 +34,8 @@ for database in db.database_names():
                 for modelTopicType in setting['properties']['topicTypes']:
                     topicTypesDict[modelTopicType['label']] = modelTopicType
                 readTopicTypes = True
-##### Delete Topic Types from Model Settings #####
-                if not dryRun:
-                    del setting['properties']['topicTypes']
-                    db['settings'].save(setting)
             except KeyError:
                 print("\t\ttopicTypes not found in settings")
-                break
 
 ##### Create Teamspace Settings BSON #####
         if readTopicTypes:
