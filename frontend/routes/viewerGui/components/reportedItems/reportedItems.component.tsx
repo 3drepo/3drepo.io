@@ -149,7 +149,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 					onClick={this.handleAddNewItem}
 					color="secondary"
 					variant="fab"
-					disabled={!this.hasPermission(CREATE_ISSUE) || !this.props.isModelLoaded}
+					// disabled={!this.hasPermission(CREATE_ISSUE) || !this.props.isModelLoaded}
 				>
 					<AddIcon />
 				</ViewerPanelButton>

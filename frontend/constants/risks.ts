@@ -56,6 +56,16 @@ export const RISK_CONSEQUENCES = [...LEVELS_LIST];
 
 export const LEVELS_OF_RISK = [...LEVELS_LIST];
 
+export const MAIN_RISK_TYPE = 'risk';
+export const TREATMENT_RISK_TYPE = 'treatment';
+export const ATTACHMENTS_RISK_TYPE = 'attachments';
+
+export const RISK_TABS = {
+	RISK: 'Risk',
+	TREATMENT: 'Treatment',
+	ATTACHMENTS: 'Attachments',
+};
+
 export const RISK_LEVELS = {
 	UNMITIGATED: '',
 	PROPOSED: 'proposed',

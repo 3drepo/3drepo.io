@@ -29,6 +29,7 @@ interface IProps {
 	itemTemplate?: React.Component;
 	disabled?: boolean;
 	disabledPlaceholder?: boolean;
+	hidden?: boolean;
 	inputId?: string;
 	labelName?: string;
 	onChange: (event, selectedValue: string) => void;
@@ -44,7 +45,8 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 		items: [],
 		disabled: false,
 		readOnly: false,
-		disabledPlaceholder: false
+		disabledPlaceholder: false,
+		hidden: false,
 	};
 
 	public state = {
@@ -92,7 +94,7 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const {items, itemTemplate, disabled, placeholder, disabledPlaceholder, readOnly, inputId, name} = this.props;
+		const {items, itemTemplate, disabled, placeholder, disabledPlaceholder, readOnly, inputId, name, hidden} = this.props;
 		const {selectedValue} = this.state;
 		const hasNoOptions = !items.length;
 		const options = [];
@@ -112,6 +114,7 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 				name={name}
 				readOnly={readOnly}
 				disabled={readOnly || disabled || hasNoOptions}
+				hidden={hidden}
 				displayEmpty
 				input={<Input id={inputId} readOnly={readOnly} />}
 				value={selectedValue}

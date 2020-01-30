@@ -15,15 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import React from 'react';
+
 import { TextFieldProps } from '@material-ui/core/TextField';
 import CancelIcon from '@material-ui/icons/Cancel';
 import EditIcon from '@material-ui/icons/Edit';
 import SaveIcon from '@material-ui/icons/Save';
-import React from 'react';
-
 import { Field, Formik } from 'formik';
-import { ActionsLine, Container, FieldLabel,
-		MutableActionsLine, StyledIconButton, StyledLinkableField, StyledTextField } from './textField.styles';
+
+import { renderWhenTrue } from '../../../helpers/rendering';
+import { ExpandAction } from '../../viewerGui/components/risks/components/riskDetails/riskDetails.styles';
+import {
+	ActionsLine,
+	Container,
+	FieldLabel,
+	MutableActionsLine,
+	StyledIconButton,
+	StyledLinkableField,
+	StyledTextField,
+} from './textField.styles';
 
 interface IProps extends TextFieldProps {
 	className?: string;
@@ -31,12 +41,15 @@ interface IProps extends TextFieldProps {
 	validationSchema?: any;
 	mutable?: boolean;
 	onBeforeConfirmChange?: (event) => void;
+	expandable?: boolean;
 }
 
 interface IState {
 	initialValue: string;
 	currentValue: string;
 	edit: boolean;
+	isExpanded: boolean;
+	isLongContent: boolean;
 }
 
 const SmallButton = ({ onClick, children}) => (
@@ -47,10 +60,17 @@ export class TextField extends React.PureComponent<IProps, IState> {
 	public state = {
 		initialValue: '',
 		currentValue: '',
-		edit: false
+		edit: false,
+		isExpanded: false,
+		isLongContent: false,
 	};
 
 	private inputLocalRef = React.createRef();
+	private linkableFieldRef = React.createRef();
+
+	get isExpandable() {
+		return this.props.expandable && this.state.isLongContent && !this.state.edit;
+	}
 
 	get isEditMode() {
 		return (!this.props.mutable || this.state.edit) && !this.props.disabled;
@@ -68,9 +88,36 @@ export class TextField extends React.PureComponent<IProps, IState> {
 		return this.textFieldRef.current;
 	}
 
+	get linkableFieldElement() {
+		return this.linkableFieldRef && this.linkableFieldRef.current as any;
+	}
+
 	get fieldValue() {
 		return this.props.requiredConfirm ? this.state.currentValue : this.props.value;
 	}
+
+	private checkIfGotLongContent = () => {
+		if (!this.props.expandable) {
+			return null;
+		}
+
+		const { textRef } = this.linkableFieldElement;
+		if (textRef) {
+			const height = textRef.current.offsetHeight;
+
+			if (height >= 48 && !this.state.isLongContent) {
+				this.setState({ isLongContent: true });
+			} else if (height < 48 && this.state.isLongContent) {
+				this.setState({ isLongContent: false });
+			}
+		}
+	}
+
+	private handleOnExpand = () => this.setState({ isExpanded: !this.state.isExpanded });
+
+	private renderExpandableText = renderWhenTrue(() => (
+		<ExpandAction onClick={this.handleOnExpand}>{this.state.isExpanded ? 'Less' : 'More'}</ExpandAction>
+	));
 
 	public componentDidMount() {
 		const { value, requiredConfirm } = this.props;
@@ -83,6 +130,12 @@ export class TextField extends React.PureComponent<IProps, IState> {
 		const { value, requiredConfirm } = this.props;
 		if (requiredConfirm && value !== prevProps.value) {
 			this.setState({ initialValue: value, currentValue: value, edit: false } as IState);
+		}
+
+		if (this.linkableFieldElement && !this.state.isLongContent) {
+			setTimeout(() => {
+				this.checkIfGotLongContent();
+			});
 		}
 	}
 
@@ -144,6 +197,24 @@ export class TextField extends React.PureComponent<IProps, IState> {
 		}, 0);
 	}
 
+	private additionalProps = () => {
+		if (!this.state.isExpanded && this.isExpandable) {
+			return {
+				style: {
+					height: '48px',
+				}
+			};
+		}
+
+		return {};
+	}
+
+	private handlePlaceholderClick = () => {
+		if (this.isExpandable) {
+			this.handleOnExpand();
+		}
+	}
+
 	public render() {
 		const {
 			onBeforeConfirmChange,
@@ -160,40 +231,45 @@ export class TextField extends React.PureComponent<IProps, IState> {
 		const shouldRenderMutable = !this.isEditMode && !this.props.disabled;
 
 		return (
-			<Formik
-				enableReinitialize
-				initialValues={{ [name]: initialValue }}
-				validationSchema={validationSchema}
-				onSubmit={this.saveChange}
-			>
-				<Container onBlur={this.onBlur} className={className}>
-					{this.isEditMode &&
-						<Field name={name} render={({ field, form }) =>
-							(
-								<StyledTextField
-									{...props}
-									{...field}
-									value={this.fieldValue}
-									inputRef={this.textFieldRef}
-									fullWidth
-									onChange={this.onChange(field)}
-									error={Boolean(form.errors[name] || props.error)}
-									helperText={form.errors[name] || props.helperText}
-									autoFocus
-								/>
-							)}
-						/>
-					}
-					{!this.isEditMode &&
-						<div>
-							<FieldLabel shrink>{this.props.label}</FieldLabel>
-							<StyledLinkableField>{this.fieldValue}</StyledLinkableField>
-						</div>
-					}
-					{shouldRenderActions && this.renderActionsLine()}
-					{shouldRenderMutable && this.renderMutableButton()}
-				</Container>
-			</Formik>
+			<>
+				<Formik
+					enableReinitialize
+					initialValues={{ [name]: initialValue }}
+					validationSchema={validationSchema}
+					onSubmit={this.saveChange}
+				>
+					<Container onBlur={this.onBlur} className={className}>
+						{this.isEditMode &&
+							<Field name={name} render={({ field, form }) =>
+								(
+									<StyledTextField
+										{...props}
+										{...field}
+										value={this.fieldValue}
+										inputRef={this.textFieldRef}
+										fullWidth
+										onChange={this.onChange(field)}
+										error={Boolean(form.errors[name] || props.error)}
+										helperText={form.errors[name] || props.helperText}
+										autoFocus
+									/>
+								)}
+							/>
+						}
+						{!this.isEditMode &&
+							<div onClick={this.handlePlaceholderClick}>
+								<FieldLabel shrink>{this.props.label}</FieldLabel>
+								<StyledLinkableField ref={this.linkableFieldRef} {...this.additionalProps()}>
+									{this.fieldValue}
+								</StyledLinkableField>
+							</div>
+						}
+						{shouldRenderActions && this.renderActionsLine()}
+						{shouldRenderMutable && this.renderMutableButton()}
+					</Container>
+				</Formik>
+				{this.renderExpandableText(this.isExpandable)}
+			</>
 		);
 	}
 }

@@ -54,6 +54,7 @@ export const StyledLinkableField = styled(LinkableField)`
 		margin: 8px 0;
 		min-height:14px;
 		font-size: 14px;
+		overflow: hidden;
 	}
 `;
 

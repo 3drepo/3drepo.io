@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,9 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import styled from 'styled-components';
+
 import FormControl from '@material-ui/core/FormControl';
 import Grid from '@material-ui/core/Grid';
-import styled from 'styled-components';
+import { cond, constant, matches, stubTrue } from 'lodash';
+
+import { COLOR } from '../../../../../../styles';
 import { LogList as LogListBase } from '../../../../../components/logList/logList.component';
 import * as TextFieldStyles from '../../../../../components/textField/textField.styles';
 import PreviewDetailsBase from '../../../previewDetails/previewDetails.container';
@@ -52,12 +56,18 @@ export const Container = styled.div`
 	}
 `;
 
+const getFieldsContainerSize = cond([
+	[matches('wide'), constant(57)],
+	[matches('tight'), constant(37)],
+	[stubTrue, constant(47)]
+]);
+
 export const FieldsContainer = styled.div`
 	display: flex;
 	flex-direction: column;
 	margin-bottom: auto;
 	overflow: hidden;
-	width: 47%;
+	width: ${({ size }) => getFieldsContainerSize(size)}%;
 
 	${TextFieldStyles.Container},
 	${StyledFormControl} {
@@ -100,6 +110,7 @@ export const HorizontalView = styled.div`
 	${PreviewDetails}, ${LogsContainer} {
 		min-width: 50%;
 		width: 50%;
+		min-height: 60vh;
 		max-height: 75vh;
 		position: relative;
 		overflow: auto;
@@ -110,4 +121,26 @@ export const HorizontalView = styled.div`
 			box-shadow: none;
 		}
 	}
+`;
+
+export const TabContent = styled.div`
+	background-color: ${COLOR.WHITE};
+	flex: 1;
+	position: relative;
+	overflow: hidden;
+	display: flex;
+	height: inherit;
+`;
+
+export const Content = styled.div`
+	display: ${(props) => props.active ? 'block' : 'none'};
+	width: 100%;
+	margin-bottom: 5px;
+`;
+
+export const ExpandAction = styled.span`
+	font-size: 11px;
+	cursor: pointer;
+	display: block;
+	text-align: center;
 `;

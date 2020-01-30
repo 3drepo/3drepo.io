@@ -34,7 +34,10 @@ const SUMMARY_HEIGHT = 64;
 export const Container = styled.div`
 	color: ${COLOR.BLACK_60};
 	background-color: ${COLOR.WHITE};
-	overflow: auto;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	height: 100%;
 `;
 
 export const Collapsable = styled(ExpansionPanel)`
@@ -62,10 +65,8 @@ export const Summary = styled(ExpansionPanelSummary).attrs({
 	}
 })`
 	&& {
-		position: absolute;
 		min-height: ${SUMMARY_HEIGHT}px;
 		width: 100%;
-		left: 0;
 		box-sizing: border-box;
 		padding: 0 12px;
 		background-color: ${COLOR.WHITE};
@@ -80,7 +81,7 @@ export const Summary = styled(ExpansionPanelSummary).attrs({
 ` as any;
 
 export const CollapsableContent = styled.div`
-	margin: 8px 0;
+	margin-bottom: 8px;
 `;
 
 export const StyledForm = styled(Form)`
@@ -103,7 +104,6 @@ export const ToggleButtonContainer = styled.div`
 	background-color: ${COLOR.WHITE};
 	width: 100%;
 	z-index: 2;
-	margin-top: ${(props: any) => props.expanded ? 0 : SUMMARY_HEIGHT}px;
 	position: static;
 ` as any;
 
@@ -124,5 +124,17 @@ export const Typography = styled(TypographyComponent)`
 		max-height: 40px;
 		overflow: hidden;
 		margin-right: 24px;
+		margin-bottom: 0;
 	}
+`;
+
+export const MainInfoContainer = styled.div`
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+`;
+
+export const ScrollableContainer = styled.div`
+	overflow: auto;
+	position: static;
 `;
