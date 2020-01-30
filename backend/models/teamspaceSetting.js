@@ -76,9 +76,8 @@ class TeamspaceSettings {
 	}
 
 	async update(account, data, noClean = false) {
-		const attributeBlacklist = [
-			"_id"
-		];
+		const attributeBlacklist = ["_id"];
+		const labelFields = ["riskCategories", "topicTypes"];
 
 		const oldSettings = await this.getTeamspaceSettings(account, true);
 
@@ -88,6 +87,42 @@ class TeamspaceSettings {
 		if (_.isEmpty(data)) {
 			throw responseCodes.INVALID_ARGUMENTS;
 		}
+
+		labelFields.forEach((key) => {
+			if (Object.prototype.toString.call(data[key]) === "[object Array]") {
+				const labelObject = {};
+				data[key].forEach(label => {
+					if (label &&
+						Object.prototype.toString.call(label) === "[object String]" &&
+						label.trim()) {
+						// generate value from label
+						const value = label.trim().toLowerCase().replace(/ /g, "_").replace(/&/g, "");
+
+						if (labelObject[value]) {
+							switch (key) {
+								case "riskCategories":
+									throw responseCodes.RISK_DUPLICATE_CATEGORY;
+									break;
+								case "topicTypes":
+									throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;
+									break;
+							}
+						} else {
+							labelObject[value] = {
+								value,
+								label: label.trim()
+							};
+						}
+					} else {
+						throw responseCodes.INVALID_ARGUMENTS;
+					}
+				});
+
+				data[key] = _.values(labelObject);
+			} else if (data[key]) {
+				throw responseCodes.INVALID_ARGUMENTS;
+			}
+		});
 
 		// Update the data
 		const settingsColl = await this.getTeamspaceSettingsCollection(account, true);

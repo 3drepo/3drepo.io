@@ -190,8 +190,8 @@
 	 *
 	 * @apiUse Teamspace
 	 *
-	 * @apiParam (Request body) {Object[]} riskCategories List of risk categories
-	 * @apiParam (Request body) {Object[]} topicTypes List of issue topic types
+	 * @apiParam (Request body) {Object[]} [riskCategories] List of risk categories
+	 * @apiParam (Request body) {Object[]} [topicTypes] List of issue topic types
 	 *
 	 * @apiParam (Risk category) {String} value Value of risk category
 	 * @apiParam (Risk category) {String} label Label for risk category
@@ -203,24 +203,12 @@
 	 * PUT /acme/settings HTTP/1.1
 	 * {
 	 * 	"topicTypes":[
-	 * 		{
-	 * 			"value":"new_topic_1",
-	 * 			"label":"New Topic 1"
-	 * 		},
-	 * 		{
-	 * 			"value":"new_topic_2",
-	 * 			"label":"New Topic 2"
-	 * 		}
+	 * 		"New Topic 1",
+	 * 		"New Topic 2"
 	 * 	],
 	 * 	"riskCategories":[
-	 * 		{
-	 * 			"value":"new_category_1",
-	 * 			"label":"New Category 1"
-	 * 		},
-	 * 		{
-	 * 			"value":"new_category_2",
-	 * 			"label":"NEW CATEGORY 2"
-	 * 		}
+	 * 		"New Category 1",
+	 * 		"NEW CATEGORY 2"
 	 * 	]
 	 * }
 	 *
