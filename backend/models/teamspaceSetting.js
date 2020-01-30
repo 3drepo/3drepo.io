@@ -102,10 +102,8 @@ class TeamspaceSettings {
 							switch (key) {
 								case "riskCategories":
 									throw responseCodes.RISK_DUPLICATE_CATEGORY;
-									break;
 								case "topicTypes":
 									throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;
-									break;
 							}
 						} else {
 							labelObject[value] = {

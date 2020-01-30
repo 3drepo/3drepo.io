@@ -63,19 +63,6 @@ const schema = mongoose.Schema({
 	heliSpeed: Number
 });
 
-const defaultTopicTypes = [
-	{value: "clash", label: "Clash"},
-	{value: "diff", label: "Diff"},
-	{value: "rfi", label: "RFI"},
-	{value: "risk", label: "Risk"},
-	{value: "hs", label: "H&S"},
-	{value: "design", label: "Design"},
-	{value: "constructibility", label: "Constructibility"},
-	{value: "gis", label: "GIS"},
-	{value: "for_information", label: "For information"},
-	{value: "vr", label: "VR"}
-];
-
 schema.set("toObject", { getters: true });
 
 schema.statics.modelCodeRegExp = /^[a-zA-Z0-9]{0,50}$/;

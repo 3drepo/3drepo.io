@@ -776,7 +776,7 @@
 	}
 
 	function uploadTreatmentsFile(req, res, next) {
-		TeamspaceSettings.getTopicTypes(req.params.account).then((types) => {
+		TeamspaceSettings.getTopicTypes(req.params.account).then(() => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {"status":"ok"});
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
