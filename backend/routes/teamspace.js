@@ -64,6 +64,9 @@
 	 *
 	 * @apiSuccessExample {json} Success-Response
 	 * HTTP/1.1 200 OK
+	 * {
+	 * 	"status":"ok"
+	 * }
 	 */
 	router.post("/treatments.csv", middlewares.isAccountAdmin, uploadTreatmentsFile);
 
