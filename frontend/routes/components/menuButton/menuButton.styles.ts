@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import React from 'react';
+
 import styled, { css } from 'styled-components';
 
 import IconButton from '@material-ui/core/IconButton';
@@ -32,5 +34,5 @@ const disableGuttersStyles = css`
 
 export const StyledIconButton = styled(IconButton)`
 	${({ hidden }) => hidden && hiddenStyles};
-	${({ disableGutters }) => disableGutters && disableGuttersStyles};
+	${({ role }) => role === 'button' && disableGuttersStyles};
 `;
