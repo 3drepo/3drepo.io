@@ -45,24 +45,13 @@ interface IProps {
 	onAddProject: (event, teamspaceName) => void;
 	onLeaveTeamspace: (event) => void;
 	history: History;
+	account: string;
 }
 
 const getMemoizedAvatarUrl = memoize(getAvatarUrl);
 
-export const TeamspaceItem = React.memo((props: IProps) => {
-	const {
-		name,
-		projects,
-		onToggle,
-		active,
-		isMyTeamspace,
-		onAddProject,
-		permissions,
-		disabled,
-		hasAvatar,
-		onLeaveTeamspace,
-		history,
-	} = props;
+export const TeamspaceItem = ({ name, projects, onToggle, active, isMyTeamspace, onAddProject, permissions,
+	disabled, hasAvatar, onLeaveTeamspace, history, account, ...props}: IProps) => {
 
 	const avatarUrl = getMemoizedAvatarUrl(name);
 
@@ -72,9 +61,7 @@ export const TeamspaceItem = React.memo((props: IProps) => {
 
 	const handleGoToTeamspaceSetting = (event) => {
 		event.preventDefault();
-		console.warn('props.history:', history);
-		console.warn('permissions:', permissions);
-		history.push(`${ROUTES.TEAMSPACES}/${this.props.teamspace}/`);
+		history.push(`${ROUTES.TEAMSPACES}/${account}/`);
 	};
 
 	const RenderNewProjectAction = () => renderWhenTrue(() => (
@@ -129,4 +116,4 @@ export const TeamspaceItem = React.memo((props: IProps) => {
 		)}
 		</Container>
 	);
-});
+};

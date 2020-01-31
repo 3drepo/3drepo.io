@@ -81,13 +81,13 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 			/>
 			<Route
 				exact
-				path={ROUTES.MODEL_SETTINGS}
-				component={ModelSettings}
+				path={ROUTES.TEAMSPACE_SETTINGS}
+				component={TeamspaceSettings}
 			/>
 			<Route
 				exact
-				path={ROUTES.TEAMSPACE_SETTINGS}
-				component={TeamspaceSettings}
+				path={ROUTES.MODEL_SETTINGS}
+				component={ModelSettings}
 			/>
 			<Route
 				path={ROUTES.USER_MANAGEMENT_TEAMSPACE}
@@ -123,6 +123,7 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const { match, currentUser, isPending, isInitialised, isAvatarPending } = this.props;
+
 		return (
 			<Container
 				container

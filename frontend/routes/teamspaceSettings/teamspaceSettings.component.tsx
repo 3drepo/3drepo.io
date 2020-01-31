@@ -15,39 +15,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Field, Formik } from 'formik';
-import { isEmpty } from 'lodash';
-import * as queryString from 'query-string';
 import React from 'react';
-import * as Yup from 'yup';
 
 import Button from '@material-ui/core/Button';
+import Divider from '@material-ui/core/Divider';
 import Grid from '@material-ui/core/Grid';
-import InputLabel from '@material-ui/core/InputLabel';
-
-import { Loader } from '../components/loader/loader.component';
-
-import { clientConfigService } from '../../services/clientConfig';
-import { schema } from '../../services/validation';
-
-import { Chips } from '../components/chips/chips.component';
-import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
-import { Panel } from '../components/panel/panel.component';
+import { Field, Formik } from 'formik';
+import * as Yup from 'yup';
 
 import { ROUTES } from '../../constants/routes';
-import { convertPositionToDirectX, convertPositionToOpenGL } from '../../helpers/model';
+import { schema } from '../../services/validation';
+import { Chips } from '../components/chips/chips.component';
+import { Loader } from '../components/loader/loader.component';
+import { Panel } from '../components/panel/panel.component';
 import {
 	BackButton,
 	ButtonContainer,
+	ButtonRowContainer,
 	Container,
-	FieldsRow,
-	GridColumn,
 	Headline,
 	LoaderContainer,
-	SelectWrapper,
+	StyledButton,
 	StyledForm,
+	StyledGrid,
 	StyledIcon,
-	StyledTextField
+	SuggestionsContainer
 } from './teamspaceSettings.styles';
 
 const ModelSettingsSchema = Yup.object().shape({
@@ -86,7 +78,7 @@ interface IProps {
 	match: any;
 	location: any;
 	history: any;
-	fetchModelSettings: (teamspace, modelId) => void;
+	fetchTeamspaceSettings: (teamspace) => void;
 	updateModelSettings: (modelData, settings) => void;
 	modelSettings: any;
 	currentTeamspace: string;
@@ -96,6 +88,7 @@ interface IProps {
 export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 	public state = {
 		topicTypes: [],
+		riskCategories: [],
 		latitude: 0,
 		longitude: 0,
 		axisX: 0,
@@ -106,101 +99,102 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 	};
 
 	public componentDidMount() {
-		const { modelSettings: { properties }, match, fetchModelSettings } = this.props;
-		const { teamspace, modelId } = match.params;
-		const topicTypes = properties && properties.topicTypes ? properties.topicTypes : [];
+		// const { modelSettings: { properties }, match, fetchModelSettings } = this.props;
+		const { match, fetchTeamspaceSettings } = this.props;
+		const { teamspace } = match.params;
+		// const topicTypes = properties && properties.topicTypes ? properties.topicTypes : [];
+		//
+		// if (topicTypes.length) {
+		// 	this.setState({ topicTypes });
+		// }
 
-		if (topicTypes.length) {
-			this.setState({ topicTypes });
-		}
-
-		fetchModelSettings(teamspace, modelId);
+		fetchTeamspaceSettings(teamspace);
 	}
 
 	public componentDidUpdate(prevProps) {
-		const changes = {} as any;
-		const { properties, surveyPoints, elevation, angleFromNorth } = this.props.modelSettings;
-		const prevSurveyPoints = prevProps.modelSettings.surveyPoints;
-		const prevProperties = prevProps.modelSettings.properties;
-		const topicTypes = properties ? properties.topicTypes : [];
-		const prevTopicTypes = prevProperties ? prevProperties.topicTypes : [];
-
-		if (topicTypes && topicTypes.length !== prevTopicTypes.length) {
-			changes.topicTypes = topicTypes;
-		}
-
-		if (elevation && prevProps.modelSettings.elevation !== elevation) {
-			changes.elevation = elevation;
-		}
-
-		if (angleFromNorth && prevProps.modelSettings.angleFromNorth !== angleFromNorth) {
-			changes.angleFromNorth = angleFromNorth;
-		}
-
-		const pointsChanges = this.getSurveyPointsChanges(prevSurveyPoints, surveyPoints);
-
-		if (!isEmpty({ ...changes, ...pointsChanges })) {
-			this.setState({ ...changes, ...pointsChanges });
-		}
+		// const changes = {} as any;
+		// const { properties, surveyPoints, elevation, angleFromNorth } = this.props.modelSettings;
+		// const prevSurveyPoints = prevProps.modelSettings.surveyPoints;
+		// const prevProperties = prevProps.modelSettings.properties;
+		// const topicTypes = properties ? properties.topicTypes : [];
+		// const prevTopicTypes = prevProperties ? prevProperties.topicTypes : [];
+		//
+		// if (topicTypes && topicTypes.length !== prevTopicTypes.length) {
+		// 	changes.topicTypes = topicTypes;
+		// }
+		//
+		// if (elevation && prevProps.modelSettings.elevation !== elevation) {
+		// 	changes.elevation = elevation;
+		// }
+		//
+		// if (angleFromNorth && prevProps.modelSettings.angleFromNorth !== angleFromNorth) {
+		// 	changes.angleFromNorth = angleFromNorth;
+		// }
+		//
+		// const pointsChanges = this.getSurveyPointsChanges(prevSurveyPoints, surveyPoints);
+		//
+		// if (!isEmpty({ ...changes, ...pointsChanges })) {
+		// 	this.setState({ ...changes, ...pointsChanges });
+		// }
 	}
 
-	public getSurveyPointsChanges = (prevPoints, currentPoints) => {
-		const changes = {} as any;
-
-		if (prevPoints !== currentPoints && currentPoints.length) {
-			const { axisX, axisY, axisZ, latitude, longitude } = this.state;
-			const [prevLatitude, prevLongitude] = currentPoints[0].latLong.map(Number);
-			const [prevAxisX, prevAxisY, prevAxisZ] = convertPositionToOpenGL(currentPoints[0].position);
-
-			if (axisX !== prevAxisX) {
-				changes.axisX = prevAxisX;
-			}
-
-			if (axisY !== prevAxisY) {
-				changes.axisY = prevAxisY;
-			}
-
-			if (axisZ !== prevAxisZ) {
-				changes.axisZ = prevAxisZ;
-			}
-
-			if (latitude !== prevLatitude) {
-				changes.latitude = prevLatitude;
-			}
-
-			if (longitude !== prevLongitude) {
-				changes.longitude = prevLongitude;
-			}
-		}
-		return changes;
-	}
+	// public getSurveyPointsChanges = (prevPoints, currentPoints) => {
+	// 	const changes = {} as any;
+	//
+	// 	if (prevPoints !== currentPoints && currentPoints.length) {
+	// 		const { axisX, axisY, axisZ, latitude, longitude } = this.state;
+	// 		const [prevLatitude, prevLongitude] = currentPoints[0].latLong.map(Number);
+	// 		const [prevAxisX, prevAxisY, prevAxisZ] = convertPositionToOpenGL(currentPoints[0].position);
+	//
+	// 		if (axisX !== prevAxisX) {
+	// 			changes.axisX = prevAxisX;
+	// 		}
+	//
+	// 		if (axisY !== prevAxisY) {
+	// 			changes.axisY = prevAxisY;
+	// 		}
+	//
+	// 		if (axisZ !== prevAxisZ) {
+	// 			changes.axisZ = prevAxisZ;
+	// 		}
+	//
+	// 		if (latitude !== prevLatitude) {
+	// 			changes.latitude = prevLatitude;
+	// 		}
+	//
+	// 		if (longitude !== prevLongitude) {
+	// 			changes.longitude = prevLongitude;
+	// 		}
+	// 	}
+	// 	return changes;
+	// }
 
 	public handleUpdateSettings = (data) => {
-		const { match, location, updateModelSettings } = this.props;
-		const { modelId, teamspace } = match.params;
-		const queryParams = queryString.parse(location.search);
-		const { project } = queryParams;
-		const { name, unit, type, code, elevation, angleFromNorth, fourDSequenceTag,
-			topicTypes, axisX, axisY, axisZ, latitude, longitude } = data;
-		const types = topicTypes.map((topicType) => topicType.label);
-
-		const settings = {
-			name,
-			unit,
-			angleFromNorth,
-			code,
-			elevation,
-			type,
-			fourDSequenceTag,
-			surveyPoints: [{
-				position: convertPositionToDirectX([axisX, axisY, axisZ]),
-				latLong: [latitude, longitude].map(Number)
-			}],
-			topicTypes: types
-		};
-
-		const modelData = { teamspace, project, modelId };
-		updateModelSettings(modelData, settings);
+		// const { match, location, updateModelSettings } = this.props;
+		// const { modelId, teamspace } = match.params;
+		// const queryParams = queryString.parse(location.search);
+		// const { project } = queryParams;
+		// const { name, unit, type, code, elevation, angleFromNorth, fourDSequenceTag,
+		// 	topicTypes, axisX, axisY, axisZ, latitude, longitude } = data;
+		// const types = topicTypes.map((topicType) => topicType.label);
+		//
+		// const settings = {
+		// 	name,
+		// 	unit,
+		// 	angleFromNorth,
+		// 	code,
+		// 	elevation,
+		// 	type,
+		// 	fourDSequenceTag,
+		// 	surveyPoints: [{
+		// 		position: convertPositionToDirectX([axisX, axisY, axisZ]),
+		// 		latLong: [latitude, longitude].map(Number)
+		// 	}],
+		// 	topicTypes: types
+		// };
+		//
+		// const modelData = { teamspace, project, modelId };
+		// updateModelSettings(modelData, settings);
 	}
 
 	public handleBackLink = () => {
@@ -212,169 +206,81 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 			<BackButton onClick={this.handleBackLink}>
 				<StyledIcon />
 			</BackButton>
-			Model Settings
+			Teamspace Settings
 		</>
 	)
 
-	public renderLoader = (content) => (
+	public renderLoader = () => (
 		<LoaderContainer>
-			<Loader content={content} />
+			<Loader content="Loading teamspace settings data..." />
 		</LoaderContainer>
 	)
 
 	public renderForm = () => {
 		const { id, name, type, fourDSequenceTag, properties, federate } = this.props.modelSettings;
-		const { latitude, longitude, axisX, axisY, axisZ, angleFromNorth, elevation, topicTypes } = this.state;
+		const { teamspace } = this.props.match.params;
+		const {
+			latitude, longitude, axisX, axisY, axisZ, angleFromNorth, elevation, topicTypes, riskCategories,
+		} = this.state;
 
 		return	(
 			<Container>
 				<Formik
 					initialValues={ {
 						id, name, type: federate ? 'Federation' : type, code: properties.code, unit: properties.unit, fourDSequenceTag,
-						latitude, longitude, axisX, axisY, axisZ, elevation, angleFromNorth, topicTypes
+						latitude, longitude, axisX, axisY, axisZ, elevation, angleFromNorth, topicTypes, riskCategories
 					} }
 					validationSchema={ModelSettingsSchema}
 					onSubmit={this.handleUpdateSettings}
 				>
 					<StyledForm>
-						<Headline color="primary" variant="subheading">Model Information</Headline>
-						<Grid>
-							<FieldsRow container wrap="nowrap">
-								<Field name="id" render={ ({ field }) => (
-									<StyledTextField
-										{...field}
-										label="Model ID"
-										margin="normal"
-										disabled
-									/>
-								)} />
-								<Field name="name" render={ ({ field, form }) => (
-									<StyledTextField
-										{...field}
-										error={Boolean(form.errors.name)}
-										helperText={form.errors.name}
-										label="Model name"
-										margin="normal"
-									/>
-								)} />
-							</FieldsRow>
-							<FieldsRow container wrap="nowrap">
-								<Field name="type" render={ ({ field }) => (
-									<StyledTextField
-										{...field}
-										label="Model type"
-										margin="normal"
-										disabled
-									/>
-								)} />
-								<Field name="code" render={ ({ field, form }) => (
-									<StyledTextField
-										{...field}
-										label="Model code"
-										margin="normal"
-										error={Boolean(form.errors.code)}
-										helperText={form.errors.code}
-									/>
-								)} />
-							</FieldsRow>
-							<FieldsRow container wrap="nowrap">
-								<Field name="fourDSequenceTag" render={ ({ field }) => (
-									<StyledTextField
-										{...field}
-										label="4D Sequence Tag"
-										margin="normal"
-									/>
-								)} />
-								<SelectWrapper fullWidth>
-									<InputLabel shrink htmlFor="unit-select">Unit</InputLabel>
-									<Field name="unit" render={ ({ field }) => (
-										<CellSelect
-											{...field}
-											items={clientConfigService.units}
-											inputId="unit-select"
+						<StyledGrid>
+							<Headline color="primary" variant="subheading">Teamspace</Headline>
+							<Headline color="textPrimary" variant="subheading">{teamspace}</Headline>
+						</StyledGrid>
+						<Divider />
+
+						<StyledGrid>
+							<Headline color="primary" variant="title">Issues</Headline>
+							<Headline color="textPrimary" variant="subheading">Topic Types</Headline>
+							<Field name="topicTypes" render={({ field }) => <Chips {...field} inputPlaceholder={'Enter Topic Type'} />} />
+						</StyledGrid>
+						<Divider />
+
+						<StyledGrid>
+							<Headline color="primary" variant="title">Risks</Headline>
+							<Headline color="textPrimary" variant="subheading">Categories</Headline>
+							<Field name="riskCategories" render={({ field }) => <Chips {...field} inputPlaceholder={'Enter Category'} />} />
+						</StyledGrid>
+
+						<SuggestionsContainer container direction="column" wrap="nowrap">
+							<Headline color="textPrimary" variant="subheading">Treatment Suggestions</Headline>
+							<Grid container direction="column" wrap="nowrap">
+								<ButtonRowContainer container direction="row" justify="space-between" alignItems="center" wrap="nowrap">
+									<Headline color="textPrimary" variant="body2">No suggestions uploaded</Headline>
+									<StyledButton
+											color="secondary"
+											variant="raised"
+											type="button"
 											disabled
-										/>
-									)} />
-								</SelectWrapper>
-							</FieldsRow>
-							<Field name="topicTypes" render={({ field }) => <Chips {...field} inputPlaceholder={'Enter topic types'} />} />
-						</Grid>
-						<Headline color="primary" variant="subheading">GIS Reference Information</Headline>
-						<Grid container direction="column" wrap="nowrap">
-							<Grid container direction="row" wrap="nowrap">
-								<GridColumn container direction="column" wrap="nowrap">
-									<Headline color="textPrimary" variant="subheading">Survey Point</Headline>
-									<Field name="latitude" render={ ({ field, form }) => (
-										<StyledTextField
-											{...field}
-											label="Latitude (Decimal)"
-											margin="normal"
-											error={Boolean(form.errors.latitude)}
-											helperText={form.errors.latitude}
-										/>
-									)} />
-									<Field name="longitude" render={ ({ field, form }) => (
-										<StyledTextField
-											{...field}
-											label="Longitude"
-											margin="normal"
-											error={Boolean(form.errors.longitude)}
-											helperText={form.errors.longitude}
-										/>
-									)} />
-									<Field name="elevation" render={ ({ field, form }) => (
-										<StyledTextField
-											{...field}
-											label="Elevation"
-											margin="normal"
+									>
+										Download
+									</StyledButton>
+								</ButtonRowContainer>
+								<ButtonRowContainer container direction="row" justify="space-between" alignItems="center" wrap="nowrap">
+									<Headline color="textPrimary" variant="body2">No file selected</Headline>
+									<StyledButton
+											color="secondary"
+											variant="raised"
+											type="button"
 											disabled
-											error={Boolean(form.errors.elevation)}
-											helperText={form.errors.elevation}
-										/>
-									)} />
-									<Field name="angleFromNorth" render={ ({ field, form }) => (
-										<StyledTextField
-											{...field}
-											label="Angle from North (Clockwise Degrees)"
-											margin="normal"
-											error={Boolean(form.errors.angleFromNorth)}
-											helperText={form.errors.angleFromNorth}
-										/>
-									)} />
-								</GridColumn>
-								<GridColumn container direction="column" wrap="nowrap">
-									<Headline color="textPrimary" variant="subheading">Project Point</Headline>
-									<Field name="axisX" render={ ({ field, form }) => (
-										<StyledTextField
-											{...field}
-											label={`x (${properties.unit})`}
-											margin="normal"
-											error={Boolean(form.errors.axisX)}
-											helperText={form.errors.axisX}
-										/>
-									)} />
-									<Field name="axisY" render={ ({ field, form }) => (
-										<StyledTextField
-											{...field}
-											name="axisY"
-											label={`y (${properties.unit})`}
-											margin="normal"
-											error={Boolean(form.errors.axisY)}
-											helperText={form.errors.axisY}
-										/>
-									)} />
-									<Field name="axisZ" render={ ({ field, form }) => (
-										<StyledTextField
-											{...field}
-											label={`z (${properties.unit})`}
-											margin="normal"
-											error={Boolean(form.errors.axisZ)}
-											helperText={form.errors.axisZ}
-										/>
-									)} />
-								</GridColumn>
+									>
+										Browse
+									</StyledButton>
+								</ButtonRowContainer>
 							</Grid>
-						</Grid>
+						</SuggestionsContainer>
+
 						<ButtonContainer container direction="column" alignItems="flex-end">
 							<Field render={ ({ form }) =>
 								<Button
@@ -399,7 +305,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 
 		return (
 			<Panel {...PANEL_PROPS} title={this.renderTitleWithBackLink()}>
-				{isSettingsLoading ? this.renderLoader('Loading model settings data...') : this.renderForm()}
+				{isSettingsLoading ? this.renderLoader() : this.renderForm()}
 			</Panel>
 		);
 	}

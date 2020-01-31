@@ -33,3 +33,11 @@ export const fetchTeamspace = (teamspace) => {
 export const getQuotaInfo = (teamspace) => {
 	return api.get(`${teamspace}/quota`);
 };
+
+/**
+ * Get teamspace settings
+ * @param teamspace
+ */
+export const fetchTeamspaceSettings = (teamspace) => {
+	return api.get(`${teamspace}/settings`);
+};

@@ -15,22 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import { createSelector } from 'reselect';
 
-import IconButton from '@material-ui/core/IconButton';
+export const selectTeamspaceDomain = (state) => ({...state.teamspace});
 
-const hiddenStyles = css`
-	pointer-events: none;
-	visibility: hidden;
-`;
+// export const selectIsTeamspaceActive = createSelector(
+// 	selectTeamspaceDomain, (state) => state.isActive
+// );
+//
+// export const selectIsTeamspaceDisabled = createSelector(
+// 	selectTeamspaceDomain, (state) => state.isDisabled
+// );
 
-const disableGuttersStyles = css`
-	&& {
-		padding: 6px;
-	}
-`;
-
-export const StyledIconButton = styled(IconButton)`
-	${({ hidden }) => hidden && hiddenStyles};
-	${({ role }) => role === 'button' && disableGuttersStyles};
-`;
+export const selectIsPending = createSelector(
+	selectTeamspaceDomain, (state) => state.isPending
+);

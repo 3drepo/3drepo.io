@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Button from '@material-ui/core/Button';
 import FormControl from '@material-ui/core/FormControl';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import { Form } from 'formik';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { COLOR } from '../../styles';
 
 export const StyledTextField = styled(TextField)``;
@@ -46,32 +47,34 @@ export const FieldsRow = styled(Grid)`
 	}
 `;
 
-export const SelectWrapper = styled(FormControl)`
-	&& {
-		margin-left: 12px;
-		margin-top: 15px;
-	}
+export const StyledGrid = styled(Grid)`
+	padding: 24px 24px 0;
 `;
 
-export const GridColumn = styled(Grid)`
-	margin-top: 30px;
-
-	&:first-of-type {
-		margin-right: 12px;
+export const SuggestionsContainer = styled(Grid)`
+	&& {
+		padding: 0 24px 24px;
+		max-width: 400px;
 	}
-
-	&:last-of-type {
-		margin-left: 12px;
+`;
+export const ButtonRowContainer = styled(Grid)`
+	&& {
+		padding: 10px 0;
 	}
 `;
 
 export const StyledForm = styled(Form)`
-	padding: 24px;
 	padding-bottom: 80px;
 	box-sizing: border-box;
 	overflow-y: scroll;
 	overflow-x: hidden;
 	height: inherit;
+`;
+
+export const StyledButton = styled(Button)`
+	&& {
+		align-self: flex-end;
+	}
 `;
 
 export const Headline = styled(Typography)``;
