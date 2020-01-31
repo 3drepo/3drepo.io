@@ -26,6 +26,7 @@ const colName = "teamspace";
 const fieldTypes = {
 	"_id": "[object String]",
 	"topicTypes": "[object Array]",
+	"treatmentsUpdatedAt": "[object Number]",
 	"riskCategories": "[object Array]"
 };
 
@@ -76,7 +77,7 @@ class TeamspaceSettings {
 	}
 
 	async update(account, data, noClean = false) {
-		const attributeBlacklist = ["_id"];
+		const attributeBlacklist = ["_id", "treatmentsUpdatedAt"];
 		const labelFields = ["riskCategories", "topicTypes"];
 
 		const oldSettings = await this.getTeamspaceSettings(account, true);

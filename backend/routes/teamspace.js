@@ -34,7 +34,7 @@
 	 */
 
 	/**
-	 * @api {get} /:teamspace/treatments.csv Download treatments file
+	 * @api {get} /:teamspace/settings/treatments.csv Download treatments file
 	 * @apiName getTreatmentsFile
 	 * @apiGroup Teamspace
 	 * @apiDescription Returns a CSV file containing all defined suggested risk treatments.
@@ -48,10 +48,10 @@
 	 * HTTP/1.1 200 OK
 	 * <Risk treatments CSV file>
 	 */
-	router.get("/treatments.csv", middlewares.isAccountAdmin, getTreatmentsFile);
+	router.get("/settings/treatments.csv", middlewares.isAccountAdmin, getTreatmentsFile);
 
 	/**
-	 * @api {post} /:teamspace/treatments.csv Upload treatments file
+	 * @api {post} /:teamspace/settings/treatments.csv Upload treatments file
 	 * @apiName uploadTreatmentsFile
 	 * @apiGroup Teamspace
 	 * @apiDescription Upload a risk treatments CSV file to a teamspace.
@@ -68,7 +68,7 @@
 	 * 	"status":"ok"
 	 * }
 	 */
-	router.post("/treatments.csv", middlewares.isAccountAdmin, uploadTreatmentsFile);
+	router.post("/settings/treatments.csv", middlewares.isAccountAdmin, uploadTreatmentsFile);
 
 	/**
 	 * @api {get} /:teamspace/settings Get teamspace settings
@@ -84,48 +84,6 @@
 	 * @apiSuccessExample {json} Success-Response
 	 * HTTP/1.1 200 OK
 	 * {
-	 * 	"topicTypes":[
-	 * 		{
-	 * 			"value":"for_information",
-	 * 			"label":"For information"
-	 * 		},
-	 * 		{
-	 * 			"value":"vr",
-	 * 			"label":"VR"
-	 * 		},
-	 * 		{
-	 * 			"value":"clash",
-	 * 			"label":"Clash"
-	 * 		},
-	 * 		{
-	 * 			"value":"diff",
-	 * 			"label":"Diff"
-	 * 		},
-	 * 		{
-	 * 			"value":"rfi",
-	 * 			"label":"RFI"
-	 * 		},
-	 * 		{
-	 * 			"value":"risk",
-	 * 			"label":"Risk"
-	 * 		},
-	 * 		{
-	 * 			"value":"hs",
-	 * 			"label":"H&S"
-	 * 		},
-	 * 		{
-	 * 			"value":"design",
-	 * 			"label":"Design"
-	 * 		},
-	 * 		{
-	 * 			"value":"constructibility",
-	 * 			"label":"Constructibility"
-	 * 		},
-	 * 		{
-	 * 			"value":"gis",
-	 * 			"label":"GIS"
-	 * 		}
-	 * 	],
 	 * 	"riskCategories":[
 	 * 		{
 	 * 			"value":"commercial",
@@ -180,6 +138,49 @@
 	 * 			"label":"UNKNOWN"
 	 * 		}
 	 * 	],
+	 * 	"topicTypes":[
+	 * 		{
+	 * 			"value":"for_information",
+	 * 			"label":"For information"
+	 * 		},
+	 * 		{
+	 * 			"value":"vr",
+	 * 			"label":"VR"
+	 * 		},
+	 * 		{
+	 * 			"value":"clash",
+	 * 			"label":"Clash"
+	 * 		},
+	 * 		{
+	 * 			"value":"diff",
+	 * 			"label":"Diff"
+	 * 		},
+	 * 		{
+	 * 			"value":"rfi",
+	 * 			"label":"RFI"
+	 * 		},
+	 * 		{
+	 * 			"value":"risk",
+	 * 			"label":"Risk"
+	 * 		},
+	 * 		{
+	 * 			"value":"hs",
+	 * 			"label":"H&S"
+	 * 		},
+	 * 		{
+	 * 			"value":"design",
+	 * 			"label":"Design"
+	 * 		},
+	 * 		{
+	 * 			"value":"constructibility",
+	 * 			"label":"Constructibility"
+	 * 		},
+	 * 		{
+	 * 			"value":"gis",
+	 * 			"label":"GIS"
+	 * 		}
+	 * 	],
+	 * 	"treatmentsUpdatedAt":1567156228976,
 	 * 	"teamspace":"acme"
 	 * }
 	 */
@@ -218,16 +219,6 @@
 	 * @apiSuccessExample {json} Success-Response
 	 * HTTP/1.1 200 OK
 	 * {
-	 * 	"topicTypes":[
-	 * 		{
-	 * 			"value":"new_topic_1",
-	 * 			"label":"New Topic 1"
-	 * 		},
-	 * 		{
-	 * 			"value":"new_topic_2",
-	 * 			"label":"New Topic 2"
-	 * 		}
-	 * 	],
 	 * 	"riskCategories":[
 	 * 		{
 	 * 			"value":"new_category_1",
@@ -238,6 +229,17 @@
 	 * 			"label":"NEW CATEGORY 2"
 	 * 		}
 	 * 	],
+	 * 	"topicTypes":[
+	 * 		{
+	 * 			"value":"new_topic_1",
+	 * 			"label":"New Topic 1"
+	 * 		},
+	 * 		{
+	 * 			"value":"new_topic_2",
+	 * 			"label":"New Topic 2"
+	 * 		}
+	 * 	],
+	 * 	"treatmentsUpdatedAt":1567156228976,
 	 * 	"teamspace":"acme"
 	 * }
 	 */
