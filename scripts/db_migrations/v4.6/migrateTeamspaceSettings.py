@@ -46,19 +46,19 @@ for database in db.database_names():
             teamspaceSettings = {}
             teamspaceSettings['_id'] = database
             teamspaceSettings['riskCategories'] = [
-                { u'value': u'commercial', u'name': u'Commercial Issue' },
-                { u'value': u'environmental', u'name': u'Environmental Issue' },
-                { u'value': u'health_material_effect', u'name': u'Health - Material effect' },
-                { u'value': u'health_mechanical_effect', u'name': u'Health - Mechanical effect' },
-                { u'value': u'safety_fall', u'name': u'Safety Issue - Fall' },
-                { u'value': u'safety_trapped', u'name': u'Safety Issue - Trapped' },
-                { u'value': u'safety_event', u'name': u'Safety Issue - Event' },
-                { u'value': u'safety_handling', u'name': u'Safety Issue - Handling' },
-                { u'value': u'safety_struck', u'name': u'Safety Issue - Struck' },
-                { u'value': u'safety_public', u'name': u'Safety Issue - Public' },
-                { u'value': u'social', u'name': u'Social Issue' },
-                { u'value': u'other', u'name': u'Other Issue' },
-                { u'value': u'unknown', u'name': u'UNKNOWN' }
+                { u'value': u'commercial', u'label': u'Commercial Issue' },
+                { u'value': u'environmental', u'label': u'Environmental Issue' },
+                { u'value': u'health_material_effect', u'label': u'Health - Material effect' },
+                { u'value': u'health_mechanical_effect', u'label': u'Health - Mechanical effect' },
+                { u'value': u'safety_fall', u'label': u'Safety Issue - Fall' },
+                { u'value': u'safety_trapped', u'label': u'Safety Issue - Trapped' },
+                { u'value': u'safety_event', u'label': u'Safety Issue - Event' },
+                { u'value': u'safety_handling', u'label': u'Safety Issue - Handling' },
+                { u'value': u'safety_struck', u'label': u'Safety Issue - Struck' },
+                { u'value': u'safety_public', u'label': u'Safety Issue - Public' },
+                { u'value': u'social', u'label': u'Social Issue' },
+                { u'value': u'other', u'label': u'Other Issue' },
+                { u'value': u'unknown', u'label': u'UNKNOWN' }
             ]
             teamspaceSettings['topicTypes'] = topicTypes
 
