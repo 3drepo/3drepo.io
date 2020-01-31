@@ -19,14 +19,10 @@ import { createSelector } from 'reselect';
 
 export const selectTeamspaceDomain = (state) => ({...state.teamspace});
 
-// export const selectIsTeamspaceActive = createSelector(
-// 	selectTeamspaceDomain, (state) => state.isActive
-// );
-//
-// export const selectIsTeamspaceDisabled = createSelector(
-// 	selectTeamspaceDomain, (state) => state.isDisabled
-// );
-
 export const selectIsPending = createSelector(
 	selectTeamspaceDomain, (state) => state.isPending
+);
+
+export const selectSettings = createSelector(
+	selectTeamspaceDomain, (state) => state.settings
 );

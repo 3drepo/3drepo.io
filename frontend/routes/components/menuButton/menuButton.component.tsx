@@ -20,18 +20,18 @@ import React from 'react';
 import MoreIcon from '@material-ui/icons/MoreVert';
 
 import { StyledIconButton } from './menuButton.styles';
-
-const FixedStyledIconButton = ({ disableGutters, ...props }) =>
-		<StyledIconButton role={disableGutters && 'button'} {...props} />;
+//
+// const FixedStyledIconButton = ({ ...props }) =>
+// 		<StyledIconButton {...props} />;
 
 export const MenuButton = ({
 	IconProps = {}, Icon = MoreIcon, ariaLabel = 'Show menu', ariaHasPopup = true, ...props
 }: any) => (
-	<FixedStyledIconButton
+	<StyledIconButton
 		{...props}
 		aria-label={ariaLabel}
 		aria-haspopup={ariaHasPopup}
 	>
 		<Icon {...IconProps} />
-	</FixedStyledIconButton>
+	</StyledIconButton>
 );

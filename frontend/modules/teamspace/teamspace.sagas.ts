@@ -20,7 +20,6 @@ import { all, put, takeLatest } from 'redux-saga/effects';
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
 import { TeamspaceActions, TeamspaceTypes } from './';
-import { teamspace as teamspaceResponse } from './teamspace.helper';
 
 export function* fetchSettings({ teamspace }) {
 	try {
@@ -30,8 +29,6 @@ export function* fetchSettings({ teamspace }) {
 		yield put(TeamspaceActions.fetchSettingsSuccess(data));
 		yield put(TeamspaceActions.setPendingState(false));
 	} catch (e) {
-		yield put(TeamspaceActions.fetchSettingsSuccess(teamspaceResponse));
-		yield put(TeamspaceActions.setPendingState(false));
 		yield put(DialogActions.showEndpointErrorDialog('fetch', 'teamspace settings', e));
 	}
 }

@@ -27,7 +27,11 @@ export const { Types: TeamspaceTypes, Creators: TeamspaceActions } = createActio
 
 export const INITIAL_STATE = {
 	isPending: true,
-	settings: {}
+	settings: {
+		riskCategories: [],
+		topicTypes: [],
+		teamspace: '',
+	}
 };
 
 // export const setActiveSuccess = (state = INITIAL_STATE, { isActive }) => ({ ...state, isActive });

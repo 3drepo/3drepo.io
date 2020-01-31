@@ -21,10 +21,9 @@ import Button from '@material-ui/core/Button';
 import Divider from '@material-ui/core/Divider';
 import Grid from '@material-ui/core/Grid';
 import { Field, Formik } from 'formik';
-import * as Yup from 'yup';
+import { isEmpty } from 'lodash';
 
 import { ROUTES } from '../../constants/routes';
-import { schema } from '../../services/validation';
 import { Chips } from '../components/chips/chips.component';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
@@ -42,19 +41,6 @@ import {
 	SuggestionsContainer
 } from './teamspaceSettings.styles';
 
-const ModelSettingsSchema = Yup.object().shape({
-	code: Yup.string()
-		.max(50)
-		.matches(/^[A-Za-z0-9]+$/),
-	longitude: schema.measureNumberDecimal,
-	latitude: schema.measureNumberDecimal,
-	elevation: schema.measureNumberDecimal,
-	angleFromNorth: schema.measureNumberDecimal,
-	axisY: schema.measureNumberDecimal,
-	axisX: schema.measureNumberDecimal,
-	axisZ: schema.measureNumberDecimal
-});
-
 const PANEL_PROPS = {
 	paperProps: {
 		height: '100%'
@@ -62,16 +48,8 @@ const PANEL_PROPS = {
 };
 
 interface IState {
-	topicTypes?: any[];
-	latitude?: number;
-	longitude?: number;
-	axisX?: number;
-	axisY?: number;
-	axisZ?: number;
-	elevation?: number;
-	angleFromNorth?: number;
-	code?: string;
-	unit?: string;
+	topicTypes?: string[];
+	riskCategories?: string[];
 }
 
 interface IProps {
@@ -79,9 +57,8 @@ interface IProps {
 	location: any;
 	history: any;
 	fetchTeamspaceSettings: (teamspace) => void;
-	updateModelSettings: (modelData, settings) => void;
-	modelSettings: any;
-	currentTeamspace: string;
+	updateTeamspaceSettings: (teamspace, settings) => void;
+	teamspaceSettings: any;
 	isSettingsLoading: boolean;
 }
 
@@ -89,112 +66,50 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 	public state = {
 		topicTypes: [],
 		riskCategories: [],
-		latitude: 0,
-		longitude: 0,
-		axisX: 0,
-		axisY: 0,
-		axisZ: 0,
-		elevation: 0,
-		angleFromNorth: 0
 	};
 
 	public componentDidMount() {
-		// const { modelSettings: { properties }, match, fetchModelSettings } = this.props;
 		const { match, fetchTeamspaceSettings } = this.props;
 		const { teamspace } = match.params;
-		// const topicTypes = properties && properties.topicTypes ? properties.topicTypes : [];
-		//
-		// if (topicTypes.length) {
-		// 	this.setState({ topicTypes });
-		// }
 
 		fetchTeamspaceSettings(teamspace);
 	}
 
 	public componentDidUpdate(prevProps) {
-		// const changes = {} as any;
-		// const { properties, surveyPoints, elevation, angleFromNorth } = this.props.modelSettings;
-		// const prevSurveyPoints = prevProps.modelSettings.surveyPoints;
-		// const prevProperties = prevProps.modelSettings.properties;
-		// const topicTypes = properties ? properties.topicTypes : [];
-		// const prevTopicTypes = prevProperties ? prevProperties.topicTypes : [];
-		//
-		// if (topicTypes && topicTypes.length !== prevTopicTypes.length) {
-		// 	changes.topicTypes = topicTypes;
-		// }
-		//
-		// if (elevation && prevProps.modelSettings.elevation !== elevation) {
-		// 	changes.elevation = elevation;
-		// }
-		//
-		// if (angleFromNorth && prevProps.modelSettings.angleFromNorth !== angleFromNorth) {
-		// 	changes.angleFromNorth = angleFromNorth;
-		// }
-		//
-		// const pointsChanges = this.getSurveyPointsChanges(prevSurveyPoints, surveyPoints);
-		//
-		// if (!isEmpty({ ...changes, ...pointsChanges })) {
-		// 	this.setState({ ...changes, ...pointsChanges });
-		// }
+		const changes = {} as any;
+		const properties = this.props.teamspaceSettings;
+		const prevProperties = prevProps.modelSettingss;
+		const topicTypes = properties ? properties.topicTypes : [];
+		const prevTopicTypes = prevProperties ? prevProperties.topicTypes : [];
+		const riskCategories = properties ? properties.riskCategories : [];
+		const prevRiskCategories = prevProperties ? prevProperties.riskCategories : [];
+
+		if (topicTypes && topicTypes.length !== prevTopicTypes.length) {
+			changes.topicTypes = topicTypes;
+		}
+
+		if (riskCategories && riskCategories.length !== prevRiskCategories.length) {
+			changes.riskCategories = riskCategories;
+		}
+		
+		console.warn('changes:', changes);
+
+		if (!isEmpty({ ...changes })) {
+			this.setState({ ...changes });
+		}
 	}
 
-	// public getSurveyPointsChanges = (prevPoints, currentPoints) => {
-	// 	const changes = {} as any;
-	//
-	// 	if (prevPoints !== currentPoints && currentPoints.length) {
-	// 		const { axisX, axisY, axisZ, latitude, longitude } = this.state;
-	// 		const [prevLatitude, prevLongitude] = currentPoints[0].latLong.map(Number);
-	// 		const [prevAxisX, prevAxisY, prevAxisZ] = convertPositionToOpenGL(currentPoints[0].position);
-	//
-	// 		if (axisX !== prevAxisX) {
-	// 			changes.axisX = prevAxisX;
-	// 		}
-	//
-	// 		if (axisY !== prevAxisY) {
-	// 			changes.axisY = prevAxisY;
-	// 		}
-	//
-	// 		if (axisZ !== prevAxisZ) {
-	// 			changes.axisZ = prevAxisZ;
-	// 		}
-	//
-	// 		if (latitude !== prevLatitude) {
-	// 			changes.latitude = prevLatitude;
-	// 		}
-	//
-	// 		if (longitude !== prevLongitude) {
-	// 			changes.longitude = prevLongitude;
-	// 		}
-	// 	}
-	// 	return changes;
-	// }
+	private handleUpdateSettings = (data) => {
+		const { teamspace } = this.props.match.params;
+		const { topicTypes, riskCategories } = data;
+		const types = topicTypes.map((topicType) => topicType.label);
+		const categories = riskCategories.map((riskCategory) => riskCategory.label);
+		const settings = {
+			topicTypes: types,
+			riskCategories: categories,
+		};
 
-	public handleUpdateSettings = (data) => {
-		// const { match, location, updateModelSettings } = this.props;
-		// const { modelId, teamspace } = match.params;
-		// const queryParams = queryString.parse(location.search);
-		// const { project } = queryParams;
-		// const { name, unit, type, code, elevation, angleFromNorth, fourDSequenceTag,
-		// 	topicTypes, axisX, axisY, axisZ, latitude, longitude } = data;
-		// const types = topicTypes.map((topicType) => topicType.label);
-		//
-		// const settings = {
-		// 	name,
-		// 	unit,
-		// 	angleFromNorth,
-		// 	code,
-		// 	elevation,
-		// 	type,
-		// 	fourDSequenceTag,
-		// 	surveyPoints: [{
-		// 		position: convertPositionToDirectX([axisX, axisY, axisZ]),
-		// 		latLong: [latitude, longitude].map(Number)
-		// 	}],
-		// 	topicTypes: types
-		// };
-		//
-		// const modelData = { teamspace, project, modelId };
-		// updateModelSettings(modelData, settings);
+		this.props.updateTeamspaceSettings(teamspace, settings);
 	}
 
 	public handleBackLink = () => {
@@ -217,20 +132,16 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 	)
 
 	public renderForm = () => {
-		const { id, name, type, fourDSequenceTag, properties, federate } = this.props.modelSettings;
 		const { teamspace } = this.props.match.params;
-		const {
-			latitude, longitude, axisX, axisY, axisZ, angleFromNorth, elevation, topicTypes, riskCategories,
-		} = this.state;
+		const { topicTypes, riskCategories } = this.state;
 
 		return	(
 			<Container>
 				<Formik
-					initialValues={ {
-						id, name, type: federate ? 'Federation' : type, code: properties.code, unit: properties.unit, fourDSequenceTag,
-						latitude, longitude, axisX, axisY, axisZ, elevation, angleFromNorth, topicTypes, riskCategories
-					} }
-					validationSchema={ModelSettingsSchema}
+					initialValues={{
+						topicTypes,
+						riskCategories
+					}}
 					onSubmit={this.handleUpdateSettings}
 				>
 					<StyledForm>
