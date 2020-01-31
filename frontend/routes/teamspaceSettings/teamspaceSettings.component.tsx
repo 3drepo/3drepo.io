@@ -91,8 +91,6 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 		if (riskCategories && riskCategories.length !== prevRiskCategories.length) {
 			changes.riskCategories = riskCategories;
 		}
-		
-		console.warn('changes:', changes);
 
 		if (!isEmpty({ ...changes })) {
 			this.setState({ ...changes });

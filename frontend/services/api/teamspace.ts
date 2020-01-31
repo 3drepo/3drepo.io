@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -18,9 +18,8 @@
 import api from './';
 
 /**
- * Get users
+ * Get teamspace
  * @param teamspace
- * @param searchText
  */
 export const fetchTeamspace = (teamspace) => {
 	return api.get(`${teamspace}.json`);
@@ -40,4 +39,12 @@ export const getQuotaInfo = (teamspace) => {
  */
 export const fetchTeamspaceSettings = (teamspace) => {
 	return api.get(`${teamspace}/settings`);
+};
+
+/**
+ * Edit teamspace settings
+ * @param teamspace
+ */
+export const editTeamspaceSettings = (teamspace, settings) => {
+	return api.put(`${teamspace}/settings`, settings);
 };

@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, takeLatest } from 'redux-saga/effects';
+import { put, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
+import { SnackbarActions } from '../snackbar';
 import { TeamspaceActions, TeamspaceTypes } from './';
 
 export function* fetchSettings({ teamspace }) {
@@ -33,54 +34,17 @@ export function* fetchSettings({ teamspace }) {
 	}
 }
 
-// export function* activateTeamspace() {
-// 	try {
-// 		yield all([
-// 			put(TeamspaceActions.setActiveSuccess(true))
-// 		]);
-// 	} catch (error) {
-// 		DialogActions.showErrorDialog('activate', 'measure', error);
-// 	}
-// }
-//
-// export function* deactivateTeamspace() {
-// 	try {
-// 		yield all([
-// 			put(TeamspaceActions.setActiveSuccess(false))
-// 		]);
-// 	} catch (error) {
-// 		DialogActions.showErrorDialog('deactivate', 'measure', error);
-// 	}
-// }
-//
-// export function* setTeamspaceActive({ isActive }) {
-// 	try {
-// 		if (isActive) {
-// 			yield put(TeamspaceActions.activateTeamspace());
-// 		} else {
-// 			yield put(TeamspaceActions.deactivateTeamspace());
-// 		}
-// 	} catch (error) {
-// 		DialogActions.showErrorDialog('toggle', 'measure', error);
-// 	}
-// }
-//
-// export function* setDisabled({ isDisabled }) {
-// 	try {
-// 		yield put(TeamspaceActions.setDisabledSuccess(isDisabled));
-//
-// 		if (isDisabled) {
-// 			yield put(TeamspaceActions.setActiveSuccess(false));
-// 		}
-// 	} catch (error) {
-// 		DialogActions.showErrorDialog('deactivate', 'measure', error);
-// 	}
-// }
+export function* updateSettings({ teamspace, settings }) {
+	try {
+		const { data } = yield API.editTeamspaceSettings(teamspace, settings);
+		yield put(TeamspaceActions.fetchSettingsSuccess(data));
+		yield put(SnackbarActions.show('Updated teamspace settings'));
+	} catch (e) {
+		yield put(DialogActions.showEndpointErrorDialog('update', 'teamspace settings', e));
+	}
+}
 
 export default function* TeamspaceSaga() {
 	yield takeLatest(TeamspaceTypes.FETCH_SETTINGS, fetchSettings);
-	// yield takeLatest(TeamspaceTypes.ACTIVATE_MEASURE, activateTeamspace);
-	// yield takeLatest(TeamspaceTypes.DEACTIVATE_MEASURE, deactivateTeamspace);
-	// yield takeLatest(TeamspaceTypes.SET_MEASURE_ACTIVE, setTeamspaceActive);
-	// yield takeLatest(TeamspaceTypes.SET_DISABLED, setDisabled);
+	yield takeLatest(TeamspaceTypes.UPDATE_SETTINGS, updateSettings);
 }

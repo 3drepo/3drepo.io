@@ -26,7 +26,7 @@ import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { dispatch } from '../store';
 import { TeamspacesActions } from '../teamspaces';
-import { SnackbarActions } from './../snackbar';
+import { SnackbarActions } from '../snackbar';
 import { uploadFileStatuses } from './model.helpers';
 import { ModelActions, ModelTypes } from './model.redux';
 import { selectRevisions } from './model.selectors';

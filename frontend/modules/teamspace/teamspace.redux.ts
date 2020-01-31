@@ -21,8 +21,9 @@ import {ModelTypes} from '../model';
 
 export const { Types: TeamspaceTypes, Creators: TeamspaceActions } = createActions({
 	fetchSettings: ['teamspace'],
-	setPendingState: ['pendingState'],
 	fetchSettingsSuccess: ['settings'],
+	setPendingState: ['pendingState'],
+	updateSettings: ['teamspace', 'settings'],
 }, { prefix: 'TEAMPSACE/' });
 
 export const INITIAL_STATE = {
@@ -43,6 +44,18 @@ const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
 };
 
 const fetchSettingsSuccess = (state = INITIAL_STATE, { settings }) => {
+	if (settings && settings.topicTypes) {
+		settings.topicTypes = sortByField(
+				settings.topicTypes,
+				{ order: 'asc', config: { field: 'label' } }
+		);
+	}
+	if (settings && settings.riskCategories) {
+		settings.riskCategories = sortByField(
+				settings.riskCategories,
+				{ order: 'asc', config: { field: 'label' } }
+		);
+	}
 	return { ...state, settings };
 };
 
