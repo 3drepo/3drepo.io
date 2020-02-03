@@ -157,9 +157,6 @@ module.exports.createApp = function (server, serverConfig) {
 					model: data.model
 				});
 			});
-			console.log("SHOULD UPDATE THE SOCKET ID:" +  socket.client.id);
-
-		
 		});
 
 	}
