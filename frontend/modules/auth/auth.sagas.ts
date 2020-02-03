@@ -162,6 +162,11 @@ function* verify({ username, token }) {
 	yield put(AuthActions.setPendingStatus(false));
 }
 
+function* onLoggedOut() {
+	yield put(AuthActions.logout());
+	yield put(DialogActions.showErrorDialog('logged out', 'logged out', 'you\'ve been logged out'));
+}
+
 export default function* AuthSaga() {
 	yield takeLatest(AuthTypes.AUTHENTICATE, authenticate);
 	yield takeLatest(AuthTypes.LOGIN, login);
@@ -171,4 +176,5 @@ export default function* AuthSaga() {
 	yield takeLatest(AuthTypes.CHANGE_PASSWORD, changePassword);
 	yield takeLatest(AuthTypes.REGISTER, register);
 	yield takeLatest(AuthTypes.VERIFY, verify);
+	yield takeLatest(AuthTypes.ON_LOGGED_OUT, onLoggedOut);
 }

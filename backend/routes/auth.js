@@ -30,6 +30,8 @@ const addressMeta = require("../models/addressMeta");
 const Mailer = require("../mailer/mailer");
 const httpsPost = require("../libs/httpsReq").post;
 
+const chatEvent = require("../models/chatEvent");
+
 const db = require("../handler/db");
 const multer = require("multer");
 
@@ -545,7 +547,6 @@ router.put("/:account", middlewares.isAccountAdmin, updateUser);
 router.put("/:account/password", resetPassword);
 
 function createSession(place, req, res, next, user) {
-
 	req.session.regenerate(function(err) {
 		req[C.REQ_REPO].logger.logInfo("Creating session for " + " " + user.username);
 		if(err) {
@@ -553,7 +554,7 @@ function createSession(place, req, res, next, user) {
 		} else {
 			req[C.REQ_REPO].logger.logDebug("Authenticated user and signed token.");
 
-			user.sessionId = req.headers[C.HEADER_SOCKET_ID];
+			user.socketId = req.headers[C.HEADER_SOCKET_ID];
 			user.webSession = false;
 
 			if (req.headers && req.headers["user-agent"]) {
@@ -567,13 +568,20 @@ function createSession(place, req, res, next, user) {
 			}
 
 			if (user.webSession) {
-				// ChatEvent.sessionCreated(sessionId, user.username);
-				db.getCollection("admin", "sessions").then((_dbCol) => {
-					_dbCol.remove({
-						"session.user.sessionId": { $ne: user.sessionId },
-						"session.user.username": user.username,
-						"session.user.webSession": true
-					});
+				const query = {
+					"_id": { $ne: req.session.id },
+					"session.user.username": user.username,
+					"session.user.webSession": true
+				};
+
+				db.getCollection("admin", "sessions").then(_dbCol => {
+					return _dbCol.find(query, {"session.user.socketId" : true })
+						.toArray().then((entries) => {
+							entries.forEach(entry => chatEvent.loggedOut(entry.session.user.socketId));
+							return _dbCol;
+						});
+				}).then(_dbCol => {
+					_dbCol.remove(query);
 				});
 			}
 

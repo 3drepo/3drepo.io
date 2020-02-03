@@ -16,7 +16,9 @@
  */
 
 "use strict";
+
 module.exports.createApp = function (server, serverConfig) {
+	const userToSocket = {};
 
 	const config = require("../config");
 	const session = require("./session").session(config);
@@ -55,21 +57,28 @@ module.exports.createApp = function (server, serverConfig) {
 
 	initiateSocket();
 
-	const userToSocket = {};
 	const credentialErrorEventName = "credentialError";
 	const joinedEventName = "joined";
 
 	function subscribeToEventMessages() {
 		Queue.subscribeToEventMessages((msg) => {
 			// consume event queue and fire msg to clients if they have subscribed related event
-			if(msg.event && msg.channel) {
+			if(msg.event && msg.channel && !msg.dm) {
 				/*eslint-disable */
 				// it is to avoid emitter getting its own message
 				const emitter = userToSocket[msg.emitter] && userToSocket[msg.emitter].broadcast || io;
 				emitter.to(msg.channel).emit(msg.event, msg.data);
 			}
+			if (msg.dm && msg.event && msg.data) {
+				const recipient = userToSocket[msg.recipient];
+				if (recipient) {
+					recipient.send({event: msg.event, data: msg.data });
+				}
+			}
 		});
 	}
+
+	const socketIdBySession = {};
 
 	function initiateSocket() {
 		subscribeToEventMessages();
@@ -82,6 +91,25 @@ module.exports.createApp = function (server, serverConfig) {
 				systemLogger.logError(err.stack);
 			});
 
+			const sessionId = _.get(socket, "handshake.session.id")
+
+			if (sessionId) {
+				if (socketIdBySession[sessionId]) {
+					delete userToSocket[socketIdBySession[sessionId]];
+				}
+
+				userToSocket[socket.client.id] = socket;
+				socketIdBySession[sessionId] = socket.client.id;
+		// save the new socket-id
+				const db = require("../handler/db");
+				db.getCollection("admin", "sessions").then((coll) =>
+					coll.update({ _id: sessionId},  { $set: { "session.user.socketId": socket.client.id }})
+				).catch(err => {
+					systemLogger.logError("Chat server - DB update error - " + err.message);
+				});
+			}
+
+
 			if(!_.get(socket, "handshake.session.user")) {
 
 				systemLogger.logError("socket connection without credential");
@@ -91,8 +119,7 @@ module.exports.createApp = function (server, serverConfig) {
 			}
 
 			const username = socket.handshake.session.user.username;
-			const sessionId =  socket.handshake.session.id;
-			userToSocket[socket.client.id] = socket;
+
 
 			systemLogger.logInfo(`${username} - ${sessionId} - ${socket.client.id} is in chat`, { username });
 
@@ -130,7 +157,9 @@ module.exports.createApp = function (server, serverConfig) {
 					model: data.model
 				});
 			});
+			console.log("SHOULD UPDATE THE SOCKET ID:" +  socket.client.id);
 
+		
 		});
 
 	}
