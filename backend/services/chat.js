@@ -109,24 +109,19 @@ module.exports.createApp = function (server, serverConfig) {
 				});
 			}
 
-
-			if(!_.get(socket, "handshake.session.user")) {
-
-				systemLogger.logError("socket connection without credential");
-				socket.emit(credentialErrorEventName, { message: "Connection without credential"});
-
-				return;
-			}
-
-			const username = socket.handshake.session.user.username;
-
-
-			systemLogger.logInfo(`${username} - ${sessionId} - ${socket.client.id} is in chat`, { username });
+//			systemLogger.logInfo(`${username} - ${sessionId} - ${socket.client.id} is in chat`, { username });
 
 			socket.on("join", data => {
 				// check permission if the user have permission to join room
 				const auth = data.model ? middlewares.hasReadAccessToModelHelper : middlewares.isAccountAdminHelper;
 				const modelNameSpace = data.model ?  `::${data.model}` : "";
+				if(!_.get(socket, "handshake.session.user")) {
+					systemLogger.logError("socket connection without credential");
+					socket.emit(credentialErrorEventName, { message: "Connection without credential"});
+					return;
+				}
+
+				const username = socket.handshake.session.user.username;
 
 				auth(username, data.account, data.model).then(hasAccess => {
 					if(hasAccess) {

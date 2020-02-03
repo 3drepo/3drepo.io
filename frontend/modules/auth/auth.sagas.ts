@@ -16,9 +16,8 @@
  */
 
 import { push } from 'connected-react-router';
-import { fork, put, takeLatest } from 'redux-saga/effects';
+import { put, take, takeLatest } from 'redux-saga/effects';
 
-import { ROUTES } from '../../constants/routes';
 import { NewTermsDialog } from '../../routes/components/newTermsDialog/newTermsDialog.component';
 import { analyticsService } from '../../services/analytics';
 import * as API from '../../services/api';
@@ -164,7 +163,9 @@ function* verify({ username, token }) {
 
 function* onLoggedOut() {
 	yield put(AuthActions.logout());
-	yield put(DialogActions.showErrorDialog('logged out', 'logged out', 'you\'ve been logged out'));
+	yield take('RESET_APP');
+	yield take('RESET_APP');
+	yield put(DialogActions.showLoggedOutDialog());
 }
 
 export default function* AuthSaga() {
