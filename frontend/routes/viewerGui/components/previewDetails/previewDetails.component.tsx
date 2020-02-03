@@ -77,7 +77,7 @@ const ValidationSchema = Yup.object().shape({
 
 export class PreviewDetails extends React.PureComponent<IProps, any> {
 	public state = {
-		expanded: false
+		expanded: true
 	};
 
 	public headerRef = React.createRef<any>();
@@ -160,7 +160,6 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	public componentDidMount() {
 		const { editable, defaultExpanded } = this.props;
 		this.setState({
-			defaultExpanded: editable || defaultExpanded,
 			expanded: editable || defaultExpanded
 		});
 	}

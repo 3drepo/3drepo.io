@@ -25,7 +25,8 @@ export const { Types: TeamspaceTypes, Creators: TeamspaceActions } = createActio
 	setPendingState: ['pendingState'],
 	updateSettings: ['teamspace', 'settings'],
 	uploadTreatmentsFile: ['teamspace', 'file'],
-	downloadTreatmentsTemplate: ['teamspace'],
+	downloadTreatmentsTemplate: [],
+	downloadTreatments: ['teamspace'],
 }, { prefix: 'TEAMPSACE/' });
 
 export const INITIAL_STATE = {
@@ -33,7 +34,6 @@ export const INITIAL_STATE = {
 	settings: {
 		riskCategories: [],
 		topicTypes: [],
-		// treatmentsUpdatedAt:
 		teamspace: '',
 	}
 };

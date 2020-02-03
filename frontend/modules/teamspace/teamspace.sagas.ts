@@ -84,22 +84,38 @@ export function* uploadTreatmentsFile({ teamspace, file }) {
 	}
 }
 
-export function* downloadTreatmentsTemplate({ teamspace }) {
+const downloadCSVFile = (data) => {
+	const content = JSON.stringify(data, null, 2);
+	const a = document.createElement('a');
+	const file = new Blob([content]);
+	a.href = URL.createObjectURL(file);
+	a.download = `treatments.csv`;
+	document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a);
+};
+
+export function* downloadTreatmentsTemplate() {
 	try {
-		const { data } = yield API.fetchTreatmentsFile(teamspace);
+		const { data } = yield API.fetchTreatmentsTemplateFile();
 		if (data) {
-			const content = JSON.stringify(data, null, 2);
-			const a = document.createElement('a');
-			const file = new Blob([content]);
-			a.href = URL.createObjectURL(file);
-			a.download = `treatments.csv`;
-			document.body.appendChild(a);
-			a.click();
-			document.body.removeChild(a);
+			downloadCSVFile(data);
 		}
 
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'treatments template', e));
+	}
+}
+
+export function* downloadTreatments({ teamspace }) {
+	try {
+		const { data } = yield API.fetchTreatmentsFile(teamspace);
+		if (data) {
+			downloadCSVFile(data);
+		}
+
+	} catch (e) {
+		yield put(DialogActions.showEndpointErrorDialog('get', 'treatments', e));
 	}
 }
 
@@ -108,4 +124,5 @@ export default function* TeamspaceSaga() {
 	yield takeLatest(TeamspaceTypes.UPDATE_SETTINGS, updateSettings);
 	yield takeLatest(TeamspaceTypes.UPLOAD_TREATMENTS_FILE, uploadTreatmentsFile);
 	yield takeLatest(TeamspaceTypes.DOWNLOAD_TREATMENTS_TEMPLATE, downloadTreatmentsTemplate);
+	yield takeLatest(TeamspaceTypes.DOWNLOAD_TREATMENTS, downloadTreatments);
 }

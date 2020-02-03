@@ -31,6 +31,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchTeamspaceSettings: TeamspaceActions.fetchSettings,
 	updateTeamspaceSettings: TeamspaceActions.updateSettings,
 	downloadTreatmentsTemplate: TeamspaceActions.downloadTreatmentsTemplate,
+	downloadTreatments: TeamspaceActions.downloadTreatments,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(TeamspaceSettings);

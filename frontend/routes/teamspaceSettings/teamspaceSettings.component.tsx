@@ -61,7 +61,8 @@ interface IProps {
 	history: any;
 	fetchTeamspaceSettings: (teamspace) => void;
 	updateTeamspaceSettings: (teamspace, settings) => void;
-	downloadTreatmentsTemplate: (teamspace) => void;
+	downloadTreatmentsTemplate: () => void;
+	downloadTreatments: (teamspace) => void;
 	teamspaceSettings: any;
 	isSettingsLoading: boolean;
 	treatmentsUpdatedAt: any;
@@ -153,7 +154,13 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 	}
 
 	private handleDownloadTreatmentsTemplate = () => {
-		this.props.downloadTreatmentsTemplate(this.teamspace);
+		this.props.downloadTreatmentsTemplate();
+	}
+
+	private handleDownloadTreatments = () => {
+		if (this.props.treatmentsUpdatedAt) {
+			this.props.downloadTreatments(this.teamspace);
+		}
 	}
 
 	private renderLastTreatmentsUpdated = () => {
@@ -207,6 +214,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 												color="secondary"
 												variant="raised"
 												type="button"
+												onClick={this.handleDownloadTreatments}
 												disabled={!this.treatmentsUpdatedAt}
 										>
 											Download

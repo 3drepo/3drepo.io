@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import axios from 'axios';
 import api from './';
 
 /**
@@ -65,4 +66,11 @@ export const uploadTreatmentsFile = (teamspace, file) => {
  */
 export const fetchTreatmentsFile = (teamspace) => {
 	return api.get(`${teamspace}/settings/treatments.csv`);
+};
+
+/**
+ * Get treatments template file
+ */
+export const fetchTreatmentsTemplateFile = () => {
+	return axios.get(`/templates/treatments-template.csv`);
 };
