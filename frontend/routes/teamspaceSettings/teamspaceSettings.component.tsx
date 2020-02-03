@@ -35,8 +35,8 @@ import {
 	ButtonRowContainer,
 	Container,
 	Headline,
+	InfoColumnWrapper,
 	LoaderContainer,
-	StyledButton,
 	StyledForm,
 	StyledGrid,
 	StyledIcon,
@@ -111,9 +111,9 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	private handleUpdateSettings = (data) => {
+	private handleUpdateSettings = (values) => {
 		const { teamspace } = this.props.match.params;
-		const { topicTypes, riskCategories, file } = data;
+		const { topicTypes, riskCategories, file } = values;
 		const types = topicTypes.map((topicType) => topicType.label);
 		const categories = riskCategories.map((riskCategory) => riskCategory.label);
 		const settings = {
@@ -153,13 +153,12 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 	}
 
 	private handleDownloadTreatmentsTemplate = () => {
-		console.warn('this.teamspace:', this.teamspace);
 		this.props.downloadTreatmentsTemplate(this.teamspace);
 	}
 
 	private renderLastTreatmentsUpdated = () => {
 		if (this.props.treatmentsUpdatedAt) {
-			return `Last updated: ${simpleDate(this.props.treatmentsUpdatedAt)}`
+			return `Last updated: ${simpleDate(this.props.treatmentsUpdatedAt)}`;
 		}
 		return 'No suggestions uploaded';
 	}
@@ -199,10 +198,10 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 						<SuggestionsContainer container direction="column" wrap="nowrap">
 							<Headline color="textPrimary" variant="subheading">Treatment Suggestions</Headline>
 							<Grid container direction="column" wrap="nowrap">
-								<ButtonRowContainer container direction="row" justify="space-between" alignItems="center" wrap="nowrap">
-									<Grid container>
+								<Grid container direction="row" justify="space-between" alignItems="center" wrap="nowrap">
+									<InfoColumnWrapper container>
 										<Headline color="textPrimary" variant="body2">{this.renderLastTreatmentsUpdated()}</Headline>
-									</Grid>
+									</InfoColumnWrapper>
 									<Grid container alignItems="center" direction="column" wrap="nowrap">
 										<Button
 												color="secondary"
@@ -214,20 +213,21 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 										</Button>
 										<Button
 												variant="text"
+												size="small"
 												type="button"
 												onClick={this.handleDownloadTreatmentsTemplate}
 										>
 											Get Template
 										</Button>
 									</Grid>
-								</ButtonRowContainer>
+								</Grid>
 								<ButtonRowContainer container direction="row" justify="space-between" alignItems="center" wrap="nowrap">
-									<Grid container>
+									<InfoColumnWrapper container>
 										<Headline color="textPrimary" variant="body2">
 											{this.state.fileName ? this.state.fileName : 'No file selected'}
 										</Headline>
-									</Grid>
-									<Grid container justify="center" wrap="nowrap">
+									</InfoColumnWrapper>
+									<Grid container alignItems="center" direction="column" wrap="nowrap">
 										<Field name="file" render={({ field }) =>
 											<FileInputField
 												{...field}
@@ -244,7 +244,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 								<Button
 									type="submit"
 									color="secondary"
-									// disabled={!form.isValid || form.isValidating}
+									disabled={!form.dirty}
 								>
 									Save
 								</Button>}

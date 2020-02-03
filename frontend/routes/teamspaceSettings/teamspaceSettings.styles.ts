@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import styled from 'styled-components';
+
 import Button from '@material-ui/core/Button';
-import FormControl from '@material-ui/core/FormControl';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import { Form } from 'formik';
-import styled, { css } from 'styled-components';
 import { COLOR } from '../../styles';
 
 export const StyledTextField = styled(TextField)``;
@@ -79,10 +79,6 @@ export const StyledButton = styled(Button)`
 
 export const Headline = styled(Typography)``;
 
-export const TypesGrid = styled(Grid)`
-	margin-bottom: 30px;
-`;
-
 export const StyledIcon = styled(ArrowBack)`
 	color: ${COLOR.WHITE};
 `;
@@ -123,4 +119,10 @@ export const ButtonContainer = styled(Grid)`
 	background: ${COLOR.LIGHT_GRAY};
 	height: 80px;
 	justify-content: center;
+`;
+
+export const InfoColumnWrapper = styled(Grid)`
+	&& {
+		min-width: 185px;
+	}
 `;

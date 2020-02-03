@@ -58,5 +58,5 @@ export const GhostElement = styled.pre`
 	visibility: hidden;
 	margin: 0;
 	padding-right: 56px;
-	white-space: pre-wrap;;
+	white-space: pre-wrap;
 `;

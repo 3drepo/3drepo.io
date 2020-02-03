@@ -41,7 +41,6 @@ export function* updateSettings({ teamspace, settings: { file, ...settings} }) {
 		const { data } = yield API.editTeamspaceSettings(teamspace, settings);
 		yield put(TeamspaceActions.fetchSettingsSuccess(data));
 		yield put(SnackbarActions.show('Updated teamspace settings'));
-		console.warn('file:', file);
 
 		if (file) {
 			yield put(TeamspaceActions.uploadTreatmentsFile(teamspace, file));
@@ -64,7 +63,6 @@ export function* uploadTreatmentsFile({ teamspace, file }) {
 			formData.append('file', file);
 
 			const { data: { status }, data } = yield API.uploadTreatmentsFile(teamspace, file);
-			console.warn('status:', status);
 
 			if (status === uploadFileStatuses.ok) {
 				if (data.hasOwnProperty('errorReason') && data.errorReason.message) {
@@ -89,7 +87,6 @@ export function* uploadTreatmentsFile({ teamspace, file }) {
 export function* downloadTreatmentsTemplate({ teamspace }) {
 	try {
 		const { data } = yield API.fetchTreatmentsFile(teamspace);
-console.warn('data:', data);
 		if (data) {
 			const content = JSON.stringify(data, null, 2);
 			const a = document.createElement('a');
@@ -102,7 +99,7 @@ console.warn('data:', data);
 		}
 
 	} catch (e) {
-		// yield put(DialogActions.showEndpointErrorDialog('update', 'teamspace settings', e));
+		yield put(DialogActions.showEndpointErrorDialog('get', 'treatments template', e));
 	}
 }
 
