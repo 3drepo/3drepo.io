@@ -18,17 +18,19 @@
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { selectIsPending, selectSettings, TeamspaceActions } from '../../modules/teamspace';
+import { selectIsPending, selectSettings, selectTreatmentsUpdatedAt, TeamspaceActions } from '../../modules/teamspace';
 import { TeamspaceSettings } from './teamspaceSettings.component';
 
 const mapStateToProps = createStructuredSelector({
 	teamspaceSettings: selectSettings,
-	isSettingsLoading: selectIsPending
+	isSettingsLoading: selectIsPending,
+	treatmentsUpdatedAt: selectTreatmentsUpdatedAt
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchTeamspaceSettings: TeamspaceActions.fetchSettings,
-	updateTeamspaceSettings: TeamspaceActions.updateSettings
+	updateTeamspaceSettings: TeamspaceActions.updateSettings,
+	downloadTreatmentsTemplate: TeamspaceActions.downloadTreatmentsTemplate,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(TeamspaceSettings);

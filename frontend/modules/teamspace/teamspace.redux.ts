@@ -16,14 +16,16 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import {sortByField} from '../../helpers/sorting';
-import {ModelTypes} from '../model';
+
+import { sortByField } from '../../helpers/sorting';
 
 export const { Types: TeamspaceTypes, Creators: TeamspaceActions } = createActions({
 	fetchSettings: ['teamspace'],
 	fetchSettingsSuccess: ['settings'],
 	setPendingState: ['pendingState'],
 	updateSettings: ['teamspace', 'settings'],
+	uploadTreatmentsFile: ['teamspace', 'file'],
+	downloadTreatmentsTemplate: ['teamspace'],
 }, { prefix: 'TEAMPSACE/' });
 
 export const INITIAL_STATE = {
@@ -31,17 +33,13 @@ export const INITIAL_STATE = {
 	settings: {
 		riskCategories: [],
 		topicTypes: [],
+		// treatmentsUpdatedAt:
 		teamspace: '',
 	}
 };
 
-// export const setActiveSuccess = (state = INITIAL_STATE, { isActive }) => ({ ...state, isActive });
-
-// export const setDisabledSuccess = (state = INITIAL_STATE, { isDisabled }) => ({ ...state, isDisabled });
-
-const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
-	return { ...state, isPending: pendingState };
-};
+const setPendingState = (state = INITIAL_STATE, { pendingState }) =>
+		({ ...state, isPending: pendingState });
 
 const fetchSettingsSuccess = (state = INITIAL_STATE, { settings }) => {
 	if (settings && settings.topicTypes) {
@@ -62,6 +60,4 @@ const fetchSettingsSuccess = (state = INITIAL_STATE, { settings }) => {
 export const reducer = createReducer(INITIAL_STATE, {
 	[TeamspaceTypes.SET_PENDING_STATE]: setPendingState,
 	[TeamspaceTypes.FETCH_SETTINGS_SUCCESS]: fetchSettingsSuccess,
-	// [TeamspaceTypes.SET_ACTIVE_SUCCESS]: setActiveSuccess,
-	// [TeamspaceTypes.SET_DISABLED_SUCCESS]: setDisabledSuccess
 });

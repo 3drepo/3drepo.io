@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2020 3D Repo Ltd
+ *  Copyright (C) 2017 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,18 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+import styled from 'styled-components';
 
-export const selectTeamspaceDomain = (state) => ({...state.teamspace});
+export const HiddenFileInput = styled.input`
+	visibility: hidden;
+	width: 0;
+`;
 
-export const selectIsPending = createSelector(
-	selectTeamspaceDomain, (state) => state.isPending
-);
-
-export const selectSettings = createSelector(
-	selectTeamspaceDomain, (state) => state.settings
-);
-
-export const selectTreatmentsUpdatedAt = createSelector(
-		selectSettings, (state) => state.treatmentsUpdatedAt || null,
-);
+export const FileLabel = styled.label`
+	&& {
+		margin: 0 4px 0 0;
+	}
+`;

@@ -24,9 +24,11 @@ import { Field, Formik } from 'formik';
 import { isEmpty } from 'lodash';
 
 import { ROUTES } from '../../constants/routes';
+import { simpleDate } from '../../services/formatting/formatDate';
 import { Chips } from '../components/chips/chips.component';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
+import { FileInputField } from './components/fileInputField/fileInputField.component';
 import {
 	BackButton,
 	ButtonContainer,
@@ -50,6 +52,7 @@ const PANEL_PROPS = {
 interface IState {
 	topicTypes?: string[];
 	riskCategories?: string[];
+	fileName: string;
 }
 
 interface IProps {
@@ -58,15 +61,26 @@ interface IProps {
 	history: any;
 	fetchTeamspaceSettings: (teamspace) => void;
 	updateTeamspaceSettings: (teamspace, settings) => void;
+	downloadTreatmentsTemplate: (teamspace) => void;
 	teamspaceSettings: any;
 	isSettingsLoading: boolean;
+	treatmentsUpdatedAt: any;
 }
 
 export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 	public state = {
 		topicTypes: [],
 		riskCategories: [],
+		fileName: '',
 	};
+
+	get teamspace() {
+		return this.props.match.params.teamspace;
+	}
+
+	get treatmentsUpdatedAt() {
+		return this.props.treatmentsUpdatedAt || false;
+	}
 
 	public componentDidMount() {
 		const { match, fetchTeamspaceSettings } = this.props;
@@ -99,12 +113,13 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 
 	private handleUpdateSettings = (data) => {
 		const { teamspace } = this.props.match.params;
-		const { topicTypes, riskCategories } = data;
+		const { topicTypes, riskCategories, file } = data;
 		const types = topicTypes.map((topicType) => topicType.label);
 		const categories = riskCategories.map((riskCategory) => riskCategory.label);
 		const settings = {
 			topicTypes: types,
 			riskCategories: categories,
+			file,
 		};
 
 		this.props.updateTeamspaceSettings(teamspace, settings);
@@ -129,8 +144,27 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 		</LoaderContainer>
 	)
 
+	public handleFileChange = (onChange) => (event, ...params) => {
+		this.setState({
+			fileName: event.target.value.name
+		});
+
+		onChange(event, ...params);
+	}
+
+	private handleDownloadTreatmentsTemplate = () => {
+		console.warn('this.teamspace:', this.teamspace);
+		this.props.downloadTreatmentsTemplate(this.teamspace);
+	}
+
+	private renderLastTreatmentsUpdated = () => {
+		if (this.props.treatmentsUpdatedAt) {
+			return `Last updated: ${simpleDate(this.props.treatmentsUpdatedAt)}`
+		}
+		return 'No suggestions uploaded';
+	}
+
 	public renderForm = () => {
-		const { teamspace } = this.props.match.params;
 		const { topicTypes, riskCategories } = this.state;
 
 		return	(
@@ -145,7 +179,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 					<StyledForm>
 						<StyledGrid>
 							<Headline color="primary" variant="subheading">Teamspace</Headline>
-							<Headline color="textPrimary" variant="subheading">{teamspace}</Headline>
+							<Headline color="textPrimary" variant="subheading">{this.teamspace}</Headline>
 						</StyledGrid>
 						<Divider />
 
@@ -166,26 +200,41 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 							<Headline color="textPrimary" variant="subheading">Treatment Suggestions</Headline>
 							<Grid container direction="column" wrap="nowrap">
 								<ButtonRowContainer container direction="row" justify="space-between" alignItems="center" wrap="nowrap">
-									<Headline color="textPrimary" variant="body2">No suggestions uploaded</Headline>
-									<StyledButton
-											color="secondary"
-											variant="raised"
-											type="button"
-											disabled
-									>
-										Download
-									</StyledButton>
+									<Grid container>
+										<Headline color="textPrimary" variant="body2">{this.renderLastTreatmentsUpdated()}</Headline>
+									</Grid>
+									<Grid container alignItems="center" direction="column" wrap="nowrap">
+										<Button
+												color="secondary"
+												variant="raised"
+												type="button"
+												disabled={!this.treatmentsUpdatedAt}
+										>
+											Download
+										</Button>
+										<Button
+												variant="text"
+												type="button"
+												onClick={this.handleDownloadTreatmentsTemplate}
+										>
+											Get Template
+										</Button>
+									</Grid>
 								</ButtonRowContainer>
 								<ButtonRowContainer container direction="row" justify="space-between" alignItems="center" wrap="nowrap">
-									<Headline color="textPrimary" variant="body2">No file selected</Headline>
-									<StyledButton
-											color="secondary"
-											variant="raised"
-											type="button"
-											disabled
-									>
-										Browse
-									</StyledButton>
+									<Grid container>
+										<Headline color="textPrimary" variant="body2">
+											{this.state.fileName ? this.state.fileName : 'No file selected'}
+										</Headline>
+									</Grid>
+									<Grid container justify="center" wrap="nowrap">
+										<Field name="file" render={({ field }) =>
+											<FileInputField
+												{...field}
+												onChange={this.handleFileChange(field.onChange)}
+											/>}
+										/>
+									</Grid>
 								</ButtonRowContainer>
 							</Grid>
 						</SuggestionsContainer>
@@ -194,9 +243,8 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 							<Field render={ ({ form }) =>
 								<Button
 									type="submit"
-									variant="raised"
 									color="secondary"
-									disabled={!form.isValid || form.isValidating}
+									// disabled={!form.isValid || form.isValidating}
 								>
 									Save
 								</Button>}

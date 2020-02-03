@@ -44,7 +44,25 @@ export const fetchTeamspaceSettings = (teamspace) => {
 /**
  * Edit teamspace settings
  * @param teamspace
+ * @param settings
  */
 export const editTeamspaceSettings = (teamspace, settings) => {
 	return api.put(`${teamspace}/settings`, settings);
+};
+
+/**
+ * Edit treatments file
+ * @param teamspace
+ * @param file
+ */
+export const uploadTreatmentsFile = (teamspace, file) => {
+	return api.put(`${teamspace}/settings/treatments.csv`, file);
+};
+
+/**
+ * Get treatments file
+ * @param teamspace
+ */
+export const fetchTreatmentsFile = (teamspace) => {
+	return api.get(`${teamspace}/settings/treatments.csv`);
 };
