@@ -31,7 +31,6 @@ import { CellSelect } from '../../../../../components/customTable/components/cel
 import { Image } from '../../../../../components/image';
 import { TextField } from '../../../../../components/textField/textField.component';
 import { LevelOfRisk } from '../levelOfRisk/levelOfRisk.component';
-import {Header} from '../levelOfRisk/levelOfRisk.styles';
 import {
 	Container,
 	Content,
