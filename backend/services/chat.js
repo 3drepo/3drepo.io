@@ -116,7 +116,7 @@ module.exports.createApp = function (server, serverConfig) {
 				const auth = data.model ? middlewares.hasReadAccessToModelHelper : middlewares.isAccountAdminHelper;
 				const modelNameSpace = data.model ?  `::${data.model}` : "";
 
-				let sessionUsername = _.get(socket, "handshake.session.user.username");
+				const sessionUsername = _.get(socket, "handshake.session.user.username");
 				let usernamePromise = Promise.resolve(sessionUsername);
 
 				if (!sessionUsername) {
