@@ -115,30 +115,42 @@ module.exports.createApp = function (server, serverConfig) {
 				// check permission if the user have permission to join room
 				const auth = data.model ? middlewares.hasReadAccessToModelHelper : middlewares.isAccountAdminHelper;
 				const modelNameSpace = data.model ?  `::${data.model}` : "";
-				if(!_.get(socket, "handshake.session.user")) {
-					systemLogger.logError("socket connection without credential");
-					socket.emit(credentialErrorEventName, { message: "Connection without credential"});
-					return;
+
+				let sessionUsername = _.get(socket, "handshake.session.user.username");
+				let usernamePromise = Promise.resolve(sessionUsername);
+
+				if (!sessionUsername) {
+					const db = require("../handler/db");
+					usernamePromise = db.getCollection("admin", "sessions").then((coll) =>
+						coll.findOne({ "session.user.socketId": socket.client.id})
+					).then( entry =>  _.get(entry, "session.user.username"));
 				}
 
-				const username = socket.handshake.session.user.username;
 
-				auth(username, data.account, data.model).then(hasAccess => {
-					if(hasAccess) {
-						socket.join(`${data.account}${modelNameSpace}`);
-						socket.emit(joinedEventName, { account: data.account, model: data.model});
-					} else {
-						socket.emit(credentialErrorEventName, { message: `You have no access to join room ${data.account}${modelNameSpace}`});
-						systemLogger.logError(`${username} - ${sessionId} - ${socket.client.id} has no access to join room ${data.account}${modelNameSpace}`, {
-							username,
-							account: data.account,
-							model: data.model
-						});
+				usernamePromise.then((username) => {
+					if(!username) {
+						systemLogger.logError("socket connection without credential");
+						socket.emit(credentialErrorEventName, { message: "Connection without credential"});
+						return;
 					}
-				}).catch( err => {
-					socket.emit(credentialErrorEventName, { message: `You have no access to join room ${data.account}${modelNameSpace}`});
-				});
 
+
+					auth(username, data.account, data.model).then(hasAccess => {
+						if(hasAccess) {
+							socket.join(`${data.account}${modelNameSpace}`);
+							socket.emit(joinedEventName, { account: data.account, model: data.model});
+						} else {
+							socket.emit(credentialErrorEventName, { message: `You have no access to join room ${data.account}${modelNameSpace}`});
+							systemLogger.logError(`${username} - ${sessionId} - ${socket.client.id} has no access to join room ${data.account}${modelNameSpace}`, {
+								username,
+								account: data.account,
+								model: data.model
+							});
+						}
+					}).catch( err => {
+						socket.emit(credentialErrorEventName, { message: `You have no access to join room ${data.account}${modelNameSpace}`});
+					});
+				});
 			});
 
 			socket.on("leave", data => {
