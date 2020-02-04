@@ -571,7 +571,7 @@ export function* removeResource({ resource }) {
 }
 
 export function* attachFileResources({ files }) {
-	const names =  files.map((file) => file.name);
+	const names = files.map((file) => file.name);
 	files = files.map((file) => file.file);
 
 	const timeStamp = Date.now();
@@ -584,8 +584,8 @@ export function* attachFileResources({ files }) {
 			progress: 0,
 			size: 0,
 			originalSize: f.size
-		})
-		);
+		}
+	));
 
 	const resourceIds = tempResources.map((resource) => resource._id);
 	const teamspace = yield select(selectCurrentModelTeamspace);

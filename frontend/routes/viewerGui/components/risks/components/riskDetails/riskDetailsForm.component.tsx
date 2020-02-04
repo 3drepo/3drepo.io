@@ -269,14 +269,14 @@ export const RiskDetailsForm = withFormik({
 			desc: risk.desc || '',
 			assigned_roles: get(risk, 'assigned_roles[0]', ''),
 			category: risk.category || '',
-			likelihood: risk.likelihood || '',
-			consequence: risk.consequence || '',
-			level_of_risk: risk.level_of_risk || -1,
-			residual_likelihood: risk.residual_likelihood || '',
-			residual_consequence: risk.residual_consequence || '',
-			residual_level_of_risk: risk.residual_level_of_risk || -1,
-			overall_level_of_risk: risk.overall_level_of_risk || -1,
-			residual_risk: risk.residual_risk || ''
+			likelihood: risk.likelihood,
+			consequence: risk.consequence,
+			level_of_risk: risk.level_of_risk,
+			residual_likelihood: risk.residual_likelihood,
+			residual_consequence: risk.residual_consequence,
+			residual_level_of_risk: risk.residual_level_of_risk,
+			overall_level_of_risk: risk.overall_level_of_risk,
+			residual_risk: risk.residual_risk
 		});
 	},
 	handleSubmit: (values, { props }) => {
