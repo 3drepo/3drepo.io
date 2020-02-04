@@ -45,6 +45,7 @@ export const Container = styled.div`
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
+	flex: ${(props: any) => props.fill ? 1 : 'auto'};
 
 	${TextFieldStyles.StyledTextField} {
 		margin: 1px 0;

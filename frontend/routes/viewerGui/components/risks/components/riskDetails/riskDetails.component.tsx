@@ -355,7 +355,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		const { failedToLoad, risk, horizontal } = this.props;
 
 		return (
-			<Container>
+			<Container fill={this.isNewRisk}>
 				<ViewerPanelContent
 					onScroll={this.handlePanelScroll}
 					ref={this.panelRef}
