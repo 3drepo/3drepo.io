@@ -39,7 +39,6 @@ export const FilterPanel = styled(FilterPanelComponent)`
 export const FilterContainer = styled.div`
 	display: flex;
 	flex-direction: row;
-	flex: 1;
 	position: relative;
 `;
 

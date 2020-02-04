@@ -22,15 +22,8 @@ import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import styled from 'styled-components';
 
 import * as CellSelect from '../components/customTable/components/cellSelect/cellSelect.styles';
-import * as UserManagementTab from '../components/userManagementTab/userManagementTab.styles';
 
 const OPTIONS_HEIGHT = '100px';
-
-export const Container = styled.div`
-	width: 100%;
-	height: 100%;
-	display: block;
-`;
 
 export const Options = styled(Grid)`
 	width: 100%;

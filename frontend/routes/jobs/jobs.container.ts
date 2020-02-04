@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -26,8 +26,7 @@ import {
 	selectJobsColors,
 	JobsActions
 } from '../../modules/jobs';
-import { UserManagementActions } from '../../modules/userManagement';
-import { selectCurrentTeamspace } from '../../modules/userManagement/userManagement.selectors';
+import { selectCurrentTeamspace } from '../../modules/userManagement';
 
 const mapStateToProps = createStructuredSelector({
 	currentTeamspace: selectCurrentTeamspace,
@@ -39,7 +38,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	updateColor: JobsActions.updateJobColor,
 	remove: JobsActions.removeJob,
 	create: JobsActions.createJob,
-	fetchJobsAndColors: UserManagementActions.fetchJobsAndColors
+	fetchJobsAndColors: JobsActions.fetchJobsAndColors
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Jobs);
