@@ -20,19 +20,21 @@ import React from 'react';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
+import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
+import EditIcon from '@material-ui/icons/Edit';
 import { Field, Formik } from 'formik';
 import { isEmpty } from 'lodash';
 
 import { ROUTES } from '../../constants/routes';
-import { simpleDate } from '../../services/formatting/formatDate';
+import { LONG_DATE_TIME_FORMAT } from '../../services/formatting/formatDate';
 import { Chips } from '../components/chips/chips.component';
+import { DateTime } from '../components/dateTime/dateTime.component';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
 import { FileInputField } from './components/fileInputField/fileInputField.component';
 import {
 	BackButton,
 	ButtonContainer,
-	ButtonRowContainer,
 	Container,
 	Headline,
 	InfoColumnWrapper,
@@ -40,6 +42,7 @@ import {
 	StyledForm,
 	StyledGrid,
 	StyledIcon,
+	StyledIconButton,
 	SuggestionsContainer
 } from './teamspaceSettings.styles';
 
@@ -158,16 +161,55 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 	}
 
 	private handleDownloadTreatments = () => {
-		if (this.props.treatmentsUpdatedAt) {
-			this.props.downloadTreatments(this.teamspace);
-		}
+		this.props.downloadTreatments(this.teamspace);
 	}
 
 	private renderLastTreatmentsUpdated = () => {
-		if (this.props.treatmentsUpdatedAt) {
-			return `Last updated: ${simpleDate(this.props.treatmentsUpdatedAt)}`;
+		if (this.state.fileName) {
+			return this.state.fileName;
+		}
+
+		if (this.treatmentsUpdatedAt) {
+			return (
+				<>
+					Last updated:&nbsp;
+					<DateTime value={this.treatmentsUpdatedAt} format={LONG_DATE_TIME_FORMAT} />
+				</>
+			);
 		}
 		return 'No suggestions uploaded';
+	}
+
+	private renderTreatmentSuggestionsSection = () => {
+		return (
+			<SuggestionsContainer container direction="column" wrap="nowrap">
+				<Headline color="textPrimary" variant="subheading">Risk Treatment Suggestions</Headline>
+				<Grid container direction="row" justify="space-between" alignItems="center" wrap="nowrap">
+					<InfoColumnWrapper container>
+						<Headline color="textPrimary" variant="body1">{this.renderLastTreatmentsUpdated()}</Headline>
+					</InfoColumnWrapper>
+					<Grid container alignItems="center" wrap="nowrap">
+						<Field name="file" render={({ field }) =>
+							<FileInputField
+								{...field}
+								renderButton={() => (
+									<StyledIconButton component="span" aria-label="Upload treatments">
+										<EditIcon />
+									</StyledIconButton>
+								)}
+								onChange={this.handleFileChange(field.onChange)}
+							/>}
+						/>
+						<StyledIconButton
+							aria-label="Download treatments"
+							onClick={this.handleDownloadTreatments}
+						>
+							<CloudDownloadIcon />
+						</StyledIconButton>
+					</Grid>
+				</Grid>
+			</SuggestionsContainer>
+		);
 	}
 
 	public renderForm = () => {
@@ -203,50 +245,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 							<Field name="riskCategories" render={({ field }) => <Chips {...field} inputPlaceholder={'Enter Category'} />} />
 						</StyledGrid>
 
-						<SuggestionsContainer container direction="column" wrap="nowrap">
-							<Headline color="textPrimary" variant="subheading">Risk Treatment Suggestions</Headline>
-							<Grid container direction="column" wrap="nowrap">
-								<Grid container direction="row" justify="space-between" alignItems="center" wrap="nowrap">
-									<InfoColumnWrapper container>
-										<Headline color="textPrimary" variant="body2">{this.renderLastTreatmentsUpdated()}</Headline>
-									</InfoColumnWrapper>
-									<Grid container alignItems="center" direction="column" wrap="nowrap">
-										<Button
-												color="secondary"
-												variant="raised"
-												type="button"
-												onClick={this.handleDownloadTreatments}
-												disabled={!this.treatmentsUpdatedAt}
-										>
-											Download
-										</Button>
-										<Button
-												variant="text"
-												size="small"
-												type="button"
-												onClick={this.handleDownloadTreatmentsTemplate}
-										>
-											Get Template
-										</Button>
-									</Grid>
-								</Grid>
-								<ButtonRowContainer container direction="row" justify="space-between" alignItems="center" wrap="nowrap">
-									<InfoColumnWrapper container>
-										<Headline color="textPrimary" variant="body2">
-											{this.state.fileName ? this.state.fileName : 'No file selected'}
-										</Headline>
-									</InfoColumnWrapper>
-									<Grid container alignItems="center" direction="column" wrap="nowrap">
-										<Field name="file" render={({ field }) =>
-											<FileInputField
-												{...field}
-												onChange={this.handleFileChange(field.onChange)}
-											/>}
-										/>
-									</Grid>
-								</ButtonRowContainer>
-							</Grid>
-						</SuggestionsContainer>
+						{this.renderTreatmentSuggestionsSection()}
 
 						<ButtonContainer container direction="column" alignItems="flex-end">
 							<Field render={ ({ form }) =>

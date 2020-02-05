@@ -25,6 +25,7 @@ interface IProps {
 	value: any[];
 	onChange: (event) => void;
 	onBlur: (event) => void;
+	renderButton?: () => React.ReactNode;
 }
 
 interface IState {
@@ -53,6 +54,22 @@ export class FileInputField extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	private renderButton = () => {
+		if (this.props.renderButton) {
+			return this.props.renderButton();
+		}
+
+		return (
+			<Button
+				component="span"
+				variant="raised"
+				color="secondary"
+			>
+				Browser
+			</Button>
+		);
+	}
+
 	public render() {
 		return (
 			<>
@@ -63,13 +80,7 @@ export class FileInputField extends React.PureComponent<IProps, IState> {
 					onChange={this.handleChange}
 				/>
 				<FileLabel htmlFor="flat-button-file">
-					<Button
-						component="span"
-						variant="raised"
-						color="secondary"
-					>
-						Browser
-					</Button>
+					{this.renderButton()}
 				</FileLabel>
 			</>
 		);

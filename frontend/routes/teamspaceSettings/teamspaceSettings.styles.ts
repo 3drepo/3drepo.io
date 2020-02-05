@@ -19,6 +19,7 @@ import styled from 'styled-components';
 
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
+import IconButton from '@material-ui/core/IconButton';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import ArrowBack from '@material-ui/icons/ArrowBack';
@@ -55,11 +56,6 @@ export const SuggestionsContainer = styled(Grid)`
 	&& {
 		padding: 0 24px 24px;
 		max-width: 500px;
-	}
-`;
-export const ButtonRowContainer = styled(Grid)`
-	&& {
-		padding: 10px 0;
 	}
 `;
 
@@ -123,6 +119,12 @@ export const ButtonContainer = styled(Grid)`
 
 export const InfoColumnWrapper = styled(Grid)`
 	&& {
-		min-width: 185px;
+		min-width: 215px;
+	}
+`;
+
+export const StyledIconButton = styled(IconButton)`
+	&& {
+		padding: 6px;
 	}
 `;
