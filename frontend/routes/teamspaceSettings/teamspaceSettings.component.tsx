@@ -18,8 +18,8 @@
 import React from 'react';
 
 import Button from '@material-ui/core/Button';
-import Divider from '@material-ui/core/Divider';
 import Grid from '@material-ui/core/Grid';
+import TextField from '@material-ui/core/TextField';
 import { Field, Formik } from 'formik';
 import { isEmpty } from 'lodash';
 
@@ -184,26 +184,27 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 				>
 					<StyledForm>
 						<StyledGrid>
-							<Headline color="primary" variant="subheading">Teamspace</Headline>
-							<Headline color="textPrimary" variant="subheading">{this.teamspace}</Headline>
+							<Headline color="textPrimary" variant="subheading">Teamspace</Headline>
+							<TextField
+									value={this.teamspace}
+									margin="dense"
+									fullWidth
+									disabled
+							/>
 						</StyledGrid>
-						<Divider />
 
 						<StyledGrid>
-							<Headline color="primary" variant="title">Issues</Headline>
-							<Headline color="textPrimary" variant="subheading">Topic Types</Headline>
+							<Headline color="textPrimary" variant="subheading">Issues Types</Headline>
 							<Field name="topicTypes" render={({ field }) => <Chips {...field} inputPlaceholder={'Enter Topic Type'} />} />
 						</StyledGrid>
-						<Divider />
 
 						<StyledGrid>
-							<Headline color="primary" variant="title">Risks</Headline>
-							<Headline color="textPrimary" variant="subheading">Categories</Headline>
+							<Headline color="textPrimary" variant="subheading">Risk Categories</Headline>
 							<Field name="riskCategories" render={({ field }) => <Chips {...field} inputPlaceholder={'Enter Category'} />} />
 						</StyledGrid>
 
 						<SuggestionsContainer container direction="column" wrap="nowrap">
-							<Headline color="textPrimary" variant="subheading">Treatment Suggestions</Headline>
+							<Headline color="textPrimary" variant="subheading">Risk Treatment Suggestions</Headline>
 							<Grid container direction="column" wrap="nowrap">
 								<Grid container direction="row" justify="space-between" alignItems="center" wrap="nowrap">
 									<InfoColumnWrapper container>
@@ -251,6 +252,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 							<Field render={ ({ form }) =>
 								<Button
 									type="submit"
+									variant="raised"
 									color="secondary"
 									disabled={!form.dirty}
 								>
