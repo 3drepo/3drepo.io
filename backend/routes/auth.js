@@ -34,6 +34,7 @@ const chatEvent = require("../models/chatEvent");
 
 const db = require("../handler/db");
 const multer = require("multer");
+const { omit } = require("lodash");
 
 /**
  * @api {post} /login Login
@@ -585,7 +586,7 @@ function createSession(place, req, res, next, user) {
 				});
 			}
 
-			responseCodes.respond(place, req, res, next, responseCodes.OK, user);
+			responseCodes.respond(place, req, res, next, responseCodes.OK, omit(user, "socketId", "webSession"));
 		}
 	});
 }
@@ -608,8 +609,6 @@ function login(req, res, next) {
 
 			req[C.REQ_REPO].logger.logInfo("User is logged in", responseData);
 
-			// TODO Is this necessary?
-			responseData.roles = user.roles;
 			responseData.flags = {};
 
 			responseData.flags.termsPrompt = !user.hasReadLatestTerms();
