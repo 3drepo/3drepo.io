@@ -22,7 +22,9 @@
 "use strict";
 
 const expressSession = require("express-session");
-const store = require("../handler/db").getSessionStore(expressSession);
+const { getCollection, getSessionStore } = require("../handler/db");
+const C = require("../constants");
+const store = getSessionStore(expressSession);
 
 module.exports.session = function(config) {
 	return expressSession({
@@ -40,3 +42,41 @@ module.exports.session = function(config) {
 	});
 };
 
+module.exports.regenerateAuthSession = (req, config, user) => {
+	return new Promise((resolve, reject) => {
+		req.session.regenerate(function(err) {
+			req[C.REQ_REPO].logger.logInfo("Creating session for " + " " + user.username);
+			if(err) {
+				reject(err);
+			} else {
+				req[C.REQ_REPO].logger.logDebug("Authenticated user and signed token.");
+				user = {...user, socketId: req.headers[C.HEADER_SOCKET_ID], webSession: false};
+
+				if (req.headers && req.headers["user-agent"]) {
+					user.webSession = !!req.headers["user-agent"];
+				}
+
+				req.session[C.REPO_SESSION_USER] = user;
+				req.session.cookie.domain = config.cookie_domain;
+				if (config.cookie.maxAge) {
+					req.session.cookie.maxAge = config.cookie.maxAge;
+				}
+
+				resolve(req.session);
+			}
+		});
+	});
+};
+
+module.exports.getSessionsByUsername = (username) => {
+	const query = {
+		"session.user.username": username
+	};
+
+	return getCollection("admin", "sessions").then(_dbCol => _dbCol.find(query).toArray());
+};
+
+module.exports.removeSessions = (sessionIds) => {
+	const query = { _id: { $in: sessionIds } };
+	return getCollection("admin", "sessions").then(_dbCol => _dbCol.remove(query));
+};

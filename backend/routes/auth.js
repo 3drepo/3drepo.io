@@ -32,9 +32,9 @@ const httpsPost = require("../libs/httpsReq").post;
 
 const chatEvent = require("../models/chatEvent");
 
-const db = require("../handler/db");
 const multer = require("multer");
-const { omit } = require("lodash");
+
+const { regenerateAuthSession, getSessionsByUsername, removeSessions } = require("../services/session");
 
 /**
  * @api {post} /login Login
@@ -548,47 +548,25 @@ router.put("/:account", middlewares.isAccountAdmin, updateUser);
 router.put("/:account/password", resetPassword);
 
 function createSession(place, req, res, next, user) {
-	req.session.regenerate(function(err) {
-		req[C.REQ_REPO].logger.logInfo("Creating session for " + " " + user.username);
-		if(err) {
+	regenerateAuthSession(req, config, user)
+		.then(() => getSessionsByUsername(user.username))
+		.then(sessions => { // Remove other sessions with the same username
+			const ids = [];
+
+			sessions.forEach(entry => {
+				if (entry._id === req.session.id || !entry.session.user.webSession) {
+					return;
+				}
+				ids.push(entry._id);
+				chatEvent.loggedOut(entry.session.user.socketId);
+			});
+
+			return removeSessions(ids);
+		}).then(() =>
+			responseCodes.respond(place, req, res, next, responseCodes.OK, user)
+		).catch((err) => {
 			responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {username: user.username});
-		} else {
-			req[C.REQ_REPO].logger.logDebug("Authenticated user and signed token.");
-
-			user.socketId = req.headers[C.HEADER_SOCKET_ID];
-			user.webSession = false;
-
-			if (req.headers && req.headers["user-agent"]) {
-				user.webSession = !!req.headers["user-agent"];
-			}
-
-			req.session[C.REPO_SESSION_USER] = user;
-			req.session.cookie.domain = config.cookie_domain;
-			if (config.cookie.maxAge) {
-				req.session.cookie.maxAge = config.cookie.maxAge;
-			}
-
-			if (user.webSession) {
-				const query = {
-					"_id": { $ne: req.session.id },
-					"session.user.username": user.username,
-					"session.user.webSession": true
-				};
-
-				db.getCollection("admin", "sessions").then(_dbCol => {
-					return _dbCol.find(query, {"session.user.socketId" : true })
-						.toArray().then((entries) => {
-							entries.forEach(entry => chatEvent.loggedOut(entry.session.user.socketId));
-							return _dbCol;
-						});
-				}).then(_dbCol => {
-					_dbCol.remove(query);
-				});
-			}
-
-			responseCodes.respond(place, req, res, next, responseCodes.OK, omit(user, "socketId", "webSession"));
-		}
-	});
+		});
 }
 
 function login(req, res, next) {
