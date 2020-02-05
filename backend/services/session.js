@@ -25,6 +25,7 @@ const expressSession = require("express-session");
 const { getCollection, getSessionStore } = require("../handler/db");
 const C = require("../constants");
 const store = getSessionStore(expressSession);
+const useragent = require("useragent");
 
 module.exports.session = function(config) {
 	return expressSession({
@@ -53,7 +54,9 @@ module.exports.regenerateAuthSession = (req, config, user) => {
 				user = {...user, socketId: req.headers[C.HEADER_SOCKET_ID], webSession: false};
 
 				if (req.headers && req.headers["user-agent"]) {
-					user.webSession = !!req.headers["user-agent"];
+					const ua = useragent.is(req.headers["user-agent"]);
+					user.webSession = ["webkit", "opera", "ie", "chrome", "safari", "mobile_safari", "firefox", "mozilla", "android"].
+						some(browserType => ua[browserType]); // If any of these browser types matches then is a websession
 				}
 
 				req.session[C.REPO_SESSION_USER] = user;
