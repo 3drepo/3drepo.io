@@ -34,33 +34,33 @@
 	 */
 
 	/**
-	 * @api {get} /:teamspace/settings/treatments.csv Download treatments file
-	 * @apiName getTreatmentsFile
+	 * @api {get} /:teamspace/settings/mitigations.csv Download mitigations file
+	 * @apiName getMitigationsFile
 	 * @apiGroup Teamspace
-	 * @apiDescription Returns a CSV file containing all defined suggested risk treatments.
+	 * @apiDescription Returns a CSV file containing all defined suggested risk mitigations.
 	 *
 	 * @apiUse Teamspace
 	 *
 	 * @apiExample {get} Example usage
-	 * GET /acme/treatments.csv HTTP/1.1
+	 * GET /acme/settings/mitigations.csv HTTP/1.1
 	 *
 	 * @apiSuccessExample {json} Success-Response
 	 * HTTP/1.1 200 OK
-	 * <Risk treatments CSV file>
+	 * <Risk mitigations CSV file>
 	 */
-	router.get("/settings/treatments.csv", middlewares.isAccountAdmin, getTreatmentsFile);
+	router.get("/settings/mitigations.csv", middlewares.isAccountAdmin, getMitigationsFile);
 
 	/**
-	 * @api {post} /:teamspace/settings/treatments.csv Upload treatments file
-	 * @apiName uploadTreatmentsFile
+	 * @api {post} /:teamspace/settings/mitigations.csv Upload mitigations file
+	 * @apiName uploadMitigationsFile
 	 * @apiGroup Teamspace
-	 * @apiDescription Upload a risk treatments CSV file to a teamspace.
+	 * @apiDescription Upload a risk mitigations CSV file to a teamspace.
 	 *
 	 * @apiUse Teamspace
 	 *
 	 * @apiExample {post} Example usage
-	 * POST /acme/treatments.csv HTTP/1.1
-	 * <Risk treatments CSV file>
+	 * POST /acme/settings/mitigations.csv HTTP/1.1
+	 * <Risk mitigations CSV file>
 	 *
 	 * @apiSuccessExample {json} Success-Response
 	 * HTTP/1.1 200 OK
@@ -68,7 +68,7 @@
 	 * 	"status":"ok"
 	 * }
 	 */
-	router.post("/settings/treatments.csv", middlewares.isAccountAdmin, uploadTreatmentsFile);
+	router.post("/settings/mitigations.csv", middlewares.isAccountAdmin, uploadMitigationsFile);
 
 	/**
 	 * @api {get} /:teamspace/settings Get teamspace settings
@@ -180,7 +180,7 @@
 	 * 			"label":"GIS"
 	 * 		}
 	 * 	],
-	 * 	"treatmentsUpdatedAt":1567156228976,
+	 * 	"mitigationsUpdatedAt":1567156228976,
 	 * 	"teamspace":"acme"
 	 * }
 	 */
@@ -239,7 +239,7 @@
 	 * 			"label":"New Topic 2"
 	 * 		}
 	 * 	],
-	 * 	"treatmentsUpdatedAt":1567156228976,
+	 * 	"mitigationsUpdatedAt":1567156228976,
 	 * 	"teamspace":"acme"
 	 * }
 	 */
@@ -619,18 +619,18 @@
 		});
 	}
 
-	function getTreatmentsFile(req, res, next) {
-		// TODO: retrieve risk treatment suggestions
-		TeamspaceSettings.getTopicTypes(req.params.account).then((treatments) => {
+	function getMitigationsFile(req, res, next) {
+		// TODO: retrieve risk mitigation suggestions
+		TeamspaceSettings.getTopicTypes(req.params.account).then((mitigations) => {
 			const timestamp = (new Date()).toLocaleString();
 			const filenamePrefix = (req.params.account + "_" + timestamp + "_").replace(/\W+/g, "_");
 
 			const headers = {
-				"Content-Disposition": "attachment;filename=" + filenamePrefix + "treatments.csv",
+				"Content-Disposition": "attachment;filename=" + filenamePrefix + "mitigations.csv",
 				"Content-Type": "text/csv"
 			};
 
-			treatments = "Treatment Title," +
+			mitigations = "Treatment Title," +
 				"Treatment Details," +
 				"Treatment Stage," +
 				"Treatment Type," +
@@ -643,13 +643,13 @@
 
 			res.set(headers);
 
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, treatments);
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, mitigations);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
 	}
 
-	function uploadTreatmentsFile(req, res, next) {
+	function uploadMitigationsFile(req, res, next) {
 		TeamspaceSettings.getTopicTypes(req.params.account).then(() => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {"status":"ok"});
 		}).catch(err => {
