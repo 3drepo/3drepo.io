@@ -50,6 +50,8 @@ interface IProps {
 	selectedSequence: any;
 }
 
+const da =  new Date();
+
 const SequenceDetails = ({ minDate, maxDate, selectedDate,
 	setSelectedFrame, stepInterval,
 	stepScale, setStepInterval, setStepScale,
@@ -68,7 +70,10 @@ const SequenceDetails = ({ minDate, maxDate, selectedDate,
 				loadingFrame={loadingFrame}
 				fetchFrame={fetchFrame}
 			/>
-			<TasksList tasks={currentTasks} minDate={selectedMinDate} maxDate={selectedDate} loadingFrame={loadingFrame} />
+			<TasksList tasks={currentTasks}
+				minDate={selectedMinDate}
+				maxDate={selectedDate}
+				loadingFrame={loadingFrame} />
 		</>
 	);
 

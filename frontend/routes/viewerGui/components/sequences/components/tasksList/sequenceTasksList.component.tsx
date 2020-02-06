@@ -19,7 +19,7 @@ import React from 'react';
 import { formatShortDate } from '../../../../../../services/formatting/formatDate';
 import { Loader } from '../../../../../components/loader/loader.component';
 import { SequenceTasksListContainer, SequenceTasksListItem, TaskListLabel } from '../../sequences.styles';
-import { ITask, Tasks } from './sequenceTasks.component';
+import { ITask, TaskItem } from './sequenceTaskItem.component';
 
 interface IProps {
 	tasks: ITask[];
@@ -68,7 +68,7 @@ export class TasksList extends React.PureComponent<IProps, IState> {
 						{
 							tasks.map((t) => (
 								<SequenceTasksListItem  key={t._id}>
-									<Tasks tasks={[t]} />
+									<TaskItem task={t} />
 								</SequenceTasksListItem>
 							))
 						}

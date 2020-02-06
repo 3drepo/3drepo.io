@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { IconButton } from '@material-ui/core';
 import CollapsedIcon from '@material-ui/icons/ChevronRight';
 import ExpandedIcon from '@material-ui/icons/ExpandMore';
+import DotIcon from '@material-ui/icons/FiberManualRecord';
 import React from 'react';
 import { Task, TaskButton } from '../../sequences.styles';
 
@@ -30,7 +30,7 @@ export interface ITask {
 }
 
 interface IProps {
-	tasks: ITask[];
+	task: ITask;
 	nested?: boolean;
 }
 
@@ -43,7 +43,7 @@ const CollapseButton = ({collapsed, onClick}) => {
 	return (<TaskButton onClick={onClick}><Icon /></TaskButton>);
 };
 
-export class Tasks extends React.PureComponent<IProps, IState> {
+export class TaskItem extends React.PureComponent<IProps, IState> {
 	public state: IState = {
 		collapsed: false
 	};
@@ -53,18 +53,18 @@ export class Tasks extends React.PureComponent<IProps, IState> {
 	}
 
 	public render = () => {
-		const { tasks, nested } = this.props;
+		const { task: task, nested } = this.props;
 		const { collapsed } = this.state;
+		const subtasks = task.tasks || [];
+		const hasSubtasks = subtasks.length > 0;
 
 		return (
-			<Task padding={nested}>
-				{tasks.map((t) => (
-					<Task key={t._id} padding={(!t.tasks || !t.tasks.length)}>
-						{(t.tasks && t.tasks.length > 0) && <CollapseButton collapsed={collapsed} onClick={this.toggleCollapse} />}
-						{t.name}
-						{(t.tasks && !collapsed) && (<Tasks nested tasks={t.tasks} />)}
-					</Task>))
-				}
+			<Task>
+				{hasSubtasks && <CollapseButton collapsed={collapsed} onClick={this.toggleCollapse} />}
+				{task.name}
+				<Task padding={hasSubtasks}>
+					{!collapsed && subtasks.map((t) => (<TaskItem key={t._id} task={t} />))}
+				</Task>
 			</Task>
 		);
 	}

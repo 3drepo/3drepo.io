@@ -31,6 +31,7 @@ import { DateField } from '../../../components/dateField/dateField.component';
 import { MenuItemContainer } from '../previewListItem/previewListItem.styles';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
+import { TasksList } from './components/tasksList/sequenceTasksList.component';
 
 export const SequencesIcon = VIEWER_PANELS_ICONS[VIEWER_PANELS.SEQUENCES];
 
