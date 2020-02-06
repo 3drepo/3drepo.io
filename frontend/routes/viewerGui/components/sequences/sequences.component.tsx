@@ -28,6 +28,8 @@ import { TasksList } from './components/tasksList/sequenceTasksList.component';
 import {
 	LoaderContainer, SequencesContainer, SequencesIcon
 } from './sequences.styles';
+import { PanelBarActions } from '../panelBarActions';
+import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 
 interface IProps {
 	sequences: any;
@@ -105,7 +107,11 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 		return (
 			<SequencesContainer
 				Icon={this.renderTitleIcon()}
-				renderActions={() => (<></>)}
+				renderActions={() => <PanelBarActions
+					type={VIEWER_PANELS.SEQUENCES}
+					hideSearch
+					hideMenu
+				/>}
 			>
 
 				{!sequences && <SequencesLoader />}
