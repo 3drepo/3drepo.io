@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,18 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import React from 'react';
+
 import FormControl from '@material-ui/core/FormControl';
 import Grid from '@material-ui/core/Grid';
 import InputLabel from '@material-ui/core/InputLabel';
-import {isEmpty, isEqual} from 'lodash';
 import * as queryString from 'query-string';
-import React from 'react';
 import { Route } from 'react-router-dom';
 
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
+import { Container } from '../components/customTable/customTable.styles';
 import { UserManagementTab } from '../components/userManagementTab/userManagementTab.component';
 import { ModelsPermissions } from '../modelsPermissions';
-import { Container, IconLeft, IconRight, Options, SelectContainer, SwitchButton } from './projects.styles';
+import { IconLeft, IconRight, Options, SelectContainer, SwitchButton } from './projects.styles';
 import { ProjectsPermissions } from './projectsPermissions';
 
 export const PERMISSIONS_VIEWS = {
@@ -126,45 +127,43 @@ export class Projects extends React.PureComponent<IProps, IState> {
 		const { currentView } = this.state;
 
 		return (
-			<Container>
-				<UserManagementTab footerLabel={this.getFooterLabel()} >
-					<>
-						<Options
-							container
-							direction="row"
-							justify="space-between"
-							alignContent="center"
-						>
-							<SelectContainer item>
-								<FormControl fullWidth>
-									<InputLabel shrink htmlFor="project">
-										Project
-									</InputLabel>
-									<CellSelect
-										items={getProjectsItems(projects)}
-										value={selectedProject}
-										placeholder="Select a project"
-										disabledPlaceholder
-										onChange={this.onProjectChange}
-										inputId="project"
-									/>
-								</FormControl>
-							</SelectContainer>
-							<Grid item>
-								<SwitchButton
-									color="secondary"
-									onClick={this.handleViewChange}
-								>
-									{currentView === PERMISSIONS_VIEWS.MODELS && <IconLeft>keyboard_arrow_left</IconLeft>}
-									{currentView !== PERMISSIONS_VIEWS.MODELS ? 'Model & federation permissions' : 'Project permissions'}
-									{currentView !== PERMISSIONS_VIEWS.MODELS && <IconRight>keyboard_arrow_right</IconRight>}
-								</SwitchButton>
-							</Grid>
-						</Options>
-						<Route path={match.url} render={this.renderPermissionsView} />
-					</>
-				</UserManagementTab>
-			</Container>
+			<UserManagementTab footerLabel={this.getFooterLabel()} >
+				<Container>
+					<Options
+						container
+						direction="row"
+						justify="space-between"
+						alignContent="center"
+					>
+						<SelectContainer item>
+							<FormControl fullWidth>
+								<InputLabel shrink htmlFor="project">
+									Project
+								</InputLabel>
+								<CellSelect
+									items={getProjectsItems(projects)}
+									value={selectedProject}
+									placeholder="Select a project"
+									disabledPlaceholder
+									onChange={this.onProjectChange}
+									inputId="project"
+								/>
+							</FormControl>
+						</SelectContainer>
+						<Grid item>
+							<SwitchButton
+								color="secondary"
+								onClick={this.handleViewChange}
+							>
+								{currentView === PERMISSIONS_VIEWS.MODELS && <IconLeft>keyboard_arrow_left</IconLeft>}
+								{currentView !== PERMISSIONS_VIEWS.MODELS ? 'Model & federation permissions' : 'Project permissions'}
+								{currentView !== PERMISSIONS_VIEWS.MODELS && <IconRight>keyboard_arrow_right</IconRight>}
+							</SwitchButton>
+						</Grid>
+					</Options>
+					<Route path={match.url} render={this.renderPermissionsView} />
+				</Container>
+			</UserManagementTab>
 		);
 	}
 }

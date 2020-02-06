@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -21,6 +21,7 @@ import { sortByField } from '../../helpers/sorting';
 export const { Types: JobsTypes, Creators: JobsActions } = createActions({
 	fetchJobs: ['teamspace'],
 	fetchJobsColors: ['teamspace'],
+	fetchJobsAndColors: ['teamspace'],
 	setJobsPending: ['isPending'],
 	setColorsPending: ['isPending'],
 	createJob: ['teamspace', 'job'],

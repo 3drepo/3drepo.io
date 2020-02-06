@@ -29,7 +29,7 @@ const utils = require("../utils");
 const multer = require("multer");
 
 /**
- * @apiDefine Risks Risks
+ * @apiDefine Risks SafetiBase Risks
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
@@ -642,7 +642,7 @@ router.delete("/risks/", middlewares.issue.canCreate, deleteRisks);
 /**
  * @api {post} /:teamspace/:model/risks/:riskId/resources Attach resources to a risk
  * @apiName attachResourceRisk
- * @apiGroup Risk
+ * @apiGroup Risks
  * @apiDescription Attaches file or url resources to a risk.
  * If the type of the resource is file it should be send as multipart/form-data.
  * Both types at the same time cant be sent. So in order to attach files and urls it should be done

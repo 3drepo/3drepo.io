@@ -22,7 +22,7 @@ import { VIEWER_LEFT_PANELS, VIEWER_RIGHT_PANELS } from '../../constants/viewerG
 export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActions({
 	fetchData: ['teamspace', 'model'],
 	resetPanelsStates: [],
-	setPanelVisibility: ['panelName'],
+	setPanelVisibility: ['panelName', 'visibility'],
 	setPanelLock: ['panelName'],
 	setMeasureVisibility: ['visible'],
 	setCoordView: ['visible'],
@@ -95,8 +95,13 @@ export const INITIAL_STATE: IViewerGuiState = {
 	pinData: null
 };
 
-const updatePanelsList = (panels, lockedPanels, panelName) => {
-	if (panels.includes(panelName)) {
+const updatePanelsList = (panels, lockedPanels, panelName, visibility) => {
+	const currentVisibility = panels.includes(panelName);
+	if (currentVisibility === visibility) {
+		return [...panels];
+	}
+
+	if (currentVisibility) {
 		return panels.filter((panel) => (panel !== panelName));
 	}
 
@@ -110,12 +115,12 @@ const updatePanelsList = (panels, lockedPanels, panelName) => {
 	return [...panels, panelName];
 };
 
-export const setPanelVisibility = (state = INITIAL_STATE, { panelName }) => {
+export const setPanelVisibility = (state = INITIAL_STATE, { panelName, visibility }) => {
 	const locked = [...state.lockedPanels];
 	const leftPanels = VIEWER_LEFT_PANELS.map(({type}) => type).includes(panelName) ?
-			updatePanelsList([...state.leftPanels], locked, panelName) : [...state.leftPanels];
+			updatePanelsList([...state.leftPanels], locked, panelName, visibility) : [...state.leftPanels];
 	const rightPanels = VIEWER_RIGHT_PANELS.map(({type}) => type).includes(panelName) ?
-			updatePanelsList([...state.rightPanels], locked, panelName) : [...state.rightPanels];
+			updatePanelsList([...state.rightPanels], locked, panelName, visibility) : [...state.rightPanels];
 	const lockedPanels = locked.includes(panelName) ? [] : locked;
 
 	return { ...state, leftPanels, rightPanels, lockedPanels };
