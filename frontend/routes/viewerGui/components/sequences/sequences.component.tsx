@@ -118,7 +118,7 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 					<SequencesList sequences={sequences} setSelectedSequence={setSelectedSequence} />
 				}
 
-				{sequences && sequences.length === 0 && <EmptyStateInfo>This revision doesnt have any sequence</EmptyStateInfo>}
+				{sequences && sequences.length === 0 && <EmptyStateInfo>No sequences found</EmptyStateInfo>}
 			</SequencesContainer>
 		);
 	}
