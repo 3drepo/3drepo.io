@@ -17,9 +17,8 @@
 
 import CollapsedIcon from '@material-ui/icons/ChevronRight';
 import ExpandedIcon from '@material-ui/icons/ExpandMore';
-import DotIcon from '@material-ui/icons/FiberManualRecord';
 import React from 'react';
-import { Task, TaskButton } from '../../sequences.styles';
+import { SubTasksItemContainer, Task, TaskButton, TaskItemLabel, TaskSmallDot } from '../../sequences.styles';
 
 export interface ITask {
 	_id: string;
@@ -59,13 +58,18 @@ export class TaskItem extends React.PureComponent<IProps, IState> {
 		const hasSubtasks = subtasks.length > 0;
 
 		return (
-			<Task>
-				{hasSubtasks && <CollapseButton collapsed={collapsed} onClick={this.toggleCollapse} />}
-				{task.name}
-				<Task padding={hasSubtasks}>
-					{!collapsed && subtasks.map((t) => (<TaskItem key={t._id} task={t} />))}
+			<>
+				<Task>
+					{hasSubtasks && <CollapseButton collapsed={collapsed} onClick={this.toggleCollapse} />}
+					{!hasSubtasks && <TaskSmallDot />}
+					<TaskItemLabel>
+						{task.name}
+					</TaskItemLabel>
 				</Task>
-			</Task>
+				<SubTasksItemContainer>
+					{!collapsed && subtasks.map((t) => (<TaskItem key={t._id} task={t} />))}
+				</SubTasksItemContainer>
+			</>
 		);
 	}
 }

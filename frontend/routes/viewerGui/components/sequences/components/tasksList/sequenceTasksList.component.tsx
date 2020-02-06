@@ -61,7 +61,6 @@ export class TasksList extends React.PureComponent<IProps, IState> {
 		return (
 			<SequenceTasksListContainer>
 				{loadingFrame && <Loader content="Loading frame..." />}
-
 				{!loadingFrame &&
 					<>
 						<TaskListLabel>{this.durationLabel}</TaskListLabel>
