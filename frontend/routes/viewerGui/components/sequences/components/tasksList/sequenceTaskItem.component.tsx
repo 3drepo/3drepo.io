@@ -63,7 +63,7 @@ export class TaskItem extends React.PureComponent<IProps, IState> {
 					{hasSubtasks && <CollapseButton collapsed={collapsed} onClick={this.toggleCollapse} />}
 					{!hasSubtasks && <TaskSmallDot />}
 					<TaskItemLabel>
-						{task.name}
+						{task.name || 'Unnamed'}
 					</TaskItemLabel>
 				</Task>
 				<SubTasksItemContainer>
