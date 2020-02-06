@@ -107,8 +107,9 @@ export const SequencePlayerColumn = styled(Grid).attrs({
 export const TaskSmallDot = styled(DotIcon)`
 	&& {
 		font-size: 10px;
-		margin-right: 6px;
+		margin-right: 14px;
 		height: 24px;
+		margin-left: 6px;
 	}
 `;
 
