@@ -45,7 +45,7 @@ const CollapseButton = ({collapsed, onClick}) => {
 
 export class Tasks extends React.PureComponent<IProps, IState> {
 	public state: IState = {
-		collapsed: true
+		collapsed: false
 	};
 
 	public toggleCollapse = () => {
