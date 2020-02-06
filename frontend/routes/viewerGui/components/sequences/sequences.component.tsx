@@ -20,7 +20,9 @@ import React from 'react';
 import { IconButton } from '@material-ui/core';
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import { STEP_SCALE } from '../../../../constants/sequences';
+import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { Loader } from '../../../components/loader/loader.component';
+import { PanelBarActions } from '../panelBarActions';
 import { EmptyStateInfo } from '../views/views.styles';
 import { SequencePlayer } from './components/sequencePlayer/sequencePlayer.component';
 import { SequencesList } from './components/sequencesList/sequencesList.component';
@@ -28,8 +30,6 @@ import { TasksList } from './components/tasksList/sequenceTasksList.component';
 import {
 	LoaderContainer, SequencesContainer, SequencesIcon
 } from './sequences.styles';
-import { PanelBarActions } from '../panelBarActions';
-import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 
 interface IProps {
 	sequences: any;
