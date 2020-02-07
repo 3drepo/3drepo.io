@@ -96,7 +96,10 @@ function insertModelUpdatedNotificationsLatestReview(account, model) {
 	}).then(n => n.forEach(ChatEvent.upsertedNotification.bind(null,null)));
 }
 function importSuccess(account, model, sharedSpacePath, user) {
-	setStatus(account, model, "ok", user).then(setting => {
+	Promise.all([
+		setStatus(account, model, "ok", user),
+		History.revisionCount(account, model)
+	]).then(([setting, nRevisions]) => {
 		if (setting) {
 			if (sharedSpacePath && setting.corID) {
 				const path = require("path");
@@ -120,7 +123,7 @@ function importSuccess(account, model, sharedSpacePath, user) {
 			setting.markModified("errorReason");
 
 			// hack to add the user field to send to the user
-			const data = Object.assign({user}, JSON.parse(JSON.stringify(setting)));
+			const data = {user, nRevisions ,...JSON.parse(JSON.stringify(setting))};
 			ChatEvent.modelStatusChanged(null, account, model, data);
 
 			// Creates model updated notification.
