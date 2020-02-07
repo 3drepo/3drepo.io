@@ -28,5 +28,5 @@ export const selectSettings = createSelector(
 );
 
 export const selectTreatmentsUpdatedAt = createSelector(
-		selectSettings, (state) => state.treatmentsUpdatedAt || null,
+		selectSettings, (state) => state.mitigationsUpdatedAt || null,
 );
