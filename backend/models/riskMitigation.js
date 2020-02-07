@@ -16,6 +16,7 @@
  */
 "use strict";
 
+const _ = require("lodash");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
@@ -64,7 +65,24 @@ class RiskMitigation {
 
 	async findMitigationSuggestions(account, criteria) {
 		const mitigationColl = await this.getRiskMitigationCollection(account);
-		let suggestions = await mitigationColl.find({}).toArray();
+		const criteriaFilterFields = [
+			"associated_activity",
+			"category",
+			"element",
+			"location_desc",
+			"risk_factor",
+			"scope"
+		];
+
+		// Only pick supported fields and clean empty criteria
+		criteria = _.pick(criteria, criteriaFilterFields);
+		Object.keys(criteria).forEach((key) => {
+			if (criteria[key] === null || criteria[key] === "") {
+				delete criteria[key];
+			}
+		});
+
+		let suggestions = await mitigationColl.find(criteria).toArray();
 
 		return suggestions;
 	}
