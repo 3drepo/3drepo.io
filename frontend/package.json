@@ -56,6 +56,7 @@
     "konva": "^4.0.9",
     "lodash": "4.17.15",
     "material-design-icons": "3.0.1",
+    "material-ui-chip-input": "^2.0.0-beta.2",
     "material-ui-pickers": "2.2.4",
     "memoize-one": "5.0.5",
     "normalize.css": "8.0.1",

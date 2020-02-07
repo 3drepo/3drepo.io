@@ -57,7 +57,7 @@ export const editTeamspaceSettings = (teamspace, settings) => {
  * @param file
  */
 export const uploadTreatmentsFile = (teamspace, file) => {
-	return api.post(`${teamspace}/settings/treatments.csv`, file);
+	return api.post(`${teamspace}/settings/mitigations.csv`, file);
 };
 
 /**
@@ -65,7 +65,7 @@ export const uploadTreatmentsFile = (teamspace, file) => {
  * @param teamspace
  */
 export const fetchTreatmentsFile = (teamspace) => {
-	return api.get(`${teamspace}/settings/treatments.csv`);
+	return api.get(`${teamspace}/settings/mitigations.csv`);
 };
 
 /**

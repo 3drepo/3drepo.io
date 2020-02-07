@@ -27,7 +27,8 @@ import { isEmpty } from 'lodash';
 
 import { ROUTES } from '../../constants/routes';
 import { LONG_DATE_TIME_FORMAT } from '../../services/formatting/formatDate';
-import { Chips } from '../components/chips/chips.component';
+import { COLOR } from '../../styles';
+import { ChipsInput } from '../components/chipsInput/chipsInput.component';
 import { DateTime } from '../components/dateTime/dateTime.component';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
@@ -186,7 +187,13 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 				<Headline color="textPrimary" variant="subheading">Risk Treatment Suggestions</Headline>
 				<Grid container direction="row" justify="space-between" alignItems="center" wrap="nowrap">
 					<InfoColumnWrapper container>
-						<Headline color="textPrimary" variant="body1">{this.renderLastTreatmentsUpdated()}</Headline>
+						<Headline
+							color="primary"
+							style={{ color: COLOR.REGENT_GRAY }}
+							variant="body1"
+						>
+							{this.renderLastTreatmentsUpdated()}
+						</Headline>
 					</InfoColumnWrapper>
 					<Grid container alignItems="center" wrap="nowrap">
 						<Field name="file" render={({ field }) =>
@@ -237,18 +244,24 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 
 						<StyledGrid>
 							<Headline color="textPrimary" variant="subheading">Issues Types</Headline>
-							<Field name="topicTypes" render={({ field }) => <Chips {...field} inputPlaceholder={'Enter Topic Type'} />} />
+							<Field
+								name="topicTypes"
+								render={({ field }) => <ChipsInput {...field} placeholder={'Enter new topic type...'} />}
+							/>
 						</StyledGrid>
 
-						<StyledGrid>
+						<StyledGrid paddingBottom>
 							<Headline color="textPrimary" variant="subheading">Risk Categories</Headline>
-							<Field name="riskCategories" render={({ field }) => <Chips {...field} inputPlaceholder={'Enter Category'} />} />
+							<Field
+								name="riskCategories"
+								render={({ field }) => <ChipsInput {...field} placeholder="Enter new category..." />}
+							/>
 						</StyledGrid>
 
 						{this.renderTreatmentSuggestionsSection()}
 
 						<ButtonContainer container direction="column" alignItems="flex-end">
-							<Field render={ ({ form }) =>
+							<Field render={({ form }) =>
 								<Button
 									type="submit"
 									variant="raised"

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2020 3D Repo Ltd
+ *  Copyright (C) 2017 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,18 +15,35 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+import styled from 'styled-components';
 
-export const selectTeamspaceDomain = (state) => ({...state.teamspace});
+import ChipInput from 'material-ui-chip-input';
 
-export const selectIsPending = createSelector(
-	selectTeamspaceDomain, (state) => state.isPending
-);
+export const StyledChipInput = styled(ChipInput)`
+	&& {
+		margin-top: 10px;
 
-export const selectSettings = createSelector(
-	selectTeamspaceDomain, (state) => state.settings
-);
-
-export const selectTreatmentsUpdatedAt = createSelector(
-		selectSettings, (state) => state.mitigationsUpdatedAt || null,
-);
+		div[class^="WAMuiChipInput-standard"] {
+			min-height: 32px;
+		}
+		div[class*="-focused-"]:after {
+			transform: scale(0);
+		}
+		div[class^="MuiChip-root"] {
+			height: 24px;
+		}
+		span[class^="MuiChip-label"] {
+			padding-left: 8px;
+			padding-right: 8px;
+		}
+		svg[class^="MuiSvgIcon-root"] {
+			width: 16px;
+			height: 16px;
+			margin-left: -4px;
+			margin-right: 4px;
+		}
+		input[class^="MuiInputBase-input"] {
+			transform: translateY(-3px);
+		}
+	}
+`;

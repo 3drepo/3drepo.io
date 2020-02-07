@@ -49,7 +49,7 @@ export const FieldsRow = styled(Grid)`
 `;
 
 export const StyledGrid = styled(Grid)`
-	padding: 24px 24px 0;
+	padding: ${(props: any) => props.paddingBottom ? '12px 24px 24px' : '12px 24px'};
 `;
 
 export const SuggestionsContainer = styled(Grid)`
@@ -60,6 +60,7 @@ export const SuggestionsContainer = styled(Grid)`
 `;
 
 export const StyledForm = styled(Form)`
+	padding-top: 10px;
 	padding-bottom: 80px;
 	box-sizing: border-box;
 	overflow-y: scroll;
