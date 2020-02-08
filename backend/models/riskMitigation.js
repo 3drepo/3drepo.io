@@ -40,6 +40,31 @@ class RiskMitigation {
 		return db.getCollection(account, "mitigations");
 	}
 
+	async clearAll(account) {
+		const mitigationColl = await this.getRiskMitigationCollection(account);
+		return await mitigationColl.remove({});
+	}
+
+	async create(account, newMitigation) {
+		const mitigationColl = await this.getRiskMitigationCollection(account);
+		const optionalFields = ["mitigation_details"];
+		const requiredFields = Object.keys(_.omit(fieldTypes, optionalFields));
+
+		newMitigation = _.pick(newMitigation, Object.keys(fieldTypes));
+
+		requiredFields.forEach((key) => {
+			if (!newMitigation[key] || newMitigation[key] === "") {
+				// TODO handle missing data
+				console.log("required field not found: " + key);
+				throw responseCodes.INVALID_ARGUMENTS;
+			}
+		});
+
+		await mitigationColl.insert(newMitigation);
+
+		return newMitigation;
+	}
+
 	async getCriteria(account) {
 		const mitigationColl = await this.getRiskMitigationCollection(account);
 		const attributeBlacklist = ["mitigation_desc", "mitigation_details"];
