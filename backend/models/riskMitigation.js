@@ -22,24 +22,28 @@ const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
 const TeamspaceSettings = require("./teamspaceSetting");
 
+const fieldTypes = {
+	"associated_activity": "[object String]",
+	"category": "[object String]",
+	"element": "[object String]",
+	"location_desc": "[object String]",
+	"mitigation_desc": "[object String]",
+	"mitigation_details": "[object String]",
+	"mitigation_stage": "[object String]",
+	"mitigation_type": "[object String]",
+	"risk_factor": "[object String]",
+	"scope": "[object String]"
+};
+
 class RiskMitigation {
 	getRiskMitigationCollection(account) {
 		return db.getCollection(account, "mitigations");
 	}
 
 	async getCriteria(account) {
-		const criteriaFields = [
-			"associated_activity",
-			"category",
-			"element",
-			"location_desc",
-			"mitigation_stage",
-			"mitigation_type",
-			"risk_factor",
-			"scope"
-		];
-
 		const mitigationColl = await this.getRiskMitigationCollection(account);
+		const attributeBlacklist = ["mitigation_desc", "mitigation_details"];
+		const criteriaFields = Object.keys(_.omit(fieldTypes, attributeBlacklist));
 		const criteriaPromises = [];
 		const criteria = {};
 
@@ -65,14 +69,13 @@ class RiskMitigation {
 
 	async findMitigationSuggestions(account, criteria) {
 		const mitigationColl = await this.getRiskMitigationCollection(account);
-		const criteriaFilterFields = [
-			"associated_activity",
-			"category",
-			"element",
-			"location_desc",
-			"risk_factor",
-			"scope"
+		const attributeBlacklist = [
+			"mitigation_desc",
+			"mitigation_details",
+			"mitigation_stage",
+			"mitigation_type"
 		];
+		const criteriaFilterFields = Object.keys(_.omit(fieldTypes, attributeBlacklist));
 
 		// Only pick supported fields and clean empty criteria
 		criteria = _.pick(criteria, criteriaFilterFields);
