@@ -16,9 +16,8 @@
  */
 
 import { push } from 'connected-react-router';
-import { fork, put, takeLatest } from 'redux-saga/effects';
+import { put, take, takeLatest } from 'redux-saga/effects';
 
-import { ROUTES } from '../../constants/routes';
 import { NewTermsDialog } from '../../routes/components/newTermsDialog/newTermsDialog.component';
 import { analyticsService } from '../../services/analytics';
 import * as API from '../../services/api';
@@ -162,6 +161,13 @@ function* verify({ username, token }) {
 	yield put(AuthActions.setPendingStatus(false));
 }
 
+function* onLoggedOut() {
+	yield put(AuthActions.logout());
+	yield take('RESET_APP');
+	yield take('RESET_APP');
+	yield put(DialogActions.showLoggedOutDialog());
+}
+
 export default function* AuthSaga() {
 	yield takeLatest(AuthTypes.AUTHENTICATE, authenticate);
 	yield takeLatest(AuthTypes.LOGIN, login);
@@ -171,4 +177,5 @@ export default function* AuthSaga() {
 	yield takeLatest(AuthTypes.CHANGE_PASSWORD, changePassword);
 	yield takeLatest(AuthTypes.REGISTER, register);
 	yield takeLatest(AuthTypes.VERIFY, verify);
+	yield takeLatest(AuthTypes.ON_LOGGED_OUT, onLoggedOut);
 }
