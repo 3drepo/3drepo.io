@@ -675,6 +675,7 @@ async function _fillInModelDetails(accountName, setting, permissions) {
 		permissions: permissions,
 		model: setting._id,
 		type: setting.type,
+		units: setting.properties.unit,
 		name: setting.name,
 		status: setting.status,
 		errorReason: setting.errorReason,
