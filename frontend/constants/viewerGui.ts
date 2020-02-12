@@ -6,6 +6,7 @@ import SequencesIcon from '@material-ui/icons/Movie';
 import ViewsIcon from '@material-ui/icons/PhotoCamera';
 import IssuesIcon from '@material-ui/icons/Place';
 import RisksIcon from '@material-ui/icons/Warning';
+import { clientConfigService } from '../services/clientConfig';
 
 export const VIEWER_PANELS = {
 	GIS: 'gis',
@@ -67,7 +68,7 @@ export const VIEWER_LEFT_PANELS = [
 	VIEWER_PANELS.COMPARE,
 	VIEWER_PANELS.GIS,
 	VIEWER_PANELS.SEQUENCES
-].map(getPanelConfig);
+].filter((panel) => clientConfigService.sequencesEnabled || panel !== VIEWER_PANELS.SEQUENCES).map(getPanelConfig);
 
 export const VIEWER_RIGHT_PANELS = [
 	VIEWER_PANELS.BIM
