@@ -28,6 +28,7 @@ import {
 } from '../../../../../../constants/risks';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
 import { TextField } from '../../../../../components/textField/textField.component';
+import { AutoSuggestField } from '../autoSuggestField/autosuggestField.component';
 import { LevelOfRisk } from '../levelOfRisk/levelOfRisk.component';
 import {
 	Container,
@@ -44,10 +45,11 @@ interface IProps {
 	canEditBasicProperty: boolean;
 	canEditRiskStatus: boolean;
 	values?: any;
+	criteria: any;
 }
 
 export const TreatmentRiskFormTab: React.FunctionComponent<IProps> = ({
-	active, isNewRisk, canEditBasicProperty, canEditRiskStatus, values
+	active, isNewRisk, canEditBasicProperty, canEditRiskStatus, values, criteria
 }) => {
 	return (
 		<Content active={active}>
@@ -82,22 +84,28 @@ export const TreatmentRiskFormTab: React.FunctionComponent<IProps> = ({
 			</Container>
 
 			<FieldsRow container alignItems="center" justify="space-between">
-				<Field name="mitigation_stage" render={({ field }) => (
-					<TextField
-						{...field}
-						requiredConfirm={!isNewRisk}
-						label="Stage"
-						disabled={!canEditBasicProperty}
-					/>
-				)} />
-				<Field name="mitigation_type" render={({ field }) => (
-					<TextField
-						{...field}
-						requiredConfirm={!isNewRisk}
-						label="Type"
-						disabled={!canEditBasicProperty}
-					/>
-				)} />
+				<StyledFormControl>
+					<Field name="mitigation_stage" render={({ field, form }) => (
+						<AutoSuggestField
+							label="Stage"
+							suggestions={criteria.mitigation_stage}
+							form={form}
+							field={field}
+							disabled={!canEditBasicProperty}
+						/>
+					)} />
+				</StyledFormControl>
+				<StyledFormControl>
+					<Field name="mitigation_type" render={({ field, form }) => (
+						<AutoSuggestField
+							label="Type"
+							suggestions={criteria.mitigation_type}
+							form={form}
+							field={field}
+							disabled={!canEditBasicProperty}
+						/>
+					)} />
+				</StyledFormControl>
 			</FieldsRow>
 
 			<Container>

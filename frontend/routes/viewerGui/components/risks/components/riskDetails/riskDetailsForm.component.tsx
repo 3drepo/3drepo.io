@@ -70,6 +70,7 @@ interface IProps {
 	canComment: boolean;
 	hasPin: boolean;
 	hidePin?: boolean;
+	criteria: any;
 }
 
 interface IState {

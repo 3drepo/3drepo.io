@@ -58,6 +58,8 @@ interface IProps {
 	attachFileResources: (files) => void;
 	attachLinkResources: (links) => void;
 	showDialog: (config: any) => void;
+	fetchMitigationCriteria: (teamspace: string) => void;
+	criteria: any;
 }
 
 interface IState {
@@ -86,6 +88,10 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 
 	get riskData() {
 		return this.props.risk;
+	}
+
+	get criteria() {
+		return this.props.criteria;
 	}
 
 	get jobsList() {
@@ -170,11 +176,13 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	});
 
 	public componentDidMount() {
-		const { teamspace, model, fetchRisk, risk, subscribeOnRiskCommentsChanges } = this.props;
+		const { teamspace, model, fetchRisk, risk, subscribeOnRiskCommentsChanges, fetchMitigationCriteria } = this.props;
 
 		if (risk._id) {
 			fetchRisk(teamspace, model, risk._id);
 			subscribeOnRiskCommentsChanges(teamspace, model, risk._id);
+		} else {
+			fetchMitigationCriteria(teamspace);
 		}
 	}
 
@@ -242,6 +250,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 			<RiskDetailsForm
 				risk={this.riskData}
 				jobs={this.jobsList}
+				criteria={this.criteria}
 				onValueChange={this.handleRiskFormSubmit}
 				onSubmit={this.handleRiskFormSubmit}
 				permissions={this.props.modelSettings.permissions}

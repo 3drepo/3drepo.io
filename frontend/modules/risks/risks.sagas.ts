@@ -17,7 +17,7 @@
 
 import { push } from 'connected-react-router';
 import filesize from 'filesize';
-import {  isEmpty, isEqual, map, omit, pick } from 'lodash';
+import { isEmpty, isEqual, map, omit, pick } from 'lodash';
 import * as queryString from 'query-string';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 import { CHAT_CHANNELS } from '../../constants/chat';
@@ -53,6 +53,7 @@ import {
 	selectActiveRiskId,
 	selectComponentState,
 	selectFilteredRisks,
+	selectMitigationCriteriaTeamspace,
 	selectRisks,
 	selectRisksMap
 } from './risks.selectors';
@@ -71,6 +72,19 @@ function* fetchRisks({teamspace, modelId, revision}) {
 	yield put(RisksActions.togglePendingState(false));
 }
 
+function* fetchMitigationCriteria({teamspace}) {
+	try {
+		const mitigationCriteriaTeamspace = yield select(selectMitigationCriteriaTeamspace);
+		if (mitigationCriteriaTeamspace !== teamspace) {
+			const {data} = yield API.getMitigationCriteria(teamspace);
+			yield put(RisksActions.fetchMitigationCriteriaSuccess(data, teamspace));
+		}
+	} catch (error) {
+		yield put(RisksActions.fetchMitigationCriteriaFailure());
+		yield put(DialogActions.showErrorDialog('get', 'mitigation criteria', error));
+	}
+}
+
 function* fetchRisk({teamspace, modelId, riskId}) {
 	yield put(RisksActions.toggleDetailsPendingState(true));
 
@@ -78,6 +92,7 @@ function* fetchRisk({teamspace, modelId, riskId}) {
 		const {data} = yield API.getRisk(teamspace, modelId, riskId);
 		data.comments = yield prepareComments(data.comments);
 		data.resources = prepareResources(teamspace, modelId, data.resources);
+		yield put(RisksActions.fetchMitigationCriteria(teamspace));
 		yield put(RisksActions.fetchRiskSuccess(data));
 	} catch (error) {
 		yield put(RisksActions.fetchRiskFailure());
@@ -669,4 +684,5 @@ export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.REMOVE_RESOURCE, removeResource);
 	yield takeLatest(RisksTypes.ATTACH_FILE_RESOURCES, attachFileResources);
 	yield takeLatest(RisksTypes.ATTACH_LINK_RESOURCES, attachLinkResources);
+	yield takeLatest(RisksTypes.FETCH_MITIGATION_CRITERIA, fetchMitigationCriteria);
 }

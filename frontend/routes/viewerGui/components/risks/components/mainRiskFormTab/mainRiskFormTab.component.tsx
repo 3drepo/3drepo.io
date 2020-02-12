@@ -30,6 +30,7 @@ import {
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
 import { Image } from '../../../../../components/image';
 import { TextField } from '../../../../../components/textField/textField.component';
+import { AutoSuggestField } from '../autoSuggestField/autosuggestField.component';
 import { LevelOfRisk } from '../levelOfRisk/levelOfRisk.component';
 import {
 	Container,
@@ -158,49 +159,57 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 			</FieldsRow>
 
 			<FieldsRow container alignItems="center" justify="space-between">
-				<Field name="associated_activity" render={({ field }) => (
-					<TextField
-						{...field}
-						requiredConfirm={!isNewRisk}
-						label="Associated Activity"
-						disabled={!canEditBasicProperty}
-					/>
-				)} />
-				<Field name="element" render={({ field }) => (
-					<TextField
-						{...field}
-						requiredConfirm={!isNewRisk}
-						label="Element type"
-						disabled={!canEditBasicProperty}
-					/>
-				)} />
+				<StyledFormControl>
+					<Field name="associated_activity" render={({ field, form }) => (
+						<AutoSuggestField
+							label="Associated Activity"
+							suggestions={criteria.associated_activity}
+							form={form}
+							field={field}
+						/>
+					)} />
+				</StyledFormControl>
+				<StyledFormControl>
+					<Field name="element" render={({ field, form }) => (
+						<AutoSuggestField
+							label="Element type"
+							suggestions={criteria.element}
+							form={form}
+							field={field}
+							disabled={!canEditBasicProperty}
+						/>
+					)} />
+				</StyledFormControl>
 			</FieldsRow>
 
 			<FieldsRow container alignItems="center" justify="space-between">
 				<FieldsContainer>
-					<Field name="risk_factor" render={({ field }) => (
-						<TextField
-							{...field}
-							requiredConfirm={!isNewRisk}
+					<Field name="risk_factor" render={({ field, form }) => (
+						<AutoSuggestField
 							label="Risk factor"
+							suggestions={criteria.risk_factor}
+							form={form}
+							field={field}
 							disabled={!canEditBasicProperty}
 						/>
 					)} />
-					<Field name="location_desc" render={({ field }) => (
-						<TextField
-							{...field}
-							requiredConfirm={!isNewRisk}
+					<Field name="location_desc" render={({ field, form }) => (
+						<AutoSuggestField
 							label="Location"
+							suggestions={criteria.location_desc}
+							form={form}
+							field={field}
 							disabled={!canEditBasicProperty}
 						/>
 					)} />
 				</FieldsContainer>
 				<FieldsContainer>
-					<Field name="scope" render={({ field }) => (
-						<TextField
-							{...field}
-							requiredConfirm={!isNewRisk}
+					<Field name="scope" render={({ field, form }) => (
+						<AutoSuggestField
 							label="Construction Scope"
+							suggestions={criteria.scope}
+							form={form}
+							field={field}
 							disabled={!canEditBasicProperty}
 						/>
 					)} />

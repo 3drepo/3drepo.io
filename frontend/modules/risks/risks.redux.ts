@@ -61,7 +61,10 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	attachFileResources: ['files'],
 	attachLinkResources: ['links'],
 	attachResourcesSuccess: ['resources', 'riskId'],
-	updateResourcesSuccess: ['resourcesIds', 'updates', 'riskId' ]
+	updateResourcesSuccess: ['resourcesIds', 'updates', 'riskId' ],
+	fetchMitigationCriteria: ['teamspace'],
+	fetchMitigationCriteriaSuccess: ['criteria', 'teamspace'],
+	fetchMitigationCriteriaFailure: [],
 }, { prefix: 'RISKS/' });
 
 export interface IRisksComponentState {
@@ -97,7 +100,10 @@ export const INITIAL_STATE = {
 		associatedActivities: [],
 		sortOrder: 'desc',
 		failedToLoad: false
-	}
+	},
+	mitigationCriteria: {
+		teamspace: '',
+	},
 };
 
 const updateRiskProps = (risksMap, riskId, props = {}) => {
@@ -251,6 +257,10 @@ const updateResourcesSuccess = (state = INITIAL_STATE, { resourcesIds, updates, 
 	return { ...state, risksMap};
 };
 
+export const fetchMitigationCriteriaSuccess = (state = INITIAL_STATE,  { criteria, teamspace }) => {
+	return { ...state, mitigationCriteria: { ...criteria, teamspace } };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.FETCH_RISKS_SUCCESS]: fetchRisksSuccess,
 	[RisksTypes.FETCH_RISK_SUCCESS]: fetchRiskSuccess,
@@ -269,5 +279,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.REMOVE_RESOURCE_SUCCESS]: removeResourceSuccess,
 	[RisksTypes.ATTACH_RESOURCES_SUCCESS]: attachResourcesSuccess,
 	[RisksTypes.UPDATE_RESOURCES_SUCCESS]: updateResourcesSuccess,
-	[RisksTypes.TOGGLE_SHOW_PINS]: toggleShowPins
+	[RisksTypes.TOGGLE_SHOW_PINS]: toggleShowPins,
+	[RisksTypes.FETCH_MITIGATION_CRITERIA_SUCCESS]: fetchMitigationCriteriaSuccess,
+	[RisksTypes.FETCH_MITIGATION_CRITERIA_FAILURE]: fetchRiskFailure,
 });

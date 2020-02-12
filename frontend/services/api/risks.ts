@@ -149,3 +149,11 @@ export const attachFileResourcesToRisk = (teamspace, modelId, riskId, names: any
 export const attachLinkResourcesToRisk = (teamspace, modelId, riskId, names: any[], urls: any[] ) => {
 	return api.post(`${teamspace}/${modelId}/risks/${riskId}/resources`, {names, urls});
 };
+
+/**
+ * Get mitigation criteria
+ * @param teamspace
+ */
+export const getMitigationCriteria  = (teamspace) => {
+	return api.get(`${teamspace}/mitigations/criteria`);
+};
