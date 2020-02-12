@@ -101,15 +101,15 @@ class Ticket {
 						vp.guid === comment.viewpoint
 					);
 
-					if (commentViewpoint) {
-						comment.viewpoint = commentViewpoint;
-					}
+					comment.viewpoint = commentViewpoint || undefined;
 				}
 			});
 		}
 
 		if (ticketToClean.thumbnail && ticketToClean.thumbnail.flag) {
 			ticketToClean.thumbnail = account + "/" + model + "/" + this.collName + "/" + id + "/thumbnail.png";
+		} else {
+			ticketToClean.thumbnail = undefined;
 		}
 
 		// Return empty arrays as frontend expects them
@@ -118,7 +118,7 @@ class Ticket {
 			if (!ticketToClean[field]) {
 				if ("[object Array]" === this.fieldTypes[field]) {
 					ticketToClean[field] = [];
-				} else if ("[object Object]" === this.fieldTypes[field]) {
+				} else if ("[object Object]" === this.fieldTypes[field] && field !== "thumbnail") {
 					ticketToClean[field] = {};
 				}
 			}
