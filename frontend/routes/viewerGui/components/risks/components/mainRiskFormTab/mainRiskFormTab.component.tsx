@@ -52,12 +52,18 @@ interface IProps {
 	hidePin?: boolean;
 	renderPinButton: (show: boolean) => React.ReactNode;
 	values?: any;
+	criteria: any;
 }
 
 export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 	active, isNewRisk, risk, hidePin, jobs, canChangeAssigned, canEditBasicProperty,
-	renderPinButton, values,
+	renderPinButton, values, criteria,
 }) => {
+	const getCategories = () => {
+		const { category = [] } = criteria;
+		return category.map((value) => ({ value, name: value }));
+	};
+
 	return (
 		<Content active={active}>
 			<Container>
@@ -150,7 +156,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 					<Field name="category" render={({ field }) => (
 						<CellSelect
 							{...field}
-							items={RISK_CATEGORIES}
+							items={getCategories()}
 							inputId="category"
 							disabled={!canEditBasicProperty}
 						/>
