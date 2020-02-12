@@ -551,6 +551,10 @@ function createSession(place, req, res, next, user) {
 	regenerateAuthSession(req, config, user)
 		.then(() => getSessionsByUsername(user.username))
 		.then(sessions => { // Remove other sessions with the same username
+			if (!req.session.user.webSession) {
+				return null;
+			}
+
 			const ids = [];
 
 			sessions.forEach(entry => {
