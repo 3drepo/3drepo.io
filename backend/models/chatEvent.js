@@ -42,6 +42,17 @@ function insertEventQueue(event, emitter, account, model, extraKeys, data) {
 	return Queue.insertEventMessage(msg);
 }
 
+function insertEventQueueDM(event, recipient, data) {
+	const msg = {
+		event,
+		recipient,
+		data,
+		dm: true
+	};
+
+	return Queue.insertEventMessage(msg);
+}
+
 // Notifications chat events
 function upsertedNotification(session, notification) {
 	const msg = {
@@ -97,6 +108,11 @@ function commentDeleted(emitter, account, model, _id, data) {
 
 function modelStatusChanged(emitter, account, model, data) {
 	return insertEventQueue("modelStatusChanged", emitter, account, model, null, data);
+}
+
+// Remotely logged out
+function loggedOut(recipient) {
+	return insertEventQueueDM("loggedOut" , recipient, { reason: 0 });
 }
 
 // Not sure if this one is being used.
@@ -165,5 +181,6 @@ module.exports = {
 	upsertedNotification,
 	deletedNotification,
 	resourcesCreated,
-	resourceDeleted
+	resourceDeleted,
+	loggedOut
 };

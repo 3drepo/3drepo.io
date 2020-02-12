@@ -26,6 +26,7 @@ import { IS_DEVELOPMENT } from '../../constants/environment';
 import { clientConfigService } from '../../services/clientConfig';
 import { Channel } from './channel';
 import { ChatActions, ChatTypes } from './chat.redux';
+import { Subscriptions } from './subscriptions';
 
 const { host, path, reconnectionAttempts } = clientConfigService.chatConfig;
 const socket = io(host, {
@@ -35,9 +36,17 @@ const socket = io(host, {
 	reconnectionDelay: 500,
 	reconnectionAttempts
 });
+const dmSubscriptions = {};
+
 socket.on('connect', () => dispatch(ChatActions.handleConnect()));
 socket.on('disconnect', () => dispatch(ChatActions.handleDisconnect()));
 socket.on('reconnect', () => dispatch(ChatActions.handleReconnect()));
+socket.on('message', (data) =>  {
+	if (!dmSubscriptions[data.event]) {
+		return;
+	}
+	dmSubscriptions[data.event].invokeCallbacks(data.data);
+});
 
 const channels = {};
 const joinedRooms = [] as any;
@@ -106,6 +115,22 @@ function* callCommentsChannelActions({ subchannelName, teamspace, model = '', da
 	invokeChannelHandlers(commentsChannel, handlers);
 }
 
+function* subscribeToDm({event, handler, context}) {
+	if (!dmSubscriptions[event]) {
+		dmSubscriptions[event] =  new Subscriptions();
+	}
+
+	dmSubscriptions[event].subscribe(handler, context);
+}
+
+function* unsubscribeToDm({event, handler }) {
+	if (!dmSubscriptions[event]) {
+		return;
+	}
+
+	dmSubscriptions[event].unsubscribe(handler);
+}
+
 export default function* ChatSaga() {
 	yield takeLatest(ChatTypes.JOIN_ROOM, joinRoom);
 	yield takeLatest(ChatTypes.CALL_CHANNEL_ACTIONS, callChannelActions);
@@ -113,4 +138,6 @@ export default function* ChatSaga() {
 	yield takeLatest(ChatTypes.HANDLE_CONNECT, handleConnect);
 	yield takeLatest(ChatTypes.HANDLE_DISCONNECT, handleDisconnect);
 	yield takeLatest(ChatTypes.HANDLE_RECONNECT, handleReconnect);
+	yield takeLatest(ChatTypes.SUBSCRIBE_TO_DM, subscribeToDm);
+	yield takeLatest(ChatTypes.UNSUBSCRIBE_TO_DM, unsubscribeToDm);
 }
