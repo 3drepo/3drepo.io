@@ -28,6 +28,7 @@ import {
 } from '../../../../../../constants/risks';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
 import { TextField } from '../../../../../components/textField/textField.component';
+import { LabelButton } from '../../../labelButton/labelButton.styles';
 import { AutoSuggestField } from '../autoSuggestField/autosuggestField.component';
 import { LevelOfRisk } from '../levelOfRisk/levelOfRisk.component';
 import {
@@ -36,6 +37,7 @@ import {
 	FieldsContainer,
 	FieldsRow,
 	StyledFormControl,
+	SuggestionButtonWrapper,
 } from '../riskDetails/riskDetails.styles';
 import { RiskSchema } from '../riskDetails/riskDetailsForm.component';
 
@@ -51,9 +53,16 @@ interface IProps {
 export const TreatmentRiskFormTab: React.FunctionComponent<IProps> = ({
 	active, isNewRisk, canEditBasicProperty, canEditRiskStatus, values, criteria
 }) => {
+	const handleSuggestionClick = () => {
+		console.log('helloo');
+	};
+
 	return (
 		<Content active={active}>
-			<Container>
+			<Container top>
+				<SuggestionButtonWrapper>
+					<LabelButton disabled={!canEditBasicProperty} onClick={handleSuggestionClick}>Suggest</LabelButton>
+				</SuggestionButtonWrapper>
 				<Field name="mitigation_desc" render={({ field }) => (
 					<TextField
 						{...field}

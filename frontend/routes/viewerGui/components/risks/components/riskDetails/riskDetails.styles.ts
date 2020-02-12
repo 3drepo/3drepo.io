@@ -44,8 +44,10 @@ export const PreviewDetails = styled(PreviewDetailsBase)``;
 export const Container = styled.div`
 	display: flex;
 	flex-direction: column;
+	position: relative;
 	overflow: hidden;
 	flex: ${(props: any) => props.fill ? 1 : 'auto'};
+	padding-top: ${(props: any) => props.top ? '16px' : 'auto'};
 
 	${TextFieldStyles.StyledTextField} {
 		margin: 1px 0;
@@ -144,4 +146,10 @@ export const ExpandAction = styled.span`
 	cursor: pointer;
 	display: block;
 	text-align: center;
+`;
+
+export const SuggestionButtonWrapper = styled.div`
+	position: absolute;
+	top: 0;
+	right: 0;
 `;
