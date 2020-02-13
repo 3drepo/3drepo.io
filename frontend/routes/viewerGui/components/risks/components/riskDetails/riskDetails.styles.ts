@@ -150,6 +150,7 @@ export const ExpandAction = styled.span`
 
 export const SuggestionButtonWrapper = styled.div`
 	position: absolute;
+	z-index: 1;
 	top: 0;
 	right: 0;
 `;

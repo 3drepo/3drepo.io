@@ -60,6 +60,7 @@ interface IProps {
 	showDialog: (config: any) => void;
 	fetchMitigationCriteria: (teamspace: string) => void;
 	criteria: any;
+	showMitigationSuggestions: (conditions: any, setFieldValue) => void;
 }
 
 interface IState {
@@ -265,6 +266,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				attachLinkResources={attachLinkResources}
 				showDialog={showDialog}
 				canComment={this.userCanComment}
+				showMitigationSuggestions={this.props.showMitigationSuggestions}
 			/>
 		);
 	}

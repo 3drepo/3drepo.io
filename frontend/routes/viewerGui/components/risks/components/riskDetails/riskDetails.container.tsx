@@ -66,8 +66,9 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	onRemoveResource: RisksActions.removeResource,
 	attachFileResources: RisksActions.attachFileResources,
 	attachLinkResources: RisksActions.attachLinkResources,
-	showDialog:  DialogActions.showDialog,
+	showDialog: DialogActions.showDialog,
 	fetchMitigationCriteria: RisksActions.fetchMitigationCriteria,
+	showMitigationSuggestions: RisksActions.showMitigationSuggestions,
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(RiskDetails));

@@ -19,6 +19,7 @@ import React from 'react';
 
 import InputLabel from '@material-ui/core/InputLabel';
 import { Field } from 'formik';
+import { isEmpty, omitBy, pick } from 'lodash';
 
 import {
 	LEVELS_OF_RISK,
@@ -41,6 +42,12 @@ import {
 } from '../riskDetails/riskDetails.styles';
 import { RiskSchema } from '../riskDetails/riskDetailsForm.component';
 
+const FIELDS_FOR_MITIGATION_SUGGESTIONS = [
+	'associated_activity', 'category', 'element', 'location_desc', 'risk_factor', 'scope',
+];
+
+const getMitigationSuggestionsFields = (values) => omitBy(pick(values, FIELDS_FOR_MITIGATION_SUGGESTIONS), isEmpty);
+
 interface IProps {
 	active: boolean;
 	isNewRisk: boolean;
@@ -48,13 +55,17 @@ interface IProps {
 	canEditRiskStatus: boolean;
 	values?: any;
 	criteria: any;
+	showDialog: (config: any) => void;
+	showMitigationSuggestions: (conditions: any, setFieldValue) => void;
+	setFieldValue: (name: string, value: string) => void;
 }
 
 export const TreatmentRiskFormTab: React.FunctionComponent<IProps> = ({
-	active, isNewRisk, canEditBasicProperty, canEditRiskStatus, values, criteria
+	active, isNewRisk, canEditBasicProperty, canEditRiskStatus, values, criteria, showDialog,
+	showMitigationSuggestions, setFieldValue
 }) => {
 	const handleSuggestionClick = () => {
-		console.log('helloo');
+		showMitigationSuggestions(getMitigationSuggestionsFields(values), setFieldValue);
 	};
 
 	return (
