@@ -40,7 +40,7 @@ install:
     - yarn install
     - yarn lint
     - cd ./../frontend
-    - yarn install
+    - DETECT_CHROMEDRIVER_VERSION=true yarn install
     - yarn lint
     - yarn build:test
 

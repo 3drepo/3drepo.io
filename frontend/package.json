@@ -132,7 +132,7 @@
     "chai": "4.2.0",
     "mocha": "5.2.0",
     "selenium-webdriver": "4.0.0-alpha.5",
-    "chromedriver": "78.0.1"
+    "chromedriver": "80.0.1"
   },
   "resolutions": {
     "react": "16.8.6",
