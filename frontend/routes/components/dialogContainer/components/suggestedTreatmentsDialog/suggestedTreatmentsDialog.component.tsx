@@ -25,7 +25,8 @@ import { forOwn, uniq } from 'lodash';
 import { LabelButton } from '../../../../viewerGui/components/labelButton/labelButton.styles';
 import { CellSelect } from '../../../customTable/components/cellSelect/cellSelect.component';
 import {
-	Container, StyledDialogContent, StyledGrid, StyledList, StyledListItem, StyledTypography,
+	Container, Label, StyledDialogContent, StyledGrid, StyledList, StyledListItem, StyledTypography,
+	TextContainer,
 } from './suggestedTreatmentsDialog.styles';
 
 interface ITextWrapper {
@@ -36,28 +37,28 @@ interface ITextWrapper {
 }
 
 const TextWrapper: React.FunctionComponent<ITextWrapper> = ({
-	children, color = 'textPrimary', variant = 'caption', ...props
+	children, color = 'textPrimary', variant = 'caption', inline, ...props
 }) => (
-	<StyledTypography component="span" variant={variant} color={color} {...props}>
+	<StyledTypography component="span" inline={inline ? 1 : 0} variant={variant} color={color} {...props}>
 		{children}
 	</StyledTypography>
 );
 
 const renderDetails = (suggestion) => (
 	<Grid container>
-		<Grid item xs={12} wrap="nowrap">
+		<TextContainer item xs={12}>
 			<TextWrapper noWrap color="textSecondary">
 				{suggestion.mitigation_details}
 			</TextWrapper>
-		</Grid>
-		<Grid item xs={4} wrap="nowrap" zeroMinWidth>
+		</TextContainer>
+		<TextContainer item xs={4} zeroMinWidth>
 			<TextWrapper noWrap>
 				Stage:&nbsp;
 				<TextWrapper inline color="textSecondary">
 					{suggestion.mitigation_stage}
 				</TextWrapper>
 			</TextWrapper>
-		</Grid>
+		</TextContainer>
 		<Grid item xs={4}>
 			<TextWrapper noWrap>
 				Type:&nbsp;
@@ -118,11 +119,11 @@ export const SuggestedTreatmentsDialog = ({ suggestions, setFieldValue, handleCl
 	return (
 		<Container>
 			<StyledGrid container>
-				<Grid container justify="flex-end" alignItems="center" xs={1}>
+				<Label container justify="flex-end" alignItems="center">
 					<TextWrapper>
 						Stage:&nbsp;
 					</TextWrapper>
-				</Grid>
+				</Label>
 				<Grid item xs={4}>
 					<CellSelect
 						value={stage}
@@ -130,11 +131,11 @@ export const SuggestedTreatmentsDialog = ({ suggestions, setFieldValue, handleCl
 						onChange={handleStageChange}
 					/>
 				</Grid>
-				<Grid container justify="flex-end" alignItems="center" xs={1}>
+				<Label container justify="flex-end" alignItems="center">
 					<TextWrapper>
 						Type:&nbsp;
 					</TextWrapper>
-				</Grid>
+				</Label>
 				<Grid item xs={4}>
 					<CellSelect
 						value={type}
@@ -150,6 +151,9 @@ export const SuggestedTreatmentsDialog = ({ suggestions, setFieldValue, handleCl
 							<ListItemText
 								primary={suggestion.mitigation_desc}
 								secondary={renderDetails(suggestion)}
+								secondaryTypographyProps={{
+									component: 'div',
+								}}
 							/>
 							<ListItemSecondaryAction>
 								<LabelButton onClick={() => handleClick(suggestion)}>Select</LabelButton>

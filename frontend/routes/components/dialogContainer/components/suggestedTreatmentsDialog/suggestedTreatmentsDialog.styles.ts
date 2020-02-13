@@ -53,6 +53,22 @@ export const StyledGrid = styled(Grid)`
 	}
 `;
 
+export const Label = styled(Grid)`
+	&& {
+		flex-grow: 0;
+		max-width: 8.333333%;
+		flex-basis: 8.333333%;
+	}
+`;
+
+export const TextContainer = styled(Grid)`
+	&& {
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+	}
+`;
+
 export const Container = styled.div`
 	position: relative;
 	width: 600px;
