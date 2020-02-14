@@ -13,9 +13,8 @@ describe('3drepo.io', function() {
   let driver
   let vars
   beforeEach(async function() {
-  //  const args = new chrome.Options().addArguments(['headless','disable-gpu', 'enable-logging']);
-    const args = new chrome.Options().addArguments(['enable-logging']);
-
+    const args = new chrome.Options().addArguments(['headless','disable-gpu', 'enable-logging']);
+  
     driver = await new Builder()
       .forBrowser('chrome')
       .setChromeOptions(args)
@@ -57,11 +56,11 @@ describe('3drepo.io', function() {
       // Click login
       await (await waitForElementToBeReady(driver, By.css('button[type=submit]'), configuration.timeout)).click();
 
-      // closes the 'update available' dialog
+      // Closes the 'update available' dialog if its showing
       try {
         await (await waitForElementToBeReady(driver, By.css("[role='dialog'] button"), configuration.timeout)).click();
       } catch (e) {
-        // the update dialog is not there, carry on
+        // The 'update available' dialog is not there: carry on
       }
 
       //  Click user menu
