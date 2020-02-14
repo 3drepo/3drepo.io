@@ -5,7 +5,7 @@ const assert = require('assert')
 const {waitForElementToBeReady , takeScreenshot, delay} = require('./helpers/selenium');
 
 const BASE_URL = 'http://127.0.0.1:8080';
-const configuration = { timeout:30000 };
+const configuration = { timeout:15000 };
 
 
 describe('3drepo.io', function() {
@@ -38,10 +38,7 @@ describe('3drepo.io', function() {
   })
 
   it('Login', async function() {
-    let element = null;
-
-//    await driver.get((new URL(`/login`, BASE_URL)).href);
-    await driver.get('https://www.bbc.co.uk/');
+    await driver.get((new URL('/login', BASE_URL)).href);
 
     try {
       await driver.manage().window().setRect({
@@ -52,22 +49,25 @@ describe('3drepo.io', function() {
       console.log('Unable to resize window. Skipping.');
     };
 
+    try {
+      (await waitForElementToBeReady(driver, By.name('login'), configuration.timeout)).sendKeys('teamSpace1');
 
-    takeScreenshot(driver);
+      (await waitForElementToBeReady(driver, By.name('password'), configuration.timeout)).sendKeys('password');
 
-    // (await waitForElementToBeReady(driver, By.name(`login`), configuration.timeout)).sendKeys(`teamSpace1`);
+      // Click login
+      (await waitForElementToBeReady(driver, By.css('button[type=submit]'), configuration.timeout)).click();
 
-    // (await waitForElementToBeReady(driver, By.name(`password`), configuration.timeout)).sendKeys(`password`);
+      //  Click user menu
+      (await waitForElementToBeReady(driver, By.css("button[aria-label='Toggle main menu']"), configuration.timeout)).click();
 
-    // // Click login
-    // (await waitForElementToBeReady(driver, By.css(`.MuiButton-contained-212 > .MuiButton-label-202`), configuration.timeout)).click();
+      //  Click logout
+      (await waitForElementToBeReady(driver, By.css("[aria-label='Logout']"), configuration.timeout)).click();
+    }
 
-    // //  Click user menu
-    // (await waitForElementToBeReady(driver, By.xpath(`/html/body/div[3]/div/div[2]/button[2]`), configuration.timeout)).click();
-
-    // //  Click logout
-    // (await waitForElementToBeReady(driver, By.css(`.MuiButtonBase-root-7:nth-child(6) > .MuiListItemText-root-496`), configuration.timeout)).click();
-
+    catch(e) {
+      await takeScreenshot(driver);
+      throw e;
+    }
   })
 })
 

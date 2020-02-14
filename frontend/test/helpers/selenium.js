@@ -8,7 +8,7 @@ const waitForElementToBeReady = async (driver, locator, timeout) => {
 
 const takeScreenshot = async (driver) => {
 	const screenshot = await driver.takeScreenshot();
-	console.log(`<img src="data:image/gif;base64,${screenshot}>`)
+	console.log(`<img src="data:image/gif;base64,${screenshot}" />`)
 }
 
 const delay =  async (time) =>  new Promise((resolve) => setTimeout(resolve, time));
