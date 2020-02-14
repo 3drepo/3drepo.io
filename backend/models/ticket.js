@@ -335,41 +335,40 @@ class Ticket {
 		newTicket.created = parseInt(newTicket.created || (new Date()).getTime());
 		newTicket.desc = newTicket.desc || "(No Description)";
 		let imagePromise = Promise.resolve();
-		if (newTicket.viewpoint) {
-			newTicket.viewpoint.guid = utils.generateUUID();
+		newTicket.viewpoint = newTicket.viewpoint || {};
+		newTicket.viewpoint.guid = utils.generateUUID();
 
-			if (newTicket.viewpoint.highlighted_group_id) {
-				newTicket.viewpoint.highlighted_group_id = utils.stringToUUID(newTicket.viewpoint.highlighted_group_id);
-			}
-
-			if (newTicket.viewpoint.hidden_group_id) {
-				newTicket.viewpoint.hidden_group_id = utils.stringToUUID(newTicket.viewpoint.hidden_group_id);
-			}
-
-			if (newTicket.viewpoint.shown_group_id) {
-				newTicket.viewpoint.shown_group_id = utils.stringToUUID(newTicket.viewpoint.shown_group_id);
-			}
-
-			if (newTicket.viewpoint.screenshot) {
-				newTicket.viewpoint.screenshot = {
-					content: new Buffer.from(newTicket.viewpoint.screenshot, "base64"),
-					flag: 1
-				};
-
-				imagePromise = utils.resizeAndCropScreenshot(newTicket.viewpoint.screenshot.content, 120, 120, true).catch((err) => {
-					systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
-						account,
-						model,
-						type: this.collName,
-						ticketId: utils.uuidToString(newTicket._id),
-						viewpointId: utils.uuidToString(newTicket.viewpoint.guid),
-						err
-					});
-				});
-			}
-
-			newTicket.viewpoints = [newTicket.viewpoint];
+		if (newTicket.viewpoint.highlighted_group_id) {
+			newTicket.viewpoint.highlighted_group_id = utils.stringToUUID(newTicket.viewpoint.highlighted_group_id);
 		}
+
+		if (newTicket.viewpoint.hidden_group_id) {
+			newTicket.viewpoint.hidden_group_id = utils.stringToUUID(newTicket.viewpoint.hidden_group_id);
+		}
+
+		if (newTicket.viewpoint.shown_group_id) {
+			newTicket.viewpoint.shown_group_id = utils.stringToUUID(newTicket.viewpoint.shown_group_id);
+		}
+
+		if (newTicket.viewpoint.screenshot) {
+			newTicket.viewpoint.screenshot = {
+				content: new Buffer.from(newTicket.viewpoint.screenshot, "base64"),
+				flag: 1
+			};
+
+			imagePromise = utils.resizeAndCropScreenshot(newTicket.viewpoint.screenshot.content, 120, 120, true).catch((err) => {
+				systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
+					account,
+					model,
+					type: this.collName,
+					ticketId: utils.uuidToString(newTicket._id),
+					viewpointId: utils.uuidToString(newTicket.viewpoint.guid),
+					err
+				});
+			});
+		}
+
+		newTicket.viewpoints = [newTicket.viewpoint];
 
 		// Assign rev_id for issue
 		const [history, image] = await Promise.all([
@@ -396,8 +395,16 @@ class Ticket {
 
 		Object.keys(newTicket).forEach((key) => {
 			if (Object.prototype.toString.call(newTicket[key]) !== this.fieldTypes[key]) {
-				systemLogger.logError(`Type check failed: ${key} is expected to be type ${this.fieldTypes[key]} but it is `, Object.prototype.toString.call(newTicket[key]));
-				throw responseCodes.INVALID_ARGUMENTS;
+				if (newTicket[key] === null) {
+					delete newTicket[key];
+				} else {
+					systemLogger.logError(`Type check failed: ${key} is expected to be type ${this.fieldTypes[key]} but it is `, Object.prototype.toString.call(newTicket[key]));
+					throw responseCodes.INVALID_ARGUMENTS;
+				}
+
+			}
+			if (key === "due_date" && newTicket[key] === 0) {
+				delete newTicket[key];
 			}
 		});
 
@@ -406,6 +413,7 @@ class Ticket {
 			this.getTicketsCollection(account, model)
 		]);
 
+		console.log(newTicket);
 		await coll.insert(newTicket);
 		newTicket.typePrefix = newTicket.typePrefix || settings.type || "";
 		newTicket = this.clean(account, model, newTicket);
