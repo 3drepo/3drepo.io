@@ -16,10 +16,8 @@
  */
 
 import React from 'react';
-import {
-	GhostElement,
-} from '../../../../../components/screenshotDialog/components/editableText/editableText.styles';
 
+import { GhostElement } from '../../../../../components/screenshotDialog/components/editableText/editableText.styles';
 import { TextField } from '../../../../../components/textField/textField.component';
 import { ExpandAction } from '../riskDetails/riskDetails.styles';
 

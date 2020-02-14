@@ -28,14 +28,16 @@ import {
 	selectExpandDetails,
 	selectFailedToLoad,
 	selectFetchingDetailsIsPending,
+	selectMitigationCriteria,
 	selectNewComment,
-	RisksActions
+	RisksActions,
 } from '../../../../../../modules/risks';
 import { ViewpointsActions } from '../../../../../../modules/viewpoints';
 import { withViewer } from '../../../../../../services/viewer/viewer';
 import { RiskDetails } from './riskDetails.component';
 
 const mapStateToProps = createStructuredSelector({
+	criteria: selectMitigationCriteria,
 	risk: selectActiveRiskDetails,
 	jobs: selectJobsList,
 	expandDetails: selectExpandDetails,
@@ -45,7 +47,7 @@ const mapStateToProps = createStructuredSelector({
 	myJob: selectMyJob,
 	currentUser: selectCurrentUser,
 	modelSettings: selectSettings,
-	failedToLoad: selectFailedToLoad
+	failedToLoad: selectFailedToLoad,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -64,7 +66,9 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	onRemoveResource: RisksActions.removeResource,
 	attachFileResources: RisksActions.attachFileResources,
 	attachLinkResources: RisksActions.attachLinkResources,
-	showDialog:  DialogActions.showDialog
+	showDialog: DialogActions.showDialog,
+	fetchMitigationCriteria: RisksActions.fetchMitigationCriteria,
+	showMitigationSuggestions: RisksActions.showMitigationSuggestions,
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(RiskDetails));

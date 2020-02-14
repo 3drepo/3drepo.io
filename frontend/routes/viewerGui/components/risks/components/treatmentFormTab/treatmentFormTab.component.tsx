@@ -19,6 +19,7 @@ import React from 'react';
 
 import InputLabel from '@material-ui/core/InputLabel';
 import { Field } from 'formik';
+import { isEmpty, omitBy, pick } from 'lodash';
 
 import {
 	LEVELS_OF_RISK,
@@ -28,6 +29,8 @@ import {
 } from '../../../../../../constants/risks';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
 import { TextField } from '../../../../../components/textField/textField.component';
+import { LabelButton } from '../../../labelButton/labelButton.styles';
+import { AutoSuggestField } from '../autoSuggestField/autosuggestField.component';
 import { LevelOfRisk } from '../levelOfRisk/levelOfRisk.component';
 import {
 	Container,
@@ -35,8 +38,15 @@ import {
 	FieldsContainer,
 	FieldsRow,
 	StyledFormControl,
+	SuggestionButtonWrapper,
 } from '../riskDetails/riskDetails.styles';
 import { RiskSchema } from '../riskDetails/riskDetailsForm.component';
+
+const FIELDS_FOR_MITIGATION_SUGGESTIONS = [
+	'associated_activity', 'category', 'element', 'location_desc', 'risk_factor', 'scope',
+];
+
+const getMitigationSuggestionsFields = (values) => omitBy(pick(values, FIELDS_FOR_MITIGATION_SUGGESTIONS), isEmpty);
 
 interface IProps {
 	active: boolean;
@@ -44,14 +54,26 @@ interface IProps {
 	canEditBasicProperty: boolean;
 	canEditRiskStatus: boolean;
 	values?: any;
+	criteria: any;
+	showDialog: (config: any) => void;
+	showMitigationSuggestions: (conditions: any, setFieldValue) => void;
+	setFieldValue: (name: string, value: string) => void;
 }
 
 export const TreatmentRiskFormTab: React.FunctionComponent<IProps> = ({
-	active, isNewRisk, canEditBasicProperty, canEditRiskStatus, values
+	active, isNewRisk, canEditBasicProperty, canEditRiskStatus, values, criteria, showDialog,
+	showMitigationSuggestions, setFieldValue
 }) => {
+	const handleSuggestionClick = () => {
+		showMitigationSuggestions(getMitigationSuggestionsFields(values), setFieldValue);
+	};
+
 	return (
 		<Content active={active}>
-			<Container>
+			<Container top>
+				<SuggestionButtonWrapper>
+					<LabelButton disabled={!canEditBasicProperty} onClick={handleSuggestionClick}>Suggest</LabelButton>
+				</SuggestionButtonWrapper>
 				<Field name="mitigation_desc" render={({ field }) => (
 					<TextField
 						{...field}
@@ -76,28 +98,34 @@ export const TreatmentRiskFormTab: React.FunctionComponent<IProps> = ({
 						label="Treatment Details"
 						disabled={!canEditBasicProperty}
 						mutable={!isNewRisk}
-						expandable={!isNewRisk && active}
+						expandable={Number(!isNewRisk && active)}
 					/>
 				)} />
 			</Container>
 
 			<FieldsRow container alignItems="center" justify="space-between">
-				<Field name="mitigation_stage" render={({ field }) => (
-					<TextField
-						{...field}
-						requiredConfirm={!isNewRisk}
-						label="Stage"
-						disabled={!canEditBasicProperty}
-					/>
-				)} />
-				<Field name="mitigation_type" render={({ field }) => (
-					<TextField
-						{...field}
-						requiredConfirm={!isNewRisk}
-						label="Type"
-						disabled={!canEditBasicProperty}
-					/>
-				)} />
+				<StyledFormControl>
+					<Field name="mitigation_stage" render={({ field, form }) => (
+						<AutoSuggestField
+							label="Stage"
+							suggestions={criteria.mitigation_stage}
+							form={form}
+							field={field}
+							disabled={!canEditBasicProperty}
+						/>
+					)} />
+				</StyledFormControl>
+				<StyledFormControl>
+					<Field name="mitigation_type" render={({ field, form }) => (
+						<AutoSuggestField
+							label="Type"
+							suggestions={criteria.mitigation_type}
+							form={form}
+							field={field}
+							disabled={!canEditBasicProperty}
+						/>
+					)} />
+				</StyledFormControl>
 			</FieldsRow>
 
 			<Container>

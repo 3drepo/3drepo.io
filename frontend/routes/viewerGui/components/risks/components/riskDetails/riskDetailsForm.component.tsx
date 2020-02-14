@@ -70,6 +70,8 @@ interface IProps {
 	canComment: boolean;
 	hasPin: boolean;
 	hidePin?: boolean;
+	criteria: any;
+	showMitigationSuggestions: (conditions: any, setFieldValue) => void;
 }
 
 interface IState {
