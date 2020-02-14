@@ -6,19 +6,10 @@ const waitForElementToBeReady = async (driver, locator, timeout) => {
 	return element
   };
 
-const takeScreenshot = async (driver, name) => {
+const takeScreenshot = async (driver) => {
 	const screenshot = await driver.takeScreenshot();
-
-	return new Promise((resolve, reject)=> {
-	  require("fs").writeFile(name, screenshot, 'base64', function(err) {
-		if (err) {
-		  reject(err);
-		} else {
-		  resolve(screenshot);
-		}
-	  });
-	});
-  }
+	console.log(`<img src="data:image/gif;base64,${screenshot}>`)
+}
 
 const delay =  async (time) =>  new Promise((resolve) => setTimeout(resolve, time));
 
