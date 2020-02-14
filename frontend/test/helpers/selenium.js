@@ -1,6 +1,6 @@
 const { until } = require('selenium-webdriver')
 
-const waitForElementToBeReady = async (driver, locator, timeout) => {
+const waitForElementToBeReady = async (driver, locator, timeout = 15000) => {
 	const element = await driver.wait(until.elementLocated(locator), timeout);
 	await driver.wait(until.elementIsVisible(element), timeout);
 	return element
