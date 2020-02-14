@@ -413,7 +413,6 @@ class Ticket {
 			this.getTicketsCollection(account, model)
 		]);
 
-		console.log(newTicket);
 		await coll.insert(newTicket);
 		newTicket.typePrefix = newTicket.typePrefix || settings.type || "";
 		newTicket = this.clean(account, model, newTicket);
