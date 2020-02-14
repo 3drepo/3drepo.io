@@ -24,7 +24,6 @@ import { COLOR } from '../../../../../../styles';
 export const StyledPopper = styled(Popper)`
 	z-index: 12323;
 	margin-top: -15px;
-	position: absolute;
 
 	.react-autosuggest__suggestions-list {
 		max-height: 250px;

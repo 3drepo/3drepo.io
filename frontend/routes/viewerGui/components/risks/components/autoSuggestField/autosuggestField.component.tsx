@@ -125,12 +125,12 @@ export const AutoSuggestField: React.FunctionComponent<IProps> = ({
 				<StyledPopper
 					anchorEl={nodeRef.current}
 					open={Boolean(options.children)}
-					placement="bottom"
+					placement="bottom-start"
 				>
 					<Paper
 						square
 						{...options.containerProps}
-						style={{ width: nodeRef.current ? nodeRef.current.clientWidth : null }}
+						style={{ minWidth: nodeRef.current ? nodeRef.current.clientWidth : null }}
 					>
 						{options.children}
 					</Paper>
