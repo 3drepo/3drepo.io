@@ -28,6 +28,7 @@ import {
 	Container, Label, StyledDialogContent, StyledGrid, StyledList, StyledListItem, StyledTypography,
 	TextContainer,
 } from './suggestedTreatmentsDialog.styles';
+import { SuggestionDetails } from './suggestionDetails/suggestionDetails.component';
 
 interface ITextWrapper {
 	noWrap?: boolean;
@@ -150,7 +151,7 @@ export const SuggestedTreatmentsDialog = ({ suggestions, setFieldValue, handleCl
 						<StyledListItem key={index} disableGutters divider>
 							<ListItemText
 								primary={suggestion.mitigation_desc}
-								secondary={renderDetails(suggestion)}
+								secondary={<SuggestionDetails {...suggestion} />}
 								secondaryTypographyProps={{
 									component: 'div',
 								}}

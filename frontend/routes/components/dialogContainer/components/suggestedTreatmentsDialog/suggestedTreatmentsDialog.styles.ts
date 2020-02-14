@@ -81,3 +81,20 @@ export const StyledDialogContent = styled(DialogContent)`
 		padding-top: 0;
 	}
 `;
+
+export const Description = styled.span`
+	color: ${COLOR.BLACK_54};
+	font-size: 0.75rem;
+	font-weight: 400;
+	line-height: 1.375em;
+	white-space: normal;
+	display: block;
+	overflow: hidden;
+`;
+
+export const ExpandButton = styled.span`
+	font-size: 0.75rem;
+	cursor: pointer;
+	display: block;
+	text-align: right;
+`;
