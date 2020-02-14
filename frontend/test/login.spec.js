@@ -29,6 +29,13 @@ describe('3drepo.io', function() {
         console.log('Unable to resize window. Skipping.');
       };
 
+      // Closes the 'update available' dialog if its showing
+      try {
+        await (await waitForElementToBeReady(driver, By.css("[role='dialog'] button"),2000)).click();
+      } catch (e) {
+        // The 'update available' dialog is not there: carry on
+      }
+
   })
 
   afterEach(async () => {
@@ -44,7 +51,7 @@ describe('3drepo.io', function() {
       await (await waitForElementToBeReady(driver, By.css('button[type=submit]'))).click();
 
       const dialogText = await (await waitForElementToBeReady(driver, By.css("[role='dialog']"))).getText();
- 
+
       assert(dialogText.includes("Incorrect username or password"), "The dialog shown is not the right one!");
     } catch(e) {
       await takeScreenshot(driver);
@@ -61,13 +68,6 @@ describe('3drepo.io', function() {
 
       // Click login
       await (await waitForElementToBeReady(driver, By.css('button[type=submit]'))).click();
-
-      // Closes the 'update available' dialog if its showing
-      try {
-        await (await waitForElementToBeReady(driver, By.css("[role='dialog'] button"))).click();
-      } catch (e) {
-        // The 'update available' dialog is not there: carry on
-      }
 
       //  Click user menu
       await (await waitForElementToBeReady(driver, By.css("button[aria-label='Toggle main menu']"))).click();
