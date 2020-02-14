@@ -98,7 +98,7 @@ export const TreatmentRiskFormTab: React.FunctionComponent<IProps> = ({
 						label="Treatment Details"
 						disabled={!canEditBasicProperty}
 						mutable={!isNewRisk}
-						expandable={!isNewRisk && active}
+						expandable={Number(!isNewRisk && active)}
 					/>
 				)} />
 			</Container>

@@ -17,6 +17,8 @@
 
 import React, { Fragment } from 'react';
 
+import { size } from 'lodash';
+
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { canComment } from '../../../../../../helpers/risks';
@@ -132,7 +134,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 					{...this.riskData}
 					id={this.riskData._id}
 					type="risk"
-					key={this.riskData._id}
+					key={`${this.riskData._id}${size(this.criteria)}`}
 					defaultExpanded={horizontal || expandDetails}
 					editable={!this.riskData._id}
 					onNameChange={this.handleNameChange}
