@@ -4,7 +4,7 @@ const waitForElementToBeReady = async (driver, locator, timeout) => {
 	const element = await driver.wait(until.elementLocated(locator), timeout);
 	await driver.wait(until.elementIsVisible(element), timeout);
 	return element
-  };
+};
 
 const takeScreenshot = async (driver) => {
 	const screenshot = await driver.takeScreenshot();

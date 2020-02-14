@@ -5,7 +5,7 @@ const assert = require('assert')
 const {waitForElementToBeReady , takeScreenshot, delay} = require('./helpers/selenium');
 
 const BASE_URL = 'http://127.0.0.1:8080';
-const configuration = { timeout:15000 };
+const configuration = { timeout: 15000 };
 
 
 describe('3drepo.io', function() {
@@ -14,7 +14,7 @@ describe('3drepo.io', function() {
   let vars
   beforeEach(async function() {
     const args = new chrome.Options().addArguments(['headless','disable-gpu', 'enable-logging']);
-//    const args = new chrome.Options().addArguments(['enable-logging']);
+  //const args = new chrome.Options().addArguments(['enable-logging']);
 
     driver = await new Builder()
       .forBrowser('chrome')
@@ -50,18 +50,18 @@ describe('3drepo.io', function() {
     };
 
     try {
-      (await waitForElementToBeReady(driver, By.name('login'), configuration.timeout)).sendKeys('teamSpace1');
+      await (await waitForElementToBeReady(driver, By.name('login'), configuration.timeout)).sendKeys('teamSpace1');
 
-      (await waitForElementToBeReady(driver, By.name('password'), configuration.timeout)).sendKeys('password');
+      await (await waitForElementToBeReady(driver, By.name('password'), configuration.timeout)).sendKeys('password');
 
       // Click login
-      (await waitForElementToBeReady(driver, By.css('button[type=submit]'), configuration.timeout)).click();
+      await (await waitForElementToBeReady(driver, By.css('button[type=submit]'), configuration.timeout)).click();
 
       //  Click user menu
-      (await waitForElementToBeReady(driver, By.css("button[aria-label='Toggle main menu']"), configuration.timeout)).click();
+      await (await waitForElementToBeReady(driver, By.css("button[aria-label='Toggle main menu']"), configuration.timeout)).click();
 
       //  Click logout
-      (await waitForElementToBeReady(driver, By.css("[aria-label='Logout']"), configuration.timeout)).click();
+      await (await waitForElementToBeReady(driver, By.css("[aria-label='Logout']"), configuration.timeout)).click();
     }
 
     catch(e) {
