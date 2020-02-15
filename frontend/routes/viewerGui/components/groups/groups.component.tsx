@@ -141,6 +141,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 
 		return (
 			<ListNavigation
+				currentPanelType={this.type}
 				initialIndex={initialIndex}
 				lastIndex={this.state.filteredGroups.length - 1}
 				onChange={this.handleNavigationChange}

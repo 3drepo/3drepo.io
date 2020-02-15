@@ -169,6 +169,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 		const initialIndex = this.state.filteredItems.findIndex(({ _id }) => this.props.activeItemId === _id);
 		return (
 			<ListNavigation
+				currentPanelType={this.props.type}
 				initialIndex={initialIndex}
 				lastIndex={this.state.filteredItems.length - 1}
 				onChange={this.handleNavigationChange}
