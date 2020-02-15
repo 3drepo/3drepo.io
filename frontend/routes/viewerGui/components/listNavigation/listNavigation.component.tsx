@@ -15,15 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { IconButton } from '@material-ui/core';
-import SkipNextIcon from '@material-ui/icons/SkipNext';
-import SkipPreviousIcon from '@material-ui/icons/SkipPrevious';
 import React from 'react';
 
-import { Container } from './listNavigation.styles';
+import SkipNextIcon from '@material-ui/icons/SkipNext';
+import SkipPreviousIcon from '@material-ui/icons/SkipPrevious';
+
+import { LockPanelButton } from '../panelBarActions/lockPanelButton';
+import { Container, StyledIconButton } from './listNavigation.styles';
 
 interface IProps {
 	className?: string;
+	currentPanelType?: string;
 	initialIndex?: number;
 	lastIndex: number;
 	onChange: (currentIndex) => void;
@@ -61,14 +63,16 @@ export class ListNavigation extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
+		const { currentPanelType } = this.props;
 		return (
 			<Container>
-				<IconButton onClick={this.handlePrevItem}>
+				{currentPanelType && <LockPanelButton type={currentPanelType} />}
+				<StyledIconButton onClick={this.handlePrevItem}>
 					<SkipPreviousIcon />
-				</IconButton>
-				<IconButton onClick={this.handleNextItem}>
+				</StyledIconButton>
+				<StyledIconButton onClick={this.handleNextItem}>
 					<SkipNextIcon />
-				</IconButton>
+				</StyledIconButton>
 			</Container>
 		);
 	}
