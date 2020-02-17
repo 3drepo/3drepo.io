@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -247,6 +247,9 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 
 	public componentWillUnmount() {
 		this.props.setMeasureVisibility(false);
+		if (this.props.isMetadataActive) {
+			this.toggleMetadataPanel();
+		}
 		this.props.stopListenOnNumClip();
 	}
 
@@ -322,14 +325,11 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 			setMetadataActive,
 			setMeasureVisibility,
 			setPanelVisibility,
-			isMetadataVisible
 		} = this.props;
 		setMetadataActive(!isMetadataActive);
-		setPanelVisibility(VIEWER_PANELS.BIM, !isMetadataVisible);
+		setPanelVisibility(VIEWER_PANELS.BIM, !isMetadataActive);
 
-		if (isMetadataActive) {
-			setPanelVisibility(VIEWER_PANELS.BIM, false);
-		} else {
+		if (!isMetadataActive) {
 			setMeasureVisibility(false);
 		}
 	}
@@ -340,11 +340,11 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 	}
 
 	private toggleMeasure = () => {
-		const { isMeasureActive, setMeasureVisibility, setPanelVisibility } = this.props;
+		const { isMeasureActive, setMeasureVisibility, setPanelVisibility, isMetadataActive } = this.props;
 		setMeasureVisibility(!isMeasureActive);
 
-		if (!isMeasureActive) {
-			setPanelVisibility(VIEWER_PANELS.BIM, false);
+		if (!isMeasureActive && isMetadataActive) {
+			this.toggleMetadataPanel();
 		}
 	}
 }

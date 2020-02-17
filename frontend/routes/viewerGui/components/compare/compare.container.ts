@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -50,7 +50,7 @@ const mapStateToProps = createStructuredSelector({
 	compareDisabled: selectIsCompareButtonDisabled,
 	selectedItemsMap: selectSelectedModelsMap,
 	isCompareProcessed: selectIsCompareProcessed,
-	isAnyTargetClashModel: selectIsAnyTargetClashModel
+	isAnyTargetClashModel: selectIsAnyTargetClashModel,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -61,7 +61,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setSortType: CompareActions.setSortType,
 	setTargetModel: CompareActions.setTargetModel,
 	setTargetRevision: CompareActions.setTargetRevision,
-	getCompareModels: CompareActions.getCompareModels
+	getCompareModels: CompareActions.getCompareModels,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Compare);

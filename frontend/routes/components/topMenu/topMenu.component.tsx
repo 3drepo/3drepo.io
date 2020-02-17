@@ -22,58 +22,73 @@ import { renderWhenTrue } from '../../../helpers/rendering';
 import { TooltipButton } from '../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { Logo } from '../logo/logo.component';
 import Notifications from '../notifications/notifications.container';
-import { ExtrasMenu } from './components/extrasMenu/extrasMenu.component';
-import { UserMenu } from './components/userMenu/userMenu.component';
+import { MainMenu } from './components/mainMenu/mainMenu.component';
+import { VisualSettingsDialog } from './components/visualSettingsDialog/visualSettingsDialog.component';
 import { BackIcon, Container } from './topMenu.styles';
 
 interface IProps {
 	currentUser: any;
+	isInitialised: boolean;
 	history: any;
 	isFocusMode: boolean;
 	isAuthenticated: boolean;
 	visualSettings?: any;
-	logoUrl?: string;
 	onLogout?: () => void;
 	onLogoClick?: () => void;
+	showDialog?: (config: any) => void;
 	updateSettings?: (settings: any) => void;
 }
 
 export class TopMenu extends React.PureComponent<IProps, any> {
-	public renderUserMenu = renderWhenTrue(() => {
-		const { logoUrl, onLogoClick, isFocusMode, isAuthenticated, ...userMenuProps } = this.props;
+	public renderUserNavItems = renderWhenTrue(() => {
 		return (
 			<>
 				<TooltipButton
 					label="Back to teamspaces"
 					Icon={BackIcon}
-					action={this.handleBackToTeamspaces}
+					action={this.handleGoToTeamspaces}
 				/>
 				<Notifications />
-				<UserMenu
-					{...userMenuProps}
-					onTeamspacesClick={this.props.onLogoClick}
-				/>
 			</>
 		);
 	});
 
 	public render() {
-		const { logoUrl, onLogoClick, isFocusMode, isAuthenticated, ...userMenuProps } = this.props;
+		const { isFocusMode, isAuthenticated, ...props } = this.props;
 		return (
 			<Container hidden={isFocusMode}>
-				<Logo onClick={onLogoClick} />
+				<Logo onClick={this.handleGoToHomepage} />
 
-				{this.renderUserMenu(isAuthenticated)}
+				{this.renderUserNavItems(isAuthenticated)}
 
-				<ExtrasMenu
-					{...userMenuProps}
-					onTeamspacesClick={this.props.onLogoClick}
+				<MainMenu
+					{...props}
+					onTeamspacesClick={this.handleGoToTeamspaces}
+					onSettingClick={this.handleOpenSettingsDialog}
+					isAuthenticated={isAuthenticated}
 				/>
 			</Container>
 		);
 	}
 
-	private handleBackToTeamspaces = () => {
+	private handleGoToTeamspaces = () => {
 		this.props.history.push(ROUTES.TEAMSPACES);
+	}
+
+	private handleGoToHomepage = () => {
+		this.props.history.push(ROUTES.HOME);
+	}
+
+	private handleOpenSettingsDialog = () => {
+		const { visualSettings, updateSettings, currentUser } = this.props;
+		this.props.showDialog({
+			title: 'Visual Settings',
+			template: VisualSettingsDialog,
+			data: {
+				visualSettings,
+				updateSettings,
+				currentUser: currentUser.username
+			}
+		});
 	}
 }

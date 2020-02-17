@@ -24,7 +24,7 @@ export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createAct
 	fetchTeamspaces: ['username'],
 	fetchTeamspacesSuccess: ['entities'],
 	setPendingState: ['pendingState'],
-	setModelUploadStatus: ['teamspace', 'project', 'model', 'modelData', 'incrementRev'],
+	setModelUploadStatus: ['teamspace', 'project', 'model', 'modelData'],
 	setComponentState: ['componentState'],
 	removeTeamspaceSuccess: ['teamspace'],
 	leaveTeamspace: ['teamspace'],
@@ -75,12 +75,16 @@ const updateProjectSuccess = (state = INITIAL_STATE, action) => {
 	return { ...state, projects };
 };
 
-const createProjectSuccess = (state = INITIAL_STATE, action) => {
-	const teamspace = { ...state.teamspaces[action.teamspace] };
-	teamspace.projects = [...teamspace.projects, action.projectData._id];
+const createProjectSuccess = (state = INITIAL_STATE, { teamspace, projectData }) => {
+	const teamspaceData = { ...state.teamspaces[teamspace] };
+	teamspaceData.projects = [...teamspaceData.projects, projectData._id];
+
 	const projects = { ...state.projects };
-	projects[action.projectData._id] = action.projectData;
-	const teamspaces = { ...state.teamspaces, [action.teamspace]: teamspace };
+	projects[projectData._id] = {
+		...projectData,
+		teamspace,
+	};
+	const teamspaces = { ...state.teamspaces, [teamspace]: teamspaceData };
 
 	return { ...state, projects, teamspaces };
 };
@@ -133,15 +137,15 @@ const removeModelSuccess = (state = INITIAL_STATE, { teamspace, modelData }) => 
 	return { ...state, models, projects };
 };
 
-const setModelUploadStatus = (state = INITIAL_STATE, { model, modelData, incrementRev = false }) => {
+const setModelUploadStatus = (state = INITIAL_STATE, { model, modelData }) => {
 	const uploadedModel = { ...state.models[model], status: modelData.status };
 
 	if (modelData.timestamp) {
 		uploadedModel.timestamp = modelData.timestamp;
 	}
 
-	if (incrementRev) {
-		uploadedModel.nRevisions = uploadedModel.nRevisions ? uploadedModel.nRevisions + 1 : 1;
+	if (modelData.nRevisions) {
+		uploadedModel.nRevisions = modelData.nRevisions;
 	}
 
 	const models = { ...state.models, [model]: uploadedModel };

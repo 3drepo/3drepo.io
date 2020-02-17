@@ -18,6 +18,7 @@
 import React from 'react';
 
 import { RISK_FILTERS, RISK_LEVELS } from '../../../../constants/risks';
+import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { filtersValuesMap, getHeaderMenuItems } from '../../../../helpers/risks';
 import RiskDetails from './components/riskDetails/riskDetails.container';
@@ -143,9 +144,7 @@ export class Risks extends React.PureComponent<IProps, any> {
 	public render() {
 		return (
 			<RisksContainer
-				type="risk"
 				isPending={this.props.isPending}
-
 				items={this.props.risks}
 				showDefaultHiddenItems={this.showDefaultHiddenItems}
 				activeItemId={this.props.activeRiskId}
@@ -156,15 +155,14 @@ export class Risks extends React.PureComponent<IProps, any> {
 				filters={this.filters}
 				selectedFilters={this.props.selectedFilters}
 				sortOrder={this.props.sortOrder}
-
 				onToggleFilters={this.handleToggleFilters}
 				onChangeFilters={this.props.setFilters}
 				onActiveItem={this.setActiveRisk}
 				onNewItem={this.props.setNewRisk}
 				onShowDetails={this.props.goToRisk}
 				onCloseDetails={this.closeDetails}
-
 				renderDetailsView={this.renderDetailsView}
+				type={VIEWER_PANELS.RISKS}
 			/>
 		);
 	}

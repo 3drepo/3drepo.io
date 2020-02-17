@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -20,7 +20,7 @@ import { put, select, takeLatest } from 'redux-saga/effects';
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
-import { selectCurrentTeamspace } from '../userManagement/userManagement.selectors';
+import { selectCurrentTeamspace } from '../userManagement';
 import { JobsActions, JobsTypes } from './jobs.redux';
 
 export function* fetchJobs({ teamspace }) {
@@ -44,6 +44,16 @@ export function* fetchJobsColors({ teamspace }) {
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'jobs colors', error));
 		yield put(JobsActions.setColorsPending(false));
+	}
+}
+
+export function* fetchJobsAndColors() {
+	try {
+		const teamspace = yield select(selectCurrentTeamspace);
+		yield put(JobsActions.fetchJobs(teamspace));
+		yield put(JobsActions.fetchJobsColors(teamspace));
+	} catch (error) {
+		yield put(DialogActions.showEndpointErrorDialog('get', 'jobs and colors', error));
 	}
 }
 
@@ -95,6 +105,7 @@ export function* getMyJob({ teamspace }) {
 export default function* JobsSaga() {
 	yield takeLatest(JobsTypes.FETCH_JOBS, fetchJobs);
 	yield takeLatest(JobsTypes.FETCH_JOBS_COLORS, fetchJobsColors);
+	yield takeLatest(JobsTypes.FETCH_JOBS_AND_COLORS, fetchJobsAndColors);
 	yield takeLatest(JobsTypes.CREATE_JOB, createJob);
 	yield takeLatest(JobsTypes.REMOVE_JOB, removeJob);
 	yield takeLatest(JobsTypes.UPDATE_JOB_COLOR, updateJobColor);

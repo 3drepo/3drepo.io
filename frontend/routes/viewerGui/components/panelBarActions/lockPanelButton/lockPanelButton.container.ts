@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,18 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import MoreIcon from '@material-ui/icons/MoreVert';
-import IconButton from '@material-ui/core/IconButton';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
 
-export const MenuButton = ({
-	IconProps = {}, Icon = MoreIcon, ariaLabel = 'Show menu', ariaHasPopup = true, ...props
-}) => (
-  <IconButton
-    {...props}
-    aria-label={ariaLabel}
-    aria-haspopup={ariaHasPopup}
-  >
-    <Icon {...IconProps} />
-  </IconButton>
-);
+import { selectLockedPanels, ViewerGuiActions } from '../../../../../modules/viewerGui';
+import { LockPanelButton } from './lockPanelButton.component';
+
+const mapStateToProps = createStructuredSelector({
+	lockedPanels: selectLockedPanels,
+});
+
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	setPanelLock: ViewerGuiActions.setPanelLock,
+}, dispatch);
+
+export default connect(mapStateToProps, mapDispatchToProps)(LockPanelButton);

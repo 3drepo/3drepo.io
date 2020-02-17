@@ -23,7 +23,7 @@ import { selectIsModelLoaded } from '../../../../modules/viewerGui';
 import { ReportedItems } from './reportedItems.component';
 
 const mapStateToProps = createStructuredSelector({
-	isModelLoaded: selectIsModelLoaded
+	isModelLoaded: selectIsModelLoaded,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);

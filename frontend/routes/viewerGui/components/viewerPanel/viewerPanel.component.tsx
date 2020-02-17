@@ -40,6 +40,7 @@ interface IProps {
 	className?: string;
 	Icon?: JSX.Element;
 	pending?: boolean;
+	flexHeight?: boolean;
 	paperProps?: any;
 	renderActions?: () => JSX.Element | JSX.Element[];
 }
@@ -70,12 +71,13 @@ export class ViewerPanel extends React.PureComponent<IProps, any> {
 	)
 
 	public render() {
-		const { pending, className, paperProps } = this.props;
+		const { pending, className, paperProps, flexHeight } = this.props;
 
 		return (
 			<Panel
 				className={className}
 				isPending={pending}
+				flexHeight={flexHeight}
 				title={this.renderTitle()}
 				paperProps={paperProps}
 			>

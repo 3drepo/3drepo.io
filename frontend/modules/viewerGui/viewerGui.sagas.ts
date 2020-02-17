@@ -87,7 +87,7 @@ function* resetPanelsStates() {
 			put(GroupsActions.resetComponentState()),
 			put(CompareActions.resetComponentState()),
 			put(BimActions.resetBimState()),
-			put(ViewerGuiActions.resetVisiblePanels())
+			put(ViewerGuiActions.resetPanels())
 		]);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('reset', 'panels data', error));

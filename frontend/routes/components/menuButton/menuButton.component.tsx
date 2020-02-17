@@ -15,18 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import IconButton from '@material-ui/core/IconButton';
-import MoreIcon from '@material-ui/icons/MoreVert';
 import React from 'react';
+
+import MoreIcon from '@material-ui/icons/MoreVert';
+
+import { StyledIconButton } from './menuButton.styles';
 
 export const MenuButton = ({
 	IconProps = {}, Icon = MoreIcon, ariaLabel = 'Show menu', ariaHasPopup = true, ...props
 }) => (
-	<IconButton
+	<StyledIconButton
 		{...props}
 		aria-label={ariaLabel}
 		aria-haspopup={ariaHasPopup}
 	>
 		<Icon {...IconProps} />
-	</IconButton>
+	</StyledIconButton>
 );

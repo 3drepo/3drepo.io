@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -20,9 +20,6 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { DialogActions } from '../../../../modules/dialog';
-import { selectSettings } from '../../../../modules/model';
-import { selectIsModelLoaded } from '../../../../modules/viewerGui';
-import { withViewer } from '../../../../services/viewer/viewer';
 import {
 	selectActiveGroupDetails,
 	selectActiveGroupId,
@@ -36,7 +33,10 @@ import {
 	selectSelectedFilters,
 	selectShowDetails,
 	GroupsActions
-} from './../../../../modules/groups';
+} from '../../../../modules/groups';
+import { selectSettings } from '../../../../modules/model';
+import { selectIsModelLoaded } from '../../../../modules/viewerGui';
+import { withViewer } from '../../../../services/viewer/viewer';
 import { Groups } from './groups.component';
 
 const mapStateToProps = createStructuredSelector({
@@ -52,7 +52,7 @@ const mapStateToProps = createStructuredSelector({
 	colorOverrides: selectColorOverrides,
 	modelSettings: selectSettings,
 	isModelLoaded: selectIsModelLoaded,
-	isAllOverridden: selectIsAllOverridden
+	isAllOverridden: selectIsAllOverridden,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -71,7 +71,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	resetToSavedSelection: GroupsActions.resetToSavedSelection,
 	resetActiveGroup: GroupsActions.resetActiveGroup,
 	subscribeOnChanges: GroupsActions.subscribeOnChanges,
-	unsubscribeFromChanges: GroupsActions.unsubscribeFromChanges
+	unsubscribeFromChanges: GroupsActions.unsubscribeFromChanges,
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(Groups));

@@ -24,13 +24,14 @@ import { StyledPopover } from './buttonMenu.styles';
 interface IProps {
 	Icon?: React.ComponentType;
 	open?: boolean;
+	ripple?: boolean;
 	ButtonProps?: IconButtonProps;
 	IconProps?: IIconProps;
 	PopoverProps?: any;
 	PaperProps?: any;
 	container?: any;
-	renderButton?: (props) => JSX.Element;
-	renderContent?: (props) => JSX.Element;
+	renderButton?: (props?) => React.ReactNode;
+	renderContent?: (props?) => React.ReactNode;
 }
 
 interface IState {
@@ -76,7 +77,7 @@ export class ButtonMenu extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { Icon, renderButton, renderContent, ButtonProps, PopoverProps, PaperProps, IconProps } = this.props;
+		const { Icon, renderButton, renderContent, ButtonProps, PopoverProps, PaperProps, IconProps, ripple } = this.props;
 		const { activeMenu } = this.state;
 
 		const buttonProps = {
@@ -84,13 +85,16 @@ export class ButtonMenu extends React.PureComponent<IProps, IState> {
 			IconProps,
 			Icon,
 			onClick: this.toggleMenu(null),
-			buttonRef: this.buttonRef
+			buttonRef: this.buttonRef,
 		};
+
+		const additionalButtonProps = ripple ? { isMenuOpen: activeMenu } : {};
+
 		const popoverProps = { ...PopoverProps };
 
 		return (
 			<>
-				{renderButton(buttonProps)}
+				{renderButton({...buttonProps, ...additionalButtonProps})}
 				<StyledPopover
 					{...popoverProps}
 					PaperProps={...PaperProps}
