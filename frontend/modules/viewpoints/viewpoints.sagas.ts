@@ -22,7 +22,7 @@ import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
 import { DialogActions } from '../dialog';
 import { dispatch } from '../store';
-import { DEFAULT_VIEWPOINTS, PRESET_VIEW } from './viewpoints.constants';
+import { PRESET_VIEW } from './viewpoints.constants';
 import { ViewpointsActions, ViewpointsTypes } from './viewpoints.redux';
 
 export const getThumbnailUrl = (thumbnail) => API.getAPIUrl(thumbnail);
@@ -37,7 +37,7 @@ export function* fetchViewpoints({ teamspace, modelId }) {
 			}
 		});
 
-		yield put(ViewpointsActions.fetchViewpointsSuccess([...DEFAULT_VIEWPOINTS, ...viewpoints]));
+		yield put(ViewpointsActions.fetchViewpointsSuccess([...viewpoints]));
 		yield put(ViewpointsActions.setPendingState(false));
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'model viewpoints', e.response));

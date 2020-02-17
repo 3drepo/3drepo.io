@@ -23,36 +23,3 @@ export const PRESET_VIEW = {
 	LEFT: 'LEFT',
 	RIGHT: 'RIGHT'
 };
-
-export const DEFAULT_VIEWPOINTS = [
-	{
-		_id: 'default_1',
-		name: 'Top Down',
-		preset: PRESET_VIEW.TOP
-	},
-	{
-		_id: 'default_2',
-		name: 'Bottom Up',
-		preset: PRESET_VIEW.BOTTOM
-	},
-	{
-		_id: 'default_3',
-		name: 'Front View',
-		preset: PRESET_VIEW.FRONT
-	},
-	{
-		_id: 'default_4',
-		name: 'Back View',
-		preset: PRESET_VIEW.BACK
-	},
-	{
-		_id: 'default_5',
-		name: 'Side View (Left)',
-		preset: PRESET_VIEW.LEFT
-	},
-	{
-		_id: 'default_6',
-		name: 'Side View (Right)',
-		preset: PRESET_VIEW.RIGHT
-	}
-];
