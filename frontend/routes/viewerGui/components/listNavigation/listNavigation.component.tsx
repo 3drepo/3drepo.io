@@ -24,8 +24,8 @@ import { LockPanelButton } from '../panelBarActions/lockPanelButton';
 import { Container, StyledIconButton } from './listNavigation.styles';
 
 interface IProps {
+	panelType?: string;
 	className?: string;
-	currentPanelType?: string;
 	initialIndex?: number;
 	lastIndex: number;
 	onChange: (currentIndex) => void;
@@ -63,10 +63,10 @@ export class ListNavigation extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { currentPanelType } = this.props;
+		const { panelType } = this.props;
 		return (
 			<Container>
-				{currentPanelType && <LockPanelButton type={currentPanelType} />}
+				{panelType && <LockPanelButton type={panelType} />}
 				<StyledIconButton onClick={this.handlePrevItem}>
 					<SkipPreviousIcon />
 				</StyledIconButton>
