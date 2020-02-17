@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -21,7 +21,6 @@ import React from 'react';
 import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
 import CancelIcon from '@material-ui/icons/Cancel';
-import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
 import SearchIcon from '@material-ui/icons/Search';
 
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
@@ -29,14 +28,15 @@ import { renderWhenTrue } from '../../../../helpers/rendering';
 import { IViewpointsComponentState } from '../../../../modules/viewpoints/viewpoints.redux';
 import { Viewer } from '../../../../services/viewer/viewer';
 import { ViewerPanelButton, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
+import { PresetViews } from './components/presetViews/presetViews.component';
 import { ViewItem } from './components/viewItem/viewItem.component';
 import {
 	Container,
 	EmptyStateInfo,
 	SearchField,
+	ViewerBottomActions,
 	ViewpointsList,
 	ViewsContainer,
-	ViewsCountInfo,
 	ViewsIcon
 } from './views.styles';
 
@@ -68,16 +68,6 @@ export class Views extends React.PureComponent<IProps, any> {
 	};
 
 	public containerRef = React.createRef<any>();
-
-	get footerText() {
-		const { searchEnabled, viewpoints } = this.props;
-		const { filteredViewpoints } = this.state;
-
-		if (searchEnabled) {
-			return `${filteredViewpoints.length} views found`;
-		}
-		return viewpoints.length ? `${viewpoints.length} views displayed` : 'Add new viewpoint';
-	}
 
 	public renderSearch = renderWhenTrue(() => (
 		<SearchField
@@ -276,7 +266,13 @@ export class Views extends React.PureComponent<IProps, any> {
 
 	public renderFooterContent = () => (
 		<ViewerPanelFooter alignItems="center">
-			<ViewsCountInfo>{this.footerText}</ViewsCountInfo>
+			<ViewerBottomActions>
+				<PresetViews
+					teamspace={this.props.teamspace}
+					model={this.props.model}
+					showViewpoint={this.props.showViewpoint}
+				/>
+			</ViewerBottomActions>
 			<ViewerPanelButton
 				aria-label="Add view"
 				onClick={this.handleAddViewpoint}
