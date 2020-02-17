@@ -1,17 +1,14 @@
 export class Subscriptions {
-	private callbacks: any[] = [];
+	private callbacks: Set<any> = new Set();
 	private callbackContext: any = {};
 
 	public subscribe = (callback, context) => {
-		if (!this.callbacks.find(callback)) {
-			this.callbacks.push(callback);
-		}
-
+		this.callbacks.add(callback);
 		this.callbackContext[callback] = context;
 	}
 
 	public unsubscribe = (callback) => {
-		this.callbacks = this.callbacks.filter((cb) => cb !== callback);
+		this.callbacks.delete(callback);
 		delete this.callbackContext[callback];
 	}
 
