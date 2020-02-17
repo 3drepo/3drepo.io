@@ -30,9 +30,13 @@ export const PresetViews = ({ teamspace, model, showViewpoint }: IProps) => {
 
 	const handleViewpointClick = (viewpoint) => () => showViewpoint(teamspace, model, viewpoint);
 
-	return DEFAULT_VIEWPOINTS.map(({ icon, viewBox, _id, ...props }) => (
-		<StyledSvgIcon viewBox={viewBox} onClick={handleViewpointClick(props)} key={_id}>
-			{icon()}
-		</StyledSvgIcon>
-	));
+	return (
+			<>
+				{DEFAULT_VIEWPOINTS.map(({ icon, viewBox, _id, ...props }) => (
+						<StyledSvgIcon viewBox={viewBox} onClick={handleViewpointClick(props)} key={_id}>
+							{icon()}
+						</StyledSvgIcon>
+				))}
+			</>
+	);
 };
