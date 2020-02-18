@@ -28,7 +28,7 @@ const fieldTypes = {
 	"element": "[object String]",
 	"location_desc": "[object String]",
 	"mitigation_desc": "[object String]",
-	"mitigation_details": "[object String]",
+	"mitigation_detail": "[object String]",
 	"mitigation_stage": "[object String]",
 	"mitigation_type": "[object String]",
 	"risk_factor": "[object String]",
@@ -47,7 +47,7 @@ class RiskMitigation {
 
 	async create(account, newMitigation) {
 		const mitigationColl = await this.getRiskMitigationCollection(account);
-		const optionalFields = ["mitigation_details"];
+		const optionalFields = ["mitigation_detail"];
 		const requiredFields = Object.keys(_.omit(fieldTypes, optionalFields));
 
 		newMitigation = _.pick(newMitigation, Object.keys(fieldTypes));
@@ -67,7 +67,7 @@ class RiskMitigation {
 
 	async getCriteria(account) {
 		const mitigationColl = await this.getRiskMitigationCollection(account);
-		const attributeBlacklist = ["mitigation_desc", "mitigation_details"];
+		const attributeBlacklist = ["mitigation_desc", "mitigation_detail"];
 		const criteriaFields = Object.keys(_.omit(fieldTypes, attributeBlacklist));
 		const criteriaPromises = [];
 		const criteria = {};
@@ -96,7 +96,7 @@ class RiskMitigation {
 		const mitigationColl = await this.getRiskMitigationCollection(account);
 		const attributeBlacklist = [
 			"mitigation_desc",
-			"mitigation_details",
+			"mitigation_detail",
 			"mitigation_stage",
 			"mitigation_type"
 		];

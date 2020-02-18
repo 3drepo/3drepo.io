@@ -117,19 +117,19 @@ router.get("/mitigations/criteria", findMitigationCriteria);
  * [
  * 	{
  * 		"mitigation_desc":"Replace all openings required in floor slabs with precast service openings.",
- * 		"mitigation_details":"Replace openings larger than a standard anvil required in floor slabs with precast service openings from A/W 2020 catalogue.",
+ * 		"mitigation_detail":"Replace openings larger than a standard anvil required in floor slabs with precast service openings from A/W 2020 catalogue.",
  * 		"mitigation_stage":"Preliminary Design",
  * 		"mitigation_type":"Eliminate"
  * 	},
  * 	{
  * 		"mitigation_desc":"Provide safe walking surface joint covers. Any covering should be: strong enough to support any loads likely to be placed on it ; and fixed in position to prevent accidental dislodgement.",
- * 		"mitigation_details":"Safe walking surface joint covers for all joins and gaps. Covers should be strong enough to support any loads likely to be placed on it and fixed in position with bolts to prevent accidental dislodgement.",
+ * 		"mitigation_detail":"Safe walking surface joint covers for all joins and gaps. Covers should be strong enough to support any loads likely to be placed on it and fixed in position with bolts to prevent accidental dislodgement.",
  * 		"mitigation_stage":"Detail Design",
  * 		"mitigation_type":"Reduce"
  * 	},
  * 	{
  * 		"mitigation_desc":"Provide warning markings and/or colour change.",
- * 		"mitigation_details":"Provide warning markings from approved list of markings and/or colour change using chart from Document XYZ.",
+ * 		"mitigation_detail":"Provide warning markings from approved list of markings and/or colour change using chart from Document XYZ.",
  * 		"mitigation_stage":"Preconstruction",
  * 		"mitigation_type":"Control"
  * 	}
