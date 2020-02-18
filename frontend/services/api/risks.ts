@@ -35,8 +35,8 @@ export const getRisk = (teamspace, modelId, riskId) => {
  */
 export const saveRisk = (teamspace, modelId, risk) => {
 	if (risk.pickedPos !== null) {
-		risk.position = risk.pickedPos;
-		risk.norm = risk.pickedNorm;
+		risk.position = null;
+		risk.norm = null;
 	}
 
 	if (risk.rev_id) {

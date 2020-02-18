@@ -35,8 +35,8 @@ export const getIssue = (teamspace, modelId, issueId) => {
  */
 export const saveIssue = (teamspace, modelId, issue) => {
 	if (issue.pickedPos !== null) {
-		issue.position = issue.pickedPos;
-		issue.norm = issue.pickedNorm;
+		issue.position = null;
+		issue.norm = null;
 	}
 
 	if (issue.rev_id) {
