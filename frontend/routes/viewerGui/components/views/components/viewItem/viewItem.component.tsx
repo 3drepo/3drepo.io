@@ -59,7 +59,7 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 	};
 
 	public renderScreenshotPlaceholder = renderWhenTrue(() => (
-		<ThumbnailPlaceholder>{this.props.viewpoint.preset ? 'Preset' : 'No Image'}</ThumbnailPlaceholder>
+		<ThumbnailPlaceholder>{'No Image'}</ThumbnailPlaceholder>
 	));
 
 	public renderViewpointName = renderWhenTrue(() => (
@@ -69,7 +69,7 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 	public renderViewpointData = renderWhenTrue(() => (
 		<NameRow>
 			<Name>{this.props.viewpoint.name}</Name>
-			{this.props.isCommenter && !this.props.viewpoint.preset &&
+			{this.props.isCommenter &&
 				<IconsGroup disabled={this.state.isDeletePending}>
 					<StyledEditIcon onClick={this.props.onOpenEditMode} />
 					<StyledDeleteIcon onClick={this.handleDelete} />
