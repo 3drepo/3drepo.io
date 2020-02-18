@@ -59,9 +59,10 @@ export const Content = styled.div`
 export const ContentWrapper = styled.div`
 	height: 100%;
 	white-space: pre-line;
-	overflow: ${(props: any) => props.hiddenScrollbars ? 'hidden' : 'auto'};display: flex;
+	overflow: ${(props: any) => props.hiddenScrollbars ? 'hidden' : 'auto'};
+	display: flex;
 	flex-direction: column;
-	justify-content: space-between;
+	justify-content: ${(props: any) => props.disableStretching ? 'flex-start' : 'space-between'};
 `as any;
 
 export const LoaderContainer = styled.div`

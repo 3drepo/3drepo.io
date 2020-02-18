@@ -58,7 +58,7 @@ export class ViewerPanel extends React.PureComponent<IProps, any> {
 
 	public renderTitleActions = () => renderWhenTrue(() => (
 		<Actions>
-		{this.props.renderActions()}
+			{this.props.renderActions()}
 		</Actions>
 	))(this.props.renderActions)
 
@@ -80,6 +80,7 @@ export class ViewerPanel extends React.PureComponent<IProps, any> {
 				flexHeight={flexHeight}
 				title={this.renderTitle()}
 				paperProps={paperProps}
+				disableStretching
 			>
 				{this.renderLoader(pending)}
 				{this.renderContent(!pending)}

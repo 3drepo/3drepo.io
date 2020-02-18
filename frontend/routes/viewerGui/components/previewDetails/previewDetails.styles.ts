@@ -35,6 +35,9 @@ export const Container = styled.div`
 	color: ${COLOR.BLACK_60};
 	background-color: ${COLOR.WHITE};
 	overflow: auto;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
 `;
 
 export const Collapsable = styled(ExpansionPanel)`
@@ -94,7 +97,9 @@ export const Content = styled.div`
 	background-color: ${COLOR.BLACK_6};
 `;
 
-export const NotCollapsableContent = styled.div``;
+export const NotCollapsableContent = styled.div`
+	height: 100%;
+`;
 
 export const ToggleButtonContainer = styled.div`
 	display: flex;

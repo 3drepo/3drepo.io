@@ -349,11 +349,12 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 			updateRisk(teamspace, model, { position: risk.position });
 		}
 	}
+
 	public render() {
 		const { failedToLoad, risk, horizontal } = this.props;
 
 		return (
-			<Container>
+			<Container fill={Number(this.isNewRisk)}>
 				<ViewerPanelContent
 					onScroll={this.handlePanelScroll}
 					ref={this.panelRef}
