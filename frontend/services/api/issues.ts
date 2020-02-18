@@ -34,11 +34,6 @@ export const getIssue = (teamspace, modelId, issueId) => {
  * @param issue
  */
 export const saveIssue = (teamspace, modelId, issue) => {
-	if (issue.pickedPos !== null) {
-		issue.position = null;
-		issue.norm = null;
-	}
-
 	if (issue.rev_id) {
 		return api.post(`${teamspace}/${modelId}/revision/${issue.rev_id}/issues`, issue);
 	}
