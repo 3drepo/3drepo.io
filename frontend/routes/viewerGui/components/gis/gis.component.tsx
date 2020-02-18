@@ -23,8 +23,8 @@ import BuildIcon from '@material-ui/icons/Build';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import { includes, isEmpty } from 'lodash';
-import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 
+import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import {
 	IconWrapper,
@@ -184,7 +184,7 @@ export class Gis extends React.PureComponent<IProps, IState> {
 
 	public renderActions = () => {
 		if (this.state.settingsModeActive) {
-			return null;
+			return <PanelBarActions type={this.type} hideSearch hideMenu menuDisabled menuOpen={false} />;
 		}
 
 		return (
