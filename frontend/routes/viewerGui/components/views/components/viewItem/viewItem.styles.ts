@@ -69,6 +69,11 @@ export const IconsGroup = styled.div<{ disabled: boolean }>`
 export const ThumbnailPlaceholder = styled.div`
 	width: 79px;
 	height: 79px;
+	align-items: center;
+	text-align: center;
+	line-height: 5.5;
+	justify-content: center;
+	color: ${COLOR.BLACK_30};
 	border: 1px solid ${COLOR.BLACK_20};
 `;
 

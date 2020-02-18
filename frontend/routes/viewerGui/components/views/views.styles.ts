@@ -43,9 +43,7 @@ export const Container = styled.div`
 	flex: auto;
 `;
 
-export const ViewsCountInfo = styled.p`
-	color: ${COLOR.BLACK_40};
-	text-align: left;
+export const ViewerBottomActions = styled.div`
 	height: 100%;
 	margin: 0;
 	display: flex;

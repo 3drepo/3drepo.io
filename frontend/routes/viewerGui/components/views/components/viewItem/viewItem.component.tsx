@@ -58,7 +58,9 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 		isDeletePending: false
 	};
 
-	public renderScreenshotPlaceholder = renderWhenTrue(() => <ThumbnailPlaceholder />);
+	public renderScreenshotPlaceholder = renderWhenTrue(() => (
+		<ThumbnailPlaceholder>{'No Image'}</ThumbnailPlaceholder>
+	));
 
 	public renderViewpointName = renderWhenTrue(() => (
 		<Name>{this.props.viewpoint.name}</Name>
@@ -148,8 +150,8 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 				onClick={onClick}
 				active={Number(active)}>
 				{this.renderDeleteMessage(viewpoint.willBeRemoved)}
-				{this.renderScreenshot(viewpoint)}
-				{this.renderScreenshotPlaceholder(!viewpoint.screenshot.thumbnailUrl)}
+				{this.renderScreenshot(viewpoint.screenshot)}
+				{this.renderScreenshotPlaceholder(!viewpoint.screenshot || !viewpoint.screenshot.thumbnailUrl)}
 				{this.renderViewpointForm(this.props.active && this.props.editMode)}
 				{this.renderViewpointData(this.props.active && !this.props.editMode)}
 				{this.renderViewpointName(!this.props.active)}
