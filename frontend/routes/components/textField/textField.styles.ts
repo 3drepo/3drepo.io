@@ -53,18 +53,21 @@ export const StyledLinkableField = styled(LinkableField)`
 		display: block;
 		position: relative;
 		margin: 8px 0;
-		min-height:14px;
+		min-height: 14px;
 		font-size: 14px;
+		overflow: hidden;
+	}
+`;
 
-		&:after {
-			left: 0;
-			right: 0;
-			bottom: -5px;
-			content: '';
-			position: absolute;
-			border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-			pointer-events: none;
-		}
+export const FieldWrapper = styled.div`
+	&:after {
+		left: 0;
+		right: 0;
+		bottom: 0;
+		content: '';
+		position: absolute;
+		border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+		pointer-events: none;
 	}
 `;
 

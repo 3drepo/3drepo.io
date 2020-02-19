@@ -146,6 +146,7 @@ export const ExpandAction = styled.span`
 	cursor: pointer;
 	display: block;
 	text-align: center;
+	margin-top: ${(props) => props.top ? '5px' : 0};
 `;
 
 export const SuggestionButtonWrapper = styled.div`

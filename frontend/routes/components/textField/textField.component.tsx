@@ -29,6 +29,7 @@ import {
 	ActionsLine,
 	Container,
 	FieldLabel,
+	FieldWrapper,
 	MutableActionsLine,
 	StyledIconButton,
 	StyledLinkableField,
@@ -116,7 +117,7 @@ export class TextField extends React.PureComponent<IProps, IState> {
 	private handleOnExpand = () => this.setState({ isExpanded: !this.state.isExpanded });
 
 	private renderExpandableText = renderWhenTrue(() => (
-		<ExpandAction onClick={this.handleOnExpand}>{this.state.isExpanded ? 'Less' : 'More'}</ExpandAction>
+		<ExpandAction onClick={this.handleOnExpand} top>{this.state.isExpanded ? 'Less' : 'More'}</ExpandAction>
 	));
 
 	public componentDidMount() {
@@ -256,12 +257,12 @@ export class TextField extends React.PureComponent<IProps, IState> {
 							/>
 						}
 						{!this.isEditMode &&
-							<div onClick={this.handlePlaceholderClick}>
+							<FieldWrapper onClick={this.handlePlaceholderClick}>
 								<FieldLabel shrink>{this.props.label}</FieldLabel>
 								<StyledLinkableField ref={this.linkableFieldRef} {...this.additionalProps()}>
 									{this.fieldValue}
 								</StyledLinkableField>
-							</div>
+							</FieldWrapper>
 						}
 						{shouldRenderActions && this.renderActionsLine()}
 						{shouldRenderMutable && this.renderMutableButton()}
