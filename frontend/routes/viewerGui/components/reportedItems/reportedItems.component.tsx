@@ -295,7 +295,8 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 	public renderActions = () => {
 		if (this.props.showDetails) {
-			const canBeNavigated = this.props.activeItemId && this.state.filteredItems.length >= 2;
+			const isOnList = Boolean(this.state.filteredItems.find(({ _id }) => (_id === this.props.activeItemId)));
+			const canBeNavigated = (this.props.activeItemId && this.state.filteredItems.length >= 2) || !isOnList;
 			return canBeNavigated ?
 					this.renderHeaderNavigation() : <PanelBarActions type={this.props.type} hideSearch hideMenu />;
 		}
