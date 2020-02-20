@@ -698,6 +698,16 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Set the measure tool mode.
+	 * @category Measuring tool
+	 * @param mode - The measuring mode, accepted values are "Point", "Raycast", "MinimumDistance",
+	 * "SurfaceArea" or "PolygonArea".
+	 */
+	public static setMeasureToolMode(mode) {
+		UnityUtil.toUnity('SetMeasureToolMode', undefined, mode);
+	}
+
+	/**
 	 * Add a Risk pin
 	 * @category Pins
 	 * @param id - Identifier for the pin
