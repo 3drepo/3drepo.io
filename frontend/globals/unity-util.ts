@@ -755,10 +755,18 @@ export class UnityUtil {
 
 	/**
 	 * Remove a particular measurement.
-	 * @param uuid - The measurement id to be removed
+	 * @param uuid - The measurement id of the measurement to be removed
 	 */
 	public static clearMeasureToolMeasurement(uuid) {
 		UnityUtil.toUnity('ClearMeasureToolMeasurement', undefined, uuid);
+	}
+
+	/**
+	 * Set color of a particular measurement.
+	 * @param uuid - The measurement id of the measurement that will change color
+	 */
+	public static setMeasureToolMeasurementColor(uuid, color) {
+		UnityUtil.toUnity('SetMeasureToolMeasurementColor', undefined, JSON.stringify({uuid, color}));
 	}
 
 	/**
