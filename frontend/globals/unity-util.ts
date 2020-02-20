@@ -716,6 +716,22 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Enable the measure tool snap to edges.
+	 * @category Measuring tool
+	 */
+	public static enableMeasureToolSnap() {
+		UnityUtil.toUnity('EnableMeasureToolSnap', undefined, undefined);
+	}
+
+	/**
+	 * Disable the measure tool snap to edges.
+	 * @category Measuring tool
+	 */
+	public static disableMeasureToolSnap() {
+		UnityUtil.toUnity('DisableMeasureToolSnap', undefined, undefined);
+	}
+
+	/**
 	 * Add a Risk pin
 	 * @category Pins
 	 * @param id - Identifier for the pin
