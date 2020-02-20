@@ -708,6 +708,14 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Set the measure tool units.
+	 * @category Measuring tool
+	 * @param units - The measuring units accepted values are "cm", "mm", "m"
+	 */	public static SetMeasureToolUnits(units) {
+		UnityUtil.toUnity('SetMeasureToolUnits', undefined, units);
+	}
+
+	/**
 	 * Add a Risk pin
 	 * @category Pins
 	 * @param id - Identifier for the pin
