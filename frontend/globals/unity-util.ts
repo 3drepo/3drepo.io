@@ -732,6 +732,14 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Clear all measurements
+	 * @category Measuring tool
+	 */
+	public static clearMeasureToolMeasurements() {
+		UnityUtil.toUnity('ClearMeasureToolMeasurements', undefined, undefined);
+	}
+
+	/**
 	 * Add a Risk pin
 	 * @category Pins
 	 * @param id - Identifier for the pin
