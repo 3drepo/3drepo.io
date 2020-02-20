@@ -469,6 +469,20 @@ export class UnityUtil {
 		}
 	}
 
+	/** @hidden */
+	public static measurementRemoved(measurmentId) {
+		if (UnityUtil.viewer && UnityUtil.viewer.measurementRemoved) {
+			UnityUtil.viewer.measurementRemoved(measurmentId);
+		}
+	}
+
+	/** @hidden */
+	public static measurementsCleared() {
+		if (UnityUtil.viewer && UnityUtil.viewer.measurementsCleared) {
+			UnityUtil.viewer.measurementsCleared();
+		}
+	}
+
 	/*
 	 * =============== TO UNITY ====================
 	 */

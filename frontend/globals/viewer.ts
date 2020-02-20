@@ -353,6 +353,18 @@ export class Viewer {
 
 	}
 
+	public measurementAlertEvent(measurement) {
+		this.emit(Viewer.EVENT.MEASUREMENT_CREATED, measurement);
+	}
+
+	public measurementRemoved(measurementId) {
+		this.emit(Viewer.EVENT.MEASUREMENT_REMOVED, measurementId);
+	}
+
+	public measurementsCleared() {
+		this.emit(Viewer.EVENT.ALL_MEASUREMENTS_REMOVED);
+	}
+
 	public hideHiddenByDefaultObjects() {
 		UnityUtil.hideHiddenByDefaultObjects();
 	}
