@@ -461,6 +461,14 @@ export class UnityUtil {
 		UnityUtil.viewpointsPromises = [];
 	}
 
+	/** @hidden */
+	public static measurementAlert(strMeasurement) {
+		const measurement = JSON.parse(strMeasurement);
+		if (UnityUtil.viewer && UnityUtil.viewer.measurementAlertEvent) {
+			UnityUtil.viewer.measurementAlertEvent(measurement);
+		}
+	}
+
 	/*
 	 * =============== TO UNITY ====================
 	 */
@@ -671,6 +679,22 @@ export class UnityUtil {
 	 */
 	public static disableMeasuringTool() {
 		UnityUtil.toUnity('StopMeasuringTool', UnityUtil.LoadingState.MODEL_LOADING, undefined);
+	}
+
+	/**
+	 * Enable the measure tool toolbar.
+	 * @category Measuring tool
+	 */
+	public static enableMeasureToolToolbar() {
+		UnityUtil.toUnity('EnableMeasureToolToolbar', undefined, undefined);
+	}
+
+	/**
+	 * Enable the measure tool toolbar.
+	 * @category Measuring tool
+	 */
+	public static disableMeasureToolToolbar() {
+		UnityUtil.toUnity('DisableMeasureToolToolbar', undefined, undefined);
 	}
 
 	/**
