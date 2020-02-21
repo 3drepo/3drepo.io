@@ -20,9 +20,12 @@
 
 	const _ = require("lodash");
 	const express = require("express");
+	const fs = require("fs");
 	const router = express.Router({mergeParams: true});
 	const responseCodes = require("../response_codes");
 	const middlewares = require("../middlewares/middlewares");
+	const multer = require("multer");
+	const config = require("../config.js");
 	const TeamspaceSettings = require("../models/teamspaceSetting");
 	const User = require("../models/user");
 	const utils = require("../utils");
@@ -639,7 +642,7 @@
 				"Element Type," +
 				"Risk Factor," +
 				"Construction Scope," +
-				"Activity";
+				"Associated Activity";
 
 			res.set(headers);
 
@@ -650,10 +653,62 @@
 	}
 
 	function uploadMitigationsFile(req, res, next) {
-		TeamspaceSettings.getTopicTypes(req.params.account).then(() => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {"status":"ok"});
-		}).catch(err => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		const place = utils.APIInfo(req);
+		const {account} = req.params;
+
+		function fileFilter(fileReq, file, cb) {
+			const acceptedFormat = ["csv"];
+
+			let format = file.originalname.split(".");
+			format = format.length <= 1 ? "" : format.splice(-1)[0];
+
+			const size = parseInt(fileReq.headers["content-length"]);
+
+			if (acceptedFormat.indexOf(format.toLowerCase()) === -1) {
+				return cb({ resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
+			}
+
+			if (size > config.uploadSizeLimit) {
+				return cb({ resCode: responseCodes.SIZE_LIMIT });
+			}
+
+			cb(null, true);
+		}
+
+		if (!config.bcf_dir) {
+			return responseCodes.respond(place, req, res, next, { message: "config.bcf_dir is not defined" });
+		}
+
+		const upload = multer({
+			dest: config.bcf_dir,
+			fileFilter: fileFilter
+		});
+
+		upload.single("file")(req, res, function (err) {
+			if (err) {
+				return responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err , err.resCode ? err.resCode : err);
+			} else {
+				fs.readFile(req.file.path, 'utf8', (err, data) => {
+					const storeFileProm = undefined;
+					const processFileProm = TeamspaceSettings.importCSV(account, data);
+
+					Promise.all([storeFileProm, processFileProm]).then(([storeFileResult, processFileResult]) => {
+						const result = { "status":"ok" };
+
+						if (storeFileResult) {
+							result.mitigationsUpdatedAt = Date.now();
+						}
+
+						if (processFileResult) {
+							result.records = processFileResult.length;
+						}
+
+						responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, result);
+					}).catch(promErr => {
+						responseCodes.respond(place, req, res, next, promErr, promErr);
+					});
+				});
+			}
 		});
 	}
 

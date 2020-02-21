@@ -45,26 +45,6 @@ class RiskMitigation {
 		return await mitigationColl.remove({});
 	}
 
-	async create(account, newMitigation) {
-		const mitigationColl = await this.getRiskMitigationCollection(account);
-		const optionalFields = ["mitigation_detail"];
-		const requiredFields = Object.keys(_.omit(fieldTypes, optionalFields));
-
-		newMitigation = _.pick(newMitigation, Object.keys(fieldTypes));
-
-		requiredFields.forEach((key) => {
-			if (!newMitigation[key] || newMitigation[key] === "") {
-				// TODO handle missing data
-				console.log("required field not found: " + key);
-				throw responseCodes.INVALID_ARGUMENTS;
-			}
-		});
-
-		await mitigationColl.insert(newMitigation);
-
-		return newMitigation;
-	}
-
 	async getCriteria(account) {
 		const mitigationColl = await this.getRiskMitigationCollection(account);
 		const attributeBlacklist = ["mitigation_desc", "mitigation_detail"];
@@ -113,6 +93,35 @@ class RiskMitigation {
 		let suggestions = await mitigationColl.find(criteria).toArray();
 
 		return suggestions;
+	}
+
+	async insert(account, mitigations) {
+		const mitigationColl = await this.getRiskMitigationCollection(account);
+		const requiredFields = ["mitigation_desc"];
+		const optionalFields = Object.keys(_.omit(fieldTypes, requiredFields));
+
+		for (let i = 0; i < mitigations.length; i++) {
+			const newMitigation = _.pick(mitigations[i], Object.keys(fieldTypes));
+
+			requiredFields.forEach((key) => {
+				if (!newMitigation[key] || newMitigation[key] === "") {
+					// TODO handle missing data
+					throw responseCodes.INVALID_ARGUMENTS;
+				}
+			});
+
+			optionalFields.forEach((key) => {
+				if (newMitigation[key] === "") {
+					delete newMitigation[key]
+				}
+			});
+
+			mitigations[i] = newMitigation;
+		}
+
+		await mitigationColl.insert(mitigations);
+
+		return mitigations;
 	}
 }
 
