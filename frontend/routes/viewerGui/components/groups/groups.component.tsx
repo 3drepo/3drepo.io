@@ -136,17 +136,18 @@ export class Groups extends React.PureComponent<IProps, IState> {
 
 	public groupsContainerRef = React.createRef<any>();
 
-	public renderHeaderNavigation = renderWhenTrue(() => {
+	public renderHeaderNavigation = () => {
 		const initialIndex = this.state.filteredGroups.findIndex(({ _id }) => this.props.activeGroupId === _id);
 
 		return (
 			<ListNavigation
+				panelType={this.type}
 				initialIndex={initialIndex}
 				lastIndex={this.state.filteredGroups.length - 1}
 				onChange={this.handleNavigationChange}
 			/>
 		);
-	});
+	}
 
 	public renderGroupsList = renderWhenTrue(() => {
 		const Items = this.state.filteredGroups.map((group) => (
@@ -333,7 +334,9 @@ export class Groups extends React.PureComponent<IProps, IState> {
 
 	public renderActions = () => {
 		if (this.props.showDetails) {
-			return this.renderHeaderNavigation(this.props.activeGroupId && this.state.filteredGroups.length >= 2);
+			const canBeNavigated = this.props.activeGroupId && this.state.filteredGroups.length >= 2;
+			return canBeNavigated ?
+					this.renderHeaderNavigation() : <PanelBarActions type={this.type} hideSearch hideMenu />;
 		}
 
 		return (

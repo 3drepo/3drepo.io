@@ -18,6 +18,8 @@
 import React from 'react';
 
 import AddIcon from '@material-ui/icons/Add';
+import CancelIcon from '@material-ui/icons/Cancel';
+import SearchIcon from '@material-ui/icons/Search';
 import { isEqual } from 'lodash';
 
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
@@ -27,14 +29,15 @@ import { IViewpointsComponentState } from '../../../../modules/viewpoints/viewpo
 import { Viewer } from '../../../../services/viewer/viewer';
 import { PanelBarActions } from '../panelBarActions';
 import { ViewerPanelButton, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
+import { PresetViews } from './components/presetViews/presetViews.component';
 import { ViewItem } from './components/viewItem/viewItem.component';
 import {
 	Container,
 	EmptyStateInfo,
 	SearchField,
+	ViewerBottomActions,
 	ViewpointsList,
 	ViewsContainer,
-	ViewsCountInfo,
 	ViewsIcon
 } from './views.styles';
 
@@ -271,7 +274,13 @@ export class Views extends React.PureComponent<IProps, any> {
 
 	public renderFooterContent = () => (
 		<ViewerPanelFooter alignItems="center">
-			<ViewsCountInfo>{this.footerText}</ViewsCountInfo>
+			<ViewerBottomActions>
+				<PresetViews
+					teamspace={this.props.teamspace}
+					model={this.props.model}
+					showViewpoint={this.props.showViewpoint}
+				/>
+			</ViewerBottomActions>
 			<ViewerPanelButton
 				aria-label="Add view"
 				onClick={this.handleAddViewpoint}
