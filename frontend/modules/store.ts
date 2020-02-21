@@ -10,6 +10,7 @@ import * as ModelRedux from './model';
 import createReducer from './reducers';
 import rootSaga from './sagas';
 import * as SequencesRedux from './sequences';
+import * as TreeRedux from './tree';
 
 const sagaMiddleware = createSagaMiddleware();
 
@@ -63,7 +64,8 @@ if (IS_DEVELOPMENT) {
 	const pickSelectors = (obj) => pickBy(obj, (value, key) => key.startsWith('select'));
 	const selectors = {
 		...pickSelectors(SequencesRedux),
-		...pickSelectors(ModelRedux)
+		...pickSelectors(ModelRedux),
+		...pickSelectors(TreeRedux)
 	};
 
 	registerSelectors(selectors);
