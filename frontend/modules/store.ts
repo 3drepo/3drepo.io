@@ -4,13 +4,9 @@ import { applyMiddleware, compose, createStore } from 'redux';
 
 import { pickBy } from 'lodash';
 import createSagaMiddleware from 'redux-saga';
-import { getStateWith as reselectGetStateWith, registerSelectors } from 'reselect-tools';
 import { IS_DEVELOPMENT } from '../constants/environment';
-import * as ModelRedux from './model';
 import createReducer from './reducers';
 import rootSaga from './sagas';
-import * as SequencesRedux from './sequences';
-import * as TreeRedux from './tree';
 
 const sagaMiddleware = createSagaMiddleware();
 
@@ -59,15 +55,3 @@ export const store = configureStore();
 export const dispatch = store.dispatch;
 
 export const getState = store.getState;
-
-if (IS_DEVELOPMENT) {
-	const pickSelectors = (obj) => pickBy(obj, (value, key) => key.startsWith('select'));
-	const selectors = {
-		...pickSelectors(SequencesRedux),
-		...pickSelectors(ModelRedux),
-		...pickSelectors(TreeRedux)
-	};
-
-	registerSelectors(selectors);
-	reselectGetStateWith(() => store.getState());
-}

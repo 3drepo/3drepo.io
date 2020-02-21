@@ -87,7 +87,6 @@
     "redux-undo": "1.0.0",
     "reduxsauce": "1.0.0",
     "reselect": "4.0.0",
-    "reselect-tools": "^0.0.7",
     "semver-compare": "1.0.0",
     "simplebar": "4.0.0",
     "simplebar-react": "1.0.0",
