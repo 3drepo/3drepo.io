@@ -25,7 +25,7 @@ import { UserInfo } from '../components/userInfo/userInfo.component';
 import ModelSettings from '../modelSettings/modelSettings.container';
 import Profile from '../profile/profile.container';
 import Teamspaces from '../teamspaces/teamspaces.container';
-import { TeamspaceSettings } from '../TeamspaceSettings';
+import { TeamspaceSettings } from '../teamspaceSettings';
 import UserManagement from '../userManagement/userManagement.container';
 import { Container, Content, Sidebar } from './dashboard.styles';
 
