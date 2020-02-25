@@ -19,7 +19,6 @@
 const _ = require("lodash");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
-const utils = require("../utils");
 const TeamspaceSettings = require("./teamspaceSetting");
 
 const fieldTypes = {
@@ -66,7 +65,7 @@ class RiskMitigation {
 
 		return Promise.all(criteriaPromises).then(() => {
 			// Append teamspace categories
-			criteria['category'] = [...new Set(Object.assign([], criteria.category).concat(teamspaceCategories))];
+			criteria["category"] = [...new Set(Object.assign([], criteria.category).concat(teamspaceCategories))];
 
 			return criteria;
 		});
@@ -90,7 +89,7 @@ class RiskMitigation {
 			}
 		});
 
-		let suggestions = await mitigationColl.find(criteria).toArray();
+		const suggestions = await mitigationColl.find(criteria).toArray();
 
 		return suggestions;
 	}
@@ -112,7 +111,7 @@ class RiskMitigation {
 
 			optionalFields.forEach((key) => {
 				if (newMitigation[key] === "") {
-					delete newMitigation[key]
+					delete newMitigation[key];
 				}
 			});
 

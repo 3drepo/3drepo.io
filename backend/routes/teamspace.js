@@ -606,22 +606,6 @@
 		});
 	}
 
-	function getRiskCategories(req, res, next) {
-		TeamspaceSettings.getRiskCategories(req.params.account).then((categories) => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, categories);
-		}).catch(err => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		});
-	}
-
-	function getTopicTypes(req, res, next) {
-		TeamspaceSettings.getTopicTypes(req.params.account).then((types) => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, types);
-		}).catch(err => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		});
-	}
-
 	function getMitigationsFile(req, res, next) {
 		// TODO: retrieve risk mitigation suggestions
 		TeamspaceSettings.getTopicTypes(req.params.account).then((mitigations) => {
@@ -688,7 +672,7 @@
 			if (err) {
 				return responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err , err.resCode ? err.resCode : err);
 			} else {
-				fs.readFile(req.file.path, 'utf8', (err, data) => {
+				fs.readFile(req.file.path, "utf8", (readErr, data) => {
 					const storeFileProm = undefined;
 					const processFileProm = TeamspaceSettings.importCSV(account, data);
 
