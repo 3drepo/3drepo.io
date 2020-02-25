@@ -333,6 +333,12 @@ class Ticket {
 		newTicket.assigned_roles = newTicket.assigned_roles || [];
 		newTicket._id = utils.stringToUUID(newTicket._id || nodeuuid());
 		newTicket.created = parseInt(newTicket.created || (new Date()).getTime());
+		const ownerJob = await Job.findByUser(account, newTicket.owner);
+		if (ownerJob) {
+			newTicket.creator_role = ownerJob._id;
+		} else {
+			delete newTicket.creator_role;
+		}
 		newTicket.desc = newTicket.desc || "(No Description)";
 		let imagePromise = Promise.resolve();
 		newTicket.viewpoint = newTicket.viewpoint || {};
