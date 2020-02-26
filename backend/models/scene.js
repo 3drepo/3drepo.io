@@ -20,6 +20,7 @@ const mongoose = require("mongoose");
 const ModelFactory = require("./factory/modelFactory");
 const Schema = mongoose.Schema;
 const utils = require("../utils");
+const db = require("../handler/db");
 
 const schema = Schema({
 	_id: Object,
@@ -29,6 +30,11 @@ const schema = Schema({
 if (!schema.options.toJSON) {
 	schema.options.toJSON = {};
 }
+
+const dbFindOne = async (account, model, query, projection) => {
+	const coll = await db.getCollection(account, model + ".scene");
+	return await coll.findOne(query, projection);
+};
 
 schema.options.toJSON.transform = function (doc, ret) {
 	ret._id = utils.uuidToString(doc._id);
@@ -40,6 +46,14 @@ schema.options.toJSON.transform = function (doc, ret) {
 		ret.parents = newParents;
 	}
 	return ret;
+};
+
+schema.statics.getBySharedId = async (account, model, shared_id, revisionIds, projection = {}) => {
+	return await dbFindOne(account, model, {shared_id, _id :{$in: revisionIds}}, projection);
+};
+
+schema.statics.getObjectById = async (account, model, id, projection = {}) => {
+	return await dbFindOne(account, model, {_id: id}, projection);
 };
 
 const Scene = ModelFactory.createClass(

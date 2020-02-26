@@ -39,6 +39,8 @@ const _ = require("lodash");
 const nodeuuid = require("uuid/v1");
 const FileRef = require("../fileRef");
 const notifications = require("../notification");
+const matrix = require("./matrix");
+const { binToArrayVector3d, binToTrianglesArray } = require("./binary");
 
 /** *****************************************************************************
  * Converts error code from repobouncerclient to a response error object.
@@ -1001,10 +1003,58 @@ function getMetadata(account, model, id) {
 			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
 		}
 	});
-
 }
 
-async function getSubModelRevisions(account, model, user, branch, rev) {
+async function getMeshById(account, model, meshId) {
+	const historyRes =  (await History.findByObjectId(account, model, meshId, {current:1}));
+	if (!historyRes) {
+		throw responseCodes.RESOURCE_NOT_FOUND;
+	}
+
+	const revisionIds = historyRes.current;
+	const projection = {
+		"parents": 1,
+		"vertices": 1,
+		"normals": 1,
+		"bounding_box": 1,
+		"faces" : 1
+	};
+
+	const mesh = await Scene.getObjectById(account, model, utils.stringToUUID(meshId), projection);
+	let parentMatrix = null;
+
+	if ((mesh.parents || []).length > 0) {
+		parentMatrix = await getParentMatrix(account, model, mesh.parents[0], revisionIds);
+		if (mesh.matrix) {
+			mesh.matrix = matrix.multiply(parentMatrix, mesh.matrix);
+		} else {
+			mesh.matrix = parentMatrix;
+		}
+	}
+
+	const vertices = binToArrayVector3d(mesh.vertices, true);
+	const normals = binToArrayVector3d(mesh.normals, true);
+	const triangles = binToTrianglesArray(mesh.faces, true);
+	const bounding_box = mesh.bounding_box;
+
+	// - if vertices are external set them
+	return {matrix: mesh.matrix, vertices, triangles, normals, bounding_box};
+}
+
+async function getParentMatrix(account, model, parent, revisionIds) {
+	const mesh = await Scene.getBySharedId(account, model, parent, revisionIds);
+
+	if ((mesh.parents || []).length > 0) {
+		const parentMatrix = await getParentMatrix(account, model, mesh.parents[0], revisionIds);
+		if (mesh.matrix) {
+			return matrix.multiply(parentMatrix, mesh.matrix);
+		}
+	}
+
+	return mesh.matrix || matrix.getIdentity(4);
+}
+
+async function getSubModelRevisions(account, model, branch, rev) {
 	const history = await History.getHistory({ account, model }, branch, rev);
 
 	if(!history) {
@@ -1078,5 +1128,6 @@ module.exports = {
 	getSubModelRevisions,
 	setStatus,
 	importSuccess,
-	importFail
+	importFail,
+	getMeshById
 };
