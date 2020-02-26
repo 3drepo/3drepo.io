@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Tooltip } from '@material-ui/core';
 import React from 'react';
-
 import { DEFAULT_VIEWPOINTS } from './presetViews.constants';
 import { StyledSvgIcon } from './presetViews.styles';
 
@@ -32,10 +32,12 @@ export const PresetViews = ({ teamspace, model, showViewpoint }: IProps) => {
 
 	return (
 			<>
-				{DEFAULT_VIEWPOINTS.map(({ icon, viewBox, _id, ...props }) => (
+				{DEFAULT_VIEWPOINTS.map(({ icon, viewBox, _id, name, ...props }) => (
+					<Tooltip title={name}>
 						<StyledSvgIcon viewBox={viewBox} onClick={handleViewpointClick(props)} key={_id}>
 							{icon()}
 						</StyledSvgIcon>
+					</Tooltip>
 				))}
 			</>
 	);
