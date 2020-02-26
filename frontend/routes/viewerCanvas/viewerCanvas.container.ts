@@ -33,7 +33,6 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	handleColorOverridesChange: TreeActions.handleColorOverridesChange
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(ViewerCanvas));

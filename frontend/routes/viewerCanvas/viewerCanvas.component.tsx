@@ -18,6 +18,7 @@
 import { isEqual } from 'lodash';
 import React from 'react';
 import { ROUTES } from '../../constants/routes';
+import { addColorOverrides, overridesDiff, removeColorOverrides } from '../../helpers/colorOverrides';
 import { pinsDiff } from '../../helpers/pins';
 import { Container } from './viewerCanvas.styles';
 
@@ -35,7 +36,6 @@ interface IProps {
 	colorOverrides: any;
 	issuePins: any[];
 	riskPins: any[];
-	handleColorOverridesChange: (currentOvverides, previousOverrides) => void;
 }
 
 export class ViewerCanvas extends React.PureComponent<IProps, any> {
@@ -62,10 +62,19 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 		}
 	}
 
+	public renderColorOverrides(prev, curr) {
+		const toAdd = overridesDiff(curr, prev);
+		const toRemove = overridesDiff(prev, curr);
+
+		removeColorOverrides(toRemove);
+		addColorOverrides(toAdd);
+	}
+
 	public componentDidUpdate(prevProps) {
-		const { colorOverrides, issuePins, riskPins, handleColorOverridesChange } = this.props;
+		const { colorOverrides, issuePins, riskPins } = this.props;
+
 		if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
-			handleColorOverridesChange(colorOverrides, prevProps.colorOverrides);
+			this.renderColorOverrides(prevProps.colorOverrides, colorOverrides);
 		}
 
 		if (issuePins !== prevProps.issuePins && prevProps.issuePins) {
