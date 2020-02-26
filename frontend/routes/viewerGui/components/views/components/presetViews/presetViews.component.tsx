@@ -33,7 +33,7 @@ export const PresetViews = ({ teamspace, model, showViewpoint }: IProps) => {
 	return (
 			<>
 				{DEFAULT_VIEWPOINTS.map(({ icon, viewBox, _id, name, ...props }) => (
-					<Tooltip title={name}>
+					<Tooltip title={name} key={`${_id}_tooltip`}>
 						<StyledSvgIcon viewBox={viewBox} onClick={handleViewpointClick(props)} key={_id}>
 							{icon()}
 						</StyledSvgIcon>
