@@ -18,45 +18,35 @@
 import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: GisTypes, Creators: GisActions } = createActions({
-	initialiseMap: ['params'],
-	initialiseMapSuccess: ['initialised'],
-	addSource: ['source'],
-	addSourceSuccess: ['source'],
-	removeSource: ['source'],
-	removeSourceSuccess: ['source'],
-	resetSources: [],
-	resetSourcesSuccess: [],
-	resetMap: []
+	addLayer: ['layer'],
+	removeLayer: ['layer'],
+	resetLayers: [],
 }, { prefix: 'GIS/' });
 
-export const INITIAL_STATE = {
-	initialised: false,
-	visibleSources: []
+interface IGisState {
+	layers: string[];
+}
+
+export const INITIAL_STATE: IGisState = {
+	layers: []
 };
 
-export const initialiseMapSuccess = (state = INITIAL_STATE, { initialised }) => {
-	return { ...state, initialised };
+export const addLayer = (state = INITIAL_STATE, { layer }): IGisState => {
+	const layers =  state.layers.includes(layer) ? [...state.layers] : [...state.layers, layer];
+	return { ...state, layers };
 };
 
-export const addSourceSuccess = (state = INITIAL_STATE, { source }) => {
-	const visibleSources = [...state.visibleSources, source];
-	return { ...state, visibleSources };
+export const removeLayer = (state = INITIAL_STATE, { layer }): IGisState  => {
+	const layers = state.layers.filter( (visibleLayer) => visibleLayer !== layer);
+	return { ...state, layers };
 };
 
-export const removeSourceSuccess = (state = INITIAL_STATE, { source }) => {
-	const visibleSources = state.visibleSources.filter(
-		(visibleSource) => visibleSource !== source);
-
-	return { ...state, visibleSources };
-};
-
-export const resetSourcesSuccess = (state = INITIAL_STATE, {}) => {
-	return { ...state, visibleSources: [] };
+export const resetLayers = (state = INITIAL_STATE, {}): IGisState  => {
+	return { ...state, layers: [] };
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
-	[GisTypes.INITIALISE_MAP_SUCCESS]: initialiseMapSuccess,
-	[GisTypes.ADD_SOURCE_SUCCESS]: addSourceSuccess,
-	[GisTypes.REMOVE_SOURCE_SUCCESS]: removeSourceSuccess,
-	[GisTypes.RESET_SOURCES_SUCCESS]: resetSourcesSuccess
+	[GisTypes.ADD_LAYER]: addLayer,
+	[GisTypes.REMOVE_LAYER]: removeLayer,
+	[GisTypes.RESET_LAYERS]: resetLayers
 });
