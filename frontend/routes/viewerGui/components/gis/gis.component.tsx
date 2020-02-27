@@ -238,7 +238,7 @@ export class Gis extends React.PureComponent<IProps, IState> {
 						/>
 					)
 				}
-				{this.renderMapLayers(!settingsModeActive)}
+				{(!settingsModeActive && hasGISCoordinates) && this.renderMapLayers(!settingsModeActive)}
 			</GisContainer>
 		);
 	}
