@@ -21,7 +21,9 @@ const _ = require("lodash");
 const parse = require("csv-parse/lib/sync");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
+const FileRef = require("./fileRef");
 const RiskMitigation = require("./riskMitigation.js");
+const User = require("./user");
 
 const colName = "teamspace";
 
@@ -104,6 +106,18 @@ class TeamspaceSettings {
 		await RiskMitigation.clearAll(account);
 
 		return RiskMitigation.insert(account, records);
+	}
+
+	async storeMitigationsFile(account, username, sessionId, filename, file) {
+		const quota = await User.getQuotaInfo(account);
+		const spaceLeft = ((quota.spaceLimit === null || quota.spaceLimit === undefined ? Infinity : quota.spaceLimit) - quota.spaceUsed) * 1024 * 1024;
+		const spaceToBeUsed = file.size;
+
+		if (spaceLeft < spaceToBeUsed) {
+			throw responseCodes.SIZE_LIMIT_PAY;
+		}
+
+		return FileRef.storeMitigationsFile(account, username, filename, file);
 	}
 
 	async update(account, data, noClean = false) {

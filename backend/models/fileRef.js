@@ -23,10 +23,14 @@ const ResponseCodes = require("../response_codes");
 const systemLogger = require("../logger.js").systemLogger;
 const nodeuuid = require("uuid/v1");
 
+const FILE_REF_EXT = ".ref";
 const ORIGINAL_FILE_REF_EXT = ".history.ref";
 const UNITY_BUNDLE_REF_EXT = ".stash.unity3d.ref";
 const JSON_FILE_REF_EXT = ".stash.json_mpc.ref";
 const RESOURCES_FILE_REF_EXT = ".resources.ref";
+
+const MITIGATIONS_FILE_REF = "mitigations" + FILE_REF_EXT;
+const MITIGATIONS_ID = "mitigations";
 
 const ISSUES_RESOURCE_PROP = "issueIds";
 const RISKS_RESOURCE_PROP = "riskIds";
@@ -40,9 +44,17 @@ function getRefEntry(account, collection, fileName) {
 	});
 }
 
-function fetchFile(account, model, ext, fileName, metadata = false) {
+function fetchModelFile(account, model, ext, fileName, metadata = false) {
 	const collection = model + ext;
 
+	return fetchFile(account, model, collection, ext, fileName, metadata);
+}
+
+function fetchTeamspaceFile(account, collection, ext, fileName, metadata = false) {
+	return fetchFile(account, null, collection, ext, fileName, metadata);
+}
+
+function fetchFile(account, model, collection, ext, fileName, metadata = false) {
 	return getRefEntry(account, collection, fileName).then((entry) => {
 		if(!entry) {
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
@@ -58,7 +70,7 @@ function fetchFile(account, model, ext, fileName, metadata = false) {
 			});
 
 			// Temporary fall back - read from gridfs
-			const fullName = ext === ORIGINAL_FILE_REF_EXT ?
+			const fullName = ext === ORIGINAL_FILE_REF_EXT || ext === FILE_REF_EXT ?
 				fileName :
 				`/${account}/${model}/${fileName.split("/").length > 1 ? "revision/" : ""}${fileName}`;
 			return ExternalServices.getFile(account, collection, "gridfs", fullName);
@@ -125,14 +137,18 @@ function removeAllFiles(account, collection) {
 	});
 }
 
-async function insertRefInResources(account, model, user, name, refInfo) {
-	const collName = model + RESOURCES_FILE_REF_EXT;
-
+async function insertRef(account, collection, user, name, refInfo) {
 	const ref = { ...refInfo, name, user , createdAt : (new Date()).getTime()};
-	const resourcesRef = await DB.getCollection(account, collName);
+	const resourcesRef = await DB.getCollection(account, collection);
 	await resourcesRef.insertOne(ref);
 
 	return ref;
+}
+
+async function insertRefInResources(account, model, user, name, refInfo) {
+	const collName = model + RESOURCES_FILE_REF_EXT;
+
+	return insertRef(account, collName, user, name, refInfo);
 }
 
 const FileRef = {};
@@ -166,15 +182,19 @@ FileRef.getTotalModelFileSize = function(account, model) {
 };
 
 FileRef.getUnityBundle = function(account, model, fileName) {
-	return fetchFile(account, model, UNITY_BUNDLE_REF_EXT, fileName);
+	return fetchModelFile(account, model, UNITY_BUNDLE_REF_EXT, fileName);
 };
 
 FileRef.getJSONFile = function(account, model, fileName) {
-	return fetchFile(account, model, JSON_FILE_REF_EXT, fileName);
+	return fetchModelFile(account, model, JSON_FILE_REF_EXT, fileName);
+};
+
+FileRef.getMitigationsFile = function(account) {
+	return fetchTeamspaceFile(account, MITIGATIONS_FILE_REF, FILE_REF_EXT, MITIGATIONS_ID);
 };
 
 FileRef.getResourceFile = function(account, model, fileName) {
-	return fetchFile(account, model, RESOURCES_FILE_REF_EXT, fileName, true);
+	return fetchModelFile(account, model, RESOURCES_FILE_REF_EXT, fileName, true);
 };
 
 /**
@@ -224,6 +244,20 @@ FileRef.removeResourceFromEntity  = async function(account, model, property, pro
 	}
 
 	ref[property] = [propertyId]; // This is to identify from where this ref has been dettached
+	return ref;
+};
+
+FileRef.storeMitigationsFile = async function(account, user, name, data) {
+	const collName = MITIGATIONS_FILE_REF;
+	const collection = await DB.getCollection(account, collName);
+
+	await removeAllFiles(account, collName);
+	await collection.remove({});
+
+	let refInfo = await ExternalServices.storeFile(account, collName, data);
+	refInfo = {...refInfo, "_id":MITIGATIONS_ID};
+
+	const ref = await insertRef(account, collName, user, name, refInfo);
 	return ref;
 };
 

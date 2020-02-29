@@ -20,6 +20,7 @@
 
 	const _ = require("lodash");
 	const express = require("express");
+	const C = require("../constants");
 	const fs = require("fs");
 	const router = express.Router({mergeParams: true});
 	const responseCodes = require("../response_codes");
@@ -27,6 +28,7 @@
 	const multer = require("multer");
 	const config = require("../config.js");
 	const TeamspaceSettings = require("../models/teamspaceSetting");
+	const FileRef = require("../models/fileRef");
 	const User = require("../models/user");
 	const utils = require("../utils");
 
@@ -607,8 +609,7 @@
 	}
 
 	function getMitigationsFile(req, res, next) {
-		// TODO: retrieve risk mitigation suggestions
-		TeamspaceSettings.getTopicTypes(req.params.account).then((mitigations) => {
+		FileRef.getMitigationsFile(req.params.account).then((mitigations) => {
 			const timestamp = (new Date()).toLocaleString();
 			const filenamePrefix = (req.params.account + "_" + timestamp + "_").replace(/\W+/g, "_");
 
@@ -616,17 +617,6 @@
 				"Content-Disposition": "attachment;filename=" + filenamePrefix + "mitigations.csv",
 				"Content-Type": "text/csv"
 			};
-
-			mitigations = "Treatment Title," +
-				"Treatment Details," +
-				"Treatment Stage," +
-				"Treatment Type," +
-				"Risk Category," +
-				"Risk Location," +
-				"Element Type," +
-				"Risk Factor," +
-				"Construction Scope," +
-				"Associated Activity";
 
 			res.set(headers);
 
@@ -639,6 +629,8 @@
 	function uploadMitigationsFile(req, res, next) {
 		const place = utils.APIInfo(req);
 		const {account} = req.params;
+		const sessionId = req.headers[C.HEADER_SOCKET_ID];
+		const user = req.session.user.username;
 
 		function fileFilter(fileReq, file, cb) {
 			const acceptedFormat = ["csv"];
@@ -673,7 +665,7 @@
 				return responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err , err.resCode ? err.resCode : err);
 			} else {
 				fs.readFile(req.file.path, "utf8", (readErr, data) => {
-					const storeFileProm = undefined;
+					const storeFileProm = TeamspaceSettings.storeMitigationsFile(account, user, sessionId, req.file.originalname, data);
 					const processFileProm = TeamspaceSettings.importCSV(account, data);
 
 					Promise.all([storeFileProm, processFileProm]).then(([storeFileResult, processFileResult]) => {
