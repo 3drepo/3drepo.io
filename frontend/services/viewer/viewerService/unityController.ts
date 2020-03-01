@@ -12,7 +12,7 @@ export class UnityController {
 	private stats: boolean = false;
 	public divId = 'unityViewer';
 
-	constructor() {
+	public startUnity() {
 		UnityUtil.init(this.handleUnityError, this.onUnityProgress, this.onModelProgress);
 		UnityUtil.hideProgressBar();
 	}

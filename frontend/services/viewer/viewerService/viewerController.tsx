@@ -90,6 +90,7 @@ export class ViewerService extends UnityController {
 
 	public setupInstance = (container) => {
 		this.element = container;
+		this.startUnity();
 
 		const unityHolder = document.createElement('div');
 		unityHolder.className = 'emscripten';
@@ -123,22 +124,27 @@ export class ViewerService extends UnityController {
 	}
 
 	public init = async () => {
+		console.error('Initiating Viewer:');
 		if (IS_DEVELOPMENT) {
 			console.debug('Initiating Viewer');
 		}
 
+		this.setInitialisePromise();
 		this.setUnity();
+
 		try {
 			await this.insertUnityLoader(this.memory);
 
-			setTimeout(() => {
-				this.initUnity({
+			(async () => {
+				await this.initUnity({
 					getAPI: {
 						hostNames: clientConfigService.apiUrls.all
 					},
 					showAll: true
 				});
-			}, 1000);
+
+				this.initialised.resolve();
+			})();
 		} catch (error) {
 			console.error('Error while initialising Unity script: ', error);
 		}
@@ -149,6 +155,8 @@ export class ViewerService extends UnityController {
 			if (this.initialized) {
 				resolve();
 			}
+			console.error('options:', options);
+			UnityUtil.setAPIHost(options.getAPI);
 
 			// Set option param from viewerDirective
 			this.options = options;
@@ -167,7 +175,6 @@ export class ViewerService extends UnityController {
 				});
 			}
 
-			UnityUtil.setAPIHost(options.getAPI);
 			this.setNavMode(VIEWER_NAV_MODES.TURNTABLE, false);
 
 			UnityUtil.onReady().then(() => {
@@ -502,6 +509,7 @@ export class ViewerService extends UnityController {
 	 */
 
 	public async loadViewerModel(teamspace, model, branch, revision) {
+		console.error('loadViewerModel:');
 		if (!teamspace || !model) {
 			console.error('Teamspace, model, branch or revision was not defined!', teamspace, model, branch, revision);
 			await Promise.reject('Teamspace, model, branch or revision was not defined!');

@@ -15,19 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { UnityUtil } from '../../globals/unity-util';
-import { PIN_COLORS } from '../../styles';
+
+interface IPinConstructor {
+	id: string;
+	type: string;
+	position: [number];
+	norm: [number];
+	colors: [number];
+	account: string;
+	model: string;
+}
 
 export class Pin {
 	public id: string;
-	public type: string;
-	public position;
 	public highlighted: boolean;
-	public norm;
-	public colours;
-	public viewpoint;
-	public account;
-	public model;
-	public pinColours = PIN_COLORS;
 
 	public pinHeadIsHighlighted;
 	public ghostPinHeadIsHighlighted;
@@ -36,17 +37,12 @@ export class Pin {
 	public pinHeadDepth;
 	public coneDepth;
 
-	constructor(
-		id: string, type: string,  position , norm, colors, viewpoint,
-		account: string, model: string
-	) {
-
+	constructor({
+		id, type, position, norm, colors, account, model,
+	}: IPinConstructor) {
 		this.id = id;
-		this.type = type;
 		this.highlighted = false;
-		this.viewpoint = viewpoint;
-		this.account = account;
-		this.model = model;
+
 		if (type === 'risk') {
 			UnityUtil.dropRiskPin(id, position, norm, colors);
 		} else {
@@ -55,8 +51,8 @@ export class Pin {
 
 	}
 
-	public remove(id) {
-		UnityUtil.removePin(id);
+	public remove() {
+		UnityUtil.removePin(this.id);
 	}
 
 	public changeColor(colors) {
