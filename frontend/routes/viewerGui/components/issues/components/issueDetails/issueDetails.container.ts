@@ -31,7 +31,7 @@ import {
 import { selectJobsList, selectMyJob } from '../../../../../../modules/jobs';
 import { selectPermissions, selectTopicTypes } from '../../../../../../modules/model';
 import { ViewpointsActions } from '../../../../../../modules/viewpoints';
-import { withViewer } from '../../../../../../services/viewer/viewer';
+import { withViewer } from '../../../../../../services/viewer/viewerService/viewerController';
 import { IssueDetails } from './issueDetails.component';
 
 const mapStateToProps = createStructuredSelector({

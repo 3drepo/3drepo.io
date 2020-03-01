@@ -22,7 +22,7 @@ import { COMPARE_SORT_TYPES, DIFF_COMPARE_TYPE, RENDERING_TYPES, VULNERABLE_PROP
 import { SORT_ORDER_TYPES } from '../../constants/sorting';
 import { VISIBILITY_STATES } from '../../constants/tree';
 import * as API from '../../services/api';
-import { Viewer } from '../../services/viewer/viewer';
+import { Viewer } from '../../services/viewer/viewerService/viewerController';
 import { DialogActions } from '../dialog';
 import { selectIsFederation, selectRevisions, selectSettings, ModelTypes } from '../model';
 import { selectNodesIndexesMap, selectTreeNodesList, TreeActions } from '../tree';

@@ -18,7 +18,7 @@
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { withViewer } from '../../../services/viewer/viewer';
+import { withViewer } from '../../../services/viewer/viewerService/viewerController';
 
 import {
 	selectAreFutureElements,

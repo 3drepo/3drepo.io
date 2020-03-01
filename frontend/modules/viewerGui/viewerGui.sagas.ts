@@ -22,7 +22,7 @@ import { ROUTES } from '../../constants/routes';
 import { INITIAL_HELICOPTER_SPEED, NEW_PIN_ID, VIEWER_CLIP_MODES, VIEWER_EVENTS } from '../../constants/viewer';
 import * as API from '../../services/api';
 import { MultiSelect } from '../../services/viewer/multiSelect';
-import { Viewer } from '../../services/viewer/viewer';
+import { Viewer } from '../../services/viewer/viewerService/viewerController';
 import { BimActions } from '../bim';
 import { CompareActions } from '../compare';
 import { selectCurrentUser, CurrentUserActions } from '../currentUser';
@@ -366,6 +366,9 @@ function* loadModel() {
 		const revision = yield select(selectCurrentRevisionId);
 		const modelSettings = yield select(selectSettings);
 
+		console.error('Viewer.isViewerReady:', Viewer.isViewerReady());
+		yield Viewer.isViewerReady();
+		console.error('Viewer.isViewerReady: resolved');
 		yield Viewer.loadViewerModel(teamspace, model, 'master', revision || 'head');
 		yield Viewer.updateViewerSettings(modelSettings);
 	} catch (error) {

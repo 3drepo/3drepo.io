@@ -36,7 +36,7 @@ import {
 } from '../../../../modules/groups';
 import { selectSettings } from '../../../../modules/model';
 import { selectIsModelLoaded } from '../../../../modules/viewerGui';
-import { withViewer } from '../../../../services/viewer/viewer';
+import { withViewer } from '../../../../services/viewer/viewerService/viewerController';
 import { Groups } from './groups.component';
 
 const mapStateToProps = createStructuredSelector({

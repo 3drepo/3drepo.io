@@ -23,7 +23,7 @@ import { selectOverrides, } from '../../modules/groups';
 import { selectPins as selectIssuePins } from '../../modules/issues';
 import { selectPins as selectRiskPins } from '../../modules/risks';
 import { TreeActions } from '../../modules/tree';
-import { withViewer } from '../../services/viewer/viewer';
+import { withViewer } from '../../services/viewer/viewerService/viewerController';
 import { ViewerCanvas } from './viewerCanvas.component';
 
 const mapStateToProps = createStructuredSelector({

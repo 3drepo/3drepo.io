@@ -17,7 +17,7 @@
 
 import { put, select, takeLatest } from 'redux-saga/effects';
 
-import { Viewer } from '../../services/viewer/viewer';
+import { Viewer } from '../../services/viewer/viewerService/viewerController';
 import { DialogActions } from '../dialog';
 import { GisActions, GisTypes } from './gis.redux';
 import { selectVisibleSources } from './gis.selectors';

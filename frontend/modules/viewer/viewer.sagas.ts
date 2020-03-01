@@ -18,7 +18,7 @@
 import { keys } from 'lodash';
 import { put, select, takeLatest } from 'redux-saga/effects';
 import { DEFAULT_SETTINGS } from '../../constants/viewer';
-import { Viewer } from '../../services/viewer/viewer';
+import { Viewer } from '../../services/viewer/viewerService/viewerController';
 import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { ViewerActions, ViewerTypes } from './viewer.redux';

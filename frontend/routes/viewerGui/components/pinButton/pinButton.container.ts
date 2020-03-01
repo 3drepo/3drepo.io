@@ -19,7 +19,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { MeasureActions } from '../../../../modules/measure';
-import { withViewer } from '../../../../services/viewer/viewer';
+import { withViewer } from '../../../../services/viewer/viewerService/viewerController';
 import { PinButton } from './pinButton.component';
 
 const mapStateToProps = createStructuredSelector({});

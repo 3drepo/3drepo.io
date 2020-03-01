@@ -37,7 +37,7 @@ import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../service
 import * as API from '../../services/api';
 import { Cache } from '../../services/cache';
 import * as Exports from '../../services/export';
-import { Viewer } from '../../services/viewer/viewer';
+import { Viewer } from '../../services/viewer/viewerService/viewerController';
 import { ChatActions } from '../chat';
 import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';

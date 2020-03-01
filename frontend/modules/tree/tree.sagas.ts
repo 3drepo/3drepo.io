@@ -20,7 +20,7 @@ import { all, call, put, select, take, takeLatest } from 'redux-saga/effects';
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import { dispatch } from '../../modules/store';
 import * as API from '../../services/api';
-import { Viewer } from '../../services/viewer/viewer';
+import { Viewer } from '../../services/viewer/viewerService/viewerController';
 import { DialogActions } from '../dialog';
 import { GroupsActions } from '../groups';
 import {
