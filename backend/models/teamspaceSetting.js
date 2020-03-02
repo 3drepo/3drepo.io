@@ -112,12 +112,17 @@ class TeamspaceSettings {
 		const quota = await User.getQuotaInfo(account);
 		const spaceLeft = ((quota.spaceLimit === null || quota.spaceLimit === undefined ? Infinity : quota.spaceLimit) - quota.spaceUsed) * 1024 * 1024;
 		const spaceToBeUsed = file.size;
+		const settingsColl = await this.getTeamspaceSettingsCollection(account, true);
 
 		if (spaceLeft < spaceToBeUsed) {
 			throw responseCodes.SIZE_LIMIT_PAY;
 		}
 
-		return FileRef.storeMitigationsFile(account, username, filename, file);
+		return FileRef.storeMitigationsFile(account, username, filename, file).then((storeResult) => {
+			return settingsColl.update({_id: account}, {$set: {"mitigationsUpdatedAt":(new Date()).getTime()}}).then(() => {
+				return storeResult;
+			});
+		});
 	}
 
 	async update(account, data, noClean = false) {
