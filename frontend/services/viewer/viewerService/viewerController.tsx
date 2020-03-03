@@ -722,18 +722,11 @@ export class ViewerService extends UnityController {
 		return this.showAll();
 	}
 
-	public async setCamera(params) {
+	public async setCamera({ position, up, view_dir, look_at, animate, rollerCoasterMode }) {
 		await this.isModelReady();
 
 		return this.setCameraPosition(
-				params.position,
-				params.view_dir,
-				params.up,
-				params.look_at,
-				params.animate !== undefined ? params.animate : true,
-				params.rollerCoasterMode,
-				// params.account,
-				// params.model
+			position, up, view_dir, look_at, animate !== undefined ? animate : true, rollerCoasterMode
 		);
 	}
 }
