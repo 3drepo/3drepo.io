@@ -18,11 +18,9 @@
 "use strict";
 
 const _ = require("lodash");
-const parse = require("csv-parse/lib/sync");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
 const FileRef = require("./fileRef");
-const RiskMitigation = require("./riskMitigation.js");
 const User = require("./user");
 
 const colName = "teamspace";
@@ -78,34 +76,6 @@ class TeamspaceSettings {
 		const topicTypes = Object.assign([], settings.topicTypes);
 
 		return topicTypes;
-	}
-
-	async importCSV(account, data) {
-		const csvFields = [
-			"mitigation_desc",
-			"mitigation_detail",
-			"mitigation_stage",
-			"mitigation_type",
-			"category",
-			"location_desc",
-			"element",
-			"risk_factor",
-			"scope",
-			"associated_activity"
-		];
-
-		// remove column headers defined in template
-		data = data.replace(/Treatment Title,Treatment Details,Treatment Stage,Treatment Type,Risk Category,Risk Location,Element Type,Risk Factor,Construction Scope,Associated Activity\r\n/gm,"");
-
-		const records = parse(data, {
-			columns: csvFields,
-			skip_empty_lines: true,
-			trim: true
-		});
-
-		await RiskMitigation.clearAll(account);
-
-		return RiskMitigation.insert(account, records);
 	}
 
 	async storeMitigationsFile(account, username, sessionId, filename, file) {

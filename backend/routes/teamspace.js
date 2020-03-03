@@ -28,6 +28,7 @@
 	const multer = require("multer");
 	const config = require("../config.js");
 	const TeamspaceSettings = require("../models/teamspaceSetting");
+	const RiskMitigation = require("../models/riskMitigation");
 	const FileRef = require("../models/fileRef");
 	const User = require("../models/user");
 	const utils = require("../utils");
@@ -666,7 +667,7 @@
 			} else {
 				fs.readFile(req.file.path, "utf8", (readErr, data) => {
 					const storeFileProm = TeamspaceSettings.storeMitigationsFile(account, user, sessionId, req.file.originalname, data);
-					const processFileProm = TeamspaceSettings.importCSV(account, data);
+					const processFileProm = RiskMitigation.importCSV(account, data);
 
 					Promise.all([storeFileProm, processFileProm]).then(([storeFileResult, processFileResult]) => {
 						const result = { "status":"ok" };
