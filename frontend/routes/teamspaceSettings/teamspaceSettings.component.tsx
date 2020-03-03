@@ -116,7 +116,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	private handleUpdateSettings = (values) => {
+	private handleUpdateSettings = (values, { resetForm }) => {
 		const { teamspace } = this.props.match.params;
 		const { topicTypes, riskCategories, file } = values;
 		const types = topicTypes.map((topicType) => topicType.label);
@@ -128,6 +128,10 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 		};
 
 		this.props.updateTeamspaceSettings(teamspace, settings);
+		resetForm({
+			topicTypes,
+			riskCategories,
+		});
 	}
 
 	public handleBackLink = () => {
@@ -268,7 +272,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 									type="submit"
 									variant="raised"
 									color="secondary"
-									disabled={!form.dirty}
+									disabled={!form.isValid || form.isSubmitting}
 								>
 									Save
 								</Button>}
