@@ -95,7 +95,9 @@ export const Content = styled.div`
 	background-color: ${COLOR.BLACK_6};
 `;
 
-export const NotCollapsableContent = styled.div``;
+export const NotCollapsableContent = styled.div`
+	height: 100%;
+`;
 
 export const ToggleButtonContainer = styled.div`
 	display: flex;

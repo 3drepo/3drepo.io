@@ -24,12 +24,17 @@ const C = require("../constants");
 const middlewares = require("../middlewares/middlewares");
 const config = require("../config");
 const utils = require("../utils");
+// const ChatEvent = require("../models/chatEvent");
 const User = require("../models/user");
 const addressMeta = require("../models/addressMeta");
 const Mailer = require("../mailer/mailer");
 const httpsPost = require("../libs/httpsReq").post;
 
+const chatEvent = require("../models/chatEvent");
+
 const multer = require("multer");
+
+const { regenerateAuthSession, getSessionsByUsername, removeSessions } = require("../services/session");
 
 /**
  * @api {post} /login Login
@@ -543,24 +548,29 @@ router.put("/:account", middlewares.isAccountAdmin, updateUser);
 router.put("/:account/password", resetPassword);
 
 function createSession(place, req, res, next, user) {
-
-	req.session.regenerate(function(err) {
-		req[C.REQ_REPO].logger.logInfo("Creating session for " + " " + user.username);
-		if(err) {
-			responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {username: user.username});
-		} else {
-			req[C.REQ_REPO].logger.logDebug("Authenticated user and signed token.");
-
-			req.session[C.REPO_SESSION_USER] = user;
-			req.session.cookie.domain				 = config.cookie_domain;
-
-			if (config.cookie.maxAge) {
-				req.session.cookie.maxAge = config.cookie.maxAge;
+	regenerateAuthSession(req, config, user)
+		.then(() => getSessionsByUsername(user.username))
+		.then(sessions => { // Remove other sessions with the same username
+			if (!req.session.user.webSession) {
+				return null;
 			}
 
-			responseCodes.respond(place, req, res, next, responseCodes.OK, {username: user.username, roles: user.roles, flags: user.flags});
-		}
-	});
+			const ids = [];
+
+			sessions.forEach(entry => {
+				if (entry._id === req.session.id || !entry.session.user.webSession) {
+					return;
+				}
+				ids.push(entry._id);
+				chatEvent.loggedOut(entry.session.user.socketId);
+			});
+
+			return removeSessions(ids);
+		}).then(() =>
+			responseCodes.respond(place, req, res, next, responseCodes.OK, user)
+		).catch((err) => {
+			responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {username: user.username});
+		});
 }
 
 function login(req, res, next) {
@@ -581,7 +591,6 @@ function login(req, res, next) {
 
 			req[C.REQ_REPO].logger.logInfo("User is logged in", responseData);
 
-			responseData.roles = user.roles;
 			responseData.flags = {};
 
 			responseData.flags.termsPrompt = !user.hasReadLatestTerms();

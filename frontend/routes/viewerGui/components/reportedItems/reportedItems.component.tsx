@@ -165,16 +165,17 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 		/>
 	));
 
-	public renderHeaderNavigation = renderWhenTrue(() => {
+	public renderHeaderNavigation = () => {
 		const initialIndex = this.state.filteredItems.findIndex(({ _id }) => this.props.activeItemId === _id);
 		return (
 			<ListNavigation
+				panelType={this.props.type}
 				initialIndex={initialIndex}
 				lastIndex={this.state.filteredItems.length - 1}
 				onChange={this.handleNavigationChange}
 			/>
 		);
-	});
+	}
 
 	public renderEmptyState = renderWhenTrue(() => (
 		<EmptyStateInfo>No entries have been created yet</EmptyStateInfo>
@@ -294,7 +295,9 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 	public renderActions = () => {
 		if (this.props.showDetails) {
-			return this.renderHeaderNavigation(this.props.activeItemId && this.state.filteredItems.length >= 2);
+			const canBeNavigated = this.props.activeItemId && this.state.filteredItems.length >= 2;
+			return canBeNavigated ?
+					this.renderHeaderNavigation() : <PanelBarActions type={this.props.type} hideSearch hideMenu />;
 		}
 
 		return (

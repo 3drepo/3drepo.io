@@ -119,8 +119,7 @@ export function* downloadModel({ teamspace, modelId }) {
 }
 
 export function* onModelStatusChanged({ modelData, teamspace, project, modelId, modelName}) {
-	yield put(TeamspacesActions.setModelUploadStatus(teamspace, project, modelId, modelData,
-		!modelData._id && modelData.status === uploadFileStatuses.ok));
+	yield put(TeamspacesActions.setModelUploadStatus(teamspace, project, modelId, modelData));
 	/* FIXME: this is hacky. At the moment there's no way to differentiate a model
 	 * change triggered by chat and a model changed because model settings data got modified...
 	 * If the modelData doesnt' have an id, we know it came from chat... very hacky. */

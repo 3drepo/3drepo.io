@@ -101,15 +101,15 @@ class Ticket {
 						vp.guid === comment.viewpoint
 					);
 
-					if (commentViewpoint) {
-						comment.viewpoint = commentViewpoint;
-					}
+					comment.viewpoint = commentViewpoint || undefined;
 				}
 			});
 		}
 
 		if (ticketToClean.thumbnail && ticketToClean.thumbnail.flag) {
 			ticketToClean.thumbnail = account + "/" + model + "/" + this.collName + "/" + id + "/thumbnail.png";
+		} else {
+			ticketToClean.thumbnail = undefined;
 		}
 
 		// Return empty arrays as frontend expects them
@@ -118,7 +118,7 @@ class Ticket {
 			if (!ticketToClean[field]) {
 				if ("[object Array]" === this.fieldTypes[field]) {
 					ticketToClean[field] = [];
-				} else if ("[object Object]" === this.fieldTypes[field]) {
+				} else if ("[object Object]" === this.fieldTypes[field] && field !== "thumbnail") {
 					ticketToClean[field] = {};
 				}
 			}
@@ -333,43 +333,48 @@ class Ticket {
 		newTicket.assigned_roles = newTicket.assigned_roles || [];
 		newTicket._id = utils.stringToUUID(newTicket._id || nodeuuid());
 		newTicket.created = parseInt(newTicket.created || (new Date()).getTime());
+		const ownerJob = await Job.findByUser(account, newTicket.owner);
+		if (ownerJob) {
+			newTicket.creator_role = ownerJob._id;
+		} else {
+			delete newTicket.creator_role;
+		}
 		newTicket.desc = newTicket.desc || "(No Description)";
 		let imagePromise = Promise.resolve();
-		if (newTicket.viewpoint) {
-			newTicket.viewpoint.guid = utils.generateUUID();
+		newTicket.viewpoint = newTicket.viewpoint || {};
+		newTicket.viewpoint.guid = utils.generateUUID();
 
-			if (newTicket.viewpoint.highlighted_group_id) {
-				newTicket.viewpoint.highlighted_group_id = utils.stringToUUID(newTicket.viewpoint.highlighted_group_id);
-			}
-
-			if (newTicket.viewpoint.hidden_group_id) {
-				newTicket.viewpoint.hidden_group_id = utils.stringToUUID(newTicket.viewpoint.hidden_group_id);
-			}
-
-			if (newTicket.viewpoint.shown_group_id) {
-				newTicket.viewpoint.shown_group_id = utils.stringToUUID(newTicket.viewpoint.shown_group_id);
-			}
-
-			if (newTicket.viewpoint.screenshot) {
-				newTicket.viewpoint.screenshot = {
-					content: new Buffer.from(newTicket.viewpoint.screenshot, "base64"),
-					flag: 1
-				};
-
-				imagePromise = utils.resizeAndCropScreenshot(newTicket.viewpoint.screenshot.content, 120, 120, true).catch((err) => {
-					systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
-						account,
-						model,
-						type: this.collName,
-						ticketId: utils.uuidToString(newTicket._id),
-						viewpointId: utils.uuidToString(newTicket.viewpoint.guid),
-						err
-					});
-				});
-			}
-
-			newTicket.viewpoints = [newTicket.viewpoint];
+		if (newTicket.viewpoint.highlighted_group_id) {
+			newTicket.viewpoint.highlighted_group_id = utils.stringToUUID(newTicket.viewpoint.highlighted_group_id);
 		}
+
+		if (newTicket.viewpoint.hidden_group_id) {
+			newTicket.viewpoint.hidden_group_id = utils.stringToUUID(newTicket.viewpoint.hidden_group_id);
+		}
+
+		if (newTicket.viewpoint.shown_group_id) {
+			newTicket.viewpoint.shown_group_id = utils.stringToUUID(newTicket.viewpoint.shown_group_id);
+		}
+
+		if (newTicket.viewpoint.screenshot) {
+			newTicket.viewpoint.screenshot = {
+				content: new Buffer.from(newTicket.viewpoint.screenshot, "base64"),
+				flag: 1
+			};
+
+			imagePromise = utils.resizeAndCropScreenshot(newTicket.viewpoint.screenshot.content, 120, 120, true).catch((err) => {
+				systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
+					account,
+					model,
+					type: this.collName,
+					ticketId: utils.uuidToString(newTicket._id),
+					viewpointId: utils.uuidToString(newTicket.viewpoint.guid),
+					err
+				});
+			});
+		}
+
+		newTicket.viewpoints = [newTicket.viewpoint];
 
 		// Assign rev_id for issue
 		const [history, image] = await Promise.all([
@@ -396,8 +401,16 @@ class Ticket {
 
 		Object.keys(newTicket).forEach((key) => {
 			if (Object.prototype.toString.call(newTicket[key]) !== this.fieldTypes[key]) {
-				systemLogger.logError(`Type check failed: ${key} is expected to be type ${this.fieldTypes[key]} but it is `, Object.prototype.toString.call(newTicket[key]));
-				throw responseCodes.INVALID_ARGUMENTS;
+				if (newTicket[key] === null) {
+					delete newTicket[key];
+				} else {
+					systemLogger.logError(`Type check failed: ${key} is expected to be type ${this.fieldTypes[key]} but it is `, Object.prototype.toString.call(newTicket[key]));
+					throw responseCodes.INVALID_ARGUMENTS;
+				}
+
+			}
+			if (key === "due_date" && newTicket[key] === 0) {
+				delete newTicket[key];
 			}
 		});
 

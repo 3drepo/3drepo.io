@@ -46,8 +46,8 @@ export const Container = styled.div`
 	flex-direction: column;
 	position: relative;
 	overflow: hidden;
-	flex: ${(props: any) => props.fill ? 1 : 'auto'};
-	padding-top: ${(props: any) => props.top ? '16px' : 'auto'};
+	flex: ${(props: { fill: boolean; }) => props.fill ? 1 : 'auto'};
+	padding-top: ${(props: { top: boolean; }) => props.top ? '16px' : 'auto'};
 
 	${TextFieldStyles.StyledTextField} {
 		margin: 1px 0;

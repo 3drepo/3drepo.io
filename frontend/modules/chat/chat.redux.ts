@@ -25,7 +25,9 @@ export const { Types: ChatTypes, Creators: ChatActions } = createActions({
 	setJoinedRooms: ['joinedRooms'],
 	joinRoom: ['teamspace', 'model'],
 	callChannelActions: ['subchannelName', 'teamspace', 'model', 'handlers'],
-	callCommentsChannelActions: ['subchannelName', 'teamspace', 'model', 'dataId', 'handlers']
+	callCommentsChannelActions: ['subchannelName', 'teamspace', 'model', 'dataId', 'handlers'],
+	subscribeToDm: ['event', 'handler', 'context'],
+	unsubscribeToDm: ['event', 'handler']
 }, { prefix: 'CHAT/' });
 
 export interface IChatState {

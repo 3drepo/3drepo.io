@@ -145,6 +145,36 @@ export class ViewerService {
 		this.viewer.off(...args);
 	}
 
+	public async topView() {
+		await this.isModelReady();
+		return this.viewer.topView();
+	}
+
+	public async bottomView() {
+		await this.isModelReady();
+		return this.viewer.bottomView();
+	}
+
+	public async frontView() {
+		await this.isModelReady();
+		return this.viewer.frontView();
+	}
+
+	public async backView() {
+		await this.isModelReady();
+		return this.viewer.backView();
+	}
+
+	public async leftView() {
+		await this.isModelReady();
+		return this.viewer.leftView();
+	}
+
+	public async rightView() {
+		await this.isModelReady();
+		return this.viewer.rightView();
+	}
+
 	public async setCamera(params) {
 		await this.isModelReady();
 

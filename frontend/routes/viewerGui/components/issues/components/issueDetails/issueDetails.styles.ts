@@ -16,6 +16,7 @@
  */
 
 import styled from 'styled-components';
+
 import { LogList as LogListBase } from '../../../../../components/logList/logList.component';
 import PreviewDetailsBase from '../../../previewDetails/previewDetails.container';
 

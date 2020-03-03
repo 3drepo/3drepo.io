@@ -209,7 +209,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			});
 		} else {
 			this.props.setState({
-				visibleItems: this.state.lastVisibleItems
+				visibleItems: this.state.visibleItems
 			});
 		}
 

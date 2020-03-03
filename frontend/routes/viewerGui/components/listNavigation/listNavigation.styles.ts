@@ -17,4 +17,12 @@
 
 import styled from 'styled-components';
 
+import IconButton from '@material-ui/core/IconButton';
+
 export const Container = styled.div``;
+
+export const StyledIconButton = styled(IconButton)`
+	&& {
+		padding: 6px;
+	}
+`;
