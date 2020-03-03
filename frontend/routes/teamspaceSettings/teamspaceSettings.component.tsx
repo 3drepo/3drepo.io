@@ -184,7 +184,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 	private renderTreatmentSuggestionsSection = () => {
 		return (
 			<SuggestionsContainer container direction="column" wrap="nowrap">
-				<Headline color="textPrimary" variant="subheading">Risk Treatment Suggestions</Headline>
+				<Headline color="textPrimary" variant="subheading">Treatment Suggestions</Headline>
 				<Grid container direction="row" justify="space-between" alignItems="center" wrap="nowrap">
 					<InfoColumnWrapper container>
 						<Headline
@@ -233,7 +233,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 				>
 					<StyledForm>
 						<StyledGrid>
-							<Headline color="textPrimary" variant="subheading">Teamspace</Headline>
+							<Headline color="primary" variant="subheading">Teamspace</Headline>
 							<TextField
 									value={this.teamspace}
 									margin="dense"
@@ -243,7 +243,8 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 						</StyledGrid>
 
 						<StyledGrid>
-							<Headline color="textPrimary" variant="subheading">Issues Types</Headline>
+							<Headline color="primary" variant="subheading">Issues</Headline>
+							<Headline color="textPrimary" variant="subheading">Topic Types</Headline>
 							<Field
 								name="topicTypes"
 								render={({ field }) => <ChipsInput {...field} placeholder={'Enter new topic type...'} />}
@@ -251,7 +252,8 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 						</StyledGrid>
 
 						<StyledGrid paddingBottom>
-							<Headline color="textPrimary" variant="subheading">Risk Categories</Headline>
+							<Headline color="primary" variant="subheading">Risks</Headline>
+							<Headline color="textPrimary" variant="subheading">Categories</Headline>
 							<Field
 								name="riskCategories"
 								render={({ field }) => <ChipsInput {...field} placeholder="Enter new category..." />}

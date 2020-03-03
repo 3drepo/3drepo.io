@@ -74,7 +74,11 @@ export const StyledButton = styled(Button)`
 	}
 `;
 
-export const Headline = styled(Typography)``;
+export const Headline = styled(Typography)`
+ 	&& + && {
+ 		margin-top: 10px;
+ 	}
+`;
 
 export const StyledIcon = styled(ArrowBack)`
 	color: ${COLOR.WHITE};
