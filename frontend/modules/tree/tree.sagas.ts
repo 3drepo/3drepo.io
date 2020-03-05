@@ -18,11 +18,11 @@ import { delay } from 'redux-saga';
 import { all, call, put, select, take, takeLatest } from 'redux-saga/effects';
 
 import { VIEWER_EVENTS } from '../../constants/viewer';
-import { dispatch } from '../../modules/store';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewerService/viewerController';
 import { DialogActions } from '../dialog';
 import { GroupsActions } from '../groups';
+import { dispatch } from '../store';
 import {
 	selectActiveNode,
 	selectDefaultHiddenNodesIds,
@@ -358,7 +358,7 @@ function* isolateSelectedNodes({ nodeId }) {
 	if (nodeId) {
 		yield isolateNodes([nodeId]);
 		const meshes = yield TreeProcessing.getMeshesByNodeIds([nodeId]);
-		Viewer.zoomToObjects({entries: meshes});
+		return Viewer.zoomToObjects({entries: meshes});
 	} else {
 		const fullySelectedNodes = yield select(selectFullySelectedNodesIds);
 		yield isolateNodes(fullySelectedNodes);
@@ -547,7 +547,7 @@ function* goToRootNode({ nodeId }) {
 function* zoomToHighlightedNodes() {
 	try {
 		yield call(delay, 100);
-		Viewer.zoomToHighlightedMeshes();
+		return Viewer.zoomToHighlightedMeshes();
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('zoom', 'highlighted nodes', error));
 	}

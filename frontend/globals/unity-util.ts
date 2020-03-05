@@ -308,7 +308,7 @@ export class UnityUtil {
 				}
 			});
 		} else {
-			UnityUtil.onReady().then(() => {
+			return UnityUtil.onReady().then(() => {
 				if (UnityUtil.unityInstance) {
 					UnityUtil.unityInstance.SendMessage(UnityUtil.UNITY_GAME_OBJECT, methodName, params);
 				}

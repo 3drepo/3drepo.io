@@ -93,7 +93,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	get isViewerInitialized() {
-		return this.props.viewer.viewer.initialized;
+		return this.props.viewer.initialized;
 	}
 
 	public commentRef = React.createRef<any>();

@@ -16,7 +16,7 @@
  */
 import { getState } from '../modules/store';
 import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds, selectTreeNodesList } from '../modules/tree';
-import { Viewer } from '../services/viewer/viewer';
+import { Viewer } from '../services/viewer/viewerService/viewerController';
 import { hexToGLColor } from './colors';
 
 export const getGroupOverride = (overrides, group) => {
@@ -75,7 +75,7 @@ export const addColorOverrides = async (overrides) => {
 
 				for (let j = 0; j < modelsList.length; j++) {
 					const { meshes, teamspace, modelId } = modelsList[j] as any;
-					Viewer.overrideMeshColor(teamspace, modelId, meshes, color);
+					await Viewer.overrideMeshColor(teamspace, modelId, meshes, color);
 				}
 			}
 		}
@@ -103,7 +103,7 @@ export const removeColorOverrides =  async (overrides) => {
 
 				for (let j = 0; j < modelsList.length; j++) {
 					const { meshes, teamspace, modelId } = modelsList[j] as any;
-					Viewer.resetMeshColor(teamspace, modelId, meshes);
+					await Viewer.resetMeshColor(teamspace, modelId, meshes);
 				}
 			}
 		}

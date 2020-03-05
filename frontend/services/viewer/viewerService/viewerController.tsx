@@ -75,6 +75,7 @@ export class ViewerService extends UnityController {
 		this.name = name;
 
 		this.unityLoaderReady = false;
+		this.pinDropMode = false;
 
 		this.viewer = document.createElement('div');
 		this.viewer.className = 'viewer';
@@ -317,13 +318,14 @@ export class ViewerService extends UnityController {
 
 	public async highlightObjects(params) {
 		if (this.canHighlight) {
-			if (params.idsIn) {
-				const uniqueIds = Array.from(new Set(params.idsIn));
+			const ids = params.id ? [params.id] : params.ids;
+			if (ids) {
+				const uniqueIds = Array.from(new Set(ids));
 				if (uniqueIds.length) {
 					await this.highlightAllObjects(
 							params.account,
 							params.model,
-							params.id ? [params.id] : params.ids,
+							ids,
 							params.colour,
 							params.multi,
 							params.forceReHighlightt);
@@ -420,26 +422,23 @@ export class ViewerService extends UnityController {
 	/**
 	 * Pins
 	 */
-// ???? this.mode ??
-	// get isPinMode() {
-	// 	return this.mode === VIEWER_PIN_MODE.PIN;
-	// }
 
-	public addPin({account, model, id, type, position, norm, colours, viewpoint, isSelected}) {
-		this.pins[id] = new Pin({ id, type, position, norm, colors: colours, account, model });
+	public addPin = async ({account, model, id, type, pickedPos: position, norm, colours, viewpoint, isSelected}) => {
+			await this.isViewerReady();
+			this.pins[id] = new Pin({ id, type, position, norm, colors: colours, account, model });
 
-		if (type === 'risk') {
-			UnityUtil.dropRiskPin(id, position, norm, colours);
-		} else {
-			UnityUtil.dropIssuePin(id, position, norm, colours);
-		}
-
-		if (isSelected) {
-			this.selectPin(id);
-		}
+			if (isSelected) {
+				this.selectPin(id);
+			}
+			await this.isModelReady();
+			if (type === 'risk') {
+				await this.dropRiskPin(id, position, norm, colours);
+			} else {
+				await this.dropIssuePin(id, position, norm, colours);
+			}
 	}
 
-	public removePin({id}) {
+	public removePin = ({id}) => {
 		if (this.pins.hasOwnProperty(id)) {
 			this.pins[id].remove();
 			delete this.pins[id];
@@ -522,16 +521,11 @@ export class ViewerService extends UnityController {
 	public async loadNewModel(account, model, branch, revision) {
 		await UnityUtil.onReady();
 		this.emit(VIEWER_EVENTS.MODEL_LOADING_START);
-		this.initialized = true;
-		// this.account = account;
-		// this.model = model;
-		// this.branch = branch;
-		// this.revision = revision;
 		document.body.style.cursor = 'wait';
 
-		this.loadModel(account, model, branch, revision);
+		await this.loadModel(account, model, branch, revision);
 
-		this.onLoaded().then((bbox) => {
+		await this.onLoaded().then((bbox) => {
 			document.body.style.cursor = 'initial';
 
 			this.emit(VIEWER_EVENTS.MODEL_LOADED, 1);
@@ -560,12 +554,12 @@ export class ViewerService extends UnityController {
 
 	public async zoomToHighlightedMeshes() {
 		await this.isModelReady();
-		this.zoomToHighlightedMeshes();
+		super.zoomToHighlightedMeshes();
 	}
 
 	public async zoomToObjects(meshes) {
 		await this.isModelReady();
-		this.zoomToObjects(meshes);
+		super.zoomToObjects(meshes);
 	}
 
 	/**
@@ -608,50 +602,37 @@ export class ViewerService extends UnityController {
 
 	public async resetMapSources() {
 		await this.isViewerReady();
-		this.resetMapSources();
+		super.resetMapSources();
 	}
 
 	public async addMapSource(source) {
 		await this.isViewerReady();
-		this.addMapSource(source);
+		super.addMapSource(source);
 	}
 
 	public async removeMapSource(source) {
 		await this.isViewerReady();
-		this.removeMapSource(source);
+		super.removeMapSource(source);
 	}
 
 	public async mapInitialise(surveyPoints) {
 		await this.isViewerReady();
-		this.mapInitialise(surveyPoints);
+		super.mapInitialise(surveyPoints);
 	}
 
 	public async mapStart() {
 		await this.isViewerReady();
-		this.mapStart();
+		super.mapStart();
 	}
 
 	public async mapStop() {
 		await this.isViewerReady();
-		this.mapStop();
+		super.mapStop();
 	}
 
 	/**
 	 * MultiSelect
 	 */
-
-	// public getMultiSelectMode() {
-	// 	if (this.viewer) {
-	// 		return this.viewer.multiSelectMode;
-	// 	}
-	// 	return false;
-	// }
-	//
-	// public setMultiSelectMode(value) {
-	// 	if (this.viewer) {
-	// 		this.viewer.setMultiSelectMode(value);
-	// 	}
-	// }
 
 	public async goToExtent() {
 		await this.isViewerReady();
@@ -667,54 +648,8 @@ export class ViewerService extends UnityController {
 		return this.getUnityObjectsStatus(teamspace, model);
 	}
 
-	/**
-	 * Compare
-	 */
-	//
-	// public diffToolSetAsComparator(teamspace: string, model: string) {
-	// 	this.diffToolSetAsComparator(teamspace, model);
-	// }
-	//
-	// public diffToolLoadComparator(teamspace: string, model: string, revision: string) {
-	// 	return this.diffToolLoadComparator(teamspace, model, revision);
-	// }
-	//
-	// public async diffToolEnableWithClashMode() {
-	// 	await this.isViewerReady();
-	// 	return this.diffToolEnableWithClashMode();
-	// }
-	//
-	// public async diffToolEnableWithDiffMode() {
-	// 	await this.isViewerReady();
-	// 	return this.diffToolEnableWithDiffMode();
-	// }
-	//
-	// public diffToolDisableAndClear = async () => {
-	// 	await this.isViewerReady();
-	// 	return this.diffToolDisableAndClear();
-	// }
-	//
-	// public diffToolShowBaseModel = async () => {
-	// 	await this.isViewerReady();
-	// 	return this.diffToolShowBaseModel();
-	// }
-	//
-	// public diffToolShowComparatorModel = async () => {
-	// 	await this.isViewerReady();
-	// 	return this.diffToolShowComparatorModel();
-	// }
-	//
-	// public diffToolDiffView = async () => {
-	// 	await this.isViewerReady();
-	// 	return this.diffToolDiffView();
-	// }
-
 	public async getCurrentViewpoint({ teamspace, model }) {
-		// if (this.viewer) {
-			return await this.getCurrentViewpointInfo(teamspace, model);
-
-		// }
-		// return {};
+		return await this.getCurrentViewpointInfo(teamspace, model);
 	}
 
 	public async goToDefaultViewpoint() {

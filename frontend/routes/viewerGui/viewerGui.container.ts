@@ -43,7 +43,6 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchData: ViewerGuiActions.fetchData,
 	resetPanelsStates: ViewerGuiActions.resetPanelsStates,
 	setPanelVisibility: ViewerGuiActions.setPanelVisibility,
-	loadModel: ViewerGuiActions.loadModel,
 	stopListenOnSelections: TreeActions.stopListenOnSelections,
 	stopListenOnModelLoaded: ViewerGuiActions.stopListenOnModelLoaded,
 	stopListenOnClickPin: ViewerGuiActions.stopListenOnClickPin,

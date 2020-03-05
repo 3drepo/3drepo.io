@@ -91,8 +91,7 @@ function* resetActiveGroup() {
 
 function* highlightGroup({ group }) {
 	try {
-		const color = group.color ? hexToGLColor(group.color) :
-		Viewer.getDefaultHighlightColor();
+		const color = group.color ? hexToGLColor(group.color) : Viewer.getDefaultHighlightColor();
 		yield put(GroupsActions.addToHighlighted(group._id));
 
 		if (group.objects && group.objects.length > 0) {
@@ -207,7 +206,7 @@ function* downloadGroups({ teamspace, modelId }) {
 		const endpointBase =
 			`${teamspace}/${modelId}/revision/master/head/groups/?noIssues=true&noRisks=true`;
 		const endpoint = ids ? `${endpointBase}&ids=${ids}` : endpointBase;
-		const modelName = Viewer.viewer && Viewer.viewer.settings ? Viewer.viewer.settings.name : '';
+		const modelName = Viewer.settings ? Viewer.settings.name : '';
 		yield API.downloadJSON('groups', modelName, `${endpoint}&convertCoords=true`);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('download', 'groups', error));

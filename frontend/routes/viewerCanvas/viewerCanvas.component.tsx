@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isEqual } from 'lodash';
 import React from 'react';
+
+import { isEqual } from 'lodash';
+
 import { ROUTES } from '../../constants/routes';
-import { pinsDiff } from '../../helpers/pins';
 import { Container } from './viewerCanvas.styles';
 
 interface IProps {
@@ -35,6 +36,7 @@ interface IProps {
 	colorOverrides: any;
 	issuePins: any[];
 	riskPins: any[];
+	updatePins: (prev, curr) => void;
 	handleColorOverridesChange: (currentOvverides, previousOverrides) => void;
 }
 
@@ -52,13 +54,7 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 
 	public renderPins(prev, curr) {
 		if (this.shouldBeVisible) {
-			const { viewer } = this.props;
-
-			const toAdd = pinsDiff(curr, prev);
-			const toRemove = pinsDiff(prev, curr);
-
-			toRemove.forEach(viewer.removePin.bind(viewer));
-			toAdd.forEach(viewer.addPin.bind(viewer));
+			this.props.updatePins(prev, curr);
 		}
 	}
 
@@ -68,11 +64,11 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 			handleColorOverridesChange(colorOverrides, prevProps.colorOverrides);
 		}
 
-		if (issuePins !== prevProps.issuePins && prevProps.issuePins) {
+		if (!isEqual(issuePins, prevProps.issuePins)) {
 			this.renderPins(prevProps.issuePins, issuePins);
 		}
 
-		if (riskPins !== prevProps.riskPins && prevProps.riskPins) {
+		if (!isEqual(riskPins, prevProps.riskPins)) {
 			this.renderPins(prevProps.riskPins, riskPins);
 		}
 	}

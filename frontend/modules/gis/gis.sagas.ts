@@ -24,7 +24,7 @@ import { selectVisibleSources } from './gis.selectors';
 
 export function* initialiseMap({params}) {
 	try {
-		Viewer.mapInitialise(params);
+		yield Viewer.mapInitialise(params);
 		yield put(GisActions.initialiseMapSuccess(true));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('initialise', 'map', error));

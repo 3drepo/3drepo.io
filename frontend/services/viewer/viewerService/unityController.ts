@@ -301,6 +301,16 @@ export class UnityController {
 		UnityUtil.selectPin(id);
 	}
 
+	public async dropRiskPin(id, position, norm, colours) {
+		await this.isModelLoaded;
+		return UnityUtil.dropRiskPin(id, position, norm, colours);
+	}
+
+	public async dropIssuePin(id, position, norm, colours) {
+		await this.isModelLoaded;
+		return UnityUtil.dropIssuePin(id, position, norm, colours);
+	}
+
 	/**
 	 * Resets map sources
 	 */
