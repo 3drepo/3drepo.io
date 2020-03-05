@@ -756,7 +756,7 @@ function renderRisksHTML(req, res, next) {
 	const {account, model, rid} = req.params;
 	const ids = req.query.ids ? req.query.ids.split(",") : undefined;
 
-	Risk.getRisksReport(account, model, req.session.user.username, rid, ids, res).catch(err => {
+	Risk.getRisksReport(account, model, rid, ids, res).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
