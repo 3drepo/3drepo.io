@@ -16,20 +16,17 @@
  **/
 
 import React from 'react';
-import {IS_DEVELOPMENT} from '../../../constants/environment';
+import { IS_DEVELOPMENT } from '../../../constants/environment';
 import {
-	VIEWER_ERRORS,
 	VIEWER_EVENTS,
-	VIEWER_MAP_SOURCES,
 	VIEWER_NAV_MODES,
 	VIEWER_PIN_MODE
 } from '../../../constants/viewer';
 import { UnityUtil } from '../../../globals/unity-util';
-import { DialogActions } from '../../../modules/dialog';
-import {dispatch, getState} from '../../../modules/store';
-import {selectMemory} from '../../../modules/viewer';
-import {clientConfigService} from '../../clientConfig';
-import {MultiSelect} from '../multiSelect';
+import { getState} from '../../../modules/store';
+import { selectMemory } from '../../../modules/viewer';
+import { clientConfigService } from '../../clientConfig';
+import { MultiSelect } from '../multiSelect';
 import { Pin } from '../pin';
 import { UnityController } from './unityController';
 
@@ -125,7 +122,6 @@ export class ViewerService extends UnityController {
 	}
 
 	public init = async () => {
-		console.error('Initiating Viewer:');
 		if (IS_DEVELOPMENT) {
 			console.debug('Initiating Viewer');
 		}
@@ -156,7 +152,7 @@ export class ViewerService extends UnityController {
 			if (this.initialized) {
 				resolve();
 			}
-			console.error('options:', options);
+
 			UnityUtil.setAPIHost(options.getAPI);
 
 			// Set option param from viewerDirective
@@ -190,7 +186,6 @@ export class ViewerService extends UnityController {
 				console.error('UnityUtil.onReady failed: ', error);
 				reject(error);
 			});
-
 		});
 	}
 
@@ -201,7 +196,6 @@ export class ViewerService extends UnityController {
 
 		return new Promise((resolve, reject) => {
 			this.unityLoaderScript.addEventListener ('load', () => {
-				// UnityUtil.loadUnity(this.divId, undefined, memory, this.onUnityProgress);
 				(async () => {
 					await this.loadUnity(memory);
 					console.debug('Loaded UnityLoader.js succesfully');
@@ -508,7 +502,6 @@ export class ViewerService extends UnityController {
 	 */
 
 	public async loadViewerModel(teamspace, model, branch, revision) {
-		console.error('loadViewerModel:');
 		if (!teamspace || !model) {
 			console.error('Teamspace, model, branch or revision was not defined!', teamspace, model, branch, revision);
 			await Promise.reject('Teamspace, model, branch or revision was not defined!');

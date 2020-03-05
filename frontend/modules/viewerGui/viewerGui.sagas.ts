@@ -366,9 +366,7 @@ function* loadModel() {
 		const revision = yield select(selectCurrentRevisionId);
 		const modelSettings = yield select(selectSettings);
 
-		console.error('Viewer.isViewerReady:', Viewer.isViewerReady());
 		yield Viewer.isViewerReady();
-		console.error('Viewer.isViewerReady: resolved');
 		yield Viewer.loadViewerModel(teamspace, model, 'master', revision || 'head');
 		yield Viewer.updateViewerSettings(modelSettings);
 	} catch (error) {
