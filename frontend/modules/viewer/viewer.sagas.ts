@@ -39,6 +39,10 @@ const updateHandlers = {
 
 const callUpdateHandlers = (oldSettings, settings) => {
 	keys(oldSettings).forEach((key) => {
+		if (key === 'shading' && settings[key] === 'architectural') {
+			// We're disabling architectural rendering for now.
+			settings[key] = 'standard';
+		}
 		if (oldSettings[key] !== settings[key]) {
 			const update = updateHandlers[key];
 			if (!update) {
