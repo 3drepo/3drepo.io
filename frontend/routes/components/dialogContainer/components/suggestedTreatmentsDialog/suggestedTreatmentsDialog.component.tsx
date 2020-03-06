@@ -20,7 +20,7 @@ import React from 'react';
 import Grid from '@material-ui/core/Grid';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
-import { forOwn, uniq } from 'lodash';
+import { forOwn, pick, uniq } from 'lodash';
 
 import { LabelButton } from '../../../../viewerGui/components/labelButton/labelButton.styles';
 import { CellSelect } from '../../../customTable/components/cellSelect/cellSelect.component';
@@ -29,6 +29,8 @@ import {
 	TextContainer,
 } from './suggestedTreatmentsDialog.styles';
 import { SuggestionDetails } from './suggestionDetails/suggestionDetails.component';
+
+const MITIGATION_PROPERTIES = ['mitigation_desc', 'mitigation_detail', 'mitigation_stage', 'mitigation_type'];
 
 interface ITextWrapper {
 	noWrap?: boolean;
@@ -98,7 +100,8 @@ export const SuggestedTreatmentsDialog = ({ suggestions, setFieldValue, handleCl
 	const [stage, setStage] = React.useState('');
 
 	const handleClick = (suggestion) => {
-		forOwn(suggestion, (value, key) => setFieldValue(key, value));
+		const mitigationProperties = pick(suggestion, MITIGATION_PROPERTIES);
+		forOwn(mitigationProperties, (value, key) => setFieldValue(key, value));
 		handleClose();
 	};
 
