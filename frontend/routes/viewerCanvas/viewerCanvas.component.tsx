@@ -65,15 +65,13 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 	}
 
 	public renderPins(prev, curr) {
-		if (this.shouldBeVisible) {
-			const { viewer } = this.props;
+		const { viewer } = this.props;
 
-			const toAdd = pinsDiff(curr, prev);
-			const toRemove = pinsDiff(prev, curr);
+		const toAdd = pinsDiff(curr, prev);
+		const toRemove = pinsDiff(prev, curr);
 
-			toRemove.forEach(viewer.removePin.bind(viewer));
-			toAdd.forEach(viewer.addPin.bind(viewer));
-		}
+		toRemove.forEach(viewer.removePin.bind(viewer));
+		toAdd.forEach(viewer.addPin.bind(viewer));
 	}
 
 	public renderColorOverrides(prev, curr) {
@@ -109,11 +107,11 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 			this.renderColorOverrides(prevProps.colorOverrides, colorOverrides);
 		}
 
-		if (issuePins !== prevProps.issuePins && prevProps.issuePins) {
+		if (!isEqual(issuePins, prevProps.issuePins)) {
 			this.renderPins(prevProps.issuePins, issuePins);
 		}
 
-		if (riskPins !== prevProps.riskPins && prevProps.riskPins) {
+		if (!isEqual(riskPins, prevProps.riskPins)) {
 			this.renderPins(prevProps.riskPins, riskPins);
 		}
 
