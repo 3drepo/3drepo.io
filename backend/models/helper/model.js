@@ -1015,9 +1015,8 @@ async function getMeshById(account, model, meshId) {
 	const projection = {
 		"parents": 1,
 		"vertices": 1,
-		"normals": 1,
-		"bounding_box": 1,
-		"faces" : 1
+		"matrix": 1,
+		"faces": 1
 	};
 
 	const mesh = await Scene.getObjectById(account, model, utils.stringToUUID(meshId), projection);
@@ -1033,12 +1032,10 @@ async function getMeshById(account, model, meshId) {
 	}
 
 	const vertices = binToArrayVector3d(mesh.vertices, true);
-	const normals = binToArrayVector3d(mesh.normals, true);
 	const triangles = binToTrianglesArray(mesh.faces, true);
-	const bounding_box = mesh.bounding_box;
 
 	// - if vertices are external set them
-	return {matrix: mesh.matrix, vertices, triangles, normals, bounding_box};
+	return { matrix: mesh.matrix, vertices, triangles };
 }
 
 async function getParentMatrix(account, model, parent, revisionIds) {

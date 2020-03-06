@@ -70,7 +70,7 @@ module.exports.createApp = function () {
 	app.set("view_engine", "pug");
 
 	app.use(bodyParser.json({ limit: "50mb" }));
-	app.use(compress());
+	app.use(compress({ level: 9 }));
 
 	app.use(function (req, res, next) {
 		// intercept OPTIONS method
