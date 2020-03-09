@@ -83,14 +83,13 @@ function* fetchData({ teamspace, model }) {
 function* resetPanelsStates() {
 	try {
 		yield all([
-			put(IssuesActions.resetComponentState()),
-			put(RisksActions.resetComponentState()),
+			put(IssuesActions.reset()),
+			put(RisksActions.reset()),
 			put(GroupsActions.resetComponentState()),
 			put(CompareActions.resetComponentState()),
 			put(BimActions.resetBimState()),
 			put(ViewerGuiActions.resetPanels()),
-			put(GisActions.resetLayers())
-
+			put(GisActions.resetLayers()),
 		]);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('reset', 'panels data', error));
