@@ -17,10 +17,8 @@
     "wdm": "yarn run wdm:update && yarn run wdm:start",
     "wdm:start": "webdriver-manager start --standalone",
     "wdm:update": "webdriver-manager update --standalone",
-    "e2e:ie": "protractor ./tests/e2e/built/ie/ie-config.js --specs ./tests/e2e/built/ie/ie.js",
-    "e2e": "yarn run tsc:tests && protractor ./tests/e2e/built/config/config.js && yarn run e2e:ie",
-    "e2e:one": "yarn run tsc:tests && yarn run protractor ./tests/e2e/built/config/config.js --specs ",
     "tsc:tests": "tsc --project ./tests",
+    "test": "mocha",
     "unity-util": "webpack --config ./internals/webpack/webpack.unityutil.config.js",
     "lint:ts": "tslint --config tslint.json --project ./ --exclude tests --exclude internals --format stylish",
     "lint:css": "stylelint ./**/*.styles.ts",
@@ -130,7 +128,11 @@
     "webpack-bundle-analyzer": "3.0.3",
     "webpack-cli": "3.1.2",
     "webpack-livereload-plugin": "2.1.1",
-    "webpack-stream": "4.0.0"
+    "webpack-stream": "4.0.0",
+    "chai": "4.2.0",
+    "mocha": "5.2.0",
+    "selenium-webdriver": "4.0.0-alpha.5",
+    "chromedriver": "80.0.1"
   },
   "resolutions": {
     "react": "16.8.6",
