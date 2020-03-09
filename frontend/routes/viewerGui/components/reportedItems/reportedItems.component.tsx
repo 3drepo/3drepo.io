@@ -290,12 +290,14 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	)
 
 	public handleNavigationChange = (currentIndex) => {
-		this.props.onShowDetails(this.state.filteredItems[currentIndex]);
+		const itemToShow = this.state.filteredItems[currentIndex] || this.state.filteredItems[0];
+		this.props.onShowDetails(itemToShow);
 	}
 
 	public renderActions = () => {
-		if (this.props.showDetails) {
-			const canBeNavigated = this.props.activeItemId && this.state.filteredItems.length >= 2;
+		if (this.props.showDetails && this.props.activeItemId) {
+			const canBeNavigated = this.state.filteredItems.length > 1 ||
+					(this.state.filteredItems.length === 1 && this.state.filteredItems[0]._id !== this.props.activeItemId);
 			return canBeNavigated ?
 					this.renderHeaderNavigation() : <PanelBarActions type={this.props.type} hideSearch hideMenu />;
 		}
