@@ -75,7 +75,7 @@ export const addColorOverrides = (overrides) => {
 
 				for (let j = 0; j < modelsList.length; j++) {
 					const { meshes, teamspace, modelId } = modelsList[j] as any;
-					await Viewer.overrideMeshColor(teamspace, modelId, meshes, color);
+					Viewer.overrideMeshColor(teamspace, modelId, meshes, color);
 				}
 			}
 		}
@@ -103,7 +103,7 @@ export const removeColorOverrides = (overrides) => {
 
 				for (let j = 0; j < modelsList.length; j++) {
 					const { meshes, teamspace, modelId } = modelsList[j] as any;
-					await Viewer.resetMeshColor(teamspace, modelId, meshes);
+					Viewer.resetMeshColor(teamspace, modelId, meshes);
 				}
 			}
 		}

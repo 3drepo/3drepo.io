@@ -247,9 +247,7 @@ const updateResourcesSuccess = (state = INITIAL_STATE, { resourcesIds, updates, 
 	return { ...state, risksMap};
 };
 
-const reset = () => {
-	return cloneDeep(INITIAL_STATE);
-};
+const reset = () => cloneDeep(INITIAL_STATE);
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.FETCH_RISKS_SUCCESS]: fetchRisksSuccess,

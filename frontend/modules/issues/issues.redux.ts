@@ -199,9 +199,7 @@ const showCloseInfo = (state = INITIAL_STATE, { issueId }) => {
 	return { ...state, issuesMap };
 };
 
-const reset = () => {
-	return cloneDeep(INITIAL_STATE);
-};
+const reset = () => cloneDeep(INITIAL_STATE);
 
 const removeResourceSuccess =  (state = INITIAL_STATE, { resource, issueId }) => {
 	const resources = state.issuesMap[issueId].resources.filter((r) => r._id !== resource._id);
