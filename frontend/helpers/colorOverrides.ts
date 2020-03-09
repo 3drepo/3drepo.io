@@ -54,7 +54,7 @@ export const overridesDiff = (overrideA, overrideB) => {
 	return result;
 };
 
-export const addColorOverrides = async (overrides) => {
+export const addColorOverrides = (overrides) => {
 	if (!overrides.length) {
 		return;
 	}
@@ -82,7 +82,7 @@ export const addColorOverrides = async (overrides) => {
 	}
 };
 
-export const removeColorOverrides =  async (overrides) => {
+export const removeColorOverrides = (overrides) => {
 	if (!overrides.length) {
 		return;
 	}

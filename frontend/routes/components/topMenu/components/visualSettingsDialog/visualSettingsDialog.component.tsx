@@ -43,7 +43,6 @@ const BasicSettings = (props) => {
 				<Field name="shading" render={ ({ field }) => (
 					<SelectField {...field}>
 						<MenuItem value="standard">Standard</MenuItem>
-						<MenuItem value="architectural">Architectural</MenuItem>
 					</SelectField>)} />
 			</FormListItem>
 			<FormListItem>

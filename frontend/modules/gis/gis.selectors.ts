@@ -19,10 +19,6 @@ import { createSelector } from 'reselect';
 
 export const selectGisDomain = (state) => ({...state.gis});
 
-export const selectIsInitialisedMap = createSelector(
-	selectGisDomain, (state) => state.initialised
-);
-
-export const selectVisibleSources = createSelector(
-	selectGisDomain, (state) => state.visibleSources
+export const selectGisLayers = createSelector(
+	selectGisDomain, (state) => state.layers
 );

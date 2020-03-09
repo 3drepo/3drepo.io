@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -19,10 +19,11 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
+import { selectGisLayers } from '../../modules/gis';
 import { selectOverrides, } from '../../modules/groups';
 import { selectPins as selectIssuePins } from '../../modules/issues';
+import { selectGISCoordinates, selectHasGISCoordinates } from '../../modules/model';
 import { selectPins as selectRiskPins } from '../../modules/risks';
-import { TreeActions } from '../../modules/tree';
 import { ViewerActions } from '../../modules/viewer';
 import { withViewer } from '../../services/viewer/viewerService/viewerController';
 import { ViewerCanvas } from './viewerCanvas.component';
@@ -31,10 +32,12 @@ const mapStateToProps = createStructuredSelector({
 	colorOverrides: selectOverrides,
 	issuePins: selectIssuePins,
 	riskPins: selectRiskPins,
+	gisCoordinates: selectGISCoordinates,
+	hasGisCoordinates: selectHasGISCoordinates,
+	gisLayers: selectGisLayers
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	handleColorOverridesChange: TreeActions.handleColorOverridesChange,
 	updatePins: ViewerActions.updatePins
 }, dispatch);
 

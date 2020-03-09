@@ -27,6 +27,7 @@ import { BimActions } from '../bim';
 import { CompareActions } from '../compare';
 import { selectCurrentUser, CurrentUserActions } from '../currentUser';
 import { DialogActions } from '../dialog';
+import { GisActions } from '../gis';
 import { GroupsActions } from '../groups';
 import { selectIssuesMap, IssuesActions } from '../issues';
 import { JobsActions } from '../jobs';
@@ -87,7 +88,9 @@ function* resetPanelsStates() {
 			put(GroupsActions.resetComponentState()),
 			put(CompareActions.resetComponentState()),
 			put(BimActions.resetBimState()),
-			put(ViewerGuiActions.resetPanels())
+			put(ViewerGuiActions.resetPanels()),
+			put(GisActions.resetLayers())
+
 		]);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('reset', 'panels data', error));
