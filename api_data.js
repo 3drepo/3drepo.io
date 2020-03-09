@@ -1902,6 +1902,105 @@ define({ "api": [
     "groupTitle": "History"
   },
   {
+    "type": "patch",
+    "url": "/:teamspace/:model/revisions/:id",
+    "title": "Update revision status",
+    "name": "updateRevisionStatus",
+    "group": "History",
+    "description": "<p>Update the status of revision, setting it to void/active</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Unique Revision ID or tag</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Input",
+          "content": "{\n   \"void\": true\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success",
+          "content": "HTTP/1.1 200 OK\n{}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/history.js",
+    "groupTitle": "History"
+  },
+  {
+    "type": "put",
+    "url": "/:teamspace/:model/revisions/:id/tag",
+    "title": "Update revision tag",
+    "name": "updateRevisionTag",
+    "group": "History",
+    "description": "<p>Update revision tag</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Unique Revision ID or tag</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "tag",
+            "description": "<p>Tag to update</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/history.js",
+    "groupTitle": "History"
+  },
+  {
     "type": "post",
     "url": "/:teamspace/invitations",
     "title": "Create/Update invitation",
@@ -2709,75 +2808,6 @@ define({ "api": [
     "groupTitle": "Issues"
   },
   {
-    "type": "get",
-    "url": "/:teamspace/:model/issues.bcfzip",
-    "title": "Get Issues BCF zip file",
-    "name": "getIssuesBCF",
-    "group": "Issues",
-    "description": "<p>Get a downloaded zip file of all Issues BCF.</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/issue.js",
-    "groupTitle": "Issues"
-  },
-  {
-    "type": "get",
-    "url": "/:teamspace/:model/revision/:rid/issues.bcfzip",
-    "title": "Get Issues BCF zip file by revision ID",
-    "name": "getIssuesBCF",
-    "group": "Issues",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "id",
-            "description": "<p>Revision unique ID.</p>"
-          }
-        ]
-      }
-    },
-    "description": "<p>Get Issues BCF export based on revision ID.</p>",
-    "version": "0.0.0",
-    "filename": "routes/issue.js",
-    "groupTitle": "Issues"
-  },
-  {
     "type": "post",
     "url": "/:teamspace/:model/revision/:rid/issues.bcfzip",
     "title": "Post Issues BCF zip file by revision ID",
@@ -2830,6 +2860,75 @@ define({ "api": [
           "type": "json"
         }
       ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/issue.js",
+    "groupTitle": "Issues"
+  },
+  {
+    "type": "get",
+    "url": "/:teamspace/:model/revision/:rid/issues.bcfzip",
+    "title": "Get Issues BCF zip file by revision ID",
+    "name": "getIssuesBCF",
+    "group": "Issues",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Revision unique ID.</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Get Issues BCF export based on revision ID.</p>",
+    "version": "0.0.0",
+    "filename": "routes/issue.js",
+    "groupTitle": "Issues"
+  },
+  {
+    "type": "get",
+    "url": "/:teamspace/:model/issues.bcfzip",
+    "title": "Get Issues BCF zip file",
+    "name": "getIssuesBCF",
+    "group": "Issues",
+    "description": "<p>Get a downloaded zip file of all Issues BCF.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          }
+        ]
+      }
     },
     "version": "0.0.0",
     "filename": "routes/issue.js",
@@ -3135,22 +3234,8 @@ define({ "api": [
             "group": "Request body",
             "type": "String",
             "optional": false,
-            "field": "owner",
-            "description": "<p>The username of the user that created the issue</p>"
-          },
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": false,
             "field": "desc",
             "description": "<p>The description of the created issue</p>"
-          },
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": false,
-            "field": "creator_role",
-            "description": "<p>The job of the user that created the issue</p>"
           },
           {
             "group": "Request body",
@@ -3158,13 +3243,6 @@ define({ "api": [
             "optional": false,
             "field": "position",
             "description": "<p>The vector defining the pin of the issue. If the pin doesnt has an issue its an empty array.</p>"
-          },
-          {
-            "group": "Request body",
-            "type": "[3]Number",
-            "optional": false,
-            "field": "norm",
-            "description": "<p>The normal vector for the pin of the issue. Its not actually being used right now it it ca alwasy be of value [0,0,0].</p>"
           }
         ],
         "Request body: Viewpoint": [
@@ -3258,7 +3336,7 @@ define({ "api": [
     "examples": [
       {
         "title": "Example usage:",
-        "content": "POST /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues HTTP/1.1\n{\n   \"name\": \"Amazing issue\",\n   \"assigned_roles\": [\n      \"jobA\"\n   ],\n   \"status\": \"open\",\n   \"priority\": \"none\",\n   \"topic_type\": \"for_information\",\n   \"viewpoint\": {\n      \"right\": [\n         0.8471935391426086,\n         -2.2351741790771484e-8,\n         0.5312844514846802\n      ],\n      \"up\": [\n         0.14098820090293884,\n         0.9641460180282593,\n         -0.22482173144817352\n      ],\n      \"position\": [\n         -5828.818359375,\n         5268.15625,\n         7829.76171875\n      ],\n      \"look_at\": [\n         -2445.6826171875,\n         3515.4658203125,\n         2434.966552734375\n      ],\n      \"view_dir\": [\n         0.5122357606887817,\n         -0.2653723657131195,\n         -0.8168182373046875\n      ],\n      \"near\": 20.835742950439453,\n      \"far\": 10417.87109375,\n      \"fov\": 1.0471975803375244,\n      \"aspect_ratio\": 4.031496047973633,\n      \"clippingPlanes\": [],\n      \"highlighted_group_id\": \"\",\n      \"hideIfc\": true,\n      \"screenshot\": \"iVBORw0KGgoAAAANSUhEUgAACAAAA...ggg==\"\n   },\n   \"owner\": \"teamSpace1\",\n   \"desc\": \"This is the most awesome issue ever\",\n   \"creator_role\": \"jobA\",\n   \"scale\": 1,\n   \"position\": [\n      -3960.10205078125,\n      4487.1552734375,\n      3326.732177734375\n   ],\n   \"norm\": [\n      0,\n      0,\n      0\n   ]\n}",
+        "content": "POST /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues HTTP/1.1\n{\n   \"name\": \"Amazing issue\",\n   \"assigned_roles\": [\n      \"jobA\"\n   ],\n   \"status\": \"open\",\n   \"priority\": \"none\",\n   \"topic_type\": \"for_information\",\n   \"viewpoint\": {\n      \"right\": [\n         0.8471935391426086,\n         -2.2351741790771484e-8,\n         0.5312844514846802\n      ],\n      \"up\": [\n         0.14098820090293884,\n         0.9641460180282593,\n         -0.22482173144817352\n      ],\n      \"position\": [\n         -5828.818359375,\n         5268.15625,\n         7829.76171875\n      ],\n      \"look_at\": [\n         -2445.6826171875,\n         3515.4658203125,\n         2434.966552734375\n      ],\n      \"view_dir\": [\n         0.5122357606887817,\n         -0.2653723657131195,\n         -0.8168182373046875\n      ],\n      \"near\": 20.835742950439453,\n      \"far\": 10417.87109375,\n      \"fov\": 1.0471975803375244,\n      \"aspect_ratio\": 4.031496047973633,\n      \"clippingPlanes\": [],\n      \"highlighted_group_id\": \"\",\n      \"hideIfc\": true,\n      \"screenshot\": \"iVBORw0KGgoAAAANSUhEUgAACAAAA...ggg==\"\n   },\n   \"desc\": \"This is the most awesome issue ever\",\n   \"position\": [\n      -3960.10205078125,\n      4487.1552734375,\n      3326.732177734375\n   ]\n}",
         "type": "post"
       }
     ],
@@ -3315,6 +3393,37 @@ define({ "api": [
   },
   {
     "type": "get",
+    "url": "/:teamspace/:model/issues.html",
+    "title": "Issues response into as HTML",
+    "name": "renderIssuesHTML",
+    "group": "Issues",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Render all Issues into a HTML webpage, response is rendered HTML.</p>",
+    "version": "0.0.0",
+    "filename": "routes/issue.js",
+    "groupTitle": "Issues"
+  },
+  {
+    "type": "get",
     "url": "/:teamspace/:model/revision/:rid/issues.html",
     "title": "Issues response into as HTML by revision ID",
     "name": "renderIssuesHTML",
@@ -3347,37 +3456,6 @@ define({ "api": [
       }
     },
     "description": "<p>Render all Issues into a HTML webpage based on current revision ID.</p>",
-    "version": "0.0.0",
-    "filename": "routes/issue.js",
-    "groupTitle": "Issues"
-  },
-  {
-    "type": "get",
-    "url": "/:teamspace/:model/issues.html",
-    "title": "Issues response into as HTML",
-    "name": "renderIssuesHTML",
-    "group": "Issues",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          }
-        ]
-      }
-    },
-    "description": "<p>Render all Issues into a HTML webpage, response is rendered HTML.</p>",
     "version": "0.0.0",
     "filename": "routes/issue.js",
     "groupTitle": "Issues"
@@ -8842,110 +8920,11 @@ define({ "api": [
     "groupTitle": "Resources"
   },
   {
-    "type": "patch",
-    "url": "/:teamspace/:model/revisions/:id",
-    "title": "",
-    "name": "updateRevisionStatus",
-    "group": "Revisions",
-    "description": "<p>Update the status of revision, setting it to void/active</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "id",
-            "description": "<p>Unique Revision ID or tag</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Input",
-          "content": "{\n   \"void\": true\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "success": {
-      "examples": [
-        {
-          "title": "Success",
-          "content": "HTTP/1.1 200 OK\n{}",
-          "type": "json"
-        }
-      ]
-    },
-    "version": "0.0.0",
-    "filename": "routes/history.js",
-    "groupTitle": "Revisions"
-  },
-  {
-    "type": "put",
-    "url": "/:teamspace/:model/revisions/:id/tag",
-    "title": "Update Revision Tag",
-    "name": "updateRevisionTag",
-    "group": "Revisions",
-    "description": "<p>Update revision tag</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "id",
-            "description": "<p>Unique Revision ID or tag</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "tag",
-            "description": "<p>Tag to update</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/history.js",
-    "groupTitle": "Revisions"
-  },
-  {
     "type": "post",
     "url": "/:teamspace/:model/risks/:riskId/resources",
     "title": "Attach resources to a risk",
     "name": "attachResourceRisk",
-    "group": "Risk",
+    "group": "Risks",
     "description": "<p>Attaches file or url resources to a risk. If the type of the resource is file it should be send as multipart/form-data. Both types at the same time cant be sent. So in order to attach files and urls it should be done with two different requests.</p> <p>This method triggers a chat event</p>",
     "parameter": {
       "fields": {
@@ -9017,7 +8996,7 @@ define({ "api": [
     },
     "version": "0.0.0",
     "filename": "routes/risk.js",
-    "groupTitle": "Risk"
+    "groupTitle": "SafetiBase Risks"
   },
   {
     "type": "post",
@@ -9140,7 +9119,7 @@ define({ "api": [
     ],
     "version": "0.0.0",
     "filename": "routes/risk.js",
-    "groupTitle": "Risks"
+    "groupTitle": "SafetiBase Risks"
   },
   {
     "type": "delete",
@@ -9203,7 +9182,7 @@ define({ "api": [
     },
     "version": "0.0.0",
     "filename": "routes/risk.js",
-    "groupTitle": "Risks"
+    "groupTitle": "SafetiBase Risks"
   },
   {
     "type": "delete",
@@ -9259,7 +9238,7 @@ define({ "api": [
     },
     "version": "0.0.0",
     "filename": "routes/risk.js",
-    "groupTitle": "Risks"
+    "groupTitle": "SafetiBase Risks"
   },
   {
     "type": "delete",
@@ -9315,7 +9294,7 @@ define({ "api": [
     },
     "version": "0.0.0",
     "filename": "routes/risk.js",
-    "groupTitle": "Risks"
+    "groupTitle": "SafetiBase Risks"
   },
   {
     "type": "get",
@@ -9380,7 +9359,7 @@ define({ "api": [
     ],
     "version": "0.0.0",
     "filename": "routes/risk.js",
-    "groupTitle": "Risks"
+    "groupTitle": "SafetiBase Risks"
   },
   {
     "type": "get",
@@ -9445,7 +9424,7 @@ define({ "api": [
     ],
     "version": "0.0.0",
     "filename": "routes/risk.js",
-    "groupTitle": "Risks"
+    "groupTitle": "SafetiBase Risks"
   },
   {
     "type": "get",
@@ -9510,7 +9489,7 @@ define({ "api": [
     ],
     "version": "0.0.0",
     "filename": "routes/risk.js",
-    "groupTitle": "Risks"
+    "groupTitle": "SafetiBase Risks"
   },
   {
     "type": "get",
@@ -9575,7 +9554,7 @@ define({ "api": [
     ],
     "version": "0.0.0",
     "filename": "routes/risk.js",
-    "groupTitle": "Risks"
+    "groupTitle": "SafetiBase Risks"
   },
   {
     "type": "get",
@@ -9645,7 +9624,7 @@ define({ "api": [
     ],
     "version": "0.0.0",
     "filename": "routes/risk.js",
-    "groupTitle": "Risks"
+    "groupTitle": "SafetiBase Risks"
   },
   {
     "type": "get",
@@ -9724,7 +9703,7 @@ define({ "api": [
     ],
     "version": "0.0.0",
     "filename": "routes/risk.js",
-    "groupTitle": "Risks"
+    "groupTitle": "SafetiBase Risks"
   },
   {
     "type": "post",
@@ -9783,7 +9762,7 @@ define({ "api": [
     },
     "version": "0.0.0",
     "filename": "routes/risk.js",
-    "groupTitle": "Risks"
+    "groupTitle": "SafetiBase Risks"
   },
   {
     "type": "patch",
@@ -9849,7 +9828,7 @@ define({ "api": [
     },
     "version": "0.0.0",
     "filename": "routes/risk.js",
-    "groupTitle": "Risks"
+    "groupTitle": "SafetiBase Risks"
   },
   {
     "type": "get",
