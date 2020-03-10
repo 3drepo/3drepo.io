@@ -21,6 +21,7 @@ import { difference, isEqual } from 'lodash';
 
 import { ROUTES } from '../../constants/routes';
 import { addColorOverrides, overridesDiff, removeColorOverrides } from '../../helpers/colorOverrides';
+import { pinsDiff } from '../../helpers/pins';
 import { Container } from './viewerCanvas.styles';
 
 interface IProps {
@@ -67,7 +68,13 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 
 	public renderPins(prev, curr) {
 		if (this.shouldBeVisible) {
-			this.props.updatePins(prev, curr);
+			const { viewer } = this.props;
+
+			const toAdd = pinsDiff(curr, prev);
+			const toRemove = pinsDiff(prev, curr);
+
+			toRemove.forEach(viewer.removePin.bind(viewer));
+			toAdd.forEach(viewer.addPin.bind(viewer));
 		}
 	}
 

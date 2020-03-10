@@ -18,7 +18,6 @@
 import { keys } from 'lodash';
 import { put, select, takeLatest } from 'redux-saga/effects';
 import { DEFAULT_SETTINGS } from '../../constants/viewer';
-import { pinsDiff } from '../../helpers/pins';
 import { Viewer } from '../../services/viewer/viewerService/viewerController';
 import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
@@ -83,20 +82,7 @@ export function* fetchSettings() {
 	yield put(ViewerActions.updateSettings(username, currentSettings));
 }
 
-function* updatePins({prev, curr}) {
-	try {
-		const toAdd = pinsDiff(curr, prev);
-		const toRemove = pinsDiff(prev, curr);
-
-		toRemove.forEach(Viewer.removePin);
-		toAdd.forEach(Viewer.addPin);
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('update pins', 'viewer', error));
-	}
-}
-
 export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.UPDATE_SETTINGS, updateSettings);
 	yield takeLatest(ViewerTypes.FETCH_SETTINGS, fetchSettings);
-	yield takeLatest(ViewerTypes.UPDATE_PINS, updatePins);
 }

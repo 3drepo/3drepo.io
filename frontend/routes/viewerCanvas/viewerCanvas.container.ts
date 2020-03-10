@@ -24,7 +24,6 @@ import { selectOverrides, } from '../../modules/groups';
 import { selectPins as selectIssuePins } from '../../modules/issues';
 import { selectGISCoordinates, selectHasGISCoordinates } from '../../modules/model';
 import { selectPins as selectRiskPins } from '../../modules/risks';
-import { ViewerActions } from '../../modules/viewer';
 import { withViewer } from '../../services/viewer/viewerService/viewerController';
 import { ViewerCanvas } from './viewerCanvas.component';
 
@@ -38,7 +37,6 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	updatePins: ViewerActions.updatePins
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(ViewerCanvas));

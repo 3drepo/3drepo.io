@@ -22,7 +22,6 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	updateSettings: ['username', 'settings'],
 	updateSettingsSuccess: ['settings'],
 	fetchSettings: [],
-	updatePins: ['prev', 'curr'],
 }, { prefix: 'VIEWER_CANVAS/' });
 
 export const INITIAL_STATE = {
