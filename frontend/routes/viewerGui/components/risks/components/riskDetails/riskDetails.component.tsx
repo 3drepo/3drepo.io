@@ -312,18 +312,10 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	public postComment = async (teamspace, model, { comment, screenshot }, finishSubmitting) => {
 		const viewpoint = await this.props.viewer.getCurrentViewpoint({ teamspace, model });
 
-		const pinData = await this.props.viewer.getPinData();
-		let position;
-
-		if (pinData) {
-			position = pinData.pickedPos;
-		}
-
 		const riskCommentData = {
 			_id: this.riskData._id,
 			rev_id: this.riskData.rev_id,
 			comment,
-			position,
 			viewpoint: {
 				...viewpoint,
 				screenshot
