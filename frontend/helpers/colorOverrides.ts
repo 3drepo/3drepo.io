@@ -16,7 +16,7 @@
  */
 import { getState } from '../modules/store';
 import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds, selectTreeNodesList } from '../modules/tree';
-import { Viewer } from '../services/viewer/viewerService/viewerController';
+import { Viewer } from '../services/viewer/viewer';
 import { hexToGLColor } from './colors';
 
 export const getGroupOverride = (overrides, group) => {

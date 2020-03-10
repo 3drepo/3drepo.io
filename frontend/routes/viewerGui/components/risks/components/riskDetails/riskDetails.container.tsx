@@ -32,7 +32,7 @@ import {
 	RisksActions
 } from '../../../../../../modules/risks';
 import { ViewpointsActions } from '../../../../../../modules/viewpoints';
-import { withViewer } from '../../../../../../services/viewer/viewerService/viewerController';
+import { withViewer } from '../../../../../../services/viewer/viewer';
 import { RiskDetails } from './riskDetails.component';
 
 const mapStateToProps = createStructuredSelector({

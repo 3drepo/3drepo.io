@@ -22,7 +22,7 @@ import { ROUTES } from '../../constants/routes';
 import { INITIAL_HELICOPTER_SPEED, NEW_PIN_ID, VIEWER_CLIP_MODES, VIEWER_EVENTS } from '../../constants/viewer';
 import * as API from '../../services/api';
 import { MultiSelect } from '../../services/viewer/multiSelect';
-import { Viewer } from '../../services/viewer/viewerService/viewerController';
+import { Viewer } from '../../services/viewer/viewer';
 import { BimActions } from '../bim';
 import { CompareActions } from '../compare';
 import { selectCurrentUser, CurrentUserActions } from '../currentUser';

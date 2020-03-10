@@ -26,7 +26,7 @@ import { normalizeGroup, prepareGroup } from '../../helpers/groups';
 import { searchByFilters } from '../../helpers/searching';
 import * as API from '../../services/api';
 import { MultiSelect } from '../../services/viewer/multiSelect';
-import { Viewer } from '../../services/viewer/viewerService/viewerController';
+import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
 import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';

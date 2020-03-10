@@ -23,7 +23,7 @@ import { DialogActions } from '../../../../modules/dialog';
 
 import { MeasureActions } from '../../../../modules/measure';
 import { selectIsModelLoaded } from '../../../../modules/viewerGui';
-import { withViewer } from '../../../../services/viewer/viewerService/viewerController';
+import { withViewer } from '../../../../services/viewer/viewer';
 import { NewCommentForm } from './newCommentForm.component';
 
 const mapStateToProps = createStructuredSelector({

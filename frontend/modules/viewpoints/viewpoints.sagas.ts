@@ -18,7 +18,7 @@
 import { put, takeLatest } from 'redux-saga/effects';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import * as API from '../../services/api';
-import { Viewer } from '../../services/viewer/viewerService/viewerController';
+import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
 import { DialogActions } from '../dialog';
 import { dispatch } from '../store';

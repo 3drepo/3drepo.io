@@ -17,7 +17,7 @@
 
 import { all, put, takeLatest } from 'redux-saga/effects';
 
-import { Viewer } from '../../services/viewer/viewerService/viewerController';
+import { Viewer } from '../../services/viewer/viewer';
 import { DialogActions } from '../dialog';
 import { MeasureActions, MeasureTypes } from './';
 

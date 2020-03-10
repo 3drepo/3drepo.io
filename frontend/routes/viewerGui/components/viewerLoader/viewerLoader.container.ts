@@ -20,7 +20,7 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { selectIsTreeProcessed } from '../../../../modules/tree';
-import { withViewer } from '../../../../services/viewer/viewerService/viewerController';
+import { withViewer } from '../../../../services/viewer/viewer';
 import { ViewerLoader } from './viewerLoader.component';
 
 const mapStateToProps = createStructuredSelector({

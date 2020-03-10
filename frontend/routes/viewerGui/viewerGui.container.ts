@@ -26,7 +26,7 @@ import { TreeActions } from '../../modules/tree';
 import {
 	selectIsFocusMode, selectLeftPanels, selectRightPanels, ViewerGuiActions,
 } from '../../modules/viewerGui';
-import { withViewer } from '../../services/viewer/viewerService/viewerController';
+import { withViewer } from '../../services/viewer/viewer';
 import { ViewerGui } from './viewerGui.component';
 
 const mapStateToProps = createStructuredSelector({
