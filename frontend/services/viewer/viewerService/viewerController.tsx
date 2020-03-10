@@ -329,22 +329,15 @@ export class ViewerService {
 	}
 
 	/**
-	 * Resetting
+	 * Destroying
 	 */
 
 	public async destroy() {
-		this.removeAllListeners();
-		await this.reset();
-		this.element = null;
-	}
-
-	public async reset() {
-		await this.disableMeasure();
-		// if (this.viewer) {
-		this.setPinDropMode(false);
-		this.initialized = false;
 		UnityUtil.reset();
-	// }
+		this.initialized = false;
+		this.removeAllListeners();
+		this.setPinDropMode(false);
+		await this.disableMeasure();
 	}
 
 	/**
