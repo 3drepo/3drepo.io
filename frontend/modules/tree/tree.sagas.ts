@@ -71,8 +71,7 @@ const highlightObjects = (objects = [], nodesSelectionMap = {}, colour?) => {
 				colour,
 				model: modelId,
 				multi: true,
-				source: 'tree',
-				forceReHighlight: true
+				forceReHighlight: true,
 			}));
 		}
 	}
@@ -357,7 +356,7 @@ function* isolateSelectedNodes({ nodeId }) {
 	if (nodeId) {
 		yield isolateNodes([nodeId]);
 		const meshes = yield TreeProcessing.getMeshesByNodeIds([nodeId]);
-		Viewer.zoomToObjects({entries: meshes});
+		return Viewer.zoomToObjects({entries: meshes});
 	} else {
 		const fullySelectedNodes = yield select(selectFullySelectedNodesIds);
 		yield isolateNodes(fullySelectedNodes);
