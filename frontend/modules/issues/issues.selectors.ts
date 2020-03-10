@@ -126,8 +126,9 @@ export const selectSelectedIssue = createSelector(
 );
 
 export const selectPins = createSelector(
-	selectFilteredIssues, selectComponentState, selectActiveIssueDetails, selectShowPins,
-	(issues: any, componentState, detailedIssue, showPins) => {
+	selectFilteredIssues, selectActiveIssueDetails,
+	selectShowPins, selectShowDetails, selectActiveIssueId,
+	(issues: any, detailedIssue, showPins, showDetails, activeIssueId) => {
 
 	let pinsToShow = [];
 
@@ -137,12 +138,13 @@ export const selectPins = createSelector(
 				return pins;
 			}
 
-			pins.push(issueToPin(issue, componentState.activeIssue === issue._id ));
+			pins.push(issueToPin(issue, activeIssueId === issue._id ));
 			return pins;
 		} , []);
 	}
 
-	if (componentState.showDetails && detailedIssue && hasPin(detailedIssue)) {
+	if (showDetails && detailedIssue && hasPin(detailedIssue)) {
+		pinsToShow = pinsToShow.filter(({id}) => id !== detailedIssue._id);
 		pinsToShow.push(issueToPin(detailedIssue, true));
 	}
 
