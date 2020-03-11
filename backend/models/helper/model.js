@@ -43,7 +43,7 @@ const matrix = require("./matrix");
 const CombinedStream = require("combined-stream");
 const stringToStream = require("string-to-stream");
 const { StreamBuffer } = require("./stream");
-const { BinToTriangleStringStream, BinToVector3dStringStream, VECTOR3D_SIZE } = require("./binary");
+const { BinToTriangleStringStream, BinToVector3dStringStream } = require("./binary");
 
 /** *****************************************************************************
  * Converts error code from repobouncerclient to a response error object.
