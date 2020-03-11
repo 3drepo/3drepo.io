@@ -7,7 +7,7 @@ class StreamBuffer extends Readable {
 		super({...options, highWaterMark: options.buffer.length});
 		this._offset = 0;
 		this._buffer = options.buffer;
-		this._chunkSize = Math.min(256000, this._buffer.length);
+		this._chunkSize = Math.min(options.chunkSize || 256000, this._buffer.length);
 	}
 
 	_read() {
@@ -15,10 +15,16 @@ class StreamBuffer extends Readable {
 			return this.push(null);
 		}
 
-		const length = Math.min(this._chunkSize, this._buffer.length - this._offset);
+		let length = Math.min(this._chunkSize, this._buffer.length - this._offset);
 
-		this.push(Buffer.from(this._buffer, this._offset, length));
-		this._offset += this._chunkSize;
+		while(this.push(Buffer.from(this._buffer, this._offset, length)) && length > 0) {
+			length = Math.min(this._chunkSize, this._buffer.length - this._offset);
+			this._offset += length;
+		}
+
+		if(this._offset + length >= this._buffer.length) {
+			this.push(null);
+		}
 	}
 }
 
