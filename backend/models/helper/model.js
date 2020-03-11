@@ -43,7 +43,7 @@ const matrix = require("./matrix");
 const CombinedStream = require("combined-stream");
 const stringToStream = require("string-to-stream");
 const { StreamBuffer } = require("./stream");
-const { BinToTriangleStringStream, BinToJSONArrayVector3dStream, VECTOR3D_SIZE } = require("./binary");
+const { BinToTriangleStringStream, BinToVector3dStringStream, VECTOR3D_SIZE } = require("./binary");
 
 /** *****************************************************************************
  * Converts error code from repobouncerclient to a response error object.
@@ -1035,15 +1035,12 @@ async function getMeshById(account, model, meshId) {
 		}
 	}
 
-	// const vertices =  mesh.vertices ? streamFromBuffer(mesh.vertices.buffer, VECTOR3D_SIZE * 1000) : await Scene.getGridfsFileStream(account, model, mesh._extRef.vertices);
-	// const triangles = mesh.faces ?  streamFromBuffer(mesh.faces, 1024) : await Scene.getGridfsFileStream(account, model, mesh._extRef.faces);
-
-	const vertices =  mesh.vertices ? new StreamBuffer({buffer: mesh.vertices.buffer, chunkSize: VECTOR3D_SIZE * 1000 }) : await Scene.getGridfsFileStream(account, model, mesh._extRef.vertices);
-	const triangles = mesh.faces ?  new StreamBuffer({buffer: mesh.faces.buffer, chunkSize: 1024})  : await Scene.getGridfsFileStream(account, model, mesh._extRef.faces);
+	const vertices =  mesh.vertices ? new StreamBuffer({buffer: mesh.vertices.buffer, chunkSize: mesh.vertices.buffer.length}) : await Scene.getGridfsFileStream(account, model, mesh._extRef.vertices);
+	const triangles = mesh.faces ?  new StreamBuffer({buffer: mesh.faces.buffer, chunkSize: mesh.faces.buffer.length})  : await Scene.getGridfsFileStream(account, model, mesh._extRef.faces);
 
 	const combinedStream = CombinedStream.create();
 	combinedStream.append(stringToStream(["{\"matrix\":", JSON.stringify(mesh.matrix), ",\"vertices\":["].join("")));
-	combinedStream.append(vertices.pipe(new BinToJSONArrayVector3dStream({isLittleEndian: true})));
+	combinedStream.append(vertices.pipe(new BinToVector3dStringStream({isLittleEndian: true})));
 	combinedStream.append(stringToStream("],\"triangles\":["));
 	combinedStream.append(triangles.pipe(new BinToTriangleStringStream({isLittleEndian: true})));
 	combinedStream.append(stringToStream("]}"));

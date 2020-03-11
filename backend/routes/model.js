@@ -2160,6 +2160,7 @@ function getMesh(req, res, next) {
 	const {model, account, meshId} = req.params;
 
 	ModelHelpers.getMeshById(account, model, meshId).then((stream) => {
+		res.writeHead(200, {"Content-Type": "application/json; charset=utf-8" });
 		stream.pipe(res);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

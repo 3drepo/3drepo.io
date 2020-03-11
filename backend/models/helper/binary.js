@@ -82,7 +82,7 @@ const binToJSONArrayVector3d = (buffer, isLittleEndian = false) => {
 	return result;
 };
 
-class BinToJSONArrayVector3dStream extends Transform {
+class BinToVector3dStringStream extends Transform {
 	constructor(opts = {}) {
 		super(opts);
 		this.started = false;
@@ -166,6 +166,6 @@ module.exports = {
 	binToTrianglesArray,
 	binToTrianglesString,
 	BinToTriangleStringStream,
-	BinToJSONArrayVector3dStream,
+	BinToVector3dStringStream,
 	VECTOR3D_SIZE
 };
