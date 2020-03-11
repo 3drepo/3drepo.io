@@ -347,7 +347,7 @@ function* focusOnRisk({ risk, revision }) {
 		yield Viewer.isViewerReady();
 
 		// Remove highlight from any multi objects
-		Viewer.highlightObjects([]);
+		Viewer.clearHighlights();
 		yield put(TreeActions.clearCurrentlySelected());
 
 		const hasViewpoint = risk.viewpoint;

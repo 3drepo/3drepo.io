@@ -416,22 +416,25 @@ export class ViewerService {
 	}
 
 	public async highlightObjects(
-		{ account, model, colour, multi, forceReHighlight, ...params }:
-		{ account: string, model: string, colour, multi: boolean, forceReHighlight: boolean, id?: string, ids?: string[]}) {
-		if (this.canHighlight) {
-			const ids = params.id ? [params.id] : params.ids;
-			if (ids) {
-				const uniqueIds = Array.from(new Set(ids));
-				if (uniqueIds.length) {
-					// @ts-ignore
-					await UnityUtil.highlightObjects(account, model, uniqueIds, colour, multi, forceReHighlight);
-					this.emit(VIEWER_EVENTS.HIGHLIGHT_OBJECTS, {account, model, uniqueIds });
-					return;
+		account: string,
+		model: string,
+		colour: [number],
+		multi: boolean,
+		forceReHighlight: boolean,
+		ids: string[]) {
+			if (this.canHighlight) {
+				if (ids) {
+					const uniqueIds = Array.from(new Set(ids));
+					if (uniqueIds.length) {
+						// @ts-ignore
+						await UnityUtil.highlightObjects(account, model, uniqueIds, colour, multi, forceReHighlight);
+						this.emit(VIEWER_EVENTS.HIGHLIGHT_OBJECTS, {account, model, uniqueIds });
+						return;
+					}
 				}
-			}
 
-			this.clearHighlights();
-		}
+				this.clearHighlights();
+			}
 	}
 
 	public clearHighlights() {
@@ -439,8 +442,7 @@ export class ViewerService {
 		this.emit(VIEWER_EVENTS.CLEAR_HIGHLIGHT_OBJECTS, {});
 	}
 
-	public unhighlightObjects({ account, model, ...params }) {
-		const ids = params.id ? [params.id] : params.ids;
+	public unhighlightObjects(account, model, ids) {
 		if (ids) {
 			const uniqueIds = Array.from(new Set(ids));
 			if (uniqueIds.length) {

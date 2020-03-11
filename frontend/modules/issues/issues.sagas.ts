@@ -369,7 +369,7 @@ function* focusOnIssue({ issue, revision }) {
 		yield Viewer.isViewerReady();
 
 		// Remove highlight from any multi objects
-		yield Viewer.highlightObjects([]);
+		yield Viewer.clearHighlights();
 		yield put(TreeActions.clearCurrentlySelected());
 
 		const hasViewpoint = issue.viewpoint;
