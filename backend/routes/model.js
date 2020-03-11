@@ -2159,8 +2159,8 @@ function getUnityBundle(req, res, next) {
 function getMesh(req, res, next) {
 	const {model, account, meshId} = req.params;
 
-	ModelHelpers.getMeshById(account, model, meshId).then((result) => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, result, undefined, req.param.rev ? config.cachePolicy : undefined);
+	ModelHelpers.getMeshById(account, model, meshId).then((stream) => {
+		stream.pipe(res);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});

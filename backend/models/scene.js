@@ -21,6 +21,7 @@ const ModelFactory = require("./factory/modelFactory");
 const Schema = mongoose.Schema;
 const utils = require("../utils");
 const db = require("../handler/db");
+const ExternalServices = require("../handler/externalServices");
 
 const schema = Schema({
 	_id: Object,
@@ -54,6 +55,14 @@ schema.statics.getBySharedId = async (account, model, shared_id, revisionIds, pr
 
 schema.statics.getObjectById = async (account, model, id, projection = {}) => {
 	return await dbFindOne(account, model, {_id: id}, projection);
+};
+
+schema.statics.getObjectById = async (account, model, id, projection = {}) => {
+	return await dbFindOne(account, model, {_id: id}, projection);
+};
+
+schema.statics.getGridfsFileStream = async (account, model, filename) => {
+	return await ExternalServices.getFileStream(account, model + ".scene", "gridfs", filename);
 };
 
 const Scene = ModelFactory.createClass(

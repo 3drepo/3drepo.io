@@ -40,7 +40,10 @@ const nodeuuid = require("uuid/v1");
 const FileRef = require("../fileRef");
 const notifications = require("../notification");
 const matrix = require("./matrix");
-const { binToArrayVector3d, binToTrianglesArray } = require("./binary");
+const CombinedStream = require("combined-stream");
+const stringToStream = require("string-to-stream");
+const { StreamBuffer } = require("./stream");
+const { BinToTriangleStringStream, BinToJSONArrayVector3dStream, VECTOR3D_SIZE } = require("./binary");
 
 /** *****************************************************************************
  * Converts error code from repobouncerclient to a response error object.
@@ -1016,7 +1019,8 @@ async function getMeshById(account, model, meshId) {
 		"parents": 1,
 		"vertices": 1,
 		"matrix": 1,
-		"faces": 1
+		"faces": 1,
+		"_extRef":1
 	};
 
 	const mesh = await Scene.getObjectById(account, model, utils.stringToUUID(meshId), projection);
@@ -1031,11 +1035,19 @@ async function getMeshById(account, model, meshId) {
 		}
 	}
 
-	const vertices = binToArrayVector3d(mesh.vertices, true);
-	const triangles = binToTrianglesArray(mesh.faces, true);
+	// const vertices =  mesh.vertices ? streamFromBuffer(mesh.vertices.buffer, VECTOR3D_SIZE * 1000) : await Scene.getGridfsFileStream(account, model, mesh._extRef.vertices);
+	// const triangles = mesh.faces ?  streamFromBuffer(mesh.faces, 1024) : await Scene.getGridfsFileStream(account, model, mesh._extRef.faces);
 
-	// - if vertices are external set them
-	return { matrix: mesh.matrix, vertices, triangles };
+	const vertices =  mesh.vertices ? new StreamBuffer({buffer: mesh.vertices.buffer, chunkSize: VECTOR3D_SIZE * 1000 }) : await Scene.getGridfsFileStream(account, model, mesh._extRef.vertices);
+	const triangles = mesh.faces ?  new StreamBuffer({buffer: mesh.faces.buffer, chunkSize: 1024})  : await Scene.getGridfsFileStream(account, model, mesh._extRef.faces);
+
+	const combinedStream = CombinedStream.create();
+	combinedStream.append(stringToStream(["{\"matrix\":", JSON.stringify(mesh.matrix), ",\"vertices\":["].join("")));
+	combinedStream.append(vertices.pipe(new BinToJSONArrayVector3dStream({isLittleEndian: true})));
+	combinedStream.append(stringToStream("],\"triangles\":["));
+	combinedStream.append(triangles.pipe(new BinToTriangleStringStream({isLittleEndian: true})));
+	combinedStream.append(stringToStream("]}"));
+	return 	combinedStream;
 }
 
 async function getParentMatrix(account, model, parent, revisionIds) {
