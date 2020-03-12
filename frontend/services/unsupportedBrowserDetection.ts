@@ -7,6 +7,8 @@ const DEFAULT_SUPPORTED_BROWSERS_CONFIG = {
 	}, {
 		browser: 'chrome', minversion: 45,
 	}, {
+		browser: 'chrome headless', minversion: 45,
+	}, {
 		browser: 'edge',
 	}, {
 		os: 'mac os', minos: '10.10.0', browser: 'safari', minversion: 8,

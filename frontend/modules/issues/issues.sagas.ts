@@ -141,15 +141,11 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 		viewpoint.screenshot = screenshot.substring(screenshot.indexOf(',') + 1);
 
 		const issue = {
-			...omit(issueData, ['author', 'statusColor']),
+			...omit(issueData, ['author', 'statusColor', 'roleColor', 'defaultHidden']),
 			owner: issueData.author,
 			rev_id: revision,
-			objectId: null,
 			creator_role: userJob._id,
 			viewpoint,
-			pickedPos: null,
-			pickedNorm: null,
-			scale: 1.0
 		};
 
 		const { data: savedIssue } = yield API.saveIssue(teamspace, model, issue);
