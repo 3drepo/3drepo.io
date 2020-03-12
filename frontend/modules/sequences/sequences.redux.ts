@@ -39,6 +39,7 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 export const INITIAL_STATE = {
 	sequences: null,
 	selectedSequence: null,
+	lastSelectedSequence: null,
 	selectedDate: null,
 	lastSuccesfulStateId: null,
 	stateDefinitions: {},
@@ -54,7 +55,19 @@ export const fetchSequencesSuccess = (state = INITIAL_STATE, { sequences }) => {
 };
 
 export const setSelectedSequence = (state = INITIAL_STATE, { sequenceId }) => {
-	return {...state, selectedSequence: sequenceId };
+	let lastSelectedSequence = state.lastSelectedSequence;
+
+	if (sequenceId !== null && state.lastSelectedSequence !== sequenceId) {
+		state = {...state,
+			selectedDate: null,
+			stepInterval: INITIAL_STATE.stepInterval,
+			stepScale: INITIAL_STATE.stepScale
+		};
+
+		lastSelectedSequence = sequenceId;
+	}
+
+	return {...state, selectedSequence: sequenceId, lastSelectedSequence };
 };
 
 export const setSelectedDate =  (state = INITIAL_STATE, { date }) => {

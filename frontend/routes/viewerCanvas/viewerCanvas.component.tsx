@@ -102,8 +102,6 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 
 	}
 
-
-
 	public componentDidUpdate(prevProps: IProps) {
 		const { colorOverrides, issuePins, riskPins, hasGisCoordinates,
 			gisCoordinates, gisLayers, transparencies } = this.props;
@@ -131,9 +129,6 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 		if (hasGisCoordinates && !isEqual(prevProps.gisLayers, gisLayers)) {
 			this.renderGisLayers(prevProps.gisLayers, gisLayers);
 		}
-
-
-
 
 	}
 
