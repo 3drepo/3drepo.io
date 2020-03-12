@@ -39,6 +39,15 @@ interface IViewerConstructor {
 	name?: string;
 }
 
+interface IPin {
+	id: string;
+	type: string;
+	position: number[];
+	norm: number[];
+	colour: number[];
+	isSelected: boolean;
+}
+
 export class ViewerService {
 	public element: HTMLElement;
 	public name: string;
@@ -545,26 +554,25 @@ export class ViewerService {
 	/**
 	 * Pins
 	 */
-
-	public addPin = async ({ id, type, pickedPos: position, norm, colours, isSelected }) => {
+	public addPin = async ({id, position, norm, colour, isSelected, type}: IPin) => {
 		await this.isViewerReady();
 		await this.isModelLoaded();
 		if (type === 'risk') {
-			UnityUtil.dropRiskPin(id, position, norm, colours);
+			UnityUtil.dropRiskPin(id, position, norm, colour);
 		} else {
-			UnityUtil.dropIssuePin(id, position, norm, colours);
+			UnityUtil.dropIssuePin(id, position, norm, colour);
 		}
 		if (isSelected) {
 			UnityUtil.selectPin(id);
 		}
 	}
 
-	public removePin({id}) {
+	public removePin({id}: IPin) {
 		UnityUtil.removePin(id);
 	}
 
-	public changePinColor({id, colours}) {
-		UnityUtil.changePinColour(id, colours);
+	public changePinColor({id, colour}: IPin) {
+		UnityUtil.changePinColour(id, colour);
 	}
 
 	public setPinDropMode(on: boolean) {

@@ -1,3 +1,5 @@
+import { ColorSelect } from "../routes/components/colorPicker/colorPicker.styles";
+
 /*
  * Copyright (C) 2017 3D Repo Ltd
  *
@@ -483,7 +485,7 @@ export class UnityUtil {
 	 * @param id - ID of the pin
 	 * @param colour - colour RGB value of the colour to change to. e.g. [1, 0, 0]
 	 */
-	public static changePinColour(id: string, colour: [number]) {
+	public static changePinColour(id: string, colour: number[]) {
 		const params = {
 			color : colour,
 			pinName : id
@@ -681,7 +683,7 @@ export class UnityUtil {
 	 * @param normal - normal vector for the pin (note: this is no longer used)
 	 * @param colour - RGB value for the colour of the pin
 	 */
-	public static dropRiskPin(id: string, position: [number], normal: [number], colour: [number]) {
+	public static dropRiskPin(id: string, position: number[], normal: number[], colour: number[]) {
 		const params = {
 			id,
 			position,
@@ -699,7 +701,7 @@ export class UnityUtil {
 	 * @param normal - normal vector for the pin (note: this is no longer used)
 	 * @param colour - RGB value for the colour of the pin
 	 */
-	public static dropIssuePin(id: string, position: [number], normal: [number], colour: [number]) {
+	public static dropIssuePin(id: string, position: number[], normal: number[], colour: number[]) {
 		const params = {
 			id,
 			position,
