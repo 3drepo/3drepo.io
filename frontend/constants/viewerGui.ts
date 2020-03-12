@@ -4,6 +4,7 @@ import GroupsIcon from '@material-ui/icons/GroupWork';
 import GisIcon from '@material-ui/icons/Layers';
 import ViewsIcon from '@material-ui/icons/PhotoCamera';
 import IssuesIcon from '@material-ui/icons/Place';
+import MeasureIcon from '@material-ui/icons/Straighten';
 import RisksIcon from '@material-ui/icons/Warning';
 
 export const VIEWER_PANELS = {
@@ -14,7 +15,8 @@ export const VIEWER_PANELS = {
 	TREE: 'tree',
 	GROUPS: 'groups',
 	VIEWS: 'views',
-	COMPARE: 'compare'
+	COMPARE: 'compare',
+	MEASURE: 'measure'
 };
 
 export const VIEWER_PANELS_ICONS = {
@@ -24,7 +26,8 @@ export const VIEWER_PANELS_ICONS = {
 	[VIEWER_PANELS.VIEWS]: ViewsIcon,
 	[VIEWER_PANELS.TREE]: TreeIcon,
 	[VIEWER_PANELS.COMPARE]: CompareIcon,
-	[VIEWER_PANELS.GIS]: GisIcon
+	[VIEWER_PANELS.GIS]: GisIcon,
+	[VIEWER_PANELS.MEASURE]: MeasureIcon
 };
 
 export const VIEWER_PANELS_MIN_HEIGHTS = {
@@ -34,7 +37,8 @@ export const VIEWER_PANELS_MIN_HEIGHTS = {
 	[VIEWER_PANELS.VIEWS]: 200,
 	[VIEWER_PANELS.TREE]: 80,
 	[VIEWER_PANELS.COMPARE]: 265,
-	[VIEWER_PANELS.GIS]: 185
+	[VIEWER_PANELS.GIS]: 185,
+	[VIEWER_PANELS.MEASURE]: 200,
 };
 
 export const VIEWER_PANELS_TITLES = {
@@ -44,7 +48,8 @@ export const VIEWER_PANELS_TITLES = {
 	[VIEWER_PANELS.VIEWS]: 'Views',
 	[VIEWER_PANELS.TREE]: 'Tree',
 	[VIEWER_PANELS.COMPARE]: 'Compare',
-	[VIEWER_PANELS.GIS]: 'GIS'
+	[VIEWER_PANELS.GIS]: 'GIS',
+	[VIEWER_PANELS.MEASURE]: 'Measure'
 };
 
 const getPanelConfig = (panelType) => ({
@@ -60,7 +65,8 @@ export const VIEWER_LEFT_PANELS = [
 	VIEWER_PANELS.VIEWS,
 	VIEWER_PANELS.TREE,
 	VIEWER_PANELS.COMPARE,
-	VIEWER_PANELS.GIS
+	VIEWER_PANELS.GIS,
+	VIEWER_PANELS.MEASURE,
 ].map(getPanelConfig);
 
 export const VIEWER_RIGHT_PANELS = [

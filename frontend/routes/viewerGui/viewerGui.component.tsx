@@ -27,6 +27,7 @@ import { Compare } from './components/compare';
 import Gis from './components/gis/gis.container';
 import { Groups } from './components/groups';
 import { Issues } from './components/issues';
+import { Measure } from './components/measure';
 import { PanelButton } from './components/panelButton/panelButton.component';
 import RevisionsSwitch from './components/revisionsSwitch/revisionsSwitch.container';
 import { Risks } from './components/risks';
@@ -182,6 +183,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		[VIEWER_PANELS.TREE]: Tree,
 		[VIEWER_PANELS.COMPARE]: Compare,
 		[VIEWER_PANELS.GIS]: Gis,
+		[VIEWER_PANELS.MEASURE]: Measure,
 	};
 
 	private renderLeftPanels = (panels) => (
