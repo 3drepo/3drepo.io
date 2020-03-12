@@ -27,6 +27,7 @@ import { BimActions } from '../bim';
 import { CompareActions } from '../compare';
 import { selectCurrentUser, CurrentUserActions } from '../currentUser';
 import { DialogActions } from '../dialog';
+import { GisActions } from '../gis';
 import { GroupsActions } from '../groups';
 import { selectIssuesMap, IssuesActions } from '../issues';
 import { JobsActions } from '../jobs';
@@ -83,13 +84,14 @@ function* fetchData({ teamspace, model }) {
 function* resetPanelsStates() {
 	try {
 		yield all([
-			put(IssuesActions.resetComponentState()),
-			put(RisksActions.resetComponentState()),
+			put(IssuesActions.reset()),
+			put(RisksActions.reset()),
 			put(GroupsActions.resetComponentState()),
 			put(CompareActions.resetComponentState()),
 			put(BimActions.resetBimState()),
 			put(ViewerGuiActions.resetPanels()),
-			put(SequencesActions.reset())
+			put(SequencesActions.reset()),
+			put(GisActions.resetLayers())
 		]);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('reset', 'panels data', error));

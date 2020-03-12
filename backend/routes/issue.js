@@ -345,11 +345,8 @@ router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssues
  * @apiParam (Request body) {String} priority The priority of the issue. It can have a value of "none", "low", "medium" or "high".
  * @apiParam (Request body) {String} topic_type Type of the issue. It's value has to be one of the defined topic_types for the model. See <a href='#api-Model-createModel'>here</a> for more details.
  * @apiParam (Request body) {Viewpoint} viewpoint The viewpoint of the issue, defining the position of the camera and the screenshot for that position.
- * @apiParam (Request body) {String} owner The username of the user that created the issue
  * @apiParam (Request body) {String} desc The description of the created issue
- * @apiParam (Request body) {String} creator_role The job of the user that created the issue
  * @apiParam (Request body) {[3]Number} position The vector defining the pin of the issue. If the pin doesnt has an issue its an empty array.
- * @apiParam (Request body) {[3]Number} norm The normal vector for the pin of the issue. Its not actually being used right now it it ca alwasy be of value [0,0,0].
  *
  * @apiParam (Request body: Viewpoint) {[3]Number} right The right vector of the viewpoint indicating the direction of right in relative coordinates.
  * @apiParam (Request body: Viewpoint) {[3]Number} up The up vector of the viewpoint indicating the direction of up in relative coordinates.
@@ -410,19 +407,11 @@ router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssues
  *       "hideIfc": true,
  *       "screenshot": "iVBORw0KGgoAAAANSUhEUgAACAAAA...ggg=="
  *    },
- *    "owner": "teamSpace1",
  *    "desc": "This is the most awesome issue ever",
- *    "creator_role": "jobA",
- *    "scale": 1,
  *    "position": [
  *       -3960.10205078125,
  *       4487.1552734375,
  *       3326.732177734375
- *    ],
- *    "norm": [
- *       0,
- *       0,
- *       0
  *    ]
  * }
  *
@@ -805,6 +794,7 @@ function storeIssue(req, res, next) {
 
 	data.owner = req.session.user.username;
 	data.revId = req.params.rid;
+	data.created = undefined;
 	const {account, model} = req.params;
 
 	Issue.create(account, model, data, sessionId).then(issue => {

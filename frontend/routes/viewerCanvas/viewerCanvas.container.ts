@@ -19,7 +19,9 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
+import { selectGisLayers } from '../../modules/gis';
 import { selectPins as selectIssuePins } from '../../modules/issues';
+import { selectGISCoordinates, selectHasGISCoordinates } from '../../modules/model';
 import { selectPins as selectRiskPins } from '../../modules/risks';
 import { selectAllTransparencyOverrides, selectColorOverrides, TreeActions } from '../../modules/tree';
 import { withViewer } from '../../services/viewer/viewer';
@@ -30,10 +32,12 @@ const mapStateToProps = createStructuredSelector({
 	transparencies: selectAllTransparencyOverrides,
 	issuePins: selectIssuePins,
 	riskPins: selectRiskPins,
+	gisCoordinates: selectGISCoordinates,
+	hasGisCoordinates: selectHasGISCoordinates,
+	gisLayers: selectGisLayers
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	handleColorOverridesChange: TreeActions.handleColorOverridesChange,
 	handleTransparencyOverridesChange: TreeActions.handleTransparencyOverridesChange
 }, dispatch);
 

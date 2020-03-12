@@ -40,8 +40,9 @@ import TreeProcessing from './treeProcessing/treeProcessing';
 
 import { SELECTION_STATES, VISIBILITY_STATES } from '../../constants/tree';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
-import { addColorOverrides, addTransparencyOverrides, overridesColorDiff,
-	overridesTransparencyDiff, removeColorOverrides, removeTransparencyOverrides } from '../../helpers/colorOverrides';
+
+import { addTransparencyOverrides, overridesTransparencyDiff,
+	removeTransparencyOverrides } from '../../helpers/colorOverrides';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { selectActiveMeta, selectIsActive, BimActions } from '../bim';
 import { selectSettings, ModelTypes } from '../model';
@@ -554,14 +555,6 @@ function* zoomToHighlightedNodes() {
 	}
 }
 
-function* handleColorOverridesChange({ currentOverrides, previousOverrides }) {
-	const toAdd = overridesColorDiff(currentOverrides, previousOverrides);
-	const toRemove = overridesColorDiff(previousOverrides, currentOverrides);
-
-	yield removeColorOverrides(toRemove);
-	yield addColorOverrides(toAdd);
-}
-
 function* handleTransparencyOverridesChange({ currentOverrides, previousOverrides }) {
 	yield put (TreeActions.showAllNodes());
 	const overrides = Object.keys(currentOverrides).reduce((ov, key) => {
@@ -608,6 +601,5 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.COLLAPSE_NODES, collapseNodes);
 	yield takeLatest(TreeTypes.GO_TO_ROOT_NODE, goToRootNode);
 	yield takeLatest(TreeTypes.ZOOM_TO_HIGHLIGHTED_NODES, zoomToHighlightedNodes);
-	yield takeLatest(TreeTypes.HANDLE_COLOR_OVERRIDES_CHANGE, handleColorOverridesChange);
 	yield takeLatest(TreeTypes.HANDLE_TRANSPARENCY_OVERRIDES_CHANGE, handleTransparencyOverridesChange);
 }

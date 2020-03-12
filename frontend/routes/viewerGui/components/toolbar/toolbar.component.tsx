@@ -188,7 +188,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 				label: VIEWER_TOOLBAR_ITEMS.CLIP,
 				Icon: ClipIcon,
 				action: () => this.handleShowSubmenu(VIEWER_TOOLBAR_ITEMS.CLIP),
-				show: !this.props.clippingMode,
+				show: this.props.clipNumber === 0,
 				subMenu: [
 					{
 						label: 'Start box clip',
@@ -206,7 +206,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 				label: VIEWER_TOOLBAR_ITEMS.CLIP,
 				Icon: () =>	<ClipIconWithNumber clipNumber={this.props.clipNumber} />,
 				action: this.handleClipEdit,
-				show: this.props.clippingMode && this.props.clipNumber,
+				show: this.props.clipNumber,
 				active: this.props.isClipEdit
 			},
 			{

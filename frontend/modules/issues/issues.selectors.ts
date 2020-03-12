@@ -23,7 +23,7 @@ import { searchByFilters } from '../../helpers/searching';
 import { selectCurrentModel } from '../model';
 import { selectQueryParams } from '../router/router.selectors';
 
-export const selectIssuesDomain = (state) => ({...state.issues});
+export const selectIssuesDomain = (state) => state.issues;
 
 export const selectComponentState = createSelector(
 	selectIssuesDomain, (state) => state.componentState
