@@ -83,7 +83,7 @@ class Sequence {
 		});
 
 		const submodelSequences = await Promise.all(submodels.map((submodel) => this.getList(account, submodel, "master", null, cleanResponse)));
-		submodelSequences.forEach((s) => sequences.push.apply(sequences,s));
+		submodelSequences.forEach((s) => sequences.push(...s));
 
 		return sequences;
 	}
