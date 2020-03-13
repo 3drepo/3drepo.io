@@ -19,6 +19,7 @@ import { Grid, IconButton, MenuItem, Select } from '@material-ui/core';
 import StepForwardIcon from '@material-ui/icons/FastForward';
 import StepBackIcon from '@material-ui/icons/FastRewind';
 import PlayArrow from '@material-ui/icons/PlayArrow';
+import Replay from '@material-ui/icons/Replay';
 import Stop from '@material-ui/icons/Stop';
 
 import DayJsUtils from '@date-io/dayjs';
@@ -96,6 +97,14 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 
 	get isLastDay() {
 		return this.currentDay === this.totalDays;
+	}
+
+	get PlayButtonIcon() {
+		return this.state.playing ?
+					Stop :
+				this.isLastDay ?
+					Replay :
+					PlayArrow;
 	}
 
 	public setValue = (newValue: Date) => {
@@ -292,7 +301,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 						</IntervalRow>
 						<SliderRow>
 							<Grid item>
-								<IconButton onClick={this.onClickPlayStop} >{!playing && <PlayArrow />}{playing &&  <Stop />}</IconButton>
+								<IconButton onClick={this.onClickPlayStop} ><this.PlayButtonIcon /></IconButton>
 							</Grid>
 							<Grid item>
 								<SequenceSlider max={this.totalDays} step={1} value={this.currentDay} onChange={(e, val) => this.goTo(val)} />
