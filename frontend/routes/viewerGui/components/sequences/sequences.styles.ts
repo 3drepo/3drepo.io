@@ -136,6 +136,12 @@ export const SequenceRow = styled(Grid).attrs({
 	}
 `;
 
+export const SliderRow = styled(SequenceRow)`
+	&& {
+		margin-left: -24px;
+	}
+`;
+
 export const IntervalRow = styled(SequenceRow)`
 	&& {
 		font-size: 14px;

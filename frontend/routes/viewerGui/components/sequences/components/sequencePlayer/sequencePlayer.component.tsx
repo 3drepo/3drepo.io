@@ -29,7 +29,8 @@ import { STEP_SCALE } from '../../../../../../constants/sequences';
 import { getDate, getDays } from '../../../../../../helpers/dateTime';
 import { NAMED_MONTH_DATE_FORMAT } from '../../../../../../services/formatting/formatDate';
 import { DatePicker, IntervalRow, SequencePlayerColumn,
-	SequencePlayerContainer, SequenceRow, SequenceSlider, StepInput } from '../../sequences.styles';
+	SequencePlayerContainer, SequenceRow, SequenceSlider,
+	SliderRow, StepInput } from '../../sequences.styles';
 
 interface IProps {
 	max: Date;
@@ -289,14 +290,14 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 								<MenuItem value={STEP_SCALE.YEAR}>year(s)</MenuItem>
 							</Select>
 						</IntervalRow>
-						<SequenceRow>
+						<SliderRow>
 							<Grid item>
 								<IconButton onClick={this.onClickPlayStop} >{!playing && <PlayArrow />}{playing &&  <Stop />}</IconButton>
 							</Grid>
 							<Grid item>
 								<SequenceSlider max={this.totalDays} step={1} value={this.currentDay} onChange={(e, val) => this.goTo(val)} />
 							</Grid>
-						</SequenceRow>
+						</SliderRow>
 					</MuiPickersUtilsProvider>
 				</SequencePlayerColumn>
 			</SequencePlayerContainer>
