@@ -46,7 +46,7 @@ export const SettingsForm = (props) => {
 						{...defaultFieldProps}
 						error={Boolean(form.errors.latitude)}
 						helperText={form.errors.latitude}
-						label="Latitude (Decimal)"
+						label="Latitude"
 					/>
 				)} />
 				<Field name="longitude" render={ ({ field, form }) => (

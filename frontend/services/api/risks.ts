@@ -34,11 +34,6 @@ export const getRisk = (teamspace, modelId, riskId) => {
  * @param risk
  */
 export const saveRisk = (teamspace, modelId, risk) => {
-	if (risk.pickedPos !== null) {
-		risk.position = risk.pickedPos;
-		risk.norm = risk.pickedNorm;
-	}
-
 	if (risk.rev_id) {
 		return api.post(`${teamspace}/${modelId}/revision/${risk.rev_id}/risks`, risk);
 	}

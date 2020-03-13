@@ -140,15 +140,11 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 		viewpoint.screenshot = screenshot.substring(screenshot.indexOf(',') + 1);
 
 		const risk = {
-			...omit(riskData, ['author', 'statusColor']),
+			...omit(riskData, ['author', 'statusColor', 'roleColor', 'defaultHidden']),
 			owner: riskData.author,
 			rev_id: revision,
-			objectId: null,
 			creator_role: userJob._id,
 			viewpoint,
-			pickedPos: null,
-			pickedNorm: null,
-			scale: 1.0
 		};
 
 		const { data: savedRisk } = yield API.saveRisk(teamspace, model, risk);

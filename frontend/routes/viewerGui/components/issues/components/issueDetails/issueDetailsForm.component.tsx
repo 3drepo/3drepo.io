@@ -26,6 +26,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import { ISSUE_PRIORITIES, ISSUE_STATUSES } from '../../../../../../constants/issues';
 import { canChangeAssigned, canChangeBasicProperty, canChangeStatus } from '../../../../../../helpers/issues';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
+import { NAMED_MONTH_DATE_FORMAT } from '../../../../../../services/formatting/formatDate';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
 import { DateField } from '../../../../../components/dateField/dateField.component';
@@ -34,9 +35,7 @@ import { Resources } from '../../../../../components/resources/resources.compone
 import { ScreenshotDialog } from '../../../../../components/screenshotDialog';
 import { TextField } from '../../../../../components/textField/textField.component';
 import PinButton from '../../../pinButton/pinButton.container';
-import {
-	FieldsRow, StyledFormControl
-}	from './../../../risks/components/riskDetails/riskDetails.styles';
+import { FieldsRow, StyledFormControl } from '../../../risks/components/riskDetails/riskDetails.styles';
 import { DescriptionImage } from './issueDetails.styles';
 
 interface IProps {
@@ -132,14 +131,6 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public getDueDateFormat = (timestamp) => {
-		const formatBase = 'DD MMM';
-		const dueDateYear = new Date(timestamp).getFullYear();
-		const thisYear = new Date().getFullYear();
-		const format = thisYear === dueDateYear ? formatBase : formatBase + ' YYYY';
-		return format;
-	}
-
 	public handleThumbnailClick = () => {
 		this.props.showScreenshotDialog({
 			sourceImage: this.props.issue.descriptionThumbnail,
@@ -221,7 +212,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							<Field name="due_date" render={({ field }) =>
 								<DateField
 									{...field}
-									format={this.getDueDateFormat(field.value)}
+									format={NAMED_MONTH_DATE_FORMAT}
 									disabled={!this.canEditBasicProperty}
 									placeholder="Choose a due date" />}
 								/>

@@ -6,9 +6,6 @@
   },
   "private": true,
   "scripts": {
-    "start": "./../run/forever_app default",
-    "stop": "forever stop 3drepo.js",
-    "restart": "yarn run stop; yarn run start",
     "upgrade": "git checkout master && git pull && yarn run restart",
     "create-ghost": "NODE_ENV=test NODE_CONFIG_DIR=../config node ../scripts/createGhost",
     "gen-docs": "yarn run apidoc -i routes/ -o docs/ ",

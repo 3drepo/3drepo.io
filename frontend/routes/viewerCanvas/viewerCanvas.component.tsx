@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isEqual } from 'lodash';
+import { difference, isEqual } from 'lodash';
 import React from 'react';
 import { ROUTES } from '../../constants/routes';
+import { addColorOverrides, overridesDiff, removeColorOverrides } from '../../helpers/colorOverrides';
 import { pinsDiff } from '../../helpers/pins';
 import { Container } from './viewerCanvas.styles';
 
@@ -35,7 +36,10 @@ interface IProps {
 	colorOverrides: any;
 	issuePins: any[];
 	riskPins: any[];
-	handleColorOverridesChange: (currentOvverides, previousOverrides) => void;
+
+	gisLayers: string[];
+	hasGisCoordinates: boolean;
+	gisCoordinates: any;
 }
 
 export class ViewerCanvas extends React.PureComponent<IProps, any> {
@@ -50,30 +54,73 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 		viewer.setupInstance(this.containerRef.current);
 	}
 
-	public renderPins(prev, curr) {
-		if (this.shouldBeVisible) {
-			const { viewer } = this.props;
+	public renderGisCoordinates(coordinates) {
+		const { viewer, gisLayers } = this.props;
+		viewer.mapInitialise(coordinates);
 
-			const toAdd = pinsDiff(curr, prev);
-			const toRemove = pinsDiff(prev, curr);
-
-			toRemove.forEach(viewer.removePin.bind(viewer));
-			toAdd.forEach(viewer.addPin.bind(viewer));
+		if (gisLayers.length > 0) {
+			viewer.mapStop();
+			viewer.mapStart();
 		}
 	}
 
-	public componentDidUpdate(prevProps) {
-		const { colorOverrides, issuePins, riskPins, handleColorOverridesChange } = this.props;
-		if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
-			handleColorOverridesChange(colorOverrides, prevProps.colorOverrides);
+	public renderPins(prev, curr) {
+		const { viewer } = this.props;
+
+		const toAdd = pinsDiff(curr, prev);
+		const toRemove = pinsDiff(prev, curr);
+
+		toRemove.forEach(viewer.removePin.bind(viewer));
+		toAdd.forEach(viewer.addPin.bind(viewer));
+	}
+
+	public renderColorOverrides(prev, curr) {
+		const toAdd = overridesDiff(curr, prev);
+		const toRemove = overridesDiff(prev, curr);
+
+		removeColorOverrides(toRemove);
+		addColorOverrides(toAdd);
+	}
+
+	public renderGisLayers(prev: string[], curr: string[]) {
+		const { viewer } = this.props;
+		const toAdd = difference(curr, prev);
+		const toRemove = difference(prev, curr);
+
+		toAdd.forEach(viewer.addMapSource.bind(viewer));
+		toRemove.forEach(viewer.removeMapSource.bind(viewer));
+
+		if (curr.length === 0) {
+			viewer.mapStop();
 		}
 
-		if (issuePins !== prevProps.issuePins && prevProps.issuePins) {
+		if (prev.length === 0 && curr.length > 0) {
+			viewer.mapStart();
+		}
+
+	}
+
+	public componentDidUpdate(prevProps: IProps) {
+		const { colorOverrides, issuePins, riskPins, hasGisCoordinates, gisCoordinates, gisLayers } = this.props;
+
+		if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
+			this.renderColorOverrides(prevProps.colorOverrides, colorOverrides);
+		}
+
+		if (!isEqual(issuePins, prevProps.issuePins)) {
 			this.renderPins(prevProps.issuePins, issuePins);
 		}
 
-		if (riskPins !== prevProps.riskPins && prevProps.riskPins) {
+		if (!isEqual(riskPins, prevProps.riskPins)) {
 			this.renderPins(prevProps.riskPins, riskPins);
+		}
+
+		if (hasGisCoordinates && !isEqual(prevProps.gisCoordinates, gisCoordinates)) {
+			this.renderGisCoordinates(gisCoordinates);
+		}
+
+		if (hasGisCoordinates && !isEqual(prevProps.gisLayers, gisLayers)) {
+			this.renderGisLayers(prevProps.gisLayers, gisLayers);
 		}
 	}
 
