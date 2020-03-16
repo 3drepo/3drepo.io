@@ -70,6 +70,8 @@ class Sequence {
 			submodels = submodels.map(r => r.project);
 		}
 
+		const submodelSequencesPromises = Promise.all(submodels.map((submodel) => this.getList(account, submodel, "master", null, cleanResponse)));
+
 		const dbCol = await db.getCollection(account, model + ".sequences");
 
 		const sequences = await (dbCol.find({"rev_id": history._id}).toArray());
@@ -82,7 +84,7 @@ class Sequence {
 			}
 		});
 
-		const submodelSequences = await Promise.all(submodels.map((submodel) => this.getList(account, submodel, "master", null, cleanResponse)));
+		const submodelSequences = await submodelSequencesPromises;
 		submodelSequences.forEach((s) => sequences.push(...s));
 
 		return sequences;
