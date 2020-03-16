@@ -567,12 +567,8 @@ export class ViewerService {
 		}
 	}
 
-	public removePin({id}: IPin) {
-		UnityUtil.removePin(id);
-	}
-
-	public changePinColor({id, colour}: IPin) {
-		UnityUtil.changePinColour(id, colour);
+	public removePin(pin: IPin) {
+		UnityUtil.removePin(pin.id);
 	}
 
 	public setPinDropMode(on: boolean) {
