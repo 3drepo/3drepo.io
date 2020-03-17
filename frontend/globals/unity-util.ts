@@ -1205,6 +1205,7 @@ export class UnityUtil {
 		UnityUtil.initialLoad = true;
 
 		UnityUtil.disableMeasuringTool();
+		UnityUtil.clearMeasureToolMeasurements();
 		UnityUtil.diffToolDisableAndClear();
 		UnityUtil.toUnity('ClearCanvas', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}

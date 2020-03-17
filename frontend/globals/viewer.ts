@@ -51,7 +51,8 @@ export class Viewer {
 	public runtime = null;
 	public fullscreen = false;
 	public pinDropMode = false;
-	public measureMode = false;
+	public measureMode = '';
+	public measuringUnits = '';
 	public clickingEnabled = false;
 
 	public previousHighLightedPin = null;
@@ -491,7 +492,6 @@ export class Viewer {
 	}
 
 	public reset() {
-		this.setMeasureMode(false);
 		this.setPinDropMode(false);
 		this.initialized = false;
 		UnityUtil.reset();
@@ -573,13 +573,41 @@ export class Viewer {
 		this.pinDropMode = on;
 	}
 
-	public setMeasureMode(on: boolean) {
-		this.measureMode = on;
+	public setMeasureActivity(on: boolean) {
 		if (on === true) {
 			UnityUtil.enableMeasuringTool();
 		} else {
 			UnityUtil.disableMeasuringTool();
 		}
+	}
+
+	public setMeasureMode(mode: string) {
+		UnityUtil.setMeasureToolMode(mode);
+	}
+
+	public setMeasuringUnits(units) {
+		this.measuringUnits = units;
+		UnityUtil.setMeasureToolUnits(units);
+	}
+
+	public getMeasuringUnits() {
+		return this.measuringUnits;
+	}
+
+	public removeMeasurement(uuid) {
+		UnityUtil.clearMeasureToolMeasurement(uuid);
+	}
+
+	public setMeasurementColor(uuid, color) {
+		UnityUtil.setMeasureToolMeasurementColor(uuid, color);
+	}
+
+	public enableEdgeSnapping() {
+		UnityUtil.enableMeasureToolSnap();
+	}
+
+	public disableEdgeSnapping() {
+		UnityUtil.enableMeasureToolSnap();
 	}
 
 	public showCoordView() {

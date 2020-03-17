@@ -240,12 +240,42 @@ export class ViewerService {
 
 	public async activateMeasure() {
 		await this.isViewerReady();
-		this.viewer.setMeasureMode(true);
+		this.viewer.setMeasureActivity(true);
+	}
+
+	public async setMeasureMode(mode) {
+		await this.isViewerReady();
+		return this.viewer.setMeasureMode(mode);
+	}
+
+	public async setMeasuringUnits(units) {
+		await this.isViewerReady();
+		return this.viewer.setMeasuringUnits(units);
+	}
+
+	public async removeMeasurement(uuid) {
+		await this.isViewerReady();
+		return this.viewer.removeMeasurement(uuid);
+	}
+
+	public async setMeasurementColor(uuid, color) {
+		await this.isViewerReady();
+		return this.viewer.setMeasurementColor(uuid, color);
+	}
+
+	public async enableEdgeSnapping() {
+		await this.isViewerReady();
+		return this.viewer.enableEdgeSnapping();
+	}
+
+	public async disableEdgeSnapping() {
+		await this.isViewerReady();
+		return this.viewer.disableEdgeSnapping();
 	}
 
 	public async disableMeasure() {
 		await this.isViewerReady();
-		this.viewer.setMeasureMode(false);
+		this.viewer.setMeasureActivity(false);
 	}
 
 	/**
