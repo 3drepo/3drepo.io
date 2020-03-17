@@ -15,25 +15,32 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Check from '@material-ui/icons/Check';
 import React from 'react';
 
-import { isEmpty, isEqual } from 'lodash';
-
+import { isEmpty } from 'lodash';
+import { MEASURE_ACTIONS_ITEMS, MEASURE_ACTIONS_MENU } from '../../../../constants/measure';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { Viewer } from '../../../../services/viewer/viewer';
+import {
+	IconWrapper,
+	MenuList, StyledItemText,
+	StyledListItem
+} from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { PanelBarActions } from '../panelBarActions';
-import { ViewerPanelButton, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
+import { ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
+import { IMeasure, MeasureItem } from './components/measureItem/measureItem.component';
 import { MeasuringType } from './components/measuringType';
 import {
 	Container,
 	EmptyStateInfo,
-	SearchField,
+	Title,
+	TitleWrapper,
 	ViewerBottomActions,
-	ViewpointsList,
 	ViewsContainer,
-	ViewsIcon
+	ViewsIcon,
 } from './measure.styles';
 
 interface IProps {
@@ -45,23 +52,48 @@ interface IProps {
 	disableMeasure: (isDisabled) => void;
 	deactivateMeasure: () => void;
 	activateMeasure: () => void;
+	measurements: IMeasure[];
+	areaMeasurements: IMeasure[];
+	lengthMeasurements: IMeasure[];
+	addMeasurement: (IMeasure) => void;
+	removeMeasurement: (uuid) => void;
+	clearMeasurements: () => void;
+	setMeasureMode: (mode) => void;
+	measureMode: string;
+	setMeasurementColor: (uuid, color) => void;
+	measureUnits: string;
+	setMeasureUnits: (units: string) => void;
+	setMeasureEdgeSnapping: (edgeSnapping: boolean) => void;
+	edgeSnappingEnabled: boolean;
 }
 
-const MEASURE_TYPE = {
-	LENGTH: 0,
-	AREA: 1,
-};
+interface IState {
+	isViewerReady: boolean;
+}
 
-export class Measure extends React.PureComponent<IProps, any> {
+export class Measure extends React.PureComponent<IProps, IState> {
 	public state = {
 		isViewerReady: false,
-		measurements: [],
 	};
 
 	public containerRef = React.createRef<any>();
 
 	get type() {
 		return VIEWER_PANELS.MEASURE;
+	}
+
+	private handleToggleEdgeSnapping = () => this.props.setMeasureEdgeSnapping(!this.props.edgeSnappingEnabled);
+
+	private handleToggleMeasureUnits = () => this.props.setMeasureUnits(this.props.measureUnits === 'm' ? 'mm' : 'm' );
+
+	get menuActionsMap() {
+		return {
+			[MEASURE_ACTIONS_ITEMS.EDGE_SNAPPING]: this.handleToggleEdgeSnapping,
+			[MEASURE_ACTIONS_ITEMS.SHOW_XYZ]: this.handleToggleEdgeSnapping,
+			[MEASURE_ACTIONS_ITEMS.UNITS_DISPLAYED_IN]: this.handleToggleMeasureUnits,
+			[MEASURE_ACTIONS_ITEMS.RESET_COLOURS]: this.handleAllMeasureRemoved,
+			[MEASURE_ACTIONS_ITEMS.DELETE_ALL]: this.handleAllMeasureRemoved,
+		};
 	}
 
 	public componentDidMount(): void {
@@ -75,16 +107,17 @@ export class Measure extends React.PureComponent<IProps, any> {
 	public toggleMeasureListeners = (enabled: boolean) => {
 		const resolver = enabled ? 'on' : 'off';
 		const { viewer } = this.props;
-		console.warn('viewer:', viewer);
+
 		viewer[resolver](VIEWER_EVENTS.MEASUREMENT_CREATED, this.handleMeasureCreated);
+		viewer[resolver](VIEWER_EVENTS.MEASUREMENT_REMOVED, this.handleMeasureRemoved);
+		viewer[resolver](VIEWER_EVENTS.ALL_MEASUREMENTS_REMOVED, this.handleAllMeasureRemoved);
 	}
 
-	public handleMeasureCreated = ((measure) => {
-		this.setState((prevState) => ({
-			measurements: [...prevState.measurements, measure]
-		}));
-		console.info('handleMeasureCreated:', measure);
-	});
+	public handleMeasureCreated = (measure) => this.props.addMeasurement(measure);
+
+	public handleMeasureRemoved = (measurementId) => this.props.removeMeasurement(measurementId);
+
+	public handleAllMeasureRemoved = () => this.props.clearMeasurements();
 
 	public renderEmptyState = renderWhenTrue(() => (
 		<EmptyStateInfo>No measurements have been created yet</EmptyStateInfo>
@@ -92,9 +125,48 @@ export class Measure extends React.PureComponent<IProps, any> {
 
 	public getTitleIcon = () => <ViewsIcon />;
 
+	public renderAreasMeasurements = renderWhenTrue(() => (
+			<div>
+				<Title>
+					<TitleWrapper>Area</TitleWrapper>
+				</Title>
+				{this.props.areaMeasurements.map((props, index) => (
+					<MeasureItem
+						key={props.uuid}
+						index={index + 1}
+						typeName="Area"
+						units={this.props.measureUnits}
+						removeMeasurement={this.props.removeMeasurement}
+						setMeasurementColor={this.props.setMeasurementColor}
+						{...props}
+					/>
+				))}
+			</div>
+	));
+
+	public renderLengthsMeasurements = renderWhenTrue(() => (
+			<div>
+				<Title>
+					<TitleWrapper>Length</TitleWrapper>
+				</Title>
+				{this.props.lengthMeasurements.map((props, index) => (
+					<MeasureItem
+						key={props.uuid}
+						index={index + 1}
+						typeName="Length"
+						units={this.props.measureUnits}
+						removeMeasurement={this.props.removeMeasurement}
+						setMeasurementColor={this.props.setMeasurementColor}
+						{...props}
+					/>
+				))}
+			</div>
+	));
+
 	public renderMeasurementDetails = renderWhenTrue(() => (
 		<div>
-			{this.state.measurements.map((measure) => (measure.type))}
+			{this.renderAreasMeasurements(!isEmpty(this.props.areaMeasurements))}
+			{this.renderLengthsMeasurements(!isEmpty(this.props.lengthMeasurements))}
 		</div>
 	));
 
@@ -106,16 +178,34 @@ export class Measure extends React.PureComponent<IProps, any> {
 		</ViewerPanelFooter>
 	)
 
+	private renderActionsMenu = () => (
+			<MenuList>
+				{MEASURE_ACTIONS_MENU.map(( {name, Icon, label }) => (
+						<StyledListItem key={name} button onClick={this.menuActionsMap[name]}>
+							<IconWrapper><Icon fontSize="small" /></IconWrapper>
+							<StyledItemText>
+								{label}
+								{(name === MEASURE_ACTIONS_ITEMS.EDGE_SNAPPING && this.props.edgeSnappingEnabled) && <Check fontSize="small" />}
+								{(name === MEASURE_ACTIONS_ITEMS.SHOW_XYZ && this.props.edgeSnappingEnabled) && <Check fontSize="small" />}
+								{name === MEASURE_ACTIONS_ITEMS.UNITS_DISPLAYED_IN && <strong>{this.props.measureUnits}</strong>}
+							</StyledItemText>
+						</StyledListItem>
+				))}
+			</MenuList>
+	)
+
 	public renderActions = () => (
 		<PanelBarActions
 			type={this.type}
-			hideMenu
+			menuLabel="Show measure menu"
+			menuActions={this.renderActionsMenu}
 			hideSearch
 		/>
 	)
 
 	public render() {
-		const { isViewerReady, measurements } = this.state;
+		const { isViewerReady } = this.state;
+		const { areaMeasurements, lengthMeasurements } = this.props;
 		return (
 			<ViewsContainer
 				Icon={this.getTitleIcon()}
@@ -123,8 +213,8 @@ export class Measure extends React.PureComponent<IProps, any> {
 				pending={!isViewerReady}
 			>
 				<Container ref={this.containerRef}>
-					{this.renderEmptyState(isEmpty(measurements))}
-					{this.renderMeasurementDetails(!isEmpty(measurements))}
+					{this.renderEmptyState(isEmpty(areaMeasurements) && isEmpty(lengthMeasurements))}
+					{this.renderMeasurementDetails(!isEmpty(areaMeasurements) || !isEmpty(lengthMeasurements))}
 				</Container>
 				{this.renderFooterContent()}
 			</ViewsContainer>

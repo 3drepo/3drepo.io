@@ -19,7 +19,10 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { selectIsMeasureActive, selectIsMeasureDisabled, MeasureActions} from '../../../../modules/measure';
+import {
+	selectAreaMeasurements, selectEdgeSnapping, selectIsMeasureActive, selectIsMeasureDisabled, selectLengthMeasurements,
+	selectMeasureMode, selectMeasureUnits, MeasureActions
+} from '../../../../modules/measure';
 import { withViewer } from '../../../../services/viewer/viewer';
 
 import { Measure } from './measure.component';
@@ -27,12 +30,24 @@ import { Measure } from './measure.component';
 const mapStateToProps = createStructuredSelector({
 	isMeasureActive: selectIsMeasureActive,
 	isMeasureDisabled: selectIsMeasureDisabled,
+	areaMeasurements: selectAreaMeasurements,
+	lengthMeasurements: selectLengthMeasurements,
+	measureMode: selectMeasureMode,
+	measureUnits: selectMeasureUnits,
+	edgeSnappingEnabled: selectEdgeSnapping,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	disableMeasure: MeasureActions.setDisabled,
 	activateMeasure: MeasureActions.activateMeasure,
 	deactivateMeasure: MeasureActions.deactivateMeasure,
+	setMeasureMode: MeasureActions.setMeasureMode,
+	removeMeasurement: MeasureActions.removeMeasurement,
+	clearMeasurements: MeasureActions.clearMeasurements,
+	addMeasurement: MeasureActions.addMeasurement,
+	setMeasurementColor: MeasureActions.setMeasurementColor,
+	setMeasureUnits: MeasureActions.setMeasureUnits,
+	setMeasureEdgeSnapping: MeasureActions.setMeasureEdgeSnapping,
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(Measure));

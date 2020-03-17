@@ -17,29 +17,17 @@
 
 import styled from 'styled-components';
 
-import SvgIcon from '@material-ui/core/SvgIcon';
-
-export const StyledSvgIcon = styled(SvgIcon)`
+export const Wrapper = styled.div`
+	width: 24px;
 	cursor: pointer;
 	margin: 0 3px;
 
-	.wall {
-		fill: #dadada;
-	}
-
-	.cube {
-		fill: none;
-		stroke: #b2b2b2;
-		stroke-miterlimit: 10;
-		stroke-width: 8px;
-	}
-
-	.stroke-dash {
-		stroke-dasharray: 12;
+	&& + && {
+		margin: 0 10px;
 	}
 `;
 
 export const Icon = styled.img`
-	max-height: 40px;
-	max-width: 40px;
+	max-height: 24px;
+	max-width: 24px;
 `;

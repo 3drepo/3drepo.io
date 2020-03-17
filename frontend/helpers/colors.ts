@@ -1,7 +1,7 @@
 import { memoize } from 'lodash';
 import { WHITE } from './../styles/colors';
 
-const parseHex = (hex) => {
+export const parseHex = (hex) => {
 	hex = hex.replace(/^#/, '');
 
 	if (hex.length <= 4) {

@@ -19,31 +19,45 @@ import React from 'react';
 
 import { UnityUtil } from '../../../../../../globals/unity-util';
 import { MEASURING_TYPES } from './measuringType.constants';
-import { StyledSvgIcon, Icon } from './measuringType.styles';
+import { Icon, Wrapper } from './measuringType.styles';
 
 interface IProps {
 	teamspace: string;
 	model: string;
 	isMeasureActive: boolean;
 	isMeasureDisabled: boolean;
+	setMeasureMode: (mode) => void;
+	measureMode: string;
 	disableMeasure: (isDisabled) => void;
 	deactivateMeasure: () => void;
 	activateMeasure: () => void;
+	measureUnits: string;
 }
 
-export const MeasuringType = ({ activateMeasure }: IProps) => {
+export const MeasuringType = ({
+	activateMeasure, deactivateMeasure, setMeasureMode, measureMode, measureUnits
+}: IProps) => {
 
-	const handleMeasuringTypeClick = () => {
+	React.useEffect(() => {
 		activateMeasure();
+		return () => deactivateMeasure();
+	}, []);
+
+	const handleMeasuringTypeClick = (mode) => () => {
+		setMeasureMode(mode);
 		UnityUtil.enableMeasureToolToolbar();
 	};
 
-	console.info('DEFAULT_VIEWPOINTS:', MEASURING_TYPES);
-
 	return (
 			<>
-				{MEASURING_TYPES.map(({ icon, name, ...props }) => (
-						<Icon src={icon} alt={name} onClick={handleMeasuringTypeClick} key={name} />
+				{MEASURING_TYPES.map(({ icon, activeIcon, name, mode, ...props }) => (
+					<Wrapper key={name}>
+						<Icon
+							src={mode === measureMode ? activeIcon : icon}
+							alt={name}
+							onClick={handleMeasuringTypeClick(mode)}
+						/>
+					</Wrapper>
 				))}
 			</>
 	);

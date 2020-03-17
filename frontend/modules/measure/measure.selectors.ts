@@ -16,6 +16,7 @@
  */
 
 import { createSelector } from 'reselect';
+import { MEASURE_TYPE } from './measure.constants';
 
 export const selectMeasureDomain = (state) => ({...state.measure});
 
@@ -25,4 +26,24 @@ export const selectIsMeasureActive = createSelector(
 
 export const selectIsMeasureDisabled = createSelector(
 	selectMeasureDomain, (state) => state.isDisabled
+);
+
+export const selectMeasureMode = createSelector(
+	selectMeasureDomain, (state) => state.mode
+);
+
+export const selectMeasureUnits = createSelector(
+	selectMeasureDomain, (state) => state.units
+);
+
+export const selectEdgeSnapping = createSelector(
+	selectMeasureDomain, (state) => state.edgeSnapping
+);
+
+export const selectAreaMeasurements = createSelector(
+		selectMeasureDomain, (state) => state.areaMeasurements
+);
+
+export const selectLengthMeasurements = createSelector(
+		selectMeasureDomain, (state) => state.lengthMeasurements
 );

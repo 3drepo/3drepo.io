@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,15 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { cond, constant, isEqual, matches, stubTrue } from 'lodash';
+import {cond, constant, matches, stubTrue} from 'lodash';
 import styled, { css } from 'styled-components';
-import {
-	TREE_ITEM_FEDERATION_TYPE,
-	TREE_ITEM_MODEL_TYPE,
-	TREE_ITEM_OBJECT_TYPE,
-	TREE_ITEM_SIZE
-} from '../../../../../../constants/tree';
+
+import { TREE_ITEM_FEDERATION_TYPE, TREE_ITEM_MODEL_TYPE, TREE_ITEM_SIZE } from '../../../../../../constants/tree';
 import { COLOR } from '../../../../../../styles';
+import { ColorSelect } from '../../../../../components/colorPicker/colorPicker.styles';
 
 interface IContainer {
 	nodeType: string;
@@ -34,16 +31,6 @@ interface IContainer {
 	level: number;
 	active: boolean;
 	hasFederationRoot: boolean;
-}
-
-interface IName {
-	nodeType: string;
-}
-
-interface IExpandableButton {
-	nodeType?: string;
-	hasChildren: boolean;
-	expanded: boolean;
 }
 
 const getBackgroundColor = (props) => {
@@ -65,17 +52,6 @@ const getBackgroundColor = (props) => {
 	}
 };
 
-const getButtonBackgroundColor = (props) => {
-	if (props.hasChildren) {
-		if (isEqual(TREE_ITEM_OBJECT_TYPE, props.nodeType)) {
-			return COLOR.PRIMARY_DARK;
-		} else {
-			return COLOR.BLACK_60;
-		}
-	}
-	return 'transparent';
-};
-
 const containerIndentation = cond([
 	[matches({ nodeType: TREE_ITEM_FEDERATION_TYPE }), constant(38)],
 	[matches({ nodeType: TREE_ITEM_MODEL_TYPE }), constant(20)],
@@ -85,9 +61,22 @@ const containerIndentation = cond([
 	}]
 ]);
 
+export const MeasurementValue = styled.div`
+	width: 120px;
+	text-align: right;
+	padding-right: 10px;
+`;
+
 export const Actions = styled.div`
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
 	align-self: center;
-	display: none;
+
+	${ColorSelect} {
+		width: auto;
+		border-bottom: none;
+	}
 `;
 
 const containerBorder = css`
@@ -109,55 +98,4 @@ export const Container = styled.li<IContainer>`
 	height: ${TREE_ITEM_SIZE}px;
 	box-sizing: border-box;
 	cursor: pointer;
-
-	&:hover ${Actions} {
-		display: block;
-	}
-	${({ active }: any) => active ? css`
-		${Actions} {
-			display: block;
-		}
-	` : ''};
-`;
-
-export const Name = styled.div<IName>`
-	align-self: center;
-	font-size: 13px;
-	margin-left: 12px;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-`;
-
-export const StyledExpandableButton = styled.button<IExpandableButton>`
-	background-color: ${getButtonBackgroundColor};
-	border-radius: 3px;
-	color: ${(props) => props.hasChildren ? COLOR.WHITE : COLOR.PRIMARY_DARK};
-	border: none;
-	width: 18px;
-	height: 18px;
-	display: flex;
-	margin: 0;
-	padding: 0;
-	flex: none;
-	justify-content: center;
-
-	&:focus {
-		outline: none;
-	}
-
-	svg {
-		font-size: 16px;
-	}
-`;
-
-export const NameWrapper = styled.div`
-	display: flex;
-	overflow: hidden;
-	flex: 1;
-`;
-
-export const ParentOfVisible = styled.span`
-	color: ${COLOR.LIGHT_BLUE};
-	display: flex;
 `;

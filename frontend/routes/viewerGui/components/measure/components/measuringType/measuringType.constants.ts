@@ -29,7 +29,7 @@ import RayCastActiveIcon from '../../../../../../icons/measure/ray_cast_selected
 import SAMIcon from '../../../../../../icons/measure/surface_area_measurement.svg';
 import SAMActiveIcon from '../../../../../../icons/measure/surface_area_measurement_selected.svg';
 
-import { ACTIVE, DEFAULT, MEASURING_TYPE } from '../../../../../../modules/measure/measure.constants';
+import { ACTIVE, DEFAULT, MEASURING_MODE, MEASURING_TYPE } from '../../../../../../modules/measure/measure.constants';
 
 const MEASURING_TYPE_ICON = {
 	[MEASURING_TYPE.POINT]: {
@@ -61,31 +61,37 @@ const MEASURING_TYPE_ICON = {
 export const MEASURING_TYPES = [
 	{
 		name: MEASURING_TYPE.POINT,
+		mode: MEASURING_MODE.POINT,
 		icon: MEASURING_TYPE_ICON[MEASURING_TYPE.POINT][DEFAULT],
 		activeIcon: MEASURING_TYPE_ICON[MEASURING_TYPE.POINT][ACTIVE],
 	},
 	{
 		name: MEASURING_TYPE.POINT_TO_POINT,
+		mode: MEASURING_MODE.POINT_TO_POINT,
 		icon: MEASURING_TYPE_ICON[MEASURING_TYPE.POINT_TO_POINT][DEFAULT],
 		activeIcon: MEASURING_TYPE_ICON[MEASURING_TYPE.POINT_TO_POINT][ACTIVE],
 	},
 	{
 		name: MEASURING_TYPE.RAY_CAST,
+		mode: MEASURING_MODE.RAY_CAST,
 		icon: MEASURING_TYPE_ICON[MEASURING_TYPE.RAY_CAST][DEFAULT],
 		activeIcon: MEASURING_TYPE_ICON[MEASURING_TYPE.RAY_CAST][ACTIVE],
 	},
 	{
 		name: MEASURING_TYPE.MINIMUM_DISTANCE,
+		mode: MEASURING_MODE.MINIMUM_DISTANCE,
 		icon: MEASURING_TYPE_ICON[MEASURING_TYPE.MINIMUM_DISTANCE][DEFAULT],
 		activeIcon: MEASURING_TYPE_ICON[MEASURING_TYPE.MINIMUM_DISTANCE][ACTIVE],
 	},
 	{
 		name: MEASURING_TYPE.SAM,
+		mode: MEASURING_MODE.SAM,
 		icon: MEASURING_TYPE_ICON[MEASURING_TYPE.SAM][DEFAULT],
 		activeIcon: MEASURING_TYPE_ICON[MEASURING_TYPE.SAM][ACTIVE],
 	},
 	{
 		name: MEASURING_TYPE.CSAM,
+		mode: MEASURING_MODE.CSAM,
 		icon: MEASURING_TYPE_ICON[MEASURING_TYPE.CSAM][DEFAULT],
 		activeIcon: MEASURING_TYPE_ICON[MEASURING_TYPE.CSAM][ACTIVE],
 	},

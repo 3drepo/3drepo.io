@@ -18,6 +18,11 @@
 export const DEFAULT = 'default';
 export const ACTIVE = 'active';
 
+export const MEASURE_TYPE = {
+	LENGTH: 0,
+	AREA: 1,
+};
+
 export const MEASURING_TYPE = {
 	CSAM: 'Custom surface area measurement',
 	SAM: 'Surface area measurement',
@@ -25,4 +30,13 @@ export const MEASURING_TYPE = {
 	POINT: 'Point',
 	POINT_TO_POINT: 'Point to point',
 	RAY_CAST: 'Ray cast',
+};
+
+export const MEASURING_MODE = {
+	POINT: null,
+	RAY_CAST: 'Raycast',
+	MINIMUM_DISTANCE: 'MinimumDistance',
+	SAM: 'SurfaceArea',
+	CSAM: 'PolygonArea',
+	POINT_TO_POINT: 'Point',
 };

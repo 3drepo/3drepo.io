@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { MenuItem, MenuList, TextField } from '@material-ui/core';
 import styled from 'styled-components';
 
 import { COLOR } from '../../../../styles';
@@ -27,6 +26,7 @@ import {
 	VIEWER_PANELS_TITLES
 } from '../../../../constants/viewerGui';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
+import { Container as ItemContainer } from './components/measureItem/measureItem.styles';
 
 export const ViewsIcon = VIEWER_PANELS_ICONS[VIEWER_PANELS.MEASURE];
 
@@ -50,26 +50,6 @@ export const ViewerBottomActions = styled.p`
 	width: 100%;
 `;
 
-export const ViewpointsList = styled(MenuList)`
-	&& {
-		padding: 0;
-		height: auto;
-		max-height: 70vh;
-	}
-`;
-
-export const ViewpointItem = styled(MenuItem)`
-	&& {
-		height: 80px;
-		padding: 8px;
-		background-color: ${(props: any) => props.active ? `${COLOR.BLACK_6}` : 'initial'};
-	}
-
-	&&:not(:first-child) {
-		border-top: 1px solid ${COLOR.BLACK_20};
-	}
-` as any;
-
 export const EmptyStateInfo = styled.p`
 	padding: 14px;
 	font-size: 13px;
@@ -80,13 +60,15 @@ export const EmptyStateInfo = styled.p`
 	text-align: center;
 `;
 
-export const NewItemWrapper = styled.div`
-	display: flex;
-	flex: 1;
+export const Title = styled(ItemContainer)`
 `;
 
-export const SearchField = styled(TextField)`
-	&& {
-		flex: none;
-	}
+export const TitleWrapper = styled.h3`
+	align-self: center;
+	font-size: 13px;
+	margin-left: 12px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	font-weight: normal;
 `;
