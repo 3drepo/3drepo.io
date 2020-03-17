@@ -48,7 +48,8 @@ export const { Types: DialogTypes, Creators: DialogActions } = createActions({
 	hideDialog: ['dialogId'],
 	setPendingState: ['isPending'],
 	showScreenshotDialog: ['config'],
-	showNewUpdateDialog: ['config']
+	showNewUpdateDialog: ['config'],
+	showLoggedOutDialog: []
 }, { prefix: 'DIALOG/' });
 
 export const INITIAL_STATE = {
@@ -143,6 +144,16 @@ const hideDialog = (state = INITIAL_STATE, { dialogId }) => {
 	return { ...state, dialogs };
 };
 
+const showLoggedOutDialog = (state = INITIAL_STATE, action) => {
+	const config = {
+		title: 'Notice',
+		content: 'You have been logged out because your account has signed in elsewhere',
+		buttonVariant: 'raised',
+		onCancel: () => {}
+	};
+
+	return showDialog(state, { config });
+};
 export const reducer = createReducer({...INITIAL_STATE}, {
 	[DialogTypes.HIDE_DIALOG]: hideDialog,
 	[DialogTypes.SHOW_DIALOG]: showDialog,
@@ -151,5 +162,6 @@ export const reducer = createReducer({...INITIAL_STATE}, {
 	[DialogTypes.SHOW_CONFIRM_DIALOG]: showConfirmDialog,
 	[DialogTypes.SHOW_REVISIONS_DIALOG]: showRevisionsDialog,
 	[DialogTypes.SHOW_SCREENSHOT_DIALOG]: showScreenshotDialog,
-	[DialogTypes.SHOW_NEW_UPDATE_DIALOG]: showNewUpdateDialog
+	[DialogTypes.SHOW_NEW_UPDATE_DIALOG]: showNewUpdateDialog,
+	[DialogTypes.SHOW_LOGGED_OUT_DIALOG]: showLoggedOutDialog
 });

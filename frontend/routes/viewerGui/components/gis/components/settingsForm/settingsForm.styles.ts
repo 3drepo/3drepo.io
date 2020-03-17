@@ -24,6 +24,7 @@ import { ViewerPanelContent } from '../../../viewerPanel/viewerPanel.styles';
 export const StyledForm = styled(Form)`
 	display: flex;
 	flex-direction: column;
+	flex: auto;
 `;
 
 export const Header = styled.div``;

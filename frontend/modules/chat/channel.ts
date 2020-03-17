@@ -21,6 +21,7 @@ import { IssuesChatEvents } from './issues.chat.events';
 import { ModelChatEvents } from './models.chat.events';
 import { NotificationsChatEvents } from './notifications.chat.events';
 import { RisksChatEvents } from './risks.chat.events';
+import { Subscriptions } from './subscriptions';
 
 const getEventName = (teamspace: string, model: string, keys: string, event: string) => {
 	const eventName = [teamspace];
@@ -74,7 +75,7 @@ export class Channel {
 	 * This dictionary holds the callbacks for every event in the channel .
 	 * When the last callback has been unsubscribed, the channel unsubscribe from the event completely.
 	 */
-	private subscriptions: { [event: string]: Array<{ callback: (data: any) => void, context: object }> } = {};
+	private subscriptions: { [event: string]: Subscriptions } = {};
 
 	constructor(
 		private socket,
@@ -124,19 +125,15 @@ export class Channel {
 	}
 
 	private onEvent(event: string, data: any) {
-		this.subscriptions[event].forEach((cb) => cb.callback.call(cb.context, data));
+		this.subscriptions[event].invokeCallbacks(data);
 	}
 
 	private addCallback(event, callback, context): void {
 		if (!this.hasSubscriptions(event)) {
-			this.subscriptions[event] = [];
+			this.subscriptions[event] = new Subscriptions();
 		}
 
-		if (this.hasAlreadySubscribed(event, callback, context)) {
-			return;
-		}
-
-		this.subscriptions[event].push({ callback, context });
+		this.subscriptions[event].subscribe(callback, context);
 	}
 
 	private removeCallBack(event, callback): void {
@@ -144,25 +141,11 @@ export class Channel {
 			return;
 		}
 
-		const index: number = this.subscriptions[event].findIndex((cb) => cb.callback === callback);
-		this.subscriptions[event].splice(index, 1);
-
-		if (this.subscriptions[event].length === 0) {
-			delete this.subscriptions[event];
-		}
+		this.subscriptions[event].unsubscribe(callback);
 	}
 
 	private hasSubscriptions(event: string) {
-		return (this.subscriptions[event] || []).length > 0;
-	}
-
-	private hasAlreadySubscribed(event, callback, context) {
-		const subscriptions =  this.subscriptions[event];
-
-		if (!subscriptions) {
-			return false;
-		}
-		return subscriptions.some((subscription) =>  subscription.callback === callback &&  subscription.context === context);
+		return Boolean(this.subscriptions[event]);
 	}
 
 	private performSubscribe(teamspace: string, model: string, keys: any, event: any, callback: any) {

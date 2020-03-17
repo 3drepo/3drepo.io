@@ -53,6 +53,8 @@ interface IProps {
 	logout: () => void;
 	startup: () => void;
 	hideDialog: () => void;
+	onLoggedOut: () => void;
+	subscribeToDm: (event, handler) => void;
 }
 
 interface IState {
@@ -110,6 +112,8 @@ export class App extends React.PureComponent<IProps, IState> {
 				}
 			});
 		}
+
+		this.props.subscribeToDm('loggedOut', this.props.onLoggedOut);
 	}
 
 	public componentDidUpdate(prevProps) {

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -18,7 +18,7 @@
 import { MenuItem, MenuList, TextField } from '@material-ui/core';
 import styled from 'styled-components';
 
-import { COLOR } from '../../../../styles/colors';
+import { COLOR } from '../../../../styles';
 
 import {
 	VIEWER_PANELS,
@@ -40,11 +40,10 @@ export const Container = styled.div`
 	display: flex;
 	flex-direction: column;
 	overflow: auto;
+	flex: auto;
 `;
 
-export const ViewsCountInfo = styled.p`
-	color: ${COLOR.BLACK_40};
-	text-align: left;
+export const ViewerBottomActions = styled.div`
 	height: 100%;
 	margin: 0;
 	display: flex;

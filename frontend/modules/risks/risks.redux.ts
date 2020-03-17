@@ -53,7 +53,6 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	updateNewRisk: ['newRisk'],
 	setFilters: ['filters'],
 	showCloseInfo: ['riskId'],
-	resetComponentState: [],
 	showMultipleGroups: ['risk', 'revision'],
 	updateSelectedRiskPin: ['position'],
 	removeResource: ['resource'],
@@ -61,7 +60,8 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	attachFileResources: ['files'],
 	attachLinkResources: ['links'],
 	attachResourcesSuccess: ['resources', 'riskId'],
-	updateResourcesSuccess: ['resourcesIds', 'updates', 'riskId' ]
+	updateResourcesSuccess: ['resourcesIds', 'updates', 'riskId' ],
+	reset: []
 }, { prefix: 'RISKS/' });
 
 export interface IRisksComponentState {
@@ -219,10 +219,6 @@ const toggleShowPins = (state = INITIAL_STATE, { showPins }) => {
 	return setComponentState(state, { componentState: {showPins} });
 };
 
-export const resetComponentState = (state = INITIAL_STATE) => {
-	return { ...state, componentState: INITIAL_STATE.componentState };
-};
-
 const removeResourceSuccess =  (state = INITIAL_STATE, { resource, riskId }) => {
 	const resources = state.risksMap[riskId].resources.filter((r) => r._id !== resource._id);
 	const risksMap = updateRiskProps(state.risksMap, riskId, { resources });
@@ -251,6 +247,10 @@ const updateResourcesSuccess = (state = INITIAL_STATE, { resourcesIds, updates, 
 	return { ...state, risksMap};
 };
 
+const reset = () => {
+	return cloneDeep(INITIAL_STATE);
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.FETCH_RISKS_SUCCESS]: fetchRisksSuccess,
 	[RisksTypes.FETCH_RISK_SUCCESS]: fetchRiskSuccess,
@@ -258,7 +258,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.SET_COMPONENT_STATE]: setComponentState,
 	[RisksTypes.SAVE_RISK_SUCCESS]: saveRiskSuccess,
 	[RisksTypes.TOGGLE_PENDING_STATE]: togglePendingState,
-	[RisksTypes.RESET_COMPONENT_STATE]: resetComponentState,
 	[RisksTypes.TOGGLE_DETAILS_PENDING_STATE]: toggleDetailsPendingState,
 	[RisksTypes.CREATE_COMMENT_SUCCESS]: createCommentSuccess,
 	[RisksTypes.UPDATE_COMMENT_SUCCESS]: updateCommentSuccess,
@@ -269,5 +268,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.REMOVE_RESOURCE_SUCCESS]: removeResourceSuccess,
 	[RisksTypes.ATTACH_RESOURCES_SUCCESS]: attachResourcesSuccess,
 	[RisksTypes.UPDATE_RESOURCES_SUCCESS]: updateResourcesSuccess,
-	[RisksTypes.TOGGLE_SHOW_PINS]: toggleShowPins
+	[RisksTypes.TOGGLE_SHOW_PINS]: toggleShowPins,
+	[RisksTypes.RESET]: reset
 });

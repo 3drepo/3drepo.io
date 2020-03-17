@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import FormControl from '@material-ui/core/FormControl';
 import styled from 'styled-components';
+
+import FormControl from '@material-ui/core/FormControl';
 
 import { COLOR } from '../../../../../../styles';
 import { TextField } from '../../../../../components/textField/textField.component';
@@ -25,6 +26,7 @@ import { ViewerPanelContent } from '../../../viewerPanel/viewerPanel.styles';
 export const Container = styled.div`
 	display: flex;
 	flex-direction: column;
+	flex: auto;
 `;
 
 export const FieldsRow = styled.div`

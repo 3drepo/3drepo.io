@@ -99,9 +99,9 @@ router.get("/revisions.json", middlewares.hasReadAccessToModel, listRevisions);
 router.get("/revisions/:branch.json", middlewares.hasReadAccessToModel, listRevisionsByBranch);
 
 /**
- * @api {put} /:teamspace/:model/revisions/:id/tag Update Revision Tag
+ * @api {put} /:teamspace/:model/revisions/:id/tag Update revision tag
  * @apiName updateRevisionTag
- * @apiGroup Revisions
+ * @apiGroup History
  *
  * @apiDescription Update revision tag
  *
@@ -115,9 +115,9 @@ router.get("/revisions/:branch.json", middlewares.hasReadAccessToModel, listRevi
 router.put("/revisions/:id/tag", middlewares.hasReadAccessToModel, updateRevisionTag);
 
 /**
- * @api {patch} /:teamspace/:model/revisions/:id
+ * @api {patch} /:teamspace/:model/revisions/:id Update revision status
  * @apiName updateRevisionStatus
- * @apiGroup Revisions
+ * @apiGroup History
  *
  * @apiDescription Update the status of revision, setting it to void/active
  *

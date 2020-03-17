@@ -90,7 +90,7 @@ interface IProps {
 	setMeasureVisibility: (visible) => void;
 	setCoordView: (visible) => void;
 	stopListenOnNumClip: () => void;
-	setPanelVisibility: (panelName) => void;
+	setPanelVisibility: (panelName, visibility) => void;
 }
 
 interface IState {
@@ -188,7 +188,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 				label: VIEWER_TOOLBAR_ITEMS.CLIP,
 				Icon: ClipIcon,
 				action: () => this.handleShowSubmenu(VIEWER_TOOLBAR_ITEMS.CLIP),
-				show: !this.props.clippingMode,
+				show: this.props.clipNumber === 0,
 				subMenu: [
 					{
 						label: 'Start box clip',
@@ -206,7 +206,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 				label: VIEWER_TOOLBAR_ITEMS.CLIP,
 				Icon: () =>	<ClipIconWithNumber clipNumber={this.props.clipNumber} />,
 				action: this.handleClipEdit,
-				show: this.props.clippingMode && this.props.clipNumber,
+				show: this.props.clipNumber,
 				active: this.props.isClipEdit
 			},
 			{
@@ -247,6 +247,9 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 
 	public componentWillUnmount() {
 		this.props.setMeasureVisibility(false);
+		if (this.props.isMetadataActive) {
+			this.toggleMetadataPanel();
+		}
 		this.props.stopListenOnNumClip();
 	}
 
@@ -324,7 +327,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 			setPanelVisibility,
 		} = this.props;
 		setMetadataActive(!isMetadataActive);
-		setPanelVisibility(VIEWER_PANELS.BIM);
+		setPanelVisibility(VIEWER_PANELS.BIM, !isMetadataActive);
 
 		if (!isMetadataActive) {
 			setMeasureVisibility(false);
@@ -337,11 +340,11 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 	}
 
 	private toggleMeasure = () => {
-		const { isMeasureActive, setMeasureVisibility, setPanelVisibility } = this.props;
+		const { isMeasureActive, setMeasureVisibility, setPanelVisibility, isMetadataActive } = this.props;
 		setMeasureVisibility(!isMeasureActive);
 
-		if (!isMeasureActive) {
-			setPanelVisibility(VIEWER_PANELS.BIM);
+		if (!isMeasureActive && isMetadataActive) {
+			this.toggleMetadataPanel();
 		}
 	}
 }

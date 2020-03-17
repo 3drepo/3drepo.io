@@ -7,7 +7,6 @@ import chatSaga from './chat/chat.sagas';
 import compareSaga from './compare/compare.sagas';
 import currentUserSaga from './currentUser/currentUser.sagas';
 import dialogSaga from './dialog/dialog.sagas';
-import gisSaga from './gis/gis.sagas';
 import groupsSaga from './groups/groups.sagas';
 import issuesSaga from './issues/issues.sagas';
 import jobsSaga from './jobs/jobs.sagas';
@@ -38,7 +37,6 @@ export default function* rootSaga() {
 		fork(authSaga),
 		fork(notificationsSaga),
 		fork(usersSaga),
-		fork(gisSaga),
 		fork(viewerSaga),
 		fork(risksSaga),
 		fork(viewpointsSaga),

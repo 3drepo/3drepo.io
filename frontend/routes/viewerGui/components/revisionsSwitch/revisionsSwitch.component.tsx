@@ -15,15 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CircularProgress from '@material-ui/core/CircularProgress';
-import ArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import React from 'react';
 
-import { ROUTES } from '../../../../constants/routes';
+import ArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
+
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { formatDate, LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
-import { TYPES } from './../../../components/dialogContainer/components/revisionsDialog/revisionsDialog.constants';
-import { Container, DisplayedText, ProgressWrapper } from './revisionsSwitch.styles';
+import { Container, DisplayedText, ProgressWrapper, StyledCircularProgress } from './revisionsSwitch.styles';
 
 interface IProps {
 	className?: string;
@@ -47,7 +45,7 @@ export class RevisionsSwitch extends React.PureComponent<IProps, any> {
 
 	public renderIndicator = renderWhenTrue(() => (
 		<ProgressWrapper>
-			<CircularProgress size={10} color="inherit" />
+			<StyledCircularProgress size={14} color="inherit" />
 		</ProgressWrapper>
 		)
 	);

@@ -44,7 +44,8 @@ export const Panel = styled(PanelComponent)<IPanel>`
 	margin-bottom: 20px;
 
 	&& {
-		height: 100%;
+		${(props) => props.flexHeight ? '' : css`
+		height: 100%;` };
 	}
 
 	${(props) => props.isPending ? css`
@@ -100,7 +101,6 @@ export const TitleIcon = styled.div`
 `;
 
 export const ViewerPanelContent = styled.div<IViewerPanelContent>`
-	background-color: ${COLOR.WHITE_87};
 	overflow: ${(props) => props.scrollDisabled ? 'hidden' : 'auto'};
 	display: ${(props) => props.scrollDisabled ? 'flex' : 'block'};
 	flex-direction: ${(props) => props.scrollDisabled ? 'column' : 'unset'};
@@ -110,7 +110,7 @@ export const ViewerPanelContent = styled.div<IViewerPanelContent>`
 
 export const LoaderContainer = styled(ViewerPanelContent)`
 	padding: 24px;
-	height: 100%;
+	${(props) => props.flexHeight ? '' : css`height: 100%;`};
 `;
 
 export const ViewerPanelFooter = styled(Grid).attrs({

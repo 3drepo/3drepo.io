@@ -16,6 +16,9 @@
  */
 
 import styled from 'styled-components';
+
+import CircularProgress from '@material-ui/core/CircularProgress';
+
 import { COLOR, FONT_WEIGHT } from '../../../../styles';
 
 export const Container = styled.div`
@@ -50,4 +53,8 @@ export const DisplayedText = styled.div`
 
 export const ProgressWrapper = styled.div`
 	color: ${COLOR.WHITE};
+`;
+
+export const StyledCircularProgress = styled(CircularProgress)`
+	margin: 4px;
 `;

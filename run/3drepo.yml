@@ -1,7 +1,8 @@
 apps:
   - name : "3drepo"
-    script: "./backend/3drepo.js"
-    instances: "max"
+    script: "./3drepo.js"
+    instances: "1"
     watch: false
-    exec_mode: "cluster"
-      
+    env:
+      NODE_ENV: "test"
+      NODE_CONFIG_DIR: "../config"

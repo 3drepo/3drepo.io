@@ -19,26 +19,25 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { selectIsInitialisedMap, selectVisibleSources, GisActions } from '../../../../modules/gis';
-import { selectIsPending, selectMaps, selectSettings, ModelActions } from '../../../../modules/model';
+import { selectGisLayers, GisActions } from '../../../../modules/gis';
+import { selectHasGISCoordinates, selectIsPending, selectMaps,
+	selectSettings, ModelActions } from '../../../../modules/model';
 import { Gis } from './gis.component';
 
 const mapStateToProps = createStructuredSelector({
 	settings: selectSettings,
 	isPending: selectIsPending,
 	mapsProviders: selectMaps,
-	isInitialisedMap: selectIsInitialisedMap,
-	visibleSources: selectVisibleSources,
+	visibleLayers: selectGisLayers,
+	hasGISCoordinates: selectHasGISCoordinates
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchModelMaps: ModelActions.fetchMaps,
 	updateModelSettings: ModelActions.updateSettings,
-	initialiseMap: GisActions.initialiseMap,
-	addSource: GisActions.addSource,
-	removeSource: GisActions.removeSource,
-	resetSources: GisActions.resetSources,
-	resetMap: GisActions.resetMap,
+	addVisibleLayer: GisActions.addLayer,
+	removeVisibleLayer: GisActions.removeLayer,
+	resetVisibleLayers: GisActions.resetLayers,
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Gis));
