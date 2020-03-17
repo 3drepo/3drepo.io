@@ -610,6 +610,10 @@ export class Viewer {
 		UnityUtil.enableMeasureToolSnap();
 	}
 
+	public clearMeasurements() {
+		UnityUtil.clearMeasureToolMeasurements();
+	}
+
 	public showCoordView() {
 		UnityUtil.showCoordView();
 	}

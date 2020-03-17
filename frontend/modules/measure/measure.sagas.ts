@@ -123,6 +123,15 @@ export function* setMeasureEdgeSnapping({ edgeSnapping }) {
 	}
 }
 
+export function* clearMeasurements() {
+	try {
+		yield Viewer.clearMeasurements();
+		yield put(MeasureActions.clearMeasurementsSuccess());
+	} catch (error) {
+		DialogActions.showErrorDialog('clear', 'measurements', error);
+	}
+}
+
 export default function* MeasureSaga() {
 	yield takeLatest(MeasureTypes.ACTIVATE_MEASURE, activateMeasure);
 	yield takeLatest(MeasureTypes.DEACTIVATE_MEASURE, deactivateMeasure);
@@ -131,6 +140,7 @@ export default function* MeasureSaga() {
 	yield takeLatest(MeasureTypes.SET_MEASURE_MODE, setMeasureMode);
 	yield takeLatest(MeasureTypes.SET_MEASURE_UNITS, setMeasuringUnits);
 	yield takeLatest(MeasureTypes.REMOVE_MEASUREMENT, removeMeasurement);
+	yield takeLatest(MeasureTypes.CLEAR_MEASUREMENTS, clearMeasurements);
 	yield takeLatest(MeasureTypes.SET_MEASUREMENT_COLOR, setMeasurementColor);
 	yield takeLatest(MeasureTypes.SET_MEASURE_EDGE_SNAPPING, setMeasureEdgeSnapping);
 }

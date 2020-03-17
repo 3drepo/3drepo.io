@@ -91,8 +91,8 @@ export class Measure extends React.PureComponent<IProps, IState> {
 			[MEASURE_ACTIONS_ITEMS.EDGE_SNAPPING]: this.handleToggleEdgeSnapping,
 			[MEASURE_ACTIONS_ITEMS.SHOW_XYZ]: this.handleToggleEdgeSnapping,
 			[MEASURE_ACTIONS_ITEMS.UNITS_DISPLAYED_IN]: this.handleToggleMeasureUnits,
-			[MEASURE_ACTIONS_ITEMS.RESET_COLOURS]: this.handleAllMeasureRemoved,
-			[MEASURE_ACTIONS_ITEMS.DELETE_ALL]: this.handleAllMeasureRemoved,
+			[MEASURE_ACTIONS_ITEMS.RESET_COLOURS]: this.handleClearMeasurements,
+			[MEASURE_ACTIONS_ITEMS.DELETE_ALL]: this.handleClearMeasurements,
 		};
 	}
 
@@ -110,14 +110,13 @@ export class Measure extends React.PureComponent<IProps, IState> {
 
 		viewer[resolver](VIEWER_EVENTS.MEASUREMENT_CREATED, this.handleMeasureCreated);
 		viewer[resolver](VIEWER_EVENTS.MEASUREMENT_REMOVED, this.handleMeasureRemoved);
-		viewer[resolver](VIEWER_EVENTS.ALL_MEASUREMENTS_REMOVED, this.handleAllMeasureRemoved);
 	}
 
 	public handleMeasureCreated = (measure) => this.props.addMeasurement(measure);
 
 	public handleMeasureRemoved = (measurementId) => this.props.removeMeasurement(measurementId);
 
-	public handleAllMeasureRemoved = () => this.props.clearMeasurements();
+	public handleClearMeasurements = () => this.props.clearMeasurements();
 
 	public renderEmptyState = renderWhenTrue(() => (
 		<EmptyStateInfo>No measurements have been created yet</EmptyStateInfo>

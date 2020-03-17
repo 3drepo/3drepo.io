@@ -273,6 +273,11 @@ export class ViewerService {
 		return this.viewer.disableEdgeSnapping();
 	}
 
+	public async clearMeasurements() {
+		await this.isViewerReady();
+		return this.viewer.clearMeasurements();
+	}
+
 	public async disableMeasure() {
 		await this.isViewerReady();
 		this.viewer.setMeasureActivity(false);

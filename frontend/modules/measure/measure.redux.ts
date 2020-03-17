@@ -31,6 +31,7 @@ export const { Types: MeasureTypes, Creators: MeasureActions } = createActions({
 	setMeasureUnitsSuccess: ['units'],
 	addMeasurement: ['measurement'],
 	clearMeasurements: [],
+	clearMeasurementsSuccess: [],
 	removeMeasurement: ['uuid'],
 	removeMeasurementSuccess: ['uuid'],
 	setMeasurementColor: ['uuid', 'color'],
@@ -59,7 +60,7 @@ export const setMeasureUnitsSuccess = (state = INITIAL_STATE, { units }) => ({ .
 
 export const setMeasureEdgeSnappingSuccess = (state = INITIAL_STATE, { edgeSnapping }) => ({ ...state, edgeSnapping });
 
-export const clearMeasurements = (state = INITIAL_STATE) => ({
+export const clearMeasurementsSuccess  = (state = INITIAL_STATE) => ({
 	...state,
 	areaMeasurements: INITIAL_STATE.areaMeasurements,
 	lengthMeasurements: INITIAL_STATE.lengthMeasurements,
@@ -105,7 +106,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[MeasureTypes.SET_MEASURE_MODE]: setMeasureModeSuccess,
 	[MeasureTypes.SET_MEASURE_UNITS_SUCCESS]: setMeasureUnitsSuccess,
 	[MeasureTypes.ADD_MEASUREMENT]: addMeasurement,
-	[MeasureTypes.CLEAR_MEASUREMENTS]: clearMeasurements,
+	[MeasureTypes.CLEAR_MEASUREMENTS_SUCCESS]: clearMeasurementsSuccess,
 	[MeasureTypes.REMOVE_MEASUREMENT_SUCCESS]: removeMeasurementSuccess,
 	[MeasureTypes.SET_MEASUREMENT_COLOR_SUCCESS]: setMeasurementColorSuccess,
 	[MeasureTypes.SET_MEASURE_EDGE_SNAPPING_SUCCESS]: setMeasureEdgeSnappingSuccess,
