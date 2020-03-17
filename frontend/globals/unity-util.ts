@@ -282,7 +282,7 @@ export class UnityUtil {
 	}
 
 	/** @hidden*/
-	public static toUnity(methodName, requireStatus, params?) {
+	public static toUnity(methodName, requireStatus?, params?) {
 		if (requireStatus === UnityUtil.LoadingState.MODEL_LOADED) {
 			// Requires model to be loaded
 			UnityUtil.onLoaded().then(() => {
@@ -767,6 +767,22 @@ export class UnityUtil {
 	 */
 	public static setMeasureToolMeasurementColor(uuid, color) {
 		UnityUtil.toUnity('SetMeasureToolMeasurementColor', undefined, JSON.stringify({uuid, color}));
+	}
+
+	/**
+	 * Enable measure display mode to xyz.
+	 * @category Measuring tool
+	 */
+	public static enableMeasureToolXYZDisplay() {
+		UnityUtil.toUnity('EnableMeasureToolXYZDisplay');
+	}
+
+	/**
+	 * Disnable measure display mode to xyz.
+	 * @category Measuring tool
+	 */
+	public static disableMeasureToolXYZDisplay() {
+		UnityUtil.toUnity('DisableMeasureToolXYZDisplay');
 	}
 
 	/**
