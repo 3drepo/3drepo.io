@@ -42,7 +42,7 @@ export const Container = styled.div`
 	overflow: auto;
 `;
 
-export const ViewerBottomActions = styled.p`
+export const ViewerBottomActions = styled.div`
 	height: 100%;
 	margin: 0;
 	display: flex;

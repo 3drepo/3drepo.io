@@ -24,7 +24,7 @@ const hiddenStyles = css`
 	visibility: hidden;
 `;
 
-const disableGuttersStyles = css`
+const widenedStyles = css`
 	&& {
 		padding: 6px;
 	}
@@ -32,5 +32,5 @@ const disableGuttersStyles = css`
 
 export const StyledIconButton = styled(IconButton)`
 	${({ hidden }) => hidden && hiddenStyles};
-	${({ disableGutters }) => disableGutters && disableGuttersStyles};
+	${({ widened }) => widened && widenedStyles};
 `;

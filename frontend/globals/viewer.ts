@@ -607,7 +607,7 @@ export class Viewer {
 	}
 
 	public disableEdgeSnapping() {
-		UnityUtil.enableMeasureToolSnap();
+		UnityUtil.disableMeasureToolSnap();
 	}
 
 	public clearMeasurements() {

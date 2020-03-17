@@ -104,6 +104,10 @@ export class Measure extends React.PureComponent<IProps, IState> {
 		this.toggleMeasureListeners(true);
 	}
 
+	public componentWillUnmount = () => {
+		this.toggleMeasureListeners(false);
+	}
+
 	public toggleMeasureListeners = (enabled: boolean) => {
 		const resolver = enabled ? 'on' : 'off';
 		const { viewer } = this.props;

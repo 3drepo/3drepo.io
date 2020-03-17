@@ -47,7 +47,7 @@ export const INITIAL_STATE = {
 	units: 'm',
 	areaMeasurements: [],
 	lengthMeasurements: [],
-	edgeSnapping: false,
+	edgeSnapping: true,
 };
 
 export const setActiveSuccess = (state = INITIAL_STATE, { isActive }) => ({ ...state, isActive });

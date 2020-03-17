@@ -80,8 +80,19 @@ const getValue = (value: number, units: string, type: number) => {
 
 export const getColor = ({ r, g, b }) => `#${[r, g, b].map(componentToHex).join('')}`;
 
+export const getUnits = (units: string, type: number) => {
+	if (type === MEASURE_TYPE.AREA) {
+		return (
+			<>
+				{units}<sup>2</sup>
+			</>
+		);
+	}
+	return units;
+};
+
 export const MeasureItem = ({
-	uuid, index, typeName, value, units, color, removeMeasurement, ...props
+	uuid, index, typeName, value, units, color, removeMeasurement, type, ...props
 }: IProps) => {
 	const handleRemoveMeasurement = () => {
 		removeMeasurement(uuid);
@@ -104,7 +115,7 @@ export const MeasureItem = ({
 				{`${typeName} ${index}`}
 			</Name>
 			<Actions>
-				<MeasurementValue>{getValue(value, units, props.type)} {units}</MeasurementValue>
+				<MeasurementValue>{getValue(value, units, type)} {getUnits(units, type)}</MeasurementValue>
 				<ColorPicker
 					value={getColor(color)}
 					onChange={handleColorChange}
