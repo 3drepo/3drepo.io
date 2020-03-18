@@ -164,13 +164,7 @@ export function* setCameraOnViewpoint({ teamspace, modelId, view }) {
 			}
 
 			if (view.clippingPlanes) {
-				const clipData = {
-					clippingPlanes: view.clippingPlanes,
-					account: teamspace,
-					model: modelId
-				};
-
-				yield Viewer.updateClippingPlanes(clipData);
+				yield Viewer.updateClippingPlanes( view.clippingPlanes, teamspace, modelId);
 			}
 		}
 	}

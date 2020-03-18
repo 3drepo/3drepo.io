@@ -369,11 +369,7 @@ function* focusOnRisk({ risk, revision }) {
 				Viewer.setCamera({ ...viewpoint, account, model });
 			}
 
-			yield Viewer.updateClippingPlanes({
-				clippingPlanes: viewpoint.clippingPlanes,
-				account,
-				model
-			});
+			yield Viewer.updateClippingPlanes(viewpoint.clippingPlanes, account, model);
 		} else {
 			yield Viewer.goToDefaultViewpoint();
 		}

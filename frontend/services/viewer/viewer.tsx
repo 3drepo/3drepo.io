@@ -939,7 +939,7 @@ export class ViewerService {
 		this.emit(VIEWER_EVENTS.UPDATE_NUM_CLIP, nPlanes);
 	}
 
-	public updateClippingPlanes({ clipPlanes, account, model }: any) {
+	public updateClippingPlanes( clipPlanes, account, model ) {
 		UnityUtil.updateClippingPlanes(clipPlanes ? clipPlanes : [], false, account, model);
 	}
 
