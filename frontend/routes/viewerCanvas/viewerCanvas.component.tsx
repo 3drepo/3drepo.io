@@ -38,7 +38,6 @@ interface IProps {
 	colorOverrides: any;
 	issuePins: any[];
 	riskPins: any[];
-	updatePins: (prev, curr) => void;
 	gisLayers: string[];
 	hasGisCoordinates: boolean;
 	gisCoordinates: any;
