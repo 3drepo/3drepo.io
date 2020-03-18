@@ -23,7 +23,6 @@ const FileRef = require("../models/fileRef");
 const utils = require("../utils");
 const responseCodes = require("../response_codes");
 const mimeTypes = require("mime-types");
-const config = require("../config");
 
 /**
  * @api {get} /:teamspace/:model/resources/:resourceId Get resource file
@@ -46,7 +45,6 @@ function downloadResource(req, res, next) {
 		res.set("Content-Length", resource.size);
 		res.set("Content-Type", mimeTypes.lookup(resource.type) || "application/octet-stream");
 		res.set("Content-Disposition","inline;filename=" + resource.name);
-		res.set("Cache-Control", "private, max-age=" + config.cachePolicy.maxAge);
 		res.send(resource.file);
 
 	}).catch(err => {

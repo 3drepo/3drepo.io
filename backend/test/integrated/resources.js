@@ -27,6 +27,7 @@ const orderBy = require("lodash").orderBy;
 
 
 describe("Resources ", function () {
+	this.timeout(60000);
 	const usernames = [ "adminTeamspace1JobA",
 		"viewerTeamspace1Model1JobC",
 		"collaboratorTeamspace1Model1JobC",
@@ -50,7 +51,6 @@ describe("Resources ", function () {
 			async.parallel(
 				usernames.map(username => next => {
 					const agent = request.agent(server);
-
 					agent.post("/login")
 						.send({ username, password})
 						.expect(200, function(err, res) {
@@ -123,12 +123,6 @@ describe("Resources ", function () {
 		], done);
 	});
 
-	// it("attached resource to issue should be able to be downloaded", done => {
-	// 	// TODO: finish me
-	// 	expect('implemented').to.equals('not implemented');
-	// 	done();
-	// })
-
 	it("attached resource to issue should be able to be deleted", done => {
 		async.waterfall([
 			createIssue(agents.adminTeamspace1JobA),
@@ -150,5 +144,24 @@ describe("Resources ", function () {
 			], done);
 	});
 
+	it("attached resource to issue should be able to be downloaded", function(done) {
+		async.waterfall([
+			createIssue(agents.adminTeamspace1JobA),
+			attachDocs(agents.adminTeamspace1JobA, ['anotherDoc', 'anotherPdf'], ['test_doc.docx', 'dummy.pdf']),
+			(refs, next) => {
+				agents.adminTeamspace1JobA.get(`/${account}/${model}/resources/${refs[0]._id}`).expect(200, next);
+			}
+		], done);
+	});
+
+	it("attached resource to issue should not be able to be downloaded by unauthorised users", function(done) {
+		async.waterfall([
+			createIssue(agents.adminTeamspace1JobA),
+			attachDocs(agents.adminTeamspace1JobA, ['anotherDoc', 'anotherPdf'], ['test_doc.docx', 'dummy.pdf']),
+			(refs, next) => {
+				request.agent(server).get(`/${account}/${model}/resources/${refs[0]._id}`).expect(401, next);
+			}
+		], done);
+	});
 
 });
