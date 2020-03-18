@@ -345,7 +345,7 @@ function* isolateSelectedNodes({ nodeId }) {
 	if (nodeId) {
 		yield isolateNodes([nodeId]);
 		const meshes = yield TreeProcessing.getMeshesByNodeIds([nodeId]);
-		yield Viewer.zoomToObjects({entries: meshes});
+		Viewer.zoomToObjects({entries: meshes});
 	} else {
 		const fullySelectedNodes = yield select(selectFullySelectedNodesIds);
 		yield isolateNodes(fullySelectedNodes);
@@ -534,7 +534,7 @@ function* goToRootNode({ nodeId }) {
 function* zoomToHighlightedNodes() {
 	try {
 		yield call(delay, 100);
-		yield Viewer.zoomToHighlightedMeshes();
+		Viewer.zoomToHighlightedMeshes();
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('zoom', 'highlighted nodes', error));
 	}
