@@ -408,14 +408,8 @@ function* goToRisk({ risk }) {
 
 function* showDetails({ revision, riskId }) {
 	try {
-		const activeRisk = yield select(selectActiveRiskDetails);
-		const componentState = yield select(selectComponentState);
 		const risksMap = yield select(selectRisksMap);
 		const risk = risksMap[riskId];
-
-		if (componentState.showDetails && !isEqual(activeRisk.position, componentState.savedPin)) {
-			yield put(RisksActions.updateSelectedRiskPin(componentState.savedPin));
-		}
 
 		yield put(RisksActions.setActiveRisk(risk, revision));
 		yield put(RisksActions.setComponentState({ showDetails: true, savedPin: risk.position }));
@@ -429,11 +423,13 @@ function* closeDetails() {
 		const activeRisk = yield select(selectActiveRiskDetails);
 		const componentState = yield select(selectComponentState);
 
-		if (!isEqual(activeRisk.position, componentState.savedPin)) {
-			yield put(RisksActions.updateSelectedRiskPin(componentState.savedPin));
-		}
+		if (componentState.showDetails) {
+			if (!isEqual(activeRisk.position, componentState.savedPin)) {
+				yield put(RisksActions.updateSelectedRiskPin(componentState.savedPin));
+			}
 
-		yield put(RisksActions.setComponentState({ showDetails: false, savedPin: null }));
+			yield put(RisksActions.setComponentState({ showDetails: false, savedPin: null }));
+		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('close', 'risk details', error));
 	}

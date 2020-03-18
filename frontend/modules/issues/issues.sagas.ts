@@ -443,14 +443,8 @@ function* goToIssue({ issue }) {
 
 function* showDetails({ revision, issueId }) {
 	try {
-		const activeIssue = yield select(selectActiveIssueDetails);
-		const componentState = yield select(selectComponentState);
 		const issuesMap = yield select(selectIssuesMap);
 		const issue = issuesMap[issueId];
-
-		if (componentState.showDetails && !isEqual(activeIssue.position, componentState.savedPin)) {
-			yield put(IssuesActions.updateSelectedIssuePin(componentState.savedPin));
-		}
 
 		yield put(IssuesActions.setActiveIssue(issue, revision));
 		yield put(IssuesActions.setComponentState({ showDetails: true, savedPin: issue.position }));
@@ -464,11 +458,14 @@ function* closeDetails() {
 		const activeIssue = yield select(selectActiveIssueDetails);
 		const componentState = yield select(selectComponentState);
 
-		if (!isEqual(activeIssue.position, componentState.savedPin)) {
-			yield put(IssuesActions.updateSelectedIssuePin(componentState.savedPin));
+		if (componentState.showDetails) {
+			if (!isEqual(activeIssue.position, componentState.savedPin)) {
+				yield put(IssuesActions.updateSelectedIssuePin(componentState.savedPin));
+			}
+
+			yield put(IssuesActions.setComponentState({ showDetails: false, savedPin: null }));
 		}
 
-		yield put(IssuesActions.setComponentState({ showDetails: false, savedPin: null }));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('close', 'issue details', error));
 	}

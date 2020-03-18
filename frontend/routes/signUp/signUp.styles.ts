@@ -34,6 +34,7 @@ export const StyledSelect = styled(Select)`
 
 export const Container = styled(Grid)`
 	&& {
+		overflow: auto;
 		height: 100%;
 		z-index: 1;
 	}

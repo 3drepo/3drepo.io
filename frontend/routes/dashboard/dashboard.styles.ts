@@ -55,7 +55,7 @@ export const Sidebar = styled(Grid)`
 export const Content = styled(Grid)`
 	&& {
 		flex: 1;
-		overflow: hidden;
+		overflow: auto;
 		padding-bottom: 5px;
 		padding-right: 5px;
 		padding-left: 5px;
