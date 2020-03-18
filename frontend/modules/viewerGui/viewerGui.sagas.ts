@@ -215,11 +215,11 @@ function* updateClipState({clipNumber}) {
 
 		if (currentClipNumber !== clipNumber) {
 			yield put(ViewerGuiActions.setClipNumber(clipNumber));
-		}
 
-		if (clipNumber === 0 && isClipEdit) {
-			yield put(ViewerGuiActions.setClipEdit(false));
-			yield put(ViewerGuiActions.setClippingMode(null));
+			if (clipNumber === 0 && isClipEdit) {
+				yield put(ViewerGuiActions.setClipEdit(false));
+				yield put(ViewerGuiActions.setClippingMode(null));
+			}
 		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'clip state', error));
