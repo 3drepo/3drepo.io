@@ -23,7 +23,6 @@ const FileRef = require("../models/fileRef");
 const utils = require("../utils");
 const responseCodes = require("../response_codes");
 const mimeTypes = require("mime-types");
-const config = require("../config");
 
 /**
  * @api {get} /:teamspace/:model/resources/:resourceId Get resource file
