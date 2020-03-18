@@ -118,8 +118,6 @@ export const selectPins = createSelector(
 	selectFilteredRisks, selectActiveRiskDetails,
 	selectShowPins, selectShowDetails, selectActiveRiskId,
 	(risks: any, detailedRisk, showPins, showDetails, activeRiskId) => {
-		// console.log(JSON.stringify(componentState));
-		// console.log(JSON.stringify(risks));
 
 		let pinsToShow = [];
 
