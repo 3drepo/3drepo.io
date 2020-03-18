@@ -46,7 +46,6 @@ function downloadResource(req, res, next) {
 		res.set("Content-Length", resource.size);
 		res.set("Content-Type", mimeTypes.lookup(resource.type) || "application/octet-stream");
 		res.set("Content-Disposition","inline;filename=" + resource.name);
-		res.set("Cache-Control", "private, max-age=" + config.cachePolicy.maxAge);
 		res.send(resource.file);
 
 	}).catch(err => {
