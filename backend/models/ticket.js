@@ -81,9 +81,7 @@ class Ticket {
 					}
 				});
 
-				if (viewpoint.screenshot) {
-					Viewpoint.setViewpointScreenshot(this.collName, account, model, id, viewpoint);
-				}
+				Viewpoint.setViewpointScreenshotURL(this.collName, account, model, id, viewpoint);
 
 				if (0 === i) {
 					ticketToClean.viewpoint = viewpoint;
@@ -359,6 +357,7 @@ class Ticket {
 		}
 		newTicket.desc = newTicket.desc || "(No Description)";
 		let imagePromise = Promise.resolve();
+		let viewpointScreenshotPromise =  Promise.resolve();
 		newTicket.viewpoint = newTicket.viewpoint || {};
 		newTicket.viewpoint.guid = utils.generateUUID();
 
@@ -377,6 +376,9 @@ class Ticket {
 		if (newTicket.viewpoint.screenshot) {
 			const imageBuffer = new Buffer.from(newTicket.viewpoint.screenshot, "base64");
 
+			newTicket.viewpoint.screenshot = imageBuffer;
+			viewpointScreenshotPromise = Viewpoint.setExternalScreenshotRef(newTicket.viewpoint, account, model, this.collName);
+
 			imagePromise = utils.resizeAndCropScreenshot(imageBuffer, 120, 120, true).catch((err) => {
 				systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
 					account,
@@ -394,7 +396,8 @@ class Ticket {
 		// Assign rev_id for issue
 		const [history, image] = await Promise.all([
 			History.getHistory({ account, model }, branch, newTicket.revId, { _id: 1 }),
-			imagePromise
+			imagePromise,
+			viewpointScreenshotPromise
 		]);
 
 		if (!history && (newTicket.revId || (newTicket.viewpoint || {}).highlighted_group_id)) {
@@ -435,9 +438,14 @@ class Ticket {
 			viewpoints: { $elemMatch: { guid: vid } },
 			"viewpoints.screenshot.resizedContent": 0
 		}, true).then((foundTicket) => {
-			if (!_.get(foundTicket, "viewpoints[0].screenshot.content.buffer")) {
+			if (!_.get(foundTicket, "viewpoints[0].screenshot.content.buffer") && !_.get(foundTicket, "viewpoints[0].screenshot_ref")) {
 				return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 			} else {
+				if (foundTicket.viewpoints[0].screenshot_ref) {
+					return FileRef.getFile(account, model, this.collName , foundTicket.viewpoints[0].screenshot_ref);
+				}
+
+				// this is being kept for legacy reasons
 				return foundTicket.viewpoints[0].screenshot.content.buffer;
 			}
 		});

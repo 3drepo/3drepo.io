@@ -23,6 +23,7 @@ const responseCodes = require("../response_codes.js");
 const systemLogger = require("../logger.js").systemLogger;
 const db = require("../handler/db");
 const ChatEvent = require("./chatEvent");
+const FileRef = require("./fileRef");
 
 const view = {};
 
@@ -110,8 +111,16 @@ view.listViewpoints = function (dbCol) {
 
 };
 
-view.setViewpointScreenshot = function(collName, account, model, id, viewpoint) {
-	if (!viewpoint || !viewpoint.screenshot) {
+view.setExternalScreenshotRef = async function(viewpoint, account, model, collName) {
+	const screenshot = viewpoint.screenshot;
+	const ref = await FileRef.storeFile(account, model, collName, screenshot);
+	delete viewpoint.screenshot;
+	viewpoint.screenshot_ref = ref._id;
+	return viewpoint;
+};
+
+view.setViewpointScreenshotURL = function(collName, account, model, id, viewpoint) {
+	if (!viewpoint || (!viewpoint.screenshot && !viewpoint.screenshot_ref)) {
 		return viewpoint;
 	}
 

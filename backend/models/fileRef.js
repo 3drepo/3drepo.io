@@ -142,6 +142,10 @@ FileRef.getOriginalFile = function(account, model, fileName) {
 	return fetchFileStream(account, model, collection, fileName, true);
 };
 
+FileRef.getFile = (account, model, collName , ref_id) => {
+	return fetchFile(account, model, "." + collName + ".ref", ref_id);
+};
+
 FileRef.getTotalModelFileSize = function(account, model) {
 	return DB.getCollection(account, model + ORIGINAL_FILE_REF_EXT).then((col) => {
 		let totalSize = 0;
@@ -249,6 +253,16 @@ FileRef.storeMitigationsFile = async function(account, user, name, data) {
 	const extraFields = {"_id":MITIGATIONS_ID};
 
 	return await this.storeFile(account, collName, user, name, data, extraFields);
+};
+
+FileRef.storeFile = async function(account, model, collName, data, extraFields = null) {
+	const refCollName = model + "." + collName + ".ref";
+	let refInfo = await ExternalServices.storeFile(account, refCollName, data);
+	refInfo = {...refInfo ,...(extraFields || {}) };
+
+	const refColl = await DB.getCollection(account, refCollName);
+	await refColl.insertOne(refInfo);
+	return refInfo;
 };
 
 FileRef.storeFileAsResource = async function(account, model, user, name, data, extraFields = null) {

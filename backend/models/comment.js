@@ -147,7 +147,7 @@ const addComment = async function(account, model, colName, id, user, data) {
 
 	await col.update({ _id }, {...viewpointPush ,$set : {comments}});
 
-	View.setViewpointScreenshot(colName, account, model, id, viewpoint);
+	View.setViewpointScreenshotURL(colName, account, model, id, viewpoint);
 
 	// 6. Return the new comment.
 	return {...comment, viewpoint, guid: utils.uuidToString(comment.guid)};
