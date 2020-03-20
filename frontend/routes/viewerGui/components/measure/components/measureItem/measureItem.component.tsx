@@ -17,12 +17,14 @@
 
 import React from 'react';
 
+import { Checkbox } from '@material-ui/core';
 import RemoveIcon from '@material-ui/icons/Close';
 import { cond, matches, stubTrue } from 'lodash';
 
 import { componentToHex, parseHex } from '../../../../../../helpers/colors';
-import {MEASURE_TYPE} from '../../../../../../modules/measure/measure.constants';
+import { MEASURE_TYPE } from '../../../../../../modules/measure/measure.constants';
 import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
+import { CheckboxCell } from '../../../../../components/customTable/customTable.styles';
 import { SmallIconButton } from '../../../../../components/smallIconButon/smallIconButton.component';
 import { Name as NameText, NameWrapper} from '../../../tree/components/treeNode/treeNode.styles';
 import { Actions, Container, MeasurementPoint, MeasurementValue, Units } from './measureItem.styles';
@@ -46,6 +48,7 @@ export interface IMeasure {
 	position?: number[];
 	value: number;
 	color: IColor;
+	checked: boolean;
 	customColor: IColor;
 	type: number;
 }
@@ -56,9 +59,10 @@ interface IProps extends IMeasure {
 	removeMeasurement: (uuid) => void;
 	units: string;
 	setMeasurementColor: (uuid, color) => void;
+	setMeasurementCheck?: (uuid, type) => void;
 }
 
-const getValue = (value: number, units: string, type: number) => {
+export const getValue = (value: number, units: string, type: number) => {
 	if (type === MEASURE_TYPE.AREA) {
 		return cond([
 			[matches('mm'), () => Math.trunc(value)],
@@ -90,10 +94,16 @@ export const getUnits = (units: string, type: number) => {
 };
 
 export const MeasureItem = ({
-	uuid, index, typeName, value, units, color, removeMeasurement, type, position, customColor, ...props
+	uuid, index, typeName, value, units, color, removeMeasurement, type, position, customColor, checked, ...props
 }: IProps) => {
 	const handleRemoveMeasurement = () => {
 		removeMeasurement(uuid);
+	};
+
+	const handleCheckChange = () => {
+		if (props.setMeasurementCheck) {
+			props.setMeasurementCheck(uuid, type);
+		}
 	};
 
 	const handleColorChange = (hexColor) => {
@@ -109,7 +119,17 @@ export const MeasureItem = ({
 
 	return (
 		<Container tall={Number(type === MEASURE_TYPE.POINT)}>
-			<Name>
+			{
+				type !== MEASURE_TYPE.POINT &&
+				<CheckboxCell width="50px">
+					<Checkbox
+						{...props}
+						onChange={handleCheckChange}
+						checked={checked}
+					/>
+				</CheckboxCell>
+			}
+			<Name left={Number(type === MEASURE_TYPE.POINT)}>
 				{`${typeName} ${index}`}
 			</Name>
 			<Actions>
@@ -140,9 +160,9 @@ export const MeasureItem = ({
 	);
 };
 
-export const Name = ({ children }) => (
+export const Name = ({ children, left }) => (
 	<NameWrapper>
-		<NameText>
+		<NameText left={left}>
 			{children}
 		</NameText>
 	</NameWrapper>

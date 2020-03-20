@@ -15,15 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Check from '@material-ui/icons/Check';
 import React from 'react';
 
+import {Checkbox} from '@material-ui/core';
+import Check from '@material-ui/icons/Check';
 import { isEmpty } from 'lodash';
 import { MEASURE_ACTIONS_ITEMS, MEASURE_ACTIONS_MENU } from '../../../../constants/measure';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../helpers/rendering';
+import { MEASURE_TYPE } from '../../../../modules/measure/measure.constants';
 import { Viewer } from '../../../../services/viewer/viewer';
+import { CheckboxCell } from '../../../components/customTable/customTable.styles';
 import {
 	IconWrapper,
 	MenuList, StyledItemText,
@@ -31,16 +34,18 @@ import {
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { PanelBarActions } from '../panelBarActions';
 import { ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
-import { IMeasure, MeasureItem } from './components/measureItem/measureItem.component';
+import { getUnits, getValue, IMeasure, MeasureItem } from './components/measureItem/measureItem.component';
+import { Units } from './components/measureItem/measureItem.styles';
 import { MeasuringType } from './components/measuringType';
 import {
 	Container,
 	EmptyStateInfo,
+	MeasureIcon,
+	Sum,
 	Title,
 	TitleWrapper,
 	ViewerBottomActions,
 	ViewsContainer,
-	MeasureIcon,
 } from './measure.styles';
 
 interface IProps {
@@ -68,6 +73,8 @@ interface IProps {
 	edgeSnappingEnabled: boolean;
 	setMeasureXYZDisplay: (XYZDisplay: boolean) => void;
 	XYZdisplay: boolean;
+	setMeasurementCheck: (uuid, type) => void;
+	setMeasurementCheckAll: (type) => void;
 }
 
 interface IState {
@@ -135,10 +142,31 @@ export class Measure extends React.PureComponent<IProps, IState> {
 
 	public getTitleIcon = () => <MeasureIcon />;
 
+	private getSumValue = (measurements, type) => {
+		const sum = measurements.reduce((acc, measure) => {
+			if (measure.checked) {
+				return acc + measure.value;
+			}
+			return acc;
+		}, 0);
+		return getValue(sum, this.props.measureUnits, type);
+	}
+
 	public renderAreasMeasurements = renderWhenTrue(() => (
 			<div>
 				<Title>
+					<CheckboxCell width="50px">
+						<Checkbox
+							onChange={() => this.props.setMeasurementCheckAll(MEASURE_TYPE.AREA)}
+							checked={this.props.areaMeasurements.every(({checked}) => checked)}
+						/>
+					</CheckboxCell>
 					<TitleWrapper>Area</TitleWrapper>
+					<Sum>
+						Selected total:&nbsp;
+						{this.getSumValue(this.props.areaMeasurements, MEASURE_TYPE.AREA)}
+					</Sum>
+					<Units sum>{getUnits(this.props.measureUnits, MEASURE_TYPE.AREA)}</Units>
 				</Title>
 				{this.props.areaMeasurements.map((props, index) => (
 					<MeasureItem
@@ -148,6 +176,7 @@ export class Measure extends React.PureComponent<IProps, IState> {
 						units={this.props.measureUnits}
 						removeMeasurement={this.props.removeMeasurement}
 						setMeasurementColor={this.props.setMeasurementColor}
+						setMeasurementCheck={this.props.setMeasurementCheck}
 						{...props}
 					/>
 				))}
@@ -157,7 +186,18 @@ export class Measure extends React.PureComponent<IProps, IState> {
 	public renderLengthsMeasurements = renderWhenTrue(() => (
 			<div>
 				<Title>
+					<CheckboxCell width="50px">
+						<Checkbox
+								onChange={() => this.props.setMeasurementCheckAll(MEASURE_TYPE.LENGTH)}
+								checked={this.props.lengthMeasurements.every(({checked}) => checked)}
+						/>
+					</CheckboxCell>
 					<TitleWrapper>Length</TitleWrapper>
+					<Sum>
+						Selected total:&nbsp;
+						{this.getSumValue(this.props.lengthMeasurements, MEASURE_TYPE.LENGTH)}
+					</Sum>
+					<Units sum>{getUnits(this.props.measureUnits, MEASURE_TYPE.LENGTH)}</Units>
 				</Title>
 				{this.props.lengthMeasurements.map((props, index) => (
 					<MeasureItem
@@ -167,6 +207,7 @@ export class Measure extends React.PureComponent<IProps, IState> {
 						units={this.props.measureUnits}
 						removeMeasurement={this.props.removeMeasurement}
 						setMeasurementColor={this.props.setMeasurementColor}
+						setMeasurementCheck={this.props.setMeasurementCheck}
 						{...props}
 					/>
 				))}
@@ -176,7 +217,7 @@ export class Measure extends React.PureComponent<IProps, IState> {
 	public renderPointMeasurements = renderWhenTrue(() => (
 			<div>
 				<Title>
-					<TitleWrapper>Point</TitleWrapper>
+					<TitleWrapper left>Point</TitleWrapper>
 				</Title>
 				{this.props.pointMeasurements.map((props, index) => (
 					<MeasureItem
@@ -195,8 +236,8 @@ export class Measure extends React.PureComponent<IProps, IState> {
 	public renderMeasurementDetails = renderWhenTrue(() => (
 		<div>
 			{this.renderPointMeasurements(!isEmpty(this.props.pointMeasurements))}
-			{this.renderAreasMeasurements(!isEmpty(this.props.areaMeasurements))}
 			{this.renderLengthsMeasurements(!isEmpty(this.props.lengthMeasurements))}
+			{this.renderAreasMeasurements(!isEmpty(this.props.areaMeasurements))}
 		</div>
 	));
 

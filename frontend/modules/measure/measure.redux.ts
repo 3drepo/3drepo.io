@@ -42,6 +42,8 @@ export const { Types: MeasureTypes, Creators: MeasureActions } = createActions({
 	setMeasureEdgeSnappingSuccess: ['edgeSnapping'],
 	setMeasureXyzDisplay: ['XYZdisplay'],
 	setMeasureXyzDisplaySuccess: ['XYZdisplay'],
+	setMeasurementCheck: ['uuid', 'measureType'],
+	setMeasurementCheckAll: ['measureType'],
 }, { prefix: 'MEASURE/' });
 
 export const INITIAL_STATE = {
@@ -116,6 +118,50 @@ export const setMeasurementColorSuccess = (state = INITIAL_STATE, { uuid, color 
 	return ({ ...state });
 };
 
+export const setMeasurementCheck = (state = INITIAL_STATE, { uuid, measureType }) => {
+	if (measureType === MEASURE_TYPE.AREA) {
+		const areaMeasurement = state.areaMeasurements.find((measure) => measure.uuid === uuid);
+		areaMeasurement.checked = !areaMeasurement.checked;
+		return ({ ...state, areaMeasurements: [...state.areaMeasurements]});
+	} else if (measureType === MEASURE_TYPE.LENGTH) {
+		const lengthMeasurement = state.lengthMeasurements.find((measure) => measure.uuid === uuid);
+		lengthMeasurement.checked = !lengthMeasurement.checked;
+		return ({ ...state, lengthMeasurements: [...state.lengthMeasurements]});
+	}
+
+	return ({ ...state });
+};
+
+export const setMeasurementCheckAll = (state = INITIAL_STATE, { measureType }) => {
+	if (measureType === MEASURE_TYPE.AREA) {
+		const checkedAreaMeasurements = state.areaMeasurements.filter((measure) => measure.checked === true);
+		if (checkedAreaMeasurements.length === state.areaMeasurements.length) {
+			return ({
+				...state,
+				areaMeasurements: [...state.areaMeasurements.map((measure) => ({ ...measure, checked: false }))],
+			});
+		}
+		return ({
+			...state,
+			areaMeasurements: [...state.areaMeasurements.map((measure) => ({ ...measure, checked: true }))],
+		});
+	} else if (measureType === MEASURE_TYPE.LENGTH) {
+		const checkedLengthMeasurements = state.lengthMeasurements.filter((measure) => measure.checked);
+		if (checkedLengthMeasurements.length === state.lengthMeasurements.length) {
+			return ({
+				...state,
+				lengthMeasurements: [...state.lengthMeasurements.map((measure) => ({ ...measure, checked: false }))],
+			});
+		}
+		return ({
+			...state,
+			lengthMeasurements: [...state.lengthMeasurements.map((measure) => ({ ...measure, checked: true }))],
+		});
+	}
+
+	return ({ ...state });
+};
+
 export const resetMeasurementColorsSuccess = (state = INITIAL_STATE, {}) => {
 	const resetColor = (measure) => {
 		if (measure.customColor) {
@@ -147,4 +193,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[MeasureTypes.RESET_MEASUREMENT_COLORS_SUCCESS]: resetMeasurementColorsSuccess,
 	[MeasureTypes.SET_MEASURE_EDGE_SNAPPING_SUCCESS]: setMeasureEdgeSnappingSuccess,
 	[MeasureTypes.SET_MEASURE_XYZ_DISPLAY_SUCCESS]: setMeasureXyzDisplaySuccess,
+	[MeasureTypes.SET_MEASUREMENT_CHECK]: setMeasurementCheck,
+	[MeasureTypes.SET_MEASUREMENT_CHECK_ALL]: setMeasurementCheckAll,
 });

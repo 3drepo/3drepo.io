@@ -62,13 +62,20 @@ const containerIndentation = cond([
 ]);
 
 export const MeasurementPoint = styled.div`
-	width: 120px;
+	width: 100px;
+`;
+
+const sumUnitsStyle = css`
+	width: auto;
+	padding-right: 93px;
+	padding-left: 3px;
 `;
 
 export const Units = styled.div`
 	width: 30px;
 	text-align: right;
 	padding-right: 10px;
+	${({ sum }: any) => sum && sumUnitsStyle};
 `;
 
 export const MeasurementValue = styled.div`

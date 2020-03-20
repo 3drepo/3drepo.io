@@ -51,6 +51,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setMeasureUnits: MeasureActions.setMeasureUnits,
 	setMeasureEdgeSnapping: MeasureActions.setMeasureEdgeSnapping,
 	setMeasureXYZDisplay: MeasureActions.setMeasureXyzDisplay,
+	setMeasurementCheck: MeasureActions.setMeasurementCheck,
+	setMeasurementCheckAll: MeasureActions.setMeasurementCheckAll,
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(Measure));
