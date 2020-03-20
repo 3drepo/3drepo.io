@@ -60,8 +60,11 @@ view.clean = function (dbCol, viewToClean, targetType = "[object String]") {
 		});
 	}
 
-	if (viewToClean.screenshot && viewToClean.screenshot.buffer) {
-		delete viewToClean.screenshot.buffer;
+	if (viewToClean.screenshot) {
+		if (viewToClean.screenshot.buffer) {
+			delete viewToClean.screenshot.buffer;
+		}
+
 		viewToClean.screenshot.thumbnail =
 			dbCol.account + "/" + dbCol.model + "/viewpoints/" + viewToClean._id + "/thumbnail.png";
 	}
@@ -116,7 +119,7 @@ view.setViewpointScreenshot = function(collName, account, model, id, viewpoint) 
 	const viewpointId = utils.uuidToString(viewpoint.guid);
 
 	viewpoint.screenshot = account + "/" + model + "/" + collName + "/" + id + "/viewpoints/" + viewpointId + "/screenshot.png";
-	viewpoint.screenshotSmall = account + "/" + model + "/" + collName + "/" + id + "/viewpoints/" + viewpointId + "/screenshotSmall.png";
+	viewpoint.screenshotSmall = viewpoint.screenshot;
 	return viewpoint;
 };
 

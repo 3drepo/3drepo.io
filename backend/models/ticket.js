@@ -59,7 +59,7 @@ class Ticket {
 		const vpIdKeys = ["hidden_group_id", "highlighted_group_id", "shown_group_id", "guid", "group_id"];
 
 		ticketToClean.account = account;
-		model = ticketToClean.model || ticketToClean.origin_model ||  model;
+		model = ticketToClean.model || ticketToClean.origin_model || model;
 		ticketToClean.model = model;
 
 		const id = utils.uuidToString(ticketToClean._id);
@@ -109,7 +109,7 @@ class Ticket {
 			});
 		}
 
-		if (ticketToClean.thumbnail && ticketToClean.thumbnail.flag) {
+		if (ticketToClean.thumbnail) {
 			ticketToClean.thumbnail = account + "/" + model + "/" + this.collName + "/" + id + "/thumbnail.png";
 		} else {
 			ticketToClean.thumbnail = undefined;
@@ -149,11 +149,11 @@ class Ticket {
 			return Promise.reject(this.response("NOT_FOUND"));
 		}
 
-		if(foundTicket.refs) {
+		if (foundTicket.refs) {
 			const refsColl = await db.getCollection(account, model + ".resources.ref");
-			const resources = await refsColl.find({ _id: { $in: foundTicket.refs } }, {name:1, size: 1, createdAt: 1, link: 1, type: 1}).toArray();
+			const resources = await refsColl.find({ _id: { $in: foundTicket.refs } }, { name: 1, size: 1, createdAt: 1, link: 1, type: 1 }).toArray();
 			resources.forEach(r => {
-				if(r.type !== "http") {
+				if (r.type !== "http") {
 					delete r.link;
 				}
 
@@ -215,7 +215,7 @@ class Ticket {
 		const hasOwnerJob = oldTicket.creator_role === job;
 		const hasAdminPrivileges = isAdmin || hasOwnerJob;
 		const hasAssignedJob = job === oldTicket.assigned_roles[0];
-		const userPermissions = { hasAdminPrivileges,	hasAssignedJob };
+		const userPermissions = { hasAdminPrivileges, hasAssignedJob };
 
 		// 2.5 if the user dont have the necessary permissions to update the ticket throw a UPDATE_PERMISSION_DECLINED
 		if (this.ownerPrivilegeAttributes.some(attr => !!data[attr]) && !userPermissions.hasAdminPrivileges) {
@@ -233,7 +233,7 @@ class Ticket {
 		const systemComments = [];
 		const fields = Object.keys(data);
 
-		fields.forEach(field=> {
+		fields.forEach(field => {
 			if (Object.prototype.toString.call(data[field]) !== this.fieldTypes[field]) {
 				throw responseCodes.INVALID_ARGUMENTS;
 			}
@@ -245,7 +245,7 @@ class Ticket {
 			}
 
 			// update of extras must not create a system comment
-			if(field === "extras") {
+			if (field === "extras") {
 				return;
 			}
 
@@ -265,7 +265,7 @@ class Ticket {
 		data = await beforeUpdate(data, oldTicket, userPermissions, systemComments);
 
 		if (systemComments.length > 0) {
-			data.comments = (oldTicket.comments || []).map(c=> ({...c,sealed:true}));
+			data.comments = (oldTicket.comments || []).map(c => ({ ...c, sealed: true }));
 			data.comments = data.comments.concat(systemComments);
 		}
 
@@ -273,14 +273,14 @@ class Ticket {
 		const _id = utils.stringToUUID(id);
 
 		const tickets = await this.getTicketsCollection(account, model);
-		await tickets.update({_id}, {$set: data});
+		await tickets.update({ _id }, { $set: data });
 
 		// 7. Return the updated data and the old ticket
-		const updatedTicket =  this.clean(account, model,{...oldTicket, ...data});
+		const updatedTicket = this.clean(account, model, { ...oldTicket, ...data });
 		oldTicket = this.clean(account, model, oldTicket);
 		delete data.comments;
 
-		return {oldTicket, updatedTicket, data};
+		return { oldTicket, updatedTicket, data };
 	}
 
 	filterFields(data, blackList) {
@@ -289,16 +289,16 @@ class Ticket {
 	}
 
 	setGroupTicketId(account, model, newTicket) {
-		const groupField =  this.groupField;
+		const groupField = this.groupField;
 
 		const updateGroup = (group_id) => {
 			// TODO - Do we need to find group first? Can we just patch
-			return Group.findByUID({account, model}, utils.uuidToString(group_id), null, utils.uuidToString(newTicket.rev_id)).then((group) => {
+			return Group.findByUID({ account, model }, utils.uuidToString(group_id), null, utils.uuidToString(newTicket.rev_id)).then((group) => {
 				const ticketIdData = {
-					[groupField] :  utils.stringToUUID(newTicket._id)
+					[groupField]: utils.stringToUUID(newTicket._id)
 				};
 
-				return group.updateAttrs({account, model}, ticketIdData);
+				return group.updateAttrs({ account, model }, ticketIdData);
 			});
 		};
 
@@ -332,6 +332,21 @@ class Ticket {
 			return Promise.reject({ resCode: responseCodes.INVALID_ARGUMENTS });
 		}
 
+		Object.keys(newTicket).forEach((key) => {
+			if (Object.prototype.toString.call(newTicket[key]) !== this.fieldTypes[key]) {
+				if (newTicket[key] === null) {
+					delete newTicket[key];
+				} else {
+					systemLogger.logError(`Type check failed: ${key} is expected to be type ${this.fieldTypes[key]} but it is `, Object.prototype.toString.call(newTicket[key]));
+					throw responseCodes.INVALID_ARGUMENTS;
+				}
+
+			}
+			if (key === "due_date" && newTicket[key] === 0) {
+				delete newTicket[key];
+			}
+		});
+
 		const branch = newTicket.revId || "master";
 		newTicket.assigned_roles = newTicket.assigned_roles || [];
 		newTicket._id = utils.stringToUUID(newTicket._id || nodeuuid());
@@ -360,12 +375,9 @@ class Ticket {
 		}
 
 		if (newTicket.viewpoint.screenshot) {
-			newTicket.viewpoint.screenshot = {
-				content: new Buffer.from(newTicket.viewpoint.screenshot, "base64"),
-				flag: 1
-			};
+			const imageBuffer = new Buffer.from(newTicket.viewpoint.screenshot, "base64");
 
-			imagePromise = utils.resizeAndCropScreenshot(newTicket.viewpoint.screenshot.content, 120, 120, true).catch((err) => {
+			imagePromise = utils.resizeAndCropScreenshot(imageBuffer, 120, 120, true).catch((err) => {
 				systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
 					account,
 					model,
@@ -381,7 +393,7 @@ class Ticket {
 
 		// Assign rev_id for issue
 		const [history, image] = await Promise.all([
-			History.getHistory({account, model}, branch, newTicket.revId, { _id: 1 }),
+			History.getHistory({ account, model }, branch, newTicket.revId, { _id: 1 }),
 			imagePromise
 		]);
 
@@ -392,33 +404,15 @@ class Ticket {
 		}
 
 		if (image) {
-			newTicket.thumbnail = {
-				flag: 1,
-				content: image
-			};
+			newTicket.thumbnail = image;
 		}
 
 		await this.setGroupTicketId(account, model, newTicket);
 
 		newTicket = this.filterFields(newTicket, ["viewpoint", "revId"]);
 
-		Object.keys(newTicket).forEach((key) => {
-			if (Object.prototype.toString.call(newTicket[key]) !== this.fieldTypes[key]) {
-				if (newTicket[key] === null) {
-					delete newTicket[key];
-				} else {
-					systemLogger.logError(`Type check failed: ${key} is expected to be type ${this.fieldTypes[key]} but it is `, Object.prototype.toString.call(newTicket[key]));
-					throw responseCodes.INVALID_ARGUMENTS;
-				}
-
-			}
-			if (key === "due_date" && newTicket[key] === 0) {
-				delete newTicket[key];
-			}
-		});
-
 		const [settings, coll] = await Promise.all([
-			ModelSetting.findById({account, model}, model),
+			ModelSetting.findById({ account, model }, model),
 			this.getTicketsCollection(account, model)
 		]);
 
@@ -437,7 +431,8 @@ class Ticket {
 			vid = utils.stringToUUID(vid);
 		}
 
-		return this.findByUID(account, model, uid, { viewpoints: { $elemMatch: { guid: vid } },
+		return this.findByUID(account, model, uid, {
+			viewpoints: { $elemMatch: { guid: vid } },
 			"viewpoints.screenshot.resizedContent": 0
 		}, true).then((foundTicket) => {
 			if (!_.get(foundTicket, "viewpoints[0].screenshot.content.buffer")) {
@@ -448,57 +443,17 @@ class Ticket {
 		});
 	}
 
-	getSmallScreenshot(account, model, uid, vid) {
-		if ("[object String]" === Object.prototype.toString.call(uid)) {
-			uid = utils.stringToUUID(uid);
-		}
-
-		if ("[object String]" === Object.prototype.toString.call(vid)) {
-			vid = utils.stringToUUID(vid);
-		}
-
-		return this.findByUID(account, model, uid, { viewpoints: { $elemMatch: { guid: vid } } }, true)
-			.then((foundTicket) => {
-				if (_.get(foundTicket, "viewpoints[0].screenshot.resizedContent.buffer")) {
-					return foundTicket.viewpoints[0].screenshot.resizedContent.buffer;
-				} else if (!_.get(foundTicket, "viewpoints[0].screenshot.content.buffer")) {
-					return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
-				} else {
-					return utils.resizeAndCropScreenshot(foundTicket.viewpoints[0].screenshot.content.buffer, 365)
-						.then((resized) => {
-							this.getTicketsCollection(account, model).then((_dbCol) => {
-								_dbCol.update({
-									_id: uid,
-									"viewpoints.guid": vid
-								},{
-									$set: {"viewpoints.$.screenshot.resizedContent": resized}
-								}).catch((err) => {
-									systemLogger.logError("Error while saving resized screenshot",
-										{
-											collName: this.collName,
-											ticketId: utils.uuidToString(uid),
-											viewpointId: utils.uuidToString(vid),
-											err: err
-										});
-								});
-							});
-
-							return resized;
-						});
-				}
-			});
-	}
-
 	getThumbnail(account, model, uid) {
 		if ("[object String]" === Object.prototype.toString.call(uid)) {
 			uid = utils.stringToUUID(uid);
 		}
 
 		return this.findByUID(account, model, uid, { thumbnail: 1 }, true).then((foundTicket) => {
-			if (!_.get(foundTicket, "thumbnail.content.buffer")) {
+			// the 'content' field is for legacy reasons
+			if (!_.get(foundTicket, "thumbnail.buffer") && !_.get(foundTicket, "thumbnail.content.buffer")) {
 				return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 			} else {
-				return foundTicket.thumbnail.content.buffer;
+				return (foundTicket.thumbnail.content ||  foundTicket.thumbnail).buffer;
 			}
 		});
 	}
@@ -507,7 +462,7 @@ class Ticket {
 		let filter = {};
 
 		if (Array.isArray(ids)) {
-			filter._id = {"$in": ids.map(utils.stringToUUID)};
+			filter._id = { "$in": ids.map(utils.stringToUUID) };
 		} else {
 			filter = { ...filter, ...(ids || {}) }; // this means that the ids are a different filter;
 		}
@@ -516,16 +471,16 @@ class Ticket {
 
 		if (branch || revId) {
 			// searches for the first rev id
-			const history = await History.getHistory({account, model}, branch, revId);
+			const history = await History.getHistory({ account, model }, branch, revId);
 			if (history) {
 				// Uses the first revsion searched to get all posterior revisions
-				invalidRevIds = await History.find({account, model}, {timestamp: {"$gt": history.timestamp}}, {_id: 1});
+				invalidRevIds = await History.find({ account, model }, { timestamp: { "$gt": history.timestamp } }, { _id: 1 });
 				invalidRevIds = invalidRevIds.map(r => r._id);
 			}
 		}
 
-		const modelSettings = await ModelSetting.findById({account, model}, model);
-		filter.rev_id = {"$not" : {"$in": invalidRevIds}};
+		const modelSettings = await ModelSetting.findById({ account, model }, model);
+		filter.rev_id = { "$not": { "$in": invalidRevIds } };
 		const coll = await this.getTicketsCollection(account, model);
 		const tickets = await coll.find(filter, projection).toArray();
 		tickets.forEach((foundTicket, index) => {
@@ -557,7 +512,7 @@ class Ticket {
 		});
 
 		const clippingPlanes = viewpoint.clippingPlanes;
-		if(clippingPlanes) {
+		if (clippingPlanes) {
 			for (const item in clippingPlanes) {
 				clippingPlanes[item].normal = utils.webGLtoDirectX(clippingPlanes[item].normal);
 			}
@@ -606,7 +561,7 @@ class Ticket {
 		}
 
 		const tickets = await this.getTicketsCollection(account, model);
-		const ticketQuery = {_id: utils.stringToUUID(id)};
+		const ticketQuery = { _id: utils.stringToUUID(id) };
 		const ticketFound = await tickets.findOne(ticketQuery);
 
 		if (!ticketFound) {
@@ -622,7 +577,7 @@ class Ticket {
 			ref_ids.push(ref._id);
 		});
 
-		await tickets.update(ticketQuery, { $set: {comments}, $push: {refs:  {$each: ref_ids}}});
+		await tickets.update(ticketQuery, { $set: { comments }, $push: { refs: { $each: ref_ids } } });
 		return refs;
 	}
 
@@ -637,9 +592,9 @@ class Ticket {
 			throw responseCodes.SIZE_LIMIT;
 		}
 
-		const refsPromises = files.map((file,i) => {
+		const refsPromises = files.map((file, i) => {
 			const extension = ((file.originalname.match(extensionRe) || [])[0] || "").toLowerCase();
-			return FileRef.storeFileAsResource(account, model, username, resourceNames[i] + extension, file.buffer, {[this.refIdsField]:[id]});
+			return FileRef.storeFileAsResource(account, model, username, resourceNames[i] + extension, file.buffer, { [this.refIdsField]: [id] });
 		});
 		const refs = await Promise.all(refsPromises);
 		refs.forEach(r => {
@@ -652,7 +607,7 @@ class Ticket {
 	}
 
 	async attachResourceUrls(account, model, id, username, sessionId, resourceNames, urls) {
-		const refsPromises = urls.map((url, index) =>  FileRef.storeUrlAsResource(account, model, username,resourceNames[index], url,{[this.refIdsField]:[id]}));
+		const refsPromises = urls.map((url, index) => FileRef.storeUrlAsResource(account, model, username, resourceNames[index], url, { [this.refIdsField]: [id] }));
 		const refs = await Promise.all(refsPromises);
 		refs.forEach(r => {
 			delete r.type;
@@ -665,7 +620,7 @@ class Ticket {
 	async detachResource(account, model, id, resourceId, username, sessionId) {
 		const ref = await FileRef.removeResourceFromEntity(account, model, this.refIdsField, id, resourceId);
 		const tickets = await this.getTicketsCollection(account, model);
-		const ticketQuery = {_id: utils.stringToUUID(id)};
+		const ticketQuery = { _id: utils.stringToUUID(id) };
 		const ticketFound = await tickets.findOne(ticketQuery);
 
 		if (!ticketFound) {
@@ -674,9 +629,9 @@ class Ticket {
 
 		const comments = ticketFound.comments;
 		comments.push(await this.createSystemComment(account, model, sessionId, id, username, "resource", ref.name, null));
-		await tickets.update(ticketQuery, {$set: {comments}, $pull: { refs: resourceId } });
+		await tickets.update(ticketQuery, { $set: { comments }, $pull: { refs: resourceId } });
 
-		if(ref.type !== "http") {
+		if (ref.type !== "http") {
 			delete ref.link;
 		}
 		delete ref.type;
