@@ -15,11 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, takeLatest } from 'redux-saga/effects';
+import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import { Viewer } from '../../services/viewer/viewer';
 import { DialogActions } from '../dialog';
-import { MeasureActions, MeasureTypes } from './';
+import {
+	selectAreaMeasurements,
+	selectLengthMeasurements,
+	selectPointMeasurements,
+	MeasureActions,
+	MeasureTypes
+} from './';
+import {MEASURING_MODE} from './measure.constants';
 
 export function* activateMeasure() {
 	try {
@@ -115,6 +122,35 @@ export function* setMeasurementColor({ uuid, color }) {
 	}
 }
 
+export function* resetMeasurementColors() {
+	try {
+		const areaMeasurements = yield select(selectAreaMeasurements);
+		const lengthMeasurements = yield select(selectLengthMeasurements);
+		const pointMeasurements = yield select(selectPointMeasurements);
+
+		const setDefaultColor = async ({ uuid, color }) => {
+			const colorToSet = [color.r / 255, color.g / 255, color.b / 255, color.a];
+			await Viewer.setMeasurementColor(uuid, colorToSet);
+		};
+
+		if (areaMeasurements.length) {
+			areaMeasurements.forEach(setDefaultColor);
+		}
+
+		if (lengthMeasurements.length) {
+			lengthMeasurements.forEach(setDefaultColor);
+		}
+
+		if (lengthMeasurements.length) {
+			pointMeasurements.forEach(setDefaultColor);
+		}
+
+		yield put(MeasureActions.resetMeasurementColorsSuccess());
+	} catch (error) {
+		DialogActions.showErrorDialog('set color', 'measure', error);
+	}
+}
+
 export function* setMeasureEdgeSnapping({ edgeSnapping }) {
 	try {
 		if (edgeSnapping) {
@@ -147,5 +183,6 @@ export default function* MeasureSaga() {
 	yield takeLatest(MeasureTypes.REMOVE_MEASUREMENT, removeMeasurement);
 	yield takeLatest(MeasureTypes.CLEAR_MEASUREMENTS, clearMeasurements);
 	yield takeLatest(MeasureTypes.SET_MEASUREMENT_COLOR, setMeasurementColor);
+	yield takeLatest(MeasureTypes.RESET_MEASUREMENT_COLORS, resetMeasurementColors);
 	yield takeLatest(MeasureTypes.SET_MEASURE_EDGE_SNAPPING, setMeasureEdgeSnapping);
 }

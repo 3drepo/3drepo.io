@@ -93,7 +93,7 @@ export class Measure extends React.PureComponent<IProps, IState> {
 			[MEASURE_ACTIONS_ITEMS.EDGE_SNAPPING]: this.handleToggleEdgeSnapping,
 			[MEASURE_ACTIONS_ITEMS.SHOW_XYZ]: this.handleToggleEdgeSnapping,
 			[MEASURE_ACTIONS_ITEMS.UNITS_DISPLAYED_IN]: this.handleToggleMeasureUnits,
-			[MEASURE_ACTIONS_ITEMS.RESET_COLOURS]: this.handleClearMeasurements,
+			[MEASURE_ACTIONS_ITEMS.RESET_COLOURS]: this.handleResetMeasurementColors,
 			[MEASURE_ACTIONS_ITEMS.DELETE_ALL]: this.handleClearMeasurements,
 		};
 	}
@@ -123,6 +123,8 @@ export class Measure extends React.PureComponent<IProps, IState> {
 	public handleMeasureRemoved = (measurementId) => this.props.removeMeasurement(measurementId);
 
 	public handleClearMeasurements = () => this.props.clearMeasurements();
+
+	public handleResetMeasurementColors = () => this.props.resetMeasurementColors();
 
 	public renderEmptyState = renderWhenTrue(() => (
 		<EmptyStateInfo>No measurements have been created yet</EmptyStateInfo>

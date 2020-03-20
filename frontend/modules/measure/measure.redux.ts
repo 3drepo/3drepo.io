@@ -36,6 +36,8 @@ export const { Types: MeasureTypes, Creators: MeasureActions } = createActions({
 	removeMeasurementSuccess: ['uuid'],
 	setMeasurementColor: ['uuid', 'color'],
 	setMeasurementColorSuccess: ['uuid', 'color'],
+	resetMeasurementColors: [],
+	resetMeasurementColorsSuccess: [],
 	setMeasureEdgeSnapping: ['edgeSnapping'],
 	setMeasureEdgeSnappingSuccess: ['edgeSnapping'],
 }, { prefix: 'MEASURE/' });
@@ -94,15 +96,38 @@ export const addMeasurement = (state = INITIAL_STATE, { measurement }) => {
 export const setMeasurementColorSuccess = (state = INITIAL_STATE, { uuid, color }) => {
 	const areaMeasurement = state.areaMeasurements.find((measure) => measure.uuid === uuid);
 	const lengthMeasurement = state.lengthMeasurements.find((measure) => measure.uuid === uuid);
+	const pointMeasurement = state.pointMeasurements.find((measure) => measure.uuid === uuid);
 
 	if (areaMeasurement) {
-		areaMeasurement.color = color;
+		areaMeasurement.customColor = color;
 		return ({ ...state, areaMeasurements: [...state.areaMeasurements]});
 	} else if (lengthMeasurement) {
-		lengthMeasurement.color = color;
+		lengthMeasurement.customColor = color;
 		return ({ ...state, lengthMeasurements: [...state.lengthMeasurements]});
+	} else if (pointMeasurement) {
+		pointMeasurement.customColor = color;
+		return ({ ...state, pointMeasurements: [...state.pointMeasurements]});
 	}
 	return ({ ...state });
+};
+
+export const resetMeasurementColorsSuccess = (state = INITIAL_STATE, {}) => {
+	const resetColor = (measure) => {
+		if (measure.customColor) {
+			measure.customColor = undefined;
+		}
+		return measure;
+	};
+	const areaMeasurements = state.areaMeasurements.map(resetColor);
+	const lengthMeasurements = state.lengthMeasurements.map(resetColor);
+	const pointMeasurements = state.pointMeasurements.map(resetColor);
+
+	return ({
+		...state,
+		areaMeasurements,
+		lengthMeasurements,
+		pointMeasurements,
+	});
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
@@ -114,5 +139,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[MeasureTypes.CLEAR_MEASUREMENTS_SUCCESS]: clearMeasurementsSuccess,
 	[MeasureTypes.REMOVE_MEASUREMENT_SUCCESS]: removeMeasurementSuccess,
 	[MeasureTypes.SET_MEASUREMENT_COLOR_SUCCESS]: setMeasurementColorSuccess,
+	[MeasureTypes.RESET_MEASUREMENT_COLORS_SUCCESS]: resetMeasurementColorsSuccess,
 	[MeasureTypes.SET_MEASURE_EDGE_SNAPPING_SUCCESS]: setMeasureEdgeSnappingSuccess,
 });

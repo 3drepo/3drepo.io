@@ -47,6 +47,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	clearMeasurements: MeasureActions.clearMeasurements,
 	addMeasurement: MeasureActions.addMeasurement,
 	setMeasurementColor: MeasureActions.setMeasurementColor,
+	resetMeasurementColors: MeasureActions.resetMeasurementColors,
 	setMeasureUnits: MeasureActions.setMeasureUnits,
 	setMeasureEdgeSnapping: MeasureActions.setMeasureEdgeSnapping,
 }, dispatch);
