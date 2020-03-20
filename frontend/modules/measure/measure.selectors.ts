@@ -16,16 +16,11 @@
  */
 
 import { createSelector } from 'reselect';
-import { MEASURE_TYPE } from './measure.constants';
 
 export const selectMeasureDomain = (state) => ({...state.measure});
 
 export const selectIsMeasureActive = createSelector(
 	selectMeasureDomain, (state) => state.isActive
-);
-
-export const selectIsMeasureDisabled = createSelector(
-	selectMeasureDomain, (state) => state.isDisabled
 );
 
 export const selectMeasureMode = createSelector(

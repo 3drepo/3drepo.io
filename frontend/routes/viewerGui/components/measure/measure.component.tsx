@@ -40,7 +40,7 @@ import {
 	TitleWrapper,
 	ViewerBottomActions,
 	ViewsContainer,
-	ViewsIcon,
+	MeasureIcon,
 } from './measure.styles';
 
 interface IProps {
@@ -48,7 +48,6 @@ interface IProps {
 	teamspace: string;
 	model: string;
 	isMeasureActive: boolean;
-	isMeasureDisabled: boolean;
 	disableMeasure: (isDisabled) => void;
 	deactivateMeasure: () => void;
 	activateMeasure: () => void;
@@ -134,7 +133,7 @@ export class Measure extends React.PureComponent<IProps, IState> {
 		<EmptyStateInfo>No measurements have been created yet</EmptyStateInfo>
 	));
 
-	public getTitleIcon = () => <ViewsIcon />;
+	public getTitleIcon = () => <MeasureIcon />;
 
 	public renderAreasMeasurements = renderWhenTrue(() => (
 			<div>

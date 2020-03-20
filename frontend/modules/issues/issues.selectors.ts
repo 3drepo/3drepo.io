@@ -148,7 +148,8 @@ export const selectPins = createSelector(
 	}
 
 	if (measurePoints.length) {
-		measurePoints.forEach(({ color, ...measure }) => {
+		measurePoints.forEach(({ customColor, ...measure }) => {
+			const color = customColor || measure.color;
 			const colorToSet = [color.r / 255, color.g / 255, color.b / 255, color.a];
 			pinsToShow.push({
 				id: measure.uuid,

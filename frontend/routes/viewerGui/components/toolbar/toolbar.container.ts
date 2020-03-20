@@ -35,10 +35,7 @@ import { Toolbar } from './toolbar.component';
 import { TreeActions } from '../../../../modules/tree';
 
 import { selectIsActive, BimActions } from '../../../../modules/bim';
-import {
-	selectIsMeasureActive,
-	selectIsMeasureDisabled
-} from '../../../../modules/measure';
+import { selectIsMeasureActive } from '../../../../modules/measure';
 import { selectMetaKeysExist } from '../../../../modules/model';
 
 const mapStateToProps = createStructuredSelector({
@@ -52,7 +49,6 @@ const mapStateToProps = createStructuredSelector({
 	isMetadataActive: selectIsActive,
 	isMeasureActive: selectIsMeasureActive,
 	coordViewActive: selectIsCoordViewActive,
-	isMeasureDisabled: selectIsMeasureDisabled,
 	metaKeysExist: selectMetaKeysExist
 });
 

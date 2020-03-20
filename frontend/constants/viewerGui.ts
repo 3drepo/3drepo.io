@@ -49,7 +49,7 @@ export const VIEWER_PANELS_TITLES = {
 	[VIEWER_PANELS.TREE]: 'Tree',
 	[VIEWER_PANELS.COMPARE]: 'Compare',
 	[VIEWER_PANELS.GIS]: 'GIS',
-	[VIEWER_PANELS.MEASURE]: 'Measure'
+	[VIEWER_PANELS.MEASURE]: 'Measurement'
 };
 
 const getPanelConfig = (panelType) => ({

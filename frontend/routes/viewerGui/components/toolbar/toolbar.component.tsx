@@ -71,7 +71,6 @@ interface IProps {
 	coordViewActive: boolean;
 	isMetadataActive: boolean;
 	isMeasureActive: boolean;
-	isMeasureDisabled: boolean;
 	metaKeysExist: boolean;
 	isMetadataVisible: boolean;
 	goToExtent: () => void;

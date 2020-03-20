@@ -30,7 +30,6 @@ interface IProps {
 	teamspace: string;
 	model: string;
 	isMeasureActive: boolean;
-	isMeasureDisabled: boolean;
 	setMeasureMode: (mode) => void;
 	measureMode: string;
 	disableMeasure: (isDisabled) => void;

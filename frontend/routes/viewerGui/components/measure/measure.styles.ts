@@ -28,7 +28,7 @@ import {
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { Container as ItemContainer } from './components/measureItem/measureItem.styles';
 
-export const ViewsIcon = VIEWER_PANELS_ICONS[VIEWER_PANELS.MEASURE];
+export const MeasureIcon = VIEWER_PANELS_ICONS[VIEWER_PANELS.MEASURE];
 
 export const ViewsContainer = styled(ViewerPanel).attrs({
 	title: VIEWER_PANELS_TITLES[VIEWER_PANELS.MEASURE]
@@ -40,6 +40,7 @@ export const Container = styled.div`
 	display: flex;
 	flex-direction: column;
 	overflow: auto;
+	flex: auto;
 `;
 
 export const ViewerBottomActions = styled.div`

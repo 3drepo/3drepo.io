@@ -51,7 +51,7 @@ export class Viewer {
 	public runtime = null;
 	public fullscreen = false;
 	public pinDropMode = false;
-	public measureMode = '';
+	public measureMode = false;
 	public measuringUnits = '';
 	public clickingEnabled = false;
 
@@ -600,8 +600,10 @@ export class Viewer {
 	public setMeasureActivity(on: boolean) {
 		if (on === true) {
 			UnityUtil.enableMeasuringTool();
+			this.measureMode = true;
 		} else {
 			UnityUtil.disableMeasuringTool();
+			this.measureMode = false;
 		}
 	}
 
