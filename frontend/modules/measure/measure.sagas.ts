@@ -160,7 +160,20 @@ export function* setMeasureEdgeSnapping({ edgeSnapping }) {
 		}
 		yield put(MeasureActions.setMeasureEdgeSnappingSuccess(edgeSnapping));
 	} catch (error) {
-		DialogActions.showErrorDialog('set color', 'measure', error);
+		DialogActions.showErrorDialog('set edge snapping', 'measure', error);
+	}
+}
+
+export function* setMeasureXyzDisplay({ XYZdisplay }) {
+	try {
+		if (XYZdisplay) {
+			yield Viewer.enableMeasureXYZDisplay();
+		} else {
+			yield Viewer.disableMeasureXYZDisplay();
+		}
+		yield put(MeasureActions.setMeasureXyzDisplaySuccess(XYZdisplay));
+	} catch (error) {
+		DialogActions.showErrorDialog('set XYZ display', 'measure', error);
 	}
 }
 
@@ -185,4 +198,5 @@ export default function* MeasureSaga() {
 	yield takeLatest(MeasureTypes.SET_MEASUREMENT_COLOR, setMeasurementColor);
 	yield takeLatest(MeasureTypes.RESET_MEASUREMENT_COLORS, resetMeasurementColors);
 	yield takeLatest(MeasureTypes.SET_MEASURE_EDGE_SNAPPING, setMeasureEdgeSnapping);
+	yield takeLatest(MeasureTypes.SET_MEASURE_XYZ_DISPLAY, setMeasureXyzDisplay);
 }

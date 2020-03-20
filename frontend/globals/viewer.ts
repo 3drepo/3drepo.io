@@ -638,6 +638,14 @@ export class Viewer {
 		UnityUtil.clearMeasureToolMeasurements();
 	}
 
+	public enableMeasureXYZDisplay() {
+		UnityUtil.enableMeasureToolXYZDisplay();
+	}
+
+	public disableMeasureXYZDisplay() {
+		UnityUtil.disableMeasureToolXYZDisplay();
+	}
+
 	public showCoordView() {
 		UnityUtil.showCoordView();
 	}

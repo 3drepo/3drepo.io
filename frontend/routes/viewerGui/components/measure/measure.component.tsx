@@ -67,6 +67,8 @@ interface IProps {
 	setMeasureUnits: (units: string) => void;
 	setMeasureEdgeSnapping: (edgeSnapping: boolean) => void;
 	edgeSnappingEnabled: boolean;
+	setMeasureXYZDisplay: (XYZDisplay: boolean) => void;
+	XYZdisplay: boolean;
 }
 
 interface IState {
@@ -86,12 +88,14 @@ export class Measure extends React.PureComponent<IProps, IState> {
 
 	private handleToggleEdgeSnapping = () => this.props.setMeasureEdgeSnapping(!this.props.edgeSnappingEnabled);
 
+	private handleToggleXYZdisplay = () => this.props.setMeasureXYZDisplay(!this.props.XYZdisplay);
+
 	private handleToggleMeasureUnits = () => this.props.setMeasureUnits(this.props.measureUnits === 'm' ? 'mm' : 'm' );
 
 	get menuActionsMap() {
 		return {
 			[MEASURE_ACTIONS_ITEMS.EDGE_SNAPPING]: this.handleToggleEdgeSnapping,
-			[MEASURE_ACTIONS_ITEMS.SHOW_XYZ]: this.handleToggleEdgeSnapping,
+			[MEASURE_ACTIONS_ITEMS.SHOW_XYZ]: this.handleToggleXYZdisplay,
 			[MEASURE_ACTIONS_ITEMS.UNITS_DISPLAYED_IN]: this.handleToggleMeasureUnits,
 			[MEASURE_ACTIONS_ITEMS.RESET_COLOURS]: this.handleResetMeasurementColors,
 			[MEASURE_ACTIONS_ITEMS.DELETE_ALL]: this.handleClearMeasurements,
@@ -213,7 +217,7 @@ export class Measure extends React.PureComponent<IProps, IState> {
 							<StyledItemText>
 								{label}
 								{(name === MEASURE_ACTIONS_ITEMS.EDGE_SNAPPING && this.props.edgeSnappingEnabled) && <Check fontSize="small" />}
-								{(name === MEASURE_ACTIONS_ITEMS.SHOW_XYZ && this.props.edgeSnappingEnabled) && <Check fontSize="small" />}
+								{(name === MEASURE_ACTIONS_ITEMS.SHOW_XYZ && this.props.XYZdisplay) && <Check fontSize="small" />}
 								{name === MEASURE_ACTIONS_ITEMS.UNITS_DISPLAYED_IN && <strong>{this.props.measureUnits}</strong>}
 							</StyledItemText>
 						</StyledListItem>

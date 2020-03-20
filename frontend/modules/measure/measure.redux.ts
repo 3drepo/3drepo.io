@@ -40,6 +40,8 @@ export const { Types: MeasureTypes, Creators: MeasureActions } = createActions({
 	resetMeasurementColorsSuccess: [],
 	setMeasureEdgeSnapping: ['edgeSnapping'],
 	setMeasureEdgeSnappingSuccess: ['edgeSnapping'],
+	setMeasureXyzDisplay: ['XYZdisplay'],
+	setMeasureXyzDisplaySuccess: ['XYZdisplay'],
 }, { prefix: 'MEASURE/' });
 
 export const INITIAL_STATE = {
@@ -51,6 +53,7 @@ export const INITIAL_STATE = {
 	lengthMeasurements: [],
 	pointMeasurements: [],
 	edgeSnapping: true,
+	XYZdisplay: false,
 };
 
 export const setActiveSuccess = (state = INITIAL_STATE, { isActive }) => ({ ...state, isActive });
@@ -62,6 +65,8 @@ export const setMeasureModeSuccess = (state = INITIAL_STATE, { mode }) => ({ ...
 export const setMeasureUnitsSuccess = (state = INITIAL_STATE, { units }) => ({ ...state, units });
 
 export const setMeasureEdgeSnappingSuccess = (state = INITIAL_STATE, { edgeSnapping }) => ({ ...state, edgeSnapping });
+
+export const setMeasureXyzDisplaySuccess = (state = INITIAL_STATE, { XYZdisplay }) => ({ ...state, XYZdisplay });
 
 export const clearMeasurementsSuccess  = (state = INITIAL_STATE) => ({
 	...state,
@@ -141,4 +146,5 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[MeasureTypes.SET_MEASUREMENT_COLOR_SUCCESS]: setMeasurementColorSuccess,
 	[MeasureTypes.RESET_MEASUREMENT_COLORS_SUCCESS]: resetMeasurementColorsSuccess,
 	[MeasureTypes.SET_MEASURE_EDGE_SNAPPING_SUCCESS]: setMeasureEdgeSnappingSuccess,
+	[MeasureTypes.SET_MEASURE_XYZ_DISPLAY_SUCCESS]: setMeasureXyzDisplaySuccess,
 });
