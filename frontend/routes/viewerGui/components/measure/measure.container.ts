@@ -21,7 +21,7 @@ import { createStructuredSelector } from 'reselect';
 
 import {
 	selectAreaMeasurements, selectEdgeSnapping, selectIsMeasureActive, selectIsMeasureDisabled, selectLengthMeasurements,
-	selectMeasureMode, selectMeasureUnits, MeasureActions
+	selectMeasureMode, selectMeasureUnits, selectPointMeasurements, MeasureActions
 } from '../../../../modules/measure';
 import { withViewer } from '../../../../services/viewer/viewer';
 
@@ -32,6 +32,7 @@ const mapStateToProps = createStructuredSelector({
 	isMeasureDisabled: selectIsMeasureDisabled,
 	areaMeasurements: selectAreaMeasurements,
 	lengthMeasurements: selectLengthMeasurements,
+	pointMeasurements: selectPointMeasurements,
 	measureMode: selectMeasureMode,
 	measureUnits: selectMeasureUnits,
 	edgeSnappingEnabled: selectEdgeSnapping,

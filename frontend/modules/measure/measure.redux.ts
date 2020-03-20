@@ -47,6 +47,7 @@ export const INITIAL_STATE = {
 	units: 'm',
 	areaMeasurements: [],
 	lengthMeasurements: [],
+	pointMeasurements: [],
 	edgeSnapping: true,
 };
 
@@ -64,12 +65,14 @@ export const clearMeasurementsSuccess  = (state = INITIAL_STATE) => ({
 	...state,
 	areaMeasurements: INITIAL_STATE.areaMeasurements,
 	lengthMeasurements: INITIAL_STATE.lengthMeasurements,
+	pointMeasurements: INITIAL_STATE.pointMeasurements,
 });
 
 export const removeMeasurementSuccess = (state = INITIAL_STATE, { uuid }) => ({
 	...state,
 	areaMeasurements: state.areaMeasurements.filter((measurement) => measurement.uuid !== uuid),
 	lengthMeasurements: state.lengthMeasurements.filter((measurement) => measurement.uuid !== uuid),
+	pointMeasurements: state.pointMeasurements.filter((measurement) => measurement.uuid !== uuid),
 });
 
 export const addMeasurement = (state = INITIAL_STATE, { measurement }) => {
@@ -82,6 +85,8 @@ export const addMeasurement = (state = INITIAL_STATE, { measurement }) => {
 		return ({ ...state, areaMeasurements: [...state.areaMeasurements, measurement]});
 	} else if (measurement.type === MEASURE_TYPE.LENGTH) {
 		return ({ ...state, lengthMeasurements: [...state.lengthMeasurements, measurement]});
+	} else if (measurement.type === MEASURE_TYPE.POINT) {
+		return ({ ...state, pointMeasurements: [...state.pointMeasurements, measurement]});
 	}
 	return ({ ...state });
 };

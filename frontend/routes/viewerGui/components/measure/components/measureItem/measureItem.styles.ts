@@ -61,6 +61,16 @@ const containerIndentation = cond([
 	}]
 ]);
 
+export const MeasurementPoint = styled.div`
+	width: 120px;
+`;
+
+export const Units = styled.div`
+	width: 30px;
+	text-align: right;
+	padding-right: 10px;
+`;
+
 export const MeasurementValue = styled.div`
 	width: 120px;
 	text-align: right;
@@ -72,6 +82,7 @@ export const Actions = styled.div`
 	justify-content: flex-end;
 	align-items: center;
 	align-self: center;
+	font-size: 12px;
 
 	${ColorSelect} {
 		width: auto;
@@ -95,7 +106,7 @@ export const Container = styled.li<IContainer>`
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	height: ${TREE_ITEM_SIZE}px;
+	height: ${({ tall }: any) => tall ? '56px' : '40px'};
 	box-sizing: border-box;
 	cursor: pointer;
 `;

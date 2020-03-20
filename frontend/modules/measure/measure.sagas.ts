@@ -45,10 +45,15 @@ export function* deactivateMeasure() {
 
 export function* setMeasureMode({ mode }) {
 	try {
-		yield all([
-			Viewer.setMeasureMode(mode),
-			put(MeasureActions.setMeasureModeSuccess(mode))
-		]);
+		if (mode === '' || mode === MEASURING_MODE.POINT) {
+			yield put(MeasureActions.setMeasureActive(false));
+			yield put(MeasureActions.setMeasureModeSuccess(mode));
+		} else {
+			yield all([
+				Viewer.setMeasureMode(mode),
+				put(MeasureActions.setMeasureModeSuccess(mode))
+			]);
+		}
 	} catch (error) {
 		DialogActions.showErrorDialog('set', `measure mode to ${mode}`, error);
 	}

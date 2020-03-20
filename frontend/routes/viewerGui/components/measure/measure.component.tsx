@@ -55,12 +55,14 @@ interface IProps {
 	measurements: IMeasure[];
 	areaMeasurements: IMeasure[];
 	lengthMeasurements: IMeasure[];
+	pointMeasurements: IMeasure[];
 	addMeasurement: (IMeasure) => void;
 	removeMeasurement: (uuid) => void;
 	clearMeasurements: () => void;
 	setMeasureMode: (mode) => void;
 	measureMode: string;
 	setMeasurementColor: (uuid, color) => void;
+	resetMeasurementColors: () => void;
 	measureUnits: string;
 	setMeasureUnits: (units: string) => void;
 	setMeasureEdgeSnapping: (edgeSnapping: boolean) => void;
@@ -166,8 +168,28 @@ export class Measure extends React.PureComponent<IProps, IState> {
 			</div>
 	));
 
+	public renderPointMeasurements = renderWhenTrue(() => (
+			<div>
+				<Title>
+					<TitleWrapper>Point</TitleWrapper>
+				</Title>
+				{this.props.pointMeasurements.map((props, index) => (
+					<MeasureItem
+						key={props.uuid}
+						index={index + 1}
+						typeName="Point"
+						units={this.props.measureUnits}
+						removeMeasurement={this.props.removeMeasurement}
+						setMeasurementColor={this.props.setMeasurementColor}
+						{...props}
+					/>
+				))}
+			</div>
+	));
+
 	public renderMeasurementDetails = renderWhenTrue(() => (
 		<div>
+			{this.renderPointMeasurements(!isEmpty(this.props.pointMeasurements))}
 			{this.renderAreasMeasurements(!isEmpty(this.props.areaMeasurements))}
 			{this.renderLengthsMeasurements(!isEmpty(this.props.lengthMeasurements))}
 		</div>
@@ -208,7 +230,7 @@ export class Measure extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { isViewerReady } = this.state;
-		const { areaMeasurements, lengthMeasurements } = this.props;
+		const { areaMeasurements, lengthMeasurements, pointMeasurements } = this.props;
 		return (
 			<ViewsContainer
 				Icon={this.getTitleIcon()}
@@ -216,8 +238,10 @@ export class Measure extends React.PureComponent<IProps, IState> {
 				pending={!isViewerReady}
 			>
 				<Container ref={this.containerRef}>
-					{this.renderEmptyState(isEmpty(areaMeasurements) && isEmpty(lengthMeasurements))}
-					{this.renderMeasurementDetails(!isEmpty(areaMeasurements) || !isEmpty(lengthMeasurements))}
+					{this.renderEmptyState(isEmpty(areaMeasurements) && isEmpty(lengthMeasurements) && isEmpty(pointMeasurements))}
+					{this.renderMeasurementDetails(
+							!isEmpty(areaMeasurements) || !isEmpty(lengthMeasurements) || !isEmpty(pointMeasurements)
+					)}
 				</Container>
 				{this.renderFooterContent()}
 			</ViewsContainer>

@@ -25,7 +25,7 @@ import {MEASURE_TYPE} from '../../../../../../modules/measure/measure.constants'
 import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
 import { SmallIconButton } from '../../../../../components/smallIconButon/smallIconButton.component';
 import { Name as NameText, NameWrapper} from '../../../tree/components/treeNode/treeNode.styles';
-import { Actions, Container, MeasurementValue } from './measureItem.styles';
+import { Actions, Container, MeasurementPoint, MeasurementValue, Units } from './measureItem.styles';
 
 export interface IColor {
 	r: number;
@@ -42,9 +42,11 @@ interface IPosition {
 
 export interface IMeasure {
 	uuid: string;
-	positions: IPosition[];
+	positions?: IPosition[];
+	position?: number[];
 	value: number;
 	color: IColor;
+	customColor: IColor;
 	type: number;
 }
 
@@ -57,15 +59,6 @@ interface IProps extends IMeasure {
 }
 
 const getValue = (value: number, units: string, type: number) => {
-	if (type === MEASURE_TYPE.LENGTH) {
-		return cond([
-			[matches('mm'), () => Math.trunc(value)],
-			[matches('cm'), () => Math.trunc(value / 10)],
-			[matches('m'), () => Number(value / 1000).toFixed(2)],
-			[stubTrue, () => Math.trunc(value)]
-		])(units);
-	}
-
 	if (type === MEASURE_TYPE.AREA) {
 		return cond([
 			[matches('mm'), () => Math.trunc(value)],
@@ -75,7 +68,12 @@ const getValue = (value: number, units: string, type: number) => {
 		])(units);
 	}
 
-	return Math.trunc(value);
+	return cond([
+		[matches('mm'), () => Math.trunc(value)],
+		[matches('cm'), () => Math.trunc(value / 10)],
+		[matches('m'), () => Number(value / 1000).toFixed(2)],
+		[stubTrue, () => Math.trunc(value)]
+	])(units);
 };
 
 export const getColor = ({ r, g, b }) => `#${[r, g, b].map(componentToHex).join('')}`;
@@ -92,7 +90,7 @@ export const getUnits = (units: string, type: number) => {
 };
 
 export const MeasureItem = ({
-	uuid, index, typeName, value, units, color, removeMeasurement, type, ...props
+	uuid, index, typeName, value, units, color, removeMeasurement, type, position, customColor, ...props
 }: IProps) => {
 	const handleRemoveMeasurement = () => {
 		removeMeasurement(uuid);
@@ -110,14 +108,25 @@ export const MeasureItem = ({
 	};
 
 	return (
-		<Container>
+		<Container tall={Number(type === MEASURE_TYPE.POINT)}>
 			<Name>
 				{`${typeName} ${index}`}
 			</Name>
 			<Actions>
-				<MeasurementValue>{getValue(value, units, type)} {getUnits(units, type)}</MeasurementValue>
+				{
+					typeName === 'Point' ?
+					<>
+						<div>
+							<MeasurementPoint>x: {getValue(position[0], units, type)}</MeasurementPoint>
+							<MeasurementPoint>y: {getValue(position[1], units, type)}</MeasurementPoint>
+							<MeasurementPoint>z: {getValue(position[2], units, type)}</MeasurementPoint>
+						</div>
+						<Units>{getUnits(units, type)}</Units>
+					</>
+					: <MeasurementValue>{getValue(value, units, type)} {getUnits(units, type)}</MeasurementValue>
+				}
 				<ColorPicker
-					value={getColor(color)}
+					value={getColor(customColor || color)}
 					onChange={handleColorChange}
 					disableUnderline
 				/>

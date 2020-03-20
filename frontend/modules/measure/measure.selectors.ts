@@ -47,3 +47,7 @@ export const selectAreaMeasurements = createSelector(
 export const selectLengthMeasurements = createSelector(
 		selectMeasureDomain, (state) => state.lengthMeasurements
 );
+
+export const selectPointMeasurements = createSelector(
+		selectMeasureDomain, (state) => state.pointMeasurements
+);

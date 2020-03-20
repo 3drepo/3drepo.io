@@ -19,6 +19,7 @@ export const DEFAULT = 'default';
 export const ACTIVE = 'active';
 
 export const MEASURE_TYPE = {
+	POINT: -1,
 	LENGTH: 0,
 	AREA: 1,
 };
@@ -33,7 +34,7 @@ export const MEASURING_TYPE = {
 };
 
 export const MEASURING_MODE = {
-	POINT: null,
+	POINT: 'PointPin',
 	RAY_CAST: 'Raycast',
 	MINIMUM_DISTANCE: 'MinimumDistance',
 	SAM: 'SurfaceArea',
