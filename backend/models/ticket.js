@@ -331,7 +331,7 @@ class Ticket {
 		}
 
 		Object.keys(newTicket).forEach((key) => {
-			if (Object.prototype.toString.call(newTicket[key]) !== this.fieldTypes[key]) {
+			if (Object.prototype.toString.call(newTicket[key]) !== this.fieldTypes[key] && this.fieldTypes[key]) {
 				if (newTicket[key] === null) {
 					delete newTicket[key];
 				} else {
