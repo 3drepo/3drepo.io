@@ -142,8 +142,22 @@ FileRef.getOriginalFile = function(account, model, fileName) {
 	return fetchFileStream(account, model, collection, fileName, true);
 };
 
-FileRef.getFile = (account, model, collName , ref_id) => {
+FileRef.getFile = (account, model, collName, ref_id) => {
 	return fetchFile(account, model, "." + collName + ".ref", ref_id);
+};
+
+FileRef.removeFile = async (account, model, collName, ref_id) => {
+	const refCollName =   model + "." + collName + ".ref";
+
+	const col = await DB.getCollection(account, refCollName);
+	const entry = await col.findOne({_id: ref_id});
+
+	await Promise.all([
+		ExternalServices.removeFiles(account, refCollName, entry.type, [entry.link]),
+		col.remove({_id:entry._id})
+	]);
+
+	return true; // success
 };
 
 FileRef.getTotalModelFileSize = function(account, model) {

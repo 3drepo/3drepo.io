@@ -20,16 +20,14 @@
 const utils = require("../utils");
 const nodeuuid = require("uuid/v1");
 const responseCodes = require("../response_codes.js");
-const systemLogger = require("../logger.js").systemLogger;
 const db = require("../handler/db");
 const ChatEvent = require("./chatEvent");
 const FileRef = require("./fileRef");
 
 const view = {};
 
-view.clean = function (dbCol, viewToClean, targetType = "[object String]") {
+view.clean =  function (viewToClean, targetType = "[object String]") {
 	const keys = ["_id", "guid", "highlighted_group_id", "hidden_group_id", "shown_group_id"];
-	let thumbnailPromise;
 
 	keys.forEach((key) => {
 		if (viewToClean[key] && "[object String]" === targetType) {
@@ -42,40 +40,6 @@ view.clean = function (dbCol, viewToClean, targetType = "[object String]") {
 			}
 		}
 	});
-
-	// FIXME - Need to unify content/buffer for buffer field name in document
-	// FIXME - Currently, Issues/Risks uses content
-	// FIXME - Currently, Viewpoints uses buffer
-	if ("[object String]" === Object.prototype.toString.call(viewToClean.screenshot) && viewToClean.screenshot.length > 0) {
-		viewToClean.screenshot = {
-			content: new Buffer.from(viewToClean.screenshot, "base64"),
-			flag: 1
-		};
-
-		thumbnailPromise = utils.resizeAndCropScreenshot(viewToClean.screenshot.content, 120, 120, true).catch((err) => {
-			systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
-				account: dbCol.account,
-				model: dbCol.model,
-				err
-			});
-		});
-	}
-
-	if (viewToClean.screenshot) {
-		if (viewToClean.screenshot.buffer) {
-			delete viewToClean.screenshot.buffer;
-		}
-
-		viewToClean.screenshot.thumbnail =
-			dbCol.account + "/" + dbCol.model + "/viewpoints/" + viewToClean._id + "/thumbnail.png";
-	}
-
-	if (thumbnailPromise) {
-		return thumbnailPromise.then((thumbnail) => {
-			viewToClean.screenshot.thumbnail = thumbnail;
-			return viewToClean;
-		});
-	}
 
 	return viewToClean;
 };
@@ -128,6 +92,8 @@ view.setViewpointScreenshotURL = function(collName, account, model, id, viewpoin
 	const viewpointId = utils.uuidToString(viewpoint.guid);
 
 	viewpoint.screenshot = account + "/" + model + "/" + collName + "/" + id + "/viewpoints/" + viewpointId + "/screenshot.png";
+
+	// DEPRECATED
 	viewpoint.screenshotSmall = viewpoint.screenshot;
 	return viewpoint;
 };
