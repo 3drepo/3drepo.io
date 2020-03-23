@@ -17,16 +17,15 @@
 
 import React from 'react';
 
-import {Checkbox} from '@material-ui/core';
 import Check from '@material-ui/icons/Check';
 import { isEmpty } from 'lodash';
+
 import { MEASURE_ACTIONS_ITEMS, MEASURE_ACTIONS_MENU } from '../../../../constants/measure';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { MEASURE_TYPE } from '../../../../modules/measure/measure.constants';
 import { Viewer } from '../../../../services/viewer/viewer';
-import { CheckboxCell } from '../../../components/customTable/customTable.styles';
 import {
 	IconWrapper,
 	MenuList, StyledItemText,
@@ -34,16 +33,13 @@ import {
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { PanelBarActions } from '../panelBarActions';
 import { ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
-import { getUnits, getValue, IMeasure, MeasureItem } from './components/measureItem/measureItem.component';
-import { Units } from './components/measureItem/measureItem.styles';
+import { IMeasure } from './components/measureItem/measureItem.component';
+import { MeasurementsList } from './components/measurementsList/measurementsList.component';
 import { MeasuringType } from './components/measuringType';
 import {
 	Container,
 	EmptyStateInfo,
 	MeasureIcon,
-	Sum,
-	Title,
-	TitleWrapper,
 	ViewerBottomActions,
 	ViewsContainer,
 } from './measure.styles';
@@ -92,12 +88,6 @@ export class Measure extends React.PureComponent<IProps, IState> {
 		return VIEWER_PANELS.MEASURE;
 	}
 
-	private handleToggleEdgeSnapping = () => this.props.setMeasureEdgeSnapping(!this.props.edgeSnappingEnabled);
-
-	private handleToggleXYZdisplay = () => this.props.setMeasureXYZDisplay(!this.props.XYZdisplay);
-
-	private handleToggleMeasureUnits = () => this.props.setMeasureUnits(this.props.measureUnits === 'm' ? 'mm' : 'm' );
-
 	get menuActionsMap() {
 		return {
 			[MEASURE_ACTIONS_ITEMS.EDGE_SNAPPING]: this.handleToggleEdgeSnapping,
@@ -120,7 +110,7 @@ export class Measure extends React.PureComponent<IProps, IState> {
 		this.toggleMeasureListeners(false);
 	}
 
-	public toggleMeasureListeners = (enabled: boolean) => {
+	private toggleMeasureListeners = (enabled: boolean) => {
 		const resolver = enabled ? 'on' : 'off';
 		const { viewer } = this.props;
 
@@ -128,112 +118,63 @@ export class Measure extends React.PureComponent<IProps, IState> {
 		viewer[resolver](VIEWER_EVENTS.MEASUREMENT_REMOVED, this.handleMeasureRemoved);
 	}
 
-	public handleMeasureCreated = (measure) => this.props.addMeasurement(measure);
+	private handleToggleEdgeSnapping = () => this.props.setMeasureEdgeSnapping(!this.props.edgeSnappingEnabled);
 
-	public handleMeasureRemoved = (measurementId) => this.props.removeMeasurement(measurementId);
+	private handleToggleXYZdisplay = () => this.props.setMeasureXYZDisplay(!this.props.XYZdisplay);
 
-	public handleClearMeasurements = () => this.props.clearMeasurements();
+	private handleToggleMeasureUnits = () => this.props.setMeasureUnits(this.props.measureUnits === 'm' ? 'mm' : 'm' );
 
-	public handleResetMeasurementColors = () => this.props.resetMeasurementColors();
+	private handleMeasureCreated = (measure) => this.props.addMeasurement(measure);
 
-	public renderEmptyState = renderWhenTrue(() => (
+	private handleMeasureRemoved = (measurementId) => this.props.removeMeasurement(measurementId);
+
+	private handleClearMeasurements = () => this.props.clearMeasurements();
+
+	private handleResetMeasurementColors = () => this.props.resetMeasurementColors();
+
+	private renderEmptyState = renderWhenTrue(() => (
 		<EmptyStateInfo>No measurements have been created yet</EmptyStateInfo>
 	));
 
-	public getTitleIcon = () => <MeasureIcon />;
+	private getTitleIcon = () => <MeasureIcon />;
 
-	private getSumValue = (measurements, type) => {
-		const sum = measurements.reduce((acc, measure) => {
-			if (measure.checked) {
-				return acc + measure.value;
-			}
-			return acc;
-		}, 0);
-		return getValue(sum, this.props.measureUnits, type);
-	}
-
-	public renderAreasMeasurements = renderWhenTrue(() => (
-			<div>
-				<Title>
-					<CheckboxCell width="50px">
-						<Checkbox
-							onChange={() => this.props.setMeasurementCheckAll(MEASURE_TYPE.AREA)}
-							checked={this.props.areaMeasurements.every(({checked}) => checked)}
-						/>
-					</CheckboxCell>
-					<TitleWrapper>Area</TitleWrapper>
-					<Sum>
-						Selected total:&nbsp;
-						{this.getSumValue(this.props.areaMeasurements, MEASURE_TYPE.AREA)}
-					</Sum>
-					<Units sum>{getUnits(this.props.measureUnits, MEASURE_TYPE.AREA)}</Units>
-				</Title>
-				{this.props.areaMeasurements.map((props, index) => (
-					<MeasureItem
-						key={props.uuid}
-						index={index + 1}
-						typeName="Area"
-						units={this.props.measureUnits}
-						removeMeasurement={this.props.removeMeasurement}
-						setMeasurementColor={this.props.setMeasurementColor}
-						setMeasurementCheck={this.props.setMeasurementCheck}
-						{...props}
-					/>
-				))}
-			</div>
+	private renderAreasMeasurements = renderWhenTrue(() => (
+		<MeasurementsList
+			measurements={this.props.areaMeasurements}
+			units={this.props.measureUnits}
+			measureType={MEASURE_TYPE.AREA}
+			setMeasurementCheck={this.props.setMeasurementCheck}
+			setMeasurementCheckAll={this.props.setMeasurementCheckAll}
+			removeMeasurement={this.props.removeMeasurement}
+			setMeasurementColor={this.props.setMeasurementColor}
+		/>
 	));
 
-	public renderLengthsMeasurements = renderWhenTrue(() => (
-			<div>
-				<Title>
-					<CheckboxCell width="50px">
-						<Checkbox
-								onChange={() => this.props.setMeasurementCheckAll(MEASURE_TYPE.LENGTH)}
-								checked={this.props.lengthMeasurements.every(({checked}) => checked)}
-						/>
-					</CheckboxCell>
-					<TitleWrapper>Length</TitleWrapper>
-					<Sum>
-						Selected total:&nbsp;
-						{this.getSumValue(this.props.lengthMeasurements, MEASURE_TYPE.LENGTH)}
-					</Sum>
-					<Units sum>{getUnits(this.props.measureUnits, MEASURE_TYPE.LENGTH)}</Units>
-				</Title>
-				{this.props.lengthMeasurements.map((props, index) => (
-					<MeasureItem
-						key={props.uuid}
-						index={index + 1}
-						typeName="Length"
-						units={this.props.measureUnits}
-						removeMeasurement={this.props.removeMeasurement}
-						setMeasurementColor={this.props.setMeasurementColor}
-						setMeasurementCheck={this.props.setMeasurementCheck}
-						{...props}
-					/>
-				))}
-			</div>
+	private renderLengthsMeasurements = renderWhenTrue(() => (
+		<MeasurementsList
+			measurements={this.props.lengthMeasurements}
+			units={this.props.measureUnits}
+			measureType={MEASURE_TYPE.LENGTH}
+			setMeasurementCheck={this.props.setMeasurementCheck}
+			setMeasurementCheckAll={this.props.setMeasurementCheckAll}
+			removeMeasurement={this.props.removeMeasurement}
+			setMeasurementColor={this.props.setMeasurementColor}
+		/>
 	));
 
-	public renderPointMeasurements = renderWhenTrue(() => (
-			<div>
-				<Title>
-					<TitleWrapper left>Point</TitleWrapper>
-				</Title>
-				{this.props.pointMeasurements.map((props, index) => (
-					<MeasureItem
-						key={props.uuid}
-						index={index + 1}
-						typeName="Point"
-						units={this.props.measureUnits}
-						removeMeasurement={this.props.removeMeasurement}
-						setMeasurementColor={this.props.setMeasurementColor}
-						{...props}
-					/>
-				))}
-			</div>
+	private renderPointMeasurements = renderWhenTrue(() => (
+		<MeasurementsList
+			measurements={this.props.pointMeasurements}
+			units={this.props.measureUnits}
+			measureType={MEASURE_TYPE.POINT}
+			setMeasurementCheck={this.props.setMeasurementCheck}
+			setMeasurementCheckAll={this.props.setMeasurementCheckAll}
+			removeMeasurement={this.props.removeMeasurement}
+			setMeasurementColor={this.props.setMeasurementColor}
+		/>
 	));
 
-	public renderMeasurementDetails = renderWhenTrue(() => (
+	private renderMeasurementDetails = renderWhenTrue(() => (
 		<div>
 			{this.renderPointMeasurements(!isEmpty(this.props.pointMeasurements))}
 			{this.renderLengthsMeasurements(!isEmpty(this.props.lengthMeasurements))}
@@ -241,7 +182,7 @@ export class Measure extends React.PureComponent<IProps, IState> {
 		</div>
 	));
 
-	public renderFooterContent = () => (
+	private renderFooterContent = () => (
 		<ViewerPanelFooter alignItems="center">
 			<ViewerBottomActions>
 				<MeasuringType {...this.props} />
@@ -250,25 +191,25 @@ export class Measure extends React.PureComponent<IProps, IState> {
 	)
 
 	private renderActionsMenu = () => (
-			<MenuList>
-				{MEASURE_ACTIONS_MENU.map(( {name, Icon, label }) => (
-						<StyledListItem key={name} button onClick={this.menuActionsMap[name]}>
-							<IconWrapper><Icon fontSize="small" /></IconWrapper>
-							<StyledItemText>
-								{label}
-								{(name === MEASURE_ACTIONS_ITEMS.EDGE_SNAPPING && this.props.edgeSnappingEnabled) && <Check fontSize="small" />}
-								{(name === MEASURE_ACTIONS_ITEMS.SHOW_XYZ && this.props.XYZdisplay) && <Check fontSize="small" />}
-								{name === MEASURE_ACTIONS_ITEMS.UNITS_DISPLAYED_IN && <strong>{this.props.measureUnits}</strong>}
-							</StyledItemText>
-						</StyledListItem>
-				))}
-			</MenuList>
+		<MenuList>
+			{MEASURE_ACTIONS_MENU.map(( {name, Icon, label }) => (
+				<StyledListItem key={name} button onClick={this.menuActionsMap[name]}>
+					<IconWrapper><Icon fontSize="small" /></IconWrapper>
+					<StyledItemText>
+						{label}
+						{(name === MEASURE_ACTIONS_ITEMS.EDGE_SNAPPING && this.props.edgeSnappingEnabled) && <Check fontSize="small" />}
+						{(name === MEASURE_ACTIONS_ITEMS.SHOW_XYZ && this.props.XYZdisplay) && <Check fontSize="small" />}
+						{name === MEASURE_ACTIONS_ITEMS.UNITS_DISPLAYED_IN && <strong>{this.props.measureUnits}</strong>}
+					</StyledItemText>
+				</StyledListItem>
+			))}
+		</MenuList>
 	)
 
-	public renderActions = () => (
+	private renderActions = () => (
 		<PanelBarActions
 			type={this.type}
-			menuLabel="Show measure menu"
+			menuLabel="Show measurement menu"
 			menuActions={this.renderActionsMenu}
 			hideSearch
 		/>

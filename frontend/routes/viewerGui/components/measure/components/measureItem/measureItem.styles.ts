@@ -15,12 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {cond, constant, matches, stubTrue} from 'lodash';
 import styled, { css } from 'styled-components';
 
-import { TREE_ITEM_FEDERATION_TYPE, TREE_ITEM_MODEL_TYPE, TREE_ITEM_SIZE } from '../../../../../../constants/tree';
+import Checkbox from '@material-ui/core/Checkbox';
+
 import { COLOR } from '../../../../../../styles';
 import { ColorSelect } from '../../../../../components/colorPicker/colorPicker.styles';
+import { CheckboxCell } from '../../../../../components/customTable/customTable.styles';
+import { Name } from '../../../tree/components/treeNode/treeNode.styles';
 
 interface IContainer {
 	nodeType: string;
@@ -32,34 +34,6 @@ interface IContainer {
 	active: boolean;
 	hasFederationRoot: boolean;
 }
-
-const getBackgroundColor = (props) => {
-	if (props.highlighted) {
-		return '#B6C4DE';
-	} else if (props.selected) {
-		return '#D8E6FF';
-	}
-
-	switch (props.nodeType) {
-		case TREE_ITEM_FEDERATION_TYPE:
-			return  COLOR.GRAY_50;
-			break;
-		case TREE_ITEM_MODEL_TYPE:
-			return COLOR.GRAY;
-			break;
-		default:
-			return COLOR.WHITE;
-	}
-};
-
-const containerIndentation = cond([
-	[matches({ nodeType: TREE_ITEM_FEDERATION_TYPE }), constant(38)],
-	[matches({ nodeType: TREE_ITEM_MODEL_TYPE }), constant(20)],
-	[stubTrue, ({ level, hasFederationRoot }) => {
-		const indentation = level * 10;
-		return !hasFederationRoot ? indentation + 10 : indentation;
-	}]
-]);
 
 export const MeasurementPoint = styled.div`
 	width: 100px;
@@ -97,23 +71,33 @@ export const Actions = styled.div`
 	}
 `;
 
-const containerBorder = css`
-	border: 1px solid ${COLOR.DARK_GRAY};
-	border-left-color: transparent;
-	border-top-color: transparent;
-	border-right-color: transparent;
-
-	${({ active }: any) => active ? 'border-color: #757575' : ''};
-`;
-
 export const Container = styled.li<IContainer>`
-	${containerBorder};
-	background-color: ${getBackgroundColor};
-	padding: 2px 12px 2px ${containerIndentation}px;
+	color: ${COLOR.BLACK_60};
+	border-bottom: 1px solid ${COLOR.BLACK_6};
+	background-color: ${COLOR.WHITE};
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	height: ${({ tall }: any) => tall ? '56px' : '40px'};
 	box-sizing: border-box;
 	cursor: pointer;
+
+	&:last-of-type {
+		border-bottom: none;
+	}
+`;
+
+export const StyledCheckbox = styled(Checkbox)`
+	&& {
+		padding: 6px;
+	}
+`;
+
+export const StyledCheckboxCell = styled(CheckboxCell)`
+	padding: 0;
+	margin-left: 36px;
+`;
+
+export const StyledName = styled(Name)`
+	margin-left: ${(props) => props.left ? '78px' : '6px'};
 `;

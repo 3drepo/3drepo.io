@@ -26,7 +26,6 @@ import {
 	VIEWER_PANELS_TITLES
 } from '../../../../constants/viewerGui';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
-import { Container as ItemContainer } from './components/measureItem/measureItem.styles';
 
 export const MeasureIcon = VIEWER_PANELS_ICONS[VIEWER_PANELS.MEASURE];
 
@@ -59,24 +58,4 @@ export const EmptyStateInfo = styled.p`
 	margin: 25px;
 	border-radius: 6px;
 	text-align: center;
-`;
-
-export const Title = styled(ItemContainer)`
-	justify-content: flex-start;
-	font-size: 13px;
-`;
-
-export const Sum = styled.div`
-	text-align: right;
-	flex: 1;
-`;
-
-export const TitleWrapper = styled.h3`
-	align-self: center;
-	font-size: 13px;
-	margin-left: ${(props) => props.left ? '60px' : '12px'};
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	font-weight: normal;
 `;

@@ -17,17 +17,24 @@
 
 import React from 'react';
 
-import { Checkbox } from '@material-ui/core';
 import RemoveIcon from '@material-ui/icons/Close';
 import { cond, matches, stubTrue } from 'lodash';
 
 import { componentToHex, parseHex } from '../../../../../../helpers/colors';
 import { MEASURE_TYPE } from '../../../../../../modules/measure/measure.constants';
 import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
-import { CheckboxCell } from '../../../../../components/customTable/customTable.styles';
 import { SmallIconButton } from '../../../../../components/smallIconButon/smallIconButton.component';
-import { Name as NameText, NameWrapper} from '../../../tree/components/treeNode/treeNode.styles';
-import { Actions, Container, MeasurementPoint, MeasurementValue, Units } from './measureItem.styles';
+import { NameWrapper} from '../../../tree/components/treeNode/treeNode.styles';
+import {
+	Actions,
+	Container,
+	MeasurementPoint,
+	MeasurementValue,
+	StyledCheckbox,
+	StyledCheckboxCell,
+	StyledName,
+	Units,
+} from './measureItem.styles';
 
 export interface IColor {
 	r: number;
@@ -121,13 +128,12 @@ export const MeasureItem = ({
 		<Container tall={Number(type === MEASURE_TYPE.POINT)}>
 			{
 				type !== MEASURE_TYPE.POINT &&
-				<CheckboxCell width="50px">
-					<Checkbox
-						{...props}
+				<StyledCheckboxCell width="36px">
+					<StyledCheckbox
 						onChange={handleCheckChange}
 						checked={checked}
 					/>
-				</CheckboxCell>
+				</StyledCheckboxCell>
 			}
 			<Name left={Number(type === MEASURE_TYPE.POINT)}>
 				{`${typeName} ${index}`}
@@ -162,8 +168,8 @@ export const MeasureItem = ({
 
 export const Name = ({ children, left }) => (
 	<NameWrapper>
-		<NameText left={left}>
+		<StyledName left={left}>
 			{children}
-		</NameText>
+		</StyledName>
 	</NameWrapper>
 );

@@ -123,7 +123,7 @@ export const Container = styled.li<IContainer>`
 export const Name = styled.div<IName>`
 	align-self: center;
 	font-size: 13px;
-	margin-left: ${(props) => props.left ? '60px' : '12px'};
+	margin-left: 60px;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;

@@ -163,15 +163,10 @@ export const setMeasurementCheckAll = (state = INITIAL_STATE, { measureType }) =
 };
 
 export const resetMeasurementColorsSuccess = (state = INITIAL_STATE, {}) => {
-	const resetColor = (measure) => {
-		if (measure.customColor) {
-			measure.customColor = undefined;
-		}
-		return measure;
-	};
-	const areaMeasurements = state.areaMeasurements.map(resetColor);
-	const lengthMeasurements = state.lengthMeasurements.map(resetColor);
-	const pointMeasurements = state.pointMeasurements.map(resetColor);
+	const removeCustomColor = ({ customColor, ...measure }) => measure;
+	const areaMeasurements = state.areaMeasurements.map(removeCustomColor);
+	const lengthMeasurements = state.lengthMeasurements.map(removeCustomColor);
+	const pointMeasurements = state.pointMeasurements.map(removeCustomColor);
 
 	return ({
 		...state,
