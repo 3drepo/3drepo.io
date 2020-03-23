@@ -24,6 +24,12 @@ export const MEASURE_TYPE = {
 	AREA: 1,
 };
 
+export const MEASURE_TYPE_NAME = {
+	[MEASURE_TYPE.POINT]: 'Point',
+	[MEASURE_TYPE.LENGTH]: 'Length',
+	[MEASURE_TYPE.AREA]: 'Area',
+};
+
 export const MEASURING_TYPE = {
 	CSAM: 'Custom surface area measurement',
 	SAM: 'Surface area measurement',

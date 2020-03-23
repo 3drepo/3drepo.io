@@ -80,7 +80,6 @@ export const Container = styled.li<IContainer>`
 	align-items: center;
 	height: ${({ tall }: any) => tall ? '56px' : '40px'};
 	box-sizing: border-box;
-	cursor: pointer;
 
 	&:last-of-type {
 		border-bottom: none;

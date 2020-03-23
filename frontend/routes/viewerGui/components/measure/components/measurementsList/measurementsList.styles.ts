@@ -41,7 +41,6 @@ export const SectionHeader = styled.div`
 	background-color: ${COLOR.WHITE};
 	border-bottom: 1px solid ${COLOR.BLACK_20};
 	height: ${({ tall }: any) => tall ? '56px' : '40px'};
-	cursor: pointer;
 `;
 
 export const Title = styled.h3`

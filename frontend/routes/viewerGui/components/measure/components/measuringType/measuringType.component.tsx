@@ -16,12 +16,10 @@
  */
 
 import React from 'react';
-import {VIEWER_EVENTS} from '../../../../../../constants/viewer';
 
-import { UnityUtil } from '../../../../../../globals/unity-util';
-import {uuid} from '../../../../../../helpers/uuid';
-import {MEASURE_TYPE, MEASURING_MODE} from '../../../../../../modules/measure/measure.constants';
-import {IColor} from '../measureItem/measureItem.component';
+import { VIEWER_EVENTS } from '../../../../../../constants/viewer';
+import { uuid } from '../../../../../../helpers/uuid';
+import { MEASURE_TYPE, MEASURING_MODE } from '../../../../../../modules/measure/measure.constants';
 import { MEASURING_TYPES } from './measuringType.constants';
 import { Icon, Wrapper } from './measuringType.styles';
 
@@ -85,8 +83,11 @@ export const MeasuringType = ({
 	}, [measureMode]);
 
 	const handleMeasuringTypeClick = (mode) => () => {
+		if (mode === measureMode) {
+			setMeasureMode('');
+			return deactivateMeasure();
+		}
 		setMeasureMode(mode);
-		UnityUtil.enableMeasureToolToolbar();
 	};
 
 	return (
