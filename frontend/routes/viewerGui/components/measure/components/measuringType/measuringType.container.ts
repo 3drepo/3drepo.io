@@ -15,4 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { default as MeasuringType } from './measuringType.container';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
+
+import { selectIsActive, BimActions } from '../../../../../../modules/bim';
+import { ViewerGuiActions } from '../../../../../../modules/viewerGui';
+
+import { MeasuringType } from './measuringType.component';
+
+const mapStateToProps = createStructuredSelector({
+	isMetadataActive: selectIsActive,
+});
+
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	setPanelVisibility: ViewerGuiActions.setPanelVisibility,
+	setMetadataActive: BimActions.setIsActive,
+}, dispatch);
+
+export default connect(mapStateToProps, mapDispatchToProps)(MeasuringType);

@@ -111,7 +111,6 @@ export const VIEWER_TOOLBAR_ITEMS = {
 	ISOLATE: 'Isolate',
 	FOCUS: 'Focus',
 	CLIP: 'Clip',
-	MEASURE: 'Measure',
 	COORDVIEW: 'Show Coordinates',
 	BIM: 'BIM'
 };

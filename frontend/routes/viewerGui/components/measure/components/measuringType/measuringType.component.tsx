@@ -18,6 +18,7 @@
 import React from 'react';
 
 import { VIEWER_EVENTS } from '../../../../../../constants/viewer';
+import { VIEWER_PANELS } from '../../../../../../constants/viewerGui';
 import { uuid } from '../../../../../../helpers/uuid';
 import { MEASURE_TYPE, MEASURING_MODE } from '../../../../../../modules/measure/measure.constants';
 import { MEASURING_TYPES } from './measuringType.constants';
@@ -34,10 +35,14 @@ interface IProps {
 	deactivateMeasure: () => void;
 	activateMeasure: () => void;
 	addMeasurement: (measure: any) => void;
+	isMetadataActive: boolean;
+	setMetadataActive: (isActive) => void;
+	setPanelVisibility: (panelName, visibility) => void;
 }
 
 export const MeasuringType = ({
-	activateMeasure, deactivateMeasure, setMeasureMode, measureMode, viewer, addMeasurement
+	activateMeasure, deactivateMeasure, setMeasureMode, measureMode, viewer, addMeasurement, isMetadataActive,
+	setMetadataActive, setPanelVisibility,
 }: IProps) => {
 
 	const handlePickPoint = ({ trans, position }) => {
@@ -63,6 +68,13 @@ export const MeasuringType = ({
 	};
 
 	React.useEffect(() => {
+		if (isMetadataActive) {
+			setMeasureMode('');
+			deactivateMeasure();
+		}
+	}, [isMetadataActive]);
+
+	React.useEffect(() => {
 		if (measureMode === '' || measureMode === MEASURING_MODE.POINT) {
 			deactivateMeasure();
 
@@ -83,10 +95,16 @@ export const MeasuringType = ({
 	}, [measureMode]);
 
 	const handleMeasuringTypeClick = (mode) => () => {
+		if (isMetadataActive) {
+			setMetadataActive(false);
+			setPanelVisibility(VIEWER_PANELS.BIM, false);
+		}
+
 		if (mode === measureMode) {
 			setMeasureMode('');
 			return deactivateMeasure();
 		}
+
 		setMeasureMode(mode);
 	};
 
