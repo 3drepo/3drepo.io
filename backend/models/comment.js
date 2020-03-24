@@ -23,7 +23,6 @@ const View = require("./viewpoint");
 const db = require("../handler/db");
 const FileRef = require("./fileRef");
 
-
 const fieldTypes = {
 	"action": "[object Object]",
 	"comment": "[object String]",
