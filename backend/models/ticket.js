@@ -331,7 +331,13 @@ class Ticket {
 		}
 
 		Object.keys(newTicket).forEach((key) => {
-			if (Object.prototype.toString.call(newTicket[key]) !== this.fieldTypes[key] && this.fieldTypes[key]) {
+			const validTypes = [].concat(this.fieldTypes[key]);
+			const value = newTicket[key];
+			const fieldType = Object.prototype.toString.call(value);
+
+			if (this.fieldTypes[key] && validTypes.every(t => {
+				return (t === "[object Number]" && isNaN(parseFloat(value))) || (t !== "[object Number]" &&  t !== fieldType);
+			})) {
 				if (newTicket[key] === null) {
 					delete newTicket[key];
 				} else {
