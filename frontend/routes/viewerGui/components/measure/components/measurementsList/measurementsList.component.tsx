@@ -32,6 +32,7 @@ interface IProps {
 	setMeasurementCheckAll?: (type) => void;
 	removeMeasurement: (uuid) => void;
 	setMeasurementColor: (uuid, color) => void;
+	setMeasurementName: (uuid, type, name) => void;
 	measureType: number;
 }
 
@@ -47,7 +48,8 @@ const getTotal = (measurements, type, units) => {
 };
 
 export const MeasurementsList = ({
-	measurements, units, measureType, setMeasurementCheck, setMeasurementCheckAll, removeMeasurement, setMeasurementColor
+	measurements, units, measureType, setMeasurementCheck, setMeasurementCheckAll, removeMeasurement,
+	setMeasurementColor, setMeasurementName,
 }: IProps) => {
 	const [expanded, setExpanded] = React.useState(false);
 
@@ -98,6 +100,7 @@ export const MeasurementsList = ({
 							removeMeasurement={removeMeasurement}
 							setMeasurementColor={setMeasurementColor}
 							setMeasurementCheck={setMeasurementCheck}
+							setMeasurementName={setMeasurementName}
 							{...measurement}
 						/>
 					))}

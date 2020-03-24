@@ -35,8 +35,8 @@ export const selectEdgeSnapping = createSelector(
 	selectMeasureDomain, (state) => state.edgeSnapping
 );
 
-export const selectXYZdisplay = createSelector(
-	selectMeasureDomain, (state) => state.XYZdisplay
+export const selectXyzDisplay = createSelector(
+	selectMeasureDomain, (state) => state.xyzDisplay
 );
 
 export const selectAreaMeasurements = createSelector(

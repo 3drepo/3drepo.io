@@ -21,7 +21,7 @@ import { createStructuredSelector } from 'reselect';
 
 import {
 	selectAreaMeasurements, selectEdgeSnapping, selectIsMeasureActive, selectLengthMeasurements,
-	selectMeasureMode, selectMeasureUnits, selectPointMeasurements, selectXYZdisplay, MeasureActions
+	selectMeasureMode, selectMeasureUnits, selectPointMeasurements, selectXyzDisplay, MeasureActions
 } from '../../../../modules/measure';
 import { withViewer } from '../../../../services/viewer/viewer';
 
@@ -35,7 +35,7 @@ const mapStateToProps = createStructuredSelector({
 	measureMode: selectMeasureMode,
 	measureUnits: selectMeasureUnits,
 	edgeSnappingEnabled: selectEdgeSnapping,
-	XYZdisplay: selectXYZdisplay,
+	XYZdisplay: selectXyzDisplay,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -53,6 +53,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setMeasureXYZDisplay: MeasureActions.setMeasureXyzDisplay,
 	setMeasurementCheck: MeasureActions.setMeasurementCheck,
 	setMeasurementCheckAll: MeasureActions.setMeasurementCheckAll,
+	setMeasurementName: MeasureActions.setMeasurementName,
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(Measure));

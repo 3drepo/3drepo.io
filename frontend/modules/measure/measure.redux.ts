@@ -16,7 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { MEASURE_TYPE } from './measure.constants';
+import { MEASURE_TYPE, MEASURE_TYPE_NAME, MEASURE_TYPE_STATE_MAP } from './measure.constants';
 
 export const { Types: MeasureTypes, Creators: MeasureActions } = createActions({
 	activateMeasure: [],
@@ -40,13 +40,28 @@ export const { Types: MeasureTypes, Creators: MeasureActions } = createActions({
 	resetMeasurementColorsSuccess: [],
 	setMeasureEdgeSnapping: ['edgeSnapping'],
 	setMeasureEdgeSnappingSuccess: ['edgeSnapping'],
-	setMeasureXyzDisplay: ['XYZdisplay'],
-	setMeasureXyzDisplaySuccess: ['XYZdisplay'],
+	setMeasureXyzDisplay: ['xyzDisplay'],
+	setMeasureXyzDisplaySuccess: ['xyzDisplay'],
+	setMeasurementName: ['uuid', 'name', 'measureType'],
+	setMeasurementNameSuccess: ['uuid', 'name', 'measureType'],
 	setMeasurementCheck: ['uuid', 'measureType'],
 	setMeasurementCheckAll: ['measureType'],
 }, { prefix: 'MEASURE/' });
 
-export const INITIAL_STATE = {
+export interface IMeasurementState {
+	isDisabled: boolean;
+	isActive: boolean;
+	mode: string;
+	units: string;
+	areaMeasurements: any[];
+	lengthMeasurements: any[];
+	pointMeasurements: any[];
+	edgeSnapping: boolean;
+	xyzDisplay: boolean;
+	editMode: boolean;
+}
+
+export const INITIAL_STATE: IMeasurementState = {
 	isDisabled: false,
 	isActive: false,
 	mode: '',
@@ -55,7 +70,8 @@ export const INITIAL_STATE = {
 	lengthMeasurements: [],
 	pointMeasurements: [],
 	edgeSnapping: true,
-	XYZdisplay: false,
+	xyzDisplay: false,
+	editMode: false,
 };
 
 export const setActiveSuccess = (state = INITIAL_STATE, { isActive }) => ({ ...state, isActive });
@@ -68,7 +84,7 @@ export const setMeasureUnitsSuccess = (state = INITIAL_STATE, { units }) => ({ .
 
 export const setMeasureEdgeSnappingSuccess = (state = INITIAL_STATE, { edgeSnapping }) => ({ ...state, edgeSnapping });
 
-export const setMeasureXyzDisplaySuccess = (state = INITIAL_STATE, { XYZdisplay }) => ({ ...state, XYZdisplay });
+export const setMeasureXyzDisplaySuccess = (state = INITIAL_STATE, { xyzDisplay }) => ({ ...state, xyzDisplay });
 
 export const clearMeasurementsSuccess  = (state = INITIAL_STATE) => ({
 	...state,
@@ -85,18 +101,31 @@ export const removeMeasurementSuccess = (state = INITIAL_STATE, { uuid }) => ({
 });
 
 export const addMeasurement = (state = INITIAL_STATE, { measurement }) => {
-	measurement.checked = true;
-	measurement.color.r = measurement.color.r * 255;
-	measurement.color.g = measurement.color.g * 255;
-	measurement.color.b = measurement.color.b * 255;
+	const measurementStateName = MEASURE_TYPE_STATE_MAP[measurement.type];
 
-	if (measurement.type === MEASURE_TYPE.AREA) {
-		return ({ ...state, areaMeasurements: [...state.areaMeasurements, measurement]});
-	} else if (measurement.type === MEASURE_TYPE.LENGTH) {
-		return ({ ...state, lengthMeasurements: [...state.lengthMeasurements, measurement]});
-	} else if (measurement.type === MEASURE_TYPE.POINT) {
-		return ({ ...state, pointMeasurements: [...state.pointMeasurements, measurement]});
+	if (measurementStateName) {
+		const index = state[measurementStateName].length + 1;
+		measurement.name = `${MEASURE_TYPE_NAME[measurement.type]} ${index}`;
+		measurement.checked = true;
+		measurement.color.r = measurement.color.r * 255;
+		measurement.color.g = measurement.color.g * 255;
+		measurement.color.b = measurement.color.b * 255;
+
+		return ({ ...state, [measurementStateName]: [...state[measurementStateName], measurement]});
 	}
+
+	return ({ ...state });
+};
+
+export const setMeasurementNameSuccess = (state = INITIAL_STATE, { uuid, name, measureType }) => {
+	const measurementStateName = MEASURE_TYPE_STATE_MAP[measureType];
+
+	if (measurementStateName) {
+		const searchedMeasurement = state[measurementStateName].find((measure) => measure.uuid === uuid);
+		searchedMeasurement.name = name;
+		return ({ ...state, [measurementStateName]: [...state[measurementStateName]]});
+	}
+
 	return ({ ...state });
 };
 
@@ -115,6 +144,7 @@ export const setMeasurementColorSuccess = (state = INITIAL_STATE, { uuid, color 
 		pointMeasurement.customColor = color;
 		return ({ ...state, pointMeasurements: [...state.pointMeasurements]});
 	}
+
 	return ({ ...state });
 };
 
@@ -190,4 +220,5 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[MeasureTypes.SET_MEASURE_XYZ_DISPLAY_SUCCESS]: setMeasureXyzDisplaySuccess,
 	[MeasureTypes.SET_MEASUREMENT_CHECK]: setMeasurementCheck,
 	[MeasureTypes.SET_MEASUREMENT_CHECK_ALL]: setMeasurementCheckAll,
+	[MeasureTypes.SET_MEASUREMENT_NAME_SUCCESS]: setMeasurementNameSuccess,
 });

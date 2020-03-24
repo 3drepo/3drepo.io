@@ -61,6 +61,7 @@ interface IProps {
 	clearMeasurements: () => void;
 	setMeasureMode: (mode) => void;
 	measureMode: string;
+	setMeasurementName: (uuid, type, name) => void;
 	setMeasurementColor: (uuid, color) => void;
 	resetMeasurementColors: () => void;
 	measureUnits: string;
@@ -147,6 +148,7 @@ export class Measure extends React.PureComponent<IProps, IState> {
 			setMeasurementCheckAll={this.props.setMeasurementCheckAll}
 			removeMeasurement={this.props.removeMeasurement}
 			setMeasurementColor={this.props.setMeasurementColor}
+			setMeasurementName={this.props.setMeasurementName}
 		/>
 	));
 
@@ -159,6 +161,7 @@ export class Measure extends React.PureComponent<IProps, IState> {
 			setMeasurementCheckAll={this.props.setMeasurementCheckAll}
 			removeMeasurement={this.props.removeMeasurement}
 			setMeasurementColor={this.props.setMeasurementColor}
+			setMeasurementName={this.props.setMeasurementName}
 		/>
 	));
 
@@ -171,6 +174,7 @@ export class Measure extends React.PureComponent<IProps, IState> {
 			setMeasurementCheckAll={this.props.setMeasurementCheckAll}
 			removeMeasurement={this.props.removeMeasurement}
 			setMeasurementColor={this.props.setMeasurementColor}
+			setMeasurementName={this.props.setMeasurementName}
 		/>
 	));
 

@@ -51,6 +51,7 @@ interface IPosition {
 
 export interface IMeasure {
 	uuid: string;
+	name: string;
 	positions?: IPosition[];
 	position?: number[];
 	value: number;
@@ -67,6 +68,7 @@ interface IProps extends IMeasure {
 	units: string;
 	setMeasurementColor: (uuid, color) => void;
 	setMeasurementCheck?: (uuid, type) => void;
+	setMeasurementName: (uuid, type, name) => void;
 }
 
 export const getValue = (value: number, units: string, type: number) => {
@@ -101,7 +103,7 @@ export const getUnits = (units: string, type: number) => {
 };
 
 export const MeasureItem = ({
-	uuid, index, typeName, value, units, color, removeMeasurement, type, position, customColor, checked, ...props
+	uuid, index, name, typeName, value, units, color, removeMeasurement, type, position, customColor, checked, ...props
 }: IProps) => {
 	const handleRemoveMeasurement = () => {
 		removeMeasurement(uuid);
@@ -136,7 +138,7 @@ export const MeasureItem = ({
 				</StyledCheckboxCell>
 			}
 			<Name left={Number(type === MEASURE_TYPE.POINT)}>
-				{`${typeName} ${index}`}
+				{name}
 			</Name>
 			<Actions>
 				{

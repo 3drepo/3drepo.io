@@ -26,7 +26,7 @@ import {
 	MeasureActions,
 	MeasureTypes
 } from './';
-import {MEASURING_MODE} from './measure.constants';
+import { MEASURING_MODE } from './measure.constants';
 
 export function* activateMeasure() {
 	try {
@@ -122,6 +122,15 @@ export function* setMeasurementColor({ uuid, color }) {
 	}
 }
 
+export function* setMeasurementName({ uuid, name, measureType }) {
+	try {
+		// yield Viewer.setMeasurementName(uuid, name);
+		yield put(MeasureActions.setMeasurementColorSuccess(uuid, name, measureType));
+	} catch (error) {
+		DialogActions.showErrorDialog('set name', 'measure', error);
+	}
+}
+
 export function* resetMeasurementColors() {
 	try {
 		const areaMeasurements = yield select(selectAreaMeasurements);
@@ -164,14 +173,14 @@ export function* setMeasureEdgeSnapping({ edgeSnapping }) {
 	}
 }
 
-export function* setMeasureXyzDisplay({ XYZdisplay }) {
+export function* setMeasureXyzDisplay({ xyzDisplay }) {
 	try {
-		if (XYZdisplay) {
+		if (xyzDisplay) {
 			yield Viewer.enableMeasureXYZDisplay();
 		} else {
 			yield Viewer.disableMeasureXYZDisplay();
 		}
-		yield put(MeasureActions.setMeasureXyzDisplaySuccess(XYZdisplay));
+		yield put(MeasureActions.setMeasureXyzDisplaySuccess(xyzDisplay));
 	} catch (error) {
 		DialogActions.showErrorDialog('set XYZ display', 'measure', error);
 	}
@@ -199,4 +208,5 @@ export default function* MeasureSaga() {
 	yield takeLatest(MeasureTypes.RESET_MEASUREMENT_COLORS, resetMeasurementColors);
 	yield takeLatest(MeasureTypes.SET_MEASURE_EDGE_SNAPPING, setMeasureEdgeSnapping);
 	yield takeLatest(MeasureTypes.SET_MEASURE_XYZ_DISPLAY, setMeasureXyzDisplay);
+	yield takeLatest(MeasureTypes.SET_MEASUREMENT_NAME, setMeasurementName);
 }
