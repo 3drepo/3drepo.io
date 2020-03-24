@@ -25,6 +25,7 @@ const nodeuuid = require("uuid/v1");
 
 const ORIGINAL_FILE_REF_EXT = ".history.ref";
 const UNITY_BUNDLE_REF_EXT = ".stash.unity3d.ref";
+const STATE_FILE_REF_EXT = ".sequences.ref";
 const JSON_FILE_REF_EXT = ".stash.json_mpc.ref";
 const RESOURCES_FILE_REF_EXT = ".resources.ref";
 
@@ -58,7 +59,7 @@ function fetchFile(account, model, ext, fileName, metadata = false) {
 			});
 
 			// Temporary fall back - read from gridfs
-			const fullName = ext === ORIGINAL_FILE_REF_EXT ?
+			const fullName = (ext === ORIGINAL_FILE_REF_EXT || ext === STATE_FILE_REF_EXT) ?
 				fileName :
 				`/${account}/${model}/${fileName.split("/").length > 1 ? "revision/" : ""}${fileName}`;
 			return ExternalServices.getFile(account, collection, "gridfs", fullName);
@@ -167,6 +168,10 @@ FileRef.getTotalModelFileSize = function(account, model) {
 
 FileRef.getUnityBundle = function(account, model, fileName) {
 	return fetchFile(account, model, UNITY_BUNDLE_REF_EXT, fileName);
+};
+
+FileRef.getSequenceStateFile = function(account, model, fileName) {
+	return fetchFile(account, model, STATE_FILE_REF_EXT, fileName);
 };
 
 FileRef.getJSONFile = function(account, model, fileName) {

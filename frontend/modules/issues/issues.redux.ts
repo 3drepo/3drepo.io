@@ -209,7 +209,7 @@ const removeResourceSuccess =  (state = INITIAL_STATE, { resource, issueId }) =>
 };
 
 const attachResourcesSuccess = (state = INITIAL_STATE, { resources, issueId }) => {
-	resources = resources.concat(state.issuesMap[issueId].resources);
+	resources = resources.concat(state.issuesMap[issueId].resources || []);
 	const issuesMap = updateIssueProps(state.issuesMap, issueId, { resources });
 	return { ...state, issuesMap};
 };

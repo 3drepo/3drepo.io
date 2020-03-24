@@ -530,10 +530,19 @@ export class ViewerService {
 		return this.currentNavMode;
 	}
 
+	public async overrideMeshOpacity(account, model, meshIDs, opacity) {
+		await this.isViewerReady();
+		UnityUtil.overrideMeshOpacity(account, model, meshIDs, opacity);
+	}
+
+	public async resetMeshOpacity(account, model, meshIDs) {
+		await this.isViewerReady();
+		UnityUtil.resetMeshOpacity(account, model, meshIDs);
+	}
+
 	/**
 	 * Fullscreen
 	 */
-
 	public switchFullScreen() {
 		if (!this.fullscreen) {
 			if (this.viewer.hasOwnProperty('mozRequestFullScreen')) {

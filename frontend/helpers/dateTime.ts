@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,15 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import { formatDate } from '../../../services/formatting/formatDate';
+export const MILLI_PER_DAY = 1000 * 60 * 60 * 24;
 
-interface IProps {
-	value: any;
-	format?: string;
-}
+export const getDays = (min, max) => {
+	const maxDate = new Date(max).setHours(0, 0, 0, 0);
+	const minDate = new Date(min).setHours(0, 0, 0, 0);
+	return  Math.round((maxDate - minDate) / MILLI_PER_DAY);
+};
 
-export const DateTime = (props: IProps) => {
-	const formattedDateString = formatDate(props.value, props.format);
-	return <>{formattedDateString}</>;
+export const getDate = (base, days) => {
+	const baseDate = new Date(base).setHours(0, 0, 0, 0);
+	return new Date(baseDate.valueOf() + days * MILLI_PER_DAY);
 };

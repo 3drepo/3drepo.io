@@ -15,15 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import { formatDate } from '../../../services/formatting/formatDate';
+import api from './';
 
-interface IProps {
-	value: any;
-	format?: string;
-}
+/**
+ * Get sequences list
+ *
+ * @param teamspace
+ * @returns {*|promise}
+ */
+export const getSequences = (teamspace, modelId, revision): Promise<any> => {
+	return api.get(`${teamspace}/${modelId}/revision/${revision}/sequences`);
+};
 
-export const DateTime = (props: IProps) => {
-	const formattedDateString = formatDate(props.value, props.format);
-	return <>{formattedDateString}</>;
+export const getSequenceState = (teamspace, modelId, revision, sequenceId, stateId): Promise<any> => {
+	return api.get(`${teamspace}/${modelId}/revision/${revision}/sequences/${sequenceId}/state/${stateId}`);
 };

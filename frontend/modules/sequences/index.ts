@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,15 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import { formatDate } from '../../../services/formatting/formatDate';
+export {
+	SequencesTypes,
+	SequencesActions
+} from './sequences.redux';
 
-interface IProps {
-	value: any;
-	format?: string;
-}
-
-export const DateTime = (props: IProps) => {
-	const formattedDateString = formatDate(props.value, props.format);
-	return <>{formattedDateString}</>;
-};
+export * from './sequences.selectors';
