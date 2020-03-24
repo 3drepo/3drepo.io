@@ -755,15 +755,18 @@ export class Viewer {
 
 	public overrideMeshColor(account, model, meshIDs, color) {
 		UnityUtil.overrideMeshColor(account, model, meshIDs, color);
-
-		if (color.length > 3) {
-			UnityUtil.overrideMeshOpacity(account, model, meshIDs, color[3]);
-		}
 	}
 
 	public resetMeshColor(account, model, meshIDs) {
-		UnityUtil.resetMeshOpacity(account, model, meshIDs);
 		UnityUtil.resetMeshColor(account, model, meshIDs);
+	}
+
+	public overrideMeshOpacity(account, model, meshIDs, opacity) {
+		UnityUtil.overrideMeshOpacity(account, model, meshIDs, opacity);
+	}
+
+	public resetMeshOpacity(account, model, meshIDs) {
+		UnityUtil.resetMeshOpacity(account, model, meshIDs);
 	}
 
 	// Navigation

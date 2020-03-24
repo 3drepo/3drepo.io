@@ -35,6 +35,7 @@ import { MeasureActions } from '../measure';
 import { selectCurrentRevisionId, selectSettings, ModelActions, ModelTypes } from '../model';
 import { selectRisksMap, RisksActions } from '../risks';
 import { selectUrlParams } from '../router/router.selectors';
+import { SequencesActions } from '../sequences';
 import { StarredActions } from '../starred';
 import { dispatch } from '../store';
 import { TreeActions } from '../tree';
@@ -89,7 +90,8 @@ function* resetPanelsStates() {
 			put(CompareActions.resetComponentState()),
 			put(BimActions.resetBimState()),
 			put(ViewerGuiActions.resetPanels()),
-			put(GisActions.resetLayers()),
+			put(SequencesActions.reset()),
+			put(GisActions.resetLayers())
 		]);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('reset', 'panels data', error));

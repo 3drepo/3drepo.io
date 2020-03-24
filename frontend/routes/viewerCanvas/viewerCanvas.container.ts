@@ -20,15 +20,16 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { selectGisLayers } from '../../modules/gis';
-import { selectOverrides, } from '../../modules/groups';
 import { selectPins as selectIssuePins } from '../../modules/issues';
 import { selectGISCoordinates, selectHasGISCoordinates } from '../../modules/model';
 import { selectPins as selectRiskPins } from '../../modules/risks';
+import { selectAllTransparencyOverrides, selectColorOverrides, TreeActions } from '../../modules/tree';
 import { withViewer } from '../../services/viewer/viewer';
 import { ViewerCanvas } from './viewerCanvas.component';
 
 const mapStateToProps = createStructuredSelector({
-	colorOverrides: selectOverrides,
+	colorOverrides: selectColorOverrides,
+	transparencies: selectAllTransparencyOverrides,
 	issuePins: selectIssuePins,
 	riskPins: selectRiskPins,
 	gisCoordinates: selectGISCoordinates,
@@ -37,6 +38,7 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	handleTransparencyOverridesChange: TreeActions.handleTransparencyOverridesChange
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(ViewerCanvas));

@@ -18,7 +18,7 @@
 import { difference, isEqual } from 'lodash';
 import React from 'react';
 import { ROUTES } from '../../constants/routes';
-import { addColorOverrides, overridesDiff, removeColorOverrides } from '../../helpers/colorOverrides';
+import { addColorOverrides, overridesColorDiff, removeColorOverrides } from '../../helpers/colorOverrides';
 import { pinsDiff } from '../../helpers/pins';
 import { Container } from './viewerCanvas.styles';
 
@@ -34,12 +34,14 @@ interface IProps {
 		}
 	};
 	colorOverrides: any;
+	transparencies: any;
 	issuePins: any[];
 	riskPins: any[];
 
 	gisLayers: string[];
 	hasGisCoordinates: boolean;
 	gisCoordinates: any;
+	handleTransparencyOverridesChange: any;
 }
 
 export class ViewerCanvas extends React.PureComponent<IProps, any> {
@@ -75,8 +77,8 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 	}
 
 	public renderColorOverrides(prev, curr) {
-		const toAdd = overridesDiff(curr, prev);
-		const toRemove = overridesDiff(prev, curr);
+		const toAdd = overridesColorDiff(curr, prev);
+		const toRemove = overridesColorDiff(prev, curr);
 
 		removeColorOverrides(toRemove);
 		addColorOverrides(toAdd);
@@ -101,10 +103,15 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 	}
 
 	public componentDidUpdate(prevProps: IProps) {
-		const { colorOverrides, issuePins, riskPins, hasGisCoordinates, gisCoordinates, gisLayers } = this.props;
+		const { colorOverrides, issuePins, riskPins, hasGisCoordinates,
+			gisCoordinates, gisLayers, transparencies } = this.props;
 
 		if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
 			this.renderColorOverrides(prevProps.colorOverrides, colorOverrides);
+		}
+
+		if (prevProps.transparencies && !isEqual(transparencies, prevProps.transparencies)) {
+			this.props.handleTransparencyOverridesChange(transparencies, prevProps.transparencies);
 		}
 
 		if (!isEqual(issuePins, prevProps.issuePins)) {
@@ -122,6 +129,7 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 		if (hasGisCoordinates && !isEqual(prevProps.gisLayers, gisLayers)) {
 			this.renderGisLayers(prevProps.gisLayers, gisLayers);
 		}
+
 	}
 
 	public render() {
