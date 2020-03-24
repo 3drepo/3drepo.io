@@ -54,19 +54,14 @@ class TextCommentGenerator extends CommentGenerator {
 		super(owner);
 
 		if (fieldTypes.comment === Object.prototype.toString.call(commentText)) {
-			if (commentText.length > 0 || (viewpoint &&
-				fieldTypes.screenshot === Object.prototype.toString.call(viewpoint.screenshot))) {
-				this.comment = commentText;
+			this.comment = commentText;
 
-				if (viewpoint && viewpoint.guid) {
-					this.viewpoint = viewpoint.guid;
-				}
+			if (viewpoint && viewpoint.guid) {
+				this.viewpoint = viewpoint.guid;
+			}
 
-				if (pinPosition && fieldTypes.pinPosition === Object.prototype.toString.call(pinPosition)) {
-					this.pinPosition = pinPosition;
-				}
-			} else {
-				throw responseCodes.ISSUE_COMMENT_NO_TEXT;
+			if (pinPosition && fieldTypes.pinPosition === Object.prototype.toString.call(pinPosition)) {
+				this.pinPosition = pinPosition;
 			}
 		} else {
 			throw responseCodes.INVALID_ARGUMENTS;
@@ -114,7 +109,7 @@ class MitigationCommentGenerator extends TextCommentGenerator {
 }
 
 const addComment = async function(account, model, colName, id, user, data) {
-	if ((!data.comment || !data.comment.trim()) && !get(data,"viewpoint.screenshot")) {
+	if (!(data.comment || "").trim() && !get(data,"viewpoint.screenshot")) {
 		throw { resCode: responseCodes.ISSUE_COMMENT_NO_TEXT};
 	}
 
@@ -136,8 +131,11 @@ const addComment = async function(account, model, colName, id, user, data) {
 	if (data.viewpoint) {
 		viewpoint = View.clean(data.viewpoint, fieldTypes.viewpoint);
 		viewpoint.guid = utils.generateUUID();
-		viewpoint.screenshot = new Buffer.from(viewpoint.screenshot, "base64");
-		await View.setExternalScreenshotRef(viewpoint, account, model, colName);
+
+		if (viewpoint.screenshot) {
+			viewpoint.screenshot = new Buffer.from(viewpoint.screenshot, "base64");
+			await View.setExternalScreenshotRef(viewpoint, account, model, colName);
+		}
 	}
 
 	const comment = new TextCommentGenerator(user, data.comment, viewpoint);
