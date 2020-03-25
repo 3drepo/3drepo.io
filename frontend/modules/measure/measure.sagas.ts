@@ -195,6 +195,14 @@ export function* clearMeasurements() {
 	}
 }
 
+export function* resetMeasurementTool() {
+	try {
+		yield put(MeasureActions.resetMeasurementToolSuccess());
+	} catch (error) {
+		DialogActions.showErrorDialog('reset', 'measurements tool', error);
+	}
+}
+
 export default function* MeasureSaga() {
 	yield takeLatest(MeasureTypes.ACTIVATE_MEASURE, activateMeasure);
 	yield takeLatest(MeasureTypes.DEACTIVATE_MEASURE, deactivateMeasure);
@@ -209,4 +217,5 @@ export default function* MeasureSaga() {
 	yield takeLatest(MeasureTypes.SET_MEASURE_EDGE_SNAPPING, setMeasureEdgeSnapping);
 	yield takeLatest(MeasureTypes.SET_MEASURE_XYZ_DISPLAY, setMeasureXyzDisplay);
 	yield takeLatest(MeasureTypes.SET_MEASUREMENT_NAME, setMeasurementName);
+	yield takeLatest(MeasureTypes.RESET_MEASUREMENT_TOOL, resetMeasurementTool);
 }

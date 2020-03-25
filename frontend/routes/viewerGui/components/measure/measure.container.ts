@@ -54,6 +54,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setMeasurementCheck: MeasureActions.setMeasurementCheck,
 	setMeasurementCheckAll: MeasureActions.setMeasurementCheckAll,
 	setMeasurementName: MeasureActions.setMeasurementName,
+	resetMeasurementTool: MeasureActions.resetMeasurementTool,
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(Measure));

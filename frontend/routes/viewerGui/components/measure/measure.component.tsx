@@ -72,6 +72,7 @@ interface IProps {
 	XYZdisplay: boolean;
 	setMeasurementCheck: (uuid, type) => void;
 	setMeasurementCheckAll: (type) => void;
+	resetMeasurementTool: () => void;
 }
 
 interface IState {
@@ -108,6 +109,7 @@ export class Measure extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentWillUnmount = () => {
+		this.props.resetMeasurementTool();
 		this.toggleMeasureListeners(false);
 	}
 

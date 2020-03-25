@@ -46,6 +46,8 @@ export const { Types: MeasureTypes, Creators: MeasureActions } = createActions({
 	setMeasurementNameSuccess: ['uuid', 'name', 'measureType'],
 	setMeasurementCheck: ['uuid', 'measureType'],
 	setMeasurementCheckAll: ['measureType'],
+	resetMeasurementTool: [],
+	resetMeasurementToolSuccess: [],
 }, { prefix: 'MEASURE/' });
 
 export interface IMeasurementState {
@@ -83,6 +85,8 @@ export const setMeasureUnitsSuccess = (state = INITIAL_STATE, { units }) => ({ .
 export const setMeasureEdgeSnappingSuccess = (state = INITIAL_STATE, { edgeSnapping }) => ({ ...state, edgeSnapping });
 
 export const setMeasureXyzDisplaySuccess = (state = INITIAL_STATE, { xyzDisplay }) => ({ ...state, xyzDisplay });
+
+export const resetMeasurementToolSuccess = () => ({ ...INITIAL_STATE });
 
 export const clearMeasurementsSuccess  = (state = INITIAL_STATE) => ({
 	...state,
@@ -219,4 +223,5 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[MeasureTypes.SET_MEASUREMENT_CHECK]: setMeasurementCheck,
 	[MeasureTypes.SET_MEASUREMENT_CHECK_ALL]: setMeasurementCheckAll,
 	[MeasureTypes.SET_MEASUREMENT_NAME_SUCCESS]: setMeasurementNameSuccess,
+	[MeasureTypes.RESET_MEASUREMENT_TOOL_SUCCESS]: resetMeasurementToolSuccess,
 });

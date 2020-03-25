@@ -24,7 +24,6 @@ import { componentToHex, parseHex } from '../../../../../../helpers/colors';
 import { MEASURE_TYPE } from '../../../../../../modules/measure/measure.constants';
 import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
 import { SmallIconButton } from '../../../../../components/smallIconButon/smallIconButton.component';
-import { NameWrapper} from '../../../tree/components/treeNode/treeNode.styles';
 import { StyledForm } from '../../../views/components/viewItem/viewItem.styles';
 import {
 	Actions,
@@ -33,9 +32,7 @@ import {
 	MeasurementValue,
 	StyledCheckbox,
 	StyledCheckboxCell,
-	StyledName,
 	StyledTextField,
-	Units,
 } from './measureItem.styles';
 
 export interface IColor {
