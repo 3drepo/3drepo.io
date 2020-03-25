@@ -165,11 +165,10 @@ export const MeasureItem = ({
 					typeName === 'Point' ?
 					<>
 						<div>
-							<MeasurementPoint>x: {getValue(position[0], units, type)}</MeasurementPoint>
-							<MeasurementPoint>y: {getValue(position[1], units, type)}</MeasurementPoint>
-							<MeasurementPoint>z: {getValue(position[2], units, type)}</MeasurementPoint>
+							<MeasurementPoint>x: {getValue(position[0], units, type)} {getUnits(units, type)}</MeasurementPoint>
+							<MeasurementPoint>y: {getValue(position[1], units, type)} {getUnits(units, type)}</MeasurementPoint>
+							<MeasurementPoint>z: {getValue(position[2], units, type)} {getUnits(units, type)}</MeasurementPoint>
 						</div>
-						<Units>{getUnits(units, type)}</Units>
 					</>
 					: <MeasurementValue>{getValue(value, units, type)} {getUnits(units, type)}</MeasurementValue>
 				}

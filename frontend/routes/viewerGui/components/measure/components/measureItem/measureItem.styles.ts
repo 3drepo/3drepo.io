@@ -38,7 +38,9 @@ interface IContainer {
 }
 
 export const MeasurementPoint = styled.div`
-	width: 100px;
+	width: 120px;
+	text-align: right;
+	padding-right: 10px;
 `;
 
 const sumUnitsStyle = css`
