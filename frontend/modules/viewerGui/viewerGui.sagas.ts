@@ -217,11 +217,11 @@ function* updateClipState({clipNumber}) {
 
 		if (currentClipNumber !== clipNumber) {
 			yield put(ViewerGuiActions.setClipNumber(clipNumber));
-		}
 
-		if (clipNumber === 0 && isClipEdit) {
-			yield put(ViewerGuiActions.setClipEdit(false));
-			yield put(ViewerGuiActions.setClippingMode(null));
+			if (clipNumber === 0 && isClipEdit) {
+				yield put(ViewerGuiActions.setClipEdit(false));
+				yield put(ViewerGuiActions.setClippingMode(null));
+			}
 		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'clip state', error));
@@ -346,30 +346,13 @@ function* setCamera({ params }) {
 	}
 }
 
-function* changePinColor({ params }) {
-	try {
-		const { id, colours } = params;
-		Viewer.changePinColor({ id, colours });
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('change', 'pin colour', error));
-	}
-}
-
-function* removeUnsavedPin() {
-	try {
-		Viewer.removePin({ id: NEW_PIN_ID });
-		yield put(ViewerGuiActions.setPinData(null));
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('remove', 'unsaved pin', error));
-	}
-}
-
 function* loadModel() {
 	try {
 		const { teamspace, model } = yield select(selectUrlParams);
 		const revision = yield select(selectCurrentRevisionId);
 		const modelSettings = yield select(selectSettings);
 
+		yield Viewer.isViewerReady();
 		yield Viewer.loadViewerModel(teamspace, model, 'master', revision || 'head');
 		yield Viewer.updateViewerSettings(modelSettings);
 	} catch (error) {
@@ -417,8 +400,6 @@ export default function* ViewerGuiSaga() {
 	yield takeLatest(ViewerGuiTypes.STOP_LISTEN_ON_NUM_CLIP, stopListenOnNumClip);
 	yield takeLatest(ViewerGuiTypes.CLEAR_HIGHLIGHTS, clearHighlights);
 	yield takeLatest(ViewerGuiTypes.SET_CAMERA, setCamera);
-	yield takeLatest(ViewerGuiTypes.CHANGE_PIN_COLOR, changePinColor);
-	yield takeLatest(ViewerGuiTypes.REMOVE_UNSAVED_PIN, removeUnsavedPin);
 	yield takeLatest(ViewerGuiTypes.LOAD_MODEL, loadModel);
 	yield takeLatest(ViewerGuiTypes.SET_IS_PIN_DROP_MODE, setIsPinDropMode);
 }

@@ -18,11 +18,11 @@ import { delay } from 'redux-saga';
 import { all, call, put, select, take, takeLatest } from 'redux-saga/effects';
 
 import { VIEWER_EVENTS } from '../../constants/viewer';
-import { dispatch } from '../../modules/store';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { DialogActions } from '../dialog';
 import { GroupsActions } from '../groups';
+import { dispatch } from '../store';
 import {
 	selectActiveNode,
 	selectDefaultHiddenNodesIds,
@@ -53,11 +53,7 @@ const unhighlightObjects = (objects = []) => {
 	for (let index = 0, size = objects.length; index < size; index++) {
 		const { meshes, teamspace, modelId } = objects[index];
 
-		Viewer.unhighlightObjects({
-			account: teamspace,
-			model: modelId,
-			ids: meshes
-		});
+		Viewer.unhighlightObjects(teamspace, modelId, meshes);
 	}
 };
 
@@ -68,15 +64,7 @@ const highlightObjects = (objects = [], nodesSelectionMap = {}, colour?) => {
 		const { meshes, teamspace, modelId } = objects[index];
 		const filteredMeshes = meshes.filter((mesh) => nodesSelectionMap[mesh] === SELECTION_STATES.SELECTED);
 		if (filteredMeshes.length) {
-			promises.push(Viewer.highlightObjects({
-				account: teamspace,
-				ids: filteredMeshes,
-				colour,
-				model: modelId,
-				multi: true,
-				source: 'tree',
-				forceReHighlight: true
-			}));
+			promises.push(Viewer.highlightObjects(teamspace, modelId, colour, true, true, filteredMeshes));
 		}
 	}
 	return Promise.all(promises);

@@ -33,7 +33,11 @@ class TreeProcessing {
 
 	public updateVisibility = (payload) => this.processing.updateVisibility(payload);
 
-	public showAllNodes = (ifcSpacesHidden) => this.processing.showAllNodes(ifcSpacesHidden);
+	public showAllNodes = (ifcSpacesHidden) => {
+		if (this.processing && this.processing.showAllNodes) {
+			return this.processing.showAllNodes(ifcSpacesHidden);
+		}
+	}
 
 	public isolateNodes = (payload) => this.processing.isolateNodes(payload);
 

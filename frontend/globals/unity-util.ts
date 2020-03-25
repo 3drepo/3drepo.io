@@ -1,19 +1,19 @@
 /*
- * Copyright (C) 2017 3D Repo Ltd
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+* Copyright (C) 2017 3D Repo Ltd
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU Affero General Public License as
+* published by the Free Software Foundation, either version 3 of the
+* License, or (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU Affero General Public License for more details.
+*
+* You should have received a copy of the GNU Affero General Public License
+* along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
 declare var Module;
 declare var SendMessage;
 declare var UnityLoader;
@@ -483,7 +483,7 @@ export class UnityUtil {
 	 * @param id - ID of the pin
 	 * @param colour - colour RGB value of the colour to change to. e.g. [1, 0, 0]
 	 */
-	public static changePinColour(id: string, colour: [number]) {
+	public static changePinColour(id: string, colour: number[]) {
 		const params = {
 			color : colour,
 			pinName : id
@@ -681,7 +681,7 @@ export class UnityUtil {
 	 * @param normal - normal vector for the pin (note: this is no longer used)
 	 * @param colour - RGB value for the colour of the pin
 	 */
-	public static dropRiskPin(id: string, position: [number], normal: [number], colour: [number]) {
+	public static dropRiskPin(id: string, position: number[], normal: number[], colour: number[]) {
 		const params = {
 			id,
 			position,
@@ -699,7 +699,7 @@ export class UnityUtil {
 	 * @param normal - normal vector for the pin (note: this is no longer used)
 	 * @param colour - RGB value for the colour of the pin
 	 */
-	public static dropIssuePin(id: string, position: [number], normal: [number], colour: [number]) {
+	public static dropIssuePin(id: string, position: number[], normal: number[], colour: number[]) {
 		const params = {
 			id,
 			position,

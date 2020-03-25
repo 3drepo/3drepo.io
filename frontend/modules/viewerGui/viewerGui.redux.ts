@@ -58,8 +58,6 @@ export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActio
 	deactivateMeasure: [],
 	clearHighlights: [],
 	setCamera: ['params'],
-	changePinColor: ['params'],
-	removeUnsavedPin: [],
 	resetPanels: []
 }, { prefix: 'VIEWER_GUI/' });
 

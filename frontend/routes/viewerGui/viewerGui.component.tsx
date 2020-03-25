@@ -60,7 +60,6 @@ interface IProps {
 	stopListenOnModelLoaded: () => void;
 	stopListenOnClickPin: () => void;
 	fetchData: (teamspace, model) => void;
-	loadModel: () => void;
 	resetPanelsStates: () => void;
 	resetModel: () => void;
 	setPanelVisibility: (panelName, visibility?) => void;
@@ -190,7 +189,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		<LeftPanels>
 			{panels.map((panel) => {
 				const PanelComponent = this.panelsMap[panel];
-				return <PanelComponent key={panel} {...this.urlParams} />;
+				return PanelComponent && <PanelComponent key={panel} {...this.urlParams} />;
 			})}
 		</LeftPanels>
 	)

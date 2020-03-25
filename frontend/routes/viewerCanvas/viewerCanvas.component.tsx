@@ -15,8 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { difference, isEqual } from 'lodash';
 import React from 'react';
+
+import { difference, isEqual } from 'lodash';
+
 import { ROUTES } from '../../constants/routes';
 import { addColorOverrides, overridesColorDiff, removeColorOverrides } from '../../helpers/colorOverrides';
 import { pinsDiff } from '../../helpers/pins';
@@ -37,7 +39,6 @@ interface IProps {
 	transparencies: any;
 	issuePins: any[];
 	riskPins: any[];
-
 	gisLayers: string[];
 	hasGisCoordinates: boolean;
 	gisCoordinates: any;
@@ -67,13 +68,15 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 	}
 
 	public renderPins(prev, curr) {
-		const { viewer } = this.props;
+		if (this.shouldBeVisible) {
+			const { viewer } = this.props;
 
-		const toAdd = pinsDiff(curr, prev);
-		const toRemove = pinsDiff(prev, curr);
+			const toAdd = pinsDiff(curr, prev);
+			const toRemove = pinsDiff(prev, curr);
 
-		toRemove.forEach(viewer.removePin.bind(viewer));
-		toAdd.forEach(viewer.addPin.bind(viewer));
+			toRemove.forEach(viewer.removePin.bind(viewer));
+			toAdd.forEach(viewer.addPin.bind(viewer));
+		}
 	}
 
 	public renderColorOverrides(prev, curr) {
