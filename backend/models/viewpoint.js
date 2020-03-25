@@ -23,6 +23,7 @@ const responseCodes = require("../response_codes.js");
 const db = require("../handler/db");
 const ChatEvent = require("./chatEvent");
 const FileRef = require("./fileRef");
+const { pick } = require("lodash");
 
 const view = {};
 
@@ -44,9 +45,8 @@ view.clean =  function (viewToClean, targetType = "[object String]") {
 	return viewToClean;
 };
 
-view.findByUID = function (dbCol, uid, projection, cleanResponse = false) {
-
-	return db.getCollection(dbCol.account, dbCol.model + ".views").then((_dbCol) => {
+view.findByUID = function (account, model, uid, projection, cleanResponse = false) {
+	return db.getCollection(account, model + ".views").then((_dbCol) => {
 		return _dbCol.findOne({ _id: utils.stringToUUID(uid) }, projection).then(vp => {
 
 			if (!vp) {
@@ -54,7 +54,7 @@ view.findByUID = function (dbCol, uid, projection, cleanResponse = false) {
 			}
 
 			if (cleanResponse) {
-				this.clean(dbCol, vp);
+				return this.setViewpointThumbnailURL(account, model, this.clean(vp));
 			}
 
 			return vp;
@@ -62,13 +62,11 @@ view.findByUID = function (dbCol, uid, projection, cleanResponse = false) {
 	});
 };
 
-view.listViewpoints = function (dbCol) {
+view.listViewpoints = function (account, model) {
 
-	return db.getCollection(dbCol.account, dbCol.model + ".views").then(_dbCol => {
+	return db.getCollection(account, model + ".views").then(_dbCol => {
 		return _dbCol.find().toArray().then(results => {
-			results.forEach((result) => {
-				this.clean(dbCol, result);
-			});
+			results.forEach(view.clean);
 			return results;
 		});
 	});
@@ -98,9 +96,19 @@ view.setViewpointScreenshotURL = function(collName, account, model, id, viewpoin
 	return viewpoint;
 };
 
-view.getThumbnail = function (dbColOptions, uid) {
+view.setViewpointThumbnailURL = function(account, model, viewpoint) {
+	if (!viewpoint || (!viewpoint.screenshot && !viewpoint.screenshot_ref)) {
+		return viewpoint;
+	}
 
-	return this.findByUID(dbColOptions, uid, { "screenshot.buffer": 1 }).then(vp => {
+	const viewpointId = utils.uuidToString(viewpoint._id);
+	viewpoint.screenshot = { thumbnail: account + "/" + model + "/viewpoints/" + viewpointId + "/thumbnail.png" };
+
+	return viewpoint;
+};
+
+view.getThumbnail = function (account, model, uid) {
+	return this.findByUID(account, model, uid, { "screenshot.buffer": 1 }).then(vp => {
 		if (!vp.screenshot) {
 			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 		} else {
@@ -111,14 +119,14 @@ view.getThumbnail = function (dbColOptions, uid) {
 
 };
 
-view.updateViewpoint = function (dbCol, sessionId, data, id) {
-	return this.updateAttrs(dbCol, id, data).then((result) => {
-		ChatEvent.viewpointsChanged(sessionId, dbCol.account, dbCol.model, Object.assign({ _id: utils.uuidToString(id) }, data));
+view.updateViewpoint = function (account, model, sessionId, data, id) {
+	return this.updateAttrs(account, model, id, data).then((result) => {
+		ChatEvent.viewpointsChanged(sessionId, account, model, Object.assign({ _id: utils.uuidToString(id) }, data));
 		return result;
 	});
 };
 
-view.updateAttrs = function (dbCol, id, data) {
+view.updateAttrs = function (account, model, id, data) {
 	const toUpdate = {};
 	const fieldsCanBeUpdated = ["name"];
 
@@ -129,69 +137,44 @@ view.updateAttrs = function (dbCol, id, data) {
 		}
 	});
 
-	return db.getCollection(dbCol.account, dbCol.model + ".views").then(_dbCol => {
+	return db.getCollection(account, model + ".views").then(_dbCol => {
 		return _dbCol.update({ _id: id }, { $set: toUpdate }).then(() => {
 			return { _id: utils.uuidToString(id) };
 		});
 	});
 };
 
-view.createViewpoint = function (dbCol, sessionId, data) {
-	return db.getCollection(dbCol.account, dbCol.model + ".views").then((_dbCol) => {
-		let cropped;
+view.createViewpoint = async (account, model, sessionId, data) => {
+	if (data.screenshot && data.screenshot.base64) {
+		const croppedScreenshot = await utils.getCroppedScreenshotFromBase64(data.screenshot.base64, 79, 79);
+		data.screenshot.buffer = new Buffer.from(croppedScreenshot, "base64");
+	}
 
-		if (data.screenshot && data.screenshot.base64) {
-			cropped = utils.getCroppedScreenshotFromBase64(data.screenshot.base64, 79, 79);
-		} else {
-			cropped = Promise.resolve();
-		}
+	data = pick(data, ["name", "clippingPlanes", "viewpoint", "screenshot"]);
 
-		return cropped.then((croppedScreenshot) => {
+	const newViewpoint = { _id:  utils.stringToUUID(nodeuuid()), ...data };
+	const coll = await db.getCollection(account, model + ".views");
+	await coll.insert(newViewpoint);
 
-			const id = utils.stringToUUID(nodeuuid());
+	const viewpoint = view.setViewpointThumbnailURL(account, model,  view.clean(newViewpoint));
 
-			if (croppedScreenshot) {
-				// Remove the base64 version of the screenshotgetViewpointThumbnail
-				delete data.screenshot.base64;
-				data.screenshot.buffer = new Buffer.from(croppedScreenshot, "base64");
-			}
-
-			const newViewpoint = {
-				_id: id,
-				clippingPlanes: data.clippingPlanes,
-				viewpoint: data.viewpoint,
-				screenshot: data.screenshot
-			};
-
-			return _dbCol.insert(newViewpoint).then(() => {
-				return this.updateAttrs(dbCol, id, data).then((result) => {
-					data._id = id;
-					ChatEvent.viewpointsCreated(sessionId, dbCol.account, dbCol.model, this.clean(dbCol, data));
-					return result;
-				}).catch((err) => {
-					// remove the recently saved new view as update attributes failed
-					return this.deleteViewpoint(dbCol, id).then(() => {
-						return Promise.reject(err);
-					});
-				});
-			});
-		});
-	});
+	ChatEvent.viewpointsCreated(sessionId, account, model,viewpoint);
+	return viewpoint;
 };
 
-view.deleteViewpoint = function (dbCol, idStr, sessionId) {
+view.deleteViewpoint = function (account, model, idStr, sessionId) {
 	let id = idStr;
 	if ("[object String]" === Object.prototype.toString.call(id)) {
 		id = utils.stringToUUID(id);
 	}
 
-	return db.getCollection(dbCol.account, dbCol.model + ".views").then((_dbCol) => {
+	return db.getCollection(account, model + ".views").then((_dbCol) => {
 		return _dbCol.findOneAndDelete({ _id: id }).then((deleteResponse) => {
 			if (!deleteResponse.value) {
 				return Promise.reject(responseCodes.VIEW_NOT_FOUND);
 			}
 			if(sessionId) {
-				ChatEvent.viewpointsDeleted(sessionId, dbCol.account, dbCol.model, idStr);
+				ChatEvent.viewpointsDeleted(sessionId, account, model, idStr);
 			}
 		});
 	});

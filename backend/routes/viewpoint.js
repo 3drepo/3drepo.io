@@ -256,16 +256,12 @@ router.delete("/viewpoints/:uid", middlewares.issue.canCreate, deleteViewpoint);
  */
 router.get("/viewpoints/:uid/thumbnail.png", middlewares.issue.canView, getViewpointThumbnail);
 
-const getDbColOptions = function(req) {
-	return {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
-};
-
 function listViewpoints(req, res, next) {
+	const { account, model } = req.params;
 
-	const dbCol = getDbColOptions(req);
 	const place = utils.APIInfo(req);
 
-	Viewpoint.listViewpoints(dbCol, req.query)
+	Viewpoint.listViewpoints(account, model, req.query)
 		.then(viewpoints => {
 
 			responseCodes.respond(place, req, res, next, responseCodes.OK, viewpoints);
@@ -279,11 +275,10 @@ function listViewpoints(req, res, next) {
 }
 
 function findViewpoint(req, res, next) {
-
-	const dbCol = getDbColOptions(req);
+	const { account, model, uid } = req.params;
 	const place = utils.APIInfo(req);
 
-	Viewpoint.findByUID(dbCol, req.params.uid, undefined, true)
+	Viewpoint.findByUID(account, model, uid, undefined, true)
 		.then(view => {
 			if(!view) {
 				return Promise.reject({resCode: responseCodes.VIEW_NOT_FOUND});
@@ -302,27 +297,30 @@ function createViewpoint(req, res, next) {
 	if (Object.keys(req.body).length >= 3 &&
 			Object.prototype.toString.call(req.body.name) === "[object String]" &&
 			Object.prototype.toString.call(req.body.viewpoint) === "[object Object]" &&
-			Object.prototype.toString.call(req.body.screenshot) === "[object Object]" &&
+			(Object.prototype.toString.call(req.body.screenshot) === "[object Object]"  || !req.body.screenshot) &&
 			(!req.body.clippingPlanes || Object.prototype.toString.call(req.body.clippingPlanes) === "[object Array]")) {
 		const place = utils.APIInfo(req);
 		const sessionId = req.headers[C.HEADER_SOCKET_ID];
-		Viewpoint.createViewpoint(getDbColOptions(req), sessionId, req.body)
+		const { account, model } = req.params;
+
+		Viewpoint.createViewpoint(account, model, sessionId, req.body)
 			.then(view => {
 				responseCodes.respond(place, req, res, next, responseCodes.OK, view);
 			}).catch(err => {
 				responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 			});
 	} else {
+
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
 	}
 }
 
 function deleteViewpoint(req, res, next) {
-
 	const place = utils.APIInfo(req);
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
+	const { account, model, uid } = req.params;
 
-	Viewpoint.deleteViewpoint(getDbColOptions(req), req.params.uid, sessionId).then(() => {
+	Viewpoint.deleteViewpoint(account, model, uid, sessionId).then(() => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "success"});
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -333,16 +331,17 @@ function deleteViewpoint(req, res, next) {
 function updateViewpoint(req, res, next) {
 	if (Object.keys(req.body).length >= 1 &&
 			Object.prototype.toString.call(req.body.name) === "[object String]") {
-		const dbCol = getDbColOptions(req);
+
+		const { account, model, uid } = req.params;
 		const place = utils.APIInfo(req);
 		const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-		Viewpoint.findByUID(dbCol, req.params.uid)
+		Viewpoint.findByUID(account, model, uid)
 			.then(view => {
 				if(!view) {
 					return Promise.reject({resCode: responseCodes.VIEW_NOT_FOUND});
 				} else {
-					return Viewpoint.updateViewpoint(dbCol, sessionId, req.body, utils.stringToUUID(req.params.uid));
+					return Viewpoint.updateViewpoint(account, model, sessionId, req.body, utils.stringToUUID(uid));
 				}
 			}).then(view => {
 				responseCodes.respond(place, req, res, next, responseCodes.OK, view);
@@ -356,11 +355,10 @@ function updateViewpoint(req, res, next) {
 }
 
 function getViewpointThumbnail(req, res, next) {
-
-	const dbCol = getDbColOptions(req);
+	const { account, model, uid } = req.params;
 	const place = utils.APIInfo(req);
 
-	Viewpoint.getThumbnail(dbCol, req.params.uid).then(buffer => {
+	Viewpoint.getThumbnail(account, model, uid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png" , config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
