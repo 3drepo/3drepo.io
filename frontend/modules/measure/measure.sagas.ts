@@ -125,7 +125,7 @@ export function* setMeasurementColor({ uuid, color }) {
 export function* setMeasurementName({ uuid, name, measureType }) {
 	try {
 		// yield Viewer.setMeasurementName(uuid, name);
-		yield put(MeasureActions.setMeasurementColorSuccess(uuid, name, measureType));
+		yield put(MeasureActions.setMeasurementNameSuccess(uuid, name, measureType));
 	} catch (error) {
 		DialogActions.showErrorDialog('set name', 'measure', error);
 	}

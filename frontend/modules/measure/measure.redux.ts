@@ -58,7 +58,6 @@ export interface IMeasurementState {
 	pointMeasurements: any[];
 	edgeSnapping: boolean;
 	xyzDisplay: boolean;
-	editMode: boolean;
 }
 
 export const INITIAL_STATE: IMeasurementState = {
@@ -71,7 +70,6 @@ export const INITIAL_STATE: IMeasurementState = {
 	pointMeasurements: [],
 	edgeSnapping: true,
 	xyzDisplay: false,
-	editMode: false,
 };
 
 export const setActiveSuccess = (state = INITIAL_STATE, { isActive }) => ({ ...state, isActive });

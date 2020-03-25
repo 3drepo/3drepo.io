@@ -21,7 +21,8 @@ import LessIcon from '@material-ui/icons/ExpandLess';
 import MoreIcon from '@material-ui/icons/ExpandMore';
 
 import { MEASURE_TYPE, MEASURE_TYPE_NAME} from '../../../../../../modules/measure/measure.constants';
-import { getUnits, getValue, IMeasure, MeasureItem } from '../measureItem/measureItem.component';
+import { MeasureItem } from '../measureItem/';
+import { getUnits, getValue, IMeasure } from '../measureItem/measureItem.component';
 import { StyledCheckbox, Units } from '../measureItem/measureItem.styles';
 import { List, SectionHeader, StyledCheckboxCell, StyledIconButton, Title, Total } from './measurementsList.styles';
 

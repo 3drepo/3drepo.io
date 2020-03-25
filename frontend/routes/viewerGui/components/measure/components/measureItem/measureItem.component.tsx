@@ -25,6 +25,7 @@ import { MEASURE_TYPE } from '../../../../../../modules/measure/measure.constant
 import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
 import { SmallIconButton } from '../../../../../components/smallIconButon/smallIconButton.component';
 import { NameWrapper} from '../../../tree/components/treeNode/treeNode.styles';
+import { StyledForm } from '../../../views/components/viewItem/viewItem.styles';
 import {
 	Actions,
 	Container,
@@ -33,6 +34,7 @@ import {
 	StyledCheckbox,
 	StyledCheckboxCell,
 	StyledName,
+	StyledTextField,
 	Units,
 } from './measureItem.styles';
 
@@ -126,6 +128,8 @@ export const MeasureItem = ({
 		});
 	};
 
+	const handleSave = ({ target: { value: newName }}) => props.setMeasurementName(uuid, newName, type);
+
 	return (
 		<Container tall={Number(type === MEASURE_TYPE.POINT)}>
 			{
@@ -137,9 +141,25 @@ export const MeasureItem = ({
 					/>
 				</StyledCheckboxCell>
 			}
-			<Name left={Number(type === MEASURE_TYPE.POINT)}>
-				{name}
-			</Name>
+			<StyledForm>
+				<StyledTextField
+						requiredConfirm
+						fullWidth
+						value={name}
+						mutable
+						onChange={handleSave}
+				/>
+			</StyledForm>
+			{/*{*/}
+			{/*	isSet ?*/}
+			{/*		<MeasureForm*/}
+			{/*			name={name}*/}
+			{/*			onSubmit={handleSave}*/}
+			{/*		/> :*/}
+			{/*		<Name left={Number(type === MEASURE_TYPE.POINT)}>*/}
+			{/*			{name}*/}
+			{/*		</Name>*/}
+			{/*}*/}
 			<Actions>
 				{
 					typeName === 'Point' ?

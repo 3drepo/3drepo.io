@@ -18,11 +18,12 @@
 import styled, { css } from 'styled-components';
 
 import Checkbox from '@material-ui/core/Checkbox';
-import TextField from '@material-ui/core/TextField';
 
 import { COLOR } from '../../../../../../styles';
 import { ColorSelect } from '../../../../../components/colorPicker/colorPicker.styles';
 import { CheckboxCell } from '../../../../../components/customTable/customTable.styles';
+import { TextField } from '../../../../../components/textField/textField.component';
+import { ActionsLine, MutableActionsLine } from '../../../../../components/textField/textField.styles';
 import { Name } from '../../../tree/components/treeNode/treeNode.styles';
 
 interface IContainer {
@@ -54,7 +55,7 @@ export const Units = styled.div`
 `;
 
 export const MeasurementValue = styled.div`
-	width: 120px;
+	width: auto;
 	text-align: right;
 	padding-right: 10px;
 `;
@@ -100,4 +101,16 @@ export const StyledCheckboxCell = styled(CheckboxCell)`
 
 export const StyledName = styled(Name)`
 	margin-left: ${(props) => props.left ? '78px' : '6px'};
+`;
+
+export const StyledTextField = styled(TextField)`
+	width: 100%;
+
+	${ActionsLine} {
+		bottom: 8px;
+	}
+
+	${MutableActionsLine} {
+		bottom: 0;
+	}
 `;

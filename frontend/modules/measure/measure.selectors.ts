@@ -40,13 +40,13 @@ export const selectXyzDisplay = createSelector(
 );
 
 export const selectAreaMeasurements = createSelector(
-		selectMeasureDomain, (state) => state.areaMeasurements
+	selectMeasureDomain, (state) => state.areaMeasurements
 );
 
 export const selectLengthMeasurements = createSelector(
-		selectMeasureDomain, (state) => state.lengthMeasurements
+	selectMeasureDomain, (state) => state.lengthMeasurements
 );
 
 export const selectPointMeasurements = createSelector(
-		selectMeasureDomain, (state) => state.pointMeasurements
+	selectMeasureDomain, (state) => state.pointMeasurements
 );
