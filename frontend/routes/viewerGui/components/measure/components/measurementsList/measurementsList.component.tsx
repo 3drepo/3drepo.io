@@ -52,7 +52,7 @@ export const MeasurementsList = ({
 	measurements, units, measureType, setMeasurementCheck, setMeasurementCheckAll, removeMeasurement,
 	setMeasurementColor, setMeasurementName,
 }: IProps) => {
-	const [expanded, setExpanded] = React.useState(false);
+	const [expanded, setExpanded] = React.useState(true);
 
 	const handleOnClick = () => setExpanded(!expanded);
 
