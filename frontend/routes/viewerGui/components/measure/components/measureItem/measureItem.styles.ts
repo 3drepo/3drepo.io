@@ -12,10 +12,10 @@
  *  GNU Affero General Public License for more details.
  *
  *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 import Checkbox from '@material-ui/core/Checkbox';
 
@@ -24,7 +24,6 @@ import { ColorSelect } from '../../../../../components/colorPicker/colorPicker.s
 import { CheckboxCell } from '../../../../../components/customTable/customTable.styles';
 import { TextField } from '../../../../../components/textField/textField.component';
 import { ActionsLine, MutableActionsLine } from '../../../../../components/textField/textField.styles';
-import { Name } from '../../../tree/components/treeNode/treeNode.styles';
 
 interface IContainer {
 	nodeType: string;
@@ -41,19 +40,6 @@ export const MeasurementPoint = styled.div`
 	width: 120px;
 	text-align: right;
 	padding-right: 10px;
-`;
-
-const sumUnitsStyle = css`
-	width: auto;
-	padding-right: 93px;
-	padding-left: 3px;
-`;
-
-export const Units = styled.div`
-	width: 30px;
-	text-align: right;
-	padding-right: 10px;
-	${({ sum }: any) => sum && sumUnitsStyle};
 `;
 
 export const MeasurementValue = styled.div`
@@ -84,6 +70,7 @@ export const Container = styled.li<IContainer>`
 	align-items: center;
 	height: ${({ tall }: any) => tall ? '56px' : '40px'};
 	box-sizing: border-box;
+	padding: 0 8px;
 
 	&:last-of-type {
 		border-bottom: none;
@@ -92,21 +79,18 @@ export const Container = styled.li<IContainer>`
 
 export const StyledCheckbox = styled(Checkbox)`
 	&& {
-		padding: 6px;
+		padding: 3px;
 	}
 `;
 
 export const StyledCheckboxCell = styled(CheckboxCell)`
 	padding: 0;
-	margin-left: 36px;
-`;
-
-export const StyledName = styled(Name)`
-	margin-left: ${(props) => props.left ? '78px' : '6px'};
+	margin-left: 30px;
 `;
 
 export const StyledTextField = styled(TextField)`
 	width: 100%;
+	margin-left: ${(props) => props.left ? '66px' : '6px'};
 
 	${ActionsLine} {
 		bottom: 8px;

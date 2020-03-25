@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import IconButton from '@material-ui/core/IconButton';
 
@@ -24,7 +24,7 @@ import { CheckboxCell } from '../../../../../components/customTable/customTable.
 
 export const StyledIconButton = styled(IconButton)`
 	&& {
-		padding: 6px;
+		padding: 3px;
 	}
 `;
 
@@ -41,12 +41,13 @@ export const SectionHeader = styled.div`
 	background-color: ${COLOR.WHITE};
 	border-bottom: 1px solid ${COLOR.BLACK_20};
 	height: ${({ tall }: any) => tall ? '56px' : '40px'};
+	padding: 0 8px;
 `;
 
 export const Title = styled.h3`
 	align-self: center;
 	font-size: 14px;
-	margin-left: ${(props) => props.left ? '42px' : '6px'};
+	margin-left: ${(props) => props.left ? '36px' : '6px'};
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -68,4 +69,17 @@ export const List = styled.div`
 	&:last-of-type {
 		border-bottom: none;
 	}
+`;
+
+const sumUnitsStyle = css`
+	width: auto;
+	padding-right: 93px;
+	padding-left: 3px;
+`;
+
+export const Units = styled.div`
+	width: 30px;
+	text-align: right;
+	padding-right: 10px;
+	${({ sum }: any) => sum && sumUnitsStyle};
 `;

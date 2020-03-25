@@ -23,8 +23,10 @@ import LessIcon from '@material-ui/icons/ExpandMore';
 import { MEASURE_TYPE, MEASURE_TYPE_NAME} from '../../../../../../modules/measure/measure.constants';
 import { MeasureItem } from '../measureItem/';
 import { getUnits, getValue, IMeasure } from '../measureItem/measureItem.component';
-import { StyledCheckbox, Units } from '../measureItem/measureItem.styles';
-import { List, SectionHeader, StyledCheckboxCell, StyledIconButton, Title, Total } from './measurementsList.styles';
+import { StyledCheckbox } from '../measureItem/measureItem.styles';
+import {
+	List, SectionHeader, StyledCheckboxCell, StyledIconButton, Title, Total, Units,
+} from './measurementsList.styles';
 
 interface IProps {
 	measurements: IMeasure[];
@@ -72,7 +74,7 @@ export const MeasurementsList = ({
 				<StyledIconButton onClick={handleOnClick}>
 					{expanded ? <LessIcon /> : <MoreIcon />}
 				</StyledIconButton>
-				{isCountable && <StyledCheckboxCell width="36px">
+				{isCountable && <StyledCheckboxCell>
 					<StyledCheckbox
 						onChange={handleOnChange}
 						checked={isChecked}

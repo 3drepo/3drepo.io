@@ -127,11 +127,13 @@ export const MeasureItem = ({
 
 	const handleSave = ({ target: { value: newName }}) => props.setMeasurementName(uuid, newName, type);
 
+	const isPointTypeMeasure = type === MEASURE_TYPE.POINT;
+
 	return (
-		<Container tall={Number(type === MEASURE_TYPE.POINT)}>
+		<Container tall={Number(isPointTypeMeasure)}>
 			{
-				type !== MEASURE_TYPE.POINT &&
-				<StyledCheckboxCell width="36px">
+				!isPointTypeMeasure &&
+				<StyledCheckboxCell>
 					<StyledCheckbox
 						onChange={handleCheckChange}
 						checked={checked}
@@ -140,6 +142,7 @@ export const MeasureItem = ({
 			}
 			<StyledForm>
 				<StyledTextField
+						left={Number(isPointTypeMeasure)}
 						requiredConfirm
 						fullWidth
 						value={name}
@@ -147,19 +150,9 @@ export const MeasureItem = ({
 						onChange={handleSave}
 				/>
 			</StyledForm>
-			{/*{*/}
-			{/*	isSet ?*/}
-			{/*		<MeasureForm*/}
-			{/*			name={name}*/}
-			{/*			onSubmit={handleSave}*/}
-			{/*		/> :*/}
-			{/*		<Name left={Number(type === MEASURE_TYPE.POINT)}>*/}
-			{/*			{name}*/}
-			{/*		</Name>*/}
-			{/*}*/}
 			<Actions>
 				{
-					typeName === 'Point' ?
+					isPointTypeMeasure ?
 					<>
 						<div>
 							<MeasurementPoint>x: {getValue(position[0], units, type)} {getUnits(units, type)}</MeasurementPoint>
@@ -183,11 +176,3 @@ export const MeasureItem = ({
 		</Container>
 	);
 };
-
-export const Name = ({ children, left }) => (
-	<NameWrapper>
-		<StyledName left={left}>
-			{children}
-		</StyledName>
-	</NameWrapper>
-);
