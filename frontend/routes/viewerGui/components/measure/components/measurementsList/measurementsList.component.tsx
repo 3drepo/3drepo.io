@@ -17,8 +17,8 @@
 
 import React from 'react';
 
-import LessIcon from '@material-ui/icons/ExpandLess';
-import MoreIcon from '@material-ui/icons/ExpandMore';
+import MoreIcon from '@material-ui/icons/ChevronRight';
+import LessIcon from '@material-ui/icons/ExpandMore';
 
 import { MEASURE_TYPE, MEASURE_TYPE_NAME} from '../../../../../../modules/measure/measure.constants';
 import { MeasureItem } from '../measureItem/';
