@@ -143,6 +143,7 @@ export const MeasureItem = ({
 				!isPointTypeMeasure &&
 				<StyledCheckboxCell>
 					<StyledCheckbox
+						color="primary"
 						onChange={handleCheckChange}
 						checked={checked}
 					/>

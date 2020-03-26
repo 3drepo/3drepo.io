@@ -77,6 +77,7 @@ export const MeasurementsList = ({
 				</StyledIconButton>
 				{isCountable && <StyledCheckboxCell>
 					<StyledCheckbox
+						color="primary"
 						onChange={handleOnChange}
 						checked={isChecked}
 					/>
