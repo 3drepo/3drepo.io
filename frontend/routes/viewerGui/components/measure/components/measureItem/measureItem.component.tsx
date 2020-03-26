@@ -18,7 +18,7 @@
 import React from 'react';
 
 import RemoveIcon from '@material-ui/icons/Close';
-import { cond, matches, stubTrue } from 'lodash';
+import { cond, eq, matches, stubTrue } from 'lodash';
 
 import { componentToHex, parseHex } from '../../../../../../helpers/colors';
 import { MEASURE_TYPE } from '../../../../../../modules/measure/measure.constants';
@@ -68,23 +68,31 @@ interface IProps extends IMeasure {
 	setMeasurementColor: (uuid, color) => void;
 	setMeasurementCheck?: (uuid, type) => void;
 	setMeasurementName: (uuid, type, name) => void;
+	modelUnit: string;
 }
 
-export const getValue = (value: number, units: string, type: number) => {
-	if (type === MEASURE_TYPE.AREA) {
+export const getValue = (measureValue: number, units: string, type: number, modelUnit: string) => {
+	const isAreaMeasurement = type === MEASURE_TYPE.AREA;
+	const isRecalculationNeeded = modelUnit !== 'mm';
+	const value = cond([
+		[(is) => eq(is, true), () => isAreaMeasurement ? measureValue * 1000 * 1000 : measureValue * 1000],
+		[stubTrue, () => measureValue],
+	])(isRecalculationNeeded);
+
+	if (isAreaMeasurement) {
 		return cond([
-			[matches('mm'), () => Math.trunc(value)],
-			[matches('cm'), () => Math.trunc(value / 100)],
+			[matches('mm'), () => Math.round(value)],
+			[matches('cm'), () => Math.round(value / 100)],
 			[matches('m'), () => Number(value / 1000000).toFixed(2)],
-			[stubTrue, () => Math.trunc(value)]
+			[stubTrue, () => Math.round(value)]
 		])(units);
 	}
 
 	return cond([
-		[matches('mm'), () => Math.trunc(value)],
-		[matches('cm'), () => Math.trunc(value / 10)],
+		[matches('mm'), () => Math.round(value)],
+		[matches('cm'), () => Math.round(value / 10)],
 		[matches('m'), () => Number(value / 1000).toFixed(2)],
-		[stubTrue, () => Math.trunc(value)]
+		[stubTrue, () => Math.round(value)]
 	])(units);
 };
 
@@ -155,12 +163,18 @@ export const MeasureItem = ({
 					isPointTypeMeasure ?
 					<>
 						<div>
-							<MeasurementPoint>x: {getValue(position[0], units, type)} {getUnits(units, type)}</MeasurementPoint>
-							<MeasurementPoint>y: {getValue(position[1], units, type)} {getUnits(units, type)}</MeasurementPoint>
-							<MeasurementPoint>z: {getValue(position[2], units, type)} {getUnits(units, type)}</MeasurementPoint>
+							<MeasurementPoint>
+								x: {getValue(position[0], units, type, props.modelUnit)} {getUnits(units, type)}
+							</MeasurementPoint>
+							<MeasurementPoint>
+								y: {getValue(position[1], units, type, props.modelUnit)} {getUnits(units, type)}
+							</MeasurementPoint>
+							<MeasurementPoint>
+								z: {getValue(position[2], units, type, props.modelUnit)} {getUnits(units, type)}
+							</MeasurementPoint>
 						</div>
 					</>
-					: <MeasurementValue>{getValue(value, units, type)} {getUnits(units, type)}</MeasurementValue>
+					: <MeasurementValue>{getValue(value, units, type, props.modelUnit)} {getUnits(units, type)}</MeasurementValue>
 				}
 				<ColorPicker
 					value={getColor(customColor || color)}

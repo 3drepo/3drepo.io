@@ -37,9 +37,10 @@ interface IProps {
 	setMeasurementColor: (uuid, color) => void;
 	setMeasurementName: (uuid, type, name) => void;
 	measureType: number;
+	modelUnit: string;
 }
 
-const getTotal = (measurements, type, units) => {
+const getTotal = (measurements, type, units, modelUnit) => {
 	const sum = measurements.reduce((acc, { checked, value }) => {
 		if (checked) {
 			return acc + value;
@@ -47,12 +48,12 @@ const getTotal = (measurements, type, units) => {
 		return acc;
 	}, 0);
 
-	return getValue(sum, units, type);
+	return getValue(sum, units, type, modelUnit);
 };
 
 export const MeasurementsList = ({
 	measurements, units, measureType, setMeasurementCheck, setMeasurementCheckAll, removeMeasurement,
-	setMeasurementColor, setMeasurementName,
+	setMeasurementColor, setMeasurementName, ...props
 }: IProps) => {
 	const [expanded, setExpanded] = React.useState(true);
 
@@ -86,7 +87,7 @@ export const MeasurementsList = ({
 					<>
 						<Total>
 							Selected total:&nbsp;
-							{getTotal(measurements, measureType, units)}
+							{getTotal(measurements, measureType, units, props.modelUnit)}
 						</Total>
 						<Units sum>{getUnits(units, measureType)}</Units>
 					</>

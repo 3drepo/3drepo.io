@@ -23,6 +23,7 @@ import {
 	selectAreaMeasurements, selectEdgeSnapping, selectIsMeasureActive, selectLengthMeasurements,
 	selectMeasureMode, selectMeasureUnits, selectPointMeasurements, selectXyzDisplay, MeasureActions
 } from '../../../../modules/measure';
+import { selectUnit } from '../../../../modules/model';
 import { withViewer } from '../../../../services/viewer/viewer';
 
 import { Measure } from './measure.component';
@@ -36,6 +37,7 @@ const mapStateToProps = createStructuredSelector({
 	measureUnits: selectMeasureUnits,
 	edgeSnappingEnabled: selectEdgeSnapping,
 	XYZdisplay: selectXyzDisplay,
+	modelUnit: selectUnit,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

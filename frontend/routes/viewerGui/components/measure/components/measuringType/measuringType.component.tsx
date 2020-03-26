@@ -57,7 +57,7 @@ export const MeasuringType = ({
 		});
 	};
 
-	const handleClickBackground = (props) => {
+	const handleClickBackground = () => {
 		return null;
 	};
 
@@ -110,7 +110,7 @@ export const MeasuringType = ({
 
 	return (
 			<>
-				{MEASURING_TYPES.map(({ icon, activeIcon, name, mode, ...props }) => (
+				{MEASURING_TYPES.map(({ icon, activeIcon, name, mode }) => (
 					<Wrapper key={name}>
 						<Icon
 							src={mode === measureMode ? activeIcon : icon}

@@ -56,7 +56,7 @@ interface IProps {
 	areaMeasurements: IMeasure[];
 	lengthMeasurements: IMeasure[];
 	pointMeasurements: IMeasure[];
-	addMeasurement: (IMeasure) => void;
+	addMeasurement: (measure: IMeasure) => void;
 	removeMeasurement: (uuid) => void;
 	clearMeasurements: () => void;
 	setMeasureMode: (mode) => void;
@@ -73,6 +73,7 @@ interface IProps {
 	setMeasurementCheck: (uuid, type) => void;
 	setMeasurementCheckAll: (type) => void;
 	resetMeasurementTool: () => void;
+	modelUnit: string;
 }
 
 interface IState {
@@ -151,6 +152,7 @@ export class Measure extends React.PureComponent<IProps, IState> {
 			removeMeasurement={this.props.removeMeasurement}
 			setMeasurementColor={this.props.setMeasurementColor}
 			setMeasurementName={this.props.setMeasurementName}
+			modelUnit={this.props.modelUnit}
 		/>
 	));
 
@@ -164,6 +166,7 @@ export class Measure extends React.PureComponent<IProps, IState> {
 			removeMeasurement={this.props.removeMeasurement}
 			setMeasurementColor={this.props.setMeasurementColor}
 			setMeasurementName={this.props.setMeasurementName}
+			modelUnit={this.props.modelUnit}
 		/>
 	));
 
@@ -177,6 +180,7 @@ export class Measure extends React.PureComponent<IProps, IState> {
 			removeMeasurement={this.props.removeMeasurement}
 			setMeasurementColor={this.props.setMeasurementColor}
 			setMeasurementName={this.props.setMeasurementName}
+			modelUnit={this.props.modelUnit}
 		/>
 	));
 
