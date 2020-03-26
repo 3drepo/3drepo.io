@@ -61,7 +61,11 @@ export const MeasurementsList = ({
 
 	const handleOnChange = () => setMeasurementCheckAll(measureType);
 
-	const isChecked = measurements.every(({checked}) => checked);
+	const numberOfCheckedMeasurements = measurements.filter(({checked}) => checked).length;
+
+	const selectedAll = numberOfCheckedMeasurements && numberOfCheckedMeasurements === measurements.length;
+
+	const isIndeterminate = Boolean(numberOfCheckedMeasurements && !selectedAll);
 
 	const isCountable = ![MEASURE_TYPE.POINT].includes(measureType);
 
@@ -79,7 +83,8 @@ export const MeasurementsList = ({
 					<StyledCheckbox
 						color="primary"
 						onChange={handleOnChange}
-						checked={isChecked}
+						indeterminate={isIndeterminate}
+						checked={selectedAll || isIndeterminate}
 					/>
 				</StyledCheckboxCell>}
 				<Title {...getTitleProperties}>{MEASURE_TYPE_NAME[measureType]}</Title>
