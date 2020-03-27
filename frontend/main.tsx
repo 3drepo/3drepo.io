@@ -12,15 +12,11 @@ import Root from './routes/index';
 import './styles/global';
 
 import { IS_DEVELOPMENT } from './constants/environment';
-import { Pin } from './globals/pin';
 import { UnityUtil } from './globals/unity-util';
-import { Viewer } from './globals/viewer';
 import { clientConfigService } from './services/clientConfig';
 import './services/fontAwesome';
 
 window.UnityUtil = UnityUtil;
-window.Viewer = Viewer;
-window.Pin = Pin;
 
 const render = () => {
 	ReactDOM.render(

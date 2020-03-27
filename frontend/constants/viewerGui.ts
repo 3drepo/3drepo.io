@@ -2,10 +2,12 @@ import CompareIcon from '@material-ui/icons/Compare';
 import TreeIcon from '@material-ui/icons/DeviceHub';
 import GroupsIcon from '@material-ui/icons/GroupWork';
 import GisIcon from '@material-ui/icons/Layers';
+import SequencesIcon from '@material-ui/icons/Movie';
 import ViewsIcon from '@material-ui/icons/PhotoCamera';
 import IssuesIcon from '@material-ui/icons/Place';
 import MeasureIcon from '@material-ui/icons/Straighten';
 import RisksIcon from '@material-ui/icons/Warning';
+import { clientConfigService } from '../services/clientConfig';
 
 export const VIEWER_PANELS = {
 	GIS: 'gis',
@@ -16,7 +18,8 @@ export const VIEWER_PANELS = {
 	GROUPS: 'groups',
 	VIEWS: 'views',
 	COMPARE: 'compare',
-	MEASURE: 'measure'
+	SEQUENCES: 'sequences',
+	MEASURE: 'measure',
 };
 
 export const VIEWER_PANELS_ICONS = {
@@ -27,7 +30,8 @@ export const VIEWER_PANELS_ICONS = {
 	[VIEWER_PANELS.TREE]: TreeIcon,
 	[VIEWER_PANELS.COMPARE]: CompareIcon,
 	[VIEWER_PANELS.GIS]: GisIcon,
-	[VIEWER_PANELS.MEASURE]: MeasureIcon
+	[VIEWER_PANELS.SEQUENCES]: SequencesIcon,
+	[VIEWER_PANELS.MEASURE]: MeasureIcon,
 };
 
 export const VIEWER_PANELS_MIN_HEIGHTS = {
@@ -38,6 +42,7 @@ export const VIEWER_PANELS_MIN_HEIGHTS = {
 	[VIEWER_PANELS.TREE]: 80,
 	[VIEWER_PANELS.COMPARE]: 265,
 	[VIEWER_PANELS.GIS]: 185,
+	[VIEWER_PANELS.SEQUENCES]: 200,
 	[VIEWER_PANELS.MEASURE]: 200,
 };
 
@@ -49,7 +54,8 @@ export const VIEWER_PANELS_TITLES = {
 	[VIEWER_PANELS.TREE]: 'Tree',
 	[VIEWER_PANELS.COMPARE]: 'Compare',
 	[VIEWER_PANELS.GIS]: 'GIS',
-	[VIEWER_PANELS.MEASURE]: 'Measurement'
+	[VIEWER_PANELS.SEQUENCES]: 'Sequences',
+	[VIEWER_PANELS.MEASURE]: 'Measurement',
 };
 
 const getPanelConfig = (panelType) => ({
@@ -66,8 +72,9 @@ export const VIEWER_LEFT_PANELS = [
 	VIEWER_PANELS.TREE,
 	VIEWER_PANELS.COMPARE,
 	VIEWER_PANELS.GIS,
+	VIEWER_PANELS.SEQUENCES,
 	VIEWER_PANELS.MEASURE,
-].map(getPanelConfig);
+].filter((panel) => clientConfigService.sequencesEnabled || panel !== VIEWER_PANELS.SEQUENCES).map(getPanelConfig);
 
 export const VIEWER_RIGHT_PANELS = [
 	VIEWER_PANELS.BIM

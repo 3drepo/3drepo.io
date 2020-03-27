@@ -132,6 +132,9 @@ module.exports.createApp = function () {
 	// risks handler
 	app.use("/:account/:model", require("../routes/risk"));
 
+	// sequences handler
+	app.use("/:account/:model", require("../routes/sequence"));
+
 	// history handler
 	app.use("/:account/:model", require("../routes/history"));
 

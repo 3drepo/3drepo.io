@@ -127,8 +127,9 @@ export const selectSelectedIssue = createSelector(
 );
 
 export const selectPins = createSelector(
-	selectFilteredIssues, selectComponentState, selectActiveIssueDetails, selectShowPins, selectPointMeasurements,
-		(issues: any, componentState, detailedIssue, showPins, measurePoints) => {
+	selectFilteredIssues, selectActiveIssueDetails,
+	selectShowPins, selectShowDetails, selectActiveIssueId, selectPointMeasurements,
+	(issues: any, detailedIssue, showPins, showDetails, activeIssueId, measurePoints) => {
 
 	let pinsToShow = [];
 
@@ -138,25 +139,26 @@ export const selectPins = createSelector(
 				return pins;
 			}
 
-			pins.push(issueToPin(issue, componentState.activeIssue === issue._id ));
+			pins.push(issueToPin(issue, activeIssueId === issue._id ));
 			return pins;
 		} , []);
 	}
 
-	if (componentState.showDetails && detailedIssue && hasPin(detailedIssue)) {
+	if (showDetails && detailedIssue && hasPin(detailedIssue)) {
+		pinsToShow = pinsToShow.filter(({id}) => id !== detailedIssue._id);
 		pinsToShow.push(issueToPin(detailedIssue, true));
 	}
 
 	if (measurePoints.length) {
 		measurePoints.forEach(({ customColor, ...measure }) => {
 			const color = customColor || measure.color;
-			const colorToSet = [color.r / 255, color.g / 255, color.b / 255, color.a];
+			const colorToSet = [color.r / 255, color.g / 255, color.b / 255];
 			pinsToShow.push({
 				id: measure.uuid,
 				type: 'point',
 				isSelected: false,
-				pickedPos: measure.position,
-				colours: colorToSet,
+				position: measure.position,
+				colour: colorToSet,
 			});
 		});
 	}

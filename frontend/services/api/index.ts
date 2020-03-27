@@ -17,5 +17,6 @@ export * from './meta';
 export * from './issues';
 export * from './tree';
 export * from './invitations';
+export * from './sequences';
 
 export default API;

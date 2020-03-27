@@ -40,8 +40,8 @@ export const ticketToPin = (ticket, type, isSelected, color) =>
 		isSelected,
 		account: ticket.account,
 		model: ticket.model,
-		pickedPos: ticket.position,
-		colours: color,
+		position: ticket.position,
+		colour: color,
 		viewpoint: ticket.viewpoint
 	});
 

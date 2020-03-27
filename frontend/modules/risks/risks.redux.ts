@@ -227,7 +227,7 @@ const removeResourceSuccess =  (state = INITIAL_STATE, { resource, riskId }) => 
 };
 
 const attachResourcesSuccess = (state = INITIAL_STATE, { resources, riskId }) => {
-	resources = resources.concat(state.risksMap[riskId].resources);
+	resources = resources.concat(state.risksMap[riskId].resources || []);
 	const risksMap = updateRiskProps(state.risksMap, riskId, { resources });
 	return { ...state, risksMap};
 };
@@ -247,9 +247,7 @@ const updateResourcesSuccess = (state = INITIAL_STATE, { resourcesIds, updates, 
 	return { ...state, risksMap};
 };
 
-const reset = () => {
-	return cloneDeep(INITIAL_STATE);
-};
+const reset = () => cloneDeep(INITIAL_STATE);
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.FETCH_RISKS_SUCCESS]: fetchRisksSuccess,

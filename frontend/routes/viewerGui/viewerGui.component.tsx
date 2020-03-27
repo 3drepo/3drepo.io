@@ -31,6 +31,7 @@ import { Measure } from './components/measure';
 import { PanelButton } from './components/panelButton/panelButton.component';
 import RevisionsSwitch from './components/revisionsSwitch/revisionsSwitch.container';
 import { Risks } from './components/risks';
+import Sequences from './components/sequences/sequences.container';
 import Toolbar from './components/toolbar/toolbar.container';
 import { Tree } from './components/tree';
 import { ViewerLoader } from './components/viewerLoader';
@@ -60,7 +61,6 @@ interface IProps {
 	stopListenOnModelLoaded: () => void;
 	stopListenOnClickPin: () => void;
 	fetchData: (teamspace, model) => void;
-	loadModel: () => void;
 	resetPanelsStates: () => void;
 	resetModel: () => void;
 	setPanelVisibility: (panelName, visibility?) => void;
@@ -183,6 +183,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		[VIEWER_PANELS.TREE]: Tree,
 		[VIEWER_PANELS.COMPARE]: Compare,
 		[VIEWER_PANELS.GIS]: Gis,
+		[VIEWER_PANELS.SEQUENCES]: Sequences,
 		[VIEWER_PANELS.MEASURE]: Measure,
 	};
 
@@ -190,7 +191,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		<LeftPanels>
 			{panels.map((panel) => {
 				const PanelComponent = this.panelsMap[panel];
-				return <PanelComponent key={panel} {...this.urlParams} />;
+				return PanelComponent && <PanelComponent key={panel} {...this.urlParams} />;
 			})}
 		</LeftPanels>
 	)

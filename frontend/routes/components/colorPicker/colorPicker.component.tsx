@@ -339,7 +339,7 @@ const OpacityControl = ({ opacity, onOpacityChanged, sliderVisible, onSliderVisi
 						/>
 					</OpacityValue>
 				</Grid>
-		</Grid>
+			</Grid>
 		}
 	</>
 	);

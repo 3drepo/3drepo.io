@@ -15,10 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { difference, isEqual } from 'lodash';
 import React from 'react';
+
+import { difference, isEqual } from 'lodash';
+
 import { ROUTES } from '../../constants/routes';
-import { addColorOverrides, overridesDiff, removeColorOverrides } from '../../helpers/colorOverrides';
+import { addColorOverrides, overridesColorDiff, removeColorOverrides } from '../../helpers/colorOverrides';
 import { pinsDiff } from '../../helpers/pins';
 import { Container } from './viewerCanvas.styles';
 
@@ -34,12 +36,13 @@ interface IProps {
 		}
 	};
 	colorOverrides: any;
+	transparencies: any;
 	issuePins: any[];
 	riskPins: any[];
-
 	gisLayers: string[];
 	hasGisCoordinates: boolean;
 	gisCoordinates: any;
+	handleTransparencyOverridesChange: any;
 }
 
 export class ViewerCanvas extends React.PureComponent<IProps, any> {
@@ -65,18 +68,20 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 	}
 
 	public renderPins(prev, curr) {
-		const { viewer } = this.props;
+		if (this.shouldBeVisible) {
+			const { viewer } = this.props;
 
-		const toAdd = pinsDiff(curr, prev);
-		const toRemove = pinsDiff(prev, curr);
+			const toAdd = pinsDiff(curr, prev);
+			const toRemove = pinsDiff(prev, curr);
 
-		toRemove.forEach(viewer.removePin.bind(viewer));
-		toAdd.forEach(viewer.addPin.bind(viewer));
+			toRemove.forEach(viewer.removePin.bind(viewer));
+			toAdd.forEach(viewer.addPin.bind(viewer));
+		}
 	}
 
 	public renderColorOverrides(prev, curr) {
-		const toAdd = overridesDiff(curr, prev);
-		const toRemove = overridesDiff(prev, curr);
+		const toAdd = overridesColorDiff(curr, prev);
+		const toRemove = overridesColorDiff(prev, curr);
 
 		removeColorOverrides(toRemove);
 		addColorOverrides(toAdd);
@@ -101,10 +106,15 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 	}
 
 	public componentDidUpdate(prevProps: IProps) {
-		const { colorOverrides, issuePins, riskPins, hasGisCoordinates, gisCoordinates, gisLayers } = this.props;
+		const { colorOverrides, issuePins, riskPins, hasGisCoordinates,
+			gisCoordinates, gisLayers, transparencies } = this.props;
 
 		if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
 			this.renderColorOverrides(prevProps.colorOverrides, colorOverrides);
+		}
+
+		if (prevProps.transparencies && !isEqual(transparencies, prevProps.transparencies)) {
+			this.props.handleTransparencyOverridesChange(transparencies, prevProps.transparencies);
 		}
 
 		if (!isEqual(issuePins, prevProps.issuePins)) {
@@ -122,6 +132,7 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 		if (hasGisCoordinates && !isEqual(prevProps.gisLayers, gisLayers)) {
 			this.renderGisLayers(prevProps.gisLayers, gisLayers);
 		}
+
 	}
 
 	public render() {
