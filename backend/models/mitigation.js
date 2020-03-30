@@ -22,31 +22,32 @@ const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
 const TeamspaceSettings = require("./teamspaceSetting");
 
+// NB: Order of fieldTypes important for importCSV
 const fieldTypes = {
-	"associated_activity": "[object String]",
-	"category": "[object String]",
-	"element": "[object String]",
-	"location_desc": "[object String]",
 	"mitigation_desc": "[object String]",
 	"mitigation_detail": "[object String]",
 	"mitigation_stage": "[object String]",
 	"mitigation_type": "[object String]",
+	"category": "[object String]",
+	"location_desc": "[object String]",
+	"element": "[object String]",
 	"risk_factor": "[object String]",
-	"scope": "[object String]"
+	"scope": "[object String]",
+	"associated_activity": "[object String]"
 };
 
-class RiskMitigation {
-	getRiskMitigationCollection(account) {
+class Mitigation {
+	getMitigationCollection(account) {
 		return db.getCollection(account, "mitigations");
 	}
 
 	async clearAll(account) {
-		const mitigationColl = await this.getRiskMitigationCollection(account);
+		const mitigationColl = await this.getMitigationCollection(account);
 		return await mitigationColl.remove({});
 	}
 
 	async getCriteria(account) {
-		const mitigationColl = await this.getRiskMitigationCollection(account);
+		const mitigationColl = await this.getMitigationCollection(account);
 		const attributeBlacklist = ["mitigation_desc", "mitigation_detail"];
 		const criteriaFields = Object.keys(_.omit(fieldTypes, attributeBlacklist));
 		const criteriaPromises = [];
@@ -64,16 +65,16 @@ class RiskMitigation {
 			});
 		});
 
-		return Promise.all(criteriaPromises).then(() => {
-			// Append teamspace categories
-			criteria["category"] = [...new Set(Object.assign([], criteria.category).concat(teamspaceCategories))];
+		await Promise.all(criteriaPromises);
 
-			return criteria;
-		});
+		// Append teamspace categories
+		criteria["category"] = [...new Set(Object.assign([], criteria.category).concat(teamspaceCategories))];
+
+		return criteria;
 	}
 
 	async findMitigationSuggestions(account, criteria) {
-		const mitigationColl = await this.getRiskMitigationCollection(account);
+		const mitigationColl = await this.getMitigationCollection(account);
 		const attributeBlacklist = [
 			"mitigation_desc",
 			"mitigation_detail",
@@ -83,9 +84,8 @@ class RiskMitigation {
 		const criteriaFilterFields = Object.keys(_.omit(fieldTypes, attributeBlacklist));
 
 		// Only pick supported fields and clean empty criteria
-		criteria = _.pick(criteria, criteriaFilterFields);
 		Object.keys(criteria).forEach((key) => {
-			if (criteria[key] === null || criteria[key] === "") {
+			if (!criteriaFilterFields.includes(key) || criteria[key] === null || criteria[key] === "") {
 				delete criteria[key];
 			}
 		});
@@ -96,18 +96,7 @@ class RiskMitigation {
 	}
 
 	async importCSV(account, data) {
-		const csvFields = [
-			"mitigation_desc",
-			"mitigation_detail",
-			"mitigation_stage",
-			"mitigation_type",
-			"category",
-			"location_desc",
-			"element",
-			"risk_factor",
-			"scope",
-			"associated_activity"
-		];
+		const csvFields = Object.keys(fieldTypes);
 
 		// remove column headers defined in template
 		data = data.replace(/Treatment Title,Treatment Details,Treatment Stage,Treatment Type,Risk Category,Risk Location,Element Type,Risk Factor,Construction Scope,Associated Activity\r\n/gm,"");
@@ -124,7 +113,7 @@ class RiskMitigation {
 	}
 
 	async insert(account, mitigations) {
-		const mitigationColl = await this.getRiskMitigationCollection(account);
+		const mitigationColl = await this.getMitigationCollection(account);
 		const requiredFields = ["mitigation_desc"];
 		const optionalFields = Object.keys(_.omit(fieldTypes, requiredFields));
 
@@ -153,4 +142,4 @@ class RiskMitigation {
 	}
 }
 
-module.exports = new RiskMitigation();
+module.exports = new Mitigation();

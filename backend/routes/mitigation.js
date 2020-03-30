@@ -20,7 +20,7 @@ const express = require("express");
 const router = express.Router({mergeParams: true});
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
-const RiskMitigation = require("../models/riskMitigation");
+const Mitigation = require("../models/mitigation");
 
 /**
  * @api {get} /:teamspace/mitigations/criteria Get mitigation criteria
@@ -142,7 +142,7 @@ function findMitigationSuggestions(req, res, next) {
 	const {account} = req.params;
 	const criteria = req.body;
 
-	RiskMitigation.findMitigationSuggestions(account, criteria).then((suggestions) => {
+	Mitigation.findMitigationSuggestions(account, criteria).then((suggestions) => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, suggestions);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
@@ -153,7 +153,7 @@ function findMitigationCriteria(req, res, next) {
 	const place = utils.APIInfo(req);
 	const {account} = req.params;
 
-	RiskMitigation.getCriteria(account).then((criteria) => {
+	Mitigation.getCriteria(account).then((criteria) => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, criteria);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);

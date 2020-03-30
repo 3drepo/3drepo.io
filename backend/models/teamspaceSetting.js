@@ -49,9 +49,9 @@ class TeamspaceSettings {
 		return db.getCollection(account, colName);
 	}
 
-	async getTeamspaceSettings(account, noClean = false) {
+	async getTeamspaceSettings(account, noClean = false, projection = {}) {
 		const settingsColl = await this.getTeamspaceSettingsCollection(account);
-		let foundSettings = await settingsColl.findOne({ _id: account });
+		let foundSettings = await settingsColl.findOne({ _id: account }, projection);
 
 		if (!foundSettings) {
 			return Promise.reject(responseCodes.TEAMSPACE_SETTINGS_NOT_FOUND);
@@ -65,17 +65,16 @@ class TeamspaceSettings {
 	}
 
 	async getRiskCategories(account) {
-		const settings = await this.getTeamspaceSettings(account, true);
-		const riskCategories = Object.assign([], settings.riskCategories);
+		const settings = await this.getTeamspaceSettings(account, true, { riskCategories: 1 });
+		console.log(settings);
 
-		return riskCategories;
+		return settings.riskCategories || [];
 	}
 
 	async getTopicTypes(account) {
-		const settings = await this.getTeamspaceSettings(account, true);
-		const topicTypes = Object.assign([], settings.topicTypes);
+		const settings = await this.getTeamspaceSettings(account, true, { topicTypes: 1 });
 
-		return topicTypes;
+		return settings.topicTypes || [];
 	}
 
 	async storeMitigationsFile(account, username, sessionId, filename, file) {
@@ -148,11 +147,7 @@ class TeamspaceSettings {
 
 		let updatedSettings = {...oldSettings, ...data};
 
-		if (!noClean) {
-			updatedSettings = this.clean(updatedSettings);
-		}
-
-		return updatedSettings;
+		return (noClean) ? updatedSettings : this.clean(updatedSettings);
 	}
 }
 
