@@ -443,6 +443,11 @@ export class ViewerService {
 		UnityUtil.setMeasureToolMeasurementColor(uuid, color);
 	}
 
+	public async setMeasurementName(uuid, name) {
+		await this.isViewerReady();
+		UnityUtil.setMeasureToolMeasurementName(uuid, name);
+	}
+
 	public async enableEdgeSnapping() {
 		await this.isViewerReady();
 		UnityUtil.enableMeasureToolSnap();

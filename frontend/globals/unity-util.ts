@@ -771,7 +771,7 @@ export class UnityUtil {
 
 	/**
 	 * Set color of a particular measurement.
-	 * @param uuid - The measurement id of the measurement that will change color
+	 * @param uuid - The measurement id of the measurement that will change name
 	 */
 	public static setMeasureToolMeasurementName(uuid, name) {
 		UnityUtil.toUnity('SetMeasureToolMeasurementName', undefined, JSON.stringify({uuid, name}));
