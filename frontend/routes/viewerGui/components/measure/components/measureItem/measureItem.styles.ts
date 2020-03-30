@@ -37,9 +37,9 @@ interface IContainer {
 }
 
 export const MeasurementPoint = styled.div`
-	width: 120px;
 	text-align: right;
 	padding-right: 10px;
+	margin-left: 10px;
 `;
 
 export const MeasurementValue = styled.div`

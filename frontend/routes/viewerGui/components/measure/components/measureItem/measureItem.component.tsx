@@ -136,6 +136,8 @@ export const MeasureItem = ({
 
 	const handleSave = ({ target: { value: newName }}) => props.setMeasurementName(uuid, newName, type);
 
+	const handleSubmit = (e) => e.preventDefault();
+
 	const isPointTypeMeasure = type === MEASURE_TYPE.POINT;
 
 	return (
@@ -150,14 +152,14 @@ export const MeasureItem = ({
 					/>
 				</StyledCheckboxCell>
 			}
-			<StyledForm>
+			<StyledForm onSubmit={handleSubmit}>
 				<StyledTextField
-						left={Number(isPointTypeMeasure)}
-						requiredConfirm
-						fullWidth
-						value={name}
-						mutable
-						onChange={handleSave}
+					left={Number(isPointTypeMeasure)}
+					requiredConfirm
+					fullWidth
+					value={name}
+					mutable
+					onChange={handleSave}
 				/>
 			</StyledForm>
 			<Actions>
