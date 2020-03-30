@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -39,6 +39,7 @@ interface IProps {
 	transparencies: any;
 	issuePins: any[];
 	riskPins: any[];
+	measurementPins: any[];
 	gisLayers: string[];
 	hasGisCoordinates: boolean;
 	gisCoordinates: any;
@@ -106,7 +107,7 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 	}
 
 	public componentDidUpdate(prevProps: IProps) {
-		const { colorOverrides, issuePins, riskPins, hasGisCoordinates,
+		const { colorOverrides, issuePins, riskPins, measurementPins, hasGisCoordinates,
 			gisCoordinates, gisLayers, transparencies } = this.props;
 
 		if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
@@ -123,6 +124,10 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 
 		if (!isEqual(riskPins, prevProps.riskPins)) {
 			this.renderPins(prevProps.riskPins, riskPins);
+		}
+
+		if (!isEqual(measurementPins, prevProps.measurementPins)) {
+			this.renderPins(prevProps.measurementPins, measurementPins);
 		}
 
 		if (hasGisCoordinates && !isEqual(prevProps.gisCoordinates, gisCoordinates)) {

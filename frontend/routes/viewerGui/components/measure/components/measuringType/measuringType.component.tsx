@@ -58,7 +58,8 @@ export const MeasuringType = ({
 	};
 
 	const handleClickBackground = () => {
-		return null;
+		setMeasureMode('');
+		return deactivateMeasure();
 	};
 
 	const togglePinListeners = (enabled: boolean) => {

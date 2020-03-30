@@ -837,7 +837,7 @@ export class UnityUtil {
 	 * @param normal - normal vector for the pin (note: this is no longer used)
 	 * @param colour - RGB value for the colour of the pin
 	 */
-	public static dropBookmarkPin(id: string, position: [number], normal: [number], colour: [number]) {
+	public static dropBookmarkPin(id: string, position: number[], normal: number[], colour: number[]) {
 		const params = {
 			id,
 			position,

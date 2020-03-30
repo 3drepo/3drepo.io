@@ -632,8 +632,10 @@ export class ViewerService {
 		await this.isModelLoaded();
 		if (type === 'risk') {
 			UnityUtil.dropRiskPin(id, position, norm, colour);
-		} else {
+		} else if (type === 'issue') {
 			UnityUtil.dropIssuePin(id, position, norm, colour);
+		} else {
+			UnityUtil.dropBookmarkPin(id, position, norm, colour);
 		}
 		if (isSelected) {
 			UnityUtil.selectPin(id);

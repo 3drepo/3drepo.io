@@ -20,7 +20,6 @@ import { createSelector } from 'reselect';
 import { STATUSES } from '../../constants/issues';
 import { hasPin, issueToPin } from '../../helpers/pins';
 import { searchByFilters } from '../../helpers/searching';
-import { selectPointMeasurements } from '../measure';
 import { selectCurrentModel } from '../model';
 import { selectQueryParams } from '../router/router.selectors';
 
@@ -128,8 +127,8 @@ export const selectSelectedIssue = createSelector(
 
 export const selectPins = createSelector(
 	selectFilteredIssues, selectActiveIssueDetails,
-	selectShowPins, selectShowDetails, selectActiveIssueId, selectPointMeasurements,
-	(issues: any, detailedIssue, showPins, showDetails, activeIssueId, measurePoints) => {
+	selectShowPins, selectShowDetails, selectActiveIssueId,
+	(issues: any, detailedIssue, showPins, showDetails, activeIssueId) => {
 
 	let pinsToShow = [];
 
@@ -147,20 +146,6 @@ export const selectPins = createSelector(
 	if (showDetails && detailedIssue && hasPin(detailedIssue)) {
 		pinsToShow = pinsToShow.filter(({id}) => id !== detailedIssue._id);
 		pinsToShow.push(issueToPin(detailedIssue, true));
-	}
-
-	if (measurePoints.length) {
-		measurePoints.forEach(({ customColor, ...measure }) => {
-			const color = customColor || measure.color;
-			const colorToSet = [color.r / 255, color.g / 255, color.b / 255];
-			pinsToShow.push({
-				id: measure.uuid,
-				type: 'point',
-				isSelected: false,
-				position: measure.position,
-				colour: colorToSet,
-			});
-		});
 	}
 
 	return pinsToShow;
