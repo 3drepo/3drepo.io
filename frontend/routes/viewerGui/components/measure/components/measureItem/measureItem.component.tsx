@@ -96,7 +96,8 @@ export const getValue = (measureValue: number, units: string, type: number, mode
 	])(units);
 };
 
-export const getColor = ({ r, g, b }) => `#${[r, g, b].map(componentToHex).join('')}`;
+export const getColor = ({ r, g, b }) => `#${[r, g, b].map((color) =>
+	componentToHex(Math.trunc(color))).join('')}`;
 
 export const getUnits = (units: string, type: number) => {
 	if (type === MEASURE_TYPE.AREA) {
