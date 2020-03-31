@@ -10,5 +10,9 @@
   "unitydll" : {
 	"current": "2.8.0",
 	"supported" : []
+  },
+  "vba" : {
+	"current" : "4.4.0",
+	"supported": []
   }
 }
