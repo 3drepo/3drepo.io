@@ -20,13 +20,14 @@ import React from 'react';
 import Grid from '@material-ui/core/Grid';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
+import { isEmpty } from 'lodash';
 import { forOwn, pick, uniq } from 'lodash';
 
 import { LabelButton } from '../../../../viewerGui/components/labelButton/labelButton.styles';
+import { EmptyStateInfo } from '../../../../viewerGui/components/views/views.styles';
 import { CellSelect } from '../../../customTable/components/cellSelect/cellSelect.component';
 import {
 	Container, Label, StyledDialogContent, StyledGrid, StyledList, StyledListItem, StyledTypography,
-	TextContainer,
 } from './suggestedTreatmentsDialog.styles';
 import { SuggestionDetails } from './suggestionDetails/suggestionDetails.component';
 
@@ -47,30 +48,23 @@ const TextWrapper: React.FunctionComponent<ITextWrapper> = ({
 	</StyledTypography>
 );
 
-const renderDetails = (suggestion) => (
-	<Grid container>
-		<TextContainer item xs={12}>
-			<TextWrapper noWrap color="textSecondary">
-				{suggestion.mitigation_details}
-			</TextWrapper>
-		</TextContainer>
-		<TextContainer item xs={4} zeroMinWidth>
-			<TextWrapper noWrap>
-				Stage:&nbsp;
-				<TextWrapper inline color="textSecondary">
-					{suggestion.mitigation_stage}
-				</TextWrapper>
-			</TextWrapper>
-		</TextContainer>
-		<Grid item xs={4}>
-			<TextWrapper noWrap>
-				Type:&nbsp;
-				<TextWrapper inline color="textSecondary">
-					{suggestion.mitigation_type}
-				</TextWrapper>
-			</TextWrapper>
-		</Grid>
-	</Grid>
+const SuggestionsList = ({ suggestions, onClick }) => (
+	<StyledList dense>
+		{suggestions.map((suggestion, index) => (
+			<StyledListItem key={index} disableGutters divider>
+				<ListItemText
+					primary={suggestion.mitigation_desc}
+					secondary={<SuggestionDetails {...suggestion} />}
+					secondaryTypographyProps={{
+						component: 'div',
+					}}
+				/>
+				<ListItemSecondaryAction>
+					<LabelButton onClick={() => onClick(suggestion)}>Select</LabelButton>
+				</ListItemSecondaryAction>
+			</StyledListItem>
+		))}
+	</StyledList>
 );
 
 const getStageOptions = (suggestions) => [{ value: '', name: 'All' }, ...uniq(suggestions
@@ -149,22 +143,8 @@ export const SuggestedTreatmentsDialog = ({ suggestions, setFieldValue, handleCl
 				</Grid>
 			</StyledGrid>
 			<StyledDialogContent>
-				<StyledList dense>
-					{getSuggestions.map((suggestion, index) => (
-						<StyledListItem key={index} disableGutters divider>
-							<ListItemText
-								primary={suggestion.mitigation_desc}
-								secondary={<SuggestionDetails {...suggestion} />}
-								secondaryTypographyProps={{
-									component: 'div',
-								}}
-							/>
-							<ListItemSecondaryAction>
-								<LabelButton onClick={() => handleClick(suggestion)}>Select</LabelButton>
-							</ListItemSecondaryAction>
-						</StyledListItem>
-					))}
-				</StyledList>
+				{!isEmpty(suggestions) && <SuggestionsList suggestions={getSuggestions} onClick={handleClick} />}
+				{isEmpty(suggestions) && <EmptyStateInfo>No suggestion found</EmptyStateInfo>}
 			</StyledDialogContent>
 		</Container>
 	);
