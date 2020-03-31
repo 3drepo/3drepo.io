@@ -54,7 +54,6 @@ import {
 	selectActiveRiskId,
 	selectComponentState,
 	selectFilteredRisks,
-	selectMitigationCriteriaTeamspace,
 	selectRisks,
 	selectRisksMap
 } from './risks.selectors';
@@ -155,6 +154,7 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 		const preparedRisk = prepareRisk(savedRisk, jobs);
 
 		finishSubmitting();
+		yield put(RisksActions.setComponentState({ activeRisk: preparedRisk._id }));
 		yield put(RisksActions.saveRiskSuccess(preparedRisk));
 
 		if (!ignoreViewer) {
@@ -638,13 +638,10 @@ export function* attachLinkResources({ links }) {
 	}
 }
 
-function* fetchMitigationCriteria({teamspace}) {
+function* fetchMitigationCriteria({ teamspace }) {
 	try {
-		const mitigationCriteriaTeamspace = yield select(selectMitigationCriteriaTeamspace);
-		if (mitigationCriteriaTeamspace !== teamspace) {
-			const {data} = yield API.getMitigationCriteria(teamspace);
-			yield put(RisksActions.fetchMitigationCriteriaSuccess(data, teamspace));
-		}
+		const {data} = yield API.getMitigationCriteria(teamspace);
+		yield put(RisksActions.fetchMitigationCriteriaSuccess(data, teamspace));
 	} catch (error) {
 		yield put(RisksActions.fetchMitigationCriteriaFailure());
 		yield put(DialogActions.showErrorDialog('get', 'mitigation criteria', error));
