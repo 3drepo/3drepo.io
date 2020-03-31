@@ -23,13 +23,12 @@ const ResponseCodes = require("../response_codes");
 const systemLogger = require("../logger.js").systemLogger;
 const nodeuuid = require("uuid/v1");
 
-const FILE_REF_EXT = ".ref";
 const ORIGINAL_FILE_REF_EXT = ".history.ref";
 const UNITY_BUNDLE_REF_EXT = ".stash.unity3d.ref";
 const JSON_FILE_REF_EXT = ".stash.json_mpc.ref";
 const RESOURCES_FILE_REF_EXT = ".resources.ref";
 
-const MITIGATIONS_FILE_REF = "mitigations" + FILE_REF_EXT;
+const MITIGATIONS_FILE_REF = "mitigations.ref";
 const MITIGATIONS_ID = "mitigations";
 
 const ISSUES_RESOURCE_PROP = "issueIds";
@@ -44,17 +43,17 @@ function getRefEntry(account, collection, fileName) {
 	});
 }
 
-function fetchModelFile(account, model, ext, fileName, metadata = false) {
+function fetchModelFile(account, model, ext, fileName, metadata = false, useLegacyNameOnFallback = false) {
 	const collection = model + ext;
 
-	return fetchFile(account, model, collection, ext, fileName, metadata);
+	return fetchFile(account, model, collection, fileName, metadata, useLegacyNameOnFallback);
 }
 
-function fetchTeamspaceFile(account, collection, ext, fileName, metadata = false) {
-	return fetchFile(account, null, collection, ext, fileName, metadata);
+function fetchTeamspaceFile(account, collection, fileName, metadata = false, useLegacyNameOnFallback = false) {
+	return fetchFile(account, null, collection, fileName, metadata, useLegacyNameOnFallback);
 }
 
-function fetchFile(account, model, collection, ext, fileName, metadata = false) {
+function fetchFile(account, model, collection, fileName, metadata = false, useLegacyNameOnFallback = false) {
 	return getRefEntry(account, collection, fileName).then((entry) => {
 		if(!entry) {
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
@@ -70,9 +69,10 @@ function fetchFile(account, model, collection, ext, fileName, metadata = false) 
 			});
 
 			// Temporary fall back - read from gridfs
-			const fullName = ext === ORIGINAL_FILE_REF_EXT || ext === FILE_REF_EXT ?
-				fileName :
-				`/${account}/${model}/${fileName.split("/").length > 1 ? "revision/" : ""}${fileName}`;
+			// const fullName = ext === ORIGINAL_FILE_REF_EXT || ext === FILE_REF_EXT ?
+			const fullName = useLegacyNameOnFallback ?
+				`/${account}/${model}/${fileName.split("/").length > 1 ? "revision/" : ""}${fileName}` :
+				fileName;
 			return ExternalServices.getFile(account, collection, "gridfs", fullName);
 		}).then(fileBuffer=> {
 			if (metadata) {
@@ -84,7 +84,7 @@ function fetchFile(account, model, collection, ext, fileName, metadata = false) 
 	});
 }
 
-function fetchFileStream(account, model, ext, fileName) {
+function fetchFileStream(account, model, ext, fileName, useLegacyNameOnFallback = false) {
 	const collection = model + ext;
 	return getRefEntry(account, collection, fileName).then((entry) => {
 		if(!entry) {
@@ -101,9 +101,10 @@ function fetchFileStream(account, model, ext, fileName) {
 			});
 
 			// Temporary fall back - read from gridfs
-			const fullName = ext === ORIGINAL_FILE_REF_EXT ?
-				fileName :
-				`/${account}/${model}/${fileName.split("/").length > 1 ? "revision/" : ""}${fileName}`;
+			// const fullName = ext === ORIGINAL_FILE_REF_EXT ?
+			const fullName = useLegacyNameOnFallback ?
+				`/${account}/${model}/${fileName.split("/").length > 1 ? "revision/" : ""}${fileName}` :
+				fileName;
 			return ExternalServices.getFileStream(account, collection, "gridfs", fullName).then((stream) => {
 				return {readStream: stream, size: entry.size };
 			});
@@ -154,7 +155,7 @@ async function insertRefInResources(account, model, user, name, refInfo) {
 const FileRef = {};
 
 FileRef.getOriginalFile = function(account, model, fileName) {
-	return fetchFileStream(account, model, ORIGINAL_FILE_REF_EXT, fileName);
+	return fetchFileStream(account, model, ORIGINAL_FILE_REF_EXT, fileName, true);
 };
 
 FileRef.getTotalModelFileSize = function(account, model) {
@@ -182,19 +183,19 @@ FileRef.getTotalModelFileSize = function(account, model) {
 };
 
 FileRef.getUnityBundle = function(account, model, fileName) {
-	return fetchModelFile(account, model, UNITY_BUNDLE_REF_EXT, fileName);
+	return fetchModelFile(account, model, UNITY_BUNDLE_REF_EXT, fileName, false, false);
 };
 
 FileRef.getJSONFile = function(account, model, fileName) {
-	return fetchModelFile(account, model, JSON_FILE_REF_EXT, fileName);
+	return fetchModelFile(account, model, JSON_FILE_REF_EXT, fileName, false, false);
 };
 
 FileRef.getMitigationsFile = function(account) {
-	return fetchTeamspaceFile(account, MITIGATIONS_FILE_REF, FILE_REF_EXT, MITIGATIONS_ID);
+	return fetchTeamspaceFile(account, MITIGATIONS_FILE_REF, MITIGATIONS_ID, false, false);
 };
 
 FileRef.getResourceFile = function(account, model, fileName) {
-	return fetchModelFile(account, model, RESOURCES_FILE_REF_EXT, fileName, true);
+	return fetchModelFile(account, model, RESOURCES_FILE_REF_EXT, fileName, true, false);
 };
 
 /**
@@ -204,7 +205,7 @@ FileRef.getResourceFile = function(account, model, fileName) {
  * @returns { Promise<{readStream: stream.Readable , size: Number}>}
  */
 FileRef.getJSONFileStream = function(account, model, fileName) {
-	return fetchFileStream(account, model, JSON_FILE_REF_EXT, fileName);
+	return fetchFileStream(account, model, JSON_FILE_REF_EXT, fileName, false);
 };
 
 FileRef.removeAllFilesFromModel = function(account, model) {

@@ -57,16 +57,11 @@ class TeamspaceSettings {
 			return Promise.reject(responseCodes.TEAMSPACE_SETTINGS_NOT_FOUND);
 		}
 
-		if (!noClean) {
-			foundSettings = this.clean(foundSettings);
-		}
-
-		return foundSettings;
+		return (noClean) ? foundSettings : this.clean(foundSettings);
 	}
 
 	async getRiskCategories(account) {
 		const settings = await this.getTeamspaceSettings(account, true, { riskCategories: 1 });
-		console.log(settings);
 
 		return settings.riskCategories || [];
 	}

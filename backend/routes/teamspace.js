@@ -661,7 +661,7 @@
 			fileFilter: fileFilter
 		});
 
-		upload.single("file")(req, res, function (err) {
+		upload.single("file")(req, res, (err) => {
 			if (err) {
 				return responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err , err.resCode ? err.resCode : err);
 			} else {
