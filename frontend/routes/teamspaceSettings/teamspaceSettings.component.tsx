@@ -237,9 +237,9 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 				>
 					<StyledForm>
 						<StyledGrid>
-							<Headline color="primary" variant="subheading">Teamspace</Headline>
 							<TextField
 									value={this.teamspace}
+									label="Teamspace"
 									margin="dense"
 									fullWidth
 									disabled
@@ -247,8 +247,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 						</StyledGrid>
 
 						<StyledGrid>
-							<Headline color="primary" variant="subheading">Issues</Headline>
-							<Headline color="textPrimary" variant="subheading">Topic Types</Headline>
+							<Headline color="textPrimary" variant="subheading">Issues Topic Types</Headline>
 							<Field
 								name="topicTypes"
 								render={({ field }) => <ChipsInput {...field} placeholder={'Enter new topic type...'} />}
@@ -256,8 +255,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 						</StyledGrid>
 
 						<StyledGrid paddingBottom>
-							<Headline color="primary" variant="subheading">Risks</Headline>
-							<Headline color="textPrimary" variant="subheading">Categories</Headline>
+							<Headline color="textPrimary" variant="subheading">Risks Categories</Headline>
 							<Field
 								name="riskCategories"
 								render={({ field }) => <ChipsInput {...field} placeholder="Enter new category..." />}
