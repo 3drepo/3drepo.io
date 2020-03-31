@@ -102,9 +102,7 @@ export const INITIAL_STATE = {
 		sortOrder: 'desc',
 		failedToLoad: false
 	},
-	mitigationCriteria: {
-		teamspace: '',
-	},
+	mitigationCriteria: {},
 };
 
 const updateRiskProps = (risksMap, riskId, props = {}) => {
