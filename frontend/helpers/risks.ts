@@ -124,12 +124,12 @@ export const getRiskLikelihoodName = (likelihood: number) => {
 	return (filteredDefinitions.length > 0) ? filteredDefinitions[0].name : '(invalid)';
 };
 
-export const getRiskStatus = (levelOfRisk: number, mitigationStatus: string) => ({
-	Icon: RISK_LEVELS_ICONS[mitigationStatus] || null,
-	color: (typeof levelOfRisk === undefined)
-			? COLOR.SOFT_BLUE
-			: RISK_LEVELS_COLOURS[levelOfRisk] && RISK_LEVELS_COLOURS[levelOfRisk].color,
-});
+export const getRiskStatus = (levelOfRisk: number, mitigationStatus: string) => {
+	return ({
+		Icon: RISK_LEVELS_ICONS[mitigationStatus] || null,
+		color: RISK_LEVELS_COLOURS[levelOfRisk].color,
+	});
+}
 
 export const getRiskPinColor = (risk) => {
 	const levelOfRisk = (risk.overall_level_of_risk !== undefined) ? risk.overall_level_of_risk : 4;

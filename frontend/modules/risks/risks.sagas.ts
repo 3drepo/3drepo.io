@@ -154,6 +154,7 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 		const preparedRisk = prepareRisk(savedRisk, jobs);
 
 		finishSubmitting();
+		yield put(RisksActions.setComponentState({ activeRisk: preparedRisk._id }));
 		yield put(RisksActions.saveRiskSuccess(preparedRisk));
 
 		if (!ignoreViewer) {
