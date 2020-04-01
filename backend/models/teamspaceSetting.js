@@ -33,13 +33,6 @@ const fieldTypes = {
 };
 
 class TeamspaceSettings {
-	clean(settingsToClean) {
-		settingsToClean.teamspace = settingsToClean._id;
-		delete settingsToClean._id;
-
-		return settingsToClean;
-	}
-
 	filterFields(data, blackList) {
 		data = _.omit(data, blackList);
 		return _.pick(data, Object.keys(fieldTypes));
@@ -49,7 +42,7 @@ class TeamspaceSettings {
 		return db.getCollection(account, colName);
 	}
 
-	async getTeamspaceSettings(account, noClean = false, projection = {}) {
+	async getTeamspaceSettings(account, projection = {}) {
 		const settingsColl = await this.getTeamspaceSettingsCollection(account);
 		let foundSettings = await settingsColl.findOne({ _id: account }, projection);
 
@@ -57,17 +50,17 @@ class TeamspaceSettings {
 			return Promise.reject(responseCodes.TEAMSPACE_SETTINGS_NOT_FOUND);
 		}
 
-		return (noClean) ? foundSettings : this.clean(foundSettings);
+		return foundSettings;
 	}
 
 	async getRiskCategories(account) {
-		const settings = await this.getTeamspaceSettings(account, true, { riskCategories: 1 });
+		const settings = await this.getTeamspaceSettings(account, { riskCategories: 1 });
 
 		return settings.riskCategories || [];
 	}
 
 	async getTopicTypes(account) {
-		const settings = await this.getTeamspaceSettings(account, true, { topicTypes: 1 });
+		const settings = await this.getTeamspaceSettings(account, { topicTypes: 1 });
 
 		return settings.topicTypes || [];
 	}
@@ -89,15 +82,15 @@ class TeamspaceSettings {
 		});
 	}
 
-	async getMitigationsFile(account) {
-		return await FileRef.getMitigationsFile(account);
+	async getMitigationsStream(account) {
+		return await FileRef.getMitigationsStream(account);
 	}
 
-	async update(account, data, noClean = false) {
+	async update(account, data) {
 		const attributeBlacklist = ["_id", "mitigationsUpdatedAt"];
 		const labelFields = ["riskCategories", "topicTypes"];
 
-		const oldSettings = await this.getTeamspaceSettings(account, true);
+		const oldSettings = await this.getTeamspaceSettings(account);
 
 		// Filter out blacklisted attributes and leave proper attrs
 		data = this.filterFields(data, attributeBlacklist);
@@ -120,7 +113,7 @@ class TeamspaceSettings {
 
 		let updatedSettings = {...oldSettings, ...data};
 
-		return (noClean) ? updatedSettings : this.clean(updatedSettings);
+		return updatedSettings;
 	}
 }
 

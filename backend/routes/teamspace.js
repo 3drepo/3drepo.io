@@ -117,7 +117,7 @@
 	 * 		"GIS"
 	 * 	],
 	 * 	"mitigationsUpdatedAt":1567156228976,
-	 * 	"teamspace":"acme"
+	 * 	"_id":"acme"
 	 * }
 	 */
 	router.get("/settings", middlewares.isAccountAdmin, getTeamspaceSettings);
@@ -164,7 +164,7 @@
 	 * 		"New Topic 2"
 	 * 	],
 	 * 	"mitigationsUpdatedAt":1567156228976,
-	 * 	"teamspace":"acme"
+	 * 	"_id":"acme"
 	 * }
 	 */
 	router.put("/settings", middlewares.isAccountAdmin, updateTeamspaceSettings);
