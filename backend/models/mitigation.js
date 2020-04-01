@@ -58,11 +58,9 @@ class Mitigation {
 		teamspaceCategories = teamspaceCategories.map(x => x.label);
 
 		criteriaFields.forEach((field) => {
-			const promise = mitigationColl.distinct(field, {});
-			criteriaPromises.push(promise);
-			promise.then((values) => {
+			criteriaPromises.push(mitigationColl.distinct(field, {}).then((values) => {
 				criteria[field] = values;
-			});
+			}));
 		});
 
 		await Promise.all(criteriaPromises);
@@ -90,9 +88,7 @@ class Mitigation {
 			}
 		});
 
-		const suggestions = await mitigationColl.find(criteria).toArray();
-
-		return suggestions;
+		return await mitigationColl.find(criteria).toArray();
 	}
 
 	async importCSV(account, data) {

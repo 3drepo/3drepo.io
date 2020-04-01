@@ -89,6 +89,10 @@ class TeamspaceSettings {
 		});
 	}
 
+	async getMitigationsFile(account) {
+		return await FileRef.getMitigationsFile(account);
+	}
+
 	async update(account, data, noClean = false) {
 		const attributeBlacklist = ["_id", "mitigationsUpdatedAt"];
 		const labelFields = ["riskCategories", "topicTypes"];
@@ -104,33 +108,7 @@ class TeamspaceSettings {
 
 		labelFields.forEach((key) => {
 			if (Object.prototype.toString.call(data[key]) === "[object Array]") {
-				const labelObject = {};
-				data[key].forEach(label => {
-					if (label &&
-						Object.prototype.toString.call(label) === "[object String]" &&
-						label.trim()) {
-						// generate value from label
-						const value = label.trim().toLowerCase().replace(/ /g, "_").replace(/&/g, "");
-
-						if (labelObject[value]) {
-							switch (key) {
-								case "riskCategories":
-									throw responseCodes.RISK_DUPLICATE_CATEGORY;
-								case "topicTypes":
-									throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;
-							}
-						} else {
-							labelObject[value] = {
-								value,
-								label: label.trim()
-							};
-						}
-					} else {
-						throw responseCodes.INVALID_ARGUMENTS;
-					}
-				});
-
-				data[key] = _.values(labelObject);
+				data[key] = data[key].map(label => label.trim());
 			} else if (data[key]) {
 				throw responseCodes.INVALID_ARGUMENTS;
 			}

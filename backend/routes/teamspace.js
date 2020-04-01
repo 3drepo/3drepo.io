@@ -29,7 +29,6 @@
 	const config = require("../config.js");
 	const TeamspaceSettings = require("../models/teamspaceSetting");
 	const Mitigation = require("../models/mitigation");
-	const FileRef = require("../models/fileRef");
 	const User = require("../models/user");
 	const utils = require("../utils");
 
@@ -610,7 +609,7 @@
 	}
 
 	function getMitigationsFile(req, res, next) {
-		FileRef.getMitigationsFile(req.params.account).then((mitigations) => {
+		TeamspaceSettings.getMitigationsFile(req.params.account).then((mitigations) => {
 			const timestamp = (new Date()).toLocaleString();
 			const filenamePrefix = (req.params.account + "_" + timestamp + "_").replace(/\W+/g, "_");
 

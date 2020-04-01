@@ -84,8 +84,7 @@ function fetchFile(account, model, collection, fileName, metadata = false, useLe
 	});
 }
 
-function fetchFileStream(account, model, ext, fileName, useLegacyNameOnFallback = false) {
-	const collection = model + ext;
+function fetchFileStream(account, model, collection, fileName, useLegacyNameOnFallback = false) {
 	return getRefEntry(account, collection, fileName).then((entry) => {
 		if(!entry) {
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
@@ -101,7 +100,6 @@ function fetchFileStream(account, model, ext, fileName, useLegacyNameOnFallback 
 			});
 
 			// Temporary fall back - read from gridfs
-			// const fullName = ext === ORIGINAL_FILE_REF_EXT ?
 			const fullName = useLegacyNameOnFallback ?
 				`/${account}/${model}/${fileName.split("/").length > 1 ? "revision/" : ""}${fileName}` :
 				fileName;
@@ -155,7 +153,8 @@ async function insertRefInResources(account, model, user, name, refInfo) {
 const FileRef = {};
 
 FileRef.getOriginalFile = function(account, model, fileName) {
-	return fetchFileStream(account, model, ORIGINAL_FILE_REF_EXT, fileName, true);
+	const collection = model + ORIGINAL_FILE_REF_EXT;
+	return fetchFileStream(account, model, collection, fileName, true);
 };
 
 FileRef.getTotalModelFileSize = function(account, model) {
@@ -194,6 +193,10 @@ FileRef.getMitigationsFile = function(account) {
 	return fetchTeamspaceFile(account, MITIGATIONS_FILE_REF, MITIGATIONS_ID, false, false);
 };
 
+FileRef.getMitigationsStream = function(account) {
+	return fetchFileStream(account, undefined, MITIGATIONS_FILE_REF, MITIGATIONS_ID, false);
+};
+
 FileRef.getResourceFile = function(account, model, fileName) {
 	return fetchModelFile(account, model, RESOURCES_FILE_REF_EXT, fileName, true, false);
 };
@@ -205,7 +208,8 @@ FileRef.getResourceFile = function(account, model, fileName) {
  * @returns { Promise<{readStream: stream.Readable , size: Number}>}
  */
 FileRef.getJSONFileStream = function(account, model, fileName) {
-	return fetchFileStream(account, model, JSON_FILE_REF_EXT, fileName, false);
+	const collection = model + JSON_FILE_REF_EXT;
+	return fetchFileStream(account, model, collection, fileName, false);
 };
 
 FileRef.removeAllFilesFromModel = function(account, model) {
