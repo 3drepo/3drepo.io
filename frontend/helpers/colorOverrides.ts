@@ -15,15 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { getState } from '../modules/store';
-import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds, selectTreeNodesList } from '../modules/tree';
+import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds,
+	selectTreeNodesList } from '../modules/tree';
 import { Viewer } from '../services/viewer/viewer';
 import { hexToGLColor } from './colors';
 
-export const getGroupOverride = (overrides, group) => {
-	const color = group.color;
+export const getGroupOverride = (overrides, group, value) => {
 	group.objects.forEach((object) => {
 		object.shared_ids.forEach((sharedId) => {
-			overrides[sharedId] = color;
+			overrides[sharedId] = value;
 		});
 	});
 	return overrides;
@@ -31,30 +31,34 @@ export const getGroupOverride = (overrides, group) => {
 
 export const getColorOverrides = (groups) => groups.reduce(getGroupOverride, {});
 
-export const overridesDiff = (overrideA, overrideB) => {
+export const overridesDiff = (field) => (overrideA, overrideB) => {
 	const keys = Object.keys(overrideA);
 	const diff = {};
 	const result = [];
-	let color = null;
+	let value = null;
 
 	keys.forEach((key) => {
 		if (overrideA[key] !== overrideB[key]) {
-			color = overrideA[key];
+			value = overrideA[key];
 
-			if (!diff[color]) {
-				const overrideByColor = {color, shared_ids: []};
-				diff[color] = overrideByColor;
+			if (!diff[value]) {
+				const overrideByColor = {[field]: value, shared_ids: []};
+				diff[value] = overrideByColor;
 				result.push(overrideByColor);
 			}
 
-			diff[color].shared_ids.push(key);
+			diff[value].shared_ids.push(key);
 		}
 	});
 
 	return result;
 };
 
-export const addColorOverrides = (overrides) => {
+export const overridesColorDiff = overridesDiff('color');
+
+export const overridesTransparencyDiff = overridesDiff('transparency');
+
+export const addOverrides = (field, valueConvert, addOverride) => async (overrides) => {
 	if (!overrides.length) {
 		return;
 	}
@@ -63,7 +67,7 @@ export const addColorOverrides = (overrides) => {
 
 	for (let i = 0; i < overrides.length; i++) {
 		const override = overrides[i];
-		const color = hexToGLColor(override.color);
+		const value = valueConvert(override[field]);
 
 		if (treeNodes.length) {
 			const selectNodes = selectGetNodesIdsFromSharedIds([override]);
@@ -75,14 +79,26 @@ export const addColorOverrides = (overrides) => {
 
 				for (let j = 0; j < modelsList.length; j++) {
 					const { meshes, teamspace, modelId } = modelsList[j] as any;
-					Viewer.overrideMeshColor(teamspace, modelId, meshes, color);
+					addOverride(teamspace, modelId, meshes, value);
 				}
 			}
 		}
 	}
 };
 
-export const removeColorOverrides = (overrides) => {
+export const addColorOverrides = addOverrides('color', hexToGLColor, Viewer.overrideMeshColor.bind(Viewer));
+
+export const addTransparencyOverrides = addOverrides('transparency', parseFloat,
+	(teamspace, modelId, meshes, transparency) => {
+		if (transparency === 0) {
+			Viewer.switchObjectVisibility(teamspace, modelId, meshes, false);
+		} else {
+			// Viewer.switchObjectVisibility(teamspace, modelId, meshes, true);
+			Viewer.overrideMeshOpacity(teamspace, modelId, meshes, transparency);
+		}
+	});
+
+export const removeOverrides = (resetMesh) => async (overrides) => {
 	if (!overrides.length) {
 		return;
 	}
@@ -103,9 +119,15 @@ export const removeColorOverrides = (overrides) => {
 
 				for (let j = 0; j < modelsList.length; j++) {
 					const { meshes, teamspace, modelId } = modelsList[j] as any;
-					Viewer.resetMeshColor(teamspace, modelId, meshes);
+					resetMesh(teamspace, modelId, meshes);
 				}
 			}
 		}
 	}
 };
+
+export const removeColorOverrides = removeOverrides(Viewer.resetMeshColor.bind(Viewer));
+export const removeTransparencyOverrides = removeOverrides((teamspace, modelId, meshes) => {
+	Viewer.switchObjectVisibility(teamspace, modelId, meshes, true);
+	Viewer.resetMeshOpacity(teamspace, modelId, meshes);
+});

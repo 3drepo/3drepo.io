@@ -346,7 +346,7 @@ function* focusOnRisk({ risk, revision }) {
 		yield Viewer.isViewerReady();
 
 		// Remove highlight from any multi objects
-		Viewer.highlightObjects([]);
+		Viewer.clearHighlights();
 		yield put(TreeActions.clearCurrentlySelected());
 
 		const hasViewpoint = risk.viewpoint;
@@ -372,11 +372,7 @@ function* focusOnRisk({ risk, revision }) {
 				Viewer.setCamera({ ...viewpoint, account, model });
 			}
 
-			yield Viewer.updateClippingPlanes({
-				clippingPlanes: viewpoint.clippingPlanes,
-				account,
-				model
-			});
+			yield Viewer.updateClippingPlanes(viewpoint.clippingPlanes, account, model);
 		} else {
 			yield Viewer.goToDefaultViewpoint();
 		}

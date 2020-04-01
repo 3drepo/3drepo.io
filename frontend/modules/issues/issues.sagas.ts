@@ -365,7 +365,7 @@ function* focusOnIssue({ issue, revision }) {
 		yield Viewer.isViewerReady();
 
 		// Remove highlight from any multi objects
-		yield Viewer.highlightObjects([]);
+		yield Viewer.clearHighlights();
 		yield put(TreeActions.clearCurrentlySelected());
 
 		const hasViewpoint = issue.viewpoint;
@@ -391,11 +391,7 @@ function* focusOnIssue({ issue, revision }) {
 				Viewer.setCamera({ ...viewpoint, account, model });
 			}
 
-			yield Viewer.updateClippingPlanes({
-				clippingPlanes: viewpoint.clippingPlanes,
-				account,
-				model
-			});
+			yield Viewer.updateClippingPlanes(viewpoint.clippingPlanes, account, model);
 		} else {
 			yield Viewer.goToDefaultViewpoint();
 		}

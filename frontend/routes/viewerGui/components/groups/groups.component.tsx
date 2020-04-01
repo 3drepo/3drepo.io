@@ -272,7 +272,9 @@ export class Groups extends React.PureComponent<IProps, IState> {
 
 	public toggleViewerEvents = (enabled = true) => {
 		const eventHandler = enabled ? 'on' : 'off';
+		if (this.props.viewer) {
 		this.props.viewer[eventHandler](VIEWER_EVENTS.BACKGROUND_SELECTED, this.resetActiveGroup);
+		}
 	}
 
 	public getOverriddenColor = (groupId, color) => {

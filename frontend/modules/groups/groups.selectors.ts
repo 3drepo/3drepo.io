@@ -18,6 +18,7 @@
 import { values } from 'lodash';
 import { createSelector } from 'reselect';
 import { getGroupOverride } from '../../helpers/colorOverrides';
+import { getTransparency, hasTransparency } from '../../helpers/colors';
 import { searchByFilters } from '../../helpers/searching';
 
 export const selectGroupsDomain = (state) => ({...state.groups});
@@ -99,7 +100,7 @@ export const selectCriteriaFieldState = createSelector(
 	selectComponentState, (state) => state.criteriaFieldState
 );
 
-export const selectOverrides = createSelector(
+const selectOverridesDict = createSelector(
 	selectColorOverrides, selectFilteredGroups, selectComponentState, (groupOverrides, filteredGroups, componentState) => {
 		const filteredGroupsMap = filteredGroups.reduce((map, group) => {
 			map[group._id] = group;
@@ -109,9 +110,22 @@ export const selectOverrides = createSelector(
 		return groupOverrides.reduce((overrides, groupId) => {
 			// filter out the filtered groups and if its showing details the selected group
 			if (filteredGroupsMap[groupId] && (!componentState.showDetails || componentState.activeGroup !== groupId)) {
-				getGroupOverride(overrides, filteredGroupsMap[groupId]);
+				const group = filteredGroupsMap[groupId];
+				getGroupOverride(overrides.colors, group, group.color);
+
+				if (hasTransparency(group.color)) {
+					getGroupOverride(overrides.transparencies, group, getTransparency(group.color));
+				}
 			}
 			return overrides;
-		}, {});
+		}, {colors: {}, transparencies: {} });
 	}
+);
+
+export const selectOverrides = createSelector(
+	selectOverridesDict, (overrides) => overrides.colors
+);
+
+export const selectTransparencies = createSelector(
+	selectOverridesDict, (overrides) => overrides.transparencies
 );

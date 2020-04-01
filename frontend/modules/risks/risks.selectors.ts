@@ -29,9 +29,7 @@ export const selectRisksMap = createSelector(
 );
 
 export const selectRisks = createSelector(
-	selectRisksMap, (risksMap) => {
-		return values(risksMap);
-	}
+	selectRisksMap, (risksMap) => values(risksMap)
 );
 
 export const selectComponentState = createSelector(

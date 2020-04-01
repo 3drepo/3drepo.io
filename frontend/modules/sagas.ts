@@ -14,6 +14,7 @@ import measureSaga from './measure/measure.sagas';
 import modelSaga from './model/model.sagas';
 import notificationsSaga from './notifications/notifications.sagas';
 import risksSaga from './risks/risks.sagas';
+import sequencesSaga from './sequences/sequences.sagas';
 import starredSaga from './starred/starred.sagas';
 import startupSaga from './startup/startup.sagas';
 import teamspaceSaga from './teamspace/teamspace.sagas';
@@ -52,6 +53,8 @@ export default function* rootSaga() {
 		fork(viewerGuiSaga),
 		fork(dialogSaga),
 		fork(teamspaceSaga),
-		fork(boardSaga) // <-- INJECT MODULE SAGA -->
+		fork(boardSaga),
+		fork(sequencesSaga)
+		// <-- INJECT MODULE SAGA -->
 	]);
 }

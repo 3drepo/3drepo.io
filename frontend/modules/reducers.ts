@@ -22,6 +22,7 @@ import { reducer as measureReducer } from './measure/measure.redux';
 import { reducer as modelReducer } from './model/model.redux';
 import { reducer as notificationsReducer } from './notifications/notifications.redux';
 import { reducer as risksReducer } from './risks/risks.redux';
+import { reducer as sequencesReducer } from './sequences/sequences.redux';
 import { reducer as snackbarReducer } from './snackbar/snackbar.redux';
 import { reducer as starredReducer } from './starred/starred.redux';
 import { reducer as teamspaceReducer } from './teamspace/teamspace.redux';
@@ -69,6 +70,7 @@ export default function createReducer(history) {
 		chat: chatReducer,
 		viewerGui: viewerGuiReducer,
 		teamspace: teamspaceReducer,
+		sequences: sequencesReducer,
 		board: boardReducer // <-- INJECT MODULE REDUCER -->
 	});
 }
