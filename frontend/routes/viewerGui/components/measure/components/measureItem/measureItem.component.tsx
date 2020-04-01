@@ -81,18 +81,18 @@ export const getValue = (measureValue: number, units: string, type: number, mode
 
 	if (isAreaMeasurement) {
 		return cond([
-			[matches('mm'), () => Math.round(value)],
-			[matches('cm'), () => Math.round(value / 100)],
+			[matches('mm'), () => Math.round(value).toString()],
+			[matches('cm'), () => Math.round(value / 100).toString()],
 			[matches('m'), () => Number(value / 1000000).toFixed(2)],
-			[stubTrue, () => Math.round(value)]
+			[stubTrue, () => Math.round(value).toString()]
 		])(units);
 	}
 
 	return cond([
-		[matches('mm'), () => Math.round(value)],
-		[matches('cm'), () => Math.round(value / 10)],
+		[matches('mm'), () => Math.round(value).toString()],
+		[matches('cm'), () => Math.round(value / 10).toString()],
 		[matches('m'), () => Number(value / 1000).toFixed(2)],
-		[stubTrue, () => Math.round(value)]
+		[stubTrue, () => Math.round(value).toString()]
 	])(units);
 };
 
