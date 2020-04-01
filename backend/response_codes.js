@@ -94,6 +94,7 @@
 		FILE_IMPORT_UNSUPPORTED_VERSION: { message: "Unsupported file version", status: 400 },
 		FILE_IMPORT_MAX_NODES_EXCEEDED: { message: "Import failed: Too many objects, consider splitting up the model", status: 400 },
 		FILE_IMPORT_ODA_NOT_SUPPORTED: { message: "DGN/RVT import is currently not supported", status: 400 },
+		FILE_IMPORT_SYNCHRO_NOT_SUPPORTED: { message: "SPM import is currently not supported", status: 400 },
 		FILE_IMPORT_NO_3D_VIEW: { message: "Cannot find a 3D View within the model.", status: 400 },
 		FILE_IMPORT_TIMED_OUT: { message: "Process timed out. Consider splitting up the model", status: 500 },
 
@@ -114,6 +115,9 @@
 		INVALID_GROUP: { message: "Group request malformed", status: 400 },
 
 		VIEW_NOT_FOUND: { message: "Camera viewpoint not found", status: 404 },
+
+		SEQUENCE_NOT_FOUND: { message: "Sequence not found", status: 404 },
+		TASK_NOT_FOUND: { message: "Sequence task not found", status: 404 },
 
 		USER_EXISTS: { message: "User already exists", status: 400 },
 		OWNER_MUST_BE_ADMIN: {message: "Cannot alter permissions of teamspace owner", status: 400},

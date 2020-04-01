@@ -80,7 +80,8 @@ function translateBouncerErrCode(bouncerErrorCode) {
 		{ res: responseCodes.FILE_IMPORT_ODA_NOT_SUPPORTED, softFail: false, userErr: false},
 		{ res: responseCodes.FILE_IMPORT_NO_3D_VIEW, softFail: false, userErr: true},
 		{ res: responseCodes.FILE_IMPORT_UNKNOWN_ERR, softFail: false, userErr: false},
-		{ res: responseCodes.FILE_IMPORT_TIMED_OUT, softFail: false, userErr: false}
+		{ res: responseCodes.FILE_IMPORT_TIMED_OUT, softFail: false, userErr: false},
+		{ res: responseCodes.FILE_IMPORT_SYNCHRO_NOT_SUPPORTED, softFail: false, userErr: false}
 	];
 
 	const errObj =  bouncerErrToWebErr.length > bouncerErrorCode ?
@@ -1055,7 +1056,7 @@ const acceptedFormat = [
 	"dae","ter","csm","3d","lws","xml","ogex",
 	"ms3d","cob","scn","blend","pk3","ndo",
 	"ifc","xgl","zgl","fbx","assbin", "bim", "dgn",
-	"rvt", "rfa"
+	"rvt", "rfa", "spm"
 ];
 
 module.exports = {

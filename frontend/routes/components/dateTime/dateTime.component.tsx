@@ -19,7 +19,7 @@ import React from 'react';
 import { formatDate } from '../../../services/formatting/formatDate';
 
 interface IProps {
-	value: string;
+	value: any;
 	format?: string;
 }
 

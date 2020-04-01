@@ -25,6 +25,7 @@ const nodeuuid = require("uuid/v1");
 
 const ORIGINAL_FILE_REF_EXT = ".history.ref";
 const UNITY_BUNDLE_REF_EXT = ".stash.unity3d.ref";
+const STATE_FILE_REF_EXT = ".sequences.ref";
 const JSON_FILE_REF_EXT = ".stash.json_mpc.ref";
 const RESOURCES_FILE_REF_EXT = ".resources.ref";
 
@@ -184,6 +185,10 @@ FileRef.getTotalModelFileSize = function(account, model) {
 
 FileRef.getUnityBundle = function(account, model, fileName) {
 	return fetchModelFile(account, model, UNITY_BUNDLE_REF_EXT, fileName, false, false);
+};
+
+FileRef.getSequenceStateFile = function(account, model, fileName) {
+	return fetchFile(account, model, STATE_FILE_REF_EXT, fileName, false, false));
 };
 
 FileRef.getJSONFile = function(account, model, fileName) {
