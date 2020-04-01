@@ -194,10 +194,6 @@ FileRef.getJSONFile = function(account, model, fileName) {
 	return fetchModelFile(account, model, JSON_FILE_REF_EXT, fileName, false, false);
 };
 
-FileRef.getMitigationsFile = function(account) {
-	return fetchTeamspaceFile(account, MITIGATIONS_FILE_REF, MITIGATIONS_ID, false, false);
-};
-
 FileRef.getMitigationsStream = function(account) {
 	return fetchFileStream(account, undefined, MITIGATIONS_FILE_REF, MITIGATIONS_ID, false);
 };

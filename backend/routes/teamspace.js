@@ -90,100 +90,31 @@
 	 * HTTP/1.1 200 OK
 	 * {
 	 * 	"riskCategories":[
-	 * 		{
-	 * 			"value":"commercial",
-	 * 			"label":"Commercial Issue"
-	 * 		},
-	 * 		{
-	 * 			"value":"environmental",
-	 * 			"label":"Environmental Issue"
-	 * 		},
-	 * 		{
-	 * 			"value":"health_material_effect",
-	 * 			"label":"Health - Material effect"
-	 * 		},
-	 * 		{
-	 * 			"value":"health_mechanical_effect",
-	 * 			"label":"Health - Mechanical effect"
-	 * 		},
-	 * 		{
-	 * 			"value":"safety_fall",
-	 * 			"label":"Safety Issue - Fall"
-	 * 		},
-	 * 		{
-	 * 			"value":"safety_trapped",
-	 * 			"label":"Safety Issue - Trapped"
-	 * 		},
-	 * 		{
-	 * 			"value":"safety_event",
-	 * 			"label":"Safety Issue - Event"
-	 * 		},
-	 * 		{
-	 * 			"value":"safety_handling",
-	 * 			"label":"Safety Issue - Handling"
-	 * 		},
-	 * 		{
-	 * 			"value":"safety_struck",
-	 * 			"label":"Safety Issue - Struck"
-	 * 		},
-	 * 		{
-	 * 			"value":"safety_public",
-	 * 			"label":"Safety Issue - Public"
-	 * 		},
-	 * 		{
-	 * 			"value":"social",
-	 * 			"label":"Social Issue"
-	 * 		},
-	 * 		{
-	 * 			"value":"other",
-	 * 			"label":"Other Issue"
-	 * 		},
-	 * 		{
-	 * 			"value":"unknown",
-	 * 			"label":"UNKNOWN"
-	 * 		}
+	 * 		"Commercial Issue",
+	 * 		"Environmental Issue",
+	 * 		"Health - Material effect",
+	 * 		"Health - Mechanical effect",
+	 * 		"Safety Issue - Fall",
+	 * 		"Safety Issue - Trapped",
+	 * 		"Safety Issue - Event",
+	 * 		"Safety Issue - Handling",
+	 * 		"Safety Issue - Struck",
+	 * 		"Safety Issue - Public",
+	 * 		"Social Issue",
+	 * 		"Other Issue",
+	 * 		"UNKNOWN"
 	 * 	],
 	 * 	"topicTypes":[
-	 * 		{
-	 * 			"value":"for_information",
-	 * 			"label":"For information"
-	 * 		},
-	 * 		{
-	 * 			"value":"vr",
-	 * 			"label":"VR"
-	 * 		},
-	 * 		{
-	 * 			"value":"clash",
-	 * 			"label":"Clash"
-	 * 		},
-	 * 		{
-	 * 			"value":"diff",
-	 * 			"label":"Diff"
-	 * 		},
-	 * 		{
-	 * 			"value":"rfi",
-	 * 			"label":"RFI"
-	 * 		},
-	 * 		{
-	 * 			"value":"risk",
-	 * 			"label":"Risk"
-	 * 		},
-	 * 		{
-	 * 			"value":"hs",
-	 * 			"label":"H&S"
-	 * 		},
-	 * 		{
-	 * 			"value":"design",
-	 * 			"label":"Design"
-	 * 		},
-	 * 		{
-	 * 			"value":"constructibility",
-	 * 			"label":"Constructibility"
-	 * 		},
-	 * 		{
-	 * 			"value":"gis",
-	 * 			"label":"GIS"
-	 * 		}
+	 * 		"For information",
+	 * 		"VR",
+	 * 		"Clash",
+	 * 		"Diff",
+	 * 		"RFI",
+	 * 		"Risk",
+	 * 		"H&S",
+	 * 		"Design",
+	 * 		"Constructibility",
+	 * 		"GIS"
 	 * 	],
 	 * 	"mitigationsUpdatedAt":1567156228976,
 	 * 	"teamspace":"acme"
@@ -225,24 +156,12 @@
 	 * HTTP/1.1 200 OK
 	 * {
 	 * 	"riskCategories":[
-	 * 		{
-	 * 			"value":"new_category_1",
-	 * 			"label":"New Category 1"
-	 * 		},
-	 * 		{
-	 * 			"value":"new_category_2",
-	 * 			"label":"NEW CATEGORY 2"
-	 * 		}
+	 * 		"New Category 1",
+	 * 		"NEW CATEGORY 2"
 	 * 	],
 	 * 	"topicTypes":[
-	 * 		{
-	 * 			"value":"new_topic_1",
-	 * 			"label":"New Topic 1"
-	 * 		},
-	 * 		{
-	 * 			"value":"new_topic_2",
-	 * 			"label":"New Topic 2"
-	 * 		}
+	 * 		"New Topic 1",
+	 * 		"New Topic 2"
 	 * 	],
 	 * 	"mitigationsUpdatedAt":1567156228976,
 	 * 	"teamspace":"acme"
@@ -609,7 +528,7 @@
 	}
 
 	function getMitigationsFile(req, res, next) {
-		TeamspaceSettings.getMitigationsFile(req.params.account).then((mitigations) => {
+		TeamspaceSettings.getMitigationsStream(req.params.account).then((mitigations) => {
 			const timestamp = (new Date()).toLocaleString();
 			const filenamePrefix = (req.params.account + "_" + timestamp + "_").replace(/\W+/g, "_");
 
@@ -620,7 +539,7 @@
 
 			res.set(headers);
 
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, mitigations);
+			responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, mitigations.readStream, headers);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
