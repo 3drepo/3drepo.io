@@ -188,7 +188,7 @@ FileRef.getUnityBundle = function(account, model, fileName) {
 };
 
 FileRef.getSequenceStateFile = function(account, model, fileName) {
-	return fetchFile(account, model, STATE_FILE_REF_EXT, fileName, false, false));
+	return fetchFile(account, model, STATE_FILE_REF_EXT, fileName, false, false);
 };
 
 FileRef.getJSONFile = function(account, model, fileName) {
