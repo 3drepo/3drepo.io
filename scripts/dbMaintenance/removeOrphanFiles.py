@@ -1,9 +1,12 @@
 import sys, os
 
-import gridfs
 from pymongo import MongoClient
+import gridfs
 import re
-import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import BytesIO
 
 if len(sys.argv) <= 5:
     print("Not enough arguments.")
@@ -23,8 +26,9 @@ if not os.path.exists(localFolder):
 connString = "mongodb://"+ userName + ":" + password +"@"+mongoURL + ":" + mongoPort + "/"
 
 ##### Enable dry run to not commit to the database #####
-dryRun = True
+dryRun = False
 verbose = True
+Debug = True
 ignoreDirs = ["toy_2019-05-31"]
 
 ##### Retrieve file list from local folder #####
@@ -58,7 +62,9 @@ for database in db.database_names():
                     print("\t\t--stash: " + colName)
                 for refEntry in db[colName].find({"type": "fs"}):
                     filePath = os.path.normpath(os.path.join(localFolder, refEntry['link']))
-                    if not [ x for x in ignoreDirs if filePath.find(x) ]:
+                    if not [ x for x in ignoreDirs if filePath.find(x) + 1 ]:
+                        if Debug:
+                            print("\t\t--Should be a real object " + filePath)
                         fileStatus = fileList.get(filePath)
                         if fileStatus == None:
                             refInfo = database + "." + modelId + "." + colName + ": " + refEntry["_id"]
@@ -79,14 +85,19 @@ for database in db.database_names():
                                     if not os.path.exists(os.path.dirname(filePath)):
                                         os.makedirs(os.path.dirname(filePath))
                                     file = open(filePath,'wb')
-                                    file.write(StringIO.StringIO(gridFSEntry.read()).getvalue())
+                                    try:
+                                        file.write(StringIO.StringIO(gridFSEntry.read()).getvalue())
+                                    except:
+                                        file.write(BytesIO(gridFSEntry.read()).getvalue())
                                     file.close()
                                     missing.append(refInfo + " (Restored to: " + filePath + ")");
                                 else:
                                     missing.append(refInfo + ": No backup found.");
                         else:
                             fileList[filePath] = True
-
+                    else:
+                        if Debug:
+                            print("\t\t--Object in ignoreDirs " + filePath)
 print("===== Missing Files =====");
 for entry in missing:
     print("\t"+ entry);
