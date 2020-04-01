@@ -3,10 +3,12 @@ import sys, os
 from pymongo import MongoClient
 import gridfs
 import re
-try:
-    from StringIO import StringIO
-except ImportError:
+
+isPython3 = bool(sys.version_info >= (3, 0))
+if isPython3:
     from io import BytesIO
+else:
+    from StringIO import StringIO
 
 if len(sys.argv) <= 5:
     print("Not enough arguments.")
@@ -26,9 +28,8 @@ if not os.path.exists(localFolder):
 connString = "mongodb://"+ userName + ":" + password +"@"+mongoURL + ":" + mongoPort + "/"
 
 ##### Enable dry run to not commit to the database #####
-dryRun = False
+dryRun = True
 verbose = True
-Debug = True
 ignoreDirs = ["toy_2019-05-31"]
 
 ##### Retrieve file list from local folder #####
@@ -62,9 +63,8 @@ for database in db.database_names():
                     print("\t\t--stash: " + colName)
                 for refEntry in db[colName].find({"type": "fs"}):
                     filePath = os.path.normpath(os.path.join(localFolder, refEntry['link']))
-                    if not [ x for x in ignoreDirs if filePath.find(x) + 1 ]:
-                        if Debug:
-                            print("\t\t--Should be a real object " + filePath)
+                    inIgnoreDir= bool([ x for x in ignoreDirs if filePath.find(x) + 1 ])
+                    if not inIgnoreDir:
                         fileStatus = fileList.get(filePath)
                         if fileStatus == None:
                             refInfo = database + "." + modelId + "." + colName + ": " + refEntry["_id"]
@@ -85,19 +85,17 @@ for database in db.database_names():
                                     if not os.path.exists(os.path.dirname(filePath)):
                                         os.makedirs(os.path.dirname(filePath))
                                     file = open(filePath,'wb')
-                                    try:
-                                        file.write(StringIO.StringIO(gridFSEntry.read()).getvalue())
-                                    except:
+                                    if isPython3:
                                         file.write(BytesIO(gridFSEntry.read()).getvalue())
+                                    else:
+                                        file.write(StringIO.StringIO(gridFSEntry.read()).getvalue())
                                     file.close()
                                     missing.append(refInfo + " (Restored to: " + filePath + ")");
                                 else:
                                     missing.append(refInfo + ": No backup found.");
                         else:
                             fileList[filePath] = True
-                    else:
-                        if Debug:
-                            print("\t\t--Object in ignoreDirs " + filePath)
+
 print("===== Missing Files =====");
 for entry in missing:
     print("\t"+ entry);
