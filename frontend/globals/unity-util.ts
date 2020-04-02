@@ -725,7 +725,8 @@ export class UnityUtil {
 	 * Set the measure tool units.
 	 * @category Measuring tool
 	 * @param units - The measuring units accepted values are "cm", "mm", "m"
-	 */	public static setMeasureToolUnits(units) {
+	 */
+	public static setMeasureToolUnits(units) {
 		UnityUtil.toUnity('SetMeasureToolUnits', undefined, units);
 	}
 
