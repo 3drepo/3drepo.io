@@ -179,7 +179,6 @@ export class TextField extends React.PureComponent<IProps, IState> {
 									onChange={this.onChange(field)}
 									error={Boolean(form.errors[name] || props.error)}
 									helperText={form.errors[name] || props.helperText}
-									autoFocus
 								/>
 							)}
 						/>
