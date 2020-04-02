@@ -1,9 +1,14 @@
 import sys, os
 
-import gridfs
 from pymongo import MongoClient
+import gridfs
 import re
-import StringIO
+
+isPython3 = bool(sys.version_info >= (3, 0))
+if isPython3:
+    from io import BytesIO
+else:
+    from StringIO import StringIO
 
 if len(sys.argv) <= 5:
     print("Not enough arguments.")
@@ -58,33 +63,38 @@ for database in db.database_names():
                     print("\t\t--stash: " + colName)
                 for refEntry in db[colName].find({"type": "fs"}):
                     filePath = os.path.normpath(os.path.join(localFolder, refEntry['link']))
-                    fileStatus = fileList.get(filePath)
-                    if fileStatus == None:
-                        refInfo = database + "." + modelId + "." + colName + ": " + refEntry["_id"]
-                        if dryRun:
-                            missing.append(refInfo);
-                        else:
-##### Upload missing files to FS and insert BSON #####
-                            fs = gridfs.GridFS(db, modelId + colPrefix)
-                            if colPrefix == ".history":
-                                toRepair = refEntry["_id"]
+                    inIgnoreDir= bool([ x for x in ignoreDirs if filePath.find(x) + 1 ])
+                    if not inIgnoreDir:
+                        fileStatus = fileList.get(filePath)
+                        if fileStatus == None:
+                            refInfo = database + "." + modelId + "." + colName + ": " + refEntry["_id"]
+                            if dryRun:
+                                missing.append(refInfo);
                             else:
-                                if len(refEntry["_id"].split("/")) > 1:
-                                    toRepair = "/" + database + "/" + modelId + "/revision/" + refEntry["_id"]
+    ##### Upload missing files to FS and insert BSON #####
+                                fs = gridfs.GridFS(db, modelId + colPrefix)
+                                if colPrefix == ".history":
+                                    toRepair = refEntry["_id"]
                                 else:
-                                    toRepair = "/" + database + "/" + modelId + "/" + refEntry["_id"]
-                            gridFSEntry = fs.find_one({"filename": toRepair})
-                            if gridFSEntry != None:
-                                if not os.path.exists(os.path.dirname(filePath)):
-                                    os.makedirs(os.path.dirname(filePath))
-                                file = open(filePath,'wb')
-                                file.write(StringIO.StringIO(gridFSEntry.read()).getvalue())
-                                file.close()
-                                missing.append(refInfo + " (Restored to: " + filePath + ")");
-                            else:
-                                missing.append(refInfo + ": No backup found.");
-                    else:
-                        fileList[filePath] = True
+                                    if len(refEntry["_id"].split("/")) > 1:
+                                        toRepair = "/" + database + "/" + modelId + "/revision/" + refEntry["_id"]
+                                    else:
+                                        toRepair = "/" + database + "/" + modelId + "/" + refEntry["_id"]
+                                gridFSEntry = fs.find_one({"filename": toRepair})
+                                if gridFSEntry != None:
+                                    if not os.path.exists(os.path.dirname(filePath)):
+                                        os.makedirs(os.path.dirname(filePath))
+                                    file = open(filePath,'wb')
+                                    if isPython3:
+                                        file.write(BytesIO(gridFSEntry.read()).getvalue())
+                                    else:
+                                        file.write(StringIO.StringIO(gridFSEntry.read()).getvalue())
+                                    file.close()
+                                    missing.append(refInfo + " (Restored to: " + filePath + ")");
+                                else:
+                                    missing.append(refInfo + ": No backup found.");
+                        else:
+                            fileList[filePath] = True
 
 print("===== Missing Files =====");
 for entry in missing:
