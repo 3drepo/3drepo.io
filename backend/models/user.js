@@ -27,6 +27,7 @@ const utils = require("../utils");
 const Role = require("./role");
 const Job = require("./job");
 const History = require("./history");
+const TeamspaceSettings = require("./teamspaceSetting");
 const Mailer = require("../mailer/mailer");
 
 const systemLogger = require("../logger.js").systemLogger;
@@ -576,6 +577,9 @@ schema.statics.verify = function (username, token, options) {
 			systemLogger.logError("Failed to create default jobs for ", username, err);
 		});
 
+		TeamspaceSettings.createTeamspaceSettings(username).catch((err) => {
+			systemLogger.logError("Failed to create teamspace settings for ", username, err);
+		});
 	});
 };
 
