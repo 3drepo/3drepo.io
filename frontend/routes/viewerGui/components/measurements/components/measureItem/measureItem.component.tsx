@@ -160,6 +160,7 @@ export const MeasureItem = ({
 					value={name}
 					mutable
 					onChange={handleSave}
+					inputProps={{ maxLength: 30 }}
 				/>
 			</StyledForm>
 			<Actions>

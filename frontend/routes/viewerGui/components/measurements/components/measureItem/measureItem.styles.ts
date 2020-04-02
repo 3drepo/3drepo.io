@@ -92,6 +92,10 @@ export const StyledTextField = styled(TextField)`
 	width: 100%;
 	margin-left: ${(props) => props.left ? '66px' : '6px'};
 
+	input {
+		margin-right: 60px;
+	}
+
 	${ActionsLine} {
 		bottom: 8px;
 	}
