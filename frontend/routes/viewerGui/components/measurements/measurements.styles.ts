@@ -27,12 +27,12 @@ import {
 } from '../../../../constants/viewerGui';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 
-export const MeasureIcon = VIEWER_PANELS_ICONS[VIEWER_PANELS.MEASURE];
+export const MeasureIcon = VIEWER_PANELS_ICONS[VIEWER_PANELS.MEASUREMENTS];
 
 export const ViewsContainer = styled(ViewerPanel).attrs({
-	title: VIEWER_PANELS_TITLES[VIEWER_PANELS.MEASURE]
+	title: VIEWER_PANELS_TITLES[VIEWER_PANELS.MEASUREMENTS]
 })`
-	min-height: ${VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.MEASURE]}px;
+	min-height: ${VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.MEASUREMENTS]}px;
 `;
 
 export const Container = styled.div`

@@ -10,7 +10,7 @@ import dialogSaga from './dialog/dialog.sagas';
 import groupsSaga from './groups/groups.sagas';
 import issuesSaga from './issues/issues.sagas';
 import jobsSaga from './jobs/jobs.sagas';
-import measureSaga from './measure/measure.sagas';
+import measurementsSaga from './measurements/measurements.sagas';
 import modelSaga from './model/model.sagas';
 import notificationsSaga from './notifications/notifications.sagas';
 import risksSaga from './risks/risks.sagas';
@@ -45,7 +45,7 @@ export default function* rootSaga() {
 		fork(treeSaga),
 		fork(bimSaga),
 		fork(starredSaga),
-		fork(measureSaga),
+		fork(measurementsSaga),
 		fork(issuesSaga),
 		fork(compareSaga),
 		fork(chatSaga),

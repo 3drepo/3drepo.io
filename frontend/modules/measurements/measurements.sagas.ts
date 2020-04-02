@@ -23,16 +23,16 @@ import {
 	selectAreaMeasurements,
 	selectLengthMeasurements,
 	selectPointMeasurements,
-	MeasureActions,
-	MeasureTypes
+	MeasurementsActions,
+	MeasurementsTypes
 } from './';
-import { MEASURING_MODE } from './measure.constants';
+import { MEASURING_MODE } from './measurements.constants';
 
 export function* activateMeasure() {
 	try {
 		yield all([
 			Viewer.activateMeasure(),
-			put(MeasureActions.setActiveSuccess(true))
+			put(MeasurementsActions.setActiveSuccess(true))
 		]);
 	} catch (error) {
 		DialogActions.showErrorDialog('activate', 'measure', error);
@@ -43,7 +43,7 @@ export function* deactivateMeasure() {
 	try {
 		yield all([
 			Viewer.disableMeasure(),
-			put(MeasureActions.setActiveSuccess(false))
+			put(MeasurementsActions.setActiveSuccess(false))
 		]);
 	} catch (error) {
 		DialogActions.showErrorDialog('deactivate', 'measure', error);
@@ -53,12 +53,12 @@ export function* deactivateMeasure() {
 export function* setMeasureMode({ mode }) {
 	try {
 		if (mode === '' || mode === MEASURING_MODE.POINT) {
-			yield put(MeasureActions.setMeasureActive(false));
-			yield put(MeasureActions.setMeasureModeSuccess(mode));
+			yield put(MeasurementsActions.setMeasureActive(false));
+			yield put(MeasurementsActions.setMeasureModeSuccess(mode));
 		} else {
 			yield all([
 				Viewer.setMeasureMode(mode),
-				put(MeasureActions.setMeasureModeSuccess(mode))
+				put(MeasurementsActions.setMeasureModeSuccess(mode))
 			]);
 		}
 	} catch (error) {
@@ -70,7 +70,7 @@ export function* setMeasuringUnits({ units }) {
 	try {
 		yield all([
 			Viewer.setMeasuringUnits(units),
-			put(MeasureActions.setMeasureUnitsSuccess(units))
+			put(MeasurementsActions.setMeasureUnitsSuccess(units))
 		]);
 	} catch (error) {
 		DialogActions.showErrorDialog('set', `measure units to ${units}`, error);
@@ -81,7 +81,7 @@ export function* removeMeasurement({ uuid }) {
 	try {
 		yield all([
 			Viewer.removeMeasurement(uuid),
-			put(MeasureActions.removeMeasurementSuccess(uuid))
+			put(MeasurementsActions.removeMeasurementSuccess(uuid))
 		]);
 	} catch (error) {
 		DialogActions.showErrorDialog('remove', `measurement`, error);
@@ -91,9 +91,9 @@ export function* removeMeasurement({ uuid }) {
 export function* setMeasureActive({ isActive }) {
 	try {
 		if (isActive) {
-			yield put(MeasureActions.activateMeasure());
+			yield put(MeasurementsActions.activateMeasure());
 		} else {
-			yield put(MeasureActions.deactivateMeasure());
+			yield put(MeasurementsActions.deactivateMeasure());
 		}
 	} catch (error) {
 		DialogActions.showErrorDialog('toggle', 'measure', error);
@@ -102,10 +102,10 @@ export function* setMeasureActive({ isActive }) {
 
 export function* setDisabled({ isDisabled }) {
 	try {
-		yield put(MeasureActions.setDisabledSuccess(isDisabled));
+		yield put(MeasurementsActions.setDisabledSuccess(isDisabled));
 
 		if (isDisabled) {
-			yield put(MeasureActions.setActiveSuccess(false));
+			yield put(MeasurementsActions.setActiveSuccess(false));
 		}
 	} catch (error) {
 		DialogActions.showErrorDialog('deactivate', 'measure', error);
@@ -116,7 +116,7 @@ export function* setMeasurementColor({ uuid, color }) {
 	const colorToSet = [color.r / 255, color.g / 255, color.b / 255, color.a];
 	try {
 		yield Viewer.setMeasurementColor(uuid, colorToSet);
-		yield put(MeasureActions.setMeasurementColorSuccess(uuid, color));
+		yield put(MeasurementsActions.setMeasurementColorSuccess(uuid, color));
 	} catch (error) {
 		DialogActions.showErrorDialog('set color', 'measure', error);
 	}
@@ -125,7 +125,7 @@ export function* setMeasurementColor({ uuid, color }) {
 export function* setMeasurementName({ uuid, name, measureType }) {
 	try {
 		yield Viewer.setMeasurementName(uuid, name);
-		yield put(MeasureActions.setMeasurementNameSuccess(uuid, name, measureType));
+		yield put(MeasurementsActions.setMeasurementNameSuccess(uuid, name, measureType));
 	} catch (error) {
 		DialogActions.showErrorDialog('set name', 'measure', error);
 	}
@@ -154,7 +154,7 @@ export function* resetMeasurementColors() {
 			pointMeasurements.forEach(setDefaultColor);
 		}
 
-		yield put(MeasureActions.resetMeasurementColorsSuccess());
+		yield put(MeasurementsActions.resetMeasurementColorsSuccess());
 	} catch (error) {
 		DialogActions.showErrorDialog('set color', 'measure', error);
 	}
@@ -167,7 +167,7 @@ export function* setMeasureEdgeSnapping({ edgeSnapping }) {
 		} else {
 			yield Viewer.disableEdgeSnapping();
 		}
-		yield put(MeasureActions.setMeasureEdgeSnappingSuccess(edgeSnapping));
+		yield put(MeasurementsActions.setMeasureEdgeSnappingSuccess(edgeSnapping));
 	} catch (error) {
 		DialogActions.showErrorDialog('set edge snapping', 'measure', error);
 	}
@@ -180,7 +180,7 @@ export function* setMeasureXyzDisplay({ xyzDisplay }) {
 		} else {
 			yield Viewer.disableMeasureXYZDisplay();
 		}
-		yield put(MeasureActions.setMeasureXyzDisplaySuccess(xyzDisplay));
+		yield put(MeasurementsActions.setMeasureXyzDisplaySuccess(xyzDisplay));
 	} catch (error) {
 		DialogActions.showErrorDialog('set XYZ display', 'measure', error);
 	}
@@ -189,7 +189,7 @@ export function* setMeasureXyzDisplay({ xyzDisplay }) {
 export function* clearMeasurements() {
 	try {
 		yield Viewer.clearMeasurements();
-		yield put(MeasureActions.clearMeasurementsSuccess());
+		yield put(MeasurementsActions.clearMeasurementsSuccess());
 	} catch (error) {
 		DialogActions.showErrorDialog('clear', 'measurements', error);
 	}
@@ -197,25 +197,25 @@ export function* clearMeasurements() {
 
 export function* resetMeasurementTool() {
 	try {
-		yield put(MeasureActions.resetMeasurementToolSuccess());
+		yield put(MeasurementsActions.resetMeasurementToolSuccess());
 	} catch (error) {
 		DialogActions.showErrorDialog('reset', 'measurements tool', error);
 	}
 }
 
-export default function* MeasureSaga() {
-	yield takeLatest(MeasureTypes.ACTIVATE_MEASURE, activateMeasure);
-	yield takeLatest(MeasureTypes.DEACTIVATE_MEASURE, deactivateMeasure);
-	yield takeLatest(MeasureTypes.SET_MEASURE_ACTIVE, setMeasureActive);
-	yield takeLatest(MeasureTypes.SET_DISABLED, setDisabled);
-	yield takeLatest(MeasureTypes.SET_MEASURE_MODE, setMeasureMode);
-	yield takeLatest(MeasureTypes.SET_MEASURE_UNITS, setMeasuringUnits);
-	yield takeLatest(MeasureTypes.REMOVE_MEASUREMENT, removeMeasurement);
-	yield takeLatest(MeasureTypes.CLEAR_MEASUREMENTS, clearMeasurements);
-	yield takeLatest(MeasureTypes.SET_MEASUREMENT_COLOR, setMeasurementColor);
-	yield takeLatest(MeasureTypes.RESET_MEASUREMENT_COLORS, resetMeasurementColors);
-	yield takeLatest(MeasureTypes.SET_MEASURE_EDGE_SNAPPING, setMeasureEdgeSnapping);
-	yield takeLatest(MeasureTypes.SET_MEASURE_XYZ_DISPLAY, setMeasureXyzDisplay);
-	yield takeLatest(MeasureTypes.SET_MEASUREMENT_NAME, setMeasurementName);
-	yield takeLatest(MeasureTypes.RESET_MEASUREMENT_TOOL, resetMeasurementTool);
+export default function* MeasurementsSaga() {
+	yield takeLatest(MeasurementsTypes.ACTIVATE_MEASURE, activateMeasure);
+	yield takeLatest(MeasurementsTypes.DEACTIVATE_MEASURE, deactivateMeasure);
+	yield takeLatest(MeasurementsTypes.SET_MEASURE_ACTIVE, setMeasureActive);
+	yield takeLatest(MeasurementsTypes.SET_DISABLED, setDisabled);
+	yield takeLatest(MeasurementsTypes.SET_MEASURE_MODE, setMeasureMode);
+	yield takeLatest(MeasurementsTypes.SET_MEASURE_UNITS, setMeasuringUnits);
+	yield takeLatest(MeasurementsTypes.REMOVE_MEASUREMENT, removeMeasurement);
+	yield takeLatest(MeasurementsTypes.CLEAR_MEASUREMENTS, clearMeasurements);
+	yield takeLatest(MeasurementsTypes.SET_MEASUREMENT_COLOR, setMeasurementColor);
+	yield takeLatest(MeasurementsTypes.RESET_MEASUREMENT_COLORS, resetMeasurementColors);
+	yield takeLatest(MeasurementsTypes.SET_MEASURE_EDGE_SNAPPING, setMeasureEdgeSnapping);
+	yield takeLatest(MeasurementsTypes.SET_MEASURE_XYZ_DISPLAY, setMeasureXyzDisplay);
+	yield takeLatest(MeasurementsTypes.SET_MEASUREMENT_NAME, setMeasurementName);
+	yield takeLatest(MeasurementsTypes.RESET_MEASUREMENT_TOOL, resetMeasurementTool);
 }

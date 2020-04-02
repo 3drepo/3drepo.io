@@ -17,38 +17,38 @@
 
 import { createSelector } from 'reselect';
 
-export const selectMeasureDomain = (state) => ({...state.measure});
+export const selectMeasurementsDomain = (state) => ({...state.measurements});
 
 export const selectIsMeasureActive = createSelector(
-	selectMeasureDomain, (state) => state.isActive
+	selectMeasurementsDomain, (state) => state.isActive
 );
 
 export const selectMeasureMode = createSelector(
-	selectMeasureDomain, (state) => state.mode
+	selectMeasurementsDomain, (state) => state.mode
 );
 
 export const selectMeasureUnits = createSelector(
-	selectMeasureDomain, (state) => state.units
+	selectMeasurementsDomain, (state) => state.units
 );
 
 export const selectEdgeSnapping = createSelector(
-	selectMeasureDomain, (state) => state.edgeSnapping
+	selectMeasurementsDomain, (state) => state.edgeSnapping
 );
 
 export const selectXyzDisplay = createSelector(
-	selectMeasureDomain, (state) => state.xyzDisplay
+	selectMeasurementsDomain, (state) => state.xyzDisplay
 );
 
 export const selectAreaMeasurements = createSelector(
-	selectMeasureDomain, (state) => state.areaMeasurements
+	selectMeasurementsDomain, (state) => state.areaMeasurements
 );
 
 export const selectLengthMeasurements = createSelector(
-	selectMeasureDomain, (state) => state.lengthMeasurements
+	selectMeasurementsDomain, (state) => state.lengthMeasurements
 );
 
 export const selectPointMeasurements = createSelector(
-	selectMeasureDomain, (state) => state.pointMeasurements
+	selectMeasurementsDomain, (state) => state.pointMeasurements
 );
 
 export const selectPins = createSelector(

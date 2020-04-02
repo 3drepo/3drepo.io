@@ -21,12 +21,12 @@ import { createStructuredSelector } from 'reselect';
 
 import {
 	selectAreaMeasurements, selectEdgeSnapping, selectIsMeasureActive, selectLengthMeasurements,
-	selectMeasureMode, selectMeasureUnits, selectPointMeasurements, selectXyzDisplay, MeasureActions
-} from '../../../../modules/measure';
+	selectMeasureMode, selectMeasureUnits, selectPointMeasurements, selectXyzDisplay, MeasurementsActions
+} from '../../../../modules/measurements';
 import { selectUnit } from '../../../../modules/model';
 import { withViewer } from '../../../../services/viewer/viewer';
 
-import { Measure } from './measure.component';
+import { Measurements } from './measurements.component';
 
 const mapStateToProps = createStructuredSelector({
 	isMeasureActive: selectIsMeasureActive,
@@ -41,22 +41,22 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	disableMeasure: MeasureActions.setDisabled,
-	activateMeasure: MeasureActions.activateMeasure,
-	deactivateMeasure: MeasureActions.deactivateMeasure,
-	setMeasureMode: MeasureActions.setMeasureMode,
-	removeMeasurement: MeasureActions.removeMeasurement,
-	clearMeasurements: MeasureActions.clearMeasurements,
-	addMeasurement: MeasureActions.addMeasurement,
-	setMeasurementColor: MeasureActions.setMeasurementColor,
-	resetMeasurementColors: MeasureActions.resetMeasurementColors,
-	setMeasureUnits: MeasureActions.setMeasureUnits,
-	setMeasureEdgeSnapping: MeasureActions.setMeasureEdgeSnapping,
-	setMeasureXYZDisplay: MeasureActions.setMeasureXyzDisplay,
-	setMeasurementCheck: MeasureActions.setMeasurementCheck,
-	setMeasurementCheckAll: MeasureActions.setMeasurementCheckAll,
-	setMeasurementName: MeasureActions.setMeasurementName,
-	resetMeasurementTool: MeasureActions.resetMeasurementTool,
+	disableMeasure: MeasurementsActions.setDisabled,
+	activateMeasure: MeasurementsActions.activateMeasure,
+	deactivateMeasure: MeasurementsActions.deactivateMeasure,
+	setMeasureMode: MeasurementsActions.setMeasureMode,
+	removeMeasurement: MeasurementsActions.removeMeasurement,
+	clearMeasurements: MeasurementsActions.clearMeasurements,
+	addMeasurement: MeasurementsActions.addMeasurement,
+	setMeasurementColor: MeasurementsActions.setMeasurementColor,
+	resetMeasurementColors: MeasurementsActions.resetMeasurementColors,
+	setMeasureUnits: MeasurementsActions.setMeasureUnits,
+	setMeasureEdgeSnapping: MeasurementsActions.setMeasureEdgeSnapping,
+	setMeasureXYZDisplay: MeasurementsActions.setMeasureXyzDisplay,
+	setMeasurementCheck: MeasurementsActions.setMeasurementCheck,
+	setMeasurementCheckAll: MeasurementsActions.setMeasurementCheckAll,
+	setMeasurementName: MeasurementsActions.setMeasurementName,
+	resetMeasurementTool: MeasurementsActions.resetMeasurementTool,
 }, dispatch);
 
-export default withViewer(connect(mapStateToProps, mapDispatchToProps)(Measure));
+export default withViewer(connect(mapStateToProps, mapDispatchToProps)(Measurements));

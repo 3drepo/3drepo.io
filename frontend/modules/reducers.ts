@@ -18,7 +18,7 @@ import { reducer as gisReducer } from './gis/gis.redux';
 import { reducer as groupsReducer } from './groups/groups.redux';
 import { reducer as issuesReducer } from './issues/issues.redux';
 import { reducer as jobsReducer } from './jobs/jobs.redux';
-import { reducer as measureReducer } from './measure/measure.redux';
+import { reducer as measurementsReducer } from './measurements/measurements.redux';
 import { reducer as modelReducer } from './model/model.redux';
 import { reducer as notificationsReducer } from './notifications/notifications.redux';
 import { reducer as risksReducer } from './risks/risks.redux';
@@ -64,7 +64,7 @@ export default function createReducer(history) {
 		tree: treeReducer,
 		bim: bimReducer,
 		starred: starredReducer,
-		measure: measureReducer,
+		measurements: measurementsReducer,
 		issues: issuesReducer,
 		compare: compareReducer,
 		chat: chatReducer,

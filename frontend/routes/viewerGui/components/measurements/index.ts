@@ -15,9 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export {
-	MeasureTypes,
-	MeasureActions
-} from './measure.redux';
-
-export * from './measure.selectors';
+export { default as Measurements } from './measurements.container';

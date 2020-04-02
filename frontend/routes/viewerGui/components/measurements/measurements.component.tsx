@@ -24,7 +24,7 @@ import { MEASURE_ACTIONS_ITEMS, MEASURE_ACTIONS_MENU } from '../../../../constan
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../helpers/rendering';
-import { MEASURE_TYPE } from '../../../../modules/measure/measure.constants';
+import { MEASURE_TYPE } from '../../../../modules/measurements/measurements.constants';
 import { Viewer } from '../../../../services/viewer/viewer';
 import {
 	IconWrapper,
@@ -42,7 +42,7 @@ import {
 	MeasureIcon,
 	ViewerBottomActions,
 	ViewsContainer,
-} from './measure.styles';
+} from './measurements.styles';
 
 interface IProps {
 	viewer: any;
@@ -80,7 +80,7 @@ interface IState {
 	isViewerReady: boolean;
 }
 
-export class Measure extends React.PureComponent<IProps, IState> {
+export class Measurements extends React.PureComponent<IProps, IState> {
 	public state = {
 		isViewerReady: false,
 	};
@@ -88,7 +88,7 @@ export class Measure extends React.PureComponent<IProps, IState> {
 	public containerRef = React.createRef<any>();
 
 	get type() {
-		return VIEWER_PANELS.MEASURE;
+		return VIEWER_PANELS.MEASUREMENTS;
 	}
 
 	get menuActionsMap() {

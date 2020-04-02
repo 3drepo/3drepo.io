@@ -29,7 +29,7 @@ import RayCastActiveIcon from '../../../../../../icons/measure/ray_cast_selected
 import SAMIcon from '../../../../../../icons/measure/surface_area_measurement.svg';
 import SAMActiveIcon from '../../../../../../icons/measure/surface_area_measurement_selected.svg';
 
-import { ACTIVE, DEFAULT, MEASURING_MODE, MEASURING_TYPE } from '../../../../../../modules/measure/measure.constants';
+import { ACTIVE, DEFAULT, MEASURING_MODE, MEASURING_TYPE } from '../../../../../../modules/measurements/measurements.constants';
 
 const MEASURING_TYPE_ICON = {
 	[MEASURING_TYPE.POINT]: {

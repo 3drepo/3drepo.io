@@ -21,7 +21,7 @@ import RemoveIcon from '@material-ui/icons/Close';
 import { cond, eq, matches, stubTrue } from 'lodash';
 
 import { componentToHex, parseHex } from '../../../../../../helpers/colors';
-import { MEASURE_TYPE } from '../../../../../../modules/measure/measure.constants';
+import { MEASURE_TYPE } from '../../../../../../modules/measurements/measurements.constants';
 import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
 import { SmallIconButton } from '../../../../../components/smallIconButon/smallIconButton.component';
 import { StyledForm } from '../../../views/components/viewItem/viewItem.styles';

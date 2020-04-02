@@ -19,7 +19,7 @@ export const VIEWER_PANELS = {
 	VIEWS: 'views',
 	COMPARE: 'compare',
 	SEQUENCES: 'sequences',
-	MEASURE: 'measure',
+	MEASUREMENTS: 'measurements',
 };
 
 export const VIEWER_PANELS_ICONS = {
@@ -31,7 +31,7 @@ export const VIEWER_PANELS_ICONS = {
 	[VIEWER_PANELS.COMPARE]: CompareIcon,
 	[VIEWER_PANELS.GIS]: GisIcon,
 	[VIEWER_PANELS.SEQUENCES]: SequencesIcon,
-	[VIEWER_PANELS.MEASURE]: MeasureIcon,
+	[VIEWER_PANELS.MEASUREMENTS]: MeasureIcon,
 };
 
 export const VIEWER_PANELS_MIN_HEIGHTS = {
@@ -43,7 +43,7 @@ export const VIEWER_PANELS_MIN_HEIGHTS = {
 	[VIEWER_PANELS.COMPARE]: 265,
 	[VIEWER_PANELS.GIS]: 185,
 	[VIEWER_PANELS.SEQUENCES]: 200,
-	[VIEWER_PANELS.MEASURE]: 200,
+	[VIEWER_PANELS.MEASUREMENTS]: 200,
 };
 
 export const VIEWER_PANELS_TITLES = {
@@ -55,7 +55,7 @@ export const VIEWER_PANELS_TITLES = {
 	[VIEWER_PANELS.COMPARE]: 'Compare',
 	[VIEWER_PANELS.GIS]: 'GIS',
 	[VIEWER_PANELS.SEQUENCES]: 'Sequences',
-	[VIEWER_PANELS.MEASURE]: 'Measurement',
+	[VIEWER_PANELS.MEASUREMENTS]: 'Measurement',
 };
 
 const getPanelConfig = (panelType) => ({
@@ -73,7 +73,7 @@ export const VIEWER_LEFT_PANELS = [
 	VIEWER_PANELS.COMPARE,
 	VIEWER_PANELS.GIS,
 	VIEWER_PANELS.SEQUENCES,
-	VIEWER_PANELS.MEASURE,
+	VIEWER_PANELS.MEASUREMENTS,
 ].filter((panel) => clientConfigService.sequencesEnabled || panel !== VIEWER_PANELS.SEQUENCES).map(getPanelConfig);
 
 export const VIEWER_RIGHT_PANELS = [

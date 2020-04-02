@@ -20,7 +20,7 @@ import React from 'react';
 import { VIEWER_EVENTS } from '../../../../../../constants/viewer';
 import { VIEWER_PANELS } from '../../../../../../constants/viewerGui';
 import { uuid } from '../../../../../../helpers/uuid';
-import { MEASURE_TYPE, MEASURING_MODE } from '../../../../../../modules/measure/measure.constants';
+import { MEASURE_TYPE, MEASURING_MODE } from '../../../../../../modules/measurements/measurements.constants';
 import { MEASURING_TYPES } from './measuringType.constants';
 import { Icon, Wrapper } from './measuringType.styles';
 

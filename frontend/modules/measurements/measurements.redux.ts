@@ -16,9 +16,9 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { MEASURE_TYPE, MEASURE_TYPE_NAME, MEASURE_TYPE_STATE_MAP } from './measure.constants';
+import { MEASURE_TYPE, MEASURE_TYPE_NAME, MEASURE_TYPE_STATE_MAP } from './measurements.constants';
 
-export const { Types: MeasureTypes, Creators: MeasureActions } = createActions({
+export const { Types: MeasurementsTypes, Creators: MeasurementsActions } = createActions({
 	activateMeasure: [],
 	deactivateMeasure: [],
 	setMeasureActive: ['isActive'],
@@ -48,7 +48,7 @@ export const { Types: MeasureTypes, Creators: MeasureActions } = createActions({
 	setMeasurementCheckAll: ['measureType'],
 	resetMeasurementTool: [],
 	resetMeasurementToolSuccess: [],
-}, { prefix: 'MEASURE/' });
+}, { prefix: 'MEASUREMENTS/' });
 
 export interface IMeasurementState {
 	isDisabled: boolean;
@@ -209,19 +209,19 @@ export const resetMeasurementColorsSuccess = (state = INITIAL_STATE, {}) => {
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
-	[MeasureTypes.SET_ACTIVE_SUCCESS]: setActiveSuccess,
-	[MeasureTypes.SET_DISABLED_SUCCESS]: setDisabledSuccess,
-	[MeasureTypes.SET_MEASURE_MODE]: setMeasureModeSuccess,
-	[MeasureTypes.SET_MEASURE_UNITS_SUCCESS]: setMeasureUnitsSuccess,
-	[MeasureTypes.ADD_MEASUREMENT]: addMeasurement,
-	[MeasureTypes.CLEAR_MEASUREMENTS_SUCCESS]: clearMeasurementsSuccess,
-	[MeasureTypes.REMOVE_MEASUREMENT_SUCCESS]: removeMeasurementSuccess,
-	[MeasureTypes.SET_MEASUREMENT_COLOR_SUCCESS]: setMeasurementColorSuccess,
-	[MeasureTypes.RESET_MEASUREMENT_COLORS_SUCCESS]: resetMeasurementColorsSuccess,
-	[MeasureTypes.SET_MEASURE_EDGE_SNAPPING_SUCCESS]: setMeasureEdgeSnappingSuccess,
-	[MeasureTypes.SET_MEASURE_XYZ_DISPLAY_SUCCESS]: setMeasureXyzDisplaySuccess,
-	[MeasureTypes.SET_MEASUREMENT_CHECK]: setMeasurementCheck,
-	[MeasureTypes.SET_MEASUREMENT_CHECK_ALL]: setMeasurementCheckAll,
-	[MeasureTypes.SET_MEASUREMENT_NAME_SUCCESS]: setMeasurementNameSuccess,
-	[MeasureTypes.RESET_MEASUREMENT_TOOL_SUCCESS]: resetMeasurementToolSuccess,
+	[MeasurementsTypes.SET_ACTIVE_SUCCESS]: setActiveSuccess,
+	[MeasurementsTypes.SET_DISABLED_SUCCESS]: setDisabledSuccess,
+	[MeasurementsTypes.SET_MEASURE_MODE]: setMeasureModeSuccess,
+	[MeasurementsTypes.SET_MEASURE_UNITS_SUCCESS]: setMeasureUnitsSuccess,
+	[MeasurementsTypes.ADD_MEASUREMENT]: addMeasurement,
+	[MeasurementsTypes.CLEAR_MEASUREMENTS_SUCCESS]: clearMeasurementsSuccess,
+	[MeasurementsTypes.REMOVE_MEASUREMENT_SUCCESS]: removeMeasurementSuccess,
+	[MeasurementsTypes.SET_MEASUREMENT_COLOR_SUCCESS]: setMeasurementColorSuccess,
+	[MeasurementsTypes.RESET_MEASUREMENT_COLORS_SUCCESS]: resetMeasurementColorsSuccess,
+	[MeasurementsTypes.SET_MEASURE_EDGE_SNAPPING_SUCCESS]: setMeasureEdgeSnappingSuccess,
+	[MeasurementsTypes.SET_MEASURE_XYZ_DISPLAY_SUCCESS]: setMeasureXyzDisplaySuccess,
+	[MeasurementsTypes.SET_MEASUREMENT_CHECK]: setMeasurementCheck,
+	[MeasurementsTypes.SET_MEASUREMENT_CHECK_ALL]: setMeasurementCheckAll,
+	[MeasurementsTypes.SET_MEASUREMENT_NAME_SUCCESS]: setMeasurementNameSuccess,
+	[MeasurementsTypes.RESET_MEASUREMENT_TOOL_SUCCESS]: resetMeasurementToolSuccess,
 });
