@@ -153,6 +153,7 @@ export class TextField extends React.PureComponent<IProps, IState> {
 			validationSchema,
 			name,
 			className,
+			mutable,
 			...props
 		} = this.props;
 		const { initialValue } = this.state;
