@@ -30,6 +30,7 @@ export const { Types: MeasurementsTypes, Creators: MeasurementsActions } = creat
 	setMeasureUnits: ['units'],
 	setMeasureUnitsSuccess: ['units'],
 	addMeasurement: ['measurement'],
+	addMeasurementSuccess: ['measurement'],
 	clearMeasurements: [],
 	clearMeasurementsSuccess: [],
 	removeMeasurement: ['uuid'],
@@ -102,17 +103,10 @@ export const removeMeasurementSuccess = (state = INITIAL_STATE, { uuid }) => ({
 	pointMeasurements: state.pointMeasurements.filter((measurement) => measurement.uuid !== uuid),
 });
 
-export const addMeasurement = (state = INITIAL_STATE, { measurement }) => {
+export const addMeasurementSuccess = (state = INITIAL_STATE, { measurement }) => {
 	const measurementStateName = MEASURE_TYPE_STATE_MAP[measurement.type];
 
 	if (measurementStateName) {
-		const index = state[measurementStateName].length + 1;
-		measurement.name = `${MEASURE_TYPE_NAME[measurement.type]} ${index}`;
-		measurement.checked = true;
-		measurement.color.r = measurement.color.r * 255;
-		measurement.color.g = measurement.color.g * 255;
-		measurement.color.b = measurement.color.b * 255;
-
 		return ({ ...state, [measurementStateName]: [...state[measurementStateName], measurement]});
 	}
 
@@ -213,7 +207,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[MeasurementsTypes.SET_DISABLED_SUCCESS]: setDisabledSuccess,
 	[MeasurementsTypes.SET_MEASURE_MODE]: setMeasureModeSuccess,
 	[MeasurementsTypes.SET_MEASURE_UNITS_SUCCESS]: setMeasureUnitsSuccess,
-	[MeasurementsTypes.ADD_MEASUREMENT]: addMeasurement,
+	[MeasurementsTypes.ADD_MEASUREMENT_SUCCESS]: addMeasurementSuccess,
 	[MeasurementsTypes.CLEAR_MEASUREMENTS_SUCCESS]: clearMeasurementsSuccess,
 	[MeasurementsTypes.REMOVE_MEASUREMENT_SUCCESS]: removeMeasurementSuccess,
 	[MeasurementsTypes.SET_MEASUREMENT_COLOR_SUCCESS]: setMeasurementColorSuccess,

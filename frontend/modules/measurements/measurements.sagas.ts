@@ -22,11 +22,12 @@ import { DialogActions } from '../dialog';
 import {
 	selectAreaMeasurements,
 	selectLengthMeasurements,
+	selectMeasurementsDomain,
 	selectPointMeasurements,
 	MeasurementsActions,
-	MeasurementsTypes
+	MeasurementsTypes,
 } from './';
-import { MEASURING_MODE } from './measurements.constants';
+import { MEASURE_TYPE_NAME, MEASURE_TYPE_STATE_MAP, MEASURING_MODE } from './measurements.constants';
 
 export function* activateMeasure() {
 	try {
@@ -74,6 +75,28 @@ export function* setMeasuringUnits({ units }) {
 		]);
 	} catch (error) {
 		DialogActions.showErrorDialog('set', `measure units to ${units}`, error);
+	}
+}
+
+export function* addMeasurement({ measurement }) {
+	try {
+		const measurementStateName = MEASURE_TYPE_STATE_MAP[measurement.type];
+
+		if (measurementStateName) {
+			const measurementsState = yield select(selectMeasurementsDomain);
+			const index = measurementsState[measurementStateName].length + 1;
+
+			measurement.name = `${MEASURE_TYPE_NAME[measurement.type]} ${index}`;
+			measurement.checked = true;
+			measurement.color.r = measurement.color.r * 255;
+			measurement.color.g = measurement.color.g * 255;
+			measurement.color.b = measurement.color.b * 255;
+
+			yield Viewer.setMeasurementName(measurement.uuid, measurement.name);
+			yield put(MeasurementsActions.addMeasurementSuccess(measurement));
+		}
+	} catch (error) {
+		DialogActions.showErrorDialog('add', `measurement`, error);
 	}
 }
 
@@ -210,6 +233,7 @@ export default function* MeasurementsSaga() {
 	yield takeLatest(MeasurementsTypes.SET_DISABLED, setDisabled);
 	yield takeLatest(MeasurementsTypes.SET_MEASURE_MODE, setMeasureMode);
 	yield takeLatest(MeasurementsTypes.SET_MEASURE_UNITS, setMeasuringUnits);
+	yield takeLatest(MeasurementsTypes.ADD_MEASUREMENT, addMeasurement);
 	yield takeLatest(MeasurementsTypes.REMOVE_MEASUREMENT, removeMeasurement);
 	yield takeLatest(MeasurementsTypes.CLEAR_MEASUREMENTS, clearMeasurements);
 	yield takeLatest(MeasurementsTypes.SET_MEASUREMENT_COLOR, setMeasurementColor);
