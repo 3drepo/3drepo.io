@@ -145,12 +145,6 @@ async function insertRef(account, collection, user, name, refInfo) {
 	return ref;
 }
 
-async function insertRefInResources(account, model, user, name, refInfo) {
-	const collName = model + RESOURCES_FILE_REF_EXT;
-
-	return insertRef(account, collName, user, name, refInfo);
-}
-
 const FileRef = {};
 
 FileRef.getOriginalFile = function(account, model, fileName) {
@@ -260,25 +254,28 @@ FileRef.storeMitigationsFile = async function(account, user, name, data) {
 	await removeAllFiles(account, collName);
 	await collection.remove({});
 
-	let refInfo = await ExternalServices.storeFile(account, collName, data);
-	refInfo = {...refInfo, "_id":MITIGATIONS_ID};
+	const extraFields = {"_id":MITIGATIONS_ID};
 
-	const ref = await insertRef(account, collName, user, name, refInfo);
-	return ref;
+	return await this.storeFile(account, collName, user, name, data, extraFields);
 };
 
 FileRef.storeFileAsResource = async function(account, model, user, name, data, extraFields = null) {
 	const collName = model + RESOURCES_FILE_REF_EXT;
-	let refInfo = await ExternalServices.storeFile(account, collName, data);
+
+	return await this.storeFile(account, collName, user, name, data, extraFields);
+};
+
+FileRef.storeFile = async function(account, collection, user, name, data, extraFields = null) {
+	let refInfo = await ExternalServices.storeFile(account, collection, data);
 	refInfo = {...refInfo ,...(extraFields || {}) };
 
-	const ref = await insertRefInResources(account, model, user, name, refInfo);
-	return ref;
+	return await insertRef(account, collection, user, name, refInfo);
 };
 
 FileRef.storeUrlAsResource = async function(account, model, user, name, link, extraFields = null) {
+	const collName = model + RESOURCES_FILE_REF_EXT;
 	const refInfo = {_id: nodeuuid(), link, type: "http", ...extraFields  };
-	const ref = await insertRefInResources(account, model, user, name, refInfo);
+	const ref = await insertRef(account, collName, user, name, refInfo);
 	return ref;
 };
 
