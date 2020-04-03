@@ -57,7 +57,7 @@
 
 	/**
 	 * @api {post} /:teamspace/settings/mitigations.csv Upload mitigations file
-	 * @apiName uploadMitigationsFile
+	 * @apiName upload//MitigationsFile
 	 * @apiGroup Teamspace
 	 * @apiDescription Upload a risk mitigations CSV file to a teamspace.
 	 *
@@ -551,58 +551,31 @@
 		const sessionId = req.headers[C.HEADER_SOCKET_ID];
 		const user = req.session.user.username;
 
-		function fileFilter(fileReq, file, cb) {
-			const acceptedFormat = ["csv"];
-
-			let format = file.originalname.split(".");
-			format = format.length <= 1 ? "" : format.splice(-1)[0];
-
-			const size = parseInt(fileReq.headers["content-length"]);
-
-			if (acceptedFormat.indexOf(format.toLowerCase()) === -1) {
-				return cb({ resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
-			}
-
-			if (size > config.uploadSizeLimit) {
-				return cb({ resCode: responseCodes.SIZE_LIMIT });
-			}
-
-			cb(null, true);
-		}
-
-		if (!config.bcf_dir) {
-			return responseCodes.respond(place, req, res, next, { message: "config.bcf_dir is not defined" });
-		}
-
 		const upload = multer({
-			dest: config.bcf_dir,
-			fileFilter: fileFilter
+			storage: multer.memoryStorage(),
 		});
 
 		upload.single("file")(req, res, (err) => {
 			if (err) {
 				return responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err , err.resCode ? err.resCode : err);
 			} else {
-				fs.readFile(req.file.path, "utf8", (readErr, data) => {
-					const storeFileProm = TeamspaceSettings.storeMitigationsFile(account, user, sessionId, req.file.originalname, data);
-					const processFileProm = Mitigation.importCSV(account, data);
+					const storeFileProm = TeamspaceSettings.processMitigationsFile(account, user, sessionId, req.file.originalname, req.file.buffer);
+					const processFileProm = Mitigation.importCSV(account, req.file.buffer);
 
-					Promise.all([storeFileProm, processFileProm]).then(([storeFileResult, processFileResult]) => {
+					Promise.all([storeFileProm, processFileProm]).then(([updatedTS, processFileResult]) => {
 						const result = { "status":"ok" };
 
-						if (storeFileResult) {
-							result.mitigationsUpdatedAt = Date.now();
+						if (updatedTS) {
+							result.mitigationsUpdatedAt = updatedTS;
 						}
-
 						if (processFileResult) {
 							result.records = processFileResult.length;
 						}
-
 						responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, result);
 					}).catch(promErr => {
 						responseCodes.respond(place, req, res, next, promErr, promErr);
 					});
-				});
+				//				});
 			}
 		});
 	}

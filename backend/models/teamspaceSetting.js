@@ -101,20 +101,23 @@ class TeamspaceSettings {
 		return settings.topicTypes || [];
 	}
 
-	async storeMitigationsFile(account, username, sessionId, filename, file) {
-		const quota = await User.getQuotaInfo(account);
+	processMitigationsFile(account, username, sessionId, filename, file) {
+		/*		const quota = await User.getQuotaInfo(account);
 		const spaceLeft = ((quota.spaceLimit === null || quota.spaceLimit === undefined ? Infinity : quota.spaceLimit) - quota.spaceUsed) * 1024 * 1024;
 		const spaceToBeUsed = file.size;
-		const settingsColl = await this.getTeamspaceSettingsCollection(account, true);
-
 		if (spaceLeft < spaceToBeUsed) {
 			throw responseCodes.SIZE_LIMIT_PAY;
+		i}
+		*/
+		const fNameArr = filename.split(".");
+		if (fNameArr.length < 2 || fNameArr[fNameArr.length-1].toLowerCase() !== "csv") {
+			throw responseCodes.FILE_FORMAT_NOT_SUPPORTED;
 		}
-
-		return FileRef.storeMitigationsFile(account, username, filename, file).then((storeResult) => {
-			return settingsColl.update({_id: account}, {$set: {"mitigationsUpdatedAt":(new Date()).getTime()}}).then(() => {
-				return storeResult;
-			});
+		return FileRef.storeMitigationsFile(account, username, filename, file).then(async () => {
+			const settingsCol = await this.getTeamspaceSettingsCollection(account, true);
+			const updatedAt = new Date();
+			await settingsCol.update({_id: account}, {$set: {"mitigationsUpdatedAt":updatedAt.getTime()}})
+			return updatedAt;
 		});
 	}
 

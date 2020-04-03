@@ -61,18 +61,3 @@ export const uploadTreatmentsFile = (teamspace, file) => {
 	formData.append('file', file);
 	return api.post(`${teamspace}/settings/mitigations.csv`, formData);
 };
-
-/**
- * Get treatments file
- * @param teamspace
- */
-export const fetchTreatmentsFile = (teamspace) => {
-	return api.get(`${teamspace}/settings/mitigations.csv`);
-};
-
-/**
- * Get treatments template file
- */
-export const fetchTreatmentsTemplateFile = () => {
-	return axios.get(`/templates/treatments-template.csv`);
-};

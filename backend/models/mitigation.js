@@ -95,7 +95,7 @@ class Mitigation {
 		const csvFields = Object.keys(fieldTypes);
 
 		// remove column headers defined in template
-		data = data.replace(/Treatment Title,Treatment Details,Treatment Stage,Treatment Type,Risk Category,Risk Location,Element Type,Risk Factor,Construction Scope,Associated Activity\r\n/gm,"");
+		data = data.toString().replace(/Treatment Title,Treatment Details,Treatment Stage,Treatment Type,Risk Category,Risk Location,Element Type,Risk Factor,Construction Scope,Associated Activity\r\n/gm,"");
 
 		const records = parse(data, {
 			columns: csvFields,
