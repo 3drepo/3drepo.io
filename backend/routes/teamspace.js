@@ -28,7 +28,6 @@
 	const multer = require("multer");
 	const config = require("../config.js");
 	const TeamspaceSettings = require("../models/teamspaceSetting");
-	const Mitigation = require("../models/mitigation");
 	const User = require("../models/user");
 	const utils = require("../utils");
 
@@ -559,12 +558,9 @@
 			if (err) {
 				return responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err , err.resCode ? err.resCode : err);
 			} else {
-					const storeFileProm = TeamspaceSettings.processMitigationsFile(account, user, sessionId, req.file.originalname, req.file.buffer);
-					const processFileProm = Mitigation.importCSV(account, req.file.buffer);
-
-					Promise.all([storeFileProm, processFileProm]).then(([updatedTS, processFileResult]) => {
+				const storeFileProm = TeamspaceSettings.processMitigationsFile(account, user, sessionId, req.file.originalname, req.file.buffer);
+				storeFileProm.then(([updatedTS, processFileResult]) => {
 						const result = { "status":"ok" };
-
 						if (updatedTS) {
 							result.mitigationsUpdatedAt = updatedTS;
 						}

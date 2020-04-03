@@ -20,7 +20,6 @@ const _ = require("lodash");
 const parse = require("csv-parse/lib/sync");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
-const TeamspaceSettings = require("./teamspaceSetting");
 
 // NB: Order of fieldTypes important for importCSV
 const fieldTypes = {
@@ -52,6 +51,8 @@ class Mitigation {
 		const criteriaFields = Object.keys(_.omit(fieldTypes, attributeBlacklist));
 		const criteriaPromises = [];
 		const criteria = {};
+
+		const TeamspaceSettings = require("./teamspaceSetting");
 
 		// Get teamspace categories
 		let teamspaceCategories = await TeamspaceSettings.getRiskCategories(account);

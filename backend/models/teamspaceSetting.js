@@ -110,12 +110,17 @@ class TeamspaceSettings {
 			if (fNameArr.length < 2 || fNameArr[fNameArr.length-1].toLowerCase() !== "csv") {
 				throw responseCodes.FILE_FORMAT_NOT_SUPPORTED;
 			}
-			return FileRef.storeMitigationsFile(account, username, filename, file).then(async () => {
+
+			const storeFileProm = FileRef.storeMitigationsFile(account, username, filename, file).then(async () => {
 				const settingsCol = await this.getTeamspaceSettingsCollection(account, true);
 				const updatedAt = new Date();
 				await settingsCol.update({_id: account}, {$set: {"mitigationsUpdatedAt":updatedAt.getTime()}})
 				return updatedAt;
 			});
+
+			const Mitigation = require("./mitigation");
+			const readCSVProm = Mitigation.importCSV(account, file);
+			return Promise.all([storeFileProm, readCSVProm]);
 		} else {
 			throw responseCodes.SIZE_LIMIT_PAY;
 		}
