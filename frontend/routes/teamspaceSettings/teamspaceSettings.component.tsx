@@ -37,8 +37,9 @@ import {
 	BackButton,
 	ButtonContainer,
 	Container,
-	Headline,
+	DataText,
 	FileGrid,
+	Headline,
 	InfoColumnWrapper,
 	LoaderContainer,
 	StyledButton,
@@ -193,13 +194,9 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 				<Headline color="textPrimary" variant="subheading">Treatment Suggestions</Headline>
 				<FileGrid container direction="row" justify="space-between" alignItems="center" wrap="nowrap">
 					<InfoColumnWrapper container>
-						<Headline
-							color="primary"
-							style={{ color: COLOR.REGENT_GRAY }}
-							variant="body1"
-						>
+						<DataText variant="body2">
 							{this.renderLastTreatmentsUpdated()}
-						</Headline>
+						</DataText>
 					</InfoColumnWrapper>
 					<Grid container alignItems="center" wrap="nowrap">
 						<Field name="file" render={({ field }) =>
@@ -215,20 +212,19 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 						/>
 						<StyledIconButton
 							aria-label="Download treatments"
+							disabled={!this.treatmentsUpdatedAt}
 							onClick={this.handleDownloadTreatments}
 						>
 							<CloudDownloadIcon />
 						</StyledIconButton>
+						<StyledButton
+							color="primary"
+							onClick={this.handleDownloadTreatmentsTemplate}
+						>
+						Get Template
+						</StyledButton>
 					</Grid>
 				</FileGrid>
-				<Field render={ ({ form }) => (
-					<StyledButton
-						color="secondary"
-						onClick={this.handleDownloadTreatmentsTemplate}
-					>
-						Get Template
-					</StyledButton>
-				)} />
 			</SuggestionsContainer>
 		);
 	}
@@ -257,15 +253,15 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 						</StyledGrid>
 
 						<StyledGrid>
-							<Headline color="textPrimary" variant="subheading">Issues Topic Types</Headline>
+							<Headline>Issues Types</Headline>
 							<Field
 								name="topicTypes"
-								render={({ field }) => <ChipsInput {...field} placeholder={'Enter new topic type...'} />}
+								render={({ field }) => <ChipsInput {...field} placeholder={'Enter new issue type...'} />}
 							/>
 						</StyledGrid>
 
 						<StyledGrid paddingBottom>
-							<Headline color="textPrimary" variant="subheading">Risks Categories</Headline>
+							<Headline>Risks Categories</Headline>
 							<Field
 								name="riskCategories"
 								render={({ field }) => <ChipsInput {...field} placeholder="Enter new category..." />}
