@@ -750,7 +750,7 @@ export class UnityUtil {
 	 * Clear all measurements
 	 * @category Measuring tool
 	 */
-	public static clearMeasureToolMeasurements() {
+	public static clearAllMeasurements() {
 		UnityUtil.toUnity('ClearMeasureToolMeasurements', undefined, undefined);
 	}
 
@@ -1230,7 +1230,7 @@ export class UnityUtil {
 		UnityUtil.initialLoad = true;
 
 		UnityUtil.disableMeasuringTool();
-		UnityUtil.clearMeasureToolMeasurements();
+		UnityUtil.clearAllMeasurements();
 		UnityUtil.diffToolDisableAndClear();
 		UnityUtil.toUnity('ClearCanvas', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}

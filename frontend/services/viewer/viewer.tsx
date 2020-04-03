@@ -470,7 +470,7 @@ export class ViewerService {
 
 	public async clearMeasurements() {
 		await this.isViewerReady();
-		UnityUtil.clearMeasureToolMeasurements();
+		UnityUtil.clearAllMeasurements();
 	}
 
 	public measurementAlertEvent(measurement) {
