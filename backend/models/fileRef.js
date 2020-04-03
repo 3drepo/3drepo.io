@@ -50,10 +50,6 @@ function fetchModelFile(account, model, ext, fileName, metadata = false, useLega
 	return fetchFile(account, model, collection, fileName, metadata, useLegacyNameOnFallback);
 }
 
-function fetchTeamspaceFile(account, collection, fileName, metadata = false, useLegacyNameOnFallback = false) {
-	return fetchFile(account, null, collection, fileName, metadata, useLegacyNameOnFallback);
-}
-
 function fetchFile(account, model, collection, fileName, metadata = false, useLegacyNameOnFallback = false) {
 	return getRefEntry(account, collection, fileName).then((entry) => {
 		if(!entry) {
