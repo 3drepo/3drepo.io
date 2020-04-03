@@ -21,12 +21,10 @@
 	const _ = require("lodash");
 	const express = require("express");
 	const C = require("../constants");
-	const fs = require("fs");
 	const router = express.Router({mergeParams: true});
 	const responseCodes = require("../response_codes");
 	const middlewares = require("../middlewares/middlewares");
 	const multer = require("multer");
-	const config = require("../config.js");
 	const TeamspaceSettings = require("../models/teamspaceSetting");
 	const User = require("../models/user");
 	const utils = require("../utils");
