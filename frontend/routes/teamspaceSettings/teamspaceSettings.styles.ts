@@ -121,6 +121,12 @@ export const ButtonContainer = styled(Grid)`
 	justify-content: center;
 `;
 
+export const FileGrid = styled(Grid)`
+	&& {
+		max-width: 500px;
+	}
+`;
+
 export const InfoColumnWrapper = styled(Grid)`
 	&& {
 		min-width: 215px;

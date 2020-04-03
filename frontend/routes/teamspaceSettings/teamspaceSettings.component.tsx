@@ -38,6 +38,7 @@ import {
 	ButtonContainer,
 	Container,
 	Headline,
+	FileGrid,
 	InfoColumnWrapper,
 	LoaderContainer,
 	StyledButton,
@@ -190,7 +191,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 		return (
 			<SuggestionsContainer container direction="column" wrap="nowrap">
 				<Headline color="textPrimary" variant="subheading">Treatment Suggestions</Headline>
-				<Grid container direction="row" justify="space-between" alignItems="center" wrap="nowrap">
+				<FileGrid container direction="row" justify="space-between" alignItems="center" wrap="nowrap">
 					<InfoColumnWrapper container>
 						<Headline
 							color="primary"
@@ -219,7 +220,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 							<CloudDownloadIcon />
 						</StyledIconButton>
 					</Grid>
-				</Grid>
+				</FileGrid>
 				<Field render={ ({ form }) => (
 					<StyledButton
 						color="secondary"
