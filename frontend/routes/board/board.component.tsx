@@ -385,6 +385,7 @@ export function Board(props: IProps) {
 			aria-label="Add new card"
 			aria-haspopup="true"
 			onClick={handleAddNewCard}
+			disabled={props.isPending || !modelId || !project}
 		>
 			<Add />
 		</AddButton>

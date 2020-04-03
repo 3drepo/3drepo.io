@@ -110,15 +110,7 @@ export const ViewConfig = styled.div`
 
 export const AddButton = styled(Button).attrs({
 	mini: true,
-	classes: {
-		disabled: 'button--disabled'
-	}
-})`
-	&&.button--disabled {
-		background: #d9d9d9;
-		color: #868686;
-	}
-`;
+})``;
 
 export const TitleActions = styled.div`
 	display: flex;
