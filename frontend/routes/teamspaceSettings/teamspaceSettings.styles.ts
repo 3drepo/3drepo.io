@@ -73,9 +73,16 @@ export const StyledButton = styled(Button)`
 	}
 `;
 
+export const DataText = styled(Typography)`
+	&& {
+		color:${COLOR.BLACK_60}
+	}
+`;
+
 export const Headline = styled(Typography)`
-	&& + && {
-		margin-top: 10px;
+	&& {
+		font-size: 11px;
+		color:${COLOR.BLACK_60}
 	}
 `;
 
