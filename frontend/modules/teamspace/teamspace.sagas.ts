@@ -84,24 +84,9 @@ export function* uploadTreatmentsFile({ teamspace, file }) {
 	}
 }
 
-const downloadCSVFile = (data) => {
-	const content = JSON.stringify(data, null, 2);
-	const a = document.createElement('a');
-	const file = new Blob([content]);
-	a.href = URL.createObjectURL(file);
-	a.download = `treatments.csv`;
-	document.body.appendChild(a);
-	a.click();
-	document.body.removeChild(a);
-};
-
 export function* downloadTreatmentsTemplate() {
 	try {
-		const { data } = yield API.fetchTreatmentsTemplateFile();
-		if (data) {
-			downloadCSVFile(data);
-		}
-
+		window.open('/templates/treatments-template.csv', '_blank');
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'treatments template', e));
 	}
@@ -109,11 +94,8 @@ export function* downloadTreatmentsTemplate() {
 
 export function* downloadTreatments({ teamspace }) {
 	try {
-		const { data } = yield API.fetchTreatmentsFile(teamspace);
-		if (data) {
-			downloadCSVFile(data);
-		}
-
+		const url = yield API.getAPIUrl(`${teamspace}/settings/mitigations.csv`);
+		window.open(url, '_blank');
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'treatments', e));
 	}
