@@ -194,8 +194,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 				<Headline color="textPrimary" variant="subheading">Treatment Suggestions</Headline>
 				<FileGrid container direction="row" justify="space-between" alignItems="center" wrap="nowrap">
 					<InfoColumnWrapper container>
-						<DataText variant="body2"
-							onClick={this.handleDownloadTreatments} >
+						<DataText variant="body2">
 							{this.renderLastTreatmentsUpdated()}
 						</DataText>
 					</InfoColumnWrapper>
@@ -217,17 +216,14 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 						>
 							<CloudDownloadIcon />
 						</StyledIconButton>
+						<StyledButton
+							color="primary"
+							onClick={this.handleDownloadTreatmentsTemplate}
+						>
+						Get Template
+						</StyledButton>
 					</Grid>
 				</FileGrid>
-				<Field render={ ({ form }) => (
-					<StyledButton
-						color="secondary"
-						variant="raised"
-						onClick={this.handleDownloadTreatmentsTemplate}
-					>
-						Get Template
-					</StyledButton>
-				)} />
 			</SuggestionsContainer>
 		);
 	}
