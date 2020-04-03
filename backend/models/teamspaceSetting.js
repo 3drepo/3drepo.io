@@ -21,8 +21,6 @@ const _ = require("lodash");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
 const FileRef = require("./fileRef");
-const User = require("./user");
-
 const colName = "teamspace";
 
 const fieldTypes = {
@@ -102,23 +100,25 @@ class TeamspaceSettings {
 	}
 
 	processMitigationsFile(account, username, sessionId, filename, file) {
-		/*		const quota = await User.getQuotaInfo(account);
-		const spaceLeft = ((quota.spaceLimit === null || quota.spaceLimit === undefined ? Infinity : quota.spaceLimit) - quota.spaceUsed) * 1024 * 1024;
-		const spaceToBeUsed = file.size;
-		if (spaceLeft < spaceToBeUsed) {
+		const User = require("./user"); //Circular dependencies, have to import here.
+		if (User.hasSufficientQuota(account, file.size)) {
+			const fileSizeLimit = require("../config").uploadSizeLimit;
+			if(file.size > fileSizeLimit) {
+				throw responseCodes.SIZE_LIMIT;
+			}
+			const fNameArr = filename.split(".");
+			if (fNameArr.length < 2 || fNameArr[fNameArr.length-1].toLowerCase() !== "csv") {
+				throw responseCodes.FILE_FORMAT_NOT_SUPPORTED;
+			}
+			return FileRef.storeMitigationsFile(account, username, filename, file).then(async () => {
+				const settingsCol = await this.getTeamspaceSettingsCollection(account, true);
+				const updatedAt = new Date();
+				await settingsCol.update({_id: account}, {$set: {"mitigationsUpdatedAt":updatedAt.getTime()}})
+				return updatedAt;
+			});
+		} else {
 			throw responseCodes.SIZE_LIMIT_PAY;
-		i}
-		*/
-		const fNameArr = filename.split(".");
-		if (fNameArr.length < 2 || fNameArr[fNameArr.length-1].toLowerCase() !== "csv") {
-			throw responseCodes.FILE_FORMAT_NOT_SUPPORTED;
 		}
-		return FileRef.storeMitigationsFile(account, username, filename, file).then(async () => {
-			const settingsCol = await this.getTeamspaceSettingsCollection(account, true);
-			const updatedAt = new Date();
-			await settingsCol.update({_id: account}, {$set: {"mitigationsUpdatedAt":updatedAt.getTime()}})
-			return updatedAt;
-		});
 	}
 
 	async getMitigationsStream(account) {
