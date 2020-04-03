@@ -224,7 +224,6 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 				<Field render={ ({ form }) => (
 					<StyledButton
 						color="secondary"
-						variant="raised"
 						onClick={this.handleDownloadTreatmentsTemplate}
 					>
 						Get Template
