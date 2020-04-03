@@ -20,6 +20,8 @@ const _ = require("lodash");
 const parse = require("csv-parse/lib/sync");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
+const utils = require("../utils");
+const nodeuuid = require("uuid/v1");
 
 // NB: Order of fieldTypes important for importCSV
 const fieldTypes = {
@@ -128,6 +130,8 @@ class Mitigation {
 					delete newMitigation[key];
 				}
 			});
+
+			newMitigation._id = utils.stringToUUID(nodeuuid());
 
 			mitigations[i] = newMitigation;
 		}
