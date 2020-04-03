@@ -94,6 +94,7 @@ class Mitigation {
 
 	async importCSV(account, data) {
 		const csvFields = Object.keys(fieldTypes);
+		const clearMitigations = this.clearAll(account);
 
 		// remove column headers defined in template
 		data = data.toString().replace(/Treatment Title,Treatment Details,Treatment Stage,Treatment Type,Risk Category,Risk Location,Element Type,Risk Factor,Construction Scope,Associated Activity\r\n/gm,"");
@@ -104,7 +105,7 @@ class Mitigation {
 			trim: true
 		});
 
-		await this.clearAll(account);
+		await clearMitigations;
 
 		return this.insert(account, records);
 	}

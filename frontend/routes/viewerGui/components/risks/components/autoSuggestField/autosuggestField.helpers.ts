@@ -23,7 +23,7 @@ export const getSuggestions = (value: string, suggestions: string[]) => {
 	let count = 0;
 
 	return inputLength === 0 ? suggestions : suggestions.filter((suggestion) => {
-		const keep = count < 5 && suggestion.slice(0, inputLength).toLowerCase() === inputValue;
+		const keep = count < 5 && suggestion.toLowerCase().includes(inputValue);
 
 		if (keep) {
 			count += 1;
