@@ -47,17 +47,6 @@ const getIdentity = (size) => {
 	return matrix;
 };
 
-const scalarMultiply = (matrix, scalar) => {
-	const size =  matrix.length;
-	for (let i = 0 ; i < size; i++) {
-		for (let j = 0 ; j < size; j++) {
-			matrix[i][j] = scalar * matrix[i][j];
-		}
-	}
-
-	return matrix;
-};
-
 const multiplyVectors = (v1, v2) => {
 	let res = 0;
 
@@ -103,7 +92,6 @@ const transformVector = (matrix, vector) => {
 module.exports = {
 	multiply,
 	getIdentity,
-	scalarMultiply,
 	transformVector,
 	addVectors,
 	subtractVectors
