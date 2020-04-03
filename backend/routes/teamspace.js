@@ -551,7 +551,7 @@
 		const user = req.session.user.username;
 
 		const upload = multer({
-			storage: multer.memoryStorage(),
+			storage: multer.memoryStorage()
 		});
 
 		upload.single("file")(req, res, (err) => {
@@ -560,17 +560,17 @@
 			} else {
 				const storeFileProm = TeamspaceSettings.processMitigationsFile(account, user, sessionId, req.file.originalname, req.file.buffer);
 				storeFileProm.then(([updatedTS, processFileResult]) => {
-						const result = { "status":"ok" };
-						if (updatedTS) {
-							result.mitigationsUpdatedAt = updatedTS;
-						}
-						if (processFileResult) {
-							result.records = processFileResult.length;
-						}
-						responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, result);
-					}).catch(promErr => {
-						responseCodes.respond(place, req, res, next, promErr, promErr);
-					});
+					const result = { "status":"ok" };
+					if (updatedTS) {
+						result.mitigationsUpdatedAt = updatedTS;
+					}
+					if (processFileResult) {
+						result.records = processFileResult.length;
+					}
+					responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, result);
+				}).catch(promErr => {
+					responseCodes.respond(place, req, res, next, promErr, promErr);
+				});
 				//				});
 			}
 		});

@@ -1243,7 +1243,7 @@ schema.statics.hasSufficientQuota = async (teamspace, size) => {
 	const quota = await User.getQuotaInfo(teamspace);
 	const spaceLeft = ((quota.spaceLimit === null || quota.spaceLimit === undefined ? Infinity : quota.spaceLimit) - quota.spaceUsed) * 1024 * 1024;
 	return spaceLeft >= size;
-}
+};
 
 schema.methods.hasReachedLicenceLimit = async function () {
 	const Invitations =  require("./invitations");
