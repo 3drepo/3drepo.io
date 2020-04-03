@@ -40,6 +40,7 @@ import {
 	Headline,
 	InfoColumnWrapper,
 	LoaderContainer,
+	StyledButton,
 	StyledForm,
 	StyledGrid,
 	StyledIcon,
@@ -219,6 +220,15 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 						</StyledIconButton>
 					</Grid>
 				</Grid>
+				<Field render={ ({ form }) => (
+					<StyledButton
+						color="secondary"
+						variant="raised"
+						onClick={this.handleDownloadTreatmentsTemplate}
+					>
+						Get Template
+					</StyledButton>
+				)} />
 			</SuggestionsContainer>
 		);
 	}

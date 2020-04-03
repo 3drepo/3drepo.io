@@ -55,7 +55,6 @@ export const StyledGrid = styled(Grid)`
 export const SuggestionsContainer = styled(Grid)`
 	&& {
 		padding: 0 24px 24px;
-		max-width: 500px;
 	}
 `;
 
