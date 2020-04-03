@@ -253,7 +253,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 						</StyledGrid>
 
 						<StyledGrid>
-							<Headline>Issues Types</Headline>
+							<Headline>Issue Types</Headline>
 							<Field
 								name="topicTypes"
 								render={({ field }) => <ChipsInput {...field} placeholder={'Enter new issue type...'} />}
@@ -261,7 +261,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 						</StyledGrid>
 
 						<StyledGrid paddingBottom>
-							<Headline>Risks Categories</Headline>
+							<Headline>Risk Categories</Headline>
 							<Field
 								name="riskCategories"
 								render={({ field }) => <ChipsInput {...field} placeholder="Enter new category..." />}
