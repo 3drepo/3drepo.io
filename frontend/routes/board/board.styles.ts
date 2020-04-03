@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -22,6 +22,7 @@ import Select from '@material-ui/core/Select';
 import styled from 'styled-components';
 import { COLOR } from '../../styles';
 import { PreviewListItem } from '../viewerGui/components/previewListItem/previewListItem.component';
+import { ViewerPanelContent } from '../viewerGui/components/viewerPanel/viewerPanel.styles';
 
 export const Container = styled.div`
 	height: 100%;
@@ -35,6 +36,10 @@ export const BoardContainer = styled.div`
 	height: calc(100% - 50px);
 	box-sizing: border-box;
 	border-top: 1px solid ${COLOR.BLACK_6};
+
+	> div {
+		height: 100%;
+	}
 
 	.react-trello-board {
 		background-color: initial;
@@ -106,15 +111,7 @@ export const ViewConfig = styled.div`
 
 export const AddButton = styled(Button).attrs({
 	mini: true,
-	classes: {
-		disabled: 'button--disabled'
-	}
-})`
-	&&.button--disabled {
-		background: #d9d9d9;
-		color: #868686;
-	}
-`;
+})``;
 
 export const TitleActions = styled.div`
 	display: flex;
@@ -189,6 +186,13 @@ export const LoaderContainer = styled.div`
 
 export const FormWrapper = styled.div`
 	width: ${(props: any) => props.size === 'sm' ? 400 : 800}px;
+
+	${ViewerPanelContent} {
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
+		flex: auto;
+	}
 `;
 
 export const NoDataMessage = styled.div`

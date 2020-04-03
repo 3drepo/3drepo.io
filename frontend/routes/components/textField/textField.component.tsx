@@ -232,15 +232,15 @@ export class TextField extends React.PureComponent<IProps, IState> {
 		const shouldRenderMutable = !this.isEditMode && !this.props.disabled;
 
 		return (
-			<>
-				<Formik
-					enableReinitialize
-					initialValues={{ [name]: initialValue }}
-					validationSchema={validationSchema}
-					onSubmit={this.saveChange}
-				>
-					<Container onBlur={this.onBlur} className={className}>
-						{this.isEditMode &&
+				<>
+					<Formik
+							enableReinitialize
+							initialValues={{ [name]: initialValue }}
+							validationSchema={validationSchema}
+							onSubmit={this.saveChange}
+					>
+						<Container onBlur={this.onBlur} className={className}>
+							{this.isEditMode &&
 							<Field name={name} render={({ field, form }) =>
 								(
 									<StyledTextField
@@ -255,21 +255,21 @@ export class TextField extends React.PureComponent<IProps, IState> {
 									/>
 								)}
 							/>
-						}
-						{!this.isEditMode &&
+							}
+							{!this.isEditMode &&
 							<FieldWrapper onClick={this.handlePlaceholderClick}>
 								<FieldLabel shrink>{this.props.label}</FieldLabel>
 								<StyledLinkableField ref={this.linkableFieldRef} {...this.additionalProps()}>
 									{this.fieldValue}
 								</StyledLinkableField>
 							</FieldWrapper>
-						}
-						{shouldRenderActions && this.renderActionsLine()}
-						{shouldRenderMutable && this.renderMutableButton()}
-					</Container>
-				</Formik>
-				{this.renderExpandableText(this.isExpandable)}
-			</>
+							}
+							{shouldRenderActions && this.renderActionsLine()}
+							{shouldRenderMutable && this.renderMutableButton()}
+						</Container>
+					</Formik>
+					{this.renderExpandableText(this.isExpandable)}
+				</>
 		);
 	}
 }
