@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+
 import IconButton from '@material-ui/core/IconButton';
 import InputLabel from '@material-ui/core/InputLabel';
 import Add from '@material-ui/icons/Add';
@@ -22,7 +24,6 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import Check from '@material-ui/icons/Check';
 import SearchIcon from '@material-ui/icons/Search';
 import { get } from 'lodash';
-import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import TrelloBoard from 'react-trello';
 
@@ -146,6 +147,7 @@ const BoardCard = memo(({ metadata, onClick }: any) => (
 ));
 
 export function Board(props: IProps) {
+	const boardRef = useRef(null);
 	const { type, teamspace, project, modelId } = useParams();
 	const projectParam = `${project ? `/${project}` : ''}`;
 	const modelParam = `${modelId ? `/${modelId}` : ''}`;
@@ -189,6 +191,17 @@ export function Board(props: IProps) {
 	useEffect(() => {
 		props.fetchData(type, teamspace, project, modelId);
 	}, [type, teamspace, project, modelId]);
+
+	useEffect(() => {
+		if (boardRef.current) {
+			const board = boardRef.current;
+			const lanes = board.getElementsByClassName('react-trello-lane');
+
+			setTimeout(() => {
+				lanes.forEach((lane) => lane.removeAttribute('title'));
+			});
+		}
+	}, [boardRef, props.isPending]);
 
 	const hasViewerPermissions = isViewer(props.modelSettings.permissions);
 
@@ -372,6 +385,7 @@ export function Board(props: IProps) {
 			aria-label="Add new card"
 			aria-haspopup="true"
 			onClick={handleAddNewCard}
+			disabled={props.isPending || !modelId || !project}
 		>
 			<Add />
 		</AddButton>
@@ -419,17 +433,19 @@ export function Board(props: IProps) {
 	};
 
 	const renderBoard = renderWhenTrue(() => (
-		<BoardContainer>
-			<TrelloBoard
-				data={boardData}
-				hideCardDeleteIcon
-				handleDragEnd={handleCardDrop}
-				onCardClick={handleOpenDialog}
-				onCardMoveAcrossLanes={handleCardMove}
-				components={components}
-				cardDraggable
-			/>
-		</BoardContainer>
+			<BoardContainer>
+				<div ref={boardRef}>
+					<TrelloBoard
+						data={boardData}
+						hideCardDeleteIcon
+						handleDragEnd={handleCardDrop}
+						onCardClick={handleOpenDialog}
+						onCardMoveAcrossLanes={handleCardMove}
+						components={components}
+						cardDraggable
+					/>
+				</div>
+			</BoardContainer>
 	));
 
 	const renderLoader = renderWhenTrue(() => (
