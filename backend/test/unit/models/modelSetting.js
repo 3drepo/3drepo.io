@@ -59,20 +59,12 @@ describe("Model Settings", function() {
 			const props = {
 				_id: "xmb3ZydpSM",
 				unit: "metre",
-				topicTypes: ["For info", "VR"],
 				code: "09ABC"
 
 			};
 
 			const expectedReturn = {
 				unit: "metre",
-				topicTypes: [{
-					label: "For info",
-					value: "for_info"
-				}, {
-					label: "VR",
-					value: "vr"
-				}],
 				code: "09ABC"
 			};
 

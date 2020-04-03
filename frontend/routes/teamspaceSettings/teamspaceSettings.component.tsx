@@ -212,6 +212,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 						/>
 						<StyledIconButton
 							aria-label="Download treatments"
+							disabled={!this.treatmentsUpdatedAt}
 							onClick={this.handleDownloadTreatments}
 						>
 							<CloudDownloadIcon />
