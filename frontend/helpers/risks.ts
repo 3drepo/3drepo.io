@@ -129,7 +129,7 @@ export const getRiskStatus = (levelOfRisk: number, mitigationStatus: string) => 
 		Icon: RISK_LEVELS_ICONS[mitigationStatus] || null,
 		color: RISK_LEVELS_COLOURS[levelOfRisk].color,
 	});
-}
+};
 
 export const getRiskPinColor = (risk) => {
 	const levelOfRisk = (risk.overall_level_of_risk !== undefined) ? risk.overall_level_of_risk : 4;
