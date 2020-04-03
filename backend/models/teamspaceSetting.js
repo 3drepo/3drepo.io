@@ -114,7 +114,7 @@ class TeamspaceSettings {
 			const storeFileProm = FileRef.storeMitigationsFile(account, username, filename, file).then(async () => {
 				const settingsCol = await this.getTeamspaceSettingsCollection(account, true);
 				const updatedAt = new Date();
-				await settingsCol.update({_id: account}, {$set: {"mitigationsUpdatedAt":updatedAt.getTime()}});
+				await settingsCol.update({_id: account}, {$set: {"mitigationsUpdatedAt":updatedAt}});
 				return updatedAt;
 			});
 
