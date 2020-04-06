@@ -25,23 +25,28 @@ export const StyledChipInput = styled(ChipInput)`
 
 		div[class^="WAMuiChipInput-standard"] {
 			min-height: 32px;
+
+			&::before  {
+				border-bottom-color: rgba(0, 0, 0, .12) !important;
+			}
 		}
-		div[class*="-focused-"]:after {
-			transform: scale(0);
-		}
+
 		div[class^="MuiChip-root"] {
 			height: 24px;
 		}
+
 		span[class^="MuiChip-label"] {
 			padding-left: 8px;
 			padding-right: 8px;
 		}
+
 		svg[class^="MuiSvgIcon-root"] {
 			width: 16px;
 			height: 16px;
 			margin-left: -4px;
 			margin-right: 4px;
 		}
+
 		input[class^="MuiInputBase-input"] {
 			transform: translateY(-3px);
 		}

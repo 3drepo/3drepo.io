@@ -29,12 +29,11 @@ interface IChip {
 interface IProps {
 	name: string;
 	value: IChip[];
-	onBlur: (event) => void;
 	onChange: (event) => void;
 	placeholder?: string;
 }
 
-export const ChipsInput: React.FunctionComponent<IProps> = ({ name, onBlur, onChange, ...props }) => {
+export const ChipsInput: React.FunctionComponent<IProps> = ({ name, onChange, ...props }) => {
 	const getValues = () => [...props.value.map(({ label }) => label)];
 
 	const handleAddChip = (value) => {
@@ -72,7 +71,6 @@ export const ChipsInput: React.FunctionComponent<IProps> = ({ name, onBlur, onCh
 			{...props}
 			value={getValues()}
 			InputProps={{
-				onBlur,
 				name,
 			}}
 			onAdd={handleAddChip}
