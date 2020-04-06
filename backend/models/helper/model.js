@@ -1022,22 +1022,12 @@ async function getMeshById(account, model, meshId) {
 	const projection = {
 		"parents": 1,
 		"vertices": 1,
-		"matrix": 1,
 		"faces": 1,
 		"_extRef":1
 	};
 
 	const mesh = await Scene.getObjectById(account, model, utils.stringToUUID(meshId), projection);
-	let parentMatrix = null;
-
-	if ((mesh.parents || []).length > 0) {
-		parentMatrix = await getParentMatrix(account, model, mesh.parents[0], revisionIds);
-		if (mesh.matrix) {
-			mesh.matrix = matrix.multiply(parentMatrix, mesh.matrix);
-		} else {
-			mesh.matrix = parentMatrix;
-		}
-	}
+	mesh.matrix = await getParentMatrix(account, model, mesh.parents[0], revisionIds);
 
 	const vertices =  mesh.vertices ? new StreamBuffer({buffer: mesh.vertices.buffer, chunkSize: mesh.vertices.buffer.length}) : await Scene.getGridfsFileStream(account, model, mesh._extRef.vertices);
 	const triangles = mesh.faces ?  new StreamBuffer({buffer: mesh.faces.buffer, chunkSize: mesh.faces.buffer.length})  : await Scene.getGridfsFileStream(account, model, mesh._extRef.faces);
