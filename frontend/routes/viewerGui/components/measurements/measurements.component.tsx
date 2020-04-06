@@ -107,10 +107,13 @@ export class Measurements extends React.PureComponent<IProps, IState> {
 			this.setState({ isViewerReady: true });
 		})();
 		this.toggleMeasureListeners(true);
+
+		if (this.props.modelUnit === 'ft') {
+			this.props.setMeasureUnits(this.props.modelUnit);
+		}
 	}
 
 	public componentWillUnmount = () => {
-		this.props.resetMeasurementTool();
 		this.toggleMeasureListeners(false);
 	}
 
@@ -202,7 +205,10 @@ export class Measurements extends React.PureComponent<IProps, IState> {
 
 	private renderActionsMenu = () => (
 		<MenuList>
-			{MEASURE_ACTIONS_MENU.map(( {name, Icon, label }) => (
+			{MEASURE_ACTIONS_MENU
+				// When the model is in feet there shouldnt be the options of change the units
+				.filter(({name}) => name !== MEASURE_ACTIONS_ITEMS.UNITS_DISPLAYED_IN || this.props.modelUnit !== 'ft')
+				.map(( {name, Icon, label }) => (
 				<StyledListItem key={name} button onClick={this.menuActionsMap[name]}>
 					<IconWrapper><Icon fontSize="small" /></IconWrapper>
 					<StyledItemText>

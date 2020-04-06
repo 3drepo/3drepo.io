@@ -23,6 +23,7 @@ import {
 	selectAreaMeasurements,
 	selectLengthMeasurements,
 	selectMeasurementsDomain,
+	selectMeasureUnits,
 	selectPointMeasurements,
 	MeasurementsActions,
 	MeasurementsTypes,
@@ -67,7 +68,7 @@ export function* setMeasureMode({ mode }) {
 	}
 }
 
-export function* setMeasuringUnits({ units }) {
+export function* setMeasureUnits({ units }) {
 	try {
 		yield all([
 			Viewer.setMeasuringUnits(units),
@@ -221,6 +222,8 @@ export function* clearMeasurements() {
 export function* resetMeasurementTool() {
 	try {
 		yield put(MeasurementsActions.resetMeasurementToolSuccess());
+		const units = yield select(selectMeasureUnits);
+		yield put(MeasurementsActions.setMeasureUnits(units));
 	} catch (error) {
 		DialogActions.showErrorDialog('reset', 'measurements tool', error);
 	}
@@ -232,7 +235,7 @@ export default function* MeasurementsSaga() {
 	yield takeLatest(MeasurementsTypes.SET_MEASURE_ACTIVE, setMeasureActive);
 	yield takeLatest(MeasurementsTypes.SET_DISABLED, setDisabled);
 	yield takeLatest(MeasurementsTypes.SET_MEASURE_MODE, setMeasureMode);
-	yield takeLatest(MeasurementsTypes.SET_MEASURE_UNITS, setMeasuringUnits);
+	yield takeLatest(MeasurementsTypes.SET_MEASURE_UNITS, setMeasureUnits);
 	yield takeLatest(MeasurementsTypes.ADD_MEASUREMENT, addMeasurement);
 	yield takeLatest(MeasurementsTypes.REMOVE_MEASUREMENT, removeMeasurement);
 	yield takeLatest(MeasurementsTypes.CLEAR_MEASUREMENTS, clearMeasurements);

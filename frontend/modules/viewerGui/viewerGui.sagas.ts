@@ -91,7 +91,8 @@ function* resetPanelsStates() {
 			put(BimActions.resetBimState()),
 			put(ViewerGuiActions.resetPanels()),
 			put(SequencesActions.reset()),
-			put(GisActions.resetLayers())
+			put(GisActions.resetLayers()),
+			put(MeasurementsActions.resetMeasurementTool())
 		]);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('reset', 'panels data', error));
