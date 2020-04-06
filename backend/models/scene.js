@@ -22,6 +22,7 @@ const Schema = mongoose.Schema;
 const utils = require("../utils");
 const db = require("../handler/db");
 const ExternalServices = require("../handler/externalServices");
+const matrix = require("./helper/matrix");
 
 const schema = Schema({
 	_id: Object,
@@ -63,6 +64,19 @@ schema.statics.getObjectById = async (account, model, id, projection = {}) => {
 
 schema.statics.getGridfsFileStream = async (account, model, filename) => {
 	return await ExternalServices.getFileStream(account, model + ".scene", "gridfs", filename);
+};
+
+schema.statics.getParentMatrix = async (account, model, parent, revisionIds) => {
+	const mesh = await Scene.getBySharedId(account, model, parent, revisionIds);
+
+	if ((mesh.parents || []).length > 0) {
+		const parentMatrix = await Scene.getParentMatrix(account, model, mesh.parents[0], revisionIds);
+		if (mesh.matrix) {
+			return matrix.multiply(parentMatrix, mesh.matrix);
+		}
+	}
+
+	return mesh.matrix || matrix.getIdentity(4);
 };
 
 const Scene = ModelFactory.createClass(

@@ -39,7 +39,6 @@ const _ = require("lodash");
 const nodeuuid = require("uuid/v1");
 const FileRef = require("../fileRef");
 const notifications = require("../notification");
-const matrix = require("./matrix");
 const CombinedStream = require("combined-stream");
 const stringToStream = require("string-to-stream");
 const { StreamBuffer } = require("./stream");
@@ -1027,7 +1026,7 @@ async function getMeshById(account, model, meshId) {
 	};
 
 	const mesh = await Scene.getObjectById(account, model, utils.stringToUUID(meshId), projection);
-	mesh.matrix = await getParentMatrix(account, model, mesh.parents[0], revisionIds);
+	mesh.matrix = await Scene.getParentMatrix(account, model, mesh.parents[0], revisionIds);
 
 	const vertices =  mesh.vertices ? new StreamBuffer({buffer: mesh.vertices.buffer, chunkSize: mesh.vertices.buffer.length}) : await Scene.getGridfsFileStream(account, model, mesh._extRef.vertices);
 	const triangles = mesh.faces ?  new StreamBuffer({buffer: mesh.faces.buffer, chunkSize: mesh.faces.buffer.length})  : await Scene.getGridfsFileStream(account, model, mesh._extRef.faces);
@@ -1039,19 +1038,6 @@ async function getMeshById(account, model, meshId) {
 	combinedStream.append(triangles.pipe(new BinToTriangleStringStream({isLittleEndian: true})));
 	combinedStream.append(stringToStream("]}"));
 	return 	combinedStream;
-}
-
-async function getParentMatrix(account, model, parent, revisionIds) {
-	const mesh = await Scene.getBySharedId(account, model, parent, revisionIds);
-
-	if ((mesh.parents || []).length > 0) {
-		const parentMatrix = await getParentMatrix(account, model, mesh.parents[0], revisionIds);
-		if (mesh.matrix) {
-			return matrix.multiply(parentMatrix, mesh.matrix);
-		}
-	}
-
-	return mesh.matrix || matrix.getIdentity(4);
 }
 
 async function getSubModelRevisions(account, model, branch, rev) {
