@@ -232,43 +232,18 @@ describe("Model", function () {
 
 	});
 
-	it("update issues type with duplicate values", function(done) {
-
-		const model = "project5";
-
-		agent.put(`/${username}/${model}/settings`)
-			.send({
-				topicTypes: ["For Info", "for info"]
-			}).expect(400, function(err ,res) {
-				expect(res.body.value).to.equal(responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE.value);
-				done(err);
-			});
-	});
-
 	it("update settings should be successful", function(done) {
 
 		const body = {
 
 			unit: "cm",
-			code: "00222",
-			topicTypes: ["For Info", "3D Repo", "Vr"]
-
+			code: "00222"
 		};
 
 		const expectedReturn = {
 
 			unit: "cm",
-			code: "00222",
-			topicTypes: [{
-				label: "For Info",
-				value: "for_info"
-			}, {
-				label: "3D Repo",
-				value: "3d_repo"
-			}, {
-				label: "Vr",
-				value: "vr"
-			}]
+			code: "00222"
 
 		};
 

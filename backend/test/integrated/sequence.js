@@ -225,6 +225,7 @@ describe("Sequences", function () {
 	describe("Get sequence state", function() {
 		it("from latest revision should succeed", function(done) {
 			agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/state/${stateId}`).expect(200, function(err , res) {
+				console.log(res.body);
 				expect(Object.keys(res.body)).to.deep.equal(["transparency", "color"]);
 
 				return done(err);
