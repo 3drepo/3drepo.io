@@ -15,29 +15,35 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { withFormik, Field, Form } from 'formik';
-import { debounce, get, isEmpty, isEqual } from 'lodash';
 import React from 'react';
+
+import Tab from '@material-ui/core/Tab';
+import Tabs from '@material-ui/core/Tabs';
+import Tooltip from '@material-ui/core/Tooltip';
+import { withFormik, Form } from 'formik';
+import { debounce, get, isEmpty, isEqual } from 'lodash';
 import * as Yup from 'yup';
 
-import InputLabel from '@material-ui/core/InputLabel';
 import {
-	LEVELS_OF_RISK,
-	RISK_CATEGORIES,
-	RISK_CONSEQUENCES,
-	RISK_LIKELIHOODS,
-	RISK_MITIGATION_STATUSES
+	ATTACHMENTS_RISK_TYPE, MAIN_RISK_TYPE, RISK_TABS, TREATMENT_RISK_TYPE,
 } from '../../../../../../constants/risks';
+import { VIEWER_PANELS_TITLES } from '../../../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { calculateLevelOfRisk } from '../../../../../../helpers/risks';
 import { canChangeAssigned, canChangeBasicProperty, canChangeStatus } from '../../../../../../helpers/risks';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
-import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
-import { Image } from '../../../../../components/image';
-import { Resources } from '../../../../../components/resources/resources.component';
-import { TextField } from '../../../../../components/textField/textField.component';
 import PinButton from '../../../pinButton/pinButton.container';
-import { Container, DescriptionImage, FieldsContainer, FieldsRow, StyledFormControl } from './riskDetails.styles';
+import { AttachmentsFormTab } from '../attachmentsFormTab/attachmentsFormTab.component';
+import { MainRiskFormTab } from '../mainRiskFormTab/mainRiskFormTab.component';
+import { TreatmentRiskFormTab } from '../treatmentFormTab/treatmentFormTab.component';
+import {
+	Container,
+	DescriptionImage,
+	FieldsContainer,
+	FieldsRow,
+	StyledFormControl,
+	TabContent,
+} from './riskDetails.styles';
 
 interface IProps {
 	risk: any;
@@ -64,10 +70,13 @@ interface IProps {
 	canComment: boolean;
 	hasPin: boolean;
 	hidePin?: boolean;
+	criteria: any;
+	showMitigationSuggestions: (conditions: any, setFieldValue) => void;
 }
 
 interface IState {
 	isSaving: boolean;
+	activeTab: string;
 }
 
 export const RiskSchema = Yup.object().shape({
@@ -81,13 +90,24 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		return !this.props.risk._id;
 	}
 
+	get canEditRiskStatus() {
+		const { risk, myJob, permissions, currentUser } = this.props;
+		return this.isNewRisk || canChangeStatus(risk, myJob, permissions, currentUser);
+	}
+
 	get canEditBasicProperty() {
 		const { risk, myJob, permissions, currentUser } = this.props;
 		return this.isNewRisk || canChangeBasicProperty(risk, myJob, permissions, currentUser);
 	}
 
+	get canChangeAssigned() {
+		const { risk, myJob, permissions, currentUser } = this.props;
+		return canChangeAssigned(risk, myJob, permissions, currentUser);
+	}
+
 	public state = {
-		isSaving: false
+		isSaving: false,
+		activeTab: MAIN_RISK_TYPE,
 	};
 
 	public autoSave = debounce(() => {
@@ -102,17 +122,6 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 			this.setState({ isSaving: false });
 		});
 	}, 200);
-
-	public renderPinButton = renderWhenTrue(() => (
-		<StyledFormControl>
-			<PinButton
-				onChange={this.props.onChangePin}
-				onSave={this.props.onSavePin}
-				disabled={!this.isNewRisk && !this.canEditBasicProperty}
-				hasPin={this.props.hasPin}
-			/>
-		</StyledFormControl>
-	));
 
 	public componentDidUpdate(prevProps) {
 		const changes = {} as IState;
@@ -163,226 +172,83 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public render() {
-		const { risk, myJob, permissions, currentUser, onRemoveResource,
-			attachFileResources, attachLinkResources, showDialog,
-			canComment } = this.props;
-		const newRisk = !risk._id;
-		const canEditRiskStatus = newRisk || canChangeStatus(risk, myJob, permissions, currentUser);
+	private handleChange = (event, activeTab) => {
+		this.setState({ activeTab });
+	}
 
+	public renderPinButton = renderWhenTrue(() => (
+		<StyledFormControl>
+			<PinButton
+				onChange={this.props.onChangePin}
+				onSave={this.props.onSavePin}
+				disabled={!this.isNewRisk && !this.canEditBasicProperty}
+				hasPin={this.props.hasPin}
+			/>
+		</StyledFormControl>
+	));
+
+	public showRiskContent = (active) => (
+		<MainRiskFormTab
+			active={active}
+			isNewRisk={this.isNewRisk}
+			canEditBasicProperty={this.canEditBasicProperty}
+			canChangeAssigned={this.canChangeAssigned}
+			renderPinButton={this.renderPinButton}
+			{...this.props}
+		/>
+	)
+
+	public showTreatmentContent = (active) => (
+		<TreatmentRiskFormTab
+			active={active}
+			isNewRisk={this.isNewRisk}
+			canEditBasicProperty={this.canEditBasicProperty}
+			canEditRiskStatus={this.canEditRiskStatus}
+			{...this.props}
+		/>
+	)
+
+	public showAttachmentsContent = (active) => (
+		<AttachmentsFormTab active={active} {...this.props} />
+	)
+
+	get attachmentsProps() {
+		if (!this.isNewRisk) {
+			return {
+				label: RISK_TABS.ATTACHMENTS
+			};
+		}
+
+		return {
+			disabled: true,
+			label: (
+				<Tooltip title={`Save the ${VIEWER_PANELS_TITLES.risks} before adding an attachment`}>
+					<span>{RISK_TABS.ATTACHMENTS}</span>
+				</Tooltip>
+			)
+		};
+	}
+
+	public render() {
+		const { activeTab } = this.state;
 		return (
 			<Form>
-				<FieldsRow container alignItems="center" justify="space-between">
-					<StyledFormControl>
-						<InputLabel shrink htmlFor="assigned_roles">Risk owner</InputLabel>
-						<Field name="assigned_roles" render={({ field }) => (
-							<CellSelect
-								{...field}
-								items={this.props.jobs}
-								inputId="assigned_roles"
-								disabled={!(newRisk || canChangeAssigned(risk, myJob, permissions, currentUser))}
-							/>
-						)} />
-					</StyledFormControl>
-
-					<StyledFormControl>
-						<InputLabel shrink htmlFor="category">Category</InputLabel>
-						<Field name="category" render={({ field }) => (
-							<CellSelect
-								{...field}
-								items={RISK_CATEGORIES}
-								inputId="category"
-								disabled={!this.canEditBasicProperty}
-							/>
-						)} />
-					</StyledFormControl>
-				</FieldsRow>
-
-				<FieldsRow container alignItems="center" justify="space-between">
-					<Field name="associated_activity" render={({ field }) => (
-						<TextField
-							{...field}
-							requiredConfirm={!this.isNewRisk}
-							label="Associated Activity"
-							disabled={!this.canEditBasicProperty}
-						/>
-					)} />
-
-					<Field name="safetibase_id" render={({ field }) => (
-						<TextField
-							{...field}
-							requiredConfirm={!this.isNewRisk}
-							validationSchema={RiskSchema}
-							label="SafetiBase ID"
-							disabled={!this.canEditBasicProperty}
-						/>
-					)} />
-				</FieldsRow>
-
-				<Container>
-					<Field name="desc" render={({ field }) => (
-						<TextField
-							{...field}
-							requiredConfirm={!this.isNewRisk}
-							validationSchema={RiskSchema}
-							fullWidth
-							multiline
-							label="Description"
-							disabled={!this.canEditBasicProperty}
-							mutable={!this.isNewRisk}
-						/>
-					)} />
-				</Container>
-
-				{this.props.risk.descriptionThumbnail && (
-					<DescriptionImage>
-						<Image
-							src={this.props.risk.descriptionThumbnail}
-							enablePreview
-						/>
-					</DescriptionImage>
-				)}
-
-				<FieldsRow container alignItems="center" justify="space-between">
-					<FieldsContainer>
-						<StyledFormControl>
-							<InputLabel shrink htmlFor="likelihood">Risk Likelihood</InputLabel>
-							<Field name="likelihood" render={({ field }) => (
-								<CellSelect
-									{...field}
-									items={RISK_LIKELIHOODS}
-									inputId="likelihood"
-									disabled={!this.canEditBasicProperty}
-								/>
-							)} />
-						</StyledFormControl>
-
-						<StyledFormControl>
-							<InputLabel shrink htmlFor="consequence">Risk Consequence</InputLabel>
-							<Field name="consequence" render={({ field }) => (
-								<CellSelect
-									{...field}
-									items={RISK_CONSEQUENCES}
-									inputId="consequence"
-									disabled={!this.canEditBasicProperty}
-								/>
-							)} />
-						</StyledFormControl>
-					</FieldsContainer>
-
-					<FieldsContainer>
-						<StyledFormControl>
-							<InputLabel shrink htmlFor="level_of_risk">Level of Risk</InputLabel>
-							<Field name="level_of_risk" render={({ field }) => (
-								<CellSelect
-									{...field}
-									items={LEVELS_OF_RISK}
-									inputId="level_of_risk"
-									disabled
-									readOnly
-								/>
-							)} />
-						</StyledFormControl>
-						{this.renderPinButton(!this.props.hidePin)}
-					</FieldsContainer>
-
-				</FieldsRow>
-
-				<Container>
-					<Field name="mitigation_desc" render={({ field, form }) => (
-						<TextField
-							{...field}
-							requiredConfirm={!this.isNewRisk}
-							validationSchema={RiskSchema}
-							fullWidth
-							multiline
-							label="Mitigation"
-							disabled={!this.canEditBasicProperty}
-							mutable={!this.isNewRisk}
-						/>
-					)} />
-				</Container>
-
-				<Container>
-					<StyledFormControl>
-						<InputLabel shrink htmlFor="mitigation_status">Mitigation Status</InputLabel>
-						<Field name="mitigation_status" render={({ field }) => (
-							<CellSelect
-								{...field}
-								items={RISK_MITIGATION_STATUSES}
-								inputId="mitigation_status"
-								disabled={!canEditRiskStatus}
-							/>
-						)} />
-					</StyledFormControl>
-				</Container>
-
-				<FieldsRow container alignItems="center" justify="space-between">
-					<FieldsContainer>
-						<StyledFormControl>
-							<InputLabel shrink htmlFor="residual_likelihood">Mitigated Likelihood</InputLabel>
-							<Field name="residual_likelihood" render={({ field }) => (
-								<CellSelect
-									{...field}
-									items={RISK_LIKELIHOODS}
-									inputId="residual_likelihood"
-									disabled={!canEditRiskStatus}
-								/>
-							)} />
-						</StyledFormControl>
-
-						<StyledFormControl>
-							<InputLabel shrink htmlFor="residual_consequence">Mitigated Consequence</InputLabel>
-							<Field name="residual_consequence" render={({ field }) => (
-								<CellSelect
-									{...field}
-									items={RISK_CONSEQUENCES}
-									inputId="residual_consequence"
-									disabled={!canEditRiskStatus}
-								/>
-							)} />
-						</StyledFormControl>
-					</FieldsContainer>
-
-					<FieldsContainer>
-						<StyledFormControl>
-							<InputLabel shrink htmlFor="residual_level_of_risk">Level of Mitigated Risk</InputLabel>
-							<Field name="residual_level_of_risk" render={({ field }) => (
-								<CellSelect
-									{...field}
-									items={LEVELS_OF_RISK}
-									inputId="residual_level_of_risk"
-									disabled
-									readOnly
-								/>
-							)} />
-						</StyledFormControl>
-					</FieldsContainer>
-				</FieldsRow>
-
-				<Container>
-					<Field name="residual_risk" render={({ field, form }) => (
-						<TextField
-							{...field}
-							requiredConfirm={!this.isNewRisk}
-							validationSchema={RiskSchema}
-							fullWidth
-							multiline
-							label="Residual Risk"
-							disabled={!this.canEditBasicProperty}
-							mutable={!this.isNewRisk}
-						/>
-					)} />
-				</Container>
-				{!this.isNewRisk &&
-					<Resources showDialog={showDialog}
-							resources={risk.resources}
-							onSaveFiles={attachFileResources}
-							onSaveLinks={attachLinkResources}
-							onRemoveResource={onRemoveResource}
-							canEdit={canComment}
-					/>
-				}
+				<Tabs
+					value={activeTab}
+					indicatorColor="secondary"
+					textColor="primary"
+					fullWidth
+					onChange={this.handleChange}
+				>
+					<Tab label={RISK_TABS.RISK} value={MAIN_RISK_TYPE} />
+					<Tab label={RISK_TABS.TREATMENT} value={TREATMENT_RISK_TYPE} />
+					<Tab {...this.attachmentsProps} value={ATTACHMENTS_RISK_TYPE} />
+				</Tabs>
+				<TabContent>
+					{this.showRiskContent(activeTab === MAIN_RISK_TYPE)}
+					{this.showTreatmentContent(activeTab === TREATMENT_RISK_TYPE)}
+					{this.showAttachmentsContent(activeTab === ATTACHMENTS_RISK_TYPE)}
+				</TabContent>
 			</Form>
 		);
 	}
@@ -393,8 +259,15 @@ export const RiskDetailsForm = withFormik({
 		return ({
 			safetibase_id: risk.safetibase_id || '',
 			associated_activity: risk.associated_activity || '',
+			element: risk.element || '',
+			risk_factor: risk.risk_factor || '',
+			scope: risk.scope || '',
+			location_desc: risk.location_desc || '',
 			mitigation_status: risk.mitigation_status || '',
 			mitigation_desc: risk.mitigation_desc || '',
+			mitigation_detail: risk.mitigation_detail || '',
+			mitigation_stage: risk.mitigation_stage || '',
+			mitigation_type: risk.mitigation_type || '',
 			desc: risk.desc || '',
 			assigned_roles: get(risk, 'assigned_roles[0]', ''),
 			category: risk.category || '',

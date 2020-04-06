@@ -137,3 +137,7 @@ export const selectPins = createSelector(
 		return pinsToShow;
 	}
 );
+
+export const selectMitigationCriteria = createSelector(
+		selectRisksDomain, (state) => state.mitigationCriteria
+);

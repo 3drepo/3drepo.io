@@ -478,6 +478,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			disabled={!props.projects.length}
 			showStarredOnly={this.props.showStarredOnly}
 			onLeaveTeamspace={this.onLeaveTeamspace(props.account)}
+			history={this.props.history}
 		/>
 	)
 

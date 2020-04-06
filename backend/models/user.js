@@ -27,6 +27,7 @@ const utils = require("../utils");
 const Role = require("./role");
 const Job = require("./job");
 const History = require("./history");
+const TeamspaceSettings = require("./teamspaceSetting");
 const Mailer = require("../mailer/mailer");
 
 const systemLogger = require("../logger.js").systemLogger;
@@ -576,6 +577,9 @@ schema.statics.verify = function (username, token, options) {
 			systemLogger.logError("Failed to create default jobs for ", username, err);
 		});
 
+		TeamspaceSettings.createTeamspaceSettings(username).catch((err) => {
+			systemLogger.logError("Failed to create teamspace settings for ", username, err);
+		});
 	});
 };
 
@@ -1233,6 +1237,12 @@ schema.statics.getQuotaInfo = function (teamspace) {
 
 		return _calSpace(user);
 	});
+};
+
+schema.statics.hasSufficientQuota = async (teamspace, size) => {
+	const quota = await User.getQuotaInfo(teamspace);
+	const spaceLeft = ((quota.spaceLimit === null || quota.spaceLimit === undefined ? Infinity : quota.spaceLimit) - quota.spaceUsed) * 1024 * 1024;
+	return spaceLeft >= size;
 };
 
 schema.methods.hasReachedLicenceLimit = async function () {

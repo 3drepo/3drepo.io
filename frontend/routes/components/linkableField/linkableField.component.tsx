@@ -20,6 +20,7 @@ import React from 'react';
 interface IProps {
 	children?: any;
 	className?: string;
+	style?: any;
 }
 
 // tslint:disable-next-line:max-line-length
@@ -30,6 +31,8 @@ const anchorUrl = (url, key) => {
 };
 
 export class LinkableField extends React.PureComponent<IProps, null> {
+	public textRef = React.createRef<HTMLSpanElement>();
+
 	public linkedText = (): React.ReactNode => {
 		let match = urlRegex.exec(this.props.children || '');
 		let lastIndex = 0;
@@ -56,7 +59,7 @@ export class LinkableField extends React.PureComponent<IProps, null> {
 
 	public render() {
 		return (
-			<span  className={this.props.className}>
+			<span ref={this.textRef} style={...this.props.style} className={this.props.className}>
 				{this.linkedText()}
 			</span>
 		);

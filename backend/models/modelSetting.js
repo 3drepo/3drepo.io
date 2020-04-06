@@ -42,12 +42,7 @@ const schema = mongoose.Schema({
 	}],
 	properties: {
 		unit: String, // cm, m, ft, mm
-		code: String,
-		topicTypes: [{
-			_id: false,
-			value: String,
-			label: String
-		}]
+		code: String
 	},
 	surveyPoints: [
 		{
@@ -68,27 +63,6 @@ const schema = mongoose.Schema({
 	heliSpeed: Number
 });
 
-const defaultTopicTypes = [
-	{value: "clash", label: "Clash"},
-	{value: "diff", label: "Diff"},
-	{value: "rfi", label: "RFI"},
-	{value: "risk", label: "Risk"},
-	{value: "hs", label: "H&S"},
-	{value: "design", label: "Design"},
-	{value: "constructibility", label: "Constructibility"},
-	{value: "gis", label: "GIS"},
-	{value: "for_information", label: "For information"},
-	{value: "vr", label: "VR"}
-];
-
-schema.path("properties.topicTypes").get(function(v) {
-	// TODO: Why would this be undefined?
-	if (!v) {
-		v = [];
-	}
-	return v.length === 0 ? schema.statics.defaultTopicTypes : v;
-});
-
 schema.set("toObject", { getters: true });
 
 schema.statics.modelCodeRegExp = /^[a-zA-Z0-9]{0,50}$/;
@@ -99,36 +73,6 @@ schema.methods.updateProperties = function(updateObj) {
 			return;
 		}
 		switch (key) {
-			case "topicTypes":
-				if (Object.prototype.toString.call(updateObj[key]) === "[object Array]") {
-					const topicTypes = {};
-					updateObj[key].forEach(type => {
-
-						if (type &&
-								Object.prototype.toString.call(type) === "[object String]" &&
-								type.trim()) {
-							// generate value from label
-							const value = type.trim().toLowerCase().replace(/ /g, "_").replace(/&/g, "");
-
-							if(topicTypes[value]) {
-								throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;
-							} else {
-								topicTypes[value] = {
-									value,
-									label: type.trim()
-								};
-							}
-						} else {
-							throw responseCodes.INVALID_ARGUMENTS;
-						}
-
-					});
-
-					this.properties[key] = _.values(topicTypes);
-				} else {
-					throw responseCodes.INVALID_ARGUMENTS;
-				}
-				break;
 			case "code":
 				if (!schema.statics.modelCodeRegExp.test(updateObj[key])) {
 					throw responseCodes.INVALID_MODEL_CODE;
@@ -262,8 +206,6 @@ schema.statics.createNewSetting = function(teamspace, modelName, data) {
 	if(data.elevation) {
 		setting.elevation = data.elevation;
 	}
-
-	setting.properties = {topicTypes: defaultTopicTypes};
 
 	if(data.code) {
 		if (!schema.statics.modelCodeRegExp.test(data.code)) {

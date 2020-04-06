@@ -9,6 +9,7 @@ export const ROUTES = {
 	VIEWER: '/viewer',
 	DASHBOARD: '/dashboard',
 	TEAMSPACES: '/dashboard/teamspaces',
+	TEAMSPACE_SETTINGS: '/dashboard/teamspaces/:teamspace',
 	MODEL_SETTINGS: '/dashboard/teamspaces/:teamspace/models/:modelId',
 	USER_MANAGEMENT_MAIN: '/dashboard/user-management',
 	USER_MANAGEMENT_TEAMSPACE: '/dashboard/user-management/:teamspace',

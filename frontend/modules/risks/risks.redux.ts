@@ -61,6 +61,10 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	attachLinkResources: ['links'],
 	attachResourcesSuccess: ['resources', 'riskId'],
 	updateResourcesSuccess: ['resourcesIds', 'updates', 'riskId' ],
+	fetchMitigationCriteria: ['teamspace'],
+	fetchMitigationCriteriaSuccess: ['criteria', 'teamspace'],
+	fetchMitigationCriteriaFailure: [],
+	showMitigationSuggestions: ['conditions', 'setFieldValue'],
 	reset: []
 }, { prefix: 'RISKS/' });
 
@@ -97,7 +101,8 @@ export const INITIAL_STATE = {
 		associatedActivities: [],
 		sortOrder: 'desc',
 		failedToLoad: false
-	}
+	},
+	mitigationCriteria: {},
 };
 
 const updateRiskProps = (risksMap, riskId, props = {}) => {
@@ -247,6 +252,10 @@ const updateResourcesSuccess = (state = INITIAL_STATE, { resourcesIds, updates, 
 	return { ...state, risksMap};
 };
 
+export const fetchMitigationCriteriaSuccess = (state = INITIAL_STATE,  { criteria, teamspace }) => {
+	return { ...state, mitigationCriteria: { ...criteria, teamspace } };
+};
+
 const reset = () => cloneDeep(INITIAL_STATE);
 
 export const reducer = createReducer(INITIAL_STATE, {
@@ -267,5 +276,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.ATTACH_RESOURCES_SUCCESS]: attachResourcesSuccess,
 	[RisksTypes.UPDATE_RESOURCES_SUCCESS]: updateResourcesSuccess,
 	[RisksTypes.TOGGLE_SHOW_PINS]: toggleShowPins,
-	[RisksTypes.RESET]: reset
+	[RisksTypes.FETCH_MITIGATION_CRITERIA_SUCCESS]: fetchMitigationCriteriaSuccess,
+	[RisksTypes.FETCH_MITIGATION_CRITERIA_FAILURE]: fetchRiskFailure,
+	[RisksTypes.RESET]: reset,
 });

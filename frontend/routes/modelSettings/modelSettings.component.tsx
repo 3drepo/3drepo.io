@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,27 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Field, Formik } from 'formik';
-import { isEmpty } from 'lodash';
-import * as queryString from 'query-string';
 import React from 'react';
-import * as Yup from 'yup';
 
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
+import { Field, Formik } from 'formik';
+import { isEmpty } from 'lodash';
+import * as queryString from 'query-string';
+import * as Yup from 'yup';
+
 import InputLabel from '@material-ui/core/InputLabel';
-
-import { Loader } from '../components/loader/loader.component';
-
-import { clientConfigService } from '../../services/clientConfig';
-import { schema } from '../../services/validation';
-
-import { Chips } from '../components/chips/chips.component';
-import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
-import { Panel } from '../components/panel/panel.component';
-
 import { ROUTES } from '../../constants/routes';
 import { convertPositionToDirectX, convertPositionToOpenGL } from '../../helpers/model';
+import { clientConfigService } from '../../services/clientConfig';
+import { schema } from '../../services/validation';
+import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
+import { Loader } from '../components/loader/loader.component';
+import { Panel } from '../components/panel/panel.component';
 import {
 	BackButton,
 	ButtonContainer,
@@ -70,7 +66,6 @@ const PANEL_PROPS = {
 };
 
 interface IState {
-	topicTypes?: any[];
 	latitude?: number;
 	longitude?: number;
 	axisX?: number;
@@ -95,7 +90,6 @@ interface IProps {
 
 export class ModelSettings extends React.PureComponent<IProps, IState> {
 	public state = {
-		topicTypes: [],
 		latitude: 0,
 		longitude: 0,
 		axisX: 0,
@@ -106,28 +100,16 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 	};
 
 	public componentDidMount() {
-		const { modelSettings: { properties }, match, fetchModelSettings } = this.props;
+		const { match, fetchModelSettings } = this.props;
 		const { teamspace, modelId } = match.params;
-		const topicTypes = properties && properties.topicTypes ? properties.topicTypes : [];
-
-		if (topicTypes.length) {
-			this.setState({ topicTypes });
-		}
 
 		fetchModelSettings(teamspace, modelId);
 	}
 
 	public componentDidUpdate(prevProps) {
 		const changes = {} as any;
-		const { properties, surveyPoints, elevation, angleFromNorth } = this.props.modelSettings;
+		const { surveyPoints, elevation, angleFromNorth } = this.props.modelSettings;
 		const prevSurveyPoints = prevProps.modelSettings.surveyPoints;
-		const prevProperties = prevProps.modelSettings.properties;
-		const topicTypes = properties ? properties.topicTypes : [];
-		const prevTopicTypes = prevProperties ? prevProperties.topicTypes : [];
-
-		if (topicTypes && topicTypes.length !== prevTopicTypes.length) {
-			changes.topicTypes = topicTypes;
-		}
 
 		if (elevation && prevProps.modelSettings.elevation !== elevation) {
 			changes.elevation = elevation;
@@ -181,8 +163,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 		const queryParams = queryString.parse(location.search);
 		const { project } = queryParams;
 		const { name, unit, type, code, elevation, angleFromNorth, fourDSequenceTag,
-			topicTypes, axisX, axisY, axisZ, latitude, longitude } = data;
-		const types = topicTypes.map((topicType) => topicType.label);
+			axisX, axisY, axisZ, latitude, longitude } = data;
 
 		const settings = {
 			name,
@@ -196,7 +177,6 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 				position: convertPositionToDirectX([axisX, axisY, axisZ]),
 				latLong: [latitude, longitude].map(Number)
 			}],
-			topicTypes: types
 		};
 
 		const modelData = { teamspace, project, modelId };
@@ -224,14 +204,14 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 
 	public renderForm = () => {
 		const { id, name, type, fourDSequenceTag, properties, federate } = this.props.modelSettings;
-		const { latitude, longitude, axisX, axisY, axisZ, angleFromNorth, elevation, topicTypes } = this.state;
+		const { latitude, longitude, axisX, axisY, axisZ, angleFromNorth, elevation } = this.state;
 
 		return	(
 			<Container>
 				<Formik
 					initialValues={ {
 						id, name, type: federate ? 'Federation' : type, code: properties.code, unit: properties.unit, fourDSequenceTag,
-						latitude, longitude, axisX, axisY, axisZ, elevation, angleFromNorth, topicTypes
+						latitude, longitude, axisX, axisY, axisZ, elevation, angleFromNorth
 					} }
 					validationSchema={ModelSettingsSchema}
 					onSubmit={this.handleUpdateSettings}
@@ -297,7 +277,6 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 									)} />
 								</SelectWrapper>
 							</FieldsRow>
-							<Field name="topicTypes" render={({ field }) => <Chips {...field} inputPlaceholder={'Enter topic types'} />} />
 						</Grid>
 						<Headline color="primary" variant="subheading">GIS Reference Information</Headline>
 						<Grid container direction="column" wrap="nowrap">

@@ -17,6 +17,7 @@ import risksSaga from './risks/risks.sagas';
 import sequencesSaga from './sequences/sequences.sagas';
 import starredSaga from './starred/starred.sagas';
 import startupSaga from './startup/startup.sagas';
+import teamspaceSaga from './teamspace/teamspace.sagas';
 import teamspacesSaga from './teamspaces/teamspaces.sagas';
 import treeSaga from './tree/tree.sagas';
 import userManagementSaga from './userManagement/userManagement.sagas';
@@ -51,6 +52,7 @@ export default function* rootSaga() {
 		fork(chatSaga),
 		fork(viewerGuiSaga),
 		fork(dialogSaga),
+		fork(teamspaceSaga),
 		fork(boardSaga),
 		fork(sequencesSaga)
 		// <-- INJECT MODULE SAGA -->

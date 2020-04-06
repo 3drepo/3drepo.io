@@ -42,9 +42,14 @@ const fieldTypes = {
 	"createdAt": "[object Number]",
 	"creator_role": "[object String]",
 	"desc": "[object String]",
+	"element": "[object String]",
 	"likelihood": "[object Number]",
+	"location_desc": "[object String]",
 	"mitigation_desc": "[object String]",
+	"mitigation_detail": "[object String]",
+	"mitigation_stage": "[object String]",
 	"mitigation_status": "[object String]",
+	"mitigation_type": "[object String]",
 	"name": "[object String]",
 	"owner": "[object String]",
 	"position": "[object Array]",
@@ -52,7 +57,9 @@ const fieldTypes = {
 	"residual_likelihood": "[object Number]",
 	"residual_risk": "[object String]",
 	"rev_id": "[object Object]",
+	"risk_factor": "[object String]",
 	"safetibase_id": "[object String]",
+	"scope": "[object String]",
 	"thumbnail": "[object Object]",
 	"viewpoint": "[object Object]",
 	"viewpoints": "[object Array]"
@@ -80,7 +87,7 @@ function getLevelOfRisk(riskData) {
 	return {level_of_risk, residual_level_of_risk, overall_level_of_risk};
 }
 
-function addRiskMitigationComment(account, model, sessionId, riskId, comments, data, viewpoint) {
+function addMitigationComment(account, model, sessionId, riskId, comments, data, viewpoint) {
 	if (data.residual && data.likelihood && data.consequence && data.mitigation) {
 		if (!comments) {
 			comments = [];
@@ -90,7 +97,7 @@ function addRiskMitigationComment(account, model, sessionId, riskId, comments, d
 			comment.sealed = true;
 		});
 
-		const mitigationComment = Comment.newRiskMitigationComment(
+		const mitigationComment = Comment.newMitigationComment(
 			data.owner,
 			data.likelihood,
 			data.consequence,
@@ -159,7 +166,7 @@ class Risk extends Ticket {
 	onBeforeUpdate(account, model, sessionId, residualData) {
 		return async function(data, oldRisk) {
 			if (residualData.residual) {
-				const updatedComments = addRiskMitigationComment(
+				const updatedComments = addMitigationComment(
 					account,
 					model,
 					sessionId,

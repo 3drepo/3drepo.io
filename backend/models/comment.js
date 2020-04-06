@@ -93,7 +93,7 @@ class SystemCommentGenerator extends CommentGenerator {
 	}
 }
 
-class RiskMitigationCommentGenerator extends TextCommentGenerator {
+class MitigationCommentGenerator extends TextCommentGenerator {
 	constructor(owner, likelihood, consequence, mitigation, viewpoint, pinPosition) {
 		super(owner, mitigation, viewpoint, pinPosition);
 
@@ -196,7 +196,7 @@ const deleteComment =  async function(account, model, colName, id, guid, user) {
 module.exports = {
 	newTextComment : (owner, commentText, viewpoint, pinPosition) => new TextCommentGenerator(owner, commentText, viewpoint, pinPosition),
 	newSystemComment : (owner, property, from, to) => new SystemCommentGenerator(owner, property, from, to),
-	newRiskMitigationComment : (owner, likelihood, consequence, mitigation, viewpoint, pinPosition) => new RiskMitigationCommentGenerator(owner, likelihood, consequence, mitigation, viewpoint, pinPosition),
+	newMitigationComment : (owner, likelihood, consequence, mitigation, viewpoint, pinPosition) => new MitigationCommentGenerator(owner, likelihood, consequence, mitigation, viewpoint, pinPosition),
 	addComment,
 	deleteComment
 };

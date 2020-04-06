@@ -20,11 +20,151 @@
 
 	const _ = require("lodash");
 	const express = require("express");
+	const C = require("../constants");
 	const router = express.Router({mergeParams: true});
 	const responseCodes = require("../response_codes");
 	const middlewares = require("../middlewares/middlewares");
+	const multer = require("multer");
+	const TeamspaceSettings = require("../models/teamspaceSetting");
 	const User = require("../models/user");
 	const utils = require("../utils");
+
+	/**
+	 * @apiDefine Teamspace Teamspace
+	 *
+	 * @apiParam {String} teamspace Name of teamspace
+	 */
+
+	/**
+	 * @api {get} /:teamspace/settings/mitigations.csv Download mitigations file
+	 * @apiName getMitigationsFile
+	 * @apiGroup Teamspace
+	 * @apiDescription Returns a CSV file containing all defined suggested risk mitigations.
+	 *
+	 * @apiUse Teamspace
+	 *
+	 * @apiExample {get} Example usage
+	 * GET /acme/settings/mitigations.csv HTTP/1.1
+	 *
+	 * @apiSuccessExample {json} Success-Response
+	 * HTTP/1.1 200 OK
+	 * <Risk mitigations CSV file>
+	 */
+	router.get("/settings/mitigations.csv", middlewares.isAccountAdmin, getMitigationsFile);
+
+	/**
+	 * @api {post} /:teamspace/settings/mitigations.csv Upload mitigations file
+	 * @apiName upload//MitigationsFile
+	 * @apiGroup Teamspace
+	 * @apiDescription Upload a risk mitigations CSV file to a teamspace.
+	 *
+	 * @apiUse Teamspace
+	 *
+	 * @apiExample {post} Example usage
+	 * POST /acme/settings/mitigations.csv HTTP/1.1
+	 * <Risk mitigations CSV file>
+	 *
+	 * @apiSuccessExample {json} Success-Response
+	 * HTTP/1.1 200 OK
+	 * {
+	 * 	"status":"ok"
+	 * }
+	 */
+	router.post("/settings/mitigations.csv", middlewares.isAccountAdmin, uploadMitigationsFile);
+
+	/**
+	 * @api {get} /:teamspace/settings Get teamspace settings
+	 * @apiName getTeamspaceSettings
+	 * @apiGroup Teamspace
+	 * @apiDescription Returns all teamspace settings.
+	 *
+	 * @apiUse Teamspace
+	 *
+	 * @apiExample {get} Example usage
+	 * GET /acme/settings HTTP/1.1
+	 *
+	 * @apiSuccessExample {json} Success-Response
+	 * HTTP/1.1 200 OK
+	 * {
+	 * 	"riskCategories":[
+	 * 		"Commercial Issue",
+	 * 		"Environmental Issue",
+	 * 		"Health - Material effect",
+	 * 		"Health - Mechanical effect",
+	 * 		"Safety Issue - Fall",
+	 * 		"Safety Issue - Trapped",
+	 * 		"Safety Issue - Event",
+	 * 		"Safety Issue - Handling",
+	 * 		"Safety Issue - Struck",
+	 * 		"Safety Issue - Public",
+	 * 		"Social Issue",
+	 * 		"Other Issue",
+	 * 		"UNKNOWN"
+	 * 	],
+	 * 	"topicTypes":[
+	 * 		"For information",
+	 * 		"VR",
+	 * 		"Clash",
+	 * 		"Diff",
+	 * 		"RFI",
+	 * 		"Risk",
+	 * 		"H&S",
+	 * 		"Design",
+	 * 		"Constructibility",
+	 * 		"GIS"
+	 * 	],
+	 * 	"mitigationsUpdatedAt":1567156228976,
+	 * 	"_id":"acme"
+	 * }
+	 */
+	router.get("/settings", middlewares.isAccountAdmin, getTeamspaceSettings);
+
+	/**
+	 * @api {put} /:teamspace/settings Update teamspace settings
+	 * @apiName updateTeamspaceSettings
+	 * @apiGroup Teamspace
+	 * @apiDescription Update teamspace settings.
+	 *
+	 * @apiUse Teamspace
+	 *
+	 * @apiParam (Request body) {Object[]} [riskCategories] List of risk categories
+	 * @apiParam (Request body) {Object[]} [topicTypes] List of issue topic types
+	 *
+	 * @apiParam (Risk category) {String} value Value of risk category
+	 * @apiParam (Risk category) {String} label Label for risk category
+	 *
+	 * @apiParam (Topic type) {String} value Value of topic type
+	 * @apiParam (Topic type) {String} label Label for topic type
+	 *
+	 * @apiExample {put} Example usage
+	 * PUT /acme/settings HTTP/1.1
+	 * {
+	 * 	"topicTypes":[
+	 * 		"New Topic 1",
+	 * 		"New Topic 2"
+	 * 	],
+	 * 	"riskCategories":[
+	 * 		"New Category 1",
+	 * 		"NEW CATEGORY 2"
+	 * 	]
+	 * }
+	 *
+	 * @apiSuccessExample {json} Success-Response
+	 * HTTP/1.1 200 OK
+	 * {
+	 * 	"riskCategories":[
+	 * 		"New Category 1",
+	 * 		"NEW CATEGORY 2"
+	 * 	],
+	 * 	"topicTypes":[
+	 * 		"New Topic 1",
+	 * 		"New Topic 2"
+	 * 	],
+	 * 	"mitigationsUpdatedAt":1567156228976,
+	 * 	"_id":"acme"
+	 * }
+	 */
+	router.put("/settings", middlewares.isAccountAdmin, updateTeamspaceSettings);
 
 	/**
 	 *
@@ -366,6 +506,72 @@
 				responseCodes.respond(responsePlace, req, res, next,
 					err.resCode || utils.mongoErrorToResCode(err), err.resCode ? err.info : err);
 			});
+	}
+
+	function getTeamspaceSettings(req, res, next) {
+		TeamspaceSettings.getTeamspaceSettings(req.params.account).then((settings) => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, settings);
+		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+	}
+
+	function updateTeamspaceSettings(req, res, next) {
+		TeamspaceSettings.update(req.params.account, req.body).then((settings) => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, settings);
+		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+	}
+
+	function getMitigationsFile(req, res, next) {
+		TeamspaceSettings.getMitigationsStream(req.params.account).then((mitigations) => {
+			const timestamp = (new Date()).toLocaleString();
+			const filenamePrefix = (req.params.account + "_" + timestamp + "_").replace(/\W+/g, "_");
+
+			const headers = {
+				"Content-Disposition": "attachment;filename=" + filenamePrefix + "mitigations.csv",
+				"Content-Type": "text/csv"
+			};
+
+			res.set(headers);
+
+			responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, mitigations.readStream, headers);
+		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+	}
+
+	function uploadMitigationsFile(req, res, next) {
+		const place = utils.APIInfo(req);
+		const {account} = req.params;
+		const sessionId = req.headers[C.HEADER_SOCKET_ID];
+		const user = req.session.user.username;
+
+		const upload = multer({
+			storage: multer.memoryStorage()
+		});
+
+		upload.single("file")(req, res, (err) => {
+			if (err) {
+				return responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err , err.resCode ? err.resCode : err);
+			} else {
+				const storeFileProm = TeamspaceSettings.processMitigationsFile(account, user, sessionId, req.file.originalname, req.file.buffer);
+				storeFileProm.then(([updatedTS, processFileResult]) => {
+					const result = { "status":"ok" };
+					if (updatedTS) {
+						result.mitigationsUpdatedAt = updatedTS;
+					}
+					if (processFileResult) {
+						result.records = processFileResult.length;
+					}
+					responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, result);
+				}).catch(promErr => {
+					responseCodes.respond(place, req, res, next, promErr, promErr);
+				});
+				//				});
+			}
+		});
 	}
 
 	module.exports = router;

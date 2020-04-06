@@ -17,7 +17,6 @@
 
 import { cloneDeep } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
-import { sortByField } from '../../helpers/sorting';
 
 export const { Types: ModelTypes, Creators: ModelActions } = createActions({
 	fetchSettings: ['teamspace', 'modelId'],
@@ -47,7 +46,6 @@ export const { Types: ModelTypes, Creators: ModelActions } = createActions({
 export const INITIAL_STATE = {
 	settings: {
 		properties: {
-			topicTypes: []
 		},
 		permissions: [],
 	},
@@ -67,12 +65,6 @@ const setPendingRevision = (state = INITIAL_STATE, { revision }) => {
 };
 
 const fetchSettingsSuccess = (state = INITIAL_STATE, { settings }) => {
-	if (settings && settings.properties && settings.properties.topicTypes) {
-		settings.properties.topicTypes = sortByField(
-			settings.properties.topicTypes,
-			{ order: 'asc', config: { field: 'label' } }
-		);
-	}
 	return { ...state, settings };
 };
 
