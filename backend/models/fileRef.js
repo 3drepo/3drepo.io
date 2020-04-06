@@ -61,7 +61,6 @@ function fetchFile(account, model, ext, fileName, metadata = false, useLegacyNam
 			});
 
 			// Temporary fall back - read from gridfs
-			// const fullName = ext === ORIGINAL_FILE_REF_EXT || ext === FILE_REF_EXT ?
 			const fullName = useLegacyNameOnFallback ?
 				`/${account}/${model}/${fileName.split("/").length > 1 ? "revision/" : ""}${fileName}` :
 				fileName;
