@@ -44,13 +44,8 @@ function getRefEntry(account, collection, fileName) {
 	});
 }
 
-function fetchModelFile(account, model, ext, fileName, metadata = false, useLegacyNameOnFallback = false) {
-	const collection = model + ext;
-
-	return fetchFile(account, model, collection, fileName, metadata, useLegacyNameOnFallback);
-}
-
-function fetchFile(account, model, collection, fileName, metadata = false, useLegacyNameOnFallback = false) {
+function fetchFile(account, model, ext, fileName, metadata = false, useLegacyNameOnFallback = false) {
+	const collection =  model ? `${model}${ext}` : ext;
 	return getRefEntry(account, collection, fileName).then((entry) => {
 		if(!entry) {
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
@@ -173,7 +168,7 @@ FileRef.getTotalModelFileSize = function(account, model) {
 };
 
 FileRef.getUnityBundle = function(account, model, fileName) {
-	return fetchModelFile(account, model, UNITY_BUNDLE_REF_EXT, fileName, false, false);
+	return fetchFile(account, model, UNITY_BUNDLE_REF_EXT, fileName, false, false);
 };
 
 FileRef.getSequenceStateFile = function(account, model, fileName) {
@@ -181,7 +176,7 @@ FileRef.getSequenceStateFile = function(account, model, fileName) {
 };
 
 FileRef.getJSONFile = function(account, model, fileName) {
-	return fetchModelFile(account, model, JSON_FILE_REF_EXT, fileName, false, false);
+	return fetchFile(account, model, JSON_FILE_REF_EXT, fileName, false, false);
 };
 
 FileRef.getMitigationsStream = function(account) {
@@ -189,7 +184,7 @@ FileRef.getMitigationsStream = function(account) {
 };
 
 FileRef.getResourceFile = function(account, model, fileName) {
-	return fetchModelFile(account, model, RESOURCES_FILE_REF_EXT, fileName, true, false);
+	return fetchFile(account, model, RESOURCES_FILE_REF_EXT, fileName, true, false);
 };
 
 /**
