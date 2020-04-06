@@ -24,6 +24,7 @@ export const { Types: TeamspaceTypes, Creators: TeamspaceActions } = createActio
 	fetchSettingsSuccess: ['settings'],
 	setPendingState: ['pendingState'],
 	updateSettings: ['teamspace', 'settings'],
+	uploadTreatmentsFileSuccess: ['mitigationsUpdatedAt'],
 	uploadTreatmentsFile: ['teamspace', 'file'],
 	downloadTreatmentsTemplate: [],
 	downloadTreatments: ['teamspace'],
@@ -40,6 +41,9 @@ export const INITIAL_STATE = {
 
 const setPendingState = (state = INITIAL_STATE, { pendingState }) =>
 		({ ...state, isPending: pendingState });
+
+const uploadTreatmentsFileSuccess = (state = INITIAL_STATE, { mitigationsUpdatedAt }) =>
+		({ ...state, settings: { ...state.settings, mitigationsUpdatedAt } });
 
 const fetchSettingsSuccess = (state = INITIAL_STATE, { settings }) => {
 	if (settings && settings.topicTypes) {
@@ -60,4 +64,5 @@ const fetchSettingsSuccess = (state = INITIAL_STATE, { settings }) => {
 export const reducer = createReducer(INITIAL_STATE, {
 	[TeamspaceTypes.SET_PENDING_STATE]: setPendingState,
 	[TeamspaceTypes.FETCH_SETTINGS_SUCCESS]: fetchSettingsSuccess,
+	[TeamspaceTypes.UPLOAD_TREATMENTS_FILE_SUCCESS]: uploadTreatmentsFileSuccess,
 });

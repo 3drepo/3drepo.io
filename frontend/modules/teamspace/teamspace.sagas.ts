@@ -69,6 +69,7 @@ export function* uploadTreatmentsFile({ teamspace, file }) {
 					yield put(SnackbarActions.show(data.errorReason.message));
 				} else {
 					yield put(SnackbarActions.show(`Treatments file uploaded successfully`));
+					yield put(TeamspaceActions.uploadTreatmentsFileSuccess(data.mitigationsUpdatedAt));
 				}
 			}
 			if (status === uploadFileStatuses.failed) {

@@ -114,6 +114,12 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 			changes.riskCategories = riskCategories;
 		}
 
+		if (this.props.treatmentsUpdatedAt !== prevProps.treatmentsUpdatedAt && this.state.fileName !== '') {
+			this.setState({
+				fileName: '',
+			});
+		}
+
 		if (!isEmpty({ ...changes })) {
 			this.setState({ ...changes });
 		}
@@ -134,6 +140,9 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 		resetForm({
 			topicTypes,
 			riskCategories,
+		});
+		this.setState({
+			fileName: '',
 		});
 	}
 
