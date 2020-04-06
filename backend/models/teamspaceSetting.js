@@ -104,11 +104,11 @@ class TeamspaceSettings {
 		if (User.hasSufficientQuota(account, file.size)) {
 			const fileSizeLimit = require("../config").uploadSizeLimit;
 			if(file.size > fileSizeLimit) {
-				throw responseCodes.SIZE_LIMIT;
+				return Promise.reject(responseCodes.SIZE_LIMIT);
 			}
 			const fNameArr = filename.split(".");
 			if (fNameArr.length < 2 || fNameArr[fNameArr.length - 1].toLowerCase() !== "csv") {
-				throw responseCodes.FILE_FORMAT_NOT_SUPPORTED;
+				return Promise.reject(responseCodes.FILE_FORMAT_NOT_SUPPORTED);
 			}
 
 			const storeFileProm = FileRef.storeMitigationsFile(account, username, filename, file).then(async () => {
@@ -122,7 +122,7 @@ class TeamspaceSettings {
 			const readCSVProm = Mitigation.importCSV(account, file);
 			return Promise.all([storeFileProm, readCSVProm]);
 		} else {
-			throw responseCodes.SIZE_LIMIT_PAY;
+			return Promise.reject(responseCodes.SIZE_LIMIT_PAY);
 		}
 	}
 
