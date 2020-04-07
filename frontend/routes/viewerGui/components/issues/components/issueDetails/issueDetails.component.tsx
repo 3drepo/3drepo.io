@@ -116,9 +116,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		const { comments } = this.issueData;
 		const isIssueWithComments = Boolean((comments && comments.length || horizontal) && !this.isNewIssue);
 		const PreviewWrapper = horizontal && isIssueWithComments ? HorizontalView : Fragment;
-		const renderNotCollapsable = () => {
-			return this.renderLogList(!horizontal && isIssueWithComments);
-		};
+		const renderNotCollapsable = () => this.renderLogList(!horizontal && isIssueWithComments);
 
 		return (
 			<PreviewWrapper>
@@ -183,7 +181,15 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		const { issue } = this.props;
+		const {
+			issue, teamspace, model, fetchIssue, subscribeOnIssueCommentsChanges, unsubscribeOnIssueCommentsChanges,
+		} = this.props;
+
+		if (prevProps.issue._id !== issue._id) {
+			unsubscribeOnIssueCommentsChanges(prevProps.teamspace, prevProps.model, prevProps.issue._id);
+			fetchIssue(teamspace, model, issue._id);
+			subscribeOnIssueCommentsChanges(teamspace, model, issue._id);
+		}
 
 		if (
 			issue.comments && prevProps.issue.comments &&
