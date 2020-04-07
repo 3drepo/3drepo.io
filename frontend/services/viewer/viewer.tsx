@@ -399,23 +399,17 @@ export class ViewerService {
 	 */
 
 	public async activateMeasure() {
+		this.measureMode = true;
 		await this.isViewerReady();
-		this.setMeasureActivity(true);
+		UnityUtil.enableMeasuringTool();
+		this.measureMode = true;
 	}
 
 	public async disableMeasure() {
+		this.measureMode = false;
 		await this.isViewerReady();
-		this.setMeasureActivity(false);
-	}
-
-	public setMeasureActivity(on: boolean) {
-		if (on === true) {
-			UnityUtil.enableMeasuringTool();
-			this.measureMode = true;
-		} else {
-			UnityUtil.disableMeasuringTool();
-			this.measureMode = false;
-		}
+		UnityUtil.disableMeasuringTool();
+		this.measureMode = false;
 	}
 
 	public async setMeasureMode(mode: string) {
