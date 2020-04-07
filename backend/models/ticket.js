@@ -69,6 +69,9 @@ class Ticket {
 				ticketToClean[key] = utils.uuidToString(ticketToClean[key]);
 			}
 		});
+		if(ticketToClean.due_date === null) {
+			delete ticketToClean.due_date;
+		}
 
 		if (ticketToClean.viewpoints) {
 			ticketToClean.viewpoints.forEach((viewpoint, i) => {
