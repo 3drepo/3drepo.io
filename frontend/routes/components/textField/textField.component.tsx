@@ -43,6 +43,7 @@ interface IProps extends TextFieldProps {
 	mutable?: boolean;
 	onBeforeConfirmChange?: (event) => void;
 	expandable?: boolean;
+	disableShowDefaultUnderline?: boolean;
 }
 
 interface IState {
@@ -226,6 +227,7 @@ export class TextField extends React.PureComponent<IProps, IState> {
 			name,
 			className,
 			mutable,
+			disableShowDefaultUnderline,
 			...props
 		} = this.props;
 		const { initialValue } = this.state;
@@ -258,7 +260,7 @@ export class TextField extends React.PureComponent<IProps, IState> {
 							/>
 							}
 							{!this.isEditMode &&
-							<FieldWrapper onClick={this.handlePlaceholderClick}>
+							<FieldWrapper line={Number(!disableShowDefaultUnderline)} onClick={this.handlePlaceholderClick}>
 								<FieldLabel shrink>{this.props.label}</FieldLabel>
 								<StyledLinkableField ref={this.linkableFieldRef} {...this.additionalProps()}>
 									{this.fieldValue}
