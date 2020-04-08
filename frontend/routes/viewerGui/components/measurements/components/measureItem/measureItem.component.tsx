@@ -161,6 +161,7 @@ export const MeasureItem = ({
 					mutable
 					onChange={handleSave}
 					inputProps={{ maxLength: 30 }}
+					disableShowDefaultUnderline
 				/>
 			</StyledForm>
 			<Actions>

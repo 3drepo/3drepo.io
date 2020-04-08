@@ -78,10 +78,6 @@ export class TextField extends React.PureComponent<IProps, IState> {
 		return (!this.props.mutable || this.state.edit) && !this.props.disabled;
 	}
 
-	get hasValueChanged() {
-		return this.state.initialValue !== this.state.currentValue;
-	}
-
 	get textFieldRef() {
 		return (this.props.inputRef || this.inputLocalRef) as any;
 	}
@@ -231,7 +227,7 @@ export class TextField extends React.PureComponent<IProps, IState> {
 			...props
 		} = this.props;
 		const { initialValue } = this.state;
-		const shouldRenderActions = this.hasValueChanged && this.isEditMode;
+		const shouldRenderActions = this.isEditMode;
 		const shouldRenderMutable = !this.isEditMode && !this.props.disabled;
 
 		return (
