@@ -225,9 +225,10 @@ export class TextField extends React.PureComponent<IProps, IState> {
 			validationSchema,
 			name,
 			className,
+			mutable,
 			...props
 		} = this.props;
-		const { initialValue, currentValue } = this.state;
+		const { initialValue } = this.state;
 		const shouldRenderActions = this.hasValueChanged && this.isEditMode;
 		const shouldRenderMutable = !this.isEditMode && !this.props.disabled;
 

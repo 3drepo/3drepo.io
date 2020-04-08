@@ -31,7 +31,9 @@ export interface IMenuButton {
 export const MenuButton: React.FunctionComponent<IMenuButton> = ({
 	hidden, label, content, disabled = false, open
 }) => {
-	const renderButton = (props) => <MenuButtonComponent ariaLabel={label} hidden={hidden} disableGutters {...props} />;
+	const renderButton = (props) => (
+		<MenuButtonComponent ariaLabel={label} hidden={hidden} widened={1} disableGutters {...props} />
+	);
 
 	return (
 		<ButtonMenu

@@ -100,6 +100,10 @@ export const selectTopicTypes = createSelector(
 	selectSettingsProperties, (state) => state.topicTypes || []
 );
 
+export const selectUnit = createSelector(
+	selectSettingsProperties, (state) => state.unit
+);
+
 export const selectCurrentModelTeamspace = createSelector(
 	selectSettings, (state) => state.account
 );

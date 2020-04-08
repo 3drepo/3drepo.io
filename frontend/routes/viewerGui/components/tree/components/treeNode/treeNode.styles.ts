@@ -100,7 +100,7 @@ const containerBorder = css`
 `;
 
 export const Container = styled.li<IContainer>`
-	${containerBorder}
+	${containerBorder};
 	background-color: ${getBackgroundColor};
 	padding: 2px 12px 2px ${containerIndentation}px;
 	display: flex;
@@ -123,7 +123,7 @@ export const Container = styled.li<IContainer>`
 export const Name = styled.div<IName>`
 	align-self: center;
 	font-size: 13px;
-	margin-left: 12px;
+	margin-left: 60px;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;

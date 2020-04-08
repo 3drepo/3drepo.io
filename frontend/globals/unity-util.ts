@@ -282,7 +282,7 @@ export class UnityUtil {
 	}
 
 	/** @hidden*/
-	public static toUnity(methodName, requireStatus, params?) {
+	public static toUnity(methodName, requireStatus?, params?) {
 		if (requireStatus === UnityUtil.LoadingState.MODEL_LOADED) {
 			// Requires model to be loaded
 			UnityUtil.onLoaded().then(() => {
@@ -459,6 +459,28 @@ export class UnityUtil {
 		}
 
 		UnityUtil.viewpointsPromises = [];
+	}
+
+	/** @hidden */
+	public static measurementAlert(strMeasurement) {
+		const measurement = JSON.parse(strMeasurement);
+		if (UnityUtil.viewer && UnityUtil.viewer.measurementAlertEvent) {
+			UnityUtil.viewer.measurementAlertEvent(measurement);
+		}
+	}
+
+	/** @hidden */
+	public static measurementRemoved(measurmentId) {
+		if (UnityUtil.viewer && UnityUtil.viewer.measurementRemoved) {
+			UnityUtil.viewer.measurementRemoved(measurmentId);
+		}
+	}
+
+	/** @hidden */
+	public static measurementsCleared() {
+		if (UnityUtil.viewer && UnityUtil.viewer.measurementsCleared) {
+			UnityUtil.viewer.measurementsCleared();
+		}
 	}
 
 	/*
@@ -674,6 +696,105 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Enable the measure tool toolbar.
+	 * @category Measuring tool
+	 */
+	public static enableMeasureToolToolbar() {
+		UnityUtil.toUnity('EnableMeasureToolToolbar', undefined, undefined);
+	}
+
+	/**
+	 * Enable the measure tool toolbar.
+	 * @category Measuring tool
+	 */
+	public static disableMeasureToolToolbar() {
+		UnityUtil.toUnity('DisableMeasureToolToolbar', undefined, undefined);
+	}
+
+	/**
+	 * Set the measure tool mode.
+	 * @category Measuring tool
+	 * @param mode - The measuring mode, accepted values are "Point", "Raycast", "MinimumDistance",
+	 * "SurfaceArea" or "PolygonArea".
+	 */
+	public static setMeasureToolMode(mode) {
+		UnityUtil.toUnity('SetMeasureToolMode', undefined, mode);
+	}
+
+	/**
+	 * Set the measure tool units.
+	 * @category Measuring tool
+	 * @param units - The measuring units accepted values are "cm", "mm", "m"
+	 */
+	public static setMeasureToolUnits(units) {
+		UnityUtil.toUnity('SetMeasureToolUnits', undefined, units);
+	}
+
+	/**
+	 * Enable the measure tool snap to edges.
+	 * @category Measuring tool
+	 */
+	public static enableMeasureToolSnap() {
+		UnityUtil.toUnity('EnableMeasureToolSnap', undefined, undefined);
+	}
+
+	/**
+	 * Disable the measure tool snap to edges.
+	 * @category Measuring tool
+	 */
+	public static disableMeasureToolSnap() {
+		UnityUtil.toUnity('DisableMeasureToolSnap', undefined, undefined);
+	}
+
+	/**
+	 * Clear all measurements
+	 * @category Measuring tool
+	 */
+	public static clearAllMeasurements() {
+		UnityUtil.toUnity('ClearMeasureToolMeasurements', undefined, undefined);
+	}
+
+	/**
+	 * Remove a particular measurement.
+	 * @param uuid - The measurement id of the measurement to be removed
+	 */
+	public static clearMeasureToolMeasurement(uuid) {
+		UnityUtil.toUnity('ClearMeasureToolMeasurement', undefined, uuid);
+	}
+
+	/**
+	 * Set color of a particular measurement.
+	 * @param uuid - The measurement id of the measurement that will change color
+	 */
+	public static setMeasureToolMeasurementColor(uuid, color) {
+		UnityUtil.toUnity('SetMeasureToolMeasurementColor', undefined, JSON.stringify({uuid, color}));
+	}
+
+	/**
+	 * Set color of a particular measurement.
+	 * @param uuid - The measurement id of the measurement that will change name
+	 */
+	public static setMeasureToolMeasurementName(uuid, name) {
+		UnityUtil.toUnity('SetMeasureToolMeasurementName', undefined, JSON.stringify({uuid, name}));
+	}
+
+	/**
+	 * Enable measure display mode to xyz.
+	 * @category Measuring tool
+	 */
+	public static enableMeasureToolXYZDisplay() {
+		UnityUtil.toUnity('EnableMeasureToolXYZDisplay');
+	}
+
+	/**
+	 * Disnable measure display mode to xyz.
+	 * @category Measuring tool
+	 */
+	public static disableMeasureToolXYZDisplay() {
+		UnityUtil.toUnity('DisableMeasureToolXYZDisplay');
+	}
+
+	/**
 	 * Add a Risk pin
 	 * @category Pins
 	 * @param id - Identifier for the pin
@@ -707,6 +828,24 @@ export class UnityUtil {
 			color : colour
 		};
 		UnityUtil.toUnity('DropIssuePin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
+	}
+
+	/**
+	 * Add a bookmark pin
+	 * @category Pins
+	 * @param id - Identifier for the pin
+	 * @param position - point in space where the pin should generate
+	 * @param normal - normal vector for the pin (note: this is no longer used)
+	 * @param colour - RGB value for the colour of the pin
+	 */
+	public static dropBookmarkPin(id: string, position: number[], normal: number[], colour: number[]) {
+		const params = {
+			id,
+			position,
+			normal,
+			color : colour
+		};
+		UnityUtil.toUnity('DropBookmarkPin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
 
 	public static selectPin(id: string) {
@@ -1091,6 +1230,7 @@ export class UnityUtil {
 		UnityUtil.initialLoad = true;
 
 		UnityUtil.disableMeasuringTool();
+		UnityUtil.clearAllMeasurements();
 		UnityUtil.diffToolDisableAndClear();
 		UnityUtil.toUnity('ClearCanvas', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}

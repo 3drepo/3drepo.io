@@ -31,7 +31,7 @@ import { GisActions } from '../gis';
 import { GroupsActions } from '../groups';
 import { selectIssuesMap, IssuesActions } from '../issues';
 import { JobsActions } from '../jobs';
-import { MeasureActions } from '../measure';
+import { MeasurementsActions } from '../measurements';
 import { selectCurrentRevisionId, selectSettings, ModelActions, ModelTypes } from '../model';
 import { selectRisksMap, RisksActions } from '../risks';
 import { selectUrlParams } from '../router/router.selectors';
@@ -91,7 +91,8 @@ function* resetPanelsStates() {
 			put(BimActions.resetBimState()),
 			put(ViewerGuiActions.resetPanels()),
 			put(SequencesActions.reset()),
-			put(GisActions.resetLayers())
+			put(GisActions.resetLayers()),
+			put(MeasurementsActions.resetMeasurementTool())
 		]);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('reset', 'panels data', error));
@@ -105,7 +106,7 @@ function* setMeasureVisibility({ visible }) {
 		if (visible && metadataActive) {
 			yield put(BimActions.setIsActive(false));
 		}
-		yield put(MeasureActions.setMeasureActive(visible));
+		yield put(MeasurementsActions.setMeasureActive(visible));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'measure visibility', error));
 	}

@@ -101,9 +101,14 @@
 		});
 	}
 
-	function getGridFSBucket(database, collection) {
+	function getGridFSBucket(database, collection, chunksize = null) {
 		return getDB(database).then(dbConn => {
-			return new GridFSBucket(dbConn, {bucketName: collection});
+			const options = {bucketName: collection};
+			if (chunksize) {
+				options.chunksize =  chunksize;
+			}
+
+			return new GridFSBucket(dbConn, options);
 		}).catch(err => {
 			disconnect();
 			return Promise.reject(err);

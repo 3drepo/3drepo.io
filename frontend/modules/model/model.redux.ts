@@ -46,6 +46,8 @@ export const { Types: ModelTypes, Creators: ModelActions } = createActions({
 export const INITIAL_STATE = {
 	settings: {
 		properties: {
+			topicTypes: [],
+			unit: 'mm',
 		},
 		permissions: [],
 	},

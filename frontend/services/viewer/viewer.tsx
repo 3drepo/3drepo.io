@@ -57,6 +57,7 @@ export class ViewerService {
 	public convertToM = 1.0;
 	public initialized = false;
 	public measureMode = false;
+	public measuringUnits = '';
 	public modelString = null;
 	public divId = 'unityViewer';
 	private numClips = 0;
@@ -398,22 +399,84 @@ export class ViewerService {
 	 */
 
 	public async activateMeasure() {
+		this.measureMode = true;
 		await this.isViewerReady();
-		this.setMeasureMode(true);
+		UnityUtil.enableMeasuringTool();
+		this.measureMode = true;
 	}
 
 	public async disableMeasure() {
+		this.measureMode = false;
 		await this.isViewerReady();
-		this.setMeasureMode(false);
+		UnityUtil.disableMeasuringTool();
+		this.measureMode = false;
 	}
 
-	public setMeasureMode(on: boolean) {
-		this.measureMode = on;
-		if (on === true) {
-			UnityUtil.enableMeasuringTool();
-		} else {
-			UnityUtil.disableMeasuringTool();
-		}
+	public async setMeasureMode(mode: string) {
+		await this.isViewerReady();
+		UnityUtil.setMeasureToolMode(mode);
+	}
+
+	public async setMeasuringUnits(units) {
+		this.measuringUnits = units;
+		await this.isViewerReady();
+		UnityUtil.setMeasureToolUnits(units);
+	}
+
+	public getMeasuringUnits() {
+		return this.measuringUnits;
+	}
+
+	public async removeMeasurement(uuid) {
+		await this.isViewerReady();
+		UnityUtil.clearMeasureToolMeasurement(uuid);
+	}
+
+	public async setMeasurementColor(uuid, color) {
+		await this.isViewerReady();
+		UnityUtil.setMeasureToolMeasurementColor(uuid, color);
+	}
+
+	public async setMeasurementName(uuid, name) {
+		await this.isViewerReady();
+		UnityUtil.setMeasureToolMeasurementName(uuid, name);
+	}
+
+	public async enableEdgeSnapping() {
+		await this.isViewerReady();
+		UnityUtil.enableMeasureToolSnap();
+	}
+
+	public async disableEdgeSnapping() {
+		await this.isViewerReady();
+		UnityUtil.disableMeasureToolSnap();
+	}
+
+	public async enableMeasureXYZDisplay() {
+		await this.isViewerReady();
+		UnityUtil.enableMeasureToolXYZDisplay();
+	}
+
+	public async disableMeasureXYZDisplay() {
+		await this.isViewerReady();
+		UnityUtil.disableMeasureToolXYZDisplay();
+	}
+
+	public async clearMeasurements() {
+		await this.isViewerReady();
+		UnityUtil.clearAllMeasurements();
+	}
+
+	public measurementAlertEvent(measurement) {
+		this.emit(VIEWER_EVENTS.MEASUREMENT_CREATED, measurement);
+	}
+
+	public measurementRemoved(measurementId) {
+		this.emit(VIEWER_EVENTS.MEASUREMENT_REMOVED, measurementId);
+	}
+
+	public measurementsCleared() {
+		this.emit(VIEWER_EVENTS.ALL_MEASUREMENTS_REMOVED);
 	}
 
 	/**
@@ -568,8 +631,10 @@ export class ViewerService {
 		await this.isModelLoaded();
 		if (type === 'risk') {
 			UnityUtil.dropRiskPin(id, position, norm, colour);
-		} else {
+		} else if (type === 'issue') {
 			UnityUtil.dropIssuePin(id, position, norm, colour);
+		} else {
+			UnityUtil.dropBookmarkPin(id, position, norm, colour);
 		}
 		if (isSelected) {
 			UnityUtil.selectPin(id);

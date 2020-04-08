@@ -74,16 +74,6 @@ export class Views extends React.PureComponent<IProps, any> {
 		return VIEWER_PANELS.VIEWS;
 	}
 
-	get footerText() {
-		const { searchEnabled, viewpoints } = this.props;
-		const { filteredViewpoints } = this.state;
-
-		if (searchEnabled) {
-			return `${filteredViewpoints.length} views found`;
-		}
-		return viewpoints.length ? `${viewpoints.length} views displayed` : 'Add new viewpoint';
-	}
-
 	public renderSearch = renderWhenTrue(() => (
 		<SearchField
 			placeholder="Search viewpoint..."
