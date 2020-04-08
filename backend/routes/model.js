@@ -62,49 +62,7 @@ function convertProjectToParam(req, res, next) {
  *    subModels: [],
  *    surveyPoints: [],
  *    properties: {
- *       unit: "mm",
- *       topicTypes: [
- *          {
- *             value: "clash",
- *             label: "Clash"
- *          },
- *          {
- *             value: "diff",
- *             label: "Diff"
- *          },
- *          {
- *             value: "rfi",
- *             label: "RFI"
- *          },
- *          {
- *             value: "risk",
- *             label: "Risk"
- *          },
- *          {
- *             value: "hs",
- *             label: "H&S"
- *          },
- *          {
- *             value: "design",
- *             label: "Design"
- *          },
- *          {
- *             value: "constructibility",
- *             label: "Constructibility"
- *          },
- *          {
- *             value: "gis",
- *             label: "GIS"
- *          },
- *          {
- *             value: "for_information",
- *             label: "For information"
- *          },
- *          {
- *             value: "vr",
- *             label: "VR"
- *          }
- *       ]
+ *       unit: "mm"
  *    },
  *    permissions: [
  *       "change_model_settings",
@@ -181,7 +139,6 @@ router.put("/:model/settings/heliSpeed", middlewares.hasReadAccessToModel, updat
  * @apiParam (Request body) {Number} angleFromNorth GIS bearing angle
  * @apiParam (Request body) {Number} elevation GIS elevation
  * @apiParam (Request body) {[]SurveyPoint} surveyPoints  an array containing GIS surveypoints
- * @apiParam (Request body) {[]String} topicTypes  an array containing the different types of issues/risks that can be associated with the model
  *
  * @apiParam (Request body: SurveyPoint) {[]Number} position an array representing a three dimensional coordinate
  * @apiParam (Request body: SurveyPoint) {[]Number} latLong an array representing a two dimensional coordinate for latitude and logitude
@@ -207,65 +164,11 @@ router.put("/:model/settings/heliSpeed", middlewares.hasReadAccessToModel, updat
  *             2,
  *          ]
  *       }
- *    ],
- *    topicTypes: [
- *       "Clash",
- *       "Constructibility",
- *       "Design",
- *       "Diff",
- *       "For information",
- *       "GIS",
- *       "H&S",
- *       "RFI",
- *       "Risk",
- *       "VR"
  *    ]
  * }
  *
  * @apiSuccessExample {json} Success:
  * {
- *    topicTypes: [
- *       {
- *          value: "clash",
- *          label: "Clash"
- *       },
- *       {
- *          value: "constructibility",
- *          label: "Constructibility"
- *       },
- *       {
- *          value: "design",
- *          label: "Design"
- *       },
- *       {
- *          value: "diff",
- *          label: "Diff"
- *       },
- *       {
- *          value: "for_information",
- *          label: "For information"
- *       },
- *       {
- *          value: "gis",
- *          label: "GIS"
- *       },
- *       {
- *          value: "hs",
- *          label: "H&S"
- *       },
- *       {
- *          value: "rfi",
- *          label: "RFI"
- *       },
- *       {
- *          value: "risk",
- *          label: "Risk"
- *       },
- *       {
- *          value: "vr",
- *          label: "VR"
- *       }
- *    ],
  *    code: "stage",
  *    unit: "cm"
  * }
@@ -325,49 +228,7 @@ router.put("/:model/settings", middlewares.hasWriteAccessToModelSettings, update
  *       subModels: [],
  *       surveyPoints: [],
  *       properties: {
- *          unit: "ft",
- *          topicTypes: [
- *             {
- *                value: "clash",
- *                label: "Clash"
- *             },
- *             {
- *                value: "diff",
- *                label: "Diff"
- *             },
- *             {
- *                value: "rfi",
- *                label: "RFI"
- *             },
- *             {
- *                value: "risk",
- *                label: "Risk"
- *             },
- *             {
- *                value: "hs",
- *                label: "H&S"
- *             },
- *             {
- *                value: "design",
- *                label: "Design"
- *             },
- *             {
- *                value: "constructibility",
- *                label: "Constructibility"
- *             },
- *             {
- *                value: "gis",
- *                label: "GIS"
- *             },
- *             {
- *                value: "for_information",
- *                label: "For information"
- *             },
- *             {
- *                value: "vr",
- *                label: "VR"
- *             }
- *          ]
+ *          unit: "ft"
  *       },
  *       permissions: [],
  *       status: "ok"
@@ -575,49 +436,7 @@ router.get("/:model/:uid.unity3d", middlewares.hasReadAccessToModel, getUnityBun
  *          }
  *       ],
  *       properties: {
- *          unit: "mm",
- *          topicTypes: [
- *             {
- *                value: "clash",
- *                label: "Clash"
- *             },
- *             {
- *                value: "constructibility",
- *                label: "Constructibility"
- *             },
- *             {
- *                value: "design",
- *                label: "Design"
- *             },
- *             {
- *                value: "diff",
- *                label: "Diff"
- *             },
- *             {
- *                value: "for_information",
- *                label: "For information"
- *             },
- *             {
- *                value: "gis",
- *                label: "GIS"
- *             },
- *             {
- *                value: "hs",
- *                label: "H&S"
- *             },
- *             {
- *                value: "rfi",
- *                label: "RFI"
- *             },
- *             {
- *                value: "risk",
- *                label: "Risk"
- *             },
- *             {
- *                value: "vr",
- *                label: "VR"
- *             }
- *          ]
+ *          unit: "mm"
  *       },
  *       permissions: [
  *          {
@@ -824,49 +643,7 @@ router.post("/models/permissions", middlewares.hasEditPermissionsAccessToMulitpl
  *       }
  *    ],
  *    properties: {
- *       unit: "mm",
- *       topicTypes: [
- *          {
- *             value: "clash",
- *             label: "Clash"
- *          },
- *          {
- *             value: "diff",
- *             label: "Diff"
- *          },
- *          {
- *             value: "rfi",
- *             label: "RFI"
- *          },
- *          {
- *             value: "risk",
- *             label: "Risk"
- *          },
- *          {
- *             value: "hs",
- *             label: "H&S"
- *          },
- *          {
- *             value: "design",
- *             label: "Design"
- *          },
- *          {
- *             value: "constructibility",
- *             label: "Constructibility"
- *          },
- *          {
- *             value: "gis",
- *             label: "GIS"
- *          },
- *          {
- *             value: "for_information",
- *             label: "For information"
- *          },
- *          {
- *             value: "vr",
- *             label: "VR"
- *          }
- *       ]
+ *       unit: "mm"
  *    },
  *    permissions: [
  *       {

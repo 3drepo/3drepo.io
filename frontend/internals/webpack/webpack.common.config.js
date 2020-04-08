@@ -44,7 +44,8 @@ module.exports = (options) => {
         { from: 'unity/**', to: '../' },
         { from: 'manifest-icons/*', to: '../' },
         { from: 'serviceWorkerExtras.js', to: '../' },
-        { context: '../resources', from: '**/*.html', to: '../templates' }
+        { context: '../resources', from: '**/*.html', to: '../templates' },
+        { context: '../resources', from: '**/*.csv', to: '../templates' }
       ], options),
       new HTMLWebpackPlugin({
         template: './index.html',

@@ -41,16 +41,24 @@ attributes[ReportType.ISSUES] = [
 ];
 attributes[ReportType.RISKS] = [
 	{ label: "Safetibase ID", field: "safetibase_id"},
-	{ label: "Associated Activity", field: "associated_activity"},
-	{ label: "Category", field: "category"},
 	{ label: "Risk Likelihood", field: "likelihood", mapping: riskLevelMapping},
 	{ label: "Risk Consequence", field: "consequence", mapping: riskLevelMapping},
 	{ label: "Level of Risk", field: "level_of_risk", mapping: riskLevelMapping},
-	{ label: "Mitigated Likelihood", field: "residual_likelihood", mapping: riskLevelMapping},
-	{ label: "Mitigated Consequence", field: "residual_consequence", mapping: riskLevelMapping},
-	{ label: "Level of Mitigated Risk", field: "residual_level_of_risk", mapping: riskLevelMapping},
-	{ label: "Mitigation Status", field: "mitigation_status", default: "Unmitigated"},
-	{ label: "Mitigation", field: "mitigation_desc", default: "None"},
+	{ label: "Assigned", field: "assigned_roles"},
+	{ label: "Category", field: "category"},
+	{ label: "Associated Activity", field: "associated_activity"},
+	{ label: "Element Type", field: "element"},
+	{ label: "Risk Factor", field: "risk_factor"},
+	{ label: "Construction Scope", field: "scope"},
+	{ label: "Location", field: "location_desc"},
+	{ label: "Treatment", field: "mitigation_desc"},
+	{ label: "Treatment Details", field: "mitigation_detail"},
+	{ label: "Treatment Stage", field: "mitigation_stage"},
+	{ label: "Treatment Type", field: "mitigation_type"},
+	{ label: "Treatment Status", field: "mitigation_status", default: "Unmitigated"},
+	{ label: "Treatment Likelihood", field: "residual_likelihood", mapping: riskLevelMapping},
+	{ label: "Treatment Consequence", field: "residual_consequence", mapping: riskLevelMapping},
+	{ label: "Level of Treated Risk", field: "residual_level_of_risk", mapping: riskLevelMapping},
 	{ label: "Residual Risk", field: "residual_risk", default: "None"}
 ];
 

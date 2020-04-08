@@ -31,6 +31,7 @@ import {
 	RISKS_ACTIONS_MENU
 } from '../constants/risks';
 import { getAPIUrl } from '../services/api';
+import { COLOR } from '../styles';
 import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
 
 export const prepareRisk = (risk, jobs = []) => {
@@ -124,12 +125,10 @@ export const getRiskLikelihoodName = (likelihood: number) => {
 };
 
 export const getRiskStatus = (levelOfRisk: number, mitigationStatus: string) => {
-	const statusIcon = {
+	return ({
 		Icon: RISK_LEVELS_ICONS[mitigationStatus] || null,
-		color: RISK_LEVELS_COLOURS[levelOfRisk].color
-	};
-
-	return statusIcon;
+		color: RISK_LEVELS_COLOURS[levelOfRisk].color,
+	});
 };
 
 export const getRiskPinColor = (risk) => {

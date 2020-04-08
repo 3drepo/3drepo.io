@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -18,8 +18,8 @@
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { selectIsPending, selectSettings, ModelActions } from './../../modules/model';
-import { selectCurrentTeamspace } from './../../modules/userManagement';
+import { selectIsPending, selectSettings, ModelActions } from '../../modules/model';
+import { selectCurrentTeamspace } from '../../modules/userManagement';
 import { ModelSettings } from './modelSettings.component';
 
 const mapStateToProps = createStructuredSelector({

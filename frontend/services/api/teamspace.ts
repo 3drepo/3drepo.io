@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import axios from 'axios';
 import api from './';
 
 /**
- * Get users
+ * Get teamspace
  * @param teamspace
- * @param searchText
  */
 export const fetchTeamspace = (teamspace) => {
 	return api.get(`${teamspace}.json`);
@@ -32,4 +32,32 @@ export const fetchTeamspace = (teamspace) => {
  */
 export const getQuotaInfo = (teamspace) => {
 	return api.get(`${teamspace}/quota`);
+};
+
+/**
+ * Get teamspace settings
+ * @param teamspace
+ */
+export const fetchTeamspaceSettings = (teamspace) => {
+	return api.get(`${teamspace}/settings`);
+};
+
+/**
+ * Edit teamspace settings
+ * @param teamspace
+ * @param settings
+ */
+export const editTeamspaceSettings = (teamspace, settings) => {
+	return api.put(`${teamspace}/settings`, settings);
+};
+
+/**
+ * Edit treatments file
+ * @param teamspace
+ * @param file
+ */
+export const uploadTreatmentsFile = (teamspace, file) => {
+	const formData = new FormData();
+	formData.append('file', file);
+	return api.post(`${teamspace}/settings/mitigations.csv`, formData);
 };

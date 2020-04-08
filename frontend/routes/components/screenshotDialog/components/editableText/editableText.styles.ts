@@ -47,3 +47,16 @@ export const AssistantElement = styled.pre`
 	visibility: hidden;
 	margin: 0;
 `;
+
+export const GhostElement = styled.pre`
+	${commonStyles};
+	display: inline;
+	font-size: 14px;
+	line-height: 16.625px;
+	font-family: inherit;
+	position: absolute;
+	visibility: hidden;
+	margin: 0;
+	padding-right: 56px;
+	white-space: pre-wrap;
+`;

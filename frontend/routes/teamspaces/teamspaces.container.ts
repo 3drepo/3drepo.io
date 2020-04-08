@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -21,6 +21,7 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { selectCurrentTeamspace } from '../../modules/currentUser';
 import { DialogActions } from '../../modules/dialog';
+import { selectRevisions, ModelActions } from '../../modules/model';
 import { selectStarredModels, StarredActions } from '../../modules/starred';
 import {
 	selectActiveSorting,
@@ -40,7 +41,6 @@ import {
 	selectVisibleItems,
 	TeamspacesActions
 } from '../../modules/teamspaces';
-import { selectRevisions, ModelActions } from './../../modules/model';
 import { Teamspaces } from './teamspaces.component';
 
 const mapStateToProps = createStructuredSelector({

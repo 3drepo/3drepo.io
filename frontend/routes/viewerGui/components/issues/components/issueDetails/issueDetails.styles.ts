@@ -16,6 +16,7 @@
  */
 
 import styled from 'styled-components';
+import { COLOR } from '../../../../../../styles';
 
 import { LogList as LogListBase } from '../../../../../components/logList/logList.component';
 import PreviewDetailsBase from '../../../previewDetails/previewDetails.container';
@@ -44,10 +45,12 @@ export const HorizontalView = styled.div`
 	flex: 1;
 	justify-content: flex-start;
 	overflow: hidden;
+	background-color: ${COLOR.WHITE};
 
 	${PreviewDetails}, ${LogsContainer} {
 		min-width: 50%;
 		width: 50%;
+		min-height: 60vh;
 		max-height: 75vh;
 		position: relative;
 		overflow: auto;

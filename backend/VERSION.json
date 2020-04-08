@@ -1,4 +1,4 @@
-{ "VERSION" : "4.4.0",
+{ "VERSION" : "4.5.0",
   "unity" : {
 	"current" : "2.20.0",
 	"supported": []
@@ -8,7 +8,7 @@
 	"supported": ["3.12.0"]
   },
   "unitydll" : {
-	"current": "2.8.0",
+	"current": "4.4.0",
 	"supported" : []
   }
 }

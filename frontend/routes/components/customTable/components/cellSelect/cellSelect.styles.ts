@@ -27,7 +27,10 @@ export const StyledSelect = styled(SelectField).attrs({
 		icon: 'select__icon'
 	}
 })`
-	width: 100%;
+	&& {
+		width: 100%;
+		display: ${({ hidden }) => hidden ? 'none' : 'initial'};
+	}
 
 	.select--disabled ~ .select__icon {
 		opacity: 0.6;

@@ -29,6 +29,9 @@ const STATE_FILE_REF_EXT = ".sequences.ref";
 const JSON_FILE_REF_EXT = ".stash.json_mpc.ref";
 const RESOURCES_FILE_REF_EXT = ".resources.ref";
 
+const MITIGATIONS_FILE_REF = "mitigations.ref";
+const MITIGATIONS_ID = "mitigations";
+
 const ISSUES_RESOURCE_PROP = "issueIds";
 const RISKS_RESOURCE_PROP = "riskIds";
 const attachResourceProps = [ISSUES_RESOURCE_PROP, RISKS_RESOURCE_PROP];
@@ -41,9 +44,8 @@ function getRefEntry(account, collection, fileName) {
 	});
 }
 
-function fetchFile(account, model, ext, fileName, metadata = false) {
-	const collection = model + ext;
-
+function fetchFile(account, model, ext, fileName, metadata = false, useLegacyNameOnFallback = false) {
+	const collection =  model ? `${model}${ext}` : ext;
 	return getRefEntry(account, collection, fileName).then((entry) => {
 		if(!entry) {
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
@@ -59,9 +61,9 @@ function fetchFile(account, model, ext, fileName, metadata = false) {
 			});
 
 			// Temporary fall back - read from gridfs
-			const fullName = (ext === ORIGINAL_FILE_REF_EXT || ext === STATE_FILE_REF_EXT) ?
-				fileName :
-				`/${account}/${model}/${fileName.split("/").length > 1 ? "revision/" : ""}${fileName}`;
+			const fullName = useLegacyNameOnFallback ?
+				`/${account}/${model}/${fileName.split("/").length > 1 ? "revision/" : ""}${fileName}` :
+				fileName;
 			return ExternalServices.getFile(account, collection, "gridfs", fullName);
 		}).then(fileBuffer=> {
 			if (metadata) {
@@ -73,8 +75,7 @@ function fetchFile(account, model, ext, fileName, metadata = false) {
 	});
 }
 
-function fetchFileStream(account, model, ext, fileName) {
-	const collection = model + ext;
+function fetchFileStream(account, model, collection, fileName, useLegacyNameOnFallback = false) {
 	return getRefEntry(account, collection, fileName).then((entry) => {
 		if(!entry) {
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
@@ -90,9 +91,9 @@ function fetchFileStream(account, model, ext, fileName) {
 			});
 
 			// Temporary fall back - read from gridfs
-			const fullName = ext === ORIGINAL_FILE_REF_EXT ?
-				fileName :
-				`/${account}/${model}/${fileName.split("/").length > 1 ? "revision/" : ""}${fileName}`;
+			const fullName = useLegacyNameOnFallback ?
+				`/${account}/${model}/${fileName.split("/").length > 1 ? "revision/" : ""}${fileName}` :
+				fileName;
 			return ExternalServices.getFileStream(account, collection, "gridfs", fullName).then((stream) => {
 				return {readStream: stream, size: entry.size };
 			});
@@ -126,11 +127,9 @@ function removeAllFiles(account, collection) {
 	});
 }
 
-async function insertRefInResources(account, model, user, name, refInfo) {
-	const collName = model + RESOURCES_FILE_REF_EXT;
-
+async function insertRef(account, collection, user, name, refInfo) {
 	const ref = { ...refInfo, name, user , createdAt : (new Date()).getTime()};
-	const resourcesRef = await DB.getCollection(account, collName);
+	const resourcesRef = await DB.getCollection(account, collection);
 	await resourcesRef.insertOne(ref);
 
 	return ref;
@@ -139,7 +138,8 @@ async function insertRefInResources(account, model, user, name, refInfo) {
 const FileRef = {};
 
 FileRef.getOriginalFile = function(account, model, fileName) {
-	return fetchFileStream(account, model, ORIGINAL_FILE_REF_EXT, fileName);
+	const collection = model + ORIGINAL_FILE_REF_EXT;
+	return fetchFileStream(account, model, collection, fileName, true);
 };
 
 FileRef.getTotalModelFileSize = function(account, model) {
@@ -167,19 +167,23 @@ FileRef.getTotalModelFileSize = function(account, model) {
 };
 
 FileRef.getUnityBundle = function(account, model, fileName) {
-	return fetchFile(account, model, UNITY_BUNDLE_REF_EXT, fileName);
+	return fetchFile(account, model, UNITY_BUNDLE_REF_EXT, fileName, false, false);
 };
 
 FileRef.getSequenceStateFile = function(account, model, fileName) {
-	return fetchFile(account, model, STATE_FILE_REF_EXT, fileName);
+	return fetchFile(account, model, STATE_FILE_REF_EXT, fileName, false, false);
 };
 
 FileRef.getJSONFile = function(account, model, fileName) {
-	return fetchFile(account, model, JSON_FILE_REF_EXT, fileName);
+	return fetchFile(account, model, JSON_FILE_REF_EXT, fileName, false, false);
+};
+
+FileRef.getMitigationsStream = function(account) {
+	return fetchFileStream(account, undefined, MITIGATIONS_FILE_REF, MITIGATIONS_ID, false);
 };
 
 FileRef.getResourceFile = function(account, model, fileName) {
-	return fetchFile(account, model, RESOURCES_FILE_REF_EXT, fileName, true);
+	return fetchFile(account, model, RESOURCES_FILE_REF_EXT, fileName, true, false);
 };
 
 /**
@@ -189,7 +193,8 @@ FileRef.getResourceFile = function(account, model, fileName) {
  * @returns { Promise<{readStream: stream.Readable , size: Number}>}
  */
 FileRef.getJSONFileStream = function(account, model, fileName) {
-	return fetchFileStream(account, model, JSON_FILE_REF_EXT, fileName);
+	const collection = model + JSON_FILE_REF_EXT;
+	return fetchFileStream(account, model, collection, fileName, false);
 };
 
 FileRef.removeAllFilesFromModel = function(account, model) {
@@ -197,6 +202,8 @@ FileRef.removeAllFilesFromModel = function(account, model) {
 	promises.push(removeAllFiles(account, model + ORIGINAL_FILE_REF_EXT));
 	promises.push(removeAllFiles(account, model + JSON_FILE_REF_EXT));
 	promises.push(removeAllFiles(account, model + UNITY_BUNDLE_REF_EXT));
+	promises.push(removeAllFiles(account, model + RESOURCES_FILE_REF_EXT));
+	promises.push(removeAllFiles(account, model + STATE_FILE_REF_EXT));
 	return Promise.all(promises);
 };
 
@@ -232,18 +239,35 @@ FileRef.removeResourceFromEntity  = async function(account, model, property, pro
 	return ref;
 };
 
+FileRef.storeMitigationsFile = async function(account, user, name, data) {
+	const collName = MITIGATIONS_FILE_REF;
+	const collection = await DB.getCollection(account, collName);
+
+	await removeAllFiles(account, collName);
+	await collection.remove({});
+
+	const extraFields = {"_id":MITIGATIONS_ID};
+
+	return await this.storeFile(account, collName, user, name, data, extraFields);
+};
+
 FileRef.storeFileAsResource = async function(account, model, user, name, data, extraFields = null) {
 	const collName = model + RESOURCES_FILE_REF_EXT;
-	let refInfo = await ExternalServices.storeFile(account, collName, data);
+
+	return await this.storeFile(account, collName, user, name, data, extraFields);
+};
+
+FileRef.storeFile = async function(account, collection, user, name, data, extraFields = null) {
+	let refInfo = await ExternalServices.storeFile(account, collection, data);
 	refInfo = {...refInfo ,...(extraFields || {}) };
 
-	const ref = await insertRefInResources(account, model, user, name, refInfo);
-	return ref;
+	return await insertRef(account, collection, user, name, refInfo);
 };
 
 FileRef.storeUrlAsResource = async function(account, model, user, name, link, extraFields = null) {
+	const collName = model + RESOURCES_FILE_REF_EXT;
 	const refInfo = {_id: nodeuuid(), link, type: "http", ...extraFields  };
-	const ref = await insertRefInResources(account, model, user, name, refInfo);
+	const ref = await insertRef(account, collName, user, name, refInfo);
 	return ref;
 };
 

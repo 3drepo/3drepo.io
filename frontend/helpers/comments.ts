@@ -61,7 +61,7 @@ const convertActionCommentToText = (comment, topicTypes) => {
 				}
 				break;
 			case 'associated_activity':
-				comment.action.propertyText = 'Associated Activity';
+				comment.action.propertyText = 'Associated activity';
 				break;
 			case 'category':
 				comment.action.propertyText = 'Category';
@@ -79,6 +79,9 @@ const convertActionCommentToText = (comment, topicTypes) => {
 						comment.owner;
 				}
 				break;
+			case 'element':
+				comment.action.propertyText = 'Element';
+				break;
 			case 'likelihood':
 				comment.action.propertyText = 'Likelihood';
 				if (undefined !== comment.action.to) {
@@ -92,12 +95,24 @@ const convertActionCommentToText = (comment, topicTypes) => {
 						comment.owner;
 				}
 				break;
+			case 'location_desc':
+				comment.action.propertyText = 'Location';
+				break;
 			case 'mitigation_desc':
-				comment.action.propertyText = 'Mitigation description';
+				comment.action.propertyText = 'Treatment description';
 				text = comment.action.propertyText + ' updated by ' + comment.owner;
 				break;
+			case 'mitigation_detail':
+				comment.action.propertyText = 'Treatment detail';
+				break;
+			case 'mitigation_stage':
+				comment.action.propertyText = 'Treatment stage';
+				break;
+			case 'mitigation_type':
+				comment.action.propertyText = 'Treatment type';
+				break;
 			case 'mitigation_status':
-				comment.action.propertyText = 'Mitigation Status';
+				comment.action.propertyText = 'Treatment status';
 				break;
 			case 'priority':
 				comment.action.propertyText = 'Priority';
@@ -105,7 +120,7 @@ const convertActionCommentToText = (comment, topicTypes) => {
 				comment.action.to = convertActionValueToText(comment.action.to);
 				break;
 			case 'residual_consequence':
-				comment.action.propertyText = 'Mitigated consequence';
+				comment.action.propertyText = 'Treated consequence';
 				if (undefined !== comment.action.to) {
 					comment.action.to = getRiskConsequenceName(parseInt(comment.action.to, 10));
 				}
@@ -118,7 +133,7 @@ const convertActionCommentToText = (comment, topicTypes) => {
 				}
 				break;
 			case 'residual_likelihood':
-				comment.action.propertyText = 'Mitigated likelihood';
+				comment.action.propertyText = 'Treated likelihood';
 				if (undefined !== comment.action.to) {
 					comment.action.to = getRiskLikelihoodName(parseInt(comment.action.to, 10));
 				}
@@ -134,11 +149,17 @@ const convertActionCommentToText = (comment, topicTypes) => {
 				comment.action.propertyText = 'Residual risk';
 				text = comment.action.propertyText + ' updated by ' + comment.owner;
 				break;
+			case 'risk_factor':
+				comment.action.propertyText = 'Risk factor';
+				break;
 			case 'likelihood':
 				comment.action.propertyText = 'Likelihood';
 				break;
 			case 'safetibase_id':
 				comment.action.propertyText = 'Safetibase ID';
+				break;
+			case 'scope':
+				comment.action.propertyText = 'Construction scope';
 				break;
 			case 'status':
 				comment.action.propertyText = 'Status';
@@ -188,7 +209,7 @@ const convertActionCommentToText = (comment, topicTypes) => {
 				}
 				break;
 			case 'bcf_import':
-				comment.action.propertyText = 'BCF Import';
+				comment.action.propertyText = 'BCF import';
 				text = comment.action.propertyText + ' by ' + comment.owner;
 				break;
 			case 'position' :

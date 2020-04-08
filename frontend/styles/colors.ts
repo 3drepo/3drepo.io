@@ -2,7 +2,7 @@ import { mapValues } from 'lodash';
 
 import { hexToGLColor, hexToRgba } from '../helpers/colors';
 
-export const BLACK = '#00000';
+export const BLACK = '#000000';
 export const WHITE = '#ffffff';
 export const PRIMARY_MAIN = '#0c2f54';
 export const SECONDARY_MAIN = '#06563c';

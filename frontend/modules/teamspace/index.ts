@@ -15,22 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+export {
+	TeamspaceTypes,
+	TeamspaceActions
+} from './teamspace.redux';
 
-import IconButton from '@material-ui/core/IconButton';
-
-const hiddenStyles = css`
-	pointer-events: none;
-	visibility: hidden;
-`;
-
-const widenedStyles = css`
-	&& {
-		padding: 6px;
-	}
-`;
-
-export const StyledIconButton = styled(IconButton)`
-	${({ hidden }) => hidden && hiddenStyles};
-	${({ widened }) => widened && widenedStyles};
-`;
+export * from './teamspace.selectors';

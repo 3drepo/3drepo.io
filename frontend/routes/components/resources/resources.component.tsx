@@ -44,6 +44,7 @@ interface IProps {
 	onSaveFiles: (files) => void;
 	onSaveLinks: (links) => void;
 	showDialog: (config: any) => void;
+	toLeft?: boolean;
 }
 
 interface IState {
@@ -120,7 +121,7 @@ export class Resources extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { resources = [], canEdit } = this.props;
+		const { resources = [], canEdit, toLeft } = this.props;
 
 		return (
 			<ResourcesContainer>
@@ -134,7 +135,7 @@ export class Resources extends React.PureComponent<IProps, IState> {
 					/>
 				))}
 				<FieldsRow container justify="space-between" flex={0.5}>
-					<StyledFormControl />
+					{!toLeft && <StyledFormControl />}
 					<StyledFormControl>
 						<span>
 							<LabelButton disabled={!canEdit} onClick={this.onClickAttach}>Attach resource</LabelButton>

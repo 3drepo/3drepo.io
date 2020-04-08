@@ -17,6 +17,8 @@
 
 import React, { Fragment } from 'react';
 
+import { size } from 'lodash';
+
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { canComment } from '../../../../../../helpers/risks';
@@ -58,6 +60,9 @@ interface IProps {
 	attachFileResources: (files) => void;
 	attachLinkResources: (links) => void;
 	showDialog: (config: any) => void;
+	fetchMitigationCriteria: (teamspace: string) => void;
+	criteria: any;
+	showMitigationSuggestions: (conditions: any, setFieldValue) => void;
 }
 
 interface IState {
@@ -86,6 +91,10 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 
 	get riskData() {
 		return this.props.risk;
+	}
+
+	get criteria() {
+		return this.props.criteria;
 	}
 
 	get jobsList() {
@@ -125,13 +134,13 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 					{...this.riskData}
 					id={this.riskData._id}
 					type="risk"
-					key={this.riskData._id}
+					key={`${this.riskData._id}${size(this.criteria)}`}
 					defaultExpanded={horizontal || expandDetails}
 					editable={!this.riskData._id}
 					onNameChange={this.handleNameChange}
 					onExpandChange={this.handleExpandChange}
 					renderCollapsable={this.renderDetailsForm}
-					renderNotCollapsable={!horizontal ? renderNotCollapsable : null}
+					renderNotCollapsable={!horizontal && !this.isNewRisk ? renderNotCollapsable : null}
 					handleHeaderClick={this.handleHeaderClick}
 					scrolled={this.state.scrolled && !horizontal}
 					isNew={this.isNewRisk}
@@ -170,11 +179,13 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	});
 
 	public componentDidMount() {
-		const { teamspace, model, fetchRisk, risk, subscribeOnRiskCommentsChanges } = this.props;
+		const { teamspace, model, fetchRisk, risk, subscribeOnRiskCommentsChanges, fetchMitigationCriteria } = this.props;
 
 		if (risk._id) {
 			fetchRisk(teamspace, model, risk._id);
 			subscribeOnRiskCommentsChanges(teamspace, model, risk._id);
+		} else {
+			fetchMitigationCriteria(teamspace);
 		}
 	}
 
@@ -234,13 +245,15 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderDetailsForm = () => {
-		const {risk, onRemoveResource, showDialog,
-			currentUser, myJob, attachFileResources, attachLinkResources, updateSelectedRiskPin } = this.props;
+		const {
+			onRemoveResource, showDialog, currentUser, myJob, attachFileResources, attachLinkResources, updateSelectedRiskPin,
+		} = this.props;
 
 		return (
 			<RiskDetailsForm
 				risk={this.riskData}
 				jobs={this.jobsList}
+				criteria={this.criteria}
 				onValueChange={this.handleRiskFormSubmit}
 				onSubmit={this.handleRiskFormSubmit}
 				permissions={this.props.modelSettings.permissions}
@@ -255,6 +268,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				attachLinkResources={attachLinkResources}
 				showDialog={showDialog}
 				canComment={this.userCanComment}
+				showMitigationSuggestions={this.props.showMitigationSuggestions}
 			/>
 		);
 	}

@@ -69,6 +69,9 @@ class Ticket {
 				ticketToClean[key] = utils.uuidToString(ticketToClean[key]);
 			}
 		});
+		if(ticketToClean.due_date === null) {
+			delete ticketToClean.due_date;
+		}
 
 		if (ticketToClean.viewpoints) {
 			ticketToClean.viewpoints.forEach((viewpoint, i) => {
@@ -624,11 +627,9 @@ class Ticket {
 	}
 
 	async attachResourceFiles(account, model, id, username, sessionId, resourceNames, files) {
-		const quota = await User.getQuotaInfo(account);
-		const spaceLeft = ((quota.spaceLimit === null || quota.spaceLimit === undefined ? Infinity : quota.spaceLimit) - quota.spaceUsed) * 1024 * 1024;
 		const spaceToBeUsed = files.reduce((size, file) => size + file.size,0);
 
-		if (spaceLeft < spaceToBeUsed) {
+		if (!User.hasSufficientQuota(account, spaceToBeUsed)) {
 			throw responseCodes.SIZE_LIMIT_PAY;
 		}
 
