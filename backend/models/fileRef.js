@@ -282,14 +282,9 @@ FileRef.storeFile = async function(account, model, collName, data, extraFields =
 FileRef.storeFileAsResource = async function(account, model, user, name, data, extraFields = null) {
 	const collName = model + RESOURCES_FILE_REF_EXT;
 
-	return await this.storeFile(account, collName, user, name, data, extraFields);
-};
-
-FileRef.storeFile = async function(account, collection, user, name, data, extraFields = null) {
-	let refInfo = await ExternalServices.storeFile(account, collection, data);
+	let refInfo = await ExternalServices.storeFile(account, collName, data);
 	refInfo = {...refInfo ,...(extraFields || {}) };
-
-	return await insertRef(account, collection, user, name, refInfo);
+	return await insertRef(account, collName, user, name, refInfo);
 };
 
 FileRef.storeUrlAsResource = async function(account, model, user, name, link, extraFields = null) {
