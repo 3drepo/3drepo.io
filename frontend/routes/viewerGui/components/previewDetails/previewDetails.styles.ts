@@ -95,7 +95,9 @@ export const Content = styled.div`
 	background-color: ${COLOR.BLACK_6};
 `;
 
-export const NotCollapsableContent = styled.div``;
+export const NotCollapsableContent = styled.div`
+  flex-grow: 1;
+`;
 
 export const ToggleButtonContainer = styled.div`
 	display: flex;
@@ -137,4 +139,7 @@ export const MainInfoContainer = styled.div`
 export const ScrollableContainer = styled.div`
 	overflow: auto;
 	position: static;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
 `;
