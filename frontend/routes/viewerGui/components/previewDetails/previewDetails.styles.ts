@@ -96,7 +96,7 @@ export const Content = styled.div`
 `;
 
 export const NotCollapsableContent = styled.div`
-  flex-grow: 1;
+	flex-grow: 1;
 `;
 
 export const ToggleButtonContainer = styled.div`

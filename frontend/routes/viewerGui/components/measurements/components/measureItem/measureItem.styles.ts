@@ -37,6 +37,8 @@ interface IContainer {
 }
 
 export const MeasurementPoint = styled.div`
+	display: flex;
+	justify-content: space-between;
 	text-align: right;
 	padding-right: 10px;
 	margin-left: 10px;
@@ -46,6 +48,13 @@ export const MeasurementValue = styled.div`
 	width: auto;
 	text-align: right;
 	padding-right: 10px;
+`;
+
+export const AxisLabel = styled.div`
+	margin-right: 5px;
+`;
+
+export const AxisValue = styled.div`
 `;
 
 export const Actions = styled.div`

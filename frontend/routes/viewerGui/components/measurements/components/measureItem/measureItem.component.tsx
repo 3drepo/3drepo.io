@@ -27,6 +27,8 @@ import { SmallIconButton } from '../../../../../components/smallIconButon/smallI
 import { StyledForm } from '../../../views/components/viewItem/viewItem.styles';
 import {
 	Actions,
+	AxisLabel,
+	AxisValue,
 	Container,
 	MeasurementPoint,
 	MeasurementValue,
@@ -170,13 +172,16 @@ export const MeasureItem = ({
 					<>
 						<div>
 							<MeasurementPoint>
-								x: {getValue(position[0], units, type, props.modelUnit)} {getUnits(units, type)}
+								<AxisLabel>x:</AxisLabel>
+								<AxisValue>{getValue(position[0], units, type, props.modelUnit)} {getUnits(units, type)}</AxisValue>
 							</MeasurementPoint>
 							<MeasurementPoint>
-								y: {getValue(position[1], units, type, props.modelUnit)} {getUnits(units, type)}
+								<AxisLabel>y:</AxisLabel>
+								<AxisValue>{getValue(position[1], units, type, props.modelUnit)} {getUnits(units, type)}</AxisValue>
 							</MeasurementPoint>
 							<MeasurementPoint>
-								z: {getValue(position[2], units, type, props.modelUnit)} {getUnits(units, type)}
+								<AxisLabel>z:</AxisLabel>
+								<AxisValue>{getValue(position[2], units, type, props.modelUnit)} {getUnits(units, type)}</AxisValue>
 							</MeasurementPoint>
 						</div>
 					</>
