@@ -124,7 +124,7 @@ export class TextField extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public componentDidUpdate(prevProps) {
+	public componentDidUpdate(prevProps, prevState) {
 		const { value, requiredConfirm } = this.props;
 		if (requiredConfirm && value !== prevProps.value) {
 			this.setState({ initialValue: value, currentValue: value, edit: false } as IState);
@@ -134,6 +134,10 @@ export class TextField extends React.PureComponent<IProps, IState> {
 			setTimeout(() => {
 				this.checkIfGotLongContent();
 			});
+		}
+
+		if (prevState.edit === false && this.state.edit) {
+			this.inputElement.select();
 		}
 	}
 
