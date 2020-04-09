@@ -26,6 +26,10 @@ function Utils() {
 
 	const self = this;
 
+	this.isString = (value) => {
+		return "[object String]" === Object.prototype.toString.call(value);
+	};
+
 	/** *****************************************************************************
 	* Convert a string to a UUID
 	* @param {string} uuid - String representation of a UUID
