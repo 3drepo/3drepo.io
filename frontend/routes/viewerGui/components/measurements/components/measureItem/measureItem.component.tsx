@@ -83,7 +83,7 @@ export const getValue = (measureValue: number, units: string, type: number, mode
 		return cond([
 			[matches('mm'), () => Math.round(value).toString()],
 			[matches('cm'), () => Math.round(value / 100).toString()],
-			[matches('m'), () => Number(value / 1000000).toFixed(2)],
+			[matches('m'), () => (Math.round((Number(value / 1000000) + Number.EPSILON) * 100) / 100).toFixed(2)],
 			[stubTrue, () => Math.round(value).toString()]
 		])(units);
 	}
@@ -91,7 +91,7 @@ export const getValue = (measureValue: number, units: string, type: number, mode
 	return cond([
 		[matches('mm'), () => Math.round(value).toString()],
 		[matches('cm'), () => Math.round(value / 10).toString()],
-		[matches('m'), () => Number(value / 1000).toFixed(2)],
+		[matches('m'), () => (Math.round((Number(value / 1000) + Number.EPSILON) * 100) / 100).toFixed(2)],
 		[stubTrue, () => Math.round(value).toString()]
 	])(units);
 };
