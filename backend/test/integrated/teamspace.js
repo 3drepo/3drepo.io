@@ -22,7 +22,7 @@ const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp();
 const responseCodes = require("../../response_codes");
 
-describe("Checking Quota Info  ", function() {
+describe("Teamspace", function() {
 	let server;
 	let agent;
 	const timeout = 30000;
@@ -72,6 +72,11 @@ describe("Checking Quota Info  ", function() {
 		user: "sub_all4",
 		password: "password",
 		quota: {spaceLimit: 3073, collaboratorLimit: "unlimited", spaceUsed: 0}
+	};
+
+	const imsharedTeamspace = {
+		user: "imsharedTeamspace",
+		password: "imsharedTeamspace"
 	};
 
 	before(function(done) {
@@ -366,4 +371,178 @@ describe("Checking Quota Info  ", function() {
 		});
 	});
 
+	const defaultRiskCategories = [
+		{ "value" : "commercial_issue", "label" : "Commercial Issue" },
+		{ "value" : "environmental_issue", "label" : "Environmental Issue" },
+		{ "value" : "health_-_material_effect", "label" : "Health - Material effect" },
+		{ "value" : "health_-_mechanical_effect", "label" : "Health - Mechanical effect" },
+		{ "value" : "safety_issue_-_fall", "label" : "Safety Issue - Fall" },
+		{ "value" : "safety_issue_-_trapped", "label" : "Safety Issue - Trapped" },
+		{ "value" : "safety_issue_-_event", "label" : "Safety Issue - Event" },
+		{ "value" : "safety_issue_-_handling", "label" : "Safety Issue - Handling" },
+		{ "value" : "safety_issue_-_struck", "label" : "Safety Issue - Struck" },
+		{ "value" : "safety_issue_-_public", "label" : "Safety Issue - Public" },
+		{ "value" : "social_issue", "label" : "Social Issue" },
+		{ "value" : "other_issue", "label" : "Other Issue" },
+		{ "value" : "unknown", "label" : "UNKNOWN" }
+	];
+	const defaultRiskCategoryLabels = defaultRiskCategories.map(x => x.label);
+	const defaultTopicTypes =  [
+		{ "value" : "for_information", "label" : "For information" },
+		{ "value" : "vr", "label" : "VR" }
+	];
+	const defaultTopicTypeLabels = defaultTopicTypes.map(x => x.label);
+
+	describe("Update teamspace settings", function(done) {
+		const user =  imsharedTeamspace;
+		const newRiskCategories = [
+			{ "value": "new_cat_1", "label": "New Cat 1" },
+			{ "value": "new_cat_2", "label": "New Cat 2" }
+		];
+		const newRiskCategoryLabels = newRiskCategories.map(x => x.label);
+		const newTopicTypes = [
+			{ "value": "new_type_1", "label": "New Type 1" },
+			{ "value": "new_type_2", "label": "New Type 2" }
+		];
+		const newTopicTypeLabels = newTopicTypes.map(x => x.label);
+
+		before(function(done) {
+			this.timeout(timeout);
+			agent.post("/login")
+				.send({username: user.user, password: user.password})
+				.expect(200, done);
+
+		});
+
+		it("set defaults should succeed", function(done) {
+			agent.put(`/${user.user}/settings`)
+				.send({ topicTypes: defaultTopicTypeLabels, riskCategories: defaultRiskCategoryLabels })
+				.expect(200, function(err, res) {
+					expect(res.body._id).to.equal(user.user);
+					expect(res.body.riskCategories).to.deep.equal(defaultRiskCategories);
+					expect(res.body.topicTypes).to.deep.equal(defaultTopicTypes);
+					done(err);
+				});
+		});
+
+		it("with new topic types should succeed", function(done) {
+			agent.put(`/${user.user}/settings`)
+				.send({ topicTypes: newTopicTypeLabels })
+				.expect(200, function(err, res) {
+					expect(res.body._id).to.equal(user.user);
+					expect(res.body.riskCategories).to.deep.equal(defaultRiskCategories);
+					expect(res.body.topicTypes).to.deep.equal(newTopicTypes);
+					done(err);
+				});
+		});
+
+		it("with new risk categories should succeed", function(done) {
+			agent.put(`/${user.user}/settings`)
+				.send({ riskCategories: newRiskCategoryLabels })
+				.expect(200, function(err, res) {
+					expect(res.body._id).to.equal(user.user);
+					expect(res.body.riskCategories).to.deep.equal(newRiskCategories);
+					expect(res.body.topicTypes).to.deep.equal(newTopicTypes);
+					done(err);
+				});
+		});
+
+		it("with unexpected field should succeed", function(done) {
+			agent.put(`/${user.user}/settings`)
+				.send({
+					topicTypes: defaultTopicTypeLabels,
+					riskCategories: defaultRiskCategoryLabels,
+					unexpectedField: "abc"
+				})
+				.expect(200, function(err, res) {
+					expect(res.body._id).to.equal(user.user);
+					expect(res.body.riskCategories).to.deep.equal(defaultRiskCategories);
+					expect(res.body.topicTypes).to.deep.equal(defaultTopicTypes);
+					expect(res.body.unexpectedField).to.equal(undefined);
+					done(err);
+				});
+		});
+
+		after(function(done) {
+			this.timeout(timeout);
+			agent.post("/logout")
+				.expect(200, done);
+		});
+	});
+
+	describe("Get teamspace settings", function(done) {
+		const user =  imsharedTeamspace;
+
+		before(function(done) {
+			this.timeout(timeout);
+			agent.post("/login")
+				.send({username: user.user, password: user.password})
+				.expect(200, done);
+
+		});
+
+		it("should succeed", function(done) {
+			agent.get(`/${user.user}/settings`)
+				.expect(200, function(err, res) {
+					expect(res.body._id).to.equal(user.user);
+					expect(res.body.riskCategories).to.deep.equal(defaultRiskCategories);
+					expect(res.body.topicTypes).to.deep.equal(defaultTopicTypes);
+					done(err);
+				});
+		});
+
+		after(function(done) {
+			this.timeout(timeout);
+			agent.post("/logout")
+				.expect(200, done);
+		});
+	});
+
+	describe("Upload mitigations file", function(done) {
+		const user =  imsharedTeamspace;
+		const mitigationsFile = "/../../statics/mitigations/mitigations1.csv";
+
+		before(function(done) {
+			this.timeout(timeout);
+			agent.post("/login")
+				.send({username: user.user, password: user.password})
+				.expect(200, done);
+
+		});
+
+		it("should succeed", function(done) {
+			agent.post(`/${user.user}/settings/mitigations.csv`)
+				.attach("file", __dirname + mitigationsFile)
+				.expect(200, done);
+		});
+
+		after(function(done) {
+			this.timeout(timeout);
+			agent.post("/logout")
+				.expect(200, done);
+		});
+	});
+
+	describe("Download mitigations file", function(done) {
+		const user =  imsharedTeamspace;
+
+		before(function(done) {
+			this.timeout(timeout);
+			agent.post("/login")
+				.send({username: user.user, password: user.password})
+				.expect(200, done);
+
+		});
+
+		it("should succeed", function(done) {
+			agent.get(`/${user.user}/settings/mitigations.csv`)
+				.expect(200, done);
+		});
+
+		after(function(done) {
+			this.timeout(timeout);
+			agent.post("/logout")
+				.expect(200, done);
+		});
+	});
 });
