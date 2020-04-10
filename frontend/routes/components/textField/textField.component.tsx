@@ -78,6 +78,10 @@ export class TextField extends React.PureComponent<IProps, IState> {
 		return (!this.props.mutable || this.state.edit) && !this.props.disabled;
 	}
 
+	get hasValueChanged() {
+		return this.state.initialValue !== this.state.currentValue;
+	}
+
 	get textFieldRef() {
 		return (this.props.inputRef || this.inputLocalRef) as any;
 	}
@@ -157,8 +161,10 @@ export class TextField extends React.PureComponent<IProps, IState> {
 	}
 
 	public saveChange = () => {
-		if (this.props.onChange) {
+		if (this.props.onChange && this.hasValueChanged) {
 			this.props.onChange({ target: this.inputElement } as any);
+		} else {
+			this.declineChange();
 		}
 	}
 
