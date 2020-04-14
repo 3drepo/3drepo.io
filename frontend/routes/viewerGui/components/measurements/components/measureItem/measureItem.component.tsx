@@ -16,6 +16,7 @@
  */
 
 import RemoveIcon from '@material-ui/icons/Close';
+import { Formik } from 'formik';
 import { cond, eq, matches, stubTrue } from 'lodash';
 import React from 'react';
 
@@ -112,6 +113,8 @@ export const getUnits = (units: string, type: number) => {
 export const MeasureItem = ({
 	uuid, index, name, typeName, value, units, color, removeMeasurement, type, position, customColor, checked, ...props
 }: IProps) => {
+	const textFieldRef = React.useRef(null);
+
 	const handleRemoveMeasurement = () => {
 		removeMeasurement(uuid);
 	};
@@ -135,7 +138,7 @@ export const MeasureItem = ({
 
 	const handleSave = ({ target: { value: newName }}) => props.setMeasurementName(uuid, newName, type);
 
-	const handleSubmit = (e) => e.preventDefault();
+	const handleSubmit = () => textFieldRef.current.saveChange();
 
 	const isPointTypeMeasure = type === MEASURE_TYPE.POINT;
 
@@ -151,18 +154,26 @@ export const MeasureItem = ({
 					/>
 				</StyledCheckboxCell>
 			}
-			<StyledForm onSubmit={handleSubmit}>
-				<StyledTextField
-					left={Number(isPointTypeMeasure)}
-					requiredConfirm
-					fullWidth
-					value={name}
-					mutable
-					onChange={handleSave}
-					inputProps={{ maxLength: 15 }}
-					disableShowDefaultUnderline
-				/>
-			</StyledForm>
+			<Formik
+				initialValues={{ newName: name }}
+				onSubmit={handleSubmit}
+			>
+				<StyledForm>
+					<StyledTextField
+						ref={textFieldRef}
+						left={Number(isPointTypeMeasure)}
+						requiredConfirm
+						fullWidth
+						value={name}
+						name="newName"
+						mutable
+						onChange={handleSave}
+						onKeyDown={this._handleKeyDown}
+						inputProps={{ maxLength: 15 }}
+						disableShowDefaultUnderline
+					/>
+				</StyledForm>
+			</Formik>
 			<Actions>
 				{
 					isPointTypeMeasure ?
