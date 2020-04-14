@@ -30,6 +30,10 @@ function Utils() {
 		return "[object String]" === Object.prototype.toString.call(value);
 	};
 
+	this.hasField = (obj, field) => {
+		return Object.prototype.hasOwnProperty.call(obj, field);
+	};
+
 	/** *****************************************************************************
 	* Convert a string to a UUID
 	* @param {string} uuid - String representation of a UUID

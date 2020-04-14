@@ -19,16 +19,10 @@
 
 const _ = require("lodash");
 const db = require("../handler/db");
-const responseCodes = require("../response_codes.js");
+const responseCodes = require("../response_codes");
+const utils = require("../utils");
 const FileRef = require("./fileRef");
 const colName = "teamspace";
-
-const fieldTypes = {
-	"_id": "[object String]",
-	"topicTypes": "[object Array]",
-	"mitigationsUpdatedAt": "[object Number]",
-	"riskCategories": "[object Array]"
-};
 
 class TeamspaceSettings {
 	async createTeamspaceSettings(account) {
@@ -65,11 +59,6 @@ class TeamspaceSettings {
 		const settingsColl = await this.getTeamspaceSettingsCollection(account);
 
 		return await settingsColl.insert(settings);
-	}
-
-	filterFields(data, blackList) {
-		data = _.omit(data, blackList);
-		return _.pick(data, Object.keys(fieldTypes));
 	}
 
 	getTeamspaceSettingsCollection(account) {
@@ -131,58 +120,58 @@ class TeamspaceSettings {
 	}
 
 	async update(account, data) {
-		const attributeBlacklist = ["_id", "mitigationsUpdatedAt"];
 		const labelFields = ["riskCategories", "topicTypes"];
 
 		const oldSettings = await this.getTeamspaceSettings(account);
 
-		// Filter out blacklisted attributes and leave proper attrs
-		data = this.filterFields(data, attributeBlacklist);
-
-		if (_.isEmpty(data)) {
-			throw responseCodes.INVALID_ARGUMENTS;
-		}
+		const toUpdate = {};
 
 		labelFields.forEach((key) => {
-			if (Object.prototype.toString.call(data[key]) === "[object Array]") {
-				// store as key/val array
-				const labelObject = {};
-				data[key].forEach(label => {
-					if (label &&
-						Object.prototype.toString.call(label) === "[object String]" &&
-						label.trim()) {
-						// generate value from label
-						const value = label.trim().toLowerCase().replace(/ /g, "_").replace(/&/g, "");
-						if (labelObject[value]) {
-							switch (key) {
-								case "riskCategories":
-									throw responseCodes.RISK_DUPLICATE_CATEGORY;
-								case "topicTypes":
-									throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;
+			if (utils.hasField(data, key)) {
+				if (Object.prototype.toString.call(data[key]) === "[object Array]") {
+					// store as key/val array
+					const labelObject = {};
+					data[key].forEach(label => {
+						if (label &&
+							Object.prototype.toString.call(label) === "[object String]" &&
+							label.trim()) {
+							// generate value from label
+							const value = label.trim().toLowerCase().replace(/ /g, "_").replace(/&/g, "");
+							if (labelObject[value]) {
+								switch (key) {
+									case "riskCategories":
+										throw responseCodes.RISK_DUPLICATE_CATEGORY;
+									case "topicTypes":
+										throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;
+								}
+							} else {
+								labelObject[value] = {
+									value,
+									label: label.trim()
+								};
 							}
 						} else {
-							labelObject[value] = {
-								value,
-								label: label.trim()
-							};
+							throw responseCodes.INVALID_ARGUMENTS;
 						}
-					} else {
-						throw responseCodes.INVALID_ARGUMENTS;
-					}
-				});
+					});
 
-				data[key] = _.values(labelObject);
+					toUpdate[key] = _.values(labelObject);
 
-				// store as string array
-				// data[key] = data[key].map(label => label.trim());
-			} else if (data[key]) {
-				throw responseCodes.INVALID_ARGUMENTS;
+					// store as string array
+					// data[key] = data[key].map(label => label.trim());
+				} else {
+					throw responseCodes.INVALID_ARGUMENTS;
+				}
 			}
 		});
 
+		if (_.isEmpty(toUpdate)) {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+
 		// Update the data
 		const settingsColl = await this.getTeamspaceSettingsCollection(account, true);
-		await settingsColl.update({_id: account}, {$set: data});
+		await settingsColl.update({_id: account}, {$set: toUpdate});
 
 		const updatedSettings = {...oldSettings, ...data};
 
