@@ -32,7 +32,7 @@ export const PRIORITIES = {
 // FIXME: first item should be taken in topicTypes should be taken
 // for default value
 const TOPIC_TYPES = {
-	FOR_INFORMATION: 'for_information'
+	FOR_INFORMATION: 'For Information'
 };
 
 export const DEFAULT_PROPERTIES = {

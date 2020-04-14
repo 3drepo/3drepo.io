@@ -144,8 +144,8 @@ export const selectLanes = createSelector(
 				value: p
 			})),
 			[ISSUE_FILTER_PROPS.topic_type.value]: topicTypes.map((t) => ({
-				name: t.label,
-				value: t.value
+				name: startCase(t),
+				value: t
 			})),
 			[ISSUE_FILTER_PROPS.creator_role.value]: jobsValues,
 			[ISSUE_FILTER_PROPS.assigned_roles.value]: jobsValues,

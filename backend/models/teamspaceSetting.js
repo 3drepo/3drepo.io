@@ -53,7 +53,7 @@ class TeamspaceSettings {
 				"Safety Issue - Public",
 				"Social Issue",
 				"Other Issue",
-				"UNKNOWN"
+				"Unknown"
 			]
 		};
 		const settingsColl = await this.getTeamspaceSettingsCollection(account);
@@ -130,13 +130,20 @@ class TeamspaceSettings {
 			if (utils.hasField(data, key)) {
 				if (Object.prototype.toString.call(data[key]) === "[object Array]") {
 					const arrayUpdated = [];
-					data[key].forEach((entry) => {
+					const foundKeys = {};
+					for (let i = 0; i < data[key].length; ++i) {
+						const entry = data[key][i];
 						if(utils.isString(entry) && entry !== "") {
-							arrayUpdated.push(entry.trim());
+							const value = entry.trim();
+							if (utils.hasField(foundKeys, value)) {
+								throw responseCodes.DUPLICATED_ENTRIES;
+							}
+							foundKeys[value] = 1;
+							arrayUpdated.push(value);
 						} else {
 							throw responseCodes.INVALID_ARGUMENTS;
 						}
-					});
+					}
 				} else if (data[key]) {
 					throw responseCodes.INVALID_ARGUMENTS;
 				}

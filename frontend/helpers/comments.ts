@@ -39,7 +39,7 @@ export const prepareComments = (comments = []) => {
 
 export const prepareComment = (comment) => {
 	if (comment.action) {
-		comment.comment = convertActionCommentToText(comment, undefined);
+		comment.comment = convertActionCommentToText(comment);
 	}
 	if (comment.viewpoint && comment.viewpoint.screenshot) {
 		comment.viewpoint.screenshotPath = getAPIUrl(comment.viewpoint.screenshot);
@@ -48,7 +48,7 @@ export const prepareComment = (comment) => {
 	return comment;
 };
 
-const convertActionCommentToText = (comment, topicTypes) => {
+const convertActionCommentToText = (comment) => {
 	let text = '';
 
 	if (comment) {
@@ -173,23 +173,6 @@ const convertActionCommentToText = (comment, topicTypes) => {
 				break;
 			case 'topic_type':
 				comment.action.propertyText = 'Type';
-				if (topicTypes) {
-					const from = topicTypes.find((topicType) => {
-						return topicType.value === comment.action.from;
-					});
-
-					const to = topicTypes.find((topicType) => {
-						return topicType.value === comment.action.to;
-					});
-
-					if (from && from.label) {
-						comment.action.from = from.label;
-					}
-
-					if (to && to.label) {
-						comment.action.to = to.label;
-					}
-				}
 				break;
 			case 'desc':
 				comment.action.propertyText = 'Description';

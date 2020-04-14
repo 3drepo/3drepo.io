@@ -572,8 +572,8 @@ export function* setNewIssue() {
 	const currentUser = yield select(selectCurrentUser);
 	const topicTypes: any[] = yield select(selectTopicTypes);
 
-	const topicType =  topicTypes.find((t) => t.value === DEFAULT_PROPERTIES.TOPIC_TYPE) ?
-						DEFAULT_PROPERTIES.TOPIC_TYPE : topicTypes[0].value;
+	const topicType =  topicTypes.find((t) => t === DEFAULT_PROPERTIES.TOPIC_TYPE) ?
+						DEFAULT_PROPERTIES.TOPIC_TYPE : topicTypes[0];
 
 	try {
 		const newIssue = prepareIssue({
