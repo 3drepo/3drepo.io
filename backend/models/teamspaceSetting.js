@@ -20,16 +20,9 @@
 const _ = require("lodash");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes");
+const utils = require("../utils");
 const FileRef = require("./fileRef");
 const colName = "teamspace";
-const utils = require("../utils");
-
-const fieldTypes = {
-	"_id": "[object String]",
-	"topicTypes": "[object Array]",
-	"mitigationsUpdatedAt": "[object Number]",
-	"riskCategories": "[object Array]"
-};
 
 class TeamspaceSettings {
 	async createTeamspaceSettings(account) {
@@ -66,11 +59,6 @@ class TeamspaceSettings {
 		const settingsColl = await this.getTeamspaceSettingsCollection(account);
 
 		return await settingsColl.insert(settings);
-	}
-
-	filterFields(data, blackList) {
-		data = _.omit(data, blackList);
-		return _.pick(data, Object.keys(fieldTypes));
 	}
 
 	getTeamspaceSettingsCollection(account) {
@@ -132,36 +120,36 @@ class TeamspaceSettings {
 	}
 
 	async update(account, data) {
-		const attributeBlacklist = ["_id", "mitigationsUpdatedAt"];
 		const labelFields = ["riskCategories", "topicTypes"];
 
 		const oldSettings = await this.getTeamspaceSettings(account);
 
-		// Filter out blacklisted attributes and leave proper attrs
-		data = this.filterFields(data, attributeBlacklist);
-
-		if (_.isEmpty(data)) {
-			throw responseCodes.INVALID_ARGUMENTS;
-		}
+		const toUpdate = {};
 
 		labelFields.forEach((key) => {
-			if (Object.prototype.toString.call(data[key]) === "[object Array]") {
-				for(let i = 0; i < data[key].length; ++i) {
-					const entry = data[key][i];
-					if(utils.isString(entry) && entry !== "") {
-						data[key][i] = entry.trim();
-					} else {
-						throw responseCodes.INVALID_ARGUMENTS;
-					}
+			if (utils.hasField(data, key)) {
+				if (Object.prototype.toString.call(data[key]) === "[object Array]") {
+					const arrayUpdated = [];
+					data[key].forEach((entry) => {
+						if(utils.isString(entry) && entry !== "") {
+							arrayUpdated.push(entry.trim());
+						} else {
+							throw responseCodes.INVALID_ARGUMENTS;
+						}
+					});
+				} else if (data[key]) {
+					throw responseCodes.INVALID_ARGUMENTS;
 				}
-			} else if (data[key]) {
-				throw responseCodes.INVALID_ARGUMENTS;
 			}
 		});
 
+		if (_.isEmpty(toUpdate)) {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+
 		// Update the data
 		const settingsColl = await this.getTeamspaceSettingsCollection(account, true);
-		await settingsColl.update({_id: account}, {$set: data});
+		await settingsColl.update({_id: account}, {$set: toUpdate});
 
 		const updatedSettings = {...oldSettings, ...data};
 

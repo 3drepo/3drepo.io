@@ -15,18 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-
 import RemoveIcon from '@material-ui/icons/Close';
 import { cond, eq, matches, stubTrue } from 'lodash';
+import React from 'react';
 
-import { componentToHex, parseHex } from '../../../../../../helpers/colors';
-import { MEASURE_TYPE } from '../../../../../../modules/measurements/measurements.constants';
+import { parseHex } from '../../../../../../helpers/colors';
+import { getColor, MEASURE_TYPE } from '../../../../../../modules/measurements/measurements.constants';
 import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
 import { SmallIconButton } from '../../../../../components/smallIconButon/smallIconButton.component';
 import { StyledForm } from '../../../views/components/viewItem/viewItem.styles';
 import {
 	Actions,
+	AxisLabel,
+	AxisValue,
 	Container,
 	MeasurementPoint,
 	MeasurementValue,
@@ -69,6 +70,7 @@ interface IProps extends IMeasure {
 	setMeasurementCheck?: (uuid, type) => void;
 	setMeasurementName: (uuid, type, name) => void;
 	modelUnit: string;
+	colors: string[];
 }
 
 export const getValue = (measureValue: number, units: string, type: number, modelUnit: string) => {
@@ -83,7 +85,7 @@ export const getValue = (measureValue: number, units: string, type: number, mode
 		return cond([
 			[matches('mm'), () => Math.round(value).toString()],
 			[matches('cm'), () => Math.round(value / 100).toString()],
-			[matches('m'), () => Number(value / 1000000).toFixed(2)],
+			[matches('m'), () => (Math.round((Number(value / 1000000) + Number.EPSILON) * 100) / 100).toFixed(2)],
 			[stubTrue, () => Math.round(value).toString()]
 		])(units);
 	}
@@ -91,13 +93,10 @@ export const getValue = (measureValue: number, units: string, type: number, mode
 	return cond([
 		[matches('mm'), () => Math.round(value).toString()],
 		[matches('cm'), () => Math.round(value / 10).toString()],
-		[matches('m'), () => Number(value / 1000).toFixed(2)],
+		[matches('m'), () => (Math.round((Number(value / 1000) + Number.EPSILON) * 100) / 100).toFixed(2)],
 		[stubTrue, () => Math.round(value).toString()]
 	])(units);
 };
-
-export const getColor = ({ r, g, b }) => `#${[r, g, b].map((color) =>
-	componentToHex(Math.trunc(color))).join('')}`;
 
 export const getUnits = (units: string, type: number) => {
 	if (type === MEASURE_TYPE.AREA) {
@@ -160,7 +159,8 @@ export const MeasureItem = ({
 					value={name}
 					mutable
 					onChange={handleSave}
-					inputProps={{ maxLength: 30 }}
+					inputProps={{ maxLength: 15 }}
+					disableShowDefaultUnderline
 				/>
 			</StyledForm>
 			<Actions>
@@ -169,13 +169,16 @@ export const MeasureItem = ({
 					<>
 						<div>
 							<MeasurementPoint>
-								x: {getValue(position[0], units, type, props.modelUnit)} {getUnits(units, type)}
+								<AxisLabel>x:</AxisLabel>
+								<AxisValue>{getValue(position[0], units, type, props.modelUnit)} {getUnits(units, type)}</AxisValue>
 							</MeasurementPoint>
 							<MeasurementPoint>
-								y: {getValue(position[1], units, type, props.modelUnit)} {getUnits(units, type)}
+								<AxisLabel>y:</AxisLabel>
+								<AxisValue>{getValue(position[1], units, type, props.modelUnit)} {getUnits(units, type)}</AxisValue>
 							</MeasurementPoint>
 							<MeasurementPoint>
-								z: {getValue(position[2], units, type, props.modelUnit)} {getUnits(units, type)}
+								<AxisLabel>z:</AxisLabel>
+								<AxisValue>{getValue(position[2], units, type, props.modelUnit)} {getUnits(units, type)}</AxisValue>
 							</MeasurementPoint>
 						</div>
 					</>
@@ -185,6 +188,7 @@ export const MeasureItem = ({
 					value={getColor(customColor || color)}
 					onChange={handleColorChange}
 					disableUnderline
+					predefinedColors={props.colors}
 				/>
 				<SmallIconButton
 					Icon={RemoveIcon}

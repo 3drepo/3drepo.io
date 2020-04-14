@@ -130,6 +130,9 @@ interface IProps {
 	unsubscribeOnIssueChanges: (teamspace, modelId) => void;
 	subscribeOnRiskChanges: (teamspace, modelId) => void;
 	unsubscribeOnRiskChanges: (teamspace, modelId) => void;
+	resetModel: () => void;
+	resetIssues: () => void;
+	resetRisks: () => void;
 }
 
 const PANEL_PROPS = {
@@ -162,7 +165,10 @@ export function Board(props: IProps) {
 		toggleIssuesSortOrder,
 		toggleRisksSortOrder,
 		toggleClosedIssues,
-		showClosedIssues
+		showClosedIssues,
+		resetModel,
+		resetIssues,
+		resetRisks,
 	} = props;
 
 	useEffect(() => {
@@ -202,6 +208,14 @@ export function Board(props: IProps) {
 			});
 		}
 	}, [boardRef, props.isPending]);
+
+	useEffect(() => {
+		return () => {
+			resetModel();
+			resetIssues();
+			resetRisks();
+		};
+	}, []);
 
 	const hasViewerPermissions = isViewer(props.modelSettings.permissions);
 

@@ -120,7 +120,7 @@
 	router.get("/settings", middlewares.isAccountAdmin, getTeamspaceSettings);
 
 	/**
-	 * @api {put} /:teamspace/settings Update teamspace settings
+	 * @api {patch} /:teamspace/settings Update teamspace settings
 	 * @apiName updateTeamspaceSettings
 	 * @apiGroup Teamspace
 	 * @apiDescription Update teamspace settings.
@@ -164,7 +164,7 @@
 	 * 	"_id":"acme"
 	 * }
 	 */
-	router.put("/settings", middlewares.isAccountAdmin, updateTeamspaceSettings);
+	router.patch("/settings", middlewares.isAccountAdmin, updateTeamspaceSettings);
 
 	/**
 	 *

@@ -35,7 +35,7 @@ import {
 	IssuesActions
 } from '../../modules/issues';
 import { selectJobsList } from '../../modules/jobs';
-import { selectSettings, selectTopicTypes } from '../../modules/model';
+import { selectSettings, selectTopicTypes, ModelActions } from '../../modules/model';
 import {
 	selectSelectedFilters as selectSelectedRiskFilters,
 	selectSortOrder as selectRisksSortOrder,
@@ -88,6 +88,9 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	unsubscribeOnIssueChanges: IssuesActions.unsubscribeOnIssueChanges,
 	subscribeOnRiskChanges: RisksActions.subscribeOnRiskChanges,
 	unsubscribeOnRiskChanges: RisksActions.unsubscribeOnRiskChanges,
+	resetModel: ModelActions.reset,
+	resetIssues: IssuesActions.reset,
+	resetRisks: RisksActions.reset,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Board);
