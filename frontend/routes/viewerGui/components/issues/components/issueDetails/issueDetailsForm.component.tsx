@@ -199,7 +199,6 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 								<CellSelect
 									{...field}
 									items={topicTypes}
-									labelName="label"
 									inputId="topic_type"
 									disabled={!this.canEditBasicProperty}
 								/>
