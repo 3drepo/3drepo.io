@@ -237,7 +237,7 @@ export class TextField extends React.PureComponent<IProps, IState> {
 			...props
 		} = this.props;
 		const { initialValue } = this.state;
-		const shouldRenderActions = this.isEditMode;
+		const shouldRenderActions = mutable && this.isEditMode;
 		const shouldRenderMutable = !this.isEditMode && !this.props.disabled;
 
 		return (
