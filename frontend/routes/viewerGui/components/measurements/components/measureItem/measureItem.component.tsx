@@ -15,13 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-
 import RemoveIcon from '@material-ui/icons/Close';
 import { cond, eq, matches, stubTrue } from 'lodash';
+import React from 'react';
 
-import { componentToHex, parseHex } from '../../../../../../helpers/colors';
-import { MEASURE_TYPE } from '../../../../../../modules/measurements/measurements.constants';
+import { parseHex } from '../../../../../../helpers/colors';
+import { getColor, MEASURE_TYPE } from '../../../../../../modules/measurements/measurements.constants';
 import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
 import { SmallIconButton } from '../../../../../components/smallIconButon/smallIconButton.component';
 import { StyledForm } from '../../../views/components/viewItem/viewItem.styles';
@@ -71,6 +70,7 @@ interface IProps extends IMeasure {
 	setMeasurementCheck?: (uuid, type) => void;
 	setMeasurementName: (uuid, type, name) => void;
 	modelUnit: string;
+	colors: string[];
 }
 
 export const getValue = (measureValue: number, units: string, type: number, modelUnit: string) => {
@@ -97,9 +97,6 @@ export const getValue = (measureValue: number, units: string, type: number, mode
 		[stubTrue, () => Math.round(value).toString()]
 	])(units);
 };
-
-export const getColor = ({ r, g, b }) => `#${[r, g, b].map((color) =>
-	componentToHex(Math.trunc(color))).join('')}`;
 
 export const getUnits = (units: string, type: number) => {
 	if (type === MEASURE_TYPE.AREA) {
@@ -191,6 +188,7 @@ export const MeasureItem = ({
 					value={getColor(customColor || color)}
 					onChange={handleColorChange}
 					disableUnderline
+					predefinedColors={props.colors}
 				/>
 				<SmallIconButton
 					Icon={RemoveIcon}
