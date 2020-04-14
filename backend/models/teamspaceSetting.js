@@ -19,9 +19,10 @@
 
 const _ = require("lodash");
 const db = require("../handler/db");
-const responseCodes = require("../response_codes.js");
+const responseCodes = require("../response_codes");
 const FileRef = require("./fileRef");
 const colName = "teamspace";
+const utils = require("../utils");
 
 const fieldTypes = {
 	"_id": "[object String]",
@@ -145,7 +146,14 @@ class TeamspaceSettings {
 
 		labelFields.forEach((key) => {
 			if (Object.prototype.toString.call(data[key]) === "[object Array]") {
-				data[key] = data[key].map(label => label.trim());
+				for(let i = 0; i < data[key].length; ++i) {
+					const entry = data[key][i];
+					if(utils.isString(entry) && entry !== "") {
+						data[key][i] = entry.trim();
+					} else {
+						throw responseCodes.INVALID_ARGUMENTS;
+					}
+				}
 			} else if (data[key]) {
 				throw responseCodes.INVALID_ARGUMENTS;
 			}
