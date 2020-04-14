@@ -463,6 +463,54 @@ describe("Teamspace", function() {
 				});
 		});
 
+		it("with duplicate risk categories should fail", function(done) {
+			const duplicateRiskCategoryLabels = defaultRiskCategoryLabels.concat(defaultRiskCategoryLabels);
+			agent.put(`/${user.user}/settings`)
+				.send({
+					riskCategories: duplicateRiskCategoryLabels
+				})
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.RISK_DUPLICATE_CATEGORY.value);
+					done(err);
+				});
+		});
+
+		it("with duplicate topic type should fail", function(done) {
+			const duplicateTopicTypeLabels = defaultTopicTypeLabels.concat(defaultTopicTypeLabels);
+			agent.put(`/${user.user}/settings`)
+				.send({
+					topicTypes: duplicateTopicTypeLabels
+				})
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE.value);
+					done(err);
+				});
+		});
+
+		it("with duplicate (case insensitive) categories should fail", function(done) {
+			const duplicateRiskCategoryLabels = ["dup 1", "DUP 1"];
+			agent.put(`/${user.user}/settings`)
+				.send({
+					riskCategories: duplicateRiskCategoryLabels
+				})
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.RISK_DUPLICATE_CATEGORY.value);
+					done(err);
+				});
+		});
+
+		it("with duplicate (case insensitive) topic type should fail", function(done) {
+			const duplicateTopicTypeLabels = ["clone 2", "CLONE 2"];
+			agent.put(`/${user.user}/settings`)
+				.send({
+					topicTypes: duplicateTopicTypeLabels
+				})
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE.value);
+					done(err);
+				});
+		});
+
 		after(function(done) {
 			this.timeout(timeout);
 			agent.post("/logout")
@@ -498,9 +546,36 @@ describe("Teamspace", function() {
 		});
 	});
 
+	describe("Download mitigations file", function(done) {
+		const user =  imsharedTeamspace;
+
+		before(function(done) {
+			this.timeout(timeout);
+			agent.post("/login")
+				.send({username: user.user, password: user.password})
+				.expect(200, done);
+
+		});
+
+		it("that doesn't exist should fail", function(done) {
+			agent.get(`/${user.user}/settings/mitigations.csv`)
+				.expect(404, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.NO_FILE_FOUND.value);
+					done(err);
+				});
+		});
+
+		after(function(done) {
+			this.timeout(timeout);
+			agent.post("/logout")
+				.expect(200, done);
+		});
+	});
+
 	describe("Upload mitigations file", function(done) {
 		const user =  imsharedTeamspace;
 		const mitigationsFile = "/../../statics/mitigations/mitigations1.csv";
+		const notMitigationsFile = "/../../statics/mitigations/notMitigations.zip";
 
 		before(function(done) {
 			this.timeout(timeout);
@@ -514,6 +589,15 @@ describe("Teamspace", function() {
 			agent.post(`/${user.user}/settings/mitigations.csv`)
 				.attach("file", __dirname + mitigationsFile)
 				.expect(200, done);
+		});
+
+		it("non-CSV file should fail", function(done) {
+			agent.post(`/${user.user}/settings/mitigations.csv`)
+				.attach("file", __dirname + notMitigationsFile)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.FILE_FORMAT_NOT_SUPPORTED.value);
+					done(err);
+				});
 		});
 
 		after(function(done) {
