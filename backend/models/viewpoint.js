@@ -142,7 +142,7 @@ view.updateViewpoint = function (dbCol, sessionId, data, id) {
 
 view.updateAttrs = function (dbCol, id, data) {
 	const toUpdate = {};
-	//We can only update the name of a viewpoint
+	// We can only update the name of a viewpoint
 	const name = data["name"];
 	if (name && utils.isString(name) && name !== "") {
 		toUpdate["name"] = name;

@@ -1912,7 +1912,7 @@ function getSubModelRevisions(req, res, next) {
 	const branch = revId ? undefined : "master";
 	const username = req.session.user.username;
 
-	ModelHelpers.getSubModelRevisions(account, model, username, branch, revId).then((result) => {
+	ModelHelpers.getSubModelRevisions(account, model, branch, revId).then((result) => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, result, undefined, req.param.rev ? config.cachePolicy : undefined);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
