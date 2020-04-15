@@ -21,11 +21,6 @@ import { snakeCase } from 'lodash';
 
 import { StyledChipInput } from './chipsInput.styles';
 
-interface IChip {
-	value: string;
-	label: string;
-}
-
 interface IProps {
 	name: string;
 	value: string[];
@@ -34,7 +29,7 @@ interface IProps {
 }
 
 export const ChipsInput: React.FunctionComponent<IProps> = ({ name, onChange, ...props }) => {
-	const getValues = () => [...props.value.map(({ label }) => label)];
+	const getValues = () => [...props.value];
 
 	const handleAddChip = (value) => {
 		const chipExists = !!props.value.find((chipValue) => (value === chipValue));

@@ -144,6 +144,7 @@ class TeamspaceSettings {
 							throw responseCodes.INVALID_ARGUMENTS;
 						}
 					}
+					toUpdate[key] = arrayUpdated;
 				} else if (data[key]) {
 					throw responseCodes.INVALID_ARGUMENTS;
 				}
