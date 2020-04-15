@@ -1910,7 +1910,6 @@ function getSubModelRevisions(req, res, next) {
 	const account = req.params.account;
 	const revId = req.params.revId;
 	const branch = revId ? undefined : "master";
-	const username = req.session.user.username;
 
 	ModelHelpers.getSubModelRevisions(account, model, branch, revId).then((result) => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, result, undefined, req.param.rev ? config.cachePolicy : undefined);
