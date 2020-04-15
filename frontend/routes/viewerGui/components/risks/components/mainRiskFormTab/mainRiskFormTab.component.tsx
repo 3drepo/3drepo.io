@@ -61,7 +61,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 }) => {
 	const getCategories = () => {
 		const { category = [] } = criteria;
-		return category.map((x) => ({label: x, value: x});
+		return category.map((x) => ({label: x, value: x}));
 	};
 
 	return (
