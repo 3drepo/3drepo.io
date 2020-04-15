@@ -79,6 +79,8 @@ describe("Teamspace", function() {
 		password: "imsharedTeamspace"
 	};
 
+	const mitigationsFile = "/../../statics/mitigations/mitigations1.csv";
+
 	before(function(done) {
 
 		server = app.listen(8080, function () {
@@ -574,7 +576,6 @@ describe("Teamspace", function() {
 
 	describe("Upload mitigations file", function(done) {
 		const user =  imsharedTeamspace;
-		const mitigationsFile = "/../../statics/mitigations/mitigations1.csv";
 		const notMitigationsFile = "/../../statics/mitigations/notMitigations.zip";
 
 		before(function(done) {
@@ -621,6 +622,49 @@ describe("Teamspace", function() {
 		it("should succeed", function(done) {
 			agent.get(`/${user.user}/settings/mitigations.csv`)
 				.expect(200, done);
+		});
+
+		after(function(done) {
+			this.timeout(timeout);
+			agent.post("/logout")
+				.expect(200, done);
+		});
+	});
+
+	describe("Check suggestions", function(done) {
+		const user =  imsharedTeamspace;
+		let totalSuggestions;
+
+		before(function(done) {
+			this.timeout(timeout);
+			agent.post("/login")
+				.send({username: user.user, password: user.password})
+				.expect(200, done);
+
+		});
+
+		it("should succeed", function(done) {
+			agent.post(`/${user.user}/mitigations`)
+				.send({})
+				.expect(200, function(err, res) {
+					totalSuggestions = res.body.length;
+					done(err);
+				});
+		});
+
+		it("reupload mitigations should succeed", function(done) {
+			agent.post(`/${user.user}/settings/mitigations.csv`)
+				.attach("file", __dirname + mitigationsFile)
+				.expect(200, done);
+		});
+
+		it("number of mitigations should remain the same", function(done) {
+			agent.post(`/${user.user}/mitigations`)
+				.send({})
+				.expect(200, function(err, res) {
+					expect(res.body.length).to.equal(totalSuggestions);
+					done(err);
+				});
 		});
 
 		after(function(done) {
