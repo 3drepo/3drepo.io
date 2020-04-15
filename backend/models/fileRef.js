@@ -139,7 +139,7 @@ const FileRef = {};
 
 FileRef.getOriginalFile = function(account, model, fileName) {
 	const collection = model + ORIGINAL_FILE_REF_EXT;
-	return fetchFileStream(account, model, collection, fileName, true);
+	return fetchFileStream(account, model, collection, fileName, false);
 };
 
 FileRef.getTotalModelFileSize = function(account, model) {
@@ -167,7 +167,7 @@ FileRef.getTotalModelFileSize = function(account, model) {
 };
 
 FileRef.getUnityBundle = function(account, model, fileName) {
-	return fetchFile(account, model, UNITY_BUNDLE_REF_EXT, fileName, false, false);
+	return fetchFile(account, model, UNITY_BUNDLE_REF_EXT, fileName, false, true);
 };
 
 FileRef.getSequenceStateFile = function(account, model, fileName) {
@@ -175,7 +175,7 @@ FileRef.getSequenceStateFile = function(account, model, fileName) {
 };
 
 FileRef.getJSONFile = function(account, model, fileName) {
-	return fetchFile(account, model, JSON_FILE_REF_EXT, fileName, false, false);
+	return fetchFile(account, model, JSON_FILE_REF_EXT, fileName, false, true);
 };
 
 FileRef.getMitigationsStream = function(account) {
@@ -194,7 +194,7 @@ FileRef.getResourceFile = function(account, model, fileName) {
  */
 FileRef.getJSONFileStream = function(account, model, fileName) {
 	const collection = model + JSON_FILE_REF_EXT;
-	return fetchFileStream(account, model, collection, fileName, false);
+	return fetchFileStream(account, model, collection, fileName, true);
 };
 
 FileRef.removeAllFilesFromModel = function(account, model) {
