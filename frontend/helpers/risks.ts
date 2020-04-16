@@ -20,7 +20,6 @@ import { getFilterValues, UNASSIGNED_JOB } from '../constants/reportedItems';
 import {
 	LEVELS,
 	LEVELS_OF_RISK,
-	RISK_CATEGORIES,
 	RISK_CONSEQUENCES,
 	RISK_FILTER_RELATED_FIELDS,
 	RISK_LEVELS,
@@ -31,7 +30,6 @@ import {
 	RISKS_ACTIONS_MENU
 } from '../constants/risks';
 import { getAPIUrl } from '../services/api';
-import { COLOR } from '../styles';
 import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
 
 export const prepareRisk = (risk, jobs = []) => {
@@ -198,11 +196,12 @@ export const canComment = (riskData, userJob, permissions, currentUser) => {
 	return ableToComment;
 };
 
-export const filtersValuesMap = (jobs) => {
+export const filtersValuesMap = (jobs, settings) => {
 	const jobsList = [...jobs, UNASSIGNED_JOB];
 
 	return {
-		[RISK_FILTER_RELATED_FIELDS.CATEGORY]: getFilterValues(RISK_CATEGORIES),
+		[RISK_FILTER_RELATED_FIELDS.CATEGORY]: getFilterValues(settings.riskCategories
+				.map((category) => ({ value: category.label, name: category.label }))),
 		[RISK_FILTER_RELATED_FIELDS.MITIGATION_STATUS]: getFilterValues(RISK_MITIGATION_STATUSES),
 		[RISK_FILTER_RELATED_FIELDS.CREATED_BY]: getFilterValues(jobs),
 		[RISK_FILTER_RELATED_FIELDS.RISK_OWNER]: getFilterValues(jobsList),

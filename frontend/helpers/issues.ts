@@ -145,7 +145,8 @@ export const filtersValuesMap = (jobs, topicTypes) => {
 		[ISSUE_FILTER_RELATED_FIELDS.CREATED_BY]: getFilterValues(jobs),
 		[ISSUE_FILTER_RELATED_FIELDS.ASSIGNED_TO]: getFilterValues(jobsList),
 		[ISSUE_FILTER_RELATED_FIELDS.PRIORITY]: getFilterValues(ISSUE_PRIORITIES),
-		[ISSUE_FILTER_RELATED_FIELDS.TYPE]: getFilterValues(topicTypes),
+		[ISSUE_FILTER_RELATED_FIELDS.TYPE]: getFilterValues(topicTypes
+				.map((category) => ({ value: category.label, name: category.label }))),
 		[ISSUE_FILTER_RELATED_FIELDS.CREATED_DATE]: [{
 			label: 'From',
 			value: {
