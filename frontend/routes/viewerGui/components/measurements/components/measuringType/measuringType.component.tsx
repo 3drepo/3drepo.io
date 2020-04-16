@@ -48,15 +48,17 @@ export const MeasuringType = ({
 }: IProps) => {
 
 	const handlePickPoint = ({ trans, position }) => {
-		if (trans) {
-			position = trans.inverse().multMatrixPnt(position);
+		if (measureMode === MEASURING_MODE.POINT) {
+			if (trans) {
+				position = trans.inverse().multMatrixPnt(position);
+			}
+			addMeasurement({
+				uuid: uuid(),
+				position,
+				type: MEASURE_TYPE.POINT,
+				color: { r: 0, g: 1, b: 1, a: 1},
+			});
 		}
-		addMeasurement({
-			uuid: uuid(),
-			position,
-			type: MEASURE_TYPE.POINT,
-			color: { r: 0, g: 1, b: 1, a: 1},
-		});
 	};
 
 	const handleClickBackground = () => {
