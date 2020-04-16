@@ -74,10 +74,10 @@ interface IProps extends IMeasure {
 	colors: string[];
 }
 
-const roundNumber = (num : number, numDP: number) => {
+const roundNumber = (num: number, numDP: number) => {
 	const factor = Math.pow(10, numDP);
-	return Math.round((num + Number.EPSILON)* factor)/factor;
-}
+	return Math.round((num + Number.EPSILON) * factor) / factor;
+};
 
 export const getValue = (measureValue: number, units: string, type: number, modelUnits: string) => {
 	const isAreaMeasurement = type === MEASURE_TYPE.AREA;
