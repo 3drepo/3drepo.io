@@ -127,8 +127,8 @@
 	 *
 	 * @apiUse Teamspace
 	 *
-	 * @apiParam (Request body) {Object[]} [riskCategories] List of risk categories
-	 * @apiParam (Request body) {Object[]} [topicTypes] List of issue topic types
+	 * @apiParam (Request body) {String[]} [riskCategories] List of risk categories
+	 * @apiParam (Request body) {String[]} [topicTypes] List of issue topic types
 	 *
 	 * @apiParam (Risk category) {String} value Value of risk category
 	 * @apiParam (Risk category) {String} label Label for risk category
