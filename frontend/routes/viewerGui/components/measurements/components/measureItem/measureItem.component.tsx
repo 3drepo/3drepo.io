@@ -92,8 +92,8 @@ export const getValue = (measureValue: number, units: string, type: number, mode
 			[stubTrue, () => Math.round(measureValue)]
 	])(modelUnits);
 
-
-	const valueInUnits = (units === 'mm') ? Math.round(roundedValueMM) : roundNumber(roundedValueMM / Math.pow(1000, factor), 2);
+	const valueInUnits = (units === 'mm') ? Math.round(roundedValueMM)
+		: roundNumber(roundedValueMM / Math.pow(1000, factor), 2);
 
 	return Number.parseFloat(valueInUnits.toPrecision(7)).toString(); // Unity only gives 7sf
 };
