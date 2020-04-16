@@ -19,8 +19,9 @@ function updateTeamspaceSetting(dbConn) {
 		});
 		setting.riskCategories.forEach(function(entry) {
 			// Change UNKNOWN to unknown, otherwise, take label.
-			riskMapping[entry.value] = entry.value === "unknown" ? "Unknown" : entry.label;
-			newRiskCat.push(entry.label);
+			var newValue = entry.value === "unknown" ? "Unknown" : entry.label;
+			riskMapping[entry.value] = newValue;
+			newRiskCat.push(newValue);
 		});
 
 		if(!dryRun) {
@@ -72,6 +73,7 @@ function updateTicket(dbConn, mapping, colName, typeLabel) {
 					}
 				}
 			}
+
 			if(!dryRun) {
 				var setObj = {comments: ticket.comments};
 				setObj[typeLabel] = ticket[typeLabel];
