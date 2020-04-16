@@ -39,12 +39,12 @@ export const MEASURE_TYPE_STATE_MAP = {
 };
 
 export const MEASURING_TYPE = {
-	CSAM: 'Custom Area',
+	CSAM: 'Custom Polygonal Area',
 	SAM: 'Surface Area',
-	MINIMUM_DISTANCE: 'Minimum Distance',
-	POINT: 'Point',
+	MINIMUM_DISTANCE: 'Minimal Distance',
+	POINT: 'Locate Point',
 	POINT_TO_POINT: 'Point to Point',
-	RAY_CAST: 'Ray cast',
+	RAY_CAST: 'Ray Cast',
 };
 
 export const MEASURING_MODE = {
