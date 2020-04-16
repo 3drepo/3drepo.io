@@ -84,7 +84,7 @@ export const getValue = (measureValue: number, units: string, type: number, mode
 
 	const factor = isAreaMeasurement ? 2 : 1;
 
-	let roundedValueMM = cond([
+	const roundedValueMM = cond([
 			[matches('mm'), () => Math.round(measureValue)],
 			[matches('cm'), () => roundNumber(measureValue, 1 * factor) * Math.pow(10, factor)],
 			[matches('dm'), () => roundNumber(measureValue, 2 * factor) * Math.pow(100, factor)],
@@ -92,14 +92,10 @@ export const getValue = (measureValue: number, units: string, type: number, mode
 			[stubTrue, () => Math.round(measureValue)]
 	])(modelUnits);
 
-	if (units === 'mm') {
-		roundedValueMM =  Math.round(roundedValueMM);
-	} else {
-		const valueInUnits = roundedValueMM / Math.pow(1000, factor);
-		roundedValueMM = roundNumber(valueInUnits, 2);
-	}
 
-	return Number.parseFloat(roundedValueMM.toPrecision(7)).toString(); // Unity only gives 7sf
+	const valueInUnits = (units === 'mm') ? Math.round(roundedValueMM) : roundNumber(roundedValueMM / Math.pow(1000, factor), 2);
+
+	return Number.parseFloat(valueInUnits.toPrecision(7)).toString(); // Unity only gives 7sf
 };
 
 export const getUnits = (units: string, type: number) => {
