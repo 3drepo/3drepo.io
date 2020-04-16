@@ -26,8 +26,8 @@ import { LEVELS_LIST, RISK_MITIGATION_STATUSES } from '../../constants/risks';
 import { sortByDate } from '../../helpers/sorting';
 import { selectAllFilteredIssues, selectSortOrder as selectIssuesSortOrder } from '../issues';
 import { selectJobs } from '../jobs';
-import { selectTopicTypes } from '../model';
 import { selectAllFilteredRisks, selectSortOrder as selectRisksSortOrder } from '../risks';
+import { selectTopicTypes } from '../teamspace';
 import { selectRiskCategories } from '../teamspace';
 import { BOARD_TYPES, ISSUE_FILTER_PROPS, NOT_DEFINED_PROP, RISK_FILTER_PROPS } from './board.constants';
 
@@ -145,10 +145,7 @@ export const selectLanes = createSelector(
 				name: startCase(p),
 				value: p
 			})),
-			[ISSUE_FILTER_PROPS.topic_type.value]: topicTypes.map((t) => ({
-				name: t.label,
-				value: t.value
-			})),
+			[ISSUE_FILTER_PROPS.topic_type.value]: topicTypes,
 			[ISSUE_FILTER_PROPS.creator_role.value]: jobsValues,
 			[ISSUE_FILTER_PROPS.assigned_roles.value]: jobsValues,
 			[ISSUE_FILTER_PROPS.due_date.value]: datesValues,

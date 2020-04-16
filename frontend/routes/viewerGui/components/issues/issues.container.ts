@@ -35,7 +35,8 @@ import {
 	IssuesActions
 } from '../../../../modules/issues';
 import { selectJobsList } from '../../../../modules/jobs';
-import { selectSettings, selectTopicTypes } from '../../../../modules/model';
+import { selectSettings } from '../../../../modules/model';
+import { selectTopicTypes } from '../../../../modules/teamspace';
 import { Issues } from './issues.component';
 
 const mapStateToProps = createStructuredSelector({

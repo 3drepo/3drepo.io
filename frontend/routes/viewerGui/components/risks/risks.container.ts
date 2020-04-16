@@ -36,7 +36,7 @@ import {
 	selectSortOrder,
 	RisksActions
 } from '../../../../modules/risks';
-import { selectQueryParams } from '../../../../modules/router/router.selectors';
+import { selectSettings as selectTeamspaceSettings } from '../../../../modules/teamspace';
 import { Risks } from './risks.component';
 
 const mapStateToProps = createStructuredSelector({
@@ -52,7 +52,8 @@ const mapStateToProps = createStructuredSelector({
 	isPending: selectIsRisksPending,
 	fetchingDetailsIsPending: selectFetchingDetailsIsPending,
 	sortOrder: selectSortOrder,
-	selectedRisk: selectSelectedRisk
+	selectedRisk: selectSelectedRisk,
+	teamspaceSettings: selectTeamspaceSettings,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

@@ -36,14 +36,14 @@ import {
 	IssuesActions
 } from '../../modules/issues';
 import { selectJobsList } from '../../modules/jobs';
-import { selectSettings, selectTopicTypes, ModelActions } from '../../modules/model';
+import { selectSettings, ModelActions } from '../../modules/model';
 import {
 	selectSelectedFilters as selectSelectedRiskFilters,
 	selectSortOrder as selectRisksSortOrder,
 	RisksActions
 } from '../../modules/risks';
 import { SnackbarActions } from '../../modules/snackbar';
-import { selectSettings as selectTeamspaceSettings } from '../../modules/teamspace';
+import { selectSettings as selectTeamspaceSettings, selectTopicTypes } from '../../modules/teamspace';
 import { selectModels, selectProjects, selectTeamspacesList } from '../../modules/teamspaces';
 import { Board } from './board.component';
 
