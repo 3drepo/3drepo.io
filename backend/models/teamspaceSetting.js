@@ -135,10 +135,10 @@ class TeamspaceSettings {
 						const entry = data[key][i];
 						if(utils.isString(entry) && entry !== "") {
 							const value = entry.trim();
-							if (utils.hasField(foundKeys, value)) {
+							if (utils.hasField(foundKeys, value.toLower())) {
 								throw responseCodes.DUPLICATED_ENTRIES;
 							}
-							foundKeys[value] = 1;
+							foundKeys[value.toLower()] = 1;
 							arrayUpdated.push(value);
 						} else {
 							throw responseCodes.INVALID_ARGUMENTS;
