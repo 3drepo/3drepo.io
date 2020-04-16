@@ -44,9 +44,17 @@ function updateRisk(dbConn, mapping, colName) {
 }
 
 function updateTicket(dbConn, mapping, colName, typeLabel) {
-	dbConn.getCollection(colName).find({"comments.action.property": typeLabel}, {"comments": 1})
+	var projection =  {"comments": 1 };
+	projection[typeLabel] = 1;
+	dbConn.getCollection(colName).find({"comments.action.property": typeLabel}, projection)
 		.toArray().forEach(function(ticket) {
 			var hasChange = false;
+
+			if(ticket[typeLabel] && mapping[ticket[typeLabel]]) {
+				hasChange = true;
+				ticket[typeLabel] = mapping[ticket[typeLabel]];
+			}
+
 			for(var i = 0; i < ticket.comments.length; ++i) {
 				if(ticket.comments[i].action) {
 					var property = ticket.comments[i].action.property;
@@ -65,7 +73,9 @@ function updateTicket(dbConn, mapping, colName, typeLabel) {
 				}
 			}
 			if(!dryRun) {
-				dbConn.getCollection(colName).update({_id: ticket._id}, {$set:{comments: ticket.comments}});
+				var setObj = {comments: ticket.comments};
+				setObj[typeLabel] = ticket[typeLabel];
+				dbConn.getCollection(colName).update({_id: ticket._id}, {$set:setObj});
 			}
 
 	});
@@ -98,7 +108,6 @@ function updateTeamspace(ts) {
 }
 
 var toIgnore = ["admin", "local", "notifications"];
-
 
 db.getSiblingDB("admin").adminCommand({listDatabases:1}).databases.forEach(function(database){
 	if(toIgnore.indexOf(database.name) === -1)

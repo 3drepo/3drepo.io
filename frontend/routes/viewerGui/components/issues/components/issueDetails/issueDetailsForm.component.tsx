@@ -152,7 +152,12 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		const { issue, myJob, permissions,
 				topicTypes, currentUser, onRemoveResource,
 				attachFileResources, attachLinkResources, showDialog,
-				canComment } = this.props;
+			canComment } = this.props;
+
+		const topicTypesSelect = topicTypes.map((x) => ({label: x, value:x}));
+		if (issue.topic_type && topicTypes.indexOf(issue.topic_type) === -1) {
+			topicTypesSelect.push({label: issue.topic_type, value: issue.topic_type});
+		}
 
 		return (
 			<MuiPickersUtilsProvider utils={DayJsUtils}>
@@ -198,7 +203,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							<Field name="topic_type" render={({ field }) => (
 								<CellSelect
 									{...field}
-									items={topicTypes}
+									items={topicTypesSelect}
 									inputId="topic_type"
 									disabled={!this.canEditBasicProperty}
 								/>

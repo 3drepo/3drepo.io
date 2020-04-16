@@ -146,7 +146,7 @@ export const filtersValuesMap = (jobs, topicTypes) => {
 		[ISSUE_FILTER_RELATED_FIELDS.ASSIGNED_TO]: getFilterValues(jobsList),
 		[ISSUE_FILTER_RELATED_FIELDS.PRIORITY]: getFilterValues(ISSUE_PRIORITIES),
 		[ISSUE_FILTER_RELATED_FIELDS.TYPE]: getFilterValues(topicTypes
-				.map((category) => ({ value: category.label, name: category.label }))),
+				.map((category) => ({ value: category, name: category }))),
 		[ISSUE_FILTER_RELATED_FIELDS.CREATED_DATE]: [{
 			label: 'From',
 			value: {
