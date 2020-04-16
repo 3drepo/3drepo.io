@@ -79,6 +79,7 @@ interface ICard {
 	draggable: boolean;
 	metadata: any;
 }
+
 interface ILane {
 	id: string;
 	title: string;
@@ -133,6 +134,7 @@ interface IProps {
 	resetModel: () => void;
 	resetIssues: () => void;
 	resetRisks: () => void;
+	teamspaceSettings: any;
 }
 
 const PANEL_PROPS = {
@@ -497,7 +499,9 @@ export function Board(props: IProps) {
 	const FILTER_ITEMS = isIssuesBoard ? ISSUE_FILTERS : RISK_FILTERS;
 
 	const filterItems = () => {
-		const filterValuesMap = isIssuesBoard ? issuesFilters(props.jobs, props.topicTypes) : risksFilters(props.jobs);
+		const filterValuesMap = isIssuesBoard
+				? issuesFilters(props.jobs, props.topicTypes)
+				: risksFilters(props.jobs, props.teamspaceSettings);
 
 		return FILTER_ITEMS.map((issueFilter) => {
 			issueFilter.values = filterValuesMap[issueFilter.relatedField];

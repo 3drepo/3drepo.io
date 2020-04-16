@@ -23,7 +23,6 @@ import { Field } from 'formik';
 
 import {
 	LEVELS_OF_RISK,
-	RISK_CATEGORIES,
 	RISK_CONSEQUENCES,
 	RISK_LIKELIHOODS,
 } from '../../../../../../constants/risks';

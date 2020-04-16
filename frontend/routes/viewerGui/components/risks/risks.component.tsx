@@ -61,10 +61,11 @@ interface IProps {
 	saveRisk: (teamspace, modelId, risk) => void;
 	toggleSortOrder: () => void;
 	setFilters: (filters) => void;
+	teamspaceSettings: any;
 }
 export class Risks extends React.PureComponent<IProps, any> {
 	get filters() {
-		const filterValuesMap = filtersValuesMap(this.props.jobs);
+		const filterValuesMap = filtersValuesMap(this.props.jobs, this.props.teamspaceSettings);
 		return RISK_FILTERS.map((riskFilter) => {
 			riskFilter.values = filterValuesMap[riskFilter.relatedField];
 			return riskFilter;

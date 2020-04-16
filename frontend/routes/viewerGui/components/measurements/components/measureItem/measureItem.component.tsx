@@ -74,29 +74,28 @@ interface IProps extends IMeasure {
 	colors: string[];
 }
 
-export const getValue = (measureValue: number, units: string, type: number, modelUnit: string) => {
+const roundNumber = (num: number, numDP: number) => {
+	const factor = Math.pow(10, numDP);
+	return Math.round((num + Number.EPSILON) * factor) / factor;
+};
+
+export const getValue = (measureValue: number, units: string, type: number, modelUnits: string) => {
 	const isAreaMeasurement = type === MEASURE_TYPE.AREA;
-	const isRecalculationNeeded = modelUnit !== 'mm';
-	const value = cond([
-		[(is) => eq(is, true), () => isAreaMeasurement ? measureValue * 1000 * 1000 : measureValue * 1000],
-		[stubTrue, () => measureValue],
-	])(isRecalculationNeeded);
 
-	if (isAreaMeasurement) {
-		return cond([
-			[matches('mm'), () => Math.round(value).toString()],
-			[matches('cm'), () => Math.round(value / 100).toString()],
-			[matches('m'), () => (Math.round((Number(value / 1000000) + Number.EPSILON) * 100) / 100).toFixed(2)],
-			[stubTrue, () => Math.round(value).toString()]
-		])(units);
-	}
+	const factor = isAreaMeasurement ? 2 : 1;
 
-	return cond([
-		[matches('mm'), () => Math.round(value).toString()],
-		[matches('cm'), () => Math.round(value / 10).toString()],
-		[matches('m'), () => (Math.round((Number(value / 1000) + Number.EPSILON) * 100) / 100).toFixed(2)],
-		[stubTrue, () => Math.round(value).toString()]
-	])(units);
+	const roundedValueMM = cond([
+			[matches('mm'), () => Math.round(measureValue)],
+			[matches('cm'), () => roundNumber(measureValue, 1 * factor) * Math.pow(10, factor)],
+			[matches('dm'), () => roundNumber(measureValue, 2 * factor) * Math.pow(100, factor)],
+			[matches('m'),  () => roundNumber(measureValue, 3 * factor) * Math.pow(1000, factor)],
+			[stubTrue, () => Math.round(measureValue)]
+	])(modelUnits);
+
+
+	const valueInUnits = (units === 'mm') ? Math.round(roundedValueMM) : roundNumber(roundedValueMM / Math.pow(1000, factor), 2);
+
+	return Number.parseFloat(valueInUnits.toPrecision(7)).toString(); // Unity only gives 7sf
 };
 
 export const getUnits = (units: string, type: number) => {

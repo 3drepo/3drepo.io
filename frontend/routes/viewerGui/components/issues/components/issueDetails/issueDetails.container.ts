@@ -29,7 +29,8 @@ import {
 	IssuesActions
 } from '../../../../../../modules/issues';
 import { selectJobsList, selectMyJob } from '../../../../../../modules/jobs';
-import { selectPermissions, selectTopicTypes } from '../../../../../../modules/model';
+import { selectPermissions } from '../../../../../../modules/model';
+import { selectTopicTypes } from '../../../../../../modules/teamspace';
 import { ViewpointsActions } from '../../../../../../modules/viewpoints';
 import { withViewer } from '../../../../../../services/viewer/viewer';
 import { IssueDetails } from './issueDetails.component';

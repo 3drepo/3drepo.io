@@ -33,23 +33,6 @@ export const LEVELS_LIST = [
 	{ value: LEVELS.VERY_HIGH, name: 'Very High' }
 ];
 
-export const RISK_CATEGORIES = [
-	{ value: 'commercial', name: 'Commercial Issue' },
-	{ value: 'environmental', name: 'Environmental Issue' },
-	{ value: 'health_material_effect', name: 'Health - Material effect' },
-	{ value: 'health_mechanical_effect', name: 'Health - Mechanical effect' },
-	{ value: 'safety_fall', name: 'Safety Issue - Fall' },
-	{ value: 'safety_trapped', name: 'Safety Issue - Trapped' },
-	{ value: 'safety_event', name: 'Safety Issue - Event' },
-	{ value: 'safety_handling', name: 'Safety Issue - Handling' },
-	{ value: 'safety_struck', name: 'Safety Issue - Struck' },
-	{ value: 'safety_public', name: 'Safety Issue - Public' },
-	{ value: 'social', name: 'Social Issue' },
-	{ value: 'other', name: 'Other Issue' },
-	{ value: 'unknown', name: 'UNKNOWN' },
-	{ value: '', name: 'UNSET' }
-];
-
 export const RISK_LIKELIHOODS = [...LEVELS_LIST];
 
 export const RISK_CONSEQUENCES = [...LEVELS_LIST];

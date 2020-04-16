@@ -17,6 +17,8 @@
 
 import React from 'react';
 
+import { Tooltip } from '@material-ui/core';
+
 import { VIEWER_EVENTS } from '../../../../../../constants/viewer';
 import { VIEWER_PANELS } from '../../../../../../constants/viewerGui';
 import { uuid } from '../../../../../../helpers/uuid';
@@ -46,15 +48,17 @@ export const MeasuringType = ({
 }: IProps) => {
 
 	const handlePickPoint = ({ trans, position }) => {
-		if (trans) {
-			position = trans.inverse().multMatrixPnt(position);
+		if (measureMode === MEASURING_MODE.POINT) {
+			if (trans) {
+				position = trans.inverse().multMatrixPnt(position);
+			}
+			addMeasurement({
+				uuid: uuid(),
+				position,
+				type: MEASURE_TYPE.POINT,
+				color: { r: 0, g: 1, b: 1, a: 1},
+			});
 		}
-		addMeasurement({
-			uuid: uuid(),
-			position,
-			type: MEASURE_TYPE.POINT,
-			color: { r: 0, g: 1, b: 1, a: 1},
-		});
 	};
 
 	const handleClickBackground = () => {
@@ -112,13 +116,15 @@ export const MeasuringType = ({
 	return (
 			<>
 				{MEASURING_TYPES.map(({ icon, activeIcon, name, mode }) => (
-					<Wrapper key={name}>
-						<Icon
-							src={mode === measureMode ? activeIcon : icon}
-							alt={name}
-							onClick={handleMeasuringTypeClick(mode)}
-						/>
-					</Wrapper>
+					<Tooltip title={name} key={name}>
+						<Wrapper>
+							<Icon
+								src={mode === measureMode ? activeIcon : icon}
+								alt={name}
+								onClick={handleMeasuringTypeClick(mode)}
+							/>
+						</Wrapper>
+					</Tooltip>
 				))}
 			</>
 	);

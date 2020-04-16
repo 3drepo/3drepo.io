@@ -42,10 +42,11 @@ import { ChatActions } from '../chat';
 import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { selectJobsList, selectMyJob } from '../jobs';
-import { selectCurrentModel, selectCurrentModelTeamspace, selectTopicTypes } from '../model';
+import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
+import { selectTopicTypes, TeamspaceActions } from '../teamspace';
 import { selectIfcSpacesHidden, TreeActions } from '../tree';
 import { IssuesActions, IssuesTypes } from './issues.redux';
 import {
@@ -59,6 +60,7 @@ import {
 function* fetchIssues({teamspace, modelId, revision}) {
 	yield put(IssuesActions.togglePendingState(true));
 	try {
+		yield put(TeamspaceActions.fetchSettings(teamspace));
 		const { data } = yield API.getIssues(teamspace, modelId, revision);
 		const jobs = yield select(selectJobsList);
 
@@ -571,7 +573,6 @@ export function* setNewIssue() {
 	const jobs = yield select(selectJobsList);
 	const currentUser = yield select(selectCurrentUser);
 	const topicTypes: any[] = yield select(selectTopicTypes);
-
 	const topicType =  topicTypes.length > 0 ? (topicTypes.find((t) => t === DEFAULT_PROPERTIES.TOPIC_TYPE) ?
 		DEFAULT_PROPERTIES.TOPIC_TYPE : topicTypes[0]) : undefined;
 
