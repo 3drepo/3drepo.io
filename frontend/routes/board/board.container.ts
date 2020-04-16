@@ -18,6 +18,7 @@
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
+
 import {
 	selectBoardType,
 	selectCards,
@@ -42,6 +43,7 @@ import {
 	RisksActions
 } from '../../modules/risks';
 import { SnackbarActions } from '../../modules/snackbar';
+import { selectSettings as selectTeamspaceSettings } from '../../modules/teamspace';
 import { selectModels, selectProjects, selectTeamspacesList } from '../../modules/teamspaces';
 import { Board } from './board.component';
 
@@ -63,6 +65,7 @@ const mapStateToProps = createStructuredSelector({
 	modelsMap: selectModels,
 	showClosedIssues: selectShowClosedIssues,
 	modelSettings: selectSettings,
+	teamspaceSettings: selectTeamspaceSettings,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

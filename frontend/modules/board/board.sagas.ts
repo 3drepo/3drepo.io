@@ -23,6 +23,7 @@ import { IssuesActions, IssuesTypes } from '../issues';
 import { JobsActions } from '../jobs';
 import { selectCurrentModel, ModelActions } from '../model';
 import { RisksActions, RisksTypes } from '../risks';
+import { TeamspaceActions } from '../teamspace';
 import { selectTeamspaces, TeamspacesActions } from '../teamspaces';
 import { BoardActions, BoardTypes } from './board.redux';
 import { selectBoardType } from './board.selectors';
@@ -45,6 +46,7 @@ function* fetchData({ boardType, teamspace, project, modelId }) {
 
 		if (!teamspaces.length) {
 			yield put(TeamspacesActions.fetchTeamspaces(currentTeamspace));
+			yield put(TeamspaceActions.fetchSettings(teamspace));
 		}
 
 		if (teamspace && project && modelId) {

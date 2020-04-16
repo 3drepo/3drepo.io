@@ -19,15 +19,16 @@ import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
-import { get, groupBy, memoize, sortBy, startCase, uniqBy, values } from 'lodash';
+import { get, groupBy, memoize, startCase, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { PRIORITIES, STATUSES } from '../../constants/issues';
-import { LEVELS_LIST, RISK_CATEGORIES, RISK_MITIGATION_STATUSES } from '../../constants/risks';
+import { LEVELS_LIST, RISK_MITIGATION_STATUSES } from '../../constants/risks';
 import { sortByDate } from '../../helpers/sorting';
 import { selectAllFilteredIssues, selectSortOrder as selectIssuesSortOrder } from '../issues';
 import { selectJobs } from '../jobs';
 import { selectTopicTypes } from '../model';
 import { selectAllFilteredRisks, selectSortOrder as selectRisksSortOrder } from '../risks';
+import { selectRiskCategories } from '../teamspace';
 import { BOARD_TYPES, ISSUE_FILTER_PROPS, NOT_DEFINED_PROP, RISK_FILTER_PROPS } from './board.constants';
 
 dayjs.extend(isSameOrBefore);
@@ -112,7 +113,8 @@ export const selectLanes = createSelector(
 	selectRawCardData,
 	selectTopicTypes,
 	selectJobsValues,
-	({ filterProp, boardType }, rawCardData, topicTypes, jobsValues) => {
+	selectRiskCategories,
+	({ filterProp, boardType }, rawCardData, topicTypes, jobsValues, riskCategories) => {
 		const isIssueBoardType = boardType === 'issues';
 
 		const FILTER_PROPS = isIssueBoardType ? ISSUE_FILTER_PROPS : RISK_FILTER_PROPS;
@@ -155,7 +157,7 @@ export const selectLanes = createSelector(
 		const riskFiltersMap = {
 			[RISK_FILTER_PROPS.level_of_risk.value]: LEVELS_LIST,
 			[RISK_FILTER_PROPS.residual_level_of_risk.value]: LEVELS_LIST,
-			[RISK_FILTER_PROPS.category.value]: RISK_CATEGORIES,
+			[RISK_FILTER_PROPS.category.value]: riskCategories,
 			[RISK_FILTER_PROPS.mitigation_status.value]: RISK_MITIGATION_STATUSES,
 			[RISK_FILTER_PROPS.creator_role.value]: jobsValues,
 			[RISK_FILTER_PROPS.assigned_roles.value]: jobsValues,
