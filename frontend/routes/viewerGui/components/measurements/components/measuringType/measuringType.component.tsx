@@ -17,6 +17,8 @@
 
 import React from 'react';
 
+import { Tooltip } from '@material-ui/core';
+
 import { VIEWER_EVENTS } from '../../../../../../constants/viewer';
 import { VIEWER_PANELS } from '../../../../../../constants/viewerGui';
 import { uuid } from '../../../../../../helpers/uuid';
@@ -112,13 +114,15 @@ export const MeasuringType = ({
 	return (
 			<>
 				{MEASURING_TYPES.map(({ icon, activeIcon, name, mode }) => (
-					<Wrapper key={name}>
-						<Icon
-							src={mode === measureMode ? activeIcon : icon}
-							alt={name}
-							onClick={handleMeasuringTypeClick(mode)}
-						/>
-					</Wrapper>
+					<Tooltip title={name} key={name}>
+						<Wrapper>
+							<Icon
+								src={mode === measureMode ? activeIcon : icon}
+								alt={name}
+								onClick={handleMeasuringTypeClick(mode)}
+							/>
+						</Wrapper>
+					</Tooltip>
 				))}
 			</>
 	);
