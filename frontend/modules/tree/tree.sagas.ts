@@ -34,6 +34,7 @@ import {
 	selectIsTreeProcessed,
 	selectNodesIndexesMap,
 	selectSelectionMap,
+	selectSubModelsRootNodes,
 	selectTreeNodesList
 } from './tree.selectors';
 import TreeProcessing from './treeProcessing/treeProcessing';
@@ -447,6 +448,20 @@ function* selectNodesBySharedIds({ objects = [], colour }: { objects: any[], col
 	yield put(TreeActions.selectNodes(nodesIds, false, true, colour));
 }
 
+function* setSubmodelsVisibility({ models, visibility}) {
+	try {
+		const submodelsRootNodes = yield select(selectSubModelsRootNodes);
+		const rootNodes =  models.map(({teamspace, _id }) => submodelsRootNodes[teamspace + ':' + _id]);
+
+		if (rootNodes.length) {
+			yield put(TreeActions.setTreeNodesVisibility(rootNodes, visibility));
+		}
+
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('set', 'tree node visibility', error));
+	}
+}
+
 /**
  * SET VISIBILITY
  */
@@ -590,4 +605,5 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.GO_TO_ROOT_NODE, goToRootNode);
 	yield takeLatest(TreeTypes.ZOOM_TO_HIGHLIGHTED_NODES, zoomToHighlightedNodes);
 	yield takeLatest(TreeTypes.HANDLE_TRANSPARENCY_OVERRIDES_CHANGE, handleTransparencyOverridesChange);
+	yield takeLatest(TreeTypes.SET_SUBMODELS_VISIBILITY, setSubmodelsVisibility);
 }
