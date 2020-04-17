@@ -47,16 +47,10 @@ const uploadTreatmentsFileSuccess = (state = INITIAL_STATE, { mitigationsUpdated
 
 const fetchSettingsSuccess = (state = INITIAL_STATE, { settings }) => {
 	if (settings && settings.topicTypes) {
-		settings.topicTypes = sortByField(
-				settings.topicTypes,
-				{ order: 'asc', config: { field: 'label' } }
-		);
+		settings.topicTypes.sort();
 	}
 	if (settings && settings.riskCategories) {
-		settings.riskCategories = sortByField(
-				settings.riskCategories,
-				{ order: 'asc', config: { field: 'label' } }
-		);
+		settings.riskCategories.sort();
 	}
 	return { ...state, settings };
 };

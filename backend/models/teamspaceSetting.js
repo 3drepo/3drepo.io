@@ -29,31 +29,31 @@ class TeamspaceSettings {
 		const settings = {
 			"_id" : account,
 			"topicTypes" : [
-				{value: "clash", label: "Clash"},
-				{value: "diff", label: "Diff"},
-				{value: "rfi", label: "RFI"},
-				{value: "risk", label: "Risk"},
-				{value: "hs", label: "H&S"},
-				{value: "design", label: "Design"},
-				{value: "constructibility", label: "Constructibility"},
-				{value: "gis", label: "GIS"},
-				{value: "for_information", label: "For information"},
-				{value: "vr", label: "VR"}
+				"Clash",
+				"Diff",
+				"RFI",
+				"Risk",
+				"H&S",
+				"Design",
+				"Constructibility",
+				"GIS",
+				"For information",
+				"VR"
 			],
 			"riskCategories" : [
-				{value: "commercial", label: "Commercial Issue"},
-				{value: "environmental", label: "Environmental Issue"},
-				{value: "health_material_effect", label: "Health - Material effect"},
-				{value: "health_mechanical_effect", label: "Health - Mechanical effect"},
-				{value: "safety_fall", label: "Safety Issue - Fall"},
-				{value: "safety_trapped", label: "Safety Issue - Trapped"},
-				{value: "safety_event", label: "Safety Issue - Event"},
-				{value: "safety_handling", label: "Safety Issue - Handling"},
-				{value: "safety_struck", label: "Safety Issue - Struck"},
-				{value: "safety_public", label: "Safety Issue - Public"},
-				{value: "social", label: "Social Issue"},
-				{value: "other", label: "Other Issue"},
-				{value: "unknown", label: "UNKNOWN"}
+				"Commercial Issue",
+				"Environmental Issue",
+				"Health - Material effect",
+				"Health - Mechanical effect",
+				"Safety Issue - Fall",
+				"Safety Issue - Trapped",
+				"Safety Issue - Event",
+				"Safety Issue - Handling",
+				"Safety Issue - Struck",
+				"Safety Issue - Public",
+				"Social Issue",
+				"Other Issue",
+				"Unknown"
 			]
 		};
 		const settingsColl = await this.getTeamspaceSettingsCollection(account);
@@ -129,37 +129,23 @@ class TeamspaceSettings {
 		labelFields.forEach((key) => {
 			if (utils.hasField(data, key)) {
 				if (Object.prototype.toString.call(data[key]) === "[object Array]") {
-					// store as key/val array
-					const labelObject = {};
-					data[key].forEach(label => {
-						if (label &&
-							Object.prototype.toString.call(label) === "[object String]" &&
-							label.trim()) {
-							// generate value from label
-							const value = label.trim().toLowerCase().replace(/ /g, "_").replace(/&/g, "");
-							if (labelObject[value]) {
-								switch (key) {
-									case "riskCategories":
-										throw responseCodes.RISK_DUPLICATE_CATEGORY;
-									case "topicTypes":
-										throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;
-								}
-							} else {
-								labelObject[value] = {
-									value,
-									label: label.trim()
-								};
+					const arrayUpdated = [];
+					const foundKeys = {};
+					for (let i = 0; i < data[key].length; ++i) {
+						const entry = data[key][i];
+						if(utils.isString(entry) && entry !== "") {
+							const value = entry.trim();
+							if (utils.hasField(foundKeys, value.toLowerCase())) {
+								throw responseCodes.DUPLICATED_ENTRIES;
 							}
+							foundKeys[value.toLowerCase()] = 1;
+							arrayUpdated.push(value);
 						} else {
 							throw responseCodes.INVALID_ARGUMENTS;
 						}
-					});
-
-					toUpdate[key] = _.values(labelObject);
-
-					// store as string array
-					// data[key] = data[key].map(label => label.trim());
-				} else {
+					}
+					toUpdate[key] = arrayUpdated;
+				} else if (data[key]) {
 					throw responseCodes.INVALID_ARGUMENTS;
 				}
 			}

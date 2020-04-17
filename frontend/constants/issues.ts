@@ -29,16 +29,10 @@ export const PRIORITIES = {
 	HIGH: 'high'
 };
 
-// FIXME: first item should be taken in topicTypes should be taken
-// for default value
-const TOPIC_TYPES = {
-	FOR_INFORMATION: 'for_information'
-};
-
 export const DEFAULT_PROPERTIES = {
 	STATUS: STATUSES.OPEN,
 	PRIORITY: PRIORITIES.NONE,
-	TOPIC_TYPE: TOPIC_TYPES.FOR_INFORMATION
+	TOPIC_TYPE: 'For Information'
 };
 
 export const ISSUE_STATUSES = [

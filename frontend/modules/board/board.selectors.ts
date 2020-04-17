@@ -145,7 +145,10 @@ export const selectLanes = createSelector(
 				name: startCase(p),
 				value: p
 			})),
-			[ISSUE_FILTER_PROPS.topic_type.value]: topicTypes,
+			[ISSUE_FILTER_PROPS.topic_type.value]: topicTypes.map((t) => ({
+				name: startCase(t),
+				value: t
+			})),
 			[ISSUE_FILTER_PROPS.creator_role.value]: jobsValues,
 			[ISSUE_FILTER_PROPS.assigned_roles.value]: jobsValues,
 			[ISSUE_FILTER_PROPS.due_date.value]: datesValues,
@@ -154,7 +157,10 @@ export const selectLanes = createSelector(
 		const riskFiltersMap = {
 			[RISK_FILTER_PROPS.level_of_risk.value]: LEVELS_LIST,
 			[RISK_FILTER_PROPS.residual_level_of_risk.value]: LEVELS_LIST,
-			[RISK_FILTER_PROPS.category.value]: riskCategories,
+			[RISK_FILTER_PROPS.category.value]: riskCategories.map((t) => ({
+				name: startCase(t),
+				value: t
+			})),
 			[RISK_FILTER_PROPS.mitigation_status.value]: RISK_MITIGATION_STATUSES,
 			[RISK_FILTER_PROPS.creator_role.value]: jobsValues,
 			[RISK_FILTER_PROPS.assigned_roles.value]: jobsValues,
