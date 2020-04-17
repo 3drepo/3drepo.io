@@ -184,11 +184,11 @@ export const MeasureItem = ({
 							</MeasurementPoint>
 							<MeasurementPoint>
 								<AxisLabel>y:</AxisLabel>
-								<AxisValue>{getValue(position[1], units, type, props.modelUnit)} {getUnits(units, type)}</AxisValue>
+								<AxisValue>{getValue(position[2], units, type, props.modelUnit)} {getUnits(units, type)}</AxisValue>
 							</MeasurementPoint>
 							<MeasurementPoint>
 								<AxisLabel>z:</AxisLabel>
-								<AxisValue>{getValue(position[2], units, type, props.modelUnit)} {getUnits(units, type)}</AxisValue>
+								<AxisValue>{getValue(position[1], units, type, props.modelUnit)} {getUnits(units, type)}</AxisValue>
 							</MeasurementPoint>
 						</div>
 					</>
