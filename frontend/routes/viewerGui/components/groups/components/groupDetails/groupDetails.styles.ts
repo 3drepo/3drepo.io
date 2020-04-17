@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -19,14 +19,15 @@ import styled from 'styled-components';
 
 import FormControl from '@material-ui/core/FormControl';
 
-import { COLOR } from '../../../../../../styles';
 import { TextField } from '../../../../../components/textField/textField.component';
+import * as TextFieldStyles from '../../../../../components/textField/textField.styles';
 import { ViewerPanelContent } from '../../../viewerPanel/viewerPanel.styles';
 
 export const Container = styled.div`
 	display: flex;
 	flex-direction: column;
 	flex: auto;
+	overflow: auto;
 `;
 
 export const FieldsRow = styled.div`
@@ -67,13 +68,15 @@ export const ColorPickerWrapper = styled.div`
 
 export const Description = styled(TextField)`
 	margin-bottom: -16px;
+
+	${TextFieldStyles.StyledTextField} {
+		margin: 1px 0;
+	}
+
+	${TextFieldStyles.Container},
+	${StyledFormControl} {
+		margin: 1px 0;
+	}
 `;
 
-export const StyledIcon = styled.span`
-	color: ${(props) => props.color ? props.color : COLOR.BLACK_54};
-	font-size: 18px;
-`;
-
-export const Content = styled(ViewerPanelContent)`
-	flex: 1;
-`;
+export const Content = styled(ViewerPanelContent)``;

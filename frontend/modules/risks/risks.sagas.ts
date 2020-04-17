@@ -47,6 +47,7 @@ import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
+import { TeamspaceActions } from '../teamspace';
 import { selectIfcSpacesHidden, TreeActions } from '../tree';
 import { RisksActions, RisksTypes } from './risks.redux';
 import {
@@ -61,6 +62,7 @@ import {
 function* fetchRisks({teamspace, modelId, revision}) {
 	yield put(RisksActions.togglePendingState(true));
 	try {
+		yield put(TeamspaceActions.fetchSettings(teamspace));
 		const {data} = yield API.getRisks(teamspace, modelId, revision);
 		const jobs = yield select(selectJobsList);
 		const preparedRisks = data.map((risk) => prepareRisk(risk, jobs));
@@ -367,11 +369,8 @@ function* focusOnRisk({ risk, revision }) {
 		}
 
 		const { account, model, viewpoint } = risk;
-		if (viewpoint) {
-			if (viewpoint.position && viewpoint.position.length > 0) {
-				Viewer.setCamera({ ...viewpoint, account, model });
-			}
-
+		if (viewpoint && viewpoint.position) {
+			Viewer.setCamera({ ...viewpoint, account, model });
 			yield Viewer.updateClippingPlanes(viewpoint.clippingPlanes, account, model);
 		} else {
 			yield Viewer.goToDefaultViewpoint();
@@ -445,6 +444,9 @@ const onUpdateEvent = (updatedRisk) => {
 		setTimeout(() => {
 			dispatch(RisksActions.saveRiskSuccess(prepareRisk(updatedRisk, jobs)));
 		}, 5000);
+		setTimeout(() => {
+			dispatch(RisksActions.hideCloseInfo(updatedRisk._id));
+		}, 6000);
 	} else {
 		dispatch(RisksActions.saveRiskSuccess(prepareRisk(updatedRisk, jobs)));
 	}

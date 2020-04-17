@@ -66,7 +66,7 @@ export const FieldWrapper = styled.div`
 		bottom: 0;
 		content: '';
 		position: absolute;
-		border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+		border-bottom: ${(props: any) => props.line ? `1px solid rgba(0, 0, 0, 0.12);` : `none`};
 		pointer-events: none;
 	}
 `;

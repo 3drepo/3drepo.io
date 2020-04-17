@@ -27,6 +27,14 @@ export const selectSettings = createSelector(
 	selectTeamspaceDomain, (state) => state.settings
 );
 
+export const selectRiskCategories = createSelector(
+	selectSettings, (state) => state.riskCategories
+);
+
+export const selectTopicTypes = createSelector(
+	selectSettings, (state) => state.topicTypes
+);
+
 export const selectTreatmentsUpdatedAt = createSelector(
 		selectSettings, (state) => state.mitigationsUpdatedAt || null,
 );

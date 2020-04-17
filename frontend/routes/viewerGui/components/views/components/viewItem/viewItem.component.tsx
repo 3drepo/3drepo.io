@@ -89,11 +89,19 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 		}
 	}, 150, { leading: true });
 
+	private handleSubmit = (values) => {
+		if (!values.newName) {
+			values.newName = this.props.viewpoint.name;
+		}
+
+		this.props.onSaveEdit(values);
+	}
+
 	public renderViewpointForm = renderWhenTrue(() => {
 		return (
 			<Formik
 				initialValues={{ newName: this.props.viewpoint._id ? this.props.viewpoint.name : '' }}
-				onSubmit={this.props.onSaveEdit}>
+				onSubmit={this.handleSubmit}>
 				<StyledForm>
 					<Field name="newName" render={({ field, form }) => (
 						<NewViewpointName

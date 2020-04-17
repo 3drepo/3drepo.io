@@ -125,7 +125,7 @@ export class Log extends React.PureComponent<IProps, any> {
 	)
 
 	public handleSetCameraOnViewpoint = () => {
-		if (this.props.viewpoint) {
+		if (this.props.viewpoint && this.props.viewpoint.up) {
 			this.props.setCameraOnViewpoint({viewpoint: this.props.viewpoint});
 		}
 	}

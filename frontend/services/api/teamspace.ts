@@ -48,7 +48,7 @@ export const fetchTeamspaceSettings = (teamspace) => {
  * @param settings
  */
 export const editTeamspaceSettings = (teamspace, settings) => {
-	return api.put(`${teamspace}/settings`, settings);
+	return api.patch(`${teamspace}/settings`, settings);
 };
 
 /**

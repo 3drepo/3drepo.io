@@ -26,6 +26,7 @@ export interface INode {
 }
 
 export interface ITreeProcessingData {
+	subModelsRootNodes: any;
 	fullySelectedNodesIds: string[];
 	visibilityMap: any;
 	selectionMap: any;

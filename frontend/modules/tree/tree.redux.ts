@@ -35,6 +35,7 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	expandNodes: ['nodesIds'],
 	collapseNodes: ['nodesIds'],
 	setIsPending: ['isPending'],
+	setSubmodelsVisibility: ['models', 'visibility'],
 	setTreeNodesVisibility: ['nodesIds', 'visibility', 'skipChildren', 'skipParents'],
 	setSelectedNodesVisibility: ['nodeId', 'visibility'],
 	handleNodesClick: ['nodesIds', 'skipExpand'],

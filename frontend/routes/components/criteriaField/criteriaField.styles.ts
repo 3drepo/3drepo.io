@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -32,8 +32,15 @@ import { COLOR } from '../../../styles';
 import { SelectField as SelectFieldComponent } from '../selectField/selectField.component';
 
 export const Container = styled.div`
+	height: 100%;
+	box-sizing: border-box;
+	background-color: ${hexToRgba(COLOR.BLACK, .02)};
 	border-top: 1px solid ${COLOR.BLACK_20};
+`;
+
+export const FiltersContainer = styled.div`
 	padding-top: 8px;
+	background-color: ${COLOR.WHITE};
 `;
 
 export const InputLabel = styled(InputLabelComponent)`
@@ -122,7 +129,6 @@ export const FormControl = styled(FormControlComponent)`
 `;
 
 export const FormContainer = styled.div`
-	background-color: ${hexToRgba(COLOR.BLACK, .02)};
 	border-top: 1px solid ${COLOR.BLACK_20};
 	padding: 22px;
 	padding-top: 12px;

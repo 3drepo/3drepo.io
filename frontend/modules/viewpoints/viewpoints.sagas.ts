@@ -159,9 +159,11 @@ export function* setCameraOnViewpoint({ teamspace, modelId, view }) {
 					break;
 			}
 		} else {
-			if (view.viewpoint) {
+			if (view.viewpoint && view.viewpoint.up) {
 				const viewpoint = { ...view.viewpoint, account: teamspace, model: modelId };
 				yield Viewer.setCamera(viewpoint);
+			} else {
+				yield Viewer.goToDefaultViewpoint();
 			}
 
 			const clippingPlanes = view.clippingPlanes || get(view, 'viewpoint.clippingPlanes');

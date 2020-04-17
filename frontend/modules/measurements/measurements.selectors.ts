@@ -17,6 +17,8 @@
 
 import { createSelector } from 'reselect';
 
+import { getColor } from './measurements.constants';
+
 export const selectMeasurementsDomain = (state) => ({...state.measurements});
 
 export const selectIsMeasureActive = createSelector(
@@ -49,6 +51,16 @@ export const selectLengthMeasurements = createSelector(
 
 export const selectPointMeasurements = createSelector(
 	selectMeasurementsDomain, (state) => state.pointMeasurements
+);
+
+export const selectMeasurementsColors = createSelector(
+		selectAreaMeasurements, selectLengthMeasurements, selectPointMeasurements,
+		(areaMeasurements, lengthMeasurements, pointMeasurements) => {
+			const addColors = [...areaMeasurements, ...lengthMeasurements, ...pointMeasurements]
+				.map(({customColor, color}) => getColor(customColor || color));
+
+			return Array.from(new Set(addColors));
+		}
 );
 
 export const selectPins = createSelector(
