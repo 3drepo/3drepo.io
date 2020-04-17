@@ -240,7 +240,7 @@
 		REMOVE_MODEL_FAILED: { message: "Failed to remove data associated with model", status: 500 },
 
 		INVALID_MODEL_CODE: { message: "Model code must contain only alphabets and numerical digits", status: 400 },
-		DUPLICATE_ENTRIES: { message: "Two or more given fields are the same", status: 400 },
+		DUPLICATED_ENTRIES: { message: "Two or more given fields are the same", status: 400 },
 
 		MESH_STASH_NOT_FOUND: { message: "Message stash not found", status: 404},
 		BUNDLE_STASH_NOT_FOUND: { message: "Asset bundle not found", status: 404},
