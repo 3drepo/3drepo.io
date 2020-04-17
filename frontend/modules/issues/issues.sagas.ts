@@ -482,6 +482,9 @@ const onUpdateEvent = (updatedIssue) => {
 		setTimeout(() => {
 			dispatch(IssuesActions.saveIssueSuccess(prepareIssue(updatedIssue, jobs)));
 		}, 5000);
+		setTimeout(() => {
+			dispatch(IssuesActions.hideCloseInfo(updatedIssue._id));
+		}, 6000);
 	} else {
 		dispatch(IssuesActions.saveIssueSuccess(prepareIssue(updatedIssue, jobs)));
 	}
