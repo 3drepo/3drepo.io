@@ -74,11 +74,11 @@ export const prepareRisk = (risk, jobs = []) => {
 		);
 	}
 
-	if(preparedRisk.overall_level_of_risk) {
+	if (preparedRisk.overall_level_of_risk) {
 		preparedRisk.statusColor = getRiskColor(preparedRisk.overall_level_of_risk);
 	}
 
-	if(preparedRisk.mitigation_status) {
+	if (preparedRisk.mitigation_status) {
 		preparedRisk.StatusIconComponent = getRiskIcon(preparedRisk.mitigation_status);
 	}
 
@@ -140,7 +140,6 @@ export const getRiskPinColor = (risk) => {
 	const levelOfRisk = (risk.overall_level_of_risk !== undefined) ? risk.overall_level_of_risk : 4;
 	return RISK_LEVELS_COLOURS[levelOfRisk].pinColor;
 };
-
 
 const userJobMatchesCreator = (userJob, riskData) => {
 	return (userJob._id && riskData.creator_role && userJob._id === riskData.creator_role);
