@@ -61,15 +61,9 @@ export const MeasuringType = ({
 		}
 	};
 
-	const handleClickBackground = () => {
-		setMeasureMode('');
-		return deactivateMeasure();
-	};
-
 	const togglePinListeners = (enabled: boolean) => {
 		const resolver = enabled ? 'on' : 'off';
 		viewer[resolver](VIEWER_EVENTS.PICK_POINT, handlePickPoint);
-		viewer[resolver](VIEWER_EVENTS.BACKGROUND_SELECTED_PIN_MODE, handleClickBackground);
 	};
 
 	React.useEffect(() => {
