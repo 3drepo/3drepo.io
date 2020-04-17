@@ -20,6 +20,7 @@ import styled from 'styled-components';
 import FormControl from '@material-ui/core/FormControl';
 
 import { TextField } from '../../../../../components/textField/textField.component';
+import * as TextFieldStyles from '../../../../../components/textField/textField.styles';
 import { ViewerPanelContent } from '../../../viewerPanel/viewerPanel.styles';
 
 export const Container = styled.div`
@@ -67,6 +68,15 @@ export const ColorPickerWrapper = styled.div`
 
 export const Description = styled(TextField)`
 	margin-bottom: -16px;
+
+	${TextFieldStyles.StyledTextField} {
+		margin: 1px 0;
+	}
+
+	${TextFieldStyles.Container},
+	${StyledFormControl} {
+		margin: 1px 0;
+	}
 `;
 
 export const Content = styled(ViewerPanelContent)``;
