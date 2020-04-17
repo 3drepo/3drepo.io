@@ -74,9 +74,13 @@ export const prepareRisk = (risk, jobs = []) => {
 		);
 	}
 
-	const { Icon, color } = getRiskStatus(preparedRisk.overall_level_of_risk, preparedRisk.mitigation_status);
-	preparedRisk.StatusIconComponent = Icon;
-	preparedRisk.statusColor = color;
+	if(preparedRisk.overall_level_of_risk) {
+		preparedRisk.statusColor = getRiskColor(preparedRisk.overall_level_of_risk);
+	}
+
+	if(preparedRisk.mitigation_status) {
+		preparedRisk.StatusIconComponent = getRiskIcon(preparedRisk.mitigation_status);
+	}
 
 	if (preparedRisk.assigned_roles) {
 		preparedRisk.roleColor = get(jobs.find((job) => job.name === get(preparedRisk.assigned_roles, '[0]')), 'color');
@@ -122,10 +126,13 @@ export const getRiskLikelihoodName = (likelihood: number) => {
 	return (filteredDefinitions.length > 0) ? filteredDefinitions[0].name : '(invalid)';
 };
 
+const getRiskIcon = (mitigationStatus) =>  RISK_LEVELS_ICONS[mitigationStatus] || null;
+const getRiskColor = (levelOfRisk) => RISK_LEVELS_COLOURS[levelOfRisk].color;
+
 export const getRiskStatus = (levelOfRisk: number, mitigationStatus: string) => {
 	return ({
-		Icon: RISK_LEVELS_ICONS[mitigationStatus] || null,
-		color: RISK_LEVELS_COLOURS[levelOfRisk].color,
+		Icon: getRiskIcon(mitigationStatus),
+		color: getRiskColor(levelOfRisk),
 	});
 };
 
@@ -133,6 +140,7 @@ export const getRiskPinColor = (risk) => {
 	const levelOfRisk = (risk.overall_level_of_risk !== undefined) ? risk.overall_level_of_risk : 4;
 	return RISK_LEVELS_COLOURS[levelOfRisk].pinColor;
 };
+
 
 const userJobMatchesCreator = (userJob, riskData) => {
 	return (userJob._id && riskData.creator_role && userJob._id === riskData.creator_role);

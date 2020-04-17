@@ -444,6 +444,9 @@ const onUpdateEvent = (updatedRisk) => {
 		setTimeout(() => {
 			dispatch(RisksActions.saveRiskSuccess(prepareRisk(updatedRisk, jobs)));
 		}, 5000);
+		setTimeout(() => {
+			dispatch(RisksActions.hideCloseInfo(updatedRisk._id));
+		}, 6000);
 	} else {
 		dispatch(RisksActions.saveRiskSuccess(prepareRisk(updatedRisk, jobs)));
 	}
