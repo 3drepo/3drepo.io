@@ -369,11 +369,8 @@ function* focusOnRisk({ risk, revision }) {
 		}
 
 		const { account, model, viewpoint } = risk;
-		if (viewpoint) {
-			if (viewpoint.position && viewpoint.position.length > 0) {
-				Viewer.setCamera({ ...viewpoint, account, model });
-			}
-
+		if (viewpoint && viewpoint.position) {
+			Viewer.setCamera({ ...viewpoint, account, model });
 			yield Viewer.updateClippingPlanes(viewpoint.clippingPlanes, account, model);
 		} else {
 			yield Viewer.goToDefaultViewpoint();
