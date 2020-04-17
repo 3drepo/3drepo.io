@@ -248,6 +248,7 @@ function* setTargetModel({ modelId, isTarget, isTypeChange = false }) {
 
 function* startComparisonOfFederation() {
 	yield put(CompareActions.setIsPending(true));
+
 	const activeTab = yield select(selectActiveTab);
 	const isDiff = activeTab === DIFF_COMPARE_TYPE;
 
@@ -267,7 +268,7 @@ function* startComparisonOfFederation() {
 
 		if (isTargetModel && isSelectedModel) {
 			const targetRevision = isDiff ? model.targetDiffRevision : model.targetClashRevision;
-			const canReuseModel = model.baseRevision.name === targetRevision.name && selectedModelsMap[model._id];
+			const canReuseModel = model.baseRevision.name === targetRevision.name && selectedModelsMap[model._id] && !isDiff;
 
 			if (canReuseModel) {
 				const isAlreadyVisible = modelsToShow.some(({ _id }) => !!model._id);
