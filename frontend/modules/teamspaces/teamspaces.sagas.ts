@@ -199,5 +199,5 @@ export default function* TeamspacesSaga() {
 	// Models
 	yield takeLatest(TeamspacesTypes.CREATE_MODEL, createModel);
 	yield takeLatest(TeamspacesTypes.UPDATE_MODEL, updateModel);
-	yield takeLatest(TeamspacesTypes.REMOVE_MODEL, removeModel)
+	yield takeLatest(TeamspacesTypes.REMOVE_MODEL, removeModel);
 }
