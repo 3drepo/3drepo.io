@@ -524,7 +524,7 @@ function cleanEmbeddedObject(field, data) {
 		const filtered =  data.map((entry) => {
 			const cleaned  = {};
 			embeddedObjectFields[field].forEach((allowedField) => {
-				if(entry.hasOwnProperty(allowedField)) {
+				if(utils.hasField(entry, allowedField)) {
 					cleaned[allowedField] = entry[allowedField];
 				}
 			});
@@ -550,7 +550,7 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data, creator = ""
 		const allowedFields = ["description", "name", "objects","rules","color","issue_id","risk_id"];
 
 		allowedFields.forEach((key) => {
-			if (fieldTypes[key] && data.hasOwnProperty(key)) {
+			if (fieldTypes[key] && utils.hasField(data, key)) {
 				if (Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
 					if (key === "objects" && data.objects) {
 						newGroup.objects = cleanEmbeddedObject(key, convertedObjects);
@@ -606,11 +606,11 @@ function clean(groupData) {
 	cleaned.issue_id = cleaned.issue_id && utils.uuidToString(cleaned.issue_id);
 	cleaned.risk_id = cleaned.risk_id && utils.uuidToString(cleaned.risk_id);
 
-	if (Date.prototype.isPrototypeOf(cleaned.createdAt)) {
+	if (utils.isDate(cleaned.createdAt)) {
 		cleaned.createdAt = cleaned.createdAt.getTime();
 	}
 
-	if (Date.prototype.isPrototypeOf(cleaned.updatedAt)) {
+	if (utils.isDate(cleaned.updatedAt)) {
 		cleaned.updatedAt = cleaned.updatedAt.getTime();
 	}
 

@@ -21,6 +21,7 @@ const _ = require("lodash");
 const C	= require("../constants");
 const getPermissionsAdapter = require("./getPermissionsAdapter");
 const responseCodes = require("../response_codes");
+const utils = require("../utils");
 
 // logic to check permissions
 function checkPermissionsHelper(username, account, project, model, requiredPerms, getPermissions) {
@@ -73,7 +74,7 @@ function checkPermissionsHelper(username, account, project, model, requiredPerms
 }
 
 function validateUserSession(req) {
-	if (!req.session || !req.session.hasOwnProperty(C.REPO_SESSION_USER)) {
+	if (!req.session || !utils.hasField(req.session, C.REPO_SESSION_USER)) {
 		return Promise.reject(responseCodes.NOT_LOGGED_IN);
 	}
 

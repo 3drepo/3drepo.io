@@ -49,7 +49,7 @@
 	function loggedIn(req, res, next) {
 		if (skipLoggedIn(req)) {
 			next();
-		} else if (!req.session || !req.session.hasOwnProperty(C.REPO_SESSION_USER)) {
+		} else if (!req.session || !utils.hasField(req.session, C.REPO_SESSION_USER)) {
 			responseCodes.respond("Check logged in middleware", req, res, next, responseCodes.AUTH_ERROR, null, req.params);
 		} else {
 			next();

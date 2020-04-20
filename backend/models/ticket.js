@@ -94,7 +94,7 @@ class Ticket {
 		if (ticketToClean.comments) {
 			ticketToClean.comments.forEach((comment) => {
 				commentIdKeys.forEach((key) => {
-					if (comment[key] && _.isObject(comment[key]) && !comment[key].hasOwnProperty("up")) {
+					if (comment[key] && _.isObject(comment[key]) && !utils.hasField(comment[key], "up")) {
 						comment[key] = utils.uuidToString(comment[key]);
 					}
 				});
