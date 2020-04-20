@@ -21,6 +21,7 @@ const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp();
 const async = require("async");
+const responseCodes = require("../../response_codes");
 
 describe("Mitigations", function () {
 
@@ -30,6 +31,10 @@ describe("Mitigations", function () {
 
 	const username = "metaTest";
 	const password = "123456";
+
+	const fakeTeamspace = "fakeTeamspace";
+	const notMemberOfTeamspace = "fed";
+	const collaboratorTeamspace = "teamSpace1";
 
 	const goldenCriteria = {
 		mitigation_stage: [
@@ -241,6 +246,30 @@ describe("Mitigations", function () {
 				});
 		});
 
+		it("if user is not teamspace admin should succeed", function(done) {
+			agent.get(`/${collaboratorTeamspace}/mitigations/criteria`)
+				.expect(200, function(err, res) {
+					expect(res.body).to.deep.equal(goldenCriteria);
+					done(err);
+				});
+		});
+
+		it("if user is not member of teamspace should fail", function(done) {
+			agent.get(`/${notMemberOfTeamspace}/mitigations/criteria`)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+					done(err);
+				});
+		});
+
+		it("if teamspace doesn't exist should fail", function(done) {
+			agent.get(`/${fakeTeamspace}/mitigations/criteria`)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+					done(err);
+				});
+		});
+
 		after(function(done) {
 			this.timeout(timeout);
 			agent.post("/logout")
@@ -280,6 +309,33 @@ describe("Mitigations", function () {
 				.send({})
 				.expect(200, function(err, res) {
 					expect(res.body.length).to.equal(totalSuggestions);
+					done(err);
+				});
+		});
+
+		it("if user is not teamspace admin should succeed", function(done) {
+			agent.post(`/${collaboratorTeamspace}/mitigations`)
+				.send({})
+				.expect(200, function(err, res) {
+					expect(res.body.length).to.equal(totalSuggestions);
+					done(err);
+				});
+		});
+
+		it("if user is not member of teamspace should fail", function(done) {
+			agent.post(`/${notMemberOfTeamspace}/mitigations`)
+				.send({})
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+					done(err);
+				});
+		});
+
+		it("if teamspace doesn't exist should fail", function(done) {
+			agent.post(`/${fakeTeamspace}/mitigations`)
+				.send({})
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
 					done(err);
 				});
 		});
