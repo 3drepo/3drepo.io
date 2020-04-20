@@ -20,7 +20,6 @@ import { sortByField } from '../../helpers/sorting';
 
 export const { Types: JobsTypes, Creators: JobsActions } = createActions({
 	fetchJobs: ['teamspace'],
-	fetchJobsColors: ['teamspace'],
 	fetchJobsAndColors: ['teamspace'],
 	setJobsPending: ['isPending'],
 	setColorsPending: ['isPending'],
@@ -28,7 +27,6 @@ export const { Types: JobsTypes, Creators: JobsActions } = createActions({
 	createJobSuccess: ['job'],
 	removeJob: ['teamspace', 'jobId'],
 	fetchJobsSuccess: ['jobs'],
-	fetchJobsColorsSuccess: ['colors'],
 	removeJobSuccess: ['jobId'],
 	updateJobColor: ['teamspace', 'job'],
 	updateJobSuccess: ['job'],
@@ -48,8 +46,6 @@ export const fetchJobsSuccess = (state = INITIAL_STATE, { jobs }) => {
 	jobs = sortByField([...jobs], { order: 'asc', config: { field: '_id' } });
 	return { ...state, jobs };
 };
-
-export const fetchJobsColorsSuccess = (state = INITIAL_STATE, { colors }) => ({ ...state, colors });
 
 export const updateColors = (state = INITIAL_STATE, { color }) => {
 	const colors = [...state.colors] as any;
@@ -99,7 +95,6 @@ export const setColorsPending = (state = INITIAL_STATE, { isPending }) => {
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[JobsTypes.FETCH_JOBS_SUCCESS]: fetchJobsSuccess,
-	[JobsTypes.FETCH_JOBS_COLORS_SUCCESS]: fetchJobsColorsSuccess,
 	[JobsTypes.CREATE_JOB_SUCCESS]: createJobSuccess,
 	[JobsTypes.UPDATE_JOB_SUCCESS]: updateJobSuccess,
 	[JobsTypes.REMOVE_JOB_SUCCESS]: removeJobSuccess,

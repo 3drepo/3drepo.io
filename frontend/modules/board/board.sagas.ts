@@ -35,10 +35,7 @@ function* fetchData({ boardType, teamspace, project, modelId }) {
 		const currentTeamspace = yield select(selectCurrentTeamspace);
 		const currentModel = yield select(selectCurrentModel);
 
-		yield all([
-			put(JobsActions.fetchJobs(teamspace)),
-			put(JobsActions.fetchJobsColors(teamspace))
-		]);
+		yield put(JobsActions.fetchJobs(teamspace));
 
 		if (modelId && modelId !== currentModel) {
 			yield put(ModelActions.fetchSettings(teamspace, modelId));
