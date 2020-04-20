@@ -41,8 +41,9 @@ function* fetchData({ boardType, teamspace, project, modelId }) {
 			yield put(ModelActions.fetchSettings(teamspace, modelId));
 		}
 
+		yield put(TeamspacesActions.fetchTeamspacesIfNecessary(currentTeamspace));
+
 		if (!teamspaces.length) {
-			yield put(TeamspacesActions.fetchTeamspaces(currentTeamspace));
 			yield put(TeamspaceActions.fetchSettings(teamspace));
 		}
 

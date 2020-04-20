@@ -43,7 +43,7 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	fetchTeamspaces: TeamspacesActions.fetchTeamspaces,
+	fetchTeamspacesIfNecessary: TeamspacesActions.fetchTeamspacesIfNecessary,
 	fetchUsers: UserManagementActions.fetchTeamspaceUsers
 }, dispatch);
 
