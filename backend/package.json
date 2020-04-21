@@ -9,7 +9,7 @@
     "gen-docs": "yarn apidoc -i routes/ -o docs/ ",
     "test": "yarn test:unit && yarn test:int",
     "test:cover": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config mocha -R mocha-lcov-reporter test/unit > coverage/coverage.lcov",
-    "test:coverall": "yarn test:cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
+    "test:coverall": "yarn test:cover && cat ./coverage/coverage.lcov | coveralls",
     "test:unit": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config mocha test/unit",
     "test:one": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config mocha",
     "test:int-clean": "./test/cleanup/cleanup.sh",
