@@ -213,7 +213,6 @@
 	}
 
 	function deletePermission(req, res, next) {
-		console.log("Passed middleware");
 		User.findByUserName(req.params.account)
 			.then(user => {
 				return user.customData.permissions.remove(req.params.user);
