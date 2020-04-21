@@ -569,7 +569,6 @@
 				}).catch(promErr => {
 					responseCodes.respond(place, req, res, next, promErr, promErr);
 				});
-				//				});
 			}
 		});
 	}

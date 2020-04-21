@@ -88,11 +88,13 @@ class TeamspaceSettings {
 		return settings.topicTypes || [];
 	}
 
-	processMitigationsFile(account, username, sessionId, filename, file) {
+	async processMitigationsFile(account, username, sessionId, filename, file) {
 		const User = require("./user"); // Circular dependencies, have to import here.
-		if (User.hasSufficientQuota(account, file.size)) {
+		const fileSize = (file.size) ? file.size : file.byteLength;
+		const hasSufficientQuota = await User.hasSufficientQuota(account, fileSize);
+		if (hasSufficientQuota) {
 			const fileSizeLimit = require("../config").uploadSizeLimit;
-			if(file.size > fileSizeLimit) {
+			if(fileSize > fileSizeLimit) {
 				return Promise.reject(responseCodes.SIZE_LIMIT);
 			}
 			const fNameArr = filename.split(".");
@@ -159,7 +161,7 @@ class TeamspaceSettings {
 		const settingsColl = await this.getTeamspaceSettingsCollection(account, true);
 		await settingsColl.update({_id: account}, {$set: toUpdate});
 
-		const updatedSettings = {...oldSettings, ...data};
+		const updatedSettings = {...oldSettings, ...toUpdate};
 
 		return updatedSettings;
 	}
