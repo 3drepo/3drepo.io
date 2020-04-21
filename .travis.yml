@@ -38,7 +38,7 @@ before_install:
 install:
     - cd ./backend
     - yarn install
-    - yarn lint
+      #    - yarn lint
     - cd ./../frontend
     - DETECT_CHROMEDRIVER_VERSION=true yarn install
       #    - yarn lint
