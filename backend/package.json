@@ -8,7 +8,7 @@
   "scripts": {
     "gen-docs": "yarn apidoc -i routes/ -o docs/ ",
     "test": "yarn test:unit && yarn test:int",
-    "test:cover": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config istanbul cover _mocha test/integrated test/unit ",
+    "test:cover": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config istanbul cover _mocha test/unit ",
     "test:coverall": "yarn test:cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
     "test:unit": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config mocha test/unit",
     "test:one": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config mocha",
