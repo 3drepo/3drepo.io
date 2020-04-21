@@ -107,6 +107,7 @@ module.exports = {
 
 				// resetting the static collection
 				if (!options || !options.account) {
+					console.log(staticFuncName, options);
 					throw new Error("account name (db) is missing");
 				}
 
