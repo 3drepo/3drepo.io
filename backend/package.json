@@ -16,7 +16,7 @@
     "test:unit": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config mocha --exit --recursive test/unit",
     "test:one": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config mocha --exit ",
     "test:int-clean": "./test/cleanup/cleanup.sh",
-    "test:int": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config mocha --exit --recursive --t 10000 test/integrated",
+    "test:int": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config mocha --exit --recursive --timeout 10000 test/integrated",
     "test:clean-and-int": "yarn run test:int-clean && yarn run test:int",
     "test:clean-and-int-one": "yarn run test:int-clean && yarn run test:int-one",
     "test:add-mongo": "mongo --eval \"username='admintesting'; password='admintesting'\" ../scripts/mongo-admin.js",
