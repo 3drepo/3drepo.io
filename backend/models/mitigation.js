@@ -57,8 +57,7 @@ class Mitigation {
 		const TeamspaceSettings = require("./teamspaceSetting");
 
 		// Get teamspace categories
-		let teamspaceCategories = await TeamspaceSettings.getRiskCategories(account);
-		teamspaceCategories = teamspaceCategories.map(x => x.label);
+		const teamspaceCategories = await TeamspaceSettings.getRiskCategories(account);
 
 		criteriaFields.forEach((field) => {
 			criteriaPromises.push(mitigationColl.distinct(field, {}).then((values) => {

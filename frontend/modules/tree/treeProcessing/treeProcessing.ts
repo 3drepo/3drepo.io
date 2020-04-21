@@ -21,7 +21,8 @@ class TreeProcessing {
 			meshesByNodeId: auxiliaryMaps.meshesByNodeId,
 			visibilityMap: auxiliaryMaps.nodesVisibilityMap,
 			selectionMap: auxiliaryMaps.nodesSelectionMap,
-			nodesBySharedIdsMap: auxiliaryMaps.nodesBySharedIdsMap
+			nodesBySharedIdsMap: auxiliaryMaps.nodesBySharedIdsMap,
+			subModelsRootNodes: auxiliaryMaps.subModelsRootNodes
 		});
 		setIsProcessed(true);
 		return { nodesList, treePath, auxiliaryMaps };

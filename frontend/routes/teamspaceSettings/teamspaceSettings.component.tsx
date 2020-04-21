@@ -128,11 +128,9 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 	private handleUpdateSettings = (values, { resetForm }) => {
 		const { teamspace } = this.props.match.params;
 		const { topicTypes, riskCategories, file } = values;
-		const types = topicTypes.map((topicType) => topicType.label);
-		const categories = riskCategories.map((riskCategory) => riskCategory.label);
 		const settings = {
-			topicTypes: types,
-			riskCategories: categories,
+			topicTypes,
+			riskCategories,
 			file,
 		};
 

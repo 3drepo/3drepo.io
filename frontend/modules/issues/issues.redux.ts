@@ -55,6 +55,7 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	updateNewIssue: ['newIssue'],
 	setFilters: ['filters'],
 	showCloseInfo: ['issueId'],
+	hideCloseInfo: ['issueId'],
 	removeResource: ['resource'],
 	removeResourceSuccess: ['resource', 'issueId'],
 	attachFileResources: ['files'],
@@ -199,6 +200,11 @@ const showCloseInfo = (state = INITIAL_STATE, { issueId }) => {
 	return { ...state, issuesMap };
 };
 
+const hideCloseInfo = (state = INITIAL_STATE, { issueId }) => {
+	const issuesMap = updateIssueProps(state.issuesMap, issueId, { willBeClosed: false });
+	return { ...state, issuesMap };
+};
+
 const reset = () => cloneDeep(INITIAL_STATE);
 
 const removeResourceSuccess =  (state = INITIAL_STATE, { resource, issueId }) => {
@@ -248,6 +254,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.DELETE_COMMENT_SUCCESS]: deleteCommentSuccess,
 	[IssuesTypes.TOGGLE_SORT_ORDER]: toggleSortOrder,
 	[IssuesTypes.SHOW_CLOSE_INFO]: showCloseInfo,
+	[IssuesTypes.HIDE_CLOSE_INFO]: hideCloseInfo,
 	[IssuesTypes.RESET]: reset,
 	[IssuesTypes.REMOVE_RESOURCE_SUCCESS]: removeResourceSuccess,
 	[IssuesTypes.ATTACH_RESOURCES_SUCCESS]: attachResourcesSuccess,

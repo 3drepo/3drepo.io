@@ -73,7 +73,6 @@ export const List = styled.div`
 
 const sumUnitsStyle = css`
 	width: auto;
-	padding-right: 93px;
 	padding-left: 3px;
 `;
 

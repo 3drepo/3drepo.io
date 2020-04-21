@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { componentToHex } from '../../helpers/colors';
+
 export const DEFAULT = 'default';
 export const ACTIVE = 'active';
 
@@ -37,12 +39,12 @@ export const MEASURE_TYPE_STATE_MAP = {
 };
 
 export const MEASURING_TYPE = {
-	CSAM: 'Custom surface area measurement',
-	SAM: 'Surface area measurement',
-	MINIMUM_DISTANCE: 'Minimum distance',
-	POINT: 'Point',
-	POINT_TO_POINT: 'Point to point',
-	RAY_CAST: 'Ray cast',
+	CSAM: 'Custom Polygonal Area',
+	SAM: 'Surface Area',
+	MINIMUM_DISTANCE: 'Minimal Distance',
+	POINT: 'Locate Point',
+	POINT_TO_POINT: 'Point to Point',
+	RAY_CAST: 'Ray Cast',
 };
 
 export const MEASURING_MODE = {
@@ -53,3 +55,6 @@ export const MEASURING_MODE = {
 	CSAM: 'PolygonArea',
 	POINT_TO_POINT: 'Point',
 };
+
+export const getColor = ({r, g, b}) => `#${[r, g, b].map((color) =>
+		componentToHex(Math.trunc(color))).join('')}`;

@@ -79,6 +79,7 @@ interface ICard {
 	draggable: boolean;
 	metadata: any;
 }
+
 interface ILane {
 	id: string;
 	title: string;
@@ -130,6 +131,10 @@ interface IProps {
 	unsubscribeOnIssueChanges: (teamspace, modelId) => void;
 	subscribeOnRiskChanges: (teamspace, modelId) => void;
 	unsubscribeOnRiskChanges: (teamspace, modelId) => void;
+	resetModel: () => void;
+	resetIssues: () => void;
+	resetRisks: () => void;
+	teamspaceSettings: any;
 }
 
 const PANEL_PROPS = {
@@ -162,7 +167,10 @@ export function Board(props: IProps) {
 		toggleIssuesSortOrder,
 		toggleRisksSortOrder,
 		toggleClosedIssues,
-		showClosedIssues
+		showClosedIssues,
+		resetModel,
+		resetIssues,
+		resetRisks,
 	} = props;
 
 	useEffect(() => {
@@ -202,6 +210,14 @@ export function Board(props: IProps) {
 			});
 		}
 	}, [boardRef, props.isPending]);
+
+	useEffect(() => {
+		return () => {
+			resetModel();
+			resetIssues();
+			resetRisks();
+		};
+	}, []);
 
 	const hasViewerPermissions = isViewer(props.modelSettings.permissions);
 
@@ -483,7 +499,9 @@ export function Board(props: IProps) {
 	const FILTER_ITEMS = isIssuesBoard ? ISSUE_FILTERS : RISK_FILTERS;
 
 	const filterItems = () => {
-		const filterValuesMap = isIssuesBoard ? issuesFilters(props.jobs, props.topicTypes) : risksFilters(props.jobs);
+		const filterValuesMap = isIssuesBoard
+				? issuesFilters(props.jobs, props.topicTypes)
+				: risksFilters(props.jobs, props.teamspaceSettings);
 
 		return FILTER_ITEMS.map((issueFilter) => {
 			issueFilter.values = filterValuesMap[issueFilter.relatedField];

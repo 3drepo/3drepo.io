@@ -19,57 +19,46 @@
 
 const _ = require("lodash");
 const db = require("../handler/db");
-const responseCodes = require("../response_codes.js");
+const responseCodes = require("../response_codes");
+const utils = require("../utils");
 const FileRef = require("./fileRef");
 const colName = "teamspace";
-
-const fieldTypes = {
-	"_id": "[object String]",
-	"topicTypes": "[object Array]",
-	"mitigationsUpdatedAt": "[object Number]",
-	"riskCategories": "[object Array]"
-};
 
 class TeamspaceSettings {
 	async createTeamspaceSettings(account) {
 		const settings = {
 			"_id" : account,
 			"topicTypes" : [
-				{value: "clash", label: "Clash"},
-				{value: "diff", label: "Diff"},
-				{value: "rfi", label: "RFI"},
-				{value: "risk", label: "Risk"},
-				{value: "hs", label: "H&S"},
-				{value: "design", label: "Design"},
-				{value: "constructibility", label: "Constructibility"},
-				{value: "gis", label: "GIS"},
-				{value: "for_information", label: "For information"},
-				{value: "vr", label: "VR"}
+				"Clash",
+				"Diff",
+				"RFI",
+				"Risk",
+				"H&S",
+				"Design",
+				"Constructibility",
+				"GIS",
+				"For information",
+				"VR"
 			],
 			"riskCategories" : [
-				{value: "commercial", label: "Commercial Issue"},
-				{value: "environmental", label: "Environmental Issue"},
-				{value: "health_material_effect", label: "Health - Material effect"},
-				{value: "health_mechanical_effect", label: "Health - Mechanical effect"},
-				{value: "safety_fall", label: "Safety Issue - Fall"},
-				{value: "safety_trapped", label: "Safety Issue - Trapped"},
-				{value: "safety_event", label: "Safety Issue - Event"},
-				{value: "safety_handling", label: "Safety Issue - Handling"},
-				{value: "safety_struck", label: "Safety Issue - Struck"},
-				{value: "safety_public", label: "Safety Issue - Public"},
-				{value: "social", label: "Social Issue"},
-				{value: "other", label: "Other Issue"},
-				{value: "unknown", label: "UNKNOWN"}
+				"Commercial Issue",
+				"Environmental Issue",
+				"Health - Material effect",
+				"Health - Mechanical effect",
+				"Safety Issue - Fall",
+				"Safety Issue - Trapped",
+				"Safety Issue - Event",
+				"Safety Issue - Handling",
+				"Safety Issue - Struck",
+				"Safety Issue - Public",
+				"Social Issue",
+				"Other Issue",
+				"Unknown"
 			]
 		};
 		const settingsColl = await this.getTeamspaceSettingsCollection(account);
 
 		return await settingsColl.insert(settings);
-	}
-
-	filterFields(data, blackList) {
-		data = _.omit(data, blackList);
-		return _.pick(data, Object.keys(fieldTypes));
 	}
 
 	getTeamspaceSettingsCollection(account) {
@@ -131,58 +120,44 @@ class TeamspaceSettings {
 	}
 
 	async update(account, data) {
-		const attributeBlacklist = ["_id", "mitigationsUpdatedAt"];
 		const labelFields = ["riskCategories", "topicTypes"];
 
 		const oldSettings = await this.getTeamspaceSettings(account);
 
-		// Filter out blacklisted attributes and leave proper attrs
-		data = this.filterFields(data, attributeBlacklist);
-
-		if (_.isEmpty(data)) {
-			throw responseCodes.INVALID_ARGUMENTS;
-		}
+		const toUpdate = {};
 
 		labelFields.forEach((key) => {
-			if (Object.prototype.toString.call(data[key]) === "[object Array]") {
-				// store as key/val array
-				const labelObject = {};
-				data[key].forEach(label => {
-					if (label &&
-						Object.prototype.toString.call(label) === "[object String]" &&
-						label.trim()) {
-						// generate value from label
-						const value = label.trim().toLowerCase().replace(/ /g, "_").replace(/&/g, "");
-						if (labelObject[value]) {
-							switch (key) {
-								case "riskCategories":
-									throw responseCodes.RISK_DUPLICATE_CATEGORY;
-								case "topicTypes":
-									throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;
+			if (utils.hasField(data, key)) {
+				if (Object.prototype.toString.call(data[key]) === "[object Array]") {
+					const arrayUpdated = [];
+					const foundKeys = {};
+					for (let i = 0; i < data[key].length; ++i) {
+						const entry = data[key][i];
+						if(utils.isString(entry) && entry !== "") {
+							const value = entry.trim();
+							if (utils.hasField(foundKeys, value.toLowerCase())) {
+								throw responseCodes.DUPLICATED_ENTRIES;
 							}
+							foundKeys[value.toLowerCase()] = 1;
+							arrayUpdated.push(value);
 						} else {
-							labelObject[value] = {
-								value,
-								label: label.trim()
-							};
+							throw responseCodes.INVALID_ARGUMENTS;
 						}
-					} else {
-						throw responseCodes.INVALID_ARGUMENTS;
 					}
-				});
-
-				data[key] = _.values(labelObject);
-
-				// store as string array
-				// data[key] = data[key].map(label => label.trim());
-			} else if (data[key]) {
-				throw responseCodes.INVALID_ARGUMENTS;
+					toUpdate[key] = arrayUpdated;
+				} else if (data[key]) {
+					throw responseCodes.INVALID_ARGUMENTS;
+				}
 			}
 		});
 
+		if (_.isEmpty(toUpdate)) {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+
 		// Update the data
 		const settingsColl = await this.getTeamspaceSettingsCollection(account, true);
-		await settingsColl.update({_id: account}, {$set: data});
+		await settingsColl.update({_id: account}, {$set: toUpdate});
 
 		const updatedSettings = {...oldSettings, ...data};
 

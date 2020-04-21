@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -27,6 +27,7 @@ import {
 	ChipsContainer,
 	ChipsDeselectCatcher,
 	Container,
+	FiltersContainer,
 	FormContainer,
 	IconButton,
 	InputLabel,
@@ -293,13 +294,15 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 		const { placeholder, value, label, className, isPasteEnabled } = this.props;
 		return (
 			<Container className={className}>
-				<InputLabel shrink>{label}</InputLabel>
-				<SelectedCriteria>
-					{this.renderPlaceholder(placeholder && !value.length && !isPasteEnabled)}
-					{this.renderCriteriaChips(!!value.length)}
-					{this.renderCriteriaPasteField(isPasteEnabled)}
-					{this.renderOptionsMenu(!isPasteEnabled)}
-				</SelectedCriteria>
+				<FiltersContainer>
+					<InputLabel shrink>{label}</InputLabel>
+					<SelectedCriteria>
+						{this.renderPlaceholder(placeholder && !value.length && !isPasteEnabled)}
+						{this.renderCriteriaChips(!!value.length)}
+						{this.renderCriteriaPasteField(isPasteEnabled)}
+						{this.renderOptionsMenu(!isPasteEnabled)}
+					</SelectedCriteria>
+				</FiltersContainer>
 				{this.renderForm()}
 			</Container>
 		);

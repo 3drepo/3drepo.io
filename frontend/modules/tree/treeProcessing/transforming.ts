@@ -106,12 +106,15 @@ const getMeshesByNodeId = (modelsWithMeshes) => {
 
 export default ({ mainTree, subTrees, subModels, meshMap, treePath }) => new Promise((resolve, reject) => {
 	try {
+		const subModelsRootNodes = {};
+
 		for (let index = 0; index < mainTree.children.length; index++) {
 			const child = mainTree.children[index];
 			const [modelTeamspace, model] = (child.name || '').split(':');
 			const subModel = subModels.find((m) => m.model === model);
 
 			if (subModel) {
+				subModelsRootNodes[child.name] = child._id;
 				child.name = [modelTeamspace, subModel.name].join(':');
 			} else if (child.type !== 'mesh') {
 				child.name = child.name || DEFAULT_NODE_NAME;
@@ -137,7 +140,7 @@ export default ({ mainTree, subTrees, subModels, meshMap, treePath }) => new Pro
 
 		const { data: nodesList } = getFlattenNested(mainTree, auxiliaryMaps);
 		const meshesByNodeId = getMeshesByNodeId(meshMap);
-		resolve({ nodesList, meshesByNodeId, treePath, ...auxiliaryMaps });
+		resolve({ nodesList, meshesByNodeId, treePath, subModelsRootNodes, ...auxiliaryMaps });
 	} catch (error) {
 		reject(error);
 	}

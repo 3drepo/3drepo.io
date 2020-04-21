@@ -59,6 +59,11 @@ export const selectTreeNodesList = createSelector(
 	(treeProcessingData) => treeProcessingData.nodesList || []
 );
 
+export const selectSubModelsRootNodes = createSelector(
+	selectTreeProccessing, selectDataRevision,
+	(treeProcessingData) => treeProcessingData.subModelsRootNodes || []
+);
+
 export const selectIsFederation = createSelector(
 	selectTreeNodesList, (treeNodesList) => {
 		const rootNode = treeNodesList[0];

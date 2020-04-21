@@ -120,15 +120,15 @@
 	router.get("/settings", middlewares.isAccountAdmin, getTeamspaceSettings);
 
 	/**
-	 * @api {put} /:teamspace/settings Update teamspace settings
+	 * @api {patch} /:teamspace/settings Update teamspace settings
 	 * @apiName updateTeamspaceSettings
 	 * @apiGroup Teamspace
 	 * @apiDescription Update teamspace settings.
 	 *
 	 * @apiUse Teamspace
 	 *
-	 * @apiParam (Request body) {Object[]} [riskCategories] List of risk categories
-	 * @apiParam (Request body) {Object[]} [topicTypes] List of issue topic types
+	 * @apiParam (Request body) {String[]} [riskCategories] List of risk categories
+	 * @apiParam (Request body) {String[]} [topicTypes] List of issue topic types
 	 *
 	 * @apiParam (Risk category) {String} value Value of risk category
 	 * @apiParam (Risk category) {String} label Label for risk category
@@ -164,7 +164,7 @@
 	 * 	"_id":"acme"
 	 * }
 	 */
-	router.put("/settings", middlewares.isAccountAdmin, updateTeamspaceSettings);
+	router.patch("/settings", middlewares.isAccountAdmin, updateTeamspaceSettings);
 
 	/**
 	 *

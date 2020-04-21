@@ -53,6 +53,7 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	updateNewRisk: ['newRisk'],
 	setFilters: ['filters'],
 	showCloseInfo: ['riskId'],
+	hideCloseInfo: ['riskId'],
 	showMultipleGroups: ['risk', 'revision'],
 	updateSelectedRiskPin: ['position'],
 	removeResource: ['resource'],
@@ -220,6 +221,11 @@ const showCloseInfo = (state = INITIAL_STATE, { riskId }) => {
 	return { ...state, risksMap };
 };
 
+const hideCloseInfo = (state = INITIAL_STATE, { riskId }) => {
+	const risksMap = updateRiskProps(state.risksMap, riskId, { willBeClosed: false });
+	return { ...state, risksMap };
+};
+
 const toggleShowPins = (state = INITIAL_STATE, { showPins }) => {
 	return setComponentState(state, { componentState: {showPins} });
 };
@@ -271,6 +277,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.DELETE_COMMENT_SUCCESS]: deleteCommentSuccess,
 	[RisksTypes.TOGGLE_SORT_ORDER]: toggleSortOrder,
 	[RisksTypes.SHOW_CLOSE_INFO]: showCloseInfo,
+	[RisksTypes.HIDE_CLOSE_INFO]: hideCloseInfo,
 	[RisksTypes.UPDATE_SELECTED_RISK_PIN]: updateSelectedRiskPin,
 	[RisksTypes.REMOVE_RESOURCE_SUCCESS]: removeResourceSuccess,
 	[RisksTypes.ATTACH_RESOURCES_SUCCESS]: attachResourcesSuccess,
