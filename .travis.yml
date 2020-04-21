@@ -38,12 +38,11 @@ before_install:
 install:
     - cd ./backend
     - yarn install
-      #    - yarn lint
+    - yarn lint
     - cd ./../frontend
     - DETECT_CHROMEDRIVER_VERSION=true yarn install
-      #    - yarn lint
-      #    - yarn build:test
-    - yarn build
+    - yarn lint
+    - yarn build:test
 
 cache:
   yarn: true
@@ -61,7 +60,7 @@ script:
     - cd ../
     - NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" &
     - cd ./frontend
-      #    - unbuffer yarn test
+    - unbuffer yarn test
 
 notifications:
     email:
