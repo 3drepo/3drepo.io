@@ -34,14 +34,16 @@ export class HandlePolygonDrawing
 	public isAfterPolygonCreated: boolean = false;
 
 	public subscribeDrawingEvents = () => {
-		this.props.stage.on('mousemove', this.handleMouseMovePolygon);
-		this.props.stage.on('mousedown', this.handleMouseDownPolygon);
+		this.props.stage.on('mousemove touchmove', this.handleMouseMovePolygon);
+		this.props.stage.on('mousedown touchstart', this.handleMouseDownPolygon);
+		document.addEventListener('touchend', this.handleClickCheck);
 		document.addEventListener('mouseup', this.handleClickCheck);
 	}
 
 	public unsubscribeDrawingEvents = () => {
-		this.props.stage.off('mousemove', this.handleMouseMovePolygon);
-		this.props.stage.off('mousedown', this.handleMouseDownPolygon);
+		this.props.stage.off('mousemove touchmove', this.handleMouseMovePolygon);
+		this.props.stage.off('mousedown touchstart', this.handleMouseDownPolygon);
+		document.removeEventListener('touchend', this.handleClickCheck);
 		document.removeEventListener('mouseup', this.handleClickCheck);
 		this.isAfterPolygonCreated = false;
 	}

@@ -16,8 +16,8 @@
  */
 
 import React from 'react';
-import {createDrawnLine, createShape} from '../drawingHandler.helpers';
 
+import { createDrawnLine } from '../drawingHandler.helpers';
 import {
 	HandleBaseDrawing, IHandleBaseDrawingProps, IHandleBaseDrawingStates,
 } from '../handleBaseDrawing/handleBaseDrawing.component';
@@ -30,15 +30,15 @@ export class HandleLineDrawing
 		extends HandleBaseDrawing<IHandleLineDrawingProps, IHandleBaseDrawingStates> {
 
 	public subscribeDrawingEvents = () => {
-		this.props.stage.on('mousemove', this.handleMouseMoveLine);
-		this.props.stage.on('mouseup', this.handleMouseUpLine);
-		this.props.stage.on('mousedown', this.handleMouseDownLine);
+		this.props.stage.on('mousemove touchmove', this.handleMouseMoveLine);
+		this.props.stage.on('mouseup touchend', this.handleMouseUpLine);
+		this.props.stage.on('mousedown touchstart', this.handleMouseDownLine);
 	}
 
 	public unsubscribeDrawingEvents = () => {
-		this.props.stage.off('mousemove', this.handleMouseMoveLine);
-		this.props.stage.off('mouseup', this.handleMouseUpLine);
-		this.props.stage.off('mousedown', this.handleMouseDownLine);
+		this.props.stage.off('mousemove touchmove', this.handleMouseMoveLine);
+		this.props.stage.off('mouseup touchend', this.handleMouseUpLine);
+		this.props.stage.off('mousedown touchstart', this.handleMouseDownLine);
 	}
 
 	public handleMouseDownLine = () => {
