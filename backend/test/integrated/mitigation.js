@@ -87,7 +87,7 @@ describe("Mitigations", function () {
 			'Safety Issue - Public',
 			'Social Issue',
 			'Other Issue',
-			'UNKNOWN'
+			'Unknown'
 		],
 		location_desc: [
 			'High Level-Near Opening',
