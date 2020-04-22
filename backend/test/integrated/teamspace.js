@@ -622,10 +622,12 @@ describe("Teamspace", function() {
 				});
 		});
 
-		it("if user is not teamspace admin should fail", function(done) {
+		it("if user is not teamspace admin should succeed", function(done) {
 			agent.get(`/${collaboratorTeamspace}/settings`)
-				.expect(401, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.NOT_AUTHORIZED.value);
+				.expect(200, function(err, res) {
+					expect(res.body._id).to.equal(user.user);
+					expect(res.body.riskCategories).to.deep.equal(defaultRiskCategories);
+					expect(res.body.topicTypes).to.deep.equal(defaultTopicTypes);
 					done(err);
 				});
 		});

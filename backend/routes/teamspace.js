@@ -117,7 +117,7 @@
 	 * 	"_id":"acme"
 	 * }
 	 */
-	router.get("/settings", middlewares.isAccountAdmin, getTeamspaceSettings);
+	router.get("/settings", middlewares.isTeamspaceMember, getTeamspaceSettings);
 
 	/**
 	 * @api {patch} /:teamspace/settings Update teamspace settings
