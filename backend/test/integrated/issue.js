@@ -1520,6 +1520,12 @@ describe("Issues", function () {
 								expect(issue1.topic_type).to.equal("for_approval");
 								expect(issue1.thumbnail).to.exist;
 								expect(issue1.viewpoint).to.exist;
+								expect(issue1.viewpoint.screenshot).to.exist;
+								expect(issue1.viewpoint.up).to.exist;
+								expect(issue1.viewpoint.view_dir).to.exist;
+								expect(issue1.viewpoint.position).to.exist;
+								expect(issue1.viewpoint.fov).to.exist;
+								expect(issue1.viewpoint.type).to.equal("perspective");
 
 								expect(issue1.comments.length).to.equal(2);
 								expect(issue1.comments[0].comment).to.equal("cccc");
