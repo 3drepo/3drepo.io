@@ -344,40 +344,45 @@ class Ticket {
 		}
 		newTicket.desc = newTicket.desc || "(No Description)";
 		let imagePromise = Promise.resolve();
-		newTicket.viewpoint = newTicket.viewpoint || {};
-		newTicket.viewpoint.guid = utils.generateUUID();
 
-		if (newTicket.viewpoint.highlighted_group_id) {
-			newTicket.viewpoint.highlighted_group_id = utils.stringToUUID(newTicket.viewpoint.highlighted_group_id);
-		}
+		if (!newTicket.viewpoints || newTicket.viewpoint) {
+			// FIXME need to revisit this for BCF refactor
+			// This allows BCF import to create new issue with more than 1 viewpoint
+			newTicket.viewpoint = newTicket.viewpoint || {};
+			newTicket.viewpoint.guid = utils.generateUUID();
 
-		if (newTicket.viewpoint.hidden_group_id) {
-			newTicket.viewpoint.hidden_group_id = utils.stringToUUID(newTicket.viewpoint.hidden_group_id);
-		}
+			if (newTicket.viewpoint.highlighted_group_id) {
+				newTicket.viewpoint.highlighted_group_id = utils.stringToUUID(newTicket.viewpoint.highlighted_group_id);
+			}
 
-		if (newTicket.viewpoint.shown_group_id) {
-			newTicket.viewpoint.shown_group_id = utils.stringToUUID(newTicket.viewpoint.shown_group_id);
-		}
+			if (newTicket.viewpoint.hidden_group_id) {
+				newTicket.viewpoint.hidden_group_id = utils.stringToUUID(newTicket.viewpoint.hidden_group_id);
+			}
 
-		if (newTicket.viewpoint.screenshot) {
-			newTicket.viewpoint.screenshot = {
-				content: new Buffer.from(newTicket.viewpoint.screenshot, "base64"),
-				flag: 1
-			};
+			if (newTicket.viewpoint.shown_group_id) {
+				newTicket.viewpoint.shown_group_id = utils.stringToUUID(newTicket.viewpoint.shown_group_id);
+			}
 
-			imagePromise = utils.resizeAndCropScreenshot(newTicket.viewpoint.screenshot.content, 120, 120, true).catch((err) => {
-				systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
-					account,
-					model,
-					type: this.collName,
-					ticketId: utils.uuidToString(newTicket._id),
-					viewpointId: utils.uuidToString(newTicket.viewpoint.guid),
-					err
+			if (newTicket.viewpoint.screenshot) {
+				newTicket.viewpoint.screenshot = {
+					content: new Buffer.from(newTicket.viewpoint.screenshot, "base64"),
+					flag: 1
+				};
+
+				imagePromise = utils.resizeAndCropScreenshot(newTicket.viewpoint.screenshot.content, 120, 120, true).catch((err) => {
+					systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
+						account,
+						model,
+						type: this.collName,
+						ticketId: utils.uuidToString(newTicket._id),
+						viewpointId: utils.uuidToString(newTicket.viewpoint.guid),
+						err
+					});
 				});
-			});
-		}
+			}
 
-		newTicket.viewpoints = [newTicket.viewpoint];
+			newTicket.viewpoints = [newTicket.viewpoint];
+		}
 
 		// Assign rev_id for issue
 		const [history, image] = await Promise.all([

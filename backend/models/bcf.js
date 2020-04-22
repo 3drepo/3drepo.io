@@ -798,7 +798,9 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 
 					if (xml.Markup) {
 						issue.extras.Header = _.get(xml, "Markup.Header");
-						issue.topic_type = _.get(xml, "Markup.Topic[0].@.TopicType");
+						if (_.get(xml, "Markup.Topic[0].@.TopicType")) {
+							issue.topic_type = _.get(xml, "Markup.Topic[0].@.TopicType");
+						}
 						issue.status = sanitise(_.get(xml, "Markup.Topic[0].@.TopicStatus"), statusEnum);
 						if (!issue.status || issue.status === "") {
 							issue.status = "open";
