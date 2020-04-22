@@ -18,6 +18,7 @@
 
 const express = require("express");
 const router = express.Router({mergeParams: true});
+const middlewares = require("../middlewares/middlewares");
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
 const Mitigation = require("../models/mitigation");
@@ -84,7 +85,7 @@ const Mitigation = require("../models/mitigation");
  * 	]
  * }
  */
-router.get("/mitigations/criteria", findMitigationCriteria);
+router.get("/mitigations/criteria", middlewares.isTeamspaceMember, findMitigationCriteria);
 
 /**
  * @api {post} /:teamspace/mitigations Find mitigation suggestions
@@ -135,7 +136,7 @@ router.get("/mitigations/criteria", findMitigationCriteria);
  * 	}
  * ]
  */
-router.post("/mitigations", findMitigationSuggestions);
+router.post("/mitigations", middlewares.isTeamspaceMember, findMitigationSuggestions);
 
 function findMitigationSuggestions(req, res, next) {
 	const place = utils.APIInfo(req);
