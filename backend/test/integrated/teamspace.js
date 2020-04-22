@@ -623,27 +623,39 @@ describe("Teamspace", function() {
 		});
 
 		it("if user is not teamspace admin should succeed", function(done) {
+			const collaboratorTeamspaceTopicTypes = [
+				"GIS",
+				"Risk",
+				"Clash",
+				"H&S",
+				"For information",
+				"VR",
+				"Constructibility",
+				"Design",
+				"Diff",
+				"RFI"
+			];
 			agent.get(`/${collaboratorTeamspace}/settings`)
 				.expect(200, function(err, res) {
-					expect(res.body._id).to.equal(user.user);
+					expect(res.body._id).to.equal(collaboratorTeamspace);
 					expect(res.body.riskCategories).to.deep.equal(defaultRiskCategories);
-					expect(res.body.topicTypes).to.deep.equal(defaultTopicTypes);
+					expect(res.body.topicTypes).to.deep.equal(collaboratorTeamspaceTopicTypes);
 					done(err);
 				});
 		});
 
 		it("if user is not member of teamspace should fail", function(done) {
 			agent.get(`/${notMemberOfTeamspace}/settings`)
-				.expect(401, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.NOT_AUTHORIZED.value);
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
 					done(err);
 				});
 		});
 
 		it("if teamspace doesn't exist should fail", function(done) {
 			agent.get(`/${fakeTeamspace}/settings`)
-				.expect(404, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
 					done(err);
 				});
 		});
