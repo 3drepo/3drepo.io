@@ -90,11 +90,10 @@ class TeamspaceSettings {
 
 	async processMitigationsFile(account, username, sessionId, filename, file) {
 		const User = require("./user"); // Circular dependencies, have to import here.
-		const fileSize = (file.size) ? file.size : file.byteLength;
-		const hasSufficientQuota = await User.hasSufficientQuota(account, fileSize);
+		const hasSufficientQuota = await User.hasSufficientQuota(account, file.byteLength);
 		if (hasSufficientQuota) {
 			const fileSizeLimit = require("../config").uploadSizeLimit;
-			if(fileSize > fileSizeLimit) {
+			if(file.byteLength > fileSizeLimit) {
 				return Promise.reject(responseCodes.SIZE_LIMIT);
 			}
 			const fNameArr = filename.split(".");
