@@ -23,7 +23,6 @@ import { IssuesActions, IssuesTypes } from '../issues';
 import { JobsActions } from '../jobs';
 import { selectCurrentModel, ModelActions } from '../model';
 import { RisksActions, RisksTypes } from '../risks';
-import { TeamspaceActions } from '../teamspace';
 import { selectTeamspaces, TeamspacesActions } from '../teamspaces';
 import { BoardActions, BoardTypes } from './board.redux';
 import { selectBoardType } from './board.selectors';
@@ -53,7 +52,8 @@ function* fetchData({ boardType, teamspace, project, modelId }) {
 				yield put(IssuesActions.fetchIssues(teamspace, modelId));
 				yield take(IssuesTypes.FETCH_ISSUES_SUCCESS);
 			} else {
-				yield put(RisksActions.fetchRisks(teamspace, modelId));
+				yield all([ put(RisksActions.fetchRisks(teamspace, modelId)),
+					put(RisksActions.fetchMitigationCriteria(teamspace))]);
 				yield take(RisksTypes.FETCH_RISKS_SUCCESS);
 			}
 		}
