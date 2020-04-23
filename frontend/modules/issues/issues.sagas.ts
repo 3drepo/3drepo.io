@@ -60,7 +60,6 @@ import {
 function* fetchIssues({teamspace, modelId, revision}) {
 	yield put(IssuesActions.togglePendingState(true));
 	try {
-		yield put(TeamspaceActions.fetchSettings(teamspace));
 		const { data } = yield API.getIssues(teamspace, modelId, revision);
 		const jobs = yield select(selectJobsList);
 
