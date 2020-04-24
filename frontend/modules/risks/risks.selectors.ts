@@ -139,5 +139,9 @@ export const selectPins = createSelector(
 );
 
 export const selectMitigationCriteria = createSelector(
-		selectRisksDomain, (state) => state.mitigationCriteria
+	selectRisksDomain, (state) => state.mitigationCriteria
+);
+
+export const selectRiskCategories = createSelector(
+	selectMitigationCriteria, (mitigation) => mitigation?.category || []
 );

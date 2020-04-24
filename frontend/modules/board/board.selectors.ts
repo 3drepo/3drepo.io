@@ -26,9 +26,8 @@ import { LEVELS_LIST, RISK_MITIGATION_STATUSES } from '../../constants/risks';
 import { sortByDate } from '../../helpers/sorting';
 import { selectAllFilteredIssues, selectSortOrder as selectIssuesSortOrder } from '../issues';
 import { selectJobs } from '../jobs';
-import { selectAllFilteredRisks, selectSortOrder as selectRisksSortOrder } from '../risks';
+import { selectAllFilteredRisks, selectRiskCategories, selectSortOrder as selectRisksSortOrder } from '../risks';
 import { selectTopicTypes } from '../teamspace';
-import { selectRiskCategories } from '../teamspace';
 import { BOARD_TYPES, ISSUE_FILTER_PROPS, NOT_DEFINED_PROP, RISK_FILTER_PROPS } from './board.constants';
 
 dayjs.extend(isSameOrBefore);

@@ -46,15 +46,20 @@ function* fetchData({ boardType, teamspace, project, modelId }) {
 
 		if (!teamspaces.length) {
 			yield put(TeamspacesActions.fetchTeamspaces(currentTeamspace));
-			yield put(TeamspaceActions.fetchSettings(teamspace));
 		}
 
 		if (teamspace && project && modelId) {
 			if (boardType === 'issues') {
-				yield put(IssuesActions.fetchIssues(teamspace, modelId));
+				yield all([
+					put(IssuesActions.fetchIssues(teamspace, modelId)),
+					put(TeamspaceActions.fetchSettings(teamspace))
+				]);
 				yield take(IssuesTypes.FETCH_ISSUES_SUCCESS);
 			} else {
-				yield put(RisksActions.fetchRisks(teamspace, modelId));
+				yield all([
+					put(RisksActions.fetchRisks(teamspace, modelId)),
+					put(RisksActions.fetchMitigationCriteria(teamspace))
+				]);
 				yield take(RisksTypes.FETCH_RISKS_SUCCESS);
 			}
 		}
