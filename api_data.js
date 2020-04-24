@@ -3055,57 +3055,6 @@ define({ "api": [
   },
   {
     "type": "get",
-    "url": "/:teamspace/:model/issues",
-    "title": "Get all Issues",
-    "name": "listIssues",
-    "group": "Issues",
-    "description": "<p>List all available issue for current model.</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "200": [
-          {
-            "group": "200",
-            "type": "Object",
-            "optional": false,
-            "field": "Issue",
-            "description": "<p>Object.</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response.",
-          "content": "HTTP/1.1 200 OK\n[\n\t{\n\t\t\"_id\":\"ISSUE_ID\",\n\t\t\"creator_role\":\"Client\",\"scale\":1,\n\t\t\"due_date\":1543881600000,\n\t\t\"priority\":\"low\",\n\t\t\"desc\":\"reverse\",\n\t\t\"topic_type\":\"for_information\",\n\t\t\"status\":\"for approval\",\n\t\t\"owner\":\"username\",\n\t\t\"created\":1546217360002,\n\t\t\"name\":\"Without reverse\",\n\t\t\"number\":2,\n\t\t\"rev_id\":\"REVISION_ID\",\n\t\t\"__v\":0,\n\t\t\"assigned_roles\":[\"Architect\"],\n\t\t\"viewCount\":1,\n\t\t\"commentCount\":0,\n\t\t\"thumbnail\":\"nabile/MODEL_ID/issues/ISSUE_ID/thumbnail.png\",\n\t\t\"norm\":[0,0,0],\n\t\t\"position\":[8341.8056640625,1279.962158203125,-3050.34521484375],\n\t\t\"typePrefix\":\"sample\",\n\t\t\"modelCode\":\"\",\n\t\t\"account\":\"username\",\n\t\t\"model\":\"MODEL_ID\",\n\t\t\"viewpoint\":\n\t\t\t{\n\t\t\t\t\"near\":54.739341735839844,\n\t\t\t\t\"far\":27369.669921875,\n\t\t\t\t\"fov\":1.0471975803375244,\n\t\t\t\t\"aspect_ratio\":1.451704502105713,\n\t\t\t\t\"hideIfc\":true,\n\t\t\t\t\"guid\":\"9279d95e-3aee-49c2-ba45-9d2302044597\",\n\t\t\t\t\"_id\":\"5c296790e5f57704580ca00a\",\n\t\t\t\t\"type\":\"perspective\",\n\t\t\t\t\"screenshot\":\"ACCOUNT/MODEL_ID/issues/ISSUE_ID/viewpoints/MODEL_ID/screenshot.png\",\n\t\t\t\t\"clippingPlanes\":[],\"right\":[0.7270411252975464,1.862645149230957e-8,0.6865938901901245],\n\t\t\t\t\"view_dir\":[0.6777805089950562,-0.15971262753009796,-0.7177084684371948],\n\t\t\t\t\"look_at\":[8400.001953125,2339.99951171875,-9599.9990234375],\n\t\t\t\t\"position\":[-3360.6259765625,5111.28125,2853.4453125],\n\t\t\t\t\"up\":[0.10965770483016968,0.9871635437011719,-0.11611767113208771],\n\t\t\t\t\"screenshotSmall\":\"nabile/MODEL_ID/issues/ISSUE_ID/viewpoints/MODEL_ID/screenshotSmall.png\"\n\t\t\t}\n\t}\n]",
-          "type": "json"
-        }
-      ]
-    },
-    "version": "0.0.0",
-    "filename": "routes/issue.js",
-    "groupTitle": "Issues"
-  },
-  {
-    "type": "get",
     "url": "/:teamspace/:model/revision/:rid/issues",
     "title": "Get all Issues by revision ID",
     "name": "listIssues",
@@ -3154,6 +3103,57 @@ define({ "api": [
         {
           "title": "Success-Response",
           "content": "\n[\n\t{\n\t\t\"_id\":\"issue_ID\",\n\t\t\"creator_role\":\"Client\",\n\t\t\"scale\":1,\n\t\t\"due_date\":1547424000000,\n\t\t\"priority\":\"low\",\n\t\t\"desc\":\"This is a description\",\n\t\t\"topic_type\":\"for_information\",\n\t\t\"status\":\"open\",\"owner\":\"username\",\n\t\t\"created\":1546626949432,\n\t\t\"name\":\"An Issue for API\",\n\t\t\"number\":3,\n\t\t\"rev_id\":\"9cf31c6e-37cc-4625-8cee-270cf731059e\",\n\t\t\"__v\":0,\n\t\t\"assigned_roles\":[\"Architect\"],\n\t\t\"viewCount\":1,\"commentCount\":0,\n\t\t\"thumbnail\":\"ACCOUNT/MODEL_ID/issues/ISSUE_ID/thumbnail.png\",\n\t\t\"norm\":[],\"position\":[],\n\t\t\"typePrefix\":\"sample\",\n\t\t\"modelCode\":\"\",\n\t\t\"account\":\"username\",\n\t\t\"model\":\"MODEL_ID\",\n\t\t\"viewpoint\":\n\t\t\t{\n\t\t\t\t\"near\":54.739341735839844,\n\t\t\t\t\"far\":27369.669921875,\n\t\t\t\t\"fov\":1.0471975803375244,\n\t\t\t\t\"aspect_ratio\":2.522167444229126,\n\t\t\t\t\"hideIfc\":true,\n\t\t\t\t\"guid\":\"5afbe23f-8307-42d0-ba77-f031922281ce\",\n\t\t\t\t\"_id\":\"5c2fa785b4af3c45f8f83c60\",\n\t\t\t\t\"type\":\"perspective\",\n\t\t\t\t\"screenshot\":\"username/MODEL_ID/issues/ISSUE_ID/viewpoints/5afbe23f-8307-42d0-ba77-f031922281ce/screenshot.png\",\n\t\t\t\t\"clippingPlanes\":[],\"right\":[0.7270411252975464,1.862645149230957e-8,0.6865938901901245],\n\t\t\t\t\t\"view_dir\":[0.6777805089950562,-0.15971262753009796,-0.7177084684371948],\n\t\t\t\t\t\"look_at\":[8400.001953125,2339.99951171875,-9599.9990234375],\n\t\t\t\t\t\"position\":[-3360.6259765625,5111.28125,2853.4453125],\n\t\t\t\t\t\"up\":[0.10965770483016968,0.9871635437011719,-0.11611767113208771],\n\t\t\t\t\t\"screenshotSmall\"username/MODEL_ID/issues/ISSUE_ID/viewpoints/5afbe23f-8307-42d0-ba77-f031922281ce/screenshot.png\"}\n\t}\n]",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/issue.js",
+    "groupTitle": "Issues"
+  },
+  {
+    "type": "get",
+    "url": "/:teamspace/:model/issues",
+    "title": "Get all Issues",
+    "name": "listIssues",
+    "group": "Issues",
+    "description": "<p>List all available issue for current model.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "200": [
+          {
+            "group": "200",
+            "type": "Object",
+            "optional": false,
+            "field": "Issue",
+            "description": "<p>Object.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response.",
+          "content": "HTTP/1.1 200 OK\n[\n\t{\n\t\t\"_id\":\"ISSUE_ID\",\n\t\t\"creator_role\":\"Client\",\"scale\":1,\n\t\t\"due_date\":1543881600000,\n\t\t\"priority\":\"low\",\n\t\t\"desc\":\"reverse\",\n\t\t\"topic_type\":\"for_information\",\n\t\t\"status\":\"for approval\",\n\t\t\"owner\":\"username\",\n\t\t\"created\":1546217360002,\n\t\t\"name\":\"Without reverse\",\n\t\t\"number\":2,\n\t\t\"rev_id\":\"REVISION_ID\",\n\t\t\"__v\":0,\n\t\t\"assigned_roles\":[\"Architect\"],\n\t\t\"viewCount\":1,\n\t\t\"commentCount\":0,\n\t\t\"thumbnail\":\"nabile/MODEL_ID/issues/ISSUE_ID/thumbnail.png\",\n\t\t\"norm\":[0,0,0],\n\t\t\"position\":[8341.8056640625,1279.962158203125,-3050.34521484375],\n\t\t\"typePrefix\":\"sample\",\n\t\t\"modelCode\":\"\",\n\t\t\"account\":\"username\",\n\t\t\"model\":\"MODEL_ID\",\n\t\t\"viewpoint\":\n\t\t\t{\n\t\t\t\t\"near\":54.739341735839844,\n\t\t\t\t\"far\":27369.669921875,\n\t\t\t\t\"fov\":1.0471975803375244,\n\t\t\t\t\"aspect_ratio\":1.451704502105713,\n\t\t\t\t\"hideIfc\":true,\n\t\t\t\t\"guid\":\"9279d95e-3aee-49c2-ba45-9d2302044597\",\n\t\t\t\t\"_id\":\"5c296790e5f57704580ca00a\",\n\t\t\t\t\"type\":\"perspective\",\n\t\t\t\t\"screenshot\":\"ACCOUNT/MODEL_ID/issues/ISSUE_ID/viewpoints/MODEL_ID/screenshot.png\",\n\t\t\t\t\"clippingPlanes\":[],\"right\":[0.7270411252975464,1.862645149230957e-8,0.6865938901901245],\n\t\t\t\t\"view_dir\":[0.6777805089950562,-0.15971262753009796,-0.7177084684371948],\n\t\t\t\t\"look_at\":[8400.001953125,2339.99951171875,-9599.9990234375],\n\t\t\t\t\"position\":[-3360.6259765625,5111.28125,2853.4453125],\n\t\t\t\t\"up\":[0.10965770483016968,0.9871635437011719,-0.11611767113208771],\n\t\t\t\t\"screenshotSmall\":\"nabile/MODEL_ID/issues/ISSUE_ID/viewpoints/MODEL_ID/screenshotSmall.png\"\n\t\t\t}\n\t}\n]",
           "type": "json"
         }
       ]
@@ -6722,7 +6722,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success:",
-          "content": "{\n   account: \"teamSpace1\",\n   model: \"17d09947-368e-4748-877f-d105842c6681\",\n   name: \"awesomeModel\",\n   permissions: [\n      \"change_model_settings\",\n      \"upload_files\",\n      \"create_issue\",\n      \"comment_issue\",\n      \"view_issue\",\n      \"view_model\",\n      \"download_model\",\n      \"edit_federation\",\n      \"delete_federation\",\n      \"delete_model\",\n      \"manage_model_permission\"\n   ],\n   setting: {\n      type: \"Mechanical\",\n      desc: \"\",\n      name: \"awesomeModel\",\n      _id: \"17d09947-368e-4748-877f-d105842c6681\",\n      subModels: [],\n      surveyPoints: [],\n      properties: {\n         unit: \"ft\",\n         topicTypes: [\n            {\n               value: \"clash\",\n               label: \"Clash\"\n            },\n            {\n               value: \"diff\",\n               label: \"Diff\"\n            },\n            {\n               value: \"rfi\",\n               label: \"RFI\"\n            },\n            {\n               value: \"risk\",\n               label: \"Risk\"\n            },\n            {\n               value: \"hs\",\n               label: \"H&S\"\n            },\n            {\n               value: \"design\",\n               label: \"Design\"\n            },\n            {\n               value: \"constructibility\",\n               label: \"Constructibility\"\n            },\n            {\n               value: \"gis\",\n               label: \"GIS\"\n            },\n            {\n               value: \"for_information\",\n               label: \"For information\"\n            },\n            {\n               value: \"vr\",\n               label: \"VR\"\n            }\n         ]\n      },\n      permissions: [],\n      status: \"ok\"\n   }\n}",
+          "content": "{\n   account: \"teamSpace1\",\n   model: \"17d09947-368e-4748-877f-d105842c6681\",\n   name: \"awesomeModel\",\n   permissions: [\n      \"change_model_settings\",\n      \"upload_files\",\n      \"create_issue\",\n      \"comment_issue\",\n      \"view_issue\",\n      \"view_model\",\n      \"download_model\",\n      \"edit_federation\",\n      \"delete_federation\",\n      \"delete_model\",\n      \"manage_model_permission\"\n   ],\n   setting: {\n      type: \"Mechanical\",\n      desc: \"\",\n      name: \"awesomeModel\",\n      _id: \"17d09947-368e-4748-877f-d105842c6681\",\n      subModels: [],\n      surveyPoints: [],\n      properties: {\n         unit: \"ft\"\n      },\n      permissions: [],\n      status: \"ok\"\n   }\n}",
           "type": "json"
         }
       ]
@@ -7102,7 +7102,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success:",
-          "content": "{\n   _id: \"3549ddf6-885d-4977-87f1-eeac43a0e818\",\n   timestamp: \"2019-05-13T16:54:44.000Z\",\n   type: \"Structural\",\n   desc: \"\",\n   name: \"Lego Tree\",\n   subModels: [],\n   surveyPoints: [],\n   properties: {\n      unit: \"mm\",\n      topicTypes: [\n         {\n            value: \"clash\",\n            label: \"Clash\"\n         },\n         {\n            value: \"diff\",\n            label: \"Diff\"\n         },\n         {\n            value: \"rfi\",\n            label: \"RFI\"\n         },\n         {\n            value: \"risk\",\n            label: \"Risk\"\n         },\n         {\n            value: \"hs\",\n            label: \"H&S\"\n         },\n         {\n            value: \"design\",\n            label: \"Design\"\n         },\n         {\n            value: \"constructibility\",\n            label: \"Constructibility\"\n         },\n         {\n            value: \"gis\",\n            label: \"GIS\"\n         },\n         {\n            value: \"for_information\",\n            label: \"For information\"\n         },\n         {\n            value: \"vr\",\n            label: \"VR\"\n         }\n      ]\n   },\n   permissions: [\n      \"change_model_settings\",\n      \"upload_files\",\n      \"create_issue\",\n      \"comment_issue\",\n      \"view_issue\",\n      \"view_model\",\n      \"download_model\",\n      \"edit_federation\",\n      \"delete_federation\",\n      \"delete_model\",\n      \"manage_model_permission\"\n   ],\n   status: \"ok\",\n   id: \"3549ddf6-885d-4977-87f1-eeac43a0e818\",\n   model: \"3549ddf6-885d-4977-87f1-eeac43a0e818\",\n   account: \"teamSpace1\",\n   headRevisions: {\n   }\n}",
+          "content": "{\n   _id: \"3549ddf6-885d-4977-87f1-eeac43a0e818\",\n   timestamp: \"2019-05-13T16:54:44.000Z\",\n   type: \"Structural\",\n   desc: \"\",\n   name: \"Lego Tree\",\n   subModels: [],\n   surveyPoints: [],\n   properties: {\n      unit: \"mm\"\n   },\n   permissions: [\n      \"change_model_settings\",\n      \"upload_files\",\n      \"create_issue\",\n      \"comment_issue\",\n      \"view_issue\",\n      \"view_model\",\n      \"download_model\",\n      \"edit_federation\",\n      \"delete_federation\",\n      \"delete_model\",\n      \"manage_model_permission\"\n   ],\n   status: \"ok\",\n   id: \"3549ddf6-885d-4977-87f1-eeac43a0e818\",\n   model: \"3549ddf6-885d-4977-87f1-eeac43a0e818\",\n   account: \"teamSpace1\",\n   headRevisions: {\n   }\n}",
           "type": "json"
         }
       ]
@@ -7928,7 +7928,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success:",
-          "content": "{\n   account: \"teamSpace1\",\n   model: \"5ce7dd19-1252-4548-a9c9-4a5414f2e0c5\",\n   setting: {\n      _id: \"5ce7dd19-1252-4548-a9c9-4a5414f2e0c5\",\n      federate: {\n      },\n      desc: \"\",\n      name: \"Full Logo test\",\n      timestamp: \"2019-08-22T10:42:05.242Z\",\n      type: \"Federation\",\n      subModels: [\n         {\n            database: \"teamSpace1\",\n            model: \"2710bd65-37d3-4e7f-b2e0-ffe743ce943f\"\n         },\n         {\n            database: \"teamSpace1\",\n            model: \"7cf61b4f-acdf-4295-b2d0-9b45f9f27418\"\n         }\n      ],\n      surveyPoints: [\n         {\n            position: [\n               0,\n               0,\n               0\n            ],\n            latLong: [\n               0,\n               0\n            ]\n         }\n      ],\n      properties: {\n         unit: \"mm\",\n         topicTypes: [\n            {\n               value: \"clash\",\n               label: \"Clash\"\n            },\n            {\n               value: \"constructibility\",\n               label: \"Constructibility\"\n            },\n            {\n               value: \"design\",\n               label: \"Design\"\n            },\n            {\n               value: \"diff\",\n               label: \"Diff\"\n            },\n            {\n               value: \"for_information\",\n               label: \"For information\"\n            },\n            {\n               value: \"gis\",\n               label: \"GIS\"\n            },\n            {\n               value: \"hs\",\n               label: \"H&S\"\n            },\n            {\n               value: \"rfi\",\n               label: \"RFI\"\n            },\n            {\n               value: \"risk\",\n               label: \"Risk\"\n            },\n            {\n               value: \"vr\",\n               label: \"VR\"\n            }\n         ]\n      },\n      permissions: [\n         {\n            user: \"viewerTeamspace1Model1JobA\",\n            permission: \"viewer\"\n         },\n         {\n            user: \"commenterTeamspace1Model1JobA\",\n            permission: \"commenter\"\n         },\n         {\n            user: \"collaboratorTeamspace1Model1JobA\",\n            permission: \"collaborator\"\n         },\n         {\n            user: \"commenterTeamspace1Model1JobB\",\n            permission: \"commenter\"\n         },\n         {\n            user: \"collaboratorTeamspace1Model1JobB\",\n            permission: \"collaborator\"\n         }\n      ],\n      status: \"ok\"\n   }\n}",
+          "content": "{\n   account: \"teamSpace1\",\n   model: \"5ce7dd19-1252-4548-a9c9-4a5414f2e0c5\",\n   setting: {\n      _id: \"5ce7dd19-1252-4548-a9c9-4a5414f2e0c5\",\n      federate: {\n      },\n      desc: \"\",\n      name: \"Full Logo test\",\n      timestamp: \"2019-08-22T10:42:05.242Z\",\n      type: \"Federation\",\n      subModels: [\n         {\n            database: \"teamSpace1\",\n            model: \"2710bd65-37d3-4e7f-b2e0-ffe743ce943f\"\n         },\n         {\n            database: \"teamSpace1\",\n            model: \"7cf61b4f-acdf-4295-b2d0-9b45f9f27418\"\n         }\n      ],\n      surveyPoints: [\n         {\n            position: [\n               0,\n               0,\n               0\n            ],\n            latLong: [\n               0,\n               0\n            ]\n         }\n      ],\n      properties: {\n         unit: \"mm\"\n      },\n      permissions: [\n         {\n            user: \"viewerTeamspace1Model1JobA\",\n            permission: \"viewer\"\n         },\n         {\n            user: \"commenterTeamspace1Model1JobA\",\n            permission: \"commenter\"\n         },\n         {\n            user: \"collaboratorTeamspace1Model1JobA\",\n            permission: \"collaborator\"\n         },\n         {\n            user: \"commenterTeamspace1Model1JobB\",\n            permission: \"commenter\"\n         },\n         {\n            user: \"collaboratorTeamspace1Model1JobB\",\n            permission: \"collaborator\"\n         }\n      ],\n      status: \"ok\"\n   }\n}",
           "type": "json"
         }
       ]
@@ -8079,7 +8079,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success:",
-          "content": "{\n   _id: \"2710bd65-37d3-4e7f-b2e0-ffe743ce943f\",\n   timestamp: \"2019-05-02T16:17:14.000Z\",\n   type: \"Architectural\",\n   desc: \"\",\n   name: \"pipes\",\n   subModels: [],\n   surveyPoints: [\n      {\n         position: [\n            0,\n            0,\n            0\n         ],\n         latLong: [\n            0,\n            0\n         ]\n      }\n   ],\n   properties: {\n      unit: \"mm\",\n      topicTypes: [\n         {\n            value: \"clash\",\n            label: \"Clash\"\n         },\n         {\n            value: \"diff\",\n            label: \"Diff\"\n         },\n         {\n            value: \"rfi\",\n            label: \"RFI\"\n         },\n         {\n            value: \"risk\",\n            label: \"Risk\"\n         },\n         {\n            value: \"hs\",\n            label: \"H&S\"\n         },\n         {\n            value: \"design\",\n            label: \"Design\"\n         },\n         {\n            value: \"constructibility\",\n            label: \"Constructibility\"\n         },\n         {\n            value: \"gis\",\n            label: \"GIS\"\n         },\n         {\n            value: \"for_information\",\n            label: \"For information\"\n         },\n         {\n            value: \"vr\",\n            label: \"VR\"\n         }\n      ]\n   },\n   permissions: [\n      {\n         user: \"viewerTeamspace1Model1JobA\",\n         permission: \"collaborator\"\n      },\n      {\n         user: \"commenterTeamspace1Model1JobA\",\n         permission: \"viewer\"\n      },\n      {\n         user: \"collaboratorTeamspace1Model1JobA\",\n         permission: \"collaborator\"\n      },\n      {\n         user: \"commenterTeamspace1Model1JobB\",\n         permission: \"commenter\"\n      },\n      {\n         user: \"collaboratorTeamspace1Model1JobB\",\n         permission: \"collaborator\"\n      }\n   ],\n   status: \"ok\"\n}",
+          "content": "{\n   _id: \"2710bd65-37d3-4e7f-b2e0-ffe743ce943f\",\n   timestamp: \"2019-05-02T16:17:14.000Z\",\n   type: \"Architectural\",\n   desc: \"\",\n   name: \"pipes\",\n   subModels: [],\n   surveyPoints: [\n      {\n         position: [\n            0,\n            0,\n            0\n         ],\n         latLong: [\n            0,\n            0\n         ]\n      }\n   ],\n   properties: {\n      unit: \"mm\"\n   },\n   permissions: [\n      {\n         user: \"viewerTeamspace1Model1JobA\",\n         permission: \"collaborator\"\n      },\n      {\n         user: \"commenterTeamspace1Model1JobA\",\n         permission: \"viewer\"\n      },\n      {\n         user: \"collaboratorTeamspace1Model1JobA\",\n         permission: \"collaborator\"\n      },\n      {\n         user: \"commenterTeamspace1Model1JobB\",\n         permission: \"commenter\"\n      },\n      {\n         user: \"collaboratorTeamspace1Model1JobB\",\n         permission: \"collaborator\"\n      }\n   ],\n   status: \"ok\"\n}",
           "type": "json"
         }
       ]
@@ -8154,13 +8154,6 @@ define({ "api": [
             "optional": false,
             "field": "surveyPoints",
             "description": "<p>an array containing GIS surveypoints</p>"
-          },
-          {
-            "group": "Request body",
-            "type": "[]String",
-            "optional": false,
-            "field": "topicTypes",
-            "description": "<p>an array containing the different types of issues/risks that can be associated with the model</p>"
           }
         ],
         "Request body: SurveyPoint": [
@@ -8184,7 +8177,7 @@ define({ "api": [
     "examples": [
       {
         "title": "Example usage:",
-        "content": "PUT /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/settings HTTP/1.1\n{\n   name: \"Medieval\",\n   unit: \"cm\",\n   code: \"1233\",\n   type: \"Architectural\",\n   angleFromNorth: 3,\n   elevation: 0,\n   surveyPoints: [\n      {\n         position: [\n            4,\n            -7,\n            -1\n         ],\n         latLong: [\n            1,\n            2,\n         ]\n      }\n   ],\n   topicTypes: [\n      \"Clash\",\n      \"Constructibility\",\n      \"Design\",\n      \"Diff\",\n      \"For information\",\n      \"GIS\",\n      \"H&S\",\n      \"RFI\",\n      \"Risk\",\n      \"VR\"\n   ]\n}",
+        "content": "PUT /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/settings HTTP/1.1\n{\n   name: \"Medieval\",\n   unit: \"cm\",\n   code: \"1233\",\n   type: \"Architectural\",\n   angleFromNorth: 3,\n   elevation: 0,\n   surveyPoints: [\n      {\n         position: [\n            4,\n            -7,\n            -1\n         ],\n         latLong: [\n            1,\n            2,\n         ]\n      }\n   ]\n}",
         "type": "put"
       }
     ],
@@ -8192,7 +8185,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success:",
-          "content": "{\n   topicTypes: [\n      {\n         value: \"clash\",\n         label: \"Clash\"\n      },\n      {\n         value: \"constructibility\",\n         label: \"Constructibility\"\n      },\n      {\n         value: \"design\",\n         label: \"Design\"\n      },\n      {\n         value: \"diff\",\n         label: \"Diff\"\n      },\n      {\n         value: \"for_information\",\n         label: \"For information\"\n      },\n      {\n         value: \"gis\",\n         label: \"GIS\"\n      },\n      {\n         value: \"hs\",\n         label: \"H&S\"\n      },\n      {\n         value: \"rfi\",\n         label: \"RFI\"\n      },\n      {\n         value: \"risk\",\n         label: \"Risk\"\n      },\n      {\n         value: \"vr\",\n         label: \"VR\"\n      }\n   ],\n   code: \"stage\",\n   unit: \"cm\"\n}",
+          "content": "{\n   code: \"stage\",\n   unit: \"cm\"\n}",
           "type": "json"
         }
       ]
@@ -8331,16 +8324,6 @@ define({ "api": [
   },
   {
     "type": "patch",
-    "url": "/notifications",
-    "title": "Patch all the user notifications",
-    "name": "patchNotification",
-    "group": "Notification",
-    "version": "0.0.0",
-    "filename": "routes/notification.js",
-    "groupTitle": "Notification"
-  },
-  {
-    "type": "patch",
     "url": "/notifications/:id",
     "title": "Patch a notification",
     "name": "patchNotification",
@@ -8358,6 +8341,16 @@ define({ "api": [
         ]
       }
     },
+    "version": "0.0.0",
+    "filename": "routes/notification.js",
+    "groupTitle": "Notification"
+  },
+  {
+    "type": "patch",
+    "url": "/notifications",
+    "title": "Patch all the user notifications",
+    "name": "patchNotification",
+    "group": "Notification",
     "version": "0.0.0",
     "filename": "routes/notification.js",
     "groupTitle": "Notification"
@@ -9298,6 +9291,130 @@ define({ "api": [
   },
   {
     "type": "get",
+    "url": "/:teamspace/mitigations/criteria",
+    "title": "Get mitigation criteria",
+    "name": "findMitigationCriteria",
+    "group": "Risks",
+    "description": "<p>Returns all mitigations criteria from mitigation suggestions.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          }
+        ]
+      }
+    },
+    "examples": [
+      {
+        "title": "Example usage:",
+        "content": "GET /acme/mitigations/criteria HTTP/1.1",
+        "type": "get"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response.",
+          "content": "HTTP/1.1 200 OK\n{\n\t\"associated_activity\":[\n\t\t\"All construction\",\n\t\t\"Site tests\",\n\t\t\"Logistics\"\n\t],\n\t\"category\":[\n\t\t\"safety_electricity\"\n\t],\n\t\"element\":[\n\t\t\"Doors\",\n\t\t\"Floors\",\n\t\t\"Pipes\",\n\t\t\"Vents\",\n\t\t\"Walls\"\n\t],\n\t\"location_desc\":[\n\t\t\"Tower 1 - Level 0\",\n\t\t\"Tower 1 - Level 1\",\n\t\t\"Tower 1 - Level 2\",\n\t\t\"Tower 2 - Level 0\",\n\t\t\"Tower 2 - Level 1\",\n\t\t\"Tower 3 - Level 0\",\n\t\t\"Tower 3 - Level 1\",\n\t\t\"Tower 3 - Level 2\"\n\t],\n\t\"mitigation_stage\":[\n\t\t\"Preliminary Design\",\n\t\t\"Detail Design\",\n\t\t\"Preconstruction\",\n\t\t\"Site work and Change Control\"\n\t],\n\t\"mitigation_type\":[\n\t\t\"Eliminate\",\n\t\t\"Reduce\",\n\t\t\"Control\",\n\t\t\"Inform\"\n\t],\n\t\"risk_factor\":[\n\t\t\"Factor 2\",\n\t\t\"Factor 5\",\n\t\t\"Factor 8\"\n\t],\n\t\"scope\":[\n\t\t\"General concrete\",\n\t\t\"In situ concrete\"\n\t]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/mitigation.js",
+    "groupTitle": "SafetiBase Risks"
+  },
+  {
+    "type": "post",
+    "url": "/:teamspace/mitigations",
+    "title": "Find mitigation suggestions",
+    "name": "findMitigationSuggestions",
+    "group": "Risks",
+    "description": "<p>Returns a list of suggestions for risk mitigation based on given criteria.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          }
+        ],
+        "Request body": [
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": true,
+            "field": "associated_activity",
+            "description": "<p>Risk associated activity</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": true,
+            "field": "category",
+            "description": "<p>Risk category</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": true,
+            "field": "element",
+            "description": "<p>Risk element type</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": true,
+            "field": "location_desc",
+            "description": "<p>Risk location description</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": true,
+            "field": "risk_factor",
+            "description": "<p>Risk factor</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": true,
+            "field": "scope",
+            "description": "<p>Risk construction scope</p>"
+          }
+        ]
+      }
+    },
+    "examples": [
+      {
+        "title": "Example usage:",
+        "content": "POST /acme/mitigations HTTP/1.1\n{\n\t\"associated_activity\":\"\",\n\t\"category\":\"safety_fall\",\n\t\"element\":\"Doors\",\n\t\"location_desc\":\"Tower 3 - Level 2\",\n\t\"risk_factor\":\"Factor 9\",\n\t\"scope\":\"Tower 3\"\n}",
+        "type": "post"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response.",
+          "content": "HTTP/1.1 200 OK\n[\n\t{\n\t\t\"mitigation_desc\":\"Replace all openings required in floor slabs with precast service openings.\",\n\t\t\"mitigation_detail\":\"Replace openings larger than a standard anvil required in floor slabs with precast service openings from A/W 2020 catalogue.\",\n\t\t\"mitigation_stage\":\"Preliminary Design\",\n\t\t\"mitigation_type\":\"Eliminate\"\n\t},\n\t{\n\t\t\"mitigation_desc\":\"Provide safe walking surface joint covers. Any covering should be: strong enough to support any loads likely to be placed on it ; and fixed in position to prevent accidental dislodgement.\",\n\t\t\"mitigation_detail\":\"Safe walking surface joint covers for all joins and gaps. Covers should be strong enough to support any loads likely to be placed on it and fixed in position with bolts to prevent accidental dislodgement.\",\n\t\t\"mitigation_stage\":\"Detail Design\",\n\t\t\"mitigation_type\":\"Reduce\"\n\t},\n\t{\n\t\t\"mitigation_desc\":\"Provide warning markings and/or colour change.\",\n\t\t\"mitigation_detail\":\"Provide warning markings from approved list of markings and/or colour change using chart from Document XYZ.\",\n\t\t\"mitigation_stage\":\"Preconstruction\",\n\t\t\"mitigation_type\":\"Control\"\n\t}\n]",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/mitigation.js",
+    "groupTitle": "SafetiBase Risks"
+  },
+  {
+    "type": "get",
     "url": "/:teamspace/:model/risks/:riskId",
     "title": "Get a risk",
     "name": "findRiskById",
@@ -9345,7 +9462,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response.",
-          "content": "HTTP/1.1 200 OK\n{\n\t\"name\":\"Risk 1\",\n\t\"associated_activity\":\"\",\n\t\"assigned_roles\":[\n\t\t\"Job1\"\n\t],\n\t\"category\":\"safety_fall\",\n\t\"comments\":[],\n\t\"safetibase_id\":\"\",\n\t\"likelihood\":0,\n\t\"consequence\":0,\n\t\"residual_likelihood\":-1,\n\t\"residual_consequence\":-1,\n\t\"mitigation_status\":\"\",\n\t\"mitigation_desc\":\"\",\n\t\"residual_risk\":\"\",\n\t\"owner\":\"alice\",\n\t\"thumbnail\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/thumbnail.png\",\n\t\"desc\":\"Risk description that describes the risk\",\n\t\"creator_role\":\"Job4\",\n\t\"position\":[55000.0,80000.0,-10000.0],\n\t\"norm\":[0,0,0],\n\t\"_id\":\"00000000-0000-0000-0000-000000000002\",\n\t\"created\":1567156228976,\n\t\"rev_id\":\"00000000-0000-0000-0000-000000000001\",\n\t\"account\":\"acme\",\n\t\"model\":\"00000000-0000-0000-0000-000000000000\",\n\t\"viewpoint\":{\n\t\t\"right\":[0.8,-0.3,0.6],\n\t\t\"up\":[0.3,0.9,-0.3],\n\t\t\"position\":[-70000.0,120000.0,150000.0],\n\t\t\"look_at\":[35000.0,40000.0,8000.0],\n\t\t\"view_dir\":[0.5,-0.4,-0.7],\n\t\t\"near\":600.0,\n\t\t\"far\":300000,\n\t\t\"fov\":1.05,\n\t\t\"aspect_ratio\":1.4,\n\t\t\"clippingPlanes\":[],\n\t\t\"hideIfc\":true,\n\t\t\"screenshot\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshot.png\",\n\t\t\"guid\":\"00000000-0000-0000-0000-000000000004\",\n\t\t\"screenshotSmall\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshotSmall.png\"\n\t},\n\t\"level_of_risk\":0,\n\t\"residual_level_of_risk\":-1,\n\t\"overall_level_of_risk\":0\n}",
+          "content": "HTTP/1.1 200 OK\n{\n\t\"_id\":\"00000000-0000-0000-0000-000000000002\",\n\t\"account\":\"acme\",\n\t\"assigned_roles\":[\n\t\t\"Job1\"\n\t],\n\t\"associated_activity\":\"Column casting\",\n\t\"category\":\"safety_fall\",\n\t\"comments\":[],\n\t\"consequence\":0,\n\t\"created\":1567156228976,\n\t\"creator_role\":\"Job4\",\n\t\"desc\":\"Risk description that describes the risk\",\n\t\"element\":\"Doors\",\n\t\"level_of_risk\":0,\n\t\"likelihood\":0,\n\t\"location_desc\":\"Tower 3 - Level 2\",\n\t\"mitigation_desc\":\"Erect temporary barrier\",\n\t\"mitigation_detail\":\"Erect a temporary 1.5m metal barrier along edge\",\n\t\"mitigation_stage\":\"Construction stage 5\",\n\t\"mitigation_status\":\"proposed\",\n\t\"mitigation_type\":\"Eliminate\",\n\t\"model\":\"00000000-0000-0000-0000-000000000000\",\n\t\"name\":\"Risk 1\",\n\t\"norm\":[0,0,0],\n\t\"overall_level_of_risk\":0,\n\t\"owner\":\"alice\",\n\t\"position\":[55000.0,80000.0,-10000.0],\n\t\"residual_consequence\":-1,\n\t\"residual_level_of_risk\":-1,\n\t\"residual_likelihood\":-1,\n\t\"residual_risk\":\"\",\n\t\"rev_id\":\"00000000-0000-0000-0000-000000000001\",\n\t\"risk_factor\":\"Factor 9\",\n\t\"safetibase_id\":\"\",\n\t\"scope\":\"Tower 3\",\n\t\"thumbnail\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/thumbnail.png\",\n\t\"viewpoint\":{\n\t\t\"aspect_ratio\":1.4,\n\t\t\"clippingPlanes\":[],\n\t\t\"far\":300000,\n\t\t\"fov\":1.05,\n\t\t\"guid\":\"00000000-0000-0000-0000-000000000004\",\n\t\t\"hideIfc\":true,\n\t\t\"look_at\":[35000.0,40000.0,8000.0],\n\t\t\"near\":600.0,\n\t\t\"position\":[-70000.0,120000.0,150000.0],\n\t\t\"right\":[0.8,-0.3,0.6],\n\t\t\"screenshot\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshot.png\",\n\t\t\"screenshotSmall\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshotSmall.png\",\n\t\t\"up\":[0.3,0.9,-0.3],\n\t\t\"view_dir\":[0.5,-0.4,-0.7]\n\t}\n}",
           "type": "json"
         }
       ]
@@ -9605,7 +9722,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response",
-          "content": "HTTP/1.1 200 OK\n[\n\t{\n\t\t\"name\":\"Risk 1\",\n\t\t\"associated_activity\":\"\",\n\t\t\"assigned_roles\":[\n\t\t\t\"Job1\"\n\t\t],\n\t\t\"category\":\"safety_fall\",\n\t\t\"comments\":[],\n\t\t\"safetibase_id\":\"\",\n\t\t\"likelihood\":0,\n\t\t\"consequence\":0,\n\t\t\"residual_likelihood\":-1,\n\t\t\"residual_consequence\":-1,\n\t\t\"mitigation_status\":\"\",\n\t\t\"mitigation_desc\":\"\",\n\t\t\"residual_risk\":\"\",\n\t\t\"owner\":\"alice\",\n\t\t\"thumbnail\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/thumbnail.png\",\n\t\t\"desc\":\"Risk description that describes the risk\",\n\t\t\"creator_role\":\"Job4\",\n\t\t\"position\":[55000.0,80000.0,-10000.0],\n\t\t\"norm\":[0,0,0],\n\t\t\"_id\":\"00000000-0000-0000-0000-000000000002\",\n\t\t\"created\":1567156228976,\n\t\t\"rev_id\":\"00000000-0000-0000-0000-000000000001\",\n\t\t\"account\":\"acme\",\n\t\t\"model\":\"00000000-0000-0000-0000-000000000000\",\n\t\t\"viewpoint\":{\n\t\t\t\"right\":[0.8,-0.3,0.6],\n\t\t\t\"up\":[0.3,0.9,-0.3],\n\t\t\t\"position\":[-70000.0,120000.0,150000.0],\n\t\t\t\"look_at\":[35000.0,40000.0,8000.0],\n\t\t\t\"view_dir\":[0.5,-0.4,-0.7],\n\t\t\t\"near\":600.0,\n\t\t\t\"far\":300000,\n\t\t\t\"fov\":1.05,\n\t\t\t\"aspect_ratio\":1.4,\n\t\t\t\"clippingPlanes\":[],\n\t\t\t\"hideIfc\":true,\n\t\t\t\"screenshot\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshot.png\",\n\t\t\t\"guid\":\"00000000-0000-0000-0000-000000000004\",\n\t\t\t\"screenshotSmall\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshotSmall.png\"\n\t\t},\n\t\t\"level_of_risk\":0,\n\t\t\"residual_level_of_risk\":-1,\n\t\t\"overall_level_of_risk\":0\n\t}\n]",
+          "content": "HTTP/1.1 200 OK\n[\n\t{\n\t\t\"_id\":\"00000000-0000-0000-0000-000000000002\",\n\t\t\"account\":\"acme\",\n\t\t\"assigned_roles\":[\n\t\t\t\"Job1\"\n\t\t],\n\t\t\"associated_activity\":\"Column casting\",\n\t\t\"category\":\"safety_fall\",\n\t\t\"comments\":[],\n\t\t\"consequence\":0,\n\t\t\"created\":1567156228976,\n\t\t\"creator_role\":\"Job4\",\n\t\t\"desc\":\"Risk description that describes the risk\",\n\t\t\"element\":\"Doors\",\n\t\t\"level_of_risk\":0,\n\t\t\"likelihood\":0,\n\t\t\"location_desc\":\"Tower 3 - Level 2\",\n\t\t\"mitigation_desc\":\"Erect temporary barrier\",\n\t\t\"mitigation_detail\":\"Erect a temporary 1.5m metal barrier along edge\",\n\t\t\"mitigation_stage\":\"Construction stage 5\",\n\t\t\"mitigation_status\":\"proposed\",\n\t\t\"mitigation_type\":\"Eliminate\",\n\t\t\"model\":\"00000000-0000-0000-0000-000000000000\",\n\t\t\"name\":\"Risk 1\",\n\t\t\"norm\":[0,0,0],\n\t\t\"overall_level_of_risk\":0,\n\t\t\"owner\":\"alice\",\n\t\t\"position\":[55000.0,80000.0,-10000.0],\n\t\t\"residual_consequence\":-1,\n\t\t\"residual_level_of_risk\":-1,\n\t\t\"residual_likelihood\":-1,\n\t\t\"residual_risk\":\"\",\n\t\t\"rev_id\":\"00000000-0000-0000-0000-000000000001\",\n\t\t\"risk_factor\":\"Factor 9\",\n\t\t\"safetibase_id\":\"\",\n\t\t\"scope\":\"Tower 3\",\n\t\t\"thumbnail\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/thumbnail.png\",\n\t\t\"viewpoint\":{\n\t\t\t\"aspect_ratio\":1.4,\n\t\t\t\"clippingPlanes\":[],\n\t\t\t\"far\":300000,\n\t\t\t\"fov\":1.05,\n\t\t\t\"guid\":\"00000000-0000-0000-0000-000000000004\",\n\t\t\t\"hideIfc\":true,\n\t\t\t\"look_at\":[35000.0,40000.0,8000.0],\n\t\t\t\"near\":600.0,\n\t\t\t\"position\":[-70000.0,120000.0,150000.0],\n\t\t\t\"right\":[0.8,-0.3,0.6],\n\t\t\t\"screenshot\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshot.png\",\n\t\t\t\"screenshotSmall\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshotSmall.png\",\n\t\t\t\"up\":[0.3,0.9,-0.3],\n\t\t\t\"view_dir\":[0.5,-0.4,-0.7]\n\t\t}\n\t}\n]",
           "type": "json"
         }
       ]
@@ -9742,12 +9859,12 @@ define({ "api": [
     "examples": [
       {
         "title": "Example usage:",
-        "content": "POST /acme/00000000-0000-0000-0000-000000000000/risks HTTP/1.1\n{\n\t\"name\":\"Risk 1\",\n\t\"associated_activity\":\"\",\n\t\"assigned_roles\":[\n\t\t\"Job1\"\n\t],\n\t\"category\":\"safety_fall\",\n\t\"comments\":[],\n\t\"safetibase_id\":\"\",\n\t\"likelihood\":0,\n\t\"consequence\":0,\n\t\"level_of_risk\":0,\n\t\"overall_level_of_risk\":0,\n\t\"residual_likelihood\":-1,\n\t\"residual_consequence\":-1,\n\t\"residual_level_of_risk\":-1,\n\t\"mitigation_status\":\"\",\n\t\"mitigation_desc\":\"\",\n\t\"residual_risk\":\"\",\n\t\"viewpoint\":{\n\t\t\"right\":[0.8,-0.3,0.6],\n\t\t\"up\":[0.3,0.9,-0.3],\n\t\t\"position\":[-70000.0,120000.0,150000.0],\n\t\t\"look_at\":[35000.0,40000.0,8000.0],\n\t\t\"view_dir\":[0.5,-0.4,-0.7],\n\t\t\"near\":600.0,\n\t\t\"far\":300000,\n\t\t\"fov\":1.05,\n\t\t\"aspect_ratio\":1.4,\n\t\t\"clippingPlanes\":[],\n\t\t\"highlighted_group_id\":\"\",\n\t\t\"hideIfc\":true,\n\t\t\"screenshot\":<base64 image>\n\t},\n\t\"desc\":\"Risk description that describes the risk\",\n\t\"creator_role\":\"Job4\",\n\t\"position\":[55000.0,80000.0,-10000.0],\n\t\"norm\":[0,0,0]\n}",
+        "content": "POST /acme/00000000-0000-0000-0000-000000000000/risks HTTP/1.1\n{\n\t\"assigned_roles\":[\n\t\t\"Job1\"\n\t],\n\t\"associated_activity\":\"\",\n\t\"category\":\"safety_fall\",\n\t\"comments\":[],\n\t\"consequence\":0,\n\t\"creator_role\":\"Job4\",\n\t\"desc\":\"Risk description that describes the risk\",\n\t\"element\":\"Doors\",\n\t\"level_of_risk\":0,\n\t\"likelihood\":0,\n\t\"location_desc\":\"Tower 3 - Level 2\",\n\t\"mitigation_desc\":\"Erect temporary barrier\",\n\t\"mitigation_detail\":\"Erect a temporary 1.5m metal barrier along edge\",\n\t\"mitigation_stage\":\"Construction stage 5\",\n\t\"mitigation_status\":\"proposed\",\n\t\"mitigation_type\":\"Eliminate\",\n\t\"name\":\"Risk 1\",\n\t\"norm\":[0,0,0],\n\t\"overall_level_of_risk\":0,\n\t\"position\":[55000.0,80000.0,-10000.0],\n\t\"residual_consequence\":-1,\n\t\"residual_level_of_risk\":-1,\n\t\"residual_likelihood\":-1,\n\t\"residual_risk\":\"\",\n\t\"risk_factor\":\"Factor 9\",\n\t\"safetibase_id\":\"\",\n\t\"scope\":\"Tower 3\",\n\t\"viewpoint\":{\n\t\t\"aspect_ratio\":1.4,\n\t\t\"clippingPlanes\":[],\n\t\t\"far\":300000,\n\t\t\"fov\":1.05,\n\t\t\"hideIfc\":true,\n\t\t\"highlighted_group_id\":\"\",\n\t\t\"look_at\":[35000.0,40000.0,8000.0],\n\t\t\"near\":600.0,\n\t\t\"position\":[-70000.0,120000.0,150000.0],\n\t\t\"right\":[0.8,-0.3,0.6],\n\t\t\"up\":[0.3,0.9,-0.3],\n\t\t\"view_dir\":[0.5,-0.4,-0.7],\n\t\t\"screenshot\":<base64 image>\n\t}\n}",
         "type": "post"
       },
       {
         "title": "Example usage:",
-        "content": "POST /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/risks HTTP/1.1\n{\n\t\"name\":\"Risk 1\",\n\t\"associated_activity\":\"\",\n\t\"assigned_roles\":[\n\t\t\"Job1\"\n\t],\n\t\"category\":\"safety_fall\",\n\t\"comments\":[],\n\t\"safetibase_id\":\"\",\n\t\"likelihood\":0,\n\t\"consequence\":0,\n\t\"level_of_risk\":0,\n\t\"overall_level_of_risk\":0,\n\t\"residual_likelihood\":-1,\n\t\"residual_consequence\":-1,\n\t\"residual_level_of_risk\":-1,\n\t\"mitigation_status\":\"\",\n\t\"mitigation_desc\":\"\",\n\t\"residual_risk\":\"\",\n\t\"viewpoint\":{\n\t\t\"right\":[0.8,-0.3,0.6],\n\t\t\"up\":[0.3,0.9,-0.3],\n\t\t\"position\":[-70000.0,120000.0,150000.0],\n\t\t\"look_at\":[35000.0,40000.0,8000.0],\n\t\t\"view_dir\":[0.5,-0.4,-0.7],\n\t\t\"near\":600.0,\n\t\t\"far\":300000,\n\t\t\"fov\":1.05,\n\t\t\"aspect_ratio\":1.4,\n\t\t\"clippingPlanes\":[],\n\t\t\"highlighted_group_id\":\"\",\n\t\t\"hideIfc\":true,\n\t\t\"screenshot\":<base64 image>\n\t},\n\t\"desc\":\"Risk description that describes the risk\",\n\t\"creator_role\":\"Job4\",\n\t\"position\":[55000.0,80000.0,-10000.0],\n\t\"norm\":[0,0,0]\n}",
+        "content": "POST /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/risks HTTP/1.1\n{\n\t\"assigned_roles\":[\n\t\t\"Job1\"\n\t],\n\t\"associated_activity\":\"\",\n\t\"category\":\"safety_fall\",\n\t\"comments\":[],\n\t\"consequence\":0,\n\t\"creator_role\":\"Job4\",\n\t\"desc\":\"Risk description that describes the risk\",\n\t\"element\":\"Doors\",\n\t\"level_of_risk\":0,\n\t\"likelihood\":0,\n\t\"location_desc\":\"Tower 3 - Level 2\",\n\t\"mitigation_desc\":\"Erect temporary barrier\",\n\t\"mitigation_detail\":\"Erect a temporary 1.5m metal barrier along edge\",\n\t\"mitigation_stage\":\"Construction stage 5\",\n\t\"mitigation_status\":\"proposed\",\n\t\"mitigation_type\":\"Eliminate\",\n\t\"name\":\"Risk 1\",\n\t\"norm\":[0,0,0],\n\t\"overall_level_of_risk\":0,\n\t\"position\":[55000.0,80000.0,-10000.0],\n\t\"residual_consequence\":-1,\n\t\"residual_level_of_risk\":-1,\n\t\"residual_likelihood\":-1,\n\t\"residual_risk\":\"\",\n\t\"risk_factor\":\"Factor 9\",\n\t\"safetibase_id\":\"\",\n\t\"scope\":\"Tower 3\",\n\t\"viewpoint\":{\n\t\t\"aspect_ratio\":1.4,\n\t\t\"clippingPlanes\":[],\n\t\t\"far\":300000,\n\t\t\"fov\":1.05,\n\t\t\"hideIfc\":true,\n\t\t\"highlighted_group_id\":\"\",\n\t\t\"look_at\":[35000.0,40000.0,8000.0],\n\t\t\"near\":600.0,\n\t\t\"position\":[-70000.0,120000.0,150000.0],\n\t\t\"right\":[0.8,-0.3,0.6],\n\t\t\"up\":[0.3,0.9,-0.3],\n\t\t\"view_dir\":[0.5,-0.4,-0.7],\n\t\t\"screenshot\":<base64 image>\n\t}\n}",
         "type": "post"
       }
     ],
@@ -9755,7 +9872,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response",
-          "content": "HTTP/1.1 200 OK\n{\n\t\"name\":\"Risk 1\",\n\t\"associated_activity\":\"\",\n\t\"assigned_roles\":[\n\t\t\"Job1\"\n\t],\n\t\"category\":\"safety_fall\",\n\t\"comments\":[],\n\t\"safetibase_id\":\"\",\n\t\"likelihood\":0,\n\t\"consequence\":0,\n\t\"residual_likelihood\":-1,\n\t\"residual_consequence\":-1,\n\t\"mitigation_status\":\"\",\n\t\"mitigation_desc\":\"\",\n\t\"residual_risk\":\"\",\n\t\"owner\":\"alice\",\n\t\"thumbnail\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/thumbnail.png\",\n\t\"desc\":\"Risk description that describes the risk\",\n\t\"creator_role\":\"Job4\",\n\t\"position\":[55000.0,80000.0,-10000.0],\n\t\"norm\":[0,0,0],\n\t\"_id\":\"00000000-0000-0000-0000-000000000002\",\n\t\"created\":1567156228976,\n\t\"rev_id\":\"00000000-0000-0000-0000-000000000001\",\n\t\"account\":\"acme\",\n\t\"model\":\"00000000-0000-0000-0000-000000000000\",\n\t\"viewpoint\":{\n\t\t\"right\":[0.8,-0.3,0.6],\n\t\t\"up\":[0.3,0.9,-0.3],\n\t\t\"position\":[-70000.0,120000.0,150000.0],\n\t\t\"look_at\":[35000.0,40000.0,8000.0],\n\t\t\"view_dir\":[0.5,-0.4,-0.7],\n\t\t\"near\":600.0,\n\t\t\"far\":300000,\n\t\t\"fov\":1.05,\n\t\t\"aspect_ratio\":1.4,\n\t\t\"clippingPlanes\":[],\n\t\t\"hideIfc\":true,\n\t\t\"screenshot\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshot.png\",\n\t\t\"guid\":\"00000000-0000-0000-0000-000000000004\",\n\t\t\"screenshotSmall\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshotSmall.png\"\n\t},\n\t\"level_of_risk\":0,\n\t\"residual_level_of_risk\":-1,\n\t\"overall_level_of_risk\":0\n}",
+          "content": "HTTP/1.1 200 OK\n{\n\t\"_id\":\"00000000-0000-0000-0000-000000000002\",\n\t\"account\":\"acme\",\n\t\"assigned_roles\":[\n\t\t\"Job1\"\n\t],\n\t\"associated_activity\":\"\",\n\t\"category\":\"safety_fall\",\n\t\"comments\":[],\n\t\"consequence\":0,\n\t\"created\":1567156228976,\n\t\"creator_role\":\"Job4\",\n\t\"desc\":\"Risk description that describes the risk\",\n\t\"element\":\"Doors\",\n\t\"level_of_risk\":0,\n\t\"likelihood\":0,\n\t\"location_desc\":\"Tower 3 - Level 2\",\n\t\"mitigation_desc\":\"Erect temporary barrier\",\n\t\"mitigation_detail\":\"Erect a temporary 1.5m metal barrier along edge\",\n\t\"mitigation_stage\":\"Construction stage 5\",\n\t\"mitigation_status\":\"proposed\",\n\t\"mitigation_type\":\"Eliminate\",\n\t\"model\":\"00000000-0000-0000-0000-000000000000\",\n\t\"name\":\"Risk 1\",\n\t\"norm\":[0,0,0],\n\t\"overall_level_of_risk\":0,\n\t\"owner\":\"alice\",\n\t\"position\":[55000.0,80000.0,-10000.0],\n\t\"residual_consequence\":-1,\n\t\"residual_level_of_risk\":-1,\n\t\"residual_likelihood\":-1,\n\t\"residual_risk\":\"\",\n\t\"rev_id\":\"00000000-0000-0000-0000-000000000001\",\n\t\"risk_factor\":\"Factor 9\",\n\t\"safetibase_id\":\"\",\n\t\"scope\":\"Tower 3\",\n\t\"thumbnail\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/thumbnail.png\",\n\t\"viewpoint\":{\n\t\t\"aspect_ratio\":1.4,\n\t\t\"clippingPlanes\":[],\n\t\t\"far\":300000,\n\t\t\"fov\":1.05,\n\t\t\"guid\":\"00000000-0000-0000-0000-000000000004\",\n\t\t\"hideIfc\":true,\n\t\t\"look_at\":[35000.0,40000.0,8000.0],\n\t\t\"near\":600.0,\n\t\t\"position\":[-70000.0,120000.0,150000.0],\n\t\t\"right\":[0.8,-0.3,0.6],\n\t\t\"screenshot\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshot.png\",\n\t\t\"screenshotSmall\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshotSmall.png\",\n\t\t\"up\":[0.3,0.9,-0.3],\n\t\t\"view_dir\":[0.5,-0.4,-0.7]\n\t}\n}",
           "type": "json"
         }
       ]
@@ -9821,7 +9938,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response",
-          "content": "HTTP/1.1 200 OK\n{\n\t\"name\":\"Risk 1\",\n\t\"associated_activity\":\"\",\n\t\"assigned_roles\":[\n\t\t\"Job1\"\n\t],\n\t\"category\":\"safety_fall\",\n\t\"comments\":[],\n\t\"safetibase_id\":\"\",\n\t\"likelihood\":0,\n\t\"consequence\":0,\n\t\"residual_likelihood\":1,\n\t\"residual_consequence\":-1,\n\t\"mitigation_status\":\"\",\n\t\"mitigation_desc\":\"\",\n\t\"residual_risk\":\"\",\n\t\"owner\":\"alice\",\n\t\"thumbnail\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/thumbnail.png\",\n\t\"desc\":\"Risk description that describes the risk\",\n\t\"creator_role\":\"Job4\",\n\t\"position\":[55000.0,80000.0,-10000.0],\n\t\"norm\":[0,0,0],\n\t\"_id\":\"00000000-0000-0000-0000-000000000002\",\n\t\"created\":1567156228976,\n\t\"rev_id\":\"00000000-0000-0000-0000-000000000001\",\n\t\"account\":\"acme\",\n\t\"model\":\"00000000-0000-0000-0000-000000000000\",\n\t\"viewpoint\":{\n\t\t\"right\":[0.8,-0.3,0.6],\n\t\t\"up\":[0.3,0.9,-0.3],\n\t\t\"position\":[-70000.0,120000.0,150000.0],\n\t\t\"look_at\":[35000.0,40000.0,8000.0],\n\t\t\"view_dir\":[0.5,-0.4,-0.7],\n\t\t\"near\":600.0,\n\t\t\"far\":300000,\n\t\t\"fov\":1.05,\n\t\t\"aspect_ratio\":1.4,\n\t\t\"clippingPlanes\":[],\n\t\t\"hideIfc\":true,\n\t\t\"screenshot\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshot.png\",\n\t\t\"guid\":\"00000000-0000-0000-0000-000000000004\",\n\t\t\"screenshotSmall\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshotSmall.png\"\n\t},\n\t\"level_of_risk\":0,\n\t\"residual_level_of_risk\":-1,\n\t\"overall_level_of_risk\":0\n}",
+          "content": "HTTP/1.1 200 OK\n{\n\t\"_id\":\"00000000-0000-0000-0000-000000000002\",\n\t\"account\":\"acme\",\n\t\"assigned_roles\":[\n\t\t\"Job1\"\n\t],\n\t\"associated_activity\":\"\",\n\t\"category\":\"safety_fall\",\n\t\"comments\":[],\n\t\"consequence\":0,\n\t\"created\":1567156228976,\n\t\"creator_role\":\"Job4\",\n\t\"desc\":\"Risk description that describes the risk\",\n\t\"element\":\"Doors\",\n\t\"level_of_risk\":0,\n\t\"likelihood\":0,\n\t\"location_desc\":\"Tower 3 - Level 2\",\n\t\"mitigation_desc\":\"Erect temporary barrier\",\n\t\"mitigation_detail\":\"Erect a temporary 1.5m metal barrier along edge\",\n\t\"mitigation_stage\":\"Construction stage 5\",\n\t\"mitigation_status\":\"proposed\",\n\t\"mitigation_type\":\"Eliminate\",\n\t\"model\":\"00000000-0000-0000-0000-000000000000\",\n\t\"name\":\"Risk 1\",\n\t\"norm\":[0,0,0],\n\t\"owner\":\"alice\",\n\t\"overall_level_of_risk\":0,\n\t\"position\":[55000.0,80000.0,-10000.0],\n\t\"residual_consequence\":-1,\n\t\"residual_level_of_risk\":-1,\n\t\"residual_likelihood\":1,\n\t\"residual_risk\":\"\",\n\t\"rev_id\":\"00000000-0000-0000-0000-000000000001\",\n\t\"risk_factor\":\"Factor 9\",\n\t\"safetibase_id\":\"\",\n\t\"scope\":\"Tower 3\",\n\t\"thumbnail\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/thumbnail.png\",\n\t\"viewpoint\":{\n\t\t\"aspect_ratio\":1.4,\n\t\t\"clippingPlanes\":[],\n\t\t\"far\":300000,\n\t\t\"fov\":1.05,\n\t\t\"guid\":\"00000000-0000-0000-0000-000000000004\",\n\t\t\"hideIfc\":true,\n\t\t\"look_at\":[35000.0,40000.0,8000.0],\n\t\t\"near\":600.0,\n\t\t\"position\":[-70000.0,120000.0,150000.0],\n\t\t\"right\":[0.8,-0.3,0.6],\n\t\t\"screenshot\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshot.png\",\n\t\t\"screenshotSmall\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshotSmall.png\",\n\t\t\"up\":[0.3,0.9,-0.3],\n\t\t\"view_dir\":[0.5,-0.4,-0.7]\n\t}\n}",
           "type": "json"
         }
       ]
@@ -9829,6 +9946,138 @@ define({ "api": [
     "version": "0.0.0",
     "filename": "routes/risk.js",
     "groupTitle": "SafetiBase Risks"
+  },
+  {
+    "type": "get",
+    "url": "/:teamspace/:model/revision(/master/head/|/:revId)/sequences/:sequenceId/state/:stateId",
+    "title": "Get state",
+    "name": "getSequenceState",
+    "group": "Sequences",
+    "description": "<p>Get state of model in sequence.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "sequenceId",
+            "description": "<p>Sequence unique ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "stateId",
+            "description": "<p>State unique ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "revId",
+            "description": "<p>Revision unique ID</p>"
+          }
+        ]
+      }
+    },
+    "examples": [
+      {
+        "title": "Example usage (/master/head)",
+        "content": "GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences/00000000-0000-0000-0000-000000000002/state/00000000-0000-0000-0001-000000000002 HTTP/1.1",
+        "type": "get"
+      },
+      {
+        "title": "Example usage (/:revId)",
+        "content": "GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/sequences/00000000-0000-0000-0000-000000000002/state/00000000-0000-0000-0001-000000000002 HTTP/1.1",
+        "type": "get"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "HTTP/1.1 200 OK\n{\n\t\"transparency\":[\n\t\t{\n\t\t\t\"value\":1,\n\t\t\t\"shared_ids\":[\n\t\t\t\t11111111-1111-1111-1111-111111111111,\n\t\t\t\t22222222-2222-2222-2222-222222222222,\n\t\t\t\t33333333-3333-3333-3333-333333333333\n\t\t\t]\n\t\t}\n\t],\n\t\"color\":[\n\t\t{\n\t\t\t\"value\":[\n\t\t\t\t0,\n\t\t\t\t1,\n\t\t\t\t0\n\t\t\t],\n\t\t\t\"shared_ids\":[\n\t\t\t\t44444444-4444-4444-4444-444444444444,\n\t\t\t\t55555555-5555-5555-5555-555555555555,\n\t\t\t\t66666666-6666-6666-6666-666666666666\n\t\t\t]\n\t\t}\n\t],\n\t\"transform\":[\n\t\t{\n\t\t\t\"value\":[\n\t\t\t\t1, 0, 0, -0.0036411285400390625,\n\t\t\t\t0, 1, 0, 0.0012891292572021484,\n\t\t\t\t0, 0, 1, 0,\n\t\t\t\t0, 0, 0, 1\n\t\t\t],\n\t\t\t\"shared_ids\":[\n\t\t\t\t77777777-7777-7777-7777-777777777777,\n\t\t\t\t88888888-8888-8888-8888-888888888888,\n\t\t\t\t99999999-9999-9999-9999-999999999999\n\t\t\t]\n\t\t},\n\t\t{\n\t\t\t\"value\":[\n\t\t\t\t1, 0, 0, -0.0036411285400390625,\n\t\t\t\t0, 1, 0, 0.0012891292572021484,\n\t\t\t\t0, 0, 1, 0,\n\t\t\t\t0, 0, 0, 1\n\t\t\t],\n\t\t\t\"shared_ids\":[\n\t\t\t\t66666666-6666-6666-6666-666666666666\n\t\t\t]\n\t\t},\n\t\t{\n\t\t\t\"value\":[\n\t\t\t\t1, 0, 0, -0.0036411285400390625,\n\t\t\t\t0, 1, 0, 0.0012891292572021484,\n\t\t\t\t0, 0, 1, 0,\n\t\t\t\t0, 0, 0, 1\n\t\t\t],\n\t\t\t\"shared_ids\":[\n\t\t\t\t44444444-4444-4444-4444-444444444444,\n\t\t\t\taaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa,\n\t\t\t\tbbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb,\n\t\t\t\tcccccccc-cccc-cccc-cccc-cccccccccccc\n\t\t\t]\n\t\t}\n\t]",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/sequence.js",
+    "groupTitle": "Sequences"
+  },
+  {
+    "type": "get",
+    "url": "/:teamspace/:model/revision(/master/head/|/:revId)/sequences",
+    "title": "List all sequences",
+    "name": "listSequences",
+    "group": "Sequences",
+    "description": "<p>List all sequences associated with the model.</p>",
+    "examples": [
+      {
+        "title": "Example usage (/master/head)",
+        "content": "GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences HTTP/1.1",
+        "type": "get"
+      },
+      {
+        "title": "Example usage (/:revId)",
+        "content": "GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/sequences HTTP/1.1",
+        "type": "get"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "HTTP/1.1 200 OK\n[\n\t{\n\t\t\"teamspace\":\"alice\",\n\t\t\"model\":\"00000000-0000-0000-0000-000000000000\",\n\t\t\"rev_id\":\"00000000-0000-0000-0000-000000000001\",\n\t\t\"name\":\"Sequence 1\",\n\t\t\"frames\":[\n\t\t\t{\n\t\t\t\t\"dateTime\":1244246400000,\n\t\t\t\t\"state\":\"00000000-0000-0000-0001-000000000002\",\n\t\t\t\t\"tasks\":[\n\t\t\t\t\t{\n\t\t\t\t\t\t\"name\":\"Task 1\",\n\t\t\t\t\t\t\"startDate\":1244246400000,\n\t\t\t\t\t\t\"endDate\":1244246410000,\n\t\t\t\t\t\t\"_id\":\"00000000-0000-0001-0001-000000000002\"\n\t\t\t\t\t},\n\t\t\t\t\t{\n\t\t\t\t\t\t\"name\":\"Task 2\",\n\t\t\t\t\t\t\"startDate\":1244246410000,\n\t\t\t\t\t\t\"endDate\":1244246420000,\n\t\t\t\t\t\t\"_id\":\"00000000-0000-0002-0001-000000000002\"\n\t\t\t\t\t},\n\t\t\t\t\t{\n\t\t\t\t\t\t\"name\":\"Task 3\",\n\t\t\t\t\t\t\"startDate\":1244246420000,\n\t\t\t\t\t\t\"endDate\":1244246430000,\n\t\t\t\t\t\t\"_id\":\"00000000-0000-0003-0001-000000000002\"\n\t\t\t\t\t}\n\t\t\t\t]\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"dateTime\":1244419200000,\n\t\t\t\t\"state\":\"00000000-0000-0000-0002-000000000002\"\n\t\t\t\t\"tasks\":[\n\t\t\t\t\t{\n\t\t\t\t\t\t\"name\":\"Task 2\",\n\t\t\t\t\t\t\"startDate\":1244419200000,\n\t\t\t\t\t\t\"endDate\":1245369600000,\n\t\t\t\t\t\t\"_id\":\"00000000-0000-0001-0002-000000000002\"\n\t\t\t\t\t}\n\t\t\t\t]\n\t\t\t}\n\t\t],\n\t\t\"_id\":\"00000000-0000-0000-0000-000000000002\"\n\t}\n]",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/sequence.js",
+    "groupTitle": "Sequences",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "revId",
+            "description": "<p>Revision unique ID</p>"
+          }
+        ]
+      }
+    }
   },
   {
     "type": "get",
@@ -10151,6 +10400,46 @@ define({ "api": [
   },
   {
     "type": "get",
+    "url": "/:teamspace/settings/mitigations.csv",
+    "title": "Download mitigations file",
+    "name": "getMitigationsFile",
+    "group": "Teamspace",
+    "description": "<p>Returns a CSV file containing all defined suggested risk mitigations.</p>",
+    "examples": [
+      {
+        "title": "Example usage",
+        "content": "GET /acme/settings/mitigations.csv HTTP/1.1",
+        "type": "get"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "HTTP/1.1 200 OK\n<Risk mitigations CSV file>",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/teamspace.js",
+    "groupTitle": "Teamspace",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "get",
     "url": "/:teamspace/quota",
     "title": "Get Quota Information",
     "name": "getQuotaInfo",
@@ -10193,6 +10482,46 @@ define({ "api": [
     "version": "0.0.0",
     "filename": "routes/teamspace.js",
     "groupTitle": "Teamspace"
+  },
+  {
+    "type": "get",
+    "url": "/:teamspace/settings",
+    "title": "Get teamspace settings",
+    "name": "getTeamspaceSettings",
+    "group": "Teamspace",
+    "description": "<p>Returns all teamspace settings.</p>",
+    "examples": [
+      {
+        "title": "Example usage",
+        "content": "GET /acme/settings HTTP/1.1",
+        "type": "get"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "HTTP/1.1 200 OK\n{\n\t\"riskCategories\":[\n\t\t\"Commercial Issue\",\n\t\t\"Environmental Issue\",\n\t\t\"Health - Material effect\",\n\t\t\"Health - Mechanical effect\",\n\t\t\"Safety Issue - Fall\",\n\t\t\"Safety Issue - Trapped\",\n\t\t\"Safety Issue - Event\",\n\t\t\"Safety Issue - Handling\",\n\t\t\"Safety Issue - Struck\",\n\t\t\"Safety Issue - Public\",\n\t\t\"Social Issue\",\n\t\t\"Other Issue\",\n\t\t\"UNKNOWN\"\n\t],\n\t\"topicTypes\":[\n\t\t\"For information\",\n\t\t\"VR\",\n\t\t\"Clash\",\n\t\t\"Diff\",\n\t\t\"RFI\",\n\t\t\"Risk\",\n\t\t\"H&S\",\n\t\t\"Design\",\n\t\t\"Constructibility\",\n\t\t\"GIS\"\n\t],\n\t\"mitigationsUpdatedAt\":1567156228976,\n\t\"_id\":\"acme\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/teamspace.js",
+    "groupTitle": "Teamspace",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          }
+        ]
+      }
+    }
   },
   {
     "type": "delete",
@@ -10245,6 +10574,134 @@ define({ "api": [
     "version": "0.0.0",
     "filename": "routes/teamspace.js",
     "groupTitle": "Teamspace"
+  },
+  {
+    "type": "patch",
+    "url": "/:teamspace/settings",
+    "title": "Update teamspace settings",
+    "name": "updateTeamspaceSettings",
+    "group": "Teamspace",
+    "description": "<p>Update teamspace settings.</p>",
+    "parameter": {
+      "fields": {
+        "Request body": [
+          {
+            "group": "Request body",
+            "type": "String[]",
+            "optional": true,
+            "field": "riskCategories",
+            "description": "<p>List of risk categories</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String[]",
+            "optional": true,
+            "field": "topicTypes",
+            "description": "<p>List of issue topic types</p>"
+          }
+        ],
+        "Risk category": [
+          {
+            "group": "Risk category",
+            "type": "String",
+            "optional": false,
+            "field": "value",
+            "description": "<p>Value of risk category</p>"
+          },
+          {
+            "group": "Risk category",
+            "type": "String",
+            "optional": false,
+            "field": "label",
+            "description": "<p>Label for risk category</p>"
+          }
+        ],
+        "Topic type": [
+          {
+            "group": "Topic type",
+            "type": "String",
+            "optional": false,
+            "field": "value",
+            "description": "<p>Value of topic type</p>"
+          },
+          {
+            "group": "Topic type",
+            "type": "String",
+            "optional": false,
+            "field": "label",
+            "description": "<p>Label for topic type</p>"
+          }
+        ],
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          }
+        ]
+      }
+    },
+    "examples": [
+      {
+        "title": "Example usage",
+        "content": "PUT /acme/settings HTTP/1.1\n{\n\t\"topicTypes\":[\n\t\t\"New Topic 1\",\n\t\t\"New Topic 2\"\n\t],\n\t\"riskCategories\":[\n\t\t\"New Category 1\",\n\t\t\"NEW CATEGORY 2\"\n\t]\n}",
+        "type": "put"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "HTTP/1.1 200 OK\n{\n\t\"riskCategories\":[\n\t\t\"New Category 1\",\n\t\t\"NEW CATEGORY 2\"\n\t],\n\t\"topicTypes\":[\n\t\t\"New Topic 1\",\n\t\t\"New Topic 2\"\n\t],\n\t\"mitigationsUpdatedAt\":1567156228976,\n\t\"_id\":\"acme\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/teamspace.js",
+    "groupTitle": "Teamspace"
+  },
+  {
+    "type": "post",
+    "url": "/:teamspace/settings/mitigations.csv",
+    "title": "Upload mitigations file",
+    "name": "upload__MitigationsFile",
+    "group": "Teamspace",
+    "description": "<p>Upload a risk mitigations CSV file to a teamspace.</p>",
+    "examples": [
+      {
+        "title": "Example usage",
+        "content": "POST /acme/settings/mitigations.csv HTTP/1.1\n<Risk mitigations CSV file>",
+        "type": "post"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "HTTP/1.1 200 OK\n{\n\t\"status\":\"ok\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/teamspace.js",
+    "groupTitle": "Teamspace",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          }
+        ]
+      }
+    }
   },
   {
     "type": "get",
