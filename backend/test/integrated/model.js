@@ -381,7 +381,11 @@ describe("Model", function () {
 					agent2.get("/testing.json").expect(200, function(err, res) {
 
 						const account = res.body.accounts.find(account => account.account === username);
-						expect(account).to.not.exist;
+						const modelExists = account.projects
+							.map(p => p.models
+								.find(m => m.model === model)
+							).reduce((acc, val) => acc || val !== undefined);
+						expect(modelExists).to.equal(false);
 
 						// const mm = account.models.find(m => m.model === model);
 						// expect(mm).to.not.exist;
