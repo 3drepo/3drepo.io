@@ -116,7 +116,7 @@ export class SelectField extends React.PureComponent<SelectProps, any> {
 		};
 
 		return (
-			<Select className={className} {...selectProps} MenuProps={customMenuProps}>
+			<Select className={className} {...selectProps} MenuProps={customMenuProps} displayEmpty renderValue={(val) => val}>
 				{children}
 			</Select>
 		);

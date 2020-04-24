@@ -155,9 +155,6 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 			canComment } = this.props;
 
 		const topicTypesSelect = topicTypes.map((x) => ({label: x, value: x}));
-		if (issue.topic_type && topicTypes.indexOf(issue.topic_type) === -1) {
-			topicTypesSelect.push({label: issue.topic_type, value: issue.topic_type});
-		}
 
 		return (
 			<MuiPickersUtilsProvider utils={DayJsUtils}>
