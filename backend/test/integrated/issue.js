@@ -1662,7 +1662,6 @@ describe("Issues", function () {
 						expect(res.body.value).to.equal(responseCodes.NOT_AUTHORIZED.value);
 						done(err);
 					});
-				}
 			});
 		});
 
