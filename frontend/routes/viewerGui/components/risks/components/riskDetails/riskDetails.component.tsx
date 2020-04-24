@@ -315,7 +315,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 
 	public handleNewScreenshot = async (screenshot) => {
 		const { teamspace, model, viewer } = this.props;
-		const viewpoint = this.isViewerInitialized ? await viewer.getCurrentViewpoint({ teamspace, model }) : null;
+		const viewpoint = await viewer.getCurrentViewpoint({ teamspace, model });
 
 		if (this.isNewRisk) {
 			this.props.setState({ newRisk: {
