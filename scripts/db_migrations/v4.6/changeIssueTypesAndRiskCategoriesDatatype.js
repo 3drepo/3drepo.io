@@ -55,26 +55,32 @@ function updateTicket(dbConn, mapping, colName, typeLabel) {
 				ticket[typeLabel] = mapping[ticket[typeLabel]];
 			}
 
-			for(var i = 0; i < ticket.comments.length; ++i) {
-				if(ticket.comments[i].action) {
-					var property = ticket.comments[i].action.property;
-					if( property === typeLabel) {
-						var from = ticket.comments[i].action.from;
-						if(mapping[from]) {
-							ticket.comments[i].action.from = mapping[from];
-							hasChange = true;
-						}
-						var to = ticket.comments[i].action.to;
-						if(mapping[to]) {
-							ticket.comments[i].action.to = mapping[to];
-							hasChange = true;
+			if(ticket.comments) {
+
+				for(var i = 0; i < ticket.comments.length; ++i) {
+					if(ticket.comments[i].action) {
+						var property = ticket.comments[i].action.property;
+						if( property === typeLabel) {
+							var from = ticket.comments[i].action.from;
+							if(mapping[from]) {
+								ticket.comments[i].action.from = mapping[from];
+								hasChange = true;
+							}
+							var to = ticket.comments[i].action.to;
+							if(mapping[to]) {
+								ticket.comments[i].action.to = mapping[to];
+								hasChange = true;
+							}
 						}
 					}
 				}
 			}
 
 			if(!dryRun) {
-				var setObj = {comments: ticket.comments};
+				var setObj = {};
+				if(ticket.comments) {
+					setObj.comments = ticket.comments;
+				}
 				setObj[typeLabel] = ticket[typeLabel];
 				dbConn.getCollection(colName).update({_id: ticket._id}, {$set:setObj});
 			}
