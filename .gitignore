@@ -84,3 +84,4 @@ backend/3drepo.log
 npm-debug.log.*
 .vscode/
 *.swo
+submodules/tests
