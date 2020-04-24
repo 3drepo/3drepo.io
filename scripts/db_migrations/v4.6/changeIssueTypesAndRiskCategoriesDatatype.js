@@ -47,10 +47,9 @@ function updateRisk(dbConn, mapping, colName) {
 function updateTicket(dbConn, mapping, colName, typeLabel) {
 	var projection =  {"comments": 1 };
 	projection[typeLabel] = 1;
-	dbConn.getCollection(colName).find({"comments.action.property": typeLabel}, projection)
+	dbConn.getCollection(colName).find({}, projection)
 		.toArray().forEach(function(ticket) {
 			var hasChange = false;
-
 			if(ticket[typeLabel] && mapping[ticket[typeLabel]]) {
 				hasChange = true;
 				ticket[typeLabel] = mapping[ticket[typeLabel]];
