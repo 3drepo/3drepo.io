@@ -20,6 +20,7 @@ import React from 'react';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { Loader } from '../loader/loader.component';
 import { Log } from './components/log/log.component';
+import { Message } from './components/message/message.component';
 import { Container, EmptyStateInfo, LoaderContainer } from './logList.styles';
 
 interface IProps {
@@ -29,7 +30,7 @@ interface IProps {
 	currentUser: string;
 	teamspace: string;
 	commentsRef?: any;
-	removeLog: (index, guid) => void;
+	removeMessage: (index, guid) => void;
 	setCameraOnViewpoint: (viewpoint) => void;
 }
 
@@ -46,15 +47,26 @@ export class LogList extends React.PureComponent<IProps, any> {
 
 	public renderLogItem = (item, index) => {
 		return (
-			<Log
-				{...item}
-				key={item.guid + item._id}
-				removeLog={this.props.removeLog}
-				index={index}
-				teamspace={this.props.teamspace}
-				currentUser={this.props.currentUser}
-				setCameraOnViewpoint={this.props.setCameraOnViewpoint}
-			/>
+			<>
+				<Message
+					key={`${item.guid}_${item._id}`}
+					{...item}
+					removeMessage={this.props.removeMessage}
+					index={index}
+					teamspace={this.props.teamspace}
+					currentUser={this.props.currentUser}
+					setCameraOnViewpoint={this.props.setCameraOnViewpoint}
+				/>
+				<Log
+					{...item}
+					key={item.guid + item._id}
+					removeMessage={this.props.removeMessage}
+					index={index}
+					teamspace={this.props.teamspace}
+					currentUser={this.props.currentUser}
+					setCameraOnViewpoint={this.props.setCameraOnViewpoint}
+				/>
+			</>
 		);
 	}
 

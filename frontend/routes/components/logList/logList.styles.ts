@@ -16,13 +16,22 @@
  */
 
 import styled from 'styled-components';
+
+import FormControl from '@material-ui/core/FormControl';
+import Typography from '@material-ui/core/Typography';
+
 import { COLOR } from '../../../styles';
 
 export const Container = styled.div`
+	padding-left: 10px;
 	min-height: 55px;
 	position: relative;
 	background-color: ${COLOR.BLACK_6};
 	overflow: auto;
+
+	& > * {
+		margin-bottom: 10px;
+	}
 
 	&:before {
 		position: absolute;
@@ -49,4 +58,27 @@ export const EmptyStateInfo = styled.p`
 	margin: 25px;
 	border-radius: 6px;
 	text-align: center;
+`;
+
+export const Label = styled(Typography)`
+	&& {
+  	margin-right: 5px;
+  	margin-bottom: 3px;
+  }
+`;
+
+export const FormContainer = styled(FormControl)`
+	&& {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+	}
+`;
+
+export const FilterWrapper = styled.div`
+	box-sizing: border-box;
+	width: 100%;
+	padding-left: 10px;
+	z-index: 2;
+	background: ${COLOR.GRAY};
 `;

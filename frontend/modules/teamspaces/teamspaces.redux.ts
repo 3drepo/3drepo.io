@@ -45,6 +45,18 @@ export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createAct
 	removeModelSuccess: ['teamspace', 'modelData'],
 }, { prefix: 'TEAMSPACES/' });
 
+export interface ITeamspace {
+	account: string;
+	firstName: string;
+	lastName: string;
+	hasAvatar: boolean;
+	projects: string[];
+	models: string[];
+	fedModels: string[];
+	isAdmin: boolean;
+	permissions: string[];
+}
+
 export const INITIAL_STATE = {
 	teamspaces: {},
 	projects: {},

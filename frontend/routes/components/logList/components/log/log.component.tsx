@@ -15,9 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CloseIcon from '@material-ui/icons/Close';
 import React from 'react';
+
+import CloseIcon from '@material-ui/icons/Close';
+import { memoize } from 'lodash';
 import { renderWhenTrue } from '../../../../../helpers/rendering';
+import { getAvatarUrl } from '../../../../../services/api';
 import { DATE_TIME_FORMAT } from '../../../../../services/formatting/formatDate';
 import { TooltipButton } from '../../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { DateTime } from '../../../dateTime/dateTime.component';
@@ -52,6 +55,8 @@ interface IProps {
 	setCameraOnViewpoint: (viewpoint) => void;
 }
 
+const getMemoizedAvatarUrl = memoize(getAvatarUrl);
+
 export class Log extends React.PureComponent<IProps, any> {
 	get isScreenshot() {
 		return this.props.viewpoint && this.props.viewpoint.screenshotPath;
@@ -69,6 +74,10 @@ export class Log extends React.PureComponent<IProps, any> {
 		return !this.props.sealed && !this.props.action && this.props.currentUser === this.props.owner;
 	}
 
+	get avatarUrl() {
+		return getMemoizedAvatarUrl(this.props.owner);
+	}
+
 	public renderRemoveButton = renderWhenTrue(() => (
 		<RemoveButtonWrapper screenshot={this.isScreenshot}>
 			<TooltipButton
@@ -79,12 +88,14 @@ export class Log extends React.PureComponent<IProps, any> {
 		</RemoveButtonWrapper>
 	));
 
-	public renderUserMessage = renderWhenTrue(() => (
-		<MessageContainer>
-			<UserMessage>{this.props.comment}</UserMessage>
-			{this.renderRemoveButton(this.isRemovable)}
-		</MessageContainer>
-	));
+	public renderUserMessage = renderWhenTrue(() => {
+		return (
+				<MessageContainer>
+					<UserMessage>{this.props.comment}</UserMessage>
+					{this.renderRemoveButton(this.isRemovable)}
+				</MessageContainer>
+		);
+	});
 
 	public renderSystemMessage = renderWhenTrue(() => (
 		<SystemMessage>

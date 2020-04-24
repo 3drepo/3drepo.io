@@ -31,6 +31,7 @@ export class DynamicUsername extends React.PureComponent<IProps, any> {
 		this.props.fetchUserDetails(this.props.teamspace, this.props.name);
 	}
 
+	// @TODO we need this functionality in new coments (userMEssage)
 	get tootliptText() {
 		if (this.props.userDetails) {
 			const { firstName, lastName, company } = this.props.userDetails;

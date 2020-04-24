@@ -79,7 +79,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public formRef = React.createRef<any>();
 	public panelRef = React.createRef<any>();
-	public commentsRef = React.createRef<any>();
+	// public commentsRef = React.createRef<any>();
 
 	get isNewIssue() {
 		return !this.props.issue._id;
@@ -97,10 +97,10 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public renderLogList = renderWhenTrue(() => (
 		<LogList
-			commentsRef={this.commentsRef}
-			items={this.issueData.comments}
+			// commentsRef={this.commentsRef}
+			messages={this.issueData.comments}
 			isPending={this.props.fetchingDetailsIsPending}
-			removeLog={this.removeComment}
+			removeMessage={this.removeMessage}
 			teamspace={this.props.teamspace}
 			currentUser={this.props.currentUser}
 			setCameraOnViewpoint={this.setCameraOnViewpoint}
@@ -187,22 +187,22 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 			subscribeOnIssueCommentsChanges(teamspace, model, issue._id);
 		}
 
-		if (
-			issue.comments && prevProps.issue.comments &&
-			(issue.comments.length > prevProps.issue.comments.length && issue.comments[issue.comments.length - 1].new)
-		) {
-			const { top: commentsTop } = this.commentsRef.current.getBoundingClientRect();
-			const panelElements = this.panelRef.current.children[0].children;
-			const detailsDimensions = panelElements[1].getBoundingClientRect();
-			const { height: detailsHeight } = detailsDimensions;
-
-			if (commentsTop < 0) {
-				this.panelRef.current.scrollTo({
-					top: detailsHeight - 16,
-					behavior: 'smooth'
-				});
-			}
-		}
+		// if (
+		// 	issue.comments && prevProps.issue.comments &&
+		// 	(issue.comments.length > prevProps.issue.comments.length && issue.comments[issue.comments.length - 1].new)
+		// ) {
+		// 	const { top: commentsTop } = this.commentsRef.current.getBoundingClientRect();
+		// 	const panelElements = this.panelRef.current.children[0].children;
+		// 	const detailsDimensions = panelElements[1].getBoundingClientRect();
+		// 	const { height: detailsHeight } = detailsDimensions;
+		//
+		// 	if (commentsTop < 0) {
+		// 		this.panelRef.current.scrollTo({
+		// 			top: detailsHeight - 16,
+		// 			behavior: 'smooth'
+		// 		});
+		// 	}
+		// }
 	}
 
 	public handleHeaderClick = () => {
@@ -258,7 +258,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		);
 	}
 
-	public removeComment = (index, guid) => {
+	public removeMessage = (index, guid) => {
 		const issueData = {
 			_id: this.issueData._id,
 			rev_id: this.issueData.rev_id,

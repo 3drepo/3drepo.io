@@ -18,7 +18,7 @@
 import styled from 'styled-components';
 import { COLOR } from '../../../../../../styles';
 
-import { LogList as LogListBase } from '../../../../../components/logList/logList.component';
+import { MessagesList as LogListBase } from '../../../../../components/logList/MessagesList.component';
 import PreviewDetailsBase from '../../../previewDetails/previewDetails.container';
 
 export const Container = styled.div``;
