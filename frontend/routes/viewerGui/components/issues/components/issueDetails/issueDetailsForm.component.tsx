@@ -154,8 +154,6 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 				attachFileResources, attachLinkResources, showDialog,
 			canComment } = this.props;
 
-		const topicTypesSelect = topicTypes.map((x) => ({label: x, value: x}));
-
 		return (
 			<MuiPickersUtilsProvider utils={DayJsUtils}>
 				<Form>
@@ -200,7 +198,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							<Field name="topic_type" render={({ field }) => (
 								<CellSelect
 									{...field}
-									items={topicTypesSelect}
+									items={topicTypes}
 									inputId="topic_type"
 									disabled={!this.canEditBasicProperty}
 								/>

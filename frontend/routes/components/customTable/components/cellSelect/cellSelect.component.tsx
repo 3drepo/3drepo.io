@@ -67,6 +67,11 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 		const labelName =  this.props.labelName || 'name';
 
 		return items.map((item, index) => {
+			if (!item[labelName] && !item.value) {
+				const val = item;
+				item = {[labelName]: val, value: val};
+			}
+
 			return (
 				<Item
 					group={item.group}
