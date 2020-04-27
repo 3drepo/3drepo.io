@@ -101,7 +101,6 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		return [...this.props.jobs, UNASSIGNED_JOB];
 	}
 
-
 	public commentRef = React.createRef<any>();
 
 	public renderLogList = renderWhenTrue(() => (
