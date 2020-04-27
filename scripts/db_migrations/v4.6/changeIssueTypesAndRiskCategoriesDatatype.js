@@ -47,35 +47,40 @@ function updateRisk(dbConn, mapping, colName) {
 function updateTicket(dbConn, mapping, colName, typeLabel) {
 	var projection =  {"comments": 1 };
 	projection[typeLabel] = 1;
-	dbConn.getCollection(colName).find({"comments.action.property": typeLabel}, projection)
+	dbConn.getCollection(colName).find({}, projection)
 		.toArray().forEach(function(ticket) {
 			var hasChange = false;
-
 			if(ticket[typeLabel] && mapping[ticket[typeLabel]]) {
 				hasChange = true;
 				ticket[typeLabel] = mapping[ticket[typeLabel]];
 			}
 
-			for(var i = 0; i < ticket.comments.length; ++i) {
-				if(ticket.comments[i].action) {
-					var property = ticket.comments[i].action.property;
-					if( property === typeLabel) {
-						var from = ticket.comments[i].action.from;
-						if(mapping[from]) {
-							ticket.comments[i].action.from = mapping[from];
-							hasChange = true;
-						}
-						var to = ticket.comments[i].action.to;
-						if(mapping[to]) {
-							ticket.comments[i].action.to = mapping[to];
-							hasChange = true;
+			if(ticket.comments) {
+
+				for(var i = 0; i < ticket.comments.length; ++i) {
+					if(ticket.comments[i].action) {
+						var property = ticket.comments[i].action.property;
+						if( property === typeLabel) {
+							var from = ticket.comments[i].action.from;
+							if(mapping[from]) {
+								ticket.comments[i].action.from = mapping[from];
+								hasChange = true;
+							}
+							var to = ticket.comments[i].action.to;
+							if(mapping[to]) {
+								ticket.comments[i].action.to = mapping[to];
+								hasChange = true;
+							}
 						}
 					}
 				}
 			}
 
 			if(!dryRun) {
-				var setObj = {comments: ticket.comments};
+				var setObj = {};
+				if(ticket.comments) {
+					setObj.comments = ticket.comments;
+				}
 				setObj[typeLabel] = ticket[typeLabel];
 				dbConn.getCollection(colName).update({_id: ticket._id}, {$set:setObj});
 			}

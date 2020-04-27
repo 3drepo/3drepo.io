@@ -36,7 +36,7 @@ import {
 } from '../../../../modules/issues';
 import { selectJobsList } from '../../../../modules/jobs';
 import { selectSettings } from '../../../../modules/model';
-import { selectTopicTypes } from '../../../../modules/teamspace';
+import { selectTopicTypes, TeamspaceActions } from '../../../../modules/teamspace';
 import { Issues } from './issues.component';
 
 const mapStateToProps = createStructuredSelector({
@@ -75,6 +75,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	exportBCF: IssuesActions.exportBcf,
 	toggleSortOrder: IssuesActions.toggleSortOrder,
 	setFilters: IssuesActions.setFilters,
+	fetchSettings: TeamspaceActions.fetchSettings
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Issues);
