@@ -101,10 +101,6 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		return [...this.props.jobs, UNASSIGNED_JOB];
 	}
 
-	get isViewerInitialized() {
-		return this.props.viewer.initialized;
-	}
-
 	public commentRef = React.createRef<any>();
 
 	public renderLogList = renderWhenTrue(() => (
