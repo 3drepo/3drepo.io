@@ -1119,6 +1119,7 @@ export class UnityUtil {
 	 * @param surveyingInfo - array of survey points and it's respective latitude and longitude value
 	 */
 	public static mapInitialise(surveyingInfo: [object]) {
+		// FIMXE: this should be MODEL_LOADING require #2010 to be fixed
 		UnityUtil.toUnity('MapsInitiate', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(surveyingInfo));
 	}
 
