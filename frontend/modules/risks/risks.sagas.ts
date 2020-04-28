@@ -62,7 +62,6 @@ import {
 function* fetchRisks({teamspace, modelId, revision}) {
 	yield put(RisksActions.togglePendingState(true));
 	try {
-		yield put(TeamspaceActions.fetchSettings(teamspace));
 		const {data} = yield API.getRisks(teamspace, modelId, revision);
 		const jobs = yield select(selectJobsList);
 		const preparedRisks = data.map((risk) => prepareRisk(risk, jobs));
@@ -439,7 +438,7 @@ function* closeDetails() {
 
 const onUpdateEvent = (updatedRisk) => {
 	const jobs = selectJobsList(getState());
-	if (updatedRisk.status === RISK_LEVELS.AGREED_FULLY) {
+	if (updatedRisk.mitigation_status === RISK_LEVELS.AGREED_FULLY) {
 		dispatch(RisksActions.showCloseInfo(updatedRisk._id));
 		setTimeout(() => {
 			dispatch(RisksActions.saveRiskSuccess(prepareRisk(updatedRisk, jobs)));

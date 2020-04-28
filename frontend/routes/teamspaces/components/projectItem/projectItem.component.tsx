@@ -74,10 +74,11 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 
 	public handlePermissionsClick = (event) => {
 		event.stopPropagation();
+		const {teamspace, name} = this.props;
 
 		this.props.history.push({
-			pathname: `${ROUTES.USER_MANAGEMENT_MAIN}/${this.props.teamspace}/projects`,
-			search: `?project=${this.props.name}`
+			pathname: `${ROUTES.USER_MANAGEMENT_MAIN}/${teamspace}/projects`,
+			search: `?project=${encodeURIComponent(name)}`
 		});
 	}
 

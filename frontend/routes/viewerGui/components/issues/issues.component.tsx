@@ -53,6 +53,7 @@ interface IProps {
 	};
 	activeIssueDetails: any;
 	sortOrder: string;
+	fetchSettings: (teamspace) => void;
 	fetchIssues: (teamspace, model, revision) => void;
 	setState: (componentState: any) => void;
 	setNewIssue: () => void;
@@ -148,6 +149,7 @@ export class Issues extends React.PureComponent<IProps, any> {
 
 	public componentDidMount() {
 		this.props.subscribeOnIssueChanges(this.props.teamspace, this.props.model);
+		this.props.fetchSettings(this.props.teamspace); // This is to fetch topic_types
 		this.handleSelectedIssue();
 	}
 
