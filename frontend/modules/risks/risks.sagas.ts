@@ -47,6 +47,7 @@ import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
+import { TeamspaceActions } from '../teamspace';
 import { selectIfcSpacesHidden, TreeActions } from '../tree';
 import { RisksActions, RisksTypes } from './risks.redux';
 import {
@@ -367,11 +368,8 @@ function* focusOnRisk({ risk, revision }) {
 		}
 
 		const { account, model, viewpoint } = risk;
-		if (viewpoint) {
-			if (viewpoint.position && viewpoint.position.length > 0) {
-				Viewer.setCamera({ ...viewpoint, account, model });
-			}
-
+		if (viewpoint && viewpoint.position) {
+			Viewer.setCamera({ ...viewpoint, account, model });
 			yield Viewer.updateClippingPlanes(viewpoint.clippingPlanes, account, model);
 		} else {
 			yield Viewer.goToDefaultViewpoint();
@@ -440,11 +438,14 @@ function* closeDetails() {
 
 const onUpdateEvent = (updatedRisk) => {
 	const jobs = selectJobsList(getState());
-	if (updatedRisk.status === RISK_LEVELS.AGREED_FULLY) {
+	if (updatedRisk.mitigation_status === RISK_LEVELS.AGREED_FULLY) {
 		dispatch(RisksActions.showCloseInfo(updatedRisk._id));
 		setTimeout(() => {
 			dispatch(RisksActions.saveRiskSuccess(prepareRisk(updatedRisk, jobs)));
 		}, 5000);
+		setTimeout(() => {
+			dispatch(RisksActions.hideCloseInfo(updatedRisk._id));
+		}, 6000);
 	} else {
 		dispatch(RisksActions.saveRiskSuccess(prepareRisk(updatedRisk, jobs)));
 	}

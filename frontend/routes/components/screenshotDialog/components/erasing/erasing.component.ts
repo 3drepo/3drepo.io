@@ -43,9 +43,9 @@ export class Erasing extends React.PureComponent<IProps, any> {
 	}
 
 	public componentDidMount() {
-		this.props.stage.on('mousemove', this.handleMouseMove);
-		this.props.stage.on('mouseup', this.handleMouseUp);
-		this.props.stage.on('mousedown', this.handleMouseDown);
+		this.props.stage.on('mousemove touchmove', this.handleMouseMove);
+		this.props.stage.on('mouseup touchend', this.handleMouseUp);
+		this.props.stage.on('mousedown touchstart', this.handleMouseDown);
 	}
 
 	public handleMouseDown = () => {

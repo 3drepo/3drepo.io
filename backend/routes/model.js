@@ -1389,6 +1389,8 @@ router.post("/:model/upload", middlewares.hasUploadAccessToModel, uploadModel);
 
 router.get("/:model/download/latest", middlewares.hasDownloadAccessToModel, downloadLatest);
 
+router.get("/:model/meshes/:meshId", middlewares.hasReadAccessToModel, getMesh);
+
 function updateSettings(req, res, next) {
 
 	const place = utils.APIInfo(req);
@@ -1908,9 +1910,8 @@ function getSubModelRevisions(req, res, next) {
 	const account = req.params.account;
 	const revId = req.params.revId;
 	const branch = revId ? undefined : "master";
-	const username = req.session.user.username;
 
-	ModelHelpers.getSubModelRevisions(account, model, username, branch, revId).then((result) => {
+	ModelHelpers.getSubModelRevisions(account, model, branch, revId).then((result) => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, result, undefined, req.param.rev ? config.cachePolicy : undefined);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -1926,6 +1927,17 @@ function getUnityBundle(req, res, next) {
 	UnityAssets.getUnityBundle(account, model, id).then(file => {
 		req.params.format = "unity3d";
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file, undefined, config.cachePolicy);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function getMesh(req, res, next) {
+	const {model, account, meshId} = req.params;
+
+	ModelHelpers.getMeshById(account, model, meshId).then((stream) => {
+		res.writeHead(200, {"Content-Type": "application/json; charset=utf-8" });
+		stream.pipe(res);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});

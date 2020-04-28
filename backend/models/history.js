@@ -46,6 +46,18 @@ const historySchema = Schema({
 	void: Boolean
 });
 
+const getColl = async (account, model) =>  await db.getCollection(account, model + ".history");
+
+const find = async (account, model, query, projection = {}) =>  {
+	const col = await getColl(account, model);
+	return await col.find(query, projection);
+};
+
+const findOne = async (account, model, query, projection = {}) =>  {
+	const col = await getColl(account, model);
+	return await col.findOne(query, projection);
+};
+
 historySchema.statics.getHistory = function(dbColOptions, branch, revId, projection) {
 
 	let history;
@@ -111,10 +123,9 @@ historySchema.statics.findByBranch = function(dbColOptions, branch, projection, 
 	);
 };
 
-historySchema.statics.revisionCount = async function(teamspace, account) {
+historySchema.statics.revisionCount = async function(teamspace, model) {
 	const query = {"incomplete": {"$exists": false}, "void": {"$ne": true}};
-	const col = await db.getCollection(teamspace, account + ".history");
-	return col.find(query, {}).count();
+	return (await find(teamspace, model, query)).count();
 };
 
 // get the head of default branch (master)
@@ -123,7 +134,6 @@ historySchema.statics.findLatest = function(dbColOptions, projection) {
 };
 
 historySchema.statics.findByUID = function(dbColOptions, revId, projection) {
-
 	projection = projection || {};
 	return History.findOne(dbColOptions, { _id: stringToUUID(revId)}, projection);
 
@@ -151,11 +161,12 @@ historySchema.statics.updateRevision = async function(dbColOptions, modelId, dat
 };
 
 historySchema.statics.findByTag = function(dbColOptions, tag, projection) {
-
 	projection = projection || {};
 	return History.findOne(dbColOptions, { tag, incomplete: {"$exists": false }}, projection);
-
 };
+
+historySchema.statics.findByObjectId = async (account, model, id, projection) =>
+	await findOne(account, model, { current: stringToUUID(id) }, projection);
 
 // add an item to current
 historySchema.methods.addToCurrent = function(id) {

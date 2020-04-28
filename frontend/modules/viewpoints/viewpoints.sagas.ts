@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { get } from 'lodash';
 import { put, takeLatest } from 'redux-saga/effects';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import * as API from '../../services/api';
@@ -158,13 +159,17 @@ export function* setCameraOnViewpoint({ teamspace, modelId, view }) {
 					break;
 			}
 		} else {
-			if (view.viewpoint) {
+			if (view.viewpoint && view.viewpoint.up) {
 				const viewpoint = { ...view.viewpoint, account: teamspace, model: modelId };
 				yield Viewer.setCamera(viewpoint);
+			} else {
+				yield Viewer.goToDefaultViewpoint();
 			}
 
-			if (view.clippingPlanes) {
-				yield Viewer.updateClippingPlanes( view.clippingPlanes, teamspace, modelId);
+			const clippingPlanes = view.clippingPlanes || get(view, 'viewpoint.clippingPlanes');
+
+			if (clippingPlanes) {
+				yield Viewer.updateClippingPlanes( clippingPlanes, teamspace, modelId);
 			}
 		}
 	}

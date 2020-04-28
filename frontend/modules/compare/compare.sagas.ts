@@ -246,22 +246,9 @@ function* setTargetModel({ modelId, isTarget, isTypeChange = false }) {
 	}
 }
 
-function* setModelsNodesVisibility(models, visibility) {
-	const indexesMap = yield select(selectNodesIndexesMap);
-	const nodesList = yield select(selectTreeNodesList);
-	const nodesIds = models.map(({ _id, name }) => {
-		if (!indexesMap[_id]) {
-			const modelByName = nodesList.find((node) => node.name === name);
-			return modelByName._id;
-		}
-		return _id;
-	});
-
-	yield put(TreeActions.setTreeNodesVisibility(nodesIds, visibility, false, false));
-}
-
 function* startComparisonOfFederation() {
 	yield put(CompareActions.setIsPending(true));
+
 	const activeTab = yield select(selectActiveTab);
 	const isDiff = activeTab === DIFF_COMPARE_TYPE;
 
@@ -281,7 +268,7 @@ function* startComparisonOfFederation() {
 
 		if (isTargetModel && isSelectedModel) {
 			const targetRevision = isDiff ? model.targetDiffRevision : model.targetClashRevision;
-			const canReuseModel = model.baseRevision.name === targetRevision.name && selectedModelsMap[model._id];
+			const canReuseModel = model.baseRevision.name === targetRevision.name && selectedModelsMap[model._id] && !isDiff;
 
 			if (canReuseModel) {
 				const isAlreadyVisible = modelsToShow.some(({ _id }) => !!model._id);
@@ -306,8 +293,9 @@ function* startComparisonOfFederation() {
 		}
 	}
 
-	yield setModelsNodesVisibility(modelsToHide, VISIBILITY_STATES.INVISIBLE);
-	yield setModelsNodesVisibility(modelsToShow, VISIBILITY_STATES.VISIBLE);
+	yield  put(TreeActions.setSubmodelsVisibility(modelsToHide, VISIBILITY_STATES.INVISIBLE));
+	yield  put(TreeActions.setSubmodelsVisibility(modelsToShow, VISIBILITY_STATES.VISIBLE));
+
 	yield all(modelsToLoad);
 
 	if (isDiff) {

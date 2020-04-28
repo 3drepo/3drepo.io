@@ -46,6 +46,7 @@ export const { Types: ModelTypes, Creators: ModelActions } = createActions({
 export const INITIAL_STATE = {
 	settings: {
 		properties: {
+			unit: 'mm',
 		},
 		permissions: [],
 	},

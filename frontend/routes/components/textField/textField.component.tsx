@@ -43,6 +43,7 @@ interface IProps extends TextFieldProps {
 	mutable?: boolean;
 	onBeforeConfirmChange?: (event) => void;
 	expandable?: boolean;
+	disableShowDefaultUnderline?: boolean;
 }
 
 interface IState {
@@ -127,7 +128,7 @@ export class TextField extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public componentDidUpdate(prevProps) {
+	public componentDidUpdate(prevProps, prevState) {
 		const { value, requiredConfirm } = this.props;
 		if (requiredConfirm && value !== prevProps.value) {
 			this.setState({ initialValue: value, currentValue: value, edit: false } as IState);
@@ -137,6 +138,10 @@ export class TextField extends React.PureComponent<IProps, IState> {
 			setTimeout(() => {
 				this.checkIfGotLongContent();
 			});
+		}
+
+		if (prevState.edit === false && this.state.edit) {
+			this.inputElement.select();
 		}
 	}
 
@@ -156,8 +161,10 @@ export class TextField extends React.PureComponent<IProps, IState> {
 	}
 
 	public saveChange = () => {
-		if (this.props.onChange) {
+		if (this.props.onChange && this.hasValueChanged) {
 			this.props.onChange({ target: this.inputElement } as any);
+		} else {
+			this.declineChange();
 		}
 	}
 
@@ -225,10 +232,12 @@ export class TextField extends React.PureComponent<IProps, IState> {
 			validationSchema,
 			name,
 			className,
+			mutable,
+			disableShowDefaultUnderline,
 			...props
 		} = this.props;
-		const { initialValue, currentValue } = this.state;
-		const shouldRenderActions = this.hasValueChanged && this.isEditMode;
+		const { initialValue } = this.state;
+		const shouldRenderActions = mutable && this.isEditMode;
 		const shouldRenderMutable = !this.isEditMode && !this.props.disabled;
 
 		return (
@@ -257,7 +266,7 @@ export class TextField extends React.PureComponent<IProps, IState> {
 							/>
 							}
 							{!this.isEditMode &&
-							<FieldWrapper onClick={this.handlePlaceholderClick}>
+							<FieldWrapper line={Number(!disableShowDefaultUnderline)} onClick={this.handlePlaceholderClick}>
 								<FieldLabel shrink>{this.props.label}</FieldLabel>
 								<StyledLinkableField ref={this.linkableFieldRef} {...this.additionalProps()}>
 									{this.fieldValue}

@@ -29,7 +29,7 @@ export const mergeData = (source, data = source) => {
 
 export const diffData =  ( vals, data ) => {
 	return Object.keys(vals).reduce((acc, key) => {
-		if (vals[key] !== data[key] && !Array.isArray(data[key])) {
+		if (vals[key] !== data[key] && !Array.isArray(data[key]) && !(!vals[key] && !data[key])) {
 			acc[key] = vals[key];
 		}
 

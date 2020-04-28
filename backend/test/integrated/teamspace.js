@@ -17,12 +17,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const async = require("async");
 const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp();
 const responseCodes = require("../../response_codes");
 
-describe("Checking Quota Info  ", function() {
+describe("Teamspace", function() {
 	let server;
 	let agent;
 	const timeout = 30000;
@@ -73,6 +74,23 @@ describe("Checking Quota Info  ", function() {
 		password: "password",
 		quota: {spaceLimit: 3073, collaboratorLimit: "unlimited", spaceUsed: 0}
 	};
+
+	const imsharedTeamspace = {
+		user: "imsharedTeamspace",
+		password: "imsharedTeamspace"
+	};
+
+	const metaTestTeamspace = {
+		user: "metaTest",
+		password: "123456"
+	};
+
+	const fakeTeamspace = "fakeTeamspace";
+	const notMemberOfTeamspace = "fed";
+	const collaboratorTeamspace = "teamSpace1";
+
+	const mitigationsFile = "/../../statics/mitigations/mitigations1.csv";
+	const bigMitigationsFile = "/../../statics/mitigations/big.csv";
 
 	before(function(done) {
 
@@ -281,7 +299,6 @@ describe("Checking Quota Info  ", function() {
 		it("should have the correct aggregated quota", function(done) {
 			agent.get(`/${user.user}/quota`)
 				.expect(200, function(err, res) {
-					console.log(res.body);
 					expect(res.body).to.deep.equal(user.quota);
 					done(err);
 				});
@@ -366,4 +383,493 @@ describe("Checking Quota Info  ", function() {
 		});
 	});
 
+	const defaultRiskCategories = [
+		"Commercial Issue",
+		"Environmental Issue",
+		"Health - Material effect",
+		"Health - Mechanical effect",
+		"Safety Issue - Fall",
+		"Safety Issue - Trapped",
+		"Safety Issue - Event",
+		"Safety Issue - Handling",
+		"Safety Issue - Struck",
+		"Safety Issue - Public",
+		"Social Issue",
+		"Other Issue",
+		"Unknown"
+	];
+	const defaultTopicTypes =  [
+		"For information",
+		"VR"
+	];
+
+	describe("Update teamspace settings", function(done) {
+		const user =  imsharedTeamspace;
+		const newRiskCategories = [
+			"New Cat 1",
+			"New Cat 2"
+		];
+		const newTopicTypes = [
+			"New Type 1",
+			"New Type 2"
+		];
+
+		before(function(done) {
+			this.timeout(timeout);
+			agent.post("/login")
+				.send({username: user.user, password: user.password})
+				.expect(200, done);
+
+		});
+
+		it("set defaults should succeed", function(done) {
+			agent.patch(`/${user.user}/settings`)
+				.send({ topicTypes: defaultTopicTypes, riskCategories: defaultRiskCategories })
+				.expect(200, function(err, res) {
+					expect(res.body._id).to.equal(user.user);
+					expect(res.body.riskCategories).to.deep.equal(defaultRiskCategories);
+					expect(res.body.topicTypes).to.deep.equal(defaultTopicTypes);
+					done(err);
+				});
+		});
+
+		it("set defaults if user is not teamspace admin should fail", function(done) {
+			agent.patch(`/${collaboratorTeamspace}/settings`)
+				.send({ topicTypes: defaultTopicTypes, riskCategories: defaultRiskCategories })
+				.expect(401, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.NOT_AUTHORIZED.value);
+					done(err);
+				});
+		});
+
+		it("set defaults if user is not member of teamspace should fail", function(done) {
+			agent.patch(`/${notMemberOfTeamspace}/settings`)
+				.send({ topicTypes: defaultTopicTypes, riskCategories: defaultRiskCategories })
+				.expect(401, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.NOT_AUTHORIZED.value);
+					done(err);
+				});
+		});
+
+		it("set defaults if teamspace doesn't exist should fail", function(done) {
+			agent.patch(`/${fakeTeamspace}/settings`)
+				.send({ topicTypes: defaultTopicTypes, riskCategories: defaultRiskCategories })
+				.expect(404, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+					done(err);
+				});
+		});
+
+		it("with new topic types should succeed", function(done) {
+			agent.patch(`/${user.user}/settings`)
+				.send({ topicTypes: newTopicTypes })
+				.expect(200, function(err, res) {
+					expect(res.body._id).to.equal(user.user);
+					expect(res.body.riskCategories).to.deep.equal(defaultRiskCategories);
+					expect(res.body.topicTypes).to.deep.equal(newTopicTypes);
+					done(err);
+				});
+		});
+
+		it("with new risk categories should succeed", function(done) {
+			agent.patch(`/${user.user}/settings`)
+				.send({ riskCategories: newRiskCategories })
+				.expect(200, function(err, res) {
+					expect(res.body._id).to.equal(user.user);
+					expect(res.body.riskCategories).to.deep.equal(newRiskCategories);
+					expect(res.body.topicTypes).to.deep.equal(newTopicTypes);
+					done(err);
+				});
+		});
+
+		it("with unexpected field should succeed", function(done) {
+			agent.patch(`/${user.user}/settings`)
+				.send({
+					topicTypes: defaultTopicTypes,
+					riskCategories: defaultRiskCategories,
+					unexpectedField: "abc"
+				})
+				.expect(200, function(err, res) {
+					expect(res.body._id).to.equal(user.user);
+					expect(res.body.riskCategories).to.deep.equal(defaultRiskCategories);
+					expect(res.body.topicTypes).to.deep.equal(defaultTopicTypes);
+					expect(res.body.unexpectedField).to.equal(undefined);
+					done(err);
+				});
+		});
+
+		it("with duplicate risk categories should fail", function(done) {
+			const duplicateRiskCategories = defaultRiskCategories.concat(defaultRiskCategories);
+			agent.patch(`/${user.user}/settings`)
+				.send({
+					riskCategories: duplicateRiskCategories
+				})
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.DUPLICATED_ENTRIES.value);
+					done(err);
+				});
+		});
+
+		it("with duplicate topic type should fail", function(done) {
+			const duplicateTopicTypes = defaultTopicTypes.concat(defaultTopicTypes);
+			agent.patch(`/${user.user}/settings`)
+				.send({
+					topicTypes: duplicateTopicTypes
+				})
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.DUPLICATED_ENTRIES.value);
+					done(err);
+				});
+		});
+
+		it("with duplicate (case insensitive) categories should fail", function(done) {
+			const duplicateRiskCategoryLabels = ["dup 1", "DUP 1"];
+			agent.patch(`/${user.user}/settings`)
+				.send({
+					riskCategories: duplicateRiskCategoryLabels
+				})
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.DUPLICATED_ENTRIES.value);
+					done(err);
+				});
+		});
+
+		it("with duplicate (case insensitive) topic type should fail", function(done) {
+			const duplicateTopicTypeLabels = ["clone 2", "CLONE 2"];
+			agent.patch(`/${user.user}/settings`)
+				.send({
+					topicTypes: duplicateTopicTypeLabels
+				})
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.DUPLICATED_ENTRIES.value);
+					done(err);
+				});
+		});
+
+		it("with non-string array categories should fail", function(done) {
+			const nonStringRiskCategories = [1, 2, 3, 4, 5];
+			agent.patch(`/${user.user}/settings`)
+				.send({
+					riskCategories: nonStringRiskCategories
+				})
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("with non-string array topic type should fail", function(done) {
+			const nonStringTopicTypes = [{"value":"value 1"}, {"value":"value 2"}];
+			agent.patch(`/${user.user}/settings`)
+				.send({
+					topicTypes: nonStringTopicTypes
+				})
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("with non-array categories should fail", function(done) {
+			const nonArrayRiskCategories = {"key":"value"};
+			agent.patch(`/${user.user}/settings`)
+				.send({
+					riskCategories: nonArrayRiskCategories
+				})
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("with non-array topic type should fail", function(done) {
+			const nonArrayTopicTypes = "invalid entry";
+			agent.patch(`/${user.user}/settings`)
+				.send({
+					topicTypes: nonArrayTopicTypes
+				})
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		after(function(done) {
+			this.timeout(timeout);
+			agent.post("/logout")
+				.expect(200, done);
+		});
+	});
+
+	describe("Get teamspace settings", function(done) {
+		const user =  imsharedTeamspace;
+
+		before(function(done) {
+			this.timeout(timeout);
+			agent.post("/login")
+				.send({username: user.user, password: user.password})
+				.expect(200, done);
+
+		});
+
+		it("should succeed", function(done) {
+			agent.get(`/${user.user}/settings`)
+				.expect(200, function(err, res) {
+					expect(res.body._id).to.equal(user.user);
+					expect(res.body.riskCategories).to.deep.equal(defaultRiskCategories);
+					expect(res.body.topicTypes).to.deep.equal(defaultTopicTypes);
+					done(err);
+				});
+		});
+
+		it("if user is not teamspace admin should succeed", function(done) {
+			const collaboratorTeamspaceTopicTypes = [
+				"GIS",
+				"Risk",
+				"Clash",
+				"H&S",
+				"For information",
+				"VR",
+				"Constructibility",
+				"Design",
+				"Diff",
+				"RFI"
+			];
+			agent.get(`/${collaboratorTeamspace}/settings`)
+				.expect(200, function(err, res) {
+					expect(res.body._id).to.equal(collaboratorTeamspace);
+					expect(res.body.riskCategories).to.deep.equal(defaultRiskCategories);
+					expect(res.body.topicTypes).to.deep.equal(collaboratorTeamspaceTopicTypes);
+					done(err);
+				});
+		});
+
+		it("if user is not member of teamspace should fail", function(done) {
+			agent.get(`/${notMemberOfTeamspace}/settings`)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+					done(err);
+				});
+		});
+
+		it("if teamspace doesn't exist should fail", function(done) {
+			agent.get(`/${fakeTeamspace}/settings`)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+					done(err);
+				});
+		});
+
+		after(function(done) {
+			this.timeout(timeout);
+			agent.post("/logout")
+				.expect(200, done);
+		});
+	});
+
+	describe("Download mitigations file", function(done) {
+		const user =  imsharedTeamspace;
+
+		before(function(done) {
+			this.timeout(timeout);
+			agent.post("/login")
+				.send({username: user.user, password: user.password})
+				.expect(200, done);
+
+		});
+
+		it("that doesn't exist should fail", function(done) {
+			agent.get(`/${user.user}/settings/mitigations.csv`)
+				.expect(404, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.NO_FILE_FOUND.value);
+					done(err);
+				});
+		});
+
+		after(function(done) {
+			this.timeout(timeout);
+			agent.post("/logout")
+				.expect(200, done);
+		});
+	});
+
+	describe("Download mitigations file", function(done) {
+		const user =  metaTestTeamspace;
+
+		before(function(done) {
+			this.timeout(timeout);
+			agent.post("/login")
+				.send({username: user.user, password: user.password})
+				.expect(200, done);
+
+		});
+
+		it("should succeed", function(done) {
+			agent.get(`/${user.user}/settings/mitigations.csv`)
+				.expect(200, done);
+		});
+
+		it("if user is not teamspace admin should fail", function(done) {
+			agent.get(`/${collaboratorTeamspace}/settings/mitigations.csv`)
+				.expect(401, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.NOT_AUTHORIZED.value);
+					done(err);
+				});
+		});
+
+		it("if user is not member of teamspace should fail", function(done) {
+			agent.get(`/${notMemberOfTeamspace}/settings/mitigations.csv`)
+				.expect(401, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.NOT_AUTHORIZED.value);
+					done(err);
+				});
+		});
+
+		it("if user doesn't exist should fail", function(done) {
+			agent.get(`/${fakeTeamspace}/settings/mitigations.csv`)
+				.expect(404, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+					done(err);
+				});
+		});
+
+		after(function(done) {
+			this.timeout(timeout);
+			agent.post("/logout")
+				.expect(200, done);
+		});
+	});
+
+	describe("Upload mitigations file", function(done) {
+		const user =  imsharedTeamspace;
+		const notMitigationsFile = "/../../statics/mitigations/notMitigations.zip";
+
+		before(function(done) {
+			this.timeout(timeout);
+			agent.post("/login")
+				.send({username: user.user, password: user.password})
+				.expect(200, done);
+
+		});
+
+		it("should succeed", function(done) {
+			agent.post(`/${user.user}/settings/mitigations.csv`)
+				.attach("file", __dirname + mitigationsFile)
+				.expect(200, done);
+		});
+
+		it("reupload mitigations should succeed", function(done) {
+			agent.post(`/${user.user}/settings/mitigations.csv`)
+				.attach("file", __dirname + mitigationsFile)
+				.expect(200, done);
+		});
+
+		it("number of mitigations should remain the same on reupload", function(done) {
+			let totalSuggestions;
+
+			async.series([
+				function(done) {
+					agent.post(`/${user.user}/mitigations`)
+						.send({})
+						.expect(200, function(err, res) {
+							totalSuggestions = res.body.length;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.post(`/${user.user}/settings/mitigations.csv`)
+						.attach("file", __dirname + mitigationsFile)
+						.expect(200, function(err, res) {
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.post(`/${user.user}/mitigations`)
+						.send({})
+						.expect(200, function(err, res) {
+							expect(res.body.length).to.equal(totalSuggestions);
+							return done(err);
+						});
+				}
+			], done);
+		});
+
+		it("if user is not teamspace admin should fail", function(done) {
+			agent.post(`/${collaboratorTeamspace}/settings/mitigations.csv`)
+				.attach("file", __dirname + mitigationsFile)
+				.expect(401, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.NOT_AUTHORIZED.value);
+					done(err);
+				});
+		});
+
+		it("if user is not member of teamspace should fail", function(done) {
+			agent.post(`/${notMemberOfTeamspace}/settings/mitigations.csv`)
+				.attach("file", __dirname + mitigationsFile)
+				.expect(401, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.NOT_AUTHORIZED.value);
+					done(err);
+				});
+		});
+
+		it("if teamspace doesn't exist should fail", function(done) {
+			agent.post(`/${fakeTeamspace}/settings/mitigations.csv`)
+				.attach("file", __dirname + mitigationsFile)
+				.expect(404, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+					done(err);
+				});
+		});
+
+		it("non-CSV file should fail", function(done) {
+			agent.post(`/${user.user}/settings/mitigations.csv`)
+				.attach("file", __dirname + notMitigationsFile)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.FILE_FORMAT_NOT_SUPPORTED.value);
+					done(err);
+				});
+		});
+
+		it("file exceeding file size limit should fail", function(done) {
+			agent.post(`/${user.user}/settings/mitigations.csv`)
+				.attach("file", __dirname + bigMitigationsFile)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT.value);
+					done(err);
+				});
+		});
+
+		after(function(done) {
+			this.timeout(timeout);
+			agent.post("/logout")
+				.expect(200, done);
+		});
+	});
+
+	describe("Upload mitigations file", function(done) {
+		const user = noSubUser;
+
+		before(function(done) {
+			this.timeout(timeout);
+			agent.post("/login")
+				.send({username: user.user, password: user.password})
+				.expect(200, done);
+
+		});
+
+		it("that exceeds teamspace quota should fail", function(done) {
+			agent.post(`/${user.user}/settings/mitigations.csv`)
+                                .attach("file", __dirname + bigMitigationsFile)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT_PAY.value);
+					done(err);
+				});
+		});
+
+		after(function(done) {
+			this.timeout(timeout);
+			agent.post("/logout")
+				.expect(200, done);
+		});
+	});
 });

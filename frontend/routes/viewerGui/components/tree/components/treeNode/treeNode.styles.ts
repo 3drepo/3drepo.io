@@ -100,7 +100,7 @@ const containerBorder = css`
 `;
 
 export const Container = styled.li<IContainer>`
-	${containerBorder}
+	${containerBorder};
 	background-color: ${getBackgroundColor};
 	padding: 2px 12px 2px ${containerIndentation}px;
 	display: flex;

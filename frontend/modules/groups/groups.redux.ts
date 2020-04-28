@@ -124,7 +124,7 @@ export const togglePendingState = (state = INITIAL_STATE, { isPending }) => ({ .
 
 export const fetchGroupsSuccess = (state = INITIAL_STATE, { groups = [] }) => {
 	const groupsMap = keyBy(groups, '_id');
-	return { ...state, groupsMap };
+	return { ...state, colorOverrides: [], groupsMap };
 };
 
 export const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {

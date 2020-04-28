@@ -1,14 +1,22 @@
-{ "VERSION" : "4.5.0",
+{ "VERSION" : "4.5.4",
   "unity" : {
 	"current" : "2.20.0",
 	"supported": []
   },
   "navis" :{
-	"current" : "4.0.0",
-	"supported": ["3.12.0"]
+	"current" : "4.6.0",
+	"supported": [ "4.0.0", "3.12.0"]
+  },
+   "revit" :{
+	"current" : "4.6.0",
+	"supported": []
   },
   "unitydll" : {
 	"current": "4.4.0",
 	"supported" : []
+  },
+  "vba" : {
+	"current" : "4.6.0",
+	"supported": []
   }
 }

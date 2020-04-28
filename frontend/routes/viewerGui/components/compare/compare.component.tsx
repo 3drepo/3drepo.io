@@ -135,7 +135,9 @@ export class Compare extends React.PureComponent<IProps, any> {
 	));
 
 	public componentDidMount() {
-		this.props.getCompareModels(this.props.revision);
+		if (!this.props.compareModels.length) {
+			this.props.getCompareModels(this.props.revision);
+		}
 	}
 
 	public renderClashTabLabel = () => {

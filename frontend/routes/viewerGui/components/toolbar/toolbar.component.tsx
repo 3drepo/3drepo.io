@@ -25,7 +25,6 @@ import HomeIcon from '@material-ui/icons/Home';
 import MetadataIcon from '@material-ui/icons/Info';
 import MyLocationIcon from '@material-ui/icons/MyLocation';
 import TurntableIcon from '@material-ui/icons/Redo';
-import MeasureIcon from '@material-ui/icons/Straighten';
 import ShowAllIcon from '@material-ui/icons/Visibility';
 import HideIcon from '@material-ui/icons/VisibilityOff';
 import IsolateIcon from '@material-ui/icons/VisibilityOutlined';
@@ -70,8 +69,6 @@ interface IProps {
 	clipNumber: number;
 	coordViewActive: boolean;
 	isMetadataActive: boolean;
-	isMeasureActive: boolean;
-	isMeasureDisabled: boolean;
 	metaKeysExist: boolean;
 	isMetadataVisible: boolean;
 	goToExtent: () => void;
@@ -210,12 +207,6 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 				active: this.props.isClipEdit
 			},
 			{
-				label: VIEWER_TOOLBAR_ITEMS.MEASURE,
-				Icon: MeasureIcon,
-				action: this.toggleMeasure,
-				active: this.props.isMeasureActive
-			},
-			{
 				label: VIEWER_TOOLBAR_ITEMS.COORDVIEW,
 				Icon: MyLocationIcon,
 				action: this.toggleCoordView,
@@ -337,14 +328,5 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 	private toggleCoordView = () => {
 		const { coordViewActive, setCoordView} = this.props;
 		setCoordView(!coordViewActive);
-	}
-
-	private toggleMeasure = () => {
-		const { isMeasureActive, setMeasureVisibility, setPanelVisibility, isMetadataActive } = this.props;
-		setMeasureVisibility(!isMeasureActive);
-
-		if (!isMeasureActive && isMetadataActive) {
-			this.toggleMetadataPanel();
-		}
 	}
 }

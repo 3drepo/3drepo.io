@@ -18,15 +18,15 @@
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { MeasureActions } from '../../../../modules/measure';
+import { MeasurementsActions } from '../../../../modules/measurements';
 import { withViewer } from '../../../../services/viewer/viewer';
 import { PinButton } from './pinButton.component';
 
 const mapStateToProps = createStructuredSelector({});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	disableMeasure: MeasureActions.setDisabled,
-	deactivateMeasure: MeasureActions.deactivateMeasure,
+	disableMeasure: MeasurementsActions.setDisabled,
+	deactivateMeasure: MeasurementsActions.deactivateMeasure,
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(PinButton));

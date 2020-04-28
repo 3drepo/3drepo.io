@@ -27,6 +27,7 @@ export class Processing {
 	public selectionMap = {};
 	public visibilityMap = {};
 	public treePath = {} as any;
+	public subModelsRootNodes = {};
 
 	public getParentsByPath = memoize((node = {}) => {
 		const parents = [];
@@ -65,7 +66,7 @@ export class Processing {
 		const {
 			nodesList, nodesIndexesMap, defaultVisibilityMap,
 			meshesByNodeId, nodesBySharedIdsMap, visibilityMap, selectionMap,
-			treePath
+			treePath, subModelsRootNodes
 		} = data;
 		this.nodesList = nodesList;
 		this.nodesIndexesMap = nodesIndexesMap;
@@ -75,6 +76,7 @@ export class Processing {
 		this.selectionMap = selectionMap;
 		this.nodesBySharedIdsMap = nodesBySharedIdsMap;
 		this.treePath = treePath;
+		this.subModelsRootNodes = subModelsRootNodes;
 	}
 
 	public clearCurrentlySelected = () => {

@@ -36,7 +36,7 @@ view.clean =  function (viewToClean, targetType = "[object String]") {
 				viewToClean[key] = utils.uuidToString(viewToClean[key]);
 			}
 		} else if (viewToClean[key] && "[object Object]" === targetType) {
-			if ("[object String]" === Object.prototype.toString.call(viewToClean[key])) {
+			if (utils.isString(viewToClean[key])) {
 				viewToClean[key] = utils.stringToUUID(viewToClean[key]);
 			}
 		}
@@ -128,14 +128,13 @@ view.updateViewpoint = function (account, model, sessionId, data, id) {
 
 view.updateAttrs = function (account, model, id, data) {
 	const toUpdate = {};
-	const fieldsCanBeUpdated = ["name"];
-
-	// Set the data to be updated in Mongo
-	fieldsCanBeUpdated.forEach((key) => {
-		if (data[key]) {
-			toUpdate[key] = data[key];
-		}
-	});
+	// We can only update the name of a viewpoint
+	const name = data["name"];
+	if (name && utils.isString(name) && name !== "") {
+		toUpdate["name"] = name;
+	} else {
+		return Promise.reject(responseCodes.INVALID_ARGUMENTS);
+	}
 
 	return db.getCollection(account, model + ".views").then(_dbCol => {
 		return _dbCol.update({ _id: id }, { $set: toUpdate }).then(() => {
@@ -164,7 +163,7 @@ view.createViewpoint = async (account, model, sessionId, data) => {
 
 view.deleteViewpoint = function (account, model, idStr, sessionId) {
 	let id = idStr;
-	if ("[object String]" === Object.prototype.toString.call(id)) {
+	if (utils.isString(id)) {
 		id = utils.stringToUUID(id);
 	}
 

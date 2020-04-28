@@ -195,10 +195,14 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		const { teamspace, model, fetchRisk, risk } = this.props;
+		const {
+			teamspace, model, fetchRisk, risk, unsubscribeOnRiskCommentsChanges, subscribeOnRiskCommentsChanges,
+		} = this.props;
 
 		if (risk._id !== prevProps.risk._id) {
+			unsubscribeOnRiskCommentsChanges(prevProps.teamspace, prevProps.model, prevProps.risk._id);
 			fetchRisk(teamspace, model, risk._id);
+			subscribeOnRiskCommentsChanges(teamspace, model, risk._id);
 		}
 
 		if (
@@ -311,7 +315,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 
 	public handleNewScreenshot = async (screenshot) => {
 		const { teamspace, model, viewer } = this.props;
-		const viewpoint = this.isViewerInitialized ? await viewer.getCurrentViewpoint({ teamspace, model }) : null;
+		const viewpoint = await viewer.getCurrentViewpoint({ teamspace, model });
 
 		if (this.isNewRisk) {
 			this.props.setState({ newRisk: {

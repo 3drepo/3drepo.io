@@ -21,32 +21,23 @@ import { snakeCase } from 'lodash';
 
 import { StyledChipInput } from './chipsInput.styles';
 
-interface IChip {
-	value: string;
-	label: string;
-}
-
 interface IProps {
 	name: string;
-	value: IChip[];
+	value: string[];
 	onChange: (event) => void;
 	placeholder?: string;
 }
 
 export const ChipsInput: React.FunctionComponent<IProps> = ({ name, onChange, ...props }) => {
-	const getValues = () => [...props.value.map(({ label }) => label)];
+	const getValues = () => [...props.value];
 
 	const handleAddChip = (value) => {
-		const newChip = {
-			value: snakeCase(value),
-			label: value
-		};
-		const chipExists = !!props.value.find((chip) => (chip.value === newChip.value));
+		const chipExists = !!props.value.find((chipValue) => (value === chipValue));
 
 		if (!chipExists && onChange) {
 			onChange({
 				target: {
-					value: [...props.value, newChip],
+					value: [...props.value, value],
 					name,
 				}
 			});
@@ -54,7 +45,7 @@ export const ChipsInput: React.FunctionComponent<IProps> = ({ name, onChange, ..
 	};
 
 	const handleDeleteChip = (chipToRemove) => {
-		const newValue = props.value.filter((chip) => chip.label !== chipToRemove);
+		const newValue = props.value.filter((chip) => chip !== chipToRemove);
 
 		if (onChange) {
 			onChange({

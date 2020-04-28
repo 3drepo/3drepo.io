@@ -39,6 +39,10 @@ const _ = require("lodash");
 const nodeuuid = require("uuid/v1");
 const FileRef = require("../fileRef");
 const notifications = require("../notification");
+const CombinedStream = require("combined-stream");
+const stringToStream = require("string-to-stream");
+const { StreamBuffer } = require("./stream");
+const { BinToTriangleStringStream, BinToVector3dStringStream } = require("./binary");
 
 /** *****************************************************************************
  * Converts error code from repobouncerclient to a response error object.
@@ -1005,10 +1009,38 @@ function getMetadata(account, model, id) {
 			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
 		}
 	});
-
 }
 
-async function getSubModelRevisions(account, model, user, branch, rev) {
+async function getMeshById(account, model, meshId) {
+	const historyRes =  (await History.findByObjectId(account, model, meshId, {current:1}));
+	if (!historyRes) {
+		throw responseCodes.RESOURCE_NOT_FOUND;
+	}
+
+	const revisionIds = historyRes.current;
+	const projection = {
+		"parents": 1,
+		"vertices": 1,
+		"faces": 1,
+		"_extRef":1
+	};
+
+	const mesh = await Scene.getObjectById(account, model, utils.stringToUUID(meshId), projection);
+	mesh.matrix = await Scene.getParentMatrix(account, model, mesh.parents[0], revisionIds);
+
+	const vertices =  mesh.vertices ? new StreamBuffer({buffer: mesh.vertices.buffer, chunkSize: mesh.vertices.buffer.length}) : await Scene.getGridfsFileStream(account, model, mesh._extRef.vertices);
+	const triangles = mesh.faces ?  new StreamBuffer({buffer: mesh.faces.buffer, chunkSize: mesh.faces.buffer.length})  : await Scene.getGridfsFileStream(account, model, mesh._extRef.faces);
+
+	const combinedStream = CombinedStream.create();
+	combinedStream.append(stringToStream(["{\"matrix\":", JSON.stringify(mesh.matrix), ",\"vertices\":["].join("")));
+	combinedStream.append(vertices.pipe(new BinToVector3dStringStream({isLittleEndian: true})));
+	combinedStream.append(stringToStream("],\"triangles\":["));
+	combinedStream.append(triangles.pipe(new BinToTriangleStringStream({isLittleEndian: true})));
+	combinedStream.append(stringToStream("]}"));
+	return 	combinedStream;
+}
+
+async function getSubModelRevisions(account, model, branch, rev) {
 	const history = await History.getHistory({ account, model }, branch, rev);
 
 	if(!history) {
@@ -1082,5 +1114,6 @@ module.exports = {
 	getSubModelRevisions,
 	setStatus,
 	importSuccess,
-	importFail
+	importFail,
+	getMeshById
 };

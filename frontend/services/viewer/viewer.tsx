@@ -24,6 +24,7 @@ import {
 	VIEWER_NAV_MODES,
 } from '../../constants/viewer';
 import { UnityUtil } from '../../globals/unity-util';
+import { asyncTimeout } from '../../helpers/aync';
 import { DialogActions } from '../../modules/dialog';
 import { dispatch, getState } from '../../modules/store';
 import { selectMemory } from '../../modules/viewer';
@@ -55,14 +56,15 @@ export class ViewerService {
 	public currentNavMode = null;
 	public units = 'm';
 	public convertToM = 1.0;
-	public initialized = false;
+	public isInitialised = false;
 	public measureMode = false;
+	public measuringUnits = '';
 	public modelString = null;
 	public divId = 'unityViewer';
 	private numClips = 0;
 	private stats: boolean = false;
 	private emitter = new EventEmitter();
-	public initialised: {
+	public initialisedPromise: {
 		promise: Promise<any>;
 		resolve: () => void;
 		reject: () => void;
@@ -149,7 +151,7 @@ export class ViewerService {
 					showAll: true
 				});
 
-				this.initialised.resolve();
+				this.initialisedPromise.resolve();
 			})();
 		} catch (error) {
 			console.error('Error while initialising Unity script: ', error);
@@ -158,7 +160,7 @@ export class ViewerService {
 
 	public initUnity(options) {
 		return new Promise((resolve, reject) => {
-			if (this.initialized) {
+			if (this.isInitialised) {
 				resolve();
 			}
 
@@ -184,7 +186,7 @@ export class ViewerService {
 			this.setNavMode(VIEWER_NAV_MODES.TURNTABLE, false);
 
 			UnityUtil.onReady().then(() => {
-				this.initialized = true;
+				this.isInitialised = true;
 				this.emit(VIEWER_EVENTS.UNITY_READY, {
 					model: this.modelString,
 					name: this.name
@@ -343,7 +345,7 @@ export class ViewerService {
 
 	public async destroy() {
 		UnityUtil.reset();
-		this.initialized = false;
+		this.isInitialised = false;
 		this.removeAllListeners();
 		this.setPinDropMode(false);
 		await this.disableMeasure();
@@ -398,22 +400,84 @@ export class ViewerService {
 	 */
 
 	public async activateMeasure() {
+		this.measureMode = true;
 		await this.isViewerReady();
-		this.setMeasureMode(true);
+		UnityUtil.enableMeasuringTool();
+		this.measureMode = true;
 	}
 
 	public async disableMeasure() {
+		this.measureMode = false;
 		await this.isViewerReady();
-		this.setMeasureMode(false);
+		UnityUtil.disableMeasuringTool();
+		this.measureMode = false;
 	}
 
-	public setMeasureMode(on: boolean) {
-		this.measureMode = on;
-		if (on === true) {
-			UnityUtil.enableMeasuringTool();
-		} else {
-			UnityUtil.disableMeasuringTool();
-		}
+	public async setMeasureMode(mode: string) {
+		await this.isViewerReady();
+		UnityUtil.setMeasureToolMode(mode);
+	}
+
+	public async setMeasuringUnits(units) {
+		this.measuringUnits = units;
+		await this.isViewerReady();
+		UnityUtil.setMeasureToolUnits(units);
+	}
+
+	public getMeasuringUnits() {
+		return this.measuringUnits;
+	}
+
+	public async removeMeasurement(uuid) {
+		await this.isViewerReady();
+		UnityUtil.clearMeasureToolMeasurement(uuid);
+	}
+
+	public async setMeasurementColor(uuid, color) {
+		await this.isViewerReady();
+		UnityUtil.setMeasureToolMeasurementColor(uuid, color);
+	}
+
+	public async setMeasurementName(uuid, name) {
+		await this.isViewerReady();
+		UnityUtil.setMeasureToolMeasurementName(uuid, name);
+	}
+
+	public async enableEdgeSnapping() {
+		await this.isViewerReady();
+		UnityUtil.enableMeasureToolSnap();
+	}
+
+	public async disableEdgeSnapping() {
+		await this.isViewerReady();
+		UnityUtil.disableMeasureToolSnap();
+	}
+
+	public async enableMeasureXYZDisplay() {
+		await this.isViewerReady();
+		UnityUtil.enableMeasureToolXYZDisplay();
+	}
+
+	public async disableMeasureXYZDisplay() {
+		await this.isViewerReady();
+		UnityUtil.disableMeasureToolXYZDisplay();
+	}
+
+	public async clearMeasurements() {
+		await this.isViewerReady();
+		UnityUtil.clearAllMeasurements();
+	}
+
+	public measurementAlertEvent(measurement) {
+		this.emit(VIEWER_EVENTS.MEASUREMENT_CREATED, measurement);
+	}
+
+	public measurementRemoved(measurementId) {
+		this.emit(VIEWER_EVENTS.MEASUREMENT_REMOVED, measurementId);
+	}
+
+	public measurementsCleared() {
+		this.emit(VIEWER_EVENTS.ALL_MEASUREMENTS_REMOVED);
 	}
 
 	/**
@@ -421,7 +485,7 @@ export class ViewerService {
 	 */
 
 	public get canHighlight() {
-		return this.initialized && !this.pinDropMode && !this.measureMode;
+		return this.isInitialised && !this.pinDropMode && !this.measureMode;
 	}
 
 	public async highlightObjects(
@@ -568,8 +632,10 @@ export class ViewerService {
 		await this.isModelLoaded();
 		if (type === 'risk') {
 			UnityUtil.dropRiskPin(id, position, norm, colour);
-		} else {
+		} else if (type === 'issue') {
 			UnityUtil.dropIssuePin(id, position, norm, colour);
+		} else {
+			UnityUtil.dropBookmarkPin(id, position, norm, colour);
 		}
 		if (isSelected) {
 			UnityUtil.selectPin(id);
@@ -634,11 +700,11 @@ export class ViewerService {
 			initialised.resolve = resolve;
 			initialised.reject = reject;
 		});
-		this.initialised = initialised;
+		this.initialisedPromise = initialised;
 	}
 
 	public async isViewerReady() {
-		return await this.initialised.promise;
+		return await this.initialisedPromise.promise;
 	}
 
 	/**
@@ -655,7 +721,7 @@ export class ViewerService {
 			await Promise.reject('Teamspace, model, branch or revision was not defined!');
 		} else {
 			await this.loadNewModel(teamspace, model, branch, revision);
-			this.initialised.resolve();
+			this.initialisedPromise.resolve();
 		}
 	}
 
@@ -824,7 +890,7 @@ export class ViewerService {
 	}
 
 	public async getCurrentViewpoint({ teamspace, model }) {
-		return await this.getCurrentViewpointInfo(teamspace, model);
+		return this.isInitialised ? await asyncTimeout(1000, this.getCurrentViewpointInfo, teamspace, model) : null;
 	}
 
 	public async goToDefaultViewpoint() {

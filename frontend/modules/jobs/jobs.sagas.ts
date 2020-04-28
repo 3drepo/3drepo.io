@@ -35,23 +35,10 @@ export function* fetchJobs({ teamspace }) {
 	}
 }
 
-export function* fetchJobsColors({ teamspace }) {
-	try {
-		yield put(JobsActions.setColorsPending(true));
-		const response = yield API.getJobsColors(teamspace);
-		yield put(JobsActions.fetchJobsColorsSuccess(response.data));
-		yield put(JobsActions.setColorsPending(false));
-	} catch (error) {
-		yield put(DialogActions.showEndpointErrorDialog('get', 'jobs colors', error));
-		yield put(JobsActions.setColorsPending(false));
-	}
-}
-
 export function* fetchJobsAndColors() {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
 		yield put(JobsActions.fetchJobs(teamspace));
-		yield put(JobsActions.fetchJobsColors(teamspace));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'jobs and colors', error));
 	}
@@ -104,7 +91,6 @@ export function* getMyJob({ teamspace }) {
 
 export default function* JobsSaga() {
 	yield takeLatest(JobsTypes.FETCH_JOBS, fetchJobs);
-	yield takeLatest(JobsTypes.FETCH_JOBS_COLORS, fetchJobsColors);
 	yield takeLatest(JobsTypes.FETCH_JOBS_AND_COLORS, fetchJobsAndColors);
 	yield takeLatest(JobsTypes.CREATE_JOB, createJob);
 	yield takeLatest(JobsTypes.REMOVE_JOB, removeJob);
