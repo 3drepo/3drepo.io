@@ -63,6 +63,7 @@ describe("Issues", function () {
 
 	const bcf = {
 		path: "/../../statics/bcf/example1.bcf",
+		invalidFile: "/../../statics/bcf/notBCF.txt",
 		issue1: "75959a60-8ef1-11e6-8d05-9717c0574272",
 		issue2: "8d46d1b0-8ef1-11e6-8d05-9717c0574272"
 	};
@@ -1464,9 +1465,95 @@ describe("Issues", function () {
 		const bcfmodel = "testproject";
 
 		const altTeamspace = "projectshared";
+		const fakeTeamspace = "fakeTeamspace";
 		const collaboratorModel = "test_collaborator";
 		const commenterModel = "test_commenter";
 		const viewerModel = "test_viewer";
+		const fakeModel = "fakeModel";
+
+		const goldenBCF1 = {
+			"_id": bcf.issue1,
+			"desc": "cc",
+			"created": 1476107839000,
+			"priority": "medium",
+			"name": "monkey",
+			"owner": "fed",
+			"status": "in progress",
+			"topic_type": "for_approval",
+			"viewpoint": {
+				"guid": "8c7dd6b7-1259-4881-b0da-f37380894bd2",
+				"up": [
+					0.13319581086474475,
+					-0.10770430451778479,
+					-0.9852201067560606
+				],
+				"view_dir": [
+					0.7660971583345693,
+					-0.6194786539890793,
+					0.17129314418147787
+				],
+				"position": [
+					-6.020707046479461,
+					2.9113493754923834,
+					-0.05611432211203965
+				],
+				"fov": 1.726742513539546,
+				"type": "perspective"
+			},
+			"comments": [
+				{
+					"comment": "cccc",
+					"owner": "fed",
+					"viewpoint": {
+						"guid": "b34ece85-6f11-4a2f-ae88-0c159b6d7d1b",
+						"up": [
+							-0.254925235676232,
+							-0.839895797253119,
+							-0.479153601647702
+						],
+						"view_dir": [
+							-0.139163747773675,
+							-0.458499318731828,
+							0.877731067029096
+						],
+						"position": [
+							-0.521862880637192,
+							1.93350942622735,
+							-4.34724412167489
+						],
+						"fov": 1.72674251353955,
+						"type": "perspective"
+					}
+				},
+				{
+					"action": {
+						"property": "bcf_import"
+					}
+				}
+			]
+		};
+
+		const keys = [
+			"_id",
+			"desc",
+			"created",
+			"priority",
+			"name",
+			"owner",
+			"status",
+			"topic_type"
+		];
+		const commentKeys = [
+			"comment",
+			"owner"
+		];
+		const viewpointKeys = [
+			"up",
+			"view_dir",
+			"position",
+			"fov",
+			"type"
+		];
 
 		before(function(done) {
 			async.series([
@@ -1486,21 +1573,15 @@ describe("Issues", function () {
 		describe("Importing a bcf file", function() {
 
 			it("should succeed", function(done) {
-
 				async.series([
 					function(done) {
 						agent.post(`/${bcfusername}/${bcfmodel}/issues.bcfzip`)
 							.attach("file", __dirname + bcf.path)
-							.expect(200, function(err, res) {
-								done(err);
-							});
+							.expect(200, done);
 					},
-
 					function(done) {
 						agent.get(`/${bcfusername}/${bcfmodel}/issues`)
 							.expect(200, function(err, res) {
-
-							// issues in bcf file should be imported
 								const issue1 = res.body.find(issue => issue._id === bcf.issue1);
 								const issue2 = res.body.find(issue => issue._id === bcf.issue2);
 
@@ -1509,34 +1590,39 @@ describe("Issues", function () {
 								done(err);
 							});
 					},
-
 					function(done) {
 						agent.get(`/${bcfusername}/${bcfmodel}/issues/${bcf.issue1}`)
 							.expect(200, function(err, res) {
 
 								const issue1 = res.body;
 
-								expect(issue1._id).to.equal(bcf.issue1);
-								expect(issue1.desc).to.equal("cc");
-								expect(issue1.created).to.equal(1476107839000);
-								expect(issue1.priority).to.equal("medium");
-								expect(issue1.name).to.equal("monkey");
-								expect(issue1.status).to.equal("in progress");
-								expect(issue1.topic_type).to.equal("for_approval");
 								expect(issue1.thumbnail).to.exist;
+								expect(issue1.comments.length).to.equal(goldenBCF1.comments.length);
 								expect(issue1.viewpoint).to.exist;
 								expect(issue1.viewpoint.screenshot).to.exist;
-								expect(issue1.viewpoint.up).to.exist;
-								expect(issue1.viewpoint.view_dir).to.exist;
-								expect(issue1.viewpoint.position).to.exist;
-								expect(issue1.viewpoint.fov).to.exist;
-								expect(issue1.viewpoint.type).to.equal("perspective");
 
-								expect(issue1.comments.length).to.equal(2);
-								expect(issue1.comments[0].comment).to.equal("cccc");
+								keys.forEach(key => {
+									expect(issue1[key]).to.equal(goldenBCF1[key]);
+								});
+
+								commentKeys.forEach(key => {
+									expect(issue1.comments[0][key]).to.equal(goldenBCF1.comments[0][key]);
+								});
+
+								viewpointKeys.forEach(key => {
+									if (Array.isArray(goldenBCF1.viewpoint[key])) {
+										expect(issue1.viewpoint[key]).to.deep.equal(goldenBCF1.viewpoint[key]);
+									} else {
+										expect(issue1.viewpoint[key]).to.equal(goldenBCF1.viewpoint[key]);
+									}
+									if (Array.isArray(goldenBCF1.comments[0][key])) {
+										expect(issue1.comments[0][key]).to.deep.equal(goldenBCF1.comments[0][key]);
+									} else {
+										expect(issue1.comments[0][key]).to.equal(goldenBCF1.comments[0][key]);
+									}
+								});
 
 								done(err);
-
 							});
 					}
 				], done);
@@ -1548,16 +1634,11 @@ describe("Issues", function () {
 					function(done) {
 						agent.post(`/${altTeamspace}/${collaboratorModel}/issues.bcfzip`)
 							.attach("file", __dirname + bcf.path)
-							.expect(200, function(err, res) {
-								done(err);
-							});
+							.expect(200, done);
 					},
-
 					function(done) {
 						agent.get(`/${altTeamspace}/${collaboratorModel}/issues`)
 							.expect(200, function(err, res) {
-
-							// issues in bcf file should be imported
 								const issue1 = res.body.find(issue => issue._id === bcf.issue1);
 								const issue2 = res.body.find(issue => issue._id === bcf.issue2);
 
@@ -1566,34 +1647,39 @@ describe("Issues", function () {
 								done(err);
 							});
 					},
-
 					function(done) {
 						agent.get(`/${altTeamspace}/${collaboratorModel}/issues/${bcf.issue1}`)
 							.expect(200, function(err, res) {
 
 								const issue1 = res.body;
 
-								expect(issue1._id).to.equal(bcf.issue1);
-								expect(issue1.desc).to.equal("cc");
-								expect(issue1.created).to.equal(1476107839000);
-								expect(issue1.priority).to.equal("medium");
-								expect(issue1.name).to.equal("monkey");
-								expect(issue1.status).to.equal("in progress");
-								expect(issue1.topic_type).to.equal("for_approval");
 								expect(issue1.thumbnail).to.exist;
+								expect(issue1.comments.length).to.equal(goldenBCF1.comments.length);
 								expect(issue1.viewpoint).to.exist;
 								expect(issue1.viewpoint.screenshot).to.exist;
-								expect(issue1.viewpoint.up).to.exist;
-								expect(issue1.viewpoint.view_dir).to.exist;
-								expect(issue1.viewpoint.position).to.exist;
-								expect(issue1.viewpoint.fov).to.exist;
-								expect(issue1.viewpoint.type).to.equal("perspective");
 
-								expect(issue1.comments.length).to.equal(2);
-								expect(issue1.comments[0].comment).to.equal("cccc");
+								keys.forEach(key => {
+									expect(issue1[key]).to.equal(goldenBCF1[key]);
+								});
+
+								commentKeys.forEach(key => {
+									expect(issue1.comments[0][key]).to.equal(goldenBCF1.comments[0][key]);
+								});
+
+								viewpointKeys.forEach(key => {
+									if (Array.isArray(goldenBCF1.viewpoint[key])) {
+										expect(issue1.viewpoint[key]).to.deep.equal(goldenBCF1.viewpoint[key]);
+									} else {
+										expect(issue1.viewpoint[key]).to.equal(goldenBCF1.viewpoint[key]);
+									}
+									if (Array.isArray(goldenBCF1.comments[0][key])) {
+										expect(issue1.comments[0][key]).to.deep.equal(goldenBCF1.comments[0][key]);
+									} else {
+										expect(issue1.comments[0][key]).to.equal(goldenBCF1.comments[0][key]);
+									}
+								});
 
 								done(err);
-
 							});
 					}
 				], done);
@@ -1604,16 +1690,11 @@ describe("Issues", function () {
 					function(done) {
 						agent.post(`/${altTeamspace}/${commenterModel}/issues.bcfzip`)
 							.attach("file", __dirname + bcf.path)
-							.expect(200, function(err, res) {
-								done(err);
-							});
+							.expect(200, done);
 					},
-
 					function(done) {
 						agent.get(`/${altTeamspace}/${commenterModel}/issues`)
 							.expect(200, function(err, res) {
-
-							// issues in bcf file should be imported
 								const issue1 = res.body.find(issue => issue._id === bcf.issue1);
 								const issue2 = res.body.find(issue => issue._id === bcf.issue2);
 
@@ -1622,34 +1703,39 @@ describe("Issues", function () {
 								done(err);
 							});
 					},
-
 					function(done) {
 						agent.get(`/${altTeamspace}/${commenterModel}/issues/${bcf.issue1}`)
 							.expect(200, function(err, res) {
 
 								const issue1 = res.body;
 
-								expect(issue1._id).to.equal(bcf.issue1);
-								expect(issue1.desc).to.equal("cc");
-								expect(issue1.created).to.equal(1476107839000);
-								expect(issue1.priority).to.equal("medium");
-								expect(issue1.name).to.equal("monkey");
-								expect(issue1.status).to.equal("in progress");
-								expect(issue1.topic_type).to.equal("for_approval");
 								expect(issue1.thumbnail).to.exist;
+								expect(issue1.comments.length).to.equal(goldenBCF1.comments.length);
 								expect(issue1.viewpoint).to.exist;
 								expect(issue1.viewpoint.screenshot).to.exist;
-								expect(issue1.viewpoint.up).to.exist;
-								expect(issue1.viewpoint.view_dir).to.exist;
-								expect(issue1.viewpoint.position).to.exist;
-								expect(issue1.viewpoint.fov).to.exist;
-								expect(issue1.viewpoint.type).to.equal("perspective");
 
-								expect(issue1.comments.length).to.equal(2);
-								expect(issue1.comments[0].comment).to.equal("cccc");
+								keys.forEach(key => {
+									expect(issue1[key]).to.equal(goldenBCF1[key]);
+								});
+
+								commentKeys.forEach(key => {
+									expect(issue1.comments[0][key]).to.equal(goldenBCF1.comments[0][key]);
+								});
+
+								viewpointKeys.forEach(key => {
+									if (Array.isArray(goldenBCF1.viewpoint[key])) {
+										expect(issue1.viewpoint[key]).to.deep.equal(goldenBCF1.viewpoint[key]);
+									} else {
+										expect(issue1.viewpoint[key]).to.equal(goldenBCF1.viewpoint[key]);
+									}
+									if (Array.isArray(goldenBCF1.comments[0][key])) {
+										expect(issue1.comments[0][key]).to.deep.equal(goldenBCF1.comments[0][key]);
+									} else {
+										expect(issue1.comments[0][key]).to.equal(goldenBCF1.comments[0][key]);
+									}
+								});
 
 								done(err);
-
 							});
 					}
 				], done);
@@ -1663,12 +1749,68 @@ describe("Issues", function () {
 						done(err);
 					});
 			});
+
+			it("if model does not exist should fail", function(done) {
+				agent.post(`/${altTeamspace}/${fakeModel}/issues.bcfzip`)
+					.attach("file", __dirname + bcf.path)
+					.expect(404, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+						done(err);
+					});
+			});
+
+			it("if teamspace does not exist should fail", function(done) {
+				agent.post(`/${fakeTeamspace}/${viewerModel}/issues.bcfzip`)
+					.attach("file", __dirname + bcf.path)
+					.expect(404, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+						done(err);
+					});
+			});
+
+			it("if file is not BCF file should fail", function(done) {
+				agent.post(`/${altTeamspace}/${viewerModel}/issues.bcfzip`)
+					.attach("file", __dirname + bcf.invalidFile)
+					.expect(401, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.NOT_AUTHORIZED.value);
+						done(err);
+					});
+			});
 		});
 
 		describe("Exporting a bcf file", function() {
 			it("should succeed", function(done) {
 				agent.get(`/${bcfusername}/${bcfmodel}/issues.bcfzip`)
-					.expect(200, function(err, res) {
+					.expect(200, done);
+			});
+
+			it("if user is collaborator should succeed", function(done) {
+				agent.get(`/${altTeamspace}/${collaboratorModel}/issues.bcfzip`)
+					.expect(200, done);
+			});
+
+			it("if user is commenter should succeed", function(done) {
+				agent.get(`/${altTeamspace}/${commenterModel}/issues.bcfzip`)
+					.expect(200, done);
+			});
+
+			it("if user is viewer should succeed", function(done) {
+				agent.get(`/${altTeamspace}/${viewerModel}/issues.bcfzip`)
+					.expect(200, done);
+			});
+
+			it("if model does not exist should fail", function(done) {
+				agent.get(`/${altTeamspace}/${fakeModel}/issues.bcfzip`)
+					.expect(404, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+						done(err);
+					});
+			});
+
+			it("if teamspace does not exist should fail", function(done) {
+				agent.get(`/${fakeTeamspace}/${viewerModel}/issues.bcfzip`)
+					.expect(404, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
 						done(err);
 					});
 			});
