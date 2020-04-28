@@ -26,7 +26,7 @@ import { selectStarredModels, StarredActions } from '../starred';
 import { UserManagementActions } from '../userManagement';
 import { TeamspacesActions, TeamspacesTypes } from './teamspaces.redux';
 import { teamspacesSchema } from './teamspaces.schema';
-import { selectProjects } from './teamspaces.selectors';
+import { selectProjects, selectTeamspacesList } from './teamspaces.selectors';
 
 export function* fetchTeamspaces({ username }) {
 	try {
@@ -40,6 +40,13 @@ export function* fetchTeamspaces({ username }) {
 	}
 
 	yield put(TeamspacesActions.setPendingState(false));
+}
+
+export function* fetchTeamspacesIfNecessary({ username }) {
+	const teamspaces = yield select( selectTeamspacesList );
+	if (!teamspaces.length) {
+		yield put(TeamspacesActions.fetchTeamspaces(username));
+	}
 }
 
 export function* leaveTeamspace({ teamspace }) {
@@ -183,6 +190,7 @@ export function* removeModel({ teamspace, modelData }) {
 export default function* TeamspacesSaga() {
 	yield takeLatest(TeamspacesTypes.FETCH_TEAMSPACES, fetchTeamspaces);
 	yield takeLatest(TeamspacesTypes.LEAVE_TEAMSPACE, leaveTeamspace);
+	yield takeLatest(TeamspacesTypes.FETCH_TEAMSPACES_IF_NECESSARY, fetchTeamspacesIfNecessary);
 
 	// Projects
 	yield takeLatest(TeamspacesTypes.CREATE_PROJECT, createProject);

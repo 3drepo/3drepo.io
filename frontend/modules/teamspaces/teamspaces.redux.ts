@@ -22,6 +22,7 @@ import { SORTING_BY_LAST_UPDATED } from '../../routes/teamspaces/teamspaces.cont
 
 export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createActions({
 	fetchTeamspaces: ['username'],
+	fetchTeamspacesIfNecessary: ['username'],
 	fetchTeamspacesSuccess: ['entities'],
 	setPendingState: ['pendingState'],
 	setModelUploadStatus: ['teamspace', 'project', 'model', 'modelData'],

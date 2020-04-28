@@ -28,16 +28,6 @@ export const getJobs = (teamspace): Promise<any> => {
 };
 
 /**
- * Get jobs colors list
- *
- * @param teamspace
- * @returns {*|promise}
- */
-export const getJobsColors = (teamspace): Promise<any> => {
-	return api.get(`${teamspace}/jobs/colors`);
-};
-
-/**
  * Create new job
  *
  * @param teamspace

@@ -76,7 +76,7 @@ interface IProps {
 	isLoadingTeamspace: boolean;
 	isTeamspaceAdmin: boolean;
 	currentUser: {username: string};
-	fetchTeamspaces: (username) => void;
+	fetchTeamspacesIfNecessary: (username) => void;
 	fetchUsers: () => void;
 	selectedTeamspace: string;
 }
@@ -106,9 +106,7 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 		const { teamspaces, match, history, currentUser, selectedTeamspace } = this.props;
 		const { activeTab } = this.state;
 
-		if (teamspaces.length === 0) {
-			this.props.fetchTeamspaces(currentUser.username);
-		}
+		this.props.fetchTeamspacesIfNecessary(currentUser.username);
 
 		if (selectedTeamspace) {
 			this.props.fetchUsers();
