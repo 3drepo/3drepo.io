@@ -48,13 +48,13 @@ export const TypingHandler = ({
 	React.useEffect(() => {
 		if (stage) {
 			if (mode === MODES.TEXT && !visible && !positionLocked && !selected) {
-				stage.on('mousemove', handleMouseMove);
-				stage.on('mousedown', handleMouseDown);
+				stage.on('mousemove touchmove', handleMouseMove);
+				stage.on('mousedown touchstart', handleMouseDown);
 			}
 
 			return () => {
-				stage.off('mousemove', handleMouseMove);
-				stage.off('mousedown', handleMouseDown);
+				stage.off('mousemove touchmove', handleMouseMove);
+				stage.off('mousedown touchstart', handleMouseDown);
 			};
 		}
 	}, [mode, stage, positionLocked, selected]);

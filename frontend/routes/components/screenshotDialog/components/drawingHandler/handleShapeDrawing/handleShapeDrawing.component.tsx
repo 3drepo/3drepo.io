@@ -16,8 +16,8 @@
  */
 
 import React from 'react';
-import { createShape } from '../drawingHandler.helpers';
 
+import { createShape } from '../drawingHandler.helpers';
 import {
 	HandleBaseDrawing, IHandleBaseDrawingProps, IHandleBaseDrawingStates,
 } from '../handleBaseDrawing/handleBaseDrawing.component';
@@ -43,15 +43,15 @@ export class HandleShapeDrawing
 			this.activeShape = this.props.activeShape;
 		}
 
-		this.props.stage.on('mousemove', this.handleMouseMoveShape);
-		this.props.stage.on('mouseup', this.handleMouseUpShape);
-		this.props.stage.on('mousedown', this.handleMouseDownShape);
+		this.props.stage.on('mousemove touchmove', this.handleMouseMoveShape);
+		this.props.stage.on('mouseup touchend', this.handleMouseUpShape);
+		this.props.stage.on('mousedown touchstart', this.handleMouseDownShape);
 	}
 
 	public unsubscribeDrawingEvents = () => {
-		this.props.stage.off('mousemove', this.handleMouseMoveShape);
-		this.props.stage.off('mouseup', this.handleMouseUpShape);
-		this.props.stage.off('mousedown', this.handleMouseDownShape);
+		this.props.stage.off('mousemove touchmove', this.handleMouseMoveShape);
+		this.props.stage.off('mouseup touchend', this.handleMouseUpShape);
+		this.props.stage.off('mousedown touchstart', this.handleMouseDownShape);
 	}
 
 	public handleMouseMoveShape = () => {

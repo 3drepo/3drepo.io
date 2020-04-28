@@ -551,6 +551,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 						height={stage.height}
 						width={stage.width}
 						onMouseDown={this.handleStageMouseDown}
+						onTouchStart={this.handleStageMouseDown}
 					>
 						{this.renderLayers()}
 					</Stage>
