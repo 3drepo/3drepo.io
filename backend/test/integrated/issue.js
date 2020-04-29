@@ -1784,6 +1784,11 @@ describe("Issues", function () {
 					.expect(200, done);
 			});
 
+			it("for specific issue numbers should succeed", function(done) {
+				agent.get(`/${bcfusername}/${bcfmodel}/issues.bcfzip?numbers=8,9`)
+					.expect(200, done);
+			});
+
 			it("if user is collaborator should succeed", function(done) {
 				agent.get(`/${altTeamspace}/${collaboratorModel}/issues.bcfzip`)
 					.expect(200, done);
