@@ -44,7 +44,7 @@ function getRefEntry(account, collection, fileName) {
 	});
 }
 
-function fetchFile(account, model, ext, fileName, metadata = false, useLegacyNameOnFallback = false) {
+function _fetchFile(account, model, ext, fileName, metadata = false, useLegacyNameOnFallback = false) {
 	const collection =  model ? `${model}${ext}` : ext;
 	return getRefEntry(account, collection, fileName).then((entry) => {
 		if(!entry) {
@@ -142,8 +142,8 @@ FileRef.getOriginalFile = function(account, model, fileName) {
 	return fetchFileStream(account, model, collection, fileName, false);
 };
 
-FileRef.getFile = (account, model, collName, ref_id) => {
-	return fetchFile(account, model, "." + collName + ".ref", ref_id);
+FileRef.fetchFile = (account, model, collName, ref_id) => {
+	return _fetchFile(account, model, "." + collName + ".ref", ref_id);
 };
 
 FileRef.removeFile = async (account, model, collName, ref_id) => {
@@ -152,12 +152,10 @@ FileRef.removeFile = async (account, model, collName, ref_id) => {
 	const col = await DB.getCollection(account, refCollName);
 	const entry = await col.findOne({_id: ref_id});
 
-	await Promise.all([
+	return await Promise.all([
 		ExternalServices.removeFiles(account, refCollName, entry.type, [entry.link]),
 		col.remove({_id:entry._id})
 	]);
-
-	return true; // success
 };
 
 FileRef.getTotalModelFileSize = function(account, model) {
@@ -185,15 +183,15 @@ FileRef.getTotalModelFileSize = function(account, model) {
 };
 
 FileRef.getUnityBundle = function(account, model, fileName) {
-	return fetchFile(account, model, UNITY_BUNDLE_REF_EXT, fileName, false, true);
+	return _fetchFile(account, model, UNITY_BUNDLE_REF_EXT, fileName, false, true);
 };
 
 FileRef.getSequenceStateFile = function(account, model, fileName) {
-	return fetchFile(account, model, STATE_FILE_REF_EXT, fileName, false, false);
+	return _fetchFile(account, model, STATE_FILE_REF_EXT, fileName, false, false);
 };
 
 FileRef.getJSONFile = function(account, model, fileName) {
-	return fetchFile(account, model, JSON_FILE_REF_EXT, fileName, false, true);
+	return _fetchFile(account, model, JSON_FILE_REF_EXT, fileName, false, true);
 };
 
 FileRef.getMitigationsStream = function(account) {
@@ -201,7 +199,7 @@ FileRef.getMitigationsStream = function(account) {
 };
 
 FileRef.getResourceFile = function(account, model, fileName) {
-	return fetchFile(account, model, RESOURCES_FILE_REF_EXT, fileName, true, false);
+	return _fetchFile(account, model, RESOURCES_FILE_REF_EXT, fileName, true, false);
 };
 
 /**
@@ -269,22 +267,17 @@ FileRef.storeMitigationsFile = async function(account, user, name, data) {
 	return await this.storeFile(account, collName, user, name, data, extraFields);
 };
 
-FileRef.storeFile = async function(account, model, collName, data, extraFields = null) {
-	const refCollName = model + "." + collName + ".ref";
-	let refInfo = await ExternalServices.storeFile(account, refCollName, data);
-	refInfo = {...refInfo ,...(extraFields || {}) };
-
-	const refColl = await DB.getCollection(account, refCollName);
-	await refColl.insertOne(refInfo);
-	return refInfo;
-};
-
 FileRef.storeFileAsResource = async function(account, model, user, name, data, extraFields = null) {
 	const collName = model + RESOURCES_FILE_REF_EXT;
 
-	let refInfo = await ExternalServices.storeFile(account, collName, data);
+	return await this.storeFile(account, collName, user, name, data, extraFields);
+};
+
+FileRef.storeFile = async function(account, collection, user, name, data, extraFields = null) {
+	let refInfo = await ExternalServices.storeFile(account, collection, data);
 	refInfo = {...refInfo ,...(extraFields || {}) };
-	return await insertRef(account, collName, user, name, refInfo);
+
+	return await insertRef(account, collection, user, name, refInfo);
 };
 
 FileRef.storeUrlAsResource = async function(account, model, user, name, link, extraFields = null) {

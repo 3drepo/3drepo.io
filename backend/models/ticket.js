@@ -448,7 +448,7 @@ class Ticket {
 				return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 			} else {
 				if (foundTicket.viewpoints[0].screenshot_ref) {
-					return FileRef.getFile(account, model, this.collName , foundTicket.viewpoints[0].screenshot_ref);
+					return FileRef.fetchFile(account, model, this.collName , foundTicket.viewpoints[0].screenshot_ref);
 				}
 
 				// this is being kept for legacy reasons
