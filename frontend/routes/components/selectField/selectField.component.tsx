@@ -20,6 +20,12 @@ import React from 'react';
 import Select, { SelectProps } from '@material-ui/core/Select';
 import { MuiTheme } from '../../../styles/theme';
 
+function findLabel(children, value) {
+	return  children.find((c) => {
+		return (Array.isArray(c)) ?  findLabel(c, value) : c.props.value === value;
+	});
+}
+
 export class SelectField extends React.PureComponent<SelectProps, any> {
 	public menuWrapper;
 	public menuItems;
@@ -115,7 +121,7 @@ export class SelectField extends React.PureComponent<SelectProps, any> {
 			onExit: this.handleClose
 		};
 
-		const hasLabel = (children as any[]).find((c) => c.props.value === selectProps.value);
+		const hasLabel = Boolean(findLabel(this.props.children, selectProps.value));
 
 		return (
 			<Select
