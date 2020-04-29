@@ -438,7 +438,7 @@ function* closeDetails() {
 
 const onUpdateEvent = (updatedRisk) => {
 	const jobs = selectJobsList(getState());
-	if (updatedRisk.status === RISK_LEVELS.AGREED_FULLY) {
+	if (updatedRisk.mitigation_status === RISK_LEVELS.AGREED_FULLY) {
 		dispatch(RisksActions.showCloseInfo(updatedRisk._id));
 		setTimeout(() => {
 			dispatch(RisksActions.saveRiskSuccess(prepareRisk(updatedRisk, jobs)));

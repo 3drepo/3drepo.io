@@ -47,8 +47,7 @@ export function* fetchQuotaAndInvitations() {
 		const [{data: invitations}, {data: {collaboratorLimit}}] = yield all([
 			API.fetchInvitations(teamspace),
 			API.getQuotaInfo(teamspace),
-			put(JobsActions.fetchJobs(teamspace)),
-			put(JobsActions.fetchJobsColors(teamspace))
+			put(JobsActions.fetchJobs(teamspace))
 		]);
 
 		yield put(UserManagementActions.fetchQuotaAndInvitationsSuccess(
@@ -66,10 +65,7 @@ export function* fetchQuotaAndInvitations() {
 export function *fetchCurrentTeamspaceJobsAndColors() {
 	const teamspace = yield select(selectCurrentTeamspace);
 
-	yield all([
-		put(JobsActions.fetchJobs(teamspace)),
-		put(JobsActions.fetchJobsColors(teamspace))
-	]);
+	yield put(JobsActions.fetchJobs(teamspace));
 }
 
 export function* fetchTeamspaceUsers() {

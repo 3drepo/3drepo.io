@@ -88,7 +88,8 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 		</Name>
 	));
 	public renderName = renderWhenTrue(() => <Name as="div"><Truncate lines={1}>{this.props.name}</Truncate></Name>);
-	public renderClosedMessage = renderWhenTrue(() => <ActionMessage content="This issue is now closed" />);
+	public renderClosedMessage = renderWhenTrue(() =>
+		<ActionMessage content={`This ${this.props.panelName.slice(0, -1)} is now closed`} />);
 
 	public renderThumbnail = renderWhenTrue(() => (
 		<ThumbnailWrapper>

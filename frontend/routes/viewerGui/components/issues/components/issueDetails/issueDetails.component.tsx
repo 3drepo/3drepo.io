@@ -93,10 +93,6 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		return [...this.props.jobs, UNASSIGNED_JOB];
 	}
 
-	get isViewerInitialized() {
-		return this.props.viewer.initialized;
-	}
-
 	public commentRef = React.createRef<any>();
 
 	public renderLogList = renderWhenTrue(() => (
@@ -301,7 +297,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public handleNewScreenshot = async (screenshot) => {
 		const { teamspace, model, viewer } = this.props;
-		const viewpoint = this.isViewerInitialized ? await viewer.getCurrentViewpoint({ teamspace, model }) : null;
+		const viewpoint = await viewer.getCurrentViewpoint({ teamspace, model });
 
 		if (this.isNewIssue) {
 			this.props.setState({
@@ -320,7 +316,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public postComment = async (teamspace, model, { comment, screenshot }, finishSubmitting) => {
-		const viewpoint = this.isViewerInitialized ? await this.props.viewer.getCurrentViewpoint({ teamspace, model }) : null;
+		const viewpoint = await this.props.viewer.getCurrentViewpoint({ teamspace, model });
 		const issueCommentData = {
 			_id: this.issueData._id,
 			comment,
