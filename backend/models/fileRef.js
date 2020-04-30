@@ -32,6 +32,9 @@ const RESOURCES_FILE_REF_EXT = ".resources.ref";
 const MITIGATIONS_FILE_REF = "mitigations.ref";
 const MITIGATIONS_ID = "mitigations";
 
+const ISSUES_FILE_REF_EXT = ".issues.ref";
+const RISKS_FILE_REF_EXT = ".risks.ref";
+
 const ISSUES_RESOURCE_PROP = "issueIds";
 const RISKS_RESOURCE_PROP = "riskIds";
 const attachResourceProps = [ISSUES_RESOURCE_PROP, RISKS_RESOURCE_PROP];
@@ -116,6 +119,7 @@ function removeAllFiles(account, collection) {
 						links: {$addToSet:  "$link"}
 					}
 				}];
+
 			return col.aggregate(query).toArray().then((results) => {
 				const delPromises = [];
 				results.forEach((entry) => {
@@ -220,6 +224,9 @@ FileRef.removeAllFilesFromModel = function(account, model) {
 	promises.push(removeAllFiles(account, model + UNITY_BUNDLE_REF_EXT));
 	promises.push(removeAllFiles(account, model + RESOURCES_FILE_REF_EXT));
 	promises.push(removeAllFiles(account, model + STATE_FILE_REF_EXT));
+	promises.push(removeAllFiles(account, model + ISSUES_FILE_REF_EXT));
+	promises.push(removeAllFiles(account, model + RISKS_FILE_REF_EXT));
+
 	return Promise.all(promises);
 };
 
