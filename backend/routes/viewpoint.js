@@ -295,7 +295,7 @@ function findViewpoint(req, res, next) {
 
 function createViewpoint(req, res, next) {
 	if (Object.keys(req.body).length >= 3 &&
-			Object.prototype.toString.call(req.body.name) === "[object String]" &&
+			utils.isString(req.body.name) &&
 			Object.prototype.toString.call(req.body.viewpoint) === "[object Object]" &&
 			(Object.prototype.toString.call(req.body.screenshot) === "[object Object]"  || !req.body.screenshot) &&
 			(!req.body.clippingPlanes || Object.prototype.toString.call(req.body.clippingPlanes) === "[object Array]")) {
