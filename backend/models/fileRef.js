@@ -32,6 +32,9 @@ const RESOURCES_FILE_REF_EXT = ".resources.ref";
 const MITIGATIONS_FILE_REF = "mitigations.ref";
 const MITIGATIONS_ID = "mitigations";
 
+const ISSUES_FILE_REF_EXT = ".issues.ref";
+const RISKS_FILE_REF_EXT = ".risks.ref";
+
 const ISSUES_RESOURCE_PROP = "issueIds";
 const RISKS_RESOURCE_PROP = "riskIds";
 const attachResourceProps = [ISSUES_RESOURCE_PROP, RISKS_RESOURCE_PROP];
@@ -44,7 +47,7 @@ function getRefEntry(account, collection, fileName) {
 	});
 }
 
-function fetchFile(account, model, ext, fileName, metadata = false, useLegacyNameOnFallback = false) {
+function _fetchFile(account, model, ext, fileName, metadata = false, useLegacyNameOnFallback = false) {
 	const collection =  model ? `${model}${ext}` : ext;
 	return getRefEntry(account, collection, fileName).then((entry) => {
 		if(!entry) {
@@ -116,6 +119,7 @@ function removeAllFiles(account, collection) {
 						links: {$addToSet:  "$link"}
 					}
 				}];
+
 			return col.aggregate(query).toArray().then((results) => {
 				const delPromises = [];
 				results.forEach((entry) => {
@@ -140,6 +144,22 @@ const FileRef = {};
 FileRef.getOriginalFile = function(account, model, fileName) {
 	const collection = model + ORIGINAL_FILE_REF_EXT;
 	return fetchFileStream(account, model, collection, fileName, false);
+};
+
+FileRef.fetchFile = (account, model, collName, ref_id) => {
+	return _fetchFile(account, model, "." + collName + ".ref", ref_id);
+};
+
+FileRef.removeFile = async (account, model, collName, ref_id) => {
+	const refCollName =   model + "." + collName + ".ref";
+
+	const col = await DB.getCollection(account, refCollName);
+	const entry = await col.findOne({_id: ref_id});
+
+	return await Promise.all([
+		ExternalServices.removeFiles(account, refCollName, entry.type, [entry.link]),
+		col.remove({_id:entry._id})
+	]);
 };
 
 FileRef.getTotalModelFileSize = function(account, model) {
@@ -167,15 +187,15 @@ FileRef.getTotalModelFileSize = function(account, model) {
 };
 
 FileRef.getUnityBundle = function(account, model, fileName) {
-	return fetchFile(account, model, UNITY_BUNDLE_REF_EXT, fileName, false, true);
+	return _fetchFile(account, model, UNITY_BUNDLE_REF_EXT, fileName, false, true);
 };
 
 FileRef.getSequenceStateFile = function(account, model, fileName) {
-	return fetchFile(account, model, STATE_FILE_REF_EXT, fileName, false, false);
+	return _fetchFile(account, model, STATE_FILE_REF_EXT, fileName, false, false);
 };
 
 FileRef.getJSONFile = function(account, model, fileName) {
-	return fetchFile(account, model, JSON_FILE_REF_EXT, fileName, false, true);
+	return _fetchFile(account, model, JSON_FILE_REF_EXT, fileName, false, true);
 };
 
 FileRef.getMitigationsStream = function(account) {
@@ -183,7 +203,7 @@ FileRef.getMitigationsStream = function(account) {
 };
 
 FileRef.getResourceFile = function(account, model, fileName) {
-	return fetchFile(account, model, RESOURCES_FILE_REF_EXT, fileName, true, false);
+	return _fetchFile(account, model, RESOURCES_FILE_REF_EXT, fileName, true, false);
 };
 
 /**
@@ -204,6 +224,9 @@ FileRef.removeAllFilesFromModel = function(account, model) {
 	promises.push(removeAllFiles(account, model + UNITY_BUNDLE_REF_EXT));
 	promises.push(removeAllFiles(account, model + RESOURCES_FILE_REF_EXT));
 	promises.push(removeAllFiles(account, model + STATE_FILE_REF_EXT));
+	promises.push(removeAllFiles(account, model + ISSUES_FILE_REF_EXT));
+	promises.push(removeAllFiles(account, model + RISKS_FILE_REF_EXT));
+
 	return Promise.all(promises);
 };
 
