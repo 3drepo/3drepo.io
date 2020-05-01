@@ -21,6 +21,7 @@ const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
 const View = require("./viewpoint");
 const db = require("../handler/db");
+const FileRef = require("./fileRef");
 
 const fieldTypes = {
 	"action": "[object Object]",
@@ -53,19 +54,14 @@ class TextCommentGenerator extends CommentGenerator {
 		super(owner);
 
 		if (fieldTypes.comment === Object.prototype.toString.call(commentText)) {
-			if (commentText.length > 0 || (viewpoint &&
-				fieldTypes.screenshot === Object.prototype.toString.call(viewpoint.screenshot))) {
-				this.comment = commentText;
+			this.comment = commentText;
 
-				if (viewpoint && viewpoint.guid) {
-					this.viewpoint = viewpoint.guid;
-				}
+			if (viewpoint && viewpoint.guid) {
+				this.viewpoint = viewpoint.guid;
+			}
 
-				if (pinPosition && fieldTypes.pinPosition === Object.prototype.toString.call(pinPosition)) {
-					this.pinPosition = pinPosition;
-				}
-			} else {
-				throw responseCodes.ISSUE_COMMENT_NO_TEXT;
+			if (pinPosition && fieldTypes.pinPosition === Object.prototype.toString.call(pinPosition)) {
+				this.pinPosition = pinPosition;
 			}
 		} else {
 			throw responseCodes.INVALID_ARGUMENTS;
@@ -113,7 +109,7 @@ class MitigationCommentGenerator extends TextCommentGenerator {
 }
 
 const addComment = async function(account, model, colName, id, user, data) {
-	if ((!data.comment || !data.comment.trim()) && !get(data,"viewpoint.screenshot")) {
+	if (!(data.comment || "").trim() && !get(data,"viewpoint.screenshot")) {
 		throw { resCode: responseCodes.ISSUE_COMMENT_NO_TEXT};
 	}
 
@@ -133,8 +129,13 @@ const addComment = async function(account, model, colName, id, user, data) {
 	let viewpoint = null;
 
 	if (data.viewpoint) {
-		viewpoint = await View.clean({account, model}, data.viewpoint, fieldTypes.viewpoint);
+		viewpoint = View.clean(data.viewpoint, fieldTypes.viewpoint);
 		viewpoint.guid = utils.generateUUID();
+
+		if (viewpoint.screenshot) {
+			viewpoint.screenshot = new Buffer.from(viewpoint.screenshot, "base64");
+			await View.setExternalScreenshotRef(viewpoint, account, model, colName);
+		}
 	}
 
 	const comment = new TextCommentGenerator(user, data.comment, viewpoint);
@@ -147,7 +148,7 @@ const addComment = async function(account, model, colName, id, user, data) {
 
 	await col.update({ _id }, {...viewpointPush ,$set : {comments}});
 
-	View.setViewpointScreenshot(colName, account, model, id, viewpoint);
+	View.setViewpointScreenshotURL(colName, account, model, id, viewpoint);
 
 	// 6. Return the new comment.
 	return {...comment, viewpoint, guid: utils.uuidToString(comment.guid)};
@@ -157,14 +158,17 @@ const deleteComment =  async function(account, model, colName, id, guid, user) {
 	// 1. Fetch comments
 	const _id = utils.stringToUUID(id) ;
 	const col = await db.getCollection(account, model + "." + colName);
-	const items = await col.find({ _id }, {comments: 1}).toArray();
+	const item = await col.findOne({ _id }, {comments: 1, viewpoints: 1});
 
-	if (items.length === 0) {
+	if (item === 0) {
 		throw { resCode: responseCodes.ISSUE_NOT_FOUND };
 	}
 
-	let comments = items[0].comments;
+	let comments = item.comments;
 	const count = comments.length;
+	let deleteScreenshotPromise = Promise.resolve();
+	let viewpoints = item.viewpoints;
+
 	// 3. Filter out the particular comment
 	comments = comments.filter(c => {
 		if(utils.uuidToString(c.guid) !== guid) {
@@ -179,6 +183,22 @@ const deleteComment =  async function(account, model, colName, id, guid, user) {
 			throw { resCode: responseCodes.NOT_AUTHORIZED};
 		}
 
+		if (c.viewpoint) {
+			let screenshot_ref = null;
+
+			viewpoints = item.viewpoints.filter(v => {
+				if (!v.guid.buffer.equals(c.viewpoint.buffer)) {
+					return true;
+				}
+
+				screenshot_ref =  v.screenshot_ref;
+				return false;
+			});
+
+			if (screenshot_ref) {
+				deleteScreenshotPromise = FileRef.removeFile(account, model, colName, screenshot_ref);
+			}
+		}
 		return false;
 	});
 
@@ -187,7 +207,10 @@ const deleteComment =  async function(account, model, colName, id, guid, user) {
 	}
 
 	// 4. Update the issue;
-	await col.update({ _id }, {$set : {comments}});
+	await Promise.all([
+		col.update({ _id }, {$set : {comments, viewpoints}}),
+		deleteScreenshotPromise
+	]);
 
 	// 5. Return which comment was deleted
 	return {guid};

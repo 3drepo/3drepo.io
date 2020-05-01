@@ -209,7 +209,7 @@ router.get("/issues/:issueId/viewpoints/:vid/screenshot.png", middlewares.issue.
  *
  * @apiSuccess (200) {Object} Issue Screenshot.
  */
-router.get("/issues/:issueId/viewpoints/:vid/screenshotSmall.png", middlewares.issue.canView, getScreenshotSmall);
+router.get("/issues/:issueId/viewpoints/:vid/screenshotSmall.png", middlewares.issue.canView, getScreenshot);
 
 /**
  * @api {get} /:teamspace/:model/revision/:rid/issues Get all Issues by revision ID
@@ -792,8 +792,11 @@ function storeIssue(req, res, next) {
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
 	data.owner = req.session.user.username;
-	data.revId = req.params.rid;
-	data.created = undefined;
+
+	if (req.params.rid) {
+		data.revId = req.params.rid;
+	}
+
 	const {account, model} = req.params;
 
 	Issue.create(account, model, data, sessionId).then(issue => {
@@ -958,17 +961,6 @@ function getScreenshot(req, res, next) {
 	const {account, model, issueId, vid} = req.params;
 
 	Issue.getScreenshot(account, model, issueId, vid).then(buffer => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png", config.cachePolicy);
-	}).catch(err => {
-		responseCodes.respond(place, req, res, next, err, err);
-	});
-}
-
-function getScreenshotSmall(req, res, next) {
-	const place = utils.APIInfo(req);
-	const { account, model, issueId, vid } = req.params;
-
-	Issue.getSmallScreenshot(account, model, issueId, vid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png", config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);

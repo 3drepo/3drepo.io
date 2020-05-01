@@ -67,8 +67,6 @@ export const ColorPickerWrapper = styled.div`
 `;
 
 export const Description = styled(TextField)`
-	margin-bottom: -16px;
-
 	${TextFieldStyles.StyledTextField} {
 		margin: 1px 0;
 	}
