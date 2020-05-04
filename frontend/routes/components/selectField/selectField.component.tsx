@@ -21,7 +21,11 @@ import Select, { SelectProps } from '@material-ui/core/Select';
 import { MuiTheme } from '../../../styles/theme';
 
 function findLabel(children, value) {
-	return  children.find((c) => {
+	if (!Array.isArray(children )) {
+		return children?.props?.value === value;
+	}
+
+	return children.find((c) => {
 		return (Array.isArray(c)) ?  findLabel(c, value) : c.props.value === value;
 	});
 }
