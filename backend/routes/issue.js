@@ -784,7 +784,6 @@ router.post("/issues/:issueId/resources",middlewares.issue.canComment, attachRes
  *    "user":"teamSpace1",
  *    "createdAt":1561973996462
  * }
- *
  */
 router.delete("/issues/:issueId/resources",middlewares.issue.canComment, detachResourcefromIssue, middlewares.chat.onResourceDeleted, responseCodes.onSuccessfulOperation);
 
