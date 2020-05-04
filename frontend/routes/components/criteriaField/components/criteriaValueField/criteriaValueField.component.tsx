@@ -189,6 +189,11 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 		if (onChange) {
 			const newValue = [...value];
 			newValue.splice(index, 1);
+
+			if (newValue.length === 0 ) {
+				newValue.push('');
+			}
+
 			onChange({ target: { value: newValue, name } });
 			this.setState({ value: newValue }, () => {
 				const touchedValues = this.props.touched;
