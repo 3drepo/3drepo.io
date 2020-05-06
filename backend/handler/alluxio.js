@@ -18,10 +18,8 @@
 "use strict";
 
 const config = require("../config.js");
-const fs = require("fs");
 const path = require("path");
 const ResponseCodes = require("../response_codes");
-const systemLogger = require("../logger.js").systemLogger;
 const nodeuuid = require("uuid/v1");
 const farmhash = require("farmhash");
 const AlluxioClient = require("../models/alluxioClient");
@@ -81,39 +79,17 @@ class AlluxioHandler {
 		}
 	}
 
-	removeFiles(keys) {
-		keys.forEach((key) => {
-			fs.unlink(this.getFullPath(key), (err) => {
-				if (err) {
-					systemLogger.logError("File not removed:", {err, key});
-				} else {
-					systemLogger.logInfo("File removed:", key);
-				}
-			});
-		});
+	async removeFile(key) {
+		return await this.client.delete(this.getAlluxioPathFormat(key));
 	}
 
-	getFullPath(key = "") {
-		if (config.fs && config.fs.path) {
-			return path.resolve(config.fs.path, key);
-		} else {
-			throw new Error("Filesystem is not configured");
-		}
+	async removeFiles(keys) {
+		return await Promise.all(keys.map(this.removeFile, this));
 	}
 
 	getAlluxioPathFormat(link) {
 		return "/" + slash(link);
 	}
-
-	// testFilesystem() {
-	// 	return fs.readdir(this.getFullPath(), (err) => {
-	// 		if (err) {
-	// 			const errMsg = "Failed to connect to filesystem at " + this.getFullPath();
-	// 			systemLogger.logError(errMsg," : ", err);
-	// 			throw new Error(errMsg);
-	// 		}
-	// 	});
-	// }
 }
 
 module.exports = new AlluxioHandler();
