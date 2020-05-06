@@ -43,21 +43,16 @@ const generateFoldernames = (fileName, dirLevels) => {
 
 class AlluxioHandler {
 	constructor() {
-		this.client = new AlluxioClient("localhost:39999");
-		// if (config.fs) {
-		// 	if (config.fs.hasOwnProperty("path") && config.fs.hasOwnProperty("levels")) {
-		// 		this.testFilesystem();
-		// 	} else {
-		// 		const err = "fs entry found in config, but cannot find path/levels entry";
-		// 		systemLogger.logError(err);
-		// 		throw new Error(err);
-		// 	}
-		// }
+		if (config.alluxio) {
+			const {hostname, port, levels } = config.alluxio;
+			this.client = new AlluxioClient(`${hostname}:${port}`);
+			this.levels = levels;
+		}
 	}
 
 	async storeFile(data) {
 		const _id = nodeuuid();
-		const folderNames = generateFoldernames(_id, config.fs.levels);
+		const folderNames = generateFoldernames(_id, this.levels);
 		const link = path.join(folderNames, _id);
 		await this.client.uploadFile(this.getAlluxioPathFormat(link), data);
 		return ({_id, link, size:data.length, type: "alluxio"});
