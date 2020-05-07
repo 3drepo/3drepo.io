@@ -1317,19 +1317,24 @@ schema.statics.teamspaceMemberCheck = function (teamspace, user) {
 	});
 };
 
-schema.statics.getTeamMemberInfo = function (teamspace, user) {
-	return User.findByUserName(user).then((userEntry) => {
-		if(!userEntry || !userEntry.isMemberOfTeamspace(teamspace)) {
-			return Promise.reject(responseCodes.USER_NOT_FOUND);
-		} else {
-			return {
-				user,
-				firstName: userEntry.customData.firstName,
-				lastName: userEntry.customData.lastName,
-				company: _.get(userEntry.customData, "billing.billingInfo.company", null)
-			};
+schema.statics.getTeamMemberInfo = async (teamspace, user)  => {
+	const userEntry = await User.findByUserName(user);
+	if(!userEntry || !userEntry.isMemberOfTeamspace(teamspace)) {
+		throw Promise.reject(responseCodes.USER_NOT_FOUND);
+	} else {
+		const job = await Job.findByUser(teamspace, user);
+		const result = {
+			user,
+			firstName: userEntry.customData.firstName,
+			lastName: userEntry.customData.lastName,
+			company: _.get(userEntry.customData, "billing.billingInfo.company", null)
+		};
+
+		if(job) {
+			result.job = {_id: job._id, color: job.color};
 		}
-	});
+		return result;
+	}
 };
 
 schema.statics.isHereEnabled = function (username) {
