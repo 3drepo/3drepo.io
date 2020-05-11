@@ -27,9 +27,9 @@ export const Avatar = styled(AvatarComponent)`
 		background-color: ${(props) => !props.src ? COLOR.BLACK_20 : `transparent`};
 		color: ${COLOR.WHITE};
 		font-size: 14px;
-		border-width: 2px;
 		border-style: solid;
 		border-color: ${({ jobColor }: { jobColor: string }) => !jobColor ? `transparent` : jobColor};
+		border-width: ${({ placeholder }: { placeholder: boolean }) => placeholder ? `0px` : `2px`};
 	}
 `;
 

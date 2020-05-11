@@ -20,9 +20,7 @@ import React from 'react';
 import { isEmpty, memoize } from 'lodash';
 import { renderWhenTrueOtherwise } from '../../../../../../../helpers/rendering';
 import { getAvatarUrl } from '../../../../../../../services/api';
-import { Popover } from '../markdownMessage/issueReference/issueReference.styles';
-import { UserPopover } from '../userPopover/userPopover.component';
-import { Avatar, AvatarWrapper } from './userAvatar.styles';
+import { Avatar } from './userAvatar.styles';
 
 const getMemoizedAvatarUrl = memoize(getAvatarUrl);
 
@@ -32,21 +30,18 @@ const avatarUrl = (name) => getMemoizedAvatarUrl(name);
 
 interface IProps {
 	name: string;
-	users: any[];
-	jobsList: any[];
+	currentUser: any;
 }
 
-export const UserAvatar = ({ name, users, jobsList }: IProps) => {
+export const UserAvatar = ({ name, currentUser }: IProps) => {
 	const url = avatarUrl(name);
-	// @TODO change to userDetails data
-	const currentUser = users.find((user) => user.user === name);
-	const currentUserJobColor = currentUser && jobsList.find((job) => job.name === currentUser.job).color;
 
 	return (
 		<>
-			{renderWhenTrueOtherwise(
-				() => <Avatar src={url} jobColor={currentUserJobColor} />,
-				() => <Avatar jobColor={currentUserJobColor}>{getInitials(name)}</Avatar>
+			{!currentUser && <Avatar placeholder>{getInitials(name)}</Avatar>}
+			{currentUser && renderWhenTrueOtherwise(
+				() => <Avatar src={url} jobColor={currentUser.job.color} />,
+				() => <Avatar jobColor={currentUser.job.color}>{getInitials(name)}</Avatar>
 			)(!isEmpty(url))}
 		</>
 	);

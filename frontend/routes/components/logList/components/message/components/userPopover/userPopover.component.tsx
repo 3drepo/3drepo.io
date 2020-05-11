@@ -12,7 +12,7 @@ export const UserPopover = ({ user: { firstName, lastName, company, user, job },
 				<Name>{lastName}, {firstName}</Name>
 				<Details>{user}</Details>
 				<Details>{company}</Details>
-				<Details>{job}</Details>
+				<Details>{job._id}</Details>
 			</UserData>
 		</Container>
 	);

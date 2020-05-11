@@ -24,16 +24,21 @@ import { UserIndicator } from './userMarker.styles';
 
 interface IProps {
 	name: string;
-	users: any[];
+	teamspace: string;
 	children?: React.ReactNode;
+	usersCachedResponses: any[];
+	fetchUserDetails: (teamspace, username) => void;
 }
 
-export const UserMarker = ({ name, users, children }: IProps) => {
+export const UserMarker = ({ name, children, teamspace, fetchUserDetails, usersCachedResponses }: IProps) => {
 	const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
 	const open = Boolean(anchorEl);
 
-	// @TODO change to userDetails data
-	const currentUser = users.find((user) => user.user === name);
+	React.useEffect(() => {
+		fetchUserDetails(teamspace, name);
+	}, [fetchUserDetails, teamspace, name]);
+
+	const currentUser = usersCachedResponses[`${teamspace}-${name}`];
 
 	const handlePopoverOpen = (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
 		setAnchorEl(event.currentTarget);
@@ -50,7 +55,7 @@ export const UserMarker = ({ name, users, children }: IProps) => {
 				onMouseEnter={handlePopoverOpen}
 				onMouseLeave={handlePopoverClose}
 			>
-				{children || <UserAvatar name={name} />}
+				{children || <UserAvatar name={name} currentUser={currentUser} />}
 			</UserIndicator>
 			<Popover
 				id="mouse-over-popover"
@@ -68,7 +73,7 @@ export const UserMarker = ({ name, users, children }: IProps) => {
 				disableRestoreFocus
 			>
 				<UserPopover user={currentUser}>
-					<UserAvatar name={name} />
+					<UserAvatar name={name} currentUser={currentUser} />
 				</UserPopover>
 			</Popover>
 		</>

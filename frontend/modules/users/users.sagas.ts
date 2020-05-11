@@ -38,11 +38,6 @@ export function* fetchUserDetails({ teamspace, username }) {
 		const response = cachedResponses[key] || apiResponse.data;
 
 		yield put(UsersActions.setUserDetailsResponse(key, response));
-
-		if (!cachedResponses[key]) {
-			yield call(delay, CACHE_RESPONSE_TTL, true);
-			yield put(UsersActions.setUserDetailsResponse(key, null));
-		}
 	} catch (e) {}
 }
 

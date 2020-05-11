@@ -22,3 +22,7 @@ export const selectUsersDomain = (state) => state.comments;
 export const selectTeamspaceUsers = createSelector(
 		selectUsersDomain, (state) => state.users
 );
+
+export const selectTeamspace = createSelector(
+		selectUsersDomain, (state) => state.teamspace
+);
