@@ -16,6 +16,7 @@ addons:
 
    packages:
       - expect-dev
+      - rabbitmq-server
 
   chrome: stable
   hosts:
@@ -49,7 +50,6 @@ cache:
     - node_modules
 
 services:
-  - rabbitmq
   - mongodb
 
 script:
