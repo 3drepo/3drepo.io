@@ -27,7 +27,7 @@ before_install:
     - sudo service mongod start
     - ps aux | grep mongod
     - cat /etc/mongod.conf
-    - until nc -z localhost 27017; do sudo tail /var/log/mongodb/mongod; sleep 5; done
+    - until nc -z localhost 27017; do sudo tail /var/log/mongodb/mongod.log; sleep 5; done
     - mkdir -p submodules
     - test_ver=`cat backend/test/testDBVersion`
     - cd submodules
