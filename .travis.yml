@@ -11,9 +11,6 @@ sudo: true
 
 addons:
   apt:
-   sources:
-      - mongodb-3.2-precise
-
    packages:
       - expect-dev
       - rabbitmq-server
@@ -48,9 +45,7 @@ cache:
   yarn: true
   directories:
     - node_modules
-
-services:
-  - mongodb
+    - mongodb
 
 script:
     - cd ./../backend
