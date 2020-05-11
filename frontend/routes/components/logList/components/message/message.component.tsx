@@ -23,24 +23,25 @@ import { Container } from './message.styles';
 
 interface IProps {
 	comment: string;
+	commentWithMarkdown: string;
 	viewpoint: any;
 	created: number;
 	owner: string;
 	action: any;
 	companyName: string;
 	userName: string;
-	users: any[];
 	teamspace: string;
 	guid: string;
 	sealed: boolean;
 	index: number;
 	currentUser: string;
+	formRef?: any;
 	removeMessage: (index, guid) => void;
 	setCameraOnViewpoint: (viewpoint) => void;
 }
 
 export const Message = ({
-	viewpoint, setCameraOnViewpoint, action, owner, comment, users, removeMessage, created, ...props
+	viewpoint, setCameraOnViewpoint, action, owner, comment, commentWithMarkdown, removeMessage, created, ...props
 }: IProps) => {
 
 	const isSystemMessage = Boolean(action);
@@ -66,9 +67,10 @@ export const Message = ({
 							index={props.index}
 							guid={props.guid}
 							created={created}
-							users={users}
 							teamspace={props.teamspace}
+							formRef={props.formRef}
 							comment={comment}
+							commentWithMarkdown={commentWithMarkdown}
 							viewpoint={viewpoint}
 							removeMessage={removeMessage}
 							isRemovable={isRemovable}

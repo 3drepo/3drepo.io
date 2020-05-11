@@ -17,23 +17,17 @@
 
 import styled from 'styled-components';
 
-import { Avatar as AvatarComponent } from '@material-ui/core';
 import { COLOR } from '../../../../../../../styles';
 
-export const Avatar = styled(AvatarComponent)`
-	&& {
-		height: 30px;
-		width: 30px;
-		background-color: ${(props) => !props.src ? COLOR.BLACK_20 : `transparent`};
-		color: ${COLOR.WHITE};
-		font-size: 14px;
-		border-width: 2px;
-		border-style: solid;
-		border-color: ${({ jobColor }: { jobColor: string }) => !jobColor ? `transparent` : jobColor};
-	}
+export const Blockquote = styled.blockquote`
+	color: ${COLOR.BLACK_30};
+	border-left: 3px solid ${COLOR.BLACK_30};
+	margin-left: 0;
+	margin-right: 20px;
+	margin-top: 8px;
+	margin-bottom: 14px;
+	padding-left: 10px;
 `;
 
-export const AvatarWrapper = styled.div`
-	display: flex;
-	align-items: center;
+export const Paragraph = styled.p`
 `;

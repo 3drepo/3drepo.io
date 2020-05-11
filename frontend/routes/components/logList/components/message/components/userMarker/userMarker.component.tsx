@@ -17,37 +17,60 @@
 
 import React from 'react';
 
-import { isEmpty, memoize } from 'lodash';
-import { renderWhenTrueOtherwise } from '../../../../../../../helpers/rendering';
-import { getAvatarUrl } from '../../../../../../../services/api';
 import { Popover } from '../markdownMessage/issueReference/issueReference.styles';
+import { UserAvatar } from '../userAvatar';
 import { UserPopover } from '../userPopover/userPopover.component';
-import { Avatar, AvatarWrapper } from './userAvatar.styles';
-
-const getMemoizedAvatarUrl = memoize(getAvatarUrl);
-
-const getInitials = (name) => name.split(' ').slice(0, 2).map((text) => text[0]).join('').trim().toUpperCase();
-
-const avatarUrl = (name) => getMemoizedAvatarUrl(name);
+import { UserIndicator } from './userMarker.styles';
 
 interface IProps {
 	name: string;
 	users: any[];
-	jobsList: any[];
+	children?: React.ReactNode;
 }
 
-export const UserAvatar = ({ name, users, jobsList }: IProps) => {
-	const url = avatarUrl(name);
+export const UserMarker = ({ name, users, children }: IProps) => {
+	const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+	const open = Boolean(anchorEl);
+
 	// @TODO change to userDetails data
 	const currentUser = users.find((user) => user.user === name);
-	const currentUserJobColor = currentUser && jobsList.find((job) => job.name === currentUser.job).color;
+
+	const handlePopoverOpen = (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
+		setAnchorEl(event.currentTarget);
+	};
+
+	const handlePopoverClose = () => {
+		setAnchorEl(null);
+	};
 
 	return (
 		<>
-			{renderWhenTrueOtherwise(
-				() => <Avatar src={url} jobColor={currentUserJobColor} />,
-				() => <Avatar jobColor={currentUserJobColor}>{getInitials(name)}</Avatar>
-			)(!isEmpty(url))}
+			<UserIndicator
+				aria-haspopup="true"
+				onMouseEnter={handlePopoverOpen}
+				onMouseLeave={handlePopoverClose}
+			>
+				{children || <UserAvatar name={name} />}
+			</UserIndicator>
+			<Popover
+				id="mouse-over-popover"
+				open={open}
+				anchorEl={anchorEl}
+				anchorOrigin={{
+					vertical: 'bottom',
+					horizontal: 'center',
+				}}
+				transformOrigin={{
+					vertical: 'top',
+					horizontal: 'left',
+				}}
+				onClose={handlePopoverClose}
+				disableRestoreFocus
+			>
+				<UserPopover user={currentUser}>
+					<UserAvatar name={name} />
+				</UserPopover>
+			</Popover>
 		</>
 	);
 };

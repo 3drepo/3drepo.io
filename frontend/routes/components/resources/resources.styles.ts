@@ -17,6 +17,7 @@
 
 import IconButtonComponent from '@material-ui/core/IconButton';
 import Description from '@material-ui/icons/Description';
+import QuoteIconComponent from '@material-ui/icons/FormatQuote';
 import Link from '@material-ui/icons/Link';
 import Photo from '@material-ui/icons/Photo';
 import RemoveCircleOutline from '@material-ui/icons/RemoveCircleOutline';
@@ -35,6 +36,12 @@ export const IconButton = styled(IconButtonComponent)`
 		width: 28px;
 		height: 28px;
 		padding: 4px;
+	}
+`;
+
+export const QuoteIcon = styled(QuoteIconComponent)`
+	&& {
+		font-size: 20px;
 	}
 `;
 

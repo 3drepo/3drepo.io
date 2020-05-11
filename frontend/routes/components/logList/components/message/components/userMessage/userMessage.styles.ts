@@ -18,19 +18,24 @@
 import styled, { css } from 'styled-components';
 
 import { COLOR } from '../../../../../../../styles';
-import { LinkableField } from '../../../../../linkableField/linkableField.component';
+import { MarkdownMessage } from '../markdownMessage/markdownMessage.component';
 
 export const Container = styled.div`
 	width: 100%;
 	display: flex;
 	justify-content: space-between;
+	align-items: flex-start;
 	position: relative;
 `;
 
-export const Comment = styled.p`
+export const Comment = styled(MarkdownMessage)`
 	margin: 0;
 	color: ${COLOR.BLACK_50};
 	font-size: 12px;
+
+	p {
+		margin: 0;
+	}
 `;
 
 const regularCommentStyles = css`

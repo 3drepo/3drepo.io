@@ -64,6 +64,7 @@ interface IProps {
 	hidePin?: boolean;
 	hasPin: boolean;
 	canComment: boolean;
+	formRef?: any;
 }
 
 interface IState {
@@ -248,6 +249,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						onSaveLinks={attachLinkResources}
 						onRemoveResource={onRemoveResource}
 						canEdit={canComment}
+						formRef={this.props.formRef}
 					/>
 				}
 			</MuiPickersUtilsProvider>

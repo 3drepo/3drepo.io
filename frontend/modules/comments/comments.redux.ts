@@ -15,25 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { createActions, createReducer } from 'reduxsauce';
 
-import { Avatar as AvatarComponent } from '@material-ui/core';
-import { COLOR } from '../../../../../../../styles';
+export const { Types: CommentsTypes, Creators: CommentsActions } = createActions({
+	fetchUsers: ['teamspace'],
+	fetchUsersSuccess: ['users'],
+}, { prefix: 'COMMENTS/' });
 
-export const Avatar = styled(AvatarComponent)`
-	&& {
-		height: 30px;
-		width: 30px;
-		background-color: ${(props) => !props.src ? COLOR.BLACK_20 : `transparent`};
-		color: ${COLOR.WHITE};
-		font-size: 14px;
-		border-width: 2px;
-		border-style: solid;
-		border-color: ${({ jobColor }: { jobColor: string }) => !jobColor ? `transparent` : jobColor};
-	}
-`;
+export const INITIAL_STATE = {
+	teamspace: '',
+	users: [],
+};
 
-export const AvatarWrapper = styled.div`
-	display: flex;
-	align-items: center;
-`;
+const setTeamspace = (state = INITIAL_STATE, { teamspace }) => ({
+	...state,
+	teamspace,
+});
+
+const setUsers = (state = INITIAL_STATE, { users }) => ({
+	...state,
+	users,
+});
+
+export const reducer = createReducer(INITIAL_STATE, {
+	[CommentsTypes.FETCH_USERS]: setTeamspace,
+	[CommentsTypes.FETCH_USERS_SUCCESS]: setUsers,
+});

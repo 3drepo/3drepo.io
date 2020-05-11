@@ -15,25 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { put, takeEvery } from 'redux-saga/effects';
 
-import { Avatar as AvatarComponent } from '@material-ui/core';
-import { COLOR } from '../../../../../../../styles';
+import * as API from '../../services/api';
+import { DialogActions } from '../dialog';
+import { CommentsActions, CommentsTypes } from './comments.redux';
 
-export const Avatar = styled(AvatarComponent)`
-	&& {
-		height: 30px;
-		width: 30px;
-		background-color: ${(props) => !props.src ? COLOR.BLACK_20 : `transparent`};
-		color: ${COLOR.WHITE};
-		font-size: 14px;
-		border-width: 2px;
-		border-style: solid;
-		border-color: ${({ jobColor }: { jobColor: string }) => !jobColor ? `transparent` : jobColor};
+export function* fetchUsers({ teamspace }) {
+	try {
+		const { data } = yield API.fetchUsers(teamspace);
+
+		yield put(CommentsActions.fetchUsersSuccess(data));
+	} catch (error) {
+		yield put(DialogActions.showEndpointErrorDialog('get', 'users', error));
 	}
-`;
+}
 
-export const AvatarWrapper = styled.div`
-	display: flex;
-	align-items: center;
-`;
+export default function* CommentsSaga() {
+	yield takeEvery(CommentsTypes.FETCH_USERS, fetchUsers);
+}

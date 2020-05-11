@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -19,7 +19,6 @@ import InputLabel from '@material-ui/core/InputLabel';
 import CameraIcon from '@material-ui/icons/AddAPhoto';
 import AddPhoto from '@material-ui/icons/AddPhotoAlternate';
 import CloseIcon from '@material-ui/icons/Close';
-import OpenInBrowser from '@material-ui/icons/OpenInBrowser';
 import ReportProblemIcon from '@material-ui/icons/ReportProblem';
 import SaveIcon from '@material-ui/icons/Save';
 import ShortTextIcon from '@material-ui/icons/ShortText';
@@ -39,6 +38,7 @@ import { ScreenshotDialog } from '../../../components/screenshotDialog';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { FieldsRow, StyledFormControl } from '../risks/components/riskDetails/riskDetails.styles';
 import { ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
+import { COMMENT_FIELD_NAME } from './newCommentForm.constants';
 import {
 	Actions,
 	ActionsGroup,
@@ -137,7 +137,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 
 	public renderCommentField = renderWhenTrue(() => (
 		<TextFieldWrapper>
-			<Field name="comment" render={({ field }) => (
+			<Field name={COMMENT_FIELD_NAME} render={({ field }) => (
 				<StyledTextField
 					{...field}
 					autoFocus

@@ -31,6 +31,7 @@ interface IProps {
 	jobs: any[];
 	topicTypes: any[];
 	issue: any;
+	issueWithMarkdownComments: any[];
 	teamspace: string;
 	model: string;
 	revision: string;
@@ -79,7 +80,6 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public formRef = React.createRef<any>();
 	public panelRef = React.createRef<any>();
-	// public commentsRef = React.createRef<any>();
 
 	get isNewIssue() {
 		return !this.props.issue._id;
@@ -93,19 +93,23 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		return [...this.props.jobs, UNASSIGNED_JOB];
 	}
 
-	public commentRef = React.createRef<any>();
+	get isViewerInitialized() {
+		return this.props.viewer.initialized;
+	}
 
-	public renderLogList = renderWhenTrue(() => (
-		<LogList
-			// commentsRef={this.commentsRef}
-			messages={this.issueData.comments}
-			isPending={this.props.fetchingDetailsIsPending}
-			removeMessage={this.removeMessage}
-			teamspace={this.props.teamspace}
-			currentUser={this.props.currentUser}
-			setCameraOnViewpoint={this.setCameraOnViewpoint}
-		/>
-	));
+	public renderLogList = renderWhenTrue(() => {
+		return (
+			<LogList
+				formRef={this.formRef}
+				messages={this.props.issueWithMarkdownComments}
+				isPending={this.props.fetchingDetailsIsPending}
+				removeMessage={this.removeMessage}
+				teamspace={this.props.teamspace}
+				currentUser={this.props.currentUser}
+				setCameraOnViewpoint={this.setCameraOnViewpoint}
+			/>
+		);
+	});
 
 	public renderPreview = renderWhenTrue(() => {
 		const { expandDetails, horizontal, failedToLoad, disableViewer } = this.props;
@@ -186,23 +190,6 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 			fetchIssue(teamspace, model, issue._id);
 			subscribeOnIssueCommentsChanges(teamspace, model, issue._id);
 		}
-
-		// if (
-		// 	issue.comments && prevProps.issue.comments &&
-		// 	(issue.comments.length > prevProps.issue.comments.length && issue.comments[issue.comments.length - 1].new)
-		// ) {
-		// 	const { top: commentsTop } = this.commentsRef.current.getBoundingClientRect();
-		// 	const panelElements = this.panelRef.current.children[0].children;
-		// 	const detailsDimensions = panelElements[1].getBoundingClientRect();
-		// 	const { height: detailsHeight } = detailsDimensions;
-		//
-		// 	if (commentsTop < 0) {
-		// 		this.panelRef.current.scrollTo({
-		// 			top: detailsHeight - 16,
-		// 			behavior: 'smooth'
-		// 		});
-		// 	}
-		// }
 	}
 
 	public handleHeaderClick = () => {
@@ -254,6 +241,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				showScreenshotDialog={showScreenshotDialog}
 				canComment={this.userCanComment}
 				onThumbnailUpdate={this.handleNewScreenshot}
+				formRef={this.formRef}
 			/>
 		);
 	}
@@ -297,7 +285,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public handleNewScreenshot = async (screenshot) => {
 		const { teamspace, model, viewer } = this.props;
-		const viewpoint = await viewer.getCurrentViewpoint({ teamspace, model });
+		const viewpoint = this.isViewerInitialized ? await viewer.getCurrentViewpoint({ teamspace, model }) : null;
 
 		if (this.isNewIssue) {
 			this.props.setState({
@@ -316,7 +304,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public postComment = async (teamspace, model, { comment, screenshot }, finishSubmitting) => {
-		const viewpoint = await this.props.viewer.getCurrentViewpoint({ teamspace, model });
+		const viewpoint = this.isViewerInitialized ? await this.props.viewer.getCurrentViewpoint({ teamspace, model }) : null;
 		const issueCommentData = {
 			_id: this.issueData._id,
 			comment,

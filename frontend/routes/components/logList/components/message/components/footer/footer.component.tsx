@@ -18,21 +18,47 @@
 import React from 'react';
 
 import { DATE_TIME_FORMAT } from '../../../../../../../services/formatting/formatDate';
+import { COMMENT_FIELD_NAME } from '../../../../../../viewerGui/components/newCommentForm/newCommentForm.constants';
 import { DateTime } from '../../../../../dateTime/dateTime.component';
-import { Container, Date, Username } from './footer.styles';
+import { Container, Date, IconButton, StyledQuoteIcon, StyledReplyIcon, Username } from './footer.styles';
 
 interface IProps {
 	name: string;
 	created: any;
+	comment: string;
+	formRef?: any;
 }
 
-export const Footer = ({ name, created, ...props }: IProps) => {
+export const Footer = ({ name, created, formRef, comment, ...props }: IProps) => {
+
+	const handleReplayButtonClick = () => {
+		const commentForm = formRef.current;
+		const currentFormCommentValue = commentForm.state.values[COMMENT_FIELD_NAME];
+
+		commentForm.setFieldValue(COMMENT_FIELD_NAME, `${currentFormCommentValue}@${name}`);
+	};
+
+	const handleQuoteButtonClick = () => {
+		const commentForm = formRef.current;
+		const currentFormCommentValue = commentForm.state.values[COMMENT_FIELD_NAME];
+		const quoteComment = comment.replace(/(?:\r\n|\r|\n)/g, `\n`);
+		const additionalNewLine = (!currentFormCommentValue || currentFormCommentValue.endsWith(`\n`)) ? '' : `  \n`;
+
+		commentForm.setFieldValue(COMMENT_FIELD_NAME, `${currentFormCommentValue}${additionalNewLine}> ${quoteComment}\n\n`);
+	};
+
 	return (
 		<Container>
 			<Username>{name}</Username>
 			<Date>
 				<DateTime value={created} format={DATE_TIME_FORMAT} />
 			</Date>
+			<IconButton onClick={handleQuoteButtonClick}>
+				<StyledQuoteIcon />
+			</IconButton>
+			<IconButton onClick={handleReplayButtonClick}>
+				<StyledReplyIcon />
+			</IconButton>
 		</Container>
 	);
 };

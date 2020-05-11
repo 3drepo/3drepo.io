@@ -17,18 +17,10 @@
 
 import React from 'react';
 
-import CloseIcon from '@material-ui/icons/Close';
-import { memoize } from 'lodash';
-
-import { renderWhenTrueOtherwise } from '../../../../../../../helpers/rendering';
-import { getAvatarUrl } from '../../../../../../../services/api';
-import { Avatar } from '../../../../../../teamspaces/components/teamspaceItem/teamspaceItem.styles';
-import {TooltipButton} from '../../../../../../teamspaces/components/tooltipButton/tooltipButton.component';
-import {RemoveButtonWrapper} from '../../../log/log.styles';
 import { Footer } from '../footer/footer.component';
 import { RemoveButton } from '../removeButton/removeButton.component';
 import { Screenshot } from '../screenshot/screenshot.component';
-import { UserAvatar } from '../userAvatar';
+import { UserMarker } from '../userMarker';
 import { Comment, CommentContainer, Container } from './userMessage.styles';
 
 interface IProps {
@@ -36,16 +28,19 @@ interface IProps {
 	guid: string;
 	name: string;
 	created: number;
-	users: any[];
+	formRef?: any;
 	teamspace: string;
 	comment: string;
+	commentWithMarkdown: string;
 	viewpoint: any;
 	removeMessage: (index, guid) => void;
 	isRemovable: boolean;
 	self: boolean;
 }
 
-export const UserMessage = ({ name, comment, index, guid, removeMessage, created, viewpoint, ...props }: IProps) => {
+export const UserMessage = ({
+	name, commentWithMarkdown, index, guid, removeMessage, created, viewpoint, ...props
+}: IProps) => {
 
 	const isScreenshot = viewpoint && viewpoint.screenshotPath;
 
@@ -53,17 +48,15 @@ export const UserMessage = ({ name, comment, index, guid, removeMessage, created
 
 	return (
 		<Container>
-			<UserAvatar
-				name={name}
-				users={props.users}
-				teamspace={props.teamspace}
-			/>
+			<UserMarker name={name} />
 			<CommentContainer self={props.self}>
-				{isScreenshot && <Screenshot comment={comment} viewpoint={viewpoint} />}
-				<Comment>{comment}</Comment>
+				{isScreenshot && <Screenshot comment={commentWithMarkdown} viewpoint={viewpoint} />}
+				<Comment teamspace={props.teamspace}>{commentWithMarkdown}</Comment>
 				<Footer
 					name={name}
+					formRef={props.formRef}
 					created={created}
+					comment={props.comment}
 				/>
 			</CommentContainer>
 			{props.isRemovable && <RemoveButton index={index} guid={guid} removeMessage={handleRemoveMessage} />}

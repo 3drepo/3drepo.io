@@ -17,7 +17,9 @@
 
 import { values } from 'lodash';
 import { createSelector } from 'reselect';
+
 import { STATUSES } from '../../constants/issues';
+import { transformCustomsLinksToMarkdown } from '../../helpers/comments';
 import { hasPin, issueToPin } from '../../helpers/pins';
 import { searchByFilters } from '../../helpers/searching';
 import { selectCurrentModel } from '../model';
@@ -60,6 +62,16 @@ export const selectActiveIssueId = createSelector(
 export const selectActiveIssueDetails = createSelector(
 	selectIssuesDomain, selectComponentState, (state, componentState) => {
 		return state.issuesMap[componentState.activeIssue] || componentState.newIssue;
+	}
+);
+
+export const selectActiveIssueWithMarkdownComments = createSelector(
+	selectActiveIssueDetails, selectIssuesMap, (activeIssueDetails, issues) => {
+		return !activeIssueDetails.comments ? [] : activeIssueDetails.comments.map(({ comment, ...props }) => ({
+			...props,
+			comment,
+			commentWithMarkdown: transformCustomsLinksToMarkdown({ comment, issues }),
+		}));
 	}
 );
 

@@ -19,20 +19,15 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { selectJobsList } from '../../../../../../../modules/jobs';
-import { selectTeamspaceDetails } from '../../../../../../../modules/teamspaces';
-import { selectUserDetails, UsersActions } from '../../../../../../../modules/users';
+import { selectActiveIssueDetails } from '../../../../../../../../modules/issues';
 
-import { UserAvatar } from './userAvatar.component';
+import { ResourceReference } from './resourceReference.component';
 
-const mapStateToProps = ({}, { teamspace, name }) => createStructuredSelector({
-	userDetails: selectUserDetails(teamspace, name),
-	teamspaceDetails: selectTeamspaceDetails(teamspace),
-	jobsList: selectJobsList,
+const mapStateToProps = createStructuredSelector({
+	activeIssue: selectActiveIssueDetails
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	fetchUserDetails: UsersActions.fetchUserDetails
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(UserAvatar);
+export default connect(mapStateToProps, mapDispatchToProps)(ResourceReference);

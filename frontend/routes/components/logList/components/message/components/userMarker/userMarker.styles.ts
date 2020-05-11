@@ -17,23 +17,8 @@
 
 import styled from 'styled-components';
 
-import { Avatar as AvatarComponent } from '@material-ui/core';
 import { COLOR } from '../../../../../../../styles';
 
-export const Avatar = styled(AvatarComponent)`
-	&& {
-		height: 30px;
-		width: 30px;
-		background-color: ${(props) => !props.src ? COLOR.BLACK_20 : `transparent`};
-		color: ${COLOR.WHITE};
-		font-size: 14px;
-		border-width: 2px;
-		border-style: solid;
-		border-color: ${({ jobColor }: { jobColor: string }) => !jobColor ? `transparent` : jobColor};
-	}
-`;
-
-export const AvatarWrapper = styled.div`
-	display: flex;
-	align-items: center;
+export const UserIndicator = styled.span`
+	color: ${COLOR.VIVID_NAVY};
 `;

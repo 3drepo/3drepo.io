@@ -15,8 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Typography from '@material-ui/core/Typography';
 import styled, { css } from 'styled-components';
+
+import IconButtonComponent from '@material-ui/core/IconButton';
+import Typography from '@material-ui/core/Typography';
+import QuoteIcon from '@material-ui/icons/FormatQuote';
+import ReplyIcon from '@material-ui/icons/Reply';
 
 import { COLOR } from '../../../../../../../styles';
 
@@ -32,7 +36,6 @@ const commonTextStyle = css`
 		color: ${COLOR.BLACK_30};
 		font-size: 10px;
 		font-style: italic;
-		margin: 0 4px;
 	}
 `;
 
@@ -50,4 +53,28 @@ export const Date = styled(Typography)`
 
 export const Username = styled(Typography)`
 	${commonTextStyle};
+
+	&& {
+		margin: 0 4px;
+	}
+`;
+
+export const IconButton = styled(IconButtonComponent)`
+	&& {
+		padding: 2px;
+	}
+`;
+
+const commonIconStyles = css`
+	&& {
+		font-size: 12px;
+	}
+`;
+
+export const StyledQuoteIcon = styled(QuoteIcon)`
+	${commonIconStyles};
+`;
+
+export const StyledReplyIcon = styled(ReplyIcon)`
+	${commonIconStyles};
 `;

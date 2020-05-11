@@ -15,25 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
 
-import { Avatar as AvatarComponent } from '@material-ui/core';
-import { COLOR } from '../../../../../../../styles';
+import { selectIssuesMap } from '../../../../../../../../modules/issues';
+import { selectCurrentModelTeamspace } from '../../../../../../../../modules/model';
 
-export const Avatar = styled(AvatarComponent)`
-	&& {
-		height: 30px;
-		width: 30px;
-		background-color: ${(props) => !props.src ? COLOR.BLACK_20 : `transparent`};
-		color: ${COLOR.WHITE};
-		font-size: 14px;
-		border-width: 2px;
-		border-style: solid;
-		border-color: ${({ jobColor }: { jobColor: string }) => !jobColor ? `transparent` : jobColor};
-	}
-`;
+import { IssueReference } from './issueReference.component';
 
-export const AvatarWrapper = styled.div`
-	display: flex;
-	align-items: center;
-`;
+const mapStateToProps = createStructuredSelector({
+	issues: selectIssuesMap,
+	teamspace: selectCurrentModelTeamspace
+});
+
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+}, dispatch);
+
+export default connect(mapStateToProps, mapDispatchToProps)(IssueReference);

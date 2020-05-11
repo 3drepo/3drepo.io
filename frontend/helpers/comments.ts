@@ -15,9 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { values } from 'lodash';
 import { getAPIUrl } from '../services/api';
 import { getRiskConsequenceName, getRiskLikelihoodName } from './risks';
 import { sortByDate } from './sorting';
+
+export const MARKDOWN_USER_REFERENCE_REGEX = new RegExp('@\\w+', 'gi');
+export const MARKDOWN_ISSUE_REFERENCE_REGEX = new RegExp('#\\d+', 'gi');
+export const MARKDOWN_RESOURCE_REFERENCE_REGEX = new RegExp('#res.[\\w-]+', 'gi');
 
 export const createAttachResourceComments = (owner: string,  resources = []) =>
 	resources.map((r, i) =>
@@ -240,4 +245,34 @@ const convertActionValueToText = (value = '') => {
 	}
 
 	return actionText;
+};
+
+export const transformCustomsLinksToMarkdown = ({comment, issues}) => {
+	const usersReferences = comment.matchAll(MARKDOWN_USER_REFERENCE_REGEX);
+	const issuesReferences = comment.matchAll(MARKDOWN_ISSUE_REFERENCE_REGEX) || [];
+	const resourcesReferences = comment.matchAll(MARKDOWN_RESOURCE_REFERENCE_REGEX);
+
+	if (issuesReferences) {
+		[...issuesReferences].forEach(({ 0: issueReference }) => {
+			const issueNumber = Number(issueReference.replace('#', ''));
+			const issueData = values(issues).find((issue) => issue.number === issueNumber);
+			if (issueData && issueData._id) {
+				comment = comment.replace(issueReference, `[${issueReference}](${issueData._id})`);
+			}
+		});
+	}
+
+	if (usersReferences) {
+		[...usersReferences].forEach(({ 0: userReference }) => {
+			comment = comment.replace(userReference, `[${userReference}](${userReference.replace('@', '')})`);
+		});
+	}
+
+	if (resourcesReferences) {
+		[...resourcesReferences].forEach(({ 0: resourceReference }) => {
+			comment = comment.replace(resourceReference, `[${resourceReference}](${resourceReference.replace('#res.', '')})`);
+		});
+	}
+
+	return comment;
 };

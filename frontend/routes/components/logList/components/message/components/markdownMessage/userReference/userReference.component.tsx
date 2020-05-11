@@ -15,25 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import React from 'react';
 
-import { Avatar as AvatarComponent } from '@material-ui/core';
-import { COLOR } from '../../../../../../../styles';
+import { UserMarker } from '../../userMarker';
 
-export const Avatar = styled(AvatarComponent)`
-	&& {
-		height: 30px;
-		width: 30px;
-		background-color: ${(props) => !props.src ? COLOR.BLACK_20 : `transparent`};
-		color: ${COLOR.WHITE};
-		font-size: 14px;
-		border-width: 2px;
-		border-style: solid;
-		border-color: ${({ jobColor }: { jobColor: string }) => !jobColor ? `transparent` : jobColor};
-	}
-`;
-
-export const AvatarWrapper = styled.div`
-	display: flex;
-	align-items: center;
-`;
+export const UserReference = ({ id, text }) => {
+	return (
+		<UserMarker name={id}>
+			{text}
+		</UserMarker>
+	);
+};

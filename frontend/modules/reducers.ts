@@ -11,6 +11,7 @@ import { reducer as bimReducer } from './bim/bim.redux';
 import { reducer as boardReducer } from './board/board.redux';
 import { reducer as canvasHistoryReducer } from './canvasHistory/canvasHistory.redux';
 import { reducer as chatReducer } from './chat/chat.redux';
+import { reducer as commentsReducer } from './comments/comments.redux';
 import { reducer as compareReducer } from './compare/compare.redux';
 import { reducer as currentUserReducer } from './currentUser/currentUser.redux';
 import { reducer as dialogReducer } from './dialog/dialog.redux';
@@ -56,6 +57,7 @@ export default function createReducer(history) {
 		auth: authReducer,
 		notifications: notificationsReducer,
 		users: usersReducer,
+		comments: commentsReducer,
 		gis: gisReducer,
 		viewer: viewerReducer,
 		viewpoints: viewpointsReducer,

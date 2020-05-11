@@ -62,9 +62,9 @@ export const EmptyStateInfo = styled.p`
 
 export const Label = styled(Typography)`
 	&& {
-  	margin-right: 5px;
-  	margin-bottom: 3px;
-  }
+		margin-right: 5px;
+		margin-bottom: 3px;
+	}
 `;
 
 export const FormContainer = styled(FormControl)`

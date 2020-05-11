@@ -4,6 +4,7 @@ import billingSaga from './billing/billing.sagas';
 import bimSaga from './bim/bim.sagas';
 import boardSaga from './board/board.sagas';
 import chatSaga from './chat/chat.sagas';
+import commentsSaga from './comments/comments.sagas';
 import compareSaga from './compare/compare.sagas';
 import currentUserSaga from './currentUser/currentUser.sagas';
 import dialogSaga from './dialog/dialog.sagas';
@@ -39,6 +40,7 @@ export default function* rootSaga() {
 		fork(authSaga),
 		fork(notificationsSaga),
 		fork(usersSaga),
+		fork(commentsSaga),
 		fork(viewerSaga),
 		fork(risksSaga),
 		fork(viewpointsSaga),

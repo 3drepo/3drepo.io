@@ -1,0 +1,50 @@
+import React from 'react';
+
+import { cond, get, mapValues, stubTrue } from 'lodash';
+import {
+	MARKDOWN_ISSUE_REFERENCE_REGEX,
+	MARKDOWN_RESOURCE_REFERENCE_REGEX,
+	MARKDOWN_USER_REFERENCE_REGEX
+} from '../../../../../../../helpers/comments';
+
+import { IssueReference } from './issueReference/';
+import { Blockquote, Paragraph } from './markdownMessage.styles';
+import { ResourceReference } from './resourceReference/';
+import { UserReference } from './userReference/userReference.component';
+
+const withStyledRenderer = (StyledComponent) => (props) => <StyledComponent {...props} />;
+
+const EnhancedParagraph = (props) => {
+	const { children } = props;
+	const hasSingleChild = children && children[0] && children.length === 1;
+	const hasInvalidStructure = hasSingleChild && get(children, ['0', 'props', 'values'], null);
+
+	if (hasInvalidStructure) {
+		return children;
+	}
+
+	return <Paragraph {...props} />;
+};
+
+const EnhancedLink = ({ children, href, ...props }) => {
+	const value = get(children, ['0', 'props', 'value'], children);
+
+	return cond([
+		[() => value.match(MARKDOWN_RESOURCE_REFERENCE_REGEX), () => {
+			return (<ResourceReference id={href} text={value} />);
+		}],
+		[() => value.match(MARKDOWN_ISSUE_REFERENCE_REGEX), () => {
+			return (<IssueReference id={href} text={value} />);
+		}],
+		[() => value.match(MARKDOWN_USER_REFERENCE_REGEX), () => {
+			return (<UserReference id={href} text={value} />);
+		}],
+		[stubTrue, () => value]
+	])(value);
+};
+
+export const renderers = mapValues({
+	link: EnhancedLink,
+	paragraph: EnhancedParagraph,
+	blockquote: Blockquote,
+}, withStyledRenderer);

@@ -17,26 +17,25 @@
 
 import React from 'react';
 
-import { cond, matches, stubTrue } from 'lodash';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
+import { cond, matches, stubTrue } from 'lodash';
 
 import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../helpers/rendering';
-import {useStayScrolled} from '../../../hooks/useStayScrolled';
-import * as API from '../../../services/api';
 import { Loader as LoaderIndicator } from '../loader/loader.component';
 import { Message } from './components/message/message.component';
 import { Container, EmptyStateInfo, FilterWrapper, FormContainer, Label, LoaderContainer } from './logList.styles';
 
 interface IProps {
 	className?: string;
-	// commentsRef?: any;
+	formRef?: any;
 	messages: any[];
 	isPending: boolean;
 	currentUser: string;
 	teamspace: string;
 	removeMessage: (index, guid) => void;
 	setCameraOnViewpoint: (viewpoint) => void;
+	fetchUsers: (teamspace) => void;
 }
 
 const EmptyState = () => (
@@ -51,17 +50,13 @@ const Loader = () => (
 	</LoaderContainer>
 );
 
-export const MessagesList = ({ teamspace, isPending, messages, ...props }: IProps) => {
-	const [users, setUsers] = React.useState([]);
+export const MessagesList = ({ teamspace, isPending, messages, fetchUsers, ...props }: IProps) => {
 	const [filter, setFilter] = React.useState('all');
 	const listRef = React.useRef<HTMLDivElement>();
 
 	React.useEffect(() => {
-		(async () => {
-			const { data } = await API.fetchUsers(teamspace);
-			setUsers(data);
-		})();
-	}, []);
+		fetchUsers(teamspace);
+	}, [fetchUsers, teamspace]);
 
 	React.useLayoutEffect(() => {
 		if (listRef.current) {
@@ -81,24 +76,24 @@ export const MessagesList = ({ teamspace, isPending, messages, ...props }: IProp
 	}, [isPending, messages.length]);
 
 	const messagesList = React.useMemo(() => messages
-				.filter((message) => cond([
-					[matches('comments'), () => !Boolean(message.action)],
-					[matches('systemLogs'), () => Boolean(message.action)],
-					[stubTrue, stubTrue]
-				])(filter))
-				.map((item, index) => (
-						<Message
-								key={`${item.guid}_${item._id}`}
-								index={index}
-								{...item}
-								removeMessage={props.removeMessage}
-								users={users}
-								teamspace={teamspace}
-								currentUser={props.currentUser}
-								setCameraOnViewpoint={props.setCameraOnViewpoint}
-						/>
-				)).reverse()
-	, [messages, users, filter]);
+		.filter((message) => cond([
+			[matches('comments'), () => !Boolean(message.action)],
+			[matches('systemLogs'), () => Boolean(message.action)],
+			[stubTrue, stubTrue]
+		])(filter))
+		.map((item, index) => (
+			<Message
+				key={`${item.guid}_${item._id}`}
+				index={index}
+				{...item}
+				formRef={props.formRef}
+				removeMessage={props.removeMessage}
+				teamspace={teamspace}
+				currentUser={props.currentUser}
+				setCameraOnViewpoint={props.setCameraOnViewpoint}
+			/>
+		)).reverse()
+	, [messages, filter]);
 
 	const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
 		setFilter(event.target.value as string);
