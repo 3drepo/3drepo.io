@@ -26,6 +26,7 @@ before_install:
     - sudo ls -lrth /var/lib/ | grep mongodb
     - sudo rm -rf /var/lib/mongodb
     - sudo mkdir /var/lib/mongodb
+    - sudo chown mongodb:mongodb /var/lib/mongodb
     - sudo service mongod start
     - ps aux | grep mongod
     - cat /etc/mongod.conf
