@@ -129,6 +129,16 @@ export class UnityUtil {
 	public static loadUnity(divId: string, unityConfig = 'unity/Build/unity.json', memory?: number): Promise<void> {
 		memory = memory || 2130706432;
 
+		// Add withCredentials to XMLHttpRequest prototype to allow unity game to
+		// do CORS request. We used to do this with a .jspre on the unity side but it's no longer supported as of Unity 2019.1
+		(XMLHttpRequest.prototype as any).originalOpen = XMLHttpRequest.prototype.open;
+		const newOpen = function(_, url) {
+			const original = this.originalOpen.apply(this, arguments);
+			this.withCredentials = true;
+			return original;
+		};
+		XMLHttpRequest.prototype.open = newOpen;
+
 		const unitySettings: any = {
 			onProgress: this.onProgress
 		};
