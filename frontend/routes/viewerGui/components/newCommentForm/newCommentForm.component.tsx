@@ -22,18 +22,18 @@ import CloseIcon from '@material-ui/icons/Close';
 import ReportProblemIcon from '@material-ui/icons/ReportProblem';
 import SaveIcon from '@material-ui/icons/Save';
 import ShortTextIcon from '@material-ui/icons/ShortText';
+import ReactTextareaAutocomplete from '@webscopeio/react-textarea-autocomplete';
 import { Field, Formik } from 'formik';
+import { values as _values } from 'lodash';
 import React from 'react';
 import * as Yup from 'yup';
 
-import {
-	RISK_CONSEQUENCES,
-	RISK_LIKELIHOODS
-} from '../../../../constants/risks';
+import { RISK_CONSEQUENCES, RISK_LIKELIHOODS } from '../../../../constants/risks';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
 import { Image } from '../../../components/image';
 import { RemoveButtonWrapper } from '../../../components/logList/components/log/log.styles';
+import { UserAvatar } from '../../../components/logList/components/message/components/userAvatar';
 import { ScreenshotDialog } from '../../../components/screenshotDialog';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { FieldsRow, StyledFormControl } from '../risks/components/riskDetails/riskDetails.styles';
@@ -45,13 +45,17 @@ import {
 	Container,
 	FileUploadContainer,
 	FileUploadInvoker,
+	IssueSuggestion,
 	StyledForm,
 	StyledTextField,
 	TextFieldWrapper,
+	UserSuggestion,
 } from './newCommentForm.styles';
 
 interface IProps {
 	formRef: any;
+	messagesContainerRef: any;
+	issues: any[];
 	canComment: boolean;
 	comment?: string;
 	screenshot?: string;
@@ -68,17 +72,36 @@ interface IProps {
 	setDisabled: (isDisabled) => void;
 	deactivateMeasure: () => void;
 	setIsPinDropMode: (mode: boolean) => void;
+	teamspaceUsers: any[];
 }
 
 interface IState {
 	isPinActive: boolean;
 	newScreenshot: string;
 	isResidualRiskInputActive: boolean;
+	caretPosition: boolean;
+	optionsCaret: string;
 }
 
 const NewCommentSchema = Yup.object().shape({
 	comment: Yup.string().max(220)
 });
+
+interface ISuggestionItem {
+	entity: {
+		user: string
+	};
+}
+
+const UserSuggestionItem = ({ entity: { ...userData } }: ISuggestionItem) => (
+	<UserSuggestion user={userData}>
+		<UserAvatar name={userData.user} currentUser={userData} />
+	</UserSuggestion>
+);
+
+const IssueSuggestionItem = ({ entity: { ...issueData } }) => (
+	<IssueSuggestion {...issueData} />
+);
 
 export class NewCommentForm extends React.PureComponent<IProps, IState> {
 	get commentTypeIcon() {
@@ -96,10 +119,17 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 		return 'You are not able to comment';
 	}
 
+	private filteredUsersList = (token) => this.props.teamspaceUsers.filter(({ user }) => user.startsWith(token));
+
+	private filteredIssuesList = (token) => _values(this.props.issues)
+		.filter(({ number: issueNumber }) => String(issueNumber).startsWith(token)).slice(0, 5)
+
 	public state = {
 		isPinActive: false,
 		newScreenshot: '',
-		isResidualRiskInputActive: this.props.showResidualRiskInput
+		isResidualRiskInputActive: this.props.showResidualRiskInput,
+		caretPosition: 0,
+		optionsCaret: 'start',
 	};
 
 	public fileInputRef = React.createRef<HTMLInputElement>();
@@ -135,11 +165,11 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 		/>
 	));
 
-	public renderCommentField = renderWhenTrue(() => (
-		<TextFieldWrapper>
-			<Field name={COMMENT_FIELD_NAME} render={({ field }) => (
+	private renderTextAreaComponent = React.forwardRef((props, ref) => {
+		return (
+			<>
 				<StyledTextField
-					{...field}
+					{...props}
 					autoFocus
 					placeholder={this.commentPlaceholder}
 					multiline
@@ -147,6 +177,44 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 					InputLabelProps={{ shrink: true }}
 					inputProps={{ rowsMax: 4, maxLength: 220 }}
 					disabled={!this.props.canComment}
+					inputRef={ref}
+				/>
+			</>
+		);
+	});
+
+	private onCaretPositionChangeHandle = (position) => {
+		this.setState({
+			caretPosition: position,
+		});
+	}
+
+	private outputUser = (item, trigger) => ({ text: `${trigger}${item.user}`, caretPosition: 'end' });
+
+	private outputIssue = (item, trigger) => ({ text: `${trigger}${item.number}`, caretPosition: 'end' });
+
+	public renderCommentField = renderWhenTrue(() => (
+		<TextFieldWrapper>
+			<Field name={COMMENT_FIELD_NAME} render={({ field }) => (
+				<ReactTextareaAutocomplete
+					{...field}
+					textAreaComponent={this.renderTextAreaComponent}
+					boundariesElement={this.props.messagesContainerRef.current}
+					loadingComponent={() => null}
+					onCaretPositionChange={this.onCaretPositionChangeHandle}
+					minChar={1}
+					trigger={{
+						'@': {
+							dataProvider: (token) => this.filteredUsersList(token),
+							component: UserSuggestionItem,
+							output: this.outputUser,
+						},
+						'#': {
+							dataProvider: (token) => this.filteredIssuesList(token),
+							component: IssueSuggestionItem,
+							output: this.outputIssue,
+						},
+					}}
 				/>
 			)} />
 		</TextFieldWrapper>
@@ -172,16 +240,16 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 
 	public renderCreatedScreenshot = renderWhenTrue(() => {
 		return (
-				<>
-					<RemoveButtonWrapper screenshot>
-						<TooltipButton
-								label="Remove"
-								action={this.removeImage}
-								Icon={CloseIcon}
-						/>
-					</RemoveButtonWrapper>
-					<Image src={this.state.newScreenshot} onClick={this.handleImageClick} className="new-comment" />
-				</>
+			<>
+				<RemoveButtonWrapper screenshot>
+					<TooltipButton
+						label="Remove"
+						action={this.removeImage}
+						Icon={CloseIcon}
+					/>
+				</RemoveButtonWrapper>
+				<Image src={this.state.newScreenshot} onClick={this.handleImageClick} className="new-comment" />
+			</>
 		);
 	});
 

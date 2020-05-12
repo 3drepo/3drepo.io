@@ -15,12 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
-import { Form } from 'formik';
 import styled from 'styled-components';
 
+import Grid from '@material-ui/core/Grid';
+import TextField from '@material-ui/core/Input';
+import { Form } from 'formik';
+
 import { COLOR } from '../../../../styles';
+// tslint:disable-next-line:max-line-length
+import { IssuePopover } from '../../../components/logList/components/message/components/markdownMessage/issueReference/issuePopover/issuePopover.component';
+import {
+	UserPopover
+} from '../../../components/logList/components/message/components/userPopover/userPopover.component';
 
 export const Container = styled.div`
 	position: relative;
@@ -38,7 +44,54 @@ export const Title = styled.div`
 	color: ${COLOR.BLACK_20};
 `;
 
-export const TextFieldWrapper = styled.div``;
+export const TextFieldWrapper = styled.div`
+	.rta {
+		position: relative;
+		font-size: 18px;
+		width: 100%;
+		height: 100%;
+	}
+
+	.rta__autocomplete {
+		position: absolute;
+		display: block;
+		margin-top: 1em;
+		max-width: 380px;
+	}
+
+	.rta__autocomplete--top {
+		margin-top: 0;
+		margin-bottom: 1em;
+	}
+
+	.rta__list {
+		margin: 0;
+		padding: 0;
+		background: ${COLOR.WHITE};
+		border: 1px solid ${COLOR.BLACK_30};
+		border-radius: 3px;
+		box-shadow: 0 0 5px rgba(27, 31, 35, 0.1);
+		list-style: none;
+	}
+
+	.rta__entity {
+		width: 100%;
+		outline: none;
+	}
+
+	.rta__entity:hover {
+		cursor: pointer;
+	}
+
+	.rta__item:not(:last-child) {
+		border-bottom: 1px solid ${COLOR.BLACK_30};
+	}
+
+	.rta__entity--selected {
+		text-decoration: none;
+		background: ${COLOR.BLACK_12};
+	}
+`;
 
 export const StyledTextField = styled(TextField)`
 	font-size: 14px;
@@ -75,4 +128,21 @@ export const FileUploadInvoker = styled.input.attrs({
 })`
 	position:fixed;
 	top: -200%;
+`;
+
+export const LoaderContainer = styled.div`
+	display: flex;
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	justify-content: center;
+	overflow: hidden;
+	top: 0;
+	left: 0;
+`;
+
+export const UserSuggestion = styled(UserPopover)`
+`;
+
+export const IssueSuggestion = styled(IssuePopover)`
 `;

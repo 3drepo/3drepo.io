@@ -80,6 +80,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public formRef = React.createRef<any>();
 	public panelRef = React.createRef<any>();
+	public logsRef = React.createRef<any>();
 
 	get isNewIssue() {
 		return !this.props.issue._id;
@@ -136,7 +137,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 					isNew={this.isNewIssue}
 					showModelButton={disableViewer && !this.isNewIssue}
 				/>
-				<LogsContainer>
+				<LogsContainer ref={this.logsRef}>
 					{this.renderLogList(horizontal && isIssueWithComments)}
 					{this.renderFooter(horizontal && !failedToLoad)}
 				</LogsContainer>
@@ -158,6 +159,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				hideComment={this.isNewIssue}
 				hideScreenshot={this.props.disableViewer}
 				hideUploadButton={!this.props.disableViewer}
+				messagesContainerRef={this.logsRef}
 			/>
 		</ViewerPanelFooter>
 	));

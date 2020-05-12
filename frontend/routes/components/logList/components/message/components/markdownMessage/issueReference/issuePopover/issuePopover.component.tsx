@@ -15,23 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+import React from 'react';
 
-import { selectJobs } from '../jobs';
+import { Truncate } from '../../../../../../../truncate/truncate.component';
+import { Container, Description, Header, Icon, IssueNumber, Title } from '../issueReference.styles';
 
-export const selectUsersDomain = (state) => state.comments;
-
-export const selectTeamspaceUsers = createSelector(
-	selectUsersDomain, selectJobs, (state, jobs) => state.users
-		.map(({ job, ...user }) => ({
-			...user,
-			job: {
-				_id: job,
-				color: jobs.find(({ _id }) => job === _id )
-			}
-		}))
-);
-
-export const selectTeamspace = createSelector(
-	selectUsersDomain, (state) => state.teamspace
-);
+export const IssuePopover = ({ number: issueNumber, name, desc, statusColor, StatusIconComponent } ) => {
+	return (
+		<Container>
+			<Header>
+				<Icon color={statusColor}>
+					<StatusIconComponent color="inherit" fontSize="inherit" />
+				</Icon>
+				<Title>{name} <IssueNumber>(#{issueNumber})</IssueNumber></Title>
+			</Header>
+			<Description>
+				<Truncate lines={1}>
+					{desc}
+				</Truncate>
+			</Description>
+		</Container>
+	);
+};

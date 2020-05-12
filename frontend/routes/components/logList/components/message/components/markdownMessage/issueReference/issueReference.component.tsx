@@ -17,8 +17,8 @@
 
 import React from 'react';
 
-import { Truncate } from '../../../../../../truncate/truncate.component';
-import { Container, Description, Header, Icon, IssueNumber, Link, Popover, Title } from './issueReference.styles';
+import { IssuePopover } from './issuePopover/issuePopover.component';
+import { Link, Popover } from './issueReference.styles';
 
 export const IssueReference = ({ id, text, issues, teamspace }) => {
 	const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
@@ -29,7 +29,7 @@ export const IssueReference = ({ id, text, issues, teamspace }) => {
 		return text;
 	}
 
-	const { _id: issueId, model, number: issueNumber, name, desc, StatusIconComponent, ...props } = issueData;
+	const { _id: issueId, model, number: issueNumber, name, desc, statusColor, StatusIconComponent, ...props } = issueData;
 
 	const handlePopoverOpen = (
 			event: React.MouseEvent<HTMLElement, MouseEvent>
@@ -66,19 +66,13 @@ export const IssueReference = ({ id, text, issues, teamspace }) => {
 				onClose={handlePopoverClose}
 				disableRestoreFocus
 			>
-				<Container>
-					<Header>
-						<Icon>
-							<StatusIconComponent color="inherit" fontSize="inherit" />
-						</Icon>
-						<Title>{name} <IssueNumber>(#{issueNumber})</IssueNumber></Title>
-					</Header>
-					<Description>
-						<Truncate lines={1}>
-							{desc}
-						</Truncate>
-					</Description>
-				</Container>
+				<IssuePopover
+					name={name}
+					desc={desc}
+					number={issueNumber}
+					StatusIconComponent={StatusIconComponent}
+					statusColor={statusColor}
+				/>
 			</Popover>
 		</>
 	);

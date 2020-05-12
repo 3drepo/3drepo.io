@@ -44,6 +44,7 @@ export const Typography = styled(TypographyComponent)`
 export const Icon = styled.div`
 	font-size: 14px;
 	display: flex;
+	color: ${(props) => props.color || COLOR.WHITE};
 `;
 
 export const IssueNumber = styled.span`
