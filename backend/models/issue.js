@@ -196,34 +196,6 @@ class Issue extends Ticket {
 		return super.getReport(account, model, rid, ids, res, reportGen);
 	}
 
-	getIssuesList(account, model, branch, revision, ids, sort, convertCoords) {
-
-		const projection = {
-			extras: 0,
-			"comments": 0,
-			"viewpoints.extras": 0,
-			"viewpoints.scribble": 0,
-			"viewpoints.screenshot.content": 0,
-			"viewpoints.screenshot.resizedContent": 0,
-			"thumbnail.content": 0
-		};
-
-		return this.findByModelName(
-			account,
-			model,
-			branch,
-			revision,
-			projection,
-			ids,
-			false
-		).then((issues) => {
-			if (convertCoords) {
-				issues.forEach(this.toDirectXCoords);
-			}
-			return issues;
-		});
-	}
-
 	isIssueBeingClosed(oldIssue, newIssue) {
 		return !!oldIssue && oldIssue.status !== "closed" && newIssue.status === "closed";
 	}
