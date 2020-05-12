@@ -20,9 +20,11 @@ import { getAPIUrl } from '../services/api';
 import { getRiskConsequenceName, getRiskLikelihoodName } from './risks';
 import { sortByDate } from './sorting';
 
+export const INTERNAL_IMAGE_PATH_PREFIX = `API/`;
 export const MARKDOWN_USER_REFERENCE_REGEX = new RegExp('@\\w+', 'gi');
 export const MARKDOWN_ISSUE_REFERENCE_REGEX = new RegExp('#\\d+', 'gi');
 export const MARKDOWN_RESOURCE_REFERENCE_REGEX = new RegExp('#res.[\\w-]+', 'gi');
+export const MARKDOWN_INTERNAL_IMAGE_PATH_REGEX = new RegExp(`${INTERNAL_IMAGE_PATH_PREFIX}`, 'gi');
 
 export const createAttachResourceComments = (owner: string,  resources = []) =>
 	resources.map((r, i) =>

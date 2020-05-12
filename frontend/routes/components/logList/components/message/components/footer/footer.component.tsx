@@ -17,6 +17,7 @@
 
 import React from 'react';
 
+import { INTERNAL_IMAGE_PATH_PREFIX } from '../../../../../../../helpers/comments';
 import { DATE_TIME_FORMAT } from '../../../../../../../services/formatting/formatDate';
 import { COMMENT_FIELD_NAME } from '../../../../../../viewerGui/components/newCommentForm/newCommentForm.constants';
 import { DateTime } from '../../../../../dateTime/dateTime.component';
@@ -27,6 +28,7 @@ interface IProps {
 	created: any;
 	comment: string;
 	formRef?: any;
+	viewpoint: any;
 }
 
 export const Footer = ({ name, created, formRef, comment, ...props }: IProps) => {
@@ -41,10 +43,22 @@ export const Footer = ({ name, created, formRef, comment, ...props }: IProps) =>
 	const handleQuoteButtonClick = () => {
 		const commentForm = formRef.current;
 		const currentFormCommentValue = commentForm.state.values[COMMENT_FIELD_NAME];
-		const quoteComment = comment.replace(/(?:\r\n|\r|\n)/g, `\n`);
 		const additionalNewLine = (!currentFormCommentValue || currentFormCommentValue.endsWith(`\n`)) ? '' : `  \n`;
+		let quoteComment = '';
 
-		commentForm.setFieldValue(COMMENT_FIELD_NAME, `${currentFormCommentValue}${additionalNewLine}> ${quoteComment}\n\n`);
+		if (props.viewpoint && props.viewpoint.screenshotPath) {
+			const screenshotPath = props.viewpoint.screenshotPath.split('/api/');
+			if (screenshotPath[1]) {
+				quoteComment = quoteComment.concat(`> ![](${INTERNAL_IMAGE_PATH_PREFIX}${screenshotPath[1]})`);
+			}
+		}
+
+		if (comment) {
+			quoteComment = quoteComment !== '' ? quoteComment.concat(`\n`) : quoteComment;
+			quoteComment = quoteComment.concat(`> ${comment.replace(/(?:\r\n|\r|\n)/g, `\n`)}`);
+		}
+
+		commentForm.setFieldValue(COMMENT_FIELD_NAME, `${currentFormCommentValue}${additionalNewLine}${quoteComment}\n\n`);
 	};
 
 	return (

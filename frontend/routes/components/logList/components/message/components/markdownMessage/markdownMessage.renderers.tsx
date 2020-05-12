@@ -1,14 +1,16 @@
 import React from 'react';
 
 import { cond, get, mapValues, stubTrue } from 'lodash';
+
 import {
+	MARKDOWN_INTERNAL_IMAGE_PATH_REGEX,
 	MARKDOWN_ISSUE_REFERENCE_REGEX,
 	MARKDOWN_RESOURCE_REFERENCE_REGEX,
 	MARKDOWN_USER_REFERENCE_REGEX
 } from '../../../../../../../helpers/comments';
-
+import { getAPIUrl } from '../../../../../../../services/api';
 import { IssueReference } from './issueReference/';
-import { Blockquote, Paragraph } from './markdownMessage.styles';
+import { Blockquote, Image, Paragraph } from './markdownMessage.styles';
 import { ResourceReference } from './resourceReference/';
 import { UserReference } from './userReference/userReference.component';
 
@@ -43,8 +45,16 @@ const EnhancedLink = ({ children, href, ...props }) => {
 	])(value);
 };
 
+const EnhancedImage = ({ children, src, ...props }) => cond([
+	[() => src.match(MARKDOWN_INTERNAL_IMAGE_PATH_REGEX), () => (
+		<Image src={getAPIUrl(src.replace(MARKDOWN_INTERNAL_IMAGE_PATH_REGEX, ''))} />
+	)],
+	[stubTrue, () => (<Image src={src} />)]
+])(src);
+
 export const renderers = mapValues({
 	link: EnhancedLink,
 	paragraph: EnhancedParagraph,
 	blockquote: Blockquote,
+	image: EnhancedImage,
 }, withStyledRenderer);

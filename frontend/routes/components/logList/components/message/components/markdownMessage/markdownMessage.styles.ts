@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 
 import { COLOR } from '../../../../../../../styles';
+import { Image as ImageComponent } from '../../../../../image';
 
 export const Blockquote = styled.blockquote`
 	color: ${COLOR.BLACK_30};
@@ -30,4 +31,14 @@ export const Blockquote = styled.blockquote`
 `;
 
 export const Paragraph = styled.p`
+`;
+
+export const Image = styled(ImageComponent)`
+	img {
+		display: block;
+		max-width: 100%;
+		width: 100%;
+		height: auto;
+		margin: auto;
+	}
 `;

@@ -57,6 +57,7 @@ export const UserMessage = ({
 					formRef={props.formRef}
 					created={created}
 					comment={props.comment}
+					viewpoint={viewpoint}
 				/>
 			</CommentContainer>
 			{props.isRemovable && <RemoveButton index={index} guid={guid} removeMessage={handleRemoveMessage} />}
