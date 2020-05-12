@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { values } from 'lodash';
+import { uniqBy, values } from 'lodash';
 import { getAPIUrl } from '../services/api';
 import { getRiskConsequenceName, getRiskLikelihoodName } from './risks';
 import { sortByDate } from './sorting';
@@ -255,24 +255,33 @@ export const transformCustomsLinksToMarkdown = ({comment, issues}) => {
 	const resourcesReferences = comment.matchAll(MARKDOWN_RESOURCE_REFERENCE_REGEX);
 
 	if (issuesReferences) {
-		[...issuesReferences].forEach(({ 0: issueReference }) => {
+		const uniqIssuesReferences = uniqBy([...issuesReferences], 0);
+		uniqIssuesReferences.forEach(({ 0: issueReference }) => {
 			const issueNumber = Number(issueReference.replace('#', ''));
 			const issueData = values(issues).find((issue) => issue.number === issueNumber);
+
 			if (issueData && issueData._id) {
-				comment = comment.replace(issueReference, `[${issueReference}](${issueData._id})`);
+				const referenceRegExp = RegExp(issueReference, 'g');
+				comment = comment.replace(referenceRegExp, `[${issueReference}](${issueData._id})`);
 			}
 		});
 	}
 
 	if (usersReferences) {
-		[...usersReferences].forEach(({ 0: userReference }) => {
-			comment = comment.replace(userReference, `[${userReference}](${userReference.replace('@', '')})`);
+		const uniqUsersReferences = uniqBy([...usersReferences], 0);
+
+		uniqUsersReferences.forEach(({ 0: userReference }) => {
+			const referenceRegExp = RegExp(userReference, 'g');
+			comment = comment.replace(referenceRegExp, `[${userReference}](${userReference.replace('@', '')})`);
 		});
 	}
 
 	if (resourcesReferences) {
-		[...resourcesReferences].forEach(({ 0: resourceReference }) => {
-			comment = comment.replace(resourceReference, `[${resourceReference}](${resourceReference.replace('#res.', '')})`);
+		const uniqResourceReferences = uniqBy([...resourcesReferences], 0);
+
+		uniqResourceReferences.forEach(({ 0: resourceReference }) => {
+			const referenceRegExp = RegExp(resourceReference, 'g');
+			comment = comment.replace(referenceRegExp, `[${resourceReference}](${resourceReference.replace('#res.', '')})`);
 		});
 	}
 
