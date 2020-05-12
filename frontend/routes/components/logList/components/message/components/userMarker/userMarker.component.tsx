@@ -72,9 +72,9 @@ export const UserMarker = ({ name, children, teamspace, fetchUserDetails, usersC
 				onClose={handlePopoverClose}
 				disableRestoreFocus
 			>
-				<UserPopover user={currentUser}>
+				{currentUser && <UserPopover user={currentUser}>
 					<UserAvatar name={name} currentUser={currentUser} />
-				</UserPopover>
+				</UserPopover>}
 			</Popover>
 		</>
 	);

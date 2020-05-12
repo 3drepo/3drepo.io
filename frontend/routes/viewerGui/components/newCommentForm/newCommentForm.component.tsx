@@ -79,7 +79,6 @@ interface IState {
 	isPinActive: boolean;
 	newScreenshot: string;
 	isResidualRiskInputActive: boolean;
-	caretPosition: boolean;
 	optionsCaret: string;
 }
 
@@ -128,7 +127,6 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 		isPinActive: false,
 		newScreenshot: '',
 		isResidualRiskInputActive: this.props.showResidualRiskInput,
-		caretPosition: 0,
 		optionsCaret: 'start',
 	};
 
@@ -183,12 +181,6 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 		);
 	});
 
-	private onCaretPositionChangeHandle = (position) => {
-		this.setState({
-			caretPosition: position,
-		});
-	}
-
 	private outputUser = (item, trigger) => ({ text: `${trigger}${item.user}`, caretPosition: 'end' });
 
 	private outputIssue = (item, trigger) => ({ text: `${trigger}${item.number}`, caretPosition: 'end' });
@@ -201,7 +193,6 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 					textAreaComponent={this.renderTextAreaComponent}
 					boundariesElement={this.props.messagesContainerRef.current}
 					loadingComponent={() => null}
-					onCaretPositionChange={this.onCaretPositionChangeHandle}
 					minChar={1}
 					trigger={{
 						'@': {

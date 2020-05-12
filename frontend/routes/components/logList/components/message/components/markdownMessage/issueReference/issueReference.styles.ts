@@ -17,7 +17,6 @@
 
 import styled from 'styled-components';
 
-import { Typography as TypographyComponent } from '@material-ui/core';
 import PopoverComponent from '@material-ui/core/Popover';
 import { Link as RouterLink } from 'react-router-dom';
 
@@ -30,15 +29,6 @@ export const Link = styled(RouterLink)`
 
 export const Popover = styled(PopoverComponent)`
 	pointer-events: none;
-`;
-
-export const Typography = styled(TypographyComponent)`
-	&& {
-		max-height: 40px;
-		overflow: hidden;
-		margin-right: 24px;
-		margin-bottom: 0;
-	}
 `;
 
 export const Icon = styled.div`
@@ -65,7 +55,7 @@ export const Title = styled.span`
 	margin-left: 4px;
 `;
 
-export const Description = styled.p`
+export const Description = styled.div`
 	color: ${COLOR.BLACK_30};
 	font-size: 10px;
 	margin-top: 4px;
