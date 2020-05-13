@@ -832,7 +832,7 @@ function listIssues(req, res, next) {
 	const ids = req.query.ids ? req.query.ids.split(",") : null;
 	const convertCoords = !!req.query.convertCoords;
 
-	Issue.getIssuesList(account, model, branch, rid, ids, req.query.sortBy, convertCoords).then(issues => {
+	Issue.getList(account, model, branch, rid, ids, convertCoords).then(issues => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, issues);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
