@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,6 +16,7 @@
  */
 
 import React, { Fragment } from 'react';
+
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { canComment } from '../../../../../../helpers/issues';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
@@ -23,7 +24,7 @@ import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
 import { Container } from '../../../risks/components/riskDetails/riskDetails.styles';
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { EmptyStateInfo } from '../../../views/views.styles';
-import { HorizontalView, LogsContainer, LogList, PreviewDetails } from './issueDetails.styles';
+import { HorizontalView, MessagesList, MessageContainer, PreviewDetails } from './issueDetails.styles';
 import { IssueDetailsForm } from './issueDetailsForm.component';
 
 interface IProps {
@@ -80,7 +81,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public formRef = React.createRef<any>();
 	public panelRef = React.createRef<any>();
-	public logsRef = React.createRef<any>();
+	public messageContainerRef = React.createRef<any>();
 
 	get isNewIssue() {
 		return !this.props.issue._id;
@@ -98,9 +99,9 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		return this.props.viewer.initialized;
 	}
 
-	public renderLogList = renderWhenTrue(() => {
+	public renderMessagesList = renderWhenTrue(() => {
 		return (
-			<LogList
+			<MessagesList
 				formRef={this.formRef}
 				messages={this.props.issueWithMarkdownComments}
 				isPending={this.props.fetchingDetailsIsPending}
@@ -117,7 +118,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		const { comments } = this.issueData;
 		const isIssueWithComments = Boolean((comments && comments.length || horizontal) && !this.isNewIssue);
 		const PreviewWrapper = horizontal && isIssueWithComments ? HorizontalView : Fragment;
-		const renderNotCollapsable = () => this.renderLogList(!horizontal && isIssueWithComments);
+		const renderNotCollapsable = () => this.renderMessagesList(!horizontal && isIssueWithComments);
 
 		return (
 			<PreviewWrapper>
@@ -137,10 +138,10 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 					isNew={this.isNewIssue}
 					showModelButton={disableViewer && !this.isNewIssue}
 				/>
-				<LogsContainer ref={this.logsRef}>
-					{this.renderLogList(horizontal && isIssueWithComments)}
+				<MessageContainer ref={this.messageContainerRef}>
+					{this.renderMessagesList(horizontal && isIssueWithComments)}
 					{this.renderFooter(horizontal && !failedToLoad)}
-				</LogsContainer>
+				</MessageContainer>
 			</PreviewWrapper>
 		);
 	});
@@ -159,7 +160,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				hideComment={this.isNewIssue}
 				hideScreenshot={this.props.disableViewer}
 				hideUploadButton={!this.props.disableViewer}
-				messagesContainerRef={this.logsRef}
+				messagesContainerRef={this.messageContainerRef}
 			/>
 		</ViewerPanelFooter>
 	));

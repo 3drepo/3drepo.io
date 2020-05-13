@@ -18,16 +18,16 @@
 import styled from 'styled-components';
 import { COLOR } from '../../../../../../styles';
 
-import { MessagesList as LogListBase } from '../../../../../components/logList/';
+import { MessagesList as MessagesListComponent } from '../../../../../components/messagesList/';
 import PreviewDetailsBase from '../../../previewDetails/previewDetails.container';
 
 export const Container = styled.div``;
 
-export const LogList = styled(LogListBase)`
+export const MessagesList = styled(MessagesListComponent)`
 	height: 100%;
 `;
 
-export const LogsContainer = styled.div`
+export const MessageContainer = styled.div`
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
@@ -47,7 +47,7 @@ export const HorizontalView = styled.div`
 	overflow: hidden;
 	background-color: ${COLOR.WHITE};
 
-	${PreviewDetails}, ${LogsContainer} {
+	${PreviewDetails}, ${MessageContainer} {
 		min-width: 50%;
 		width: 50%;
 		min-height: 60vh;
@@ -56,7 +56,7 @@ export const HorizontalView = styled.div`
 		overflow: auto;
 	}
 
-	${LogList} {
+	${MessagesList} {
 		:before {
 			box-shadow: none;
 		}

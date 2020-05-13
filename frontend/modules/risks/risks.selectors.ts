@@ -18,8 +18,10 @@
 import { values } from 'lodash';
 import { createSelector } from 'reselect';
 import { RISK_LEVELS } from '../../constants/risks';
+import { transformCustomsLinksToMarkdown } from '../../helpers/comments';
 import { hasPin, riskToPin } from '../../helpers/pins';
 import { searchByFilters } from '../../helpers/searching';
+import { selectIssuesMap } from '../issues';
 import { selectQueryParams } from '../router/router.selectors';
 
 export const selectRisksDomain = (state) => state.risks;
@@ -52,6 +54,16 @@ export const selectActiveRiskDetails = createSelector(
 	selectRisksDomain, selectComponentState, (state, componentState) => {
 		return state.risksMap[componentState.activeRisk] || componentState.newRisk;
 	}
+);
+
+export const selectActiveRiskWithMarkdownComments = createSelector(
+		selectActiveRiskDetails, selectIssuesMap, (activeRiskDetails, issues) => {
+			return !activeRiskDetails.comments ? [] : activeRiskDetails.comments.map(({ comment, ...props }) => ({
+				...props,
+				comment,
+				commentWithMarkdown: transformCustomsLinksToMarkdown({ comment, issues }),
+			}));
+		}
 );
 
 export const selectShowDetails = createSelector(

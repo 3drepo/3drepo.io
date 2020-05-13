@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -31,18 +31,6 @@ export const Container = styled.div`
 
 	& > * {
 		margin-bottom: 10px;
-	}
-
-	&:before {
-		position: absolute;
-		top: 0;
-		left: 0;
-		pointer-events: none;
-		width: 100%;
-		content: '';
-		height: 10px;
-		overflow: hidden;
-		box-shadow: inset 0 4px 7px -4px ${COLOR.BLACK_30};
 	}
 `;
 
@@ -81,4 +69,17 @@ export const FilterWrapper = styled.div`
 	padding-left: 10px;
 	z-index: 2;
 	background: ${COLOR.GRAY};
+	position: relative;
+
+	&:before {
+		position: absolute;
+		top: 0;
+		left: 0;
+		pointer-events: none;
+		width: 100%;
+		content: '';
+		height: 10px;
+		overflow: hidden;
+		box-shadow: inset 0 4px 7px -4px ${COLOR.BLACK_30};
+	}
 `;

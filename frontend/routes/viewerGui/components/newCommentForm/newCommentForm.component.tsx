@@ -32,8 +32,7 @@ import { RISK_CONSEQUENCES, RISK_LIKELIHOODS } from '../../../../constants/risks
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
 import { Image } from '../../../components/image';
-import { RemoveButtonWrapper } from '../../../components/logList/components/log/log.styles';
-import { UserAvatar } from '../../../components/logList/components/message/components/userAvatar';
+import { UserAvatar } from '../../../components/messagesList/components/message/components/userAvatar';
 import { ScreenshotDialog } from '../../../components/screenshotDialog';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { FieldsRow, StyledFormControl } from '../risks/components/riskDetails/riskDetails.styles';
@@ -46,6 +45,7 @@ import {
 	FileUploadContainer,
 	FileUploadInvoker,
 	IssueSuggestion,
+	RemoveButtonWrapper,
 	StyledForm,
 	StyledTextField,
 	TextFieldWrapper,

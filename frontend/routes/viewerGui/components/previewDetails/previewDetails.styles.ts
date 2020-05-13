@@ -105,7 +105,7 @@ export const ToggleButtonContainer = styled.div`
 	top: auto;
 	background-color: ${COLOR.WHITE};
 	width: 100%;
-	z-index: 2;
+	z-index: 1;
 	position: static;
 ` as any;
 

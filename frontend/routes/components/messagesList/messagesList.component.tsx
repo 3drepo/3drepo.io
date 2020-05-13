@@ -24,7 +24,7 @@ import { cond, matches, stubTrue } from 'lodash';
 import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../helpers/rendering';
 import { Loader as LoaderIndicator } from '../loader/loader.component';
 import { Message } from './components/message/message.component';
-import { Container, EmptyStateInfo, FilterWrapper, FormContainer, Label, LoaderContainer } from './logList.styles';
+import { Container, EmptyStateInfo, FilterWrapper, FormContainer, Label, LoaderContainer } from './messagesList.styles';
 
 interface IProps {
 	className?: string;
@@ -51,7 +51,7 @@ const Loader = () => (
 );
 
 export const MessagesList = ({ teamspace, isPending, messages, fetchUsers, ...props }: IProps) => {
-	const [filter, setFilter] = React.useState('all');
+	const [filter, setFilter] = React.useState('comments');
 	const listRef = React.useRef<HTMLDivElement>();
 
 	React.useEffect(() => {
@@ -98,8 +98,6 @@ export const MessagesList = ({ teamspace, isPending, messages, fetchUsers, ...pr
 	const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
 		setFilter(event.target.value as string);
 	};
-
-	// @TODO move filtering to redux state and filter form to separate component
 
 	return (
 		<>

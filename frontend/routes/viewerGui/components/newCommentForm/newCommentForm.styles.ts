@@ -23,10 +23,10 @@ import { Form } from 'formik';
 
 import { COLOR } from '../../../../styles';
 // tslint:disable-next-line:max-line-length
-import { IssuePopover } from '../../../components/logList/components/message/components/markdownMessage/issueReference/issuePopover/issuePopover.component';
+import { IssuePopover } from '../../../components/messagesList/components/message/components/markdownMessage/issueReference/issuePopover/issuePopover.component';
 import {
 	UserPopover
-} from '../../../components/logList/components/message/components/userPopover/userPopover.component';
+} from '../../../components/messagesList/components/message/components/userPopover/userPopover.component';
 
 export const Container = styled.div`
 	position: relative;
@@ -141,6 +141,12 @@ export const LoaderContainer = styled.div`
 	top: 0;
 	left: 0;
 `;
+
+export const RemoveButtonWrapper = styled.div`
+	position: absolute;
+	right: 0;
+	top: ${(props: any) => props.screenshot ? 0 : '-8px'};
+` as any;
 
 export const UserSuggestion = styled(UserPopover)`
 `;
