@@ -549,7 +549,7 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 
 				zipfile.on("end", () => {
 
-					Issue.getIssuesList(account, model, branch, revId).then(() => {
+					Issue.getList(account, model, branch, revId).then(() => {
 						return Promise.all(promises);
 
 					}).then(() => {

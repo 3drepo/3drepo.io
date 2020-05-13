@@ -69,7 +69,7 @@ class Ticket {
 				ticketToClean[key] = utils.uuidToString(ticketToClean[key]);
 			}
 		});
-		if(ticketToClean.due_date === null) {
+		if (ticketToClean.due_date === null) {
 			delete ticketToClean.due_date;
 		}
 
@@ -336,7 +336,7 @@ class Ticket {
 			const fieldType = Object.prototype.toString.call(value);
 
 			if (this.fieldTypes[key] && validTypes.every(t => {
-				return (t === "[object Number]" && isNaN(parseFloat(value))) || (t !== "[object Number]" &&  t !== fieldType);
+				return (t === "[object Number]" && isNaN(parseFloat(value))) || (t !== "[object Number]" && t !== fieldType);
 			})) {
 				if (newTicket[key] === null) {
 					delete newTicket[key];
@@ -363,7 +363,7 @@ class Ticket {
 		}
 		newTicket.desc = newTicket.desc || "(No Description)";
 		let imagePromise = Promise.resolve();
-		let viewpointScreenshotPromise =  Promise.resolve();
+		let viewpointScreenshotPromise = Promise.resolve();
 
 		if (!newTicket.viewpoints || newTicket.viewpoint) {
 			// FIXME need to revisit this for BCF refactor
@@ -453,7 +453,7 @@ class Ticket {
 				return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 			} else {
 				if (foundTicket.viewpoints[0].screenshot_ref) {
-					return FileRef.fetchFile(account, model, this.collName , foundTicket.viewpoints[0].screenshot_ref);
+					return FileRef.fetchFile(account, model, this.collName, foundTicket.viewpoints[0].screenshot_ref);
 				}
 
 				// this is being kept for legacy reasons
@@ -472,12 +472,22 @@ class Ticket {
 			if (!_.get(foundTicket, "thumbnail.buffer") && !_.get(foundTicket, "thumbnail.content.buffer")) {
 				return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 			} else {
-				return (foundTicket.thumbnail.content ||  foundTicket.thumbnail).buffer;
+				return (foundTicket.thumbnail.content || foundTicket.thumbnail).buffer;
 			}
 		});
 	}
 
-	async findByModelName(account, model, branch, revId, projection, ids, noClean = false) {
+	async findByModelNameUpdateTimestamp(account, model, branch, revId, ids) {
+		const filter = await this.getIdsFilter(account, model, branch, revId, ids);
+		const coll = await this.getTicketsCollection(account, model);
+		return await coll.aggregate([
+			{ $match: filter},
+			{ $unwind: "$comments" },
+			{ $group: { _id: "$_id", lastUpdated: { $max: "$comments.created" } } }
+		]).toArray();
+	}
+
+	async getIdsFilter(account, model, branch, revId, ids) {
 		let filter = {};
 
 		if (Array.isArray(ids)) {
@@ -498,8 +508,15 @@ class Ticket {
 			}
 		}
 
-		const modelSettings = await ModelSetting.findById({ account, model }, model);
 		filter.rev_id = { "$not": { "$in": invalidRevIds } };
+
+		return filter;
+	}
+
+	async findByModelName(account, model, branch, revId, projection, ids, noClean = false) {
+		const filter = await this.getIdsFilter(account, model, branch, revId, ids);
+
+		const modelSettings = await ModelSetting.findById({ account, model }, model);
 		const coll = await this.getTicketsCollection(account, model);
 		const tickets = await coll.find(filter, projection).toArray();
 		tickets.forEach((foundTicket, index) => {
@@ -551,10 +568,34 @@ class Ticket {
 			"thumbnail.content": 0
 		};
 
-		const tickets = await this.findByModelName(account, model, branch, revision, projection, ids, false);
-		if (convertCoords) {
-			tickets.forEach(this.toDirectXCoords);
-		}
+		const [tickets, lastUpdated] = await Promise.all([
+			this.findByModelName(
+				account,
+				model,
+				branch,
+				revision,
+				projection,
+				ids,
+				false
+			),
+			this.findByModelNameUpdateTimestamp(
+				account,
+				model,
+				branch,
+				revision,
+				ids
+			)
+		]);
+
+		tickets.forEach(ticket => {
+			if (convertCoords) {
+				this.toDirectXCoords(ticket);
+			}
+
+			const timestamp =  lastUpdated.find(updatedTimestamp =>  utils.uuidToString(updatedTimestamp._id) === ticket._id);
+			ticket.lastUpdated =  (timestamp || {}).lastUpdated || ticket.created;
+		});
+
 		return tickets;
 	}
 
@@ -601,7 +642,7 @@ class Ticket {
 	}
 
 	async attachResourceFiles(account, model, id, username, sessionId, resourceNames, files) {
-		const spaceToBeUsed = files.reduce((size, file) => size + file.size,0);
+		const spaceToBeUsed = files.reduce((size, file) => size + file.size, 0);
 
 		if (!User.hasSufficientQuota(account, spaceToBeUsed)) {
 			throw responseCodes.SIZE_LIMIT_PAY;

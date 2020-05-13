@@ -1,13 +1,15 @@
 {
 "companyName": "3D Repo Ltd",
 "productName": "3D Repo Unity",
+"productVersion": "1.0",
 "dataUrl": "unity.data.unityweb",
-"asmCodeUrl": "unity.asm.code.unityweb",
-"asmMemoryUrl": "unity.asm.memory.unityweb",
-"asmFrameworkUrl": "unity.asm.framework.unityweb",
-"TOTAL_MEMORY": 2130706432,
+"wasmCodeUrl": "unity.wasm.code.unityweb",
+"wasmFrameworkUrl": "unity.wasm.framework.unityweb",
 "graphicsAPI": ["WebGL 2.0"],
 "webglContextAttributes": {"preserveDrawingBuffer": false},
 "splashScreenStyle": "Light",
-"backgroundColor": "#828080"
+"backgroundColor": "#828080",
+"developmentBuild": false,
+"multithreading": false,
+"unityVersion": "2019.3.12f1"
 }
