@@ -19,28 +19,21 @@
 
 const _ = require("lodash");
 const archiver = require("archiver");
-const C = require("../constants");
 const moment = require("moment");
-const responseCodes = require("../response_codes.js");
-const systemLogger = require("../logger.js").systemLogger;
-const utils = require("../utils");
 const xml2js = require("xml2js");
 const yauzl = require("yauzl");
 
-const ChatEvent = require("./chatEvent");
+const C = require("../constants");
+const responseCodes = require("../response_codes.js");
+const systemLogger = require("../logger.js").systemLogger;
+const utils = require("../utils");
+
+const ChatEvent = require("./chatEvent"); // FIXME necessary?
 const Group = require("./group");
 const History = require("./history");
-const Issue = require("./issue");
 const Meta = require("./meta");
-const ModelSetting = require("./modelSetting");
 
-// TODO duplicated from issue
-const statusEnum = {
-	"OPEN": C.ISSUE_STATUS_OPEN,
-	"IN_PROGRESS": C.ISSUE_STATUS_IN_PROGRESS,
-	"FOR_APPROVAL": C.ISSUE_STATUS_FOR_APPROVAL,
-	"CLOSED": C.ISSUE_STATUS_CLOSED
-};
+const statusEnum = C.ISSUE_STATUS;
 
 const priorityEnum = {
 	"NONE": "none",
@@ -62,6 +55,33 @@ const xmlBuilder = new xml2js.Builder({
 
 const bcf = {};
 
+function getBCFVersion() {
+	return `<?xml version="1.0" encoding="UTF-8"?>
+		<Version VersionId="2.1" xsi:noNamespaceSchemaLocation="version.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+		<DetailedVersion>2.1</DetailedVersion>
+		</Version>`;
+}
+
+/*
+ * Project Extension not used
+ * function getProjectExtension(modelId) {
+	const model = {
+		ProjectExtension:{
+			"@" : {
+				"xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
+				"xmlns:xsd": "http://www.w3.org/2001/XMLSchema"
+			},
+			"Project": {
+				"@": { "ProjectId": modelId },
+				"Name": modelId
+			},
+			"ExtensionSchema": {}
+		}
+	};
+
+	return xmlBuilder.buildObject(model);
+}*/
+
 function getIfcGuids(account, model) {
 	return Meta.find({ account, model }, { type: "meta" }, { "metadata.IFC GUID": 1 })
 		.then(ifcGuidResults => {
@@ -70,7 +90,6 @@ function getIfcGuids(account, model) {
 }
 
 function parseXmlString(xmlString, options) {
-
 	return new Promise((resolve, reject) => {
 		xml2js.parseString(xmlString, options, function (err, xml) {
 			if(err) {
@@ -80,7 +99,6 @@ function parseXmlString(xmlString, options) {
 			}
 		});
 	});
-
 }
 
 // TODO comment code should reside in comment
@@ -88,7 +106,21 @@ function isSystemComment(comment) {
 	return !_.isEmpty(comment.action);
 }
 
-function getBCFMarkup(issue, account, model, unit) {
+function sanitise(data, list) {
+	if (!data) {
+		return data;
+	}
+
+	const dataSanitised = data.toLowerCase();
+
+	if (_.map(list).indexOf(dataSanitised) === -1) {
+		return data;
+	}
+
+	return dataSanitised;
+}
+
+function getIssueBCF(issue, account, model, unit) {
 	// FIXME
 	// this.generateCommentsGUID();
 	// this.save();
@@ -126,32 +158,58 @@ function getBCFMarkup(issue, account, model, unit) {
 		}
 	};
 
-	issue.topic_type && (markup.Markup.Topic["@"].TopicType = issue.topic_type);
+	const markupMapping = {
+		"TopicType": "topic_type",
+		"Markup.Header": "extras.Header",
+		"Markup.Topic.ReferenceLink": "extras.ReferenceLink",
+		"Markup.Topic.Title": "name",
+		"Markup.Topic.Priority": "priority",
+		"Markup.Topic.Index": "extras.Index",
+		"Markup.Topic.Labels": "extras.Labels",
+		"Markup.Topic.CreationDate": "created",
+		"Markup.Topic.CreationAuthor": "owner",
+		"Markup.Topic.ModifiedDate": "extras.ModifiedDate",
+		"Markup.Topic.ModifiedAuthor": "extras.ModifiedAuthor",
+		"Markup.Topic.DueDate": "due_date",
+		"Markup.Topic.AssignedTo": "assigned_roles",
+		"Markup.Topic.Description": "desc",
+		"Markup.Topic.BimSnippet": "extras.BimSnippet",
+		"Markup.Topic.DocumentReference": "extras.DocumentReference",
+		"Markup.Topic.RelatedTopic": "extras.RelatedTopic"
+	};
 
-	_.get(issue, "extras.Header") && (markup.Markup.Header = _.get(issue, "extras.Header"));
-	_.get(issue, "extras.ReferenceLink") && (markup.Markup.Topic.ReferenceLink = _.get(issue, "extras.ReferenceLink"));
-	_.get(issue, "name") && (markup.Markup.Topic.Title = _.get(issue, "name"));
-	_.get(issue, "priority") && (markup.Markup.Topic.Priority = _.get(issue, "priority"));
-	_.get(issue, "extras.Index") && (markup.Markup.Topic.Index = _.get(issue, "extras.Index"));
-	_.get(issue, "extras.Labels") && (markup.Markup.Topic.Labels = _.get(issue, "extras.Labels"));
-	_.get(issue, "created") && (markup.Markup.Topic.CreationDate = moment(issue.created).format());
-	_.get(issue, "owner") && (markup.Markup.Topic.CreationAuthor = _.get(issue, "owner"));
-	_.get(issue, "extras.ModifiedDate") && (markup.Markup.Topic.ModifiedDate = _.get(issue, "extras.ModifiedDate"));
-	_.get(issue, "extras.ModifiedAuthor") && (markup.Markup.Topic.ModifiedAuthor = _.get(issue, "extras.ModifiedAuthor"));
-	if (_.get(issue, "due_date")) {
-		markup.Markup.Topic.DueDate = moment(_.get(issue, "due_date")).format();
-	} else if (_.get(issue, "extras.DueDate")) {
-		markup.Markup.Topic.DueDate = _.get(issue, "extras.DueDate"); // For backwards compatibility
-	}
-	if (issue.assigned_roles && issue.assigned_roles.length > 0) {
-		markup.Markup.Topic.AssignedTo = issue.assigned_roles.toString();
-	} else if (_.get(issue, "extras.AssignedTo")) {
-		markup.Markup.Topic.AssignedTo = _.get(issue, "extras.AssignedTo");
-	}
-	_.get(issue, "desc") && (markup.Markup.Topic.Description = _.get(issue, "desc"));
-	_.get(issue, "extras.BimSnippet") && (markup.Markup.Topic.BimSnippet = _.get(issue, "extras.BimSnippet"));
-	_.get(issue, "extras.DocumentReference") && (markup.Markup.Topic.DocumentReference = _.get(issue, "extras.DocumentReference"));
-	_.get(issue, "extras.RelatedTopic") && (markup.Markup.Topic.RelatedTopic = _.get(issue, "extras.RelatedTopic"));
+	Object.keys(markupMapping).forEach((key) => {
+		switch (key) {
+			case "TopicType":
+				if (issue[markupMapping[key]]) {
+					markup.Markup.Topic["@"].TopicType = issue[markupMapping[key]];
+				}
+				break;
+			case "Markup.Topic.CreationDate":
+				if (_.has(issue, markupMapping[key])) {
+					_.set(markup, key, moment(_.get(issue, markupMapping[key])).format());
+				}
+				break;
+			case "Markup.Topic.DueDate":
+				if (_.has(issue, markupMapping[key])) {
+					_.set(markup, key, moment(_.get(issue, markupMapping[key])).format());
+				} else if (_.has(issue, "extras.DueDate")) {
+					_.set(markup, key, _.get(issue, "extras.DueDate"));
+				}
+				break;
+			case "Markup.Topic.AssignedTo":
+				if (_.has(issue, markupMapping[key]) && issue[markupMapping[key]].length > 0) {
+					_.set(markup, key, _.get(issue, markupMapping[key]).toString());
+				} else if (_.has(issue, "extras.AssignedTo")) {
+					_.set(markup, key, _.get(issue, "extras.AssignedTo"));
+				}
+				break;
+			default:
+				if (_.has(issue, markupMapping[key])) {
+					_.set(markup, key, _.get(issue, markupMapping[key]));
+				}
+		}
+	});
 
 	// add comments
 	issue.comments && issue.comments.forEach(comment => {
@@ -408,771 +466,218 @@ function getBCFMarkup(issue, account, model, unit) {
 	});
 }
 
-bcf.getBCFZipReadStream = function(account, model, username, branch, revId, ids, useIssueNumbers = false) {
-
+bcf.getBCFZipReadStream = function(account, model, issues, unit) {
 	const zip = archiver.create("zip");
 
 	// Optional project extensions not currently utilised
 	// zip.append(new Buffer.from(getProjectExtension(model), "utf8"), {name: "project.bcfp"})
 	zip.append(new Buffer.from(getBCFVersion(), "utf8"), {name: "bcf.version"});
 
-	const projection = {};
-	const noClean = true;
-	let settings;
+	const bcfPromises = [];
 
-	return ModelSetting.findById({account, model}, model).then(_settings => {
+	issues.forEach(issue => {
 
-		settings = _settings;
-		return Issue.findByModelName(account, model, branch, revId, projection, ids, noClean, useIssueNumbers);
+		const issueAccount = (issue.origin_account) ? issue.origin_account : account;
+		const issueModel = (issue.origin_model) ? issue.origin_model : model;
 
-	}).then(issues => {
+		bcfPromises.push(
+			// FIXME
+			getIssueBCF(issue, issueAccount, issueModel, unit).then(bcfResult => {
 
-		const bcfPromises = [];
+				zip.append(new Buffer.from(bcfResult.markup, "utf8"), {name: `${utils.uuidToString(issue._id)}/markup.bcf`});
 
-		issues.forEach(issue => {
+				bcfResult.viewpoints.forEach(vp => {
+					zip.append(new Buffer.from(vp.xml, "utf8"), {name: `${utils.uuidToString(issue._id)}/${vp.filename}`});
+				});
 
-			const issueAccount = (issue.origin_account) ? issue.origin_account : account;
-			const issueModel = (issue.origin_model) ? issue.origin_model : model;
+				bcfResult.snapshots.forEach(snapshot => {
+					zip.append(snapshot.snapshot.buffer, {name: `${utils.uuidToString(issue._id)}/${snapshot.filename}`});
+				});
+			})
+		);
+	});
 
-			bcfPromises.push(
-				// FIXME
-				getBCFMarkup(issue, issueAccount, issueModel, _.get(settings, "properties.unit")).then(bcfResult => {
-
-					zip.append(new Buffer.from(bcfResult.markup, "utf8"), {name: `${utils.uuidToString(issue._id)}/markup.bcf`});
-
-					bcfResult.viewpoints.forEach(vp => {
-						zip.append(new Buffer.from(vp.xml, "utf8"), {name: `${utils.uuidToString(issue._id)}/${vp.filename}`});
-					});
-
-					bcfResult.snapshots.forEach(snapshot => {
-						zip.append(snapshot.snapshot.buffer, {name: `${utils.uuidToString(issue._id)}/${snapshot.filename}`});
-					});
-
-				})
-			);
-		});
-
-		return Promise.all(bcfPromises).then(() => {
-			zip.finalize();
-			return Promise.resolve(zip);
-		});
+	return Promise.all(bcfPromises).then(() => {
+		zip.finalize();
+		return Promise.resolve(zip);
 	});
 };
 
-function getBCFVersion() {
-	return `<?xml version="1.0" encoding="UTF-8"?>
-		<Version VersionId="2.1" xsi:noNamespaceSchemaLocation="version.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-		<DetailedVersion>2.1</DetailedVersion>
-		</Version>`;
+function parseViewpoints(issueGuid, issueFiles, vps) {
+
+	const viewpoints = {};
+	const vpPromises = [];
+
+	vps && vps.forEach(vp => {
+
+		if(!_.get(vp, "@.Guid")) {
+			return;
+		}
+
+		const vpFile = issueFiles[`${issueGuid}/${_.get(vp, "Viewpoint[0]._")}`];
+
+		viewpoints[vp["@"].Guid] = {
+			snapshot: issueFiles[`${issueGuid}/${_.get(vp, "Snapshot[0]._")}`]
+		};
+
+		vpFile && vpPromises.push(parseXmlString(vpFile.toString("utf8"), {explicitCharkey: 1, attrkey: "@"}).then(xml => {
+			viewpoints[vp["@"].Guid].viewpointXml = xml;
+			viewpoints[vp["@"].Guid].Index = _.get(vp, "Index");
+			viewpoints[vp["@"].Guid].Viewpoint = _.get(vp, "Viewpoint");
+			viewpoints[vp["@"].Guid].Snapshot = _.get(vp, "Snapshot");
+		}));
+
+	});
+
+	return Promise.all(vpPromises).then(() => viewpoints);
 }
 
-/*
- * Project Extension not used
- * function getProjectExtension(modelId) {
-	const model = {
-		ProjectExtension:{
-			"@" : {
-				"xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
-				"xmlns:xsd": "http://www.w3.org/2001/XMLSchema"
-			},
-			"Project": {
-				"@": { "ProjectId": modelId },
-				"Name": modelId
-			},
-			"ExtensionSchema": {}
+function createGroupData(groupObject) {
+
+	const groupData = {};
+
+	groupData.name = groupObject.name;
+	groupData.color = groupObject.color;
+
+	for (const groupAccount in groupObject.objects) {
+		for (const groupModel in groupObject.objects[groupAccount]) {
+			if (!groupData.objects) {
+				groupData.objects = [];
+			}
+
+			groupData.objects.push({
+				account: groupAccount,
+				model: groupModel,
+				ifc_guids: groupObject.objects[groupAccount][groupModel].ifc_guids
+			});
 		}
-	};
-
-	return xmlBuilder.buildObject(model);
-}*/
-
-bcf.importBCF = function(requester, account, model, revId, zipPath) {
-	let settings;
-	let branch;
-
-	if (!revId) {
-		branch = "master";
 	}
 
-	// assign revId for issue
-	return History.getHistory({ account, model }, branch, revId, {_id: 1}).then(history => {
-		if(!history) {
-			return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
-		} else if (history) {
-			revId = history._id;
+	return groupData;
+}
+
+function createGroupObject(group, name, color, groupAccount, groupModel, ifc_guid) {
+
+	if (groupAccount && groupModel && ifc_guid) {
+		if (!group) {
+			group = {};
 		}
-	}).then(() => {
 
-		return ModelSetting.findById({account, model}, model);
+		if (name) {
+			group.name = name;
+		}
 
-	}).then(_settings => {
-		settings = _settings;
+		if (color) {
+			group.color = color;
+		}
 
-	}).then(() => {
-		const ifcToModelMapPromises = [];
-		const ifcToModelMap = [];
+		if (!group.objects) {
+			group.objects = {};
+		}
 
-		if (settings.federate) {
-			for (let i = 0; settings.subModels && i < settings.subModels.length; i++) {
-				const subModelId = settings.subModels[i].model;
-				ifcToModelMapPromises.push(
-					getIfcGuids(account, subModelId).then(ifcGuidResults => {
-						for (let j = 0; j < ifcGuidResults.length; j++) {
-							ifcToModelMap[ifcGuidResults[j].metadata["IFC GUID"]] = subModelId;
-						}
-					})
-				);
+		if (!group.objects[groupAccount]) {
+			group.objects[groupAccount] = {};
+		}
+
+		if (!group.objects[groupAccount][groupModel]) {
+			group.objects[groupAccount][groupModel] = { ifc_guids: [] };
+		}
+
+		group.objects[groupAccount][groupModel].ifc_guids.push(ifc_guid);
+	}
+
+	return group;
+}
+
+function parseMarkupBuffer(markupBuffer) {
+	if (!markupBuffer) {
+		return Promise.resolve();
+	}
+
+	return parseXmlString(markupBuffer.toString("utf8"), { explicitCharkey: 1, attrkey: "@" }).then(xml => {
+		// console.log(xml);
+		const issue = {};
+		// issue._id = utils.stringToUUID(guid);
+		issue.comments = [];
+		issue.extras = {};
+		// issue.rev_id = revId;
+		issue.viewpoints = [];
+
+		if (xml.Markup) {
+			issue.extras.Header = _.get(xml, "Markup.Header");
+			if (_.get(xml, "Markup.Topic[0].@.TopicType")) {
+				issue.topic_type = _.get(xml, "Markup.Topic[0].@.TopicType");
 			}
+			issue.status = sanitise(_.get(xml, "Markup.Topic[0].@.TopicStatus"), statusEnum);
+			if (!issue.status || issue.status === "") {
+				issue.status = "open";
+			}
+			issue.extras.ReferenceLink = _.get(xml, "Topic[0].ReferenceLink");
+			issue.name = _.get(xml, "Markup.Topic[0].Title[0]._");
+			issue.priority = sanitise(_.get(xml, "Markup.Topic[0].Priority[0]._"), priorityEnum);
+			issue.extras.Index = _.get(xml, "Markup.Topic[0].Index[0]._");
+			issue.extras.Labels = _.get(xml, "Markup.Topic[0].Labels[0]._");
+			issue.created = moment(_.get(xml, "Markup.Topic[0].CreationDate[0]._")).format("x").valueOf();
+			issue.owner = _.get(xml, "Markup.Topic[0].CreationAuthor[0]._");
+			issue.extras.ModifiedDate = _.get(xml, "Markup.Topic[0].ModifiedDate[0]._");
+			issue.extras.ModifiedAuthor = _.get(xml, "Markup.Topic[0].ModifiedAuthor[0]._");
+			if (_.get(xml, "Markup.Topic[0].DueDate[0]._")) {
+				issue.due_date = moment(_.get(xml, "Markup.Topic[0].DueDate[0]._")).valueOf();
+			}
+			if (_.get(xml, "Markup.Topic[0].AssignedTo[0]._")) {
+				issue.assigned_roles = _.get(xml, "Markup.Topic[0].AssignedTo[0]._").split(",");
+			} else {
+				issue.assigned_roles = [];
+			}
+
+			issue.desc = (_.get(xml, "Markup.Topic[0].Description[0]._")) ? _.get(xml, "Markup.Topic[0].Description[0]._") : "(No Description)";
+			issue.extras.BimSnippet = _.get(xml, "Markup.Topic[0].BimSnippet");
+			issue.extras.DocumentReference = _.get(xml, "Markup.Topic[0].DocumentReference");
+			issue.extras.RelatedTopic = _.get(xml, "Markup.Topic[0].RelatedTopic");
 		}
 
-		return Promise.all(ifcToModelMapPromises).then(() => {
-			return ifcToModelMap;
+		_.get(xml, "Markup.Comment") && xml.Markup.Comment.forEach(comment => {
+			const obj = {
+				guid: _.get(comment, "@.Guid") ? utils.stringToUUID(_.get(comment, "@.Guid")) : utils.generateUUID(),
+				created: moment(_.get(comment, "Date[0]._")).format("x").valueOf(),
+				owner: _.get(comment, "Author[0]._"),
+				comment: _.get(comment, "Comment[0]._"),
+				sealed: true,
+				viewpoint: utils.isUUID(_.get(comment, "Viewpoint[0].@.Guid")) ? utils.stringToUUID(_.get(comment, "Viewpoint[0].@.Guid")) : undefined,
+				extras: {}
+			};
+
+			obj.extras.ModifiedDate = _.get(comment, "ModifiedDate");
+			obj.extras.ModifiedAuthor = _.get(comment, "ModifiedAuthor");
+
+			issue.comments.push(obj);
 		});
 
-	}).then(ifcToModelMap => {
+		return {
+			issue,
+			viewpoints: xml.Markup.Viewpoints
+		};
+	});
+}
 
-		return new Promise((resolve, reject) => {
+bcf.readBCF = function(requester, ifcToModelMap, zipPath) {
+	return new Promise((resolve, reject) => {
 
-			const files = {};
-			const promises = [];
+		const files = {};
+		const promises = [];
 
-			function handleZip(err, zipfile) {
-				if(err) {
-					return reject(err);
-				}
-
-				zipfile.readEntry();
-
-				zipfile.on("entry", entry => handleEntry(zipfile, entry));
-
-				zipfile.on("error", error => reject(error));
-
-				zipfile.on("end", () => {
-
-					Issue.getList(account, model, branch, revId).then(() => {
-						return Promise.all(promises);
-
-					}).then(() => {
-
-						const createIssueProms = [];
-
-						Object.keys(files).forEach(guid => {
-							createIssueProms.push(createIssue(guid));
-						});
-
-						return Promise.all(createIssueProms);
-
-					}).then(issues => {
-
-						const saveIssueProms = [];
-						const issuesToCreate = [];
-
-						// sort issues by date and add number
-						issues = issues.sort((a, b) => {
-							return a.created > b.created;
-						});
-
-						issues.forEach(issue => {
-							// System notification of BCF import
-							const currentTS = (new Date()).getTime();
-							const bcfImportNotification = {
-								guid: utils.generateUUID(),
-								created: currentTS,
-								action: {property: "bcf_import"},
-								owner: requester.user
-							};
-							saveIssueProms.push(
-								Issue.findByUID(account, model, issue._id, {}, true).then(matchingIssue => {
-									const toChange = {};
-									toChange.comments = matchingIssue.comments;
-									toChange.comments.push(bcfImportNotification);
-
-									// Replace following attributes if they do not exist
-									const simpleAttrs = ["priority", "status", "topic_type", "due_date", "desc"];
-									for (const simpleAttrIndex in simpleAttrs) {
-										const simpleAttr = simpleAttrs[simpleAttrIndex];
-										if (undefined !== issue[simpleAttr]
-											&& (undefined === matchingIssue[simpleAttr] || issue[simpleAttr] !== matchingIssue[simpleAttr])) {
-											toChange.comments.push({
-												guid: utils.generateUUID(),
-												created: currentTS,
-												action: {property: simpleAttr, from: matchingIssue[simpleAttr], to: issue[simpleAttr]},
-												owner: requester.user + "(BCF Import)"
-											});
-											toChange[simpleAttr] = issue[simpleAttr];
-										}
-									}
-
-									// Attempt to merge following attributes and sort by created desc
-									const complexAttrs = ["comments", "viewpoints"];
-									for (const complexAttrIndex in complexAttrs) {
-										const complexAttr = complexAttrs[complexAttrIndex];
-										if(!matchingIssue[complexAttr]) {
-											matchingIssue[complexAttr] = issue[complexAttr];
-											toChange[complexAttr] = matchingIssue[complexAttr];
-											continue;
-										}
-										for (let i = 0; i < issue[complexAttr].length; i++) {
-											if (-1 === matchingIssue[complexAttr].findIndex(attr =>
-												utils.uuidToString(attr.guid) === utils.uuidToString(issue[complexAttr][i].guid))) {
-												matchingIssue[complexAttr].push(issue[complexAttr][i]);
-											}
-										}
-										if (matchingIssue[complexAttr].length && matchingIssue[complexAttr][0].created) {
-											matchingIssue[complexAttr] = matchingIssue[complexAttr].sort((a, b) => {
-												return a.created > b.created;
-											});
-										}
-										toChange[complexAttr] = matchingIssue[complexAttr];
-									}
-									return Issue.updateFromBCF({account, model}, matchingIssue, toChange);
-								}).catch((error) => {
-									if (error.value === responseCodes.ISSUE_NOT_FOUND.value) {
-										issue.comments.push(bcfImportNotification);
-										issuesToCreate.push(issue);
-									} else {
-										return Promise.reject(error);
-									}
-								})
-							);
-						});
-
-						return Promise.all(saveIssueProms).then((updatedIssues) => {
-							// We need to do this synchronously to ensure the integrity of issue numbers
-							const savedIssues = [] ;
-							const issuesCreatedProm = issuesToCreate.reduce((promise, item) => {
-								return promise.then(() => {
-									return Issue.create(account, model, item).then((issue) => {
-										savedIssues.push(issue);
-									});
-								});
-							}, Promise.resolve());
-							return issuesCreatedProm.then(() => {
-								return savedIssues.concat(updatedIssues);
-							});
-						});
-
-					}).then(savedIssues => {
-
-						const notifications = [];
-
-						savedIssues.forEach(issue => {
-							if (issue && issue.clean) {
-								notifications.push(issue.clean(settings.type));
-							}
-						});
-
-						if(notifications.length) {
-							ChatEvent.newIssues(requester.socketId, account, model, notifications);
-						}
-
-						resolve();
-
-					}).catch(error => {
-						reject(error);
-					});
-				});
-
+		yauzl.open(zipPath, {lazyEntries: true}, function (err, zipfile) {
+			if (err) {
+				return reject(err);
 			}
 
-			function parseViewpoints(issueGuid, issueFiles, vps) {
+			zipfile.readEntry();
 
-				const viewpoints = {};
-				const vpPromises = [];
-
-				vps && vps.forEach(vp => {
-
-					if(!_.get(vp, "@.Guid")) {
-						return;
-					}
-
-					const vpFile = issueFiles[`${issueGuid}/${_.get(vp, "Viewpoint[0]._")}`];
-
-					viewpoints[vp["@"].Guid] = {
-						snapshot: issueFiles[`${issueGuid}/${_.get(vp, "Snapshot[0]._")}`]
-					};
-
-					vpFile && vpPromises.push(parseXmlString(vpFile.toString("utf8"), {explicitCharkey: 1, attrkey: "@"}).then(xml => {
-						viewpoints[vp["@"].Guid].viewpointXml = xml;
-						viewpoints[vp["@"].Guid].Index = _.get(vp, "Index");
-						viewpoints[vp["@"].Guid].Viewpoint = _.get(vp, "Viewpoint");
-						viewpoints[vp["@"].Guid].Snapshot = _.get(vp, "Snapshot");
-					}));
-
-				});
-
-				return Promise.all(vpPromises).then(() => viewpoints);
-			}
-
-			function sanitise(data, list) {
-				if (!data) {
-					return data;
-				}
-
-				const dataSanitised = data.toLowerCase();
-				if(_.map(list).indexOf(dataSanitised) === -1) {
-					return data;
-				}
-				return dataSanitised;
-
-			}
-
-			function createGroupData(groupObject) {
-
-				const groupData = {};
-
-				groupData.name = groupObject.name;
-				groupData.color = groupObject.color;
-
-				for (const groupAccount in groupObject.objects) {
-					for (const groupModel in groupObject.objects[groupAccount]) {
-						if (!groupData.objects) {
-							groupData.objects = [];
-						}
-
-						groupData.objects.push({
-							account: groupAccount,
-							model: groupModel,
-							ifc_guids: groupObject.objects[groupAccount][groupModel].ifc_guids
-						});
-					}
-				}
-
-				return groupData;
-			}
-
-			function createGroupObject(group, name, color, groupAccount, groupModel, ifc_guid) {
-
-				if (groupAccount && groupModel && ifc_guid) {
-					if (!group) {
-						group = {};
-					}
-
-					if (name) {
-						group.name = name;
-					}
-
-					if (color) {
-						group.color = color;
-					}
-
-					if (!group.objects) {
-						group.objects = {};
-					}
-
-					if (!group.objects[groupAccount]) {
-						group.objects[groupAccount] = {};
-					}
-
-					if (!group.objects[groupAccount][groupModel]) {
-						group.objects[groupAccount][groupModel] = { ifc_guids: [] };
-					}
-
-					group.objects[groupAccount][groupModel].ifc_guids.push(ifc_guid);
-				}
-
-				return group;
-			}
-
-			function createIssue(guid) {
-
-				const issueFiles = files[guid];
-				const markupBuf = issueFiles[`${guid}/markup.bcf`];
-				let xml;
-				let issue;
-
-				if(!markupBuf) {
-					return Promise.resolve();
-				}
-
-				return parseXmlString(markupBuf.toString("utf8"), { explicitCharkey: 1, attrkey: "@" }).then(_xml => {
-
-					xml = _xml;
-
-					issue = {};
-					issue._id = utils.stringToUUID(guid);
-					issue.comments = [];
-					issue.extras = {};
-					issue.rev_id = revId;
-					issue.viewpoints = [];
-
-					if (xml.Markup) {
-						issue.extras.Header = _.get(xml, "Markup.Header");
-						if (_.get(xml, "Markup.Topic[0].@.TopicType")) {
-							issue.topic_type = _.get(xml, "Markup.Topic[0].@.TopicType");
-						}
-						issue.status = sanitise(_.get(xml, "Markup.Topic[0].@.TopicStatus"), statusEnum);
-						if (!issue.status || issue.status === "") {
-							issue.status = "open";
-						}
-						issue.extras.ReferenceLink = _.get(xml, "Topic[0].ReferenceLink");
-						issue.name = _.get(xml, "Markup.Topic[0].Title[0]._");
-						issue.priority = sanitise(_.get(xml, "Markup.Topic[0].Priority[0]._"), priorityEnum);
-						issue.extras.Index = _.get(xml, "Markup.Topic[0].Index[0]._");
-						issue.extras.Labels = _.get(xml, "Markup.Topic[0].Labels[0]._");
-						issue.created = moment(_.get(xml, "Markup.Topic[0].CreationDate[0]._")).format("x").valueOf();
-						issue.owner = _.get(xml, "Markup.Topic[0].CreationAuthor[0]._");
-						issue.extras.ModifiedDate = _.get(xml, "Markup.Topic[0].ModifiedDate[0]._");
-						issue.extras.ModifiedAuthor = _.get(xml, "Markup.Topic[0].ModifiedAuthor[0]._");
-						if (_.get(xml, "Markup.Topic[0].DueDate[0]._")) {
-							issue.due_date = moment(_.get(xml, "Markup.Topic[0].DueDate[0]._")).valueOf();
-						}
-						if (_.get(xml, "Markup.Topic[0].AssignedTo[0]._")) {
-							issue.assigned_roles = _.get(xml, "Markup.Topic[0].AssignedTo[0]._").split(",");
-						} else {
-							issue.assigned_roles = [];
-						}
-
-						issue.desc = (_.get(xml, "Markup.Topic[0].Description[0]._")) ? _.get(xml, "Markup.Topic[0].Description[0]._") : "(No Description)";
-						issue.extras.BimSnippet = _.get(xml, "Markup.Topic[0].BimSnippet");
-						issue.extras.DocumentReference = _.get(xml, "Markup.Topic[0].DocumentReference");
-						issue.extras.RelatedTopic = _.get(xml, "Markup.Topic[0].RelatedTopic");
-					}
-
-					_.get(xml, "Markup.Comment") && xml.Markup.Comment.forEach(comment => {
-						const obj = {
-							guid: _.get(comment, "@.Guid") ? utils.stringToUUID(_.get(comment, "@.Guid")) : utils.generateUUID(),
-							created: moment(_.get(comment, "Date[0]._")).format("x").valueOf(),
-							owner: _.get(comment, "Author[0]._"),
-							comment: _.get(comment, "Comment[0]._"),
-							sealed: true,
-							viewpoint: utils.isUUID(_.get(comment, "Viewpoint[0].@.Guid")) ? utils.stringToUUID(_.get(comment, "Viewpoint[0].@.Guid")) : undefined,
-							extras: {}
-						};
-
-						obj.extras.ModifiedDate = _.get(comment, "ModifiedDate");
-						obj.extras.ModifiedAuthor = _.get(comment, "ModifiedAuthor");
-
-						issue.comments.push(obj);
-					});
-
-					return parseViewpoints(guid, issueFiles, xml.Markup.Viewpoints);
-
-				}).then(viewpoints => {
-
-					const vpGuids = Object.keys(viewpoints);
-					const groupPromises = [];
-
-					vpGuids.forEach(vpGuid => {
-						if (!viewpoints[vpGuid].viewpointXml) {
-							return;
-						}
-
-						const extras = {};
-						const vpXML = viewpoints[vpGuid].viewpointXml;
-
-						extras.Spaces = _.get(vpXML, "VisualizationInfo.Spaces");
-						extras.SpaceBoundaries = _.get(vpXML, "VisualizationInfo.SpaceBoundaries");
-						extras.Openings = _.get(vpXML, "VisualizationInfo.Openings");
-						extras.OrthogonalCamera = _.get(vpXML, "VisualizationInfo.OrthogonalCamera");
-						extras.Lines = _.get(vpXML, "VisualizationInfo.Lines");
-						extras.Bitmap = _.get(vpXML, "VisualizationInfo.Bitmap");
-						extras.Index = viewpoints[vpGuid].Viewpoint;
-						extras.Snapshot = viewpoints[vpGuid].Snapshot;
-						!_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0]") && (extras._noPerspective = true);
-
-						const screenshotObj = viewpoints[vpGuid].snapshot ? {
-							flag: 1,
-							content: viewpoints[vpGuid].snapshot
-						} : undefined;
-
-						const vp = {
-							guid: utils.stringToUUID(vpGuid),
-							extras: extras,
-							screenshot: screenshotObj
-
-						};
-
-						let scale = 1;
-						const unit = _.get(settings, "properties.unit");
-						if (unit === "dm") {
-							scale = 10;
-						} else if (unit === "cm") {
-							scale = 100;
-						} else if (unit === "mm") {
-							scale = 1000;
-						} else if (unit === "ft") {
-							scale = 3.28084;
-						}
-
-						if (_.get(vpXML, "VisualizationInfo.ClippingPlanes")) {
-							const clippingPlanes = _.get(vpXML, "VisualizationInfo.ClippingPlanes");
-							const planes = [];
-							if (clippingPlanes[0].ClippingPlane) {
-								for (let clipIdx = 0; clipIdx < clippingPlanes[0].ClippingPlane.length; ++clipIdx) {
-									const fieldName = "VisualizationInfo.ClippingPlanes[0].ClippingPlane[" + clipIdx + "]";
-									const clip = {};
-									clip.normal = [
-										parseFloat(_.get(vpXML, fieldName + ".Direction[0].X[0]._")),
-										parseFloat(_.get(vpXML, fieldName + ".Direction[0].Z[0]._")),
-										-parseFloat(_.get(vpXML, fieldName + ".Direction[0].Y[0]._"))
-									];
-									const position = [
-										parseFloat(_.get(vpXML, fieldName + ".Location[0].X[0]._")) * scale,
-										parseFloat(_.get(vpXML, fieldName + ".Location[0].Z[0]._")) * scale,
-										-parseFloat(_.get(vpXML, fieldName + ".Location[0].Y[0]._")) * scale
-									];
-
-									clip.distance = - (position[0] * clip.normal[0]
-										+ position[1] * clip.normal[1]
-										+ position[2] * clip.normal[2]);
-
-									clip.clipDirection = 1;
-									planes.push(clip);
-								}
-							}
-
-							vp.clippingPlanes = planes;
-
-						}
-
-						if (_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0]")) {
-							vp.up = [
-								parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].X[0]._")),
-								parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Z[0]._")),
-								-parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Y[0]._"))
-							];
-							vp.view_dir = [
-								parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].X[0]._")),
-								parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].Z[0]._")),
-								-parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].Y[0]._"))
-							];
-							vp.position = [
-								parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].X[0]._")) * scale,
-								parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].Z[0]._")) * scale,
-								-parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].Y[0]._")) * scale
-							];
-
-							vp.fov = parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].FieldOfView[0]._")) * Math.PI / 180;
-
-							vp.type = "perspective";
-
-						} else if (_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0]")) {
-
-							vp.up = [
-								parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].CameraUpVector[0].X[0]._")),
-								parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].CameraUpVector[0].Z[0]._")),
-								-parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].CameraUpVector[0].Y[0]._"))
-							];
-
-							vp.view_dir = [
-								parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].CameraDirection[0].X[0]._")),
-								parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].CameraDirection[0].Z[0]._")),
-								-parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].CameraDirection[0].Y[0]._"))
-							];
-
-							vp.position = [
-								parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].CameraViewPoint[0].X[0]._")) * scale,
-								parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].CameraViewPoint[0].Z[0]._")) * scale,
-								-parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].CameraViewPoint[0].Y[0]._")) * scale
-							];
-
-							vp.fov = 1.8;
-
-							vp.type = "orthogonal";
-						}
-
-						if (_.get(vpXML, "VisualizationInfo.Components")) {
-							const groupDbCol = {
-								account: account,
-								model: model
-							};
-
-							const vpComponents = _.get(vpXML, "VisualizationInfo.Components");
-
-							for (let i = 0; i < vpComponents.length; i++) {
-
-								let highlightedGroupObject;
-
-								// TODO: refactor to reduce duplication?
-								if (vpComponents[i].Selection) {
-
-									for (let j = 0; j < vpComponents[i].Selection.length; j++) {
-										for (let k = 0; vpComponents[i].Selection[j].Component && k < vpComponents[i].Selection[j].Component.length; k++) {
-											let objectModel = model;
-
-											if (settings.federate) {
-												objectModel = ifcToModelMap[vpComponents[i].Selection[j].Component[k]["@"].IfcGuid];
-											}
-
-											highlightedGroupObject = createGroupObject(
-												highlightedGroupObject,
-												issue.name,
-												[255, 0, 0],
-												account,
-												objectModel,
-												vpComponents[i].Selection[j].Component[k]["@"].IfcGuid
-											);
-										}
-									}
-
-								}
-								if (vpComponents[i].Coloring) {
-									// FIXME: this is essentially copy of selection with slight modification. Should merge common code.
-									for (let j = 0; j < vpComponents[i].Coloring.length; j++) {
-										for (let k = 0; vpComponents[i].Coloring[j].Color && k < vpComponents[i].Coloring[j].Color.length; k++) {
-											for (let compIdx = 0; vpComponents[i].Coloring[j].Color[k].Component && compIdx < vpComponents[i].Coloring[j].Color[k].Component.length; compIdx++) {
-												// const color = vpComponents[i].Coloring[j].Color[k]["@"].Color; // TODO: colour needs to be preserved at some point in the future
-												let objectModel = model;
-
-												if (settings.federate) {
-													objectModel = ifcToModelMap[vpComponents[i].Coloring[j].Color[k].Component[compIdx]["@"].IfcGuid];
-												}
-
-												highlightedGroupObject = createGroupObject(
-													highlightedGroupObject,
-													issue.name,
-													[255, 0, 0],
-													account,
-													objectModel,
-													vpComponents[i].Coloring[j].Color[k].Component[compIdx]["@"].IfcGuid
-												);
-											}
-										}
-									}
-
-								}
-
-								let highlightedGroupData;
-								let highlightedObjectsMap = [];
-
-								if (highlightedGroupObject) {
-									highlightedGroupData = createGroupData(highlightedGroupObject);
-									groupPromises.push(
-										Group.createGroup(groupDbCol, undefined, highlightedGroupData).then(group => {
-											vp.highlighted_group_id = utils.stringToUUID(group._id);
-										})
-									);
-
-									highlightedObjectsMap = highlightedGroupData.objects.reduce((acc, val) => acc.concat(val.ifc_guids), []);
-								}
-
-								if (vpComponents[i].Visibility) {
-									let hiddenGroupObject;
-									let shownGroupObject;
-
-									for (let j = 0; j < vpComponents[i].Visibility.length; j++) {
-										const defaultVisibility = JSON.parse(vpComponents[i].Visibility[j]["@"].DefaultVisibility);
-										let componentsToHide = [];
-										let componentsToShow = [];
-
-										if (defaultVisibility) {
-											componentsToShow = vpComponents[i].Visibility[j].Component;
-											if (vpComponents[i].Visibility[j].Exceptions) {
-												componentsToHide = vpComponents[i].Visibility[j].Exceptions[0].Component;
-											}
-										} else {
-											componentsToHide = vpComponents[i].Visibility[j].Component;
-											if (vpComponents[i].Visibility[j].Exceptions) {
-												componentsToShow = vpComponents[i].Visibility[j].Exceptions[0].Component;
-											}
-										}
-
-										for (let k = 0; componentsToHide && k < componentsToHide.length; k++) {
-											let objectModel = model;
-
-											if (settings.federate) {
-												objectModel = ifcToModelMap[componentsToHide[k]["@"].IfcGuid];
-											}
-
-											// Exclude items selected
-											if (highlightedObjectsMap && -1 === highlightedObjectsMap.indexOf(componentsToHide[k]["@"].IfcGuid)) {
-												hiddenGroupObject = createGroupObject(
-													hiddenGroupObject,
-													issue.name,
-													[255, 0, 0],
-													account,
-													objectModel,
-													componentsToHide[k]["@"].IfcGuid
-												);
-											}
-										}
-
-										for (let k = 0; componentsToShow && k < componentsToShow.length; k++) {
-											let objectModel = model;
-
-											if (settings.federate) {
-												objectModel = ifcToModelMap[componentsToShow[k]["@"].IfcGuid];
-											}
-
-											shownGroupObject = createGroupObject(
-												shownGroupObject,
-												issue.name,
-												[255, 0, 0],
-												account,
-												objectModel,
-												componentsToShow[k]["@"].IfcGuid
-											);
-										}
-									}
-
-									// TODO: May need a better way to combine hidden/shown
-									// as it is not ideal to save both hidden and shown objects
-									if (shownGroupObject) {
-										const shownGroupData = createGroupData(shownGroupObject);
-
-										if (highlightedGroupData) {
-											shownGroupData.objects = shownGroupData.objects.concat(highlightedGroupData.objects);
-										}
-
-										groupPromises.push(
-											Group.createGroup(groupDbCol, undefined, shownGroupData).then(group => {
-												vp.shown_group_id = utils.stringToUUID(group._id);
-											})
-										);
-									} else if (hiddenGroupObject) {
-										groupPromises.push(
-											Group.createGroup(groupDbCol, undefined, createGroupData(hiddenGroupObject)).then(group => {
-												vp.hidden_group_id = utils.stringToUUID(group._id);
-											})
-										);
-									}
-								}
-
-								if (vpComponents[i].ViewSetupHints) {
-									// TODO: Full ViewSetupHints support -
-									// SpaceVisible should correspond to !hideIfc
-									vp.extras.ViewSetupHints = vpComponents[i].ViewSetupHints;
-								}
-							}
-						}
-						issue.viewpoints.push(vp);
-
-					});
-
-					return Promise.all(groupPromises).then(() => {
-						if (viewpoints[vpGuids[0]].snapshot) {
-							// take the first screenshot as thumbnail
-							return utils.resizeAndCropScreenshot(viewpoints[vpGuids[0]].snapshot, 120, 120, true).then((image) => {
-								if (image) {
-									issue.thumbnail = {
-										flag: 1,
-										content: image
-									};
-								}
-							}).catch(err => {
-								systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
-									account,
-									model,
-									issueId: utils.uuidToString(issue._id),
-									viewpointId: vpGuids[0],
-									err: err
-								});
-							});
-						}
-					}).then(() => {
-						return issue;
-					});
-				});
-
-			}
-
-			// read each item zip file, put them in files object
-			function handleEntry(zipfile, entry) {
-
+			zipfile.on("entry", entry => {
+				// read each item zip file, put them in files object
 				let paths;
 
-				if(entry.fileName.indexOf("\\") !== -1) {
+				if (entry.fileName.indexOf("\\") !== -1) {
 					// give tolerance to file path using \ instead of /
 					paths = entry.fileName.split("\\");
 				} else {
@@ -1181,19 +686,17 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 
 				const guid = paths[0] && utils.isUUID(paths[0]) && paths[0];
 
-				if(guid && !files[guid]) {
+				if (guid && !files[guid]) {
 					files[guid] = {};
 				}
 
 				// if entry is a file and start with guid
-				if(!entry.fileName.endsWith("/") && !entry.fileName.endsWith("\\") && guid) {
-
+				if (!entry.fileName.endsWith("/") && !entry.fileName.endsWith("\\") && guid) {
 					promises.push(new Promise((_resolve, _reject) => {
 						zipfile.openReadStream(entry, (err, rs) => {
-							if(err) {
+							if (err) {
 								return _reject(err);
 							} else {
-
 								const bufs = [];
 
 								rs.on("data", d => bufs.push(d));
@@ -1212,12 +715,391 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 					}));
 				}
 
-				zipfile.readEntry();
+				return zipfile.readEntry();
+			});
 
-			}
+			zipfile.on("error", error => reject(error));
 
-			yauzl.open(zipPath, {lazyEntries: true}, handleZip);
+			zipfile.on("end", () => {
+
+				// console.log("end 1");
+				const endPromise = Promise.all(promises).then(() => {
+					const parsePromises = [];
+					// console.log(files);
+					// TODO: parse all XML first
+					Object.keys(files).forEach(guid => {
+						// console.log(guid);
+						const parsePromise = parseMarkupBuffer(files[guid][`${guid}/markup.bcf`]).then((markupData) => {
+							const {issue, viewpoints} = markupData;
+							issue._id = utils.stringToUUID(guid);
+							// revId?
+							// console.log(issue);
+							// console.log(viewpoints);
+							return parseViewpoints(issue._id, files[guid], viewpoints).then(viewpoints => {
+								const vpGuids = Object.keys(viewpoints);
+								const groupPromises = [];
+
+								vpGuids.forEach(vpGuid => {
+									if (!viewpoints[vpGuid].viewpointXml) {
+										return;
+									}
+
+									const extras = {};
+									const vpXML = viewpoints[vpGuid].viewpointXml;
+
+									extras.Spaces = _.get(vpXML, "VisualizationInfo.Spaces");
+									extras.SpaceBoundaries = _.get(vpXML, "VisualizationInfo.SpaceBoundaries");
+									extras.Openings = _.get(vpXML, "VisualizationInfo.Openings");
+									extras.OrthogonalCamera = _.get(vpXML, "VisualizationInfo.OrthogonalCamera");
+									extras.Lines = _.get(vpXML, "VisualizationInfo.Lines");
+									extras.Bitmap = _.get(vpXML, "VisualizationInfo.Bitmap");
+									extras.Index = viewpoints[vpGuid].Viewpoint;
+									extras.Snapshot = viewpoints[vpGuid].Snapshot;
+									!_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0]") && (extras._noPerspective = true);
+
+									const screenshotObj = viewpoints[vpGuid].snapshot ? {
+										flag: 1,
+										content: viewpoints[vpGuid].snapshot
+									} : undefined;
+
+									const vp = {
+										guid: utils.stringToUUID(vpGuid),
+										extras: extras,
+										screenshot: screenshotObj
+
+									};
+
+									let scale = 1;
+									const unit = _.get(settings, "properties.unit");
+									if (unit === "dm") {
+										scale = 10;
+									} else if (unit === "cm") {
+										scale = 100;
+									} else if (unit === "mm") {
+										scale = 1000;
+									} else if (unit === "ft") {
+										scale = 3.28084;
+									}
+
+									if (_.get(vpXML, "VisualizationInfo.ClippingPlanes")) {
+										const clippingPlanes = _.get(vpXML, "VisualizationInfo.ClippingPlanes");
+										const planes = [];
+										if (clippingPlanes[0].ClippingPlane) {
+											for (let clipIdx = 0; clipIdx < clippingPlanes[0].ClippingPlane.length; ++clipIdx) {
+												const fieldName = "VisualizationInfo.ClippingPlanes[0].ClippingPlane[" + clipIdx + "]";
+												const clip = {};
+												clip.normal = [
+													parseFloat(_.get(vpXML, fieldName + ".Direction[0].X[0]._")),
+													parseFloat(_.get(vpXML, fieldName + ".Direction[0].Z[0]._")),
+													-parseFloat(_.get(vpXML, fieldName + ".Direction[0].Y[0]._"))
+												];
+												const position = [
+													parseFloat(_.get(vpXML, fieldName + ".Location[0].X[0]._")) * scale,
+													parseFloat(_.get(vpXML, fieldName + ".Location[0].Z[0]._")) * scale,
+													-parseFloat(_.get(vpXML, fieldName + ".Location[0].Y[0]._")) * scale
+												];
+
+												clip.distance = - (position[0] * clip.normal[0]
+													+ position[1] * clip.normal[1]
+													+ position[2] * clip.normal[2]);
+
+												clip.clipDirection = 1;
+												planes.push(clip);
+											}
+										}
+
+										vp.clippingPlanes = planes;
+
+									}
+
+									if (_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0]")) {
+										vp.up = [
+											parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].X[0]._")),
+											parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Z[0]._")),
+											-parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Y[0]._"))
+										];
+										vp.view_dir = [
+											parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].X[0]._")),
+											parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].Z[0]._")),
+											-parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].Y[0]._"))
+										];
+										vp.position = [
+											parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].X[0]._")) * scale,
+											parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].Z[0]._")) * scale,
+											-parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].Y[0]._")) * scale
+										];
+
+										vp.fov = parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].FieldOfView[0]._")) * Math.PI / 180;
+
+										vp.type = "perspective";
+
+									} else if (_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0]")) {
+
+										vp.up = [
+											parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].CameraUpVector[0].X[0]._")),
+											parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].CameraUpVector[0].Z[0]._")),
+											-parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].CameraUpVector[0].Y[0]._"))
+										];
+
+										vp.view_dir = [
+											parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].CameraDirection[0].X[0]._")),
+											parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].CameraDirection[0].Z[0]._")),
+											-parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].CameraDirection[0].Y[0]._"))
+										];
+
+										vp.position = [
+											parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].CameraViewPoint[0].X[0]._")) * scale,
+											parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].CameraViewPoint[0].Z[0]._")) * scale,
+											-parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].CameraViewPoint[0].Y[0]._")) * scale
+										];
+
+										vp.fov = 1.8;
+
+										vp.type = "orthogonal";
+									}
+
+									if (_.get(vpXML, "VisualizationInfo.Components")) {
+										const groupDbCol = {
+											account: account,
+											model: model
+										};
+
+										const vpComponents = _.get(vpXML, "VisualizationInfo.Components");
+
+										for (let i = 0; i < vpComponents.length; i++) {
+
+											let highlightedGroupObject;
+
+											// TODO: refactor to reduce duplication?
+											if (vpComponents[i].Selection) {
+
+												for (let j = 0; j < vpComponents[i].Selection.length; j++) {
+													for (let k = 0; vpComponents[i].Selection[j].Component && k < vpComponents[i].Selection[j].Component.length; k++) {
+														let objectModel = model;
+
+														if (settings.federate) {
+															objectModel = ifcToModelMap[vpComponents[i].Selection[j].Component[k]["@"].IfcGuid];
+														}
+
+														highlightedGroupObject = createGroupObject(
+															highlightedGroupObject,
+															issue.name,
+															[255, 0, 0],
+															account,
+															objectModel,
+															vpComponents[i].Selection[j].Component[k]["@"].IfcGuid
+														);
+													}
+												}
+
+											}
+											if (vpComponents[i].Coloring) {
+												// FIXME: this is essentially copy of selection with slight modification. Should merge common code.
+												for (let j = 0; j < vpComponents[i].Coloring.length; j++) {
+													for (let k = 0; vpComponents[i].Coloring[j].Color && k < vpComponents[i].Coloring[j].Color.length; k++) {
+														for (let compIdx = 0; vpComponents[i].Coloring[j].Color[k].Component && compIdx < vpComponents[i].Coloring[j].Color[k].Component.length; compIdx++) {
+															// const color = vpComponents[i].Coloring[j].Color[k]["@"].Color; // TODO: colour needs to be preserved at some point in the future
+															let objectModel = model;
+
+															if (settings.federate) {
+																objectModel = ifcToModelMap[vpComponents[i].Coloring[j].Color[k].Component[compIdx]["@"].IfcGuid];
+															}
+
+															highlightedGroupObject = createGroupObject(
+																highlightedGroupObject,
+																issue.name,
+																[255, 0, 0],
+																account,
+																objectModel,
+																vpComponents[i].Coloring[j].Color[k].Component[compIdx]["@"].IfcGuid
+															);
+														}
+													}
+												}
+
+											}
+
+											let highlightedGroupData;
+											let highlightedObjectsMap = [];
+
+											if (highlightedGroupObject) {
+												highlightedGroupData = createGroupData(highlightedGroupObject);
+												groupPromises.push(
+													Group.createGroup(groupDbCol, undefined, highlightedGroupData).then(group => {
+														vp.highlighted_group_id = utils.stringToUUID(group._id);
+													})
+												);
+
+												highlightedObjectsMap = highlightedGroupData.objects.reduce((acc, val) => acc.concat(val.ifc_guids), []);
+											}
+
+											if (vpComponents[i].Visibility) {
+												let hiddenGroupObject;
+												let shownGroupObject;
+
+												for (let j = 0; j < vpComponents[i].Visibility.length; j++) {
+													const defaultVisibility = JSON.parse(vpComponents[i].Visibility[j]["@"].DefaultVisibility);
+													let componentsToHide = [];
+													let componentsToShow = [];
+
+													if (defaultVisibility) {
+														componentsToShow = vpComponents[i].Visibility[j].Component;
+														if (vpComponents[i].Visibility[j].Exceptions) {
+															componentsToHide = vpComponents[i].Visibility[j].Exceptions[0].Component;
+														}
+													} else {
+														componentsToHide = vpComponents[i].Visibility[j].Component;
+														if (vpComponents[i].Visibility[j].Exceptions) {
+															componentsToShow = vpComponents[i].Visibility[j].Exceptions[0].Component;
+														}
+													}
+
+													for (let k = 0; componentsToHide && k < componentsToHide.length; k++) {
+														let objectModel = model;
+
+														if (settings.federate) {
+															objectModel = ifcToModelMap[componentsToHide[k]["@"].IfcGuid];
+														}
+
+														// Exclude items selected
+														if (highlightedObjectsMap && -1 === highlightedObjectsMap.indexOf(componentsToHide[k]["@"].IfcGuid)) {
+															hiddenGroupObject = createGroupObject(
+																hiddenGroupObject,
+																issue.name,
+																[255, 0, 0],
+																account,
+																objectModel,
+																componentsToHide[k]["@"].IfcGuid
+															);
+														}
+													}
+
+													for (let k = 0; componentsToShow && k < componentsToShow.length; k++) {
+														let objectModel = model;
+
+														if (settings.federate) {
+															objectModel = ifcToModelMap[componentsToShow[k]["@"].IfcGuid];
+														}
+
+														shownGroupObject = createGroupObject(
+															shownGroupObject,
+															issue.name,
+															[255, 0, 0],
+															account,
+															objectModel,
+															componentsToShow[k]["@"].IfcGuid
+														);
+													}
+												}
+
+												// TODO: May need a better way to combine hidden/shown
+												// as it is not ideal to save both hidden and shown objects
+												if (shownGroupObject) {
+													const shownGroupData = createGroupData(shownGroupObject);
+
+													if (highlightedGroupData) {
+														shownGroupData.objects = shownGroupData.objects.concat(highlightedGroupData.objects);
+													}
+
+													groupPromises.push(
+														Group.createGroup(groupDbCol, undefined, shownGroupData).then(group => {
+															vp.shown_group_id = utils.stringToUUID(group._id);
+														})
+													);
+												} else if (hiddenGroupObject) {
+													groupPromises.push(
+														Group.createGroup(groupDbCol, undefined, createGroupData(hiddenGroupObject)).then(group => {
+															vp.hidden_group_id = utils.stringToUUID(group._id);
+														})
+													);
+												}
+											}
+
+											if (vpComponents[i].ViewSetupHints) {
+												// TODO: Full ViewSetupHints support -
+												// SpaceVisible should correspond to !hideIfc
+												vp.extras.ViewSetupHints = vpComponents[i].ViewSetupHints;
+											}
+										}
+									}
+									issue.viewpoints.push(vp);
+
+								});
+
+								return Promise.all(groupPromises).then(() => {
+									if (viewpoints[vpGuids[0]].snapshot) {
+										// take the first screenshot as thumbnail
+										return utils.resizeAndCropScreenshot(viewpoints[vpGuids[0]].snapshot, 120, 120, true).then((image) => {
+											if (image) {
+												issue.thumbnail = {
+													flag: 1,
+													content: image
+												};
+											}
+										}).catch(err => {
+											systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
+												account,
+												model,
+												issueId: utils.uuidToString(issue._id),
+												viewpointId: vpGuids[0],
+												err: err
+											});
+										});
+									}
+								}).then(() => {
+									console.log("viewpoint return");
+
+									// System notification of BCF import
+									const currentTS = (new Date()).getTime();
+									const bcfImportNotification = {
+										guid: utils.generateUUID(),
+										created: currentTS,
+										action: {property: "bcf_import"},
+										owner: requester.user
+									};
+
+									issue.comments.push(bcfImportNotification);
+									console.log(issue);
+
+									return issue;
+								});
+							});
+						});
+						parsePromises.push(parsePromise);
+					});
+
+					return Promise.all(parsePromises);
+				});
+
+				endPromise.then((end) => {
+					console.log("read bcf return");
+					// console.log(end);
+					resolve(end);
+				});
+			});
 		});
+	});
+};
+
+bcf.importBCF = function(requester, account, model, zipPath, settings) {
+	const ifcToModelMapPromises = [];
+	const ifcToModelMap = [];
+
+	if (settings.federate) {
+		for (let i = 0; settings.subModels && i < settings.subModels.length; i++) {
+			const subModelId = settings.subModels[i].model;
+			ifcToModelMapPromises.push(
+				getIfcGuids(account, subModelId).then(ifcGuidResults => {
+					for (let j = 0; j < ifcGuidResults.length; j++) {
+						ifcToModelMap[ifcGuidResults[j].metadata["IFC GUID"]] = subModelId;
+					}
+				})
+			);
+		}
+	}
+
+	return Promise.all(ifcToModelMapPromises).then(() => {
+		return this.readBCF(requester, ifcToModelMap, zipPath);
 	});
 };
 

@@ -24,7 +24,9 @@ const History = require("./history");
 const Ref = require("./ref");
 
 const ChatEvent = require("./chatEvent");
+const ModelSetting = require("../models/modelSetting");
 
+const BCF = require("./bcf");
 const Ticket = require("./ticket");
 
 const C = require("../constants");
@@ -63,12 +65,7 @@ const ownerPrivilegeAttributes = [
 	"priority"
 ];
 
-const statusEnum = {
-	"OPEN": C.ISSUE_STATUS_OPEN,
-	"IN_PROGRESS": C.ISSUE_STATUS_IN_PROGRESS,
-	"FOR_APPROVAL": C.ISSUE_STATUS_FOR_APPROVAL,
-	"CLOSED": C.ISSUE_STATUS_CLOSED
-};
+const statusEnum = C.ISSUE_STATUS;
 
 class Issue extends Ticket {
 	constructor() {
@@ -189,6 +186,30 @@ class Issue extends Ticket {
 		];
 
 		return await super.update(attributeBlacklist, user, sessionId, account, model, issueId, data, this.onBeforeUpdate.bind(this));
+	}
+
+	async getBCF(account, model, branch, revId, ids, useIssueNumbers = false) {
+		const projection = {};
+		const noClean = true;
+
+		const settings = await ModelSetting.findById({account, model}, model);
+		const issues = await this.findByModelName(account, model, branch, revId, projection, ids, noClean, useIssueNumbers);
+
+		return BCF.getBCFZipReadStream(account, model, issues, settings.properties.unit);
+	}
+
+	async importBCF(requester, account, model, revId, zipPath) {
+		const projection = {};
+		const noClean = true;
+
+		const settings = await ModelSetting.findById({account, model}, model);
+
+		return BCF.importBCF(requester, account, model, zipPath, settings).then((bcfIssues) => {
+			return this.merge(account, model, revId, bcfIssues);
+		});
+	}
+
+	async merge(account, model, revId, data) {
 	}
 
 	async getIssuesReport(account, model, rid, ids, res) {

@@ -350,6 +350,7 @@ groupSchema.methods.getObjectsArray = function (model, branch, revId, convertSha
 	});
 };
 
+// FIXME: Why do we have findByUID and findByUIDSerialised? - charence
 groupSchema.statics.findByUID = function (dbCol, uid, branch, revId, convertObjects = true) {
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
@@ -371,6 +372,7 @@ groupSchema.statics.findByUID = function (dbCol, uid, branch, revId, convertObje
 
 };
 
+// FIXME: Why do we have findByUID and findByUIDSerialised? - charence
 groupSchema.statics.findByUIDSerialised = function (dbCol, uid, branch, revId, showIfcGuids = false) {
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })

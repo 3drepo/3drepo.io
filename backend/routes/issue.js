@@ -22,7 +22,6 @@ const middlewares = require("../middlewares/middlewares");
 
 const C = require("../constants");
 const responseCodes = require("../response_codes.js");
-const BCF = require("../models/bcf");
 const Issue = require("../models/issue");
 const utils = require("../utils");
 const multer = require("multer");
@@ -858,13 +857,12 @@ function getIssuesBCF(req, res, next) {
 	let getBCFZipRS;
 
 	if (req.params.rid) {
-		getBCFZipRS = BCF.getBCFZipReadStream(account, model, req.session.user.username, null, req.params.rid, ids, useIssueNumbers);
+		getBCFZipRS = Issue.getBCF(account, model, null, req.params.rid, ids, useIssueNumbers);
 	} else {
-		getBCFZipRS = BCF.getBCFZipReadStream(account, model, req.session.user.username, "master", null, ids, useIssueNumbers);
+		getBCFZipRS = Issue.getBCF(account, model, "master", null, ids, useIssueNumbers);
 	}
 
 	getBCFZipRS.then(zipRS => {
-
 		const timestamp = (new Date()).toLocaleString();
 
 		ModelSetting.findById(dbCol, dbCol.model).then((settings) => {
@@ -947,7 +945,7 @@ function importBCF(req, res, next) {
 		} else if (!req.file.size) {
 			return responseCodes.respond(place, req, res, next, responseCodes.FILE_FORMAT_NOT_SUPPORTED, responseCodes.FILE_FORMAT_NOT_SUPPORTED);
 		} else {
-			BCF.importBCF({ socketId: req.headers[C.HEADER_SOCKET_ID], user: req.session.user.username }, req.params.account, req.params.model, req.params.rid, req.file.path).then(() => {
+			Issue.importBCF({ socketId: req.headers[C.HEADER_SOCKET_ID], user: req.session.user.username }, req.params.account, req.params.model, req.params.rid, req.file.path).then(() => {
 				responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "ok" });
 			}).catch(error => {
 				responseCodes.respond(place, req, res, next, error, error);

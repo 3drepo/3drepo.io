@@ -530,6 +530,13 @@
 	define("ISSUE_STATUS_FOR_APPROVAL", "for approval");
 	define("ISSUE_STATUS_CLOSED", "closed");
 
+	define("ISSUE_STATUS",{
+		"OPEN": module.exports.ISSUE_STATUS_OPEN,
+		"IN_PROGRESS": module.exports.ISSUE_STATUS_IN_PROGRESS,
+		"FOR_APPROVAL": module.exports.ISSUE_STATUS_FOR_APPROVAL,
+		"CLOSED": module.exports.ISSUE_STATUS_CLOSED
+	});
+
 	define("MAIL_URLS",{
 		"forgotPassword": data => `/password-change?username=${data.username}&token=${data.token}`,
 		"verify": data => `/register-verify?username=${data.username}&token=${data.token}` + (data.pay ? "&pay=true" : ""),
