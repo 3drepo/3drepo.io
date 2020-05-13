@@ -19,13 +19,13 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { selectIssuesMap } from '../../../../../../../../modules/issues';
+import { selectIssues } from '../../../../../../../../modules/issues';
 import { selectCurrentModelTeamspace } from '../../../../../../../../modules/model';
 
 import { IssueReference } from './issueReference.component';
 
 const mapStateToProps = createStructuredSelector({
-	issues: selectIssuesMap,
+	issues: selectIssues,
 	teamspace: selectCurrentModelTeamspace
 });
 

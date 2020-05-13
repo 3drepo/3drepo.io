@@ -54,6 +54,7 @@ export const TextFieldWrapper = styled.div`
 
 	.rta__autocomplete {
 		position: absolute;
+		z-index: 1;
 		display: block;
 		margin-top: 1em;
 		max-width: 380px;

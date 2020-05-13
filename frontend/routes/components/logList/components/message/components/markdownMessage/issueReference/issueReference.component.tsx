@@ -17,29 +17,24 @@
 
 import React from 'react';
 
+import { PopoverProps as PopoverType } from '@material-ui/core/Popover';
+
 import { IssuePopover } from './issuePopover/issuePopover.component';
 import { Link, Popover } from './issueReference.styles';
 
 export const IssueReference = ({ id, text, issues, teamspace }) => {
-	const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
-	const open = Boolean(anchorEl);
-	const issueData = issues[id];
+	const [anchorEl, setAnchorEl] = React.useState<PopoverType | null>(null);
+	const issueData = issues.find(({ _id }) => id === _id );
 
 	if (!issueData) {
 		return text;
 	}
 
-	const { _id: issueId, model, number: issueNumber, name, desc, statusColor, StatusIconComponent, ...props } = issueData;
+	const { _id: issueId, model, number: issueNumber, name, desc, statusColor, StatusIconComponent } = issueData;
 
-	const handlePopoverOpen = (
-			event: React.MouseEvent<HTMLElement, MouseEvent>
-	) => {
-		setAnchorEl(event.currentTarget);
-	};
+	const handlePopoverOpen = (event: React.MouseEvent<PopoverType, MouseEvent>) => setAnchorEl(event.currentTarget);
 
-	const handlePopoverClose = () => {
-		setAnchorEl(null);
-	};
+	const handlePopoverClose = () => setAnchorEl(null);
 
 	return (
 		<>
@@ -53,7 +48,7 @@ export const IssueReference = ({ id, text, issues, teamspace }) => {
 			</Link>
 			<Popover
 				id="mouse-over-popover"
-				open={open}
+				open={Boolean(anchorEl)}
 				anchorEl={anchorEl}
 				anchorOrigin={{
 					vertical: 'bottom',
