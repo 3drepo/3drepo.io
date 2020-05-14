@@ -1595,7 +1595,7 @@ export class UnityUtil {
 	 * @param colour - colour RGB value of the colour to change to. e.g. [1, 0, 0]
 	 */
 	public static setPlaneBorderColor(color: number[]) {
-		UnityUtil.toUnity('SetPlaneBorderColor', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify({color}));
+		UnityUtil.toUnity('SetPlaneBorderColor', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({color}));
 	}
 
 	/**
@@ -1605,7 +1605,7 @@ export class UnityUtil {
 	 */
 	public static setPlaneBorderWidth(width: number) {
 		// There is an scale factor so the value that the user enters is not small
-		UnityUtil.toUnity('SetPlaneBorderWidth', UnityUtil.LoadingState.MODEL_LOADING, width *	0.01);
+		UnityUtil.toUnity('SetPlaneBorderWidth', UnityUtil.LoadingState.VIEWER_READY, width *	0.01);
 	}
 
 }
