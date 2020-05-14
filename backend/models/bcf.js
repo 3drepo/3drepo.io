@@ -24,13 +24,11 @@ const xml2js = require("xml2js");
 const yauzl = require("yauzl");
 
 const C = require("../constants");
-const responseCodes = require("../response_codes.js");
+// const responseCodes = require("../response_codes.js");
 const systemLogger = require("../logger.js").systemLogger;
 const utils = require("../utils");
 
-const ChatEvent = require("./chatEvent"); // FIXME necessary?
 const Group = require("./group");
-const History = require("./history");
 const Meta = require("./meta");
 
 const statusEnum = C.ISSUE_STATUS;
@@ -504,12 +502,10 @@ bcf.getBCFZipReadStream = function(account, model, issues, unit) {
 };
 
 function parseViewpoints(issueGuid, issueFiles, vps) {
-
 	const viewpoints = {};
 	const vpPromises = [];
 
 	vps && vps.forEach(vp => {
-
 		if(!_.get(vp, "@.Guid")) {
 			return;
 		}
@@ -526,7 +522,6 @@ function parseViewpoints(issueGuid, issueFiles, vps) {
 			viewpoints[vp["@"].Guid].Viewpoint = _.get(vp, "Viewpoint");
 			viewpoints[vp["@"].Guid].Snapshot = _.get(vp, "Snapshot");
 		}));
-
 	});
 
 	return Promise.all(vpPromises).then(() => viewpoints);
@@ -655,12 +650,12 @@ function parseMarkupBuffer(markupBuffer) {
 
 		return {
 			issue,
-			viewpoints: xml.Markup.Viewpoints
+			viewpointsData: xml.Markup.Viewpoints
 		};
 	});
 }
 
-bcf.readBCF = function(requester, ifcToModelMap, zipPath) {
+bcf.readBCF = function(account, model, requester, ifcToModelMap, zipPath, settings) {
 	return new Promise((resolve, reject) => {
 
 		const files = {};
@@ -693,9 +688,9 @@ bcf.readBCF = function(requester, ifcToModelMap, zipPath) {
 				// if entry is a file and start with guid
 				if (!entry.fileName.endsWith("/") && !entry.fileName.endsWith("\\") && guid) {
 					promises.push(new Promise((_resolve, _reject) => {
-						zipfile.openReadStream(entry, (err, rs) => {
-							if (err) {
-								return _reject(err);
+						zipfile.openReadStream(entry, (readErr, rs) => {
+							if (readErr) {
+								return _reject(readErr);
 							} else {
 								const bufs = [];
 
@@ -730,12 +725,14 @@ bcf.readBCF = function(requester, ifcToModelMap, zipPath) {
 					Object.keys(files).forEach(guid => {
 						// console.log(guid);
 						const parsePromise = parseMarkupBuffer(files[guid][`${guid}/markup.bcf`]).then((markupData) => {
-							const {issue, viewpoints} = markupData;
+							const {issue, viewpointsData} = markupData;
 							issue._id = utils.stringToUUID(guid);
 							// revId?
 							// console.log(issue);
-							// console.log(viewpoints);
-							return parseViewpoints(issue._id, files[guid], viewpoints).then(viewpoints => {
+							// console.log(viewpointsData);
+							return parseViewpoints(issue._id, files[guid], viewpointsData).then(viewpoints => {
+								// console.log(viewpoints);
+
 								const vpGuids = Object.keys(viewpoints);
 								const groupPromises = [];
 
@@ -1036,18 +1033,18 @@ bcf.readBCF = function(requester, ifcToModelMap, zipPath) {
 													content: image
 												};
 											}
-										}).catch(err => {
+										}).catch(resizeErr => {
 											systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
 												account,
 												model,
 												issueId: utils.uuidToString(issue._id),
 												viewpointId: vpGuids[0],
-												err: err
+												err: resizeErr
 											});
 										});
 									}
 								}).then(() => {
-									console.log("viewpoint return");
+									// console.log("viewpoint return");
 
 									// System notification of BCF import
 									const currentTS = (new Date()).getTime();
@@ -1059,7 +1056,7 @@ bcf.readBCF = function(requester, ifcToModelMap, zipPath) {
 									};
 
 									issue.comments.push(bcfImportNotification);
-									console.log(issue);
+									// console.log(issue);
 
 									return issue;
 								});
@@ -1072,7 +1069,7 @@ bcf.readBCF = function(requester, ifcToModelMap, zipPath) {
 				});
 
 				endPromise.then((end) => {
-					console.log("read bcf return");
+					// console.log("read bcf return");
 					// console.log(end);
 					resolve(end);
 				});
@@ -1099,7 +1096,7 @@ bcf.importBCF = function(requester, account, model, zipPath, settings) {
 	}
 
 	return Promise.all(ifcToModelMapPromises).then(() => {
-		return this.readBCF(requester, ifcToModelMap, zipPath);
+		return this.readBCF(account, model, requester, ifcToModelMap, zipPath, settings);
 	});
 };
 

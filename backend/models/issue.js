@@ -199,17 +199,87 @@ class Issue extends Ticket {
 	}
 
 	async importBCF(requester, account, model, revId, zipPath) {
-		const projection = {};
-		const noClean = true;
-
 		const settings = await ModelSetting.findById({account, model}, model);
 
 		return BCF.importBCF(requester, account, model, zipPath, settings).then((bcfIssues) => {
-			return this.merge(account, model, revId, bcfIssues);
+			return this.merge(account, model, revId, bcfIssues, requester.socketId, requester.user);
 		});
 	}
 
-	async merge(account, model, revId, data) {
+	async merge(account, model, revId, data, sessionId, user) {
+		let branch;
+
+		if (!revId) {
+			branch = "master";
+		}
+
+		const history = await History.getHistory({ account, model }, branch, revId, {_id: 1});
+
+		if (!history) {
+			return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
+		} else if (history) {
+			revId = history._id;
+		}
+
+		const existingIssues = await this.getList(account, model, branch, revId);
+		//const existingIssues = await this.findByModelName(account, model, branch, revId, {}, "", true);
+		const existingIssueIds = existingIssues.map(x => x._id);
+
+		// sort issues by date and add number
+		data = data.sort((a, b) => {
+			return a.created > b.created;
+		});
+
+		data.forEach(async (issueToMerge) => {
+			issueToMerge.rev_id = revId;
+
+			const matchIndex = existingIssueIds.indexOf(utils.uuidToString(issueToMerge._id));
+
+			if (matchIndex !== -1) {
+				const matchingIssue = existingIssues[matchIndex];
+
+				// 0. Set the black list for attributes
+				const attributeBlacklist = [
+					"_id",
+					"created",
+					"creator_role",
+					"name",
+					"norm",
+					"number",
+					"owner",
+					"rev_id",
+					"thumbnail",
+					"viewpoint",
+					"priority_last_changed",
+					"status_last_changed"
+				];
+
+				// Attempt to merge viewpoints and comments and sort by created desc
+				const complexAttrs = ["comments", "viewpoints"];
+				complexAttrs.forEach((complexAttr) => {
+					if (matchingIssue[complexAttr]) {
+						let mergedAttr = matchingIssue[complexAttr];
+
+						for (let i = 0; i < issueToMerge[complexAttr].length; i++) {
+							if (-1 === matchingIssue[complexAttr].findIndex(attr =>
+								utils.uuidToString(attr.guid) === utils.uuidToString(issueToMerge[complexAttr][i].guid))) {
+								mergedAttr.push(issueToMerge[complexAttr][i]);
+							}
+						}
+						if (mergedAttr.length && mergedAttr[0].created) {
+							mergedAttr = mergedAttr.sort((a, b) => {
+								return a.created > b.created;
+							});
+						}
+						issueToMerge[complexAttr] = mergedAttr;
+					}
+				});
+
+				return await super.update(attributeBlacklist, user, sessionId, account, model, issueToMerge._id, issueToMerge, this.onBeforeUpdate.bind(this));
+			} else {
+				await this.create(account, model, issueToMerge, sessionId);
+			}
+		});
 	}
 
 	async getIssuesReport(account, model, rid, ids, res) {
