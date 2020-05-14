@@ -1320,7 +1320,7 @@ schema.statics.teamspaceMemberCheck = function (teamspace, user) {
 schema.statics.getTeamMemberInfo = async (teamspace, user)  => {
 	const userEntry = await User.findByUserName(user);
 	if(!userEntry || !userEntry.isMemberOfTeamspace(teamspace)) {
-		throw Promise.reject(responseCodes.USER_NOT_FOUND);
+		throw responseCodes.USER_NOT_FOUND;
 	} else {
 		const job = await Job.findByUser(teamspace, user);
 		const result = {
