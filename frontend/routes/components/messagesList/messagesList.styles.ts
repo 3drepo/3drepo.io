@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 
 import FormControl from '@material-ui/core/FormControl';
+import SelectComponent from '@material-ui/core/Select';
 import Typography from '@material-ui/core/Typography';
 
 import { COLOR } from '../../../styles';
@@ -28,10 +29,6 @@ export const Container = styled.div`
 	position: relative;
 	background-color: ${COLOR.BLACK_6};
 	overflow: auto;
-
-	& > * {
-		margin-bottom: 10px;
-	}
 `;
 
 export const LoaderContainer = styled.div`
@@ -50,8 +47,23 @@ export const EmptyStateInfo = styled.p`
 
 export const Label = styled(Typography)`
 	&& {
+		color: ${COLOR.BLACK_60};
 		margin-right: 5px;
 		margin-bottom: 3px;
+	}
+`;
+
+export const Select = styled(SelectComponent)`
+	&& {
+		color: ${COLOR.BLACK_60};
+
+		&:after, &:before {
+			display: none;
+		}
+
+		div[role="button"] {
+			padding-right: 22px;
+		}
 	}
 `;
 
@@ -67,6 +79,7 @@ export const FilterWrapper = styled.div`
 	box-sizing: border-box;
 	width: 100%;
 	padding-left: 10px;
+	padding-top: 10px;
 	z-index: 2;
 	background: ${COLOR.GRAY};
 	position: relative;

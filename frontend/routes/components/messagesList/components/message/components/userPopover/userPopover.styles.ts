@@ -22,7 +22,7 @@ export const Name = styled.span`
 `;
 
 export const Details = styled.p`
-	color: ${COLOR.BLACK_30};
+	color: ${COLOR.BLACK_40};
 	font-size: 10px;
 	margin-top: 0;
 	margin-bottom: 2px;

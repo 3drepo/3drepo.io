@@ -20,7 +20,7 @@ import React, { Fragment } from 'react';
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { canComment } from '../../../../../../helpers/issues';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
+import NewCommentForm from '../../../commentForm/commentForm.container';
 import { Container } from '../../../risks/components/riskDetails/riskDetails.styles';
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { EmptyStateInfo } from '../../../views/views.styles';
@@ -81,6 +81,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public formRef = React.createRef<any>();
 	public panelRef = React.createRef<any>();
+	public containerRef = React.createRef<any>();
 	public messageContainerRef = React.createRef<any>();
 
 	get isNewIssue() {
@@ -161,6 +162,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				hideScreenshot={this.props.disableViewer}
 				hideUploadButton={!this.props.disableViewer}
 				messagesContainerRef={this.messageContainerRef}
+				previewWrapperRef={this.containerRef}
+				horizontal={this.props.horizontal}
 			/>
 		</ViewerPanelFooter>
 	));
@@ -340,7 +343,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	public render() {
 		const { failedToLoad, issue, horizontal } = this.props;
 		return (
-			<Container>
+			<Container ref={this.containerRef}>
 				<ViewerPanelContent
 					onScroll={this.handlePanelScroll}
 					ref={this.panelRef}

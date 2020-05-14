@@ -33,7 +33,7 @@ export const Container = styled.footer`
 
 const commonTextStyle = css`
 	&& {
-		color: ${COLOR.BLACK_30};
+		color: ${COLOR.BLACK_40};
 		font-size: 10px;
 		font-style: italic;
 	}

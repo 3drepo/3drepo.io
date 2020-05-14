@@ -35,8 +35,14 @@ export const UserMarker = ({ name, children, teamspace, fetchUserDetails, usersC
 	const open = Boolean(anchorEl);
 
 	React.useEffect(() => {
-		fetchUserDetails(teamspace, name);
+		if (teamspace && name) {
+			fetchUserDetails(teamspace, name);
+		}
 	}, [fetchUserDetails, teamspace, name]);
+
+	if (!teamspace || !name) {
+		return children || <UserAvatar name={name} />;
+	}
 
 	const currentUser = usersCachedResponses[`${teamspace}-${name}`];
 

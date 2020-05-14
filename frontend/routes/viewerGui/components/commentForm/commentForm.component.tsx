@@ -37,7 +37,7 @@ import { ScreenshotDialog } from '../../../components/screenshotDialog';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { FieldsRow, StyledFormControl } from '../risks/components/riskDetails/riskDetails.styles';
 import { ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
-import { COMMENT_FIELD_NAME } from './newCommentForm.constants';
+import { COMMENT_FIELD_NAME } from './commentForm.constants';
 import {
 	Actions,
 	ActionsGroup,
@@ -50,11 +50,13 @@ import {
 	StyledTextField,
 	TextFieldWrapper,
 	UserSuggestion,
-} from './newCommentForm.styles';
+} from './commentForm.styles';
 
 interface IProps {
 	formRef: any;
 	messagesContainerRef: any;
+	previewWrapperRef: any;
+	horizontal: boolean;
 	issues: any[];
 	canComment: boolean;
 	comment?: string;
@@ -82,7 +84,7 @@ interface IState {
 	optionsCaret: string;
 }
 
-const NewCommentSchema = Yup.object().shape({
+const CommentSchema = Yup.object().shape({
 	comment: Yup.string().max(220)
 });
 
@@ -102,7 +104,7 @@ const IssueSuggestionItem = ({ entity: { ...issueData } }) => (
 	<IssueSuggestion {...issueData} />
 );
 
-export class NewCommentForm extends React.PureComponent<IProps, IState> {
+export class CommentForm extends React.PureComponent<IProps, IState> {
 	get commentTypeIcon() {
 		return this.state.isResidualRiskInputActive ? ReportProblemIcon : ShortTextIcon;
 	}
@@ -118,10 +120,16 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 		return 'You are not able to comment';
 	}
 
-	private filteredUsersList = (token) => this.props.teamspaceUsers.filter(({ user }) => user.startsWith(token));
+	get boundariesElement() {
+		return !this.props.horizontal ? this.props.previewWrapperRef.current : this.props.messagesContainerRef.current;
+	}
 
-	private filteredIssuesList = (token) => _values(this.props.issues)
-		.filter(({ number: issueNumber }) => String(issueNumber).startsWith(token)).slice(0, 5)
+	private filteredUsersList = (token) => this.props.teamspaceUsers.filter(({ user }) =>
+		user.startsWith(token)).slice(0, 5)
+
+	private filteredIssuesList = (token) =>
+			_values(this.props.issues).filter(({ number: issueNumber }) =>
+			String(issueNumber).startsWith(token)).slice(0, 5)
 
 	public state = {
 		isPinActive: false,
@@ -191,9 +199,9 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 				<ReactTextareaAutocomplete
 					{...field}
 					textAreaComponent={this.renderTextAreaComponent}
-					boundariesElement={this.props.messagesContainerRef.current}
+					boundariesElement={this.boundariesElement}
 					loadingComponent={() => null}
-					minChar={1}
+					minChar={0}
 					trigger={{
 						'@': {
 							dataProvider: (token) => this.filteredUsersList(token),
@@ -378,7 +386,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 				<Formik
 					ref={formRef}
 					initialValues={{ comment: '', screenshot: this.state.newScreenshot }}
-					validationSchema={NewCommentSchema}
+					validationSchema={CommentSchema}
 					onSubmit={this.handleSave}
 				>
 					<StyledForm>

@@ -18,13 +18,14 @@
 import React from 'react';
 
 import MenuItem from '@material-ui/core/MenuItem';
-import Select from '@material-ui/core/Select';
 import { cond, matches, stubTrue } from 'lodash';
 
 import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../helpers/rendering';
 import { Loader as LoaderIndicator } from '../loader/loader.component';
 import { Message } from './components/message/message.component';
-import { Container, EmptyStateInfo, FilterWrapper, FormContainer, Label, LoaderContainer } from './messagesList.styles';
+import {
+	Container, EmptyStateInfo, FilterWrapper, FormContainer, Label, LoaderContainer, Select,
+} from './messagesList.styles';
 
 interface IProps {
 	className?: string;

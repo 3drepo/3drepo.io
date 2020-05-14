@@ -39,15 +39,15 @@ export const Comment = styled(MarkdownMessage)`
 `;
 
 const regularCommentStyles = css`
-	background-color: ${COLOR.LIGHT_GREY_BLUE};
-`;
-
-const selfCommentStyles = css`
 	background-color: ${COLOR.WHITE};
 
 	${Comment} {
 		color: ${COLOR.BLACK_60};
 	}
+`;
+
+const selfCommentStyles = css`
+	background-color: ${COLOR.LIGHT_GREY_BLUE};
 `;
 
 export const CommentContainer = styled.div`

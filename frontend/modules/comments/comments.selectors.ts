@@ -19,7 +19,7 @@ import { createSelector } from 'reselect';
 
 import { selectJobs } from '../jobs';
 
-export const selectUsersDomain = (state) => state.comments;
+export const selectUsersDomain = (state) => ({ ...state.comments });
 
 export const selectTeamspaceUsers = createSelector(
 	selectUsersDomain, selectJobs, (state, jobs) => state.users

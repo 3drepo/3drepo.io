@@ -22,8 +22,8 @@ import { Image as ImageComponent } from '../../../../../image';
 import { UserIndicator } from '../userMarker/userMarker.styles';
 
 export const Blockquote = styled.blockquote`
-	color: ${COLOR.BLACK_30};
-	border-left: 3px solid ${COLOR.BLACK_30};
+	color: ${COLOR.BLACK_40};
+	border-left: 3px solid ${COLOR.BLACK_40};
 	margin-left: 0;
 	margin-right: 20px;
 	margin-top: 8px;

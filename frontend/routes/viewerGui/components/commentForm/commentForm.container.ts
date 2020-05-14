@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -25,7 +25,7 @@ import { selectIssues } from '../../../../modules/issues';
 import { MeasurementsActions } from '../../../../modules/measurements';
 import { selectIsModelLoaded } from '../../../../modules/viewerGui';
 import { withViewer } from '../../../../services/viewer/viewer';
-import { NewCommentForm } from './newCommentForm.component';
+import { CommentForm } from './commentForm.component';
 
 const mapStateToProps = createStructuredSelector({
 	isModelLoaded: selectIsModelLoaded,
@@ -39,4 +39,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	deactivateMeasure: MeasurementsActions.deactivateMeasure,
 }, dispatch);
 
-export default withViewer(connect(mapStateToProps, mapDispatchToProps)(NewCommentForm));
+export default withViewer(connect(mapStateToProps, mapDispatchToProps)(CommentForm));

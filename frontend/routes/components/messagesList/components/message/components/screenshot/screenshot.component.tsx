@@ -17,17 +17,15 @@
 
 import React from 'react';
 
-import { Image, Wrapper } from './screenshot.styles';
+import { Image } from './screenshot.styles';
 
 interface IProps {
 	comment: string;
 	viewpoint: any;
 }
 
-export const Screenshot = ({ comment, viewpoint }: IProps) => {
+export const Screenshot = ({ viewpoint }: IProps) => {
 	return (
-		<Wrapper withMessage={!!comment}>
-			<Image src={viewpoint.screenshotPath} enablePreview />
-		</Wrapper>
+		<Image src={viewpoint.screenshotPath} enablePreview />
 	);
 };

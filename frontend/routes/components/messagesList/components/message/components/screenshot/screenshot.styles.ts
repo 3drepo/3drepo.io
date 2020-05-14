@@ -19,26 +19,13 @@ import styled from 'styled-components';
 
 import { Image as ImageComponent } from '../../../../../image';
 
-export const Wrapper = styled.div`
-	width: 100%;
-	padding-top: 42%;
-	overflow: hidden;
-	position: relative;
-	margin: 8px 0 0;
-	border-radius: ${(props: any) => props.withMessage ? '2px 2px 0 0' : '2px'};
-` as any;
-
 export const Image = styled(ImageComponent)`
 	img {
 		display: block;
+		margin-top: 6px;
+		margin-bottom: 8px;
 		max-width: 100%;
 		width: 100%;
 		height: auto;
-		margin: auto;
-		position: absolute;
-		top: 0;
-		right: 0;
-		bottom: 0;
-		left: 0;
 	}
 ` as any;

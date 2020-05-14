@@ -19,7 +19,7 @@ import React from 'react';
 
 import { INTERNAL_IMAGE_PATH_PREFIX } from '../../../../../../../helpers/comments';
 import { DATE_TIME_FORMAT } from '../../../../../../../services/formatting/formatDate';
-import { COMMENT_FIELD_NAME } from '../../../../../../viewerGui/components/newCommentForm/newCommentForm.constants';
+import { COMMENT_FIELD_NAME } from '../../../../../../viewerGui/components/commentForm/commentForm.constants';
 import { DateTime } from '../../../../../dateTime/dateTime.component';
 import { Container, Date, IconButton, StyledQuoteIcon, StyledReplyIcon, Username } from './footer.styles';
 
@@ -37,7 +37,7 @@ export const Footer = ({ name, created, formRef, comment, ...props }: IProps) =>
 		const commentForm = formRef.current;
 		const currentFormCommentValue = commentForm.state.values[COMMENT_FIELD_NAME];
 
-		commentForm.setFieldValue(COMMENT_FIELD_NAME, `${currentFormCommentValue}@${name}`);
+		commentForm.setFieldValue(COMMENT_FIELD_NAME, `${currentFormCommentValue}@${name} `);
 	};
 
 	const handleQuoteButtonClick = () => {
@@ -55,7 +55,10 @@ export const Footer = ({ name, created, formRef, comment, ...props }: IProps) =>
 
 		if (comment) {
 			quoteComment = quoteComment !== '' ? quoteComment.concat(`\n`) : quoteComment;
-			quoteComment = quoteComment.concat(`> ${comment.replace(/(?:\r\n|\r|\n)/g, `\n`)}`);
+			quoteComment = quoteComment.concat(`> ${comment
+				.replace(/(?:\r\n|\r|\n)/g, `\n`)
+				.replace(`\n\n`, `\n\n> `)
+			}`);
 		}
 
 		commentForm.setFieldValue(COMMENT_FIELD_NAME, `${currentFormCommentValue}${additionalNewLine}${quoteComment}\n\n`);

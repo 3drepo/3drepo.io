@@ -22,7 +22,7 @@ import { size } from 'lodash';
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { canComment } from '../../../../../../helpers/risks';
-import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
+import NewCommentForm from '../../../commentForm/commentForm.container';
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { EmptyStateInfo } from '../../../views/views.styles';
 import { Container, HorizontalView, MessagesList, MessageContainer, PreviewDetails } from './riskDetails.styles';
@@ -84,6 +84,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 
 	public formRef = React.createRef<any>();
 	public panelRef = React.createRef<any>();
+	public containerRef = React.createRef<any>();
 	public messageContainerRef = React.createRef<any>();
 
 	get isNewRisk() {
@@ -164,6 +165,8 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				hideScreenshot={this.props.disableViewer}
 				hideUploadButton={!this.props.disableViewer}
 				messagesContainerRef={this.messageContainerRef}
+				previewWrapperRef={this.containerRef}
+				horizontal={this.props.horizontal}
 			/>
 		</ViewerPanelFooter>
 	));
@@ -343,7 +346,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		const { failedToLoad, risk, horizontal } = this.props;
 
 		return (
-			<Container fill={Number(this.isNewRisk)}>
+			<Container ref={this.containerRef} fill={Number(this.isNewRisk)}>
 				<ViewerPanelContent
 					onScroll={this.handlePanelScroll}
 					ref={this.panelRef}

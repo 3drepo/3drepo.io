@@ -17,8 +17,8 @@
 
 import { LinearProgress } from '@material-ui/core';
 import * as React from 'react';
+import { COMMENT_FIELD_NAME } from '../../viewerGui/components/commentForm/commentForm.constants';
 import { LabelButton } from '../../viewerGui/components/labelButton/labelButton.styles';
-import { COMMENT_FIELD_NAME } from '../../viewerGui/components/newCommentForm/newCommentForm.constants';
 import {
 	FieldsRow,
 	StyledFormControl
