@@ -19,10 +19,10 @@ import React from 'react';
 
 import { isEmpty, memoize } from 'lodash';
 import { renderWhenTrueOtherwise } from '../../../../../../../helpers/rendering';
-import { getAvatarUrl } from '../../../../../../../services/api';
+import { getCheckedAvatarUrl } from '../../../../../../../services/api';
 import { Avatar } from './userAvatar.styles';
 
-const getMemoizedAvatarUrl = memoize(getAvatarUrl);
+const getMemoizedAvatarUrl = memoize(getCheckedAvatarUrl);
 
 const getInitials = (name) => name.split(' ').slice(0, 2).map((text) => text[0]).join('').trim().toUpperCase();
 
@@ -30,11 +30,18 @@ const avatarUrl = (name) => getMemoizedAvatarUrl(name);
 
 interface IProps {
 	name: string;
-	currentUser: any;
+	currentUser?: any;
 }
 
 export const UserAvatar = ({ name, currentUser }: IProps) => {
-	const url = avatarUrl(name);
+	const [url, setUrl] = React.useState(null);
+
+	React.useEffect(() => {
+		(async () => {
+			const avatarCheckedUrl = await avatarUrl(name);
+			setUrl(avatarCheckedUrl);
+		})();
+	}, [name]);
 
 	return (
 		<>

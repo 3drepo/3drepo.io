@@ -27,7 +27,7 @@ export const selectTeamspaceUsers = createSelector(
 			...user,
 			job: {
 				_id: job,
-				color: jobs.find(({ _id }) => job === _id )
+				color: jobs.find(({ _id }) => job === _id ).color
 			}
 		}))
 );
