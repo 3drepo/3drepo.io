@@ -54,8 +54,6 @@ import {
 
 interface IProps {
 	formRef: any;
-	messagesContainerRef: any;
-	previewWrapperRef: any;
 	horizontal: boolean;
 	issues: any[];
 	canComment: boolean;
@@ -118,10 +116,6 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 			return 'Write your comment here';
 		}
 		return 'You are not able to comment';
-	}
-
-	get boundariesElement() {
-		return !this.props.horizontal ? this.props.previewWrapperRef.current : this.props.messagesContainerRef.current;
 	}
 
 	private filteredUsersList = (token) => this.props.teamspaceUsers.filter(({ user }) =>
@@ -199,8 +193,8 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 				<ReactTextareaAutocomplete
 					{...field}
 					textAreaComponent={this.renderTextAreaComponent}
-					boundariesElement={this.boundariesElement}
 					loadingComponent={() => null}
+					renderToBody
 					minChar={0}
 					trigger={{
 						'@': {

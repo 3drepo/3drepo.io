@@ -62,10 +62,6 @@ export const MessagesList = ({ teamspace, isPending, messages, fetchUsers, ...pr
 	React.useLayoutEffect(() => {
 		if (listRef.current) {
 			const list = listRef.current;
-			const lastMessage = list.lastChild as any;
-			const lastMessageHeight = lastMessage.offsetHeight;
-
-			// @TODO do not scroll if user is in a middle of list
 
 			const maxScrollTop = (element) => element.scrollHeight - element.clientHeight;
 			const isScrolled = Math.ceil(list.scrollTop) >= maxScrollTop(list);
