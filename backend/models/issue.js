@@ -195,13 +195,14 @@ class Issue extends Ticket {
 		const settings = await ModelSetting.findById({account, model}, model);
 		const issues = await this.findByModelName(account, model, branch, revId, projection, ids, noClean, useIssueNumbers);
 
-		return BCF.getBCFZipReadStream(account, model, issues, settings.properties.unit);
+		return BCF.getReadStream(account, model, issues, settings.properties.unit);
 	}
 
 	async importBCF(requester, account, model, revId, zipPath) {
 		const settings = await ModelSetting.findById({account, model}, model);
 
-		return BCF.importBCF(requester, account, model, zipPath, settings).then((bcfIssues) => {
+		return BCF.importFile(requester, account, model, zipPath, settings).then((bcfIssues) => {
+			console.log(bcfIssues);
 			return this.merge(account, model, revId, bcfIssues, requester.socketId, requester.user);
 		});
 	}
@@ -222,7 +223,6 @@ class Issue extends Ticket {
 		}
 
 		const existingIssues = await this.getList(account, model, branch, revId);
-		//const existingIssues = await this.findByModelName(account, model, branch, revId, {}, "", true);
 		const existingIssueIds = existingIssues.map(x => x._id);
 
 		// sort issues by date and add number
