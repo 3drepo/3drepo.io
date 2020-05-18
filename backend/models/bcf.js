@@ -1024,7 +1024,6 @@ bcf.readBCF = function(account, model, requester, ifcToModelMap, zipPath, settin
 								});
 
 								return Promise.all(groupPromises).then(() => {
-									console.log(viewpoints);
 									if (viewpoints[vpGuids[0]].snapshot) {
 										// take the first screenshot as thumbnail
 										return utils.resizeAndCropScreenshot(viewpoints[vpGuids[0]].snapshot, 120, 120, true).then((image) => {
