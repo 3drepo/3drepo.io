@@ -513,7 +513,7 @@ function parseViewpoints(issueGuid, issueFiles, vps) {
 		const vpFile = issueFiles[`${issueGuid}/${_.get(vp, "Viewpoint[0]._")}`];
 
 		viewpoints[vp["@"].Guid] = {
-			snapshot: issueFiles[`${issueGuid}/${_.get(vp, "Snapshot[0]._")}`]
+			snapshot: issueFiles[`${utils.uuidToString(issueGuid)}/${_.get(vp, "Snapshot[0]._")}`]
 		};
 
 		vpFile && vpPromises.push(parseXmlString(vpFile.toString("utf8"), {explicitCharkey: 1, attrkey: "@"}).then(xml => {
@@ -1024,6 +1024,7 @@ bcf.readBCF = function(account, model, requester, ifcToModelMap, zipPath, settin
 								});
 
 								return Promise.all(groupPromises).then(() => {
+									console.log(viewpoints);
 									if (viewpoints[vpGuids[0]].snapshot) {
 										// take the first screenshot as thumbnail
 										return utils.resizeAndCropScreenshot(viewpoints[vpGuids[0]].snapshot, 120, 120, true).then((image) => {
