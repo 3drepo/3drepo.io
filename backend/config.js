@@ -19,6 +19,7 @@
 const VERSION = require("./VERSION.json").VERSION;
 
 const config = require("app-config").config;
+const utils = require("./utils");
 
 /** *****************************************************************************
  * Coalesce function
@@ -55,7 +56,7 @@ function createRoundRobinAlgorithm(algoConfig) {
 	};
 
 	for (const k in algoConfig.apiUrls) {
-		if(algoConfig.apiUrls.hasOwnProperty(k)) {
+		if(utils.hasField(algoConfig.apiUrls,k)) {
 			roundRobin.apiUrlCounter[k] = 0;
 		}
 	}
@@ -108,7 +109,7 @@ config.host = coalesce(config.host, "127.0.0.1");
 config.numThreads = coalesce(config.numThreads, 1);
 config.HTTPSredirect = coalesce(config.HTTPSredirect, false);
 
-config.using_ssl = config.hasOwnProperty("ssl");
+config.using_ssl = utils.hasField(config, "ssl");
 config.port = coalesce(config.port, config.using_ssl ? default_https_port : default_http_port);
 
 config.public_protocol = config.public_protocol || (config.using_ssl ? "https" : "http");
@@ -167,7 +168,7 @@ let multipleAPIServer = false;
 for (let i = 0; i < config.servers.length; i++) {
 	const server = config.servers[i];
 
-	if (!config.subdomains.hasOwnProperty(server.subdomain)) {
+	if (!utils.hasField(config.subdomains, server.subdomain)) {
 		config.subdomains[server.subdomain] = [];
 	}
 
@@ -189,13 +190,13 @@ for (let i = 0; i < config.servers.length; i++) {
 			server.external = coalesce(server.external, false); // Do we need to start an API server, or just link to an external one.
 		}
 
-		const hasSubdomainArr = config.subdomains.hasOwnProperty(server.subdomain);
+		const hasSubdomainArr = utils.hasField(config.subdomains, server.subdomain);
 		if (!hasSubdomainArr) {
 			// Create empty array for the subdomain to hold servers
 			config.subdomains[server.subdomain] = [];
 		}
 
-		if (!config.apiUrls.hasOwnProperty(server.type)) {
+		if (!utils.hasField(config.apiUrls, server.type)) {
 			config.apiUrls[server.type] = [];
 		}
 
