@@ -1589,4 +1589,23 @@ export class UnityUtil {
 		UnityUtil.toUnity('SetXRayHighlightOff', UnityUtil.LoadingState.VIEWER_READY);
 	}
 
+	/**
+	 * Change the colour of the clipping planes border
+	 * @category  Model Interactions
+	 * @param colour - colour RGB value of the colour to change to. e.g. [1, 0, 0]
+	 */
+	public static setPlaneBorderColor(color: number[]) {
+		UnityUtil.toUnity('SetPlaneBorderColor', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({color}));
+	}
+
+	/**
+	 * Change the width of the clipping planes border
+	 * @category  Model Interactions
+	 * @param width - the width of the clipping plane border
+	 */
+	public static setPlaneBorderWidth(width: number) {
+		// There is an scale factor so the value that the user enters is not small
+		UnityUtil.toUnity('SetPlaneBorderWidth', UnityUtil.LoadingState.VIEWER_READY, width *	0.01);
+	}
+
 }

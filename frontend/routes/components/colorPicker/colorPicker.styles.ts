@@ -31,6 +31,10 @@ import { CheckboxField } from '../customTable/customTable.component';
 export const ColorSelect = styled(Grid)`
 	cursor: ${(props: any) => props.disabled ? 'default' : 'pointer'};
 	border-bottom: 1px solid rgba(0, 0, 0, .12);
+
+	&& {
+		width: 49px;
+	}
 ` as any;
 
 export const Dot = styled(Grid)`

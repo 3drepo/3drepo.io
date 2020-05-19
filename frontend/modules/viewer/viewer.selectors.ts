@@ -61,3 +61,11 @@ export const selectFarPlaneSamplingPoints = createSelector(
 export const selectMaxShadowDistance = createSelector(
 	selectSettings, (state) => state.maxShadowDistance
 );
+
+export const selectClipPlaneBorderWidth = createSelector(
+	selectSettings, (state) => state.clipPlaneBorderWidth
+);
+
+export const selectClipPlaneBorderColor = createSelector(
+	selectSettings, (state) => state.clipPlaneBorderColor
+);

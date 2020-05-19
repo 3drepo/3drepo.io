@@ -837,6 +837,16 @@ export class ViewerService {
 		}
 	}
 
+	public setPlaneBorderWidth = (width: number) => {
+		if (width === undefined) { return; }
+		UnityUtil.setPlaneBorderWidth(width);
+	}
+
+	public setPlaneBorderColor = (color: number[]) => {
+		if (color === undefined) { return; }
+		UnityUtil.setPlaneBorderColor(color);
+	}
+
 	/**
 	 * Map
 	 */
