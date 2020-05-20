@@ -30,6 +30,7 @@ const ExternalServices = {};
 const getDefaultStorageType = () => config.defaultStorage || (config.fs ? "fs" : null) || "gridfs";
 
 ExternalServices.getFileStream = (account, collection, type, key) => {
+	type = "alluxio";
 	switch(type) {
 		case "fs" :
 			return FSHandler.getFileStream(key);
@@ -46,6 +47,7 @@ ExternalServices.getFileStream = (account, collection, type, key) => {
 };
 
 ExternalServices.getFile = (account, collection, type, key) => {
+	type = "alluxio";
 	switch(type) {
 		case "fs" :
 			return  Promise.resolve(FSHandler.getFile(key));
@@ -78,6 +80,7 @@ ExternalServices.storeFile = (account, collection, data) => {
 };
 
 ExternalServices.removeFiles = (account, collection, type, keys) => {
+	type = "alluxio";
 	switch(type) {
 		case "fs" :
 			return FSHandler.removeFiles(keys);
