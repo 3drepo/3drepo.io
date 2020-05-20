@@ -199,14 +199,6 @@ class Issue extends Ticket {
 	}
 
 	async importBCF(requester, account, model, revId, zipPath) {
-		const settings = await ModelSetting.findById({account, model}, model);
-
-		return BCF.importBCF(requester, account, model, zipPath, settings).then((bcfIssues) => {
-			return this.merge(account, model, revId, bcfIssues, requester.socketId, requester.user);
-		});
-	}
-
-	async merge(account, model, revId, data, sessionId, user) {
 		let branch;
 
 		if (!revId) {
@@ -221,6 +213,13 @@ class Issue extends Ticket {
 			revId = history._id;
 		}
 
+		const settings = await ModelSetting.findById({account, model}, model);
+		const bcfIssues = await BCF.importBCF(requester, account, model, zipPath, settings);
+
+		return this.merge(account, model, branch, revId, bcfIssues, requester.socketId, requester.user);
+	}
+
+	async merge(account, model, branch, revId, data, sessionId, user) {
 		const existingIssues = await this.getList(account, model, branch, revId);
 		const existingIssueIds = existingIssues.map(x => x._id);
 

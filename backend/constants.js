@@ -524,17 +524,11 @@
 	define("PROJECT_DEFAULT_ID", "default");
 
 	// issues
-
-	define("ISSUE_STATUS_OPEN", "open");
-	define("ISSUE_STATUS_IN_PROGRESS", "in progress");
-	define("ISSUE_STATUS_FOR_APPROVAL", "for approval");
-	define("ISSUE_STATUS_CLOSED", "closed");
-
 	define("ISSUE_STATUS",{
-		"OPEN": module.exports.ISSUE_STATUS_OPEN,
-		"IN_PROGRESS": module.exports.ISSUE_STATUS_IN_PROGRESS,
-		"FOR_APPROVAL": module.exports.ISSUE_STATUS_FOR_APPROVAL,
-		"CLOSED": module.exports.ISSUE_STATUS_CLOSED
+		"OPEN": "open",
+		"IN_PROGRESS": "in progress",
+		"FOR_APPROVAL": "for approval",
+		"CLOSED": "closed"
 	});
 
 	define("MAIL_URLS",{
