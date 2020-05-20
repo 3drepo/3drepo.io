@@ -229,7 +229,8 @@ class Issue extends Ticket {
 			return a.created > b.created;
 		});
 
-		data.forEach(async (issueToMerge) => {
+		for (let i = 0; i < data.length; i++) {
+			const issueToMerge = data[i];
 			issueToMerge.rev_id = revId;
 
 			const matchIndex = existingIssueIds.indexOf(utils.uuidToString(issueToMerge._id));
@@ -274,11 +275,11 @@ class Issue extends Ticket {
 					}
 				});
 
-				return await super.update(attributeBlacklist, user, sessionId, account, model, issueToMerge._id, issueToMerge, this.onBeforeUpdate.bind(this));
+				await super.update(attributeBlacklist, user, sessionId, account, model, issueToMerge._id, issueToMerge, this.onBeforeUpdate.bind(this));
 			} else {
 				await this.create(account, model, issueToMerge, sessionId);
 			}
-		});
+		}
 	}
 
 	async getIssuesReport(account, model, rid, ids, res) {
