@@ -23,6 +23,7 @@ const User = require ("./user");
 const config = require("../config");
 const C = require("../constants");
 const Job = require("./job");
+const utils = require("../utils");
 
 const ReportType = {
 	ISSUES : "Issues",
@@ -131,7 +132,7 @@ class ReportGenerator {
 	}
 
 	getUserJob(user) {
-		return this.userToJob.hasOwnProperty(user) ? this.userToJob[user] : "Unknown";
+		return utils.hasField(this.userToJob, user) ? this.userToJob[user] : "Unknown";
 	}
 
 	addEntries(entries) {
@@ -155,7 +156,7 @@ class ReportGenerator {
 
 			attributes[this.type].forEach((field) => {
 				const attri = { label: field.label };
-				if (entry.hasOwnProperty(field.field)) {
+				if (utils.hasField(entry, field.field)) {
 					const value = entry[field.field];
 
 					if(value === "" || value === undefined || value === null) {

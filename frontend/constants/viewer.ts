@@ -88,7 +88,9 @@ export const DEFAULT_SETTINGS = {
 	farPlaneSamplingPoints: 5,
 	farPlaneAlgorithm: 'box',
 	maxShadowDistance: 10000,
-	numCacheThreads: 3
+	numCacheThreads: 3,
+	clipPlaneBorderWidth: 0.8,
+	clipPlaneBorderColor: [0.02, 0.16, 0.32]
 };
 
 export const VIEWER_PANELS = {

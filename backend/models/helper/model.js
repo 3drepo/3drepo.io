@@ -274,7 +274,7 @@ function resetCorrelationId(account, model) {
 }
 
 function createNewModel(teamspace, modelName, data) {
-	if(!data.hasOwnProperty("project")) {
+	if(!utils.hasField(data, "project")) {
 		return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
 	}
 

@@ -307,7 +307,7 @@ class Issue extends Ticket {
 	}
 
 	isPriorityChange(oldIssue, newIssue) {
-		if (!newIssue.hasOwnProperty("priority")) {
+		if (!utils.hasField(newIssue, "priority")) {
 			return false;
 		}
 
@@ -315,7 +315,7 @@ class Issue extends Ticket {
 	}
 
 	isStatusChange(oldIssue, newIssue) {
-		if (!newIssue.hasOwnProperty("status")) {
+		if (!utils.hasField(newIssue, "status")) {
 			return false;
 		}
 		return oldIssue.status !== newIssue.status;

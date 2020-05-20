@@ -13,6 +13,7 @@ const ModelHelper = require("../models/helper/model");
 const User = require("../models/user");
 const DEFAULT_PLUGIN_STRUCTURE = require("../plugin/plugin-structure.js").DEFAULT_PLUGIN_STRUCTURE;
 const path = require("path");
+const utils = require("../utils");
 
 const config = require("../config");
 
@@ -45,18 +46,18 @@ function createClientConfig(serverConfig, req) {
 		"sequencesEnabled": Boolean(config.sequencesEnabled)
 	};
 
-	if (config.hasOwnProperty("captcha_client_key")) {
+	if (utils.hasField(config, "captcha_client_key")) {
 		clientConfig.captcha_client_key = config.captcha_client_key;
 	}
 
 	// Set up the legal plugins
-	if (config.hasOwnProperty("legal")) {
+	if (utils.hasField(config, "legal")) {
 		for (let i = 0; i < config.legal.length; i += 1) {
 			pluginStructure.functions.push(config.legal[i].page);
 		}
 	}
 
-	if (config.hasOwnProperty("captcha_client_key")) {
+	if (utils.hasField(config, "captcha_client_key")) {
 		clientConfig.captcha_client_key = config.captcha_client_key;
 	}
 
@@ -66,7 +67,7 @@ function createClientConfig(serverConfig, req) {
 
 	// Set up the legal plugins
 	clientConfig.legalTemplates = [];
-	if (config.hasOwnProperty("legal")) {
+	if (utils.hasField(config, "legal")) {
 		clientConfig.legalTemplates = config.legal;
 	}
 

@@ -598,7 +598,7 @@ schema.methods.updateInfo = function (updateObj) {
 	this.customData = this.customData || {};
 	let validUpdates = true;
 	updateableFields.forEach(field => {
-		if (updateObj.hasOwnProperty(field)) {
+		if (utils.hasField(updateObj, field)) {
 			if (Object.prototype.toString.call(updateObj[field]) === "[object String]") {
 				this.customData[field] = updateObj[field];
 			} else {

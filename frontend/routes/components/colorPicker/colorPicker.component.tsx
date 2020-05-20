@@ -22,7 +22,7 @@ import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import { identity, memoize } from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
 
-import { componentToHex, rgbaToHex } from '../../../helpers/colors';
+import { componentToHex, hexToGLColor, rgbaToHex, GLToHexColor } from '../../../helpers/colors';
 import {
 	Canvas,
 	CanvasContainer,
@@ -88,7 +88,7 @@ const getCanvasColor = (event, canvasCtx) => {
 };
 
 interface IProps {
-	value?: string;
+	value?: string | number[];
 	predefinedColors?: string[];
 	onChange?: (color) => void;
 	disabled?: boolean;
@@ -381,7 +381,8 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleSave = () => {
-		this.props.onChange(this.state.selectedColor);
+		const value = Array.isArray(this.props.value) ?  hexToGLColor(this.state.selectedColor) : this.state.selectedColor;
+		this.props.onChange(value);
 		this.handleClose();
 	}
 
@@ -412,8 +413,12 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	get hexValue() {
+		return (Array.isArray(this.props.value) ? GLToHexColor(this.props.value) : this.props.value) || '';
+	}
+
 	public onPanelOpen = () => {
-		const value = this.props.value || '';
+		const value = this.hexValue;
 
 		this.setState({
 			baseColor: stripAlpha(value),
@@ -467,13 +472,13 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const {value, predefinedColors, disabled, disableButtons, opacityEnabled} = this.props;
+		const {predefinedColors, disabled, disableButtons, opacityEnabled} = this.props;
 		const {open, hashInput, selectedColor, baseColor, opacity, opacitySliderVisibility} = this.state;
 
 		return (
 			<>
 				<RootRef rootRef={this.colorSelectRef}>
-					<OpenPanelButton onClick={this.openPanel} disabled={disabled} color={value} />
+					<OpenPanelButton onClick={this.openPanel} disabled={disabled} color={this.hexValue} />
 				</RootRef>
 
 				<Panel
