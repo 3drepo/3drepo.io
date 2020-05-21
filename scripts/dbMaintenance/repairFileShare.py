@@ -95,7 +95,6 @@ for database in db.database_names():
                                     missing.append(refInfo + ": No backup found.");
                         else:
                             fileList[filePath] = True
-    break;
 
 print("===== Missing Files =====");
 for entry in missing:
