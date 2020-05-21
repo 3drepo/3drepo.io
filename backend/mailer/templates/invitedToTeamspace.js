@@ -25,9 +25,11 @@ const html = ({name, company, teamspace, url}) => basicEmailTemplateWithLogo(`
 				${name} <em>(${company})</em> invites you to join their teamspace <strong>${teamspace}</strong>. Please press on the button below to sign up and start collaborating.
 			</td>
 		</tr>
-		</tbody></table>
-		${(ctaButton(`Join ${teamspace}`, url))}
-	`);
+		</tbody>
+	</table>
+	${(ctaButton(`Join ${teamspace}`, url))}
+	<div style="height:30px" />
+`);
 
 const subject = data => `${data.name} has invited you to collaborate in 3D Repo`;
 

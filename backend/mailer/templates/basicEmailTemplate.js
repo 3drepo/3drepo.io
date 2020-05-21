@@ -858,7 +858,7 @@ United Kingdom</span>
 
 </body></html>`;
 
-const emailTemplate = (showLogo) => (data) => emailContainer(showLogo)(`
+const emailTemplate = (showLogo) => (content, name) => emailContainer(showLogo)(`
 <table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnTextBlock" style="min-width:100%;">
 <tbody class="mcnTextBlockOuter">
 	<tr>
@@ -875,7 +875,7 @@ const emailTemplate = (showLogo) => (data) => emailContainer(showLogo)(`
 				<tbody><tr>
 
 					<td valign="top" class="mcnTextContent" style="padding: 0px 18px 9px;color: #8A8A8A;font-family: Roboto, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif;font-size: 20px;font-style: normal;font-weight: bold;">
-						Hello ${ data.name ? data.name + "," : ""}
+						Hello ${ name ? name + "," : ""}
 					</td>
 				</tr>
 			</tbody></table>
@@ -911,31 +911,14 @@ const emailTemplate = (showLogo) => (data) => emailContainer(showLogo)(`
 </table><table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnButtonBlock" style="min-width:100%;">
 <tbody class="mcnButtonBlockOuter">
 	<tr>
-		<td style="padding-top:0; padding-right:18px; padding-bottom:18px; padding-left:18px;" valign="top" align="center" class="mcnButtonBlockInner"> ${ data.content || data} </td>
+		<td style="padding-top:0; padding-right:18px; padding-left:18px;" valign="top" align="center" class="mcnButtonBlockInner"> ${ content } </td>
 	</tr>
 </tbody>
-</table><table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnDividerBlock" style="min-width:100%;">
-<tbody class="mcnDividerBlockOuter">
-	<tr>
-		<td class="mcnDividerBlockInner" style="min-width: 100%; padding: 10px 18px;">
-			<table class="mcnDividerContent" border="0" cellpadding="0" cellspacing="0" width="100%" style="min-width: 100%;border-top: 2px none #EAEAEA;">
-				<tbody><tr>
-					<td>
-						<span></span>
-					</td>
-				</tr>
-			</tbody></table>
-<!--
-			<td class="mcnDividerBlockInner" style="padding: 18px;">
-			<hr class="mcnDividerContent" style="border-bottom-color:none; border-left-color:none; border-right-color:none; border-bottom-width:0; border-left-width:0; border-right-width:0; margin-top:0; margin-right:0; margin-bottom:0; margin-left:0;" />
--->
-		</td>
-	</tr>
-</tbody>
-</table><table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnTextBlock" style="min-width:100%;">
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnTextBlock" style="min-width:100%;">
 <tbody class="mcnTextBlockOuter">
 	<tr>
-		<td valign="top" class="mcnTextBlockInner" style="padding-top:9px;">
+		<td valign="top" class="mcnTextBlockInner" style="padding-top:0px;">
 			  <!--[if mso]>
 			<table align="left" border="0" cellspacing="0" cellpadding="0" width="100%" style="width:100%;">
 			<tr>
@@ -967,7 +950,7 @@ const emailTemplate = (showLogo) => (data) => emailContainer(showLogo)(`
 </table><table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnTextBlock" style="min-width:100%;">
 <tbody class="mcnTextBlockOuter">
 	<tr>
-		<td valign="top" class="mcnTextBlockInner" style="padding-top:9px;">
+		<td valign="top" class="mcnTextBlockInner" style="padding-top:0px;">
 			  <!--[if mso]>
 			<table align="left" border="0" cellspacing="0" cellpadding="0" width="100%" style="width:100%;">
 			<tr>
@@ -979,7 +962,7 @@ const emailTemplate = (showLogo) => (data) => emailContainer(showLogo)(`
 			<table align="left" border="0" cellpadding="0" cellspacing="0" style="max-width:100%; min-width:100%;" width="100%" class="mcnTextContentContainer">
 				<tbody><tr>
 
-					<td valign="top" class="mcnTextContent" style="padding: 0px 18px 9px;color: #8A8A8A;font-family: Roboto, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif;font-size: 16px;line-height: 150%;">
+					<td valign="top" class="mcnTextContent" style="padding: 0px 18px 0px;color: #8A8A8A;font-family: Roboto, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif;font-size: 16px;line-height: 150%;">
 
 						All the best,<br>
 3D Repo Team
