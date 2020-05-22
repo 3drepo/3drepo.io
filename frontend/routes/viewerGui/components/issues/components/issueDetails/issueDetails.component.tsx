@@ -76,7 +76,7 @@ const UNASSIGNED_JOB = {
 export class IssueDetails extends React.PureComponent<IProps, IState> {
 	public state = {
 		logsLoaded: false,
-		scrolled: false
+		scrolled: false,
 	};
 
 	public formRef = React.createRef<any>();
