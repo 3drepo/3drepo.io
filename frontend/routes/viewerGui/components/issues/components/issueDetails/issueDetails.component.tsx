@@ -20,7 +20,7 @@ import React, { Fragment } from 'react';
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { canComment } from '../../../../../../helpers/issues';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import NewCommentForm from '../../../commentForm/commentForm.container';
+import { CommentForm } from '../../../commentForm';
 import { Container } from '../../../risks/components/riskDetails/riskDetails.styles';
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { EmptyStateInfo } from '../../../views/views.styles';
@@ -149,7 +149,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public renderFooter = renderWhenTrue(() => (
 		<ViewerPanelFooter alignItems="center" padding="0">
-			<NewCommentForm
+			<CommentForm
 				disableViewer={this.props.disableViewer}
 				comment={this.props.newComment.comment}
 				screenshot={this.props.newComment.screenshot}

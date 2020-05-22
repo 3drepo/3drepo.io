@@ -22,7 +22,7 @@ import { size } from 'lodash';
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { canComment } from '../../../../../../helpers/risks';
-import NewCommentForm from '../../../commentForm/commentForm.container';
+import { CommentForm } from '../../../commentForm';
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { EmptyStateInfo } from '../../../views/views.styles';
 import { Container, HorizontalView, MessagesList, MessageContainer, PreviewDetails } from './riskDetails.styles';
@@ -152,7 +152,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 
 	public renderFooter = renderWhenTrue(() => (
 		<ViewerPanelFooter alignItems="center" padding="0">
-			<NewCommentForm
+			<CommentForm
 				disableViewer={this.props.disableViewer}
 				comment={this.props.newComment.comment}
 				screenshot={this.props.newComment.screenshot}
