@@ -86,16 +86,4 @@ export const FilterWrapper = styled.div`
 	z-index: 2;
 	background: ${COLOR.GRAY};
 	position: relative;
-
-	&:before {
-		position: absolute;
-		top: 0;
-		left: 0;
-		pointer-events: none;
-		width: 100%;
-		content: '';
-		height: 10px;
-		overflow: hidden;
-		box-shadow: inset 0 4px 7px -4px ${COLOR.BLACK_30};
-	}
 `;
