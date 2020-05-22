@@ -64,10 +64,14 @@ export const MessagesList = ({ teamspace, isPending, messages, fetchUsers, ...pr
 			const list = listRef.current;
 
 			const maxScrollTop = (element) => element.scrollHeight - element.clientHeight;
-			const isScrolled = Math.ceil(list.scrollTop) >= maxScrollTop(list);
+			const currentScroll = Math.ceil(list.scrollTop);
+			const isScrolled = currentScroll >= maxScrollTop(list);
 
-			if (!isScrolled) {
-				list.scrollTop = list.scrollHeight - list.clientHeight;
+			if (!isScrolled && currentScroll) {
+				list.scrollTo({
+					top: list.scrollHeight - list.clientHeight,
+					behavior: 'smooth'
+				});
 			}
 		}
 	}, [isPending, messages.length]);
