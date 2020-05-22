@@ -49,7 +49,7 @@ export const Label = styled(Typography)`
 	&& {
 		color: ${COLOR.BLACK_60};
 		margin-right: 5px;
-		margin-bottom: 3px;
+		margin-bottom: 1px;
 	}
 `;
 
