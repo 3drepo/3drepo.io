@@ -93,7 +93,7 @@ export const MessagesList = ({ teamspace, isPending, messages, fetchUsers, ...pr
 				currentUser={props.currentUser}
 				setCameraOnViewpoint={props.setCameraOnViewpoint}
 			/>
-		)).reverse()
+		))
 	, [messages, filter]);
 
 	const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {

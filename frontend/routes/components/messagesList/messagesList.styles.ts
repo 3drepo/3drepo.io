@@ -24,11 +24,14 @@ import Typography from '@material-ui/core/Typography';
 import { COLOR } from '../../../styles';
 
 export const Container = styled.div`
+	height: 100%;
 	padding-left: 10px;
 	min-height: 55px;
 	position: relative;
 	background-color: ${COLOR.BLACK_6};
 	overflow: auto;
+	display: flex;
+	flex-direction: column-reverse;
 `;
 
 export const LoaderContainer = styled.div`
