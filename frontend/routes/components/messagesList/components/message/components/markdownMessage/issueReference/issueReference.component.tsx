@@ -18,13 +18,56 @@
 import React from 'react';
 
 import { PopoverProps as PopoverType } from '@material-ui/core/Popover';
+import { renderWhenTrueOtherwise } from '../../../../../../../../helpers/rendering';
 
 import { IssuePopover } from './issuePopover/issuePopover.component';
-import { Link, Popover } from './issueReference.styles';
+import { Link, Popover, Reference } from './issueReference.styles';
 
-export const IssueReference = ({ id, text, issues, teamspace }) => {
+interface IReferenceLink {
+	isBoardView: boolean;
+	onPopoverOpen: (event: React.MouseEvent<PopoverType, MouseEvent>) => void;
+	onPopoverClose: () => void;
+	onCardChange: () => void;
+	to: string;
+	children: React.ReactChild;
+}
+
+const ReferenceLink = ({ onPopoverOpen, onPopoverClose, onCardChange, children, to, ...props }: IReferenceLink) => (
+	<>
+		{renderWhenTrueOtherwise(
+			() => (
+				<Reference onClick={onCardChange}>
+					{children}
+				</Reference>
+			),
+			() => (
+				<Link
+					to={to}
+					aria-haspopup="true"
+					onMouseEnter={onPopoverOpen}
+					onMouseLeave={onPopoverClose}
+				>
+					{children}
+				</Link>
+			),
+		)(props.isBoardView)}
+	</>
+);
+
+interface IProps {
+	id: number;
+	text: string;
+	issues: any[];
+	urlParams: any;
+	fetchCardData: (boardType, teamspace, modelId, cardId) => void;
+	resetCardData: () => void;
+}
+
+export const IssueReference = ({ id, text, issues, urlParams, ...props }: IProps) => {
 	const [anchorEl, setAnchorEl] = React.useState<PopoverType | null>(null);
 	const issueData = issues.find(({ _id }) => id === _id );
+	const { teamspace, type } = urlParams;
+	const isBoardView = Boolean(type);
 
 	if (!issueData) {
 		return text;
@@ -36,16 +79,22 @@ export const IssueReference = ({ id, text, issues, teamspace }) => {
 
 	const handlePopoverClose = () => setAnchorEl(null);
 
+	const handleCardChange = () => {
+		props.resetCardData();
+		props.fetchCardData(type, teamspace, model, issueId);
+	};
+
 	return (
 		<>
-			<Link
+			<ReferenceLink
 				to={`/viewer/${teamspace}/${model}?issueId=${issueId}`}
-				aria-haspopup="true"
-				onMouseEnter={handlePopoverOpen}
-				onMouseLeave={handlePopoverClose}
+				onPopoverOpen={handlePopoverOpen}
+				onPopoverClose={handlePopoverClose}
+				onCardChange={handleCardChange}
+				isBoardView={isBoardView}
 			>
 				{text}
-			</Link>
+			</ReferenceLink>
 			<Popover
 				id="mouse-over-popover"
 				open={Boolean(anchorEl)}

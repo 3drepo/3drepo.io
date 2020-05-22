@@ -27,6 +27,12 @@ export const Link = styled(RouterLink)`
 	color: ${COLOR.VIVID_NAVY};
 `;
 
+export const Reference = styled.a`
+	font-size: inherit;
+	color: ${COLOR.VIVID_NAVY};
+	text-decoration: underline;
+`;
+
 export const Popover = styled(PopoverComponent)`
 	pointer-events: none;
 `;

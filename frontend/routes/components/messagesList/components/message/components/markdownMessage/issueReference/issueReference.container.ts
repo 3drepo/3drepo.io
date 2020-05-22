@@ -19,17 +19,20 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
+import { BoardActions } from '../../../../../../../../modules/board';
 import { selectIssues } from '../../../../../../../../modules/issues';
-import { selectCurrentModelTeamspace } from '../../../../../../../../modules/model';
+import { selectUrlParams } from '../../../../../../../../modules/router/router.selectors';
 
 import { IssueReference } from './issueReference.component';
 
 const mapStateToProps = createStructuredSelector({
 	issues: selectIssues,
-	teamspace: selectCurrentModelTeamspace
+	urlParams: selectUrlParams,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	fetchCardData: BoardActions.fetchCardData,
+	resetCardData: BoardActions.resetCardData,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(IssueReference);
