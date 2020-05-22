@@ -15,25 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { Avatar as AvatarComponent } from '@material-ui/core';
 import { COLOR } from '../../../../../../../styles';
 
+const jobBorderStyles = (color) => css`
+	height: 30px;
+	width: 30px;
+	border-style: solid;
+	border-color: ${color};
+	border-width: 2px;
+`;
+
+const noneJobBorderStyles = css`
+	height: 34px;
+	width: 34px;
+`;
+
 export const Avatar = styled(AvatarComponent)`
 	&& {
-		height: 30px;
-		width: 30px;
 		background-color: ${(props) => !props.src ? COLOR.BLACK_20 : `transparent`};
 		color: ${COLOR.WHITE};
 		font-size: 14px;
-		border-style: solid;
-		border-color: ${({ color }: { color: string }) => !color ? `transparent` : color};
-		border-width: ${({ placeholder }: { placeholder: boolean }) => placeholder ? `0px` : `2px`};
+		${({ color }: { color: string }) => color ? jobBorderStyles(color) : noneJobBorderStyles};
 	}
-`;
-
-export const AvatarWrapper = styled.div`
-	display: flex;
-	align-items: center;
 `;
