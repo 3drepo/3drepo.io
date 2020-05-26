@@ -831,7 +831,7 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 	}
 
 	await Promise.all(groupPromises);
-	
+
 	return vp;
 }
 
@@ -855,13 +855,13 @@ function parseViewpointCamera(camera, scale) {
 	return {up, view_dir, position};
 }
 
-function readBCF(account, model, requester, ifcToModelMap, zipPath, settings) {
+function readBCF(account, model, requester, ifcToModelMap, dataBuffer, settings) {
 	return new Promise((resolve, reject) => {
 
 		const files = {};
 		const promises = [];
 
-		yauzl.open(zipPath, {lazyEntries: true}, function (err, zipfile) {
+		yauzl.fromBuffer(dataBuffer, {lazyEntries: true}, function (err, zipfile) {
 			if (err) {
 				return reject(err);
 			}
@@ -1045,7 +1045,7 @@ function readBCF(account, model, requester, ifcToModelMap, zipPath, settings) {
 	});
 }
 
-bcf.importBCF = function(requester, account, model, zipPath, settings) {
+bcf.importBCF = function(requester, account, model, dataBuffer, settings) {
 	const ifcToModelMapPromises = [];
 	const ifcToModelMap = [];
 
@@ -1063,7 +1063,7 @@ bcf.importBCF = function(requester, account, model, zipPath, settings) {
 	}
 
 	return Promise.all(ifcToModelMapPromises).then(() => {
-		return readBCF(account, model, requester, ifcToModelMap, zipPath, settings);
+		return readBCF(account, model, requester, ifcToModelMap, dataBuffer, settings);
 	});
 };
 

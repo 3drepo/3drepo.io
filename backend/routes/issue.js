@@ -911,7 +911,7 @@ function importBCF(req, res, next) {
 	}
 
 	const upload = multer({
-		dest: config.bcf_dir,
+		storage: multer.memoryStorage(),
 		fileFilter : (fileReq, file, cb) => {
 			const acceptedFormat = [
 				"bcf", "bcfzip", "zip"
@@ -938,9 +938,9 @@ function importBCF(req, res, next) {
 
 	upload.single("file")(req, res, function (err) {
 		if (err) {
-			return responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
+			return responseCodes.respond(place, req, res, next, err.resCode || err, err.resCode || err);
 		}
-		Issue.importBCF({ socketId: req.headers[C.HEADER_SOCKET_ID], user: req.session.user.username }, req.params.account, req.params.model, req.params.rid, req.file.path).then(() => {
+		Issue.importBCF({ socketId: req.headers[C.HEADER_SOCKET_ID], user: req.session.user.username }, req.params.account, req.params.model, req.params.rid, req.file.buffer).then(() => {
 			responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "ok" });
 		}).catch(error => {
 			responseCodes.respond(place, req, res, next, error, error);
