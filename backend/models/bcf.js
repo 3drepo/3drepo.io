@@ -80,13 +80,6 @@ function getBCFVersion() {
 	return xmlBuilder.buildObject(model);
 }*/
 
-function getIfcGuids(account, model) {
-	return Meta.find({ account, model }, { type: "meta" }, { "metadata.IFC GUID": 1 })
-		.then(ifcGuidResults => {
-			return ifcGuidResults;
-		});
-}
-
 function parseXmlString(xmlString, options) {
 	return new Promise((resolve, reject) => {
 		xml2js.parseString(xmlString, options, function (err, xml) {
@@ -471,11 +464,10 @@ bcf.getBCFZipReadStream = function(account, model, issues, unit) {
 
 	issues.forEach(issue => {
 
-		const issueAccount = (issue.origin_account) ? issue.origin_account : account;
-		const issueModel = (issue.origin_model) ? issue.origin_model : model;
+		const issueAccount = issue.origin_account || account;
+		const issueModel = issue.origin_model || model;
 
 		bcfPromises.push(
-			// FIXME
 			getIssueBCF(issue, issueAccount, issueModel, unit).then(bcfResult => {
 
 				zip.append(new Buffer.from(bcfResult.markup, "utf8"), {name: `${utils.uuidToString(issue._id)}/markup.bcf`});
@@ -651,7 +643,219 @@ function parseMarkupBuffer(markupBuffer) {
 	});
 }
 
-bcf.readBCF = function(account, model, requester, ifcToModelMap, zipPath, settings) {
+function parseViewpointClippingPlanes(clippingPlanes, scale) {
+	const parsedPlanes = [];
+
+	for (let planeIdx = 0; planeIdx < clippingPlanes.length; planeIdx++) {
+		for (let clipIdx = 0; clippingPlanes[planeIdx].ClippingPlane && clipIdx < clippingPlanes[planeIdx].ClippingPlane.length; ++clipIdx) {
+			const fieldName = "ClippingPlane[" + clipIdx + "]";
+			const clip = {};
+			clip.normal = [
+				parseFloat(_.get(clippingPlanes[planeIdx], fieldName + ".Direction[0].X[0]._")),
+				parseFloat(_.get(clippingPlanes[planeIdx], fieldName + ".Direction[0].Z[0]._")),
+				-parseFloat(_.get(clippingPlanes[planeIdx], fieldName + ".Direction[0].Y[0]._"))
+			];
+			const position = [
+				parseFloat(_.get(clippingPlanes[planeIdx], fieldName + ".Location[0].X[0]._")) * scale,
+				parseFloat(_.get(clippingPlanes[planeIdx], fieldName + ".Location[0].Z[0]._")) * scale,
+				-parseFloat(_.get(clippingPlanes[planeIdx], fieldName + ".Location[0].Y[0]._")) * scale
+			];
+
+			clip.distance = - (position[0] * clip.normal[0]
+				+ position[1] * clip.normal[1]
+				+ position[2] * clip.normal[2]);
+
+			clip.clipDirection = 1;
+			parsedPlanes.push(clip);
+		}
+	}
+
+	return parsedPlanes;
+}
+
+async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, issueName) {
+	const vp = {};
+	const groupPromises = [];
+
+	for (let componentsIdx = 0; componentsIdx < vpComponents.length; componentsIdx++) {
+		let highlightedGroupObject;
+
+		// TODO: refactor to reduce duplication?
+		if (vpComponents[componentsIdx].Selection) {
+			for (let j = 0; j < vpComponents[componentsIdx].Selection.length; j++) {
+				for (let k = 0; vpComponents[componentsIdx].Selection[j].Component && k < vpComponents[componentsIdx].Selection[j].Component.length; k++) {
+					let objectModel = groupDbCol.model;
+
+					if (isFederation) {
+						objectModel = ifcToModelMap[vpComponents[componentsIdx].Selection[j].Component[k]["@"].IfcGuid];
+					}
+
+					highlightedGroupObject = createGroupObject(
+						highlightedGroupObject,
+						issueName,
+						[255, 0, 0],
+						groupDbCol.account,
+						objectModel,
+						vpComponents[componentsIdx].Selection[j].Component[k]["@"].IfcGuid
+					);
+				}
+			}
+		}
+
+		if (vpComponents[componentsIdx].Coloring) {
+			// FIXME: this is essentially copy of selection with slight modification. Should merge common code.
+			for (let j = 0; j < vpComponents[componentsIdx].Coloring.length; j++) {
+				for (let k = 0; vpComponents[componentsIdx].Coloring[j].Color && k < vpComponents[componentsIdx].Coloring[j].Color.length; k++) {
+					for (let compIdx = 0; vpComponents[componentsIdx].Coloring[j].Color[k].Component && compIdx < vpComponents[componentsIdx].Coloring[j].Color[k].Component.length; compIdx++) {
+						// const color = vpComponents[componentsIdx].Coloring[j].Color[k]["@"].Color; // TODO: colour needs to be preserved at some point in the future
+						let objectModel = model;
+
+						if (isFederation) {
+							objectModel = ifcToModelMap[vpComponents[componentsIdx].Coloring[j].Color[k].Component[compIdx]["@"].IfcGuid];
+						}
+
+						highlightedGroupObject = createGroupObject(
+							highlightedGroupObject,
+							issueName,
+							[255, 0, 0],
+							groupDbCol.account,
+							objectModel,
+							vpComponents[componentsIdx].Coloring[j].Color[k].Component[compIdx]["@"].IfcGuid
+						);
+					}
+				}
+			}
+		}
+
+		let highlightedGroupData;
+		let highlightedObjectsMap = [];
+
+		if (highlightedGroupObject) {
+			highlightedGroupData = createGroupData(highlightedGroupObject);
+			groupPromises.push(
+				Group.createGroup(groupDbCol, undefined, highlightedGroupData).then(group => {
+					vp.highlighted_group_id = utils.stringToUUID(group._id);
+				})
+			);
+
+			highlightedObjectsMap = highlightedGroupData.objects.reduce((acc, val) => acc.concat(val.ifc_guids), []);
+		}
+
+		if (vpComponents[componentsIdx].Visibility) {
+			let hiddenGroupObject;
+			let shownGroupObject;
+
+			for (let j = 0; j < vpComponents[componentsIdx].Visibility.length; j++) {
+				const defaultVisibility = JSON.parse(vpComponents[componentsIdx].Visibility[j]["@"].DefaultVisibility);
+				let componentsToHide = [];
+				let componentsToShow = [];
+
+				if (defaultVisibility) {
+					componentsToShow = vpComponents[componentsIdx].Visibility[j].Component;
+					if (vpComponents[componentsIdx].Visibility[j].Exceptions) {
+						componentsToHide = vpComponents[componentsIdx].Visibility[j].Exceptions[0].Component;
+					}
+				} else {
+					componentsToHide = vpComponents[componentsIdx].Visibility[j].Component;
+					if (vpComponents[componentsIdx].Visibility[j].Exceptions) {
+						componentsToShow = vpComponents[componentsIdx].Visibility[j].Exceptions[0].Component;
+					}
+				}
+
+				for (let k = 0; componentsToHide && k < componentsToHide.length; k++) {
+					let objectModel = groupDbCol.model;
+
+					if (isFederation) {
+						objectModel = ifcToModelMap[componentsToHide[k]["@"].IfcGuid];
+					}
+
+					// Exclude items selected
+					if (highlightedObjectsMap && -1 === highlightedObjectsMap.indexOf(componentsToHide[k]["@"].IfcGuid)) {
+						hiddenGroupObject = createGroupObject(
+							hiddenGroupObject,
+							issueName,
+							[255, 0, 0],
+							groupDbCol.account,
+							objectModel,
+							componentsToHide[k]["@"].IfcGuid
+						);
+					}
+				}
+
+				for (let k = 0; componentsToShow && k < componentsToShow.length; k++) {
+					let objectModel = groupDbCol.model;
+
+					if (isFederation) {
+						objectModel = ifcToModelMap[componentsToShow[k]["@"].IfcGuid];
+					}
+
+					shownGroupObject = createGroupObject(
+						shownGroupObject,
+						issueName,
+						[255, 0, 0],
+						groupDbCol.account,
+						objectModel,
+						componentsToShow[k]["@"].IfcGuid
+					);
+				}
+			}
+
+			// TODO: May need a better way to combine hidden/shown
+			// as it is not ideal to save both hidden and shown objects
+			if (shownGroupObject) {
+				const shownGroupData = createGroupData(shownGroupObject);
+
+				if (highlightedGroupData) {
+					shownGroupData.objects = shownGroupData.objects.concat(highlightedGroupData.objects);
+				}
+
+				groupPromises.push(
+					Group.createGroup(groupDbCol, undefined, shownGroupData).then(group => {
+						vp.shown_group_id = utils.stringToUUID(group._id);
+					})
+				);
+			} else if (hiddenGroupObject) {
+				groupPromises.push(
+					Group.createGroup(groupDbCol, undefined, createGroupData(hiddenGroupObject)).then(group => {
+						vp.hidden_group_id = utils.stringToUUID(group._id);
+					})
+				);
+			}
+		}
+
+		if (vpComponents[componentsIdx].ViewSetupHints) {
+			// TODO: Full ViewSetupHints support -
+			// SpaceVisible should correspond to !hideIfc
+			vp.extras.ViewSetupHints = vpComponents[componentsIdx].ViewSetupHints;
+		}
+	}
+
+	await Promise.all(groupPromises);
+	
+	return vp;
+}
+
+function parseViewpointCamera(camera, scale) {
+	const up = [
+		parseFloat(_.get(camera, "CameraUpVector[0].X[0]._")),
+		parseFloat(_.get(camera, "CameraUpVector[0].Z[0]._")),
+		-parseFloat(_.get(camera, "CameraUpVector[0].Y[0]._"))
+	];
+	const view_dir = [
+		parseFloat(_.get(camera, "CameraDirection[0].X[0]._")),
+		parseFloat(_.get(camera, "CameraDirection[0].Z[0]._")),
+		-parseFloat(_.get(camera, "CameraDirection[0].Y[0]._"))
+	];
+	const position = [
+		parseFloat(_.get(camera, "CameraViewPoint[0].X[0]._")) * scale,
+		parseFloat(_.get(camera, "CameraViewPoint[0].Z[0]._")) * scale,
+		-parseFloat(_.get(camera, "CameraViewPoint[0].Y[0]._")) * scale
+	];
+
+	return {up, view_dir, position};
+}
+
+function readBCF(account, model, requester, ifcToModelMap, zipPath, settings) {
 	return new Promise((resolve, reject) => {
 
 		const files = {};
@@ -713,20 +917,33 @@ bcf.readBCF = function(account, model, requester, ifcToModelMap, zipPath, settin
 
 			zipfile.on("end", async () => {
 
+				// FIXME - separate?
 				await Promise.all(promises);
+
+				let scale = 1;
+				const unit = _.get(settings, "properties.unit");
+				if (unit === "dm") {
+					scale = 10;
+				} else if (unit === "cm") {
+					scale = 100;
+				} else if (unit === "mm") {
+					scale = 1000;
+				} else if (unit === "ft") {
+					scale = 3.28084;
+				}
 
 				const parsePromises = [];
 				// TODO: parse all XML first
 				const fileGuids = Object.keys(files);
 				for (let i = 0; i < fileGuids.length; i++) {
 					const guid = fileGuids[i];
+					// FIXME - separate?
 					const markupData = await parseMarkupBuffer(files[guid][`${guid}/markup.bcf`]);
 					const {issue, viewpointsData} = markupData;
 					issue._id = utils.stringToUUID(guid);
 
 					const viewpoints = await parseViewpoints(utils.uuidToString(issue._id), files[guid], viewpointsData);
 					const vpGuids = Object.keys(viewpoints);
-					const groupPromises = [];
 
 					vpGuids.forEach(vpGuid => {
 						if (!viewpoints[vpGuid].viewpointXml) {
@@ -736,6 +953,7 @@ bcf.readBCF = function(account, model, requester, ifcToModelMap, zipPath, settin
 						const extras = {};
 						const vpXML = viewpoints[vpGuid].viewpointXml;
 
+						// FIXME - separate?
 						extras.Spaces = _.get(vpXML, "VisualizationInfo.Spaces");
 						extras.SpaceBoundaries = _.get(vpXML, "VisualizationInfo.SpaceBoundaries");
 						extras.Openings = _.get(vpXML, "VisualizationInfo.Openings");
@@ -751,99 +969,25 @@ bcf.readBCF = function(account, model, requester, ifcToModelMap, zipPath, settin
 							content: viewpoints[vpGuid].snapshot
 						} : undefined;
 
-						const vp = {
+						let vp = {
 							guid: utils.stringToUUID(vpGuid),
 							extras: extras,
 							screenshot: screenshotObj
 
 						};
 
-						let scale = 1;
-						const unit = _.get(settings, "properties.unit");
-						if (unit === "dm") {
-							scale = 10;
-						} else if (unit === "cm") {
-							scale = 100;
-						} else if (unit === "mm") {
-							scale = 1000;
-						} else if (unit === "ft") {
-							scale = 3.28084;
-						}
-
 						if (_.get(vpXML, "VisualizationInfo.ClippingPlanes")) {
-							const clippingPlanes = _.get(vpXML, "VisualizationInfo.ClippingPlanes");
-							const planes = [];
-							if (clippingPlanes[0].ClippingPlane) {
-								for (let clipIdx = 0; clipIdx < clippingPlanes[0].ClippingPlane.length; ++clipIdx) {
-									const fieldName = "VisualizationInfo.ClippingPlanes[0].ClippingPlane[" + clipIdx + "]";
-									const clip = {};
-									clip.normal = [
-										parseFloat(_.get(vpXML, fieldName + ".Direction[0].X[0]._")),
-										parseFloat(_.get(vpXML, fieldName + ".Direction[0].Z[0]._")),
-										-parseFloat(_.get(vpXML, fieldName + ".Direction[0].Y[0]._"))
-									];
-									const position = [
-										parseFloat(_.get(vpXML, fieldName + ".Location[0].X[0]._")) * scale,
-										parseFloat(_.get(vpXML, fieldName + ".Location[0].Z[0]._")) * scale,
-										-parseFloat(_.get(vpXML, fieldName + ".Location[0].Y[0]._")) * scale
-									];
-
-									clip.distance = - (position[0] * clip.normal[0]
-										+ position[1] * clip.normal[1]
-										+ position[2] * clip.normal[2]);
-
-									clip.clipDirection = 1;
-									planes.push(clip);
-								}
-							}
-
-							vp.clippingPlanes = planes;
-
+							vp.clippingPlanes = parseViewpointClippingPlanes(_.get(vpXML, "VisualizationInfo.ClippingPlanes"), scale);
 						}
 
 						if (_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0]")) {
-							vp.up = [
-								parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].X[0]._")),
-								parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Z[0]._")),
-								-parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Y[0]._"))
-							];
-							vp.view_dir = [
-								parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].X[0]._")),
-								parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].Z[0]._")),
-								-parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].Y[0]._"))
-							];
-							vp.position = [
-								parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].X[0]._")) * scale,
-								parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].Z[0]._")) * scale,
-								-parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].Y[0]._")) * scale
-							];
-
+							vp = {...vp, ...parseViewpointCamera(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0]"), scale)};
 							vp.fov = parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].FieldOfView[0]._")) * Math.PI / 180;
-
 							vp.type = "perspective";
 
 						} else if (_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0]")) {
-
-							vp.up = [
-								parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].CameraUpVector[0].X[0]._")),
-								parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].CameraUpVector[0].Z[0]._")),
-								-parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].CameraUpVector[0].Y[0]._"))
-							];
-
-							vp.view_dir = [
-								parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].CameraDirection[0].X[0]._")),
-								parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].CameraDirection[0].Z[0]._")),
-								-parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].CameraDirection[0].Y[0]._"))
-							];
-
-							vp.position = [
-								parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].CameraViewPoint[0].X[0]._")) * scale,
-								parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].CameraViewPoint[0].Z[0]._")) * scale,
-								-parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].CameraViewPoint[0].Y[0]._")) * scale
-							];
-
+							vp = {...vp, ...parseViewpointCamera(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0]"), scale)};
 							vp.fov = 1.8;
-
 							vp.type = "orthogonal";
 						}
 
@@ -853,169 +997,11 @@ bcf.readBCF = function(account, model, requester, ifcToModelMap, zipPath, settin
 								model: model
 							};
 
-							const vpComponents = _.get(vpXML, "VisualizationInfo.Components");
-
-							for (let i = 0; i < vpComponents.length; i++) {
-
-								let highlightedGroupObject;
-
-								// TODO: refactor to reduce duplication?
-								if (vpComponents[i].Selection) {
-
-									for (let j = 0; j < vpComponents[i].Selection.length; j++) {
-										for (let k = 0; vpComponents[i].Selection[j].Component && k < vpComponents[i].Selection[j].Component.length; k++) {
-											let objectModel = model;
-
-											if (settings.federate) {
-												objectModel = ifcToModelMap[vpComponents[i].Selection[j].Component[k]["@"].IfcGuid];
-											}
-
-											highlightedGroupObject = createGroupObject(
-												highlightedGroupObject,
-												issue.name,
-												[255, 0, 0],
-												account,
-												objectModel,
-												vpComponents[i].Selection[j].Component[k]["@"].IfcGuid
-											);
-										}
-									}
-
-								}
-								if (vpComponents[i].Coloring) {
-									// FIXME: this is essentially copy of selection with slight modification. Should merge common code.
-									for (let j = 0; j < vpComponents[i].Coloring.length; j++) {
-										for (let k = 0; vpComponents[i].Coloring[j].Color && k < vpComponents[i].Coloring[j].Color.length; k++) {
-											for (let compIdx = 0; vpComponents[i].Coloring[j].Color[k].Component && compIdx < vpComponents[i].Coloring[j].Color[k].Component.length; compIdx++) {
-												// const color = vpComponents[i].Coloring[j].Color[k]["@"].Color; // TODO: colour needs to be preserved at some point in the future
-												let objectModel = model;
-
-												if (settings.federate) {
-													objectModel = ifcToModelMap[vpComponents[i].Coloring[j].Color[k].Component[compIdx]["@"].IfcGuid];
-												}
-
-												highlightedGroupObject = createGroupObject(
-													highlightedGroupObject,
-													issue.name,
-													[255, 0, 0],
-													account,
-													objectModel,
-													vpComponents[i].Coloring[j].Color[k].Component[compIdx]["@"].IfcGuid
-												);
-											}
-										}
-									}
-
-								}
-
-								let highlightedGroupData;
-								let highlightedObjectsMap = [];
-
-								if (highlightedGroupObject) {
-									highlightedGroupData = createGroupData(highlightedGroupObject);
-									groupPromises.push(
-										Group.createGroup(groupDbCol, undefined, highlightedGroupData).then(group => {
-											vp.highlighted_group_id = utils.stringToUUID(group._id);
-										})
-									);
-
-									highlightedObjectsMap = highlightedGroupData.objects.reduce((acc, val) => acc.concat(val.ifc_guids), []);
-								}
-
-								if (vpComponents[i].Visibility) {
-									let hiddenGroupObject;
-									let shownGroupObject;
-
-									for (let j = 0; j < vpComponents[i].Visibility.length; j++) {
-										const defaultVisibility = JSON.parse(vpComponents[i].Visibility[j]["@"].DefaultVisibility);
-										let componentsToHide = [];
-										let componentsToShow = [];
-
-										if (defaultVisibility) {
-											componentsToShow = vpComponents[i].Visibility[j].Component;
-											if (vpComponents[i].Visibility[j].Exceptions) {
-												componentsToHide = vpComponents[i].Visibility[j].Exceptions[0].Component;
-											}
-										} else {
-											componentsToHide = vpComponents[i].Visibility[j].Component;
-											if (vpComponents[i].Visibility[j].Exceptions) {
-												componentsToShow = vpComponents[i].Visibility[j].Exceptions[0].Component;
-											}
-										}
-
-										for (let k = 0; componentsToHide && k < componentsToHide.length; k++) {
-											let objectModel = model;
-
-											if (settings.federate) {
-												objectModel = ifcToModelMap[componentsToHide[k]["@"].IfcGuid];
-											}
-
-											// Exclude items selected
-											if (highlightedObjectsMap && -1 === highlightedObjectsMap.indexOf(componentsToHide[k]["@"].IfcGuid)) {
-												hiddenGroupObject = createGroupObject(
-													hiddenGroupObject,
-													issue.name,
-													[255, 0, 0],
-													account,
-													objectModel,
-													componentsToHide[k]["@"].IfcGuid
-												);
-											}
-										}
-
-										for (let k = 0; componentsToShow && k < componentsToShow.length; k++) {
-											let objectModel = model;
-
-											if (settings.federate) {
-												objectModel = ifcToModelMap[componentsToShow[k]["@"].IfcGuid];
-											}
-
-											shownGroupObject = createGroupObject(
-												shownGroupObject,
-												issue.name,
-												[255, 0, 0],
-												account,
-												objectModel,
-												componentsToShow[k]["@"].IfcGuid
-											);
-										}
-									}
-
-									// TODO: May need a better way to combine hidden/shown
-									// as it is not ideal to save both hidden and shown objects
-									if (shownGroupObject) {
-										const shownGroupData = createGroupData(shownGroupObject);
-
-										if (highlightedGroupData) {
-											shownGroupData.objects = shownGroupData.objects.concat(highlightedGroupData.objects);
-										}
-
-										groupPromises.push(
-											Group.createGroup(groupDbCol, undefined, shownGroupData).then(group => {
-												vp.shown_group_id = utils.stringToUUID(group._id);
-											})
-										);
-									} else if (hiddenGroupObject) {
-										groupPromises.push(
-											Group.createGroup(groupDbCol, undefined, createGroupData(hiddenGroupObject)).then(group => {
-												vp.hidden_group_id = utils.stringToUUID(group._id);
-											})
-										);
-									}
-								}
-
-								if (vpComponents[i].ViewSetupHints) {
-									// TODO: Full ViewSetupHints support -
-									// SpaceVisible should correspond to !hideIfc
-									vp.extras.ViewSetupHints = vpComponents[i].ViewSetupHints;
-								}
-							}
+							vp = {...vp, ...parseViewpointComponents(groupDbCol, _.get(vpXML, "VisualizationInfo.Components"), settings.federate, issue.name)};
 						}
 						issue.viewpoints.push(vp);
 
 					});
-
-					await Promise.all(groupPromises);
 
 					if (viewpoints[vpGuids[0]].snapshot) {
 						// take the first screenshot as thumbnail
@@ -1057,7 +1043,7 @@ bcf.readBCF = function(account, model, requester, ifcToModelMap, zipPath, settin
 			});
 		});
 	});
-};
+}
 
 bcf.importBCF = function(requester, account, model, zipPath, settings) {
 	const ifcToModelMapPromises = [];
@@ -1067,7 +1053,7 @@ bcf.importBCF = function(requester, account, model, zipPath, settings) {
 		for (let i = 0; settings.subModels && i < settings.subModels.length; i++) {
 			const subModelId = settings.subModels[i].model;
 			ifcToModelMapPromises.push(
-				getIfcGuids(account, subModelId).then(ifcGuidResults => {
+				Meta.getIfcGuids(account, subModelId).then(ifcGuidResults => {
 					for (let j = 0; j < ifcGuidResults.length; j++) {
 						ifcToModelMap[ifcGuidResults[j].metadata["IFC GUID"]] = subModelId;
 					}
@@ -1077,7 +1063,7 @@ bcf.importBCF = function(requester, account, model, zipPath, settings) {
 	}
 
 	return Promise.all(ifcToModelMapPromises).then(() => {
-		return this.readBCF(account, model, requester, ifcToModelMap, zipPath, settings);
+		return readBCF(account, model, requester, ifcToModelMap, zipPath, settings);
 	});
 };
 

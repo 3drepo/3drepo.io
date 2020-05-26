@@ -237,13 +237,13 @@ class Ticket {
 			}
 
 			// if a field have the same value shouldnt update the property
-			if (_.isEqual(field[field], data[field])) {
+			if (_.isEqual(oldTicket[field], data[field])) {
 				delete data[field];
 				return;
 			}
 
-			// update of extras must not create a system comment
-			if (field === "extras") {
+			// update of extras, comments, viewpoints must not create a system comment
+			if (field === "extras" || field === "comments" || field === "viewpoints") {
 				return;
 			}
 

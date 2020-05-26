@@ -220,7 +220,8 @@ class Issue extends Ticket {
 	}
 
 	async merge(account, model, branch, revId, data, sessionId, user) {
-		const existingIssues = await this.getList(account, model, branch, revId);
+		const existingIssues = await this.findByModelName(account, model, branch, revId, {}, {}, true);
+		// FIXME
 		const existingIssueIds = existingIssues.map(x => x._id);
 
 		// sort issues by date and add number
@@ -259,10 +260,10 @@ class Issue extends Ticket {
 					if (matchingIssue[complexAttr]) {
 						let mergedAttr = matchingIssue[complexAttr];
 
-						for (let i = 0; i < issueToMerge[complexAttr].length; i++) {
+						for (let issueIdx = 0; issueIdx < issueToMerge[complexAttr].length; issueIdx++) {
 							if (-1 === matchingIssue[complexAttr].findIndex(attr =>
-								utils.uuidToString(attr.guid) === utils.uuidToString(issueToMerge[complexAttr][i].guid))) {
-								mergedAttr.push(issueToMerge[complexAttr][i]);
+								utils.uuidToString(attr.guid) === utils.uuidToString(issueToMerge[complexAttr][issueIdx].guid))) {
+								mergedAttr.push(issueToMerge[complexAttr][issueIdx]);
 							}
 						}
 						if (mergedAttr.length && mergedAttr[0].created) {

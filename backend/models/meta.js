@@ -113,4 +113,8 @@ Meta.getMetadataFields = function(account, model) {
 	});
 };
 
+Meta.getIfcGuids = function(account, model) {
+	return this.find({ account, model }, { type: "meta" }, { "metadata.IFC GUID": 1 });
+};
+
 module.exports = Meta;
