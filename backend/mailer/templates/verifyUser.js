@@ -18,27 +18,20 @@
 
 "use strict";
 
-const { ctaButton,  basicEmailTemplateWithLogo } = require("./basicEmailTemplate");
+const { ctaButton,  basicEmailTemplateWithLogo, SIGN_OFF } = require("./basicEmailTemplate");
 
 const html = ({url, firstName}) => basicEmailTemplateWithLogo(`
-<div valign="top" class="mcnTextContent" style="padding: 9px 0px 29px;color: #8A8A8A;font-family: Roboto, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif;font-size: 16px;line-height: 150%;">
-Thank you for signing up to 3D Repo.<br>
+Thank you for signing up to 3D Repo.<br />
 Please press on the button below to verify your email address.
-</div>
 ${ctaButton("Verify Email Addres", url)}
 <div valign="top" class="mcnTextContent" style="padding: 27px 0px 9px;color: #8A8A8A;font-family: Roboto, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif;font-size: 14px;line-height: 150%;text-align: center;">
     Alternatively, Copy and Paste the link below into your browser:<br>
 	<span style="color:#3452ff">${url}</span>
 </div>
-<table align="left" border="0" cellpadding="0" cellspacing="0" style="max-width:100%; min-width:100%;" width="100%" class="mcnTextContentContainer">
-	<tbody>
-		<tr>
-			<td valign="top" class="mcnTextContent" style="padding: 30px 18px 0px;color: #8A8A8A;font-family: Roboto, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif;font-size: 16px;line-height: 150%;">
-				By verifying your email address you are agreeing to 3D Repo's <a href="https://www.3drepo.io/terms" target="_blank"><span style="color:#3452ff">Terms of Service</span></a>
-			</td>
-		</tr>
-	</tbody>
-</table>
+<br />
+By verifying your email address you are agreeing to 3D Repo's <a href="https://www.3drepo.io/terms" target="_blank"><span style="color:#3452ff;  word-break: break-all;">Terms of Service</span></a>
+ ${SIGN_OFF}
+<br />
 `, firstName);
 
 module.exports =  {
