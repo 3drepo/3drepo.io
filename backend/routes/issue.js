@@ -906,10 +906,6 @@ function renderIssuesHTML(req, res, next) {
 function importBCF(req, res, next) {
 	const place = utils.APIInfo(req);
 
-	if (!config.bcf_dir) {
-		return responseCodes.respond(place, req, res, next, { message: "config.bcf_dir is not defined" });
-	}
-
 	const upload = multer({
 		storage: multer.memoryStorage(),
 		fileFilter : (fileReq, file, cb) => {
