@@ -222,7 +222,7 @@ class Issue extends Ticket {
 	async merge(account, model, branch, revId, data, sessionId, user) {
 		const existingIssues = await this.findByModelName(account, model, branch, revId, {}, {}, true);
 		// FIXME
-		const existingIssueIds = existingIssues.map(x => x._id);
+		const existingIssueIds = existingIssues.map(x => utils.uuidToString(x._id));
 
 		// sort issues by date and add number
 		data = data.sort((a, b) => {
