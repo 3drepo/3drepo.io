@@ -199,8 +199,7 @@ class Issue extends Ticket {
 	}
 
 	async importBCF(requester, account, model, revId, dataBuffer) {
-
-		if(dataBuffer.byteLength === 0) {
+		if (dataBuffer.byteLength === 0) {
 			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
 		}
 
@@ -219,7 +218,7 @@ class Issue extends Ticket {
 		}
 
 		const settings = await ModelSetting.findById({account, model}, model);
-		const bcfIssues = await BCF.importBCF(requester, account, model, zipPath, settings);
+		const bcfIssues = await BCF.importBCF(requester, account, model, dataBuffer, settings);
 
 		return this.merge(account, model, branch, revId, bcfIssues, requester.socketId, requester.user);
 	}
