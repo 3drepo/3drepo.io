@@ -25,7 +25,7 @@ const { ctaButton,  basicEmailTemplateWithLogo } = require("./basicEmailTemplate
 
 const html = ({firstName, username, url}) => basicEmailTemplateWithLogo(`
 	We received a request to reset your password, for username <strong>${username}</strong>. Press on the button below to set up your new password.&nbsp;
-	${ctaButton("Reset your password", url)}
+	${ctaButton("Reset Your Password", url)}
 
 	If you did not request a password reset, please ignore this email and contact us at&nbsp;<a href="mailto:support@3drepo.com?subject=Password%20Reset%20Support%20Query" target="_blank"><span style="color:#3452ff">support@3drepo.com</span></a>&nbsp;so we can make sure no one else is trying to access your account.
 	<br /><br />
