@@ -681,7 +681,7 @@ function parseViewpointClippingPlanes(clippingPlanes, scale) {
 	return parsedPlanes;
 }
 
-async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, issueName) {
+async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, issueName, ifcToModelMap) {
 	const vp = {};
 	const groupPromises = [];
 
@@ -716,7 +716,7 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 				for (let k = 0; vpComponents[componentsIdx].Coloring[j].Color && k < vpComponents[componentsIdx].Coloring[j].Color.length; k++) {
 					for (let compIdx = 0; vpComponents[componentsIdx].Coloring[j].Color[k].Component && compIdx < vpComponents[componentsIdx].Coloring[j].Color[k].Component.length; compIdx++) {
 						// const color = vpComponents[componentsIdx].Coloring[j].Color[k]["@"].Color; // TODO: colour needs to be preserved at some point in the future
-						let objectModel = model;
+						let objectModel = groupDbCol.model;
 
 						if (isFederation) {
 							objectModel = ifcToModelMap[vpComponents[componentsIdx].Coloring[j].Color[k].Component[compIdx]["@"].IfcGuid];
@@ -1005,7 +1005,7 @@ function readBCF(account, model, requester, ifcToModelMap, dataBuffer, settings)
 								model: model
 							};
 
-							vp = {...vp, ...parseViewpointComponents(groupDbCol, _.get(vpXML, "VisualizationInfo.Components"), settings.federate, issue.name)};
+							vp = {...vp, ...parseViewpointComponents(groupDbCol, _.get(vpXML, "VisualizationInfo.Components"), settings.federate, issue.name, ifcToModelMap)};
 						}
 						issue.viewpoints.push(vp);
 
