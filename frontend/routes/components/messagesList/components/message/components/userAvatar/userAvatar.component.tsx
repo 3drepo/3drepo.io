@@ -47,8 +47,8 @@ export const UserAvatar = ({ name, currentUser }: IProps) => {
 		<>
 			{!currentUser && <Avatar initials>{getInitials(name)}</Avatar>}
 			{currentUser && renderWhenTrueOtherwise(
-				() => <Avatar src={url} color={currentUser.job.color} />,
-				() => <Avatar color={currentUser.job.color}>{getInitials(name)}</Avatar>
+				() => <Avatar src={url} color={currentUser.job && currentUser.job.color} />,
+				() => <Avatar color={currentUser.job && currentUser.job.color}>{getInitials(name)}</Avatar>
 			)(!isEmpty(url))}
 		</>
 	);
