@@ -913,7 +913,6 @@ function importBCF(req, res, next) {
 	const upload = multer({
 		dest: config.bcf_dir,
 		fileFilter : (fileReq, file, cb) => {
-
 			const acceptedFormat = [
 				"bcf", "bcfzip", "zip"
 			];
@@ -929,6 +928,8 @@ function importBCF(req, res, next) {
 
 			if (size > config.uploadSizeLimit) {
 				return cb({ resCode: responseCodes.SIZE_LIMIT });
+			} if (size === 0) {
+				return cb({ resCode: responseCodes.INVALID_ARGUMENTS });
 			}
 
 			cb(null, true);
@@ -938,16 +939,12 @@ function importBCF(req, res, next) {
 	upload.single("file")(req, res, function (err) {
 		if (err) {
 			return responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
-
-		} else if (!req.file.size) {
-			return responseCodes.respond(place, req, res, next, responseCodes.FILE_FORMAT_NOT_SUPPORTED, responseCodes.FILE_FORMAT_NOT_SUPPORTED);
-		} else {
-			Issue.importBCF({ socketId: req.headers[C.HEADER_SOCKET_ID], user: req.session.user.username }, req.params.account, req.params.model, req.params.rid, req.file.path).then(() => {
-				responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "ok" });
-			}).catch(error => {
-				responseCodes.respond(place, req, res, next, error, error);
-			});
 		}
+		Issue.importBCF({ socketId: req.headers[C.HEADER_SOCKET_ID], user: req.session.user.username }, req.params.account, req.params.model, req.params.rid, req.file.path).then(() => {
+			responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "ok" });
+		}).catch(error => {
+			responseCodes.respond(place, req, res, next, error, error);
+		});
 	});
 }
 
