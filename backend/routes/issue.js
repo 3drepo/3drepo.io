@@ -906,36 +906,33 @@ function renderIssuesHTML(req, res, next) {
 function importBCF(req, res, next) {
 	const place = utils.APIInfo(req);
 
-	// check space
-	function fileFilter(fileReq, file, cb) {
-
-		const acceptedFormat = [
-			"bcf", "bcfzip", "zip"
-		];
-
-		let format = file.originalname.split(".");
-		format = format.length <= 1 ? "" : format.splice(-1)[0];
-
-		const size = parseInt(fileReq.headers["content-length"]);
-
-		if (acceptedFormat.indexOf(format.toLowerCase()) === -1) {
-			return cb({ resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
-		}
-
-		if (size > config.uploadSizeLimit) {
-			return cb({ resCode: responseCodes.SIZE_LIMIT });
-		}
-
-		cb(null, true);
-	}
-
 	if (!config.bcf_dir) {
 		return responseCodes.respond(place, req, res, next, { message: "config.bcf_dir is not defined" });
 	}
 
 	const upload = multer({
 		dest: config.bcf_dir,
-		fileFilter: fileFilter
+		fileFilter : (fileReq, file, cb) => {
+
+			const acceptedFormat = [
+				"bcf", "bcfzip", "zip"
+			];
+
+			let format = file.originalname.split(".");
+			format = format.length <= 1 ? "" : format.splice(-1)[0];
+
+			const size = parseInt(fileReq.headers["content-length"]);
+
+			if (acceptedFormat.indexOf(format.toLowerCase()) === -1) {
+				return cb({ resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
+			}
+
+			if (size > config.uploadSizeLimit) {
+				return cb({ resCode: responseCodes.SIZE_LIMIT });
+			}
+
+			cb(null, true);
+		}
 	});
 
 	upload.single("file")(req, res, function (err) {
