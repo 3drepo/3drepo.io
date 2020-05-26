@@ -924,8 +924,6 @@ function importBCF(req, res, next) {
 
 			if (size > config.uploadSizeLimit) {
 				return cb({ resCode: responseCodes.SIZE_LIMIT });
-			} if (size === 0) {
-				return cb({ resCode: responseCodes.INVALID_ARGUMENTS });
 			}
 
 			cb(null, true);

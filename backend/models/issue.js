@@ -198,7 +198,12 @@ class Issue extends Ticket {
 		return BCF.getBCFZipReadStream(account, model, issues, settings.properties.unit);
 	}
 
-	async importBCF(requester, account, model, revId, zipPath) {
+	async importBCF(requester, account, model, revId, dataBuffer) {
+
+		if(dataBuffer.byteLength === 0) {
+			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
+		}
+
 		let branch;
 
 		if (!revId) {
