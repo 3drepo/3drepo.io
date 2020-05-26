@@ -28,6 +28,7 @@ const C = require("../constants");
 const systemLogger = require("../logger.js").systemLogger;
 const utils = require("../utils");
 
+const FileRef = require("./fileRef");
 const Group = require("./group");
 const Meta = require("./meta");
 
@@ -111,7 +112,7 @@ function sanitise(data, list) {
 	return dataSanitised;
 }
 
-function getIssueBCF(issue, account, model, unit) {
+async function getIssueBCF(issue, account, model, unit) {
 	const viewpointEntries = [];
 	const snapshotEntries = [];
 
@@ -232,9 +233,9 @@ function getIssueBCF(issue, account, model, unit) {
 	let snapshotNo = 0;
 
 	if (issue.viewpoints) {
-		issue.viewpoints.forEach((vp, index) => {
-
-			const number = index === 0 ? "" : index;
+		for (let vpIdx = 0; vpIdx < issue.viewpoints.length; vpIdx++) {
+			const vp = issue.viewpoints[vpIdx];
+			const number = vpIdx === 0 ? "" : vpIdx;
 			const viewpointFileName = `viewpoint${number}.bcfv`;
 			const snapshotFileName = `snapshot${(snapshotNo === 0 ? "" : snapshotNo)}.png`;
 
@@ -246,11 +247,19 @@ function getIssueBCF(issue, account, model, unit) {
 				"Snapshot":  null
 			};
 
-			if(vp.screenshot && vp.screenshot.flag) {
+			let screenshotContent;
+
+			if (vp.screenshot_ref) {
+				screenshotContent = await FileRef.fetchFile(account, model, "issues", vp.screenshot_ref);
+			} else if (vp.screenshot && vp.screenshot.flag) {
+				screenshotContent = vp.screenshot.content.buffer;
+			}
+
+			if (screenshotContent) {
 				vpObj.Snapshot = snapshotFileName;
 				snapshotEntries.push({
 					filename: snapshotFileName,
-					snapshot: vp.screenshot.content
+					snapshot: screenshotContent
 				});
 				snapshotNo++;
 			}
@@ -440,8 +449,7 @@ function getIssueBCF(issue, account, model, unit) {
 					});
 				})
 			);
-
-		});
+		}
 	}
 
 	return Promise.all(viewpointsPromises).then(() => {
@@ -477,7 +485,7 @@ bcf.getBCFZipReadStream = function(account, model, issues, unit) {
 				});
 
 				bcfResult.snapshots.forEach(snapshot => {
-					zip.append(snapshot.snapshot.buffer, {name: `${utils.uuidToString(issue._id)}/${snapshot.filename}`});
+					zip.append(snapshot.snapshot, {name: `${utils.uuidToString(issue._id)}/${snapshot.filename}`});
 				});
 			})
 		);
