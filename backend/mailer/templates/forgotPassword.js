@@ -19,10 +19,6 @@
 
 const { ctaButton,  basicEmailTemplate } = require("./basicEmailTemplate");
 
-// data.firstName
-// data.username
-// data.url
-
 const html = ({firstName, username, url}) => basicEmailTemplate(`
 	We received a request to reset your password, for username <strong>${username}</strong>. Press on the button below to set up your new password.&nbsp;
 	${ctaButton("Reset Your Password", url)}
