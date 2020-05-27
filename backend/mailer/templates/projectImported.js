@@ -15,15 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 "use strict";
-const html = data => `
-	Hi there,<br>
-	<br>
-	Your model ${data.model} has been processed successfully without errors and is now ready.<br><br>
-	<a href="${data.url}">Go to my model</a>
-	<br><br>
-	Best,<br>
-	3D Repo
-`;
+const { basicEmailTemplate } = require("./basicEmailTemplate");
+
+const html = ({ url, model }) => basicEmailTemplate(`
+Your model <b>${model}</b> has been processed successfully without errors and is now ready.<br><br>
+<a href="${url}">Go to my model</a><br>
+`);
 
 const subject = data => `Your model ${data.model} is now ready`;
 
