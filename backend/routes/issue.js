@@ -162,7 +162,7 @@ router.get("/issues/:issueId/thumbnail.png", middlewares.issue.canView, getThumb
 router.get("/issues", middlewares.issue.canView, listIssues);
 
 /**
- * @api {get} /:teamspace/:model/issues.bcfzip Get Issues BCF zip file
+ * @api {get} /:teamspace/:model/issues.bcfzip Download issues BCF zip file
  * @apiName getIssuesBCF
  * @apiGroup Issues
  *
@@ -272,7 +272,7 @@ router.get("/revision/:rid/issues", middlewares.issue.canView, listIssues);
 
 /**
  * @api {get} /:teamspace/:model/revision/:rid/issues.bcfzip Get Issues BCF zip file by revision ID
- * @apiName getIssuesBCF
+ * @apiName getIssuesBCFTRid
  * @apiGroup Issues
  *
  * @apiParam {String} teamspace Name of teamspace
@@ -286,7 +286,7 @@ router.get("/revision/:rid/issues.bcfzip", middlewares.issue.canView, getIssuesB
 
 /**
  * @api {post} /:teamspace/:model/revision/:rid/issues.bcfzip Post Issues BCF zip file by revision ID
- * @apiName getIssuesBCF
+ * @apiName postIssuesBCF
  * @apiGroup Issues
  *
  * @apiParam {String} teamspace Name of teamspace
@@ -319,7 +319,7 @@ router.get("/issues.html", middlewares.issue.canView, renderIssuesHTML);
 
 /**
  * @api {get} /:teamspace/:model/revision/:rid/issues.html Issues response into as HTML by revision ID
- * @apiName  renderIssuesHTML
+ * @apiName  renderIssuesHTMLRid
  * @apiGroup Issues
  *
  * @apiParam {String} teamspace Name of teamspace
