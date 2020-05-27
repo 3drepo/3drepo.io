@@ -16,17 +16,15 @@
  */
 
 "use strict";
-const html = data => `
-	Hi there,<br>
-	<br>
-	Your subscription is now suspended.
+const { basicEmailTemplate } = require("./basicEmailTemplate");
+
+const html = ({ url }) => basicEmailTemplate(`
+	Your subscription is now suspended.<br>
 	<br>
 	Please click on the following link if you would like to subscribe again.
-	<br><a href="${data.url}">${data.url}</a>
-	<br><br>
-	Best,<br>
-	3D Repo
-`;
+	<br><a href="${url}">${url}</a>
+	<br>
+`);
 
 const subject = "Your 3D Repo subscription is suspended";
 

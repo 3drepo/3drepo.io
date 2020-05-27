@@ -16,7 +16,7 @@
  */
 
 "use strict";
-const {  basicEmailTemplate } = require("./basicEmailTemplate");
+const { basicEmailTemplate } = require("./basicEmailTemplate");
 
 const html = ({amount, account}) => basicEmailTemplate(`
 	Your payment of <b>${amount}</b> is confirmed and you can start uploading models in your
