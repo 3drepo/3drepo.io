@@ -214,8 +214,10 @@ class Issue extends Ticket {
 
 	async merge(account, model, branch, revId, data, sessionId, user) {
 		const existingIssues = await this.findByModelName(account, model, branch, revId, {}, {}, true);
-		// FIXME
-		const existingIssueIds = existingIssues.map(x => utils.uuidToString(x._id));
+		const existingIssuesMap = {};
+		for (let i = 0; i < existingIssues.length; ++i) {
+			existingIssuesMap[utils.uuidToString(existingIssues[i]._id)] = i;
+		}
 
 		// sort issues by date and add number
 		data = data.sort((a, b) => {
@@ -226,9 +228,9 @@ class Issue extends Ticket {
 			const issueToMerge = data[i];
 			issueToMerge.rev_id = revId;
 
-			const matchIndex = existingIssueIds.indexOf(utils.uuidToString(issueToMerge._id));
+			const matchIndex = existingIssuesMap[utils.uuidToString(issueToMerge._id)];
 
-			if (matchIndex !== -1) {
+			if (matchIndex !== undefined) {
 				const matchingIssue = existingIssues[matchIndex];
 
 				// 0. Set the black list for attributes
