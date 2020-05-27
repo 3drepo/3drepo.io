@@ -40,11 +40,13 @@ interface IProps {
 	isMetadataActive: boolean;
 	setMetadataActive: (isActive) => void;
 	setPanelVisibility: (panelName, visibility) => void;
+	isClipEdit: boolean;
+	setClipEdit: (isActive) => void;
 }
 
 export const MeasuringType = ({
 	activateMeasure, deactivateMeasure, setMeasureMode, measureMode, viewer, addMeasurement, isMetadataActive,
-	setMetadataActive, setPanelVisibility,
+	setMetadataActive, setPanelVisibility, isClipEdit, setClipEdit
 }: IProps) => {
 
 	const handlePickPoint = ({ trans, position }) => {
@@ -97,6 +99,10 @@ export const MeasuringType = ({
 		if (isMetadataActive) {
 			setMetadataActive(false);
 			setPanelVisibility(VIEWER_PANELS.BIM, false);
+		}
+
+		if (isClipEdit) {
+			setClipEdit(false);
 		}
 
 		if (mode === measureMode) {
