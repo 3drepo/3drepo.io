@@ -940,6 +940,9 @@ async function readBCF(account, model, requester, ifcToModelMap, dataBuffer, set
 		const {issue, viewpointsData} = await parseMarkupBuffer(files[guid][`${guid}/markup.bcf`]);
 		issue._id = utils.stringToUUID(guid);
 
+		// TODO: instead of doing a foreach with await inside (forcing serialisation on the processing), we should
+		//       it should really be a foreach with a promise.push(...). and assign issue.viewpoints to promise.all()
+		//       to ensure the order of the viewpoints, instead of pushing it within the loop.
 		const viewpoints = await parseViewpoints(utils.uuidToString(issue._id), files[guid], viewpointsData);
 		const vpGuids = Object.keys(viewpoints);
 
