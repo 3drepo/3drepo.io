@@ -162,7 +162,7 @@ router.get("/issues/:issueId/thumbnail.png", middlewares.issue.canView, getThumb
 router.get("/issues", middlewares.issue.canView, listIssues);
 
 /**
- * @api {get} /issues.bcfzip Download issues BCF zip file
+ * @api {get} /:teamspace/:model/issues.bcfzip Download issues BCF zip file
  * @apiName getIssuesBCF
  * @apiGroup Issues
  *
