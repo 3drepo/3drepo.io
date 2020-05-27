@@ -34,6 +34,10 @@ function Utils() {
 		return "[object String]" === Object.prototype.toString.call(value);
 	};
 
+	this.isObject = (value) => {
+		return "[object Object]" === Object.prototype.toString.call(value);
+	}
+
 	this.hasField = (obj, field) => {
 		return Object.prototype.hasOwnProperty.call(obj, field);
 	};

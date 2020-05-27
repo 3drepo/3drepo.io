@@ -32,7 +32,7 @@ view.clean =  function (viewToClean, targetType = "[object String]") {
 
 	keys.forEach((key) => {
 		if (viewToClean[key] && "[object String]" === targetType) {
-			if ("[object Object]" === Object.prototype.toString.call(viewToClean[key])) {
+			if (utils.isObject(viewToClean[key])) {
 				viewToClean[key] = utils.uuidToString(viewToClean[key]);
 			}
 		} else if (viewToClean[key] && "[object Object]" === targetType) {
@@ -66,7 +66,7 @@ view.listViewpoints = function (account, model) {
 
 	return db.getCollection(account, model + ".views").then(_dbCol => {
 		return _dbCol.find().toArray().then(results => {
-			results.forEach(view.clean);
+			results.forEach((vp) => view.clean(vp));
 			return results;
 		});
 	});
