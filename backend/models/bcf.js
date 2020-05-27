@@ -527,6 +527,35 @@ function createGroupData(groupObject) {
 	return groupData;
 }
 
+function parseViewpointComponentIfc(model, component, ifcToModelMap, isFederation) {
+	return {
+		model: isFederation ? ifcToModelMap[component["@"].IfcGuid] : model,
+		ifcGuid: component["@"].IfcGuid
+	};
+}
+
+function compileGroupObjects(account, componentIfcs) {
+	const objects = [];
+	const modelIndexes = {};
+
+	console.log(componentIfcs);
+	for (let i = 0; i < componentIfcs.length; i++) {
+		if (!modelIndexes[componentIfcs[i].model]) {
+			modelIndexes[componentIfcs[i].model] = Object.keys(modelIndexes).length;
+
+			objects.push({
+				account,
+				model: componentIfcs[i].model,
+				ifc_guids: []
+			});
+		}
+
+		objects[modelIndexes[componentIfcs[i].model]].ifc_guids.push(componentIfcs[i].ifcGuid);
+	}
+
+	return objects;
+}
+
 function createGroupObject(group, name, color, groupAccount, groupModel, ifcGuid) {
 
 	if (groupAccount && groupModel && ifcGuid) {
@@ -671,28 +700,52 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 
 	for (let componentsIdx = 0; componentsIdx < vpComponents.length; componentsIdx++) {
 		let highlightedGroupObject;
+		let highlightedObjectsMap = [];
 
 		// TODO: refactor to reduce duplication?
-		if (vpComponents[componentsIdx].Selection) {
-			for (let j = 0; j < vpComponents[componentsIdx].Selection.length; j++) {
-				for (let k = 0; vpComponents[componentsIdx].Selection[j].Component && k < vpComponents[componentsIdx].Selection[j].Component.length; k++) {
-					let objectModel = groupDbCol.model;
+		Object.keys(vpComponents[componentsIdx]).forEach((componentType) => {
+			console.log(componentType);
+			if ("ViewSetupHints" === componentType) {
+				// TODO: Full ViewSetupHints support -
+				// SpaceVisible should correspond to !hideIfc
+				vp.extras.ViewSetupHints = vpComponents[componentsIdx][componentType];
+			} else {
+				const groupData = {
+					name: issueName
+				};
 
-					if (isFederation) {
-						objectModel = ifcToModelMap[vpComponents[componentsIdx].Selection[j].Component[k]["@"].IfcGuid];
+				let componentIfcs;
+
+				for (let i = 0; i < vpComponents[componentsIdx][componentType].length; i++) {
+					if (vpComponents[componentsIdx][componentType][i].Component) {
+						componentIfcs = vpComponents[componentsIdx][componentType][i].Component.map(component =>
+							parseViewpointComponentIfc(groupDbCol.model, component, ifcToModelMap, isFederation)
+						);
 					}
+				}
 
-					highlightedGroupObject = createGroupObject(
-						highlightedGroupObject,
-						issueName,
-						[255, 0, 0],
-						groupDbCol.account,
-						objectModel,
-						vpComponents[componentsIdx].Selection[j].Component[k]["@"].IfcGuid
-					);
+				switch (componentType) {
+					case "Selection":
+						groupData.color = [255, 0, 0];
+						groupData.objects = componentIfcs ? compileGroupObjects(groupDbCol.account, componentIfcs) : [];
+
+						console.log(groupData);
+
+						groupPromises.push(
+							Group.createGroup(groupDbCol, undefined, groupData).then(group => {
+								vp.highlighted_group_id = utils.stringToUUID(group._id);
+							})
+						);
+
+						highlightedObjectsMap = groupData.objects.reduce((acc, val) => acc.concat(val.ifc_guids), []);
+						break;
+					case "Coloring":
+						break;
+					case "Visibility":
+						break;
 				}
 			}
-		}
+		});
 
 		if (vpComponents[componentsIdx].Coloring) {
 			// FIXME: this is essentially copy of selection with slight modification. Should merge common code.
@@ -717,20 +770,6 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 					}
 				}
 			}
-		}
-
-		let highlightedGroupData;
-		let highlightedObjectsMap = [];
-
-		if (highlightedGroupObject) {
-			highlightedGroupData = createGroupData(highlightedGroupObject);
-			groupPromises.push(
-				Group.createGroup(groupDbCol, undefined, highlightedGroupData).then(group => {
-					vp.highlighted_group_id = utils.stringToUUID(group._id);
-				})
-			);
-
-			highlightedObjectsMap = highlightedGroupData.objects.reduce((acc, val) => acc.concat(val.ifc_guids), []);
 		}
 
 		if (vpComponents[componentsIdx].Visibility) {
@@ -813,12 +852,6 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 					})
 				);
 			}
-		}
-
-		if (vpComponents[componentsIdx].ViewSetupHints) {
-			// TODO: Full ViewSetupHints support -
-			// SpaceVisible should correspond to !hideIfc
-			vp.extras.ViewSetupHints = vpComponents[componentsIdx].ViewSetupHints;
 		}
 	}
 
