@@ -16,19 +16,16 @@
  */
 
 "use strict";
-const html = data => `
-	Hi there,<br>
-	<br>
-	Your payment of ${data.amount} is confirmed and you can start uploading models in your
-	${data.account} repository.
-	<br><br>
-	Best,<br>
-	3D Repo
-`;
+const {  basicEmailTemplate } = require("./basicEmailTemplate");
+
+const html = ({amount, account}) => basicEmailTemplate(`
+	Your payment of <b>${amount}</b> is confirmed and you can start uploading models in your
+	<b>${account}</b> repository.
+	<br>`);
 
 const subject = "Your payment to 3D Repo is confirmed";
 
 module.exports =  {
-	html: html,
-	subject: subject
+	html,
+	subject
 };
