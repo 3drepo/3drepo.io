@@ -16,18 +16,18 @@
  */
 
 "use strict";
-const { ctaButton,  basicEmailTemplateWithLogo, SIGN_OFF } = require("./basicEmailTemplate");
+const { ctaButton,  basicEmailTemplate, SIGN_OFF } = require("./basicEmailTemplate");
 
-const html = ({name, company, teamspace, url}) => basicEmailTemplateWithLogo(`
+const html = ({name, company, teamspace, url}) => basicEmailTemplate(`
 		${name} <em>(${company})</em> invites you to join their teamspace <strong>${teamspace}</strong>. Please press on the button below to sign up and start collaborating.
 		${(ctaButton(`Join ${teamspace}`, url))}
 		${SIGN_OFF}
 		<br />
-	`);
+`);
 
 const subject = data => `${data.name} has invited you to collaborate in 3D Repo`;
 
 module.exports =  {
-	html: html,
-	subject: subject
+	html,
+	subject
 };

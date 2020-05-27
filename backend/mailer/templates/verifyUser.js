@@ -18,9 +18,9 @@
 
 "use strict";
 
-const { ctaButton,  basicEmailTemplateWithLogo, SIGN_OFF } = require("./basicEmailTemplate");
+const { ctaButton,  basicEmailTemplate, SIGN_OFF } = require("./basicEmailTemplate");
 
-const html = ({url, firstName}) => basicEmailTemplateWithLogo(`
+const html = ({url, firstName}) => basicEmailTemplate(`
 Thank you for signing up to 3D Repo.<br />
 Please press on the button below to verify your email address.
 ${ctaButton("Verify Email Addres", url)}

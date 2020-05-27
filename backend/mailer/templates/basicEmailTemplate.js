@@ -132,7 +132,7 @@ const SIGN_OFF =  `
 	For any queries please contact our support team at <a href="mailto:support@3drepo.com?subject=Support%20Request" target="_blank"><span style="color:#3452ff">support@3drepo.com</span></a>
 `;
 
-const emailTemplate = (showLogo) => (content, name) => emailContainer(showLogo)(`
+const emailTemplate = (content, name) => emailContainer(true)(`
 	<h1 style="font-size: 20px; font-style: normal; font-weight: normal; margin: 0px; mso-line-height-rule:exactly;">Hello  ${ name ? name + "," : ""}</h1> <br/>
 	${content}
 	<br/>
@@ -140,12 +140,12 @@ const emailTemplate = (showLogo) => (content, name) => emailContainer(showLogo)(
 	3D Repo Team
 `);
 
-const ctaButton = (text, url) => `
+const ctaButton = (text, url, padding = 15) => `
 <div style="width:100%;margin: 37px 0px 43px 0px;">
 	<table align="center" border="0" cellpadding="0" cellspacing="0" class="d" style="border-collapse: separate !important;border-radius: 50px;background-color: #3452FF;">
 	<tbody>
 		<tr>
-			<td align="center" valign="middle" style="font-family: Roboto, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; font-size: 18px; padding: 15px;">
+			<td align="center" valign="middle" style="font-family: Roboto, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; font-size: 18px; padding: ${padding}px;">
 				<a class="mcnButton " title="Reset Your Password" href="${url}" target="_blank" style="font-weight: normal;letter-spacing: 1px;line-height: 100%;text-align: center;text-decoration: none;color: #FFFFFF;">${text}</a>
 			</td>
 		</tr>
@@ -155,10 +155,8 @@ const ctaButton = (text, url) => `
 `;
 
 module.exports = {
-	basicEmailTemplate: emailTemplate(false),
-	basicEmailTemplateWithLogo: emailTemplate(true),
+	basicEmailTemplate: emailTemplate,
 	emailContainer: emailContainer(false),
-	emailContainerWithLogo: emailContainer(true),
 	ctaButton,
 	SIGN_OFF
 };
