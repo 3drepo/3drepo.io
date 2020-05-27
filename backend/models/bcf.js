@@ -583,15 +583,15 @@ function parseMarkupBuffer(markupBuffer) {
 			if (!issue.status || issue.status === "") {
 				issue.status = "open";
 			}
-			issue.extras.ReferenceLink = _.get(xml, "Topic[0].ReferenceLink");
+			_.get(xml, "Topic[0].ReferenceLink") && (issue.extras.ReferenceLink = _.get(xml, "Topic[0].ReferenceLink"));
 			issue.name = _.get(xml, "Markup.Topic[0].Title[0]._");
 			issue.priority = sanitise(_.get(xml, "Markup.Topic[0].Priority[0]._"), priorityEnum);
-			issue.extras.Index = _.get(xml, "Markup.Topic[0].Index[0]._");
-			issue.extras.Labels = _.get(xml, "Markup.Topic[0].Labels[0]._");
+			_.get(xml, "Markup.Topic[0].Index[0]._") && (issue.extras.Index = _.get(xml, "Markup.Topic[0].Index[0]._"));
+			_.get(xml, "Markup.Topic[0].Labels[0]._") && (issue.extras.Labels = _.get(xml, "Markup.Topic[0].Labels[0]._"));
 			issue.created = moment(_.get(xml, "Markup.Topic[0].CreationDate[0]._")).format("x").valueOf();
 			issue.owner = _.get(xml, "Markup.Topic[0].CreationAuthor[0]._");
-			issue.extras.ModifiedDate = _.get(xml, "Markup.Topic[0].ModifiedDate[0]._");
-			issue.extras.ModifiedAuthor = _.get(xml, "Markup.Topic[0].ModifiedAuthor[0]._");
+			_.get(xml, "Markup.Topic[0].ModifiedDate[0]._") && (issue.extras.ModifiedDate = _.get(xml, "Markup.Topic[0].ModifiedDate[0]._"));
+			_.get(xml, "Markup.Topic[0].ModifiedAuthor[0]._") && (issue.extras.ModifiedAuthor = _.get(xml, "Markup.Topic[0].ModifiedAuthor[0]._"));
 			if (_.get(xml, "Markup.Topic[0].DueDate[0]._")) {
 				issue.due_date = moment(_.get(xml, "Markup.Topic[0].DueDate[0]._")).valueOf();
 			}
@@ -602,9 +602,9 @@ function parseMarkupBuffer(markupBuffer) {
 			}
 
 			issue.desc = (_.get(xml, "Markup.Topic[0].Description[0]._")) ? _.get(xml, "Markup.Topic[0].Description[0]._") : "(No Description)";
-			issue.extras.BimSnippet = _.get(xml, "Markup.Topic[0].BimSnippet");
-			issue.extras.DocumentReference = _.get(xml, "Markup.Topic[0].DocumentReference");
-			issue.extras.RelatedTopic = _.get(xml, "Markup.Topic[0].RelatedTopic");
+			_.get(xml, "Markup.Topic[0].BimSnippet") && (issue.extras.BimSnippet = _.get(xml, "Markup.Topic[0].BimSnippet"));
+			_.get(xml, "Markup.Topic[0].DocumentReference") && (issue.extras.DocumentReference = _.get(xml, "Markup.Topic[0].DocumentReference"));
+			_.get(xml, "Markup.Topic[0].RelatedTopic") && (issue.extras.RelatedTopic = _.get(xml, "Markup.Topic[0].RelatedTopic"));
 		}
 
 		_.get(xml, "Markup.Comment") && xml.Markup.Comment.forEach(comment => {
@@ -614,12 +614,16 @@ function parseMarkupBuffer(markupBuffer) {
 				owner: _.get(comment, "Author[0]._"),
 				comment: _.get(comment, "Comment[0]._"),
 				sealed: true,
-				viewpoint: utils.isUUID(_.get(comment, "Viewpoint[0].@.Guid")) ? utils.stringToUUID(_.get(comment, "Viewpoint[0].@.Guid")) : undefined,
-				extras: {}
+				viewpoint: utils.isUUID(_.get(comment, "Viewpoint[0].@.Guid")) ? utils.stringToUUID(_.get(comment, "Viewpoint[0].@.Guid")) : undefined
 			};
 
-			obj.extras.ModifiedDate = _.get(comment, "ModifiedDate");
-			obj.extras.ModifiedAuthor = _.get(comment, "ModifiedAuthor");
+			const commentExtras = {};
+			_.get(comment, "ModifiedDate") && (commentExtras.ModifiedDate = _.get(comment, "ModifiedDate"));
+			_.get(comment, "ModifiedDate") && (commentExtras.ModifiedAuthor = _.get(comment, "ModifiedAuthor"));
+
+			if(Object.keys(commentExtras).length) {
+				obj.extras = commentExtras;
+			}
 
 			issue.comments.push(obj);
 		});
@@ -846,12 +850,12 @@ function parseViewpointCamera(camera, scale) {
 function parseViewpointExtras(vpXML, viewpoint, snapshot) {
 	const extras = {};
 
-	extras.Spaces = _.get(vpXML, "VisualizationInfo.Spaces");
-	extras.SpaceBoundaries = _.get(vpXML, "VisualizationInfo.SpaceBoundaries");
-	extras.Openings = _.get(vpXML, "VisualizationInfo.Openings");
-	extras.OrthogonalCamera = _.get(vpXML, "VisualizationInfo.OrthogonalCamera");
-	extras.Lines = _.get(vpXML, "VisualizationInfo.Lines");
-	extras.Bitmap = _.get(vpXML, "VisualizationInfo.Bitmap");
+	_.get(vpXML, "VisualizationInfo.Spaces") && (extras.Spaces = _.get(vpXML, "VisualizationInfo.Spaces"));
+	_.get(vpXML, "VisualizationInfo.SpaceBoundaries") && (extras.SpaceBoundaries = _.get(vpXML, "VisualizationInfo.SpaceBoundaries"));
+	_.get(vpXML, "VisualizationInfo.Openings") && (extras.Openings = _.get(vpXML, "VisualizationInfo.Openings"));
+	_.get(vpXML, "VisualizationInfo.OrthogonalCamera")	&& (extras.OrthogonalCamera = _.get(vpXML, "VisualizationInfo.OrthogonalCamera"));
+	_.get(vpXML, "VisualizationInfo.Lines") && (extras.Lines = _.get(vpXML, "VisualizationInfo.Lines"));
+	_.get(vpXML, "VisualizationInfo.Bitmap") && (extras.Bitmap = _.get(vpXML, "VisualizationInfo.Bitmap"));
 	extras.Index = viewpoint;
 	extras.Snapshot = snapshot;
 	!_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0]") && (extras._noPerspective = true);
@@ -951,7 +955,10 @@ async function readBCF(account, model, requester, ifcToModelMap, dataBuffer, set
 				guid: utils.stringToUUID(vpGuid)
 			};
 
-			vp.extras = parseViewpointExtras(vpXML, viewpoints[vpGuid].Viewpoint, viewpoints[vpGuid].Snapshot);
+			const extras = parseViewpointExtras(vpXML, viewpoints[vpGuid].Viewpoint, viewpoints[vpGuid].Snapshot);
+			if (Object.keys(extras)) {
+				vp.extras = extras;
+			}
 
 			if (viewpoints[vpGuid].snapshot) {
 				vp.screenshot = {
