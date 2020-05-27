@@ -24,7 +24,6 @@ const xml2js = require("xml2js");
 const yauzl = require("yauzl");
 
 const C = require("../constants");
-// const responseCodes = require("../response_codes.js");
 const systemLogger = require("../logger.js").systemLogger;
 const utils = require("../utils");
 
@@ -61,26 +60,6 @@ function getBCFVersion() {
 		<DetailedVersion>2.1</DetailedVersion>
 		</Version>`;
 }
-
-/*
- * Project Extension not used
- * function getProjectExtension(modelId) {
-	const model = {
-		ProjectExtension:{
-			"@" : {
-				"xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
-				"xmlns:xsd": "http://www.w3.org/2001/XMLSchema"
-			},
-			"Project": {
-				"@": { "ProjectId": modelId },
-				"Name": modelId
-			},
-			"ExtensionSchema": {}
-		}
-	};
-
-	return xmlBuilder.buildObject(model);
-}*/
 
 function parseXmlString(xmlString, options) {
 	return new Promise((resolve, reject) => {
@@ -494,7 +473,7 @@ bcf.getBCFZipReadStream = function(account, model, issues, unit) {
 
 	return Promise.all(bcfPromises).then(() => {
 		zip.finalize();
-		return Promise.resolve(zip);
+		return zip;
 	});
 };
 
