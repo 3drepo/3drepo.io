@@ -559,7 +559,7 @@ class Ticket {
 		return viewpoint;
 	}
 
-	async getList(account, model, branch, revision, ids, convertCoords) {
+	async getList(account, model, branch, revision, ids, convertCoords, updatedSince) {
 		const projection = {
 			extras: 0,
 			"comments": 0,
@@ -589,6 +589,8 @@ class Ticket {
 			)
 		]);
 
+		const results = [];
+
 		tickets.forEach(ticket => {
 			if (convertCoords) {
 				this.toDirectXCoords(ticket);
@@ -596,9 +598,14 @@ class Ticket {
 
 			const timestamp =  lastUpdated.find(updatedTimestamp =>  utils.uuidToString(updatedTimestamp._id) === ticket._id);
 			ticket.lastUpdated =  (timestamp || {}).lastUpdated || ticket.created;
+
+			if(!updatedSince || updatedSince && ticket.lastUpdated >= updatedSince) {
+				results.push(ticket);
+			}
+
 		});
 
-		return tickets;
+		return results;
 	}
 
 	async getReport(account, model, rid, ids, res, reportGen) {
