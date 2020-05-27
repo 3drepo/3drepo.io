@@ -20,6 +20,7 @@ import styled from 'styled-components';
 import { COLOR } from '../../../../../../../styles';
 import { Image as ImageComponent } from '../../../../../image';
 import { UserIndicator } from '../userMarker/userMarker.styles';
+import { Reference } from './issueReference/issueReference.styles';
 
 export const Blockquote = styled.blockquote`
 	color: ${COLOR.BLACK_40};
@@ -30,7 +31,7 @@ export const Blockquote = styled.blockquote`
 	margin-bottom: 14px;
 	padding-left: 10px;
 
-	a {
+	a, ${Reference} {
 		pointer-events: none;
 		cursor: default;
 		color: inherit;

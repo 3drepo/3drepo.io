@@ -27,7 +27,7 @@ export const Link = styled(RouterLink)`
 	color: ${COLOR.VIVID_NAVY};
 `;
 
-export const Reference = styled.a`
+export const Reference = styled.span`
 	font-size: inherit;
 	color: ${COLOR.VIVID_NAVY};
 	text-decoration: underline;

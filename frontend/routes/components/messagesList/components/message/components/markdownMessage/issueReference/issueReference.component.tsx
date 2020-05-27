@@ -36,7 +36,11 @@ const ReferenceLink = ({ onPopoverOpen, onPopoverClose, onCardChange, children, 
 	<>
 		{renderWhenTrueOtherwise(
 			() => (
-				<Reference onClick={onCardChange}>
+				<Reference
+					onClick={onCardChange}
+					onMouseEnter={onPopoverOpen}
+					onMouseLeave={onPopoverClose}
+				>
 					{children}
 				</Reference>
 			),
