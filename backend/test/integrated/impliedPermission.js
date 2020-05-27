@@ -250,11 +250,7 @@ describe("Implied permission::", function () {
 			agent
 				.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}`)
 				.send({  status: "open" })
-				.expect(200, function(err, res) {
-					console.log(err);
-					console.log(res);
-					done(err);
-				});
+				.expect(200 , done);
 		});
 
 		it("can delete model", function(done) {
@@ -577,11 +573,7 @@ describe("Implied permission::", function () {
 			agent
 				.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}`)
 				.send({  status: "open" })
-				.expect(200, function(err, res) {
-					console.log(err);
-					console.log(res);
-					done(err);
-				});
+				.expect(200 , done);
 		});
 
 		it("cannot edit issue in other model", function(done) {

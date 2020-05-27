@@ -482,11 +482,7 @@ describe("Risks", function () {
 				function(done) {
 					agent.patch(`/${username}/${model}/risks/${riskId}`)
 						.send(likelihood)
-						.expect(200, function(err, res) {
-							console.log(err);
-							console.log(res);
-							done(err);
-						});
+						.expect(200, done);
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`)
@@ -517,11 +513,7 @@ describe("Risks", function () {
 				function(done) {
 					agent.patch(`/${username}/${model}/risks/${riskId}`)
 						.send(consequence)
-						.expect(200, function(err, res) {
-							console.log(err);
-							console.log(res);
-							done(err);
-						});
+						.expect(200, done);
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`)

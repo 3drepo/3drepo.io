@@ -271,7 +271,9 @@ class Ticket {
 		const _id = utils.stringToUUID(id);
 
 		const tickets = await this.getTicketsCollection(account, model);
-		await tickets.update({ _id }, { $set: data });
+		if (Object.keys(data).length > 0) {
+			await tickets.update({ _id }, { $set: data });
+		}
 
 		// 7. Return the updated data and the old ticket
 		const updatedTicket = this.clean(account, model, { ...oldTicket, ...data });
