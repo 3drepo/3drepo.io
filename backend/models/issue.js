@@ -117,17 +117,6 @@ class Issue extends Ticket {
 		return issues;
 	}
 
-	updateFromBCF(dbCol, issueToUpdate, changeSet) {
-		return db.getCollection(dbCol.account, dbCol.model + ".issues").then((_dbCol) => {
-			return _dbCol.update({_id: utils.stringToUUID(issueToUpdate._id)}, {$set: changeSet}).then(() => {
-				const sessionId = issueToUpdate.sessionId;
-				const updatedIssue = this.clean(dbCol.account, dbCol.model, issueToUpdate);
-				ChatEvent.issueChanged(sessionId, dbCol.account, dbCol.model, updatedIssue._id, updatedIssue);
-				return updatedIssue;
-			});
-		});
-	}
-
 	async onBeforeUpdate(data, oldIssue, userPermissions, systemComments) {
 		// 2.6 if the user is trying to change the status and it doesnt have the necessary permissions throw a ISSUE_UPDATE_PERMISSION_DECLINED
 		if (data.status && data.status !== oldIssue.status) {
