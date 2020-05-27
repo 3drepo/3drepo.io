@@ -954,7 +954,8 @@ function readBCF(account, model, requester, ifcToModelMap, dataBuffer, settings)
 					const viewpoints = await parseViewpoints(utils.uuidToString(issue._id), files[guid], viewpointsData);
 					const vpGuids = Object.keys(viewpoints);
 
-					vpGuids.forEach(async vpGuid => {
+					for (let vpGuidIdx = 0; vpGuidIdx < vpGuids.length; vpGuidIdx++) {
+						const vpGuid = vpGuids[vpGuidIdx];
 						if (!viewpoints[vpGuid].viewpointXml) {
 							return;
 						}
@@ -1010,8 +1011,7 @@ function readBCF(account, model, requester, ifcToModelMap, dataBuffer, settings)
 							vp = {...vp, ...parseViewpointComponents(groupDbCol, _.get(vpXML, "VisualizationInfo.Components"), settings.federate, issue.name, ifcToModelMap)};
 						}
 						issue.viewpoints.push(vp);
-
-					});
+					}
 
 					if (viewpoints[vpGuids[0]].snapshot) {
 						// take the first screenshot as thumbnail
