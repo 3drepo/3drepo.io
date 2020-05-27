@@ -21,7 +21,7 @@ const _ = require("lodash");
 const archiver = require("archiver");
 const moment = require("moment");
 const xml2js = require("xml2js");
-const yauzl = require("yauzl");
+const yauzl = require("yauzl-promise");
 
 const C = require("../constants");
 const systemLogger = require("../logger.js").systemLogger;
@@ -859,184 +859,169 @@ function parseViewpointExtras(vpXML, viewpoint, snapshot) {
 	return extras;
 }
 
-function readBCF(account, model, requester, ifcToModelMap, dataBuffer, settings) {
-	return new Promise((resolve, reject) => {
+const processZipFileEntry = async(entry, files) => {
+	// read each item zip file, put them in files object
+	let paths;
 
-		const files = {};
-		const promises = [];
+	if (entry.fileName.indexOf("\\") !== -1) {
+		// give tolerance to file path using \ instead of /
+		paths = entry.fileName.split("\\");
+	} else {
+		paths = entry.fileName.split("/");
+	}
 
-		yauzl.fromBuffer(dataBuffer, {lazyEntries: true}, function (err, zipfile) {
-			if (err) {
-				return reject(err);
+	const guid = paths[0] && utils.isUUID(paths[0]) && paths[0];
+
+	if (guid && !files[guid]) {
+		files[guid] = {};
+	}
+
+	// if entry is a file and start with guid
+	if (!entry.fileName.endsWith("/") && !entry.fileName.endsWith("\\") && guid) {
+		const rs = await entry.openReadStream();
+		return new Promise((resolve, reject) => {
+
+			const bufs = [];
+
+			rs.on("data", d => bufs.push(d));
+
+			rs.on("end", () => {
+				const buf = Buffer.concat(bufs);
+				files[guid][paths.join("/")] = buf;
+				resolve();
+			});
+
+			rs.on("error", error =>{
+				reject(error);
+			});
+
+		});
+	}
+	return Promise.resolve();
+
+};
+
+async function readBCF(account, model, requester, ifcToModelMap, dataBuffer, settings) {
+
+	const promises = [];
+	const files = {};
+	const zipFile = await yauzl.fromBuffer(dataBuffer, {lazyEntries: true});
+
+	let entry = await zipFile.readEntry();
+	while (entry) {
+		promises.push(processZipFileEntry(entry, files));
+		entry = await zipFile.readEntry();
+	}
+
+	await Promise.all(promises);
+
+	let scale = 1;
+	const unit = _.get(settings, "properties.unit");
+	if (unit === "dm") {
+		scale = 10;
+	} else if (unit === "cm") {
+		scale = 100;
+	} else if (unit === "mm") {
+		scale = 1000;
+	} else if (unit === "ft") {
+		scale = 3.28084;
+	}
+
+	const parsePromises = [];
+
+	const fileGuids = Object.keys(files);
+	for (let i = 0; i < fileGuids.length; i++) {
+		const guid = fileGuids[i];
+		// FIXME - separate?
+		const {issue, viewpointsData} = await parseMarkupBuffer(files[guid][`${guid}/markup.bcf`]);
+		issue._id = utils.stringToUUID(guid);
+
+		const viewpoints = await parseViewpoints(utils.uuidToString(issue._id), files[guid], viewpointsData);
+		const vpGuids = Object.keys(viewpoints);
+
+		for (let vpGuidIdx = 0; vpGuidIdx < vpGuids.length; vpGuidIdx++) {
+			const vpGuid = vpGuids[vpGuidIdx];
+			if (!viewpoints[vpGuid].viewpointXml) {
+				return;
 			}
 
-			zipfile.readEntry();
+			const vpXML = viewpoints[vpGuid].viewpointXml;
 
-			zipfile.on("entry", entry => {
-				// read each item zip file, put them in files object
-				let paths;
+			let vp = {
+				guid: utils.stringToUUID(vpGuid)
+			};
 
-				if (entry.fileName.indexOf("\\") !== -1) {
-					// give tolerance to file path using \ instead of /
-					paths = entry.fileName.split("\\");
-				} else {
-					paths = entry.fileName.split("/");
-				}
+			vp.extras = parseViewpointExtras(vpXML, viewpoints[vpGuid].Viewpoint, viewpoints[vpGuid].Snapshot);
 
-				const guid = paths[0] && utils.isUUID(paths[0]) && paths[0];
+			if (viewpoints[vpGuid].snapshot) {
+				vp.screenshot = {
+					flag: 1,
+					content: viewpoints[vpGuid].snapshot
+				};
+				await View.setExternalScreenshotRef(vp, account, model, "issues");
+			}
 
-				if (guid && !files[guid]) {
-					files[guid] = {};
-				}
+			if (_.get(vpXML, "VisualizationInfo.ClippingPlanes")) {
+				vp.clippingPlanes = parseViewpointClippingPlanes(_.get(vpXML, "VisualizationInfo.ClippingPlanes"), scale);
+			}
 
-				// if entry is a file and start with guid
-				if (!entry.fileName.endsWith("/") && !entry.fileName.endsWith("\\") && guid) {
-					promises.push(new Promise((_resolve, _reject) => {
-						zipfile.openReadStream(entry, (readErr, rs) => {
-							if (readErr) {
-								return _reject(readErr);
-							} else {
-								const bufs = [];
+			if (_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0]")) {
+				vp = {...vp, ...parseViewpointCamera(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0]"), scale)};
+				vp.fov = parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].FieldOfView[0]._")) * Math.PI / 180;
+				vp.type = "perspective";
 
-								rs.on("data", d => bufs.push(d));
+			} else if (_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0]")) {
+				vp = {...vp, ...parseViewpointCamera(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0]"), scale)};
+				vp.fov = 1.8;
+				vp.type = "orthogonal";
+			}
 
-								rs.on("end", () => {
-									const buf = Buffer.concat(bufs);
-									files[guid][paths.join("/")] = buf;
-									_resolve();
-								});
+			if (_.get(vpXML, "VisualizationInfo.Components")) {
+				const groupDbCol = {
+					account: account,
+					model: model
+				};
 
-								rs.on("error", error =>{
-									_reject(error);
-								});
-							}
-						});
-					}));
-				}
+				vp = {...vp, ...parseViewpointComponents(groupDbCol, _.get(vpXML, "VisualizationInfo.Components"), settings.federate, issue.name, ifcToModelMap)};
+			}
+			issue.viewpoints.push(vp);
+		}
 
-				return zipfile.readEntry();
-			});
-
-			zipfile.on("error", error => reject(error));
-
-			zipfile.on("end", async () => {
-
-				// FIXME - separate?
-				await Promise.all(promises);
-
-				let scale = 1;
-				const unit = _.get(settings, "properties.unit");
-				if (unit === "dm") {
-					scale = 10;
-				} else if (unit === "cm") {
-					scale = 100;
-				} else if (unit === "mm") {
-					scale = 1000;
-				} else if (unit === "ft") {
-					scale = 3.28084;
-				}
-
-				const parsePromises = [];
-				// TODO: parse all XML first
-				const fileGuids = Object.keys(files);
-				for (let i = 0; i < fileGuids.length; i++) {
-					const guid = fileGuids[i];
-					// FIXME - separate?
-					const markupData = await parseMarkupBuffer(files[guid][`${guid}/markup.bcf`]);
-					const {issue, viewpointsData} = markupData;
-					issue._id = utils.stringToUUID(guid);
-
-					const viewpoints = await parseViewpoints(utils.uuidToString(issue._id), files[guid], viewpointsData);
-					const vpGuids = Object.keys(viewpoints);
-
-					for (let vpGuidIdx = 0; vpGuidIdx < vpGuids.length; vpGuidIdx++) {
-						const vpGuid = vpGuids[vpGuidIdx];
-						if (!viewpoints[vpGuid].viewpointXml) {
-							return;
-						}
-
-						const vpXML = viewpoints[vpGuid].viewpointXml;
-
-						let vp = {
-							guid: utils.stringToUUID(vpGuid)
-						};
-
-						vp.extras = parseViewpointExtras(vpXML, viewpoints[vpGuid].Viewpoint, viewpoints[vpGuid].Snapshot);
-
-						if (viewpoints[vpGuid].snapshot) {
-							vp.screenshot = {
-								flag: 1,
-								content: viewpoints[vpGuid].snapshot
-							};
-							await View.setExternalScreenshotRef(vp, account, model, "issues");
-						}
-
-						if (_.get(vpXML, "VisualizationInfo.ClippingPlanes")) {
-							vp.clippingPlanes = parseViewpointClippingPlanes(_.get(vpXML, "VisualizationInfo.ClippingPlanes"), scale);
-						}
-
-						if (_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0]")) {
-							vp = {...vp, ...parseViewpointCamera(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0]"), scale)};
-							vp.fov = parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].FieldOfView[0]._")) * Math.PI / 180;
-							vp.type = "perspective";
-
-						} else if (_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0]")) {
-							vp = {...vp, ...parseViewpointCamera(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0]"), scale)};
-							vp.fov = 1.8;
-							vp.type = "orthogonal";
-						}
-
-						if (_.get(vpXML, "VisualizationInfo.Components")) {
-							const groupDbCol = {
-								account: account,
-								model: model
-							};
-
-							vp = {...vp, ...parseViewpointComponents(groupDbCol, _.get(vpXML, "VisualizationInfo.Components"), settings.federate, issue.name, ifcToModelMap)};
-						}
-						issue.viewpoints.push(vp);
-					}
-
-					if (viewpoints[vpGuids[0]].snapshot) {
-						// take the first screenshot as thumbnail
-						await utils.resizeAndCropScreenshot(viewpoints[vpGuids[0]].snapshot, 120, 120, true).then((image) => {
-							if (image) {
-								issue.thumbnail = {
-									flag: 1,
-									content: image
-								};
-							}
-						}).catch(resizeErr => {
-							systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
-								account,
-								model,
-								issueId: utils.uuidToString(issue._id),
-								viewpointId: vpGuids[0],
-								err: resizeErr
-							});
-						});
-					}
-
-					// System notification of BCF import
-					const currentTS = (new Date()).getTime();
-					const bcfImportNotification = {
-						guid: utils.generateUUID(),
-						created: currentTS,
-						action: {property: "bcf_import"},
-						owner: requester.user
+		if (viewpoints[vpGuids[0]].snapshot) {
+			// take the first screenshot as thumbnail
+			await utils.resizeAndCropScreenshot(viewpoints[vpGuids[0]].snapshot, 120, 120, true).then((image) => {
+				if (image) {
+					issue.thumbnail = {
+						flag: 1,
+						content: image
 					};
-
-					issue.comments.push(bcfImportNotification);
-
-					parsePromises.push(issue);
 				}
-
-				const parsedData = await Promise.all(parsePromises);
-
-				resolve(parsedData);
+			}).catch(resizeErr => {
+				systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
+					account,
+					model,
+					issueId: utils.uuidToString(issue._id),
+					viewpointId: vpGuids[0],
+					err: resizeErr
+				});
 			});
-		});
-	});
+		}
+
+		// System notification of BCF import
+		const currentTS = (new Date()).getTime();
+		const bcfImportNotification = {
+			guid: utils.generateUUID(),
+			created: currentTS,
+			action: {property: "bcf_import"},
+			owner: requester.user
+		};
+
+		issue.comments.push(bcfImportNotification);
+
+		parsePromises.push(issue);
+	}
+
+	return await Promise.all(parsePromises);
 }
 
 bcf.importBCF = function(requester, account, model, dataBuffer, settings) {
