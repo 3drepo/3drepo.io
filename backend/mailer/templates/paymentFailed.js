@@ -16,18 +16,16 @@
  */
 
 "use strict";
-const html = data => `
-	Hi there,<br>
-	<br>
-	Your payment of ${data.amount} is failed. Please make sure you have enough credits in your PayPal account and have
+const { basicEmailTemplate } = require("./basicEmailTemplate");
+
+const html = ({ amount }) => basicEmailTemplate(`
+	Your payment of <b>${amount}</b> has failed. Please make sure you have enough credits in your PayPal account and have
 	your account verified.
 	<br><br> We will reattempt to collect your recurring payments again within five days.
-	<br><br>
-	Best,<br>
-	3D Repo
-`;
+	<br>
+`);
 
-const subject = "Your payment to 3D Repo is failed";
+const subject = "Your payment to 3D Repo has failed";
 
 module.exports =  {
 	html: html,
