@@ -843,6 +843,22 @@ function parseViewpointCamera(camera, scale) {
 	return {up, view_dir, position};
 }
 
+function parseViewpointExtras(vpXML, viewpoint, snapshot) {
+	const extras = {};
+
+	extras.Spaces = _.get(vpXML, "VisualizationInfo.Spaces");
+	extras.SpaceBoundaries = _.get(vpXML, "VisualizationInfo.SpaceBoundaries");
+	extras.Openings = _.get(vpXML, "VisualizationInfo.Openings");
+	extras.OrthogonalCamera = _.get(vpXML, "VisualizationInfo.OrthogonalCamera");
+	extras.Lines = _.get(vpXML, "VisualizationInfo.Lines");
+	extras.Bitmap = _.get(vpXML, "VisualizationInfo.Bitmap");
+	extras.Index = viewpoint;
+	extras.Snapshot = snapshot;
+	!_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0]") && (extras._noPerspective = true);
+
+	return extras;
+}
+
 function readBCF(account, model, requester, ifcToModelMap, dataBuffer, settings) {
 	return new Promise((resolve, reject) => {
 
@@ -939,24 +955,13 @@ function readBCF(account, model, requester, ifcToModelMap, dataBuffer, settings)
 							return;
 						}
 
-						const extras = {};
 						const vpXML = viewpoints[vpGuid].viewpointXml;
 
-						// FIXME - separate?
-						extras.Spaces = _.get(vpXML, "VisualizationInfo.Spaces");
-						extras.SpaceBoundaries = _.get(vpXML, "VisualizationInfo.SpaceBoundaries");
-						extras.Openings = _.get(vpXML, "VisualizationInfo.Openings");
-						extras.OrthogonalCamera = _.get(vpXML, "VisualizationInfo.OrthogonalCamera");
-						extras.Lines = _.get(vpXML, "VisualizationInfo.Lines");
-						extras.Bitmap = _.get(vpXML, "VisualizationInfo.Bitmap");
-						extras.Index = viewpoints[vpGuid].Viewpoint;
-						extras.Snapshot = viewpoints[vpGuid].Snapshot;
-						!_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0]") && (extras._noPerspective = true);
-
 						let vp = {
-							guid: utils.stringToUUID(vpGuid),
-							extras: extras
+							guid: utils.stringToUUID(vpGuid)
 						};
+
+						vp.extras = parseViewpointExtras(vpXML, viewpoints[vpGuid].Viewpoint, viewpoints[vpGuid].Snapshot);
 
 						if (viewpoints[vpGuid].snapshot) {
 							vp.screenshot = {
