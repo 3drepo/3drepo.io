@@ -18,6 +18,7 @@
 import { isEmpty } from 'lodash';
 import React from 'react';
 
+import { VIEWER_EVENTS } from '../../constants/viewer';
 import { VIEWER_LEFT_PANELS, VIEWER_PANELS } from '../../constants/viewerGui';
 import { renderWhenTrue } from '../../helpers/rendering';
 import { MultiSelect } from '../../services/viewer/multiSelect';
@@ -64,6 +65,7 @@ interface IProps {
 	resetPanelsStates: () => void;
 	resetModel: () => void;
 	setPanelVisibility: (panelName, visibility?) => void;
+	removeMeasurement: (uuid) => void;
 }
 
 interface IState {
@@ -102,6 +104,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 
 		MultiSelect.initKeyWatchers();
 		this.props.fetchData(params.teamspace, params.model);
+		this.toggleViewerListeners(true);
 	}
 
 	public componentDidUpdate(prevProps: IProps, prevState: IState) {
@@ -137,7 +140,17 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		this.props.resetPanelsStates();
 		this.props.viewer.destroy();
 		this.props.resetModel();
+		this.toggleViewerListeners(false);
 	}
+
+	private toggleViewerListeners = (enabled: boolean) => {
+		const resolver = enabled ? 'on' : 'off';
+		const { viewer } = this.props;
+
+		viewer[resolver](VIEWER_EVENTS.MEASUREMENT_REMOVED, this.handleMeasureRemoved);
+	}
+
+	private handleMeasureRemoved = (measurementId) => this.props.removeMeasurement(measurementId);
 
 	public render() {
 		const { leftPanels, rightPanels, isFocusMode, viewer } = this.props;
