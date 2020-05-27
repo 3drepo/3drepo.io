@@ -31,6 +31,7 @@ const utils = require("../utils");
 const FileRef = require("./fileRef");
 const Group = require("./group");
 const Meta = require("./meta");
+const View = require("./viewpoint");
 
 const statusEnum = C.ISSUE_STATUS;
 
@@ -953,7 +954,7 @@ function readBCF(account, model, requester, ifcToModelMap, dataBuffer, settings)
 					const viewpoints = await parseViewpoints(utils.uuidToString(issue._id), files[guid], viewpointsData);
 					const vpGuids = Object.keys(viewpoints);
 
-					vpGuids.forEach(vpGuid => {
+					vpGuids.forEach(async vpGuid => {
 						if (!viewpoints[vpGuid].viewpointXml) {
 							return;
 						}
@@ -972,17 +973,18 @@ function readBCF(account, model, requester, ifcToModelMap, dataBuffer, settings)
 						extras.Snapshot = viewpoints[vpGuid].Snapshot;
 						!_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0]") && (extras._noPerspective = true);
 
-						const screenshotObj = viewpoints[vpGuid].snapshot ? {
-							flag: 1,
-							content: viewpoints[vpGuid].snapshot
-						} : undefined;
-
 						let vp = {
 							guid: utils.stringToUUID(vpGuid),
-							extras: extras,
-							screenshot: screenshotObj
-
+							extras: extras
 						};
+
+						if (viewpoints[vpGuid].snapshot) {
+							vp.screenshot = {
+								flag: 1,
+								content: viewpoints[vpGuid].snapshot
+							};
+							await View.setExternalScreenshotRef(vp, account, model, "issues");
+						}
 
 						if (_.get(vpXML, "VisualizationInfo.ClippingPlanes")) {
 							vp.clippingPlanes = parseViewpointClippingPlanes(_.get(vpXML, "VisualizationInfo.ClippingPlanes"), scale);
