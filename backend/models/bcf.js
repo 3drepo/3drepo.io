@@ -951,10 +951,7 @@ async function readBCF(account, model, requester, ifcToModelMap, dataBuffer, set
 			}
 
 			if (viewpoints[vpGuid].snapshot) {
-				vp.screenshot = {
-					flag: 1,
-					content: viewpoints[vpGuid].snapshot
-				};
+				vp.screenshot = viewpoints[vpGuid].snapshot;
 				await View.setExternalScreenshotRef(vp, account, model, "issues");
 			}
 
