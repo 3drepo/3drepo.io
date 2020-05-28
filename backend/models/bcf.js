@@ -639,9 +639,9 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 	const groupPromises = [];
 
 	for (let componentsIdx = 0; componentsIdx < vpComponents.length; componentsIdx++) {
-		// let highlightedObjectsMap = [];
+		let selectionObjects;
 
-		Object.keys(vpComponents[componentsIdx]).forEach((componentType) => {
+		Object.keys(vpComponents[componentsIdx]).sort().forEach((componentType) => {
 			if ("ViewSetupHints" === componentType) {
 				// TODO: Full ViewSetupHints support -
 				// SpaceVisible should correspond to !hideIfc
@@ -666,13 +666,13 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 						groupData.color = [255, 0, 0];
 						groupData.objects = componentIfcs ? compileGroupObjects(groupDbCol.account, componentIfcs) : [];
 
+						selectionObjects = groupData.objects;
+
 						groupPromises.push(
 							Group.createGroup(groupDbCol, undefined, groupData).then(group => {
 								return vp.highlighted_group_id = utils.stringToUUID(group._id);
 							})
 						);
-
-						// highlightedObjectsMap = groupData.objects.reduce((acc, val) => acc.concat(val.ifc_guids), []);
 						break;
 					}
 					case "Coloring": {
@@ -691,11 +691,11 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 								groupData.objects = componentIfcs ? compileGroupObjects(groupDbCol.account, componentIfcs) : [];
 
 								// TODO - handle colour import
-								groupPromises.push(
-									Group.createGroup(groupDbCol, undefined, groupData).then(group => {
-										return vp.highlighted_group_id = utils.stringToUUID(group._id);
-									})
-								);
+								// groupPromises.push(
+								// 	Group.createGroup(groupDbCol, undefined, groupData).then(group => {
+								// 		return vp.highlighted_group_id = utils.stringToUUID(group._id);
+								// 	})
+								// );
 							}
 						}
 						break;
@@ -725,11 +725,9 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 							if (componentsToShow && componentsToShow.length > 0) {
 								groupData.objects = compileGroupObjects(groupDbCol.account, componentsToShow);
 
-								/*
-								if (selectedGroup) {
-									groupData.objects = groupData.objects.concat(selectedGroup.objects);
+								if (selectionObjects) {
+									groupData.objects = groupData.objects.concat(selectionObjects);
 								}
-								*/
 
 								groupPromises.push(
 									Group.createGroup(groupDbCol, undefined, groupData).then(group => {
