@@ -237,13 +237,13 @@ class Ticket {
 			}
 
 			// if a field have the same value shouldnt update the property
-			if (_.isEqual(field[field], data[field])) {
+			if (_.isEqual(oldTicket[field], data[field])) {
 				delete data[field];
 				return;
 			}
 
-			// update of extras must not create a system comment
-			if (field === "extras") {
+			// update of extras, comments, viewpoints must not create a system comment
+			if (field === "extras" || field === "comments" || field === "viewpoints") {
 				return;
 			}
 
@@ -271,7 +271,9 @@ class Ticket {
 		const _id = utils.stringToUUID(id);
 
 		const tickets = await this.getTicketsCollection(account, model);
-		await tickets.update({ _id }, { $set: data });
+		if (Object.keys(data).length > 0) {
+			await tickets.update({ _id }, { $set: data });
+		}
 
 		// 7. Return the updated data and the old ticket
 		const updatedTicket = this.clean(account, model, { ...oldTicket, ...data });

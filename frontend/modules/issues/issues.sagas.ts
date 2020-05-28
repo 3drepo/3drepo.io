@@ -267,7 +267,7 @@ function* importBcf({ teamspace, modelId, file, revision }) {
 		yield put(IssuesActions.fetchIssues(teamspace, modelId, revision));
 		yield put(SnackbarActions.show('BCF file uploaded'));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('import', 'BCF', error));
+		yield put(DialogActions.showEndpointErrorDialog('import', 'BCF', error));
 	}
 
 	yield put(IssuesActions.toggleIsImportingBcf(false));
