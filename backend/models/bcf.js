@@ -639,7 +639,9 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 	const groupPromises = [];
 
 	for (let componentsIdx = 0; componentsIdx < vpComponents.length; componentsIdx++) {
-		let selectionObjects;
+		let selectionObjects = [];
+		let shownObjects = [];
+		let hiddenObjects = [];
 
 		Object.keys(vpComponents[componentsIdx]).sort().forEach((componentType) => {
 			if ("ViewSetupHints" === componentType) {
@@ -647,10 +649,6 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 				// SpaceVisible should correspond to !hideIfc
 				vp.extras.ViewSetupHints = vpComponents[componentsIdx][componentType];
 			} else {
-				const groupData = {
-					name: issueName
-				};
-
 				switch (componentType) {
 					case "Selection": {
 						let componentIfcs;
@@ -663,22 +661,16 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 							}
 						}
 
-						groupData.color = [255, 0, 0];
-						groupData.objects = componentIfcs ? compileGroupObjects(groupDbCol.account, componentIfcs) : [];
-
-						selectionObjects = groupData.objects;
-
-						groupPromises.push(
-							Group.createGroup(groupDbCol, undefined, groupData).then(group => {
-								return vp.highlighted_group_id = utils.stringToUUID(group._id);
-							})
-						);
+						selectionObjects = componentIfcs ?
+							selectionObjects.concat(compileGroupObjects(groupDbCol.account, componentIfcs)) :
+							selectionObjects;
 						break;
 					}
 					case "Coloring": {
 						for (let i = 0; i < vpComponents[componentsIdx][componentType].length; i++) {
 							for (let j = 0; vpComponents[componentsIdx][componentType][i].Color && j < vpComponents[componentsIdx][componentType][i].Color.length; j++) {
-								groupData.color = vpComponents[componentsIdx][componentType][i].Color[j]["@"].Color;
+								// TODO: handle colour import
+								// groupData.color = vpComponents[componentsIdx][componentType][i].Color[j]["@"].Color;
 
 								let componentIfcs;
 
@@ -688,14 +680,9 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 									);
 								}
 
-								groupData.objects = componentIfcs ? compileGroupObjects(groupDbCol.account, componentIfcs) : [];
-
-								// TODO - handle colour import
-								// groupPromises.push(
-								// 	Group.createGroup(groupDbCol, undefined, groupData).then(group => {
-								// 		return vp.highlighted_group_id = utils.stringToUUID(group._id);
-								// 	})
-								// );
+								selectionObjects = componentIfcs ?
+									selectionObjects.concat(compileGroupObjects(groupDbCol.account, componentIfcs)) :
+									selectionObjects;
 							}
 						}
 						break;
@@ -720,28 +707,10 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 							const componentsToShow = defaultVisibility ? componentIfcs : exceptionIfcs;
 							const componentsToHide = defaultVisibility ? exceptionIfcs : componentIfcs;
 
-							groupData.color = [255, 0, 0];
-
 							if (componentsToShow && componentsToShow.length > 0) {
-								groupData.objects = compileGroupObjects(groupDbCol.account, componentsToShow);
-
-								if (selectionObjects) {
-									groupData.objects = groupData.objects.concat(selectionObjects);
-								}
-
-								groupPromises.push(
-									Group.createGroup(groupDbCol, undefined, groupData).then(group => {
-										return vp.shown_group_id = utils.stringToUUID(group._id);
-									})
-								);
+								shownObjects = selectionObjects.concat(compileGroupObjects(groupDbCol.account, componentsToShow));
 							} else if (componentsToHide && componentsToHide.length > 0) {
-								groupData.objects = compileGroupObjects(groupDbCol.account, componentsToHide);
-
-								groupPromises.push(
-									Group.createGroup(groupDbCol, undefined, groupData).then(group => {
-										return vp.hidden_group_id = utils.stringToUUID(group._id);
-									})
-								);
+								hiddenObjects = compileGroupObjects(groupDbCol.account, componentsToHide);
 							}
 						}
 						break;
@@ -749,6 +718,48 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 				}
 			}
 		});
+
+		if (selectionObjects && selectionObjects.length > 0) {
+			const groupData = {
+				name: issueName,
+				color: [255, 0, 0],
+				objects: selectionObjects
+			};
+
+			groupPromises.push(
+				Group.createGroup(groupDbCol, undefined, groupData).then(group => {
+					return vp.highlighted_group_id = utils.stringToUUID(group._id);
+				})
+			);
+		}
+
+		if (shownObjects && shownObjects.length > 0) {
+			const groupData = {
+				name: issueName,
+				color: [255, 0, 0],
+				objects: shownObjects
+			};
+
+			groupPromises.push(
+				Group.createGroup(groupDbCol, undefined, groupData).then(group => {
+					return vp.shown_group_id = utils.stringToUUID(group._id);
+				})
+			);
+		}
+
+		if (hiddenObjects && hiddenObjects.length > 0) {
+			const groupData = {
+				name: issueName,
+				color: [255, 0, 0],
+				objects: hiddenObjects
+			};
+
+			groupPromises.push(
+				Group.createGroup(groupDbCol, undefined, groupData).then(group => {
+					return vp.hidden_group_id = utils.stringToUUID(group._id);
+				})
+			);
+		}
 	}
 
 	await Promise.all(groupPromises);
