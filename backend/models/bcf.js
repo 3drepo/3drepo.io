@@ -652,7 +652,7 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 				};
 
 				switch (componentType) {
-					case "Selection":
+					case "Selection": {
 						let componentIfcs;
 
 						for (let i = 0; i < vpComponents[componentsIdx][componentType].length; i++) {
@@ -674,20 +674,21 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 
 						// highlightedObjectsMap = groupData.objects.reduce((acc, val) => acc.concat(val.ifc_guids), []);
 						break;
-					case "Coloring":
+					}
+					case "Coloring": {
 						for (let i = 0; i < vpComponents[componentsIdx][componentType].length; i++) {
 							for (let j = 0; vpComponents[componentsIdx][componentType][i].Color && j < vpComponents[componentsIdx][componentType][i].Color.length; j++) {
 								groupData.color = vpComponents[componentsIdx][componentType][i].Color[j]["@"].Color;
 
-								let colorComponentIfcs;
+								let componentIfcs;
 
 								if (vpComponents[componentsIdx][componentType][i].Color[j].Component) {
-									colorComponentIfcs = vpComponents[componentsIdx][componentType][i].Color[j].Component.map(component =>
+									componentIfcs = vpComponents[componentsIdx][componentType][i].Color[j].Component.map(component =>
 										parseViewpointComponentIfc(groupDbCol.model, component, ifcToModelMap, isFederation)
 									);
 								}
 
-								groupData.objects = colorComponentIfcs ? compileGroupObjects(groupDbCol.account, colorComponentIfcs) : [];
+								groupData.objects = componentIfcs ? compileGroupObjects(groupDbCol.account, componentIfcs) : [];
 
 								// TODO - handle colour import
 								groupPromises.push(
@@ -698,14 +699,15 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 							}
 						}
 						break;
-					case "Visibility":
+					}
+					case "Visibility": {
 						for (let i = 0; i < vpComponents[componentsIdx][componentType].length; i++) {
 							const defaultVisibility = JSON.parse(vpComponents[componentsIdx][componentType][i]["@"].DefaultVisibility);
-							let visibilityComponentIfcs;
+							let componentIfcs;
 							let exceptionIfcs;
 
 							if (vpComponents[componentsIdx][componentType][i].Component) {
-								visibilityComponentIfcs = vpComponents[componentsIdx][componentType][i].Component.map(component =>
+								componentIfcs = vpComponents[componentsIdx][componentType][i].Component.map(component =>
 									parseViewpointComponentIfc(groupDbCol.model, component, ifcToModelMap, isFederation)
 								);
 							}
@@ -715,8 +717,8 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 								);
 							}
 
-							const componentsToShow = defaultVisibility ? visibilityComponentIfcs : exceptionIfcs;
-							const componentsToHide = defaultVisibility ? exceptionIfcs : visibilityComponentIfcs;
+							const componentsToShow = defaultVisibility ? componentIfcs : exceptionIfcs;
+							const componentsToHide = defaultVisibility ? exceptionIfcs : componentIfcs;
 
 							groupData.color = [255, 0, 0];
 
@@ -745,6 +747,7 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 							}
 						}
 						break;
+					}
 				}
 			}
 		});
