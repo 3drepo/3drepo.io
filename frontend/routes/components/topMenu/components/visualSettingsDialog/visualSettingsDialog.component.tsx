@@ -21,6 +21,7 @@ import { isEqual } from 'lodash';
 import * as React from 'react';
 import * as Yup from 'yup';
 import { DEFAULT_SETTINGS } from '../../../../../constants/viewer';
+import { IS_FIREFOX } from '../../../../../helpers/browser';
 import { schema } from '../../../../../services/validation';
 import { ColorPicker } from '../../../colorPicker/colorPicker.component';
 import { SelectField } from '../../../selectField/selectField.component';
@@ -103,19 +104,21 @@ const AdvancedSettings = (props) => {
 					<Switch checked={field.value} {...field} value="true" color="secondary" />
 				)} />
 			</FormListItem>
-			<FormListItem>
-				Memory for Unity
-				<Field name="memory" render={ ({ field, form }) => {
-					return (
-					<ErrorTooltip title={form.errors.memory || ''} placement="bottom-end">
-					<ShortInput
-						error={Boolean(form.errors.memory)}
-						{...field}
-						endAdornment={<InputAdornment position="end">MB</InputAdornment>} />
-					</ErrorTooltip>
-					);
-				}} />
-			</FormListItem>
+			{!IS_FIREFOX &&
+				<FormListItem>
+					Memory for Unity
+					<Field name="memory" render={ ({ field, form }) => {
+						return (
+						<ErrorTooltip title={form.errors.memory || ''} placement="bottom-end">
+						<ShortInput
+							error={Boolean(form.errors.memory)}
+							{...field}
+							endAdornment={<InputAdornment position="end">MB</InputAdornment>} />
+						</ErrorTooltip>
+						);
+					}} />
+				</FormListItem>
+			}
 			<FormListItem>
 				Number of Caching Threads
 				<Field name="numCacheThreads" render={ ({ field, form }) => {

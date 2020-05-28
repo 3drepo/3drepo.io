@@ -18,6 +18,8 @@ declare var Module;
 declare var SendMessage;
 declare var UnityLoader;
 
+import { IS_FIREFOX } from '../helpers/browser';
+
 export class UnityUtil {
 	/** @hidden */
 	private static errorCallback: any;
@@ -148,7 +150,11 @@ export class UnityUtil {
 				window.Module = {};
 			}
 			unitySettings.Module = (window as any).Module;
-			unitySettings.Module.TOTAL_MEMORY = memory;
+
+			if (!IS_FIREFOX) {
+				unitySettings.Module.TOTAL_MEMORY = memory;
+			}
+
 			UnityUtil.unityInstance = UnityLoader.instantiate(
 				divId,
 				unityConfig,
