@@ -538,9 +538,8 @@ function compileGroupObjects(account, componentIfcs) {
 	const objects = [];
 	const modelIndexes = {};
 
-	console.log(componentIfcs);
 	for (let i = 0; i < componentIfcs.length; i++) {
-		if (!modelIndexes[componentIfcs[i].model]) {
+		if (modelIndexes[componentIfcs[i].model] === undefined) {
 			modelIndexes[componentIfcs[i].model] = Object.keys(modelIndexes).length;
 
 			objects.push({
@@ -548,8 +547,10 @@ function compileGroupObjects(account, componentIfcs) {
 				model: componentIfcs[i].model,
 				ifc_guids: []
 			});
+			console.log(modelIndexes);
 		}
 
+		console.log(objects);
 		objects[modelIndexes[componentIfcs[i].model]].ifc_guids.push(componentIfcs[i].ifcGuid);
 	}
 
@@ -714,22 +715,22 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 					name: issueName
 				};
 
-				let componentIfcs;
-
-				for (let i = 0; i < vpComponents[componentsIdx][componentType].length; i++) {
-					if (vpComponents[componentsIdx][componentType][i].Component) {
-						componentIfcs = vpComponents[componentsIdx][componentType][i].Component.map(component =>
-							parseViewpointComponentIfc(groupDbCol.model, component, ifcToModelMap, isFederation)
-						);
-					}
-				}
+				console.log(vpComponents[componentsIdx][componentType]);
 
 				switch (componentType) {
 					case "Selection":
+						let componentIfcs;
+
+						for (let i = 0; i < vpComponents[componentsIdx][componentType].length; i++) {
+							if (vpComponents[componentsIdx][componentType][i].Component) {
+								componentIfcs = vpComponents[componentsIdx][componentType][i].Component.map(component =>
+									parseViewpointComponentIfc(groupDbCol.model, component, ifcToModelMap, isFederation)
+								);
+							}
+						}
+
 						groupData.color = [255, 0, 0];
 						groupData.objects = componentIfcs ? compileGroupObjects(groupDbCol.account, componentIfcs) : [];
-
-						console.log(groupData);
 
 						groupPromises.push(
 							Group.createGroup(groupDbCol, undefined, groupData).then(group => {
@@ -742,6 +743,49 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 					case "Coloring":
 						break;
 					case "Visibility":
+						for (let i = 0; i < vpComponents[componentsIdx][componentType].length; i++) {
+							const defaultVisibility = JSON.parse(vpComponents[componentsIdx][componentType][i]["@"].DefaultVisibility);
+							let componentIfcs;
+							let exceptionIfcs;
+
+							if (vpComponents[componentsIdx][componentType][i].Component) {
+								componentIfcs = vpComponents[componentsIdx][componentType][i].Component.map(component =>
+									parseViewpointComponentIfc(groupDbCol.model, component, ifcToModelMap, isFederation)
+								);
+							}
+							if (vpComponents[componentsIdx][componentType][i].Exceptions) {
+								exceptionIfcs = vpComponents[componentsIdx][componentType][i].Exceptions[0].Component.map(component =>
+									parseViewpointComponentIfc(groupDbCol.model, component, ifcToModelMap, isFederation)
+								);
+							}
+
+							const componentsToShow = defaultVisibility ? componentIfcs : exceptionIfcs;
+							const componentsToHide = defaultVisibility ? exceptionIfcs : componentIfcs;
+
+							groupData.color = [255, 0, 0];
+
+							if (componentsToShow && componentsToShow.length > 0) {
+								groupData.objects = compileGroupObjects(groupDbCol.account, componentsToShow);
+
+								/*if (selectedGroup) {
+									groupData.objects = groupData.objects.concat(selectedGroup.objects);
+								}*/
+
+								groupPromises.push(
+									Group.createGroup(groupDbCol, undefined, groupData).then(group => {
+										vp.shown_group_id = utils.stringToUUID(group._id);
+									})
+								);
+							} else if (componentsToHide && componentsToHide.length > 0) {
+								groupData.objects = compileGroupObjects(groupDbCol.account, componentsToHide);
+
+								groupPromises.push(
+									Group.createGroup(groupDbCol, undefined, groupData).then(group => {
+										vp.hidden_group_id = utils.stringToUUID(group._id);
+									})
+								);
+							}
+						}
 						break;
 				}
 			}
@@ -769,88 +813,6 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 						);
 					}
 				}
-			}
-		}
-
-		if (vpComponents[componentsIdx].Visibility) {
-			let hiddenGroupObject;
-			let shownGroupObject;
-
-			for (let j = 0; j < vpComponents[componentsIdx].Visibility.length; j++) {
-				const defaultVisibility = JSON.parse(vpComponents[componentsIdx].Visibility[j]["@"].DefaultVisibility);
-				let componentsToHide = [];
-				let componentsToShow = [];
-
-				if (defaultVisibility) {
-					componentsToShow = vpComponents[componentsIdx].Visibility[j].Component;
-					if (vpComponents[componentsIdx].Visibility[j].Exceptions) {
-						componentsToHide = vpComponents[componentsIdx].Visibility[j].Exceptions[0].Component;
-					}
-				} else {
-					componentsToHide = vpComponents[componentsIdx].Visibility[j].Component;
-					if (vpComponents[componentsIdx].Visibility[j].Exceptions) {
-						componentsToShow = vpComponents[componentsIdx].Visibility[j].Exceptions[0].Component;
-					}
-				}
-
-				for (let k = 0; componentsToHide && k < componentsToHide.length; k++) {
-					let objectModel = groupDbCol.model;
-
-					if (isFederation) {
-						objectModel = ifcToModelMap[componentsToHide[k]["@"].IfcGuid];
-					}
-
-					// Exclude items selected
-					if (highlightedObjectsMap && -1 === highlightedObjectsMap.indexOf(componentsToHide[k]["@"].IfcGuid)) {
-						hiddenGroupObject = createGroupObject(
-							hiddenGroupObject,
-							issueName,
-							[255, 0, 0],
-							groupDbCol.account,
-							objectModel,
-							componentsToHide[k]["@"].IfcGuid
-						);
-					}
-				}
-
-				for (let k = 0; componentsToShow && k < componentsToShow.length; k++) {
-					let objectModel = groupDbCol.model;
-
-					if (isFederation) {
-						objectModel = ifcToModelMap[componentsToShow[k]["@"].IfcGuid];
-					}
-
-					shownGroupObject = createGroupObject(
-						shownGroupObject,
-						issueName,
-						[255, 0, 0],
-						groupDbCol.account,
-						objectModel,
-						componentsToShow[k]["@"].IfcGuid
-					);
-				}
-			}
-
-			// TODO: May need a better way to combine hidden/shown
-			// as it is not ideal to save both hidden and shown objects
-			if (shownGroupObject) {
-				const shownGroupData = createGroupData(shownGroupObject);
-
-				if (highlightedGroupData) {
-					shownGroupData.objects = shownGroupData.objects.concat(highlightedGroupData.objects);
-				}
-
-				groupPromises.push(
-					Group.createGroup(groupDbCol, undefined, shownGroupData).then(group => {
-						vp.shown_group_id = utils.stringToUUID(group._id);
-					})
-				);
-			} else if (hiddenGroupObject) {
-				groupPromises.push(
-					Group.createGroup(groupDbCol, undefined, createGroupData(hiddenGroupObject)).then(group => {
-						vp.hidden_group_id = utils.stringToUUID(group._id);
-					})
-				);
 			}
 		}
 	}
