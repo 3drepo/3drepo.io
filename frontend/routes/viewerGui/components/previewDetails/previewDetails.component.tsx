@@ -145,14 +145,18 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		<ActionMessage content={`This ${this.props.panelName} has been deleted by someone else`} />
 	);
 
+	public renderToggleButtonContainer = renderWhenTrue(() => (
+		<ToggleButtonContainer onClick={this.handleToggle}>
+			<ToggleButton>
+				{this.renderExpandIcon(!this.props.editable)}
+			</ToggleButton>
+		</ToggleButtonContainer>
+	));
+
 	public renderNotCollapsableContent = renderWhenTrue(() => {
 		return (
 			<>
-				<ToggleButtonContainer onClick={this.handleToggle}>
-					<ToggleButton>
-						{this.renderExpandIcon(!this.props.editable)}
-					</ToggleButton>
-				</ToggleButtonContainer>
+				{this.renderToggleButtonContainer(!this.props.disableExpanding)}
 				<NotCollapsableContent>
 					{this.props.renderNotCollapsable()}
 				</NotCollapsableContent>
