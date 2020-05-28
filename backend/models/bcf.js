@@ -580,7 +580,7 @@ function parseMarkupBuffer(markupBuffer) {
 		_.get(xml, "Markup.Comment") && xml.Markup.Comment.forEach(comment => {
 			const obj = {
 				guid: _.get(comment, "@.Guid") ? utils.stringToUUID(_.get(comment, "@.Guid")) : utils.generateUUID(),
-				created: moment(_.get(comment, "Date[0]._")).format("x").valueOf(),
+				created: Number(moment(_.get(comment, "Date[0]._")).format("x").valueOf()),
 				owner: _.get(comment, "Author[0]._"),
 				comment: _.get(comment, "Comment[0]._"),
 				sealed: true,
@@ -594,7 +594,6 @@ function parseMarkupBuffer(markupBuffer) {
 			if(Object.keys(commentExtras).length) {
 				obj.extras = commentExtras;
 			}
-
 			issue.comments.push(obj);
 		});
 
@@ -945,7 +944,7 @@ async function readBCF(account, model, requester, ifcToModelMap, dataBuffer, set
 		}
 
 		// System notification of BCF import
-		const currentTS = (new Date()).getTime();
+		const currentTS = Date.now();
 		const bcfImportNotification = {
 			guid: utils.generateUUID(),
 			created: currentTS,
