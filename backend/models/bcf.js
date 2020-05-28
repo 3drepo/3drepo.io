@@ -503,30 +503,6 @@ function parseViewpoints(issueGuid, issueFiles, vps) {
 	return Promise.all(vpPromises).then(() => viewpoints);
 }
 
-function createGroupData(groupObject) {
-
-	const groupData = {};
-
-	groupData.name = groupObject.name;
-	groupData.color = groupObject.color;
-
-	for (const groupAccount in groupObject.objects) {
-		for (const groupModel in groupObject.objects[groupAccount]) {
-			if (!groupData.objects) {
-				groupData.objects = [];
-			}
-
-			groupData.objects.push({
-				account: groupAccount,
-				model: groupModel,
-				ifc_guids: groupObject.objects[groupAccount][groupModel].ifc_guids
-			});
-		}
-	}
-
-	return groupData;
-}
-
 function parseViewpointComponentIfc(model, component, ifcToModelMap, isFederation) {
 	return {
 		model: isFederation ? ifcToModelMap[component["@"].IfcGuid] : model,
@@ -553,39 +529,6 @@ function compileGroupObjects(account, componentIfcs) {
 	}
 
 	return objects;
-}
-
-function createGroupObject(group, name, color, groupAccount, groupModel, ifcGuid) {
-
-	if (groupAccount && groupModel && ifcGuid) {
-		if (!group) {
-			group = {};
-		}
-
-		if (name) {
-			group.name = name;
-		}
-
-		if (color) {
-			group.color = color;
-		}
-
-		if (!group.objects) {
-			group.objects = {};
-		}
-
-		if (!group.objects[groupAccount]) {
-			group.objects[groupAccount] = {};
-		}
-
-		if (!group.objects[groupAccount][groupModel]) {
-			group.objects[groupAccount][groupModel] = { ifc_guids: [] };
-		}
-
-		group.objects[groupAccount][groupModel].ifc_guids.push(ifcGuid);
-	}
-
-	return group;
 }
 
 function parseMarkupBuffer(markupBuffer) {
@@ -697,10 +640,9 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 	const groupPromises = [];
 
 	for (let componentsIdx = 0; componentsIdx < vpComponents.length; componentsIdx++) {
-		let highlightedGroupObject;
 		// let highlightedObjectsMap = [];
 
-		const groups = Object.keys(vpComponents[componentsIdx]).forEach((componentType) => {
+		Object.keys(vpComponents[componentsIdx]).forEach((componentType) => {
 			if ("ViewSetupHints" === componentType) {
 				// TODO: Full ViewSetupHints support -
 				// SpaceVisible should correspond to !hideIfc
@@ -738,15 +680,15 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 							for (let j = 0; vpComponents[componentsIdx][componentType][i].Color && j < vpComponents[componentsIdx][componentType][i].Color.length; j++) {
 								groupData.color = vpComponents[componentsIdx][componentType][i].Color[j]["@"].Color;
 
-								let componentIfcs;
+								let colorComponentIfcs;
 
 								if (vpComponents[componentsIdx][componentType][i].Color[j].Component) {
-									componentIfcs = vpComponents[componentsIdx][componentType][i].Color[j].Component.map(component =>
+									colorComponentIfcs = vpComponents[componentsIdx][componentType][i].Color[j].Component.map(component =>
 										parseViewpointComponentIfc(groupDbCol.model, component, ifcToModelMap, isFederation)
 									);
 								}
 
-								groupData.objects = componentIfcs ? compileGroupObjects(groupDbCol.account, componentIfcs) : [];
+								groupData.objects = colorComponentIfcs ? compileGroupObjects(groupDbCol.account, colorComponentIfcs) : [];
 
 								// TODO - handle colour import
 								groupPromises.push(
@@ -760,11 +702,11 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 					case "Visibility":
 						for (let i = 0; i < vpComponents[componentsIdx][componentType].length; i++) {
 							const defaultVisibility = JSON.parse(vpComponents[componentsIdx][componentType][i]["@"].DefaultVisibility);
-							let componentIfcs;
+							let visibilityComponentIfcs;
 							let exceptionIfcs;
 
 							if (vpComponents[componentsIdx][componentType][i].Component) {
-								componentIfcs = vpComponents[componentsIdx][componentType][i].Component.map(component =>
+								visibilityComponentIfcs = vpComponents[componentsIdx][componentType][i].Component.map(component =>
 									parseViewpointComponentIfc(groupDbCol.model, component, ifcToModelMap, isFederation)
 								);
 							}
@@ -774,8 +716,8 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 								);
 							}
 
-							const componentsToShow = defaultVisibility ? componentIfcs : exceptionIfcs;
-							const componentsToHide = defaultVisibility ? exceptionIfcs : componentIfcs;
+							const componentsToShow = defaultVisibility ? visibilityComponentIfcs : exceptionIfcs;
+							const componentsToHide = defaultVisibility ? exceptionIfcs : visibilityComponentIfcs;
 
 							groupData.color = [255, 0, 0];
 
