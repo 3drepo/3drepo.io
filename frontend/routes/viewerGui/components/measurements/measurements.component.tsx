@@ -122,7 +122,6 @@ export class Measurements extends React.PureComponent<IProps, IState> {
 		const { viewer } = this.props;
 
 		viewer[resolver](VIEWER_EVENTS.MEASUREMENT_CREATED, this.handleMeasureCreated);
-		viewer[resolver](VIEWER_EVENTS.MEASUREMENT_REMOVED, this.handleMeasureRemoved);
 	}
 
 	private handleToggleEdgeSnapping = () => this.props.setMeasureEdgeSnapping(!this.props.edgeSnappingEnabled);
@@ -132,8 +131,6 @@ export class Measurements extends React.PureComponent<IProps, IState> {
 	private handleToggleMeasureUnits = () => this.props.setMeasureUnits(this.props.measureUnits === 'm' ? 'mm' : 'm' );
 
 	private handleMeasureCreated = (measure) => this.props.addMeasurement(measure);
-
-	private handleMeasureRemoved = (measurementId) => this.props.removeMeasurement(measurementId);
 
 	private handleClearMeasurements = () => this.props.clearMeasurements();
 
