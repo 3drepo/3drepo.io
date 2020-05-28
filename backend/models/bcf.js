@@ -547,10 +547,8 @@ function compileGroupObjects(account, componentIfcs) {
 				model: componentIfcs[i].model,
 				ifc_guids: []
 			});
-			console.log(modelIndexes);
 		}
 
-		console.log(objects);
 		objects[modelIndexes[componentIfcs[i].model]].ifc_guids.push(componentIfcs[i].ifcGuid);
 	}
 
@@ -596,7 +594,6 @@ function parseMarkupBuffer(markupBuffer) {
 	}
 
 	return parseXmlString(markupBuffer.toString("utf8"), { explicitCharkey: 1, attrkey: "@" }).then(xml => {
-		// console.log(xml);
 		const issue = {};
 		// issue._id = utils.stringToUUID(guid);
 		issue.comments = [];
@@ -701,11 +698,9 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 
 	for (let componentsIdx = 0; componentsIdx < vpComponents.length; componentsIdx++) {
 		let highlightedGroupObject;
-		let highlightedObjectsMap = [];
+		// let highlightedObjectsMap = [];
 
-		// TODO: refactor to reduce duplication?
-		Object.keys(vpComponents[componentsIdx]).forEach((componentType) => {
-			console.log(componentType);
+		const groups = Object.keys(vpComponents[componentsIdx]).forEach((componentType) => {
 			if ("ViewSetupHints" === componentType) {
 				// TODO: Full ViewSetupHints support -
 				// SpaceVisible should correspond to !hideIfc
@@ -714,8 +709,6 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 				const groupData = {
 					name: issueName
 				};
-
-				console.log(vpComponents[componentsIdx][componentType]);
 
 				switch (componentType) {
 					case "Selection":
@@ -734,13 +727,35 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 
 						groupPromises.push(
 							Group.createGroup(groupDbCol, undefined, groupData).then(group => {
-								vp.highlighted_group_id = utils.stringToUUID(group._id);
+								return vp.highlighted_group_id = utils.stringToUUID(group._id);
 							})
 						);
 
-						highlightedObjectsMap = groupData.objects.reduce((acc, val) => acc.concat(val.ifc_guids), []);
+						// highlightedObjectsMap = groupData.objects.reduce((acc, val) => acc.concat(val.ifc_guids), []);
 						break;
 					case "Coloring":
+						for (let i = 0; i < vpComponents[componentsIdx][componentType].length; i++) {
+							for (let j = 0; vpComponents[componentsIdx][componentType][i].Color && j < vpComponents[componentsIdx][componentType][i].Color.length; j++) {
+								groupData.color = vpComponents[componentsIdx][componentType][i].Color[j]["@"].Color;
+
+								let componentIfcs;
+
+								if (vpComponents[componentsIdx][componentType][i].Color[j].Component) {
+									componentIfcs = vpComponents[componentsIdx][componentType][i].Color[j].Component.map(component =>
+										parseViewpointComponentIfc(groupDbCol.model, component, ifcToModelMap, isFederation)
+									);
+								}
+
+								groupData.objects = componentIfcs ? compileGroupObjects(groupDbCol.account, componentIfcs) : [];
+
+								// TODO - handle colour import
+								groupPromises.push(
+									Group.createGroup(groupDbCol, undefined, groupData).then(group => {
+										return vp.highlighted_group_id = utils.stringToUUID(group._id);
+									})
+								);
+							}
+						}
 						break;
 					case "Visibility":
 						for (let i = 0; i < vpComponents[componentsIdx][componentType].length; i++) {
@@ -767,13 +782,15 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 							if (componentsToShow && componentsToShow.length > 0) {
 								groupData.objects = compileGroupObjects(groupDbCol.account, componentsToShow);
 
-								/*if (selectedGroup) {
+								/*
+								if (selectedGroup) {
 									groupData.objects = groupData.objects.concat(selectedGroup.objects);
-								}*/
+								}
+								*/
 
 								groupPromises.push(
 									Group.createGroup(groupDbCol, undefined, groupData).then(group => {
-										vp.shown_group_id = utils.stringToUUID(group._id);
+										return vp.shown_group_id = utils.stringToUUID(group._id);
 									})
 								);
 							} else if (componentsToHide && componentsToHide.length > 0) {
@@ -781,7 +798,7 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 
 								groupPromises.push(
 									Group.createGroup(groupDbCol, undefined, groupData).then(group => {
-										vp.hidden_group_id = utils.stringToUUID(group._id);
+										return vp.hidden_group_id = utils.stringToUUID(group._id);
 									})
 								);
 							}
@@ -790,31 +807,6 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 				}
 			}
 		});
-
-		if (vpComponents[componentsIdx].Coloring) {
-			// FIXME: this is essentially copy of selection with slight modification. Should merge common code.
-			for (let j = 0; j < vpComponents[componentsIdx].Coloring.length; j++) {
-				for (let k = 0; vpComponents[componentsIdx].Coloring[j].Color && k < vpComponents[componentsIdx].Coloring[j].Color.length; k++) {
-					for (let compIdx = 0; vpComponents[componentsIdx].Coloring[j].Color[k].Component && compIdx < vpComponents[componentsIdx].Coloring[j].Color[k].Component.length; compIdx++) {
-						// const color = vpComponents[componentsIdx].Coloring[j].Color[k]["@"].Color; // TODO: colour needs to be preserved at some point in the future
-						let objectModel = groupDbCol.model;
-
-						if (isFederation) {
-							objectModel = ifcToModelMap[vpComponents[componentsIdx].Coloring[j].Color[k].Component[compIdx]["@"].IfcGuid];
-						}
-
-						highlightedGroupObject = createGroupObject(
-							highlightedGroupObject,
-							issueName,
-							[255, 0, 0],
-							groupDbCol.account,
-							objectModel,
-							vpComponents[componentsIdx].Coloring[j].Color[k].Component[compIdx]["@"].IfcGuid
-						);
-					}
-				}
-			}
-		}
 	}
 
 	await Promise.all(groupPromises);
@@ -987,7 +979,8 @@ async function readBCF(account, model, requester, ifcToModelMap, dataBuffer, set
 					model: model
 				};
 
-				vp = {...vp, ...parseViewpointComponents(groupDbCol, _.get(vpXML, "VisualizationInfo.Components"), settings.federate, issue.name, ifcToModelMap)};
+				const vpComponents = await parseViewpointComponents(groupDbCol, _.get(vpXML, "VisualizationInfo.Components"), settings.federate, issue.name, ifcToModelMap);
+				vp = {...vp, ...vpComponents};
 			}
 			issue.viewpoints.push(vp);
 		}
