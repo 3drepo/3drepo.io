@@ -476,6 +476,15 @@ function listGroups(req, res, next) {
 	const ids = req.query.ids ? req.query.ids.split(",") : null;
 	let groupList;
 
+	let updatedSince = req.query.updatedSince;
+
+	if (updatedSince) {
+		updatedSince = parseInt(updatedSince, 10);
+		if (isNaN(updatedSince)) {
+			return responseCodes.respond(place, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
+		}
+	}
+
 	if (req.params.rid) {
 		groupList = Group.listGroups(dbCol, req.query, null, req.params.rid, ids, showIfcGuids);
 	} else {
