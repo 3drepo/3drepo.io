@@ -17,15 +17,19 @@
 
 import styled from 'styled-components';
 
-import { Image as ImageComponent } from '../../../../../image';
+import { Image as ImageComponent } from '../../../../../image/';
+import { ImagePlaceholder, StyledImage } from '../../../../../image/image.styles';
 
 export const Image = styled(ImageComponent)`
-	img {
+	margin-top: 6px;
+	margin-bottom: 8px;
+
+	${StyledImage} {
 		display: block;
-		margin-top: 6px;
-		margin-bottom: 8px;
-		max-width: 100%;
-		width: 100%;
-		height: auto;
+		max-height: 100px;
+	}
+
+	${ImagePlaceholder} {
+		height: 100px;
 	}
 ` as any;

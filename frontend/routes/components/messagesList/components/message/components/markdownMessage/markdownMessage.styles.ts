@@ -48,10 +48,16 @@ export const Paragraph = styled.p`
 `;
 
 export const Image = styled(ImageComponent)`
+	max-width: 100%;
+	width: 100%;
+	max-height: 100px;
+	height: auto;
+	
 	img {
 		display: block;
 		max-width: 100%;
 		width: 100%;
+		max-height: 100px;
 		height: auto;
 		margin: auto;
 	}

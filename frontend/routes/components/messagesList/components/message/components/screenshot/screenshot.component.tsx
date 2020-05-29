@@ -26,6 +26,6 @@ interface IProps {
 
 export const Screenshot = ({ viewpoint }: IProps) => {
 	return (
-		<Image src={viewpoint.screenshotPath} enablePreview />
+		<Image src={viewpoint.screenshotPath} enablePreview enablePlaceholder />
 	);
 };

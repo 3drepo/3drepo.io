@@ -30,8 +30,6 @@ export const Container = styled.div`
 	position: relative;
 	background-color: ${COLOR.BLACK_6};
 	overflow: auto;
-	display: flex;
-	flex-direction: column-reverse;
 `;
 
 export const LoaderContainer = styled.div`

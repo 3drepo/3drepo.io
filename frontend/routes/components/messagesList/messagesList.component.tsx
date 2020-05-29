@@ -51,6 +51,8 @@ const Loader = () => (
 	</LoaderContainer>
 );
 
+const maxScrollTop = (element) => element.scrollHeight - element.clientHeight;
+
 export const MessagesList = ({ teamspace, isPending, messages, fetchUsers, ...props }: IProps) => {
 	const [filter, setFilter] = React.useState('comments');
 	const listRef = React.useRef<HTMLDivElement>();
@@ -62,12 +64,11 @@ export const MessagesList = ({ teamspace, isPending, messages, fetchUsers, ...pr
 	React.useLayoutEffect(() => {
 		if (listRef.current) {
 			const list = listRef.current;
-
-			const maxScrollTop = (element) => element.scrollHeight - element.clientHeight;
 			const currentScroll = Math.ceil(list.scrollTop);
 			const isScrolled = currentScroll >= maxScrollTop(list);
 
-			if (!isScrolled && currentScroll) {
+			// @TODO scroll immidietly on first render
+			if (!isScrolled) {
 				list.scrollTo({
 					top: list.scrollHeight - list.clientHeight,
 					behavior: 'smooth'
@@ -93,7 +94,7 @@ export const MessagesList = ({ teamspace, isPending, messages, fetchUsers, ...pr
 				currentUser={props.currentUser}
 				setCameraOnViewpoint={props.setCameraOnViewpoint}
 			/>
-		))
+		)).reverse()
 	, [messages, filter]);
 
 	const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {

@@ -233,13 +233,11 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					)} />
 
 					{this.props.issue.descriptionThumbnail && (
-						<DescriptionImage>
-							<Image
-								src={this.props.issue.descriptionThumbnail}
-								enablePreview
-								{...this.imageProps()}
-							/>
-						</DescriptionImage>
+						<DescriptionImage
+							src={this.props.issue.descriptionThumbnail}
+							enablePreview
+							{...this.imageProps()}
+						/>
 					)}
 				</Form>
 				{!this.isNewIssue &&

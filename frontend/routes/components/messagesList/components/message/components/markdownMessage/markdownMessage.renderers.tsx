@@ -9,8 +9,9 @@ import {
 	MARKDOWN_USER_REFERENCE_REGEX
 } from '../../../../../../../helpers/comments';
 import { getAPIUrl } from '../../../../../../../services/api';
+import { Image } from '../screenshot/screenshot.styles';
 import { IssueReference } from './issueReference/';
-import { Blockquote, Image, Paragraph } from './markdownMessage.styles';
+import { Blockquote, Paragraph } from './markdownMessage.styles';
 import { ResourceReference } from './resourceReference/';
 import { UserReference } from './userReference/userReference.component';
 
@@ -47,9 +48,9 @@ const EnhancedLink = ({ children, href, ...props }) => {
 
 const EnhancedImage = ({ children, src, ...props }) => cond([
 	[() => src.match(MARKDOWN_INTERNAL_IMAGE_PATH_REGEX), () => (
-		<Image src={getAPIUrl(src.replace(MARKDOWN_INTERNAL_IMAGE_PATH_REGEX, ''))} />
+		<Image src={getAPIUrl(src.replace(MARKDOWN_INTERNAL_IMAGE_PATH_REGEX, ''))} enablePreview enablePlaceholder />
 	)],
-	[stubTrue, () => (<Image src={src} />)]
+	[stubTrue, () => (<Image src={src} enablePreview enablePlaceholder />)]
 ])(src);
 
 export const renderers = mapValues({

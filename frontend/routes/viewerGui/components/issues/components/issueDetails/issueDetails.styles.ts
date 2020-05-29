@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,8 +16,9 @@
  */
 
 import styled from 'styled-components';
-import { COLOR } from '../../../../../../styles';
 
+import { COLOR } from '../../../../../../styles';
+import { Image as ImageComponent } from '../../../../../components/image';
 import { MessagesList as MessagesListComponent } from '../../../../../components/messagesList/';
 import PreviewDetailsBase from '../../../previewDetails/previewDetails.container';
 
@@ -35,10 +36,17 @@ export const MessageContainer = styled.div`
 
 export const PreviewDetails = styled(PreviewDetailsBase)``;
 
-export const DescriptionImage = styled.div`
-	max-height: 250px;
-	overflow: hidden;
-`;
+export const DescriptionImage = styled(ImageComponent)`
+	img {
+		display: block;
+		margin-top: 6px;
+		margin-bottom: 8px;
+		max-width: 100%;
+		width: 100%;
+		max-height: 200px;
+		height: auto;
+	}
+` as any;
 
 export const HorizontalView = styled.div`
 	display: flex;
