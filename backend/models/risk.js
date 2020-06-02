@@ -65,6 +65,12 @@ const fieldTypes = {
 	"viewpoints": "[object Array]"
 };
 
+const ownerPrivilegeAttributes = [
+	"position",
+	"desc",
+	"viewpoint"
+];
+
 const LEVELS = {
 	VERY_LOW: 0,
 	LOW: 1,
@@ -154,7 +160,7 @@ async function createViewPoint(account, model, viewpoint) {
 
 class Risk extends Ticket {
 	constructor() {
-		super("risks", "risk_id", "issueIds", "RISK", fieldTypes, []);
+		super("risks", "risk_id", "issueIds", "RISK", fieldTypes, ownerPrivilegeAttributes);
 	}
 
 	async create(account, model, newRisk, sessionId) {
@@ -197,7 +203,6 @@ class Risk extends Ticket {
 			"rev_id",
 			"status",
 			"thumbnail",
-			"viewpoint",
 			"viewpoints"
 		];
 

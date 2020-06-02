@@ -236,6 +236,10 @@ class Ticket {
 				throw responseCodes.INVALID_ARGUMENTS;
 			}
 
+			if (field === "viewpoint") {
+				oldTicket[field] = oldTicket.viewpoints[0];
+			}
+
 			// if a field have the same value shouldnt update the property
 			if (_.isEqual(oldTicket[field], data[field])) {
 				delete data[field];
@@ -265,6 +269,19 @@ class Ticket {
 		if (systemComments.length > 0) {
 			data.comments = (oldTicket.comments || []).map(c => ({ ...c, sealed: true }));
 			data.comments = data.comments.concat(systemComments);
+		}
+
+		// Handle viewpoint
+		if (data.viewpoint) {
+			data.viewpoints[0] = {
+				...data.viewpoints[0],
+				...await this.handlePrimaryViewpoint(account, model, data._id, data.viewpoint)
+			};
+
+			if (data.viewpoints[0].thumbnail) {
+				data.thumbnail = data.viewpoints[0].thumbnail;
+				delete data.viewpoints[0].thumbnail;
+			}
 		}
 
 		// 6. Update the data
@@ -321,6 +338,43 @@ class Ticket {
 		return Promise.all(groupUpdatePromises);
 	}
 
+	async handlePrimaryViewpoint(account, model, ticketId, viewpoint) {
+		viewpoint = viewpoint || {};
+		viewpoint.guid = utils.generateUUID();
+
+		if (viewpoint.highlighted_group_id) {
+			viewpoint.highlighted_group_id = utils.stringToUUID(viewpoint.highlighted_group_id);
+		}
+
+		if (viewpoint.hidden_group_id) {
+			viewpoint.hidden_group_id = utils.stringToUUID(viewpoint.hidden_group_id);
+		}
+
+		if (viewpoint.shown_group_id) {
+			viewpoint.shown_group_id = utils.stringToUUID(viewpoint.shown_group_id);
+		}
+
+		if (viewpoint.screenshot) {
+			const imageBuffer = new Buffer.from(viewpoint.screenshot, "base64");
+
+			viewpoint.screenshot = imageBuffer;
+			await Viewpoint.setExternalScreenshotRef(viewpoint, account, model, this.collName);
+
+			viewpoint.thumbnail = await utils.resizeAndCropScreenshot(imageBuffer, 120, 120, true).catch((err) => {
+				systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
+					account,
+					model,
+					type: this.collName,
+					ticketId: utils.uuidToString(ticketId),
+					viewpointId: utils.uuidToString(viewpoint.guid),
+					err
+				});
+			});
+		}
+
+		return viewpoint;
+	}
+
 	/*
 	* @param {string} account
 	* @param {string} model
@@ -370,57 +424,21 @@ class Ticket {
 		if (!newTicket.viewpoints || newTicket.viewpoint) {
 			// FIXME need to revisit this for BCF refactor
 			// This allows BCF import to create new issue with more than 1 viewpoint
-			newTicket.viewpoint = newTicket.viewpoint || {};
-			newTicket.viewpoint.guid = utils.generateUUID();
+			newTicket.viewpoints = [await this.handlePrimaryViewpoint(account, model, newTicket._id, newTicket.viewpoint)];
 
-			if (newTicket.viewpoint.highlighted_group_id) {
-				newTicket.viewpoint.highlighted_group_id = utils.stringToUUID(newTicket.viewpoint.highlighted_group_id);
+			if (newTicket.viewpoints[0].thumbnail) {
+				newTicket.thumbnail = newTicket.viewpoints[0].thumbnail;
+				delete newTicket.viewpoints[0].thumbnail;
 			}
-
-			if (newTicket.viewpoint.hidden_group_id) {
-				newTicket.viewpoint.hidden_group_id = utils.stringToUUID(newTicket.viewpoint.hidden_group_id);
-			}
-
-			if (newTicket.viewpoint.shown_group_id) {
-				newTicket.viewpoint.shown_group_id = utils.stringToUUID(newTicket.viewpoint.shown_group_id);
-			}
-
-			if (newTicket.viewpoint.screenshot) {
-				const imageBuffer = new Buffer.from(newTicket.viewpoint.screenshot, "base64");
-
-				newTicket.viewpoint.screenshot = imageBuffer;
-				viewpointScreenshotPromise = Viewpoint.setExternalScreenshotRef(newTicket.viewpoint, account, model, this.collName);
-
-				imagePromise = utils.resizeAndCropScreenshot(imageBuffer, 120, 120, true).catch((err) => {
-					systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
-						account,
-						model,
-						type: this.collName,
-						ticketId: utils.uuidToString(newTicket._id),
-						viewpointId: utils.uuidToString(newTicket.viewpoint.guid),
-						err
-					});
-				});
-			}
-
-			newTicket.viewpoints = [newTicket.viewpoint];
 		}
 
 		// Assign rev_id for issue
-		const [history, image] = await Promise.all([
-			History.getHistory({ account, model }, branch, newTicket.revId, { _id: 1 }),
-			imagePromise,
-			viewpointScreenshotPromise
-		]);
+		const history = await History.getHistory({ account, model }, branch, newTicket.revId, { _id: 1 });
 
 		if (!history && (newTicket.revId || (newTicket.viewpoint || {}).highlighted_group_id)) {
 			throw (responseCodes.MODEL_HISTORY_NOT_FOUND);
 		} else if (history) {
 			newTicket.rev_id = history._id;
-		}
-
-		if (image) {
-			newTicket.thumbnail = image;
 		}
 
 		await this.setGroupTicketId(account, model, newTicket);

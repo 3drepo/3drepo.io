@@ -493,7 +493,7 @@ router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssues
 router.post("/issues", middlewares.issue.canCreate, storeIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {patch} /:teamspace/:model/issues/:issueId Update Issue.
+ * @api {patch} /:teamspace/:model/issues/:issueId Update Issue
  * @apiName  updateIssue
  * @apiGroup Issues
  * @apiDescription Updates an issue. It takes the part of the issue that can be updated.
