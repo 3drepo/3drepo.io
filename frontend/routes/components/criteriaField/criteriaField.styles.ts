@@ -85,6 +85,14 @@ export const Chip = styled(ChipComponent)`
 		margin-right: 4px;
 		margin-top: 3px;
 		margin-bottom: 3px;
+		max-width: 100%;
+		overflow: hidden;
+	}
+
+	&& > span {
+		text-overflow: ellipsis;
+		display: block;
+		overflow: hidden;
 	}
 `;
 
