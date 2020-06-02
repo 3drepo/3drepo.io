@@ -418,8 +418,6 @@ class Ticket {
 			delete newTicket.creator_role;
 		}
 		newTicket.desc = newTicket.desc || "(No Description)";
-		let imagePromise = Promise.resolve();
-		let viewpointScreenshotPromise = Promise.resolve();
 
 		if (!newTicket.viewpoints || newTicket.viewpoint) {
 			// FIXME need to revisit this for BCF refactor
