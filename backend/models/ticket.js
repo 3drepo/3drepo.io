@@ -273,6 +273,7 @@ class Ticket {
 
 		// Handle viewpoint
 		if (data.viewpoint) {
+			data.viewpoints = oldTicket.viewpoints;
 			data.viewpoints[0] = {
 				...data.viewpoints[0],
 				...await this.handlePrimaryViewpoint(account, model, data._id, data.viewpoint)
