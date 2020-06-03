@@ -138,6 +138,8 @@ router.get("/risks/:riskId/thumbnail.png", middlewares.issue.canView, getThumbna
  * @apiUse Risks
  *
  * @apiParam {String} [revId] Revision ID
+ * @apiParam (Query) {Number} [updatedSince] Only return issues that has been updated since this value (in epoch value)
+ *
  * @apiSuccess (200) {Object[]} risks Risk objects
  *
  * @apiExample {get} Example usage:

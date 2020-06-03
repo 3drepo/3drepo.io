@@ -99,7 +99,7 @@ router.get("/issues/:issueId", middlewares.issue.canView, findIssueById);
 router.get("/issues/:issueId/thumbnail.png", middlewares.issue.canView, getThumbnail);
 
 /**
- * @api {get} /:teamspace/:model/issues Get all Issues
+ * @api {get} /:teamspace/:model/issues?[query] Get all Issues
  * @apiName listIssues
  * @apiGroup Issues
  *
@@ -107,6 +107,9 @@ router.get("/issues/:issueId/thumbnail.png", middlewares.issue.canView, getThumb
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
+ *
+ * @apiParam (Query) {String} [convertCoords] Convert coordinates to user space
+ * @apiParam (Query) {Number} [updatedSince] Only return issues that has been updated since this value (in epoch value)
  *
  * @apiSuccess (200) {Object} Issue Object.
  * @apiSuccessExample {json} Success-Response.
@@ -218,6 +221,9 @@ router.get("/issues/:issueId/viewpoints/:vid/screenshotSmall.png", middlewares.i
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  * @apiParam {String} id Revision unique ID.
+ *
+ * @apiParam (Query) {String} [convertCoords] Convert coordinates to user space
+ * @apiParam (Query) {Number} [updatedSince] Only return issues that has been updated since this value (in epoch value)
  *
  * @apiDescription Get all issues related to specific revision ID.
  *
