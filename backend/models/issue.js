@@ -88,35 +88,6 @@ class Issue extends Ticket {
 		return newIssue;
 	}
 
-	async findByModelName(account, model, branch, revId, projection, ids, noClean = false, useIssueNumber = false) {
-		if (useIssueNumber && Array.isArray(ids)) {
-			ids = { number:  {"$in": ids.map(x => parseInt(x))} };
-		}
-
-		const issues = await super.findByModelName(account, model, branch, revId, projection, ids, noClean);
-
-		if (!useIssueNumber) { // useIssueNumber is being used by export bcf and it doesnt export the submodel issues
-			let submodels = [];
-
-			if (branch || revId) {
-				// searches for the revision models
-				const { current } = (await History.getHistory({account, model}, branch, revId)) || {};
-				if (current) {
-					submodels = await Ref.find({account, model}, {type: "ref", _id: {"$in": current}}, {project:1});
-					submodels = submodels.map(r => r.project);
-				}
-			}
-
-			const issuesPerSubmodels = await Promise.all(submodels.map(submodel =>
-				this.findByModelName(account, submodel,"master", null, projection, ids, noClean, useIssueNumber)
-			));
-
-			issuesPerSubmodels.forEach(subIssues => Array.prototype.push.apply(issues, subIssues));
-		}
-
-		return issues;
-	}
-
 	async onBeforeUpdate(data, oldIssue, userPermissions, systemComments) {
 		// 2.6 if the user is trying to change the status and it doesnt have the necessary permissions throw a ISSUE_UPDATE_PERMISSION_DECLINED
 		if (data.status && data.status !== oldIssue.status) {
@@ -182,6 +153,9 @@ class Issue extends Ticket {
 		const noClean = true;
 
 		const settings = await ModelSetting.findById({account, model}, model);
+		if (useIssueNumber && Array.isArray(ids)) {
+			ids = { number:  {"$in": ids.map(x => parseInt(x))} };
+		}
 		const issues = await this.findByModelName(account, model, branch, revId, projection, ids, noClean, useIssueNumbers);
 
 		return BCF.getBCFZipReadStream(account, model, issues, settings.properties.unit);
