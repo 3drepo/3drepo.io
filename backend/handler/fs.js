@@ -74,7 +74,7 @@ class FSHandler {
 	storeFile(data) {
 		const _id = nodeuuid();
 		const folderNames = generateFoldernames(_id, config.fs.levels);
-		const link = path.join(folderNames, _id);
+		const link = path.posix.join(folderNames, _id);
 
 		return new Promise((resolve, reject) => {
 			createFoldersIfNecessary(this.getFullPath(folderNames)).then(() =>{
