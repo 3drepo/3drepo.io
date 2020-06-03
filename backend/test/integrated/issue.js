@@ -617,7 +617,7 @@ describe("Issues", function () {
 						.send(issue)
 						.expect(200 , function(err, res) {
 							issueId = res.body._id;
-							screenshotRef = res.body.viewpoints[0].screenshot_ref;
+							screenshotRef = res.body.viewpoint.screenshot_ref;
 							return done(err);
 
 						});
@@ -630,7 +630,7 @@ describe("Issues", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`)
 						.expect(200, function(err, res) {
-							expect(res.body.viewpoints[0].screenshot_ref).to.not.equal(screenshotRef);
+							expect(res.body.viewpoint.screenshot_ref).to.not.equal(screenshotRef);
 							expect(res.body.comments[0].action.property).to.equal("viewpoint");
 							expect(res.body.comments[0].owner).to.equal(username);
 							done(err);
@@ -674,16 +674,16 @@ describe("Issues", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`)
 						.expect(200, function(err, res) {
-							expect(res.body.viewpoints[0].up).to.deep.equal(data.viewpoint.up);
-							expect(res.body.viewpoints[0].position).to.deep.equal(data.viewpoint.position);
-							expect(res.body.viewpoints[0].look_at).to.deep.equal(data.viewpoint.look_at);
-							expect(res.body.viewpoints[0].view_dir).to.deep.equal(data.viewpoint.view_dir);
-							expect(res.body.viewpoints[0].right).to.deep.equal(data.viewpoint.right);
-							expect(res.body.viewpoints[0].fov).to.equal(data.viewpoint.fov);
-							expect(res.body.viewpoints[0].aspect_ratio).to.equal(data.viewpoint.aspect_ratio);
-							expect(res.body.viewpoints[0].far).to.equal(data.viewpoint.far);
-							expect(res.body.viewpoints[0].near).to.equal(data.viewpoint.near);
-							expect(res.body.viewpoints[0].clippingPlanes).to.deep.equal(data.viewpoint.clippingPlanes);
+							expect(res.body.viewpoint.up).to.deep.equal(data.viewpoint.up);
+							expect(res.body.viewpoint.position).to.deep.equal(data.viewpoint.position);
+							expect(res.body.viewpoint.look_at).to.deep.equal(data.viewpoint.look_at);
+							expect(res.body.viewpoint.view_dir).to.deep.equal(data.viewpoint.view_dir);
+							expect(res.body.viewpoint.right).to.deep.equal(data.viewpoint.right);
+							expect(res.body.viewpoint.fov).to.equal(data.viewpoint.fov);
+							expect(res.body.viewpoint.aspect_ratio).to.equal(data.viewpoint.aspect_ratio);
+							expect(res.body.viewpoint.far).to.equal(data.viewpoint.far);
+							expect(res.body.viewpoint.near).to.equal(data.viewpoint.near);
+							expect(res.body.viewpoint.clippingPlanes).to.deep.equal(data.viewpoint.clippingPlanes);
 							expect(res.body.comments[0].action.property).to.equal("viewpoint");
 							expect(res.body.comments[0].owner).to.equal(username);
 							done(err);

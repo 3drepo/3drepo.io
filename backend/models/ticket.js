@@ -125,7 +125,7 @@ class Ticket {
 			}
 		});
 
-		delete ticketToClean.viewpoint;
+		delete ticketToClean.viewpoints;
 		delete ticketToClean.viewCount;
 
 		return ticketToClean;
