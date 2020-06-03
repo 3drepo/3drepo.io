@@ -623,6 +623,7 @@ describe("Risks", function () {
 		it("change screenshot should succeed and create system comment", function(done) {
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			let riskId;
+			let screenshotRef;
 			const data = {
 				"viewpoint": {
 					"screenshot": altBase64
@@ -634,6 +635,7 @@ describe("Risks", function () {
 						.send(risk)
 						.expect(200 , function(err, res) {
 							riskId = res.body._id;
+							screenshotRef = res.body.viewpoints[0].screenshot_ref;
 							return done(err);
 
 						});
@@ -646,8 +648,7 @@ describe("Risks", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function(err, res) {
-							console.log(res.body);
-							expect(res.body.viewpoints[0].screenshot).to.equal(data.viewpoint.screenshot);
+							expect(res.body.viewpoints[0].screenshot_ref).to.not.equal(screenshotRef);
 							expect(res.body.comments[0].action.property).to.equal("viewpoint");
 							expect(res.body.comments[0].owner).to.equal(username);
 							done(err);
@@ -691,7 +692,6 @@ describe("Risks", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function(err, res) {
-							console.log(res.body);
 							expect(res.body.viewpoints[0].up).to.deep.equal(data.viewpoint.up);
 							expect(res.body.viewpoints[0].position).to.deep.equal(data.viewpoint.position);
 							expect(res.body.viewpoints[0].look_at).to.deep.equal(data.viewpoint.look_at);
