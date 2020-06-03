@@ -125,7 +125,6 @@ class Ticket {
 			}
 		});
 
-		delete ticketToClean.viewpoints;
 		delete ticketToClean.viewCount;
 
 		return ticketToClean;
@@ -283,6 +282,8 @@ class Ticket {
 				data.thumbnail = data.viewpoints[0].thumbnail;
 				delete data.viewpoints[0].thumbnail;
 			}
+
+			delete data.viewpoint;
 		}
 
 		// 6. Update the data
