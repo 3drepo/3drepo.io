@@ -624,6 +624,7 @@ describe("Issues", function () {
 					agent.patch(`/${username}/${model}/issues/${issueId}`)
 						.send(data)
 						.expect(200, function(err, res) {
+							console.log(res.body);
 							console.log(err);
 							return done(err)
 						});
@@ -672,6 +673,7 @@ describe("Issues", function () {
 					agent.patch(`/${username}/${model}/issues/${issueId}`)
 						.send(data)
 						.expect(200, function(err, res) {
+							console.log(res.body);
 							console.log(err);
 							return done(err)
 						});
