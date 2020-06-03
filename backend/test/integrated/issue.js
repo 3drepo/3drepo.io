@@ -623,7 +623,10 @@ describe("Issues", function () {
 				function(done) {
 					agent.patch(`/${username}/${model}/issues/${issueId}`)
 						.send(data)
-						.expect(200, done);
+						.expect(200, function(err, res) {
+							console.log(err);
+							return done(err)
+						});
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`)
@@ -668,7 +671,10 @@ describe("Issues", function () {
 				function(done) {
 					agent.patch(`/${username}/${model}/issues/${issueId}`)
 						.send(data)
-						.expect(200, done);
+						.expect(200, function(err, res) {
+							console.log(err);
+							return done(err)
+						});
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`)
