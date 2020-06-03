@@ -637,7 +637,6 @@ describe("Risks", function () {
 							riskId = res.body._id;
 							screenshotRef = res.body.viewpoint.screenshot_ref;
 							return done(err);
-
 						});
 				},
 				function(done) {

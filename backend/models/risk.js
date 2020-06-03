@@ -206,10 +206,10 @@ class Risk extends Ticket {
 			"viewpoints"
 		];
 
-		const residualData = _.pick(data, ["viewpoint", "residual"]);
+		const residualData = _.pick(data, ["residual"]);
 		const beforeUpdate =  this.onBeforeUpdate(account, model, sessionId, residualData).bind(this);
 
-		data = _.omit(data, ["viewpoint", "residual"]);
+		data = _.omit(data, ["residual"]);
 		return await super.update(attributeBlacklist, user, sessionId, account, model, issueId, data, beforeUpdate);
 	}
 
