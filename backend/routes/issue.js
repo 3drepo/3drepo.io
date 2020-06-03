@@ -99,7 +99,7 @@ router.get("/issues/:issueId", middlewares.issue.canView, findIssueById);
 router.get("/issues/:issueId/thumbnail.png", middlewares.issue.canView, getThumbnail);
 
 /**
- * @api {get} /:teamspace/:model/issues Get all Issues
+ * @api {get} /:teamspace/:model/issues?[query] Get all Issues
  * @apiName listIssues
  * @apiGroup Issues
  *
@@ -107,6 +107,9 @@ router.get("/issues/:issueId/thumbnail.png", middlewares.issue.canView, getThumb
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
+ *
+ * @apiParam (Query) {String} [convertCoords] Convert coordinates to user space
+ * @apiParam (Query) {Number} [updatedSince] Only return issues that has been updated since this value (in epoch value)
  *
  * @apiSuccess (200) {Object} Issue Object.
  * @apiSuccessExample {json} Success-Response.
@@ -218,6 +221,9 @@ router.get("/issues/:issueId/viewpoints/:vid/screenshotSmall.png", middlewares.i
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  * @apiParam {String} id Revision unique ID.
+ *
+ * @apiParam (Query) {String} [convertCoords] Convert coordinates to user space
+ * @apiParam (Query) {Number} [updatedSince] Only return issues that has been updated since this value (in epoch value)
  *
  * @apiDescription Get all issues related to specific revision ID.
  *
@@ -830,13 +836,20 @@ function listIssues(req, res, next) {
 	const branch = rid ? null : "master";
 	const ids = req.query.ids ? req.query.ids.split(",") : null;
 	const convertCoords = !!req.query.convertCoords;
+	let updatedSince = req.query.updatedSince;
 
-	Issue.getList(account, model, branch, rid, ids, convertCoords).then(issues => {
+	if (updatedSince) {
+		updatedSince = parseInt(updatedSince, 10);
+		if (isNaN(updatedSince)) {
+			return responseCodes.respond(place, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
+		}
+	}
+
+	Issue.getList(account, model, branch, rid, ids, convertCoords, updatedSince).then(issues => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, issues);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
-
 }
 
 function getIssuesBCF(req, res, next) {

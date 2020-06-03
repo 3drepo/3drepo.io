@@ -84,7 +84,7 @@ const groupSchema = new Schema({
 	author: String,
 	description: String,
 	createdAt: Date,
-	updatedAt: Date,
+	updatedAt: Number,
 	updatedBy: String,
 	objects: {
 		type: [{
@@ -402,6 +402,19 @@ groupSchema.statics.listGroups = function (dbCol, queryParams, branch, revId, id
 	// If we want groups that aren't from risks
 	if (queryParams.noRisks) {
 		query.risk_id = { $exists: false };
+	}
+
+	if (queryParams.updatedSince) {
+		const updatedSince = parseFloat(queryParams.updatedSince);
+
+		query.$or = [
+			{
+				createdAt: { $gte: new Date(updatedSince) },  updatedAt: { $exists: false}
+			},
+			{
+				updatedAt: { $gte: updatedSince }
+			}
+		];
 	}
 
 	if (ids) {
