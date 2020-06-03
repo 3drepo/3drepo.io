@@ -155,7 +155,7 @@ class Issue extends Ticket {
 		if (useIssueNumbers && Array.isArray(ids)) {
 			ids = { number:  {"$in": ids.map(x => parseInt(x))} };
 		}
-		const issues = await this.findByModelName(account, model, branch, revId, projection, ids, noClean, useIssueNumbers);
+		const issues = await this.findByModelName(account, model, branch, revId, undefined, projection, ids, noClean);
 
 		return BCF.getBCFZipReadStream(account, model, issues, settings.properties.unit);
 	}
