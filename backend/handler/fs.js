@@ -94,7 +94,8 @@ class FSHandler {
 			return fs.existsSync(this.getFullPath(key)) ?
 				Promise.resolve(fs.createReadStream(this.getFullPath(key))) :
 				Promise.reject(ResponseCodes.NO_FILE_FOUND);
-		} catch {
+		} catch (err) {
+			systemLogger.logError("Failed to get filestream: ", JSON.stringify(err));
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
 		}
 	}
@@ -102,7 +103,8 @@ class FSHandler {
 	getFile(key) {
 		try {
 			return Promise.resolve(fs.readFileSync(this.getFullPath(key)));
-		} catch {
+		} catch (err) {
+			systemLogger.logError("Failed to get file: ", JSON.stringify(err));
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
 		}
 	}
