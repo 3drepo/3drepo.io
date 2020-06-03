@@ -19,14 +19,14 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { selectTeamspace } from '../../../../../../../modules/comments';
+import { selectUrlParams } from '../../../../../../../modules/router/router.selectors';
 import { selectCachedResponses, UsersActions} from '../../../../../../../modules/users';
 
 import { UserMarker } from './userMarker.component';
 
 const mapStateToProps = createStructuredSelector({
-	teamspace: selectTeamspace,
 	usersCachedResponses: selectCachedResponses,
+	urlParams: selectUrlParams,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

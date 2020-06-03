@@ -23,21 +23,14 @@ export const { Types: CommentsTypes, Creators: CommentsActions } = createActions
 }, { prefix: 'COMMENTS/' });
 
 export const INITIAL_STATE = {
-	teamspace: '',
 	users: [],
 };
 
-const setTeamspace = (state = INITIAL_STATE, { teamspace }) => ({
-	...state,
-	teamspace,
-});
-
-const setUsers = (state = INITIAL_STATE, { users }) => ({
+const fetchUsersSuccess = (state = INITIAL_STATE, { users }) => ({
 	...state,
 	users,
 });
 
 export const reducer = createReducer(INITIAL_STATE, {
-	[CommentsTypes.FETCH_USERS]: setTeamspace,
-	[CommentsTypes.FETCH_USERS_SUCCESS]: setUsers,
+	[CommentsTypes.FETCH_USERS_SUCCESS]: fetchUsersSuccess,
 });

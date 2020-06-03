@@ -24,13 +24,14 @@ import { UserIndicator } from './userMarker.styles';
 
 interface IProps {
 	name: string;
-	teamspace: string;
 	children?: React.ReactNode;
 	usersCachedResponses: any[];
 	fetchUserDetails: (teamspace, username) => void;
+	urlParams: { teamspace: string };
 }
 
-export const UserMarker = ({ name, children, teamspace, fetchUserDetails, usersCachedResponses }: IProps) => {
+export const UserMarker = ({ name, children, fetchUserDetails, usersCachedResponses, urlParams }: IProps) => {
+	const teamspace = urlParams ? urlParams.teamspace : '';
 	const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
 	const open = Boolean(anchorEl);
 

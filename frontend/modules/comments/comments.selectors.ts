@@ -19,10 +19,10 @@ import { createSelector } from 'reselect';
 
 import { selectJobs } from '../jobs';
 
-export const selectUsersDomain = (state) => ({ ...state.comments });
+export const selectCommentsDomain = (state) => ({ ...state.comments });
 
 export const selectTeamspaceUsers = createSelector(
-	selectUsersDomain, selectJobs, (state, jobs) => state.users
+	selectCommentsDomain, selectJobs, (state, jobs) => state.users
 		.map(({ job, ...user }) => ({
 			...user,
 			job: {
@@ -30,8 +30,4 @@ export const selectTeamspaceUsers = createSelector(
 				color: jobs.find(({ _id }) => job === _id ).color
 			}
 		}))
-);
-
-export const selectTeamspace = createSelector(
-	selectUsersDomain, (state) => state.teamspace
 );
