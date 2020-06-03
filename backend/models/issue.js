@@ -21,7 +21,6 @@ const responseCodes = require("../response_codes.js");
 const db = require("../handler/db");
 
 const History = require("./history");
-const Ref = require("./ref");
 
 const ChatEvent = require("./chatEvent");
 const ModelSetting = require("../models/modelSetting");
@@ -153,7 +152,7 @@ class Issue extends Ticket {
 		const noClean = true;
 
 		const settings = await ModelSetting.findById({account, model}, model);
-		if (useIssueNumber && Array.isArray(ids)) {
+		if (useIssueNumbers && Array.isArray(ids)) {
 			ids = { number:  {"$in": ids.map(x => parseInt(x))} };
 		}
 		const issues = await this.findByModelName(account, model, branch, revId, projection, ids, noClean, useIssueNumbers);
