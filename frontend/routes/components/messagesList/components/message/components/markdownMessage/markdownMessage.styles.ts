@@ -52,7 +52,7 @@ export const Image = styled(ImageComponent)`
 	width: 100%;
 	max-height: 100px;
 	height: auto;
-	
+
 	img {
 		display: block;
 		max-width: 100%;

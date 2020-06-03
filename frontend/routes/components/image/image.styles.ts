@@ -36,9 +36,9 @@ export const Container = styled.div`
 `;
 
 const fadeIn = keyframes`
-  from {
+	from {
 		opacity: 0.5;
-  }
+	}
 `;
 
 const imageLoadingStyles = css`
@@ -57,7 +57,7 @@ export const StyledImage = styled.img`
 `;
 
 export const ImagePlaceholder = styled.div`
-  position: relative;
+	position: relative;
 	width: 100%;
 	height: 100%;
 	transition: unset;
