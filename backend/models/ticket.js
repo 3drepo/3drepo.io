@@ -231,18 +231,13 @@ class Ticket {
 		const systemComments = [];
 		const fields = Object.keys(data);
 
-		let newViewpoint;
-
-		if (data.viewpoint) {
-			newViewpoint = await this.handlePrimaryViewpoint(account, model, data._id, data.viewpoint);
-		}
-
-		fields.forEach(field => {
+		fields.forEach(async field => {
 			if (Object.prototype.toString.call(data[field]) !== this.fieldTypes[field]) {
 				throw responseCodes.INVALID_ARGUMENTS;
 			}
 
 			if (field === "viewpoint") {
+				const newViewpoint = await this.handlePrimaryViewpoint(account, model, data._id, data.viewpoint);
 				oldTicket[field] = oldTicket.viewpoints[0];
 
 				if (data[field]) {
