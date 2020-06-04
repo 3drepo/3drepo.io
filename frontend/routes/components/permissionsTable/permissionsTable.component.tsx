@@ -103,6 +103,9 @@ const MODEL_PERMISSIONS_TABLE_CELLS = [{
 	searchBy: ['model', 'name']
 }];
 
+MODEL_PERMISSIONS_TABLE_CELLS[0].HeadingProps.root.width = '220px';
+MODEL_PERMISSIONS_TABLE_CELLS[0].CellProps.root.width = '220px';
+
 interface IProps {
 	className?: string;
 	permissions: any[];

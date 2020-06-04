@@ -21,10 +21,11 @@ const responseCodes = require("../response_codes.js");
 const db = require("../handler/db");
 
 const History = require("./history");
-const Ref = require("./ref");
 
 const ChatEvent = require("./chatEvent");
+const ModelSetting = require("../models/modelSetting");
 
+const BCF = require("./bcf");
 const Ticket = require("./ticket");
 
 const C = require("../constants");
@@ -63,12 +64,7 @@ const ownerPrivilegeAttributes = [
 	"priority"
 ];
 
-const statusEnum = {
-	"OPEN": C.ISSUE_STATUS_OPEN,
-	"IN_PROGRESS": C.ISSUE_STATUS_IN_PROGRESS,
-	"FOR_APPROVAL": C.ISSUE_STATUS_FOR_APPROVAL,
-	"CLOSED": C.ISSUE_STATUS_CLOSED
-};
+const statusEnum = C.ISSUE_STATUS;
 
 class Issue extends Ticket {
 	constructor() {
@@ -89,46 +85,6 @@ class Issue extends Ticket {
 
 		ChatEvent.newIssues(sessionId, account, model, [newIssue]);
 		return newIssue;
-	}
-
-	async findByModelName(account, model, branch, revId, projection, ids, noClean = false, useIssueNumber = false) {
-		if (useIssueNumber && Array.isArray(ids)) {
-			ids = { number:  {"$in": ids.map(x => parseInt(x))} };
-		}
-
-		const issues = await super.findByModelName(account, model, branch, revId, projection, ids, noClean);
-
-		if (!useIssueNumber) { // useIssueNumber is being used by export bcf and it doesnt export the submodel issues
-			let submodels = [];
-
-			if (branch || revId) {
-				// searches for the revision models
-				const { current } = (await History.getHistory({account, model}, branch, revId)) || {};
-				if (current) {
-					submodels = await Ref.find({account, model}, {type: "ref", _id: {"$in": current}}, {project:1});
-					submodels = submodels.map(r => r.project);
-				}
-			}
-
-			const issuesPerSubmodels = await Promise.all(submodels.map(submodel =>
-				this.findByModelName(account, submodel,"master", null, projection, ids, noClean, useIssueNumber)
-			));
-
-			issuesPerSubmodels.forEach(subIssues => Array.prototype.push.apply(issues, subIssues));
-		}
-
-		return issues;
-	}
-
-	updateFromBCF(dbCol, issueToUpdate, changeSet) {
-		return db.getCollection(dbCol.account, dbCol.model + ".issues").then((_dbCol) => {
-			return _dbCol.update({_id: utils.stringToUUID(issueToUpdate._id)}, {$set: changeSet}).then(() => {
-				const sessionId = issueToUpdate.sessionId;
-				const updatedIssue = this.clean(dbCol.account, dbCol.model, issueToUpdate);
-				ChatEvent.issueChanged(sessionId, dbCol.account, dbCol.model, updatedIssue._id, updatedIssue);
-				return updatedIssue;
-			});
-		});
 	}
 
 	async onBeforeUpdate(data, oldIssue, userPermissions, systemComments) {
@@ -191,6 +147,109 @@ class Issue extends Ticket {
 		return await super.update(attributeBlacklist, user, sessionId, account, model, issueId, data, this.onBeforeUpdate.bind(this));
 	}
 
+	async getBCF(account, model, branch, revId, ids, useIssueNumbers = false) {
+		const projection = {};
+		const noClean = true;
+
+		const settings = await ModelSetting.findById({account, model}, model);
+		if (useIssueNumbers && Array.isArray(ids)) {
+			ids = { number:  {"$in": ids.map(x => parseInt(x))} };
+		}
+		const issues = await this.findByModelName(account, model, branch, revId, undefined, projection, ids, noClean);
+
+		return BCF.getBCFZipReadStream(account, model, issues, settings.properties.unit);
+	}
+
+	async importBCF(requester, account, model, revId, dataBuffer) {
+		if (dataBuffer.byteLength === 0) {
+			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
+		}
+
+		let branch;
+
+		if (!revId) {
+			branch = "master";
+		}
+
+		const history = await History.getHistory({ account, model }, branch, revId, {_id: 1});
+
+		if (!history) {
+			return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
+		} else if (history) {
+			revId = history._id;
+		}
+
+		const settings = await ModelSetting.findById({account, model}, model);
+		const bcfIssues = await BCF.importBCF(requester, account, model, dataBuffer, settings);
+
+		return this.merge(account, model, branch, revId, bcfIssues, requester.socketId, requester.user);
+	}
+
+	async merge(account, model, branch, revId, data, sessionId, user) {
+		const existingIssues = await this.findByModelName(account, model, branch, revId, {}, {}, true);
+		const existingIssuesMap = {};
+		for (let i = 0; i < existingIssues.length; ++i) {
+			existingIssuesMap[utils.uuidToString(existingIssues[i]._id)] = i;
+		}
+
+		// sort issues by date and add number
+		data = data.sort((a, b) => {
+			return a.created > b.created;
+		});
+
+		for (let i = 0; i < data.length; i++) {
+			const issueToMerge = data[i];
+			issueToMerge.rev_id = revId;
+
+			const matchIndex = existingIssuesMap[utils.uuidToString(issueToMerge._id)];
+
+			if (matchIndex !== undefined) {
+				const matchingIssue = existingIssues[matchIndex];
+
+				// 0. Set the black list for attributes
+				const attributeBlacklist = [
+					"_id",
+					"created",
+					"creator_role",
+					"name",
+					"norm",
+					"number",
+					"owner",
+					"rev_id",
+					"thumbnail",
+					"viewpoint",
+					"priority_last_changed",
+					"status_last_changed"
+				];
+
+				// Attempt to merge viewpoints and comments and sort by created desc
+				const complexAttrs = ["comments", "viewpoints"];
+				complexAttrs.forEach((complexAttr) => {
+					if (matchingIssue[complexAttr]) {
+						let mergedAttr = matchingIssue[complexAttr];
+
+						for (let issueIdx = 0; issueIdx < issueToMerge[complexAttr].length; issueIdx++) {
+							if (-1 === matchingIssue[complexAttr].findIndex(attr =>
+								utils.uuidToString(attr.guid) === utils.uuidToString(issueToMerge[complexAttr][issueIdx].guid))) {
+								mergedAttr.push(issueToMerge[complexAttr][issueIdx]);
+							}
+						}
+						if (mergedAttr.length && mergedAttr[0].created) {
+							mergedAttr = mergedAttr.sort((a, b) => {
+								return a.created > b.created;
+							});
+						}
+						issueToMerge[complexAttr] = mergedAttr;
+					}
+				});
+
+				await super.update(attributeBlacklist, user, sessionId, account, model, issueToMerge._id, issueToMerge, this.onBeforeUpdate.bind(this));
+			} else {
+				await this.create(account, model, issueToMerge, sessionId);
+			}
+		}
+	}
+
 	async getIssuesReport(account, model, rid, ids, res) {
 		const reportGen = require("../models/report").newIssuesReport(account, model, rid);
 		return super.getReport(account, model, rid, ids, res, reportGen);
@@ -217,7 +276,7 @@ class Issue extends Ticket {
 	}
 
 	isPriorityChange(oldIssue, newIssue) {
-		if (!newIssue.hasOwnProperty("priority")) {
+		if (!utils.hasField(newIssue, "priority")) {
 			return false;
 		}
 
@@ -225,7 +284,7 @@ class Issue extends Ticket {
 	}
 
 	isStatusChange(oldIssue, newIssue) {
-		if (!newIssue.hasOwnProperty("status")) {
+		if (!utils.hasField(newIssue, "status")) {
 			return false;
 		}
 		return oldIssue.status !== newIssue.status;

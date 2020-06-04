@@ -84,7 +84,7 @@ const groupSchema = new Schema({
 	author: String,
 	description: String,
 	createdAt: Date,
-	updatedAt: Date,
+	updatedAt: Number,
 	updatedBy: String,
 	objects: {
 		type: [{
@@ -350,6 +350,7 @@ groupSchema.methods.getObjectsArray = function (model, branch, revId, convertSha
 	});
 };
 
+// FIXME: Why do we have findByUID and findByUIDSerialised? - charence
 groupSchema.statics.findByUID = function (dbCol, uid, branch, revId, convertObjects = true) {
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
@@ -371,6 +372,7 @@ groupSchema.statics.findByUID = function (dbCol, uid, branch, revId, convertObje
 
 };
 
+// FIXME: Why do we have findByUID and findByUIDSerialised? - charence
 groupSchema.statics.findByUIDSerialised = function (dbCol, uid, branch, revId, showIfcGuids = false) {
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
@@ -400,6 +402,19 @@ groupSchema.statics.listGroups = function (dbCol, queryParams, branch, revId, id
 	// If we want groups that aren't from risks
 	if (queryParams.noRisks) {
 		query.risk_id = { $exists: false };
+	}
+
+	if (queryParams.updatedSince) {
+		const updatedSince = parseFloat(queryParams.updatedSince);
+
+		query.$or = [
+			{
+				createdAt: { $gte: new Date(updatedSince) },  updatedAt: { $exists: false}
+			},
+			{
+				updatedAt: { $gte: updatedSince }
+			}
+		];
 	}
 
 	if (ids) {
@@ -524,7 +539,7 @@ function cleanEmbeddedObject(field, data) {
 		const filtered =  data.map((entry) => {
 			const cleaned  = {};
 			embeddedObjectFields[field].forEach((allowedField) => {
-				if(entry.hasOwnProperty(allowedField)) {
+				if(utils.hasField(entry, allowedField)) {
 					cleaned[allowedField] = entry[allowedField];
 				}
 			});
@@ -550,7 +565,7 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data, creator = ""
 		const allowedFields = ["description", "name", "objects","rules","color","issue_id","risk_id"];
 
 		allowedFields.forEach((key) => {
-			if (fieldTypes[key] && data.hasOwnProperty(key)) {
+			if (fieldTypes[key] && utils.hasField(data, key)) {
 				if (Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
 					if (key === "objects" && data.objects) {
 						newGroup.objects = cleanEmbeddedObject(key, convertedObjects);
@@ -606,11 +621,11 @@ function clean(groupData) {
 	cleaned.issue_id = cleaned.issue_id && utils.uuidToString(cleaned.issue_id);
 	cleaned.risk_id = cleaned.risk_id && utils.uuidToString(cleaned.risk_id);
 
-	if (Date.prototype.isPrototypeOf(cleaned.createdAt)) {
+	if (utils.isDate(cleaned.createdAt)) {
 		cleaned.createdAt = cleaned.createdAt.getTime();
 	}
 
-	if (Date.prototype.isPrototypeOf(cleaned.updatedAt)) {
+	if (utils.isDate(cleaned.updatedAt)) {
 		cleaned.updatedAt = cleaned.updatedAt.getTime();
 	}
 

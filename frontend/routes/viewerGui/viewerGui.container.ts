@@ -20,6 +20,7 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { selectCurrentUser } from '../../modules/currentUser';
+import { MeasurementsActions } from '../../modules/measurements';
 import { selectIsPending, selectSettings, ModelActions } from '../../modules/model';
 import { selectQueryParams } from '../../modules/router/router.selectors';
 import { TreeActions } from '../../modules/tree';
@@ -46,7 +47,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	stopListenOnSelections: TreeActions.stopListenOnSelections,
 	stopListenOnModelLoaded: ViewerGuiActions.stopListenOnModelLoaded,
 	stopListenOnClickPin: ViewerGuiActions.stopListenOnClickPin,
-	resetModel: ModelActions.reset
+	resetModel: ModelActions.reset,
+	removeMeasurement: MeasurementsActions.removeMeasurement,
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(ViewerGui));

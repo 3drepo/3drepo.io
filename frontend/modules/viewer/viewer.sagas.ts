@@ -34,7 +34,10 @@ const updateHandlers = {
 	caching: Viewer.setModelCache,
 	maxShadowDistance: Viewer.setMaxShadowDistance,
 	xray: Viewer.setXray,
-	numCacheThreads: Viewer.setNumCacheThreads
+	numCacheThreads: Viewer.setNumCacheThreads,
+	clipPlaneBorderWidth: Viewer.setPlaneBorderWidth,
+	clipPlaneBorderColor: Viewer.setPlaneBorderColor,
+
 };
 
 const callUpdateHandlers = (oldSettings, settings) => {

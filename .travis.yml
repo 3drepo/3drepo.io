@@ -53,7 +53,8 @@ cache:
 
 script:
     - cd ./../backend
-    - unbuffer yarn test
+    - mkdir coverage
+    - unbuffer yarn test:coverall
     - cd ../
     - NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" &
     - cd ./frontend

@@ -19,9 +19,10 @@ const config = require("../config.js");
 const fs = require("fs");
 const path = require("path");
 const ResponseCodes = require("../response_codes");
-const systemLogger = require("../logger.js").systemLogger;
+const systemLogger = require("../logger").systemLogger;
 const nodeuuid = require("uuid/v1");
 const farmhash = require("farmhash");
+const utils = require("../utils");
 
 const generateFoldernames = (fileName, dirLevels) => {
 	if (dirLevels < 1) {
@@ -60,7 +61,7 @@ const createFoldersIfNecessary = (foldersPath) => {
 class FSHandler {
 	constructor() {
 		if (config.fs) {
-			if (config.fs.hasOwnProperty("path") && config.fs.hasOwnProperty("levels")) {
+			if (utils.hasField(config.fs, "path") && utils.hasField(config.fs, "levels")) {
 				this.testFilesystem();
 			} else {
 				const err = "fs entry found in config, but cannot find path/levels entry";

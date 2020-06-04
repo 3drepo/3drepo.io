@@ -148,7 +148,6 @@ module.exports = {
 			skipChecking: true
 		}
 	},
-	bcf_dir: '/tmp',
 	legal: [
 		{title: "Terms & Conditions", type: "agreeTo", page: "terms", fileName: "terms.html"},
 		{title: "Privacy", type: "haveRead", page: "privacy", fileName: "privacy.html"},

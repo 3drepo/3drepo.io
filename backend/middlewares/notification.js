@@ -18,6 +18,7 @@
 const notification = require("../models/notification");
 const issues = require("../models/issue");
 const _ = require("lodash");
+const utils = require("../utils");
 
 module.exports = {
 	onUpdateIssue: function (req, res, next) {
@@ -27,7 +28,7 @@ module.exports = {
 		let oldIssue = null;
 		let issue = null;
 
-		const isCommentModification = req.dataModel.hasOwnProperty("comment"); // In case the update of the issue is for commenting
+		const isCommentModification = utils.hasField(req.dataModel, "comment"); // In case the update of the issue is for commenting
 
 		if (!isCommentModification) {
 			oldIssue = req.oldDataModel;
