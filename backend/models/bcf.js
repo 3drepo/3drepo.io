@@ -230,7 +230,11 @@ async function getIssueBCF(issue, account, model, unit) {
 			let screenshotContent;
 
 			if (vp.screenshot_ref) {
-				screenshotContent = await FileRef.fetchFile(account, model, "issues", vp.screenshot_ref);
+				try {
+					screenshotContent = await FileRef.fetchFile(account, model, "issues", vp.screenshot_ref);
+				} catch {
+					screenshotContent = undefined;
+				}
 			} else if (vp.screenshot && vp.screenshot.flag) {
 				screenshotContent = vp.screenshot.content.buffer;
 			}
