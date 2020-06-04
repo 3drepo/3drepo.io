@@ -69,11 +69,11 @@ export const MeasuringType = ({
 	};
 
 	React.useEffect(() => {
-		if (isMetadataActive) {
+		if (isMetadataActive || isClipEdit) {
 			setMeasureMode('');
 			deactivateMeasure();
 		}
-	}, [isMetadataActive]);
+	}, [isMetadataActive, isClipEdit]);
 
 	React.useEffect(() => {
 		if (measureMode === '' || measureMode === MEASURING_MODE.POINT) {
