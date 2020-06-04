@@ -231,7 +231,9 @@ class Ticket {
 		const systemComments = [];
 		const fields = Object.keys(data);
 
-		fields.forEach(async field => {
+		for (let i = 0; i < fields.length; i++) {
+			const field = fields[i];
+
 			if (Object.prototype.toString.call(data[field]) !== this.fieldTypes[field]) {
 				throw responseCodes.INVALID_ARGUMENTS;
 			}
@@ -274,7 +276,7 @@ class Ticket {
 				data[field]);
 
 			systemComments.push(comment);
-		});
+		}
 
 		data = await beforeUpdate(data, oldTicket, userPermissions, systemComments);
 
