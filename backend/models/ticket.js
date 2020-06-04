@@ -231,9 +231,13 @@ class Ticket {
 		const systemComments = [];
 		const fields = Object.keys(data);
 
-		for (let i = 0; i < fields.length; i++) {
-			const field = fields[i];
+		let newViewpoint;
 
+		if (data.viewpoint) {
+			newViewpoint = await this.handlePrimaryViewpoint(account, model, data._id, data.viewpoint);
+		}
+
+		fields.forEach(field => {
 			if (Object.prototype.toString.call(data[field]) !== this.fieldTypes[field]) {
 				throw responseCodes.INVALID_ARGUMENTS;
 			}
@@ -244,7 +248,7 @@ class Ticket {
 				if (data[field]) {
 					data[field] = {
 						...oldTicket[field],
-						...await this.handlePrimaryViewpoint(account, model, data._id, data[field])
+						...newViewpoint
 					};
 				}
 
@@ -276,7 +280,7 @@ class Ticket {
 				data[field]);
 
 			systemComments.push(comment);
-		}
+		});
 
 		data = await beforeUpdate(data, oldTicket, userPermissions, systemComments);
 
