@@ -138,6 +138,8 @@ router.get("/risks/:riskId/thumbnail.png", middlewares.issue.canView, getThumbna
  * @apiUse Risks
  *
  * @apiParam {String} [revId] Revision ID
+ * @apiParam (Query) {Number} [updatedSince] Only return issues that has been updated since this value (in epoch value)
+ *
  * @apiSuccess (200) {Object[]} risks Risk objects
  *
  * @apiExample {get} Example usage:
@@ -773,8 +775,16 @@ function listRisks(req, res, next) {
 	const branch = rid ? null : "master";
 	const ids = req.query.ids ? req.query.ids.split(",") : null;
 	const convertCoords = !!req.query.convertCoords;
+	let updatedSince = req.query.updatedSince;
 
-	Risk.getList(account, model, branch, rid, ids, convertCoords).then(risks => {
+	if (updatedSince) {
+		updatedSince = parseInt(updatedSince, 10);
+		if (isNaN(updatedSince)) {
+			return responseCodes.respond(place, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
+		}
+	}
+
+	Risk.getList(account, model, branch, rid, ids, convertCoords, updatedSince).then(risks => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, risks);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

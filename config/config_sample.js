@@ -120,5 +120,4 @@ module.exports = {
 		}
 	},
 	termsUpdatedAt: 1520592720000,
-	bcf_dir: '/tmp',
 }

@@ -84,7 +84,7 @@ const groupSchema = new Schema({
 	author: String,
 	description: String,
 	createdAt: Date,
-	updatedAt: Date,
+	updatedAt: Number,
 	updatedBy: String,
 	objects: {
 		type: [{
@@ -350,6 +350,7 @@ groupSchema.methods.getObjectsArray = function (model, branch, revId, convertSha
 	});
 };
 
+// FIXME: Why do we have findByUID and findByUIDSerialised? - charence
 groupSchema.statics.findByUID = function (dbCol, uid, branch, revId, convertObjects = true) {
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
@@ -371,6 +372,7 @@ groupSchema.statics.findByUID = function (dbCol, uid, branch, revId, convertObje
 
 };
 
+// FIXME: Why do we have findByUID and findByUIDSerialised? - charence
 groupSchema.statics.findByUIDSerialised = function (dbCol, uid, branch, revId, showIfcGuids = false) {
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
@@ -400,6 +402,19 @@ groupSchema.statics.listGroups = function (dbCol, queryParams, branch, revId, id
 	// If we want groups that aren't from risks
 	if (queryParams.noRisks) {
 		query.risk_id = { $exists: false };
+	}
+
+	if (queryParams.updatedSince) {
+		const updatedSince = parseFloat(queryParams.updatedSince);
+
+		query.$or = [
+			{
+				createdAt: { $gte: new Date(updatedSince) },  updatedAt: { $exists: false}
+			},
+			{
+				updatedAt: { $gte: updatedSince }
+			}
+		];
 	}
 
 	if (ids) {
