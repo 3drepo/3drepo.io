@@ -231,13 +231,25 @@ class Ticket {
 		const systemComments = [];
 		const fields = Object.keys(data);
 
-		fields.forEach(field => {
+		fields.forEach(async field => {
 			if (Object.prototype.toString.call(data[field]) !== this.fieldTypes[field]) {
 				throw responseCodes.INVALID_ARGUMENTS;
 			}
 
 			if (field === "viewpoint") {
 				oldTicket[field] = oldTicket.viewpoints[0];
+
+				if (data[field]) {
+					data[field] = {
+						...oldTicket[field],
+						...await this.handlePrimaryViewpoint(account, model, data._id, data[field])
+					};
+				}
+
+				if (data[field].thumbnail) {
+					data.thumbnail = data[field].thumbnail;
+					delete data[field].thumbnail;
+				}
 			}
 
 			// if a field have the same value shouldnt update the property
@@ -274,15 +286,7 @@ class Ticket {
 		// Handle viewpoint
 		if (data.viewpoint) {
 			data.viewpoints = oldTicket.viewpoints;
-			data.viewpoints[0] = {
-				...data.viewpoints[0],
-				...await this.handlePrimaryViewpoint(account, model, data._id, data.viewpoint)
-			};
-
-			if (data.viewpoints[0].thumbnail) {
-				data.thumbnail = data.viewpoints[0].thumbnail;
-				delete data.viewpoints[0].thumbnail;
-			}
+			data.viewpoints[0] = data.viewpoint;
 
 			delete data.viewpoint;
 		}
