@@ -468,7 +468,6 @@ const getDbColOptions = function (req) {
 };
 
 function listGroups(req, res, next) {
-
 	const dbCol = getDbColOptions(req);
 	const place = utils.APIInfo(req);
 

@@ -160,6 +160,11 @@ function viewpointsDeleted(emitter, account, model, ids) {
 	return insertEventQueue("view" + eventTypes.DELETED, emitter, account, model, null, ids);
 }
 
+// Presentation stream
+function streamPresentation(emitter, account, model, presentationId, data) {
+	return insertEventQueue("updated", emitter, account, model, ["presentation", presentationId], data);
+}
+
 module.exports = {
 	newIssues,
 	newComment,
@@ -182,5 +187,6 @@ module.exports = {
 	deletedNotification,
 	resourcesCreated,
 	resourceDeleted,
-	loggedOut
+	loggedOut,
+	streamPresentation
 };

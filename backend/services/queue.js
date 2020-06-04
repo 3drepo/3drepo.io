@@ -285,7 +285,7 @@ class ImportQueue {
 	}
 
 	insertEventMessage(msg) {
-		this.getChannel().then((channel) => {
+		return  this.getChannel().then((channel) => {
 			return channel.assertExchange(this.eventExchange, "fanout", {
 				durable: true
 			}).then(() => {

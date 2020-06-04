@@ -27,6 +27,7 @@ const ModelHelpers = require("../models/helper/model");
 const UnityAssets = require("../models/unityAssets");
 const JSONAssets = require("../models/jsonAssets");
 const config = require("../config");
+const ChatEvent = require("../models/chatEvent");
 
 function getDbColOptions(req) {
 	return {account: req.params.account, model: req.params.model};
@@ -1361,6 +1362,41 @@ router.delete("/:model", middlewares.hasDeleteAccessToModel, deleteModel);
 router.post("/:model/upload", middlewares.hasUploadAccessToModel, uploadModel);
 
 /**
+ * @api {post} /:teamspace/:model/start-presentation
+ * @apiName uploadModel
+ * @apiGroup Model
+ * @apiDescription It uploads a model file and creates a new revision for that model.
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model id to upload.
+ * @apiParam (Request body) {String} tag the tag name for the new revision
+ * @apiParam (Request body) {String} desc the description for the new revision
+ *
+ * @apiParam (Request body: Attachment) {binary} FILE the file to be uploaded
+ *
+ * @apiExample {post} Example usage:
+ * POST /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload HTTP/1.1
+ * Content-Type: multipart/form-data; boundary=----WebKitFormBoundarySos0xligf1T8Sy8I
+ *
+ * ------WebKitFormBoundarySos0xligf1T8Sy8I
+ * Content-Disposition: form-data; name="file"; filename="3DrepoBIM.obj"
+ * Content-Type: application/octet-stream
+ *
+ * <binary content>
+ * ------WebKitFormBoundarySos0xligf1T8Sy8I
+ * Content-Disposition: form-data; name="tag"
+ *
+ * rev1
+ * ------WebKitFormBoundarySos0xligf1T8Sy8I
+ * Content-Disposition: form-data; name="desc"
+ *
+ * el paso
+ * ------WebKitFormBoundarySos0xligf1T8Sy8I-- *
+ *
+ */
+router.put("/:model/presentation/:presentationId", middlewares.hasReadAccessToModel, streamPresentation);
+
+/**
  * @api {get} /:teamspace/:model/download/latest Download model
  * @apiName downloadModel
  * @apiGroup Model
@@ -1938,6 +1974,18 @@ function getMesh(req, res, next) {
 	ModelHelpers.getMeshById(account, model, meshId).then((stream) => {
 		res.writeHead(200, {"Content-Type": "application/json; charset=utf-8" });
 		stream.pipe(res);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function streamPresentation(req, res, next) {
+	const {model, account, presentationId} = req.params;
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
+	const viewpoint = req.body;
+
+	ChatEvent.streamPresentation(sessionId,account , model, presentationId, viewpoint).then(()=> {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
