@@ -250,6 +250,9 @@ const convertActionValueToText = (value = '') => {
 };
 
 export const transformCustomsLinksToMarkdown = ({comment, issues}) => {
+	if (!comment) {
+		return comment;
+	}
 	const usersReferences = comment.matchAll(MARKDOWN_USER_REFERENCE_REGEX);
 	const issuesReferences = comment.matchAll(MARKDOWN_ISSUE_REFERENCE_REGEX) || [];
 	const resourcesReferences = comment.matchAll(MARKDOWN_RESOURCE_REFERENCE_REGEX);
