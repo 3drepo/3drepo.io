@@ -70,5 +70,27 @@ module.exports = {
 		} else {
 			next();
 		}
+	},
+
+	onNewComment: (req, res, next) => {
+		const username = req.session.user.username;
+		const teamspace = req.params.account;
+		const modelId = req.params.model;
+		const _id = req.params.issueId || req.params.riskId;
+		const { comment, type, userRefs } = req.dataModel;
+		req.dataModel = comment;
+
+		if(userRefs) {
+			Promise.all(
+				userRefs.map((user) =>
+					notification.insertUserReferencedNotification(username, teamspace, modelId, type, _id, user)
+				)
+			).then((notifications) => {
+				req.userNotifications = _.flatten(notifications);
+				next();
+			});
+		} else {
+			next();
+		}
 	}
 };

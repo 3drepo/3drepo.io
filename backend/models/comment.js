@@ -53,7 +53,7 @@ class TextCommentGenerator extends CommentGenerator {
 	constructor(owner, commentText, viewpoint, pinPosition) {
 		super(owner);
 
-		if (fieldTypes.comment === Object.prototype.toString.call(commentText)) {
+		if (utils.isString(commentText)) {
 			this.comment = commentText;
 
 			if (viewpoint && viewpoint.guid) {
@@ -73,11 +73,11 @@ class SystemCommentGenerator extends CommentGenerator {
 	constructor(owner, property, from, to) {
 		super(owner);
 
-		if (undefined !== from && fieldTypes.from !== Object.prototype.toString.call(from)) {
+		if (undefined !== from && utils.isString(from)) {
 			from = from ? from.toString() : "";
 		}
 
-		if (undefined !== to && fieldTypes.to !== Object.prototype.toString.call(to)) {
+		if (undefined !== to && utils.isString(to)) {
 			to = to ? to.toString() : "";
 		}
 
@@ -107,6 +107,27 @@ class MitigationCommentGenerator extends TextCommentGenerator {
 		}
 	}
 }
+
+const identifyReferences = (comment) => {
+	const userRefs = new Set();
+	if (comment) {
+		let inQuotes = false;
+		const arrayOfLines = comment.split("\n");
+		arrayOfLines.forEach((line) => {
+			// New line resets the quote state. So a line is considered
+			// within quotes if the previous line is already in quotes or
+			// it contains the quote symbol
+			inQuotes = line !== "" && (line[0] === ">" || inQuotes);
+			if (!inQuotes) {
+				const users = line.match(/@\S*/g);
+				users && users.forEach((x) => userRefs.add(x.substr(1)));
+			}
+		});
+	}
+
+	return { userRefs: Array.from(userRefs) };
+
+};
 
 const addComment = async function(account, model, colName, id, user, data) {
 	if (!(data.comment || "").trim() && !get(data,"viewpoint.screenshot")) {
@@ -138,6 +159,7 @@ const addComment = async function(account, model, colName, id, user, data) {
 		}
 	}
 
+	const { userRefs } = identifyReferences(data.comment);
 	const comment = new TextCommentGenerator(user, data.comment, viewpoint);
 
 	// 4. Append the new comment
@@ -151,7 +173,7 @@ const addComment = async function(account, model, colName, id, user, data) {
 	View.setViewpointScreenshotURL(colName, account, model, id, viewpoint);
 
 	// 6. Return the new comment.
-	return {...comment, viewpoint, guid: utils.uuidToString(comment.guid)};
+	return { comment: {...comment, viewpoint, guid: utils.uuidToString(comment.guid)}, userRefs};
 };
 
 const deleteComment =  async function(account, model, colName, id, guid, user) {
