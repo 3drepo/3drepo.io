@@ -240,12 +240,14 @@ class Ticket {
 
 			if (field === "viewpoint") {
 				newViewpoint = this.handlePrimaryViewpoint(account, model, data._id, data.viewpoint);
-				oldTicket[field] = oldTicket.viewpoints[0];
+				oldTicket[field] = Viewpoint.clean(oldTicket.viewpoints[0]);
+				delete oldTicket[field].screenshot;
 
 				data[field] = {
 					...oldTicket[field],
 					...await newViewpoint
 				};
+				data[field].guid = utils.uuidToString(data[field].guid);
 
 				if (data[field].thumbnail) {
 					data.thumbnail = data[field].thumbnail;
@@ -300,6 +302,8 @@ class Ticket {
 
 		// Handle viewpoint
 		if (data.viewpoint) {
+			data.viewpoint.guid = utils.stringToUUID(data.viewpoint.guid);
+
 			data.viewpoints = oldTicket.viewpoints;
 			data.viewpoints[0] = data.viewpoint;
 
