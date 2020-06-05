@@ -140,7 +140,7 @@ const getDetails = (notification: IProps) => {
 		case TYPES.ISSUE_CLOSED:
 			return notification.issuesId.length <= 1 ? 'Issue has been closed' : `${notification.issuesId.length} closed issues`;
 		case TYPES.USER_REFERENCED:
-			return `${notification.referrer} has referenced you in an ${notification.issueId? 'issue' : 'risk'}`;
+			return `${notification.referrer} has referenced you in an ${notification.issueId ? 'issue' : 'risk'}`;
 	}
 };
 
@@ -174,7 +174,6 @@ export class NotificationItem extends React.PureComponent<IProps, IState> {
 		if (this.props.type === TYPES.USER_REFERENCED) {
 			search = this.props.issueId ? `?issueId=${this.props.issueId}` : `?riskId=${this.props.riskId}`;
 		}
-
 
 		if (this.props.type === TYPES.MODEL_UPDATED && this.props.revision) {
 			pathname += `/${this.props.revision}`;
