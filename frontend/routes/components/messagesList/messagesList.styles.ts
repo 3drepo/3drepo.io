@@ -64,6 +64,7 @@ export const Select = styled(SelectComponent)`
 
 		div[role="button"] {
 			padding-right: 22px;
+			min-height: unset;
 		}
 	}
 `;
