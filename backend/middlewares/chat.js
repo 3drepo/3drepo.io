@@ -33,7 +33,7 @@ module.exports = {
 
 	onCommentCreated: function(req, res, next) {
 		const sessionId = req.headers[C.HEADER_SOCKET_ID];
-		const comment = req.dataModel.comment;
+		const comment = req.dataModel;
 		const account = req.params.account;
 		const model = req.params.model;
 		const _id = req.params.issueId || req.params.riskId;
