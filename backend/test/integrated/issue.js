@@ -636,9 +636,12 @@ describe("Issues", function () {
 							newViewpoint.viewpoint = { ...newViewpoint.viewpoint, ...data.viewpoint };
 
 							expect(res.body.viewpoint.screenshot_ref).to.not.equal(screenshotRef);
-							expect(res.body.comments[0].action.property).to.equal("viewpoint.screenshot_ref");
-							expect(res.body.comments[0].action.from).to.equal(screenshotRef);
-							expect(res.body.comments[0].action.to).to.equal(res.body.viewpoint.screenshot_ref);
+							expect(res.body.comments[0].action.property).to.equal("viewpoint");
+							expect(res.body.comments[0].action.from).to.equal(JSON.stringify(oldViewpoint));
+							expect(res.body.comments[0].action.to).to.equal(JSON.stringify(newViewpoint));
+							expect(res.body.comments[1].action.property).to.equal("screenshot");
+							expect(res.body.comments[1].action.from).to.equal(screenshotRef);
+							expect(res.body.comments[1].action.to).to.equal(res.body.viewpoint.screenshot_ref);
 							expect(res.body.comments[0].owner).to.equal(username);
 							done(err);
 						});

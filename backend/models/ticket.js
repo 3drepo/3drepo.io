@@ -254,53 +254,43 @@ class Ticket {
 				if (data[field].thumbnail) {
 					data.thumbnail = data[field].thumbnail;
 					delete data[field].thumbnail;
+
+					const comment = this.createSystemComment(
+						account,
+						model,
+						sessionId,
+						id,
+						user,
+						"viewpoint.screenshot_ref",
+						oldTicket[field].screenshot_ref,
+						data[field].screenshot_ref);
+
+					systemComments.push(comment);
 				}
-
-				if (_.isEqual(Object.keys(await newViewpoint), ["guid","screenshot_ref","thumbnail"])) {
-					actionProperty = "viewpoint.screenshot_ref";
-					actionFrom = oldTicket[field].screenshot_ref;
-					actionTo = data[field].screenshot_ref;
-				} else {
-					actionProperty = field;
-					actionFrom = oldTicket[field];
-					actionTo = data[field];
-				}
-
-				const comment = this.createSystemComment(
-					account,
-					model,
-					sessionId,
-					id,
-					user,
-					actionProperty,
-					actionFrom,
-					actionTo);
-
-				systemComments.push(comment);
-			} else {
-				// if a field have the same value shouldnt update the property
-				if (_.isEqual(oldTicket[field], data[field])) {
-					delete data[field];
-					return;
-				}
-
-				// update of extras, comments, viewpoints must not create a system comment
-				if (field === "extras" || field === "comments" || field === "viewpoints") {
-					return;
-				}
-
-				const comment = this.createSystemComment(
-					account,
-					model,
-					sessionId,
-					id,
-					user,
-					field,
-					oldTicket[field],
-					data[field]);
-
-				systemComments.push(comment);
 			}
+
+			// if a field have the same value shouldnt update the property
+			if (_.isEqual(oldTicket[field], data[field])) {
+				delete data[field];
+				return;
+			}
+
+			// update of extras, comments, viewpoints must not create a system comment
+			if (field === "extras" || field === "comments" || field === "viewpoints") {
+				return;
+			}
+
+			const comment = this.createSystemComment(
+				account,
+				model,
+				sessionId,
+				id,
+				user,
+				field,
+				oldTicket[field],
+				data[field]);
+
+			systemComments.push(comment);
 		});
 
 		await newViewpoint;
