@@ -38,6 +38,9 @@ export interface INotification {
 	teamSpace: string;
 	modelName: string;
 	issuesId?: string[];
+	referer?: string;
+	riskId?: string;
+	issueId?: string;
 	revision?: string;
 	revisions?: string[];
 	timestamp: number;
