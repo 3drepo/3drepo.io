@@ -651,6 +651,8 @@ describe("Risks", function () {
 						.expect(200, function(err, res) {
 							const newViewpoint = { ...oldViewpoint };
 							newViewpoint.viewpoint = { ...newViewpoint.viewpoint, ...data.viewpoint };
+							delete newViewpoint.viewpoint.screenshot;
+							delete newViewpoint.viewpoint.screenshotSmall;
 
 							expect(res.body.viewpoint.screenshot_ref).to.not.equal(screenshotRef);
 							expect(res.body.comments[0].action.property).to.equal("screenshot");
@@ -705,6 +707,8 @@ describe("Risks", function () {
 					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function(err, res) {
 							const newViewpoint = { ...oldViewpoint, ...data.viewpoint };
+							delete newViewpoint.viewpoint.screenshot;
+							delete newViewpoint.viewpoint.screenshotSmall;
 
 							expect(res.body.viewpoint.up).to.deep.equal(data.viewpoint.up);
 							expect(res.body.viewpoint.position).to.deep.equal(data.viewpoint.position);
