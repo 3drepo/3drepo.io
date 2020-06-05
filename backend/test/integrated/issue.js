@@ -619,6 +619,8 @@ describe("Issues", function () {
 						.expect(200 , function(err, res) {
 							issueId = res.body._id;
 							oldViewpoint = res.body.viewpoint;
+							delete oldViewpoint.screenshot;
+							delete oldViewpoint.screenshotSmall;
 							screenshotRef = res.body.viewpoint.screenshot_ref;
 							return done(err);
 
@@ -634,8 +636,6 @@ describe("Issues", function () {
 						.expect(200, function(err, res) {
 							const newViewpoint = { ...oldViewpoint };
 							newViewpoint.viewpoint = { ...newViewpoint.viewpoint, ...data.viewpoint };
-							delete newViewpoint.viewpoint.screenshot;
-							delete newViewpoint.viewpoint.screenshotSmall;
 
 							expect(res.body.viewpoint.screenshot_ref).to.not.equal(screenshotRef);
 							expect(res.body.comments[0].action.property).to.equal("screenshot");
@@ -677,8 +677,9 @@ describe("Issues", function () {
 						.expect(200 , function(err, res) {
 							issueId = res.body._id;
 							oldViewpoint = res.body.viewpoint;
+							delete oldViewpoint.screenshot;
+							delete oldViewpoint.screenshotSmall;
 							return done(err);
-
 						});
 				},
 				function(done) {
@@ -690,8 +691,6 @@ describe("Issues", function () {
 					agent.get(`/${username}/${model}/issues/${issueId}`)
 						.expect(200, function(err, res) {
 							const newViewpoint = { ...oldViewpoint, ...data.viewpoint };
-							delete newViewpoint.viewpoint.screenshot;
-							delete newViewpoint.viewpoint.screenshotSmall;
 
 							expect(res.body.viewpoint.up).to.deep.equal(data.viewpoint.up);
 							expect(res.body.viewpoint.position).to.deep.equal(data.viewpoint.position);
