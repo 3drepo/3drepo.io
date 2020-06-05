@@ -73,6 +73,7 @@ interface IProps {
 	deactivateMeasure: () => void;
 	setIsPinDropMode: (mode: boolean) => void;
 	teamspaceUsers: any[];
+	disableIssuesSuggestions?: boolean;
 }
 
 interface IState {
@@ -187,6 +188,29 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 
 	private outputIssue = (item, trigger) => ({ text: `${trigger}${item.number}`, caretPosition: 'end' });
 
+	private get autocompleteTriggers() {
+		const usersTrigger = {
+			'@': {
+				dataProvider: (token) => this.filteredUsersList(token),
+				component: UserSuggestionItem,
+				output: this.outputUser,
+			},
+		};
+
+		if (!this.props.disableIssuesSuggestions) {
+			return ({
+				...usersTrigger,
+				'#': {
+					dataProvider: (token) => this.filteredIssuesList(token),
+					component: IssueSuggestionItem,
+					output: this.outputIssue,
+				},
+			});
+		}
+
+		return usersTrigger;
+	}
+
 	public renderCommentField = renderWhenTrue(() => (
 		<TextFieldWrapper>
 			<Field name={COMMENT_FIELD_NAME} render={({ field }) => (
@@ -196,18 +220,7 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 					loadingComponent={() => null}
 					renderToBody
 					minChar={0}
-					trigger={{
-						'@': {
-							dataProvider: (token) => this.filteredUsersList(token),
-							component: UserSuggestionItem,
-							output: this.outputUser,
-						},
-						'#': {
-							dataProvider: (token) => this.filteredIssuesList(token),
-							component: IssueSuggestionItem,
-							output: this.outputIssue,
-						},
-					}}
+					trigger={this.autocompleteTriggers}
 				/>
 			)} />
 		</TextFieldWrapper>

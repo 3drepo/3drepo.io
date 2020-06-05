@@ -167,6 +167,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				messagesContainerRef={this.messageContainerRef}
 				previewWrapperRef={this.containerRef}
 				horizontal={this.props.horizontal}
+				disableIssuesSuggestions
 			/>
 		</ViewerPanelFooter>
 	));
