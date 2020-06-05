@@ -257,7 +257,7 @@ class Ticket {
 						sessionId,
 						id,
 						user,
-						"viewpoint.screenshot_ref",
+						"screenshot",
 						oldTicket[field].screenshot_ref,
 						data[field].screenshot_ref);
 
