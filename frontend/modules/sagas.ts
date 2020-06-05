@@ -13,6 +13,7 @@ import jobsSaga from './jobs/jobs.sagas';
 import measurementsSaga from './measurements/measurements.sagas';
 import modelSaga from './model/model.sagas';
 import notificationsSaga from './notifications/notifications.sagas';
+import presentationSaga from './presentation/presentation.sagas';
 import risksSaga from './risks/risks.sagas';
 import sequencesSaga from './sequences/sequences.sagas';
 import starredSaga from './starred/starred.sagas';
@@ -25,6 +26,7 @@ import usersSaga from './users/users.sagas';
 import viewerSaga from './viewer/viewer.sagas';
 import viewerGuiSaga from './viewerGui/viewerGui.sagas';
 import viewpointsSaga from './viewpoints/viewpoints.sagas';
+
 // <-- IMPORT MODULE SAGA -->
 
 export default function* rootSaga() {
@@ -54,7 +56,8 @@ export default function* rootSaga() {
 		fork(dialogSaga),
 		fork(teamspaceSaga),
 		fork(boardSaga),
-		fork(sequencesSaga)
+		fork(sequencesSaga),
+		fork(presentationSaga)
 		// <-- INJECT MODULE SAGA -->
 	]);
 }
