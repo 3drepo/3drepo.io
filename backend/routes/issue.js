@@ -982,8 +982,9 @@ function addComment(req, res, next) {
 	const data =  req.body;
 	const {account, model, issueId} = req.params;
 
-	Comment.addComment(account, model, "issues", issueId, user, data).then(comment => {
-		req.dataModel = {...comment, type: "issue"};
+	Comment.addComment(account, model, "issues", issueId, user, data).then(({comment, userRefs}) => {
+		req.dataModel = comment;
+		req.userReferences = {type: "issue", userRefs};
 		next();
 	}).catch(err => {
 		responseCodes.onError(req, res, err);

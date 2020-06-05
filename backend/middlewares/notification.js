@@ -77,8 +77,7 @@ module.exports = {
 		const teamspace = req.params.account;
 		const modelId = req.params.model;
 		const _id = req.params.issueId || req.params.riskId;
-		const { comment, type, userRefs } = req.dataModel;
-		req.dataModel = comment;
+		const { type, userRefs } = req.userReferences;
 
 		if(userRefs) {
 			Promise.all(
