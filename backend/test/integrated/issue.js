@@ -635,7 +635,8 @@ describe("Issues", function () {
 					agent.get(`/${username}/${model}/issues/${issueId}`)
 						.expect(200, function(err, res) {
 							const newViewpoint = { ...oldViewpoint };
-							newViewpoint.viewpoint = { ...newViewpoint.viewpoint, ...data.viewpoint };
+							newViewpoint = { ...newViewpoint.viewpoint, ...data.viewpoint };
+							newViewpoint.guid = res.body.viewpoint.guid;
 
 							expect(res.body.viewpoint.screenshot_ref).to.not.equal(screenshotRef);
 							expect(res.body.comments[0].action.property).to.equal("screenshot");
@@ -691,6 +692,7 @@ describe("Issues", function () {
 					agent.get(`/${username}/${model}/issues/${issueId}`)
 						.expect(200, function(err, res) {
 							const newViewpoint = { ...oldViewpoint, ...data.viewpoint };
+							newViewpoint.guid = res.body.viewpoint.guid;
 
 							expect(res.body.viewpoint.up).to.deep.equal(data.viewpoint.up);
 							expect(res.body.viewpoint.position).to.deep.equal(data.viewpoint.position);
