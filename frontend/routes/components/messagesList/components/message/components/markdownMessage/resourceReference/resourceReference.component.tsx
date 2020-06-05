@@ -22,7 +22,7 @@ import { Link } from './resourceReference.styles';
 export const ResourceReference = ({ id, text, activeIssue }) => {
 	const { resources } = activeIssue;
 
-	const resourceData = resources.find((resource) => resource._id === id);
+	const resourceData = resources && resources.find((resource) => resource._id === id);
 
 	if (!resourceData) {
 		return text;

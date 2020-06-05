@@ -64,7 +64,7 @@ interface IProps {
 	hidePin?: boolean;
 	hasPin: boolean;
 	canComment: boolean;
-	formRef?: any;
+	formRef: any;
 }
 
 interface IState {

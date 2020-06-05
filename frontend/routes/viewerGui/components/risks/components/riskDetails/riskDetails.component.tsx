@@ -255,6 +255,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				showDialog={showDialog}
 				canComment={this.userCanComment}
 				showMitigationSuggestions={this.props.showMitigationSuggestions}
+				formRef={this.formRef}
 			/>
 		);
 	}
