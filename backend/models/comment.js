@@ -74,7 +74,7 @@ class SystemCommentGenerator extends CommentGenerator {
 		super(owner);
 
 		if (undefined !== from && fieldTypes.from !== Object.prototype.toString.call(from)) {
-			if ("[object Object]" === Object.prototype.toString.call(from)) {
+			if (utils.isObject(from)) {
 				from = JSON.stringify(from);
 			} else {
 				from = from ? from.toString() : "";
@@ -82,7 +82,7 @@ class SystemCommentGenerator extends CommentGenerator {
 		}
 
 		if (undefined !== to && fieldTypes.to !== Object.prototype.toString.call(to)) {
-			if ("[object Object]" === Object.prototype.toString.call(to)) {
+			if (utils.isObject(to)) {
 				to = JSON.stringify(to);
 			} else {
 				to = to ? to.toString() : "";
