@@ -239,10 +239,6 @@ class Ticket {
 			}
 
 			if (field === "viewpoint") {
-				let actionProperty;
-				let actionFrom;
-				let actionTo;
-
 				newViewpoint = this.handlePrimaryViewpoint(account, model, data._id, data.viewpoint);
 				oldTicket[field] = oldTicket.viewpoints[0];
 
