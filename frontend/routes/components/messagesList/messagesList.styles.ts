@@ -82,6 +82,6 @@ export const FilterWrapper = styled.div`
 	padding-left: 10px;
 	padding-top: 10px;
 	z-index: 2;
-	background: ${COLOR.GRAY};
+	background-color: ${COLOR.BLACK_6};
 	position: relative;
 `;
