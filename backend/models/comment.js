@@ -53,7 +53,7 @@ class TextCommentGenerator extends CommentGenerator {
 	constructor(owner, commentText, viewpoint, pinPosition) {
 		super(owner);
 
-		if (utils.isString(commentText)) {
+		if (utils.typeMatch(commentText, fieldTypes.comment)) {
 			this.comment = commentText;
 
 			if (viewpoint && viewpoint.guid) {
@@ -73,11 +73,11 @@ class SystemCommentGenerator extends CommentGenerator {
 	constructor(owner, property, from, to) {
 		super(owner);
 
-		if (undefined !== from && utils.isString(from)) {
+		if (undefined !== from && !utils.typeMatch(from, fieldTypes.from)) {
 			from = from ? from.toString() : "";
 		}
 
-		if (undefined !== to && utils.isString(to)) {
+		if (undefined !== to && !utils.typeMatch(to, fieldTypes.to)) {
 			to = to ? to.toString() : "";
 		}
 
