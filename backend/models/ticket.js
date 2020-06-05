@@ -241,6 +241,7 @@ class Ticket {
 			if (field === "viewpoint") {
 				newViewpoint = this.handlePrimaryViewpoint(account, model, data._id, data.viewpoint);
 				oldTicket[field] = oldTicket.viewpoints[0];
+				oldTicket[field].guid = utils.uuidToString(oldTicket[field].guid);
 
 				data[field] = {
 					...oldTicket[field],
