@@ -259,7 +259,7 @@ class Ticket {
 				if (_.isEqual(Object.keys(await newViewpoint), ["guid","screenshot_ref","thumbnail"])) {
 					actionProperty = "viewpoint.screenshot_ref";
 					actionFrom = oldTicket[field].screenshot_ref;
-					actionTo = (await newViewpoint).screenshot_ref;
+					actionTo = data[field].screenshot_ref;
 				} else {
 					actionProperty = field;
 					actionFrom = oldTicket[field];
