@@ -694,6 +694,7 @@ describe("Risks", function () {
 						.expect(200 , function(err, res) {
 							riskId = res.body._id;
 							oldViewpoint = res.body.viewpoint;
+							delete oldViewpoint.guid;
 							delete oldViewpoint.screenshot;
 							delete oldViewpoint.screenshotSmall;
 							return done(err);
@@ -709,6 +710,7 @@ describe("Risks", function () {
 					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function(err, res) {
 							const newViewpoint = { ...oldViewpoint, ...data.viewpoint };
+							delete newViewpoint.guid;
 
 							expect(res.body.viewpoint.up).to.deep.equal(data.viewpoint.up);
 							expect(res.body.viewpoint.position).to.deep.equal(data.viewpoint.position);

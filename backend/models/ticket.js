@@ -240,7 +240,7 @@ class Ticket {
 
 			if (field === "viewpoint") {
 				newViewpoint = this.handlePrimaryViewpoint(account, model, data._id, data.viewpoint);
-				oldTicket[field] = Viewpoint.clean(oldTicket.viewpoints[0]);
+				oldTicket[field] = oldTicket.viewpoints[0];
 
 				data[field] = {
 					...oldTicket[field],
