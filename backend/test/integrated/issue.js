@@ -635,8 +635,8 @@ describe("Issues", function () {
 					agent.get(`/${username}/${model}/issues/${issueId}`)
 						.expect(200, function(err, res) {
 							const newViewpoint = { ...oldViewpoint };
-							newViewpoint = { ...newViewpoint.viewpoint, ...data.viewpoint };
 							newViewpoint.guid = res.body.viewpoint.guid;
+							newViewpoint.screenshot_ref = res.body.viewpoint.screenshot_ref;
 
 							expect(res.body.viewpoint.screenshot_ref).to.not.equal(screenshotRef);
 							expect(res.body.comments[0].action.property).to.equal("screenshot");
