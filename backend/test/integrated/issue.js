@@ -1099,7 +1099,7 @@ describe("Issues", function () {
 			const issue = Object.assign({}, baseIssue, {"name":"Issue test", creator_role: "jobC"});
 			let issueId1;
 			let issueId2;
-			const void = { status: "void"};
+			const voidStatus = { status: "void"};
 			const close = { status: "closed"};
 
 			before(function(done) {
@@ -1149,7 +1149,7 @@ describe("Issues", function () {
 				async.series([
 					function(done) {
 						agent.patch(`/${username}/${model}/issues/${issueId1}`)
-							.send(void)
+							.send(voidStatus)
 							.expect(200, done);
 					}
 
@@ -1173,7 +1173,7 @@ describe("Issues", function () {
 			const issue = Object.assign({}, baseIssue, {"name":"Issue test", creator_role: "jobC"});
 			let issueId1;
 			let issueId2;
-			const void = { status: "void"};
+			const voidStatus = { status: "void"};
 			const close = { status: "closed"};
 
 			before(function(done) {
@@ -1223,7 +1223,7 @@ describe("Issues", function () {
 				async.series([
 					function(done) {
 						agent.patch(`/${username}/${model}/issues/${issueId2}`)
-							.send(void)
+							.send(voidStatus)
 							.expect(200, done);
 					}
 
@@ -1247,7 +1247,7 @@ describe("Issues", function () {
 			const issue = Object.assign({}, baseIssue, {"name":"Issue test", creator_role: "jobC"});
 			let issueId1;
 			let issueId2;
-			const void = { status: "void"};
+			const voidStatus = { status: "void"};
 			const close = { status: "closed"};
 
 			before(function(done) {
@@ -1300,7 +1300,7 @@ describe("Issues", function () {
 				async.series([
 					function(done) {
 						agent.patch(`/${username}/${model}/issues/${issueId2}`)
-							.send(void)
+							.send(voidStatus)
 							.expect(400, function(err, res) {
 								expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
 								done(err);
@@ -1499,10 +1499,10 @@ describe("Issues", function () {
 			});
 
 			it("should succeed", function(done) {
-				const void = { status: "void" };
+				const voidStatus = { status: "void" };
 
 				agent.patch(`/${username}/${model}/issues/${issueId}`)
-					.send(void)
+					.send(voidStatus)
 					.expect(200 , done);
 			});
 
@@ -1516,10 +1516,10 @@ describe("Issues", function () {
 
 			it("should fail if invalid issue ID is given", function(done) {
 				const invalidId = "00000000-0000-0000-0000-000000000000";
-				const void = { status: "void" };
+				const voidStatus = { status: "void" };
 
 				agent.patch(`/${username}/${model}/issues/${invalidId}`)
-					.send(void)
+					.send(voidStatus)
 					.expect(404, done);
 			});
 		});
