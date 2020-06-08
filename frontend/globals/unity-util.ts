@@ -479,9 +479,13 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static measurementAlert(strMeasurement) {
-		const measurement = JSON.parse(strMeasurement);
-		if (UnityUtil.viewer && UnityUtil.viewer.measurementAlertEvent) {
-			UnityUtil.viewer.measurementAlertEvent(measurement);
+		try {
+			const measurement = JSON.parse(strMeasurement);
+			if (UnityUtil.viewer && UnityUtil.viewer.measurementAlertEvent) {
+				UnityUtil.viewer.measurementAlertEvent(measurement);
+			}
+		} catch (error) {
+			console.error('Failed to parse measurement alert', strMeasurement);
 		}
 	}
 
