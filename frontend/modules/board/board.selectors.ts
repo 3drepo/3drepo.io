@@ -196,10 +196,16 @@ export const selectLanes = createSelector(
 
 		if (notDefinedGroup && notDefinedGroup.length) {
 			const propertyName = notDefinedGroup[0].prop;
+			let title = 'Undefined';
+
+			if (propertyName === FILTER_PROPS.assigned_roles.value) {
+				title = 'Unassigned';
+			} else if (propertyName === RISK_FILTER_PROPS.mitigation_status.value) {
+				title = 'Unmitigated'
+			}
 			const notDefinedLane = {
 				id: propertyName,
-				title: propertyName === FILTER_PROPS.assigned_roles.value ?
-					'Unassigned' : `Not defined ${FILTER_PROPS[propertyName] ? FILTER_PROPS[propertyName].name : ''}`,
+				title,
 				label: `${notDefinedGroup.length} ${boardType}`,
 				cards: notDefinedGroup
 			};
