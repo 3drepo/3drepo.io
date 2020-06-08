@@ -346,7 +346,7 @@ router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssues
  *
  * @apiParam (Request body) {String} name The name of the issue
  * @apiParam (Request body) {[]String} assigned_roles The roles assigned to the issue. Even though its an array (this is for future support of multiple assigned jobs), currently it has one or none elements correspoing to the available jobs in the teamaspace.
- * @apiParam (Request body) {String} status The status of the issue. It can have a value of "open","in progress","for approval" or "closed".
+ * @apiParam (Request body) {String} status The status of the issue. It can have a value of "open","in progress","for approval", "void" or "closed".
  * @apiParam (Request body) {String} priority The priority of the issue. It can have a value of "none", "low", "medium" or "high".
  * @apiParam (Request body) {String} topic_type Type of the issue. It's value has to be one of the defined topic_types for the model. See <a href='#api-Model-createModel'>here</a> for more details.
  * @apiParam (Request body) {Viewpoint} viewpoint The viewpoint of the issue, defining the position of the camera and the screenshot for that position.
@@ -516,7 +516,7 @@ router.post("/issues", middlewares.issue.canCreate, storeIssue, middlewares.noti
  *
  * @apiParam (Request body) {[]String} [assigned_roles] The roles assigned to the issue. Even though its an array (this is for future support of multiple assigned jobs), currently it has one or none elements correspoing to the available jobs in the teamaspace.
  * @apiParam (Request body) {String} [desc] The description of the issue
- * @apiParam (Request body) {String} [status] The status of the issue. It can have a value of "open","in progress","for approval" or "closed".
+ * @apiParam (Request body) {String} [status] The status of the issue. It can have a value of "open","in progress","for approval", "void" or "closed".
  * @apiParam (Request body) {String} [topic_type] Type of the issue. It's value has to be one of the defined topic_types for the model. See <a href='#api-Model-createModel'>here</a> for more details.
  * @apiParam (Request body) {[3]Number} [position] The vector defining the pin of the issue. If the pin doesnt has an issue its an empty array.
  * @apiParam (Request body) {Number} [due_date] A timestamp depicting the due date of issue.

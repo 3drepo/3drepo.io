@@ -918,6 +918,19 @@ describe("Issues", function () {
 
 			});
 
+			it("not change status to void", function(done) {
+
+				const updateData = {
+					"status": "void"
+				};
+				agent.patch(`/${username}/${model}/issues/${issueId}`)
+					.send(updateData)
+					.expect(400, function(err, res) {
+						done(err);
+					});
+
+			});
+
 			it("not change status to closed", function(done) {
 
 				const updateData = {
@@ -1013,7 +1026,7 @@ describe("Issues", function () {
 
 			});
 
-			it("not changed the status to in progress", function(done) {
+			it("not change the status to in progress", function(done) {
 
 				const updateDataProgress = {
 					"status": "in progress"
@@ -1027,7 +1040,20 @@ describe("Issues", function () {
 
 			});
 
-			it("not changed the status to closed", function(done) {
+			it("not change the status to void", function(done) {
+
+				const updateDataVoid = {
+					"status": "void"
+				};
+				agent.patch(`/${username}/${model}/issues/${issueId}`)
+					.send(updateDataVoid)
+					.expect(400, function(err, res) {
+						done(err);
+					});
+
+			});
+
+			it("not change the status to closed", function(done) {
 
 				const updateDataClosed = {
 					"status": "closed"
@@ -1071,7 +1097,9 @@ describe("Issues", function () {
 		describe("user with different role but is an admin", function() {
 
 			const issue = Object.assign({}, baseIssue, {"name":"Issue test", creator_role: "jobC"});
-			let issueId;
+			let issueId1;
+			let issueId2;
+			const void = { status: "void"};
 			const close = { status: "closed"};
 
 			before(function(done) {
@@ -1090,7 +1118,16 @@ describe("Issues", function () {
 						agent.post(`/${username}/${model}/issues`)
 							.send(issue)
 							.expect(200 , function(err, res) {
-								issueId = res.body._id;
+								issueId1 = res.body._id;
+								return done(err);
+
+							});
+					},
+					function(done) {
+						agent.post(`/${username}/${model}/issues`)
+							.send(issue)
+							.expect(200 , function(err, res) {
+								issueId2 = res.body._id;
 								return done(err);
 
 							});
@@ -1108,24 +1145,35 @@ describe("Issues", function () {
 				],done);
 			});
 
-			it("try to close an issue should succeed", function(done) {
-
+			it("try to void an issue should succeed", function(done) {
 				async.series([
 					function(done) {
-						agent.patch(`/${username}/${model}/issues/${issueId}`)
-							.send(close)
+						agent.patch(`/${username}/${model}/issues/${issueId1}`)
+							.send(void)
 							.expect(200, done);
 					}
 
 				], done);
 			});
 
+			it("try to close an issue should succeed", function(done) {
+				async.series([
+					function(done) {
+						agent.patch(`/${username}/${model}/issues/${issueId1}`)
+							.send(close)
+							.expect(200, done);
+					}
+
+				], done);
+			});
 		});
 
 		describe("user with different role but is a project admin", function() {
 
 			const issue = Object.assign({}, baseIssue, {"name":"Issue test", creator_role: "jobC"});
-			let issueId;
+			let issueId1;
+			let issueId2;
+			const void = { status: "void"};
 			const close = { status: "closed"};
 
 			before(function(done) {
@@ -1144,7 +1192,16 @@ describe("Issues", function () {
 						agent.post(`/${username}/${model}/issues`)
 							.send(issue)
 							.expect(200 , function(err, res) {
-								issueId = res.body._id;
+								issueId1 = res.body._id;
+								return done(err);
+
+							});
+					},
+					function(done) {
+						agent.post(`/${username}/${model}/issues`)
+							.send(issue)
+							.expect(200 , function(err, res) {
+								issueId2 = res.body._id;
 								return done(err);
 
 							});
@@ -1162,24 +1219,35 @@ describe("Issues", function () {
 				],done);
 			});
 
-			it("try to close an issue should succeed", function(done) {
-
+			it("try to void an issue should succeed", function(done) {
 				async.series([
 					function(done) {
-						agent.patch(`/${username}/${model}/issues/${issueId}`)
-							.send(close)
+						agent.patch(`/${username}/${model}/issues/${issueId2}`)
+							.send(void)
 							.expect(200, done);
 					}
 
 				], done);
 			});
 
+			it("try to close an issue should succeed", function(done) {
+				async.series([
+					function(done) {
+						agent.patch(`/${username}/${model}/issues/${issueId1}`)
+							.send(close)
+							.expect(200, done);
+					}
+
+				], done);
+			});
 		});
 
 		describe("user with different role and is not an admin ", function() {
 
 			const issue = Object.assign({}, baseIssue, {"name":"Issue test", creator_role: "jobC"});
-			let issueId;
+			let issueId1;
+			let issueId2;
+			const void = { status: "void"};
 			const close = { status: "closed"};
 
 			before(function(done) {
@@ -1188,9 +1256,16 @@ describe("Issues", function () {
 						agent.post(`/${username}/${model}/issues`)
 							.send(issue)
 							.expect(200 , function(err, res) {
-								issueId = res.body._id;
+								issueId1 = res.body._id;
 								return done(err);
-
+							});
+					},
+					function(done) {
+						agent.post(`/${username}/${model}/issues`)
+							.send(issue)
+							.expect(200 , function(err, res) {
+								issueId2 = res.body._id;
+								return done(err);
 							});
 					},
 					function(done) {
@@ -1221,14 +1296,25 @@ describe("Issues", function () {
 				],done);
 			});
 
-			it("try to close an issue should fail", function(done) {
-
+			it("try to void an issue should fail", function(done) {
 				async.series([
 					function(done) {
-						agent.patch(`/${username}/${model}/issues/${issueId}`)
+						agent.patch(`/${username}/${model}/issues/${issueId2}`)
+							.send(void)
+							.expect(400, function(err, res) {
+								expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
+								done(err);
+							});
+					}
+				], done);
+			});
+
+			it("try to close an issue should fail", function(done) {
+				async.series([
+					function(done) {
+						agent.patch(`/${username}/${model}/issues/${issueId1}`)
 							.send(close)
 							.expect(400, function(err, res) {
-
 								expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
 								done(err);
 							});
@@ -1388,18 +1474,15 @@ describe("Issues", function () {
 
 		});
 
-		describe("and then closing it", function() {
-
+		describe("and then voidng it", function() {
 			let issueId;
 
 			before(function(done) {
-
 				const issue = Object.assign({"name":"Issue test"}, baseIssue);
 
 				agent.post(`/${username}/${model}/issues`)
 					.send(issue)
 					.expect(200 , function(err, res) {
-
 						if(err) {
 							return done(err);
 						}
@@ -1411,50 +1494,84 @@ describe("Issues", function () {
 
 						agent.post(`/${username}/${model}/issues/${issueId}/comments`)
 							.send(comment)
-							.expect(200 , function(err, res) {
-								done(err);
-							});
+							.expect(200, done);
 					});
-
 			});
 
 			it("should succeed", function(done) {
-
-				const close = { status: "closed" };
+				const void = { status: "void" };
 
 				agent.patch(`/${username}/${model}/issues/${issueId}`)
-					.send(close)
-					.expect(200 , function(err, res) {
-
-						done(err);
-
-					});
+					.send(void)
+					.expect(200 , done);
 			});
 
 			it("should succeed if reopening", function(done) {
-
 				const open = {  status: "open" };
 
 				agent.patch(`/${username}/${model}/issues/${issueId}`)
 					.send(open)
-					.expect(200 , function(err, res) {
-						done(err);
-
-					});
+					.expect(200, done);
 			});
 
 			it("should fail if invalid issue ID is given", function(done) {
+				const invalidId = "00000000-0000-0000-0000-000000000000";
+				const void = { status: "void" };
 
+				agent.patch(`/${username}/${model}/issues/${invalidId}`)
+					.send(void)
+					.expect(404, done);
+			});
+		});
+
+		describe("and then closing it", function() {
+			let issueId;
+
+			before(function(done) {
+				const issue = Object.assign({"name":"Issue test"}, baseIssue);
+
+				agent.post(`/${username}/${model}/issues`)
+					.send(issue)
+					.expect(200 , function(err, res) {
+						if(err) {
+							return done(err);
+						}
+
+						issueId = res.body._id;
+
+						// add an comment
+						const comment = { comment: "hello world" };
+
+						agent.post(`/${username}/${model}/issues/${issueId}/comments`)
+							.send(comment)
+							.expect(200, done);
+					});
+			});
+
+			it("should succeed", function(done) {
+				const close = { status: "closed" };
+
+				agent.patch(`/${username}/${model}/issues/${issueId}`)
+					.send(close)
+					.expect(200 , done);
+			});
+
+			it("should succeed if reopening", function(done) {
+				const open = {  status: "open" };
+
+				agent.patch(`/${username}/${model}/issues/${issueId}`)
+					.send(open)
+					.expect(200, done);
+			});
+
+			it("should fail if invalid issue ID is given", function(done) {
 				const invalidId = "00000000-0000-0000-0000-000000000000";
 				const close = { status: "closed" };
 
 				agent.patch(`/${username}/${model}/issues/${invalidId}`)
 					.send(close)
-					.expect(404 , function(err, res) {
-						done(err);
-					});
+					.expect(404 , done);
 			});
-
 		});
 	});
 
