@@ -103,7 +103,7 @@ export const ModelGridItem = memo((props: IProps) => {
 		event.stopPropagation();
 		const { history, projectName, teamspace, model } = props;
 		history.push({
-			pathname: `${ROUTES.BOARD_MAIN}/issues/${teamspace}/${projectName}/${model}`
+			pathname: `${ROUTES.BOARD_MAIN}/issues/${teamspace}/${encodeURIComponent(projectName)}/${model}`
 		});
 	};
 
@@ -112,7 +112,7 @@ export const ModelGridItem = memo((props: IProps) => {
 		const { history, projectName, teamspace, model } = props;
 		history.push({
 			pathname: `${ROUTES.USER_MANAGEMENT_MAIN}/${teamspace}/projects`,
-			search: `?project=${projectName}&modelId=${model}&view=${PERMISSIONS_VIEWS.MODELS}`
+			search: `?project=${encodeURIComponent(projectName)}&modelId=${model}&view=${PERMISSIONS_VIEWS.MODELS}`
 		});
 	};
 
@@ -121,7 +121,7 @@ export const ModelGridItem = memo((props: IProps) => {
 		const { history, projectName, teamspace, model } = props;
 		history.push({
 			pathname: `${ROUTES.TEAMSPACES}/${teamspace}/models/${model}`,
-			search: `?project=${projectName}`
+			search: `?project=${encodeURIComponent(projectName)}`
 		});
 	};
 
