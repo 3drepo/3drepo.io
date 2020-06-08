@@ -103,7 +103,7 @@ export const ModelGridItem = memo((props: IProps) => {
 		event.stopPropagation();
 		const { history, projectName, teamspace, model } = props;
 		history.push({
-			pathname: `${ROUTES.BOARD_MAIN}/issues/${teamspace}/${encodeURIComponent(projectName)}/${model}`
+			pathname: `${ROUTES.BOARD_MAIN}/issues/${teamspace}/${projectName}/${model}`
 		});
 	};
 
