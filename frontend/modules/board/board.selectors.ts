@@ -201,7 +201,7 @@ export const selectLanes = createSelector(
 			if (propertyName === FILTER_PROPS.assigned_roles.value) {
 				title = 'Unassigned';
 			} else if (propertyName === RISK_FILTER_PROPS.mitigation_status.value) {
-				title = 'Unmitigated'
+				title = 'Unmitigated';
 			}
 			const notDefinedLane = {
 				id: propertyName,
