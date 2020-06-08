@@ -21,7 +21,6 @@ const EnhancedParagraph = (props) => {
 	const { children } = props;
 	const hasSingleChild = children && children[0] && children.length === 1;
 	const hasInvalidStructure = hasSingleChild && get(children, ['0', 'props', 'values'], null);
-
 	if (hasInvalidStructure) {
 		return children;
 	}

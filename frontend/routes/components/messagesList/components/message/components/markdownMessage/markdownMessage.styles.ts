@@ -45,6 +45,9 @@ export const Blockquote = styled.blockquote`
 `;
 
 export const Paragraph = styled.p`
+	& + & {
+		margin-top: 14px;
+	}
 `;
 
 export const Image = styled(ImageComponent)`

@@ -52,6 +52,8 @@ export const prepareComment = (comment) => {
 		comment.viewpoint.screenshotPath = getAPIUrl(comment.viewpoint.screenshot);
 	}
 
+	comment.comment = comment.comment.replace(/[\n]{2,}/g, `\n\n`);
+
 	return comment;
 };
 

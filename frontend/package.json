@@ -87,6 +87,7 @@
     "redux-saga": "0.16.0",
     "redux-undo": "1.0.0",
     "reduxsauce": "1.0.0",
+    "remark-breaks": "^1.0.5",
     "reselect": "4.0.0",
     "semver-compare": "1.0.0",
     "simplebar": "4.0.0",

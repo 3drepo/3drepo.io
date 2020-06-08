@@ -56,9 +56,8 @@ export const Footer = ({ name, created, formRef, comment, ...props }: IProps) =>
 		if (comment) {
 			quoteComment = quoteComment !== '' ? quoteComment.concat(`\n`) : quoteComment;
 			quoteComment = quoteComment.concat(`> ${comment
-				.replace(/(?:\r\n|\r|\n)/g, `\n`)
-				.replace(`\n\n`, `\n\n> `)
-			}`);
+					.replace(/(?:\r\n|\r|\n)/g, `\n`)
+					.replace(/\n/gi, `  \n> `)}`);
 		}
 
 		commentForm.setFieldValue(COMMENT_FIELD_NAME, `${currentFormCommentValue}${additionalNewLine}${quoteComment}\n\n`);
