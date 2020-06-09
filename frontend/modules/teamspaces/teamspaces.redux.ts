@@ -111,8 +111,8 @@ const getProject = (state, teamspaceName, projectName) => {
 // Models
 const updateModelSuccess = (state = INITIAL_STATE, { modelId, modelData }) => {
 	const model = { ...state.models[modelId],
-		name: modelData.name || state.models[modelId].name, code:
-		modelData.code || state.models[modelId].code
+		name: modelData.name || state.models[modelId].name,
+		code: modelData.code || state.models[modelId].code
 	};
 	if (modelData.federate) {
 		model.subModels = modelData.subModels;
