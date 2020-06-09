@@ -19,18 +19,17 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
+import { selectTeamspaceUser } from '../../../../../../../modules/comments';
 import { selectUrlParams } from '../../../../../../../modules/router/router.selectors';
-import { selectCachedResponses, UsersActions} from '../../../../../../../modules/users';
 
 import { UserMarker } from './userMarker.component';
 
-const mapStateToProps = createStructuredSelector({
-	usersCachedResponses: selectCachedResponses,
+const mapStateToProps = ({}, { name }) => createStructuredSelector({
+	currentUser: selectTeamspaceUser(name),
 	urlParams: selectUrlParams,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	fetchUserDetails: UsersActions.fetchUserDetails
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(UserMarker);

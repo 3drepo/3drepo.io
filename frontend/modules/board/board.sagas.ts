@@ -17,6 +17,7 @@
 
 import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
+import { CommentsActions } from '../comments';
 import { selectCurrentTeamspace } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { IssuesActions, IssuesTypes } from '../issues';
@@ -48,6 +49,8 @@ function* fetchData({ boardType, teamspace, project, modelId }) {
 		}
 
 		if (teamspace && project && modelId) {
+			yield put(CommentsActions.fetchUsers(teamspace));
+
 			if (boardType === 'issues') {
 				yield all([
 					put(IssuesActions.fetchIssues(teamspace, modelId)),

@@ -30,7 +30,6 @@ import { reducer as teamspaceReducer } from './teamspace/teamspace.redux';
 import { reducer as teamspacesReducer } from './teamspaces/teamspaces.redux';
 import { reducer as treeReducer } from './tree/tree.redux';
 import { reducer as userManagementReducer } from './userManagement/userManagement.redux';
-import { reducer as usersReducer } from './users/users.redux';
 import { reducer as viewerReducer } from './viewer/viewer.redux';
 import { reducer as viewerGuiReducer } from './viewerGui/viewerGui.redux';
 import { reducer as viewpointsReducer } from './viewpoints/viewpoints.redux';
@@ -56,7 +55,6 @@ export default function createReducer(history) {
 		model: modelReducer,
 		auth: authReducer,
 		notifications: notificationsReducer,
-		users: usersReducer,
 		comments: commentsReducer,
 		gis: gisReducer,
 		viewer: viewerReducer,

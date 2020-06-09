@@ -36,7 +36,6 @@ interface IProps {
 	teamspace: string;
 	removeMessage: (index, guid) => void;
 	setCameraOnViewpoint: (viewpoint) => void;
-	fetchUsers: (teamspace) => void;
 }
 
 const EmptyState = () => (
@@ -53,13 +52,9 @@ const Loader = () => (
 
 const maxScrollTop = (element) => element.scrollHeight - element.clientHeight;
 
-export const MessagesList = ({ teamspace, isPending, messages, fetchUsers, ...props }: IProps) => {
+export const MessagesList = ({ teamspace, isPending, messages, ...props }: IProps) => {
 	const [filter, setFilter] = React.useState('comments');
 	const listRef = React.useRef<HTMLDivElement>();
-
-	React.useEffect(() => {
-		fetchUsers(teamspace);
-	}, [fetchUsers, teamspace]);
 
 	React.useLayoutEffect(() => {
 		if (listRef.current) {
@@ -67,7 +62,6 @@ export const MessagesList = ({ teamspace, isPending, messages, fetchUsers, ...pr
 			const currentScroll = Math.ceil(list.scrollTop);
 			const isScrolled = currentScroll >= maxScrollTop(list);
 
-			// @TODO scroll immidietly on first render
 			if (!isScrolled) {
 				list.scrollTo({
 					top: list.scrollHeight - list.clientHeight,

@@ -22,7 +22,6 @@ import teamspaceSaga from './teamspace/teamspace.sagas';
 import teamspacesSaga from './teamspaces/teamspaces.sagas';
 import treeSaga from './tree/tree.sagas';
 import userManagementSaga from './userManagement/userManagement.sagas';
-import usersSaga from './users/users.sagas';
 import viewerSaga from './viewer/viewer.sagas';
 import viewerGuiSaga from './viewerGui/viewerGui.sagas';
 import viewpointsSaga from './viewpoints/viewpoints.sagas';
@@ -39,7 +38,6 @@ export default function* rootSaga() {
 		fork(modelSaga),
 		fork(authSaga),
 		fork(notificationsSaga),
-		fork(usersSaga),
 		fork(commentsSaga),
 		fork(viewerSaga),
 		fork(risksSaga),

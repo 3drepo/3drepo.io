@@ -17,17 +17,32 @@
 
 import { createSelector } from 'reselect';
 
+import { COLOR } from '../../styles';
 import { selectJobs } from '../jobs';
+
+const getJobColor = (jobs, jobId) => {
+	const jobData = jobs.find(({ _id }) => jobId === _id );
+
+	if (jobData && jobData.color) {
+		return jobData.color;
+	}
+
+	return COLOR.TRANSPARENT;
+};
 
 export const selectCommentsDomain = (state) => ({ ...state.comments });
 
 export const selectTeamspaceUsers = createSelector(
-	selectCommentsDomain, selectJobs, (state, jobs) => state.users
+	selectCommentsDomain, selectJobs, (state, jobs) => state.users ? state.users
 		.map(({ job, ...user }) => ({
 			...user,
 			job: {
 				_id: job,
-				color: jobs.find(({ _id }) => job === _id ).color
+				color: getJobColor(jobs, job),
 			}
-		}))
+	})) : []
+);
+
+export const selectTeamspaceUser = (name) => createSelector(
+	selectTeamspaceUsers, (users) => users.find(({ user }) => user === name) || null
 );

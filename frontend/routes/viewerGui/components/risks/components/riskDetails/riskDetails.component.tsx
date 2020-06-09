@@ -108,7 +108,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 			formRef={this.formRef}
 			messages={this.props.riskWithMarkdownComments}
 			isPending={this.props.fetchingDetailsIsPending}
-			removeLog={this.removeMessage}
+			removeMessage={this.removeMessage}
 			teamspace={this.props.teamspace}
 			currentUser={this.props.currentUser.username}
 			setCameraOnViewpoint={this.setCameraOnViewpoint}

@@ -19,15 +19,12 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { CommentsActions } from '../../../modules/comments';
-
 import { MessagesList } from './messagesList.component';
 
 const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	fetchUsers: CommentsActions.fetchUsers
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(MessagesList);

@@ -112,7 +112,7 @@ export const uploadAvatar = (teamspace, formData) => {
 
 export const getAvatarUrl = (username) => getAPIUrl(`${username}/avatar?${Date.now()}`);
 
-export const getCheckedAvatarUrl = async (username) => api.get(`${username}/avatar?${Date.now()}`)
+export const getCheckedAvatarUrl = async (username) => api.get(`${username}/avatar?${new Date().setSeconds(0, 0)}`)
 	.then(({ status, config: { url } }) => {
 		return status === 200 ? url : null;
 	})

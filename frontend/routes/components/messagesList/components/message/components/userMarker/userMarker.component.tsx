@@ -19,36 +19,29 @@ import React from 'react';
 
 import { Popover } from '../markdownMessage/issueReference/issueReference.styles';
 import { UserAvatar } from '../userAvatar';
-import { UserPopover } from '../userPopover/userPopover.component';
+import { IUser, UserPopover } from '../userPopover/userPopover.component';
 import { UserIndicator } from './userMarker.styles';
 
 interface IProps {
 	name: string;
 	children?: React.ReactNode;
-	usersCachedResponses: any[];
-	fetchUserDetails: (teamspace, username) => void;
+	currentUser: IUser;
 	urlParams: { teamspace: string };
 }
 
-export const UserMarker = ({ name, children, fetchUserDetails, usersCachedResponses, urlParams }: IProps) => {
+export const UserMarker = ({ name, children, currentUser, urlParams }: IProps) => {
 	const teamspace = urlParams ? urlParams.teamspace : '';
 	const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
 	const open = Boolean(anchorEl);
-
-	React.useEffect(() => {
-		if (teamspace && name) {
-			fetchUserDetails(teamspace, name);
-		}
-	}, [fetchUserDetails, teamspace, name]);
 
 	if (!teamspace || !name) {
 		return children || <UserAvatar name={name} />;
 	}
 
-	const currentUser = usersCachedResponses[`${teamspace}-${name}`];
-
 	const handlePopoverOpen = (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
-		setAnchorEl(event.currentTarget);
+		if (currentUser) {
+			setAnchorEl(event.currentTarget);
+		}
 	};
 
 	const handlePopoverClose = () => {
