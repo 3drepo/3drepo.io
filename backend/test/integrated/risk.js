@@ -24,7 +24,6 @@ const responseCodes = require("../../response_codes.js");
 const async = require("async");
 
 describe("Risks", function () {
-
 	let server;
 	let agent;
 
@@ -70,7 +69,6 @@ describe("Risks", function () {
 	};
 
 	before(function(done) {
-
 		server = app.listen(8080, function () {
 			console.log("API test server is listening on port 8080!");
 
@@ -136,7 +134,6 @@ describe("Risks", function () {
 
 				function(done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function(err, res) {
-
 						expect(res.body.name).to.equal(risk.name);
 						expect(res.body.safetibase_id).to.equal(risk.safetibase_id);
 						expect(res.body.associated_activity).to.equal(risk.associated_activity);
@@ -168,7 +165,6 @@ describe("Risks", function () {
 		});
 
 		it("with screenshot should succeed", function(done) {
-
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			risk.viewpoint.screenshot = pngBase64;
 
@@ -183,7 +179,6 @@ describe("Risks", function () {
 							return done(err);
 						});
 				},
-
 				function(done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function(err, res) {
 						expect(res.body.viewpoint.screenshot).to.equal(`${username}/${model}/risks/${riskId}/viewpoints/${res.body.viewpoint.guid}/screenshot.png`);
@@ -226,18 +221,15 @@ describe("Risks", function () {
 				});
 		});
 
-		it("with invalid mitigation status", function(done) {
+		it("with invalid mitigation status should pass", function(done) {
 			const risk = Object.assign({}, baseRisk, {"name":"Risk test", "mitigation_status":"abc"});
 
 			agent.post(`/${username}/${model}/risks`)
 				.send(risk)
-				.expect(200, function(err, res) {
-					done(err);
-				});
+				.expect(200, done);
 		});
 
 		it("with pin should succeed and pin info is saved", function(done) {
-
 			const risk = Object.assign({
 				"name": "Risk test",
 				"position": [33.167440465643935, 12.46054749529149, -46.997271893235435]
@@ -254,7 +246,6 @@ describe("Risks", function () {
 							expect(res.body.norm).to.deep.equal(risk.norm);
 							expect(res.body.position).to.deep.equal(risk.position);
 							return done(err);
-
 						});
 				},
 				function(done) {
@@ -268,7 +259,6 @@ describe("Risks", function () {
 		});
 
 		it("change safetibase_id should succeed", function(done) {
-
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			let riskId;
 
@@ -299,7 +289,6 @@ describe("Risks", function () {
 		});
 
 		it("change associated_activity should succeed", function(done) {
-
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			let riskId;
 
@@ -330,7 +319,6 @@ describe("Risks", function () {
 		});
 
 		it("change description should succeed", function(done) {
-
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			let riskId;
 
@@ -361,7 +349,6 @@ describe("Risks", function () {
 		});
 
 		it("change assigned_roles should succeed", function(done) {
-
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			let riskId;
 
@@ -392,7 +379,6 @@ describe("Risks", function () {
 		});
 
 		it("change category should succeed and create system comment", function(done) {
-
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			let riskId;
 
@@ -429,7 +415,6 @@ describe("Risks", function () {
 		});
 
 		it("seal last non system comment when adding system comment", function(done) {
-
 			const risk = Object.assign({"name":"Risk test"}, baseRisk, { associated_activity: "ru123"});
 			let riskId;
 			const data = { associated_activity: "abc123"};
@@ -440,7 +425,6 @@ describe("Risks", function () {
 						.expect(200 , function(err, res) {
 							riskId = res.body._id;
 							return done(err);
-
 						});
 				},
 				function(done) {
@@ -464,7 +448,6 @@ describe("Risks", function () {
 		});
 
 		it("change likelihood should succeed", function(done) {
-
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			let riskId;
 
@@ -495,7 +478,6 @@ describe("Risks", function () {
 		});
 
 		it("change consequence should succeed", function(done) {
-
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			let riskId;
 
@@ -526,7 +508,6 @@ describe("Risks", function () {
 		});
 
 		it("change pin should succeed", function(done) {
-
 			const risk = {...baseRisk, "name":"Risk test", position:[3,2,1]};
 			let riskId;
 
@@ -556,9 +537,7 @@ describe("Risks", function () {
 			], done);
 		});
 
-
 		it("change mitigation status should succeed", function(done) {
-
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			let riskId;
 
@@ -588,8 +567,37 @@ describe("Risks", function () {
 			], done);
 		});
 
-		it("change mitigation should succeed", function(done) {
+		it("change mitigation status to void should succeed", function(done) {
+			const risk = Object.assign({"name":"Risk test"}, baseRisk);
+			let riskId;
 
+			const mitigationStatus = { mitigation_status: "void" };
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200, function(err, res) {
+							riskId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
+						.send(mitigationStatus)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/risks/${riskId}`)
+						.expect(200, function(err, res) {
+							expect(res.body.mitigation_status).to.equal(mitigationStatus.mitigation_status);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change mitigation should succeed", function(done) {
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			let riskId;
 
@@ -624,7 +632,6 @@ describe("Risks", function () {
 			let commentId = null
 
 			before(function(done) {
-
 				const risk = Object.assign({"name":"Risk test"}, baseRisk);
 
 				agent.post(`/${username}/${model}/risks`)
@@ -637,7 +644,6 @@ describe("Risks", function () {
 			});
 
 			it("should succeed", function(done) {
-
 				const comment = {
 					comment: "hello world",
 					"viewpoint":{
@@ -661,7 +667,6 @@ describe("Risks", function () {
 							.send(comment)
 							.expect(200 , done);
 					},
-
 					function(done) {
 						agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function(err , res) {
 							comment.viewpoint.guid = res.body.comments[0].viewpoint.guid;
@@ -676,12 +681,9 @@ describe("Risks", function () {
 						});
 					}
 				], done);
-
 			});
 
-
 			it("should fail if comment is empty", function(done) {
-
 				const comment = { comment: "" };
 
 				agent.post(`/${username}/${model}/risks/${riskId}/comments`)
@@ -701,15 +703,12 @@ describe("Risks", function () {
 			});
 
 			it("should fail if invalid risk ID is given", function(done) {
-
 				const invalidId = "00000000-0000-0000-0000-000000000000";
 				const comment = { comment: "hello world" };
 
 				agent.patch(`/${username}/${model}/risks/${invalidId}`)
 					.send(comment)
-					.expect(404 , function(err, res) {
-						done(err);
-					});
+					.expect(404 , done);
 			});
 
 		});
