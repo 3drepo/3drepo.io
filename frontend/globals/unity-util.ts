@@ -1350,6 +1350,15 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Set API key to use for authentication. Ensure setAPIHost is called before this.
+	 * @category Configurations
+	 * @param apiKey
+	 */
+	public static setAPIKey(apiKey: string) {
+		UnityUtil.toUnity('SetAPIKey', UnityUtil.LoadingState.VIEWER_READY, apiKey);
+	}
+
+	/**
 	 * Set the default near plane value. This can be use to tweak situations where
 	 * geometry closest to you are being clipped
 	 * @category Configurations
