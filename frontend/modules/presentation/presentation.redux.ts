@@ -35,6 +35,10 @@ export const { Types: PresentationTypes, Creators: PresentationActions } = creat
 	startPresenting: [],
 	stopPresenting: [],
 	setPresenting: ['isPresenting'],
+	setJoinPresentation: ['joinedPresentation', 'sessionCode'],
+	joinPresentation: ['sessionCode'],
+	leavePresentation: []
+
 }, { prefix: 'PRESENTATION/' });
 
 export const INITIAL_STATE = {
@@ -52,6 +56,17 @@ export const setPresenting = (state = INITIAL_STATE, { isPresenting }) => {
 	return { ...state, isPresenting, sessionCode };
 };
 
+export const setJoinPresentation = (state = INITIAL_STATE, { joinedPresentation, sessionCode }) => {
+	if (state.joinedPresentation === joinedPresentation) {
+		return state;
+	}
+
+	sessionCode = sessionCode || '';
+
+	return { ...state, joinedPresentation, sessionCode };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[PresentationTypes.SET_PRESENTING]: setPresenting,
+	[PresentationTypes.SET_JOIN_PRESENTATION]: setJoinPresentation,
 });

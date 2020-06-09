@@ -15,18 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { VIEWER_PANELS, VIEWER_PANELS_ICONS } from '../../../../constants/viewerGui';
 import {  PresentationContainer } from './presentation.styles';
 
 const PresentationIcon = VIEWER_PANELS_ICONS[VIEWER_PANELS.PRESENTATION];
 
-const JoinedPresentation = ({sessionCode}) => {
+const JoinedPresentation = ({sessionCode, leavePresentation}) => {
 	return (
 		<div> you have joined a presentation {sessionCode}
 			<button>Pause</button>
-			<button>End Session</button>
+			<button onClick={leavePresentation}>End Session</button>
 		</div>
 	);
 };
@@ -39,11 +39,13 @@ const Presenting = ({sessionCode, stopPresenting}) => {
 	);
 };
 
-const InitialState = ({startPresenting}) => {
+const InitialState = ({startPresenting, joinPresentation}) => {
+	const [code, setCode] = useState('');
+
 	return (
 		<div>
-			<input />
-			<button >Join</button>
+			<input onChange={(e) => setCode(e.currentTarget.value)} value={code} />
+			<button onClick={() => joinPresentation(code)}>Join</button>
 			<hr />
 			<button onClick={startPresenting}>Create Session</button>
 		</div>
@@ -56,6 +58,8 @@ interface IProps {
 	sessionCode: string;
 	startPresenting: () => void;
 	stopPresenting: () => void;
+	joinPresentation: (code: string) => void;
+	leavePresentation: () => void;
 }
 
 export class Presentation extends React.PureComponent<IProps, any> {

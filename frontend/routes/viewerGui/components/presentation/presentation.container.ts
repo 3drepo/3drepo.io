@@ -35,7 +35,10 @@ const mapStateToProps = createStructuredSelector({
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	startPresenting: PresentationActions.startPresenting,
-	stopPresenting: PresentationActions.stopPresenting
+	stopPresenting: PresentationActions.stopPresenting,
+	joinPresentation: PresentationActions.joinPresentation,
+	leavePresentation: PresentationActions.leavePresentation
+
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Presentation);

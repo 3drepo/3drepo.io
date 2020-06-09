@@ -22,24 +22,54 @@ import { CHAT_CHANNELS } from '../../constants/chat';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
-import { selectCurrentTeamspace } from '../currentUser';
-import { selectCurrentModel } from '../model';
+import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
+import { getState } from '../store';
 import {  selectSessionCode, PresentationActions, PresentationTypes } from './index';
 
 let intervalId = 0;
 
 const streamPresentation = async (teamspace, model, code) => {
-	const viewpoint  =  await Viewer.getCurrentViewpoint({ teamspace, model });
+	const viewpoint = await Viewer.getCurrentViewpoint({ teamspace, model });
 	await API.streamPresentation(teamspace, model, code, viewpoint);
 };
 
 function* startPresenting() {
 	yield put(PresentationActions.setPresenting(true));
-	const currentTeamspace = yield select(selectCurrentTeamspace);
+	const currentTeamspace = yield select(selectCurrentModelTeamspace);
 	const currentModel = yield select(selectCurrentModel);
 	const sessionCode = yield select(selectSessionCode);
 
 	intervalId = window.setInterval(streamPresentation, 1000, currentTeamspace, currentModel, sessionCode);
+}
+
+const onStreamPresentationEvent = (viewpoint) => {
+	const account = selectCurrentModelTeamspace(getState());
+	const model = selectCurrentModel(getState());
+
+	Viewer.setCamera({ ...viewpoint, account, model });
+};
+
+function* joinPresentation({ sessionCode }) {
+	const currentTeamspace = yield select(selectCurrentModelTeamspace);
+	const currentModel = yield select(selectCurrentModel);
+
+	yield put(PresentationActions.setJoinPresentation(true, sessionCode));
+
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.PRESENTATION, currentTeamspace, currentModel, {
+		subscribeToStream: [sessionCode, onStreamPresentationEvent]
+	}));
+
+}
+
+function* leavePresentation() {
+	const currentTeamspace = yield select(selectCurrentModelTeamspace);
+	const currentModel = yield select(selectCurrentModel);
+
+	yield put(PresentationActions.setJoinPresentation(false));
+
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.PRESENTATION, currentTeamspace, currentModel, {
+		unsubscribeFromStream: onStreamPresentationEvent
+	}));
 }
 
 function* stopPresenting() {
@@ -50,4 +80,7 @@ function* stopPresenting() {
 export default function* PresentationSaga() {
 	yield takeLatest(PresentationTypes.START_PRESENTING, startPresenting);
 	yield takeLatest(PresentationTypes.STOP_PRESENTING, stopPresenting);
+	yield takeLatest(PresentationTypes.JOIN_PRESENTATION, joinPresentation);
+	yield takeLatest(PresentationTypes.LEAVE_PRESENTATION, leavePresentation);
+
 }
