@@ -22,12 +22,13 @@ import { difference, isEqual } from 'lodash';
 import { ROUTES } from '../../constants/routes';
 import { addColorOverrides, overridesColorDiff, removeColorOverrides } from '../../helpers/colorOverrides';
 import { pinsDiff } from '../../helpers/pins';
+import { ViewerService } from '../../services/viewer/viewer';
 import { Container } from './viewerCanvas.styles';
 
 interface IProps {
 	location: any;
 	className?: string;
-	viewer: any;
+	viewer: ViewerService;
 	match: {
 		params: {
 			model: string;
@@ -44,6 +45,7 @@ interface IProps {
 	hasGisCoordinates: boolean;
 	gisCoordinates: any;
 	handleTransparencyOverridesChange: any;
+	viewerManipulationEnabled: boolean;
 }
 
 export class ViewerCanvas extends React.PureComponent<IProps, any> {
@@ -107,8 +109,8 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 	}
 
 	public componentDidUpdate(prevProps: IProps) {
-		const { colorOverrides, issuePins, riskPins, measurementPins, hasGisCoordinates,
-			gisCoordinates, gisLayers, transparencies } = this.props;
+		const { viewer, colorOverrides, issuePins, riskPins, measurementPins, hasGisCoordinates,
+			gisCoordinates, gisLayers, transparencies, viewerManipulationEnabled } = this.props;
 
 		if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
 			this.renderColorOverrides(prevProps.colorOverrides, colorOverrides);
@@ -138,6 +140,13 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 			this.renderGisLayers(prevProps.gisLayers, gisLayers);
 		}
 
+		if (prevProps.viewerManipulationEnabled !== viewerManipulationEnabled) {
+			if (viewerManipulationEnabled) {
+				viewer.setNavigationOn();
+			} else {
+				viewer.setNavigationOff();
+			}
+		}
 	}
 
 	public render() {

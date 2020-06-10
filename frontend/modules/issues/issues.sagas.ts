@@ -46,7 +46,7 @@ import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
-import { selectTopicTypes, TeamspaceActions } from '../teamspace';
+import { selectTopicTypes } from '../teamspace';
 import { selectIfcSpacesHidden, TreeActions } from '../tree';
 import { IssuesActions, IssuesTypes } from './issues.redux';
 import {

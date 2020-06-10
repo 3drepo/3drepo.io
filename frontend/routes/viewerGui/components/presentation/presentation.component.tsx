@@ -22,10 +22,10 @@ import {  PresentationContainer } from './presentation.styles';
 
 const PresentationIcon = VIEWER_PANELS_ICONS[VIEWER_PANELS.PRESENTATION];
 
-const JoinedPresentation = ({sessionCode, leavePresentation}) => {
+const JoinedPresentation = ({sessionCode, leavePresentation, isPaused, togglePause}) => {
 	return (
 		<div> you have joined a presentation {sessionCode}
-			<button>Pause</button>
+			<button onClick={togglePause}>{isPaused ? 'Resume' : 'Pause'}</button>
 			<button onClick={leavePresentation}>End Session</button>
 		</div>
 	);
@@ -54,12 +54,14 @@ const InitialState = ({startPresenting, joinPresentation}) => {
 
 interface IProps {
 	isPresenting: boolean;
+	isPaused: boolean;
 	joinedPresentation: boolean;
 	sessionCode: string;
 	startPresenting: () => void;
 	stopPresenting: () => void;
 	joinPresentation: (code: string) => void;
 	leavePresentation: () => void;
+	togglePause: () => void;
 }
 
 export class Presentation extends React.PureComponent<IProps, any> {

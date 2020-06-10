@@ -29,3 +29,11 @@ export const selectJoinedPresentation = createSelector(
 export const selectSessionCode = createSelector(
 	selectPresentationDomain, (state) => state.sessionCode
 );
+
+export const selectIsPaused = createSelector(
+	selectPresentationDomain, (state) => state.isPaused
+);
+
+export const selectIsViewerManipulationEnabled = createSelector(
+	selectJoinedPresentation, selectIsPaused,  (joined, paused) => !joined || paused
+);

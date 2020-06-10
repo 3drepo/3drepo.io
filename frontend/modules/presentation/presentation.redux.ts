@@ -37,14 +37,16 @@ export const { Types: PresentationTypes, Creators: PresentationActions } = creat
 	setPresenting: ['isPresenting'],
 	setJoinPresentation: ['joinedPresentation', 'sessionCode'],
 	joinPresentation: ['sessionCode'],
-	leavePresentation: []
-
+	leavePresentation: [],
+	togglePause: [],
+	setPaused: ['isPaused']
 }, { prefix: 'PRESENTATION/' });
 
 export const INITIAL_STATE = {
 	sessionCode: '',
 	isPresenting: false,
-	joinedPresentation: false
+	joinedPresentation: false,
+	isPaused: false
 };
 
 export const setPresenting = (state = INITIAL_STATE, { isPresenting }) => {
@@ -63,10 +65,19 @@ export const setJoinPresentation = (state = INITIAL_STATE, { joinedPresentation,
 
 	sessionCode = sessionCode || '';
 
-	return { ...state, joinedPresentation, sessionCode };
+	return { ...state, joinedPresentation, sessionCode, isPaused: false };
+};
+
+export const setPaused = (state = INITIAL_STATE, { isPaused }) => {
+	if (state.isPaused === isPaused) {
+		return state;
+	}
+
+	return { ...state, isPaused };
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[PresentationTypes.SET_PRESENTING]: setPresenting,
 	[PresentationTypes.SET_JOIN_PRESENTATION]: setJoinPresentation,
+	[PresentationTypes.SET_PAUSED]: setPaused
 });

@@ -20,6 +20,7 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import {
+	selectIsPaused,
 	selectIsPresenting,
 	selectJoinedPresentation,
 	selectSessionCode,
@@ -29,6 +30,7 @@ import { Presentation } from './presentation.component';
 
 const mapStateToProps = createStructuredSelector({
 	isPresenting: selectIsPresenting,
+	isPaused: selectIsPaused,
 	joinedPresentation: selectJoinedPresentation,
 	sessionCode: selectSessionCode
 });
@@ -37,8 +39,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	startPresenting: PresentationActions.startPresenting,
 	stopPresenting: PresentationActions.stopPresenting,
 	joinPresentation: PresentationActions.joinPresentation,
-	leavePresentation: PresentationActions.leavePresentation
-
+	leavePresentation: PresentationActions.leavePresentation,
+	togglePause: PresentationActions.togglePause
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Presentation);

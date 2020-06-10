@@ -24,7 +24,7 @@ import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
 import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { getState } from '../store';
-import {  selectSessionCode, PresentationActions, PresentationTypes } from './index';
+import {  selectIsPaused, selectSessionCode, PresentationActions, PresentationTypes } from './index';
 
 let intervalId = 0;
 
@@ -43,6 +43,12 @@ function* startPresenting() {
 }
 
 const onStreamPresentationEvent = (viewpoint) => {
+	const paused = selectIsPaused(getState());
+
+	if (paused) {
+		return;
+	}
+
 	const account = selectCurrentModelTeamspace(getState());
 	const model = selectCurrentModel(getState());
 
@@ -77,10 +83,15 @@ function* stopPresenting() {
 	clearInterval(intervalId);
 }
 
+function* togglePause() {
+	const paused = !(yield select(selectIsPaused));
+	yield put(PresentationActions.setPaused(paused));
+}
+
 export default function* PresentationSaga() {
 	yield takeLatest(PresentationTypes.START_PRESENTING, startPresenting);
 	yield takeLatest(PresentationTypes.STOP_PRESENTING, stopPresenting);
 	yield takeLatest(PresentationTypes.JOIN_PRESENTATION, joinPresentation);
 	yield takeLatest(PresentationTypes.LEAVE_PRESENTATION, leavePresentation);
-
+	yield takeLatest(PresentationTypes.TOGGLE_PAUSE, togglePause);
 }

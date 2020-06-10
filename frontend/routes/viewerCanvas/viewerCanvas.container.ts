@@ -23,6 +23,7 @@ import { selectGisLayers } from '../../modules/gis';
 import { selectPins as selectIssuePins } from '../../modules/issues';
 import { selectPins as selectMeasurementPins } from '../../modules/measurements';
 import { selectGISCoordinates, selectHasGISCoordinates } from '../../modules/model';
+import { selectIsViewerManipulationEnabled } from '../../modules/presentation';
 import { selectPins as selectRiskPins } from '../../modules/risks';
 import { selectAllTransparencyOverrides, selectColorOverrides, TreeActions } from '../../modules/tree';
 import { withViewer } from '../../services/viewer/viewer';
@@ -36,7 +37,8 @@ const mapStateToProps = createStructuredSelector({
 	measurementPins: selectMeasurementPins,
 	gisCoordinates: selectGISCoordinates,
 	hasGisCoordinates: selectHasGISCoordinates,
-	gisLayers: selectGisLayers
+	gisLayers: selectGisLayers,
+	viewerManipulationEnabled: selectIsViewerManipulationEnabled
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

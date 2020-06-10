@@ -1627,4 +1627,20 @@ export class UnityUtil {
 		UnityUtil.toUnity('SetPlaneBorderWidth', UnityUtil.LoadingState.VIEWER_READY, width *	0.01);
 	}
 
+	/**
+	 * Sets the navigations interaction on
+	 * @category Model Interactions
+	 */
+	public static setNavigationOn(): any {
+		UnityUtil.toUnity('SetNavigationOn', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/**
+	 * Sets the navigations interaction off
+	 * @category Model Interactions
+	 */
+	public static setNavigationOff(): any {
+		UnityUtil.toUnity('SetNavigationOff', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
 }
