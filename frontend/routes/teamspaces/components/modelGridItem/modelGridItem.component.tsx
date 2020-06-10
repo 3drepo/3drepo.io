@@ -112,7 +112,7 @@ export const ModelGridItem = memo((props: IProps) => {
 		const { history, projectName, teamspace, model } = props;
 		history.push({
 			pathname: `${ROUTES.USER_MANAGEMENT_MAIN}/${teamspace}/projects`,
-			search: `?project=${projectName}&modelId=${model}&view=${PERMISSIONS_VIEWS.MODELS}`
+			search: `?project=${encodeURIComponent(projectName)}&modelId=${model}&view=${PERMISSIONS_VIEWS.MODELS}`
 		});
 	};
 
@@ -121,7 +121,7 @@ export const ModelGridItem = memo((props: IProps) => {
 		const { history, projectName, teamspace, model } = props;
 		history.push({
 			pathname: `${ROUTES.TEAMSPACES}/${teamspace}/models/${model}`,
-			search: `?project=${projectName}`
+			search: `?project=${encodeURIComponent(projectName)}`
 		});
 	};
 

@@ -73,6 +73,17 @@ class Ticket {
 			delete ticketToClean.due_date;
 		}
 
+		// legacy schema support
+		if (ticketToClean.viewpoint) {
+			vpIdKeys.forEach((key) => {
+				if (ticketToClean.viewpoint[key]) {
+					ticketToClean.viewpoint[key] = utils.uuidToString(ticketToClean.viewpoint[key]);
+				}
+			});
+
+			Viewpoint.setViewpointScreenshotURL(this.collName, account, model, id, ticketToClean.viewpoint);
+		}
+
 		if (ticketToClean.viewpoints) {
 			ticketToClean.viewpoints.forEach((viewpoint, i) => {
 				vpIdKeys.forEach((key) => {
@@ -83,7 +94,7 @@ class Ticket {
 
 				Viewpoint.setViewpointScreenshotURL(this.collName, account, model, id, viewpoint);
 
-				if (0 === i) {
+				if (0 === i && !ticketToClean.viewpoint) {
 					ticketToClean.viewpoint = viewpoint;
 				}
 			});
