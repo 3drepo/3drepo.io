@@ -234,62 +234,44 @@ class Ticket {
 		let newViewpoint;
 
 		fields.forEach(async field => {
-			if (Object.prototype.toString.call(data[field]) !== this.fieldTypes[field]) {
-				throw responseCodes.INVALID_ARGUMENTS;
-			}
-
+			// handle viewpoint later
 			if (field === "viewpoint") {
-				newViewpoint = this.handlePrimaryViewpoint(account, model, data._id, data.viewpoint);
-				oldTicket[field] = Viewpoint.clean(oldTicket.viewpoints[0]);
-				delete oldTicket[field].screenshot;
-
-				data[field] = {
-					...oldTicket[field],
-					...await newViewpoint
-				};
-				data[field].guid = utils.uuidToString(data[field].guid);
-
-				if (data[field].thumbnail) {
-					data.thumbnail = data[field].thumbnail;
-					delete data[field].thumbnail;
-
-					const comment = this.createSystemComment(
-						account,
-						model,
-						sessionId,
-						id,
-						user,
-						"screenshot",
-						oldTicket[field].screenshot_ref,
-						data[field].screenshot_ref);
-
-					systemComments.push(comment);
-				}
-			}
-
-			// if a field have the same value shouldnt update the property
-			if (_.isEqual(oldTicket[field], data[field])) {
-				delete data[field];
 				return;
 			}
 
-			// update of extras, comments, viewpoints must not create a system comment
-			if (field === "extras" || field === "comments" || field === "viewpoints") {
-				return;
-			}
-
-			const comment = this.createSystemComment(
-				account,
-				model,
-				sessionId,
-				id,
-				user,
-				field,
-				oldTicket[field],
-				data[field]);
-
-			systemComments.push(comment);
+			await this.handleFieldUpdate(account, model, sessionId, id, user, field, oldTicket, data, systemComments);
 		});
+
+		if (data.viewpoint) {
+			newViewpoint = this.handlePrimaryViewpoint(account, model, data._id, data.viewpoint);
+			oldTicket.viewpoint = Viewpoint.clean(oldTicket.viewpoints[0]);
+			delete oldTicket.viewpoint.screenshot;
+
+			data.viewpoint = {
+				...oldTicket.viewpoint,
+				...await newViewpoint
+			};
+			data.viewpoint.guid = utils.uuidToString(data.viewpoint.guid);
+
+			if (data.viewpoint.thumbnail) {
+				data.thumbnail = data.viewpoint.thumbnail;
+				delete data.viewpoint.thumbnail;
+
+				const comment = this.createSystemComment(
+					account,
+					model,
+					sessionId,
+					id,
+					user,
+					"screenshot",
+					oldTicket.viewpoint.screenshot_ref,
+					data.viewpoint.screenshot_ref);
+
+				systemComments.push(comment);
+			}
+
+			await this.handleFieldUpdate(account, model, sessionId, id, user, "viewpoint", oldTicket, data, systemComments);
+		}
 
 		await newViewpoint;
 
@@ -399,6 +381,35 @@ class Ticket {
 		}
 
 		return viewpoint;
+	}
+
+	async handleFieldUpdate(account, model, sessionId, id, user, field, oldTicket, data, systemComments) {
+		if (Object.prototype.toString.call(data[field]) !== this.fieldTypes[field]) {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+
+		// if a field have the same value shouldnt update the property
+		if (_.isEqual(oldTicket[field], data[field])) {
+			delete data[field];
+			return;
+		}
+
+		// update of extras, comments, viewpoints must not create a system comment
+		if (field === "extras" || field === "comments" || field === "viewpoints") {
+			return;
+		}
+
+		const comment = this.createSystemComment(
+			account,
+			model,
+			sessionId,
+			id,
+			user,
+			field,
+			oldTicket[field],
+			data[field]);
+
+		systemComments.push(comment);
 	}
 
 	/*
