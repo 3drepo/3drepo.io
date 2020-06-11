@@ -22,5 +22,13 @@ import api from './';
  * @param teamspace
  */
 export const streamPresentation = (teamspace, model, id, viewpoint) => {
-	return api.put(`${teamspace}/${model}/presentation/${id}`, viewpoint);
+	return api.put(`${teamspace}/${model}/presentation/${id}/stream`, viewpoint);
+};
+
+/**
+ * end presentation
+ * @param teamspace
+ */
+export const endPresentation = (teamspace, model, id) => {
+	return api.post(`${teamspace}/${model}/presentation/${id}/end`);
 };

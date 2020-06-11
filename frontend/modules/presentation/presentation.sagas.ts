@@ -23,7 +23,7 @@ import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
 import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
-import { getState } from '../store';
+import { dispatch, getState } from '../store';
 import {  selectIsPaused, selectSessionCode, PresentationActions, PresentationTypes } from './index';
 
 let intervalId = 0;
@@ -35,11 +35,11 @@ const streamPresentation = async (teamspace, model, code) => {
 
 function* startPresenting() {
 	yield put(PresentationActions.setPresenting(true));
-	const currentTeamspace = yield select(selectCurrentModelTeamspace);
-	const currentModel = yield select(selectCurrentModel);
-	const sessionCode = yield select(selectSessionCode);
+	const teamspace = yield select(selectCurrentModelTeamspace);
+	const model = yield select(selectCurrentModel);
+	const code = yield select(selectSessionCode);
 
-	intervalId = window.setInterval(streamPresentation, 1000, currentTeamspace, currentModel, sessionCode);
+	intervalId = window.setInterval(streamPresentation, 1000, teamspace, model, code);
 }
 
 const onStreamPresentationEvent = (viewpoint) => {
@@ -55,30 +55,40 @@ const onStreamPresentationEvent = (viewpoint) => {
 	Viewer.setCamera({ ...viewpoint, account, model });
 };
 
+const onEndPresentationEvent = () => {
+	dispatch(PresentationActions.leavePresentation());
+};
+
 function* joinPresentation({ sessionCode }) {
-	const currentTeamspace = yield select(selectCurrentModelTeamspace);
+	const teamspace = yield select(selectCurrentModelTeamspace);
 	const currentModel = yield select(selectCurrentModel);
 
 	yield put(PresentationActions.setJoinPresentation(true, sessionCode));
 
-	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.PRESENTATION, currentTeamspace, currentModel, {
-		subscribeToStream: [sessionCode, onStreamPresentationEvent]
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.PRESENTATION, teamspace, currentModel, {
+		subscribeToStream: [sessionCode, onStreamPresentationEvent],
+		subscribeToEnd: [sessionCode, onEndPresentationEvent]
 	}));
 
 }
 
 function* leavePresentation() {
-	const currentTeamspace = yield select(selectCurrentModelTeamspace);
-	const currentModel = yield select(selectCurrentModel);
+	const teamspace = yield select(selectCurrentModelTeamspace);
+	const model = yield select(selectCurrentModel);
 
 	yield put(PresentationActions.setJoinPresentation(false));
-
-	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.PRESENTATION, currentTeamspace, currentModel, {
-		unsubscribeFromStream: onStreamPresentationEvent
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.PRESENTATION, teamspace, model, {
+		unsubscribeFromStream: onStreamPresentationEvent,
+		unsubscribeFromEnd: onEndPresentationEvent
 	}));
 }
 
 function* stopPresenting() {
+	const teamspace = yield select(selectCurrentModelTeamspace);
+	const model = yield select(selectCurrentModel);
+	const code = yield select(selectSessionCode);
+
+	yield API.endPresentation(teamspace, model, code);
 	yield put(PresentationActions.setPresenting(false));
 	clearInterval(intervalId);
 }

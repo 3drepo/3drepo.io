@@ -28,12 +28,24 @@ export class PresentationChatEvents {
 	public subscribeToStream(code: string, callback: (data: any) => void, context: any) {
 		this.code = code;
 
-		const event = `presentation::${code}::updated`;
+		const event = `presentation::${code}::stream`;
 		this.channel.subscribe(event, callback, context);
 	}
 
 	public unsubscribeFromStream(callback: (data: any) => void) {
-		const event = `presentation::${this.code}::updated`;
+		const event = `presentation::${this.code}::stream`;
+		this.channel.unsubscribe(event, callback);
+	}
+
+	public subscribeToEnd(code: string, callback: (data: any) => void, context: any) {
+		this.code = code;
+
+		const event = `presentation::${code}::end`;
+		this.channel.subscribe(event, callback, context);
+	}
+
+	public unsubscribeFromEnd(callback: (data: any) => void) {
+		const event = `presentation::${this.code}::end`;
 		this.channel.unsubscribe(event, callback);
 	}
 

@@ -1362,41 +1362,6 @@ router.delete("/:model", middlewares.hasDeleteAccessToModel, deleteModel);
 router.post("/:model/upload", middlewares.hasUploadAccessToModel, uploadModel);
 
 /**
- * @api {post} /:teamspace/:model/start-presentation
- * @apiName uploadModel
- * @apiGroup Model
- * @apiDescription It uploads a model file and creates a new revision for that model.
- *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model id to upload.
- * @apiParam (Request body) {String} tag the tag name for the new revision
- * @apiParam (Request body) {String} desc the description for the new revision
- *
- * @apiParam (Request body: Attachment) {binary} FILE the file to be uploaded
- *
- * @apiExample {post} Example usage:
- * POST /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload HTTP/1.1
- * Content-Type: multipart/form-data; boundary=----WebKitFormBoundarySos0xligf1T8Sy8I
- *
- * ------WebKitFormBoundarySos0xligf1T8Sy8I
- * Content-Disposition: form-data; name="file"; filename="3DrepoBIM.obj"
- * Content-Type: application/octet-stream
- *
- * <binary content>
- * ------WebKitFormBoundarySos0xligf1T8Sy8I
- * Content-Disposition: form-data; name="tag"
- *
- * rev1
- * ------WebKitFormBoundarySos0xligf1T8Sy8I
- * Content-Disposition: form-data; name="desc"
- *
- * el paso
- * ------WebKitFormBoundarySos0xligf1T8Sy8I-- *
- *
- */
-router.put("/:model/presentation/:presentationId", middlewares.hasReadAccessToModel, streamPresentation);
-
-/**
  * @api {get} /:teamspace/:model/download/latest Download model
  * @apiName downloadModel
  * @apiGroup Model
@@ -1426,6 +1391,10 @@ router.put("/:model/presentation/:presentationId", middlewares.hasReadAccessToMo
 router.get("/:model/download/latest", middlewares.hasDownloadAccessToModel, downloadLatest);
 
 router.get("/:model/meshes/:meshId", middlewares.hasReadAccessToModel, getMesh);
+
+router.put("/:model/presentation/:presentationId/stream", middlewares.hasReadAccessToModel, streamPresentation);
+
+router.post("/:model/presentation/:presentationId/end", middlewares.hasReadAccessToModel, endPresentation);
 
 function updateSettings(req, res, next) {
 
@@ -1985,6 +1954,17 @@ function streamPresentation(req, res, next) {
 	const viewpoint = req.body;
 
 	ChatEvent.streamPresentation(sessionId,account , model, presentationId, viewpoint).then(()=> {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function endPresentation(req, res, next) {
+	const {model, account, presentationId} = req.params;
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
+
+	ChatEvent.endPresentation(sessionId,account , model, presentationId).then(()=> {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
