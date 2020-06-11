@@ -38,9 +38,13 @@ interface IProps {
 	setCameraOnViewpoint: (viewpoint) => void;
 }
 
-const EmptyState = () => (
+const EmptyState = ({ filter }) => (
 	<EmptyStateInfo>
-		No comments
+		No {cond([
+			[matches('comments'), () => 'comments'],
+			[matches('systemLogs'), () => 'system logs'],
+			[stubTrue, () => 'messages']
+		])(filter)}
 	</EmptyStateInfo>
 );
 
@@ -121,8 +125,8 @@ export const MessagesList = ({ teamspace, isPending, messages, ...props }: IProp
 					</>,
 				)(isPending)}
 				{renderWhenTrue(
-					<EmptyState />
-				)(!isPending && !messages.length)}
+					<EmptyState filter={filter} />
+				)(!isPending && !messagesList.length)}
 			</Container>
 		</>
 	);
