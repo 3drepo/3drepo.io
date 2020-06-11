@@ -251,7 +251,7 @@ const convertActionValueToText = (value = '') => {
 	return actionText;
 };
 
-export const transformCustomsLinksToMarkdown = ({comment, issues}) => {
+export const transformCustomsLinksToMarkdown = ({ comment, issues, type }) => {
 	if (!comment) {
 		return comment;
 	}
@@ -286,7 +286,8 @@ export const transformCustomsLinksToMarkdown = ({comment, issues}) => {
 
 		uniqResourceReferences.forEach(({ 0: resourceReference }) => {
 			const referenceRegExp = RegExp(resourceReference, 'g');
-			comment = comment.replace(referenceRegExp, `[${resourceReference}](${resourceReference.replace('#res.', '')})`);
+			comment = comment
+				.replace(referenceRegExp, `[${resourceReference}](${resourceReference.replace('#res.', '')} "${type}")`);
 		});
 	}
 

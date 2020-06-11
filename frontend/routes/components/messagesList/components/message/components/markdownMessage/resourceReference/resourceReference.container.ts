@@ -20,11 +20,13 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { selectActiveIssueDetails } from '../../../../../../../../modules/issues';
+import { selectActiveRiskDetails } from '../../../../../../../../modules/risks';
 
 import { ResourceReference } from './resourceReference.component';
 
 const mapStateToProps = createStructuredSelector({
-	activeIssue: selectActiveIssueDetails
+	activeIssue: selectActiveIssueDetails,
+	activeRisk: selectActiveRiskDetails
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

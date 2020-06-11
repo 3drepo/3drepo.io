@@ -70,7 +70,7 @@ export const selectActiveIssueWithMarkdownComments = createSelector(
 		return !activeIssueDetails.comments ? [] : activeIssueDetails.comments.map(({ comment, ...props }) => ({
 			...props,
 			comment,
-			commentWithMarkdown: transformCustomsLinksToMarkdown({ comment, issues }),
+			commentWithMarkdown: transformCustomsLinksToMarkdown({ comment, issues, type: 'issue' }),
 		}));
 	}
 );

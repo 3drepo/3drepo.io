@@ -33,7 +33,7 @@ const EnhancedLink = ({ children, href, ...props }) => {
 
 	return cond([
 		[() => value.match(MARKDOWN_RESOURCE_REFERENCE_REGEX), () => {
-			return (<ResourceReference id={href} text={value} />);
+			return (<ResourceReference id={href} text={value} type={props.title} />);
 		}],
 		[() => value.match(MARKDOWN_ISSUE_REFERENCE_REGEX), () => {
 			return (<IssueReference id={href} text={value} />);

@@ -61,7 +61,7 @@ export const selectActiveRiskWithMarkdownComments = createSelector(
 			return !activeRiskDetails.comments ? [] : activeRiskDetails.comments.map(({ comment, ...props }) => ({
 				...props,
 				comment,
-				commentWithMarkdown: transformCustomsLinksToMarkdown({ comment, issues }),
+				commentWithMarkdown: transformCustomsLinksToMarkdown({ comment, issues, type: 'risk' }),
 			}));
 		}
 );

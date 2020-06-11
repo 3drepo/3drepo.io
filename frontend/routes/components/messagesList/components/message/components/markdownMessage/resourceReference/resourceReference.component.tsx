@@ -19,10 +19,13 @@ import React from 'react';
 
 import { Link } from './resourceReference.styles';
 
-export const ResourceReference = ({ id, text, activeIssue }) => {
-	const { resources } = activeIssue;
+const findResource = (resources, id) => resources && resources.find((resource) => resource._id === id);
 
-	const resourceData = resources && resources.find((resource) => resource._id === id);
+export const ResourceReference = ({ id, text, type, activeIssue, activeRisk }) => {
+
+	const resourceData = (type === 'risk')
+		? findResource(activeRisk.resources, id)
+		: findResource(activeIssue.resources, id);
 
 	if (!resourceData) {
 		return text;
