@@ -48,3 +48,32 @@ export const StyledTextfield = styled(TextField)`
 		width: 257px;
 	}
 `;
+
+export const SessionStartedContent = styled(Content)`
+	padding: 20px;
+	position: relative;
+	height: 100%;
+`;
+
+export const CodeLabel = styled.div`
+	display: block;
+	width: 100%;
+	text-align: center;
+	font-size: 24px;
+	padding: 10px;
+`;
+
+export const AlignRight = styled.div`
+	display: flex;
+
+	&& > *:first-child {
+		margin-left: auto;
+	}
+
+	&& > * {
+		margin-right: 5px;
+	}
+
+	margin-top: ${(props) => props.marginTop}px;
+
+`;

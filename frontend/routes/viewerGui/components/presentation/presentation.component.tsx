@@ -18,25 +18,47 @@
 import React, { useState } from 'react';
 
 import { VIEWER_PANELS, VIEWER_PANELS_ICONS } from '../../../../constants/viewerGui';
-import {  Content, CreateSessionSection, JoinPresentationSection,
-PresentationContainer, StyledButton, StyledTextfield } from './presentation.styles';
+import {  AlignRight, CodeLabel, Content,
+CreateSessionSection, JoinPresentationSection, PresentationContainer,
+SessionStartedContent, StyledButton, StyledTextfield } from './presentation.styles';
 
 const PresentationIcon = VIEWER_PANELS_ICONS[VIEWER_PANELS.PRESENTATION];
 
 const JoinedPresentation = ({sessionCode, leavePresentation, isPaused, togglePause}) => {
 	return (
-		<div> you have joined a presentation {sessionCode}
-			<button onClick={togglePause}>{isPaused ? 'Resume' : 'Pause'}</button>
-			<button onClick={leavePresentation}>End Session</button>
-		</div>
+		<SessionStartedContent>
+			You have entered a presentation session. Your
+			camera will now be controller by the presenter.
+			<AlignRight marginTop={45}>
+				<StyledButton
+						variant="raised"
+						color="secondary"
+						onClick={togglePause}>{isPaused ? 'Resume' : 'Pause'}</StyledButton>
+
+				<StyledButton
+						variant="raised"
+						color="secondary"
+						onClick={leavePresentation}>Exit Session</StyledButton>
+			</AlignRight>
+		</SessionStartedContent>
+
 	);
 };
 
 const Presenting = ({sessionCode, stopPresenting}) => {
 	return (
-		<div> you are presenting  {sessionCode}
-			<button onClick={stopPresenting}>End Session</button>
-		</div>
+		<SessionStartedContent>
+			Session Started. Please share the following
+					invitation code to your attendees:
+			<CodeLabel>{sessionCode}</CodeLabel>
+
+			<AlignRight>
+				<StyledButton
+						variant="raised"
+						color="secondary"
+						onClick={stopPresenting}>End Session</StyledButton>
+			</AlignRight>
+		</SessionStartedContent>
 	);
 };
 
