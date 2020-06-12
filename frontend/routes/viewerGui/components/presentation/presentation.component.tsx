@@ -18,7 +18,8 @@
 import React, { useState } from 'react';
 
 import { VIEWER_PANELS, VIEWER_PANELS_ICONS } from '../../../../constants/viewerGui';
-import {  PresentationContainer } from './presentation.styles';
+import {  Content, CreateSessionSection, JoinPresentationSection,
+PresentationContainer, StyledButton, StyledTextfield } from './presentation.styles';
 
 const PresentationIcon = VIEWER_PANELS_ICONS[VIEWER_PANELS.PRESENTATION];
 
@@ -41,14 +42,27 @@ const Presenting = ({sessionCode, stopPresenting}) => {
 
 const InitialState = ({startPresenting, joinPresentation}) => {
 	const [code, setCode] = useState('');
+	const hasCode = code.trim() !== '';
 
 	return (
-		<div>
-			<input onChange={(e) => setCode(e.currentTarget.value)} value={code} />
-			<button onClick={() => joinPresentation(code)}>Join</button>
-			<hr />
-			<button onClick={startPresenting}>Create Session</button>
-		</div>
+		<Content>
+			<JoinPresentationSection>
+				<StyledTextfield
+					label="Enter your invitation code"
+					onChange={(e) => setCode(e.currentTarget.value)} value={code} />
+				<StyledButton
+					variant="raised"
+					color="secondary"
+					disabled={!hasCode}
+					onClick={() => joinPresentation(code)}>Join</StyledButton>
+			</JoinPresentationSection>
+			<CreateSessionSection>
+				<StyledButton
+						variant="raised"
+						color="secondary"
+						onClick={startPresenting}>Create Session</StyledButton>
+			</CreateSessionSection>
+		</Content>
 	);
 };
 
