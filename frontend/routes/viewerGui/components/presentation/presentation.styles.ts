@@ -75,5 +75,4 @@ export const AlignRight = styled.div`
 	}
 
 	margin-top: ${(props) => props.marginTop}px;
-
 `;
