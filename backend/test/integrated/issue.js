@@ -1513,6 +1513,14 @@ describe("Issues", function () {
 
 		});
 
+		it("should create comment successful if the user tagged a user that doesn't not exist", function(done) {
+			const comment = {comment : `@doesntExist1234`};
+			agent.post(`/${teamspace}/${model}/issues/${issueId}/comments`)
+				.send(comment)
+				.expect(200, done);
+		});
+
+
 		it("should NOT create a notification if the user does not belong in the teamspace", function(done) {
 			const comment = {comment : `@${username}`};
 			async.series([
