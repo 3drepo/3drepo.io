@@ -562,9 +562,9 @@ function* subscribeOnIssueCommentsChanges({ teamspace, modelId, issueId }) {
 
 function* unsubscribeOnIssueCommentsChanges({ teamspace, modelId, issueId }) {
 	yield put(ChatActions.callCommentsChannelActions(CHAT_CHANNELS.ISSUES, teamspace, modelId, issueId, {
-		unsubscribeToCreated: onCreateCommentEvent,
-		unsubscribeToUpdated: onUpdateCommentEvent,
-		unsubscribeToDeleted: onDeleteCommentEvent
+		unsubscribeFromCreated: onCreateCommentEvent,
+		unsubscribeFromUpdated: onUpdateCommentEvent,
+		unsubscribeFromDeleted: onDeleteCommentEvent
 	}));
 }
 
