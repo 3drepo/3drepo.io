@@ -143,7 +143,7 @@ const getDetails = (notification: IProps) => {
 		case TYPES.ISSUE_CLOSED:
 			return notification.issuesId.length <= 1 ? 'Issue has been closed' : `${notification.issuesId.length} closed issues`;
 		case TYPES.USER_REFERENCED:
-			return `${notification.referrer} has referenced you in an ${notification.issueId ? 'issue' : 'risk'}`;
+			return `${notification.referrer} has tagged you in a comment`;
 	}
 };
 
