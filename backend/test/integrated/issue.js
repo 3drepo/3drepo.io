@@ -1481,7 +1481,7 @@ describe("Issues", function () {
 		});
 
 		it("should create a notification on the tagged user's messages", function(done) {
-			const comment = {comment : `@${altUser}`, viewpoint: {}, _id: `${issueId}`};
+			const comment = {comment : `@${altUser}`};
 			async.series([
 				function(done) {
 					agent.post(`/${teamspace}/${model}/issues/${issueId}/comments`)
