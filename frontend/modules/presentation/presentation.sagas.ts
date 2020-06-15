@@ -53,6 +53,7 @@ const onStreamPresentationEvent = (viewpoint) => {
 	const model = selectCurrentModel(getState());
 
 	Viewer.setCamera({ ...viewpoint, account, model });
+	Viewer.updateClippingPlanes(viewpoint.clippingPlanes, account, model);
 };
 
 const onEndPresentationEvent = () => {
