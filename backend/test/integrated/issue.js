@@ -18,7 +18,7 @@
  */
 
 const request = require("supertest");
-const {expect, Assertion } = require("chai");
+const {assert, expect, Assertion } = require("chai");
 const app = require("../../services/api.js").createApp();
 const responseCodes = require("../../response_codes.js");
 const async = require("async");
@@ -1455,6 +1455,64 @@ describe("Issues", function () {
 					.expect(404 , done);
 			});
 		});
+	});
+
+
+	describe("Tagging a user in a comment", function() {
+		const teamspace = "teamSpace1";
+		const altUser = "commenterTeamspace1Model1JobA";
+		const password = "password";
+		const model = "5bfc11fa-50ac-b7e7-4328-83aa11fa50ac";
+		const issueId = "2eb8f760-7ac5-11e8-9567-6b401a084a90";
+
+		before(function(done) {
+			async.series([
+				function(done) {
+					agent.post("/logout")
+						.send({})
+						.expect(200, done);
+				},
+				function(done) {
+					agent.post("/login")
+						.send({username: teamspace, password})
+						.expect(200, done);
+				}
+			], done);
+		});
+
+		it("should create a notification on the tagged user's messages", function(done) {
+			const comment = {comment : `@${altUser}`, viewpoint: {}, _id: `${issueId}`};
+			async.series([
+				function(done) {
+					agent.post(`/${teamspace}/${model}/issues/${issueId}/comments`)
+						.send(comment)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.post("/logout")
+						.send({})
+						.expect(200, done);
+				},
+				function(done) {
+					agent.post("/login")
+						.send({username: altUser, password})
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get("/notifications")
+						.expect(200, function(err, res) {
+							const notification = res.body.find(item => item.type === "USER_REFERENCED" && item.issueId === issueId);
+							assert(notification);
+							expect(notification.modelId).to.equal(model);
+							expect(notification.teamSpace).to.equal(teamspace);
+							expect(notification.referrer).to.equal(teamspace);
+							done(err);
+						});
+				}],
+			done);
+
+		});
+
 	});
 
 	describe("BCF", function() {
