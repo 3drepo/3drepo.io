@@ -404,6 +404,8 @@ module.exports = {
 			if (await user.isMemberOfTeamspace(teamspace)) {
 				const notification = await insertUserReferencedNotification(referrer, teamspace, modelId, type, _id, referee);
 				return await fillModelData([{username: referee, notification}]);
+			} else {
+				return [];
 			}
 		} catch (e) {
 			return [];

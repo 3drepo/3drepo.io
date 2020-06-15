@@ -18,7 +18,7 @@
  */
 
 const request = require("supertest");
-const {assert, expect, Assertion } = require("chai");
+const {should, assert, expect, Assertion } = require("chai");
 const app = require("../../services/api.js").createApp();
 const responseCodes = require("../../response_codes.js");
 const async = require("async");
@@ -1506,6 +1506,36 @@ describe("Issues", function () {
 							expect(notification.modelId).to.equal(model);
 							expect(notification.teamSpace).to.equal(teamspace);
 							expect(notification.referrer).to.equal(teamspace);
+							done(err);
+						});
+				}],
+			done);
+
+		});
+
+		it("should NOT create a notification if the user does not belong in the teamspace", function(done) {
+			const comment = {comment : `@${username}`};
+			async.series([
+				function(done) {
+					agent.post(`/${teamspace}/${model}/issues/${issueId}/comments`)
+						.send(comment)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.post("/logout")
+						.send({})
+						.expect(200, done);
+				},
+				function(done) {
+					agent.post("/login")
+						.send({username, password})
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get("/notifications")
+						.expect(200, function(err, res) {
+							const notification = res.body.find(item => item.type === "USER_REFERENCED" && item.issueId === issueId);
+							expect(notification).to.equal(undefined);
 							done(err);
 						});
 				}],
