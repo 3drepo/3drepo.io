@@ -193,6 +193,45 @@ describe("Risks", function () {
 			], done);
 		});
 
+		it("with orthographic viewpoint should succeed", function(done) {
+
+			const risk = Object.assign({"name":"Risk test"}, baseRisk);
+			risk.viewpoint = {
+				"up":[0,1,0],
+				"position":[38,38 ,125.08011914810137],
+				"look_at":[0,0,-163.08011914810137],
+				"view_dir":[0,0,-1],
+				"right":[1,0,0],
+				"view_to_world_scale":3.537606904422707,
+				"aspect_ratio":0.8750189337327384,
+				"far":276.75612077194506 ,
+				"near":76.42411012233212,
+				"type":"orthogonal",
+				"clippingPlanes":[]
+			};
+
+			let riskId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200, function(err, res) {
+							riskId = res.body._id;
+							return done(err);
+						});
+				},
+
+				function(done) {
+					agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function(err, res) {
+						expect(res.body.viewpoint.type).to.equal(risk.viewpoint.type);
+						expect(res.body.viewpoint.view_to_world_scale).to.equal(risk.viewpoint.view_to_world_scale);
+						return done(err);
+					});
+				}
+			], done);
+		});
+
 		it("without name should fail", function(done) {
 			const risk = baseRisk;
 
@@ -422,6 +461,44 @@ describe("Risks", function () {
 								to: category.category
 							});
 							expect(res.body.comments[0].owner).to.equal(username);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change to orthographic viewpoint should fail (for now)", function(done) {
+			const risk = Object.assign({"name":"Risk test"}, baseRisk);
+			let riskId;
+
+			const viewpointData = {
+				"up":[0,1,0],
+				"position":[38,38 ,125.08011914810137],
+				"look_at":[0,0,-163.08011914810137],
+				"view_dir":[0,0,-1],
+				"right":[1,0,0],
+				"view_to_world_scale":3.537606904422707,
+				"aspect_ratio":0.8750189337327384,
+				"far":276.75612077194506 ,
+				"near":76.42411012233212,
+				"type":"orthogonal",
+				"clippingPlanes":[]
+			};
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200, function(err, res) {
+							riskId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
+						.send(viewpointData)
+						.expect(400, function(err, res) {
+							expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
 							done(err);
 						});
 				}
@@ -677,6 +754,46 @@ describe("Risks", function () {
 					}
 				], done);
 
+			});
+
+			it("with orthographic viewpoint should succeed", function(done) {
+				const comment = {
+					comment: "hello world",
+					"viewpoint":{
+						"up":[0,1,0],
+						"position":[38,38 ,125.08011914810137],
+						"look_at":[0,0,-163.08011914810137],
+						"view_dir":[0,0,-1],
+						"right":[1,0,0],
+						"view_to_world_scale":3.537606904422707,
+						"aspect_ratio":0.8750189337327384,
+						"far":276.75612077194506 ,
+						"near":76.42411012233212,
+						"type":"orthogonal",
+						"clippingPlanes":[]
+					}
+				};
+
+				async.series([
+					function(done) {
+						agent.post(`/${username}/${model}/risks/${riskId}/comments`)
+							.send(comment)
+							.expect(200 , done);
+					},
+					function(done) {
+						agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function(err , res) {
+							comment.viewpoint.guid = res.body.comments[0].viewpoint.guid;
+
+							expect(res.body.comments.length).to.equal(1);
+							expect(res.body.comments[0].comment).to.equal(comment.comment);
+							expect(res.body.comments[0].owner).to.equal(username);
+							expect(res.body.comments[0].viewpoint).to.deep.equal(comment.viewpoint);
+							commentId = res.body.comments[0].guid;
+
+							done(err);
+						});
+					}
+				], done);
 			});
 
 

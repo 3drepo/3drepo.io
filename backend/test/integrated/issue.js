@@ -188,6 +188,44 @@ describe("Issues", function () {
 
 		});
 
+		it("with orthographic viewpoint should succeed", function(done) {
+
+			const issue = Object.assign({"name":"Issue test"}, baseIssue);
+			issue.viewpoint = {
+				"up":[0,1,0],
+				"position":[38,38 ,125.08011914810137],
+				"look_at":[0,0,-163.08011914810137],
+				"view_dir":[0,0,-1],
+				"right":[1,0,0],
+				"view_to_world_scale":3.537606904422707,
+				"aspect_ratio":0.8750189337327384,
+				"far":276.75612077194506 ,
+				"near":76.42411012233212,
+				"type":"orthogonal",
+				"clippingPlanes":[]
+			};
+
+			let issueId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200 , function(err, res) {
+							issueId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/issues/${issueId}`).expect(200, function(err, res) {
+						expect(res.body.viewpoint.type).to.equal(issue.viewpoint.type);
+						expect(res.body.viewpoint.view_to_world_scale).to.equal(issue.viewpoint.view_to_world_scale);
+						return done(err);
+					});
+				}
+			], done);
+		});
+
 		it("with group associated should succeed", function(done) {
 			const username3 = 'teamSpace1';
 			const model2 = '5bfc11fa-50ac-b7e7-4328-83aa11fa50ac';
@@ -601,6 +639,44 @@ describe("Issues", function () {
 			], done);
 		});
 
+		it("change to orthographic viewpoint should fail (for now)", function(done) {
+			const issue = Object.assign({"name":"Issue test"}, baseIssue);
+			let issueId;
+
+			const viewpointData = {
+				"up":[0,1,0],
+				"position":[38,38 ,125.08011914810137],
+				"look_at":[0,0,-163.08011914810137],
+				"view_dir":[0,0,-1],
+				"right":[1,0,0],
+				"view_to_world_scale":3.537606904422707,
+				"aspect_ratio":0.8750189337327384,
+				"far":276.75612077194506 ,
+				"near":76.42411012233212,
+				"type":"orthogonal",
+				"clippingPlanes":[]
+			};
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200 , function(err, res) {
+							issueId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/issues/${issueId}`)
+						.send(viewpointData)
+						.expect(400, function(err, res) {
+							expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
+							done(err);
+						});
+				}
+			], done);
+		});
+
 		it("screenshot within comments should work", (done) => {
 			const issue = Object.assign({"name":"Issue test"}, baseIssue, { topic_type: "ru123"});
 			let issueId;
@@ -654,6 +730,51 @@ describe("Issues", function () {
 								.and.to.be.not.equal(pngBase64);
 							expect(comment.viewpoint.screenshotSmall).to.exist;
 
+							return next(err);
+						});
+				}
+			],done);
+		})
+
+		it("orthographic viewpoint within comments should work", (done) => {
+			const issue = Object.assign({"name":"Issue test"}, baseIssue);
+			let issueId;
+			let commentId;
+
+			const comment = {
+				comment:'',
+				viewpoint:{
+					"up":[0,1,0],
+					"position":[38,38 ,125.08011914810137],
+					"look_at":[0,0,-163.08011914810137],
+					"view_dir":[0,0,-1],
+					"right":[1,0,0],
+					"view_to_world_scale":3.537606904422707,
+					"aspect_ratio":0.8750189337327384,
+					"far":276.75612077194506 ,
+					"near":76.42411012233212,
+					"type":"orthogonal",
+					"clippingPlanes":[]
+				}
+			}
+
+			async.series([
+				next => {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200 , function(err, res) {
+							issueId = res.body._id;
+							return next(err);
+						});
+				},
+				next => {
+					agent.post(`/${username}/${model}/issues/${issueId}/comments`)
+						.send(comment)
+						.expect(200 , (err, res) => {
+							const comment = res.body;
+							expect(comment.viewpoint.type).to.exist;
+							expect(comment.viewpoint.view_to_world_scale).to.exist;
+							commentId = comment.guid;
 							return next(err);
 						});
 				}
@@ -1621,6 +1742,19 @@ describe("Issues", function () {
 										expect(issue1.comments[0][key]).to.equal(goldenBCF1.comments[0][key]);
 									}
 								});
+
+								done(err);
+							});
+					},
+					function(done) {
+						agent.get(`/${bcfusername}/${bcfmodel}/issues/${bcf.issue2}`)
+							.expect(200, function(err, res) {
+
+								const issue2 = res.body;
+
+								expect(issue2.viewpoint).to.exist;
+								expect(issue2.viewpoint.type).to.equal("orthogonal");
+								expect(issue2.viewpoint.view_to_world_scale).to.equal(2.1);
 
 								done(err);
 							});
