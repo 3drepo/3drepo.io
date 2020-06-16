@@ -60,7 +60,7 @@ const fieldTypes = {
 	"risk_factor": "[object String]",
 	"safetibase_id": "[object String]",
 	"scope": "[object String]",
-	"thumbnail": "[object Object]",
+	"thumbnail": "[object String]",
 	"viewpoint": "[object Object]",
 	"viewpoints": "[object Array]"
 };
@@ -143,7 +143,7 @@ async function createViewPoint(account, model, viewpoint) {
 		newViewpoint = {...viewpoint};
 		if (Object.prototype.toString.call(viewpoint) === fieldTypes["viewpoint"]) {
 			newViewpoint.guid = utils.generateUUID();
-			newViewpoint = await View.clean({account, model}, newViewpoint, fieldTypes.viewpoint);
+			newViewpoint = View.clean(newViewpoint, fieldTypes.viewpoint);
 		} else {
 			throw responseCodes.INVALID_ARGUMENTS;
 		}

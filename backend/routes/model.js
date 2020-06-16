@@ -178,7 +178,7 @@ router.put("/:model/settings/heliSpeed", middlewares.hasReadAccessToModel, updat
 router.put("/:model/settings", middlewares.hasWriteAccessToModelSettings, updateSettings);
 
 /**
- * @api {post} /:teamspace/:model Create a model
+ * @api {post} /:teamspace/model Create a model
  * @apiName createModel
  * @apiGroup Model
  *
@@ -187,8 +187,8 @@ router.put("/:model/settings", middlewares.hasWriteAccessToModelSettings, update
  * @apiParam (Request body) {String} project Name of project in which the model will be created
  * @apiParam (Request body) {String} modelName Name of the model to be created
  * @apiParam (Request body) {String} unit The unit in which the model is specified
- * @apiParam (Request body) {String} desc A description of the model
- * @apiParam (Request body) {String} code A code to be associated with the model; it can be of maximum 5 letters (a-z) and numbers
+ * @apiParam (Request body) {String} [desc] A description of the model
+ * @apiParam (Request body) {String} [code] A code to be associated with the model; it can be of maximum 5 letters (a-z) and numbers
  * @apiParam (Request body) {String} type The type of the model
  *
  * @apiExample {post} Example usage:
@@ -1326,7 +1326,7 @@ router.get("/:model/revision/:revId/subModelRevisions", middlewares.hasReadAcces
 router.delete("/:model", middlewares.hasDeleteAccessToModel, deleteModel);
 
 /**
- * @api {post} /:teamspace/upload Upload Model.
+ * @api {post} /:teamspace/:model/upload Upload Model.
  * @apiName uploadModel
  * @apiGroup Model
  * @apiDescription It uploads a model file and creates a new revision for that model.

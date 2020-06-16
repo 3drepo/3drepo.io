@@ -21,7 +21,9 @@ import { isEqual } from 'lodash';
 import * as React from 'react';
 import * as Yup from 'yup';
 import { DEFAULT_SETTINGS } from '../../../../../constants/viewer';
+import { IS_FIREFOX } from '../../../../../helpers/browser';
 import { schema } from '../../../../../services/validation';
+import { ColorPicker } from '../../../colorPicker/colorPicker.component';
 import { SelectField } from '../../../selectField/selectField.component';
 import { DialogTab, DialogTabs, ErrorTooltip, FormListItem, NegativeActionButton, NeutralActionButton,
 		ShortInput, VisualSettingsButtonsContainer,
@@ -32,7 +34,8 @@ const SettingsSchema = Yup.object().shape({
 	memory: schema.integer(16, 2032),
 	farPlaneSamplingPoints: schema.integer(1, Number.POSITIVE_INFINITY),
 	maxShadowDistance: schema.integer(1, Number.POSITIVE_INFINITY),
-	numCacheThreads: schema.integer(1, 15)
+	numCacheThreads: schema.integer(1, 15),
+	clipPlaneBorderWidth: schema.number(0, Number.POSITIVE_INFINITY)
 });
 
 const BasicSettings = (props) => {
@@ -66,6 +69,28 @@ const BasicSettings = (props) => {
 					<Switch onClick={props.onCacheChange} checked={field.value} {...field} value="true" color="secondary" />
 				)} />
 			</FormListItem>
+			<FormListItem>
+				Clipping plane border width
+				<Field name="clipPlaneBorderWidth" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.clipPlaneBorderWidth || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.clipPlaneBorderWidth)}
+						{...field}
+						/>
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
+			<FormListItem>
+				Clipping plane border color
+				<Field name="clipPlaneBorderColor" render={ ({ field }) => (
+					<ColorPicker {...field} onChange={(val) => {
+						// this is because colorpicker doenst use the standard events for inputs
+						field.onChange({target: {name: field.name, value: val}});
+					}} />
+				)} />
+			</FormListItem>
 		</List>
 	);
 };
@@ -79,19 +104,21 @@ const AdvancedSettings = (props) => {
 					<Switch checked={field.value} {...field} value="true" color="secondary" />
 				)} />
 			</FormListItem>
-			<FormListItem>
-				Memory for Unity
-				<Field name="memory" render={ ({ field, form }) => {
-					return (
-					<ErrorTooltip title={form.errors.memory || ''} placement="bottom-end">
-					<ShortInput
-						error={Boolean(form.errors.memory)}
-						{...field}
-						endAdornment={<InputAdornment position="end">MB</InputAdornment>} />
-					</ErrorTooltip>
-					);
-				}} />
-			</FormListItem>
+			{!IS_FIREFOX &&
+				<FormListItem>
+					Memory for Unity
+					<Field name="memory" render={ ({ field, form }) => {
+						return (
+						<ErrorTooltip title={form.errors.memory || ''} placement="bottom-end">
+						<ShortInput
+							error={Boolean(form.errors.memory)}
+							{...field}
+							endAdornment={<InputAdornment position="end">MB</InputAdornment>} />
+						</ErrorTooltip>
+						);
+					}} />
+				</FormListItem>
+			}
 			<FormListItem>
 				Number of Caching Threads
 				<Field name="numCacheThreads" render={ ({ field, form }) => {

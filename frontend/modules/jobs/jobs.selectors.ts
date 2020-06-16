@@ -15,16 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { uniq } from 'lodash';
 import { createSelector } from 'reselect';
 
 export const selectJobsDomain = (state) => ({...state.jobs});
 
 export const selectJobs = createSelector(
-	selectJobsDomain, (state) => state.jobs
+	selectJobsDomain, (state) => state.jobs || []
 );
 
 export const selectJobsColors = createSelector(
-	selectJobsDomain, (state) => state.colors
+	selectJobs, (jobs) => uniq(jobs.map(({color}) => color))
 );
 
 export const selectJobsList = createSelector(

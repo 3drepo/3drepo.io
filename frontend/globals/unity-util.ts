@@ -18,6 +18,8 @@ declare var Module;
 declare var SendMessage;
 declare var UnityLoader;
 
+import { IS_FIREFOX } from '../helpers/browser';
+
 export class UnityUtil {
 	/** @hidden */
 	private static errorCallback: any;
@@ -129,6 +131,16 @@ export class UnityUtil {
 	public static loadUnity(divId: string, unityConfig = 'unity/Build/unity.json', memory?: number): Promise<void> {
 		memory = memory || 2130706432;
 
+		// Add withCredentials to XMLHttpRequest prototype to allow unity game to
+		// do CORS request. We used to do this with a .jspre on the unity side but it's no longer supported as of Unity 2019.1
+		(XMLHttpRequest.prototype as any).originalOpen = XMLHttpRequest.prototype.open;
+		const newOpen = function(_, url) {
+			const original = this.originalOpen.apply(this, arguments);
+			this.withCredentials = true;
+			return original;
+		};
+		XMLHttpRequest.prototype.open = newOpen;
+
 		const unitySettings: any = {
 			onProgress: this.onProgress
 		};
@@ -138,7 +150,11 @@ export class UnityUtil {
 				window.Module = {};
 			}
 			unitySettings.Module = (window as any).Module;
-			unitySettings.Module.TOTAL_MEMORY = memory;
+
+			if (!IS_FIREFOX) {
+				unitySettings.Module.TOTAL_MEMORY = memory;
+			}
+
 			UnityUtil.unityInstance = UnityLoader.instantiate(
 				divId,
 				unityConfig,
@@ -463,9 +479,13 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static measurementAlert(strMeasurement) {
-		const measurement = JSON.parse(strMeasurement);
-		if (UnityUtil.viewer && UnityUtil.viewer.measurementAlertEvent) {
-			UnityUtil.viewer.measurementAlertEvent(measurement);
+		try {
+			const measurement = JSON.parse(strMeasurement);
+			if (UnityUtil.viewer && UnityUtil.viewer.measurementAlertEvent) {
+				UnityUtil.viewer.measurementAlertEvent(measurement);
+			}
+		} catch (error) {
+			console.error('Failed to parse measurement alert', strMeasurement);
 		}
 	}
 
@@ -1340,6 +1360,15 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Set API key to use for authentication. Ensure setAPIHost is called before this.
+	 * @category Configurations
+	 * @param apiKey
+	 */
+	public static setAPIKey(apiKey: string) {
+		UnityUtil.toUnity('SetAPIKey', UnityUtil.LoadingState.VIEWER_READY, apiKey);
+	}
+
+	/**
 	 * Set the default near plane value. This can be use to tweak situations where
 	 * geometry closest to you are being clipped
 	 * @category Configurations
@@ -1577,6 +1606,25 @@ export class UnityUtil {
 	 */
 	public static setXRayHighlightOff(): any {
 		UnityUtil.toUnity('SetXRayHighlightOff', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/**
+	 * Change the colour of the clipping planes border
+	 * @category  Model Interactions
+	 * @param colour - colour RGB value of the colour to change to. e.g. [1, 0, 0]
+	 */
+	public static setPlaneBorderColor(color: number[]) {
+		UnityUtil.toUnity('SetPlaneBorderColor', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({color}));
+	}
+
+	/**
+	 * Change the width of the clipping planes border
+	 * @category  Model Interactions
+	 * @param width - the width of the clipping plane border
+	 */
+	public static setPlaneBorderWidth(width: number) {
+		// There is an scale factor so the value that the user enters is not small
+		UnityUtil.toUnity('SetPlaneBorderWidth', UnityUtil.LoadingState.VIEWER_READY, width *	0.01);
 	}
 
 }

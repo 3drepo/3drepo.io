@@ -59,7 +59,7 @@ class Ticket {
 		const vpIdKeys = ["hidden_group_id", "highlighted_group_id", "shown_group_id", "guid", "group_id"];
 
 		ticketToClean.account = account;
-		model = ticketToClean.model || ticketToClean.origin_model ||  model;
+		model = ticketToClean.model || ticketToClean.origin_model || model;
 		ticketToClean.model = model;
 
 		const id = utils.uuidToString(ticketToClean._id);
@@ -69,8 +69,19 @@ class Ticket {
 				ticketToClean[key] = utils.uuidToString(ticketToClean[key]);
 			}
 		});
-		if(ticketToClean.due_date === null) {
+		if (ticketToClean.due_date === null) {
 			delete ticketToClean.due_date;
+		}
+
+		// legacy schema support
+		if (ticketToClean.viewpoint) {
+			vpIdKeys.forEach((key) => {
+				if (ticketToClean.viewpoint[key]) {
+					ticketToClean.viewpoint[key] = utils.uuidToString(ticketToClean.viewpoint[key]);
+				}
+			});
+
+			Viewpoint.setViewpointScreenshotURL(this.collName, account, model, id, ticketToClean.viewpoint);
 		}
 
 		if (ticketToClean.viewpoints) {
@@ -81,11 +92,9 @@ class Ticket {
 					}
 				});
 
-				if (viewpoint.screenshot) {
-					Viewpoint.setViewpointScreenshot(this.collName, account, model, id, viewpoint);
-				}
+				Viewpoint.setViewpointScreenshotURL(this.collName, account, model, id, viewpoint);
 
-				if (0 === i) {
+				if (0 === i && !ticketToClean.viewpoint) {
 					ticketToClean.viewpoint = viewpoint;
 				}
 			});
@@ -94,7 +103,7 @@ class Ticket {
 		if (ticketToClean.comments) {
 			ticketToClean.comments.forEach((comment) => {
 				commentIdKeys.forEach((key) => {
-					if (comment[key] && _.isObject(comment[key]) && !comment[key].hasOwnProperty("up")) {
+					if (comment[key] && _.isObject(comment[key]) && !utils.hasField(comment[key], "up")) {
 						comment[key] = utils.uuidToString(comment[key]);
 					}
 				});
@@ -109,7 +118,7 @@ class Ticket {
 			});
 		}
 
-		if (ticketToClean.thumbnail && ticketToClean.thumbnail.flag) {
+		if (ticketToClean.thumbnail) {
 			ticketToClean.thumbnail = account + "/" + model + "/" + this.collName + "/" + id + "/thumbnail.png";
 		} else {
 			ticketToClean.thumbnail = undefined;
@@ -149,11 +158,11 @@ class Ticket {
 			return Promise.reject(this.response("NOT_FOUND"));
 		}
 
-		if(foundTicket.refs) {
+		if (foundTicket.refs) {
 			const refsColl = await db.getCollection(account, model + ".resources.ref");
-			const resources = await refsColl.find({ _id: { $in: foundTicket.refs } }, {name:1, size: 1, createdAt: 1, link: 1, type: 1}).toArray();
+			const resources = await refsColl.find({ _id: { $in: foundTicket.refs } }, { name: 1, size: 1, createdAt: 1, link: 1, type: 1 }).toArray();
 			resources.forEach(r => {
-				if(r.type !== "http") {
+				if (r.type !== "http") {
 					delete r.link;
 				}
 
@@ -215,7 +224,7 @@ class Ticket {
 		const hasOwnerJob = oldTicket.creator_role === job;
 		const hasAdminPrivileges = isAdmin || hasOwnerJob;
 		const hasAssignedJob = job === oldTicket.assigned_roles[0];
-		const userPermissions = { hasAdminPrivileges,	hasAssignedJob };
+		const userPermissions = { hasAdminPrivileges, hasAssignedJob };
 
 		// 2.5 if the user dont have the necessary permissions to update the ticket throw a UPDATE_PERMISSION_DECLINED
 		if (this.ownerPrivilegeAttributes.some(attr => !!data[attr]) && !userPermissions.hasAdminPrivileges) {
@@ -233,19 +242,19 @@ class Ticket {
 		const systemComments = [];
 		const fields = Object.keys(data);
 
-		fields.forEach(field=> {
+		fields.forEach(field => {
 			if (Object.prototype.toString.call(data[field]) !== this.fieldTypes[field]) {
 				throw responseCodes.INVALID_ARGUMENTS;
 			}
 
 			// if a field have the same value shouldnt update the property
-			if (_.isEqual(field[field], data[field])) {
+			if (_.isEqual(oldTicket[field], data[field])) {
 				delete data[field];
 				return;
 			}
 
-			// update of extras must not create a system comment
-			if(field === "extras") {
+			// update of extras, comments, viewpoints must not create a system comment
+			if (field === "extras" || field === "comments" || field === "viewpoints") {
 				return;
 			}
 
@@ -265,7 +274,7 @@ class Ticket {
 		data = await beforeUpdate(data, oldTicket, userPermissions, systemComments);
 
 		if (systemComments.length > 0) {
-			data.comments = (oldTicket.comments || []).map(c=> ({...c,sealed:true}));
+			data.comments = (oldTicket.comments || []).map(c => ({ ...c, sealed: true }));
 			data.comments = data.comments.concat(systemComments);
 		}
 
@@ -273,14 +282,16 @@ class Ticket {
 		const _id = utils.stringToUUID(id);
 
 		const tickets = await this.getTicketsCollection(account, model);
-		await tickets.update({_id}, {$set: data});
+		if (Object.keys(data).length > 0) {
+			await tickets.update({ _id }, { $set: data });
+		}
 
 		// 7. Return the updated data and the old ticket
-		const updatedTicket =  this.clean(account, model,{...oldTicket, ...data});
+		const updatedTicket = this.clean(account, model, { ...oldTicket, ...data });
 		oldTicket = this.clean(account, model, oldTicket);
 		delete data.comments;
 
-		return {oldTicket, updatedTicket, data};
+		return { oldTicket, updatedTicket, data };
 	}
 
 	filterFields(data, blackList) {
@@ -289,16 +300,16 @@ class Ticket {
 	}
 
 	setGroupTicketId(account, model, newTicket) {
-		const groupField =  this.groupField;
+		const groupField = this.groupField;
 
 		const updateGroup = (group_id) => {
 			// TODO - Do we need to find group first? Can we just patch
-			return Group.findByUID({account, model}, utils.uuidToString(group_id), null, utils.uuidToString(newTicket.rev_id)).then((group) => {
+			return Group.findByUID({ account, model }, utils.uuidToString(group_id), null, utils.uuidToString(newTicket.rev_id)).then((group) => {
 				const ticketIdData = {
-					[groupField] :  utils.stringToUUID(newTicket._id)
+					[groupField]: utils.stringToUUID(newTicket._id)
 				};
 
-				return group.updateAttrs({account, model}, ticketIdData);
+				return group.updateAttrs({ account, model }, ticketIdData);
 			});
 		};
 
@@ -332,78 +343,14 @@ class Ticket {
 			return Promise.reject({ resCode: responseCodes.INVALID_ARGUMENTS });
 		}
 
-		const branch = newTicket.revId || "master";
-		newTicket.assigned_roles = newTicket.assigned_roles || [];
-		newTicket._id = utils.stringToUUID(newTicket._id || nodeuuid());
-		newTicket.created = parseInt(newTicket.created || (new Date()).getTime());
-		const ownerJob = await Job.findByUser(account, newTicket.owner);
-		if (ownerJob) {
-			newTicket.creator_role = ownerJob._id;
-		} else {
-			delete newTicket.creator_role;
-		}
-		newTicket.desc = newTicket.desc || "(No Description)";
-		let imagePromise = Promise.resolve();
-		newTicket.viewpoint = newTicket.viewpoint || {};
-		newTicket.viewpoint.guid = utils.generateUUID();
-
-		if (newTicket.viewpoint.highlighted_group_id) {
-			newTicket.viewpoint.highlighted_group_id = utils.stringToUUID(newTicket.viewpoint.highlighted_group_id);
-		}
-
-		if (newTicket.viewpoint.hidden_group_id) {
-			newTicket.viewpoint.hidden_group_id = utils.stringToUUID(newTicket.viewpoint.hidden_group_id);
-		}
-
-		if (newTicket.viewpoint.shown_group_id) {
-			newTicket.viewpoint.shown_group_id = utils.stringToUUID(newTicket.viewpoint.shown_group_id);
-		}
-
-		if (newTicket.viewpoint.screenshot) {
-			newTicket.viewpoint.screenshot = {
-				content: new Buffer.from(newTicket.viewpoint.screenshot, "base64"),
-				flag: 1
-			};
-
-			imagePromise = utils.resizeAndCropScreenshot(newTicket.viewpoint.screenshot.content, 120, 120, true).catch((err) => {
-				systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
-					account,
-					model,
-					type: this.collName,
-					ticketId: utils.uuidToString(newTicket._id),
-					viewpointId: utils.uuidToString(newTicket.viewpoint.guid),
-					err
-				});
-			});
-		}
-
-		newTicket.viewpoints = [newTicket.viewpoint];
-
-		// Assign rev_id for issue
-		const [history, image] = await Promise.all([
-			History.getHistory({account, model}, branch, newTicket.revId, { _id: 1 }),
-			imagePromise
-		]);
-
-		if (!history && (newTicket.revId || (newTicket.viewpoint || {}).highlighted_group_id)) {
-			throw (responseCodes.MODEL_HISTORY_NOT_FOUND);
-		} else if (history) {
-			newTicket.rev_id = history._id;
-		}
-
-		if (image) {
-			newTicket.thumbnail = {
-				flag: 1,
-				content: image
-			};
-		}
-
-		await this.setGroupTicketId(account, model, newTicket);
-
-		newTicket = this.filterFields(newTicket, ["viewpoint", "revId"]);
-
 		Object.keys(newTicket).forEach((key) => {
-			if (Object.prototype.toString.call(newTicket[key]) !== this.fieldTypes[key]) {
+			const validTypes = [].concat(this.fieldTypes[key]);
+			const value = newTicket[key];
+			const fieldType = Object.prototype.toString.call(value);
+
+			if (this.fieldTypes[key] && validTypes.every(t => {
+				return (t === "[object Number]" && isNaN(parseFloat(value))) || (t !== "[object Number]" && t !== fieldType);
+			})) {
 				if (newTicket[key] === null) {
 					delete newTicket[key];
 				} else {
@@ -417,8 +364,82 @@ class Ticket {
 			}
 		});
 
+		const branch = newTicket.revId || "master";
+		newTicket.assigned_roles = newTicket.assigned_roles || [];
+		newTicket._id = utils.stringToUUID(newTicket._id || nodeuuid());
+		newTicket.created = parseInt(newTicket.created || (new Date()).getTime());
+		const ownerJob = await Job.findByUser(account, newTicket.owner);
+		if (ownerJob) {
+			newTicket.creator_role = ownerJob._id;
+		} else {
+			delete newTicket.creator_role;
+		}
+		newTicket.desc = newTicket.desc || "(No Description)";
+		let imagePromise = Promise.resolve();
+		let viewpointScreenshotPromise = Promise.resolve();
+
+		if (!newTicket.viewpoints || newTicket.viewpoint) {
+			// FIXME need to revisit this for BCF refactor
+			// This allows BCF import to create new issue with more than 1 viewpoint
+			newTicket.viewpoint = newTicket.viewpoint || {};
+			newTicket.viewpoint.guid = utils.generateUUID();
+
+			if (newTicket.viewpoint.highlighted_group_id) {
+				newTicket.viewpoint.highlighted_group_id = utils.stringToUUID(newTicket.viewpoint.highlighted_group_id);
+			}
+
+			if (newTicket.viewpoint.hidden_group_id) {
+				newTicket.viewpoint.hidden_group_id = utils.stringToUUID(newTicket.viewpoint.hidden_group_id);
+			}
+
+			if (newTicket.viewpoint.shown_group_id) {
+				newTicket.viewpoint.shown_group_id = utils.stringToUUID(newTicket.viewpoint.shown_group_id);
+			}
+
+			if (newTicket.viewpoint.screenshot) {
+				const imageBuffer = new Buffer.from(newTicket.viewpoint.screenshot, "base64");
+
+				newTicket.viewpoint.screenshot = imageBuffer;
+				viewpointScreenshotPromise = Viewpoint.setExternalScreenshotRef(newTicket.viewpoint, account, model, this.collName);
+
+				imagePromise = utils.resizeAndCropScreenshot(imageBuffer, 120, 120, true).catch((err) => {
+					systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
+						account,
+						model,
+						type: this.collName,
+						ticketId: utils.uuidToString(newTicket._id),
+						viewpointId: utils.uuidToString(newTicket.viewpoint.guid),
+						err
+					});
+				});
+			}
+
+			newTicket.viewpoints = [newTicket.viewpoint];
+		}
+
+		// Assign rev_id for issue
+		const [history, image] = await Promise.all([
+			History.getHistory({ account, model }, branch, newTicket.revId, { _id: 1 }),
+			imagePromise,
+			viewpointScreenshotPromise
+		]);
+
+		if (!history && (newTicket.revId || (newTicket.viewpoint || {}).highlighted_group_id)) {
+			throw (responseCodes.MODEL_HISTORY_NOT_FOUND);
+		} else if (history) {
+			newTicket.rev_id = history._id;
+		}
+
+		if (image) {
+			newTicket.thumbnail = image;
+		}
+
+		await this.setGroupTicketId(account, model, newTicket);
+
+		newTicket = this.filterFields(newTicket, ["viewpoint", "revId"]);
+
 		const [settings, coll] = await Promise.all([
-			ModelSetting.findById({account, model}, model),
+			ModelSetting.findById({ account, model }, model),
 			this.getTicketsCollection(account, model)
 		]);
 
@@ -437,56 +458,21 @@ class Ticket {
 			vid = utils.stringToUUID(vid);
 		}
 
-		return this.findByUID(account, model, uid, { viewpoints: { $elemMatch: { guid: vid } },
+		return this.findByUID(account, model, uid, {
+			viewpoints: { $elemMatch: { guid: vid } },
 			"viewpoints.screenshot.resizedContent": 0
 		}, true).then((foundTicket) => {
-			if (!_.get(foundTicket, "viewpoints[0].screenshot.content.buffer")) {
+			if (!_.get(foundTicket, "viewpoints[0].screenshot.content.buffer") && !_.get(foundTicket, "viewpoints[0].screenshot_ref")) {
 				return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 			} else {
+				if (foundTicket.viewpoints[0].screenshot_ref) {
+					return FileRef.fetchFile(account, model, this.collName, foundTicket.viewpoints[0].screenshot_ref);
+				}
+
+				// this is being kept for legacy reasons
 				return foundTicket.viewpoints[0].screenshot.content.buffer;
 			}
 		});
-	}
-
-	getSmallScreenshot(account, model, uid, vid) {
-		if ("[object String]" === Object.prototype.toString.call(uid)) {
-			uid = utils.stringToUUID(uid);
-		}
-
-		if ("[object String]" === Object.prototype.toString.call(vid)) {
-			vid = utils.stringToUUID(vid);
-		}
-
-		return this.findByUID(account, model, uid, { viewpoints: { $elemMatch: { guid: vid } } }, true)
-			.then((foundTicket) => {
-				if (_.get(foundTicket, "viewpoints[0].screenshot.resizedContent.buffer")) {
-					return foundTicket.viewpoints[0].screenshot.resizedContent.buffer;
-				} else if (!_.get(foundTicket, "viewpoints[0].screenshot.content.buffer")) {
-					return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
-				} else {
-					return utils.resizeAndCropScreenshot(foundTicket.viewpoints[0].screenshot.content.buffer, 365)
-						.then((resized) => {
-							this.getTicketsCollection(account, model).then((_dbCol) => {
-								_dbCol.update({
-									_id: uid,
-									"viewpoints.guid": vid
-								},{
-									$set: {"viewpoints.$.screenshot.resizedContent": resized}
-								}).catch((err) => {
-									systemLogger.logError("Error while saving resized screenshot",
-										{
-											collName: this.collName,
-											ticketId: utils.uuidToString(uid),
-											viewpointId: utils.uuidToString(vid),
-											err: err
-										});
-								});
-							});
-
-							return resized;
-						});
-				}
-			});
 	}
 
 	getThumbnail(account, model, uid) {
@@ -495,19 +481,20 @@ class Ticket {
 		}
 
 		return this.findByUID(account, model, uid, { thumbnail: 1 }, true).then((foundTicket) => {
-			if (!_.get(foundTicket, "thumbnail.content.buffer")) {
+			// the 'content' field is for legacy reasons
+			if (!_.get(foundTicket, "thumbnail.buffer") && !_.get(foundTicket, "thumbnail.content.buffer")) {
 				return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 			} else {
-				return foundTicket.thumbnail.content.buffer;
+				return (foundTicket.thumbnail.content || foundTicket.thumbnail).buffer;
 			}
 		});
 	}
 
-	async findByModelName(account, model, branch, revId, projection, ids, noClean = false) {
+	async getIdsFilter(account, model, branch, revId, ids) {
 		let filter = {};
 
 		if (Array.isArray(ids)) {
-			filter._id = {"$in": ids.map(utils.stringToUUID)};
+			filter._id = { "$in": ids.map(utils.stringToUUID) };
 		} else {
 			filter = { ...filter, ...(ids || {}) }; // this means that the ids are a different filter;
 		}
@@ -516,24 +503,34 @@ class Ticket {
 
 		if (branch || revId) {
 			// searches for the first rev id
-			const history = await History.getHistory({account, model}, branch, revId);
+			const history = await History.getHistory({ account, model }, branch, revId);
 			if (history) {
 				// Uses the first revsion searched to get all posterior revisions
-				invalidRevIds = await History.find({account, model}, {timestamp: {"$gt": history.timestamp}}, {_id: 1});
+				invalidRevIds = await History.find({ account, model }, { timestamp: { "$gt": history.timestamp } }, { _id: 1 });
 				invalidRevIds = invalidRevIds.map(r => r._id);
 			}
 		}
 
-		const modelSettings = await ModelSetting.findById({account, model}, model);
-		filter.rev_id = {"$not" : {"$in": invalidRevIds}};
+		filter.rev_id = { "$not": { "$in": invalidRevIds } };
+
+		return filter;
+	}
+
+	async findByModelName(account, model, branch, revId, query, projection, ids, noClean = false, convertCoords = false) {
+		const filter = await this.getIdsFilter(account, model, branch, revId, ids);
+		const fullQuery = {...filter, ...query};
+
 		const coll = await this.getTicketsCollection(account, model);
-		const tickets = await coll.find(filter, projection).toArray();
+		const tickets = await coll.find(fullQuery, projection).toArray();
 		tickets.forEach((foundTicket, index) => {
-			foundTicket.typePrefix = modelSettings.type || "";
-			foundTicket.modelCode = (modelSettings.properties || {}).code || "";
 			if (!noClean) {
 				tickets[index] = this.clean(account, model, foundTicket);
 			}
+
+			if (convertCoords) {
+				this.toDirectXCoords(foundTicket);
+			}
+
 		});
 
 		return tickets;
@@ -557,7 +554,7 @@ class Ticket {
 		});
 
 		const clippingPlanes = viewpoint.clippingPlanes;
-		if(clippingPlanes) {
+		if (clippingPlanes) {
 			for (const item in clippingPlanes) {
 				clippingPlanes[item].normal = utils.webGLtoDirectX(clippingPlanes[item].normal);
 			}
@@ -566,10 +563,9 @@ class Ticket {
 		return viewpoint;
 	}
 
-	async getList(account, model, branch, revision, ids, convertCoords) {
+	async getList(account, model, branch, revision, ids, convertCoords, updatedSince) {
 		const projection = {
 			extras: 0,
-			"comments": 0,
 			"viewpoints.extras": 0,
 			"viewpoints.scribble": 0,
 			"viewpoints.screenshot.content": 0,
@@ -577,10 +573,38 @@ class Ticket {
 			"thumbnail.content": 0
 		};
 
-		const tickets = await this.findByModelName(account, model, branch, revision, projection, ids, false);
-		if (convertCoords) {
-			tickets.forEach(this.toDirectXCoords);
-		}
+		const query = updatedSince ?
+			{
+				$or:[
+					{created: {$gte: updatedSince}},
+					{"comments.created": {$gte: updatedSince}}
+				]
+			}
+			: undefined;
+
+		const tickets = await this.findByModelName(
+			account,
+			model,
+			branch,
+			revision,
+			query,
+			projection,
+			ids,
+			false,
+			convertCoords
+		);
+
+		tickets.forEach((ticket) => {
+			ticket.lastUpdated = ticket.created;
+			ticket.comments && ticket.comments.forEach((comment) => {
+				if (comment.created > ticket.lastUpdated) {
+					ticket.lastUpdated = comment.created;
+				}
+			});
+
+			ticket.comment = undefined;
+		});
+
 		return tickets;
 	}
 
@@ -595,7 +619,7 @@ class Ticket {
 		};
 
 		const branch = rid ? null : "master";
-		const tickets = await this.findByModelName(account, model, branch, rid, projection, ids, false);
+		const tickets = await this.findByModelName(account, model, branch, rid, undefined, projection, ids, false);
 		reportGen.addEntries(tickets);
 		return reportGen.generateReport(res);
 	}
@@ -606,7 +630,7 @@ class Ticket {
 		}
 
 		const tickets = await this.getTicketsCollection(account, model);
-		const ticketQuery = {_id: utils.stringToUUID(id)};
+		const ticketQuery = { _id: utils.stringToUUID(id) };
 		const ticketFound = await tickets.findOne(ticketQuery);
 
 		if (!ticketFound) {
@@ -622,12 +646,12 @@ class Ticket {
 			ref_ids.push(ref._id);
 		});
 
-		await tickets.update(ticketQuery, { $set: {comments}, $push: {refs:  {$each: ref_ids}}});
+		await tickets.update(ticketQuery, { $set: { comments }, $push: { refs: { $each: ref_ids } } });
 		return refs;
 	}
 
 	async attachResourceFiles(account, model, id, username, sessionId, resourceNames, files) {
-		const spaceToBeUsed = files.reduce((size, file) => size + file.size,0);
+		const spaceToBeUsed = files.reduce((size, file) => size + file.size, 0);
 
 		if (!User.hasSufficientQuota(account, spaceToBeUsed)) {
 			throw responseCodes.SIZE_LIMIT_PAY;
@@ -637,9 +661,9 @@ class Ticket {
 			throw responseCodes.SIZE_LIMIT;
 		}
 
-		const refsPromises = files.map((file,i) => {
+		const refsPromises = files.map((file, i) => {
 			const extension = ((file.originalname.match(extensionRe) || [])[0] || "").toLowerCase();
-			return FileRef.storeFileAsResource(account, model, username, resourceNames[i] + extension, file.buffer, {[this.refIdsField]:[id]});
+			return FileRef.storeFileAsResource(account, model, username, resourceNames[i] + extension, file.buffer, { [this.refIdsField]: [id] });
 		});
 		const refs = await Promise.all(refsPromises);
 		refs.forEach(r => {
@@ -652,7 +676,7 @@ class Ticket {
 	}
 
 	async attachResourceUrls(account, model, id, username, sessionId, resourceNames, urls) {
-		const refsPromises = urls.map((url, index) =>  FileRef.storeUrlAsResource(account, model, username,resourceNames[index], url,{[this.refIdsField]:[id]}));
+		const refsPromises = urls.map((url, index) => FileRef.storeUrlAsResource(account, model, username, resourceNames[index], url, { [this.refIdsField]: [id] }));
 		const refs = await Promise.all(refsPromises);
 		refs.forEach(r => {
 			delete r.type;
@@ -665,7 +689,7 @@ class Ticket {
 	async detachResource(account, model, id, resourceId, username, sessionId) {
 		const ref = await FileRef.removeResourceFromEntity(account, model, this.refIdsField, id, resourceId);
 		const tickets = await this.getTicketsCollection(account, model);
-		const ticketQuery = {_id: utils.stringToUUID(id)};
+		const ticketQuery = { _id: utils.stringToUUID(id) };
 		const ticketFound = await tickets.findOne(ticketQuery);
 
 		if (!ticketFound) {
@@ -674,9 +698,9 @@ class Ticket {
 
 		const comments = ticketFound.comments;
 		comments.push(await this.createSystemComment(account, model, sessionId, id, username, "resource", ref.name, null));
-		await tickets.update(ticketQuery, {$set: {comments}, $pull: { refs: resourceId } });
+		await tickets.update(ticketQuery, { $set: { comments }, $pull: { refs: resourceId } });
 
-		if(ref.type !== "http") {
+		if (ref.type !== "http") {
 			delete ref.link;
 		}
 		delete ref.type;

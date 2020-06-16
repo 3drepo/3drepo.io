@@ -26,8 +26,16 @@ function Utils() {
 
 	const self = this;
 
+	this.isDate = (value) => {
+		return "[object Date]" === Object.prototype.toString.call(value);
+	};
+
 	this.isString = (value) => {
 		return "[object String]" === Object.prototype.toString.call(value);
+	};
+
+	this.isObject = (value) => {
+		return "[object Object]" === Object.prototype.toString.call(value);
 	};
 
 	this.hasField = (obj, field) => {

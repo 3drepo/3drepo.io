@@ -140,7 +140,7 @@ historySchema.statics.findByUID = function(dbColOptions, revId, projection) {
 };
 
 historySchema.statics.updateRevision = async function(dbColOptions, modelId, data) {
-	if(data.hasOwnProperty("void") &&
+	if(utils.hasField(data, "void") &&
 		Object.prototype.toString.call(data.void) === "[object Boolean]") {
 		const rev = await History.findByUID(dbColOptions, modelId);
 		if(!rev) {

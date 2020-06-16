@@ -381,7 +381,9 @@ describe("Model", function () {
 					agent2.get("/testing.json").expect(200, function(err, res) {
 
 						const account = res.body.accounts.find(account => account.account === username);
-						expect(account).to.not.exist;
+						const modelExists = account.models.find(m => m.model === model);
+
+						expect(modelExists).to.not.exist;
 
 						// const mm = account.models.find(m => m.model === model);
 						// expect(mm).to.not.exist;

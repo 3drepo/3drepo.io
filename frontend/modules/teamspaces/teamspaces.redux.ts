@@ -22,6 +22,7 @@ import { SORTING_BY_LAST_UPDATED } from '../../routes/teamspaces/teamspaces.cont
 
 export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createActions({
 	fetchTeamspaces: ['username'],
+	fetchTeamspacesIfNecessary: ['username'],
 	fetchTeamspacesSuccess: ['entities'],
 	setPendingState: ['pendingState'],
 	setModelUploadStatus: ['teamspace', 'project', 'model', 'modelData'],
@@ -109,7 +110,10 @@ const getProject = (state, teamspaceName, projectName) => {
 
 // Models
 const updateModelSuccess = (state = INITIAL_STATE, { modelId, modelData }) => {
-	const model = { ...state.models[modelId], name: modelData.name, code: modelData.code };
+	const model = { ...state.models[modelId],
+		name: modelData.name || state.models[modelId].name,
+		code: modelData.code || state.models[modelId].code
+	};
 	if (modelData.federate) {
 		model.subModels = modelData.subModels;
 		model.timestamp = modelData.timestamp;

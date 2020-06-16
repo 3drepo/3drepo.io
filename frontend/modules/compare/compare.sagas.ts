@@ -271,11 +271,6 @@ function* startComparisonOfFederation() {
 			const canReuseModel = model.baseRevision.name === targetRevision.name && selectedModelsMap[model._id] && !isDiff;
 
 			if (canReuseModel) {
-				const isAlreadyVisible = modelsToShow.some(({ _id }) => !!model._id);
-
-				if (!isAlreadyVisible) {
-					modelsToShow.push(model);
-				}
 				Viewer.diffToolSetAsComparator(
 					model.teamspace,
 					model._id
@@ -288,6 +283,10 @@ function* startComparisonOfFederation() {
 				);
 				modelsToLoad.push(modelPromise);
 			}
+		}
+
+		if (isSelectedModel) {
+			modelsToShow.push(model);
 		} else {
 			modelsToHide.push(model);
 		}

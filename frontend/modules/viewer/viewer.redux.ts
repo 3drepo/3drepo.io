@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { cloneDeep } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 import { DEFAULT_SETTINGS } from '../../constants/viewer';
 
@@ -25,7 +26,7 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 }, { prefix: 'VIEWER_CANVAS/' });
 
 export const INITIAL_STATE = {
-	settings: {...DEFAULT_SETTINGS },
+	settings: cloneDeep(DEFAULT_SETTINGS),
 };
 
 const updateSettingsSuccess = (state = INITIAL_STATE, {username,  settings }) => {

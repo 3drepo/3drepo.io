@@ -71,7 +71,7 @@ export const Container = styled.div`
 `;
 
 export const Row = styled.div`
-	height: 62px;
+	min-height: 62px;
 	display: flex;
 	flex-direction: row;
 	border-bottom: 1px solid ${COLOR.BLACK_6};

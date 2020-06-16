@@ -75,10 +75,6 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	get isFormValid() {
-		if (this.isNewGroup) {
-			return this.state.isFormValid;
-		}
-
 		return this.state.isFormDirty && this.state.isFormValid && this.hasValidRules;
 	}
 

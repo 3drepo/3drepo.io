@@ -30,6 +30,7 @@ const http = require("http");
 const tls  = require("tls");
 const vhost = require("vhost");
 const crypto = require("crypto");
+const utils = require("./utils");
 
 const certs = {};
 const certMap = {};
@@ -40,7 +41,7 @@ function setupSSL() {
 
 		for (const certGroup in config.ssl) {
 
-			if (config.ssl.hasOwnProperty(certGroup)) {
+			if (utils.hasField(config.ssl, certGroup)) {
 				const certGroupOptions = {};
 
 				certGroupOptions.key = fs.readFileSync(config.ssl[certGroup].key, "utf8");
@@ -113,7 +114,7 @@ function runServer() {
 	// The core express application
 	const mainApp = express();
 
-	if(config.hasOwnProperty("umask")) {
+	if(utils.hasField(config, "umask")) {
 		systemLogger.logInfo("Setting umask: " + config.umask);
 		process.umask(config.umask);
 	}
@@ -138,9 +139,9 @@ function runServer() {
 }
 
 function handleSubdomains(mainApp) {
-	if (config.hasOwnProperty("subdomains")) {
+	if (utils.hasField(config, "subdomains")) {
 		for (const subdomain in config.subdomains) {
-			if (config.subdomains.hasOwnProperty(subdomain)) {
+			if (utils.hasField(config.subdomains, subdomain)) {
 				setupSubdomain(mainApp, subdomain);
 			}
 		}

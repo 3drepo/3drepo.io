@@ -35,17 +35,17 @@ function* fetchData({ boardType, teamspace, project, modelId }) {
 		const currentTeamspace = yield select(selectCurrentTeamspace);
 		const currentModel = yield select(selectCurrentModel);
 
-		yield all([
-			put(JobsActions.fetchJobs(teamspace)),
-			put(JobsActions.fetchJobsColors(teamspace))
-		]);
+		yield put(JobsActions.fetchJobs(teamspace));
+		yield put(JobsActions.getMyJob(teamspace));
 
 		if (modelId && modelId !== currentModel) {
 			yield put(ModelActions.fetchSettings(teamspace, modelId));
 		}
 
+		yield put(TeamspacesActions.fetchTeamspacesIfNecessary(currentTeamspace));
+
 		if (!teamspaces.length) {
-			yield put(TeamspacesActions.fetchTeamspaces(currentTeamspace));
+			yield put(TeamspaceActions.fetchSettings(teamspace));
 		}
 
 		if (teamspace && project && modelId) {

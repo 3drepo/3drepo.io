@@ -22,7 +22,6 @@ const middlewares = require("../middlewares/middlewares");
 
 const C = require("../constants");
 const responseCodes = require("../response_codes.js");
-const BCF = require("../models/bcf");
 const Issue = require("../models/issue");
 const utils = require("../utils");
 const multer = require("multer");
@@ -100,7 +99,7 @@ router.get("/issues/:issueId", middlewares.issue.canView, findIssueById);
 router.get("/issues/:issueId/thumbnail.png", middlewares.issue.canView, getThumbnail);
 
 /**
- * @api {get} /:teamspace/:model/issues Get all Issues
+ * @api {get} /:teamspace/:model/issues?[query] Get all Issues
  * @apiName listIssues
  * @apiGroup Issues
  *
@@ -108,6 +107,9 @@ router.get("/issues/:issueId/thumbnail.png", middlewares.issue.canView, getThumb
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
+ *
+ * @apiParam (Query) {String} [convertCoords] Convert coordinates to user space
+ * @apiParam (Query) {Number} [updatedSince] Only return issues that has been updated since this value (in epoch value)
  *
  * @apiSuccess (200) {Object} Issue Object.
  * @apiSuccessExample {json} Success-Response.
@@ -162,7 +164,7 @@ router.get("/issues/:issueId/thumbnail.png", middlewares.issue.canView, getThumb
 router.get("/issues", middlewares.issue.canView, listIssues);
 
 /**
- * @api {get} /:teamspace/:model/issues.bcfzip Get Issues BCF zip file
+ * @api {get} /:teamspace/:model/issues.bcfzip Download issues BCF zip file
  * @apiName getIssuesBCF
  * @apiGroup Issues
  *
@@ -209,7 +211,7 @@ router.get("/issues/:issueId/viewpoints/:vid/screenshot.png", middlewares.issue.
  *
  * @apiSuccess (200) {Object} Issue Screenshot.
  */
-router.get("/issues/:issueId/viewpoints/:vid/screenshotSmall.png", middlewares.issue.canView, getScreenshotSmall);
+router.get("/issues/:issueId/viewpoints/:vid/screenshotSmall.png", middlewares.issue.canView, getScreenshot);
 
 /**
  * @api {get} /:teamspace/:model/revision/:rid/issues Get all Issues by revision ID
@@ -219,6 +221,9 @@ router.get("/issues/:issueId/viewpoints/:vid/screenshotSmall.png", middlewares.i
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  * @apiParam {String} id Revision unique ID.
+ *
+ * @apiParam (Query) {String} [convertCoords] Convert coordinates to user space
+ * @apiParam (Query) {Number} [updatedSince] Only return issues that has been updated since this value (in epoch value)
  *
  * @apiDescription Get all issues related to specific revision ID.
  *
@@ -272,7 +277,7 @@ router.get("/revision/:rid/issues", middlewares.issue.canView, listIssues);
 
 /**
  * @api {get} /:teamspace/:model/revision/:rid/issues.bcfzip Get Issues BCF zip file by revision ID
- * @apiName getIssuesBCF
+ * @apiName getIssuesBCFTRid
  * @apiGroup Issues
  *
  * @apiParam {String} teamspace Name of teamspace
@@ -286,7 +291,7 @@ router.get("/revision/:rid/issues.bcfzip", middlewares.issue.canView, getIssuesB
 
 /**
  * @api {post} /:teamspace/:model/revision/:rid/issues.bcfzip Post Issues BCF zip file by revision ID
- * @apiName getIssuesBCF
+ * @apiName postIssuesBCF
  * @apiGroup Issues
  *
  * @apiParam {String} teamspace Name of teamspace
@@ -319,7 +324,7 @@ router.get("/issues.html", middlewares.issue.canView, renderIssuesHTML);
 
 /**
  * @api {get} /:teamspace/:model/revision/:rid/issues.html Issues response into as HTML by revision ID
- * @apiName  renderIssuesHTML
+ * @apiName  renderIssuesHTMLRid
  * @apiGroup Issues
  *
  * @apiParam {String} teamspace Name of teamspace
@@ -784,7 +789,6 @@ router.post("/issues/:issueId/resources",middlewares.issue.canComment, attachRes
  *    "user":"teamSpace1",
  *    "createdAt":1561973996462
  * }
- *
  */
 router.delete("/issues/:issueId/resources",middlewares.issue.canComment, detachResourcefromIssue, middlewares.chat.onResourceDeleted, responseCodes.onSuccessfulOperation);
 
@@ -793,8 +797,11 @@ function storeIssue(req, res, next) {
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
 	data.owner = req.session.user.username;
-	data.revId = req.params.rid;
-	data.created = undefined;
+
+	if (req.params.rid) {
+		data.revId = req.params.rid;
+	}
+
 	const {account, model} = req.params;
 
 	Issue.create(account, model, data, sessionId).then(issue => {
@@ -829,13 +836,20 @@ function listIssues(req, res, next) {
 	const branch = rid ? null : "master";
 	const ids = req.query.ids ? req.query.ids.split(",") : null;
 	const convertCoords = !!req.query.convertCoords;
+	let updatedSince = req.query.updatedSince;
 
-	Issue.getIssuesList(account, model, branch, rid, ids, req.query.sortBy, convertCoords).then(issues => {
+	if (updatedSince) {
+		updatedSince = parseInt(updatedSince, 10);
+		if (isNaN(updatedSince)) {
+			return responseCodes.respond(place, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
+		}
+	}
+
+	Issue.getList(account, model, branch, rid, ids, convertCoords, updatedSince).then(issues => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, issues);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
-
 }
 
 function getIssuesBCF(req, res, next) {
@@ -856,13 +870,12 @@ function getIssuesBCF(req, res, next) {
 	let getBCFZipRS;
 
 	if (req.params.rid) {
-		getBCFZipRS = BCF.getBCFZipReadStream(account, model, req.session.user.username, null, req.params.rid, ids, useIssueNumbers);
+		getBCFZipRS = Issue.getBCF(account, model, null, req.params.rid, ids, useIssueNumbers);
 	} else {
-		getBCFZipRS = BCF.getBCFZipReadStream(account, model, req.session.user.username, "master", null, ids, useIssueNumbers);
+		getBCFZipRS = Issue.getBCF(account, model, "master", null, ids, useIssueNumbers);
 	}
 
 	getBCFZipRS.then(zipRS => {
-
 		const timestamp = (new Date()).toLocaleString();
 
 		ModelSetting.findById(dbCol, dbCol.model).then((settings) => {
@@ -906,51 +919,39 @@ function renderIssuesHTML(req, res, next) {
 function importBCF(req, res, next) {
 	const place = utils.APIInfo(req);
 
-	// check space
-	function fileFilter(fileReq, file, cb) {
-
-		const acceptedFormat = [
-			"bcf", "bcfzip", "zip"
-		];
-
-		let format = file.originalname.split(".");
-		format = format.length <= 1 ? "" : format.splice(-1)[0];
-
-		const size = parseInt(fileReq.headers["content-length"]);
-
-		if (acceptedFormat.indexOf(format.toLowerCase()) === -1) {
-			return cb({ resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
-		}
-
-		if (size > config.uploadSizeLimit) {
-			return cb({ resCode: responseCodes.SIZE_LIMIT });
-		}
-
-		cb(null, true);
-	}
-
-	if (!config.bcf_dir) {
-		return responseCodes.respond(place, req, res, next, { message: "config.bcf_dir is not defined" });
-	}
-
 	const upload = multer({
-		dest: config.bcf_dir,
-		fileFilter: fileFilter
+		storage: multer.memoryStorage(),
+		fileFilter : (fileReq, file, cb) => {
+			const acceptedFormat = [
+				"bcf", "bcfzip", "zip"
+			];
+
+			let format = file.originalname.split(".");
+			format = format.length <= 1 ? "" : format.splice(-1)[0];
+
+			const size = parseInt(fileReq.headers["content-length"]);
+
+			if (acceptedFormat.indexOf(format.toLowerCase()) === -1) {
+				return cb({ resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
+			}
+
+			if (size > config.uploadSizeLimit) {
+				return cb({ resCode: responseCodes.SIZE_LIMIT });
+			}
+
+			cb(null, true);
+		}
 	});
 
 	upload.single("file")(req, res, function (err) {
 		if (err) {
-			return responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
-
-		} else if (!req.file.size) {
-			return responseCodes.respond(place, req, res, next, responseCodes.FILE_FORMAT_NOT_SUPPORTED, responseCodes.FILE_FORMAT_NOT_SUPPORTED);
-		} else {
-			BCF.importBCF({ socketId: req.headers[C.HEADER_SOCKET_ID], user: req.session.user.username }, req.params.account, req.params.model, req.params.rid, req.file.path).then(() => {
-				responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "ok" });
-			}).catch(error => {
-				responseCodes.respond(place, req, res, next, error, error);
-			});
+			return responseCodes.respond(place, req, res, next, err.resCode || err, err.resCode || err);
 		}
+		Issue.importBCF({ socketId: req.headers[C.HEADER_SOCKET_ID], user: req.session.user.username }, req.params.account, req.params.model, req.params.rid, req.file.buffer).then(() => {
+			responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "ok" });
+		}).catch(error => {
+			responseCodes.respond(place, req, res, next, error, error);
+		});
 	});
 }
 
@@ -959,17 +960,6 @@ function getScreenshot(req, res, next) {
 	const {account, model, issueId, vid} = req.params;
 
 	Issue.getScreenshot(account, model, issueId, vid).then(buffer => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png", config.cachePolicy);
-	}).catch(err => {
-		responseCodes.respond(place, req, res, next, err, err);
-	});
-}
-
-function getScreenshotSmall(req, res, next) {
-	const place = utils.APIInfo(req);
-	const { account, model, issueId, vid } = req.params;
-
-	Issue.getSmallScreenshot(account, model, issueId, vid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png", config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);

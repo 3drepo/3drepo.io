@@ -31,7 +31,6 @@ module.exports = {
 		{
 			service: "api",
 			subdirectory: "api",
-			port: http_port,
 			public_port: http_port,
 			public_protocol: "http"
 		},
@@ -49,6 +48,7 @@ module.exports = {
 		{
 			service: "chat",
 			port: 3000,
+			chatOnPublicPort: false,
 			subdirectory: 'chat'
 		}
 	],
@@ -148,7 +148,6 @@ module.exports = {
 			skipChecking: true
 		}
 	},
-	bcf_dir: '/tmp',
 	legal: [
 		{title: "Terms & Conditions", type: "agreeTo", page: "terms", fileName: "terms.html"},
 		{title: "Privacy", type: "haveRead", page: "privacy", fileName: "privacy.html"},

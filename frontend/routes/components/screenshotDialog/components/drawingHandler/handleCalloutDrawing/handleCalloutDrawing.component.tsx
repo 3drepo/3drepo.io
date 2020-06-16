@@ -101,11 +101,11 @@ export class HandleCalloutDrawing
 	}
 
 	public subscribeDotDrawingEvents = () => {
-		this.props.stage.on('mouseup', this.handleMouseUpDot);
+		this.props.stage.on('mouseup touchend', this.handleMouseUpDot);
 	}
 
 	public unsubscribeDotDrawingEvents = () => {
-		this.props.stage.off('mouseup', this.handleMouseUpDot);
+		this.props.stage.off('mouseup touchend', this.handleMouseUpDot);
 	}
 
 	public handleMouseUpDot = () => {
@@ -138,11 +138,11 @@ export class HandleCalloutDrawing
 	}
 
 	public subscribeLineDrawingEvents = () => {
-		this.props.stage.on('mousemove', this.handleMouseMoveLine);
+		this.props.stage.on('mousemove touchmove', this.handleMouseMoveLine);
 	}
 
 	public unsubscribeLineDrawingEvents = () => {
-		this.props.stage.off('mousemove', this.handleMouseMoveLine);
+		this.props.stage.off('mousemove touchmove', this.handleMouseMoveLine);
 	}
 
 	public saveCallout = () => {
@@ -203,15 +203,15 @@ export class HandleCalloutDrawing
 	}
 
 	public subscribeShapeDrawingEvents = () => {
-		this.props.stage.on('mousemove', this.handleMouseMoveShape);
-		this.props.stage.on('mouseup', this.handleMouseUpShape);
-		this.props.stage.on('mousedown', this.handleMouseDownShape);
+		this.props.stage.on('mousemove touchmove', this.handleMouseMoveShape);
+		this.props.stage.on('mouseup touchend', this.handleMouseUpShape);
+		this.props.stage.on('mousedown touchstart', this.handleMouseDownShape);
 	}
 
 	public unsubscribeShapeDrawingEvents = () => {
-		this.props.stage.off('mousemove', this.handleMouseMoveShape);
-		this.props.stage.off('mouseup', this.handleMouseUpShape);
-		this.props.stage.off('mousedown', this.handleMouseDownShape);
+		this.props.stage.off('mousemove touchmove', this.handleMouseMoveShape);
+		this.props.stage.off('mouseup touchend', this.handleMouseUpShape);
+		this.props.stage.off('mousedown touchstart', this.handleMouseDownShape);
 	}
 
 	public handleMouseMoveShape = () => {
