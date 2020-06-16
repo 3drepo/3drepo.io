@@ -1543,6 +1543,13 @@
             "optional": true,
             "field": "noRisks",
             "description": "<p>Flag that hides groups for risks</p>"
+          },
+          {
+            "group": "Query",
+            "type": "Number",
+            "optional": true,
+            "field": "updatedSince",
+            "description": "<p>Only return issues that has been updated since this value (in epoch value)</p>"
           }
         ]
       }
@@ -2808,11 +2815,12 @@
     "groupTitle": "Issues"
   },
   {
-    "type": "post",
-    "url": "/:teamspace/:model/revision/:rid/issues.bcfzip",
-    "title": "Post Issues BCF zip file by revision ID",
+    "type": "get",
+    "url": "/:teamspace/:model/issues.bcfzip",
+    "title": "Download issues BCF zip file",
     "name": "getIssuesBCF",
     "group": "Issues",
+    "description": "<p>Get a downloaded zip file of all Issues BCF.</p>",
     "parameter": {
       "fields": {
         "Parameter": [
@@ -2829,37 +2837,9 @@
             "optional": false,
             "field": "model",
             "description": "<p>Model ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "id",
-            "description": "<p>Revision unique ID.</p>"
           }
         ]
       }
-    },
-    "description": "<p>Upload Issues BCF file using current revision ID.</p>",
-    "success": {
-      "fields": {
-        "200": [
-          {
-            "group": "200",
-            "type": "Object",
-            "optional": false,
-            "field": "Status",
-            "description": ""
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response.",
-          "content": "HTTP\n{\n\t\"status\":\"ok\"\n}",
-          "type": "json"
-        }
-      ]
     },
     "version": "0.0.0",
     "filename": "routes/issue.js",
@@ -2869,7 +2849,7 @@
     "type": "get",
     "url": "/:teamspace/:model/revision/:rid/issues.bcfzip",
     "title": "Get Issues BCF zip file by revision ID",
-    "name": "getIssuesBCF",
+    "name": "getIssuesBCFTRid",
     "group": "Issues",
     "parameter": {
       "fields": {
@@ -2899,37 +2879,6 @@
       }
     },
     "description": "<p>Get Issues BCF export based on revision ID.</p>",
-    "version": "0.0.0",
-    "filename": "routes/issue.js",
-    "groupTitle": "Issues"
-  },
-  {
-    "type": "get",
-    "url": "/:teamspace/:model/issues.bcfzip",
-    "title": "Get Issues BCF zip file",
-    "name": "getIssuesBCF",
-    "group": "Issues",
-    "description": "<p>Get a downloaded zip file of all Issues BCF.</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          }
-        ]
-      }
-    },
     "version": "0.0.0",
     "filename": "routes/issue.js",
     "groupTitle": "Issues"
@@ -3083,6 +3032,22 @@
             "field": "id",
             "description": "<p>Revision unique ID.</p>"
           }
+        ],
+        "Query": [
+          {
+            "group": "Query",
+            "type": "String",
+            "optional": true,
+            "field": "convertCoords",
+            "description": "<p>Convert coordinates to user space</p>"
+          },
+          {
+            "group": "Query",
+            "type": "Number",
+            "optional": true,
+            "field": "updatedSince",
+            "description": "<p>Only return issues that has been updated since this value (in epoch value)</p>"
+          }
         ]
       }
     },
@@ -3113,7 +3078,7 @@
   },
   {
     "type": "get",
-    "url": "/:teamspace/:model/issues",
+    "url": "/:teamspace/:model/issues?[query]",
     "title": "Get all Issues",
     "name": "listIssues",
     "group": "Issues",
@@ -3134,6 +3099,22 @@
             "optional": false,
             "field": "model",
             "description": "<p>Model ID</p>"
+          }
+        ],
+        "Query": [
+          {
+            "group": "Query",
+            "type": "String",
+            "optional": true,
+            "field": "convertCoords",
+            "description": "<p>Convert coordinates to user space</p>"
+          },
+          {
+            "group": "Query",
+            "type": "Number",
+            "optional": true,
+            "field": "updatedSince",
+            "description": "<p>Only return issues that has been updated since this value (in epoch value)</p>"
           }
         ]
       }
@@ -3392,6 +3373,64 @@
     "groupTitle": "Issues"
   },
   {
+    "type": "post",
+    "url": "/:teamspace/:model/revision/:rid/issues.bcfzip",
+    "title": "Post Issues BCF zip file by revision ID",
+    "name": "postIssuesBCF",
+    "group": "Issues",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Revision unique ID.</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Upload Issues BCF file using current revision ID.</p>",
+    "success": {
+      "fields": {
+        "200": [
+          {
+            "group": "200",
+            "type": "Object",
+            "optional": false,
+            "field": "Status",
+            "description": ""
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response.",
+          "content": "HTTP\n{\n\t\"status\":\"ok\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/issue.js",
+    "groupTitle": "Issues"
+  },
+  {
     "type": "get",
     "url": "/:teamspace/:model/issues.html",
     "title": "Issues response into as HTML",
@@ -3426,7 +3465,7 @@
     "type": "get",
     "url": "/:teamspace/:model/revision/:rid/issues.html",
     "title": "Issues response into as HTML by revision ID",
-    "name": "renderIssuesHTML",
+    "name": "renderIssuesHTMLRid",
     "group": "Issues",
     "parameter": {
       "fields": {
@@ -6650,7 +6689,7 @@
   },
   {
     "type": "post",
-    "url": "/:teamspace/:model",
+    "url": "/:teamspace/model",
     "title": "Create a model",
     "name": "createModel",
     "group": "Model",
@@ -6690,14 +6729,14 @@
           {
             "group": "Request body",
             "type": "String",
-            "optional": false,
+            "optional": true,
             "field": "desc",
             "description": "<p>A description of the model</p>"
           },
           {
             "group": "Request body",
             "type": "String",
-            "optional": false,
+            "optional": true,
             "field": "code",
             "description": "<p>A code to be associated with the model; it can be of maximum 5 letters (a-z) and numbers</p>"
           },
@@ -8196,7 +8235,7 @@
   },
   {
     "type": "post",
-    "url": "/:teamspace/upload",
+    "url": "/:teamspace/:model/upload",
     "title": "Upload Model.",
     "name": "uploadModel",
     "group": "Model",
@@ -9703,6 +9742,15 @@
             "optional": false,
             "field": "model",
             "description": "<p>Model ID</p>"
+          }
+        ],
+        "Query": [
+          {
+            "group": "Query",
+            "type": "Number",
+            "optional": true,
+            "field": "updatedSince",
+            "description": "<p>Only return issues that has been updated since this value (in epoch value)</p>"
           }
         ]
       }
