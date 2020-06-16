@@ -77,12 +77,13 @@ const ValidationSchema = Yup.object().shape({
 
 export class PreviewDetails extends React.PureComponent<IProps, any> {
 	public state = {
-		expanded: true
+		expanded: true,
+		collapsed: false,
 	};
 
 	public headerRef = React.createRef<any>();
-
 	public textFieldRef = React.createRef<any>();
+	public scrollableContainerRef = React.createRef<HTMLDivElement>();
 
 	public renderNameWithCounter = renderWhenTrue(() => (
 		<Typography paragraph>
@@ -182,6 +183,18 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	public handleToggle = (event) => {
 		event.persist();
 		this.setState(({ expanded }) => ({ expanded: !expanded }), () => {
+			if (this.scrollableContainerRef.current) {
+				if (this.state.expanded) {
+					setTimeout(() => {
+						this.scrollableContainerRef.current.scrollTop = 0;
+					}, 50);
+					this.setState({ collapsed: false });
+				} else {
+					setTimeout(() => {
+						this.setState({ collapsed: true });
+					}, 300);
+				}
+			}
 			if (this.props.onExpandChange) {
 				this.props.onExpandChange(event, this.state.expanded);
 			}
@@ -242,7 +255,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 				<Summary
 					expandIcon={this.renderExpandIcon(!disableExpanding && !editable)}
 					onClick={handleHeaderClick}
-					scrolled={this.props.scrolled ? 1 : 0}
+					expanded={this.state.expanded && this.props.scrolled}
 				>
 					<RoleIndicator color={roleColor} ref={this.headerRef} />
 					<MainInfoContainer>
@@ -259,7 +272,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 					</MainInfoContainer>
 				</Summary>
 
-				<ScrollableContainer>
+				<ScrollableContainer ref={this.scrollableContainerRef} expanded={!this.state.collapsed}>
 					<Collapsable onChange={this.handleToggle} expanded={this.state.expanded}>
 						<Details>
 							{this.renderCollapsable(Boolean(renderCollapsable))}

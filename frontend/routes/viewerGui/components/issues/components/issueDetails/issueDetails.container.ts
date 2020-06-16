@@ -22,11 +22,12 @@ import { selectUsername } from '../../../../../../modules/currentUser';
 import { DialogActions } from '../../../../../../modules/dialog';
 import {
 	selectActiveIssueDetails,
+	selectActiveIssueWithMarkdownComments,
 	selectExpandDetails,
 	selectFailedToLoad,
 	selectFetchingDetailsIsPending,
 	selectNewComment,
-	IssuesActions
+	IssuesActions,
 } from '../../../../../../modules/issues';
 import { selectJobsList, selectMyJob } from '../../../../../../modules/jobs';
 import { selectPermissions } from '../../../../../../modules/model';
@@ -37,6 +38,7 @@ import { IssueDetails } from './issueDetails.component';
 
 const mapStateToProps = createStructuredSelector({
 	issue: selectActiveIssueDetails,
+	issueWithMarkdownComments: selectActiveIssueWithMarkdownComments,
 	jobs: selectJobsList,
 	expandDetails: selectExpandDetails,
 	fetchingDetailsIsPending: selectFetchingDetailsIsPending,

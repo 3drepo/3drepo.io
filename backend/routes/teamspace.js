@@ -296,7 +296,8 @@
 	 *    user: "viewerTeamspace1Model1JobB",
 	 *    firstName: "Alice",
 	 *    lastName: "Stratford",
-	 *    company: "Teamspace one"
+	 *    company: "Teamspace one",
+	 *    job: {"_id": "Job1", color: "#FFFFFF"}
 	 * }
 	 */
 	router.get("/members/:user", middlewares.isTeamspaceMember, getTeamMemberInfo);

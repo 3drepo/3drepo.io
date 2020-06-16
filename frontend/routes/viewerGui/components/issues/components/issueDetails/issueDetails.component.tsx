@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,14 +16,15 @@
  */
 
 import React, { Fragment } from 'react';
+
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { canComment } from '../../../../../../helpers/issues';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
+import { CommentForm } from '../../../commentForm';
 import { Container } from '../../../risks/components/riskDetails/riskDetails.styles';
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { EmptyStateInfo } from '../../../views/views.styles';
-import { HorizontalView, LogsContainer, LogList, PreviewDetails } from './issueDetails.styles';
+import { HorizontalView, MessagesList, MessageContainer, PreviewDetails } from './issueDetails.styles';
 import { IssueDetailsForm } from './issueDetailsForm.component';
 
 interface IProps {
@@ -31,6 +32,7 @@ interface IProps {
 	jobs: any[];
 	topicTypes: any[];
 	issue: any;
+	issueWithMarkdownComments: any[];
 	teamspace: string;
 	model: string;
 	revision: string;
@@ -74,12 +76,13 @@ const UNASSIGNED_JOB = {
 export class IssueDetails extends React.PureComponent<IProps, IState> {
 	public state = {
 		logsLoaded: false,
-		scrolled: false
+		scrolled: false,
 	};
 
 	public formRef = React.createRef<any>();
 	public panelRef = React.createRef<any>();
-	public commentsRef = React.createRef<any>();
+	public containerRef = React.createRef<any>();
+	public messageContainerRef = React.createRef<any>();
 
 	get isNewIssue() {
 		return !this.props.issue._id;
@@ -93,26 +96,30 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		return [...this.props.jobs, UNASSIGNED_JOB];
 	}
 
-	public commentRef = React.createRef<any>();
+	get isViewerInitialized() {
+		return this.props.viewer.initialized;
+	}
 
-	public renderLogList = renderWhenTrue(() => (
-		<LogList
-			commentsRef={this.commentsRef}
-			items={this.issueData.comments}
-			isPending={this.props.fetchingDetailsIsPending}
-			removeLog={this.removeComment}
-			teamspace={this.props.teamspace}
-			currentUser={this.props.currentUser}
-			setCameraOnViewpoint={this.setCameraOnViewpoint}
-		/>
-	));
+	public renderMessagesList = renderWhenTrue(() => {
+		return (
+			<MessagesList
+				formRef={this.formRef}
+				messages={this.props.issueWithMarkdownComments}
+				isPending={this.props.fetchingDetailsIsPending}
+				removeMessage={this.removeMessage}
+				teamspace={this.props.teamspace}
+				currentUser={this.props.currentUser}
+				setCameraOnViewpoint={this.setCameraOnViewpoint}
+			/>
+		);
+	});
 
 	public renderPreview = renderWhenTrue(() => {
 		const { expandDetails, horizontal, failedToLoad, disableViewer } = this.props;
 		const { comments } = this.issueData;
 		const isIssueWithComments = Boolean((comments && comments.length || horizontal) && !this.isNewIssue);
 		const PreviewWrapper = horizontal && isIssueWithComments ? HorizontalView : Fragment;
-		const renderNotCollapsable = () => this.renderLogList(!horizontal && isIssueWithComments);
+		const renderNotCollapsable = () => this.renderMessagesList(!horizontal && isIssueWithComments);
 
 		return (
 			<PreviewWrapper>
@@ -132,17 +139,17 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 					isNew={this.isNewIssue}
 					showModelButton={disableViewer && !this.isNewIssue}
 				/>
-				<LogsContainer>
-					{this.renderLogList(horizontal && isIssueWithComments)}
+				<MessageContainer ref={this.messageContainerRef}>
+					{this.renderMessagesList(horizontal && isIssueWithComments)}
 					{this.renderFooter(horizontal && !failedToLoad)}
-				</LogsContainer>
+				</MessageContainer>
 			</PreviewWrapper>
 		);
 	});
 
 	public renderFooter = renderWhenTrue(() => (
 		<ViewerPanelFooter alignItems="center" padding="0">
-			<NewCommentForm
+			<CommentForm
 				disableViewer={this.props.disableViewer}
 				comment={this.props.newComment.comment}
 				screenshot={this.props.newComment.screenshot}
@@ -154,6 +161,9 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				hideComment={this.isNewIssue}
 				hideScreenshot={this.props.disableViewer}
 				hideUploadButton={!this.props.disableViewer}
+				messagesContainerRef={this.messageContainerRef}
+				previewWrapperRef={this.containerRef}
+				horizontal={this.props.horizontal}
 			/>
 		</ViewerPanelFooter>
 	));
@@ -185,23 +195,6 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 			unsubscribeOnIssueCommentsChanges(prevProps.teamspace, prevProps.model, prevProps.issue._id);
 			fetchIssue(teamspace, model, issue._id);
 			subscribeOnIssueCommentsChanges(teamspace, model, issue._id);
-		}
-
-		if (
-			issue.comments && prevProps.issue.comments &&
-			(issue.comments.length > prevProps.issue.comments.length && issue.comments[issue.comments.length - 1].new)
-		) {
-			const { top: commentsTop } = this.commentsRef.current.getBoundingClientRect();
-			const panelElements = this.panelRef.current.children[0].children;
-			const detailsDimensions = panelElements[1].getBoundingClientRect();
-			const { height: detailsHeight } = detailsDimensions;
-
-			if (commentsTop < 0) {
-				this.panelRef.current.scrollTo({
-					top: detailsHeight - 16,
-					behavior: 'smooth'
-				});
-			}
 		}
 	}
 
@@ -254,11 +247,12 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				showScreenshotDialog={showScreenshotDialog}
 				canComment={this.userCanComment}
 				onThumbnailUpdate={this.handleNewScreenshot}
+				formRef={this.formRef}
 			/>
 		);
 	}
 
-	public removeComment = (index, guid) => {
+	public removeMessage = (index, guid) => {
 		const issueData = {
 			_id: this.issueData._id,
 			rev_id: this.issueData.rev_id,
@@ -297,7 +291,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public handleNewScreenshot = async (screenshot) => {
 		const { teamspace, model, viewer } = this.props;
-		const viewpoint = await viewer.getCurrentViewpoint({ teamspace, model });
+		const viewpoint = this.isViewerInitialized ? await viewer.getCurrentViewpoint({ teamspace, model }) : null;
 
 		if (this.isNewIssue) {
 			this.props.setState({
@@ -316,7 +310,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public postComment = async (teamspace, model, { comment, screenshot }, finishSubmitting) => {
-		const viewpoint = await this.props.viewer.getCurrentViewpoint({ teamspace, model });
+		const viewpoint = this.isViewerInitialized ? await this.props.viewer.getCurrentViewpoint({ teamspace, model }) : null;
 		const issueCommentData = {
 			_id: this.issueData._id,
 			comment,
@@ -349,7 +343,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	public render() {
 		const { failedToLoad, issue, horizontal } = this.props;
 		return (
-			<Container>
+			<Container ref={this.containerRef}>
 				<ViewerPanelContent
 					onScroll={this.handlePanelScroll}
 					ref={this.panelRef}

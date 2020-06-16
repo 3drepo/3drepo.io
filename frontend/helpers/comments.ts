@@ -15,9 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { uniqBy, values } from 'lodash';
 import { getAPIUrl } from '../services/api';
 import { getRiskConsequenceName, getRiskLikelihoodName } from './risks';
 import { sortByDate } from './sorting';
+
+export const INTERNAL_IMAGE_PATH_PREFIX = `API/`;
+export const MARKDOWN_USER_REFERENCE_REGEX = new RegExp('@\\w+', 'gi');
+export const MARKDOWN_ISSUE_REFERENCE_REGEX = new RegExp('#\\d+', 'gi');
+export const MARKDOWN_RESOURCE_REFERENCE_REGEX = new RegExp('#res.[\\w-]+', 'gi');
+export const MARKDOWN_INTERNAL_IMAGE_PATH_REGEX = new RegExp(`${INTERNAL_IMAGE_PATH_PREFIX}`, 'gi');
 
 export const createAttachResourceComments = (owner: string,  resources = []) =>
 	resources.map((r, i) =>
@@ -44,6 +51,8 @@ export const prepareComment = (comment) => {
 	if (comment.viewpoint && comment.viewpoint.screenshot) {
 		comment.viewpoint.screenshotPath = getAPIUrl(comment.viewpoint.screenshot);
 	}
+
+	comment.comment = comment.comment ? comment.comment.replace(/[\n]{2,}/g, `\n\n`) : comment.comment;
 
 	return comment;
 };
@@ -240,4 +249,47 @@ const convertActionValueToText = (value = '') => {
 	}
 
 	return actionText;
+};
+
+export const transformCustomsLinksToMarkdown = ({ comment, issues, type }) => {
+	if (!comment) {
+		return comment;
+	}
+	const usersReferences = comment.matchAll(MARKDOWN_USER_REFERENCE_REGEX);
+	const issuesReferences = comment.matchAll(MARKDOWN_ISSUE_REFERENCE_REGEX) || [];
+	const resourcesReferences = comment.matchAll(MARKDOWN_RESOURCE_REFERENCE_REGEX);
+
+	if (issuesReferences) {
+		const uniqIssuesReferences = uniqBy([...issuesReferences], 0);
+		uniqIssuesReferences.forEach(({ 0: issueReference }) => {
+			const issueNumber = Number(issueReference.replace('#', ''));
+			const issueData = values(issues).find((issue) => issue.number === issueNumber);
+
+			if (issueData && issueData._id) {
+				const referenceRegExp = RegExp(issueReference, 'g');
+				comment = comment.replace(referenceRegExp, `[${issueReference}](${issueData._id})`);
+			}
+		});
+	}
+
+	if (usersReferences) {
+		const uniqUsersReferences = uniqBy([...usersReferences], 0);
+
+		uniqUsersReferences.forEach(({ 0: userReference }) => {
+			const referenceRegExp = RegExp(userReference, 'g');
+			comment = comment.replace(referenceRegExp, `[${userReference}](${userReference.replace('@', '')})`);
+		});
+	}
+
+	if (resourcesReferences) {
+		const uniqResourceReferences = uniqBy([...resourcesReferences], 0);
+
+		uniqResourceReferences.forEach(({ 0: resourceReference }) => {
+			const referenceRegExp = RegExp(resourceReference, 'g');
+			comment = comment
+				.replace(referenceRegExp, `[${resourceReference}](${resourceReference.replace('#res.', '')} "${type}")`);
+		});
+	}
+
+	return comment;
 };
