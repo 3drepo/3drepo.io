@@ -104,7 +104,7 @@ describe("Views", function () {
 		it("with orthographic projection should succeed", function(done) {
 			const viewpoint = Object.assign({"name":"View test"}, baseView);
 			viewpoint.viewpoint.type = "orthogonal";
-			viewpoint.viewpoint.view_to_world_scale = 2.1;
+			viewpoint.viewpoint.orthographicSize = 2.1;
 			let viewpointId;
 
 			async.series([
@@ -120,7 +120,7 @@ describe("Views", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/viewpoints/${viewpointId}`).expect(200, function(err , res) {
 						expect(res.body.viewpoint.type).to.equal(viewpoint.viewpoint.type);
-						expect(res.body.viewpoint.view_to_world_scale).to.equal(viewpoint.viewpoint.view_to_world_scale);
+						expect(res.body.viewpoint.orthographicSize).to.equal(viewpoint.viewpoint.orthographicSize);
 
 						return done(err);
 					});

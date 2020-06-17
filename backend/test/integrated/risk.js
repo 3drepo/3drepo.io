@@ -472,17 +472,19 @@ describe("Risks", function () {
 			let riskId;
 
 			const viewpointData = {
-				"up":[0,1,0],
-				"position":[38,38 ,125.08011914810137],
-				"look_at":[0,0,-163.08011914810137],
-				"view_dir":[0,0,-1],
-				"right":[1,0,0],
-				"view_to_world_scale":3.537606904422707,
-				"aspect_ratio":0.8750189337327384,
-				"far":276.75612077194506 ,
-				"near":76.42411012233212,
-				"type":"orthogonal",
-				"clippingPlanes":[]
+				"viewpoint":{
+					"up":[0,1,0],
+					"position":[38,38 ,125.08011914810137],
+					"look_at":[0,0,-163.08011914810137],
+					"view_dir":[0,0,-1],
+					"right":[1,0,0],
+					"view_to_world_scale":3.537606904422707,
+					"aspect_ratio":0.8750189337327384,
+					"far":276.75612077194506 ,
+					"near":76.42411012233212,
+					"type":"orthogonal",
+					"clippingPlanes":[]
+				}
 			};
 
 			async.series([
@@ -498,7 +500,7 @@ describe("Risks", function () {
 					agent.patch(`/${username}/${model}/risks/${riskId}`)
 						.send(viewpointData)
 						.expect(400, function(err, res) {
-							expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
+							expect(res.body.value === responseCodes.INVALID_ARGUMENTS.value);
 							done(err);
 						});
 				}
@@ -784,7 +786,7 @@ describe("Risks", function () {
 						agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function(err , res) {
 							comment.viewpoint.guid = res.body.comments[0].viewpoint.guid;
 
-							expect(res.body.comments.length).to.equal(1);
+							expect(res.body.comments.length).to.equal(2);
 							expect(res.body.comments[0].comment).to.equal(comment.comment);
 							expect(res.body.comments[0].owner).to.equal(username);
 							expect(res.body.comments[0].viewpoint).to.deep.equal(comment.viewpoint);

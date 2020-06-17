@@ -197,7 +197,7 @@ describe("Issues", function () {
 				"look_at":[0,0,-163.08011914810137],
 				"view_dir":[0,0,-1],
 				"right":[1,0,0],
-				"view_to_world_scale":3.537606904422707,
+				"orthographicSize":3.537606904422707,
 				"aspect_ratio":0.8750189337327384,
 				"far":276.75612077194506 ,
 				"near":76.42411012233212,
@@ -219,7 +219,7 @@ describe("Issues", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`).expect(200, function(err, res) {
 						expect(res.body.viewpoint.type).to.equal(issue.viewpoint.type);
-						expect(res.body.viewpoint.view_to_world_scale).to.equal(issue.viewpoint.view_to_world_scale);
+						expect(res.body.viewpoint.orthographicSize).to.equal(issue.viewpoint.orthographicSize);
 						return done(err);
 					});
 				}
@@ -644,17 +644,19 @@ describe("Issues", function () {
 			let issueId;
 
 			const viewpointData = {
-				"up":[0,1,0],
-				"position":[38,38 ,125.08011914810137],
-				"look_at":[0,0,-163.08011914810137],
-				"view_dir":[0,0,-1],
-				"right":[1,0,0],
-				"view_to_world_scale":3.537606904422707,
-				"aspect_ratio":0.8750189337327384,
-				"far":276.75612077194506 ,
-				"near":76.42411012233212,
-				"type":"orthogonal",
-				"clippingPlanes":[]
+				"viewpoint":{
+					"up":[0,1,0],
+					"position":[38,38 ,125.08011914810137],
+					"look_at":[0,0,-163.08011914810137],
+					"view_dir":[0,0,-1],
+					"right":[1,0,0],
+					"orthographicSize":3.537606904422707,
+					"aspect_ratio":0.8750189337327384,
+					"far":276.75612077194506 ,
+					"near":76.42411012233212,
+					"type":"orthogonal",
+					"clippingPlanes":[]
+				}
 			};
 
 			async.series([
@@ -670,7 +672,7 @@ describe("Issues", function () {
 					agent.patch(`/${username}/${model}/issues/${issueId}`)
 						.send(viewpointData)
 						.expect(400, function(err, res) {
-							expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
+							expect(res.body.value === responseCodes.INVALID_ARGUMENTS.value);
 							done(err);
 						});
 				}
@@ -749,7 +751,7 @@ describe("Issues", function () {
 					"look_at":[0,0,-163.08011914810137],
 					"view_dir":[0,0,-1],
 					"right":[1,0,0],
-					"view_to_world_scale":3.537606904422707,
+					"orthographicSize":3.537606904422707,
 					"aspect_ratio":0.8750189337327384,
 					"far":276.75612077194506 ,
 					"near":76.42411012233212,
@@ -773,7 +775,7 @@ describe("Issues", function () {
 						.expect(200 , (err, res) => {
 							const comment = res.body;
 							expect(comment.viewpoint.type).to.exist;
-							expect(comment.viewpoint.view_to_world_scale).to.exist;
+							expect(comment.viewpoint.orthographicSize).to.exist;
 							commentId = comment.guid;
 							return next(err);
 						});
@@ -1754,7 +1756,7 @@ describe("Issues", function () {
 
 								expect(issue2.viewpoint).to.exist;
 								expect(issue2.viewpoint.type).to.equal("orthogonal");
-								expect(issue2.viewpoint.view_to_world_scale).to.equal(2.1);
+								expect(issue2.viewpoint.orthographicSize).to.equal(2.1);
 
 								done(err);
 							});

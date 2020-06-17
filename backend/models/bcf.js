@@ -400,10 +400,10 @@ async function getIssueBCF(issue, account, model, unit) {
 							}
 						};
 
-						if ("orthogonal" === vp.type && vp.view_to_world_scale) {
+						if ("orthogonal" === vp.type && vp.orthographicSize) {
 							viewpointXmlObj.VisualizationInfo.OrthogonalCamera = {
 								...camera,
-								ViewToWorldScale: vp.view_to_world_scale
+								ViewToWorldScale: vp.orthographicSize
 							};
 						}
 
@@ -940,7 +940,7 @@ async function readBCF(account, model, requester, ifcToModelMap, dataBuffer, set
 
 			if (_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0]")) {
 				vp = {...vp, ...parseViewpointCamera(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0]"), scale)};
-				vp.view_to_world_scale = parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].ViewToWorldScale[0]._"));
+				vp.orthographicSize = parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].ViewToWorldScale[0]._"));
 				vp.type = "orthogonal";
 			}
 
