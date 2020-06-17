@@ -465,8 +465,8 @@ function* subscribeOnRiskChanges({ teamspace, modelId }) {
 
 function* unsubscribeOnRiskChanges({ teamspace, modelId }) {
 	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.RISKS, teamspace, modelId, {
-		unsubscribeToUpdated: onUpdateEvent,
-		unsubscribeToCreated: onCreateEvent
+		unsubscribeFromUpdated: onUpdateEvent,
+		unsubscribeFromCreated: onCreateEvent
 	}));
 }
 
@@ -496,9 +496,9 @@ function* subscribeOnRiskCommentsChanges({ teamspace, modelId, riskId }) {
 
 function* unsubscribeOnRiskCommentsChanges({ teamspace, modelId, riskId }) {
 	yield put(ChatActions.callCommentsChannelActions(CHAT_CHANNELS.RISKS, teamspace, modelId, riskId, {
-		unsubscribeToCreated: onCreateCommentEvent,
-		unsubscribeToUpdated: onUpdateCommentEvent,
-		unsubscribeToDeleted: onDeleteCommentEvent
+		unsubscribeFromCreated: onCreateCommentEvent,
+		unsubscribeFromUpdated: onUpdateCommentEvent,
+		unsubscribeFromDeleted: onDeleteCommentEvent
 	}));
 }
 
