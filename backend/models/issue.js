@@ -90,7 +90,8 @@ class Issue extends Ticket {
 	async onBeforeUpdate(data, oldIssue, userPermissions, systemComments) {
 		// 2.6 if the user is trying to change the status and it doesnt have the necessary permissions throw a ISSUE_UPDATE_PERMISSION_DECLINED
 		if (data.status && data.status !== oldIssue.status) {
-			const canChangeStatus = userPermissions.hasAdminPrivileges || (userPermissions.hasAssignedJob && data.status !== statusEnum.CLOSED);
+			const canChangeStatus = userPermissions.hasAdminPrivileges ||
+				(userPermissions.hasAssignedJob && data.status !== statusEnum.CLOSED && data.status !== statusEnum.VOID);
 			if (!canChangeStatus) {
 				throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
 			}

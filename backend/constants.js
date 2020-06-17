@@ -528,6 +528,7 @@
 		"OPEN": "open",
 		"IN_PROGRESS": "in progress",
 		"FOR_APPROVAL": "for approval",
+		"VOID": "void",
 		"CLOSED": "closed"
 	});
 
