@@ -379,10 +379,10 @@ async function getIssueBCF(issue, account, model, unit) {
 
 			viewpointsPromises.push(
 				Promise.all(componentsPromises).then(() => {
-					_.get(vp, "extras.OrthogonalCamera") && (viewpointXmlObj.VisualizationInfo.OrthogonalCamera = _.get(vp, "extras.OrthogonalCamera"));
-					if(!_.get(vp, "extras._noPerspective") && vp.position && vp.position.length >= 3 && vp.view_dir.length >= 3 && vp.up.length >= 3) {
-
-						viewpointXmlObj.VisualizationInfo.PerspectiveCamera = {
+					if (vp.position && vp.position.length >= 3 &&
+						vp.view_dir && vp.view_dir.length >= 3 &&
+						vp.up && vp.up.length >= 3) {
+						const camera = {
 							CameraViewPoint:{
 								X: vp.position[0] * scale,
 								Y: -vp.position[2] * scale,
@@ -397,9 +397,24 @@ async function getIssueBCF(issue, account, model, unit) {
 								X: vp.up[0],
 								Y: -vp.up[2],
 								Z: vp.up[1]
-							},
-							FieldOfView: vp.fov * 180 / Math.PI
+							}
 						};
+
+						if ("orthogonal" === vp.type && vp.view_to_world_scale) {
+							viewpointXmlObj.VisualizationInfo.OrthogonalCamera = {
+								...camera,
+								ViewToWorldScale: vp.view_to_world_scale
+							};
+						}
+
+						if (("perspective" === vp.type || !_.get(vp, "extras._noPerspective")) && vp.fov) {
+							viewpointXmlObj.VisualizationInfo.PerspectiveCamera = {
+								...camera,
+								FieldOfView: vp.fov * 180 / Math.PI
+							};
+						}
+					} else if (_.get(vp, "extras.OrthogonalCamera")) {
+						viewpointXmlObj.VisualizationInfo.OrthogonalCamera = _.get(vp, "extras.OrthogonalCamera");
 					}
 
 					_.get(vp, "extras.Lines") && (viewpointXmlObj.VisualizationInfo.Lines = _.get(vp, "extras.Lines"));
@@ -921,9 +936,11 @@ async function readBCF(account, model, requester, ifcToModelMap, dataBuffer, set
 				vp.fov = parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].FieldOfView[0]._")) * Math.PI / 180;
 				vp.type = "perspective";
 
-			} else if (_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0]")) {
+			}
+
+			if (_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0]")) {
 				vp = {...vp, ...parseViewpointCamera(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0]"), scale)};
-				vp.fov = 1.8;
+				vp.view_to_world_scale = parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].ViewToWorldScale[0]._"));
 				vp.type = "orthogonal";
 			}
 
