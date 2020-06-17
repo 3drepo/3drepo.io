@@ -28,6 +28,8 @@ const ModelSetting = require("../models/modelSetting");
 const BCF = require("./bcf");
 const Ticket = require("./ticket");
 
+const Comment = require("./comment");
+
 const C = require("../constants");
 
 const fieldTypes = {
@@ -290,6 +292,33 @@ class Issue extends Ticket {
 		}
 		return oldIssue.status !== newIssue.status;
 	}
+
+	async addComment(account, model, id, user, data, sessionId) {
+		// 1. creates a comment
+		const comment = await Comment.addComment(account, model, this.collName, id, user, data);
+
+		// 2. analize original comment searching for other tickets references
+		const issueNumbers = Array.from(new Set(data.comment.match(/(#\d+)/g))).map(n => parseInt(n.substr(1), 10));
+
+		// 3. Get issues from number
+		const issuesColl = await this.getTicketsCollection(account, model);
+		const res = await issuesColl.find({ number: {$in: issueNumbers}}).toArray();
+
+		// 3. Create system comments for those ticket references
+		const issuesCommentsUpdates =  [];
+
+		res.forEach((issue)  => {
+			const systemComment = this.createSystemComment(account, model, sessionId, issue._id, user, "ticketReference", null, id);
+			const comments = (issue.comments || []).map(c=>c.sealed = true).concat([systemComment]);
+
+			issuesCommentsUpdates.push(issuesColl.update({_id: issue._id}, { $set: { comments }}));
+		});
+
+		await Promise.all(issuesCommentsUpdates);
+
+		return comment;
+	}
+
 }
 
 module.exports = new Issue();

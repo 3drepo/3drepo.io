@@ -239,7 +239,6 @@ const deleteComment =  async function(account, model, colName, id, guid, user) {
 };
 
 module.exports = {
-	newTextComment : (owner, commentText, viewpoint, pinPosition) => new TextCommentGenerator(owner, commentText, viewpoint, pinPosition),
 	newSystemComment : (owner, property, from, to) => new SystemCommentGenerator(owner, property, from, to),
 	newMitigationComment : (owner, likelihood, consequence, mitigation, viewpoint, pinPosition) => new MitigationCommentGenerator(owner, likelihood, consequence, mitigation, viewpoint, pinPosition),
 	addComment,

@@ -665,7 +665,11 @@ describe("Risks", function () {
 					function(done) {
 						agent.post(`/${username}/${model}/risks/${riskId}/comments`)
 							.send(comment)
-							.expect(200 , done);
+							.expect(200 , function(err , res) {
+								const commentRes = res.body;
+								expect(commentRes.comment).to.equal(comment.comment);
+								done(err);
+							});
 					},
 					function(done) {
 						agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function(err , res) {

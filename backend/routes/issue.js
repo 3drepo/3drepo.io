@@ -981,8 +981,9 @@ function addComment(req, res, next) {
 	const user = req.session.user.username;
 	const data =  req.body;
 	const {account, model, issueId} = req.params;
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-	Comment.addComment(account, model, "issues", issueId, user, data).then(({comment, userRefs}) => {
+	Issue.addComment(account, model, issueId, user, data, sessionId).then(({comment, userRefs}) => {
 		req.dataModel = comment;
 		req.userReferences = {type: "issue", userRefs};
 		next();
