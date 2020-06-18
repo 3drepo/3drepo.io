@@ -75,11 +75,16 @@ class Ticket {
 
 		// legacy schema support
 		if (ticketToClean.viewpoint) {
-			vpIdKeys.forEach((key) => {
-				if (ticketToClean.viewpoint[key]) {
-					ticketToClean.viewpoint[key] = utils.uuidToString(ticketToClean.viewpoint[key]);
-				}
-			});
+			if(ticketToClean.viewpoint.right.length) {
+				vpIdKeys.forEach((key) => {
+					if (ticketToClean.viewpoint[key]) {
+						ticketToClean.viewpoint[key] = utils.uuidToString(ticketToClean.viewpoint[key]);
+					}
+				});
+			} else {
+				// workaround for erroneous legacy data - see ISSUE #2085
+				ticketToClean.viewpoint = undefined;
+			}
 
 			Viewpoint.setViewpointScreenshotURL(this.collName, account, model, id, ticketToClean.viewpoint);
 		}
