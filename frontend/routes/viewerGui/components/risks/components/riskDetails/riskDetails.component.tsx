@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -22,7 +22,10 @@ import { size } from 'lodash';
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { canComment } from '../../../../../../helpers/risks';
+import { Copy } from '../../../../../components/fontAwesomeIcon';
+import { ScreenshotDialog } from '../../../../../components/screenshotDialog';
 import { CommentForm } from '../../../commentForm';
+import { ContainedButton } from '../../../containedButton/containedButton.component';
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { EmptyStateInfo } from '../../../views/views.styles';
 import { Container, HorizontalView, MessagesList, MessageContainer, PreviewDetails } from './riskDetails.styles';
@@ -64,6 +67,8 @@ interface IProps {
 	fetchMitigationCriteria: (teamspace: string) => void;
 	criteria: any;
 	showMitigationSuggestions: (conditions: any, setFieldValue) => void;
+	showScreenshotDialog: (config: any) => void;
+	showConfirmDialog: (config: any) => void;
 }
 
 interface IState {
@@ -103,6 +108,12 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		return [...this.props.jobs, UNASSIGNED_JOB];
 	}
 
+	get actionButton() {
+		return <ContainedButton icon={Copy}>Clone</ContainedButton>;
+	}
+
+	public commentRef = React.createRef<any>();
+
 	public renderMessagesList = renderWhenTrue(() => (
 		<MessagesList
 			formRef={this.formRef}
@@ -141,6 +152,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 					scrolled={this.state.scrolled && !horizontal}
 					isNew={this.isNewRisk}
 					showModelButton={disableViewer && !this.isNewRisk}
+					actionButton={this.actionButton}
 				/>
 				<MessageContainer ref={this.messageContainerRef}>
 					{this.renderMessagesList(horizontal && isRiskWithComments)}
@@ -246,10 +258,14 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				permissions={this.props.modelSettings.permissions}
 				currentUser={currentUser}
 				myJob={myJob}
+				onUploadScreenshot={this.handleUpdateScreenshot}
+				onTakeScreenshot={this.handleTakeScreenshot}
+				showScreenshotDialog={this.props.showScreenshotDialog}
+				onUpdateViewpoint={this.onUpdateRiskViewpoint}
 				onChangePin={updateSelectedRiskPin}
 				onSavePin={this.onPositionSave}
 				hasPin={!this.props.disableViewer && this.riskData.position && this.riskData.position.length}
-				hidePin={this.props.disableViewer}
+				disableViewer={this.props.disableViewer}
 				onRemoveResource={onRemoveResource}
 				attachFileResources={attachFileResources}
 				attachLinkResources={attachLinkResources}
@@ -342,6 +358,47 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		if (risk._id) {
 			updateRisk(teamspace, model, { position: risk.position });
 		}
+	}
+
+	public handleUpdateScreenshot = (screenshot) => {
+		const { teamspace, model, updateRisk } = this.props;
+
+		if (screenshot) {
+			updateRisk(teamspace, model, { descriptionThumbnail: screenshot });
+		}
+	}
+
+	public handleTakeScreenshot = () => {
+		const { showScreenshotDialog, viewer } = this.props;
+
+		showScreenshotDialog({
+			sourceImage: viewer.getScreenshot(),
+			onSave: (screenshot) => this.handleUpdateScreenshot(screenshot),
+			template: ScreenshotDialog,
+			notFullScreen: true,
+		});
+	}
+
+	public onUpdateRiskViewpoint = async () => {
+		const { teamspace, model, risk, updateRisk, viewer, showConfirmDialog } = this.props;
+
+		const currentViewpoint = await viewer.getCurrentViewpoint({ teamspace, model });
+
+		const viewpoint = mergeData(risk.viewpoint, currentViewpoint);
+
+		if (viewpoint.guid) {
+			updateRisk(teamspace, model, { viewpoint });
+		}
+
+		showConfirmDialog({
+			title: 'Save Screenshot?',
+			content: `
+				Would you like to create a new screenshot?
+			`,
+			onConfirm: () => {
+				this.handleTakeScreenshot();
+			}
+		});
 	}
 
 	public render() {

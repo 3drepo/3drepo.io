@@ -69,6 +69,7 @@ interface IProps {
 	onNameChange?: (event, name: string) => void;
 	renderCollapsable?: () => JSX.Element | JSX.Element[];
 	renderNotCollapsable?: () => JSX.Element | JSX.Element[];
+	actionButton?: React.ReactNode;
 }
 
 const ValidationSchema = Yup.object().shape({
@@ -245,7 +246,8 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			renderCollapsable,
 			renderNotCollapsable,
 			handleHeaderClick,
-			showModelButton
+			showModelButton,
+			actionButton,
 		} = this.props;
 
 		return (
@@ -268,6 +270,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 							createdAt={created}
 							StatusIconComponent={StatusIconComponent}
 							statusColor={statusColor}
+							actionButton={actionButton}
 						/>
 					</MainInfoContainer>
 				</Summary>

@@ -18,17 +18,21 @@
 import React from 'react';
 
 import InputLabel from '@material-ui/core/InputLabel';
-import RisksIcon from '@material-ui/icons/Warning';
 import { Field } from 'formik';
 
 import {
 	LEVELS_OF_RISK,
+	RisksIcon,
 	RISK_CONSEQUENCES,
 	RISK_LIKELIHOODS,
 } from '../../../../../../constants/risks';
+import { renderWhenTrueOtherwise } from '../../../../../../helpers/rendering';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
 import { Image } from '../../../../../components/image';
 import { TextField } from '../../../../../components/textField/textField.component';
+import { ImageButton } from '../../../imageButton/imageButton.component';
+import PinButton from '../../../pinButton/pinButton.container';
+import { ViewpointButton } from '../../../viewpointButton/viewpointButton.component';
 import { AutoSuggestField } from '../autoSuggestField/autosuggestField.component';
 import { LevelOfRisk } from '../levelOfRisk/levelOfRisk.component';
 import {
@@ -37,7 +41,8 @@ import {
 	DescriptionImage,
 	FieldsContainer,
 	FieldsRow,
-	StyledFormControl
+	StyledFormControl,
+	UpdateButtonsContainer
 } from '../riskDetails/riskDetails.styles';
 import { RiskSchema } from '../riskDetails/riskDetailsForm.component';
 
@@ -48,15 +53,56 @@ interface IProps {
 	canEditBasicProperty: boolean;
 	canChangeAssigned: boolean;
 	jobs: any[];
-	hidePin?: boolean;
-	renderPinButton: (show: boolean) => React.ReactNode;
+	disableViewer?: boolean;
 	values?: any;
 	criteria: any;
+	onSavePin: (position) => void;
+	onChangePin: (pin) => void;
+	onUpdateViewpoint: () => void;
+	onTakeScreenshot: () => void;
+	onUploadScreenshot: (image) => void;
+	showScreenshotDialog: (config: any) => void;
 }
 
+const UpdateButtons = ({
+	isNewRisk, canEditBasicProperty, disableViewer, onSavePin, onChangePin, onUpdateViewpoint, hasImage, ...props
+}) => (
+	<FieldsRow container alignItems="center" justify="space-between">
+		{renderWhenTrueOtherwise(() => (
+			<UpdateButtonsContainer>
+				<PinButton
+					onChange={onChangePin}
+					onSave={onSavePin}
+					// @TODO check conditions for new ticket
+					disabled={!isNewRisk && !canEditBasicProperty}
+					hasPin={disableViewer}
+				/>
+				<ImageButton
+					hasImage={Boolean(hasImage)}
+					disableScreenshot={!disableViewer}
+					onTakeScreenshot={props.onTakeScreenshot}
+					onUploadScreenshot={props.onUploadScreenshot}
+					onShowScreenshotDialog={props.onShowScreenshotDialog}
+					disabled={!canEditBasicProperty}
+				/>
+				{!isNewRisk && <ViewpointButton
+					onUpdate={onUpdateViewpoint}
+					disabled={!canEditBasicProperty}
+				/>}
+			</UpdateButtonsContainer>
+			), () => (
+				<div>
+					//@TODO Add Board version
+					No
+				</div>
+			)
+		)(!disableViewer)}
+	</FieldsRow>
+);
+
 export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
-	active, isNewRisk, risk, hidePin, jobs, canChangeAssigned, canEditBasicProperty,
-	renderPinButton, values, criteria,
+	active, isNewRisk, risk, disableViewer, jobs, canChangeAssigned, canEditBasicProperty,
+	values, criteria, ...props
 }) => {
 	const getCategories = () => {
 		const { category = [] } = criteria;
@@ -90,7 +136,18 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 			)}
 
 			<FieldsRow container alignItems="center" justify="space-between">
-				{renderPinButton(!hidePin)}
+				<UpdateButtons
+					isNewRisk={isNewRisk}
+					disableViewer={disableViewer}
+					canEditBasicProperty={canEditBasicProperty}
+					onChangePin={props.onChangePin}
+					onSavePin={props.onSavePin}
+					onUpdateViewpoint={props.onUpdateViewpoint}
+					onTakeScreenshot={props.onTakeScreenshot}
+					onUploadScreenshot={props.onUploadScreenshot}
+					onShowScreenshotDialog={props.showScreenshotDialog}
+					hasImage={risk.descriptionThumbnail}
+				/>
 			</FieldsRow>
 
 			<FieldsRow container alignItems="center" justify="space-between">

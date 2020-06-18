@@ -24,9 +24,24 @@ import { cond, constant, matches, stubTrue } from 'lodash';
 import { COLOR } from '../../../../../../styles';
 import { MessagesList as MessagesListComponent } from '../../../../../components/messagesList/';
 import * as TextFieldStyles from '../../../../../components/textField/textField.styles';
+import { FileUploadInvoker } from '../../../commentForm/commentForm.styles';
+import { StyledButton } from '../../../containedButton/containedButton.styles';
 import PreviewDetailsBase from '../../../previewDetails/previewDetails.container';
 
 export const StyledFormControl = styled(FormControl)`
+`;
+
+export const UpdateButtonsContainer = styled(FormControl)`
+	&& {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		width: 100%;
+
+		${StyledButton} {
+			padding: 4px 10px;
+		}
+	}
 `;
 
 export const MessagesList = styled(MessagesListComponent)`

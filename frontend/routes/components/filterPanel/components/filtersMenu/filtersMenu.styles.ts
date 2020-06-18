@@ -19,7 +19,9 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import { DatePicker } from 'material-ui-pickers';
 import styled from 'styled-components';
+
 import { COLOR } from '../../../../../styles';
+import { FileUploadInvoker } from '../../../../viewerGui/components/newCommentForm/newCommentForm.styles';
 
 export const MenuList = styled(List)`
 	background-color: ${COLOR.WHITE};
@@ -72,6 +74,10 @@ export const StyledListItem = styled(ListItem)`
 		padding: 4px 10px;
 		height: 30px;
 		min-width: 180px;
+
+    ${FileUploadInvoker} {
+			display: none;
+		}
 	}
 `;
 

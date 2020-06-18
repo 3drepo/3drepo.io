@@ -17,6 +17,9 @@
 
 import React, { Fragment } from 'react';
 
+import Button from '@material-ui/core/Button';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { canComment } from '../../../../../../helpers/issues';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
@@ -96,9 +99,20 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		return [...this.props.jobs, UNASSIGNED_JOB];
 	}
 
+	get actionButton() {
+		return (
+			<Button variant="contained" size="small">
+				<FileCopyIcon />
+				Clone
+			</Button>
+		);
+	}
+
 	get isViewerInitialized() {
 		return this.props.viewer.initialized;
 	}
+
+	public commentRef = React.createRef<any>();
 
 	public renderMessagesList = renderWhenTrue(() => {
 		return (
@@ -138,6 +152,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 					scrolled={this.state.scrolled && !horizontal}
 					isNew={this.isNewIssue}
 					showModelButton={disableViewer && !this.isNewIssue}
+					actionButton={this.actionButton}
 				/>
 				<MessageContainer ref={this.messageContainerRef}>
 					{this.renderMessagesList(horizontal && isIssueWithComments)}
