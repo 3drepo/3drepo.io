@@ -75,7 +75,7 @@ class Ticket {
 
 		// legacy schema support
 		if (ticketToClean.viewpoint) {
-			if(ticketToClean.viewpoint.right.length) {
+			if(ticketToClean.viewpoint.right && ticketToClean.viewpoint.right.length) {
 				vpIdKeys.forEach((key) => {
 					if (ticketToClean.viewpoint[key]) {
 						ticketToClean.viewpoint[key] = utils.uuidToString(ticketToClean.viewpoint[key]);
