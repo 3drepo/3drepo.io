@@ -17,6 +17,7 @@
 
 import { values } from 'lodash';
 import { createSelector } from 'reselect';
+
 import { RISK_LEVELS } from '../../constants/risks';
 import { transformCustomsLinksToMarkdown } from '../../helpers/comments';
 import { hasPin, riskToPin } from '../../helpers/pins';

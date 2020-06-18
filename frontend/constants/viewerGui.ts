@@ -6,8 +6,9 @@ import SequencesIcon from '@material-ui/icons/Movie';
 import ViewsIcon from '@material-ui/icons/PhotoCamera';
 import IssuesIcon from '@material-ui/icons/Place';
 import MeasureIcon from '@material-ui/icons/Straighten';
-import RisksIcon from '@material-ui/icons/Warning';
+
 import { clientConfigService } from '../services/clientConfig';
+import { RisksIcon } from './risks';
 
 export const VIEWER_PANELS = {
 	GIS: 'gis',

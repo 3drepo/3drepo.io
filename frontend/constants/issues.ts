@@ -2,6 +2,7 @@ import AdjustIcon from '@material-ui/icons/Adjust';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import Download from '@material-ui/icons/CloudDownload';
 import Upload from '@material-ui/icons/CloudUpload';
+import HighlightOff from '@material-ui/icons/HighlightOff';
 import LensIcon from '@material-ui/icons/Lens';
 import PanoramaFishEyeIcon from '@material-ui/icons/PanoramaFishEye';
 import Pins from '@material-ui/icons/PinDrop';
@@ -19,7 +20,8 @@ export const STATUSES = {
 	OPEN: 'open',
 	IN_PROGRESS: 'in progress',
 	FOR_APPROVAL: 'for approval',
-	CLOSED: 'closed'
+	CLOSED: 'closed',
+	VOID: 'void',
 };
 
 export const PRIORITIES = {
@@ -39,7 +41,8 @@ export const ISSUE_STATUSES = [
 	{ value: STATUSES.OPEN, name: 'Open' },
 	{ value: STATUSES.IN_PROGRESS, name: 'In progress'},
 	{ value: STATUSES.FOR_APPROVAL, name: 'For approval' },
-	{ value: STATUSES.CLOSED, name: 'Closed' }
+	{ value: STATUSES.CLOSED, name: 'Closed' },
+	{ value: STATUSES.VOID, name: 'Void' },
 ];
 
 export const ISSUE_PRIORITIES = [
@@ -76,7 +79,8 @@ export const STATUSES_ICONS = {
 	[STATUSES.OPEN]: PanoramaFishEyeIcon,
 	[STATUSES.IN_PROGRESS]: LensIcon,
 	[STATUSES.FOR_APPROVAL]: AdjustIcon,
-	[STATUSES.CLOSED]: CheckCircleIcon
+	[STATUSES.CLOSED]: CheckCircleIcon,
+	[STATUSES.VOID]: HighlightOff,
 };
 
 export const ISSUE_FILTER_RELATED_FIELDS = {

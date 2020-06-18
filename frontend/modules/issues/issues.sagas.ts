@@ -475,8 +475,7 @@ const onUpdateEvent = (updatedIssue) => {
 		updatedIssue.comments = prepareComments(updatedIssue.comments);
 	}
 
-	if (updatedIssue.status === STATUSES.CLOSED) {
-
+	if ([STATUSES.CLOSED, STATUSES.VOID].includes(updatedIssue.status)) {
 		dispatch(IssuesActions.showCloseInfo(updatedIssue._id));
 		setTimeout(() => {
 			dispatch(IssuesActions.saveIssueSuccess(prepareIssue(updatedIssue, jobs)));
