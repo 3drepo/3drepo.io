@@ -44,7 +44,6 @@ export const AttachmentsFormTab: React.FunctionComponent<IProps> = ({
 				onSaveLinks={attachLinkResources}
 				onRemoveResource={onRemoveResource}
 				canEdit={canComment}
-				toLeft
 				formRef={formRef}
 			/>
 		</Content>

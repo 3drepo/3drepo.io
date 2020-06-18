@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,20 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { LinearProgress } from '@material-ui/core';
 import * as React from 'react';
+
+import { LinearProgress } from '@material-ui/core';
+import { isEmpty } from 'lodash';
+
+import { renderWhenTrue } from '../../../helpers/rendering';
 import { COMMENT_FIELD_NAME } from '../../viewerGui/components/commentForm/commentForm.constants';
-import { LabelButton } from '../../viewerGui/components/labelButton/labelButton.styles';
-import {
-	FieldsRow,
-	StyledFormControl
-} from '../../viewerGui/components/risks/components/riskDetails/riskDetails.styles';
-import { FieldLabel } from '../textField/textField.styles';
+import { FieldsRow } from '../../viewerGui/components/risks/components/riskDetails/riskDetails.styles';
+import { EmptyStateInfo } from '../../viewerGui/components/views/views.styles';
 import AttachResourcesDialog from './attachResourcesDialog/attachResourcesDialog.container';
-import { ActionContainer, DocumentIcon,
-	IconButton, LinkIcon, PhotoIcon, QuoteIcon,
-	RemoveIcon, ResourcesContainer, ResourceItemContainer, ResourceItemRightColumn,
-	ResourceLabel, ResourceLink, UploadSizeLabel } from './resources.styles';
+import {
+	ActionContainer, DocumentIcon, IconButton, LinkIcon, PhotoIcon, QuoteIcon, RemoveIcon, ResourcesContainer, ResourcesList,
+	ResourceItemContainer, ResourceItemRightColumn, ResourceLabel, ResourceLink, StyledContainedButton, UploadSizeLabel,
+} from './resources.styles';
 
 interface IResource {
 	_id: string;
@@ -140,37 +140,40 @@ export class Resources extends React.PureComponent<IProps, IState> {
 	public onClickAttach = () => {
 		const {onSaveFiles, onSaveLinks} = this.props;
 		this.props.showDialog({
-				title: 'Attach Resources',
-				template: AttachResourcesDialog,
-				data: {
-					onSaveFiles,
-					onSaveLinks
-				}
+			title: 'Attach Resources',
+			template: AttachResourcesDialog,
+			data: {
+				onSaveFiles,
+				onSaveLinks
+			}
 		});
 	}
 
+	public renderResources = renderWhenTrue(() => (
+		<ResourcesList>
+			{this.props.resources.map((r) => (
+				<ResourceItem
+					key={r._id}
+					{...r}
+					canEdit={this.props.canEdit}
+					onClickRemove={this.onClickRemove(r)}
+					onClickQuote={this.onClickQuote(r)}
+				/>
+			))}
+		</ResourcesList>
+	));
+
 	public render() {
-		const { resources = [], canEdit, toLeft } = this.props;
+		const { resources = [], canEdit } = this.props;
 
 		return (
 			<ResourcesContainer>
-				<FieldLabel>Resources</FieldLabel>
-				{resources.map((r) => (
-					<ResourceItem
-						key={r._id}
-						{...r}
-						canEdit={canEdit}
-						onClickRemove={this.onClickRemove(r)}
-						onClickQuote={this.onClickQuote(r)}
-					/>
-				))}
-				<FieldsRow container justify="space-between" flex={0.5}>
-					{!toLeft && <StyledFormControl />}
-					<StyledFormControl>
-						<span>
-							<LabelButton disabled={!canEdit} onClick={this.onClickAttach}>Attach resource</LabelButton>
-						</span>
-					</StyledFormControl>
+				{this.renderResources(!isEmpty(resources))}
+				{isEmpty(resources) && <EmptyStateInfo>No resources have been attached yet</EmptyStateInfo>}
+				<FieldsRow container justify="flex-end">
+					<StyledContainedButton onClick={this.onClickAttach} disabled={!canEdit}>
+						Add Resource
+					</StyledContainedButton>
 				</FieldsRow>
 			</ResourcesContainer>
 		);
