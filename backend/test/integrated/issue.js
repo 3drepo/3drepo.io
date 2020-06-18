@@ -774,7 +774,6 @@ describe("Issues", function () {
 						.send(comment)
 						.expect(200 , (err, res) => {
 							const comment = res.body;
-							console.log(comment);
 							expect(comment.viewpoint.type).to.exist;
 							expect(comment.viewpoint.orthographicSize).to.exist;
 							commentId = comment.guid;
