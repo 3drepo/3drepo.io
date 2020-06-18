@@ -744,7 +744,7 @@ describe("Issues", function () {
 			let commentId;
 
 			const comment = {
-				comment:'',
+				comment:'Test comment',
 				viewpoint:{
 					"up":[0,1,0],
 					"position":[38,38 ,125.08011914810137],
@@ -774,6 +774,7 @@ describe("Issues", function () {
 						.send(comment)
 						.expect(200 , (err, res) => {
 							const comment = res.body;
+							console.log(comment);
 							expect(comment.viewpoint.type).to.exist;
 							expect(comment.viewpoint.orthographicSize).to.exist;
 							commentId = comment.guid;

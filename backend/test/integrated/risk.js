@@ -784,13 +784,13 @@ describe("Risks", function () {
 					},
 					function(done) {
 						agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function(err , res) {
-							comment.viewpoint.guid = res.body.comments[0].viewpoint.guid;
+							comment.viewpoint.guid = res.body.comments[1].viewpoint.guid;
 
 							expect(res.body.comments.length).to.equal(2);
-							expect(res.body.comments[0].comment).to.equal(comment.comment);
-							expect(res.body.comments[0].owner).to.equal(username);
-							expect(res.body.comments[0].viewpoint).to.deep.equal(comment.viewpoint);
-							commentId = res.body.comments[0].guid;
+							expect(res.body.comments[1].comment).to.equal(comment.comment);
+							expect(res.body.comments[1].owner).to.equal(username);
+							expect(res.body.comments[1].viewpoint).to.deep.equal(comment.viewpoint);
+							commentId = res.body.comments[1].guid;
 
 							done(err);
 						});
@@ -814,9 +814,7 @@ describe("Risks", function () {
 			it("should succeed if removing an existing comment", function(done) {
 				agent.delete(`/${username}/${model}/risks/${riskId}/comments`)
 					.send({guid:commentId})
-					.expect(200 , function(err, res) {
-						done(err);
-					});
+					.expect(200, done);
 			});
 
 			it("should fail if invalid risk ID is given", function(done) {
