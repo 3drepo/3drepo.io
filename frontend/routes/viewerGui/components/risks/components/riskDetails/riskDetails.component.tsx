@@ -174,7 +174,8 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				onSave={this.handleSave}
 				canComment={this.userCanComment()}
 				hideComment={this.isNewRisk}
-				hideScreenshot={this.props.disableViewer}
+				hideScreenshot={this.props.disableViewer || this.isNewRisk}
+				hideUploadButton={this.isNewRisk}
 				messagesContainerRef={this.messageContainerRef}
 				previewWrapperRef={this.containerRef}
 				horizontal={this.props.horizontal}
