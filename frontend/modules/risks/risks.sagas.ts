@@ -25,9 +25,7 @@ import { RISK_LEVELS } from '../../constants/risks';
 import { ROUTES } from '../../constants/routes';
 import {
 	createAttachResourceComments,
-	createRemoveResourceComment,
-	prepareComment,
-	prepareComments
+	createRemoveResourceComment
 } from '../../helpers/comments';
 
 import { EXTENSION_RE } from '../../constants/resources';
@@ -78,7 +76,6 @@ function* fetchRisk({teamspace, modelId, riskId}) {
 
 	try {
 		const {data} = yield API.getRisk(teamspace, modelId, riskId);
-		data.comments = yield prepareComments(data.comments);
 		data.resources = prepareResources(teamspace, modelId, data.resources);
 		yield put(RisksActions.fetchMitigationCriteria(teamspace));
 		yield put(RisksActions.fetchRiskSuccess(data));
@@ -180,7 +177,6 @@ function* updateRisk({ teamspace, modelId, riskData }) {
 
 		const jobs = yield select(selectJobsList);
 		const preparedRisk = prepareRisk(updatedRisk, jobs);
-		preparedRisk.comments = yield prepareComments(preparedRisk.comments);
 
 		yield put(RisksActions.setComponentState({ savedPin: position }));
 		yield put(RisksActions.saveRiskSuccess(preparedRisk));
@@ -196,7 +192,6 @@ function* updateBoardRisk({ teamspace, modelId, riskData }) {
 		const { data: updatedRisk } = yield API.updateRisk(teamspace, modelId, _id, null, changedData);
 		const jobs = yield select(selectJobsList);
 		const preparedIssue = prepareRisk(updatedRisk, jobs);
-		preparedIssue.comments = yield prepareComments(preparedIssue.comments);
 		yield put(RisksActions.saveRiskSuccess(preparedIssue));
 		yield put(SnackbarActions.show('Risk updated'));
 	} catch (error) {
@@ -219,10 +214,9 @@ function* postComment({ teamspace, modelId, riskData, finishSubmitting }) {
 	try {
 		const { _id } = yield select(selectActiveRiskDetails);
 		const { data: comment } = yield API.addRiskComment(teamspace, modelId, _id, riskData);
-		const preparedComment = yield prepareComment(comment);
 
 		finishSubmitting();
-		yield put(RisksActions.createCommentSuccess(preparedComment, riskData._id));
+		yield put(RisksActions.createCommentSuccess(comment, riskData._id));
 		yield put(SnackbarActions.show('Risk comment added'));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('post', 'risk comment', error));
@@ -476,9 +470,8 @@ const onUpdateCommentEvent = (updatedComment) => {
 };
 
 const onCreateCommentEvent = (createdComment) => {
-	const preparedComment = prepareComment(createdComment);
 	const riskId = selectActiveRiskId(getState());
-	dispatch(RisksActions.createCommentSuccess(preparedComment, riskId));
+	dispatch(RisksActions.createCommentSuccess(createdComment, riskId));
 };
 
 const onDeleteCommentEvent = (deletedComment) => {

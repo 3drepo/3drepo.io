@@ -32,7 +32,7 @@ interface IProps {
 	viewer: any;
 	jobs: any[];
 	risk: any;
-	riskWithMarkdownComments: any[];
+	comments: any[];
 	teamspace: string;
 	model: string;
 	revision: string;
@@ -106,7 +106,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	public renderMessagesList = renderWhenTrue(() => (
 		<MessagesList
 			formRef={this.formRef}
-			messages={this.props.riskWithMarkdownComments}
+			messages={this.props.comments}
 			isPending={this.props.fetchingDetailsIsPending}
 			removeMessage={this.removeMessage}
 			teamspace={this.props.teamspace}

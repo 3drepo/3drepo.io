@@ -28,10 +28,22 @@ export const MARKDOWN_INTERNAL_IMAGE_PATH_REGEX = new RegExp(`${INTERNAL_IMAGE_P
 
 export const createAttachResourceComments = (owner: string,  resources = []) =>
 	resources.map((r, i) =>
-		prepareComment({_id: +(new Date()), guid: i, owner, action: {property: 'resource', to: r.name}, sealed: true }));
+	({
+		_id: +(new Date()),
+		guid: i,
+		owner,
+		action: {property: 'resource', to: r.name},
+		sealed: true
+	}));
 
 export const createRemoveResourceComment = (owner: string, {name} ) =>
-	prepareComment({_id: +(new Date()), guid: 0, owner, action: {property: 'resource', from: name}, sealed: true });
+	({
+		_id: +(new Date()),
+		guid: 0,
+		owner,
+		action: {property: 'resource', from: name},
+		sealed: true
+	});
 
 export const prepareComments = (comments = []) => {
 	comments = comments.filter((c) => !c.action || c.action.property !== 'extras');
@@ -209,6 +221,12 @@ const convertActionCommentToText = (comment) => {
 				comment.action.to = comment.action.from = null;
 				comment.action.propertyText = 'Pin';
 				break;
+
+			case 'issue_referenced':
+				comment.action.propertyText = 'Referenced';
+				text = 'Issue referenced in #' + comment.action.to  + ' by ' + comment.owner;
+				break;
+
 		}
 	}
 

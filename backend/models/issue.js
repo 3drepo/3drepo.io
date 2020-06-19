@@ -31,6 +31,7 @@ const Ticket = require("./ticket");
 const Comment = require("./comment");
 
 const C = require("../constants");
+const { stringToUUID, uuidToString } = require("../utils");
 
 const fieldTypes = {
 	"_id": "[object Object]",
@@ -302,13 +303,22 @@ class Issue extends Ticket {
 
 		// 3. Get issues from number
 		const issuesColl = await this.getTicketsCollection(account, model);
-		const res = await issuesColl.find({ number: {$in: issueNumbers}}).toArray();
+		// 3.5 Adding the comment id to get its number and to not make 2 queries to the database
+		const res = await issuesColl.find({ $or: [{ number: {$in: issueNumbers}}, {_id : stringToUUID(id)}]}).toArray();
 
 		// 3. Create system comments for those ticket references
 		const issuesCommentsUpdates =  [];
 
+		// 4. Find the number of the issue that made the reference
+		const referenceNumber = res.find(({_id}) => uuidToString(_id) === id).number;
+
 		res.forEach((issue)  => {
-			const systemComment = this.createSystemComment(account, model, sessionId, issue._id, user, "ticketReference", null, id);
+			if (issue.number === referenceNumber) {
+				return;
+			}
+
+			// 5. Create the system comment
+			const systemComment = this.createSystemComment(account, model, sessionId, issue._id, user, "issue_referenced", null, referenceNumber);
 			const comments = (issue.comments || []).map(c=>c.sealed = true).concat([systemComment]);
 
 			issuesCommentsUpdates.push(issuesColl.update({_id: issue._id}, { $set: { comments }}));
