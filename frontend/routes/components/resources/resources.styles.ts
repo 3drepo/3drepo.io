@@ -63,8 +63,8 @@ export const ActionContainer = styled.span`
 
 export const StyledContainedButton = styled(ContainedButton)`
 	&& {
- 		margin-right: 25px;
- 	}
+		margin-right: 25px;
+	}
 `;
 
 export const ResourceItemRightColumn = styled.div`

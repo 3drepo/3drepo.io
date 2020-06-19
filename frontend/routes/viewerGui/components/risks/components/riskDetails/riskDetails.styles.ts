@@ -26,6 +26,7 @@ import { MessagesList as MessagesListComponent } from '../../../../../components
 import * as TextFieldStyles from '../../../../../components/textField/textField.styles';
 import { FileUploadInvoker } from '../../../commentForm/commentForm.styles';
 import { StyledButton } from '../../../containedButton/containedButton.styles';
+import { Container as ButtonContainer } from '../../../pinButton/pinButton.styles';
 import PreviewDetailsBase from '../../../previewDetails/previewDetails.container';
 
 export const StyledFormControl = styled(FormControl)`
@@ -35,11 +36,15 @@ export const UpdateButtonsContainer = styled(FormControl)`
 	&& {
 		display: flex;
 		flex-direction: row;
-		justify-content: space-between;
+		justify-content: flex-start;
 		width: 100%;
 
 		${StyledButton} {
 			padding: 4px 10px;
+		}
+
+		${ButtonContainer} ~ ${ButtonContainer} {
+			margin-left: 20px;
 		}
 	}
 `;

@@ -25,9 +25,9 @@ export const StyledButton = styled(Button)`
 	&& {
 		background-color: ${COLOR.SOFT_BLUE};
 		padding: ${({ squeezed }: { squeezed: boolean }) => squeezed ? '4px 5px' : '6px 20px'};
-	  min-width: 56px;
-	  min-height: 18px;
-    font-size: 12px;
-	  text-transform: none;
-  }
+		min-width: 56px;
+		min-height: 18px;
+		font-size: 12px;
+		text-transform: none;
+	}
 `;

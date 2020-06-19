@@ -21,7 +21,7 @@ import { DatePicker } from 'material-ui-pickers';
 import styled from 'styled-components';
 
 import { COLOR } from '../../../../../styles';
-import { FileUploadInvoker } from '../../../../viewerGui/components/newCommentForm/newCommentForm.styles';
+import { FileUploadInvoker } from '../../../../viewerGui/components/commentForm/commentForm.styles';
 
 export const MenuList = styled(List)`
 	background-color: ${COLOR.WHITE};
@@ -75,7 +75,7 @@ export const StyledListItem = styled(ListItem)`
 		height: 30px;
 		min-width: 180px;
 
-    ${FileUploadInvoker} {
+		${FileUploadInvoker} {
 			display: none;
 		}
 	}

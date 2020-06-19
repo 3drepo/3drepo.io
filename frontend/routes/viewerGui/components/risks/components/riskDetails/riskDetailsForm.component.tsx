@@ -34,14 +34,7 @@ import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { AttachmentsFormTab } from '../attachmentsFormTab/attachmentsFormTab.component';
 import { MainRiskFormTab } from '../mainRiskFormTab/mainRiskFormTab.component';
 import { TreatmentRiskFormTab } from '../treatmentFormTab/treatmentFormTab.component';
-import {
-	Container,
-	DescriptionImage,
-	FieldsContainer,
-	FieldsRow,
-	StyledFormControl,
-	TabContent,
-} from './riskDetails.styles';
+import { TabContent } from './riskDetails.styles';
 
 interface IProps {
 	risk: any;

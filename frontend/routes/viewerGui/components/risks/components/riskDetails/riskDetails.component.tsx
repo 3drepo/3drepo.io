@@ -109,7 +109,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	get actionButton() {
-		return <ContainedButton icon={Copy}>Clone</ContainedButton>;
+		return renderWhenTrue(() => <ContainedButton icon={Copy}>Clone</ContainedButton>)(!this.isNewRisk);
 	}
 
 	public commentRef = React.createRef<any>();
@@ -175,7 +175,6 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				canComment={this.userCanComment()}
 				hideComment={this.isNewRisk}
 				hideScreenshot={this.props.disableViewer}
-				hideUploadButton={!this.props.disableViewer}
 				messagesContainerRef={this.messageContainerRef}
 				previewWrapperRef={this.containerRef}
 				horizontal={this.props.horizontal}
@@ -360,26 +359,49 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public handleUpdateScreenshot = (screenshot) => {
+	public handleUpdateScreenshot = (screenshot, disableViewpointSuggestion: boolean) => {
 		const { teamspace, model, updateRisk } = this.props;
 
-		if (screenshot) {
-			updateRisk(teamspace, model, { descriptionThumbnail: screenshot });
+		if (this.isNewRisk) {
+			this.props.setState({ newRisk: {
+					...this.riskData,
+					descriptionThumbnail: screenshot
+				}});
+		} else {
+			if (screenshot) {
+				if (!disableViewpointSuggestion) {
+					this.handleViewpointUpdateSuggest();
+				}
+				updateRisk(teamspace, model, { descriptionThumbnail: screenshot });
+			}
 		}
 	}
 
-	public handleTakeScreenshot = () => {
+	public handleTakeScreenshot = (disableViewpointSuggestion: boolean) => {
 		const { showScreenshotDialog, viewer } = this.props;
 
 		showScreenshotDialog({
 			sourceImage: viewer.getScreenshot(),
-			onSave: (screenshot) => this.handleUpdateScreenshot(screenshot),
+			onSave: (screenshot) => this.handleUpdateScreenshot(screenshot, disableViewpointSuggestion),
 			template: ScreenshotDialog,
 			notFullScreen: true,
 		});
 	}
 
-	public onUpdateRiskViewpoint = async () => {
+	public handleViewpointUpdateSuggest = () => {
+		const { showConfirmDialog } = this.props;
+		showConfirmDialog({
+			title: 'Save Viewpoint?',
+			content: `
+				Would you like to update the viewpoint to your current position?
+			`,
+			onConfirm: async () => {
+				await this.handleViewpointUpdate();
+			}
+		});
+	}
+
+	public handleViewpointUpdate = async () => {
 		const { teamspace, model, risk, updateRisk, viewer, showConfirmDialog } = this.props;
 
 		const currentViewpoint = await viewer.getCurrentViewpoint({ teamspace, model });
@@ -390,13 +412,18 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 			updateRisk(teamspace, model, { viewpoint });
 		}
 
-		showConfirmDialog({
+	}
+
+	public onUpdateRiskViewpoint = async () => {
+		await this.handleViewpointUpdate();
+
+		this.props.showConfirmDialog({
 			title: 'Save Screenshot?',
 			content: `
 				Would you like to create a new screenshot?
 			`,
 			onConfirm: () => {
-				this.handleTakeScreenshot();
+				this.handleTakeScreenshot(true);
 			}
 		});
 	}

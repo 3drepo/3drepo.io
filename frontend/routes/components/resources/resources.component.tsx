@@ -26,8 +26,9 @@ import { FieldsRow } from '../../viewerGui/components/risks/components/riskDetai
 import { EmptyStateInfo } from '../../viewerGui/components/views/views.styles';
 import AttachResourcesDialog from './attachResourcesDialog/attachResourcesDialog.container';
 import {
-	ActionContainer, DocumentIcon, IconButton, LinkIcon, PhotoIcon, QuoteIcon, RemoveIcon, ResourcesContainer, ResourcesList,
-	ResourceItemContainer, ResourceItemRightColumn, ResourceLabel, ResourceLink, StyledContainedButton, UploadSizeLabel,
+	ActionContainer, DocumentIcon, IconButton, LinkIcon, PhotoIcon, QuoteIcon, RemoveIcon, ResourcesContainer,
+	ResourcesList, ResourceItemContainer, ResourceItemRightColumn, ResourceLabel, ResourceLink, StyledContainedButton,
+	UploadSizeLabel,
 } from './resources.styles';
 
 interface IResource {

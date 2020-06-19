@@ -175,7 +175,6 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				canComment={this.userCanComment()}
 				hideComment={this.isNewIssue}
 				hideScreenshot={this.props.disableViewer}
-				hideUploadButton={!this.props.disableViewer}
 				messagesContainerRef={this.messageContainerRef}
 				previewWrapperRef={this.containerRef}
 				horizontal={this.props.horizontal}

@@ -75,11 +75,10 @@ const UpdateButtons = ({
 					onSave={onSavePin}
 					// @TODO check conditions for new ticket
 					disabled={!isNewRisk && !canEditBasicProperty}
-					hasPin={disableViewer}
+					hasPin
 				/>
 				<ImageButton
 					hasImage={Boolean(hasImage)}
-					disableScreenshot={!disableViewer}
 					onTakeScreenshot={props.onTakeScreenshot}
 					onUploadScreenshot={props.onUploadScreenshot}
 					onShowScreenshotDialog={props.onShowScreenshotDialog}
@@ -90,13 +89,18 @@ const UpdateButtons = ({
 					disabled={!canEditBasicProperty}
 				/>}
 			</UpdateButtonsContainer>
-			), () => (
-				<div>
-					//@TODO Add Board version
-					No
-				</div>
-			)
-		)(!disableViewer)}
+		), () => (
+			<UpdateButtonsContainer>
+				<ImageButton
+					hasImage={Boolean(hasImage)}
+					onTakeScreenshot={props.onTakeScreenshot}
+					onUploadScreenshot={props.onUploadScreenshot}
+					onShowScreenshotDialog={props.onShowScreenshotDialog}
+					disabled={!canEditBasicProperty}
+					disableScreenshot
+				/>
+			</UpdateButtonsContainer>
+		))(!disableViewer)}
 	</FieldsRow>
 );
 

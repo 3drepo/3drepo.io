@@ -19,6 +19,7 @@ import React from 'react';
 
 import ImageIcon from '@material-ui/icons/Image';
 
+import { renderWhenTrue } from '../../../../helpers/rendering';
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import {
 	MenuList,
@@ -26,15 +27,15 @@ import {
 	StyledListItem
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { ScreenshotDialog } from '../../../components/screenshotDialog';
+import { FileUploadInvoker } from '../commentForm/commentForm.styles';
 import { ContainedButton } from '../containedButton/containedButton.component';
-import { FileUploadInvoker } from '../newCommentForm/newCommentForm.styles';
 import { Container as ButtonContainer } from '../pinButton/pinButton.styles';
 
 interface IProps {
 	hasImage?: boolean;
 	onShowScreenshotDialog: (config: any) => void;
-	onTakeScreenshot?: () => void;
-	onUploadScreenshot?: (image) => void;
+	onTakeScreenshot?: (disableViewpointSuggestion: boolean) => void;
+	onUploadScreenshot?: (image, disableViewpointSuggestion: boolean) => void;
 	onUploadImage?: () => void;
 	disabled?: boolean;
 	disableScreenshot?: boolean;
@@ -57,7 +58,7 @@ const UploadImage = ({ onUploadScreenshot, onShowScreenshotDialog }) => {
 			onShowScreenshotDialog({
 				sourceImage: reader.result,
 				onSave: (screenshot) => {
-					onUploadScreenshot(screenshot);
+					onUploadScreenshot(screenshot, true);
 					resetFileInput();
 				},
 				onCancel: () => resetFileInput(),
@@ -81,8 +82,21 @@ const UploadImage = ({ onUploadScreenshot, onShowScreenshotDialog }) => {
 	);
 };
 
+const CreateScreenshot = ({ disableScreenshot, onTakeScreenshot }) => (
+	<>
+		{renderWhenTrue(() => (
+			<StyledListItem button onClick={() => onTakeScreenshot(false)}>
+				<StyledItemText>
+					Create Screenshot...
+				</StyledItemText>
+			</StyledListItem>
+		))(!disableScreenshot)}
+	</>
+);
+
 export const ImageButton = ({ hasImage, disabled, ...props }: IProps) => {
 	const imageLabel = !hasImage ? 'Add Image' : 'Edit Image';
+
 	return (
 		<ButtonContainer>
 			<ButtonMenu
@@ -97,11 +111,10 @@ export const ImageButton = ({ hasImage, disabled, ...props }: IProps) => {
 				)}
 				renderContent={() => (
 					<MenuList>
-						<StyledListItem button onClick={props.onTakeScreenshot}>
-							<StyledItemText>
-								Create Screenshot...
-							</StyledItemText>
-						</StyledListItem>
+						<CreateScreenshot
+							disableScreenshot={props.disableScreenshot}
+							onTakeScreenshot={props.onTakeScreenshot}
+						/>
 						<UploadImage
 							onShowScreenshotDialog={props.onShowScreenshotDialog}
 							onUploadScreenshot={props.onUploadScreenshot}
