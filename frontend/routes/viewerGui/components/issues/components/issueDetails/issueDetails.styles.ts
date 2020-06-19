@@ -70,3 +70,19 @@ export const HorizontalView = styled.div`
 		}
 	}
 `;
+
+export const TabContent = styled.div`
+	background-color: ${COLOR.WHITE};
+	flex: 1;
+	position: relative;
+	overflow: hidden;
+	display: flex;
+	height: inherit;
+`;
+
+export const Content = styled.div`
+	display: ${(props) => props.active ? 'block' : 'none'};
+	width: 100%;
+	margin-bottom: 5px;
+`;
+

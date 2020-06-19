@@ -189,7 +189,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	)
 
 	public showAttachmentsContent = (active) => (
-		<AttachmentsFormTab active={active} {...this.props} />
+		<AttachmentsFormTab active={active} resources={this.props.risk.resources} {...this.props} />
 	)
 
 	get attachmentsProps() {

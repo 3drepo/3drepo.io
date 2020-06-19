@@ -50,6 +50,7 @@ export class PinButton extends React.PureComponent<IProps, any> {
 
 	public handleChangeEditMode = (active) => {
 		const { deactivateMeasure, disableMeasure, viewer, onSave } = this.props;
+
 		if (active) {
 			viewer.setPinDropMode(true);
 			deactivateMeasure();

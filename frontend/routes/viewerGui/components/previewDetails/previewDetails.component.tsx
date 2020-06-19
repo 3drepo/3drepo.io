@@ -222,6 +222,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		const { teamspace, modelId } = this.props.urlParams;
 		return (
 			<OpenInViewerButton
+				preview
 				teamspace={teamspace}
 				model={modelId}
 				query={`${type}Id=${id}`}

@@ -17,13 +17,13 @@
 
 import React, { Fragment } from 'react';
 
-import Button from '@material-ui/core/Button';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { canComment } from '../../../../../../helpers/issues';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
+import { Copy} from '../../../../../components/fontAwesomeIcon';
+import { ScreenshotDialog } from '../../../../../components/screenshotDialog';
 import { CommentForm } from '../../../commentForm';
+import { ContainedButton } from '../../../containedButton/containedButton.component';
 import { Container } from '../../../risks/components/riskDetails/riskDetails.styles';
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { EmptyStateInfo } from '../../../views/views.styles';
@@ -64,6 +64,7 @@ interface IProps {
 	attachLinkResources: (links) => void;
 	showDialog: (config: any) => void;
 	showScreenshotDialog: (config: any) => void;
+	showConfirmDialog: (config: any) => void;
 }
 
 interface IState {
@@ -100,12 +101,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	get actionButton() {
-		return (
-			<Button variant="contained" size="small">
-				<FileCopyIcon />
-				Clone
-			</Button>
-		);
+		return renderWhenTrue(() => <ContainedButton icon={Copy}>Clone</ContainedButton>)(!this.isNewIssue);
 	}
 
 	get isViewerInitialized() {
@@ -251,15 +247,18 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				topicTypes={topicTypes}
 				currentUser={currentUser}
 				myJob={myJob}
+				onUploadScreenshot={this.handleUpdateScreenshot}
+				onTakeScreenshot={this.handleTakeScreenshot}
+				showScreenshotDialog={showScreenshotDialog}
+				onUpdateViewpoint={this.onUpdateIssueViewpoint}
 				onChangePin={updateSelectedIssuePin}
 				onSavePin={this.onPositionSave}
 				hasPin={!disableViewer && issue.position && issue.position.length}
-				hidePin={disableViewer}
+				disableViewer={disableViewer}
 				onRemoveResource={onRemoveResource}
 				attachFileResources={attachFileResources}
 				attachLinkResources={attachLinkResources}
 				showDialog={showDialog}
-				showScreenshotDialog={showScreenshotDialog}
 				canComment={this.userCanComment}
 				onThumbnailUpdate={this.handleNewScreenshot}
 				formRef={this.formRef}
@@ -353,6 +352,74 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		if (!this.isNewIssue) {
 			updateIssue(teamspace, model, {position: issue.position || []});
 		}
+	}
+
+	public handleUpdateScreenshot = (screenshot, disableViewpointSuggestion: boolean) => {
+		const { teamspace, model, updateIssue } = this.props;
+
+		if (this.isNewIssue) {
+			this.props.setState({ newIssue: {
+					...this.issueData,
+					descriptionThumbnail: screenshot
+				}});
+		} else {
+			if (screenshot) {
+				if (!disableViewpointSuggestion) {
+					this.handleViewpointUpdateSuggest();
+				}
+				updateIssue(teamspace, model, { descriptionThumbnail: screenshot });
+			}
+		}
+	}
+
+	public handleTakeScreenshot = (disableViewpointSuggestion: boolean) => {
+		const { showScreenshotDialog, viewer } = this.props;
+
+		showScreenshotDialog({
+			sourceImage: viewer.getScreenshot(),
+			onSave: (screenshot) => this.handleUpdateScreenshot(screenshot, disableViewpointSuggestion),
+			template: ScreenshotDialog,
+			notFullScreen: true,
+		});
+	}
+
+	public handleViewpointUpdateSuggest = () => {
+		const { showConfirmDialog } = this.props;
+		showConfirmDialog({
+			title: 'Save Viewpoint?',
+			content: `
+				Would you like to update the viewpoint to your current position?
+			`,
+			onConfirm: async () => {
+				await this.handleViewpointUpdate();
+			}
+		});
+	}
+
+	public handleViewpointUpdate = async () => {
+		const { teamspace, model, issue, updateIssue, viewer } = this.props;
+
+		const currentViewpoint = await viewer.getCurrentViewpoint({ teamspace, model });
+
+		const viewpoint = mergeData(issue.viewpoint, currentViewpoint);
+
+		if (viewpoint.guid) {
+			updateIssue(teamspace, model, { viewpoint });
+		}
+	}
+
+	public onUpdateIssueViewpoint = async () => {
+		await this.handleViewpointUpdate();
+
+		this.props.showConfirmDialog({
+			title: 'Save Screenshot?',
+			content: `
+				Would you like to create a new screenshot?
+			`,
+			onConfirm: () => {
+				this.handleTakeScreenshot(true);
+			}
+		});
 	}
 
 	public render() {

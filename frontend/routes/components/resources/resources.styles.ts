@@ -61,11 +61,7 @@ export const ActionContainer = styled.span`
 	min-height: 28px;
 `;
 
-export const StyledContainedButton = styled(ContainedButton)`
-	&& {
-		margin-right: 25px;
-	}
-`;
+export const StyledContainedButton = styled(ContainedButton)``;
 
 export const ResourceItemRightColumn = styled.div`
 	display: flex;

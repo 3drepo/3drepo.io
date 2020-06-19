@@ -403,7 +403,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleViewpointUpdate = async () => {
-		const { teamspace, model, risk, updateRisk, viewer, showConfirmDialog } = this.props;
+		const { teamspace, model, risk, updateRisk, viewer } = this.props;
 
 		const currentViewpoint = await viewer.getCurrentViewpoint({ teamspace, model });
 
@@ -412,7 +412,6 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		if (viewpoint.guid) {
 			updateRisk(teamspace, model, { viewpoint });
 		}
-
 	}
 
 	public onUpdateRiskViewpoint = async () => {

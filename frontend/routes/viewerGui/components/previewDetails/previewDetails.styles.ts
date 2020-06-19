@@ -31,7 +31,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { COLOR } from '../../../../styles';
 import { Container as MessageListContainer, FilterWrapper } from '../../../components/messagesList/messagesList.styles';
 
-const SUMMARY_HEIGHT = 64;
+const SUMMARY_HEIGHT = 70;
 
 export const Container = styled.div`
 	color: ${COLOR.BLACK_60};
@@ -150,6 +150,7 @@ export const MainInfoContainer = styled.div`
 	display: flex;
 	flex-direction: column;
 	width: 100%;
+	padding-right: 0 !important;
 `;
 
 const unexpandedStyles  = css`
