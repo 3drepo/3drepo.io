@@ -27,6 +27,7 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	saveIssue: ['teamspace', 'model', 'issueData', 'revision', 'finishSubmitting', 'ignoreViewer'],
 	updateIssue: ['teamspace', 'modelId', 'issueData'],
 	updateBoardIssue: ['teamspace', 'modelId', 'issueData'],
+	cloneIssue: [],
 	postComment: ['teamspace', 'modelId', 'issueData', 'finishSubmitting'],
 	removeComment: ['teamspace', 'modelId', 'issueData'],
 	saveIssueSuccess: ['issue'],

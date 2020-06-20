@@ -17,7 +17,7 @@
 
 import { push } from 'connected-react-router';
 import filesize from 'filesize';
-import { isEmpty, isEqual, map, omit, pick } from 'lodash';
+import {get, isEmpty, isEqual, map, omit, pick} from 'lodash';
 import * as queryString from 'query-string';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 import { CHAT_CHANNELS } from '../../constants/chat';
@@ -502,6 +502,54 @@ function* unsubscribeOnRiskCommentsChanges({ teamspace, modelId, riskId }) {
 	}));
 }
 
+function* cloneRisk() {
+	const activeRisk = yield select(selectActiveRiskDetails);
+	const jobs = yield select(selectJobsList);
+	const currentUser = yield select(selectCurrentUser);
+	const clonedProperties = pick(activeRisk, [
+		'name',
+		'associated_activity',
+		'assigned_roles',
+		'category',
+		'element',
+		'risk_factor',
+		'scope',
+		'location_desc',
+		'desc',
+		'safetibase_id',
+		'likelihood',
+		'consequence',
+		'level_of_risk',
+		'overall_level_of_risk',
+		'residual_likelihood',
+		'residual_consequence',
+		'residual_level_of_risk',
+		'mitigation_status',
+		'mitigation_desc',
+		'mitigation_detail',
+		'mitigation_stage',
+		'mitigation_type',
+		'residual_risk',
+		'descriptionThumbnail',
+		'viewpoint',
+	]);
+
+	try {
+		const newRisk = prepareRisk({
+			...clonedProperties,
+			owner: currentUser.username
+		}, jobs);
+
+		yield put(RisksActions.setComponentState({
+			showDetails: true,
+			activeRisk: null,
+			newRisk
+		}));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('prepare', 'clone risk', error));
+	}
+}
+
 function* setNewRisk() {
 	const risks = yield select(selectRisks);
 	const jobs = yield select(selectJobsList);
@@ -680,6 +728,7 @@ export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.UNSUBSCRIBE_ON_RISK_CHANGES, unsubscribeOnRiskChanges);
 	yield takeLatest(RisksTypes.FOCUS_ON_RISK, focusOnRisk);
 	yield takeLatest(RisksTypes.SET_NEW_RISK, setNewRisk);
+	yield takeLatest(RisksTypes.CLONE_RISK, cloneRisk);
 	yield takeLatest(RisksTypes.SUBSCRIBE_ON_RISK_COMMENTS_CHANGES, subscribeOnRiskCommentsChanges);
 	yield takeLatest(RisksTypes.UNSUBSCRIBE_ON_RISK_COMMENTS_CHANGES, unsubscribeOnRiskCommentsChanges);
 	yield takeLatest(RisksTypes.UPDATE_NEW_RISK, updateNewRisk);

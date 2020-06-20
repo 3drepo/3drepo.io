@@ -57,6 +57,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchRisk: RisksActions.fetchRisk,
 	saveRisk: RisksActions.saveRisk,
 	updateRisk: RisksActions.updateRisk,
+	cloneRisk: RisksActions.cloneRisk,
 	postComment: RisksActions.postComment,
 	removeComment: RisksActions.removeComment,
 	updateSelectedRiskPin: RisksActions.updateSelectedRiskPin,

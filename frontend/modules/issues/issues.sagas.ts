@@ -17,7 +17,7 @@
 
 import { push } from 'connected-react-router';
 import filesize from 'filesize';
-import { isEmpty, isEqual, map, omit, pick } from 'lodash';
+import {get, isEmpty, isEqual, map, omit, pick} from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import * as queryString from 'query-string';
@@ -43,6 +43,7 @@ import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { selectJobsList, selectMyJob } from '../jobs';
 import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
+import {selectActiveRiskDetails} from '../risks';
 import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
@@ -567,6 +568,37 @@ function* unsubscribeOnIssueCommentsChanges({ teamspace, modelId, issueId }) {
 	}));
 }
 
+export function* cloneIssue() {
+	const activeIssue = yield select(selectActiveIssueDetails);
+	const jobs = yield select(selectJobsList);
+	const currentUser = yield select(selectCurrentUser);
+	const clonedProperties = pick(activeIssue, [
+		'name',
+		'status',
+		'priority',
+		'topic_type',
+		'assigned_roles',
+		'due_date',
+		'desc',
+		'descriptionThumbnail',
+		'viewpoint',
+	]);
+
+	try {
+		const newIssue = prepareIssue({
+			...clonedProperties,
+			owner: currentUser.username
+		}, jobs);
+
+		yield put(IssuesActions.setComponentState({
+			showDetails: true,
+			activeIssue: null,
+			newIssue
+		}));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('prepare', 'clone issue', error));
+	}
+}
 export function* setNewIssue() {
 	const jobs = yield select(selectJobsList);
 	const currentUser = yield select(selectCurrentUser);
@@ -710,6 +742,7 @@ export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.UNSUBSCRIBE_ON_ISSUE_CHANGES, unsubscribeOnIssueChanges);
 	yield takeLatest(IssuesTypes.FOCUS_ON_ISSUE, focusOnIssue);
 	yield takeLatest(IssuesTypes.SET_NEW_ISSUE, setNewIssue);
+	yield takeLatest(IssuesTypes.CLONE_ISSUE, cloneIssue);
 	yield takeLatest(IssuesTypes.EXPORT_BCF, exportBcf);
 	yield takeLatest(IssuesTypes.IMPORT_BCF, importBcf);
 	yield takeLatest(IssuesTypes.SUBSCRIBE_ON_ISSUE_COMMENTS_CHANGES, subscribeOnIssueCommentsChanges);

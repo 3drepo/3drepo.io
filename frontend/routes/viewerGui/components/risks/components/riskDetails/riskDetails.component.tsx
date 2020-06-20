@@ -53,6 +53,7 @@ interface IProps {
 	fetchRisk: (teamspace, model, riskId) => void;
 	saveRisk: (teamspace, modelId, risk, revision, finishSubmitting, disableViewer) => void;
 	updateRisk: (teamspace, modelId, risk) => void;
+	cloneRisk: () => void;
 	postComment: (teamspace, modelId, riskData, finishSubmitting) => void;
 	removeComment: (teamspace, modelId, riskData) => void;
 	subscribeOnRiskCommentsChanges: (teamspace, modelId, riskId) => void;
@@ -109,7 +110,14 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	get actionButton() {
-		return renderWhenTrue(() => <ContainedButton icon={Copy}>Clone</ContainedButton>)(!this.isNewRisk);
+		return renderWhenTrue(() => (
+			<ContainedButton
+				icon={Copy}
+				onClick={this.props.cloneRisk}
+			>
+				Clone
+			</ContainedButton>
+		))(!this.isNewRisk);
 	}
 
 	public commentRef = React.createRef<any>();
@@ -211,7 +219,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 			teamspace, model, fetchRisk, risk, unsubscribeOnRiskCommentsChanges, subscribeOnRiskCommentsChanges,
 		} = this.props;
 
-		if (risk._id !== prevProps.risk._id) {
+		if (risk._id !== prevProps.risk._id && risk._id) {
 			unsubscribeOnRiskCommentsChanges(prevProps.teamspace, prevProps.model, prevProps.risk._id);
 			fetchRisk(teamspace, model, risk._id);
 			subscribeOnRiskCommentsChanges(teamspace, model, risk._id);

@@ -53,6 +53,7 @@ interface IProps {
 	updateSelectedIssuePin: (position) => void;
 	saveIssue: (teamspace, modelId, issue, revision, finishSubmitting, disableViewer) => void;
 	updateIssue: (teamspace, modelId, issue) => void;
+	cloneIssue: () => void;
 	postComment: (teamspace, modelId, issueData, finishSubmitting) => void;
 	removeComment: (teamspace, modelId, issueData) => void;
 	subscribeOnIssueCommentsChanges: (teamspace, modelId, issueId) => void;
@@ -101,7 +102,14 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	get actionButton() {
-		return renderWhenTrue(() => <ContainedButton icon={Copy}>Clone</ContainedButton>)(!this.isNewIssue);
+		return renderWhenTrue(() => (
+				<ContainedButton
+						icon={Copy}
+						onClick={this.props.cloneIssue}
+				>
+					Clone
+				</ContainedButton>
+		))(!this.isNewIssue);
 	}
 
 	get isViewerInitialized() {
@@ -202,7 +210,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 			issue, teamspace, model, fetchIssue, subscribeOnIssueCommentsChanges, unsubscribeOnIssueCommentsChanges,
 		} = this.props;
 
-		if (prevProps.issue._id !== issue._id) {
+		if (prevProps.issue._id !== issue._id && issue._id) {
 			unsubscribeOnIssueCommentsChanges(prevProps.teamspace, prevProps.model, prevProps.issue._id);
 			fetchIssue(teamspace, model, issue._id);
 			subscribeOnIssueCommentsChanges(teamspace, model, issue._id);

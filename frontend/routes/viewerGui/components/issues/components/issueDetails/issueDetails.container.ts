@@ -55,6 +55,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchIssue: IssuesActions.fetchIssue,
 	saveIssue: IssuesActions.saveIssue,
 	updateIssue: IssuesActions.updateIssue,
+	cloneIssue: IssuesActions.cloneIssue,
 	postComment: IssuesActions.postComment,
 	removeComment: IssuesActions.removeComment,
 	updateSelectedIssuePin: IssuesActions.updateSelectedIssuePin,
