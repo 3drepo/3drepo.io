@@ -26,6 +26,15 @@ export const MARKDOWN_ISSUE_REFERENCE_REGEX = new RegExp('#\\d+', 'gi');
 export const MARKDOWN_RESOURCE_REFERENCE_REGEX = new RegExp('#res.[\\w-]+', 'gi');
 export const MARKDOWN_INTERNAL_IMAGE_PATH_REGEX = new RegExp(`${INTERNAL_IMAGE_PATH_PREFIX}`, 'gi');
 
+export interface IComment {
+	action?: {property: string, from: string, to: string, propertyText: string, text: string};
+	comment: string | undefined | null;
+	_id: string;
+	guid: number;
+	owner: string;
+	sealed: boolean;
+}
+
 export const createAttachResourceComments = (owner: string,  resources = []) =>
 	resources.map((r, i) =>
 	({
@@ -69,7 +78,7 @@ export const prepareComment = (comment) => {
 	return comment;
 };
 
-const convertActionCommentToText = (comment) => {
+const convertActionCommentToText = (comment: IComment) => {
 	let text = '';
 
 	if (comment) {
@@ -269,13 +278,16 @@ const convertActionValueToText = (value = '') => {
 	return actionText;
 };
 
-export const transformCustomsLinksToMarkdown = ({ comment, issues, type }) => {
-	if (!comment) {
-		return comment;
+export const transformCustomsLinksToMarkdown = ( comment: IComment, issues, type ) => {
+	let text = comment.comment;
+
+	if (!text || comment.action?.property !== 'issue_referenced') {
+		return text;
 	}
-	const usersReferences = comment.matchAll(MARKDOWN_USER_REFERENCE_REGEX);
-	const issuesReferences = comment.matchAll(MARKDOWN_ISSUE_REFERENCE_REGEX) || [];
-	const resourcesReferences = comment.matchAll(MARKDOWN_RESOURCE_REFERENCE_REGEX);
+
+	const usersReferences = text.matchAll(MARKDOWN_USER_REFERENCE_REGEX);
+	const issuesReferences = text.matchAll(MARKDOWN_ISSUE_REFERENCE_REGEX) || [];
+	const resourcesReferences = text.matchAll(MARKDOWN_RESOURCE_REFERENCE_REGEX);
 
 	if (issuesReferences) {
 		const uniqIssuesReferences = uniqBy([...issuesReferences], 0);
@@ -285,7 +297,7 @@ export const transformCustomsLinksToMarkdown = ({ comment, issues, type }) => {
 
 			if (issueData && issueData._id) {
 				const referenceRegExp = RegExp(issueReference, 'g');
-				comment = comment.replace(referenceRegExp, `[${issueReference}](${issueData._id})`);
+				text = text.replace(referenceRegExp, `[${issueReference}](${issueData._id})`);
 			}
 		});
 	}
@@ -295,7 +307,7 @@ export const transformCustomsLinksToMarkdown = ({ comment, issues, type }) => {
 
 		uniqUsersReferences.forEach(({ 0: userReference }) => {
 			const referenceRegExp = RegExp(userReference, 'g');
-			comment = comment.replace(referenceRegExp, `[${userReference}](${userReference.replace('@', '')})`);
+			text = text.replace(referenceRegExp, `[${userReference}](${userReference.replace('@', '')})`);
 		});
 	}
 
@@ -304,10 +316,10 @@ export const transformCustomsLinksToMarkdown = ({ comment, issues, type }) => {
 
 		uniqResourceReferences.forEach(({ 0: resourceReference }) => {
 			const referenceRegExp = RegExp(resourceReference, 'g');
-			comment = comment
+			text = text
 				.replace(referenceRegExp, `[${resourceReference}](${resourceReference.replace('#res.', '')} "${type}")`);
 		});
 	}
 
-	return comment;
+	return text;
 };
