@@ -110,6 +110,8 @@ class MitigationCommentGenerator extends TextCommentGenerator {
 
 const identifyReferences = (comment) => {
 	const userRefs = new Set();
+	const issueRefs =  new Set();
+
 	if (comment) {
 		let inQuotes = false;
 		const arrayOfLines = comment.split("\n");
@@ -121,11 +123,14 @@ const identifyReferences = (comment) => {
 			if (!inQuotes) {
 				const users = line.match(/@\S*/g);
 				users && users.forEach((x) => userRefs.add(x.substr(1)));
+
+				const issues = line.match(/#\d+/g);
+				issues && issues.forEach((x) => issueRefs.add(parseInt(x.substr(1),10)));
 			}
 		});
 	}
 
-	return { userRefs: Array.from(userRefs) };
+	return { userRefs: Array.from(userRefs), issueRefs: Array.from(issueRefs) };
 
 };
 
@@ -159,7 +164,7 @@ const addComment = async function(account, model, colName, id, user, data) {
 		}
 	}
 
-	const { userRefs } = identifyReferences(data.comment);
+	const references = identifyReferences(data.comment);
 	const comment = new TextCommentGenerator(user, data.comment, viewpoint);
 
 	// 4. Append the new comment
@@ -173,7 +178,7 @@ const addComment = async function(account, model, colName, id, user, data) {
 	View.setViewpointScreenshotURL(colName, account, model, id, viewpoint);
 
 	// 6. Return the new comment.
-	return { comment: {...comment, viewpoint, guid: utils.uuidToString(comment.guid)}, userRefs};
+	return { comment: {...comment, viewpoint, guid: utils.uuidToString(comment.guid)}, ...references };
 };
 
 const deleteComment =  async function(account, model, colName, id, guid, user) {

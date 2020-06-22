@@ -295,21 +295,21 @@ class Issue extends Ticket {
 	}
 
 	async addComment(account, model, id, user, data, sessionId) {
-		// 1. creates a comment
-		const comment = await Comment.addComment(account, model, this.collName, id, user, data);
+		// 1. creates a comment and gets the result ( comment + references)
+		const commentResult = await Comment.addComment(account, model, this.collName, id, user, data);
 
-		// 2. analize original comment searching for other tickets references
-		const issueNumbers = Array.from(new Set(data.comment.match(/(#\d+)/g))).map(n => parseInt(n.substr(1), 10));
+		// 2 get referenced issue numbers
+		const issueNumbers = commentResult.issueRefs;
 
 		// 3. Get issues from number
 		const issuesColl = await this.getTicketsCollection(account, model);
-		// 3.5 Adding the comment id to get its number and to not make 2 queries to the database
+		// 4 Adding the comment id to get its number and to not make 2 queries to the database
 		const res = await issuesColl.find({ $or: [{ number: {$in: issueNumbers}}, {_id : stringToUUID(id)}]}).toArray();
 
-		// 3. Create system comments for those ticket references
+		// 5. Create system comments promise updates for those issues that were referenced
 		const issuesCommentsUpdates =  [];
 
-		// 4. Find the number of the issue that made the reference
+		// 6. Find the number of the issue that made the reference
 		const referenceNumber = res.find(({_id}) => uuidToString(_id) === id).number;
 
 		res.forEach((issue)  => {
@@ -317,16 +317,18 @@ class Issue extends Ticket {
 				return;
 			}
 
-			// 5. Create the system comment
+			// 7. Create the system comment
 			const systemComment = this.createSystemComment(account, model, sessionId, issue._id, user, "issue_referenced", null, referenceNumber);
 			const comments = (issue.comments || []).map(c=>c.sealed = true).concat([systemComment]);
 
+			// 8. Add update promise to updates array
 			issuesCommentsUpdates.push(issuesColl.update({_id: issue._id}, { $set: { comments }}));
 		});
 
+		// 9. update referenced issues with new system comments
 		await Promise.all(issuesCommentsUpdates);
 
-		return comment;
+		return commentResult;
 	}
 
 }
