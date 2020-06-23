@@ -1,5 +1,3 @@
-"use strict";
-
 /**
  *  Copyright (C) 2014 3D Repo Ltd
  *
@@ -16,12 +14,20 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+"use strict";
 
 const request = require("supertest");
 const {should, assert, expect, Assertion } = require("chai");
 const app = require("../../services/api.js").createApp();
 const responseCodes = require("../../response_codes.js");
 const async = require("async");
+const { login } = require("../helpers/users.js");
+
+const { createIssue } = require("../helpers/issues.js");
+
+const { deleteNotifications, fetchNotification } = require("../helpers/notifications.js");
+const { Agent } = require("useragent");
+
 
 describe("Issues", function () {
 	let server;
@@ -87,6 +93,8 @@ describe("Issues", function () {
 			done();
 		});
 	});
+
+
 
 	describe("Creating an issue", function() {
 		it("should succeed", function(done) {
@@ -1461,7 +1469,6 @@ describe("Issues", function () {
 		});
 	});
 
-
 	describe("Tagging a user in a comment", function() {
 		const teamspace = "teamSpace1";
 		const altUser = "commenterTeamspace1Model1JobA";
@@ -1552,7 +1559,28 @@ describe("Issues", function () {
 						});
 				}],
 			done);
+		});
 
+		it("should NOT create a notification if the user is tagged in a quote", function(done) {
+			const comment = {comment : `>
+			@${altUser}`};
+			async.waterfall([
+				login(agent, altUser, password),
+				deleteNotifications(agent),
+				login(agent, teamspace, password),
+				function(args, next) {
+					agent.post(`/${teamspace}/${model}/issues/${issueId}/comments`)
+						.send(comment)
+						.expect(200, next);
+				},
+				login(agent, altUser, password),
+				fetchNotification(agent),
+				(notifications, next) => {
+					expect(notifications, 'There shouldnt be any notifications').to.be.an("array").and.to.have.length(0);
+					next();
+				},
+			],
+			done);
 		});
 
 	});
