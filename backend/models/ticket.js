@@ -233,13 +233,13 @@ class Ticket {
 
 		let newViewpoint;
 
-		fields.forEach(async field => {
+		fields.forEach(field => {
 			// handle viewpoint later
 			if (field === "viewpoint") {
 				return;
 			}
 
-			await this.handleFieldUpdate(account, model, sessionId, id, user, field, oldTicket, data, systemComments);
+			this.handleFieldUpdate(account, model, sessionId, id, user, field, oldTicket, data, systemComments);
 		});
 
 		if (data.viewpoint) {
@@ -270,7 +270,7 @@ class Ticket {
 				systemComments.push(comment);
 			}
 
-			await this.handleFieldUpdate(account, model, sessionId, id, user, "viewpoint", oldTicket, data, systemComments);
+			this.handleFieldUpdate(account, model, sessionId, id, user, "viewpoint", oldTicket, data, systemComments);
 		}
 
 		await newViewpoint;
@@ -383,7 +383,7 @@ class Ticket {
 		return viewpoint;
 	}
 
-	async handleFieldUpdate(account, model, sessionId, id, user, field, oldTicket, data, systemComments) {
+	handleFieldUpdate(account, model, sessionId, id, user, field, oldTicket, data, systemComments) {
 		if (Object.prototype.toString.call(data[field]) !== this.fieldTypes[field]) {
 			throw responseCodes.INVALID_ARGUMENTS;
 		}
