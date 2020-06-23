@@ -281,7 +281,7 @@ const convertActionValueToText = (value = '') => {
 export const transformCustomsLinksToMarkdown = ( comment: IComment, issues, type ) => {
 	let text = comment.comment;
 
-	if (!text || comment.action?.property !== 'issue_referenced') {
+	if (!text || (Boolean(comment.action) && comment.action?.property !== 'issue_referenced')) {
 		return text;
 	}
 

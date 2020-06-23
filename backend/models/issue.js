@@ -319,7 +319,10 @@ class Issue extends Ticket {
 
 			// 7. Create the system comment
 			const systemComment = this.createSystemComment(account, model, sessionId, issue._id, user, "issue_referenced", null, referenceNumber);
-			const comments = (issue.comments || []).map(c=>c.sealed = true).concat([systemComment]);
+			const comments = (issue.comments || []).map(c=> {
+				c.sealed = true;
+				return c;
+			}).concat([systemComment]);
 
 			// 8. Add update promise to updates array
 			issuesCommentsUpdates.push(issuesColl.update({_id: issue._id}, { $set: { comments }}));
