@@ -45,6 +45,18 @@ export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createAct
 	removeModelSuccess: ['teamspace', 'modelData'],
 }, { prefix: 'TEAMSPACES/' });
 
+export interface ITeamspace {
+	account: string;
+	firstName: string;
+	lastName: string;
+	hasAvatar: boolean;
+	projects: string[];
+	models: string[];
+	fedModels: string[];
+	isAdmin: boolean;
+	permissions: string[];
+}
+
 export const INITIAL_STATE = {
 	teamspaces: {},
 	projects: {},
@@ -110,7 +122,10 @@ const getProject = (state, teamspaceName, projectName) => {
 
 // Models
 const updateModelSuccess = (state = INITIAL_STATE, { modelId, modelData }) => {
-	const model = { ...state.models[modelId], name: modelData.name, code: modelData.code };
+	const model = { ...state.models[modelId],
+		name: modelData.name || state.models[modelId].name,
+		code: modelData.code || state.models[modelId].code
+	};
 	if (modelData.federate) {
 		model.subModels = modelData.subModels;
 		model.timestamp = modelData.timestamp;

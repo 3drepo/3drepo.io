@@ -72,6 +72,7 @@ interface IProps {
 	hidePin?: boolean;
 	criteria: any;
 	showMitigationSuggestions: (conditions: any, setFieldValue) => void;
+	formRef: any;
 }
 
 interface IState {

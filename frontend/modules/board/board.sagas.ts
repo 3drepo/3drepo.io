@@ -17,6 +17,7 @@
 
 import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
+import { CommentsActions } from '../comments';
 import { selectCurrentTeamspace } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { IssuesActions, IssuesTypes } from '../issues';
@@ -36,6 +37,7 @@ function* fetchData({ boardType, teamspace, project, modelId }) {
 		const currentModel = yield select(selectCurrentModel);
 
 		yield put(JobsActions.fetchJobs(teamspace));
+		yield put(JobsActions.getMyJob(teamspace));
 
 		if (modelId && modelId !== currentModel) {
 			yield put(ModelActions.fetchSettings(teamspace, modelId));
@@ -48,6 +50,8 @@ function* fetchData({ boardType, teamspace, project, modelId }) {
 		}
 
 		if (teamspace && project && modelId) {
+			yield put(CommentsActions.fetchUsers(teamspace));
+
 			if (boardType === 'issues') {
 				yield all([
 					put(IssuesActions.fetchIssues(teamspace, modelId)),

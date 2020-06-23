@@ -24,6 +24,7 @@ import { selectJobsList, selectMyJob } from '../../../../../../modules/jobs';
 import { selectSettings } from '../../../../../../modules/model';
 import {
 	selectActiveRiskDetails,
+	selectActiveRiskWithMarkdownComments,
 	selectAssociatedActivities,
 	selectExpandDetails,
 	selectFailedToLoad,
@@ -39,6 +40,7 @@ import { RiskDetails } from './riskDetails.component';
 const mapStateToProps = createStructuredSelector({
 	criteria: selectMitigationCriteria,
 	risk: selectActiveRiskDetails,
+	riskWithMarkdownComments: selectActiveRiskWithMarkdownComments,
 	jobs: selectJobsList,
 	expandDetails: selectExpandDetails,
 	fetchingDetailsIsPending: selectFetchingDetailsIsPending,

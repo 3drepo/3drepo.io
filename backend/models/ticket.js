@@ -73,6 +73,17 @@ class Ticket {
 			delete ticketToClean.due_date;
 		}
 
+		// legacy schema support
+		if (ticketToClean.viewpoint) {
+			vpIdKeys.forEach((key) => {
+				if (ticketToClean.viewpoint[key]) {
+					ticketToClean.viewpoint[key] = utils.uuidToString(ticketToClean.viewpoint[key]);
+				}
+			});
+
+			Viewpoint.setViewpointScreenshotURL(this.collName, account, model, id, ticketToClean.viewpoint);
+		}
+
 		if (ticketToClean.viewpoints) {
 			ticketToClean.viewpoints.forEach((viewpoint, i) => {
 				vpIdKeys.forEach((key) => {
@@ -83,7 +94,7 @@ class Ticket {
 
 				Viewpoint.setViewpointScreenshotURL(this.collName, account, model, id, viewpoint);
 
-				if (0 === i) {
+				if (0 === i && !ticketToClean.viewpoint) {
 					ticketToClean.viewpoint = viewpoint;
 				}
 			});
@@ -532,16 +543,6 @@ class Ticket {
 		});
 	}
 
-	async findByModelNameUpdateTimestamp(account, model, branch, revId, ids) {
-		const filter = await this.getIdsFilter(account, model, branch, revId, ids);
-		const coll = await this.getTicketsCollection(account, model);
-		return await coll.aggregate([
-			{ $match: filter},
-			{ $unwind: "$comments" },
-			{ $group: { _id: "$_id", lastUpdated: { $max: "$comments.created" } } }
-		]).toArray();
-	}
-
 	async getIdsFilter(account, model, branch, revId, ids) {
 		let filter = {};
 
@@ -568,18 +569,21 @@ class Ticket {
 		return filter;
 	}
 
-	async findByModelName(account, model, branch, revId, projection, ids, noClean = false) {
+	async findByModelName(account, model, branch, revId, query, projection, ids, noClean = false, convertCoords = false) {
 		const filter = await this.getIdsFilter(account, model, branch, revId, ids);
+		const fullQuery = {...filter, ...query};
 
-		const modelSettings = await ModelSetting.findById({ account, model }, model);
 		const coll = await this.getTicketsCollection(account, model);
-		const tickets = await coll.find(filter, projection).toArray();
+		const tickets = await coll.find(fullQuery, projection).toArray();
 		tickets.forEach((foundTicket, index) => {
-			foundTicket.typePrefix = modelSettings.type || "";
-			foundTicket.modelCode = (modelSettings.properties || {}).code || "";
 			if (!noClean) {
 				tickets[index] = this.clean(account, model, foundTicket);
 			}
+
+			if (convertCoords) {
+				this.toDirectXCoords(foundTicket);
+			}
+
 		});
 
 		return tickets;
@@ -612,10 +616,9 @@ class Ticket {
 		return viewpoint;
 	}
 
-	async getList(account, model, branch, revision, ids, convertCoords) {
+	async getList(account, model, branch, revision, ids, convertCoords, updatedSince) {
 		const projection = {
 			extras: 0,
-			"comments": 0,
 			"viewpoints.extras": 0,
 			"viewpoints.scribble": 0,
 			"viewpoints.screenshot.content": 0,
@@ -623,32 +626,36 @@ class Ticket {
 			"thumbnail.content": 0
 		};
 
-		const [tickets, lastUpdated] = await Promise.all([
-			this.findByModelName(
-				account,
-				model,
-				branch,
-				revision,
-				projection,
-				ids,
-				false
-			),
-			this.findByModelNameUpdateTimestamp(
-				account,
-				model,
-				branch,
-				revision,
-				ids
-			)
-		]);
-
-		tickets.forEach(ticket => {
-			if (convertCoords) {
-				this.toDirectXCoords(ticket);
+		const query = updatedSince ?
+			{
+				$or:[
+					{created: {$gte: updatedSince}},
+					{"comments.created": {$gte: updatedSince}}
+				]
 			}
+			: undefined;
 
-			const timestamp =  lastUpdated.find(updatedTimestamp =>  utils.uuidToString(updatedTimestamp._id) === ticket._id);
-			ticket.lastUpdated =  (timestamp || {}).lastUpdated || ticket.created;
+		const tickets = await this.findByModelName(
+			account,
+			model,
+			branch,
+			revision,
+			query,
+			projection,
+			ids,
+			false,
+			convertCoords
+		);
+
+		tickets.forEach((ticket) => {
+			ticket.lastUpdated = ticket.created;
+			ticket.comments && ticket.comments.forEach((comment) => {
+				if (comment.created > ticket.lastUpdated) {
+					ticket.lastUpdated = comment.created;
+				}
+			});
+
+			ticket.comment = undefined;
 		});
 
 		return tickets;
@@ -665,7 +672,7 @@ class Ticket {
 		};
 
 		const branch = rid ? null : "master";
-		const tickets = await this.findByModelName(account, model, branch, rid, projection, ids, false);
+		const tickets = await this.findByModelName(account, model, branch, rid, undefined, projection, ids, false);
 		reportGen.addEntries(tickets);
 		return reportGen.generateReport(res);
 	}

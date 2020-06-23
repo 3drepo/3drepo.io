@@ -105,4 +105,45 @@ export const GlobalStyle = createGlobalStyle`
 	[data-simplebar=init][data-simplebar-y-hidden] > .simplebar-track.vertical {
 		display: none;
 	}
+
+	.rta__autocomplete {
+		position: absolute;
+		z-index: 1400;
+		display: block;
+		margin-top: 1em;
+		max-width: 380px;
+	}
+
+	.rta__autocomplete--top {
+		margin-top: 0;
+		margin-bottom: 1em;
+	}
+
+	.rta__list {
+		margin: 0;
+		padding: 0;
+		background: ${COLOR.WHITE};
+		border: 1px solid ${COLOR.BLACK_30};
+		border-radius: 3px;
+		box-shadow: 0 0 5px rgba(27, 31, 35, 0.1);
+		list-style: none;
+	}
+
+	.rta__entity {
+		width: 100%;
+		outline: none;
+	}
+
+	.rta__entity:hover {
+		cursor: pointer;
+	}
+
+	.rta__item:not(:last-child) {
+		border-bottom: 1px solid ${COLOR.BLACK_30};
+	}
+
+	.rta__entity--selected {
+		text-decoration: none;
+		background: ${COLOR.BLACK_12};
+	}
 `;

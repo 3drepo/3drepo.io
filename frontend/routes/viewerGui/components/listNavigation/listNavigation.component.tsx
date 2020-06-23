@@ -28,7 +28,7 @@ interface IProps {
 	className?: string;
 	initialIndex?: number;
 	lastIndex: number;
-	onChange: (currentIndex) => void;
+	onChange: (currentIndex: number) => void;
 }
 
 interface IState {
