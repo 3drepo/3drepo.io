@@ -119,7 +119,7 @@ const identifyReferences = (comment) => {
 			// New line resets the quote state. So a line is considered
 			// within quotes if the previous line is already in quotes or
 			// it contains the quote symbol
-			inQuotes = line !== "" && (line[0] === ">" || inQuotes);
+			inQuotes = line.trim() !== "" && (line[0] === ">" || inQuotes);
 			if (!inQuotes) {
 				const users = line.match(/@\S*/g);
 				users && users.forEach((x) => userRefs.add(x.substr(1)));

@@ -94,8 +94,6 @@ describe("Issues", function () {
 		});
 	});
 
-
-
 	describe("Creating an issue", function() {
 		it("should succeed", function(done) {
 			const issue = Object.assign({"name":"Issue test"}, baseIssue);
@@ -1582,6 +1580,117 @@ describe("Issues", function () {
 			],
 			done);
 		});
+
+	});
+
+	describe("referencing an issue in another issue ", function() {
+		const teamspace = "teamSpace1";
+		const altUser = "commenterTeamspace1Model1JobA";
+		const password = "password";
+		const model = "5bfc11fa-50ac-b7e7-4328-83aa11fa50ac";
+
+		const createIssueTeamspace1 = createIssue(teamspace,model);
+
+		const issues = [];
+
+		const createAndPushIssue = (done) => {
+			async.waterfall([
+				createIssueTeamspace1(agent),
+				(issue, next) => {
+					issues.push(issue);
+					next();
+				}], done)
+		};
+
+
+		before(function(done) {
+			async.series([
+				login(agent, teamspace, password),
+				createAndPushIssue,
+				createAndPushIssue,
+				createAndPushIssue,
+				createAndPushIssue,
+				createAndPushIssue,
+				createAndPushIssue,
+				createAndPushIssue,
+				createAndPushIssue,
+			], done);
+		});
+
+
+		const testForNoComment = (id, done) => {
+			agent.get(`/${teamspace}/${model}/issues/${id}`).expect(200, function(err , res) {
+				const comments = res.body.comments;
+				expect(comments, 'There shouldnt be a comment').to.be.an("array").and.to.have.length(0);
+				return done(err);
+			});
+		};
+
+		const testForReference = (referencedIssueId, otherIssueNumber, done) =>  {
+			agent.get(`/${teamspace}/${model}/issues/${referencedIssueId}`).expect(200, function(err , res) {
+				const comments = res.body.comments;
+
+				expect(comments, 'There should be one system comment').to.be.an("array").and.to.have.length(1);
+
+				const commentAction = comments[0].action;
+
+				expect(commentAction.property).to.equal('issue_referenced')
+				expect(commentAction.to).to.equal(otherIssueNumber.toString())
+				return done(err);
+			});
+		}
+
+		it("should create a system message when the issue has been referenced", function(done) {
+			const comment = {comment : `look at issue  #${issues[0].number} and #${issues[1].number} `};
+
+			async.series([
+				function(done) {
+					agent.post(`/${teamspace}/${model}/issues/${issues[2]._id}/comments`)
+						.send(comment)
+						.expect(200, done);
+				},
+				function(done) {
+					testForReference(issues[0]._id, issues[2].number, done );
+				},
+				function(done) {
+					testForReference(issues[1]._id, issues[2].number, done );
+				},
+				function(done) {
+					testForNoComment(issues[3]._id, done);
+				},
+
+			], done);
+
+		});
+
+		it("shouldnt  create a system message when the issue that has been referenced is part of a quote", function(done) {
+			const comment = {comment : `> look at issue  #${issues[4].number}
+			and #${issues[5].number}
+			
+			and #${issues[6].number}
+			`};
+
+			async.series([
+				function(done) {
+					agent.post(`/${teamspace}/${model}/issues/${issues[7]._id}/comments`)
+						.send(comment)
+						.expect(200, done);
+				},
+				function(done) {
+					testForNoComment(issues[4]._id, done);
+				},
+				function(done) {
+					testForNoComment(issues[5]._id, done);
+				},
+				function(done) {
+					testForReference(issues[6]._id, issues[7].number, done );
+				},
+
+			], done);
+
+		});
+
+
 
 	});
 
