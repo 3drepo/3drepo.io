@@ -910,7 +910,7 @@ export class ViewerService {
 
 	public async setCamera({ position, up, view_dir, look_at, type, orthographicSize, account, model }) {
 		await this.isModelReady();
-		UnityUtil.setViewpoint(position, up, view_dir, look_at, type === "orthogonal", orthographicSize,account, model);
+		UnityUtil.setViewpoint(position, up, view_dir, look_at, type === 'orthogonal', orthographicSize, account, model);
 	}
 
 	/**
