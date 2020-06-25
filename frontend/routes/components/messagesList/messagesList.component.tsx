@@ -126,7 +126,7 @@ export const MessagesList = ({ teamspace, isPending, messages, ...props }: IProp
 				)(isPending)}
 				{renderWhenTrue(
 					<EmptyState filter={filter} />
-				)(!isPending && !messagesList.length)}
+				)(!isPending && (!messagesList.length))}
 			</Container>
 		</>
 	);
