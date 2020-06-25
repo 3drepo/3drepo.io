@@ -1697,27 +1697,13 @@ describe("Issues", function () {
 				function(done) {
 					agent.get(`/${teamspace}/${model}/issues/${issues[0]._id}`).expect(200, function(err , res) {
 						let comments = res.body.comments;
-						const [otherIssueNumber1, otherIssueNumber2] =  [issues[2].number.toString(), issues[1].number.toString()].sort();
-
-
+						const [otherIssueNumber1, otherIssueNumber2] =  [issues[2].number.toString(), issues[1].number.toString()]
+							.sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
 
 						expect(comments, 'There should be two system comments').to.be.an("array").and.to.have.length(2);
-						console.log("----------------------------------------------");
-						console.log(JSON.stringify(comments, null, '  '));
 
-						console.log("----------------------------------------------");
-						comments = comments.sort((commentA, commentB) => commentB.action.to - commentA.action.to );
-						console.log(JSON.stringify(comments, null, '  '));
-
-						console.log("----------------------------------------------");
-
-						comments = comments.sort((commentA, commentB) =>  commentA.action.to - commentB.action.to );
-						console.log(JSON.stringify(comments, null, '  '));
-						console.log("----------------------------------------------");
-
-						console.log([otherIssueNumber1, otherIssueNumber2]);
-						console.log("----------------------------------------------");
-
+						comments = comments
+							.sort((commentA, commentB) => parseInt(commentA.action.to, 10) - parseInt(commentB.action.to, 10));
 
 						const commentAction1 = comments[0].action;
 						expect(commentAction1.property).to.equal('issue_referenced')
