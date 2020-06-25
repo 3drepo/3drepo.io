@@ -27,7 +27,25 @@ const { createIssue } = require("../helpers/issues.js");
 
 const { deleteNotifications, fetchNotification } = require("../helpers/notifications.js");
 const { Agent } = require("useragent");
+const supertest = require("supertest");
 
+
+
+// var expectOld = supertest.Test.prototype.expect;
+
+// supertest.Test.prototype.expect = function(status, callback) {
+// 	expectOld.apply(this, [status,  function(err, res) {
+// 		console.log(status);
+// 		console.log(res.status);
+
+// 		expect(res.status, 'Status should be ' + status).to.be.equal(status);
+// 		callback(err, res);
+// 	}]);
+// }
+
+// __proto__.constructor.prototype
+
+// return;
 
 describe("Issues", function () {
 	let server;
@@ -1533,6 +1551,7 @@ describe("Issues", function () {
 		it("should NOT create a notification if the user does not belong in the teamspace", function(done) {
 			const comment = {comment : `@${username}`};
 			async.series([
+				login(agent, altUser, password),
 				function(done) {
 					agent.post(`/${teamspace}/${model}/issues/${issueId}/comments`)
 						.send(comment)
@@ -1585,7 +1604,6 @@ describe("Issues", function () {
 
 	describe("referencing an issue in another issue ", function() {
 		const teamspace = "teamSpace1";
-		const altUser = "commenterTeamspace1Model1JobA";
 		const password = "password";
 		const model = "5bfc11fa-50ac-b7e7-4328-83aa11fa50ac";
 
@@ -1659,8 +1677,43 @@ describe("Issues", function () {
 					testForNoComment(issues[3]._id, done);
 				},
 
+				function(done) {
+					testForNoComment(issues[3]._id, done);
+				},
 			], done);
+		});
 
+		it("should have multiple system messages when the issue has been referenced several times", function(done) {
+			const comment = {comment : `#${issues[0].number} is interesting`};
+
+			async.series([
+				function(done) {
+					agent.post(`/${teamspace}/${model}/issues/${issues[1]._id}/comments`)
+						.send(comment)
+						.expect(200, done);
+				},
+
+				function(done) {
+					agent.get(`/${teamspace}/${model}/issues/${issues[0]._id}`).expect(200, function(err , res) {
+						let comments = res.body.comments;
+						const [otherIssueNumber1, otherIssueNumber2] =  [issues[2].number.toString(), issues[1].number.toString()].sort();
+
+						expect(comments, 'There should be two system comments').to.be.an("array").and.to.have.length(2);
+						comments.sort((commentA, commentB) => commentA.action.to - commentB.action.to);
+
+						const commentAction1 = comments[0].action;
+						expect(commentAction1.property).to.equal('issue_referenced')
+						expect(commentAction1.to).to.equal(otherIssueNumber1);
+
+						const commentAction2 = comments[1].action;
+						expect(commentAction2.property).to.equal('issue_referenced')
+						expect(commentAction2.to).to.equal(otherIssueNumber2);
+
+
+						return done(err);
+					});
+				},
+			], done);
 		});
 
 		it("shouldnt  create a system message when the issue that has been referenced is part of a quote", function(done) {
