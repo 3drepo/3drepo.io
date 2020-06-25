@@ -908,9 +908,9 @@ export class ViewerService {
 		return this.showAll();
 	}
 
-	public async setCamera({ position, up, view_dir, look_at, animate, rollerCoasterMode, account, model }) {
+	public async setCamera({ position, up, view_dir, look_at, type, orthographicSize, account, model }) {
 		await this.isModelReady();
-		UnityUtil.setViewpoint(position, up, view_dir, look_at, animate !== undefined ? animate : true, rollerCoasterMode);
+		UnityUtil.setViewpoint(position, up, view_dir, look_at, type === "orthogonal", orthographicSize,account, model);
 	}
 
 	/**

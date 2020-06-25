@@ -1416,6 +1416,28 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Enable orthographic view
+	 */
+	public static enableOrthographic() {
+		UnityUtil.toUnity('EnableOrthographic', UnityUtil.LoadingState.MODEL_LOADING, undefined);
+	}
+
+	/**
+	 * Disable orthographic view. Enables perspective view.
+	 */
+	public static disableOrthographic() {
+		UnityUtil.toUnity('DisableOrthographic', UnityUtil.LoadingState.MODEL_LOADING, undefined);
+	}
+
+	/**
+	 * Set orthographic size for orthographic view
+	 * @param {number} orthographicSize - Camera's half-size when in orthographic mode
+	 */
+	public static setOrthographicSize(orthographicSize: number) {
+		UnityUtil.toUnity('SetOrthographicSize', UnityUtil.LoadingState.MODEL_LOADING, orthographicSize);
+	}
+
+	/**
 	 * Change the camera configuration
 	 * teamspace and model is only needed if the viewpoint is relative to a model
 	 * @category Navigations
@@ -1431,12 +1453,20 @@ export class UnityUtil {
 		up: [number],
 		forward: [number],
 		lookAt: [number],
+		isOrthographic?: boolean,
+		orthographicSize?: number,
 		account?: string,
 		model?: string
 	) {
 		const param: any = {};
 		if (account && model) {
 			param.nameSpace = account + '.' + model;
+		}
+
+		param.orthographic = isOrthographic;
+
+		if (param.orthographic) {
+			param.orthographicSize = orthographicSize;
 		}
 
 		param.position = pos;
