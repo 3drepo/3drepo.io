@@ -28,6 +28,7 @@ const { createIssue } = require("../helpers/issues.js");
 const { deleteNotifications, fetchNotification } = require("../helpers/notifications.js");
 const { Agent } = require("useragent");
 const supertest = require("supertest");
+const { json } = require("body-parser");
 
 
 
@@ -1698,8 +1699,25 @@ describe("Issues", function () {
 						let comments = res.body.comments;
 						const [otherIssueNumber1, otherIssueNumber2] =  [issues[2].number.toString(), issues[1].number.toString()].sort();
 
+
+
 						expect(comments, 'There should be two system comments').to.be.an("array").and.to.have.length(2);
-						comments.sort((commentA, commentB) => commentA.action.to - commentB.action.to);
+						console.log("----------------------------------------------");
+						console.log(JSON.stringify(comments, null, '  '));
+
+						console.log("----------------------------------------------");
+						comments = comments.sort((commentA, commentB) => commentB.action.to - commentA.action.to );
+						console.log(JSON.stringify(comments, null, '  '));
+
+						console.log("----------------------------------------------");
+
+						comments = comments.sort((commentA, commentB) =>  commentA.action.to - commentB.action.to );
+						console.log(JSON.stringify(comments, null, '  '));
+						console.log("----------------------------------------------");
+
+						console.log([otherIssueNumber1, otherIssueNumber2]);
+						console.log("----------------------------------------------");
+
 
 						const commentAction1 = comments[0].action;
 						expect(commentAction1.property).to.equal('issue_referenced')
