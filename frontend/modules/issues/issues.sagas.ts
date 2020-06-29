@@ -128,14 +128,12 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 		};
 
 		if (objectInfo && (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0)) {
-			const [highlightedGroup, hiddenGroup] = yield createGroup(issueData, objectInfo, teamspace, model, revision);
-
-			if (highlightedGroup) {
-				viewpoint.highlighted_group_id = highlightedGroup.data._id;
+			if (objectInfo.highlightedNodes.length > 0) {
+				viewpoint.highlighted_objects = objectInfo.highlightedNodes;
 			}
 
-			if (hiddenGroup) {
-				viewpoint.hidden_group_id = hiddenGroup.data._id;
+			if (objectInfo.hiddenNodes.length > 0) {
+				viewpoint.hidden_objects = objectInfo.hiddenNodes;
 			}
 		}
 
