@@ -23,9 +23,9 @@ import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
 import { DialogActions } from '../dialog';
 import { dispatch } from '../store';
+import { ViewerGuiActions } from '../viewerGui';
 import { PRESET_VIEW } from './viewpoints.constants';
 import { ViewpointsActions, ViewpointsTypes } from './viewpoints.redux';
-import { ViewerGuiActions } from '../viewerGui';
 
 export const getThumbnailUrl = (thumbnail) => API.getAPIUrl(thumbnail);
 

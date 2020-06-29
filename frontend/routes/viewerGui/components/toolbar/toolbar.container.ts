@@ -27,8 +27,8 @@ import {
 	selectIsCoordViewActive,
 	selectIsFocusMode,
 	selectIsMetadataVisible,
-	selectProjectionMode,
 	selectNavigationMode,
+	selectProjectionMode,
 	ViewerGuiActions
 } from '../../../../modules/viewerGui';
 import { Toolbar } from './toolbar.component';

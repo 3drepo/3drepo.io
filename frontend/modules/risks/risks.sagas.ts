@@ -49,6 +49,7 @@ import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { TeamspaceActions } from '../teamspace';
 import { selectIfcSpacesHidden, TreeActions } from '../tree';
+import { ViewerGuiActions } from '../viewerGui';
 import { RisksActions, RisksTypes } from './risks.redux';
 import {
 	selectActiveRiskDetails,
@@ -58,7 +59,6 @@ import {
 	selectRisks,
 	selectRisksMap
 } from './risks.selectors';
-import { ViewerGuiActions } from '../viewerGui';
 
 function* fetchRisks({teamspace, modelId, revision}) {
 	yield put(RisksActions.togglePendingState(true));

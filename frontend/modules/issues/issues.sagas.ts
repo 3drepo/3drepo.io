@@ -48,6 +48,7 @@ import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { selectTopicTypes, TeamspaceActions } from '../teamspace';
 import { selectIfcSpacesHidden, TreeActions } from '../tree';
+import { ViewerGuiActions } from '../viewerGui';
 import { IssuesActions, IssuesTypes } from './issues.redux';
 import {
 	selectActiveIssueDetails,
@@ -56,7 +57,6 @@ import {
 	selectFilteredIssues,
 	selectIssuesMap
 } from './issues.selectors';
-import { ViewerGuiActions } from '../viewerGui';
 
 function* fetchIssues({teamspace, modelId, revision}) {
 	yield put(IssuesActions.togglePendingState(true));
