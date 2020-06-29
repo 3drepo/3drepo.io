@@ -126,15 +126,28 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 			{
 				label: VIEWER_TOOLBAR_ITEMS.PERSPECTIVE_VIEW,
 				Icon: PerspectiveIcon,
-				action: () => this.handleProjectionModeClick(VIEWER_PROJECTION_MODES.ORTHOGONAL),
-				show: this.props.projectionMode !== VIEWER_PROJECTION_MODES.ORTHOGONAL
+				action: () => this.handleShowSubmenu(VIEWER_TOOLBAR_ITEMS.PERSPECTIVE_VIEW),
+				show: this.props.projectionMode !== VIEWER_PROJECTION_MODES.ORTHOGONAL,
+				subMenu: [
+					{
+						label: VIEWER_TOOLBAR_ITEMS.ORTHOGONAL_VIEW,
+						Icon: OrthogonalIcon,
+						action: () => this.handleProjectionModeClick(VIEWER_PROJECTION_MODES.ORTHOGONAL)
+					}
+				]
 			},
 			{
 				label: VIEWER_TOOLBAR_ITEMS.ORTHOGONAL_VIEW,
 				Icon: OrthogonalIcon,
-				active: true,
-				action: () => this.handleProjectionModeClick(VIEWER_PROJECTION_MODES.PERSPECTIVE),
-				show: this.props.projectionMode === VIEWER_PROJECTION_MODES.ORTHOGONAL
+				action: () => this.handleShowSubmenu(VIEWER_TOOLBAR_ITEMS.ORTHOGONAL_VIEW),
+				show: this.props.projectionMode === VIEWER_PROJECTION_MODES.ORTHOGONAL,
+				subMenu: [
+					{
+						label: VIEWER_TOOLBAR_ITEMS.PERSPECTIVE_VIEW,
+						Icon: PerspectiveIcon,
+						action: () => this.handleProjectionModeClick(VIEWER_PROJECTION_MODES.PERSPECTIVE)
+					}
+				]
 			},
 			{
 				label: VIEWER_TOOLBAR_ITEMS.TURNTABLE,
