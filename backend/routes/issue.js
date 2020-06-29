@@ -797,6 +797,7 @@ function storeIssue(req, res, next) {
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
 	data.owner = req.session.user.username;
+	delete data._id; // Ignore _id field
 
 	if (req.params.rid) {
 		data.revId = req.params.rid;
