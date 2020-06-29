@@ -36,6 +36,11 @@ import ResetIcon from '@material-ui/icons/Replay';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { Helicopter } from '../../../components/fontAwesomeIcon';
 
+// import OrthogonalIcon from '../../../../icons/orthogonal.svg';
+// import PerspectiveIcon from '../../../../icons/perspective.svg';
+import OrthogonalIcon from '@material-ui/icons/Business';
+import PerspectiveIcon from '@material-ui/icons/DomainDisabled';
+
 import {
 	ButtonWrapper,
 	ClipIconWrapper,
@@ -52,6 +57,7 @@ import {
 	MIN_HELICOPTER_SPEED,
 	VIEWER_CLIP_MODES,
 	VIEWER_NAV_MODES,
+	VIEWER_PROJECTION_MODES,
 	VIEWER_TOOLBAR_ITEMS
 } from '../../../../constants/viewer';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
@@ -61,6 +67,7 @@ const HelicopterIcon = () => <Helicopter IconProps={{ className: 'fontSizeSmall'
 interface IProps {
 	teamspace: string;
 	model: string;
+	projectionMode: string;
 	navigationMode: string;
 	helicopterSpeed: number;
 	isFocusMode: boolean;
@@ -72,6 +79,7 @@ interface IProps {
 	metaKeysExist: boolean;
 	isMetadataVisible: boolean;
 	goToExtent: () => void;
+	setProjectionMode: (mode) => void;
 	setNavigationMode: (navigationMode) => void;
 	initialiseToolbar: () => void;
 	increaseHelicopterSpeed: (teamspace, modelId) => void;
@@ -114,6 +122,18 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 				label: VIEWER_TOOLBAR_ITEMS.EXTENT,
 				Icon: HomeIcon,
 				action: this.props.goToExtent
+			},
+			{
+				label: VIEWER_TOOLBAR_ITEMS.PERSPECTIVE_VIEW,
+				Icon: PerspectiveIcon,
+				action: () => this.handleProjectionModeClick(VIEWER_PROJECTION_MODES.ORTHOGONAL),
+				show: this.props.projectionMode !== VIEWER_PROJECTION_MODES.ORTHOGONAL
+			},
+			{
+				label: VIEWER_TOOLBAR_ITEMS.ORTHOGONAL_VIEW,
+				Icon: OrthogonalIcon,
+				action: () => this.handleProjectionModeClick(VIEWER_PROJECTION_MODES.PERSPECTIVE),
+				show: this.props.projectionMode === VIEWER_PROJECTION_MODES.ORTHOGONAL
 			},
 			{
 				label: VIEWER_TOOLBAR_ITEMS.TURNTABLE,
@@ -247,6 +267,10 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 	public handleNavigationModeClick = (mode) => {
 		this.props.setNavigationMode(mode);
 		this.setState({ activeSubMenu: '' });
+	}
+
+	public handleProjectionModeClick = (mode) => {
+		this.props.setProjectionMode(mode);
 	}
 
 	public handleClickAway = () => {

@@ -58,6 +58,7 @@ import {
 	selectRisks,
 	selectRisksMap
 } from './risks.selectors';
+import { ViewerGuiActions } from '../viewerGui';
 
 function* fetchRisks({teamspace, modelId, revision}) {
 	yield put(RisksActions.togglePendingState(true));
@@ -369,7 +370,7 @@ function* focusOnRisk({ risk, revision }) {
 
 		const { account, model, viewpoint } = risk;
 		if (viewpoint && viewpoint.position) {
-			Viewer.setCamera({ ...viewpoint, account, model });
+			yield put(ViewerGuiActions.setCamera({ ...viewpoint, account, model }));
 			yield Viewer.updateClippingPlanes(viewpoint.clippingPlanes, account, model);
 		} else {
 			yield Viewer.goToDefaultViewpoint();

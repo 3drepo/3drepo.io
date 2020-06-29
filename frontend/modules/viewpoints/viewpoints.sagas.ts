@@ -25,6 +25,7 @@ import { DialogActions } from '../dialog';
 import { dispatch } from '../store';
 import { PRESET_VIEW } from './viewpoints.constants';
 import { ViewpointsActions, ViewpointsTypes } from './viewpoints.redux';
+import { ViewerGuiActions } from '../viewerGui';
 
 export const getThumbnailUrl = (thumbnail) => API.getAPIUrl(thumbnail);
 
@@ -161,7 +162,7 @@ export function* setCameraOnViewpoint({ teamspace, modelId, view }) {
 		} else {
 			if (view.viewpoint && view.viewpoint.up) {
 				const viewpoint = { ...view.viewpoint, account: teamspace, model: modelId };
-				yield Viewer.setCamera(viewpoint);
+				yield put(ViewerGuiActions.setCamera(viewpoint));
 			} else {
 				yield Viewer.goToDefaultViewpoint();
 			}

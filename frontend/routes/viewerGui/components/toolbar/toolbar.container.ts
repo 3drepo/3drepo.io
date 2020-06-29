@@ -27,6 +27,7 @@ import {
 	selectIsCoordViewActive,
 	selectIsFocusMode,
 	selectIsMetadataVisible,
+	selectProjectionMode,
 	selectNavigationMode,
 	ViewerGuiActions
 } from '../../../../modules/viewerGui';
@@ -38,6 +39,7 @@ import { selectIsActive, BimActions } from '../../../../modules/bim';
 import { selectMetaKeysExist } from '../../../../modules/model';
 
 const mapStateToProps = createStructuredSelector({
+	projectionMode: selectProjectionMode,
 	navigationMode: selectNavigationMode,
 	helicopterSpeed: selectHelicopterSpeed,
 	isFocusMode: selectIsFocusMode,
@@ -64,6 +66,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setMeasureVisibility: ViewerGuiActions.setMeasureVisibility,
 	setCoordView: ViewerGuiActions.setCoordView,
 	setPanelVisibility: ViewerGuiActions.setPanelVisibility,
+	setProjectionMode: ViewerGuiActions.setProjectionMode,
 	setMetadataActive: BimActions.setIsActive,
 	showAllNodes: TreeActions.showAllNodes,
 	hideSelectedNodes: TreeActions.hideSelectedNodes,

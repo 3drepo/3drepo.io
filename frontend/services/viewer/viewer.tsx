@@ -22,6 +22,7 @@ import { IS_DEVELOPMENT } from '../../constants/environment';
 import {
 	VIEWER_EVENTS,
 	VIEWER_NAV_MODES,
+	VIEWER_PROJECTION_MODES
 } from '../../constants/viewer';
 import { UnityUtil } from '../../globals/unity-util';
 import { asyncTimeout } from '../../helpers/aync';
@@ -908,9 +909,20 @@ export class ViewerService {
 		return this.showAll();
 	}
 
+	public async setProjectionMode(mode) {
+		await this.isModelReady();
+		switch (mode) {
+			case VIEWER_PROJECTION_MODES.ORTHOGONAL:
+				UnityUtil.enableOrthographic();
+				break;
+			default:
+				UnityUtil.disableOrthographic();
+		}
+	}
+
 	public async setCamera({ position, up, view_dir, look_at, type, orthographicSize, account, model }) {
 		await this.isModelReady();
-		UnityUtil.setViewpoint(position, up, view_dir, look_at, type === 'orthogonal', orthographicSize, account, model);
+		UnityUtil.setViewpoint(position, up, view_dir, look_at, type === VIEWER_PROJECTION_MODES.ORTHOGONAL, orthographicSize, account, model);
 	}
 
 	/**

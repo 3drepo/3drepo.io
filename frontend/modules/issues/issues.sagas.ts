@@ -56,6 +56,7 @@ import {
 	selectFilteredIssues,
 	selectIssuesMap
 } from './issues.selectors';
+import { ViewerGuiActions } from '../viewerGui';
 
 function* fetchIssues({teamspace, modelId, revision}) {
 	yield put(IssuesActions.togglePendingState(true));
@@ -388,7 +389,7 @@ function* focusOnIssue({ issue, revision }) {
 
 		const { account, model, viewpoint } = issue;
 		if (viewpoint && viewpoint.position) {
-			Viewer.setCamera({ ...viewpoint, account, model });
+			yield put(ViewerGuiActions.setCamera({ ...viewpoint, account, model }));
 			yield Viewer.updateClippingPlanes(viewpoint.clippingPlanes, account, model);
 		} else {
 			yield Viewer.goToDefaultViewpoint();
