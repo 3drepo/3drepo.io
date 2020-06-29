@@ -448,6 +448,10 @@ class Ticket {
 			delete newTicket.viewpoint[objectsField];
 		};
 
+		if (!newTicket.viewpoint) {
+			return;
+		}
+
 		if (newTicket.viewpoint.highlighted_objects && !newTicket.viewpoint.highlighted_group_id) {
 			await createGroup(newTicket, "highlighted_objects", "highlighted_group_id");
 		}
