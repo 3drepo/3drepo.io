@@ -126,14 +126,13 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 		riskData.rev_id = revision;
 
 		if (objectInfo && (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0)) {
-			const [highlightedGroup, hiddenGroup] = yield createGroup(riskData, objectInfo, teamspace, model, revision);
-
-			if (highlightedGroup) {
-				viewpoint.highlighted_group_id = highlightedGroup.data._id;
+			const {highlightedNodes, hiddenNodes} = objectInfo;
+			if (highlightedNodes.length > 0) {
+				viewpoint.highlighted_objects = highlightedNodes;
 			}
 
-			if (hiddenGroup) {
-				viewpoint.hidden_group_id = hiddenGroup.data._id;
+			if (hiddenNodes.length > 0) {
+				viewpoint.hidden_objects = hiddenNodes;
 			}
 		}
 

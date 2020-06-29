@@ -128,12 +128,13 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 		};
 
 		if (objectInfo && (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0)) {
-			if (objectInfo.highlightedNodes.length > 0) {
-				viewpoint.highlighted_objects = objectInfo.highlightedNodes;
+			const {highlightedNodes, hiddenNodes} = objectInfo;
+			if (highlightedNodes.length > 0) {
+				viewpoint.highlighted_objects = highlightedNodes;
 			}
 
-			if (objectInfo.hiddenNodes.length > 0) {
-				viewpoint.hidden_objects = objectInfo.hiddenNodes;
+			if (hiddenNodes.length > 0) {
+				viewpoint.hidden_objects = hiddenNodes;
 			}
 		}
 
