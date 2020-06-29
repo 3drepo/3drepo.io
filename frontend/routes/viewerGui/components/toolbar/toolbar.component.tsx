@@ -132,6 +132,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 			{
 				label: VIEWER_TOOLBAR_ITEMS.ORTHOGONAL_VIEW,
 				Icon: OrthogonalIcon,
+				active: true,
 				action: () => this.handleProjectionModeClick(VIEWER_PROJECTION_MODES.PERSPECTIVE),
 				show: this.props.projectionMode === VIEWER_PROJECTION_MODES.ORTHOGONAL
 			},
