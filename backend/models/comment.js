@@ -137,7 +137,7 @@ const addComment = async function(account, model, colName, id, user, data) {
 	let viewpoint = null;
 
 	if (data.viewpoint) {
-		viewpoint = View.clean(data.viewpoint, fieldTypes.viewpoint);
+		viewpoint = View.clean(account, model, data.viewpoint, fieldTypes.viewpoint);
 		viewpoint.guid = utils.generateUUID();
 
 		if (viewpoint.screenshot) {

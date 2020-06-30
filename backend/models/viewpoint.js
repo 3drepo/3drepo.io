@@ -44,7 +44,6 @@ class View {
 	// TODO v2
 	clean(account, model, viewToClean, targetType = "[object String]") {
 		const keys = ["_id", "guid", "highlighted_group_id", "hidden_group_id", "shown_group_id"];
-		const id = utils.uuidToString(viewToClean._id);
 
 		keys.forEach((key) => {
 			if (viewToClean[key] && "[object String]" === targetType) {
@@ -59,6 +58,7 @@ class View {
 		});
 
 		if (viewToClean.thumbnail) {
+			const id = utils.uuidToString(viewToClean._id);
 			viewToClean.thumbnail = account + "/" + model + "/" + this.collName + "/" + id + "/thumbnail.png";
 		} else {
 			viewToClean.thumbnail = undefined;
