@@ -57,12 +57,14 @@ class View {
 			}
 		});
 
+		/*
 		if (viewToClean.thumbnail) {
 			const id = utils.uuidToString(viewToClean._id);
 			viewToClean.thumbnail = account + "/" + model + "/" + this.collName + "/" + id + "/thumbnail.png";
 		} else {
 			viewToClean.thumbnail = undefined;
 		}
+		*/
 
 		// ===============================
 		// DEPRECATED LEGACY SUPPORT START
