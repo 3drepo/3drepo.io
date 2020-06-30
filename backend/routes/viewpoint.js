@@ -24,7 +24,6 @@ const C = require("../constants");
 const responseCodes = require("../response_codes.js");
 const View = require("../models/viewpoint");
 const utils = require("../utils");
-const systemLogger = require("../logger.js").systemLogger;
 const config = require("../config");
 
 /**

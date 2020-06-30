@@ -169,7 +169,7 @@ class View {
 
 	async update(sessionId, account, model, id, data) {
 		// 1. Get old view
-		const oldView = await this.findByUID(account, model, id, {}, true);
+		// const oldView = await this.findByUID(account, model, id, {}, true);
 
 		// 2. Pick whitelisted attributes and leave proper attrs
 		const attributeWhitelist = ["name"];
