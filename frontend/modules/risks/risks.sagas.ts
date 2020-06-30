@@ -129,7 +129,7 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 			const {highlightedNodes, hiddenNodes} = objectInfo;
 			if (highlightedNodes.length > 0) {
 				viewpoint.highlighted_objects = highlightedNodes;
-				viewpoint.color = UnityUtil.defaultHighlightColor;
+				viewpoint.color = UnityUtil.defaultHighlightColor.map((c) => c * 255);
 			}
 
 			if (hiddenNodes.length > 0) {

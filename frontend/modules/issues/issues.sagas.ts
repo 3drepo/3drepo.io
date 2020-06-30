@@ -132,7 +132,7 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 			const {highlightedNodes, hiddenNodes} = objectInfo;
 			if (highlightedNodes.length > 0) {
 				viewpoint.highlighted_objects = highlightedNodes;
-				viewpoint.color = UnityUtil.defaultHighlightColor;
+				viewpoint.color = UnityUtil.defaultHighlightColor.map((c) => c * 255);
 			}
 
 			if (hiddenNodes.length > 0) {
