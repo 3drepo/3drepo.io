@@ -18,7 +18,7 @@
 const _ = require("lodash");
 
 const Project = require("./project");
-const Viewpoint = require("./viewpoint");
+const View = require("./viewpoint");
 const User = require("./user");
 const Job = require("./job");
 const Group = require("./group");
@@ -43,8 +43,9 @@ const extensionRe = /\.(\w+)$/;
 
 const getResponse = (responseCodeType) => (type) => responseCodes[responseCodeType + "_" + type];
 
-class Ticket {
+class Ticket extends View {
 	constructor(collName, groupField, refIdsField, responseCodeType, fieldTypes, ownerPrivilegeAttributes) {
+		super();
 		this.collName = collName;
 		this.response = getResponse(responseCodeType);
 		this.fieldTypes = fieldTypes;
@@ -86,7 +87,7 @@ class Ticket {
 				ticketToClean.viewpoint = undefined;
 			}
 
-			Viewpoint.setViewpointScreenshotURL(this.collName, account, model, id, ticketToClean.viewpoint);
+			super.setViewpointScreenshotURL(this.collName, account, model, id, ticketToClean.viewpoint);
 		}
 
 		if (ticketToClean.viewpoints) {
@@ -97,7 +98,7 @@ class Ticket {
 					}
 				});
 
-				Viewpoint.setViewpointScreenshotURL(this.collName, account, model, id, viewpoint);
+				super.setViewpointScreenshotURL(this.collName, account, model, id, viewpoint);
 
 				if (0 === i && !ticketToClean.viewpoint) {
 					ticketToClean.viewpoint = viewpoint;
@@ -260,7 +261,7 @@ class Ticket {
 
 		if (data.viewpoint) {
 			newViewpoint = this.handlePrimaryViewpoint(account, model, data._id, data.viewpoint);
-			oldTicket.viewpoint = Viewpoint.clean(account, model, oldTicket.viewpoints[0]);
+			oldTicket.viewpoint = super.clean(account, model, oldTicket.viewpoints[0]);
 			delete oldTicket.viewpoint.screenshot;
 
 			data.viewpoint = {
@@ -382,7 +383,7 @@ class Ticket {
 			const imageBuffer = new Buffer.from(viewpoint.screenshot, "base64");
 
 			viewpoint.screenshot = imageBuffer;
-			await Viewpoint.setExternalScreenshotRef(viewpoint, account, model, this.collName);
+			await super.setExternalScreenshotRef(viewpoint, account, model, this.collName);
 
 			viewpoint.thumbnail = await utils.resizeAndCropScreenshot(imageBuffer, 120, 120, true).catch((err) => {
 				systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {

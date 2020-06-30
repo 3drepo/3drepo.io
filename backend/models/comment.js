@@ -19,7 +19,7 @@
 const get = require("lodash").get;
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
-const View = require("./viewpoint");
+const View = new (require("../models/viewpoint"))();
 const db = require("../handler/db");
 const FileRef = require("./fileRef");
 

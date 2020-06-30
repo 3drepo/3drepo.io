@@ -228,4 +228,4 @@ class View {
 	}
 }
 
-module.exports = new View();
+module.exports = View;
