@@ -31,6 +31,7 @@ import {
 } from '../../helpers/comments';
 
 import { EXTENSION_RE } from '../../constants/resources';
+import { UnityUtil } from '../../globals/unity-util';
 import { prepareResources } from '../../helpers/resources';
 import { prepareRisk } from '../../helpers/risks';
 import { SuggestedTreatmentsDialog } from '../../routes/components/dialogContainer/components';
@@ -47,7 +48,6 @@ import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
-import { TeamspaceActions } from '../teamspace';
 import { selectIfcSpacesHidden, TreeActions } from '../tree';
 import { RisksActions, RisksTypes } from './risks.redux';
 import {
@@ -129,6 +129,7 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 			const {highlightedNodes, hiddenNodes} = objectInfo;
 			if (highlightedNodes.length > 0) {
 				viewpoint.highlighted_objects = highlightedNodes;
+				viewpoint.color = UnityUtil.defaultHighlightColor;
 			}
 
 			if (hiddenNodes.length > 0) {

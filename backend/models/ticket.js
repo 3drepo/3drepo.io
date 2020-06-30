@@ -432,12 +432,12 @@ class Ticket {
 		// TODO: take in consideration the revision
 		const groupField = this.groupField;
 
-		const getGroupData = (ticket, objects) => {
+		const getGroupData = ({viewpoint, name, _id}, objects) => {
 			return {
-				color: [255, 0, 0],
-				name: ticket.name,
+				color: viewpoint.color,
+				name,
 				objects,
-				[groupField]: utils.stringToUUID(newTicket._id)
+				[groupField]: utils.stringToUUID(_id)
 			};
 		};
 
