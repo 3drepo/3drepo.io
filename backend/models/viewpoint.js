@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2018 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -25,158 +25,191 @@ const ChatEvent = require("./chatEvent");
 const FileRef = require("./fileRef");
 const { pick } = require("lodash");
 
-const view = {};
+const fieldTypes = {
+	"_id": "[object Object]",
+	"name": "[object String]",
+	"thumbnail": ["[object String]", "[object Object]"],
+	"viewpoint": "[object Object]"
+};
 
-view.clean =  function (viewToClean, targetType = "[object String]") {
-	const keys = ["_id", "guid", "highlighted_group_id", "hidden_group_id", "shown_group_id"];
+const getResponse = (responseCodeType) => (type) => responseCodes[responseCodeType + "_" + type];
 
-	keys.forEach((key) => {
-		if (viewToClean[key] && "[object String]" === targetType) {
-			if (utils.isObject(viewToClean[key])) {
-				viewToClean[key] = utils.uuidToString(viewToClean[key]);
+class View {
+	constructor(collName, groupField, refIdsField, responseCodeType, fieldTypes) {
+		this.collName = "views";
+		this.response = getResponse("VIEW");
+		this.fieldTypes = fieldTypes;
+	}
+
+	// TODO v2
+	clean(account, model, viewToClean, targetType = "[object String]") {
+		const keys = ["_id", "guid", "highlighted_group_id", "hidden_group_id", "shown_group_id"];
+
+		keys.forEach((key) => {
+			if (viewToClean[key] && "[object String]" === targetType) {
+				if (utils.isObject(viewToClean[key])) {
+					viewToClean[key] = utils.uuidToString(viewToClean[key]);
+				}
+			} else if (viewToClean[key] && "[object Object]" === targetType) {
+				if (utils.isString(viewToClean[key])) {
+					viewToClean[key] = utils.stringToUUID(viewToClean[key]);
+				}
 			}
-		} else if (viewToClean[key] && "[object Object]" === targetType) {
-			if (utils.isString(viewToClean[key])) {
-				viewToClean[key] = utils.stringToUUID(viewToClean[key]);
-			}
+		});
+
+		if (viewToClean.thumbnail) {
+			viewToClean.thumbnail = account + "/" + model + "/" + this.collName + "/" + id + "/thumbnail.png";
+		} else {
+			viewToClean.thumbnail = undefined;
 		}
-	});
 
-	return viewToClean;
-};
+		return viewToClean;
+	}
 
-view.findByUID = function (account, model, uid, projection, cleanResponse = false) {
-	return db.getCollection(account, model + ".views").then((_dbCol) => {
-		return _dbCol.findOne({ _id: utils.stringToUUID(uid) }, projection).then(vp => {
+	getViewsCollection(account, model) {
+		return db.getCollection(account, model + "." + this.collName);
+	}
 
-			if (!vp) {
-				return Promise.reject(responseCodes.VIEW_NOT_FOUND);
+	// NOTE: noClean changed - flipped
+	async findByUID(account, model, uid, projection, noClean = true) {
+		if (utils.isString(uid)) {
+			uid = utils.stringToUUID(uid);
+		}
+
+		const views = await this.getViewsCollection(account, model);
+		const foundView = await views.findOne({ _id: uid }, projection);
+
+		if (!foundView) {
+			return Promise.reject(this.response("NOT_FOUND"));
+		}
+
+		if (!noClean) {
+			return this.setViewpointThumbnailURL(account, model, this.clean(account, model, foundView));
+		}
+
+		return foundView;
+	}
+
+	// similar to findByModelName
+	async listViewpoints(account, model, noClean = true) {
+		const coll = await this.getViewsCollection(account, model);
+		const views = await coll.find().toArray();
+		views.forEach((foundView, index) => {
+			if (!noClean) {
+				views[index] = this.clean(account, model, foundView);
 			}
-
-			if (cleanResponse) {
-				return this.setViewpointThumbnailURL(account, model, this.clean(vp));
-			}
-
-			return vp;
 		});
-	});
-};
 
-view.listViewpoints = function (account, model) {
+		return views;
+	}
 
-	return db.getCollection(account, model + ".views").then(_dbCol => {
-		return _dbCol.find().toArray().then(results => {
-			results.forEach((vp) => view.clean(vp));
-			return results;
-		});
-	});
-
-};
-
-view.setExternalScreenshotRef = async function(viewpoint, account, model, collName) {
-	const screenshot = viewpoint.screenshot;
-	const ref = await FileRef.storeFile(account, model + "." + collName + ".ref", null, null, screenshot);
-	delete viewpoint.screenshot;
-	viewpoint.screenshot_ref = ref._id;
-	return viewpoint;
-};
-
-view.setViewpointScreenshotURL = function(collName, account, model, id, viewpoint) {
-	if (!viewpoint || (!viewpoint.screenshot && !viewpoint.screenshot_ref)) {
+	async setExternalScreenshotRef(viewpoint, account, model, collName) {
+		const screenshot = viewpoint.screenshot;
+		const ref = await FileRef.storeFile(account, model + "." + collName + ".ref", null, null, screenshot);
+		delete viewpoint.screenshot;
+		viewpoint.screenshot_ref = ref._id;
 		return viewpoint;
 	}
 
-	id = utils.uuidToString(id);
-	const viewpointId = utils.uuidToString(viewpoint.guid);
+	setViewpointScreenshotURL(collName, account, model, id, viewpoint) {
+		if (!viewpoint || (!viewpoint.screenshot && !viewpoint.screenshot_ref)) {
+			return viewpoint;
+		}
 
-	viewpoint.screenshot = account + "/" + model + "/" + collName + "/" + id + "/viewpoints/" + viewpointId + "/screenshot.png";
+		id = utils.uuidToString(id);
+		const viewpointId = utils.uuidToString(viewpoint.guid);
+
+		viewpoint.screenshot = account + "/" + model + "/" + collName + "/" + id + "/viewpoints/" + viewpointId + "/screenshot.png";
+
+		// DEPRECATED
+		viewpoint.screenshotSmall = viewpoint.screenshot;
+		return viewpoint;
+	}
 
 	// DEPRECATED
-	viewpoint.screenshotSmall = viewpoint.screenshot;
-	return viewpoint;
-};
+	setViewpointThumbnailURL(account, model, viewpoint) {
+		if (!viewpoint || (!viewpoint.screenshot && !viewpoint.screenshot_ref)) {
+			return viewpoint;
+		}
 
-view.setViewpointThumbnailURL = function(account, model, viewpoint) {
-	if (!viewpoint || (!viewpoint.screenshot && !viewpoint.screenshot_ref)) {
+		const viewpointId = utils.uuidToString(viewpoint._id);
+		viewpoint.screenshot = { thumbnail: account + "/" + model + "/viewpoints/" + viewpointId + "/thumbnail.png" };
+
 		return viewpoint;
 	}
 
-	const viewpointId = utils.uuidToString(viewpoint._id);
-	viewpoint.screenshot = { thumbnail: account + "/" + model + "/viewpoints/" + viewpointId + "/thumbnail.png" };
-
-	return viewpoint;
-};
-
-view.getThumbnail = function (account, model, uid) {
-	return this.findByUID(account, model, uid, { "screenshot.buffer": 1 }).then(vp => {
-		if (!vp.screenshot) {
-			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
-		} else {
-			// Mongo stores it as it's own binary object, so we need to do buffer.buffer!
-			return vp.screenshot.buffer.buffer;
+	getThumbnail(account, model, uid) {
+		if (utils.isString(uid)) {
+			uid = utils.stringToUUID(uid);
 		}
-	});
 
-};
-
-view.updateViewpoint = function (account, model, sessionId, data, id) {
-	return this.updateAttrs(account, model, id, data).then((result) => {
-		ChatEvent.viewpointsChanged(sessionId, account, model, Object.assign({ _id: utils.uuidToString(id) }, data));
-		return result;
-	});
-};
-
-view.updateAttrs = function (account, model, id, data) {
-	const toUpdate = {};
-	// We can only update the name of a viewpoint
-	const name = data["name"];
-	if (name && utils.isString(name) && name !== "") {
-		toUpdate["name"] = name;
-	} else {
-		return Promise.reject(responseCodes.INVALID_ARGUMENTS);
+		return this.findByUID(account, model, uid, { "screenshot.buffer": 1 }).then((foundView) => {
+			// the 'screenshot' field is for legacy reasons
+			if (!_.get(foundView, "thumbnail.buffer") && !_.get(foundView, "screenshot.buffer")) {
+				return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
+			} else {
+				// Mongo stores it as it's own binary object, so we need to do buffer.buffer!
+				return (foundView.screenshot.buffer || foundView.thumbnail).buffer;
+			}
+		});
 	}
 
-	return db.getCollection(account, model + ".views").then(_dbCol => {
-		return _dbCol.update({ _id: id }, { $set: toUpdate }).then(() => {
+	updateViewpoint(account, model, sessionId, data, id) {
+		return this.updateAttrs(account, model, id, data).then((result) => {
+			ChatEvent.viewpointsChanged(sessionId, account, model, Object.assign({ _id: utils.uuidToString(id) }, data));
+			return result;
+		});
+	}
+
+	async updateAttrs(account, model, id, data) {
+		const toUpdate = {};
+		// We can only update the name of a viewpoint
+		const name = data["name"];
+		if (name && utils.isString(name) && name !== "") {
+			toUpdate["name"] = name;
+		} else {
+			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
+		}
+
+		const coll = await this.getViewsCollection(account, model);
+		return coll.update({ _id: id }, { $set: toUpdate }).then(() => {
 			return { _id: utils.uuidToString(id) };
 		});
-	});
-};
-
-view.createViewpoint = async (account, model, sessionId, data) => {
-	if (data.screenshot && data.screenshot.base64) {
-		const croppedScreenshot = await utils.getCroppedScreenshotFromBase64(data.screenshot.base64, 79, 79);
-		data.screenshot.buffer = new Buffer.from(croppedScreenshot, "base64");
 	}
 
-	data = pick(data, ["name", "clippingPlanes", "viewpoint", "screenshot"]);
+	async createViewpoint(account, model, sessionId, newView) {
+		if (newView.screenshot && newView.screenshot.base64) {
+			const croppedScreenshot = await utils.getCroppedScreenshotFromBase64(newView.screenshot.base64, 79, 79);
+			newView.screenshot.buffer = new Buffer.from(croppedScreenshot, "base64");
+		}
 
-	const newViewpoint = { _id:  utils.stringToUUID(nodeuuid()), ...data };
-	const coll = await db.getCollection(account, model + ".views");
-	await coll.insert(newViewpoint);
+		newView = pick(newView, ["name", "clippingPlanes", "viewpoint", "screenshot"]);
 
-	const viewpoint = view.setViewpointThumbnailURL(account, model,  view.clean(newViewpoint));
+		newView._id = utils.stringToUUID(newView._id || nodeuuid());
+		const coll = await this.getViewsCollection(account, model);
+		await coll.insert(newView);
 
-	ChatEvent.viewpointsCreated(sessionId, account, model,viewpoint);
-	return viewpoint;
-};
+		newView = this.setViewpointThumbnailURL(account, model, this.clean(account, model, newView));
 
-view.deleteViewpoint = function (account, model, idStr, sessionId) {
-	let id = idStr;
-	if (utils.isString(id)) {
-		id = utils.stringToUUID(id);
+		ChatEvent.viewpointsCreated(sessionId, account, model, newView);
+		return newView;
 	}
 
-	return db.getCollection(account, model + ".views").then((_dbCol) => {
-		return _dbCol.findOneAndDelete({ _id: id }).then((deleteResponse) => {
+	async deleteViewpoint(account, model, uid, sessionId) {
+		if (utils.isString(uid)) {
+			uid = utils.stringToUUID(uid);
+		}
+
+		const coll = await this.getViewsCollection(account, model);
+		return coll.findOneAndDelete({ _id: uid }).then((deleteResponse) => {
 			if (!deleteResponse.value) {
-				return Promise.reject(responseCodes.VIEW_NOT_FOUND);
+				return Promise.reject(this.response("NOT_FOUND"));
 			}
 			if(sessionId) {
-				ChatEvent.viewpointsDeleted(sessionId, account, model, idStr);
+				ChatEvent.viewpointsDeleted(sessionId, account, model, utils.uuidToString(uid));
 			}
 		});
-	});
-};
+	}
+}
 
-module.exports = view;
+module.exports = new View();

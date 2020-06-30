@@ -261,16 +261,12 @@ function listViewpoints(req, res, next) {
 
 	const place = utils.APIInfo(req);
 
-	Viewpoint.listViewpoints(account, model, req.query)
+	Viewpoint.listViewpoints(account, model, false)
 		.then(viewpoints => {
-
 			responseCodes.respond(place, req, res, next, responseCodes.OK, viewpoints);
-
 		}).catch(err => {
-
 			systemLogger.logError(err.stack);
 			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-
 		});
 }
 
