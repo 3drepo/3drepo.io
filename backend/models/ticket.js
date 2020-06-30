@@ -428,7 +428,7 @@ class Ticket {
 		systemComments.push(comment);
 	}
 
-	async createGroupsIfNecessary(account, model, newTicket) {
+	async createGroupsIfNecessary(account, model, newTicket, branch, rid) {
 		// TODO: take in consideration the revision
 		const groupField = this.groupField;
 
@@ -442,10 +442,10 @@ class Ticket {
 		};
 
 		const createGroup = async (ticket, objectsField, idField) => {
-			const data = getGroupData(newTicket, newTicket.viewpoint[objectsField]);
-			const group = await  Group.createGroup({account, model}, null,  data, newTicket.owner);
-			newTicket.viewpoint[idField] = utils.stringToUUID(group._id);
-			delete newTicket.viewpoint[objectsField];
+			const data = getGroupData(ticket, ticket.viewpoint[objectsField]);
+			const group = await  Group.createGroup({account, model}, null,  data, ticket.owner, branch, rid);
+			ticket.viewpoint[idField] = utils.stringToUUID(group._id);
+			delete ticket.viewpoint[objectsField];
 		};
 
 		if (!newTicket.viewpoint) {
@@ -459,6 +459,8 @@ class Ticket {
 		if (newTicket.viewpoint.hidden_objects && !newTicket.viewpoint.hidden_group_id) {
 			await createGroup(newTicket, "hidden_objects", "hidden_group_id");
 		}
+
+		delete newTicket.viewpoint.color;
 	}
 
 	/*
