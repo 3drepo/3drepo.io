@@ -114,7 +114,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 
 	return (
 		<Content active={active}>
-			<Container>
+			<Container top>
 				<Field name="desc" render={({ field }) => (
 					<TextField
 						{...field}

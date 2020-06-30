@@ -101,12 +101,11 @@ const UpdateButtons = ({
 export const MainIssueFormTab: React.FunctionComponent<IProps> = ({
 	active, issue, permissions, topicTypes, currentUser, myJob, isNew, canChangeAssigned, canEditBasicProperty,
 	jobs, disableViewer, ...props
-// , disableViewer, , , ,
 }) => {
 
 	return (
 		<Content active={active}>
-			<Container>
+			<Container top>
 				<Field name="desc" render={({ field }) => (
 					<TextField
 						{...field}
