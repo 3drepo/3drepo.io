@@ -19,7 +19,7 @@ import React from 'react';
 
 import ImageIcon from '@material-ui/icons/Image';
 
-import { renderWhenTrue } from '../../../../helpers/rendering';
+import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../../helpers/rendering';
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import {
 	MenuList,
@@ -41,7 +41,7 @@ interface IProps {
 	disableScreenshot?: boolean;
 }
 
-const UploadImage = ({ onUploadScreenshot, onShowScreenshotDialog }) => {
+const UploadImage = ({ onUploadScreenshot, onShowScreenshotDialog, asMenuItem = false, ...props }) => {
 	const fileInputRef = React.useRef<HTMLInputElement>(null);
 
 	const resetFileInput = () => {
@@ -70,14 +70,28 @@ const UploadImage = ({ onUploadScreenshot, onShowScreenshotDialog }) => {
 		reader.readAsDataURL(file);
 	};
 
+	const fileInvoker = <FileUploadInvoker id="file-upload" ref={fileInputRef} onChange={handleFileUpload} />;
+
+	const handleOnClickButton = () => {
+		if (fileInputRef.current) {
+			fileInputRef.current.click();
+		}
+	};
+
 	return (
 		<label htmlFor="file-upload">
-			<StyledListItem button>
-				<StyledItemText>
-					Upload image...
-				</StyledItemText>
-				<FileUploadInvoker id="file-upload" ref={fileInputRef} onChange={handleFileUpload} />
-			</StyledListItem>
+			{renderWhenTrueOtherwise(() => (
+					<StyledListItem button>
+						<StyledItemText>
+							Upload image...
+						</StyledItemText>
+					</StyledListItem>
+			), () => (
+				<ContainedButton icon={props.icon} onClick={handleOnClickButton}>
+					{props.children}
+				</ContainedButton>
+			))(asMenuItem)}
+			{fileInvoker}
 		</label>
 	);
 };
@@ -99,31 +113,44 @@ export const ImageButton = ({ hasImage, disabled, ...props }: IProps) => {
 
 	return (
 		<ButtonContainer>
-			<ButtonMenu
-				renderButton={(p) => (
-					<ContainedButton
-						icon={ImageIcon}
-						disabled={disabled}
-						{...p}
-					>
-						{imageLabel}
-					</ContainedButton>
-				)}
-				renderContent={() => (
-					<MenuList>
-						<CreateScreenshot
-							disableScreenshot={props.disableScreenshot}
-							onTakeScreenshot={props.onTakeScreenshot}
-						/>
-						<UploadImage
-							onShowScreenshotDialog={props.onShowScreenshotDialog}
-							onUploadScreenshot={props.onUploadScreenshot}
-						/>
-					</MenuList>
-				)}
-				PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
-				PopoverProps={{ anchorOrigin: { vertical: 'bottom', horizontal: 'center' } }}
-			/>
+			{renderWhenTrueOtherwise(() => (
+				<UploadImage
+					asMenuItem={false}
+					onShowScreenshotDialog={props.onShowScreenshotDialog}
+					onUploadScreenshot={props.onUploadScreenshot}
+					icon={ImageIcon}
+				>
+					{imageLabel}
+				</UploadImage>
+			), () => (
+				<ButtonMenu
+					renderButton={(p) => (
+						<ContainedButton
+							icon={ImageIcon}
+							disabled={disabled}
+							{...p}
+						>
+							{imageLabel}
+						</ContainedButton>
+					)}
+					renderContent={() => (
+						<MenuList>
+							<CreateScreenshot
+								disableScreenshot={props.disableScreenshot}
+								onTakeScreenshot={props.onTakeScreenshot}
+							/>
+							<UploadImage
+								asMenuItem
+								onShowScreenshotDialog={props.onShowScreenshotDialog}
+								onUploadScreenshot={props.onUploadScreenshot}
+							/>
+						</MenuList>
+					)}
+					PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
+					PopoverProps={{ anchorOrigin: { vertical: 'bottom', horizontal: 'center' } }}
+				/>
+			))(props.disableScreenshot)}
+
 		</ButtonContainer>
 	);
 };
