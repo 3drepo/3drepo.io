@@ -16,6 +16,7 @@
  */
 
 "use strict";
+const _ = require("lodash");
 
 const utils = require("../utils");
 const nodeuuid = require("uuid/v1");
@@ -23,7 +24,6 @@ const responseCodes = require("../response_codes.js");
 const db = require("../handler/db");
 const ChatEvent = require("./chatEvent");
 const FileRef = require("./fileRef");
-const { pick } = require("lodash");
 
 const fieldTypes = {
 	"_id": "[object Object]",
@@ -44,6 +44,7 @@ class View {
 	// TODO v2
 	clean(account, model, viewToClean, targetType = "[object String]") {
 		const keys = ["_id", "guid", "highlighted_group_id", "hidden_group_id", "shown_group_id"];
+		const id = utils.uuidToString(viewToClean._id);
 
 		keys.forEach((key) => {
 			if (viewToClean[key] && "[object String]" === targetType) {
@@ -183,7 +184,7 @@ class View {
 			newView.screenshot.buffer = new Buffer.from(croppedScreenshot, "base64");
 		}
 
-		newView = pick(newView, ["name", "clippingPlanes", "viewpoint", "screenshot"]);
+		newView = _.pick(newView, ["name", "clippingPlanes", "viewpoint", "screenshot"]);
 
 		newView._id = utils.stringToUUID(newView._id || nodeuuid());
 		const coll = await this.getViewsCollection(account, model);
