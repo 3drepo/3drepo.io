@@ -17,7 +17,10 @@
 import { Form, Formik } from 'formik';
 import * as React from 'react';
 import * as Yup from 'yup';
+import { renderWhenTrueOtherwise } from '../../../../helpers/rendering';
 import { clientConfigService } from '../../../../services/clientConfig';
+import { Loader as LoaderIndicator } from '../../loader/loader.component';
+import { LoaderContainer } from '../../messagesList/messagesList.styles';
 import {
 	DialogTab,
 	DialogTabs
@@ -60,6 +63,12 @@ const schema = Yup.object().shape({
 		)
 	});
 
+const Loader = () => (
+		<LoaderContainer>
+			<LoaderIndicator size={18} />
+		</LoaderContainer>
+);
+
 export class AttachResourcesDialog extends React.PureComponent<IProps, IState> {
 	public state = {
 		selectedTab: 0
@@ -99,6 +108,18 @@ export class AttachResourcesDialog extends React.PureComponent<IProps, IState> {
 				.every((s) => s <= clientConfigService.resourceUploadSizeLimit);
 	}
 
+	private renderAttachResourceFiles = (values) => renderWhenTrueOtherwise(
+		<>
+			<AttachResourceFiles
+				files={values.files}
+				validateQuota={this.validateQuota}
+				validateUploadLimit={this.validateUploadLimit}
+				uploadLimit={clientConfigService.resourceUploadSizeLimit}
+			/>
+		</>,
+		<Loader />
+	)
+
 	public render() {
 		const {selectedTab} = this.state;
 		return (
@@ -120,13 +141,7 @@ export class AttachResourcesDialog extends React.PureComponent<IProps, IState> {
 					render={({ values }) => (
 						<Form>
 							{
-								selectedTab === 0 &&
-									<AttachResourceFiles
-										files={values.files}
-										validateQuota={this.validateQuota}
-										validateUploadLimit={this.validateUploadLimit}
-										uploadLimit={clientConfigService.resourceUploadSizeLimit}
-									/>
+								selectedTab === 0 && this.renderAttachResourceFiles(values)(this.props.quotaLeft)
 							}
 							{selectedTab === 1 && <AttachResourceUrls links={values.links} />}
 								<DialogButtons
