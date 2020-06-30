@@ -74,11 +74,19 @@ class SystemCommentGenerator extends CommentGenerator {
 		super(owner);
 
 		if (undefined !== from && fieldTypes.from !== Object.prototype.toString.call(from)) {
-			from = from ? from.toString() : "";
+			if (utils.isObject(from)) {
+				from = JSON.stringify(from);
+			} else {
+				from = from ? from.toString() : "";
+			}
 		}
 
 		if (undefined !== to && fieldTypes.to !== Object.prototype.toString.call(to)) {
-			to = to ? to.toString() : "";
+			if (utils.isObject(to)) {
+				to = JSON.stringify(to);
+			} else {
+				to = to ? to.toString() : "";
+			}
 		}
 
 		this.action = {

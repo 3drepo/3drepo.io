@@ -36,6 +36,7 @@ describe("Risks", function () {
 	const model = "project1";
 
 	const pngBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVR42mPUjrj6n4EIwDiqkL4KAV6SF3F1FmGrAAAAAElFTkSuQmCC";
+	const altBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==";
 	const baseRisk = {
 		"safetibase_id":"12456-abcdef",
 		"associated_activity":"replacement",
@@ -621,6 +622,118 @@ describe("Risks", function () {
 					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function(err, res) {
 							expect(res.body.mitigation_desc).to.equal(mitigation.mitigation_desc);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change screenshot should succeed and create system comment", function(done) {
+			const risk = Object.assign({"name":"Risk test"}, baseRisk);
+			let riskId;
+			let oldViewpoint;
+			let screenshotRef;
+			const data = {
+				"viewpoint": {
+					"screenshot": altBase64
+				}
+			};
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200 , function(err, res) {
+							riskId = res.body._id;
+							oldViewpoint = res.body.viewpoint;
+							delete oldViewpoint.screenshot;
+							delete oldViewpoint.screenshotSmall;
+							screenshotRef = res.body.viewpoint.screenshot_ref;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
+						.send(data)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/risks/${riskId}`)
+						.expect(200, function(err, res) {
+							const newViewpoint = { ...oldViewpoint };
+							newViewpoint.guid = res.body.viewpoint.guid;
+							newViewpoint.screenshot_ref = res.body.viewpoint.screenshot_ref;
+
+							expect(res.body.viewpoint.screenshot_ref).to.not.equal(screenshotRef);
+							expect(res.body.comments[0].action.property).to.equal("screenshot");
+							expect(res.body.comments[0].action.from).to.equal(screenshotRef);
+							expect(res.body.comments[0].action.to).to.equal(res.body.viewpoint.screenshot_ref);
+							expect(res.body.comments[0].owner).to.equal(username);
+							expect(res.body.comments[1].action.property).to.equal("viewpoint");
+							expect(res.body.comments[1].action.from).to.equal(JSON.stringify(oldViewpoint));
+							expect(res.body.comments[1].action.to).to.equal(JSON.stringify(newViewpoint));
+							expect(res.body.comments[1].owner).to.equal(username);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change viewpoint should succeed and create system comment", function(done) {
+			const risk = Object.assign({"name":"Risk test"}, baseRisk);
+			let riskId;
+			let oldViewpoint;
+			const data = {
+				"viewpoint": {
+						"up":[0,1,0],
+						"position":[20,20,100],
+						"look_at":[0,0,-100],
+						"view_dir":[0,0,-1],
+						"right":[1,0,0],
+						"fov":2,
+						"aspect_ratio":1,
+						"far":300,
+						"near":50,
+						"clippingPlanes":[]
+				}
+			};
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200 , function(err, res) {
+							riskId = res.body._id;
+							oldViewpoint = res.body.viewpoint;
+							delete oldViewpoint.screenshot;
+							delete oldViewpoint.screenshotSmall;
+							return done(err);
+
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
+						.send(data)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/risks/${riskId}`)
+						.expect(200, function(err, res) {
+							const newViewpoint = { ...oldViewpoint, ...data.viewpoint };
+							newViewpoint.guid = res.body.viewpoint.guid;
+
+							expect(res.body.viewpoint.up).to.deep.equal(data.viewpoint.up);
+							expect(res.body.viewpoint.position).to.deep.equal(data.viewpoint.position);
+							expect(res.body.viewpoint.look_at).to.deep.equal(data.viewpoint.look_at);
+							expect(res.body.viewpoint.view_dir).to.deep.equal(data.viewpoint.view_dir);
+							expect(res.body.viewpoint.right).to.deep.equal(data.viewpoint.right);
+							expect(res.body.viewpoint.fov).to.equal(data.viewpoint.fov);
+							expect(res.body.viewpoint.aspect_ratio).to.equal(data.viewpoint.aspect_ratio);
+							expect(res.body.viewpoint.far).to.equal(data.viewpoint.far);
+							expect(res.body.viewpoint.near).to.equal(data.viewpoint.near);
+							expect(res.body.viewpoint.clippingPlanes).to.deep.equal(data.viewpoint.clippingPlanes);
+							expect(res.body.comments[0].action.property).to.equal("viewpoint");
+							expect(res.body.comments[0].action.from).to.equal(JSON.stringify(oldViewpoint));
+							expect(res.body.comments[0].action.to).to.equal(JSON.stringify(newViewpoint));
+							expect(res.body.comments[0].owner).to.equal(username);
 							done(err);
 						});
 				}
