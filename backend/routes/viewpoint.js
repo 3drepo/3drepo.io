@@ -332,7 +332,7 @@ function updateViewpoint(req, res, next) {
 		const place = utils.APIInfo(req);
 		const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-		Viewpoint.findByUID(account, model, uid, true)
+		Viewpoint.findByUID(account, model, uid, undefined, true)
 			.then(view => {
 				if(!view) {
 					return Promise.reject({resCode: responseCodes.VIEW_NOT_FOUND});
