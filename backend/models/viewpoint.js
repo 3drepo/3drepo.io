@@ -35,7 +35,7 @@ const fieldTypes = {
 const getResponse = (responseCodeType) => (type) => responseCodes[responseCodeType + "_" + type];
 
 class View {
-	constructor(collName, groupField, refIdsField, responseCodeType, fieldTypes) {
+	constructor() {
 		this.collName = "views";
 		this.response = getResponse("VIEW");
 		this.fieldTypes = fieldTypes;
