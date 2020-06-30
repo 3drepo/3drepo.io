@@ -192,10 +192,8 @@ class View {
 		const coll = await this.getViewsCollection(account, model);
 		await coll.insert(newView);
 
-		console.log(newView);
 		newView = this.setViewpointThumbnailURL(account, model, this.clean(account, model, newView));
 
-		console.log(newView);
 		ChatEvent.viewpointsCreated(sessionId, account, model, newView);
 		return newView;
 	}
