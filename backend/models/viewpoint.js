@@ -57,12 +57,14 @@ class View {
 			}
 		});
 
+		/*
 		if (viewToClean.thumbnail) {
 			const id = utils.uuidToString(viewToClean._id);
 			viewToClean.thumbnail = account + "/" + model + "/" + this.collName + "/" + id + "/thumbnail.png";
 		} else {
 			viewToClean.thumbnail = undefined;
 		}
+		*/
 
 		return viewToClean;
 	}
@@ -72,7 +74,7 @@ class View {
 	}
 
 	// NOTE: noClean changed - flipped
-	async findByUID(account, model, uid, projection, noClean = true) {
+	async findByUID(account, model, uid, projection, noClean = false) {
 		if (utils.isString(uid)) {
 			uid = utils.stringToUUID(uid);
 		}
@@ -190,8 +192,10 @@ class View {
 		const coll = await this.getViewsCollection(account, model);
 		await coll.insert(newView);
 
+		console.log(newView);
 		newView = this.setViewpointThumbnailURL(account, model, this.clean(account, model, newView));
 
+		console.log(newView);
 		ChatEvent.viewpointsCreated(sessionId, account, model, newView);
 		return newView;
 	}
