@@ -30,8 +30,8 @@ const ModelSetting = require("../models/modelSetting");
 const Comment = require("../models/comment");
 
 /**
- * @api {get} /:teamspace/:model/issues/:issueId Find Issue by ID
- * @apiName findIssueById
+ * @api {get} /:teamspace/:model/issues/:issueId Get issue
+ * @apiName findIssue
  * @apiGroup Issues
  *
  * @apiParam {String} teamspace Name of teamspace
@@ -80,11 +80,11 @@ const Comment = require("../models/comment");
  * }
  *
  */
-router.get("/issues/:issueId", middlewares.issue.canView, findIssueById);
+router.get("/issues/:issueId", middlewares.issue.canView, findIssue);
 
 /**
  * @api {get} /:teamspace/:model/issues/:issueId/thumbnail.png Get Issue Thumbnail
- * @apiName findIssueById
+ * @apiName getThumbnail
  * @apiGroup Issues
  *
  * @apiParam {String} teamspace Name of teamspace
@@ -897,7 +897,7 @@ function getIssuesBCF(req, res, next) {
 	});
 }
 
-function findIssueById(req, res, next) {
+function findIssue(req, res, next) {
 	const place = utils.APIInfo(req);
 	const {account, model, issueId} = req.params;
 

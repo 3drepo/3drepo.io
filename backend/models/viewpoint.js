@@ -57,14 +57,26 @@ class View {
 			}
 		});
 
-		/*
 		if (viewToClean.thumbnail) {
 			const id = utils.uuidToString(viewToClean._id);
 			viewToClean.thumbnail = account + "/" + model + "/" + this.collName + "/" + id + "/thumbnail.png";
 		} else {
 			viewToClean.thumbnail = undefined;
 		}
-		*/
+
+		// ===============================
+		// DEPRECATED LEGACY SUPPORT START
+		// ===============================
+		if (viewToClean.thumbnail) {
+			viewToClean.screenshot = { thumbnail: viewToClean.thumbnail };
+		}
+
+		if (viewToClean.viewpoint && viewToClean.viewpoint.clippingPlanes) {
+			viewToClean.clippingPlanes = viewToClean.viewpoint.clippingPlanes;
+		}
+		// =============================
+		// DEPRECATED LEGACY SUPPORT END
+		// =============================
 
 		return viewToClean;
 	}
@@ -94,13 +106,11 @@ class View {
 	}
 
 	// similar to findByModelName
-	async listViewpoints(account, model, noClean = true) {
+	async getList(account, model) {
 		const coll = await this.getViewsCollection(account, model);
 		const views = await coll.find().toArray();
 		views.forEach((foundView, index) => {
-			if (!noClean) {
-				views[index] = this.clean(account, model, foundView);
-			}
+			views[index] = this.clean(account, model, foundView);
 		});
 
 		return views;
@@ -157,27 +167,24 @@ class View {
 		});
 	}
 
-	updateViewpoint(account, model, sessionId, data, id) {
-		return this.updateAttrs(account, model, id, data).then((result) => {
-			ChatEvent.viewpointsChanged(sessionId, account, model, Object.assign({ _id: utils.uuidToString(id) }, data));
-			return result;
-		});
-	}
+	async update(sessionId, account, model, id, data) {
+		// 1. Get old view
+		const oldView = await this.findByUID(account, model, id, {}, true);
 
-	async updateAttrs(account, model, id, data) {
-		const toUpdate = {};
-		// We can only update the name of a viewpoint
-		const name = data["name"];
-		if (name && utils.isString(name) && name !== "") {
-			toUpdate["name"] = name;
-		} else {
-			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
+		// 2. Pick whitelisted attributes and leave proper attrs
+		const attributeWhitelist = ["name"];
+		data = _.pick(data, attributeWhitelist);
+
+		if (_.isEmpty(data)) {
+			throw responseCodes.INVALID_ARGUMENTS;
 		}
 
-		const coll = await this.getViewsCollection(account, model);
-		return coll.update({ _id: id }, { $set: toUpdate }).then(() => {
-			return { _id: utils.uuidToString(id) };
-		});
+		const views = await this.getViewsCollection(account, model);
+		await views.update({ _id: id }, { $set: data });
+
+		ChatEvent.viewpointsChanged(sessionId, account, model, Object.assign({ _id: utils.uuidToString(id) }, data));
+
+		return { _id: utils.uuidToString(id) };
 	}
 
 	async createViewpoint(account, model, sessionId, newView) {

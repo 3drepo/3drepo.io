@@ -1,18 +1,18 @@
 /**
- *	Copyright (C) 2018 3D Repo Ltd
+ * Copyright (C) 2020 3D Repo Ltd
  *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 "use strict";
@@ -22,38 +22,39 @@ const router = express.Router({mergeParams: true});
 const middlewares = require("../middlewares/middlewares");
 const C = require("../constants");
 const responseCodes = require("../response_codes.js");
-const Viewpoint = require("../models/viewpoint");
+const View = require("../models/viewpoint");
 const utils = require("../utils");
 const systemLogger = require("../logger.js").systemLogger;
 const config = require("../config");
 
 /**
- * @apiDefine Viewpoints Viewpoints
+ * @apiDefine Views Views
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  */
 
 /**
- * @apiDefine SuccessViewpointObject
+ * @apiDefine SuccessViewObject
  *
- * @apiSuccess (Viewpoint object) {String} _id Viewpoint ID
- * @apiSuccess (Viewpoint object) {Number[]} clippingPlanes Array of clipping planes
- * @apiSuccess (Viewpoint object) {Object} viewpoint Viewpoint properties
- * @apiSuccess (Viewpoint object) {Object} screenshot Screenshot object
- * @apiSuccess (Viewpoint object) {String} name Name of viewpoint
+ * @apiSuccess (View object) {String} _id View ID
+ * @apiSuccess (View object) {String} name Name of view
+ * @apiSuccess (View object) {String} thumbnail Thumbnail image
+ * @apiSuccess (View object) {Object} viewpoint Viewpoint properties
+ * @apiSuccess (View object) {Number[]} clippingPlanes [DEPRECATED] Array of clipping planes
+ * @apiSuccess (View object) {Object} screenshot [DEPRECATED] Screenshot object
  */
 
 /**
- * @api {get} /:teamspace/:model/viewpoints List all viewpoints
- * @apiName listViewpoints
- * @apiGroup Viewpoints
- * @apiDescription List all model viewpoints.
+ * @api {get} /:teamspace/:model/viewpoints List all views
+ * @apiName listViews
+ * @apiGroup Views
+ * @apiDescription List all model views.
  *
- * @apiUse Viewpoints
- * @apiUse SuccessViewpointObject
+ * @apiUse Views
+ * @apiUse SuccessViewObject
  *
- * @apiSuccess {Object[]} viewpoints List of viewpoint objects
+ * @apiSuccess {Object[]} views List of view objects
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/viewpoints HTTP/1.1
@@ -63,7 +64,7 @@ const config = require("../config");
  * [
  * 	{
  * 		"_id":"00000000-0000-0000-0000-000000000001",
- * 		"clippingPlanes":[],
+ * 		"thumbnail":"charence/00000000-0000-0000-0000-000000000000/viewpoints/00000000-0000-0000-0000-000000000001/thumbnail.png",
  * 		"viewpoint":{
  * 			"right":[1.0,-0.0,0.0],
  * 			"up":[0.0,0.0,-1.0],
@@ -74,8 +75,10 @@ const config = require("../config");
  * 			"far":100000.0,
  * 			"fov":1.0,
  * 			"aspect_ratio":1.185,
+ * 			"clippingPlanes":[],
  * 			"highlighted_group_id":""
  * 		},
+ * 		"clippingPlanes":[],
  * 		"screenshot":{
  * 			"thumbnailUrl":<binary image>,
  * 			"thumbnail":"charence/00000000-0000-0000-0000-000000000000/viewpoints/00000000-0000-0000-0000-000000000001/thumbnail.png"
@@ -84,7 +87,7 @@ const config = require("../config");
  * 	},
  * 	{
  * 		"_id":"00000000-0000-0000-0000-000000000002",
- * 		"clippingPlanes":[],
+ * 		"thumbnail":"charence/00000000-0000-0000-0000-000000000000/viewpoints/00000000-0000-0000-0000-000000000002/thumbnail.png",
  * 		"viewpoint":{
  * 			"right":[1.0,-0.0,0.5],
  * 			"up":[0.0,0.0,-1.0],
@@ -95,8 +98,10 @@ const config = require("../config");
  * 			"far":100000.0,
  * 			"fov":1.0,
  * 			"aspect_ratio":1.185,
+ * 			"clippingPlanes":[],
  * 			"highlighted_group_id":""
  * 		},
+ * 		"clippingPlanes":[],
  * 		"screenshot":{
  * 			"thumbnailUrl":<binary image>,
  * 			"thumbnail":"charence/00000000-0000-0000-0000-000000000000/viewpoints/00000000-0000-0000-0000-000000000002/thumbnail.png"
@@ -105,18 +110,18 @@ const config = require("../config");
  * 	}
  * ]
  */
-router.get("/viewpoints/", middlewares.issue.canView, listViewpoints);
+router.get("/viewpoints/", middlewares.issue.canView, listViews);
 
 /**
- * @api {get} /:teamspace/:model/viewpoints/:viewId Get viewpoint
- * @apiName findViewpoint
- * @apiGroup Viewpoints
- * @apiDescription Retrieve a viewpoint.
+ * @api {get} /:teamspace/:model/viewpoints/:viewId Get view
+ * @apiName findView
+ * @apiGroup Views
+ * @apiDescription Retrieve a view.
  *
- * @apiUse Viewpoints
- * @apiUse SuccessViewpointObject
+ * @apiUse Views
+ * @apiUse SuccessViewObject
  *
- * @apiParam {String} viewId Viewpoint ID
+ * @apiParam {String} viewId View ID
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/viewpoints/00000000-0000-0000-0000-000000000001 HTTP/1.1
@@ -125,7 +130,7 @@ router.get("/viewpoints/", middlewares.issue.canView, listViewpoints);
  * HTTP/1.1 200 OK
  * {
  * 	"_id":"00000000-0000-0000-0000-000000000001",
- * 	"clippingPlanes":[],
+ * 	"thumbnail":"charence/00000000-0000-0000-0000-000000000000/viewpoints/00000000-0000-0000-0000-000000000001/thumbnail.png",
  * 	"viewpoint":{
  * 		"right":[1.0,-0.0,0.0],
  * 		"up":[0.0,0.0,-1.0],
@@ -136,8 +141,10 @@ router.get("/viewpoints/", middlewares.issue.canView, listViewpoints);
  * 		"far":100000.0,
  * 		"fov":1.0,
  * 		"aspect_ratio":1.185,
+ * 		"clippingPlanes":[],
  * 		"highlighted_group_id":""
  * 	},
+ * 	"clippingPlanes":[],
  * 	"screenshot":{
  * 		"thumbnailUrl":<binary image>,
  * 		"thumbnail":"charence/00000000-0000-0000-0000-000000000000/viewpoints/00000000-0000-0000-0000-000000000001/thumbnail.png"
@@ -145,18 +152,18 @@ router.get("/viewpoints/", middlewares.issue.canView, listViewpoints);
  * 	"name":"View1"
  * }
  */
-router.get("/viewpoints/:uid", middlewares.issue.canView, findViewpoint);
+router.get("/viewpoints/:uid", middlewares.issue.canView, findView);
 
 /**
- * @api {put} /:teamspace/:model/viewpoints/:viewId Update viewpoint
- * @apiName updateViewpoint
- * @apiGroup Viewpoints
- * @apiDescription Update a viewpoint.
+ * @api {put} /:teamspace/:model/viewpoints/:viewId Update view
+ * @apiName updateView
+ * @apiGroup Views
+ * @apiDescription Update a view.
  *
- * @apiUse Viewpoints
+ * @apiUse Views
  *
- * @apiParam {String} viewId Viewpoint ID
- * @apiParam (Request body) {String} name Name of viewpoint
+ * @apiParam {String} viewId View ID
+ * @apiParam (Request body) {String} name Name of view
  *
  * @apiExample {put} Example usage:
  * PUT /acme/00000000-0000-0000-0000-000000000000/viewpoints/00000000-0000-0000-0000-000000000001 HTTP/1.1
@@ -170,17 +177,17 @@ router.get("/viewpoints/:uid", middlewares.issue.canView, findViewpoint);
  * 	"_id":"00000000-0000-0000-0000-000000000001"
  * }
  */
-router.put("/viewpoints/:uid", middlewares.issue.canCreate, updateViewpoint);
+router.put("/viewpoints/:uid", middlewares.issue.canCreate, updateView);
 
 /**
- * @api {post} /:teamspace/:model/viewpoints/ Create viewpoint
- * @apiName createViewpoint
- * @apiGroup Viewpoints
- * @apiDescription Create a new viewpoint.
+ * @api {post} /:teamspace/:model/viewpoints/ Create view
+ * @apiName createView
+ * @apiGroup Views
+ * @apiDescription Create a new view.
  *
- * @apiUse Viewpoints
+ * @apiUse Views
  *
- * @apiParam (Request body) {String} name Name of viewpoint
+ * @apiParam (Request body) {String} name Name of view
  * @apiParam (Request body) {String} viewpoint Viewpoint
  * @apiParam (Request body) {String} screenshot Screenshot
  * @apiParam (Request body) {String} [clippingPlanes] List of clipping planes
@@ -214,17 +221,17 @@ router.put("/viewpoints/:uid", middlewares.issue.canCreate, updateViewpoint);
  * 	"_id":"00000000-0000-0000-0000-000000000001"
  * }
  */
-router.post("/viewpoints/", middlewares.issue.canCreate, createViewpoint);
+router.post("/viewpoints/", middlewares.issue.canCreate, createView);
 
 /**
- * @api {delete} /:teamspace/:model/viewpoints/:viewId Delete viewpoint
- * @apiName deleteViewpoint
- * @apiGroup Viewpoints
- * @apiDescription Delete a viewpoint.
+ * @api {delete} /:teamspace/:model/viewpoints/:viewId Delete view
+ * @apiName deleteView
+ * @apiGroup Views
+ * @apiDescription Delete a view.
  *
- * @apiUse Viewpoints
+ * @apiUse Views
  *
- * @apiParam {String} viewId Viewpoint ID
+ * @apiParam {String} viewId View ID
  *
  * @apiExample {delete} Example usage:
  * DELETE /acme/00000000-0000-0000-0000-000000000000/viewpoints/00000000-0000-0000-0000-000000000000 HTTP/1.1
@@ -235,17 +242,17 @@ router.post("/viewpoints/", middlewares.issue.canCreate, createViewpoint);
  * 	"status":"success"
  * }
  */
-router.delete("/viewpoints/:uid", middlewares.issue.canCreate, deleteViewpoint);
+router.delete("/viewpoints/:uid", middlewares.issue.canCreate, deleteView);
 
 /**
- * @api {get} /:teamspace/:model/viewpoints/:viewId/thumbnail.png Get viewpoint thumbnail
- * @apiName getViewpointThumbnail
- * @apiGroup Viewpoints
- * @apiDescription Retrieve a viewpoint's thumbnail image.
+ * @api {get} /:teamspace/:model/viewpoints/:viewId/thumbnail.png Get view thumbnail
+ * @apiName getThumbnail
+ * @apiGroup Views
+ * @apiDescription Retrieve a view's thumbnail image.
  *
- * @apiUse Viewpoints
+ * @apiUse Views
  *
- * @apiParam {String} viewId Viewpoint ID
+ * @apiParam {String} viewId View ID
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/viewpoints/00000000-0000-0000-0000-000000000000/thumbnail.png HTTP/1.1
@@ -254,42 +261,31 @@ router.delete("/viewpoints/:uid", middlewares.issue.canCreate, deleteViewpoint);
  * HTTP/1.1 200 OK
  * <binary image>
  */
-router.get("/viewpoints/:uid/thumbnail.png", middlewares.issue.canView, getViewpointThumbnail);
+router.get("/viewpoints/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail);
 
-function listViewpoints(req, res, next) {
+function listViews(req, res, next) {
+	const place = utils.APIInfo(req);
 	const { account, model } = req.params;
 
-	const place = utils.APIInfo(req);
-
-	Viewpoint.listViewpoints(account, model, false)
-		.then(viewpoints => {
-			responseCodes.respond(place, req, res, next, responseCodes.OK, viewpoints);
-		}).catch(err => {
-			systemLogger.logError(err.stack);
-			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-		});
+	View.getList(account, model).then(views => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, views);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
 }
 
-function findViewpoint(req, res, next) {
+function findView(req, res, next) {
+	const place = utils.APIInfo(req);
 	const { account, model, uid } = req.params;
-	const place = utils.APIInfo(req);
 
-	Viewpoint.findByUID(account, model, uid, undefined, false)
-		.then(view => {
-			if(!view) {
-				return Promise.reject({resCode: responseCodes.VIEW_NOT_FOUND});
-			} else {
-				return Promise.resolve(view);
-			}
-		}).then(view => {
-			responseCodes.respond(place, req, res, next, responseCodes.OK, view);
-		}).catch(err => {
-			systemLogger.logError(err.stack);
-			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-		});
+	View.findByUID(account, model, uid).then(view => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, view);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
 }
 
-function createViewpoint(req, res, next) {
+function createView(req, res, next) {
 	if (Object.keys(req.body).length >= 3 &&
 			utils.isString(req.body.name) &&
 			Object.prototype.toString.call(req.body.viewpoint) === "[object Object]" &&
@@ -299,7 +295,7 @@ function createViewpoint(req, res, next) {
 		const sessionId = req.headers[C.HEADER_SOCKET_ID];
 		const { account, model } = req.params;
 
-		Viewpoint.createViewpoint(account, model, sessionId, req.body)
+		View.createViewpoint(account, model, sessionId, req.body)
 			.then(view => {
 				responseCodes.respond(place, req, res, next, responseCodes.OK, view);
 			}).catch(err => {
@@ -311,12 +307,12 @@ function createViewpoint(req, res, next) {
 	}
 }
 
-function deleteViewpoint(req, res, next) {
+function deleteView(req, res, next) {
 	const place = utils.APIInfo(req);
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 	const { account, model, uid } = req.params;
 
-	Viewpoint.deleteViewpoint(account, model, uid, sessionId).then(() => {
+	View.deleteViewpoint(account, model, uid, sessionId).then(() => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "success"});
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -324,42 +320,29 @@ function deleteViewpoint(req, res, next) {
 
 }
 
-function updateViewpoint(req, res, next) {
-	if (Object.keys(req.body).length >= 1 &&
-			Object.prototype.toString.call(req.body.name) === "[object String]") {
+function updateView(req, res, next) {
+	const place = utils.APIInfo(req);
+	const { account, model, uid } = req.params;
+	const updateData = req.body;
 
-		const { account, model, uid } = req.params;
-		const place = utils.APIInfo(req);
-		const sessionId = req.headers[C.HEADER_SOCKET_ID];
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-		Viewpoint.findByUID(account, model, uid, undefined, true)
-			.then(view => {
-				if(!view) {
-					return Promise.reject({resCode: responseCodes.VIEW_NOT_FOUND});
-				} else {
-					return Viewpoint.updateViewpoint(account, model, sessionId, req.body, utils.stringToUUID(uid));
-				}
-			}).then(view => {
-				responseCodes.respond(place, req, res, next, responseCodes.OK, view);
-			}).catch(err => {
-				systemLogger.logError(err.stack);
-				responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-			});
-	} else {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
-	}
+	return View.update(sessionId, account, model, uid, updateData).then((id) => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, id);
+	}).catch((err) => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
 }
 
-function getViewpointThumbnail(req, res, next) {
-	const { account, model, uid } = req.params;
+function getThumbnail(req, res, next) {
 	const place = utils.APIInfo(req);
+	const { account, model, uid } = req.params;
 
-	Viewpoint.getThumbnail(account, model, uid).then(buffer => {
+	View.getThumbnail(account, model, uid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png" , config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
 	});
-
 }
 
 module.exports = router;
