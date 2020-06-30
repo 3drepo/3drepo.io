@@ -29,9 +29,17 @@ interface IProps extends ButtonProps {
 
 export const ContainedButton = ({ children, icon, onClick, ...props }: IProps) => {
 	const IconComponent = icon;
+
 	return (
-		<StyledButton color="primary" variant="contained" size="small" squeezed={Boolean(icon)} onClick={onClick} {...props}>
-			{icon && <IconComponent style={{ fontSize: 14 }} />}
+		<StyledButton
+			color="primary"
+			variant="contained"
+			size="small"
+			squeezed={Boolean(icon)}
+			onClick={onClick}
+			{...props}
+		>
+			{icon && <IconComponent style={{ fontSize: 14, marginRight: 2 }} />}
 			{children}
 		</StyledButton>
 	);

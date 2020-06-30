@@ -108,15 +108,14 @@ export class AttachResourcesDialog extends React.PureComponent<IProps, IState> {
 				.every((s) => s <= clientConfigService.resourceUploadSizeLimit);
 	}
 
-	private renderAttachResourceFiles = (values) => renderWhenTrueOtherwise(
-		<>
-			<AttachResourceFiles
-				files={values.files}
-				validateQuota={this.validateQuota}
-				validateUploadLimit={this.validateUploadLimit}
-				uploadLimit={clientConfigService.resourceUploadSizeLimit}
-			/>
-		</>,
+	private renderAttachResourceFiles = (values) => renderWhenTrueOtherwise(() => (
+		<AttachResourceFiles
+			files={values.files}
+			validateQuota={this.validateQuota}
+			validateUploadLimit={this.validateUploadLimit}
+			uploadLimit={clientConfigService.resourceUploadSizeLimit}
+		/>
+		),
 		<Loader />
 	)
 
