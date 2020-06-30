@@ -169,9 +169,13 @@ class View {
 		});
 	}
 
-	async update(sessionId, account, model, id, data) {
+	async update(sessionId, account, model, uid, data) {
+		if (utils.isString(uid)) {
+			uid = utils.stringToUUID(uid);
+		}
+
 		// 1. Get old view
-		// const oldView = await this.findByUID(account, model, id, {}, true);
+		// const oldView = await this.findByUID(account, model, uid, {}, true);
 
 		// 2. Pick whitelisted attributes and leave proper attrs
 		const attributeWhitelist = ["name"];
@@ -182,11 +186,11 @@ class View {
 		}
 
 		const views = await this.getViewsCollection(account, model);
-		await views.update({ _id: id }, { $set: data });
+		await views.update({ _id: uid }, { $set: data });
 
-		ChatEvent.viewpointsChanged(sessionId, account, model, Object.assign({ _id: utils.uuidToString(id) }, data));
+		ChatEvent.viewpointsChanged(sessionId, account, model, Object.assign({ _id: utils.uuidToString(uid) }, data));
 
-		return { _id: utils.uuidToString(id) };
+		return { _id: utils.uuidToString(uid) };
 	}
 
 	async createViewpoint(account, model, sessionId, newView) {
