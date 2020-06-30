@@ -230,9 +230,6 @@ describe("Issues", function () {
 			], done);
 		});
 
-
-/// ==================================================================
-
 		it("with a embeded group should succeed", function(done) {
 			const username3 = 'teamSpace1';
 			const model2 = '5bfc11fa-50ac-b7e7-4328-83aa11fa50ac';
@@ -296,9 +293,6 @@ describe("Issues", function () {
 			], done);
 
 		});
-
-
-/// ==================================================================
 
 
 		it("without name should fail", function(done) {
