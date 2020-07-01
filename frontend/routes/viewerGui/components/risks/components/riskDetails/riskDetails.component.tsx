@@ -118,7 +118,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	public renderPreview = renderWhenTrue(() => {
 		const { expandDetails, horizontal, failedToLoad, disableViewer } = this.props;
 		const { comments } = this.riskData;
-		const isRiskWithComments = Boolean((comments && comments.length || horizontal) && !this.isNewRisk);
+		const isRiskWithComments = Boolean(!this.isNewRisk);
 		const PreviewWrapper = horizontal && isRiskWithComments ? HorizontalView : Fragment;
 		const renderNotCollapsable = () => {
 			return this.renderMessagesList(!horizontal && isRiskWithComments);

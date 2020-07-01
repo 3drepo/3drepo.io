@@ -117,7 +117,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	public renderPreview = renderWhenTrue(() => {
 		const { expandDetails, horizontal, failedToLoad, disableViewer } = this.props;
 		const { comments } = this.issueData;
-		const isIssueWithComments = Boolean((comments && comments.length || horizontal) && !this.isNewIssue);
+		const isIssueWithComments = Boolean(!this.isNewIssue);
 		const PreviewWrapper = horizontal && isIssueWithComments ? HorizontalView : Fragment;
 		const renderNotCollapsable = () => this.renderMessagesList(!horizontal && isIssueWithComments);
 
