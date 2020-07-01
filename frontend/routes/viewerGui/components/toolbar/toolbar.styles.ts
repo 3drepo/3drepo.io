@@ -102,20 +102,14 @@ export const ToolbarButton = styled(TooltipButton)`
 ` as any;
 
 export const Icon = styled.img`
-	max-height: 24px;
-	max-width: 24px;
+	max-height: 20px;
+	max-width: 20px;
 `;
 
 export const OrthogonalIcon = styled(Icon).attrs({
 	src: OrthogonalIconSVG,
-})`
-	max-height: 20px;
-	max-width: 20px;
-`;
+})``;
 
 export const PerspectiveIcon = styled(Icon).attrs({
 	src: PerspectiveIconSVG,
-})`
-	max-height: 20px;
-	max-width: 20px;
-`;
+})``;
