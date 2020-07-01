@@ -43,28 +43,31 @@ class View {
 
 	// TODO v2
 	clean(account, model, viewToClean, targetType = "[object String]") {
-		const keys = ["_id", "guid", "highlighted_group_id", "hidden_group_id", "shown_group_id"];
+		const viewFields = [
+			"_id",
+			"viewpoint.group_id",
+			"viewpoint.guid",
+			"viewpoint.highlighted_group_id",
+			"viewpoint.hidden_group_id",
+			"viewpoint.shown_group_id"
+		];
 
-		keys.forEach((key) => {
-			if (viewToClean[key] && "[object String]" === targetType) {
-				if (utils.isObject(viewToClean[key])) {
-					viewToClean[key] = utils.uuidToString(viewToClean[key]);
-				}
-			} else if (viewToClean[key] && "[object Object]" === targetType) {
-				if (utils.isString(viewToClean[key])) {
-					viewToClean[key] = utils.stringToUUID(viewToClean[key]);
+		viewFields.forEach((field) => {
+			if (_.get(viewToClean, field)) {
+				if ("[object String]" === targetType && utils.isObject(_.get(viewToClean, field))) {
+					_.set(viewToClean, field, utils.uuidToString(_.get(viewToClean, field)));
+				} else if ("[object Object]" === targetType && utils.isString(_.get(viewToClean, field))) {
+					_.set(viewToClean, field, utils.stringToUUID(_.get(viewToClean, field)));
 				}
 			}
 		});
 
-		/*
 		if (viewToClean.thumbnail) {
 			const id = utils.uuidToString(viewToClean._id);
 			viewToClean.thumbnail = account + "/" + model + "/" + this.collName + "/" + id + "/thumbnail.png";
 		} else {
 			viewToClean.thumbnail = undefined;
 		}
-		*/
 
 		// ===============================
 		// DEPRECATED LEGACY SUPPORT START

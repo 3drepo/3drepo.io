@@ -55,9 +55,8 @@ class Ticket extends View {
 	}
 
 	clean(account, model, ticketToClean) {
-		const idKeys = ["_id", "rev_id", "parent", "group_id"];
-		const commentIdKeys = ["rev_id", "guid", "viewpoint"];
-		const vpIdKeys = ["hidden_group_id", "highlighted_group_id", "shown_group_id", "guid", "group_id"];
+		const ticketFields = ["_id", "rev_id", "parent", "group_id"];
+		const commentFields = ["rev_id", "guid", "viewpoint"];
 
 		ticketToClean.account = account;
 		model = ticketToClean.model || ticketToClean.origin_model || model;
@@ -65,50 +64,33 @@ class Ticket extends View {
 
 		const id = utils.uuidToString(ticketToClean._id);
 
-		idKeys.concat(vpIdKeys).forEach((key) => {
+		ticketFields.forEach((key) => {
 			if (ticketToClean[key]) {
 				ticketToClean[key] = utils.uuidToString(ticketToClean[key]);
 			}
 		});
+
 		if (ticketToClean.due_date === null) {
 			delete ticketToClean.due_date;
 		}
 
 		// legacy schema support
 		if (ticketToClean.viewpoint) {
-			if(ticketToClean.viewpoint.right && ticketToClean.viewpoint.right.length) {
-				vpIdKeys.forEach((key) => {
-					if (ticketToClean.viewpoint[key]) {
-						ticketToClean.viewpoint[key] = utils.uuidToString(ticketToClean.viewpoint[key]);
-					}
-				});
-			} else {
+			if (!ticketToClean.viewpoint.right || !ticketToClean.viewpoint.right.length) {
 				// workaround for erroneous legacy data - see ISSUE #2085
 				ticketToClean.viewpoint = undefined;
 			}
+		}
+
+		if (ticketToClean.viewpoints && ticketToClean.viewpoints.length > 0 && !ticketToClean.viewpoint) {
+			ticketToClean.viewpoint = ticketToClean.viewpoints[0];
 
 			super.setViewpointScreenshotURL(this.collName, account, model, id, ticketToClean.viewpoint);
 		}
 
-		if (ticketToClean.viewpoints) {
-			ticketToClean.viewpoints.forEach((viewpoint, i) => {
-				vpIdKeys.forEach((key) => {
-					if (viewpoint[key]) {
-						viewpoint[key] = utils.uuidToString(viewpoint[key]);
-					}
-				});
-
-				super.setViewpointScreenshotURL(this.collName, account, model, id, viewpoint);
-
-				if (0 === i && !ticketToClean.viewpoint) {
-					ticketToClean.viewpoint = viewpoint;
-				}
-			});
-		}
-
 		if (ticketToClean.comments) {
 			ticketToClean.comments.forEach((comment) => {
-				commentIdKeys.forEach((key) => {
+				commentFields.forEach((key) => {
 					if (comment[key] && _.isObject(comment[key]) && !utils.hasField(comment[key], "up")) {
 						comment[key] = utils.uuidToString(comment[key]);
 					}
@@ -116,18 +98,15 @@ class Ticket extends View {
 
 				if (comment.viewpoint) {
 					const commentViewpoint = ticketToClean.viewpoints.find((vp) =>
-						vp.guid === comment.viewpoint
+						utils.uuidToString(vp.guid) === comment.viewpoint
 					);
 
 					comment.viewpoint = commentViewpoint || undefined;
+					super.setViewpointScreenshotURL(this.collName, account, model, id, comment.viewpoint);
+
+					comment = super.clean(account, model, comment);
 				}
 			});
-		}
-
-		if (ticketToClean.thumbnail) {
-			ticketToClean.thumbnail = account + "/" + model + "/" + this.collName + "/" + id + "/thumbnail.png";
-		} else {
-			ticketToClean.thumbnail = undefined;
 		}
 
 		// Return empty arrays as frontend expects them
@@ -144,6 +123,8 @@ class Ticket extends View {
 
 		delete ticketToClean.viewpoints;
 		delete ticketToClean.viewCount;
+
+		ticketToClean = super.clean(account, model, ticketToClean);
 
 		return ticketToClean;
 	}
