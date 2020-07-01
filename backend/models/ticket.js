@@ -148,21 +148,8 @@ class Ticket extends View {
 		return ticketToClean;
 	}
 
-	getTicketsCollection(account, model) {
-		return db.getCollection(account, model + "." + this.collName);
-	}
-
 	async findByUID(account, model, uid, projection, noClean = false) {
-		if ("[object String]" === Object.prototype.toString.call(uid)) {
-			uid = utils.stringToUUID(uid);
-		}
-
-		const tickets = await this.getTicketsCollection(account, model);
-		const foundTicket = await tickets.findOne({ _id: uid }, projection);
-
-		if (!foundTicket) {
-			return Promise.reject(this.response("NOT_FOUND"));
-		}
+		const foundTicket = await super.findByUID(account, model, uid, projection, true);
 
 		if (foundTicket.refs) {
 			const refsColl = await db.getCollection(account, model + ".resources.ref");
@@ -312,7 +299,7 @@ class Ticket extends View {
 		// 6. Update the data
 		const _id = utils.stringToUUID(id);
 
-		const tickets = await this.getTicketsCollection(account, model);
+		const tickets = await this.getCollection(account, model);
 		if (Object.keys(data).length > 0) {
 			await tickets.update({ _id }, { $set: data });
 		}
@@ -499,7 +486,7 @@ class Ticket extends View {
 
 		const [settings, coll] = await Promise.all([
 			ModelSetting.findById({ account, model }, model),
-			this.getTicketsCollection(account, model)
+			this.getCollection(account, model)
 		]);
 
 		await coll.insert(newTicket);
@@ -534,21 +521,6 @@ class Ticket extends View {
 		});
 	}
 
-	getThumbnail(account, model, uid) {
-		if ("[object String]" === Object.prototype.toString.call(uid)) {
-			uid = utils.stringToUUID(uid);
-		}
-
-		return this.findByUID(account, model, uid, { thumbnail: 1 }, true).then((foundTicket) => {
-			// the 'content' field is for legacy reasons
-			if (!_.get(foundTicket, "thumbnail.buffer") && !_.get(foundTicket, "thumbnail.content.buffer")) {
-				return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
-			} else {
-				return (foundTicket.thumbnail.content || foundTicket.thumbnail).buffer;
-			}
-		});
-	}
-
 	async getIdsFilter(account, model, branch, revId, ids) {
 		let filter = {};
 
@@ -579,7 +551,7 @@ class Ticket extends View {
 		const filter = await this.getIdsFilter(account, model, branch, revId, ids);
 		const fullQuery = {...filter, ...query};
 
-		const coll = await this.getTicketsCollection(account, model);
+		const coll = await this.getCollection(account, model);
 		const tickets = await coll.find(fullQuery, projection).toArray();
 		tickets.forEach((foundTicket, index) => {
 			if (!noClean) {
@@ -688,7 +660,7 @@ class Ticket extends View {
 			return [];
 		}
 
-		const tickets = await this.getTicketsCollection(account, model);
+		const tickets = await this.getCollection(account, model);
 		const ticketQuery = { _id: utils.stringToUUID(id) };
 		const ticketFound = await tickets.findOne(ticketQuery);
 
@@ -747,7 +719,7 @@ class Ticket extends View {
 
 	async detachResource(account, model, id, resourceId, username, sessionId) {
 		const ref = await FileRef.removeResourceFromEntity(account, model, this.refIdsField, id, resourceId);
-		const tickets = await this.getTicketsCollection(account, model);
+		const tickets = await this.getCollection(account, model);
 		const ticketQuery = { _id: utils.stringToUUID(id) };
 		const ticketFound = await tickets.findOne(ticketQuery);
 

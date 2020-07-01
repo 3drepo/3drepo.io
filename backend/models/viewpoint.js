@@ -83,17 +83,16 @@ class View {
 		return viewToClean;
 	}
 
-	getViewsCollection(account, model) {
+	getCollection(account, model) {
 		return db.getCollection(account, model + "." + this.collName);
 	}
 
-	// NOTE: noClean changed - flipped
 	async findByUID(account, model, uid, projection, noClean = false) {
 		if (utils.isString(uid)) {
 			uid = utils.stringToUUID(uid);
 		}
 
-		const views = await this.getViewsCollection(account, model);
+		const views = await this.getCollection(account, model);
 		const foundView = await views.findOne({ _id: uid }, projection);
 
 		if (!foundView) {
@@ -109,7 +108,7 @@ class View {
 
 	// similar to findByModelName
 	async getList(account, model) {
-		const coll = await this.getViewsCollection(account, model);
+		const coll = await this.getCollection(account, model);
 		const views = await coll.find().toArray();
 		views.forEach((foundView, index) => {
 			views[index] = this.clean(account, model, foundView);
@@ -158,13 +157,16 @@ class View {
 			uid = utils.stringToUUID(uid);
 		}
 
-		return this.findByUID(account, model, uid, { "screenshot.buffer": 1 }).then((foundView) => {
-			// the 'screenshot' field is for legacy reasons
-			if (!_.get(foundView, "thumbnail.buffer") && !_.get(foundView, "screenshot.buffer")) {
+		return this.findByUID(account, model, uid, { "screenshot.buffer": 1, thumbnail: 1 }, true).then((foundView) => {
+			// the 'content','screenshot' field is for legacy reasons
+			if (!_.get(foundView, "thumbnail.buffer") &&
+				!_.get(foundView, "thumbnail.content.buffer") &&
+				!_.get(foundView, "screenshot.buffer")) {
 				return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 			} else {
-				// Mongo stores it as it's own binary object, so we need to do buffer.buffer!
-				return (foundView.screenshot.buffer || foundView.thumbnail).buffer;
+				return (foundTicket.thumbnail.content ||
+					foundView.screenshot.buffer ||
+					foundTicket.thumbnail).buffer;
 			}
 		});
 	}
@@ -185,7 +187,7 @@ class View {
 			throw responseCodes.INVALID_ARGUMENTS;
 		}
 
-		const views = await this.getViewsCollection(account, model);
+		const views = await this.getCollection(account, model);
 		await views.update({ _id: uid }, { $set: data });
 
 		ChatEvent.viewpointsChanged(sessionId, account, model, Object.assign({ _id: utils.uuidToString(uid) }, data));
@@ -202,7 +204,7 @@ class View {
 		newView = _.pick(newView, ["name", "clippingPlanes", "viewpoint", "screenshot"]);
 
 		newView._id = utils.stringToUUID(newView._id || nodeuuid());
-		const coll = await this.getViewsCollection(account, model);
+		const coll = await this.getCollection(account, model);
 		await coll.insert(newView);
 
 		newView = this.setViewpointThumbnailURL(account, model, this.clean(account, model, newView));
@@ -216,7 +218,7 @@ class View {
 			uid = utils.stringToUUID(uid);
 		}
 
-		const coll = await this.getViewsCollection(account, model);
+		const coll = await this.getCollection(account, model);
 		return coll.findOneAndDelete({ _id: uid }).then((deleteResponse) => {
 			if (!deleteResponse.value) {
 				return Promise.reject(this.response("NOT_FOUND"));

@@ -74,7 +74,7 @@ class Issue extends Ticket {
 
 	async create(account, model, newIssue, sessionId) {
 		// Sets the issue number
-		const coll = await db.getCollection(account, model + ".issues");
+		const coll = await this.getCollection(account, model);
 		try {
 			const issues = await coll.find({}, {number: 1}).sort({ number: -1 }).limit(1).toArray();
 			newIssue.number = (issues.length > 0) ? issues[0].number + 1 : 1;

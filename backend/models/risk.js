@@ -213,27 +213,6 @@ class Risk extends Ticket {
 		return await super.update(attributeBlacklist, user, sessionId, account, model, issueId, data, beforeUpdate);
 	}
 
-	deleteRisks(dbCol, sessionId, ids) {
-		const riskIdStrings = [].concat(ids);
-
-		for (let i = 0; i < ids.length; i++) {
-			if ("[object String]" === Object.prototype.toString.call(ids[i])) {
-				ids[i] = utils.stringToUUID(ids[i]);
-			}
-		}
-
-		return db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
-			return _dbCol.remove({ _id: {$in: ids}}).then((deleteResponse) => {
-				if (!deleteResponse.result.ok) {
-					return Promise.reject(responseCodes.RISK_NOT_FOUND);
-				}
-
-				// Success!
-				ChatEvent.risksDeleted(sessionId, dbCol.account,  dbCol.model, riskIdStrings);
-			});
-		});
-	}
-
 	async getRisksReport(account, model, rid, ids, res) {
 		const reportGen = require("../models/report").newRisksReport(account, model, rid);
 		return this.getReport(account, model, rid, ids, res, reportGen);

@@ -623,25 +623,6 @@ router.post("/risks/:riskId/comments", middlewares.issue.canComment, addComment,
 router.delete("/risks/:riskId/comments", middlewares.issue.canComment, deleteComment, middlewares.chat.onCommentDeleted, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {delete} /:teamspace/:model/risks?ids=:ids Delete risks
- * @apiName deleteRisks
- * @apiGroup Risks
- * @apiDescription Delete model risks.
- *
- * @apiUse Risks
- *
- * @apiParam (Query) {String} ids Comma separated list of IDs of risks to delete
- *
- * @apiExample {delete} Example usage:
- * DELETE /acme/00000000-0000-0000-0000-000000000000/risks?ids=00000000-0000-0000-0000-000000000002 HTTP/1.1
- *
- * @apiSuccessExample {json} Success-Response
- * HTTP/1.1 200 OK
- * {}
- */
-router.delete("/risks/", middlewares.issue.canCreate, deleteRisks);
-
-/**
  * @api {post} /:teamspace/:model/risks/:riskId/resources Attach resources to a risk
  * @apiName attachResourceRisk
  * @apiGroup Risks
@@ -749,24 +730,6 @@ function updateRisk(req, res, next) {
 	}).catch((err) => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
-}
-
-function deleteRisks(req, res, next) {
-	const sessionId = req.headers[C.HEADER_SOCKET_ID];
-	const place = utils.APIInfo(req);
-	const dbCol = {account: req.params.account, model: req.params.model};
-
-	if (req.query.ids) {
-		const ids = req.query.ids.split(",");
-
-		Risk.deleteRisks(dbCol, sessionId, ids).then(() => {
-			responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "success"});
-		}).catch((err) => {
-			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
-		});
-	} else {
-		responseCodes.respond(place, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
-	}
 }
 
 function listRisks(req, res, next) {

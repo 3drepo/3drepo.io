@@ -30,7 +30,7 @@ const utils = require("../utils");
 const FileRef = require("./fileRef");
 const Group = require("./group");
 const Meta = require("./meta");
-const View = require("./viewpoint");
+const View = new (require("../models/viewpoint"))();
 
 const statusEnum = C.ISSUE_STATUS;
 
