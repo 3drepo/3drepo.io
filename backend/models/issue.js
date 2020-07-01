@@ -28,7 +28,10 @@ const ModelSetting = require("../models/modelSetting");
 const BCF = require("./bcf");
 const Ticket = require("./ticket");
 
+const Comment = require("./comment");
+
 const C = require("../constants");
+const { stringToUUID, uuidToString } = require("../utils");
 
 const fieldTypes = {
 	"_id": "[object Object]",
@@ -290,6 +293,47 @@ class Issue extends Ticket {
 		}
 		return oldIssue.status !== newIssue.status;
 	}
+
+	async addComment(account, model, id, user, data, sessionId) {
+		// 1. creates a comment and gets the result ( comment + references)
+		const commentResult = await Comment.addComment(account, model, this.collName, id, user, data);
+
+		// 2 get referenced issue numbers
+		const issueNumbers = commentResult.issueRefs;
+
+		// 3. Get issues from number
+		const issuesColl = await this.getTicketsCollection(account, model);
+		// 4 Adding the comment id to get its number and to not make 2 queries to the database
+		const res = await issuesColl.find({ $or: [{ number: {$in: issueNumbers}}, {_id : stringToUUID(id)}]}).toArray();
+
+		// 5. Create system comments promise updates for those issues that were referenced
+		const issuesCommentsUpdates =  [];
+
+		// 6. Find the number of the issue that made the reference
+		const referenceNumber = res.find(({_id}) => uuidToString(_id) === id).number;
+
+		res.forEach((issue)  => {
+			if (issue.number === referenceNumber) {
+				return;
+			}
+
+			// 7. Create the system comment
+			const systemComment = this.createSystemComment(account, model, sessionId, issue._id, user, "issue_referenced", null, referenceNumber);
+			const comments = (issue.comments || []).map(c=> {
+				c.sealed = true;
+				return c;
+			}).concat([systemComment]);
+
+			// 8. Add update promise to updates array
+			issuesCommentsUpdates.push(issuesColl.update({_id: issue._id}, { $set: { comments }}));
+		});
+
+		// 9. update referenced issues with new system comments
+		await Promise.all(issuesCommentsUpdates);
+
+		return commentResult;
+	}
+
 }
 
 module.exports = new Issue();

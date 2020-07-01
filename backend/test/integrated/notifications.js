@@ -1,5 +1,3 @@
-"use strict";
-
 /**
  *  Copyright (C) 2018 3D Repo Ltd
  *
@@ -16,6 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+"use strict";
+
 const { deleteNotifications, fetchNotification } = require("../helpers/notifications");
 const { loginUsers } = require("../helpers/users.js");
 const { createModel, createFederation, updateFederation } = require("../helpers/models");

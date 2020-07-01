@@ -32,7 +32,7 @@ interface IProps {
 	jobs: any[];
 	topicTypes: any[];
 	issue: any;
-	issueWithMarkdownComments: any[];
+	comments: any[];
 	teamspace: string;
 	model: string;
 	revision: string;
@@ -104,7 +104,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		return (
 			<MessagesList
 				formRef={this.formRef}
-				messages={this.props.issueWithMarkdownComments}
+				messages={this.props.comments}
 				isPending={this.props.fetchingDetailsIsPending}
 				removeMessage={this.removeMessage}
 				teamspace={this.props.teamspace}
