@@ -18,7 +18,6 @@
 
 const utils = require("../utils");
 const responseCodes = require("../response_codes.js");
-const db = require("../handler/db");
 
 const History = require("./history");
 

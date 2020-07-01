@@ -164,9 +164,9 @@ class View {
 				!_.get(foundView, "screenshot.buffer")) {
 				return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 			} else {
-				return (foundTicket.thumbnail.content ||
+				return (foundView.thumbnail.content ||
 					foundView.screenshot.buffer ||
-					foundTicket.thumbnail).buffer;
+					foundView.thumbnail).buffer;
 			}
 		});
 	}
