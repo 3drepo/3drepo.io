@@ -64,14 +64,15 @@ const ownerPrivilegeAttributes = [
 	"position",
 	"desc",
 	"due_date",
-	"priority"
+	"priority",
+	"viewpoint"
 ];
 
 const statusEnum = C.ISSUE_STATUS;
 
 class Issue extends Ticket {
 	constructor() {
-		super("issues", "issue_id", "issueIds", "ISSUE", fieldTypes,ownerPrivilegeAttributes);
+		super("issues", "issue_id", "issueIds", "ISSUE", fieldTypes, ownerPrivilegeAttributes);
 	}
 
 	async create(account, model, newIssue, sessionId) {
@@ -142,7 +143,6 @@ class Issue extends Ticket {
 			"owner",
 			"rev_id",
 			"thumbnail",
-			"viewpoint",
 			"viewpoints",
 			"priority_last_changed",
 			"status_last_changed"
