@@ -35,13 +35,15 @@ interface IProps {
 	sealed: boolean;
 	index: number;
 	currentUser: string;
+	property: string;
 	formRef?: any;
 	removeMessage: (index, guid) => void;
 	setCameraOnViewpoint: (viewpoint) => void;
 }
 
 export const Message = ({
-	viewpoint, setCameraOnViewpoint, action, owner, comment, commentWithMarkdown, removeMessage, created, ...props
+	viewpoint, setCameraOnViewpoint, action, owner, comment, commentWithMarkdown,
+	removeMessage, created,  teamspace , ...props
 }: IProps) => {
 
 	const isSystemMessage = Boolean(action);
@@ -59,7 +61,11 @@ export const Message = ({
 	return (
 		<>
 			{isSystemMessage
-				? <SystemMessage name={owner} created={created} comment={comment} />
+				? <SystemMessage
+					created={created}
+					comment={commentWithMarkdown}
+					propertyName={action.property}
+					teamspace={teamspace} />
 				: <Container onClick={handleClick} clickable={Boolean(viewpoint)}>
 						<UserMessage
 							name={owner}
@@ -67,7 +73,7 @@ export const Message = ({
 							index={props.index}
 							guid={props.guid}
 							created={created}
-							teamspace={props.teamspace}
+							teamspace={teamspace}
 							formRef={props.formRef}
 							comment={comment}
 							commentWithMarkdown={commentWithMarkdown}
