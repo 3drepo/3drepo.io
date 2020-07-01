@@ -16,6 +16,8 @@
  */
 
 import styled from 'styled-components';
+import OrthogonalIconSVG from '../../../../icons/orthogonal.svg';
+import PerspectiveIconSVG from '../../../../icons/perspective.svg';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 
 import { COLOR, FONT_WEIGHT } from '../../../../styles';
@@ -96,3 +98,16 @@ export const ToolbarButton = styled(TooltipButton)`
 		}
 	}
 ` as any;
+
+export const Icon = styled.img`
+	max-height: 24px;
+	max-width: 24px;
+`;
+
+export const OrthogonalIcon = styled(Icon).attrs({
+	src: OrthogonalIconSVG,
+})``;
+
+export const PerspectiveIcon = styled(Icon).attrs({
+	src: PerspectiveIconSVG,
+})``;

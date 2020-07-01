@@ -36,16 +36,13 @@ import ResetIcon from '@material-ui/icons/Replay';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { Helicopter } from '../../../components/fontAwesomeIcon';
 
-// import OrthogonalIcon from '../../../../icons/orthogonal.svg';
-// import PerspectiveIcon from '../../../../icons/perspective.svg';
-import OrthogonalIcon from '@material-ui/icons/Business';
-import PerspectiveIcon from '@material-ui/icons/DomainDisabled';
-
 import {
 	ButtonWrapper,
 	ClipIconWrapper,
 	ClipNumber,
 	Container,
+	OrthogonalIcon,
+	PerspectiveIcon,
 	Submenu,
 	SubmenuDot,
 	ToolbarButton
