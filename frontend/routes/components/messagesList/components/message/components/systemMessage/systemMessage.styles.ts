@@ -20,6 +20,7 @@ import styled from 'styled-components';
 import { Avatar as AvatarComponent } from '@material-ui/core';
 
 import { COLOR } from '../../../../../../../styles';
+import { MarkdownMessage } from '../markdownMessage/markdownMessage.component';
 
 export const Container = styled.span`
 	color: ${COLOR.BLACK_60};
@@ -40,5 +41,17 @@ export const Avatar = styled(AvatarComponent)`
 		width: 34px;
 		color: ${COLOR.BLACK_60 };
 		background-color: transparent;
+	}
+`;
+
+export const MarkdownComment = styled(MarkdownMessage)`
+	margin: 0;
+	color: ${COLOR.BLACK_50};
+	font-size: 11px;
+	display: inline;
+
+	p {
+		display: inline;
+		margin: 0;
 	}
 `;

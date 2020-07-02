@@ -1,5 +1,3 @@
-"use strict";
-
 /**
  *  Copyright (C) 2014 3D Repo Ltd
  *
@@ -16,12 +14,39 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+"use strict";
 
 const request = require("supertest");
-const {expect, Assertion } = require("chai");
+const {should, assert, expect, Assertion } = require("chai");
 const app = require("../../services/api.js").createApp();
 const responseCodes = require("../../response_codes.js");
 const async = require("async");
+const { login } = require("../helpers/users.js");
+
+const { createIssue } = require("../helpers/issues.js");
+
+const { deleteNotifications, fetchNotification } = require("../helpers/notifications.js");
+const { Agent } = require("useragent");
+const supertest = require("supertest");
+const { json } = require("body-parser");
+
+
+
+// var expectOld = supertest.Test.prototype.expect;
+
+// supertest.Test.prototype.expect = function(status, callback) {
+// 	expectOld.apply(this, [status,  function(err, res) {
+// 		console.log(status);
+// 		console.log(res.status);
+
+// 		expect(res.status, 'Status should be ' + status).to.be.equal(status);
+// 		callback(err, res);
+// 	}]);
+// }
+
+// __proto__.constructor.prototype
+
+// return;
 
 describe("Issues", function () {
 	let server;
@@ -37,6 +62,7 @@ describe("Issues", function () {
 	const model = "project1";
 
 	const pngBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVR42mPUjrj6n4EIwDiqkL4KAV6SF3F1FmGrAAAAAElFTkSuQmCC";
+	const altBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==";
 	const baseIssue = {
 		"status": "open",
 		"priority": "low",
@@ -561,6 +587,118 @@ describe("Issues", function () {
 			], done);
 		});
 
+		it("change screenshot should succeed and create system comment", function(done) {
+			const issue = Object.assign({"name":"Issue test"}, baseIssue, { assigned_roles:["jobA"]});
+			let issueId;
+			let oldViewpoint;
+			let screenshotRef;
+			const data = {
+				"viewpoint": {
+					"screenshot": altBase64
+				}
+			};
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200 , function(err, res) {
+							issueId = res.body._id;
+							oldViewpoint = res.body.viewpoint;
+							delete oldViewpoint.screenshot;
+							delete oldViewpoint.screenshotSmall;
+							screenshotRef = res.body.viewpoint.screenshot_ref;
+							return done(err);
+
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/issues/${issueId}`)
+						.send(data)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/issues/${issueId}`)
+						.expect(200, function(err, res) {
+							const newViewpoint = { ...oldViewpoint };
+							newViewpoint.guid = res.body.viewpoint.guid;
+							newViewpoint.screenshot_ref = res.body.viewpoint.screenshot_ref;
+
+							expect(res.body.viewpoint.screenshot_ref).to.not.equal(screenshotRef);
+							expect(res.body.comments[0].action.property).to.equal("screenshot");
+							expect(res.body.comments[0].action.from).to.equal(screenshotRef);
+							expect(res.body.comments[0].action.to).to.equal(res.body.viewpoint.screenshot_ref);
+							expect(res.body.comments[0].owner).to.equal(username);
+							expect(res.body.comments[1].action.property).to.equal("viewpoint");
+							expect(res.body.comments[1].action.from).to.equal(JSON.stringify(oldViewpoint));
+							expect(res.body.comments[1].action.to).to.equal(JSON.stringify(newViewpoint));
+							expect(res.body.comments[1].owner).to.equal(username);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change viewpoint should succeed and create system comment", function(done) {
+			const issue = Object.assign({"name":"Issue test"}, baseIssue, { assigned_roles:["jobA"]});
+			let issueId;
+			let oldViewpoint;
+			const data = {
+				"viewpoint": {
+						"up":[0,1,0],
+						"position":[20,20,100],
+						"look_at":[0,0,-100],
+						"view_dir":[0,0,-1],
+						"right":[1,0,0],
+						"fov":2,
+						"aspect_ratio":1,
+						"far":300,
+						"near":50,
+						"clippingPlanes":[]
+				}
+			};
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200 , function(err, res) {
+							issueId = res.body._id;
+							oldViewpoint = res.body.viewpoint;
+							delete oldViewpoint.screenshot;
+							delete oldViewpoint.screenshotSmall;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/issues/${issueId}`)
+						.send(data)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/issues/${issueId}`)
+						.expect(200, function(err, res) {
+							const newViewpoint = { ...oldViewpoint, ...data.viewpoint };
+							newViewpoint.guid = res.body.viewpoint.guid;
+
+							expect(res.body.viewpoint.up).to.deep.equal(data.viewpoint.up);
+							expect(res.body.viewpoint.position).to.deep.equal(data.viewpoint.position);
+							expect(res.body.viewpoint.look_at).to.deep.equal(data.viewpoint.look_at);
+							expect(res.body.viewpoint.view_dir).to.deep.equal(data.viewpoint.view_dir);
+							expect(res.body.viewpoint.right).to.deep.equal(data.viewpoint.right);
+							expect(res.body.viewpoint.fov).to.equal(data.viewpoint.fov);
+							expect(res.body.viewpoint.aspect_ratio).to.equal(data.viewpoint.aspect_ratio);
+							expect(res.body.viewpoint.far).to.equal(data.viewpoint.far);
+							expect(res.body.viewpoint.near).to.equal(data.viewpoint.near);
+							expect(res.body.viewpoint.clippingPlanes).to.deep.equal(data.viewpoint.clippingPlanes);
+							expect(res.body.comments[0].action.property).to.equal("viewpoint");
+							expect(res.body.comments[0].action.from).to.equal(JSON.stringify(oldViewpoint));
+							expect(res.body.comments[0].action.to).to.equal(JSON.stringify(newViewpoint));
+							expect(res.body.comments[0].owner).to.equal(username);
+							done(err);
+						});
+				}
+			], done);
+		});
+
 		it("screenshot within comments should work", (done) => {
 			const issue = Object.assign({"name":"Issue test"}, baseIssue, { topic_type: "ru123"});
 			let issueId;
@@ -847,6 +985,47 @@ describe("Issues", function () {
 					});
 			});
 
+			it("not change screenshot", function(done) {
+
+				const updateData = {
+					"viewpoint": {
+						"screenshot": altBase64
+					}
+				};
+				agent.patch(`/${username}/${model}/issues/${issueId}`)
+					.send(updateData)
+					.expect(400, function(err, res) {
+						expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
+						done(err);
+					});
+
+			});
+
+			it("not change viewpoint", function(done) {
+
+				const updateData = {
+					"viewpoint": {
+							"up":[0,1,0],
+							"position":[20,20,100],
+							"look_at":[0,0,-100],
+							"view_dir":[0,0,-1],
+							"right":[1,0,0],
+							"fov":2,
+							"aspect_ratio":1,
+							"far":300,
+							"near":50,
+							"clippingPlanes":[]
+					}
+				};
+				agent.patch(`/${username}/${model}/issues/${issueId}`)
+					.send(updateData)
+					.expect(400, function(err, res) {
+						expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
+						done(err);
+					});
+
+			});
+
 			it("can change status to anything but closed", function(done) {
 				const updateData = {
 					"status": "in progress"
@@ -986,6 +1165,47 @@ describe("Issues", function () {
 						expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
 						done(err);
 					});
+			});
+
+			it("not change screenshot", function(done) {
+
+				const updateData = {
+					"viewpoint": {
+						"screenshot": altBase64
+					}
+				};
+				agent.patch(`/${username}/${model}/issues/${issueId}`)
+					.send(updateData)
+					.expect(400, function(err, res) {
+						expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
+						done(err);
+					});
+
+			});
+
+			it("not change viewpoint", function(done) {
+
+				const updateData = {
+					"viewpoint": {
+							"up":[0,1,0],
+							"position":[20,20,100],
+							"look_at":[0,0,-100],
+							"view_dir":[0,0,-1],
+							"right":[1,0,0],
+							"fov":2,
+							"aspect_ratio":1,
+							"far":300,
+							"near":50,
+							"clippingPlanes":[]
+					}
+				};
+				agent.patch(`/${username}/${model}/issues/${issueId}`)
+					.send(updateData)
+					.expect(400, function(err, res) {
+						expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
+						done(err);
+					});
+
 			});
 
 			it("can change type", function(done) {
@@ -1303,7 +1523,11 @@ describe("Issues", function () {
 					function(done) {
 						agent.post(`/${username}/${model}/issues/${issueId}/comments`)
 							.send(comment)
-							.expect(200 , done);
+							.expect(200 , function(err , res) {
+								const commentRes = res.body;
+								expect(commentRes.comment).to.equal(comment.comment);
+								done(err);
+							});
 					},
 					function(done) {
 						agent.get(`/${username}/${model}/issues/${issueId}`).expect(200, function(err , res) {
@@ -1455,6 +1679,271 @@ describe("Issues", function () {
 					.expect(404 , done);
 			});
 		});
+	});
+
+	describe("Tagging a user in a comment", function() {
+		const teamspace = "teamSpace1";
+		const altUser = "commenterTeamspace1Model1JobA";
+		const password = "password";
+		const model = "5bfc11fa-50ac-b7e7-4328-83aa11fa50ac";
+		const issueId = "2eb8f760-7ac5-11e8-9567-6b401a084a90";
+
+		before(function(done) {
+			async.series([
+				function(done) {
+					agent.post("/logout")
+						.send({})
+						.expect(200, done);
+				},
+				function(done) {
+					agent.post("/login")
+						.send({username: teamspace, password})
+						.expect(200, done);
+				}
+			], done);
+		});
+
+		it("should create a notification on the tagged user's messages", function(done) {
+			const comment = {comment : `@${altUser}`};
+			async.series([
+				function(done) {
+					agent.post(`/${teamspace}/${model}/issues/${issueId}/comments`)
+						.send(comment)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.post("/logout")
+						.send({})
+						.expect(200, done);
+				},
+				function(done) {
+					agent.post("/login")
+						.send({username: altUser, password})
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get("/notifications")
+						.expect(200, function(err, res) {
+							const notification = res.body.find(item => item.type === "USER_REFERENCED" && item.issueId === issueId);
+							assert(notification);
+							expect(notification.modelId).to.equal(model);
+							expect(notification.teamSpace).to.equal(teamspace);
+							expect(notification.referrer).to.equal(teamspace);
+							done(err);
+						});
+				}],
+			done);
+
+		});
+
+		it("should create comment successful if the user tagged a user that doesn't not exist", function(done) {
+			const comment = {comment : `@doesntExist1234`};
+			agent.post(`/${teamspace}/${model}/issues/${issueId}/comments`)
+				.send(comment)
+				.expect(200, done);
+		});
+
+
+		it("should NOT create a notification if the user does not belong in the teamspace", function(done) {
+			const comment = {comment : `@${username}`};
+			async.series([
+				login(agent, altUser, password),
+				function(done) {
+					agent.post(`/${teamspace}/${model}/issues/${issueId}/comments`)
+						.send(comment)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.post("/logout")
+						.send({})
+						.expect(200, done);
+				},
+				function(done) {
+					agent.post("/login")
+						.send({username, password})
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get("/notifications")
+						.expect(200, function(err, res) {
+							const notification = res.body.find(item => item.type === "USER_REFERENCED" && item.issueId === issueId);
+							expect(notification).to.equal(undefined);
+							done(err);
+						});
+				}],
+			done);
+		});
+
+		it("should NOT create a notification if the user is tagged in a quote", function(done) {
+			const comment = {comment : `>
+			@${altUser}`};
+			async.waterfall([
+				login(agent, altUser, password),
+				deleteNotifications(agent),
+				login(agent, teamspace, password),
+				function(args, next) {
+					agent.post(`/${teamspace}/${model}/issues/${issueId}/comments`)
+						.send(comment)
+						.expect(200, next);
+				},
+				login(agent, altUser, password),
+				fetchNotification(agent),
+				(notifications, next) => {
+					expect(notifications, 'There shouldnt be any notifications').to.be.an("array").and.to.have.length(0);
+					next();
+				},
+			],
+			done);
+		});
+
+	});
+
+	describe("referencing an issue in another issue ", function() {
+		const teamspace = "teamSpace1";
+		const password = "password";
+		const model = "5bfc11fa-50ac-b7e7-4328-83aa11fa50ac";
+
+		const createIssueTeamspace1 = createIssue(teamspace,model);
+
+		const issues = [];
+
+		const createAndPushIssue = (done) => {
+			async.waterfall([
+				createIssueTeamspace1(agent),
+				(issue, next) => {
+					issues.push(issue);
+					next();
+				}], done)
+		};
+
+
+		before(function(done) {
+			async.series([
+				login(agent, teamspace, password),
+				createAndPushIssue,
+				createAndPushIssue,
+				createAndPushIssue,
+				createAndPushIssue,
+				createAndPushIssue,
+				createAndPushIssue,
+				createAndPushIssue,
+				createAndPushIssue,
+			], done);
+		});
+
+
+		const testForNoComment = (id, done) => {
+			agent.get(`/${teamspace}/${model}/issues/${id}`).expect(200, function(err , res) {
+				const comments = res.body.comments;
+				expect(comments, 'There shouldnt be a comment').to.be.an("array").and.to.have.length(0);
+				return done(err);
+			});
+		};
+
+		const testForReference = (referencedIssueId, otherIssueNumber, done) =>  {
+			agent.get(`/${teamspace}/${model}/issues/${referencedIssueId}`).expect(200, function(err , res) {
+				const comments = res.body.comments;
+
+				expect(comments, 'There should be one system comment').to.be.an("array").and.to.have.length(1);
+
+				const commentAction = comments[0].action;
+
+				expect(commentAction.property).to.equal('issue_referenced')
+				expect(commentAction.to).to.equal(otherIssueNumber.toString())
+				return done(err);
+			});
+		}
+
+		it("should create a system message when the issue has been referenced", function(done) {
+			const comment = {comment : `look at issue  #${issues[0].number} and #${issues[1].number} `};
+
+			async.series([
+				function(done) {
+					agent.post(`/${teamspace}/${model}/issues/${issues[2]._id}/comments`)
+						.send(comment)
+						.expect(200, done);
+				},
+				function(done) {
+					testForReference(issues[0]._id, issues[2].number, done );
+				},
+				function(done) {
+					testForReference(issues[1]._id, issues[2].number, done );
+				},
+				function(done) {
+					testForNoComment(issues[3]._id, done);
+				},
+
+				function(done) {
+					testForNoComment(issues[3]._id, done);
+				},
+			], done);
+		});
+
+		it("should have multiple system messages when the issue has been referenced several times", function(done) {
+			const comment = {comment : `#${issues[0].number} is interesting`};
+
+			async.series([
+				function(done) {
+					agent.post(`/${teamspace}/${model}/issues/${issues[1]._id}/comments`)
+						.send(comment)
+						.expect(200, done);
+				},
+
+				function(done) {
+					agent.get(`/${teamspace}/${model}/issues/${issues[0]._id}`).expect(200, function(err , res) {
+						let comments = res.body.comments;
+						const [otherIssueNumber1, otherIssueNumber2] =  [issues[2].number.toString(), issues[1].number.toString()]
+							.sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+
+						expect(comments, 'There should be two system comments').to.be.an("array").and.to.have.length(2);
+
+						comments = comments
+							.sort((commentA, commentB) => parseInt(commentA.action.to, 10) - parseInt(commentB.action.to, 10));
+
+						const commentAction1 = comments[0].action;
+						expect(commentAction1.property).to.equal('issue_referenced')
+						expect(commentAction1.to).to.equal(otherIssueNumber1);
+
+						const commentAction2 = comments[1].action;
+						expect(commentAction2.property).to.equal('issue_referenced')
+						expect(commentAction2.to).to.equal(otherIssueNumber2);
+
+
+						return done(err);
+					});
+				},
+			], done);
+		});
+
+		it("shouldnt  create a system message when the issue that has been referenced is part of a quote", function(done) {
+			const comment = {comment : `> look at issue  #${issues[4].number}
+			and #${issues[5].number}
+			
+			and #${issues[6].number}
+			`};
+
+			async.series([
+				function(done) {
+					agent.post(`/${teamspace}/${model}/issues/${issues[7]._id}/comments`)
+						.send(comment)
+						.expect(200, done);
+				},
+				function(done) {
+					testForNoComment(issues[4]._id, done);
+				},
+				function(done) {
+					testForNoComment(issues[5]._id, done);
+				},
+				function(done) {
+					testForReference(issues[6]._id, issues[7].number, done );
+				},
+
+			], done);
+
+		});
+
+
+
 	});
 
 	describe("BCF", function() {

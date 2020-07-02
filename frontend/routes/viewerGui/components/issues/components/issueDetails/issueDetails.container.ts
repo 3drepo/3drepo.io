@@ -21,8 +21,8 @@ import { createStructuredSelector } from 'reselect';
 import { selectUsername } from '../../../../../../modules/currentUser';
 import { DialogActions } from '../../../../../../modules/dialog';
 import {
+	selectActiveIssueComments,
 	selectActiveIssueDetails,
-	selectActiveIssueWithMarkdownComments,
 	selectExpandDetails,
 	selectFailedToLoad,
 	selectFetchingDetailsIsPending,
@@ -38,7 +38,7 @@ import { IssueDetails } from './issueDetails.component';
 
 const mapStateToProps = createStructuredSelector({
 	issue: selectActiveIssueDetails,
-	issueWithMarkdownComments: selectActiveIssueWithMarkdownComments,
+	comments: selectActiveIssueComments,
 	jobs: selectJobsList,
 	expandDetails: selectExpandDetails,
 	fetchingDetailsIsPending: selectFetchingDetailsIsPending,

@@ -35,7 +35,7 @@ interface IProps {
 	viewer: any;
 	jobs: any[];
 	risk: any;
-	riskWithMarkdownComments: any[];
+	comments: any[];
 	teamspace: string;
 	model: string;
 	revision: string;
@@ -125,7 +125,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	public renderMessagesList = renderWhenTrue(() => (
 		<MessagesList
 			formRef={this.formRef}
-			messages={this.props.riskWithMarkdownComments}
+			messages={this.props.comments}
 			isPending={this.props.fetchingDetailsIsPending}
 			removeMessage={this.removeMessage}
 			teamspace={this.props.teamspace}
@@ -137,7 +137,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	public renderPreview = renderWhenTrue(() => {
 		const { expandDetails, horizontal, failedToLoad, disableViewer } = this.props;
 		const { comments } = this.riskData;
-		const isRiskWithComments = Boolean((comments && comments.length || horizontal) && !this.isNewRisk);
+		const isRiskWithComments = Boolean(!this.isNewRisk);
 		const PreviewWrapper = horizontal && isRiskWithComments ? HorizontalView : Fragment;
 		const renderNotCollapsable = () => {
 			return this.renderMessagesList(!horizontal && isRiskWithComments);
