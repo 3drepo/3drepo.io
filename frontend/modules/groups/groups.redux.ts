@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { keyBy, omit } from 'lodash';
+import { keyBy } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({

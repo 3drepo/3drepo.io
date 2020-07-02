@@ -17,7 +17,7 @@
 
 import { push } from 'connected-react-router';
 import filesize from 'filesize';
-import {get, isEmpty, isEqual, map, omit, pick} from 'lodash';
+import { isEmpty, isEqual, map, omit, pick } from 'lodash';
 import * as queryString from 'query-string';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 import { CHAT_CHANNELS } from '../../constants/chat';

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,7 @@
 
 import { push } from 'connected-react-router';
 import filesize from 'filesize';
-import {get, isEmpty, isEqual, map, omit, pick} from 'lodash';
+import { isEmpty, isEqual, map, omit, pick } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import * as queryString from 'query-string';
@@ -29,6 +29,7 @@ import {
 	createAttachResourceComments,
 	createRemoveResourceComment
 } from '../../helpers/comments';
+import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
 import { prepareIssue } from '../../helpers/issues';
 import { prepareResources } from '../../helpers/resources';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
@@ -41,11 +42,10 @@ import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { selectJobsList, selectMyJob } from '../jobs';
 import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
-import {selectActiveRiskDetails} from '../risks';
 import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
-import { selectTopicTypes, TeamspaceActions } from '../teamspace';
+import { selectTopicTypes } from '../teamspace';
 import { selectIfcSpacesHidden, TreeActions } from '../tree';
 import { IssuesActions, IssuesTypes } from './issues.redux';
 import {
@@ -563,17 +563,27 @@ export function* cloneIssue() {
 	const activeIssue = yield select(selectActiveIssueDetails);
 	const jobs = yield select(selectJobsList);
 	const currentUser = yield select(selectCurrentUser);
-	const clonedProperties = pick(activeIssue, [
-		'name',
-		'status',
-		'priority',
-		'topic_type',
-		'assigned_roles',
-		'due_date',
-		'desc',
-		'descriptionThumbnail',
+
+	const clonedProperties = omit(activeIssue, [
+		'_id',
+		'rev_id',
+		'number',
+		'owner',
+		'comments',
+		'created',
+		'creator_role',
+		'lastUpdated',
+		'resources',
+		'thumbnail',
 		'viewpoint',
+		'priority_last_changed',
+		'status_last_changed',
 	]);
+
+	if (activeIssue.descriptionThumbnail) {
+		const base64Image = yield imageUrlToBase64(activeIssue.descriptionThumbnail);
+		clonedProperties.descriptionThumbnail = `data:image/png;base64,${base64Image}`;
+	}
 
 	try {
 		const newIssue = prepareIssue({
