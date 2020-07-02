@@ -20,8 +20,8 @@ import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tool
 
 import { COLOR, FONT_WEIGHT } from '../../../../styles';
 
-const OrthogonalIconSVG = require('../../../../icons/orthogonal.svg');
-const PerspectiveIconSVG = require('../../../../icons/perspective.svg');
+import OrthogonalIconSVG = require('../../../../icons/orthogonal.svg');
+import PerspectiveIconSVG = require('../../../../icons/perspective.svg');
 
 export const Container = styled.div`
 	background-color: ${COLOR.REGENT_GRAY};
