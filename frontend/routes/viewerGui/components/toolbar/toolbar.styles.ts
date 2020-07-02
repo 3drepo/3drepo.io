@@ -16,13 +16,12 @@
  */
 
 import styled from 'styled-components';
-// eslint-disable-next-line
-import OrthogonalIconSVG from '../../../../icons/orthogonal.svg';
-// eslint-disable-next-line
-import PerspectiveIconSVG from '../../../../icons/perspective.svg';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 
 import { COLOR, FONT_WEIGHT } from '../../../../styles';
+
+const OrthogonalIconSVG = require('../../../../icons/orthogonal.svg');
+const PerspectiveIconSVG = require('../../../../icons/perspective.svg');
 
 export const Container = styled.div`
 	background-color: ${COLOR.REGENT_GRAY};
