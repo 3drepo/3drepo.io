@@ -20,9 +20,9 @@ import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tool
 
 import { COLOR, FONT_WEIGHT } from '../../../../styles';
 
-// eslint-disable-next-line no-var-requires
+// tslint:disable-next-line:no-var-requires
 const OrthogonalIconSVG = require('../../../../icons/orthogonal.svg');
-// eslint-disable-next-line no-var-requires
+// tslint:disable-next-line:no-var-requires
 const PerspectiveIconSVG = require('../../../../icons/perspective.svg');
 
 export const Container = styled.div`
