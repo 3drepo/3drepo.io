@@ -22,18 +22,18 @@ import Grid from '@material-ui/core/Grid';
 import { cond, constant, matches, stubTrue } from 'lodash';
 
 import { COLOR } from '../../../../../../styles';
-import { LogList as LogListBase } from '../../../../../components/logList/logList.component';
+import { MessagesList as MessagesListComponent } from '../../../../../components/messagesList/';
 import * as TextFieldStyles from '../../../../../components/textField/textField.styles';
 import PreviewDetailsBase from '../../../previewDetails/previewDetails.container';
 
 export const StyledFormControl = styled(FormControl)`
 `;
 
-export const LogList = styled(LogListBase)`
+export const MessagesList = styled(MessagesListComponent)`
 	height: 100%;
 `;
 
-export const LogsContainer = styled.div`
+export const MessageContainer = styled.div`
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
@@ -110,7 +110,7 @@ export const HorizontalView = styled.div`
 	justify-content: flex-start;
 	overflow: hidden;
 
-	${PreviewDetails}, ${LogsContainer} {
+	${PreviewDetails}, ${MessageContainer} {
 		min-width: 50%;
 		width: 50%;
 		min-height: 60vh;
@@ -119,7 +119,7 @@ export const HorizontalView = styled.div`
 		overflow: auto;
 	}
 
-	${LogList} {
+	${MessagesList} {
 		:before {
 			box-shadow: none;
 		}

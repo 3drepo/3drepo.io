@@ -23,6 +23,7 @@ import { DialogActions } from '../../../../../../modules/dialog';
 import { selectJobsList, selectMyJob } from '../../../../../../modules/jobs';
 import { selectSettings } from '../../../../../../modules/model';
 import {
+	selectActiveRiskComments,
 	selectActiveRiskDetails,
 	selectAssociatedActivities,
 	selectExpandDetails,
@@ -39,6 +40,7 @@ import { RiskDetails } from './riskDetails.component';
 const mapStateToProps = createStructuredSelector({
 	criteria: selectMitigationCriteria,
 	risk: selectActiveRiskDetails,
+	comments: selectActiveRiskComments,
 	jobs: selectJobsList,
 	expandDetails: selectExpandDetails,
 	fetchingDetailsIsPending: selectFetchingDetailsIsPending,

@@ -23,8 +23,11 @@ import { IS_FIREFOX } from '../helpers/browser';
 export class UnityUtil {
 	/** @hidden */
 	private static errorCallback: any;
+	/** @hidden */
 	private static progressCallback: any;
+	/** @hidden */
 	private static modelLoaderProgressCallback: any;
+
 	/**
 	 * viewer can be assigned, containing any callback function the user wishes to hook onto.
 	 * The following functions are supported:

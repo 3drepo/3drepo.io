@@ -29,7 +29,8 @@ const types = {
 	ISSUE_ASSIGNED : "ISSUE_ASSIGNED",
 	ISSUE_CLOSED: "ISSUE_CLOSED",
 	MODEL_UPDATED : "MODEL_UPDATED",
-	MODEL_UPDATED_FAILED : "MODEL_UPDATED_FAILED"
+	MODEL_UPDATED_FAILED : "MODEL_UPDATED_FAILED",
+	USER_REFERENCED : "USER_REFERENCED"
 };
 
 const NOTIFICATIONS_DB = "notifications";
@@ -155,6 +156,16 @@ const getHistoricAssignedRoles = (issue) => {
 	}
 
 	return assignedRoles;
+};
+
+const insertUserReferencedNotification = (referrer, teamSpace, modelId, type, id, referee) => {
+	const data = { referrer, teamSpace, modelId };
+	if (type === "issue") {
+		data.issueId = id;
+	} else {
+		data.riskId = id;
+	}
+	return insertNotification(referee, types.USER_REFERENCED, data);
 };
 
 const upsertIssueClosedNotification = (username, teamSpace, modelId, issueId) => {
@@ -385,6 +396,21 @@ module.exports = {
 		}));
 
 		return await fillModelData(userNotifications);
+	},
+
+	insertUserReferencedNotification: async function (referrer, teamspace, modelId, type, _id, referee) {
+		try {
+			const user = await User.findByUserName(referee);
+			if (await user.isMemberOfTeamspace(teamspace)) {
+				const notification = await insertUserReferencedNotification(referrer, teamspace, modelId, type, _id, referee);
+				return await fillModelData([{username: referee, notification}]);
+			} else {
+				return [];
+			}
+		} catch (e) {
+			return [];
+		}
+
 	},
 
 	/**

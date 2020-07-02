@@ -64,6 +64,7 @@ interface IProps {
 	hidePin?: boolean;
 	hasPin: boolean;
 	canComment: boolean;
+	formRef: any;
 }
 
 interface IState {
@@ -232,13 +233,11 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					)} />
 
 					{this.props.issue.descriptionThumbnail && (
-						<DescriptionImage>
-							<Image
-								src={this.props.issue.descriptionThumbnail}
-								enablePreview
-								{...this.imageProps()}
-							/>
-						</DescriptionImage>
+						<DescriptionImage
+							src={this.props.issue.descriptionThumbnail}
+							enablePreview
+							{...this.imageProps()}
+						/>
 					)}
 				</Form>
 				{!this.isNewIssue &&
@@ -248,6 +247,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						onSaveLinks={attachLinkResources}
 						onRemoveResource={onRemoveResource}
 						canEdit={canComment}
+						formRef={this.props.formRef}
 					/>
 				}
 			</MuiPickersUtilsProvider>

@@ -24,7 +24,6 @@ const responseCodes = require("../../response_codes.js");
 const async = require("async");
 
 describe("Risks", function () {
-
 	let server;
 	let agent;
 
@@ -37,6 +36,7 @@ describe("Risks", function () {
 	const model = "project1";
 
 	const pngBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVR42mPUjrj6n4EIwDiqkL4KAV6SF3F1FmGrAAAAAElFTkSuQmCC";
+	const altBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==";
 	const baseRisk = {
 		"safetibase_id":"12456-abcdef",
 		"associated_activity":"replacement",
@@ -70,7 +70,6 @@ describe("Risks", function () {
 	};
 
 	before(function(done) {
-
 		server = app.listen(8080, function () {
 			console.log("API test server is listening on port 8080!");
 
@@ -136,7 +135,6 @@ describe("Risks", function () {
 
 				function(done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function(err, res) {
-
 						expect(res.body.name).to.equal(risk.name);
 						expect(res.body.safetibase_id).to.equal(risk.safetibase_id);
 						expect(res.body.associated_activity).to.equal(risk.associated_activity);
@@ -168,7 +166,6 @@ describe("Risks", function () {
 		});
 
 		it("with screenshot should succeed", function(done) {
-
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			risk.viewpoint.screenshot = pngBase64;
 
@@ -183,7 +180,6 @@ describe("Risks", function () {
 							return done(err);
 						});
 				},
-
 				function(done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function(err, res) {
 						expect(res.body.viewpoint.screenshot).to.equal(`${username}/${model}/risks/${riskId}/viewpoints/${res.body.viewpoint.guid}/screenshot.png`);
@@ -265,18 +261,15 @@ describe("Risks", function () {
 				});
 		});
 
-		it("with invalid mitigation status", function(done) {
+		it("with invalid mitigation status should pass", function(done) {
 			const risk = Object.assign({}, baseRisk, {"name":"Risk test", "mitigation_status":"abc"});
 
 			agent.post(`/${username}/${model}/risks`)
 				.send(risk)
-				.expect(200, function(err, res) {
-					done(err);
-				});
+				.expect(200, done);
 		});
 
 		it("with pin should succeed and pin info is saved", function(done) {
-
 			const risk = Object.assign({
 				"name": "Risk test",
 				"position": [33.167440465643935, 12.46054749529149, -46.997271893235435]
@@ -293,7 +286,6 @@ describe("Risks", function () {
 							expect(res.body.norm).to.deep.equal(risk.norm);
 							expect(res.body.position).to.deep.equal(risk.position);
 							return done(err);
-
 						});
 				},
 				function(done) {
@@ -307,7 +299,6 @@ describe("Risks", function () {
 		});
 
 		it("change safetibase_id should succeed", function(done) {
-
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			let riskId;
 
@@ -338,7 +329,6 @@ describe("Risks", function () {
 		});
 
 		it("change associated_activity should succeed", function(done) {
-
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			let riskId;
 
@@ -369,7 +359,6 @@ describe("Risks", function () {
 		});
 
 		it("change description should succeed", function(done) {
-
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			let riskId;
 
@@ -400,7 +389,6 @@ describe("Risks", function () {
 		});
 
 		it("change assigned_roles should succeed", function(done) {
-
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			let riskId;
 
@@ -431,7 +419,6 @@ describe("Risks", function () {
 		});
 
 		it("change category should succeed and create system comment", function(done) {
-
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			let riskId;
 
@@ -508,7 +495,6 @@ describe("Risks", function () {
 		});
 
 		it("seal last non system comment when adding system comment", function(done) {
-
 			const risk = Object.assign({"name":"Risk test"}, baseRisk, { associated_activity: "ru123"});
 			let riskId;
 			const data = { associated_activity: "abc123"};
@@ -519,7 +505,6 @@ describe("Risks", function () {
 						.expect(200 , function(err, res) {
 							riskId = res.body._id;
 							return done(err);
-
 						});
 				},
 				function(done) {
@@ -543,7 +528,6 @@ describe("Risks", function () {
 		});
 
 		it("change likelihood should succeed", function(done) {
-
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			let riskId;
 
@@ -574,7 +558,6 @@ describe("Risks", function () {
 		});
 
 		it("change consequence should succeed", function(done) {
-
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			let riskId;
 
@@ -605,7 +588,6 @@ describe("Risks", function () {
 		});
 
 		it("change pin should succeed", function(done) {
-
 			const risk = {...baseRisk, "name":"Risk test", position:[3,2,1]};
 			let riskId;
 
@@ -635,9 +617,7 @@ describe("Risks", function () {
 			], done);
 		});
 
-
 		it("change mitigation status should succeed", function(done) {
-
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			let riskId;
 
@@ -667,8 +647,37 @@ describe("Risks", function () {
 			], done);
 		});
 
-		it("change mitigation should succeed", function(done) {
+		it("change mitigation status to void should succeed", function(done) {
+			const risk = Object.assign({"name":"Risk test"}, baseRisk);
+			let riskId;
 
+			const mitigationStatus = { mitigation_status: "void" };
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200, function(err, res) {
+							riskId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
+						.send(mitigationStatus)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/risks/${riskId}`)
+						.expect(200, function(err, res) {
+							expect(res.body.mitigation_status).to.equal(mitigationStatus.mitigation_status);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change mitigation should succeed", function(done) {
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			let riskId;
 
@@ -698,12 +707,123 @@ describe("Risks", function () {
 			], done);
 		});
 
+		it("change screenshot should succeed and create system comment", function(done) {
+			const risk = Object.assign({"name":"Risk test"}, baseRisk);
+			let riskId;
+			let oldViewpoint;
+			let screenshotRef;
+			const data = {
+				"viewpoint": {
+					"screenshot": altBase64
+				}
+			};
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200 , function(err, res) {
+							riskId = res.body._id;
+							oldViewpoint = res.body.viewpoint;
+							delete oldViewpoint.screenshot;
+							delete oldViewpoint.screenshotSmall;
+							screenshotRef = res.body.viewpoint.screenshot_ref;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
+						.send(data)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/risks/${riskId}`)
+						.expect(200, function(err, res) {
+							const newViewpoint = { ...oldViewpoint };
+							newViewpoint.guid = res.body.viewpoint.guid;
+							newViewpoint.screenshot_ref = res.body.viewpoint.screenshot_ref;
+
+							expect(res.body.viewpoint.screenshot_ref).to.not.equal(screenshotRef);
+							expect(res.body.comments[0].action.property).to.equal("screenshot");
+							expect(res.body.comments[0].action.from).to.equal(screenshotRef);
+							expect(res.body.comments[0].action.to).to.equal(res.body.viewpoint.screenshot_ref);
+							expect(res.body.comments[0].owner).to.equal(username);
+							expect(res.body.comments[1].action.property).to.equal("viewpoint");
+							expect(res.body.comments[1].action.from).to.equal(JSON.stringify(oldViewpoint));
+							expect(res.body.comments[1].action.to).to.equal(JSON.stringify(newViewpoint));
+							expect(res.body.comments[1].owner).to.equal(username);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change viewpoint should succeed and create system comment", function(done) {
+			const risk = Object.assign({"name":"Risk test"}, baseRisk);
+			let riskId;
+			let oldViewpoint;
+			const data = {
+				"viewpoint": {
+						"up":[0,1,0],
+						"position":[20,20,100],
+						"look_at":[0,0,-100],
+						"view_dir":[0,0,-1],
+						"right":[1,0,0],
+						"fov":2,
+						"aspect_ratio":1,
+						"far":300,
+						"near":50,
+						"clippingPlanes":[]
+				}
+			};
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200 , function(err, res) {
+							riskId = res.body._id;
+							oldViewpoint = res.body.viewpoint;
+							delete oldViewpoint.screenshot;
+							delete oldViewpoint.screenshotSmall;
+							return done(err);
+
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
+						.send(data)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/risks/${riskId}`)
+						.expect(200, function(err, res) {
+							const newViewpoint = { ...oldViewpoint, ...data.viewpoint };
+							newViewpoint.guid = res.body.viewpoint.guid;
+
+							expect(res.body.viewpoint.up).to.deep.equal(data.viewpoint.up);
+							expect(res.body.viewpoint.position).to.deep.equal(data.viewpoint.position);
+							expect(res.body.viewpoint.look_at).to.deep.equal(data.viewpoint.look_at);
+							expect(res.body.viewpoint.view_dir).to.deep.equal(data.viewpoint.view_dir);
+							expect(res.body.viewpoint.right).to.deep.equal(data.viewpoint.right);
+							expect(res.body.viewpoint.fov).to.equal(data.viewpoint.fov);
+							expect(res.body.viewpoint.aspect_ratio).to.equal(data.viewpoint.aspect_ratio);
+							expect(res.body.viewpoint.far).to.equal(data.viewpoint.far);
+							expect(res.body.viewpoint.near).to.equal(data.viewpoint.near);
+							expect(res.body.viewpoint.clippingPlanes).to.deep.equal(data.viewpoint.clippingPlanes);
+							expect(res.body.comments[0].action.property).to.equal("viewpoint");
+							expect(res.body.comments[0].action.from).to.equal(JSON.stringify(oldViewpoint));
+							expect(res.body.comments[0].action.to).to.equal(JSON.stringify(newViewpoint));
+							expect(res.body.comments[0].owner).to.equal(username);
+							done(err);
+						});
+				}
+			], done);
+		});
+
 		describe("and then commenting", function() {
 			let riskId;
 			let commentId = null
 
 			before(function(done) {
-
 				const risk = Object.assign({"name":"Risk test"}, baseRisk);
 
 				agent.post(`/${username}/${model}/risks`)
@@ -716,7 +836,6 @@ describe("Risks", function () {
 			});
 
 			it("should succeed", function(done) {
-
 				const comment = {
 					comment: "hello world",
 					"viewpoint":{
@@ -738,9 +857,12 @@ describe("Risks", function () {
 					function(done) {
 						agent.post(`/${username}/${model}/risks/${riskId}/comments`)
 							.send(comment)
-							.expect(200 , done);
+							.expect(200 , function(err , res) {
+								const commentRes = res.body;
+								expect(commentRes.comment).to.equal(comment.comment);
+								done(err);
+							});
 					},
-
 					function(done) {
 						agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function(err , res) {
 							comment.viewpoint.guid = res.body.comments[0].viewpoint.guid;
@@ -755,7 +877,6 @@ describe("Risks", function () {
 						});
 					}
 				], done);
-
 			});
 
 			it("with orthographic viewpoint should succeed", function(done) {
@@ -798,9 +919,7 @@ describe("Risks", function () {
 				], done);
 			});
 
-
 			it("should fail if comment is empty", function(done) {
-
 				const comment = { comment: "" };
 
 				agent.post(`/${username}/${model}/risks/${riskId}/comments`)
@@ -818,15 +937,12 @@ describe("Risks", function () {
 			});
 
 			it("should fail if invalid risk ID is given", function(done) {
-
 				const invalidId = "00000000-0000-0000-0000-000000000000";
 				const comment = { comment: "hello world" };
 
 				agent.patch(`/${username}/${model}/risks/${invalidId}`)
 					.send(comment)
-					.expect(404 , function(err, res) {
-						done(err);
-					});
+					.expect(404 , done);
 			});
 
 		});

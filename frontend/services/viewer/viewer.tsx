@@ -705,7 +705,7 @@ export class ViewerService {
 	}
 
 	public async isViewerReady() {
-		return await this.initialisedPromise.promise;
+		return await (this.initialisedPromise && this.initialisedPromise.promise);
 	}
 
 	/**

@@ -17,6 +17,7 @@
 
 import { LinearProgress } from '@material-ui/core';
 import * as React from 'react';
+import { COMMENT_FIELD_NAME } from '../../viewerGui/components/commentForm/commentForm.constants';
 import { LabelButton } from '../../viewerGui/components/labelButton/labelButton.styles';
 import {
 	FieldsRow,
@@ -25,9 +26,9 @@ import {
 import { FieldLabel } from '../textField/textField.styles';
 import AttachResourcesDialog from './attachResourcesDialog/attachResourcesDialog.container';
 import { ActionContainer, DocumentIcon,
-	IconButton, LinkIcon, PhotoIcon, RemoveIcon,
-	ResourcesContainer, ResourceItemContainer, ResourceItemRightColumn, ResourceLabel,
-	ResourceLink, UploadSizeLabel } from './resources.styles';
+	IconButton, LinkIcon, PhotoIcon, QuoteIcon,
+	RemoveIcon, ResourcesContainer, ResourceItemContainer, ResourceItemRightColumn,
+	ResourceLabel, ResourceLink, UploadSizeLabel } from './resources.styles';
 
 interface IResource {
 	_id: string;
@@ -45,6 +46,7 @@ interface IProps {
 	onSaveLinks: (links) => void;
 	showDialog: (config: any) => void;
 	toLeft?: boolean;
+	formRef?: any;
 }
 
 interface IState {
@@ -61,6 +63,15 @@ export const RemoveButton = (props) => (
 	</IconButton>
 );
 
+export const QuoteButton = (props) => (
+	<IconButton
+		{...props}
+		aria-label="Quote resource"
+	>
+		<QuoteIcon />
+	</IconButton>
+);
+
 const imageExtensions = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff', 'pcx'];
 
 const ResourceIcon = ({type}) =>
@@ -71,20 +82,26 @@ const ResourceIcon = ({type}) =>
 		(<DocumentIcon />)
 ;
 
-const ResourceAvailable = ({link, type, name, size, onClickRemove, canEdit}) => (
-	<ResourceItemContainer>
-		<ResourceIcon type={type} />
-		<ResourceLink href={link} target="_blank" rel="noopener">
-			{name}
-		</ResourceLink>
-		<ResourceItemRightColumn>
-			{size}
-			<ActionContainer>
-			{canEdit && <RemoveButton onClick={onClickRemove} />}
-			</ActionContainer>
-		</ResourceItemRightColumn>
-	</ResourceItemContainer>
-);
+const ResourceAvailable = ({link, type, name, size, onClickRemove, canEdit, onClickQuote}) => {
+	return (
+		<ResourceItemContainer>
+			<ResourceIcon type={type} />
+			<ResourceLink href={link} target="_blank" rel="noopener">
+				{name}
+			</ResourceLink>
+			<ResourceItemRightColumn>
+				{size}
+				<ActionContainer>
+					{canEdit &&
+					<>
+						<RemoveButton onClick={onClickRemove} />
+						<QuoteButton onClick={onClickQuote} />
+					</>}
+				</ActionContainer>
+			</ResourceItemRightColumn>
+		</ResourceItemContainer>
+	);
+};
 
 const ResourceUploading = ({type, name, size,  progress }) => (
 	<>
@@ -106,6 +123,18 @@ const ResourceItem = (resource) =>
 export class Resources extends React.PureComponent<IProps, IState> {
 	public onClickRemove = (r) => (e) => {
 		this.props.onRemoveResource(r);
+	}
+
+	public onClickQuote = (resource) => (e) => {
+		const { current: commentForm } = this.props.formRef;
+
+		if (commentForm) {
+			const currentFormCommentValue = commentForm.state.values[COMMENT_FIELD_NAME];
+			const additionalNewLine = (!currentFormCommentValue || currentFormCommentValue.endsWith(`\n`)) ? '' : `\n`;
+
+			commentForm
+				.setFieldValue(COMMENT_FIELD_NAME, `${currentFormCommentValue}${additionalNewLine}#res.${resource._id} \n`);
+		}
 	}
 
 	public onClickAttach = () => {
@@ -132,6 +161,7 @@ export class Resources extends React.PureComponent<IProps, IState> {
 						{...r}
 						canEdit={canEdit}
 						onClickRemove={this.onClickRemove(r)}
+						onClickQuote={this.onClickQuote(r)}
 					/>
 				))}
 				<FieldsRow container justify="space-between" flex={0.5}>

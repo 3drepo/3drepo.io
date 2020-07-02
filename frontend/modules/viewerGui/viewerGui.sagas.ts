@@ -24,6 +24,7 @@ import * as API from '../../services/api';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { Viewer } from '../../services/viewer/viewer';
 import { BimActions } from '../bim';
+import { CommentsActions } from '../comments';
 import { CompareActions } from '../compare';
 import { selectCurrentUser, CurrentUserActions } from '../currentUser';
 import { DialogActions } from '../dialog';
@@ -61,7 +62,9 @@ function* fetchData({ teamspace, model }) {
 			put(ModelActions.fetchSettings(teamspace, model)),
 			put(ModelActions.fetchMetaKeys(teamspace, model)),
 			put(ModelActions.waitForSettingsAndFetchRevisions(teamspace, model)),
-			put(TreeActions.setIsTreeProcessed(false))]);
+			put(TreeActions.setIsTreeProcessed(false)),
+			put(CommentsActions.fetchUsers(teamspace)),
+		]);
 
 		yield take(ModelTypes.FETCH_REVISIONS_SUCCESS);
 		const revision = yield select(selectCurrentRevisionId);
