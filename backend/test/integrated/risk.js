@@ -454,7 +454,7 @@ describe("Risks", function () {
 			], done);
 		});
 
-		it("change to orthographic viewpoint should fail (for now)", function(done) {
+		it("change to orthographic viewpoint should succeed", function(done) {
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			let riskId;
 
@@ -486,8 +486,13 @@ describe("Risks", function () {
 				function(done) {
 					agent.patch(`/${username}/${model}/risks/${riskId}`)
 						.send(viewpointData)
-						.expect(400, function(err, res) {
-							expect(res.body.value === responseCodes.INVALID_ARGUMENTS.value);
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/issues/${issueId}`)
+						.expect(200, function(err, res) {
+							expect(res.body.viewpoint.type).to.equal(viewpointData.viewpoint.type);
+							expect(res.body.viewpoint.type).to.equal(viewpointData.viewpoint.orthogonalSize);
 							done(err);
 						});
 				}
