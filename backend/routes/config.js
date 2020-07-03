@@ -43,7 +43,8 @@ function createClientConfig(serverConfig, req) {
 		"customLogins" : config.customLogins,
 		"liveChatLicense" : config.liveChatLicense,
 		"resourceUploadSizeLimit" : config.resourceUploadSizeLimit,
-		"sequencesEnabled": Boolean(config.sequencesEnabled)
+		"sequencesEnabled": Boolean(config.sequencesEnabled),
+		"presenterEnabled": Boolean(config.presenterEnabled)
 	};
 
 	if (utils.hasField(config, "captcha_client_key")) {

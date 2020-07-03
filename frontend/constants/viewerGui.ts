@@ -80,7 +80,10 @@ export const VIEWER_LEFT_PANELS = [
 	VIEWER_PANELS.SEQUENCES,
 	VIEWER_PANELS.MEASUREMENTS,
 	VIEWER_PANELS.PRESENTATION,
-].filter((panel) => clientConfigService.sequencesEnabled || panel !== VIEWER_PANELS.SEQUENCES).map(getPanelConfig);
+].filter((panel) =>
+			(clientConfigService.sequencesEnabled || panel !== VIEWER_PANELS.SEQUENCES) &&
+			(clientConfigService.presenterEnabled || panel !== VIEWER_PANELS.PRESENTATION)
+		).map(getPanelConfig);
 
 export const VIEWER_RIGHT_PANELS = [
 	VIEWER_PANELS.BIM

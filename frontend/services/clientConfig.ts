@@ -23,6 +23,7 @@ export class ClientConfigService {
 	public userId;
 	public development;
 	public sequencesEnabled;
+	public presenterEnabled;
 	// tslint:disable-next-line
 	public captcha_client_key;
 	public legalTemplates;
