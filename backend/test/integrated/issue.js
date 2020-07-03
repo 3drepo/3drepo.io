@@ -663,7 +663,7 @@ describe("Issues", function () {
 					agent.get(`/${username}/${model}/issues/${issueId}`)
 						.expect(200, function(err, res) {
 							expect(res.body.viewpoint.type).to.equal(viewpointData.viewpoint.type);
-							expect(res.body.viewpoint.type).to.equal(viewpointData.viewpoint.orthogonalSize);
+							expect(res.body.viewpoint.orthographicSize).to.equal(viewpointData.viewpoint.orthographicSize);
 							done(err);
 						});
 				}
