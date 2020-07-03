@@ -913,10 +913,10 @@ export class ViewerService {
 		await this.isModelReady();
 		switch (mode) {
 			case VIEWER_PROJECTION_MODES.ORTHOGONAL:
-				UnityUtil.enableOrthographic();
+				UnityUtil.useOrthographicProjection();
 				break;
 			default:
-				UnityUtil.disableOrthographic();
+				UnityUtil.usePerspectiveProjection();
 		}
 	}
 
@@ -927,7 +927,7 @@ export class ViewerService {
 			up,
 			view_dir,
 			look_at,
-			type === VIEWER_PROJECTION_MODES.ORTHOGONAL,
+			type,
 			orthographicSize,
 			account,
 			model

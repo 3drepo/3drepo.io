@@ -1419,25 +1419,17 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Enable orthographic view
+	 * Use orthographic view
 	 */
-	public static enableOrthographic() {
-		UnityUtil.toUnity('EnableOrthographic', UnityUtil.LoadingState.MODEL_LOADING, undefined);
+	public static useOrthographicProjection() {
+		UnityUtil.toUnity('UseOrthographicProjection', UnityUtil.LoadingState.MODEL_LOADING, undefined);
 	}
 
 	/**
-	 * Disable orthographic view. Enables perspective view.
+	 * Use perspective view
 	 */
-	public static disableOrthographic() {
-		UnityUtil.toUnity('DisableOrthographic', UnityUtil.LoadingState.MODEL_LOADING, undefined);
-	}
-
-	/**
-	 * Set orthographic size for orthographic view
-	 * @param {number} orthographicSize - Camera's half-size when in orthographic mode
-	 */
-	public static setOrthographicSize(orthographicSize: number) {
-		UnityUtil.toUnity('SetOrthographicSize', UnityUtil.LoadingState.MODEL_LOADING, orthographicSize);
+	public static usePerspectiveProjection() {
+		UnityUtil.toUnity('UsePerspectiveProjection', UnityUtil.LoadingState.MODEL_LOADING, undefined);
 	}
 
 	/**
@@ -1456,7 +1448,7 @@ export class UnityUtil {
 		up: [number],
 		forward: [number],
 		lookAt: [number],
-		isOrthographic?: boolean,
+		projectionType?: boolean,
 		orthographicSize?: number,
 		account?: string,
 		model?: string
@@ -1466,9 +1458,11 @@ export class UnityUtil {
 			param.nameSpace = account + '.' + model;
 		}
 
-		param.orthographic = isOrthographic;
+		if (projectionType) {
+			param.type = projectionType;
+		}
 
-		if (param.orthographic) {
+		if (orthographicSize) {
 			param.orthographicSize = orthographicSize;
 		}
 
