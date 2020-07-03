@@ -38,6 +38,10 @@ function Utils() {
 		return "[object Object]" === Object.prototype.toString.call(value);
 	};
 
+	this.typeMatch = (value, type) => {
+		return type === Object.prototype.toString.call(value);
+	};
+
 	this.hasField = (obj, field) => {
 		return Object.prototype.hasOwnProperty.call(obj, field);
 	};

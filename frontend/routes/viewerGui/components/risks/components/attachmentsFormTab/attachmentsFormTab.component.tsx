@@ -29,10 +29,11 @@ interface IProps {
 	attachLinkResources: () => void;
 	showDialog: (config: any) => void;
 	canComment: boolean;
+	formRef: any;
 }
 
 export const AttachmentsFormTab: React.FunctionComponent<IProps> = ({
-	active, risk, showDialog, attachFileResources, attachLinkResources, onRemoveResource, canComment,
+	active, risk, showDialog, attachFileResources, attachLinkResources, onRemoveResource, canComment, formRef,
 }) => {
 	return (
 		<Content active={active}>
@@ -44,6 +45,7 @@ export const AttachmentsFormTab: React.FunctionComponent<IProps> = ({
 				onRemoveResource={onRemoveResource}
 				canEdit={canComment}
 				toLeft
+				formRef={formRef}
 			/>
 		</Content>
 	);

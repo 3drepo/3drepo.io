@@ -346,7 +346,7 @@ router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssues
  *
  * @apiParam (Request body) {String} name The name of the issue
  * @apiParam (Request body) {[]String} assigned_roles The roles assigned to the issue. Even though its an array (this is for future support of multiple assigned jobs), currently it has one or none elements correspoing to the available jobs in the teamaspace.
- * @apiParam (Request body) {String} status The status of the issue. It can have a value of "open","in progress","for approval" or "closed".
+ * @apiParam (Request body) {String} status The status of the issue. It can have a value of "open","in progress","for approval", "void" or "closed".
  * @apiParam (Request body) {String} priority The priority of the issue. It can have a value of "none", "low", "medium" or "high".
  * @apiParam (Request body) {String} topic_type Type of the issue. It's value has to be one of the defined topic_types for the model. See <a href='#api-Model-createModel'>here</a> for more details.
  * @apiParam (Request body) {Viewpoint} viewpoint The viewpoint of the issue, defining the position of the camera and the screenshot for that position.
@@ -499,31 +499,32 @@ router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssues
 router.post("/issues", middlewares.issue.canCreate, storeIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {patch} /:teamspace/:model/issues/:issueId Update Issue.
+ * @api {patch} /:teamspace/:model/issues/:issueId Update issue
  * @apiName  updateIssue
  * @apiGroup Issues
  * @apiDescription Updates an issue. It takes the part of the issue that can be updated.
- * The system will create a system comment withing the issue describing which values were changed.
- * The user needs to be the teamspace administrator, or the project administrator, or has the same job as the creator of the issue, or has the issue assigned. In the case that the issue has been assigned to the user, the user cant change it to the "close status".
+ * The system will create a system comment within the issue describing which values were changed.
+ * The user needs to be the teamspace administrator, the project administrator, has the same job as the creator of the issue, or has the issue assigned. In the case that the issue has been assigned to the user, the user cannot change it to the "closed" status.
  *
- * If the issue is being updated to assigned to a job, and the status of the issue has the value "for_approval" then the status of the issue is automtically changed to "in_progress".
+ * If the issue is being updated to assigned to a job and the status of the issue has the value "for_approval", then the status of the issue is automatically changed to "in_progress".
  *
- * If the user is changing the issue to the "for_approval" status, the issue will be assigned to the job that the creator of the issue has.
+ * If the user is changing the issue to the "for_approval" status, the issue will be assigned to the job that the creator of the issue.
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
- * @apiParam {String} id Issue unique ID.
+ * @apiParam {String} id Issue unique ID
  *
- * @apiParam (Request body) {[]String} [assigned_roles] The roles assigned to the issue. Even though its an array (this is for future support of multiple assigned jobs), currently it has one or none elements correspoing to the available jobs in the teamaspace.
- * @apiParam (Request body) {String} [desc] The description of the issue
- * @apiParam (Request body) {String} [status] The status of the issue. It can have a value of "open","in progress","for approval" or "closed".
- * @apiParam (Request body) {String} [topic_type] Type of the issue. It's value has to be one of the defined topic_types for the model. See <a href='#api-Model-createModel'>here</a> for more details.
- * @apiParam (Request body) {[3]Number} [position] The vector defining the pin of the issue. If the pin doesnt has an issue its an empty array.
- * @apiParam (Request body) {Number} [due_date] A timestamp depicting the due date of issue.
- * @apiParam (Request body) {String} [priority] The priority of the issue. It can have a value of "none", "low", "medium" or "high".
- * @apiParam (Request body) {Number} [scale] The scale of the issue.
- * @apiParam (Request body) {Number} [viewCount] The viewcount of the issue.
- * @apiParam (Request body) {Object} [extras] A field containing any extras that wanted to be saved in the issue. This is normally used by BCF.
+ * @apiParam (Request body) {[]String} [assigned_roles] Job roles assigned to the issue
+ * @apiParam (Request body) {String} [desc] Description of issue
+ * @apiParam (Request body) {String} [status] The status of issue (values: "open", "in progress", "for approval", "closed")
+ * @apiParam (Request body) {String} [topic_type] Topic type of issue (see <a href='#api-Model-createModel'>here</a> for available types)
+ * @apiParam (Request body) {[3]Number} [position] Vector defining the pin position of the issue; empty if the issue has no pin
+ * @apiParam (Request body) {Number} [due_date] Due date timestamp for the issue
+ * @apiParam (Request body) {String} [priority] The priority of the issue (values: "none", "low", "medium", "high")
+ * @apiParam (Request body) {Number} [scale] The scale factor of the issue
+ * @apiParam (Request body) {Object} [viewpoint] The viewpoint and screenshot of the issue
+ * @apiParam (Request body) {Number} [viewCount] The viewcount of the issue
+ * @apiParam (Request body) {Object} [extras] A field containing any extras that wanted to be saved in the issue (typically used by BCF)
  *
  * @apiExample {patch} Example usage:
  * PATCH /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/98c39770-c8e2-11e9-8f2a-ada77612c97e HTTP/1.1
@@ -686,7 +687,7 @@ router.patch("/revision/:rid/issues/:issueId", middlewares.issue.canComment, upd
  * @apiError 404 Issue not found
  * @apiError 400 Comment with no text
  * */
-router.post("/issues/:issueId/comments", middlewares.issue.canComment, addComment, middlewares.chat.onCommentCreated, responseCodes.onSuccessfulOperation);
+router.post("/issues/:issueId/comments", middlewares.issue.canComment, addComment, middlewares.notification.onNewComment, middlewares.chat.onCommentCreated, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {delete} /:teamspace/:model/issues/:issueId/comments Deletes an comment from an issue
@@ -797,6 +798,7 @@ function storeIssue(req, res, next) {
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
 	data.owner = req.session.user.username;
+	delete data._id; // Ignore _id field
 
 	if (req.params.rid) {
 		data.revId = req.params.rid;
@@ -981,9 +983,11 @@ function addComment(req, res, next) {
 	const user = req.session.user.username;
 	const data =  req.body;
 	const {account, model, issueId} = req.params;
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-	Comment.addComment(account, model, "issues", issueId, user, data).then(comment => {
+	Issue.addComment(account, model, issueId, user, data, sessionId).then(({comment, userRefs}) => {
 		req.dataModel = comment;
+		req.userReferences = {type: "issue", userRefs};
 		next();
 	}).catch(err => {
 		responseCodes.onError(req, res, err);

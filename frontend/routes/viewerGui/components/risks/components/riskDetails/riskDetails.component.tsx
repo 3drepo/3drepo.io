@@ -22,16 +22,17 @@ import { size } from 'lodash';
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { canComment } from '../../../../../../helpers/risks';
-import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
+import { CommentForm } from '../../../commentForm';
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { EmptyStateInfo } from '../../../views/views.styles';
-import { Container, HorizontalView, LogsContainer, LogList, PreviewDetails } from './riskDetails.styles';
+import { Container, HorizontalView, MessagesList, MessageContainer, PreviewDetails } from './riskDetails.styles';
 import { RiskDetailsForm } from './riskDetailsForm.component';
 
 interface IProps {
 	viewer: any;
 	jobs: any[];
 	risk: any;
+	comments: any[];
 	teamspace: string;
 	model: string;
 	revision: string;
@@ -83,7 +84,8 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 
 	public formRef = React.createRef<any>();
 	public panelRef = React.createRef<any>();
-	public commentsRef = React.createRef<any>();
+	public containerRef = React.createRef<any>();
+	public messageContainerRef = React.createRef<any>();
 
 	get isNewRisk() {
 		return !this.props.risk._id;
@@ -101,14 +103,12 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		return [...this.props.jobs, UNASSIGNED_JOB];
 	}
 
-	public commentRef = React.createRef<any>();
-
-	public renderLogList = renderWhenTrue(() => (
-		<LogList
-			commentsRef={this.commentsRef}
-			items={this.riskData.comments}
+	public renderMessagesList = renderWhenTrue(() => (
+		<MessagesList
+			formRef={this.formRef}
+			messages={this.props.comments}
 			isPending={this.props.fetchingDetailsIsPending}
-			removeLog={this.removeComment}
+			removeMessage={this.removeMessage}
 			teamspace={this.props.teamspace}
 			currentUser={this.props.currentUser.username}
 			setCameraOnViewpoint={this.setCameraOnViewpoint}
@@ -118,10 +118,10 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	public renderPreview = renderWhenTrue(() => {
 		const { expandDetails, horizontal, failedToLoad, disableViewer } = this.props;
 		const { comments } = this.riskData;
-		const isRiskWithComments = Boolean((comments && comments.length || horizontal) && !this.isNewRisk);
+		const isRiskWithComments = Boolean(!this.isNewRisk);
 		const PreviewWrapper = horizontal && isRiskWithComments ? HorizontalView : Fragment;
 		const renderNotCollapsable = () => {
-			return this.renderLogList(!horizontal && isRiskWithComments);
+			return this.renderMessagesList(!horizontal && isRiskWithComments);
 		};
 
 		return (
@@ -142,17 +142,17 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 					isNew={this.isNewRisk}
 					showModelButton={disableViewer && !this.isNewRisk}
 				/>
-				<LogsContainer>
-					{this.renderLogList(horizontal && isRiskWithComments)}
+				<MessageContainer ref={this.messageContainerRef}>
+					{this.renderMessagesList(horizontal && isRiskWithComments)}
 					{this.renderFooter(horizontal && !failedToLoad)}
-				</LogsContainer>
+				</MessageContainer>
 			</PreviewWrapper>
 		);
 	});
 
 	public renderFooter = renderWhenTrue(() => (
 		<ViewerPanelFooter alignItems="center" padding="0">
-			<NewCommentForm
+			<CommentForm
 				disableViewer={this.props.disableViewer}
 				comment={this.props.newComment.comment}
 				screenshot={this.props.newComment.screenshot}
@@ -164,6 +164,10 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				hideComment={this.isNewRisk}
 				hideScreenshot={this.props.disableViewer}
 				hideUploadButton={!this.props.disableViewer}
+				messagesContainerRef={this.messageContainerRef}
+				previewWrapperRef={this.containerRef}
+				horizontal={this.props.horizontal}
+				disableIssuesSuggestions
 			/>
 		</ViewerPanelFooter>
 	));
@@ -199,23 +203,6 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 			unsubscribeOnRiskCommentsChanges(prevProps.teamspace, prevProps.model, prevProps.risk._id);
 			fetchRisk(teamspace, model, risk._id);
 			subscribeOnRiskCommentsChanges(teamspace, model, risk._id);
-		}
-
-		if (
-			risk.comments && prevProps.risk.comments &&
-			(risk.comments.length > prevProps.risk.comments.length && risk.comments[risk.comments.length - 1].new)
-		) {
-			const { top: commentsTop } = this.commentsRef.current.getBoundingClientRect();
-			const panelElements = this.panelRef.current.children[0].children;
-			const detailsDimensions = panelElements[1].getBoundingClientRect();
-			const { height: detailsHeight } = detailsDimensions;
-
-			if (commentsTop < 0) {
-				this.panelRef.current.scrollTo({
-					top: detailsHeight - 16,
-					behavior: 'smooth'
-				});
-			}
 		}
 	}
 
@@ -269,11 +256,12 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				showDialog={showDialog}
 				canComment={this.userCanComment}
 				showMitigationSuggestions={this.props.showMitigationSuggestions}
+				formRef={this.formRef}
 			/>
 		);
 	}
 
-	public removeComment = (index, guid) => {
+	public removeMessage = (index, guid) => {
 		const riskData = {
 			_id: this.riskData._id,
 			rev_id: this.riskData.rev_id,
@@ -360,7 +348,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		const { failedToLoad, risk, horizontal } = this.props;
 
 		return (
-			<Container fill={Number(this.isNewRisk)}>
+			<Container ref={this.containerRef} fill={Number(this.isNewRisk)}>
 				<ViewerPanelContent
 					onScroll={this.handlePanelScroll}
 					ref={this.panelRef}
