@@ -23,6 +23,7 @@ import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
 import { DialogActions } from '../dialog';
 import { dispatch } from '../store';
+import { ViewerGuiActions } from '../viewerGui';
 import { PRESET_VIEW } from './viewpoints.constants';
 import { ViewpointsActions, ViewpointsTypes } from './viewpoints.redux';
 
@@ -45,23 +46,35 @@ export function* fetchViewpoints({ teamspace, modelId }) {
 	}
 }
 
-export function* generateViewpointObject(teamspace, modelId, viewName) {
+export function* generateViewpoint(teamspace, modelId, name, withScreenshot = false) {
 	try {
-		const screenshot = yield Viewer.getScreenshot();
-		const { clippingPlanes, ...viewpoint } = yield Viewer.getCurrentViewpoint({
+		const viewpoint = yield Viewer.getCurrentViewpoint({
 			teamspace,
 			model: modelId
 		});
 
 		const generatedObject = {
-			name: viewName,
-			screenshot: {
-				base64: screenshot,
-				thumbnailUrl: screenshot
-			},
-			viewpoint,
-			clippingPlanes
+			name,
+			viewpoint
 		} as any;
+
+		if (withScreenshot) {
+			generatedObject.thumbnail =  yield Viewer.getScreenshot();
+		}
+
+		const objectInfo = yield Viewer.getObjectsStatus();
+
+		if (objectInfo && (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0)) {
+			const { highlightedNodes, hiddenNodes } = objectInfo;
+
+			if (highlightedNodes.length > 0) {
+				generatedObject.viewpoint.highlighted_objects  = highlightedNodes;
+			}
+
+			if (hiddenNodes.length > 0) {
+				generatedObject.viewpoint.hidden_objects  = hiddenNodes;
+			}
+		}
 
 		return generatedObject;
 	} catch (error) {
@@ -161,7 +174,7 @@ export function* setCameraOnViewpoint({ teamspace, modelId, view }) {
 		} else {
 			if (view.viewpoint && view.viewpoint.up) {
 				const viewpoint = { ...view.viewpoint, account: teamspace, model: modelId };
-				yield Viewer.setCamera(viewpoint);
+				yield put(ViewerGuiActions.setCamera(viewpoint));
 			} else {
 				yield Viewer.goToDefaultViewpoint();
 			}
@@ -187,7 +200,7 @@ export function* showViewpoint({ teamspace, modelId, view }) {
 
 export function* prepareNewViewpoint({teamspace, modelId, viewpointName}) {
 	try {
-		const newViewpoint = yield generateViewpointObject(teamspace, modelId, viewpointName);
+		const newViewpoint = yield generateViewpoint(teamspace, modelId, viewpointName, true);
 		yield put(ViewpointsActions.setComponentState({ newViewpoint, activeViewpoint: null, editMode: false }));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('prepare', 'new viewpoint'));

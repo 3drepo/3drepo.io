@@ -47,6 +47,7 @@ import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { selectTopicTypes } from '../teamspace';
 import { selectIfcSpacesHidden, TreeActions } from '../tree';
+import { generateViewpoint } from '../viewpoints/viewpoints.sagas';
 import { IssuesActions, IssuesTypes } from './issues.redux';
 import {
 	selectActiveIssueDetails,
@@ -111,6 +112,8 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 	try {
 		const myJob = yield select(selectMyJob);
 		const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
+
+		const vp = yield generateViewpoint( teamspace, model, issueData.name, true );
 
 		const [viewpoint, objectInfo, screenshot, userJob] = !ignoreViewer ? yield all([
 			Viewer.getCurrentViewpoint({ teamspace, model }),
