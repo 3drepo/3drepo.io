@@ -428,35 +428,30 @@ class Ticket {
 		systemComments.push(comment);
 	}
 
-	getGroupData({viewpoint, name, _id}, objects) {
-		return {
-			color: viewpoint.color,
-			name,
-			objects,
-			[this.groupField]: utils.stringToUUID(_id)
+	async  createGroup(account, model, ticket,  groupdata, idField, branch, rid) {
+		const data =  {
+			name: ticket.name,
+			[this.groupField]: utils.stringToUUID(ticket._id),
+			...groupdata
 		};
-	}
 
-	async  createGroup(account, model, ticket, objectsField, idField, branch, rid) {
-		const data = this.getGroupData(ticket, ticket.viewpoint[objectsField]);
 		const group = await  Group.createGroup({account, model}, null,  data, ticket.owner, branch, rid);
 		ticket.viewpoint[idField] = utils.stringToUUID(group._id);
-		delete ticket.viewpoint[objectsField];
 	}
 	async createGroupsIfNecessary(account, model, newTicket, branch, rid) {
 		if (!newTicket.viewpoint) {
 			return;
 		}
 
-		if (newTicket.viewpoint.highlighted_objects && !newTicket.viewpoint.highlighted_group_id) {
-			await this.createGroup(account, model, newTicket, "highlighted_objects", "highlighted_group_id", branch, rid);
+		if (newTicket.viewpoint.highlighted_group && !newTicket.viewpoint.highlighted_group_id) {
+			await this.createGroup(account, model, newTicket,  newTicket.viewpoint.highlighted_group, "highlighted_group_id", branch, rid);
+			delete newTicket.highlighted_group;
 		}
 
-		if (newTicket.viewpoint.hidden_objects && !newTicket.viewpoint.hidden_group_id) {
-			await this.createGroup(account, model, newTicket, "hidden_objects", "hidden_group_id", branch, rid);
+		if (newTicket.viewpoint.hidden_group && !newTicket.viewpoint.hidden_group_id) {
+			await this.createGroup(account, model, newTicket, newTicket.viewpoint.hidden_group, "hidden_group_id", branch, rid);
+			delete newTicket.hidden_group;
 		}
-
-		delete newTicket.viewpoint.color;
 	}
 
 	/*

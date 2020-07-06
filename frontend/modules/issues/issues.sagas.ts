@@ -131,12 +131,16 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 		if (objectInfo && (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0)) {
 			const {highlightedNodes, hiddenNodes} = objectInfo;
 			if (highlightedNodes.length > 0) {
-				viewpoint.highlighted_objects = highlightedNodes;
-				viewpoint.color = UnityUtil.defaultHighlightColor.map((c) => c * 255);
+				viewpoint.highlighted_group = {
+					objects: highlightedNodes,
+					color: UnityUtil.defaultHighlightColor.map((c) => c * 255)
+				} ;
 			}
 
 			if (hiddenNodes.length > 0) {
-				viewpoint.hidden_objects = hiddenNodes;
+				viewpoint.hidden_group = {
+					objects: hiddenNodes
+				};
 			}
 		}
 
