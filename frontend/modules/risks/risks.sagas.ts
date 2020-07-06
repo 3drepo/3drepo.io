@@ -29,6 +29,7 @@ import {
 } from '../../helpers/comments';
 
 import { EXTENSION_RE } from '../../constants/resources';
+import {imageUrlToBase64} from '../../helpers/imageUrlToBase64';
 import { prepareResources } from '../../helpers/resources';
 import { prepareRisk } from '../../helpers/risks';
 import { SuggestedTreatmentsDialog } from '../../routes/components/dialogContainer/components';
@@ -499,33 +500,26 @@ function* cloneRisk() {
 	const activeRisk = yield select(selectActiveRiskDetails);
 	const jobs = yield select(selectJobsList);
 	const currentUser = yield select(selectCurrentUser);
-	const clonedProperties = pick(activeRisk, [
-		'name',
-		'associated_activity',
-		'assigned_roles',
-		'category',
-		'element',
-		'risk_factor',
-		'scope',
-		'location_desc',
-		'desc',
-		'safetibase_id',
-		'likelihood',
-		'consequence',
-		'level_of_risk',
-		'overall_level_of_risk',
-		'residual_likelihood',
-		'residual_consequence',
-		'residual_level_of_risk',
-		'mitigation_status',
-		'mitigation_desc',
-		'mitigation_detail',
-		'mitigation_stage',
-		'mitigation_type',
-		'residual_risk',
-		'descriptionThumbnail',
+	const clonedProperties = omit(activeRisk, [
+		'_id',
+		'rev_id',
+		'number',
+		'owner',
+		'comments',
+		'created',
+		'creator_role',
+		'lastUpdated',
+		'resources',
+		'thumbnail',
 		'viewpoint',
+		'priority_last_changed',
+		'status_last_changed',
 	]);
+
+	if (activeRisk.descriptionThumbnail) {
+		const base64Image = yield imageUrlToBase64(activeRisk.descriptionThumbnail);
+		clonedProperties.descriptionThumbnail = `data:image/png;base64,${base64Image}`;
+	}
 
 	try {
 		const newRisk = prepareRisk({
@@ -544,7 +538,6 @@ function* cloneRisk() {
 }
 
 function* setNewRisk() {
-	const risks = yield select(selectRisks);
 	const jobs = yield select(selectJobsList);
 	const currentUser = yield select(selectCurrentUser);
 

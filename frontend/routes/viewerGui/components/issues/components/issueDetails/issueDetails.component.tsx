@@ -375,7 +375,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				if (!disableViewpointSuggestion) {
 					this.handleViewpointUpdateSuggest();
 				}
-				updateIssue(teamspace, model, { descriptionThumbnail: screenshot });
+
+				updateIssue(teamspace, model, { viewpoint: { screenshot: screenshot.replace('data:image/png;base64,', '') } });
 			}
 		}
 	}
@@ -407,11 +408,9 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	public handleViewpointUpdate = async () => {
 		const { teamspace, model, issue, updateIssue, viewer } = this.props;
 
-		const currentViewpoint = await viewer.getCurrentViewpoint({ teamspace, model });
+		const viewpoint = await viewer.getCurrentViewpoint({ teamspace, model });
 
-		const viewpoint = mergeData(issue.viewpoint, currentViewpoint);
-
-		if (viewpoint.guid) {
+		if (viewpoint.position) {
 			updateIssue(teamspace, model, { viewpoint });
 		}
 	}

@@ -64,6 +64,9 @@ interface IProps {
 	criteria: any;
 	showMitigationSuggestions: (conditions: any, setFieldValue) => void;
 	formRef: any;
+	onUpdateViewpoint: () => void;
+	onTakeScreenshot: () => void;
+	onUploadScreenshot: (image) => void;
 }
 
 interface IState {
