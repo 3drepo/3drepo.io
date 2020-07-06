@@ -32,7 +32,7 @@ interface IProps {
 	jobs: any[];
 	topicTypes: any[];
 	issue: any;
-	issueWithMarkdownComments: any[];
+	comments: any[];
 	teamspace: string;
 	model: string;
 	revision: string;
@@ -104,7 +104,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		return (
 			<MessagesList
 				formRef={this.formRef}
-				messages={this.props.issueWithMarkdownComments}
+				messages={this.props.comments}
 				isPending={this.props.fetchingDetailsIsPending}
 				removeMessage={this.removeMessage}
 				teamspace={this.props.teamspace}
@@ -117,7 +117,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	public renderPreview = renderWhenTrue(() => {
 		const { expandDetails, horizontal, failedToLoad, disableViewer } = this.props;
 		const { comments } = this.issueData;
-		const isIssueWithComments = Boolean((comments && comments.length || horizontal) && !this.isNewIssue);
+		const isIssueWithComments = Boolean(!this.isNewIssue);
 		const PreviewWrapper = horizontal && isIssueWithComments ? HorizontalView : Fragment;
 		const renderNotCollapsable = () => this.renderMessagesList(!horizontal && isIssueWithComments);
 

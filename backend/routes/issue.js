@@ -691,7 +691,7 @@ router.patch("/revision/:rid/issues/:issueId", middlewares.issue.canComment, upd
  * @apiError 404 Issue not found
  * @apiError 400 Comment with no text
  * */
-router.post("/issues/:issueId/comments", middlewares.issue.canComment, addComment, middlewares.chat.onCommentCreated, responseCodes.onSuccessfulOperation);
+router.post("/issues/:issueId/comments", middlewares.issue.canComment, addComment, middlewares.notification.onNewComment, middlewares.chat.onCommentCreated, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {delete} /:teamspace/:model/issues/:issueId/comments Deletes an comment from an issue
@@ -987,9 +987,11 @@ function addComment(req, res, next) {
 	const user = req.session.user.username;
 	const data =  req.body;
 	const {account, model, issueId} = req.params;
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-	Comment.addComment(account, model, "issues", issueId, user, data).then(comment => {
+	Issue.addComment(account, model, issueId, user, data, sessionId).then(({comment, userRefs}) => {
 		req.dataModel = comment;
+		req.userReferences = {type: "issue", userRefs};
 		next();
 	}).catch(err => {
 		responseCodes.onError(req, res, err);

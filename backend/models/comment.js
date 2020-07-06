@@ -53,7 +53,7 @@ class TextCommentGenerator extends CommentGenerator {
 	constructor(owner, commentText, viewpoint, pinPosition) {
 		super(owner);
 
-		if (fieldTypes.comment === Object.prototype.toString.call(commentText)) {
+		if (utils.typeMatch(commentText, fieldTypes.comment)) {
 			this.comment = commentText;
 
 			if (viewpoint && viewpoint.guid) {
@@ -88,7 +88,6 @@ class SystemCommentGenerator extends CommentGenerator {
 				to = to ? to.toString() : "";
 			}
 		}
-
 		this.action = {
 			property,
 			from,
@@ -115,6 +114,32 @@ class MitigationCommentGenerator extends TextCommentGenerator {
 		}
 	}
 }
+
+const identifyReferences = (comment) => {
+	const userRefs = new Set();
+	const issueRefs =  new Set();
+
+	if (comment) {
+		let inQuotes = false;
+		const arrayOfLines = comment.split("\n");
+		arrayOfLines.forEach((line) => {
+			// New line resets the quote state. So a line is considered
+			// within quotes if the previous line is already in quotes or
+			// it contains the quote symbol
+			inQuotes = line.trim() !== "" && (line[0] === ">" || inQuotes);
+			if (!inQuotes) {
+				const users = line.match(/@\S*/g);
+				users && users.forEach((x) => userRefs.add(x.substr(1)));
+
+				const issues = line.match(/#\d+/g);
+				issues && issues.forEach((x) => issueRefs.add(parseInt(x.substr(1),10)));
+			}
+		});
+	}
+
+	return { userRefs: Array.from(userRefs), issueRefs: Array.from(issueRefs) };
+
+};
 
 const addComment = async function(account, model, colName, id, user, data) {
 	if (!(data.comment || "").trim() && !get(data,"viewpoint.screenshot")) {
@@ -146,6 +171,7 @@ const addComment = async function(account, model, colName, id, user, data) {
 		}
 	}
 
+	const references = identifyReferences(data.comment);
 	const comment = new TextCommentGenerator(user, data.comment, viewpoint);
 
 	// 4. Append the new comment
@@ -159,7 +185,7 @@ const addComment = async function(account, model, colName, id, user, data) {
 	View.setViewpointScreenshotURL(colName, account, model, id, viewpoint);
 
 	// 6. Return the new comment.
-	return {...comment, viewpoint, guid: utils.uuidToString(comment.guid)};
+	return { comment: {...comment, viewpoint, guid: utils.uuidToString(comment.guid)}, ...references };
 };
 
 const deleteComment =  async function(account, model, colName, id, guid, user) {
@@ -225,7 +251,6 @@ const deleteComment =  async function(account, model, colName, id, guid, user) {
 };
 
 module.exports = {
-	newTextComment : (owner, commentText, viewpoint, pinPosition) => new TextCommentGenerator(owner, commentText, viewpoint, pinPosition),
 	newSystemComment : (owner, property, from, to) => new SystemCommentGenerator(owner, property, from, to),
 	newMitigationComment : (owner, likelihood, consequence, mitigation, viewpoint, pinPosition) => new MitigationCommentGenerator(owner, likelihood, consequence, mitigation, viewpoint, pinPosition),
 	addComment,

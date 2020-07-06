@@ -21,22 +21,31 @@ import SystemInfoIcon from '@material-ui/icons/InfoOutlined';
 
 import { DATE_TIME_FORMAT } from '../../../../../../../services/formatting/formatDate';
 import { DateTime } from '../../../../../dateTime/dateTime.component';
-import { Avatar, CommentWrapper, Container } from './systemMessage.styles';
+import { Avatar, CommentWrapper, Container, MarkdownComment } from './systemMessage.styles';
 
 interface IProps {
 	created: number;
-	name: string;
 	comment: string;
+	teamspace: string;
+	propertyName: string;
 }
 
-export const SystemMessage = ({ created, name, comment }: IProps) => {
+const Comment: React.FunctionComponent<{teamspace, propertyName}> = ({teamspace, children , propertyName}) => {
+	if (propertyName === 'issue_referenced') {
+		return (<MarkdownComment teamspace={teamspace}>{children}</MarkdownComment>);
+	}
+	return (<>{children}</>);
+};
+
+export const SystemMessage = ({ created, propertyName, comment, teamspace }: IProps) => {
 	return (
 		<Container>
 			<Avatar>
 				<SystemInfoIcon />
 			</Avatar>
 			<CommentWrapper>
-				{comment} • <DateTime value={created} format={DATE_TIME_FORMAT} />
+				<Comment propertyName={propertyName} teamspace={teamspace}>{comment}</Comment> •
+				<DateTime value={created} format={DATE_TIME_FORMAT} />
 			</CommentWrapper>
 		</Container>
 	);

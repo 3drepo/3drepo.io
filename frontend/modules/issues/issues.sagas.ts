@@ -28,9 +28,7 @@ import { ROUTES } from '../../constants/routes';
 import { UnityUtil } from '../../globals/unity-util';
 import {
 	createAttachResourceComments,
-	createRemoveResourceComment,
-	prepareComment,
-	prepareComments
+	createRemoveResourceComment
 } from '../../helpers/comments';
 import { prepareIssue } from '../../helpers/issues';
 import { prepareResources } from '../../helpers/resources';
@@ -78,7 +76,6 @@ function* fetchIssue({teamspace, modelId, issueId}) {
 
 	try {
 		const {data} = yield API.getIssue(teamspace, modelId, issueId);
-		data.comments = yield prepareComments(data.comments);
 		data.resources = prepareResources(teamspace, modelId, data.resources);
 
 		yield put(IssuesActions.fetchIssueSuccess(data));
@@ -183,7 +180,6 @@ function* updateIssue({ issueData }) {
 
 		const jobs = yield select(selectJobsList);
 		const preparedIssue = prepareIssue(updatedIssue, jobs);
-		preparedIssue.comments = yield prepareComments(preparedIssue.comments);
 
 		yield put(IssuesActions.setComponentState({ savedPin: position }));
 		yield put(IssuesActions.saveIssueSuccess(preparedIssue));
@@ -199,7 +195,7 @@ function* updateBoardIssue({ teamspace, modelId, issueData }) {
 		const { data: updatedIssue } = yield API.updateIssue(teamspace, modelId, _id, null, changedData);
 		const jobs = yield select(selectJobsList);
 		const preparedIssue = prepareIssue(updatedIssue, jobs);
-		preparedIssue.comments = yield prepareComments(preparedIssue.comments);
+
 		yield put(IssuesActions.saveIssueSuccess(preparedIssue));
 		yield put(SnackbarActions.show('Issue updated'));
 	} catch (error) {
@@ -221,10 +217,9 @@ function* postComment({ issueData, finishSubmitting }) {
 	try {
 		const { _id, model, account } = yield select(selectActiveIssueDetails);
 		const { data: comment } = yield API.addIssueComment(account, model, _id, issueData);
-		const preparedComment = yield prepareComment(comment);
 
 		finishSubmitting();
-		yield put(IssuesActions.createCommentSuccess(preparedComment, _id));
+		yield put(IssuesActions.createCommentSuccess(comment, _id));
 		yield put(SnackbarActions.show('Issue comment added'));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('post', 'issue comment', error));
@@ -476,9 +471,6 @@ function* closeDetails() {
 
 const onUpdateEvent = (updatedIssue) => {
 	const jobs = selectJobsList(getState());
-	if (updatedIssue.comments) {
-		updatedIssue.comments = prepareComments(updatedIssue.comments);
-	}
 
 	if (updatedIssue.status === STATUSES.CLOSED) {
 
@@ -547,9 +539,8 @@ const onUpdateCommentEvent = (updatedComment) => {
 };
 
 const onCreateCommentEvent = (createdComment) => {
-	const preparedComment = prepareComment(createdComment);
 	const issueId = selectActiveIssueId(getState());
-	dispatch(IssuesActions.createCommentSuccess(preparedComment, issueId));
+	dispatch(IssuesActions.createCommentSuccess(createdComment, issueId));
 };
 
 const onDeleteCommentEvent = (deletedComment) => {
