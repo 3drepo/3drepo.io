@@ -103,13 +103,12 @@ class View {
 		}
 
 		if (!noClean) {
-			return this.setViewpointThumbnailURL(account, model, this.clean(account, model, foundView));
+			return this.clean(account, model, foundView);
 		}
 
 		return foundView;
 	}
 
-	// similar to findByModelName
 	async getList(account, model) {
 		const coll = await this.getCollection(account, model);
 		const views = await coll.find().toArray();
@@ -140,18 +139,6 @@ class View {
 
 		// DEPRECATED
 		viewpoint.screenshotSmall = viewpoint.screenshot;
-		return viewpoint;
-	}
-
-	// DEPRECATED
-	setViewpointThumbnailURL(account, model, viewpoint) {
-		if (!viewpoint || (!viewpoint.screenshot && !viewpoint.screenshot_ref)) {
-			return viewpoint;
-		}
-
-		const viewpointId = utils.uuidToString(viewpoint._id);
-		viewpoint.screenshot = { thumbnail: account + "/" + model + "/viewpoints/" + viewpointId + "/thumbnail.png" };
-
 		return viewpoint;
 	}
 
@@ -210,7 +197,7 @@ class View {
 		const coll = await this.getCollection(account, model);
 		await coll.insert(newView);
 
-		newView = this.setViewpointThumbnailURL(account, model, this.clean(account, model, newView));
+		newView = this.clean(account, model, newView);
 
 		ChatEvent.viewpointsCreated(sessionId, account, model, newView);
 		return newView;
