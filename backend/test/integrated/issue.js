@@ -234,23 +234,24 @@ describe("Issues", function () {
 			const username3 = 'teamSpace1';
 			const model2 = '5bfc11fa-50ac-b7e7-4328-83aa11fa50ac';
 
-			const highlighted_objects = [
-				{
+			const highlighted_group = {
+				objects: [{
 					"account": 'teamSpace1',
 					model: model2,
 					"shared_ids":["8b9259d2-316d-4295-9591-ae020bfcce48"]
-				}
-			];
+				}],
+				color: [2555, 255, 0]
+			};
 
-			const hidden_objects = [
-				{
+			const hidden_group = {
+				objects: [{
 					"account": 'teamSpace1',
 					model: model2,
 					"shared_ids":["69b60e77-e049-492f-b8a3-5f5b2730129c"]
-				}
-			];
+				}]
+			};
 
-			const viewpoint = {...baseIssue.viewpoint, color: [2555, 255, 0], highlighted_objects, hidden_objects};
+			const viewpoint = {...baseIssue.viewpoint, color: [2555, 255, 0],  highlighted_group, hidden_group};
 
 			const issue = {...baseIssue, "name":"Issue embeded group  test", viewpoint};
 
@@ -279,14 +280,15 @@ describe("Issues", function () {
 				function(done) {
 					agent2.get(`/${username3}/${model2}/revision/master/head/groups/${highlighted_group_id}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.objects).to.deep.equal(highlighted_objects);
+							expect(res.body.objects).to.deep.equal(highlighted_group.objects);
+							expect(res.body.color).to.deep.equal(highlighted_group.color);
 							done(err);
 						});
 				},
 				function(done) {
 					agent2.get(`/${username3}/${model2}/revision/master/head/groups/${hidden_group_id}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.objects).to.deep.equal(hidden_objects);
+							expect(res.body.objects).to.deep.equal(hidden_group.objects);
 							done(err);
 						});
 				}
