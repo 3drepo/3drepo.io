@@ -140,8 +140,8 @@ router.put("/:model/settings/heliSpeed", middlewares.hasReadAccessToModel, updat
  * @apiParam (Request body) {Number} elevation GIS elevation
  * @apiParam (Request body) {[]SurveyPoint} surveyPoints  an array containing GIS surveypoints
  *
- * @apiParam (Request body: SurveyPoint) {[]Number} position an array representing a three dimensional coordinate
- * @apiParam (Request body: SurveyPoint) {[]Number} latLong an array representing a two dimensional coordinate for latitude and logitude
+ * @apiParam (Request body: SurveyPoint) {Number[]} position an array representing a three dimensional coordinate
+ * @apiParam (Request body: SurveyPoint) {Number[]} latLong an array representing a two dimensional coordinate for latitude and logitude
  *
  * @apiExample {put} Example usage:
  * PUT /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/settings HTTP/1.1
@@ -682,7 +682,7 @@ router.post("/:model/permissions", middlewares.hasEditPermissionsAccessToModel, 
  * @apiDescription Gets the permissions of a list of models
  *
  * @apiParam {String} teamspace Name of teamspace.
- * @apiParam (Query) {[]String} MODELS An array of model ids.
+ * @apiParam (Query) {String[]} MODELS An array of model ids.
  *
  * @apiExample {get} Example usage:
  * GET /teamSpace1/models/permissions?models=5ce7dd19-1252-4548-a9c9-4a5414f2e0c5,3549ddf6-885d-4977-87f1-eeac43a0e818 HTTP/1.1
