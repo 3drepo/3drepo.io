@@ -18,11 +18,20 @@
 import React, { useState } from 'react';
 
 import { VIEWER_PANELS, VIEWER_PANELS_ICONS } from '../../../../constants/viewerGui';
-import {  AlignRight, CodeLabel, Content,
-CreateSessionSection, JoinPresentationSection, PresentationContainer,
-SessionStartedContent, StyledButton, StyledTextfield } from './presentation.styles';
+import {  AlignRight, CancelButton, CodeLabel,
+Content, CreateSessionSection, JoinPresentationSection,
+MainButton, PresentationContainer, SessionStartedContent, StyledButton, StyledTextfield } from './presentation.styles';
 
 const PresentationIcon = VIEWER_PANELS_ICONS[VIEWER_PANELS.PRESENTATION];
+
+const TogglePauseButton = ({isPaused, onClick}) => {
+	return (
+	<>
+		{isPaused && (<StyledButton variant="raised"  color="secondary"  onClick={onClick}> Resume </StyledButton>)}
+		{!isPaused && (<MainButton variant="raised"  color="secondary"  onClick={onClick}> Pause </MainButton>)}
+	</>
+	);
+};
 
 const JoinedPresentation = ({sessionCode, leavePresentation, isPaused, togglePause}) => {
 	return (
@@ -30,15 +39,11 @@ const JoinedPresentation = ({sessionCode, leavePresentation, isPaused, togglePau
 			You have entered a presentation session. Your
 			camera will now be controller by the presenter.
 			<AlignRight marginTop={45}>
-				<StyledButton
+				<TogglePauseButton onClick={togglePause} isPaused={isPaused} />
+				<CancelButton
 						variant="raised"
 						color="secondary"
-						onClick={togglePause}>{isPaused ? 'Resume' : 'Pause'}</StyledButton>
-
-				<StyledButton
-						variant="raised"
-						color="secondary"
-						onClick={leavePresentation}>Exit Session</StyledButton>
+						onClick={leavePresentation}>Exit Session</CancelButton>
 			</AlignRight>
 		</SessionStartedContent>
 
@@ -53,10 +58,10 @@ const Presenting = ({sessionCode, stopPresenting}) => {
 			<CodeLabel>{sessionCode}</CodeLabel>
 
 			<AlignRight>
-				<StyledButton
+				<CancelButton
 						variant="raised"
 						color="secondary"
-						onClick={stopPresenting}>End Session</StyledButton>
+						onClick={stopPresenting}>End Session</CancelButton>
 			</AlignRight>
 		</SessionStartedContent>
 	);
@@ -72,17 +77,17 @@ const InitialState = ({startPresenting, joinPresentation}) => {
 				<StyledTextfield
 					label="Enter your invitation code"
 					onChange={(e) => setCode(e.currentTarget.value)} value={code} />
-				<StyledButton
+				<MainButton
 					variant="raised"
 					color="secondary"
 					disabled={!hasCode}
-					onClick={() => joinPresentation(code)}>Join</StyledButton>
+					onClick={() => joinPresentation(code)}>Join</MainButton>
 			</JoinPresentationSection>
 			<CreateSessionSection>
-				<StyledButton
+				<MainButton
 						variant="raised"
 						color="secondary"
-						onClick={startPresenting}>Create Session</StyledButton>
+						onClick={startPresenting}>Create Sessiond</MainButton>
 			</CreateSessionSection>
 		</Content>
 	);

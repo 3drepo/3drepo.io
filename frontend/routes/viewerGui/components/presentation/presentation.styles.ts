@@ -23,6 +23,26 @@ export const StyledButton = styled(Button)`
 	margin: 8px;
 `;
 
+export const MainButton = styled(StyledButton)`
+	&& {
+		background-color: ${COLOR.PRIMARY_MAIN};
+	}
+
+	&&:hover {
+		background-color: ${COLOR.PRIMARY_LIGHT};
+	}
+`;
+
+export const CancelButton = styled(StyledButton)`
+	&& {
+		background-color: ${COLOR.NEGATIVE_87};
+	}
+
+	&&:hover {
+		background-color: ${COLOR.NEGATIVE};
+	}
+`;
+
 export const CreateSessionSection = styled.div`
 	text-align: center;
 	margin: 20px;
