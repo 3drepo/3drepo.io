@@ -310,7 +310,6 @@ describe("Risks", function () {
 			let highlighted_group_id = "";
 			let hidden_group_id = "";
 
-
 			async.series([
 				function(done) {
 					agent2 = request.agent(server);
@@ -344,7 +343,6 @@ describe("Risks", function () {
 						});
 				}
 			], done);
-
 		});
 
 		it("without name should fail", function(done) {
