@@ -345,24 +345,28 @@ router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssues
  * @apiParam {String} model Model ID
  *
  * @apiParam (Request body) {String} name The name of the issue
- * @apiParam (Request body) {[]String} assigned_roles The roles assigned to the issue. Even though its an array (this is for future support of multiple assigned jobs), currently it has one or none elements correspoing to the available jobs in the teamaspace.
+ * @apiParam (Request body) {String[]} assigned_roles The roles assigned to the issue. Even though its an array (this is for future support of multiple assigned jobs), currently it has one or none elements correspoing to the available jobs in the teamaspace.
  * @apiParam (Request body) {String} status The status of the issue. It can have a value of "open","in progress","for approval", "void" or "closed".
- * @apiParam (Request body) {String} priority The priority of the issue. It can have a value of "none", "low", "medium" or "high".
+ * @apiParam (Request body) {String} priority The priority of the issue. It can have a value of "none", String"low", "medium" or "high".
  * @apiParam (Request body) {String} topic_type Type of the issue. It's value has to be one of the defined topic_types for the model. See <a href='#api-Model-createModel'>here</a> for more details.
  * @apiParam (Request body) {Viewpoint} viewpoint The viewpoint of the issue, defining the position of the camera and the screenshot for that position.
  * @apiParam (Request body) {String} desc The description of the created issue
- * @apiParam (Request body) {[3]Number} position The vector defining the pin of the issue. If the pin doesnt has an issue its an empty array.
+ * @apiParam (Request body) {Number[3]} position The vector defining the pin of the issue. If the pin doesnt has an issue its an empty array.
+ * @apiParam (Request body) {Number[3]} position The vector defining the pin of the issue. If the pin doesnt has an issue its an empty array.
  *
- * @apiParam (Request body: Viewpoint) {[3]Number} right The right vector of the viewpoint indicating the direction of right in relative coordinates.
- * @apiParam (Request body: Viewpoint) {[3]Number} up The up vector of the viewpoint indicating the direction of up in relative coordinates.
- * @apiParam (Request body: Viewpoint) {[3]Number} position The position vector indicates where in the world the viewpoint is positioned.
- * @apiParam (Request body: Viewpoint) {[3]Number} look_at The vector indicating where in the world the viewpoint is looking at.
- * @apiParam (Request body: Viewpoint) {[3]Number} view_dir The vector indicating where is the viewpoint is looking at in relative coordinates.
+ * @apiParam (Request body: Viewpoint) {Number[3]} right The right vector of the viewpoint indicating the direction of right in relative coordinates.
+ * @apiParam (Request body: Viewpoint) {Number[3]} up The up vector of the viewpoint indicating the direction of up in relative coordinates.
+ * @apiParam (Request body: Viewpoint) {Number[3]} position The position vector indicates where in the world the viewpoint is positioned.
+ * @apiParam (Request body: Viewpoint) {Number[3]} look_at The vector indicating where in the world the viewpoint is looking at.
+ * @apiParam (Request body: Viewpoint) {Number[3]} view_dir The vector indicating where is the viewpoint is looking at in relative coordinates.
  * @apiParam (Request body: Viewpoint) {Number} near The vector indicating the near plane.
  * @apiParam (Request body: Viewpoint) {Number} far The vector indicating the far plane.
  * @apiParam (Request body: Viewpoint) {Number} fov The angle of the field of view.
  * @apiParam (Request body: Viewpoint) {Number} aspect_ratio The aspect ratio of the fustrum.
- * @apiParam (Request body: Viewpoint) {String} highlighted_group_id If the issue is associated with one or more objects from the model this field has the value of a group id generated to hold those objects
+ * @apiParam (Request body: Viewpoint) {String} [highlighted_group_id] If the issue is associated with one or more objects from the model this field has the value of a group id generated to hold those objects
+ * @apiParam (Request body: Viewpoint) {String[]} [highlighted_objects] If the issue is associated with one or more objects from the model this field has the value of the meshes
+ * @apiParam (Request body: Viewpoint) {String} [hidden_group_id] If the issue is associated with one or more objects from the model this field has the value of a group id generated to hold those objects
+ * @apiParam (Request body: Viewpoint) {String[]} [hidden_objects] If the issue is associated with one or more objects from the model this field has the value of a group id generated to hold those objects
  * @apiParam (Request body: Viewpoint) {Boolean} hide_IFC A flag to hide the IFC
  * @apiParam (Request body: Viewpoint) {String} screenshot A string in base64 representing the screenshot associated with the issue
  *

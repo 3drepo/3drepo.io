@@ -428,6 +428,32 @@ class Ticket {
 		systemComments.push(comment);
 	}
 
+	async  createGroup(account, model, ticket,  groupdata, idField, branch, rid) {
+		const data =  {
+			name: ticket.name,
+			[this.groupField]: utils.stringToUUID(ticket._id),
+			...groupdata
+		};
+
+		const group = await  Group.createGroup({account, model}, null,  data, ticket.owner, branch, rid);
+		ticket.viewpoint[idField] = utils.stringToUUID(group._id);
+	}
+	async createGroupsIfNecessary(account, model, newTicket, branch, rid) {
+		if (!newTicket.viewpoint) {
+			return;
+		}
+
+		if (newTicket.viewpoint.highlighted_group && !newTicket.viewpoint.highlighted_group_id) {
+			await this.createGroup(account, model, newTicket,  newTicket.viewpoint.highlighted_group, "highlighted_group_id", branch, rid);
+			delete newTicket.highlighted_group;
+		}
+
+		if (newTicket.viewpoint.hidden_group && !newTicket.viewpoint.hidden_group_id) {
+			await this.createGroup(account, model, newTicket, newTicket.viewpoint.hidden_group, "hidden_group_id", branch, rid);
+			delete newTicket.hidden_group;
+		}
+	}
+
 	/*
 	* @param {string} account
 	* @param {string} model
@@ -493,6 +519,8 @@ class Ticket {
 		}
 
 		await this.setGroupTicketId(account, model, newTicket);
+
+		await this.createGroupsIfNecessary(account, model, newTicket);
 
 		newTicket = this.filterFields(newTicket, ["viewpoint", "revId"]);
 
