@@ -22,32 +22,31 @@ verify = True
 ##### Connect to the Database #####
 db = MongoClient(connString)
 for database in db.database_names():
-    if database != "admin" and database != "local" and database == "charence":
+    if database != "admin" and database != "local":
         db = MongoClient(connString)[database]
         print("--database:" + database)
 
 ##### Get a model ID and find entries #####
         for setting in db.settings.find(no_cursor_timeout=True):
             modelId = setting.get("_id")
-            if str(modelId) == "f0446ff6-1503-4ea7-aa7a-a989bc827d2d":
-                print("\t--model: " +  modelId)
-                for view in db[modelId + ".views"].find({"$or":[{"clippingPlanes":{"$exists":True}},{"screenshot":{"$exists":True}}]}):
-                    viewId = view.get("_id")
-                    unsetFields = { "$unset": {} }
-                    print("\t\t--view: " +  str(viewId))
+            print("\t--model: " +  modelId)
+            for view in db[modelId + ".views"].find({"$or":[{"clippingPlanes":{"$exists":True}},{"screenshot":{"$exists":True}}]}):
+                viewId = view.get("_id")
+                unsetFields = { "$unset": {} }
+                print("\t\t--view: " +  str(viewId))
 ##### Handle old clipping planes #####
-                    if "clippingPlanes" in view and "clippingPlanes" in view.get("viewpoint"):
-                        if not verify or view["viewpoint"]["clippingPlanes"] == view["clippingPlanes"]:
-                            unsetFields["$unset"]["clippingPlanes"] = ""
-                        else:
-                            print("\t\t\tclippingPlanes mismatch, skipping...")
+                if "clippingPlanes" in view and "clippingPlanes" in view.get("viewpoint"):
+                    if not verify or view["viewpoint"]["clippingPlanes"] == view["clippingPlanes"]:
+                        unsetFields["$unset"]["clippingPlanes"] = ""
+                    else:
+                        print("\t\t\tclippingPlanes mismatch, skipping...")
 ##### Handle old screenshot #####
-                    if "screenshot" in view and "buffer" in view.get("screenshot") and "thumbnail" in view:
-                        if not verify or view["thumbnail"] == view["screenshot"]["buffer"]:
-                            unsetFields["$unset"]["screenshot"] = ""
-                        else:
-                            print("\t\t\tthumbnail mismatch, skipping...")
+                if "screenshot" in view and "buffer" in view.get("screenshot") and "thumbnail" in view:
+                    if not verify or view["thumbnail"] == view["screenshot"]["buffer"]:
+                        unsetFields["$unset"]["screenshot"] = ""
+                    else:
+                        print("\t\t\tthumbnail mismatch, skipping...")
 
-                    if not dryRun and any(unsetFields.get("$unset")):
-                        db[modelId + ".views"].update_one({"_id":viewId}, unsetFields)
+                if not dryRun and any(unsetFields.get("$unset")):
+                    db[modelId + ".views"].update_one({"_id":viewId}, unsetFields)
 
