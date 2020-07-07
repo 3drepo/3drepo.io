@@ -1088,7 +1088,8 @@ export class UnityUtil {
 	 * @param model - name of model
 	 * @param branch - ID of the branch (deprecated value)
 	 * @param revision - ID of revision
-	 * @param initView - the view the model should load with
+	 * @param initView? - the view the model should load with
+	 * @param clearCanvas? - Reset the state of the viewer prior to loading the model (Default: true)
 	 * @return returns a promise that resolves when the model start loading.
 	 */
 	public static loadModel(
@@ -1096,9 +1097,12 @@ export class UnityUtil {
 		model: string,
 		branch = '',
 		revision = 'head',
-		initView = null
+		initView = null,
+		clearCanvas = true
 	): Promise<void> {
-		UnityUtil.reset();
+		if (clearCanvas) {
+			UnityUtil.reset();
+		}
 		const params: any = {
 			database : account,
 			model
@@ -1118,6 +1122,19 @@ export class UnityUtil {
 		UnityUtil.toUnity('LoadModel', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(params));
 
 		return UnityUtil.onLoading();
+	}
+
+	/**
+	 * Offload a model that is currently loaded
+	 * @category Configurations
+	 * @param account - name of teamspace
+	 * @param model - name of model
+	 * @param branch - ID of the branch (deprecated value)
+	 * @param revision - ID of revision
+	 */
+	public static offLoadModel(account: string, model: string, revision = 'head') {
+		const ns = `${account}.${model}${revision === 'head' ? '' : `.${revision}`}`;
+		UnityUtil.toUnity('UnloadModel', UnityUtil.LoadingState.MODEL_LOADED, ns);
 	}
 
 	/**
