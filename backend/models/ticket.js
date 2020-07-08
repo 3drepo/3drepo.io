@@ -96,6 +96,7 @@ class Ticket extends View {
 
 				if (comment.viewpoint) {
 					const commentViewpoint = ticketToClean.viewpoints.find((vp) =>
+						vp.guid &&
 						utils.uuidToString(vp.guid) === comment.viewpoint
 					);
 

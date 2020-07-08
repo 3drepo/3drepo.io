@@ -24,6 +24,7 @@ const responseCodes = require("../response_codes.js");
 const db = require("../handler/db");
 const ChatEvent = require("./chatEvent");
 const FileRef = require("./fileRef");
+const { systemLogger } = require("../logger.js");
 
 const fieldTypes = {
 	"_id": "[object Object]",
@@ -41,7 +42,6 @@ class View {
 		this.fieldTypes = fieldTypes;
 	}
 
-	// TODO v2
 	clean(account, model, viewToClean, targetType = "[object String]") {
 		const viewFields = [
 			"_id",
