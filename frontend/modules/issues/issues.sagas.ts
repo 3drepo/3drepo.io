@@ -25,6 +25,7 @@ import { CHAT_CHANNELS } from '../../constants/chat';
 import { DEFAULT_PROPERTIES, PRIORITIES, STATUSES } from '../../constants/issues';
 import { EXTENSION_RE } from '../../constants/resources';
 import { ROUTES } from '../../constants/routes';
+import { UnityUtil } from '../../globals/unity-util';
 import {
 	createAttachResourceComments,
 	createRemoveResourceComment
@@ -44,7 +45,7 @@ import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
-import { selectTopicTypes, TeamspaceActions } from '../teamspace';
+import { selectTopicTypes } from '../teamspace';
 import { selectIfcSpacesHidden, TreeActions } from '../tree';
 import { IssuesActions, IssuesTypes } from './issues.redux';
 import {
@@ -125,14 +126,18 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 		};
 
 		if (objectInfo && (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0)) {
-			const [highlightedGroup, hiddenGroup] = yield createGroup(issueData, objectInfo, teamspace, model, revision);
-
-			if (highlightedGroup) {
-				viewpoint.highlighted_group_id = highlightedGroup.data._id;
+			const {highlightedNodes, hiddenNodes} = objectInfo;
+			if (highlightedNodes.length > 0) {
+				viewpoint.highlighted_group = {
+					objects: highlightedNodes,
+					color: UnityUtil.defaultHighlightColor.map((c) => c * 255)
+				} ;
 			}
 
-			if (hiddenGroup) {
-				viewpoint.hidden_group_id = hiddenGroup.data._id;
+			if (hiddenNodes.length > 0) {
+				viewpoint.hidden_group = {
+					objects: hiddenNodes
+				};
 			}
 		}
 
