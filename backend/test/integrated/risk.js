@@ -189,6 +189,128 @@ describe("Risks", function () {
 			], done);
 		});
 
+		it("with an existing group associated should succeed", function(done) {
+			const username3 = 'teamSpace1';
+			const model2 = '5bfc11fa-50ac-b7e7-4328-83aa11fa50ac';
+			let agent2 =  null;
+
+			const groupData = {
+				"color":[98,126,184],
+				"objects":[
+					{
+						"account": 'teamSpace1',
+						model: model2,
+						"shared_ids":["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}]
+			};
+
+
+			const risk = {...baseRisk, "name":"Risk group test"};
+
+			let riskId;
+			let groupId;
+
+			async.series([
+				function(done) {
+					agent2 = request.agent(server);
+					agent2.post("/login")
+						.send({ username: 'teamSpace1', password })
+						.expect(200, done);
+				},
+				function(done) {
+					agent2.post(`/${username3}/${model2}/revision/master/head/groups/`)
+						.send(groupData)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					risk.viewpoint = { ...risk.viewpoint, highlighted_group_id:groupId};
+
+					agent2.post(`/${username3}/${model2}/risks`)
+						.send(risk)
+						.expect(200 , function(err, res) {
+							riskId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent2.get(`/${username3}/${model2}/risks/${riskId}`).expect(200, function(err , res) {
+						expect(res.body.viewpoint.highlighted_group_id).to.equal(groupId);
+						return done(err);
+					});
+				}
+			], done);
+		});
+
+		it("with a embeded group should succeed", function(done) {
+			const username3 = 'teamSpace1';
+			const model2 = '5bfc11fa-50ac-b7e7-4328-83aa11fa50ac';
+			let agent2 =  null;
+
+			const highlighted_group = {
+				objects: [{
+					"account": 'teamSpace1',
+					model: model2,
+					"shared_ids":["8b9259d2-316d-4295-9591-ae020bfcce48"]
+				}],
+				color: [2555, 255, 0]
+			};
+
+			const hidden_group = {
+				objects: [{
+					"account": 'teamSpace1',
+					model: model2,
+					"shared_ids":["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+				}]
+			};
+
+			const viewpoint = {...baseRisk.viewpoint, highlighted_group, hidden_group};
+
+			const risk = {...baseRisk, "name":"risk embeded group  test", viewpoint};
+
+			let riskId = '';
+			let highlighted_group_id = "";
+			let hidden_group_id = "";
+
+
+			async.series([
+				function(done) {
+					agent2 = request.agent(server);
+					agent2.post("/login")
+						.send({ username: 'teamSpace1', password })
+						.expect(200, done);
+				},
+				function(done) {
+					agent2.post(`/${username3}/${model2}/risks`)
+						.send(risk)
+						.expect(200 , function(err, res) {
+							riskId = res.body._id;
+							highlighted_group_id = res.body.viewpoint.highlighted_group_id;
+							hidden_group_id = res.body.viewpoint.hidden_group_id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent2.get(`/${username3}/${model2}/revision/master/head/groups/${highlighted_group_id}`)
+						.expect(200 , function(err, res) {
+							expect(res.body.objects).to.deep.equal(highlighted_group.objects);
+							expect(res.body.color).to.deep.equal(highlighted_group.color);
+							done(err);
+						});
+				},
+				function(done) {
+					agent2.get(`/${username3}/${model2}/revision/master/head/groups/${hidden_group_id}`)
+						.expect(200 , function(err, res) {
+							expect(res.body.objects).to.deep.equal(hidden_group.objects);
+							done(err);
+						});
+				}
+			], done);
+
+		});
+
 		it("without name should fail", function(done) {
 			const risk = baseRisk;
 
