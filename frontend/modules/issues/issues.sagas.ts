@@ -87,27 +87,6 @@ function* fetchIssue({teamspace, modelId, issueId}) {
 	yield put(IssuesActions.toggleDetailsPendingState(false));
 }
 
-const createGroupData = (name, nodes) => {
-	const groupData = {
-		name,
-		color: [255, 0, 0],
-		objects: nodes,
-		isIssueGroup: true
-	};
-
-	return nodes.length === 0 ? null : groupData;
-};
-
-const createGroup = (issue, objectInfo, teamspace, model, revision) => {
-	const highlightedGroupData = createGroupData(issue.name, objectInfo.highlightedNodes);
-	const hiddenGroupData = createGroupData(issue.name, objectInfo.hiddenNodes);
-
-	return Promise.all([
-		highlightedGroupData && API.createGroup(teamspace, model, revision, highlightedGroupData),
-		hiddenGroupData && API.createGroup(teamspace, model, revision, hiddenGroupData)
-	]);
-};
-
 function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, ignoreViewer = false }) {
 	try {
 		const userJob = yield select(selectMyJob);
@@ -116,9 +95,17 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 			yield generateViewpoint( teamspace, model, issueData.name, !Boolean(issueData.descriptionThumbnail) ) :
 			{};
 
+			// .substring(screenshot.indexOf(',') + 1);
+		if (issueData.descriptionThumbnail ) {
+			issue.viewpoint = {
+				...(issue.viewpoint || {}),
+				screenshot: issueData.descriptionThumbnail.substring(issueData.descriptionThumbnail.indexOf(',') + 1 )
+			};
+		}
+
 		issue = {
 			...issue,
-			...omit(issueData, ['author', 'statusColor', 'roleColor', 'defaultHidden', 'viewpoint']),
+			...omit(issueData, ['author', 'statusColor', 'roleColor', 'defaultHidden', 'viewpoint', 'descriptionThumbnail']),
 			owner: issueData.author,
 			rev_id: revision,
 			creator_role: userJob._id,
