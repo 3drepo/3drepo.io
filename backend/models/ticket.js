@@ -62,8 +62,6 @@ class Ticket extends View {
 		model = ticketToClean.model || ticketToClean.origin_model || model;
 		ticketToClean.model = model;
 
-		const id = utils.uuidToString(ticketToClean._id);
-
 		ticketFields.forEach((key) => {
 			if (ticketToClean[key]) {
 				ticketToClean[key] = utils.uuidToString(ticketToClean[key]);
