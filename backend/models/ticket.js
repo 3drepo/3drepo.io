@@ -101,7 +101,8 @@ class Ticket extends View {
 
 					comment.viewpoint = commentViewpoint || undefined;
 
-					comment = super.clean(account, model, comment);
+					comment = super.clean(account, model, { _id: ticketToClean._id, ...comment });
+					delete comment._id;
 				}
 			});
 		}
@@ -329,37 +330,11 @@ class Ticket extends View {
 	}
 
 	async handlePrimaryViewpoint(account, model, ticketId, viewpoint) {
-		viewpoint = viewpoint || {};
+		viewpoint = super.handleViewpoint(account, model, ticketId, viewpoint);
 		viewpoint.guid = utils.generateUUID();
 
-		if (viewpoint.highlighted_group_id) {
-			viewpoint.highlighted_group_id = utils.stringToUUID(viewpoint.highlighted_group_id);
-		}
-
-		if (viewpoint.hidden_group_id) {
-			viewpoint.hidden_group_id = utils.stringToUUID(viewpoint.hidden_group_id);
-		}
-
-		if (viewpoint.shown_group_id) {
-			viewpoint.shown_group_id = utils.stringToUUID(viewpoint.shown_group_id);
-		}
-
 		if (viewpoint.screenshot) {
-			const imageBuffer = new Buffer.from(viewpoint.screenshot, "base64");
-
-			viewpoint.screenshot = imageBuffer;
 			await super.setExternalScreenshotRef(viewpoint, account, model, this.collName);
-
-			viewpoint.thumbnail = await utils.resizeAndCropScreenshot(imageBuffer, 120, 120, true).catch((err) => {
-				systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
-					account,
-					model,
-					type: this.collName,
-					ticketId: utils.uuidToString(ticketId),
-					viewpointId: utils.uuidToString(viewpoint.guid),
-					err
-				});
-			});
 		}
 
 		return viewpoint;

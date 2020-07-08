@@ -63,6 +63,7 @@ class View {
 		});
 
 		if (viewToClean.viewpoint &&
+			viewToClean.viewpoint._id &&
 			viewToClean.viewpoint.guid &&
 			(viewToClean.viewpoint.screenshot || viewToClean.viewpoint.screenshot_ref)) {
 			const id = utils.uuidToString(viewToClean._id);
@@ -84,12 +85,14 @@ class View {
 			viewToClean.screenshot = { thumbnail: viewToClean.thumbnail };
 		}
 
-		if (viewToClean.viewpoint && viewToClean.viewpoint.clippingPlanes) {
-			viewToClean.clippingPlanes = viewToClean.viewpoint.clippingPlanes;
-		}
+		if (viewToClean.viewpoint) {
+			if (viewToClean.viewpoint && viewToClean.viewpoint.clippingPlanes) {
+				viewToClean.clippingPlanes = viewToClean.viewpoint.clippingPlanes;
+			}
 
-		if (viewToClean.viewpoint.screenshot && !viewToClean.viewpoint.screenshotSmall) {
-			viewpoint.screenshotSmall = viewpoint.screenshot;
+			if (viewToClean.viewpoint.screenshot && !viewToClean.viewpoint.screenshotSmall) {
+				viewToClean.viewpoint.screenshotSmall = viewToClean.viewpoint.screenshot;
+			}
 		}
 		// =============================
 		// DEPRECATED LEGACY SUPPORT END
@@ -195,8 +198,43 @@ class View {
 		return { _id: utils.uuidToString(uid) };
 	}
 
+	async handleViewpoint(account, model, id, viewpoint) {
+		viewpoint = viewpoint || {};
+
+		if (viewpoint.highlighted_group_id) {
+			viewpoint.highlighted_group_id = utils.stringToUUID(viewpoint.highlighted_group_id);
+		}
+
+		if (viewpoint.hidden_group_id) {
+			viewpoint.hidden_group_id = utils.stringToUUID(viewpoint.hidden_group_id);
+		}
+
+		if (viewpoint.shown_group_id) {
+			viewpoint.shown_group_id = utils.stringToUUID(viewpoint.shown_group_id);
+		}
+
+		if (viewpoint.screenshot) {
+			const imageBuffer = new Buffer.from(viewpoint.screenshot, "base64");
+
+			viewpoint.screenshot = imageBuffer;
+
+			viewpoint.thumbnail = await utils.resizeAndCropScreenshot(imageBuffer, 120, 120, true).catch((err) => {
+				systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
+					account,
+					model,
+					type: this.collName,
+					id: utils.uuidToString(id),
+					viewpointId: utils.uuidToString(viewpoint.guid),
+					err
+				});
+			});
+		}
+
+		return viewpoint;
+	}
+
 	async create(sessionId, account, model, newView) {
-		if (!newView.name) {
+		if (!newView.name || !utils.isString(newView.name)) {
 			return Promise.reject({ resCode: responseCodes.INVALID_ARGUMENTS });
 		}
 
@@ -211,13 +249,24 @@ class View {
 		if (newView.clippingPlanes && newView.viewpoint && !newView.viewpoint.clippingPlanes) {
 			newView.viewpoint.clippingPlanes = newView.clippingPlanes;
 		}
+
+		delete newView.screenshot;
+		delete newView.clippingPlanes;
 		// =============================
 		// DEPRECATED LEGACY SUPPORT END
 		// =============================
 
-		newView = _.pick(newView, Object.keys(fieldTypes));
-
 		newView._id = utils.stringToUUID(newView._id || nodeuuid());
+
+		if (newView.viewpoint) {
+			newView.viewpoint = await this.handleViewpoint(account, model, newView._id, newView.viewpoint);
+
+			if (newView.viewpoint.thumbnail) {
+				newView.thumbnail = newView.viewpoint.thumbnail;
+				delete newView.viewpoint.thumbnail;
+			}
+		}
+
 		const coll = await this.getCollection(account, model);
 		await coll.insert(newView);
 

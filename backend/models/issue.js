@@ -301,7 +301,7 @@ class Issue extends Ticket {
 		const issueNumbers = commentResult.issueRefs;
 
 		// 3. Get issues from number
-		const issuesColl = await this.getTicketsCollection(account, model);
+		const issuesColl = await this.getCollection(account, model);
 		// 4 Adding the comment id to get its number and to not make 2 queries to the database
 		const res = await issuesColl.find({ $or: [{ number: {$in: issueNumbers}}, {_id : stringToUUID(id)}]}).toArray();
 
