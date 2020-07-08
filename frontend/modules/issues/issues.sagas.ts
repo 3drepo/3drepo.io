@@ -104,6 +104,14 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 			};
 		}
 
+			// .substring(screenshot.indexOf(',') + 1);
+		if (issueData.descriptionThumbnail ) {
+			issue.viewpoint = {
+				...(issue.viewpoint || {}),
+				screenshot: issueData.descriptionThumbnail.substring(issueData.descriptionThumbnail.indexOf(',') + 1 )
+			};
+		}
+
 		issue = {
 			...issue,
 			...omit(issueData, ['author', 'statusColor', 'roleColor', 'defaultHidden', 'viewpoint', 'descriptionThumbnail']),
