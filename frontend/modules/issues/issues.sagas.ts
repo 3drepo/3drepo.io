@@ -110,48 +110,18 @@ const createGroup = (issue, objectInfo, teamspace, model, revision) => {
 
 function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, ignoreViewer = false }) {
 	try {
-		const myJob = yield select(selectMyJob);
-		const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
+		const userJob = yield select(selectMyJob);
 
-		const vp = yield generateViewpoint( teamspace, model, issueData.name, true );
+		let issue = !ignoreViewer ?
+			yield generateViewpoint( teamspace, model, issueData.name, !Boolean(issueData.descriptionThumbnail) ) :
+			{};
 
-		const [viewpoint, objectInfo, screenshot, userJob] = !ignoreViewer ? yield all([
-			Viewer.getCurrentViewpoint({ teamspace, model }),
-			Viewer.getObjectsStatus(),
-			issueData.descriptionThumbnail || Viewer.getScreenshot(),
-			myJob
-		]) : [{}, null, issueData.descriptionThumbnail || '', myJob];
-
-		viewpoint.hideIfc = ifcSpacesHidden;
-		issueData.rev_id = {
-			...issueData,
-			rev_id: revision
-		};
-
-		if (objectInfo && (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0)) {
-			const {highlightedNodes, hiddenNodes} = objectInfo;
-			if (highlightedNodes.length > 0) {
-				viewpoint.highlighted_group = {
-					objects: highlightedNodes,
-					color: UnityUtil.defaultHighlightColor.map((c) => c * 255)
-				} ;
-			}
-
-			if (hiddenNodes.length > 0) {
-				viewpoint.hidden_group = {
-					objects: hiddenNodes
-				};
-			}
-		}
-
-		viewpoint.screenshot = screenshot.substring(screenshot.indexOf(',') + 1);
-
-		const issue = {
-			...omit(issueData, ['author', 'statusColor', 'roleColor', 'defaultHidden']),
+		issue = {
+			...issue,
+			...omit(issueData, ['author', 'statusColor', 'roleColor', 'defaultHidden', 'viewpoint']),
 			owner: issueData.author,
 			rev_id: revision,
 			creator_role: userJob._id,
-			viewpoint,
 		};
 
 		const { data: savedIssue } = yield API.saveIssue(teamspace, model, issue);

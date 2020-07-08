@@ -16,13 +16,15 @@
  */
 
 import { get } from 'lodash';
-import { put, takeLatest } from 'redux-saga/effects';
+import { put, select, takeLatest } from 'redux-saga/effects';
 import { CHAT_CHANNELS } from '../../constants/chat';
+import { UnityUtil } from '../../globals/unity-util';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
 import { DialogActions } from '../dialog';
 import { dispatch } from '../store';
+import { selectIfcSpacesHidden } from '../tree';
 import { ViewerGuiActions } from '../viewerGui';
 import { PRESET_VIEW } from './viewpoints.constants';
 import { ViewpointsActions, ViewpointsTypes } from './viewpoints.redux';
@@ -48,6 +50,8 @@ export function* fetchViewpoints({ teamspace, modelId }) {
 
 export function* generateViewpoint(teamspace, modelId, name, withScreenshot = false) {
 	try {
+		const hideIfc = yield select(selectIfcSpacesHidden);
+
 		const viewpoint = yield Viewer.getCurrentViewpoint({
 			teamspace,
 			model: modelId
@@ -55,11 +59,16 @@ export function* generateViewpoint(teamspace, modelId, name, withScreenshot = fa
 
 		const generatedObject = {
 			name,
-			viewpoint
+			viewpoint:  {
+				...viewpoint,
+				hideIfc
+			}
 		} as any;
 
 		if (withScreenshot) {
-			generatedObject.thumbnail =  yield Viewer.getScreenshot();
+			let screenshot = yield Viewer.getScreenshot();
+			screenshot = screenshot.substring(screenshot.indexOf(',') + 1);
+			generatedObject.viewpoint.screenshot = screenshot;
 		}
 
 		const objectInfo = yield Viewer.getObjectsStatus();
@@ -68,12 +77,18 @@ export function* generateViewpoint(teamspace, modelId, name, withScreenshot = fa
 			const { highlightedNodes, hiddenNodes } = objectInfo;
 
 			if (highlightedNodes.length > 0) {
-				generatedObject.viewpoint.highlighted_objects  = highlightedNodes;
+				generatedObject.viewpoint.highlighted_group = {
+					objects: highlightedNodes,
+					color: UnityUtil.defaultHighlightColor.map((c) => c * 255)
+				} ;
 			}
 
 			if (hiddenNodes.length > 0) {
-				generatedObject.viewpoint.hidden_objects  = hiddenNodes;
+				generatedObject.viewpoint.hidden_group = {
+					objects: hiddenNodes
+				};
 			}
+
 		}
 
 		return generatedObject;
