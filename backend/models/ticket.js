@@ -84,8 +84,6 @@ class Ticket extends View {
 
 		if (ticketToClean.viewpoints && ticketToClean.viewpoints.length > 0 && !ticketToClean.viewpoint) {
 			ticketToClean.viewpoint = ticketToClean.viewpoints[0];
-
-			super.setViewpointScreenshotURL(this.collName, account, model, id, ticketToClean.viewpoint);
 		}
 
 		if (ticketToClean.comments) {
@@ -102,7 +100,6 @@ class Ticket extends View {
 					);
 
 					comment.viewpoint = commentViewpoint || undefined;
-					super.setViewpointScreenshotURL(this.collName, account, model, id, comment.viewpoint);
 
 					comment = super.clean(account, model, comment);
 				}

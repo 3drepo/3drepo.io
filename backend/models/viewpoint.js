@@ -62,6 +62,14 @@ class View {
 			}
 		});
 
+		if (viewToClean.viewpoint &&
+			viewToClean.viewpoint.guid &&
+			(viewToClean.viewpoint.screenshot || viewToClean.viewpoint.screenshot_ref)) {
+			const id = utils.uuidToString(viewToClean._id);
+			const viewpointId = utils.uuidToString(viewToClean.viewpoint.guid);
+			viewToClean.viewpoint.screenshot = account + "/" + model + "/" + this.collName + "/" + id + "/viewpoints/" + viewpointId + "/screenshot.png";
+		}
+
 		if (viewToClean.thumbnail) {
 			const id = utils.uuidToString(viewToClean._id);
 			viewToClean.thumbnail = account + "/" + model + "/" + this.collName + "/" + id + "/thumbnail.png";
@@ -78,6 +86,10 @@ class View {
 
 		if (viewToClean.viewpoint && viewToClean.viewpoint.clippingPlanes) {
 			viewToClean.clippingPlanes = viewToClean.viewpoint.clippingPlanes;
+		}
+
+		if (viewToClean.viewpoint.screenshot && !viewToClean.viewpoint.screenshotSmall) {
+			viewpoint.screenshotSmall = viewpoint.screenshot;
 		}
 		// =============================
 		// DEPRECATED LEGACY SUPPORT END
@@ -137,8 +149,6 @@ class View {
 
 		viewpoint.screenshot = account + "/" + model + "/" + collName + "/" + id + "/viewpoints/" + viewpointId + "/screenshot.png";
 
-		// DEPRECATED
-		viewpoint.screenshotSmall = viewpoint.screenshot;
 		return viewpoint;
 	}
 
@@ -185,13 +195,27 @@ class View {
 		return { _id: utils.uuidToString(uid) };
 	}
 
-	async createViewpoint(account, model, sessionId, newView) {
-		if (newView.screenshot && newView.screenshot.base64) {
-			const croppedScreenshot = await utils.getCroppedScreenshotFromBase64(newView.screenshot.base64, 79, 79);
-			newView.screenshot.buffer = new Buffer.from(croppedScreenshot, "base64");
+	async create(sessionId, account, model, newView) {
+		if (!newView.name) {
+			return Promise.reject({ resCode: responseCodes.INVALID_ARGUMENTS });
 		}
 
-		newView = _.pick(newView, ["name", "clippingPlanes", "viewpoint", "screenshot"]);
+		// ===============================
+		// DEPRECATED LEGACY SUPPORT START
+		// ===============================
+		if (newView.screenshot && newView.screenshot.base64) {
+			const croppedScreenshot = await utils.getCroppedScreenshotFromBase64(newView.screenshot.base64, 79, 79);
+			newView.thumbnail = new Buffer.from(croppedScreenshot, "base64");
+		}
+
+		if (newView.clippingPlanes && newView.viewpoint && !newView.viewpoint.clippingPlanes) {
+			newView.viewpoint.clippingPlanes = newView.clippingPlanes;
+		}
+		// =============================
+		// DEPRECATED LEGACY SUPPORT END
+		// =============================
+
+		newView = _.pick(newView, Object.keys(fieldTypes));
 
 		newView._id = utils.stringToUUID(newView._id || nodeuuid());
 		const coll = await this.getCollection(account, model);
@@ -199,7 +223,10 @@ class View {
 
 		newView = this.clean(account, model, newView);
 
-		ChatEvent.viewpointsCreated(sessionId, account, model, newView);
+		if (sessionId) {
+			ChatEvent.viewpointsCreated(sessionId, account, model, newView);
+		}
+
 		return newView;
 	}
 

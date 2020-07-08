@@ -285,25 +285,15 @@ function findView(req, res, next) {
 }
 
 function createView(req, res, next) {
-	if (Object.keys(req.body).length >= 3 &&
-			utils.isString(req.body.name) &&
-			Object.prototype.toString.call(req.body.viewpoint) === "[object Object]" &&
-			(Object.prototype.toString.call(req.body.screenshot) === "[object Object]"  || !req.body.screenshot) &&
-			(!req.body.clippingPlanes || Object.prototype.toString.call(req.body.clippingPlanes) === "[object Array]")) {
-		const place = utils.APIInfo(req);
-		const sessionId = req.headers[C.HEADER_SOCKET_ID];
-		const { account, model } = req.params;
+	const place = utils.APIInfo(req);
+	const { account, model } = req.params;
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-		View.createViewpoint(account, model, sessionId, req.body)
-			.then(view => {
-				responseCodes.respond(place, req, res, next, responseCodes.OK, view);
-			}).catch(err => {
-				responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-			});
-	} else {
-
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
-	}
+	View.create(sessionId, account, model, req.body).then(view => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, view);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
 }
 
 function deleteView(req, res, next) {
