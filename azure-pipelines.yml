@@ -66,7 +66,7 @@ steps:
   displayName: 'frontend build and test'
 
 - script: |
-    cd ./../backend
+    cd ./backend
     mkdir coverage
     unbuffer yarn test:coverall
     cd ../
