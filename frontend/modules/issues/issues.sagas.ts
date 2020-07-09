@@ -223,6 +223,10 @@ function* postComment({ issueData, finishSubmitting }) {
 			... issueData.viewpoint
 		};
 
+		if (isEmpty(issueData.viewpoint) || isEqual(issueData.viewpoint, { screenshot: '' }) ) {
+			delete issueData.viewpoint;
+		}
+
 		const { data: comment } = yield API.addIssueComment(account, model, _id, issueData);
 		finishSubmitting();
 		yield put(IssuesActions.createCommentSuccess(comment, _id));

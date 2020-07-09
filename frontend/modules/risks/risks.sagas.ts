@@ -220,6 +220,14 @@ function* postComment({ teamspace, modelId, riskData, finishSubmitting }) {
 			... riskData.viewpoint
 		};
 
+		if (isEmpty(riskData.viewpoint)) {
+			delete riskData.viewpoint;
+		}
+
+		if (isEmpty(riskData.viewpoint) || isEqual(riskData.viewpoint, { screenshot: '' }) ) {
+			delete riskData.viewpoint;
+		}
+
 		const { data: comment } = yield API.addRiskComment(teamspace, modelId, _id, riskData);
 
 		finishSubmitting();
