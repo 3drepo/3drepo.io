@@ -51,6 +51,7 @@ class View {
 			"viewpoint.hidden_group_id",
 			"viewpoint.shown_group_id"
 		];
+		const collName = ("views" === this.collName) ? "viewpoints" : this.collName;
 
 		viewFields.forEach((field) => {
 			if (_.get(viewToClean, field)) {
@@ -68,12 +69,12 @@ class View {
 			(viewToClean.viewpoint.screenshot || viewToClean.viewpoint.screenshot_ref)) {
 			const id = utils.uuidToString(viewToClean._id);
 			const viewpointId = utils.uuidToString(viewToClean.viewpoint.guid);
-			viewToClean.viewpoint.screenshot = account + "/" + model + "/" + this.collName + "/" + id + "/viewpoints/" + viewpointId + "/screenshot.png";
+			viewToClean.viewpoint.screenshot = account + "/" + model + "/" + collName + "/" + id + "/viewpoints/" + viewpointId + "/screenshot.png";
 		}
 
 		if (viewToClean.thumbnail) {
 			const id = utils.uuidToString(viewToClean._id);
-			viewToClean.thumbnail = account + "/" + model + "/" + this.collName + "/" + id + "/thumbnail.png";
+			viewToClean.thumbnail = account + "/" + model + "/" + collName + "/" + id + "/thumbnail.png";
 		} else {
 			viewToClean.thumbnail = undefined;
 		}

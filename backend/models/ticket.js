@@ -101,6 +101,7 @@ class Ticket extends View {
 					comment.viewpoint = commentViewpoint || undefined;
 
 					comment = super.clean(account, model, { _id: ticketToClean._id, ...comment });
+					comment.viewpoint = super.setViewpointScreenshotURL(this.collName, account, model, ticketToClean._id, comment.viewpoint);
 					delete comment._id;
 				}
 			});
@@ -330,7 +331,7 @@ class Ticket extends View {
 	}
 
 	async handlePrimaryViewpoint(account, model, ticketId, viewpoint) {
-		viewpoint = super.handleViewpoint(account, model, ticketId, viewpoint);
+		viewpoint = await super.handleViewpoint(account, model, ticketId, viewpoint);
 		viewpoint.guid = utils.generateUUID();
 
 		if (viewpoint.screenshot) {
