@@ -228,7 +228,8 @@ class Ticket extends View {
 
 		if (data.viewpoint) {
 			newViewpoint = this.handlePrimaryViewpoint(account, model, data._id, data.viewpoint);
-			oldTicket.viewpoint = super.clean(account, model, oldTicket.viewpoints[0]);
+			oldTicket.viewpoint = oldTicket.viewpoints[0];
+			oldTicket = super.clean(account, model, oldTicket);
 			delete oldTicket.viewpoint.screenshot;
 
 			data.viewpoint = {
