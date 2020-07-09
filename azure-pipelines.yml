@@ -4,7 +4,8 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
 
 trigger:
-- master
+  - master
+  - releases/*
 
 pool:
   vmImage: 'ubuntu-16.04'
@@ -63,7 +64,7 @@ steps:
     DETECT_CHROMEDRIVER_VERSION=true yarn install --network-timeout 100000
     yarn lint
     yarn build:test
-  displayName: 'frontend build and test'
+  displayName: 'frontend build:test'
 
 - script: |
     cd ./backend
