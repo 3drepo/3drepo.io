@@ -122,6 +122,7 @@ class Ticket extends View {
 		delete ticketToClean.viewCount;
 
 		ticketToClean = super.clean(account, model, ticketToClean);
+		ticketToClean.viewpoint = super.setViewpointScreenshotURL(this.collName, account, model, ticketToClean._id, ticketToClean.viewpoint);
 
 		return ticketToClean;
 	}

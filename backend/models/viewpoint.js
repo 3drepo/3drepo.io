@@ -143,7 +143,7 @@ class View {
 	}
 
 	setViewpointScreenshotURL(collName, account, model, id, viewpoint) {
-		if (!viewpoint || (!viewpoint.screenshot && !viewpoint.screenshot_ref)) {
+		if (!viewpoint || !viewpoint.guid || (!viewpoint.screenshot && !viewpoint.screenshot_ref)) {
 			return viewpoint;
 		}
 
