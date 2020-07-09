@@ -216,8 +216,14 @@ function* updateNewIssue({ newIssue }) {
 function* postComment({ issueData, finishSubmitting }) {
 	try {
 		const { _id, model, account } = yield select(selectActiveIssueDetails);
-		const { data: comment } = yield API.addIssueComment(account, model, _id, issueData);
+		const viewpoint = yield Viewer.getCurrentViewpoint({ teamspace: account, model });
 
+		issueData.viewpoint = {
+			...viewpoint,
+			... issueData.viewpoint
+		};
+
+		const { data: comment } = yield API.addIssueComment(account, model, _id, issueData);
 		finishSubmitting();
 		yield put(IssuesActions.createCommentSuccess(comment, _id));
 		yield put(SnackbarActions.show('Issue comment added'));
