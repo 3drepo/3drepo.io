@@ -93,7 +93,7 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 
 		let issue = !ignoreViewer ?
 			yield generateViewpoint( teamspace, model, issueData.name, !Boolean(issueData.descriptionThumbnail) ) :
-			{};
+			{ viewpoint: {hideIfc: true} };
 
 			// .substring(screenshot.indexOf(',') + 1);
 		if (issueData.descriptionThumbnail ) {

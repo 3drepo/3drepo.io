@@ -29,7 +29,6 @@ import {
 } from '../../helpers/comments';
 
 import { EXTENSION_RE } from '../../constants/resources';
-import { UnityUtil } from '../../globals/unity-util';
 import { prepareResources } from '../../helpers/resources';
 import { prepareRisk } from '../../helpers/risks';
 import { SuggestedTreatmentsDialog } from '../../routes/components/dialogContainer/components';
@@ -46,7 +45,8 @@ import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
-import { selectIfcSpacesHidden, TreeActions } from '../tree';
+import { TreeActions } from '../tree';
+import { generateViewpoint } from '../viewpoints/viewpoints.sagas';
 import { RisksActions, RisksTypes } from './risks.redux';
 import {
 	selectActiveRiskDetails,
@@ -109,39 +109,26 @@ const createGroup = (risk, objectInfo, teamspace, model, revision) => {
 
 function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ignoreViewer = false  }) {
 	try {
-		const myJob = yield select(selectMyJob);
-		const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
+		const userJob = yield select(selectMyJob);
 
-		const [viewpoint, objectInfo, screenshot, userJob] = !ignoreViewer ? yield all([
-			Viewer.getCurrentViewpoint({ teamspace, model }),
-			Viewer.getObjectsStatus(),
-			riskData.descriptionThumbnail || Viewer.getScreenshot(),
-			myJob
-		]) : [{}, null, riskData.descriptionThumbnail || '', myJob];
+		let risk = !ignoreViewer ?
+			yield generateViewpoint( teamspace, model, riskData.name, !Boolean(riskData.descriptionThumbnail) ) :
+			{ viewpoint: {hideIfc: true} };
 
-		viewpoint.hideIfc = ifcSpacesHidden;
-		riskData.rev_id = revision;
-
-		if (objectInfo && (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0)) {
-			const {highlightedNodes, hiddenNodes} = objectInfo;
-			if (highlightedNodes.length > 0) {
-				viewpoint.highlighted_objects = highlightedNodes;
-				viewpoint.color = UnityUtil.defaultHighlightColor.map((c) => c * 255);
-			}
-
-			if (hiddenNodes.length > 0) {
-				viewpoint.hidden_objects = hiddenNodes;
-			}
+			// .substring(screenshot.indexOf(',') + 1);
+		if (riskData.descriptionThumbnail ) {
+			risk.viewpoint = {
+				...(risk.viewpoint || {}),
+				screenshot: riskData.descriptionThumbnail.substring(riskData.descriptionThumbnail.indexOf(',') + 1 )
+			};
 		}
 
-		viewpoint.screenshot = screenshot.substring(screenshot.indexOf(',') + 1);
-
-		const risk = {
-			...omit(riskData, ['author', 'statusColor', 'roleColor', 'defaultHidden']),
+		risk = {
+			...risk,
+			...omit(riskData, ['author', 'statusColor', 'roleColor', 'defaultHidden', 'viewpoint', 'descriptionThumbnail']),
 			owner: riskData.author,
 			rev_id: revision,
-			creator_role: userJob._id,
-			viewpoint,
+			creator_role: userJob._id
 		};
 
 		const { data: savedRisk } = yield API.saveRisk(teamspace, model, risk);
