@@ -16,7 +16,7 @@ steps:
   displayName: 'Install Node.js'
 
 - script: |
-    apt-get install -y expect-dev rabbitmq-server
+    sudo apt-get install -y expect-dev rabbitmq-server
   displayName: 'apt tasks'
 
 - script: |
