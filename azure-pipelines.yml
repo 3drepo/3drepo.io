@@ -7,6 +7,11 @@ trigger:
   - master
   - releases/*
 
+pr:
+  branches:
+    include:
+    - 'ISSUE_*'  # must quote since "*" is a YAML reserved character; we want a string
+
 pool:
   vmImage: 'ubuntu-16.04'
 
