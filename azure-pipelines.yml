@@ -48,7 +48,10 @@ steps:
     cd ../../../
     cp -r ./submodules/tests/frontend/staticPages/legal/ ./resources/legal
   displayName: 'checkout tests'
-
+  env: 
+    TESTS_USER: $(TESTS_USER)
+    TESTS_PASSWORD: $(TESTS_PASSWORD)
+    
 - script: |
     cd ./backend
     yarn install
