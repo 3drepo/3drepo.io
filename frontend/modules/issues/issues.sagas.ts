@@ -46,7 +46,7 @@ import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { selectTopicTypes } from '../teamspace';
-import { selectIfcSpacesHidden, TreeActions } from '../tree';
+import { TreeActions } from '../tree';
 import { generateViewpoint } from '../viewpoints/viewpoints.sagas';
 import { IssuesActions, IssuesTypes } from './issues.redux';
 import {
@@ -176,7 +176,7 @@ function* updateNewIssue({ newIssue }) {
 function* postComment({ issueData, finishSubmitting }) {
 	try {
 		const { _id, model, account } = yield select(selectActiveIssueDetails);
-		const viewpoint = yield Viewer.getCurrentViewpoint({ teamspace: account, model });
+		const { viewpoint } = yield generateViewpoint( account, model, '', false);
 
 		issueData.viewpoint = {
 			...viewpoint,
