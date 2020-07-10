@@ -4,8 +4,12 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
 
 trigger:
-  - master
-  - releases/*
+  batch: true
+  branches:
+    include:
+    - master
+    - staging
+    - ISSUE*
 
 pr:
   branches:
@@ -40,7 +44,7 @@ steps:
     sudo rm -rf /var/lib/mongodb/*
     sudo service mongod start
     until nc -z localhost 27017; do sudo tail /var/log/mongodb/mongod.log; sleep 5; done
-  displayName: 'mongo install'
+  displayName: 'install mongo'
 
 - script: |
     mkdir -p submodules
@@ -62,7 +66,7 @@ steps:
     cd ./backend
     yarn install --network-timeout 100000
     yarn lint
-  displayName: 'backend build and test'
+  displayName: 'backend build and lint'
 
 - script: |
     cd ./frontend
@@ -75,8 +79,10 @@ steps:
     cd ./backend
     mkdir coverage
     unbuffer yarn test:coverall
-    cd ../
+  displayName: 'backend yarn test:coverall'
+
+- script: |
     NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" &
     cd ./frontend
     unbuffer yarn test
-  displayName: 'coverall tests'
+  displayName: 'frontend yarn test'
