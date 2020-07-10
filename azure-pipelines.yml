@@ -73,7 +73,7 @@ steps:
     DETECT_CHROMEDRIVER_VERSION=true yarn install --network-timeout 100000
     yarn lint
     yarn build:test
-  displayName: 'frontend build:test'
+  displayName: 'frontend build lint and test'
 
 - script: |
     cd ./backend
