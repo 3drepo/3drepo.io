@@ -9,7 +9,7 @@ trigger:
     include:
     - master
     - staging
-    - ISSUE*
+    - 'ISSUE_*'
 
 pr:
   branches:
