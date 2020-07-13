@@ -119,7 +119,7 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 		if (riskData.descriptionThumbnail ) {
 			risk.viewpoint = {
 				...(risk.viewpoint || {}),
-				screenshot: riskData.descriptionThumbnail.substring(riskData.descriptionThumbnail.indexOf(',') + 1 )
+				screenshot: riskData.descriptionThumbnail
 			};
 		}
 

@@ -99,7 +99,7 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 		if (issueData.descriptionThumbnail ) {
 			issue.viewpoint = {
 				...(issue.viewpoint || {}),
-				screenshot: issueData.descriptionThumbnail.substring(issueData.descriptionThumbnail.indexOf(',') + 1 )
+				screenshot: issueData.descriptionThumbnail
 			};
 		}
 

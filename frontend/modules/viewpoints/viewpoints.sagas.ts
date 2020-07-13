@@ -66,9 +66,7 @@ export function* generateViewpoint(teamspace, modelId, name, withScreenshot = fa
 		} as any;
 
 		if (withScreenshot) {
-			let screenshot = yield Viewer.getScreenshot();
-			screenshot = screenshot.substring(screenshot.indexOf(',') + 1);
-			generatedObject.viewpoint.screenshot = screenshot;
+			generatedObject.viewpoint.screenshot = yield Viewer.getScreenshot();
 		}
 
 		const objectInfo = yield Viewer.getObjectsStatus();

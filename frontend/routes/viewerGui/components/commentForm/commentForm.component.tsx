@@ -316,9 +316,7 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleSave = (values, form) => {
-		const screenshot = values.screenshot.substring(values.screenshot.indexOf(',') + 1);
-		const commentValues = { ...values, screenshot };
-		this.props.onSave(commentValues, () => {
+		this.props.onSave(values, () => {
 			form.resetForm();
 		});
 		this.setState({ newScreenshot: ''});
