@@ -1,3 +1,6 @@
+variables:
+  - group: tests-group
+
 trigger:
   batch: true
   branches:
