@@ -77,6 +77,6 @@ steps:
     mkdir coverage
     unbuffer yarn test:coverall
     NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" &
-    cd ./frontend
+    cd ../frontend
     unbuffer yarn test
   displayName: 'install and test'
