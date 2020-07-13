@@ -24,10 +24,10 @@ steps:
   displayName: 'Install Node.js'
 
 - script: |
-    sudo apt-get update && apt-get install -y expect-dev rabbitmq-server
-    sudo rm /var/lib/rabbitmq/.erlang.cookie
-    sudo service rabbitmq-server start
-    sudo systemctl status rabbitmq-server.service 
+    sudo apt-get update && apt-get install -y expect-dev rabbitmq-server && \
+      sudo rm /var/lib/rabbitmq/.erlang.cookie && \
+      sudo service rabbitmq-server start && \
+      sudo systemctl status rabbitmq-server.service
   displayName: 'expect and rabbitmq'
 
 - script: |
