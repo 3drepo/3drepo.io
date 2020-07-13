@@ -90,10 +90,6 @@ class View {
 			if (viewToClean.viewpoint && viewToClean.viewpoint.clippingPlanes) {
 				viewToClean.clippingPlanes = viewToClean.viewpoint.clippingPlanes;
 			}
-
-			if (viewToClean.viewpoint.screenshot && !viewToClean.viewpoint.screenshotSmall) {
-				viewToClean.viewpoint.screenshotSmall = viewToClean.viewpoint.screenshot;
-			}
 		}
 		// =============================
 		// DEPRECATED LEGACY SUPPORT END
@@ -152,6 +148,16 @@ class View {
 		const viewpointId = utils.uuidToString(viewpoint.guid);
 
 		viewpoint.screenshot = account + "/" + model + "/" + collName + "/" + id + "/viewpoints/" + viewpointId + "/screenshot.png";
+
+		// ===============================
+		// DEPRECATED LEGACY SUPPORT START
+		// ===============================
+		if (!viewpoint.screenshotSmall) {
+			viewpoint.screenshotSmall = viewpoint.screenshot;
+		}
+		// =============================
+		// DEPRECATED LEGACY SUPPORT END
+		// =============================
 
 		return viewpoint;
 	}
