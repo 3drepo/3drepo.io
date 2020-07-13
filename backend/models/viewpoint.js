@@ -198,6 +198,7 @@ class View {
 	}
 
 	checkTypes(data, types) {
+		data = _.pick(data, Object.keys(types));
 		Object.keys(data).forEach((field) => {
 			if (utils.isString(types[field]) && !utils.typeMatch(data[field], types[field])) {
 				throw responseCodes.INVALID_ARGUMENTS;
