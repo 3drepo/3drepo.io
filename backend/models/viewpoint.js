@@ -240,7 +240,7 @@ class View {
 
 		if (viewpoint.screenshot) {
 			const imageBuffer = new Buffer.from(
-				viewpoint.screenshot.substring(viewpoint.screenshot.indexOf(",") + 1 ),
+				viewpoint.screenshot.substring(viewpoint.screenshot.indexOf(",") + 1),
 				"base64"
 			);
 

@@ -168,7 +168,7 @@ const addComment = async function(account, model, colName, id, user, data) {
 
 		if (viewpoint.screenshot) {
 			viewpoint.screenshot = new Buffer.from(
-				viewpoint.screenshot.substring(viewpoint.screenshot.indexOf(",") + 1 ),
+				viewpoint.screenshot.substring(viewpoint.screenshot.indexOf(",") + 1),
 				"base64"
 			);
 			await View.setExternalScreenshotRef(viewpoint, account, model, colName);
