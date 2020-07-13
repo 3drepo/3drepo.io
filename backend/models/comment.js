@@ -167,7 +167,10 @@ const addComment = async function(account, model, colName, id, user, data) {
 		viewpoint.guid = utils.generateUUID();
 
 		if (viewpoint.screenshot) {
-			viewpoint.screenshot = new Buffer.from(viewpoint.screenshot, "base64");
+			viewpoint.screenshot = new Buffer.from(
+				viewpoint.screenshot.substring(viewpoint.screenshot.indexOf(",") + 1 ),
+				"base64"
+			);
 			await View.setExternalScreenshotRef(viewpoint, account, model, colName);
 		}
 	}

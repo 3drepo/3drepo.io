@@ -30,7 +30,23 @@ const fieldTypes = {
 	"_id": "[object Object]",
 	"name": "[object String]",
 	"thumbnail": ["[object String]", "[object Object]"],
-	"viewpoint": "[object Object]"
+	"viewpoint": {
+		"right": "[object Array]",
+		"up": "[object Array]",
+		"view_dir": "[object Array]",
+		"position": "[object Array]",
+		"look_at": "[object Array]",
+		"near": "[object Number]",
+		"far": "[object Number]",
+		"fov": "[object Number]",
+		"aspect_ratio": "[object Number]",
+		"type": "[object String]",
+		"orthographicSize": "[object Number]",
+		"highlighted_group_id": "[object Object]",
+		"hidden_group_id": "[object Object]",
+		"shown_group_id": "[object Object]",
+		"clippingPlanes": "[object Array]"
+	}
 };
 
 const getResponse = (responseCodeType) => (type) => responseCodes[responseCodeType + "_" + type];
@@ -208,6 +224,8 @@ class View {
 	async handleViewpoint(account, model, id, viewpoint) {
 		viewpoint = viewpoint || {};
 
+		const viewpointId = (viewpoint.guid) ? utils.uuidToString(viewpoint.guid) : undefined;
+
 		if (viewpoint.highlighted_group_id) {
 			viewpoint.highlighted_group_id = utils.stringToUUID(viewpoint.highlighted_group_id);
 		}
@@ -221,7 +239,10 @@ class View {
 		}
 
 		if (viewpoint.screenshot) {
-			const imageBuffer = new Buffer.from(viewpoint.screenshot, "base64");
+			const imageBuffer = new Buffer.from(
+				viewpoint.screenshot.substring(viewpoint.screenshot.indexOf(",") + 1 ),
+				"base64"
+			);
 
 			viewpoint.screenshot = imageBuffer;
 
@@ -231,7 +252,7 @@ class View {
 					model,
 					type: this.collName,
 					id: utils.uuidToString(id),
-					viewpointId: utils.uuidToString(viewpoint.guid),
+					viewpointId,
 					err
 				});
 			});
