@@ -66,18 +66,42 @@ steps:
     TESTS_PASSWORD: $(TESTS_PASSWORD)
 
 - script: |
+    mkdir -p submodules
+    test_ver=`cat backend/test/testDBVersion`
+    cd submodules
+    git clone https://${TESTS_USER}:${TESTS_PASSWORD}@github.com/3drepo/tests.git
+    cd tests
+    git checkout $test_ver
+    git status
+    cd backend && mongorestore
+    cd ../../../
+    cp -r ./submodules/tests/frontend/staticPages/legal/ ./resources/legal
+  displayName: 'checkout tests'
+  env: 
+    TESTS_USER: $(TESTS_USER)
+    TESTS_PASSWORD: $(TESTS_PASSWORD)
+
+- script: |
     cd ./backend
     yarn install --network-timeout 100000
     yarn lint
-    cd ../frontend
+  displayName: 'backend build and lint'
+
+- script: |
+    cd ./frontend
     DETECT_CHROMEDRIVER_VERSION=true yarn install --network-timeout 100000
     yarn lint
     yarn build:test
-    echo $(pwd) 
-    cd ../backend
+  displayName: 'frontend build:test'
+
+- script: |
+    cd ./backend
     mkdir coverage
     unbuffer yarn test:coverall
+  displayName: 'backend yarn test:coverall'
+
+- script: |
     NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" &
-    cd ../frontend
+    cd ./frontend
     unbuffer yarn test
-  displayName: 'install and test'
+  displayName: 'frontend yarn test'
