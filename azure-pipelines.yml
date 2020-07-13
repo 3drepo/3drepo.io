@@ -25,6 +25,7 @@ steps:
 
 - script: |
     sudo apt-get install -y expect-dev rabbitmq-server
+    service rabbitmq-server start
   displayName: 'apt tasks'
 
 - script: |
