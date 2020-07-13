@@ -297,9 +297,8 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		this.props.setState({ newComment });
 	}
 
-	public handleNewScreenshot = async (screenshot) => {
+	public handleNewScreenshot = (screenshot) => {
 		const { teamspace, model, viewer } = this.props;
-		const viewpoint = await viewer.getCurrentViewpoint({ teamspace, model });
 
 		if (this.isNewRisk) {
 			this.props.setState({ newRisk: {
@@ -307,21 +306,16 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				descriptionThumbnail: screenshot
 			}});
 		} else {
-			this.setCommentData({ screenshot, viewpoint });
+			this.setCommentData({ screenshot });
 		}
 	}
 
-	public postComment = async (teamspace, model, { comment, screenshot }, finishSubmitting) => {
-		const viewpoint = await this.props.viewer.getCurrentViewpoint({ teamspace, model });
-
+	public postComment = (teamspace, model, { comment, screenshot }, finishSubmitting) => {
 		const riskCommentData = {
 			_id: this.riskData._id,
 			rev_id: this.riskData.rev_id,
 			comment,
-			viewpoint: {
-				...viewpoint,
-				screenshot
-			}
+			viewpoint: { screenshot }
 		};
 
 		this.props.postComment(teamspace, model, riskCommentData, finishSubmitting);

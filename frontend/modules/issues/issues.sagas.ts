@@ -46,7 +46,7 @@ import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { selectTopicTypes } from '../teamspace';
-import { selectIfcSpacesHidden, TreeActions } from '../tree';
+import { TreeActions } from '../tree';
 import { generateViewpoint } from '../viewpoints/viewpoints.sagas';
 import { IssuesActions, IssuesTypes } from './issues.redux';
 import {
@@ -176,8 +176,18 @@ function* updateNewIssue({ newIssue }) {
 function* postComment({ issueData, finishSubmitting }) {
 	try {
 		const { _id, model, account } = yield select(selectActiveIssueDetails);
-		const { data: comment } = yield API.addIssueComment(account, model, _id, issueData);
+		const { viewpoint } = yield generateViewpoint( account, model, '', false);
 
+		issueData.viewpoint = {
+			...viewpoint,
+			... issueData.viewpoint
+		};
+
+		if (isEmpty(issueData.viewpoint) || isEqual(issueData.viewpoint, { screenshot: '' }) ) {
+			delete issueData.viewpoint;
+		}
+
+		const { data: comment } = yield API.addIssueComment(account, model, _id, issueData);
 		finishSubmitting();
 		yield put(IssuesActions.createCommentSuccess(comment, _id));
 		yield put(SnackbarActions.show('Issue comment added'));
