@@ -1,7 +1,3 @@
-# Node.js with React
-# Build a Node.js project that uses React.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
 variables:
   - group: tests-group
 
@@ -72,24 +68,15 @@ steps:
     cd ./backend
     yarn install --network-timeout 100000
     yarn lint
-  displayName: 'backend build and lint'
-
-- script: |
-    cd ./frontend
+    cd ../frontend
     DETECT_CHROMEDRIVER_VERSION=true yarn install --network-timeout 100000
     yarn lint
     yarn build:test
-  displayName: 'frontend build lint and test'
-
-- script: |
     echo $(pwd) 
-    cd ./backend
+    cd ../backend
     mkdir coverage
     unbuffer yarn test:coverall
-  displayName: 'backend yarn test:coverall'
-
-- script: |
     NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" &
     cd ./frontend
     unbuffer yarn test
-  displayName: 'frontend yarn test'
+  displayName: 'install and test'
