@@ -197,6 +197,16 @@ class View {
 		});
 	}
 
+	checkTypes(data, types) {
+		Object.keys(data).forEach((field) => {
+			if (utils.isString(types[field]) && !utils.typeMatch(data[field], types[field])) {
+				throw responseCodes.INVALID_ARGUMENTS;
+			} else if (utils.isObject(types[field])) {
+				this.checkTypes(data[field], types[field]);
+			}
+		});
+	}
+
 	async update(sessionId, account, model, uid, data) {
 		if (utils.isString(uid)) {
 			uid = utils.stringToUUID(uid);
@@ -213,6 +223,8 @@ class View {
 			throw responseCodes.INVALID_ARGUMENTS;
 		}
 
+		this.checkTypes(data, this.fieldTypes);
+
 		const views = await this.getCollection(account, model);
 		await views.update({ _id: uid }, { $set: data });
 
@@ -228,14 +240,20 @@ class View {
 
 		if (viewpoint.highlighted_group_id) {
 			viewpoint.highlighted_group_id = utils.stringToUUID(viewpoint.highlighted_group_id);
+		} else if ("" === viewpoint.highlighted_group_id) {
+			delete viewpoint.highlighted_group_id;
 		}
 
 		if (viewpoint.hidden_group_id) {
 			viewpoint.hidden_group_id = utils.stringToUUID(viewpoint.hidden_group_id);
+		} else if ("" === viewpoint.hidden_group_id) {
+			delete viewpoint.hidden_group_id;
 		}
 
 		if (viewpoint.shown_group_id) {
 			viewpoint.shown_group_id = utils.stringToUUID(viewpoint.shown_group_id);
+		} else if ("" === viewpoint.shown_group_id) {
+			delete viewpoint.shown_group_id;
 		}
 
 		if (viewpoint.screenshot) {
@@ -294,6 +312,8 @@ class View {
 				delete newView.viewpoint.thumbnail;
 			}
 		}
+
+		this.checkTypes(newView, this.fieldTypes);
 
 		const coll = await this.getCollection(account, model);
 		await coll.insert(newView);
