@@ -25,6 +25,7 @@ steps:
 
 - script: |
     sudo apt-get install -y expect-dev rabbitmq-server
+    rm /var/lib/rabbitmq/.erlang.cookie
     service rabbitmq-server start
   displayName: 'apt tasks'
 
