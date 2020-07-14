@@ -34,7 +34,7 @@ export const UpdateButtonsContainer = styled(FormControl)`
 		}
 
 		${ButtonContainer} ~ ${ButtonContainer} {
-			margin-left: 20px;
+			margin-left: 12px;
 		}
 	}
 `;
