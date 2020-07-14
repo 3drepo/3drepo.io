@@ -37,6 +37,7 @@ import * as API from '../../services/api';
 import { Cache } from '../../services/cache';
 import * as Exports from '../../services/export';
 import { Viewer } from '../../services/viewer/viewer';
+import { BoardActions } from '../board';
 import { ChatActions } from '../chat';
 import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
@@ -420,7 +421,7 @@ function* setActiveIssue({ issue, revision, ignoreViewer = false }) {
 }
 
 function* goToIssue({ issue }) {
-	const {teamspace, model, revision} = yield select(selectUrlParams);
+	const { teamspace, model, revision } = yield select(selectUrlParams);
 	let queryParams =  yield select(selectQueryParams);
 
 	const issueId = (issue || {})._id;
@@ -559,11 +560,10 @@ function* unsubscribeOnIssueCommentsChanges({ teamspace, modelId, issueId }) {
 	}));
 }
 
-export function* cloneIssue() {
+export function* cloneIssue({ dialogId }) {
 	const activeIssue = yield select(selectActiveIssueDetails);
 	const jobs = yield select(selectJobsList);
 	const currentUser = yield select(selectCurrentUser);
-
 	const clonedProperties = omit(activeIssue, [
 		'_id',
 		'rev_id',
@@ -588,8 +588,14 @@ export function* cloneIssue() {
 	try {
 		const newIssue = prepareIssue({
 			...clonedProperties,
-			owner: currentUser.username
+			owner: currentUser.username,
+			clone: true,
 		}, jobs);
+
+		if (dialogId) {
+			yield put(DialogActions.hideDialog(dialogId));
+			yield put(BoardActions.openCardDialog(null, null, true));
+		}
 
 		yield put(IssuesActions.setComponentState({
 			showDetails: true,

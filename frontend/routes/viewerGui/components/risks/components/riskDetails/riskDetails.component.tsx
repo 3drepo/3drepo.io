@@ -53,7 +53,7 @@ interface IProps {
 	fetchRisk: (teamspace, model, riskId) => void;
 	saveRisk: (teamspace, modelId, risk, revision, finishSubmitting, disableViewer) => void;
 	updateRisk: (teamspace, modelId, risk) => void;
-	cloneRisk: () => void;
+	cloneRisk: (dialogId?: string) => void;
 	postComment: (teamspace, modelId, riskData, finishSubmitting) => void;
 	removeComment: (teamspace, modelId, riskData) => void;
 	subscribeOnRiskCommentsChanges: (teamspace, modelId, riskId) => void;
@@ -70,6 +70,7 @@ interface IProps {
 	showMitigationSuggestions: (conditions: any, setFieldValue) => void;
 	showScreenshotDialog: (config: any) => void;
 	showConfirmDialog: (config: any) => void;
+	dialogId?: string;
 }
 
 interface IState {
@@ -113,7 +114,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		return renderWhenTrue(() => (
 			<ContainedButton
 				icon={Copy}
-				onClick={this.props.cloneRisk}
+				onClick={() => this.props.cloneRisk(this.props.dialogId)}
 			>
 				Clone
 			</ContainedButton>

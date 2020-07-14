@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -38,6 +38,7 @@ import * as API from '../../services/api';
 import { Cache } from '../../services/cache';
 import * as Exports from '../../services/export';
 import { Viewer } from '../../services/viewer/viewer';
+import { BoardActions } from '../board';
 import { ChatActions } from '../chat';
 import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
@@ -496,7 +497,7 @@ function* unsubscribeOnRiskCommentsChanges({ teamspace, modelId, riskId }) {
 	}));
 }
 
-function* cloneRisk() {
+function* cloneRisk({ dialogId }) {
 	const activeRisk = yield select(selectActiveRiskDetails);
 	const jobs = yield select(selectJobsList);
 	const currentUser = yield select(selectCurrentUser);
@@ -524,8 +525,14 @@ function* cloneRisk() {
 	try {
 		const newRisk = prepareRisk({
 			...clonedProperties,
-			owner: currentUser.username
+			owner: currentUser.username,
+			clone: true,
 		}, jobs);
+
+		if (dialogId) {
+			yield put(DialogActions.hideDialog(dialogId));
+			yield put(BoardActions.openCardDialog(null, null, true));
+		}
 
 		yield put(RisksActions.setComponentState({
 			showDetails: true,

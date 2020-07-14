@@ -53,7 +53,7 @@ interface IProps {
 	updateSelectedIssuePin: (position) => void;
 	saveIssue: (teamspace, modelId, issue, revision, finishSubmitting, disableViewer) => void;
 	updateIssue: (teamspace, modelId, issue) => void;
-	cloneIssue: () => void;
+	cloneIssue: (dialogId?: string) => void;
 	postComment: (teamspace, modelId, issueData, finishSubmitting) => void;
 	removeComment: (teamspace, modelId, issueData) => void;
 	subscribeOnIssueCommentsChanges: (teamspace, modelId, issueId) => void;
@@ -66,6 +66,7 @@ interface IProps {
 	showDialog: (config: any) => void;
 	showScreenshotDialog: (config: any) => void;
 	showConfirmDialog: (config: any) => void;
+	dialogId?: string;
 }
 
 interface IState {
@@ -105,7 +106,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		return renderWhenTrue(() => (
 				<ContainedButton
 						icon={Copy}
-						onClick={this.props.cloneIssue}
+						onClick={() => this.props.cloneIssue(this.props.dialogId)}
 				>
 					Clone
 				</ContainedButton>

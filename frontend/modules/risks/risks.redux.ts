@@ -28,7 +28,7 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	saveRisk: ['teamspace', 'model', 'riskData', 'revision', 'finishSubmitting', 'ignoreViewer'],
 	updateRisk: ['teamspace', 'modelId', 'riskData'],
 	updateBoardRisk: ['teamspace', 'modelId', 'riskData'],
-	cloneRisk: [],
+	cloneRisk: ['dialogId'],
 	postComment: ['teamspace', 'modelId', 'riskData', 'finishSubmitting'],
 	removeComment: ['teamspace', 'modelId', 'riskData'],
 	saveRiskSuccess: ['risk'],

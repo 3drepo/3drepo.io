@@ -60,6 +60,7 @@ export const Dialog = (props: IProps) => {
 				{...data}
 				handleResolve={handleResolve}
 				handleClose={handleClose}
+				dialogId={props.id}
 			/>
 		);
 	});
