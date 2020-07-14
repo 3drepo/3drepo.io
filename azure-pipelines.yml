@@ -29,6 +29,9 @@ steps:
       sudo rm /var/lib/rabbitmq/.erlang.cookie && \
       sudo service rabbitmq-server start && \
       sudo systemctl status rabbitmq-server.service && \
+      sudo cat /var/log/rabbitmq/* && *\
+      sleep 10 && \
+      sudo systemctl status rabbitmq-server.service && *\
       sudo cat /var/log/rabbitmq/*
   displayName: 'expect and rabbitmq'
 
