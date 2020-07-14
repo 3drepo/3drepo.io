@@ -88,6 +88,11 @@ steps:
     mkdir coverage
     unbuffer yarn test:coverall
   displayName: 'Backend yarn test:coverall'
+  env:
+    CI_NAME: "Azure DevOps" #(value is up to you)
+    CI_BRANCH: "$(Build.SourceBranch) "# (maybe it's better to use $(Build.SourceBranchName))
+    CI_BUILD_NUMBER: "$(Build.BuildNumber)"
+    CI_BUILD_URL: "$(Build.BuildUri)"
 
 - script: |
     NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" &
