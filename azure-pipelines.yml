@@ -28,7 +28,7 @@ steps:
     sudo apt-get install -y expect-dev rabbitmq-server && \
       sudo rm /var/lib/rabbitmq/.erlang.cookie && \
       sudo service rabbitmq-server start && \
-      sudo systemctl status rabbitmq-server.service && *\
+      sudo systemctl status rabbitmq-server.service && \
       sudo cat /var/log/rabbitmq
   displayName: 'expect and rabbitmq'
 
