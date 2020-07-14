@@ -24,20 +24,29 @@ steps:
   displayName: 'Install Node.js'
 
 
+# - script: |
+#     sudo wget https://packages.erlang-solutions.com/erlang/debian/pool/esl-erlang_22.3.4.3-1~ubuntu~xenial_amd64.deb
+#     sudo dpkg -i esl-erlang_22.3.4.3-1~ubuntu~xenial_amd64.deb
+#     sudo apt-get -y install expect-dev socat logrotate init-system-helpers adduser
+#     sudo wget https://github.com/rabbitmq/rabbitmq-server/releases/download/v3.7.15/rabbitmq-server_3.7.15-1_all.deb
+#     sudo dpkg -i rabbitmq-server_3.7.17-1_all.deb
+#     sudo /etc/init.d/rabbitmq-server start
+#     sudo sleep 10
+#     sudo cat /var/log/rabbitmq/*
+#   displayName: 'expect and rabbitmq'
+
+
 - script: |
-    sudo wget https://packages.erlang-solutions.com/erlang/debian/pool/esl-erlang_22.3.4.3-1~ubuntu~xenial_amd64.deb
-    sudo dpkg -i esl-erlang_22.3.4.3-1~ubuntu~xenial_amd64.deb
-    sudo apt-get -y install expect-dev socat logrotate init-system-helpers adduser
-    sudo wget https://github.com/rabbitmq/rabbitmq-server/releases/download/v3.7.15/rabbitmq-server_3.7.15-1_all.deb
-    sudo dpkg -i rabbitmq-server_3.7.17-1_all.deb
-    sudo /etc/init.d/rabbitmq-server start
-    sudo sleep 10
-    sudo cat /var/log/rabbitmq/*
+    sudo wget -O - "https://packagecloud.io/rabbitmq/rabbitmq-server/gpgkey" | sudo apt-key add - 
+    sudo apt-get update
+    curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.deb.sh | sudo bash
+    cat /var/log/rabbitmq/*
   displayName: 'expect and rabbitmq'
-  
+
+
 # - script: |
 #     sudo apt-get update 
-#     sudo apt-get install -y expect-dev rabbitmq-server -V 
+#     sudo apt-get install -y expect-dev -V 
 #     sudo apt-get upgrade -y && \
 #       sudo rm /var/lib/rabbitmq/.erlang.cookie && \
 #       sudo service rabbitmq-server start && \
