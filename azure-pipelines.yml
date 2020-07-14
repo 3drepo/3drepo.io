@@ -31,10 +31,7 @@ steps:
     EOF
     sudo apt-get update -y
     sudo apt-get install expect-dev rabbitmq-server -y --fix-missing
-    sudo service rabbitmq-server start && \
-      sleep 10 && \
-      sudo systemctl status rabbitmq-server.service && \
-      sudo cat /var/log/rabbitmq/*
+    sudo service rabbitmq-server start
   displayName: 'Install RabbitMQ and Expect'
 
 - script: |
