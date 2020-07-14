@@ -25,7 +25,8 @@ steps:
 
 - script: |
     sudo apt-get update 
-    sudo apt-get install -y expect-dev rabbitmq-server -V && \
+    sudo apt-get install -y expect-dev rabbitmq-server -V 
+    sudo apt-get upgrade && \
       sudo rm /var/lib/rabbitmq/.erlang.cookie && \
       sudo service rabbitmq-server start && \
       sudo systemctl status rabbitmq-server.service && \
