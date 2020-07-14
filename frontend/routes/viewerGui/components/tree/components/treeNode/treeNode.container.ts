@@ -19,20 +19,22 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { selectSettings } from '../../../../../../modules/model';
+import { selectSettings, selectSubModels } from '../../../../../../modules/model';
 import {
 	selectDataRevision,
 	selectSelectionMap,
 	selectVisibilityMap,
 	TreeActions
 } from '../../../../../../modules/tree';
+import { ViewerGuiActions } from '../../../../../../modules/viewerGui';
 import { TreeNode } from './treeNode.component';
 
 const mapStateToProps = createStructuredSelector({
 	settings: selectSettings,
 	visibilityMap: selectVisibilityMap,
 	selectionMap: selectSelectionMap,
-	rev: selectDataRevision
+	rev: selectDataRevision,
+	subModels: selectSubModels
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -41,7 +43,9 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	collapseNodes: TreeActions.collapseNodes,
 	setSelectedNodesVisibility: TreeActions.setSelectedNodesVisibility,
 	isolateSelectedNodes: TreeActions.isolateSelectedNodes,
-	zoomToHighlightedNodes: TreeActions.zoomToHighlightedNodes
+	zoomToHighlightedNodes: TreeActions.zoomToHighlightedNodes,
+	loadSubModel: ViewerGuiActions.loadSubModel,
+	offLoadSubModel:  ViewerGuiActions.offLoadSubModel,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(TreeNode);

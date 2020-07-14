@@ -368,6 +368,16 @@ function* loadModel() {
 	}
 }
 
+function* loadSubModel({account, model}) {
+	yield Viewer.loadModel(account, model);
+	yield put(ModelActions.setSubmodelLoaded(account, model, true));
+}
+
+function* offLoadSubModel({account, model}) {
+	yield Viewer.offLoadModel(account, model);
+	yield put(ModelActions.setSubmodelLoaded(account, model, false));
+}
+
 function* setIsPinDropMode({ mode }: { mode: boolean }) {
 	try {
 		yield put(ViewerGuiActions.setIsPinDropModeSuccess(mode));
@@ -406,4 +416,6 @@ export default function* ViewerGuiSaga() {
 	yield takeLatest(ViewerGuiTypes.SET_CAMERA, setCamera);
 	yield takeLatest(ViewerGuiTypes.LOAD_MODEL, loadModel);
 	yield takeLatest(ViewerGuiTypes.SET_IS_PIN_DROP_MODE, setIsPinDropMode);
+	yield takeLatest(ViewerGuiTypes.LOAD_SUB_MODEL, loadSubModel);
+	yield takeLatest(ViewerGuiTypes.OFF_LOAD_SUB_MODEL, offLoadSubModel);
 }

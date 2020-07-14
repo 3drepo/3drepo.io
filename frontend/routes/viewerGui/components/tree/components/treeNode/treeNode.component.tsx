@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Tooltip } from '@material-ui/core';
+import { Switch, Tooltip } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import UpIcon from '@material-ui/icons/KeyboardArrowUp';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
@@ -42,6 +42,7 @@ interface IProps {
 	index: number;
 	data: any;
 	settings: any;
+	subModels: any[];
 	isSearchResult?: boolean;
 	visibilityMap: any;
 	selectionMap: any;
@@ -59,6 +60,8 @@ interface IProps {
 	onScrollToTop: (index) => void;
 	onClick: (id) => void;
 	zoomToHighlightedNodes: () => void;
+	loadSubModel: (account, model) => void;
+	offLoadSubModel: (account, model) => void;
 }
 
 const CollapseButton = ({ Icon, onClick, expanded, hasChildren, nodeType }) => (
@@ -108,6 +111,19 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 		return !this.props.hasFederationRoot && this.level === 1;
 	}
 
+	get isSubmodelRoot() {
+		return this.node.isModel && !this.isModelRoot;
+	}
+
+	get subModel() {
+		const [teamspace, name] = this.node.name.split(':');
+		return  this.props.subModels.find((subModel) => subModel.name === name);
+	}
+
+	get isLoaded() {
+		return this.subModel.loaded;
+	}
+
 	public static defaultProps = {
 		visible: false,
 		selected: false,
@@ -147,10 +163,22 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 		/>
 	));
 
+	private onChangeLoadStatus = (e: React.SyntheticEvent) => {
+		const {checked} = (e.currentTarget as any);
+		const {database, model} =  this.subModel;
+
+		if (!this.isLoaded) {
+			this.props.loadSubModel(database, model);
+		} else {
+			this.props.offLoadSubModel(database, model);
+		}
+	}
+
 	private renderActions = renderWhenTrue(() => (
 		<Actions>
-			{this.renderOpenModelAction(this.node.isModel && !this.isModelRoot)}
-			{this.renderGoTopAction(!this.node.isModel && !this.isModelRoot)}
+			{}
+			{this.renderOpenModelAction(this.isSubmodelRoot)}
+			{this.renderGoTopAction(!this.isSubmodelRoot)}
 			<SmallIconButton
 				Icon={IsolateIcon}
 				tooltip="Isolate"
@@ -161,6 +189,9 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 				tooltip="Show/Hide"
 				onClick={this.toggleShowNode}
 			/>
+			{this.isSubmodelRoot &&
+				<Switch checked={this.isLoaded} onClick={(e) => e.stopPropagation()} onChange={this.onChangeLoadStatus} />
+			}
 		</Actions>
 	));
 

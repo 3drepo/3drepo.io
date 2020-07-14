@@ -747,10 +747,17 @@ export class ViewerService {
 		return UnityUtil.onLoading();
 	}
 
+	public async offLoadModel(account, model) {
+		return UnityUtil.offLoadModel(account, model);
+	}
+
+	public async loadModel(account, model) {
+		return UnityUtil.loadModel(account, model, '', 'head' , false);
+	}
+
 	/**
 	 * Zooms
 	 */
-
 	public zoomToHighlightedMeshes() {
 		UnityUtil.zoomToHighlightedMeshes();
 	}

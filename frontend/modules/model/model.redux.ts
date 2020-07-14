@@ -40,7 +40,8 @@ export const { Types: ModelTypes, Creators: ModelActions } = createActions({
 	updateSettingsSuccess: ['settings'],
 	fetchMetaKeys: ['teamspace', 'modelId'],
 	fetchMetaKeysSuccess: ['metaKeys'],
-	reset: []
+	reset: [],
+	setSubmodelLoaded: ['teamspace', 'modelId', 'loaded'],
 }, { prefix: 'MODEL/' });
 
 export const INITIAL_STATE = {
@@ -49,6 +50,7 @@ export const INITIAL_STATE = {
 			unit: 'mm',
 		},
 		permissions: [],
+		subModels: [],
 	},
 	metaKeys: [],
 	revisions: [],
@@ -99,6 +101,17 @@ const setModelRevisionStateSuccess = (state = INITIAL_STATE, { revision, isVoid 
 	return { ...state, revisions };
 };
 
+const setSubmodelLoaded = (state = INITIAL_STATE, { teamspace, modelId, loaded }) => {
+	const subModels = state.settings.subModels.map((submodel) => {
+		if (submodel.database === teamspace && submodel.model === modelId) {
+			return {...submodel, loaded};
+		}
+		return submodel;
+	});
+
+	return updateSettingsSuccess(state, { settings: {subModels}});
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[ModelTypes.FETCH_META_KEYS_SUCCESS]: fetchMetaKeysSuccess,
 	[ModelTypes.FETCH_SETTINGS_SUCCESS]: fetchSettingsSuccess,
@@ -109,5 +122,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ModelTypes.FETCH_MAPS_SUCCESS]: fetchMapsSuccess,
 	[ModelTypes.UPDATE_SETTINGS_SUCCESS]: updateSettingsSuccess,
 	[ModelTypes.RESET]: reset,
-	[ModelTypes.SET_MODEL_REVISION_STATE_SUCCESS]: setModelRevisionStateSuccess
+	[ModelTypes.SET_MODEL_REVISION_STATE_SUCCESS]: setModelRevisionStateSuccess,
+	[ModelTypes.SET_SUBMODEL_LOADED]: setSubmodelLoaded
 });

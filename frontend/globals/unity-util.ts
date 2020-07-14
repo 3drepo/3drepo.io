@@ -1091,7 +1091,13 @@ export class UnityUtil {
 	 * @param clearCanvas? - Reset the state of the viewer prior to loading the model (Default: true)
 	 * @return returns a promise that resolves when the model start loading.
 	 */
-	public static loadModel(account: string, model: string, branch = '', revision = 'head', clearCanvas = true): Promise<void> {
+	public static loadModel(
+		account: string,
+		model: string,
+		branch = '',
+		revision = 'head',
+		clearCanvas = true): Promise<void> {
+
 		if (clearCanvas) {
 			UnityUtil.reset();
 		}

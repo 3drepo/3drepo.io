@@ -34,6 +34,10 @@ export const selectGISCoordinates = createSelector(
 	selectSettings, (settings) => pick(settings, ['surveyPoints', 'angleFromNorth'])
 );
 
+export const selectSubModels = createSelector(
+	selectSettings, (state) => state.subModels || []
+);
+
 export const selectHasGISCoordinates = createSelector(
 	selectGISCoordinates, (coordinates) => (coordinates.surveyPoints || []).length > 0
 );

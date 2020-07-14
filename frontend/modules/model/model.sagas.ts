@@ -35,6 +35,7 @@ export function* fetchSettings({ teamspace, modelId }) {
 	try {
 		yield put(ModelActions.setPendingState(true));
 		const { data: settings } = yield API.getModelSettings(teamspace, modelId);
+		settings.subModels = (settings.subModels || []).map((model) => ({...model, loaded: true}));
 
 		yield put(ModelActions.fetchSettingsSuccess(settings));
 		yield put(ModelActions.setPendingState(false));
