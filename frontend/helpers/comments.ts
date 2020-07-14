@@ -231,6 +231,16 @@ const convertActionCommentToText = (comment: IComment) => {
 				comment.action.propertyText = 'Pin';
 				break;
 
+			case 'screenshot':
+				comment.action.to = comment.action.from = null;
+				comment.action.propertyText = 'Screenshot';
+				break;
+
+			case 'viewpoint':
+				comment.action.to = comment.action.from = null;
+				comment.action.propertyText = 'Viewpoint';
+				break;
+
 			case 'issue_referenced':
 				comment.action.propertyText = 'Referenced';
 				text = 'Issue referenced in #' + comment.action.to  + ' by ' + comment.owner;
