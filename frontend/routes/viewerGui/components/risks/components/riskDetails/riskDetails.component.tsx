@@ -411,13 +411,11 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleViewpointUpdate = async () => {
-		const { teamspace, model, risk, updateRisk, viewer } = this.props;
+		const { teamspace, model, updateRisk, viewer } = this.props;
 
-		const currentViewpoint = await viewer.getCurrentViewpoint({ teamspace, model });
+		const viewpoint = await viewer.getCurrentViewpoint({ teamspace, model });
 
-		const viewpoint = mergeData(risk.viewpoint, currentViewpoint);
-
-		if (viewpoint.guid) {
+		if (viewpoint.position) {
 			updateRisk(teamspace, model, { viewpoint });
 		}
 	}

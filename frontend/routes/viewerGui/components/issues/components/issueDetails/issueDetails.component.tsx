@@ -406,7 +406,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleViewpointUpdate = async () => {
-		const { teamspace, model, issue, updateIssue, viewer } = this.props;
+		const { teamspace, model, updateIssue, viewer } = this.props;
 
 		const viewpoint = await viewer.getCurrentViewpoint({ teamspace, model });
 

@@ -22,20 +22,16 @@ import { Field } from 'formik';
 
 import { ISSUE_PRIORITIES, ISSUE_STATUSES } from '../../../../../../constants/issues';
 import { canChangeStatus } from '../../../../../../helpers/issues';
-import { renderWhenTrueOtherwise } from '../../../../../../helpers/rendering';
 import { NAMED_MONTH_DATE_FORMAT } from '../../../../../../services/formatting/formatDate';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
 import { DateField } from '../../../../../components/dateField/dateField.component';
 import { TextField } from '../../../../../components/textField/textField.component';
-import { ImageButton } from '../../../imageButton/imageButton.component';
-import PinButton from '../../../pinButton/pinButton.container';
 import {
 	Container,
 	FieldsRow,
 	StyledFormControl,
-	UpdateButtonsContainer
 } from '../../../risks/components/riskDetails/riskDetails.styles';
-import { ViewpointButton } from '../../../viewpointButton/viewpointButton.component';
+import { UpdateButtons } from '../../../updateButtons/updateButtons.component';
 import { Content, DescriptionImage } from '../issueDetails/issueDetails.styles';
 import { IssueSchema } from '../issueDetails/issueDetailsForm.component';
 
@@ -58,45 +54,6 @@ interface IProps {
 	onUploadScreenshot: (image) => void;
 	showScreenshotDialog: (config: any) => void;
 }
-
-const UpdateButtons = ({
-	isNew, canEditBasicProperty, disableViewer, onSavePin, onChangePin, onUpdateViewpoint, hasImage, ...props
-}) => (
-	<FieldsRow container alignItems="center" justify="space-between">
-		{renderWhenTrueOtherwise(() => (
-			<UpdateButtonsContainer>
-				<PinButton
-					onChange={onChangePin}
-					onSave={onSavePin}
-					disabled={!isNew && !canEditBasicProperty}
-					hasPin
-				/>
-				<ImageButton
-					hasImage={Boolean(hasImage)}
-					onTakeScreenshot={props.onTakeScreenshot}
-					onUploadScreenshot={props.onUploadScreenshot}
-					onShowScreenshotDialog={props.onShowScreenshotDialog}
-					disabled={!canEditBasicProperty}
-				/>
-				{!isNew && <ViewpointButton
-					onUpdate={onUpdateViewpoint}
-					disabled={!canEditBasicProperty}
-				/>}
-			</UpdateButtonsContainer>
-		), () => (
-			<UpdateButtonsContainer>
-				<ImageButton
-					hasImage={Boolean(hasImage)}
-					onTakeScreenshot={props.onTakeScreenshot}
-					onUploadScreenshot={props.onUploadScreenshot}
-					onShowScreenshotDialog={props.onShowScreenshotDialog}
-					disabled={!canEditBasicProperty}
-					disableScreenshot
-				/>
-			</UpdateButtonsContainer>
-		))(!disableViewer)}
-	</FieldsRow>
-);
 
 export const MainIssueFormTab: React.FunctionComponent<IProps> = ({
 	active, issue, permissions, topicTypes, currentUser, myJob, isNew, canChangeAssigned, canEditBasicProperty,

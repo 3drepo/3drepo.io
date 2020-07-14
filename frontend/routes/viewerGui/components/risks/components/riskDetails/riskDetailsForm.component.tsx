@@ -57,6 +57,7 @@ interface IProps {
 	onRemoveResource: (resource) => void;
 	attachFileResources: () => void;
 	attachLinkResources: () => void;
+	showScreenshotDialog: (config: any) => void;
 	showDialog: (config: any) => void;
 	canComment: boolean;
 	hasPin: boolean;

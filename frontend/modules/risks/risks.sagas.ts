@@ -29,7 +29,7 @@ import {
 } from '../../helpers/comments';
 
 import { EXTENSION_RE } from '../../constants/resources';
-import {imageUrlToBase64} from '../../helpers/imageUrlToBase64';
+import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
 import { prepareResources } from '../../helpers/resources';
 import { prepareRisk } from '../../helpers/risks';
 import { SuggestedTreatmentsDialog } from '../../routes/components/dialogContainer/components';

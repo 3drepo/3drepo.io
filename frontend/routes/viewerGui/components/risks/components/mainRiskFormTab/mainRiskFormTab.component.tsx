@@ -26,13 +26,10 @@ import {
 	RISK_CONSEQUENCES,
 	RISK_LIKELIHOODS,
 } from '../../../../../../constants/risks';
-import { renderWhenTrueOtherwise } from '../../../../../../helpers/rendering';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
 import { Image } from '../../../../../components/image';
 import { TextField } from '../../../../../components/textField/textField.component';
-import { ImageButton } from '../../../imageButton/imageButton.component';
-import PinButton from '../../../pinButton/pinButton.container';
-import { ViewpointButton } from '../../../viewpointButton/viewpointButton.component';
+import { UpdateButtons } from '../../../updateButtons/updateButtons.component';
 import { AutoSuggestField } from '../autoSuggestField/autosuggestField.component';
 import { LevelOfRisk } from '../levelOfRisk/levelOfRisk.component';
 import {
@@ -42,7 +39,6 @@ import {
 	FieldsContainer,
 	FieldsRow,
 	StyledFormControl,
-	UpdateButtonsContainer
 } from '../riskDetails/riskDetails.styles';
 import { RiskSchema } from '../riskDetails/riskDetailsForm.component';
 
@@ -63,45 +59,6 @@ interface IProps {
 	onUploadScreenshot: (image) => void;
 	showScreenshotDialog: (config: any) => void;
 }
-
-const UpdateButtons = ({
-	isNewRisk, canEditBasicProperty, disableViewer, onSavePin, onChangePin, onUpdateViewpoint, hasImage, ...props
-}) => (
-	<FieldsRow container alignItems="center" justify="space-between">
-		{renderWhenTrueOtherwise(() => (
-			<UpdateButtonsContainer>
-				<PinButton
-					onChange={onChangePin}
-					onSave={onSavePin}
-					disabled={!isNewRisk && !canEditBasicProperty}
-					hasPin
-				/>
-				<ImageButton
-					hasImage={Boolean(hasImage)}
-					onTakeScreenshot={props.onTakeScreenshot}
-					onUploadScreenshot={props.onUploadScreenshot}
-					onShowScreenshotDialog={props.onShowScreenshotDialog}
-					disabled={!canEditBasicProperty}
-				/>
-				{!isNewRisk && <ViewpointButton
-					onUpdate={onUpdateViewpoint}
-					disabled={!canEditBasicProperty}
-				/>}
-			</UpdateButtonsContainer>
-		), () => (
-			<UpdateButtonsContainer>
-				<ImageButton
-					hasImage={Boolean(hasImage)}
-					onTakeScreenshot={props.onTakeScreenshot}
-					onUploadScreenshot={props.onUploadScreenshot}
-					onShowScreenshotDialog={props.onShowScreenshotDialog}
-					disabled={!canEditBasicProperty}
-					disableScreenshot
-				/>
-			</UpdateButtonsContainer>
-		))(!disableViewer)}
-	</FieldsRow>
-);
 
 export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 	active, isNewRisk, risk, disableViewer, jobs, canChangeAssigned, canEditBasicProperty,
@@ -140,7 +97,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 
 			<FieldsRow container alignItems="center" justify="space-between">
 				<UpdateButtons
-					isNewRisk={isNewRisk}
+					isNew={isNewRisk}
 					disableViewer={disableViewer}
 					canEditBasicProperty={canEditBasicProperty}
 					onChangePin={props.onChangePin}
