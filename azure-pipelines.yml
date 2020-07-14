@@ -40,6 +40,8 @@ steps:
     sudo wget -O - "https://packagecloud.io/rabbitmq/rabbitmq-server/gpgkey" | sudo apt-key add - 
     sudo apt-get update
     curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.deb.sh | sudo bash
+    sudo apt-get install rabbitmq-server
+    sudo service rabbitmq-server start
     cat /var/log/rabbitmq/*
   displayName: 'expect and rabbitmq'
 
