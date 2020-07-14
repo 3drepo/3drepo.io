@@ -317,7 +317,11 @@ class Ticket {
 		}
 
 		// 7. Return the updated data and the old ticket
-		const updatedTicket = this.clean(account, model, { ...oldTicket, ...data });
+		const updatedTicket = this.clean(account, model, {
+			...oldTicket,
+			...data,
+			viewpoint: data.viewpoints && data.viewpoints[0] || oldTicket.viewpoint
+		});
 		oldTicket = this.clean(account, model, oldTicket);
 		delete data.comments;
 
