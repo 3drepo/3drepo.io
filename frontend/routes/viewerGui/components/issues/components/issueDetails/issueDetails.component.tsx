@@ -377,7 +377,10 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 					this.handleViewpointUpdateSuggest();
 				}
 
-				updateIssue(teamspace, model, { viewpoint: { screenshot: screenshot.replace('data:image/png;base64,', '') } });
+				updateIssue(teamspace, model, {
+					descriptionThumbnail: screenshot,
+					viewpoint: { screenshot: screenshot.replace('data:image/png;base64,', '') }
+				});
 			}
 		}
 	}

@@ -382,7 +382,10 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				if (!disableViewpointSuggestion) {
 					this.handleViewpointUpdateSuggest();
 				}
-				updateRisk(teamspace, model, { viewpoint: { screenshot: screenshot.replace('data:image/png;base64,', '') } });
+				updateRisk(teamspace, model, {
+					descriptionThumbnail: screenshot,
+					viewpoint: { screenshot: screenshot.replace('data:image/png;base64,', '') }
+				});
 			}
 		}
 	}

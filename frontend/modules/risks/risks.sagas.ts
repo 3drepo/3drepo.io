@@ -179,6 +179,9 @@ function* updateRisk({ teamspace, modelId, riskData }) {
 
 		const jobs = yield select(selectJobsList);
 		const preparedRisk = prepareRisk(updatedRisk, jobs);
+		if (riskData.descriptionThumbnail) {
+			preparedRisk.descriptionThumbnail = riskData.descriptionThumbnail;
+		}
 
 		yield put(RisksActions.setComponentState({ savedPin: position }));
 		yield put(RisksActions.saveRiskSuccess(preparedRisk));
