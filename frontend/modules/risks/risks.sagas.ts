@@ -29,6 +29,7 @@ import {
 } from '../../helpers/comments';
 
 import { EXTENSION_RE } from '../../constants/resources';
+import { UnityUtil } from '../../globals/unity-util';
 import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
 import { prepareResources } from '../../helpers/resources';
 import { prepareRisk } from '../../helpers/risks';
@@ -47,7 +48,6 @@ import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
-import { TeamspaceActions } from '../teamspace';
 import { selectIfcSpacesHidden, TreeActions } from '../tree';
 import { RisksActions, RisksTypes } from './risks.redux';
 import {
@@ -125,14 +125,14 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 		riskData.rev_id = revision;
 
 		if (objectInfo && (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0)) {
-			const [highlightedGroup, hiddenGroup] = yield createGroup(riskData, objectInfo, teamspace, model, revision);
-
-			if (highlightedGroup) {
-				viewpoint.highlighted_group_id = highlightedGroup.data._id;
+			const {highlightedNodes, hiddenNodes} = objectInfo;
+			if (highlightedNodes.length > 0) {
+				viewpoint.highlighted_objects = highlightedNodes;
+				viewpoint.color = UnityUtil.defaultHighlightColor.map((c) => c * 255);
 			}
 
-			if (hiddenGroup) {
-				viewpoint.hidden_group_id = hiddenGroup.data._id;
+			if (hiddenNodes.length > 0) {
+				viewpoint.hidden_objects = hiddenNodes;
 			}
 		}
 
@@ -214,7 +214,22 @@ function* updateNewRisk({ newRisk }) {
 
 function* postComment({ teamspace, modelId, riskData, finishSubmitting }) {
 	try {
-		const { _id } = yield select(selectActiveRiskDetails);
+		const { _id, account, model } = yield select(selectActiveRiskDetails);
+		const viewpoint = yield Viewer.getCurrentViewpoint({ teamspace: account, model });
+
+		riskData.viewpoint = {
+			...viewpoint,
+			... riskData.viewpoint
+		};
+
+		if (isEmpty(riskData.viewpoint)) {
+			delete riskData.viewpoint;
+		}
+
+		if (isEmpty(riskData.viewpoint) || isEqual(riskData.viewpoint, { screenshot: '' }) ) {
+			delete riskData.viewpoint;
+		}
+
 		const { data: comment } = yield API.addRiskComment(teamspace, modelId, _id, riskData);
 
 		finishSubmitting();

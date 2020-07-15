@@ -25,6 +25,7 @@ import { CHAT_CHANNELS } from '../../constants/chat';
 import { DEFAULT_PROPERTIES, PRIORITIES, STATUSES } from '../../constants/issues';
 import { EXTENSION_RE } from '../../constants/resources';
 import { ROUTES } from '../../constants/routes';
+import { UnityUtil } from '../../globals/unity-util';
 import {
 	createAttachResourceComments,
 	createRemoveResourceComment
@@ -127,14 +128,18 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 		};
 
 		if (objectInfo && (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0)) {
-			const [highlightedGroup, hiddenGroup] = yield createGroup(issueData, objectInfo, teamspace, model, revision);
-
-			if (highlightedGroup) {
-				viewpoint.highlighted_group_id = highlightedGroup.data._id;
+			const {highlightedNodes, hiddenNodes} = objectInfo;
+			if (highlightedNodes.length > 0) {
+				viewpoint.highlighted_group = {
+					objects: highlightedNodes,
+					color: UnityUtil.defaultHighlightColor.map((c) => c * 255)
+				} ;
 			}
 
-			if (hiddenGroup) {
-				viewpoint.hidden_group_id = hiddenGroup.data._id;
+			if (hiddenNodes.length > 0) {
+				viewpoint.hidden_group = {
+					objects: hiddenNodes
+				};
 			}
 		}
 
@@ -213,8 +218,18 @@ function* updateNewIssue({ newIssue }) {
 function* postComment({ issueData, finishSubmitting }) {
 	try {
 		const { _id, model, account } = yield select(selectActiveIssueDetails);
-		const { data: comment } = yield API.addIssueComment(account, model, _id, issueData);
+		const viewpoint = yield Viewer.getCurrentViewpoint({ teamspace: account, model });
 
+		issueData.viewpoint = {
+			...viewpoint,
+			... issueData.viewpoint
+		};
+
+		if (isEmpty(issueData.viewpoint) || isEqual(issueData.viewpoint, { screenshot: '' }) ) {
+			delete issueData.viewpoint;
+		}
+
+		const { data: comment } = yield API.addIssueComment(account, model, _id, issueData);
 		finishSubmitting();
 		yield put(IssuesActions.createCommentSuccess(comment, _id));
 		yield put(SnackbarActions.show('Issue comment added'));

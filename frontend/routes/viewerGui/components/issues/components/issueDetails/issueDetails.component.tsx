@@ -20,7 +20,7 @@ import React, { Fragment } from 'react';
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { canComment } from '../../../../../../helpers/issues';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { Copy} from '../../../../../components/fontAwesomeIcon';
+import { Copy } from '../../../../../components/fontAwesomeIcon';
 import { ScreenshotDialog } from '../../../../../components/screenshotDialog';
 import { CommentForm } from '../../../commentForm';
 import { ContainedButton } from '../../../containedButton/containedButton.component';
@@ -312,9 +312,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		this.props.setState({ newComment });
 	}
 
-	public handleNewScreenshot = async (screenshot) => {
+	public handleNewScreenshot = (screenshot) => {
 		const { teamspace, model, viewer } = this.props;
-		const viewpoint = this.isViewerInitialized ? await viewer.getCurrentViewpoint({ teamspace, model }) : null;
 
 		if (this.isNewIssue) {
 			this.props.setState({
@@ -324,21 +323,15 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				}
 			});
 		} else {
-			if (viewpoint) {
-				this.setCommentData({ screenshot, viewpoint });
-			} else {
-				this.setCommentData({ screenshot });
-			}
+			this.setCommentData({ screenshot });
 		}
 	}
 
-	public postComment = async (teamspace, model, { comment, screenshot }, finishSubmitting) => {
-		const viewpoint = this.isViewerInitialized ? await this.props.viewer.getCurrentViewpoint({ teamspace, model }) : null;
+	public postComment = (teamspace, model, { comment, screenshot }, finishSubmitting) => {
 		const issueCommentData = {
 			_id: this.issueData._id,
 			comment,
 			viewpoint: {
-				...viewpoint,
 				screenshot
 			}
 		};
