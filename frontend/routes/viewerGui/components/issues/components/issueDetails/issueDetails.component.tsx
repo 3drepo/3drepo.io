@@ -378,7 +378,6 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				}
 
 				updateIssue(teamspace, model, {
-					descriptionThumbnail: screenshot,
 					viewpoint: { screenshot: screenshot.replace('data:image/png;base64,', '') }
 				});
 			}

@@ -22,6 +22,7 @@ import Grid from '@material-ui/core/Grid';
 import { cond, constant, matches, stubTrue } from 'lodash';
 
 import { COLOR } from '../../../../../../styles';
+import { Image as ImageComponent } from '../../../../../components/image';
 import { MessagesList as MessagesListComponent } from '../../../../../components/messagesList/';
 import * as TextFieldStyles from '../../../../../components/textField/textField.styles';
 import PreviewDetailsBase from '../../../previewDetails/previewDetails.container';
@@ -99,10 +100,17 @@ export const FieldsRow = styled(Grid)`
 	}
 ` as any;
 
-export const DescriptionImage = styled.div`
-	max-height: 250px;
-	overflow: hidden;
-`;
+export const DescriptionImage = styled(ImageComponent)`
+	img {
+		display: block;
+		margin-top: 6px;
+		margin-bottom: 8px;
+		max-width: 100%;
+		width: 100%;
+		max-height: 200px;
+		height: auto;
+	}
+` as any;
 
 export const HorizontalView = styled.div`
 	display: flex;

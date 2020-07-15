@@ -17,6 +17,7 @@
 
 import React from 'react';
 
+import Tooltip from '@material-ui/core/Tooltip';
 import ImageIcon from '@material-ui/icons/Image';
 
 import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../../helpers/rendering';
@@ -108,11 +109,11 @@ const CreateScreenshot = ({ disableScreenshot, onTakeScreenshot }) => (
 	</>
 );
 
-export const ImageButton = ({ hasImage, disabled, ...props }: IProps) => {
+export const UpdateImageButton = ({ hasImage, disabled, ...props }: IProps) => {
 	const imageLabel = !hasImage ? 'Add Image' : 'Edit Image';
 
 	return (
-		<ButtonContainer>
+		<ButtonContainer {...props}>
 			{renderWhenTrueOtherwise(() => (
 				<UploadImage
 					asMenuItem={false}
@@ -152,5 +153,19 @@ export const ImageButton = ({ hasImage, disabled, ...props }: IProps) => {
 			))(props.disableScreenshot)}
 
 		</ButtonContainer>
+	);
+};
+
+export const ImageButton = ({ ...props }: IProps) => {
+	return (
+		<>
+			{renderWhenTrueOtherwise(() => (
+				<Tooltip title={`Sorry, You do not have enough permissions to do this.`}>
+					<UpdateImageButton {...props} />
+				</Tooltip>
+			), () => (
+				<UpdateImageButton {...props} />
+			))(props.disabled)}
+		</>
 	);
 };

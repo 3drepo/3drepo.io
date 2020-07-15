@@ -177,9 +177,6 @@ function* updateIssue({ issueData }) {
 
 		const jobs = yield select(selectJobsList);
 		const preparedIssue = prepareIssue(updatedIssue, jobs);
-		if (issueData.descriptionThumbnail) {
-			preparedIssue.descriptionThumbnail = issueData.descriptionThumbnail;
-		}
 
 		yield put(IssuesActions.setComponentState({ savedPin: position }));
 		yield put(IssuesActions.saveIssueSuccess(preparedIssue));

@@ -27,7 +27,6 @@ import {
 	RISK_LIKELIHOODS,
 } from '../../../../../../constants/risks';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
-import { Image } from '../../../../../components/image';
 import { TextField } from '../../../../../components/textField/textField.component';
 import { UpdateButtons } from '../../../updateButtons/updateButtons.component';
 import { AutoSuggestField } from '../autoSuggestField/autosuggestField.component';
@@ -87,12 +86,10 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 			</Container>
 
 			{risk.descriptionThumbnail && (
-				<DescriptionImage>
-					<Image
-						src={risk.descriptionThumbnail}
-						enablePreview
-					/>
-				</DescriptionImage>
+				<DescriptionImage
+					src={risk.descriptionThumbnail}
+					enablePreview
+				/>
 			)}
 
 			<FieldsRow container alignItems="center" justify="space-between">

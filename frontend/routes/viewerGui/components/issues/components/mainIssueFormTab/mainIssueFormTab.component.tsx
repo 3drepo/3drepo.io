@@ -78,10 +78,10 @@ export const MainIssueFormTab: React.FunctionComponent<IProps> = ({
 			</Container>
 
 			{issue.descriptionThumbnail && (
-					<DescriptionImage
-							src={issue.descriptionThumbnail}
-							enablePreview
-					/>
+				<DescriptionImage
+					src={issue.descriptionThumbnail}
+					enablePreview
+				/>
 			)}
 
 			<FieldsRow container alignItems="center" justify="space-between">
