@@ -59,7 +59,6 @@ export const MainIssueFormTab: React.FunctionComponent<IProps> = ({
 	active, issue, permissions, topicTypes, currentUser, myJob, isNew, canChangeAssigned, canEditBasicProperty,
 	jobs, disableViewer, ...props
 }) => {
-
 	return (
 		<Content active={active}>
 			<Container top>

@@ -317,6 +317,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { className, title, isPending, searchEnabled, showDetails } = this.props;
+
 		return (
 			<ViewerPanel
 				className={className}

@@ -17,6 +17,9 @@
 
 import React from 'react';
 
+import Tooltip from '@material-ui/core/Tooltip';
+
+import { renderWhenTrueOtherwise } from '../../../../helpers/rendering';
 import { StreetView } from '../../../components/fontAwesomeIcon';
 import { ContainedButton } from '../containedButton/containedButton.component';
 import { Container as ButtonContainer } from '../pinButton/pinButton.styles';
@@ -26,16 +29,28 @@ interface IProps {
 	disabled?: boolean;
 }
 
-export const ViewpointButton = ({ disabled, onUpdate, ...props }: IProps) => {
+const UpdateViewpointButton = ({ disabled, onUpdate, ...props }: IProps) => (
+	<ButtonContainer {...props}>
+		<ContainedButton
+			onClick={onUpdate}
+			icon={StreetView}
+			disabled={disabled}
+		>
+			Update Viewpoint
+		</ContainedButton>
+	</ButtonContainer>
+);
+
+export const ViewpointButton = ({ ...props }: IProps) => {
 	return (
-		<ButtonContainer>
-			<ContainedButton
-				onClick={onUpdate}
-				icon={StreetView}
-				disabled={disabled}
-			>
-				Update Viewpoint
-			</ContainedButton>
-		</ButtonContainer>
+		<>
+			{renderWhenTrueOtherwise(() => (
+				<Tooltip title={`Sorry, You do not have enough permissions to do this.`}>
+					<UpdateViewpointButton {...props} />
+				</Tooltip>
+			), () => (
+				<UpdateViewpointButton {...props} />
+			))(props.disabled)}
+		</>
 	);
 };

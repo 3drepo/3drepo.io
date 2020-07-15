@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,7 +16,11 @@
  */
 
 import React from 'react';
+
+import Tooltip from '@material-ui/core/Tooltip';
+
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
+import { renderWhenTrueOtherwise } from '../../../../helpers/rendering';
 import { ContainedButton } from '../containedButton/containedButton.component';
 import { Container, PinIcon } from './pinButton.styles';
 
@@ -31,6 +35,18 @@ interface IProps {
 	disableMeasure: (isDisabled) => void;
 	deactivateMeasure: () => void;
 }
+
+const UpdatePinButton = ({ pinLabel, disabled, onClickButton, ...props }) => (
+	<Container {...props}>
+		<ContainedButton
+			onClick={onClickButton}
+			icon={PinIcon}
+			disabled={disabled}
+		>
+			{pinLabel}
+		</ContainedButton>
+	</Container>
+);
 
 export class PinButton extends React.PureComponent<IProps, any> {
 	public state = {
@@ -97,15 +113,23 @@ export class PinButton extends React.PureComponent<IProps, any> {
 		const pinLabel =  this.state.active ? 'Save pin' :  editMsg;
 
 		return (
-			<Container>
-				<ContainedButton
-					onClick={this.onClickButton}
-					icon={PinIcon}
-					disabled={disabled}
-				>
-					{pinLabel}
-				</ContainedButton>
-			</Container>
+			<>
+				{renderWhenTrueOtherwise(() => (
+					<Tooltip title={`Sorry, You do not have enough permissions to do this.`}>
+						<UpdatePinButton
+							disabled={disabled}
+							onClickButton={this.onClickButton}
+							pinLabel={pinLabel}
+						/>
+					</Tooltip>
+				), () => (
+					<UpdatePinButton
+						disabled={disabled}
+						onClickButton={this.onClickButton}
+						pinLabel={pinLabel}
+					/>
+				))(disabled)}
+			</>
 		);
 	}
 }

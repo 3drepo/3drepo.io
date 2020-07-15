@@ -155,9 +155,9 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		return {
 			disabled: true,
 			label: (
-					<Tooltip title={`Save the ${VIEWER_PANELS_TITLES.issues} before adding an attachment`}>
-						<span>{ISSUE_TABS.ATTACHMENTS}</span>
-					</Tooltip>
+				<Tooltip title={`Save the ${VIEWER_PANELS_TITLES.issues} before adding an attachment`}>
+					<span>{ISSUE_TABS.ATTACHMENTS}</span>
+				</Tooltip>
 			)
 		};
 	}
