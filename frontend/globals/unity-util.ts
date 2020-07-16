@@ -1630,4 +1630,16 @@ export class UnityUtil {
 		UnityUtil.toUnity('SetPlaneBorderWidth', UnityUtil.LoadingState.VIEWER_READY, width *	0.01);
 	}
 
+	public static setResolutionScaling(scale: number) {
+		UnityUtil.toUnity('SetResolutionScaling', UnityUtil.LoadingState.VIEWER_READY, scale);
+	}
+
+	public static toggleUtilityCamera() {
+		UnityUtil.toUnity('ToggleUtilityCamera', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	public static toggleCameraPause(color: number[]) {
+		UnityUtil.toUnity('ToggleCameraPause', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
 }
