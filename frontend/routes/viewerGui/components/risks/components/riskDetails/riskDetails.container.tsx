@@ -31,6 +31,7 @@ import {
 	selectFetchingDetailsIsPending,
 	selectMitigationCriteria,
 	selectNewComment,
+	selectPostCommentIsPending,
 	RisksActions,
 } from '../../../../../../modules/risks';
 import { ViewpointsActions } from '../../../../../../modules/viewpoints';
@@ -50,6 +51,7 @@ const mapStateToProps = createStructuredSelector({
 	currentUser: selectCurrentUser,
 	modelSettings: selectSettings,
 	failedToLoad: selectFailedToLoad,
+	postCommentIsPending: selectPostCommentIsPending,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
