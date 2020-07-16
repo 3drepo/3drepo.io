@@ -212,7 +212,22 @@ function* updateNewRisk({ newRisk }) {
 
 function* postComment({ teamspace, modelId, riskData, finishSubmitting }) {
 	try {
-		const { _id } = yield select(selectActiveRiskDetails);
+		const { _id, account, model } = yield select(selectActiveRiskDetails);
+		const viewpoint = yield Viewer.getCurrentViewpoint({ teamspace: account, model });
+
+		riskData.viewpoint = {
+			...viewpoint,
+			... riskData.viewpoint
+		};
+
+		if (isEmpty(riskData.viewpoint)) {
+			delete riskData.viewpoint;
+		}
+
+		if (isEmpty(riskData.viewpoint) || isEqual(riskData.viewpoint, { screenshot: '' }) ) {
+			delete riskData.viewpoint;
+		}
+
 		const { data: comment } = yield API.addRiskComment(teamspace, modelId, _id, riskData);
 
 		finishSubmitting();
