@@ -19,7 +19,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { selectSettings, selectSubModels } from '../../../../../../modules/model';
+import { selectIsSubModelLoading, selectSettings, selectSubModels } from '../../../../../../modules/model';
 import {
 	selectDataRevision,
 	selectSelectionMap,
@@ -34,7 +34,8 @@ const mapStateToProps = createStructuredSelector({
 	visibilityMap: selectVisibilityMap,
 	selectionMap: selectSelectionMap,
 	rev: selectDataRevision,
-	subModels: selectSubModels
+	subModels: selectSubModels,
+	isSubmodelLoading: selectIsSubModelLoading
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

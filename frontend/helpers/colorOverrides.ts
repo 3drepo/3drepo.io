@@ -20,8 +20,8 @@ import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds,
 import { Viewer } from '../services/viewer/viewer';
 import { hexToGLColor } from './colors';
 
-export const getGroupOverride = (overrides, group, value) => {
-	group.objects.forEach((object) => {
+export const getGroupOverride = (overrides, objects, value) => {
+	objects.forEach((object) => {
 		object.shared_ids.forEach((sharedId) => {
 			overrides[sharedId] = value;
 		});
@@ -58,7 +58,7 @@ export const overridesColorDiff = overridesDiff('color');
 
 export const overridesTransparencyDiff = overridesDiff('transparency');
 
-export const addOverrides = (field, valueConvert, addOverride) => async (overrides) => {
+export const addOverrides = (field, valueConvert, addOverride) => async (overrides, ignoreModels = {}) => {
 	if (!overrides.length) {
 		return;
 	}
@@ -79,7 +79,9 @@ export const addOverrides = (field, valueConvert, addOverride) => async (overrid
 
 				for (let j = 0; j < modelsList.length; j++) {
 					const { meshes, teamspace, modelId } = modelsList[j] as any;
-					addOverride(teamspace, modelId, meshes, value);
+					if (!ignoreModels[modelId]) {
+						addOverride(teamspace, modelId, meshes, value);
+					}
 				}
 			}
 		}
@@ -98,7 +100,7 @@ export const addTransparencyOverrides = addOverrides('transparency', parseFloat,
 		}
 	});
 
-export const removeOverrides = (resetMesh) => async (overrides) => {
+export const removeOverrides = (resetMesh) => async (overrides, ignoreModels = {}) => {
 	if (!overrides.length) {
 		return;
 	}
@@ -119,7 +121,9 @@ export const removeOverrides = (resetMesh) => async (overrides) => {
 
 				for (let j = 0; j < modelsList.length; j++) {
 					const { meshes, teamspace, modelId } = modelsList[j] as any;
-					resetMesh(teamspace, modelId, meshes);
+					if (!ignoreModels[modelId]) {
+						resetMesh(teamspace, modelId, meshes);
+					}
 				}
 			}
 		}

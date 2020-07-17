@@ -129,13 +129,14 @@ function* setCoordView({ visible }) {
 	}
 }
 
-const setIsModelLoaded = () => {
+const onIsModelLoaded = () => {
 	dispatch(ViewerGuiActions.setIsModelLoaded(true));
+	dispatch(ViewerGuiActions.setLoadingProgress(1));
 };
 
 function* startListenOnModelLoaded() {
 	try {
-		Viewer.on(VIEWER_EVENTS.MODEL_LOADED, setIsModelLoaded);
+		Viewer.on(VIEWER_EVENTS.MODEL_LOADED, onIsModelLoaded);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('start listen on', 'model loaded', error));
 	}
@@ -143,7 +144,7 @@ function* startListenOnModelLoaded() {
 
 function* stopListenOnModelLoaded() {
 	try {
-		Viewer.off(VIEWER_EVENTS.MODEL_LOADED, setIsModelLoaded);
+		Viewer.off(VIEWER_EVENTS.MODEL_LOADED, onIsModelLoaded);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('stop listen on', 'model loaded', error));
 	}
@@ -180,7 +181,7 @@ function* startListenOnClickPin() {
 
 function* stopListenOnClickPin() {
 	try {
-		Viewer.off(VIEWER_EVENTS.MODEL_LOADED, setIsModelLoaded);
+		Viewer.off(VIEWER_EVENTS.MODEL_LOADED, onIsModelLoaded);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('stop listen on', 'click pin', error));
 	}
@@ -370,6 +371,17 @@ function* loadModel() {
 
 function* loadSubModel({account, model}) {
 	yield Viewer.loadModel(account, model);
+
+	const onSubModelLoadingProgress = (progress) => {
+		if (progress === 1 ) {
+			dispatch(ModelActions.setSubmodelLoading(account, model, false));
+			Viewer.off(VIEWER_EVENTS.MODEL_LOADING_PROGRESS, onSubModelLoadingProgress);
+		}
+	};
+
+	Viewer.on(VIEWER_EVENTS.MODEL_LOADING_PROGRESS, onSubModelLoadingProgress);
+
+	yield put(ModelActions.setSubmodelLoading(account, model, true));
 	yield put(ModelActions.setSubmodelLoaded(account, model, true));
 }
 

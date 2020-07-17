@@ -20,6 +20,7 @@ import { createSelector } from 'reselect';
 import { getGroupOverride } from '../../helpers/colorOverrides';
 import { getTransparency, hasTransparency } from '../../helpers/colors';
 import { searchByFilters } from '../../helpers/searching';
+import { selectSubModels } from '../model';
 
 export const selectGroupsDomain = (state) => ({...state.groups});
 
@@ -100,8 +101,19 @@ export const selectCriteriaFieldState = createSelector(
 	selectComponentState, (state) => state.criteriaFieldState
 );
 
+export const selectModelsToIgnoreOverrides = createSelector(
+	selectSubModels, (submodels) => (submodels as any[]).reduce((ignoreDict, submodel) => {
+			if (!submodel.loaded || submodel.loading) {
+				ignoreDict[submodel.model] = true;
+			}
+
+			return ignoreDict;
+		}, {})
+);
+
 const selectOverridesDict = createSelector(
-	selectColorOverrides, selectFilteredGroups, selectComponentState, (groupOverrides, filteredGroups, componentState) => {
+	selectColorOverrides, selectFilteredGroups, selectComponentState, selectModelsToIgnoreOverrides,
+		(groupOverrides, filteredGroups, componentState, subModelsToIgnore) => {
 		const filteredGroupsMap = filteredGroups.reduce((map, group) => {
 			map[group._id] = group;
 			return map;
@@ -109,12 +121,19 @@ const selectOverridesDict = createSelector(
 
 		return groupOverrides.reduce((overrides, groupId) => {
 			// filter out the filtered groups and if its showing details the selected group
-			if (filteredGroupsMap[groupId] && (!componentState.showDetails || componentState.activeGroup !== groupId)) {
+			const isInFilteredGroups = filteredGroupsMap[groupId];
+			const isNotAnActivegroup = componentState.activeGroup !== groupId;
+			const isNotShowingGroupDetails = !componentState.showDetails;
+
+			if (isInFilteredGroups && (isNotShowingGroupDetails || isNotAnActivegroup )) {
 				const group = filteredGroupsMap[groupId];
-				getGroupOverride(overrides.colors, group, group.color);
+
+				const objects = group.objects.filter((objs) =>  !subModelsToIgnore[objs.model]);
+
+				getGroupOverride(overrides.colors, objects, group.color);
 
 				if (hasTransparency(group.color)) {
-					getGroupOverride(overrides.transparencies, group, getTransparency(group.color));
+					getGroupOverride(overrides.transparencies, objects, getTransparency(group.color));
 				}
 			}
 			return overrides;

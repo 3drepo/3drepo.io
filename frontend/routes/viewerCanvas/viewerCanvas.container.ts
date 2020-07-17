@@ -20,6 +20,7 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { selectGisLayers } from '../../modules/gis';
+import { selectModelsToIgnoreOverrides } from '../../modules/groups';
 import { selectPins as selectIssuePins } from '../../modules/issues';
 import { selectPins as selectMeasurementPins } from '../../modules/measurements';
 import { selectGISCoordinates, selectHasGISCoordinates } from '../../modules/model';
@@ -30,6 +31,7 @@ import { ViewerCanvas } from './viewerCanvas.component';
 
 const mapStateToProps = createStructuredSelector({
 	colorOverrides: selectColorOverrides,
+	modelsToIgnoreOverrides: selectModelsToIgnoreOverrides,
 	transparencies: selectAllTransparencyOverrides,
 	issuePins: selectIssuePins,
 	riskPins: selectRiskPins,

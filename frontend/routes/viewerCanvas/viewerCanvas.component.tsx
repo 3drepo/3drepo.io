@@ -44,6 +44,7 @@ interface IProps {
 	hasGisCoordinates: boolean;
 	gisCoordinates: any;
 	handleTransparencyOverridesChange: any;
+	modelsToIgnoreOverrides: any;
 }
 
 export class ViewerCanvas extends React.PureComponent<IProps, any> {
@@ -80,12 +81,12 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 		}
 	}
 
-	public renderColorOverrides(prev, curr) {
+	public renderColorOverrides(prev, curr, modelsToIgnoreOverrides) {
 		const toAdd = overridesColorDiff(curr, prev);
 		const toRemove = overridesColorDiff(prev, curr);
 
-		removeColorOverrides(toRemove);
-		addColorOverrides(toAdd);
+		removeColorOverrides(toRemove, modelsToIgnoreOverrides);
+		addColorOverrides(toAdd, modelsToIgnoreOverrides);
 	}
 
 	public renderGisLayers(prev: string[], curr: string[]) {
@@ -108,14 +109,14 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 
 	public componentDidUpdate(prevProps: IProps) {
 		const { colorOverrides, issuePins, riskPins, measurementPins, hasGisCoordinates,
-			gisCoordinates, gisLayers, transparencies } = this.props;
+			gisCoordinates, gisLayers, transparencies, modelsToIgnoreOverrides } = this.props;
 
 		if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
-			this.renderColorOverrides(prevProps.colorOverrides, colorOverrides);
+			this.renderColorOverrides(prevProps.colorOverrides, colorOverrides, modelsToIgnoreOverrides);
 		}
 
 		if (prevProps.transparencies && !isEqual(transparencies, prevProps.transparencies)) {
-			this.props.handleTransparencyOverridesChange(transparencies, prevProps.transparencies);
+			this.props.handleTransparencyOverridesChange(transparencies, prevProps.transparencies, modelsToIgnoreOverrides);
 		}
 
 		if (!isEqual(issuePins, prevProps.issuePins)) {

@@ -42,6 +42,7 @@ export const { Types: ModelTypes, Creators: ModelActions } = createActions({
 	fetchMetaKeysSuccess: ['metaKeys'],
 	reset: [],
 	setSubmodelLoaded: ['teamspace', 'modelId', 'loaded'],
+	setSubmodelLoading: ['teamspace', 'modelId', 'loading'],
 }, { prefix: 'MODEL/' });
 
 export const INITIAL_STATE = {
@@ -101,14 +102,22 @@ const setModelRevisionStateSuccess = (state = INITIAL_STATE, { revision, isVoid 
 	return { ...state, revisions };
 };
 
-const setSubmodelLoaded = (state = INITIAL_STATE, { teamspace, modelId, loaded }) => {
-	const subModels = state.settings.subModels.map((submodel) => {
+const setSubModelProps = (subModels, teamspace, modelId, props) => {
+	return subModels.map((submodel) => {
 		if (submodel.database === teamspace && submodel.model === modelId) {
-			return {...submodel, loaded};
+			return {...submodel, ...props};
 		}
 		return submodel;
 	});
+};
 
+const setSubmodelLoaded = (state = INITIAL_STATE, { teamspace, modelId, loaded }) => {
+	const subModels = setSubModelProps(state.settings.subModels, teamspace, modelId, {loaded});
+	return updateSettingsSuccess(state, { settings: {subModels}});
+};
+
+const setSubmodelLoading = (state = INITIAL_STATE, { teamspace, modelId, loading }) => {
+	const subModels = setSubModelProps(state.settings.subModels, teamspace, modelId, { loading});
 	return updateSettingsSuccess(state, { settings: {subModels}});
 };
 
@@ -123,5 +132,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ModelTypes.UPDATE_SETTINGS_SUCCESS]: updateSettingsSuccess,
 	[ModelTypes.RESET]: reset,
 	[ModelTypes.SET_MODEL_REVISION_STATE_SUCCESS]: setModelRevisionStateSuccess,
-	[ModelTypes.SET_SUBMODEL_LOADED]: setSubmodelLoaded
+	[ModelTypes.SET_SUBMODEL_LOADED]: setSubmodelLoaded,
+	[ModelTypes.SET_SUBMODEL_LOADING]: setSubmodelLoading
 });
