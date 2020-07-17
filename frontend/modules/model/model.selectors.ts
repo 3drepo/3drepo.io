@@ -39,7 +39,7 @@ export const selectSubModels = createSelector(
 );
 
 export const selectIsSubModelLoading = createSelector(
-	selectSubModels,  (subModels) => (subModels as []).some((submodel) => subModels.loading)
+	selectSubModels,  (subModels) => (subModels as []).some((submodel) => (submodel as any).loading)
 );
 
 export const selectHasGISCoordinates = createSelector(

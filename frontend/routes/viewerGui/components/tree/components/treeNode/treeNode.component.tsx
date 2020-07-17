@@ -52,6 +52,7 @@ interface IProps {
 	selected?: boolean;
 	active?: boolean;
 	hasFederationRoot?: boolean;
+	isSubmodelLoading: boolean;
 	collapseNodes?: (nodesIds: string[]) => void;
 	expandNodes?: (id) => void;
 	selectNode?: (id) => void;
@@ -164,7 +165,11 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 	));
 
 	private onChangeLoadStatus = (e: React.SyntheticEvent) => {
-		const {checked} = (e.currentTarget as any);
+		e.stopPropagation();
+
+		if (this.props.isSubmodelLoading) {
+			return;
+		}
 		const {database, model} =  this.subModel;
 
 		if (!this.isLoaded) {
@@ -190,7 +195,12 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 				onClick={this.toggleShowNode}
 			/>
 			{this.isSubmodelRoot &&
-				<Switch checked={this.isLoaded} onClick={(e) => e.stopPropagation()} onChange={this.onChangeLoadStatus} />
+				<Switch
+					onClick={(e) => e.stopPropagation()}
+					onChange={this.onChangeLoadStatus}
+					checked={this.isLoaded}
+					disabled={this.props.isSubmodelLoading}
+				/>
 			}
 		</Actions>
 	));
