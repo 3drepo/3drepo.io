@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,20 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { keyBy, omit } from 'lodash';
+import { keyBy } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	fetchGroups: ['teamspace', 'modelId', 'revision'],
 	fetchGroupsSuccess: ['groups'],
 	togglePendingState: ['isPending'],
+	toggleDetailsPendingState: ['isPending'],
 	setComponentState: ['componentState'],
 	setActiveGroup: ['group', 'revision'],
 	resetActiveGroup: ['group'],
 	showDetails: ['group', 'revision'],
 	closeDetails: [],
 	setNewGroup: [],
-	updateNewGroup: ['newGroup'],
 	selectGroup: ['group'],
 	addToHighlighted: ['groupId'],
 	removeFromHighlighted: ['groupId'],
@@ -79,6 +79,7 @@ export interface IGroupComponentState {
 	criteriaFieldState: ICriteriaFieldState;
 	allOverridden: boolean;
 	searchEnabled: boolean;
+	fetchingDetailsIsPending: boolean;
 }
 
 export interface IGroupState {
@@ -114,13 +115,18 @@ export const INITIAL_STATE: IGroupState = {
 		totalMeshes: 0,
 		criteriaFieldState: INITIAL_CRITERIA_FIELD_STATE,
 		allOverridden: false,
-		searchEnabled: false
+		searchEnabled: false,
+		fetchingDetailsIsPending: false,
 	},
 	colorOverrides: [],
 	fieldNames: []
 };
 
 export const togglePendingState = (state = INITIAL_STATE, { isPending }) => ({ ...state, isPending });
+
+export const toggleDetailsPendingState = (state = INITIAL_STATE, { isPending }) => {
+	return setComponentState(state, { componentState: { fetchingDetailsIsPending: isPending } });
+};
 
 export const fetchGroupsSuccess = (state = INITIAL_STATE, { groups = [] }) => {
 	const groupsMap = keyBy(groups, '_id');
@@ -249,6 +255,7 @@ const resetComponentState = (state = INITIAL_STATE) => {
 export const reducer = createReducer(INITIAL_STATE, {
 	[GroupsTypes.FETCH_GROUPS_SUCCESS]: fetchGroupsSuccess,
 	[GroupsTypes.TOGGLE_PENDING_STATE]: togglePendingState,
+	[GroupsTypes.TOGGLE_DETAILS_PENDING_STATE]: toggleDetailsPendingState,
 	[GroupsTypes.SET_COMPONENT_STATE]: setComponentState,
 	[GroupsTypes.ADD_TO_HIGHLIGHTED]: addToHighlighted,
 	[GroupsTypes.REMOVE_FROM_HIGHLIGHTED]: removeFromHighlighted,

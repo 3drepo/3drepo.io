@@ -74,6 +74,8 @@ interface IProps {
 	setIsPinDropMode: (mode: boolean) => void;
 	teamspaceUsers: any[];
 	disableIssuesSuggestions?: boolean;
+	fetchingDetailsIsPending?: boolean;
+	postCommentIsPending?: boolean;
 }
 
 interface IState {
@@ -384,8 +386,11 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 			hideUploadButton,
 			showResidualRiskInput,
 			formRef,
-			canComment
+			canComment,
+			postCommentIsPending,
+			fetchingDetailsIsPending,
 		} = this.props;
+		const isPending = postCommentIsPending || fetchingDetailsIsPending;
 
 		return (
 			<Container>
@@ -413,6 +418,7 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 										mini
 										disabled={!hideComment && (!canComment || !form.isValid || form.isValidating) || form.isSubmitting}
 										aria-label="Add new comment"
+										pending={isPending}
 									>
 										<SaveIcon fontSize="small" />
 									</ViewerPanelButton>

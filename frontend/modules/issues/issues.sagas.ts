@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -108,6 +108,7 @@ const createGroup = (issue, objectInfo, teamspace, model, revision) => {
 };
 
 function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, ignoreViewer = false }) {
+	yield put(IssuesActions.toggleDetailsPendingState(true));
 	try {
 		const myJob = yield select(selectMyJob);
 		const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
@@ -170,6 +171,7 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('save', 'issue', error));
 	}
+	yield put(IssuesActions.toggleDetailsPendingState(false));
 }
 
 function* updateIssue({ issueData }) {
@@ -214,6 +216,7 @@ function* updateNewIssue({ newIssue }) {
 }
 
 function* postComment({ issueData, finishSubmitting }) {
+	yield put(IssuesActions.togglePostCommentPendingState(true));
 	try {
 		const { _id, model, account } = yield select(selectActiveIssueDetails);
 		const viewpoint = yield Viewer.getCurrentViewpoint({ teamspace: account, model });
@@ -234,6 +237,7 @@ function* postComment({ issueData, finishSubmitting }) {
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('post', 'issue comment', error));
 	}
+	yield put(IssuesActions.togglePostCommentPendingState(false));
 }
 
 function* removeComment({ issueData }) {
