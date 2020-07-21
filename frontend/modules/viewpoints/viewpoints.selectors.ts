@@ -57,5 +57,7 @@ export const selectEditMode = createSelector(
 export const selectSelectedViewpoint =  createSelector(
 	selectViewpointsDomain, selectQueryParams, selectModelsToSkip, selectDefaultViewpoint,
 		({viewpointsMap}, {viewpointId}, modelsToSkip, defaultViewpoint) =>
-			(!viewpointId || !viewpointsMap ? null : viewpointsMap[viewpointId]) || modelsToSkip || defaultViewpoint
+			(!viewpointId || !viewpointsMap ? null : viewpointsMap[viewpointId]) || 
+			(modelsToSkip.length ? ({modelsToSkip}) : null) ||
+			defaultViewpoint
 );
