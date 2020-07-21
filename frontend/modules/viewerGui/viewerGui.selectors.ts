@@ -71,3 +71,7 @@ export const selectIsClipEdit = createSelector(
 export const selectClipNumber = createSelector(
 	selectViewerGuiDomain, (state) => state.clipNumber
 );
+
+export const selectModelsToSkip = createSelector(
+	selectViewerGuiDomain, (state) => state.modelsToSkip
+);

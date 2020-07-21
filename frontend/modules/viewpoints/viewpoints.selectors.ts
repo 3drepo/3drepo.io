@@ -16,8 +16,11 @@
  */
 import { values } from 'lodash';
 import { createSelector } from 'reselect';
+import { selectDefaultViewpoint } from '../model';
+import { selectQueryParams } from '../router/router.selectors';
+import { selectModelsToSkip } from '../viewerGui';
 
-export const selectViewpointsDomain = (state) => ({...state.viewpoints});
+export const selectViewpointsDomain = (state) => state.viewpoints;
 
 export const selectIsPending = createSelector(
 	selectViewpointsDomain, (state) => state.isPending
@@ -49,4 +52,10 @@ export const selectSearchEnabled = createSelector(
 
 export const selectEditMode = createSelector(
 	selectComponentState, (state) => state.editMode
+);
+
+export const selectSelectedViewpoint =  createSelector(
+	selectViewpointsDomain, selectQueryParams, selectModelsToSkip, selectDefaultViewpoint,
+		({viewpointsMap}, {viewpointId}, modelsToSkip, defaultViewpoint) =>
+			(!viewpointId || !viewpointsMap ? null : viewpointsMap[viewpointId]) || modelsToSkip || defaultViewpoint
 );

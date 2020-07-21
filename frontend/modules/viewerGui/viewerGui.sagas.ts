@@ -40,7 +40,7 @@ import { SequencesActions } from '../sequences';
 import { StarredActions } from '../starred';
 import { dispatch } from '../store';
 import { TreeActions } from '../tree';
-import { ViewpointsActions } from '../viewpoints';
+import { selectSelectedViewpoint, ViewpointsActions, ViewpointsTypes } from '../viewpoints';
 import { ViewerGuiActions, ViewerGuiTypes } from './viewerGui.redux';
 import {
 	selectClipNumber,
@@ -63,16 +63,23 @@ function* fetchData({ teamspace, model }) {
 			put(ModelActions.fetchMetaKeys(teamspace, model)),
 			put(ModelActions.waitForSettingsAndFetchRevisions(teamspace, model)),
 			put(TreeActions.setIsTreeProcessed(false)),
+			put(ViewpointsActions.fetchViewpoints(teamspace, model)),
 			put(CommentsActions.fetchUsers(teamspace)),
 		]);
 
-		yield take(ModelTypes.FETCH_REVISIONS_SUCCESS);
+		yield all([
+			take(ModelTypes.FETCH_REVISIONS_SUCCESS),
+			take(ViewpointsTypes.FETCH_VIEWPOINTS_SUCCESS),
+			take(ModelTypes.FETCH_SETTINGS_SUCCESS)
+		]);
+
+		const selectedViewpoint = yield select(selectSelectedViewpoint);
+
 		const revision = yield select(selectCurrentRevisionId);
 
 		yield all([
 			put(ViewerGuiActions.loadModel()),
 			put(TreeActions.fetchFullTree(teamspace, model, revision)),
-			put(ViewpointsActions.fetchViewpoints(teamspace, model)),
 			put(IssuesActions.fetchIssues(teamspace, model, revision)),
 			put(RisksActions.fetchRisks(teamspace, model, revision)),
 			put(GroupsActions.fetchGroups(teamspace, model, revision)),
