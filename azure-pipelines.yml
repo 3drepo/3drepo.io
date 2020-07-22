@@ -11,9 +11,9 @@ resources:
 variables:
   # Container registry service connection established during pipeline creation
   dockerRegistryServiceConnection: '8775ee4b-0b4d-40f5-b4fd-c9c74e4c5cac'
-  imageRepository: '3drepoio'
+  imageRepository: '3drepo.io'
   containerRegistry: '3drepo.azurecr.io'
-  dockerfilePath: '$(Build.SourcesDirectory)/.azure/Docker/Dockerfile.local.source'
+  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
   tag: '$(Build.BuildId)'
   
   # Agent VM image name

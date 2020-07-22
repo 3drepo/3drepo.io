@@ -7,7 +7,7 @@ ARG NODE_GROUP=bouncer
 ARG NODE_UID=1101
 ARG NODE_GID=1102
 
-RUN  cd backend  && \
+RUN cd backend && \
         yarn install --network-timeout 100000 && \
         cd ../frontend  && \
         yarn install --network-timeout 100000 && \ 
@@ -42,7 +42,7 @@ ENV NODE_CONFIG_DIR='./config'
 EXPOSE 8080 3000
 
 USER root   
-COPY ./.azure/Docker/src/init.sh /usr/local/bin/start.sh
+COPY .azure/Docker/src/init.sh /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh ; ln -s /usr/local/bin/start.sh /usr/local/bin/start
 
 WORKDIR /home/node/3drepo.io/
