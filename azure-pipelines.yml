@@ -1,9 +1,14 @@
-# Docker
-# Build and push an image to Azure Container Registry
-# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
-
 trigger:
-- master
+  batch: true
+  branches:
+    include:
+    - master
+    - staging
+
+pr:
+  branches:
+    include:
+    - 'ISSUE_*'  # must quote since "*" is a YAML reserved character; we want a string
 
 resources:
 - repo: self
@@ -15,7 +20,8 @@ variables:
   containerRegistry: '3drepo.azurecr.io'
   dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
   tag: '$(Build.BuildId)'
-  
+  DOCKER_BUILDKIT: 1
+
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
 

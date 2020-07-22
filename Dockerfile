@@ -6,8 +6,8 @@ ARG NODE_USERNAME=node
 ARG NODE_GROUP=bouncer
 ARG NODE_UID=1101
 ARG NODE_GID=1102
-
-RUN ls -la && pwd && cd backend && \
+COPY . /home/node/3drepo.io
+RUN cd /home/node/3drepo.io/backend && \
         yarn install --network-timeout 100000 && \
         cd ../frontend  && \
         yarn install --network-timeout 100000 && \ 
