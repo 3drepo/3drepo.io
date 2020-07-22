@@ -23,7 +23,6 @@ const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
 const utils = require("../utils");
 const db = require("../handler/db");
-const views = require("./viewpoint");
 
 const MODELS_COLL = "settings";
 
@@ -70,6 +69,7 @@ schema.set("toObject", { getters: true });
 schema.statics.modelCodeRegExp = /^[a-zA-Z0-9]{0,50}$/;
 
 schema.methods.clean = async function() {
+	const views = require("./viewpoint");
 	const cleanedData = this.toObject();
 	if (this.defaultView) {
 		delete cleanedData.defaultView;
@@ -88,6 +88,7 @@ schema.methods.clean = async function() {
 };
 
 schema.methods.updateProperties = async function (updateObj) {
+	const views = require("./viewpoint");
 	const keys = Object.keys(updateObj);
 	for(let i = 0; i < keys.length; ++i) {
 		const key = keys[i];
