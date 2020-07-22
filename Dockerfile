@@ -13,11 +13,6 @@ RUN cd /home/node/3drepo.io/backend && \
         yarn install --network-timeout 100000 && \ 
         yarn build
 
-LABEL io.k8s.description="3drepo.io is a scalable, high-performance, open source AEC database." \
-      io.k8s.display-name="3drepo.io ${app_web_version}" \
-      io.openshift.expose-services="8080:3drepo.io" \
-      io.openshift.tags="3drepo/3drepo.io"
-
 FROM node:10 as deploy
 
 RUN apt-get update && apt-get install -y \
@@ -35,7 +30,7 @@ RUN if [ ${NODE_USERNAME} != "root" ] \
 
 USER node
 WORKDIR /home/node/3drepo.io/
-COPY --from=builder / .
+COPY --from=builder /home/node/3drepo.io/ /home/node/3drepo.io/
 ARG NODE_ENV=local
 ENV NODE_ENV ${NODE_ENV:-"production"}
 ENV NODE_CONFIG_DIR='./config'
@@ -44,6 +39,11 @@ EXPOSE 8080 3000
 USER root   
 COPY .azure/Docker/src/init.sh /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh ; ln -s /usr/local/bin/start.sh /usr/local/bin/start
+
+LABEL io.k8s.description="3drepo.io is a scalable, high-performance, open source AEC database." \
+      io.k8s.display-name="3drepo.io ${app_web_version}" \
+      io.openshift.expose-services="8080:3drepo.io" \
+      io.openshift.tags="3drepo/3drepo.io"
 
 WORKDIR /home/node/3drepo.io/
 ENTRYPOINT [ "start" ]
