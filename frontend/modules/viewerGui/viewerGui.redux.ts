@@ -59,7 +59,6 @@ export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActio
 	clearHighlights: [],
 	setCamera: ['params'],
 	resetPanels: [],
-	setModelsToSkipLoad: ['modelsToSkip'],
 }, { prefix: 'VIEWER_GUI/' });
 
 export interface IViewerGuiState {
@@ -76,7 +75,6 @@ export interface IViewerGuiState {
 	clipNumber: number;
 	isPinDropMode: boolean;
 	pinData: any;
-	modelsToSkip: string[];
 }
 
 export const INITIAL_STATE: IViewerGuiState = {
@@ -93,7 +91,6 @@ export const INITIAL_STATE: IViewerGuiState = {
 	clipNumber: 0,
 	isPinDropMode: false,
 	pinData: null,
-	modelsToSkip: []
 };
 
 const updatePanelsList = (panels, lockedPanels, panelName, visibility) => {
@@ -181,9 +178,6 @@ const setCoordViewSuccess = (state = INITIAL_STATE, { coordViewActive }) => {
 	return { ...state, coordViewActive };
 };
 
-const setModelsToSkipLoad = (state = INITIAL_STATE, { modelsToSkip }) => {
-	return { ...state, modelsToSkip };
-};
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[ViewerGuiTypes.SET_PANEL_VISIBILITY]: setPanelVisibility,
@@ -198,6 +192,5 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ViewerGuiTypes.SET_COORD_VIEW_SUCCESS] : setCoordViewSuccess,
 	[ViewerGuiTypes.SET_IS_PIN_DROP_MODE_SUCCESS]: setIsPinDropModeSuccess,
 	[ViewerGuiTypes.SET_PIN_DATA]: setPinData,
-	[ViewerGuiTypes.SET_MODELS_TO_SKIP_LOAD]: setModelsToSkipLoad,
 	[ViewerGuiTypes.RESET_PANELS]: resetPanels
 });
