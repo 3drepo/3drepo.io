@@ -23,6 +23,7 @@ const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
 const utils = require("../utils");
 const db = require("../handler/db");
+const views = require("./viewpoint");
 
 const MODELS_COLL = "settings";
 
@@ -35,6 +36,7 @@ const schema = mongoose.Schema({
 	status: {type: String, default: "ok"},
 	errorReason: Object,
 	federate: Boolean,
+	defaultView: Object,
 	permissions: [{
 		_id: false,
 		user: String,
@@ -67,9 +69,25 @@ schema.set("toObject", { getters: true });
 
 schema.statics.modelCodeRegExp = /^[a-zA-Z0-9]{0,50}$/;
 
-schema.methods.updateProperties = function(updateObj) {
+schema.methods.clean = async function() {
+	const cleanedData = this.toObject();
+	if (this.defaultView) {
+		delete cleanedData.defaultView;
+		const viewData = await views.findByUID(this._dbcolOptions.account, this._dbcolOptions.model, this.defaultView, {name: 1});
+		if (viewData) {
+			cleanedData.defaultView = {id: this.defaultView, name: viewData.name};
+		}
+	}
+
+	return cleanedData;
+};
+
+schema.methods.updateProperties = async function (updateObj) {
 	Object.keys(updateObj).forEach(key => {
 		if(!updateObj[key]) {
+			if (key === "defaultView") {
+				this[key] = undefined;
+			}
 			return;
 		}
 		switch (key) {
@@ -78,7 +96,7 @@ schema.methods.updateProperties = function(updateObj) {
 					throw responseCodes.INVALID_MODEL_CODE;
 				}
 			case "unit":
-				if (Object.prototype.toString.call(updateObj[key]) === "[object String]") {
+				if (utils.isString(updateObj[key])) {
 					this.properties[key] = updateObj[key];
 				} else {
 					throw responseCodes.INVALID_ARGUMENTS;
@@ -88,7 +106,8 @@ schema.methods.updateProperties = function(updateObj) {
 				this[key] = updateObj[key];
 		}
 	});
-	return this.save();
+	await this.save();
+	return this.clean();
 };
 
 schema.methods.changePermissions = function(permissions, account = this._dbcolOptions.account) {
@@ -189,6 +208,14 @@ schema.statics.createNewSetting = function(teamspace, modelName, data) {
 	setting.name = modelName;
 	setting.desc = data.desc;
 	setting.type = data.type;
+
+	if(data.defaultView) {
+		if (utils.isUUID(data.defaultView)) {
+			setting.defaultView = data.defaultView;
+		} else {
+			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
+		}
+	}
 
 	if(data.subModels) {
 		setting.federate = true;
