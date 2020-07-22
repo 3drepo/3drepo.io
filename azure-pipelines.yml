@@ -43,3 +43,8 @@ stages:
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
+          $(Build.DefinitionName)
+          $(Build.DefinitionVersion)
+          $(Build.BuildId)
+          $(Build.BuildNumber)
+          $(Build.DefinitionName)_$(Build.DefinitionVersion)_$(Build.BuildId)_$(Build.BuildNumber)
