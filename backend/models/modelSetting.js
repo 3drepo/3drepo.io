@@ -73,9 +73,14 @@ schema.methods.clean = async function() {
 	const cleanedData = this.toObject();
 	if (this.defaultView) {
 		delete cleanedData.defaultView;
-		const viewData = await views.findByUID(this._dbcolOptions.account, this._dbcolOptions.model, this.defaultView, {name: 1});
-		if (viewData) {
-			cleanedData.defaultView = {id: this.defaultView, name: viewData.name};
+		try {
+			const viewData = await views.findByUID(this._dbcolOptions.account, this._dbcolOptions.model,
+				utils.uuidToString(this.defaultView), {name: 1});
+			if (viewData) {
+				cleanedData.defaultView = {id: this.defaultView, name: viewData.name};
+			}
+		} catch (err) {
+			// This should technically never happen.
 		}
 	}
 
@@ -83,12 +88,14 @@ schema.methods.clean = async function() {
 };
 
 schema.methods.updateProperties = async function (updateObj) {
-	Object.keys(updateObj).forEach(key => {
+	const keys = Object.keys(updateObj);
+	for(let i = 0; i < keys.length; ++i) {
+		const key = keys[i];
 		if(!updateObj[key]) {
 			if (key === "defaultView") {
 				this[key] = undefined;
 			}
-			return;
+			continue;
 		}
 		switch (key) {
 			case "code":
@@ -102,10 +109,18 @@ schema.methods.updateProperties = async function (updateObj) {
 					throw responseCodes.INVALID_ARGUMENTS;
 				}
 				break;
+			case "defaultView":
+				if (utils.isString(updateObj[key]) && utils.isUUID(updateObj[key])) {
+					const res = await views.findByUID(this._dbcolOptions.account, this._dbcolOptions.model, this.defaultView, {_id: 1});
+					this[key] = res._id;
+				} else {
+					throw responseCodes.INVALID_ARGUMENTS;
+				}
+				break;
 			default:
 				this[key] = updateObj[key];
 		}
-	});
+	}
 	await this.save();
 	return this.clean();
 };

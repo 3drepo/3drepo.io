@@ -1444,7 +1444,7 @@ function updateHeliSpeed(req, res, next) {
 }
 
 function _getModel(req) {
-
+	// FIXME: this should live in models/modelSetting.
 	let setting;
 	return ModelSetting.findById(getDbColOptions(req), req.params.model).then(_setting => {
 
@@ -1453,7 +1453,7 @@ function _getModel(req) {
 		} else {
 
 			setting = _setting;
-			setting = setting.toObject();
+			setting = setting.clean();
 			// compute permissions by user role
 
 			return ModelHelpers.getModelPermission(
