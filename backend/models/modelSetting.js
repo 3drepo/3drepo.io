@@ -74,10 +74,11 @@ schema.methods.clean = async function() {
 	if (this.defaultView) {
 		delete cleanedData.defaultView;
 		try {
+			const viewIDStr = utils.uuidToString(this.defaultView);
 			const viewData = await views.findByUID(this._dbcolOptions.account, this._dbcolOptions.model,
-				utils.uuidToString(this.defaultView), {name: 1});
+				viewIDStr, {name: 1});
 			if (viewData) {
-				cleanedData.defaultView = {id: this.defaultView, name: viewData.name};
+				cleanedData.defaultView = {id: viewIDStr, name: viewData.name};
 			}
 		} catch (err) {
 			// This should technically never happen.
