@@ -7,7 +7,7 @@ ARG NODE_GROUP=bouncer
 ARG NODE_UID=1101
 ARG NODE_GID=1102
 
-RUN cd backend && \
+RUN ls -la && pwd && cd backend && \
         yarn install --network-timeout 100000 && \
         cd ../frontend  && \
         yarn install --network-timeout 100000 && \ 
