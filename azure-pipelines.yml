@@ -43,6 +43,6 @@ stages:
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
-          $(Build.SourceBranch)
           $(Build.SourceBranchName)
           $(Build.SourceVersion)
+          $(System.PullRequest.SourceBranch)
