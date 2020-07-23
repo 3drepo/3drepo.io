@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { get } from 'lodash';
+import { get, groupBy } from 'lodash';
 import { put, select, takeLatest } from 'redux-saga/effects';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { UnityUtil } from '../../globals/unity-util';
@@ -23,11 +23,38 @@ import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
 import { DialogActions } from '../dialog';
+import { selectOverrides } from '../groups';
 import { dispatch } from '../store';
-import { selectIfcSpacesHidden } from '../tree';
+import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds, selectIfcSpacesHidden } from '../tree';
 import { ViewerGuiActions } from '../viewerGui';
 import { PRESET_VIEW } from './viewpoints.constants';
 import { ViewpointsActions, ViewpointsTypes } from './viewpoints.redux';
+
+function* groupByColor(overrides) {
+	const sharedIdnodes = Object.keys(overrides);
+	const nodes = yield select(selectGetNodesIdsFromSharedIds([{shared_ids: sharedIdnodes}]));
+	const modelsList = yield select(selectGetMeshesByIds(nodes));
+
+	return sharedIdnodes.reduce((arr, objectId, i) =>  {
+		const { teamspace, modelId } = modelsList[i] as any;
+		let colorItem = arr.find(({color}) => color === overrides[objectId]);
+
+		if (!colorItem) {
+			colorItem = { color: overrides[objectId], objects: [] };
+			arr.push(colorItem);
+		}
+
+		let sharedIdsItem =  colorItem.objects.find(({model, account}) => model === modelId && account === teamspace);
+
+		if (!sharedIdsItem) {
+			sharedIdsItem = { shared_ids: [], account: teamspace, model: modelId};
+			colorItem.objects.push(sharedIdsItem);
+		}
+
+		sharedIdsItem.shared_ids.push(objectId);
+		return arr;
+	}, []);
+}
 
 export const getThumbnailUrl = (thumbnail) => API.getAPIUrl(thumbnail);
 
@@ -51,6 +78,8 @@ export function* fetchViewpoints({ teamspace, modelId }) {
 export function* generateViewpoint(teamspace, modelId, name, withScreenshot = false) {
 	try {
 		const hideIfc = yield select(selectIfcSpacesHidden);
+		const overrides = yield select(selectOverrides);
+		const overrideGroups = yield groupByColor(overrides);
 
 		const viewpoint = yield Viewer.getCurrentViewpoint({
 			teamspace,
