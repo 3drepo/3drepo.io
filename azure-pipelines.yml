@@ -45,4 +45,3 @@ stages:
           $(tag)
           $(Build.SourceBranchName)
           $(Build.SourceVersion)
-          $(System.PullRequest.SourceBranch)
