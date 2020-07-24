@@ -25,12 +25,10 @@ import { CHAT_CHANNELS } from '../../constants/chat';
 import { DEFAULT_PROPERTIES, PRIORITIES, STATUSES } from '../../constants/issues';
 import { EXTENSION_RE } from '../../constants/resources';
 import { ROUTES } from '../../constants/routes';
-import { UnityUtil } from '../../globals/unity-util';
 import {
 	createAttachResourceComments,
 	createRemoveResourceComment
 } from '../../helpers/comments';
-import { prepareGroup } from '../../helpers/groups';
 import { prepareIssue } from '../../helpers/issues';
 import { prepareResources } from '../../helpers/resources';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
@@ -97,7 +95,6 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 			yield generateViewpoint( teamspace, model, issueData.name, !Boolean(issueData.descriptionThumbnail) ) :
 			{ viewpoint: {} };
 
-			// .substring(screenshot.indexOf(',') + 1);
 		if (issueData.descriptionThumbnail ) {
 			issue.viewpoint = {
 				...(issue.viewpoint || {}),
@@ -292,7 +289,6 @@ function* showMultipleGroups({issue, revision}) {
 			'highlighted_group_id',
 			'hidden_group_id',
 			'shown_group_id',
-			'override_groups_id'
 		]));
 
 		let objects = {} as { hidden: any[], shown: any[], objects: any[] };
@@ -303,16 +299,6 @@ function* showMultipleGroups({issue, revision}) {
 				getIssueGroup(issue, issue.viewpoint.hidden_group_id, revision),
 				getIssueGroup(issue, issue.viewpoint.shown_group_id, revision)
 			]) as any;
-
-			let overridesGroupData = null;
-
-			if (issue.viewpoint.override_groups_id) {
-				overridesGroupData = (yield Promise.all(
-					issue.viewpoint.override_groups_id.map((id) => getIssueGroup(issue, id, revision))
-				)).map(prepareGroup) ;
-
-				yield put(IssuesActions.updateIssueOverrideGroups(issue._id, overridesGroupData));
-			}
 
 			if (hiddenGroupData) {
 				objects.hidden = hiddenGroupData.objects;
@@ -375,8 +361,7 @@ function* focusOnIssue({ issue, revision }) {
 
 		const hasViewpointGroup = hasViewpoint && (
 			issue.viewpoint.highlighted_group_id ||
-			issue.viewpoint.group_id ||
-			issue.viewpoint?.override_groups_id?.length
+			issue.viewpoint.group_id
 		);
 
 		const hasGroup = issue.group_id;

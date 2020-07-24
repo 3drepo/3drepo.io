@@ -69,8 +69,7 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	setNewComment: ['newComment'],
 	saveNewScreenshot: ['teamspace', 'model', 'isNewIssue'],
 	updateSelectedIssuePin: ['position'],
-	toggleShowPins: ['showPins'],
-	updateIssueOverrideGroups: ['issueId', 'override_groups']
+	toggleShowPins: ['showPins']
 }, { prefix: 'ISSUES/' });
 
 export const INITIAL_STATE = {
@@ -246,11 +245,6 @@ const toggleShowPins = (state = INITIAL_STATE, { showPins }) => {
 	return setComponentState(state, { componentState: { showPins } });
 };
 
-const updateIssueOverrideGroups = (state = INITIAL_STATE, { issueId, override_groups }) => {
-	const issuesMap = updateIssueProps(state.issuesMap, issueId, { override_groups });
-	return { ...state, issuesMap };
-};
-
 export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.FETCH_ISSUES_SUCCESS]: fetchIssuesSuccess,
 	[IssuesTypes.FETCH_ISSUE_SUCCESS]: fetchIssueSuccess,
@@ -273,6 +267,5 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.ATTACH_RESOURCES_SUCCESS]: attachResourcesSuccess,
 	[IssuesTypes.UPDATE_RESOURCES_SUCCESS]: updateResourcesSuccess,
 	[IssuesTypes.UPDATE_SELECTED_ISSUE_PIN]: updateSelectedIssuePin,
-	[IssuesTypes.UPDATE_ISSUE_OVERRIDE_GROUPS]: updateIssueOverrideGroups,
 	[IssuesTypes.TOGGLE_SHOW_PINS]: toggleShowPins
 });

@@ -78,11 +78,9 @@ export function* fetchViewpoints({ teamspace, modelId }) {
 	}
 }
 
-export function* generateViewpoint(teamspace, modelId, name, withScreenshot = false) {
+export function* generateViewpoint(teamspace, modelId, name, withScreenshot = false, withOverrides = false) {
 	try {
 		const hideIfc = yield select(selectIfcSpacesHidden);
-		const overrides = yield select(selectOverrides);
-		const overrideGroups = yield groupByColor(overrides);
 
 		const viewpoint = yield Viewer.getCurrentViewpoint({
 			teamspace,
@@ -103,8 +101,13 @@ export function* generateViewpoint(teamspace, modelId, name, withScreenshot = fa
 
 		const objectInfo = yield Viewer.getObjectsStatus();
 
-		if (overrideGroups.length) {
-			generatedObject.viewpoint.override_groups = overrideGroups;
+		if (withOverrides) {
+			const overrides = yield select(selectOverrides);
+			const overrideGroups = yield groupByColor(overrides);
+
+			if (overrideGroups.length) {
+				generatedObject.viewpoint.override_groups = overrideGroups;
+			}
 		}
 
 		if (objectInfo && (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0)) {
@@ -249,7 +252,7 @@ export function* showViewpoint({ teamspace, modelId, view }) {
 
 export function* prepareNewViewpoint({teamspace, modelId, viewpointName}) {
 	try {
-		const newViewpoint = yield generateViewpoint(teamspace, modelId, viewpointName, true);
+		const newViewpoint = yield generateViewpoint(teamspace, modelId, viewpointName, true, true);
 		yield put(ViewpointsActions.setComponentState({ newViewpoint, activeViewpoint: null, editMode: false }));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('prepare', 'new viewpoint'));
