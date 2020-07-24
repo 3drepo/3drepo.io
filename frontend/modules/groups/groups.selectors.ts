@@ -20,6 +20,7 @@ import { createSelector } from 'reselect';
 import { getGroupOverride } from '../../helpers/colorOverrides';
 import { getTransparency, hasTransparency } from '../../helpers/colors';
 import { searchByFilters } from '../../helpers/searching';
+import { selectFocusedIssueOverrideGroups } from '../issues';
 
 export const selectGroupsDomain = (state) => ({...state.groups});
 
@@ -105,13 +106,16 @@ export const selectCriteriaFieldState = createSelector(
 );
 
 const selectOverridesDict = createSelector(
-	selectColorOverrides, selectFilteredGroups, selectComponentState, (groupOverrides, filteredGroups, componentState) => {
-		const filteredGroupsMap = filteredGroups.reduce((map, group) => {
+	selectColorOverrides, selectFilteredGroups, selectComponentState, selectFocusedIssueOverrideGroups,
+	(groupOverrides, filteredGroups, componentState, issuesGroups) => {
+		const issuesOverrides = issuesGroups.map(({_id}) => _id);
+
+		const filteredGroupsMap = filteredGroups.concat(issuesGroups).reduce((map, group) => {
 			map[group._id] = group;
 			return map;
 		} , {});
 
-		return groupOverrides.reduce((overrides, groupId) => {
+		return groupOverrides.concat(issuesOverrides).reduce((overrides, groupId) => {
 			// filter out the filtered groups and if its showing details the selected group
 			if (filteredGroupsMap[groupId] && (!componentState.showDetails || componentState.activeGroup !== groupId)) {
 				const group = filteredGroupsMap[groupId];

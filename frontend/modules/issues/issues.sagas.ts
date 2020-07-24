@@ -30,6 +30,7 @@ import {
 	createAttachResourceComments,
 	createRemoveResourceComment
 } from '../../helpers/comments';
+import { prepareGroup } from '../../helpers/groups';
 import { prepareIssue } from '../../helpers/issues';
 import { prepareResources } from '../../helpers/resources';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
@@ -290,7 +291,8 @@ function* showMultipleGroups({issue, revision}) {
 		const hasViewpointGroups = !isEmpty(pick(issue.viewpoint, [
 			'highlighted_group_id',
 			'hidden_group_id',
-			'shown_group_id'
+			'shown_group_id',
+			'override_groups_id'
 		]));
 
 		let objects = {} as { hidden: any[], shown: any[], objects: any[] };
@@ -301,6 +303,16 @@ function* showMultipleGroups({issue, revision}) {
 				getIssueGroup(issue, issue.viewpoint.hidden_group_id, revision),
 				getIssueGroup(issue, issue.viewpoint.shown_group_id, revision)
 			]) as any;
+
+			let overridesGroupData = null;
+
+			if (issue.viewpoint.override_groups_id) {
+				overridesGroupData = (yield Promise.all(
+					issue.viewpoint.override_groups_id.map((id) => getIssueGroup(issue, id, revision))
+				)).map(prepareGroup) ;
+
+				yield put(IssuesActions.updateIssueOverrideGroups(issue._id, overridesGroupData));
+			}
 
 			if (hiddenGroupData) {
 				objects.hidden = hiddenGroupData.objects;
@@ -361,7 +373,12 @@ function* focusOnIssue({ issue, revision }) {
 
 		yield put(TreeActions.showAllNodes(!hasHiddenOrShownGroup));
 
-		const hasViewpointGroup = hasViewpoint && (issue.viewpoint.highlighted_group_id || issue.viewpoint.group_id);
+		const hasViewpointGroup = hasViewpoint && (
+			issue.viewpoint.highlighted_group_id ||
+			issue.viewpoint.group_id ||
+			issue.viewpoint?.override_groups_id?.length
+		);
+
 		const hasGroup = issue.group_id;
 
 		if (hasViewpointGroup || hasGroup || hasHiddenOrShownGroup) {

@@ -371,29 +371,41 @@ class Ticket extends View {
 		systemComments.push(comment);
 	}
 
-	async  createGroup(account, model, ticket,  groupdata, idField, branch, rid) {
+	async createGroup(account, model, ticket,  groupdata, branch, rid) {
 		const data =  {
 			name: ticket.name,
 			[this.groupField]: utils.stringToUUID(ticket._id),
 			...groupdata
 		};
 
-		const group = await  Group.createGroup({account, model}, null,  data, ticket.owner, branch, rid);
+		return await Group.createGroup({account, model}, null,  data, ticket.owner, branch, rid);
+	}
+
+	async createGroupAndticketField(account, model, ticket,  groupdata, idField, branch, rid) {
+		const group = await this.createGroup(account, model, ticket,  groupdata , branch, rid);
 		ticket.viewpoint[idField] = utils.stringToUUID(group._id);
 	}
+
 	async createGroupsIfNecessary(account, model, newTicket, branch, rid) {
 		if (!newTicket.viewpoint) {
 			return;
 		}
 
 		if (newTicket.viewpoint.highlighted_group && !newTicket.viewpoint.highlighted_group_id) {
-			await this.createGroup(account, model, newTicket,  newTicket.viewpoint.highlighted_group, "highlighted_group_id", branch, rid);
-			delete newTicket.highlighted_group;
+			await this.createGroupAndticketField(account, model, newTicket,  newTicket.viewpoint.highlighted_group, "highlighted_group_id", branch, rid);
+			delete newTicket.viewpoint.highlighted_group;
 		}
 
 		if (newTicket.viewpoint.hidden_group && !newTicket.viewpoint.hidden_group_id) {
-			await this.createGroup(account, model, newTicket, newTicket.viewpoint.hidden_group, "hidden_group_id", branch, rid);
-			delete newTicket.hidden_group;
+			await this.createGroupAndticketField(account, model, newTicket, newTicket.viewpoint.hidden_group, "hidden_group_id", branch, rid);
+			delete newTicket.viewpoint.hidden_group;
+		}
+
+		if (newTicket.viewpoint.override_groups && !newTicket.viewpoint.override_groups_id) {
+			let override_groups_id =  await Promise.all(newTicket.viewpoint.override_groups.map((groupdata) => this.createGroup(account, model, newTicket, groupdata, branch, rid)));
+			override_groups_id = override_groups_id.map(({_id}) => utils.stringToUUID(_id));
+			newTicket.viewpoint["override_groups_id"] = override_groups_id;
+			delete newTicket.viewpoint.override_groups;
 		}
 	}
 

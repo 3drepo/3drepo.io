@@ -19,6 +19,7 @@ import { get, groupBy } from 'lodash';
 import { put, select, takeLatest } from 'redux-saga/effects';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { UnityUtil } from '../../globals/unity-util';
+import { hexToArray } from '../../helpers/colors';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
@@ -37,10 +38,11 @@ function* groupByColor(overrides) {
 
 	return sharedIdnodes.reduce((arr, objectId, i) =>  {
 		const { teamspace, modelId } = modelsList[i] as any;
-		let colorItem = arr.find(({color}) => color === overrides[objectId]);
+		let colorItem = arr.find(({color}) => color.join(',') === hexToArray(overrides[objectId]).join(','));
 
 		if (!colorItem) {
-			colorItem = { color: overrides[objectId], objects: [] };
+			colorItem = { color: hexToArray(overrides[objectId]), objects: [] , totalSavedMeshes: 0};
+
 			arr.push(colorItem);
 		}
 
@@ -49,6 +51,7 @@ function* groupByColor(overrides) {
 		if (!sharedIdsItem) {
 			sharedIdsItem = { shared_ids: [], account: teamspace, model: modelId};
 			colorItem.objects.push(sharedIdsItem);
+			colorItem.totalSavedMeshes ++;
 		}
 
 		sharedIdsItem.shared_ids.push(objectId);
@@ -99,6 +102,10 @@ export function* generateViewpoint(teamspace, modelId, name, withScreenshot = fa
 		}
 
 		const objectInfo = yield Viewer.getObjectsStatus();
+
+		if (overrideGroups.length) {
+			generatedObject.viewpoint.override_groups = overrideGroups;
+		}
 
 		if (objectInfo && (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0)) {
 			const { highlightedNodes, hiddenNodes } = objectInfo;
