@@ -29,6 +29,7 @@ interface IProps {
 	name: string;
 	created: number;
 	formRef?: any;
+	commentRef?: any;
 	teamspace: string;
 	comment: string;
 	commentWithMarkdown: string;
@@ -55,6 +56,7 @@ export const UserMessage = ({
 				<Footer
 					name={name}
 					formRef={props.formRef}
+					commentRef={props.commentRef}
 					created={created}
 					comment={props.comment}
 					viewpoint={viewpoint}

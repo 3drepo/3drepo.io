@@ -28,20 +28,24 @@ interface IProps {
 	created: any;
 	comment: string;
 	formRef?: any;
+	commentRef?: any;
 	viewpoint: any;
 }
 
-export const Footer = ({ name, created, formRef, comment, ...props }: IProps) => {
+export const Footer = ({ name, created, formRef, commentRef, comment, ...props }: IProps) => {
 
 	const handleReplayButtonClick = () => {
 		const commentForm = formRef.current;
+		const commentTextarea = commentRef.current.textareaRef;
 		const currentFormCommentValue = commentForm.state.values[COMMENT_FIELD_NAME];
 
 		commentForm.setFieldValue(COMMENT_FIELD_NAME, `${currentFormCommentValue}@${name} `);
+		commentTextarea.focus();
 	};
 
 	const handleQuoteButtonClick = () => {
 		const commentForm = formRef.current;
+		const commentTextarea = commentRef.current.textareaRef;
 		const currentFormCommentValue = commentForm.state.values[COMMENT_FIELD_NAME];
 		const additionalNewLine = (!currentFormCommentValue || currentFormCommentValue.endsWith(`\n`)) ? '' : `  \n`;
 		let quoteComment = '';
@@ -61,6 +65,7 @@ export const Footer = ({ name, created, formRef, comment, ...props }: IProps) =>
 		}
 
 		commentForm.setFieldValue(COMMENT_FIELD_NAME, `${currentFormCommentValue}${additionalNewLine}${quoteComment}\n\n`);
+		commentTextarea.focus();
 	};
 
 	return (
