@@ -35,7 +35,7 @@ const SUMMARY_HEIGHT = 70;
 
 export const Container = styled.div`
 	color: ${COLOR.BLACK_60};
-	background-color: ${COLOR.WHITE};
+	background-color: ${({ edit }: { edit: boolean; }) => edit ? COLOR.BLACK_6 : COLOR.WHITE};
 	overflow: hidden;
 	display: flex;
 	flex-direction: column;
