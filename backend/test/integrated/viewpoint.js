@@ -336,7 +336,7 @@ describe("Views", function () {
 				},
 				function(done) {
 					agent2.delete(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}/`)
-						.expect(400, done);
+						.expect(200, done);
 				},
 				function(done) {
 					agent2.get(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}`)
