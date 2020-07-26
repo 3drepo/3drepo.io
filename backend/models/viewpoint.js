@@ -103,7 +103,8 @@ class View {
 		}
 
 		if (viewToClean.viewpoint) {
-			if (viewToClean.viewpoint && viewToClean.viewpoint.clippingPlanes) {
+			if (viewToClean.viewpoint.clippingPlanes) {
+				console.log(viewToClean);
 				viewToClean.clippingPlanes = viewToClean.viewpoint.clippingPlanes;
 			}
 		}

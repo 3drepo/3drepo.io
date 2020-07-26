@@ -217,6 +217,7 @@ describe("Views", function () {
 				function(done) {
 					agent2.get(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}`)
 						.expect(200, function(err, res) {
+							console.log(res.body);
 							expect(res.body.clippingPlanes).to.deep.equal(teamSpace1Views[viewId].clippingPlanes);
 							expect(res.body.screenshot).to.exist;
 							expect(res.body.screenshot.thumbnail).to.equal(`${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}/thumbnail.png`);
@@ -240,6 +241,7 @@ describe("Views", function () {
 				function(done) {
 					agent2.get(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}`)
 						.expect(200, function(err, res) {
+							console.log(res.body);
 							expect(res.body.viewpoint.clippingPlanes).to.deep.equal(teamSpace1Views[viewId].viewpoint.clippingPlanes);
 
 							return done(err);
