@@ -111,6 +111,10 @@ export const selectFetchingDetailsIsPending = createSelector(
 	selectComponentState, (state) => state.fetchingDetailsIsPending
 );
 
+export const selectPostCommentIsPending = createSelector(
+		selectComponentState, (state) => state.postCommentIsPending
+);
+
 export const selectSortOrder = createSelector(
 	selectComponentState, (state) => state.sortOrder
 );

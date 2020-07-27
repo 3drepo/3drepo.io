@@ -239,6 +239,7 @@ function* closeDetails() {
 }
 
 function* createGroup({ teamspace, modelId, revision }) {
+	yield put(GroupsActions.toggleDetailsPendingState(true));
 	try {
 		const isAllOverridden = yield select(selectIsAllOverridden);
 		const currentUser = yield select(selectCurrentUser);
@@ -274,9 +275,11 @@ function* createGroup({ teamspace, modelId, revision }) {
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('create', 'group', error));
 	}
+	yield put(GroupsActions.toggleDetailsPendingState(false));
 }
 
 function* updateGroup({ teamspace, modelId, revision, groupId }) {
+	yield put(GroupsActions.toggleDetailsPendingState(true));
 	try {
 		const groupDetails = yield select(selectActiveGroupDetails);
 
@@ -304,6 +307,7 @@ function* updateGroup({ teamspace, modelId, revision, groupId }) {
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('update', 'group', error));
 	}
+	yield put(GroupsActions.toggleDetailsPendingState(false));
 }
 
 function* setNewGroup() {

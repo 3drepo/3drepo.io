@@ -111,6 +111,7 @@ const createGroup = (risk, objectInfo, teamspace, model, revision) => {
 };
 
 function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ignoreViewer = false  }) {
+	yield put(RisksActions.toggleDetailsPendingState(true));
 	try {
 		const myJob = yield select(selectMyJob);
 		const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
@@ -169,6 +170,7 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('save', 'risk', error));
 	}
+	yield put(RisksActions.toggleDetailsPendingState(false));
 }
 
 function* updateRisk({ teamspace, modelId, riskData }) {
@@ -214,6 +216,7 @@ function* updateNewRisk({ newRisk }) {
 }
 
 function* postComment({ teamspace, modelId, riskData, finishSubmitting }) {
+	yield put(RisksActions.togglePostCommentPendingState(true));
 	try {
 		const { _id, account, model } = yield select(selectActiveRiskDetails);
 		const viewpoint = yield Viewer.getCurrentViewpoint({ teamspace: account, model });
@@ -239,6 +242,7 @@ function* postComment({ teamspace, modelId, riskData, finishSubmitting }) {
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('post', 'risk comment', error));
 	}
+	yield put(RisksActions.togglePostCommentPendingState(false));
 }
 
 function* removeComment({ teamspace, modelId, riskData }) {

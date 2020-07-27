@@ -69,6 +69,7 @@ interface IProps {
 	showScreenshotDialog: (config: any) => void;
 	showConfirmDialog: (config: any) => void;
 	dialogId?: string;
+	postCommentIsPending?: boolean;
 }
 
 interface IState {
@@ -186,6 +187,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				messagesContainerRef={this.messageContainerRef}
 				previewWrapperRef={this.containerRef}
 				horizontal={this.props.horizontal}
+				fetchingDetailsIsPending={this.props.fetchingDetailsIsPending}
+				postCommentIsPending={this.props.postCommentIsPending}
 			/>
 		</ViewerPanelFooter>
 	));

@@ -50,6 +50,7 @@ interface IProps {
 	setState: (componentState) => void;
 	setCriteriaState: (criteriaState) => void;
 	resetToSavedSelection: () => void;
+	isPending: boolean;
 }
 interface IState {
 	isFormValid: boolean;
@@ -228,6 +229,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 					mini
 					aria-label="Save group"
 					disabled={!this.isFormValid || !this.props.canUpdate}
+					pending={this.props.isPending}
 				>
 					<SaveIcon />
 				</ViewerPanelButton>

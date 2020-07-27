@@ -39,6 +39,7 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	setActiveIssue: ['issue', 'revision', 'ignoreViewer'],
 	togglePendingState: ['isPending'],
 	toggleDetailsPendingState: ['isPending'],
+	togglePostCommentPendingState: ['isPending'],
 	subscribeOnIssueChanges: ['teamspace', 'modelId'],
 	unsubscribeOnIssueChanges: ['teamspace', 'modelId'],
 	focusOnIssue: ['issue', 'revision'],
@@ -85,6 +86,7 @@ export const INITIAL_STATE = {
 		filteredRisks: [],
 		showPins: true,
 		fetchingDetailsIsPending: false,
+		postCommentIsPending: false,
 		isImportingBCF: false,
 		showSubmodelIssues: false,
 		sortOrder: 'desc',
@@ -107,6 +109,10 @@ export const togglePendingState = (state = INITIAL_STATE, { isPending }) => ({ .
 
 export const toggleDetailsPendingState = (state = INITIAL_STATE, { isPending }) => {
 	return setComponentState(state, { componentState: { fetchingDetailsIsPending: isPending } });
+};
+
+export const togglePostCommentPendingState = (state = INITIAL_STATE, { isPending }) => {
+	return setComponentState(state, { componentState: { postCommentIsPending: isPending } });
 };
 
 export const toggleIsImportingBcf = (state = INITIAL_STATE, { isImporting }) => {
@@ -248,6 +254,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.SAVE_ISSUE_SUCCESS]: saveIssueSuccess,
 	[IssuesTypes.TOGGLE_PENDING_STATE]: togglePendingState,
 	[IssuesTypes.TOGGLE_DETAILS_PENDING_STATE]: toggleDetailsPendingState,
+	[IssuesTypes.TOGGLE_POST_COMMENT_PENDING_STATE]: togglePostCommentPendingState,
 	[IssuesTypes.TOGGLE_IS_IMPORTING_BCF]: toggleIsImportingBcf,
 	[IssuesTypes.CREATE_COMMENT_SUCCESS]: createCommentSuccess,
 	[IssuesTypes.CREATE_COMMENTS_SUCCESS]: createCommentsSuccess,

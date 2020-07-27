@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -27,6 +27,7 @@ import {
 	selectFailedToLoad,
 	selectFetchingDetailsIsPending,
 	selectNewComment,
+	selectPostCommentIsPending,
 	IssuesActions,
 } from '../../../../../../modules/issues';
 import { selectJobsList, selectMyJob } from '../../../../../../modules/jobs';
@@ -47,7 +48,8 @@ const mapStateToProps = createStructuredSelector({
 	currentUser: selectUsername,
 	permissions: selectPermissions,
 	topicTypes: selectTopicTypes,
-	failedToLoad: selectFailedToLoad
+	failedToLoad: selectFailedToLoad,
+	postCommentIsPending: selectPostCommentIsPending,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
