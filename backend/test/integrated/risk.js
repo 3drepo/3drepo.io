@@ -878,6 +878,7 @@ describe("Risks", function () {
 					"clippingPlanes":[]
 				}
 			};
+
 			async.series([
 				function(done) {
 					agent.post(`/${username}/${model}/risks`)
