@@ -805,7 +805,7 @@ describe("Issues", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`)
 						.expect(200, function(err, res) {
-							const newViewpoint = { ...oldViewpoint };
+							const newViewpoint = { ...oldViewpoint, ...data.viewpoint };
 							newViewpoint.guid = res.body.viewpoint.guid;
 							newViewpoint.screenshot_ref = res.body.viewpoint.screenshot_ref;
 
