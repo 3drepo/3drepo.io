@@ -20,6 +20,7 @@ import filesize from 'filesize';
 import { isEmpty, isEqual, map, omit, pick } from 'lodash';
 import * as queryString from 'query-string';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
+
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { RISK_LEVELS } from '../../constants/risks';
 import { ROUTES } from '../../constants/routes';
@@ -449,7 +450,8 @@ function* closeDetails() {
 
 const onUpdateEvent = (updatedRisk) => {
 	const jobs = selectJobsList(getState());
-	if (updatedRisk.mitigation_status === RISK_LEVELS.AGREED_FULLY) {
+
+	if ([RISK_LEVELS.AGREED_FULLY, RISK_LEVELS.VOID].includes(updatedRisk.mitigation_status)) {
 		dispatch(RisksActions.showCloseInfo(updatedRisk._id));
 		setTimeout(() => {
 			dispatch(RisksActions.saveRiskSuccess(prepareRisk(updatedRisk, jobs)));

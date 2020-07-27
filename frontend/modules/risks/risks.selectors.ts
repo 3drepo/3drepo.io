@@ -92,7 +92,7 @@ export const selectSelectedFilters = createSelector(
 export const selectFilteredRisks = createSelector(
 	selectRisks, selectSelectedFilters, (risks, selectedFilters) => {
 		const returnHiddenRisk = selectedFilters.length && selectedFilters
-			.some(({ value: { value } }) => value === RISK_LEVELS.AGREED_FULLY);
+			.some(({ value: { value } }) => [RISK_LEVELS.AGREED_FULLY, RISK_LEVELS.VOID].includes(value));
 
 		return searchByFilters(risks, selectedFilters, returnHiddenRisk);
 	}
