@@ -273,6 +273,12 @@ class Ticket {
 				data.thumbnail = data.viewpoint.thumbnail;
 				delete data.viewpoint.thumbnail;
 
+				// if a field have the same value shouldnt update the property
+				if (_.isEqual(oldTicket["viewpoint"], data["viewpoint"])) {
+					delete data["viewpoint"];
+					return;
+				}
+
 				const comment = this.createSystemComment(
 					account,
 					model,
@@ -284,9 +290,13 @@ class Ticket {
 					data.viewpoint.screenshot_ref);
 
 				systemComments.push(comment);
-			}
 
-			this.handleFieldUpdate(account, model, sessionId, id, user, "viewpoint", oldTicket, data, systemComments);
+				if (!_.isEqual(_.omit(oldTicket.viewpoint, ["screenshot_ref"]), _.omit(data.viewpoint, ["screenshot_ref"]))) {
+					this.handleFieldUpdate(account, model, sessionId, id, user, "viewpoint", oldTicket, data, systemComments);
+				}
+			} else {
+				this.handleFieldUpdate(account, model, sessionId, id, user, "viewpoint", oldTicket, data, systemComments);
+			}
 		}
 
 		await newViewpoint;
