@@ -902,6 +902,7 @@ describe("Risks", function () {
 							const newViewpoint = { ...oldViewpoint, ...data.viewpoint };
 							newViewpoint.guid = res.body.viewpoint.guid;
 							newViewpoint.screenshot_ref = res.body.viewpoint.screenshot_ref;
+							delete newViewpoint.screenshot;
 
 							expect(res.body.viewpoint.screenshot_ref).to.not.equal(screenshotRef);
 							expect(res.body.comments[0].action.property).to.equal("screenshot");

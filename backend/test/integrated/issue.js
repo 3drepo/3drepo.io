@@ -741,6 +741,7 @@ describe("Issues", function () {
 						.expect(200, function(err, res) {
 							const newViewpoint = { ...oldViewpoint, ...data.viewpoint };
 							newViewpoint.guid = res.body.viewpoint.guid;
+							delete newViewpoint.screenshot;
 
 							expect(res.body.viewpoint.up).to.deep.equal(data.viewpoint.up);
 							expect(res.body.viewpoint.position).to.deep.equal(data.viewpoint.position);
