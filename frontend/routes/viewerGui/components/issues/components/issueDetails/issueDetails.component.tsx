@@ -17,6 +17,8 @@
 
 import React, { Fragment } from 'react';
 
+import { merge } from 'lodash';
+
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { canComment } from '../../../../../../helpers/issues';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
@@ -356,8 +358,9 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public handleUpdateScreenshot = (screenshot, disableViewpointSuggestion: boolean) => {
-		const { teamspace, model, updateIssue } = this.props;
+	public handleUpdateScreenshot =
+		async (screenshot, disableViewpointSuggestion = false, forceViewpointUpdate = false) => {
+		const { teamspace, model, updateIssue, viewer, disableViewer } = this.props;
 
 		if (this.isNewIssue) {
 			this.props.setState({ newIssue: {
@@ -366,62 +369,65 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				}});
 		} else {
 			if (screenshot) {
-				if (!disableViewpointSuggestion) {
-					this.handleViewpointUpdateSuggest();
-				}
+				const viewpoint = { screenshot: screenshot.replace('data:image/png;base64,', '') };
 
-				updateIssue(teamspace, model, {
-					viewpoint: { screenshot: screenshot.replace('data:image/png;base64,', '') }
-				});
+				if (!disableViewpointSuggestion && !disableViewer) {
+					this.handleViewpointUpdateSuggest(viewpoint);
+				} else {
+					const updatedViewpoint = forceViewpointUpdate ? await viewer.getCurrentViewpoint({ teamspace, model }) : {};
+					updateIssue(teamspace, model, {
+						viewpoint: merge(viewpoint, updatedViewpoint),
+					});
+				}
 			}
 		}
 	}
 
-	public handleTakeScreenshot = (disableViewpointSuggestion: boolean) => {
+	public handleTakeScreenshot = (disableViewpointSuggestion: boolean, forceViewpointUpdate) => {
 		const { showScreenshotDialog, viewer } = this.props;
 
 		showScreenshotDialog({
 			sourceImage: viewer.getScreenshot(),
-			onSave: (screenshot) => this.handleUpdateScreenshot(screenshot, disableViewpointSuggestion),
+			onSave: (screenshot) => this.handleUpdateScreenshot(screenshot, disableViewpointSuggestion, forceViewpointUpdate),
 			template: ScreenshotDialog,
 			notFullScreen: true,
 		});
 	}
 
-	public handleViewpointUpdateSuggest = () => {
-		const { showConfirmDialog } = this.props;
+	public handleViewpointUpdateSuggest = (viewpoint) => {
+		const { showConfirmDialog, teamspace, model, updateIssue, viewer } = this.props;
 		showConfirmDialog({
 			title: 'Save Viewpoint?',
 			content: `
 				Would you like to update the viewpoint to your current position?
 			`,
 			onConfirm: async () => {
-				await this.handleViewpointUpdate();
-			}
+				await this.handleViewpointUpdate(viewpoint);
+			},
+			onCancel: () => updateIssue(teamspace, model, { viewpoint }),
 		});
 	}
 
-	public handleViewpointUpdate = async () => {
+	public handleViewpointUpdate = async (updatedViewpoint = {}) => {
 		const { teamspace, model, updateIssue, viewer } = this.props;
 
 		const viewpoint = await viewer.getCurrentViewpoint({ teamspace, model });
 
 		if (viewpoint.position) {
-			updateIssue(teamspace, model, { viewpoint });
+			updateIssue(teamspace, model, { viewpoint: merge(viewpoint, updatedViewpoint) });
 		}
 	}
 
-	public onUpdateIssueViewpoint = async () => {
-		await this.handleViewpointUpdate();
-
+	public onUpdateIssueViewpoint = () => {
 		this.props.showConfirmDialog({
 			title: 'Save Screenshot?',
 			content: `
 				Would you like to create a new screenshot?
 			`,
 			onConfirm: () => {
-				this.handleTakeScreenshot(true);
-			}
+				this.handleTakeScreenshot(true, true);
+			},
+			onCancel: async () => await this.handleViewpointUpdate()
 		});
 	}
 
