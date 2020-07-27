@@ -19,6 +19,7 @@ import React from 'react';
 
 import Tooltip from '@material-ui/core/Tooltip';
 import ImageIcon from '@material-ui/icons/Image';
+import { noop } from 'lodash';
 
 import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../../helpers/rendering';
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
@@ -40,15 +41,17 @@ interface IProps {
 	onUploadImage?: () => void;
 	disabled?: boolean;
 	disableScreenshot?: boolean;
+	close?: (e) => void;
 }
 
-const UploadImage = ({ onUploadScreenshot, onShowScreenshotDialog, asMenuItem = false, ...props }) => {
+const UploadImage = ({ onUploadScreenshot, onShowScreenshotDialog, close = noop, asMenuItem = false, ...props }) => {
 	const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-	const resetFileInput = () => {
+	const resetFileInput = (e) => {
 		if (fileInputRef.current) {
 			fileInputRef.current.value = '';
 		}
+		close(e);
 	};
 
 	const handleFileUpload = (event) => {
@@ -59,10 +62,10 @@ const UploadImage = ({ onUploadScreenshot, onShowScreenshotDialog, asMenuItem = 
 			onShowScreenshotDialog({
 				sourceImage: reader.result,
 				onSave: (screenshot) => {
-					onUploadScreenshot(screenshot, true);
-					resetFileInput();
+					onUploadScreenshot(screenshot, false);
+					resetFileInput(event);
 				},
-				onCancel: () => resetFileInput(),
+				onCancel: () => resetFileInput(event),
 				template: ScreenshotDialog,
 				notFullScreen: true,
 			});
@@ -73,9 +76,10 @@ const UploadImage = ({ onUploadScreenshot, onShowScreenshotDialog, asMenuItem = 
 
 	const fileInvoker = <FileUploadInvoker id="file-upload" ref={fileInputRef} onChange={handleFileUpload} />;
 
-	const handleOnClickButton = () => {
+	const handleOnClickButton = (e) => {
 		if (fileInputRef.current) {
 			fileInputRef.current.click();
+			close(e);
 		}
 	};
 
@@ -97,17 +101,23 @@ const UploadImage = ({ onUploadScreenshot, onShowScreenshotDialog, asMenuItem = 
 	);
 };
 
-const CreateScreenshot = ({ disableScreenshot, onTakeScreenshot }) => (
-	<>
-		{renderWhenTrue(() => (
-			<StyledListItem button onClick={() => onTakeScreenshot(false)}>
-				<StyledItemText>
-					Create Screenshot...
-				</StyledItemText>
-			</StyledListItem>
-		))(!disableScreenshot)}
-	</>
-);
+const CreateScreenshot = ({ disableScreenshot, onTakeScreenshot, ...props }) => {
+	const handleOnClick = (e) => {
+		onTakeScreenshot(false);
+		props.close(e);
+	};
+	return (
+		<>
+			{renderWhenTrue(() => (
+					<StyledListItem button onClick={handleOnClick}>
+						<StyledItemText>
+							Create Screenshot...
+						</StyledItemText>
+					</StyledListItem>
+			))(!disableScreenshot)}
+		</>
+	);
+};
 
 export const UpdateImageButton = ({ hasImage, disabled, ...props }: IProps) => {
 	const imageLabel = !hasImage ? 'Add Image' : 'Edit Image';
@@ -134,14 +144,16 @@ export const UpdateImageButton = ({ hasImage, disabled, ...props }: IProps) => {
 							{imageLabel}
 						</ContainedButton>
 					)}
-					renderContent={() => (
+					renderContent={({ close }) => (
 						<MenuList>
 							<CreateScreenshot
+								close={close}
 								disableScreenshot={props.disableScreenshot}
 								onTakeScreenshot={props.onTakeScreenshot}
 							/>
 							<UploadImage
 								asMenuItem
+								close={close}
 								onShowScreenshotDialog={props.onShowScreenshotDialog}
 								onUploadScreenshot={props.onUploadScreenshot}
 							/>

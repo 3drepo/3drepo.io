@@ -24,7 +24,7 @@ import { StyledButton } from './containedButton.styles';
 interface IProps extends ButtonProps {
 	children: React.ReactNode;
 	icon?: any;
-	onClick?: () => void;
+	onClick?: (e) => void;
 }
 
 export const ContainedButton = ({ children, icon, onClick, ...props }: IProps) => {
