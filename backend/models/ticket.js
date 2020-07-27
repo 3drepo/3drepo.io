@@ -347,7 +347,7 @@ class Ticket extends View {
 			throw responseCodes.INVALID_ARGUMENTS;
 		}
 
-		// if a field have the same value shouldnt update the property
+		// do not update the property if value of field unchanged
 		if (_.isEqual(oldTicket[field], data[field])) {
 			delete data[field];
 			return;
@@ -406,6 +406,15 @@ class Ticket extends View {
 		// const sessionId = newTicket.sessionId;
 		if (!newTicket.name) {
 			return Promise.reject({ resCode: responseCodes.INVALID_ARGUMENTS });
+		}
+
+		// Sets the ticket number
+		const coll = await this.getCollection(account, model);
+		try {
+			const tickets = await coll.find({}, {number: 1}).sort({ number: -1 }).limit(1).toArray();
+			newTicket.number = (tickets.length > 0) ? tickets[0].number + 1 : 1;
+		} catch(e) {
+			newTicket.number = 1;
 		}
 
 		Object.keys(newTicket).forEach((key) => {
@@ -467,10 +476,7 @@ class Ticket extends View {
 
 		newTicket = this.filterFields(newTicket, ["viewpoint", "revId"]);
 
-		const [settings, coll] = await Promise.all([
-			ModelSetting.findById({ account, model }, model),
-			this.getCollection(account, model)
-		]);
+		const settings = await ModelSetting.findById({ account, model }, model);
 
 		await coll.insert(newTicket);
 		newTicket.typePrefix = newTicket.typePrefix || settings.type || "";
@@ -636,6 +642,46 @@ class Ticket extends View {
 		const tickets = await this.findByModelName(account, model, branch, rid, undefined, projection, ids, false);
 		reportGen.addEntries(tickets);
 		return reportGen.generateReport(res);
+	}
+
+	async addComment(account, model, id, user, data, sessionId) {
+		// 1. creates a comment and gets the result ( comment + references)
+		const commentResult = await Comment.addComment(account, model, this.collName, id, user, data);
+
+		// 2 get referenced ticket numbers
+		const ticketNumbers = commentResult.ticketRefs;
+
+		// 3. Get tickets from number
+		const ticketsColl = await this.getCollection(account, model);
+		// 4 Adding the comment id to get its number and to not make 2 queries to the database
+		const res = await ticketsColl.find({ $or: [{ number: {$in: ticketNumbers}}, {_id : stringToUUID(id)}]}).toArray();
+
+		// 5. Create system comments promise updates for those tickets that were referenced
+		const ticketsCommentsUpdates =  [];
+
+		// 6. Find the number of the ticket that made the reference
+		const referenceNumber = res.find(({_id}) => uuidToString(_id) === id).number;
+
+		res.forEach((ticket)  => {
+			if (ticket.number === referenceNumber) {
+				return;
+			}
+
+			// 7. Create the system comment
+			const systemComment = this.createSystemComment(account, model, sessionId, ticket._id, user, this.collName + "_referenced", null, referenceNumber);
+			const comments = (ticket.comments || []).map(c=> {
+				c.sealed = true;
+				return c;
+			}).concat([systemComment]);
+
+			// 8. Add update promise to updates array
+			ticketsCommentsUpdates.push(ticketsColl.update({_id: ticket._id}, { $set: { comments }}));
+		});
+
+		// 9. update referenced tickets with new system comments
+		await Promise.all(ticketsCommentsUpdates);
+
+		return commentResult;
 	}
 
 	async addRefs(account, model, id, username, sessionId, refs) {

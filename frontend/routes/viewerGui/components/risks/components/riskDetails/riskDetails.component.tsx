@@ -265,6 +265,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		const riskData = {
 			_id: this.riskData._id,
 			rev_id: this.riskData.rev_id,
+			riskNumber: this.riskData.number,
 			commentIndex: this.riskData.comments.length - 1 - index,
 			guid
 		};

@@ -50,6 +50,7 @@ const fieldTypes = {
 	"mitigation_status": "[object String]",
 	"mitigation_type": "[object String]",
 	"name": "[object String]",
+	"number": "[object Number]",
 	"owner": "[object String]",
 	"position": "[object Array]",
 	"residual_consequence": "[object Number]",

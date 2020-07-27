@@ -117,7 +117,7 @@ class MitigationCommentGenerator extends TextCommentGenerator {
 
 const identifyReferences = (comment) => {
 	const userRefs = new Set();
-	const issueRefs =  new Set();
+	const ticketRefs =  new Set();
 
 	if (comment) {
 		let inQuotes = false;
@@ -131,13 +131,13 @@ const identifyReferences = (comment) => {
 				const users = line.match(/@\S*/g);
 				users && users.forEach((x) => userRefs.add(x.substr(1)));
 
-				const issues = line.match(/#\d+/g);
-				issues && issues.forEach((x) => issueRefs.add(parseInt(x.substr(1),10)));
+				const tickets = line.match(/#\d+/g);
+				tickets && tickets.forEach((x) => ticketRefs.add(parseInt(x.substr(1),10)));
 			}
 		});
 	}
 
-	return { userRefs: Array.from(userRefs), issueRefs: Array.from(issueRefs) };
+	return { userRefs: Array.from(userRefs), ticketRefs: Array.from(ticketRefs) };
 
 };
 
