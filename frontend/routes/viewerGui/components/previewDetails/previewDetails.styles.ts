@@ -166,7 +166,7 @@ const unexpandedStyles  = css`
 `;
 
 const expandedStyles = css`
-	overflow: auto;
+	overflow-y:scroll;
 	position: static;
 
 	${MessageListContainer} {
