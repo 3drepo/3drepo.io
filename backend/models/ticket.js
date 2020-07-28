@@ -654,13 +654,13 @@ class Ticket extends View {
 		// 3. Get tickets from number
 		const ticketsColl = await this.getCollection(account, model);
 		// 4 Adding the comment id to get its number and to not make 2 queries to the database
-		const res = await ticketsColl.find({ $or: [{ number: {$in: ticketNumbers}}, {_id : stringToUUID(id)}]}).toArray();
+		const res = await ticketsColl.find({ $or: [{ number: {$in: ticketNumbers}}, {_id : utils.stringToUUID(id)}]}).toArray();
 
 		// 5. Create system comments promise updates for those tickets that were referenced
 		const ticketsCommentsUpdates =  [];
 
 		// 6. Find the number of the ticket that made the reference
-		const referenceNumber = res.find(({_id}) => uuidToString(_id) === id).number;
+		const referenceNumber = res.find(({_id}) => utils.uuidToString(_id) === id).number;
 
 		res.forEach((ticket)  => {
 			if (ticket.number === referenceNumber) {

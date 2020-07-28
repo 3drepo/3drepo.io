@@ -27,10 +27,7 @@ const ModelSetting = require("../models/modelSetting");
 const BCF = require("./bcf");
 const Ticket = require("./ticket");
 
-const Comment = require("./comment");
-
 const C = require("../constants");
-const { stringToUUID, uuidToString } = require("../utils");
 
 const fieldTypes = {
 	"_id": "[object Object]",

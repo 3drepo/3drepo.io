@@ -1857,7 +1857,7 @@ describe("Issues", function () {
 				login(agent, altUser, password),
 				fetchNotification(agent),
 				(notifications, next) => {
-					expect(notifications, 'There shouldnt be any notifications').to.be.an("array").and.to.have.length(0);
+					expect(notifications, 'There should not be any notifications').to.be.an("array").and.to.have.length(0);
 					next();
 				},
 			],
@@ -1903,7 +1903,7 @@ describe("Issues", function () {
 		const testForNoComment = (id, done) => {
 			agent.get(`/${teamspace}/${model}/issues/${id}`).expect(200, function(err , res) {
 				const comments = res.body.comments;
-				expect(comments, 'There shouldnt be a comment').to.be.an("array").and.to.have.length(0);
+				expect(comments, 'There should not be a comment').to.be.an("array").and.to.have.length(0);
 				return done(err);
 			});
 		};
@@ -1983,7 +1983,7 @@ describe("Issues", function () {
 			], done);
 		});
 
-		it("shouldnt  create a system message when the issue that has been referenced is part of a quote", function(done) {
+		it("should not create a system message when the issue that has been referenced is part of a quote", function(done) {
 			const comment = {comment : `> look at issue  #${issues[4].number}
 			and #${issues[5].number}
 			
