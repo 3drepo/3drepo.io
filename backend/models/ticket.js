@@ -668,7 +668,8 @@ class Ticket extends View {
 			}
 
 			// 7. Create the system comment
-			const systemComment = this.createSystemComment(account, model, sessionId, ticket._id, user, this.collName + "_referenced", null, referenceNumber);
+			const property = this.collName.slice(0, -1) + "_referenced";
+			const systemComment = this.createSystemComment(account, model, sessionId, ticket._id, user, property, null, referenceNumber);
 			const comments = (ticket.comments || []).map(c=> {
 				c.sealed = true;
 				return c;
