@@ -24,7 +24,7 @@ import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
 import { DialogActions } from '../dialog';
-import { selectOverrides } from '../groups';
+import {  selectAllOverridesDict, GroupsActions } from '../groups';
 import { dispatch } from '../store';
 import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds, selectIfcSpacesHidden } from '../tree';
 import { ViewerGuiActions } from '../viewerGui';
@@ -34,10 +34,19 @@ import { ViewpointsActions, ViewpointsTypes } from './viewpoints.redux';
 function* groupByColor(overrides) {
 	const sharedIdnodes = Object.keys(overrides);
 	const nodes = yield select(selectGetNodesIdsFromSharedIds([{shared_ids: sharedIdnodes}]));
-	const modelsList = yield select(selectGetMeshesByIds(nodes));
+
+	const modelsDict = (yield select(selectGetMeshesByIds(nodes))).reduce((dict, meshesByModel) => {
+		const { teamspace, modelId } = meshesByModel;
+		const model = { teamspace, modelId};
+		return meshesByModel.meshes.reduce((d, mesh) => {
+			const index = nodes.indexOf(mesh);
+			d[sharedIdnodes[index]] = model;
+			return d;
+		}, dict);
+	}, {});
 
 	return sharedIdnodes.reduce((arr, objectId, i) =>  {
-		const { teamspace, modelId } = modelsList[i] as any;
+		const { teamspace, modelId } = modelsDict[objectId];
 		let colorItem = arr.find(({color}) => color.join(',') === hexToArray(overrides[objectId]).join(','));
 
 		if (!colorItem) {
@@ -102,8 +111,8 @@ export function* generateViewpoint(teamspace, modelId, name, withScreenshot = fa
 		const objectInfo = yield Viewer.getObjectsStatus();
 
 		if (withOverrides) {
-			const overrides = yield select(selectOverrides);
-			const overrideGroups = yield groupByColor(overrides);
+			const overrides = yield select(selectAllOverridesDict);
+			const overrideGroups = yield groupByColor(overrides.colors);
 
 			if (overrideGroups.length) {
 				generatedObject.viewpoint.override_groups = overrideGroups;
@@ -136,8 +145,9 @@ export function* generateViewpoint(teamspace, modelId, name, withScreenshot = fa
 
 export function* createViewpoint({teamspace, modelId, viewpoint}) {
 	try {
-		const {data: {_id}} = yield API.createModelViewpoint(teamspace, modelId, viewpoint);
+		const {data: {_id, viewpoint: viewpointData}} = yield API.createModelViewpoint(teamspace, modelId, viewpoint);
 		viewpoint._id = _id;
+		viewpoint.viewpoint = { ...viewpointData, screenshot: viewpoint.viewpoint.screenshot} ;
 
 		yield put(ViewpointsActions.createViewpointSuccess(viewpoint));
 	} catch (error) {
@@ -242,6 +252,7 @@ export function* setCameraOnViewpoint({ teamspace, modelId, view }) {
 
 export function* showViewpoint({ teamspace, modelId, view }) {
 	try {
+		yield put(GroupsActions.clearColorOverrides());
 		yield put(ViewpointsActions.setComponentState({ activeViewpoint: view }));
 		yield put(ViewpointsActions.setCameraOnViewpoint(teamspace, modelId, view));
 	} catch (error) {

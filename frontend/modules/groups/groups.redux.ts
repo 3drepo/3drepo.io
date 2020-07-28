@@ -37,6 +37,7 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	clearSelectionHighlights: ['shouldClearTree'],
 	addColorOverride: ['groupId'],
 	removeColorOverride: ['groupId'],
+	clearColorOverrides: [],
 	setColorOverrides: ['groupIds'],
 	toggleColorOverride: ['groupId'],
 	setOverrideAll: ['overrideAll'],
@@ -252,6 +253,11 @@ const resetComponentState = (state = INITIAL_STATE) => {
 	return { ...state, componentState: INITIAL_STATE.componentState };
 };
 
+const clearColorOverrides = (state = INITIAL_STATE) => {
+	const componentState = { ...state.componentState, allOverridden: false };
+	return { ...state, colorOverrides: [], componentState};
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[GroupsTypes.FETCH_GROUPS_SUCCESS]: fetchGroupsSuccess,
 	[GroupsTypes.TOGGLE_PENDING_STATE]: togglePendingState,
@@ -267,5 +273,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[GroupsTypes.SET_CRITERIA_FIELD_STATE]: setCriteriaFieldState,
 	[GroupsTypes.SHOW_UPDATE_INFO]: showUpdateInfo,
 	[GroupsTypes.RESET_COMPONENT_STATE]: resetComponentState,
+	[GroupsTypes.CLEAR_COLOR_OVERRIDES]: clearColorOverrides,
 	[GroupsTypes.SET_OVERRIDE_ALL]: setOverrideAll
 });

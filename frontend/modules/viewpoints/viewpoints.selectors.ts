@@ -16,6 +16,8 @@
  */
 import { values } from 'lodash';
 import { createSelector } from 'reselect';
+import { getGroupOverride } from '../../helpers/colorOverrides';
+import { hasTransparency } from '../../helpers/colors';
 
 export const selectViewpointsDomain = (state) => ({...state.viewpoints});
 
@@ -49,4 +51,32 @@ export const selectSearchEnabled = createSelector(
 
 export const selectEditMode = createSelector(
 	selectComponentState, (state) => state.editMode
+);
+
+export const selectOverridesDict = createSelector(
+	selectActiveViewpoint, (viewpoint) =>  {
+		if ( !Boolean(viewpoint?.viewpoint?.override_groups?.length)) {
+			return {};
+		}
+
+		const groups = viewpoint.viewpoint.override_groups ;
+
+		return groups.reduce((overrides, group) => {
+			getGroupOverride(overrides.colors, group, group.color);
+
+			if (hasTransparency(group.color)) {
+				getGroupOverride(overrides.transparencies, group, hasTransparency(group.color));
+			}
+
+			return overrides;
+		}, {colors: {}, transparencies: {} });
+	}
+);
+
+export const selectOverrides = createSelector(
+	selectOverridesDict, (overrides) => overrides?.colors || {}
+);
+
+export const selectTransparencies = createSelector(
+	selectOverridesDict, (overrides) => overrides?.transparencies || {}
 );

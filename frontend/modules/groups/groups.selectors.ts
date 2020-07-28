@@ -105,7 +105,7 @@ export const selectCriteriaFieldState = createSelector(
 	selectComponentState, (state) => state.criteriaFieldState
 );
 
-const selectOverridesDict = createSelector(
+export const selectAllOverridesDict = createSelector(
 	selectColorOverrides, selectFilteredGroups, selectComponentState, selectFocusedIssueOverrideGroups,
 	(groupOverrides, filteredGroups, componentState, issuesGroups) => {
 		const issuesOverrides = issuesGroups.map(({_id}) => _id);
@@ -117,7 +117,7 @@ const selectOverridesDict = createSelector(
 
 		return groupOverrides.concat(issuesOverrides).reduce((overrides, groupId) => {
 			// filter out the filtered groups and if its showing details the selected group
-			if (filteredGroupsMap[groupId] && (!componentState.showDetails || componentState.activeGroup !== groupId)) {
+			if (filteredGroupsMap[groupId]  && !componentState.showDetails) {
 				const group = filteredGroupsMap[groupId];
 				getGroupOverride(overrides.colors, group, group.color);
 
@@ -127,6 +127,21 @@ const selectOverridesDict = createSelector(
 			}
 			return overrides;
 		}, {colors: {}, transparencies: {} });
+	}
+);
+
+export const selectOverridesDict = createSelector(
+	selectAllOverridesDict, selectComponentState, (overrides, { activeGroup}) => {
+		if (!activeGroup) {
+			return overrides;
+		}
+
+		const filtered = { colors: {} , transparencies: {}};
+		filtered.colors = {...overrides.color};
+		filtered.transparencies = {...overrides.transparencies};
+		delete filtered.colors[activeGroup];
+		delete filtered.transparencies[activeGroup];
+		return filtered;
 	}
 );
 

@@ -17,6 +17,7 @@
 
 import { cloneDeep, keyBy } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
+import { prepareGroup } from '../../helpers/groups';
 
 export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createActions({
 	setPendingState: ['pendingState'],
@@ -64,14 +65,21 @@ const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
 	return { ...state, isPending: pendingState };
 };
 
+const prepareViewpointGroups = (viewpoint) => {
+	if (Boolean(viewpoint.viewpoint.override_groups?.length)) {
+		viewpoint.viewpoint.override_groups = viewpoint.viewpoint.override_groups.map(prepareGroup);
+	}
+	return viewpoint;
+};
+
 const fetchViewpointsSuccess = (state = INITIAL_STATE, { viewpoints = [] }) => {
-	const viewpointsMap = keyBy(viewpoints, '_id');
+	const viewpointsMap = keyBy(viewpoints.map(prepareViewpointGroups), '_id');
 	return { ...state, viewpointsMap };
 };
 
 const createViewpointSuccess = (state = INITIAL_STATE, {viewpoint}) => {
 	const viewpointsMap = cloneDeep(state.viewpointsMap);
-	viewpointsMap[viewpoint._id] = viewpoint ;
+	viewpointsMap[viewpoint._id] = prepareViewpointGroups(viewpoint) ;
 
 	const componentState = {
 		...state.componentState,
