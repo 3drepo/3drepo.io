@@ -16,10 +16,11 @@
  */
 
 import { get, groupBy } from 'lodash';
-import { put, select, takeLatest } from 'redux-saga/effects';
+import { all, put, select, takeLatest } from 'redux-saga/effects';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { UnityUtil } from '../../globals/unity-util';
 import { hexToArray } from '../../helpers/colors';
+import { prepareGroup } from '../../helpers/groups';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
@@ -250,9 +251,24 @@ export function* setCameraOnViewpoint({ teamspace, modelId, view }) {
 	}
 }
 
+export function* prepareGroupsIfNecessary( teamspace, modelId, viewpoint) {
+	if (viewpoint.override_groups_id) {
+		viewpoint.override_groups =  (yield all(viewpoint.override_groups_id.map((groupId) =>
+			API.getGroup(teamspace, modelId, groupId))))
+			.map(({data}) => prepareGroup(data));
+
+		delete viewpoint.override_groups_id;
+	}
+
+}
+
 export function* showViewpoint({ teamspace, modelId, view }) {
 	try {
-		yield put(GroupsActions.clearColorOverrides());
+		yield prepareGroupsIfNecessary(teamspace, modelId, view.viewpoint);
+		if (view.viewpoint.override_groups) {
+			yield put(GroupsActions.clearColorOverrides());
+		}
+
 		yield put(ViewpointsActions.setComponentState({ activeViewpoint: view }));
 		yield put(ViewpointsActions.setCameraOnViewpoint(teamspace, modelId, view));
 	} catch (error) {

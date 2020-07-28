@@ -70,7 +70,8 @@ const fieldTypes = {
 	"rules": "[object Array]",
 	"color": "[object Array]",
 	"issue_id": "[object Object]",
-	"risk_id": "[object Object]"
+	"risk_id": "[object Object]",
+	"view_id": "[object Object]"
 };
 
 const embeddedObjectFields = {
@@ -116,6 +117,10 @@ const groupSchema = new Schema({
 		required: false
 	},
 	risk_id: {
+		type: Object,
+		required: false
+	},
+	view_id: {
 		type: Object,
 		required: false
 	},
@@ -404,6 +409,11 @@ groupSchema.statics.listGroups = function (dbCol, queryParams, branch, revId, id
 		query.risk_id = { $exists: false };
 	}
 
+	// If we want groups that aren't from risks
+	if (queryParams.noViews) {
+		query.view_id = { $exists: false };
+	}
+
 	if (queryParams.updatedSince) {
 		const updatedSince = parseFloat(queryParams.updatedSince);
 
@@ -562,7 +572,7 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data, creator = ""
 
 		let typeCorrect = (!data.objects !== !data.rules);
 
-		const allowedFields = ["description", "name", "objects","rules","color","issue_id","risk_id"];
+		const allowedFields = ["description", "name", "objects","rules","color","issue_id","risk_id","view_id"];
 
 		allowedFields.forEach((key) => {
 			if (fieldTypes[key] && utils.hasField(data, key)) {
@@ -1019,6 +1029,11 @@ Group.deleteGroups = function (dbCol, sessionId, ids) {
 			ChatEvent.groupsDeleted(sessionId, dbCol.account, dbCol.model, groupsIds);
 		});
 	});
+};
+
+Group.deleteGroupsByViewId = async function (account, model, view_id) {
+	const _dbCol = await db.getCollection(account, model + ".groups");
+	return await _dbCol.remove({ view_id });
 };
 
 module.exports = Group;
