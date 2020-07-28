@@ -10,16 +10,6 @@ if [ "$1" = 'web' ]; then
         export APP_EFS_ROOT=/efs
     fi
 
-    if [ "$CONFDIR" = '' ]; then
-        export CONFDIR=/etc/confd
-    fi
-
-    if [ "$BACKEND" != '' ]; then
-        confd -onetime -backend $BACKEND -confdir $CONFDIR
-    else
-        confd -onetime -backend etcd -node $ETCD -confdir $CONFDIR
-    fi
-
     if [ ! -d "$APP_EFS_ROOT/models" ]; then
         chmod -R 2774 $APP_EFS_ROOT 
         chown -R $NODE_UID:$NODE_GID $APP_EFS_ROOT 
