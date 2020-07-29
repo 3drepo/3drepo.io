@@ -14,9 +14,10 @@ RUN apt-get update && apt-get install -y \
         && rm -rf /var/lib/apt/lists/*
 
 ARG NODE_USERNAME=node
+ENV NODE_USERNAME ${NODE_USERNAME}
 ARG NODE_GROUP=bouncer
 ARG NODE_UID=1101
-ARG NODE_GID=1102
+ARG NODE_GID=1102       
 RUN if [ ${NODE_USERNAME} != "root" ] \
     && [ ${NODE_GROUP} != "root" ] \
     && [ ${NODE_UID} -ne 0 ] \
