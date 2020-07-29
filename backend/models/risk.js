@@ -160,7 +160,7 @@ async function createViewPoint(account, model, viewpoint) {
 
 class Risk extends Ticket {
 	constructor() {
-		super("risks", "risk_id", "issueIds", "RISK", fieldTypes, ownerPrivilegeAttributes);
+		super("risks", "risk", "issueIds", "RISK", fieldTypes, ownerPrivilegeAttributes);
 	}
 
 	async create(account, model, newRisk, sessionId) {
