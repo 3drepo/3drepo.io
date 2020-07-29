@@ -7,7 +7,6 @@ ARG NODE_GID=1102
 
 FROM node:10 as builder
 
-USER node
 COPY . /home/node/3drepo.io
 RUN cd /home/node/3drepo.io/backend && \
         yarn install --network-timeout 100000 && \
@@ -32,7 +31,7 @@ RUN if [ ${NODE_USERNAME} != "root" ] \
 
 USER node
 WORKDIR /home/node/3drepo.io/
-COPY --from=builder /home/node/3drepo.io/ /home/node/3drepo.io/
+COPY --chown=$NODE_UID:$NODE_GROUP --from=builder /home/node/3drepo.io/ /home/node/3drepo.io/
 ARG NODE_ENV=local
 ENV NODE_ENV ${NODE_ENV:-"production"}
 ENV NODE_CONFIG_DIR='./config'
