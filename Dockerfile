@@ -6,17 +6,9 @@ ARG NODE_UID=1101
 ARG NODE_GID=1102
 
 FROM node:10 as builder
-RUN if [ ${NODE_USERNAME} != "root" ] \
-    && [ ${NODE_GROUP} != "root" ] \
-    && [ ${NODE_UID} -ne 0 ] \
-    && [ ${NODE_GID} -ne 0 ]; then \
-      groupadd ${NODE_GROUP} -g ${NODE_GID} && \
-      usermod -u ${NODE_UID} ${NODE_USERNAME} && \
-      usermod -G ${NODE_GID} ${NODE_USERNAME} ; \
-    fi
-    
+
 USER node
-WORKDIR /home/node/3drepo.io/
+COPY . /home/node/3drepo.io
 RUN cd /home/node/3drepo.io/backend && \
         yarn install --network-timeout 100000 && \
         cd ../frontend  && \
@@ -24,6 +16,7 @@ RUN cd /home/node/3drepo.io/backend && \
         yarn build
 
 FROM node:10 as deploy
+
 RUN apt-get update && apt-get install -y \
         gosu \
         && rm -rf /var/lib/apt/lists/*
