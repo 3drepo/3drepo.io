@@ -29,15 +29,13 @@ RUN if [ ${NODE_USERNAME} != "root" ] \
       usermod -G ${NODE_GID} ${NODE_USERNAME} ; \
     fi
 
-USER node
 WORKDIR /home/node/3drepo.io/
-COPY --chown=$NODE_UID:$NODE_GROUP --from=builder /home/node/3drepo.io/ /home/node/3drepo.io/
+COPY --chown=${NODE_UID}:${NODE_GID} --from=builder /home/node/3drepo.io/ /home/node/3drepo.io/
 ARG NODE_ENV=local
 ENV NODE_ENV ${NODE_ENV:-"production"}
 ENV NODE_CONFIG_DIR='./config'
 EXPOSE 8080 3000
 
-USER root   
 COPY .azure/Docker/src/init.sh /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh ; ln -s /usr/local/bin/start.sh /usr/local/bin/start
 
