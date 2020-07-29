@@ -1,12 +1,5 @@
-
 ARG REBUILD_DATE=unknown
-ARG NODE_USERNAME=node
-ARG NODE_GROUP=bouncer
-ARG NODE_UID=1101
-ARG NODE_GID=1102
-
 FROM node:10 as builder
-
 COPY . /home/node/3drepo.io
 RUN cd /home/node/3drepo.io/backend && \
         yarn install --network-timeout 100000 && \
@@ -20,6 +13,10 @@ RUN apt-get update && apt-get install -y \
         gosu \
         && rm -rf /var/lib/apt/lists/*
 
+ARG NODE_USERNAME=node
+ARG NODE_GROUP=bouncer
+ARG NODE_UID=1101
+ARG NODE_GID=1102
 RUN if [ ${NODE_USERNAME} != "root" ] \
     && [ ${NODE_GROUP} != "root" ] \
     && [ ${NODE_UID} -ne 0 ] \
