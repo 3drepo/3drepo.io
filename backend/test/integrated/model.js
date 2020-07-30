@@ -299,6 +299,42 @@ describe("Model", function () {
 			});
 	});
 
+	describe("Setting a default viewpoint", function() {
+		before(function(done) {
+			async.series([
+				callback => {
+					agent.post("/logout").send({}).expect(200, callback);
+				},
+				callback => {
+					agent.post("/login").send({
+						username, password
+					}).expect(200, callback);
+				}
+			], done);
+		});
+
+		const testModel = "2d4a6208-6847-4a25-9d9e-097a63f2de93";
+		it("setting a valid view Id as default viewpoint should succeed", function (done) {
+			async.series([
+				callback => {
+					agent.put(`/${username}/${testModel}/settings`)
+						.send({defaultView: "df8fa4a0-c2ba-11ea-8373-eb03ef03362f"})
+						.expect(200, callback);
+				},
+				callback => {
+						.expect(200, (err, res) => {
+							expect(res.body.defaultView).to.equal({
+								id: "df8fa4a0-c2ba-11ea-8373-eb03ef03362f",
+								name: "fdgdfg"
+							});
+							callback(err);
+						});
+				}
+			], done);
+		});
+
+	});
+
 	describe("Download latest file", function() {
 
 		const username = "testing";
