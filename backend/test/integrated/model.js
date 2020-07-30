@@ -324,7 +324,7 @@ describe("Model", function () {
 				callback => {
 					agent.get(`/${username}/${testModel}.json`)
 						.expect(200, (err, res) => {
-							expect(res.body.defaultView).to.equal({
+							expect(res.body.defaultView).to.deep.equal({
 								id: "df8fa4a0-c2ba-11ea-8373-eb03ef03362f",
 								name: "fdgdfg"
 							});
@@ -339,6 +339,7 @@ describe("Model", function () {
 				.send({defaultView: "df8fa4a0-c2ba-11ea-8373-eb03ef03362a"})
 				.expect(404, (err, res) => {
 					expect(res.body.value).to.equal(responseCodes.VIEW_NOT_FOUND.value);
+					done(err);
 				});
 		});
 
