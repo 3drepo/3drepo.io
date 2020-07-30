@@ -334,6 +334,31 @@ describe("Model", function () {
 			], done);
 		});
 
+		it("setting an invalid view Id as default viewpoint should fail", function (done) {
+			agent.put(`/${username}/${testModel}/settings`)
+				.send({defaultView: "df8fa4a0-c2ba-11ea-8373-eb03ef03362a"})
+				.expect(404, (err, res) => {
+					expect(res.body.value).to.equal(responseCodes.VIEW_NOT_FOUND.value);
+				});
+		});
+
+		it("setting null as default viewpoint to reset default viewpoint should succeed", function (done) {
+			async.series([
+				callback => {
+					agent.put(`/${username}/${testModel}/settings`)
+						.send({defaultView: null})
+						.expect(200, callback);
+				},
+				callback => {
+					agent.get(`/${username}/${testModel}.json`)
+						.expect(200, (err, res) => {
+							expect(res.body.defaultView).to.equal(undefined);
+							callback(err);
+						});
+				}
+			], done);
+		});
+
 	});
 
 	describe("Download latest file", function() {
