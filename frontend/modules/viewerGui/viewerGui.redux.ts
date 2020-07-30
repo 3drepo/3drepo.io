@@ -178,7 +178,6 @@ const setCoordViewSuccess = (state = INITIAL_STATE, { coordViewActive }) => {
 	return { ...state, coordViewActive };
 };
 
-
 export const reducer = createReducer(INITIAL_STATE, {
 	[ViewerGuiTypes.SET_PANEL_VISIBILITY]: setPanelVisibility,
 	[ViewerGuiTypes.SET_PANEL_LOCK]: setPanelLock,
