@@ -322,6 +322,7 @@ describe("Model", function () {
 						.expect(200, callback);
 				},
 				callback => {
+					agent.get(`/${username}/${testModel}.json`)
 						.expect(200, (err, res) => {
 							expect(res.body.defaultView).to.equal({
 								id: "df8fa4a0-c2ba-11ea-8373-eb03ef03362f",
