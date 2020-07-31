@@ -73,8 +73,6 @@ function* fetchData({ teamspace, model }) {
 			take(ModelTypes.FETCH_SETTINGS_SUCCESS)
 		]);
 
-		const selectedViewpoint = yield select(selectSelectedViewpoint);
-
 		const revision = yield select(selectCurrentRevisionId);
 
 		yield all([
@@ -362,9 +360,10 @@ function* loadModel() {
 		const { teamspace, model } = yield select(selectUrlParams);
 		const revision = yield select(selectCurrentRevisionId);
 		const modelSettings = yield select(selectSettings);
+		const selectedViewpoint = yield select(selectSelectedViewpoint);
 
 		yield Viewer.isViewerReady();
-		yield Viewer.loadViewerModel(teamspace, model, 'master', revision || 'head');
+		yield Viewer.loadViewerModel(teamspace, model, 'master', revision || 'head', selectedViewpoint);
 		yield Viewer.updateViewerSettings(modelSettings);
 	} catch (error) {
 		const content = 'The model was either not found, failed to load correctly ' +

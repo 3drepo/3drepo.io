@@ -1090,7 +1090,13 @@ export class UnityUtil {
 	 * @param revision - ID of revision
 	 * @return returns a promise that resolves when the model start loading.
 	 */
-	public static loadModel(account: string, model: string, branch = '', revision = 'head'): Promise<void> {
+	public static loadModel(
+		account: string,
+		model: string,
+		branch = '',
+		revision = 'head',
+		initView = null
+	): Promise<void> {
 		UnityUtil.reset();
 		const params: any = {
 			database : account,
@@ -1099,6 +1105,10 @@ export class UnityUtil {
 
 		if (revision !== 'head') {
 			params.revID = revision;
+		}
+
+		if (initView) {
+			params.initView = initView;
 		}
 
 		UnityUtil.onLoaded();
