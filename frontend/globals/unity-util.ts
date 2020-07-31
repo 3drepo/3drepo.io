@@ -1641,7 +1641,7 @@ export class UnityUtil {
 	}
 
 	/** @hidden */
-	public static toggleCameraPause(color: number[]) {
+	public static toggleCameraPause() {
 		UnityUtil.toUnity('ToggleCameraPause', UnityUtil.LoadingState.VIEWER_READY);
 	}
 
