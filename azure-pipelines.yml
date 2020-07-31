@@ -4,12 +4,14 @@ trigger:
     include:
     - master
     - staging
-    - 'helm'
+    - helm
 
 pr:
   branches:
     include:
-    - 'ISSUE_*'  # must quote since "*" is a YAML reserved character; we want a string
+    - master
+    - staging
+    - helm
 
 resources:
 - repo: self
