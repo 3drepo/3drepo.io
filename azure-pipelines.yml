@@ -4,6 +4,7 @@ trigger:
     include:
     - master
     - staging
+    - 'helm'
 
 pr:
   branches:
