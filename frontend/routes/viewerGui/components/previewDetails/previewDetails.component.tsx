@@ -254,7 +254,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		} = this.props;
 
 		return (
-			<Container className={className} edit={!this.props.isNew}>
+			<Container className={className} edit={!this.props.isNew} panelName={this.props.panelName}>
 				{this.renderUpdateMessage(willBeUpdated)}
 				{this.renderDeleteMessage(willBeRemoved)}
 				<Summary
