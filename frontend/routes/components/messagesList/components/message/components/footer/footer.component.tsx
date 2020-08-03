@@ -41,6 +41,9 @@ export const Footer = ({ name, created, formRef, commentRef, comment, ...props }
 
 		commentForm.setFieldValue(COMMENT_FIELD_NAME, `${currentFormCommentValue}@${name} `);
 		commentTextarea.focus();
+		setTimeout(() => {
+			commentTextarea.scrollTop = commentTextarea.scrollHeight;
+		});
 	};
 
 	const handleQuoteButtonClick = () => {
@@ -66,6 +69,9 @@ export const Footer = ({ name, created, formRef, commentRef, comment, ...props }
 
 		commentForm.setFieldValue(COMMENT_FIELD_NAME, `${currentFormCommentValue}${additionalNewLine}${quoteComment}\n\n`);
 		commentTextarea.focus();
+		setTimeout(() => {
+			commentTextarea.scrollTop = commentTextarea.scrollHeight;
+		});
 	};
 
 	return (
