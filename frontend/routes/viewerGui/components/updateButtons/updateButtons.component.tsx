@@ -42,7 +42,7 @@ export const UpdateButtons = ({
 }: IProps) => (
 		<FieldsRow container alignItems="center" justify="space-between">
 			{renderWhenTrueOtherwise(() => (
-				<UpdateButtonsContainer center>
+				<UpdateButtonsContainer center={!isNew}>
 					<PinButton
 						onChange={onChangePin}
 						onSave={onSavePin}

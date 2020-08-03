@@ -61,7 +61,7 @@ export const MainIssueFormTab: React.FunctionComponent<IProps> = ({
 }) => {
 	return (
 		<Content active={active}>
-			<Container top>
+			<Container>
 				<Field name="desc" render={({ field }) => (
 					<TextField
 						{...field}
