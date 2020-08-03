@@ -26,7 +26,7 @@ export const UpdateButtonsContainer = styled(FormControl)`
 	&& {
 		display: flex;
 		flex-direction: row;
-		justify-content: center;
+		justify-content: ${({ center }: { center: boolean }) => center ? 'center' : 'flex-start'};
 		width: 100%;
 
 		${StyledButton} {
