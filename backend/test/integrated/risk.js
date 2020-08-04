@@ -952,5 +952,122 @@ describe("Risks", function () {
 
 		});
 	});
+
+	describe("Tagging a user in a comment", function() {
+		const teamspace = "teamSpace1";
+		const altUser = "commenterTeamspace1Model1JobA";
+		const password = "password";
+		const model = "5bfc11fa-50ac-b7e7-4328-83aa11fa50ac";
+		const riskId = "06f25e30-d011-11ea-82b5-01d0c3871ca6";
+
+		before(function(done) {
+			async.series([
+				function(done) {
+					agent.post("/logout")
+						.send({})
+						.expect(200, done);
+				},
+				function(done) {
+					agent.post("/login")
+						.send({username: teamspace, password})
+						.expect(200, done);
+				}
+			], done);
+		});
+
+		it("should create a notification on the tagged user's messages", function(done) {
+			const comment = {comment : `@${altUser}`};
+			async.series([
+				function(done) {
+					agent.post(`/${teamspace}/${model}/risks/${riskId}/comments`)
+						.send(comment)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.post("/logout")
+						.send({})
+						.expect(200, done);
+				},
+				function(done) {
+					agent.post("/login")
+						.send({username: altUser, password})
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get("/notifications")
+						.expect(200, function(err, res) {
+							const notification = res.body.find(item => item.type === "USER_REFERENCED" && item.riskId === riskId);
+							assert(notification);
+							expect(notification.modelId).to.equal(model);
+							expect(notification.teamSpace).to.equal(teamspace);
+							expect(notification.referrer).to.equal(teamspace);
+							done(err);
+						});
+				}],
+			done);
+
+		});
+
+		it("should create comment successful if the user tagged a user that doesn't not exist", function(done) {
+			const comment = {comment : `@doesntExist1234`};
+			agent.post(`/${teamspace}/${model}/risks/${riskId}/comments`)
+				.send(comment)
+				.expect(200, done);
+		});
+
+		it("should NOT create a notification if the user does not belong in the teamspace", function(done) {
+			const comment = {comment : `@${username}`};
+			async.series([
+				login(agent, altUser, password),
+				function(done) {
+					agent.post(`/${teamspace}/${model}/risks/${riskId}/comments`)
+						.send(comment)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.post("/logout")
+						.send({})
+						.expect(200, done);
+				},
+				function(done) {
+					agent.post("/login")
+						.send({username, password})
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get("/notifications")
+						.expect(200, function(err, res) {
+							const notification = res.body.find(item => item.type === "USER_REFERENCED" && item.riskId === riskId);
+							expect(notification).to.equal(undefined);
+							done(err);
+						});
+				}],
+			done);
+		});
+
+		it("should NOT create a notification if the user is tagged in a quote", function(done) {
+			const comment = {comment : `>
+			@${altUser}`};
+			async.waterfall([
+				login(agent, altUser, password),
+				deleteNotifications(agent),
+				login(agent, teamspace, password),
+				function(args, next) {
+					agent.post(`/${teamspace}/${model}/risks/${riskId}/comments`)
+						.send(comment)
+						.expect(200, next);
+				},
+				login(agent, altUser, password),
+				fetchNotification(agent),
+				(notifications, next) => {
+					expect(notifications, 'There should not be any notifications').to.be.an("array").and.to.have.length(0);
+					next();
+				},
+			],
+			done);
+		});
+
+	});
+
 });
 
