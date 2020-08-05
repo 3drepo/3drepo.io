@@ -64,6 +64,7 @@ interface IProps {
 	fetchMitigationCriteria: (teamspace: string) => void;
 	criteria: any;
 	showMitigationSuggestions: (conditions: any, setFieldValue) => void;
+	postCommentIsPending?: boolean;
 }
 
 interface IState {
@@ -168,6 +169,8 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				previewWrapperRef={this.containerRef}
 				horizontal={this.props.horizontal}
 				disableIssuesSuggestions
+				fetchingDetailsIsPending={this.props.fetchingDetailsIsPending}
+				postCommentIsPending={this.props.postCommentIsPending}
 			/>
 		</ViewerPanelFooter>
 	));

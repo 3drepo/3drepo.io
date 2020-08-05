@@ -61,6 +61,7 @@ interface IProps {
 	attachLinkResources: (links) => void;
 	showDialog: (config: any) => void;
 	showScreenshotDialog: (config: any) => void;
+	postCommentIsPending?: boolean;
 }
 
 interface IState {
@@ -160,6 +161,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				messagesContainerRef={this.messageContainerRef}
 				previewWrapperRef={this.containerRef}
 				horizontal={this.props.horizontal}
+				fetchingDetailsIsPending={this.props.fetchingDetailsIsPending}
+				postCommentIsPending={this.props.postCommentIsPending}
 			/>
 		</ViewerPanelFooter>
 	));

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -40,6 +40,7 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	setActiveRisk: ['risk', 'revision', 'ignoreViewer'],
 	togglePendingState: ['isPending'],
 	toggleDetailsPendingState: ['isPending'],
+	togglePostCommentPendingState: ['isPending'],
 	subscribeOnRiskChanges: ['teamspace', 'modelId'],
 	unsubscribeOnRiskChanges: ['teamspace', 'modelId'],
 	focusOnRisk: ['risk', 'revision'],
@@ -99,6 +100,7 @@ export const INITIAL_STATE = {
 		filteredRisks: [],
 		showPins: true,
 		fetchingDetailsIsPending: false,
+		postCommentIsPending: false,
 		associatedActivities: [],
 		sortOrder: 'desc',
 		failedToLoad: false
@@ -120,6 +122,10 @@ export const togglePendingState = (state = INITIAL_STATE, { isPending }) => ({ .
 
 export const toggleDetailsPendingState = (state = INITIAL_STATE, { isPending }) => {
 	return setComponentState(state, { componentState: { fetchingDetailsIsPending: isPending } });
+};
+
+export const togglePostCommentPendingState = (state = INITIAL_STATE, { isPending }) => {
+	return setComponentState(state, { componentState: { postCommentIsPending: isPending } });
 };
 
 export const fetchRisksSuccess = (state = INITIAL_STATE, { risks = [] }) => {
@@ -272,6 +278,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.SAVE_RISK_SUCCESS]: saveRiskSuccess,
 	[RisksTypes.TOGGLE_PENDING_STATE]: togglePendingState,
 	[RisksTypes.TOGGLE_DETAILS_PENDING_STATE]: toggleDetailsPendingState,
+	[RisksTypes.TOGGLE_POST_COMMENT_PENDING_STATE]: togglePostCommentPendingState,
 	[RisksTypes.CREATE_COMMENT_SUCCESS]: createCommentSuccess,
 	[RisksTypes.UPDATE_COMMENT_SUCCESS]: updateCommentSuccess,
 	[RisksTypes.DELETE_COMMENT_SUCCESS]: deleteCommentSuccess,

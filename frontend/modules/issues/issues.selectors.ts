@@ -119,6 +119,10 @@ export const selectFetchingDetailsIsPending = createSelector(
 	selectComponentState, (state) => state.fetchingDetailsIsPending
 );
 
+export const selectPostCommentIsPending = createSelector(
+	selectComponentState, (state) => state.postCommentIsPending
+);
+
 export const selectIsImportingBCF = createSelector(
 	selectComponentState, (state) => state.isImportingBCF
 );

@@ -52,6 +52,10 @@ export const selectUnalteredActiveGroupDetails = createSelector(
 		(groupId, groupMap, defaultGroup) => groupMap[groupId] || defaultGroup
 );
 
+export const selectFetchingDetailsIsPending = createSelector(
+	selectComponentState, (state) => state.fetchingDetailsIsPending
+);
+
 export const selectShowDetails = createSelector(
 	selectComponentState, (state) => state.showDetails
 );
