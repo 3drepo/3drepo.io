@@ -297,6 +297,8 @@ class Ticket {
 			} else {
 				this.handleFieldUpdate(account, model, sessionId, id, user, "viewpoint", oldTicket, data, systemComments);
 			}
+
+			delete oldTicket.viewpoint;
 		}
 
 		await newViewpoint;
@@ -329,8 +331,7 @@ class Ticket {
 		// 7. Return the updated data and the old ticket
 		const updatedTicket = this.clean(account, model, {
 			...oldTicket,
-			...data,
-			viewpoint: data.viewpoints && data.viewpoints[0] || oldTicket.viewpoint
+			...data
 		});
 		oldTicket = this.clean(account, model, oldTicket);
 		delete data.comments;
