@@ -27,7 +27,7 @@ import { ChatActions } from '../chat';
 import { DialogActions } from '../dialog';
 import {  selectAllOverridesDict, GroupsActions } from '../groups';
 import { dispatch } from '../store';
-import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds, selectIfcSpacesHidden } from '../tree';
+import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds, selectIfcSpacesHidden, TreeActions } from '../tree';
 import { ViewerGuiActions } from '../viewerGui';
 import { PRESET_VIEW } from './viewpoints.constants';
 import { ViewpointsActions, ViewpointsTypes } from './viewpoints.redux';
@@ -210,7 +210,7 @@ export function* unsubscribeOnViewpointChanges({ teamspace, modelId }) {
 	}));
 }
 
-export function* setCameraOnViewpoint({ teamspace, modelId, view }) {
+export function* showViewpoint({ teamspace, modelId, view }) {
 	if (view) {
 
 		if (view.preset) {
@@ -235,8 +235,14 @@ export function* setCameraOnViewpoint({ teamspace, modelId, view }) {
 					break;
 			}
 		} else {
-			if (view.viewpoint && view.viewpoint.up) {
-				const viewpoint = { ...view.viewpoint, account: teamspace, model: modelId };
+			yield prepareGroupsIfNecessary(teamspace, modelId, view.viewpoint);
+			const viewpoint = view.viewpoint;
+
+			if (viewpoint?.override_groups) {
+				yield put(GroupsActions.clearColorOverrides());
+			}
+
+			if (viewpoint?.up) {
 				yield put(ViewerGuiActions.setCamera(viewpoint));
 			} else {
 				yield Viewer.goToDefaultViewpoint();
@@ -247,12 +253,28 @@ export function* setCameraOnViewpoint({ teamspace, modelId, view }) {
 			if (clippingPlanes) {
 				yield Viewer.updateClippingPlanes( clippingPlanes, teamspace, modelId);
 			}
+
+			yield Viewer.clearHighlights();
+			yield put(TreeActions.clearCurrentlySelected());
+
+			if (viewpoint?.hidden_group?.objects?.length > 0) {
+				yield put(TreeActions.hideNodesBySharedIds(viewpoint.hidden_group.objects));
+			}
+
+			if (viewpoint?.shown?.objects?.length > 0) {
+				yield put(TreeActions.isolateNodesBySharedIds(viewpoint.shown.objects.length));
+			}
+
+			if (viewpoint?.highlighted_group?.objects?.length > 0) {
+				yield put(TreeActions.selectNodesBySharedIds(viewpoint.highlighted_group.objects));
+				window.dispatchEvent(new Event('resize'));
+			}
 		}
 	}
 }
 
 export function* prepareGroupsIfNecessary( teamspace, modelId, viewpoint) {
-	if (viewpoint.override_groups_id) {
+	if (viewpoint?.override_groups_id) {
 		viewpoint.override_groups =  (yield all(viewpoint.override_groups_id.map((groupId) =>
 			API.getGroup(teamspace, modelId, groupId))))
 			.map(({data}) => prepareGroup(data));
@@ -260,17 +282,23 @@ export function* prepareGroupsIfNecessary( teamspace, modelId, viewpoint) {
 		delete viewpoint.override_groups_id;
 	}
 
+	if (viewpoint?.highlighted_group_id) {
+		const highlightedGroup = (yield API.getGroup(teamspace, modelId, viewpoint?.highlighted_group_id)).data;
+		viewpoint.highlighted_group = prepareGroup(highlightedGroup);
+		delete viewpoint.highlighted_group_id;
+	}
+
+	if (viewpoint?.hidden_group_id) {
+		const hiddenGroup = (yield API.getGroup(teamspace, modelId, viewpoint?.hidden_group_id)).data;
+		viewpoint.hidden_group = prepareGroup(hiddenGroup);
+		delete viewpoint.hidden_group;
+	}
 }
 
-export function* showViewpoint({ teamspace, modelId, view }) {
+export function* setActiveViewpoint({ teamspace, modelId, view }) {
 	try {
-		yield prepareGroupsIfNecessary(teamspace, modelId, view.viewpoint);
-		if (view.viewpoint.override_groups) {
-			yield put(GroupsActions.clearColorOverrides());
-		}
-
+		yield showViewpoint({teamspace, modelId, view});
 		yield put(ViewpointsActions.setComponentState({ activeViewpoint: view }));
-		yield put(ViewpointsActions.setCameraOnViewpoint(teamspace, modelId, view));
 	} catch (error) {
 		yield put(ViewpointsActions.setComponentState({ activeViewpoint: null }));
 		yield put(DialogActions.showErrorDialog('show', 'viewpoint'));
@@ -291,8 +319,7 @@ export default function* ViewpointsSaga() {
 	yield takeLatest(ViewpointsTypes.CREATE_VIEWPOINT, createViewpoint);
 	yield takeLatest(ViewpointsTypes.UPDATE_VIEWPOINT, updateViewpoint);
 	yield takeLatest(ViewpointsTypes.DELETE_VIEWPOINT, deleteViewpoint);
-	yield takeLatest(ViewpointsTypes.SHOW_VIEWPOINT, showViewpoint);
-	yield takeLatest(ViewpointsTypes.SET_CAMERA_ON_VIEWPOINT, setCameraOnViewpoint);
+	yield takeLatest(ViewpointsTypes.SET_ACTIVE_VIEWPOINT, setActiveViewpoint);
 	yield takeLatest(ViewpointsTypes.SUBSCRIBE_ON_VIEWPOINT_CHANGES, subscribeOnViewpointChanges);
 	yield takeLatest(ViewpointsTypes.UNSUBSCRIBE_ON_VIEWPOINT_CHANGES, unsubscribeOnViewpointChanges);
 	yield takeLatest(ViewpointsTypes.PREPARE_NEW_VIEWPOINT, prepareNewViewpoint);

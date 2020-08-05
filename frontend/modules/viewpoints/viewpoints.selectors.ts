@@ -53,6 +53,10 @@ export const selectEditMode = createSelector(
 	selectComponentState, (state) => state.editMode
 );
 
+export const selectSelectedViewpoint = createSelector(
+	selectViewpointsDomain, (state) => state.selectedviewpoint
+);
+
 export const selectOverridesDict = createSelector(
 	selectActiveViewpoint, (viewpoint) =>  {
 		if ( !Boolean(viewpoint?.viewpoint?.override_groups?.length)) {

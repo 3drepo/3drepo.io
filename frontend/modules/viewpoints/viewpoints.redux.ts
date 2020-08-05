@@ -31,14 +31,14 @@ export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createAct
 	deleteViewpointSuccess: ['viewpointId'],
 	subscribeOnViewpointChanges: ['teamspace', 'modelId'],
 	unsubscribeOnViewpointChanges: ['teamspace', 'modelId'],
-	showViewpoint: ['teamspace', 'modelId', 'view'],
 	setCameraOnViewpoint: ['teamspace', 'modelId', 'view'],
 	prepareNewViewpoint: ['teamspace', 'modelId', 'viewpointName'],
 	setNewViewpoint: ['newViewpoint'],
-	setActiveViewpoint: ['activeViewpoint'],
+	setActiveViewpoint: ['teamspace', 'modelId', 'view'],
 	setSearchQuery: ['searchQuery'],
 	showDeleteInfo: ['viewpointId'],
-	setComponentState: ['componentState']
+	setComponentState: ['componentState'],
+	setSelectedViewpoint: ['selectedViewpoint']
 }, { prefix: 'VIEWPOINTS/' });
 
 export interface IViewpointsComponentState {
@@ -53,12 +53,14 @@ export interface IViewpointsState {
 	isPending: boolean;
 	viewpointsMap: any[];
 	componentState: IViewpointsComponentState;
+	selectedViewpoint: any;
 }
 
 export const INITIAL_STATE: IViewpointsState = {
 	isPending: true,
 	viewpointsMap: [],
-	componentState: {}
+	componentState: {},
+	selectedViewpoint: null
 };
 
 const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
@@ -112,6 +114,10 @@ const showDeleteInfo = (state = INITIAL_STATE, { viewpointId }) => {
 
 const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
 	return { ...state, componentState: {...state.componentState, ...componentState} };
+};
+
+const selectViewpoint = (state = INITIAL_STATE, { selectedViewpoint }) => {
+	return { ...state, selectedViewpoint };
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
