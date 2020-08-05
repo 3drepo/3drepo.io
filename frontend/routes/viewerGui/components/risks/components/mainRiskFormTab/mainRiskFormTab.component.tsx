@@ -22,7 +22,6 @@ import { Field } from 'formik';
 
 import {
 	LEVELS_OF_RISK,
-	RisksIcon,
 	RISK_CONSEQUENCES,
 	RISK_LIKELIHOODS,
 } from '../../../../../../constants/risks';
@@ -40,6 +39,7 @@ import {
 	StyledFormControl,
 } from '../riskDetails/riskDetails.styles';
 import { RiskSchema } from '../riskDetails/riskDetailsForm.component';
+import { RisksIcon } from '../riskIcon/riskIcon.component';
 
 interface IProps {
 	risk: any;

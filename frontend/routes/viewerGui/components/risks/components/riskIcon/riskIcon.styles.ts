@@ -17,29 +17,15 @@
 
 import styled from 'styled-components';
 
-import {
-	VIEWER_PANELS,
-	VIEWER_PANELS_ICONS,
-	VIEWER_PANELS_MIN_HEIGHTS,
-	VIEWER_PANELS_TITLES
-} from '../../../../constants/viewerGui';
-import { COLOR } from '../../../../styles';
-import { ReportedItems } from '../reportedItems';
+import IconComponent from '@material-ui/core/SvgIcon';
 
-export const RisksContainer = styled(ReportedItems).attrs({
-	title: VIEWER_PANELS_TITLES[VIEWER_PANELS.RISKS],
-	Icon: () => VIEWER_PANELS_ICONS[VIEWER_PANELS.RISKS] as any
-})`
-	min-height: ${VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.RISKS]}px;
-` as any;
+export const Icon = styled(IconComponent)`
+	&& {
+		justify-content: center;
+		align-items: center;
 
-export const ListContainer = styled.ul`
-	height: 100%;
-	padding: 0;
-	margin: 0;
-	cursor: pointer;
-`;
-
-export const Summary = styled.div`
-	color: ${COLOR.BLACK_40};
+		svg path {
+			stroke: currentColor;
+		}
+	}
 `;
