@@ -18,11 +18,13 @@
  */
 
 const request = require("supertest");
-const {assert, expect } = require("chai");
+const {should, assert, expect, Assertion } = require("chai");
 const app = require("../../services/api.js").createApp();
 const responseCodes = require("../../response_codes.js");
 const async = require("async");
 const { login } = require("../helpers/users.js");
+
+const { deleteNotifications, fetchNotification } = require("../helpers/notifications.js");
 
 describe("Risks", function () {
 	let server;
