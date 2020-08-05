@@ -18,7 +18,7 @@
  */
 
 const request = require("supertest");
-const {should, assert, expect, Assertion } = require("chai");
+const {should, assert, expect, Assertion, AssertionError } = require("chai");
 const app = require("../../services/api.js").createApp();
 const responseCodes = require("../../response_codes.js");
 const async = require("async");
@@ -999,6 +999,7 @@ describe("Risks", function () {
 				function(done) {
 					agent.get("/notifications")
 						.expect(200, function(err, res) {
+							console.log(res.body);
 							const notification = res.body.find(item => item.type === "USER_REFERENCED" && item.riskId === riskId);
 							assert(notification);
 							expect(notification.modelId).to.equal(model);
