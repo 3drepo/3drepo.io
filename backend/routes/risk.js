@@ -595,7 +595,7 @@ router.patch("/revision/:rid/risks/:riskId", middlewares.issue.canComment, updat
  * 	}
  * }
  **/
-router.post("/risks/:riskId/comments", middlewares.issue.canComment, addComment, middlewares.chat.onCommentCreated, responseCodes.onSuccessfulOperation);
+router.post("/risks/:riskId/comments", middlewares.issue.canComment, addComment, middlewares.notification.onNewComment, middlewares.chat.onCommentCreated, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {delete} /:teamspace/:model/risks/:riskId/comments Delete a comment
