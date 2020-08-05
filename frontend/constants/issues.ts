@@ -16,8 +16,8 @@ import { COLOR, PIN_COLORS } from '../styles';
 
 export const ISSUE_PANEL_NAME = 'issue';
 
-export const MAIN_ISSUE_TYPE = 'issue';
-export const ATTACHMENTS_ISSUE_TYPE = 'attachments';
+export const ISSUE_PROPERTIES_TAB = 'issue';
+export const ATTACHMENTS_ISSUE_TAB = 'attachments';
 
 export const ISSUE_TABS = {
 	ISSUE: 'Properties',

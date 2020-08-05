@@ -22,13 +22,13 @@ import { isEmpty } from 'lodash';
 
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { COMMENT_FIELD_NAME } from '../../viewerGui/components/commentForm/commentForm.constants';
+import { ContainedButton } from '../../viewerGui/components/containedButton/containedButton.component';
 import { FieldsRow } from '../../viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { EmptyStateInfo } from '../../viewerGui/components/views/views.styles';
 import AttachResourcesDialog from './attachResourcesDialog/attachResourcesDialog.container';
 import {
 	ActionContainer, DocumentIcon, IconButton, LinkIcon, PhotoIcon, QuoteIcon, RemoveIcon, ResourcesContainer,
-	ResourcesList, ResourceItemContainer, ResourceItemRightColumn, ResourceLabel, ResourceLink, StyledContainedButton,
-	UploadSizeLabel,
+	ResourcesList, ResourceItemContainer, ResourceItemRightColumn, ResourceLabel, ResourceLink, UploadSizeLabel,
 } from './resources.styles';
 
 interface IResource {
@@ -46,7 +46,6 @@ interface IProps {
 	onSaveFiles: (files) => void;
 	onSaveLinks: (links) => void;
 	showDialog: (config: any) => void;
-	toLeft?: boolean;
 	formRef?: any;
 }
 
@@ -172,9 +171,9 @@ export class Resources extends React.PureComponent<IProps, IState> {
 				{this.renderResources(!isEmpty(resources))}
 				{isEmpty(resources) && <EmptyStateInfo>No resources have been attached yet</EmptyStateInfo>}
 				<FieldsRow container justify="flex-end">
-					<StyledContainedButton onClick={this.onClickAttach} disabled={!canEdit}>
+					<ContainedButton onClick={this.onClickAttach} disabled={!canEdit}>
 						Add Resource
-					</StyledContainedButton>
+					</ContainedButton>
 				</FieldsRow>
 			</ResourcesContainer>
 		);

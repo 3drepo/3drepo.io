@@ -26,7 +26,7 @@ import { debounce, get, isEmpty, isEqual } from 'lodash';
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 import * as Yup from 'yup';
 
-import { ATTACHMENTS_ISSUE_TYPE, ISSUE_TABS, MAIN_ISSUE_TYPE, } from '../../../../../../constants/issues';
+import { ATTACHMENTS_ISSUE_TAB, ISSUE_PROPERTIES_TAB, ISSUE_TABS } from '../../../../../../constants/issues';
 import { VIEWER_PANELS_TITLES } from '../../../../../../constants/viewerGui';
 import { canChangeAssigned, canChangeBasicProperty } from '../../../../../../helpers/issues';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
@@ -92,7 +92,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 
 	public state = {
 		isSaving: false,
-		activeTab: MAIN_ISSUE_TYPE,
+		activeTab: ISSUE_PROPERTIES_TAB,
 	};
 
 	public autoSave = debounce(() => {
@@ -174,12 +174,12 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						textColor="primary"
 						onChange={this.handleChange}
 					>
-						<Tab label={ISSUE_TABS.ISSUE} value={MAIN_ISSUE_TYPE} />
-						<Tab {...this.attachmentsProps} value={ATTACHMENTS_ISSUE_TYPE} />
+						<Tab label={ISSUE_TABS.ISSUE} value={ISSUE_PROPERTIES_TAB} />
+						<Tab {...this.attachmentsProps} value={ATTACHMENTS_ISSUE_TAB} />
 					</Tabs>
 					<TabContent>
-						{this.showIssueContent(activeTab === MAIN_ISSUE_TYPE)}
-						{this.showAttachmentsContent(activeTab === ATTACHMENTS_ISSUE_TYPE)}
+						{this.showIssueContent(activeTab === ISSUE_PROPERTIES_TAB)}
+						{this.showAttachmentsContent(activeTab === ATTACHMENTS_ISSUE_TAB)}
 					</TabContent>
 				</Form>
 			</MuiPickersUtilsProvider>
