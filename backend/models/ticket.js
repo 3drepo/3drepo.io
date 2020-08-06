@@ -18,7 +18,7 @@
 const _ = require("lodash");
 
 const Project = require("./project");
-const View = require("./viewpoint");
+const View = require("./view");
 const User = require("./user");
 const Job = require("./job");
 const Group = require("./group");
@@ -55,7 +55,7 @@ class Ticket extends View {
 	}
 
 	clean(account, model, ticketToClean) {
-		const ticketFields = ["_id", "rev_id", "parent", "group_id"];
+		const ticketFields = ["rev_id", "group_id"];
 		const commentFields = ["rev_id", "guid", "viewpoint"];
 
 		ticketToClean.account = account;

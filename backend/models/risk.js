@@ -24,7 +24,7 @@ const _ = require("lodash");
 const ChatEvent = require("./chatEvent");
 
 const Comment = require("./comment");
-const View = require("./viewpoint");
+const View = require("./view");
 
 const Ticket = require("./ticket");
 

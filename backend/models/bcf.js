@@ -30,7 +30,7 @@ const utils = require("../utils");
 const FileRef = require("./fileRef");
 const Group = require("./group");
 const Meta = require("./meta");
-const View = new (require("../models/viewpoint"))();
+const View = new (require("../models/view"))();
 
 const statusEnum = C.ISSUE_STATUS;
 
@@ -909,6 +909,7 @@ async function readBCF(account, model, requester, ifcToModelMap, dataBuffer, set
 
 			if (viewpoints[vpGuid].snapshot) {
 				vp.screenshot = viewpoints[vpGuid].snapshot;
+				// TODO do not import View
 				await View.setExternalScreenshotRef(vp, account, model, "issues");
 			}
 

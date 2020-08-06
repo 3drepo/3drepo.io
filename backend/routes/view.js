@@ -22,7 +22,7 @@ const router = express.Router({mergeParams: true});
 const middlewares = require("../middlewares/middlewares");
 const C = require("../constants");
 const responseCodes = require("../response_codes.js");
-const View = new (require("../models/viewpoint"))();
+const View = new (require("../models/view"))();
 const utils = require("../utils");
 const config = require("../config");
 

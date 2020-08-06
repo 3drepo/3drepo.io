@@ -19,7 +19,7 @@
 const get = require("lodash").get;
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
-const View = new (require("../models/viewpoint"))();
+const View = new (require("../models/view"))();
 const db = require("../handler/db");
 const FileRef = require("./fileRef");
 
@@ -167,6 +167,7 @@ const addComment = async function(account, model, colName, id, user, data) {
 		viewpoint.guid = utils.generateUUID();
 
 		if (viewpoint.screenshot) {
+			// Trim png header from base64 string
 			viewpoint.screenshot = new Buffer.from(
 				viewpoint.screenshot.substring(viewpoint.screenshot.indexOf(",") + 1),
 				"base64"
