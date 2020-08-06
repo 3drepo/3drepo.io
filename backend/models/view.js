@@ -24,6 +24,8 @@ const responseCodes = require("../response_codes.js");
 const db = require("../handler/db");
 const ChatEvent = require("./chatEvent");
 const FileRef = require("./fileRef");
+const Viewpoint = require("./viewpoint");
+
 const { systemLogger } = require("../logger.js");
 
 const fieldTypes = {
@@ -59,38 +61,23 @@ class View {
 	}
 
 	clean(account, model, viewToClean, targetType = "[object String]") {
-		const viewFields = [
-			"_id",
-			"viewpoint.group_id",
-			"viewpoint.guid",
-			"viewpoint.highlighted_group_id",
-			"viewpoint.hidden_group_id",
-			"viewpoint.shown_group_id"
-		];
-		const collName = ("views" === this.collName) ? "viewpoints" : this.collName;
+		const id = utils.uuidToString(viewToClean._id);
+		const route = ("views" === this.collName) ? "viewpoints" : this.collName;
 
-		viewFields.forEach((field) => {
-			if (_.get(viewToClean, field)) {
-				if ("[object String]" === targetType && utils.isObject(_.get(viewToClean, field))) {
-					_.set(viewToClean, field, utils.uuidToString(_.get(viewToClean, field)));
-				} else if ("[object Object]" === targetType && utils.isString(_.get(viewToClean, field))) {
-					_.set(viewToClean, field, utils.stringToUUID(_.get(viewToClean, field)));
-				}
+		if (viewToClean._id) {
+			if ("[object String]" === targetType) {
+				viewToClean._id = utils.uuidToString(viewToClean._id);
+			} else if ("[object Object]" === targetType) {
+				viewToClean._id = utils.stringToUUID(viewToClean._id);
 			}
-		});
+		}
 
-		if (viewToClean.viewpoint &&
-			viewToClean.viewpoint._id &&
-			viewToClean.viewpoint.guid &&
-			(viewToClean.viewpoint.screenshot || viewToClean.viewpoint.screenshot_ref)) {
-			const id = utils.uuidToString(viewToClean._id);
-			const viewpointId = utils.uuidToString(viewToClean.viewpoint.guid);
-			viewToClean.viewpoint.screenshot = `${account}/${model}/${collName}/${id}/viewpoints/${viewpointId}/screenshot.png`;
+		if (viewToClean.viewpoint) {
+			viewToClean.viewpoint = Viewpoint.clean(`${account}/${model}/${route}/${id}`, viewToClean.viewpoint, targetType);;
 		}
 
 		if (viewToClean.thumbnail) {
-			const id = utils.uuidToString(viewToClean._id);
-			viewToClean.thumbnail = `${account}/${model}/${collName}/${id}/thumbnail.png`;
+			viewToClean.thumbnail = `${account}/${model}/${route}/${id}/thumbnail.png`;
 		} else {
 			viewToClean.thumbnail = undefined;
 		}
@@ -100,12 +87,6 @@ class View {
 		// ===============================
 		if (viewToClean.thumbnail) {
 			viewToClean.screenshot = { thumbnail: viewToClean.thumbnail };
-		}
-
-		if (viewToClean.viewpoint) {
-			if (viewToClean.viewpoint.clippingPlanes) {
-				viewToClean.clippingPlanes = viewToClean.viewpoint.clippingPlanes;
-			}
 		}
 		// =============================
 		// DEPRECATED LEGACY SUPPORT END
