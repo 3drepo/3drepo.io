@@ -85,12 +85,12 @@ class View {
 			(viewToClean.viewpoint.screenshot || viewToClean.viewpoint.screenshot_ref)) {
 			const id = utils.uuidToString(viewToClean._id);
 			const viewpointId = utils.uuidToString(viewToClean.viewpoint.guid);
-			viewToClean.viewpoint.screenshot = account + "/" + model + "/" + collName + "/" + id + "/viewpoints/" + viewpointId + "/screenshot.png";
+			viewToClean.viewpoint.screenshot = `${account}/${model}/${collName}/${id}/viewpoints/${viewpointId}/screenshot.png`;
 		}
 
 		if (viewToClean.thumbnail) {
 			const id = utils.uuidToString(viewToClean._id);
-			viewToClean.thumbnail = account + "/" + model + "/" + collName + "/" + id + "/thumbnail.png";
+			viewToClean.thumbnail = `${account}/${model}/${collName}/${id}/thumbnail.png`;
 		} else {
 			viewToClean.thumbnail = undefined;
 		}
@@ -119,9 +119,7 @@ class View {
 	}
 
 	async findByUID(account, model, uid, projection, noClean = false) {
-		if (utils.isString(uid)) {
-			uid = utils.stringToUUID(uid);
-		}
+		uid = utils.stringToUUID(uid);
 
 		const views = await this.getCollection(account, model);
 		const foundView = await views.findOne({ _id: uid }, projection);
@@ -179,9 +177,7 @@ class View {
 	}
 
 	getThumbnail(account, model, uid) {
-		if (utils.isString(uid)) {
-			uid = utils.stringToUUID(uid);
-		}
+		uid = utils.stringToUUID(uid);
 
 		return this.findByUID(account, model, uid, { "screenshot.buffer": 1, thumbnail: 1 }, true).then((foundView) => {
 			// the 'content','screenshot' field is for legacy reasons
@@ -209,9 +205,7 @@ class View {
 	}
 
 	async update(sessionId, account, model, uid, data) {
-		if (utils.isString(uid)) {
-			uid = utils.stringToUUID(uid);
-		}
+		uid = utils.stringToUUID(uid);
 
 		// 1. Get old view
 		// const oldView = await this.findByUID(account, model, uid, {}, true);
@@ -329,9 +323,7 @@ class View {
 	}
 
 	async deleteViewpoint(account, model, uid, sessionId) {
-		if (utils.isString(uid)) {
-			uid = utils.stringToUUID(uid);
-		}
+		uid = utils.stringToUUID(uid);
 
 		const coll = await this.getCollection(account, model);
 		return coll.findOneAndDelete({ _id: uid }).then((deleteResponse) => {
