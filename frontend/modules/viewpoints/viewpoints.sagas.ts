@@ -210,7 +210,7 @@ export function* unsubscribeOnViewpointChanges({ teamspace, modelId }) {
 	}));
 }
 
-export function* showViewpoint({ teamspace, modelId, view }) {
+export function* showViewpoint(teamspace, modelId, view ) {
 	if (view) {
 
 		if (view.preset) {
@@ -235,6 +235,8 @@ export function* showViewpoint({ teamspace, modelId, view }) {
 					break;
 			}
 		} else {
+			yield Viewer.isViewerReady();
+
 			yield prepareGroupsIfNecessary(teamspace, modelId, view.viewpoint);
 			const viewpoint = view.viewpoint;
 
@@ -244,8 +246,6 @@ export function* showViewpoint({ teamspace, modelId, view }) {
 
 			if (viewpoint?.up) {
 				yield put(ViewerGuiActions.setCamera(viewpoint));
-			} else {
-				yield Viewer.goToDefaultViewpoint();
 			}
 
 			const clippingPlanes = view.clippingPlanes || get(view, 'viewpoint.clippingPlanes');
@@ -253,6 +253,12 @@ export function* showViewpoint({ teamspace, modelId, view }) {
 			if (clippingPlanes) {
 				yield Viewer.updateClippingPlanes( clippingPlanes, teamspace, modelId);
 			}
+
+			if (viewpoint?.hideIfc) {
+				yield put(TreeActions.setIfcSpacesHidden(true));
+			}
+
+			yield put(TreeActions.showAllNodes());
 
 			yield Viewer.clearHighlights();
 			yield put(TreeActions.clearCurrentlySelected());
@@ -269,6 +275,7 @@ export function* showViewpoint({ teamspace, modelId, view }) {
 				yield put(TreeActions.selectNodesBySharedIds(viewpoint.highlighted_group.objects));
 				window.dispatchEvent(new Event('resize'));
 			}
+
 		}
 	}
 }
@@ -297,7 +304,7 @@ export function* prepareGroupsIfNecessary( teamspace, modelId, viewpoint) {
 
 export function* setActiveViewpoint({ teamspace, modelId, view }) {
 	try {
-		yield showViewpoint({teamspace, modelId, view});
+		yield showViewpoint(teamspace, modelId, view);
 		yield put(ViewpointsActions.setComponentState({ activeViewpoint: view }));
 	} catch (error) {
 		yield put(ViewpointsActions.setComponentState({ activeViewpoint: null }));

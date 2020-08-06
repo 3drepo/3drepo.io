@@ -34,9 +34,7 @@ import { prepareRisk } from '../../helpers/risks';
 import { SuggestedTreatmentsDialog } from '../../routes/components/dialogContainer/components';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
 import * as API from '../../services/api';
-import { Cache } from '../../services/cache';
 import * as Exports from '../../services/export';
-import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
 import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
@@ -45,8 +43,7 @@ import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
-import { TreeActions } from '../tree';
-import { generateViewpoint } from '../viewpoints/viewpoints.sagas';
+import { generateViewpoint, showViewpoint } from '../viewpoints/viewpoints.sagas';
 import { RisksActions, RisksTypes } from './risks.redux';
 import {
 	selectActiveRiskDetails,
@@ -257,129 +254,10 @@ function* printRisks({ teamspace, modelId }) {
 	}
 }
 
-const getRiskGroup = async (risk, groupId, revision) => {
-	if (!groupId) {
-		return null;
-	}
-
-	const cachedGroup = Cache.get('risk.group', groupId);
-	if (cachedGroup) {
-		return cachedGroup;
-	}
-
-	try {
-		const { data } = await API.getGroup(risk.account, risk.model, groupId, revision);
-
-		if (data.hiddenObjects && !risk.viewpoint.group_id) {
-			data.hiddenObjects = null;
-		}
-
-		Cache.add('risk.group', groupId, data);
-		return data;
-	} catch (error) {
-		return null;
-	}
-};
-
-function* showMultipleGroups({risk, revision}) {
-	try {
-		const hasViewpointGroups = !isEmpty(pick(risk.viewpoint, [
-			'highlighted_group_id',
-			'hidden_group_id',
-			'shown_group_id'
-		]));
-
-		let objects = {} as { hidden: any[], shown: any[], objects: any[] };
-
-		if (hasViewpointGroups) {
-			const [highlightedGroupData, hiddenGroupData, shownGroupData] = yield Promise.all([
-				getRiskGroup(risk, risk.viewpoint.highlighted_group_id, revision),
-				getRiskGroup(risk, risk.viewpoint.hidden_group_id, revision),
-				getRiskGroup(risk, risk.viewpoint.shown_group_id, revision)
-			]) as any;
-
-			if (hiddenGroupData) {
-				objects.hidden = hiddenGroupData.objects;
-			}
-
-			if (shownGroupData) {
-				objects.shown = shownGroupData.objects;
-			}
-
-			if (highlightedGroupData) {
-				objects.objects = highlightedGroupData.objects;
-			}
-	} else {
-		const  groupId =  risk.viewpoint.group_id || risk.group_id;
-		const groupData = yield getRiskGroup(risk, groupId, revision);
-
-		if (groupData.hiddenObjects && !risk.viewpoint.group_id) {
-				groupData.hiddenObjects = null;
-				Cache.add('risk.group', groupId, groupData);
-			}
-
-		objects = groupData;
-		}
-
-		if (objects.hidden) {
-			yield put(TreeActions.hideNodesBySharedIds(objects.hidden));
-		}
-
-		if (objects.shown) {
-			yield put(TreeActions.isolateNodesBySharedIds(objects.shown));
-		}
-
-		if (objects.objects && objects.objects.length > 0) {
-			yield put(TreeActions.selectNodesBySharedIds(objects.objects));
-			window.dispatchEvent(new Event('resize'));
-		}
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('show', 'multiple groups', error));
-	}
-}
-
-function* focusOnRisk({ risk, revision }) {
-	try {
-		yield Viewer.isViewerReady();
-
-		// Remove highlight from any multi objects
-		Viewer.clearHighlights();
-		yield put(TreeActions.clearCurrentlySelected());
-
-		const hasViewpoint = risk.viewpoint;
-		const hasHiddenOrShownGroup = hasViewpoint && (risk.viewpoint.hidden_group_id || risk.viewpoint.shown_group_id);
-
-		// Reset object visibility
-		if (hasViewpoint && risk.viewpoint.hideIfc) {
-			yield put(TreeActions.setIfcSpacesHidden(risk.viewpoint.hideIfc));
-		}
-
-		yield put(TreeActions.showAllNodes(!hasHiddenOrShownGroup));
-
-		const hasViewpointGroup = hasViewpoint && (risk.viewpoint.highlighted_group_id || risk.viewpoint.group_id);
-		const hasGroup = risk.group_id;
-
-		if (hasViewpointGroup || hasGroup || hasHiddenOrShownGroup) {
-			yield put(RisksActions.showMultipleGroups(risk, revision));
-		}
-
-		const { account, model, viewpoint } = risk;
-		if (viewpoint && viewpoint.position) {
-			Viewer.setCamera({ ...viewpoint, account, model });
-			yield Viewer.updateClippingPlanes(viewpoint.clippingPlanes, account, model);
-		} else {
-			yield Viewer.goToDefaultViewpoint();
-		}
-
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('focus', 'risk', error));
-	}
-}
-
 function* setActiveRisk({ risk, revision, ignoreViewer = false }) {
 	try {
 		yield all([
-			!ignoreViewer ? put(RisksActions.focusOnRisk(risk, revision)) : null,
+			!ignoreViewer ? showViewpoint(risk?.account, risk?.model, risk) : null,
 			put(RisksActions.setComponentState({ activeRisk: risk._id, expandDetails: true }))
 		]);
 	} catch (error) {
@@ -673,13 +551,11 @@ export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.CLOSE_DETAILS, closeDetails);
 	yield takeLatest(RisksTypes.SUBSCRIBE_ON_RISK_CHANGES, subscribeOnRiskChanges);
 	yield takeLatest(RisksTypes.UNSUBSCRIBE_ON_RISK_CHANGES, unsubscribeOnRiskChanges);
-	yield takeLatest(RisksTypes.FOCUS_ON_RISK, focusOnRisk);
 	yield takeLatest(RisksTypes.SET_NEW_RISK, setNewRisk);
 	yield takeLatest(RisksTypes.SUBSCRIBE_ON_RISK_COMMENTS_CHANGES, subscribeOnRiskCommentsChanges);
 	yield takeLatest(RisksTypes.UNSUBSCRIBE_ON_RISK_COMMENTS_CHANGES, unsubscribeOnRiskCommentsChanges);
 	yield takeLatest(RisksTypes.UPDATE_NEW_RISK, updateNewRisk);
 	yield takeLatest(RisksTypes.SET_FILTERS, setFilters);
-	yield takeLatest(RisksTypes.SHOW_MULTIPLE_GROUPS, showMultipleGroups);
 	yield takeLatest(RisksTypes.GO_TO_RISK, goToRisk);
 	yield takeLatest(RisksTypes.UPDATE_BOARD_RISK, updateBoardRisk);
 	yield takeLatest(RisksTypes.REMOVE_RESOURCE, removeResource);
