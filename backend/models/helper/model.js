@@ -793,8 +793,7 @@ async function removeModelCollections(account, model) {
 		systemLogger.logError("Failed to remove files", err);
 	}
 
-
-	var collections = await ModelFactory.dbManager.listCollections(account)
+	const collections = await ModelFactory.dbManager.listCollections(account);
 	const promises = [];
 
 	collections.forEach(collection => {
