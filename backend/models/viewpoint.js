@@ -31,9 +31,9 @@ const clean = function(routePrefix, viewpointToClean, targetType = "[object Stri
 
 	viewpointFields.forEach((field) => {
 		if (_.get(viewpointToClean, field)) {
-			if ("[object String]" === targetType) {
+			if ("[object String]" === targetType && utils.isObject(_.get(viewToClean, field))) {
 				_.set(viewpointToClean, field, utils.uuidToString(_.get(viewpointToClean, field)));
-			} else if ("[object Object]" === targetType) {
+			} else if ("[object Object]" === targetType && utils.isString(_.get(viewToClean, field))) {
 				_.set(viewpointToClean, field, utils.stringToUUID(_.get(viewpointToClean, field)));
 			}
 		}

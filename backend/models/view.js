@@ -61,22 +61,23 @@ class View {
 	}
 
 	clean(account, model, viewToClean, targetType = "[object String]") {
-		const id = utils.uuidToString(viewToClean._id);
 		const route = ("views" === this.collName) ? "viewpoints" : this.collName;
 
 		if (viewToClean._id) {
-			if ("[object String]" === targetType) {
+			if ("[object String]" === targetType && utils.isObject(_.get(viewToClean, field))) {
 				viewToClean._id = utils.uuidToString(viewToClean._id);
-			} else if ("[object Object]" === targetType) {
+			} else if ("[object Object]" === targetType && utils.isString(_.get(viewToClean, field))) {
 				viewToClean._id = utils.stringToUUID(viewToClean._id);
 			}
 		}
 
 		if (viewToClean.viewpoint) {
+			const id = utils.uuidToString(viewToClean._id);
 			viewToClean.viewpoint = Viewpoint.clean(`${account}/${model}/${route}/${id}`, viewToClean.viewpoint, targetType);
 		}
 
 		if (viewToClean.thumbnail) {
+			const id = utils.uuidToString(viewToClean._id);
 			viewToClean.thumbnail = `${account}/${model}/${route}/${id}/thumbnail.png`;
 		} else {
 			viewToClean.thumbnail = undefined;
