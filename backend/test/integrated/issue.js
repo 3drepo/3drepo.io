@@ -803,6 +803,7 @@ describe("Issues", function () {
 						.send(comment)
 						.expect(200 , (err, res) => {
 							const comment = res.body;
+							console.log(comment);
 							expect(comment.viewpoint.screenshot).to.exist
 								.and.to.be.not.equal(pngBase64);
 							expect(comment.viewpoint.screenshotSmall).to.exist;
@@ -1592,6 +1593,7 @@ describe("Issues", function () {
 							.send(comment)
 							.expect(200 , function(err , res) {
 								const commentRes = res.body;
+								console.log(commentRes);
 								expect(commentRes.comment).to.equal(comment.comment);
 								done(err);
 							});
@@ -1634,7 +1636,10 @@ describe("Issues", function () {
 			it("should succeed if removing an existing comment", function(done) {
 				agent.delete(`/${username}/${model}/issues/${issueId}/comments`)
 					.send({guid:commentId})
-					.expect(200 , done);
+					.expect(200, function(err, res) {
+						console.log(res);
+						done(err);
+					});
 			});
 
 			it("should fail if invalid issue ID is given", function(done) {

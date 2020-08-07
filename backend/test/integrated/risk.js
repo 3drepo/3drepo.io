@@ -905,6 +905,7 @@ describe("Risks", function () {
 							.send(comment)
 							.expect(200 , function(err , res) {
 								const commentRes = res.body;
+								console.log(commentRes);
 								expect(commentRes.comment).to.equal(comment.comment);
 								done(err);
 							});
@@ -939,7 +940,8 @@ describe("Risks", function () {
 			it("should succeed if removing an existing comment", function(done) {
 				agent.delete(`/${username}/${model}/risks/${riskId}/comments`)
 					.send({guid:commentId})
-					.expect(200 , function(err, res) {
+					.expect(200, function(err, res) {
+						console.log(res);
 						done(err);
 					});
 			});
