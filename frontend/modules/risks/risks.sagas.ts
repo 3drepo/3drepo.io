@@ -114,7 +114,7 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 
 		let risk = !ignoreViewer ?
 			yield generateViewpoint( teamspace, model, riskData.name, !Boolean(riskData.descriptionThumbnail) ) :
-			{ viewpoint: {hideIfc: true} };
+			{ viewpoint: {} };
 
 			// .substring(screenshot.indexOf(',') + 1);
 		if (riskData.descriptionThumbnail ) {
