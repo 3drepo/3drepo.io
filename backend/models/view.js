@@ -73,7 +73,7 @@ class View {
 		}
 
 		if (viewToClean.viewpoint) {
-			viewToClean.viewpoint = Viewpoint.clean(`${account}/${model}/${route}/${id}`, viewToClean.viewpoint, targetType);;
+			viewToClean.viewpoint = Viewpoint.clean(`${account}/${model}/${route}/${id}`, viewToClean.viewpoint, targetType);
 		}
 
 		if (viewToClean.thumbnail) {
