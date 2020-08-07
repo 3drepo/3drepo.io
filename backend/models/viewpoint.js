@@ -43,6 +43,8 @@ const clean = function(routePrefix, viewpointToClean, targetType = "[object Stri
 		const viewpointId = utils.uuidToString(viewpointToClean.guid);
 		viewpointToClean.screenshot = `${routePrefix}/viewpoints/${viewpointId}/screenshot.png`;
 	}
+
+	return viewpointToClean;
 };
 
 module.exports = {
