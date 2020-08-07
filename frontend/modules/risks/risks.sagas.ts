@@ -199,11 +199,11 @@ function* updateNewRisk({ newRisk }) {
 	}
 }
 
-function* postComment({ teamspace, modelId, riskData, finishSubmitting }) {
+function* postComment({ teamspace, modelId, riskData, ignoreViewer, finishSubmitting }) {
 	yield put(RisksActions.togglePostCommentPendingState(true));
 	try {
 		const { _id, account, model } = yield select(selectActiveRiskDetails);
-		const { viewpoint } = yield generateViewpoint( account, model, '', false);
+		const { viewpoint } = !ignoreViewer ?  yield generateViewpoint( account, model, '', false) : {viewpoint: {}};
 
 		riskData.viewpoint = {
 			...viewpoint,

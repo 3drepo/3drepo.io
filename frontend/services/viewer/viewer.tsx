@@ -895,11 +895,13 @@ export class ViewerService {
 	 */
 
 	public async getObjectsStatus({ teamspace, model } = { teamspace: '', model: '' }) {
-		return this.isInitialised ? await asyncTimeout(1000, this.getUnityObjectsStatus, teamspace, model) : null;
+		await this.isViewerReady();
+		return await this.getUnityObjectsStatus(teamspace, model);
 	}
 
 	public async getCurrentViewpoint({ teamspace, model }) {
-		return this.isInitialised ? await asyncTimeout(1000, this.getCurrentViewpointInfo, teamspace, model) : null;
+		await this.isViewerReady();
+		await this.getCurrentViewpointInfo(teamspace, model);
 	}
 
 	public async goToDefaultViewpoint() {

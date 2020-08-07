@@ -175,11 +175,11 @@ function* updateNewIssue({ newIssue }) {
 	}
 }
 
-function* postComment({ issueData, finishSubmitting }) {
+function* postComment({ issueData, ignoreViewer, finishSubmitting }) {
 	yield put(IssuesActions.togglePostCommentPendingState(true));
 	try {
 		const { _id, model, account } = yield select(selectActiveIssueDetails);
-		const { viewpoint } = yield generateViewpoint( account, model, '', false);
+		const { viewpoint } = !ignoreViewer ?  yield generateViewpoint( account, model, '', false) : {viewpoint: {}};
 
 		issueData.viewpoint = {
 			...viewpoint,

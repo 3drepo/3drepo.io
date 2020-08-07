@@ -50,7 +50,7 @@ interface IProps {
 	updateSelectedIssuePin: (position) => void;
 	saveIssue: (teamspace, modelId, issue, revision, finishSubmitting, disableViewer) => void;
 	updateIssue: (teamspace, modelId, issue) => void;
-	postComment: (teamspace, modelId, issueData, finishSubmitting) => void;
+	postComment: (teamspace, modelId, issueData, ignoreViewer, finishSubmitting) => void;
 	removeComment: (teamspace, modelId, issueData) => void;
 	subscribeOnIssueCommentsChanges: (teamspace, modelId, issueId) => void;
 	unsubscribeOnIssueCommentsChanges: (teamspace, modelId, issueId) => void;
@@ -304,6 +304,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public postComment = (teamspace, model, { comment, screenshot }, finishSubmitting) => {
+		const { disableViewer } = this.props;
 		const issueCommentData = {
 			_id: this.issueData._id,
 			comment,
@@ -312,7 +313,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 			}
 		};
 
-		this.props.postComment(teamspace, model, issueCommentData, finishSubmitting);
+		this.props.postComment(teamspace, model, issueCommentData, disableViewer, finishSubmitting);
 	}
 
 	public handleSave = (formValues, finishSubmitting) => {

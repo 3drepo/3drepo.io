@@ -50,7 +50,7 @@ interface IProps {
 	fetchRisk: (teamspace, model, riskId) => void;
 	saveRisk: (teamspace, modelId, risk, revision, finishSubmitting, disableViewer) => void;
 	updateRisk: (teamspace, modelId, risk) => void;
-	postComment: (teamspace, modelId, riskData, finishSubmitting) => void;
+	postComment: (teamspace, modelId, riskData, ignoreViewer, finishSubmitting) => void;
 	removeComment: (teamspace, modelId, riskData) => void;
 	subscribeOnRiskCommentsChanges: (teamspace, modelId, riskId) => void;
 	unsubscribeOnRiskCommentsChanges: (teamspace, modelId, riskId) => void;
@@ -315,6 +315,8 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public postComment = (teamspace, model, { comment, screenshot }, finishSubmitting) => {
+		const { disableViewer } = this.props;
+
 		const riskCommentData = {
 			_id: this.riskData._id,
 			rev_id: this.riskData.rev_id,
@@ -322,7 +324,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 			viewpoint: { screenshot }
 		};
 
-		this.props.postComment(teamspace, model, riskCommentData, finishSubmitting);
+		this.props.postComment(teamspace, model, riskCommentData, disableViewer, finishSubmitting);
 	}
 
 	public handleSave = (formValues, finishSubmitting) => {
