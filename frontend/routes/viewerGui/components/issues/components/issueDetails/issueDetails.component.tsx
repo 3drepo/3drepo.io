@@ -55,7 +55,7 @@ interface IProps {
 	subscribeOnIssueCommentsChanges: (teamspace, modelId, issueId) => void;
 	unsubscribeOnIssueCommentsChanges: (teamspace, modelId, issueId) => void;
 	updateNewIssue: (newIssue) => void;
-	setCameraOnViewpoint: (teamspace, modelId, view) => void;
+	showViewpoint: (teamspace, modelId, view) => void;
 	onRemoveResource: (resource) => void;
 	attachFileResources: (files) => void;
 	attachLinkResources: (links) => void;
@@ -199,7 +199,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public handleHeaderClick = () => {
 		if (!this.isNewIssue) { // if its a new issue it shouldnt go to the viewpoint
-			this.setCameraOnViewpoint({ viewpoint: this.issueData.viewpoint });
+			this.setCameraOnViewpoint(this.issueData);
 		}
 	}
 
@@ -262,8 +262,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		this.props.removeComment(this.props.teamspace, this.props.model, issueData);
 	}
 
-	public setCameraOnViewpoint = (viewpoint) => {
-		this.props.setCameraOnViewpoint(this.props.teamspace, this.props.model, viewpoint);
+	public setCameraOnViewpoint = (view) => {
+		this.props.showViewpoint(this.props.teamspace, this.props.model, view);
 	}
 
 	public handlePanelScroll = (e) => {

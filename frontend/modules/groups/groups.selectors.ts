@@ -137,7 +137,7 @@ export const selectOverridesDict = createSelector(
 		}
 
 		const filtered = { colors: {} , transparencies: {}};
-		filtered.colors = {...overrides.color};
+		filtered.colors = {...overrides.colors};
 		filtered.transparencies = {...overrides.transparencies};
 		delete filtered.colors[activeGroup];
 		delete filtered.transparencies[activeGroup];

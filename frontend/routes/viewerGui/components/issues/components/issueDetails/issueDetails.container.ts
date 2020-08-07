@@ -68,7 +68,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	attachLinkResources: IssuesActions.attachLinkResources,
 	showDialog: DialogActions.showDialog,
 	showScreenshotDialog:  DialogActions.showScreenshotDialog,
-	setCameraOnViewpoint: ViewpointsActions.setCameraOnViewpoint
+	showViewpoint: ViewpointsActions.showViewpoint
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(IssueDetails));

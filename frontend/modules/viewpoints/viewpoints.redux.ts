@@ -38,7 +38,9 @@ export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createAct
 	setSearchQuery: ['searchQuery'],
 	showDeleteInfo: ['viewpointId'],
 	setComponentState: ['componentState'],
-	setSelectedViewpoint: ['selectedViewpoint']
+	setSelectedViewpoint: ['selectedViewpoint'],
+	showViewpoint: ['teamspace', 'modelId', 'view']
+
 }, { prefix: 'VIEWPOINTS/' });
 
 export interface IViewpointsComponentState {
@@ -116,7 +118,7 @@ const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
 	return { ...state, componentState: {...state.componentState, ...componentState} };
 };
 
-const selectViewpoint = (state = INITIAL_STATE, { selectedViewpoint }) => {
+const setSelectedViewpoint = (state = INITIAL_STATE, { selectedViewpoint }) => {
 	return { ...state, selectedViewpoint };
 };
 
@@ -127,5 +129,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ViewpointsTypes.UPDATE_VIEWPOINT_SUCCESS]: updateViewpointSuccess,
 	[ViewpointsTypes.DELETE_VIEWPOINT_SUCCESS]: deleteViewpointSuccess,
 	[ViewpointsTypes.SHOW_DELETE_INFO]: showDeleteInfo,
-	[ViewpointsTypes.SET_COMPONENT_STATE]: setComponentState
+	[ViewpointsTypes.SET_COMPONENT_STATE]: setComponentState,
+	[ViewpointsTypes.SET_SELECTED_VIEWPOINT]: setSelectedViewpoint
 });

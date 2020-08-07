@@ -44,6 +44,7 @@ import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { selectTopicTypes } from '../teamspace';
+import { ViewpointsActions } from '../viewpoints';
 import { generateViewpoint, showViewpoint } from '../viewpoints/viewpoints.sagas';
 import { IssuesActions, IssuesTypes } from './issues.redux';
 import {
@@ -277,7 +278,7 @@ function* setActiveIssue({ issue, revision, ignoreViewer = false }) {
 		}
 
 		yield all([
-			!ignoreViewer ? showViewpoint(issue?.account, issue?.model, issue ) : null,
+			!ignoreViewer ? put(ViewpointsActions.showViewpoint(issue?.account, issue?.model, issue)) : null,
 			put(IssuesActions.setComponentState({ activeIssue: issue._id, expandDetails: true }))
 		]);
 	} catch (error) {

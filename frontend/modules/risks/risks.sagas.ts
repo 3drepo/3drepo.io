@@ -43,7 +43,8 @@ import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
-import { generateViewpoint, showViewpoint } from '../viewpoints/viewpoints.sagas';
+import { ViewpointsActions } from '../viewpoints';
+import { generateViewpoint } from '../viewpoints/viewpoints.sagas';
 import { RisksActions, RisksTypes } from './risks.redux';
 import {
 	selectActiveRiskDetails,
@@ -257,7 +258,7 @@ function* printRisks({ teamspace, modelId }) {
 function* setActiveRisk({ risk, revision, ignoreViewer = false }) {
 	try {
 		yield all([
-			!ignoreViewer ? showViewpoint(risk?.account, risk?.model, risk) : null,
+			!ignoreViewer ?  put(ViewpointsActions.showViewpoint(risk?.account, risk?.model, risk)) : null,
 			put(RisksActions.setComponentState({ activeRisk: risk._id, expandDetails: true }))
 		]);
 	} catch (error) {

@@ -19,7 +19,7 @@ import { createSelector } from 'reselect';
 import { getGroupOverride } from '../../helpers/colorOverrides';
 import { hasTransparency } from '../../helpers/colors';
 
-export const selectViewpointsDomain = (state) => ({...state.viewpoints});
+export const selectViewpointsDomain = (state) => state.viewpoints;
 
 export const selectIsPending = createSelector(
 	selectViewpointsDomain, (state) => state.isPending
@@ -54,16 +54,16 @@ export const selectEditMode = createSelector(
 );
 
 export const selectSelectedViewpoint = createSelector(
-	selectViewpointsDomain, (state) => state.selectedviewpoint
+	selectViewpointsDomain, (state) => state.selectedViewpoint
 );
 
 export const selectOverridesDict = createSelector(
-	selectActiveViewpoint, (viewpoint) =>  {
-		if ( !Boolean(viewpoint?.viewpoint?.override_groups?.length)) {
+	selectSelectedViewpoint, (viewpoint) =>  {
+		if ( !Boolean(viewpoint?.override_groups?.length)) {
 			return {};
 		}
 
-		const groups = viewpoint.viewpoint.override_groups ;
+		const groups = viewpoint.override_groups ;
 
 		return groups.reduce((overrides, group) => {
 			getGroupOverride(overrides.colors, group, group.color);

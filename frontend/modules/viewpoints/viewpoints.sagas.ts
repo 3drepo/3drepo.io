@@ -88,7 +88,7 @@ export function* fetchViewpoints({ teamspace, modelId }) {
 	}
 }
 
-export function* generateViewpoint(teamspace, modelId, name, withScreenshot = false, withOverrides = false) {
+export function* generateViewpoint(teamspace, modelId, name, withScreenshot = false) {
 	try {
 		const hideIfc = yield select(selectIfcSpacesHidden);
 
@@ -111,13 +111,11 @@ export function* generateViewpoint(teamspace, modelId, name, withScreenshot = fa
 
 		const objectInfo = yield Viewer.getObjectsStatus();
 
-		if (withOverrides) {
-			const overrides = yield select(selectAllOverridesDict);
-			const overrideGroups = yield groupByColor(overrides.colors);
+		const overrides = yield select(selectAllOverridesDict);
+		const overrideGroups = yield groupByColor(overrides.colors);
 
-			if (overrideGroups.length) {
-				generatedObject.viewpoint.override_groups = overrideGroups;
-			}
+		if (overrideGroups.length) {
+			generatedObject.viewpoint.override_groups = overrideGroups;
 		}
 
 		if (objectInfo && (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0)) {
@@ -210,7 +208,7 @@ export function* unsubscribeOnViewpointChanges({ teamspace, modelId }) {
 	}));
 }
 
-export function* showViewpoint(teamspace, modelId, view ) {
+export function* showViewpoint({teamspace, modelId, view}) {
 	if (view) {
 
 		if (view.preset) {
@@ -276,6 +274,7 @@ export function* showViewpoint(teamspace, modelId, view ) {
 				window.dispatchEvent(new Event('resize'));
 			}
 
+			yield put(ViewpointsActions.setSelectedViewpoint(viewpoint));
 		}
 	}
 }
@@ -304,7 +303,7 @@ export function* prepareGroupsIfNecessary( teamspace, modelId, viewpoint) {
 
 export function* setActiveViewpoint({ teamspace, modelId, view }) {
 	try {
-		yield showViewpoint(teamspace, modelId, view);
+		yield put(ViewpointsActions.showViewpoint(teamspace, modelId, view));
 		yield put(ViewpointsActions.setComponentState({ activeViewpoint: view }));
 	} catch (error) {
 		yield put(ViewpointsActions.setComponentState({ activeViewpoint: null }));
@@ -314,7 +313,7 @@ export function* setActiveViewpoint({ teamspace, modelId, view }) {
 
 export function* prepareNewViewpoint({teamspace, modelId, viewpointName}) {
 	try {
-		const newViewpoint = yield generateViewpoint(teamspace, modelId, viewpointName, true, true);
+		const newViewpoint = yield generateViewpoint(teamspace, modelId, viewpointName, true);
 		yield put(ViewpointsActions.setComponentState({ newViewpoint, activeViewpoint: null, editMode: false }));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('prepare', 'new viewpoint'));
@@ -330,4 +329,5 @@ export default function* ViewpointsSaga() {
 	yield takeLatest(ViewpointsTypes.SUBSCRIBE_ON_VIEWPOINT_CHANGES, subscribeOnViewpointChanges);
 	yield takeLatest(ViewpointsTypes.UNSUBSCRIBE_ON_VIEWPOINT_CHANGES, unsubscribeOnViewpointChanges);
 	yield takeLatest(ViewpointsTypes.PREPARE_NEW_VIEWPOINT, prepareNewViewpoint);
+	yield takeLatest(ViewpointsTypes.SHOW_VIEWPOINT, showViewpoint);
 }

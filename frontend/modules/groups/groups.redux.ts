@@ -54,7 +54,7 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	unsubscribeFromChanges: ['teamspace', 'modelId'],
 	setCriteriaFieldState: ['criteriaFieldState'],
 	resetToSavedSelection: ['groupId'],
-	resetComponentState: []
+	resetComponentState: [],
 }, { prefix: 'GROUPS/' });
 
 export interface ICriteriaFieldState {
