@@ -64,9 +64,9 @@ class View {
 		const route = ("views" === this.collName) ? "viewpoints" : this.collName;
 
 		if (viewToClean._id) {
-			if ("[object String]" === targetType && utils.isObject(_.get(viewToClean, field))) {
+			if ("[object String]" === targetType && utils.isObject(viewToClean._id)) {
 				viewToClean._id = utils.uuidToString(viewToClean._id);
-			} else if ("[object Object]" === targetType && utils.isString(_.get(viewToClean, field))) {
+			} else if ("[object Object]" === targetType && utils.isString(viewToClean._id)) {
 				viewToClean._id = utils.stringToUUID(viewToClean._id);
 			}
 		}
