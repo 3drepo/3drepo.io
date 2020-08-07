@@ -43,16 +43,6 @@ const clean = function(routePrefix, viewpointToClean, targetType = "[object Stri
 		const viewpointId = utils.uuidToString(viewpointToClean.guid);
 		viewpointToClean.screenshot = `${routePrefix}/viewpoints/${viewpointId}/screenshot.png`;
 	}
-
-	// ===============================
-	// DEPRECATED LEGACY SUPPORT START
-	// ===============================
-	if (viewToClean.clippingPlanes) {
-		viewToClean.clippingPlanes = viewToClean.clippingPlanes;
-	}
-	// =============================
-	// DEPRECATED LEGACY SUPPORT END
-	// =============================
 };
 
 module.exports = {

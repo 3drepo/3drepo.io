@@ -88,6 +88,10 @@ class View {
 		if (viewToClean.thumbnail) {
 			viewToClean.screenshot = { thumbnail: viewToClean.thumbnail };
 		}
+
+		if (viewToClean.viewpoint.clippingPlanes) {
+			viewToClean.clippingPlanes = viewToClean.viewpoint.clippingPlanes;
+		}
 		// =============================
 		// DEPRECATED LEGACY SUPPORT END
 		// =============================
