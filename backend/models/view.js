@@ -69,23 +69,23 @@ class View {
 		const route = ("views" === this.collName) ? "viewpoints" : this.collName;
 
 		if (viewToClean._id) {
-			if ("[object String]" === targetType && utils.isObject(viewToClean._id)) {
-				viewToClean._id = utils.uuidToString(viewToClean._id);
-			} else if ("[object Object]" === targetType && utils.isString(viewToClean._id)) {
+			const id = utils.uuidToString(viewToClean._id);
+
+			if ("[object String]" === targetType) {
+				viewToClean._id = id;
+			} else if ("[object Object]" === targetType) {
 				viewToClean._id = utils.stringToUUID(viewToClean._id);
 			}
-		}
 
-		if (viewToClean.viewpoint && viewToClean._id) {
-			const id = utils.uuidToString(viewToClean._id);
-			viewToClean.viewpoint = Viewpoint.clean(`${account}/${model}/${route}/${id}`, viewToClean.viewpoint, targetType);
-		}
+			if (viewToClean.viewpoint) {
+				viewToClean.viewpoint = Viewpoint.clean(`${account}/${model}/${route}/${id}`, viewToClean.viewpoint, targetType);
+			}
 
-		if (viewToClean.thumbnail && viewToClean._id) {
-			const id = utils.uuidToString(viewToClean._id);
-			viewToClean.thumbnail = `${account}/${model}/${route}/${id}/thumbnail.png`;
-		} else {
-			viewToClean.thumbnail = undefined;
+			if (viewToClean.thumbnail) {
+				viewToClean.thumbnail = `${account}/${model}/${route}/${id}/thumbnail.png`;
+			} else {
+				viewToClean.thumbnail = undefined;
+			}
 		}
 
 		// ===============================

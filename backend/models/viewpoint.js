@@ -45,7 +45,7 @@ const clean = function(routePrefix, viewpointToClean, targetType = "[object Stri
 		}
 	});
 
-	if (viewpointToClean._id && viewpointToClean.guid && (viewpointToClean.screenshot || viewpointToClean.screenshot_ref)) {
+	if (viewpointToClean.guid && (viewpointToClean.screenshot || viewpointToClean.screenshot_ref)) {
 		const viewpointId = utils.uuidToString(viewpointToClean.guid);
 		viewpointToClean.screenshot = `${routePrefix}/viewpoints/${viewpointId}/screenshot.png`;
 	}
