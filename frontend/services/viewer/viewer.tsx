@@ -901,7 +901,7 @@ export class ViewerService {
 
 	public async getCurrentViewpoint({ teamspace, model }) {
 		await this.isViewerReady();
-		await this.getCurrentViewpointInfo(teamspace, model);
+		return await this.getCurrentViewpointInfo(teamspace, model);
 	}
 
 	public async goToDefaultViewpoint() {
