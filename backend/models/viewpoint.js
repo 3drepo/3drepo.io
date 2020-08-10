@@ -19,6 +19,7 @@
 const _ = require("lodash");
 
 const utils = require("../utils");
+const FileRef = require("./fileRef");
 
 const clean = function(routePrefix, viewpointToClean, targetType = "[object String]") {
 	const viewpointFields = [
@@ -34,13 +35,12 @@ const clean = function(routePrefix, viewpointToClean, targetType = "[object Stri
 		if (_.get(viewpointToClean, field)) {
 			if ("[object String]" === targetType) {
 				if (Array.isArray(_.get(viewpointToClean, field))) {
-					_.set(viewpointToClean, field,  _.get(viewpointToClean, field).map(utils.uuidToString));
+					viewpointToClean[field] = viewpointToClean[field].map(utils.uuidToString);
 				} else {
-					_.set(viewpointToClean, field, utils.uuidToString(_.get(viewpointToClean, field)));
+					viewpointToClean[field] = utils.uuidToString(viewpointToClean[field]);
 				}
-
 			} else if ("[object Object]" === targetType) {
-				_.set(viewpointToClean, field, utils.stringToUUID(_.get(viewpointToClean, field)));
+				viewpointToClean[field] = utils.stringToUUID(viewpointToClean[field]);
 			}
 		}
 	});
@@ -53,6 +53,39 @@ const clean = function(routePrefix, viewpointToClean, targetType = "[object Stri
 	return viewpointToClean;
 };
 
+const setExternalScreenshotRef = async function(viewpoint, account, model, collName) {
+	const screenshot = viewpoint.screenshot;
+	const ref = await FileRef.storeFile(account, model + "." + collName + ".ref", null, null, screenshot);
+	delete viewpoint.screenshot;
+	viewpoint.screenshot_ref = ref._id;
+	return viewpoint;
+};
+
+const setViewpointScreenshotURL = function(collName, account, model, id, viewpoint) {
+	if (!viewpoint || !viewpoint.guid || (!viewpoint.screenshot && !viewpoint.screenshot_ref)) {
+		return viewpoint;
+	}
+
+	id = utils.uuidToString(id);
+	const viewpointId = utils.uuidToString(viewpoint.guid);
+
+	viewpoint.screenshot = `${account}/${model}/${collName}/${id}/viewpoints/${viewpointId}/screenshot.png`;
+
+	// ===============================
+	// DEPRECATED LEGACY SUPPORT START
+	// ===============================
+	if (!viewpoint.screenshotSmall) {
+		viewpoint.screenshotSmall = viewpoint.screenshot;
+	}
+	// =============================
+	// DEPRECATED LEGACY SUPPORT END
+	// =============================
+
+	return viewpoint;
+};
+
 module.exports = {
-	clean
+	clean,
+	setExternalScreenshotRef,
+	setViewpointScreenshotURL
 };

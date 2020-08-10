@@ -23,7 +23,6 @@ const nodeuuid = require("uuid/v1");
 const responseCodes = require("../response_codes.js");
 const db = require("../handler/db");
 const ChatEvent = require("./chatEvent");
-const FileRef = require("./fileRef");
 const Viewpoint = require("./viewpoint");
 const Groups = require("./group.js");
 
@@ -137,34 +136,11 @@ class View {
 	}
 
 	async setExternalScreenshotRef(viewpoint, account, model, collName) {
-		const screenshot = viewpoint.screenshot;
-		const ref = await FileRef.storeFile(account, model + "." + collName + ".ref", null, null, screenshot);
-		delete viewpoint.screenshot;
-		viewpoint.screenshot_ref = ref._id;
-		return viewpoint;
+		return await Viewpoint.setExternalScreenshotRef(viewpoint, account, model, collName);
 	}
 
 	setViewpointScreenshotURL(collName, account, model, id, viewpoint) {
-		if (!viewpoint || !viewpoint.guid || (!viewpoint.screenshot && !viewpoint.screenshot_ref)) {
-			return viewpoint;
-		}
-
-		id = utils.uuidToString(id);
-		const viewpointId = utils.uuidToString(viewpoint.guid);
-
-		viewpoint.screenshot = account + "/" + model + "/" + collName + "/" + id + "/viewpoints/" + viewpointId + "/screenshot.png";
-
-		// ===============================
-		// DEPRECATED LEGACY SUPPORT START
-		// ===============================
-		if (!viewpoint.screenshotSmall) {
-			viewpoint.screenshotSmall = viewpoint.screenshot;
-		}
-		// =============================
-		// DEPRECATED LEGACY SUPPORT END
-		// =============================
-
-		return viewpoint;
+		return Viewpoint.setViewpointScreenshotURL(collName, account, model, id, viewpoint);
 	}
 
 	getThumbnail(account, model, uid) {

@@ -24,7 +24,7 @@ const _ = require("lodash");
 const ChatEvent = require("./chatEvent");
 
 const Comment = require("./comment");
-const View = require("./view");
+const Viewpoint = require("./viewpoint");
 
 const Ticket = require("./ticket");
 
@@ -142,14 +142,15 @@ function calculateLevelOfRisk(likelihood, consequence) {
 	return levelOfRisk;
 }
 
-async function createViewPoint(account, model, viewpoint) {
+async function createViewPoint(account, model, id, viewpoint) {
 	let newViewpoint = null;
 
 	if (viewpoint) {
 		newViewpoint = {...viewpoint};
 		if (Object.prototype.toString.call(viewpoint) === fieldTypes["viewpoint"]) {
+			const routePrefix = `${account}/${model}/risks/${id}`;
 			newViewpoint.guid = utils.generateUUID();
-			newViewpoint = View.clean(account, model, newViewpoint, fieldTypes.viewpoint);
+			newViewpoint = Viewpoint.clean(routePrefix, newViewpoint, fieldTypes.viewpoint);
 		} else {
 			throw responseCodes.INVALID_ARGUMENTS;
 		}
@@ -179,7 +180,7 @@ class Risk extends Ticket {
 					oldRisk._id,
 					oldRisk.comments,
 					data,
-					createViewPoint(residualData.viewpoint)
+					createViewPoint(oldRisk._id, residualData.viewpoint)
 				);
 
 				data.comments = updatedComments;

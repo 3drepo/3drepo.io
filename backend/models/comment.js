@@ -19,7 +19,7 @@
 const get = require("lodash").get;
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
-const View = new (require("../models/view"))();
+const Viewpoint = require("../models/viewpoint");
 const db = require("../handler/db");
 const FileRef = require("./fileRef");
 
@@ -162,7 +162,8 @@ const addComment = async function(account, model, colName, id, user, data) {
 	let viewpoint = null;
 
 	if (data.viewpoint) {
-		data = View.clean(account, model, data, fieldTypes.viewpoint);
+		const routePrefix = `${account}/${model}/${colName}/${_id}`;
+		data = Viewpoint.clean(routePrefix, data, fieldTypes.viewpoint);
 		viewpoint = data.viewpoint;
 		viewpoint.guid = utils.generateUUID();
 
@@ -172,7 +173,7 @@ const addComment = async function(account, model, colName, id, user, data) {
 				viewpoint.screenshot.substring(viewpoint.screenshot.indexOf(",") + 1),
 				"base64"
 			);
-			await View.setExternalScreenshotRef(viewpoint, account, model, colName);
+			await Viewpoint.setExternalScreenshotRef(viewpoint, account, model, colName);
 		}
 	}
 
@@ -187,7 +188,7 @@ const addComment = async function(account, model, colName, id, user, data) {
 
 	await col.update({ _id }, {...viewpointPush ,$set : {comments}});
 
-	View.setViewpointScreenshotURL(colName, account, model, id, viewpoint);
+	Viewpoint.setViewpointScreenshotURL(colName, account, model, id, viewpoint);
 
 	// 6. Return the new comment.
 	return { comment: {...comment, viewpoint, guid: utils.uuidToString(comment.guid)}, ...references };
