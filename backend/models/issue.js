@@ -68,7 +68,7 @@ const statusEnum = C.ISSUE_STATUS;
 
 class Issue extends Ticket {
 	constructor() {
-		super("issues", "issue_id", "issueIds", "ISSUE", fieldTypes, ownerPrivilegeAttributes);
+		super("issues", "issue", "issueIds", "ISSUE", fieldTypes, ownerPrivilegeAttributes);
 	}
 
 	async create(account, model, newIssue, sessionId) {

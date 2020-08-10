@@ -44,13 +44,13 @@ const extensionRe = /\.(\w+)$/;
 const getResponse = (responseCodeType) => (type) => responseCodes[responseCodeType + "_" + type];
 
 class Ticket extends View {
-	constructor(collName, groupField, refIdsField, responseCodeType, fieldTypes, ownerPrivilegeAttributes) {
+	constructor(collName, viewpointType, refIdsField, responseCodeType, fieldTypes, ownerPrivilegeAttributes) {
 		super();
 		this.collName = collName;
 		this.response = getResponse(responseCodeType);
 		this.fieldTypes = fieldTypes;
 		this.ownerPrivilegeAttributes = ownerPrivilegeAttributes;
-		this.groupField = groupField;
+		this.viewpointType = viewpointType;
 		this.refIdsField = refIdsField;
 	}
 
@@ -299,9 +299,9 @@ class Ticket extends View {
 	}
 
 	setGroupTicketId(account, model, newTicket) {
-		const groupField = this.groupField;
+		const groupField = this.viewpointType + "_id";
 
-		const updateGroup = (group_id) => {
+		const updateGroup = async (group_id) => {
 			// TODO - Do we need to find group first? Can we just patch
 			return Group.findByUID({ account, model }, utils.uuidToString(group_id), null, utils.uuidToString(newTicket.rev_id)).then((group) => {
 				const ticketIdData = {
@@ -332,7 +332,7 @@ class Ticket extends View {
 	}
 
 	async handlePrimaryViewpoint(account, model, ticketId, viewpoint) {
-		viewpoint = await super.handleViewpoint(account, model, ticketId, viewpoint);
+		viewpoint = await super.handleViewpoint(account, model, ticketId, viewpoint, this.viewpointType);
 		viewpoint.guid = utils.generateUUID();
 
 		if (viewpoint.screenshot) {
@@ -371,32 +371,6 @@ class Ticket extends View {
 		systemComments.push(comment);
 	}
 
-	async  createGroup(account, model, ticket,  groupdata, idField, branch, rid) {
-		const data =  {
-			name: ticket.name,
-			[this.groupField]: utils.stringToUUID(ticket._id),
-			...groupdata
-		};
-
-		const group = await  Group.createGroup({account, model}, null,  data, ticket.owner, branch, rid);
-		ticket.viewpoint[idField] = utils.stringToUUID(group._id);
-	}
-	async createGroupsIfNecessary(account, model, newTicket, branch, rid) {
-		if (!newTicket.viewpoint) {
-			return;
-		}
-
-		if (newTicket.viewpoint.highlighted_group && !newTicket.viewpoint.highlighted_group_id) {
-			await this.createGroup(account, model, newTicket,  newTicket.viewpoint.highlighted_group, "highlighted_group_id", branch, rid);
-			delete newTicket.highlighted_group;
-		}
-
-		if (newTicket.viewpoint.hidden_group && !newTicket.viewpoint.hidden_group_id) {
-			await this.createGroup(account, model, newTicket, newTicket.viewpoint.hidden_group, "hidden_group_id", branch, rid);
-			delete newTicket.hidden_group;
-		}
-	}
-
 	/*
 	* @param {string} account
 	* @param {string} model
@@ -416,6 +390,8 @@ class Ticket extends View {
 		} catch(e) {
 			newTicket.number = 1;
 		}
+		const viewpoint = newTicket.viewpoint;
+		const didntHadEmbededGroups = viewpoint &&  (Boolean(viewpoint.hidden_group_id) ||  Boolean(viewpoint.hidden_group_id) || Boolean(viewpoint.shown_group_id));
 
 		Object.keys(newTicket).forEach((key) => {
 			const validTypes = [].concat(this.fieldTypes[key]);
@@ -470,9 +446,9 @@ class Ticket extends View {
 			newTicket.rev_id = history._id;
 		}
 
-		await this.setGroupTicketId(account, model, newTicket);
-
-		await this.createGroupsIfNecessary(account, model, newTicket);
+		if (didntHadEmbededGroups) {
+			await this.setGroupTicketId(account, model, newTicket);
+		}
 
 		newTicket = this.filterFields(newTicket, ["viewpoint", "revId"]);
 

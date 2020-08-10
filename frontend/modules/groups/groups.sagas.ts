@@ -204,7 +204,7 @@ function* downloadGroups({ teamspace, modelId }) {
 		const filteredGroups = searchByFilters(groups, filters, false);
 		const ids = filteredGroups.map((group) => group._id).join(',');
 		const endpointBase =
-			`${teamspace}/${modelId}/revision/master/head/groups/?noIssues=true&noRisks=true`;
+			`${teamspace}/${modelId}/revision/master/head/groups/?noIssues=true&noRisks=true&noViews=true`;
 		const endpoint = ids ? `${endpointBase}&ids=${ids}` : endpointBase;
 		const modelName = Viewer.settings ? Viewer.settings.name : '';
 		yield API.downloadJSON('groups', modelName, `${endpoint}&convertCoords=true`);

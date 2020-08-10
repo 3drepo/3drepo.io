@@ -57,7 +57,7 @@ interface IProps {
 	prepareNewViewpoint: (teamspace, modelId, viewName) => void;
 	updateViewpoint: (teamspace, modelId, viewId, newName) => void;
 	deleteViewpoint: (teamspace, modelId, viewId) => void;
-	showViewpoint: (teamspace, modelId, view) => void;
+	setActiveViewpoint: (teamspace, modelId, view) => void;
 	subscribeOnViewpointChanges: (teamspace, modelId) => void;
 	unsubscribeOnViewpointChanges: (teamspace, modelId) => void;
 	setState: (componentState: IViewpointsComponentState) => void;
@@ -204,7 +204,7 @@ export class Views extends React.PureComponent<IProps, any> {
 	public handleViewpointItemClick = (viewpoint) => () => {
 		if (!this.props.editMode) {
 			const { teamspace, model } = this.props;
-			this.props.showViewpoint(teamspace, model, viewpoint);
+			this.props.setActiveViewpoint(teamspace, model, viewpoint);
 		}
 	}
 
@@ -268,7 +268,7 @@ export class Views extends React.PureComponent<IProps, any> {
 				<PresetViews
 					teamspace={this.props.teamspace}
 					model={this.props.model}
-					showViewpoint={this.props.showViewpoint}
+					setActiveViewpoint={this.props.setActiveViewpoint}
 				/>
 			</ViewerBottomActions>
 			<ViewerPanelButton

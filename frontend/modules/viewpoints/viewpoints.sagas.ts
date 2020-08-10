@@ -15,19 +15,59 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { get } from 'lodash';
-import { put, select, takeLatest } from 'redux-saga/effects';
+import { get, groupBy } from 'lodash';
+import { all, put, select, takeLatest } from 'redux-saga/effects';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { UnityUtil } from '../../globals/unity-util';
+import { hexToArray } from '../../helpers/colors';
+import { prepareGroup } from '../../helpers/groups';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
 import { DialogActions } from '../dialog';
+import {  selectAllOverridesDict, GroupsActions } from '../groups';
 import { dispatch } from '../store';
-import { selectIfcSpacesHidden } from '../tree';
+import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds, selectIfcSpacesHidden, TreeActions } from '../tree';
 import { ViewerGuiActions } from '../viewerGui';
 import { PRESET_VIEW } from './viewpoints.constants';
 import { ViewpointsActions, ViewpointsTypes } from './viewpoints.redux';
+
+function* groupByColor(overrides) {
+	const sharedIdnodes = Object.keys(overrides);
+	const nodes = yield select(selectGetNodesIdsFromSharedIds([{shared_ids: sharedIdnodes}]));
+
+	const modelsDict = (yield select(selectGetMeshesByIds(nodes))).reduce((dict, meshesByModel) => {
+		const { teamspace, modelId } = meshesByModel;
+		const model = { teamspace, modelId};
+		return meshesByModel.meshes.reduce((d, mesh) => {
+			const index = nodes.indexOf(mesh);
+			d[sharedIdnodes[index]] = model;
+			return d;
+		}, dict);
+	}, {});
+
+	return sharedIdnodes.reduce((arr, objectId, i) =>  {
+		const { teamspace, modelId } = modelsDict[objectId];
+		let colorItem = arr.find(({color}) => color.join(',') === hexToArray(overrides[objectId]).join(','));
+
+		if (!colorItem) {
+			colorItem = { color: hexToArray(overrides[objectId]), objects: [] , totalSavedMeshes: 0};
+
+			arr.push(colorItem);
+		}
+
+		let sharedIdsItem =  colorItem.objects.find(({model, account}) => model === modelId && account === teamspace);
+
+		if (!sharedIdsItem) {
+			sharedIdsItem = { shared_ids: [], account: teamspace, model: modelId};
+			colorItem.objects.push(sharedIdsItem);
+			colorItem.totalSavedMeshes ++;
+		}
+
+		sharedIdsItem.shared_ids.push(objectId);
+		return arr;
+	}, []);
+}
 
 export const getThumbnailUrl = (thumbnail) => API.getAPIUrl(thumbnail);
 
@@ -71,6 +111,13 @@ export function* generateViewpoint(teamspace, modelId, name, withScreenshot = fa
 
 		const objectInfo = yield Viewer.getObjectsStatus();
 
+		const overrides = yield select(selectAllOverridesDict);
+		const overrideGroups = yield groupByColor(overrides.colors);
+
+		if (overrideGroups.length) {
+			generatedObject.viewpoint.override_groups = overrideGroups;
+		}
+
 		if (objectInfo && (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0)) {
 			const { highlightedNodes, hiddenNodes } = objectInfo;
 
@@ -97,8 +144,9 @@ export function* generateViewpoint(teamspace, modelId, name, withScreenshot = fa
 
 export function* createViewpoint({teamspace, modelId, viewpoint}) {
 	try {
-		const {data: {_id}} = yield API.createModelViewpoint(teamspace, modelId, viewpoint);
+		const {data: {_id, viewpoint: viewpointData}} = yield API.createModelViewpoint(teamspace, modelId, viewpoint);
 		viewpoint._id = _id;
+		viewpoint.viewpoint = { ...viewpointData, screenshot: viewpoint.viewpoint.screenshot} ;
 
 		yield put(ViewpointsActions.createViewpointSuccess(viewpoint));
 	} catch (error) {
@@ -160,7 +208,7 @@ export function* unsubscribeOnViewpointChanges({ teamspace, modelId }) {
 	}));
 }
 
-export function* setCameraOnViewpoint({ teamspace, modelId, view }) {
+export function* showViewpoint({teamspace, modelId, view}) {
 	if (view) {
 
 		if (view.preset) {
@@ -185,11 +233,17 @@ export function* setCameraOnViewpoint({ teamspace, modelId, view }) {
 					break;
 			}
 		} else {
-			if (view.viewpoint && view.viewpoint.up) {
-				const viewpoint = { ...view.viewpoint, account: teamspace, model: modelId };
+			yield Viewer.isViewerReady();
+
+			yield prepareGroupsIfNecessary(teamspace, modelId, view.viewpoint);
+			const viewpoint = view.viewpoint;
+
+			if (viewpoint?.override_groups) {
+				yield put(GroupsActions.clearColorOverrides());
+			}
+
+			if (viewpoint?.up) {
 				yield put(ViewerGuiActions.setCamera(viewpoint));
-			} else {
-				yield Viewer.goToDefaultViewpoint();
 			}
 
 			const clippingPlanes = view.clippingPlanes || get(view, 'viewpoint.clippingPlanes');
@@ -197,14 +251,60 @@ export function* setCameraOnViewpoint({ teamspace, modelId, view }) {
 			if (clippingPlanes) {
 				yield Viewer.updateClippingPlanes( clippingPlanes, teamspace, modelId);
 			}
+
+			if (viewpoint?.hideIfc) {
+				yield put(TreeActions.setIfcSpacesHidden(true));
+			}
+
+			yield put(TreeActions.showAllNodes());
+
+			yield Viewer.clearHighlights();
+			yield put(TreeActions.clearCurrentlySelected());
+
+			if (viewpoint?.hidden_group?.objects?.length > 0) {
+				yield put(TreeActions.hideNodesBySharedIds(viewpoint.hidden_group.objects));
+			}
+
+			if (viewpoint?.shown?.objects?.length > 0) {
+				yield put(TreeActions.isolateNodesBySharedIds(viewpoint.shown.objects.length));
+			}
+
+			if (viewpoint?.highlighted_group?.objects?.length > 0) {
+				yield put(TreeActions.selectNodesBySharedIds(viewpoint.highlighted_group.objects));
+				window.dispatchEvent(new Event('resize'));
+			}
+
+			yield put(ViewpointsActions.setSelectedViewpoint(viewpoint));
 		}
 	}
 }
 
-export function* showViewpoint({ teamspace, modelId, view }) {
+export function* prepareGroupsIfNecessary( teamspace, modelId, viewpoint) {
+	if (viewpoint?.override_groups_id) {
+		viewpoint.override_groups =  (yield all(viewpoint.override_groups_id.map((groupId) =>
+			API.getGroup(teamspace, modelId, groupId))))
+			.map(({data}) => prepareGroup(data));
+
+		delete viewpoint.override_groups_id;
+	}
+
+	if (viewpoint?.highlighted_group_id) {
+		const highlightedGroup = (yield API.getGroup(teamspace, modelId, viewpoint?.highlighted_group_id)).data;
+		viewpoint.highlighted_group = prepareGroup(highlightedGroup);
+		delete viewpoint.highlighted_group_id;
+	}
+
+	if (viewpoint?.hidden_group_id) {
+		const hiddenGroup = (yield API.getGroup(teamspace, modelId, viewpoint?.hidden_group_id)).data;
+		viewpoint.hidden_group = prepareGroup(hiddenGroup);
+		delete viewpoint.hidden_group_id;
+	}
+}
+
+export function* setActiveViewpoint({ teamspace, modelId, view }) {
 	try {
+		yield put(ViewpointsActions.showViewpoint(teamspace, modelId, view));
 		yield put(ViewpointsActions.setComponentState({ activeViewpoint: view }));
-		yield put(ViewpointsActions.setCameraOnViewpoint(teamspace, modelId, view));
 	} catch (error) {
 		yield put(ViewpointsActions.setComponentState({ activeViewpoint: null }));
 		yield put(DialogActions.showErrorDialog('show', 'viewpoint'));
@@ -225,9 +325,9 @@ export default function* ViewpointsSaga() {
 	yield takeLatest(ViewpointsTypes.CREATE_VIEWPOINT, createViewpoint);
 	yield takeLatest(ViewpointsTypes.UPDATE_VIEWPOINT, updateViewpoint);
 	yield takeLatest(ViewpointsTypes.DELETE_VIEWPOINT, deleteViewpoint);
-	yield takeLatest(ViewpointsTypes.SHOW_VIEWPOINT, showViewpoint);
-	yield takeLatest(ViewpointsTypes.SET_CAMERA_ON_VIEWPOINT, setCameraOnViewpoint);
+	yield takeLatest(ViewpointsTypes.SET_ACTIVE_VIEWPOINT, setActiveViewpoint);
 	yield takeLatest(ViewpointsTypes.SUBSCRIBE_ON_VIEWPOINT_CHANGES, subscribeOnViewpointChanges);
 	yield takeLatest(ViewpointsTypes.UNSUBSCRIBE_ON_VIEWPOINT_CHANGES, unsubscribeOnViewpointChanges);
 	yield takeLatest(ViewpointsTypes.PREPARE_NEW_VIEWPOINT, prepareNewViewpoint);
+	yield takeLatest(ViewpointsTypes.SHOW_VIEWPOINT, showViewpoint);
 }

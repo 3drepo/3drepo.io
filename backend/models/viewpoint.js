@@ -26,14 +26,20 @@ const clean = function(routePrefix, viewpointToClean, targetType = "[object Stri
 		"guid",
 		"highlighted_group_id",
 		"hidden_group_id",
-		"shown_group_id"
+		"shown_group_id",
+		"override_groups_id"
 	];
 
 	viewpointFields.forEach((field) => {
 		if (_.get(viewpointToClean, field)) {
-			if ("[object String]" === targetType && utils.isObject(_.get(viewpointToClean, field))) {
-				_.set(viewpointToClean, field, utils.uuidToString(_.get(viewpointToClean, field)));
-			} else if ("[object Object]" === targetType && utils.isString(_.get(viewpointToClean, field))) {
+			if ("[object String]" === targetType) {
+				if (Array.isArray(_.get(viewpointToClean, field))) {
+					_.set(viewpointToClean, field,  _.get(viewpointToClean, field).map(utils.uuidToString));
+				} else {
+					_.set(viewpointToClean, field, utils.uuidToString(_.get(viewpointToClean, field)));
+				}
+
+			} else if ("[object Object]" === targetType) {
 				_.set(viewpointToClean, field, utils.stringToUUID(_.get(viewpointToClean, field)));
 			}
 		}

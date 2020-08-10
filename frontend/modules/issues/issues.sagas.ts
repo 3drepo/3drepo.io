@@ -25,7 +25,6 @@ import { CHAT_CHANNELS } from '../../constants/chat';
 import { DEFAULT_PROPERTIES, PRIORITIES, STATUSES } from '../../constants/issues';
 import { EXTENSION_RE } from '../../constants/resources';
 import { ROUTES } from '../../constants/routes';
-import { UnityUtil } from '../../globals/unity-util';
 import {
 	createAttachResourceComments,
 	createRemoveResourceComment
@@ -34,7 +33,6 @@ import { prepareIssue } from '../../helpers/issues';
 import { prepareResources } from '../../helpers/resources';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
 import * as API from '../../services/api';
-import { Cache } from '../../services/cache';
 import * as Exports from '../../services/export';
 import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
@@ -46,8 +44,8 @@ import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { selectTopicTypes } from '../teamspace';
-import { TreeActions } from '../tree';
-import { generateViewpoint } from '../viewpoints/viewpoints.sagas';
+import { ViewpointsActions } from '../viewpoints';
+import { generateViewpoint, showViewpoint } from '../viewpoints/viewpoints.sagas';
 import { IssuesActions, IssuesTypes } from './issues.redux';
 import {
 	selectActiveIssueDetails,
@@ -96,11 +94,18 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 			yield generateViewpoint( teamspace, model, issueData.name, !Boolean(issueData.descriptionThumbnail) ) :
 			{ viewpoint: {} };
 
-			// .substring(screenshot.indexOf(',') + 1);
 		if (issueData.descriptionThumbnail ) {
 			issue.viewpoint = {
 				...(issue.viewpoint || {}),
 				screenshot: issueData.descriptionThumbnail
+			};
+		}
+
+			// .substring(screenshot.indexOf(',') + 1);
+		if (issueData.descriptionThumbnail ) {
+			issue.viewpoint = {
+				...(issue.viewpoint || {}),
+				screenshot: issueData.descriptionThumbnail.substring(issueData.descriptionThumbnail.indexOf(',') + 1 )
 			};
 		}
 
@@ -257,122 +262,6 @@ function* printIssues({ teamspace, modelId }) {
 	}
 }
 
-const getIssueGroup = async (issue, groupId, revision) => {
-	if (!groupId) {
-		return null;
-	}
-
-	const cachedGroup = Cache.get('issue.group', groupId);
-	if (cachedGroup) {
-		return cachedGroup;
-	}
-
-	const { data } = await API.getGroup(issue.account, issue.model, groupId, revision);
-
-	if (data.hiddenObjects && !issue.viewpoint.group_id) {
-		data.hiddenObjects = null;
-	}
-
-	Cache.add('issue.group', groupId, data);
-	return data;
-};
-
-function* showMultipleGroups({issue, revision}) {
-	try {
-		const hasViewpointGroups = !isEmpty(pick(issue.viewpoint, [
-			'highlighted_group_id',
-			'hidden_group_id',
-			'shown_group_id'
-		]));
-
-		let objects = {} as { hidden: any[], shown: any[], objects: any[] };
-
-		if (hasViewpointGroups) {
-			const [highlightedGroupData, hiddenGroupData, shownGroupData] = yield Promise.all([
-				getIssueGroup(issue, issue.viewpoint.highlighted_group_id, revision),
-				getIssueGroup(issue, issue.viewpoint.hidden_group_id, revision),
-				getIssueGroup(issue, issue.viewpoint.shown_group_id, revision)
-			]) as any;
-
-			if (hiddenGroupData) {
-				objects.hidden = hiddenGroupData.objects;
-			}
-
-			if (shownGroupData) {
-				objects.shown = shownGroupData.objects;
-			}
-
-			if (highlightedGroupData) {
-				objects.objects = highlightedGroupData.objects;
-			}
-		} else {
-			const hasViewpointDefaultGroup = issue.viewpoint.group_id;
-			const groupId = hasViewpointDefaultGroup ? issue.viewpoint.group_id : issue.group_id;
-			const groupData = yield getIssueGroup(issue, groupId, revision);
-
-			if (groupData.hiddenObjects && !issue.viewpoint.group_id) {
-				groupData.hiddenObjects = null;
-				Cache.add('issue.group', groupId, groupData);
-			}
-
-			objects = groupData;
-		}
-
-		if (objects.hidden) {
-			yield put(TreeActions.hideNodesBySharedIds(objects.hidden));
-		}
-
-		if (objects.shown) {
-			yield put(TreeActions.isolateNodesBySharedIds(objects.shown));
-		}
-
-		if (objects.objects && objects.objects.length > 0) {
-			yield put(TreeActions.selectNodesBySharedIds(objects.objects));
-			window.dispatchEvent(new Event('resize'));
-		}
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('show', 'multiple groups', error));
-	}
-}
-
-function* focusOnIssue({ issue, revision }) {
-	try {
-		yield Viewer.isViewerReady();
-
-		// Remove highlight from any multi objects
-		yield Viewer.clearHighlights();
-		yield put(TreeActions.clearCurrentlySelected());
-
-		const hasViewpoint = issue.viewpoint;
-		const hasHiddenOrShownGroup = hasViewpoint && (issue.viewpoint.hidden_group_id || issue.viewpoint.shown_group_id);
-
-		// Reset object visibility
-		if (hasViewpoint && issue.viewpoint.hideIfc) {
-			yield put(TreeActions.setIfcSpacesHidden(issue.viewpoint.hideIfc));
-		}
-
-		yield put(TreeActions.showAllNodes(!hasHiddenOrShownGroup));
-
-		const hasViewpointGroup = hasViewpoint && (issue.viewpoint.highlighted_group_id || issue.viewpoint.group_id);
-		const hasGroup = issue.group_id;
-
-		if (hasViewpointGroup || hasGroup || hasHiddenOrShownGroup) {
-			yield put(IssuesActions.showMultipleGroups(issue, revision));
-		}
-
-		const { account, model, viewpoint } = issue;
-		if (viewpoint && viewpoint.position) {
-			Viewer.setCamera({ ...viewpoint, account, model });
-			yield Viewer.updateClippingPlanes(viewpoint.clippingPlanes, account, model);
-		} else {
-			yield Viewer.goToDefaultViewpoint();
-		}
-
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('focus', 'issue', error));
-	}
-}
-
 function* setActiveIssue({ issue, revision, ignoreViewer = false }) {
 	try {
 		const activeIssueId = yield select(selectActiveIssueId);
@@ -389,7 +278,7 @@ function* setActiveIssue({ issue, revision, ignoreViewer = false }) {
 		}
 
 		yield all([
-			!ignoreViewer ? put(IssuesActions.focusOnIssue(issue, revision)) : null,
+			!ignoreViewer ? put(ViewpointsActions.showViewpoint(issue?.account, issue?.model, issue)) : null,
 			put(IssuesActions.setComponentState({ activeIssue: issue._id, expandDetails: true }))
 		]);
 	} catch (error) {
@@ -679,7 +568,6 @@ export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.CLOSE_DETAILS, closeDetails);
 	yield takeLatest(IssuesTypes.SUBSCRIBE_ON_ISSUE_CHANGES, subscribeOnIssueChanges);
 	yield takeLatest(IssuesTypes.UNSUBSCRIBE_ON_ISSUE_CHANGES, unsubscribeOnIssueChanges);
-	yield takeLatest(IssuesTypes.FOCUS_ON_ISSUE, focusOnIssue);
 	yield takeLatest(IssuesTypes.SET_NEW_ISSUE, setNewIssue);
 	yield takeLatest(IssuesTypes.EXPORT_BCF, exportBcf);
 	yield takeLatest(IssuesTypes.IMPORT_BCF, importBcf);
@@ -691,7 +579,6 @@ export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.REMOVE_RESOURCE, removeResource);
 	yield takeLatest(IssuesTypes.ATTACH_FILE_RESOURCES, attachFileResources);
 	yield takeLatest(IssuesTypes.ATTACH_LINK_RESOURCES, attachLinkResources);
-	yield takeLatest(IssuesTypes.SHOW_MULTIPLE_GROUPS, showMultipleGroups);
 	yield takeLatest(IssuesTypes.GO_TO_ISSUE, goToIssue);
 	yield takeLatest(IssuesTypes.UPDATE_BOARD_ISSUE, updateBoardIssue);
 }

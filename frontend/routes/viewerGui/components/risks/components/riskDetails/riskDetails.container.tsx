@@ -66,7 +66,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	unsubscribeOnRiskCommentsChanges: RisksActions.unsubscribeOnRiskCommentsChanges,
 	updateNewRisk: RisksActions.updateNewRisk,
 	showScreenshotDialog: DialogActions.showScreenshotDialog,
-	setCameraOnViewpoint: ViewpointsActions.setCameraOnViewpoint,
+	setCameraOnViewpoint: ViewpointsActions.showViewpoint,
 	onRemoveResource: RisksActions.removeResource,
 	attachFileResources: RisksActions.attachFileResources,
 	attachLinkResources: RisksActions.attachLinkResources,

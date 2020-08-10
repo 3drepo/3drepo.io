@@ -537,6 +537,81 @@ describe("Views", function () {
 				}
 			], done);
 		});
+
+		it("with a embeded group should succeed", async function() {
+			const username3 = 'teamSpace1';
+			const model2 = '5bfc11fa-50ac-b7e7-4328-83aa11fa50ac';
+
+			const highlighted_group = {
+				objects: [{
+					"account": 'teamSpace1',
+					model: model2,
+					"shared_ids":["8b9259d2-316d-4295-9591-ae020bfcce48"]
+				}],
+				color: [2555, 255, 0]
+			};
+
+			const hidden_group = {
+				objects: [{
+					"account": 'teamSpace1',
+					model: model2,
+					"shared_ids":["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+				}]
+			};
+
+			const override_groups = [
+				{
+					objects: [{
+						"account": 'teamSpace1',
+						model: model2,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}],
+					color: [1, 2, 3],
+					totalSavedMeshes: 1
+				},
+				{
+					objects: [{
+						"account": 'teamSpace1',
+						model: model2,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					color: [4, 5, 6],
+					totalSavedMeshes: 1
+				},
+			];
+
+			const viewpoint_groups = { highlighted_group, hidden_group, override_groups };
+
+			const view = { "name":"View embeded group  test", viewpoint : {...baseView.viewpoint, ...viewpoint_groups}};
+
+			const agent2 = request.agent(server);
+			await agent2.post("/login")
+						.send({ username: 'teamSpace1', password })
+						.expect(200);
+
+			const { body:{viewpoint:{highlighted_group_id, hidden_group_id, override_groups_id}} } = await agent2.post(`/${username3}/${model2}/viewpoints/`)
+						.send(view)
+						.expect(200);
+
+			const getGroup = async (id) => {
+				const {body} = await agent2.get(`/${username3}/${model2}/revision/master/head/groups/${id}`).expect(200);
+				return body;
+			}
+
+			const [highlighted_group2,hidden_group2, ...override_groups_2 ]	= await	Promise.all([
+				getGroup(highlighted_group_id),
+				getGroup(hidden_group_id),
+			].concat(override_groups_id.map(getGroup)));
+
+			expect(highlighted_group2.objects).to.deep.equal(highlighted_group.objects);
+			expect(hidden_group2.objects).to.deep.equal(hidden_group.objects);
+
+			const mergeObjects = (groups) => groups.reduce((arr, group) => arr.concat(group.objects), []);
+
+			expect(mergeObjects(override_groups_2)).to.deep.equal(mergeObjects(override_groups));
+		});
+
+
 	});
 });
 
