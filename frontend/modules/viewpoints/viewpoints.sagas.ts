@@ -280,24 +280,28 @@ export function* showViewpoint({teamspace, modelId, view}) {
 }
 
 export function* prepareGroupsIfNecessary( teamspace, modelId, viewpoint) {
-	if (viewpoint?.override_groups_id) {
-		viewpoint.override_groups =  (yield all(viewpoint.override_groups_id.map((groupId) =>
-			API.getGroup(teamspace, modelId, groupId))))
-			.map(({data}) => prepareGroup(data));
+	try  {
+		if (viewpoint?.override_groups_id) {
+			viewpoint.override_groups =  (yield all(viewpoint.override_groups_id.map((groupId) =>
+				API.getGroup(teamspace, modelId, groupId))))
+				.map(({data}) => prepareGroup(data));
 
-		delete viewpoint.override_groups_id;
-	}
+			delete viewpoint.override_groups_id;
+		}
 
-	if (viewpoint?.highlighted_group_id) {
-		const highlightedGroup = (yield API.getGroup(teamspace, modelId, viewpoint?.highlighted_group_id)).data;
-		viewpoint.highlighted_group = prepareGroup(highlightedGroup);
-		delete viewpoint.highlighted_group_id;
-	}
+		if (viewpoint?.highlighted_group_id) {
+			const highlightedGroup = (yield API.getGroup(teamspace, modelId, viewpoint?.highlighted_group_id)).data;
+			viewpoint.highlighted_group = prepareGroup(highlightedGroup);
+			delete viewpoint.highlighted_group_id;
+		}
 
-	if (viewpoint?.hidden_group_id) {
-		const hiddenGroup = (yield API.getGroup(teamspace, modelId, viewpoint?.hidden_group_id)).data;
-		viewpoint.hidden_group = prepareGroup(hiddenGroup);
-		delete viewpoint.hidden_group_id;
+		if (viewpoint?.hidden_group_id) {
+			const hiddenGroup = (yield API.getGroup(teamspace, modelId, viewpoint?.hidden_group_id)).data;
+			viewpoint.hidden_group = prepareGroup(hiddenGroup);
+			delete viewpoint.hidden_group_id;
+		}
+	} catch {
+		// groups doesnt exists, still continue
 	}
 }
 
