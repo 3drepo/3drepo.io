@@ -71,12 +71,12 @@ class View {
 			}
 		}
 
-		if (viewToClean.viewpoint) {
+		if (viewToClean.viewpoint && viewToClean._id) {
 			const id = utils.uuidToString(viewToClean._id);
 			viewToClean.viewpoint = Viewpoint.clean(`${account}/${model}/${route}/${id}`, viewToClean.viewpoint, targetType);
 		}
 
-		if (viewToClean.thumbnail) {
+		if (viewToClean.thumbnail && viewToClean._id) {
 			const id = utils.uuidToString(viewToClean._id);
 			viewToClean.thumbnail = `${account}/${model}/${route}/${id}/thumbnail.png`;
 		} else {
