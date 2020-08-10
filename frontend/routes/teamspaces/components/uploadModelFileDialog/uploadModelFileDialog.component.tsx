@@ -31,7 +31,14 @@ import { schema } from '../../../../services/validation';
 import { FileInputField } from './components/fileInputField.component';
 
 import { formatNamedMonthDate } from '../../../../services/formatting/formatDate';
-import { CancelButton, ModelInfo, ModelName, StyledDialogActions } from './uploadModelFileDialog.styles';
+import {
+	Additional,
+	CancelButton,
+	Main,
+	ModelInfo,
+	ModelName,
+	StyledDialogActions,
+} from './uploadModelFileDialog.styles';
 
 const UploadSchema = Yup.object().shape({
 	revisionName: schema.revisionName,
@@ -43,6 +50,8 @@ interface IProps {
 	fetchModelSettings: (teamspace, modelId) => void;
 	fetchRevisions: (teamspace, modelId, showVoid) => void;
 	handleClose: () => void;
+	handleDisableClose: (set: boolean) => void;
+	disableClosed: boolean;
 	modelSettings: any;
 	revisions: any[];
 	models: any[];
@@ -78,6 +87,16 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		const { modelId, teamspaceName, fetchModelSettings, fetchRevisions } = this.props;
 		fetchRevisions(teamspaceName, modelId, true);
 		fetchModelSettings(teamspaceName, modelId);
+	}
+
+	public componentDidUpdate(prevProps: Readonly<IProps>) {
+		if (this.isModelUploading && !this.props.disableClosed) {
+			this.props.handleDisableClose(true);
+		}
+
+		if (!this.isModelUploading && this.props.disableClosed) {
+			this.props.handleDisableClose(false);
+		}
 	}
 
 	public handleFileUpload = (values) => {
@@ -127,7 +146,12 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		}
 
 		if (this.isModelUploading) {
-			return <LoadingDialog content={`Uploading ${modelName} model...`} />;
+			return (
+				<LoadingDialog>
+					<Main>{`Uploading ${modelName} model...`}</Main>
+					<Additional>{'Please do not leave this page before upload has finished'}</Additional>
+				</LoadingDialog>
+			);
 		}
 
 		return (
