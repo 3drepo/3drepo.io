@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -24,14 +24,21 @@ import DialogContent from '@material-ui/core/DialogContent';
 import TextField from '@material-ui/core/TextField';
 import {
 	LoadingDialog
-} from './../../../../routes/components/dialogContainer/components/loadingDialog/loadingDialog.component';
+} from '../../../components/dialogContainer/components';
 
 import { unitsMap } from '../../../../constants/model-parameters';
 import { schema } from '../../../../services/validation';
 import { FileInputField } from './components/fileInputField.component';
 
 import { formatNamedMonthDate } from '../../../../services/formatting/formatDate';
-import { CancelButton, ModelInfo, ModelName, StyledDialogActions } from './uploadModelFileDialog.styles';
+import {
+	Additional,
+	CancelButton,
+	Main,
+	ModelInfo,
+	ModelName,
+	StyledDialogActions,
+} from './uploadModelFileDialog.styles';
 
 const UploadSchema = Yup.object().shape({
 	revisionName: schema.revisionName,
@@ -39,12 +46,15 @@ const UploadSchema = Yup.object().shape({
 });
 
 interface IProps {
-	uploadModelFile: (teamspace, projectName, modelData, fileData) => void;
+	uploadModelFile: (teamspace, projectName, modelData, fileData, handleClose) => void;
 	fetchModelSettings: (teamspace, modelId) => void;
 	fetchRevisions: (teamspace, modelId, showVoid) => void;
 	handleClose: () => void;
+	handleDisableClose: (set: boolean) => void;
+	disableClosed: boolean;
 	modelSettings: any;
 	revisions: any[];
+	models: any[];
 	modelId: string;
 	modelName: string;
 	teamspaceName: string;
@@ -61,10 +71,32 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		fileName: ''
 	};
 
+	get modelDetails() {
+		return this.props.models[this.props.modelSettings.id] || null;
+	}
+
+	get modelStatus() {
+		return this.modelDetails && this.modelDetails.status;
+	}
+
+	get isModelUploading() {
+		return this.modelStatus === 'uploading';
+	}
+
 	public componentDidMount() {
 		const { modelId, teamspaceName, fetchModelSettings, fetchRevisions } = this.props;
 		fetchRevisions(teamspaceName, modelId, true);
 		fetchModelSettings(teamspaceName, modelId);
+	}
+
+	public componentDidUpdate(prevProps: Readonly<IProps>) {
+		if (this.isModelUploading && !this.props.disableClosed) {
+			this.props.handleDisableClose(true);
+		}
+
+		if (!this.isModelUploading && this.props.disableClosed) {
+			this.props.handleDisableClose(false);
+		}
 	}
 
 	public handleFileUpload = (values) => {
@@ -80,8 +112,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 			modelName, modelId
 		};
 
-		uploadModelFile(teamspaceName, projectName, modelData, fileData);
-		handleClose();
+		uploadModelFile(teamspaceName, projectName, modelData, fileData, handleClose);
 	}
 
 	public renderRevisionInfo = (revisions) => {
@@ -108,10 +139,19 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { modelSettings, revisions, modelName, handleClose, isPending } = this.props;
+		const { modelSettings, revisions, modelName, models, handleClose, isPending } = this.props;
 
 		if (isPending) {
 			return <LoadingDialog content={`Loading ${modelName} data...`} />;
+		}
+
+		if (this.isModelUploading) {
+			return (
+				<LoadingDialog>
+					<Main>{`Uploading ${modelName} model...`}</Main>
+					<Additional>{'Please do not leave this page before upload has finished'}</Additional>
+				</LoadingDialog>
+			);
 		}
 
 		return (
@@ -157,22 +197,26 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 								<FileInputField
 									{...field}
 									onChange={this.handleFileChange(field.onChange)}
-						/>} />
+								/>
+							} />
 							<Field render={ () =>
 								<CancelButton
 									onClick={handleClose}
-									color="secondary">
+									color="secondary"
+								>
 									Cancel
-									</CancelButton> }
-							/>
+								</CancelButton>
+							} />
 							<Field render={ ({ form }) =>
 								<Button
 									type="submit"
 									variant="raised"
 									color="secondary"
-									disabled={(!form.isValid || form.isValidating)}>
-										Upload
-									</Button>}	/>
+									disabled={(!form.isValid || form.isValidating)}
+								>
+									Upload
+								</Button>
+							} />
 						</StyledDialogActions>
 					</DialogContent>
 				</Form>

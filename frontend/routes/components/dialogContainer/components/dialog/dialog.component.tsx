@@ -38,6 +38,8 @@ interface IProps {
 
 export const Dialog = (props: IProps) => {
 	const [isOpen, setIsOpen] = useState(true);
+	const [closeDisabled, setCloseDisabled] = useState(false);
+
 	useEffect(() => {
 		if (props.config && props.config.logError) {
 			console.error(props.config.logError, props.config.content);
@@ -61,6 +63,8 @@ export const Dialog = (props: IProps) => {
 				handleResolve={handleResolve}
 				handleClose={handleClose}
 				dialogId={props.id}
+				handleDisableClose={handleCloseDisable}
+				disableClosed={closeDisabled}
 			/>
 		);
 	});
@@ -80,6 +84,8 @@ export const Dialog = (props: IProps) => {
 		</DialogActions>
 	));
 
+	const handleCloseDisable = (set: boolean) => setCloseDisabled(set);
+
 	const handleCallback = (callback) => {
 		const action = callback();
 
@@ -95,12 +101,15 @@ export const Dialog = (props: IProps) => {
 	};
 
 	const handleClose = (...args) => {
-		setIsOpen(false);
+		if (!closeDisabled) {
+			setIsOpen(false);
 
-		handleHide();
+			handleHide();
 
-		if (props.config.onCancel) {
-			handleCallback(props.config.onCancel.bind(null, ...args));
+			if (props.config.onCancel) {
+				handleCallback(props.config.onCancel.bind(null, ...args));
+			}
+
 		}
 	};
 
