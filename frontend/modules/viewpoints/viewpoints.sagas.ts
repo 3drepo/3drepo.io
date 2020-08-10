@@ -297,7 +297,7 @@ export function* prepareGroupsIfNecessary( teamspace, modelId, viewpoint) {
 	if (viewpoint?.hidden_group_id) {
 		const hiddenGroup = (yield API.getGroup(teamspace, modelId, viewpoint?.hidden_group_id)).data;
 		viewpoint.hidden_group = prepareGroup(hiddenGroup);
-		delete viewpoint.hidden_group;
+		delete viewpoint.hidden_group_id;
 	}
 }
 

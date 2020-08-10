@@ -45,9 +45,13 @@ const fieldTypes = {
 		"aspect_ratio": "[object Number]",
 		"type": "[object String]",
 		"orthographicSize": "[object Number]",
-		"highlighted_group_id": "[object Object]",
-		"hidden_group_id": "[object Object]",
-		"shown_group_id": "[object Object]",
+		"highlighted_group_id": "[object String]",
+		"hidden_group_id": "[object String]",
+		"shown_group_id": "[object String]",
+		"shown_group": "[object Object]",
+		"hidden_group": "[object Object]",
+		"highlighted_group": "[object Object]",
+		"override_groups": "[object Array]",
 		"clippingPlanes": "[object Array]"
 	}
 };
