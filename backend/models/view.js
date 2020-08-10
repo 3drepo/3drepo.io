@@ -237,7 +237,7 @@ class View {
 		}
 
 		if (viewpoint.override_groups) {
-			viewpoint.override_groups_id = (await Promise.all(viewpoint.override_groups.map(data => Groups.createGroup(dbCol, null, {...data, [groupIdField]: id, name: "override_" + viewpoint.color.join(",")})))).map(({_id}) => _id);
+			viewpoint.override_groups_id = (await Promise.all(viewpoint.override_groups.map(data => Groups.createGroup(dbCol, null, {...data, [groupIdField]: id, name: "override"})))).map(({_id}) => _id);
 			delete viewpoint.override_groups;
 		}
 
