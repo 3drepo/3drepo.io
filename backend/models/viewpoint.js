@@ -32,17 +32,14 @@ const clean = function(routePrefix, viewpointToClean, targetType = "[object Stri
 
 	viewpointFields.forEach((field) => {
 		if (_.get(viewpointToClean, field)) {
-			if ("[object String]" === targetType && utils.isObject(_.get(viewpointToClean, field))) {
-				_.set(viewpointToClean, field, utils.uuidToString(_.get(viewpointToClean, field)));
-<<<<<<< HEAD
-			} else if ("[object Object]" === targetType && utils.isString(_.get(viewpointToClean, field))) {
-=======
-
+			if ("[object String]" === targetType) {
 				if (Array.isArray(_.get(viewpointToClean, field))) {
 					_.set(viewpointToClean, field,  _.get(viewpointToClean, field).map(utils.uuidToString));
+				} else {
+					_.set(viewpointToClean, field, utils.uuidToString(_.get(viewpointToClean, field)));
 				}
+
 			} else if ("[object Object]" === targetType) {
->>>>>>> ISSUE #2116 - When an issue with overrid colour has been selected it
 				_.set(viewpointToClean, field, utils.stringToUUID(_.get(viewpointToClean, field)));
 			}
 		}

@@ -25,6 +25,7 @@ const db = require("../handler/db");
 const ChatEvent = require("./chatEvent");
 const FileRef = require("./fileRef");
 const Viewpoint = require("./viewpoint");
+const Groups = require("./group.js");
 
 const { systemLogger } = require("../logger.js");
 
@@ -214,7 +215,7 @@ class View {
 		return { _id: utils.uuidToString(uid) };
 	}
 
-	async handleViewpoint(account, model, id, viewpoint) {
+	async handleViewpoint(account, model, id, viewpoint, viewpointType) {
 		viewpoint = viewpoint || {};
 
 		const viewpointId = (viewpoint.guid) ? utils.uuidToString(viewpoint.guid) : undefined;
@@ -235,6 +236,29 @@ class View {
 			viewpoint.shown_group_id = utils.stringToUUID(viewpoint.shown_group_id);
 		} else if ("" === viewpoint.shown_group_id) {
 			delete viewpoint.shown_group_id;
+		}
+
+		const dbCol = {account, model};
+		const groupIdField = viewpointType + "_id";
+
+		if (viewpoint.highlighted_group) {
+			viewpoint.highlighted_group_id = (await Groups.createGroup(dbCol, null, {...viewpoint.highlighted_group, [groupIdField]: id}))._id;
+			delete viewpoint.highlighted_group;
+		}
+
+		if (viewpoint.hidden_group) {
+			viewpoint.hidden_group_id = (await Groups.createGroup(dbCol, null, {...viewpoint.hidden_group, [groupIdField]: id}))._id;
+			delete viewpoint.hidden_group;
+		}
+
+		if (viewpoint.shown_group) {
+			viewpoint.shown_group_id = (await Groups.createGroup(dbCol, null, {...viewpoint.shown_group, [groupIdField]: id}))._id;
+			delete viewpoint.shown_group;
+		}
+
+		if (viewpoint.override_groups) {
+			viewpoint.override_groups_id = (await Promise.all(viewpoint.override_groups.map(data => Groups.createGroup(dbCol, null, {...data, [groupIdField]: id})))).map(({_id}) => _id);
+			delete viewpoint.override_groups;
 		}
 
 		if (viewpoint.screenshot) {
