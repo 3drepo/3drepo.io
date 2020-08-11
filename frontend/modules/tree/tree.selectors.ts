@@ -21,13 +21,7 @@ import { createSelector } from 'reselect';
 import { NODE_TYPES, VISIBILITY_STATES } from '../../constants/tree';
 import { searchByFilters } from '../../helpers/searching';
 import { calculateTotalMeshes } from '../../helpers/tree';
-import { selectOverrides as selectGroupsOverrides,
-	selectTransparencies as selectGroupsTransparencies } from '../groups';
 
-import { selectOverrides as selectViewsOverrides,
-		selectTransparencies as selectViewsTransparencies } from '../viewpoints';
-
-import { selectSelectedFrameColors, selectSelectedFrameTransparencies } from '../sequences';
 import TreeProcessing from './treeProcessing/treeProcessing';
 import { ITreeProcessingData } from './treeProcessing/treeProcessing.constants';
 
@@ -291,16 +285,4 @@ export const selectVisibleTreeNodesIds = createSelector(
 
 export const selectIsTreeProcessed = createSelector(
 	selectTreeDomain, (state) => state.isTreeProcessed
-);
-
-export const selectColorOverrides = createSelector(
-	selectViewsOverrides, selectGroupsOverrides, selectSelectedFrameColors,
-		(viewsOverrides, groupsOverrides, sequenceFrameOverrides ) =>
-		({...viewsOverrides,  ...groupsOverrides, ...sequenceFrameOverrides})
-);
-
-export const selectAllTransparencyOverrides = createSelector(
-	selectViewsTransparencies, selectGroupsTransparencies, selectSelectedFrameTransparencies,
-		(viewsTransparencies, groupsTransparencies, sequenceTransparencies) =>
-		({...viewsTransparencies, ...groupsTransparencies, ...sequenceTransparencies})
 );
