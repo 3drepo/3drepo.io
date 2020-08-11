@@ -31,6 +31,7 @@ import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds, selectIfcSpacesHi
 import { ViewerGuiActions } from '../viewerGui';
 import { PRESET_VIEW } from './viewpoints.constants';
 import { ViewpointsActions, ViewpointsTypes } from './viewpoints.redux';
+import { selectCurrentRevisionId } from '../model';
 
 function* groupByColor(overrides) {
 	const sharedIdnodes = Object.keys(overrides);
@@ -281,22 +282,24 @@ export function* showViewpoint({teamspace, modelId, view}) {
 
 export function* prepareGroupsIfNecessary( teamspace, modelId, viewpoint) {
 	try  {
+		const revision = yield select(selectCurrentRevisionId);
+
 		if (viewpoint?.override_groups_id) {
 			viewpoint.override_groups =  (yield all(viewpoint.override_groups_id.map((groupId) =>
-				API.getGroup(teamspace, modelId, groupId))))
+				API.getGroup(teamspace, modelId, groupId, revision))))
 				.map(({data}) => prepareGroup(data));
 
 			delete viewpoint.override_groups_id;
 		}
 
 		if (viewpoint?.highlighted_group_id) {
-			const highlightedGroup = (yield API.getGroup(teamspace, modelId, viewpoint?.highlighted_group_id)).data;
+			const highlightedGroup = (yield API.getGroup(teamspace, modelId, viewpoint?.highlighted_group_id, revision)).data;
 			viewpoint.highlighted_group = prepareGroup(highlightedGroup);
 			delete viewpoint.highlighted_group_id;
 		}
 
 		if (viewpoint?.hidden_group_id) {
-			const hiddenGroup = (yield API.getGroup(teamspace, modelId, viewpoint?.hidden_group_id)).data;
+			const hiddenGroup = (yield API.getGroup(teamspace, modelId, viewpoint?.hidden_group_id, revision)).data;
 			viewpoint.hidden_group = prepareGroup(hiddenGroup);
 			delete viewpoint.hidden_group_id;
 		}
