@@ -1,16 +1,15 @@
-import { values } from 'lodash';
-
 import CheckCircle from '@material-ui/icons/CheckCircle';
 import Download from '@material-ui/icons/CloudDownload';
 import ErrorSolid from '@material-ui/icons/Error';
 import ErrorOutline from '@material-ui/icons/ErrorOutline';
+import HighlightOff from '@material-ui/icons/HighlightOff';
 import NewReleases from '@material-ui/icons/NewReleases';
 import Pins from '@material-ui/icons/PinDrop';
 import Print from '@material-ui/icons/Print';
 import SyncProblem from '@material-ui/icons/SyncProblem';
-import { SortAmountDown, SortAmountUp } from '../routes/components/fontAwesomeIcon';
 
 import { FILTER_TYPES } from '../routes/components/filterPanel/filterPanel.component';
+import { SortAmountDown, SortAmountUp } from '../routes/components/fontAwesomeIcon';
 import { COLOR, PIN_COLORS } from '../styles';
 
 export const RISK_PANEL_NAME = 'risk';
@@ -54,7 +53,8 @@ export const RISK_LEVELS = {
 	PROPOSED: 'proposed',
 	AGREED_PARTIAL: 'agreed_partial',
 	AGREED_FULLY: 'agreed_fully',
-	REJECTED: 'rejected'
+	REJECTED: 'rejected',
+	VOID: 'void',
 };
 
 export const RISK_MITIGATION_STATUSES = [
@@ -62,7 +62,8 @@ export const RISK_MITIGATION_STATUSES = [
 	{ value: RISK_LEVELS.PROPOSED, name: 'Proposed'},
 	{ value: RISK_LEVELS.AGREED_PARTIAL, name: 'Agreed (Partial)' },
 	{ value: RISK_LEVELS.AGREED_FULLY, name: 'Agreed (Fully)' },
-	{ value: RISK_LEVELS.REJECTED, name: 'Rejected' }
+	{ value: RISK_LEVELS.REJECTED, name: 'Rejected' },
+	{ value: RISK_LEVELS.VOID, name: 'Void' },
 ];
 
 export const RISK_LEVELS_ICONS = {
@@ -70,7 +71,8 @@ export const RISK_LEVELS_ICONS = {
 	[RISK_LEVELS.PROPOSED]: ErrorOutline,
 	[RISK_LEVELS.AGREED_PARTIAL]: ErrorSolid,
 	[RISK_LEVELS.AGREED_FULLY]: CheckCircle,
-	[RISK_LEVELS.REJECTED]: SyncProblem
+	[RISK_LEVELS.REJECTED]: SyncProblem,
+	[RISK_LEVELS.VOID]: HighlightOff,
 };
 
 export const RISK_LEVELS_COLOURS = {

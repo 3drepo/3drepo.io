@@ -50,6 +50,11 @@ export const ResourcesContainer = styled.div`
 	margin-bottom: 5px;
 `;
 
+export const ResourcesList = styled.div`
+	margin-top: 25px;
+	margin-bottom: 25px;
+`;
+
 export const ActionContainer = styled.span`
 	min-width: 28px;
 	min-height: 28px;

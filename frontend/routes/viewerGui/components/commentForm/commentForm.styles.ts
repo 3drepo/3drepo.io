@@ -86,8 +86,9 @@ export const FileUploadInvoker = styled.input.attrs({
 	type: 'file',
 	accept: 'image/*'
 })`
-	position:fixed;
+	position: fixed;
 	top: -200%;
+	visibility: hidden;
 `;
 
 export const LoaderContainer = styled.div`

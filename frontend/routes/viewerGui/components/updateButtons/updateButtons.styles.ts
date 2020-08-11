@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,24 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
-import { StyledIconButton } from '../../teamspaces/components/tooltipButton/tooltipButton.styles';
+import FormControl from '@material-ui/core/FormControl';
 
-export const Container = styled.div``;
+import { StyledButton } from '../containedButton/containedButton.styles';
+import { Container as ButtonContainer } from '../pinButton/pinButton.styles';
 
-export const ShowModelButtonContainer = styled.div`
+export const UpdateButtonsContainer = styled(FormControl)`
 	&& {
-		position: absolute;
-		z-index: 10;
-		top: 3px;
-		right: 3px;
-		padding: 0 !important;
+		display: flex;
+		flex-direction: row;
+		justify-content: ${({ center }: { center: boolean }) => center ? 'center' : 'flex-start'};
+		width: 100%;
 
-		${({ preview }: { preview: boolean }) => preview ? css`
-			${StyledIconButton} {
-				padding: 6px;
-			}
-		` : ''};
+		${StyledButton} {
+			padding: 4px 10px;
+		}
+
+		${ButtonContainer} ~ ${ButtonContainer} {
+			margin-left: 12px;
+		}
 	}
 `;

@@ -62,6 +62,7 @@ export const Dialog = (props: IProps) => {
 				{...data}
 				handleResolve={handleResolve}
 				handleClose={handleClose}
+				dialogId={props.id}
 				handleDisableClose={handleCloseDisable}
 				disableClosed={closeDisabled}
 			/>
@@ -126,7 +127,7 @@ export const Dialog = (props: IProps) => {
 			<DialogTitle disableTypography>{title}{renderCloseButton()}</DialogTitle>
 			{renderContent(content && !DialogTemplate)}
 			{renderTemplate(!!DialogTemplate)}
-			{renderActions(content && onCancel)}
+			{renderActions(content && onCancel && !props.config.onConfirm)}
 		</DialogBase>
 	);
 };

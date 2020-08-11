@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,24 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
-import { StyledIconButton } from '../../teamspaces/components/tooltipButton/tooltipButton.styles';
+import IconComponent from '@material-ui/core/SvgIcon';
 
-export const Container = styled.div``;
-
-export const ShowModelButtonContainer = styled.div`
+export const Icon = styled(IconComponent)`
 	&& {
-		position: absolute;
-		z-index: 10;
-		top: 3px;
-		right: 3px;
-		padding: 0 !important;
+		justify-content: center;
+		align-items: center;
 
-		${({ preview }: { preview: boolean }) => preview ? css`
-			${StyledIconButton} {
-				padding: 6px;
-			}
-		` : ''};
+		svg path {
+			stroke: currentColor;
+		}
 	}
 `;
