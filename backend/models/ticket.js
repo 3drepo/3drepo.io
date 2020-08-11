@@ -331,8 +331,8 @@ class Ticket extends View {
 		return Promise.all(groupUpdatePromises);
 	}
 
-	async handlePrimaryViewpoint(account, model, ticketId, viewpoint) {
-		viewpoint = await super.handleViewpoint(account, model, ticketId, viewpoint, this.viewpointType);
+	async handlePrimaryViewpoint(account, model, ticketId, viewpoint, branch, revId) {
+		viewpoint = await super.handleViewpoint(account, model, ticketId, viewpoint, this.viewpointType, branch, revId);
 		viewpoint.guid = utils.generateUUID();
 
 		if (viewpoint.screenshot) {
@@ -429,7 +429,7 @@ class Ticket extends View {
 		if (!newTicket.viewpoints || newTicket.viewpoint) {
 			// FIXME need to revisit this for BCF refactor
 			// This allows BCF import to create new issue with more than 1 viewpoint
-			newTicket.viewpoints = [await this.handlePrimaryViewpoint(account, model, newTicket._id, newTicket.viewpoint)];
+			newTicket.viewpoints = [await this.handlePrimaryViewpoint(account, model, newTicket._id, newTicket.viewpoint, branch, newTicket.revId)];
 
 			if (newTicket.viewpoints[0].thumbnail) {
 				newTicket.thumbnail = newTicket.viewpoints[0].thumbnail;

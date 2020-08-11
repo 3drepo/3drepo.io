@@ -195,7 +195,7 @@ class View {
 		return { _id: utils.uuidToString(uid) };
 	}
 
-	async handleViewpoint(account, model, id, viewpoint, viewpointType = "view") {
+	async handleViewpoint(account, model, id, viewpoint, viewpointType = "view", branch = "master", revid) {
 		viewpoint = viewpoint || {};
 
 		const viewpointId = (viewpoint.guid) ? utils.uuidToString(viewpoint.guid) : undefined;
@@ -222,22 +222,22 @@ class View {
 		const groupIdField = viewpointType + "_id";
 
 		if (viewpoint.highlighted_group) {
-			viewpoint.highlighted_group_id = (await Groups.createGroup(dbCol, null, {...viewpoint.highlighted_group, [groupIdField]: id, name: "highlighted"}))._id;
+			viewpoint.highlighted_group_id = (await Groups.createGroup(dbCol, null, {...viewpoint.highlighted_group, [groupIdField]: id, name: "highlighted"}, null, branch, revid))._id;
 			delete viewpoint.highlighted_group;
 		}
 
 		if (viewpoint.hidden_group) {
-			viewpoint.hidden_group_id = (await Groups.createGroup(dbCol, null, {...viewpoint.hidden_group, [groupIdField]: id, name: "hidden" }))._id;
+			viewpoint.hidden_group_id = (await Groups.createGroup(dbCol, null, {...viewpoint.hidden_group, [groupIdField]: id, name: "hidden" }, null, branch, revid))._id;
 			delete viewpoint.hidden_group;
 		}
 
 		if (viewpoint.shown_group) {
-			viewpoint.shown_group_id = (await Groups.createGroup(dbCol, null, {...viewpoint.shown_group, [groupIdField]: id, name: "shown" }))._id;
+			viewpoint.shown_group_id = (await Groups.createGroup(dbCol, null, {...viewpoint.shown_group, [groupIdField]: id, name: "shown" }, null, branch, revid))._id;
 			delete viewpoint.shown_group;
 		}
 
 		if (viewpoint.override_groups) {
-			viewpoint.override_groups_id = (await Promise.all(viewpoint.override_groups.map(data => Groups.createGroup(dbCol, null, {...data, [groupIdField]: id, name: "override"})))).map(({_id}) => _id);
+			viewpoint.override_groups_id = (await Promise.all(viewpoint.override_groups.map(data => Groups.createGroup(dbCol, null, {...data, [groupIdField]: id, name: "override"}, null, branch, revid)))).map(({_id}) => _id);
 			delete viewpoint.override_groups;
 		}
 
