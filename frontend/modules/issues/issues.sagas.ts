@@ -29,12 +29,14 @@ import {
 	createAttachResourceComments,
 	createRemoveResourceComment
 } from '../../helpers/comments';
+import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
 import { prepareIssue } from '../../helpers/issues';
 import { prepareResources } from '../../helpers/resources';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
 import { Viewer } from '../../services/viewer/viewer';
+import { BoardActions } from '../board';
 import { ChatActions } from '../chat';
 import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
@@ -287,7 +289,7 @@ function* setActiveIssue({ issue, revision, ignoreViewer = false }) {
 }
 
 function* goToIssue({ issue }) {
-	const {teamspace, model, revision} = yield select(selectUrlParams);
+	const { teamspace, model, revision } = yield select(selectUrlParams);
 	let queryParams =  yield select(selectQueryParams);
 
 	const issueId = (issue || {})._id;
@@ -335,8 +337,7 @@ function* closeDetails() {
 const onUpdateEvent = (updatedIssue) => {
 	const jobs = selectJobsList(getState());
 
-	if (updatedIssue.status === STATUSES.CLOSED) {
-
+	if ([STATUSES.CLOSED, STATUSES.VOID].includes(updatedIssue.status)) {
 		dispatch(IssuesActions.showCloseInfo(updatedIssue._id));
 		setTimeout(() => {
 			dispatch(IssuesActions.saveIssueSuccess(prepareIssue(updatedIssue, jobs)));
@@ -427,6 +428,52 @@ function* unsubscribeOnIssueCommentsChanges({ teamspace, modelId, issueId }) {
 	}));
 }
 
+export function* cloneIssue({ dialogId }) {
+	const activeIssue = yield select(selectActiveIssueDetails);
+	const jobs = yield select(selectJobsList);
+	const currentUser = yield select(selectCurrentUser);
+	const clonedProperties = omit(activeIssue, [
+		'_id',
+		'rev_id',
+		'number',
+		'owner',
+		'comments',
+		'created',
+		'creator_role',
+		'lastUpdated',
+		'resources',
+		'thumbnail',
+		'viewpoint',
+		'priority_last_changed',
+		'status_last_changed',
+	]);
+
+	if (activeIssue.descriptionThumbnail) {
+		const base64Image = yield imageUrlToBase64(activeIssue.descriptionThumbnail);
+		clonedProperties.descriptionThumbnail = `data:image/png;base64,${base64Image}`;
+	}
+
+	try {
+		const newIssue = prepareIssue({
+			...clonedProperties,
+			owner: currentUser.username,
+			clone: true,
+		}, jobs);
+
+		if (dialogId) {
+			yield put(DialogActions.hideDialog(dialogId));
+			yield put(BoardActions.openCardDialog(null, null, true));
+		}
+
+		yield put(IssuesActions.setComponentState({
+			showDetails: true,
+			activeIssue: null,
+			newIssue
+		}));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('prepare', 'clone issue', error));
+	}
+}
 export function* setNewIssue() {
 	const jobs = yield select(selectJobsList);
 	const currentUser = yield select(selectCurrentUser);
@@ -569,6 +616,7 @@ export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.SUBSCRIBE_ON_ISSUE_CHANGES, subscribeOnIssueChanges);
 	yield takeLatest(IssuesTypes.UNSUBSCRIBE_ON_ISSUE_CHANGES, unsubscribeOnIssueChanges);
 	yield takeLatest(IssuesTypes.SET_NEW_ISSUE, setNewIssue);
+	yield takeLatest(IssuesTypes.CLONE_ISSUE, cloneIssue);
 	yield takeLatest(IssuesTypes.EXPORT_BCF, exportBcf);
 	yield takeLatest(IssuesTypes.IMPORT_BCF, importBcf);
 	yield takeLatest(IssuesTypes.SUBSCRIBE_ON_ISSUE_COMMENTS_CHANGES, subscribeOnIssueCommentsChanges);

@@ -43,7 +43,7 @@ interface IProps {
 
 export const Message = ({
 	viewpoint, setCameraOnViewpoint, action, owner, comment, commentWithMarkdown,
-	removeMessage, created,  teamspace , ...props
+	removeMessage, created, teamspace, ...props
 }: IProps) => {
 
 	const isSystemMessage = Boolean(action);

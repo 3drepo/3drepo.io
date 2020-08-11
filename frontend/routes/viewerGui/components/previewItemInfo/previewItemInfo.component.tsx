@@ -29,6 +29,7 @@ interface IProps {
 	StatusIconComponent: any;
 	statusColor: string;
 	extraInfo?: string;
+	actionButton?: React.ReactNode;
 }
 
 export class PreviewItemInfo extends React.PureComponent<IProps, any> {
@@ -53,8 +54,12 @@ export class PreviewItemInfo extends React.PureComponent<IProps, any> {
 		);
 	});
 
+	public renderActionButton = renderWhenTrue(() => {
+		return <>{this.props.actionButton}</>;
+	});
+
 	public render() {
-		const { author, createdAt, statusColor, StatusIconComponent, extraInfo } = this.props;
+		const { author, createdAt, statusColor, StatusIconComponent, extraInfo, actionButton } = this.props;
 
 		return(
 			<Container>
@@ -67,6 +72,7 @@ export class PreviewItemInfo extends React.PureComponent<IProps, any> {
 					</UserMarker>
 					{this.renderExtraInfo(extraInfo)}
 					{this.renderDateTime(createdAt)}
+					{this.renderActionButton(actionButton)}
 				</Details>
 			</Container>
 		);

@@ -30,7 +30,7 @@ export const { Types: ModelTypes, Creators: ModelActions } = createActions({
 	setPendingRevision: ['revision'],
 	resetRevisions: [],
 	downloadModel: ['teamspace', 'modelId'],
-	uploadModelFile: ['teamspace', 'project', 'modelData', 'fileData'],
+	uploadModelFile: ['teamspace', 'project', 'modelData', 'fileData', 'handleClose'],
 	setPendingState: ['pendingState'],
 	onModelStatusChanged: ['modelData', 'teamspace', 'project', 'modelId', 'modelName'],
 	subscribeOnStatusChange: ['teamspace', 'project', 'modelData'],

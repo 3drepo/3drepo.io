@@ -72,6 +72,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchData: BoardActions.fetchData,
 	fetchCardData: BoardActions.fetchCardData,
 	resetCardData: BoardActions.resetCardData,
+	openCardDialog: BoardActions.openCardDialog,
 	setFilterProp: BoardActions.setFilterProp,
 	setBoardType: BoardActions.setBoardType,
 	showDialog: DialogActions.showDialog,
