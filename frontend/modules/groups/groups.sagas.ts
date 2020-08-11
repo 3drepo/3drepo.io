@@ -32,6 +32,7 @@ import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
 import { TreeActions } from '../tree';
+import { ViewpointsActions } from '../viewpoints';
 import { GroupsActions, GroupsTypes, INITIAL_CRITERIA_FIELD_STATE } from './groups.redux';
 import {
 	selectActiveGroupDetails,
@@ -335,6 +336,11 @@ function* setNewGroup() {
 	}
 }
 
+function * clearColorOverrides() {
+	yield put(GroupsActions.clearColorOverridesSuccess());
+	yield put(ViewpointsActions.setSelectedViewpoint(null));
+}
+
 const onUpdated = (updatedGroup) => {
 	const group = prepareGroup(updatedGroup);
 	const state = getState();
@@ -414,4 +420,5 @@ export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.SUBSCRIBE_ON_CHANGES, subscribeOnChanges);
 	yield takeLatest(GroupsTypes.UNSUBSCRIBE_FROM_CHANGES, unsubscribeFromChanges);
 	yield takeLatest(GroupsTypes.RESET_TO_SAVED_SELECTION, resetToSavedSelection);
+	yield takeLatest(GroupsTypes.CLEAR_COLOR_OVERRIDES, clearColorOverrides);
 }
