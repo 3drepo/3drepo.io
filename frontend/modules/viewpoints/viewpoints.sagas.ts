@@ -26,12 +26,12 @@ import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
 import { DialogActions } from '../dialog';
 import {  selectAllOverridesDict, GroupsActions } from '../groups';
+import { selectCurrentRevisionId } from '../model';
 import { dispatch } from '../store';
 import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds, selectIfcSpacesHidden, TreeActions } from '../tree';
 import { ViewerGuiActions } from '../viewerGui';
 import { PRESET_VIEW } from './viewpoints.constants';
 import { ViewpointsActions, ViewpointsTypes } from './viewpoints.redux';
-import { selectCurrentRevisionId } from '../model';
 
 function* groupByColor(overrides) {
 	const sharedIdnodes = Object.keys(overrides);
