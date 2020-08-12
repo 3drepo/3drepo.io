@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -12,32 +12,27 @@
  *  GNU Affero General Public License for more details.
  *
  *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CircularProgress from '@material-ui/core/CircularProgress';
 import React from 'react';
 
-import { Container, Content } from './loader.styles';
+import { ButtonProps } from '@material-ui/core/Button';
 
-interface IProps {
-	content?: string;
-	size?: number;
-	horizontal?: boolean;
-	className?: string;
+import { StyledButton } from './containedButton.styles';
+
+interface IProps extends ButtonProps {
+	children: React.ReactNode;
+	icon?: any;
+	onClick?: () => void;
 }
 
-export const Loader = (props: IProps) => {
-	const styleProps = {
-		horizontal: props.horizontal
-	};
-
+export const ContainedButton = ({ children, icon, onClick, ...props }: IProps) => {
+	const IconComponent = icon;
 	return (
-		<Container className={props.className} {...styleProps}>
-			<CircularProgress size={props.size || 30} />
-			<Content {...styleProps}>
-				{props.content}
-			</Content>
-		</Container>
+			<StyledButton color="primary" variant="contained" size="small" squeezed={Boolean(icon)} onClick={onClick} {...props}>
+				{icon && <IconComponent style={{ fontSize: 14 }} />}
+				{children}
+			</StyledButton>
 	);
 };

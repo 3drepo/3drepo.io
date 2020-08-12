@@ -18,8 +18,6 @@
 import React from 'react';
 
 import AddIcon from '@material-ui/icons/Add';
-import CancelIcon from '@material-ui/icons/Cancel';
-import SearchIcon from '@material-ui/icons/Search';
 import { isEqual } from 'lodash';
 
 import { VIEWER_EVENTS } from '../../../../constants/viewer';

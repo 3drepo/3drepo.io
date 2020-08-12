@@ -25,7 +25,6 @@ import styled, { css } from 'styled-components';
 
 import { FONT_WEIGHT } from '../../../../../../styles';
 import { COLOR } from '../../../../../../styles';
-import * as ImageStyles from '../../../../../components/image/image.styles';
 
 const IconStyles = css`
 	cursor: pointer;
@@ -41,11 +40,6 @@ export const ViewpointItem = styled(MenuItem)`
 		padding: 8px;
 		background-color: ${(props: any) => props.active ? `${COLOR.BLACK_6}` : 'initial'};
 		border-bottom: 1px solid ${COLOR.BLACK_20};
-	}
-
-	${ImageStyles.StyledImage} {
-		width: 79px;
-		height: 79px;
 	}
 ` as any;
 
@@ -132,4 +126,15 @@ export const Name = styled.h3`
 	font-weight: ${FONT_WEIGHT.NORMAL};
 	font-size: 14px;
 	color: ${COLOR.BLACK};
+`;
+
+export const Small = styled.small`
+	display: block;
+	color: ${COLOR.BLACK_60};
+`;
+
+export const Image = styled.img`
+	width: 79px;
+	height: 79px;
+	object-fit: cover;
 `;

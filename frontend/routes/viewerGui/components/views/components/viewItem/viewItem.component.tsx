@@ -20,15 +20,16 @@ import { debounce } from 'lodash';
 import React from 'react';
 
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { Image } from '../../../../../components/image';
 
 import { ActionMessage } from '../../../../../components/actionMessage/actionMessage.component';
 import {
 	IconsGroup,
+	Image,
 	Name,
 	NameRow,
 	NewViewpointName,
 	SaveIconButton,
+	Small,
 	StyledCancelIcon,
 	StyledDeleteIcon,
 	StyledEditIcon,
@@ -40,17 +41,18 @@ import {
 
 interface IProps {
 	viewpoint: any;
-	active: boolean;
-	editMode: boolean;
+	active?: boolean;
+	editMode?: boolean;
 	teamspace: string;
 	modelId: string;
-	isCommenter: boolean;
-	onCancelEditMode: () => void;
-	onSaveEdit: (values) => void;
+	isCommenter?: boolean;
+	onCancelEditMode?: () => void;
+	onSaveEdit?: (values) => void;
 	onDelete?: (teamspace, model, id) => void;
 	onOpenEditMode?: () => void;
 	onClick?: (viewpoint) => void;
 	onChangeName?: (viewpointName) => void;
+	defaultView?: boolean;
 }
 
 export class ViewItem extends React.PureComponent<IProps, any> {
@@ -63,7 +65,11 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 	));
 
 	public renderViewpointName = renderWhenTrue(() => (
-		<Name>{this.props.viewpoint.name}</Name>
+			<Name>{this.props.viewpoint.name}{this.renderViewpointDefault(this.props.defaultView)}</Name>
+	));
+
+	public renderViewpointDefault = renderWhenTrue(() => (
+			<Small>(Default View)</Small>
 	));
 
 	public renderViewpointData = renderWhenTrue(() => (

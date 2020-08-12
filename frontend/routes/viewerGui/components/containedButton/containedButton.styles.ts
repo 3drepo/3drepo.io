@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,29 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CircularProgress from '@material-ui/core/CircularProgress';
-import React from 'react';
+import styled from 'styled-components';
 
-import { Container, Content } from './loader.styles';
+import Button from '@material-ui/core/Button';
 
-interface IProps {
-	content?: string;
-	size?: number;
-	horizontal?: boolean;
-	className?: string;
-}
+import { COLOR } from '../../../../styles';
 
-export const Loader = (props: IProps) => {
-	const styleProps = {
-		horizontal: props.horizontal
-	};
-
-	return (
-		<Container className={props.className} {...styleProps}>
-			<CircularProgress size={props.size || 30} />
-			<Content {...styleProps}>
-				{props.content}
-			</Content>
-		</Container>
-	);
-};
+export const StyledButton = styled(Button)`
+	&& {
+		background-color: ${COLOR.SOFT_BLUE};
+		padding: ${({ squeezed }: { squeezed: boolean }) => squeezed ? '4px 5px' : '6px 20px'};
+		min-width: 56px;
+		min-height: 18px;
+		font-size: 12px;
+		text-transform: none;
+	}
+`;

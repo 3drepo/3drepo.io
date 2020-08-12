@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,29 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CircularProgress from '@material-ui/core/CircularProgress';
-import React from 'react';
+import styled from 'styled-components';
 
-import { Container, Content } from './loader.styles';
+import Typography from '@material-ui/core/Typography';
 
-interface IProps {
-	content?: string;
-	size?: number;
-	horizontal?: boolean;
-	className?: string;
-}
+import { COLOR, FONT_WEIGHT } from '../../../styles';
+import { StyledDeleteIcon, StyledEditIcon } from '../../viewerGui/components/views/components/viewItem/viewItem.styles';
 
-export const Loader = (props: IProps) => {
-	const styleProps = {
-		horizontal: props.horizontal
-	};
+export const ViewRow = styled.div`
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 16px;
 
-	return (
-		<Container className={props.className} {...styleProps}>
-			<CircularProgress size={props.size || 30} />
-			<Content {...styleProps}>
-				{props.content}
-			</Content>
-		</Container>
-	);
-};
+	${StyledEditIcon}, ${StyledDeleteIcon} {
+		color: ${COLOR.BLACK_54}
+	}
+`;
+
+export const ViewName = styled(Typography)`
+	&& {
+		font-weight: ${FONT_WEIGHT.NORMAL};
+		margin-right: 16px;
+		color: ${COLOR.BLACK_60}
+	}
+`;

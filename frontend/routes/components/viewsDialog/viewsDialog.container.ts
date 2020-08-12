@@ -19,21 +19,26 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { DialogActions } from '../../modules/dialog';
-import { selectIsPending, selectSettings, ModelActions } from '../../modules/model';
-import { selectCurrentTeamspace } from '../../modules/userManagement';
-import { ModelSettings } from './modelSettings.component';
+import { selectSettings } from '../../../modules/model';
+import {
+	selectIsPending,
+	selectSearchEnabled,
+	selectSearchQuery,
+	selectViewpointsList,
+	ViewpointsActions,
+} from '../../../modules/viewpoints';
+import { ViewsDialog } from './viewsDialog.component';
 
 const mapStateToProps = createStructuredSelector({
-	currentTeamspace: selectCurrentTeamspace,
+	isPending: selectIsPending,
+	viewpoints: selectViewpointsList,
+	searchQuery: selectSearchQuery,
+	searchEnabled: selectSearchEnabled,
 	modelSettings: selectSettings,
-	isSettingsLoading: selectIsPending
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	fetchModelSettings: ModelActions.fetchSettings,
-	updateModelSettings: ModelActions.updateSettings,
-	showDialog: DialogActions.showDialog,
+	fetchViewpoints: ViewpointsActions.fetchViewpoints,
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(ModelSettings);
+export default connect(mapStateToProps, mapDispatchToProps)(ViewsDialog);
