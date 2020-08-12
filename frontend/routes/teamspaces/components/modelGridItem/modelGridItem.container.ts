@@ -34,6 +34,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showDialog: DialogActions.showDialog,
 	showConfirmDialog: DialogActions.showConfirmDialog,
 	showRevisionsDialog: DialogActions.showRevisionsDialog,
+	showLoadModelDialog: DialogActions.showLoadModelDialog,
 	subscribeOnStatusChange: ModelActions.subscribeOnStatusChange,
 	unsubscribeOnStatusChange: ModelActions.unsubscribeOnStatusChange,
 	updateModel: TeamspacesActions.updateModel,
