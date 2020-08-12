@@ -21,6 +21,7 @@ import { ROUTES } from '../../../../../../constants/routes';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { IViewpointsComponentState } from '../../../../../../modules/viewpoints/viewpoints.redux';
 import { ViewItem } from '../../../../../viewerGui/components/views/components/viewItem/viewItem.component';
+import { SearchField } from '../../../../../viewerGui/components/views/views.styles';
 import { Container, StyledLoader } from '../loadModelDialog.styles';
 
 interface IProps {
@@ -78,8 +79,27 @@ export const ViewsList = ({ viewpoints, searchQuery, searchEnabled, teamspace, m
 		);
 	}));
 
+	const handleSearchQueryChange = ({ currentTarget }) =>
+		props.setState({ searchQuery: currentTarget.value.toLowerCase() });
+
+	const renderSearch = renderWhenTrue(() => (
+		<SearchField
+			placeholder="Search viewpoint..."
+			onChange={handleSearchQueryChange}
+			autoFocus
+			defaultValue={searchQuery}
+			fullWidth
+			inputProps={{
+				style: {
+					padding: 12
+				}
+			}}
+		/>
+	));
+
 	return (
 		<Container>
+			{renderSearch(searchEnabled)}
 			{renderViewsList(!props.isPending && !props.isSettingsLoading)}
 			{renderLoadingState(props.isPending || props.isSettingsLoading)}
 		</Container>

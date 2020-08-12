@@ -27,13 +27,15 @@ import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { IDialogConfig } from '../../../../../modules/dialog/dialog.redux';
 import { dispatch } from '../../../../../modules/store';
 import { COLOR } from '../../../../../styles';
-import { DialogActions, DialogTitle } from './dialog.styles';
+import { SearchButton } from '../../../../viewerGui/components/panelBarActions/searchButton';
+import { DialogActions, DialogTitle, TopDialogActions } from './dialog.styles';
 
 interface IProps {
 	id: number;
 	config: IDialogConfig;
 	data?: any;
 	hide: (dialogId) => void;
+	searchEnabled?: boolean;
 }
 
 export const Dialog = (props: IProps) => {
@@ -44,7 +46,7 @@ export const Dialog = (props: IProps) => {
 		}
 	}, []);
 
-	const { content, title, template: DialogTemplate, DialogProps, onCancel } = props.config;
+	const { content, title, template: DialogTemplate, DialogProps, onCancel, search } = props.config;
 
 	const renderContent = renderWhenTrue(() => (
 		<DialogContent>
@@ -65,7 +67,14 @@ export const Dialog = (props: IProps) => {
 	});
 
 	const renderCloseButton = () => (
-		<IconButton onClick={handleClose}><CloseIcon nativeColor={COLOR.WHITE} /></IconButton>
+		<TopDialogActions>
+			{search && <SearchButton
+        enabled={props.searchEnabled}
+        onOpen={search.onOpen}
+        onClose={search.onClose}
+      />}
+			<IconButton onClick={handleClose}><CloseIcon nativeColor={COLOR.WHITE} /></IconButton>
+		</TopDialogActions>
 	);
 
 	const renderActions = renderWhenTrue(() => (

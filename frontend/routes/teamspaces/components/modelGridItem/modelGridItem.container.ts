@@ -19,15 +19,18 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
+
 import { DialogActions } from '../../../../modules/dialog';
 import { ModelActions } from '../../../../modules/model';
 import { SnackbarActions } from '../../../../modules/snackbar';
 import { selectIsStarredModel, StarredActions } from '../../../../modules/starred';
 import { TeamspacesActions } from '../../../../modules/teamspaces';
+import { selectSearchEnabled, ViewpointsActions } from '../../../../modules/viewpoints';
 import { ModelGridItem } from './modelGridItem.component';
 
 const mapStateToProps = createStructuredSelector({
-	isStarred: selectIsStarredModel
+	isStarred: selectIsStarredModel,
+	searchEnabled: selectSearchEnabled,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -42,7 +45,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	downloadModel: ModelActions.downloadModel,
 	showSnackbar: SnackbarActions.show,
 	addToStarred: StarredActions.addToStarredModels,
-	removeFromStarred: StarredActions.removeFromStarredModels
+	removeFromStarred: StarredActions.removeFromStarredModels,
+	setState: ViewpointsActions.setComponentState,
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(ModelGridItem));

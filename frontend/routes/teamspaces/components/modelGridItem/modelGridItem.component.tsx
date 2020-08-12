@@ -20,6 +20,7 @@ import { pick, startCase } from 'lodash';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ROUTES } from '../../../../constants/routes';
 import { renderWhenTrue } from '../../../../helpers/rendering';
+import { IViewpointsComponentState } from '../../../../modules/viewpoints/viewpoints.redux';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../../../services/analytics';
 import { formatDate, LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
 import { TYPES } from '../../../components/dialogContainer/components/revisionsDialog/revisionsDialog.constants';
@@ -75,6 +76,8 @@ interface IProps {
 	showSnackbar: (text) => void;
 	addToStarred: (modelName) => void;
 	removeFromStarred: (modelName) => void;
+	setState: (componentState: IViewpointsComponentState) => void;
+	searchEnabled?: boolean;
 }
 
 export const ModelGridItem = memo((props: IProps) => {
@@ -90,6 +93,10 @@ export const ModelGridItem = memo((props: IProps) => {
 			props.subscribeOnStatusChange(props.teamspace, props.projectName, modelData);
 			return () => props.unsubscribeOnStatusChange(props.teamspace, props.projectName, modelData);
 		}
+	}, []);
+
+	useEffect(() => {
+		return () => handleCloseSearchMode();
 	}, []);
 
 	const resetStarClickTimeout = () => {
@@ -143,6 +150,14 @@ export const ModelGridItem = memo((props: IProps) => {
 		});
 	};
 
+	const handleOpenSearchMode = () => props.setState({ searchEnabled: true });
+
+	const handleCloseSearchMode = () =>
+		props.setState({
+			searchEnabled: false,
+			searchQuery: ''
+		});
+
 	const handleLoadModelClick = () => {
 		const { teamspace, model, name } = props;
 		props.showLoadModelDialog({
@@ -150,6 +165,11 @@ export const ModelGridItem = memo((props: IProps) => {
 			data: {
 				teamspace,
 				modelId: model,
+			},
+			search: {
+				enabled: props.searchEnabled,
+				onOpen: handleOpenSearchMode,
+				onClose: handleCloseSearchMode,
 			},
 		});
 	};

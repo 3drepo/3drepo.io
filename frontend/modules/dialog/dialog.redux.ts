@@ -33,6 +33,11 @@ export interface IDialogConfig {
 	closeText?: string;
 	onConfirm?: () => void;
 	onCancel?: () => void;
+	search?: {
+		enabled?: boolean;
+		onOpen?: () => void;
+		onClose?: () => void;
+	};
 }
 
 interface IDialogState {

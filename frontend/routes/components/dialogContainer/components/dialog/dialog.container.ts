@@ -20,27 +20,14 @@ import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { selectSettings } from '../../../../../../modules/model';
-import {
-	selectIsPending,
-	selectSearchEnabled,
-	selectSearchQuery,
-	selectViewpointsList,
-	ViewpointsActions,
-} from '../../../../../../modules/viewpoints';
-import { ViewsList } from './viewsList.component';
+import { selectSearchEnabled } from '../../../../../modules/viewpoints';
+import { Dialog } from './dialog.component';
 
 const mapStateToProps = createStructuredSelector({
-	isPending: selectIsPending,
-	viewpoints: selectViewpointsList,
-	searchQuery: selectSearchQuery,
 	searchEnabled: selectSearchEnabled,
-	modelSettings: selectSettings,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	fetchViewpoints: ViewpointsActions.fetchViewpoints,
-	setState: ViewpointsActions.setComponentState,
 }, dispatch);
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(ViewsList));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Dialog));
