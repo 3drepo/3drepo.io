@@ -62,7 +62,6 @@ export const ROW_ACTIONS = {
 	DELETE: {
 		label: 'Delete',
 		Icon: Delete,
-		color: 'error',
 		requiredPermissions: 'delete_model'
 	},
 	ADD_NEW: {
