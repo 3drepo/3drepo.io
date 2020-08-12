@@ -35,6 +35,7 @@ import {
 	StyledEditIcon,
 	StyledForm,
 	StyledSaveIcon,
+	StyledShareIcon,
 	ThumbnailPlaceholder,
 	ViewpointItem
 } from './viewItem.styles';
@@ -49,6 +50,7 @@ interface IProps {
 	onCancelEditMode?: () => void;
 	onSaveEdit?: (values) => void;
 	onDelete?: (teamspace, model, id) => void;
+	onShare?: (teamspace, model, id) => void;
 	onOpenEditMode?: () => void;
 	onClick?: (viewpoint) => void;
 	onChangeName?: (viewpointName) => void;
@@ -78,6 +80,7 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 			{this.props.isCommenter &&
 				<IconsGroup disabled={this.state.isDeletePending}>
 					<StyledEditIcon onClick={this.props.onOpenEditMode} />
+					<StyledShareIcon onClick={this.handleShareLink} />
 					<StyledDeleteIcon onClick={this.handleDelete} />
 				</IconsGroup>
 			}
@@ -144,6 +147,11 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 	public handleDelete = (event) => {
 		event.persist();
 		this._handleDelete(event);
+	}
+
+	public handleShareLink = () => {
+		const { teamspace, modelId, viewpoint: {_id} } = this.props;
+		this.props.onShare(teamspace, modelId, _id);
 	}
 
 	public handleNameChange = (field) => (event) => {

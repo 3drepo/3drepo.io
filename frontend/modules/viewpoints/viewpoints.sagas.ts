@@ -15,13 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import copy from 'copy-to-clipboard';
 import { get } from 'lodash';
 import { put, takeLatest } from 'redux-saga/effects';
 import { CHAT_CHANNELS } from '../../constants/chat';
+import { ROUTES } from '../../constants/routes';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
 import { DialogActions } from '../dialog';
+import { SnackbarActions } from '../snackbar';
 import { dispatch } from '../store';
 import { PRESET_VIEW } from './viewpoints.constants';
 import { ViewpointsActions, ViewpointsTypes } from './viewpoints.redux';
@@ -194,6 +197,12 @@ export function* prepareNewViewpoint({teamspace, modelId, viewpointName}) {
 	}
 }
 
+export function* shareViewpointLink({ teamspace, modelId, viewpointId }) {
+	const url = `${location.hostname}${ROUTES.VIEWER}/${teamspace}/${modelId}?viewpointId=${viewpointId}`;
+	copy(url);
+	yield put(SnackbarActions.show('Share link copied to clipboard'));
+}
+
 export default function* ViewpointsSaga() {
 	yield takeLatest(ViewpointsTypes.FETCH_VIEWPOINTS, fetchViewpoints);
 	yield takeLatest(ViewpointsTypes.CREATE_VIEWPOINT, createViewpoint);
@@ -204,4 +213,5 @@ export default function* ViewpointsSaga() {
 	yield takeLatest(ViewpointsTypes.SUBSCRIBE_ON_VIEWPOINT_CHANGES, subscribeOnViewpointChanges);
 	yield takeLatest(ViewpointsTypes.UNSUBSCRIBE_ON_VIEWPOINT_CHANGES, unsubscribeOnViewpointChanges);
 	yield takeLatest(ViewpointsTypes.PREPARE_NEW_VIEWPOINT, prepareNewViewpoint);
+	yield takeLatest(ViewpointsTypes.SHARE_VIEWPOINT_LINK, shareViewpointLink);
 }

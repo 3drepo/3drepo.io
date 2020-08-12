@@ -20,6 +20,8 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import SaveIcon from '@material-ui/icons/Save';
+import ShareIcon from '@material-ui/icons/Share';
+
 import { Form } from 'formik';
 import styled, { css } from 'styled-components';
 
@@ -111,6 +113,13 @@ export const SaveIconButton = styled(IconButton)`
 		&:hover {
 			background-color: transparent;
 		}
+	}
+`;
+
+export const StyledShareIcon = styled(ShareIcon)`
+	&& {
+		${IconStyles};
+		margin-right: 14px;
 	}
 `;
 

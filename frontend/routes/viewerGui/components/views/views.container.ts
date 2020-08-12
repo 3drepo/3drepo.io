@@ -54,6 +54,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setNewViewpoint: ViewpointsActions.setNewViewpoint,
 	setSearchQuery: ViewpointsActions.setSearchQuery,
 	setState: ViewpointsActions.setComponentState,
+	shareViewpointLink: ViewpointsActions.shareViewpointLink
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Views);
