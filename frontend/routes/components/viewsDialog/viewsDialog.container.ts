@@ -39,6 +39,7 @@ const mapStateToProps = createStructuredSelector({
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchViewpoints: ViewpointsActions.fetchViewpoints,
+	setState: ViewpointsActions.setComponentState,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(ViewsDialog);

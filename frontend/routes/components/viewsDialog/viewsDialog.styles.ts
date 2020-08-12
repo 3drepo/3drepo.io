@@ -15,28 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
-import { createStructuredSelector } from 'reselect';
+import styled from 'styled-components';
 
-import {
-	selectIsPending,
-	selectSearchEnabled,
-	selectSearchQuery,
-	selectViewpointsList,
-	ViewpointsActions,
-} from '../../../modules/viewpoints';
-import { ViewsDialog } from './viewsDialog.component';
+import { Loader } from '../loader/loader.component';
 
-const mapStateToProps = createStructuredSelector({
-	isPending: selectIsPending,
-	viewpoints: selectViewpointsList,
-	searchQuery: selectSearchQuery,
-	searchEnabled: selectSearchEnabled,
-});
+export const StyledLoader = styled(Loader)`
+	margin: 30px 0 20px;
+`;
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	fetchViewpoints: ViewpointsActions.fetchViewpoints,
-}, dispatch);
-
-export default connect(mapStateToProps, mapDispatchToProps)(ViewsDialog);
+export const Container = styled.div`
+	width: 380px;
+	max-height: 100%;
+	overflow: auto;
+`;

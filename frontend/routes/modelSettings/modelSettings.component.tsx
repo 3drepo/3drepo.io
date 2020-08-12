@@ -27,6 +27,7 @@ import * as Yup from 'yup';
 import InputLabel from '@material-ui/core/InputLabel';
 import { ROUTES } from '../../constants/routes';
 import { convertPositionToDirectX, convertPositionToOpenGL } from '../../helpers/model';
+import { IViewpointsComponentState } from '../../modules/viewpoints/viewpoints.redux';
 import { clientConfigService } from '../../services/clientConfig';
 import { schema } from '../../services/validation';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
@@ -91,6 +92,8 @@ interface IProps {
 	currentTeamspace: string;
 	isSettingsLoading: boolean;
 	showDialog: (config) => void;
+	setState: (componentState: IViewpointsComponentState) => void;
+	searchEnabled?: boolean;
 }
 
 export class ModelSettings extends React.PureComponent<IProps, IState> {
@@ -198,6 +201,14 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 		this.props.history.push({ pathname: ROUTES.TEAMSPACES });
 	}
 
+	public handleOpenSearchModel = () => this.props.setState({ searchEnabled: true });
+
+	public handleCloseSearchModel = () =>
+		this.props.setState({
+			searchEnabled: false,
+			searchQuery: ''
+		})
+
 	public handleSelectView = (onChange) => () => {
 		const { match } = this.props;
 		const { teamspace, modelId } = match.params;
@@ -209,7 +220,12 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 				teamspace,
 				modelId,
 				onChange,
-			}
+			},
+			search: {
+				enabled: this.props.searchEnabled,
+				onOpen: this.handleOpenSearchModel,
+				onClose: this.handleCloseSearchModel,
+			},
 		});
 	}
 

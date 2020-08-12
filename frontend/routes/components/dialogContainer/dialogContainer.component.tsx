@@ -16,7 +16,7 @@
  */
 
 import React from 'react';
-import { Dialog } from './components/dialog/dialog.container';
+import Dialog from './components/dialog/dialog.container';
 
 interface IProps {
 	dialogs: any[];

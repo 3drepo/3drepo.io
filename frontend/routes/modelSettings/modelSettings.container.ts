@@ -22,18 +22,21 @@ import { createStructuredSelector } from 'reselect';
 import { DialogActions } from '../../modules/dialog';
 import { selectIsPending, selectSettings, ModelActions } from '../../modules/model';
 import { selectCurrentTeamspace } from '../../modules/userManagement';
+import { selectSearchEnabled, ViewpointsActions } from '../../modules/viewpoints';
 import { ModelSettings } from './modelSettings.component';
 
 const mapStateToProps = createStructuredSelector({
 	currentTeamspace: selectCurrentTeamspace,
 	modelSettings: selectSettings,
-	isSettingsLoading: selectIsPending
+	isSettingsLoading: selectIsPending,
+	searchEnabled: selectSearchEnabled,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchModelSettings: ModelActions.fetchSettings,
 	updateModelSettings: ModelActions.updateSettings,
 	showDialog: DialogActions.showDialog,
+	setState: ViewpointsActions.setComponentState,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(ModelSettings);
