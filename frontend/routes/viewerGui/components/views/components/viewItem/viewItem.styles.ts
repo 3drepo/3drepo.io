@@ -147,3 +147,17 @@ export const Image = styled.img`
 	height: 79px;
 	object-fit: cover;
 `;
+
+export const HamburgerIconButton = styled(IconButton)`
+	&& {
+		color: rgba(255, 255, 255, 0.87);
+	}
+
+	&:first-child {
+		margin-right: -18px;
+	}
+
+	&:hover {
+		background-color: ${COLOR.WHITE}
+	}
+`;

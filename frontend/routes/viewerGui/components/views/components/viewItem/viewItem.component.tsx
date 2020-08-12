@@ -17,12 +17,15 @@
 
 import { Field, Formik } from 'formik';
 import { debounce } from 'lodash';
-import React from 'react';
+import React, { useState } from 'react';
 
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 
+import { Menu, MenuItem } from '@material-ui/core';
+import MoreVert from '@material-ui/icons/MoreVert';
 import { ActionMessage } from '../../../../../components/actionMessage/actionMessage.component';
 import {
+	HamburgerIconButton,
 	IconsGroup,
 	Image,
 	Name,
@@ -57,6 +60,39 @@ interface IProps {
 	defaultView?: boolean;
 }
 
+const HamburgerMenu = ({onSetAsDefault, onDelete}) => {
+	const [anchorElement, setAnchorElement] = useState(null);
+
+	const toggleMenu = (e: React.SyntheticEvent) => {
+		setAnchorElement(Boolean(anchorElement) ? null : e.currentTarget );
+		return false;
+	};
+
+	const closeMenuAnd = ( action: () => void ) =>
+		(e: React.SyntheticEvent) => {
+			toggleMenu(e);
+			action();
+	};
+
+	return (
+		<HamburgerIconButton aria-label="Menu" onClick={toggleMenu}>
+			<MoreVert />
+			<Menu
+				anchorEl={anchorElement}
+				open={Boolean(anchorElement)}
+				onClose={toggleMenu}
+			>
+				<MenuItem onClick={closeMenuAnd(onSetAsDefault)}>
+					Set as Default
+				</MenuItem>
+				<MenuItem onClick={closeMenuAnd(onDelete)} >
+					Delete
+				</MenuItem>
+			</Menu>
+		</HamburgerIconButton>
+	);
+};
+
 export class ViewItem extends React.PureComponent<IProps, any> {
 	public state = {
 		isDeletePending: false
@@ -82,6 +118,7 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 					<StyledEditIcon onClick={this.props.onOpenEditMode} />
 					<StyledShareIcon onClick={this.handleShareLink} />
 					<StyledDeleteIcon onClick={this.handleDelete} />
+					<HamburgerMenu onDelete={() => alert('onDelete')} onSetAsDefault={() => alert('onSetAsDefault')} />
 				</IconsGroup>
 			}
 		</NameRow>
