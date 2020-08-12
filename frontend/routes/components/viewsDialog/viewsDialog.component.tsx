@@ -17,10 +17,11 @@
 
 import React from 'react';
 
+import { ROUTES } from '../../../constants/routes';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { IViewpointsComponentState } from '../../../modules/viewpoints/viewpoints.redux';
 import { ViewItem } from '../../viewerGui/components/views/components/viewItem/viewItem.component';
-import { SearchField } from '../../viewerGui/components/views/views.styles';
+import { EmptyStateInfo, Link, SearchField } from '../../viewerGui/components/views/views.styles';
 import { Container, StyledLoader } from './viewsDialog.styles';
 
 interface IProps {
@@ -65,6 +66,15 @@ export const ViewsDialog = ({ viewpoints, searchQuery, searchEnabled, teamspace,
 		props.handleClose();
 	};
 
+	const renderEmptyState = renderWhenTrue(() => (
+		<EmptyStateInfo>
+			No viewpoints have been created yet.<br />
+			Press&nbsp;
+			<Link href={`${ROUTES.VIEWER}/${teamspace}/${modelId}`}>
+				visit the model</Link> and create some before using this option.
+		</EmptyStateInfo>
+	));
+
 	const handleSearchQueryChange = ({ currentTarget }) =>
 			props.setState({ searchQuery: currentTarget.value.toLowerCase() });
 
@@ -97,6 +107,7 @@ export const ViewsDialog = ({ viewpoints, searchQuery, searchEnabled, teamspace,
 
 	return (
 		<Container>
+			{renderEmptyState(!viewpoints.length && !props.isPending)}
 			{renderSearch(searchEnabled)}
 			{renderViewsList(!props.isPending)}
 			{renderLoadingState(props.isPending)}

@@ -36,8 +36,8 @@ export const LoadModelDialog = ({ teamspace, modelId, handleClose, ...props }: I
 	}, [teamspace, modelId]);
 
 	return (
-			<Container>
-				<ViewsList teamspace={teamspace} modelId={modelId} />
-			</Container>
+		<Container>
+			<ViewsList teamspace={teamspace} modelId={modelId} />
+		</Container>
 	);
 };

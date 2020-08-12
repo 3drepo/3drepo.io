@@ -21,7 +21,7 @@ import { ROUTES } from '../../../../../../constants/routes';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { IViewpointsComponentState } from '../../../../../../modules/viewpoints/viewpoints.redux';
 import { ViewItem } from '../../../../../viewerGui/components/views/components/viewItem/viewItem.component';
-import { SearchField } from '../../../../../viewerGui/components/views/views.styles';
+import { EmptyStateInfo, Link, SearchField } from '../../../../../viewerGui/components/views/views.styles';
 import { Container, StyledLoader } from '../loadModelDialog.styles';
 
 interface IProps {
@@ -62,6 +62,15 @@ export const ViewsList = ({ viewpoints, searchQuery, searchEnabled, teamspace, m
 		props.history.push(`${ROUTES.VIEWER}/${teamspace}/${modelId}?viewpointId=${viewpoint._id}`);
 	};
 
+	const renderEmptyState = renderWhenTrue(() => (
+		<EmptyStateInfo>
+			No viewpoints have been created yet.<br />
+			Press&nbsp;
+			<Link href={`${ROUTES.VIEWER}/${teamspace}/${modelId}`}>
+			visit the model</Link> and create some before using this option.
+		</EmptyStateInfo>
+	));
+
 	const { defaultView } = props.modelSettings;
 
 	const renderViewsList = renderWhenTrue(() => filteredViews.map((viewpoint) => {
@@ -99,6 +108,7 @@ export const ViewsList = ({ viewpoints, searchQuery, searchEnabled, teamspace, m
 
 	return (
 		<Container>
+			{renderEmptyState(!viewpoints.length && !props.isPending && !props.isSettingsLoading)}
 			{renderSearch(searchEnabled)}
 			{renderViewsList(!props.isPending && !props.isSettingsLoading)}
 			{renderLoadingState(props.isPending || props.isSettingsLoading)}
