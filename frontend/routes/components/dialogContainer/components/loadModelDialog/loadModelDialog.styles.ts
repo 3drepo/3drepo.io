@@ -16,7 +16,6 @@
  */
 
 import styled from 'styled-components';
-import { COLOR } from '../../../../../styles';
 
 import { Loader } from '../../../loader/loader.component';
 
@@ -28,13 +27,4 @@ export const Container = styled.div`
 	width: 380px;
 	max-height: 100%;
 	overflow: auto;
-`;
-
-export const TabContent = styled.div`
-	background-color: ${COLOR.WHITE};
-	flex: 1;
-	position: relative;
-	overflow: hidden;
-	display: flex;
-	height: inherit;
 `;

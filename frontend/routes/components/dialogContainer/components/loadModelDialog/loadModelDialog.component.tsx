@@ -17,61 +17,27 @@
 
 import React from 'react';
 
-import Tab from '@material-ui/core/Tab';
-import Tabs from '@material-ui/core/Tabs';
-
-import { renderWhenTrue } from '../../../../../helpers/rendering';
-import { LOAD_MODEL_TABS, MODEL_CONFIGURATIONS_TAB, SAVED_VIEWS_TAB } from './loadModelDialog.constants';
-import { Container, TabContent } from './loadModelDialog.styles';
-import ModelConfiguration from './modelConfiguration/modelConfiguration.container';
+import { Container } from './loadModelDialog.styles';
 import ViewsList from './viewsList/viewsList.container';
 
 interface IProps {
 	className?: string;
 	fetchModelSettings: (teamspace: string, modelId: string) => void;
+	searchEnabled: boolean;
+	searchQuery: string;
 	teamspace: string;
 	modelId: string;
 	handleClose: () => void;
-	isFederation: boolean;
 }
 
-const getRenderSavedViewsTab = ({ ...props }) => renderWhenTrue(<ViewsList {...props} />);
-
-const getRenderModelConfigurationsTab = ({ ...props }) => renderWhenTrue(<ModelConfiguration {...props} />);
-
 export const LoadModelDialog = ({ teamspace, modelId, handleClose, ...props }: IProps) => {
-	const [activeTab, setActiveTab] = React.useState(SAVED_VIEWS_TAB);
-
 	React.useEffect(() => {
 		props.fetchModelSettings(teamspace, modelId);
 	}, [teamspace, modelId]);
 
-	const renderSavedViewsTab = React.useMemo(() => {
-		return getRenderSavedViewsTab({ teamspace, modelId });
-	}, [teamspace, modelId]);
-
-	const renderModelConfigurationsTab = React.useMemo(() => {
-		return getRenderModelConfigurationsTab({ teamspace, modelId, handleClose });
-	}, [teamspace, modelId, handleClose]);
-
-	const handleTabChange = (event, tab) => setActiveTab(tab);
-
 	return (
-		<Container>
-			<Tabs
-				value={activeTab}
-				indicatorColor="primary"
-				textColor="primary"
-				fullWidth
-				onChange={handleTabChange}
-			>
-				<Tab label={LOAD_MODEL_TABS.SAVED_VIEWS} value={SAVED_VIEWS_TAB} />
-				{props.isFederation && <Tab label={LOAD_MODEL_TABS.MODEL_CONFIGURATIONS} value={MODEL_CONFIGURATIONS_TAB} />}
-			</Tabs>
-			<TabContent>
-				{renderSavedViewsTab(activeTab === SAVED_VIEWS_TAB)}
-				{renderModelConfigurationsTab(activeTab === MODEL_CONFIGURATIONS_TAB && props.isFederation )}
-			</TabContent>
-		</Container>
+			<Container>
+				<ViewsList teamspace={teamspace} modelId={modelId} />
+			</Container>
 	);
 };

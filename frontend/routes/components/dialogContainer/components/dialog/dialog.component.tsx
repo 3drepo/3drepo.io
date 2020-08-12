@@ -69,10 +69,10 @@ export const Dialog = (props: IProps) => {
 	const renderCloseButton = () => (
 		<TopDialogActions>
 			{search && <SearchButton
-        enabled={props.searchEnabled}
-        onOpen={search.onOpen}
-        onClose={search.onClose}
-      />}
+				enabled={props.searchEnabled}
+				onOpen={search.onOpen}
+				onClose={search.onClose}
+			/>}
 			<IconButton onClick={handleClose}><CloseIcon nativeColor={COLOR.WHITE} /></IconButton>
 		</TopDialogActions>
 	);

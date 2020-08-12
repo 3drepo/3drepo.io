@@ -19,11 +19,10 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { selectIsFederation, ModelActions } from '../../../../../modules/model';
+import { ModelActions } from '../../../../../modules/model';
 import { LoadModelDialog } from './loadModelDialog.component';
 
 const mapStateToProps = createStructuredSelector({
-	isFederation: selectIsFederation,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
