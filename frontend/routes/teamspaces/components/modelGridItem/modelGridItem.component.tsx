@@ -66,6 +66,7 @@ interface IProps {
 	showDialog: (config) => void;
 	showConfirmDialog: (config) => void;
 	showRevisionsDialog: (config) => void;
+	showLoadModelDialog: (config) => void;
 	removeModel: (teamspace, modelData) => void;
 	downloadModel: (teamspace, modelId) => void;
 	onShareClick: () => void;
@@ -139,6 +140,17 @@ export const ModelGridItem = memo((props: IProps) => {
 				modelId: model,
 				type: TYPES.TEAMSPACES
 			}
+		});
+	};
+
+	const handleLoadModelClick = () => {
+		const { teamspace, model, name } = props;
+		props.showLoadModelDialog({
+			title: `Load model with...`,
+			data: {
+				teamspace,
+				modelId: model,
+			},
 		});
 	};
 
@@ -228,6 +240,11 @@ export const ModelGridItem = memo((props: IProps) => {
 	}, [starClickTimeout.current, props.isStarred, props.model]);
 
 	const getRowActions = () => {
+		const sharedBeginningActions = [{
+			...ROW_ACTIONS.LOAD_MODEL,
+			onClick: handleLoadModelClick
+		}];
+
 		const sharedActions = [{
 			...ROW_ACTIONS.PERMISSIONS,
 			onClick: handlePermissionsClick
@@ -243,7 +260,9 @@ export const ModelGridItem = memo((props: IProps) => {
 		}];
 
 		if (isFederation) {
-			return [{
+			return [
+				...sharedBeginningActions,
+			{
 				...ROW_ACTIONS.EDIT,
 				onClick: handleFederationEdit
 			}, {
@@ -253,7 +272,9 @@ export const ModelGridItem = memo((props: IProps) => {
 				...sharedActions];
 		}
 
-		return [{
+		return [
+			...sharedBeginningActions,
+		{
 			...ROW_ACTIONS.UPLOAD_FILE,
 			onClick: handleUploadModelFile
 		}, {
