@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -27,6 +27,7 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	saveIssue: ['teamspace', 'model', 'issueData', 'revision', 'finishSubmitting', 'ignoreViewer'],
 	updateIssue: ['teamspace', 'modelId', 'issueData'],
 	updateBoardIssue: ['teamspace', 'modelId', 'issueData'],
+	cloneIssue: ['dialogId'],
 	postComment: ['teamspace', 'modelId', 'issueData', 'finishSubmitting'],
 	removeComment: ['teamspace', 'modelId', 'issueData'],
 	saveIssueSuccess: ['issue'],

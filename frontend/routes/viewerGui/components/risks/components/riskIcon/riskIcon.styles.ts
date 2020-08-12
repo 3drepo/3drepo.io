@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,24 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import styled from 'styled-components';
 
-import DialogContent from '@material-ui/core/DialogContent';
-import { Loader } from '../../../loader/loader.component';
-import { LoaderContainer } from './loadingDialog.styles';
+import IconComponent from '@material-ui/core/SvgIcon';
 
-interface IProps {
-	content?: string;
-}
+export const Icon = styled(IconComponent)`
+	&& {
+		justify-content: center;
+		align-items: center;
 
-export const LoadingDialog: React.FunctionComponent<IProps> = (props) => {
-	return (
-		<>
-			<DialogContent>
-				<LoaderContainer>
-					<Loader content={props.content || props.children} />
-				</LoaderContainer>
-			</DialogContent>
-		</>
-	);
-};
+		svg path {
+			stroke: currentColor;
+		}
+	}
+`;

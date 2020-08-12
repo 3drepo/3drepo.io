@@ -21,13 +21,13 @@ import React from 'react';
 import { Container, Content } from './loader.styles';
 
 interface IProps {
-	content?: string;
+	content?: React.ReactNode;
 	size?: number;
 	horizontal?: boolean;
 	className?: string;
 }
 
-export const Loader = (props: IProps) => {
+export const Loader: React.FunctionComponent<IProps> = (props) => {
 	const styleProps = {
 		horizontal: props.horizontal
 	};
@@ -36,7 +36,7 @@ export const Loader = (props: IProps) => {
 		<Container className={props.className} {...styleProps}>
 			<CircularProgress size={props.size || 30} />
 			<Content {...styleProps}>
-				{props.content}
+				{props.content || props.children}
 			</Content>
 		</Container>
 	);

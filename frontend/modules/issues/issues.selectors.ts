@@ -100,7 +100,7 @@ export const selectSelectedFilters = createSelector(
 export const selectFilteredIssues = createSelector(
 	selectIssues, selectSelectedFilters, (issues, selectedFilters) => {
 		const returnHiddenIssue = selectedFilters.length && selectedFilters
-			.some(({ value: { value } }) => value === STATUSES.CLOSED);
+			.some(({ value: { value } }) => [STATUSES.CLOSED, STATUSES.VOID].includes(value));
 
 		return searchByFilters(issues, selectedFilters, returnHiddenIssue);
 	}

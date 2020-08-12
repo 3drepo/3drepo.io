@@ -69,6 +69,7 @@ const showDialog = (state = INITIAL_STATE, action) => {
 		config,
 		data: action.config.data,
 	};
+
 	const dialogs = [...state.dialogs, dialog];
 	return { ...state, dialogs };
 };

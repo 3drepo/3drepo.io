@@ -16,6 +16,7 @@
  */
 
 import { get } from 'lodash';
+
 import { getFilterValues, UNASSIGNED_JOB } from '../constants/reportedItems';
 import {
 	LEVELS,
@@ -86,7 +87,7 @@ export const prepareRisk = (risk, jobs = []) => {
 		preparedRisk.roleColor = get(jobs.find((job) => job.name === get(preparedRisk.assigned_roles, '[0]')), 'color');
 	}
 
-	preparedRisk.defaultHidden = preparedRisk.mitigation_status === RISK_LEVELS.AGREED_FULLY;
+	preparedRisk.defaultHidden = [RISK_LEVELS.AGREED_FULLY, RISK_LEVELS.VOID].includes(preparedRisk.mitigation_status);
 
 	return preparedRisk;
 };

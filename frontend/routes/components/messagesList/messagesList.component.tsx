@@ -73,7 +73,7 @@ export const MessagesList = ({ teamspace, isPending, messages, ...props }: IProp
 				});
 			}
 		}
-	}, [isPending, messages.length]);
+	}, [isPending, messages.length, filter]);
 
 	const messagesList = React.useMemo(() => messages
 		.filter((message) => cond([

@@ -18,7 +18,6 @@
 import React from 'react';
 
 import InputLabel from '@material-ui/core/InputLabel';
-import RisksIcon from '@material-ui/icons/Warning';
 import { Field } from 'formik';
 
 import {
@@ -27,8 +26,8 @@ import {
 	RISK_LIKELIHOODS,
 } from '../../../../../../constants/risks';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
-import { Image } from '../../../../../components/image';
 import { TextField } from '../../../../../components/textField/textField.component';
+import { UpdateButtons } from '../../../updateButtons/updateButtons.component';
 import { AutoSuggestField } from '../autoSuggestField/autosuggestField.component';
 import { LevelOfRisk } from '../levelOfRisk/levelOfRisk.component';
 import {
@@ -37,9 +36,10 @@ import {
 	DescriptionImage,
 	FieldsContainer,
 	FieldsRow,
-	StyledFormControl
+	StyledFormControl,
 } from '../riskDetails/riskDetails.styles';
 import { RiskSchema } from '../riskDetails/riskDetailsForm.component';
+import { RisksIcon } from '../riskIcon/riskIcon.component';
 
 interface IProps {
 	risk: any;
@@ -48,19 +48,24 @@ interface IProps {
 	canEditBasicProperty: boolean;
 	canChangeAssigned: boolean;
 	jobs: any[];
-	hidePin?: boolean;
-	renderPinButton: (show: boolean) => React.ReactNode;
+	disableViewer?: boolean;
 	values?: any;
 	criteria: any;
+	onSavePin: (position) => void;
+	onChangePin: (pin) => void;
+	onUpdateViewpoint: () => void;
+	onTakeScreenshot: () => void;
+	onUploadScreenshot: (image) => void;
+	showScreenshotDialog: (config: any) => void;
 }
 
 export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
-	active, isNewRisk, risk, hidePin, jobs, canChangeAssigned, canEditBasicProperty,
-	renderPinButton, values, criteria,
+	active, isNewRisk, risk, disableViewer, jobs, canChangeAssigned, canEditBasicProperty,
+	values, criteria, ...props
 }) => {
 	const getCategories = () => {
 		const { category = [] } = criteria;
-		return category.map((x) => ({label: x, value: x}));
+		return category.map((x) => ({ label: x, value: x }));
 	};
 
 	return (
@@ -81,16 +86,25 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 			</Container>
 
 			{risk.descriptionThumbnail && (
-				<DescriptionImage>
-					<Image
-						src={risk.descriptionThumbnail}
-						enablePreview
-					/>
-				</DescriptionImage>
+				<DescriptionImage
+					src={risk.descriptionThumbnail}
+					enablePreview
+				/>
 			)}
 
 			<FieldsRow container alignItems="center" justify="space-between">
-				{renderPinButton(!hidePin)}
+				<UpdateButtons
+					isNew={isNewRisk}
+					disableViewer={disableViewer}
+					canEditBasicProperty={canEditBasicProperty}
+					onChangePin={props.onChangePin}
+					onSavePin={props.onSavePin}
+					onUpdateViewpoint={props.onUpdateViewpoint}
+					onTakeScreenshot={props.onTakeScreenshot}
+					onUploadScreenshot={props.onUploadScreenshot}
+					onShowScreenshotDialog={props.showScreenshotDialog}
+					hasImage={risk.descriptionThumbnail}
+				/>
 			</FieldsRow>
 
 			<FieldsRow container alignItems="center" justify="space-between">

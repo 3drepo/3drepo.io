@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -17,12 +17,15 @@
 
 import React, { Fragment } from 'react';
 
-import { size } from 'lodash';
+import { merge, size } from 'lodash';
 
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { canComment } from '../../../../../../helpers/risks';
+import { Copy } from '../../../../../components/fontAwesomeIcon';
+import { ScreenshotDialog } from '../../../../../components/screenshotDialog';
 import { CommentForm } from '../../../commentForm';
+import { ContainedButton } from '../../../containedButton/containedButton.component';
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { EmptyStateInfo } from '../../../views/views.styles';
 import { Container, HorizontalView, MessagesList, MessageContainer, PreviewDetails } from './riskDetails.styles';
@@ -50,6 +53,7 @@ interface IProps {
 	fetchRisk: (teamspace, model, riskId) => void;
 	saveRisk: (teamspace, modelId, risk, revision, finishSubmitting, disableViewer) => void;
 	updateRisk: (teamspace, modelId, risk) => void;
+	cloneRisk: (dialogId?: string) => void;
 	postComment: (teamspace, modelId, riskData, finishSubmitting) => void;
 	removeComment: (teamspace, modelId, riskData) => void;
 	subscribeOnRiskCommentsChanges: (teamspace, modelId, riskId) => void;
@@ -64,6 +68,9 @@ interface IProps {
 	fetchMitigationCriteria: (teamspace: string) => void;
 	criteria: any;
 	showMitigationSuggestions: (conditions: any, setFieldValue) => void;
+	showScreenshotDialog: (config: any) => void;
+	showConfirmDialog: (config: any) => void;
+	dialogId?: string;
 	postCommentIsPending?: boolean;
 }
 
@@ -104,6 +111,19 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		return [...this.props.jobs, UNASSIGNED_JOB];
 	}
 
+	get actionButton() {
+		return renderWhenTrue(() => (
+			<ContainedButton
+				icon={Copy}
+				onClick={() => this.props.cloneRisk(this.props.dialogId)}
+			>
+				Clone
+			</ContainedButton>
+		))(!this.isNewRisk);
+	}
+
+	public commentRef = React.createRef<any>();
+
 	public renderMessagesList = renderWhenTrue(() => (
 		<MessagesList
 			formRef={this.formRef}
@@ -142,6 +162,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 					scrolled={this.state.scrolled && !horizontal}
 					isNew={this.isNewRisk}
 					showModelButton={disableViewer && !this.isNewRisk}
+					actionButton={this.actionButton}
 				/>
 				<MessageContainer ref={this.messageContainerRef}>
 					{this.renderMessagesList(horizontal && isRiskWithComments)}
@@ -163,8 +184,8 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				onSave={this.handleSave}
 				canComment={this.userCanComment()}
 				hideComment={this.isNewRisk}
-				hideScreenshot={this.props.disableViewer}
-				hideUploadButton={!this.props.disableViewer}
+				hideScreenshot={this.props.disableViewer || this.isNewRisk}
+				hideUploadButton={this.isNewRisk}
 				messagesContainerRef={this.messageContainerRef}
 				previewWrapperRef={this.containerRef}
 				horizontal={this.props.horizontal}
@@ -202,7 +223,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 			teamspace, model, fetchRisk, risk, unsubscribeOnRiskCommentsChanges, subscribeOnRiskCommentsChanges,
 		} = this.props;
 
-		if (risk._id !== prevProps.risk._id) {
+		if (risk._id !== prevProps.risk._id && risk._id) {
 			unsubscribeOnRiskCommentsChanges(prevProps.teamspace, prevProps.model, prevProps.risk._id);
 			fetchRisk(teamspace, model, risk._id);
 			subscribeOnRiskCommentsChanges(teamspace, model, risk._id);
@@ -249,10 +270,14 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				permissions={this.props.modelSettings.permissions}
 				currentUser={currentUser}
 				myJob={myJob}
+				onUploadScreenshot={this.handleUpdateScreenshot}
+				onTakeScreenshot={this.handleTakeScreenshot}
+				showScreenshotDialog={this.props.showScreenshotDialog}
+				onUpdateViewpoint={this.onUpdateRiskViewpoint}
 				onChangePin={updateSelectedRiskPin}
 				onSavePin={this.onPositionSave}
 				hasPin={!this.props.disableViewer && this.riskData.position && this.riskData.position.length}
-				hidePin={this.props.disableViewer}
+				disableViewer={this.props.disableViewer}
 				onRemoveResource={onRemoveResource}
 				attachFileResources={attachFileResources}
 				attachLinkResources={attachLinkResources}
@@ -339,6 +364,79 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		if (risk._id) {
 			updateRisk(teamspace, model, { position: risk.position });
 		}
+	}
+
+	public handleUpdateScreenshot =
+		async (screenshot, disableViewpointSuggestion = false, forceViewpointUpdate = false) => {
+		const { teamspace, model, updateRisk, viewer, disableViewer } = this.props;
+
+		if (this.isNewRisk) {
+			this.props.setState({ newRisk: {
+					...this.riskData,
+					descriptionThumbnail: screenshot
+				}});
+		} else {
+			if (screenshot) {
+				const viewpoint = { screenshot: screenshot.replace('data:image/png;base64,', '') };
+
+				if (!disableViewpointSuggestion && !disableViewer) {
+					this.handleViewpointUpdateSuggest(viewpoint);
+				} else {
+					const updatedViewpoint = forceViewpointUpdate ? await viewer.getCurrentViewpoint({ teamspace, model }) : {};
+					updateRisk(teamspace, model, {
+						viewpoint: merge(viewpoint, updatedViewpoint),
+					});
+				}
+			}
+		}
+	}
+
+	public handleTakeScreenshot = (disableViewpointSuggestion: boolean, forceViewpointUpdate) => {
+		const { showScreenshotDialog, viewer } = this.props;
+
+		showScreenshotDialog({
+			sourceImage: viewer.getScreenshot(),
+			onSave: (screenshot) => this.handleUpdateScreenshot(screenshot, disableViewpointSuggestion, forceViewpointUpdate),
+			template: ScreenshotDialog,
+			notFullScreen: true,
+		});
+	}
+
+	public handleViewpointUpdateSuggest = (viewpoint) => {
+		const { showConfirmDialog, teamspace, model, updateRisk } = this.props;
+		showConfirmDialog({
+			title: 'Save Viewpoint?',
+			content: `
+				Would you like to update the viewpoint to your current position?
+			`,
+			onConfirm: async () => {
+				await this.handleViewpointUpdate(viewpoint);
+			},
+			onCancel: () => updateRisk(teamspace, model, { viewpoint }),
+		});
+	}
+
+	public handleViewpointUpdate = async (updatedViewpoint = {}) => {
+		const { teamspace, model, updateRisk, viewer } = this.props;
+
+		const viewpoint = await viewer.getCurrentViewpoint({ teamspace, model });
+
+		if (viewpoint.position) {
+			updateRisk(teamspace, model, { viewpoint: merge(viewpoint, updatedViewpoint) });
+		}
+	}
+
+	public onUpdateRiskViewpoint = () => {
+		this.props.showConfirmDialog({
+			title: 'Save Screenshot?',
+			content: `
+				Would you like to create a new screenshot?
+			`,
+			onConfirm: () => {
+				this.handleTakeScreenshot(true, true);
+			},
+			onCancel: async () => await this.handleViewpointUpdate()
+		});
 	}
 
 	public render() {

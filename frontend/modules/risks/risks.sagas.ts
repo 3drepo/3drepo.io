@@ -20,6 +20,7 @@ import filesize from 'filesize';
 import { isEmpty, isEqual, map, omit, pick } from 'lodash';
 import * as queryString from 'query-string';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
+
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { RISK_LEVELS } from '../../constants/risks';
 import { ROUTES } from '../../constants/routes';
@@ -30,6 +31,7 @@ import {
 
 import { EXTENSION_RE } from '../../constants/resources';
 import { UnityUtil } from '../../globals/unity-util';
+import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
 import { prepareResources } from '../../helpers/resources';
 import { prepareRisk } from '../../helpers/risks';
 import { SuggestedTreatmentsDialog } from '../../routes/components/dialogContainer/components';
@@ -38,6 +40,7 @@ import * as API from '../../services/api';
 import { Cache } from '../../services/cache';
 import * as Exports from '../../services/export';
 import { Viewer } from '../../services/viewer/viewer';
+import { BoardActions } from '../board';
 import { ChatActions } from '../chat';
 import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
@@ -451,7 +454,8 @@ function* closeDetails() {
 
 const onUpdateEvent = (updatedRisk) => {
 	const jobs = selectJobsList(getState());
-	if (updatedRisk.mitigation_status === RISK_LEVELS.AGREED_FULLY) {
+
+	if ([RISK_LEVELS.AGREED_FULLY, RISK_LEVELS.VOID].includes(updatedRisk.mitigation_status)) {
 		dispatch(RisksActions.showCloseInfo(updatedRisk._id));
 		setTimeout(() => {
 			dispatch(RisksActions.saveRiskSuccess(prepareRisk(updatedRisk, jobs)));
@@ -514,8 +518,54 @@ function* unsubscribeOnRiskCommentsChanges({ teamspace, modelId, riskId }) {
 	}));
 }
 
+function* cloneRisk({ dialogId }) {
+	const activeRisk = yield select(selectActiveRiskDetails);
+	const jobs = yield select(selectJobsList);
+	const currentUser = yield select(selectCurrentUser);
+	const clonedProperties = omit(activeRisk, [
+		'_id',
+		'rev_id',
+		'number',
+		'owner',
+		'comments',
+		'created',
+		'creator_role',
+		'lastUpdated',
+		'resources',
+		'thumbnail',
+		'viewpoint',
+		'priority_last_changed',
+		'status_last_changed',
+	]);
+
+	if (activeRisk.descriptionThumbnail) {
+		const base64Image = yield imageUrlToBase64(activeRisk.descriptionThumbnail);
+		clonedProperties.descriptionThumbnail = `data:image/png;base64,${base64Image}`;
+	}
+
+	try {
+		const newRisk = prepareRisk({
+			...clonedProperties,
+			owner: currentUser.username,
+			clone: true,
+		}, jobs);
+
+		if (dialogId) {
+			yield put(DialogActions.hideDialog(dialogId));
+			yield put(BoardActions.openCardDialog(null, null, true));
+		}
+
+		yield put(RisksActions.setComponentState({
+			showDetails: true,
+			activeRisk: null,
+			newRisk
+		}));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('prepare', 'clone risk', error));
+	}
+}
+
 function* setNewRisk() {
-	const risks = yield select(selectRisks);
 	const jobs = yield select(selectJobsList);
 	const currentUser = yield select(selectCurrentUser);
 
@@ -692,6 +742,7 @@ export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.UNSUBSCRIBE_ON_RISK_CHANGES, unsubscribeOnRiskChanges);
 	yield takeLatest(RisksTypes.FOCUS_ON_RISK, focusOnRisk);
 	yield takeLatest(RisksTypes.SET_NEW_RISK, setNewRisk);
+	yield takeLatest(RisksTypes.CLONE_RISK, cloneRisk);
 	yield takeLatest(RisksTypes.SUBSCRIBE_ON_RISK_COMMENTS_CHANGES, subscribeOnRiskCommentsChanges);
 	yield takeLatest(RisksTypes.UNSUBSCRIBE_ON_RISK_COMMENTS_CHANGES, unsubscribeOnRiskCommentsChanges);
 	yield takeLatest(RisksTypes.UPDATE_NEW_RISK, updateNewRisk);

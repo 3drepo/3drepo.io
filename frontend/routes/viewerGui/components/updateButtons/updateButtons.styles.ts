@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,24 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import styled from 'styled-components';
 
-import DialogContent from '@material-ui/core/DialogContent';
-import { Loader } from '../../../loader/loader.component';
-import { LoaderContainer } from './loadingDialog.styles';
+import FormControl from '@material-ui/core/FormControl';
 
-interface IProps {
-	content?: string;
-}
+import { StyledButton } from '../containedButton/containedButton.styles';
+import { Container as ButtonContainer } from '../pinButton/pinButton.styles';
 
-export const LoadingDialog: React.FunctionComponent<IProps> = (props) => {
-	return (
-		<>
-			<DialogContent>
-				<LoaderContainer>
-					<Loader content={props.content || props.children} />
-				</LoaderContainer>
-			</DialogContent>
-		</>
-	);
-};
+export const UpdateButtonsContainer = styled(FormControl)`
+	&& {
+		display: flex;
+		flex-direction: row;
+		justify-content: ${({ center }: { center: boolean }) => center ? 'center' : 'flex-start'};
+		width: 100%;
+
+		${StyledButton} {
+			padding: 4px 10px;
+		}
+
+		${ButtonContainer} ~ ${ButtonContainer} {
+			margin-left: 12px;
+		}
+	}
+`;
