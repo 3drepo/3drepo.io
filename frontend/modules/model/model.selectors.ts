@@ -107,3 +107,7 @@ export const selectUnit = createSelector(
 export const selectCurrentModelTeamspace = createSelector(
 	selectSettings, (state) => state.account
 );
+
+export const selectSubModels = createSelector(
+		selectSettings, (state) => state.subModels
+);

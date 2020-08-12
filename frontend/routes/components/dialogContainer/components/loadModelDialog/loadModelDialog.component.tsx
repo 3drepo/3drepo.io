@@ -23,6 +23,7 @@ import Tabs from '@material-ui/core/Tabs';
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { LOAD_MODEL_TABS, MODEL_CONFIGURATIONS_TAB, SAVED_VIEWS_TAB } from './loadModelDialog.constants';
 import { Container, TabContent } from './loadModelDialog.styles';
+import ModelConfiguration from './modelConfiguration/modelConfiguration.container';
 import ViewsList from './viewsList/viewsList.container';
 
 interface IProps {
@@ -36,6 +37,8 @@ interface IProps {
 
 const getRenderSavedViewsTab = ({ ...props }) => renderWhenTrue(<ViewsList {...props} />);
 
+const getRenderModelConfigurationsTab = ({ ...props }) => renderWhenTrue(<ModelConfiguration {...props} />);
+
 export const LoadModelDialog = ({ teamspace, modelId, handleClose, ...props }: IProps) => {
 	const [activeTab, setActiveTab] = React.useState(SAVED_VIEWS_TAB);
 
@@ -46,6 +49,10 @@ export const LoadModelDialog = ({ teamspace, modelId, handleClose, ...props }: I
 	const renderSavedViewsTab = React.useMemo(() => {
 		return getRenderSavedViewsTab({ teamspace, modelId });
 	}, [teamspace, modelId]);
+
+	const renderModelConfigurationsTab = React.useMemo(() => {
+		return getRenderModelConfigurationsTab({ teamspace, modelId, handleClose });
+	}, [teamspace, modelId, handleClose]);
 
 	const handleTabChange = (event, tab) => setActiveTab(tab);
 
@@ -63,7 +70,7 @@ export const LoadModelDialog = ({ teamspace, modelId, handleClose, ...props }: I
 			</Tabs>
 			<TabContent>
 				{renderSavedViewsTab(activeTab === SAVED_VIEWS_TAB)}
-				{/*{renderModelConfigurationsTab(activeTab === MODEL_CONFIGURATIONS_TAB && props.isFederation )}*/}
+				{renderModelConfigurationsTab(activeTab === MODEL_CONFIGURATIONS_TAB && props.isFederation )}
 			</TabContent>
 		</Container>
 	);
