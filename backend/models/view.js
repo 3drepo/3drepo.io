@@ -137,10 +137,6 @@ class View {
 		return await Viewpoint.setExternalScreenshotRef(viewpoint, account, model, collName);
 	}
 
-	setViewpointScreenshotURL(collName, account, model, id, viewpoint) {
-		return Viewpoint.setViewpointScreenshotURL(collName, account, model, id, viewpoint);
-	}
-
 	getThumbnail(account, model, uid) {
 		uid = utils.stringToUUID(uid);
 

@@ -31,24 +31,26 @@ const clean = function(routePrefix, viewpointToClean, serialise = true) {
 		"override_groups_id"
 	];
 
-	viewpointFields.forEach((field) => {
-		if (_.get(viewpointToClean, field)) {
-			if (serialise) {
-				if (Array.isArray(_.get(viewpointToClean, field))) {
-					viewpointToClean[field] = viewpointToClean[field].map(utils.uuidToString);
+	if (viewpointToClean) {
+		viewpointFields.forEach((field) => {
+			if (_.get(viewpointToClean, field)) {
+				if (serialise) {
+					if (Array.isArray(_.get(viewpointToClean, field))) {
+						viewpointToClean[field] = viewpointToClean[field].map(utils.uuidToString);
+					} else {
+						viewpointToClean[field] = utils.uuidToString(viewpointToClean[field]);
+					}
 				} else {
-					viewpointToClean[field] = utils.uuidToString(viewpointToClean[field]);
+					viewpointToClean[field] = utils.stringToUUID(viewpointToClean[field]);
 				}
-			} else {
-				viewpointToClean[field] = utils.stringToUUID(viewpointToClean[field]);
 			}
-		}
-	});
+		});
 
-	if (serialise && viewpointToClean.guid && (viewpointToClean.screenshot || viewpointToClean.screenshot_ref)) {
-		const viewpointId = utils.uuidToString(viewpointToClean.guid);
-		viewpointToClean.screenshot = `${routePrefix}/viewpoints/${viewpointId}/screenshot.png`;
-		viewpointToClean.screenshot_ref = undefined;
+		if (serialise) {
+			setViewpointScreenshotURL(routePrefix, viewpointToClean);
+			viewpointToClean.screenshot_ref = undefined;
+
+		}
 	}
 
 	return viewpointToClean;
@@ -62,15 +64,14 @@ const setExternalScreenshotRef = async function(viewpoint, account, model, collN
 	return viewpoint;
 };
 
-const setViewpointScreenshotURL = function(collName, account, model, id, viewpoint) {
+const setViewpointScreenshotURL = function(routePrefix, viewpoint) {
 	if (!viewpoint || !viewpoint.guid || (!viewpoint.screenshot && !viewpoint.screenshot_ref)) {
 		return viewpoint;
 	}
 
-	id = utils.uuidToString(id);
 	const viewpointId = utils.uuidToString(viewpoint.guid);
 
-	viewpoint.screenshot = `${account}/${model}/${collName}/${id}/viewpoints/${viewpointId}/screenshot.png`;
+	viewpoint.screenshot = `${routePrefix}/viewpoints/${viewpointId}/screenshot.png`;
 
 	// ===============================
 	// DEPRECATED LEGACY SUPPORT START
@@ -87,6 +88,5 @@ const setViewpointScreenshotURL = function(collName, account, model, id, viewpoi
 
 module.exports = {
 	clean,
-	setExternalScreenshotRef,
-	setViewpointScreenshotURL
+	setExternalScreenshotRef
 };

@@ -75,9 +75,7 @@ class Ticket extends View {
 
 		// legacy schema support
 		if (ticketToClean.viewpoint) {
-			if(ticketToClean.viewpoint.right && ticketToClean.viewpoint.right.length) {
-				ticketToClean.viewpoint = Viewpoint.clean(routePrefix, ticketToClean.viewpoint);
-			} else {
+			if(!(ticketToClean.viewpoint.right && ticketToClean.viewpoint.right.length)) {
 				// workaround for erroneous legacy data - see ISSUE #2085
 				ticketToClean.viewpoint = undefined;
 			}
@@ -89,8 +87,8 @@ class Ticket extends View {
 
 		if (ticketToClean.comments) {
 			ticketToClean.comments.forEach((comment) => {
-				comment = Comment.clean(routePrefix, comment);
-				comment.viewpoint = super.setViewpointScreenshotURL(this.collName, account, model, ticketToClean._id, comment.viewpoint);
+				const commentCleaned = Comment.clean(routePrefix, comment);
+				comment = commentCleaned;
 			});
 		}
 
@@ -110,7 +108,7 @@ class Ticket extends View {
 		delete ticketToClean.viewCount;
 
 		ticketToClean = super.clean(account, model, ticketToClean);
-		ticketToClean.viewpoint = super.setViewpointScreenshotURL(this.collName, account, model, ticketToClean._id, ticketToClean.viewpoint);
+		Viewpoint.clean(routePrefix, ticketToClean.viewpoint);
 
 		return ticketToClean;
 	}

@@ -160,9 +160,9 @@ const addComment = async function(account, model, colName, id, user, data) {
 
 	// 3. Create the comment
 	let viewpoint = null;
+	const routePrefix = `${account}/${model}/${colName}/${_id}`;
 
 	if (data.viewpoint) {
-		const routePrefix = `${account}/${model}/${colName}/${_id}`;
 		data = Viewpoint.clean(routePrefix, data, fieldTypes.viewpoint);
 		viewpoint = data.viewpoint;
 		viewpoint.guid = utils.generateUUID();
@@ -188,7 +188,7 @@ const addComment = async function(account, model, colName, id, user, data) {
 
 	await col.update({ _id }, {...viewpointPush ,$set : {comments}});
 
-	Viewpoint.setViewpointScreenshotURL(colName, account, model, id, viewpoint);
+	Viewpoint.clean(routePrefix, viewpoint);
 
 	// 6. Return the new comment.
 	return { comment: {...comment, viewpoint, guid: utils.uuidToString(comment.guid)}, ...references };
