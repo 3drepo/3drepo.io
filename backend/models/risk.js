@@ -147,7 +147,7 @@ async function createViewPoint(account, model, id, viewpoint) {
 
 	if (viewpoint) {
 		newViewpoint = {...viewpoint};
-		if (Object.prototype.toString.call(viewpoint) === fieldTypes["viewpoint"]) {
+		if (utils.typeMatch(viewpoint, fieldTypes["viewpoint"])) {
 			const routePrefix = `${account}/${model}/risks/${id}`;
 			newViewpoint.guid = utils.generateUUID();
 			newViewpoint = Viewpoint.clean(routePrefix, newViewpoint, fieldTypes.viewpoint);

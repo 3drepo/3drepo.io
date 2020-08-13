@@ -19,6 +19,7 @@ const _ = require("lodash");
 
 const Project = require("./project");
 const View = require("./view");
+const Viewpoint = require("./viewpoint");
 const User = require("./user");
 const Job = require("./job");
 const Group = require("./group");
@@ -74,13 +75,15 @@ class Ticket extends View {
 
 		// legacy schema support
 		if (ticketToClean.viewpoint) {
-			if (!ticketToClean.viewpoint.right || !ticketToClean.viewpoint.right.length) {
+			if(ticketToClean.viewpoint.right && ticketToClean.viewpoint.right.length) {
+				ticketToClean.viewpoint = Viewpoint.clean(ticketToClean.viewpoint);
+			} else {
 				// workaround for erroneous legacy data - see ISSUE #2085
 				ticketToClean.viewpoint = undefined;
 			}
 		}
 
-		if (ticketToClean.viewpoints && ticketToClean.viewpoints.length > 0 && !ticketToClean.viewpoint) {
+		if (!ticketToClean.viewpoint && ticketToClean.viewpoints && ticketToClean.viewpoints.length > 0) {
 			ticketToClean.viewpoint = ticketToClean.viewpoints[0];
 		}
 
