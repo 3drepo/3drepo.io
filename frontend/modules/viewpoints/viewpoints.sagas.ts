@@ -204,7 +204,12 @@ export function* shareViewpointLink({ teamspace, modelId, viewpointId }) {
 }
 
 export function* setDefaultViewpoint({ teamspace, modelId, viewpointId }) {
-	yield put(SnackbarActions.show('View set as default'));
+	try {
+		yield API.editModelSettings(teamspace, modelId, {defaultView: viewpointId});
+		yield put(SnackbarActions.show('View set as default'));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('set the default viewpoint', ''));
+	}
 }
 
 export default function* ViewpointsSaga() {
