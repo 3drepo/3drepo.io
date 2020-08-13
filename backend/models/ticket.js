@@ -559,12 +559,14 @@ class Ticket extends View {
 
 	async getList(account, model, branch, revision, ids, convertCoords, updatedSince) {
 		const projection = {
-			extras: 0,
+			"extras": 0,
+			"norm" : 0,
 			"viewpoints.extras": 0,
 			"viewpoints.scribble": 0,
 			"viewpoints.screenshot.content": 0,
 			"viewpoints.screenshot.resizedContent": 0,
-			"thumbnail.content": 0
+			"thumbnail.content": 0,
+			"refs": 0
 		};
 
 		const query = updatedSince ?

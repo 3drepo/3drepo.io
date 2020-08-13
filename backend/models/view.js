@@ -66,7 +66,7 @@ class View {
 
 	routePrefix(account, model, id) {
 		const route = ("views" === this.collName) ? "viewpoints" : this.collName;
-		return `${account}/${model}/${route}/${id}`;
+		return `${account}/${model}/${route}/${utils.uuidToString(id)}`;
 	}
 
 	clean(account, model, viewToClean) {
