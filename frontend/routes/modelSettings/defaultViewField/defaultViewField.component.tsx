@@ -18,11 +18,12 @@
 import React from 'react';
 import {
 	IconsGroup,
-	StyledEditIcon
+	StyledDeleteIcon,
+	StyledEditIcon,
 } from '../../viewerGui/components/views/components/viewItem/viewItem.styles';
 
 import { StyledContainedButton } from '../modelSettings.styles';
-import { StyledDeleteIcon, ViewName, ViewRow } from './defaultViewField.styles';
+import { ViewName, ViewRow } from './defaultViewField.styles';
 
 interface IDefaultView {
 	id: string;

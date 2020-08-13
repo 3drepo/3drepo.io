@@ -50,7 +50,6 @@ export const { Types: DialogTypes, Creators: DialogActions } = createActions({
 	showErrorDialog: ['method', 'dataType', 'message', 'status'],
 	showConfirmDialog: ['config'],
 	showRevisionsDialog: ['config'],
-	showLoadModelDialog: ['config'],
 	hideDialog: ['dialogId'],
 	setPendingState: ['isPending'],
 	showScreenshotDialog: ['config'],
@@ -117,11 +116,6 @@ const showRevisionsDialog = (state = INITIAL_STATE, action) => {
 	return showDialog(state, { config });
 };
 
-const showLoadModelDialog = (state = INITIAL_STATE, action) => {
-	const config = { ...action.config, template: Dialogs.LoadModelDialog } as IDialogConfig;
-	return showDialog(state, { config });
-};
-
 const showScreenshotDialog = (state = INITIAL_STATE, action) => {
 	const config = {
 		title: action.config.title || 'Screenshot',
@@ -174,7 +168,6 @@ export const reducer = createReducer({...INITIAL_STATE}, {
 	[DialogTypes.SHOW_ENDPOINT_ERROR_DIALOG]: showEndpointErrorDialog,
 	[DialogTypes.SHOW_CONFIRM_DIALOG]: showConfirmDialog,
 	[DialogTypes.SHOW_REVISIONS_DIALOG]: showRevisionsDialog,
-	[DialogTypes.SHOW_LOAD_MODEL_DIALOG]: showLoadModelDialog,
 	[DialogTypes.SHOW_SCREENSHOT_DIALOG]: showScreenshotDialog,
 	[DialogTypes.SHOW_NEW_UPDATE_DIALOG]: showNewUpdateDialog,
 	[DialogTypes.SHOW_LOGGED_OUT_DIALOG]: showLoggedOutDialog

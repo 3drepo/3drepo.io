@@ -68,7 +68,6 @@ interface IProps {
 	showDialog: (config) => void;
 	showConfirmDialog: (config) => void;
 	showRevisionsDialog: (config) => void;
-	showLoadModelDialog: (config) => void;
 	removeModel: (teamspace, modelData) => void;
 	downloadModel: (teamspace, modelId) => void;
 	onShareClick: () => void;
