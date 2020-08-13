@@ -856,7 +856,6 @@ describe("Issues", function () {
 						.send(data)
 						.expect(200, (err, res) => {
 							const comment = res.body.comments.filter(c=> c.guid == commentId)[0];
-							console.log(comment);
 							expect(comment.viewpoint.screenshot).to.exist
 								.and.to.be.not.equal(pngBase64);
 							expect(comment.viewpoint.screenshotSmall).to.exist;
