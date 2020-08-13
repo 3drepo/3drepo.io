@@ -85,19 +85,21 @@ class View {
 			}
 		}
 
-		// ===============================
-		// DEPRECATED LEGACY SUPPORT START
-		// ===============================
-		if (viewToClean.thumbnail) {
-			viewToClean.screenshot = { thumbnail: viewToClean.thumbnail };
-		}
+		if(serialise) {
+			// ===============================
+			// DEPRECATED LEGACY SUPPORT START
+			// ===============================
+			if (viewToClean.thumbnail) {
+				viewToClean.screenshot = { thumbnail: viewToClean.thumbnail };
+			}
 
-		if (viewToClean.viewpoint && viewToClean.viewpoint.clippingPlanes) {
-			viewToClean.clippingPlanes = viewToClean.viewpoint.clippingPlanes;
+			if (viewToClean.viewpoint && viewToClean.viewpoint.clippingPlanes) {
+				viewToClean.clippingPlanes = viewToClean.viewpoint.clippingPlanes;
+			}
+			// =============================
+			// DEPRECATED LEGACY SUPPORT END
+			// =============================
 		}
-		// =============================
-		// DEPRECATED LEGACY SUPPORT END
-		// =============================
 
 		return viewToClean;
 	}
