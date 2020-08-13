@@ -121,8 +121,6 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		return this.props.viewer.initialized;
 	}
 
-	public commentRef = React.createRef<any>();
-
 	public renderMessagesList = renderWhenTrue(() => {
 		return (
 			<MessagesList

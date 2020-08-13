@@ -123,8 +123,6 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		))(!this.isNewRisk);
 	}
 
-	public commentRef = React.createRef<any>();
-
 	public renderMessagesList = renderWhenTrue(() => (
 		<MessagesList
 			formRef={this.formRef}
