@@ -87,7 +87,7 @@ class Ticket extends View {
 
 		if (ticketToClean.comments) {
 			ticketToClean.comments.forEach((comment) => {
-				if (comment.viewpoint) {
+				if (utils.isUUID(comment.viewpoint)) {
 					const vpId =  utils.uuidToString(comment.viewpoint);
 					comment.viewpoint = ticketToClean.viewpoints.find((item) => utils.uuidToString(item.guid) === vpId);
 				}
@@ -392,6 +392,7 @@ class Ticket extends View {
 		} catch(e) {
 			newTicket.number = 1;
 		}
+
 		const viewpoint = newTicket.viewpoint;
 		const didntHadEmbededGroups = viewpoint &&  (Boolean(viewpoint.hidden_group_id) ||  Boolean(viewpoint.hidden_group_id) || Boolean(viewpoint.shown_group_id));
 
