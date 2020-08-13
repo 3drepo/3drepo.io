@@ -41,6 +41,7 @@ import {
 
 interface IProps {
 	isPending: boolean;
+	isAdmin: boolean;
 	viewpoints: any[];
 	newViewpoint: any;
 	activeViewpoint: any;
@@ -131,6 +132,7 @@ export class Views extends React.PureComponent<IProps, any> {
 					onSaveEdit={this.handleUpdate(viewpoint._id)}
 					onChangeName={this.handleActiveViewpointChange}
 					onSetDefault={this.props.setDefaultViewpoint}
+					isAdmin={this.props.isAdmin}
 				/>
 			);
 		});

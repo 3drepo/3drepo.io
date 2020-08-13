@@ -45,6 +45,7 @@ import {
 interface IProps {
 	viewpoint: any;
 	active?: boolean;
+	isAdmin?: boolean;
 	editMode?: boolean;
 	teamspace: string;
 	modelId: string;
@@ -60,7 +61,7 @@ interface IProps {
 	defaultView?: boolean;
 }
 
-const HamburgerMenu = ({onSetAsDefault, onDelete}) => {
+const HamburgerMenu = ({onSetAsDefault, onDelete, isAdmin}) => {
 	const [anchorElement, setAnchorElement] = useState(null);
 
 	const toggleMenu = (e: React.SyntheticEvent) => {
@@ -82,7 +83,7 @@ const HamburgerMenu = ({onSetAsDefault, onDelete}) => {
 				open={Boolean(anchorElement)}
 				onClose={toggleMenu}
 			>
-				<MenuItem onClick={closeMenuAnd(onSetAsDefault)}>
+				<MenuItem onClick={closeMenuAnd(onSetAsDefault)} disabled={!isAdmin} >
 					Set as Default
 				</MenuItem>
 				<MenuItem onClick={closeMenuAnd(onDelete)} >
@@ -117,7 +118,7 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 				<IconsGroup disabled={this.state.isDeletePending}>
 					<StyledEditIcon onClick={this.props.onOpenEditMode} />
 					<StyledShareIcon onClick={this.handleShareLink} />
-					<HamburgerMenu onDelete={this.handleDelete} onSetAsDefault={this.handleSetDefault} />
+					<HamburgerMenu onDelete={this.handleDelete} onSetAsDefault={this.handleSetDefault} isAdmin={this.props.isAdmin} />
 				</IconsGroup>
 			}
 		</NameRow>

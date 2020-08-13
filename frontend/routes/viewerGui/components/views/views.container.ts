@@ -18,7 +18,7 @@
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { selectIsCommenter } from '../../../../modules/model/permissions.selectors';
+import { selectIsAdmin, selectIsCommenter } from '../../../../modules/model/permissions.selectors';
 import {
 	selectActiveViewpoint,
 	selectEditMode,
@@ -36,6 +36,7 @@ const mapStateToProps = createStructuredSelector({
 	newViewpoint: selectNewViewpoint,
 	activeViewpoint: selectActiveViewpoint,
 	isPending: selectIsPending,
+	isAdmin: selectIsAdmin,
 	editMode: selectEditMode,
 	searchQuery: selectSearchQuery,
 	searchEnabled: selectSearchEnabled,
