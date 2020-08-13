@@ -149,7 +149,7 @@ async function createViewPoint(account, model, id, viewpoint) {
 		newViewpoint = {...viewpoint};
 		if (utils.typeMatch(viewpoint, fieldTypes["viewpoint"])) {
 			newViewpoint.guid = utils.generateUUID();
-			newViewpoint = Viewpoint.clean(this.routePrefix(account, model, this.colName, id), newViewpoint, fieldTypes.viewpoint);
+			newViewpoint = Viewpoint.clean(this.routePrefix(account, model, id), newViewpoint, false);
 		} else {
 			throw responseCodes.INVALID_ARGUMENTS;
 		}

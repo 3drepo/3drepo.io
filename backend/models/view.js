@@ -64,30 +64,24 @@ class View {
 		this.fieldTypes = fieldTypes;
 	}
 
-	routePrefix(account, model, route, id) {
+	routePrefix(account, model, id) {
+		const route = ("views" === this.collName) ? "viewpoints" : this.collName;
 		return `${account}/${model}/${route}/${id}`;
 	}
 
-	clean(account, model, viewToClean, targetType = "[object String]") {
-		const route = ("views" === this.collName) ? "viewpoints" : this.collName;
+	clean(account, model, viewToClean, serialise = true) {
 
 		if (viewToClean._id) {
 			const id = utils.uuidToString(viewToClean._id);
 
-			if ("[object String]" === targetType) {
-				viewToClean._id = id;
-			} else if ("[object Object]" === targetType) {
-				viewToClean._id = utils.stringToUUID(viewToClean._id);
-			}
+			viewToClean._id = serialise ? id : utils.stringToUUID(viewToClean._id);
 
 			if (viewToClean.viewpoint) {
-				viewToClean.viewpoint = Viewpoint.clean(this.routePrefix(id), viewToClean.viewpoint, targetType);
+				viewToClean.viewpoint = Viewpoint.clean(this.routePrefix(account, model, id), viewToClean.viewpoint, serialise);
 			}
 
-			if (viewToClean.thumbnail) {
-				viewToClean.thumbnail = `${account}/${model}/${route}/${id}/thumbnail.png`;
-			} else {
-				viewToClean.thumbnail = undefined;
+			if (serialise && viewToClean.thumbnail) {
+				viewToClean.thumbnail = `${this.routePrefix(id)}/thumbnail.png`;
 			}
 		}
 

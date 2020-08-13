@@ -71,13 +71,12 @@ class Ticket extends View {
 			delete ticketToClean.due_date;
 		}
 
-		const routePrefix = this.routePrefix(account, model, this.colName, ticketToClean._id);
+		const routePrefix = this.routePrefix(account, model, ticketToClean._id);
 
 		// legacy schema support
 		if (ticketToClean.viewpoint) {
 			if(ticketToClean.viewpoint.right && ticketToClean.viewpoint.right.length) {
-				ticketToClean.viewpoint = Viewpoint.clean(routePrefix,
-					ticketToClean.viewpoint);
+				ticketToClean.viewpoint = Viewpoint.clean(routePrefix, ticketToClean.viewpoint);
 			} else {
 				// workaround for erroneous legacy data - see ISSUE #2085
 				ticketToClean.viewpoint = undefined;

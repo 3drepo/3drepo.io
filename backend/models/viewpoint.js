@@ -21,7 +21,7 @@ const _ = require("lodash");
 const utils = require("../utils");
 const FileRef = require("./fileRef");
 
-const clean = function(routePrefix, viewpointToClean, targetType = "[object String]") {
+const clean = function(routePrefix, viewpointToClean, serialise = true) {
 	const viewpointFields = [
 		"group_id",
 		"guid",
@@ -33,21 +33,22 @@ const clean = function(routePrefix, viewpointToClean, targetType = "[object Stri
 
 	viewpointFields.forEach((field) => {
 		if (_.get(viewpointToClean, field)) {
-			if ("[object String]" === targetType) {
+			if (serialise) {
 				if (Array.isArray(_.get(viewpointToClean, field))) {
 					viewpointToClean[field] = viewpointToClean[field].map(utils.uuidToString);
 				} else {
 					viewpointToClean[field] = utils.uuidToString(viewpointToClean[field]);
 				}
-			} else if ("[object Object]" === targetType) {
+			} else {
 				viewpointToClean[field] = utils.stringToUUID(viewpointToClean[field]);
 			}
 		}
 	});
 
-	if (viewpointToClean.guid && (viewpointToClean.screenshot || viewpointToClean.screenshot_ref)) {
+	if (serialise && viewpointToClean.guid && (viewpointToClean.screenshot || viewpointToClean.screenshot_ref)) {
 		const viewpointId = utils.uuidToString(viewpointToClean.guid);
 		viewpointToClean.screenshot = `${routePrefix}/viewpoints/${viewpointId}/screenshot.png`;
+		viewpointToClean.screenshot_ref = undefined;
 	}
 
 	return viewpointToClean;
