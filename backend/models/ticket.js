@@ -596,7 +596,7 @@ class Ticket extends View {
 				}
 			});
 
-			ticket.comment = undefined;
+			ticket.comments = undefined;
 		});
 
 		return tickets;
