@@ -256,9 +256,21 @@ const deleteComment =  async function(account, model, colName, id, guid, user) {
 	return {guid};
 };
 
+const clean = (routePrefix, comment) =>  {
+	["rev_id", "guid"].forEach((key) => {
+		if (comment[key]) {
+			comment[key] = utils.uuidToString(comment[key]);
+		}
+	});
+	if(comment.viewpoint) {
+		Viewpoint.clean(routePrefix, comment.viewpoint);
+	}
+};
+
 module.exports = {
 	newSystemComment : (owner, property, from, to) => new SystemCommentGenerator(owner, property, from, to),
 	newMitigationComment : (owner, likelihood, consequence, mitigation, viewpoint, pinPosition) => new MitigationCommentGenerator(owner, likelihood, consequence, mitigation, viewpoint, pinPosition),
 	addComment,
-	deleteComment
+	deleteComment,
+	clean
 };

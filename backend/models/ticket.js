@@ -57,8 +57,6 @@ class Ticket extends View {
 
 	clean(account, model, ticketToClean) {
 		const ticketFields = ["rev_id", "group_id"];
-		const commentFields = ["rev_id", "guid", "viewpoint"];
-
 		ticketToClean.account = account;
 		model = ticketToClean.model || ticketToClean.origin_model || model;
 		ticketToClean.model = model;
@@ -73,10 +71,13 @@ class Ticket extends View {
 			delete ticketToClean.due_date;
 		}
 
+		const routePrefix = this.routePrefix(account, model, this.colName, ticketToClean._id);
+
 		// legacy schema support
 		if (ticketToClean.viewpoint) {
 			if(ticketToClean.viewpoint.right && ticketToClean.viewpoint.right.length) {
-				ticketToClean.viewpoint = Viewpoint.clean(ticketToClean.viewpoint);
+				ticketToClean.viewpoint = Viewpoint.clean(routePrefix,
+					ticketToClean.viewpoint);
 			} else {
 				// workaround for erroneous legacy data - see ISSUE #2085
 				ticketToClean.viewpoint = undefined;
@@ -89,24 +90,8 @@ class Ticket extends View {
 
 		if (ticketToClean.comments) {
 			ticketToClean.comments.forEach((comment) => {
-				commentFields.forEach((key) => {
-					if (comment[key] && _.isObject(comment[key]) && !utils.hasField(comment[key], "up")) {
-						comment[key] = utils.uuidToString(comment[key]);
-					}
-				});
-
-				if (comment.viewpoint) {
-					const commentViewpoint = ticketToClean.viewpoints.find((vp) =>
-						vp.guid &&
-						utils.uuidToString(vp.guid) === comment.viewpoint
-					);
-
-					comment.viewpoint = commentViewpoint || undefined;
-
-					comment = super.clean(account, model, { _id: ticketToClean._id, ...comment });
-					comment.viewpoint = super.setViewpointScreenshotURL(this.collName, account, model, ticketToClean._id, comment.viewpoint);
-					delete comment._id;
-				}
+				comment = Comment.clean(routePrefix, comment);
+				comment.viewpoint = super.setViewpointScreenshotURL(this.collName, account, model, ticketToClean._id, comment.viewpoint);
 			});
 		}
 

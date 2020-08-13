@@ -64,6 +64,10 @@ class View {
 		this.fieldTypes = fieldTypes;
 	}
 
+	routePrefix(account, model, route, id) {
+		return `${account}/${model}/${route}/${id}`;
+	}
+
 	clean(account, model, viewToClean, targetType = "[object String]") {
 		const route = ("views" === this.collName) ? "viewpoints" : this.collName;
 
@@ -77,7 +81,7 @@ class View {
 			}
 
 			if (viewToClean.viewpoint) {
-				viewToClean.viewpoint = Viewpoint.clean(`${account}/${model}/${route}/${id}`, viewToClean.viewpoint, targetType);
+				viewToClean.viewpoint = Viewpoint.clean(this.routePrefix(id), viewToClean.viewpoint, targetType);
 			}
 
 			if (viewToClean.thumbnail) {

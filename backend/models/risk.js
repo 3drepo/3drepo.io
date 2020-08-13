@@ -148,9 +148,8 @@ async function createViewPoint(account, model, id, viewpoint) {
 	if (viewpoint) {
 		newViewpoint = {...viewpoint};
 		if (utils.typeMatch(viewpoint, fieldTypes["viewpoint"])) {
-			const routePrefix = `${account}/${model}/risks/${id}`;
 			newViewpoint.guid = utils.generateUUID();
-			newViewpoint = Viewpoint.clean(routePrefix, newViewpoint, fieldTypes.viewpoint);
+			newViewpoint = Viewpoint.clean(this.routePrefix(account, model, this.colName, id), newViewpoint, fieldTypes.viewpoint);
 		} else {
 			throw responseCodes.INVALID_ARGUMENTS;
 		}
