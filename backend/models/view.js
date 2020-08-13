@@ -69,37 +69,35 @@ class View {
 		return `${account}/${model}/${route}/${id}`;
 	}
 
-	clean(account, model, viewToClean, serialise = true) {
+	clean(account, model, viewToClean) {
 
 		if (viewToClean._id) {
 			const id = utils.uuidToString(viewToClean._id);
 
-			viewToClean._id = serialise ? id : utils.stringToUUID(viewToClean._id);
+			viewToClean._id = id;
 
 			if (viewToClean.viewpoint) {
-				viewToClean.viewpoint = Viewpoint.clean(this.routePrefix(account, model, id), viewToClean.viewpoint, serialise);
+				viewToClean.viewpoint = Viewpoint.clean(this.routePrefix(account, model, id), viewToClean.viewpoint);
 			}
 
-			if (serialise && viewToClean.thumbnail) {
+			if (viewToClean.thumbnail) {
 				viewToClean.thumbnail = `${this.routePrefix(id)}/thumbnail.png`;
 			}
 		}
 
-		if(serialise) {
-			// ===============================
-			// DEPRECATED LEGACY SUPPORT START
-			// ===============================
-			if (viewToClean.thumbnail) {
-				viewToClean.screenshot = { thumbnail: viewToClean.thumbnail };
-			}
-
-			if (viewToClean.viewpoint && viewToClean.viewpoint.clippingPlanes) {
-				viewToClean.clippingPlanes = viewToClean.viewpoint.clippingPlanes;
-			}
-			// =============================
-			// DEPRECATED LEGACY SUPPORT END
-			// =============================
+		// ===============================
+		// DEPRECATED LEGACY SUPPORT START
+		// ===============================
+		if (viewToClean.thumbnail) {
+			viewToClean.screenshot = { thumbnail: viewToClean.thumbnail };
 		}
+
+		if (viewToClean.viewpoint && viewToClean.viewpoint.clippingPlanes) {
+			viewToClean.clippingPlanes = viewToClean.viewpoint.clippingPlanes;
+		}
+		// =============================
+		// DEPRECATED LEGACY SUPPORT END
+		// =============================
 
 		return viewToClean;
 	}
