@@ -28,7 +28,7 @@ import styled, { css } from 'styled-components';
 import { FONT_WEIGHT } from '../../../../../../styles';
 import { COLOR } from '../../../../../../styles';
 
-const IconStyles = css`
+export const IconStyles = css`
 	cursor: pointer;
 
 	&:hover {
@@ -81,7 +81,7 @@ export const StyledDeleteIcon = styled(DeleteIcon)`
 
 export const StyledEditIcon = styled(EditIcon)`
 	&& {
-		${IconStyles}
+		${IconStyles};
 		margin-right: 14px;
 	}
 `;
@@ -95,14 +95,14 @@ export const NewViewpointName = styled(TextField)`
 
 export const StyledCancelIcon = styled(CancelIcon)`
 	&& {
-		${IconStyles}
+		${IconStyles};
 		margin-right: 14px;
 	}
 `;
 
 export const StyledSaveIcon = styled(SaveIcon)`
 	&& {
-		${IconStyles}
+		${IconStyles};
 	}
 `;
 

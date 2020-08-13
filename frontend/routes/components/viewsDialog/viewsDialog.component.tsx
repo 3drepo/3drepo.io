@@ -35,6 +35,7 @@ interface IProps {
 	modelId: string;
 	handleClose: () => void;
 	onChange: (v) => void;
+	fetchModelSettings: (teamspace: string, modelId: string) => void;
 	modelSettings: any;
 	setState: (componentState: IViewpointsComponentState) => void;
 }
@@ -45,10 +46,11 @@ export const ViewsDialog = ({ viewpoints, searchQuery, searchEnabled, teamspace,
 	const [filteredViews, setFilteredViewpoints] = React.useState([]);
 
 	React.useEffect(() => {
-		if (!viewpoints.length) {
-			props.fetchViewpoints(teamspace, modelId);
+		props.fetchViewpoints(teamspace, modelId);
+		if (props.modelSettings.model !== modelId) {
+			props.fetchModelSettings(teamspace, modelId);
 		}
-	}, []);
+	}, [teamspace, modelId]);
 
 	React.useEffect(() => {
 		const filteredViewpoints = searchEnabled
@@ -93,7 +95,11 @@ export const ViewsDialog = ({ viewpoints, searchQuery, searchEnabled, teamspace,
 		/>
 	));
 
+	const { defaultView } = props.modelSettings;
+
 	const renderViewsList = renderWhenTrue(() => filteredViews.map((viewpoint) => {
+		const isDefaultView = defaultView ? viewpoint._id === defaultView.id : false;
+
 		return (
 			<ViewItem
 				key={viewpoint._id}
@@ -101,6 +107,7 @@ export const ViewsDialog = ({ viewpoints, searchQuery, searchEnabled, teamspace,
 				onClick={handleViewpointItemClick(viewpoint)}
 				teamspace={teamspace}
 				modelId={modelId}
+				defaultView={isDefaultView}
 			/>
 		);
 	}));

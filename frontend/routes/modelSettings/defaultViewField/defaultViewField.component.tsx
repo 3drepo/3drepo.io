@@ -18,12 +18,11 @@
 import React from 'react';
 import {
 	IconsGroup,
-	StyledDeleteIcon,
 	StyledEditIcon
 } from '../../viewerGui/components/views/components/viewItem/viewItem.styles';
 
 import { StyledContainedButton } from '../modelSettings.styles';
-import { ViewName, ViewRow } from './defaultViewField.styles';
+import { StyledDeleteIcon, ViewName, ViewRow } from './defaultViewField.styles';
 
 interface IDefaultView {
 	id: string;
@@ -36,12 +35,12 @@ interface IProps {
 	onChange: (v) => void;
 }
 
-export const DefaultViewField = ({ onSelectView, value, onChange, ...props }: IProps) => {
+export const DefaultViewField = ({ onSelectView, value, onChange }: IProps) => {
 	if (!value) {
 		return (
-				<StyledContainedButton onClick={onSelectView} variant="raised">
-					Select View
-				</StyledContainedButton>
+			<StyledContainedButton onClick={onSelectView} variant="raised">
+				Select View
+			</StyledContainedButton>
 		);
 	}
 

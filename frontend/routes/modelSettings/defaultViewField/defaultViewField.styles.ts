@@ -18,9 +18,16 @@
 import styled from 'styled-components';
 
 import Typography from '@material-ui/core/Typography';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 import { COLOR, FONT_WEIGHT } from '../../../styles';
-import { StyledDeleteIcon, StyledEditIcon } from '../../viewerGui/components/views/components/viewItem/viewItem.styles';
+import { IconStyles, StyledEditIcon } from '../../viewerGui/components/views/components/viewItem/viewItem.styles';
+
+export const StyledDeleteIcon = styled(DeleteIcon)`
+	&& {
+		${IconStyles}
+	}
+`;
 
 export const ViewRow = styled.div`
 	flex: 1;

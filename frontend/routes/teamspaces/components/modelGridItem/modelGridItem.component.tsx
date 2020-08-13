@@ -25,6 +25,7 @@ import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../../../s
 import { formatDate, LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
 import { TYPES } from '../../../components/dialogContainer/components/revisionsDialog/revisionsDialog.constants';
 import { Loader } from '../../../components/loader/loader.component';
+import ViewsDialog from '../../../components/viewsDialog/viewsDialog.container';
 import { PERMISSIONS_VIEWS } from '../../../projects/projects.component';
 import { ROW_ACTIONS } from '../../teamspaces.contants';
 import { ActionsMenu } from '../actionsMenu/actionsMenu.component';
@@ -158,13 +159,21 @@ export const ModelGridItem = memo((props: IProps) => {
 			searchQuery: ''
 		});
 
+	const onChange = ({ target }) => {
+		const { teamspace, model } = props;
+		props.history.push(`${ROUTES.VIEWER}/${teamspace}/${model}?viewpointId=${target.value.id}`);
+	};
+
 	const handleLoadModelClick = () => {
-		const { teamspace, model, name } = props;
-		props.showLoadModelDialog({
-			title: `Load model with...`,
+		const { teamspace, model } = props;
+
+		props.showDialog({
+			title: 'Load model with...',
+			template: ViewsDialog,
 			data: {
 				teamspace,
 				modelId: model,
+				onChange,
 			},
 			search: {
 				enabled: props.searchEnabled,

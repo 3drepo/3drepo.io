@@ -19,7 +19,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { selectSettings } from '../../../modules/model';
+import { selectSettings, ModelActions } from '../../../modules/model';
 import {
 	selectIsPending,
 	selectSearchEnabled,
@@ -39,6 +39,7 @@ const mapStateToProps = createStructuredSelector({
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchViewpoints: ViewpointsActions.fetchViewpoints,
+	fetchModelSettings: ModelActions.fetchSettings,
 	setState: ViewpointsActions.setComponentState,
 }, dispatch);
 
