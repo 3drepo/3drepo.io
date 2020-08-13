@@ -38,7 +38,8 @@ export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createAct
 	setSearchQuery: ['searchQuery'],
 	showDeleteInfo: ['viewpointId'],
 	setComponentState: ['componentState'],
-	shareViewpointLink: ['teamspace', 'modelId', 'viewpointId']
+	shareViewpointLink: ['teamspace', 'modelId', 'viewpointId'],
+	setDefaultViewpoint: ['teamspace', 'modelId', 'viewpointId']
 }, { prefix: 'VIEWPOINTS/' });
 
 export interface IViewpointsComponentState {

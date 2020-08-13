@@ -34,7 +34,6 @@ import {
 	SaveIconButton,
 	Small,
 	StyledCancelIcon,
-	StyledDeleteIcon,
 	StyledEditIcon,
 	StyledForm,
 	StyledSaveIcon,
@@ -54,6 +53,7 @@ interface IProps {
 	onSaveEdit?: (values) => void;
 	onDelete?: (teamspace, model, id) => void;
 	onShare?: (teamspace, model, id) => void;
+	onSetDefault?: (teamspace, model, id) => void;
 	onOpenEditMode?: () => void;
 	onClick?: (viewpoint) => void;
 	onChangeName?: (viewpointName) => void;
@@ -68,10 +68,10 @@ const HamburgerMenu = ({onSetAsDefault, onDelete}) => {
 		return false;
 	};
 
-	const closeMenuAnd = ( action: () => void ) =>
+	const closeMenuAnd = ( action: (e?) => void ) =>
 		(e: React.SyntheticEvent) => {
 			toggleMenu(e);
-			action();
+			action(e);
 	};
 
 	return (
@@ -117,8 +117,7 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 				<IconsGroup disabled={this.state.isDeletePending}>
 					<StyledEditIcon onClick={this.props.onOpenEditMode} />
 					<StyledShareIcon onClick={this.handleShareLink} />
-					<StyledDeleteIcon onClick={this.handleDelete} />
-					<HamburgerMenu onDelete={() => alert('onDelete')} onSetAsDefault={() => alert('onSetAsDefault')} />
+					<HamburgerMenu onDelete={this.handleDelete} onSetAsDefault={this.handleSetDefault} />
 				</IconsGroup>
 			}
 		</NameRow>
@@ -189,6 +188,11 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 	public handleShareLink = () => {
 		const { teamspace, modelId, viewpoint: {_id} } = this.props;
 		this.props.onShare(teamspace, modelId, _id);
+	}
+
+	public handleSetDefault = () => {
+		const { teamspace, modelId, viewpoint: {_id} } = this.props;
+		this.props.onSetDefault(teamspace, modelId, _id);
 	}
 
 	public handleNameChange = (field) => (event) => {

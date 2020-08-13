@@ -203,6 +203,10 @@ export function* shareViewpointLink({ teamspace, modelId, viewpointId }) {
 	yield put(SnackbarActions.show('Share link copied to clipboard'));
 }
 
+export function* setDefaultViewpoint({ teamspace, modelId, viewpointId }) {
+	yield put(SnackbarActions.show('View set as default'));
+}
+
 export default function* ViewpointsSaga() {
 	yield takeLatest(ViewpointsTypes.FETCH_VIEWPOINTS, fetchViewpoints);
 	yield takeLatest(ViewpointsTypes.CREATE_VIEWPOINT, createViewpoint);
@@ -214,4 +218,5 @@ export default function* ViewpointsSaga() {
 	yield takeLatest(ViewpointsTypes.UNSUBSCRIBE_ON_VIEWPOINT_CHANGES, unsubscribeOnViewpointChanges);
 	yield takeLatest(ViewpointsTypes.PREPARE_NEW_VIEWPOINT, prepareNewViewpoint);
 	yield takeLatest(ViewpointsTypes.SHARE_VIEWPOINT_LINK, shareViewpointLink);
+	yield takeLatest(ViewpointsTypes.SET_DEFAULT_VIEWPOINT, setDefaultViewpoint);
 }

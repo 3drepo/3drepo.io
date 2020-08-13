@@ -57,6 +57,7 @@ interface IProps {
 	deleteViewpoint: (teamspace, modelId, viewId) => void;
 	showViewpoint: (teamspace, modelId, view) => void;
 	shareViewpointLink: (teamspace, modelId, viewId) => void;
+	setDefaultViewpoint: (teamspace, modelId, viewId) => void;
 	subscribeOnViewpointChanges: (teamspace, modelId) => void;
 	unsubscribeOnViewpointChanges: (teamspace, modelId) => void;
 	setState: (componentState: IViewpointsComponentState) => void;
@@ -129,6 +130,7 @@ export class Views extends React.PureComponent<IProps, any> {
 					modelId={model}
 					onSaveEdit={this.handleUpdate(viewpoint._id)}
 					onChangeName={this.handleActiveViewpointChange}
+					onSetDefault={this.props.setDefaultViewpoint}
 				/>
 			);
 		});
