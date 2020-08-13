@@ -87,6 +87,10 @@ class Ticket extends View {
 
 		if (ticketToClean.comments) {
 			ticketToClean.comments.forEach((comment) => {
+				if (comment.viewpoint) {
+					const vpId =  utils.uuidToString(comment.viewpoint);
+					comment.viewpoint = ticketToClean.viewpoints.find((item) => utils.uuidToString(item.guid) === vpId);
+				}
 				const commentCleaned = Comment.clean(routePrefix, comment);
 				comment = commentCleaned;
 			});
