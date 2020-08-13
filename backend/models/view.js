@@ -75,25 +75,28 @@ class View {
 			const id = utils.uuidToString(viewToClean._id);
 
 			viewToClean._id = id;
+			const routePrefix = this.routePrefix(account, model, id);
 
 			if (viewToClean.viewpoint) {
-				viewToClean.viewpoint = Viewpoint.clean(this.routePrefix(account, model, id), viewToClean.viewpoint);
+				viewToClean.viewpoint = Viewpoint.clean(routePrefix, viewToClean.viewpoint);
 			}
 
 			if (viewToClean.thumbnail) {
-				viewToClean.thumbnail = `${this.routePrefix(id)}/thumbnail.png`;
+				viewToClean.thumbnail = `${routePrefix}/thumbnail.png`;
 			}
 		}
 
 		// ===============================
 		// DEPRECATED LEGACY SUPPORT START
 		// ===============================
-		if (viewToClean.thumbnail) {
-			viewToClean.screenshot = { thumbnail: viewToClean.thumbnail };
-		}
+		if(this.collName === "views") {
+			if (viewToClean.thumbnail) {
+				viewToClean.screenshot = { thumbnail: viewToClean.thumbnail };
+			}
 
-		if (viewToClean.viewpoint && viewToClean.viewpoint.clippingPlanes) {
-			viewToClean.clippingPlanes = viewToClean.viewpoint.clippingPlanes;
+			if (viewToClean.viewpoint && viewToClean.viewpoint.clippingPlanes) {
+				viewToClean.clippingPlanes = viewToClean.viewpoint.clippingPlanes;
+			}
 		}
 		// =============================
 		// DEPRECATED LEGACY SUPPORT END
