@@ -17,6 +17,7 @@
 
 import { IconButton, MenuItem, TextField } from '@material-ui/core';
 import CancelIcon from '@material-ui/icons/Cancel';
+import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import SaveIcon from '@material-ui/icons/Save';
 import ShareIcon from '@material-ui/icons/Share';
@@ -70,6 +71,12 @@ export const ThumbnailPlaceholder = styled.div`
 	justify-content: center;
 	color: ${COLOR.BLACK_30};
 	border: 1px solid ${COLOR.BLACK_20};
+`;
+
+export const StyledDeleteIcon = styled(DeleteIcon)`
+	&& {
+		${IconStyles}
+	}
 `;
 
 export const StyledEditIcon = styled(EditIcon)`
@@ -144,7 +151,6 @@ export const Image = styled.img`
 export const HamburgerIconButton = styled(IconButton)`
 	&& {
 		${IconStyles};
-		width: 24px;
 	}
 
 	&:first-child {
