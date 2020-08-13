@@ -772,7 +772,6 @@ describe("Risks", function () {
 							oldViewpoint = res.body.viewpoint;
 							delete oldViewpoint.screenshot;
 							delete oldViewpoint.screenshotSmall;
-							screenshotRef = res.body.viewpoint.screenshot_ref;
 							return done(err);
 						});
 				},
@@ -786,12 +785,8 @@ describe("Risks", function () {
 						.expect(200, function(err, res) {
 							const newViewpoint = { ...oldViewpoint };
 							newViewpoint.guid = res.body.viewpoint.guid;
-							newViewpoint.screenshot_ref = res.body.viewpoint.screenshot_ref;
 
-							expect(res.body.viewpoint.screenshot_ref).to.not.equal(screenshotRef);
 							expect(res.body.comments[0].action.property).to.equal("screenshot");
-							expect(res.body.comments[0].action.from).to.equal(screenshotRef);
-							expect(res.body.comments[0].action.to).to.equal(res.body.viewpoint.screenshot_ref);
 							expect(res.body.comments[0].owner).to.equal(username);
 							done(err);
 						});
@@ -891,7 +886,6 @@ describe("Risks", function () {
 							oldViewpoint = res.body.viewpoint;
 							delete oldViewpoint.screenshot;
 							delete oldViewpoint.screenshotSmall;
-							screenshotRef = res.body.viewpoint.screenshot_ref;
 							return done(err);
 						});
 				},
@@ -905,13 +899,9 @@ describe("Risks", function () {
 						.expect(200, function(err, res) {
 							const newViewpoint = { ...oldViewpoint, ...data.viewpoint };
 							newViewpoint.guid = res.body.viewpoint.guid;
-							newViewpoint.screenshot_ref = res.body.viewpoint.screenshot_ref;
 							delete newViewpoint.screenshot;
 
-							expect(res.body.viewpoint.screenshot_ref).to.not.equal(screenshotRef);
 							expect(res.body.comments[0].action.property).to.equal("screenshot");
-							expect(res.body.comments[0].action.from).to.equal(screenshotRef);
-							expect(res.body.comments[0].action.to).to.equal(res.body.viewpoint.screenshot_ref);
 							expect(res.body.comments[0].owner).to.equal(username);
 
 							expect(res.body.viewpoint.up).to.deep.equal(data.viewpoint.up);
@@ -926,7 +916,9 @@ describe("Risks", function () {
 							expect(res.body.viewpoint.clippingPlanes).to.deep.equal(data.viewpoint.clippingPlanes);
 							expect(res.body.comments[1].action.property).to.equal("viewpoint");
 							expect(res.body.comments[1].action.from).to.equal(JSON.stringify(oldViewpoint));
-							expect(res.body.comments[1].action.to).to.equal(JSON.stringify(newViewpoint));
+							const vp = JSON.parse(res.body.comments[1].action.to);
+							delete vp.screenshot_ref;
+							expect(vp).to.deep.equal(newViewpoint);
 							expect(res.body.comments[1].owner).to.equal(username);
 							done(err);
 						});
@@ -974,7 +966,6 @@ describe("Risks", function () {
 							.send(comment)
 							.expect(200 , function(err , res) {
 								const commentRes = res.body;
-								console.log(commentRes);
 								expect(commentRes.comment).to.equal(comment.comment);
 								done(err);
 							});
@@ -1010,7 +1001,6 @@ describe("Risks", function () {
 				agent.delete(`/${username}/${model}/risks/${riskId}/comments`)
 					.send({guid:commentId})
 					.expect(200, function(err, res) {
-						console.log(res);
 						done(err);
 					});
 			});
