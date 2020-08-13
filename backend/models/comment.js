@@ -160,7 +160,7 @@ const addComment = async function(account, model, colName, id, user, data) {
 
 	// 3. Create the comment
 	let viewpoint = null;
-	const routePrefix = `${account}/${model}/${colName}/${_id}`;
+	const routePrefix = `${account}/${model}/${colName}/${utils.uuidToString(_id)}`;
 
 	if (data.viewpoint) {
 		data = Viewpoint.clean(routePrefix, data, fieldTypes.viewpoint);

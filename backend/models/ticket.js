@@ -87,7 +87,7 @@ class Ticket extends View {
 
 		if (ticketToClean.comments) {
 			ticketToClean.comments.forEach((comment) => {
-				if (utils.isUUID(comment.viewpoint)) {
+				if (comment.viewpoint && utils.isObject(comment.viewpoint)) {
 					const vpId =  utils.uuidToString(comment.viewpoint);
 					comment.viewpoint = ticketToClean.viewpoints.find((item) => utils.uuidToString(item.guid) === vpId);
 				}
@@ -220,6 +220,8 @@ class Ticket extends View {
 			oldTicket.viewpoint = oldTicket.viewpoints[0];
 			oldTicket = super.clean(account, model, oldTicket);
 			delete oldTicket.viewpoint.screenshot;
+			// DEPRECATED
+			delete oldTicket.viewpoint.screenshotSmall;
 
 			data.viewpoint = {
 				...oldTicket.viewpoint,
@@ -285,11 +287,12 @@ class Ticket extends View {
 		}
 
 		// 7. Return the updated data and the old ticket
-		const updatedTicket = this.clean(account, model, {
+		const updatedTicket = {
 			...oldTicket,
 			...data
-		});
-		oldTicket = this.clean(account, model, oldTicket);
+		};
+		this.clean(account, model, updatedTicket);
+		this.clean(account, model, oldTicket);
 		delete data.comments;
 
 		return { oldTicket, updatedTicket, data };

@@ -30,24 +30,6 @@ const { Agent } = require("useragent");
 const supertest = require("supertest");
 const { json } = require("body-parser");
 
-
-
-// var expectOld = supertest.Test.prototype.expect;
-
-// supertest.Test.prototype.expect = function(status, callback) {
-// 	expectOld.apply(this, [status,  function(err, res) {
-// 		console.log(status);
-// 		console.log(res.status);
-
-// 		expect(res.status, 'Status should be ' + status).to.be.equal(status);
-// 		callback(err, res);
-// 	}]);
-// }
-
-// __proto__.constructor.prototype
-
-// return;
-
 describe("Issues", function () {
 	let server;
 	let agent;
@@ -673,7 +655,6 @@ describe("Issues", function () {
 							oldViewpoint = res.body.viewpoint;
 							delete oldViewpoint.screenshot;
 							delete oldViewpoint.screenshotSmall;
-							screenshotRef = res.body.viewpoint.screenshot_ref;
 							return done(err);
 
 						});
@@ -686,14 +667,7 @@ describe("Issues", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`)
 						.expect(200, function(err, res) {
-							const newViewpoint = { ...oldViewpoint };
-							newViewpoint.guid = res.body.viewpoint.guid;
-							newViewpoint.screenshot_ref = res.body.viewpoint.screenshot_ref;
-
-							expect(res.body.viewpoint.screenshot_ref).to.not.equal(screenshotRef);
 							expect(res.body.comments[0].action.property).to.equal("screenshot");
-							expect(res.body.comments[0].action.from).to.equal(screenshotRef);
-							expect(res.body.comments[0].action.to).to.equal(res.body.viewpoint.screenshot_ref);
 							expect(res.body.comments[0].owner).to.equal(username);
 							done(err);
 						});
@@ -792,7 +766,6 @@ describe("Issues", function () {
 							oldViewpoint = res.body.viewpoint;
 							delete oldViewpoint.screenshot;
 							delete oldViewpoint.screenshotSmall;
-							screenshotRef = res.body.viewpoint.screenshot_ref;
 							return done(err);
 
 						});
@@ -807,13 +780,9 @@ describe("Issues", function () {
 						.expect(200, function(err, res) {
 							const newViewpoint = { ...oldViewpoint, ...data.viewpoint };
 							newViewpoint.guid = res.body.viewpoint.guid;
-							newViewpoint.screenshot_ref = res.body.viewpoint.screenshot_ref;
 							delete newViewpoint.screenshot;
 
-							expect(res.body.viewpoint.screenshot_ref).to.not.equal(screenshotRef);
 							expect(res.body.comments[0].action.property).to.equal("screenshot");
-							expect(res.body.comments[0].action.from).to.equal(screenshotRef);
-							expect(res.body.comments[0].action.to).to.equal(res.body.viewpoint.screenshot_ref);
 							expect(res.body.comments[0].owner).to.equal(username);
 
 							expect(res.body.viewpoint.up).to.deep.equal(data.viewpoint.up);
@@ -828,7 +797,9 @@ describe("Issues", function () {
 							expect(res.body.viewpoint.clippingPlanes).to.deep.equal(data.viewpoint.clippingPlanes);
 							expect(res.body.comments[1].action.property).to.equal("viewpoint");
 							expect(res.body.comments[1].action.from).to.equal(JSON.stringify(oldViewpoint));
-							expect(res.body.comments[1].action.to).to.equal(JSON.stringify(newViewpoint));
+							const vp = JSON.parse(res.body.comments[1].action.to);
+							delete vp.screenshot_ref;
+							expect(vp).to.deep.equal(newViewpoint);
 							expect(res.body.comments[1].owner).to.equal(username);
 							done(err);
 						});
@@ -873,7 +844,6 @@ describe("Issues", function () {
 						.send(comment)
 						.expect(200 , (err, res) => {
 							const comment = res.body;
-							console.log(comment);
 							expect(comment.viewpoint.screenshot).to.exist
 								.and.to.be.not.equal(pngBase64);
 							expect(comment.viewpoint.screenshotSmall).to.exist;
@@ -886,6 +856,7 @@ describe("Issues", function () {
 						.send(data)
 						.expect(200, (err, res) => {
 							const comment = res.body.comments.filter(c=> c.guid == commentId)[0];
+							console.log(comment);
 							expect(comment.viewpoint.screenshot).to.exist
 								.and.to.be.not.equal(pngBase64);
 							expect(comment.viewpoint.screenshotSmall).to.exist;
@@ -1663,7 +1634,6 @@ describe("Issues", function () {
 							.send(comment)
 							.expect(200 , function(err , res) {
 								const commentRes = res.body;
-								console.log(commentRes);
 								expect(commentRes.comment).to.equal(comment.comment);
 								done(err);
 							});
@@ -1707,7 +1677,6 @@ describe("Issues", function () {
 				agent.delete(`/${username}/${model}/issues/${issueId}/comments`)
 					.send({guid:commentId})
 					.expect(200, function(err, res) {
-						console.log(res);
 						done(err);
 					});
 			});
@@ -2061,7 +2030,7 @@ describe("Issues", function () {
 		it("should not create a system message when the issue that has been referenced is part of a quote", function(done) {
 			const comment = {comment : `> look at issue  #${issues[4].number}
 			and #${issues[5].number}
-			
+
 			and #${issues[6].number}
 			`};
 
