@@ -382,6 +382,25 @@ describe("Views", function () {
 			], done);
 		});
 
+		it("add unexpected field should fail", function(done) {
+			const viewId = Object.keys(teamSpace1Views)[0];
+			const badData = { unexpectedData: 1234 };
+
+			async.series([
+				function(done) {
+					agent2 = request.agent(server);
+					agent2.post("/login")
+						.send({ username: 'teamSpace1', password })
+						.expect(200, done);
+				},
+				function(done) {
+					agent2.put(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}/`)
+						.send(badData)
+						.expect(400, done);
+				}
+			], done);
+		});
+
 		it("delete view should succeed", function(done) {
 			const viewId = Object.keys(teamSpace1Views)[0];
 
@@ -524,6 +543,31 @@ describe("Views", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/viewpoints/${viewId}/`).expect(200, function(err, res) {
 						expect(res.body.screenshot.thumbnail).to.equal(`${username}/${model}/viewpoints/${viewId}/thumbnail.png`);
+						return done(err);
+					});
+				}
+			], done);
+		});
+
+		it("with unexpected data should succeed without unexpected fields", function(done) {
+			const view = Object.assign({"name":"View test", "unexpected":"asdf"}, baseView);
+			let viewId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/viewpoints/`)
+						.send(view)
+						.expect(200, function(err, res) {
+							viewId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/viewpoints/${viewId}`).expect(200, function(err, res) {
+						expect(res.body.name).to.equal(view.name);
+						expect(res.body.unexpected).to.not.exist;
+						expect(res.body.viewpoint).to.deep.equal(view.viewpoint);
+
 						return done(err);
 					});
 				}
