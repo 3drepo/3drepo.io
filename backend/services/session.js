@@ -37,7 +37,7 @@ module.exports.session = function(config) {
 			maxAge: config.cookie.maxAge,
 			domain: config.cookie.domain,
 			path: "/",
-			secure: config.using_ssl,
+			secure: config.public_protocol === "https",
 			// None can only applied with secure set to true, which requires SSL.
 			// None is required for embeddable viewer to work.
 			sameSite:  config.using_ssl ? "None" : "Lax"
