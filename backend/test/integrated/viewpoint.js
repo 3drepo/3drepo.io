@@ -445,13 +445,14 @@ describe("Views", function () {
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/viewpoints/${viewId}`).expect(200, function(err, res) {
+						view.viewpoint.near = res.body.viewpoint.near;
+						view.viewpoint.far = res.body.viewpoint.far;
+						view.viewpoint.fov = res.body.viewpoint.fov;
+						view.viewpoint.aspect_ratio = res.body.viewpoint.aspect_ratio;
+						view.viewpoint.hideIfc = res.body.viewpoint.hideIfc;
+
 						expect(res.body.name).to.equal(view.name);
-						expect(res.body.viewpoint.clippingPlanes).to.deep.equal(view.viewpoint.clippingPlanes);
-						expect(res.body.viewpoint.up).to.deep.equal(view.viewpoint.up);
-						expect(res.body.viewpoint.position).to.deep.equal(view.viewpoint.position);
-						expect(res.body.viewpoint.look_at).to.deep.equal(view.viewpoint.look_at);
-						expect(res.body.viewpoint.view_dir).to.deep.equal(view.viewpoint.view_dir);
-						expect(res.body.viewpoint.right).to.deep.equal(view.viewpoint.right);
+						expect(res.body.viewpoint).to.deep.equal(view.viewpoint);
 
 						return done(err);
 					});
@@ -474,13 +475,15 @@ describe("Views", function () {
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/viewpoints/${viewId}`).expect(200, function(err, res) {
+						view.viewpoint.near = res.body.viewpoint.near;
+						view.viewpoint.far = res.body.viewpoint.far;
+						view.viewpoint.fov = res.body.viewpoint.fov;
+						view.viewpoint.aspect_ratio = res.body.viewpoint.aspect_ratio;
+						view.viewpoint.hideIfc = res.body.viewpoint.hideIfc;
+
 						expect(res.body.name).to.equal(view.name);
 						expect(res.body.clippingPlanes).to.deep.equal(view.clippingPlanes);
-						expect(res.body.viewpoint.up).to.deep.equal(view.viewpoint.up);
-						expect(res.body.viewpoint.position).to.deep.equal(view.viewpoint.position);
-						expect(res.body.viewpoint.look_at).to.deep.equal(view.viewpoint.look_at);
-						expect(res.body.viewpoint.view_dir).to.deep.equal(view.viewpoint.view_dir);
-						expect(res.body.viewpoint.right).to.deep.equal(view.viewpoint.right);
+						expect(res.body.viewpoint).to.deep.equal(view.viewpoint);
 
 						return done(err);
 					});
