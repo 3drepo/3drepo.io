@@ -28,6 +28,7 @@ const store = getSessionStore(expressSession);
 const useragent = require("useragent");
 
 module.exports.session = function(config) {
+	const isSSL = config.public_protocol === "https";
 	return expressSession({
 		secret: config.cookie.secret,
 		resave: true,
@@ -37,10 +38,10 @@ module.exports.session = function(config) {
 			maxAge: config.cookie.maxAge,
 			domain: config.cookie.domain,
 			path: "/",
-			secure: config.public_protocol === "https",
+			secure: isSSL,
 			// None can only applied with secure set to true, which requires SSL.
 			// None is required for embeddable viewer to work.
-			sameSite:  config.using_ssl ? "None" : "Lax"
+			sameSite:  isSSL ? "None" : "Lax"
 		},
 		store: store
 	});
