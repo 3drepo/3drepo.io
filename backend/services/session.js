@@ -38,7 +38,9 @@ module.exports.session = function(config) {
 			domain: config.cookie.domain,
 			path: "/",
 			secure: config.using_ssl,
-			sameSite:  config.using_ssl ? "None" : "Lax",
+			// None can only applied with secure set to true, which requires SSL.
+			// None is required for embeddable viewer to work.
+			sameSite:  config.using_ssl ? "None" : "Lax"
 		},
 		store: store
 	});
