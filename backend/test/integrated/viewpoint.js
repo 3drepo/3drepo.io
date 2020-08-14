@@ -445,6 +445,8 @@ describe("Views", function () {
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/viewpoints/${viewId}`).expect(200, function(err, res) {
+						console.log("=== check res.body ===");
+						console.log(res.body);
 						view.viewpoint.near = res.body.viewpoint.near;
 						view.viewpoint.far = res.body.viewpoint.far;
 						view.viewpoint.fov = res.body.viewpoint.fov;
@@ -475,6 +477,8 @@ describe("Views", function () {
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/viewpoints/${viewId}`).expect(200, function(err, res) {
+						console.log("=== check res.body ===");
+						console.log(res.body);
 						view.viewpoint.near = res.body.viewpoint.near;
 						view.viewpoint.far = res.body.viewpoint.far;
 						view.viewpoint.fov = res.body.viewpoint.fov;
