@@ -175,6 +175,42 @@ describe("Views", function () {
 			], done);
 		});
 
+		it("invalid teamspace should fail", function(done) {
+			async.series([
+				function(done) {
+					agent2 = request.agent(server);
+					agent2.post("/login")
+						.send({ username: 'teamSpace1', password })
+						.expect(200, done);
+				},
+				function(done) {
+					agent2.get(`/invalidTeamspace/${teamSpace1Model}/viewpoints/`)
+						.expect(404, function(err, res) {
+							expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+							return done(err);
+						});
+				}
+			], done);
+		});
+
+		it("invalid model ID should fail", function(done) {
+			async.series([
+				function(done) {
+					agent2 = request.agent(server);
+					agent2.post("/login")
+						.send({ username: 'teamSpace1', password })
+						.expect(200, done);
+				},
+				function(done) {
+					agent2.get(`/${teamSpace1Username}/invalidModelID/viewpoints/`)
+						.expect(404, function(err, res) {
+							expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+							return done(err);
+						});
+				}
+			], done);
+		});
+
 		it("by ID should succeed", function(done) {
 			const viewId = Object.keys(teamSpace1Views)[0];
 
@@ -188,6 +224,8 @@ describe("Views", function () {
 				function(done) {
 					agent2.get(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}`)
 						.expect(200, function(err, res) {
+							console.log("==== CHECK res.body ====");
+							console.log(res.body);
 							expect(res.body._id).to.equal(viewId);
 							expect(res.body.name).to.equal(teamSpace1Views[viewId].name);
 							expect(res.body.viewpoint.up).to.deep.equal(teamSpace1Views[viewId].viewpoint.up);
@@ -197,6 +235,27 @@ describe("Views", function () {
 							expect(res.body.viewpoint.right).to.deep.equal(teamSpace1Views[viewId].viewpoint.right);
 							expect(res.body.viewpoint.clippingPlanes).to.deep.equal(teamSpace1Views[viewId].viewpoint.clippingPlanes);
 							expect(res.body.thumbnail).to.exist;
+
+							return done(err);
+						});
+				}
+			], done);
+		});
+
+		it("with invalid ID should fail", function(done) {
+			const viewId = "invalidID";
+
+			async.series([
+				function(done) {
+					agent2 = request.agent(server);
+					agent2.post("/login")
+						.send({ username: 'teamSpace1', password })
+						.expect(200, done);
+				},
+				function(done) {
+					agent2.get(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}`)
+						.expect(404, function(err, res) {
+							expect(res.body.value).to.equal(responseCodes.VIEW_NOT_FOUND.value);
 
 							return done(err);
 						});
