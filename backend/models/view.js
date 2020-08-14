@@ -136,10 +136,6 @@ class View {
 		return views;
 	}
 
-	async setExternalScreenshotRef(viewpoint, account, model, collName) {
-		return await Viewpoint.setExternalScreenshotRef(viewpoint, account, model, collName);
-	}
-
 	getThumbnail(account, model, uid) {
 		uid = utils.stringToUUID(uid);
 
@@ -256,6 +252,8 @@ class View {
 					err
 				});
 			});
+
+			await Viewpoint.setExternalScreenshotRef(viewpoint, account, model, this.collName);
 		}
 
 		return viewpoint;
