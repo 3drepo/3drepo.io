@@ -159,9 +159,11 @@ class View {
 			if (utils.isString(types[field]) && !utils.typeMatch(data[field], types[field])) {
 				throw responseCodes.INVALID_ARGUMENTS;
 			} else if (utils.isObject(types[field])) {
-				this.checkTypes(data[field], types[field]);
+				data[field] = this.checkTypes(data[field], types[field]);
 			}
 		});
+
+		return data;
 	}
 
 	async update(sessionId, account, model, uid, data) {
@@ -178,7 +180,7 @@ class View {
 			throw responseCodes.INVALID_ARGUMENTS;
 		}
 
-		this.checkTypes(data, this.fieldTypes);
+		data = this.checkTypes(data, this.fieldTypes);
 
 		const views = await this.getCollection(account, model);
 		await views.update({ _id: uid }, { $set: data });
@@ -293,7 +295,7 @@ class View {
 			}
 		}
 
-		this.checkTypes(newView, this.fieldTypes);
+		newView = this.checkTypes(newView, this.fieldTypes);
 
 		const coll = await this.getCollection(account, model);
 		await coll.insert(newView);
