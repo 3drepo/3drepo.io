@@ -469,6 +469,8 @@ describe("Views", function () {
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/viewpoints/${viewId}`).expect(200, function(err, res) {
+						view.viewpoint.clippingPlanes = res.body.viewpoint.clippingPlanes;
+
 						expect(res.body.name).to.equal(view.name);
 						expect(res.body.clippingPlanes).to.deep.equal(view.clippingPlanes);
 						expect(res.body.viewpoint).to.deep.equal(view.viewpoint);
