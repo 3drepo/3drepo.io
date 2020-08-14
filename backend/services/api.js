@@ -21,7 +21,7 @@
  *
  * @returns
  */
-module.exports.createApp = function () {
+module.exports.createApp = function (config) {
 	const logger = require("../logger.js");
 	const express = require("express");
 	const compress = require("compression");
@@ -35,7 +35,10 @@ module.exports.createApp = function () {
 
 	// Express app
 	const app = express();
-	app.set("trust proxy", 1);
+
+	if (config && !config.isSSL && config.public_protocol === "https") {
+		app.set("trust proxy", 1);
+	}
 
 	app.disable("etag");
 
