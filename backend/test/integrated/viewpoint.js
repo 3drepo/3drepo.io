@@ -224,16 +224,15 @@ describe("Views", function () {
 				function(done) {
 					agent2.get(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}`)
 						.expect(200, function(err, res) {
-							console.log("==== CHECK res.body ====");
-							console.log(res.body);
+							teamSpace1Views[viewId].viewpoint.near = res.body.viewpoint.near;
+							teamSpace1Views[viewId].viewpoint.far = res.body.viewpoint.far;
+							teamSpace1Views[viewId].viewpoint.fov = res.body.viewpoint.fov;
+							teamSpace1Views[viewId].viewpoint.aspect_ratio = res.body.viewpoint.aspect_ratio;
+							teamSpace1Views[viewId].viewpoint.hideIfc = res.body.viewpoint.hideIfc;
+
 							expect(res.body._id).to.equal(viewId);
 							expect(res.body.name).to.equal(teamSpace1Views[viewId].name);
-							expect(res.body.viewpoint.up).to.deep.equal(teamSpace1Views[viewId].viewpoint.up);
-							expect(res.body.viewpoint.position).to.deep.equal(teamSpace1Views[viewId].viewpoint.position);
-							expect(res.body.viewpoint.look_at).to.deep.equal(teamSpace1Views[viewId].viewpoint.look_at);
-							expect(res.body.viewpoint.view_dir).to.deep.equal(teamSpace1Views[viewId].viewpoint.view_dir);
-							expect(res.body.viewpoint.right).to.deep.equal(teamSpace1Views[viewId].viewpoint.right);
-							expect(res.body.viewpoint.clippingPlanes).to.deep.equal(teamSpace1Views[viewId].viewpoint.clippingPlanes);
+							expect(res.body.viewpoint).to.deep.equal(teamSpace1Views[viewId].viewpoint);
 							expect(res.body.thumbnail).to.exist;
 
 							return done(err);
