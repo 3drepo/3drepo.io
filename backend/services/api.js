@@ -36,7 +36,7 @@ module.exports.createApp = function (config) {
 	// Express app
 	const app = express();
 
-	if (config && !config.isSSL && config.public_protocol === "https") {
+	if (config && !config.using_ssl && config.public_protocol === "https") {
 		app.set("trust proxy", 1);
 	}
 
