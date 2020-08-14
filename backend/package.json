@@ -49,7 +49,7 @@
     "paypal-rest-sdk": "1.8.1",
     "pm2": "3.2.9",
     "pug": "2.0.3",
-    "serialize-javascript": "2.1.1",
+    "serialize-javascript": "4.0.0",
     "serve-favicon": "2.5.0",
     "sharp": "0.21.3",
     "shortid": "2.2.14",
