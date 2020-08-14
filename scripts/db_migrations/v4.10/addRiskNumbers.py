@@ -1,5 +1,6 @@
 import sys
 from pymongo import MongoClient
+import pymongo
 
 if len(sys.argv) < 5:
     print("Not enough arguments.")
@@ -28,7 +29,7 @@ for database in db.database_names():
             modelId = setting.get("_id")
             print("\t--model: " +  modelId)
             riskNumber = 1
-            for risk in db[modelId + ".risks"].find():
+            for risk in db[modelId + ".risks"].find(no_cursor_timeout=True).sort("created", pymongo.ASCENDING):
                 riskId = risk.get("_id")
                 print("\t\t--risk (" + str(riskNumber) +"): " +  str(riskId))
                 if not dryRun:
