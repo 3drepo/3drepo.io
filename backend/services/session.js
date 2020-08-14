@@ -37,7 +37,8 @@ module.exports.session = function(config) {
 			maxAge: config.cookie.maxAge,
 			domain: config.cookie.domain,
 			path: "/",
-			secure: config.using_ssl
+			secure: config.using_ssl,
+			sameSite:  config.using_ssl ? "None" : "Lax",
 		},
 		store: store
 	});
