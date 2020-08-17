@@ -53,7 +53,6 @@ const Comment = require("../models/comment");
  *		model: "model_ID"
  *		modelCode: ""
  *		name: "Issue one"
- *		norm: []
  *		number: 1
  *		owner: "username"
  *		position: []
@@ -133,7 +132,6 @@ router.get("/issues/:issueId/thumbnail.png", middlewares.issue.canView, getThumb
  *		"viewCount":1,
  *		"commentCount":0,
  *		"thumbnail":"nabile/MODEL_ID/issues/ISSUE_ID/thumbnail.png",
- *		"norm":[0,0,0],
  *		"position":[8341.8056640625,1279.962158203125,-3050.34521484375],
  *		"typePrefix":"sample",
  *		"modelCode":"",
@@ -248,7 +246,7 @@ router.get("/issues/:issueId/viewpoints/:vid/screenshotSmall.png", middlewares.i
  *		"assigned_roles":["Architect"],
  *		"viewCount":1,"commentCount":0,
  *		"thumbnail":"ACCOUNT/MODEL_ID/issues/ISSUE_ID/thumbnail.png",
- *		"norm":[],"position":[],
+ *		"position":[],
  *		"typePrefix":"sample",
  *		"modelCode":"",
  *		"account":"username",
@@ -443,11 +441,6 @@ router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssues
  *       4487.1552734375,
  *       3326.732177734375
  *    ],
- *    "norm": [
- *       0,
- *       0,
- *       0
- *    ],
  *    "_id": "9ba5fb10-c8db-11e9-8f2a-ada77612c97e",
  *    "created": 1566918114625,
  *    "number": 1,
@@ -626,7 +619,6 @@ router.post("/issues", middlewares.issue.canCreate, storeIssue, middlewares.noti
  *       "guid": "a1167d5f-2434-4a50-a158-d6a6745e7d6a",
  *       "screenshotSmall": "teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/98c39770-c8e2-11e9-8f2a-ada77612c97e/viewpoints/a1167d5f-2434-4a50-a158-d6a6745e7d6a/screenshotSmall.png"
  *    },
- *    "norm": [],
  *    "position": [],
  *    "extras": {
  *    }

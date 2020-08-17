@@ -539,7 +539,7 @@ class Ticket extends View {
 	}
 
 	toDirectXCoords(entry) {
-		const fieldsToConvert = ["position", "norm"];
+		const fieldsToConvert = ["position"];
 		const vpFieldsToConvert = ["right", "view_dir", "look_at", "position", "up"];
 
 		fieldsToConvert.forEach((rootKey) => {
