@@ -592,7 +592,7 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data, creator = ""
 						newGroup[key] = cleanEmbeddedObject(key, data[key]);
 					}
 				} else {
-					systemLogger.logError("Type mismatch", key, data[key]);
+					systemLogger.logError(`Type mismatch ${key} ${data[key]}`);
 					typeCorrect = false;
 				}
 			}

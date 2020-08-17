@@ -21,6 +21,7 @@ const _ = require("lodash");
 const utils = require("../utils");
 const FileRef = require("./fileRef");
 const Groups = require("./group");
+const responseCodes = require("../response_codes.js");
 const { systemLogger } = require("../logger.js");
 
 const clean = function(routePrefix, viewpointToClean, serialise = true) {
@@ -58,13 +59,80 @@ const clean = function(routePrefix, viewpointToClean, serialise = true) {
 	return viewpointToClean;
 };
 
+const checkCameraValues = (output, input) => {
+	// Check vectors/points
+	["right", "up", "view_dir", "position", "look_at"].forEach((key) => {
+		if (input[key]) {
+			if (!Array.isArray(input[key])) {
+				systemLogger.logError(`invalid type ${key}`);
+				throw responseCodes.INVALID_ARGUMENTS;
+			}
+
+			if (input[key].length === 3) {
+				output[key] = input[key];
+			}
+		}
+
+	});
+
+	["near", "far", "fov", "aspect_ratio"].forEach((key) => {
+		if(utils.hasField(input, key)) {
+			if(!utils.isNumber(input[key])) {
+				systemLogger.logError(`invalid type ${key}`);
+				throw responseCodes.INVALID_ARGUMENTS;
+			}
+
+			output[key] = input[key];
+		}
+	});
+	if(input.type && utils.isString(input.type)) {
+		if(input.type === "orthographic") {
+			if(utils.hasField(input, "orthographicSize") && utils.isNumber(input.orthographicSize)) {
+				output.type = input.type;
+				output.orthographicSize = input.orthographicSize;
+			} else {
+				systemLogger.logError("invalid type orthographicSize or missing data");
+				throw responseCodes.INVALID_ARGUMENTS;
+			}
+		} else if(input.type === "perspective") {
+			output.type = input.type;
+		} else {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+	}
+
+	if (input.clippingPlanes && Array.isArray(input.clippingPlanes) && input.clippingPlanes.length) {
+		output.clippingPlanes = [];
+		input.clippingPlanes.forEach((clip) => {
+			if(Array.isArray(clip.normal) && clip.normal.length === 3 &&
+				utils.isNumber(clip.distance) &&
+				utils.isNumber(clip.clipDirection)) {
+				output.clippingPlanes.push({
+					normal: clip.normal,
+					distance: clip.distance,
+					clipDirection: clip.clipDirection
+				});
+			} else {
+				systemLogger.logError("invalid type on clipping plane data");
+				throw responseCodes.INVALID_ARGUMENTS;
+			}
+		});
+	}
+
+	if(input.extra) {
+		output.extra = input.extra;
+	}
+
+};
+
 const createViewpoint = async (account, model, collName, routePrefix, hostId, vpData, addGUID, viewpointType, createThumbnail = false) => {
 	if (!vpData) {
 		return;
 	}
-	const viewpoint = {...vpData};
-
+	const viewpoint = {};
 	hostId = utils.uuidToString(hostId);
+
+	checkCameraValues(viewpoint, vpData);
 
 	if(addGUID) {
 		viewpoint.guid = utils.generateUUID();
@@ -74,13 +142,24 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 		"hidden_group_id",
 		"shown_group_id"
 	].forEach((groupIDName) => {
-		if(viewpoint[groupIDName] === "") {
-			delete viewpoint[groupIDName];
+		if(vpData[groupIDName] && !utils.isString(vpData[groupIDName])) {
+			systemLogger.logError(`invalid type ${groupIDName}`);
+			throw responseCodes.INVALID_ARGUMENTS;
+		} else if(vpData[groupIDName] !== "") {
+			viewpoint[groupIDName] = vpData[groupIDName];
 		}
+
 	});
 
-	if (viewpoint.override_groups_id && !viewpoint.override_groups_id.length) {
-		delete viewpoint.override_groups_id;
+	if (vpData.override_groups_id) {
+		if (Array.isArray(vpData.override_groups_id)) {
+			if (vpData.override_groups_id.length) {
+				viewpoint.override_groups_id = vpData.override_groups_id;
+			}
+		} else {
+			systemLogger.logError("invalid type override_groups_id");
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
 	}
 
 	const groupPromises = [];
@@ -92,19 +171,18 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 		"hidden_group",
 		"shown_group"
 	].forEach((group) => {
-		if(viewpoint[group]) {
+		if(vpData[group]) {
 			groupPromises.push(
-				Groups.createGroup(dbCol, null, {...viewpoint[group], [groupIdField]: utils.stringToUUID(hostId)}).then((groupResult) => {
+				Groups.createGroup(dbCol, null, {...vpData[group], [groupIdField]: utils.stringToUUID(hostId)}).then((groupResult) => {
 					viewpoint[`${group}_id`] = groupResult._id;
-					delete viewpoint[group];
 				})
 			);
 		}
 	});
 
-	if (viewpoint.override_groups) {
+	if (vpData.override_groups) {
 		const overrideGroupsProms = [];
-		viewpoint.override_groups.forEach((group) => {
+		vpData.override_groups.forEach((group) => {
 			overrideGroupsProms.push(
 				Groups.createGroup(dbCol, null, {...group, [groupIdField]: utils.stringToUUID(hostId)}).then((groupResult) => {
 					return groupResult._id;
@@ -115,16 +193,17 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 		groupPromises.push(
 			Promise.all(overrideGroupsProms).then((overrideGroups) => {
 				viewpoint.override_groups_id = overrideGroups;
-				delete viewpoint.override_groups;
 			})
 		);
 	}
 
 	await Promise.all(groupPromises);
-
-	if (viewpoint.screenshot && viewpoint.screenshot !== "") {
+	if (vpData.screenshot && vpData.screenshot !== "") {
+		if (!utils.isString(vpData.screenshot)) {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
 		const imageBuffer = new Buffer.from(
-			viewpoint.screenshot.substring(viewpoint.screenshot.indexOf(",") + 1),
+			vpData.screenshot.substring(vpData.screenshot.indexOf(",") + 1),
 			"base64"
 		);
 
@@ -143,8 +222,6 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 		}
 
 		await setExternalScreenshotRef(viewpoint, account, model, collName);
-	} else {
-		delete viewpoint.screenshot;
 	}
 
 	return clean(routePrefix, viewpoint, false);

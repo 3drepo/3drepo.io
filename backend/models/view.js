@@ -30,28 +30,7 @@ const fieldTypes = {
 	"_id": "[object Object]",
 	"name": "[object String]",
 	"thumbnail": ["[object String]", "[object Object]"],
-	"viewpoint": {
-		"right": "[object Array]",
-		"up": "[object Array]",
-		"view_dir": "[object Array]",
-		"position": "[object Array]",
-		"look_at": "[object Array]",
-		"near": "[object Number]",
-		"far": "[object Number]",
-		"fov": "[object Number]",
-		"aspect_ratio": "[object Number]",
-		"type": "[object String]",
-		"orthographicSize": "[object Number]",
-		"highlighted_group_id": "[object Object]",
-		"hidden_group_id": "[object Object]",
-		"shown_group_id": "[object Object]",
-		"shown_group": "[object Object]",
-		"hidden_group": "[object Object]",
-		"highlighted_group": "[object Object]",
-		"override_groups_id": "[object Array]",
-		"override_groups": "[object Array]",
-		"clippingPlanes": "[object Array]"
-	}
+	"viewpoint": "[object Object]"
 };
 
 const getResponse = (responseCodeType) => (type) => responseCodes[responseCodeType + "_" + type];
