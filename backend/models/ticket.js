@@ -89,7 +89,7 @@ class Ticket extends View {
 			ticketToClean.comments.forEach((comment) => {
 				if (comment.viewpoint && utils.isObject(comment.viewpoint) && !comment.viewpoint.up) {
 					const vpId =  utils.uuidToString(comment.viewpoint);
-					comment.viewpoint = ticketToClean.viewpoints.find((item) => utils.uuidToString(item.guid) === vpId);
+					comment.viewpoint = ticketToClean.viewpoints.find((item) => item.guid && utils.uuidToString(item.guid) === vpId);
 				}
 				const commentCleaned = Comment.clean(routePrefix, comment);
 				comment = commentCleaned;
@@ -216,7 +216,7 @@ class Ticket extends View {
 		});
 
 		if (data.viewpoint) {
-			newViewpoint = this.handlePrimaryViewpoint(account, model, data._id, data.viewpoint);
+			newViewpoint = await this.createViewpoint(account, model, id, data.viewpoint, true);
 			oldTicket.viewpoint = oldTicket.viewpoints[0];
 			oldTicket = super.clean(account, model, oldTicket);
 			delete oldTicket.viewpoint.screenshot;
@@ -225,7 +225,7 @@ class Ticket extends View {
 
 			data.viewpoint = {
 				...oldTicket.viewpoint,
-				...await newViewpoint
+				...newViewpoint
 			};
 			data.viewpoint.guid = utils.uuidToString(data.viewpoint.guid);
 
@@ -336,17 +336,6 @@ class Ticket extends View {
 		return Promise.all(groupUpdatePromises);
 	}
 
-	async handlePrimaryViewpoint(account, model, ticketId, viewpoint) {
-		viewpoint = await super.handleViewpoint(account, model, ticketId, viewpoint, this.viewpointType);
-		viewpoint.guid = utils.generateUUID();
-
-		if (viewpoint.screenshot) {
-			await super.setExternalScreenshotRef(viewpoint, account, model, this.collName);
-		}
-
-		return viewpoint;
-	}
-
 	handleFieldUpdate(account, model, sessionId, id, user, field, oldTicket, data, systemComments) {
 		if (Object.prototype.toString.call(data[field]) !== this.fieldTypes[field]) {
 			throw responseCodes.INVALID_ARGUMENTS;
@@ -396,9 +385,6 @@ class Ticket extends View {
 			newTicket.number = 1;
 		}
 
-		const viewpoint = newTicket.viewpoint;
-		const didntHadEmbededGroups = viewpoint &&  (Boolean(viewpoint.hidden_group_id) ||  Boolean(viewpoint.hidden_group_id) || Boolean(viewpoint.shown_group_id));
-
 		Object.keys(newTicket).forEach((key) => {
 			const validTypes = [].concat(this.fieldTypes[key]);
 			const value = newTicket[key];
@@ -435,7 +421,7 @@ class Ticket extends View {
 		if (!newTicket.viewpoints || newTicket.viewpoint) {
 			// FIXME need to revisit this for BCF refactor
 			// This allows BCF import to create new issue with more than 1 viewpoint
-			newTicket.viewpoints = [await this.handlePrimaryViewpoint(account, model, newTicket._id, newTicket.viewpoint)];
+			newTicket.viewpoints = [await this.createViewpoint(account, model, newTicket._id, newTicket.viewpoint, true)];
 
 			if (newTicket.viewpoints[0].thumbnail) {
 				newTicket.thumbnail = newTicket.viewpoints[0].thumbnail;
@@ -450,10 +436,6 @@ class Ticket extends View {
 			throw (responseCodes.MODEL_HISTORY_NOT_FOUND);
 		} else if (history) {
 			newTicket.rev_id = history._id;
-		}
-
-		if (didntHadEmbededGroups) {
-			await this.setGroupTicketId(account, model, newTicket);
 		}
 
 		newTicket = this.filterFields(newTicket, ["viewpoint", "revId"]);
@@ -630,7 +612,7 @@ class Ticket extends View {
 
 	async addComment(account, model, id, user, data, sessionId) {
 		// 1. creates a comment and gets the result ( comment + references)
-		const commentResult = await Comment.addComment(account, model, this.collName, id, user, data);
+		const commentResult = await Comment.addComment(account, model, this.collName, id, user, data, this.viewpointType);
 
 		// 2 get referenced ticket numbers
 		const ticketNumbers = commentResult.ticketRefs;
@@ -662,10 +644,8 @@ class Ticket extends View {
 			// 8. Add update promise to updates array
 			ticketsCommentsUpdates.push(ticketsColl.update({_id: ticket._id}, { $set: { comments }}));
 		});
-
 		// 9. update referenced tickets with new system comments
 		await Promise.all(ticketsCommentsUpdates);
-
 		return commentResult;
 	}
 

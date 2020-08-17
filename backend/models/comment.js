@@ -141,11 +141,10 @@ const identifyReferences = (comment) => {
 
 };
 
-const addComment = async function(account, model, colName, id, user, data) {
+const addComment = async function(account, model, colName, id, user, data, ticketType) {
 	if (!(data.comment || "").trim() && !get(data,"viewpoint.screenshot")) {
 		throw { resCode: responseCodes.ISSUE_COMMENT_NO_TEXT};
 	}
-
 	// 1. Fetch comments
 	const _id = utils.stringToUUID(id) ;
 	const col = await db.getCollection(account, model + "." + colName);
@@ -163,18 +162,7 @@ const addComment = async function(account, model, colName, id, user, data) {
 	const routePrefix = `${account}/${model}/${colName}/${utils.uuidToString(_id)}`;
 
 	if (data.viewpoint) {
-		data = Viewpoint.clean(routePrefix, data, fieldTypes.viewpoint);
-		viewpoint = data.viewpoint;
-		viewpoint.guid = utils.generateUUID();
-
-		if (viewpoint.screenshot) {
-			// Trim png header from base64 string
-			viewpoint.screenshot = new Buffer.from(
-				viewpoint.screenshot.substring(viewpoint.screenshot.indexOf(",") + 1),
-				"base64"
-			);
-			await Viewpoint.setExternalScreenshotRef(viewpoint, account, model, colName);
-		}
+		viewpoint = await Viewpoint.createViewpoint(account, model, colName, routePrefix, id, data.viewpoint, true, ticketType);
 	}
 
 	const references = identifyReferences(data.comment);

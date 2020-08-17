@@ -20,6 +20,8 @@ const _ = require("lodash");
 
 const utils = require("../utils");
 const FileRef = require("./fileRef");
+const Groups = require("./group");
+const { systemLogger } = require("../logger.js");
 
 const clean = function(routePrefix, viewpointToClean, serialise = true) {
 	const viewpointFields = [
@@ -56,6 +58,96 @@ const clean = function(routePrefix, viewpointToClean, serialise = true) {
 	return viewpointToClean;
 };
 
+const createViewpoint = async (account, model, collName, routePrefix, hostId, vpData, addGUID, viewpointType, createThumbnail = false) => {
+	if (!vpData) {
+		return;
+	}
+	const viewpoint = {...vpData};
+
+	hostId = utils.uuidToString(hostId);
+
+	if(addGUID) {
+		viewpoint.guid = utils.generateUUID();
+	}
+
+	["highlighted_group_id",
+		"hidden_group_id",
+		"shown_group_id"
+	].forEach((groupIDName) => {
+		if(viewpoint[groupIDName] === "") {
+			delete viewpoint[groupIDName];
+		}
+	});
+
+	if (viewpoint.override_groups_id && !viewpoint.override_groups_id.length) {
+		delete viewpoint.override_groups_id;
+	}
+
+	const groupPromises = [];
+
+	const dbCol = {account, model};
+	const groupIdField = viewpointType + "_id";
+
+	["highlighted_group",
+		"hidden_group",
+		"shown_group"
+	].forEach((group) => {
+		if(viewpoint[group]) {
+			groupPromises.push(
+				Groups.createGroup(dbCol, null, {...viewpoint[group], [groupIdField]: utils.stringToUUID(hostId)}).then((groupResult) => {
+					viewpoint[`${group}_id`] = groupResult._id;
+					delete viewpoint[group];
+				})
+			);
+		}
+	});
+
+	if (viewpoint.override_groups) {
+		const overrideGroupsProms = [];
+		viewpoint.override_groups.forEach((group) => {
+			overrideGroupsProms.push(
+				Groups.createGroup(dbCol, null, {...viewpoint[group], [groupIdField]: utils.stringToUUID(hostId)}).then((groupResult) => {
+					delete viewpoint[group];
+					return groupResult._id;
+				})
+			);
+		});
+
+		groupPromises.push(
+			Promise.all(overrideGroupsProms).then((overrideGroups) => {
+				viewpoint.override_groups_id = overrideGroups;
+			})
+		);
+	}
+
+	await Promise.all(groupPromises);
+
+	if (viewpoint.screenshot) {
+		const imageBuffer = new Buffer.from(
+			viewpoint.screenshot.substring(viewpoint.screenshot.indexOf(",") + 1),
+			"base64"
+		);
+
+		viewpoint.screenshot = imageBuffer;
+
+		if (createThumbnail) {
+			viewpoint.thumbnail = await utils.resizeAndCropScreenshot(imageBuffer, 120, 120, true).catch((err) => {
+				systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
+					account,
+					model,
+					type: this.collName,
+					id: hostId,
+					err
+				});
+			});
+		}
+
+		await setExternalScreenshotRef(viewpoint, account, model, collName);
+	}
+
+	return clean(routePrefix, viewpoint, false);
+};
+
 const setExternalScreenshotRef = async function(viewpoint, account, model, collName) {
 	const screenshot = viewpoint.screenshot;
 	const ref = await FileRef.storeFile(account, model + "." + collName + ".ref", null, null, screenshot);
@@ -88,5 +180,5 @@ const setViewpointScreenshotURL = function(routePrefix, viewpoint) {
 
 module.exports = {
 	clean,
-	setExternalScreenshotRef
+	createViewpoint
 };

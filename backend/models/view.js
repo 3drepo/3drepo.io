@@ -26,8 +26,6 @@ const ChatEvent = require("./chatEvent");
 const Viewpoint = require("./viewpoint");
 const Groups = require("./group.js");
 
-const { systemLogger } = require("../logger.js");
-
 const fieldTypes = {
 	"_id": "[object Object]",
 	"name": "[object String]",
@@ -63,6 +61,7 @@ class View {
 		this.collName = "views";
 		this.response = getResponse("VIEW");
 		this.fieldTypes = fieldTypes;
+		this.viewpointType = "view";
 	}
 
 	routePrefix(account, model, id) {
@@ -104,6 +103,11 @@ class View {
 		// =============================
 
 		return viewToClean;
+	}
+
+	async createViewpoint(account, model, id, viewpoint, createThumbnail = false) {
+		return Viewpoint.createViewpoint(account, model, this.collName, this.routePrefix(account, model, id), id, viewpoint,
+			this.viewpointType !== "view",this.viewpointType, createThumbnail);
 	}
 
 	getCollection(account, model) {
@@ -191,77 +195,6 @@ class View {
 		return { _id: utils.uuidToString(uid) };
 	}
 
-	async handleViewpoint(account, model, id, viewpoint, viewpointType = "view") {
-		viewpoint = viewpoint || {};
-
-		const viewpointId = (viewpoint.guid) ? utils.uuidToString(viewpoint.guid) : undefined;
-
-		if (viewpoint.highlighted_group_id) {
-			viewpoint.highlighted_group_id = utils.stringToUUID(viewpoint.highlighted_group_id);
-		} else if ("" === viewpoint.highlighted_group_id) {
-			delete viewpoint.highlighted_group_id;
-		}
-
-		if (viewpoint.hidden_group_id) {
-			viewpoint.hidden_group_id = utils.stringToUUID(viewpoint.hidden_group_id);
-		} else if ("" === viewpoint.hidden_group_id) {
-			delete viewpoint.hidden_group_id;
-		}
-
-		if (viewpoint.shown_group_id) {
-			viewpoint.shown_group_id = utils.stringToUUID(viewpoint.shown_group_id);
-		} else if ("" === viewpoint.shown_group_id) {
-			delete viewpoint.shown_group_id;
-		}
-
-		const dbCol = {account, model};
-		const groupIdField = viewpointType + "_id";
-
-		if (viewpoint.highlighted_group) {
-			viewpoint.highlighted_group_id = (await Groups.createGroup(dbCol, null, {...viewpoint.highlighted_group, [groupIdField]: id, name: "highlighted"}))._id;
-			delete viewpoint.highlighted_group;
-		}
-
-		if (viewpoint.hidden_group) {
-			viewpoint.hidden_group_id = (await Groups.createGroup(dbCol, null, {...viewpoint.hidden_group, [groupIdField]: id, name: "hidden" }))._id;
-			delete viewpoint.hidden_group;
-		}
-
-		if (viewpoint.shown_group) {
-			viewpoint.shown_group_id = (await Groups.createGroup(dbCol, null, {...viewpoint.shown_group, [groupIdField]: id, name: "shown" }))._id;
-			delete viewpoint.shown_group;
-		}
-
-		if (viewpoint.override_groups) {
-			viewpoint.override_groups_id = (await Promise.all(viewpoint.override_groups.map(data => Groups.createGroup(dbCol, null, {...data, [groupIdField]: id, name: "override"})))).map(({_id}) => _id);
-			delete viewpoint.override_groups;
-		}
-
-		if (viewpoint.screenshot) {
-			const imageBuffer = new Buffer.from(
-				viewpoint.screenshot.substring(viewpoint.screenshot.indexOf(",") + 1),
-				"base64"
-			);
-
-			viewpoint.screenshot = imageBuffer;
-
-			viewpoint.thumbnail = await utils.resizeAndCropScreenshot(imageBuffer, 120, 120, true).catch((err) => {
-				systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
-					account,
-					model,
-					type: this.collName,
-					id: utils.uuidToString(id),
-					viewpointId,
-					err
-				});
-			});
-
-			await Viewpoint.setExternalScreenshotRef(viewpoint, account, model, this.collName);
-		}
-
-		return viewpoint;
-	}
-
 	async create(sessionId, account, model, newView) {
 		if (!newView.name || !utils.isString(newView.name)) {
 			return Promise.reject({ resCode: responseCodes.INVALID_ARGUMENTS });
@@ -288,7 +221,7 @@ class View {
 		newView._id = utils.stringToUUID(newView._id || nodeuuid());
 
 		if (newView.viewpoint) {
-			newView.viewpoint = await this.handleViewpoint(account, model, newView._id, newView.viewpoint);
+			newView.viewpoint = await this.createViewpoint(account, model, newView._id, newView.viewpoint, true);
 
 			if (newView.viewpoint.thumbnail) {
 				newView.thumbnail = newView.viewpoint.thumbnail;

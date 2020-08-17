@@ -33,6 +33,8 @@ const FileRef = require("./fileRef");
 const {union, intersection, difference} = require("./helper/set");
 const { batchPromises } = require("./helper/promises");
 
+const { systemLogger } = require("../logger.js");
+
 const ruleOperators = {
 	"IS_EMPTY":	0,
 	"IS_NOT_EMPTY":	0,
@@ -576,7 +578,7 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data, creator = ""
 
 		allowedFields.forEach((key) => {
 			if (fieldTypes[key] && utils.hasField(data, key)) {
-				if (Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
+				if (utils.typeMatch(data[key], fieldTypes[key])) {
 					if (key === "objects" && data.objects) {
 						newGroup.objects = cleanEmbeddedObject(key, convertedObjects);
 					} else if (key === "color") {
@@ -590,6 +592,7 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data, creator = ""
 						newGroup[key] = cleanEmbeddedObject(key, data[key]);
 					}
 				} else {
+					systemLogger.logError("Type mismatch", key, data[key]);
 					typeCorrect = false;
 				}
 			}
