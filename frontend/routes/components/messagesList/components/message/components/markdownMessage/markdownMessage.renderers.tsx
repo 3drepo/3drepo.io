@@ -12,7 +12,7 @@ import { getAPIUrl } from '../../../../../../../services/api';
 import { Image } from '../screenshot/screenshot.styles';
 import { Blockquote, Paragraph } from './markdownMessage.styles';
 import { ResourceReference } from './resourceReference/';
-import { IssueReference } from './ticketReference/';
+import { TicketReference } from './ticketReference/';
 import { UserReference } from './userReference/userReference.component';
 
 const withStyledRenderer = (StyledComponent) => (props) => <StyledComponent {...props} />;
@@ -36,7 +36,7 @@ const EnhancedLink = ({ children, href, ...props }) => {
 			return (<ResourceReference id={href} text={value} type={props.title} />);
 		}],
 		[() => value.match(MARKDOWN_ISSUE_REFERENCE_REGEX), () => {
-			return (<IssueReference id={href} text={value} />);
+			return (<TicketReference id={href} text={value} />);
 		}],
 		[() => value.match(MARKDOWN_USER_REFERENCE_REGEX), () => {
 			return (<UserReference id={href} text={value} />);

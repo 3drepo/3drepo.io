@@ -20,8 +20,8 @@ import React from 'react';
 import { PopoverProps as PopoverType } from '@material-ui/core/Popover';
 import { renderWhenTrueOtherwise } from '../../../../../../../../helpers/rendering';
 
-import { Link, Popover, Reference } from './issueReference.styles';
 import { TicketPopover } from './ticketPopover/ticketPopover.component';
+import { Link, Popover, Reference } from './ticketReference.styles';
 
 interface IReferenceLink {
 	isBoardView: boolean;
@@ -67,7 +67,7 @@ interface IProps {
 	resetCardData: () => void;
 }
 
-export const IssueReference = ({ id, text, issues, urlParams, ...props }: IProps) => {
+export const TicketReference = ({ id, text, issues, urlParams, ...props }: IProps) => {
 	const [anchorEl, setAnchorEl] = React.useState<PopoverType | null>(null);
 	const issueData = issues.find(({ _id }) => id === _id );
 	const { teamspace, type } = urlParams;

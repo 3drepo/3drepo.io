@@ -18,7 +18,7 @@
 import React from 'react';
 
 import { Truncate } from '../../../../../../../truncate/truncate.component';
-import { Container, Description, Header, Icon, TicketNumber, Title } from '../issueReference.styles';
+import { Container, Description, Header, Icon, TicketNumber, Title } from '../ticketReference.styles';
 
 export const TicketPopover = ({ number: ticketNumber, name, desc, statusColor, StatusIconComponent } ) => {
 	return (

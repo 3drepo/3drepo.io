@@ -17,7 +17,7 @@
 
 import React from 'react';
 
-import { Popover } from '../markdownMessage/ticketReference/issueReference.styles';
+import { Popover } from '../markdownMessage/ticketReference/ticketReference.styles';
 import { UserAvatar } from '../userAvatar';
 import { IUser, UserPopover } from '../userPopover/userPopover.component';
 import { UserIndicator } from './userMarker.styles';

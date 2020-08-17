@@ -23,7 +23,7 @@ import { BoardActions } from '../../../../../../../../modules/board';
 import { selectIssues } from '../../../../../../../../modules/issues';
 import { selectUrlParams } from '../../../../../../../../modules/router/router.selectors';
 
-import { IssueReference } from './issueReference.component';
+import { TicketReference } from './ticketReference.component';
 
 const mapStateToProps = createStructuredSelector({
 	issues: selectIssues,
@@ -35,4 +35,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	resetCardData: BoardActions.resetCardData,
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(IssueReference);
+export default connect(mapStateToProps, mapDispatchToProps)(TicketReference);
