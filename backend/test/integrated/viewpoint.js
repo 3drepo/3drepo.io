@@ -686,6 +686,9 @@ describe("Views", function () {
 						.send({ username: 'teamSpace1', password })
 						.expect(200);
 
+			console.log("==== view ====");
+			console.log(view);
+
 			const { body:{viewpoint:{highlighted_group_id, hidden_group_id, override_groups_id}} } = await agent2.post(`/${username3}/${model2}/viewpoints/`)
 						.send(view)
 						.expect(200);
