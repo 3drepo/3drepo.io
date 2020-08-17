@@ -564,8 +564,6 @@ describe("Views", function () {
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/viewpoints/${viewId}`).expect(200, function(err, res) {
-						console.log("==== res.body ====");
-						console.log(res.body);
 						delete view.viewpoint.screenshot;
 
 						expect(res.body.name).to.equal(view.name);
@@ -696,9 +694,6 @@ describe("Views", function () {
 				const {body} = await agent2.get(`/${username3}/${model2}/revision/master/head/groups/${id}`).expect(200);
 				return body;
 			}
-
-			console.log("==== override_groups_id ====");
-			console.log(override_groups_id);
 
 			const [highlighted_group2,hidden_group2, ...override_groups_2 ]	= await	Promise.all([
 				getGroup(highlighted_group_id),

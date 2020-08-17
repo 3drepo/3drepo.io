@@ -50,6 +50,7 @@ const fieldTypes = {
 		"shown_group": "[object Object]",
 		"hidden_group": "[object Object]",
 		"highlighted_group": "[object Object]",
+		"override_groups_id": "[object String]",
 		"override_groups": "[object Array]",
 		"clippingPlanes": "[object Array]"
 	}
