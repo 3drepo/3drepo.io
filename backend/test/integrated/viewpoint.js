@@ -684,23 +684,14 @@ describe("Views", function () {
 			const agent2 = request.agent(server);
 			await agent2.post("/login")
 						.send({ username: 'teamSpace1', password })
-						.expect(200, function(err, res) {
-							console.log("login")
-							console.log(err)
-						});
+						.expect(200);
 
 			const { body:{viewpoint:{highlighted_group_id, hidden_group_id, override_groups_id}} } = await agent2.post(`/${username3}/${model2}/viewpoints/`)
 						.send(view)
-						.expect(200, function(err, res) {
-							console.log("send view")
-							console.log(err)
-						});
+						.expect(200);
 
 			const getGroup = async (id) => {
-				const {body} = await agent2.get(`/${username3}/${model2}/revision/master/head/groups/${id}`).expect(200, function(err, res) {
-							console.log("get group")
-							console.log(err)
-						});
+				const {body} = await agent2.get(`/${username3}/${model2}/revision/master/head/groups/${id}`).expect(200);
 				return body;
 			}
 
