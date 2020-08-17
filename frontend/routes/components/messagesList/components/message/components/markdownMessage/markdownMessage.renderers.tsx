@@ -10,9 +10,9 @@ import {
 } from '../../../../../../../helpers/comments';
 import { getAPIUrl } from '../../../../../../../services/api';
 import { Image } from '../screenshot/screenshot.styles';
-import { IssueReference } from './issueReference/';
 import { Blockquote, Paragraph } from './markdownMessage.styles';
 import { ResourceReference } from './resourceReference/';
+import { IssueReference } from './ticketReference/';
 import { UserReference } from './userReference/userReference.component';
 
 const withStyledRenderer = (StyledComponent) => (props) => <StyledComponent {...props} />;

@@ -23,7 +23,7 @@ import { Form } from 'formik';
 
 import { COLOR } from '../../../../styles';
 // tslint:disable-next-line:max-line-length
-import { TicketPopover } from '../../../components/messagesList/components/message/components/markdownMessage/issueReference/ticketPopover/ticketPopover.component';
+import { TicketPopover } from '../../../components/messagesList/components/message/components/markdownMessage/ticketReference/ticketPopover/ticketPopover.component';
 import {
 	UserPopover
 } from '../../../components/messagesList/components/message/components/userPopover/userPopover.component';

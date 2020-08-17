@@ -20,7 +20,7 @@ import styled from 'styled-components';
 import { COLOR } from '../../../../../../../styles';
 import { Image as ImageComponent } from '../../../../../image';
 import { UserIndicator } from '../userMarker/userMarker.styles';
-import { Reference } from './issueReference/issueReference.styles';
+import { Reference } from './ticketReference/issueReference.styles';
 
 export const Blockquote = styled.blockquote`
 	color: ${COLOR.BLACK_40};
