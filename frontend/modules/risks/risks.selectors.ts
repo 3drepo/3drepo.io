@@ -60,10 +60,10 @@ export const selectActiveRiskDetails = createSelector(
 );
 
 export const selectActiveRiskComments = createSelector(
-	selectActiveRiskDetails, selectIssuesMap, (activeRiskDetails, issues) =>
+	selectActiveRiskDetails, selectRisksMap, (activeRiskDetails, risks) =>
 		prepareComments(activeRiskDetails.comments || []).map((comment) => ({
 			...comment,
-			commentWithMarkdown: transformCustomsLinksToMarkdown(comment, issues, 'risk')
+			commentWithMarkdown: transformCustomsLinksToMarkdown(comment, risks, 'risk')
 		}))
 );
 

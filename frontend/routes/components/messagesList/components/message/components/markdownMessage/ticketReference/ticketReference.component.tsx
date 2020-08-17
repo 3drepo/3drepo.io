@@ -61,23 +61,24 @@ const ReferenceLink = ({ onPopoverOpen, onPopoverClose, onCardChange, children, 
 interface IProps {
 	id: number;
 	text: string;
-	issues: any[];
+	issuesMap: object;
+	risksMap: object;
 	urlParams: any;
 	fetchCardData: (boardType, teamspace, modelId, cardId) => void;
 	resetCardData: () => void;
 }
 
-export const TicketReference = ({ id, text, issues, urlParams, ...props }: IProps) => {
+export const TicketReference = ({ id, text, issuesMap, risksMap, urlParams, ...props }: IProps) => {
 	const [anchorEl, setAnchorEl] = React.useState<PopoverType | null>(null);
-	const issueData = issues.find(({ _id }) => id === _id );
+	const ticketData = issuesMap[id] ? issuesMap[id] : risksMap[id];
 	const { teamspace, type } = urlParams;
 	const isBoardView = Boolean(type);
 
-	if (!issueData) {
+	if (!ticketData) {
 		return text;
 	}
 
-	const { _id: issueId, model, number: issueNumber, name, desc, statusColor, StatusIconComponent } = issueData;
+	const { _id: ticketId, model, number: ticketNumber, name, desc, statusColor, StatusIconComponent } = ticketData;
 
 	const handlePopoverOpen = (event: React.MouseEvent<PopoverType, MouseEvent>) => setAnchorEl(event.currentTarget);
 
@@ -85,13 +86,15 @@ export const TicketReference = ({ id, text, issues, urlParams, ...props }: IProp
 
 	const handleCardChange = () => {
 		props.resetCardData();
-		props.fetchCardData(type, teamspace, model, issueId);
+		props.fetchCardData(type, teamspace, model, ticketId);
 	};
+
+	const idField = issuesMap[id] ? 'issueId' : 'riskId';
 
 	return (
 		<>
 			<ReferenceLink
-				to={`/viewer/${teamspace}/${model}?issueId=${issueId}`}
+				to={`/viewer/${teamspace}/${model}?${idField}=${ticketId}`}
 				onPopoverOpen={handlePopoverOpen}
 				onPopoverClose={handlePopoverClose}
 				onCardChange={handleCardChange}
@@ -117,7 +120,7 @@ export const TicketReference = ({ id, text, issues, urlParams, ...props }: IProp
 				<TicketPopover
 					name={name}
 					desc={desc}
-					number={issueNumber}
+					number={ticketNumber}
 					StatusIconComponent={StatusIconComponent}
 					statusColor={statusColor}
 				/>
