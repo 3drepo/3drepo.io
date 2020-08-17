@@ -33,8 +33,9 @@ for database in db.database_names():
                 print("\t\t--issue: " +  str(issueId))
 ##### Remove legacy viewpoint #####
                 if "viewpoint" in issue:
-                    unsetFields["$unset"]["viewpoint"] = ""
-                    print("\t\t\tremove legacy viewpoint")
+                    if len(issue["viewpoint"]["up"]) == 0:
+                        unsetFields["$unset"]["viewpoint"] = ""
+                        print("\t\t\tremove legacy viewpoint")
 ##### Handle comments and viewpoints IDs #####
                 for field in ["comments", "viewpoints"]:
                     if field in issue:
