@@ -20,8 +20,8 @@ import React from 'react';
 import { PopoverProps as PopoverType } from '@material-ui/core/Popover';
 import { renderWhenTrueOtherwise } from '../../../../../../../../helpers/rendering';
 
-import { IssuePopover } from './issuePopover/issuePopover.component';
 import { Link, Popover, Reference } from './issueReference.styles';
+import { TicketPopover } from './ticketPopover/ticketPopover.component';
 
 interface IReferenceLink {
 	isBoardView: boolean;
@@ -114,7 +114,7 @@ export const IssueReference = ({ id, text, issues, urlParams, ...props }: IProps
 				onClose={handlePopoverClose}
 				disableRestoreFocus
 			>
-				<IssuePopover
+				<TicketPopover
 					name={name}
 					desc={desc}
 					number={issueNumber}

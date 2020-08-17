@@ -26,6 +26,7 @@ import {
 	selectExpandDetails,
 	selectFailedToLoad,
 	selectFetchingDetailsIsPending,
+	selectIssues,
 	selectNewComment,
 	selectPostCommentIsPending,
 	IssuesActions,
@@ -50,6 +51,7 @@ const mapStateToProps = createStructuredSelector({
 	topicTypes: selectTopicTypes,
 	failedToLoad: selectFailedToLoad,
 	postCommentIsPending: selectPostCommentIsPending,
+	issues: selectIssues
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

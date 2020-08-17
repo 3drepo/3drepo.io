@@ -34,6 +34,7 @@ import { RiskDetailsForm } from './riskDetailsForm.component';
 interface IProps {
 	viewer: any;
 	jobs: any[];
+	risks: any[];
 	risk: any;
 	comments: any[];
 	teamspace: string;
@@ -189,8 +190,8 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				messagesContainerRef={this.messageContainerRef}
 				previewWrapperRef={this.containerRef}
 				horizontal={this.props.horizontal}
-				disableIssuesSuggestions
 				fetchingDetailsIsPending={this.props.fetchingDetailsIsPending}
+				tickets={this.props.risks}
 				postCommentIsPending={this.props.postCommentIsPending}
 			/>
 		</ViewerPanelFooter>

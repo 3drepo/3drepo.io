@@ -35,6 +35,7 @@ import { IssueDetailsForm } from './issueDetailsForm.component';
 interface IProps {
 	viewer: any;
 	jobs: any[];
+	issues: any[];
 	topicTypes: any[];
 	issue: any;
 	comments: any[];
@@ -188,6 +189,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				previewWrapperRef={this.containerRef}
 				horizontal={this.props.horizontal}
 				fetchingDetailsIsPending={this.props.fetchingDetailsIsPending}
+				tickets={this.props.issues}
 				postCommentIsPending={this.props.postCommentIsPending}
 			/>
 		</ViewerPanelFooter>

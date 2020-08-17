@@ -32,6 +32,7 @@ import {
 	selectMitigationCriteria,
 	selectNewComment,
 	selectPostCommentIsPending,
+	selectRisks,
 	RisksActions,
 } from '../../../../../../modules/risks';
 import { ViewpointsActions } from '../../../../../../modules/viewpoints';
@@ -43,6 +44,7 @@ const mapStateToProps = createStructuredSelector({
 	risk: selectActiveRiskDetails,
 	comments: selectActiveRiskComments,
 	jobs: selectJobsList,
+	risks: selectRisks,
 	expandDetails: selectExpandDetails,
 	fetchingDetailsIsPending: selectFetchingDetailsIsPending,
 	newComment: selectNewComment,

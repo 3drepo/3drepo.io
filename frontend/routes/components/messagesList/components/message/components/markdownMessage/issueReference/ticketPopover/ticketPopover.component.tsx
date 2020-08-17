@@ -18,16 +18,16 @@
 import React from 'react';
 
 import { Truncate } from '../../../../../../../truncate/truncate.component';
-import { Container, Description, Header, Icon, IssueNumber, Title } from '../issueReference.styles';
+import { Container, Description, Header, Icon, TicketNumber, Title } from '../issueReference.styles';
 
-export const IssuePopover = ({ number: issueNumber, name, desc, statusColor, StatusIconComponent } ) => {
+export const TicketPopover = ({ number: ticketNumber, name, desc, statusColor, StatusIconComponent } ) => {
 	return (
 		<Container>
 			<Header>
-				<Icon color={statusColor}>
+				<Icon color={statusColor} >
 					<StatusIconComponent color="inherit" fontSize="inherit" />
 				</Icon>
-				<Title>{name} <IssueNumber>(#{issueNumber})</IssueNumber></Title>
+				<Title>{name} <TicketNumber>(#{ticketNumber})</TicketNumber></Title>
 			</Header>
 			<Description>
 				<Truncate lines={1}>
