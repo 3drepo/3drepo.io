@@ -686,7 +686,7 @@ describe("Views", function () {
 						.send({ username: 'teamSpace1', password })
 						.expect(200);
 
-			const { body:{viewpoint:{highlighted_group_id, hidden_group_id, override_groups_id}} } = await agent2.post(`/${username3}/${model2}/viewpoints/`)
+			const { body:{viewpoint:{highlighted_group_id, hidden_group_id, override_group_ids}} } = await agent2.post(`/${username3}/${model2}/viewpoints/`)
 						.send(view)
 						.expect(200);
 
@@ -698,7 +698,7 @@ describe("Views", function () {
 			const [highlighted_group2,hidden_group2, ...override_groups_2 ]	= await	Promise.all([
 				getGroup(highlighted_group_id),
 				getGroup(hidden_group_id),
-			].concat(override_groups_id.map(getGroup)));
+			].concat(override_group_ids.map(getGroup)));
 
 			expect(highlighted_group2.objects).to.deep.equal(highlighted_group.objects);
 			expect(hidden_group2.objects).to.deep.equal(hidden_group.objects);

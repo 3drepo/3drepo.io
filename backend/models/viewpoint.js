@@ -31,7 +31,7 @@ const clean = function(routePrefix, viewpointToClean, serialise = true) {
 		"highlighted_group_id",
 		"hidden_group_id",
 		"shown_group_id",
-		"override_groups_id"
+		"override_group_ids"
 	];
 
 	if (viewpointToClean) {
@@ -151,8 +151,8 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 
 	});
 
-	if (vpData.override_groups_id) {
-		if (Array.isArray(vpData.override_groups_id)) {
+	if (vpData.override_group_ids) {
+		if (Array.isArray(vpData.override_group_ids)) {
 			if (vpData.override_groups_id.length) {
 				viewpoint.override_groups_id = vpData.override_groups_id;
 			}
@@ -192,7 +192,7 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 
 		groupPromises.push(
 			Promise.all(overrideGroupsProms).then((overrideGroups) => {
-				viewpoint.override_groups_id = overrideGroups;
+				viewpoint.override_group_ids = overrideGroups;
 			})
 		);
 	}

@@ -284,12 +284,12 @@ export function* prepareGroupsIfNecessary( teamspace, modelId, viewpoint) {
 	try  {
 		const revision = yield select(selectCurrentRevisionId);
 
-		if (viewpoint?.override_groups_id) {
-			viewpoint.override_groups =  (yield all(viewpoint.override_groups_id.map((groupId) =>
+		if (viewpoint?.override_group_ids) {
+			viewpoint.override_groups =  (yield all(viewpoint.override_group_ids.map((groupId) =>
 				API.getGroup(teamspace, modelId, groupId, revision))))
 				.map(({data}) => prepareGroup(data));
 
-			delete viewpoint.override_groups_id;
+			delete viewpoint.override_group_ids;
 		}
 
 		if (viewpoint?.highlighted_group_id) {
