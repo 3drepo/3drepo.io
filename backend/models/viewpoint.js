@@ -122,7 +122,7 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 
 	await Promise.all(groupPromises);
 
-	if (viewpoint.screenshot) {
+	if (viewpoint.screenshot && viewpoint.screenshot !== "") {
 		const imageBuffer = new Buffer.from(
 			viewpoint.screenshot.substring(viewpoint.screenshot.indexOf(",") + 1),
 			"base64"
@@ -143,6 +143,8 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 		}
 
 		await setExternalScreenshotRef(viewpoint, account, model, collName);
+	} else {
+		delete viewpoint.screenshot;
 	}
 
 	return clean(routePrefix, viewpoint, false);
