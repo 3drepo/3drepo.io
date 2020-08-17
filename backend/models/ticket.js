@@ -19,10 +19,8 @@ const _ = require("lodash");
 
 const Project = require("./project");
 const View = require("./view");
-const Viewpoint = require("./viewpoint");
 const User = require("./user");
 const Job = require("./job");
-const Group = require("./group");
 const History = require("./history");
 
 const ModelSetting = require("./modelSetting");
@@ -112,7 +110,6 @@ class Ticket extends View {
 		delete ticketToClean.viewCount;
 
 		ticketToClean = super.clean(account, model, ticketToClean);
-		Viewpoint.clean(routePrefix, ticketToClean.viewpoint);
 
 		return ticketToClean;
 	}
@@ -579,7 +576,8 @@ class Ticket extends View {
 
 	async addComment(account, model, id, user, data, sessionId) {
 		// 1. creates a comment and gets the result ( comment + references)
-		const commentResult = await Comment.addComment(account, model, this.collName, id, user, data, this.viewpointType);
+		const commentResult = await Comment.addComment(account, model, this.collName, id, user, data,
+			this.routePrefix(account, model, id), this.viewpointType);
 
 		// 2 get referenced ticket numbers
 		const ticketNumbers = commentResult.ticketRefs;

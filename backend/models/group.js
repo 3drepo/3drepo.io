@@ -411,7 +411,7 @@ groupSchema.statics.listGroups = function (dbCol, queryParams, branch, revId, id
 		query.risk_id = { $exists: false };
 	}
 
-	// If we want groups that aren't from risks
+	// If we want groups that aren't from views
 	if (queryParams.noViews) {
 		query.view_id = { $exists: false };
 	}

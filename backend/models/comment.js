@@ -141,7 +141,7 @@ const identifyReferences = (comment) => {
 
 };
 
-const addComment = async function(account, model, colName, id, user, data, ticketType) {
+const addComment = async function(account, model, colName, id, user, data, routePrefix, ticketType) {
 	if (!(data.comment || "").trim() && !get(data,"viewpoint.screenshot")) {
 		throw { resCode: responseCodes.ISSUE_COMMENT_NO_TEXT};
 	}
@@ -159,7 +159,6 @@ const addComment = async function(account, model, colName, id, user, data, ticke
 
 	// 3. Create the comment
 	let viewpoint = null;
-	const routePrefix = `${account}/${model}/${colName}/${utils.uuidToString(_id)}`;
 
 	if (data.viewpoint) {
 		viewpoint = await Viewpoint.createViewpoint(account, model, colName, routePrefix, id, data.viewpoint, true, ticketType);
