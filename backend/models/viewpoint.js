@@ -106,8 +106,7 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 		const overrideGroupsProms = [];
 		viewpoint.override_groups.forEach((group) => {
 			overrideGroupsProms.push(
-				Groups.createGroup(dbCol, null, {...viewpoint[group], [groupIdField]: utils.stringToUUID(hostId)}).then((groupResult) => {
-					delete viewpoint[group];
+				Groups.createGroup(dbCol, null, {...group, [groupIdField]: utils.stringToUUID(hostId)}).then((groupResult) => {
 					return groupResult._id;
 				})
 			);
@@ -116,6 +115,7 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 		groupPromises.push(
 			Promise.all(overrideGroupsProms).then((overrideGroups) => {
 				viewpoint.override_groups_id = overrideGroups;
+				delete viewpoint.override_groups;
 			})
 		);
 	}
