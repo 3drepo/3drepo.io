@@ -157,7 +157,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	));
 
 	public renderNotCollapsableContent = () => {
-		const Component = this.props.renderNotCollapsable();
+		const Component = this.props.renderNotCollapsable && this.props.renderNotCollapsable();
 
 		return renderWhenTrue(() => (
 			<>

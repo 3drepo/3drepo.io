@@ -138,12 +138,9 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 
 	public renderPreview = renderWhenTrue(() => {
 		const { expandDetails, horizontal, failedToLoad, disableViewer } = this.props;
-		const { comments } = this.riskData;
 		const isRiskWithComments = Boolean(!this.isNewRisk);
 		const PreviewWrapper = horizontal && isRiskWithComments ? HorizontalView : Fragment;
-		const renderNotCollapsable = () => {
-			return this.renderMessagesList(!horizontal && isRiskWithComments);
-		};
+		const renderNotCollapsable = () => this.renderMessagesList(!horizontal && isRiskWithComments);
 
 		return (
 			<PreviewWrapper>
@@ -157,7 +154,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 					onNameChange={this.handleNameChange}
 					onExpandChange={this.handleExpandChange}
 					renderCollapsable={this.renderDetailsForm}
-					renderNotCollapsable={!horizontal && !this.isNewRisk ? renderNotCollapsable : null}
+					renderNotCollapsable={!horizontal ? renderNotCollapsable : null}
 					handleHeaderClick={this.handleHeaderClick}
 					scrolled={this.state.scrolled && !horizontal}
 					isNew={this.isNewRisk}
