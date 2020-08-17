@@ -303,39 +303,6 @@ class Ticket extends View {
 		return _.pick(data, Object.keys(this.fieldTypes));
 	}
 
-	setGroupTicketId(account, model, newTicket) {
-		const groupField = this.viewpointType + "_id";
-
-		const updateGroup = async (group_id) => {
-			// TODO - Do we need to find group first? Can we just patch
-			return Group.findByUID({ account, model }, utils.uuidToString(group_id), null, utils.uuidToString(newTicket.rev_id)).then((group) => {
-				const ticketIdData = {
-					[groupField]: utils.stringToUUID(newTicket._id)
-				};
-
-				return group.updateAttrs({ account, model }, ticketIdData);
-			});
-		};
-
-		const groupUpdatePromises = [];
-
-		if (newTicket.viewpoint) {
-			if (newTicket.viewpoint.highlighted_group_id) {
-				groupUpdatePromises.push(updateGroup(newTicket.viewpoint.highlighted_group_id));
-			}
-
-			if (newTicket.viewpoint.hidden_group_id) {
-				groupUpdatePromises.push(updateGroup(newTicket.viewpoint.hidden_group_id));
-			}
-
-			if (newTicket.viewpoint.shown_group_id) {
-				groupUpdatePromises.push(updateGroup(newTicket.viewpoint.shown_group_id));
-			}
-		}
-
-		return Promise.all(groupUpdatePromises);
-	}
-
 	handleFieldUpdate(account, model, sessionId, id, user, field, oldTicket, data, systemComments) {
 		if (Object.prototype.toString.call(data[field]) !== this.fieldTypes[field]) {
 			throw responseCodes.INVALID_ARGUMENTS;
