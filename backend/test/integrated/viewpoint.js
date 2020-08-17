@@ -566,6 +566,8 @@ describe("Views", function () {
 					agent.get(`/${username}/${model}/viewpoints/${viewId}`).expect(200, function(err, res) {
 						console.log("==== res.body ====");
 						console.log(res.body);
+						delete view.viewpoint.screenshot;
+
 						expect(res.body.name).to.equal(view.name);
 						expect(res.body.unexpected).to.not.exist;
 						expect(res.body.viewpoint).to.deep.equal(view.viewpoint);
