@@ -52,6 +52,8 @@ interface IProps {
 	createModel: (teamspace, data) => void;
 }
 
+const getModelCodeFieldErrorMsg = (error) => error ? 'Model code can only contain alphanumeric' : '';
+
 export const ModelDialog = (props: IProps) => {
 	const { teamspaces, projects, handleClose, createModel, project, teamspace } = props;
 
@@ -131,7 +133,7 @@ export const ModelDialog = (props: IProps) => {
 								<TextField
 									{...field}
 									error={Boolean(form.touched.code && form.errors.code)}
-									helperText={form.touched.code && (form.errors.code || '')}
+									helperText={form.touched.code && getModelCodeFieldErrorMsg(form.errors.code)}
 									label="Model Code (optional)"
 									margin="normal"
 									fullWidth
