@@ -142,11 +142,13 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 		"hidden_group_id",
 		"shown_group_id"
 	].forEach((groupIDName) => {
-		if(vpData[groupIDName] && !utils.isString(vpData[groupIDName])) {
-			systemLogger.logError(`invalid type ${groupIDName}`);
-			throw responseCodes.INVALID_ARGUMENTS;
-		} else if(vpData[groupIDName] !== "") {
-			viewpoint[groupIDName] = vpData[groupIDName];
+		if(vpData[groupIDName]) {
+			if(!utils.isString(vpData[groupIDName])) {
+				systemLogger.logError(`invalid type ${groupIDName}`);
+				throw responseCodes.INVALID_ARGUMENTS;
+			} else if(vpData[groupIDName] !== "") {
+				viewpoint[groupIDName] = vpData[groupIDName];
+			}
 		}
 
 	});
