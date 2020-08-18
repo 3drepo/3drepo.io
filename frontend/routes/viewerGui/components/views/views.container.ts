@@ -18,6 +18,7 @@
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
+import { selectSettings, ModelActions } from '../../../../modules/model';
 import { selectIsAdmin, selectIsCommenter } from '../../../../modules/model/permissions.selectors';
 import {
 	selectActiveViewpoint,
@@ -41,6 +42,7 @@ const mapStateToProps = createStructuredSelector({
 	searchQuery: selectSearchQuery,
 	searchEnabled: selectSearchEnabled,
 	isCommenter: selectIsCommenter,
+	modelSettings: selectSettings,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -56,7 +58,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setDefaultViewpoint: ViewpointsActions.setDefaultViewpoint,
 	setSearchQuery: ViewpointsActions.setSearchQuery,
 	setState: ViewpointsActions.setComponentState,
-	shareViewpointLink: ViewpointsActions.shareViewpointLink
+	shareViewpointLink: ViewpointsActions.shareViewpointLink,
+	fetchModelSettings: ModelActions.fetchSettings,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Views);

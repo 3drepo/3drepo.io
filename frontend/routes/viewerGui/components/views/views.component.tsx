@@ -51,6 +51,7 @@ interface IProps {
 	isCommenter: boolean;
 	teamspace: string;
 	model: string;
+	modelSettings: any;
 	fetchViewpoints: (teamspace, modelId) => void;
 	createViewpoint: (teamspace, modelId, view) => void;
 	prepareNewViewpoint: (teamspace, modelId, viewName) => void;
@@ -62,6 +63,7 @@ interface IProps {
 	subscribeOnViewpointChanges: (teamspace, modelId) => void;
 	unsubscribeOnViewpointChanges: (teamspace, modelId) => void;
 	setState: (componentState: IViewpointsComponentState) => void;
+	fetchModelSettings: (teamspace: string, modelId: string) => void;
 }
 
 export class Views extends React.PureComponent<IProps, any> {
@@ -115,6 +117,8 @@ export class Views extends React.PureComponent<IProps, any> {
 		const Viewpoints = filteredViewpoints.map((viewpoint) => {
 			const isActive = Boolean(activeViewpoint && activeViewpoint._id === viewpoint._id);
 			const viewpointData = isActive && editMode ? activeViewpoint : viewpoint;
+			const { defaultView } = this.props.modelSettings;
+			const isDefaultView = defaultView ? viewpoint._id === defaultView.id : false;
 			return (
 				<ViewItem
 					key={viewpoint._id}
@@ -133,6 +137,7 @@ export class Views extends React.PureComponent<IProps, any> {
 					onChangeName={this.handleActiveViewpointChange}
 					onSetDefault={this.props.setDefaultViewpoint}
 					isAdmin={this.props.isAdmin}
+					defaultView={isDefaultView}
 				/>
 			);
 		});
@@ -163,9 +168,14 @@ export class Views extends React.PureComponent<IProps, any> {
 	}
 
 	public componentDidUpdate(prevProps, prevState) {
-		const { viewpoints, searchQuery, newViewpoint, activeViewpoint } = this.props;
+		const { viewpoints, searchQuery, newViewpoint, activeViewpoint, modelSettings, model } = this.props;
 		const viewpointsChanged = !isEqual(prevProps.viewpoints, viewpoints);
 		const searchQueryChanged = prevProps.searchQuery !== searchQuery;
+
+		if (modelSettings.model !== model) {
+			this.props.fetchModelSettings(this.props.teamspace, model);
+		}
+
 		if (searchQueryChanged || viewpointsChanged) {
 			this.setFilteredViewpoints(() => {
 				if (!searchQuery && activeViewpoint) {
