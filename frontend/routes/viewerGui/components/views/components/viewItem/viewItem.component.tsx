@@ -61,7 +61,7 @@ interface IProps {
 	defaultView?: boolean;
 }
 
-const HamburgerMenu = ({onSetAsDefault, onDelete, isAdmin}) => {
+const HamburgerMenu = ({onSetAsDefault, onDelete, isAdmin, defaultView}) => {
 	const [anchorElement, setAnchorElement] = useState(null);
 
 	const toggleMenu = (e: React.SyntheticEvent) => {
@@ -75,6 +75,12 @@ const HamburgerMenu = ({onSetAsDefault, onDelete, isAdmin}) => {
 			action(e);
 	};
 
+	const renderDeleteMenuItem = renderWhenTrue(() => (
+		<MenuItem onClick={closeMenuAnd(onDelete)} >
+			Delete
+		</MenuItem>
+	));
+
 	return (
 		<HamburgerIconButton aria-label="Menu" onClick={toggleMenu}>
 			<MoreVert />
@@ -86,9 +92,7 @@ const HamburgerMenu = ({onSetAsDefault, onDelete, isAdmin}) => {
 				<MenuItem onClick={closeMenuAnd(onSetAsDefault)} disabled={!isAdmin} >
 					Set as Default
 				</MenuItem>
-				<MenuItem onClick={closeMenuAnd(onDelete)} >
-					Delete
-				</MenuItem>
+				{renderDeleteMenuItem(!defaultView)}
 			</Menu>
 		</HamburgerIconButton>
 	);
@@ -118,7 +122,12 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 				<IconsGroup disabled={this.state.isDeletePending}>
 					<StyledEditIcon onClick={this.props.onOpenEditMode} />
 					<StyledShareIcon onClick={this.handleShareLink} />
-					<HamburgerMenu onDelete={this.handleDelete} onSetAsDefault={this.handleSetDefault} isAdmin={this.props.isAdmin} />
+					<HamburgerMenu
+						onDelete={this.handleDelete}
+						onSetAsDefault={this.handleSetDefault}
+						isAdmin={this.props.isAdmin}
+						defaultView={this.props.defaultView}
+					/>
 				</IconsGroup>
 			}
 		</NameRow>
