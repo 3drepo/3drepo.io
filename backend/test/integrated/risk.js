@@ -50,12 +50,10 @@ describe("Risks", function () {
 			"look_at":[0,0,-163.08011914810137],
 			"view_dir":[0,0,-1],
 			"right":[1,0,0],
-			"unityHeight":3.537606904422707,
 			"fov":2.1124830653010416,
 			"aspect_ratio":0.8750189337327384,
 			"far":276.75612077194506 ,
 			"near":76.42411012233212,
-			"clippingPlanes":[]
 		},
 		"assigned_roles":["jobB"],
 		"category":"other issue",
@@ -115,7 +113,6 @@ describe("Risks", function () {
 							expect(res.body.viewpoint.position).to.deep.equal(risk.viewpoint.position);
 							expect(res.body.viewpoint.look_at).to.deep.equal(risk.viewpoint.look_at);
 							expect(res.body.viewpoint.view_dir).to.deep.equal(risk.viewpoint.view_dir);
-							expect(res.body.viewpoint.clippingPlanes).to.deep.equal(risk.viewpoint.clippingPlanes);
 							expect(res.body.assigned_roles).to.deep.equal(risk.assigned_roles);
 							expect(res.body.category).to.equal(risk.category);
 							expect(res.body.likelihood).to.equal(risk.likelihood);
@@ -124,7 +121,6 @@ describe("Risks", function () {
 							expect(res.body.mitigation_status).to.equal(risk.mitigation_status);
 							expect(res.body.mitigation_desc).to.equal(risk.mitigation_desc);
 							expect(res.body.mitigation_detail).to.equal(risk.mitigation_detail);
-							expect(res.body.viewpoint.clippingPlanes).to.deep.equal(risk.viewpoint.clippingPlanes);
 							expect(res.body.mitigation_stage).to.equal(risk.mitigation_stage);
 							expect(res.body.mitigation_type).to.equal(risk.mitigation_type);
 							expect(res.body.element).to.equal(risk.element);
@@ -146,7 +142,6 @@ describe("Risks", function () {
 						expect(res.body.viewpoint.position).to.deep.equal(risk.viewpoint.position);
 						expect(res.body.viewpoint.look_at).to.deep.equal(risk.viewpoint.look_at);
 						expect(res.body.viewpoint.view_dir).to.deep.equal(risk.viewpoint.view_dir);
-						expect(res.body.viewpoint.clippingPlanes).to.deep.equal(risk.viewpoint.clippingPlanes);
 						expect(res.body.assigned_roles).to.deep.equal(risk.assigned_roles);
 						expect(res.body.category).to.equal(risk.category);
 						expect(res.body.likelihood).to.equal(risk.likelihood);
@@ -809,7 +804,6 @@ describe("Risks", function () {
 					"aspect_ratio":1,
 					"far":300,
 					"near":50,
-					"clippingPlanes":[]
 				}
 			};
 			async.series([
@@ -845,7 +839,6 @@ describe("Risks", function () {
 							expect(res.body.viewpoint.aspect_ratio).to.equal(data.viewpoint.aspect_ratio);
 							expect(res.body.viewpoint.far).to.equal(data.viewpoint.far);
 							expect(res.body.viewpoint.near).to.equal(data.viewpoint.near);
-							expect(res.body.viewpoint.clippingPlanes).to.deep.equal(data.viewpoint.clippingPlanes);
 							expect(res.body.comments[0].action.property).to.equal("viewpoint");
 							expect(res.body.comments[0].action.from).to.equal(JSON.stringify(oldViewpoint));
 							expect(res.body.comments[0].action.to).to.equal(JSON.stringify(newViewpoint));
@@ -873,7 +866,6 @@ describe("Risks", function () {
 					"aspect_ratio":1,
 					"far":300,
 					"near":50,
-					"clippingPlanes":[]
 				}
 			};
 
@@ -913,7 +905,6 @@ describe("Risks", function () {
 							expect(res.body.viewpoint.aspect_ratio).to.equal(data.viewpoint.aspect_ratio);
 							expect(res.body.viewpoint.far).to.equal(data.viewpoint.far);
 							expect(res.body.viewpoint.near).to.equal(data.viewpoint.near);
-							expect(res.body.viewpoint.clippingPlanes).to.deep.equal(data.viewpoint.clippingPlanes);
 							expect(res.body.comments[1].action.property).to.equal("viewpoint");
 							expect(res.body.comments[1].action.from).to.equal(JSON.stringify(oldViewpoint));
 							const vp = JSON.parse(res.body.comments[1].action.to);
@@ -951,12 +942,10 @@ describe("Risks", function () {
 						"look_at":[0,0,-163.08011914810137],
 						"view_dir":[0,0,-1],
 						"right":[1,0,0],
-						"unityHeight ":3.537606904422707,
 						"fov":2.1124830653010416,
 						"aspect_ratio":0.8750189337327384,
 						"far":276.75612077194506 ,
 						"near":76.42411012233212,
-						"clippingPlanes":[]
 					}
 				};
 
