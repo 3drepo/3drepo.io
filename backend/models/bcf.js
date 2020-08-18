@@ -509,7 +509,7 @@ function parseViewpoints(issueGuid, issueFiles, vps) {
 
 function parseViewpointComponentIfc(model, component, ifcToModelMap, isFederation) {
 	return {
-		model: isFederation ? ifcToModelMap[component["@"].IfcGuid] : model,
+		model: isFederation && ifcToModelMap[component["@"].IfcGuid] ? ifcToModelMap[component["@"].IfcGuid] : model,
 		ifcGuid: component["@"].IfcGuid
 	};
 }

@@ -261,5 +261,6 @@ const setViewpointScreenshotURL = function(routePrefix, viewpoint) {
 
 module.exports = {
 	clean,
-	createViewpoint
+	createViewpoint,
+	setExternalScreenshotRef
 };
