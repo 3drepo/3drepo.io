@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { Loader } from '../loader/loader.component';
 
@@ -23,8 +23,13 @@ export const StyledLoader = styled(Loader)`
 	margin: 30px 0 20px;
 `;
 
+const loadedStyles = css`
+	min-height: 60vh;
+	max-height: 75vh;
+`;
+
 export const Container = styled.div`
 	width: 380px;
-	max-height: 100%;
 	overflow: auto;
+	${({ loaded }: { loaded: boolean }) => loaded ? loadedStyles : ''};
 `;

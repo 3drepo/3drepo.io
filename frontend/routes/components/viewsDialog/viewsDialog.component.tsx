@@ -113,7 +113,7 @@ export const ViewsDialog = ({ viewpoints, searchQuery, searchEnabled, teamspace,
 	}));
 
 	return (
-		<Container>
+		<Container loaded={!props.isPending}>
 			{renderEmptyState(!viewpoints.length && !props.isPending)}
 			{renderSearch(searchEnabled)}
 			{renderViewsList(!props.isPending)}
