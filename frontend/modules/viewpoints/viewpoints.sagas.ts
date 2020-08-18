@@ -198,7 +198,7 @@ export function* prepareNewViewpoint({teamspace, modelId, viewpointName}) {
 }
 
 export function* shareViewpointLink({ teamspace, modelId, viewpointId }) {
-	const url = `${location.hostname}${ROUTES.VIEWER}/${teamspace}/${modelId}?viewpointId=${viewpointId}`;
+	const url = `${location.hostname}${ROUTES.VIEWER}/${teamspace}/${modelId}?viewId=${viewpointId}`;
 	copy(url);
 	yield put(SnackbarActions.show('Share link copied to clipboard'));
 }
