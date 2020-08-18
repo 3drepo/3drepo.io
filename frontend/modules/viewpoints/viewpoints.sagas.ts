@@ -255,7 +255,7 @@ export function* showViewpoint({teamspace, modelId, view}) {
 
 			yield Viewer.updateClippingPlanes( clippingPlanes, teamspace, modelId);
 
-			yield put(TreeActions.setIfcSpacesHidden((viewpoint.hideIfc !== false));
+			yield put(TreeActions.setIfcSpacesHidden(viewpoint.hideIfc !== false));
 
 			yield put(TreeActions.showAllNodes());
 
