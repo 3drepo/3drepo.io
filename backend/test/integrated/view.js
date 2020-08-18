@@ -41,8 +41,7 @@ describe("Views", function () {
 			"position":[38,38 ,125.08011914810137],
 			"look_at":[0,0,-163.08011914810137],
 			"view_dir":[0,0,-1],
-			"right":[1,0,0],
-			"clippingPlanes":[]
+			"right":[1,0,0]
 		}
 	};
 	const oldBaseView = {
@@ -474,7 +473,13 @@ describe("Views", function () {
 		});
 
 		it("should succeed [deprecated version]", function(done) {
-			const view = Object.assign({"name":"View test"}, oldBaseView);
+			const view = Object.assign({"name":"View test",
+				"clippingPlanes":[
+					{
+						"distance" : 9320.0009765625,
+						"clipDirection" : -1,
+						"normal" : [ 0, -1, 0 ]
+					}]}, oldBaseView);
 			let viewId;
 
 			async.series([
@@ -488,7 +493,7 @@ describe("Views", function () {
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/viewpoints/${viewId}`).expect(200, function(err, res) {
-						view.viewpoint.clippingPlanes = res.body.viewpoint.clippingPlanes;
+						view.clippingPlanes = res.body.viewpoint.clippingPlanes;
 
 						expect(res.body.name).to.equal(view.name);
 						expect(res.body.clippingPlanes).to.deep.equal(view.clippingPlanes);
