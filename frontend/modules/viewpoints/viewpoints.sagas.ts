@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { get, groupBy } from 'lodash';
+import { get, groupBy, over } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { UnityUtil } from '../../globals/unity-util';
@@ -26,6 +26,8 @@ import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
 import { DialogActions } from '../dialog';
 import {  selectAllOverridesDict, GroupsActions } from '../groups';
+
+import { selectOverrides as selectViewsOverrides } from '.';
 import { selectCurrentRevisionId } from '../model';
 import { dispatch } from '../store';
 import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds, selectIfcSpacesHidden, TreeActions } from '../tree';
@@ -112,11 +114,13 @@ export function* generateViewpoint(teamspace, modelId, name, withScreenshot = fa
 
 		const objectInfo = yield Viewer.getObjectsStatus();
 
-		const overrides = yield select(selectAllOverridesDict);
-		const overrideGroups = yield groupByColor(overrides.colors);
+		let overrides = (yield select(selectAllOverridesDict)).colors;
+		const viewsOverrides =  (yield select(selectViewsOverrides));
+		overrides = {...overrides, ...viewsOverrides };
+		const newOverrideGroups = yield groupByColor(overrides);
 
-		if (overrideGroups.length) {
-			generatedObject.viewpoint.override_groups = overrideGroups;
+		if (newOverrideGroups.length) {
+			generatedObject.viewpoint.override_groups = newOverrideGroups;
 		}
 
 		if (objectInfo && (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0)) {
