@@ -60,7 +60,6 @@ describe("Issues", function () {
 			"aspect_ratio":0.8750189337327384,
 			"far":276.75612077194506 ,
 			"near":76.42411012233212,
-			"clippingPlanes":[]
 		},
 		"scale":1,
 		"creator_role":"jobA",
@@ -125,7 +124,6 @@ describe("Issues", function () {
 							expect(res.body.viewpoint.aspect_ratio).to.equal(issue.viewpoint.aspect_ratio);
 							expect(res.body.viewpoint.far).to.equal(issue.viewpoint.far);
 							expect(res.body.viewpoint.near).to.equal(issue.viewpoint.near);
-							expect(res.body.viewpoint.clippingPlanes).to.deep.equal(issue.viewpoint.clippingPlanes);
 
 							return done(err);
 						});
@@ -151,7 +149,6 @@ describe("Issues", function () {
 						expect(res.body.viewpoint.aspect_ratio).to.equal(issue.viewpoint.aspect_ratio);
 						expect(res.body.viewpoint.far).to.equal(issue.viewpoint.far);
 						expect(res.body.viewpoint.near).to.equal(issue.viewpoint.near);
-						expect(res.body.viewpoint.clippingPlanes).to.deep.equal(issue.viewpoint.clippingPlanes);
 
 						return done(err);
 					});
@@ -354,7 +351,6 @@ describe("Issues", function () {
 						.send(issue)
 						.expect(200 , function(err, res) {
 							issueId = res.body._id;
-							expect(res.body.norm).to.deep.equal(issue.norm);
 							expect(res.body.position).to.deep.equal(issue.position);
 							return done(err);
 
@@ -362,7 +358,6 @@ describe("Issues", function () {
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`).expect(200, function(err , res) {
-						expect(res.body.norm).to.deep.equal(issue.norm);
 						expect(res.body.position).to.deep.equal(issue.position);
 						done(err);
 					});
@@ -689,8 +684,7 @@ describe("Issues", function () {
 					"fov":2,
 					"aspect_ratio":1,
 					"far":300,
-					"near":50,
-					"clippingPlanes":[]
+					"near":50
 				}
 			};
 			async.series([
@@ -725,7 +719,6 @@ describe("Issues", function () {
 							expect(res.body.viewpoint.aspect_ratio).to.equal(data.viewpoint.aspect_ratio);
 							expect(res.body.viewpoint.far).to.equal(data.viewpoint.far);
 							expect(res.body.viewpoint.near).to.equal(data.viewpoint.near);
-							expect(res.body.viewpoint.clippingPlanes).to.deep.equal(data.viewpoint.clippingPlanes);
 							expect(res.body.comments[0].action.property).to.equal("viewpoint");
 							expect(res.body.comments[0].action.from).to.equal(JSON.stringify(oldViewpoint));
 							expect(res.body.comments[0].action.to).to.equal(JSON.stringify(newViewpoint));
@@ -753,7 +746,6 @@ describe("Issues", function () {
 					"aspect_ratio":1,
 					"far":300,
 					"near":50,
-					"clippingPlanes":[]
 				}
 			};
 
@@ -794,7 +786,6 @@ describe("Issues", function () {
 							expect(res.body.viewpoint.aspect_ratio).to.equal(data.viewpoint.aspect_ratio);
 							expect(res.body.viewpoint.far).to.equal(data.viewpoint.far);
 							expect(res.body.viewpoint.near).to.equal(data.viewpoint.near);
-							expect(res.body.viewpoint.clippingPlanes).to.deep.equal(data.viewpoint.clippingPlanes);
 							expect(res.body.comments[1].action.property).to.equal("viewpoint");
 							expect(res.body.comments[1].action.from).to.equal(JSON.stringify(oldViewpoint));
 							const vp = JSON.parse(res.body.comments[1].action.to);
@@ -825,7 +816,6 @@ describe("Issues", function () {
 					aspect_ratio:0.8750189337327384,
 					far:276.75612077194506 ,
 					near:76.42411012233212,
-					clippingPlanes:[],
 					screenshot:pngBase64
 				}
 			}
@@ -1122,7 +1112,6 @@ describe("Issues", function () {
 							"aspect_ratio":1,
 							"far":300,
 							"near":50,
-							"clippingPlanes":[]
 					}
 				};
 				agent.patch(`/${username}/${model}/issues/${issueId}`)
@@ -1304,7 +1293,6 @@ describe("Issues", function () {
 							"aspect_ratio":1,
 							"far":300,
 							"near":50,
-							"clippingPlanes":[]
 					}
 				};
 				agent.patch(`/${username}/${model}/issues/${issueId}`)
@@ -1582,7 +1570,6 @@ describe("Issues", function () {
 								"aspect_ratio":0.8750189337327384,
 								"far":276.75612077194506 ,
 								"near":76.42411012233212,
-								"clippingPlanes":[]
 							}
 						};
 
@@ -1623,7 +1610,6 @@ describe("Issues", function () {
 						"aspect_ratio":0.8750189337327384,
 						"far":276.75612077194506 ,
 						"near":76.42411012233212,
-						"clippingPlanes":[]
 					}
 				};
 
@@ -1652,7 +1638,6 @@ describe("Issues", function () {
 							expect(res.body.comments[0].viewpoint.aspect_ratio).to.equal(comment.viewpoint.aspect_ratio);
 							expect(res.body.comments[0].viewpoint.far).to.equal(comment.viewpoint.far);
 							expect(res.body.comments[0].viewpoint.near).to.equal(comment.viewpoint.near);
-							expect(res.body.comments[0].viewpoint.clippingPlanes).to.deep.equal(comment.viewpoint.clippingPlanes);
 							commentId = res.body.comments[0].guid;
 
 							done(err);
