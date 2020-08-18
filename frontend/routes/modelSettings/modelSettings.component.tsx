@@ -26,7 +26,7 @@ import * as Yup from 'yup';
 
 import InputLabel from '@material-ui/core/InputLabel';
 import { ROUTES } from '../../constants/routes';
-import { convertPositionToDirectX, convertPositionToOpenGL } from '../../helpers/model';
+import { convertPositionToDirectX, convertPositionToOpenGL, getModelCodeFieldErrorMsg } from '../../helpers/model';
 import { clientConfigService } from '../../services/clientConfig';
 import { schema } from '../../services/validation';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
@@ -253,7 +253,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 										label="Model code"
 										margin="normal"
 										error={Boolean(form.errors.code)}
-										helperText={form.errors.code}
+										helperText={getModelCodeFieldErrorMsg(form.errors.code)}
 									/>
 								)} />
 							</FieldsRow>

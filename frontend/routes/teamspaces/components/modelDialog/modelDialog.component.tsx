@@ -29,8 +29,8 @@ import { clientConfigService } from '../../../../services/clientConfig';
 import { schema } from '../../../../services/validation';
 import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
 
-import { getTeamspacesList, getTeamspaceProjects } from '../../../../helpers/model';
-import { MODEL_SUBTYPES } from './../../teamspaces.contants';
+import { getModelCodeFieldErrorMsg, getTeamspacesList, getTeamspaceProjects } from '../../../../helpers/model';
+import { MODEL_SUBTYPES } from '../../teamspaces.contants';
 import { FieldWrapper, Row, SelectWrapper } from './modelDialog.styles';
 
 const ModelSchema = Yup.object().shape({
@@ -51,8 +51,6 @@ interface IProps {
 	handleClose: () => void;
 	createModel: (teamspace, data) => void;
 }
-
-const getModelCodeFieldErrorMsg = (error) => error ? 'Model code can only contain alphanumeric' : '';
 
 export const ModelDialog = (props: IProps) => {
 	const { teamspaces, projects, handleClose, createModel, project, teamspace } = props;
