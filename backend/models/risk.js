@@ -93,33 +93,6 @@ function getLevelOfRisk(riskData) {
 	return {level_of_risk, residual_level_of_risk, overall_level_of_risk};
 }
 
-function addMitigationComment(account, model, sessionId, riskId, comments, data, viewpoint) {
-	if (data.residual && data.likelihood && data.consequence && data.mitigation) {
-		if (!comments) {
-			comments = [];
-		}
-
-		comments.forEach((comment) => {
-			comment.sealed = true;
-		});
-
-		const mitigationComment = Comment.newMitigationComment(
-			data.owner,
-			data.likelihood,
-			data.consequence,
-			data.mitigation,
-			viewpoint,
-			data.position
-		);
-
-		comments.push(mitigationComment);
-
-		ChatEvent.newComment(sessionId, account, model, riskId, mitigationComment);
-	}
-
-	return comments;
-}
-
 function calculateLevelOfRisk(likelihood, consequence) {
 	let levelOfRisk = -1;
 
@@ -169,26 +142,6 @@ class Risk extends Ticket {
 		return newRisk;
 	}
 
-	onBeforeUpdate(account, model, sessionId, residualData) {
-		return async function(data, oldRisk) {
-			if (residualData.residual) {
-				const updatedComments = addMitigationComment(
-					account,
-					model,
-					sessionId,
-					oldRisk._id,
-					oldRisk.comments,
-					data,
-					createViewPoint(oldRisk._id, residualData.viewpoint)
-				);
-
-				data.comments = updatedComments;
-			}
-
-			return data;
-		};
-	}
-
 	async update(user, sessionId, account, model, issueId, data) {
 		// 0. Set the black list for attributes
 		const attributeBlacklist = [
@@ -205,11 +158,7 @@ class Risk extends Ticket {
 			"viewpoints"
 		];
 
-		const residualData = _.pick(data, ["residual"]);
-		const beforeUpdate =  this.onBeforeUpdate(account, model, sessionId, residualData).bind(this);
-
-		data = _.omit(data, ["residual"]);
-		return await super.update(attributeBlacklist, user, sessionId, account, model, issueId, data, beforeUpdate);
+		return await super.update(attributeBlacklist, user, sessionId, account, model, issueId, data);
 	}
 
 	async getRisksReport(account, model, rid, ids, res) {
