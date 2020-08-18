@@ -16,13 +16,7 @@
  */
 "use strict";
 
-const utils = require("../utils");
-const responseCodes = require("../response_codes.js");
-
 const ChatEvent = require("./chatEvent");
-
-const Viewpoint = require("./viewpoint");
-
 const Ticket = require("./ticket");
 
 const fieldTypes = {
