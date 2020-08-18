@@ -117,7 +117,8 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 
 	public renderViewpointData = renderWhenTrue(() => (
 		<NameRow>
-			<Name>{this.props.viewpoint.name}</Name>
+			{this.renderViewpointName(true)}
+			lel
 			{this.props.isCommenter &&
 				<IconsGroup disabled={this.state.isDeletePending}>
 					<StyledEditIcon onClick={this.props.onOpenEditMode} />
@@ -201,8 +202,8 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 	}
 
 	public handleSetDefault = () => {
-		const { teamspace, modelId, viewpoint: {_id} } = this.props;
-		this.props.onSetDefault(teamspace, modelId, _id);
+		const { teamspace, modelId, viewpoint } = this.props;
+		this.props.onSetDefault(teamspace, modelId, viewpoint);
 	}
 
 	public handleNameChange = (field) => (event) => {

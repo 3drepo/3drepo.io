@@ -24,6 +24,7 @@ import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
 import { DialogActions } from '../dialog';
+import { ModelActions } from '../model';
 import { SnackbarActions } from '../snackbar';
 import { dispatch } from '../store';
 import { PRESET_VIEW } from './viewpoints.constants';
@@ -203,9 +204,10 @@ export function* shareViewpointLink({ teamspace, modelId, viewpointId }) {
 	yield put(SnackbarActions.show('Share link copied to clipboard'));
 }
 
-export function* setDefaultViewpoint({ teamspace, modelId, viewpointId }) {
+export function* setDefaultViewpoint({ teamspace, modelId, view }) {
 	try {
-		yield API.editModelSettings(teamspace, modelId, {defaultView: viewpointId});
+		yield API.editModelSettings(teamspace, modelId, {defaultView: view._id});
+		yield put(ModelActions.updateSettingsSuccess({defaultView: {id: view._id, name: view.name}}));
 		yield put(SnackbarActions.show('View set as default'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set the default viewpoint', ''));
