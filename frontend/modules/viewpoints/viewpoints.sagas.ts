@@ -253,9 +253,7 @@ export function* showViewpoint({teamspace, modelId, view}) {
 
 			const clippingPlanes = view.clippingPlanes || get(view, 'viewpoint.clippingPlanes');
 
-			if (clippingPlanes) {
-				yield Viewer.updateClippingPlanes( clippingPlanes, teamspace, modelId);
-			}
+			yield Viewer.updateClippingPlanes( clippingPlanes, teamspace, modelId);
 
 			if (viewpoint?.hideIfc) {
 				yield put(TreeActions.setIfcSpacesHidden(true));
@@ -263,14 +261,11 @@ export function* showViewpoint({teamspace, modelId, view}) {
 
 			yield put(TreeActions.showAllNodes());
 
-			yield Viewer.clearHighlights();
 			yield put(TreeActions.clearCurrentlySelected());
 
 			if (viewpoint?.hidden_group?.objects?.length > 0) {
 				yield put(TreeActions.hideNodesBySharedIds(viewpoint.hidden_group.objects));
-			}
-
-			if (viewpoint?.shown?.objects?.length > 0) {
+			} else if (viewpoint?.shown?.objects?.length > 0) {
 				yield put(TreeActions.isolateNodesBySharedIds(viewpoint.shown.objects.length));
 			}
 
