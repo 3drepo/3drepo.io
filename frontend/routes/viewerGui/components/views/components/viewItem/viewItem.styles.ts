@@ -55,7 +55,7 @@ export const StyledForm = styled(Form)`
 export const IconsGroup = styled.div<{ disabled: boolean }>`
 	display: flex;
 	align-items: center;
-	margin-right: 20px;
+	margin-right: 0;
 	${({ disabled }) => disabled ? css`
 		pointer-events: none;
 		opacity: 0.2;
@@ -151,6 +151,7 @@ export const Image = styled.img`
 export const HamburgerIconButton = styled(IconButton)`
 	&& {
 		${IconStyles};
+		width: 24px;
 	}
 
 	&:first-child {
