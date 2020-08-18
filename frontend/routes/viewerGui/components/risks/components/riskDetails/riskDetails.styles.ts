@@ -24,8 +24,13 @@ import { cond, constant, matches, stubTrue } from 'lodash';
 import { COLOR } from '../../../../../../styles';
 import { Image as ImageComponent } from '../../../../../components/image';
 import { MessagesList as MessagesListComponent } from '../../../../../components/messagesList/';
+import {
+	Container as MessageListContainer,
+	FilterWrapper,
+} from '../../../../../components/messagesList/messagesList.styles';
 import * as TextFieldStyles from '../../../../../components/textField/textField.styles';
 import PreviewDetailsBase from '../../../previewDetails/previewDetails.container';
+import { Container as PreviewDetailsContainer } from '../../../previewDetails/previewDetails.styles';
 import { Container as TabContainer } from '../../../risks/components/riskDetails/riskDetails.styles';
 
 export const StyledFormControl = styled(FormControl)`
@@ -132,6 +137,14 @@ export const HorizontalView = styled.div`
 		:before {
 			box-shadow: none;
 		}
+	}
+
+	${PreviewDetailsContainer} {
+		background-color: ${COLOR.WHITE};
+	}
+
+	${MessageListContainer}, ${FilterWrapper} {
+		background-color: ${COLOR.BLACK_6};
 	}
 `;
 

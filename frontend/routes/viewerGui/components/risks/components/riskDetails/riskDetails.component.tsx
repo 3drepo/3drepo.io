@@ -91,6 +91,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	};
 
 	public formRef = React.createRef<any>();
+	public commentRef = React.createRef<any>();
 	public panelRef = React.createRef<any>();
 	public containerRef = React.createRef<any>();
 	public messageContainerRef = React.createRef<any>();
@@ -122,11 +123,10 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		))(!this.isNewRisk);
 	}
 
-	public commentRef = React.createRef<any>();
-
 	public renderMessagesList = renderWhenTrue(() => (
 		<MessagesList
 			formRef={this.formRef}
+			commentRef={this.commentRef}
 			messages={this.props.comments}
 			isPending={this.props.fetchingDetailsIsPending}
 			removeMessage={this.removeMessage}
@@ -138,12 +138,9 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 
 	public renderPreview = renderWhenTrue(() => {
 		const { expandDetails, horizontal, failedToLoad, disableViewer } = this.props;
-		const { comments } = this.riskData;
 		const isRiskWithComments = Boolean(!this.isNewRisk);
 		const PreviewWrapper = horizontal && isRiskWithComments ? HorizontalView : Fragment;
-		const renderNotCollapsable = () => {
-			return this.renderMessagesList(!horizontal && isRiskWithComments);
-		};
+		const renderNotCollapsable = () => this.renderMessagesList(!horizontal && isRiskWithComments);
 
 		return (
 			<PreviewWrapper>
@@ -157,7 +154,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 					onNameChange={this.handleNameChange}
 					onExpandChange={this.handleExpandChange}
 					renderCollapsable={this.renderDetailsForm}
-					renderNotCollapsable={!horizontal && !this.isNewRisk ? renderNotCollapsable : null}
+					renderNotCollapsable={!horizontal ? renderNotCollapsable : null}
 					handleHeaderClick={this.handleHeaderClick}
 					scrolled={this.state.scrolled && !horizontal}
 					isNew={this.isNewRisk}
@@ -180,6 +177,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				screenshot={this.props.newComment.screenshot}
 				viewpoint={this.props.newComment.viewpoint}
 				formRef={this.formRef}
+				commentRef={this.commentRef}
 				onTakeScreenshot={this.handleNewScreenshot}
 				onSave={this.handleSave}
 				canComment={this.userCanComment()}

@@ -89,6 +89,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	};
 
 	public formRef = React.createRef<any>();
+	public commentRef = React.createRef<any>();
 	public panelRef = React.createRef<any>();
 	public containerRef = React.createRef<any>();
 	public messageContainerRef = React.createRef<any>();
@@ -120,12 +121,11 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		return this.props.viewer.initialized;
 	}
 
-	public commentRef = React.createRef<any>();
-
 	public renderMessagesList = renderWhenTrue(() => {
 		return (
 			<MessagesList
 				formRef={this.formRef}
+				commentRef={this.commentRef}
 				messages={this.props.comments}
 				isPending={this.props.fetchingDetailsIsPending}
 				removeMessage={this.removeMessage}
@@ -138,7 +138,6 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public renderPreview = renderWhenTrue(() => {
 		const { expandDetails, horizontal, failedToLoad, disableViewer } = this.props;
-		const { comments } = this.issueData;
 		const isIssueWithComments = Boolean(!this.isNewIssue);
 		const PreviewWrapper = horizontal && isIssueWithComments ? HorizontalView : Fragment;
 		const renderNotCollapsable = () => this.renderMessagesList(!horizontal && isIssueWithComments);
@@ -178,6 +177,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				screenshot={this.props.newComment.screenshot}
 				viewpoint={this.props.newComment.viewpoint}
 				formRef={this.formRef}
+				commentRef={this.commentRef}
 				onTakeScreenshot={this.handleNewScreenshot}
 				onSave={this.handleSave}
 				canComment={this.userCanComment()}
