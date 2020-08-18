@@ -54,6 +54,7 @@ import {
 
 interface IProps {
 	formRef: any;
+	commentRef: any;
 	horizontal: boolean;
 	tickets: any[];
 	canComment: boolean;
@@ -220,6 +221,7 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 					renderToBody
 					minChar={0}
 					trigger={this.autocompleteTriggers}
+					ref={this.props.commentRef}
 				/>
 			)} />
 		</TextFieldWrapper>

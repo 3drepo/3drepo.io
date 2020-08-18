@@ -37,6 +37,7 @@ interface IProps {
 	currentUser: string;
 	property: string;
 	formRef?: any;
+	commentRef?: any;
 	removeMessage: (index, guid) => void;
 	setCameraOnViewpoint: (viewpoint) => void;
 }
@@ -75,6 +76,7 @@ export const Message = ({
 							created={created}
 							teamspace={teamspace}
 							formRef={props.formRef}
+							commentRef={props.commentRef}
 							comment={comment}
 							commentWithMarkdown={commentWithMarkdown}
 							viewpoint={viewpoint}

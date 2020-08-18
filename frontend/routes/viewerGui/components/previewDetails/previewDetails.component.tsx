@@ -156,16 +156,18 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		</ToggleButtonContainer>
 	));
 
-	public renderNotCollapsableContent = renderWhenTrue(() => {
-		return (
+	public renderNotCollapsableContent = () => {
+		const Component = this.props.renderNotCollapsable && this.props.renderNotCollapsable();
+
+		return renderWhenTrue(() => (
 			<>
 				{this.renderToggleButtonContainer(!this.props.disableExpanding)}
 				<NotCollapsableContent>
 					{this.props.renderNotCollapsable()}
 				</NotCollapsableContent>
 			</>
-		);
-	});
+		))(!!Component);
+	}
 
 	public componentDidMount() {
 		const { editable, defaultExpanded } = this.props;
@@ -247,14 +249,13 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			willBeUpdated,
 			willBeRemoved,
 			renderCollapsable,
-			renderNotCollapsable,
 			handleHeaderClick,
 			showModelButton,
 			actionButton,
 		} = this.props;
 
 		return (
-			<Container className={className}>
+			<Container className={className} edit={!this.props.isNew} panelName={this.props.panelName}>
 				{this.renderUpdateMessage(willBeUpdated)}
 				{this.renderDeleteMessage(willBeRemoved)}
 				<Summary
@@ -284,7 +285,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 							{this.renderCollapsable(Boolean(renderCollapsable))}
 						</Details>
 					</Collapsable>
-					{this.renderNotCollapsableContent(!!renderNotCollapsable)}
+					{this.renderNotCollapsableContent()}
 				</ScrollableContainer>
 			</Container>
 		);

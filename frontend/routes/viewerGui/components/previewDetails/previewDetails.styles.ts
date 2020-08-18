@@ -27,15 +27,20 @@ import {
 	Typography as TypographyComponent
 } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import {GROUP_PANEL_NAME} from '../../../../constants/groups';
 
 import { COLOR } from '../../../../styles';
 import { Container as MessageListContainer, FilterWrapper } from '../../../components/messagesList/messagesList.styles';
 
 const SUMMARY_HEIGHT = 70;
 
+const containerStyle = (edit: boolean, panelName: string = '') => css`
+	${!edit || panelName === GROUP_PANEL_NAME ? COLOR.WHITE : COLOR.BLACK_6};
+`;
+
 export const Container = styled.div`
 	color: ${COLOR.BLACK_60};
-	background-color: ${COLOR.WHITE};
+	background-color: ${({ edit, panelName }: { edit: boolean; panelName: string; }) => containerStyle(edit, panelName)};
 	overflow: hidden;
 	display: flex;
 	flex-direction: column;
