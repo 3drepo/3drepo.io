@@ -193,7 +193,7 @@ router.post("/issues.bcfzip", middlewares.issue.canCreate, importBCF);
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  * @apiParam {String} issueId Issue ID
- * @apiParam {String} vid Viewpoint unique ID.
+ * @apiParam {String} vid Viewpoint ID.
  *
  * @apiDescription Get an issue screenshot from viewpoints using a viewpoint ID and issue ID.
  */
