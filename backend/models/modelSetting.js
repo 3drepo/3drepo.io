@@ -69,7 +69,7 @@ schema.set("toObject", { getters: true });
 schema.statics.modelCodeRegExp = /^[a-zA-Z0-9]{0,50}$/;
 
 schema.methods.clean = async function() {
-	const views = require("./viewpoint");
+	const views = new (require("./view"))();
 	const cleanedData = this.toObject();
 	if (this.defaultView) {
 		delete cleanedData.defaultView;
@@ -89,7 +89,7 @@ schema.methods.clean = async function() {
 };
 
 schema.methods.updateProperties = async function (updateObj) {
-	const views = require("./viewpoint");
+	const views = new (require("./view"))();
 	const keys = Object.keys(updateObj);
 	for(let i = 0; i < keys.length; ++i) {
 		const key = keys[i];
@@ -113,6 +113,7 @@ schema.methods.updateProperties = async function (updateObj) {
 				break;
 			case "defaultView":
 				if (utils.isString(updateObj[key]) && utils.isUUID(updateObj[key])) {
+					console.log(views);
 					const res = await views.findByUID(this._dbcolOptions.account, this._dbcolOptions.model, updateObj[key], {_id: 1});
 					this[key] = res._id;
 				} else {
