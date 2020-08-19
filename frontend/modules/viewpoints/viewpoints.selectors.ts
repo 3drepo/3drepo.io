@@ -17,7 +17,7 @@
 import { values } from 'lodash';
 import { createSelector } from 'reselect';
 import { getGroupOverride } from '../../helpers/colorOverrides';
-import { hasTransparency } from '../../helpers/colors';
+import { getTransparency, hasTransparency } from '../../helpers/colors';
 
 export const selectViewpointsDomain = (state) => state.viewpoints;
 
@@ -69,7 +69,7 @@ export const selectOverridesDict = createSelector(
 			getGroupOverride(overrides.colors, group, group.color);
 
 			if (hasTransparency(group.color)) {
-				getGroupOverride(overrides.transparencies, group, hasTransparency(group.color));
+				getGroupOverride(overrides.transparencies, group, getTransparency(group.color));
 			}
 
 			return overrides;
