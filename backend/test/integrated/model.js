@@ -314,18 +314,19 @@ describe("Model", function () {
 		});
 
 		const testModel = "2d4a6208-6847-4a25-9d9e-097a63f2de93";
+		const viewId = "df8fa4a0-c2ba-11ea-8373-eb03ef03362f";
 		it("setting a valid view Id as default viewpoint should succeed", function (done) {
 			async.series([
 				callback => {
 					agent.put(`/${username}/${testModel}/settings`)
-						.send({defaultView: "df8fa4a0-c2ba-11ea-8373-eb03ef03362f"})
+						.send({defaultView: viewId})
 						.expect(200, callback);
 				},
 				callback => {
 					agent.get(`/${username}/${testModel}.json`)
 						.expect(200, (err, res) => {
 							expect(res.body.defaultView).to.deep.equal({
-								id: "df8fa4a0-c2ba-11ea-8373-eb03ef03362f",
+								id: viewId,
 								name: "fdgdfg"
 							});
 							callback(err);
@@ -339,6 +340,15 @@ describe("Model", function () {
 				.send({defaultView: "df8fa4a0-c2ba-11ea-8373-eb03ef03362a"})
 				.expect(404, (err, res) => {
 					expect(res.body.value).to.equal(responseCodes.VIEW_NOT_FOUND.value);
+					done(err);
+				});
+		});
+
+
+		it("removing a view when it's currently set as default should fail", function (done) {
+			agent.delete(`/${username}/${testModel}/viewpoints/${viewId}`)
+				.expect(400, (err, res) => {
+					expect(res.body.value).to.equal(responseCodes.CANNOT_DELETE_DEFAULT_VIEW.value);
 					done(err);
 				});
 		});

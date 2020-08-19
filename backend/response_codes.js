@@ -115,6 +115,7 @@
 		INVALID_GROUP: { message: "Group request malformed", status: 400 },
 
 		VIEW_NOT_FOUND: { message: "Camera viewpoint not found", status: 404 },
+		CANNOT_DELETE_DEFAULT_VIEW: { message: "This view is set to be the default for the model. Please change it before deleting.", status: 400 },
 
 		SEQUENCE_NOT_FOUND: { message: "Sequence not found", status: 404 },
 		TASK_NOT_FOUND: { message: "Sequence task not found", status: 404 },

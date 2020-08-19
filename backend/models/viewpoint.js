@@ -161,22 +161,31 @@ view.createViewpoint = async (account, model, sessionId, data) => {
 	return viewpoint;
 };
 
-view.deleteViewpoint = function (account, model, idStr, sessionId) {
+view.deleteViewpoint = async (account, model, idStr, sessionId) => {
 	let id = idStr;
 	if (utils.isString(id)) {
 		id = utils.stringToUUID(id);
 	}
 
-	return db.getCollection(account, model + ".views").then((_dbCol) => {
-		return _dbCol.findOneAndDelete({ _id: id }).then((deleteResponse) => {
-			if (!deleteResponse.value) {
-				return Promise.reject(responseCodes.VIEW_NOT_FOUND);
-			}
-			if(sessionId) {
-				ChatEvent.viewpointsDeleted(sessionId, account, model, idStr);
-			}
+	const ModelSettings = require("./modelSetting");
+
+	const setting = await ModelSettings.findById({account, model}, model);
+
+	if(setting.defaultView && utils.stringToUUID(setting.defaultView) === idStr) {
+		throw responseCodes.CANNOT_DELETE_DEFAULT_VIEW;
+	} else {
+		return db.getCollection(account, model + ".views").then((_dbCol) => {
+			return _dbCol.findOneAndDelete({ _id: id }).then((deleteResponse) => {
+				if (!deleteResponse.value) {
+					return Promise.reject(responseCodes.VIEW_NOT_FOUND);
+				}
+				if(sessionId) {
+					ChatEvent.viewpointsDeleted(sessionId, account, model, idStr);
+				}
+			});
 		});
-	});
+	}
+
 };
 
 module.exports = view;
