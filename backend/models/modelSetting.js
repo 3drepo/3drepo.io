@@ -113,7 +113,6 @@ schema.methods.updateProperties = async function (updateObj) {
 				break;
 			case "defaultView":
 				if (utils.isString(updateObj[key]) && utils.isUUID(updateObj[key])) {
-					console.log(views);
 					const res = await views.findByUID(this._dbcolOptions.account, this._dbcolOptions.model, updateObj[key], {_id: 1});
 					this[key] = res._id;
 				} else {
