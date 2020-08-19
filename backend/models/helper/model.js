@@ -786,21 +786,23 @@ function isSubModel(account, model) {
 	});
 }
 
-function removeModelCollections(account, model) {
-	return FileRef.removeAllFilesFromModel(account, model).then(() => {
-		return ModelFactory.dbManager.listCollections(account).then((collections) => {
-			const promises = [];
+async function removeModelCollections(account, model) {
+	try {
+		await FileRef.removeAllFilesFromModel(account, model);
+	} catch (err) {
+		systemLogger.logError("Failed to remove files", err);
+	}
 
-			collections.forEach(collection => {
-				if(collection.name.startsWith(model + ".")) {
+	const collections = await ModelFactory.dbManager.listCollections(account);
+	const promises = [];
 
-					promises.push(ModelFactory.dbManager.dropCollection(account, collection));
-				}
-			});
-
-			return Promise.all(promises);
-		});
+	collections.forEach(collection => {
+		if(collection.name.startsWith(model + ".")) {
+			promises.push(ModelFactory.dbManager.dropCollection(account, collection));
+		}
 	});
+
+	return Promise.all(promises);
 }
 
 function removeModel(account, model, forceRemove) {
