@@ -30,24 +30,6 @@ const { Agent } = require("useragent");
 const supertest = require("supertest");
 const { json } = require("body-parser");
 
-
-
-// var expectOld = supertest.Test.prototype.expect;
-
-// supertest.Test.prototype.expect = function(status, callback) {
-// 	expectOld.apply(this, [status,  function(err, res) {
-// 		console.log(status);
-// 		console.log(res.status);
-
-// 		expect(res.status, 'Status should be ' + status).to.be.equal(status);
-// 		callback(err, res);
-// 	}]);
-// }
-
-// __proto__.constructor.prototype
-
-// return;
-
 describe("Issues", function () {
 	let server;
 	let agent;
@@ -78,7 +60,6 @@ describe("Issues", function () {
 			"aspect_ratio":0.8750189337327384,
 			"far":276.75612077194506 ,
 			"near":76.42411012233212,
-			"clippingPlanes":[]
 		},
 		"scale":1,
 		"creator_role":"jobA",
@@ -143,7 +124,6 @@ describe("Issues", function () {
 							expect(res.body.viewpoint.aspect_ratio).to.equal(issue.viewpoint.aspect_ratio);
 							expect(res.body.viewpoint.far).to.equal(issue.viewpoint.far);
 							expect(res.body.viewpoint.near).to.equal(issue.viewpoint.near);
-							expect(res.body.viewpoint.clippingPlanes).to.deep.equal(issue.viewpoint.clippingPlanes);
 
 							return done(err);
 						});
@@ -169,7 +149,6 @@ describe("Issues", function () {
 						expect(res.body.viewpoint.aspect_ratio).to.equal(issue.viewpoint.aspect_ratio);
 						expect(res.body.viewpoint.far).to.equal(issue.viewpoint.far);
 						expect(res.body.viewpoint.near).to.equal(issue.viewpoint.near);
-						expect(res.body.viewpoint.clippingPlanes).to.deep.equal(issue.viewpoint.clippingPlanes);
 
 						return done(err);
 					});
@@ -372,7 +351,6 @@ describe("Issues", function () {
 						.send(issue)
 						.expect(200 , function(err, res) {
 							issueId = res.body._id;
-							expect(res.body.norm).to.deep.equal(issue.norm);
 							expect(res.body.position).to.deep.equal(issue.position);
 							return done(err);
 
@@ -380,7 +358,6 @@ describe("Issues", function () {
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`).expect(200, function(err , res) {
-						expect(res.body.norm).to.deep.equal(issue.norm);
 						expect(res.body.position).to.deep.equal(issue.position);
 						done(err);
 					});
@@ -673,7 +650,6 @@ describe("Issues", function () {
 							oldViewpoint = res.body.viewpoint;
 							delete oldViewpoint.screenshot;
 							delete oldViewpoint.screenshotSmall;
-							screenshotRef = res.body.viewpoint.screenshot_ref;
 							return done(err);
 
 						});
@@ -686,14 +662,7 @@ describe("Issues", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`)
 						.expect(200, function(err, res) {
-							const newViewpoint = { ...oldViewpoint };
-							newViewpoint.guid = res.body.viewpoint.guid;
-							newViewpoint.screenshot_ref = res.body.viewpoint.screenshot_ref;
-
-							expect(res.body.viewpoint.screenshot_ref).to.not.equal(screenshotRef);
 							expect(res.body.comments[0].action.property).to.equal("screenshot");
-							expect(res.body.comments[0].action.from).to.equal(screenshotRef);
-							expect(res.body.comments[0].action.to).to.equal(res.body.viewpoint.screenshot_ref);
 							expect(res.body.comments[0].owner).to.equal(username);
 							done(err);
 						});
@@ -715,8 +684,7 @@ describe("Issues", function () {
 					"fov":2,
 					"aspect_ratio":1,
 					"far":300,
-					"near":50,
-					"clippingPlanes":[]
+					"near":50
 				}
 			};
 			async.series([
@@ -751,7 +719,6 @@ describe("Issues", function () {
 							expect(res.body.viewpoint.aspect_ratio).to.equal(data.viewpoint.aspect_ratio);
 							expect(res.body.viewpoint.far).to.equal(data.viewpoint.far);
 							expect(res.body.viewpoint.near).to.equal(data.viewpoint.near);
-							expect(res.body.viewpoint.clippingPlanes).to.deep.equal(data.viewpoint.clippingPlanes);
 							expect(res.body.comments[0].action.property).to.equal("viewpoint");
 							expect(res.body.comments[0].action.from).to.equal(JSON.stringify(oldViewpoint));
 							expect(res.body.comments[0].action.to).to.equal(JSON.stringify(newViewpoint));
@@ -779,7 +746,6 @@ describe("Issues", function () {
 					"aspect_ratio":1,
 					"far":300,
 					"near":50,
-					"clippingPlanes":[]
 				}
 			};
 
@@ -792,7 +758,6 @@ describe("Issues", function () {
 							oldViewpoint = res.body.viewpoint;
 							delete oldViewpoint.screenshot;
 							delete oldViewpoint.screenshotSmall;
-							screenshotRef = res.body.viewpoint.screenshot_ref;
 							return done(err);
 
 						});
@@ -807,13 +772,9 @@ describe("Issues", function () {
 						.expect(200, function(err, res) {
 							const newViewpoint = { ...oldViewpoint, ...data.viewpoint };
 							newViewpoint.guid = res.body.viewpoint.guid;
-							newViewpoint.screenshot_ref = res.body.viewpoint.screenshot_ref;
 							delete newViewpoint.screenshot;
 
-							expect(res.body.viewpoint.screenshot_ref).to.not.equal(screenshotRef);
 							expect(res.body.comments[0].action.property).to.equal("screenshot");
-							expect(res.body.comments[0].action.from).to.equal(screenshotRef);
-							expect(res.body.comments[0].action.to).to.equal(res.body.viewpoint.screenshot_ref);
 							expect(res.body.comments[0].owner).to.equal(username);
 
 							expect(res.body.viewpoint.up).to.deep.equal(data.viewpoint.up);
@@ -825,10 +786,11 @@ describe("Issues", function () {
 							expect(res.body.viewpoint.aspect_ratio).to.equal(data.viewpoint.aspect_ratio);
 							expect(res.body.viewpoint.far).to.equal(data.viewpoint.far);
 							expect(res.body.viewpoint.near).to.equal(data.viewpoint.near);
-							expect(res.body.viewpoint.clippingPlanes).to.deep.equal(data.viewpoint.clippingPlanes);
 							expect(res.body.comments[1].action.property).to.equal("viewpoint");
 							expect(res.body.comments[1].action.from).to.equal(JSON.stringify(oldViewpoint));
-							expect(res.body.comments[1].action.to).to.equal(JSON.stringify(newViewpoint));
+							const vp = JSON.parse(res.body.comments[1].action.to);
+							delete vp.screenshot_ref;
+							expect(vp).to.deep.equal(newViewpoint);
 							expect(res.body.comments[1].owner).to.equal(username);
 							done(err);
 						});
@@ -854,7 +816,6 @@ describe("Issues", function () {
 					aspect_ratio:0.8750189337327384,
 					far:276.75612077194506 ,
 					near:76.42411012233212,
-					clippingPlanes:[],
 					screenshot:pngBase64
 				}
 			}
@@ -1151,7 +1112,6 @@ describe("Issues", function () {
 							"aspect_ratio":1,
 							"far":300,
 							"near":50,
-							"clippingPlanes":[]
 					}
 				};
 				agent.patch(`/${username}/${model}/issues/${issueId}`)
@@ -1333,7 +1293,6 @@ describe("Issues", function () {
 							"aspect_ratio":1,
 							"far":300,
 							"near":50,
-							"clippingPlanes":[]
 					}
 				};
 				agent.patch(`/${username}/${model}/issues/${issueId}`)
@@ -1611,7 +1570,6 @@ describe("Issues", function () {
 								"aspect_ratio":0.8750189337327384,
 								"far":276.75612077194506 ,
 								"near":76.42411012233212,
-								"clippingPlanes":[]
 							}
 						};
 
@@ -1652,7 +1610,6 @@ describe("Issues", function () {
 						"aspect_ratio":0.8750189337327384,
 						"far":276.75612077194506 ,
 						"near":76.42411012233212,
-						"clippingPlanes":[]
 					}
 				};
 
@@ -1681,7 +1638,6 @@ describe("Issues", function () {
 							expect(res.body.comments[0].viewpoint.aspect_ratio).to.equal(comment.viewpoint.aspect_ratio);
 							expect(res.body.comments[0].viewpoint.far).to.equal(comment.viewpoint.far);
 							expect(res.body.comments[0].viewpoint.near).to.equal(comment.viewpoint.near);
-							expect(res.body.comments[0].viewpoint.clippingPlanes).to.deep.equal(comment.viewpoint.clippingPlanes);
 							commentId = res.body.comments[0].guid;
 
 							done(err);
@@ -1704,7 +1660,9 @@ describe("Issues", function () {
 			it("should succeed if removing an existing comment", function(done) {
 				agent.delete(`/${username}/${model}/issues/${issueId}/comments`)
 					.send({guid:commentId})
-					.expect(200 , done);
+					.expect(200, function(err, res) {
+						done(err);
+					});
 			});
 
 			it("should fail if invalid issue ID is given", function(done) {
@@ -1927,7 +1885,7 @@ describe("Issues", function () {
 				login(agent, altUser, password),
 				fetchNotification(agent),
 				(notifications, next) => {
-					expect(notifications, 'There shouldnt be any notifications').to.be.an("array").and.to.have.length(0);
+					expect(notifications, 'There should not be any notifications').to.be.an("array").and.to.have.length(0);
 					next();
 				},
 			],
@@ -1973,7 +1931,7 @@ describe("Issues", function () {
 		const testForNoComment = (id, done) => {
 			agent.get(`/${teamspace}/${model}/issues/${id}`).expect(200, function(err , res) {
 				const comments = res.body.comments;
-				expect(comments, 'There shouldnt be a comment').to.be.an("array").and.to.have.length(0);
+				expect(comments, 'There should not be a comment').to.be.an("array").and.to.have.length(0);
 				return done(err);
 			});
 		};
@@ -2053,10 +2011,10 @@ describe("Issues", function () {
 			], done);
 		});
 
-		it("shouldn't create a system message when the issue that has been referenced is part of a quote", function(done) {
+		it("should not create a system message when the issue that has been referenced is part of a quote", function(done) {
 			const comment = {comment : `> look at issue  #${issues[4].number}
 			and #${issues[5].number}
-			
+
 			and #${issues[6].number}
 			`};
 

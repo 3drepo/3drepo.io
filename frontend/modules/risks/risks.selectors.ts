@@ -21,6 +21,7 @@ import { createSelector } from 'reselect';
 import { RISK_LEVELS } from '../../constants/risks';
 import { prepareComments, transformCustomsLinksToMarkdown } from '../../helpers/comments';
 import { hasPin, riskToPin } from '../../helpers/pins';
+import { getRiskColor } from '../../helpers/risks';
 import { searchByFilters } from '../../helpers/searching';
 import { selectIssuesMap } from '../issues';
 import { selectQueryParams } from '../router/router.selectors';
@@ -32,7 +33,8 @@ export const selectRisksMap = createSelector(
 );
 
 export const selectRisks = createSelector(
-	selectRisksMap, (risksMap) => values(risksMap)
+	selectRisksMap, (risksMap) => values(risksMap).map((risk) =>
+		({...risk, color: getRiskColor(risk.residual_level_of_risk)}))
 );
 
 export const selectComponentState = createSelector(
@@ -58,10 +60,10 @@ export const selectActiveRiskDetails = createSelector(
 );
 
 export const selectActiveRiskComments = createSelector(
-	selectActiveRiskDetails, selectIssuesMap, (activeRiskDetails, issues) =>
+	selectActiveRiskDetails, selectRisksMap, (activeRiskDetails, risks) =>
 		prepareComments(activeRiskDetails.comments || []).map((comment) => ({
 			...comment,
-			commentWithMarkdown: transformCustomsLinksToMarkdown(comment, issues, 'risk')
+			commentWithMarkdown: transformCustomsLinksToMarkdown(comment, risks, 'risk')
 		}))
 );
 

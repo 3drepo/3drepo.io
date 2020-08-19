@@ -23,6 +23,7 @@ import FocusIcon from '@material-ui/icons/CenterFocusStrong';
 import ClipIcon from '@material-ui/icons/Crop';
 import HomeIcon from '@material-ui/icons/Home';
 import MetadataIcon from '@material-ui/icons/Info';
+import InvertColorsOffIcon from '@material-ui/icons/InvertColorsOff';
 import MyLocationIcon from '@material-ui/icons/MyLocation';
 import TurntableIcon from '@material-ui/icons/Redo';
 import ShowAllIcon from '@material-ui/icons/Visibility';
@@ -88,6 +89,7 @@ interface IProps {
 	setCoordView: (visible) => void;
 	stopListenOnNumClip: () => void;
 	setPanelVisibility: (panelName, visibility) => void;
+	clearColorOverrides: () => void;
 }
 
 interface IState {
@@ -176,6 +178,12 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 				Icon: IsolateIcon,
 				action: () => this.props.isolateSelectedNodes(undefined)
 			},
+			{
+				label: VIEWER_TOOLBAR_ITEMS.CLEAR_OVERRIDE,
+				Icon: InvertColorsOffIcon,
+				action: () => this.props.clearColorOverrides()
+			},
+
 			{
 				label: VIEWER_TOOLBAR_ITEMS.FOCUS,
 				Icon: FocusIcon,

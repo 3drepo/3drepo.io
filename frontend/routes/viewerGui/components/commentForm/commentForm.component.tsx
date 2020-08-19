@@ -44,11 +44,11 @@ import {
 	Container,
 	FileUploadContainer,
 	FileUploadInvoker,
-	IssueSuggestion,
 	RemoveButtonWrapper,
 	StyledForm,
 	StyledTextField,
 	TextFieldWrapper,
+	TicketSuggestion,
 	UserSuggestion,
 } from './commentForm.styles';
 
@@ -56,7 +56,7 @@ interface IProps {
 	formRef: any;
 	commentRef: any;
 	horizontal: boolean;
-	issues: any[];
+	tickets: any[];
 	canComment: boolean;
 	comment?: string;
 	screenshot?: string;
@@ -74,7 +74,6 @@ interface IProps {
 	deactivateMeasure: () => void;
 	setIsPinDropMode: (mode: boolean) => void;
 	teamspaceUsers: any[];
-	disableIssuesSuggestions?: boolean;
 	fetchingDetailsIsPending?: boolean;
 	postCommentIsPending?: boolean;
 }
@@ -102,8 +101,8 @@ const UserSuggestionItem = ({ entity: { ...userData } }: ISuggestionItem) => (
 	</UserSuggestion>
 );
 
-const IssueSuggestionItem = ({ entity: { ...issueData } }) => (
-	<IssueSuggestion {...issueData} />
+const TicketSuggestionItem = ({ entity: { ... ticketData } }) => (
+	<TicketSuggestion {...ticketData} />
 );
 
 export class CommentForm extends React.PureComponent<IProps, IState> {
@@ -125,9 +124,9 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 	private filteredUsersList = (token) => this.props.teamspaceUsers.filter(({ user }) =>
 		user.startsWith(token)).slice(0, 5)
 
-	private filteredIssuesList = (token) =>
-			_values(this.props.issues).filter(({ number: issueNumber }) =>
-			String(issueNumber).startsWith(token)).slice(0, 5)
+	private filteredTicketsList = (token) =>
+			_values(this.props.tickets).filter(({ number: ticketNumber }) =>
+			String(ticketNumber).startsWith(token)).slice(0, 5)
 
 	public state = {
 		isPinActive: false,
@@ -200,16 +199,14 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 			},
 		};
 
-		if (!this.props.disableIssuesSuggestions) {
-			return ({
-				...usersTrigger,
-				'#': {
-					dataProvider: (token) => this.filteredIssuesList(token),
-					component: IssueSuggestionItem,
-					output: this.outputIssue,
-				},
-			});
-		}
+		return ({
+			...usersTrigger,
+			'#': {
+				dataProvider: (token) => this.filteredTicketsList(token),
+				component: TicketSuggestionItem,
+				output: this.outputIssue,
+			},
+		});
 
 		return usersTrigger;
 	}
@@ -320,9 +317,7 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleSave = (values, form) => {
-		const screenshot = values.screenshot.substring(values.screenshot.indexOf(',') + 1);
-		const commentValues = { ...values, screenshot };
-		this.props.onSave(commentValues, () => {
+		this.props.onSave(values, () => {
 			form.resetForm();
 		});
 		this.setState({ newScreenshot: ''});

@@ -20,13 +20,15 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { BoardActions } from '../../../../../../../../modules/board';
-import { selectIssues } from '../../../../../../../../modules/issues';
+import { selectIssuesMap } from '../../../../../../../../modules/issues';
 import { selectUrlParams } from '../../../../../../../../modules/router/router.selectors';
 
-import { IssueReference } from './issueReference.component';
+import { selectRisks, selectRisksMap } from '../../../../../../../../modules/risks';
+import { TicketReference } from './ticketReference.component';
 
 const mapStateToProps = createStructuredSelector({
-	issues: selectIssues,
+	issuesMap: selectIssuesMap,
+	risksMap: selectRisksMap,
 	urlParams: selectUrlParams,
 });
 
@@ -35,4 +37,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	resetCardData: BoardActions.resetCardData,
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(IssueReference);
+export default connect(mapStateToProps, mapDispatchToProps)(TicketReference);

@@ -34,6 +34,7 @@ import { RiskDetailsForm } from './riskDetailsForm.component';
 interface IProps {
 	viewer: any;
 	jobs: any[];
+	risks: any[];
 	risk: any;
 	comments: any[];
 	teamspace: string;
@@ -54,7 +55,7 @@ interface IProps {
 	saveRisk: (teamspace, modelId, risk, revision, finishSubmitting, disableViewer) => void;
 	updateRisk: (teamspace, modelId, risk) => void;
 	cloneRisk: (dialogId?: string) => void;
-	postComment: (teamspace, modelId, riskData, finishSubmitting) => void;
+	postComment: (teamspace, modelId, riskData, ignoreViewer, finishSubmitting) => void;
 	removeComment: (teamspace, modelId, riskData) => void;
 	subscribeOnRiskCommentsChanges: (teamspace, modelId, riskId) => void;
 	unsubscribeOnRiskCommentsChanges: (teamspace, modelId, riskId) => void;
@@ -187,8 +188,8 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				messagesContainerRef={this.messageContainerRef}
 				previewWrapperRef={this.containerRef}
 				horizontal={this.props.horizontal}
-				disableIssuesSuggestions
 				fetchingDetailsIsPending={this.props.fetchingDetailsIsPending}
+				tickets={this.props.risks}
 				postCommentIsPending={this.props.postCommentIsPending}
 			/>
 		</ViewerPanelFooter>
@@ -291,6 +292,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		const riskData = {
 			_id: this.riskData._id,
 			rev_id: this.riskData.rev_id,
+			riskNumber: this.riskData.number,
 			commentIndex: this.riskData.comments.length - 1 - index,
 			guid
 		};
@@ -337,6 +339,8 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public postComment = (teamspace, model, { comment, screenshot }, finishSubmitting) => {
+		const { disableViewer } = this.props;
+
 		const riskCommentData = {
 			_id: this.riskData._id,
 			rev_id: this.riskData.rev_id,
@@ -344,7 +348,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 			viewpoint: { screenshot }
 		};
 
-		this.props.postComment(teamspace, model, riskCommentData, finishSubmitting);
+		this.props.postComment(teamspace, model, riskCommentData, disableViewer, finishSubmitting);
 	}
 
 	public handleSave = (formValues, finishSubmitting) => {

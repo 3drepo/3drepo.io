@@ -16,17 +16,7 @@
  */
 "use strict";
 
-const utils = require("../utils");
-const responseCodes = require("../response_codes.js");
-const db = require("../handler/db");
-
-const _ = require("lodash");
-
 const ChatEvent = require("./chatEvent");
-
-const Comment = require("./comment");
-const View = require("./viewpoint");
-
 const Ticket = require("./ticket");
 
 const fieldTypes = {
@@ -51,6 +41,7 @@ const fieldTypes = {
 	"mitigation_status": "[object String]",
 	"mitigation_type": "[object String]",
 	"name": "[object String]",
+	"number": "[object Number]",
 	"owner": "[object String]",
 	"position": "[object Array]",
 	"residual_consequence": "[object Number]",
@@ -93,33 +84,6 @@ function getLevelOfRisk(riskData) {
 	return {level_of_risk, residual_level_of_risk, overall_level_of_risk};
 }
 
-function addMitigationComment(account, model, sessionId, riskId, comments, data, viewpoint) {
-	if (data.residual && data.likelihood && data.consequence && data.mitigation) {
-		if (!comments) {
-			comments = [];
-		}
-
-		comments.forEach((comment) => {
-			comment.sealed = true;
-		});
-
-		const mitigationComment = Comment.newMitigationComment(
-			data.owner,
-			data.likelihood,
-			data.consequence,
-			data.mitigation,
-			viewpoint,
-			data.position
-		);
-
-		comments.push(mitigationComment);
-
-		ChatEvent.newComment(sessionId, account, model, riskId, mitigationComment);
-	}
-
-	return comments;
-}
-
 function calculateLevelOfRisk(likelihood, consequence) {
 	let levelOfRisk = -1;
 
@@ -142,51 +106,15 @@ function calculateLevelOfRisk(likelihood, consequence) {
 	return levelOfRisk;
 }
 
-async function createViewPoint(account, model, viewpoint) {
-	let newViewpoint = null;
-
-	if (viewpoint) {
-		newViewpoint = {...viewpoint};
-		if (Object.prototype.toString.call(viewpoint) === fieldTypes["viewpoint"]) {
-			newViewpoint.guid = utils.generateUUID();
-			newViewpoint = View.clean(newViewpoint, fieldTypes.viewpoint);
-		} else {
-			throw responseCodes.INVALID_ARGUMENTS;
-		}
-	}
-
-	return newViewpoint;
-}
-
 class Risk extends Ticket {
 	constructor() {
-		super("risks", "risk_id", "issueIds", "RISK", fieldTypes, ownerPrivilegeAttributes);
+		super("risks", "risk", "issueIds", "RISK", fieldTypes, ownerPrivilegeAttributes);
 	}
 
 	async create(account, model, newRisk, sessionId) {
 		newRisk = await super.create(account, model, newRisk);
 		ChatEvent.newRisks(sessionId, account, model, [newRisk]);
 		return newRisk;
-	}
-
-	onBeforeUpdate(account, model, sessionId, residualData) {
-		return async function(data, oldRisk) {
-			if (residualData.residual) {
-				const updatedComments = addMitigationComment(
-					account,
-					model,
-					sessionId,
-					oldRisk._id,
-					oldRisk.comments,
-					data,
-					createViewPoint(residualData.viewpoint)
-				);
-
-				data.comments = updatedComments;
-			}
-
-			return data;
-		};
 	}
 
 	async update(user, sessionId, account, model, issueId, data) {
@@ -197,7 +125,6 @@ class Risk extends Ticket {
 			"created",
 			"creator_role",
 			"name",
-			"norm",
 			"number",
 			"owner",
 			"rev_id",
@@ -206,32 +133,7 @@ class Risk extends Ticket {
 			"viewpoints"
 		];
 
-		const residualData = _.pick(data, ["residual"]);
-		const beforeUpdate =  this.onBeforeUpdate(account, model, sessionId, residualData).bind(this);
-
-		data = _.omit(data, ["residual"]);
-		return await super.update(attributeBlacklist, user, sessionId, account, model, issueId, data, beforeUpdate);
-	}
-
-	deleteRisks(dbCol, sessionId, ids) {
-		const riskIdStrings = [].concat(ids);
-
-		for (let i = 0; i < ids.length; i++) {
-			if ("[object String]" === Object.prototype.toString.call(ids[i])) {
-				ids[i] = utils.stringToUUID(ids[i]);
-			}
-		}
-
-		return db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
-			return _dbCol.remove({ _id: {$in: ids}}).then((deleteResponse) => {
-				if (!deleteResponse.result.ok) {
-					return Promise.reject(responseCodes.RISK_NOT_FOUND);
-				}
-
-				// Success!
-				ChatEvent.risksDeleted(sessionId, dbCol.account,  dbCol.model, riskIdStrings);
-			});
-		});
+		return await super.update(attributeBlacklist, user, sessionId, account, model, issueId, data);
 	}
 
 	async getRisksReport(account, model, rid, ids, res) {

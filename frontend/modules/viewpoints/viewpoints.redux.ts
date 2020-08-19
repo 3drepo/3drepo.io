@@ -17,6 +17,7 @@
 
 import { cloneDeep, keyBy } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
+import { prepareGroup } from '../../helpers/groups';
 
 export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createActions({
 	setPendingState: ['pendingState'],
@@ -30,16 +31,17 @@ export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createAct
 	deleteViewpointSuccess: ['viewpointId'],
 	subscribeOnViewpointChanges: ['teamspace', 'modelId'],
 	unsubscribeOnViewpointChanges: ['teamspace', 'modelId'],
-	showViewpoint: ['teamspace', 'modelId', 'view'],
 	setCameraOnViewpoint: ['teamspace', 'modelId', 'view'],
 	prepareNewViewpoint: ['teamspace', 'modelId', 'viewpointName'],
 	setNewViewpoint: ['newViewpoint'],
-	setActiveViewpoint: ['activeViewpoint'],
+	setActiveViewpoint: ['teamspace', 'modelId', 'view'],
 	setSearchQuery: ['searchQuery'],
 	showDeleteInfo: ['viewpointId'],
 	setComponentState: ['componentState'],
 	shareViewpointLink: ['teamspace', 'modelId', 'viewpointId'],
-	setDefaultViewpoint: ['teamspace', 'modelId', 'view']
+	setDefaultViewpoint: ['teamspace', 'modelId', 'view'],
+	setSelectedViewpoint: ['selectedViewpoint'],
+	showViewpoint: ['teamspace', 'modelId', 'view']
 }, { prefix: 'VIEWPOINTS/' });
 
 export interface IViewpointsComponentState {
@@ -54,26 +56,35 @@ export interface IViewpointsState {
 	isPending: boolean;
 	viewpointsMap: any[];
 	componentState: IViewpointsComponentState;
+	selectedViewpoint: any;
 }
 
 export const INITIAL_STATE: IViewpointsState = {
 	isPending: true,
 	viewpointsMap: [],
-	componentState: {}
+	componentState: {},
+	selectedViewpoint: null
 };
 
 const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
 	return { ...state, isPending: pendingState };
 };
 
+const prepareViewpointGroups = (viewpoint) => {
+	if (Boolean(viewpoint.viewpoint.override_groups?.length)) {
+		viewpoint.viewpoint.override_groups = viewpoint.viewpoint.override_groups.map(prepareGroup);
+	}
+	return viewpoint;
+};
+
 const fetchViewpointsSuccess = (state = INITIAL_STATE, { viewpoints = [] }) => {
-	const viewpointsMap = keyBy(viewpoints, '_id');
+	const viewpointsMap = keyBy(viewpoints.map(prepareViewpointGroups), '_id');
 	return { ...state, viewpointsMap };
 };
 
 const createViewpointSuccess = (state = INITIAL_STATE, {viewpoint}) => {
 	const viewpointsMap = cloneDeep(state.viewpointsMap);
-	viewpointsMap[viewpoint._id] = viewpoint ;
+	viewpointsMap[viewpoint._id] = prepareViewpointGroups(viewpoint) ;
 
 	const componentState = {
 		...state.componentState,
@@ -108,6 +119,10 @@ const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
 	return { ...state, componentState: {...state.componentState, ...componentState} };
 };
 
+const setSelectedViewpoint = (state = INITIAL_STATE, { selectedViewpoint }) => {
+	return { ...state, selectedViewpoint };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[ViewpointsTypes.SET_PENDING_STATE]: setPendingState,
 	[ViewpointsTypes.FETCH_VIEWPOINTS_SUCCESS]: fetchViewpointsSuccess,
@@ -115,5 +130,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ViewpointsTypes.UPDATE_VIEWPOINT_SUCCESS]: updateViewpointSuccess,
 	[ViewpointsTypes.DELETE_VIEWPOINT_SUCCESS]: deleteViewpointSuccess,
 	[ViewpointsTypes.SHOW_DELETE_INFO]: showDeleteInfo,
-	[ViewpointsTypes.SET_COMPONENT_STATE]: setComponentState
+	[ViewpointsTypes.SET_COMPONENT_STATE]: setComponentState,
+	[ViewpointsTypes.SET_SELECTED_VIEWPOINT]: setSelectedViewpoint
 });
