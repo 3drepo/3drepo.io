@@ -231,7 +231,7 @@ class View {
 		if(setting.defaultView && utils.uuidToString(setting.defaultView) === id) {
 			throw responseCodes.CANNOT_DELETE_DEFAULT_VIEW;
 		} else {
-			const uid = utils.stringToUUID(uid);
+			const uid = utils.stringToUUID(id);
 
 			const coll = await this.getCollection(account, model);
 
