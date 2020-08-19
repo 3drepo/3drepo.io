@@ -26,7 +26,7 @@ import * as Yup from 'yup';
 
 import InputLabel from '@material-ui/core/InputLabel';
 import { ROUTES } from '../../constants/routes';
-import { convertPositionToDirectX, convertPositionToOpenGL } from '../../helpers/model';
+import { convertPositionToDirectX, convertPositionToOpenGL, getModelCodeFieldErrorMsg } from '../../helpers/model';
 import { IViewpointsComponentState } from '../../modules/viewpoints/viewpoints.redux';
 import { clientConfigService } from '../../services/clientConfig';
 import { schema } from '../../services/validation';
