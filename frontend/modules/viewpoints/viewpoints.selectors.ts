@@ -55,6 +55,10 @@ export const selectEditMode = createSelector(
 	selectComponentState, (state) => state.editMode
 );
 
+export const selectSelectedViewpoint = createSelector(
+	selectViewpointsDomain, (state) => state.selectedViewpoint
+);
+
 export const selectOverridesDict = createSelector(
 	selectSelectedViewpoint, (viewpoint) =>  {
 		if ( !Boolean(viewpoint?.override_groups?.length)) {
@@ -83,7 +87,7 @@ export const selectTransparencies = createSelector(
 	selectOverridesDict, (overrides) => overrides?.transparencies || {}
 );
 
-export const selectSelectedViewpoint =  createSelector(
+export const selectInitialViewpoint =  createSelector(
 	selectViewpointsDomain, selectQueryParams,  selectDefaultViewpoint,
 		({viewpointsMap}, {viewId},  defaultViewpoint) =>
 			((!viewId || !viewpointsMap ? null : viewpointsMap[viewId]) ||

@@ -40,7 +40,7 @@ import { SequencesActions } from '../sequences';
 import { StarredActions } from '../starred';
 import { dispatch } from '../store';
 import { TreeActions } from '../tree';
-import { selectSelectedViewpoint, ViewpointsActions, ViewpointsTypes } from '../viewpoints';
+import { selectInitialViewpoint, ViewpointsActions, ViewpointsTypes } from '../viewpoints';
 import { ViewerGuiActions, ViewerGuiTypes } from './viewerGui.redux';
 import {
 	selectClipNumber,
@@ -360,7 +360,7 @@ function* loadModel() {
 		const { teamspace, model } = yield select(selectUrlParams);
 		const revision = yield select(selectCurrentRevisionId);
 		const modelSettings = yield select(selectSettings);
-		const selectedViewpoint = yield select(selectSelectedViewpoint);
+		const selectedViewpoint = yield select(selectInitialViewpoint);
 
 		yield Viewer.isViewerReady();
 		yield Viewer.loadViewerModel(teamspace, model, 'master', revision || 'head', selectedViewpoint);
