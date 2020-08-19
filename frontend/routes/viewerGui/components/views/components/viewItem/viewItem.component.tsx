@@ -118,7 +118,6 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 	public renderViewpointData = renderWhenTrue(() => (
 		<NameRow>
 			{this.renderViewpointName(true)}
-			lel
 			{this.props.isCommenter &&
 				<IconsGroup disabled={this.state.isDeletePending}>
 					<StyledEditIcon onClick={this.props.onOpenEditMode} />

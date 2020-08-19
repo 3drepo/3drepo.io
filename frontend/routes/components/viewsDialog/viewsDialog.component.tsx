@@ -22,7 +22,7 @@ import { renderWhenTrue } from '../../../helpers/rendering';
 import { IViewpointsComponentState } from '../../../modules/viewpoints/viewpoints.redux';
 import { ViewItem } from '../../viewerGui/components/views/components/viewItem/viewItem.component';
 import { EmptyStateInfo, Link, SearchField } from '../../viewerGui/components/views/views.styles';
-import { Container, StyledLoader } from './viewsDialog.styles';
+import { Container, StyledLoader, ViewsWrapper, ViewList } from './viewsDialog.styles';
 
 interface IProps {
 	className?: string;
@@ -97,20 +97,24 @@ export const ViewsDialog = ({ viewpoints, searchQuery, searchEnabled, teamspace,
 
 	const { defaultView } = props.modelSettings;
 
-	const renderViewsList = renderWhenTrue(() => filteredViews.map((viewpoint) => {
-		const isDefaultView = defaultView ? viewpoint._id === defaultView.id : false;
+	const checkIfDefaultView = (viewpoint) => defaultView ? viewpoint._id === defaultView.id : false;
 
-		return (
-			<ViewItem
-				key={viewpoint._id}
-				viewpoint={viewpoint}
-				onClick={handleViewpointItemClick(viewpoint)}
-				teamspace={teamspace}
-				modelId={modelId}
-				defaultView={isDefaultView}
-			/>
-		);
-	}));
+	const renderViewsList = renderWhenTrue(() => (
+		<ViewsWrapper>
+			<ViewList>
+				{filteredViews.map((viewpoint) => (
+					<ViewItem
+						key={viewpoint._id}
+						viewpoint={viewpoint}
+						onClick={handleViewpointItemClick(viewpoint)}
+						teamspace={teamspace}
+						modelId={modelId}
+						defaultView={checkIfDefaultView(viewpoint)}
+					/>
+				))}
+			</ViewList>
+		</ViewsWrapper>
+	));
 
 	return (
 		<Container loaded={!props.isPending}>

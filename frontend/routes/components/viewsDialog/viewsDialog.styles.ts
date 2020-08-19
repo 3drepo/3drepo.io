@@ -17,6 +17,8 @@
 
 import styled, { css } from 'styled-components';
 
+import MenuList from '@material-ui/core/MenuList';
+
 import { Loader } from '../loader/loader.component';
 
 export const StyledLoader = styled(Loader)`
@@ -24,12 +26,23 @@ export const StyledLoader = styled(Loader)`
 `;
 
 const loadedStyles = css`
-	min-height: 60vh;
-	max-height: 75vh;
+	height: 60vh;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
 `;
 
 export const Container = styled.div`
 	width: 380px;
-	overflow: auto;
 	${({ loaded }: { loaded: boolean }) => loaded ? loadedStyles : ''};
+`;
+
+export const ViewsWrapper = styled.div`
+	overflow-y: auto;
+`;
+
+export const ViewList = styled(MenuList)`
+	&& {
+		padding: 0;
+	}
 `;
