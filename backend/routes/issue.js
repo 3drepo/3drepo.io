@@ -186,13 +186,14 @@ router.get("/issues.bcfzip", middlewares.issue.canView, getIssuesBCF);
 router.post("/issues.bcfzip", middlewares.issue.canCreate, importBCF);
 
 /**
- * @api {get} /:teamspace/:model/issues.bcfzip Get Issue Screenshot
+ * @api {get} /:teamspace/:model/issues/:issueId/viewpoints/:vid/screenshot.png Get Issue Screenshot
  * @apiName getScreenshot
  * @apiGroup Issues
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
- * @apiParam {String} id Viewpoint unique ID.
+ * @apiParam {String} issueId Issue ID
+ * @apiParam {String} vid Viewpoint unique ID.
  *
  * @apiDescription Get an issue screenshot from viewpoints using a viewpoint ID and issue ID.
  */
@@ -205,7 +206,8 @@ router.get("/issues/:issueId/viewpoints/:vid/screenshot.png", middlewares.issue.
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
- * @apiParam {String} id Viewpoint unique ID.
+ * @apiParam {String} issueId Issue ID
+ * @apiParam {String} vid Viewpoint ID.
  *
  * @apiSuccess (200) {Object} Issue Screenshot.
  */
