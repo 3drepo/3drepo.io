@@ -171,7 +171,7 @@ view.deleteViewpoint = async (account, model, idStr, sessionId) => {
 
 	const setting = await ModelSettings.findById({account, model}, model);
 
-	if(setting.defaultView && utils.stringToUUID(setting.defaultView) === idStr) {
+	if(setting.defaultView && utils.uuidToString(setting.defaultView) === idStr) {
 		throw responseCodes.CANNOT_DELETE_DEFAULT_VIEW;
 	} else {
 		return db.getCollection(account, model + ".views").then((_dbCol) => {
