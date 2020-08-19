@@ -65,6 +65,10 @@ export const selectActiveIssueDetails = createSelector(
 	}
 );
 
+export const selectFocusedIssueOverrideGroups = createSelector(
+	selectActiveIssueDetails, (activeIssue) => activeIssue.override_groups || []
+);
+
 export const selectActiveIssueComments = createSelector(
 	selectActiveIssueDetails, selectIssuesMap, (activeIssueDetails, issues) =>
 		prepareComments(activeIssueDetails.comments || []).map((comment) => ({

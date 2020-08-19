@@ -26,6 +26,7 @@ import {
 	selectExpandDetails,
 	selectFailedToLoad,
 	selectFetchingDetailsIsPending,
+	selectIssues,
 	selectNewComment,
 	selectPostCommentIsPending,
 	IssuesActions,
@@ -50,6 +51,7 @@ const mapStateToProps = createStructuredSelector({
 	topicTypes: selectTopicTypes,
 	failedToLoad: selectFailedToLoad,
 	postCommentIsPending: selectPostCommentIsPending,
+	issues: selectIssues
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -70,7 +72,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showDialog: DialogActions.showDialog,
 	showScreenshotDialog:  DialogActions.showScreenshotDialog,
 	showConfirmDialog: DialogActions.showConfirmDialog,
-	setCameraOnViewpoint: ViewpointsActions.setCameraOnViewpoint
+	showViewpoint: ViewpointsActions.showViewpoint
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(IssueDetails));

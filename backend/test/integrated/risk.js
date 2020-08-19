@@ -18,10 +18,13 @@
  */
 
 const request = require("supertest");
-const expect = require("chai").expect;
+const {should, assert, expect, Assertion } = require("chai");
 const app = require("../../services/api.js").createApp();
 const responseCodes = require("../../response_codes.js");
 const async = require("async");
+const { login } = require("../helpers/users.js");
+
+const { deleteNotifications, fetchNotification } = require("../helpers/notifications.js");
 
 describe("Risks", function () {
 	let server;
@@ -47,12 +50,10 @@ describe("Risks", function () {
 			"look_at":[0,0,-163.08011914810137],
 			"view_dir":[0,0,-1],
 			"right":[1,0,0],
-			"unityHeight":3.537606904422707,
 			"fov":2.1124830653010416,
 			"aspect_ratio":0.8750189337327384,
 			"far":276.75612077194506 ,
 			"near":76.42411012233212,
-			"clippingPlanes":[]
 		},
 		"assigned_roles":["jobB"],
 		"category":"other issue",
@@ -112,7 +113,6 @@ describe("Risks", function () {
 							expect(res.body.viewpoint.position).to.deep.equal(risk.viewpoint.position);
 							expect(res.body.viewpoint.look_at).to.deep.equal(risk.viewpoint.look_at);
 							expect(res.body.viewpoint.view_dir).to.deep.equal(risk.viewpoint.view_dir);
-							expect(res.body.viewpoint.clippingPlanes).to.deep.equal(risk.viewpoint.clippingPlanes);
 							expect(res.body.assigned_roles).to.deep.equal(risk.assigned_roles);
 							expect(res.body.category).to.equal(risk.category);
 							expect(res.body.likelihood).to.equal(risk.likelihood);
@@ -121,7 +121,6 @@ describe("Risks", function () {
 							expect(res.body.mitigation_status).to.equal(risk.mitigation_status);
 							expect(res.body.mitigation_desc).to.equal(risk.mitigation_desc);
 							expect(res.body.mitigation_detail).to.equal(risk.mitigation_detail);
-							expect(res.body.viewpoint.clippingPlanes).to.deep.equal(risk.viewpoint.clippingPlanes);
 							expect(res.body.mitigation_stage).to.equal(risk.mitigation_stage);
 							expect(res.body.mitigation_type).to.equal(risk.mitigation_type);
 							expect(res.body.element).to.equal(risk.element);
@@ -143,7 +142,6 @@ describe("Risks", function () {
 						expect(res.body.viewpoint.position).to.deep.equal(risk.viewpoint.position);
 						expect(res.body.viewpoint.look_at).to.deep.equal(risk.viewpoint.look_at);
 						expect(res.body.viewpoint.view_dir).to.deep.equal(risk.viewpoint.view_dir);
-						expect(res.body.viewpoint.clippingPlanes).to.deep.equal(risk.viewpoint.clippingPlanes);
 						expect(res.body.assigned_roles).to.deep.equal(risk.assigned_roles);
 						expect(res.body.category).to.equal(risk.category);
 						expect(res.body.likelihood).to.equal(risk.likelihood);
@@ -769,7 +767,6 @@ describe("Risks", function () {
 							oldViewpoint = res.body.viewpoint;
 							delete oldViewpoint.screenshot;
 							delete oldViewpoint.screenshotSmall;
-							screenshotRef = res.body.viewpoint.screenshot_ref;
 							return done(err);
 						});
 				},
@@ -783,12 +780,8 @@ describe("Risks", function () {
 						.expect(200, function(err, res) {
 							const newViewpoint = { ...oldViewpoint };
 							newViewpoint.guid = res.body.viewpoint.guid;
-							newViewpoint.screenshot_ref = res.body.viewpoint.screenshot_ref;
 
-							expect(res.body.viewpoint.screenshot_ref).to.not.equal(screenshotRef);
 							expect(res.body.comments[0].action.property).to.equal("screenshot");
-							expect(res.body.comments[0].action.from).to.equal(screenshotRef);
-							expect(res.body.comments[0].action.to).to.equal(res.body.viewpoint.screenshot_ref);
 							expect(res.body.comments[0].owner).to.equal(username);
 							done(err);
 						});
@@ -811,7 +804,6 @@ describe("Risks", function () {
 					"aspect_ratio":1,
 					"far":300,
 					"near":50,
-					"clippingPlanes":[]
 				}
 			};
 			async.series([
@@ -847,7 +839,6 @@ describe("Risks", function () {
 							expect(res.body.viewpoint.aspect_ratio).to.equal(data.viewpoint.aspect_ratio);
 							expect(res.body.viewpoint.far).to.equal(data.viewpoint.far);
 							expect(res.body.viewpoint.near).to.equal(data.viewpoint.near);
-							expect(res.body.viewpoint.clippingPlanes).to.deep.equal(data.viewpoint.clippingPlanes);
 							expect(res.body.comments[0].action.property).to.equal("viewpoint");
 							expect(res.body.comments[0].action.from).to.equal(JSON.stringify(oldViewpoint));
 							expect(res.body.comments[0].action.to).to.equal(JSON.stringify(newViewpoint));
@@ -875,7 +866,6 @@ describe("Risks", function () {
 					"aspect_ratio":1,
 					"far":300,
 					"near":50,
-					"clippingPlanes":[]
 				}
 			};
 
@@ -888,7 +878,6 @@ describe("Risks", function () {
 							oldViewpoint = res.body.viewpoint;
 							delete oldViewpoint.screenshot;
 							delete oldViewpoint.screenshotSmall;
-							screenshotRef = res.body.viewpoint.screenshot_ref;
 							return done(err);
 						});
 				},
@@ -902,13 +891,9 @@ describe("Risks", function () {
 						.expect(200, function(err, res) {
 							const newViewpoint = { ...oldViewpoint, ...data.viewpoint };
 							newViewpoint.guid = res.body.viewpoint.guid;
-							newViewpoint.screenshot_ref = res.body.viewpoint.screenshot_ref;
 							delete newViewpoint.screenshot;
 
-							expect(res.body.viewpoint.screenshot_ref).to.not.equal(screenshotRef);
 							expect(res.body.comments[0].action.property).to.equal("screenshot");
-							expect(res.body.comments[0].action.from).to.equal(screenshotRef);
-							expect(res.body.comments[0].action.to).to.equal(res.body.viewpoint.screenshot_ref);
 							expect(res.body.comments[0].owner).to.equal(username);
 
 							expect(res.body.viewpoint.up).to.deep.equal(data.viewpoint.up);
@@ -920,10 +905,11 @@ describe("Risks", function () {
 							expect(res.body.viewpoint.aspect_ratio).to.equal(data.viewpoint.aspect_ratio);
 							expect(res.body.viewpoint.far).to.equal(data.viewpoint.far);
 							expect(res.body.viewpoint.near).to.equal(data.viewpoint.near);
-							expect(res.body.viewpoint.clippingPlanes).to.deep.equal(data.viewpoint.clippingPlanes);
 							expect(res.body.comments[1].action.property).to.equal("viewpoint");
 							expect(res.body.comments[1].action.from).to.equal(JSON.stringify(oldViewpoint));
-							expect(res.body.comments[1].action.to).to.equal(JSON.stringify(newViewpoint));
+							const vp = JSON.parse(res.body.comments[1].action.to);
+							delete vp.screenshot_ref;
+							expect(vp).to.deep.equal(newViewpoint);
 							expect(res.body.comments[1].owner).to.equal(username);
 							done(err);
 						});
@@ -956,12 +942,10 @@ describe("Risks", function () {
 						"look_at":[0,0,-163.08011914810137],
 						"view_dir":[0,0,-1],
 						"right":[1,0,0],
-						"unityHeight ":3.537606904422707,
 						"fov":2.1124830653010416,
 						"aspect_ratio":0.8750189337327384,
 						"far":276.75612077194506 ,
 						"near":76.42411012233212,
-						"clippingPlanes":[]
 					}
 				};
 
@@ -1005,7 +989,7 @@ describe("Risks", function () {
 			it("should succeed if removing an existing comment", function(done) {
 				agent.delete(`/${username}/${model}/risks/${riskId}/comments`)
 					.send({guid:commentId})
-					.expect(200 , function(err, res) {
+					.expect(200, function(err, res) {
 						done(err);
 					});
 			});
@@ -1021,5 +1005,122 @@ describe("Risks", function () {
 
 		});
 	});
+
+	describe("Tagging a user in a comment", function() {
+		const teamspace = "teamSpace1";
+		const altUser = "commenterTeamspace1Model1JobA";
+		const password = "password";
+		const model = "5bfc11fa-50ac-b7e7-4328-83aa11fa50ac";
+		const riskId = "06f25e30-d011-11ea-82b5-01d0c3871ca6";
+
+		before(function(done) {
+			async.series([
+				function(done) {
+					agent.post("/logout")
+						.send({})
+						.expect(200, done);
+				},
+				function(done) {
+					agent.post("/login")
+						.send({username: teamspace, password})
+						.expect(200, done);
+				}
+			], done);
+		});
+
+		it("should create a notification on the tagged user's messages", function(done) {
+			const comment = {comment : `@${altUser}`};
+			async.series([
+				function(done) {
+					agent.post(`/${teamspace}/${model}/risks/${riskId}/comments`)
+						.send(comment)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.post("/logout")
+						.send({})
+						.expect(200, done);
+				},
+				function(done) {
+					agent.post("/login")
+						.send({username: altUser, password})
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get("/notifications")
+						.expect(200, function(err, res) {
+							const notification = res.body.find(item => item.type === "USER_REFERENCED" && item.riskId === riskId);
+							assert(notification);
+							expect(notification.modelId).to.equal(model);
+							expect(notification.teamSpace).to.equal(teamspace);
+							expect(notification.referrer).to.equal(teamspace);
+							done(err);
+						});
+				}],
+			done);
+
+		});
+
+		it("should create comment successful if the user tagged a user that doesn't not exist", function(done) {
+			const comment = {comment : `@doesntExist1234`};
+			agent.post(`/${teamspace}/${model}/risks/${riskId}/comments`)
+				.send(comment)
+				.expect(200, done);
+		});
+
+		it("should NOT create a notification if the user does not belong in the teamspace", function(done) {
+			const comment = {comment : `@${username}`};
+			async.series([
+				login(agent, altUser, password),
+				function(done) {
+					agent.post(`/${teamspace}/${model}/risks/${riskId}/comments`)
+						.send(comment)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.post("/logout")
+						.send({})
+						.expect(200, done);
+				},
+				function(done) {
+					agent.post("/login")
+						.send({username, password})
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get("/notifications")
+						.expect(200, function(err, res) {
+							const notification = res.body.find(item => item.type === "USER_REFERENCED" && item.riskId === riskId);
+							expect(notification).to.equal(undefined);
+							done(err);
+						});
+				}],
+			done);
+		});
+
+		it("should NOT create a notification if the user is tagged in a quote", function(done) {
+			const comment = {comment : `>
+			@${altUser}`};
+			async.waterfall([
+				login(agent, altUser, password),
+				deleteNotifications(agent),
+				login(agent, teamspace, password),
+				function(args, next) {
+					agent.post(`/${teamspace}/${model}/risks/${riskId}/comments`)
+						.send(comment)
+						.expect(200, next);
+				},
+				login(agent, altUser, password),
+				fetchNotification(agent),
+				(notifications, next) => {
+					expect(notifications, 'There should not be any notifications').to.be.an("array").and.to.have.length(0);
+					next();
+				},
+			],
+			done);
+		});
+
+	});
+
 });
 

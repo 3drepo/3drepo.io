@@ -18,7 +18,6 @@
 import React from 'react';
 
 import InputLabel from '@material-ui/core/InputLabel';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { Field } from 'formik';
 import { isEmpty, omitBy, pick } from 'lodash';
 

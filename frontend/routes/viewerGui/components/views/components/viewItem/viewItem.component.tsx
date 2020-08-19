@@ -54,6 +54,21 @@ interface IProps {
 }
 
 export class ViewItem extends React.PureComponent<IProps, any> {
+
+	private get screenshot() {
+		const vpscreenshot = this.props.viewpoint.screenshot || this.props.viewpoint.viewpoint.screenshot ;
+
+		if (vpscreenshot.thumbnailUrl) {
+			return vpscreenshot.thumbnailUrl;
+		}
+
+		if (!vpscreenshot.startsWith('data:image/png;base64,') && !vpscreenshot.startsWith('https://')) {
+			return 'data:image/png;base64,' + vpscreenshot;
+		}
+
+		return vpscreenshot;
+	}
+
 	public state = {
 		isDeletePending: false
 	};
@@ -128,7 +143,7 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 
 	public renderScreenshot = renderWhenTrue(() => (
 		<Image
-			src={this.props.viewpoint.screenshot.thumbnailUrl}
+			src={this.screenshot}
 			alt={this.props.viewpoint.name}
 		/>
 	));
@@ -158,8 +173,8 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 				onClick={onClick}
 				active={Number(active)}>
 				{this.renderDeleteMessage(viewpoint.willBeRemoved)}
-				{this.renderScreenshot(viewpoint.screenshot)}
-				{this.renderScreenshotPlaceholder(!viewpoint.screenshot || !viewpoint.screenshot.thumbnailUrl)}
+				{this.renderScreenshot(this.screenshot)}
+				{this.renderScreenshotPlaceholder(!this.screenshot)}
 				{this.renderViewpointForm(this.props.active && this.props.editMode)}
 				{this.renderViewpointData(this.props.active && !this.props.editMode)}
 				{this.renderViewpointName(!this.props.active)}

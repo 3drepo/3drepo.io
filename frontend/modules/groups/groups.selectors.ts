@@ -20,6 +20,7 @@ import { createSelector } from 'reselect';
 import { getGroupOverride } from '../../helpers/colorOverrides';
 import { getTransparency, hasTransparency } from '../../helpers/colors';
 import { searchByFilters } from '../../helpers/searching';
+import { selectFocusedIssueOverrideGroups } from '../issues';
 
 export const selectGroupsDomain = (state) => ({...state.groups});
 
@@ -104,16 +105,19 @@ export const selectCriteriaFieldState = createSelector(
 	selectComponentState, (state) => state.criteriaFieldState
 );
 
-const selectOverridesDict = createSelector(
-	selectColorOverrides, selectFilteredGroups, selectComponentState, (groupOverrides, filteredGroups, componentState) => {
-		const filteredGroupsMap = filteredGroups.reduce((map, group) => {
+export const selectAllOverridesDict = createSelector(
+	selectColorOverrides, selectFilteredGroups, selectComponentState, selectFocusedIssueOverrideGroups,
+	(groupOverrides, filteredGroups, componentState, issuesGroups) => {
+		const issuesOverrides = issuesGroups.map(({_id}) => _id);
+
+		const filteredGroupsMap = filteredGroups.concat(issuesGroups).reduce((map, group) => {
 			map[group._id] = group;
 			return map;
 		} , {});
 
-		return groupOverrides.reduce((overrides, groupId) => {
+		return groupOverrides.concat(issuesOverrides).reduce((overrides, groupId) => {
 			// filter out the filtered groups and if its showing details the selected group
-			if (filteredGroupsMap[groupId] && (!componentState.showDetails || componentState.activeGroup !== groupId)) {
+			if (filteredGroupsMap[groupId]  && !componentState.showDetails) {
 				const group = filteredGroupsMap[groupId];
 				getGroupOverride(overrides.colors, group, group.color);
 
@@ -123,6 +127,21 @@ const selectOverridesDict = createSelector(
 			}
 			return overrides;
 		}, {colors: {}, transparencies: {} });
+	}
+);
+
+export const selectOverridesDict = createSelector(
+	selectAllOverridesDict, selectComponentState, (overrides, { activeGroup}) => {
+		if (!activeGroup) {
+			return overrides;
+		}
+
+		const filtered = { colors: {} , transparencies: {}};
+		filtered.colors = {...overrides.colors};
+		filtered.transparencies = {...overrides.transparencies};
+		delete filtered.colors[activeGroup];
+		delete filtered.transparencies[activeGroup];
+		return filtered;
 	}
 );
 

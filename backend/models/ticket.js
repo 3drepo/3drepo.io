@@ -1,27 +1,26 @@
 /**
- *	Copyright (C) 2019 3D Repo Ltd
+ * Copyright (C) 2020 3D Repo Ltd
  *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 "use strict";
 const _ = require("lodash");
 
 const Project = require("./project");
-const Viewpoint = require("./viewpoint");
+const View = require("./view");
 const User = require("./user");
 const Job = require("./job");
-const Group = require("./group");
 const History = require("./history");
 
 const ModelSetting = require("./modelSetting");
@@ -43,90 +42,56 @@ const extensionRe = /\.(\w+)$/;
 
 const getResponse = (responseCodeType) => (type) => responseCodes[responseCodeType + "_" + type];
 
-class Ticket {
-	constructor(collName, groupField, refIdsField, responseCodeType, fieldTypes, ownerPrivilegeAttributes) {
+class Ticket extends View {
+	constructor(collName, viewpointType, refIdsField, responseCodeType, fieldTypes, ownerPrivilegeAttributes) {
+		super();
 		this.collName = collName;
 		this.response = getResponse(responseCodeType);
 		this.fieldTypes = fieldTypes;
 		this.ownerPrivilegeAttributes = ownerPrivilegeAttributes;
-		this.groupField = groupField;
+		this.viewpointType = viewpointType;
 		this.refIdsField = refIdsField;
 	}
 
 	clean(account, model, ticketToClean) {
-		const idKeys = ["_id", "rev_id", "parent", "group_id"];
-		const commentIdKeys = ["rev_id", "guid", "viewpoint"];
-		const vpIdKeys = ["hidden_group_id", "highlighted_group_id", "shown_group_id", "guid", "group_id"];
-
+		const ticketFields = ["rev_id", "group_id"];
 		ticketToClean.account = account;
 		model = ticketToClean.model || ticketToClean.origin_model || model;
 		ticketToClean.model = model;
 
-		const id = utils.uuidToString(ticketToClean._id);
-
-		idKeys.concat(vpIdKeys).forEach((key) => {
+		ticketFields.forEach((key) => {
 			if (ticketToClean[key]) {
 				ticketToClean[key] = utils.uuidToString(ticketToClean[key]);
 			}
 		});
+
 		if (ticketToClean.due_date === null) {
 			delete ticketToClean.due_date;
 		}
 
+		const routePrefix = this.routePrefix(account, model, ticketToClean._id);
+
 		// legacy schema support
 		if (ticketToClean.viewpoint) {
-			if(ticketToClean.viewpoint.right && ticketToClean.viewpoint.right.length) {
-				vpIdKeys.forEach((key) => {
-					if (ticketToClean.viewpoint[key]) {
-						ticketToClean.viewpoint[key] = utils.uuidToString(ticketToClean.viewpoint[key]);
-					}
-				});
-			} else {
+			if(!(ticketToClean.viewpoint.right && ticketToClean.viewpoint.right.length)) {
 				// workaround for erroneous legacy data - see ISSUE #2085
 				ticketToClean.viewpoint = undefined;
 			}
-
-			Viewpoint.setViewpointScreenshotURL(this.collName, account, model, id, ticketToClean.viewpoint);
 		}
 
-		if (ticketToClean.viewpoints) {
-			ticketToClean.viewpoints.forEach((viewpoint, i) => {
-				vpIdKeys.forEach((key) => {
-					if (viewpoint[key]) {
-						viewpoint[key] = utils.uuidToString(viewpoint[key]);
-					}
-				});
-
-				Viewpoint.setViewpointScreenshotURL(this.collName, account, model, id, viewpoint);
-
-				if (0 === i && !ticketToClean.viewpoint) {
-					ticketToClean.viewpoint = viewpoint;
-				}
-			});
+		if (!ticketToClean.viewpoint && ticketToClean.viewpoints && ticketToClean.viewpoints.length > 0) {
+			ticketToClean.viewpoint = ticketToClean.viewpoints[0];
 		}
 
 		if (ticketToClean.comments) {
 			ticketToClean.comments.forEach((comment) => {
-				commentIdKeys.forEach((key) => {
-					if (comment[key] && _.isObject(comment[key]) && !utils.hasField(comment[key], "up")) {
-						comment[key] = utils.uuidToString(comment[key]);
-					}
-				});
-
-				if (comment.viewpoint) {
-					const commentViewpoint = ticketToClean.viewpoints.find((vp) =>
-						vp.guid === comment.viewpoint
-					);
-
-					comment.viewpoint = commentViewpoint || undefined;
+				if (comment.viewpoint && utils.isObject(comment.viewpoint) && !comment.viewpoint.up) {
+					const vpId =  utils.uuidToString(comment.viewpoint);
+					comment.viewpoint = ticketToClean.viewpoints.find((item) => item.guid && utils.uuidToString(item.guid) === vpId);
 				}
+				const commentCleaned = Comment.clean(routePrefix, comment);
+				comment = commentCleaned;
 			});
-		}
-
-		if (ticketToClean.thumbnail) {
-			ticketToClean.thumbnail = account + "/" + model + "/" + this.collName + "/" + id + "/thumbnail.png";
-		} else {
-			ticketToClean.thumbnail = undefined;
 		}
 
 		// Return empty arrays as frontend expects them
@@ -144,24 +109,13 @@ class Ticket {
 		delete ticketToClean.viewpoints;
 		delete ticketToClean.viewCount;
 
+		ticketToClean = super.clean(account, model, ticketToClean);
+
 		return ticketToClean;
 	}
 
-	getTicketsCollection(account, model) {
-		return db.getCollection(account, model + "." + this.collName);
-	}
-
 	async findByUID(account, model, uid, projection, noClean = false) {
-		if ("[object String]" === Object.prototype.toString.call(uid)) {
-			uid = utils.stringToUUID(uid);
-		}
-
-		const tickets = await this.getTicketsCollection(account, model);
-		const foundTicket = await tickets.findOne({ _id: uid }, projection);
-
-		if (!foundTicket) {
-			return Promise.reject(this.response("NOT_FOUND"));
-		}
+		const foundTicket = await super.findByUID(account, model, uid, projection, true);
 
 		if (foundTicket.refs) {
 			const refsColl = await db.getCollection(account, model + ".resources.ref");
@@ -259,13 +213,16 @@ class Ticket {
 		});
 
 		if (data.viewpoint) {
-			newViewpoint = this.handlePrimaryViewpoint(account, model, data._id, data.viewpoint);
-			oldTicket.viewpoint = Viewpoint.clean(oldTicket.viewpoints[0]);
+			newViewpoint = await this.createViewpoint(account, model, id, data.viewpoint, true);
+			oldTicket.viewpoint = oldTicket.viewpoints[0];
+			oldTicket = super.clean(account, model, oldTicket);
 			delete oldTicket.viewpoint.screenshot;
+			// DEPRECATED
+			delete oldTicket.viewpoint.screenshotSmall;
 
 			data.viewpoint = {
 				...oldTicket.viewpoint,
-				...await newViewpoint
+				...newViewpoint
 			};
 			data.viewpoint.guid = utils.uuidToString(data.viewpoint.guid);
 
@@ -321,17 +278,18 @@ class Ticket {
 		// 6. Update the data
 		const _id = utils.stringToUUID(id);
 
-		const tickets = await this.getTicketsCollection(account, model);
+		const tickets = await this.getCollection(account, model);
 		if (Object.keys(data).length > 0) {
 			await tickets.update({ _id }, { $set: data });
 		}
 
 		// 7. Return the updated data and the old ticket
-		const updatedTicket = this.clean(account, model, {
+		const updatedTicket = {
 			...oldTicket,
 			...data
-		});
-		oldTicket = this.clean(account, model, oldTicket);
+		};
+		this.clean(account, model, updatedTicket);
+		this.clean(account, model, oldTicket);
 		delete data.comments;
 
 		return { oldTicket, updatedTicket, data };
@@ -342,82 +300,12 @@ class Ticket {
 		return _.pick(data, Object.keys(this.fieldTypes));
 	}
 
-	setGroupTicketId(account, model, newTicket) {
-		const groupField = this.groupField;
-
-		const updateGroup = (group_id) => {
-			// TODO - Do we need to find group first? Can we just patch
-			return Group.findByUID({ account, model }, utils.uuidToString(group_id), null, utils.uuidToString(newTicket.rev_id)).then((group) => {
-				const ticketIdData = {
-					[groupField]: utils.stringToUUID(newTicket._id)
-				};
-
-				return group.updateAttrs({ account, model }, ticketIdData);
-			});
-		};
-
-		const groupUpdatePromises = [];
-
-		if (newTicket.viewpoint) {
-			if (newTicket.viewpoint.highlighted_group_id) {
-				groupUpdatePromises.push(updateGroup(newTicket.viewpoint.highlighted_group_id));
-			}
-
-			if (newTicket.viewpoint.hidden_group_id) {
-				groupUpdatePromises.push(updateGroup(newTicket.viewpoint.hidden_group_id));
-			}
-
-			if (newTicket.viewpoint.shown_group_id) {
-				groupUpdatePromises.push(updateGroup(newTicket.viewpoint.shown_group_id));
-			}
-		}
-
-		return Promise.all(groupUpdatePromises);
-	}
-
-	async handlePrimaryViewpoint(account, model, ticketId, viewpoint) {
-		viewpoint = viewpoint || {};
-		viewpoint.guid = utils.generateUUID();
-
-		if (viewpoint.highlighted_group_id) {
-			viewpoint.highlighted_group_id = utils.stringToUUID(viewpoint.highlighted_group_id);
-		}
-
-		if (viewpoint.hidden_group_id) {
-			viewpoint.hidden_group_id = utils.stringToUUID(viewpoint.hidden_group_id);
-		}
-
-		if (viewpoint.shown_group_id) {
-			viewpoint.shown_group_id = utils.stringToUUID(viewpoint.shown_group_id);
-		}
-
-		if (viewpoint.screenshot) {
-			const imageBuffer = new Buffer.from(viewpoint.screenshot, "base64");
-
-			viewpoint.screenshot = imageBuffer;
-			await Viewpoint.setExternalScreenshotRef(viewpoint, account, model, this.collName);
-
-			viewpoint.thumbnail = await utils.resizeAndCropScreenshot(imageBuffer, 120, 120, true).catch((err) => {
-				systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
-					account,
-					model,
-					type: this.collName,
-					ticketId: utils.uuidToString(ticketId),
-					viewpointId: utils.uuidToString(viewpoint.guid),
-					err
-				});
-			});
-		}
-
-		return viewpoint;
-	}
-
 	handleFieldUpdate(account, model, sessionId, id, user, field, oldTicket, data, systemComments) {
 		if (Object.prototype.toString.call(data[field]) !== this.fieldTypes[field]) {
 			throw responseCodes.INVALID_ARGUMENTS;
 		}
 
-		// if a field have the same value shouldnt update the property
+		// do not update the property if value of field unchanged
 		if (_.isEqual(oldTicket[field], data[field])) {
 			delete data[field];
 			return;
@@ -441,32 +329,6 @@ class Ticket {
 		systemComments.push(comment);
 	}
 
-	async  createGroup(account, model, ticket,  groupdata, idField, branch, rid) {
-		const data =  {
-			name: ticket.name,
-			[this.groupField]: utils.stringToUUID(ticket._id),
-			...groupdata
-		};
-
-		const group = await  Group.createGroup({account, model}, null,  data, ticket.owner, branch, rid);
-		ticket.viewpoint[idField] = utils.stringToUUID(group._id);
-	}
-	async createGroupsIfNecessary(account, model, newTicket, branch, rid) {
-		if (!newTicket.viewpoint) {
-			return;
-		}
-
-		if (newTicket.viewpoint.highlighted_group && !newTicket.viewpoint.highlighted_group_id) {
-			await this.createGroup(account, model, newTicket,  newTicket.viewpoint.highlighted_group, "highlighted_group_id", branch, rid);
-			delete newTicket.highlighted_group;
-		}
-
-		if (newTicket.viewpoint.hidden_group && !newTicket.viewpoint.hidden_group_id) {
-			await this.createGroup(account, model, newTicket, newTicket.viewpoint.hidden_group, "hidden_group_id", branch, rid);
-			delete newTicket.hidden_group;
-		}
-	}
-
 	/*
 	* @param {string} account
 	* @param {string} model
@@ -476,6 +338,15 @@ class Ticket {
 		// const sessionId = newTicket.sessionId;
 		if (!newTicket.name) {
 			return Promise.reject({ resCode: responseCodes.INVALID_ARGUMENTS });
+		}
+
+		// Sets the ticket number
+		const coll = await this.getCollection(account, model);
+		try {
+			const tickets = await coll.find({}, {number: 1}).sort({ number: -1 }).limit(1).toArray();
+			newTicket.number = (tickets.length > 0) ? tickets[0].number + 1 : 1;
+		} catch(e) {
+			newTicket.number = 1;
 		}
 
 		Object.keys(newTicket).forEach((key) => {
@@ -514,7 +385,7 @@ class Ticket {
 		if (!newTicket.viewpoints || newTicket.viewpoint) {
 			// FIXME need to revisit this for BCF refactor
 			// This allows BCF import to create new issue with more than 1 viewpoint
-			newTicket.viewpoints = [await this.handlePrimaryViewpoint(account, model, newTicket._id, newTicket.viewpoint)];
+			newTicket.viewpoints = [await this.createViewpoint(account, model, newTicket._id, newTicket.viewpoint, true)];
 
 			if (newTicket.viewpoints[0].thumbnail) {
 				newTicket.thumbnail = newTicket.viewpoints[0].thumbnail;
@@ -531,16 +402,9 @@ class Ticket {
 			newTicket.rev_id = history._id;
 		}
 
-		await this.setGroupTicketId(account, model, newTicket);
-
-		await this.createGroupsIfNecessary(account, model, newTicket);
-
 		newTicket = this.filterFields(newTicket, ["viewpoint", "revId"]);
 
-		const [settings, coll] = await Promise.all([
-			ModelSetting.findById({ account, model }, model),
-			this.getTicketsCollection(account, model)
-		]);
+		const settings = await ModelSetting.findById({ account, model }, model);
 
 		await coll.insert(newTicket);
 		newTicket.typePrefix = newTicket.typePrefix || settings.type || "";
@@ -570,21 +434,6 @@ class Ticket {
 
 				// this is being kept for legacy reasons
 				return foundTicket.viewpoints[0].screenshot.content.buffer;
-			}
-		});
-	}
-
-	getThumbnail(account, model, uid) {
-		if ("[object String]" === Object.prototype.toString.call(uid)) {
-			uid = utils.stringToUUID(uid);
-		}
-
-		return this.findByUID(account, model, uid, { thumbnail: 1 }, true).then((foundTicket) => {
-			// the 'content' field is for legacy reasons
-			if (!_.get(foundTicket, "thumbnail.buffer") && !_.get(foundTicket, "thumbnail.content.buffer")) {
-				return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
-			} else {
-				return (foundTicket.thumbnail.content || foundTicket.thumbnail).buffer;
 			}
 		});
 	}
@@ -619,7 +468,7 @@ class Ticket {
 		const filter = await this.getIdsFilter(account, model, branch, revId, ids);
 		const fullQuery = {...filter, ...query};
 
-		const coll = await this.getTicketsCollection(account, model);
+		const coll = await this.getCollection(account, model);
 		const tickets = await coll.find(fullQuery, projection).toArray();
 		tickets.forEach((foundTicket, index) => {
 			if (!noClean) {
@@ -636,7 +485,7 @@ class Ticket {
 	}
 
 	toDirectXCoords(entry) {
-		const fieldsToConvert = ["position", "norm"];
+		const fieldsToConvert = ["position"];
 		const vpFieldsToConvert = ["right", "view_dir", "look_at", "position", "up"];
 
 		fieldsToConvert.forEach((rootKey) => {
@@ -664,12 +513,14 @@ class Ticket {
 
 	async getList(account, model, branch, revision, ids, convertCoords, updatedSince) {
 		const projection = {
-			extras: 0,
+			"extras": 0,
+			"norm" : 0,
 			"viewpoints.extras": 0,
 			"viewpoints.scribble": 0,
 			"viewpoints.screenshot.content": 0,
 			"viewpoints.screenshot.resizedContent": 0,
-			"thumbnail.content": 0
+			"thumbnail.content": 0,
+			"refs": 0
 		};
 
 		const query = updatedSince ?
@@ -701,7 +552,7 @@ class Ticket {
 				}
 			});
 
-			ticket.comment = undefined;
+			ticket.comments = undefined;
 		});
 
 		return tickets;
@@ -723,12 +574,52 @@ class Ticket {
 		return reportGen.generateReport(res);
 	}
 
+	async addComment(account, model, id, user, data, sessionId) {
+		// 1. creates a comment and gets the result ( comment + references)
+		const commentResult = await Comment.addComment(account, model, this.collName, id, user, data,
+			this.routePrefix(account, model, id), this.viewpointType);
+
+		// 2 get referenced ticket numbers
+		const ticketNumbers = commentResult.ticketRefs;
+
+		// 3. Get tickets from number
+		const ticketsColl = await this.getCollection(account, model);
+		// 4 Adding the comment id to get its number and to not make 2 queries to the database
+		const res = await ticketsColl.find({ $or: [{ number: {$in: ticketNumbers}}, {_id : utils.stringToUUID(id)}]}).toArray();
+
+		// 5. Create system comments promise updates for those tickets that were referenced
+		const ticketsCommentsUpdates =  [];
+
+		// 6. Find the number of the ticket that made the reference
+		const referenceNumber = res.find(({_id}) => utils.uuidToString(_id) === id).number;
+
+		res.forEach((ticket)  => {
+			if (ticket.number === referenceNumber) {
+				return;
+			}
+
+			// 7. Create the system comment
+			const property = this.collName.slice(0, -1) + "_referenced";
+			const systemComment = this.createSystemComment(account, model, sessionId, ticket._id, user, property, null, referenceNumber);
+			const comments = (ticket.comments || []).map(c=> {
+				c.sealed = true;
+				return c;
+			}).concat([systemComment]);
+
+			// 8. Add update promise to updates array
+			ticketsCommentsUpdates.push(ticketsColl.update({_id: ticket._id}, { $set: { comments }}));
+		});
+		// 9. update referenced tickets with new system comments
+		await Promise.all(ticketsCommentsUpdates);
+		return commentResult;
+	}
+
 	async addRefs(account, model, id, username, sessionId, refs) {
 		if (refs.length === 0) {
 			return [];
 		}
 
-		const tickets = await this.getTicketsCollection(account, model);
+		const tickets = await this.getCollection(account, model);
 		const ticketQuery = { _id: utils.stringToUUID(id) };
 		const ticketFound = await tickets.findOne(ticketQuery);
 
@@ -787,7 +678,7 @@ class Ticket {
 
 	async detachResource(account, model, id, resourceId, username, sessionId) {
 		const ref = await FileRef.removeResourceFromEntity(account, model, this.refIdsField, id, resourceId);
-		const tickets = await this.getTicketsCollection(account, model);
+		const tickets = await this.getCollection(account, model);
 		const ticketQuery = { _id: utils.stringToUUID(id) };
 		const ticketFound = await tickets.findOne(ticketQuery);
 

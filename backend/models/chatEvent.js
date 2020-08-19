@@ -142,10 +142,6 @@ function riskChanged(emitter, account, model, _id, data) {
 	return insertEventQueue("risk" + eventTypes.UPDATED, emitter, account, model, null, {_id, ...data});
 }
 
-function risksDeleted(emitter, account, model, ids) {
-	return insertEventQueue("risk" + eventTypes.DELETED, emitter, account, model, null, ids);
-}
-
 // Viewpoints notifications
 
 function viewpointsCreated(emitter, account, model, data) {
@@ -170,7 +166,6 @@ module.exports = {
 	groupsDeleted,
 	newRisks,
 	riskChanged,
-	risksDeleted,
 	viewpointsChanged,
 	viewpointsCreated,
 	viewpointsDeleted,

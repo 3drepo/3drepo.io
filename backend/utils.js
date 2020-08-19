@@ -1,4 +1,5 @@
 /**
+ *
  *  Copyright (C) 2014 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -32,6 +33,10 @@ function Utils() {
 
 	this.isString = (value) => {
 		return "[object String]" === Object.prototype.toString.call(value);
+	};
+
+	this.isNumber = (value) => {
+		return "[object Number]" === Object.prototype.toString.call(value);
 	};
 
 	this.isObject = (value) => {

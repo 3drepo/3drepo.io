@@ -35,6 +35,7 @@ import { IssueDetailsForm } from './issueDetailsForm.component';
 interface IProps {
 	viewer: any;
 	jobs: any[];
+	issues: any[];
 	topicTypes: any[];
 	issue: any;
 	comments: any[];
@@ -56,12 +57,12 @@ interface IProps {
 	saveIssue: (teamspace, modelId, issue, revision, finishSubmitting, disableViewer) => void;
 	updateIssue: (teamspace, modelId, issue) => void;
 	cloneIssue: (dialogId?: string) => void;
-	postComment: (teamspace, modelId, issueData, finishSubmitting) => void;
+	postComment: (teamspace, modelId, issueData, ignoreViewer, finishSubmitting) => void;
 	removeComment: (teamspace, modelId, issueData) => void;
 	subscribeOnIssueCommentsChanges: (teamspace, modelId, issueId) => void;
 	unsubscribeOnIssueCommentsChanges: (teamspace, modelId, issueId) => void;
 	updateNewIssue: (newIssue) => void;
-	setCameraOnViewpoint: (teamspace, modelId, view) => void;
+	showViewpoint: (teamspace, modelId, view) => void;
 	onRemoveResource: (resource) => void;
 	attachFileResources: (files) => void;
 	attachLinkResources: (links) => void;
@@ -188,6 +189,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				previewWrapperRef={this.containerRef}
 				horizontal={this.props.horizontal}
 				fetchingDetailsIsPending={this.props.fetchingDetailsIsPending}
+				tickets={this.props.issues}
 				postCommentIsPending={this.props.postCommentIsPending}
 			/>
 		</ViewerPanelFooter>
@@ -225,7 +227,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public handleHeaderClick = () => {
 		if (!this.isNewIssue) { // if its a new issue it shouldnt go to the viewpoint
-			this.setCameraOnViewpoint({ viewpoint: this.issueData.viewpoint });
+			this.setCameraOnViewpoint(this.issueData);
 		}
 	}
 
@@ -291,8 +293,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		this.props.removeComment(this.props.teamspace, this.props.model, issueData);
 	}
 
-	public setCameraOnViewpoint = (viewpoint) => {
-		this.props.setCameraOnViewpoint(this.props.teamspace, this.props.model, viewpoint);
+	public setCameraOnViewpoint = (view) => {
+		this.props.showViewpoint(this.props.teamspace, this.props.model, view);
 	}
 
 	public handlePanelScroll = (e) => {
@@ -333,6 +335,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public postComment = (teamspace, model, { comment, screenshot }, finishSubmitting) => {
+		const { disableViewer } = this.props;
 		const issueCommentData = {
 			_id: this.issueData._id,
 			comment,
@@ -341,7 +344,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 			}
 		};
 
-		this.props.postComment(teamspace, model, issueCommentData, finishSubmitting);
+		this.props.postComment(teamspace, model, issueCommentData, disableViewer, finishSubmitting);
 	}
 
 	public handleSave = (formValues, finishSubmitting) => {
