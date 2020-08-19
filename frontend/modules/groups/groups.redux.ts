@@ -42,6 +42,7 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	setColorOverrides: ['groupIds'],
 	toggleColorOverride: ['groupId'],
 	setOverrideAll: ['overrideAll'],
+	setOverrideAllSuccess: [],
 	deleteGroups: ['teamspace', 'modelId', 'groups'],
 	showDeleteInfo: ['groupIds'],
 	deleteGroupsSuccess: ['groupIds'],
@@ -182,16 +183,6 @@ export const setColorOverrides = (state = INITIAL_STATE, { groupIds }) => {
 	return {...state, colorOverrides: newOverrides.concat(overridesLeft)};
 };
 
-export const setOverrideAll = (state = INITIAL_STATE, { overrideAll }) => {
-	let groupIds = [];
-	if (overrideAll) {
-		groupIds = Object.keys(state.groupsMap);
-	}
-
-	const componentState = { ...state.componentState, allOverridden: overrideAll };
-	return setColorOverrides({...state, componentState}, { groupIds });
-};
-
 export const updateGroupSuccess = (state = INITIAL_STATE, { group }) => {
 	const groupsMap = { ...state.groupsMap };
 	const newGroup = { ...state.componentState.newGroup };
@@ -254,6 +245,14 @@ const resetComponentState = (state = INITIAL_STATE) => {
 	return { ...state, componentState: INITIAL_STATE.componentState };
 };
 
+export const setOverrideAllSuccess = (state = INITIAL_STATE) => {
+	let groupIds = [];
+	groupIds = Object.keys(state.groupsMap);
+
+	const componentState = { ...state.componentState, allOverridden: true };
+	return setColorOverrides({...state, componentState}, { groupIds });
+};
+
 const clearColorOverridesSuccess = (state = INITIAL_STATE) => {
 	const componentState = { ...state.componentState, allOverridden: false };
 	return { ...state, colorOverrides: [], componentState};
@@ -275,5 +274,5 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[GroupsTypes.SHOW_UPDATE_INFO]: showUpdateInfo,
 	[GroupsTypes.RESET_COMPONENT_STATE]: resetComponentState,
 	[GroupsTypes.CLEAR_COLOR_OVERRIDES_SUCCESS]: clearColorOverridesSuccess,
-	[GroupsTypes.SET_OVERRIDE_ALL]: setOverrideAll
+	[GroupsTypes.SET_OVERRIDE_ALL_SUCCESS]: setOverrideAllSuccess
 });

@@ -341,6 +341,14 @@ function * clearColorOverrides() {
 	yield put(ViewpointsActions.setSelectedViewpoint(null));
 }
 
+function * setOverrideAll({overrideAll}) {
+	if (!overrideAll) {
+		yield put(GroupsActions.clearColorOverrides());
+	} else {
+		yield put(GroupsActions.setOverrideAllSuccess());
+	}
+}
+
 const onUpdated = (updatedGroup) => {
 	const group = prepareGroup(updatedGroup);
 	const state = getState();
@@ -421,4 +429,5 @@ export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.UNSUBSCRIBE_FROM_CHANGES, unsubscribeFromChanges);
 	yield takeLatest(GroupsTypes.RESET_TO_SAVED_SELECTION, resetToSavedSelection);
 	yield takeLatest(GroupsTypes.CLEAR_COLOR_OVERRIDES, clearColorOverrides);
+	yield takeLatest(GroupsTypes.SET_OVERRIDE_ALL, setOverrideAll);
 }
