@@ -26,6 +26,7 @@ import * as Yup from 'yup';
 
 import InputLabel from '@material-ui/core/InputLabel';
 import { ROUTES } from '../../constants/routes';
+<<<<<<< HEAD
 import { convertPositionToDirectX, convertPositionToOpenGL } from '../../helpers/model';
 import { IViewpointsComponentState } from '../../modules/viewpoints/viewpoints.redux';
 import { clientConfigService } from '../../services/clientConfig';
@@ -295,7 +296,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 										label="Model code"
 										margin="normal"
 										error={Boolean(form.errors.code)}
-										helperText={form.errors.code}
+										helperText={getModelCodeFieldErrorMsg(form.errors.code)}
 									/>
 								)} />
 							</FieldsRow>

@@ -28,7 +28,6 @@ export const Container = styled.div`
 	padding-left: 10px;
 	min-height: 55px;
 	position: relative;
-	background-color: ${COLOR.BLACK_6};
 	overflow: auto;
 `;
 
@@ -83,6 +82,5 @@ export const FilterWrapper = styled.div`
 	padding-left: 10px;
 	padding-top: 10px;
 	z-index: 2;
-	background-color: ${COLOR.BLACK_6};
 	position: relative;
 `;
