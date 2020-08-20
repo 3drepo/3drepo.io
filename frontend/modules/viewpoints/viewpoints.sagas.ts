@@ -15,9 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import copy from 'copy-to-clipboard';
 import { get, groupBy, over } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
+import { selectOverrides as selectViewsOverrides } from '.';
 import { CHAT_CHANNELS } from '../../constants/chat';
+import { ROUTES } from '../../constants/routes';
 import { UnityUtil } from '../../globals/unity-util';
 import { hexToArray } from '../../helpers/colors';
 import { prepareGroup } from '../../helpers/groups';
@@ -26,9 +29,9 @@ import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
 import { DialogActions } from '../dialog';
 import {  selectAllOverridesDict, GroupsActions } from '../groups';
-
-import { selectOverrides as selectViewsOverrides } from '.';
+import { ModelActions } from '../model';
 import { selectCurrentRevisionId } from '../model';
+import { SnackbarActions } from '../snackbar';
 import { dispatch } from '../store';
 import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds, selectIfcSpacesHidden, TreeActions } from '../tree';
 import { ViewerGuiActions } from '../viewerGui';
@@ -213,7 +216,7 @@ export function* unsubscribeOnViewpointChanges({ teamspace, modelId }) {
 	}));
 }
 
-export function* showViewpoint({teamspace, modelId, view}) {
+export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 	if (view) {
 
 		if (view.preset) {
@@ -240,22 +243,23 @@ export function* showViewpoint({teamspace, modelId, view}) {
 		} else {
 			yield Viewer.isViewerReady();
 
-			yield prepareGroupsIfNecessary(teamspace, modelId, view.viewpoint);
 			const viewpoint = view.viewpoint;
 
-			if (viewpoint?.override_groups) {
-				yield put(GroupsActions.clearColorOverrides());
-			}
-
-			if (viewpoint?.up) {
+			if (viewpoint?.up && !ignoreCamera) {
 				yield put(ViewerGuiActions.setCamera(viewpoint));
 			}
 
 			const clippingPlanes = view.clippingPlanes || get(view, 'viewpoint.clippingPlanes');
 
+			yield put(TreeActions.setIfcSpacesHidden(viewpoint.hideIfc !== false));
+
 			yield Viewer.updateClippingPlanes( clippingPlanes, teamspace, modelId);
 
-			yield put(TreeActions.setIfcSpacesHidden(viewpoint.hideIfc !== false));
+			yield prepareGroupsIfNecessary(teamspace, modelId, view.viewpoint);
+
+			if (viewpoint?.override_groups) {
+				yield put(GroupsActions.clearColorOverrides());
+			}
 
 			yield put(TreeActions.showAllNodes());
 
@@ -324,6 +328,22 @@ export function* prepareNewViewpoint({teamspace, modelId, viewpointName}) {
 	}
 }
 
+export function* shareViewpointLink({ teamspace, modelId, viewpointId }) {
+	const url = `${location.hostname}${ROUTES.VIEWER}/${teamspace}/${modelId}?viewId=${viewpointId}`;
+	copy(url);
+	yield put(SnackbarActions.show('Share link copied to clipboard'));
+}
+
+export function* setDefaultViewpoint({ teamspace, modelId, view }) {
+	try {
+		yield API.editModelSettings(teamspace, modelId, {defaultView: view._id});
+		yield put(ModelActions.updateSettingsSuccess({defaultView: {id: view._id, name: view.name}}));
+		yield put(SnackbarActions.show('View set as default'));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('set the default viewpoint', ''));
+	}
+}
+
 export default function* ViewpointsSaga() {
 	yield takeLatest(ViewpointsTypes.FETCH_VIEWPOINTS, fetchViewpoints);
 	yield takeLatest(ViewpointsTypes.CREATE_VIEWPOINT, createViewpoint);
@@ -334,4 +354,6 @@ export default function* ViewpointsSaga() {
 	yield takeLatest(ViewpointsTypes.UNSUBSCRIBE_ON_VIEWPOINT_CHANGES, unsubscribeOnViewpointChanges);
 	yield takeLatest(ViewpointsTypes.PREPARE_NEW_VIEWPOINT, prepareNewViewpoint);
 	yield takeLatest(ViewpointsTypes.SHOW_VIEWPOINT, showViewpoint);
+	yield takeLatest(ViewpointsTypes.SHARE_VIEWPOINT_LINK, shareViewpointLink);
+	yield takeLatest(ViewpointsTypes.SET_DEFAULT_VIEWPOINT, setDefaultViewpoint);
 }

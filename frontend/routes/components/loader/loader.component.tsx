@@ -24,6 +24,7 @@ interface IProps {
 	content?: React.ReactNode;
 	size?: number;
 	horizontal?: boolean;
+	className?: string;
 }
 
 export const Loader: React.FunctionComponent<IProps> = (props) => {
@@ -32,7 +33,7 @@ export const Loader: React.FunctionComponent<IProps> = (props) => {
 	};
 
 	return (
-		<Container {...styleProps}>
+		<Container className={props.className} {...styleProps}>
 			<CircularProgress size={props.size || 30} />
 			<Content {...styleProps}>
 				{props.content || props.children}

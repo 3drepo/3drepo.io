@@ -1443,36 +1443,29 @@ function updateHeliSpeed(req, res, next) {
 	});
 }
 
-function _getModel(req) {
-
-	let setting;
-	return ModelSetting.findById(getDbColOptions(req), req.params.model).then(_setting => {
-
-		if (!_setting) {
-			return Promise.reject({ resCode: responseCodes.MODEL_INFO_NOT_FOUND});
-		} else {
-
-			setting = _setting;
-			setting = setting.toObject();
-			// compute permissions by user role
-
-			return ModelHelpers.getModelPermission(
+const _getModel = async(req) => {
+	// FIXME: this should live in models/modelSetting.
+	const settingRaw = await ModelSetting.findById(getDbColOptions(req), req.params.model);
+	if (!settingRaw) {
+		return Promise.reject({ resCode: responseCodes.MODEL_INFO_NOT_FOUND});
+	} else {
+		const setting = await settingRaw.clean();
+		// compute permissions by user role
+		const [permissions, submodels] = await Promise.all([
+			ModelHelpers.getModelPermission(
 				req.session.user.username,
-				_setting,
+				settingRaw,
 				req.params.account
-			).then(permissions => {
+			),
+			ModelHelpers.listSubModels(req.params.account, req.params.model, C.MASTER_BRANCH_NAME)
+		]);
 
-				setting.permissions = permissions;
-				return ModelHelpers.listSubModels(req.params.account, req.params.model, C.MASTER_BRANCH_NAME);
+		setting.permissions = permissions;
+		setting.subModels = submodels;
+		return setting;
+	}
 
-			}).then(subModels => {
-
-				setting.subModels = subModels;
-				return setting;
-			});
-		}
-	});
-}
+};
 
 function getModelSetting(req, res, next) {
 
