@@ -1088,6 +1088,7 @@ export class UnityUtil {
 	 * @param model - name of model
 	 * @param branch - ID of the branch (deprecated value)
 	 * @param revision - ID of revision
+	 * @param initView - the view the model should load with
 	 * @return returns a promise that resolves when the model start loading.
 	 */
 	public static loadModel(

@@ -160,7 +160,7 @@ export const ModelGridItem = memo((props: IProps) => {
 
 	const onChange = ({ target }) => {
 		const { teamspace, model } = props;
-		props.history.push(`${ROUTES.VIEWER}/${teamspace}/${model}?viewpointId=${target.value.id}`);
+		props.history.push(`${ROUTES.VIEWER}/${teamspace}/${model}?viewId=${target.value.id}`);
 	};
 
 	const handleLoadModelClick = () => {
