@@ -72,6 +72,18 @@ describe("Implied permission::", function () {
 
 		const issueId = "b3e52b50-6330-11e7-a610-939d55d9fca8";
 
+		const baseView = {
+			"viewpoint":{
+				"up":[0,1,0],
+				"position":[38,38 ,125.08011914810137],
+				"look_at":[0,0,-163.08011914810137],
+				"view_dir":[0,0,-1],
+				"right":[1,0,0]
+			}
+		};
+
+		const viewId = "2b328320-e2da-11ea-bcdf-cfbbc3211ae7";
+
 		before(function(done) {
 			agent = request.agent(server);
 			agent.post("/login")
@@ -253,12 +265,32 @@ describe("Implied permission::", function () {
 				.expect(200 , done);
 		});
 
+		it("can create view", function(done) {
+			const view = Object.assign({"name":"View test"}, baseView);
+			agent
+				.post(`/${sharedTeamspace}/${modelId}/viewpoints`)
+				.send(view)
+				.expect(200, done);
+		});
+
+		it("can edit view", function(done) {
+			agent
+				.patch(`/${sharedTeamspace}/${modelId}/viewpoints/${viewId}`)
+				.send({ "name": "New name" })
+				.expect(200, done);
+		});
+
+		it("can delete view", function(done) {
+			agent
+				.delete(`/${sharedTeamspace}/${modelId}/viewpoints/${viewId}`)
+				.expect(200 , done);
+		});
+
 		it("can delete model", function(done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modeltoDelete}`)
 				.expect(200 , done);
 		});
-
 	});
 
 	// project admin
