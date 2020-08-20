@@ -178,6 +178,7 @@ export const fetchProjectSuccess = (state = INITIAL_STATE, { project }) => {
 
 export const updateProjectPermissionsSuccess = (state = INITIAL_STATE, { permissions }) => {
 	const project = {...state.project};
+
 	project.permissions = mergePermissions(project.permissions, permissions);
 	return {...state, project };
 };
