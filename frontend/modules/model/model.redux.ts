@@ -43,7 +43,28 @@ export const { Types: ModelTypes, Creators: ModelActions } = createActions({
 	reset: []
 }, { prefix: 'MODEL/' });
 
-export const INITIAL_STATE = {
+export interface ISubModel {
+	database: string;
+	model: string;
+	name: string;
+}
+
+export interface IModelState {
+	settings: {
+		properties: {
+			unit: string;
+		},
+		permissions: any[];
+	};
+	metaKeys: any[];
+	revisions: any[];
+	isPending: boolean;
+	pendingRevision: any;
+	maps: any[];
+	subModels?: ISubModel[];
+}
+
+export const INITIAL_STATE: IModelState = {
 	settings: {
 		properties: {
 			unit: 'mm',

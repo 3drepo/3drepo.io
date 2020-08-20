@@ -222,22 +222,31 @@ class View {
 		return newView;
 	}
 
-	async deleteViewpoint(account, model, uid, sessionId) {
-		uid = utils.stringToUUID(uid);
+	async deleteViewpoint(account, model, id, sessionId) {
+		id = utils.uuidToString(id);
+		const ModelSettings = require("./modelSetting");
 
-		const coll = await this.getCollection(account, model);
+		const setting = await ModelSettings.findById({account, model}, model);
 
-		const  [deleteResponse] =  await Promise.all([
-			coll.findOneAndDelete({ _id: uid }),
-			Groups.deleteGroupsByViewId(account,model, uid)
-		]);
+		if(setting.defaultView && utils.uuidToString(setting.defaultView) === id) {
+			throw responseCodes.CANNOT_DELETE_DEFAULT_VIEW;
+		} else {
+			const uid = utils.stringToUUID(id);
 
-		if (!deleteResponse.value) {
-			return Promise.reject(this.response("NOT_FOUND"));
-		}
+			const coll = await this.getCollection(account, model);
 
-		if(sessionId) {
-			ChatEvent.viewpointsDeleted(sessionId, account, model, utils.uuidToString(uid));
+			const  [deleteResponse] =  await Promise.all([
+				coll.findOneAndDelete({ _id: uid }),
+				Groups.deleteGroupsByViewId(account,model, uid)
+			]);
+
+			if (!deleteResponse.value) {
+				return Promise.reject(this.response("NOT_FOUND"));
+			}
+
+			if(sessionId) {
+				ChatEvent.viewpointsDeleted(sessionId, account, model, utils.uuidToString(uid));
+			}
 		}
 	}
 }

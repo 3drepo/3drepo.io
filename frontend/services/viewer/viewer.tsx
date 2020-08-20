@@ -715,22 +715,22 @@ export class ViewerService {
 		return await this.isModelLoaded();
 	}
 
-	public async loadViewerModel(teamspace, model, branch, revision) {
+	public async loadViewerModel(teamspace, model, branch, revision, viewpoint) {
 		if (!teamspace || !model) {
 			console.error('Teamspace, model, branch or revision was not defined!', teamspace, model, branch, revision);
 			await Promise.reject('Teamspace, model, branch or revision was not defined!');
 		} else {
-			await this.loadNewModel(teamspace, model, branch, revision);
+			await this.loadNewModel(teamspace, model, branch, revision, viewpoint);
 			this.initialisedPromise.resolve();
 		}
 	}
 
-	public async loadNewModel(account, model, branch, revision) {
+	public async loadNewModel(account, model, branch, revision, viewpoint) {
 		await UnityUtil.onReady();
 		this.emit(VIEWER_EVENTS.MODEL_LOADING_START);
 		document.body.style.cursor = 'wait';
 
-		await UnityUtil.loadModel(account, model, branch, revision);
+		await UnityUtil.loadModel(account, model, branch, revision, viewpoint);
 
 		await UnityUtil.onLoaded().then((bbox) => {
 			document.body.style.cursor = 'initial';
