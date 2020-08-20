@@ -216,7 +216,7 @@ export function* unsubscribeOnViewpointChanges({ teamspace, modelId }) {
 	}));
 }
 
-export function* showViewpoint({teamspace, modelId, view}) {
+export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 	if (view) {
 
 		if (view.preset) {
@@ -250,7 +250,7 @@ export function* showViewpoint({teamspace, modelId, view}) {
 				yield put(GroupsActions.clearColorOverrides());
 			}
 
-			if (viewpoint?.up) {
+			if (viewpoint?.up && !ignoreCamera) {
 				yield put(ViewerGuiActions.setCamera(viewpoint));
 			}
 

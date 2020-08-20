@@ -41,7 +41,7 @@ export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createAct
 	shareViewpointLink: ['teamspace', 'modelId', 'viewpointId'],
 	setDefaultViewpoint: ['teamspace', 'modelId', 'view'],
 	setSelectedViewpoint: ['selectedViewpoint'],
-	showViewpoint: ['teamspace', 'modelId', 'view']
+	showViewpoint: ['teamspace', 'modelId', 'view', 'ignoreCamera']
 }, { prefix: 'VIEWPOINTS/' });
 
 export interface IViewpointsComponentState {

@@ -80,8 +80,8 @@ export const selectCurrentModelName = createSelector(
 	selectSettings, (state) => state.name
 );
 
-export const selectDefaultViewpoint = createSelector(
-	selectSettings, (state) => state.defaultViewpooint
+export const selectDefaultView = createSelector(
+	selectSettings, (state) => state.defaultView
 );
 
 export const selectMetaKeys = createSelector(

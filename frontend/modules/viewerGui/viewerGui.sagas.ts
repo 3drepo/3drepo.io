@@ -40,7 +40,7 @@ import { SequencesActions } from '../sequences';
 import { StarredActions } from '../starred';
 import { dispatch } from '../store';
 import { TreeActions } from '../tree';
-import { selectInitialViewpoint, ViewpointsActions, ViewpointsTypes } from '../viewpoints';
+import { selectInitialView, ViewpointsActions, ViewpointsTypes } from '../viewpoints';
 import { ViewerGuiActions, ViewerGuiTypes } from './viewerGui.redux';
 import {
 	selectClipNumber,
@@ -360,11 +360,12 @@ function* loadModel() {
 		const { teamspace, model } = yield select(selectUrlParams);
 		const revision = yield select(selectCurrentRevisionId);
 		const modelSettings = yield select(selectSettings);
-		const selectedViewpoint = yield select(selectInitialViewpoint);
+		const selectedViewpoint = yield select(selectInitialView);
 
 		yield Viewer.isViewerReady();
-		yield Viewer.loadViewerModel(teamspace, model, 'master', revision || 'head', selectedViewpoint);
+		yield Viewer.loadViewerModel(teamspace, model, 'master', revision || 'head', selectedViewpoint?.viewpoint);
 		yield Viewer.updateViewerSettings(modelSettings);
+		yield put(ViewpointsActions.showViewpoint(teamspace, model, selectedViewpoint, true));
 	} catch (error) {
 		const content = 'The model was either not found, failed to load correctly ' +
 			'or you are not authorized to view it. ' +

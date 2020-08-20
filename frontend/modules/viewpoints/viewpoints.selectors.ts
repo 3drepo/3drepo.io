@@ -18,7 +18,7 @@ import { values } from 'lodash';
 import { createSelector } from 'reselect';
 import { getGroupOverride } from '../../helpers/colorOverrides';
 import { getTransparency, hasTransparency } from '../../helpers/colors';
-import { selectDefaultViewpoint } from '../model';
+import { selectDefaultView } from '../model';
 import { selectQueryParams } from '../router/router.selectors';
 
 export const selectViewpointsDomain = (state) => state.viewpoints;
@@ -87,9 +87,9 @@ export const selectTransparencies = createSelector(
 	selectOverridesDict, (overrides) => overrides?.transparencies || {}
 );
 
-export const selectInitialViewpoint =  createSelector(
-	selectViewpointsDomain, selectQueryParams,  selectDefaultViewpoint,
-		({viewpointsMap}, {viewId},  defaultViewpoint) =>
-			((!viewId || !viewpointsMap ? null : viewpointsMap[viewId]) ||
-			defaultViewpoint)?.viewpoint
+export const selectInitialView =  createSelector(
+	selectViewpointsDomain, selectQueryParams,  selectDefaultView,
+		({viewpointsMap}, {viewId},  { id: defaultView}) => {
+			return (!viewpointsMap ? null : viewpointsMap[viewId || defaultView]);
+		}
 );
