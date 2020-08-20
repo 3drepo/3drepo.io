@@ -22,6 +22,38 @@ describe("Implied permission::", function () {
 	};
 	const q = require("../../services/queue");
 
+	const baseIssue = {
+		"status": "open",
+		"priority": "low",
+		"topic_type": "for info",
+		"viewpoint":{
+			"up":[0,1,0],
+			"position":[38,38 ,125.08011914810137],
+			"look_at":[0,0,-163.08011914810137],
+			"view_dir":[0,0,-1],
+			"right":[1,0,0],
+			"unityHeight ":3.537606904422707,
+			"fov":2.1124830653010416,
+			"aspect_ratio":0.8750189337327384,
+			"far":276.75612077194506 ,
+			"near":76.42411012233212,
+			"clippingPlanes":[]
+		},
+		"scale":1,
+		"creator_role":"jobA",
+		"assigned_roles":["jobB"]
+	};
+
+	const baseView = {
+		"viewpoint":{
+			"up":[0,1,0],
+			"position":[38,38 ,125.08011914810137],
+			"look_at":[0,0,-163.08011914810137],
+			"view_dir":[0,0,-1],
+			"right":[1,0,0]
+		}
+	};
+
 	before(function(done) {
 		server = app.listen(8080, function () {
 			console.log("API test server is listening on port 8080!");
@@ -48,41 +80,10 @@ describe("Implied permission::", function () {
 		const modelId = "40e6a14c-29b9-4ce1-a04c-86eb7d8d261a";
 		const modeltoDelete = "7de7b6b3-a3c8-4121-987f-9d12d2dc241b";
 
-		const baseIssue = {
-			"status": "open",
-			"priority": "low",
-			"topic_type": "for info",
-			"viewpoint":{
-				"up":[0,1,0],
-				"position":[38,38 ,125.08011914810137],
-				"look_at":[0,0,-163.08011914810137],
-				"view_dir":[0,0,-1],
-				"right":[1,0,0],
-				"unityHeight ":3.537606904422707,
-				"fov":2.1124830653010416,
-				"aspect_ratio":0.8750189337327384,
-				"far":276.75612077194506 ,
-				"near":76.42411012233212,
-				"clippingPlanes":[]
-			},
-			"scale":1,
-			"creator_role":"jobA",
-			"assigned_roles":["jobB"]
-		};
-
 		const issueId = "b3e52b50-6330-11e7-a610-939d55d9fca8";
 
-		const baseView = {
-			"viewpoint":{
-				"up":[0,1,0],
-				"position":[38,38 ,125.08011914810137],
-				"look_at":[0,0,-163.08011914810137],
-				"view_dir":[0,0,-1],
-				"right":[1,0,0]
-			}
-		};
-
 		const viewId = "2b328320-e2da-11ea-bcdf-cfbbc3211ae7";
+		const viewToDelete = "22328320-e2da-11ea-bcdf-cfbbc3211111";
 
 		before(function(done) {
 			agent = request.agent(server);
@@ -265,6 +266,12 @@ describe("Implied permission::", function () {
 				.expect(200 , done);
 		});
 
+		it("can view views", function(done) {
+			agent
+				.get(`/${sharedTeamspace}/${modelId}/viewpoints`)
+				.expect(200, done);
+		});
+
 		it("can create view", function(done) {
 			const view = Object.assign({"name":"View test"}, baseView);
 			agent
@@ -275,14 +282,14 @@ describe("Implied permission::", function () {
 
 		it("can edit view", function(done) {
 			agent
-				.patch(`/${sharedTeamspace}/${modelId}/viewpoints/${viewId}`)
+				.put(`/${sharedTeamspace}/${modelId}/viewpoints/${viewId}`)
 				.send({ "name": "New name" })
 				.expect(200, done);
 		});
 
 		it("can delete view", function(done) {
 			agent
-				.delete(`/${sharedTeamspace}/${modelId}/viewpoints/${viewId}`)
+				.delete(`/${sharedTeamspace}/${modelId}/viewpoints/${viewToDelete}`)
 				.expect(200 , done);
 		});
 
@@ -307,29 +314,8 @@ describe("Implied permission::", function () {
 		const modeltoDelete = "5a55347a-11c7-439f-ac41-4fda1c1c89a6";
 		const modelNoAccess = "c92b9a11-c13b-40aa-b2a6-16cfea99d78e";
 
-		const baseIssue = {
-			"status": "open",
-			"priority": "low",
-			"topic_type": "for info",
-			"viewpoint":{
-				"up":[0,1,0],
-				"position":[38,38 ,125.08011914810137],
-				"look_at":[0,0,-163.08011914810137],
-				"view_dir":[0,0,-1],
-				"right":[1,0,0],
-				"unityHeight ":3.537606904422707,
-				"fov":2.1124830653010416,
-				"aspect_ratio":0.8750189337327384,
-				"far":276.75612077194506 ,
-				"near":76.42411012233212,
-				"clippingPlanes":[]
-			},
-			"scale":1,
-			"creator_role":"jobA",
-			"assigned_roles":["jobB"]
-		};
-
 		const issueId = "b3e52b50-6330-11e7-a610-939d55d9fca8";
+		const viewToDelete = "33328320-e2da-11ea-bcdf-cfbbc3222222";
 
 		before(function(done) {
 			agent = request.agent(server);
@@ -615,18 +601,71 @@ describe("Implied permission::", function () {
 				.expect(401 , done);
 		});
 
+		it("can view views", function(done) {
+			agent
+				.get(`/${sharedTeamspace}/${modelId}/viewpoints`)
+				.expect(200, done);
+		});
+
+		it("can create view", function(done) {
+			const view = Object.assign({"name":"View test"}, baseView);
+			agent
+				.post(`/${sharedTeamspace}/${modelId}/viewpoints`)
+				.send(view)
+				.expect(200, done);
+		});
+
+		it("cannot view views in other model", function(done) {
+			agent
+				.get(`/${sharedTeamspace}/${modelNoAccess}/viewpoints`)
+				.expect(401, done);
+		});
+
+		it("cannot create view in other model", function(done) {
+			const view = Object.assign({"name":"View test"}, baseView);
+			agent
+				.post(`/${sharedTeamspace}/${modelNoAccess}/viewpoints`)
+				.send(view)
+				.expect(401, done);
+		});
+
+		it("can edit view", function(done) {
+			agent
+				.put(`/${sharedTeamspace}/${modelId}/viewpoints/${viewId}`)
+				.send({ "name": "New name" })
+				.expect(200, done);
+		});
+
+		it("cannot edit view in other model", function(done) {
+			agent
+				.put(`/${sharedTeamspace}/${modelNoAccess}/viewpoints/${viewId}`)
+				.send({ "name": "New name" })
+				.expect(401, done);
+		});
+
+		it("can delete view", function(done) {
+			agent
+				.delete(`/${sharedTeamspace}/${modelId}/viewpoints/${viewToDelete}`)
+				.expect(200, done);
+		});
+
+		it("cannot delete view in other models", function(done) {
+			agent
+				.delete(`/${sharedTeamspace}/${modelNoAccess}/viewpoints/${viewToDelete}`)
+				.expect(401, done);
+		});
+
 		it("can delete model", function(done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modeltoDelete}`)
 				.expect(200 , done);
 		});
 
-		it("can delete other models", function(done) {
+		it("cannot delete other models", function(done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modelNoAccess}`)
 				.expect(401 , done);
 		});
-
 	});
 
 	// model admin
@@ -640,28 +679,6 @@ describe("Implied permission::", function () {
 		const modelId = "168da6a8-f3ed-42db-b625-af4db27ce6e7";
 		const modelToDelete = "d39fc3ef-f6b0-4aac-9468-a2f975509593";
 		const modelNoAccess = "15a54758-ccf1-4fc4-8ec7-20e94791f856";
-
-		const baseIssue = {
-			"status": "open",
-			"priority": "low",
-			"topic_type": "for info",
-			"viewpoint":{
-				"up":[0,1,0],
-				"position":[38,38 ,125.08011914810137],
-				"look_at":[0,0,-163.08011914810137],
-				"view_dir":[0,0,-1],
-				"right":[1,0,0],
-				"unityHeight ":3.537606904422707,
-				"fov":2.1124830653010416,
-				"aspect_ratio":0.8750189337327384,
-				"far":276.75612077194506 ,
-				"near":76.42411012233212,
-				"clippingPlanes":[]
-			},
-			"scale":1,
-			"creator_role":"jobA",
-			"assigned_roles":["jobB"]
-		};
 
 		const issueId = "b3e52b50-6330-11e7-a610-939d55d9fca8";
 
@@ -931,27 +948,6 @@ describe("Implied permission::", function () {
 		const modelToDelete = "42ece336-8719-4ce0-a375-3493cbdf6712";
 		const modelNoAccess = "26c69864-1630-4d02-bde3-46b14d1c6455";
 		const issueId = "b3e52b50-6330-11e7-a610-939d55d9fca8";
-		const baseIssue = {
-			"status": "open",
-			"priority": "low",
-			"topic_type": "for info",
-			"viewpoint":{
-				"up":[0,1,0],
-				"position":[38,38 ,125.08011914810137],
-				"look_at":[0,0,-163.08011914810137],
-				"view_dir":[0,0,-1],
-				"right":[1,0,0],
-				"unityHeight ":3.537606904422707,
-				"fov":2.1124830653010416,
-				"aspect_ratio":0.8750189337327384,
-				"far":276.75612077194506 ,
-				"near":76.42411012233212,
-				"clippingPlanes":[]
-			},
-			"scale":1,
-			"creator_role":"jobA",
-			"assigned_roles":["jobB"]
-		};
 
 		before(function(done) {
 			agent = request.agent(server);
@@ -1216,27 +1212,6 @@ describe("Implied permission::", function () {
 		const modelToDelete = "b0b503b0-a063-4565-b957-ad5eb8320cc2";
 		const modelNoAccess = "f2f8b651-323e-4371-bdac-c15bbe1a4f12";
 		const issueId = "b3e52b50-6330-11e7-a610-939d55d9fca8";
-		const baseIssue = {
-			"status": "open",
-			"priority": "low",
-			"topic_type": "for info",
-			"viewpoint":{
-				"up":[0,1,0],
-				"position":[38,38 ,125.08011914810137],
-				"look_at":[0,0,-163.08011914810137],
-				"view_dir":[0,0,-1],
-				"right":[1,0,0],
-				"unityHeight ":3.537606904422707,
-				"fov":2.1124830653010416,
-				"aspect_ratio":0.8750189337327384,
-				"far":276.75612077194506 ,
-				"near":76.42411012233212,
-				"clippingPlanes":[]
-			},
-			"scale":1,
-			"creator_role":"jobA",
-			"assigned_roles":["jobB"]
-		};
 
 		before(function(done) {
 			agent = request.agent(server);
