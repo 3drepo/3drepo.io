@@ -243,12 +243,7 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 		} else {
 			yield Viewer.isViewerReady();
 
-			yield prepareGroupsIfNecessary(teamspace, modelId, view.viewpoint);
 			const viewpoint = view.viewpoint;
-
-			if (viewpoint?.override_groups) {
-				yield put(GroupsActions.clearColorOverrides());
-			}
 
 			if (viewpoint?.up && !ignoreCamera) {
 				yield put(ViewerGuiActions.setCamera(viewpoint));
@@ -256,9 +251,17 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 
 			const clippingPlanes = view.clippingPlanes || get(view, 'viewpoint.clippingPlanes');
 
-			yield Viewer.updateClippingPlanes( clippingPlanes, teamspace, modelId);
 
 			yield put(TreeActions.setIfcSpacesHidden(viewpoint.hideIfc !== false));
+
+
+			yield Viewer.updateClippingPlanes( clippingPlanes, teamspace, modelId);
+
+			yield prepareGroupsIfNecessary(teamspace, modelId, view.viewpoint);
+
+			if (viewpoint?.override_groups) {
+				yield put(GroupsActions.clearColorOverrides());
+			}
 
 			yield put(TreeActions.showAllNodes());
 
