@@ -207,8 +207,6 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		if (risk._id) {
 			fetchRisk(teamspace, model, risk._id);
 			subscribeOnRiskCommentsChanges(teamspace, model, risk._id);
-		} else {
-			fetchMitigationCriteria(teamspace);
 		}
 	}
 
