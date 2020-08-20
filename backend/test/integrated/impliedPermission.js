@@ -953,7 +953,7 @@ describe("Implied permission::", function () {
 			agent
 				.put(`/${sharedTeamspace}/${modelId}/viewpoints/${viewId}`)
 				.send({ "name": "Model admin new name" })
-				.expect(404, done);
+				.expect(200, done);
 		});
 
 		it("cannot edit view in other model", function(done) {
@@ -997,6 +997,7 @@ describe("Implied permission::", function () {
 		const modelId = "67a50060-a6cd-45e2-91f1-7d262bba5971";
 		const modelToDelete = "42ece336-8719-4ce0-a375-3493cbdf6712";
 		const modelNoAccess = "26c69864-1630-4d02-bde3-46b14d1c6455";
+		const viewToDelete = "55548320-e2da-11ea-bcdf-cfbbc3334444";
 
 		before(function(done) {
 			agent = request.agent(server);
@@ -1237,6 +1238,60 @@ describe("Implied permission::", function () {
 				.expect(401 , done);
 		});
 
+		it("cannot view views", function(done) {
+			agent
+				.get(`/${sharedTeamspace}/${modelId}/viewpoints`)
+				.expect(401, done);
+		});
+
+		it("cannot create view", function(done) {
+			const view = Object.assign({"name":"View test"}, baseView);
+			agent
+				.post(`/${sharedTeamspace}/${modelId}/viewpoints`)
+				.send(view)
+				.expect(401, done);
+		});
+
+		it("cannot view views of other model in other project as well", function(done) {
+			agent
+				.get(`/${sharedTeamspace}/${modelNoAccess}/viewpoints`)
+				.expect(401, done);
+		});
+
+		it("cannot create view for other model in other project as well", function(done) {
+			const view = Object.assign({"name":"View test"}, baseView);
+			agent
+				.post(`/${sharedTeamspace}/${modelNoAccess}/viewpoints`)
+				.send(view)
+				.expect(401, done);
+		});
+
+		it("cannot edit view", function(done) {
+			agent
+				.put(`/${sharedTeamspace}/${modelId}/viewpoints/${viewId}`)
+				.send({ "name": "View all user new name" })
+				.expect(401, done);
+		});
+
+		it("cannot edit view in other model", function(done) {
+			agent
+				.put(`/${sharedTeamspace}/${modelNoAccess}/viewpoints/${viewId}`)
+				.send({ "name": "View all user bad new name" })
+				.expect(401, done);
+		});
+
+		it("cannot delete view", function(done) {
+			agent
+				.delete(`/${sharedTeamspace}/${modelId}/viewpoints/${viewToDelete}`)
+				.expect(401, done);
+		});
+
+		it("cannot delete view in other models", function(done) {
+			agent
+				.delete(`/${sharedTeamspace}/${modelNoAccess}/viewpoints/${viewToDelete}`)
+				.expect(401, done);
+		});
+
 		it("cannot delete model", function(done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modelToDelete}`)
@@ -1248,7 +1303,6 @@ describe("Implied permission::", function () {
 				.delete(`/${sharedTeamspace}/${modelNoAccess}`)
 				.expect(401 , done);
 		});
-
 	});
 
 	describe("Project::Upload models", function() {
@@ -1260,6 +1314,7 @@ describe("Implied permission::", function () {
 		const modelId = "48706168-9f4a-479a-a2b8-100b653ad71a";
 		const modelToDelete = "b0b503b0-a063-4565-b957-ad5eb8320cc2";
 		const modelNoAccess = "f2f8b651-323e-4371-bdac-c15bbe1a4f12";
+		const viewToDelete = "66668320-e2da-11ea-bcdf-cfbbc3355555";
 
 		before(function(done) {
 			agent = request.agent(server);
@@ -1489,6 +1544,60 @@ describe("Implied permission::", function () {
 				.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}`)
 				.send({  status: "open" })
 				.expect(401 , done);
+		});
+
+		it("cannot view views", function(done) {
+			agent
+				.get(`/${sharedTeamspace}/${modelId}/viewpoints`)
+				.expect(401, done);
+		});
+
+		it("cannot create view", function(done) {
+			const view = Object.assign({"name":"View test"}, baseView);
+			agent
+				.post(`/${sharedTeamspace}/${modelId}/viewpoints`)
+				.send(view)
+				.expect(401, done);
+		});
+
+		it("cannot view views of other model in other project as well", function(done) {
+			agent
+				.get(`/${sharedTeamspace}/${modelNoAccess}/viewpoints`)
+				.expect(401, done);
+		});
+
+		it("cannot create view for other model in other project as well", function(done) {
+			const view = Object.assign({"name":"View test"}, baseView);
+			agent
+				.post(`/${sharedTeamspace}/${modelNoAccess}/viewpoints`)
+				.send(view)
+				.expect(401, done);
+		});
+
+		it("cannot edit view", function(done) {
+			agent
+				.put(`/${sharedTeamspace}/${modelId}/viewpoints/${viewId}`)
+				.send({ "name": "Update user new name" })
+				.expect(401, done);
+		});
+
+		it("cannot edit view in other model", function(done) {
+			agent
+				.put(`/${sharedTeamspace}/${modelNoAccess}/viewpoints/${viewId}`)
+				.send({ "name": "Update user bad new name" })
+				.expect(401, done);
+		});
+
+		it("cannot delete view", function(done) {
+			agent
+				.delete(`/${sharedTeamspace}/${modelId}/viewpoints/${viewToDelete}`)
+				.expect(401, done);
+		});
+
+		it("cannot delete view in other models", function(done) {
+			agent
+				.delete(`/${sharedTeamspace}/${modelNoAccess}/viewpoints/${viewToDelete}`)
+				.expect(401, done);
 		});
 
 		it("cannot delete model", function(done) {
