@@ -332,9 +332,9 @@ function importToyProject(account, username) {
 
 		return Promise.all([
 
-			importToyModel(account, username, "Lego_House_Architecture", "ffdc1680-c5f3-11ea-8373-eb03ef03362f", project.name),
-			importToyModel(account, username, "Lego_House_Landscape", "ffdcb2c0-c5f3-11ea-8373-eb03ef03362f", project.name),
-			importToyModel(account, username, "Lego_House_Structure", "ffdc8bb0-c5f3-11ea-8373-eb03ef03362f", project.name)
+			importToyModel(account, username, "Lego_House_Architecture", "1cac0310-e3cc-11ea-bc6b-69e466be9639", project.name),
+			importToyModel(account, username, "Lego_House_Landscape", "1cab8de0-e3cc-11ea-bc6b-69e466be9639", project.name),
+			importToyModel(account, username, "Lego_House_Structure", "1cac5130-e3cc-11ea-bc6b-69e466be9639", project.name)
 
 		]).then(models => {
 
@@ -353,7 +353,7 @@ function importToyProject(account, username) {
 				};
 			});
 
-			return importToyModel(account, username, "Lego_House_Federation", "fffeb9b0-c5f3-11ea-8373-eb03ef03362f", project.name, subModels, skip);
+			return importToyModel(account, username, "Lego_House_Federation", "1ccd46b0-e3cc-11ea-bc6b-69e466be9639", project.name, subModels, skip);
 		});
 
 	}).catch(err => {
