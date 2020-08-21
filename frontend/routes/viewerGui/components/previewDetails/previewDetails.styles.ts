@@ -178,9 +178,6 @@ const expandedStyles = css`
 		height: auto;
 	}
 
-	${FilterWrapper} {
-		display: none;
-	}
 `;
 
 export const ScrollableContainer = styled.div`
