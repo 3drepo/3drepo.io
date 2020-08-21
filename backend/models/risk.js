@@ -136,9 +136,9 @@ class Risk extends Ticket {
 		return await super.update(attributeBlacklist, user, sessionId, account, model, issueId, data);
 	}
 
-	async getRisksReport(account, model, rid, ids, res) {
+	async getRisksReport(account, model, rid, filters, res) {
 		const reportGen = require("../models/report").newRisksReport(account, model, rid);
-		return this.getReport(account, model, rid, ids, res, reportGen);
+		return this.getReport(account, model, rid, filters, res, reportGen);
 	}
 
 	clean(account, model, riskToClean) {

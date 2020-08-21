@@ -109,6 +109,8 @@ router.get("/issues/:issueId/thumbnail.png", middlewares.issue.canView, getThumb
  *
  * @apiParam (Query) {String} [convertCoords] Convert coordinates to user space
  * @apiParam (Query) {Number} [updatedSince] Only return issues that has been updated since this value (in epoch value)
+ * @apiParam (Query) {Number} [numbers] Array of issue numbers to filter for
+ * @apiParam (Query) {String} [ids] Array of issue ids to filter for
  *
  * @apiSuccess (200) {Object} Issue Object.
  * @apiSuccessExample {json} Success-Response.
@@ -834,7 +836,8 @@ function listIssues(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model, rid } = req.params;
 	const branch = rid ? null : "master";
-	const ids = req.query.ids ? req.query.ids.split(",") : null;
+	const filters = utils.deserialiseFilters(req.query.ids, req.query.numbers);
+
 	const convertCoords = !!req.query.convertCoords;
 	let updatedSince = req.query.updatedSince;
 
@@ -845,7 +848,7 @@ function listIssues(req, res, next) {
 		}
 	}
 
-	Issue.getList(account, model, branch, rid, ids, convertCoords, updatedSince).then(issues => {
+	Issue.getList(account, model, branch, rid, filters, convertCoords, updatedSince).then(issues => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, issues);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -858,21 +861,14 @@ function getIssuesBCF(req, res, next) {
 	const model = req.params.model;
 	const dbCol =  {account: account, model: model};
 
-	let ids;
-	let useIssueNumbers = false;
-	if (req.query.numbers) {
-		ids = req.query.numbers.split(",");
-		useIssueNumbers = true;
-	} else if (req.query.ids) {
-		ids = req.query.ids.split(",");
-	}
+	const filters = utils.deserialiseFilters(req.query.ids, req.query.numbers);
 
 	let getBCFZipRS;
 
 	if (req.params.rid) {
-		getBCFZipRS = Issue.getBCF(account, model, null, req.params.rid, ids, useIssueNumbers);
+		getBCFZipRS = Issue.getBCF(account, model, null, req.params.rid, filters);
 	} else {
-		getBCFZipRS = Issue.getBCF(account, model, "master", null, ids, useIssueNumbers);
+		getBCFZipRS = Issue.getBCF(account, model, "master", null, filters);
 	}
 
 	getBCFZipRS.then(zipRS => {
@@ -909,9 +905,9 @@ function findIssue(req, res, next) {
 function renderIssuesHTML(req, res, next) {
 	const place = utils.APIInfo(req);
 	const {account, model, rid} = req.params;
-	const ids = req.query.ids ? req.query.ids.split(",") : undefined;
+	const filters = utils.deserialiseFilters(req.query.ids, req.query.numbers);
 
-	Issue.getIssuesReport(account, model, rid, ids, res).catch(err => {
+	Issue.getIssuesReport(account, model, rid, filters, res).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }

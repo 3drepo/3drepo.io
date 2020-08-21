@@ -242,8 +242,8 @@ function* removeComment({ teamspace, modelId, riskData }) {
 function* downloadRisks({ teamspace, modelId }) {
 	try {
 		const filteredRisks = yield select(selectFilteredRisks);
-		const risksIds = map(filteredRisks, '_id').join(',');
-		yield Exports.exportRisksToJSON(teamspace, modelId, risksIds);
+		const riskNumbers = map(filteredRisks, 'number').join(',');
+		yield Exports.exportRisksToJSON(teamspace, modelId, riskNumbers);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'risk', error));
 	}
@@ -252,8 +252,8 @@ function* downloadRisks({ teamspace, modelId }) {
 function* printRisks({ teamspace, modelId }) {
 	try {
 		const filteredRisks = yield select(selectFilteredRisks);
-		const risksIds = map(filteredRisks, '_id').join(',');
-		Exports.printRisks(teamspace, modelId, risksIds);
+		const riskNumbers = map(filteredRisks, 'number').join(',');
+		Exports.printRisks(teamspace, modelId, riskNumbers);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'risk', error));
 	}

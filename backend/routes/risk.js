@@ -138,6 +138,8 @@ router.get("/risks/:riskId/thumbnail.png", middlewares.issue.canView, getThumbna
  *
  * @apiParam {String} [revId] Revision ID
  * @apiParam (Query) {Number} [updatedSince] Only return issues that has been updated since this value (in epoch value)
+ * @apiParam (Query) {Number} [numbers] Array of issue numbers to filter for
+ * @apiParam (Query) {String} [ids] Array of issue ids to filter for
  *
  * @apiSuccess (200) {Object[]} risks Risk objects
  *
@@ -730,7 +732,8 @@ function listRisks(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model, rid } = req.params;
 	const branch = rid ? null : "master";
-	const ids = req.query.ids ? req.query.ids.split(",") : null;
+
+	const filters = utils.deserialiseFilters(req.query.ids, req.query.numbers);
 	const convertCoords = !!req.query.convertCoords;
 	let updatedSince = req.query.updatedSince;
 
@@ -741,7 +744,7 @@ function listRisks(req, res, next) {
 		}
 	}
 
-	Risk.getList(account, model, branch, rid, ids, convertCoords, updatedSince).then(risks => {
+	Risk.getList(account, model, branch, rid, filters, convertCoords, updatedSince).then(risks => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, risks);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -763,9 +766,9 @@ function findRiskById(req, res, next) {
 function renderRisksHTML(req, res, next) {
 	const place = utils.APIInfo(req);
 	const {account, model, rid} = req.params;
-	const ids = req.query.ids ? req.query.ids.split(",") : undefined;
+	const filters = utils.deserialiseFilters(req.query.ids, req.query.numbers);
 
-	Risk.getRisksReport(account, model, rid, ids, res).catch(err => {
+	Risk.getRisksReport(account, model, rid, filters, res).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
