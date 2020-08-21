@@ -413,13 +413,8 @@ class Ticket extends View {
 	}
 
 	getScreenshot(account, model, uid, vid) {
-		if ("[object String]" === Object.prototype.toString.call(uid)) {
-			uid = utils.stringToUUID(uid);
-		}
-
-		if ("[object String]" === Object.prototype.toString.call(vid)) {
-			vid = utils.stringToUUID(vid);
-		}
+		uid = utils.stringToUUID(uid);
+		vid = utils.stringToUUID(vid);
 
 		return this.findByUID(account, model, uid, {
 			viewpoints: { $elemMatch: { guid: vid } },
@@ -436,6 +431,20 @@ class Ticket extends View {
 				return foundTicket.viewpoints[0].screenshot.content.buffer;
 			}
 		});
+	}
+
+	async processFilter(account, model, branch, revId, filters) {
+		let filter = {};
+		if (filters) {
+			if (filters.ids) {
+				filter = await this.getIdsFilter(account, model, branch, revId, filters.ids);
+			}
+			if (filters.numbers) {
+				filter.number = { "$in": filters.numbers.filter((n) => parseInt(n)) };
+			}
+		}
+
+		return filter;
 	}
 
 	async getIdsFilter(account, model, branch, revId, ids) {
@@ -464,8 +473,8 @@ class Ticket extends View {
 		return filter;
 	}
 
-	async findByModelName(account, model, branch, revId, query, projection, ids, noClean = false, convertCoords = false) {
-		const filter = await this.getIdsFilter(account, model, branch, revId, ids);
+	async findByModelName(account, model, branch, revId, query, projection, filters, noClean = false, convertCoords = false) {
+		const filter = await this.processFilter(account, model, branch, revId, filters);
 		const fullQuery = {...filter, ...query};
 
 		const coll = await this.getCollection(account, model);
@@ -511,7 +520,7 @@ class Ticket extends View {
 		return viewpoint;
 	}
 
-	async getList(account, model, branch, revision, ids, convertCoords, updatedSince) {
+	async getList(account, model, branch, revision, filters, convertCoords, updatedSince) {
 		const projection = {
 			"extras": 0,
 			"norm" : 0,
@@ -539,7 +548,7 @@ class Ticket extends View {
 			revision,
 			query,
 			projection,
-			ids,
+			filters,
 			false,
 			convertCoords
 		);
@@ -558,7 +567,7 @@ class Ticket extends View {
 		return tickets;
 	}
 
-	async getReport(account, model, rid, ids, res, reportGen) {
+	async getReport(account, model, rid, filters, res, reportGen) {
 		const projection = {
 			extras: 0,
 			"viewpoints.extras": 0,
@@ -569,7 +578,7 @@ class Ticket extends View {
 		};
 
 		const branch = rid ? null : "master";
-		const tickets = await this.findByModelName(account, model, branch, rid, undefined, projection, ids, false);
+		const tickets = await this.findByModelName(account, model, branch, rid, undefined, projection, filters, false);
 		reportGen.addEntries(tickets);
 		return reportGen.generateReport(res);
 	}
