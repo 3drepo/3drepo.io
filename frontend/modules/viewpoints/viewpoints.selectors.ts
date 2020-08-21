@@ -89,7 +89,7 @@ export const selectTransparencies = createSelector(
 
 export const selectInitialView =  createSelector(
 	selectViewpointsDomain, selectQueryParams,  selectDefaultView,
-		({viewpointsMap}, {viewId},  { id: defaultView}) => {
-			return (!viewpointsMap ? null : viewpointsMap[viewId || defaultView]);
+		({viewpointsMap}, {viewId},  defaultView) => {
+			return (!viewpointsMap ? null : viewpointsMap[viewId || defaultView?.id]);
 		}
 );
