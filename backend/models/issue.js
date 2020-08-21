@@ -142,7 +142,7 @@ class Issue extends Ticket {
 		const settings = await ModelSetting.findById({account, model}, model);
 
 		const issues = await this.findByModelName(account, model, branch, revId, undefined, projection,
-			await this.processFilters(account, model, branch, revId, filters), noClean);
+			await this.processFilter(account, model, branch, revId, filters), noClean);
 
 		return BCF.getBCFZipReadStream(account, model, issues, settings.properties.unit);
 	}
