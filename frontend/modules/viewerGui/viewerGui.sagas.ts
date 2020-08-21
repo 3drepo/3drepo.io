@@ -365,7 +365,11 @@ function* loadModel() {
 		yield Viewer.isViewerReady();
 		yield Viewer.loadViewerModel(teamspace, model, 'master', revision || 'head', selectedViewpoint?.viewpoint);
 		yield Viewer.updateViewerSettings(modelSettings);
-		yield put(ViewpointsActions.showViewpoint(teamspace, model, selectedViewpoint, true));
+
+		if (selectedViewpoint) {
+			yield put(ViewpointsActions.showViewpoint(teamspace, model, selectedViewpoint, true));
+		}
+
 	} catch (error) {
 		const content = 'The model was either not found, failed to load correctly ' +
 			'or you are not authorized to view it. ' +
