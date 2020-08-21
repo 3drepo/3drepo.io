@@ -294,7 +294,9 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public setCameraOnViewpoint = (view) => {
-		this.props.showViewpoint(this.props.teamspace, this.props.model, view);
+		if (!this.props.disableViewer) {
+			this.props.showViewpoint(this.props.teamspace, this.props.model, view);
+		}
 	}
 
 	public handlePanelScroll = (e) => {

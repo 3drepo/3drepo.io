@@ -30,4 +30,11 @@ export const StyledButton = styled(Button)`
 		font-size: 12px;
 		text-transform: none;
 	}
+
+	&&>:first-child>:first-child  {
+		width: 15px;
+		font-size: 13px;
+		margin-right: 2px;
+		margin-bottom: 1px;
+	}
 `;
