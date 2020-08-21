@@ -1129,7 +1129,6 @@ export class UnityUtil {
 	 * @category Configurations
 	 * @param account - name of teamspace
 	 * @param model - name of model
-	 * @param branch - ID of the branch (deprecated value)
 	 * @param revision - ID of revision
 	 */
 	public static offLoadModel(account: string, model: string, revision = 'head') {
