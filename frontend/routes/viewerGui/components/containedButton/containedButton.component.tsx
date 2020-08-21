@@ -39,7 +39,7 @@ export const ContainedButton = ({ children, icon, onClick, ...props }: IProps) =
 			onClick={onClick}
 			{...props}
 		>
-			{icon && <IconComponent style={{ fontSize: 14, marginRight: 2 }} />}
+			{icon && <IconComponent />}
 			{children}
 		</StyledButton>
 	);
