@@ -236,9 +236,9 @@ class Issue extends Ticket {
 		}
 	}
 
-	async getIssuesReport(account, model, rid, ids, res) {
+	async getIssuesReport(account, model, rid, filters, res) {
 		const reportGen = require("../models/report").newIssuesReport(account, model, rid);
-		return super.getReport(account, model, rid, ids, res, reportGen);
+		return super.getReport(account, model, rid, filters, res, reportGen);
 	}
 
 	isIssueBeingClosed(oldIssue, newIssue) {

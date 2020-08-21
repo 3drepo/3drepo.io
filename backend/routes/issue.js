@@ -905,9 +905,9 @@ function findIssue(req, res, next) {
 function renderIssuesHTML(req, res, next) {
 	const place = utils.APIInfo(req);
 	const {account, model, rid} = req.params;
-	const ids = req.query.ids ? req.query.ids.split(",") : undefined;
+	const filters = utils.deserialiseFilters(req.query.ids, req.query.numbers);
 
-	Issue.getIssuesReport(account, model, rid, ids, res).catch(err => {
+	Issue.getIssuesReport(account, model, rid, filters, res).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }

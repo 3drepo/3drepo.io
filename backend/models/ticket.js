@@ -440,7 +440,7 @@ class Ticket extends View {
 				filter = await this.getIdsFilter(account, model, branch, revId, filters.ids);
 			}
 			if (filters.numbers) {
-				filter.number = { "$in": filters.numbers.filter((n) => parseInt(n)) };
+				filter.number = { "$in": filters.numbers.map((n) => parseInt(n)) };
 			}
 		}
 

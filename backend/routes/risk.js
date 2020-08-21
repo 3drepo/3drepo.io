@@ -766,9 +766,9 @@ function findRiskById(req, res, next) {
 function renderRisksHTML(req, res, next) {
 	const place = utils.APIInfo(req);
 	const {account, model, rid} = req.params;
-	const ids = req.query.ids ? req.query.ids.split(",") : undefined;
+	const filters = utils.deserialiseFilters(req.query.ids, req.query.numbers);
 
-	Risk.getRisksReport(account, model, rid, ids, res).catch(err => {
+	Risk.getRisksReport(account, model, rid, filters, res).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
