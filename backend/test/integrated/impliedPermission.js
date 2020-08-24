@@ -28,14 +28,14 @@ describe("Implied permission::", function () {
 		"topic_type": "for info",
 		"viewpoint":{
 			"up":[0,1,0],
-			"position":[38,38 ,125.08011914810137],
+			"position":[38,38,125.08011914810137],
 			"look_at":[0,0,-163.08011914810137],
 			"view_dir":[0,0,-1],
 			"right":[1,0,0],
 			"unityHeight ":3.537606904422707,
 			"fov":2.1124830653010416,
 			"aspect_ratio":0.8750189337327384,
-			"far":276.75612077194506 ,
+			"far":276.75612077194506,
 			"near":76.42411012233212,
 			"clippingPlanes":[]
 		},
@@ -49,7 +49,7 @@ describe("Implied permission::", function () {
 	const baseView = {
 		"viewpoint":{
 			"up":[0,1,0],
-			"position":[38,38 ,125.08011914810137],
+			"position":[38,38,125.08011914810137],
 			"look_at":[0,0,-163.08011914810137],
 			"view_dir":[0,0,-1],
 			"right":[1,0,0]
@@ -222,7 +222,7 @@ describe("Implied permission::", function () {
 		it("can view issues", function(done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}/issues`)
-				.expect(200 , done);
+				.expect(200, done);
 		});
 
 		it("can create issue", function(done) {
@@ -231,7 +231,7 @@ describe("Implied permission::", function () {
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/issues`)
 				.send(issue)
-				.expect(200 , done);
+				.expect(200, done);
 
 		});
 
@@ -241,14 +241,14 @@ describe("Implied permission::", function () {
 				comment: "hello world",
 				"viewpoint":{
 					"up":[0,1,0],
-					"position":[38,38 ,125.08011914810137],
+					"position":[38,38,125.08011914810137],
 					"look_at":[0,0,-163.08011914810137],
 					"view_dir":[0,0,-1],
 					"right":[1,0,0],
 					"unityHeight ":3.537606904422707,
 					"fov":2.1124830653010416,
 					"aspect_ratio":0.8750189337327384,
-					"far":276.75612077194506 ,
+					"far":276.75612077194506,
 					"near":76.42411012233212,
 					"clippingPlanes":[]
 				}
@@ -256,14 +256,14 @@ describe("Implied permission::", function () {
 
 			agent.post(`/${sharedTeamspace}/${modelId}/issues/${issueId}/comments`)
 				.send(comment)
-				.expect(200 , done);
+				.expect(200, done);
 		});
 
 		it("can edit issue", function(done) {
 			agent
 				.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}`)
 				.send({  status: "open" })
-				.expect(200 , done);
+				.expect(200, done);
 		});
 
 		it("can view views", function(done) {
@@ -290,13 +290,13 @@ describe("Implied permission::", function () {
 		it("can delete view", function(done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modelId}/viewpoints/${viewToDelete}`)
-				.expect(200 , done);
+				.expect(200, done);
 		});
 
 		it("can delete model", function(done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modeltoDelete}`)
-				.expect(200 , done);
+				.expect(200, done);
 		});
 	});
 
@@ -543,14 +543,14 @@ describe("Implied permission::", function () {
 				comment: "hello world",
 				"viewpoint":{
 					"up":[0,1,0],
-					"position":[38,38 ,125.08011914810137],
+					"position":[38,38,125.08011914810137],
 					"look_at":[0,0,-163.08011914810137],
 					"view_dir":[0,0,-1],
 					"right":[1,0,0],
 					"unityHeight ":3.537606904422707,
 					"fov":2.1124830653010416,
 					"aspect_ratio":0.8750189337327384,
-					"far":276.75612077194506 ,
+					"far":276.75612077194506,
 					"near":76.42411012233212,
 					"clippingPlanes":[]
 				}
@@ -558,7 +558,7 @@ describe("Implied permission::", function () {
 
 			agent.post(`/${sharedTeamspace}/${modelId}/issues/${issueId}/comments`)
 				.send(comment)
-				.expect(200 , done);
+				.expect(200, done);
 		});
 
 		it("cannot comment in other model", function(done) {
@@ -567,14 +567,14 @@ describe("Implied permission::", function () {
 				comment: "hello world",
 				"viewpoint":{
 					"up":[0,1,0],
-					"position":[38,38 ,125.08011914810137],
+					"position":[38,38,125.08011914810137],
 					"look_at":[0,0,-163.08011914810137],
 					"view_dir":[0,0,-1],
 					"right":[1,0,0],
 					"unityHeight ":3.537606904422707,
 					"fov":2.1124830653010416,
 					"aspect_ratio":0.8750189337327384,
-					"far":276.75612077194506 ,
+					"far":276.75612077194506,
 					"near":76.42411012233212,
 					"clippingPlanes":[]
 				}
@@ -582,21 +582,21 @@ describe("Implied permission::", function () {
 
 			agent.post(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}/comments`)
 				.send(comment)
-				.expect(401 , done);
+				.expect(401, done);
 		});
 
 		it("can edit issue", function(done) {
 			agent
 				.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}`)
 				.send({  status: "open" })
-				.expect(200 , done);
+				.expect(200, done);
 		});
 
 		it("cannot edit issue in other model", function(done) {
 			agent
 				.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}`)
 				.send({  status: "open" })
-				.expect(401 , done);
+				.expect(401, done);
 		});
 
 		it("can view views", function(done) {
@@ -656,13 +656,13 @@ describe("Implied permission::", function () {
 		it("can delete model", function(done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modeltoDelete}`)
-				.expect(200 , done);
+				.expect(200, done);
 		});
 
 		it("cannot delete other models", function(done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modelNoAccess}`)
-				.expect(401 , done);
+				.expect(401, done);
 		});
 	});
 
@@ -830,7 +830,7 @@ describe("Implied permission::", function () {
 		it("can view issues", function(done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}/issues`)
-				.expect(200 , done);
+				.expect(200, done);
 		});
 
 		it("can create issue", function(done) {
@@ -839,14 +839,14 @@ describe("Implied permission::", function () {
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/issues`)
 				.send(issue)
-				.expect(200 , done);
+				.expect(200, done);
 
 		});
 
 		it("cannot view issues in other model", function(done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelNoAccess}/issues`)
-				.expect(401 , done);
+				.expect(401, done);
 		});
 
 		it("cannot create issue in other model", function(done) {
@@ -855,7 +855,7 @@ describe("Implied permission::", function () {
 			agent
 				.post(`/${sharedTeamspace}/${modelNoAccess}/issues`)
 				.send(issue)
-				.expect(401 , done);
+				.expect(401, done);
 
 		});
 
@@ -865,14 +865,14 @@ describe("Implied permission::", function () {
 				comment: "hello world",
 				"viewpoint":{
 					"up":[0,1,0],
-					"position":[38,38 ,125.08011914810137],
+					"position":[38,38,125.08011914810137],
 					"look_at":[0,0,-163.08011914810137],
 					"view_dir":[0,0,-1],
 					"right":[1,0,0],
 					"unityHeight ":3.537606904422707,
 					"fov":2.1124830653010416,
 					"aspect_ratio":0.8750189337327384,
-					"far":276.75612077194506 ,
+					"far":276.75612077194506,
 					"near":76.42411012233212,
 					"clippingPlanes":[]
 				}
@@ -880,7 +880,7 @@ describe("Implied permission::", function () {
 
 			agent.post(`/${sharedTeamspace}/${modelId}/issues/${issueId}/comments`)
 				.send(comment)
-				.expect(404 , done);
+				.expect(404, done);
 		});
 
 		it("cannot comment in other model", function(done) {
@@ -889,14 +889,14 @@ describe("Implied permission::", function () {
 				comment: "hello world",
 				"viewpoint":{
 					"up":[0,1,0],
-					"position":[38,38 ,125.08011914810137],
+					"position":[38,38,125.08011914810137],
 					"look_at":[0,0,-163.08011914810137],
 					"view_dir":[0,0,-1],
 					"right":[1,0,0],
 					"unityHeight ":3.537606904422707,
 					"fov":2.1124830653010416,
 					"aspect_ratio":0.8750189337327384,
-					"far":276.75612077194506 ,
+					"far":276.75612077194506,
 					"near":76.42411012233212,
 					"clippingPlanes":[]
 				}
@@ -904,21 +904,21 @@ describe("Implied permission::", function () {
 
 			agent.post(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}/comments`)
 				.send(comment)
-				.expect(401 , done);
+				.expect(401, done);
 		});
 
 		it("can edit issue", function(done) {
 			agent
 				.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}`)
 				.send({  status: "open" })
-				.expect(404 , done);
+				.expect(404, done);
 		});
 
 		it("cannot edit issue in other model", function(done) {
 			agent
 				.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}`)
 				.send({  status: "open" })
-				.expect(401 , done);
+				.expect(401, done);
 		});
 
 		it("can view views", function(done) {
@@ -978,13 +978,13 @@ describe("Implied permission::", function () {
 		it("can delete model", function(done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modelToDelete}`)
-				.expect(200 , done);
+				.expect(200, done);
 		});
 
 		it("cannot delete other models", function(done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modelNoAccess}`)
-				.expect(401 , done);
+				.expect(401, done);
 		});
 	});
 
@@ -1147,7 +1147,7 @@ describe("Implied permission::", function () {
 		it("cannot view issues", function(done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}/issues`)
-				.expect(401 , done);
+				.expect(401, done);
 		});
 
 		it("cannot create issue", function(done) {
@@ -1156,14 +1156,14 @@ describe("Implied permission::", function () {
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/issues`)
 				.send(issue)
-				.expect(401 , done);
+				.expect(401, done);
 
 		});
 
 		it("cannot view issues of other model in other project as well", function(done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelNoAccess}/issues`)
-				.expect(401 , done);
+				.expect(401, done);
 		});
 
 		it("cannot create issue for other model in other project as well", function(done) {
@@ -1172,7 +1172,7 @@ describe("Implied permission::", function () {
 			agent
 				.post(`/${sharedTeamspace}/${modelNoAccess}/issues`)
 				.send(issue)
-				.expect(401 , done);
+				.expect(401, done);
 
 		});
 
@@ -1182,14 +1182,14 @@ describe("Implied permission::", function () {
 				comment: "hello world",
 				"viewpoint":{
 					"up":[0,1,0],
-					"position":[38,38 ,125.08011914810137],
+					"position":[38,38,125.08011914810137],
 					"look_at":[0,0,-163.08011914810137],
 					"view_dir":[0,0,-1],
 					"right":[1,0,0],
 					"unityHeight ":3.537606904422707,
 					"fov":2.1124830653010416,
 					"aspect_ratio":0.8750189337327384,
-					"far":276.75612077194506 ,
+					"far":276.75612077194506,
 					"near":76.42411012233212,
 					"clippingPlanes":[]
 				}
@@ -1197,7 +1197,7 @@ describe("Implied permission::", function () {
 
 			agent.post(`/${sharedTeamspace}/${modelId}/issues/${issueId}/comments`)
 				.send(comment)
-				.expect(401 , done);
+				.expect(401, done);
 		});
 
 		it("cannot comment in other model in other project as well", function(done) {
@@ -1206,14 +1206,14 @@ describe("Implied permission::", function () {
 				comment: "hello world",
 				"viewpoint":{
 					"up":[0,1,0],
-					"position":[38,38 ,125.08011914810137],
+					"position":[38,38,125.08011914810137],
 					"look_at":[0,0,-163.08011914810137],
 					"view_dir":[0,0,-1],
 					"right":[1,0,0],
 					"unityHeight ":3.537606904422707,
 					"fov":2.1124830653010416,
 					"aspect_ratio":0.8750189337327384,
-					"far":276.75612077194506 ,
+					"far":276.75612077194506,
 					"near":76.42411012233212,
 					"clippingPlanes":[]
 				}
@@ -1221,21 +1221,21 @@ describe("Implied permission::", function () {
 
 			agent.post(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}/comments`)
 				.send(comment)
-				.expect(401 , done);
+				.expect(401, done);
 		});
 
 		it("cannot edit issue", function(done) {
 			agent
 				.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}`)
 				.send({  status: "open" })
-				.expect(401 , done);
+				.expect(401, done);
 		});
 
 		it("cannot edit issue in other model", function(done) {
 			agent
 				.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}`)
 				.send({  status: "open" })
-				.expect(401 , done);
+				.expect(401, done);
 		});
 
 		it("cannot view views", function(done) {
@@ -1295,13 +1295,13 @@ describe("Implied permission::", function () {
 		it("cannot delete model", function(done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modelToDelete}`)
-				.expect(401 , done);
+				.expect(401, done);
 		});
 
 		it("cannot delete other models", function(done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modelNoAccess}`)
-				.expect(401 , done);
+				.expect(401, done);
 		});
 	});
 
@@ -1455,7 +1455,7 @@ describe("Implied permission::", function () {
 		it("cannot view issues", function(done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}/issues`)
-				.expect(401 , done);
+				.expect(401, done);
 		});
 
 		it("cannot create issue", function(done) {
@@ -1464,14 +1464,14 @@ describe("Implied permission::", function () {
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/issues`)
 				.send(issue)
-				.expect(401 , done);
+				.expect(401, done);
 
 		});
 
 		it("cannot view issues of other model in other project as well", function(done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelNoAccess}/issues`)
-				.expect(401 , done);
+				.expect(401, done);
 		});
 
 		it("cannot create issue for other model in other project as well", function(done) {
@@ -1480,7 +1480,7 @@ describe("Implied permission::", function () {
 			agent
 				.post(`/${sharedTeamspace}/${modelNoAccess}/issues`)
 				.send(issue)
-				.expect(401 , done);
+				.expect(401, done);
 
 		});
 
@@ -1490,14 +1490,14 @@ describe("Implied permission::", function () {
 				comment: "hello world",
 				"viewpoint":{
 					"up":[0,1,0],
-					"position":[38,38 ,125.08011914810137],
+					"position":[38,38,125.08011914810137],
 					"look_at":[0,0,-163.08011914810137],
 					"view_dir":[0,0,-1],
 					"right":[1,0,0],
 					"unityHeight ":3.537606904422707,
 					"fov":2.1124830653010416,
 					"aspect_ratio":0.8750189337327384,
-					"far":276.75612077194506 ,
+					"far":276.75612077194506,
 					"near":76.42411012233212,
 					"clippingPlanes":[]
 				}
@@ -1505,7 +1505,7 @@ describe("Implied permission::", function () {
 
 			agent.post(`/${sharedTeamspace}/${modelId}/issues/${issueId}/comments`)
 				.send(comment)
-				.expect(401 , done);
+				.expect(401, done);
 		});
 
 		it("cannot comment in other model in other project as well", function(done) {
@@ -1514,14 +1514,14 @@ describe("Implied permission::", function () {
 				comment: "hello world",
 				"viewpoint":{
 					"up":[0,1,0],
-					"position":[38,38 ,125.08011914810137],
+					"position":[38,38,125.08011914810137],
 					"look_at":[0,0,-163.08011914810137],
 					"view_dir":[0,0,-1],
 					"right":[1,0,0],
 					"unityHeight ":3.537606904422707,
 					"fov":2.1124830653010416,
 					"aspect_ratio":0.8750189337327384,
-					"far":276.75612077194506 ,
+					"far":276.75612077194506,
 					"near":76.42411012233212,
 					"clippingPlanes":[]
 				}
@@ -1529,21 +1529,21 @@ describe("Implied permission::", function () {
 
 			agent.post(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}/comments`)
 				.send(comment)
-				.expect(401 , done);
+				.expect(401, done);
 		});
 
 		it("cannot edit issue", function(done) {
 			agent
 				.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}`)
 				.send({  status: "open" })
-				.expect(401 , done);
+				.expect(401, done);
 		});
 
 		it("cannot edit issue in other model", function(done) {
 			agent
 				.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}`)
 				.send({  status: "open" })
-				.expect(401 , done);
+				.expect(401, done);
 		});
 
 		it("cannot view views", function(done) {
@@ -1603,13 +1603,13 @@ describe("Implied permission::", function () {
 		it("cannot delete model", function(done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modelToDelete}`)
-				.expect(401 , done);
+				.expect(401, done);
 		});
 
 		it("cannot delete other models", function(done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modelNoAccess}`)
-				.expect(401 , done);
+				.expect(401, done);
 		});
 	});
 
