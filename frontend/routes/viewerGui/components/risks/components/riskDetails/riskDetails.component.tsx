@@ -20,6 +20,7 @@ import React, { Fragment } from 'react';
 import { merge, size } from 'lodash';
 
 import { diffData, mergeData } from '../../../../../../helpers/forms';
+import { isViewer } from '../../../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { canComment } from '../../../../../../helpers/risks';
 import { Copy } from '../../../../../components/fontAwesomeIcon';
@@ -114,6 +115,8 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	get actionButton() {
+		const hasViewerPermissions = isViewer(this.props.modelSettings.permissions);
+
 		return renderWhenTrue(() => (
 			<ContainedButton
 				icon={Copy}
@@ -121,7 +124,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 			>
 				Clone
 			</ContainedButton>
-		))(!this.isNewRisk);
+		))(!this.isNewRisk && !hasViewerPermissions);
 	}
 
 	public renderMessagesList = renderWhenTrue(() => (

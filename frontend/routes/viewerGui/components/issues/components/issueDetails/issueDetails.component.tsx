@@ -21,6 +21,7 @@ import { merge } from 'lodash';
 
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { canComment } from '../../../../../../helpers/issues';
+import { isViewer } from '../../../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { Copy } from '../../../../../components/fontAwesomeIcon';
 import { ScreenshotDialog } from '../../../../../components/screenshotDialog';
@@ -108,6 +109,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	get actionButton() {
+		const hasViewerPermissions = isViewer(this.props.permissions);
+
 		return renderWhenTrue(() => (
 				<ContainedButton
 						icon={Copy}
@@ -115,7 +118,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				>
 					Clone
 				</ContainedButton>
-		))(!this.isNewIssue);
+		))(!this.isNewIssue && !hasViewerPermissions);
 	}
 
 	get isViewerInitialized() {
