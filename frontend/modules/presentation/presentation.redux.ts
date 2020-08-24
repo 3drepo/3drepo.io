@@ -39,7 +39,8 @@ export const { Types: PresentationTypes, Creators: PresentationActions } = creat
 	joinPresentation: ['sessionCode'],
 	leavePresentation: [],
 	togglePause: [],
-	setPaused: ['isPaused']
+	setPaused: ['isPaused'],
+	streamViewpoint: []
 }, { prefix: 'PRESENTATION/' });
 
 export const INITIAL_STATE = {

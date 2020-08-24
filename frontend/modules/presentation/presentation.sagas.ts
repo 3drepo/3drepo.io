@@ -19,27 +19,38 @@ import { put, select, takeLatest} from 'redux-saga/effects';
 
 import { CHAT_CHANNELS } from '../../constants/chat';
 
+import { prepareGroup } from '../../helpers/groups';
 import * as API from '../../services/api';
-import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
 import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { dispatch, getState } from '../store';
+import { ViewpointsActions } from '../viewpoints';
+import { generateViewpoint } from '../viewpoints/viewpoints.sagas';
 import {  selectIsPaused, selectSessionCode, PresentationActions, PresentationTypes } from './index';
 
 let intervalId = 0;
 
-const streamPresentation = async (teamspace, model, code) => {
-	const viewpoint = await Viewer.getCurrentViewpoint({ teamspace, model });
-	await API.streamPresentation(teamspace, model, code, viewpoint);
+const streamPresentation = () => {
+	dispatch(PresentationActions.streamViewpoint());
 };
 
-function* startPresenting() {
-	yield put(PresentationActions.setPresenting(true));
+function * streamViewpoint() {
 	const teamspace = yield select(selectCurrentModelTeamspace);
 	const model = yield select(selectCurrentModel);
 	const code = yield select(selectSessionCode);
 
-	intervalId = window.setInterval(streamPresentation, 1000, teamspace, model, code);
+	const view = yield generateViewpoint(teamspace, model, 'stream');
+	if (view.viewpoint?.override_groups) {
+		view.viewpoint.override_groups = view.viewpoint.override_groups.map(prepareGroup);
+	}
+
+	yield API.streamPresentation(teamspace, model, code, view);
+}
+
+function* startPresenting() {
+	yield put(PresentationActions.setPresenting(true));
+
+	intervalId = window.setInterval(streamPresentation, 1000);
 }
 
 const onStreamPresentationEvent = (viewpoint) => {
@@ -52,8 +63,7 @@ const onStreamPresentationEvent = (viewpoint) => {
 	const account = selectCurrentModelTeamspace(getState());
 	const model = selectCurrentModel(getState());
 
-	Viewer.setCamera({ ...viewpoint, account, model });
-	Viewer.updateClippingPlanes(viewpoint.clippingPlanes, account, model);
+	dispatch(ViewpointsActions.showViewpoint(account, model,  viewpoint ));
 };
 
 const onEndPresentationEvent = () => {
@@ -105,4 +115,5 @@ export default function* PresentationSaga() {
 	yield takeLatest(PresentationTypes.JOIN_PRESENTATION, joinPresentation);
 	yield takeLatest(PresentationTypes.LEAVE_PRESENTATION, leavePresentation);
 	yield takeLatest(PresentationTypes.TOGGLE_PAUSE, togglePause);
+	yield takeLatest(PresentationTypes.STREAM_VIEWPOINT, streamViewpoint);
 }
