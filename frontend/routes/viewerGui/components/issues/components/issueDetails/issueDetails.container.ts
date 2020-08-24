@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -26,7 +26,9 @@ import {
 	selectExpandDetails,
 	selectFailedToLoad,
 	selectFetchingDetailsIsPending,
+	selectIssues,
 	selectNewComment,
+	selectPostCommentIsPending,
 	IssuesActions,
 } from '../../../../../../modules/issues';
 import { selectJobsList, selectMyJob } from '../../../../../../modules/jobs';
@@ -47,7 +49,9 @@ const mapStateToProps = createStructuredSelector({
 	currentUser: selectUsername,
 	permissions: selectPermissions,
 	topicTypes: selectTopicTypes,
-	failedToLoad: selectFailedToLoad
+	failedToLoad: selectFailedToLoad,
+	postCommentIsPending: selectPostCommentIsPending,
+	issues: selectIssues
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -55,6 +59,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchIssue: IssuesActions.fetchIssue,
 	saveIssue: IssuesActions.saveIssue,
 	updateIssue: IssuesActions.updateIssue,
+	cloneIssue: IssuesActions.cloneIssue,
 	postComment: IssuesActions.postComment,
 	removeComment: IssuesActions.removeComment,
 	updateSelectedIssuePin: IssuesActions.updateSelectedIssuePin,
@@ -66,7 +71,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	attachLinkResources: IssuesActions.attachLinkResources,
 	showDialog: DialogActions.showDialog,
 	showScreenshotDialog:  DialogActions.showScreenshotDialog,
-	setCameraOnViewpoint: ViewpointsActions.setCameraOnViewpoint
+	showConfirmDialog: DialogActions.showConfirmDialog,
+	showViewpoint: ViewpointsActions.showViewpoint
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(IssueDetails));

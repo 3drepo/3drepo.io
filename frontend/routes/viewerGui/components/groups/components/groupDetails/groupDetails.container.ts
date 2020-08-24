@@ -24,7 +24,8 @@ import {
 	selectActiveGroupDetails,
 	selectCriteriaFieldState,
 	selectExpandDetails,
-	GroupsActions
+	selectFetchingDetailsIsPending,
+	GroupsActions,
 } from '../../../../../../modules/groups';
 import { selectMetaKeys, selectSettings } from '../../../../../../modules/model';
 import { selectSelectedNodes, selectTotalMeshes } from '../../../../../../modules/tree';
@@ -38,7 +39,8 @@ const mapStateToProps = createStructuredSelector({
 	totalMeshes: selectTotalMeshes,
 	selectedNodes: selectSelectedNodes,
 	fieldNames: selectMetaKeys,
-	criteriaFieldState: selectCriteriaFieldState
+	criteriaFieldState: selectCriteriaFieldState,
+	isPending: selectFetchingDetailsIsPending,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

@@ -16,23 +16,18 @@
  */
 
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { BoardActions } from '../../../../../../../../modules/board';
-import { selectIssues } from '../../../../../../../../modules/issues';
-import { selectUrlParams } from '../../../../../../../../modules/router/router.selectors';
-
-import { IssueReference } from './issueReference.component';
+import { selectSearchEnabled } from '../../../../../modules/viewpoints';
+import { Dialog } from './dialog.component';
 
 const mapStateToProps = createStructuredSelector({
-	issues: selectIssues,
-	urlParams: selectUrlParams,
+	searchEnabled: selectSearchEnabled,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	fetchCardData: BoardActions.fetchCardData,
-	resetCardData: BoardActions.resetCardData,
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(IssueReference);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Dialog));

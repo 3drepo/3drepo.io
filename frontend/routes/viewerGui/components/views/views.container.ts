@@ -18,7 +18,8 @@
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { selectIsCommenter } from '../../../../modules/model/permissions.selectors';
+import { selectSettings, ModelActions } from '../../../../modules/model';
+import { selectIsAdmin, selectIsCommenter } from '../../../../modules/model/permissions.selectors';
 import {
 	selectActiveViewpoint,
 	selectEditMode,
@@ -36,10 +37,12 @@ const mapStateToProps = createStructuredSelector({
 	newViewpoint: selectNewViewpoint,
 	activeViewpoint: selectActiveViewpoint,
 	isPending: selectIsPending,
+	isAdmin: selectIsAdmin,
 	editMode: selectEditMode,
 	searchQuery: selectSearchQuery,
 	searchEnabled: selectSearchEnabled,
 	isCommenter: selectIsCommenter,
+	modelSettings: selectSettings,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -50,10 +53,13 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	deleteViewpoint: ViewpointsActions.deleteViewpoint,
 	subscribeOnViewpointChanges: ViewpointsActions.subscribeOnViewpointChanges,
 	unsubscribeOnViewpointChanges: ViewpointsActions.unsubscribeOnViewpointChanges,
-	showViewpoint: ViewpointsActions.showViewpoint,
+	setActiveViewpoint: ViewpointsActions.setActiveViewpoint,
 	setNewViewpoint: ViewpointsActions.setNewViewpoint,
+	setDefaultViewpoint: ViewpointsActions.setDefaultViewpoint,
 	setSearchQuery: ViewpointsActions.setSearchQuery,
 	setState: ViewpointsActions.setComponentState,
+	shareViewpointLink: ViewpointsActions.shareViewpointLink,
+	fetchModelSettings: ModelActions.fetchSettings,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Views);

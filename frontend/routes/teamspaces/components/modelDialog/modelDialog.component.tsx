@@ -29,8 +29,8 @@ import { clientConfigService } from '../../../../services/clientConfig';
 import { schema } from '../../../../services/validation';
 import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
 
-import { getTeamspacesList, getTeamspaceProjects } from '../../../../helpers/model';
-import { MODEL_SUBTYPES } from './../../teamspaces.contants';
+import { getModelCodeFieldErrorMsg, getTeamspacesList, getTeamspaceProjects } from '../../../../helpers/model';
+import { MODEL_SUBTYPES } from '../../teamspaces.contants';
 import { FieldWrapper, Row, SelectWrapper } from './modelDialog.styles';
 
 const ModelSchema = Yup.object().shape({
@@ -131,7 +131,7 @@ export const ModelDialog = (props: IProps) => {
 								<TextField
 									{...field}
 									error={Boolean(form.touched.code && form.errors.code)}
-									helperText={form.touched.code && (form.errors.code || '')}
+									helperText={form.touched.code && getModelCodeFieldErrorMsg(form.errors.code)}
 									label="Model Code (optional)"
 									margin="normal"
 									fullWidth

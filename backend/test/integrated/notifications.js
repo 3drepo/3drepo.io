@@ -473,7 +473,7 @@ describe("Notifications", function() {
 				testForNoClosedNotification("collaboratorTeamspace1Model1JobD")
 			);
 
-			it("the user that closed the issue shouldnt get a closed issue notification",
+			it("the user that closed the issue should not get a closed issue notification",
 				testForNoClosedNotification("teamSpace1")
 			);
 

@@ -18,7 +18,6 @@
 
 const utils = require("../utils");
 const responseCodes = require("../response_codes.js");
-const db = require("../handler/db");
 
 const History = require("./history");
 
@@ -28,10 +27,7 @@ const ModelSetting = require("../models/modelSetting");
 const BCF = require("./bcf");
 const Ticket = require("./ticket");
 
-const Comment = require("./comment");
-
 const C = require("../constants");
-const { stringToUUID, uuidToString } = require("../utils");
 
 const fieldTypes = {
 	"_id": "[object Object]",
@@ -42,7 +38,6 @@ const fieldTypes = {
 	"desc": "[object String]",
 	"due_date": "[object Number]",
 	"name": "[object String]",
-	"norm": "[object Array]",
 	"number": "[object Number]",
 	"owner": "[object String]",
 	"position": "[object Array]",
@@ -72,21 +67,11 @@ const statusEnum = C.ISSUE_STATUS;
 
 class Issue extends Ticket {
 	constructor() {
-		super("issues", "issue_id", "issueIds", "ISSUE", fieldTypes, ownerPrivilegeAttributes);
+		super("issues", "issue", "issueIds", "ISSUE", fieldTypes, ownerPrivilegeAttributes);
 	}
 
 	async create(account, model, newIssue, sessionId) {
-		// Sets the issue number
-		const coll = await db.getCollection(account, model + ".issues");
-		try {
-			const issues = await coll.find({}, {number: 1}).sort({ number: -1 }).limit(1).toArray();
-			newIssue.number = (issues.length > 0) ? issues[0].number + 1 : 1;
-		} catch(e) {
-			newIssue.number = 1;
-		}
-
-		newIssue =  await super.create(account, model, newIssue);
-
+		newIssue = await super.create(account, model, newIssue);
 		ChatEvent.newIssues(sessionId, account, model, [newIssue]);
 		return newIssue;
 	}
@@ -138,7 +123,6 @@ class Issue extends Ticket {
 			"created",
 			"creator_role",
 			"name",
-			"norm",
 			"number",
 			"owner",
 			"rev_id",
@@ -151,15 +135,14 @@ class Issue extends Ticket {
 		return await super.update(attributeBlacklist, user, sessionId, account, model, issueId, data, this.onBeforeUpdate.bind(this));
 	}
 
-	async getBCF(account, model, branch, revId, ids, useIssueNumbers = false) {
+	async getBCF(account, model, branch, revId, filters) {
 		const projection = {};
 		const noClean = true;
 
 		const settings = await ModelSetting.findById({account, model}, model);
-		if (useIssueNumbers && Array.isArray(ids)) {
-			ids = { number:  {"$in": ids.map(x => parseInt(x))} };
-		}
-		const issues = await this.findByModelName(account, model, branch, revId, undefined, projection, ids, noClean);
+
+		const issues = await this.findByModelName(account, model, branch, revId, undefined, projection,
+			filters, noClean);
 
 		return BCF.getBCFZipReadStream(account, model, issues, settings.properties.unit);
 	}
@@ -216,7 +199,6 @@ class Issue extends Ticket {
 					"created",
 					"creator_role",
 					"name",
-					"norm",
 					"number",
 					"owner",
 					"rev_id",
@@ -254,9 +236,9 @@ class Issue extends Ticket {
 		}
 	}
 
-	async getIssuesReport(account, model, rid, ids, res) {
+	async getIssuesReport(account, model, rid, filters, res) {
 		const reportGen = require("../models/report").newIssuesReport(account, model, rid);
-		return super.getReport(account, model, rid, ids, res, reportGen);
+		return super.getReport(account, model, rid, filters, res, reportGen);
 	}
 
 	isIssueBeingClosed(oldIssue, newIssue) {
@@ -293,47 +275,6 @@ class Issue extends Ticket {
 		}
 		return oldIssue.status !== newIssue.status;
 	}
-
-	async addComment(account, model, id, user, data, sessionId) {
-		// 1. creates a comment and gets the result ( comment + references)
-		const commentResult = await Comment.addComment(account, model, this.collName, id, user, data);
-
-		// 2 get referenced issue numbers
-		const issueNumbers = commentResult.issueRefs;
-
-		// 3. Get issues from number
-		const issuesColl = await this.getTicketsCollection(account, model);
-		// 4 Adding the comment id to get its number and to not make 2 queries to the database
-		const res = await issuesColl.find({ $or: [{ number: {$in: issueNumbers}}, {_id : stringToUUID(id)}]}).toArray();
-
-		// 5. Create system comments promise updates for those issues that were referenced
-		const issuesCommentsUpdates =  [];
-
-		// 6. Find the number of the issue that made the reference
-		const referenceNumber = res.find(({_id}) => uuidToString(_id) === id).number;
-
-		res.forEach((issue)  => {
-			if (issue.number === referenceNumber) {
-				return;
-			}
-
-			// 7. Create the system comment
-			const systemComment = this.createSystemComment(account, model, sessionId, issue._id, user, "issue_referenced", null, referenceNumber);
-			const comments = (issue.comments || []).map(c=> {
-				c.sealed = true;
-				return c;
-			}).concat([systemComment]);
-
-			// 8. Add update promise to updates array
-			issuesCommentsUpdates.push(issuesColl.update({_id: issue._id}, { $set: { comments }}));
-		});
-
-		// 9. update referenced issues with new system comments
-		await Promise.all(issuesCommentsUpdates);
-
-		return commentResult;
-	}
-
 }
 
 module.exports = new Issue();

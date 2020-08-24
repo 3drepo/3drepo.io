@@ -43,7 +43,7 @@ export const Icon = styled.div`
 	color: ${(props) => props.color || COLOR.WHITE};
 `;
 
-export const IssueNumber = styled.span`
+export const TicketNumber = styled.span`
 	color: ${COLOR.BLACK_30};
 `;
 

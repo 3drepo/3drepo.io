@@ -1088,10 +1088,21 @@ export class UnityUtil {
 	 * @param model - name of model
 	 * @param branch - ID of the branch (deprecated value)
 	 * @param revision - ID of revision
+	 * @param initView? - the view the model should load with
+	 * @param clearCanvas? - Reset the state of the viewer prior to loading the model (Default: true)
 	 * @return returns a promise that resolves when the model start loading.
 	 */
-	public static loadModel(account: string, model: string, branch = '', revision = 'head'): Promise<void> {
-		UnityUtil.reset();
+	public static loadModel(
+		account: string,
+		model: string,
+		branch = '',
+		revision = 'head',
+		initView = null,
+		clearCanvas = true
+	): Promise<void> {
+		if (clearCanvas) {
+			UnityUtil.reset();
+		}
 		const params: any = {
 			database : account,
 			model
@@ -1101,12 +1112,28 @@ export class UnityUtil {
 			params.revID = revision;
 		}
 
+		if (initView) {
+			params.initView = initView;
+		}
+
 		UnityUtil.onLoaded();
 		// tslint:disable-next-line
 		console.log(`[${new Date()}]Loading model: `, params);
 		UnityUtil.toUnity('LoadModel', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(params));
 
 		return UnityUtil.onLoading();
+	}
+
+	/**
+	 * Offload a model that is currently loaded
+	 * @category Configurations
+	 * @param account - name of teamspace
+	 * @param model - name of model
+	 * @param revision - ID of revision
+	 */
+	public static offLoadModel(account: string, model: string, revision = 'head') {
+		const ns = `${account}.${model}${revision === 'head' ? '' : `.${revision}`}`;
+		UnityUtil.toUnity('UnloadModel', UnityUtil.LoadingState.MODEL_LOADED, ns);
 	}
 
 	/**
@@ -1644,6 +1671,21 @@ export class UnityUtil {
 	 */
 	public static setNavigationOff(): any {
 		UnityUtil.toUnity('SetNavigationOff', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/** @hidden */
+	public static setResolutionScaling(scale: number) {
+		UnityUtil.toUnity('SetResolutionScaling', UnityUtil.LoadingState.VIEWER_READY, scale);
+	}
+
+	/** @hidden */
+	public static toggleUtilityCamera() {
+		UnityUtil.toUnity('ToggleUtilityCamera', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/** @hidden */
+	public static toggleCameraPause() {
+		UnityUtil.toUnity('ToggleCameraPause', UnityUtil.LoadingState.VIEWER_READY);
 	}
 
 }

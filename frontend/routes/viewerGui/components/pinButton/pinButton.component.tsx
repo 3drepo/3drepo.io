@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,8 +16,12 @@
  */
 
 import React from 'react';
+
+import Tooltip from '@material-ui/core/Tooltip';
+
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
-import { LabelButton } from '../labelButton/labelButton.styles';
+import { renderWhenTrueOtherwise } from '../../../../helpers/rendering';
+import { ContainedButton } from '../containedButton/containedButton.component';
 import { Container, PinIcon } from './pinButton.styles';
 
 interface IProps {
@@ -32,13 +36,25 @@ interface IProps {
 	deactivateMeasure: () => void;
 }
 
+const UpdatePinButton = ({ pinLabel, disabled, onClickButton, ...props }) => (
+	<Container {...props}>
+		<ContainedButton
+			onClick={onClickButton}
+			icon={PinIcon}
+			disabled={disabled}
+		>
+			{pinLabel}
+		</ContainedButton>
+	</Container>
+);
+
 export class PinButton extends React.PureComponent<IProps, any> {
 	public state = {
 		active: false,
 		wasPinDropped: false
 	};
 
-	public onClickButton = (e) => {
+	public onClickButton = () => {
 		const active = !this.state.active;
 		this.handleChangeEditMode(active);
 		this.setState({ active });
@@ -50,6 +66,7 @@ export class PinButton extends React.PureComponent<IProps, any> {
 
 	public handleChangeEditMode = (active) => {
 		const { deactivateMeasure, disableMeasure, viewer, onSave } = this.props;
+
 		if (active) {
 			viewer.setPinDropMode(true);
 			deactivateMeasure();
@@ -94,14 +111,25 @@ export class PinButton extends React.PureComponent<IProps, any> {
 		const wasPinDropped = this.state.wasPinDropped || this.props.hasPin;
 		const editMsg = !wasPinDropped ? 'Add pin' : 'Edit pin';
 		const pinLabel =  this.state.active ? 'Save pin' :  editMsg;
-		const pinIConColor = disabled ? 'disabled' :
-							this.state.active && !disabled ? 'secondary' : 'primary';
 
 		return (
-				<Container>
-					<PinIcon color={pinIConColor} />
-					<LabelButton disabled={disabled} onClick={this.onClickButton}>{pinLabel}</LabelButton>
-				</Container>
-				);
+			<>
+				{renderWhenTrueOtherwise(() => (
+					<Tooltip title={`Sorry, You do not have enough permissions to do this.`}>
+						<UpdatePinButton
+							disabled={disabled}
+							onClickButton={this.onClickButton}
+							pinLabel={pinLabel}
+						/>
+					</Tooltip>
+				), () => (
+					<UpdatePinButton
+						disabled={disabled}
+						onClickButton={this.onClickButton}
+						pinLabel={pinLabel}
+					/>
+				))(disabled)}
+			</>
+		);
 	}
 }

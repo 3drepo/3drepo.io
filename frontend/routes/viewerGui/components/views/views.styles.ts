@@ -91,3 +91,7 @@ export const SearchField = styled(TextField)`
 		flex: none;
 	}
 `;
+
+export const Link = styled.a`
+	color: ${COLOR.PRIMARY_MAIN};
+`;

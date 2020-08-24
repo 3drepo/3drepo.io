@@ -16,6 +16,7 @@
  */
 
 import { get } from 'lodash';
+
 import { getFilterValues, UNASSIGNED_JOB } from '../constants/reportedItems';
 import {
 	LEVELS,
@@ -74,19 +75,14 @@ export const prepareRisk = (risk, jobs = []) => {
 		);
 	}
 
-	if (preparedRisk.overall_level_of_risk) {
-		preparedRisk.statusColor = getRiskColor(preparedRisk.overall_level_of_risk);
-	}
-
-	if (preparedRisk.mitigation_status) {
-		preparedRisk.StatusIconComponent = getRiskIcon(preparedRisk.mitigation_status);
-	}
+	preparedRisk.statusColor = getRiskColor(preparedRisk.overall_level_of_risk);
+	preparedRisk.StatusIconComponent = getRiskIcon(preparedRisk.mitigation_status);
 
 	if (preparedRisk.assigned_roles) {
 		preparedRisk.roleColor = get(jobs.find((job) => job.name === get(preparedRisk.assigned_roles, '[0]')), 'color');
 	}
 
-	preparedRisk.defaultHidden = preparedRisk.mitigation_status === RISK_LEVELS.AGREED_FULLY;
+	preparedRisk.defaultHidden = [RISK_LEVELS.AGREED_FULLY, RISK_LEVELS.VOID].includes(preparedRisk.mitigation_status);
 
 	return preparedRisk;
 };
@@ -127,7 +123,7 @@ export const getRiskLikelihoodName = (likelihood: number) => {
 };
 
 const getRiskIcon = (mitigationStatus) =>  RISK_LEVELS_ICONS[mitigationStatus] || null;
-const getRiskColor = (levelOfRisk) => RISK_LEVELS_COLOURS[levelOfRisk].color;
+export const getRiskColor = (levelOfRisk) => RISK_LEVELS_COLOURS[levelOfRisk].color;
 
 export const getRiskStatus = (levelOfRisk: number, mitigationStatus: string) => {
 	return ({

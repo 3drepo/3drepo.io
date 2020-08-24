@@ -30,8 +30,8 @@ const ModelSetting = require("../models/modelSetting");
 const Comment = require("../models/comment");
 
 /**
- * @api {get} /:teamspace/:model/issues/:issueId Find Issue by ID
- * @apiName findIssueById
+ * @api {get} /:teamspace/:model/issues/:issueId Get issue
+ * @apiName findIssue
  * @apiGroup Issues
  *
  * @apiParam {String} teamspace Name of teamspace
@@ -53,7 +53,6 @@ const Comment = require("../models/comment");
  *		model: "model_ID"
  *		modelCode: ""
  *		name: "Issue one"
- *		norm: []
  *		number: 1
  *		owner: "username"
  *		position: []
@@ -80,11 +79,11 @@ const Comment = require("../models/comment");
  * }
  *
  */
-router.get("/issues/:issueId", middlewares.issue.canView, findIssueById);
+router.get("/issues/:issueId", middlewares.issue.canView, findIssue);
 
 /**
  * @api {get} /:teamspace/:model/issues/:issueId/thumbnail.png Get Issue Thumbnail
- * @apiName findIssueById
+ * @apiName getThumbnail
  * @apiGroup Issues
  *
  * @apiParam {String} teamspace Name of teamspace
@@ -110,6 +109,8 @@ router.get("/issues/:issueId/thumbnail.png", middlewares.issue.canView, getThumb
  *
  * @apiParam (Query) {String} [convertCoords] Convert coordinates to user space
  * @apiParam (Query) {Number} [updatedSince] Only return issues that has been updated since this value (in epoch value)
+ * @apiParam (Query) {Number} [numbers] Array of issue numbers to filter for
+ * @apiParam (Query) {String} [ids] Array of issue ids to filter for
  *
  * @apiSuccess (200) {Object} Issue Object.
  * @apiSuccessExample {json} Success-Response.
@@ -133,7 +134,6 @@ router.get("/issues/:issueId/thumbnail.png", middlewares.issue.canView, getThumb
  *		"viewCount":1,
  *		"commentCount":0,
  *		"thumbnail":"nabile/MODEL_ID/issues/ISSUE_ID/thumbnail.png",
- *		"norm":[0,0,0],
  *		"position":[8341.8056640625,1279.962158203125,-3050.34521484375],
  *		"typePrefix":"sample",
  *		"modelCode":"",
@@ -188,13 +188,14 @@ router.get("/issues.bcfzip", middlewares.issue.canView, getIssuesBCF);
 router.post("/issues.bcfzip", middlewares.issue.canCreate, importBCF);
 
 /**
- * @api {get} /:teamspace/:model/issues.bcfzip Get Issue Screenshot
+ * @api {get} /:teamspace/:model/issues/:issueId/viewpoints/:vid/screenshot.png Get Issue Screenshot
  * @apiName getScreenshot
  * @apiGroup Issues
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
- * @apiParam {String} id Viewpoint unique ID.
+ * @apiParam {String} issueId Issue ID
+ * @apiParam {String} vid Viewpoint ID.
  *
  * @apiDescription Get an issue screenshot from viewpoints using a viewpoint ID and issue ID.
  */
@@ -207,7 +208,8 @@ router.get("/issues/:issueId/viewpoints/:vid/screenshot.png", middlewares.issue.
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
- * @apiParam {String} id Viewpoint unique ID.
+ * @apiParam {String} issueId Issue ID
+ * @apiParam {String} vid Viewpoint ID.
  *
  * @apiSuccess (200) {Object} Issue Screenshot.
  */
@@ -248,7 +250,7 @@ router.get("/issues/:issueId/viewpoints/:vid/screenshotSmall.png", middlewares.i
  *		"assigned_roles":["Architect"],
  *		"viewCount":1,"commentCount":0,
  *		"thumbnail":"ACCOUNT/MODEL_ID/issues/ISSUE_ID/thumbnail.png",
- *		"norm":[],"position":[],
+ *		"position":[],
  *		"typePrefix":"sample",
  *		"modelCode":"",
  *		"account":"username",
@@ -345,24 +347,28 @@ router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssues
  * @apiParam {String} model Model ID
  *
  * @apiParam (Request body) {String} name The name of the issue
- * @apiParam (Request body) {[]String} assigned_roles The roles assigned to the issue. Even though its an array (this is for future support of multiple assigned jobs), currently it has one or none elements correspoing to the available jobs in the teamaspace.
+ * @apiParam (Request body) {String[]} assigned_roles The roles assigned to the issue. Even though its an array (this is for future support of multiple assigned jobs), currently it has one or none elements correspoing to the available jobs in the teamaspace.
  * @apiParam (Request body) {String} status The status of the issue. It can have a value of "open","in progress","for approval", "void" or "closed".
- * @apiParam (Request body) {String} priority The priority of the issue. It can have a value of "none", "low", "medium" or "high".
+ * @apiParam (Request body) {String} priority The priority of the issue. It can have a value of "none", String"low", "medium" or "high".
  * @apiParam (Request body) {String} topic_type Type of the issue. It's value has to be one of the defined topic_types for the model. See <a href='#api-Model-createModel'>here</a> for more details.
  * @apiParam (Request body) {Viewpoint} viewpoint The viewpoint of the issue, defining the position of the camera and the screenshot for that position.
  * @apiParam (Request body) {String} desc The description of the created issue
- * @apiParam (Request body) {[3]Number} position The vector defining the pin of the issue. If the pin doesnt has an issue its an empty array.
+ * @apiParam (Request body) {Number[3]} position The vector defining the pin of the issue. If the pin doesnt has an issue its an empty array.
+ * @apiParam (Request body) {Number[3]} position The vector defining the pin of the issue. If the pin doesnt has an issue its an empty array.
  *
- * @apiParam (Request body: Viewpoint) {[3]Number} right The right vector of the viewpoint indicating the direction of right in relative coordinates.
- * @apiParam (Request body: Viewpoint) {[3]Number} up The up vector of the viewpoint indicating the direction of up in relative coordinates.
- * @apiParam (Request body: Viewpoint) {[3]Number} position The position vector indicates where in the world the viewpoint is positioned.
- * @apiParam (Request body: Viewpoint) {[3]Number} look_at The vector indicating where in the world the viewpoint is looking at.
- * @apiParam (Request body: Viewpoint) {[3]Number} view_dir The vector indicating where is the viewpoint is looking at in relative coordinates.
+ * @apiParam (Request body: Viewpoint) {Number[3]} right The right vector of the viewpoint indicating the direction of right in relative coordinates.
+ * @apiParam (Request body: Viewpoint) {Number[3]} up The up vector of the viewpoint indicating the direction of up in relative coordinates.
+ * @apiParam (Request body: Viewpoint) {Number[3]} position The position vector indicates where in the world the viewpoint is positioned.
+ * @apiParam (Request body: Viewpoint) {Number[3]} look_at The vector indicating where in the world the viewpoint is looking at.
+ * @apiParam (Request body: Viewpoint) {Number[3]} view_dir The vector indicating where is the viewpoint is looking at in relative coordinates.
  * @apiParam (Request body: Viewpoint) {Number} near The vector indicating the near plane.
  * @apiParam (Request body: Viewpoint) {Number} far The vector indicating the far plane.
  * @apiParam (Request body: Viewpoint) {Number} fov The angle of the field of view.
  * @apiParam (Request body: Viewpoint) {Number} aspect_ratio The aspect ratio of the fustrum.
- * @apiParam (Request body: Viewpoint) {String} highlighted_group_id If the issue is associated with one or more objects from the model this field has the value of a group id generated to hold those objects
+ * @apiParam (Request body: Viewpoint) {String} [highlighted_group_id] If the issue is associated with one or more objects from the model this field has the value of a group id generated to hold those objects
+ * @apiParam (Request body: Viewpoint) {String[]} [highlighted_objects] If the issue is associated with one or more objects from the model this field has the value of the meshes
+ * @apiParam (Request body: Viewpoint) {String} [hidden_group_id] If the issue is associated with one or more objects from the model this field has the value of a group id generated to hold those objects
+ * @apiParam (Request body: Viewpoint) {String[]} [hidden_objects] If the issue is associated with one or more objects from the model this field has the value of a group id generated to hold those objects
  * @apiParam (Request body: Viewpoint) {Boolean} hide_IFC A flag to hide the IFC
  * @apiParam (Request body: Viewpoint) {String} screenshot A string in base64 representing the screenshot associated with the issue
  *
@@ -438,11 +444,6 @@ router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssues
  *       -3960.10205078125,
  *       4487.1552734375,
  *       3326.732177734375
- *    ],
- *    "norm": [
- *       0,
- *       0,
- *       0
  *    ],
  *    "_id": "9ba5fb10-c8db-11e9-8f2a-ada77612c97e",
  *    "created": 1566918114625,
@@ -622,7 +623,6 @@ router.post("/issues", middlewares.issue.canCreate, storeIssue, middlewares.noti
  *       "guid": "a1167d5f-2434-4a50-a158-d6a6745e7d6a",
  *       "screenshotSmall": "teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/98c39770-c8e2-11e9-8f2a-ada77612c97e/viewpoints/a1167d5f-2434-4a50-a158-d6a6745e7d6a/screenshotSmall.png"
  *    },
- *    "norm": [],
  *    "position": [],
  *    "extras": {
  *    }
@@ -836,7 +836,8 @@ function listIssues(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model, rid } = req.params;
 	const branch = rid ? null : "master";
-	const ids = req.query.ids ? req.query.ids.split(",") : null;
+	const filters = utils.deserialiseFilters(req.query.ids, req.query.numbers);
+
 	const convertCoords = !!req.query.convertCoords;
 	let updatedSince = req.query.updatedSince;
 
@@ -847,7 +848,7 @@ function listIssues(req, res, next) {
 		}
 	}
 
-	Issue.getList(account, model, branch, rid, ids, convertCoords, updatedSince).then(issues => {
+	Issue.getList(account, model, branch, rid, filters, convertCoords, updatedSince).then(issues => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, issues);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -860,21 +861,14 @@ function getIssuesBCF(req, res, next) {
 	const model = req.params.model;
 	const dbCol =  {account: account, model: model};
 
-	let ids;
-	let useIssueNumbers = false;
-	if (req.query.numbers) {
-		ids = req.query.numbers.split(",");
-		useIssueNumbers = true;
-	} else if (req.query.ids) {
-		ids = req.query.ids.split(",");
-	}
+	const filters = utils.deserialiseFilters(req.query.ids, req.query.numbers);
 
 	let getBCFZipRS;
 
 	if (req.params.rid) {
-		getBCFZipRS = Issue.getBCF(account, model, null, req.params.rid, ids, useIssueNumbers);
+		getBCFZipRS = Issue.getBCF(account, model, null, req.params.rid, filters);
 	} else {
-		getBCFZipRS = Issue.getBCF(account, model, "master", null, ids, useIssueNumbers);
+		getBCFZipRS = Issue.getBCF(account, model, "master", null, filters);
 	}
 
 	getBCFZipRS.then(zipRS => {
@@ -897,7 +891,7 @@ function getIssuesBCF(req, res, next) {
 	});
 }
 
-function findIssueById(req, res, next) {
+function findIssue(req, res, next) {
 	const place = utils.APIInfo(req);
 	const {account, model, issueId} = req.params;
 
@@ -911,9 +905,9 @@ function findIssueById(req, res, next) {
 function renderIssuesHTML(req, res, next) {
 	const place = utils.APIInfo(req);
 	const {account, model, rid} = req.params;
-	const ids = req.query.ids ? req.query.ids.split(",") : undefined;
+	const filters = utils.deserialiseFilters(req.query.ids, req.query.numbers);
 
-	Issue.getIssuesReport(account, model, rid, ids, res).catch(err => {
+	Issue.getIssuesReport(account, model, rid, filters, res).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }

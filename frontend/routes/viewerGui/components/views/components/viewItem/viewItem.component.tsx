@@ -17,43 +17,103 @@
 
 import { Field, Formik } from 'formik';
 import { debounce } from 'lodash';
-import React from 'react';
+import React, { useState } from 'react';
 
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { Image } from '../../../../../components/image';
 
+import { Menu, MenuItem } from '@material-ui/core';
+import MoreVert from '@material-ui/icons/MoreVert';
 import { ActionMessage } from '../../../../../components/actionMessage/actionMessage.component';
 import {
+	HamburgerIconButton,
 	IconsGroup,
+	Image,
 	Name,
 	NameRow,
 	NewViewpointName,
 	SaveIconButton,
+	Small,
 	StyledCancelIcon,
-	StyledDeleteIcon,
 	StyledEditIcon,
 	StyledForm,
 	StyledSaveIcon,
+	StyledShareIcon,
 	ThumbnailPlaceholder,
 	ViewpointItem
 } from './viewItem.styles';
 
 interface IProps {
 	viewpoint: any;
-	active: boolean;
-	editMode: boolean;
+	active?: boolean;
+	isAdmin?: boolean;
+	editMode?: boolean;
 	teamspace: string;
 	modelId: string;
-	isCommenter: boolean;
-	onCancelEditMode: () => void;
-	onSaveEdit: (values) => void;
+	isCommenter?: boolean;
+	onCancelEditMode?: () => void;
+	onSaveEdit?: (values) => void;
 	onDelete?: (teamspace, model, id) => void;
+	onShare?: (teamspace, model, id) => void;
+	onSetDefault?: (teamspace, model, id) => void;
 	onOpenEditMode?: () => void;
 	onClick?: (viewpoint) => void;
 	onChangeName?: (viewpointName) => void;
+	defaultView?: boolean;
 }
 
+const HamburgerMenu = ({onSetAsDefault, onDelete, isAdmin, defaultView}) => {
+	const [anchorElement, setAnchorElement] = useState(null);
+
+	const toggleMenu = (e: React.SyntheticEvent) => {
+		setAnchorElement(Boolean(anchorElement) ? null : e.currentTarget );
+		return false;
+	};
+
+	const closeMenuAnd = ( action: (e?) => void ) =>
+		(e: React.SyntheticEvent) => {
+			toggleMenu(e);
+			action(e);
+	};
+
+	const renderDeleteMenuItem = renderWhenTrue(() => (
+		<MenuItem onClick={closeMenuAnd(onDelete)} >
+			Delete
+		</MenuItem>
+	));
+
+	return (
+		<HamburgerIconButton aria-label="Menu" onClick={toggleMenu}>
+			<MoreVert />
+			<Menu
+				anchorEl={anchorElement}
+				open={Boolean(anchorElement)}
+				onClose={toggleMenu}
+			>
+				<MenuItem onClick={closeMenuAnd(onSetAsDefault)} disabled={!isAdmin} >
+					Set as Default
+				</MenuItem>
+				{renderDeleteMenuItem(!defaultView)}
+			</Menu>
+		</HamburgerIconButton>
+	);
+};
+
 export class ViewItem extends React.PureComponent<IProps, any> {
+
+	private get screenshot() {
+		const vpscreenshot = this.props.viewpoint.screenshot || this.props.viewpoint.viewpoint.screenshot ;
+
+		if (vpscreenshot.thumbnailUrl) {
+			return vpscreenshot.thumbnailUrl;
+		}
+
+		if (!vpscreenshot.startsWith('data:image/png;base64,') && !vpscreenshot.startsWith('https://')) {
+			return 'data:image/png;base64,' + vpscreenshot;
+		}
+
+		return vpscreenshot;
+	}
+
 	public state = {
 		isDeletePending: false
 	};
@@ -63,16 +123,26 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 	));
 
 	public renderViewpointName = renderWhenTrue(() => (
-		<Name>{this.props.viewpoint.name}</Name>
+			<Name>{this.props.viewpoint.name}{this.renderViewpointDefault(this.props.defaultView)}</Name>
+	));
+
+	public renderViewpointDefault = renderWhenTrue(() => (
+			<Small>(Default View)</Small>
 	));
 
 	public renderViewpointData = renderWhenTrue(() => (
 		<NameRow>
-			<Name>{this.props.viewpoint.name}</Name>
+			{this.renderViewpointName(true)}
 			{this.props.isCommenter &&
 				<IconsGroup disabled={this.state.isDeletePending}>
 					<StyledEditIcon onClick={this.props.onOpenEditMode} />
-					<StyledDeleteIcon onClick={this.handleDelete} />
+					<StyledShareIcon onClick={this.handleShareLink} />
+					<HamburgerMenu
+						onDelete={this.handleDelete}
+						onSetAsDefault={this.handleSetDefault}
+						isAdmin={this.props.isAdmin}
+						defaultView={this.props.defaultView}
+					/>
 				</IconsGroup>
 			}
 		</NameRow>
@@ -128,7 +198,7 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 
 	public renderScreenshot = renderWhenTrue(() => (
 		<Image
-			src={this.props.viewpoint.screenshot.thumbnailUrl}
+			src={this.screenshot}
 			alt={this.props.viewpoint.name}
 		/>
 	));
@@ -138,6 +208,16 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 	public handleDelete = (event) => {
 		event.persist();
 		this._handleDelete(event);
+	}
+
+	public handleShareLink = () => {
+		const { teamspace, modelId, viewpoint: {_id} } = this.props;
+		this.props.onShare(teamspace, modelId, _id);
+	}
+
+	public handleSetDefault = () => {
+		const { teamspace, modelId, viewpoint } = this.props;
+		this.props.onSetDefault(teamspace, modelId, viewpoint);
 	}
 
 	public handleNameChange = (field) => (event) => {
@@ -158,8 +238,8 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 				onClick={onClick}
 				active={Number(active)}>
 				{this.renderDeleteMessage(viewpoint.willBeRemoved)}
-				{this.renderScreenshot(viewpoint.screenshot)}
-				{this.renderScreenshotPlaceholder(!viewpoint.screenshot || !viewpoint.screenshot.thumbnailUrl)}
+				{this.renderScreenshot(this.screenshot)}
+				{this.renderScreenshotPlaceholder(!this.screenshot)}
 				{this.renderViewpointForm(this.props.active && this.props.editMode)}
 				{this.renderViewpointData(this.props.active && !this.props.editMode)}
 				{this.renderViewpointName(!this.props.active)}

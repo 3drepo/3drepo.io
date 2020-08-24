@@ -30,6 +30,7 @@ import {
 interface IProps {
 	className?: string;
 	formRef?: any;
+	commentRef?: any;
 	messages: any[];
 	isPending: boolean;
 	currentUser: string;
@@ -73,7 +74,7 @@ export const MessagesList = ({ teamspace, isPending, messages, ...props }: IProp
 				});
 			}
 		}
-	}, [isPending, messages.length]);
+	}, [isPending, messages.length, filter]);
 
 	const messagesList = React.useMemo(() => messages
 		.filter((message) => cond([
@@ -87,6 +88,7 @@ export const MessagesList = ({ teamspace, isPending, messages, ...props }: IProp
 				index={index}
 				{...item}
 				formRef={props.formRef}
+				commentRef={props.commentRef}
 				removeMessage={props.removeMessage}
 				teamspace={teamspace}
 				currentUser={props.currentUser}

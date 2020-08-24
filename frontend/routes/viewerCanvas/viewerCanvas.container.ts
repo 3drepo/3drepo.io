@@ -25,7 +25,8 @@ import { selectPins as selectMeasurementPins } from '../../modules/measurements'
 import { selectGISCoordinates, selectHasGISCoordinates } from '../../modules/model';
 import { selectIsViewerManipulationEnabled } from '../../modules/presentation';
 import { selectPins as selectRiskPins } from '../../modules/risks';
-import { selectAllTransparencyOverrides, selectColorOverrides, TreeActions } from '../../modules/tree';
+import { TreeActions } from '../../modules/tree';
+import { selectAllTransparencyOverrides, selectColorOverrides } from '../../modules/viewerGui';
 import { withViewer } from '../../services/viewer/viewer';
 import { ViewerCanvas } from './viewerCanvas.component';
 

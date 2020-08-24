@@ -35,6 +35,7 @@ import { Toolbar } from './toolbar.component';
 import { TreeActions } from '../../../../modules/tree';
 
 import { selectIsActive, BimActions } from '../../../../modules/bim';
+import { GroupsActions } from '../../../../modules/groups';
 import { selectMetaKeysExist } from '../../../../modules/model';
 
 const mapStateToProps = createStructuredSelector({
@@ -68,6 +69,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showAllNodes: TreeActions.showAllNodes,
 	hideSelectedNodes: TreeActions.hideSelectedNodes,
 	isolateSelectedNodes: TreeActions.isolateSelectedNodes,
+	clearColorOverrides: GroupsActions.clearColorOverrides
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Toolbar);

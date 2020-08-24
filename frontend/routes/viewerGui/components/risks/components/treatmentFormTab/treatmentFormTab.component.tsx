@@ -29,7 +29,7 @@ import {
 } from '../../../../../../constants/risks';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
 import { TextField } from '../../../../../components/textField/textField.component';
-import { LabelButton } from '../../../labelButton/labelButton.styles';
+import { ContainedButton } from '../../../containedButton/containedButton.component';
 import { AutoSuggestField } from '../autoSuggestField/autosuggestField.component';
 import { LevelOfRisk } from '../levelOfRisk/levelOfRisk.component';
 import {
@@ -72,7 +72,9 @@ export const TreatmentRiskFormTab: React.FunctionComponent<IProps> = ({
 		<Content active={active}>
 			<Container top>
 				<SuggestionButtonWrapper>
-					<LabelButton disabled={!canEditBasicProperty} onClick={handleSuggestionClick}>Suggest</LabelButton>
+					<ContainedButton onClick={handleSuggestionClick} disabled={!canEditBasicProperty}>
+						Suggest
+					</ContainedButton>
 				</SuggestionButtonWrapper>
 				<Field name="mitigation_desc" render={({ field }) => (
 					<TextField

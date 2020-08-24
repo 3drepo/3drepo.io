@@ -80,6 +80,10 @@ export const selectCurrentModelName = createSelector(
 	selectSettings, (state) => state.name
 );
 
+export const selectDefaultView = createSelector(
+	selectSettings, (state) => state.defaultView
+);
+
 export const selectMetaKeys = createSelector(
 	selectModelDomain, (state) => state.metaKeys
 );
@@ -102,4 +106,8 @@ export const selectUnit = createSelector(
 
 export const selectCurrentModelTeamspace = createSelector(
 	selectSettings, (state) => state.account
+);
+
+export const selectSubModels = createSelector(
+		selectSettings, (state) => state.subModels
 );

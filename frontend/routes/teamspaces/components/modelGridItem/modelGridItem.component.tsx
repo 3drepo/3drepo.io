@@ -20,10 +20,12 @@ import { pick, startCase } from 'lodash';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ROUTES } from '../../../../constants/routes';
 import { renderWhenTrue } from '../../../../helpers/rendering';
+import { IViewpointsComponentState } from '../../../../modules/viewpoints/viewpoints.redux';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../../../services/analytics';
 import { formatDate, LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
 import { TYPES } from '../../../components/dialogContainer/components/revisionsDialog/revisionsDialog.constants';
 import { Loader } from '../../../components/loader/loader.component';
+import ViewsDialog from '../../../components/viewsDialog/viewsDialog.container';
 import { PERMISSIONS_VIEWS } from '../../../projects/projects.component';
 import { ROW_ACTIONS } from '../../teamspaces.contants';
 import { ActionsMenu } from '../actionsMenu/actionsMenu.component';
@@ -74,6 +76,8 @@ interface IProps {
 	showSnackbar: (text) => void;
 	addToStarred: (modelName) => void;
 	removeFromStarred: (modelName) => void;
+	setState: (componentState: IViewpointsComponentState) => void;
+	searchEnabled?: boolean;
 }
 
 export const ModelGridItem = memo((props: IProps) => {
@@ -89,6 +93,10 @@ export const ModelGridItem = memo((props: IProps) => {
 			props.subscribeOnStatusChange(props.teamspace, props.projectName, modelData);
 			return () => props.unsubscribeOnStatusChange(props.teamspace, props.projectName, modelData);
 		}
+	}, []);
+
+	useEffect(() => {
+		return () => handleCloseSearchMode();
 	}, []);
 
 	const resetStarClickTimeout = () => {
@@ -139,6 +147,38 @@ export const ModelGridItem = memo((props: IProps) => {
 				modelId: model,
 				type: TYPES.TEAMSPACES
 			}
+		});
+	};
+
+	const handleOpenSearchMode = () => props.setState({ searchEnabled: true });
+
+	const handleCloseSearchMode = () =>
+		props.setState({
+			searchEnabled: false,
+			searchQuery: ''
+		});
+
+	const onChange = ({ target }) => {
+		const { teamspace, model } = props;
+		props.history.push(`${ROUTES.VIEWER}/${teamspace}/${model}?viewId=${target.value.id}`);
+	};
+
+	const handleLoadModelClick = () => {
+		const { teamspace, model } = props;
+
+		props.showDialog({
+			title: 'Load model with...',
+			template: ViewsDialog,
+			data: {
+				teamspace,
+				modelId: model,
+				onChange,
+			},
+			search: {
+				enabled: props.searchEnabled,
+				onOpen: handleOpenSearchMode,
+				onClose: handleCloseSearchMode,
+			},
 		});
 	};
 
@@ -228,6 +268,11 @@ export const ModelGridItem = memo((props: IProps) => {
 	}, [starClickTimeout.current, props.isStarred, props.model]);
 
 	const getRowActions = () => {
+		const sharedBeginningActions = [{
+			...ROW_ACTIONS.LOAD_MODEL,
+			onClick: handleLoadModelClick
+		}];
+
 		const sharedActions = [{
 			...ROW_ACTIONS.PERMISSIONS,
 			onClick: handlePermissionsClick
@@ -243,7 +288,9 @@ export const ModelGridItem = memo((props: IProps) => {
 		}];
 
 		if (isFederation) {
-			return [{
+			return [
+				...sharedBeginningActions,
+			{
 				...ROW_ACTIONS.EDIT,
 				onClick: handleFederationEdit
 			}, {
@@ -253,7 +300,9 @@ export const ModelGridItem = memo((props: IProps) => {
 				...sharedActions];
 		}
 
-		return [{
+		return [
+			...sharedBeginningActions,
+		{
 			...ROW_ACTIONS.UPLOAD_FILE,
 			onClick: handleUploadModelFile
 		}, {

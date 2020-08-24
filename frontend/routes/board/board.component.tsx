@@ -135,6 +135,7 @@ interface IProps {
 	resetIssues: () => void;
 	resetRisks: () => void;
 	teamspaceSettings: any;
+	openCardDialog: (cardId: string, onChange: (index: number) => void) => void;
 }
 
 const PANEL_PROPS = {
@@ -262,54 +263,9 @@ export function Board(props: IProps) {
 		props.fetchCardData(type, teamspace, modelId, newCardId);
 	};
 
-	const handleOpenDialog = useCallback((cardId?, metadata?, laneId?) => {
-		if (cardId) {
-			props.fetchCardData(type, teamspace, modelId, cardId);
-		}
-
-		const TemplateComponent = isIssuesBoard ? IssueDetails : RiskDetails;
-		const dataType = isIssuesBoard ? 'issue' : 'risk';
-		const size = cardId ? 'lg' : 'sm';
-		const titlePrefix = cardId ? 'Edit' : 'Add new';
-		const initialIndex = props.cards.findIndex((card) => card.id === cardId);
-
-		if (!cardId) {
-			props.resetCardData();
-		}
-
-		const Form = (formProps: any) => (
-			<FormWrapper size={size}>
-				<TemplateComponent {...formProps} disableViewer />
-			</FormWrapper>
-		);
-
-		const DialogTitle = cardId ? (
-			<BoardDialogTitle>
-				<Title>{titlePrefix} {dataType}</Title>
-				<ListNavigation
-					initialIndex={initialIndex}
-					lastIndex={props.cards.length - 1}
-					onChange={handleNavigationChange}
-				/>
-			</BoardDialogTitle>
-		) : `${titlePrefix} ${dataType}`;
-
-		const config = {
-			title: DialogTitle,
-			template: Form,
-			data: {
-				teamspace,
-				model: modelId,
-				disableViewer: true,
-				horizontal: true,
-			},
-			DialogProps: {
-				maxWidth: size
-			}
-		};
-
-		props.showDialog(config);
-	}, [type, props.fetchCardData, project, teamspace, modelId, props.cards]);
+	const handleOpenDialog = useCallback((cardId?) => {
+		props.openCardDialog(cardId, handleNavigationChange);
+	}, [teamspace, modelId, props.cards]);
 
 	const handleAddNewCard = () => {
 		handleOpenDialog();

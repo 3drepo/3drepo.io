@@ -254,6 +254,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 	public renderTitleIcon = () => {
 		const { showDetails, Icon } = this.props;
+
 		if (showDetails) {
 			return (
 				<IconButton onClick={this.props.onCloseDetails} >
@@ -316,6 +317,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { className, title, isPending, searchEnabled, showDetails } = this.props;
+
 		return (
 			<ViewerPanel
 				className={className}

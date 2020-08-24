@@ -76,7 +76,6 @@ const multer = require("multer");
  * 	"mitigation_type":"Eliminate",
  * 	"model":"00000000-0000-0000-0000-000000000000",
  * 	"name":"Risk 1",
- * 	"norm":[0,0,0],
  * 	"overall_level_of_risk":0,
  * 	"owner":"alice",
  * 	"position":[55000.0,80000.0,-10000.0],
@@ -139,6 +138,8 @@ router.get("/risks/:riskId/thumbnail.png", middlewares.issue.canView, getThumbna
  *
  * @apiParam {String} [revId] Revision ID
  * @apiParam (Query) {Number} [updatedSince] Only return issues that has been updated since this value (in epoch value)
+ * @apiParam (Query) {Number} [numbers] Array of issue numbers to filter for
+ * @apiParam (Query) {String} [ids] Array of issue ids to filter for
  *
  * @apiSuccess (200) {Object[]} risks Risk objects
  *
@@ -175,7 +176,6 @@ router.get("/risks/:riskId/thumbnail.png", middlewares.issue.canView, getThumbna
  * 		"mitigation_type":"Eliminate",
  * 		"model":"00000000-0000-0000-0000-000000000000",
  * 		"name":"Risk 1",
- * 		"norm":[0,0,0],
  * 		"overall_level_of_risk":0,
  * 		"owner":"alice",
  * 		"position":[55000.0,80000.0,-10000.0],
@@ -309,7 +309,6 @@ router.get("/revision/:rid/risks.html", middlewares.issue.canView, renderRisksHT
  * 	"mitigation_status":"proposed",
  * 	"mitigation_type":"Eliminate",
  * 	"name":"Risk 1",
- * 	"norm":[0,0,0],
  * 	"overall_level_of_risk":0,
  * 	"position":[55000.0,80000.0,-10000.0],
  * 	"residual_consequence":-1,
@@ -358,7 +357,6 @@ router.get("/revision/:rid/risks.html", middlewares.issue.canView, renderRisksHT
  * 	"mitigation_status":"proposed",
  * 	"mitigation_type":"Eliminate",
  * 	"name":"Risk 1",
- * 	"norm":[0,0,0],
  * 	"overall_level_of_risk":0,
  * 	"position":[55000.0,80000.0,-10000.0],
  * 	"residual_consequence":-1,
@@ -411,7 +409,6 @@ router.get("/revision/:rid/risks.html", middlewares.issue.canView, renderRisksHT
  * 	"mitigation_type":"Eliminate",
  * 	"model":"00000000-0000-0000-0000-000000000000",
  * 	"name":"Risk 1",
- * 	"norm":[0,0,0],
  * 	"overall_level_of_risk":0,
  * 	"owner":"alice",
  * 	"position":[55000.0,80000.0,-10000.0],
@@ -493,7 +490,6 @@ router.post("/risks", middlewares.issue.canCreate, storeRisk);
  * 	"mitigation_type":"Eliminate",
  * 	"model":"00000000-0000-0000-0000-000000000000",
  * 	"name":"Risk 1",
- * 	"norm":[0,0,0],
  * 	"owner":"alice",
  * 	"overall_level_of_risk":0,
  * 	"position":[55000.0,80000.0,-10000.0],
@@ -595,7 +591,7 @@ router.patch("/revision/:rid/risks/:riskId", middlewares.issue.canComment, updat
  * 	}
  * }
  **/
-router.post("/risks/:riskId/comments", middlewares.issue.canComment, addComment, middlewares.chat.onCommentCreated, responseCodes.onSuccessfulOperation);
+router.post("/risks/:riskId/comments", middlewares.issue.canComment, addComment, middlewares.notification.onNewComment, middlewares.chat.onCommentCreated, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {delete} /:teamspace/:model/risks/:riskId/comments Delete a comment
@@ -621,25 +617,6 @@ router.post("/risks/:riskId/comments", middlewares.issue.canComment, addComment,
  * }
  **/
 router.delete("/risks/:riskId/comments", middlewares.issue.canComment, deleteComment, middlewares.chat.onCommentDeleted, responseCodes.onSuccessfulOperation);
-
-/**
- * @api {delete} /:teamspace/:model/risks?ids=:ids Delete risks
- * @apiName deleteRisks
- * @apiGroup Risks
- * @apiDescription Delete model risks.
- *
- * @apiUse Risks
- *
- * @apiParam (Query) {String} ids Comma separated list of IDs of risks to delete
- *
- * @apiExample {delete} Example usage:
- * DELETE /acme/00000000-0000-0000-0000-000000000000/risks?ids=00000000-0000-0000-0000-000000000002 HTTP/1.1
- *
- * @apiSuccessExample {json} Success-Response
- * HTTP/1.1 200 OK
- * {}
- */
-router.delete("/risks/", middlewares.issue.canCreate, deleteRisks);
 
 /**
  * @api {post} /:teamspace/:model/risks/:riskId/resources Attach resources to a risk
@@ -751,29 +728,12 @@ function updateRisk(req, res, next) {
 	});
 }
 
-function deleteRisks(req, res, next) {
-	const sessionId = req.headers[C.HEADER_SOCKET_ID];
-	const place = utils.APIInfo(req);
-	const dbCol = {account: req.params.account, model: req.params.model};
-
-	if (req.query.ids) {
-		const ids = req.query.ids.split(",");
-
-		Risk.deleteRisks(dbCol, sessionId, ids).then(() => {
-			responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "success"});
-		}).catch((err) => {
-			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
-		});
-	} else {
-		responseCodes.respond(place, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
-	}
-}
-
 function listRisks(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model, rid } = req.params;
 	const branch = rid ? null : "master";
-	const ids = req.query.ids ? req.query.ids.split(",") : null;
+
+	const filters = utils.deserialiseFilters(req.query.ids, req.query.numbers);
 	const convertCoords = !!req.query.convertCoords;
 	let updatedSince = req.query.updatedSince;
 
@@ -784,7 +744,7 @@ function listRisks(req, res, next) {
 		}
 	}
 
-	Risk.getList(account, model, branch, rid, ids, convertCoords, updatedSince).then(risks => {
+	Risk.getList(account, model, branch, rid, filters, convertCoords, updatedSince).then(risks => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, risks);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -806,9 +766,9 @@ function findRiskById(req, res, next) {
 function renderRisksHTML(req, res, next) {
 	const place = utils.APIInfo(req);
 	const {account, model, rid} = req.params;
-	const ids = req.query.ids ? req.query.ids.split(",") : undefined;
+	const filters = utils.deserialiseFilters(req.query.ids, req.query.numbers);
 
-	Risk.getRisksReport(account, model, rid, ids, res).catch(err => {
+	Risk.getRisksReport(account, model, rid, filters, res).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
@@ -852,7 +812,7 @@ function addComment(req, res, next) {
 	const {account, model, riskId} = req.params;
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-	Comment.addComment(account, model,"risks" , riskId, user, data, sessionId).then(({comment, userRefs}) => {
+	Risk.addComment(account, model, riskId, user, data, sessionId).then(({comment, userRefs}) => {
 		req.dataModel = comment;
 		req.userReferences = {type: "risk", userRefs};
 

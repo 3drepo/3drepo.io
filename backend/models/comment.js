@@ -19,7 +19,7 @@
 const get = require("lodash").get;
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
-const View = require("./viewpoint");
+const Viewpoint = require("../models/viewpoint");
 const db = require("../handler/db");
 const FileRef = require("./fileRef");
 
@@ -117,7 +117,7 @@ class MitigationCommentGenerator extends TextCommentGenerator {
 
 const identifyReferences = (comment) => {
 	const userRefs = new Set();
-	const issueRefs =  new Set();
+	const ticketRefs =  new Set();
 
 	if (comment) {
 		let inQuotes = false;
@@ -131,21 +131,20 @@ const identifyReferences = (comment) => {
 				const users = line.match(/@\S*/g);
 				users && users.forEach((x) => userRefs.add(x.substr(1)));
 
-				const issues = line.match(/#\d+/g);
-				issues && issues.forEach((x) => issueRefs.add(parseInt(x.substr(1),10)));
+				const tickets = line.match(/#\d+/g);
+				tickets && tickets.forEach((x) => ticketRefs.add(parseInt(x.substr(1),10)));
 			}
 		});
 	}
 
-	return { userRefs: Array.from(userRefs), issueRefs: Array.from(issueRefs) };
+	return { userRefs: Array.from(userRefs), ticketRefs: Array.from(ticketRefs) };
 
 };
 
-const addComment = async function(account, model, colName, id, user, data) {
+const addComment = async function(account, model, colName, id, user, data, routePrefix, ticketType) {
 	if (!(data.comment || "").trim() && !get(data,"viewpoint.screenshot")) {
 		throw { resCode: responseCodes.ISSUE_COMMENT_NO_TEXT};
 	}
-
 	// 1. Fetch comments
 	const _id = utils.stringToUUID(id) ;
 	const col = await db.getCollection(account, model + "." + colName);
@@ -162,13 +161,7 @@ const addComment = async function(account, model, colName, id, user, data) {
 	let viewpoint = null;
 
 	if (data.viewpoint) {
-		viewpoint = View.clean(data.viewpoint, fieldTypes.viewpoint);
-		viewpoint.guid = utils.generateUUID();
-
-		if (viewpoint.screenshot) {
-			viewpoint.screenshot = new Buffer.from(viewpoint.screenshot, "base64");
-			await View.setExternalScreenshotRef(viewpoint, account, model, colName);
-		}
+		viewpoint = await Viewpoint.createViewpoint(account, model, colName, routePrefix, id, data.viewpoint, true, ticketType);
 	}
 
 	const references = identifyReferences(data.comment);
@@ -182,7 +175,7 @@ const addComment = async function(account, model, colName, id, user, data) {
 
 	await col.update({ _id }, {...viewpointPush ,$set : {comments}});
 
-	View.setViewpointScreenshotURL(colName, account, model, id, viewpoint);
+	Viewpoint.clean(routePrefix, viewpoint);
 
 	// 6. Return the new comment.
 	return { comment: {...comment, viewpoint, guid: utils.uuidToString(comment.guid)}, ...references };
@@ -250,9 +243,21 @@ const deleteComment =  async function(account, model, colName, id, guid, user) {
 	return {guid};
 };
 
+const clean = (routePrefix, comment) =>  {
+	["rev_id", "guid"].forEach((key) => {
+		if (comment[key]) {
+			comment[key] = utils.uuidToString(comment[key]);
+		}
+	});
+	if(comment.viewpoint) {
+		Viewpoint.clean(routePrefix, comment.viewpoint);
+	}
+};
+
 module.exports = {
 	newSystemComment : (owner, property, from, to) => new SystemCommentGenerator(owner, property, from, to),
 	newMitigationComment : (owner, likelihood, consequence, mitigation, viewpoint, pinPosition) => new MitigationCommentGenerator(owner, likelihood, consequence, mitigation, viewpoint, pinPosition),
 	addComment,
-	deleteComment
+	deleteComment,
+	clean
 };

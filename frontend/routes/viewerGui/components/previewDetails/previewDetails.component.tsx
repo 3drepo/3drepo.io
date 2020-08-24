@@ -69,6 +69,8 @@ interface IProps {
 	onNameChange?: (event, name: string) => void;
 	renderCollapsable?: () => JSX.Element | JSX.Element[];
 	renderNotCollapsable?: () => JSX.Element | JSX.Element[];
+	actionButton?: React.ReactNode;
+	clone?: boolean;
 }
 
 const ValidationSchema = Yup.object().shape({
@@ -154,16 +156,18 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		</ToggleButtonContainer>
 	));
 
-	public renderNotCollapsableContent = renderWhenTrue(() => {
-		return (
+	public renderNotCollapsableContent = () => {
+		const Component = this.props.renderNotCollapsable && this.props.renderNotCollapsable();
+
+		return renderWhenTrue(() => (
 			<>
 				{this.renderToggleButtonContainer(!this.props.disableExpanding)}
 				<NotCollapsableContent>
 					{this.props.renderNotCollapsable()}
 				</NotCollapsableContent>
 			</>
-		);
-	});
+		))(!!Component);
+	}
 
 	public componentDidMount() {
 		const { editable, defaultExpanded } = this.props;
@@ -202,16 +206,17 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	}
 
 	public handleFocusName = (field, form) => {
-		const nameChanged = form.initialValues.name !== field.value;
+		if (this.props.isNew && !this.props.clone) {
+			const nameChanged = form.initialValues.name !== field.value;
 
-		if (this.props.isNew) {
 			form.setFieldValue('name', nameChanged ? field.value : '');
 		}
 	}
 
 	public handleBlurName = (field, form) => {
-		const nameChanged = this.props.name !== field.value;
-		if (this.props.isNew) {
+		if (this.props.isNew && !this.props.clone) {
+			const nameChanged = this.props.name !== field.value;
+
 			form.setFieldValue('name', nameChanged && field.value ? field.value : this.props.name);
 		}
 	}
@@ -221,6 +226,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		const { teamspace, modelId } = this.props.urlParams;
 		return (
 			<OpenInViewerButton
+				preview
 				teamspace={teamspace}
 				model={modelId}
 				query={`${type}Id=${id}`}
@@ -243,13 +249,13 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			willBeUpdated,
 			willBeRemoved,
 			renderCollapsable,
-			renderNotCollapsable,
 			handleHeaderClick,
-			showModelButton
+			showModelButton,
+			actionButton,
 		} = this.props;
 
 		return (
-			<Container className={className}>
+			<Container className={className} edit={!this.props.isNew} panelName={this.props.panelName}>
 				{this.renderUpdateMessage(willBeUpdated)}
 				{this.renderDeleteMessage(willBeRemoved)}
 				<Summary
@@ -268,6 +274,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 							createdAt={created}
 							StatusIconComponent={StatusIconComponent}
 							statusColor={statusColor}
+							actionButton={actionButton}
 						/>
 					</MainInfoContainer>
 				</Summary>
@@ -278,7 +285,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 							{this.renderCollapsable(Boolean(renderCollapsable))}
 						</Details>
 					</Collapsable>
-					{this.renderNotCollapsableContent(!!renderNotCollapsable)}
+					{this.renderNotCollapsableContent()}
 				</ScrollableContainer>
 			</Container>
 		);
