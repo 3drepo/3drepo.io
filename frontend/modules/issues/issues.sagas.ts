@@ -223,8 +223,8 @@ function* removeComment({ issueData }) {
 export function* downloadIssues({ teamspace, modelId }) {
 	try {
 		const filteredIssues = yield select(selectFilteredIssues);
-		const issuesIds = map(filteredIssues, '_id').join(',');
-		yield Exports.exportIssuesToJSON(teamspace, modelId, issuesIds);
+		const issueNumbers = map(filteredIssues, 'number').join(',');
+		yield Exports.exportIssuesToJSON(teamspace, modelId, issueNumbers);
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('download', 'json', error));
 	}
@@ -257,8 +257,8 @@ function* importBcf({ teamspace, modelId, file, revision }) {
 function* printIssues({ teamspace, modelId }) {
 	try {
 		const filteredIssues = yield select(selectFilteredIssues);
-		const issuesIds = map(filteredIssues, '_id').join(',');
-		Exports.printIssues(teamspace, modelId, issuesIds);
+		const issueNumbers = map(filteredIssues, 'number').join(',');
+		Exports.printIssues(teamspace, modelId, issueNumbers);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('print', 'issue', error));
 	}

@@ -135,15 +135,14 @@ class Issue extends Ticket {
 		return await super.update(attributeBlacklist, user, sessionId, account, model, issueId, data, this.onBeforeUpdate.bind(this));
 	}
 
-	async getBCF(account, model, branch, revId, ids, useIssueNumbers = false) {
+	async getBCF(account, model, branch, revId, filters) {
 		const projection = {};
 		const noClean = true;
 
 		const settings = await ModelSetting.findById({account, model}, model);
-		if (useIssueNumbers && Array.isArray(ids)) {
-			ids = { number:  {"$in": ids.map(x => parseInt(x))} };
-		}
-		const issues = await this.findByModelName(account, model, branch, revId, undefined, projection, ids, noClean);
+
+		const issues = await this.findByModelName(account, model, branch, revId, undefined, projection,
+			filters, noClean);
 
 		return BCF.getBCFZipReadStream(account, model, issues, settings.properties.unit);
 	}
@@ -237,9 +236,9 @@ class Issue extends Ticket {
 		}
 	}
 
-	async getIssuesReport(account, model, rid, ids, res) {
+	async getIssuesReport(account, model, rid, filters, res) {
 		const reportGen = require("../models/report").newIssuesReport(account, model, rid);
-		return super.getReport(account, model, rid, ids, res, reportGen);
+		return super.getReport(account, model, rid, filters, res, reportGen);
 	}
 
 	isIssueBeingClosed(oldIssue, newIssue) {

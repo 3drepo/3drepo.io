@@ -51,6 +51,13 @@ function Utils() {
 		return Object.prototype.hasOwnProperty.call(obj, field);
 	};
 
+	this.deserialiseFilters = (ids, numbers) => {
+		return {
+			ids: ids ? ids.split(",") : undefined,
+			numbers: numbers ? numbers.split(",") : undefined
+		};
+	};
+
 	/** *****************************************************************************
 	* Convert a string to a UUID
 	* @param {string} uuid - String representation of a UUID
