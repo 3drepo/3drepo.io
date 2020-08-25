@@ -118,17 +118,26 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 	public handlePermissionsChange = (permissions) => {
 		if (this.props.onPermissionsChange) {
 			const modelsWithPermissions = this.props.selectedModels.map((selectedModel) => {
-				const newPermissions = selectedModel.permissions.map((currentPermission) => {
-					const memberPermission = permissions.find(({user}) => user === currentPermission.user);
-					return {
-						user: currentPermission.user,
-						permission: memberPermission ? memberPermission.key : currentPermission.permission
-					};
-				}).filter(({ permission }) => permission);
+				const permissionsToSave = selectedModel.permissions.reduce((updatedUserPermissions, currentPermissions) => {
+					if (!currentPermissions.isAdmin) {
+						const updatedPermissions = permissions.find(({ user }) =>
+								user === currentPermissions.user
+						);
+						const permissionsKey = updatedPermissions && updatedPermissions.key;
 
+						if (updatedPermissions) {
+							updatedUserPermissions.push({
+								user: currentPermissions.user,
+								permission: permissionsKey || '',
+							});
+						}
+					}
+
+					return updatedUserPermissions;
+				}, []);
 				return {
 					...pick(selectedModel, ['name', 'model', 'federate', 'subModels']),
-					permissions: newPermissions
+					permissions: permissionsToSave
 				};
 			});
 
