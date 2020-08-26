@@ -123,7 +123,7 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 	));
 
 	public renderViewpointName = renderWhenTrue(() => (
-			<Name>{this.props.viewpoint.name}{this.renderViewpointDefault(this.props.defaultView)}</Name>
+			<Name active={Number(this.props.active)}>{this.props.viewpoint.name}{this.renderViewpointDefault(this.props.defaultView)}</Name>
 	));
 
 	public renderViewpointDefault = renderWhenTrue(() => (
