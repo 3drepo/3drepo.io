@@ -356,22 +356,7 @@ router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssues
  * @apiParam (Request body) {Number[3]} position The vector defining the pin of the issue. If the pin doesnt has an issue its an empty array.
  * @apiParam (Request body) {Number[3]} position The vector defining the pin of the issue. If the pin doesnt has an issue its an empty array.
  *
- * @apiParam (Request body: Viewpoint) {Number[3]} right The right vector of the viewpoint indicating the direction of right in relative coordinates.
- * @apiParam (Request body: Viewpoint) {Number[3]} up The up vector of the viewpoint indicating the direction of up in relative coordinates.
- * @apiParam (Request body: Viewpoint) {Number[3]} position The position vector indicates where in the world the viewpoint is positioned.
- * @apiParam (Request body: Viewpoint) {Number[3]} look_at The vector indicating where in the world the viewpoint is looking at.
- * @apiParam (Request body: Viewpoint) {Number[3]} view_dir The vector indicating where is the viewpoint is looking at in relative coordinates.
- * @apiParam (Request body: Viewpoint) {Number} near The vector indicating the near plane.
- * @apiParam (Request body: Viewpoint) {Number} far The vector indicating the far plane.
- * @apiParam (Request body: Viewpoint) {Number} fov The angle of the field of view.
- * @apiParam (Request body: Viewpoint) {Number} aspect_ratio The aspect ratio of the fustrum.
- * @apiParam (Request body: Viewpoint) {String} [highlighted_group_id] If the issue is associated with one or more objects from the model this field has the value of a group id generated to hold those objects
- * @apiParam (Request body: Viewpoint) {String[]} [highlighted_objects] If the issue is associated with one or more objects from the model this field has the value of the meshes
- * @apiParam (Request body: Viewpoint) {String} [hidden_group_id] If the issue is associated with one or more objects from the model this field has the value of a group id generated to hold those objects
- * @apiParam (Request body: Viewpoint) {String[]} [hidden_objects] If the issue is associated with one or more objects from the model this field has the value of a group id generated to hold those objects
- * @apiParam (Request body: Viewpoint) {Boolean} hide_IFC A flag to hide the IFC
- * @apiParam (Request body: Viewpoint) {String} screenshot A string in base64 representing the screenshot associated with the issue
- *
+ * @apiUse viewpointObject
  *
  * @apiExample {post} Example usage:
  * POST /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues HTTP/1.1
@@ -414,7 +399,70 @@ router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssues
  *       "fov": 1.0471975803375244,
  *       "aspect_ratio": 4.031496047973633,
  *       "clippingPlanes": [],
- *       "highlighted_group_id": "",
+ *       "override_groups": [
+ *          {
+ *          	   "color": [
+ *          	       0,
+ *          	       106,
+ *          	       255,
+ *          	       52
+ *          	   ],
+ *          	   "objects": [
+ *          	   	{
+ *          	   	   "shared_ids": [
+ *          	   	      "ffd49cfd-57fb-4c31-84f7-02b41352b54f"
+ *          	   	   ],
+ *          	   	   "account": "teamSpace1",
+ *          	   	   "model": "2710bd65-37d3-4e7f-b2e0-ffe743ce943f"
+ *          	   	}
+ *          	   ],
+ *          	   "totalSavedMeshes": 1
+ *          }   ,
+ *          {
+ *             "color": [
+ *                  96,
+ *                  237,
+ *                  61
+ *             ],
+ *          	   "objects": [
+ *          	   	{
+ *          	   	   "shared_ids": [
+ *          	   	   "a4a14ee6-aa44-4f36-96bd-f80dbabf8ead"
+ *          	   	   ],
+ *          	   	   "account": "teamSpace1",
+ *          	   	   "model": "2710bd65-37d3-4e7f-b2e0-ffe743ce943f"
+ *          	   	}
+ *          	   ],
+ *          	   "totalSavedMeshes": 1
+ *          }
+ *       ],
+ *       "highlighted_group": {
+ *       	"objects": [
+ *       		{
+ *       			"shared_ids": [
+ *       				"60286d41-d897-4de6-a0ed-0929fa68be96"
+ *       			],
+ *       			"account": "teamSpace1",
+ *       			"model": "7cf61b4f-acdf-4295-b2d0-9b45f9f27418"
+ *       		}
+ *       	],
+ *       	"color": [
+ *       		255,
+ *       		255,
+ *       		0
+ *       	]
+ *       },
+ *       "hidden_group": {
+ *       	"objects": [
+ *       		{
+ *       			"shared_ids": [
+ *       				"57b0969f-6009-4e32-9153-2b17d3a3628b"
+ *       			],
+ *       			"account": "teamSpace1",
+ *       			"model": "b1fceab8-b0e9-4e45-850b-b9888efd6521"
+ *       		}
+ *       	]
+ *       }
  *       "hideIfc": true,
  *       "screenshot": "iVBORw0KGgoAAAANSUhEUgAACAAAA...ggg=="
  *    },
@@ -484,7 +532,12 @@ router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssues
  *       "fov": 1.0471975803375244,
  *       "aspect_ratio": 4.031496047973633,
  *       "clippingPlanes": [],
- *       "highlighted_group_id": "",
+ *       "hidden_group_id": "119d5dc0-e223-11ea-8549-49012d4e4956",
+ *       "highlighted_group_id" : "80c5a270-e223-11ea-8549-49012d4e4956",
+ *       "override_group_ids": [
+ *          "11952060-e223-11ea-8549-49012d4e4956",
+ *          "bc5ca80-e6c7-11ea-bd51-ddd919e6418e"
+ *       ],
  *       "hideIfc": true,
  *       "screenshot": "teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/9ba5fb10-c8db-11e9-8f2a-ada77612c97e/viewpoints/125ce196-852c-49ed-9a2f-f9a77aa03390/screenshot.png",
  *       "guid": "125ce196-852c-49ed-9a2f-f9a77aa03390",
@@ -523,9 +576,11 @@ router.post("/issues", middlewares.issue.canCreate, storeIssue, middlewares.noti
  * @apiParam (Request body) {Number} [due_date] Due date timestamp for the issue
  * @apiParam (Request body) {String} [priority] The priority of the issue (values: "none", "low", "medium", "high")
  * @apiParam (Request body) {Number} [scale] The scale factor of the issue
- * @apiParam (Request body) {Object} [viewpoint] The viewpoint and screenshot of the issue
+ * @apiParam (Request body) {Viewpoint} [viewpoint] The viewpoint and screenshot of the issue
  * @apiParam (Request body) {Number} [viewCount] The viewcount of the issue
  * @apiParam (Request body) {Object} [extras] A field containing any extras that wanted to be saved in the issue (typically used by BCF)
+ *
+ * @apiUse viewpointObject
  *
  * @apiExample {patch} Example usage:
  * PATCH /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/98c39770-c8e2-11e9-8f2a-ada77612c97e HTTP/1.1
@@ -666,11 +721,16 @@ router.patch("/revision/:rid/issues/:issueId", middlewares.issue.canComment, upd
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  * @apiParam {String} issueId Unique Issue ID to update.
- * @apiParam {Json} PAYLOAD The data with the comment to be added.
+ *
+ * @apiParam (Request body) {String} comment The actual comment text
+ * @apiParam (Request body) {Viewpoint} [viewpoint] The viewpoint associated with the comment
+ *
+ * @apiUse viewpointObject
+ *
  * @apiParamExample {json} PAYLOAD
  *    {
  *      "comment": "This is a commment",
- *      "viewpoint: {right: [-0.0374530553817749, -7.450580596923828e-9, -0.9992983341217041],…}
+ *      "viewpoint": {right: [-0.0374530553817749, -7.450580596923828e-9, -0.9992983341217041],…}
  *    }
  *
  * @apiSuccessExample {json} Success

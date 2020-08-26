@@ -45,6 +45,36 @@ const config = require("../config");
  */
 
 /**
+ * @apiDefine viewpointObject
+ *
+ * @apiParam (type: Viewpoint) {Number[3]} right The right vector of the viewpoint indicating the direction of right in relative coordinates.
+ * @apiParam (type: Viewpoint) {Number[3]} up The up vector of the viewpoint indicating the direction of up in relative coordinates.
+ * @apiParam (type: Viewpoint) {Number[3]} position The position vector indicates where in the world the viewpoint is positioned.
+ * @apiParam (type: Viewpoint) {Number[3]} look_at The vector indicating where in the world the viewpoint is looking at.
+ * @apiParam (type: Viewpoint) {Number[3]} view_dir The vector indicating where is the viewpoint is looking at in relative coordinates.
+ * @apiParam (type: Viewpoint) {Number} near The vector indicating the near plane.
+ * @apiParam (type: Viewpoint) {Number} far The vector indicating the far plane.
+ * @apiParam (type: Viewpoint) {Number} fov The angle of the field of view.
+ * @apiParam (type: Viewpoint) {Number} aspect_ratio The aspect ratio of the fustrum.
+ * @apiParam (type: Viewpoint) {String} [highlighted_group_id] If the viewpoint is associated with one or more highlighted objects from the model this field has the value of a group id generated to hold those objects
+ * @apiParam (type: Viewpoint) {String} [hidden_group_id] If the viewpoint is associated with one or more hidden objects from the model this field has the value of a group id generated to hold those objects
+ * @apiParam (type: Viewpoint) {String} [shown_group_id] If the viewpoint is associated with one or more shown objects from the model this field has the value of a group id generated to hold those objects
+ * @apiParam (type: Viewpoint) {Group} [highlighted_group] If the viewpoint is associated with one or more highlighted objects from the model this field has the value of a group definition for those objects (this shouldnt be use simultaneously with highlighted_group_id)
+ * @apiParam (type: Viewpoint) {Group} [hidden_group] If the viewpoint is associated with one or more hidden objects from the model this field has the value of a group id generated to hold those objects (this shouldnt be use simultaneously with hidden_group_id)
+ * @apiParam (type: Viewpoint) {Group} [shown_group] If the viewpoint is associated with one or more shown objects from the model this field has the definition of the group to hold those objects (this shouldnt be use simultaneously with shown_group_id)
+ * @apiParam (type: Viewpoint) {Group[]} [override_groups] If the viewpoint has one or more objects with colour override this field has an array of groups with one group for each colour
+ * @apiParam (type: Viewpoint) {Boolean} hide_IFC A flag to hide the IFC
+ * @apiParam (type: Viewpoint) {String} screenshot A string in base64 representing the screenshot associated with the viewpoint
+ *
+ * @apiParam (type: Group) {Number[3]} color RGB colour values
+ * @apiParam (type: Group) {ModelObjects} objects List of objects in group
+ *
+ * @apiParam (type: ModelObjects) {String} account The account that has the model which contains the objects
+ * @apiParam (type: ModelObjects) {String} model The model id that contains the objects
+ * @apiParam (type: ModelObjects) {String[]} shared_ids The shared ids of objects to be selected
+ */
+
+/**
  * @api {get} /:teamspace/:model/viewpoints List all views
  * @apiName listViews
  * @apiGroup Views
