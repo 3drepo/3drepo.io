@@ -327,7 +327,7 @@ ModelSetting.updatePermissions = async function(account, model, permissions = []
 
 		const updatedSetting = await setting.changePermissions(setting.permissions, account);
 
-		return updatedSetting.permissions;
+		return { "status": updatedSetting.status };
 	} else {
 		return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 	}

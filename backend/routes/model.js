@@ -719,17 +719,7 @@ router.post("/:model/permissions", middlewares.hasEditPermissionsAccessToModel, 
  *
  * @apiSuccessExample {json} Success:
  * {
- *    _id: "00000000-0000-0000-0000-000000000000",
- *    permissions: [
- *       {
- *          user: "alice",
- *          permission: "collaborator"
- *       },
- *       {
- *          user: "bob",
- *          permission: "commenter"
- *       }
- *    ]
+ *    status: "ok"
  * }
  */
 router.patch("/:model/permissions", middlewares.hasEditPermissionsAccessToModel, updatePermissions);
