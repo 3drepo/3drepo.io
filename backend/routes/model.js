@@ -587,6 +587,7 @@ router.post("/models/permissions", middlewares.hasEditPermissionsAccessToMulitpl
  * @api {post} /:teamspace/:model/permissions Update model permissions
  * @apiName updatePermissions
  * @apiGroup Model
+ * @apiDeprecated use now (#Model:updateModelPermissions)
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model The model id of the model to be updated
@@ -669,10 +670,69 @@ router.post("/models/permissions", middlewares.hasEditPermissionsAccessToMulitpl
  *    ],
  *    status: "ok"
  * }
- *
- * */
+ */
+router.post("/:model/permissions", middlewares.hasEditPermissionsAccessToModel, changePermissions);
 
-router.post("/:model/permissions", middlewares.hasEditPermissionsAccessToModel, updatePermissions);
+/**
+ * @api {patch} /:teamspace/:model/permissions Update model permissions
+ * @apiName updateModelPermissions
+ * @apiGroup Model
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
+ *
+ * @apiParam (Request body) {Permission[]} BODY List of user permissions
+ *
+ * @apiParam (Request body: Permission) {string} user User ID
+ * @apiParam (Request body: Permission) {string} permission Permission type ('viewer'|'commenter'|'collaborator'|'').
+ *
+ * @apiExample {patch} Example usage (add user permission):
+ * PATCH /acme/00000000-0000-0000-0000-000000000000/permissions HTTP/1.1
+ * [
+ *    {
+ *       user: "alice",
+ *       permission: "collaborator"
+ *    }
+ * ]
+ *
+ * @apiExample {patch} Example usage (add multiple user permissions):
+ * PATCH /acme/00000000-0000-0000-0000-000000000000/permissions HTTP/1.1
+ * [
+ *    {
+ *       user: "bob",
+ *       permission: "commenter"
+ *    },
+ *    {
+ *       user: "mike",
+ *       permission: "viewer"
+ *    }
+ * ]
+ *
+ * @apiExample {patch} Example usage (remove user permission):
+ * PATCH /acme/00000000-0000-0000-0000-000000000000/permissions HTTP/1.1
+ * [
+ *    {
+ *       user: "mike",
+ *       permission: ""
+ *    }
+ * ]
+ *
+ * @apiSuccessExample {json} Success:
+ * {
+ *    _id: "00000000-0000-0000-0000-000000000000",
+ *    permissions: [
+ *       {
+ *          user: "alice",
+ *          permission: "collaborator"
+ *       },
+ *       {
+ *          user: "bob",
+ *          permission: "commenter"
+ *       }
+ *    ]
+ * }
+ */
+router.patch("/:model/permissions", middlewares.hasEditPermissionsAccessToModel, updatePermissions);
 
 /**
  * @api {get} /:teamspace/model/permissions?models=[MODELS] Get multiple models permissions
@@ -1764,6 +1824,17 @@ function uploadModel(req, res, next) {
 }
 
 function updatePermissions(req, res, next) {
+	const account = req.params.account;
+	const model = req.params.model;
+
+	return ModelSetting.updatePermissions(account, model, req.body).then(permission => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
+
+function changePermissions(req, res, next) {
 
 	const account = req.params.account;
 	const model = req.params.model;
