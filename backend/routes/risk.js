@@ -36,6 +36,26 @@ const multer = require("multer");
  */
 
 /**
+ * @apiDefine risksCreationPayload
+ *
+ *  @apiParam (Request body) {String} name
+ *  @apiParam (Request body) {Viewpoint} viewpoint
+ *  @apiParam (Request body) {String} associated_activity
+ *  @apiParam (Request body) {String[]} assigned_roles
+ *  @apiParam (Request body) {String} category
+ *  @apiParam (Request body) {Number} likelihood
+ *  @apiParam (Request body) {Number} consequence
+ *  @apiParam (Request body) {Number} level_of_risk
+ *  @apiParam (Request body) {Number} overall_level_of_risk
+ *  @apiParam (Request body) {Number} residual_likelihood
+ *  @apiParam (Request body) {Number} residual_consequence
+ *  @apiParam (Request body) {Number} residual_level_of_risk
+ *  @apiParam (Request body) {String} mitigation_status
+ *  @apiParam (Request body) {String} mitigation_desc
+ *  @apiParam (Request body) {String} residual_risk
+ */
+
+/**
  * @api {get} /:teamspace/:model/risks/:riskId Get a risk
  * @apiName findRiskById
  * @apiGroup Risks
@@ -45,7 +65,7 @@ const multer = require("multer");
  * @apiUse Risks
  *
  * @apiParam {String} riskId Risk ID
- * @apiSuccess {Object} issue The Issue matching the Issue ID
+ * @apiSuccess {Object} risk The Issue matching the Issue ID
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002 HTTP/1.1
@@ -284,8 +304,10 @@ router.get("/revision/:rid/risks.html", middlewares.issue.canView, renderRisksHT
  * @apiDescription Create a model risk.
  *
  * @apiUse Risks
- *
  * @apiParam {String} [revId] Revision ID
+ *
+ * @apiUse risksCreationPayload
+ * @apiUse viewpointObject
  *
  * @apiExample {post} Example usage:
  * POST /acme/00000000-0000-0000-0000-000000000000/risks HTTP/1.1
@@ -451,6 +473,7 @@ router.post("/risks", middlewares.issue.canCreate, storeRisk);
  *
  * @apiParam {String} [revId] Revision ID
  * @apiParam {String} riskId Risk ID
+ * @apiUse risksCreationPayload
  *
  * @apiExample {patch} Example usage:
  * PATCH /acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002 HTTP/1.1
@@ -538,7 +561,10 @@ router.patch("/revision/:rid/risks/:riskId", middlewares.issue.canComment, updat
  * @apiParam (Request body) {String} _id Risk ID
  * @apiParam (Request body) {String} rev_id Revision ID
  * @apiParam (Request body) {String} comment Comment text
- * @apiParam (Request body) {Object} viewpoint Viewpoint object
+ * @apiParam (Request body) {Viewpoint} viewpoint Viewpoint object
+ *
+ * @apiUse risksCreationPayload
+ *
  * @apiSuccess {String} guid Comment ID
  * @apiSuccess {Number} created Comment creation timestamp
  * @apiSuccess {String} owner Comment owner
