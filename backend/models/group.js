@@ -669,7 +669,7 @@ function checkRulesValidity(rules) {
 		if (valid) {
 			fieldsWithRules.add(rule.field);
 		} else if (hasDuplicate) {
-			throw responseCodes.DUPLICATE_RULE;
+			throw responseCodes.MULTIPLE_RULES_PER_FIELD_NOT_ALLOWED;
 		}
 		it++;
 	}
