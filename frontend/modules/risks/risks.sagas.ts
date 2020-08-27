@@ -542,7 +542,7 @@ export function* attachFileResources({ files }) {
 
 const sanitiseURL = (link: string) => {
 	try {
-		const testURL = new URL(string);
+		const testURL = new URL(link);
 		return link;
 	} catch (_) {
 		return `http://${link}`;
