@@ -333,4 +333,8 @@ ModelSetting.updatePermissions = async function(account, model, permissions = []
 	}
 };
 
+ModelSetting.batchUpdatePermissions = async function(account, model, batchPermissions = []) {
+	const modelIds = batchPermissions.map(({model}) => model);
+};
+
 module.exports = ModelSetting;

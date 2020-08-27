@@ -39,6 +39,13 @@ function convertProjectToParam(req, res, next) {
 	next();
 }
 
+/**
+ * @apiDefine PermissionObject
+ *
+ * @apiParam (Request body: Permission) {string} user User ID
+ * @apiParam (Request body: Permission) {string} permission Permission type ('viewer'|'commenter'|'collaborator'|'').
+ */
+
 // Get model info
 
 /**
@@ -472,6 +479,7 @@ router.put("/:model", middlewares.hasEditAccessToFedModel, updateModel);
  * @api {post} /:teamspace/models/permissions Update multiple models permissions
  * @apiName updateMultiplePermissions
  * @apiGroup Model
+ * @apiDeprecated use now (#Model:batchUpdateModelPermissions)
  *
  * @apiParam {String} teamspace Name of teamspace.
  * @apiParam (Request body) {[]ModelPermissions} BODY Its an array with a list of model ids and their permissions.
@@ -479,8 +487,7 @@ router.put("/:model", middlewares.hasEditAccessToFedModel, updateModel);
  * @apiParam (Request body: ModelPermissions) {String} model The model id of the model that will have their permission changed. If it's a federation the entry in the response corresponding with the model will have the 'federated' field set to true.
  * @apiParam (Request body: ModelPermissions) {[]Permission} permissions An array indicating the new permissions.
  *
- * @apiParam (Request body: Permission) {string} user The user id associated with this permission.
- * @apiParam (Request body: Permission) {string} permission The type of permission. This can has the value of 'viewer', 'commenter' or 'collaborator'.
+ * @apiUse PermissionObject
  *
  * @apiExample {post} Example usage:
  * POST /teamSpace1/models/permissions HTTP/1.1
@@ -576,12 +583,75 @@ router.put("/:model", middlewares.hasEditAccessToFedModel, updateModel);
  *       ]
  *    }
  * ]
- *
- *
- *
  */
-
 router.post("/models/permissions", middlewares.hasEditPermissionsAccessToMulitpleModels, updateMultiplePermissions);
+
+/**
+ * @api {patch} /:teamspace/models/permissions Batch update model permissions
+ * @apiName batchUpdateModelPermissions
+ * @apiGroup Model
+ *
+ * @apiParam {String} teamspace Name of teamspace.
+ *
+ * @apiParam (Request body) {ModelPermissions[]} BODY List of model permissions
+ *
+ * @apiParam (Request body: ModelPermissions) {String} model Model ID
+ * @apiParam (Request body: ModelPermissions) {Bool} [federated] True if federation, otherwise false
+ * @apiParam (Request body: ModelPermissions) {Permission[]} permissions List of user permissions
+ *
+ * @apiUse PermissionObject
+ *
+ * @apiExample {patch} Example usage:
+ * PATCH /acme/models/permissions HTTP/1.1
+ * [
+ *    {
+ *       model: "00000000-0000-0000-0000-000000000000",
+ *       permissions: [
+ *          {
+ *             user: "alice",
+ *             permission: "collaborator"
+ *          },
+ *          {
+ *             user: "bob",
+ *             permission: "commenter"
+ *          },
+ *          {
+ *             user: "mike",
+ *             permission: ""
+ *          }
+ *       ]
+ *    },
+ *    {
+ *       model: "11111111-1111-1111-1111-111111111111",
+ *       permissions: [
+ *          {
+ *             user: "charlie",
+ *             permission: "viewer"
+ *          }
+ *       ]
+ *    },
+ *    {
+ *       model: "22222222-2222-2222-2222-222222222222",
+ *       federated: true,
+ *       permissions: [
+ *          {
+ *             user: "dave",
+ *             permission: "commenter"
+ *          },
+ *          {
+ *             user: "eve",
+ *             permission: ""
+ *          }
+ *       ]
+ *    }
+ * ]
+ *
+ * @apiSuccessExample {json} Success:
+ * {
+ *    status: "ok"
+ * }
+ */
+router.patch("/models/permissions", middlewares.hasEditPermissionsAccessToMulitpleModels, batchUpdatePermissions);
 
 /**
  * @api {post} /:teamspace/:model/permissions Update model permissions
@@ -594,8 +664,7 @@ router.post("/models/permissions", middlewares.hasEditPermissionsAccessToMulitpl
  *
  * @apiParam (Request body) {[]Permissions} BODY Its an array with a list of users and their permission type.
  *
- * @apiParam (Request body: Permission) {string} user The user id associated with this permission.
- * @apiParam (Request body: Permission) {string} permission The type of permission. This can has the value of 'viewer', 'commenter' or 'collaborator'.
+ * @apiUse PermissionObject
  *
  * @apiExample {post} Example usage:
  * POST /teamSpace1/5ce7dd19-1252-4548-a9c9-4a5414f2e0c5/permissions HTTP/1.1
@@ -683,8 +752,7 @@ router.post("/:model/permissions", middlewares.hasEditPermissionsAccessToModel, 
  *
  * @apiParam (Request body) {Permission[]} BODY List of user permissions
  *
- * @apiParam (Request body: Permission) {string} user User ID
- * @apiParam (Request body: Permission) {string} permission Permission type ('viewer'|'commenter'|'collaborator'|'').
+ * @apiUse PermissionObject
  *
  * @apiExample {patch} Example usage (add user permission):
  * PATCH /acme/00000000-0000-0000-0000-000000000000/permissions HTTP/1.1
@@ -1817,8 +1885,8 @@ function updatePermissions(req, res, next) {
 	const account = req.params.account;
 	const model = req.params.model;
 
-	return ModelSetting.updatePermissions(account, model, req.body).then(permission => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
+	return ModelSetting.updatePermissions(account, model, req.body).then(response => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, response);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
@@ -1839,6 +1907,17 @@ function changePermissions(req, res, next) {
 
 	}).then(permission => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
+
+function batchUpdatePermissions(req, res, next) {
+	const account = req.params.account;
+	const model = req.params.model;
+
+	return ModelSetting.batchUpdatePermissions(account, model, req.body).then(response => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, response);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
