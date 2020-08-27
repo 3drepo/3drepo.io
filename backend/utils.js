@@ -54,7 +54,7 @@ function Utils() {
 	this.isUUIDObject = (value) => {
 		try {
 			return this.isObject(value) && !!this.uuidToString(value);
-		} catch(_) {
+		} catch(e) {
 			return false;
 		}
 	}
