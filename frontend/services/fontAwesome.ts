@@ -4,6 +4,7 @@ import { faCopy } from '@fortawesome/free-solid-svg-icons/faCopy';
 import { faDrawPolygon } from '@fortawesome/free-solid-svg-icons/faDrawPolygon';
 import { faEraser } from '@fortawesome/free-solid-svg-icons/faEraser';
 import { faEye } from '@fortawesome/free-solid-svg-icons/faEye';
+import { faFilter } from '@fortawesome/free-solid-svg-icons/faFilter';
 import { faHandPaper } from '@fortawesome/free-solid-svg-icons/faHandPaper';
 import { faHelicopter } from '@fortawesome/free-solid-svg-icons/faHelicopter';
 import { faSortAmountDown } from '@fortawesome/free-solid-svg-icons/faSortAmountDown';
@@ -13,6 +14,7 @@ import { faTint } from '@fortawesome/free-solid-svg-icons/faTint';
 
 library.add(faEraser);
 library.add(faEye);
+library.add(faFilter);
 library.add(faTint);
 library.add(faHandPaper);
 library.add(faSortAmountUp);
