@@ -596,7 +596,6 @@ router.post("/models/permissions", middlewares.hasEditPermissionsAccessToMulitpl
  * @apiParam (Request body) {ModelPermissions[]} BODY List of model permissions
  *
  * @apiParam (Request body: ModelPermissions) {String} model Model ID
- * @apiParam (Request body: ModelPermissions) {Bool} [federated] True if federation, otherwise false
  * @apiParam (Request body: ModelPermissions) {Permission[]} permissions List of user permissions
  *
  * @apiUse PermissionObject
@@ -632,7 +631,6 @@ router.post("/models/permissions", middlewares.hasEditPermissionsAccessToMulitpl
  *    },
  *    {
  *       model: "22222222-2222-2222-2222-222222222222",
- *       federated: true,
  *       permissions: [
  *          {
  *             user: "dave",
@@ -1916,7 +1914,7 @@ function batchUpdatePermissions(req, res, next) {
 	const account = req.params.account;
 	const model = req.params.model;
 
-	return ModelSetting.batchUpdatePermissions(account, model, req.body).then(response => {
+	return ModelSetting.batchUpdatePermissions(account, req.body).then(response => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, response);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);

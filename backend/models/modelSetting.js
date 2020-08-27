@@ -333,8 +333,17 @@ ModelSetting.updatePermissions = async function(account, model, permissions = []
 	}
 };
 
-ModelSetting.batchUpdatePermissions = async function(account, model, batchPermissions = []) {
-	const modelIds = batchPermissions.map(({model}) => model);
+ModelSetting.batchUpdatePermissions = async function(account, batchPermissions = []) {
+	const updatePromises = batchPermissions.map((update) => this.updatePermissions(account, update.model, update.permissions));
+	const updateResponses = await Promise.all(updatePromises);
+	const okStatus = "ok";
+	const badStatusIndex = updateResponses.findIndex((response) => okStatus !== response.status);
+
+	if (-1 === badStatusIndex) {
+		return { "status": okStatus };
+	} else {
+		return updateResponses[badStatusIndex];
+	}
 };
 
 module.exports = ModelSetting;
