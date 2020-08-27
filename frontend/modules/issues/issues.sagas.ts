@@ -583,7 +583,7 @@ export function* attachFileResources({ files }) {
 	}
 }
 
-const sanitiseURL = (link : string) => {
+const sanitiseURL = (link: string) => {
 	try {
 		const testURL = new URL(string);
 		return link;
