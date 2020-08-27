@@ -57,7 +57,7 @@ function Utils() {
 		} catch(e) {
 			return false;
 		}
-	}
+	};
 
 	this.deserialiseFilters = (ids, numbers) => {
 		return {
