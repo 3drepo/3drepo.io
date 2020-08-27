@@ -220,10 +220,21 @@ class Ticket extends View {
 			// DEPRECATED
 			delete oldTicket.viewpoint.screenshotSmall;
 
-			data.viewpoint = {
-				...oldTicket.viewpoint,
-				...newViewpoint
-			};
+			// if is not updating the viewpoint position means that is only the screenshot, so
+			// it takes the rest of the properties from the old viewpoint
+			if (!newViewpoint.position && newViewpoint.screenshot_ref) {
+				newViewpoint = {
+					...oldTicket.viewpoint,
+					...newViewpoint
+				};
+			} else if (newViewpoint.position && !newViewpoint.screenshot_ref) {
+				// if is updating the viewpoint but not the screenshot, keep the old screenshot
+				newViewpoint.screenshot_ref = oldTicket.viewpoint.screenshot_ref;
+				newViewpoint.thumbnail = oldTicket.viewpoint.thumbnail;
+			}
+
+			data.viewpoint = newViewpoint;
+
 			data.viewpoint.guid = utils.uuidToString(data.viewpoint.guid);
 
 			if (data.viewpoint.thumbnail) {

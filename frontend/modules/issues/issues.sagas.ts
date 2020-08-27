@@ -141,7 +141,7 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 	yield put(IssuesActions.toggleDetailsPendingState(false));
 }
 
-function* updateIssue({ issueData }) {
+function* updateActiveIssue({ issueData }) {
 	try {
 		const { _id, rev_id, model, account, position } = yield select(selectActiveIssueDetails);
 		const { data: updatedIssue } = yield API.updateIssue(account, model, _id, rev_id, issueData);
@@ -610,11 +610,22 @@ export function* attachLinkResources({ links }) {
 	}
 }
 
+export function * updateActiveIssueViewpoint({screenshot}) {
+	const { model, account } = yield select(selectActiveIssueDetails);
+	let { viewpoint } = yield generateViewpoint(account, model, '', false);
+
+	if (screenshot) {
+		viewpoint = {...viewpoint, screenshot};
+	}
+
+	yield put(IssuesActions.updateActiveIssue({viewpoint}));
+}
+
 export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.FETCH_ISSUES, fetchIssues);
 	yield takeLatest(IssuesTypes.FETCH_ISSUE, fetchIssue);
 	yield takeLatest(IssuesTypes.SAVE_ISSUE, saveIssue);
-	yield takeLatest(IssuesTypes.UPDATE_ISSUE, updateIssue);
+	yield takeLatest(IssuesTypes.UPDATE_ACTIVE_ISSUE, updateActiveIssue);
 	yield takeLatest(IssuesTypes.POST_COMMENT, postComment);
 	yield takeLatest(IssuesTypes.REMOVE_COMMENT, removeComment);
 	yield takeLatest(IssuesTypes.DOWNLOAD_ISSUES, downloadIssues);
@@ -638,4 +649,5 @@ export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.ATTACH_LINK_RESOURCES, attachLinkResources);
 	yield takeLatest(IssuesTypes.GO_TO_ISSUE, goToIssue);
 	yield takeLatest(IssuesTypes.UPDATE_BOARD_ISSUE, updateBoardIssue);
+	yield takeLatest(IssuesTypes.UPDATE_ACTIVE_ISSUE_VIEWPOINT, updateActiveIssueViewpoint);
 }
