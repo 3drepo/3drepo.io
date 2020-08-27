@@ -1912,7 +1912,6 @@ function changePermissions(req, res, next) {
 
 function batchUpdatePermissions(req, res, next) {
 	const account = req.params.account;
-	const model = req.params.model;
 
 	return ModelSetting.batchUpdatePermissions(account, req.body).then(response => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, response);
