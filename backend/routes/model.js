@@ -1392,6 +1392,8 @@ router.get("/:model/download/latest", middlewares.hasDownloadAccessToModel, down
 
 router.get("/:model/meshes/:meshId", middlewares.hasReadAccessToModel, getMesh);
 
+// router.post("/:model/presentation/presentationId", middlewares.hasReadAccessToModel, generateCode);
+
 router.put("/:model/presentation/:presentationId/stream", middlewares.hasReadAccessToModel, streamPresentation);
 
 router.post("/:model/presentation/:presentationId/end", middlewares.hasReadAccessToModel, endPresentation);
