@@ -583,13 +583,22 @@ export function* attachFileResources({ files }) {
 	}
 }
 
+const sanitiseURL = (link : string) => {
+	try {
+		const testURL = new URL(string);
+		return link;
+	} catch (_) {
+		return `http://${link}`;
+	}
+};
+
 export function* attachLinkResources({ links }) {
 	try {
 		const teamspace = yield select(selectCurrentModelTeamspace);
 		const issueId = (yield select(selectActiveIssueDetails))._id;
 		const model = yield select(selectCurrentModel);
 		const names = links.map((link) => link.name);
-		const urls = links.map((link) => link.link);
+		const urls = links.map((link) => sanitiseURL(link.link));
 		const username = (yield select(selectCurrentUser)).username;
 
 		const {data} = yield API.attachLinkResourcesToIssue(teamspace, model, issueId, names, urls);
