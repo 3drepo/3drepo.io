@@ -23,12 +23,12 @@ import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { isViewer } from '../../../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { canComment } from '../../../../../../helpers/risks';
+import { EmptyStateInfo } from '../../../../../components/components.styles';
 import { Copy } from '../../../../../components/fontAwesomeIcon';
 import { ScreenshotDialog } from '../../../../../components/screenshotDialog';
 import { CommentForm } from '../../../commentForm';
 import { ContainedButton } from '../../../containedButton/containedButton.component';
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
-import { EmptyStateInfo } from '../../../views/views.styles';
 import { Container, HorizontalView, MessagesList, MessageContainer, PreviewDetails } from './riskDetails.styles';
 import { RiskDetailsForm } from './riskDetailsForm.component';
 

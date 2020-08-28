@@ -21,7 +21,8 @@ import { ROUTES } from '../../../constants/routes';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { IViewpointsComponentState } from '../../../modules/viewpoints/viewpoints.redux';
 import { ViewItem } from '../../viewerGui/components/views/components/viewItem/viewItem.component';
-import { EmptyStateInfo, Link, SearchField } from '../../viewerGui/components/views/views.styles';
+import { Link, SearchField } from '../../viewerGui/components/views/views.styles';
+import { EmptyStateInfo } from '../components.styles';
 import { Container, StyledLoader, ViewsWrapper, ViewList } from './viewsDialog.styles';
 
 interface IProps {

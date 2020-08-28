@@ -102,7 +102,7 @@ export const selectFilteredRisks = createSelector(
 
 export const selectAllFilteredRisks = createSelector(
 	selectRisks, selectSelectedFilters, (risks, selectedFilters) =>
-		searchByFilters(risks, selectedFilters, true)
+		searchByFilters(risks, selectedFilters, true, ['name', 'desc', 'number'])
 );
 
 export const selectShowPins = createSelector(

@@ -22,7 +22,7 @@ import { get } from 'lodash';
 import React from 'react';
 
 import { renderWhenTrue } from '../../../helpers/rendering';
-import { EmptyStateInfo } from '../messagesList/messagesList.styles';
+import { EmptyStateInfo } from '../components.styles';
 import { SmallIconButton } from '../smallIconButon/smallIconButton.component';
 import { Actions, CancelButton, Container, Footer, Invitation, List } from './invitationsDialog.styles';
 
