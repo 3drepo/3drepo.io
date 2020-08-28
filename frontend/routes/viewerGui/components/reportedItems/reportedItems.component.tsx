@@ -96,7 +96,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	get filteredItems() {
 		const { items, selectedFilters, showDefaultHiddenItems } = this.props;
 		return sortByDate(
-			searchByFilters(items, selectedFilters, showDefaultHiddenItems),
+			searchByFilters(items, selectedFilters, showDefaultHiddenItems, ['name', 'desc', 'number']),
 			{ order: this.props.sortOrder }
 		);
 	}
