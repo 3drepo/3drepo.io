@@ -66,6 +66,7 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	fetchMitigationCriteriaSuccess: ['criteria', 'teamspace'],
 	fetchMitigationCriteriaFailure: [],
 	showMitigationSuggestions: ['conditions', 'setFieldValue'],
+	updateActiveRiskViewpoint: ['screenshot'],
 	reset: []
 }, { prefix: 'RISKS/' });
 

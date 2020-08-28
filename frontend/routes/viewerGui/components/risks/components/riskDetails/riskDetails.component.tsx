@@ -74,6 +74,7 @@ interface IProps {
 	showConfirmDialog: (config: any) => void;
 	dialogId?: string;
 	postCommentIsPending?: boolean;
+	updateViewpoint: (screenshot?: string) => void;
 }
 
 interface IState {
@@ -372,8 +373,8 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleUpdateScreenshot =
-		async (screenshot, disableViewpointSuggestion = false, forceViewpointUpdate = false) => {
-		const { teamspace, model, updateRisk, viewer, disableViewer } = this.props;
+		(screenshot, disableViewpointSuggestion = false, forceViewpointUpdate = false) => {
+		const { teamspace, model, updateRisk, disableViewer } = this.props;
 
 		if (this.isNewRisk) {
 			this.props.setState({ newRisk: {
@@ -387,10 +388,12 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				if (!disableViewpointSuggestion && !disableViewer) {
 					this.handleViewpointUpdateSuggest(viewpoint);
 				} else {
-					const updatedViewpoint = forceViewpointUpdate ? await viewer.getCurrentViewpoint({ teamspace, model }) : {};
-					updateRisk(teamspace, model, {
-						viewpoint: merge(viewpoint, updatedViewpoint),
-					});
+
+					if (forceViewpointUpdate) {
+						this.handleViewpointUpdate(viewpoint);
+					} else {
+						updateRisk(teamspace, model, { viewpoint });
+					}
 				}
 			}
 		}
@@ -421,14 +424,9 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public handleViewpointUpdate = async (updatedViewpoint = {}) => {
-		const { teamspace, model, updateRisk, viewer } = this.props;
-
-		const viewpoint = await viewer.getCurrentViewpoint({ teamspace, model });
-
-		if (viewpoint.position) {
-			updateRisk(teamspace, model, { viewpoint: merge(viewpoint, updatedViewpoint) });
-		}
+	public handleViewpointUpdate = (viewpoint?) => {
+		const { updateViewpoint } = this.props;
+		updateViewpoint(viewpoint?.screenshot);
 	}
 
 	public onUpdateRiskViewpoint = () => {

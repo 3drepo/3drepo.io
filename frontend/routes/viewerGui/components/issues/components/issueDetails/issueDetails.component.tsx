@@ -372,7 +372,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public handleUpdateScreenshot =
 		(screenshot, disableViewpointSuggestion = false, forceViewpointUpdate = false) => {
-		const { teamspace, model, updateIssue, updateViewpoint, viewer, disableViewer } = this.props;
+		const {  updateIssue, disableViewer } = this.props;
 
 		if (this.isNewIssue) {
 			this.props.setState({ newIssue: {
@@ -387,7 +387,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 					this.handleViewpointUpdateSuggest(viewpoint);
 				} else {
 					if (forceViewpointUpdate) {
-						updateViewpoint(screenshot);
+						this.handleViewpointUpdate(viewpoint);
 					} else {
 						updateIssue( { viewpoint });
 					}
