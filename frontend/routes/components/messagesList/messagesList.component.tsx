@@ -21,11 +21,10 @@ import MenuItem from '@material-ui/core/MenuItem';
 import { cond, matches, stubTrue } from 'lodash';
 
 import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../helpers/rendering';
+import { EmptyStateInfo } from '../components.styles';
 import { Loader as LoaderIndicator } from '../loader/loader.component';
 import { Message } from './components/message/message.component';
-import {
-	Container, EmptyStateInfo, FilterWrapper, FormContainer, Label, LoaderContainer, Select,
-} from './messagesList.styles';
+import { Container, FilterWrapper, FormContainer, Label, LoaderContainer, Select } from './messagesList.styles';
 
 interface IProps {
 	className?: string;

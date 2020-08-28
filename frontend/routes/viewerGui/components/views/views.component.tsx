@@ -25,13 +25,13 @@ import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { IViewpointsComponentState } from '../../../../modules/viewpoints/viewpoints.redux';
 import { Viewer } from '../../../../services/viewer/viewer';
+import { EmptyStateInfo } from '../../../components/components.styles';
 import { PanelBarActions } from '../panelBarActions';
 import { ViewerPanelButton, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
 import { PresetViews } from './components/presetViews/presetViews.component';
 import { ViewItem } from './components/viewItem/viewItem.component';
 import {
 	Container,
-	EmptyStateInfo,
 	SearchField,
 	ViewerBottomActions,
 	ViewpointsList,

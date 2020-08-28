@@ -26,6 +26,7 @@ import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { MEASURE_TYPE } from '../../../../modules/measurements/measurements.constants';
 import { Viewer } from '../../../../services/viewer/viewer';
+import { EmptyStateInfo } from '../../../components/components.styles';
 import {
 	IconWrapper,
 	MenuList, StyledItemText,
@@ -38,7 +39,6 @@ import { MeasurementsList } from './components/measurementsList/measurementsList
 import { MeasuringType } from './components/measuringType';
 import {
 	Container,
-	EmptyStateInfo,
 	MeasureIcon,
 	ViewerBottomActions,
 	ViewsContainer,
