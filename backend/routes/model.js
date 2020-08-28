@@ -1335,6 +1335,7 @@ router.delete("/:model", middlewares.hasDeleteAccessToModel, deleteModel);
  * @apiParam {String} model Model id to upload.
  * @apiParam (Request body) {String} tag the tag name for the new revision
  * @apiParam (Request body) {String} desc the description for the new revision
+ * @apiParam (Request body) {Boolean} [importAnimations] whether to import animations within a sequence
  *
  * @apiParam (Request body: Attachment) {binary} FILE the file to be uploaded
  *
@@ -1745,7 +1746,8 @@ function uploadModel(req, res, next) {
 	}).then(file => {
 		const data = {
 			tag: req.body.tag,
-			desc: req.body.desc
+			desc: req.body.desc,
+			importAnimation: req.body.importAnimations !== false
 		};
 
 		const source = {

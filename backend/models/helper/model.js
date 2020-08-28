@@ -734,7 +734,8 @@ function _handleUpload(correlationId, account, model, username, file, data) {
 		username,
 		null,
 		data.tag,
-		data.desc
+		data.desc,
+		data.importAnimations
 	);
 }
 
