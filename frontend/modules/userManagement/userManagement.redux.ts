@@ -46,9 +46,9 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	fetchModelsPermissions: ['models'],
 	fetchModelPermissionsSuccess: ['models'],
 	fetchCurrentTeamspaceJobsAndColors: [],
-	updateModelsPermissions: ['modelsWithPermissions', 'permissions'],
-	updateModelsPermissionsPre: ['modelsWithPermissions', 'permissions'],
-	updateModelPermissionsSuccess: ['updatedModels', 'permissions'],
+	updateModelsPermissions: ['modelsWithPermissions'],
+	updateModelsPermissionsPre: ['modelsWithPermissions'],
+	updateModelPermissionsSuccess: ['updatedModels'],
 	sendInvitation: ['email', 'job', 'isAdmin', 'permissions', 'onFinish', 'onError'],
 	removeInvitationSuccess: ['email'],
 	removeInvitation: ['email'],
@@ -187,8 +187,7 @@ export const fetchModelPermissionsSuccess = (state = INITIAL_STATE, { models }) 
 	return { ...state, models };
 };
 
-export const updateModelPermissionsSuccess = (state = INITIAL_STATE, { updatedModels, permissions }) => {
-
+export const updateModelPermissionsSuccess = (state = INITIAL_STATE, { updatedModels }) => {
 	const models = state.models.map((model) => {
 		const updatedModel = updatedModels.find((m) => m.model === model.model);
 
