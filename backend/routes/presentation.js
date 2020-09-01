@@ -24,15 +24,46 @@ const C = require("../constants");
 const utils = require("../utils");
 const Presentation = require("../models/presentation");
 
+/**
+ * @api {put} /:teamspace/:model/presentation/:code/start Starts a presentation session and returns the presentation code
+ * @apiName startPresentation
+ * @apiGroup Presentation
+ *
+ * @apiParam {String} teamspace The teamspace where the presentation is taking place
+ * @apiParam {String} model The model where the presentation is taking place
+ *
+ * @apiExample {get} Example usage:
+ * POST /teamSpace1/5ce7dd19-1252-4548-a9c9-4a5414f2e0c5/presentation/start HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success:
+ * { code: "aASnk" }
+ */
 router.post("/presentation/start", middlewares.hasReadAccessToModel, startPresentation);
 
+/**
+ * @api {put} /:teamspace/:model/presentation/:code/start Starts a presentation session and returns the presentation code
+ * @apiName startPresentation
+ * @apiGroup Presentation
+ *
+ * @apiParam {String} teamspace The teamspace where the presentation is taking place
+ * @apiParam {String} model The model where the presentation is taking place
+ * @apiParam {String} code The code that users need to join in order to get the viewpoint.
+ *
+ * @apiExample {get} Example usage:
+ * POST /teamSpace1/5ce7dd19-1252-4548-a9c9-4a5414f2e0c5/presentation/start HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success:
+ * { code: "aASnk" }
+ */
 router.post("/presentation/:code/end", middlewares.hasReadAccessToModel, endPresentation);
 
 /**
  * @api {put} /:teamspace/:model/presentation/:code/stream Streams a viewpoint
  * @apiName streamPresentation
  * @apiGroup Presentation
- *
+
+ * @apiParam {String} teamspace The teamspace where the presentation is taking place
+ * @apiParam {String} model The model where the presentation is taking place
  * @apiParam {String} code The code that users need to join in order to get the viewpoint.
  * @apiParam (Request body) {StreamingViewpoint} The viewpoint
  *
