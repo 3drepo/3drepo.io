@@ -47,24 +47,18 @@ import { Panel } from '../components/panel/panel.component';
 import { isViewer } from '../../helpers/permissions';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
 import { FilterPanel } from '../components/filterPanel/filterPanel.component';
-import IssueDetails from '../viewerGui/components/issues/components/issueDetails/issueDetails.container';
-import { ListNavigation } from '../viewerGui/components/listNavigation/listNavigation.component';
-import RiskDetails from '../viewerGui/components/risks/components/riskDetails/riskDetails.container';
 import { getProjectModels, getTeamspaceProjects } from './board.helpers';
 import {
 	AddButton,
 	BoardContainer,
-	BoardDialogTitle,
 	BoardItem,
 	Config,
 	Container,
 	DataConfig,
 	FormControl,
-	FormWrapper,
 	LoaderContainer,
 	NoDataMessage,
 	SelectContainer,
-	Title,
 	ViewConfig
 } from './board.styles';
 import { BoardTitleComponent } from './components/boardTitleComponent.component';

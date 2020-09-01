@@ -24,7 +24,7 @@ import { renderWhenTrue } from '../../../helpers/rendering';
 import { COMMENT_FIELD_NAME } from '../../viewerGui/components/commentForm/commentForm.constants';
 import { ContainedButton } from '../../viewerGui/components/containedButton/containedButton.component';
 import { FieldsRow } from '../../viewerGui/components/risks/components/riskDetails/riskDetails.styles';
-import { EmptyStateInfo } from '../../viewerGui/components/views/views.styles';
+import { EmptyStateInfo } from '../components.styles';
 import AttachResourcesDialog from './attachResourcesDialog/attachResourcesDialog.container';
 import {
 	ActionContainer, DocumentIcon, IconButton, LinkIcon, PhotoIcon, QuoteIcon, RemoveIcon, ResourcesContainer,

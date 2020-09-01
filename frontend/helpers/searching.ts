@@ -53,7 +53,7 @@ export const searchByFilters = (
 						}) : false;
 
 						return logFound || queryFields.some((field) => {
-							return compareStrings(item[field], filter.value.value);
+							return compareStrings(`${item[field]}`, filter.value.value);
 						});
 					});
 					break;
