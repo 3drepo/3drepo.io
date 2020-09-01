@@ -249,9 +249,9 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 				yield put(ViewerGuiActions.setCamera(viewpoint));
 			}
 
-			const clippingPlanes = view.clippingPlanes || get(view, 'viewpoint.clippingPlanes');
+			const clippingPlanes = view.clippingPlanes || viewpoint?.clippingPlanes;
 
-			yield put(TreeActions.setIfcSpacesHidden(viewpoint.hideIfc !== false));
+			yield put(TreeActions.setIfcSpacesHidden(viewpoint?.hideIfc !== false));
 
 			yield Viewer.updateClippingPlanes( clippingPlanes, teamspace, modelId);
 
@@ -303,6 +303,10 @@ export function* prepareGroupsIfNecessary( teamspace, modelId, viewpoint) {
 			const hiddenGroup = (yield API.getGroup(teamspace, modelId, viewpoint?.hidden_group_id, revision)).data;
 			viewpoint.hidden_group = prepareGroup(hiddenGroup);
 			delete viewpoint.hidden_group_id;
+		}
+
+		if (Array.isArray(viewpoint?.override_groups[0]?.color)) {
+			viewpoint.override_groups = viewpoint.override_groups.map(prepareGroup);
 		}
 	} catch {
 		// groups doesnt exists, still continue

@@ -27,7 +27,6 @@ const ModelHelpers = require("../models/helper/model");
 const UnityAssets = require("../models/unityAssets");
 const JSONAssets = require("../models/jsonAssets");
 const config = require("../config");
-const ChatEvent = require("../models/chatEvent");
 
 function getDbColOptions(req) {
 	return {account: req.params.account, model: req.params.model};
@@ -1392,12 +1391,6 @@ router.get("/:model/download/latest", middlewares.hasDownloadAccessToModel, down
 
 router.get("/:model/meshes/:meshId", middlewares.hasReadAccessToModel, getMesh);
 
-// router.post("/:model/presentation/presentationId", middlewares.hasReadAccessToModel, generateCode);
-
-router.put("/:model/presentation/:presentationId/stream", middlewares.hasReadAccessToModel, streamPresentation);
-
-router.post("/:model/presentation/:presentationId/end", middlewares.hasReadAccessToModel, endPresentation);
-
 function updateSettings(req, res, next) {
 
 	const place = utils.APIInfo(req);
@@ -1938,29 +1931,6 @@ function getMesh(req, res, next) {
 	ModelHelpers.getMeshById(account, model, meshId).then((stream) => {
 		res.writeHead(200, {"Content-Type": "application/json; charset=utf-8" });
 		stream.pipe(res);
-	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	});
-}
-
-function streamPresentation(req, res, next) {
-	const {model, account, presentationId} = req.params;
-	const sessionId = req.headers[C.HEADER_SOCKET_ID];
-	const viewpoint = req.body;
-
-	ChatEvent.streamPresentation(sessionId,account , model, presentationId, viewpoint).then(()=> {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
-	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	});
-}
-
-function endPresentation(req, res, next) {
-	const {model, account, presentationId} = req.params;
-	const sessionId = req.headers[C.HEADER_SOCKET_ID];
-
-	ChatEvent.endPresentation(sessionId,account , model, presentationId).then(()=> {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});

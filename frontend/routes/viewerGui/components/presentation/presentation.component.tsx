@@ -87,7 +87,7 @@ const InitialState = ({startPresenting, joinPresentation}) => {
 				<MainButton
 						variant="raised"
 						color="secondary"
-						onClick={startPresenting}>Create Sessiond</MainButton>
+						onClick={startPresenting}>Create Session</MainButton>
 			</CreateSessionSection>
 		</Content>
 	);

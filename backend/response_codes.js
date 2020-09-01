@@ -273,8 +273,9 @@
 		VAT_CODE_ERROR:{ message: "Error validating VAT number", status: 500},
 
 		TEAMSPACE_SETTINGS_NOT_FOUND: { message: "Teamspace settings not found", status: 404 },
-		NOTIFICATION_NOT_FOUND: { message: "Notification not found", status: 404}
+		NOTIFICATION_NOT_FOUND: { message: "Notification not found", status: 404},
 
+		INVALID_STREAM_SESSION: { message: "The streaming session code is not valid",  status:400 }
 	};
 
 	let valueCounter = 0;

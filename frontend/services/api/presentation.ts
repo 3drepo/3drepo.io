@@ -18,6 +18,14 @@
 import api from './';
 
 /**
+ * start presentation
+ * @param teamspace
+ */
+export const startPresentation = (teamspace, model) => {
+	return api.post(`${teamspace}/${model}/presentation/start`);
+};
+
+/**
  * stream presentation
  * @param teamspace
  */
@@ -31,4 +39,12 @@ export const streamPresentation = (teamspace, model, id, viewpoint) => {
  */
 export const endPresentation = (teamspace, model, id) => {
 	return api.post(`${teamspace}/${model}/presentation/${id}/end`);
+};
+
+/**
+ * exists presentation
+ * @param teamspace
+ */
+export const existsPresentation = (teamspace, model, id) => {
+	return api.get(`${teamspace}/${model}/presentation/${id}/exists`);
 };

@@ -16,30 +16,16 @@
  */
 import { createActions, createReducer } from 'reduxsauce';
 
-const generateCode = () => {
-	let code = '';
-	for (let i = 0; i < 5; i++) {
-		let val = Math.round(Math.random() * 51);
-
-		if (val > 25) {
-			val += 6;
-		}
-
-		code += String.fromCharCode(val + 65);
-	}
-
-	return code;
-};
-
 export const { Types: PresentationTypes, Creators: PresentationActions } = createActions({
 	startPresenting: [],
 	stopPresenting: [],
-	setPresenting: ['isPresenting'],
+	setPresenting: ['isPresenting', 'code'],
 	setJoinPresentation: ['joinedPresentation', 'sessionCode'],
 	joinPresentation: ['sessionCode'],
 	leavePresentation: [],
 	togglePause: [],
 	setPaused: ['isPaused'],
+	setLoading: ['loading'],
 	streamViewpoint: []
 }, { prefix: 'PRESENTATION/' });
 
@@ -47,15 +33,16 @@ export const INITIAL_STATE = {
 	sessionCode: '',
 	isPresenting: false,
 	joinedPresentation: false,
-	isPaused: false
+	isPaused: false,
+	loading: false
 };
 
-export const setPresenting = (state = INITIAL_STATE, { isPresenting }) => {
+export const setPresenting = (state = INITIAL_STATE, { isPresenting, code }) => {
 	if (state.isPresenting === isPresenting) {
 		return state;
 	}
 
-	const sessionCode = isPresenting ? generateCode() : '';
+	const sessionCode = isPresenting ? code : '';
 	return { ...state, isPresenting, sessionCode };
 };
 
@@ -77,8 +64,13 @@ export const setPaused = (state = INITIAL_STATE, { isPaused }) => {
 	return { ...state, isPaused };
 };
 
+export const setLoading = (state = INITIAL_STATE, { loading }) => {
+	return { ...state, loading };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[PresentationTypes.SET_PRESENTING]: setPresenting,
 	[PresentationTypes.SET_JOIN_PRESENTATION]: setJoinPresentation,
-	[PresentationTypes.SET_PAUSED]: setPaused
+	[PresentationTypes.SET_PAUSED]: setPaused,
+	[PresentationTypes.SET_LOADING]: setLoading
 });

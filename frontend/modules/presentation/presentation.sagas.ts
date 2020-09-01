@@ -22,6 +22,7 @@ import { CHAT_CHANNELS } from '../../constants/chat';
 import { prepareGroup } from '../../helpers/groups';
 import * as API from '../../services/api';
 import { ChatActions } from '../chat';
+import { DialogActions } from '../dialog';
 import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { dispatch, getState } from '../store';
 import { ViewpointsActions } from '../viewpoints';
@@ -40,17 +41,28 @@ function * streamViewpoint() {
 	const code = yield select(selectSessionCode);
 
 	const view = yield generateViewpoint(teamspace, model, 'stream');
-	if (view.viewpoint?.override_groups) {
-		view.viewpoint.override_groups = view.viewpoint.override_groups.map(prepareGroup);
-	}
 
-	yield API.streamPresentation(teamspace, model, code, view);
+	try {
+		yield API.streamPresentation(teamspace, model, code, view);
+	} catch (error) {
+		yield put(PresentationActions.setPresenting(false));
+		clearInterval(intervalId);
+		yield put(DialogActions.showEndpointErrorDialog('stream', 'presentation', error));
+	}
 }
 
 function* startPresenting() {
-	yield put(PresentationActions.setPresenting(true));
-
-	intervalId = window.setInterval(streamPresentation, 1000);
+	const teamspace = yield select(selectCurrentModelTeamspace);
+	const model = yield select(selectCurrentModel);
+	try {
+		yield put(PresentationActions.setLoading(true));
+		const { data: {code} } = yield API.startPresentation(teamspace, model);
+		yield put(PresentationActions.setPresenting(true, code));
+		intervalId = window.setInterval(streamPresentation, 1000);
+	} catch (error) {
+		yield put(DialogActions.showEndpointErrorDialog('start', 'presentation', error));
+	}
+	yield put(PresentationActions.setLoading(false));
 }
 
 const onStreamPresentationEvent = (viewpoint) => {
@@ -74,12 +86,17 @@ function* joinPresentation({ sessionCode }) {
 	const teamspace = yield select(selectCurrentModelTeamspace);
 	const currentModel = yield select(selectCurrentModel);
 
-	yield put(PresentationActions.setJoinPresentation(true, sessionCode));
+	const { data: {exists} } = yield API.existsPresentation(teamspace, currentModel, sessionCode);
 
-	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.PRESENTATION, teamspace, currentModel, {
-		subscribeToStream: [sessionCode, onStreamPresentationEvent],
-		subscribeToEnd: [sessionCode, onEndPresentationEvent]
-	}));
+	if (exists) {
+		yield put(PresentationActions.setJoinPresentation(true, sessionCode));
+		yield put(ChatActions.callChannelActions(CHAT_CHANNELS.PRESENTATION, teamspace, currentModel, {
+			subscribeToStream: [sessionCode, onStreamPresentationEvent],
+			subscribeToEnd: [sessionCode, onEndPresentationEvent]
+		}));
+	} else {
+		yield put(DialogActions.showErrorDialog('join', 'presentation', 'The presentation doesnt exist.'));
+	}
 
 }
 
@@ -98,10 +115,10 @@ function* stopPresenting() {
 	const teamspace = yield select(selectCurrentModelTeamspace);
 	const model = yield select(selectCurrentModel);
 	const code = yield select(selectSessionCode);
+	clearInterval(intervalId);
 
 	yield API.endPresentation(teamspace, model, code);
 	yield put(PresentationActions.setPresenting(false));
-	clearInterval(intervalId);
 }
 
 function* togglePause() {

@@ -16,15 +16,64 @@
  */
 
 "use strict";
+const db = require("../handler/db");
+
+const ChatEvent = require("./chatEvent");
+const { INVALID_STREAM_SESSION } = require("../response_codes.js");
 
 const Presentation = {};
 
-Presentation.generateCode = (user) => {
-	return user + "124";
+const generateCode = () => {
+	let code = "";
+	for (let i = 0; i < 5; i++) {
+		let val = Math.round(Math.random() * 51);
+
+		if (val > 25) {
+			val += 6;
+		}
+
+		code += String.fromCharCode(val + 65);
+	}
+
+	return code;
 };
 
-Presentation.validateStream = (user, code) => {
-	return  user + "124" === code;
+Presentation.startPresenting = async (teamspace, model, user) => {
+	const coll = await db.getCollection(teamspace, model + ".presentations");
+	const code = generateCode();
+	await coll.updateOne({ user }, { $set: { user, code}}, {upsert: true});
+	return code;
+};
+
+Presentation.validateStream = async (teamspace , model, user, code) => {
+	const coll = await db.getCollection(teamspace, model + ".presentations");
+	const res = await coll.findOne({ user, code });
+	return  Boolean(res);
+
+};
+
+Presentation.streamPresentation = async (teamspace , model, user, code, viewpoint, sessionId) => {
+	if (! await (Presentation.validateStream(teamspace, model, user, code))) {
+		throw {resCode: INVALID_STREAM_SESSION};
+	}
+
+	return await ChatEvent.streamPresentation(sessionId, teamspace , model, code, viewpoint);
+};
+
+Presentation.endPresentation = async (teamspace , model, user, code, sessionId) => {
+	if (! await (Presentation.validateStream(teamspace, model, user, code))) {
+		throw {resCode: INVALID_STREAM_SESSION};
+	}
+
+	const coll = await db.getCollection(teamspace, model + ".presentations");
+	await coll.deleteOne({ user, code });
+	return await ChatEvent.endPresentation(sessionId, teamspace , model, code);
+};
+
+Presentation.exists = async (teamspace, model, code) => {
+	const coll = await db.getCollection(teamspace, model + ".presentations");
+	const res = await coll.findOne({ code });
+	return Boolean(res);
 };
 
 module.exports =  Presentation;
