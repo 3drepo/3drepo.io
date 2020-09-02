@@ -171,7 +171,7 @@ export const RISK_FILTERS = [
 	},
 	{
 		label: 'Associated activity',
-		relatedField: RISK_FILTER_RELATED_FIELDS.RISK_FACTOR,
+		relatedField: RISK_FILTER_RELATED_FIELDS.ASSOCIATED_ACTIVITY,
 		type: RISK_FILTER_FILTER_TYPES.NORMAL
 	},
 	{
