@@ -51,6 +51,7 @@ interface IProps {
 	disableViewer?: boolean;
 	values?: any;
 	criteria: any;
+	hasPin: boolean;
 	onSavePin: (position) => void;
 	onChangePin: (pin) => void;
 	onUpdateViewpoint: () => void;
@@ -104,6 +105,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 					onUploadScreenshot={props.onUploadScreenshot}
 					onShowScreenshotDialog={props.showScreenshotDialog}
 					hasImage={risk.descriptionThumbnail}
+					hasPin={props.hasPin}
 				/>
 			</FieldsRow>
 
