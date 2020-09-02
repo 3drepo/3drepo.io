@@ -1151,13 +1151,11 @@ describe("Implied permission::", function () {
 		});
 
 		it("cannot create issue", function(done) {
-
 			const issue = Object.assign({"name":"Issue test"}, baseIssue);
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/issues`)
 				.send(issue)
 				.expect(401, done);
-
 		});
 
 		it("cannot view issues of other model in other project as well", function(done) {
@@ -1173,11 +1171,9 @@ describe("Implied permission::", function () {
 				.post(`/${sharedTeamspace}/${modelNoAccess}/issues`)
 				.send(issue)
 				.expect(401, done);
-
 		});
 
 		it("cannot comment", function(done) {
-
 			const comment = {
 				comment: "hello world",
 				"viewpoint":{
