@@ -132,7 +132,7 @@ export const NameRow = styled.div`
 
 export const Name = styled.h3`
 	margin-left: 16px;
-	max-width: ${(props: any) => props.active ? '170px' : '260px'};
+	max-width: ${(props: any) => props.active ? '150px' : '260px'};
 	font-weight: ${FONT_WEIGHT.NORMAL};
 	font-size: 14px;
 	color: ${COLOR.BLACK};
