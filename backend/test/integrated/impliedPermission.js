@@ -1080,7 +1080,6 @@ describe("Implied permission::", function () {
 		});
 
 		it("cannot create a fed model", function(done) {
-
 			const modelName = "model123";
 			agent
 				.post(`/${sharedTeamspace}/model`)
