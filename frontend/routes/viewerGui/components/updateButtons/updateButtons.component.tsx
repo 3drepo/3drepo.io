@@ -28,6 +28,7 @@ interface IProps {
 	isNew: boolean;
 	canEditBasicProperty: boolean;
 	disableViewer?: boolean;
+	hasPin: boolean;
 	onSavePin: (position) => void;
 	onChangePin: (pin) => void;
 	onUpdateViewpoint: () => void;
