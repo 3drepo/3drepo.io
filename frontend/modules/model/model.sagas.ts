@@ -185,6 +185,7 @@ export function* uploadModelFile({ teamspace, project, modelData, fileData, hand
 			formData.append('file', fileData.file);
 			formData.append('tag', fileData.tag);
 			formData.append('desc', fileData.desc);
+			formData.append('importAnimations', fileData.importAnimations);
 
 			const { modelId, modelName } = modelData;
 			const { data: { status }, data } = yield API.uploadModelFile(teamspace, modelId, formData);

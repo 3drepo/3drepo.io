@@ -17,19 +17,24 @@
 
 import Button from '@material-ui/core/Button';
 import DialogActions from '@material-ui/core/DialogActions';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import styled from 'styled-components';
 
 import { COLOR } from '../../../../styles';
-
-export const ModelName = styled.h3`
-	margin: 0 0 24px;
-	color: ${COLOR.BLACK_60};
-`;
 
 export const ModelInfo = styled.p`
 	color: ${COLOR.BLACK_40};
 	margin: 0;
 	font-size: 14px;
+`;
+
+export const FileName = styled(ModelInfo)`
+	display: flex;
+	align-items: center;
+
+	svg {
+		margin-right: 8px;
+	}
 `;
 
 export const HiddenFileInput = styled.input`
@@ -61,4 +66,19 @@ export const Main = styled.div`
 
 export const Additional = styled.p`
 	text-align: center;
+`;
+
+export const FileContainer = styled.div`
+	display: flex;
+`;
+
+export const CheckboxContainer = styled(FormControlLabel)`
+	&& {
+		height: 30px;
+		margin-left: 0;
+
+		& > span {
+			padding-left: 0;
+		}
+	}
 `;
