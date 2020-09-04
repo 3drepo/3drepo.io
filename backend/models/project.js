@@ -300,6 +300,38 @@
 		}
 	);
 
+	Project.updateProject = async function(account, projectName, data) {
+		const project = await this.findOne({ account }, { name: projectName });
+
+		if (!project) {
+			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
+		} else {
+			if (data.name) {
+				project.name = data.name;
+			}
+
+			if (data.permissions) {
+				data.permissions.forEach((permissionUpdate) => {
+					if (!project.permissions) {
+						project.permissions = [];
+					}
+
+					const userIndex = project.permissions.findIndex(x => x.user === permissionUpdate.user);
+
+					if (-1 !== userIndex && permissionUpdate.permissions && permissionUpdate.permissions.length) {
+						project.permissions[userIndex].permissions = permissionUpdate.permissions;
+					} else if (-1 !== userIndex) {
+						project.permissions.splice(userIndex, 1);
+					} else if (permissionUpdate.permissions && permissionUpdate.permissions.length) {
+						project.permissions.push(permissionUpdate);
+					}
+				});
+			}
+
+			return project.updateAttrs(project);
+		}
+	};
+
 	module.exports = Project;
 
 })();
