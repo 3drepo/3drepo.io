@@ -3,7 +3,7 @@
   "version": "2.10.0",
   "private": true,
   "dependencies": {
-    "mongodb": "2.2.35",
+    "mongodb": "3.6.1",
     "mongodb-core": "3.0.3"
   },
   "description": "The v2.10 DB migration script for 3drepo.io",
