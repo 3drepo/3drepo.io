@@ -57,21 +57,21 @@ export const prepareRisk = (risk, jobs = []) => {
 	}
 
 	if (preparedRisk.residual_likelihood || preparedRisk.residual_consequence ) {
-		preparedRisk.residual_level_of_risk  = getValidNumber(
+		preparedRisk.residual_level_of_risk  = getValidPositiveNumber(
 			preparedRisk.residual_level_of_risk,
-			calculateLevelOfRisk(preparedRisk.residual_likelihood , preparedRisk.residual_consequence )
+			calculateLevelOfRisk(preparedRisk.residual_likelihood, preparedRisk.residual_consequence )
 		);
 	}
 
 	if (preparedRisk.level_of_risk || preparedRisk.likelihood || preparedRisk.consequence) {
-		preparedRisk.level_of_risk = getValidNumber(preparedRisk.level_of_risk,
+		preparedRisk.level_of_risk = getValidPositiveNumber(preparedRisk.level_of_risk,
 			calculateLevelOfRisk(preparedRisk.likelihood, preparedRisk.consequence));
 	}
 
 	if (preparedRisk.overall_level_of_risk || preparedRisk.residual_level_of_risk  || preparedRisk.level_of_risk) {
-		preparedRisk.overall_level_of_risk = getValidNumber(
+		preparedRisk.overall_level_of_risk = getValidPositiveNumber(
 			preparedRisk.overall_level_of_risk,
-			getValidNumber(preparedRisk.residual_level_of_risk , preparedRisk.level_of_risk)
+			getValidPositiveNumber(preparedRisk.residual_level_of_risk , preparedRisk.level_of_risk)
 		);
 	}
 
@@ -172,22 +172,15 @@ const getValidNumber = (value, defaultValue?) => {
 	return defaultValue;
 };
 
-const canChangeStatusToClosed = (riskData, userJob, permissions, currentUser) => {
-	return isAdmin(permissions) || isJobOwner(riskData, userJob, permissions, currentUser);
-};
+const getValidPositiveNumber = (value, defaultValue?) => {
+	const validNumber = getValidNumber(value, defaultValue);
 
-export const canChangeStatus = (riskData, userJob, permissions, currentUser) => {
-	return canChangeStatusToClosed(riskData, userJob, permissions, currentUser) ||
-		isAssignedJob(riskData, userJob, permissions);
+	return validNumber >= 0 ? validNumber : defaultValue;
 };
 
 export const canChangeBasicProperty = (riskData, userJob, permissions, currentUser) => {
 	return isAdmin(permissions) || isJobOwner(riskData, userJob, permissions, currentUser) &&
 		canComment(riskData, userJob, permissions, currentUser);
-};
-
-export const canChangeAssigned = (riskData, userJob, permissions, currentUser) => {
-	return isAdmin(permissions) || canChangeBasicProperty(riskData, userJob, permissions, currentUser);
 };
 
 export const canComment = (riskData, userJob, permissions, currentUser) => {

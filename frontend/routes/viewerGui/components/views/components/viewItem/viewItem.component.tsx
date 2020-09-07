@@ -18,11 +18,13 @@
 import { Field, Formik } from 'formik';
 import { debounce } from 'lodash';
 import React, { useState } from 'react';
+import * as Yup from 'yup';
 
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 
 import { Menu, MenuItem } from '@material-ui/core';
 import MoreVert from '@material-ui/icons/MoreVert';
+import { getViewNameFieldErrorMsg } from '../../../../../../helpers/views';
 import { ActionMessage } from '../../../../../components/actionMessage/actionMessage.component';
 import {
 	HamburgerIconButton,
@@ -60,6 +62,10 @@ interface IProps {
 	onChangeName?: (viewpointName) => void;
 	defaultView?: boolean;
 }
+
+const ViewItemSchema = Yup.object().shape({
+	newName: Yup.string().max(37)
+});
 
 const HamburgerMenu = ({onSetAsDefault, onDelete, isAdmin, defaultView}) => {
 	const [anchorElement, setAnchorElement] = useState(null);
@@ -123,11 +129,13 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 	));
 
 	public renderViewpointName = renderWhenTrue(() => (
-			<Name>{this.props.viewpoint.name}{this.renderViewpointDefault(this.props.defaultView)}</Name>
+		<Name active={Number(this.props.active)}>
+			{this.props.viewpoint.name}{this.renderViewpointDefault(this.props.defaultView)}
+		</Name>
 	));
 
 	public renderViewpointDefault = renderWhenTrue(() => (
-			<Small>(Default View)</Small>
+		<Small>(Default View)</Small>
 	));
 
 	public renderViewpointData = renderWhenTrue(() => (
@@ -170,6 +178,7 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 	public renderViewpointForm = renderWhenTrue(() => {
 		return (
 			<Formik
+				validationSchema={ViewItemSchema}
 				initialValues={{ newName: this.props.viewpoint._id ? this.props.viewpoint.name : '' }}
 				onSubmit={this.handleSubmit}>
 				<StyledForm>
@@ -178,8 +187,8 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 							{...field}
 							onChange={this.handleNameChange(field)}
 							fullWidth
-							error={Boolean(form.errors.name)}
-							helperText={form.errors.name}
+							error={Boolean(form.errors.newName)}
+							helperText={getViewNameFieldErrorMsg(form.errors.newName)}
 							label="View name"
 							placeholder={this.props.viewpoint.name}
 							autoFocus

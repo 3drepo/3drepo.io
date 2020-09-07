@@ -166,6 +166,7 @@ const isTagFormatInValid = (tag) => {
 export function* uploadModelFile({ teamspace, project, modelData, fileData, handleClose }) {
 	try {
 		const isInvalidTag = isTagFormatInValid(fileData.tag);
+		yield put(ModelActions.setModelUploadingState(true));
 
 		if (isInvalidTag) {
 			const INVALID_TAG_MESSAGE =
@@ -205,8 +206,10 @@ export function* uploadModelFile({ teamspace, project, modelData, fileData, hand
 				}
 			}
 		}
+		yield put(ModelActions.setModelUploadingState(false));
 	} catch (e) {
 		handleClose();
+		yield put(ModelActions.setModelUploadingState(false));
 		yield put(DialogActions.showEndpointErrorDialog('upload', 'model', e));
 		yield put(TeamspacesActions.setModelUploadStatus(teamspace, project, modelData.modelId, uploadFileStatuses.failed));
 	}

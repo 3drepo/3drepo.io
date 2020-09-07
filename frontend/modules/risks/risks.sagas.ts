@@ -540,13 +540,22 @@ export function* attachFileResources({ files }) {
 	}
 }
 
+const sanitiseURL = (link: string) => {
+	try {
+		const testURL = new URL(link);
+		return link;
+	} catch (_) {
+		return `http://${link}`;
+	}
+};
+
 export function* attachLinkResources({ links }) {
 	try {
 		const teamspace = yield select(selectCurrentModelTeamspace);
 		const issueId = (yield select(selectActiveRiskDetails))._id;
 		const model = yield select(selectCurrentModel);
 		const names = links.map((link) => link.name);
-		const urls = links.map((link) => link.link);
+		const urls = links.map((link) => sanitiseURL(link.link));
 		const username = (yield select(selectCurrentUser)).username;
 
 		const {data} = yield API.attachLinkResourcesToRisk(teamspace, model, issueId, names, urls);
@@ -589,6 +598,17 @@ function* showMitigationSuggestions({conditions, setFieldValue}) {
 	}
 }
 
+export function * updateActiveRiskViewpoint({screenshot}) {
+	const { model, account } = yield select(selectActiveRiskDetails);
+	let { viewpoint } = yield generateViewpoint(account, model, '', false);
+
+	if (screenshot) {
+		viewpoint = {...viewpoint, screenshot};
+	}
+
+	yield put(RisksActions.updateRisk(account, model, {viewpoint}));
+}
+
 export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.FETCH_RISKS, fetchRisks);
 	yield takeLatest(RisksTypes.FETCH_RISK, fetchRisk);
@@ -616,4 +636,5 @@ export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.ATTACH_LINK_RESOURCES, attachLinkResources);
 	yield takeLatest(RisksTypes.FETCH_MITIGATION_CRITERIA, fetchMitigationCriteria);
 	yield takeLatest(RisksTypes.SHOW_MITIGATION_SUGGESTIONS, showMitigationSuggestions);
+	yield takeLatest(RisksTypes.UPDATE_ACTIVE_RISK_VIEWPOINT, updateActiveRiskViewpoint);
 }

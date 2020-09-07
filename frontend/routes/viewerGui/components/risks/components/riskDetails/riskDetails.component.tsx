@@ -20,6 +20,7 @@ import React, { Fragment } from 'react';
 import { merge, size } from 'lodash';
 
 import { diffData, mergeData } from '../../../../../../helpers/forms';
+import { isViewer } from '../../../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { canComment } from '../../../../../../helpers/risks';
 import { EmptyStateInfo } from '../../../../../components/components.styles';
@@ -73,6 +74,7 @@ interface IProps {
 	showConfirmDialog: (config: any) => void;
 	dialogId?: string;
 	postCommentIsPending?: boolean;
+	updateViewpoint: (screenshot?: string) => void;
 }
 
 interface IState {
@@ -114,6 +116,8 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	get actionButton() {
+		const hasViewerPermissions = isViewer(this.props.modelSettings.permissions);
+
 		return renderWhenTrue(() => (
 			<ContainedButton
 				icon={Copy}
@@ -121,7 +125,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 			>
 				Clone
 			</ContainedButton>
-		))(!this.isNewRisk);
+		))(!this.isNewRisk && !hasViewerPermissions);
 	}
 
 	public renderMessagesList = renderWhenTrue(() => (
@@ -279,7 +283,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				attachFileResources={attachFileResources}
 				attachLinkResources={attachLinkResources}
 				showDialog={showDialog}
-				canComment={this.userCanComment}
+				canComment={this.userCanComment()}
 				showMitigationSuggestions={this.props.showMitigationSuggestions}
 				formRef={this.formRef}
 			/>
@@ -367,8 +371,8 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleUpdateScreenshot =
-		async (screenshot, disableViewpointSuggestion = false, forceViewpointUpdate = false) => {
-		const { teamspace, model, updateRisk, viewer, disableViewer } = this.props;
+		(screenshot, disableViewpointSuggestion = false, forceViewpointUpdate = false) => {
+		const { teamspace, model, updateRisk, disableViewer } = this.props;
 
 		if (this.isNewRisk) {
 			this.props.setState({ newRisk: {
@@ -382,10 +386,12 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				if (!disableViewpointSuggestion && !disableViewer) {
 					this.handleViewpointUpdateSuggest(viewpoint);
 				} else {
-					const updatedViewpoint = forceViewpointUpdate ? await viewer.getCurrentViewpoint({ teamspace, model }) : {};
-					updateRisk(teamspace, model, {
-						viewpoint: merge(viewpoint, updatedViewpoint),
-					});
+
+					if (forceViewpointUpdate) {
+						this.handleViewpointUpdate(viewpoint);
+					} else {
+						updateRisk(teamspace, model, { viewpoint });
+					}
 				}
 			}
 		}
@@ -416,14 +422,9 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public handleViewpointUpdate = async (updatedViewpoint = {}) => {
-		const { teamspace, model, updateRisk, viewer } = this.props;
-
-		const viewpoint = await viewer.getCurrentViewpoint({ teamspace, model });
-
-		if (viewpoint.position) {
-			updateRisk(teamspace, model, { viewpoint: merge(viewpoint, updatedViewpoint) });
-		}
+	public handleViewpointUpdate = (viewpoint?) => {
+		const { updateViewpoint } = this.props;
+		updateViewpoint(viewpoint?.screenshot);
 	}
 
 	public onUpdateRiskViewpoint = () => {

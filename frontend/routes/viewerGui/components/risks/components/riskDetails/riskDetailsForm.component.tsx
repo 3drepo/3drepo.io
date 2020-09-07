@@ -29,7 +29,7 @@ import {
 } from '../../../../../../constants/risks';
 import { VIEWER_PANELS_TITLES } from '../../../../../../constants/viewerGui';
 import { calculateLevelOfRisk } from '../../../../../../helpers/risks';
-import { canChangeAssigned, canChangeBasicProperty, canChangeStatus } from '../../../../../../helpers/risks';
+import { canChangeBasicProperty } from '../../../../../../helpers/risks';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { AttachmentsFormTab } from '../attachmentsFormTab/attachmentsFormTab.component';
 import { MainRiskFormTab } from '../mainRiskFormTab/mainRiskFormTab.component';
@@ -86,19 +86,9 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		return !this.props.risk._id;
 	}
 
-	get canEditRiskStatus() {
-		const { risk, myJob, permissions, currentUser } = this.props;
-		return this.isNewRisk || canChangeStatus(risk, myJob, permissions, currentUser);
-	}
-
 	get canEditBasicProperty() {
 		const { risk, myJob, permissions, currentUser } = this.props;
 		return this.isNewRisk || canChangeBasicProperty(risk, myJob, permissions, currentUser);
-	}
-
-	get canChangeAssigned() {
-		const { risk, myJob, permissions, currentUser } = this.props;
-		return canChangeAssigned(risk, myJob, permissions, currentUser);
 	}
 
 	public state = {
@@ -177,7 +167,6 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 			active={active}
 			isNewRisk={this.isNewRisk}
 			canEditBasicProperty={this.canEditBasicProperty}
-			canChangeAssigned={this.canChangeAssigned}
 			{...this.props}
 		/>
 	)
@@ -186,8 +175,6 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		<TreatmentRiskFormTab
 			active={active}
 			isNewRisk={this.isNewRisk}
-			canEditBasicProperty={this.canEditBasicProperty}
-			canEditRiskStatus={this.canEditRiskStatus}
 			{...this.props}
 		/>
 	)
