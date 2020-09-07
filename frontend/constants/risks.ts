@@ -112,7 +112,14 @@ export const RISK_FILTER_RELATED_FIELDS = {
 	CREATED_BY: 'creator_role',
 	RISK_OWNER: 'assigned_roles',
 	CATEGORY: 'category',
+	ELEMENT: 'element',
+	LOCATION: 'location_desc',
 	RISK_CONSEQUENCE: 'consequence',
+	RISK_FACTOR: 'risk_factor',
+	ASSOCIATED_ACTIVITY: 'associated_activity',
+	SCOPE: 'scope',
+	MITIGATION_STAGE: 'mitigation_stage',
+	MITIGATION_TYPE: 'mitigation_type',
 	RISK_LIKELIHOOD: 'likelihood',
 	LEVEL_OF_RISK: 'level_of_risk',
 	RESIDUAL_CONSEQUENCE: 'residual_consequence',
@@ -128,7 +135,7 @@ export const RISK_FILTERS = [
 		type: RISK_FILTER_FILTER_TYPES.NORMAL
 	},
 	{
-		label: 'Mitigation Status',
+		label: 'Treatment Status',
 		relatedField: RISK_FILTER_RELATED_FIELDS.MITIGATION_STATUS,
 		type: RISK_FILTER_FILTER_TYPES.NORMAL
 	},
@@ -140,6 +147,41 @@ export const RISK_FILTERS = [
 	{
 		label: 'Risk owner',
 		relatedField: RISK_FILTER_RELATED_FIELDS.RISK_OWNER,
+		type: RISK_FILTER_FILTER_TYPES.NORMAL
+	},
+	{
+		label: 'Element type',
+		relatedField: RISK_FILTER_RELATED_FIELDS.ELEMENT,
+		type: RISK_FILTER_FILTER_TYPES.NORMAL
+	},
+	{
+		label: 'Location',
+		relatedField: RISK_FILTER_RELATED_FIELDS.LOCATION,
+		type: RISK_FILTER_FILTER_TYPES.NORMAL
+	},
+	{
+		label: 'Risk factor',
+		relatedField: RISK_FILTER_RELATED_FIELDS.RISK_FACTOR,
+		type: RISK_FILTER_FILTER_TYPES.NORMAL
+	},
+	{
+		label: 'Construction Scope',
+		relatedField: RISK_FILTER_RELATED_FIELDS.SCOPE,
+		type: RISK_FILTER_FILTER_TYPES.NORMAL
+	},
+	{
+		label: 'Associated activity',
+		relatedField: RISK_FILTER_RELATED_FIELDS.ASSOCIATED_ACTIVITY,
+		type: RISK_FILTER_FILTER_TYPES.NORMAL
+	},
+	{
+		label: 'Stage',
+		relatedField: RISK_FILTER_RELATED_FIELDS.MITIGATION_STAGE,
+		type: RISK_FILTER_FILTER_TYPES.NORMAL
+	},
+	{
+		label: 'Type',
+		relatedField: RISK_FILTER_RELATED_FIELDS.MITIGATION_TYPE,
 		type: RISK_FILTER_FILTER_TYPES.NORMAL
 	},
 	{

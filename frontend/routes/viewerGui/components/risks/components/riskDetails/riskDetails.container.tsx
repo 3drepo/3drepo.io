@@ -75,7 +75,6 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	attachFileResources: RisksActions.attachFileResources,
 	attachLinkResources: RisksActions.attachLinkResources,
 	showDialog: DialogActions.showDialog,
-	fetchMitigationCriteria: RisksActions.fetchMitigationCriteria,
 	showMitigationSuggestions: RisksActions.showMitigationSuggestions,
 }, dispatch);
 

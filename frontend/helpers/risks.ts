@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -199,15 +199,27 @@ export const canComment = (riskData, userJob, permissions, currentUser) => {
 	return ableToComment;
 };
 
+export const getRiskFilterValues = (property) =>
+	property.map((value) => ({
+		label: value,
+		value
+	}));
+
 export const filtersValuesMap = (jobs, settings) => {
 	const jobsList = [...jobs, UNASSIGNED_JOB];
 
 	return {
-		[RISK_FILTER_RELATED_FIELDS.CATEGORY]: getFilterValues(settings.riskCategories
-				.map((category) => ({ value: category, name: category }))),
+		[RISK_FILTER_RELATED_FIELDS.CATEGORY]: getFilterValues(getRiskFilterValues(settings.category)),
 		[RISK_FILTER_RELATED_FIELDS.MITIGATION_STATUS]: getFilterValues(RISK_MITIGATION_STATUSES),
 		[RISK_FILTER_RELATED_FIELDS.CREATED_BY]: getFilterValues(jobs),
 		[RISK_FILTER_RELATED_FIELDS.RISK_OWNER]: getFilterValues(jobsList),
+		[RISK_FILTER_RELATED_FIELDS.ELEMENT]: getRiskFilterValues(settings.element),
+		[RISK_FILTER_RELATED_FIELDS.LOCATION]: getRiskFilterValues(settings.location_desc),
+		[RISK_FILTER_RELATED_FIELDS.RISK_FACTOR]: getRiskFilterValues(settings.risk_factor),
+		[RISK_FILTER_RELATED_FIELDS.ASSOCIATED_ACTIVITY]: getRiskFilterValues(settings.associated_activity),
+		[RISK_FILTER_RELATED_FIELDS.SCOPE]: getRiskFilterValues(settings.scope),
+		[RISK_FILTER_RELATED_FIELDS.MITIGATION_STAGE]: getRiskFilterValues(settings.mitigation_stage),
+		[RISK_FILTER_RELATED_FIELDS.MITIGATION_TYPE]: getRiskFilterValues(settings.mitigation_type),
 		[RISK_FILTER_RELATED_FIELDS.RISK_CONSEQUENCE]: getFilterValues(RISK_CONSEQUENCES),
 		[RISK_FILTER_RELATED_FIELDS.RISK_LIKELIHOOD]: getFilterValues(RISK_LIKELIHOODS),
 		[RISK_FILTER_RELATED_FIELDS.RESIDUAL_CONSEQUENCE]: getFilterValues(RISK_CONSEQUENCES),
