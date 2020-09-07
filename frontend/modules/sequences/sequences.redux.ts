@@ -24,6 +24,7 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	initializeSequences: [],
 	fetchSequencesSuccess: ['sequences'],
 	setSelectedSequence: ['sequenceId'],
+	setSelectedSequenceSuccess: ['sequenceId'],
 	setSelectedFrame: ['date'],
 	setSelectedDate: ['date'],
 	fetchFrame: ['date'],
@@ -32,6 +33,8 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	setStepInterval: ['stepInterval'],
 	setStepScale: ['stepScale'],
 	setIfcSpacesHidden: ['ifcSpacesHidden'],
+	fetchTasksDefinitions: ['sequenceId'],
+	fetchTasksDefinitionsSuccess: ['sequenceId', 'tasks'],
 	restoreIfcSpacesHidden: [],
 	reset: []
 }, { prefix: 'SEQUENCES/' });
@@ -46,7 +49,8 @@ export const INITIAL_STATE = {
 	statesPending: false,
 	stepInterval: 1,
 	stepScale: STEP_SCALE.DAY,
-	ifcSpacesHidden: true
+	ifcSpacesHidden: true,
+	tasks: {}
 };
 
 export const fetchSequencesSuccess = (state = INITIAL_STATE, { sequences }) => {
@@ -54,7 +58,11 @@ export const fetchSequencesSuccess = (state = INITIAL_STATE, { sequences }) => {
 	return { ...state, sequences };
 };
 
-export const setSelectedSequence = (state = INITIAL_STATE, { sequenceId }) => {
+export const fetchTasksDefinitionsSuccess = (state = INITIAL_STATE, { sequenceId, tasks }) => {
+	return { ...state, tasks: {...state.tasks, [sequenceId]: tasks } };
+};
+
+export const setSelectedSequenceSuccess = (state = INITIAL_STATE, { sequenceId }) => {
 	let lastSelectedSequence = state.lastSelectedSequence;
 
 	if (sequenceId !== null && state.lastSelectedSequence !== sequenceId) {
@@ -100,9 +108,10 @@ export const setIfcSpacesHidden = (state = INITIAL_STATE, { ifcSpacesHidden }) =
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[SequencesTypes.FETCH_SEQUENCES_SUCCESS]: fetchSequencesSuccess,
+	[SequencesTypes.FETCH_TASKS_DEFINITIONS_SUCCESS]: fetchTasksDefinitionsSuccess,
 	[SequencesTypes.SET_SELECTED_DATE]: setSelectedDate,
 	[SequencesTypes.SET_STATE_DEFINITION]: setStateDefinition,
-	[SequencesTypes.SET_SELECTED_SEQUENCE]: setSelectedSequence,
+	[SequencesTypes.SET_SELECTED_SEQUENCE_SUCCESS]: setSelectedSequenceSuccess,
 	[SequencesTypes.SET_LAST_LOADED_SUCCESFULL_STATE]: setLastLoadedSuccesfullState,
 	[SequencesTypes.SET_STEP_INTERVAL]: setStepInterval,
 	[SequencesTypes.SET_IFC_SPACES_HIDDEN]: setIfcSpacesHidden,

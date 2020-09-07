@@ -22,7 +22,7 @@ import { GLToHexColor } from '../../helpers/colors';
 import { MILLI_PER_DAY } from '../../helpers/dateTime';
 import { selectSettings } from '../model';
 
-export const selectSequencesDomain = (state) => ({...state.sequences});
+export const selectSequencesDomain = (state) => (state.sequences);
 
 const getMinMaxDates = ({frames}) => ({
 	minDate: (frames[0] || {}).dateTime,
@@ -42,7 +42,7 @@ const getModelName = (sequence, settings) => {
 	return { modelName };
 };
 
-export const selectIfcSpacesHiddenSaved  = createSelector(
+export const selectIfcSpacesHiddenSaved = createSelector(
 	selectSequencesDomain, (state) => state.ifcSpacesHidden
 );
 
@@ -58,6 +58,10 @@ export const selectStateDefinitions = createSelector(
 
 export const selectSelectedSequenceId = createSelector(
 	selectSequencesDomain, (state) => state.selectedSequence
+);
+
+export const selectTasksDefinitions = createSelector(
+	selectSequencesDomain, selectSelectedSequenceId, (state, sequenceId) => (state.tasks || {}) [sequenceId]
 );
 
 export const selectSelectedSequence = createSelector(
@@ -198,10 +202,10 @@ const tasksArrToDict = (tasks) => {
 			dict[task._id] = omit(task, 'tasks');
 		}
 
-		if (task.tasks && !dict[task._id].tasks) {
-			dict[task._id].tasks =  tasksArrToDict(task.tasks);
-		} else if (task.tasks && dict[task._id].tasks) {
-			dict[task._id].tasks = merge(dict[task._id].tasks, tasksArrToDict(task.tasks));
+		if (task.subTasks && !dict[task._id].subTasks) {
+			dict[task._id].subTasks =  tasksArrToDict(task.subTasks);
+		} else if (task.subTasks && dict[task._id].subTasks) {
+			dict[task._id].subTasks = merge(dict[task._id].subTasks, tasksArrToDict(task.subTasks));
 		}
 
 		return dict;
@@ -211,8 +215,8 @@ const tasksArrToDict = (tasks) => {
 const tasksDictToArr = (taskDict) => {
 	return Object.keys(taskDict).map((id) => {
 		const task = taskDict[id];
-		if (task.tasks) {
-			task.tasks = tasksDictToArr(task.tasks);
+		if (task.subTasks) {
+			task.subTasks = tasksDictToArr(task.subTasks);
 		}
 		return task;
 	});
@@ -227,8 +231,8 @@ const getTasksByRange = (tasks, minDate, maxDate) => {
 	return tasks.reduce((filteredTasks, task) => {
 			if (! (task.startDate > maxDate || task.endDate < minDate)) {
 				task = {...task};
-				if ( task.tasks ) {
-					task.tasks = getTasksByRange(task.tasks, minDate, maxDate);
+				if ( task.subTasks ) {
+					task.subTasks = getTasksByRange(task.subTasks, minDate, maxDate);
 				}
 
 				filteredTasks.push(task);
@@ -242,8 +246,8 @@ const replaceDates = (tasks) => {
 	return tasks.map((t) => {
 		t.startDate = new Date(t.startDate);
 		t.endDate = new Date(t.endDate);
-		if (t.tasks) {
-			t.tasks = replaceDates(t.tasks);
+		if (t.subTasks) {
+			t.subTasks = replaceDates(t.subTasks);
 		}
 
 		return t;
@@ -276,31 +280,13 @@ export const selectSelectedMinDate = createSelector(
 );
 
 export const selectCurrentActivities = createSelector(
-	selectSelectedMinDate, selectSelectedDate, selectSelectedSequence,
-		(minSelectedDate: Date, maxSelectedDate: Date, selectedSequence: any) => {
+	selectSelectedMinDate, selectSelectedDate, selectSelectedSequence, selectTasksDefinitions,
+		(minSelectedDate: Date, maxSelectedDate: Date, selectedSequence: any, tasks: any) => {
 			if (!selectedSequence || !selectedSequence.frames) {
 				return [];
 			}
 
-			const frames = selectedSequence.frames;
-			const minIndex = getFrameIndexByDate(frames, minSelectedDate);
-			const maxIndex = getFrameIndexByDate(frames, maxSelectedDate);
-			const candidatesTasks = [];
-
-			for (let i = minIndex; i <= maxIndex ; i++) {
-				let foundTasks =  frames[i].tasks;
-				if (minIndex === i) { // this means is the first tasks I found so they might need to be trimmed
-					foundTasks =  getTasksByRange(foundTasks, minSelectedDate, maxSelectedDate);
-				}
-
-				Array.prototype.push.apply(candidatesTasks, foundTasks);
-			}
-
-			if (maxIndex < frames.length - 1 ) {
-				const nextTasks = getTasksByRange(frames[maxIndex + 1].tasks, minSelectedDate, maxSelectedDate);
-				Array.prototype.push.apply(candidatesTasks, nextTasks);
-			}
-
-			return replaceDates(mergeTasks(candidatesTasks));
+			const foundTasks = getTasksByRange(tasks || [], minSelectedDate, maxSelectedDate);
+			return replaceDates(foundTasks);
 		}
 );

@@ -23,7 +23,7 @@ import { SubTasksItemContainer, Task, TaskButton, TaskItemLabel, TaskSmallDot } 
 export interface ITask {
 	_id: string;
 	name: string;
-	tasks?: ITask[];
+	subTasks?: ITask[];
 	startDate: Date;
 	endDate: Date;
 }
@@ -54,7 +54,7 @@ export class TaskItem extends React.PureComponent<IProps, IState> {
 	public render = () => {
 		const { task: task, nested } = this.props;
 		const { collapsed } = this.state;
-		const subtasks = task.tasks || [];
+		const subtasks = task.subTasks || [];
 		const hasSubtasks = subtasks.length > 0;
 
 		return (
