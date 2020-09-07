@@ -285,7 +285,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				attachFileResources={attachFileResources}
 				attachLinkResources={attachLinkResources}
 				showDialog={showDialog}
-				canComment={this.userCanComment}
+				canComment={this.userCanComment()}
 				showMitigationSuggestions={this.props.showMitigationSuggestions}
 				formRef={this.formRef}
 			/>

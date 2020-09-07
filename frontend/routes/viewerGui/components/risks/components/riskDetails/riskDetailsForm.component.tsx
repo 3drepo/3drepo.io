@@ -186,7 +186,6 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		<TreatmentRiskFormTab
 			active={active}
 			isNewRisk={this.isNewRisk}
-			canEditBasicProperty={this.canEditBasicProperty}
 			canEditRiskStatus={this.canEditRiskStatus}
 			{...this.props}
 		/>

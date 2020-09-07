@@ -51,7 +51,7 @@ const getMitigationSuggestionsFields = (values) => omitBy(pick(values, FIELDS_FO
 interface IProps {
 	active: boolean;
 	isNewRisk: boolean;
-	canEditBasicProperty: boolean;
+	canComment: boolean;
 	canEditRiskStatus: boolean;
 	values?: any;
 	criteria: any;
@@ -61,7 +61,7 @@ interface IProps {
 }
 
 export const TreatmentRiskFormTab: React.FunctionComponent<IProps> = ({
-	active, isNewRisk, canEditBasicProperty, canEditRiskStatus, values, criteria, showDialog,
+	active, isNewRisk, canComment, canEditRiskStatus, values, criteria, showDialog,
 	showMitigationSuggestions, setFieldValue
 }) => {
 	const handleSuggestionClick = () => {
@@ -72,7 +72,7 @@ export const TreatmentRiskFormTab: React.FunctionComponent<IProps> = ({
 		<Content active={active}>
 			<Container top>
 				<SuggestionButtonWrapper>
-					<ContainedButton onClick={handleSuggestionClick} disabled={!canEditBasicProperty}>
+					<ContainedButton onClick={handleSuggestionClick} disabled={!canComment}>
 						Suggest
 					</ContainedButton>
 				</SuggestionButtonWrapper>
@@ -84,7 +84,7 @@ export const TreatmentRiskFormTab: React.FunctionComponent<IProps> = ({
 						fullWidth
 						multiline
 						label="Treatment"
-						disabled={!canEditBasicProperty}
+						disabled={!canComment}
 						mutable={!isNewRisk}
 					/>
 				)} />
@@ -98,7 +98,7 @@ export const TreatmentRiskFormTab: React.FunctionComponent<IProps> = ({
 						fullWidth
 						multiline
 						label="Treatment Details"
-						disabled={!canEditBasicProperty}
+						disabled={!canComment}
 						mutable={!isNewRisk}
 						expandable={Number(!isNewRisk && active)}
 					/>
@@ -113,7 +113,7 @@ export const TreatmentRiskFormTab: React.FunctionComponent<IProps> = ({
 							suggestions={criteria.mitigation_stage}
 							form={form}
 							field={field}
-							disabled={!canEditBasicProperty}
+							disabled={!canComment}
 						/>
 					)} />
 				</StyledFormControl>
@@ -124,7 +124,7 @@ export const TreatmentRiskFormTab: React.FunctionComponent<IProps> = ({
 							suggestions={criteria.mitigation_type}
 							form={form}
 							field={field}
-							disabled={!canEditBasicProperty}
+							disabled={!canComment}
 						/>
 					)} />
 				</StyledFormControl>
@@ -153,7 +153,7 @@ export const TreatmentRiskFormTab: React.FunctionComponent<IProps> = ({
 								{...field}
 								items={RISK_LIKELIHOODS}
 								inputId="residual_likelihood"
-								disabled={!canEditRiskStatus}
+								disabled={!canComment}
 							/>
 						)} />
 					</StyledFormControl>
@@ -165,7 +165,7 @@ export const TreatmentRiskFormTab: React.FunctionComponent<IProps> = ({
 								{...field}
 								items={RISK_CONSEQUENCES}
 								inputId="residual_consequence"
-								disabled={!canEditBasicProperty}
+								disabled={!canComment}
 							/>
 						)} />
 					</StyledFormControl>
@@ -201,7 +201,7 @@ export const TreatmentRiskFormTab: React.FunctionComponent<IProps> = ({
 						fullWidth
 						multiline
 						label="Residual Risk"
-						disabled={!canEditBasicProperty}
+						disabled={!canComment}
 						mutable={!isNewRisk}
 					/>
 				)} />
