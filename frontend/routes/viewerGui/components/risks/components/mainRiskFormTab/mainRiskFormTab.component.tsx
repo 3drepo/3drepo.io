@@ -47,7 +47,6 @@ interface IProps {
 	isNewRisk: boolean;
 	canComment: boolean;
 	canEditBasicProperty: boolean;
-	canChangeAssigned: boolean;
 	jobs: any[];
 	disableViewer?: boolean;
 	values?: any;
@@ -62,7 +61,7 @@ interface IProps {
 }
 
 export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
-	active, isNewRisk, risk, disableViewer, jobs, canChangeAssigned, canComment, canEditBasicProperty,
+	active, isNewRisk, risk, disableViewer, jobs, canComment, canEditBasicProperty,
 	values, criteria, ...props
 }) => {
 	const getCategories = () => {
@@ -162,7 +161,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 							{...field}
 							items={jobs}
 							inputId="assigned_roles"
-							disabled={!(isNewRisk || canChangeAssigned)}
+							disabled={!(isNewRisk || canComment)}
 						/>
 					)} />
 				</StyledFormControl>

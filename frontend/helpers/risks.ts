@@ -178,22 +178,9 @@ const getValidPositiveNumber = (value, defaultValue?) => {
 	return validNumber >= 0 ? validNumber : defaultValue;
 };
 
-const canChangeStatusToClosed = (riskData, userJob, permissions, currentUser) => {
-	return isAdmin(permissions) || isJobOwner(riskData, userJob, permissions, currentUser);
-};
-
-export const canChangeStatus = (riskData, userJob, permissions, currentUser) => {
-	return canChangeStatusToClosed(riskData, userJob, permissions, currentUser) ||
-		isAssignedJob(riskData, userJob, permissions);
-};
-
 export const canChangeBasicProperty = (riskData, userJob, permissions, currentUser) => {
 	return isAdmin(permissions) || isJobOwner(riskData, userJob, permissions, currentUser) &&
 		canComment(riskData, userJob, permissions, currentUser);
-};
-
-export const canChangeAssigned = (riskData, userJob, permissions, currentUser) => {
-	return isAdmin(permissions) || canChangeBasicProperty(riskData, userJob, permissions, currentUser);
 };
 
 export const canComment = (riskData, userJob, permissions, currentUser) => {

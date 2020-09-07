@@ -52,7 +52,6 @@ interface IProps {
 	active: boolean;
 	isNewRisk: boolean;
 	canComment: boolean;
-	canEditRiskStatus: boolean;
 	values?: any;
 	criteria: any;
 	showDialog: (config: any) => void;
@@ -61,7 +60,7 @@ interface IProps {
 }
 
 export const TreatmentRiskFormTab: React.FunctionComponent<IProps> = ({
-	active, isNewRisk, canComment, canEditRiskStatus, values, criteria, showDialog,
+	active, isNewRisk, canComment, values, criteria, showDialog,
 	showMitigationSuggestions, setFieldValue
 }) => {
 	const handleSuggestionClick = () => {
@@ -138,7 +137,7 @@ export const TreatmentRiskFormTab: React.FunctionComponent<IProps> = ({
 							{...field}
 							items={RISK_MITIGATION_STATUSES}
 							inputId="mitigation_status"
-							disabled={!canEditRiskStatus}
+							disabled={!canComment}
 						/>
 					)} />
 				</StyledFormControl>
