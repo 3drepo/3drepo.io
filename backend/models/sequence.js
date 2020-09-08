@@ -20,6 +20,7 @@ const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
 
+const FileRef = require("./fileRef");
 const History = require("./history");
 const Ref = require("./ref");
 
@@ -57,6 +58,20 @@ class Sequence {
 		}
 
 		return toClean;
+	}
+
+	async getSequenceActivities(account, model, branch, revision) {
+		const history = await History.getHistory({account, model}, branch, revision);
+
+		if (!history) {
+			return Promise.reject(responseCodes.INVALID_TAG_NAME);
+		} else {
+			return FileRef.getSequenceActivitiesFile(account, model, utils.uuidToString(history._id));
+		}
+	}
+
+	getSequenceState(account, model, stateId) {
+		return FileRef.getSequenceStateFile(account, model, stateId);
 	}
 
 	async getList(account, model, branch, revision, cleanResponse = false) {

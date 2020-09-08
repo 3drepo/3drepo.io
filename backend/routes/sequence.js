@@ -22,7 +22,6 @@ const middlewares = require("../middlewares/middlewares");
 
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
-const FileRef = require("../models/fileRef");
 const Sequence = require("../models/sequence");
 
 /**
@@ -32,6 +31,84 @@ const Sequence = require("../models/sequence");
  * @apiParam {String} model Model ID
  * @apiParam {String} [revId] Revision unique ID
  */
+
+/**
+ * @api {get} /:teamspace/:model/revision(/master/head/|/:revId)/sequences/activities Get all activities
+ * @apiName getSequenceActivities
+ * @apiGroup Sequences
+ * @apiDescription Get all sequence activities.
+ *
+ * @apiUse Sequences
+ *
+ * @apiExample {get} Example usage (/master/head)
+ * GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences/activities HTTP/1.1
+ *
+ * @apiExample {get} Example usage (/:revId)
+ * GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/sequences/activities HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {
+ * 	"tasks":[
+ * 		{
+ * 			"id":"00000000-0000-0000-0001-000000000001",
+ * 			"name":"Construction",
+ * 			"startDate":1244246400000,
+ * 			"endDate":1244246450000,
+ * 			"subTasks":[
+ * 				{
+ * 					"id":"00000000-0000-0001-0001-000000000001",
+ * 					"name":"Prepare site",
+ * 					"startDate":1244246400000,
+ * 					"endDate":1244246430000,
+ * 					"subTasks":[
+ * 						{
+ * 							"id":"00000000-0001-0001-0001-000000000001",
+ * 							"name":"Erect site hoarding",
+ * 							"startDate":1244246400000,
+ * 							"endDate":1244246410000
+ * 						},
+ * 						{
+ * 							"id":"00000000-0002-0001-0001-000000000001",
+ * 							"name":"Clear existing structures",
+ * 							"startDate":1244246410000,
+ * 							"endDate":1244246420000
+ * 						},
+ * 						{
+ * 							"id":"00000000-0003-0001-0001-000000000001",
+ * 							"name":"Smooth work surfaces",
+ * 							"startDate":1244246420000,
+ * 							"endDate":1244246430000
+ * 						}
+ * 					]
+ * 				},
+ * 				{
+ * 					"id":"00000000-0000-0002-0001-000000000001",
+ * 					"name":"Construct tunnel",
+ * 					"startDate":1244246430000,
+ * 					"endDate":1244246450000,
+ * 					"subTasks":[
+ * 						{
+ * 							"id":"00000000-0001-0002-0001-000000000001",
+ * 							"name":"Deploy instant tunnel",
+ * 							"startDate":1244246430000,
+ * 							"endDate":1244246440000
+ * 						},
+ * 						{
+ * 							"id":"00000000-0002-0002-0001-000000000001",
+ * 							"name":"Add road markings",
+ * 							"startDate":1244246440000,
+ * 							"endDate":1244246450000
+ * 						}
+ * 					]
+ * 				}
+ * 			]
+ * 		}
+ * 	]
+ * }
+ */
+router.get("/revision/master/head/sequences/activities", middlewares.issue.canView, getSequenceActivities);
+router.get("/revision/:revId/sequences/activities", middlewares.issue.canView, getSequenceActivities);
 
 /**
  * @api {get} /:teamspace/:model/revision(/master/head/|/:revId)/sequences/:sequenceId/state/:stateId Get state
@@ -119,7 +196,7 @@ const Sequence = require("../models/sequence");
  * 	]
  */
 router.get("/revision/master/head/sequences/:sequenceId/state/:stateId", middlewares.issue.canView, getSequenceState);
-router.get("/revision/:rid/sequences/:sequenceId/state/:stateId", middlewares.issue.canView, getSequenceState);
+router.get("/revision/:revId/sequences/:sequenceId/state/:stateId", middlewares.issue.canView, getSequenceState);
 
 /**
  * @api {get} /:teamspace/:model/revision(/master/head/|/:revId)/sequences List all sequences
@@ -186,13 +263,25 @@ router.get("/revision/:rid/sequences/:sequenceId/state/:stateId", middlewares.is
  * ]
  */
 router.get("/revision/master/head/sequences", middlewares.issue.canView, listSequences);
-router.get("/revision/:rid/sequences", middlewares.issue.canView, listSequences);
+router.get("/revision/:revId/sequences", middlewares.issue.canView, listSequences);
+
+function getSequenceActivities(req, res, next) {
+	const place = utils.APIInfo(req);
+	const { account, model, revId } = req.params;
+	const branch = revId ? null : "master";
+
+	Sequence.getSequenceActivities(account, model, branch, revId).then(activities => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, activities);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
 
 function getSequenceState(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model, stateId } = req.params;
 
-	FileRef.getSequenceStateFile(account, model, stateId).then(state => {
+	Sequence.getSequenceState(account, model, stateId).then(state => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, state);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -201,10 +290,10 @@ function getSequenceState(req, res, next) {
 
 function listSequences(req, res, next) {
 	const place = utils.APIInfo(req);
-	const { account, model, rid } = req.params;
-	const branch = rid ? null : "master";
+	const { account, model, revId } = req.params;
+	const branch = revId ? null : "master";
 
-	Sequence.getList(account, model, branch, rid, true).then(sequences => {
+	Sequence.getList(account, model, branch, revId, true).then(sequences => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, sequences);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
