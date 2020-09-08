@@ -39,9 +39,71 @@ const config = require("../config");
  * @apiSuccess (View object) {String} _id View ID
  * @apiSuccess (View object) {String} name Name of view
  * @apiSuccess (View object) {String} thumbnail Thumbnail image
- * @apiSuccess (View object) {Object} viewpoint Viewpoint properties
+ * @apiSuccess (View object) {ResultViewpoint} viewpoint Viewpoint properties
  * @apiSuccess (View object) {Number[]} clippingPlanes [DEPRECATED] Array of clipping planes
  * @apiSuccess (View object) {Object} screenshot [DEPRECATED] Screenshot object
+ */
+
+/**
+ * @apiDefine viewpointObject
+ *
+ * @apiParam (Type: Viewpoint) {Number[3]} right Right vector of viewpoint indicating the direction of right in relative coordinates
+ * @apiParam (Type: Viewpoint) {Number[3]} up Up vector of viewpoint indicating the direction of up in relative coordinates
+ * @apiParam (Type: Viewpoint) {Number[3]} position Position vector indicates where in the world the viewpoint is positioned
+ * @apiParam (Type: Viewpoint) {Number[3]} look_at Vector indicating where in the world the viewpoint is looking at
+ * @apiParam (Type: Viewpoint) {Number[3]} view_dir Vector indicating the direction the viewpoint is looking at in relative coordinates
+ * @apiParam (Type: Viewpoint) {Number} near Vector indicating the near plane
+ * @apiParam (Type: Viewpoint) {Number} far Vector indicating the far plane
+ * @apiParam (Type: Viewpoint) {Number} fov Angle of the field of view
+ * @apiParam (Type: Viewpoint) {Number} aspect_ratio Aspect ratio of the fustrum
+ * @apiParam (Type: Viewpoint) {ClippingPlane[]} [clippingPlanes] Clipping planes associated with the viewpoint
+ * @apiParam (Type: Viewpoint) {String} [highlighted_group_id] If the viewpoint is associated with one or more highlighted objects from the model this field has the value of a group ID generated to hold those objects
+ * @apiParam (Type: Viewpoint) {String} [hidden_group_id] If the viewpoint is associated with one or more hidden objects from the model this field has the value of a group id generated to hold those objects
+ * @apiParam (Type: Viewpoint) {String} [shown_group_id] If the viewpoint is associated with one or more shown objects from the model this field has the value of a group id generated to hold those objects
+ * @apiParam (Type: Viewpoint) {Group} [highlighted_group] If the viewpoint is associated with one or more highlighted objects from the model this field has the value of a group definition for those objects (this shouldnt be use simultaneously with highlighted_group_id)
+ * @apiParam (Type: Viewpoint) {Group} [hidden_group] If the viewpoint is associated with one or more hidden objects from the model this field has the value of a group id generated to hold those objects (this shouldnt be use simultaneously with hidden_group_id)
+ * @apiParam (Type: Viewpoint) {Group} [shown_group] If the viewpoint is associated with one or more shown objects from the model this field has the definition of the group to hold those objects (this shouldnt be use simultaneously with shown_group_id)
+ * @apiParam (Type: Viewpoint) {Group[]} [override_groups] If the viewpoint has one or more objects with colour override this field has an array of groups with one group for each colour
+ * @apiParam (Type: Viewpoint) {Boolean} hide_IFC A flag to hide the IFC
+ * @apiParam (Type: Viewpoint) {String} screenshot Base64 string representing the screenshot associated with the viewpoint
+ *
+ * @apiParam (Type: Group) {Number[3]} color RGB colour values
+ * @apiParam (Type: Group) {ModelObjects} objects List of objects in group
+ *
+ * @apiParam (Type: ModelObjects) {String} account The account that has the model which contains the objects
+ * @apiParam (Type: ModelObjects) {String} model The model id that contains the objects
+ * @apiParam (Type: ModelObjects) {String[]} shared_ids The shared ids of objects to be selected
+ *
+ * @apiParam (Type: ClippingPlane) {Number[3]} normal The normal of the plane defined for the clipping plane
+ * @apiParam (Type: ClippingPlane) {Number} distance The distance for the clipping plane to the origin
+ * @apiParam (Type: ClippingPlane) {Number} clipDirection The direction to the clipping plane will cut the model; above or below the plane. Possible values: 1 , -1.
+ *
+ */
+
+/**
+ * @apiDefine resultViewpointObject
+ *
+ * @apiParam (Type: ResultViewpoint) {Number[3]} right The right vector of the viewpoint indicating the direction of right in relative coordinates.
+ * @apiParam (Type: ResultViewpoint) {Number[3]} up The up vector of the viewpoint indicating the direction of up in relative coordinates.
+ * @apiParam (Type: ResultViewpoint) {Number[3]} position The position vector indicates where in the world the viewpoint is positioned.
+ * @apiParam (Type: ResultViewpoint) {Number[3]} look_at The vector indicating where in the world the viewpoint is looking at.
+ * @apiParam (Type: ResultViewpoint) {Number[3]} view_dir The vector indicating where is the viewpoint is looking at in relative coordinates.
+ * @apiParam (Type: ResultViewpoint) {Number} near The vector indicating the near plane.
+ * @apiParam (Type: ResultViewpoint) {Number} far The vector indicating the far plane.
+ * @apiParam (Type: ResultViewpoint) {Number} fov The angle of the field of view.
+ * @apiParam (Type: ResultViewpoint) {Number} aspect_ratio The aspect ratio of the fustrum.
+ * @apiParam (Type: ResultViewpoint) {ClippingPlane[]} [clippingPlanes] the clipping planes associated with the viewpoint
+ * @apiParam (Type: ResultViewpoint) {String} [highlighted_group_id] If the viewpoint is associated with one or more highlighted objects from the model this field has the value of a group id generated to hold those objects
+ * @apiParam (Type: ResultViewpoint) {String} [hidden_group_id] If the viewpoint is associated with one or more hidden objects from the model this field has the value of a group id generated to hold those objects
+ * @apiParam (Type: ResultViewpoint) {String} [shown_group_id] If the viewpoint is associated with one or more shown objects from the model this field has the value of a group id generated to hold those objects
+ * @apiParam (Type: ResultViewpoint) {String[]} [override_group_ids] If the viewpoint has one or more objects with colour override this field has an array of groups ids with one group for each colour
+ * @apiParam (Type: ResultViewpoint) {Boolean} hide_IFC A flag to hide the IFC
+ * @apiParam (Type: ResultViewpoint) {String} screenshot A string in base64 representing the screenshot associated with the viewpoint
+ *
+ * @apiParam (Type: ClippingPlane) {Number[3]} normal The normal of the plane defined for the clipping plane
+ * @apiParam (Type: ClippingPlane) {Number} distance The distance for the clipping plane to the origin
+ * @apiParam (Type: ClippingPlane) {Number} clipDirection The direction to the clipping plane will cut the model; above or below the plane. Possible values: 1 , -1.
+ *
  */
 
 /**
@@ -52,6 +114,7 @@ const config = require("../config");
  *
  * @apiUse Views
  * @apiUse SuccessViewObject
+ * @apiUse resultViewpointObject
  *
  * @apiSuccess {Object[]} views List of view objects
  *
@@ -119,6 +182,7 @@ router.get("/viewpoints/", middlewares.issue.canView, listViews);
  *
  * @apiUse Views
  * @apiUse SuccessViewObject
+ * @apiUse resultViewpointObject
  *
  * @apiParam {String} viewId View ID
  *
@@ -187,7 +251,7 @@ router.put("/viewpoints/:uid", middlewares.issue.canCreate, updateView);
  * @apiUse Views
  *
  * @apiParam (Request body) {String} name Name of view
- * @apiParam (Request body) {String} viewpoint Viewpoint
+ * @apiParam (Request body) {Viewpoint} viewpoint Viewpoint
  * @apiParam (Request body) {String} screenshot Screenshot
  * @apiParam (Request body) {String} [clippingPlanes] List of clipping planes
  * @apiParam (Request body: screenshot) {String} base64 Screenshot image in base64

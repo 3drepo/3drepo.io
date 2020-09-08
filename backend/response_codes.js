@@ -113,6 +113,7 @@
 
 		GROUP_NOT_FOUND: { message: "Group not found", status: 404 },
 		INVALID_GROUP: { message: "Group request malformed", status: 400 },
+		MULTIPLE_RULES_PER_FIELD_NOT_ALLOWED: { message: "Only one rule allowed per field", status: 400 },
 
 		VIEW_NOT_FOUND: { message: "Camera viewpoint not found", status: 404 },
 		CANNOT_DELETE_DEFAULT_VIEW: { message: "This view is set to be the default for the model. Please change it before deleting.", status: 400 },

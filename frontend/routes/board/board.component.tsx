@@ -128,8 +128,8 @@ interface IProps {
 	resetModel: () => void;
 	resetIssues: () => void;
 	resetRisks: () => void;
-	teamspaceSettings: any;
 	openCardDialog: (cardId: string, onChange: (index: number) => void) => void;
+	criteria: any;
 }
 
 const PANEL_PROPS = {
@@ -451,12 +451,14 @@ export function Board(props: IProps) {
 	const filterItems = () => {
 		const filterValuesMap = isIssuesBoard
 				? issuesFilters(props.jobs, props.topicTypes)
-				: risksFilters(props.jobs, props.teamspaceSettings);
+				: risksFilters(props.jobs, props.criteria);
 
-		return FILTER_ITEMS.map((issueFilter) => {
+		const generatedFilters = FILTER_ITEMS.map((issueFilter) => {
 			issueFilter.values = filterValuesMap[issueFilter.relatedField];
 			return issueFilter;
 		});
+
+		return generatedFilters.filter((filter) => filter.values.length);
 	};
 
 	const getSearchButton = () => {

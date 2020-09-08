@@ -34,7 +34,6 @@ import { SelectField as SelectFieldComponent } from '../selectField/selectField.
 export const Container = styled.div`
 	height: 100%;
 	box-sizing: border-box;
-	background-color: ${hexToRgba(COLOR.BLACK, .02)};
 	border-top: 1px solid ${COLOR.BLACK_20};
 `;
 

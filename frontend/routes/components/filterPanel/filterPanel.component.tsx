@@ -29,8 +29,8 @@ import { BACKSPACE, ENTER_KEY } from '../../../constants/keys';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { compareStrings } from '../../../helpers/searching';
 import { formatShortDate } from '../../../services/formatting/formatDate';
-import { Filter } from '../../components/fontAwesomeIcon';
 import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
+import { Filter } from '../fontAwesomeIcon';
 import { Highlight } from '../highlight/highlight.component';
 import { FiltersMenu } from './components/filtersMenu/filtersMenu.component';
 import {
@@ -344,7 +344,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 					...prevState.selectedFilters,
 					...newSelectedFilters
 				], (filter) => JSON.stringify(filter))
-			}));
+			}), this.handleFiltersChange);
 		} catch (error) {
 			this.setState({ value: event.clipboardData.getData('text') });
 		}

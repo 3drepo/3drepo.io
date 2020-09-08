@@ -71,6 +71,7 @@ interface IProps {
 	renderNotCollapsable?: () => JSX.Element | JSX.Element[];
 	actionButton?: React.ReactNode;
 	clone?: boolean;
+	isSmartGroup?: boolean;
 }
 
 const ValidationSchema = Yup.object().shape({
@@ -252,10 +253,12 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			handleHeaderClick,
 			showModelButton,
 			actionButton,
+			isSmartGroup,
+			panelName,
 		} = this.props;
 
 		return (
-			<Container className={className} edit={!this.props.isNew} panelName={this.props.panelName}>
+			<Container className={className} edit={!this.props.isNew} panelName={panelName} isSmartGroup={isSmartGroup}>
 				{this.renderUpdateMessage(willBeUpdated)}
 				{this.renderDeleteMessage(willBeRemoved)}
 				<Summary
