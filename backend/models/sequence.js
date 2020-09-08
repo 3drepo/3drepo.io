@@ -60,6 +60,19 @@ class Sequence {
 		return toClean;
 	}
 
+	async getSequenceActivityDetail(account, model, activityId, cleanResponse = false) {
+		const dbCol = await db.getCollection(account, model + ".tasks");
+		activityId = utils.stringToUUID(activityId);
+
+		const activity = await dbCol.findOne({"_id": activityId});
+
+		if (cleanResponse) {
+			this.clean(activity);
+		}
+
+		return activity;
+	}
+
 	async getSequenceActivities(account, model, branch, revision) {
 		const history = await History.getHistory({account, model}, branch, revision);
 
