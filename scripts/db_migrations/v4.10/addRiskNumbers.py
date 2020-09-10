@@ -29,6 +29,7 @@ for database in db.database_names():
             modelId = setting.get("_id")
             print("\t--model: " +  modelId)
             riskNumber = 1
+            db[modelId + ".risks"].ensure_index([("created", pymongo.ASCENDING)])
             for risk in db[modelId + ".risks"].find(no_cursor_timeout=True).sort("created", pymongo.ASCENDING):
                 riskId = risk.get("_id")
                 print("\t\t--risk (" + str(riskNumber) +"): " +  str(riskId))
