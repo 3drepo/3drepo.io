@@ -1546,6 +1546,13 @@
           },
           {
             "group": "Query",
+            "type": "Boolean",
+            "optional": true,
+            "field": "noViews",
+            "description": "<p>Flag that hides groups for risks</p>"
+          },
+          {
+            "group": "Query",
             "type": "Number",
             "optional": true,
             "field": "updatedSince",
@@ -2399,29 +2406,6 @@
     "description": "<p>Attaches file or url resources to an issue. If the type of the resource is file it should be send as multipart/form-data. Both types at the same time cant be sent. So in order to attach files and urls it should be done with two different requests.</p> <p>This method triggers a chat event</p>",
     "parameter": {
       "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "issueId",
-            "description": "<p>Issue unique ID</p>"
-          }
-        ],
         "Request body file resource (multipart/form-data)": [
           {
             "group": "Request body file resource (multipart/form-data)",
@@ -2453,30 +2437,7 @@
             "field": "names",
             "description": "<p>The names of the urls; it should have the same length as the url field</p>"
           }
-        ]
-      }
-    },
-    "success": {
-      "examples": [
-        {
-          "title": "Success example result after two files has been uploaded",
-          "content": "\n[\n   {\n      \"_id\":\"7617f775-9eb7-4877-8ec3-98ea3457e519\",\n      \"size\":1422,\n      \"issueIds\":[\n         \"3e8a11e0-9812-11e9-9c4d-ebde5888e062\"\n      ],\n      \"name\":\"todo.txt\",\n      \"user\":\"teamSpace1\",\n      \"createdAt\":1561973996461\n   },\n   {\n      \"_id\":\"e25e42d5-c4f0-4fbc-a8f4-bc9899e6662a\",\n      \"size\":2509356,\n      \"issueIds\":[\n         \"3e8a11e0-9812-11e9-9c4d-ebde5888e062\"\n      ],\n      \"name\":\"football.gif\",\n      \"user\":\"teamSpace1\",\n      \"createdAt\":1561973996462\n   }\n]",
-          "type": "json"
-        }
-      ]
-    },
-    "version": "0.0.0",
-    "filename": "routes/issue.js",
-    "groupTitle": "Issues"
-  },
-  {
-    "type": "delete",
-    "url": "/:teamspace/:model/issues/:issueId/comments",
-    "title": "Deletes an comment from an issue",
-    "name": "commentIssue",
-    "group": "Issues",
-    "parameter": {
-      "fields": {
+        ],
         "Parameter": [
           {
             "group": "Parameter",
@@ -2497,14 +2458,344 @@
             "type": "String",
             "optional": false,
             "field": "issueId",
-            "description": "<p>Unique Issue ID to update.</p>"
+            "description": "<p>Issue ID</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success example result after two files has been uploaded",
+          "content": "\n[\n   {\n      \"_id\":\"7617f775-9eb7-4877-8ec3-98ea3457e519\",\n      \"size\":1422,\n      \"issueIds\":[\n         \"3e8a11e0-9812-11e9-9c4d-ebde5888e062\"\n      ],\n      \"name\":\"todo.txt\",\n      \"user\":\"teamSpace1\",\n      \"createdAt\":1561973996461\n   },\n   {\n      \"_id\":\"e25e42d5-c4f0-4fbc-a8f4-bc9899e6662a\",\n      \"size\":2509356,\n      \"issueIds\":[\n         \"3e8a11e0-9812-11e9-9c4d-ebde5888e062\"\n      ],\n      \"name\":\"football.gif\",\n      \"user\":\"teamSpace1\",\n      \"createdAt\":1561973996462\n   }\n]",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/issue.js",
+    "groupTitle": "Issues"
+  },
+  {
+    "type": "post",
+    "url": "/:teamspace/:model/issues/:issueId/comments",
+    "title": "Add comment to issue",
+    "name": "commentIssue",
+    "group": "Issues",
+    "parameter": {
+      "fields": {
+        "Request body": [
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "comment",
+            "description": "<p>Comment text</p>"
           },
+          {
+            "group": "Request body",
+            "type": "Viewpoint",
+            "optional": true,
+            "field": "viewpoint",
+            "description": "<p>The viewpoint associated with the comment</p>"
+          }
+        ],
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "issueId",
+            "description": "<p>Issue ID</p>"
+          }
+        ],
+        "Type: Viewpoint": [
+          {
+            "group": "Type: Viewpoint",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "right",
+            "description": "<p>Right vector of viewpoint indicating the direction of right in relative coordinates</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "up",
+            "description": "<p>Up vector of viewpoint indicating the direction of up in relative coordinates</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "position",
+            "description": "<p>Position vector indicates where in the world the viewpoint is positioned</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "look_at",
+            "description": "<p>Vector indicating where in the world the viewpoint is looking at</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "view_dir",
+            "description": "<p>Vector indicating the direction the viewpoint is looking at in relative coordinates</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Number",
+            "optional": false,
+            "field": "near",
+            "description": "<p>Vector indicating the near plane</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Number",
+            "optional": false,
+            "field": "far",
+            "description": "<p>Vector indicating the far plane</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Number",
+            "optional": false,
+            "field": "fov",
+            "description": "<p>Angle of the field of view</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Number",
+            "optional": false,
+            "field": "aspect_ratio",
+            "description": "<p>Aspect ratio of the fustrum</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "ClippingPlane[]",
+            "optional": true,
+            "field": "clippingPlanes",
+            "description": "<p>Clipping planes associated with the viewpoint</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "String",
+            "optional": true,
+            "field": "highlighted_group_id",
+            "description": "<p>If the viewpoint is associated with one or more highlighted objects from the model this field has the value of a group ID generated to hold those objects</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "String",
+            "optional": true,
+            "field": "hidden_group_id",
+            "description": "<p>If the viewpoint is associated with one or more hidden objects from the model this field has the value of a group id generated to hold those objects</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "String",
+            "optional": true,
+            "field": "shown_group_id",
+            "description": "<p>If the viewpoint is associated with one or more shown objects from the model this field has the value of a group id generated to hold those objects</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Group",
+            "optional": true,
+            "field": "highlighted_group",
+            "description": "<p>If the viewpoint is associated with one or more highlighted objects from the model this field has the value of a group definition for those objects (this shouldnt be use simultaneously with highlighted_group_id)</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Group",
+            "optional": true,
+            "field": "hidden_group",
+            "description": "<p>If the viewpoint is associated with one or more hidden objects from the model this field has the value of a group id generated to hold those objects (this shouldnt be use simultaneously with hidden_group_id)</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Group",
+            "optional": true,
+            "field": "shown_group",
+            "description": "<p>If the viewpoint is associated with one or more shown objects from the model this field has the definition of the group to hold those objects (this shouldnt be use simultaneously with shown_group_id)</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Group[]",
+            "optional": true,
+            "field": "override_groups",
+            "description": "<p>If the viewpoint has one or more objects with colour override this field has an array of groups with one group for each colour</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Boolean",
+            "optional": false,
+            "field": "hide_IFC",
+            "description": "<p>A flag to hide the IFC</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "String",
+            "optional": false,
+            "field": "screenshot",
+            "description": "<p>Base64 string representing the screenshot associated with the viewpoint</p>"
+          }
+        ],
+        "Type: Group": [
+          {
+            "group": "Type: Group",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "color",
+            "description": "<p>RGB colour values</p>"
+          },
+          {
+            "group": "Type: Group",
+            "type": "ModelObjects",
+            "optional": false,
+            "field": "objects",
+            "description": "<p>List of objects in group</p>"
+          }
+        ],
+        "Type: ModelObjects": [
+          {
+            "group": "Type: ModelObjects",
+            "type": "String",
+            "optional": false,
+            "field": "account",
+            "description": "<p>The account that has the model which contains the objects</p>"
+          },
+          {
+            "group": "Type: ModelObjects",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>The model id that contains the objects</p>"
+          },
+          {
+            "group": "Type: ModelObjects",
+            "type": "String[]",
+            "optional": false,
+            "field": "shared_ids",
+            "description": "<p>The shared ids of objects to be selected</p>"
+          }
+        ],
+        "Type: ClippingPlane": [
+          {
+            "group": "Type: ClippingPlane",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "normal",
+            "description": "<p>The normal of the plane defined for the clipping plane</p>"
+          },
+          {
+            "group": "Type: ClippingPlane",
+            "type": "Number",
+            "optional": false,
+            "field": "distance",
+            "description": "<p>The distance for the clipping plane to the origin</p>"
+          },
+          {
+            "group": "Type: ClippingPlane",
+            "type": "Number",
+            "optional": false,
+            "field": "clipDirection",
+            "description": "<p>The direction to the clipping plane will cut the model; above or below the plane. Possible values: 1 , -1.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "PAYLOAD",
+          "content": "{\n  \"comment\": \"This is a commment\",\n  \"viewpoint\": {right: [-0.0374530553817749, -7.450580596923828e-9, -0.9992983341217041],…}\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success",
+          "content": " HTTP/1.1 200 OK\n{\n    guid: \"096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e\",\n    comment: \"This is a commment\",\n    created: 1558534690327,\n    guid: \"096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e\",\n    owner: \"username\",\n    viewpoint: {right: [-0.0374530553817749, -7.450580596923828e-9, -0.9992983341217041],…}\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "404",
+            "description": "<p>Issue not found</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "400",
+            "description": "<p>Comment with no text</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/issue.js",
+    "groupTitle": "Issues"
+  },
+  {
+    "type": "delete",
+    "url": "/:teamspace/:model/issues/:issueId/comments",
+    "title": "Deletes an comment from an issue",
+    "name": "commentIssue",
+    "group": "Issues",
+    "parameter": {
+      "fields": {
+        "Parameter": [
           {
             "group": "Parameter",
             "type": "Json",
             "optional": false,
             "field": "PAYLOAD",
             "description": "<p>The data with the comment guid to be deleted.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "issueId",
+            "description": "<p>Issue ID</p>"
           }
         ]
       },
@@ -2554,84 +2845,6 @@
     "groupTitle": "Issues"
   },
   {
-    "type": "post",
-    "url": "/:teamspace/:model/issues/:issueId/comments",
-    "title": "Add comment to issue",
-    "name": "commentIssue",
-    "group": "Issues",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "issueId",
-            "description": "<p>Unique Issue ID to update.</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "Json",
-            "optional": false,
-            "field": "PAYLOAD",
-            "description": "<p>The data with the comment to be added.</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "PAYLOAD",
-          "content": "{\n  \"comment\": \"This is a commment\",\n  \"viewpoint: {right: [-0.0374530553817749, -7.450580596923828e-9, -0.9992983341217041],…}\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "success": {
-      "examples": [
-        {
-          "title": "Success",
-          "content": " HTTP/1.1 200 OK\n{\n    guid: \"096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e\",\n    comment: \"This is a commment\",\n    created: 1558534690327,\n    guid: \"096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e\",\n    owner: \"username\",\n    viewpoint: {right: [-0.0374530553817749, -7.450580596923828e-9, -0.9992983341217041],…}\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "error": {
-      "fields": {
-        "Error 4xx": [
-          {
-            "group": "Error 4xx",
-            "optional": false,
-            "field": "404",
-            "description": "<p>Issue not found</p>"
-          },
-          {
-            "group": "Error 4xx",
-            "optional": false,
-            "field": "400",
-            "description": "<p>Comment with no text</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/issue.js",
-    "groupTitle": "Issues"
-  },
-  {
     "type": "delete",
     "url": "/:teamspace/:model/issues/:issueId/resources",
     "title": "Detach a resource from an issue",
@@ -2640,6 +2853,15 @@
     "description": "<p>Detachs a resource from an issue. If the issue is the last entity the resources has been attached to it also deletes the resource from the system. This method triggers a chat event .</p>",
     "parameter": {
       "fields": {
+        "Request body": [
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "_id",
+            "description": "<p>The resource id to be detached</p>"
+          }
+        ],
         "Parameter": [
           {
             "group": "Parameter",
@@ -2660,16 +2882,7 @@
             "type": "String",
             "optional": false,
             "field": "issueId",
-            "description": "<p>Issue unique ID</p>"
-          }
-        ],
-        "Request body": [
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": false,
-            "field": "_id",
-            "description": "<p>The resource id to be detached</p>"
+            "description": "<p>Issue ID</p>"
           }
         ]
       }
@@ -2677,8 +2890,8 @@
     "success": {
       "examples": [
         {
-          "title": "{",
-          "content": "\n{\n   \"_id\":\"e25e42d5-c4f0-4fbc-a8f4-bc9899e6662a\",\n   \"size\":2509356,\n   \"issueIds\":[\n   ],\n   \"name\":\"football.gif\",\n   \"user\":\"teamSpace1\",\n   \"createdAt\":1561973996462\n}",
+          "title": "Success-Response",
+          "content": "HTTP/1.1 200 OK\n{\n   \"_id\":\"e25e42d5-c4f0-4fbc-a8f4-bc9899e6662a\",\n   \"size\":2509356,\n   \"issueIds\":[\n   ],\n   \"name\":\"football.gif\",\n   \"user\":\"teamSpace1\",\n   \"createdAt\":1561973996462\n}",
           "type": "json"
         }
       ]
@@ -2690,36 +2903,9 @@
   {
     "type": "get",
     "url": "/:teamspace/:model/issues/:issueId",
-    "title": "Find Issue by ID",
-    "name": "findIssueById",
+    "title": "Get issue",
+    "name": "findIssue",
     "group": "Issues",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "Number",
-            "optional": false,
-            "field": "issueId",
-            "description": "<p>Issue ID</p>"
-          }
-        ]
-      }
-    },
     "description": "<p>Find an issue with the requested Issue ID.</p>",
     "success": {
       "fields": {
@@ -2736,7 +2922,7 @@
       "examples": [
         {
           "title": "Success-Response.",
-          "content": "HTTP/1.1 200 OK\n{\n\t\taccount: \"username\"\n\t\tassigned_roles: []\n\t\tcommentCount: 0\n\t\tcreated: 1542723030489\n\t\tcreator_role: \"3D Repo\"\n\t\tdesc: \"(No Description)\"\n\t\tmodel: \"model_ID\"\n\t\tmodelCode: \"\"\n\t\tname: \"Issue one\"\n\t\tnorm: []\n\t\tnumber: 1\n\t\towner: \"username\"\n\t\tposition: []\n\t\tpriority: \"none\"\n\t\trev_id: \"revision_ID\"\n\t\tscale: 1\n\t\tstatus: \"open\"\n\t\tthumbnail: \"USERNAME/MODEL_ID/issues/ISSUE_ID/thumbnail.png\"\n\t\ttopic_type: \"for_information\"\n\t\ttypePrefix: \"Architectural\"\n\t\tviewCount: 1\n\t\tviewpoint: {near: 24.057758331298828, far: 12028.87890625, fov: 1.0471975803375244,…}\n\t\t__v: 0\n\t\t_id: \"ISSUE_ID\"\n}",
+          "content": "HTTP/1.1 200 OK\n{\n\t\taccount: \"username\"\n\t\tassigned_roles: []\n\t\tcommentCount: 0\n\t\tcreated: 1542723030489\n\t\tcreator_role: \"3D Repo\"\n\t\tdesc: \"(No Description)\"\n\t\tmodel: \"model_ID\"\n\t\tmodelCode: \"\"\n\t\tname: \"Issue one\"\n\t\tnumber: 1\n\t\towner: \"username\"\n\t\tposition: []\n\t\tpriority: \"none\"\n\t\trev_id: \"revision_ID\"\n\t\tscale: 1\n\t\tstatus: \"open\"\n\t\tthumbnail: \"USERNAME/MODEL_ID/issues/ISSUE_ID/thumbnail.png\"\n\t\ttopic_type: \"for_information\"\n\t\ttypePrefix: \"Architectural\"\n\t\tviewCount: 1\n\t\tviewpoint: {near: 24.057758331298828, far: 12028.87890625, fov: 1.0471975803375244,…}\n\t\t__v: 0\n\t\t_id: \"ISSUE_ID\"\n}",
           "type": "json"
         }
       ]
@@ -2762,14 +2948,7 @@
     },
     "version": "0.0.0",
     "filename": "routes/issue.js",
-    "groupTitle": "Issues"
-  },
-  {
-    "type": "get",
-    "url": "/:teamspace/:model/issues/:issueId/thumbnail.png",
-    "title": "Get Issue Thumbnail",
-    "name": "findIssueById",
-    "group": "Issues",
+    "groupTitle": "Issues",
     "parameter": {
       "fields": {
         "Parameter": [
@@ -2789,38 +2968,25 @@
           },
           {
             "group": "Parameter",
-            "type": "Number",
+            "type": "String",
             "optional": false,
-            "field": "id",
-            "description": "<p>Issue unique ID.</p>"
+            "field": "issueId",
+            "description": "<p>Issue ID</p>"
           }
         ]
       }
-    },
-    "description": "<p>Retrieve thumbnail screenshot image for requested issue.</p>",
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "optional": false,
-            "field": "200",
-            "description": "<p>{Object} thumbnail Thumbnail Image</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/issue.js",
-    "groupTitle": "Issues"
+    }
   },
   {
     "type": "get",
     "url": "/:teamspace/:model/issues.bcfzip",
-    "title": "Download issues BCF zip file",
+    "title": "Download issues BCF file",
     "name": "getIssuesBCF",
     "group": "Issues",
-    "description": "<p>Get a downloaded zip file of all Issues BCF.</p>",
+    "description": "<p>Download issues as a BCF file.</p>",
+    "version": "0.0.0",
+    "filename": "routes/issue.js",
+    "groupTitle": "Issues",
     "parameter": {
       "fields": {
         "Parameter": [
@@ -2840,55 +3006,18 @@
           }
         ]
       }
-    },
-    "version": "0.0.0",
-    "filename": "routes/issue.js",
-    "groupTitle": "Issues"
+    }
   },
   {
     "type": "get",
-    "url": "/:teamspace/:model/revision/:rid/issues.bcfzip",
+    "url": "/:teamspace/:model/revision/:revId/issues.bcfzip",
     "title": "Get Issues BCF zip file by revision ID",
     "name": "getIssuesBCFTRid",
     "group": "Issues",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "id",
-            "description": "<p>Revision unique ID.</p>"
-          }
-        ]
-      }
-    },
     "description": "<p>Get Issues BCF export based on revision ID.</p>",
     "version": "0.0.0",
     "filename": "routes/issue.js",
-    "groupTitle": "Issues"
-  },
-  {
-    "type": "get",
-    "url": "/:teamspace/:model/issues.bcfzip",
-    "title": "Get Issue Screenshot",
-    "name": "getScreenshot",
-    "group": "Issues",
+    "groupTitle": "Issues",
     "parameter": {
       "fields": {
         "Parameter": [
@@ -2910,50 +3039,64 @@
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "id",
-            "description": "<p>Viewpoint unique ID.</p>"
+            "field": "revId",
+            "description": "<p>Revision ID</p>"
           }
         ]
       }
-    },
-    "description": "<p>Get an issue screenshot from viewpoints using a viewpoint ID and issue ID.</p>",
-    "version": "0.0.0",
-    "filename": "routes/issue.js",
-    "groupTitle": "Issues"
+    }
   },
   {
     "type": "get",
-    "url": "/:teamspace/:model/issues/:issueId/viewpoints/:vid/screenshotSmall.png",
+    "url": "/:teamspace/:model/issues/:issueId/viewpoints/:viewpointId/screenshot.png",
+    "title": "Get issue viewpoint screenshot",
+    "name": "getScreenshot",
+    "group": "Issues",
+    "description": "<p>Get an issue viewpoint screenshot.</p>",
+    "version": "0.0.0",
+    "filename": "routes/issue.js",
+    "groupTitle": "Issues",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "issueId",
+            "description": "<p>Issue ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "viewpointId",
+            "description": "<p>Viewpoint ID</p>"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "get",
+    "url": "/:teamspace/:model/issues/:issueId/viewpoints/:viewpointId/screenshotSmall.png",
     "title": "Get smaller version of Issue screenshot",
     "name": "getScreenshotSmall",
     "group": "Issues",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "id",
-            "description": "<p>Viewpoint unique ID.</p>"
-          }
-        ]
-      }
-    },
     "success": {
       "fields": {
         "200": [
@@ -2969,7 +3112,92 @@
     },
     "version": "0.0.0",
     "filename": "routes/issue.js",
-    "groupTitle": "Issues"
+    "groupTitle": "Issues",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "issueId",
+            "description": "<p>Issue ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "viewpointId",
+            "description": "<p>Viewpoint ID</p>"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "get",
+    "url": "/:teamspace/:model/issues/:issueId/thumbnail.png",
+    "title": "Get issue thumbnail",
+    "name": "getThumbnail",
+    "group": "Issues",
+    "description": "<p>Retrieve screenshot thumbnail image for requested issue.</p>",
+    "success": {
+      "fields": {
+        "200": [
+          {
+            "group": "200",
+            "type": "Object",
+            "optional": false,
+            "field": "thumbnail",
+            "description": "<p>Thumbnail image</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/issue.js",
+    "groupTitle": "Issues",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "issueId",
+            "description": "<p>Issue ID</p>"
+          }
+        ]
+      }
+    }
   },
   {
     "type": "post",
@@ -2977,7 +3205,10 @@
     "title": "Import BCF file",
     "name": "importBCF",
     "group": "Issues",
-    "description": "<p>Upload an Issues BCF file.</p>",
+    "description": "<p>Upload issues BCF file.</p>",
+    "version": "0.0.0",
+    "filename": "routes/issue.js",
+    "groupTitle": "Issues",
     "parameter": {
       "fields": {
         "Parameter": [
@@ -2997,19 +3228,32 @@
           }
         ]
       }
-    },
-    "version": "0.0.0",
-    "filename": "routes/issue.js",
-    "groupTitle": "Issues"
+    }
   },
   {
     "type": "get",
-    "url": "/:teamspace/:model/revision/:rid/issues",
+    "url": "/:teamspace/:model/revision/:revId/issues",
     "title": "Get all Issues by revision ID",
     "name": "listIssues",
     "group": "Issues",
     "parameter": {
       "fields": {
+        "Query": [
+          {
+            "group": "Query",
+            "type": "String",
+            "optional": true,
+            "field": "convertCoords",
+            "description": "<p>Convert coordinates to user space</p>"
+          },
+          {
+            "group": "Query",
+            "type": "Number",
+            "optional": true,
+            "field": "updatedSince",
+            "description": "<p>Only return issues that has been updated since this value (in epoch value)</p>"
+          }
+        ],
         "Parameter": [
           {
             "group": "Parameter",
@@ -3029,24 +3273,8 @@
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "id",
-            "description": "<p>Revision unique ID.</p>"
-          }
-        ],
-        "Query": [
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "convertCoords",
-            "description": "<p>Convert coordinates to user space</p>"
-          },
-          {
-            "group": "Query",
-            "type": "Number",
-            "optional": true,
-            "field": "updatedSince",
-            "description": "<p>Only return issues that has been updated since this value (in epoch value)</p>"
+            "field": "revId",
+            "description": "<p>Revision ID</p>"
           }
         ]
       }
@@ -3067,7 +3295,7 @@
       "examples": [
         {
           "title": "Success-Response",
-          "content": "\n[\n\t{\n\t\t\"_id\":\"issue_ID\",\n\t\t\"creator_role\":\"Client\",\n\t\t\"scale\":1,\n\t\t\"due_date\":1547424000000,\n\t\t\"priority\":\"low\",\n\t\t\"desc\":\"This is a description\",\n\t\t\"topic_type\":\"for_information\",\n\t\t\"status\":\"open\",\"owner\":\"username\",\n\t\t\"created\":1546626949432,\n\t\t\"name\":\"An Issue for API\",\n\t\t\"number\":3,\n\t\t\"rev_id\":\"9cf31c6e-37cc-4625-8cee-270cf731059e\",\n\t\t\"__v\":0,\n\t\t\"assigned_roles\":[\"Architect\"],\n\t\t\"viewCount\":1,\"commentCount\":0,\n\t\t\"thumbnail\":\"ACCOUNT/MODEL_ID/issues/ISSUE_ID/thumbnail.png\",\n\t\t\"norm\":[],\"position\":[],\n\t\t\"typePrefix\":\"sample\",\n\t\t\"modelCode\":\"\",\n\t\t\"account\":\"username\",\n\t\t\"model\":\"MODEL_ID\",\n\t\t\"viewpoint\":\n\t\t\t{\n\t\t\t\t\"near\":54.739341735839844,\n\t\t\t\t\"far\":27369.669921875,\n\t\t\t\t\"fov\":1.0471975803375244,\n\t\t\t\t\"aspect_ratio\":2.522167444229126,\n\t\t\t\t\"hideIfc\":true,\n\t\t\t\t\"guid\":\"5afbe23f-8307-42d0-ba77-f031922281ce\",\n\t\t\t\t\"_id\":\"5c2fa785b4af3c45f8f83c60\",\n\t\t\t\t\"type\":\"perspective\",\n\t\t\t\t\"screenshot\":\"username/MODEL_ID/issues/ISSUE_ID/viewpoints/5afbe23f-8307-42d0-ba77-f031922281ce/screenshot.png\",\n\t\t\t\t\"clippingPlanes\":[],\"right\":[0.7270411252975464,1.862645149230957e-8,0.6865938901901245],\n\t\t\t\t\t\"view_dir\":[0.6777805089950562,-0.15971262753009796,-0.7177084684371948],\n\t\t\t\t\t\"look_at\":[8400.001953125,2339.99951171875,-9599.9990234375],\n\t\t\t\t\t\"position\":[-3360.6259765625,5111.28125,2853.4453125],\n\t\t\t\t\t\"up\":[0.10965770483016968,0.9871635437011719,-0.11611767113208771],\n\t\t\t\t\t\"screenshotSmall\"username/MODEL_ID/issues/ISSUE_ID/viewpoints/5afbe23f-8307-42d0-ba77-f031922281ce/screenshot.png\"}\n\t}\n]",
+          "content": "\n[\n\t{\n\t\t\"_id\":\"issue_ID\",\n\t\t\"creator_role\":\"Client\",\n\t\t\"scale\":1,\n\t\t\"due_date\":1547424000000,\n\t\t\"priority\":\"low\",\n\t\t\"desc\":\"This is a description\",\n\t\t\"topic_type\":\"for_information\",\n\t\t\"status\":\"open\",\"owner\":\"username\",\n\t\t\"created\":1546626949432,\n\t\t\"name\":\"An Issue for API\",\n\t\t\"number\":3,\n\t\t\"rev_id\":\"9cf31c6e-37cc-4625-8cee-270cf731059e\",\n\t\t\"__v\":0,\n\t\t\"assigned_roles\":[\"Architect\"],\n\t\t\"viewCount\":1,\"commentCount\":0,\n\t\t\"thumbnail\":\"ACCOUNT/MODEL_ID/issues/ISSUE_ID/thumbnail.png\",\n\t\t\"position\":[],\n\t\t\"typePrefix\":\"sample\",\n\t\t\"modelCode\":\"\",\n\t\t\"account\":\"username\",\n\t\t\"model\":\"MODEL_ID\",\n\t\t\"viewpoint\":\n\t\t\t{\n\t\t\t\t\"near\":54.739341735839844,\n\t\t\t\t\"far\":27369.669921875,\n\t\t\t\t\"fov\":1.0471975803375244,\n\t\t\t\t\"aspect_ratio\":2.522167444229126,\n\t\t\t\t\"hideIfc\":true,\n\t\t\t\t\"guid\":\"5afbe23f-8307-42d0-ba77-f031922281ce\",\n\t\t\t\t\"_id\":\"5c2fa785b4af3c45f8f83c60\",\n\t\t\t\t\"type\":\"perspective\",\n\t\t\t\t\"screenshot\":\"username/MODEL_ID/issues/ISSUE_ID/viewpoints/5afbe23f-8307-42d0-ba77-f031922281ce/screenshot.png\",\n\t\t\t\t\"clippingPlanes\":[],\"right\":[0.7270411252975464,1.862645149230957e-8,0.6865938901901245],\n\t\t\t\t\t\"view_dir\":[0.6777805089950562,-0.15971262753009796,-0.7177084684371948],\n\t\t\t\t\t\"look_at\":[8400.001953125,2339.99951171875,-9599.9990234375],\n\t\t\t\t\t\"position\":[-3360.6259765625,5111.28125,2853.4453125],\n\t\t\t\t\t\"up\":[0.10965770483016968,0.9871635437011719,-0.11611767113208771],\n\t\t\t\t\t\"screenshotSmall\"username/MODEL_ID/issues/ISSUE_ID/viewpoints/5afbe23f-8307-42d0-ba77-f031922281ce/screenshot.png\"}\n\t}\n]",
           "type": "json"
         }
       ]
@@ -3082,9 +3310,39 @@
     "title": "Get all Issues",
     "name": "listIssues",
     "group": "Issues",
-    "description": "<p>List all available issue for current model.</p>",
+    "description": "<p>List all issues for model.</p>",
     "parameter": {
       "fields": {
+        "Query": [
+          {
+            "group": "Query",
+            "type": "String",
+            "optional": true,
+            "field": "convertCoords",
+            "description": "<p>Convert coordinates to user space</p>"
+          },
+          {
+            "group": "Query",
+            "type": "Number",
+            "optional": true,
+            "field": "updatedSince",
+            "description": "<p>Only return issues updated since this value (in epoch value)</p>"
+          },
+          {
+            "group": "Query",
+            "type": "Number",
+            "optional": true,
+            "field": "numbers",
+            "description": "<p>Array of issue numbers to filter for</p>"
+          },
+          {
+            "group": "Query",
+            "type": "String",
+            "optional": true,
+            "field": "ids",
+            "description": "<p>Array of issue IDs to filter for</p>"
+          }
+        ],
         "Parameter": [
           {
             "group": "Parameter",
@@ -3100,41 +3358,14 @@
             "field": "model",
             "description": "<p>Model ID</p>"
           }
-        ],
-        "Query": [
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "convertCoords",
-            "description": "<p>Convert coordinates to user space</p>"
-          },
-          {
-            "group": "Query",
-            "type": "Number",
-            "optional": true,
-            "field": "updatedSince",
-            "description": "<p>Only return issues that has been updated since this value (in epoch value)</p>"
-          }
         ]
       }
     },
     "success": {
-      "fields": {
-        "200": [
-          {
-            "group": "200",
-            "type": "Object",
-            "optional": false,
-            "field": "Issue",
-            "description": "<p>Object.</p>"
-          }
-        ]
-      },
       "examples": [
         {
           "title": "Success-Response.",
-          "content": "HTTP/1.1 200 OK\n[\n\t{\n\t\t\"_id\":\"ISSUE_ID\",\n\t\t\"creator_role\":\"Client\",\"scale\":1,\n\t\t\"due_date\":1543881600000,\n\t\t\"priority\":\"low\",\n\t\t\"desc\":\"reverse\",\n\t\t\"topic_type\":\"for_information\",\n\t\t\"status\":\"for approval\",\n\t\t\"owner\":\"username\",\n\t\t\"created\":1546217360002,\n\t\t\"name\":\"Without reverse\",\n\t\t\"number\":2,\n\t\t\"rev_id\":\"REVISION_ID\",\n\t\t\"__v\":0,\n\t\t\"assigned_roles\":[\"Architect\"],\n\t\t\"viewCount\":1,\n\t\t\"commentCount\":0,\n\t\t\"thumbnail\":\"nabile/MODEL_ID/issues/ISSUE_ID/thumbnail.png\",\n\t\t\"norm\":[0,0,0],\n\t\t\"position\":[8341.8056640625,1279.962158203125,-3050.34521484375],\n\t\t\"typePrefix\":\"sample\",\n\t\t\"modelCode\":\"\",\n\t\t\"account\":\"username\",\n\t\t\"model\":\"MODEL_ID\",\n\t\t\"viewpoint\":\n\t\t\t{\n\t\t\t\t\"near\":54.739341735839844,\n\t\t\t\t\"far\":27369.669921875,\n\t\t\t\t\"fov\":1.0471975803375244,\n\t\t\t\t\"aspect_ratio\":1.451704502105713,\n\t\t\t\t\"hideIfc\":true,\n\t\t\t\t\"guid\":\"9279d95e-3aee-49c2-ba45-9d2302044597\",\n\t\t\t\t\"_id\":\"5c296790e5f57704580ca00a\",\n\t\t\t\t\"type\":\"perspective\",\n\t\t\t\t\"screenshot\":\"ACCOUNT/MODEL_ID/issues/ISSUE_ID/viewpoints/MODEL_ID/screenshot.png\",\n\t\t\t\t\"clippingPlanes\":[],\"right\":[0.7270411252975464,1.862645149230957e-8,0.6865938901901245],\n\t\t\t\t\"view_dir\":[0.6777805089950562,-0.15971262753009796,-0.7177084684371948],\n\t\t\t\t\"look_at\":[8400.001953125,2339.99951171875,-9599.9990234375],\n\t\t\t\t\"position\":[-3360.6259765625,5111.28125,2853.4453125],\n\t\t\t\t\"up\":[0.10965770483016968,0.9871635437011719,-0.11611767113208771],\n\t\t\t\t\"screenshotSmall\":\"nabile/MODEL_ID/issues/ISSUE_ID/viewpoints/MODEL_ID/screenshotSmall.png\"\n\t\t\t}\n\t}\n]",
+          "content": "HTTP/1.1 200 OK\n[\n\t{\n\t\t\"_id\":\"ISSUE_ID\",\n\t\t\"creator_role\":\"Client\",\"scale\":1,\n\t\t\"due_date\":1543881600000,\n\t\t\"priority\":\"low\",\n\t\t\"desc\":\"reverse\",\n\t\t\"topic_type\":\"for_information\",\n\t\t\"status\":\"for approval\",\n\t\t\"owner\":\"username\",\n\t\t\"created\":1546217360002,\n\t\t\"name\":\"Without reverse\",\n\t\t\"number\":2,\n\t\t\"rev_id\":\"REVISION_ID\",\n\t\t\"__v\":0,\n\t\t\"assigned_roles\":[\"Architect\"],\n\t\t\"viewCount\":1,\n\t\t\"commentCount\":0,\n\t\t\"thumbnail\":\"nabile/MODEL_ID/issues/ISSUE_ID/thumbnail.png\",\n\t\t\"position\":[8341.8056640625,1279.962158203125,-3050.34521484375],\n\t\t\"typePrefix\":\"sample\",\n\t\t\"modelCode\":\"\",\n\t\t\"account\":\"username\",\n\t\t\"model\":\"MODEL_ID\",\n\t\t\"viewpoint\":\n\t\t\t{\n\t\t\t\t\"near\":54.739341735839844,\n\t\t\t\t\"far\":27369.669921875,\n\t\t\t\t\"fov\":1.0471975803375244,\n\t\t\t\t\"aspect_ratio\":1.451704502105713,\n\t\t\t\t\"hideIfc\":true,\n\t\t\t\t\"guid\":\"9279d95e-3aee-49c2-ba45-9d2302044597\",\n\t\t\t\t\"_id\":\"5c296790e5f57704580ca00a\",\n\t\t\t\t\"type\":\"perspective\",\n\t\t\t\t\"screenshot\":\"ACCOUNT/MODEL_ID/issues/ISSUE_ID/viewpoints/MODEL_ID/screenshot.png\",\n\t\t\t\t\"clippingPlanes\":[],\"right\":[0.7270411252975464,1.862645149230957e-8,0.6865938901901245],\n\t\t\t\t\"view_dir\":[0.6777805089950562,-0.15971262753009796,-0.7177084684371948],\n\t\t\t\t\"look_at\":[8400.001953125,2339.99951171875,-9599.9990234375],\n\t\t\t\t\"position\":[-3360.6259765625,5111.28125,2853.4453125],\n\t\t\t\t\"up\":[0.10965770483016968,0.9871635437011719,-0.11611767113208771],\n\t\t\t\t\"screenshotSmall\":\"nabile/MODEL_ID/issues/ISSUE_ID/viewpoints/MODEL_ID/screenshotSmall.png\"\n\t\t\t}\n\t}\n]",
           "type": "json"
         }
       ]
@@ -3152,22 +3383,6 @@
     "description": "<p>Creates a new issue.</p>",
     "parameter": {
       "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          }
-        ],
         "Request body": [
           {
             "group": "Request body",
@@ -3178,7 +3393,7 @@
           },
           {
             "group": "Request body",
-            "type": "[]String",
+            "type": "String[]",
             "optional": false,
             "field": "assigned_roles",
             "description": "<p>The roles assigned to the issue. Even though its an array (this is for future support of multiple assigned jobs), currently it has one or none elements correspoing to the available jobs in the teamaspace.</p>"
@@ -3188,14 +3403,14 @@
             "type": "String",
             "optional": false,
             "field": "status",
-            "description": "<p>The status of the issue. It can have a value of &quot;open&quot;,&quot;in progress&quot;,&quot;for approval&quot; or &quot;closed&quot;.</p>"
+            "description": "<p>The status of the issue. It can have a value of &quot;open&quot;,&quot;in progress&quot;,&quot;for approval&quot;, &quot;void&quot; or &quot;closed&quot;.</p>"
           },
           {
             "group": "Request body",
             "type": "String",
             "optional": false,
             "field": "priority",
-            "description": "<p>The priority of the issue. It can have a value of &quot;none&quot;, &quot;low&quot;, &quot;medium&quot; or &quot;high&quot;.</p>"
+            "description": "<p>The priority of the issue. It can have a value of &quot;none&quot;, String&quot;low&quot;, &quot;medium&quot; or &quot;high&quot;.</p>"
           },
           {
             "group": "Request body",
@@ -3220,96 +3435,223 @@
           },
           {
             "group": "Request body",
-            "type": "[3]Number",
+            "type": "Number[3]",
             "optional": false,
             "field": "position",
             "description": "<p>The vector defining the pin of the issue. If the pin doesnt has an issue its an empty array.</p>"
           }
         ],
-        "Request body: Viewpoint": [
+        "Parameter": [
           {
-            "group": "Request body: Viewpoint",
-            "type": "[3]Number",
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          }
+        ],
+        "Type: Viewpoint": [
+          {
+            "group": "Type: Viewpoint",
+            "type": "Number[3]",
             "optional": false,
             "field": "right",
-            "description": "<p>The right vector of the viewpoint indicating the direction of right in relative coordinates.</p>"
+            "description": "<p>Right vector of viewpoint indicating the direction of right in relative coordinates</p>"
           },
           {
-            "group": "Request body: Viewpoint",
-            "type": "[3]Number",
+            "group": "Type: Viewpoint",
+            "type": "Number[3]",
             "optional": false,
             "field": "up",
-            "description": "<p>The up vector of the viewpoint indicating the direction of up in relative coordinates.</p>"
+            "description": "<p>Up vector of viewpoint indicating the direction of up in relative coordinates</p>"
           },
           {
-            "group": "Request body: Viewpoint",
-            "type": "[3]Number",
+            "group": "Type: Viewpoint",
+            "type": "Number[3]",
             "optional": false,
             "field": "position",
-            "description": "<p>The position vector indicates where in the world the viewpoint is positioned.</p>"
+            "description": "<p>Position vector indicates where in the world the viewpoint is positioned</p>"
           },
           {
-            "group": "Request body: Viewpoint",
-            "type": "[3]Number",
+            "group": "Type: Viewpoint",
+            "type": "Number[3]",
             "optional": false,
             "field": "look_at",
-            "description": "<p>The vector indicating where in the world the viewpoint is looking at.</p>"
+            "description": "<p>Vector indicating where in the world the viewpoint is looking at</p>"
           },
           {
-            "group": "Request body: Viewpoint",
-            "type": "[3]Number",
+            "group": "Type: Viewpoint",
+            "type": "Number[3]",
             "optional": false,
             "field": "view_dir",
-            "description": "<p>The vector indicating where is the viewpoint is looking at in relative coordinates.</p>"
+            "description": "<p>Vector indicating the direction the viewpoint is looking at in relative coordinates</p>"
           },
           {
-            "group": "Request body: Viewpoint",
+            "group": "Type: Viewpoint",
             "type": "Number",
             "optional": false,
             "field": "near",
-            "description": "<p>The vector indicating the near plane.</p>"
+            "description": "<p>Vector indicating the near plane</p>"
           },
           {
-            "group": "Request body: Viewpoint",
+            "group": "Type: Viewpoint",
             "type": "Number",
             "optional": false,
             "field": "far",
-            "description": "<p>The vector indicating the far plane.</p>"
+            "description": "<p>Vector indicating the far plane</p>"
           },
           {
-            "group": "Request body: Viewpoint",
+            "group": "Type: Viewpoint",
             "type": "Number",
             "optional": false,
             "field": "fov",
-            "description": "<p>The angle of the field of view.</p>"
+            "description": "<p>Angle of the field of view</p>"
           },
           {
-            "group": "Request body: Viewpoint",
+            "group": "Type: Viewpoint",
             "type": "Number",
             "optional": false,
             "field": "aspect_ratio",
-            "description": "<p>The aspect ratio of the fustrum.</p>"
+            "description": "<p>Aspect ratio of the fustrum</p>"
           },
           {
-            "group": "Request body: Viewpoint",
+            "group": "Type: Viewpoint",
+            "type": "ClippingPlane[]",
+            "optional": true,
+            "field": "clippingPlanes",
+            "description": "<p>Clipping planes associated with the viewpoint</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
             "type": "String",
-            "optional": false,
+            "optional": true,
             "field": "highlighted_group_id",
-            "description": "<p>If the issue is associated with one or more objects from the model this field has the value of a group id generated to hold those objects</p>"
+            "description": "<p>If the viewpoint is associated with one or more highlighted objects from the model this field has the value of a group ID generated to hold those objects</p>"
           },
           {
-            "group": "Request body: Viewpoint",
+            "group": "Type: Viewpoint",
+            "type": "String",
+            "optional": true,
+            "field": "hidden_group_id",
+            "description": "<p>If the viewpoint is associated with one or more hidden objects from the model this field has the value of a group id generated to hold those objects</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "String",
+            "optional": true,
+            "field": "shown_group_id",
+            "description": "<p>If the viewpoint is associated with one or more shown objects from the model this field has the value of a group id generated to hold those objects</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Group",
+            "optional": true,
+            "field": "highlighted_group",
+            "description": "<p>If the viewpoint is associated with one or more highlighted objects from the model this field has the value of a group definition for those objects (this shouldnt be use simultaneously with highlighted_group_id)</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Group",
+            "optional": true,
+            "field": "hidden_group",
+            "description": "<p>If the viewpoint is associated with one or more hidden objects from the model this field has the value of a group id generated to hold those objects (this shouldnt be use simultaneously with hidden_group_id)</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Group",
+            "optional": true,
+            "field": "shown_group",
+            "description": "<p>If the viewpoint is associated with one or more shown objects from the model this field has the definition of the group to hold those objects (this shouldnt be use simultaneously with shown_group_id)</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Group[]",
+            "optional": true,
+            "field": "override_groups",
+            "description": "<p>If the viewpoint has one or more objects with colour override this field has an array of groups with one group for each colour</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
             "type": "Boolean",
             "optional": false,
             "field": "hide_IFC",
             "description": "<p>A flag to hide the IFC</p>"
           },
           {
-            "group": "Request body: Viewpoint",
+            "group": "Type: Viewpoint",
             "type": "String",
             "optional": false,
             "field": "screenshot",
-            "description": "<p>A string in base64 representing the screenshot associated with the issue</p>"
+            "description": "<p>Base64 string representing the screenshot associated with the viewpoint</p>"
+          }
+        ],
+        "Type: Group": [
+          {
+            "group": "Type: Group",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "color",
+            "description": "<p>RGB colour values</p>"
+          },
+          {
+            "group": "Type: Group",
+            "type": "ModelObjects",
+            "optional": false,
+            "field": "objects",
+            "description": "<p>List of objects in group</p>"
+          }
+        ],
+        "Type: ModelObjects": [
+          {
+            "group": "Type: ModelObjects",
+            "type": "String",
+            "optional": false,
+            "field": "account",
+            "description": "<p>The account that has the model which contains the objects</p>"
+          },
+          {
+            "group": "Type: ModelObjects",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>The model id that contains the objects</p>"
+          },
+          {
+            "group": "Type: ModelObjects",
+            "type": "String[]",
+            "optional": false,
+            "field": "shared_ids",
+            "description": "<p>The shared ids of objects to be selected</p>"
+          }
+        ],
+        "Type: ClippingPlane": [
+          {
+            "group": "Type: ClippingPlane",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "normal",
+            "description": "<p>The normal of the plane defined for the clipping plane</p>"
+          },
+          {
+            "group": "Type: ClippingPlane",
+            "type": "Number",
+            "optional": false,
+            "field": "distance",
+            "description": "<p>The distance for the clipping plane to the origin</p>"
+          },
+          {
+            "group": "Type: ClippingPlane",
+            "type": "Number",
+            "optional": false,
+            "field": "clipDirection",
+            "description": "<p>The direction to the clipping plane will cut the model; above or below the plane. Possible values: 1 , -1.</p>"
           }
         ]
       }
@@ -3317,7 +3659,7 @@
     "examples": [
       {
         "title": "Example usage:",
-        "content": "POST /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues HTTP/1.1\n{\n   \"name\": \"Amazing issue\",\n   \"assigned_roles\": [\n      \"jobA\"\n   ],\n   \"status\": \"open\",\n   \"priority\": \"none\",\n   \"topic_type\": \"for_information\",\n   \"viewpoint\": {\n      \"right\": [\n         0.8471935391426086,\n         -2.2351741790771484e-8,\n         0.5312844514846802\n      ],\n      \"up\": [\n         0.14098820090293884,\n         0.9641460180282593,\n         -0.22482173144817352\n      ],\n      \"position\": [\n         -5828.818359375,\n         5268.15625,\n         7829.76171875\n      ],\n      \"look_at\": [\n         -2445.6826171875,\n         3515.4658203125,\n         2434.966552734375\n      ],\n      \"view_dir\": [\n         0.5122357606887817,\n         -0.2653723657131195,\n         -0.8168182373046875\n      ],\n      \"near\": 20.835742950439453,\n      \"far\": 10417.87109375,\n      \"fov\": 1.0471975803375244,\n      \"aspect_ratio\": 4.031496047973633,\n      \"clippingPlanes\": [],\n      \"highlighted_group_id\": \"\",\n      \"hideIfc\": true,\n      \"screenshot\": \"iVBORw0KGgoAAAANSUhEUgAACAAAA...ggg==\"\n   },\n   \"desc\": \"This is the most awesome issue ever\",\n   \"position\": [\n      -3960.10205078125,\n      4487.1552734375,\n      3326.732177734375\n   ]\n}",
+        "content": "POST /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues HTTP/1.1\n{\n   \"name\": \"Amazing issue\",\n   \"assigned_roles\": [\n      \"jobA\"\n   ],\n   \"status\": \"open\",\n   \"priority\": \"none\",\n   \"topic_type\": \"for_information\",\n   \"viewpoint\": {\n      \"right\": [\n         0.8471935391426086,\n         -2.2351741790771484e-8,\n         0.5312844514846802\n      ],\n      \"up\": [\n         0.14098820090293884,\n         0.9641460180282593,\n         -0.22482173144817352\n      ],\n      \"position\": [\n         -5828.818359375,\n         5268.15625,\n         7829.76171875\n      ],\n      \"look_at\": [\n         -2445.6826171875,\n         3515.4658203125,\n         2434.966552734375\n      ],\n      \"view_dir\": [\n         0.5122357606887817,\n         -0.2653723657131195,\n         -0.8168182373046875\n      ],\n      \"near\": 20.835742950439453,\n      \"far\": 10417.87109375,\n      \"fov\": 1.0471975803375244,\n      \"aspect_ratio\": 4.031496047973633,\n      \"clippingPlanes\": [],\n      \"override_groups\": [\n         {\n         \t   \"color\": [\n         \t       0,\n         \t       106,\n         \t       255,\n         \t       52\n         \t   ],\n         \t   \"objects\": [\n         \t   \t{\n         \t   \t   \"shared_ids\": [\n         \t   \t      \"ffd49cfd-57fb-4c31-84f7-02b41352b54f\"\n         \t   \t   ],\n         \t   \t   \"account\": \"teamSpace1\",\n         \t   \t   \"model\": \"2710bd65-37d3-4e7f-b2e0-ffe743ce943f\"\n         \t   \t}\n         \t   ],\n         \t   \"totalSavedMeshes\": 1\n         }   ,\n         {\n            \"color\": [\n                 96,\n                 237,\n                 61\n            ],\n         \t   \"objects\": [\n         \t   \t{\n         \t   \t   \"shared_ids\": [\n         \t   \t   \"a4a14ee6-aa44-4f36-96bd-f80dbabf8ead\"\n         \t   \t   ],\n         \t   \t   \"account\": \"teamSpace1\",\n         \t   \t   \"model\": \"2710bd65-37d3-4e7f-b2e0-ffe743ce943f\"\n         \t   \t}\n         \t   ],\n         \t   \"totalSavedMeshes\": 1\n         }\n      ],\n      \"highlighted_group\": {\n      \t\"objects\": [\n      \t\t{\n      \t\t\t\"shared_ids\": [\n      \t\t\t\t\"60286d41-d897-4de6-a0ed-0929fa68be96\"\n      \t\t\t],\n      \t\t\t\"account\": \"teamSpace1\",\n      \t\t\t\"model\": \"7cf61b4f-acdf-4295-b2d0-9b45f9f27418\"\n      \t\t}\n      \t],\n      \t\"color\": [\n      \t\t255,\n      \t\t255,\n      \t\t0\n      \t]\n      },\n      \"hidden_group\": {\n      \t\"objects\": [\n      \t\t{\n      \t\t\t\"shared_ids\": [\n      \t\t\t\t\"57b0969f-6009-4e32-9153-2b17d3a3628b\"\n      \t\t\t],\n      \t\t\t\"account\": \"teamSpace1\",\n      \t\t\t\"model\": \"b1fceab8-b0e9-4e45-850b-b9888efd6521\"\n      \t\t}\n      \t]\n      }\n      \"hideIfc\": true,\n      \"screenshot\": \"iVBORw0KGgoAAAANSUhEUgAACAAAA...ggg==\"\n   },\n   \"desc\": \"This is the most awesome issue ever\",\n   \"position\": [\n      -3960.10205078125,\n      4487.1552734375,\n      3326.732177734375\n   ]\n}",
         "type": "post"
       }
     ],
@@ -3325,7 +3667,7 @@
       "examples": [
         {
           "title": "Success:",
-          "content": "{\n   \"name\": \"Amazing issue\",\n   \"assigned_roles\": [\n      \"jobA\"\n   ],\n   \"status\": \"open\",\n   \"priority\": \"none\",\n   \"topic_type\": \"for_information\",\n   \"owner\": \"teamSpace1\",\n   \"desc\": \"This is the most awesome issue ever\",\n   \"rev_id\": \"330f909b-9279-41aa-a87c-1c46f53a8e93\",\n   \"creator_role\": \"jobA\",\n   \"scale\": 1,\n   \"position\": [\n      -3960.10205078125,\n      4487.1552734375,\n      3326.732177734375\n   ],\n   \"norm\": [\n      0,\n      0,\n      0\n   ],\n   \"_id\": \"9ba5fb10-c8db-11e9-8f2a-ada77612c97e\",\n   \"created\": 1566918114625,\n   \"number\": 1,\n   \"thumbnail\": \"teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/9ba5fb10-c8db-11e9-8f2a-ada77612c97e/thumbnail.png\",\n   \"typePrefix\": \"Structural\",\n   \"modelCode\": \"\",\n   \"account\": \"teamSpace1\",\n   \"model\": \"3549ddf6-885d-4977-87f1-eeac43a0e818\",\n   \"viewpoint\": {\n      \"right\": [\n         0.8471935391426086,\n         -2.2351741790771484e-8,\n         0.5312844514846802\n      ],\n      \"up\": [\n         0.14098820090293884,\n         0.9641460180282593,\n         -0.22482173144817352\n      ],\n      \"position\": [\n         -5828.818359375,\n         5268.15625,\n         7829.76171875\n      ],\n      \"look_at\": [\n         -2445.6826171875,\n         3515.4658203125,\n         2434.966552734375\n      ],\n      \"view_dir\": [\n         0.5122357606887817,\n         -0.2653723657131195,\n         -0.8168182373046875\n      ],\n      \"near\": 20.835742950439453,\n      \"far\": 10417.87109375,\n      \"fov\": 1.0471975803375244,\n      \"aspect_ratio\": 4.031496047973633,\n      \"clippingPlanes\": [],\n      \"highlighted_group_id\": \"\",\n      \"hideIfc\": true,\n      \"screenshot\": \"teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/9ba5fb10-c8db-11e9-8f2a-ada77612c97e/viewpoints/125ce196-852c-49ed-9a2f-f9a77aa03390/screenshot.png\",\n      \"guid\": \"125ce196-852c-49ed-9a2f-f9a77aa03390\",\n      \"screenshotSmall\": \"teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/9ba5fb10-c8db-11e9-8f2a-ada77612c97e/viewpoints/125ce196-852c-49ed-9a2f-f9a77aa03390/screenshotSmall.png\"\n   },\n   \"comments\": [],\n   \"extras\": {\n   }\n}",
+          "content": "{\n   \"name\": \"Amazing issue\",\n   \"assigned_roles\": [\n      \"jobA\"\n   ],\n   \"status\": \"open\",\n   \"priority\": \"none\",\n   \"topic_type\": \"for_information\",\n   \"owner\": \"teamSpace1\",\n   \"desc\": \"This is the most awesome issue ever\",\n   \"rev_id\": \"330f909b-9279-41aa-a87c-1c46f53a8e93\",\n   \"creator_role\": \"jobA\",\n   \"scale\": 1,\n   \"position\": [\n      -3960.10205078125,\n      4487.1552734375,\n      3326.732177734375\n   ],\n   \"_id\": \"9ba5fb10-c8db-11e9-8f2a-ada77612c97e\",\n   \"created\": 1566918114625,\n   \"number\": 1,\n   \"thumbnail\": \"teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/9ba5fb10-c8db-11e9-8f2a-ada77612c97e/thumbnail.png\",\n   \"typePrefix\": \"Structural\",\n   \"modelCode\": \"\",\n   \"account\": \"teamSpace1\",\n   \"model\": \"3549ddf6-885d-4977-87f1-eeac43a0e818\",\n   \"viewpoint\": {\n      \"right\": [\n         0.8471935391426086,\n         -2.2351741790771484e-8,\n         0.5312844514846802\n      ],\n      \"up\": [\n         0.14098820090293884,\n         0.9641460180282593,\n         -0.22482173144817352\n      ],\n      \"position\": [\n         -5828.818359375,\n         5268.15625,\n         7829.76171875\n      ],\n      \"look_at\": [\n         -2445.6826171875,\n         3515.4658203125,\n         2434.966552734375\n      ],\n      \"view_dir\": [\n         0.5122357606887817,\n         -0.2653723657131195,\n         -0.8168182373046875\n      ],\n      \"near\": 20.835742950439453,\n      \"far\": 10417.87109375,\n      \"fov\": 1.0471975803375244,\n      \"aspect_ratio\": 4.031496047973633,\n      \"clippingPlanes\": [],\n      \"hidden_group_id\": \"119d5dc0-e223-11ea-8549-49012d4e4956\",\n      \"highlighted_group_id\" : \"80c5a270-e223-11ea-8549-49012d4e4956\",\n      \"override_group_ids\": [\n         \"11952060-e223-11ea-8549-49012d4e4956\",\n         \"bc5ca80-e6c7-11ea-bd51-ddd919e6418e\"\n      ],\n      \"hideIfc\": true,\n      \"screenshot\": \"teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/9ba5fb10-c8db-11e9-8f2a-ada77612c97e/viewpoints/125ce196-852c-49ed-9a2f-f9a77aa03390/screenshot.png\",\n      \"guid\": \"125ce196-852c-49ed-9a2f-f9a77aa03390\",\n      \"screenshotSmall\": \"teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/9ba5fb10-c8db-11e9-8f2a-ada77612c97e/viewpoints/125ce196-852c-49ed-9a2f-f9a77aa03390/screenshotSmall.png\"\n   },\n   \"comments\": [],\n   \"extras\": {\n   }\n}",
           "type": "json"
         }
       ]
@@ -3336,11 +3678,14 @@
   },
   {
     "type": "post",
-    "url": "/:teamspace/:model/revision/:rid/issues",
+    "url": "/:teamspace/:model/revision/:revId/issues",
     "title": "Create issue on revision",
     "name": "newIssueRev",
     "group": "Issues",
     "description": "<p>Creates a new issue for a particular revision. See <a href=\"#api-Issues-newIssue\">here</a> for more details.</p>",
+    "version": "0.0.0",
+    "filename": "routes/issue.js",
+    "groupTitle": "Issues",
     "parameter": {
       "fields": {
         "Parameter": [
@@ -3362,65 +3707,35 @@
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "rid",
-            "description": "<p>Unique Revision ID to store.</p>"
+            "field": "revId",
+            "description": "<p>Revision ID</p>"
           }
         ]
       }
-    },
-    "version": "0.0.0",
-    "filename": "routes/issue.js",
-    "groupTitle": "Issues"
+    }
   },
   {
     "type": "post",
-    "url": "/:teamspace/:model/revision/:rid/issues.bcfzip",
+    "url": "/:teamspace/:model/revision/:revId/issues.bcfzip",
     "title": "Post Issues BCF zip file by revision ID",
     "name": "postIssuesBCF",
     "group": "Issues",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "id",
-            "description": "<p>Revision unique ID.</p>"
-          }
-        ]
-      }
-    },
     "description": "<p>Upload Issues BCF file using current revision ID.</p>",
     "success": {
       "fields": {
         "200": [
           {
             "group": "200",
-            "type": "Object",
+            "type": "String",
             "optional": false,
-            "field": "Status",
-            "description": ""
+            "field": "status",
+            "description": "<p>&quot;ok&quot; on success</p>"
           }
         ]
       },
       "examples": [
         {
-          "title": "Success-Response.",
+          "title": "Success-Response:",
           "content": "HTTP\n{\n\t\"status\":\"ok\"\n}",
           "type": "json"
         }
@@ -3428,7 +3743,34 @@
     },
     "version": "0.0.0",
     "filename": "routes/issue.js",
-    "groupTitle": "Issues"
+    "groupTitle": "Issues",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "revId",
+            "description": "<p>Revision ID</p>"
+          }
+        ]
+      }
+    }
   },
   {
     "type": "get",
@@ -3436,37 +3778,41 @@
     "title": "Issues response into as HTML",
     "name": "renderIssuesHTML",
     "group": "Issues",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          }
-        ]
-      }
-    },
     "description": "<p>Render all Issues into a HTML webpage, response is rendered HTML.</p>",
     "version": "0.0.0",
     "filename": "routes/issue.js",
-    "groupTitle": "Issues"
+    "groupTitle": "Issues",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          }
+        ]
+      }
+    }
   },
   {
     "type": "get",
-    "url": "/:teamspace/:model/revision/:rid/issues.html",
+    "url": "/:teamspace/:model/revision/:revId/issues.html",
     "title": "Issues response into as HTML by revision ID",
     "name": "renderIssuesHTMLRid",
     "group": "Issues",
+    "description": "<p>Render all Issues into a HTML webpage based on current revision ID.</p>",
+    "version": "0.0.0",
+    "filename": "routes/issue.js",
+    "groupTitle": "Issues",
     "parameter": {
       "fields": {
         "Parameter": [
@@ -3488,119 +3834,319 @@
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "id",
-            "description": "<p>Revision unique ID.</p>"
+            "field": "revId",
+            "description": "<p>Revision ID</p>"
           }
         ]
       }
-    },
-    "description": "<p>Render all Issues into a HTML webpage based on current revision ID.</p>",
-    "version": "0.0.0",
-    "filename": "routes/issue.js",
-    "groupTitle": "Issues"
+    }
   },
   {
     "type": "patch",
     "url": "/:teamspace/:model/issues/:issueId",
-    "title": "Update Issue.",
+    "title": "Update issue",
     "name": "updateIssue",
     "group": "Issues",
-    "description": "<p>Updates an issue. It takes the part of the issue that can be updated. The system will create a system comment withing the issue describing which values were changed. The user needs to be the teamspace administrator, or the project administrator, or has the same job as the creator of the issue, or has the issue assigned. In the case that the issue has been assigned to the user, the user cant change it to the &quot;close status&quot;.</p> <p>If the issue is being updated to assigned to a job, and the status of the issue has the value &quot;for_approval&quot; then the status of the issue is automtically changed to &quot;in_progress&quot;.</p> <p>If the user is changing the issue to the &quot;for_approval&quot; status, the issue will be assigned to the job that the creator of the issue has.</p>",
+    "description": "<p>Updates an issue. It takes the part of the issue that can be updated. The system will create a system comment within the issue describing which values were changed. The user needs to be the teamspace administrator, the project administrator, has the same job as the creator of the issue, or has the issue assigned. In the case that the issue has been assigned to the user, the user cannot change it to the &quot;closed&quot; status.</p> <p>If the issue is being updated to assigned to a job and the status of the issue has the value &quot;for_approval&quot;, then the status of the issue is automatically changed to &quot;in_progress&quot;.</p> <p>If the user is changing the issue to the &quot;for_approval&quot; status, the issue will be assigned to the job that the creator of the issue.</p>",
     "parameter": {
       "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "id",
-            "description": "<p>Issue unique ID.</p>"
-          }
-        ],
         "Request body": [
           {
             "group": "Request body",
             "type": "[]String",
             "optional": true,
             "field": "assigned_roles",
-            "description": "<p>The roles assigned to the issue. Even though its an array (this is for future support of multiple assigned jobs), currently it has one or none elements correspoing to the available jobs in the teamaspace.</p>"
+            "description": "<p>Job roles assigned to the issue</p>"
           },
           {
             "group": "Request body",
             "type": "String",
             "optional": true,
             "field": "desc",
-            "description": "<p>The description of the issue</p>"
+            "description": "<p>Description of issue</p>"
           },
           {
             "group": "Request body",
             "type": "String",
             "optional": true,
             "field": "status",
-            "description": "<p>The status of the issue. It can have a value of &quot;open&quot;,&quot;in progress&quot;,&quot;for approval&quot; or &quot;closed&quot;.</p>"
+            "description": "<p>The status of issue (values: &quot;open&quot;, &quot;in progress&quot;, &quot;for approval&quot;, &quot;closed&quot;)</p>"
           },
           {
             "group": "Request body",
             "type": "String",
             "optional": true,
             "field": "topic_type",
-            "description": "<p>Type of the issue. It's value has to be one of the defined topic_types for the model. See <a href='#api-Model-createModel'>here</a> for more details.</p>"
+            "description": "<p>Topic type of issue (see <a href='#api-Model-createModel'>here</a> for available types)</p>"
           },
           {
             "group": "Request body",
             "type": "[3]Number",
             "optional": true,
             "field": "position",
-            "description": "<p>The vector defining the pin of the issue. If the pin doesnt has an issue its an empty array.</p>"
+            "description": "<p>Vector defining the pin position of the issue; empty if the issue has no pin</p>"
           },
           {
             "group": "Request body",
             "type": "Number",
             "optional": true,
             "field": "due_date",
-            "description": "<p>A timestamp depicting the due date of issue.</p>"
+            "description": "<p>Due date timestamp for the issue</p>"
           },
           {
             "group": "Request body",
             "type": "String",
             "optional": true,
             "field": "priority",
-            "description": "<p>The priority of the issue. It can have a value of &quot;none&quot;, &quot;low&quot;, &quot;medium&quot; or &quot;high&quot;.</p>"
+            "description": "<p>The priority of the issue (values: &quot;none&quot;, &quot;low&quot;, &quot;medium&quot;, &quot;high&quot;)</p>"
           },
           {
             "group": "Request body",
             "type": "Number",
             "optional": true,
             "field": "scale",
-            "description": "<p>The scale of the issue.</p>"
+            "description": "<p>The scale factor of the issue</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "Viewpoint",
+            "optional": true,
+            "field": "viewpoint",
+            "description": "<p>The viewpoint and screenshot of the issue</p>"
           },
           {
             "group": "Request body",
             "type": "Number",
             "optional": true,
             "field": "viewCount",
-            "description": "<p>The viewcount of the issue.</p>"
+            "description": "<p>The viewcount of the issue</p>"
           },
           {
             "group": "Request body",
             "type": "Object",
             "optional": true,
             "field": "extras",
-            "description": "<p>A field containing any extras that wanted to be saved in the issue. This is normally used by BCF.</p>"
+            "description": "<p>A field containing any extras that wanted to be saved in the issue (typically used by BCF)</p>"
+          }
+        ],
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "issueId",
+            "description": "<p>Issue ID</p>"
+          }
+        ],
+        "Type: Viewpoint": [
+          {
+            "group": "Type: Viewpoint",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "right",
+            "description": "<p>Right vector of viewpoint indicating the direction of right in relative coordinates</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "up",
+            "description": "<p>Up vector of viewpoint indicating the direction of up in relative coordinates</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "position",
+            "description": "<p>Position vector indicates where in the world the viewpoint is positioned</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "look_at",
+            "description": "<p>Vector indicating where in the world the viewpoint is looking at</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "view_dir",
+            "description": "<p>Vector indicating the direction the viewpoint is looking at in relative coordinates</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Number",
+            "optional": false,
+            "field": "near",
+            "description": "<p>Vector indicating the near plane</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Number",
+            "optional": false,
+            "field": "far",
+            "description": "<p>Vector indicating the far plane</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Number",
+            "optional": false,
+            "field": "fov",
+            "description": "<p>Angle of the field of view</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Number",
+            "optional": false,
+            "field": "aspect_ratio",
+            "description": "<p>Aspect ratio of the fustrum</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "ClippingPlane[]",
+            "optional": true,
+            "field": "clippingPlanes",
+            "description": "<p>Clipping planes associated with the viewpoint</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "String",
+            "optional": true,
+            "field": "highlighted_group_id",
+            "description": "<p>If the viewpoint is associated with one or more highlighted objects from the model this field has the value of a group ID generated to hold those objects</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "String",
+            "optional": true,
+            "field": "hidden_group_id",
+            "description": "<p>If the viewpoint is associated with one or more hidden objects from the model this field has the value of a group id generated to hold those objects</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "String",
+            "optional": true,
+            "field": "shown_group_id",
+            "description": "<p>If the viewpoint is associated with one or more shown objects from the model this field has the value of a group id generated to hold those objects</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Group",
+            "optional": true,
+            "field": "highlighted_group",
+            "description": "<p>If the viewpoint is associated with one or more highlighted objects from the model this field has the value of a group definition for those objects (this shouldnt be use simultaneously with highlighted_group_id)</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Group",
+            "optional": true,
+            "field": "hidden_group",
+            "description": "<p>If the viewpoint is associated with one or more hidden objects from the model this field has the value of a group id generated to hold those objects (this shouldnt be use simultaneously with hidden_group_id)</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Group",
+            "optional": true,
+            "field": "shown_group",
+            "description": "<p>If the viewpoint is associated with one or more shown objects from the model this field has the definition of the group to hold those objects (this shouldnt be use simultaneously with shown_group_id)</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Group[]",
+            "optional": true,
+            "field": "override_groups",
+            "description": "<p>If the viewpoint has one or more objects with colour override this field has an array of groups with one group for each colour</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Boolean",
+            "optional": false,
+            "field": "hide_IFC",
+            "description": "<p>A flag to hide the IFC</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "String",
+            "optional": false,
+            "field": "screenshot",
+            "description": "<p>Base64 string representing the screenshot associated with the viewpoint</p>"
+          }
+        ],
+        "Type: Group": [
+          {
+            "group": "Type: Group",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "color",
+            "description": "<p>RGB colour values</p>"
+          },
+          {
+            "group": "Type: Group",
+            "type": "ModelObjects",
+            "optional": false,
+            "field": "objects",
+            "description": "<p>List of objects in group</p>"
+          }
+        ],
+        "Type: ModelObjects": [
+          {
+            "group": "Type: ModelObjects",
+            "type": "String",
+            "optional": false,
+            "field": "account",
+            "description": "<p>The account that has the model which contains the objects</p>"
+          },
+          {
+            "group": "Type: ModelObjects",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>The model id that contains the objects</p>"
+          },
+          {
+            "group": "Type: ModelObjects",
+            "type": "String[]",
+            "optional": false,
+            "field": "shared_ids",
+            "description": "<p>The shared ids of objects to be selected</p>"
+          }
+        ],
+        "Type: ClippingPlane": [
+          {
+            "group": "Type: ClippingPlane",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "normal",
+            "description": "<p>The normal of the plane defined for the clipping plane</p>"
+          },
+          {
+            "group": "Type: ClippingPlane",
+            "type": "Number",
+            "optional": false,
+            "field": "distance",
+            "description": "<p>The distance for the clipping plane to the origin</p>"
+          },
+          {
+            "group": "Type: ClippingPlane",
+            "type": "Number",
+            "optional": false,
+            "field": "clipDirection",
+            "description": "<p>The direction to the clipping plane will cut the model; above or below the plane. Possible values: 1 , -1.</p>"
           }
         ]
       }
@@ -3616,7 +4162,7 @@
       "examples": [
         {
           "title": "Success:",
-          "content": "{\n   \"_id\": \"98c39770-c8e2-11e9-8f2a-ada77612c97e\",\n   \"name\": \"issue 2\",\n   \"assigned_roles\": [\n      \"jobC\"\n   ],\n   \"status\": \"in progress\",\n   \"priority\": \"none\",\n   \"topic_type\": \"for_information\",\n   \"owner\": \"teamSpace1\",\n   \"rev_id\": \"330f909b-9279-41aa-a87c-1c46f53a8e93\",\n   \"creator_role\": \"jobA\",\n   \"scale\": 1,\n   \"created\": 1566921116263,\n   \"desc\": \"(No Description)\",\n   \"number\": 2,\n   \"thumbnail\": \"teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/98c39770-c8e2-11e9-8f2a-ada77612c97e/thumbnail.png\",\n   \"comments\": [\n      {\n         \"guid\": \"febbe083-5a98-4711-8d60-d2ac06721f83\",\n         \"created\": 1566924049774,\n         \"owner\": \"teamSpace1\",\n         \"action\": {\n            \"property\": \"assigned_roles\",\n            \"from\": \"\",\n            \"to\": \"jobB\"\n         },\n         \"sealed\": true\n      },\n      {\n         \"guid\": \"e8ba32b2-d58e-4c33-90f7-c6e0404ef1ee\",\n         \"created\": 1566924062287,\n         \"owner\": \"teamSpace1\",\n         \"action\": {\n            \"property\": \"assigned_roles\",\n            \"from\": \"jobB\",\n            \"to\": \"jobC\"\n         },\n         \"sealed\": true\n      },\n      {\n         \"guid\": \"83117273-2698-4d2d-bd47-7cd31e6a7b14\",\n         \"created\": 1566924080277,\n         \"owner\": \"teamSpace1\",\n         \"action\": {\n            \"property\": \"status\",\n            \"from\": \"open\",\n            \"to\": \"in progress\"\n         }\n      }\n   ],\n   \"status_last_changed\": 1566924080277,\n   \"account\": \"teamSpace1\",\n   \"model\": \"3549ddf6-885d-4977-87f1-eeac43a0e818\",\n   \"viewpoint\": {\n      \"right\": [\n         0.9953137040138245,\n         -4.656612873077393e-10,\n         0.09669896215200424\n      ],\n      \"up\": [\n         0.005437099374830723,\n         0.9984180331230164,\n         -0.05596357211470604\n      ],\n      \"position\": [\n         -3083.33251953125,\n         3886.8251953125,\n         8998.2783203125\n      ],\n      \"look_at\": [\n         -2445.680419921875,\n         3515.46533203125,\n         2434.984130859375\n      ],\n      \"view_dir\": [\n         0.0965459868311882,\n         -0.05622706934809685,\n         -0.9937390685081482\n      ],\n      \"near\": 20.835796356201172,\n      \"far\": 10417.8984375,\n      \"fov\": 1.0471975803375244,\n      \"aspect_ratio\": 3.1459293365478516,\n      \"clippingPlanes\": [],\n      \"highlighted_group_id\": \"98b9d370-c8e2-11e9-8f2a-ada77612c97e\",\n      \"hideIfc\": true,\n      \"screenshot\": \"teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/98c39770-c8e2-11e9-8f2a-ada77612c97e/viewpoints/a1167d5f-2434-4a50-a158-d6a6745e7d6a/screenshot.png\",\n      \"guid\": \"a1167d5f-2434-4a50-a158-d6a6745e7d6a\",\n      \"screenshotSmall\": \"teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/98c39770-c8e2-11e9-8f2a-ada77612c97e/viewpoints/a1167d5f-2434-4a50-a158-d6a6745e7d6a/screenshotSmall.png\"\n   },\n   \"norm\": [],\n   \"position\": [],\n   \"extras\": {\n   }\n}",
+          "content": "{\n   \"_id\": \"98c39770-c8e2-11e9-8f2a-ada77612c97e\",\n   \"name\": \"issue 2\",\n   \"assigned_roles\": [\n      \"jobC\"\n   ],\n   \"status\": \"in progress\",\n   \"priority\": \"none\",\n   \"topic_type\": \"for_information\",\n   \"owner\": \"teamSpace1\",\n   \"rev_id\": \"330f909b-9279-41aa-a87c-1c46f53a8e93\",\n   \"creator_role\": \"jobA\",\n   \"scale\": 1,\n   \"created\": 1566921116263,\n   \"desc\": \"(No Description)\",\n   \"number\": 2,\n   \"thumbnail\": \"teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/98c39770-c8e2-11e9-8f2a-ada77612c97e/thumbnail.png\",\n   \"comments\": [\n      {\n         \"guid\": \"febbe083-5a98-4711-8d60-d2ac06721f83\",\n         \"created\": 1566924049774,\n         \"owner\": \"teamSpace1\",\n         \"action\": {\n            \"property\": \"assigned_roles\",\n            \"from\": \"\",\n            \"to\": \"jobB\"\n         },\n         \"sealed\": true\n      },\n      {\n         \"guid\": \"e8ba32b2-d58e-4c33-90f7-c6e0404ef1ee\",\n         \"created\": 1566924062287,\n         \"owner\": \"teamSpace1\",\n         \"action\": {\n            \"property\": \"assigned_roles\",\n            \"from\": \"jobB\",\n            \"to\": \"jobC\"\n         },\n         \"sealed\": true\n      },\n      {\n         \"guid\": \"83117273-2698-4d2d-bd47-7cd31e6a7b14\",\n         \"created\": 1566924080277,\n         \"owner\": \"teamSpace1\",\n         \"action\": {\n            \"property\": \"status\",\n            \"from\": \"open\",\n            \"to\": \"in progress\"\n         }\n      }\n   ],\n   \"status_last_changed\": 1566924080277,\n   \"account\": \"teamSpace1\",\n   \"model\": \"3549ddf6-885d-4977-87f1-eeac43a0e818\",\n   \"viewpoint\": {\n      \"right\": [\n         0.9953137040138245,\n         -4.656612873077393e-10,\n         0.09669896215200424\n      ],\n      \"up\": [\n         0.005437099374830723,\n         0.9984180331230164,\n         -0.05596357211470604\n      ],\n      \"position\": [\n         -3083.33251953125,\n         3886.8251953125,\n         8998.2783203125\n      ],\n      \"look_at\": [\n         -2445.680419921875,\n         3515.46533203125,\n         2434.984130859375\n      ],\n      \"view_dir\": [\n         0.0965459868311882,\n         -0.05622706934809685,\n         -0.9937390685081482\n      ],\n      \"near\": 20.835796356201172,\n      \"far\": 10417.8984375,\n      \"fov\": 1.0471975803375244,\n      \"aspect_ratio\": 3.1459293365478516,\n      \"clippingPlanes\": [],\n      \"highlighted_group_id\": \"98b9d370-c8e2-11e9-8f2a-ada77612c97e\",\n      \"hideIfc\": true,\n      \"screenshot\": \"teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/98c39770-c8e2-11e9-8f2a-ada77612c97e/viewpoints/a1167d5f-2434-4a50-a158-d6a6745e7d6a/screenshot.png\",\n      \"guid\": \"a1167d5f-2434-4a50-a158-d6a6745e7d6a\",\n      \"screenshotSmall\": \"teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/98c39770-c8e2-11e9-8f2a-ada77612c97e/viewpoints/a1167d5f-2434-4a50-a158-d6a6745e7d6a/screenshotSmall.png\"\n   },\n   \"position\": [],\n   \"extras\": {\n   }\n}",
           "type": "json"
         }
       ],
@@ -3638,11 +4184,14 @@
   },
   {
     "type": "patch",
-    "url": "/:teamspace/:model/revision/:rid/issues/:issueId",
+    "url": "/:teamspace/:model/revision/:revId/issues/:issueId",
     "title": "Update issue on revision",
     "name": "updateIssueRev",
     "group": "Issues",
     "description": "<p>Updates an issue for a particular revision. See <a href=\"#api-Issues-updateIssue\">here</a> for more details.</p>",
+    "version": "0.0.0",
+    "filename": "routes/issue.js",
+    "groupTitle": "Issues",
     "parameter": {
       "fields": {
         "Parameter": [
@@ -3664,22 +4213,19 @@
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "rid",
-            "description": "<p>Unique Revision ID to update to.</p>"
+            "field": "issueId",
+            "description": "<p>Issue ID</p>"
           },
           {
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "issueId",
-            "description": "<p>Unique Issue ID to update.</p>"
+            "field": "revId",
+            "description": "<p>Revision ID</p>"
           }
         ]
       }
-    },
-    "version": "0.0.0",
-    "filename": "routes/issue.js",
-    "groupTitle": "Issues"
+    }
   },
   {
     "type": "post",
@@ -7218,7 +7764,7 @@
         "Query": [
           {
             "group": "Query",
-            "type": "[]String",
+            "type": "String[]",
             "optional": false,
             "field": "MODELS",
             "description": "<p>An array of model ids.</p>"
@@ -8198,14 +8744,14 @@
         "Request body: SurveyPoint": [
           {
             "group": "Request body: SurveyPoint",
-            "type": "[]Number",
+            "type": "Number[]",
             "optional": false,
             "field": "position",
             "description": "<p>an array representing a three dimensional coordinate</p>"
           },
           {
             "group": "Request body: SurveyPoint",
-            "type": "[]Number",
+            "type": "Number[]",
             "optional": false,
             "field": "latLong",
             "description": "<p>an array representing a two dimensional coordinate for latitude and logitude</p>"
@@ -8363,6 +8909,16 @@
   },
   {
     "type": "patch",
+    "url": "/notifications",
+    "title": "Patch all the user notifications",
+    "name": "patchNotification",
+    "group": "Notification",
+    "version": "0.0.0",
+    "filename": "routes/notification.js",
+    "groupTitle": "Notification"
+  },
+  {
+    "type": "patch",
     "url": "/notifications/:id",
     "title": "Patch a notification",
     "name": "patchNotification",
@@ -8380,16 +8936,6 @@
         ]
       }
     },
-    "version": "0.0.0",
-    "filename": "routes/notification.js",
-    "groupTitle": "Notification"
-  },
-  {
-    "type": "patch",
-    "url": "/notifications",
-    "title": "Patch all the user notifications",
-    "name": "patchNotification",
-    "group": "Notification",
     "version": "0.0.0",
     "filename": "routes/notification.js",
     "groupTitle": "Notification"
@@ -8875,7 +9421,7 @@
           },
           {
             "group": "Request body: Permissions",
-            "type": "[]String",
+            "type": "String[]",
             "optional": false,
             "field": "permissions",
             "description": "<p>An array of permissions for the user to be assigned</p>"
@@ -8957,7 +9503,7 @@
     "title": "Attach resources to a risk",
     "name": "attachResourceRisk",
     "group": "Risks",
-    "description": "<p>Attaches file or url resources to a risk. If the type of the resource is file it should be send as multipart/form-data. Both types at the same time cant be sent. So in order to attach files and urls it should be done with two different requests.</p> <p>This method triggers a chat event</p>",
+    "description": "<p>Attaches file or URL resources to a risk. If the type of the resource is file it should be sent as multipart/form-data. Both types at the same time cannot be sent. So in order to attach files and URLs it should be done with two different requests.</p> <p>This method triggers a chat event</p>",
     "parameter": {
       "fields": {
         "Parameter": [
@@ -8980,7 +9526,7 @@
             "type": "String",
             "optional": false,
             "field": "riskId",
-            "description": "<p>Risk unique ID</p>"
+            "description": "<p>Risk ID</p>"
           }
         ],
         "Request body file resource (multipart/form-data)": [
@@ -8999,20 +9545,20 @@
             "description": "<p>The names of the files; it should have the same length as the files field and should include the file extension</p>"
           }
         ],
-        "Request body url resource": [
+        "Request body URL resource": [
           {
-            "group": "Request body url resource",
+            "group": "Request body URL resource",
             "type": "String[]",
             "optional": false,
             "field": "urls",
-            "description": "<p>The array of urls to be attached</p>"
+            "description": "<p>The array of URLs to be attached</p>"
           },
           {
-            "group": "Request body url resource",
+            "group": "Request body URL resource",
             "type": "String[]",
             "optional": false,
             "field": "names",
-            "description": "<p>The names of the urls; it should have the same length as the url field</p>"
+            "description": "<p>The names of the URLs; it should have the same length as the URL field</p>"
           }
         ]
       }
@@ -9039,29 +9585,6 @@
     "description": "<p>Create a comment in a risk.</p>",
     "parameter": {
       "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "riskId",
-            "description": "<p>Risk ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          }
-        ],
         "Request body": [
           {
             "group": "Request body",
@@ -9086,10 +9609,33 @@
           },
           {
             "group": "Request body",
-            "type": "Object",
+            "type": "Viewpoint",
             "optional": false,
             "field": "viewpoint",
             "description": "<p>Viewpoint object</p>"
+          }
+        ],
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "riskId",
+            "description": "<p>Risk ID</p>"
           }
         ]
       }
@@ -9162,14 +9708,16 @@
     "description": "<p>Delete a risk comment.</p>",
     "parameter": {
       "fields": {
-        "Parameter": [
+        "Request body": [
           {
-            "group": "Parameter",
+            "group": "Request body",
             "type": "String",
             "optional": false,
-            "field": "riskId",
-            "description": "<p>Risk ID</p>"
-          },
+            "field": "guid",
+            "description": "<p>Comment ID</p>"
+          }
+        ],
+        "Parameter": [
           {
             "group": "Parameter",
             "type": "String",
@@ -9183,15 +9731,13 @@
             "optional": false,
             "field": "model",
             "description": "<p>Model ID</p>"
-          }
-        ],
-        "Request body": [
+          },
           {
-            "group": "Request body",
+            "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "guid",
-            "description": "<p>Comment ID</p>"
+            "field": "riskId",
+            "description": "<p>Risk ID</p>"
           }
         ]
       }
@@ -9208,62 +9754,6 @@
         {
           "title": "Success-Response.",
           "content": "HTTP/1.1 200 OK\n{\n\t\"guid\":\"00000000-0000-0000-0000-000000000007\",\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "version": "0.0.0",
-    "filename": "routes/risk.js",
-    "groupTitle": "SafetiBase Risks"
-  },
-  {
-    "type": "delete",
-    "url": "/:teamspace/:model/risks?ids=:ids",
-    "title": "Delete risks",
-    "name": "deleteRisks",
-    "group": "Risks",
-    "description": "<p>Delete model risks.</p>",
-    "parameter": {
-      "fields": {
-        "Query": [
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": false,
-            "field": "ids",
-            "description": "<p>Comma separated list of IDs of risks to delete</p>"
-          }
-        ],
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          }
-        ]
-      }
-    },
-    "examples": [
-      {
-        "title": "Example usage:",
-        "content": "DELETE /acme/00000000-0000-0000-0000-000000000000/risks?ids=00000000-0000-0000-0000-000000000002 HTTP/1.1",
-        "type": "delete"
-      }
-    ],
-    "success": {
-      "examples": [
-        {
-          "title": "Success-Response",
-          "content": "HTTP/1.1 200 OK\n{}",
           "type": "json"
         }
       ]
@@ -9301,7 +9791,7 @@
             "type": "String",
             "optional": false,
             "field": "riskId",
-            "description": "<p>Issue unique ID</p>"
+            "description": "<p>Risk ID</p>"
           }
         ],
         "Request body": [
@@ -9459,33 +9949,6 @@
     "name": "findRiskById",
     "group": "Risks",
     "description": "<p>Retrieve a risk. The response includes all comments and screenshot URLs.</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "riskId",
-            "description": "<p>Risk ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          }
-        ]
-      }
-    },
     "success": {
       "fields": {
         "Success 200": [
@@ -9493,7 +9956,7 @@
             "group": "Success 200",
             "type": "Object",
             "optional": false,
-            "field": "issue",
+            "field": "risk",
             "description": "<p>The Issue matching the Issue ID</p>"
           }
         ]
@@ -9501,7 +9964,7 @@
       "examples": [
         {
           "title": "Success-Response.",
-          "content": "HTTP/1.1 200 OK\n{\n\t\"_id\":\"00000000-0000-0000-0000-000000000002\",\n\t\"account\":\"acme\",\n\t\"assigned_roles\":[\n\t\t\"Job1\"\n\t],\n\t\"associated_activity\":\"Column casting\",\n\t\"category\":\"safety_fall\",\n\t\"comments\":[],\n\t\"consequence\":0,\n\t\"created\":1567156228976,\n\t\"creator_role\":\"Job4\",\n\t\"desc\":\"Risk description that describes the risk\",\n\t\"element\":\"Doors\",\n\t\"level_of_risk\":0,\n\t\"likelihood\":0,\n\t\"location_desc\":\"Tower 3 - Level 2\",\n\t\"mitigation_desc\":\"Erect temporary barrier\",\n\t\"mitigation_detail\":\"Erect a temporary 1.5m metal barrier along edge\",\n\t\"mitigation_stage\":\"Construction stage 5\",\n\t\"mitigation_status\":\"proposed\",\n\t\"mitigation_type\":\"Eliminate\",\n\t\"model\":\"00000000-0000-0000-0000-000000000000\",\n\t\"name\":\"Risk 1\",\n\t\"norm\":[0,0,0],\n\t\"overall_level_of_risk\":0,\n\t\"owner\":\"alice\",\n\t\"position\":[55000.0,80000.0,-10000.0],\n\t\"residual_consequence\":-1,\n\t\"residual_level_of_risk\":-1,\n\t\"residual_likelihood\":-1,\n\t\"residual_risk\":\"\",\n\t\"rev_id\":\"00000000-0000-0000-0000-000000000001\",\n\t\"risk_factor\":\"Factor 9\",\n\t\"safetibase_id\":\"\",\n\t\"scope\":\"Tower 3\",\n\t\"thumbnail\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/thumbnail.png\",\n\t\"viewpoint\":{\n\t\t\"aspect_ratio\":1.4,\n\t\t\"clippingPlanes\":[],\n\t\t\"far\":300000,\n\t\t\"fov\":1.05,\n\t\t\"guid\":\"00000000-0000-0000-0000-000000000004\",\n\t\t\"hideIfc\":true,\n\t\t\"look_at\":[35000.0,40000.0,8000.0],\n\t\t\"near\":600.0,\n\t\t\"position\":[-70000.0,120000.0,150000.0],\n\t\t\"right\":[0.8,-0.3,0.6],\n\t\t\"screenshot\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshot.png\",\n\t\t\"screenshotSmall\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshotSmall.png\",\n\t\t\"up\":[0.3,0.9,-0.3],\n\t\t\"view_dir\":[0.5,-0.4,-0.7]\n\t}\n}",
+          "content": "HTTP/1.1 200 OK\n{\n\t\"_id\":\"00000000-0000-0000-0000-000000000002\",\n\t\"account\":\"acme\",\n\t\"assigned_roles\":[\n\t\t\"Job1\"\n\t],\n\t\"associated_activity\":\"Column casting\",\n\t\"category\":\"safety_fall\",\n\t\"comments\":[],\n\t\"consequence\":0,\n\t\"created\":1567156228976,\n\t\"creator_role\":\"Job4\",\n\t\"desc\":\"Risk description that describes the risk\",\n\t\"element\":\"Doors\",\n\t\"level_of_risk\":0,\n\t\"likelihood\":0,\n\t\"location_desc\":\"Tower 3 - Level 2\",\n\t\"mitigation_desc\":\"Erect temporary barrier\",\n\t\"mitigation_detail\":\"Erect a temporary 1.5m metal barrier along edge\",\n\t\"mitigation_stage\":\"Construction stage 5\",\n\t\"mitigation_status\":\"proposed\",\n\t\"mitigation_type\":\"Eliminate\",\n\t\"model\":\"00000000-0000-0000-0000-000000000000\",\n\t\"name\":\"Risk 1\",\n\t\"overall_level_of_risk\":0,\n\t\"owner\":\"alice\",\n\t\"position\":[55000.0,80000.0,-10000.0],\n\t\"residual_consequence\":-1,\n\t\"residual_level_of_risk\":-1,\n\t\"residual_likelihood\":-1,\n\t\"residual_risk\":\"\",\n\t\"rev_id\":\"00000000-0000-0000-0000-000000000001\",\n\t\"risk_factor\":\"Factor 9\",\n\t\"safetibase_id\":\"\",\n\t\"scope\":\"Tower 3\",\n\t\"thumbnail\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/thumbnail.png\",\n\t\"viewpoint\":{\n\t\t\"aspect_ratio\":1.4,\n\t\t\"clippingPlanes\":[],\n\t\t\"far\":300000,\n\t\t\"fov\":1.05,\n\t\t\"guid\":\"00000000-0000-0000-0000-000000000004\",\n\t\t\"hideIfc\":true,\n\t\t\"look_at\":[35000.0,40000.0,8000.0],\n\t\t\"near\":600.0,\n\t\t\"position\":[-70000.0,120000.0,150000.0],\n\t\t\"right\":[0.8,-0.3,0.6],\n\t\t\"screenshot\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshot.png\",\n\t\t\"screenshotSmall\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshotSmall.png\",\n\t\t\"up\":[0.3,0.9,-0.3],\n\t\t\"view_dir\":[0.5,-0.4,-0.7]\n\t}\n}",
           "type": "json"
         }
       ]
@@ -9515,25 +9978,10 @@
     ],
     "version": "0.0.0",
     "filename": "routes/risk.js",
-    "groupTitle": "SafetiBase Risks"
-  },
-  {
-    "type": "get",
-    "url": "/:teamspace/:model/risks/:riskId/screenshot.png",
-    "title": "Get risk screenshot",
-    "name": "getScreenshot",
-    "group": "Risks",
-    "description": "<p>Retrieve a risk screenshot image.</p>",
+    "groupTitle": "SafetiBase Risks",
     "parameter": {
       "fields": {
         "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "riskId",
-            "description": "<p>Risk ID</p>"
-          },
           {
             "group": "Parameter",
             "type": "String",
@@ -9547,10 +9995,25 @@
             "optional": false,
             "field": "model",
             "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "riskId",
+            "description": "<p>Risk ID</p>"
           }
         ]
       }
-    },
+    }
+  },
+  {
+    "type": "get",
+    "url": "/:teamspace/:model/risks/:riskId/screenshot.png",
+    "title": "Get risk screenshot",
+    "name": "getScreenshot",
+    "group": "Risks",
+    "description": "<p>Retrieve a risk screenshot image.</p>",
     "success": {
       "fields": {
         "Success 200": [
@@ -9580,25 +10043,10 @@
     ],
     "version": "0.0.0",
     "filename": "routes/risk.js",
-    "groupTitle": "SafetiBase Risks"
-  },
-  {
-    "type": "get",
-    "url": "/:teamspace/:model/risks/:riskId/screenshotSmall.png",
-    "title": "Get low-res screenshot",
-    "name": "getScreenshotSmall",
-    "group": "Risks",
-    "description": "<p>Retrieve a low-resolution risk screenshot image.</p>",
+    "groupTitle": "SafetiBase Risks",
     "parameter": {
       "fields": {
         "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "riskId",
-            "description": "<p>Risk ID</p>"
-          },
           {
             "group": "Parameter",
             "type": "String",
@@ -9612,10 +10060,25 @@
             "optional": false,
             "field": "model",
             "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "riskId",
+            "description": "<p>Risk ID</p>"
           }
         ]
       }
-    },
+    }
+  },
+  {
+    "type": "get",
+    "url": "/:teamspace/:model/risks/:riskId/screenshotSmall.png",
+    "title": "Get low-res screenshot",
+    "name": "getScreenshotSmall",
+    "group": "Risks",
+    "description": "<p>Retrieve a low-resolution risk screenshot image.</p>",
     "success": {
       "fields": {
         "Success 200": [
@@ -9645,25 +10108,10 @@
     ],
     "version": "0.0.0",
     "filename": "routes/risk.js",
-    "groupTitle": "SafetiBase Risks"
-  },
-  {
-    "type": "get",
-    "url": "/:teamspace/:model/risks/:riskId/thumbnail.png",
-    "title": "Get risk thumbnail",
-    "name": "getThumbnail",
-    "group": "Risks",
-    "description": "<p>Retrieve a risk thumbnail image.</p>",
+    "groupTitle": "SafetiBase Risks",
     "parameter": {
       "fields": {
         "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "riskId",
-            "description": "<p>Risk ID</p>"
-          },
           {
             "group": "Parameter",
             "type": "String",
@@ -9677,10 +10125,25 @@
             "optional": false,
             "field": "model",
             "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "riskId",
+            "description": "<p>Risk ID</p>"
           }
         ]
       }
-    },
+    }
+  },
+  {
+    "type": "get",
+    "url": "/:teamspace/:model/risks/:riskId/thumbnail.png",
+    "title": "Get risk thumbnail",
+    "name": "getThumbnail",
+    "group": "Risks",
+    "description": "<p>Retrieve a risk thumbnail image.</p>",
     "success": {
       "fields": {
         "Success 200": [
@@ -9710,7 +10173,34 @@
     ],
     "version": "0.0.0",
     "filename": "routes/risk.js",
-    "groupTitle": "SafetiBase Risks"
+    "groupTitle": "SafetiBase Risks",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "riskId",
+            "description": "<p>Risk ID</p>"
+          }
+        ]
+      }
+    }
   },
   {
     "type": "get",
@@ -9751,6 +10241,20 @@
             "optional": true,
             "field": "updatedSince",
             "description": "<p>Only return issues that has been updated since this value (in epoch value)</p>"
+          },
+          {
+            "group": "Query",
+            "type": "Number",
+            "optional": true,
+            "field": "numbers",
+            "description": "<p>Array of issue numbers to filter for</p>"
+          },
+          {
+            "group": "Query",
+            "type": "String",
+            "optional": true,
+            "field": "ids",
+            "description": "<p>Array of issue ids to filter for</p>"
           }
         ]
       }
@@ -9770,7 +10274,7 @@
       "examples": [
         {
           "title": "Success-Response",
-          "content": "HTTP/1.1 200 OK\n[\n\t{\n\t\t\"_id\":\"00000000-0000-0000-0000-000000000002\",\n\t\t\"account\":\"acme\",\n\t\t\"assigned_roles\":[\n\t\t\t\"Job1\"\n\t\t],\n\t\t\"associated_activity\":\"Column casting\",\n\t\t\"category\":\"safety_fall\",\n\t\t\"comments\":[],\n\t\t\"consequence\":0,\n\t\t\"created\":1567156228976,\n\t\t\"creator_role\":\"Job4\",\n\t\t\"desc\":\"Risk description that describes the risk\",\n\t\t\"element\":\"Doors\",\n\t\t\"level_of_risk\":0,\n\t\t\"likelihood\":0,\n\t\t\"location_desc\":\"Tower 3 - Level 2\",\n\t\t\"mitigation_desc\":\"Erect temporary barrier\",\n\t\t\"mitigation_detail\":\"Erect a temporary 1.5m metal barrier along edge\",\n\t\t\"mitigation_stage\":\"Construction stage 5\",\n\t\t\"mitigation_status\":\"proposed\",\n\t\t\"mitigation_type\":\"Eliminate\",\n\t\t\"model\":\"00000000-0000-0000-0000-000000000000\",\n\t\t\"name\":\"Risk 1\",\n\t\t\"norm\":[0,0,0],\n\t\t\"overall_level_of_risk\":0,\n\t\t\"owner\":\"alice\",\n\t\t\"position\":[55000.0,80000.0,-10000.0],\n\t\t\"residual_consequence\":-1,\n\t\t\"residual_level_of_risk\":-1,\n\t\t\"residual_likelihood\":-1,\n\t\t\"residual_risk\":\"\",\n\t\t\"rev_id\":\"00000000-0000-0000-0000-000000000001\",\n\t\t\"risk_factor\":\"Factor 9\",\n\t\t\"safetibase_id\":\"\",\n\t\t\"scope\":\"Tower 3\",\n\t\t\"thumbnail\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/thumbnail.png\",\n\t\t\"viewpoint\":{\n\t\t\t\"aspect_ratio\":1.4,\n\t\t\t\"clippingPlanes\":[],\n\t\t\t\"far\":300000,\n\t\t\t\"fov\":1.05,\n\t\t\t\"guid\":\"00000000-0000-0000-0000-000000000004\",\n\t\t\t\"hideIfc\":true,\n\t\t\t\"look_at\":[35000.0,40000.0,8000.0],\n\t\t\t\"near\":600.0,\n\t\t\t\"position\":[-70000.0,120000.0,150000.0],\n\t\t\t\"right\":[0.8,-0.3,0.6],\n\t\t\t\"screenshot\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshot.png\",\n\t\t\t\"screenshotSmall\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshotSmall.png\",\n\t\t\t\"up\":[0.3,0.9,-0.3],\n\t\t\t\"view_dir\":[0.5,-0.4,-0.7]\n\t\t}\n\t}\n]",
+          "content": "HTTP/1.1 200 OK\n[\n\t{\n\t\t\"_id\":\"00000000-0000-0000-0000-000000000002\",\n\t\t\"account\":\"acme\",\n\t\t\"assigned_roles\":[\n\t\t\t\"Job1\"\n\t\t],\n\t\t\"associated_activity\":\"Column casting\",\n\t\t\"category\":\"safety_fall\",\n\t\t\"comments\":[],\n\t\t\"consequence\":0,\n\t\t\"created\":1567156228976,\n\t\t\"creator_role\":\"Job4\",\n\t\t\"desc\":\"Risk description that describes the risk\",\n\t\t\"element\":\"Doors\",\n\t\t\"level_of_risk\":0,\n\t\t\"likelihood\":0,\n\t\t\"location_desc\":\"Tower 3 - Level 2\",\n\t\t\"mitigation_desc\":\"Erect temporary barrier\",\n\t\t\"mitigation_detail\":\"Erect a temporary 1.5m metal barrier along edge\",\n\t\t\"mitigation_stage\":\"Construction stage 5\",\n\t\t\"mitigation_status\":\"proposed\",\n\t\t\"mitigation_type\":\"Eliminate\",\n\t\t\"model\":\"00000000-0000-0000-0000-000000000000\",\n\t\t\"name\":\"Risk 1\",\n\t\t\"overall_level_of_risk\":0,\n\t\t\"owner\":\"alice\",\n\t\t\"position\":[55000.0,80000.0,-10000.0],\n\t\t\"residual_consequence\":-1,\n\t\t\"residual_level_of_risk\":-1,\n\t\t\"residual_likelihood\":-1,\n\t\t\"residual_risk\":\"\",\n\t\t\"rev_id\":\"00000000-0000-0000-0000-000000000001\",\n\t\t\"risk_factor\":\"Factor 9\",\n\t\t\"safetibase_id\":\"\",\n\t\t\"scope\":\"Tower 3\",\n\t\t\"thumbnail\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/thumbnail.png\",\n\t\t\"viewpoint\":{\n\t\t\t\"aspect_ratio\":1.4,\n\t\t\t\"clippingPlanes\":[],\n\t\t\t\"far\":300000,\n\t\t\t\"fov\":1.05,\n\t\t\t\"guid\":\"00000000-0000-0000-0000-000000000004\",\n\t\t\t\"hideIfc\":true,\n\t\t\t\"look_at\":[35000.0,40000.0,8000.0],\n\t\t\t\"near\":600.0,\n\t\t\t\"position\":[-70000.0,120000.0,150000.0],\n\t\t\t\"right\":[0.8,-0.3,0.6],\n\t\t\t\"screenshot\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshot.png\",\n\t\t\t\"screenshotSmall\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshotSmall.png\",\n\t\t\t\"up\":[0.3,0.9,-0.3],\n\t\t\t\"view_dir\":[0.5,-0.4,-0.7]\n\t\t}\n\t}\n]",
           "type": "json"
         }
       ]
@@ -9901,18 +10405,364 @@
             "field": "model",
             "description": "<p>Model ID</p>"
           }
+        ],
+        "Request body": [
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "name",
+            "description": "<p>Risk name</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String[]",
+            "optional": false,
+            "field": "assigned_roles",
+            "description": "<p>Risk owner</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "associated_activity",
+            "description": "<p>Associated activity</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "category",
+            "description": "<p>Category</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "Number",
+            "optional": false,
+            "field": "consequence",
+            "description": "<p>Risk consequence (0: very low, 1: low, 2: moderate, 3: high, 4: very high)</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "desc",
+            "description": "<p>Risk description</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "element",
+            "description": "<p>Element type</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "Number",
+            "optional": false,
+            "field": "likelihood",
+            "description": "<p>Risk likelihood (0: very low, 1: low, 2: moderate, 3: high, 4: very high)</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "location_desc",
+            "description": "<p>Location description</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "mitigation_status",
+            "description": "<p>Treatment status</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "mitigation_desc",
+            "description": "<p>Treatment summary</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "mitigation_detail",
+            "description": "<p>Treatment detailed description</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "mitigation_stage",
+            "description": "<p>Treatment stage</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "mitigation_type",
+            "description": "<p>Treatment type</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "position",
+            "description": "<p>Risk pin coordinates</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "Number",
+            "optional": false,
+            "field": "residual_consequence",
+            "description": "<p>Treated risk consequence (-1: unset, 0: very low, 1: low, 2: moderate, 3: high, 4: very high)</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "Number",
+            "optional": false,
+            "field": "residual_likelihood",
+            "description": "<p>Treated risk likelihood (-1: unset, 0: very low, 1: low, 2: moderate, 3: high, 4: very high)</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "residual_risk",
+            "description": "<p>Residual risk</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "risk_factor",
+            "description": "<p>Risk factor</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "scope",
+            "description": "<p>Construction scope</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "Viewpoint",
+            "optional": false,
+            "field": "viewpoint",
+            "description": "<p>Viewpoint</p>"
+          }
+        ],
+        "Type: Viewpoint": [
+          {
+            "group": "Type: Viewpoint",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "right",
+            "description": "<p>Right vector of viewpoint indicating the direction of right in relative coordinates</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "up",
+            "description": "<p>Up vector of viewpoint indicating the direction of up in relative coordinates</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "position",
+            "description": "<p>Position vector indicates where in the world the viewpoint is positioned</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "look_at",
+            "description": "<p>Vector indicating where in the world the viewpoint is looking at</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "view_dir",
+            "description": "<p>Vector indicating the direction the viewpoint is looking at in relative coordinates</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Number",
+            "optional": false,
+            "field": "near",
+            "description": "<p>Vector indicating the near plane</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Number",
+            "optional": false,
+            "field": "far",
+            "description": "<p>Vector indicating the far plane</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Number",
+            "optional": false,
+            "field": "fov",
+            "description": "<p>Angle of the field of view</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Number",
+            "optional": false,
+            "field": "aspect_ratio",
+            "description": "<p>Aspect ratio of the fustrum</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "ClippingPlane[]",
+            "optional": true,
+            "field": "clippingPlanes",
+            "description": "<p>Clipping planes associated with the viewpoint</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "String",
+            "optional": true,
+            "field": "highlighted_group_id",
+            "description": "<p>If the viewpoint is associated with one or more highlighted objects from the model this field has the value of a group ID generated to hold those objects</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "String",
+            "optional": true,
+            "field": "hidden_group_id",
+            "description": "<p>If the viewpoint is associated with one or more hidden objects from the model this field has the value of a group id generated to hold those objects</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "String",
+            "optional": true,
+            "field": "shown_group_id",
+            "description": "<p>If the viewpoint is associated with one or more shown objects from the model this field has the value of a group id generated to hold those objects</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Group",
+            "optional": true,
+            "field": "highlighted_group",
+            "description": "<p>If the viewpoint is associated with one or more highlighted objects from the model this field has the value of a group definition for those objects (this shouldnt be use simultaneously with highlighted_group_id)</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Group",
+            "optional": true,
+            "field": "hidden_group",
+            "description": "<p>If the viewpoint is associated with one or more hidden objects from the model this field has the value of a group id generated to hold those objects (this shouldnt be use simultaneously with hidden_group_id)</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Group",
+            "optional": true,
+            "field": "shown_group",
+            "description": "<p>If the viewpoint is associated with one or more shown objects from the model this field has the definition of the group to hold those objects (this shouldnt be use simultaneously with shown_group_id)</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Group[]",
+            "optional": true,
+            "field": "override_groups",
+            "description": "<p>If the viewpoint has one or more objects with colour override this field has an array of groups with one group for each colour</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Boolean",
+            "optional": false,
+            "field": "hide_IFC",
+            "description": "<p>A flag to hide the IFC</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "String",
+            "optional": false,
+            "field": "screenshot",
+            "description": "<p>Base64 string representing the screenshot associated with the viewpoint</p>"
+          }
+        ],
+        "Type: Group": [
+          {
+            "group": "Type: Group",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "color",
+            "description": "<p>RGB colour values</p>"
+          },
+          {
+            "group": "Type: Group",
+            "type": "ModelObjects",
+            "optional": false,
+            "field": "objects",
+            "description": "<p>List of objects in group</p>"
+          }
+        ],
+        "Type: ModelObjects": [
+          {
+            "group": "Type: ModelObjects",
+            "type": "String",
+            "optional": false,
+            "field": "account",
+            "description": "<p>The account that has the model which contains the objects</p>"
+          },
+          {
+            "group": "Type: ModelObjects",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>The model id that contains the objects</p>"
+          },
+          {
+            "group": "Type: ModelObjects",
+            "type": "String[]",
+            "optional": false,
+            "field": "shared_ids",
+            "description": "<p>The shared ids of objects to be selected</p>"
+          }
+        ],
+        "Type: ClippingPlane": [
+          {
+            "group": "Type: ClippingPlane",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "normal",
+            "description": "<p>The normal of the plane defined for the clipping plane</p>"
+          },
+          {
+            "group": "Type: ClippingPlane",
+            "type": "Number",
+            "optional": false,
+            "field": "distance",
+            "description": "<p>The distance for the clipping plane to the origin</p>"
+          },
+          {
+            "group": "Type: ClippingPlane",
+            "type": "Number",
+            "optional": false,
+            "field": "clipDirection",
+            "description": "<p>The direction to the clipping plane will cut the model; above or below the plane. Possible values: 1 , -1.</p>"
+          }
         ]
       }
     },
     "examples": [
       {
         "title": "Example usage:",
-        "content": "POST /acme/00000000-0000-0000-0000-000000000000/risks HTTP/1.1\n{\n\t\"assigned_roles\":[\n\t\t\"Job1\"\n\t],\n\t\"associated_activity\":\"\",\n\t\"category\":\"safety_fall\",\n\t\"comments\":[],\n\t\"consequence\":0,\n\t\"creator_role\":\"Job4\",\n\t\"desc\":\"Risk description that describes the risk\",\n\t\"element\":\"Doors\",\n\t\"level_of_risk\":0,\n\t\"likelihood\":0,\n\t\"location_desc\":\"Tower 3 - Level 2\",\n\t\"mitigation_desc\":\"Erect temporary barrier\",\n\t\"mitigation_detail\":\"Erect a temporary 1.5m metal barrier along edge\",\n\t\"mitigation_stage\":\"Construction stage 5\",\n\t\"mitigation_status\":\"proposed\",\n\t\"mitigation_type\":\"Eliminate\",\n\t\"name\":\"Risk 1\",\n\t\"norm\":[0,0,0],\n\t\"overall_level_of_risk\":0,\n\t\"position\":[55000.0,80000.0,-10000.0],\n\t\"residual_consequence\":-1,\n\t\"residual_level_of_risk\":-1,\n\t\"residual_likelihood\":-1,\n\t\"residual_risk\":\"\",\n\t\"risk_factor\":\"Factor 9\",\n\t\"safetibase_id\":\"\",\n\t\"scope\":\"Tower 3\",\n\t\"viewpoint\":{\n\t\t\"aspect_ratio\":1.4,\n\t\t\"clippingPlanes\":[],\n\t\t\"far\":300000,\n\t\t\"fov\":1.05,\n\t\t\"hideIfc\":true,\n\t\t\"highlighted_group_id\":\"\",\n\t\t\"look_at\":[35000.0,40000.0,8000.0],\n\t\t\"near\":600.0,\n\t\t\"position\":[-70000.0,120000.0,150000.0],\n\t\t\"right\":[0.8,-0.3,0.6],\n\t\t\"up\":[0.3,0.9,-0.3],\n\t\t\"view_dir\":[0.5,-0.4,-0.7],\n\t\t\"screenshot\":<base64 image>\n\t}\n}",
+        "content": "POST /acme/00000000-0000-0000-0000-000000000000/risks HTTP/1.1\n{\n\t\"assigned_roles\":[\n\t\t\"Job1\"\n\t],\n\t\"associated_activity\":\"\",\n\t\"category\":\"safety_fall\",\n\t\"comments\":[],\n\t\"consequence\":0,\n\t\"creator_role\":\"Job4\",\n\t\"desc\":\"Risk description that describes the risk\",\n\t\"element\":\"Doors\",\n\t\"level_of_risk\":0,\n\t\"likelihood\":0,\n\t\"location_desc\":\"Tower 3 - Level 2\",\n\t\"mitigation_desc\":\"Erect temporary barrier\",\n\t\"mitigation_detail\":\"Erect a temporary 1.5m metal barrier along edge\",\n\t\"mitigation_stage\":\"Construction stage 5\",\n\t\"mitigation_status\":\"proposed\",\n\t\"mitigation_type\":\"Eliminate\",\n\t\"name\":\"Risk 1\",\n\t\"overall_level_of_risk\":0,\n\t\"position\":[55000.0,80000.0,-10000.0],\n\t\"residual_consequence\":-1,\n\t\"residual_level_of_risk\":-1,\n\t\"residual_likelihood\":-1,\n\t\"residual_risk\":\"\",\n\t\"risk_factor\":\"Factor 9\",\n\t\"safetibase_id\":\"\",\n\t\"scope\":\"Tower 3\",\n\t\"viewpoint\":{\n\t\t\"aspect_ratio\":1.4,\n\t\t\"clippingPlanes\":[],\n\t\t\"far\":300000,\n\t\t\"fov\":1.05,\n\t\t\"hideIfc\":true,\n\t\t\"highlighted_group_id\":\"\",\n\t\t\"look_at\":[35000.0,40000.0,8000.0],\n\t\t\"near\":600.0,\n\t\t\"position\":[-70000.0,120000.0,150000.0],\n\t\t\"right\":[0.8,-0.3,0.6],\n\t\t\"up\":[0.3,0.9,-0.3],\n\t\t\"view_dir\":[0.5,-0.4,-0.7],\n\t\t\"screenshot\":<base64 image>\n\t}\n}",
         "type": "post"
       },
       {
         "title": "Example usage:",
-        "content": "POST /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/risks HTTP/1.1\n{\n\t\"assigned_roles\":[\n\t\t\"Job1\"\n\t],\n\t\"associated_activity\":\"\",\n\t\"category\":\"safety_fall\",\n\t\"comments\":[],\n\t\"consequence\":0,\n\t\"creator_role\":\"Job4\",\n\t\"desc\":\"Risk description that describes the risk\",\n\t\"element\":\"Doors\",\n\t\"level_of_risk\":0,\n\t\"likelihood\":0,\n\t\"location_desc\":\"Tower 3 - Level 2\",\n\t\"mitigation_desc\":\"Erect temporary barrier\",\n\t\"mitigation_detail\":\"Erect a temporary 1.5m metal barrier along edge\",\n\t\"mitigation_stage\":\"Construction stage 5\",\n\t\"mitigation_status\":\"proposed\",\n\t\"mitigation_type\":\"Eliminate\",\n\t\"name\":\"Risk 1\",\n\t\"norm\":[0,0,0],\n\t\"overall_level_of_risk\":0,\n\t\"position\":[55000.0,80000.0,-10000.0],\n\t\"residual_consequence\":-1,\n\t\"residual_level_of_risk\":-1,\n\t\"residual_likelihood\":-1,\n\t\"residual_risk\":\"\",\n\t\"risk_factor\":\"Factor 9\",\n\t\"safetibase_id\":\"\",\n\t\"scope\":\"Tower 3\",\n\t\"viewpoint\":{\n\t\t\"aspect_ratio\":1.4,\n\t\t\"clippingPlanes\":[],\n\t\t\"far\":300000,\n\t\t\"fov\":1.05,\n\t\t\"hideIfc\":true,\n\t\t\"highlighted_group_id\":\"\",\n\t\t\"look_at\":[35000.0,40000.0,8000.0],\n\t\t\"near\":600.0,\n\t\t\"position\":[-70000.0,120000.0,150000.0],\n\t\t\"right\":[0.8,-0.3,0.6],\n\t\t\"up\":[0.3,0.9,-0.3],\n\t\t\"view_dir\":[0.5,-0.4,-0.7],\n\t\t\"screenshot\":<base64 image>\n\t}\n}",
+        "content": "POST /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/risks HTTP/1.1\n{\n\t\"assigned_roles\":[\n\t\t\"Job1\"\n\t],\n\t\"associated_activity\":\"\",\n\t\"category\":\"safety_fall\",\n\t\"comments\":[],\n\t\"consequence\":0,\n\t\"creator_role\":\"Job4\",\n\t\"desc\":\"Risk description that describes the risk\",\n\t\"element\":\"Doors\",\n\t\"level_of_risk\":0,\n\t\"likelihood\":0,\n\t\"location_desc\":\"Tower 3 - Level 2\",\n\t\"mitigation_desc\":\"Erect temporary barrier\",\n\t\"mitigation_detail\":\"Erect a temporary 1.5m metal barrier along edge\",\n\t\"mitigation_stage\":\"Construction stage 5\",\n\t\"mitigation_status\":\"proposed\",\n\t\"mitigation_type\":\"Eliminate\",\n\t\"name\":\"Risk 1\",\n\t\"overall_level_of_risk\":0,\n\t\"position\":[55000.0,80000.0,-10000.0],\n\t\"residual_consequence\":-1,\n\t\"residual_level_of_risk\":-1,\n\t\"residual_likelihood\":-1,\n\t\"residual_risk\":\"\",\n\t\"risk_factor\":\"Factor 9\",\n\t\"safetibase_id\":\"\",\n\t\"scope\":\"Tower 3\",\n\t\"viewpoint\":{\n\t\t\"aspect_ratio\":1.4,\n\t\t\"clippingPlanes\":[],\n\t\t\"far\":300000,\n\t\t\"fov\":1.05,\n\t\t\"hideIfc\":true,\n\t\t\"highlighted_group_id\":\"\",\n\t\t\"look_at\":[35000.0,40000.0,8000.0],\n\t\t\"near\":600.0,\n\t\t\"position\":[-70000.0,120000.0,150000.0],\n\t\t\"right\":[0.8,-0.3,0.6],\n\t\t\"up\":[0.3,0.9,-0.3],\n\t\t\"view_dir\":[0.5,-0.4,-0.7],\n\t\t\"screenshot\":<base64 image>\n\t}\n}",
         "type": "post"
       }
     ],
@@ -9920,7 +10770,7 @@
       "examples": [
         {
           "title": "Success-Response",
-          "content": "HTTP/1.1 200 OK\n{\n\t\"_id\":\"00000000-0000-0000-0000-000000000002\",\n\t\"account\":\"acme\",\n\t\"assigned_roles\":[\n\t\t\"Job1\"\n\t],\n\t\"associated_activity\":\"\",\n\t\"category\":\"safety_fall\",\n\t\"comments\":[],\n\t\"consequence\":0,\n\t\"created\":1567156228976,\n\t\"creator_role\":\"Job4\",\n\t\"desc\":\"Risk description that describes the risk\",\n\t\"element\":\"Doors\",\n\t\"level_of_risk\":0,\n\t\"likelihood\":0,\n\t\"location_desc\":\"Tower 3 - Level 2\",\n\t\"mitigation_desc\":\"Erect temporary barrier\",\n\t\"mitigation_detail\":\"Erect a temporary 1.5m metal barrier along edge\",\n\t\"mitigation_stage\":\"Construction stage 5\",\n\t\"mitigation_status\":\"proposed\",\n\t\"mitigation_type\":\"Eliminate\",\n\t\"model\":\"00000000-0000-0000-0000-000000000000\",\n\t\"name\":\"Risk 1\",\n\t\"norm\":[0,0,0],\n\t\"overall_level_of_risk\":0,\n\t\"owner\":\"alice\",\n\t\"position\":[55000.0,80000.0,-10000.0],\n\t\"residual_consequence\":-1,\n\t\"residual_level_of_risk\":-1,\n\t\"residual_likelihood\":-1,\n\t\"residual_risk\":\"\",\n\t\"rev_id\":\"00000000-0000-0000-0000-000000000001\",\n\t\"risk_factor\":\"Factor 9\",\n\t\"safetibase_id\":\"\",\n\t\"scope\":\"Tower 3\",\n\t\"thumbnail\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/thumbnail.png\",\n\t\"viewpoint\":{\n\t\t\"aspect_ratio\":1.4,\n\t\t\"clippingPlanes\":[],\n\t\t\"far\":300000,\n\t\t\"fov\":1.05,\n\t\t\"guid\":\"00000000-0000-0000-0000-000000000004\",\n\t\t\"hideIfc\":true,\n\t\t\"look_at\":[35000.0,40000.0,8000.0],\n\t\t\"near\":600.0,\n\t\t\"position\":[-70000.0,120000.0,150000.0],\n\t\t\"right\":[0.8,-0.3,0.6],\n\t\t\"screenshot\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshot.png\",\n\t\t\"screenshotSmall\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshotSmall.png\",\n\t\t\"up\":[0.3,0.9,-0.3],\n\t\t\"view_dir\":[0.5,-0.4,-0.7]\n\t}\n}",
+          "content": "HTTP/1.1 200 OK\n{\n\t\"_id\":\"00000000-0000-0000-0000-000000000002\",\n\t\"account\":\"acme\",\n\t\"assigned_roles\":[\n\t\t\"Job1\"\n\t],\n\t\"associated_activity\":\"\",\n\t\"category\":\"safety_fall\",\n\t\"comments\":[],\n\t\"consequence\":0,\n\t\"created\":1567156228976,\n\t\"creator_role\":\"Job4\",\n\t\"desc\":\"Risk description that describes the risk\",\n\t\"element\":\"Doors\",\n\t\"level_of_risk\":0,\n\t\"likelihood\":0,\n\t\"location_desc\":\"Tower 3 - Level 2\",\n\t\"mitigation_desc\":\"Erect temporary barrier\",\n\t\"mitigation_detail\":\"Erect a temporary 1.5m metal barrier along edge\",\n\t\"mitigation_stage\":\"Construction stage 5\",\n\t\"mitigation_status\":\"proposed\",\n\t\"mitigation_type\":\"Eliminate\",\n\t\"model\":\"00000000-0000-0000-0000-000000000000\",\n\t\"name\":\"Risk 1\",\n\t\"overall_level_of_risk\":0,\n\t\"owner\":\"alice\",\n\t\"position\":[55000.0,80000.0,-10000.0],\n\t\"residual_consequence\":-1,\n\t\"residual_level_of_risk\":-1,\n\t\"residual_likelihood\":-1,\n\t\"residual_risk\":\"\",\n\t\"rev_id\":\"00000000-0000-0000-0000-000000000001\",\n\t\"risk_factor\":\"Factor 9\",\n\t\"safetibase_id\":\"\",\n\t\"scope\":\"Tower 3\",\n\t\"thumbnail\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/thumbnail.png\",\n\t\"viewpoint\":{\n\t\t\"aspect_ratio\":1.4,\n\t\t\"clippingPlanes\":[],\n\t\t\"far\":300000,\n\t\t\"fov\":1.05,\n\t\t\"guid\":\"00000000-0000-0000-0000-000000000004\",\n\t\t\"hideIfc\":true,\n\t\t\"look_at\":[35000.0,40000.0,8000.0],\n\t\t\"near\":600.0,\n\t\t\"position\":[-70000.0,120000.0,150000.0],\n\t\t\"right\":[0.8,-0.3,0.6],\n\t\t\"screenshot\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshot.png\",\n\t\t\"screenshotSmall\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshotSmall.png\",\n\t\t\"up\":[0.3,0.9,-0.3],\n\t\t\"view_dir\":[0.5,-0.4,-0.7]\n\t}\n}",
           "type": "json"
         }
       ]
@@ -9950,13 +10800,6 @@
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "riskId",
-            "description": "<p>Risk ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
             "field": "teamspace",
             "description": "<p>Name of teamspace</p>"
           },
@@ -9966,6 +10809,162 @@
             "optional": false,
             "field": "model",
             "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "riskId",
+            "description": "<p>Risk ID</p>"
+          }
+        ],
+        "Request body": [
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "name",
+            "description": "<p>Risk name</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String[]",
+            "optional": false,
+            "field": "assigned_roles",
+            "description": "<p>Risk owner</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "associated_activity",
+            "description": "<p>Associated activity</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "category",
+            "description": "<p>Category</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "Number",
+            "optional": false,
+            "field": "consequence",
+            "description": "<p>Risk consequence (0: very low, 1: low, 2: moderate, 3: high, 4: very high)</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "desc",
+            "description": "<p>Risk description</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "element",
+            "description": "<p>Element type</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "Number",
+            "optional": false,
+            "field": "likelihood",
+            "description": "<p>Risk likelihood (0: very low, 1: low, 2: moderate, 3: high, 4: very high)</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "location_desc",
+            "description": "<p>Location description</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "mitigation_status",
+            "description": "<p>Treatment status</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "mitigation_desc",
+            "description": "<p>Treatment summary</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "mitigation_detail",
+            "description": "<p>Treatment detailed description</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "mitigation_stage",
+            "description": "<p>Treatment stage</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "mitigation_type",
+            "description": "<p>Treatment type</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "position",
+            "description": "<p>Risk pin coordinates</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "Number",
+            "optional": false,
+            "field": "residual_consequence",
+            "description": "<p>Treated risk consequence (-1: unset, 0: very low, 1: low, 2: moderate, 3: high, 4: very high)</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "Number",
+            "optional": false,
+            "field": "residual_likelihood",
+            "description": "<p>Treated risk likelihood (-1: unset, 0: very low, 1: low, 2: moderate, 3: high, 4: very high)</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "residual_risk",
+            "description": "<p>Residual risk</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "risk_factor",
+            "description": "<p>Risk factor</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "scope",
+            "description": "<p>Construction scope</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "Viewpoint",
+            "optional": false,
+            "field": "viewpoint",
+            "description": "<p>Viewpoint</p>"
           }
         ]
       }
@@ -9986,7 +10985,7 @@
       "examples": [
         {
           "title": "Success-Response",
-          "content": "HTTP/1.1 200 OK\n{\n\t\"_id\":\"00000000-0000-0000-0000-000000000002\",\n\t\"account\":\"acme\",\n\t\"assigned_roles\":[\n\t\t\"Job1\"\n\t],\n\t\"associated_activity\":\"\",\n\t\"category\":\"safety_fall\",\n\t\"comments\":[],\n\t\"consequence\":0,\n\t\"created\":1567156228976,\n\t\"creator_role\":\"Job4\",\n\t\"desc\":\"Risk description that describes the risk\",\n\t\"element\":\"Doors\",\n\t\"level_of_risk\":0,\n\t\"likelihood\":0,\n\t\"location_desc\":\"Tower 3 - Level 2\",\n\t\"mitigation_desc\":\"Erect temporary barrier\",\n\t\"mitigation_detail\":\"Erect a temporary 1.5m metal barrier along edge\",\n\t\"mitigation_stage\":\"Construction stage 5\",\n\t\"mitigation_status\":\"proposed\",\n\t\"mitigation_type\":\"Eliminate\",\n\t\"model\":\"00000000-0000-0000-0000-000000000000\",\n\t\"name\":\"Risk 1\",\n\t\"norm\":[0,0,0],\n\t\"owner\":\"alice\",\n\t\"overall_level_of_risk\":0,\n\t\"position\":[55000.0,80000.0,-10000.0],\n\t\"residual_consequence\":-1,\n\t\"residual_level_of_risk\":-1,\n\t\"residual_likelihood\":1,\n\t\"residual_risk\":\"\",\n\t\"rev_id\":\"00000000-0000-0000-0000-000000000001\",\n\t\"risk_factor\":\"Factor 9\",\n\t\"safetibase_id\":\"\",\n\t\"scope\":\"Tower 3\",\n\t\"thumbnail\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/thumbnail.png\",\n\t\"viewpoint\":{\n\t\t\"aspect_ratio\":1.4,\n\t\t\"clippingPlanes\":[],\n\t\t\"far\":300000,\n\t\t\"fov\":1.05,\n\t\t\"guid\":\"00000000-0000-0000-0000-000000000004\",\n\t\t\"hideIfc\":true,\n\t\t\"look_at\":[35000.0,40000.0,8000.0],\n\t\t\"near\":600.0,\n\t\t\"position\":[-70000.0,120000.0,150000.0],\n\t\t\"right\":[0.8,-0.3,0.6],\n\t\t\"screenshot\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshot.png\",\n\t\t\"screenshotSmall\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshotSmall.png\",\n\t\t\"up\":[0.3,0.9,-0.3],\n\t\t\"view_dir\":[0.5,-0.4,-0.7]\n\t}\n}",
+          "content": "HTTP/1.1 200 OK\n{\n\t\"_id\":\"00000000-0000-0000-0000-000000000002\",\n\t\"account\":\"acme\",\n\t\"assigned_roles\":[\n\t\t\"Job1\"\n\t],\n\t\"associated_activity\":\"\",\n\t\"category\":\"safety_fall\",\n\t\"comments\":[],\n\t\"consequence\":0,\n\t\"created\":1567156228976,\n\t\"creator_role\":\"Job4\",\n\t\"desc\":\"Risk description that describes the risk\",\n\t\"element\":\"Doors\",\n\t\"level_of_risk\":0,\n\t\"likelihood\":0,\n\t\"location_desc\":\"Tower 3 - Level 2\",\n\t\"mitigation_desc\":\"Erect temporary barrier\",\n\t\"mitigation_detail\":\"Erect a temporary 1.5m metal barrier along edge\",\n\t\"mitigation_stage\":\"Construction stage 5\",\n\t\"mitigation_status\":\"proposed\",\n\t\"mitigation_type\":\"Eliminate\",\n\t\"model\":\"00000000-0000-0000-0000-000000000000\",\n\t\"name\":\"Risk 1\",\n\t\"owner\":\"alice\",\n\t\"overall_level_of_risk\":0,\n\t\"position\":[55000.0,80000.0,-10000.0],\n\t\"residual_consequence\":-1,\n\t\"residual_level_of_risk\":-1,\n\t\"residual_likelihood\":1,\n\t\"residual_risk\":\"\",\n\t\"rev_id\":\"00000000-0000-0000-0000-000000000001\",\n\t\"risk_factor\":\"Factor 9\",\n\t\"safetibase_id\":\"\",\n\t\"scope\":\"Tower 3\",\n\t\"thumbnail\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/thumbnail.png\",\n\t\"viewpoint\":{\n\t\t\"aspect_ratio\":1.4,\n\t\t\"clippingPlanes\":[],\n\t\t\"far\":300000,\n\t\t\"fov\":1.05,\n\t\t\"guid\":\"00000000-0000-0000-0000-000000000004\",\n\t\t\"hideIfc\":true,\n\t\t\"look_at\":[35000.0,40000.0,8000.0],\n\t\t\"near\":600.0,\n\t\t\"position\":[-70000.0,120000.0,150000.0],\n\t\t\"right\":[0.8,-0.3,0.6],\n\t\t\"screenshot\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshot.png\",\n\t\t\"screenshotSmall\":\"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshotSmall.png\",\n\t\t\"up\":[0.3,0.9,-0.3],\n\t\t\"view_dir\":[0.5,-0.4,-0.7]\n\t}\n}",
           "type": "json"
         }
       ]
@@ -10231,7 +11230,7 @@
           },
           {
             "group": "Request body",
-            "type": "[]String",
+            "type": "String[]",
             "optional": false,
             "field": "permissions",
             "description": "<p>The permisions to be assigned to the member it can be an empty array or have a &quot;teamspace_admin&quot; value.</p>"
@@ -10392,7 +11391,7 @@
       "examples": [
         {
           "title": "Success",
-          "content": "HTTP/1.1 200 OK\n{\n   user: \"viewerTeamspace1Model1JobB\",\n   firstName: \"Alice\",\n   lastName: \"Stratford\",\n   company: \"Teamspace one\"\n}",
+          "content": "HTTP/1.1 200 OK\n{\n   user: \"viewerTeamspace1Model1JobB\",\n   firstName: \"Alice\",\n   lastName: \"Stratford\",\n   company: \"Teamspace one\",\n   job: {\"_id\": \"Job1\", color: \"#FFFFFF\"}\n}",
           "type": "json"
         }
       ]
@@ -11150,10 +12149,10 @@
   {
     "type": "post",
     "url": "/:teamspace/:model/viewpoints/",
-    "title": "Create viewpoint",
-    "name": "createViewpoint",
-    "group": "Viewpoints",
-    "description": "<p>Create a new viewpoint.</p>",
+    "title": "Create view",
+    "name": "createView",
+    "group": "Views",
+    "description": "<p>Create a new view.</p>",
     "parameter": {
       "fields": {
         "Request body": [
@@ -11162,11 +12161,11 @@
             "type": "String",
             "optional": false,
             "field": "name",
-            "description": "<p>Name of viewpoint</p>"
+            "description": "<p>Name of view</p>"
           },
           {
             "group": "Request body",
-            "type": "String",
+            "type": "Viewpoint",
             "optional": false,
             "field": "viewpoint",
             "description": "<p>Viewpoint</p>"
@@ -11230,16 +12229,16 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/viewpoint.js",
-    "groupTitle": "Viewpoints"
+    "filename": "routes/view.js",
+    "groupTitle": "Views"
   },
   {
     "type": "delete",
     "url": "/:teamspace/:model/viewpoints/:viewId",
-    "title": "Delete viewpoint",
-    "name": "deleteViewpoint",
-    "group": "Viewpoints",
-    "description": "<p>Delete a viewpoint.</p>",
+    "title": "Delete view",
+    "name": "deleteView",
+    "group": "Views",
+    "description": "<p>Delete a view.</p>",
     "parameter": {
       "fields": {
         "Parameter": [
@@ -11248,7 +12247,7 @@
             "type": "String",
             "optional": false,
             "field": "viewId",
-            "description": "<p>Viewpoint ID</p>"
+            "description": "<p>View ID</p>"
           },
           {
             "group": "Parameter",
@@ -11284,16 +12283,16 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/viewpoint.js",
-    "groupTitle": "Viewpoints"
+    "filename": "routes/view.js",
+    "groupTitle": "Views"
   },
   {
     "type": "get",
     "url": "/:teamspace/:model/viewpoints/:viewId",
-    "title": "Get viewpoint",
-    "name": "findViewpoint",
-    "group": "Viewpoints",
-    "description": "<p>Retrieve a viewpoint.</p>",
+    "title": "Get view",
+    "name": "findView",
+    "group": "Views",
+    "description": "<p>Retrieve a view.</p>",
     "parameter": {
       "fields": {
         "Parameter": [
@@ -11302,7 +12301,7 @@
             "type": "String",
             "optional": false,
             "field": "viewId",
-            "description": "<p>Viewpoint ID</p>"
+            "description": "<p>View ID</p>"
           },
           {
             "group": "Parameter",
@@ -11318,6 +12317,143 @@
             "field": "model",
             "description": "<p>Model ID</p>"
           }
+        ],
+        "Type: ResultViewpoint": [
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "right",
+            "description": "<p>The right vector of the viewpoint indicating the direction of right in relative coordinates.</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "up",
+            "description": "<p>The up vector of the viewpoint indicating the direction of up in relative coordinates.</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "position",
+            "description": "<p>The position vector indicates where in the world the viewpoint is positioned.</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "look_at",
+            "description": "<p>The vector indicating where in the world the viewpoint is looking at.</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "view_dir",
+            "description": "<p>The vector indicating where is the viewpoint is looking at in relative coordinates.</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "Number",
+            "optional": false,
+            "field": "near",
+            "description": "<p>The vector indicating the near plane.</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "Number",
+            "optional": false,
+            "field": "far",
+            "description": "<p>The vector indicating the far plane.</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "Number",
+            "optional": false,
+            "field": "fov",
+            "description": "<p>The angle of the field of view.</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "Number",
+            "optional": false,
+            "field": "aspect_ratio",
+            "description": "<p>The aspect ratio of the fustrum.</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "ClippingPlane[]",
+            "optional": true,
+            "field": "clippingPlanes",
+            "description": "<p>the clipping planes associated with the viewpoint</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "String",
+            "optional": true,
+            "field": "highlighted_group_id",
+            "description": "<p>If the viewpoint is associated with one or more highlighted objects from the model this field has the value of a group id generated to hold those objects</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "String",
+            "optional": true,
+            "field": "hidden_group_id",
+            "description": "<p>If the viewpoint is associated with one or more hidden objects from the model this field has the value of a group id generated to hold those objects</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "String",
+            "optional": true,
+            "field": "shown_group_id",
+            "description": "<p>If the viewpoint is associated with one or more shown objects from the model this field has the value of a group id generated to hold those objects</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "String[]",
+            "optional": true,
+            "field": "override_group_ids",
+            "description": "<p>If the viewpoint has one or more objects with colour override this field has an array of groups ids with one group for each colour</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "Boolean",
+            "optional": false,
+            "field": "hide_IFC",
+            "description": "<p>A flag to hide the IFC</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "String",
+            "optional": false,
+            "field": "screenshot",
+            "description": "<p>A string in base64 representing the screenshot associated with the viewpoint</p>"
+          }
+        ],
+        "Type: ClippingPlane": [
+          {
+            "group": "Type: ClippingPlane",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "normal",
+            "description": "<p>The normal of the plane defined for the clipping plane</p>"
+          },
+          {
+            "group": "Type: ClippingPlane",
+            "type": "Number",
+            "optional": false,
+            "field": "distance",
+            "description": "<p>The distance for the clipping plane to the origin</p>"
+          },
+          {
+            "group": "Type: ClippingPlane",
+            "type": "Number",
+            "optional": false,
+            "field": "clipDirection",
+            "description": "<p>The direction to the clipping plane will cut the model; above or below the plane. Possible values: 1 , -1.</p>"
+          }
         ]
       }
     },
@@ -11332,61 +12468,68 @@
       "examples": [
         {
           "title": "Success-Response",
-          "content": "HTTP/1.1 200 OK\n{\n\t\"_id\":\"00000000-0000-0000-0000-000000000001\",\n\t\"clippingPlanes\":[],\n\t\"viewpoint\":{\n\t\t\"right\":[1.0,-0.0,0.0],\n\t\t\"up\":[0.0,0.0,-1.0],\n\t\t\"position\":[35000.0,150000.0,20000.0],\n\t\t\"look_at\":[35000.0,3000.0,20000.0],\n\t\t\"view_dir\":[-0.0,-1,-0.0],\n\t\t\"near\":100.0,\n\t\t\"far\":100000.0,\n\t\t\"fov\":1.0,\n\t\t\"aspect_ratio\":1.185,\n\t\t\"highlighted_group_id\":\"\"\n\t},\n\t\"screenshot\":{\n\t\t\"thumbnailUrl\":<binary image>,\n\t\t\"thumbnail\":\"charence/00000000-0000-0000-0000-000000000000/viewpoints/00000000-0000-0000-0000-000000000001/thumbnail.png\"\n\t},\n\t\"name\":\"View1\"\n}",
+          "content": "HTTP/1.1 200 OK\n{\n\t\"_id\":\"00000000-0000-0000-0000-000000000001\",\n\t\"thumbnail\":\"charence/00000000-0000-0000-0000-000000000000/viewpoints/00000000-0000-0000-0000-000000000001/thumbnail.png\",\n\t\"viewpoint\":{\n\t\t\"right\":[1.0,-0.0,0.0],\n\t\t\"up\":[0.0,0.0,-1.0],\n\t\t\"position\":[35000.0,150000.0,20000.0],\n\t\t\"look_at\":[35000.0,3000.0,20000.0],\n\t\t\"view_dir\":[-0.0,-1,-0.0],\n\t\t\"near\":100.0,\n\t\t\"far\":100000.0,\n\t\t\"fov\":1.0,\n\t\t\"aspect_ratio\":1.185,\n\t\t\"clippingPlanes\":[],\n\t\t\"highlighted_group_id\":\"\"\n\t},\n\t\"clippingPlanes\":[],\n\t\"screenshot\":{\n\t\t\"thumbnailUrl\":<binary image>,\n\t\t\"thumbnail\":\"charence/00000000-0000-0000-0000-000000000000/viewpoints/00000000-0000-0000-0000-000000000001/thumbnail.png\"\n\t},\n\t\"name\":\"View1\"\n}",
           "type": "png"
         }
       ],
       "fields": {
-        "Viewpoint object": [
+        "View object": [
           {
-            "group": "Viewpoint object",
+            "group": "View object",
             "type": "String",
             "optional": false,
             "field": "_id",
-            "description": "<p>Viewpoint ID</p>"
+            "description": "<p>View ID</p>"
           },
           {
-            "group": "Viewpoint object",
-            "type": "Number[]",
+            "group": "View object",
+            "type": "String",
             "optional": false,
-            "field": "clippingPlanes",
-            "description": "<p>Array of clipping planes</p>"
+            "field": "name",
+            "description": "<p>Name of view</p>"
           },
           {
-            "group": "Viewpoint object",
-            "type": "Object",
+            "group": "View object",
+            "type": "String",
+            "optional": false,
+            "field": "thumbnail",
+            "description": "<p>Thumbnail image</p>"
+          },
+          {
+            "group": "View object",
+            "type": "ResultViewpoint",
             "optional": false,
             "field": "viewpoint",
             "description": "<p>Viewpoint properties</p>"
           },
           {
-            "group": "Viewpoint object",
+            "group": "View object",
+            "type": "Number[]",
+            "optional": false,
+            "field": "clippingPlanes",
+            "description": "<p>[DEPRECATED] Array of clipping planes</p>"
+          },
+          {
+            "group": "View object",
             "type": "Object",
             "optional": false,
             "field": "screenshot",
-            "description": "<p>Screenshot object</p>"
-          },
-          {
-            "group": "Viewpoint object",
-            "type": "String",
-            "optional": false,
-            "field": "name",
-            "description": "<p>Name of viewpoint</p>"
+            "description": "<p>[DEPRECATED] Screenshot object</p>"
           }
         ]
       }
     },
     "version": "0.0.0",
-    "filename": "routes/viewpoint.js",
-    "groupTitle": "Viewpoints"
+    "filename": "routes/view.js",
+    "groupTitle": "Views"
   },
   {
     "type": "get",
     "url": "/:teamspace/:model/viewpoints/:viewId/thumbnail.png",
-    "title": "Get viewpoint thumbnail",
-    "name": "getViewpointThumbnail",
-    "group": "Viewpoints",
-    "description": "<p>Retrieve a viewpoint's thumbnail image.</p>",
+    "title": "Get view thumbnail",
+    "name": "getThumbnail",
+    "group": "Views",
+    "description": "<p>Retrieve a view's thumbnail image.</p>",
     "parameter": {
       "fields": {
         "Parameter": [
@@ -11395,7 +12538,7 @@
             "type": "String",
             "optional": false,
             "field": "viewId",
-            "description": "<p>Viewpoint ID</p>"
+            "description": "<p>View ID</p>"
           },
           {
             "group": "Parameter",
@@ -11431,16 +12574,16 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/viewpoint.js",
-    "groupTitle": "Viewpoints"
+    "filename": "routes/view.js",
+    "groupTitle": "Views"
   },
   {
     "type": "get",
     "url": "/:teamspace/:model/viewpoints",
-    "title": "List all viewpoints",
-    "name": "listViewpoints",
-    "group": "Viewpoints",
-    "description": "<p>List all model viewpoints.</p>",
+    "title": "List all views",
+    "name": "listViews",
+    "group": "Views",
+    "description": "<p>List all model views.</p>",
     "success": {
       "fields": {
         "Success 200": [
@@ -11448,52 +12591,59 @@
             "group": "Success 200",
             "type": "Object[]",
             "optional": false,
-            "field": "viewpoints",
-            "description": "<p>List of viewpoint objects</p>"
+            "field": "views",
+            "description": "<p>List of view objects</p>"
           }
         ],
-        "Viewpoint object": [
+        "View object": [
           {
-            "group": "Viewpoint object",
+            "group": "View object",
             "type": "String",
             "optional": false,
             "field": "_id",
-            "description": "<p>Viewpoint ID</p>"
+            "description": "<p>View ID</p>"
           },
           {
-            "group": "Viewpoint object",
-            "type": "Number[]",
+            "group": "View object",
+            "type": "String",
             "optional": false,
-            "field": "clippingPlanes",
-            "description": "<p>Array of clipping planes</p>"
+            "field": "name",
+            "description": "<p>Name of view</p>"
           },
           {
-            "group": "Viewpoint object",
-            "type": "Object",
+            "group": "View object",
+            "type": "String",
+            "optional": false,
+            "field": "thumbnail",
+            "description": "<p>Thumbnail image</p>"
+          },
+          {
+            "group": "View object",
+            "type": "ResultViewpoint",
             "optional": false,
             "field": "viewpoint",
             "description": "<p>Viewpoint properties</p>"
           },
           {
-            "group": "Viewpoint object",
+            "group": "View object",
+            "type": "Number[]",
+            "optional": false,
+            "field": "clippingPlanes",
+            "description": "<p>[DEPRECATED] Array of clipping planes</p>"
+          },
+          {
+            "group": "View object",
             "type": "Object",
             "optional": false,
             "field": "screenshot",
-            "description": "<p>Screenshot object</p>"
-          },
-          {
-            "group": "Viewpoint object",
-            "type": "String",
-            "optional": false,
-            "field": "name",
-            "description": "<p>Name of viewpoint</p>"
+            "description": "<p>[DEPRECATED] Screenshot object</p>"
           }
         ]
       },
       "examples": [
         {
           "title": "Success-Response",
-          "content": "HTTP/1.1 200 OK\n[\n\t{\n\t\t\"_id\":\"00000000-0000-0000-0000-000000000001\",\n\t\t\"clippingPlanes\":[],\n\t\t\"viewpoint\":{\n\t\t\t\"right\":[1.0,-0.0,0.0],\n\t\t\t\"up\":[0.0,0.0,-1.0],\n\t\t\t\"position\":[35000.0,150000.0,20000.0],\n\t\t\t\"look_at\":[35000.0,3000.0,20000.0],\n\t\t\t\"view_dir\":[-0.0,-1,-0.0],\n\t\t\t\"near\":100.0,\n\t\t\t\"far\":100000.0,\n\t\t\t\"fov\":1.0,\n\t\t\t\"aspect_ratio\":1.185,\n\t\t\t\"highlighted_group_id\":\"\"\n\t\t},\n\t\t\"screenshot\":{\n\t\t\t\"thumbnailUrl\":<binary image>,\n\t\t\t\"thumbnail\":\"charence/00000000-0000-0000-0000-000000000000/viewpoints/00000000-0000-0000-0000-000000000001/thumbnail.png\"\n\t\t},\n\t\t\"name\":\"View1\"\n\t},\n\t{\n\t\t\"_id\":\"00000000-0000-0000-0000-000000000002\",\n\t\t\"clippingPlanes\":[],\n\t\t\"viewpoint\":{\n\t\t\t\"right\":[1.0,-0.0,0.5],\n\t\t\t\"up\":[0.0,0.0,-1.0],\n\t\t\t\"position\":[20000.0,-50000.0,10000.0],\n\t\t\t\"look_at\":[20000.0,5000.0,10000.0],\n\t\t\t\"view_dir\":[0.0,-1,0.0],\n\t\t\t\"near\":100.0,\n\t\t\t\"far\":100000.0,\n\t\t\t\"fov\":1.0,\n\t\t\t\"aspect_ratio\":1.185,\n\t\t\t\"highlighted_group_id\":\"\"\n\t\t},\n\t\t\"screenshot\":{\n\t\t\t\"thumbnailUrl\":<binary image>,\n\t\t\t\"thumbnail\":\"charence/00000000-0000-0000-0000-000000000000/viewpoints/00000000-0000-0000-0000-000000000002/thumbnail.png\"\n\t\t},\n\t\t\"name\":\"View2\"\n\t}\n]",
+          "content": "HTTP/1.1 200 OK\n[\n\t{\n\t\t\"_id\":\"00000000-0000-0000-0000-000000000001\",\n\t\t\"thumbnail\":\"charence/00000000-0000-0000-0000-000000000000/viewpoints/00000000-0000-0000-0000-000000000001/thumbnail.png\",\n\t\t\"viewpoint\":{\n\t\t\t\"right\":[1.0,-0.0,0.0],\n\t\t\t\"up\":[0.0,0.0,-1.0],\n\t\t\t\"position\":[35000.0,150000.0,20000.0],\n\t\t\t\"look_at\":[35000.0,3000.0,20000.0],\n\t\t\t\"view_dir\":[-0.0,-1,-0.0],\n\t\t\t\"near\":100.0,\n\t\t\t\"far\":100000.0,\n\t\t\t\"fov\":1.0,\n\t\t\t\"aspect_ratio\":1.185,\n\t\t\t\"clippingPlanes\":[],\n\t\t\t\"highlighted_group_id\":\"\"\n\t\t},\n\t\t\"clippingPlanes\":[],\n\t\t\"screenshot\":{\n\t\t\t\"thumbnailUrl\":<binary image>,\n\t\t\t\"thumbnail\":\"charence/00000000-0000-0000-0000-000000000000/viewpoints/00000000-0000-0000-0000-000000000001/thumbnail.png\"\n\t\t},\n\t\t\"name\":\"View1\"\n\t},\n\t{\n\t\t\"_id\":\"00000000-0000-0000-0000-000000000002\",\n\t\t\"thumbnail\":\"charence/00000000-0000-0000-0000-000000000000/viewpoints/00000000-0000-0000-0000-000000000002/thumbnail.png\",\n\t\t\"viewpoint\":{\n\t\t\t\"right\":[1.0,-0.0,0.5],\n\t\t\t\"up\":[0.0,0.0,-1.0],\n\t\t\t\"position\":[20000.0,-50000.0,10000.0],\n\t\t\t\"look_at\":[20000.0,5000.0,10000.0],\n\t\t\t\"view_dir\":[0.0,-1,0.0],\n\t\t\t\"near\":100.0,\n\t\t\t\"far\":100000.0,\n\t\t\t\"fov\":1.0,\n\t\t\t\"aspect_ratio\":1.185,\n\t\t\t\"clippingPlanes\":[],\n\t\t\t\"highlighted_group_id\":\"\"\n\t\t},\n\t\t\"clippingPlanes\":[],\n\t\t\"screenshot\":{\n\t\t\t\"thumbnailUrl\":<binary image>,\n\t\t\t\"thumbnail\":\"charence/00000000-0000-0000-0000-000000000000/viewpoints/00000000-0000-0000-0000-000000000002/thumbnail.png\"\n\t\t},\n\t\t\"name\":\"View2\"\n\t}\n]",
           "type": "png"
         }
       ]
@@ -11506,8 +12656,8 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/viewpoint.js",
-    "groupTitle": "Viewpoints",
+    "filename": "routes/view.js",
+    "groupTitle": "Views",
     "parameter": {
       "fields": {
         "Parameter": [
@@ -11525,6 +12675,143 @@
             "field": "model",
             "description": "<p>Model ID</p>"
           }
+        ],
+        "Type: ResultViewpoint": [
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "right",
+            "description": "<p>The right vector of the viewpoint indicating the direction of right in relative coordinates.</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "up",
+            "description": "<p>The up vector of the viewpoint indicating the direction of up in relative coordinates.</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "position",
+            "description": "<p>The position vector indicates where in the world the viewpoint is positioned.</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "look_at",
+            "description": "<p>The vector indicating where in the world the viewpoint is looking at.</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "view_dir",
+            "description": "<p>The vector indicating where is the viewpoint is looking at in relative coordinates.</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "Number",
+            "optional": false,
+            "field": "near",
+            "description": "<p>The vector indicating the near plane.</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "Number",
+            "optional": false,
+            "field": "far",
+            "description": "<p>The vector indicating the far plane.</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "Number",
+            "optional": false,
+            "field": "fov",
+            "description": "<p>The angle of the field of view.</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "Number",
+            "optional": false,
+            "field": "aspect_ratio",
+            "description": "<p>The aspect ratio of the fustrum.</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "ClippingPlane[]",
+            "optional": true,
+            "field": "clippingPlanes",
+            "description": "<p>the clipping planes associated with the viewpoint</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "String",
+            "optional": true,
+            "field": "highlighted_group_id",
+            "description": "<p>If the viewpoint is associated with one or more highlighted objects from the model this field has the value of a group id generated to hold those objects</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "String",
+            "optional": true,
+            "field": "hidden_group_id",
+            "description": "<p>If the viewpoint is associated with one or more hidden objects from the model this field has the value of a group id generated to hold those objects</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "String",
+            "optional": true,
+            "field": "shown_group_id",
+            "description": "<p>If the viewpoint is associated with one or more shown objects from the model this field has the value of a group id generated to hold those objects</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "String[]",
+            "optional": true,
+            "field": "override_group_ids",
+            "description": "<p>If the viewpoint has one or more objects with colour override this field has an array of groups ids with one group for each colour</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "Boolean",
+            "optional": false,
+            "field": "hide_IFC",
+            "description": "<p>A flag to hide the IFC</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "String",
+            "optional": false,
+            "field": "screenshot",
+            "description": "<p>A string in base64 representing the screenshot associated with the viewpoint</p>"
+          }
+        ],
+        "Type: ClippingPlane": [
+          {
+            "group": "Type: ClippingPlane",
+            "type": "Number[3]",
+            "optional": false,
+            "field": "normal",
+            "description": "<p>The normal of the plane defined for the clipping plane</p>"
+          },
+          {
+            "group": "Type: ClippingPlane",
+            "type": "Number",
+            "optional": false,
+            "field": "distance",
+            "description": "<p>The distance for the clipping plane to the origin</p>"
+          },
+          {
+            "group": "Type: ClippingPlane",
+            "type": "Number",
+            "optional": false,
+            "field": "clipDirection",
+            "description": "<p>The direction to the clipping plane will cut the model; above or below the plane. Possible values: 1 , -1.</p>"
+          }
         ]
       }
     }
@@ -11532,10 +12819,10 @@
   {
     "type": "put",
     "url": "/:teamspace/:model/viewpoints/:viewId",
-    "title": "Update viewpoint",
-    "name": "updateViewpoint",
-    "group": "Viewpoints",
-    "description": "<p>Update a viewpoint.</p>",
+    "title": "Update view",
+    "name": "updateView",
+    "group": "Views",
+    "description": "<p>Update a view.</p>",
     "parameter": {
       "fields": {
         "Parameter": [
@@ -11544,7 +12831,7 @@
             "type": "String",
             "optional": false,
             "field": "viewId",
-            "description": "<p>Viewpoint ID</p>"
+            "description": "<p>View ID</p>"
           },
           {
             "group": "Parameter",
@@ -11567,7 +12854,7 @@
             "type": "String",
             "optional": false,
             "field": "name",
-            "description": "<p>Name of viewpoint</p>"
+            "description": "<p>Name of view</p>"
           }
         ]
       }
@@ -11589,7 +12876,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/viewpoint.js",
-    "groupTitle": "Viewpoints"
+    "filename": "routes/view.js",
+    "groupTitle": "Views"
   }
 ]
