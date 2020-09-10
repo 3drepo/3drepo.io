@@ -486,7 +486,6 @@ groupSchema.methods.updateGroup = function (dbCol, sessionId, data, user = "", b
 };
 
 groupSchema.methods.updateAttrs = function (dbCol, data, user) {
-
 	return this.getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
 		const toUpdate = {};
 		const toUnset = {};
@@ -542,7 +541,6 @@ groupSchema.methods.updateAttrs = function (dbCol, data, user) {
 		} else {
 			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
 		}
-
 	});
 };
 
@@ -663,12 +661,15 @@ function checkRulesValidity(rules) {
 	while (valid && it < rules.length) {
 
 		const rule = rules[it];
+		const hasDuplicate = fieldsWithRules.has(rule.field);
 		valid = rule &&
 			isValidRule(rule) &&
-			!fieldsWithRules.has(rule.field) ;
+			!hasDuplicate;
 
 		if (valid) {
 			fieldsWithRules.add(rule.field);
+		} else if (hasDuplicate) {
+			throw responseCodes.MULTIPLE_RULES_PER_FIELD_NOT_ALLOWED;
 		}
 		it++;
 	}

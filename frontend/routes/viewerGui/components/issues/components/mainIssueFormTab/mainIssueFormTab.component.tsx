@@ -47,6 +47,7 @@ interface IProps {
 	canChangeAssigned: boolean;
 	jobs: any[];
 	disableViewer?: boolean;
+	hasPin: boolean;
 	onSavePin: (position) => void;
 	onChangePin: (pin) => void;
 	onUpdateViewpoint: () => void;
@@ -95,6 +96,7 @@ export const MainIssueFormTab: React.FunctionComponent<IProps> = ({
 					onUploadScreenshot={props.onUploadScreenshot}
 					onShowScreenshotDialog={props.showScreenshotDialog}
 					hasImage={issue.descriptionThumbnail}
+					hasPin={props.hasPin}
 				/>
 			</FieldsRow>
 

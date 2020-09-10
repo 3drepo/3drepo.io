@@ -61,6 +61,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchRisk: RisksActions.fetchRisk,
 	saveRisk: RisksActions.saveRisk,
 	updateRisk: RisksActions.updateRisk,
+	updateViewpoint: RisksActions.updateActiveRiskViewpoint,
 	cloneRisk: RisksActions.cloneRisk,
 	postComment: RisksActions.postComment,
 	removeComment: RisksActions.removeComment,
@@ -75,7 +76,6 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	attachFileResources: RisksActions.attachFileResources,
 	attachLinkResources: RisksActions.attachLinkResources,
 	showDialog: DialogActions.showDialog,
-	fetchMitigationCriteria: RisksActions.fetchMitigationCriteria,
 	showMitigationSuggestions: RisksActions.showMitigationSuggestions,
 }, dispatch);
 

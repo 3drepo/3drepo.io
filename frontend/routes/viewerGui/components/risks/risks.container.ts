@@ -27,6 +27,7 @@ import {
 	selectActiveRiskId,
 	selectFetchingDetailsIsPending,
 	selectIsRisksPending,
+	selectMitigationCriteria,
 	selectRisks,
 	selectSearchEnabled,
 	selectSelectedFilters,
@@ -34,7 +35,7 @@ import {
 	selectShowDetails,
 	selectShowPins,
 	selectSortOrder,
-	RisksActions
+	RisksActions,
 } from '../../../../modules/risks';
 import { selectSettings as selectTeamspaceSettings } from '../../../../modules/teamspace';
 import { Risks } from './risks.component';
@@ -54,6 +55,7 @@ const mapStateToProps = createStructuredSelector({
 	sortOrder: selectSortOrder,
 	selectedRisk: selectSelectedRisk,
 	teamspaceSettings: selectTeamspaceSettings,
+	criteria: selectMitigationCriteria,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -72,6 +74,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	saveRisk: RisksActions.saveRisk,
 	toggleSortOrder: RisksActions.toggleSortOrder,
 	setFilters: RisksActions.setFilters,
+	fetchMitigationCriteria: RisksActions.fetchMitigationCriteria,
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Risks));

@@ -39,21 +39,6 @@ export const NestedWrapper = styled.div`
 	position: relative;
 `;
 
-const getDirection = ({ left }) => left ? 'right: 100%' : 'right: 100%';
-
-export const ChildMenu = styled.div`
-	background-color: ${COLOR.WHITE};
-	position: absolute;
-	top: 0;
-	z-index: 1;
-	min-width: 160px;
-	max-width: 400px;
-	width: 100%;
-	box-shadow: 1px 1px 3px 0 ${COLOR.BLACK_20};
-	border-radius: 0 2px 2px 0;
-	${getDirection}
-`;
-
 export const StyledItemText = styled.div`
 	color: ${COLOR.BLACK_60};
 	font-size: 12px;

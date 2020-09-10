@@ -45,12 +45,13 @@ interface IProps {
 	risk: any;
 	active: boolean;
 	isNewRisk: boolean;
+	canComment: boolean;
 	canEditBasicProperty: boolean;
-	canChangeAssigned: boolean;
 	jobs: any[];
 	disableViewer?: boolean;
 	values?: any;
 	criteria: any;
+	hasPin: boolean;
 	onSavePin: (position) => void;
 	onChangePin: (pin) => void;
 	onUpdateViewpoint: () => void;
@@ -60,7 +61,7 @@ interface IProps {
 }
 
 export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
-	active, isNewRisk, risk, disableViewer, jobs, canChangeAssigned, canEditBasicProperty,
+	active, isNewRisk, risk, disableViewer, jobs, canComment, canEditBasicProperty,
 	values, criteria, ...props
 }) => {
 	const getCategories = () => {
@@ -104,6 +105,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 					onUploadScreenshot={props.onUploadScreenshot}
 					onShowScreenshotDialog={props.showScreenshotDialog}
 					hasImage={risk.descriptionThumbnail}
+					hasPin={props.hasPin}
 				/>
 			</FieldsRow>
 
@@ -116,7 +118,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 								{...field}
 								items={RISK_LIKELIHOODS}
 								inputId="likelihood"
-								disabled={!canEditBasicProperty}
+								disabled={!canComment}
 							/>
 						)} />
 					</StyledFormControl>
@@ -128,7 +130,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 								{...field}
 								items={RISK_CONSEQUENCES}
 								inputId="consequence"
-								disabled={!canEditBasicProperty}
+								disabled={!canComment}
 							/>
 						)} />
 					</StyledFormControl>
@@ -159,7 +161,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 							{...field}
 							items={jobs}
 							inputId="assigned_roles"
-							disabled={!(isNewRisk || canChangeAssigned)}
+							disabled={!(isNewRisk || canComment)}
 						/>
 					)} />
 				</StyledFormControl>
@@ -171,7 +173,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 							{...field}
 							items={getCategories()}
 							inputId="category"
-							disabled={!canEditBasicProperty}
+							disabled={!canComment}
 						/>
 					)} />
 				</StyledFormControl>
@@ -185,6 +187,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 							suggestions={criteria.associated_activity}
 							form={form}
 							field={field}
+							disabled={!canComment}
 						/>
 					)} />
 				</StyledFormControl>
@@ -195,7 +198,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 							suggestions={criteria.element}
 							form={form}
 							field={field}
-							disabled={!canEditBasicProperty}
+							disabled={!canComment}
 						/>
 					)} />
 				</StyledFormControl>
@@ -209,7 +212,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 							suggestions={criteria.risk_factor}
 							form={form}
 							field={field}
-							disabled={!canEditBasicProperty}
+							disabled={!canComment}
 						/>
 					)} />
 					<Field name="location_desc" render={({ field, form }) => (
@@ -218,7 +221,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 							suggestions={criteria.location_desc}
 							form={form}
 							field={field}
-							disabled={!canEditBasicProperty}
+							disabled={!canComment}
 						/>
 					)} />
 				</FieldsContainer>
@@ -229,7 +232,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 							suggestions={criteria.scope}
 							form={form}
 							field={field}
-							disabled={!canEditBasicProperty}
+							disabled={!canComment}
 						/>
 					)} />
 				</FieldsContainer>

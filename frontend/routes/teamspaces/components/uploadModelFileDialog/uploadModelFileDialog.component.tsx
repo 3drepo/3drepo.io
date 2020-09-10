@@ -65,6 +65,7 @@ interface IProps {
 	projectName: string;
 	isPending: boolean;
 	values: any;
+	isModelUploading: boolean;
 }
 
 interface IState {
@@ -87,7 +88,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 	}
 
 	get isModelUploading() {
-		return this.modelStatus === 'uploading';
+		return this.props.isModelUploading;
 	}
 
 	public componentDidMount() {
