@@ -34,8 +34,9 @@ import {
 interface IProps {
 	sequences: any;
 	initializeSequences: () => void;
-	setSelectedFrame: (date: Date) => void;
+	setSelectedDate: (date: Date) => void;
 	fetchFrame: (date: Date) => void;
+	fetchSelectedFrame: () => void;
 	setStepInterval: (interval: number) => void;
 	setStepScale: (scale: STEP_SCALE) => void;
 	setSelectedSequence: (id: string) => void;
@@ -44,6 +45,7 @@ interface IProps {
 	minDate: Date;
 	selectedDate: Date;
 	selectedMinDate: Date;
+	selectedEndingDate: Date;
 	colorOverrides: any;
 	stepInterval: number;
 	stepScale: STEP_SCALE;
@@ -55,26 +57,28 @@ interface IProps {
 const da =  new Date();
 
 const SequenceDetails = ({ minDate, maxDate, selectedDate,
-	setSelectedFrame, stepInterval,
+	selectedEndingDate, setSelectedDate, stepInterval,
 	stepScale, setStepInterval, setStepScale,
-	currentTasks, selectedMinDate, loadingFrame,
+	fetchSelectedFrame, currentTasks, loadingFrame,
 	fetchFrame }) => (
 		<>
 			<SequencePlayer
 				min={minDate}
 				max={maxDate}
 				value={selectedDate}
+				endingDate={selectedEndingDate}
 				stepInterval={stepInterval}
 				stepScale={stepScale}
-				onChange={setSelectedFrame}
+				onChange={setSelectedDate}
 				onChangeStepScale={setStepScale}
 				onChangeStepInterval={setStepInterval}
 				loadingFrame={loadingFrame}
 				fetchFrame={fetchFrame}
+				fetchSelectedFrame={fetchSelectedFrame}
 			/>
 			<TasksList tasks={currentTasks}
-				minDate={selectedMinDate}
-				maxDate={selectedDate}
+				minDate={selectedDate}
+				maxDate={selectedEndingDate}
 				loadingFrame={loadingFrame} />
 		</>
 	);

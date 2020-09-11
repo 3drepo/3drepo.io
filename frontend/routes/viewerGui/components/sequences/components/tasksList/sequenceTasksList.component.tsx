@@ -16,7 +16,7 @@
  */
 
 import React from 'react';
-import { formatShortDate } from '../../../../../../services/formatting/formatDate';
+import { formatDateTime, formatShortDate, formatShortDateTime } from '../../../../../../services/formatting/formatDate';
 import { Loader } from '../../../../../components/loader/loader.component';
 import { SequenceTasksListContainer, SequenceTasksListItem, TaskListLabel } from '../../sequences.styles';
 import { ITask, TaskItem } from './sequenceTaskItem.component';
@@ -47,9 +47,7 @@ export class TasksList extends React.PureComponent<IProps, IState> {
 	public get durationLabel() {
 		const  {  minDate, maxDate } = this.props;
 
-		return 'Showing activities ' + ( equalsDate(minDate, maxDate) ?
-			'on ' + formatShortDate(maxDate) :
-			'from ' + formatShortDate(minDate) + ' to ' + formatShortDate(maxDate));
+		return 'Activities from ' + formatShortDateTime(minDate) + ' to ' + formatShortDateTime(maxDate));
 	}
 
 	public toggleCollapse = () => {

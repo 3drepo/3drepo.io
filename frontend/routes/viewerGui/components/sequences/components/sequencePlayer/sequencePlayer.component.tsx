@@ -28,7 +28,8 @@ import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 import React from 'react';
 import { STEP_SCALE } from '../../../../../../constants/sequences';
 import { getDate, getDays } from '../../../../../../helpers/dateTime';
-import { NAMED_MONTH_DATE_FORMAT } from '../../../../../../services/formatting/formatDate';
+import { getDateByStep } from '../../../../../../modules/sequences/sequences.helper';
+import { LONG_DATE_TIME_FORMAT_NO_MINUTES } from '../../../../../../services/formatting/formatDate';
 import { DatePicker, IntervalRow, SequencePlayerColumn,
 	SequencePlayerContainer, SequenceRow, SequenceSlider,
 	SliderRow, StepInput } from '../../sequences.styles';
@@ -38,11 +39,13 @@ interface IProps {
 	min: Date;
 	onChange?: (date: Date) => void;
 	value?: Date;
+	endingDate?: Date;
 	stepInterval?: number;
 	stepScale?: STEP_SCALE;
 	onChangeStepInterval?: (value: number) => void;
 	onChangeStepScale?: (value: STEP_SCALE) => void;
 	fetchFrame: (date: Date) => void;
+	fetchSelectedFrame: () => void;
 	loadingFrame: boolean;
 }
 
@@ -54,24 +57,6 @@ interface IState {
 	stepScale: STEP_SCALE;
 	waitingForFrameLoad: boolean;
 }
-
-const getDateByStep = (timeStamp, stepScale, step) => {
-	const newDate = new Date(timeStamp);
-
-	if (stepScale === STEP_SCALE.DAY) {
-		newDate.setDate(newDate.getDate() + step);
-	}
-
-	if (stepScale === STEP_SCALE.MONTH) {
-		newDate.setMonth(newDate.getMonth() + step);
-	}
-
-	if (stepScale === STEP_SCALE.YEAR) {
-		newDate.setFullYear(newDate.getFullYear() + step);
-	}
-
-	return newDate;
-};
 
 export class SequencePlayer extends React.PureComponent<IProps, IState> {
 	public state: IState = {
@@ -159,6 +144,10 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 			this.nextStep();
 			this.play();
 		}
+
+		if (+prevProps.endingDate !== +this.props.endingDate) {
+			this.props.fetchSelectedFrame();
+		}
 	}
 
 	public onClickPlayStop = () => {
@@ -187,9 +176,10 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 	}
 
 	public moveStep = (direction) => {
-
 		const {value, stepInterval, stepScale} = this.state;
-		this.setValue(getDateByStep(value, stepScale, stepInterval * direction));
+		const newValue = getDateByStep(value, stepScale, stepInterval * direction);
+
+		this.setValue(newValue);
 
 		if (this.isLastDay) {
 			this.stop();
@@ -237,7 +227,9 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 	public componentDidMount() {
 		if (this.props.value) {
 			this.setState({value: this.props.value});
-			this.props.fetchFrame(this.props.value);
+			if (this.props.onChange) {
+				this.props.onChange(this.props.value);
+			}
 		}
 
 		if (this.props.stepInterval) {
@@ -248,6 +240,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 			this.setState({stepScale: this.props.stepScale});
 		}
 
+		this.props.fetchSelectedFrame();
 	}
 
 	public componentWillUnmount() {
@@ -281,7 +274,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 									name="date"
 									inputId="1"
 									value={value}
-									format={NAMED_MONTH_DATE_FORMAT}
+									format={LONG_DATE_TIME_FORMAT_NO_MINUTES}
 									onChange={(e) => this.gotoDate(new Date(e.target.value))}
 									placeholder="date"
 								/>
@@ -294,6 +287,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 							Step interval: <StepInput value={stepInterval} onChange={this.onChangeStepInterval} />
 							&nbsp;
 							<Select value={stepScale} onChange={this.onChangeStepScale} >
+								<MenuItem value={STEP_SCALE.HOUR}>hour(s)</MenuItem>
 								<MenuItem value={STEP_SCALE.DAY}>day(s)</MenuItem>
 								<MenuItem value={STEP_SCALE.MONTH}>month(s)</MenuItem>
 								<MenuItem value={STEP_SCALE.YEAR}>year(s)</MenuItem>

@@ -21,6 +21,7 @@ import { STEP_SCALE } from '../../constants/sequences';
 import { GLToHexColor } from '../../helpers/colors';
 import { MILLI_PER_DAY } from '../../helpers/dateTime';
 import { selectSettings } from '../model';
+import { getSelectedEndingDate, getSelectedFrame } from './sequences.helper';
 
 export const selectSequencesDomain = (state) => (state.sequences);
 
@@ -92,21 +93,6 @@ export const selectMaxDate = createSelector(
 	selectSelectedSequence, (sequence) => (sequence || {}).maxDate
 );
 
-export const selectSelectedDate = createSelector(
-	selectSequencesDomain, selectMinDate, (state, minDate) => {
-		let date = state.selectedDate || minDate;
-
-		if (!date) {
-			return null;
-		}
-
-		date = new Date(date);
-		date.setHours(23, 59, 29, 999);
-
-		return date;
-	}
-);
-
 export const selectStepInterval = createSelector(
 	selectSequencesDomain, (state) => state.stepInterval
 );
@@ -115,28 +101,29 @@ export const selectStepScale = createSelector(
 	selectSequencesDomain, (state) => state.stepScale
 );
 
-const getFrameIndexByDate = (frames, date) => {
-	let index = 0;
+export const selectSelectedStartingDate = createSelector(
+	selectSequencesDomain, selectMinDate, (state, minDate) => {
+		let date = state.selectedDate || minDate;
 
-	for (let i = frames.length - 1 ; i >= 0 && index === 0; i--) {
-		if (frames[i].dateTime <= date) {
-			index = i;
+		if (!date) {
+			return null;
 		}
+
+		date = new Date(date);
+		return date;
 	}
+);
 
-	return index;
-};
-
-export const getSelectedFrame = (frames, date) => {
-	date = new Date(date);
-	date.setHours(23, 59, 59, 999);
-
-	const index = getFrameIndexByDate(frames, date);
-	return frames[index];
-};
+export const selectSelectedEndingDate = createSelector(
+	selectSelectedStartingDate, selectStepScale, selectStepInterval , selectMaxDate,
+		(startingDate, scale, interval, maxDate) => {
+			const endingDate = getSelectedEndingDate(startingDate, scale, interval);
+			return  +endingDate > +maxDate ? new Date(maxDate) : endingDate;
+		}
+);
 
 export const selectSelectedFrame = createSelector(
-	selectFrames, selectSelectedDate, getSelectedFrame
+	selectFrames, selectSelectedEndingDate, getSelectedFrame
 );
 
 export const selectLastSuccessfulStateId = createSelector(
@@ -255,7 +242,7 @@ const replaceDates = (tasks) => {
 };
 
 export const selectSelectedMinDate = createSelector(
-	selectSelectedDate, selectMinDate, selectStepInterval, selectStepScale,
+	selectSelectedStartingDate, selectMinDate, selectStepInterval, selectStepScale,
 		(date: Date, minDate: Date, stepInterval: number, stepScale: STEP_SCALE) => {
 			if (!date) {
 				return null;
@@ -280,7 +267,7 @@ export const selectSelectedMinDate = createSelector(
 );
 
 export const selectCurrentActivities = createSelector(
-	selectSelectedMinDate, selectSelectedDate, selectSelectedSequence, selectTasksDefinitions,
+	selectSelectedMinDate, selectSelectedStartingDate, selectSelectedSequence, selectTasksDefinitions,
 		(minSelectedDate: Date, maxSelectedDate: Date, selectedSequence: any, tasks: any) => {
 			if (!selectedSequence || !selectedSequence.frames) {
 				return [];

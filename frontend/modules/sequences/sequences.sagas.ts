@@ -25,8 +25,11 @@ import { selectCurrentModel, selectCurrentModelTeamspace,
 	selectCurrentRevisionId, selectSettings } from '../model/model.selectors';
 import { dispatch } from '../store';
 import { selectIfcSpacesHidden, TreeActions } from '../tree';
-import { getSelectedFrame, selectFrames, selectIfcSpacesHiddenSaved,
-	selectSelectedDate, selectSequences, selectSequenceModel, selectTasksDefinitions } from './sequences.selectors';
+import { selectFrames, selectIfcSpacesHiddenSaved,
+	selectSelectedStartingDate, selectSequences, selectSequenceModel,
+	selectTasksDefinitions, 
+	selectSelectedEndingDate} from './sequences.selectors';
+import { getSelectedFrame } from './sequences.helper';
 
 const tasks = { "tasks":
 [
@@ -746,8 +749,6 @@ export function* fetchTasksDefinitions({sequenceId}) {
 			yield put(SequencesActions.fetchTasksDefinitionsSuccess(sequenceId, tasks.tasks));
 		}
 
-		yield put(SequencesActions.fetchSequencesSuccess());
-
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'sequences', error));
 	}
@@ -783,10 +784,15 @@ export function* fetchFrame({date}) {
 	}
 }
 
+function * fetchSelectedFrame() {
+	const endingDate = yield select(selectSelectedEndingDate);
+	yield put(SequencesActions.fetchFrame(endingDate));
+}
+
 export function* setSelectedFrame({date}) {
 	try {
 		yield put(SequencesActions.setSelectedDate(date));
-		yield put(SequencesActions.fetchFrame(date));
+		yield put(SequencesActions.fetchSelectedFrame());
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('select frame', 'sequences', error));
 	}
@@ -808,7 +814,7 @@ export function* initializeSequences() {
 	if (!sequences || !areSequencesFromModel) {
 		yield put(SequencesActions.fetchSequences());
 		yield take(SequencesTypes.FETCH_SEQUENCES_SUCCESS);
-		const date = yield select(selectSelectedDate);
+		const date = yield select(selectSelectedStartingDate);
 
 		if (date) {
 			yield put(SequencesActions.setSelectedFrame(date));
@@ -838,4 +844,5 @@ export default function* SequencesSaga() {
 	yield takeLatest(SequencesTypes.RESTORE_IFC_SPACES_HIDDEN, restoreIfcSpacesHidden);
 	yield takeLatest(SequencesTypes.FETCH_TASKS_DEFINITIONS, fetchTasksDefinitions);
 	yield takeLatest(SequencesTypes.SET_SELECTED_SEQUENCE, setSelectedSequence);
+	yield takeLatest(SequencesTypes.FETCH_SELECTED_FRAME, fetchSelectedFrame);
 }

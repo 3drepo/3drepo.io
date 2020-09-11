@@ -20,9 +20,10 @@ import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { selectCurrentActivities, selectIsLoadingFrame, selectMaxDate, selectMinDate,
-	selectSelectedDate, selectSelectedFrameColors, selectSelectedMinDate,
-	selectSelectedSequence, selectSequences, selectStepInterval, selectStepScale,
-	SequencesActions } from '../../../../modules/sequences';
+	selectSelectedEndingDate, selectSelectedFrameColors, selectSelectedMinDate,
+	selectSelectedSequence, selectSelectedStartingDate, selectSequences, selectStepInterval,
+	selectStepScale,
+	SequencesActions} from '../../../../modules/sequences';
 
 import { Sequences } from './sequences.component';
 
@@ -30,7 +31,8 @@ const mapStateToProps = createStructuredSelector({
 	sequences: selectSequences,
 	minDate: selectMinDate,
 	maxDate: selectMaxDate,
-	selectedDate: selectSelectedDate,
+	selectedDate: selectSelectedStartingDate,
+	selectedEndingDate: selectSelectedEndingDate,
 	selectedMinDate: selectSelectedMinDate,
 	colorOverrides: selectSelectedFrameColors,
 	stepInterval: selectStepInterval,
@@ -42,12 +44,13 @@ const mapStateToProps = createStructuredSelector({
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	initializeSequences: SequencesActions.initializeSequences,
-	setSelectedFrame: SequencesActions.setSelectedFrame,
+	setSelectedDate: SequencesActions.setSelectedDate,
 	setStepInterval: SequencesActions.setStepInterval,
 	setStepScale: SequencesActions.setStepScale,
 	fetchFrame: SequencesActions.fetchFrame,
 	setSelectedSequence: SequencesActions.setSelectedSequence,
-	restoreIfcSpacesHidden: SequencesActions.restoreIfcSpacesHidden
+	restoreIfcSpacesHidden: SequencesActions.restoreIfcSpacesHidden,
+	fetchSelectedFrame: SequencesActions.fetchSelectedFrame
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Sequences));
