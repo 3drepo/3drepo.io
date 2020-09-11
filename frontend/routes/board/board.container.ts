@@ -38,12 +38,13 @@ import {
 import { selectJobsList } from '../../modules/jobs';
 import { selectSettings, ModelActions } from '../../modules/model';
 import {
+	selectMitigationCriteria,
 	selectSelectedFilters as selectSelectedRiskFilters,
 	selectSortOrder as selectRisksSortOrder,
 	RisksActions
 } from '../../modules/risks';
 import { SnackbarActions } from '../../modules/snackbar';
-import { selectSettings as selectTeamspaceSettings, selectTopicTypes } from '../../modules/teamspace';
+import { selectTopicTypes } from '../../modules/teamspace';
 import { selectModels, selectProjects, selectTeamspacesList } from '../../modules/teamspaces';
 import { Board } from './board.component';
 
@@ -65,7 +66,7 @@ const mapStateToProps = createStructuredSelector({
 	modelsMap: selectModels,
 	showClosedIssues: selectShowClosedIssues,
 	modelSettings: selectSettings,
-	teamspaceSettings: selectTeamspaceSettings,
+	criteria: selectMitigationCriteria,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

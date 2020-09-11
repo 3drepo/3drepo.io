@@ -51,6 +51,14 @@ function Utils() {
 		return Object.prototype.hasOwnProperty.call(obj, field);
 	};
 
+	this.isUUIDObject = (value) => {
+		try {
+			return this.isObject(value) && !!this.uuidToString(value);
+		} catch(e) {
+			return false;
+		}
+	};
+
 	this.deserialiseFilters = (ids, numbers) => {
 		return {
 			ids: ids ? ids.split(",") : undefined,

@@ -265,12 +265,13 @@ function* startComparisonOfFederation() {
 		const model = compareModels[index];
 		const isSelectedModel = selectedModelsMap[model._id];
 		const isTargetModel = targetModelsMap[model._id];
+		let keepModelShown = isSelectedModel;
 
 		if (isTargetModel && isSelectedModel) {
 			const targetRevision = isDiff ? model.targetDiffRevision : model.targetClashRevision;
-			const canReuseModel = model.baseRevision.name === targetRevision.name && selectedModelsMap[model._id] && !isDiff;
+			keepModelShown = model.baseRevision.name === targetRevision.name && !isDiff;
 
-			if (canReuseModel) {
+			if (keepModelShown) {
 				Viewer.diffToolSetAsComparator(
 					model.teamspace,
 					model._id
@@ -285,7 +286,7 @@ function* startComparisonOfFederation() {
 			}
 		}
 
-		if (isSelectedModel) {
+		if (keepModelShown) {
 			modelsToShow.push(model);
 		} else {
 			modelsToHide.push(model);

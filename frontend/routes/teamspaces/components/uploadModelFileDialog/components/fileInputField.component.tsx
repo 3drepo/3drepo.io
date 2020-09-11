@@ -1,5 +1,5 @@
 /**
- *Copyright (C) 2017 3D Repo Ltd
+ *Copyright (C) 2020 3D Repo Ltd
  *
  *This program is free software: you can redistribute it and/or modify
  *it under the terms of the GNU Affero General Public License as
@@ -15,10 +15,10 @@
  *along with this program.If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Button from '@material-ui/core/Button';
 import React from 'react';
 
 import { clientConfigService } from '../../../../../services/clientConfig';
+import { ContainedButton } from '../../../../viewerGui/components/containedButton/containedButton.component';
 import { FileLabel, HiddenFileInput } from './fileInputField.styles';
 
 interface IProps {
@@ -26,6 +26,7 @@ interface IProps {
 	value: any[];
 	onChange: (event) => void;
 	onBlur: (event) => void;
+	update?: boolean;
 }
 
 interface IState {
@@ -66,7 +67,7 @@ export class FileInputField extends React.PureComponent<IProps, IState> {
 					onChange={this.handleChange}
 				/>
 				<FileLabel htmlFor="flat-button-file">
-					<Button component="span">Select file</Button>
+					<ContainedButton component="span">{this.props.update ? `Update File` : `Select File`}</ContainedButton>
 				</FileLabel>
 			</>
 		);

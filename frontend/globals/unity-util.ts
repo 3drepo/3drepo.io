@@ -1672,4 +1672,38 @@ export class UnityUtil {
 		UnityUtil.toUnity('ToggleCameraPause', UnityUtil.LoadingState.VIEWER_READY);
 	}
 
+	/**
+	 * Move mesh/meshes by a given transformation matrix.
+	 * NOTE: this currently works if the mesh is not batched with other meshes during optimisations!
+	 * @category Model Interactions
+	 * @param teamspace teamspace of the model
+	 * @param modelId modelID the meshes belongs in
+	 * @param meshes array of mesh unique IDs
+	 * @param matrix array of 16 numbers, representing the transformation on the meshes (row major)
+	 */
+	public static moveMeshes(teamspace: string, modelId: string, meshes: string[], matrix: number[]) {
+		const param: any = {
+			nameSpace : teamspace + '.' + modelId,
+			meshes,
+			matrix
+		};
+		UnityUtil.toUnity('MoveMeshes', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+	}
+
+	/**
+	 * Move mesh/meshes by a given transformation matrix.
+	 * NOTE: this currently works if the mesh is not batched with other meshes during optimisations!
+	 * @category Model Interactions
+	 * @param teamspace teamspace of the model
+	 * @param modelId modelID the meshes belongs in
+	 * @param meshes array of mesh unique IDs
+	 */
+	public static resetMovedMeshes(teamspace: string, modelId: string, meshes: string[]) {
+		const param: any = {
+			nameSpace : teamspace + '.' + modelId,
+			meshes
+		};
+		UnityUtil.toUnity('ResetMovedMeshes', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+	}
+
 }

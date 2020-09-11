@@ -25,7 +25,7 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	fetchIssueFailure: [],
 	setComponentState: ['componentState'],
 	saveIssue: ['teamspace', 'model', 'issueData', 'revision', 'finishSubmitting', 'ignoreViewer'],
-	updateIssue: ['teamspace', 'modelId', 'issueData'],
+	updateActiveIssue: [ 'issueData'],
 	updateBoardIssue: ['teamspace', 'modelId', 'issueData'],
 	cloneIssue: ['dialogId'],
 	postComment: ['teamspace', 'modelId', 'issueData', 'ignoreViewer', 'finishSubmitting'],
@@ -68,7 +68,8 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	setNewComment: ['newComment'],
 	saveNewScreenshot: ['teamspace', 'model', 'isNewIssue'],
 	updateSelectedIssuePin: ['position'],
-	toggleShowPins: ['showPins']
+	toggleShowPins: ['showPins'],
+	updateActiveIssueViewpoint: ['screenshot']
 }, { prefix: 'ISSUES/' });
 
 export const INITIAL_STATE = {

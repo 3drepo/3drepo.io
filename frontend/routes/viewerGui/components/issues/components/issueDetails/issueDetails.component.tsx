@@ -21,6 +21,7 @@ import { merge } from 'lodash';
 
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { canComment } from '../../../../../../helpers/issues';
+import { isViewer } from '../../../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { EmptyStateInfo } from '../../../../../components/components.styles';
 import { Copy } from '../../../../../components/fontAwesomeIcon';
@@ -55,7 +56,7 @@ interface IProps {
 	fetchIssue: (teamspace, model, issueId) => void;
 	updateSelectedIssuePin: (position) => void;
 	saveIssue: (teamspace, modelId, issue, revision, finishSubmitting, disableViewer) => void;
-	updateIssue: (teamspace, modelId, issue) => void;
+	updateIssue: ( issue) => void;
 	cloneIssue: (dialogId?: string) => void;
 	postComment: (teamspace, modelId, issueData, ignoreViewer, finishSubmitting) => void;
 	removeComment: (teamspace, modelId, issueData) => void;
@@ -69,6 +70,7 @@ interface IProps {
 	showDialog: (config: any) => void;
 	showScreenshotDialog: (config: any) => void;
 	showConfirmDialog: (config: any) => void;
+	updateViewpoint: (screenshot?: string) => void;
 	dialogId?: string;
 	postCommentIsPending?: boolean;
 }
@@ -108,6 +110,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	get actionButton() {
+		const hasViewerPermissions = isViewer(this.props.permissions);
+
 		return renderWhenTrue(() => (
 				<ContainedButton
 						icon={Copy}
@@ -115,7 +119,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				>
 					Clone
 				</ContainedButton>
-		))(!this.isNewIssue);
+		))(!this.isNewIssue && !hasViewerPermissions);
 	}
 
 	get isViewerInitialized() {
@@ -245,7 +249,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		if (this.isNewIssue) {
 			updateNewIssue(mergeData(this.issueData, values));
 		} else {
-			updateIssue(teamspace, model, diffData(values, this.issueData));
+			updateIssue(diffData(values, this.issueData));
 		}
 	}
 
@@ -362,13 +366,13 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		const { teamspace, model, issue, updateIssue } = this.props;
 
 		if (!this.isNewIssue) {
-			updateIssue(teamspace, model, {position: issue.position || []});
+			updateIssue({position: issue.position || []});
 		}
 	}
 
 	public handleUpdateScreenshot =
-		async (screenshot, disableViewpointSuggestion = false, forceViewpointUpdate = false) => {
-		const { teamspace, model, updateIssue, viewer, disableViewer } = this.props;
+		(screenshot, disableViewpointSuggestion = false, forceViewpointUpdate = false) => {
+		const {  updateIssue, disableViewer } = this.props;
 
 		if (this.isNewIssue) {
 			this.props.setState({ newIssue: {
@@ -377,15 +381,16 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				}});
 		} else {
 			if (screenshot) {
-				const viewpoint = { screenshot: screenshot.replace('data:image/png;base64,', '') };
+				const viewpoint = { screenshot };
 
 				if (!disableViewpointSuggestion && !disableViewer) {
 					this.handleViewpointUpdateSuggest(viewpoint);
 				} else {
-					const updatedViewpoint = forceViewpointUpdate ? await viewer.getCurrentViewpoint({ teamspace, model }) : {};
-					updateIssue(teamspace, model, {
-						viewpoint: merge(viewpoint, updatedViewpoint),
-					});
+					if (forceViewpointUpdate) {
+						this.handleViewpointUpdate(viewpoint);
+					} else {
+						updateIssue( { viewpoint });
+					}
 				}
 			}
 		}
@@ -403,7 +408,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleViewpointUpdateSuggest = (viewpoint) => {
-		const { showConfirmDialog, teamspace, model, updateIssue, viewer } = this.props;
+		const { showConfirmDialog, updateIssue, viewer } = this.props;
 		showConfirmDialog({
 			title: 'Save Viewpoint?',
 			content: `
@@ -412,18 +417,13 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 			onConfirm: async () => {
 				await this.handleViewpointUpdate(viewpoint);
 			},
-			onCancel: () => updateIssue(teamspace, model, { viewpoint }),
+			onCancel: () => updateIssue({ viewpoint }),
 		});
 	}
 
-	public handleViewpointUpdate = async (updatedViewpoint = {}) => {
-		const { teamspace, model, updateIssue, viewer } = this.props;
-
-		const viewpoint = await viewer.getCurrentViewpoint({ teamspace, model });
-
-		if (viewpoint.position) {
-			updateIssue(teamspace, model, { viewpoint: merge(viewpoint, updatedViewpoint) });
-		}
+	public handleViewpointUpdate = ( viewpoint? ) => {
+		const { updateViewpoint } = this.props;
+		updateViewpoint(viewpoint?.screenshot);
 	}
 
 	public onUpdateIssueViewpoint = () => {
@@ -435,7 +435,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 			onConfirm: () => {
 				this.handleTakeScreenshot(true, true);
 			},
-			onCancel: async () => await this.handleViewpointUpdate()
+			onCancel: () => this.handleViewpointUpdate()
 		});
 	}
 

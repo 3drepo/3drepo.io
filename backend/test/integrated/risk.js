@@ -309,6 +309,59 @@ describe("Risks", function () {
 
 		});
 
+		it("with sequence start/end date should succeed", function(done) {
+			const startDate = 1476107839000;
+			const endDate = 1476107839800;
+			const risk = Object.assign({
+				"name":"Risk test",
+				"sequence_start":startDate,
+				"sequence_end":endDate
+			}, baseRisk);
+			let riskId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200 , function(err, res) {
+							riskId = res.body._id;
+							expect(res.body.sequence_start).to.equal(startDate);
+							expect(res.body.sequence_end).to.equal(endDate);
+
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function(err , res) {
+						expect(res.body.sequence_start).to.equal(startDate);
+						expect(res.body.sequence_end).to.equal(endDate);
+
+						return done(err);
+					});
+				}
+			], done);
+		});
+
+		it("with invalid sequence start/end date should fail", function(done) {
+			const risk = Object.assign({
+				"name":"Risk test",
+				"sequence_start":"invalid data",
+				"sequence_end": false
+			}, baseRisk);
+			let riskId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(400, function(err, res) {
+							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+							done(err);
+						});
+				}
+			], done);
+		});
+
 		it("without name should fail", function(done) {
 			const risk = baseRisk;
 
@@ -493,6 +546,132 @@ describe("Risks", function () {
 					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function(err, res) {
 							expect(res.body.assigned_roles).to.deep.equal(assignedRoles.assigned_roles);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("add sequence start/end date should succeed", function(done) {
+			const startDate = 1476107839000;
+			const endDate = 1476107839800;
+			const risk = {...baseRisk, "name":"Risk test"};
+			const sequenceData = {
+				sequence_start: startDate,
+				sequence_end: endDate
+			};
+			let riskId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200, function(err, res) {
+							riskId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
+						.send(sequenceData)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/risks/${riskId}`)
+						.expect(200, function(err, res) {
+							expect(res.body.sequence_start).to.equal(startDate);
+							expect(res.body.sequence_end).to.equal(endDate);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change sequence start/end date should succeed", function(done) {
+			const startDate = 1476107839000;
+			const endDate = 1476107839800;
+			const risk = {...baseRisk, "name":"Risk test", "sequence_start":1476107839555, "sequence_end":1476107839855};
+			const sequenceData = {
+				sequence_start: startDate,
+				sequence_end: endDate
+			};
+			let riskId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200, function(err, res) {
+							riskId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
+						.send(sequenceData)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/risks/${riskId}`)
+						.expect(200, function(err, res) {
+							expect(res.body.sequence_start).to.equal(startDate);
+							expect(res.body.sequence_end).to.equal(endDate);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("add sequence start/end date with invalid data should fail", function(done) {
+			const risk = {...baseRisk, "name":"Risk test"};
+			const sequenceData = {
+				sequence_start: "invalid data",
+				sequence_end: false
+			};
+			let riskId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200, function(err, res) {
+							riskId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
+						.send(sequenceData)
+						.expect(400, function(err, res) {
+							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change sequence start/end date with invalid data should fail", function(done) {
+			const risk = {...baseRisk, "name":"Risk test", "sequence_start":1476107839555, "sequence_end":1476107839855};
+			const sequenceData = {
+				sequence_start: "invalid data",
+				sequence_end: false
+			};
+			let riskId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200, function(err, res) {
+							riskId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
+						.send(sequenceData)
+						.expect(400, function(err, res) {
+							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 							done(err);
 						});
 				}

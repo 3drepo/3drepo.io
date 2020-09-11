@@ -65,6 +65,7 @@ interface IProps {
 	projectName: string;
 	isPending: boolean;
 	values: any;
+	isModelUploading: boolean;
 }
 
 interface IState {
@@ -87,7 +88,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 	}
 
 	get isModelUploading() {
-		return this.modelStatus === 'uploading';
+		return this.props.isModelUploading;
 	}
 
 	public componentDidMount() {
@@ -181,11 +182,11 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		if (extension === 'spm') {
 			this.setState({
 				allowImportAnimations: true
-			});
+			}, () => setFieldValue('importAnimations', true));
 		} else if (this.state.allowImportAnimations) {
 			this.setState({
 				allowImportAnimations: false
-			});
+			}, () => setFieldValue('importAnimations', false));
 		}
 
 		if (!values.revisionName) {
@@ -229,6 +230,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 								<FileInputField
 									{...field}
 									onChange={this.handleFileChange(field.onChange, form)}
+									update={!!this.state.fileName}
 								/>
 							} />
 						</FileContainer>
