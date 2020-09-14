@@ -68,20 +68,20 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 		waitingForFrameLoad: false,
 	};
 
-	get currentDay() {
-		return getDays(this.props.min, this.state.value);
+	get currentTime() {
+		return (+this.state.value) - (+this.props.min);
 	}
 
-	get totalDays() {
-		return getDays(this.props.min, this.props.max);
+	get totalTime() {
+		return (+this.props.max) - (+this.props.min);
 	}
 
 	get isFirstDay() {
-		return this.currentDay === 0;
+		return this.currentTime === 0;
 	}
 
 	get isLastDay() {
-		return this.currentDay === this.totalDays;
+		return this.currentTime === this.totalTime;
 	}
 
 	get PlayButtonIcon() {
@@ -93,8 +93,8 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 	}
 
 	public setValue = (newValue: Date) => {
-		const maxDate = new Date(this.props.max).setHours(0, 0, 0, 0);
-		const minDate = new Date(this.props.min).setHours(0, 0, 0, 0);
+		const maxDate = this.props.max.valueOf();
+		const minDate = this.props.min.valueOf();
 		newValue = new Date(Math.min(maxDate, Math.max(minDate, newValue.valueOf())));
 
 		if (this.props.onChange) {
@@ -104,8 +104,8 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 		this.setState({value: newValue});
 	}
 
-	public setDayNumber = (dayNumber) => {
-		const newValue = getDate(this.props.min, dayNumber);
+	public setTime = (currentTime) => {
+		const newValue = new Date(this.props.min + currentTime);
 		this.setValue(newValue);
 	}
 
@@ -118,7 +118,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 
 	public goTo = (val) => {
 		this.stop();
-		this.setDayNumber(val);
+		this.setTime(val);
 	}
 
 	public gotoDate = (val) => {
@@ -298,7 +298,12 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 								<IconButton onClick={this.onClickPlayStop} ><this.PlayButtonIcon /></IconButton>
 							</Grid>
 							<Grid item>
-								<SequenceSlider max={this.totalDays} step={1} value={this.currentDay} onChange={(e, val) => this.goTo(val)} />
+								<SequenceSlider
+									max={this.totalTime}
+									step={36000000}
+									value={this.currentTime}
+									onChange={(e, val) => this.goTo(val)}
+								/>
 							</Grid>
 						</SliderRow>
 					</MuiPickersUtilsProvider>

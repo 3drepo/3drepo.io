@@ -47,7 +47,7 @@ export class TasksList extends React.PureComponent<IProps, IState> {
 	public get durationLabel() {
 		const  {  minDate, maxDate } = this.props;
 
-		return 'Activities from ' + formatShortDateTime(minDate) + ' to ' + formatShortDateTime(maxDate));
+		return 'Activities from ' + formatShortDateTime(minDate) + ' to ' + formatShortDateTime(maxDate);
 	}
 
 	public toggleCollapse = () => {
