@@ -12,6 +12,8 @@ const DEFAULT_SUPPORTED_BROWSERS_CONFIG = {
 		browser: 'edge', minversion: 14,
 	}, {
 		os: 'mac os', minos: '10.12.0', browser: 'safari', minversion: 10.1,
+	}, {
+		browser: 'opera', minversion: 38,
 	}],
 	tablet: [{
 		os: 'ios', minos: '9', browser: 'mobile safari',
