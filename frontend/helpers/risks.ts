@@ -123,7 +123,7 @@ export const getRiskLikelihoodName = (likelihood: number) => {
 };
 
 const getRiskIcon = (mitigationStatus) =>  RISK_LEVELS_ICONS[mitigationStatus] || null;
-export const getRiskColor = (levelOfRisk) => RISK_LEVELS_COLOURS[levelOfRisk ? levelOfRisk: -1].color;
+export const getRiskColor = (levelOfRisk) => RISK_LEVELS_COLOURS[levelOfRisk ? levelOfRisk : -1].color;
 
 export const getRiskStatus = (levelOfRisk: number, mitigationStatus: string) => {
 	return ({
