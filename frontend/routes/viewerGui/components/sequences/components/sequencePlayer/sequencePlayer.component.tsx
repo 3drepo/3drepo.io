@@ -27,7 +27,6 @@ import DayJsUtils from '@date-io/dayjs';
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 import React from 'react';
 import { STEP_SCALE } from '../../../../../../constants/sequences';
-import { getDate, getDays } from '../../../../../../helpers/dateTime';
 import { getDateByStep } from '../../../../../../modules/sequences/sequences.helper';
 import { LONG_DATE_TIME_FORMAT_NO_MINUTES } from '../../../../../../services/formatting/formatDate';
 import { DatePicker, IntervalRow, SequencePlayerColumn,
@@ -111,8 +110,9 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 
 	public isDateOusideRange = (date) => {
 		const {max, min} = this.props;
-		const maxDate = new Date(max).setHours(0, 0, 0, 0);
+		const maxDate = new Date(max).setHours(23, 59, 59, 99);
 		const minDate = new Date(min).setHours(0, 0, 0, 0);
+
 		return maxDate < date || minDate > date;
 	}
 
@@ -275,8 +275,9 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 									inputId="1"
 									value={value}
 									format={LONG_DATE_TIME_FORMAT_NO_MINUTES}
-									onChange={(e) => this.gotoDate(new Date(e.target.value))}
+									onChange={(e) => this.gotoDate(new Date(Math.floor(e.target.value / 3600000) * 3600000))}
 									placeholder="date"
+									dateTime
 								/>
 							</Grid>
 							<Grid item>

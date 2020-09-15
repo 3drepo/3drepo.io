@@ -18,7 +18,7 @@
 import React from 'react';
 
 import { MaterialUiPickersDate } from 'material-ui-pickers/typings/date';
-import { Container, StyledDatePicker } from './dateField.styles';
+import { Container, StyledDatePicker, StyledDateTimePicker } from './dateField.styles';
 
 interface IProps {
 	inputId: string;
@@ -28,8 +28,9 @@ interface IProps {
 	format?: string;
 	placeholder?: string;
 	className?: string;
-	onChange: (event) => void;
-	onBlur: (event) => void;
+	dateTime?: boolean;
+	onChange?: (event) => void;
+	onBlur?: (event) => void;
 	shouldDisableDate?: (day: MaterialUiPickersDate) => boolean;
 }
 
@@ -67,11 +68,13 @@ export class DateField extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { value } = this.state;
-		const { onBlur, name, placeholder, format, disabled, className } = this.props;
+		const { onBlur, name, placeholder, format, disabled, className, dateTime } = this.props;
+
+		const Picker = dateTime ? StyledDateTimePicker : StyledDatePicker;
 
 		return (
 			<Container className={className}>
-				<StyledDatePicker
+				<Picker
 					disabled={disabled}
 					value={value}
 					onBlur={onBlur}
