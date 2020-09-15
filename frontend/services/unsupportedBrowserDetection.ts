@@ -3,15 +3,17 @@ import UAParser from 'ua-parser-js';
 
 const DEFAULT_SUPPORTED_BROWSERS_CONFIG = {
 	desktop: [{
-		browser: 'firefox', minversion: 41,
+		browser: 'firefox', minversion: 54,
 	}, {
-		browser: 'chrome', minversion: 45,
+		browser: 'chrome', minversion: 51,
 	}, {
-		browser: 'chrome headless', minversion: 45,
+		browser: 'chrome headless', minversion: 51,
 	}, {
-		browser: 'edge',
+		browser: 'edge', minversion: 14,
 	}, {
-		os: 'mac os', minos: '10.10.0', browser: 'safari', minversion: 8,
+		os: 'mac os', minos: '10.12.0', browser: 'safari', minversion: 10.1,
+	}, {
+		browser: 'opera', minversion: 38,
 	}],
 	tablet: [{
 		os: 'ios', minos: '9', browser: 'mobile safari',
