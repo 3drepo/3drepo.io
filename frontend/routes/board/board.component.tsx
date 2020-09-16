@@ -138,13 +138,23 @@ const PANEL_PROPS = {
 	}
 };
 
-const BoardCard = memo(({ metadata, onClick }: any) => (
+const RiskBoardCard = ({ metadata, onClick }: any) => (
 	<BoardItem
 		key={metadata.id}
 		{...metadata}
 		onItemClick={onClick}
+		panelName="risk "
 	/>
-));
+);
+
+const IssueBoardCard = ({ metadata, onClick }: any) => (
+	<BoardItem
+		key={metadata.id}
+		{...metadata}
+		panelName="issue "
+		onItemClick={onClick}
+	/>
+);
 
 export function Board(props: IProps) {
 	const boardRef = useRef(null);
@@ -395,7 +405,7 @@ export function Board(props: IProps) {
 	};
 
 	const components = {
-		Card: BoardCard
+		Card:  isIssuesBoard ? IssueBoardCard : RiskBoardCard
 	};
 
 	const renderBoard = renderWhenTrue(() => (
