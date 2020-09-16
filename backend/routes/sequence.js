@@ -29,22 +29,18 @@ const Sequence = require("../models/sequence");
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
- * @apiParam {String} [revId] Revision unique ID
  */
 
 /**
- * @api {get} /:teamspace/:model/revision(/master/head/|/:revId)/sequences/activities/:activityId Get activity
+ * @api {get} /:teamspace/:model/sequences/activities/:activityId Get activity
  * @apiName getSequenceActivityDetail
  * @apiGroup Sequences
  * @apiDescription Get sequence activity details.
  *
  * @apiUse Sequences
  *
- * @apiExample {get} Example usage (/master/head)
- * GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences/activities/00000000-0000-0002-0001-000000000001 HTTP/1.1
- *
- * @apiExample {get} Example usage (/:revId)
- * GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/sequences/activities/00000000-0000-0002-0001-000000000001 HTTP/1.1
+ * @apiExample {get} Example usage
+ * GET /acme/00000000-0000-0000-0000-000000000000/sequences/activities/00000000-0000-0002-0001-000000000001 HTTP/1.1
  *
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
@@ -75,18 +71,17 @@ router.get("/revision/master/head/sequences/activities/:activityId", middlewares
 router.get("/revision/:revId/sequences/activities/:activityId", middlewares.issue.canView, getSequenceActivityDetail);
 
 /**
- * @api {get} /:teamspace/:model/revision(/master/head/|/:revId)/sequences/activities Get all activities
+ * @api {get} /:teamspace/:model/sequences/:sequenceId/activities Get all activities
  * @apiName getSequenceActivities
  * @apiGroup Sequences
  * @apiDescription Get all sequence activities.
  *
  * @apiUse Sequences
  *
- * @apiExample {get} Example usage (/master/head)
- * GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences/activities HTTP/1.1
+ * @apiParam {String} sequenceId Sequence unique ID
  *
- * @apiExample {get} Example usage (/:revId)
- * GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/sequences/activities HTTP/1.1
+ * @apiExample {get} Example usage
+ * GET /acme/00000000-0000-0000-0000-000000000000/sequences/activities HTTP/1.1
  *
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
@@ -149,25 +144,20 @@ router.get("/revision/:revId/sequences/activities/:activityId", middlewares.issu
  * 	]
  * }
  */
-router.get("/revision/master/head/sequences/activities", middlewares.issue.canView, getSequenceActivities);
-router.get("/revision/:revId/sequences/activities", middlewares.issue.canView, getSequenceActivities);
+router.get("/sequences/:sequenceId/activities", middlewares.issue.canView, getSequenceActivities);
 
 /**
- * @api {get} /:teamspace/:model/revision(/master/head/|/:revId)/sequences/:sequenceId/state/:stateId Get state
+ * @api {get} /:teamspace/:model/sequences/state/:stateId Get state
  * @apiName getSequenceState
  * @apiGroup Sequences
  * @apiDescription Get state of model in sequence.
  *
  * @apiUse Sequences
  *
- * @apiParam {String} sequenceId Sequence unique ID
  * @apiParam {String} stateId State unique ID
  *
- * @apiExample {get} Example usage (/master/head)
- * GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences/00000000-0000-0000-0000-000000000002/state/00000000-0000-0000-0001-000000000002 HTTP/1.1
- *
- * @apiExample {get} Example usage (/:revId)
- * GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/sequences/00000000-0000-0000-0000-000000000002/state/00000000-0000-0000-0001-000000000002 HTTP/1.1
+ * @apiExample {get} Example usage
+ * GET /acme/00000000-0000-0000-0000-000000000000/sequences/state/00000000-0000-0000-0001-000000000002 HTTP/1.1
  *
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
@@ -237,8 +227,7 @@ router.get("/revision/:revId/sequences/activities", middlewares.issue.canView, g
  * 		}
  * 	]
  */
-router.get("/revision/master/head/sequences/:sequenceId/state/:stateId", middlewares.issue.canView, getSequenceState);
-router.get("/revision/:revId/sequences/:sequenceId/state/:stateId", middlewares.issue.canView, getSequenceState);
+router.get("/sequences/state/:stateId", middlewares.issue.canView, getSequenceState);
 
 /**
  * @api {get} /:teamspace/:model/revision(/master/head/|/:revId)/sequences List all sequences
@@ -247,6 +236,8 @@ router.get("/revision/:revId/sequences/:sequenceId/state/:stateId", middlewares.
  * @apiDescription List all sequences associated with the model.
  *
  * @apiUse Sequences
+ *
+ * @apiParam {String} [revId] Revision unique ID
  *
  * @apiExample {get} Example usage (/master/head)
  * GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences HTTP/1.1
@@ -320,10 +311,9 @@ function getSequenceActivityDetail(req, res, next) {
 
 function getSequenceActivities(req, res, next) {
 	const place = utils.APIInfo(req);
-	const { account, model, revId } = req.params;
-	const branch = revId ? null : "master";
+	const { account, model, sequenceId } = req.params;
 
-	Sequence.getSequenceActivities(account, model, branch, revId).then(activities => {
+	Sequence.getSequenceActivities(account, model, sequenceId).then(activities => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, activities);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

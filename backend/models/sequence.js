@@ -73,14 +73,8 @@ class Sequence {
 		return activity;
 	}
 
-	async getSequenceActivities(account, model, branch, revision) {
-		const history = await History.getHistory({account, model}, branch, revision);
-
-		if (!history) {
-			return Promise.reject(responseCodes.INVALID_TAG_NAME);
-		} else {
-			return FileRef.getSequenceActivitiesFile(account, model, utils.uuidToString(history._id));
-		}
+	async getSequenceActivities(account, model, sequenceId) {
+		return FileRef.getSequenceActivitiesFile(account, model, utils.uuidToString(sequenceId));
 	}
 
 	getSequenceState(account, model, stateId) {
