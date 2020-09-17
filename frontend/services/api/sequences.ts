@@ -27,8 +27,8 @@ export const getSequences = (teamspace, modelId, revision): Promise<any> => {
 	return api.get(`${teamspace}/${modelId}/revision/${revision}/sequences`);
 };
 
-export const getSequenceState = (teamspace, modelId, sequenceId, stateId): Promise<any> => {
-	return api.get(`${teamspace}/${modelId}/sequences/${sequenceId}/state/${stateId}`);
+export const getSequenceState = (teamspace, modelId, stateId): Promise<any> => {
+	return api.get(`${teamspace}/${modelId}/sequences/state/${stateId}`);
 };
 
 export const getSequenceActivityDetail = (teamspace, modelId, activityId): Promise<any> => {

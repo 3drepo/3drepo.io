@@ -770,7 +770,7 @@ export function* fetchFrame({date}) {
 		if (!loadedStates[stateId]) {
 			// Using directly the promise and 'then' to dispatch the rest of the actions
 			// because with yield it would sometimes stop there forever even though the promise resolved
-			API.getSequenceState(teamspace, model, revision, sequenceId, stateId).then((response) => {
+			API.getSequenceState(teamspace, model, stateId).then((response) => {
 				dispatch(SequencesActions.setStateDefinition(stateId, response.data));
 				dispatch(SequencesActions.setLastLoadedSuccesfullState(stateId));
 			}).catch((e) => {
