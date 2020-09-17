@@ -183,6 +183,20 @@ export const selectSelectedFrameTransparencies = createSelector(
 	}
 );
 
+export const selectSelectedFrameTransformations = createSelector(
+	selectSelectedState, (state) => {
+		if (!state) {
+			return {};
+		}
+
+		try {
+			return  convertToDictionary(state.transformation);
+		} catch (e) {
+			return {};
+		}
+	}
+);
+
 const tasksArrToDict = (tasks) => {
 	return tasks.reduce((dict , task) => {
 		if (!dict[task._id]) {

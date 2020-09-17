@@ -14,8 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { isEqual } from 'lodash';
 import { STEP_SCALE } from '../../constants/sequences';
+import { Viewer } from '../../services/viewer/viewer';
+import { getState } from '../store';
+import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds } from '../tree';
 
 export const getSelectedFrame = (frames, endingDate) => {
 	let frame = null;
@@ -52,3 +55,70 @@ export const getDateByStep = (date, stepScale, step) => {
 };
 
 export const getSelectedEndingDate = (startingDate, scale, interval) => getDateByStep(startingDate, scale, interval);
+
+export const transformationDiffChanges = (prevTransformations: any, currentTransformations: any) => {
+	return  Object.keys(currentTransformations).reduce((currentChanges, sharedId) => {
+		const value = currentTransformations[sharedId];
+
+		if (!isEqual(prevTransformations[sharedId] , value)) {
+			let cc = currentChanges.find((change) => isEqual(change.value, value));
+
+			if (!cc) {
+				cc = {value, shared_ids: []};
+				currentChanges.push(cc);
+			}
+
+			cc.shared_ids.push(sharedId);
+		}
+
+		return currentChanges;
+	}, []);
+};
+
+export const transformationDiffRemoves = (prevTransformations: any, currentTransformations: any) => {
+	return  Object.keys(prevTransformations).reduce((currentChanges, sharedId) => {
+		if (!currentTransformations[sharedId]) {
+			currentChanges.push(sharedId);
+		}
+
+		return currentChanges;
+	}, []);
+};
+
+export const moveMeshes = (transformations: any[]) => {
+	const state = getState();
+
+	transformations.forEach(({value, shared_ids}) => {
+
+		const selectNodes =  selectGetNodesIdsFromSharedIds([{shared_ids}]);
+		const nodes = selectNodes(state);
+
+		if (nodes) {
+			const filteredNodes = nodes.filter((n) => n !== undefined);
+			const modelsList = selectGetMeshesByIds(filteredNodes)(state);
+
+			for (let j = 0; j < modelsList.length; j++) {
+				const { meshes, teamspace, modelId } = modelsList[j] as any;
+				Viewer.moveMeshes(teamspace, modelId, meshes, value);
+			}
+		}
+	});
+};
+
+export const resetMovedMeshes = (sharedIds: any[]) => {
+	const state = getState();
+
+	const selectNodes =  selectGetNodesIdsFromSharedIds([{shared_ids: sharedIds}]);
+	const nodes = selectNodes(state);
+
+	if (nodes) {
+		const filteredNodes = nodes.filter((n) => n !== undefined);
+		const modelsList = selectGetMeshesByIds(filteredNodes)(state);
+
+		for (let j = 0; j < modelsList.length; j++) {
+			const { meshes, teamspace, modelId } = modelsList[j] as any;
+			Viewer.resetMovedMeshes(teamspace, modelId, meshes);
+		}
+	}
+
+};
