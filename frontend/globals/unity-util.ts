@@ -1607,6 +1607,24 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Change the background colour of the viewer
+	 * note: alpha defaults to 1 if an array of 3 numbers is sent
+	 * @param color - rgba colour value to set to e.g.[1,0,0,1] for solid red.
+	 * @category Configurations
+	 */
+	public static setBackgroundColor(color: number[]) {
+		UnityUtil.toUnity('SetBackgroundColor', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({color}));
+	}
+
+	/**
+	 * Reset viewer background to default
+	 * @category Configurations
+	 */
+	public static ResetBackground() {
+		UnityUtil.toUnity('ResetBackground', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/**
 	 * Sets the render quality to default
 	 * @category Configurations
 	 */
