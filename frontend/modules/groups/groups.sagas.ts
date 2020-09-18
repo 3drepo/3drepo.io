@@ -32,6 +32,7 @@ import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
 import { TreeActions } from '../tree';
+import { ViewpointsActions } from '../viewpoints';
 import { GroupsActions, GroupsTypes, INITIAL_CRITERIA_FIELD_STATE } from './groups.redux';
 import {
 	selectActiveGroupDetails,
@@ -204,7 +205,7 @@ function* downloadGroups({ teamspace, modelId }) {
 		const filteredGroups = searchByFilters(groups, filters, false);
 		const ids = filteredGroups.map((group) => group._id).join(',');
 		const endpointBase =
-			`${teamspace}/${modelId}/revision/master/head/groups/?noIssues=true&noRisks=true`;
+			`${teamspace}/${modelId}/revision/master/head/groups/?noIssues=true&noRisks=true&noViews=true`;
 		const endpoint = ids ? `${endpointBase}&ids=${ids}` : endpointBase;
 		const modelName = Viewer.settings ? Viewer.settings.name : '';
 		yield API.downloadJSON('groups', modelName, `${endpoint}&convertCoords=true`);
@@ -239,6 +240,7 @@ function* closeDetails() {
 }
 
 function* createGroup({ teamspace, modelId, revision }) {
+	yield put(GroupsActions.toggleDetailsPendingState(true));
 	try {
 		const isAllOverridden = yield select(selectIsAllOverridden);
 		const currentUser = yield select(selectCurrentUser);
@@ -274,9 +276,11 @@ function* createGroup({ teamspace, modelId, revision }) {
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('create', 'group', error));
 	}
+	yield put(GroupsActions.toggleDetailsPendingState(false));
 }
 
 function* updateGroup({ teamspace, modelId, revision, groupId }) {
+	yield put(GroupsActions.toggleDetailsPendingState(true));
 	try {
 		const groupDetails = yield select(selectActiveGroupDetails);
 
@@ -304,6 +308,7 @@ function* updateGroup({ teamspace, modelId, revision, groupId }) {
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('update', 'group', error));
 	}
+	yield put(GroupsActions.toggleDetailsPendingState(false));
 }
 
 function* setNewGroup() {
@@ -328,6 +333,19 @@ function* setNewGroup() {
 		}));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'new group', error));
+	}
+}
+
+function * clearColorOverrides() {
+	yield put(GroupsActions.clearColorOverridesSuccess());
+	yield put(ViewpointsActions.setSelectedViewpoint(null));
+}
+
+function * setOverrideAll({overrideAll}) {
+	if (!overrideAll) {
+		yield put(GroupsActions.clearColorOverrides());
+	} else {
+		yield put(GroupsActions.setOverrideAllSuccess());
 	}
 }
 
@@ -410,4 +428,6 @@ export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.SUBSCRIBE_ON_CHANGES, subscribeOnChanges);
 	yield takeLatest(GroupsTypes.UNSUBSCRIBE_FROM_CHANGES, unsubscribeFromChanges);
 	yield takeLatest(GroupsTypes.RESET_TO_SAVED_SELECTION, resetToSavedSelection);
+	yield takeLatest(GroupsTypes.CLEAR_COLOR_OVERRIDES, clearColorOverrides);
+	yield takeLatest(GroupsTypes.SET_OVERRIDE_ALL, setOverrideAll);
 }

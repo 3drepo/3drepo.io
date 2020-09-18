@@ -1088,10 +1088,21 @@ export class UnityUtil {
 	 * @param model - name of model
 	 * @param branch - ID of the branch (deprecated value)
 	 * @param revision - ID of revision
+	 * @param initView? - the view the model should load with
+	 * @param clearCanvas? - Reset the state of the viewer prior to loading the model (Default: true)
 	 * @return returns a promise that resolves when the model start loading.
 	 */
-	public static loadModel(account: string, model: string, branch = '', revision = 'head'): Promise<void> {
-		UnityUtil.reset();
+	public static loadModel(
+		account: string,
+		model: string,
+		branch = '',
+		revision = 'head',
+		initView = null,
+		clearCanvas = true
+	): Promise<void> {
+		if (clearCanvas) {
+			UnityUtil.reset();
+		}
 		const params: any = {
 			database : account,
 			model
@@ -1101,12 +1112,28 @@ export class UnityUtil {
 			params.revID = revision;
 		}
 
+		if (initView) {
+			params.initView = initView;
+		}
+
 		UnityUtil.onLoaded();
 		// tslint:disable-next-line
 		console.log(`[${new Date()}]Loading model: `, params);
 		UnityUtil.toUnity('LoadModel', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(params));
 
 		return UnityUtil.onLoading();
+	}
+
+	/**
+	 * Offload a model that is currently loaded
+	 * @category Configurations
+	 * @param account - name of teamspace
+	 * @param model - name of model
+	 * @param revision - ID of revision
+	 */
+	public static offLoadModel(account: string, model: string, revision = 'head') {
+		const ns = `${account}.${model}${revision === 'head' ? '' : `.${revision}`}`;
+		UnityUtil.toUnity('UnloadModel', UnityUtil.LoadingState.MODEL_LOADED, ns);
 	}
 
 	/**
@@ -1580,6 +1607,24 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Change the background colour of the viewer
+	 * note: alpha defaults to 1 if an array of 3 numbers is sent
+	 * @param color - rgba colour value to set to e.g.[1,0,0,1] for solid red.
+	 * @category Configurations
+	 */
+	public static setBackgroundColor(color: number[]) {
+		UnityUtil.toUnity('SetBackgroundColor', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({color}));
+	}
+
+	/**
+	 * Reset viewer background to default
+	 * @category Configurations
+	 */
+	public static ResetBackground() {
+		UnityUtil.toUnity('ResetBackground', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/**
 	 * Sets the render quality to default
 	 * @category Configurations
 	 */
@@ -1628,6 +1673,21 @@ export class UnityUtil {
 	public static setPlaneBorderWidth(width: number) {
 		// There is an scale factor so the value that the user enters is not small
 		UnityUtil.toUnity('SetPlaneBorderWidth', UnityUtil.LoadingState.VIEWER_READY, width *	0.01);
+	}
+
+	/** @hidden */
+	public static setResolutionScaling(scale: number) {
+		UnityUtil.toUnity('SetResolutionScaling', UnityUtil.LoadingState.VIEWER_READY, scale);
+	}
+
+	/** @hidden */
+	public static toggleUtilityCamera() {
+		UnityUtil.toUnity('ToggleUtilityCamera', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/** @hidden */
+	public static toggleCameraPause() {
+		UnityUtil.toUnity('ToggleCameraPause', UnityUtil.LoadingState.VIEWER_READY);
 	}
 
 }

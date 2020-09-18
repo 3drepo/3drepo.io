@@ -140,8 +140,8 @@ router.put("/:model/settings/heliSpeed", middlewares.hasReadAccessToModel, updat
  * @apiParam (Request body) {Number} elevation GIS elevation
  * @apiParam (Request body) {[]SurveyPoint} surveyPoints  an array containing GIS surveypoints
  *
- * @apiParam (Request body: SurveyPoint) {[]Number} position an array representing a three dimensional coordinate
- * @apiParam (Request body: SurveyPoint) {[]Number} latLong an array representing a two dimensional coordinate for latitude and logitude
+ * @apiParam (Request body: SurveyPoint) {Number[]} position an array representing a three dimensional coordinate
+ * @apiParam (Request body: SurveyPoint) {Number[]} latLong an array representing a two dimensional coordinate for latitude and logitude
  *
  * @apiExample {put} Example usage:
  * PUT /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/settings HTTP/1.1
@@ -682,7 +682,7 @@ router.post("/:model/permissions", middlewares.hasEditPermissionsAccessToModel, 
  * @apiDescription Gets the permissions of a list of models
  *
  * @apiParam {String} teamspace Name of teamspace.
- * @apiParam (Query) {[]String} MODELS An array of model ids.
+ * @apiParam (Query) {String[]} MODELS An array of model ids.
  *
  * @apiExample {get} Example usage:
  * GET /teamSpace1/models/permissions?models=5ce7dd19-1252-4548-a9c9-4a5414f2e0c5,3549ddf6-885d-4977-87f1-eeac43a0e818 HTTP/1.1
@@ -1443,36 +1443,29 @@ function updateHeliSpeed(req, res, next) {
 	});
 }
 
-function _getModel(req) {
-
-	let setting;
-	return ModelSetting.findById(getDbColOptions(req), req.params.model).then(_setting => {
-
-		if (!_setting) {
-			return Promise.reject({ resCode: responseCodes.MODEL_INFO_NOT_FOUND});
-		} else {
-
-			setting = _setting;
-			setting = setting.toObject();
-			// compute permissions by user role
-
-			return ModelHelpers.getModelPermission(
+const _getModel = async(req) => {
+	// FIXME: this should live in models/modelSetting.
+	const settingRaw = await ModelSetting.findById(getDbColOptions(req), req.params.model);
+	if (!settingRaw) {
+		return Promise.reject({ resCode: responseCodes.MODEL_INFO_NOT_FOUND});
+	} else {
+		const setting = await settingRaw.clean();
+		// compute permissions by user role
+		const [permissions, submodels] = await Promise.all([
+			ModelHelpers.getModelPermission(
 				req.session.user.username,
-				_setting,
+				settingRaw,
 				req.params.account
-			).then(permissions => {
+			),
+			ModelHelpers.listSubModels(req.params.account, req.params.model, C.MASTER_BRANCH_NAME)
+		]);
 
-				setting.permissions = permissions;
-				return ModelHelpers.listSubModels(req.params.account, req.params.model, C.MASTER_BRANCH_NAME);
+		setting.permissions = permissions;
+		setting.subModels = submodels;
+		return setting;
+	}
 
-			}).then(subModels => {
-
-				setting.subModels = subModels;
-				return setting;
-			});
-		}
-	});
-}
+};
 
 function getModelSetting(req, res, next) {
 

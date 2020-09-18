@@ -17,11 +17,11 @@
 
 import React from 'react';
 
-import { Author, Container, Date, Details, ExtraInfo, Icon, Status } from './previewItemInfo.styles';
-
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { NAMED_MONTH_DATE_FORMAT } from '../../../../services/formatting/formatDate';
 import { DateTime } from '../../../components/dateTime/dateTime.component';
+import { UserMarker } from '../../../components/messagesList/components/message/components/userMarker';
+import { Author, Container, Date, Details, ExtraInfo, Icon, Status } from './previewItemInfo.styles';
 
 interface IProps {
 	author: string;
@@ -29,6 +29,7 @@ interface IProps {
 	StatusIconComponent: any;
 	statusColor: string;
 	extraInfo?: string;
+	actionButton?: React.ReactNode;
 }
 
 export class PreviewItemInfo extends React.PureComponent<IProps, any> {
@@ -53,18 +54,25 @@ export class PreviewItemInfo extends React.PureComponent<IProps, any> {
 		);
 	});
 
+	public renderActionButton = renderWhenTrue(() => {
+		return <>{this.props.actionButton}</>;
+	});
+
 	public render() {
-		const { author, createdAt, statusColor, StatusIconComponent, extraInfo } = this.props;
+		const { author, createdAt, statusColor, StatusIconComponent, extraInfo, actionButton } = this.props;
 
 		return(
 			<Container>
 				<Details>
-					<Status color={statusColor}>
-						{this.renderStatusIcon(StatusIconComponent)}
-						<Author>{author}</Author>
-					</Status>
+					<UserMarker name={author}>
+						<Status color={statusColor}>
+							{this.renderStatusIcon(StatusIconComponent)}
+							<Author>{author}</Author>
+						</Status>
+					</UserMarker>
 					{this.renderExtraInfo(extraInfo)}
 					{this.renderDateTime(createdAt)}
+					{this.renderActionButton(actionButton)}
 				</Details>
 			</Container>
 		);

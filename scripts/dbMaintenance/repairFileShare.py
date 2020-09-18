@@ -92,7 +92,8 @@ for database in db.database_names():
                                     file.close()
                                     missing.append(refInfo + " (Restored to: " + filePath + ")");
                                 else:
-                                    missing.append(refInfo + ": No backup found.");
+                                    missing.append(refInfo + ": No backup found. Reference removed.");
+                                    db[colName].remove({"_id": refEntry["_id"]});
                         else:
                             fileList[filePath] = True
 

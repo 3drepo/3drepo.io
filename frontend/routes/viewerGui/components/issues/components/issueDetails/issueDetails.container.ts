@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -21,12 +21,15 @@ import { createStructuredSelector } from 'reselect';
 import { selectUsername } from '../../../../../../modules/currentUser';
 import { DialogActions } from '../../../../../../modules/dialog';
 import {
+	selectActiveIssueComments,
 	selectActiveIssueDetails,
 	selectExpandDetails,
 	selectFailedToLoad,
 	selectFetchingDetailsIsPending,
+	selectIssues,
 	selectNewComment,
-	IssuesActions
+	selectPostCommentIsPending,
+	IssuesActions,
 } from '../../../../../../modules/issues';
 import { selectJobsList, selectMyJob } from '../../../../../../modules/jobs';
 import { selectPermissions } from '../../../../../../modules/model';
@@ -37,6 +40,7 @@ import { IssueDetails } from './issueDetails.component';
 
 const mapStateToProps = createStructuredSelector({
 	issue: selectActiveIssueDetails,
+	comments: selectActiveIssueComments,
 	jobs: selectJobsList,
 	expandDetails: selectExpandDetails,
 	fetchingDetailsIsPending: selectFetchingDetailsIsPending,
@@ -45,14 +49,18 @@ const mapStateToProps = createStructuredSelector({
 	currentUser: selectUsername,
 	permissions: selectPermissions,
 	topicTypes: selectTopicTypes,
-	failedToLoad: selectFailedToLoad
+	failedToLoad: selectFailedToLoad,
+	postCommentIsPending: selectPostCommentIsPending,
+	issues: selectIssues
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setState: IssuesActions.setComponentState,
 	fetchIssue: IssuesActions.fetchIssue,
 	saveIssue: IssuesActions.saveIssue,
-	updateIssue: IssuesActions.updateIssue,
+	updateIssue: IssuesActions.updateActiveIssue,
+	updateViewpoint: IssuesActions.updateActiveIssueViewpoint,
+	cloneIssue: IssuesActions.cloneIssue,
 	postComment: IssuesActions.postComment,
 	removeComment: IssuesActions.removeComment,
 	updateSelectedIssuePin: IssuesActions.updateSelectedIssuePin,
@@ -64,7 +72,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	attachLinkResources: IssuesActions.attachLinkResources,
 	showDialog: DialogActions.showDialog,
 	showScreenshotDialog:  DialogActions.showScreenshotDialog,
-	setCameraOnViewpoint: ViewpointsActions.setCameraOnViewpoint
+	showConfirmDialog: DialogActions.showConfirmDialog,
+	showViewpoint: ViewpointsActions.showViewpoint
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(IssueDetails));

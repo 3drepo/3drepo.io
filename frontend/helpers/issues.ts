@@ -58,7 +58,7 @@ export const prepareIssue = (issue, jobs = []) => {
 	}
 
 	if (issue.status) {
-		preparedIssue.defaultHidden = issue.status === STATUSES.CLOSED;
+		preparedIssue.defaultHidden = [STATUSES.CLOSED, STATUSES.VOID].includes(issue.status);
 	}
 
 	return preparedIssue;

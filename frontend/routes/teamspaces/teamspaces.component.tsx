@@ -29,6 +29,7 @@ import Check from '@material-ui/icons/Check';
 import { renderWhenTrue } from '../../helpers/rendering';
 import { sortModels } from '../../modules/teamspaces/teamspaces.helpers';
 import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
+import { EmptyStateInfo } from '../components/components.styles';
 import { Body, BodyWrapper } from '../components/customTable/customTable.styles';
 import {
 	MenuList,
@@ -67,6 +68,7 @@ import {
 	MenuButton,
 	OtherTeamspacesLabel
 } from './teamspaces.styles';
+
 interface IProps {
 	match: any;
 	history: any;
@@ -525,8 +527,12 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 
 	private renderLoader = renderWhenTrue(() => (
 		<LoaderContainer>
-				<Loader content="Loading teamspaces..." />
+			<Loader content="Loading teamspaces..." />
 		</LoaderContainer>
+	));
+
+	public renderEmptyState = renderWhenTrue(() => (
+		<EmptyStateInfo>No favorites models have been added yet</EmptyStateInfo>
 	));
 
 	public renderMyTeamspace = () => {
@@ -597,6 +603,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				<List>
 					{this.renderLoader(isPending)}
 					{this.renderList(!isPending && this.props.items.length)}
+					{this.renderEmptyState(!isPending && showStarredOnly && !this.props.starredModelsMap.length)}
 				</List>
 			</ViewerPanel>
 		);

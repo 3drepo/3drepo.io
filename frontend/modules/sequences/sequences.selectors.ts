@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { merge, omit, sortBy } from 'lodash';
+import { merge, omit } from 'lodash';
 import { createSelector } from 'reselect';
 import { STEP_SCALE } from '../../constants/sequences';
 import { GLToHexColor } from '../../helpers/colors';

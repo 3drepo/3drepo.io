@@ -15,16 +15,44 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { uniqBy, values } from 'lodash';
 import { getAPIUrl } from '../services/api';
 import { getRiskConsequenceName, getRiskLikelihoodName } from './risks';
 import { sortByDate } from './sorting';
 
+export const INTERNAL_IMAGE_PATH_PREFIX = `API/`;
+export const MARKDOWN_USER_REFERENCE_REGEX = new RegExp('@\\w+', 'gi');
+export const MARKDOWN_TICKET_REFERENCE_REGEX = new RegExp('#\\d+', 'gi');
+export const MARKDOWN_RESOURCE_REFERENCE_REGEX = new RegExp('#res.[\\w-]+', 'gi');
+export const MARKDOWN_INTERNAL_IMAGE_PATH_REGEX = new RegExp(`${INTERNAL_IMAGE_PATH_PREFIX}`, 'gi');
+
+export interface IComment {
+	action?: {property: string, from: string, to: string, propertyText: string, text: string};
+	comment: string | undefined | null;
+	_id: string;
+	guid: number;
+	owner: string;
+	sealed: boolean;
+}
+
 export const createAttachResourceComments = (owner: string,  resources = []) =>
 	resources.map((r, i) =>
-		prepareComment({_id: +(new Date()), guid: i, owner, action: {property: 'resource', to: r.name}, sealed: true }));
+	({
+		_id: +(new Date()),
+		guid: i,
+		owner,
+		action: {property: 'resource', to: r.name},
+		sealed: true
+	}));
 
 export const createRemoveResourceComment = (owner: string, {name} ) =>
-	prepareComment({_id: +(new Date()), guid: 0, owner, action: {property: 'resource', from: name}, sealed: true });
+	({
+		_id: +(new Date()),
+		guid: 0,
+		owner,
+		action: {property: 'resource', from: name},
+		sealed: true
+	});
 
 export const prepareComments = (comments = []) => {
 	comments = comments.filter((c) => !c.action || c.action.property !== 'extras');
@@ -45,10 +73,12 @@ export const prepareComment = (comment) => {
 		comment.viewpoint.screenshotPath = getAPIUrl(comment.viewpoint.screenshot);
 	}
 
+	comment.comment = comment.comment ? comment.comment.replace(/[\n]{2,}/g, `\n\n`) : comment.comment;
+
 	return comment;
 };
 
-const convertActionCommentToText = (comment) => {
+const convertActionCommentToText = (comment: IComment) => {
 	let text = '';
 
 	if (comment) {
@@ -200,6 +230,22 @@ const convertActionCommentToText = (comment) => {
 				comment.action.to = comment.action.from = null;
 				comment.action.propertyText = 'Pin';
 				break;
+
+			case 'screenshot':
+				comment.action.to = comment.action.from = null;
+				comment.action.propertyText = 'Screenshot';
+				break;
+
+			case 'viewpoint':
+				comment.action.to = comment.action.from = null;
+				comment.action.propertyText = 'Viewpoint';
+				break;
+
+			case 'issue_referenced':
+				comment.action.propertyText = 'Referenced';
+				text = 'Issue referenced in #' + comment.action.to  + ' by ' + comment.owner;
+				break;
+
 		}
 	}
 
@@ -240,4 +286,51 @@ const convertActionValueToText = (value = '') => {
 	}
 
 	return actionText;
+};
+
+export const transformCustomsLinksToMarkdown = ( comment: IComment, tickets, type ) => {
+	let text = comment.comment;
+
+	if (!text || (Boolean(comment.action)
+	&&  !['issue_referenced', 'risk_referenced'].includes(comment.action?.property))) {
+		return text;
+	}
+
+	const usersReferences = text.matchAll(MARKDOWN_USER_REFERENCE_REGEX);
+	const ticketsReferences = text.matchAll(MARKDOWN_TICKET_REFERENCE_REGEX) || [];
+	const resourcesReferences = text.matchAll(MARKDOWN_RESOURCE_REFERENCE_REGEX);
+
+	if (ticketsReferences) {
+		const uniqIssuesReferences = uniqBy([...ticketsReferences], 0);
+		uniqIssuesReferences.forEach(({ 0: issueReference }) => {
+			const ticketNumber = Number(issueReference.replace('#', ''));
+			const ticketData = values(tickets).find((ticket) => ticket.number === ticketNumber);
+
+			if (ticketData && ticketData._id) {
+				const referenceRegExp = RegExp(issueReference, 'g');
+				text = text.replace(referenceRegExp, `[${issueReference}](${ticketData._id})`);
+			}
+		});
+	}
+
+	if (usersReferences) {
+		const uniqUsersReferences = uniqBy([...usersReferences], 0);
+
+		uniqUsersReferences.forEach(({ 0: userReference }) => {
+			const referenceRegExp = RegExp(userReference, 'g');
+			text = text.replace(referenceRegExp, `[${userReference}](${userReference.replace('@', '')})`);
+		});
+	}
+
+	if (resourcesReferences) {
+		const uniqResourceReferences = uniqBy([...resourcesReferences], 0);
+
+		uniqResourceReferences.forEach(({ 0: resourceReference }) => {
+			const referenceRegExp = RegExp(resourceReference, 'g');
+			text = text
+				.replace(referenceRegExp, `[${resourceReference}](${resourceReference.replace('#res.', '')} "${type}")`);
+		});
+	}
+
+	return text;
 };

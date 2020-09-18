@@ -35,6 +35,7 @@ const schema = mongoose.Schema({
 	status: {type: String, default: "ok"},
 	errorReason: Object,
 	federate: Boolean,
+	defaultView: Object,
 	permissions: [{
 		_id: false,
 		user: String,
@@ -67,10 +68,36 @@ schema.set("toObject", { getters: true });
 
 schema.statics.modelCodeRegExp = /^[a-zA-Z0-9]{0,50}$/;
 
-schema.methods.updateProperties = function(updateObj) {
-	Object.keys(updateObj).forEach(key => {
+schema.methods.clean = async function() {
+	const views = new (require("./view"))();
+	const cleanedData = this.toObject();
+	if (this.defaultView) {
+		delete cleanedData.defaultView;
+		try {
+			const viewIDStr = utils.uuidToString(this.defaultView);
+			const viewData = await views.findByUID(this._dbcolOptions.account, this._dbcolOptions.model,
+				viewIDStr, {name: 1});
+			if (viewData) {
+				cleanedData.defaultView = {id: viewIDStr, name: viewData.name};
+			}
+		} catch (err) {
+			// This should technically never happen.
+		}
+	}
+
+	return cleanedData;
+};
+
+schema.methods.updateProperties = async function (updateObj) {
+	const views = new (require("./view"))();
+	const keys = Object.keys(updateObj);
+	for(let i = 0; i < keys.length; ++i) {
+		const key = keys[i];
 		if(!updateObj[key]) {
-			return;
+			if (key === "defaultView") {
+				this[key] = undefined;
+			}
+			continue;
 		}
 		switch (key) {
 			case "code":
@@ -78,8 +105,16 @@ schema.methods.updateProperties = function(updateObj) {
 					throw responseCodes.INVALID_MODEL_CODE;
 				}
 			case "unit":
-				if (Object.prototype.toString.call(updateObj[key]) === "[object String]") {
+				if (utils.isString(updateObj[key])) {
 					this.properties[key] = updateObj[key];
+				} else {
+					throw responseCodes.INVALID_ARGUMENTS;
+				}
+				break;
+			case "defaultView":
+				if (utils.isString(updateObj[key]) && utils.isUUID(updateObj[key])) {
+					const res = await views.findByUID(this._dbcolOptions.account, this._dbcolOptions.model, updateObj[key], {_id: 1});
+					this[key] = res._id;
 				} else {
 					throw responseCodes.INVALID_ARGUMENTS;
 				}
@@ -87,8 +122,9 @@ schema.methods.updateProperties = function(updateObj) {
 			default:
 				this[key] = updateObj[key];
 		}
-	});
-	return this.save();
+	}
+	await this.save();
+	return this.clean();
 };
 
 schema.methods.changePermissions = function(permissions, account = this._dbcolOptions.account) {
@@ -189,6 +225,14 @@ schema.statics.createNewSetting = function(teamspace, modelName, data) {
 	setting.name = modelName;
 	setting.desc = data.desc;
 	setting.type = data.type;
+
+	if(data.defaultView) {
+		if (utils.isUUID(data.defaultView)) {
+			setting.defaultView = data.defaultView;
+		} else {
+			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
+		}
+	}
 
 	if(data.subModels) {
 		setting.federate = true;

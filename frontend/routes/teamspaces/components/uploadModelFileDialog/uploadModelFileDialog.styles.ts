@@ -54,3 +54,11 @@ export const CancelButton = styled(Button)`
 		margin: 0 4px 0 0;
 	}
 `;
+
+export const Main = styled.div`
+	text-align: center;
+`;
+
+export const Additional = styled.p`
+	text-align: center;
+`;

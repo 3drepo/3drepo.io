@@ -82,6 +82,7 @@ export const COLOR = {
 	REGENT_GRAY: '#8397AC',
 	SILVER_CHALICE: '#A8A8A8',
 	LIGHT_BLUE: '#6788ab',
+	LIGHT_GREY_BLUE: '#dee2e6',
 	ALICE_BLUE: '#f0f7ff',
 	CLOUD: '#cfcdcc',
 	TUNDORA: '#4d4d4d'

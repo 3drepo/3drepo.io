@@ -17,6 +17,7 @@
 
 import IconButtonComponent from '@material-ui/core/IconButton';
 import Description from '@material-ui/icons/Description';
+import QuoteIconComponent from '@material-ui/icons/FormatQuote';
 import Link from '@material-ui/icons/Link';
 import Photo from '@material-ui/icons/Photo';
 import RemoveCircleOutline from '@material-ui/icons/RemoveCircleOutline';
@@ -38,9 +39,20 @@ export const IconButton = styled(IconButtonComponent)`
 	}
 `;
 
+export const QuoteIcon = styled(QuoteIconComponent)`
+	&& {
+		font-size: 20px;
+	}
+`;
+
 export const ResourcesContainer = styled.div`
 	margin-top: 5px;
 	margin-bottom: 5px;
+`;
+
+export const ResourcesList = styled.div`
+	margin-top: 25px;
+	margin-bottom: 25px;
 `;
 
 export const ActionContainer = styled.span`

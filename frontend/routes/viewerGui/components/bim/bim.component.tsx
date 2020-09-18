@@ -25,6 +25,7 @@ import { BIM_ACTIONS_ITEMS, BIM_ACTIONS_MENU } from '../../../../constants/bim';
 import { getFilters } from '../../../../helpers/bim';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { IMetaRecord } from '../../../../modules/bim/bim.redux';
+import { EmptyStateInfo } from '../../../components/components.styles';
 import {
 	MenuList,
 	StyledItemText,
@@ -34,7 +35,7 @@ import { FilterPanel, ISelectedFilter } from '../../../components/filterPanel/fi
 import { PanelBarActions } from '../panelBarActions';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
-import { Container, EmptyStateInfo, Tabs } from './bim.styles';
+import { Container, Tabs } from './bim.styles';
 import { MetaRecord } from './components/metaRecord/metaRecord.component';
 
 interface IProps {

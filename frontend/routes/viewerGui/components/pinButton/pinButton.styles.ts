@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Button } from '@material-ui/core';
 import Place from '@material-ui/icons/Place';
 import styled from 'styled-components';
+
 import { COLOR } from '../../../../styles';
 
 export const PinIcon = styled(Place).attrs({
@@ -46,5 +46,5 @@ export const Container = styled.span`
 	display: flex;
 	align-items: center;
 	height: 100%;
-	min-height:40px;
+	min-height: 40px;
 `;

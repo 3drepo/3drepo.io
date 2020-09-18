@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -55,6 +55,7 @@ interface IProps {
 	due_date?: number;
 	number?: number;
 	active?: boolean;
+	viewpoint?: { guid: string };
 	hasViewPermission?: boolean;
 	modelLoaded?: boolean;
 	hideThumbnail?: boolean;
@@ -89,12 +90,12 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 	));
 	public renderName = renderWhenTrue(() => <Name as="div"><Truncate lines={1}>{this.props.name}</Truncate></Name>);
 	public renderClosedMessage = renderWhenTrue(() =>
-		<ActionMessage content={`This ${this.props.panelName.slice(0, -1)} is now closed`} />);
+		<ActionMessage content={`This ${(this.props.panelName || 'item').slice(0, -1)} is now closed`} />);
 
 	public renderThumbnail = renderWhenTrue(() => (
 		<ThumbnailWrapper>
 			{this.props.thumbnail ?
-				<Thumbnail src={this.props.thumbnail} /> :
+				<Thumbnail src={`${this.props.thumbnail}?${this.props.viewpoint.guid}`} /> :
 				<ThumbnailPlaceholder>No image</ThumbnailPlaceholder>
 			}
 		</ThumbnailWrapper>
