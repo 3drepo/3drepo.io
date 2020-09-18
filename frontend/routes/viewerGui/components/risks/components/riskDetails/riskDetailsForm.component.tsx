@@ -25,7 +25,7 @@ import { debounce, get, isEmpty, isEqual } from 'lodash';
 import * as Yup from 'yup';
 
 import {
-	ATTACHMENTS_RISK_TYPE, MAIN_RISK_TYPE, RISK_TABS, TREATMENT_RISK_TYPE,
+	ATTACHMENTS_RISK_TYPE, MAIN_RISK_TYPE, RISK_TABS, SEQUENCING_RISK_TYPE, TREATMENT_RISK_TYPE,
 } from '../../../../../../constants/risks';
 import { VIEWER_PANELS_TITLES } from '../../../../../../constants/viewerGui';
 import { calculateLevelOfRisk } from '../../../../../../helpers/risks';
@@ -33,6 +33,7 @@ import { canChangeBasicProperty } from '../../../../../../helpers/risks';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { AttachmentsFormTab } from '../attachmentsFormTab/attachmentsFormTab.component';
 import { MainRiskFormTab } from '../mainRiskFormTab/mainRiskFormTab.component';
+import { SequencingFormTab } from '../sequencingFormTab/sequencingFormTab.component';
 import { TreatmentRiskFormTab } from '../treatmentFormTab/treatmentFormTab.component';
 import { TabContent } from './riskDetails.styles';
 
@@ -179,6 +180,14 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		/>
 	)
 
+	public showSequencingContent = (active) => (
+		<SequencingFormTab
+			active={active}
+			isNewRisk={this.isNewRisk}
+			{...this.props}
+		/>
+	)
+
 	public showAttachmentsContent = (active) => (
 		<AttachmentsFormTab active={active} resources={this.props.risk.resources} {...this.props} />
 	)
@@ -213,11 +222,13 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 				>
 					<Tab label={RISK_TABS.RISK} value={MAIN_RISK_TYPE} />
 					<Tab label={RISK_TABS.TREATMENT} value={TREATMENT_RISK_TYPE} />
+					<Tab label={RISK_TABS.SEQUENCING} value={SEQUENCING_RISK_TYPE} />
 					<Tab {...this.attachmentsProps} value={ATTACHMENTS_RISK_TYPE} />
 				</Tabs>
 				<TabContent>
 					{this.showRiskContent(activeTab === MAIN_RISK_TYPE)}
 					{this.showTreatmentContent(activeTab === TREATMENT_RISK_TYPE)}
+					{this.showSequencingContent(activeTab === SEQUENCING_RISK_TYPE)}
 					{this.showAttachmentsContent(activeTab === ATTACHMENTS_RISK_TYPE)}
 				</TabContent>
 			</Form>
