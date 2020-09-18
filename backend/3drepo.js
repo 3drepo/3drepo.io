@@ -14,7 +14,19 @@
 *	You should have received a copy of the GNU Affero General Public License
 *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
+// Add this to the VERY top of the first file loaded in your app
+var apm = require('elastic-apm-node').start({
+	// Override service name from package.json
+	// Allowed characters: a-z, A-Z, 0-9, -, _, and space
+	serviceName: '',
+  
+	// Use if APM Server requires a token
+	secretToken: 'bpAHPHzND2NqriQynx',
+  
+	// Set custom APM Server URL (default: http://localhost:8200)
+	serverUrl: 'https://ebee69cbebb24122bd9743dd04c939f6.apm.eu-west-2.aws.cloud.es.io:443'
+  })
+  
 "use strict";
 
 const express = require("express");
