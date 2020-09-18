@@ -223,8 +223,17 @@ describe("Sequences", function () {
 	});
 
 	describe("Get sequence state", function() {
-		it("should succeed", function(done) {
-			agent.get(`/${username}/${model}/sequences/state/${stateId}`).expect(200, function(err , res) {
+		it("from latest revision should succeed", function(done) {
+			agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/state/${stateId}`).expect(200, function(err , res) {
+				console.log(res.body);
+				expect(Object.keys(res.body)).to.deep.equal(["transparency", "color"]);
+
+				return done(err);
+			});
+		});
+
+		it("from revision should succeed", function(done) {
+			agent.get(`/${username}/${model}/revision/${oldRevision}/sequences/${sequenceId}/state/${stateId}`).expect(200, function(err , res) {
 				console.log(res.body);
 				expect(Object.keys(res.body)).to.deep.equal(["transparency", "color"]);
 
@@ -233,7 +242,7 @@ describe("Sequences", function () {
 		});
 
 		it("from federation should fail", function(done) {
-			agent.get(`/${username}/${federation}/sequences/state/${stateId}`).expect(404, function(err , res) {
+			agent.get(`/${username}/${federation}/revision/master/head/sequences/${sequenceId}/state/${stateId}`).expect(404, function(err , res) {
 				expect(res.body.value).to.equal(responseCodes.NO_FILE_FOUND.value);
 
 				return done(err);
@@ -241,7 +250,7 @@ describe("Sequences", function () {
 		});
 
 		it("with invalid state ID should fail", function(done) {
-			agent.get(`/${username}/${model}/sequences/state/invalidId`).expect(404, function(err , res) {
+			agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/state/invalidId`).expect(404, function(err , res) {
 				expect(res.body.value).to.equal(responseCodes.NO_FILE_FOUND.value);
 
 				return done(err);

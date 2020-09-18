@@ -61,7 +61,7 @@ class Sequence {
 	}
 
 	async getSequenceActivityDetail(account, model, activityId, cleanResponse = false) {
-		const dbCol = await db.getCollection(account, model + ".tasks");
+		const dbCol = await db.getCollection(account, model + ".activities");
 		activityId = utils.stringToUUID(activityId);
 
 		const activity = await dbCol.findOne({"_id": activityId});

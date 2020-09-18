@@ -29,18 +29,25 @@ const Sequence = require("../models/sequence");
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
+ * @apiParam {String} [revId] Revision unique ID
  */
 
 /**
- * @api {get} /:teamspace/:model/sequences/activities/:activityId Get activity
+ * @api {get} /:teamspace/:model/revision(/master/head/|/:revId)/sequences/:sequenceId/activities/:activityId Get activity
  * @apiName getSequenceActivityDetail
  * @apiGroup Sequences
  * @apiDescription Get sequence activity details.
  *
  * @apiUse Sequences
  *
- * @apiExample {get} Example usage
- * GET /acme/00000000-0000-0000-0000-000000000000/sequences/activities/00000000-0000-0002-0001-000000000001 HTTP/1.1
+ * @apiParam {String} sequenceId Sequence ID
+ * @apiParam {String} activityId Activity ID
+ *
+ * @apiExample {get} Example usage (/master/head)
+ * GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences/00000000-0000-0000-0001-000000000001/activities/00000000-0000-0002-0001-000000000001 HTTP/1.1
+ *
+ * @apiExample {get} Example usage (/:revId)
+ * GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/sequences/00000000-0000-0000-0001-000000000001/activities/00000000-0000-0002-0001-000000000001 HTTP/1.1
  *
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
@@ -67,11 +74,11 @@ const Sequence = require("../models/sequence");
  * 	}
  * }
  */
-router.get("/revision/master/head/sequences/activities/:activityId", middlewares.issue.canView, getSequenceActivityDetail);
-router.get("/revision/:revId/sequences/activities/:activityId", middlewares.issue.canView, getSequenceActivityDetail);
+router.get("/revision/master/head/sequences/:sequenceId/activities/:activityId", middlewares.issue.canView, getSequenceActivityDetail);
+router.get("/revision/:revId/sequences/:sequenceId/activities/:activityId", middlewares.issue.canView, getSequenceActivityDetail);
 
 /**
- * @api {get} /:teamspace/:model/sequences/:sequenceId/activities Get all activities
+ * @api {get} /:teamspace/:model/revision(/master/head/|/:revId)/sequences/:sequenceId/activities Get all activities
  * @apiName getSequenceActivities
  * @apiGroup Sequences
  * @apiDescription Get all sequence activities.
@@ -80,39 +87,42 @@ router.get("/revision/:revId/sequences/activities/:activityId", middlewares.issu
  *
  * @apiParam {String} sequenceId Sequence unique ID
  *
- * @apiExample {get} Example usage
- * GET /acme/00000000-0000-0000-0000-000000000000/sequences/activities HTTP/1.1
+ * @apiExample {get} Example usage (/master/head)
+ * GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences/00000000-0000-0000-0001-000000000001/activities HTTP/1.1
+ *
+ * @apiExample {get} Example usage (/:revId)
+ * GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/sequences/00000000-0000-0000-0001-000000000001/activities HTTP/1.1
  *
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
  * {
  * 	"tasks":[
  * 		{
- * 			"id":"00000000-0000-0000-0001-000000000001",
+ * 			"id":"00000000-0000-0001-0001-000000000001",
  * 			"name":"Construction",
  * 			"startDate":1244246400000,
  * 			"endDate":1244246450000,
  * 			"subTasks":[
  * 				{
- * 					"id":"00000000-0000-0001-0001-000000000001",
+ * 					"id":"00000000-0001-0001-0001-000000000001",
  * 					"name":"Prepare site",
  * 					"startDate":1244246400000,
  * 					"endDate":1244246430000,
  * 					"subTasks":[
  * 						{
- * 							"id":"00000000-0001-0001-0001-000000000001",
+ * 							"id":"00000001-0001-0001-0001-000000000001",
  * 							"name":"Erect site hoarding",
  * 							"startDate":1244246400000,
  * 							"endDate":1244246410000
  * 						},
  * 						{
- * 							"id":"00000000-0002-0001-0001-000000000001",
+ * 							"id":"00000002-0001-0001-0001-000000000001",
  * 							"name":"Clear existing structures",
  * 							"startDate":1244246410000,
  * 							"endDate":1244246420000
  * 						},
  * 						{
- * 							"id":"00000000-0003-0001-0001-000000000001",
+ * 							"id":"00000003-0001-0001-0001-000000000001",
  * 							"name":"Smooth work surfaces",
  * 							"startDate":1244246420000,
  * 							"endDate":1244246430000
@@ -120,19 +130,19 @@ router.get("/revision/:revId/sequences/activities/:activityId", middlewares.issu
  * 					]
  * 				},
  * 				{
- * 					"id":"00000000-0000-0002-0001-000000000001",
+ * 					"id":"00000001-0002-0001-0001-000000000001",
  * 					"name":"Construct tunnel",
  * 					"startDate":1244246430000,
  * 					"endDate":1244246450000,
  * 					"subTasks":[
  * 						{
- * 							"id":"00000000-0001-0002-0001-000000000001",
+ * 							"id":"00000001-0002-0001-0001-000000000001",
  * 							"name":"Deploy instant tunnel",
  * 							"startDate":1244246430000,
  * 							"endDate":1244246440000
  * 						},
  * 						{
- * 							"id":"00000000-0002-0002-0001-000000000001",
+ * 							"id":"00000002-0002-0001-0001-000000000001",
  * 							"name":"Add road markings",
  * 							"startDate":1244246440000,
  * 							"endDate":1244246450000
@@ -144,20 +154,25 @@ router.get("/revision/:revId/sequences/activities/:activityId", middlewares.issu
  * 	]
  * }
  */
-router.get("/sequences/:sequenceId/activities", middlewares.issue.canView, getSequenceActivities);
+router.get("/revision/master/head/sequences/:sequenceId/activities", middlewares.issue.canView, getSequenceActivities);
+router.get("/revision/:revId/sequences/:sequenceId/activities", middlewares.issue.canView, getSequenceActivities);
 
 /**
- * @api {get} /:teamspace/:model/sequences/state/:stateId Get state
+ * @api {get} /:teamspace/:model/revision(/master/head/|/:revId)/sequences/:sequenceId/state/:stateId Get state
  * @apiName getSequenceState
  * @apiGroup Sequences
  * @apiDescription Get state of model in sequence.
  *
  * @apiUse Sequences
  *
+ * @apiParam {String} sequenceId Sequence unique ID
  * @apiParam {String} stateId State unique ID
  *
- * @apiExample {get} Example usage
- * GET /acme/00000000-0000-0000-0000-000000000000/sequences/state/00000000-0000-0000-0001-000000000002 HTTP/1.1
+ * @apiExample {get} Example usage (/master/head)
+ * GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences/00000000-0000-0000-0001-000000000001/state/00000000-0000-0000-0001-000000000002 HTTP/1.1
+ *
+ * @apiExample {get} Example usage (/:revId)
+ * GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/sequences/00000000-0000-0000-0001-000000000001/state/00000000-0000-0000-0001-000000000002 HTTP/1.1
  *
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
@@ -227,7 +242,8 @@ router.get("/sequences/:sequenceId/activities", middlewares.issue.canView, getSe
  * 		}
  * 	]
  */
-router.get("/sequences/state/:stateId", middlewares.issue.canView, getSequenceState);
+router.get("/revision/master/head/sequences/:sequenceId/state/:stateId", middlewares.issue.canView, getSequenceState);
+router.get("/revision/:revId/sequences/:sequenceId/state/:stateId", middlewares.issue.canView, getSequenceState);
 
 /**
  * @api {get} /:teamspace/:model/revision(/master/head/|/:revId)/sequences List all sequences
@@ -236,8 +252,6 @@ router.get("/sequences/state/:stateId", middlewares.issue.canView, getSequenceSt
  * @apiDescription List all sequences associated with the model.
  *
  * @apiUse Sequences
- *
- * @apiParam {String} [revId] Revision unique ID
  *
  * @apiExample {get} Example usage (/master/head)
  * GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences HTTP/1.1
