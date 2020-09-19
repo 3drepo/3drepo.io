@@ -15,28 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import * as React from 'react';
 
-import { SequencingDates } from '../../../../../components/sequencingDates/sequencingDates.component';
-import { Content } from '../riskDetails/riskDetails.styles';
+import InputLabel from '@material-ui/core/InputLabel';
 
 interface IProps {
-	active: boolean;
-	canComment: boolean;
-	formRef: any;
+	canEdit: boolean;
+	formRef?: any;
 	isNewRisk: boolean;
 }
 
-export const SequencingFormTab: React.FunctionComponent<IProps> = ({
-	active, canComment, formRef, isNewRisk,
-}) => {
-	return (
-		<Content active={active}>
-			<SequencingDates
-				canEdit={canComment}
-				formRef={formRef}
-				isNewRisk={isNewRisk}
-			/>
-		</Content>
-	);
-};
+interface IState {
+	value: any;
+}
+
+export class SequencingDates extends React.PureComponent<IProps, IState> {
+	public render() {
+		return (
+			<InputLabel shrink>Placeholder</InputLabel>
+		);
+	}
+}
