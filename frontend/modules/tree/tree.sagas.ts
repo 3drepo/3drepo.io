@@ -52,7 +52,7 @@ import { TreeActions, TreeTypes } from './tree.redux';
 
 let setReady: (val: boolean) => void;
 let isReady: Promise<boolean> = new Promise((accept) => setReady = accept);
-let initiliased = false;
+let initialised = false;
 
 const unhighlightObjects = (objects = []) => {
 	for (let index = 0, size = objects.length; index < size; index++) {
@@ -142,12 +142,12 @@ const setIsTreeProcessed = (isProcessed) => {
 function* fetchFullTree({ teamspace, modelId, revision }) {
 	yield put(TreeActions.setIsPending(true));
 
-	if (initiliased) {
+	if (initialised) {
 		setReady(false);
 		isReady = new Promise((accept) => setReady = accept);
 	}
 
-	initiliased = true;
+	initialised = true;
 	try {
 		let modelSettings = yield select(selectSettings);
 
