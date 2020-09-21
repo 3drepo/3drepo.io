@@ -357,16 +357,17 @@ function* setCamera({ params }) {
 
 function* loadModel() {
 	try {
+		yield Viewer.isViewerReady();
+
 		const { teamspace, model } = yield select(selectUrlParams);
 		const revision = yield select(selectCurrentRevisionId);
 		const modelSettings = yield select(selectSettings);
 		const selectedViewpoint = yield select(selectInitialView);
 
-		yield Viewer.isViewerReady();
 		yield Viewer.loadViewerModel(teamspace, model, 'master', revision || 'head', selectedViewpoint?.viewpoint);
 		yield Viewer.updateViewerSettings(modelSettings);
 
-		if (selectedViewpoint) {
+		if (selectedViewpoint) { // This is to have the viewpoint state in redux the same as in unity
 			yield put(ViewpointsActions.showViewpoint(teamspace, model, selectedViewpoint, true));
 		}
 
