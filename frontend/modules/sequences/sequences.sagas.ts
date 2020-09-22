@@ -60,7 +60,7 @@ export function* fetchTasksDefinitions({sequenceId}) {
 		const model = yield select(selectCurrentModel);
 		const tasksDefinitions = yield select(selectTasksDefinitions);
 
-		if (!tasksDefinitions) {
+		if (!tasksDefinitions && sequenceId) {
 			// API CALL TO GET TASKS
 			const {data} = yield API.getSequenceActivities(teamspace, model, revision, sequenceId);
 			yield put(SequencesActions.fetchTasksDefinitionsSuccess(sequenceId, data.tasks));
@@ -68,6 +68,7 @@ export function* fetchTasksDefinitions({sequenceId}) {
 
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'sequences', error));
+		yield put(SequencesActions.fetchTasksDefinitionsSuccess(sequenceId, []));
 	}
 }
 
@@ -149,8 +150,8 @@ export function* restoreIfcSpacesHidden() {
 }
 
 export function* setSelectedSequence({ sequenceId }) {
-	yield put(SequencesActions.fetchTasksDefinitions(sequenceId));
 	yield put(SequencesActions.setSelectedSequenceSuccess(sequenceId));
+	yield put(SequencesActions.fetchTasksDefinitions(sequenceId));
 }
 
 export default function* SequencesSaga() {
