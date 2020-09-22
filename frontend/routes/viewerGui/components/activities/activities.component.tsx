@@ -29,6 +29,7 @@ import { SequenceTasksListItem } from '../sequences/sequences.styles';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { SearchField } from '../views/views.styles';
 import { Container } from './activities.styles';
+import { ActivityDetails } from './components/activityDetails/';
 
 interface IProps {
 	viewer: any;
@@ -78,6 +79,8 @@ export class Activities extends React.PureComponent<IProps, IState> {
 
 	private handleOpenSearchMode = () => this.props.setComponentState({ searchEnabled: true });
 
+	private handleItemClick = (task) => this.props.fetchDetails(task.id);
+
 	private renderActions = () => (
 		<PanelBarActions
 			hideLock
@@ -121,11 +124,15 @@ export class Activities extends React.PureComponent<IProps, IState> {
 		<EmptyStateInfo>No activities matched</EmptyStateInfo>
 	));
 
+	public renderDetailsView = renderWhenTrue(() => (
+		<ActivityDetails />
+	));
+
 	public renderListView = renderWhenTrue(() => (
 		<Container>
 			{this.state.filteredActivities.map((t) => (
 				<SequenceTasksListItem key={t._id}>
-					<TaskItem task={t} defaultCollapsed />
+					<TaskItem task={t} defaultCollapsed onItemClick={this.handleItemClick} />
 				</SequenceTasksListItem>
 			))}
 		</Container>
@@ -144,6 +151,8 @@ export class Activities extends React.PureComponent<IProps, IState> {
 				{this.renderSearch(searchEnabled && !showDetails)}
 				{this.renderNotFound(searchEnabled && !showDetails && !this.state.filteredActivities.length)}
 				{this.renderListView(!showDetails)}
+				{this.renderDetailsView(showDetails)}
+
 			</ViewerPanel>
 		);
 	}

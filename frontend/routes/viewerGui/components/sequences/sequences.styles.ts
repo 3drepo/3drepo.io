@@ -122,6 +122,11 @@ export const TaskItemLabel = styled.div`
 	margin-top: 3px;
 	line-height: 1.3;
 	margin-bottom: 2px;
+	${(props: any) => props.clickable && css`
+		&:hover {
+			cursor: pointer;
+		}
+	`}
 `;
 
 export const SequenceRow = styled(Grid).attrs({

@@ -20,6 +20,7 @@ import { put, select, takeLatest } from 'redux-saga/effects';
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
 import { selectCurrentModel, selectCurrentModelTeamspace, selectCurrentRevisionId } from '../model';
+import { selectSelectedSequenceId } from '../sequences';
 import { ActivitiesActions, ActivitiesTypes } from './activities.redux';
 
 export function* fetchActivities() {
@@ -29,8 +30,9 @@ export function* fetchActivities() {
 		const teamspace = yield select(selectCurrentModelTeamspace);
 		const revision = yield select(selectCurrentRevisionId);
 		const model = yield select(selectCurrentModel);
+		const sequenceId =  yield select(selectSelectedSequenceId);
 
-		const { data: activities } = yield API.getSequenceActivities(teamspace, model, revision);
+		const { data: activities } = yield API.getSequenceActivities(teamspace, model, revision, sequenceId);
 
 		yield put(ActivitiesActions.fetchActivitiesSuccess(activities));
 		yield put(ActivitiesActions.setPendingState(false));
@@ -46,10 +48,9 @@ function* fetchDetails({ activityId }) {
 		const teamspace = yield select(selectCurrentModelTeamspace);
 		const revision = yield select(selectCurrentRevisionId);
 		const model = yield select(selectCurrentModel);
+		const sequenceId =  yield select(selectSelectedSequenceId);
 
-		console.error('fetchDetails activityId:', activityId);
-
-		const { data: activity } = yield API.getSequenceActivityDetail(teamspace, model, revision, activityId);
+		const { data: activity } = yield API.getSequenceActivityDetail(teamspace, model, revision, sequenceId, activityId);
 
 		yield put(ActivitiesActions.setComponentState({ isPending: false, details: activity }));
 	} catch (error) {

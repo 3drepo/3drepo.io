@@ -26,6 +26,7 @@ interface IProps {
 	minDate: Date;
 	maxDate: Date;
 	loadingFrame: boolean;
+	fetchActivityDetails: (id: string) => void;
 }
 
 interface IState {
@@ -50,9 +51,7 @@ export class TasksList extends React.PureComponent<IProps, IState> {
 		return 'Activities from ' + formatShortDateTime(minDate) + ' to ' + formatShortDateTime(maxDate);
 	}
 
-	public toggleCollapse = () => {
-		this.setState({collapsed: !this.state.collapsed});
-	}
+	private handleItemClick = (task) => this.props.fetchActivityDetails(task.id);
 
 	public render = () => {
 		const { tasks, loadingFrame } = this.props;
@@ -65,7 +64,7 @@ export class TasksList extends React.PureComponent<IProps, IState> {
 						{
 							tasks.map((t) => (
 								<SequenceTasksListItem  key={t._id}>
-									<TaskItem task={t} />
+									<TaskItem task={t} onItemClick={this.handleItemClick} />
 								</SequenceTasksListItem>
 							))
 						}
