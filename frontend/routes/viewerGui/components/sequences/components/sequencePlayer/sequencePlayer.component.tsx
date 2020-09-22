@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Grid, IconButton, MenuItem, Select } from '@material-ui/core';
+import { Grid, IconButton, MenuItem, Select, Switch } from '@material-ui/core';
 import StepForwardIcon from '@material-ui/icons/FastForward';
 import StepBackIcon from '@material-ui/icons/FastRewind';
 import PlayArrow from '@material-ui/icons/PlayArrow';
@@ -27,11 +27,12 @@ import DayJsUtils from '@date-io/dayjs';
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 import React from 'react';
 import { STEP_SCALE } from '../../../../../../constants/sequences';
+import { VIEWER_PANELS } from '../../../../../../constants/viewerGui';
 import { getDateByStep } from '../../../../../../modules/sequences/sequences.helper';
 import { LONG_DATE_TIME_FORMAT_NO_MINUTES } from '../../../../../../services/formatting/formatDate';
 import { DatePicker, IntervalRow, SequencePlayerColumn,
 	SequencePlayerContainer, SequenceRow, SequenceSlider,
-	SliderRow, StepInput } from '../../sequences.styles';
+	SliderRow, StepInput, SwitchItem } from '../../sequences.styles';
 
 interface IProps {
 	max: Date;
@@ -46,6 +47,8 @@ interface IProps {
 	fetchFrame: (date: Date) => void;
 	fetchSelectedFrame: () => void;
 	loadingFrame: boolean;
+	rightPanels: string[];
+	setPanelVisibility: (panelName) => void;
 }
 
 interface IState {
@@ -308,6 +311,14 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 							</Grid>
 						</SliderRow>
 					</MuiPickersUtilsProvider>
+					<SwitchItem>
+						<Switch
+							checked={this.props.rightPanels.includes(VIEWER_PANELS.ACTIVITIES)}
+							onChange={() => this.props.setPanelVisibility(VIEWER_PANELS.ACTIVITIES)}
+							color="primary"
+						/>
+						Full Activity List
+					</SwitchItem>
 				</SequencePlayerColumn>
 			</SequencePlayerContainer>
 		);

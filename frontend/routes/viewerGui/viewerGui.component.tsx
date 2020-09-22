@@ -22,6 +22,7 @@ import { VIEWER_EVENTS } from '../../constants/viewer';
 import { VIEWER_LEFT_PANELS, VIEWER_PANELS } from '../../constants/viewerGui';
 import { renderWhenTrue } from '../../helpers/rendering';
 import { MultiSelect } from '../../services/viewer/multiSelect';
+import { Activities } from './components/activities/';
 import { Bim } from './components/bim';
 import { CloseFocusModeButton } from './components/closeFocusModeButton';
 import { Compare } from './components/compare';
@@ -212,6 +213,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	private renderRightPanels = (panels) => (
 		<RightPanels>
 			{panels.includes(VIEWER_PANELS.BIM) && <Bim {...this.urlParams} />}
+			{panels.includes(VIEWER_PANELS.ACTIVITIES) && <Activities {...this.urlParams} />}
 		</RightPanels>
 	)
 }

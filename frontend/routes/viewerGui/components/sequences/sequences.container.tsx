@@ -25,6 +25,7 @@ import { selectCurrentActivities, selectIsLoadingFrame, selectMaxDate, selectMin
 	selectStepScale,
 	SequencesActions} from '../../../../modules/sequences';
 
+import { selectRightPanels, ViewerGuiActions } from '../../../../modules/viewerGui';
 import { Sequences } from './sequences.component';
 
 const mapStateToProps = createStructuredSelector({
@@ -39,7 +40,8 @@ const mapStateToProps = createStructuredSelector({
 	stepScale: selectStepScale,
 	currentTasks: selectCurrentActivities,
 	loadingFrame: selectIsLoadingFrame,
-	selectedSequence: selectSelectedSequence
+	selectedSequence: selectSelectedSequence,
+	rightPanels: selectRightPanels,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -50,7 +52,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchFrame: SequencesActions.fetchFrame,
 	setSelectedSequence: SequencesActions.setSelectedSequence,
 	restoreIfcSpacesHidden: SequencesActions.restoreIfcSpacesHidden,
-	fetchSelectedFrame: SequencesActions.fetchSelectedFrame
+	fetchSelectedFrame: SequencesActions.fetchSelectedFrame,
+	setPanelVisibility: ViewerGuiActions.setPanelVisibility,
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Sequences));

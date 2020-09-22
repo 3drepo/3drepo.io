@@ -52,15 +52,16 @@ interface IProps {
 	currentTasks: any[];
 	loadingFrame: boolean;
 	selectedSequence: any;
+	rightPanels: string[];
+	setPanelVisibility: (panelName) => void;
 }
 
 const da =  new Date();
 
-const SequenceDetails = ({ minDate, maxDate, selectedDate,
-	selectedEndingDate, setSelectedDate, stepInterval,
-	stepScale, setStepInterval, setStepScale,
-	fetchSelectedFrame, currentTasks, loadingFrame,
-	fetchFrame }) => (
+const SequenceDetails = ({
+	minDate, maxDate, selectedDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
+	setStepScale, fetchSelectedFrame, currentTasks, loadingFrame, fetchFrame, rightPanels, setPanelVisibility,
+}) => (
 		<>
 			<SequencePlayer
 				min={minDate}
@@ -75,11 +76,14 @@ const SequenceDetails = ({ minDate, maxDate, selectedDate,
 				loadingFrame={loadingFrame}
 				fetchFrame={fetchFrame}
 				fetchSelectedFrame={fetchSelectedFrame}
+				rightPanels={rightPanels}
+				setPanelVisibility={setPanelVisibility}
 			/>
 			<TasksList tasks={currentTasks}
 				minDate={selectedDate}
 				maxDate={selectedEndingDate}
-				loadingFrame={loadingFrame} />
+				loadingFrame={loadingFrame}
+			/>
 		</>
 	);
 

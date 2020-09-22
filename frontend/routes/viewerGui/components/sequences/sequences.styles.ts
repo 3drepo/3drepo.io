@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import {
 	VIEWER_PANELS,
@@ -24,7 +24,7 @@ import {
 	VIEWER_PANELS_TITLES
 } from '../../../../constants/viewerGui';
 
-import { Grid, IconButton, Input } from '@material-ui/core';
+import { Grid, IconButton, Input, ListItem } from '@material-ui/core';
 import DotIcon from '@material-ui/icons/FiberManualRecord';
 import Slider from '@material-ui/lab/Slider';
 import { COLOR, FONT_WEIGHT } from '../../../../styles';
@@ -56,7 +56,7 @@ export const SequenceSlider = styled(Slider)`
 
 export const SequencePlayerContainer = styled.div`
 	display: block;
-	height: 128px;
+	height: 165px
 `;
 
 export const SequenceTasksListContainer = styled(ViewerPanelContent)`
@@ -212,4 +212,13 @@ export const SequenceDatesContainer = styled(Grid).attrs({
 
 export const LoaderContainer = styled.div`
 	padding-top: 30px;
+`;
+
+export const SwitchItem = styled(ListItem)`
+	display: flex;
+	font-size: 14px;
+	&& {
+		justify-content: flex-end;
+		height: 35px;
+	}
 `;
