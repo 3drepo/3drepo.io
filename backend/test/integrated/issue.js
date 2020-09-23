@@ -650,6 +650,39 @@ describe("Issues", function () {
 			], done);
 		});
 
+		it("remove sequence start/end date should succeed", function(done) {
+			const issue = {...baseIssue, "name":"Issue test", "sequence_start":1476107839555, "sequence_end":1476107839855};
+			const sequenceData = {
+				sequence_start: undefined,
+				sequence_end: undefined
+			};
+			let issueId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200, function(err, res) {
+							issueId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/issues/${issueId}`)
+						.send(sequenceData)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/issues/${issueId}`)
+						.expect(200, function(err, res) {
+							expect(res.body.sequence_start).to.not.exist;
+							expect(res.body.sequence_end).to.not.exist;
+							done(err);
+						});
+				}
+			], done);
+		});
+
 		it("add sequence start/end date with invalid data should fail", function(done) {
 			const issue = {...baseIssue, "name":"Issue test"};
 			const sequenceData = {

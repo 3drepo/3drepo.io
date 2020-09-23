@@ -201,12 +201,22 @@ class Ticket extends View {
 		const systemComments = [];
 		const fields = Object.keys(data);
 
+		const updateData = {};
+
 		let newViewpoint;
 
 		fields.forEach(field => {
 			// handle viewpoint later
 			if (field === "viewpoint") {
 				return;
+			}
+
+			if (undefined === data[field]) {
+				if (!updateData["$unset"]) {
+					updateData["$unset"] = {};
+				}
+
+				updateData["$unset"]["field"] = "";
 			}
 
 			this.handleFieldUpdate(account, model, sessionId, id, user, field, oldTicket, data, systemComments);
@@ -290,8 +300,10 @@ class Ticket extends View {
 		const _id = utils.stringToUUID(id);
 
 		const tickets = await this.getCollection(account, model);
+
 		if (Object.keys(data).length > 0) {
-			await tickets.update({ _id }, { $set: data });
+			updateData["$set"] = data;
+			await tickets.update({ _id }, updateData);
 		}
 
 		// 7. Return the updated data and the old ticket
@@ -312,7 +324,7 @@ class Ticket extends View {
 	}
 
 	handleFieldUpdate(account, model, sessionId, id, user, field, oldTicket, data, systemComments) {
-		if (Object.prototype.toString.call(data[field]) !== this.fieldTypes[field]) {
+		if (undefined !== data[field] && !utils.typeMatch(data[field], this.fieldTypes[field])) {
 			throw responseCodes.INVALID_ARGUMENTS;
 		}
 
