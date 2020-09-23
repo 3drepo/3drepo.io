@@ -172,7 +172,10 @@ export class PasswordChange extends React.PureComponent<IProps, IState> {
 				<Grid item xs={9} sm={7} md={5} lg={3} xl={2}>
 					<Panel title="Forgot password">
 						{ this.props.message
-							? <Message>{this.props.message}</Message>
+							? <>
+								<Message>{this.props.message}</Message>
+								{this.renderBackToLogin()}
+							</>
 							:
 							<>
 								{hasInvalidParams && this.renderInvalidParams()}
