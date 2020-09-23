@@ -35,6 +35,7 @@ import {
 	selectRisks,
 	RisksActions,
 } from '../../../../../../modules/risks';
+import { SequencesActions } from '../../../../../../modules/sequences';
 import { ViewpointsActions } from '../../../../../../modules/viewpoints';
 import { withViewer } from '../../../../../../services/viewer/viewer';
 import { RiskDetails } from './riskDetails.component';
@@ -77,6 +78,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	attachLinkResources: RisksActions.attachLinkResources,
 	showDialog: DialogActions.showDialog,
 	showMitigationSuggestions: RisksActions.showMitigationSuggestions,
+	showSequenceDate: SequencesActions.showSequenceDate,
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(RiskDetails));

@@ -19,25 +19,23 @@ import { put, select, take, takeLatest } from 'redux-saga/effects';
 
 import { selectSelectedSequenceId, selectSelectedStateId, selectStateDefinitions,
 	SequencesActions, SequencesTypes } from '.';
+import { VIEWER_PANELS } from '../../constants/viewerGui';
+
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
 import { selectCurrentModel, selectCurrentModelTeamspace,
 	selectCurrentRevisionId, selectSettings } from '../model/model.selectors';
 import { dispatch } from '../store';
 import { selectIfcSpacesHidden, TreeActions } from '../tree';
+import { selectLeftPanels, ViewerGuiActions } from '../viewerGui';
 import { getSelectedFrame } from './sequences.helper';
 import { selectFrames, selectIfcSpacesHiddenSaved,
-	selectSelectedEndingDate, selectSelectedStartingDate, selectSequences,
-	selectSequenceModel,
-	selectTasksDefinitions} from './sequences.selectors';
+	selectSelectedEndingDate, selectSelectedSequence, selectSelectedStartingDate,
+	selectSequences,
+	selectSequenceModel, selectTasksDefinitions} from './sequences.selectors';
 
-const delay = async (time) => {
-	return new Promise( (resolve, reject) => {
-		setTimeout(() => {
-			resolve(true);
-		}, time);
-	});
-};
+const areSequencesFromModel = (modelSettings, sequences) => (sequences || [])
+.some((s) => s.model === modelSettings._id || (modelSettings.subModels || []).some((sm) => sm.model === s.model) );
 
 export function* fetchSequences() {
 	try {
@@ -126,10 +124,8 @@ export function* initializeSequences() {
 
 	const sequences = (yield select(selectSequences));
 	const modelSettings = yield select(selectSettings);
-	const areSequencesFromModel = (sequences || [])
-		.some((s) => s.model === modelSettings._id || (modelSettings.subModels || []).some((sm) => sm.model === s.model) );
 
-	if (!sequences || !areSequencesFromModel) {
+	if (!sequences || !areSequencesFromModel(modelSettings, sequences)) {
 		yield put(SequencesActions.fetchSequences());
 		yield take(SequencesTypes.FETCH_SEQUENCES_SUCCESS);
 		const date = yield select(selectSelectedStartingDate);
@@ -154,6 +150,34 @@ export function* setSelectedSequence({ sequenceId }) {
 	yield put(SequencesActions.fetchTasksDefinitions(sequenceId));
 }
 
+export function* showSequenceDate({ date }) {
+	// 1 - if sequence panel is closed, open it
+	const sequencePanelVisible = (yield select(selectLeftPanels))[VIEWER_PANELS.SEQUENCES];
+
+	if (!sequencePanelVisible) {
+		yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.SEQUENCES, true));
+	}
+
+	// 2 - if sequence has not been selected, select it
+	let sequences = (yield select(selectSequences));
+	const modelSettings = yield select(selectSettings);
+
+	if (!sequences || !areSequencesFromModel(modelSettings, sequences)) {
+		yield put(SequencesActions.initializeSequences());
+		yield take(SequencesTypes.FETCH_SEQUENCES_SUCCESS);
+	}
+
+	const selectedSequence = yield select(selectSelectedSequence);
+	if (!selectedSequence) {
+		sequences = yield select(selectSequences);
+		yield put(SequencesActions.setSelectedSequence(sequences[0]._id));
+	}
+
+	// 3 - if the date has not been selected, select it
+
+	yield put(SequencesActions.setSelectedFrame(date));
+}
+
 export default function* SequencesSaga() {
 	yield takeLatest(SequencesTypes.FETCH_SEQUENCES, fetchSequences);
 	yield takeLatest(SequencesTypes.SET_SELECTED_FRAME, setSelectedFrame);
@@ -163,4 +187,5 @@ export default function* SequencesSaga() {
 	yield takeLatest(SequencesTypes.FETCH_TASKS_DEFINITIONS, fetchTasksDefinitions);
 	yield takeLatest(SequencesTypes.SET_SELECTED_SEQUENCE, setSelectedSequence);
 	yield takeLatest(SequencesTypes.FETCH_SELECTED_FRAME, fetchSelectedFrame);
+	yield takeLatest(SequencesTypes.SHOW_SEQUENCE_DATE, showSequenceDate);
 }

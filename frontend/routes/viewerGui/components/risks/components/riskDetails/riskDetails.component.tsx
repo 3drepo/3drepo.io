@@ -75,6 +75,7 @@ interface IProps {
 	dialogId?: string;
 	postCommentIsPending?: boolean;
 	updateViewpoint: (screenshot?: string) => void;
+	showSequenceDate: (date) => void;
 }
 
 interface IState {
@@ -286,6 +287,8 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				canComment={this.userCanComment()}
 				showMitigationSuggestions={this.props.showMitigationSuggestions}
 				formRef={this.formRef}
+				showSequenceDate={this.props.showSequenceDate}
+
 			/>
 		);
 	}

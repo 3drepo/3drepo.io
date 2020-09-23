@@ -69,6 +69,7 @@ interface IProps {
 	onUpdateViewpoint: () => void;
 	onTakeScreenshot: () => void;
 	onUploadScreenshot: (image) => void;
+	showSequenceDate: (date) => void;
 }
 
 interface IState {
@@ -185,6 +186,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 			active={active}
 			isNewRisk={this.isNewRisk}
 			{...this.props}
+			showSequenceDate={this.props.showSequenceDate}
 		/>
 	)
 
@@ -260,7 +262,8 @@ export const RiskDetailsForm = withFormik({
 			residual_consequence: risk.residual_consequence,
 			residual_level_of_risk: risk.residual_level_of_risk,
 			overall_level_of_risk: risk.overall_level_of_risk,
-			residual_risk: risk.residual_risk
+			residual_risk: risk.residual_risk,
+			sequence_start: risk.sequence_start
 		});
 	},
 	handleSubmit: (values, { props }) => {

@@ -25,17 +25,17 @@ interface IProps {
 	canComment: boolean;
 	formRef: any;
 	isNewRisk: boolean;
+	showSequenceDate: (value) => void;
 }
 
 export const SequencingFormTab: React.FunctionComponent<IProps> = ({
-	active, canComment, formRef, isNewRisk,
+	active, canComment, showSequenceDate,
 }) => {
 	return (
 		<Content active={active}>
 			<SequencingDates
 				canEdit={canComment}
-				formRef={formRef}
-				isNewRisk={isNewRisk}
+				showSequenceDate={showSequenceDate}
 			/>
 		</Content>
 	);

@@ -18,21 +18,58 @@
 import * as React from 'react';
 
 import InputLabel from '@material-ui/core/InputLabel';
+import CloseIcon from '@material-ui/icons/Close';
+import SequencesIcon from '@material-ui/icons/Movie';
+
+import DayJsUtils from '@date-io/dayjs';
+
+import { Field } from 'formik';
+import { MuiPickersUtilsProvider } from 'material-ui-pickers';
+import { NAMED_MONTH_DATETIME_FORMAT } from '../../../services/formatting/formatDate';
+import { DateField } from '../dateField/dateField.component';
 
 interface IProps {
 	canEdit: boolean;
-	formRef?: any;
-	isNewRisk: boolean;
+	showSequenceDate: (date) => void;
 }
 
 interface IState {
-	value: any;
+	valued: any;
 }
+
+const SequenceDateField = ({value, name, onChange, showSequenceDate}) => {
+	return (
+		<>
+			<DateField
+				format={NAMED_MONTH_DATETIME_FORMAT}
+				dateTime
+				name={name}
+				inputId={name}
+				value={value}
+				onChange={onChange}
+			/>
+
+			<SequencesIcon onClick={(e) => showSequenceDate(value)} />
+			<CloseIcon onClick={(e) => {
+				onChange({target: { value: null, name }});
+			}} />
+		</>
+	);
+
+};
 
 export class SequencingDates extends React.PureComponent<IProps, IState> {
 	public render() {
 		return (
-			<InputLabel shrink>Placeholder</InputLabel>
+			<MuiPickersUtilsProvider utils={DayJsUtils}>
+				<InputLabel shrink>Start time</InputLabel>
+				<Field name="sequence_start" render={({ field }) => (
+					<SequenceDateField
+						{...field}
+						showSequenceDate={this.props.showSequenceDate}
+					/>
+				)} />
+			</MuiPickersUtilsProvider>
 		);
 	}
 }

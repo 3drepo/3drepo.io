@@ -36,6 +36,7 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	setIfcSpacesHidden: ['ifcSpacesHidden'],
 	fetchTasksDefinitions: ['sequenceId'],
 	fetchTasksDefinitionsSuccess: ['sequenceId', 'tasks'],
+	showSequenceDate: ['date'],
 	restoreIfcSpacesHidden: [],
 	reset: []
 }, { prefix: 'SEQUENCES/' });
