@@ -23,12 +23,12 @@ import { StyledSvgIcon } from './presetViews.styles';
 interface IProps {
 	teamspace: string;
 	model: string;
-	showViewpoint: (teamspace, modelId, view) => void;
+	setActiveViewpoint: (teamspace, modelId, view) => void;
 }
 
-export const PresetViews = ({ teamspace, model, showViewpoint }: IProps) => {
+export const PresetViews = ({ teamspace, model, setActiveViewpoint }: IProps) => {
 
-	const handleViewpointClick = (viewpoint) => () => showViewpoint(teamspace, model, viewpoint);
+	const handleViewpointClick = (viewpoint) => () => setActiveViewpoint(teamspace, model, viewpoint);
 
 	return (
 			<>

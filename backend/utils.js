@@ -1,4 +1,5 @@
 /**
+ *
  *  Copyright (C) 2014 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -34,6 +35,10 @@ function Utils() {
 		return "[object String]" === Object.prototype.toString.call(value);
 	};
 
+	this.isNumber = (value) => {
+		return "[object Number]" === Object.prototype.toString.call(value);
+	};
+
 	this.isObject = (value) => {
 		return "[object Object]" === Object.prototype.toString.call(value);
 	};
@@ -44,6 +49,21 @@ function Utils() {
 
 	this.hasField = (obj, field) => {
 		return Object.prototype.hasOwnProperty.call(obj, field);
+	};
+
+	this.isUUIDObject = (value) => {
+		try {
+			return this.isObject(value) && !!this.uuidToString(value);
+		} catch(e) {
+			return false;
+		}
+	};
+
+	this.deserialiseFilters = (ids, numbers) => {
+		return {
+			ids: ids ? ids.split(",") : undefined,
+			numbers: numbers ? numbers.split(",") : undefined
+		};
 	};
 
 	/** *****************************************************************************

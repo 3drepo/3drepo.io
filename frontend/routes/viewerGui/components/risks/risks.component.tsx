@@ -17,6 +17,8 @@
 
 import React from 'react';
 
+import { isEmpty } from 'lodash';
+
 import { RISK_FILTERS, RISK_LEVELS } from '../../../../constants/risks';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -62,14 +64,22 @@ interface IProps {
 	toggleSortOrder: () => void;
 	setFilters: (filters) => void;
 	teamspaceSettings: any;
+	fetchMitigationCriteria: (teamspace: string) => void;
+	criteria: any;
 }
 export class Risks extends React.PureComponent<IProps, any> {
 	get filters() {
-		const filterValuesMap = filtersValuesMap(this.props.jobs, this.props.teamspaceSettings);
-		return RISK_FILTERS.map((riskFilter) => {
+		const { criteria } = this.props;
+		if (isEmpty(criteria)) {
+			return [];
+		}
+		const filterValuesMap = filtersValuesMap(this.props.jobs, criteria);
+		const generatedFilters = RISK_FILTERS.map((riskFilter) => {
 			riskFilter.values = filterValuesMap[riskFilter.relatedField];
 			return riskFilter;
 		});
+
+		return generatedFilters.filter((riskFilter) => riskFilter.values.length);
 	}
 
 	get headerMenuItems() {
@@ -94,7 +104,9 @@ export class Risks extends React.PureComponent<IProps, any> {
 	));
 
 	public componentDidMount() {
-		this.props.subscribeOnRiskChanges(this.props.teamspace, this.props.model);
+		const { subscribeOnRiskChanges, teamspace, model, fetchMitigationCriteria } = this.props;
+		subscribeOnRiskChanges(teamspace, model);
+		fetchMitigationCriteria(teamspace);
 		this.handleSelectedIssue();
 	}
 

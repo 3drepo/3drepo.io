@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -30,6 +30,7 @@ import { renderWhenTrue } from '../../../helpers/rendering';
 import { compareStrings } from '../../../helpers/searching';
 import { formatShortDate } from '../../../services/formatting/formatDate';
 import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
+import { Filter } from '../fontAwesomeIcon';
 import { Highlight } from '../highlight/highlight.component';
 import { FiltersMenu } from './components/filtersMenu/filtersMenu.component';
 import {
@@ -40,7 +41,6 @@ import {
 	CopyIcon,
 	FiltersButton,
 	InputContainer,
-	MoreIcon,
 	Placeholder,
 	PlaceholderText,
 	SelectedFilters,
@@ -101,6 +101,8 @@ interface IState {
 	filtersOpen: boolean;
 }
 
+const FilterIcon = () => <Filter IconProps={{ className: 'fontSizeTiny' }} />;
+
 const getMenuButton = (InitialIcon) => ({ IconProps, Icon, ...props }: { Icon?, IconProps: any }) => (
 	<ButtonWrapper>
 		<StyledIconButton
@@ -114,7 +116,7 @@ const getMenuButton = (InitialIcon) => ({ IconProps, Icon, ...props }: { Icon?, 
 );
 
 const CopyButton = getMenuButton(CopyIcon) as any;
-const MoreButton = getMenuButton(MoreIcon);
+const FilterButton = getMenuButton(FilterIcon);
 
 const getSuggestionValue = (suggestion) => suggestion.name;
 
@@ -190,7 +192,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 	public renderFiltersMenuButton = renderWhenTrue(() => (
 		<ButtonContainer>
 			<ButtonMenu
-				renderButton={MoreButton}
+				renderButton={FilterButton}
 				renderContent={this.renderFiltersMenu}
 				PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
 				PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
@@ -342,7 +344,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 					...prevState.selectedFilters,
 					...newSelectedFilters
 				], (filter) => JSON.stringify(filter))
-			}));
+			}), this.handleFiltersChange);
 		} catch (error) {
 			this.setState({ value: event.clipboardData.getData('text') });
 		}

@@ -28,22 +28,11 @@ export const Container = styled.div`
 	padding-left: 10px;
 	min-height: 55px;
 	position: relative;
-	background-color: ${COLOR.BLACK_6};
 	overflow: auto;
 `;
 
 export const LoaderContainer = styled.div`
 	padding: 10px;
-`;
-
-export const EmptyStateInfo = styled.p`
-	padding: 14px;
-	font-size: 13px;
-	color: ${COLOR.BLACK_60};
-	background-color: ${COLOR.BLACK_6};
-	margin: 25px;
-	border-radius: 6px;
-	text-align: center;
 `;
 
 export const Label = styled(Typography)`
@@ -83,6 +72,5 @@ export const FilterWrapper = styled.div`
 	padding-left: 10px;
 	padding-top: 10px;
 	z-index: 2;
-	background-color: ${COLOR.BLACK_6};
 	position: relative;
 `;

@@ -28,6 +28,7 @@ import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { searchByFilters } from '../../../../helpers/searching';
 import { sortByDate } from '../../../../helpers/sorting';
+import { EmptyStateInfo } from '../../../components/components.styles';
 import {
 	IconWrapper,
 	MenuList,
@@ -41,7 +42,6 @@ import { PreviewListItem } from '../previewListItem/previewListItem.component';
 import { ListContainer, Summary } from '../risks/risks.styles';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ViewerPanelButton, ViewerPanelContent, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
-import { EmptyStateInfo } from '../views/views.styles';
 
 interface IHeaderMenuItem {
 	label: string;
@@ -96,7 +96,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	get filteredItems() {
 		const { items, selectedFilters, showDefaultHiddenItems } = this.props;
 		return sortByDate(
-			searchByFilters(items, selectedFilters, showDefaultHiddenItems),
+			searchByFilters(items, selectedFilters, showDefaultHiddenItems, ['name', 'desc', 'number']),
 			{ order: this.props.sortOrder }
 		);
 	}
@@ -254,6 +254,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 	public renderTitleIcon = () => {
 		const { showDetails, Icon } = this.props;
+
 		if (showDetails) {
 			return (
 				<IconButton onClick={this.props.onCloseDetails} >
@@ -316,6 +317,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { className, title, isPending, searchEnabled, showDetails } = this.props;
+
 		return (
 			<ViewerPanel
 				className={className}

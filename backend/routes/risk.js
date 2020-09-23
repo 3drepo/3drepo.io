@@ -36,6 +36,38 @@ const multer = require("multer");
  */
 
 /**
+ * @apiDefine RiskIdParam
+ *
+ * @apiParam {String} riskId Risk ID
+ */
+
+/**
+ * @apiDefine risksCreationPayload
+ *
+ *  @apiParam (Request body) {String} name Risk name
+ *  @apiParam (Request body) {String[]} assigned_roles Risk owner
+ *  @apiParam (Request body) {String} associated_activity Associated activity
+ *  @apiParam (Request body) {String} category Category
+ *  @apiParam (Request body) {Number} consequence Risk consequence (0: very low, 1: low, 2: moderate, 3: high, 4: very high)
+ *  @apiParam (Request body) {String} desc Risk description
+ *  @apiParam (Request body) {String} element Element type
+ *  @apiParam (Request body) {Number} likelihood Risk likelihood (0: very low, 1: low, 2: moderate, 3: high, 4: very high)
+ *  @apiParam (Request body) {String} location_desc Location description
+ *  @apiParam (Request body) {String} mitigation_status Treatment status
+ *  @apiParam (Request body) {String} mitigation_desc Treatment summary
+ *  @apiParam (Request body) {String} mitigation_detail Treatment detailed description
+ *  @apiParam (Request body) {String} mitigation_stage Treatment stage
+ *  @apiParam (Request body) {String} mitigation_type Treatment type
+ *  @apiParam (Request body) {Number[3]} position Risk pin coordinates
+ *  @apiParam (Request body) {Number} residual_consequence Treated risk consequence (-1: unset, 0: very low, 1: low, 2: moderate, 3: high, 4: very high)
+ *  @apiParam (Request body) {Number} residual_likelihood Treated risk likelihood (-1: unset, 0: very low, 1: low, 2: moderate, 3: high, 4: very high)
+ *  @apiParam (Request body) {String} residual_risk Residual risk
+ *  @apiParam (Request body) {String} risk_factor Risk factor
+ *  @apiParam (Request body) {String} scope Construction scope
+ *  @apiParam (Request body) {Viewpoint} viewpoint Viewpoint
+ */
+
+/**
  * @api {get} /:teamspace/:model/risks/:riskId Get a risk
  * @apiName findRiskById
  * @apiGroup Risks
@@ -43,9 +75,9 @@ const multer = require("multer");
  * and screenshot URLs.
  *
  * @apiUse Risks
+ * @apiUse RiskIdParam
  *
- * @apiParam {String} riskId Risk ID
- * @apiSuccess {Object} issue The Issue matching the Issue ID
+ * @apiSuccess {Object} risk The Issue matching the Issue ID
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002 HTTP/1.1
@@ -76,7 +108,6 @@ const multer = require("multer");
  * 	"mitigation_type":"Eliminate",
  * 	"model":"00000000-0000-0000-0000-000000000000",
  * 	"name":"Risk 1",
- * 	"norm":[0,0,0],
  * 	"overall_level_of_risk":0,
  * 	"owner":"alice",
  * 	"position":[55000.0,80000.0,-10000.0],
@@ -116,8 +147,8 @@ router.get("/risks/:riskId", middlewares.issue.canView, findRiskById);
  * @apiDescription Retrieve a risk thumbnail image.
  *
  * @apiUse Risks
+ * @apiUse RiskIdParam
  *
- * @apiParam {String} riskId Risk ID
  * @apiSuccess {png} image Thumbnail image
  *
  * @apiExample {get} Example usage:
@@ -139,6 +170,8 @@ router.get("/risks/:riskId/thumbnail.png", middlewares.issue.canView, getThumbna
  *
  * @apiParam {String} [revId] Revision ID
  * @apiParam (Query) {Number} [updatedSince] Only return issues that has been updated since this value (in epoch value)
+ * @apiParam (Query) {Number} [numbers] Array of issue numbers to filter for
+ * @apiParam (Query) {String} [ids] Array of issue ids to filter for
  *
  * @apiSuccess (200) {Object[]} risks Risk objects
  *
@@ -175,7 +208,6 @@ router.get("/risks/:riskId/thumbnail.png", middlewares.issue.canView, getThumbna
  * 		"mitigation_type":"Eliminate",
  * 		"model":"00000000-0000-0000-0000-000000000000",
  * 		"name":"Risk 1",
- * 		"norm":[0,0,0],
  * 		"overall_level_of_risk":0,
  * 		"owner":"alice",
  * 		"position":[55000.0,80000.0,-10000.0],
@@ -216,8 +248,8 @@ router.get("/risks", middlewares.issue.canView, listRisks);
  * @apiDescription Retrieve a risk screenshot image.
  *
  * @apiUse Risks
+ * @apiUse RiskIdParam
  *
- * @apiParam {String} riskId Risk ID
  * @apiSuccess {png} image Screenshot image
  *
  * @apiExample {get} Example usage:
@@ -236,8 +268,8 @@ router.get("/risks/:riskId/viewpoints/:vid/screenshot.png", middlewares.issue.ca
  * @apiDescription Retrieve a low-resolution risk screenshot image.
  *
  * @apiUse Risks
+ * @apiUse RiskIdParam
  *
- * @apiParam {String} riskId Risk ID
  * @apiSuccess {png} image Small screenshot image
  *
  * @apiExample {get} Example usage:
@@ -284,8 +316,10 @@ router.get("/revision/:rid/risks.html", middlewares.issue.canView, renderRisksHT
  * @apiDescription Create a model risk.
  *
  * @apiUse Risks
- *
  * @apiParam {String} [revId] Revision ID
+ *
+ * @apiUse risksCreationPayload
+ * @apiUse viewpointObject
  *
  * @apiExample {post} Example usage:
  * POST /acme/00000000-0000-0000-0000-000000000000/risks HTTP/1.1
@@ -309,7 +343,6 @@ router.get("/revision/:rid/risks.html", middlewares.issue.canView, renderRisksHT
  * 	"mitigation_status":"proposed",
  * 	"mitigation_type":"Eliminate",
  * 	"name":"Risk 1",
- * 	"norm":[0,0,0],
  * 	"overall_level_of_risk":0,
  * 	"position":[55000.0,80000.0,-10000.0],
  * 	"residual_consequence":-1,
@@ -358,7 +391,6 @@ router.get("/revision/:rid/risks.html", middlewares.issue.canView, renderRisksHT
  * 	"mitigation_status":"proposed",
  * 	"mitigation_type":"Eliminate",
  * 	"name":"Risk 1",
- * 	"norm":[0,0,0],
  * 	"overall_level_of_risk":0,
  * 	"position":[55000.0,80000.0,-10000.0],
  * 	"residual_consequence":-1,
@@ -411,7 +443,6 @@ router.get("/revision/:rid/risks.html", middlewares.issue.canView, renderRisksHT
  * 	"mitigation_type":"Eliminate",
  * 	"model":"00000000-0000-0000-0000-000000000000",
  * 	"name":"Risk 1",
- * 	"norm":[0,0,0],
  * 	"overall_level_of_risk":0,
  * 	"owner":"alice",
  * 	"position":[55000.0,80000.0,-10000.0],
@@ -451,9 +482,11 @@ router.post("/risks", middlewares.issue.canCreate, storeRisk);
  * @apiDescription Update model risk.
  *
  * @apiUse Risks
+ * @apiUse RiskIdParam
  *
  * @apiParam {String} [revId] Revision ID
- * @apiParam {String} riskId Risk ID
+ *
+ * @apiUse risksCreationPayload
  *
  * @apiExample {patch} Example usage:
  * PATCH /acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002 HTTP/1.1
@@ -493,7 +526,6 @@ router.post("/risks", middlewares.issue.canCreate, storeRisk);
  * 	"mitigation_type":"Eliminate",
  * 	"model":"00000000-0000-0000-0000-000000000000",
  * 	"name":"Risk 1",
- * 	"norm":[0,0,0],
  * 	"owner":"alice",
  * 	"overall_level_of_risk":0,
  * 	"position":[55000.0,80000.0,-10000.0],
@@ -537,12 +569,13 @@ router.patch("/revision/:rid/risks/:riskId", middlewares.issue.canComment, updat
  * @apiDescription Create a comment in a risk.
  *
  * @apiUse Risks
+ * @apiUse RiskIdParam
  *
- * @apiParam {String} riskId Risk ID
  * @apiParam (Request body) {String} _id Risk ID
  * @apiParam (Request body) {String} rev_id Revision ID
  * @apiParam (Request body) {String} comment Comment text
- * @apiParam (Request body) {Object} viewpoint Viewpoint object
+ * @apiParam (Request body) {Viewpoint} viewpoint Viewpoint object
+ *
  * @apiSuccess {String} guid Comment ID
  * @apiSuccess {Number} created Comment creation timestamp
  * @apiSuccess {String} owner Comment owner
@@ -595,7 +628,7 @@ router.patch("/revision/:rid/risks/:riskId", middlewares.issue.canComment, updat
  * 	}
  * }
  **/
-router.post("/risks/:riskId/comments", middlewares.issue.canComment, addComment, middlewares.chat.onCommentCreated, responseCodes.onSuccessfulOperation);
+router.post("/risks/:riskId/comments", middlewares.issue.canComment, addComment, middlewares.notification.onNewComment, middlewares.chat.onCommentCreated, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {delete} /:teamspace/:model/risks/:riskId/comments Delete a comment
@@ -604,8 +637,8 @@ router.post("/risks/:riskId/comments", middlewares.issue.canComment, addComment,
  * @apiDescription Delete a risk comment.
  *
  * @apiUse Risks
+ * @apiUse RiskIdParam
  *
- * @apiParam {String} riskId Risk ID
  * @apiParam (Request body) {String} guid Comment ID
  *
  * @apiExample {delete} Example usage:
@@ -623,43 +656,25 @@ router.post("/risks/:riskId/comments", middlewares.issue.canComment, addComment,
 router.delete("/risks/:riskId/comments", middlewares.issue.canComment, deleteComment, middlewares.chat.onCommentDeleted, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {delete} /:teamspace/:model/risks?ids=:ids Delete risks
- * @apiName deleteRisks
- * @apiGroup Risks
- * @apiDescription Delete model risks.
- *
- * @apiUse Risks
- *
- * @apiParam (Query) {String} ids Comma separated list of IDs of risks to delete
- *
- * @apiExample {delete} Example usage:
- * DELETE /acme/00000000-0000-0000-0000-000000000000/risks?ids=00000000-0000-0000-0000-000000000002 HTTP/1.1
- *
- * @apiSuccessExample {json} Success-Response
- * HTTP/1.1 200 OK
- * {}
- */
-router.delete("/risks/", middlewares.issue.canCreate, deleteRisks);
-
-/**
  * @api {post} /:teamspace/:model/risks/:riskId/resources Attach resources to a risk
  * @apiName attachResourceRisk
  * @apiGroup Risks
- * @apiDescription Attaches file or url resources to a risk.
- * If the type of the resource is file it should be send as multipart/form-data.
- * Both types at the same time cant be sent. So in order to attach files and urls it should be done
+ * @apiDescription Attaches file or URL resources to a risk.
+ * If the type of the resource is file it should be sent as multipart/form-data.
+ * Both types at the same time cannot be sent. So in order to attach files and URLs it should be done
  * with two different requests.
  *
  * This method triggers a chat event
  *
+ * @apiUse RiskIdParam
+ *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
- * @apiParam {String} riskId Risk unique ID
  *
  * @apiParam (Request body file resource (multipart/form-data)) {File[]} files The array of files to be attached
  * @apiParam (Request body file resource (multipart/form-data)) {String[]} names The names of the files; it should have the same length as the files field and should include the file extension
- * @apiParam (Request body url resource) {String[]} urls The array of urls to be attached
- * @apiParam (Request body url resource) {String[]} names The names of the urls; it should have the same length as the url field
+ * @apiParam (Request body URL resource) {String[]} urls The array of URLs to be attached
+ * @apiParam (Request body URL resource) {String[]} names The names of the URLs; it should have the same length as the URL field
  *
  * @apiSuccessExample {json} Success example result after two files has been uploaded
  *
@@ -696,9 +711,10 @@ router.post("/risks/:riskId/resources",middlewares.issue.canComment, attachResou
  * the resources has been attached to it also deletes the resource from the system. This
  * method triggers a chat event .
  *
+ * @apiUse RiskIdParam
+ *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
- * @apiParam {String} riskId Issue unique ID
  *
  * @apiParam (Request body) {String} _id The resource id to be detached
  *
@@ -751,29 +767,12 @@ function updateRisk(req, res, next) {
 	});
 }
 
-function deleteRisks(req, res, next) {
-	const sessionId = req.headers[C.HEADER_SOCKET_ID];
-	const place = utils.APIInfo(req);
-	const dbCol = {account: req.params.account, model: req.params.model};
-
-	if (req.query.ids) {
-		const ids = req.query.ids.split(",");
-
-		Risk.deleteRisks(dbCol, sessionId, ids).then(() => {
-			responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "success"});
-		}).catch((err) => {
-			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
-		});
-	} else {
-		responseCodes.respond(place, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
-	}
-}
-
 function listRisks(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model, rid } = req.params;
 	const branch = rid ? null : "master";
-	const ids = req.query.ids ? req.query.ids.split(",") : null;
+
+	const filters = utils.deserialiseFilters(req.query.ids, req.query.numbers);
 	const convertCoords = !!req.query.convertCoords;
 	let updatedSince = req.query.updatedSince;
 
@@ -784,7 +783,7 @@ function listRisks(req, res, next) {
 		}
 	}
 
-	Risk.getList(account, model, branch, rid, ids, convertCoords, updatedSince).then(risks => {
+	Risk.getList(account, model, branch, rid, filters, convertCoords, updatedSince).then(risks => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, risks);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -806,9 +805,9 @@ function findRiskById(req, res, next) {
 function renderRisksHTML(req, res, next) {
 	const place = utils.APIInfo(req);
 	const {account, model, rid} = req.params;
-	const ids = req.query.ids ? req.query.ids.split(",") : undefined;
+	const filters = utils.deserialiseFilters(req.query.ids, req.query.numbers);
 
-	Risk.getRisksReport(account, model, rid, ids, res).catch(err => {
+	Risk.getRisksReport(account, model, rid, filters, res).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
@@ -852,7 +851,7 @@ function addComment(req, res, next) {
 	const {account, model, riskId} = req.params;
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-	Comment.addComment(account, model,"risks" , riskId, user, data, sessionId).then(({comment, userRefs}) => {
+	Risk.addComment(account, model, riskId, user, data, sessionId).then(({comment, userRefs}) => {
 		req.dataModel = comment;
 		req.userReferences = {type: "risk", userRefs};
 

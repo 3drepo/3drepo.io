@@ -12,7 +12,29 @@
  *  GNU Affero General Public License for more details.
  *
  *  You should have received a copy of the GNU Affero General Public License
- *  along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { default as IssueReference } from './issueReference.container';
+import styled from 'styled-components';
+
+import Button from '@material-ui/core/Button';
+
+import { COLOR } from '../../../../styles';
+
+export const StyledButton = styled(Button)`
+	&& {
+		background-color: ${COLOR.SOFT_BLUE};
+		padding: ${({ squeezed }: { squeezed: boolean }) => squeezed ? '4px 5px' : '6px 20px'};
+		min-width: 56px;
+		min-height: 18px;
+		font-size: 12px;
+		text-transform: none;
+	}
+
+	&&>:first-child>:first-child  {
+		width: 15px;
+		font-size: 13px;
+		margin-right: 2px;
+		margin-bottom: 1px;
+	}
+`;

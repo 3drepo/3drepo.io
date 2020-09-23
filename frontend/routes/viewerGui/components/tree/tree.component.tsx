@@ -25,6 +25,7 @@ import { FixedSizeList as List } from 'react-window';
 import { TREE_ACTIONS_ITEMS, TREE_ACTIONS_MENU, TREE_ITEM_SIZE } from '../../../../constants/tree';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../helpers/rendering';
+import { EmptyStateInfo } from '../../../components/components.styles';
 import {
 	IconWrapper,
 	MenuList,
@@ -34,7 +35,6 @@ import {
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
 import { PanelBarActions } from '../panelBarActions';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
-import { EmptyStateInfo } from '../views/views.styles';
 import TreeNode from './components/treeNode/treeNode.container';
 
 interface IProps {

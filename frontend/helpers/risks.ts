@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,6 +16,7 @@
  */
 
 import { get } from 'lodash';
+
 import { getFilterValues, UNASSIGNED_JOB } from '../constants/reportedItems';
 import {
 	LEVELS,
@@ -56,37 +57,32 @@ export const prepareRisk = (risk, jobs = []) => {
 	}
 
 	if (preparedRisk.residual_likelihood || preparedRisk.residual_consequence ) {
-		preparedRisk.residual_level_of_risk  = getValidNumber(
+		preparedRisk.residual_level_of_risk  = getValidPositiveNumber(
 			preparedRisk.residual_level_of_risk,
-			calculateLevelOfRisk(preparedRisk.residual_likelihood , preparedRisk.residual_consequence )
+			calculateLevelOfRisk(preparedRisk.residual_likelihood, preparedRisk.residual_consequence )
 		);
 	}
 
 	if (preparedRisk.level_of_risk || preparedRisk.likelihood || preparedRisk.consequence) {
-		preparedRisk.level_of_risk = getValidNumber(preparedRisk.level_of_risk,
+		preparedRisk.level_of_risk = getValidPositiveNumber(preparedRisk.level_of_risk,
 			calculateLevelOfRisk(preparedRisk.likelihood, preparedRisk.consequence));
 	}
 
 	if (preparedRisk.overall_level_of_risk || preparedRisk.residual_level_of_risk  || preparedRisk.level_of_risk) {
-		preparedRisk.overall_level_of_risk = getValidNumber(
+		preparedRisk.overall_level_of_risk = getValidPositiveNumber(
 			preparedRisk.overall_level_of_risk,
-			getValidNumber(preparedRisk.residual_level_of_risk , preparedRisk.level_of_risk)
+			getValidPositiveNumber(preparedRisk.residual_level_of_risk , preparedRisk.level_of_risk)
 		);
 	}
 
-	if (preparedRisk.overall_level_of_risk) {
-		preparedRisk.statusColor = getRiskColor(preparedRisk.overall_level_of_risk);
-	}
-
-	if (preparedRisk.mitigation_status) {
-		preparedRisk.StatusIconComponent = getRiskIcon(preparedRisk.mitigation_status);
-	}
+	preparedRisk.statusColor = getRiskColor(preparedRisk.overall_level_of_risk);
+	preparedRisk.StatusIconComponent = getRiskIcon(preparedRisk.mitigation_status);
 
 	if (preparedRisk.assigned_roles) {
 		preparedRisk.roleColor = get(jobs.find((job) => job.name === get(preparedRisk.assigned_roles, '[0]')), 'color');
 	}
 
-	preparedRisk.defaultHidden = preparedRisk.mitigation_status === RISK_LEVELS.AGREED_FULLY;
+	preparedRisk.defaultHidden = [RISK_LEVELS.AGREED_FULLY, RISK_LEVELS.VOID].includes(preparedRisk.mitigation_status);
 
 	return preparedRisk;
 };
@@ -127,7 +123,7 @@ export const getRiskLikelihoodName = (likelihood: number) => {
 };
 
 const getRiskIcon = (mitigationStatus) =>  RISK_LEVELS_ICONS[mitigationStatus] || null;
-const getRiskColor = (levelOfRisk) => RISK_LEVELS_COLOURS[levelOfRisk].color;
+export const getRiskColor = (levelOfRisk) => RISK_LEVELS_COLOURS[levelOfRisk ? levelOfRisk : -1].color;
 
 export const getRiskStatus = (levelOfRisk: number, mitigationStatus: string) => {
 	return ({
@@ -176,22 +172,15 @@ const getValidNumber = (value, defaultValue?) => {
 	return defaultValue;
 };
 
-const canChangeStatusToClosed = (riskData, userJob, permissions, currentUser) => {
-	return isAdmin(permissions) || isJobOwner(riskData, userJob, permissions, currentUser);
-};
+const getValidPositiveNumber = (value, defaultValue?) => {
+	const validNumber = getValidNumber(value, defaultValue);
 
-export const canChangeStatus = (riskData, userJob, permissions, currentUser) => {
-	return canChangeStatusToClosed(riskData, userJob, permissions, currentUser) ||
-		isAssignedJob(riskData, userJob, permissions);
+	return validNumber >= 0 ? validNumber : defaultValue;
 };
 
 export const canChangeBasicProperty = (riskData, userJob, permissions, currentUser) => {
 	return isAdmin(permissions) || isJobOwner(riskData, userJob, permissions, currentUser) &&
 		canComment(riskData, userJob, permissions, currentUser);
-};
-
-export const canChangeAssigned = (riskData, userJob, permissions, currentUser) => {
-	return isAdmin(permissions) || canChangeBasicProperty(riskData, userJob, permissions, currentUser);
 };
 
 export const canComment = (riskData, userJob, permissions, currentUser) => {
@@ -203,15 +192,27 @@ export const canComment = (riskData, userJob, permissions, currentUser) => {
 	return ableToComment;
 };
 
+export const getRiskFilterValues = (property) =>
+	property.map((value) => ({
+		label: value,
+		value
+	}));
+
 export const filtersValuesMap = (jobs, settings) => {
 	const jobsList = [...jobs, UNASSIGNED_JOB];
 
 	return {
-		[RISK_FILTER_RELATED_FIELDS.CATEGORY]: getFilterValues(settings.riskCategories
-				.map((category) => ({ value: category, name: category }))),
+		[RISK_FILTER_RELATED_FIELDS.CATEGORY]: getFilterValues(getRiskFilterValues(settings.category)),
 		[RISK_FILTER_RELATED_FIELDS.MITIGATION_STATUS]: getFilterValues(RISK_MITIGATION_STATUSES),
 		[RISK_FILTER_RELATED_FIELDS.CREATED_BY]: getFilterValues(jobs),
 		[RISK_FILTER_RELATED_FIELDS.RISK_OWNER]: getFilterValues(jobsList),
+		[RISK_FILTER_RELATED_FIELDS.ELEMENT]: getRiskFilterValues(settings.element),
+		[RISK_FILTER_RELATED_FIELDS.LOCATION]: getRiskFilterValues(settings.location_desc),
+		[RISK_FILTER_RELATED_FIELDS.RISK_FACTOR]: getRiskFilterValues(settings.risk_factor),
+		[RISK_FILTER_RELATED_FIELDS.ASSOCIATED_ACTIVITY]: getRiskFilterValues(settings.associated_activity),
+		[RISK_FILTER_RELATED_FIELDS.SCOPE]: getRiskFilterValues(settings.scope),
+		[RISK_FILTER_RELATED_FIELDS.MITIGATION_STAGE]: getRiskFilterValues(settings.mitigation_stage),
+		[RISK_FILTER_RELATED_FIELDS.MITIGATION_TYPE]: getRiskFilterValues(settings.mitigation_type),
 		[RISK_FILTER_RELATED_FIELDS.RISK_CONSEQUENCE]: getFilterValues(RISK_CONSEQUENCES),
 		[RISK_FILTER_RELATED_FIELDS.RISK_LIKELIHOOD]: getFilterValues(RISK_LIKELIHOODS),
 		[RISK_FILTER_RELATED_FIELDS.RESIDUAL_CONSEQUENCE]: getFilterValues(RISK_CONSEQUENCES),

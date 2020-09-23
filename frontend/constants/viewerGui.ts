@@ -6,7 +6,8 @@ import SequencesIcon from '@material-ui/icons/Movie';
 import ViewsIcon from '@material-ui/icons/PhotoCamera';
 import IssuesIcon from '@material-ui/icons/Place';
 import MeasureIcon from '@material-ui/icons/Straighten';
-import RisksIcon from '@material-ui/icons/Warning';
+import { RisksIcon } from '../routes/viewerGui/components/risks/components/riskIcon/riskIcon.component';
+
 import { clientConfigService } from '../services/clientConfig';
 
 export const VIEWER_PANELS = {

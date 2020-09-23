@@ -79,7 +79,7 @@
 	 * @apiParam (Request body) {[]Permission} permissions The permissions for each user from the project
 	 *
 	 * @apiParam (Request body: Permissions ) {String} user The username of the user to have it permission changed
-	 * @apiParam (Request body: Permissions ) {[]String} permissions An array of permissions for the user to be assigned
+	 * @apiParam (Request body: Permissions ) {String[]} permissions An array of permissions for the user to be assigned
 	 *
 	 * @apiExample {put} Example usage update permissions:
 	 * PUT /teamSpace1/Classic%20project HTTP/1.1

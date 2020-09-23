@@ -30,8 +30,9 @@ export const { Types: ModelTypes, Creators: ModelActions } = createActions({
 	setPendingRevision: ['revision'],
 	resetRevisions: [],
 	downloadModel: ['teamspace', 'modelId'],
-	uploadModelFile: ['teamspace', 'project', 'modelData', 'fileData'],
+	uploadModelFile: ['teamspace', 'project', 'modelData', 'fileData', 'handleClose'],
 	setPendingState: ['pendingState'],
+	setModelUploadingState: ['modelUploadingState'],
 	onModelStatusChanged: ['modelData', 'teamspace', 'project', 'modelId', 'modelName'],
 	subscribeOnStatusChange: ['teamspace', 'project', 'modelData'],
 	unsubscribeOnStatusChange: ['teamspace', 'project', 'modelData'],
@@ -43,7 +44,29 @@ export const { Types: ModelTypes, Creators: ModelActions } = createActions({
 	reset: []
 }, { prefix: 'MODEL/' });
 
-export const INITIAL_STATE = {
+export interface ISubModel {
+	database: string;
+	model: string;
+	name: string;
+}
+
+export interface IModelState {
+	settings: {
+		properties: {
+			unit: string;
+		},
+		permissions: any[];
+	};
+	metaKeys: any[];
+	revisions: any[];
+	isPending: boolean;
+	isModelUploading: boolean;
+	pendingRevision: any;
+	maps: any[];
+	subModels?: ISubModel[];
+}
+
+export const INITIAL_STATE: IModelState = {
 	settings: {
 		properties: {
 			unit: 'mm',
@@ -53,6 +76,7 @@ export const INITIAL_STATE = {
 	metaKeys: [],
 	revisions: [],
 	isPending: true,
+	isModelUploading: false,
 	pendingRevision: null,
 	maps: []
 };
@@ -63,6 +87,10 @@ const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
 
 const setPendingRevision = (state = INITIAL_STATE, { revision }) => {
 	return { ...state, pendingRevision: revision };
+};
+
+const setModelUploadingState = (state = INITIAL_STATE, { modelUploadingState }) => {
+	return { ...state, isModelUploading: modelUploadingState };
 };
 
 const fetchSettingsSuccess = (state = INITIAL_STATE, { settings }) => {
@@ -106,6 +134,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ModelTypes.RESET_REVISIONS]: resetRevisions,
 	[ModelTypes.SET_PENDING_STATE]: setPendingState,
 	[ModelTypes.SET_PENDING_REVISION]: setPendingRevision,
+	[ModelTypes.SET_MODEL_UPLOADING_STATE]: setModelUploadingState,
 	[ModelTypes.FETCH_MAPS_SUCCESS]: fetchMapsSuccess,
 	[ModelTypes.UPDATE_SETTINGS_SUCCESS]: updateSettingsSuccess,
 	[ModelTypes.RESET]: reset,

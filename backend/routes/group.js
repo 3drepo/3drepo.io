@@ -74,6 +74,7 @@ const systemLogger = require("../logger.js").systemLogger;
  * @apiParam (Query) {Boolean} [ifcguids] Flag that returns IFC GUIDs for group elements
  * @apiParam (Query) {Boolean} [noIssues] Flag that hides groups for issues
  * @apiParam (Query) {Boolean} [noRisks] Flag that hides groups for risks
+ * @apiParam (Query) {Boolean} [noViews] Flag that hides groups for risks
  * @apiParam (Query) {Number} [updatedSince] Only return issues that has been updated since this value (in epoch value)
  * @apiSuccess (200) {Object[]} objects List of group objects
  *

@@ -31,6 +31,8 @@ import {
 	selectFetchingDetailsIsPending,
 	selectMitigationCriteria,
 	selectNewComment,
+	selectPostCommentIsPending,
+	selectRisks,
 	RisksActions,
 } from '../../../../../../modules/risks';
 import { ViewpointsActions } from '../../../../../../modules/viewpoints';
@@ -42,6 +44,7 @@ const mapStateToProps = createStructuredSelector({
 	risk: selectActiveRiskDetails,
 	comments: selectActiveRiskComments,
 	jobs: selectJobsList,
+	risks: selectRisks,
 	expandDetails: selectExpandDetails,
 	fetchingDetailsIsPending: selectFetchingDetailsIsPending,
 	newComment: selectNewComment,
@@ -50,6 +53,7 @@ const mapStateToProps = createStructuredSelector({
 	currentUser: selectCurrentUser,
 	modelSettings: selectSettings,
 	failedToLoad: selectFailedToLoad,
+	postCommentIsPending: selectPostCommentIsPending,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -57,6 +61,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchRisk: RisksActions.fetchRisk,
 	saveRisk: RisksActions.saveRisk,
 	updateRisk: RisksActions.updateRisk,
+	updateViewpoint: RisksActions.updateActiveRiskViewpoint,
+	cloneRisk: RisksActions.cloneRisk,
 	postComment: RisksActions.postComment,
 	removeComment: RisksActions.removeComment,
 	updateSelectedRiskPin: RisksActions.updateSelectedRiskPin,
@@ -64,12 +70,12 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	unsubscribeOnRiskCommentsChanges: RisksActions.unsubscribeOnRiskCommentsChanges,
 	updateNewRisk: RisksActions.updateNewRisk,
 	showScreenshotDialog: DialogActions.showScreenshotDialog,
-	setCameraOnViewpoint: ViewpointsActions.setCameraOnViewpoint,
+	showConfirmDialog: DialogActions.showConfirmDialog,
+	setCameraOnViewpoint: ViewpointsActions.showViewpoint,
 	onRemoveResource: RisksActions.removeResource,
 	attachFileResources: RisksActions.attachFileResources,
 	attachLinkResources: RisksActions.attachLinkResources,
 	showDialog: DialogActions.showDialog,
-	fetchMitigationCriteria: RisksActions.fetchMitigationCriteria,
 	showMitigationSuggestions: RisksActions.showMitigationSuggestions,
 }, dispatch);
 

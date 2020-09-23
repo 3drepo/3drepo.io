@@ -21,7 +21,7 @@
  *
  * @returns
  */
-module.exports.createApp = function () {
+module.exports.createApp = function (config) {
 	const logger = require("../logger.js");
 	const express = require("express");
 	const compress = require("compression");
@@ -35,6 +35,10 @@ module.exports.createApp = function () {
 
 	// Express app
 	const app = express();
+
+	if (config && !config.using_ssl && config.public_protocol === "https") {
+		app.set("trust proxy", 1);
+	}
 
 	app.disable("etag");
 
@@ -122,8 +126,8 @@ module.exports.createApp = function () {
 	// groups handler
 	app.use("/:account/:model", require("../routes/group"));
 
-	// viewpoints handler
-	app.use("/:account/:model", require("../routes/viewpoint"));
+	// views handler
+	app.use("/:account/:model", require("../routes/view"));
 
 	// issues handler
 	app.use("/:account/:model", require("../routes/issueAnalytic"));

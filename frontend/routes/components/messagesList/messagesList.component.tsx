@@ -21,15 +21,15 @@ import MenuItem from '@material-ui/core/MenuItem';
 import { cond, matches, stubTrue } from 'lodash';
 
 import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../helpers/rendering';
+import { EmptyStateInfo } from '../components.styles';
 import { Loader as LoaderIndicator } from '../loader/loader.component';
 import { Message } from './components/message/message.component';
-import {
-	Container, EmptyStateInfo, FilterWrapper, FormContainer, Label, LoaderContainer, Select,
-} from './messagesList.styles';
+import { Container, FilterWrapper, FormContainer, Label, LoaderContainer, Select } from './messagesList.styles';
 
 interface IProps {
 	className?: string;
 	formRef?: any;
+	commentRef?: any;
 	messages: any[];
 	isPending: boolean;
 	currentUser: string;
@@ -73,7 +73,7 @@ export const MessagesList = ({ teamspace, isPending, messages, ...props }: IProp
 				});
 			}
 		}
-	}, [isPending, messages.length]);
+	}, [isPending, messages.length, filter]);
 
 	const messagesList = React.useMemo(() => messages
 		.filter((message) => cond([
@@ -87,6 +87,7 @@ export const MessagesList = ({ teamspace, isPending, messages, ...props }: IProp
 				index={index}
 				{...item}
 				formRef={props.formRef}
+				commentRef={props.commentRef}
 				removeMessage={props.removeMessage}
 				teamspace={teamspace}
 				currentUser={props.currentUser}
