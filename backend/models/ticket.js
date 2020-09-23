@@ -211,12 +211,12 @@ class Ticket extends View {
 				return;
 			}
 
-			if (undefined === data[field]) {
+			if (null === data[field]) {
 				if (!updateData["$unset"]) {
 					updateData["$unset"] = {};
 				}
 
-				updateData["$unset"]["field"] = "";
+				updateData["$unset"][field] = "";
 			}
 
 			this.handleFieldUpdate(account, model, sessionId, id, user, field, oldTicket, data, systemComments);
@@ -307,10 +307,8 @@ class Ticket extends View {
 		}
 
 		// 7. Return the updated data and the old ticket
-		const updatedTicket = {
-			...oldTicket,
-			...data
-		};
+		const updatedTicket = this.filterFields({ ...oldTicket, ...data }, Object.keys(updateData["$unset"]));
+
 		this.clean(account, model, updatedTicket);
 		this.clean(account, model, oldTicket);
 		delete data.comments;
@@ -324,7 +322,9 @@ class Ticket extends View {
 	}
 
 	handleFieldUpdate(account, model, sessionId, id, user, field, oldTicket, data, systemComments) {
-		if (undefined !== data[field] && !utils.typeMatch(data[field], this.fieldTypes[field])) {
+		if (null === data[field]) {
+			delete data[field];
+		} else if (!utils.typeMatch(data[field], this.fieldTypes[field])) {
 			throw responseCodes.INVALID_ARGUMENTS;
 		}
 

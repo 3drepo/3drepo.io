@@ -625,8 +625,8 @@ describe("Risks", function () {
 		it("remove sequence start/end date should succeed", function(done) {
 			const risk = {...baseRisk, "name":"Risk test", "sequence_start":1476107839555, "sequence_end":1476107839855};
 			const sequenceData = {
-				sequence_start: undefined,
-				sequence_end: undefined
+				sequence_start: null,
+				sequence_end: null
 			};
 			let riskId;
 
