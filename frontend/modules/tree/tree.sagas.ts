@@ -50,6 +50,10 @@ import { selectSettings, ModelTypes } from '../model';
 import { selectIsMetadataVisible, ViewerGuiActions } from '../viewerGui';
 import { TreeActions, TreeTypes } from './tree.redux';
 
+let setReady: (val: boolean) => void;
+let isReady: Promise<boolean> = new Promise((accept) => setReady = accept);
+let initialised = false;
+
 const unhighlightObjects = (objects = []) => {
 	for (let index = 0, size = objects.length; index < size; index++) {
 		const { meshes, teamspace, modelId } = objects[index];
@@ -91,6 +95,10 @@ function* handleMetadata(node: any) {
 }
 
 function* expandToNode(node: any) {
+	if (!(yield isReady)) {
+		return;
+	}
+
 	if (node) {
 		const expandedNodesMap = yield select(selectExpandedNodesMap);
 		if (expandedNodesMap[node.parentId]) {
@@ -134,6 +142,12 @@ const setIsTreeProcessed = (isProcessed) => {
 function* fetchFullTree({ teamspace, modelId, revision }) {
 	yield put(TreeActions.setIsPending(true));
 
+	if (initialised) {
+		setReady(false);
+		isReady = new Promise((accept) => setReady = accept);
+	}
+
+	initialised = true;
 	try {
 		let modelSettings = yield select(selectSettings);
 
@@ -169,6 +183,8 @@ function* fetchFullTree({ teamspace, modelId, revision }) {
 
 		yield TreeProcessing.transformData(dataToProcessed, setIsTreeProcessed);
 		yield put(TreeActions.updateDataRevision());
+
+		setReady(true);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('fetch', 'full tree', error));
 	}
@@ -201,6 +217,9 @@ function* stopListenOnSelections() {
 }
 
 function* handleBackgroundClick() {
+	if (!(yield isReady)) {
+		return;
+	}
 
 	yield all([
 		clearCurrentlySelected(),
@@ -217,6 +236,10 @@ function* handleBackgroundClick() {
 }
 
 function* handleNodesClick({ nodesIds = [], skipExpand = false}) {
+	if (!(yield isReady)) {
+		return;
+	}
+
 	const addGroup = MultiSelect.isAccumMode();
 	const removeGroup = MultiSelect.isDecumMode();
 	const isMultiSelectMode = addGroup || removeGroup;
@@ -233,11 +256,19 @@ function* handleNodesClick({ nodesIds = [], skipExpand = false}) {
 }
 
 function* handleNodesClickBySharedIds({ objects = [] }) {
+	if (!(yield isReady)) {
+		return;
+	}
+
 	const nodes = yield select(selectGetNodesIdsFromSharedIds(objects));
 	yield put(TreeActions.handleNodesClick(nodes));
 }
 
 function* getSelectedNodes() {
+	if (!(yield isReady)) {
+		return;
+	}
+
 	try {
 		yield call(delay, 100);
 		const objectsStatus = yield Viewer.getObjectsStatus();
@@ -251,6 +282,10 @@ function* getSelectedNodes() {
 }
 
 function* clearCurrentlySelected() {
+	if (!(yield isReady)) {
+		return;
+	}
+
 	Viewer.clearHighlights();
 
 	yield TreeProcessing.clearSelected();
@@ -279,6 +314,10 @@ function* clearCurrentlySelected() {
  * SHOW NODES
  */
 function* showAllNodes() {
+	if (!(yield isReady)) {
+		return;
+	}
+
 	try {
 		const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
 		const result  = yield TreeProcessing.showAllNodes(ifcSpacesHidden);
@@ -289,11 +328,19 @@ function* showAllNodes() {
 }
 
 function* showNodesBySharedIds({ objects = [] }) {
+	if (!(yield isReady)) {
+		return;
+	}
+
 	const nodesIds = yield select(selectGetNodesIdsFromSharedIds(objects));
 	yield showTreeNodes(nodesIds);
 }
 
 function* showTreeNodes(nodesIds = [], skipNested = false) {
+	if (!(yield isReady)) {
+		return;
+	}
+
 	try {
 		yield put(TreeActions.setTreeNodesVisibility(nodesIds, VISIBILITY_STATES.VISIBLE, skipNested, skipNested));
 	} catch (error) {
@@ -305,16 +352,28 @@ function* showTreeNodes(nodesIds = [], skipNested = false) {
  * HIDE NODES
  */
 function* hideSelectedNodes() {
+	if (!(yield isReady)) {
+		return;
+	}
+
 	const fullySelectedNodes = yield select(selectFullySelectedNodesIds);
 	yield hideTreeNodes(fullySelectedNodes);
 }
 
 function* hideNodesBySharedIds({ objects = [] }) {
+	if (!(yield isReady)) {
+		return;
+	}
+
 	const nodesIds = yield select(selectGetNodesIdsFromSharedIds(objects));
 	yield hideTreeNodes(nodesIds, true);
 }
 
 function* hideTreeNodes(nodesIds = [], skipNested = false) {
+	if (!(yield isReady)) {
+		return;
+	}
+
 	try {
 		yield put(TreeActions.setTreeNodesVisibility(nodesIds, VISIBILITY_STATES.INVISIBLE, skipNested, skipNested));
 	} catch (error) {
@@ -326,6 +385,10 @@ function* hideTreeNodes(nodesIds = [], skipNested = false) {
  * ISOLATE NODES
  */
 function* isolateNodes(nodesIds = []) {
+	if (!(yield isReady)) {
+		return;
+	}
+
 	try {
 		if (nodesIds.length) {
 			const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
@@ -346,6 +409,10 @@ function* isolateNodes(nodesIds = []) {
 }
 
 function* isolateSelectedNodes({ nodeId }) {
+	if (!(yield isReady)) {
+		return;
+	}
+
 	if (nodeId) {
 		yield isolateNodes([nodeId]);
 		const meshes = yield TreeProcessing.getMeshesByNodeIds([nodeId]);
@@ -357,11 +424,19 @@ function* isolateSelectedNodes({ nodeId }) {
 }
 
 function* isolateNodesBySharedIds({ objects = []}) {
+	if (!(yield isReady)) {
+		return;
+	}
+
 	const nodesIds = yield select(selectGetNodesIdsFromSharedIds(objects));
 	yield isolateNodes(nodesIds);
 }
 
 function* hideIfcSpaces() {
+	if (!(yield isReady)) {
+		return;
+	}
+
 	try {
 		const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
 		yield put(TreeActions.setIfcSpacesHidden(!ifcSpacesHidden));
@@ -378,6 +453,10 @@ function* hideIfcSpaces() {
  * DESELECT NODES
  */
 function* deselectNodes({ nodesIds = [] }) {
+	if (!(yield isReady)) {
+		return;
+	}
+
 	try {
 		const result = yield TreeProcessing.deselectNodes({ nodesIds });
 		unhighlightObjects(result.unhighlightedObjects);
@@ -400,6 +479,10 @@ function* deselectNodes({ nodesIds = [] }) {
 }
 
 function* deselectNodesBySharedIds({ objects = [] }) {
+	if (!(yield isReady)) {
+		return;
+	}
+
 	const nodesIds = yield select(selectGetNodesIdsFromSharedIds(objects));
 	yield put(TreeActions.deselectNodes(nodesIds));
 }
@@ -409,6 +492,10 @@ function* deselectNodesBySharedIds({ objects = [] }) {
  */
 function* selectNodes({ nodesIds = [], skipExpand = false, colour }) {
 	try {
+		if (!(yield isReady)) {
+			return;
+		}
+
 		const isTreeProcessed = yield select(selectIsTreeProcessed);
 
 		if (!isTreeProcessed) {
@@ -444,12 +531,20 @@ function* selectNodes({ nodesIds = [], skipExpand = false, colour }) {
 }
 
 function* selectNodesBySharedIds({ objects = [], colour }: { objects: any[], colour?: number[]}) {
+	if (!(yield isReady)) {
+		return;
+	}
+
 	const nodesIds = yield select(selectGetNodesIdsFromSharedIds(objects));
 	yield put(TreeActions.selectNodes(nodesIds, false, true, colour));
 }
 
 function* setSubmodelsVisibility({ models, visibility}) {
 	try {
+		if (!(yield isReady)) {
+			return;
+		}
+
 		const submodelsRootNodes = yield select(selectSubModelsRootNodes);
 		const rootNodes =  models.map(({teamspace, _id }) => submodelsRootNodes[teamspace + ':' + _id]);
 
@@ -467,6 +562,10 @@ function* setSubmodelsVisibility({ models, visibility}) {
  */
 function* setTreeNodesVisibility({ nodesIds, visibility}) {
 	try {
+		if (!(yield isReady)) {
+			return;
+		}
+
 		if (nodesIds.length) {
 			const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
 
@@ -489,6 +588,10 @@ function* setTreeNodesVisibility({ nodesIds, visibility}) {
 }
 
 function* setSelectedNodesVisibility({ nodeId, visibility }) {
+	if (!(yield isReady)) {
+		return;
+	}
+
 	const fullySelectedNodes = yield select(selectFullySelectedNodesIds);
 	const hasSelectedNodes = !!fullySelectedNodes.length;
 	const nodesIds = hasSelectedNodes ? fullySelectedNodes : [nodeId];
@@ -496,6 +599,10 @@ function* setSelectedNodesVisibility({ nodeId, visibility }) {
 }
 
 function* collapseNodes({ nodesIds }) {
+	if (!(yield isReady)) {
+		return;
+	}
+
 	const expandedNodesMap = {... (yield select(selectExpandedNodesMap))};
 	const nodesIndexesMap = yield select(selectNodesIndexesMap);
 	const nodesList = yield select(selectTreeNodesList);
@@ -526,6 +633,10 @@ function* collapseNodes({ nodesIds }) {
 }
 
 function* goToRootNode({ nodeId }) {
+	if (!(yield isReady)) {
+		return;
+	}
+
 	const nodesIndexesMap = yield select(selectNodesIndexesMap);
 	const nodesList = yield select(selectTreeNodesList);
 	const level = nodesList[nodesIndexesMap[nodeId]].level;
@@ -550,6 +661,10 @@ function* goToRootNode({ nodeId }) {
 }
 
 function* zoomToHighlightedNodes() {
+	if (!(yield isReady)) {
+		return;
+	}
+
 	try {
 		yield call(delay, 100);
 		Viewer.zoomToHighlightedMeshes();
@@ -561,6 +676,10 @@ function* zoomToHighlightedNodes() {
 function* handleTransparencyOverridesChange({ currentOverrides, previousOverrides }) {
 	const toAdd = overridesTransparencyDiff(currentOverrides, previousOverrides);
 	const toRemove = overridesTransparencyDiff(previousOverrides, currentOverrides);
+
+	if (!(yield isReady)) {
+		return;
+	}
 
 	yield removeTransparencyOverrides(toRemove);
 	yield addTransparencyOverrides(toAdd);
