@@ -15,6 +15,7 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+    - run: echo helm delete $( echo $GITHUB_REF | rev | awk '{split($0,a,"/"); print a[1]}' | rev | sed "s/_/-/" | awk '{print tolower($0)}' )
     - name: Helm 3
       # You may pin to the exact commit or the version.
       # uses: WyriHaximus/github-action-helm3@7debf21f4e34c2ced1a16ca3f5599e80b826a209
@@ -23,6 +24,4 @@ jobs:
         # The full helm command to run (including helm)
         exec: helm delete $( echo $GITHUB_REF | rev | awk '{split($0,a,"/"); print a[1]}' | rev | sed "s/_/-/" | awk '{print tolower($0)}' )
         # The full helm command to run (including helm)
-        kubeconfig: '$SUPER_SECRET'
-      env:
-        SUPER_SECRET: ${{ secrets.KUBECONFIG_JSON }}
+        kubeconfig: '${{ secrets.KUBECONFIG_JSON }}'
