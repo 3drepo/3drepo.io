@@ -576,8 +576,7 @@ function createSession(place, req, res, next, user) {
 function login(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 
-	if (Object.prototype.toString.call(req.body.username) === "[object String]"
-		&& Object.prototype.toString.call(req.body.password) === "[object String]") {
+	if (utils.isString(req.body.username) && utils.isString(req.body.password)) {
 
 		req[C.REQ_REPO].logger.logInfo("Authenticating user", { username: req.body.username});
 

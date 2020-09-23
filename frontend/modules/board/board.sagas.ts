@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,17 +16,25 @@
  */
 
 import { all, put, select, take, takeLatest } from 'redux-saga/effects';
+import {
+	getDialogForm,
+	getDialogSize,
+	getDialogTitle,
+	getTemplateComponent
+} from '../../routes/board/board.helpers';
 
+import { CommentsActions } from '../comments';
 import { selectCurrentTeamspace } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { IssuesActions, IssuesTypes } from '../issues';
 import { JobsActions } from '../jobs';
 import { selectCurrentModel, ModelActions } from '../model';
 import { RisksActions, RisksTypes } from '../risks';
+import { selectUrlParams } from '../router/router.selectors';
 import { TeamspaceActions } from '../teamspace';
 import { selectTeamspaces, TeamspacesActions } from '../teamspaces';
 import { BoardActions, BoardTypes } from './board.redux';
-import { selectBoardType } from './board.selectors';
+import { selectBoardType, selectCards } from './board.selectors';
 
 function* fetchData({ boardType, teamspace, project, modelId }) {
 	try {
@@ -49,6 +57,8 @@ function* fetchData({ boardType, teamspace, project, modelId }) {
 		}
 
 		if (teamspace && project && modelId) {
+			yield put(CommentsActions.fetchUsers(teamspace));
+
 			if (boardType === 'issues') {
 				yield all([
 					put(IssuesActions.fetchIssues(teamspace, modelId)),
@@ -87,6 +97,39 @@ function* fetchCardData({ teamspace, modelId, cardId }) {
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('fetch', 'card data', error));
 	}
+}
+
+function* openCardDialog({ cardId, onNavigationChange, disableReset }) {
+	const { teamspace, modelId } = yield select(selectUrlParams);
+	const boardType = yield select(selectBoardType);
+
+	if (cardId) {
+		yield put(BoardActions.fetchCardData(boardType, teamspace, modelId, cardId));
+	}
+
+	const cards = yield select(selectCards);
+	const isIssuesBoard = boardType === 'issues';
+	const TemplateComponent = getTemplateComponent(isIssuesBoard);
+
+	if (!cardId && !disableReset) {
+		yield put(BoardActions.resetCardData());
+	}
+
+	const config = {
+		title: getDialogTitle({ cardId, isIssuesBoard, cards, onNavigationChange }),
+		template: getDialogForm(getDialogSize(cardId), TemplateComponent),
+		data: {
+			teamspace,
+			model: modelId,
+			disableViewer: true,
+			horizontal: true,
+		},
+		DialogProps: {
+			maxWidth: getDialogSize(cardId)
+		}
+	};
+
+	yield put(DialogActions.showDialog(config));
 }
 
 function* resetCardData() {
@@ -145,6 +188,7 @@ export default function* BoardSaga() {
 	yield takeLatest(BoardTypes.FETCH_DATA, fetchData);
 	yield takeLatest(BoardTypes.FETCH_CARD_DATA, fetchCardData);
 	yield takeLatest(BoardTypes.RESET_CARD_DATA, resetCardData);
+	yield takeLatest(BoardTypes.OPEN_CARD_DIALOG, openCardDialog);
 	yield takeLatest(BoardTypes.SET_FILTERS, setFilters);
 	yield takeLatest(BoardTypes.PRINT_ITEMS, printItems);
 	yield takeLatest(BoardTypes.DOWNLOAD_ITEMS, downloadItems);

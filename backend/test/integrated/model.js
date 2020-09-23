@@ -299,6 +299,79 @@ describe("Model", function () {
 			});
 	});
 
+	describe("Setting a default viewpoint", function() {
+		before(function(done) {
+			async.series([
+				callback => {
+					agent.post("/logout").send({}).expect(200, callback);
+				},
+				callback => {
+					agent.post("/login").send({
+						username, password
+					}).expect(200, callback);
+				}
+			], done);
+		});
+
+		const testModel = "2d4a6208-6847-4a25-9d9e-097a63f2de93";
+		const viewId = "df8fa4a0-c2ba-11ea-8373-eb03ef03362f";
+		it("setting a valid view Id as default viewpoint should succeed", function (done) {
+			async.series([
+				callback => {
+					agent.put(`/${username}/${testModel}/settings`)
+						.send({defaultView: viewId})
+						.expect(200, callback);
+				},
+				callback => {
+					agent.get(`/${username}/${testModel}.json`)
+						.expect(200, (err, res) => {
+							expect(res.body.defaultView).to.deep.equal({
+								id: viewId,
+								name: "fdgdfg"
+							});
+							callback(err);
+						});
+				}
+			], done);
+		});
+
+		it("setting an invalid view Id as default viewpoint should fail", function (done) {
+			agent.put(`/${username}/${testModel}/settings`)
+				.send({defaultView: "df8fa4a0-c2ba-11ea-8373-eb03ef03362a"})
+				.expect(404, (err, res) => {
+					expect(res.body.value).to.equal(responseCodes.VIEW_NOT_FOUND.value);
+					done(err);
+				});
+		});
+
+
+		it("removing a view when it's currently set as default should fail", function (done) {
+			agent.delete(`/${username}/${testModel}/viewpoints/${viewId}`)
+				.expect(400, (err, res) => {
+					expect(res.body.value).to.equal(responseCodes.CANNOT_DELETE_DEFAULT_VIEW.value);
+					done(err);
+				});
+		});
+
+		it("setting null as default viewpoint to reset default viewpoint should succeed", function (done) {
+			async.series([
+				callback => {
+					agent.put(`/${username}/${testModel}/settings`)
+						.send({defaultView: null})
+						.expect(200, callback);
+				},
+				callback => {
+					agent.get(`/${username}/${testModel}.json`)
+						.expect(200, (err, res) => {
+							expect(res.body.defaultView).to.equal(undefined);
+							callback(err);
+						});
+				}
+			], done);
+		});
+
+	});
+
 	describe("Download latest file", function() {
 
 		const username = "testing";

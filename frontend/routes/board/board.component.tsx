@@ -47,24 +47,18 @@ import { Panel } from '../components/panel/panel.component';
 import { isViewer } from '../../helpers/permissions';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
 import { FilterPanel } from '../components/filterPanel/filterPanel.component';
-import IssueDetails from '../viewerGui/components/issues/components/issueDetails/issueDetails.container';
-import { ListNavigation } from '../viewerGui/components/listNavigation/listNavigation.component';
-import RiskDetails from '../viewerGui/components/risks/components/riskDetails/riskDetails.container';
 import { getProjectModels, getTeamspaceProjects } from './board.helpers';
 import {
 	AddButton,
 	BoardContainer,
-	BoardDialogTitle,
 	BoardItem,
 	Config,
 	Container,
 	DataConfig,
 	FormControl,
-	FormWrapper,
 	LoaderContainer,
 	NoDataMessage,
 	SelectContainer,
-	Title,
 	ViewConfig
 } from './board.styles';
 import { BoardTitleComponent } from './components/boardTitleComponent.component';
@@ -134,7 +128,8 @@ interface IProps {
 	resetModel: () => void;
 	resetIssues: () => void;
 	resetRisks: () => void;
-	teamspaceSettings: any;
+	openCardDialog: (cardId: string, onChange: (index: number) => void) => void;
+	criteria: any;
 }
 
 const PANEL_PROPS = {
@@ -143,13 +138,23 @@ const PANEL_PROPS = {
 	}
 };
 
-const BoardCard = memo(({ metadata, onClick }: any) => (
+const RiskBoardCard = ({ metadata, onClick }: any) => (
 	<BoardItem
 		key={metadata.id}
 		{...metadata}
 		onItemClick={onClick}
+		panelName="risk "
 	/>
-));
+);
+
+const IssueBoardCard = ({ metadata, onClick }: any) => (
+	<BoardItem
+		key={metadata.id}
+		{...metadata}
+		panelName="issue "
+		onItemClick={onClick}
+	/>
+);
 
 export function Board(props: IProps) {
 	const boardRef = useRef(null);
@@ -262,54 +267,9 @@ export function Board(props: IProps) {
 		props.fetchCardData(type, teamspace, modelId, newCardId);
 	};
 
-	const handleOpenDialog = useCallback((cardId?, metadata?, laneId?) => {
-		if (cardId) {
-			props.fetchCardData(type, teamspace, modelId, cardId);
-		}
-
-		const TemplateComponent = isIssuesBoard ? IssueDetails : RiskDetails;
-		const dataType = isIssuesBoard ? 'issue' : 'risk';
-		const size = cardId ? 'lg' : 'sm';
-		const titlePrefix = cardId ? 'Edit' : 'Add new';
-		const initialIndex = props.cards.findIndex((card) => card.id === cardId);
-
-		if (!cardId) {
-			props.resetCardData();
-		}
-
-		const Form = (formProps: any) => (
-			<FormWrapper size={size}>
-				<TemplateComponent {...formProps} disableViewer />
-			</FormWrapper>
-		);
-
-		const DialogTitle = cardId ? (
-			<BoardDialogTitle>
-				<Title>{titlePrefix} {dataType}</Title>
-				<ListNavigation
-					initialIndex={initialIndex}
-					lastIndex={props.cards.length - 1}
-					onChange={handleNavigationChange}
-				/>
-			</BoardDialogTitle>
-		) : `${titlePrefix} ${dataType}`;
-
-		const config = {
-			title: DialogTitle,
-			template: Form,
-			data: {
-				teamspace,
-				model: modelId,
-				disableViewer: true,
-				horizontal: true,
-			},
-			DialogProps: {
-				maxWidth: size
-			}
-		};
-
-		props.showDialog(config);
-	}, [type, props.fetchCardData, project, teamspace, modelId, props.cards]);
+	const handleOpenDialog = useCallback((cardId?) => {
+		props.openCardDialog(cardId, handleNavigationChange);
+	}, [teamspace, modelId, props.cards]);
 
 	const handleAddNewCard = () => {
 		handleOpenDialog();
@@ -445,7 +405,7 @@ export function Board(props: IProps) {
 	};
 
 	const components = {
-		Card: BoardCard
+		Card:  isIssuesBoard ? IssueBoardCard : RiskBoardCard
 	};
 
 	const renderBoard = renderWhenTrue(() => (
@@ -501,12 +461,14 @@ export function Board(props: IProps) {
 	const filterItems = () => {
 		const filterValuesMap = isIssuesBoard
 				? issuesFilters(props.jobs, props.topicTypes)
-				: risksFilters(props.jobs, props.teamspaceSettings);
+				: risksFilters(props.jobs, props.criteria);
 
-		return FILTER_ITEMS.map((issueFilter) => {
+		const generatedFilters = FILTER_ITEMS.map((issueFilter) => {
 			issueFilter.values = filterValuesMap[issueFilter.relatedField];
 			return issueFilter;
 		});
+
+		return generatedFilters.filter((filter) => filter.values.length);
 	};
 
 	const getSearchButton = () => {

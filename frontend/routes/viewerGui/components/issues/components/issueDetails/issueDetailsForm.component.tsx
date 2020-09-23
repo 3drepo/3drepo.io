@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,28 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import React from 'react';
+
 import DayJsUtils from '@date-io/dayjs';
+import Tab from '@material-ui/core/Tab';
+import Tabs from '@material-ui/core/Tabs';
+import Tooltip from '@material-ui/core/Tooltip';
 import { withFormik, Field, Form } from 'formik';
 import { debounce, get, isEmpty, isEqual } from 'lodash';
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';
-import React from 'react';
 import * as Yup from 'yup';
 
-import InputLabel from '@material-ui/core/InputLabel';
-import { ISSUE_PRIORITIES, ISSUE_STATUSES } from '../../../../../../constants/issues';
-import { canChangeAssigned, canChangeBasicProperty, canChangeStatus } from '../../../../../../helpers/issues';
-import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { NAMED_MONTH_DATE_FORMAT } from '../../../../../../services/formatting/formatDate';
+import { ATTACHMENTS_ISSUE_TAB, ISSUE_PROPERTIES_TAB, ISSUE_TABS } from '../../../../../../constants/issues';
+import { VIEWER_PANELS_TITLES } from '../../../../../../constants/viewerGui';
+import { canChangeAssigned, canChangeBasicProperty } from '../../../../../../helpers/issues';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
-import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
-import { DateField } from '../../../../../components/dateField/dateField.component';
-import { Image } from '../../../../../components/image';
-import { Resources } from '../../../../../components/resources/resources.component';
-import { ScreenshotDialog } from '../../../../../components/screenshotDialog';
-import { TextField } from '../../../../../components/textField/textField.component';
-import PinButton from '../../../pinButton/pinButton.container';
-import { FieldsRow, StyledFormControl } from '../../../risks/components/riskDetails/riskDetails.styles';
-import { DescriptionImage } from './issueDetails.styles';
+import { AttachmentsFormTab } from '../../../risks/components/attachmentsFormTab/attachmentsFormTab.component';
+import { MainIssueFormTab } from '../mainIssueFormTab/mainIssueFormTab.component';
+import { TabContent } from './issueDetails.styles';
 
 interface IProps {
 	issue: any;
@@ -61,16 +57,21 @@ interface IProps {
 	onThumbnailUpdate: () => void;
 	showScreenshotDialog: (config: any) => void;
 	showDialog: (config: any) => void;
-	hidePin?: boolean;
+	disableViewer?: boolean;
 	hasPin: boolean;
 	canComment: boolean;
+	formRef: any;
+	onUpdateViewpoint: () => void;
+	onTakeScreenshot: () => void;
+	onUploadScreenshot: (image) => void;
 }
 
 interface IState {
 	isSaving: boolean;
+	activeTab: string;
 }
 
-const IssueSchema = Yup.object().shape({
+export const IssueSchema = Yup.object().shape({
 	description: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
 });
 
@@ -84,8 +85,14 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		return this.isNewIssue || canChangeBasicProperty(issue, myJob, permissions, currentUser);
 	}
 
+	get canChangeAssigned() {
+		const { issue, myJob, permissions, currentUser } = this.props;
+		return canChangeAssigned(issue, myJob, permissions, currentUser);
+	}
+
 	public state = {
-		isSaving: false
+		isSaving: false,
+		activeTab: ISSUE_PROPERTIES_TAB,
 	};
 
 	public autoSave = debounce(() => {
@@ -100,17 +107,6 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 			this.setState({ isSaving: false });
 		});
 	}, 200);
-
-	public renderPinButton = renderWhenTrue(() => (
-		<StyledFormControl>
-			<PinButton
-				onChange={this.props.onChangePin}
-				onSave={this.props.onSavePin}
-				hasPin={this.props.hasPin}
-				disabled={!this.isNewIssue && !this.canEditBasicProperty}
-			/>
-		</StyledFormControl>
-	));
 
 	public componentDidUpdate(prevProps) {
 		const changes = {} as IState;
@@ -131,125 +127,61 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public handleThumbnailClick = () => {
-		this.props.showScreenshotDialog({
-			sourceImage: this.props.issue.descriptionThumbnail,
-			onSave: this.props.onThumbnailUpdate,
-			template: ScreenshotDialog,
-			notFullScreen: true,
-		});
+	private handleChange = (event, activeTab) => {
+		this.setState({ activeTab });
 	}
 
-	public imageProps = () => {
-		if (this.isNewIssue) {
-			return ({
-				onClick: this.handleThumbnailClick,
-			});
+	public showIssueContent = (active) => (
+		<MainIssueFormTab
+			active={active}
+			isNew={this.isNewIssue}
+			canEditBasicProperty={this.canEditBasicProperty}
+			canChangeAssigned={this.canChangeAssigned}
+			{...this.props}
+		/>
+	)
+
+	public showAttachmentsContent = (active) => (
+		<AttachmentsFormTab active={active} resources={this.props.issue.resources} {...this.props} />
+	)
+
+	get attachmentsProps() {
+		if (!this.isNewIssue) {
+			return {
+				label: ISSUE_TABS.ATTACHMENTS
+			};
 		}
+
+		return {
+			disabled: true,
+			label: (
+				<Tooltip title={`Save the ${VIEWER_PANELS_TITLES.issues} before adding an attachment`}>
+					<span>{ISSUE_TABS.ATTACHMENTS}</span>
+				</Tooltip>
+			)
+		};
 	}
 
 	public render() {
-		const { issue, myJob, permissions,
-				topicTypes, currentUser, onRemoveResource,
-				attachFileResources, attachLinkResources, showDialog,
-			canComment } = this.props;
+		const { activeTab } = this.state;
 
 		return (
 			<MuiPickersUtilsProvider utils={DayJsUtils}>
 				<Form>
-					<FieldsRow container alignItems="center" justify="space-between">
-						<StyledFormControl>
-							<InputLabel shrink htmlFor="priority">Priority</InputLabel>
-							<Field name="priority" render={({ field }) => (
-								<CellSelect
-									{...field}
-									items={ISSUE_PRIORITIES}
-									inputId="priority"
-									disabled={!this.canEditBasicProperty}
-								/>
-							)} />
-						</StyledFormControl>
-						<StyledFormControl>
-							<InputLabel shrink htmlFor="status">Status</InputLabel>
-							<Field name="status" render={({ field }) => (
-								<CellSelect
-									{...field}
-									items={ISSUE_STATUSES}
-									inputId="status"
-									disabled={!(this.isNewIssue || canChangeStatus(issue, myJob, permissions, currentUser))}
-								/>
-							)} />
-						</StyledFormControl>
-					</FieldsRow>
-					<FieldsRow container alignItems="center" justify="space-between">
-						<StyledFormControl>
-							<InputLabel shrink htmlFor="assigned_roles">Assign</InputLabel>
-							<Field name="assigned_roles" render={({ field }) => (
-								<CellSelect
-									{...field}
-									items={this.props.jobs}
-									inputId="assigned_roles"
-									disabled={!(this.isNewIssue || canChangeAssigned(issue, myJob, permissions, currentUser))}
-								/>
-							)} />
-						</StyledFormControl>
-						<StyledFormControl>
-							<InputLabel shrink htmlFor="topic_type">Type</InputLabel>
-							<Field name="topic_type" render={({ field }) => (
-								<CellSelect
-									{...field}
-									items={topicTypes}
-									inputId="topic_type"
-									disabled={!this.canEditBasicProperty}
-								/>
-							)} />
-						</StyledFormControl>
-					</FieldsRow>
-					<FieldsRow container justify="space-between" flex={0.5}>
-						<StyledFormControl>
-							<InputLabel shrink>Due date</InputLabel>
-							<Field name="due_date" render={({ field }) =>
-								<DateField
-									{...field}
-									format={NAMED_MONTH_DATE_FORMAT}
-									disabled={!this.canEditBasicProperty}
-									placeholder="Choose a due date" />}
-								/>
-						</StyledFormControl>
-						{this.renderPinButton(!this.props.hidePin)}
-					</FieldsRow>
-					<Field name="desc" render={({ field }) => (
-						<TextField
-							{...field}
-							requiredConfirm={!this.isNewIssue}
-							fullWidth
-							multiline
-							label="Description"
-							disabled={!this.canEditBasicProperty}
-							validationSchema={IssueSchema}
-							mutable={!this.isNewIssue}
-						/>
-					)} />
-
-					{this.props.issue.descriptionThumbnail && (
-						<DescriptionImage>
-							<Image
-								src={this.props.issue.descriptionThumbnail}
-								enablePreview
-								{...this.imageProps()}
-							/>
-						</DescriptionImage>
-					)}
+					<Tabs
+						value={activeTab}
+						indicatorColor="secondary"
+						textColor="primary"
+						onChange={this.handleChange}
+					>
+						<Tab label={ISSUE_TABS.ISSUE} value={ISSUE_PROPERTIES_TAB} />
+						<Tab {...this.attachmentsProps} value={ATTACHMENTS_ISSUE_TAB} />
+					</Tabs>
+					<TabContent>
+						{this.showIssueContent(activeTab === ISSUE_PROPERTIES_TAB)}
+						{this.showAttachmentsContent(activeTab === ATTACHMENTS_ISSUE_TAB)}
+					</TabContent>
 				</Form>
-				{!this.isNewIssue &&
-					<Resources showDialog={showDialog}
-						resources={issue.resources}
-						onSaveFiles={attachFileResources}
-						onSaveLinks={attachLinkResources}
-						onRemoveResource={onRemoveResource}
-						canEdit={canComment}
-					/>
-				}
 			</MuiPickersUtilsProvider>
 		);
 	}

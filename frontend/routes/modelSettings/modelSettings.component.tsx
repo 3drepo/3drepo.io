@@ -26,12 +26,15 @@ import * as Yup from 'yup';
 
 import InputLabel from '@material-ui/core/InputLabel';
 import { ROUTES } from '../../constants/routes';
-import { convertPositionToDirectX, convertPositionToOpenGL } from '../../helpers/model';
+import { convertPositionToDirectX, convertPositionToOpenGL, getModelCodeFieldErrorMsg } from '../../helpers/model';
+import { IViewpointsComponentState } from '../../modules/viewpoints/viewpoints.redux';
 import { clientConfigService } from '../../services/clientConfig';
 import { schema } from '../../services/validation';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
+import ViewsDialog from '../components/viewsDialog/viewsDialog.container';
+import { DefaultViewField } from './defaultViewField/defaultViewField.component';
 import {
 	BackButton,
 	ButtonContainer,
@@ -43,7 +46,9 @@ import {
 	SelectWrapper,
 	StyledForm,
 	StyledIcon,
-	StyledTextField
+	StyledTextField,
+	SubHeadline,
+	ViewContainer,
 } from './modelSettings.styles';
 
 const ModelSettingsSchema = Yup.object().shape({
@@ -86,6 +91,9 @@ interface IProps {
 	modelSettings: any;
 	currentTeamspace: string;
 	isSettingsLoading: boolean;
+	showDialog: (config) => void;
+	setState: (componentState: IViewpointsComponentState) => void;
+	searchEnabled?: boolean;
 }
 
 export class ModelSettings extends React.PureComponent<IProps, IState> {
@@ -108,7 +116,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps) {
 		const changes = {} as any;
-		const { surveyPoints, elevation, angleFromNorth } = this.props.modelSettings;
+		const { surveyPoints, elevation, angleFromNorth, defaultView } = this.props.modelSettings;
 		const prevSurveyPoints = prevProps.modelSettings.surveyPoints;
 
 		if (elevation && prevProps.modelSettings.elevation !== elevation) {
@@ -117,6 +125,11 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 
 		if (angleFromNorth && prevProps.modelSettings.angleFromNorth !== angleFromNorth) {
 			changes.angleFromNorth = angleFromNorth;
+		}
+
+		if (defaultView && prevProps.modelSettings.defaultView !== defaultView &&
+				prevProps.modelSettings.defaultView && defaultView.id !== prevProps.modelSettings.defaultView.id ) {
+			changes.defaultView = defaultView;
 		}
 
 		const pointsChanges = this.getSurveyPointsChanges(prevSurveyPoints, surveyPoints);
@@ -163,7 +176,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 		const queryParams = queryString.parse(location.search);
 		const { project } = queryParams;
 		const { name, unit, type, code, elevation, angleFromNorth, fourDSequenceTag,
-			axisX, axisY, axisZ, latitude, longitude } = data;
+			axisX, axisY, axisZ, latitude, longitude, defaultView } = data;
 
 		const settings = {
 			name,
@@ -177,6 +190,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 				position: convertPositionToDirectX([axisX, axisY, axisZ]),
 				latLong: [latitude, longitude].map(Number)
 			}],
+			defaultView: defaultView ? defaultView.id : null,
 		};
 
 		const modelData = { teamspace, project, modelId };
@@ -185,6 +199,34 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 
 	public handleBackLink = () => {
 		this.props.history.push({ pathname: ROUTES.TEAMSPACES });
+	}
+
+	public handleOpenSearchModel = () => this.props.setState({ searchEnabled: true });
+
+	public handleCloseSearchModel = () =>
+		this.props.setState({
+			searchEnabled: false,
+			searchQuery: ''
+		})
+
+	public handleSelectView = (onChange) => () => {
+		const { match } = this.props;
+		const { teamspace, modelId } = match.params;
+
+		this.props.showDialog({
+			title: 'Select a View',
+			template: ViewsDialog,
+			data: {
+				teamspace,
+				modelId,
+				onChange,
+			},
+			search: {
+				enabled: this.props.searchEnabled,
+				onOpen: this.handleOpenSearchModel,
+				onClose: this.handleCloseSearchModel,
+			},
+		});
 	}
 
 	public renderTitleWithBackLink = () => (
@@ -203,7 +245,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 	)
 
 	public renderForm = () => {
-		const { id, name, type, fourDSequenceTag, properties, federate } = this.props.modelSettings;
+		const { id, name, type, fourDSequenceTag, properties, federate, defaultView } = this.props.modelSettings;
 		const { latitude, longitude, axisX, axisY, axisZ, angleFromNorth, elevation } = this.state;
 
 		return	(
@@ -211,7 +253,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 				<Formik
 					initialValues={ {
 						id, name, type: federate ? 'Federation' : type, code: properties.code, unit: properties.unit, fourDSequenceTag,
-						latitude, longitude, axisX, axisY, axisZ, elevation, angleFromNorth
+						latitude, longitude, axisX, axisY, axisZ, elevation, angleFromNorth, defaultView
 					} }
 					validationSchema={ModelSettingsSchema}
 					onSubmit={this.handleUpdateSettings}
@@ -253,7 +295,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 										label="Model code"
 										margin="normal"
 										error={Boolean(form.errors.code)}
-										helperText={form.errors.code}
+										helperText={getModelCodeFieldErrorMsg(form.errors.code)}
 									/>
 								)} />
 							</FieldsRow>
@@ -278,6 +320,12 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 								</SelectWrapper>
 							</FieldsRow>
 						</Grid>
+						<ViewContainer container direction="column" wrap="nowrap" alignItems="flex-start">
+							<SubHeadline color="textPrimary" variant="subheading">Default View</SubHeadline>
+							<Field name="defaultView" render={ ({ field }) => (
+									<DefaultViewField onSelectView={this.handleSelectView(field.onChange)} {...field} />
+							)} />
+						</ViewContainer>
 						<Headline color="primary" variant="subheading">GIS Reference Information</Headline>
 						<Grid container direction="column" wrap="nowrap">
 							<Grid container direction="row" wrap="nowrap">

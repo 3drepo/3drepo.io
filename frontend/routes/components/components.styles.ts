@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -63,4 +63,14 @@ export const UserActionButton = styled(Button)`
 	&&:hover {
 		background-color: transparent;
 	}
+`;
+
+export const EmptyStateInfo = styled.p`
+	padding: 14px;
+	font-size: 13px;
+	color: ${COLOR.BLACK_60};
+	background-color: ${COLOR.BLACK_6};
+	margin: 25px;
+	border-radius: 6px;
+	text-align: center;
 `;

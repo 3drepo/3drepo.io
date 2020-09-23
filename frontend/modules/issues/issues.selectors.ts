@@ -17,7 +17,9 @@
 
 import { values } from 'lodash';
 import { createSelector } from 'reselect';
+
 import { STATUSES } from '../../constants/issues';
+import { prepareComments, transformCustomsLinksToMarkdown } from '../../helpers/comments';
 import { hasPin, issueToPin } from '../../helpers/pins';
 import { searchByFilters } from '../../helpers/searching';
 import { selectCurrentModel } from '../model';
@@ -63,6 +65,18 @@ export const selectActiveIssueDetails = createSelector(
 	}
 );
 
+export const selectFocusedIssueOverrideGroups = createSelector(
+	selectActiveIssueDetails, (activeIssue) => activeIssue.override_groups || []
+);
+
+export const selectActiveIssueComments = createSelector(
+	selectActiveIssueDetails, selectIssuesMap, (activeIssueDetails, issues) =>
+		prepareComments(activeIssueDetails.comments || []).map((comment) => ({
+			...comment,
+			commentWithMarkdown: transformCustomsLinksToMarkdown(comment, issues, 'issue')
+		}))
+);
+
 export const selectShowDetails = createSelector(
 	selectComponentState, (state) => state.showDetails
 );
@@ -90,7 +104,7 @@ export const selectSelectedFilters = createSelector(
 export const selectFilteredIssues = createSelector(
 	selectIssues, selectSelectedFilters, (issues, selectedFilters) => {
 		const returnHiddenIssue = selectedFilters.length && selectedFilters
-			.some(({ value: { value } }) => value === STATUSES.CLOSED);
+			.some(({ value: { value } }) => [STATUSES.CLOSED, STATUSES.VOID].includes(value));
 
 		return searchByFilters(issues, selectedFilters, returnHiddenIssue);
 	}
@@ -98,7 +112,7 @@ export const selectFilteredIssues = createSelector(
 
 export const selectAllFilteredIssues = createSelector(
 	selectIssues, selectSelectedFilters, (issues, selectedFilters) =>
-		searchByFilters(issues, selectedFilters, true)
+		searchByFilters(issues, selectedFilters, true, ['name', 'desc', 'number'])
 );
 
 export const selectShowPins = createSelector(
@@ -107,6 +121,10 @@ export const selectShowPins = createSelector(
 
 export const selectFetchingDetailsIsPending = createSelector(
 	selectComponentState, (state) => state.fetchingDetailsIsPending
+);
+
+export const selectPostCommentIsPending = createSelector(
+	selectComponentState, (state) => state.postCommentIsPending
 );
 
 export const selectIsImportingBCF = createSelector(

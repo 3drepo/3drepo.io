@@ -33,6 +33,11 @@ export interface IDialogConfig {
 	closeText?: string;
 	onConfirm?: () => void;
 	onCancel?: () => void;
+	search?: {
+		enabled?: boolean;
+		onOpen?: () => void;
+		onClose?: () => void;
+	};
 }
 
 interface IDialogState {
@@ -63,6 +68,7 @@ const showDialog = (state = INITIAL_STATE, action) => {
 		config,
 		data: action.config.data,
 	};
+
 	const dialogs = [...state.dialogs, dialog];
 	return { ...state, dialogs };
 };
@@ -154,6 +160,7 @@ const showLoggedOutDialog = (state = INITIAL_STATE, action) => {
 
 	return showDialog(state, { config });
 };
+
 export const reducer = createReducer({...INITIAL_STATE}, {
 	[DialogTypes.HIDE_DIALOG]: hideDialog,
 	[DialogTypes.SHOW_DIALOG]: showDialog,

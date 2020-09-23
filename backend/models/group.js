@@ -33,6 +33,8 @@ const FileRef = require("./fileRef");
 const {union, intersection, difference} = require("./helper/set");
 const { batchPromises } = require("./helper/promises");
 
+const { systemLogger } = require("../logger.js");
+
 const ruleOperators = {
 	"IS_EMPTY":	0,
 	"IS_NOT_EMPTY":	0,
@@ -70,7 +72,8 @@ const fieldTypes = {
 	"rules": "[object Array]",
 	"color": "[object Array]",
 	"issue_id": "[object Object]",
-	"risk_id": "[object Object]"
+	"risk_id": "[object Object]",
+	"view_id": "[object Object]"
 };
 
 const embeddedObjectFields = {
@@ -116,6 +119,10 @@ const groupSchema = new Schema({
 		required: false
 	},
 	risk_id: {
+		type: Object,
+		required: false
+	},
+	view_id: {
 		type: Object,
 		required: false
 	},
@@ -404,6 +411,11 @@ groupSchema.statics.listGroups = function (dbCol, queryParams, branch, revId, id
 		query.risk_id = { $exists: false };
 	}
 
+	// If we want groups that aren't from views
+	if (queryParams.noViews) {
+		query.view_id = { $exists: false };
+	}
+
 	if (queryParams.updatedSince) {
 		const updatedSince = parseFloat(queryParams.updatedSince);
 
@@ -474,7 +486,6 @@ groupSchema.methods.updateGroup = function (dbCol, sessionId, data, user = "", b
 };
 
 groupSchema.methods.updateAttrs = function (dbCol, data, user) {
-
 	return this.getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
 		const toUpdate = {};
 		const toUnset = {};
@@ -530,7 +541,6 @@ groupSchema.methods.updateAttrs = function (dbCol, data, user) {
 		} else {
 			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
 		}
-
 	});
 };
 
@@ -562,11 +572,11 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data, creator = ""
 
 		let typeCorrect = (!data.objects !== !data.rules);
 
-		const allowedFields = ["description", "name", "objects","rules","color","issue_id","risk_id"];
+		const allowedFields = ["description", "name", "objects","rules","color","issue_id","risk_id","view_id"];
 
 		allowedFields.forEach((key) => {
 			if (fieldTypes[key] && utils.hasField(data, key)) {
-				if (Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
+				if (utils.typeMatch(data[key], fieldTypes[key])) {
 					if (key === "objects" && data.objects) {
 						newGroup.objects = cleanEmbeddedObject(key, convertedObjects);
 					} else if (key === "color") {
@@ -580,6 +590,7 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data, creator = ""
 						newGroup[key] = cleanEmbeddedObject(key, data[key]);
 					}
 				} else {
+					systemLogger.logError(`Type mismatch ${key} ${data[key]}`);
 					typeCorrect = false;
 				}
 			}
@@ -650,12 +661,15 @@ function checkRulesValidity(rules) {
 	while (valid && it < rules.length) {
 
 		const rule = rules[it];
+		const hasDuplicate = fieldsWithRules.has(rule.field);
 		valid = rule &&
 			isValidRule(rule) &&
-			!fieldsWithRules.has(rule.field) ;
+			!hasDuplicate;
 
 		if (valid) {
 			fieldsWithRules.add(rule.field);
+		} else if (hasDuplicate) {
+			throw responseCodes.MULTIPLE_RULES_PER_FIELD_NOT_ALLOWED;
 		}
 		it++;
 	}
@@ -1019,6 +1033,11 @@ Group.deleteGroups = function (dbCol, sessionId, ids) {
 			ChatEvent.groupsDeleted(sessionId, dbCol.account, dbCol.model, groupsIds);
 		});
 	});
+};
+
+Group.deleteGroupsByViewId = async function (account, model, view_id) {
+	const _dbCol = await db.getCollection(account, model + ".groups");
+	return await _dbCol.remove({ view_id });
 };
 
 module.exports = Group;

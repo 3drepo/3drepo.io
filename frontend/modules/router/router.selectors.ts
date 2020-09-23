@@ -20,10 +20,10 @@ import { matchPath } from 'react-router';
 import { createSelector } from 'reselect';
 import { ROUTES } from '../../constants/routes';
 
-export const selectRouterDomain = (state) => state.router;
+export const selectRouterDomain = (state) => state.router || '';
 
 export const selectLocation = createSelector(
-	selectRouterDomain, (router) => router.location
+	selectRouterDomain, (router) => router.location || ''
 );
 
 export const selectPathname = createSelector(

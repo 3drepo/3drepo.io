@@ -559,19 +559,6 @@ function* zoomToHighlightedNodes() {
 }
 
 function* handleTransparencyOverridesChange({ currentOverrides, previousOverrides }) {
-	yield put (TreeActions.showAllNodes());
-	const overrides = Object.keys(currentOverrides).reduce((ov, key) => {
-		if (currentOverrides[key] === 0) {
-			ov.hidden.push(key);
-		} else {
-			ov.unhidden[key] = currentOverrides[key];
-		}
-
-		return ov;
-	} , {hidden: [], unhidden: {}});
-
-	yield hideTreeNodes(overrides.hidden, true);
-
 	const toAdd = overridesTransparencyDiff(currentOverrides, previousOverrides);
 	const toRemove = overridesTransparencyDiff(previousOverrides, currentOverrides);
 

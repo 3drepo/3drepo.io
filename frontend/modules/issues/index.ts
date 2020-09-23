@@ -21,3 +21,6 @@ export {
 } from './issues.redux';
 
 export * from './issues.selectors';
+export { MARKDOWN_TICKET_REFERENCE_REGEX } from '../../helpers/comments';
+export { MARKDOWN_USER_REFERENCE_REGEX } from '../../helpers/comments';
+export { transformCustomsLinksToMarkdown } from '../../helpers/comments';
