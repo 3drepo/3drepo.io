@@ -17,6 +17,6 @@ if [ "$1" = 'web' ]; then
 
     umask 2
     cd /home/node/3drepo.io
-    exec gosu $NODE_USERNAME ./run/run_app
+    exec gosu $NODE_USERNAME ./run/run_app $NODE_ENV
 
 exec "$@"
