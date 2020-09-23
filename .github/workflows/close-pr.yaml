@@ -25,4 +25,4 @@ jobs:
         # The full helm command to run (including helm)
         kubeconfig: '$SUPER_SECRET'
       env:
-        SUPER_SECRET: ${{ secrets.INPUT_KUBECONFIG }}
+        SUPER_SECRET: ${{ secrets.KUBECONFIG_JSON }}
