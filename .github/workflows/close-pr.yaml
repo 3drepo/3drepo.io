@@ -1,0 +1,26 @@
+# This is a basic workflow to help you get started with Actions
+
+name: close-old-pr
+
+on:
+  pull_request:
+    types: [ closed ]
+    
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "remove"
+  remove:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    - name: Helm 3
+      # You may pin to the exact commit or the version.
+      # uses: WyriHaximus/github-action-helm3@7debf21f4e34c2ced1a16ca3f5599e80b826a209
+      uses: WyriHaximus/github-action-helm3@v2.0
+      with:
+        # The full helm command to run (including helm)
+        exec: helm delete $( echo $GITHUB_REF | rev | awk '{split($0,a,"/"); print a[1]}' | rev | sed "s/_/-/" | awk '{print tolower($0)}' )
+        # The full helm command to run (including helm)
+        kubeconfig: '${{ secrets.KUBE_CONFIG }}'
