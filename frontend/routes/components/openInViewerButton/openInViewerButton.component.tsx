@@ -28,6 +28,7 @@ interface IProps {
 	model: string;
 	query?: string;
 	history: any;
+	preview?: boolean;
 }
 
 export const OpenInViewerButton = memo((props: IProps) => {
@@ -38,7 +39,7 @@ export const OpenInViewerButton = memo((props: IProps) => {
 	};
 
 	return (
-		<ShowModelButtonContainer className={props.className}>
+		<ShowModelButtonContainer preview={props.preview} className={props.className}>
 			<TooltipButton
 				Icon={OpenInBrowser}
 				label="View on model"

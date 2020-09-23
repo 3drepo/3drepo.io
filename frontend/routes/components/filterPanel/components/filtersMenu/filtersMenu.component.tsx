@@ -26,9 +26,9 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { FILTER_TYPES } from '../../filterPanel.component';
+import { ChildMenu } from '../childMenu/childMenu.component';
 
 import {
-	ChildMenu,
 	CopyItem,
 	CopyText,
 	DataTypesWrapper,
@@ -125,9 +125,7 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderChildItems = (index, item) => renderWhenTrue(() => (
-		<ChildMenu>
-			<List>{item.values.map(this.renderListChildItem(index, item))}</List>
-		</ChildMenu>
+		<ChildMenu item={item} renderItem={this.renderListChildItem(index, item)} />
 	))(index === this.state.activeItem && item.values)
 
 	public renderMenuItems = (items) => {

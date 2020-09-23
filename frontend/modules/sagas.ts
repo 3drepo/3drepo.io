@@ -4,6 +4,7 @@ import billingSaga from './billing/billing.sagas';
 import bimSaga from './bim/bim.sagas';
 import boardSaga from './board/board.sagas';
 import chatSaga from './chat/chat.sagas';
+import commentsSaga from './comments/comments.sagas';
 import compareSaga from './compare/compare.sagas';
 import currentUserSaga from './currentUser/currentUser.sagas';
 import dialogSaga from './dialog/dialog.sagas';
@@ -21,7 +22,6 @@ import teamspaceSaga from './teamspace/teamspace.sagas';
 import teamspacesSaga from './teamspaces/teamspaces.sagas';
 import treeSaga from './tree/tree.sagas';
 import userManagementSaga from './userManagement/userManagement.sagas';
-import usersSaga from './users/users.sagas';
 import viewerSaga from './viewer/viewer.sagas';
 import viewerGuiSaga from './viewerGui/viewerGui.sagas';
 import viewpointsSaga from './viewpoints/viewpoints.sagas';
@@ -38,7 +38,7 @@ export default function* rootSaga() {
 		fork(modelSaga),
 		fork(authSaga),
 		fork(notificationsSaga),
-		fork(usersSaga),
+		fork(commentsSaga),
 		fork(viewerSaga),
 		fork(risksSaga),
 		fork(viewpointsSaga),

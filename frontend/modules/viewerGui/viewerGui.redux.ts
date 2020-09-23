@@ -58,7 +58,7 @@ export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActio
 	deactivateMeasure: [],
 	clearHighlights: [],
 	setCamera: ['params'],
-	resetPanels: []
+	resetPanels: [],
 }, { prefix: 'VIEWER_GUI/' });
 
 export interface IViewerGuiState {
@@ -90,7 +90,7 @@ export const INITIAL_STATE: IViewerGuiState = {
 	isClipEdit: false,
 	clipNumber: 0,
 	isPinDropMode: false,
-	pinData: null
+	pinData: null,
 };
 
 const updatePanelsList = (panels, lockedPanels, panelName, visibility) => {

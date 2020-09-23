@@ -17,8 +17,6 @@
 
 import styled from 'styled-components';
 
-import { COLOR } from '../../../../styles';
-
 import {
 	VIEWER_PANELS,
 	VIEWER_PANELS_ICONS,
@@ -48,14 +46,4 @@ export const ViewerBottomActions = styled.div`
 	display: flex;
 	align-items: center;
 	width: 100%;
-`;
-
-export const EmptyStateInfo = styled.p`
-	padding: 14px;
-	font-size: 13px;
-	color: ${COLOR.BLACK_60};
-	background-color: ${COLOR.BLACK_6};
-	margin: 25px;
-	border-radius: 6px;
-	text-align: center;
 `;

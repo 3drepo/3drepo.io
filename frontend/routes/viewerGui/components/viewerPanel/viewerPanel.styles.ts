@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Button, Grid } from '@material-ui/core';
+import Grid from '@material-ui/core/Grid';
 import styled, { css } from 'styled-components';
 
 import { COLOR } from '../../../../styles';
 import { Panel as PanelComponent } from '../../../components/panel/panel.component';
+import { SubmitButton } from '../../../components/submitButton/submitButton.component';
 
 interface IViewerPanelFooter {
 	padding?: string;
@@ -126,7 +127,7 @@ export const ViewerPanelFooter = styled(Grid).attrs({
 	font-size: 14px;
 `;
 
-export const ViewerPanelButton = styled(Button)<IViewerPanelButton>`
+export const ViewerPanelButton = styled(SubmitButton)<IViewerPanelButton>`
 	&& {
 		flex: none;
 		margin-right: -3px;

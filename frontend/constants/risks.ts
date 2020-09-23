@@ -1,16 +1,15 @@
-import { values } from 'lodash';
-
 import CheckCircle from '@material-ui/icons/CheckCircle';
 import Download from '@material-ui/icons/CloudDownload';
 import ErrorSolid from '@material-ui/icons/Error';
 import ErrorOutline from '@material-ui/icons/ErrorOutline';
+import HighlightOff from '@material-ui/icons/HighlightOff';
 import NewReleases from '@material-ui/icons/NewReleases';
 import Pins from '@material-ui/icons/PinDrop';
 import Print from '@material-ui/icons/Print';
 import SyncProblem from '@material-ui/icons/SyncProblem';
-import { SortAmountDown, SortAmountUp } from '../routes/components/fontAwesomeIcon';
 
 import { FILTER_TYPES } from '../routes/components/filterPanel/filterPanel.component';
+import { SortAmountDown, SortAmountUp } from '../routes/components/fontAwesomeIcon';
 import { COLOR, PIN_COLORS } from '../styles';
 
 export const RISK_PANEL_NAME = 'risk';
@@ -54,7 +53,8 @@ export const RISK_LEVELS = {
 	PROPOSED: 'proposed',
 	AGREED_PARTIAL: 'agreed_partial',
 	AGREED_FULLY: 'agreed_fully',
-	REJECTED: 'rejected'
+	REJECTED: 'rejected',
+	VOID: 'void',
 };
 
 export const RISK_MITIGATION_STATUSES = [
@@ -62,7 +62,8 @@ export const RISK_MITIGATION_STATUSES = [
 	{ value: RISK_LEVELS.PROPOSED, name: 'Proposed'},
 	{ value: RISK_LEVELS.AGREED_PARTIAL, name: 'Agreed (Partial)' },
 	{ value: RISK_LEVELS.AGREED_FULLY, name: 'Agreed (Fully)' },
-	{ value: RISK_LEVELS.REJECTED, name: 'Rejected' }
+	{ value: RISK_LEVELS.REJECTED, name: 'Rejected' },
+	{ value: RISK_LEVELS.VOID, name: 'Void' },
 ];
 
 export const RISK_LEVELS_ICONS = {
@@ -70,7 +71,8 @@ export const RISK_LEVELS_ICONS = {
 	[RISK_LEVELS.PROPOSED]: ErrorOutline,
 	[RISK_LEVELS.AGREED_PARTIAL]: ErrorSolid,
 	[RISK_LEVELS.AGREED_FULLY]: CheckCircle,
-	[RISK_LEVELS.REJECTED]: SyncProblem
+	[RISK_LEVELS.REJECTED]: SyncProblem,
+	[RISK_LEVELS.VOID]: HighlightOff,
 };
 
 export const RISK_LEVELS_COLOURS = {
@@ -110,7 +112,14 @@ export const RISK_FILTER_RELATED_FIELDS = {
 	CREATED_BY: 'creator_role',
 	RISK_OWNER: 'assigned_roles',
 	CATEGORY: 'category',
+	ELEMENT: 'element',
+	LOCATION: 'location_desc',
 	RISK_CONSEQUENCE: 'consequence',
+	RISK_FACTOR: 'risk_factor',
+	ASSOCIATED_ACTIVITY: 'associated_activity',
+	SCOPE: 'scope',
+	MITIGATION_STAGE: 'mitigation_stage',
+	MITIGATION_TYPE: 'mitigation_type',
 	RISK_LIKELIHOOD: 'likelihood',
 	LEVEL_OF_RISK: 'level_of_risk',
 	RESIDUAL_CONSEQUENCE: 'residual_consequence',
@@ -126,7 +135,7 @@ export const RISK_FILTERS = [
 		type: RISK_FILTER_FILTER_TYPES.NORMAL
 	},
 	{
-		label: 'Mitigation Status',
+		label: 'Treatment Status',
 		relatedField: RISK_FILTER_RELATED_FIELDS.MITIGATION_STATUS,
 		type: RISK_FILTER_FILTER_TYPES.NORMAL
 	},
@@ -138,6 +147,41 @@ export const RISK_FILTERS = [
 	{
 		label: 'Risk owner',
 		relatedField: RISK_FILTER_RELATED_FIELDS.RISK_OWNER,
+		type: RISK_FILTER_FILTER_TYPES.NORMAL
+	},
+	{
+		label: 'Element type',
+		relatedField: RISK_FILTER_RELATED_FIELDS.ELEMENT,
+		type: RISK_FILTER_FILTER_TYPES.NORMAL
+	},
+	{
+		label: 'Location',
+		relatedField: RISK_FILTER_RELATED_FIELDS.LOCATION,
+		type: RISK_FILTER_FILTER_TYPES.NORMAL
+	},
+	{
+		label: 'Risk factor',
+		relatedField: RISK_FILTER_RELATED_FIELDS.RISK_FACTOR,
+		type: RISK_FILTER_FILTER_TYPES.NORMAL
+	},
+	{
+		label: 'Construction Scope',
+		relatedField: RISK_FILTER_RELATED_FIELDS.SCOPE,
+		type: RISK_FILTER_FILTER_TYPES.NORMAL
+	},
+	{
+		label: 'Associated activity',
+		relatedField: RISK_FILTER_RELATED_FIELDS.ASSOCIATED_ACTIVITY,
+		type: RISK_FILTER_FILTER_TYPES.NORMAL
+	},
+	{
+		label: 'Stage',
+		relatedField: RISK_FILTER_RELATED_FIELDS.MITIGATION_STAGE,
+		type: RISK_FILTER_FILTER_TYPES.NORMAL
+	},
+	{
+		label: 'Type',
+		relatedField: RISK_FILTER_RELATED_FIELDS.MITIGATION_TYPE,
 		type: RISK_FILTER_FILTER_TYPES.NORMAL
 	},
 	{

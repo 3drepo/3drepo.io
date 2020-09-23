@@ -18,7 +18,6 @@
 
 const utils = require("../utils");
 const responseCodes = require("../response_codes.js");
-const db = require("../handler/db");
 
 const History = require("./history");
 
@@ -39,7 +38,6 @@ const fieldTypes = {
 	"desc": "[object String]",
 	"due_date": "[object Number]",
 	"name": "[object String]",
-	"norm": "[object Array]",
 	"number": "[object Number]",
 	"owner": "[object String]",
 	"position": "[object Array]",
@@ -61,28 +59,19 @@ const ownerPrivilegeAttributes = [
 	"position",
 	"desc",
 	"due_date",
-	"priority"
+	"priority",
+	"viewpoint"
 ];
 
 const statusEnum = C.ISSUE_STATUS;
 
 class Issue extends Ticket {
 	constructor() {
-		super("issues", "issue_id", "issueIds", "ISSUE", fieldTypes,ownerPrivilegeAttributes);
+		super("issues", "issue", "issueIds", "ISSUE", fieldTypes, ownerPrivilegeAttributes);
 	}
 
 	async create(account, model, newIssue, sessionId) {
-		// Sets the issue number
-		const coll = await db.getCollection(account, model + ".issues");
-		try {
-			const issues = await coll.find({}, {number: 1}).sort({ number: -1 }).limit(1).toArray();
-			newIssue.number = (issues.length > 0) ? issues[0].number + 1 : 1;
-		} catch(e) {
-			newIssue.number = 1;
-		}
-
-		newIssue =  await super.create(account, model, newIssue);
-
+		newIssue = await super.create(account, model, newIssue);
 		ChatEvent.newIssues(sessionId, account, model, [newIssue]);
 		return newIssue;
 	}
@@ -90,7 +79,8 @@ class Issue extends Ticket {
 	async onBeforeUpdate(data, oldIssue, userPermissions, systemComments) {
 		// 2.6 if the user is trying to change the status and it doesnt have the necessary permissions throw a ISSUE_UPDATE_PERMISSION_DECLINED
 		if (data.status && data.status !== oldIssue.status) {
-			const canChangeStatus = userPermissions.hasAdminPrivileges || (userPermissions.hasAssignedJob && data.status !== statusEnum.CLOSED);
+			const canChangeStatus = userPermissions.hasAdminPrivileges ||
+				(userPermissions.hasAssignedJob && data.status !== statusEnum.CLOSED && data.status !== statusEnum.VOID);
 			if (!canChangeStatus) {
 				throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
 			}
@@ -133,12 +123,10 @@ class Issue extends Ticket {
 			"created",
 			"creator_role",
 			"name",
-			"norm",
 			"number",
 			"owner",
 			"rev_id",
 			"thumbnail",
-			"viewpoint",
 			"viewpoints",
 			"priority_last_changed",
 			"status_last_changed"
@@ -147,15 +135,14 @@ class Issue extends Ticket {
 		return await super.update(attributeBlacklist, user, sessionId, account, model, issueId, data, this.onBeforeUpdate.bind(this));
 	}
 
-	async getBCF(account, model, branch, revId, ids, useIssueNumbers = false) {
+	async getBCF(account, model, branch, revId, filters) {
 		const projection = {};
 		const noClean = true;
 
 		const settings = await ModelSetting.findById({account, model}, model);
-		if (useIssueNumbers && Array.isArray(ids)) {
-			ids = { number:  {"$in": ids.map(x => parseInt(x))} };
-		}
-		const issues = await this.findByModelName(account, model, branch, revId, undefined, projection, ids, noClean);
+
+		const issues = await this.findByModelName(account, model, branch, revId, undefined, projection,
+			filters, noClean);
 
 		return BCF.getBCFZipReadStream(account, model, issues, settings.properties.unit);
 	}
@@ -212,7 +199,6 @@ class Issue extends Ticket {
 					"created",
 					"creator_role",
 					"name",
-					"norm",
 					"number",
 					"owner",
 					"rev_id",
@@ -250,9 +236,9 @@ class Issue extends Ticket {
 		}
 	}
 
-	async getIssuesReport(account, model, rid, ids, res) {
+	async getIssuesReport(account, model, rid, filters, res) {
 		const reportGen = require("../models/report").newIssuesReport(account, model, rid);
-		return super.getReport(account, model, rid, ids, res, reportGen);
+		return super.getReport(account, model, rid, filters, res, reportGen);
 	}
 
 	isIssueBeingClosed(oldIssue, newIssue) {

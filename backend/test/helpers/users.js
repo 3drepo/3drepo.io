@@ -1,6 +1,3 @@
-
-"use strict";
-
 /**
  *  Copyright (C) 2019 3D Repo Ltd
  *
@@ -17,9 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+"use strict";
 
 const app = require("../../services/api.js").createApp();
 const request = require("supertest");
+const async = require("async");
+const { expect } = require("chai");
 
 
 const loginUsers = async (usernames, passwords) => {
@@ -62,6 +62,25 @@ const loginUsers = async (usernames, passwords) => {
 	return agents;
 };
 
+
 module.exports = {
-	loginUsers
+	loginUsers,
+	login: (agent, username, password) => (...args) => {
+		const next = args.pop();
+
+		async.series([
+			function(_done) {
+				agent.post("/logout")
+					.send({})
+					.expect(200, _done);
+			},
+			function(_done) {
+				agent.post("/login")
+					.send({username, password})
+					.expect(200,  (err, res) => {
+						expect(res.status, 'Status should be 200 (ok)').to.be.equal(200);
+						_done();
+					});
+			}], next);
+	}
 };

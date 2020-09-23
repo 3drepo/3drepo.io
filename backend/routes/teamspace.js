@@ -296,7 +296,8 @@
 	 *    user: "viewerTeamspace1Model1JobB",
 	 *    firstName: "Alice",
 	 *    lastName: "Stratford",
-	 *    company: "Teamspace one"
+	 *    company: "Teamspace one",
+	 *    job: {"_id": "Job1", color: "#FFFFFF"}
 	 * }
 	 */
 	router.get("/members/:user", middlewares.isTeamspaceMember, getTeamMemberInfo);
@@ -397,7 +398,7 @@
 	 * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam (Request body) {String} job The job that the users going to have assigned
 	 * @apiParam (Request body) {String} user The username of the user to become a member
-	 * @apiParam (Request body) {[]String} permissions The permisions to be assigned to the member it can be an empty array or have a "teamspace_admin" value.
+	 * @apiParam (Request body) {String[]} permissions The permisions to be assigned to the member it can be an empty array or have a "teamspace_admin" value.
 	 *
 	 * @apiExample {post} Example usage:
 	 * POST /teamSpace1/members HTTP/1.1

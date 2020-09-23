@@ -321,15 +321,30 @@ describe("Teamspace", function() {
 
 		});
 
-		const expectedInfo = {
-			user: mixedUser3.user,
-			firstName: "dflkgjfdgdf",
-			lastName: "lkgjri",
-			company: "flskjdflksdj"
-		};
 
 		it("should pass if the member exists", function(done) {
+			const expectedInfo = {
+				user: mixedUser3.user,
+				firstName: "dflkgjfdgdf",
+				lastName: "lkgjri",
+				company: "flskjdflksdj"
+			};
 			agent.get(`/${mixedUser1.user}/members/${mixedUser3.user}`)
+				.expect(200, function(err, res) {
+					expect(res.body).to.deep.equal(expectedInfo);
+					done(err);
+				});
+		});
+
+		it("should pass if the member exists (with job)", function(done) {
+			const expectedInfo = {
+				user: mixedUser1.user,
+				firstName: "dflkgjfdgdf",
+				lastName: "lkgjri",
+				company: "flskjdflksdj",
+				job: {_id: "jobB", color: "#9C9CD5"}
+			};
+			agent.get(`/${mixedUser1.user}/members/${mixedUser1.user}`)
 				.expect(200, function(err, res) {
 					expect(res.body).to.deep.equal(expectedInfo);
 					done(err);

@@ -1,5 +1,3 @@
-"use strict";
-
 /**
  *  Copyright (C) 2018 3D Repo Ltd
  *
@@ -16,6 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+"use strict";
+
 const { deleteNotifications, fetchNotification } = require("../helpers/notifications");
 const { loginUsers } = require("../helpers/users.js");
 const { createModel, createFederation, updateFederation } = require("../helpers/models");
@@ -473,7 +473,7 @@ describe("Notifications", function() {
 				testForNoClosedNotification("collaboratorTeamspace1Model1JobD")
 			);
 
-			it("the user that closed the issue shouldnt get a closed issue notification",
+			it("the user that closed the issue should not get a closed issue notification",
 				testForNoClosedNotification("teamSpace1")
 			);
 

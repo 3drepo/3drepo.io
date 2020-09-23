@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Img from 'react-image';
-import styled, { css } from 'styled-components';
+import styled, { css, keyframes } from 'styled-components';
+
+import { COLOR } from '../../../styles';
 
 const previewStateStyles = css`
 	cursor: pointer;
@@ -29,15 +30,46 @@ const previewStateStyles = css`
 
 export const Container = styled.div`
 	cursor: pointer;
+	position: relative;
 	${(props: any) => props.enablePreview && previewStateStyles};
 	display: ${(props: any) => props.enablePreview ? 'block' : 'flex'};
-` as any;
+`;
 
-export const StyledImage = styled(Img)`
+const fadeIn = keyframes`
+	from {
+		opacity: 0.5;
+	}
+`;
+
+const imageLoadingStyles = css`
+	position: absolute;
+	top: 0;
+`;
+
+export const StyledImage = styled.img`
 	width: 100%;
 	object-fit: cover;
+	${(props: any) => props.loading && imageLoadingStyles};
 
 	.new-comment & {
 		max-height: 150px;
 	}
-` as any;
+`;
+
+export const ImagePlaceholder = styled.div`
+	position: relative;
+	width: 100%;
+	height: 100%;
+	transition: unset;
+
+	&:before {
+		content: '';
+		display: block;
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		border-radius: 5px;
+		background-color: ${COLOR.GRAY_50};
+		animation: ${fadeIn} 0.75s infinite alternate;
+	}
+`;

@@ -15,7 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
+
+import { StyledIconButton } from '../../teamspaces/components/tooltipButton/tooltipButton.styles';
 
 export const Container = styled.div``;
 
@@ -26,5 +28,11 @@ export const ShowModelButtonContainer = styled.div`
 		top: 3px;
 		right: 3px;
 		padding: 0 !important;
+
+		${({ preview }: { preview: boolean }) => preview ? css`
+			${StyledIconButton} {
+				padding: 6px;
+			}
+		` : ''};
 	}
 `;

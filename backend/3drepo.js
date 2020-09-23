@@ -155,7 +155,7 @@ function setupSubdomain(mainApp, subdomain) {
 
 	for (let subId = 0; subId < subdomainServers.length; subId++) {
 
-		const serverConfig = subdomainServers[subId];
+		const serverConfig = { ...subdomainServers[subId], using_ssl: config.using_ssl, public_protocol: config.public_protocol };
 
 		// Certificate group
 		const certGroup = serverConfig.certificate ? serverConfig.certificate : "default";
