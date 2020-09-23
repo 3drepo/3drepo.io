@@ -307,7 +307,10 @@ class Ticket extends View {
 		}
 
 		// 7. Return the updated data and the old ticket
-		const updatedTicket = this.filterFields({ ...oldTicket, ...data }, Object.keys(updateData["$unset"]));
+		const updatedTicket = this.filterFields(
+			{ ...oldTicket, ...data },
+			Object.keys(Object.assign({}, updateData["$unset"]))
+		);
 
 		this.clean(account, model, updatedTicket);
 		this.clean(account, model, oldTicket);
