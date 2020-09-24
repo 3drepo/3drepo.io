@@ -160,9 +160,33 @@ describe("Sequences", function () {
 		]
 	};
 
+	const goldenActivityDetail = {
+		"_id":"abdd5f6f-77d1-4310-8a5c-7a81cf9de045",
+		"name":"Main Site Compound",
+		"parents":["b7b025f2-9e0d-4677-920a-342ca363e587"],
+		"data":{
+			"Name":"Main Site Compound",
+			"Status":"PLANNED",
+			"Is Compound Task":"Yes",
+			"Code":"ST00150",
+			"Planned Start":"30 Apr 2020 10:00:00",
+			"Type":"WORK",
+			"Constraint":"No Constraint",
+			"Planned Finish":"11 Sep 2020 18:00:00",
+			"Percentage Complete":0,
+			"Physical Volume Unity":"Unknown",
+			"Estimated Rate":0,
+			"Planned Physical Volume":0,
+			"Actual Physical Volume":0,
+			"Remaining Physical Volume":0,
+			"Budgeted Cost":0,
+			"Actual Cost":0
+		}
+	};
+
 	const sequenceId = oldGoldenData._id;
 	const stateId = oldGoldenData.frames[0].state;
-	const activityId = "placeholder";
+	const activityId = goldenActivityDetail["_id"];
 
 	before(function(done) {
 
@@ -225,7 +249,6 @@ describe("Sequences", function () {
 	describe("Get sequence state", function() {
 		it("from latest revision should succeed", function(done) {
 			agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/state/${stateId}`).expect(200, function(err , res) {
-				console.log(res.body);
 				expect(Object.keys(res.body)).to.deep.equal(["transparency", "color"]);
 
 				return done(err);
@@ -234,7 +257,6 @@ describe("Sequences", function () {
 
 		it("from revision should succeed", function(done) {
 			agent.get(`/${username}/${model}/revision/${oldRevision}/sequences/${sequenceId}/state/${stateId}`).expect(200, function(err , res) {
-				console.log(res.body);
 				expect(Object.keys(res.body)).to.deep.equal(["transparency", "color"]);
 
 				return done(err);
@@ -261,12 +283,14 @@ describe("Sequences", function () {
 	describe("Get sequence activities", function() {
 		it("from latest revision should succeed", function(done) {
 			agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/activities`).expect(200, function(err, res) {
+				console.log(res.body);
 				return done(err);
 			});
 		});
 
 		it("from revision should succeed", function(done) {
 			agent.get(`/${username}/${model}/revision/${oldRevision}/sequences/${sequenceId}/activities`).expect(200, function(err, res) {
+				console.log(res.body);
 				return done(err);
 			});
 		});
@@ -291,18 +315,23 @@ describe("Sequences", function () {
 	describe("Get sequence activity detail", function() {
 		it("from latest revision should succeed", function(done) {
 			agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/activities/${activityId}`).expect(200, function(err, res) {
+				expect(res.body).to.deep.equal(goldenActivityDetail);
+
 				return done(err);
 			});
 		});
 
 		it("from revision should succeed", function(done) {
 			agent.get(`/${username}/${model}/revision/${oldRevision}/sequences/${sequenceId}/activities/${activityId}`).expect(200, function(err, res) {
+				expect(res.body).to.deep.equal(goldenActivityDetail);
+
 				return done(err);
 			});
 		});
 
 		it("from federation should fail", function(done) {
 			agent.get(`/${username}/${federation}/revision/master/head/sequences/${sequenceId}/activities/${activityId}`).expect(404, function(err, res) {
+				console.log(res.body);
 				expect(res.body.value).to.equal(responseCodes.NO_FILE_FOUND.value);
 
 				return done(err);
@@ -311,6 +340,7 @@ describe("Sequences", function () {
 
 		it("using invalid sequence ID should succeed", function(done) {
 			agent.get(`/${username}/${model}/revision/master/head/sequences/invalidSequenceId/activities/${activityId}`).expect(200, function(err, res) {
+				expect(res.body).to.deep.equal(goldenActivityDetail);
 				return done(err);
 			});
 		});

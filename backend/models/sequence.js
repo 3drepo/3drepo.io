@@ -27,7 +27,7 @@ const Ref = require("./ref");
 class Sequence {
 
 	clean(toClean, targetType = "[object String]") {
-		const keys = ["_id", "rev_id", "model", "dateTime", "startDate", "endDate"];
+		const keys = ["_id", "rev_id", "model", "dateTime", "startDate", "endDate", "parents"];
 
 		keys.forEach((key) => {
 			if (toClean[key] &&
