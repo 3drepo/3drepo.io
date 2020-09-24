@@ -16,6 +16,7 @@
  */
 
 import { uniqBy, values } from 'lodash';
+import linkify from 'markdown-linkify';
 import { getAPIUrl } from '../services/api';
 import { getRiskConsequenceName, getRiskLikelihoodName } from './risks';
 import { sortByDate } from './sorting';
@@ -331,6 +332,8 @@ export const transformCustomsLinksToMarkdown = ( comment: IComment, tickets, typ
 				.replace(referenceRegExp, `[${resourceReference}](${resourceReference.replace('#res.', '')} "${type}")`);
 		});
 	}
+
+	text = linkify(text);
 
 	return text;
 };

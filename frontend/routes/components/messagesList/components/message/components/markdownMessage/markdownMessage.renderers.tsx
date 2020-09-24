@@ -41,7 +41,7 @@ const EnhancedLink = ({ children, href, ...props }) => {
 		[() => value.match(MARKDOWN_USER_REFERENCE_REGEX), () => {
 			return (<UserReference id={href} text={value} />);
 		}],
-		[stubTrue, () => value]
+		[stubTrue, () => (<a href={href} target="_blank" rel="noopener noreferrer">{value}</a>)]
 	])(value);
 };
 
