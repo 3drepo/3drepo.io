@@ -25,7 +25,7 @@ const nodeuuid = require("uuid/v1");
 
 const ORIGINAL_FILE_REF_EXT = ".history.ref";
 const UNITY_BUNDLE_REF_EXT = ".stash.unity3d.ref";
-const ACTIVITIES_FILE_REF_EXT = ".tasks.ref";
+const ACTIVITIES_FILE_REF_EXT = ".activities.ref";
 const STATE_FILE_REF_EXT = ".sequences.ref";
 const JSON_FILE_REF_EXT = ".stash.json_mpc.ref";
 const RESOURCES_FILE_REF_EXT = ".resources.ref";
