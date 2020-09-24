@@ -66,6 +66,10 @@ class Sequence {
 
 		const activity = await dbCol.findOne({"_id": activityId});
 
+		if (!activity) {
+			return Promise.reject(responseCodes.ACTIVITY_NOT_FOUND);
+		}
+
 		if (cleanResponse) {
 			this.clean(activity);
 		}

@@ -118,6 +118,7 @@
 		VIEW_NOT_FOUND: { message: "Camera viewpoint not found", status: 404 },
 		CANNOT_DELETE_DEFAULT_VIEW: { message: "This view is set to be the default for the model. Please change it before deleting.", status: 400 },
 
+		ACTIVITY_NOT_FOUND: { message: "Activity not found", status: 404 },
 		SEQUENCE_NOT_FOUND: { message: "Sequence not found", status: 404 },
 		TASK_NOT_FOUND: { message: "Sequence task not found", status: 404 },
 

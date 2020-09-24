@@ -162,6 +162,7 @@ describe("Sequences", function () {
 
 	const sequenceId = oldGoldenData._id;
 	const stateId = oldGoldenData.frames[0].state;
+	const activityId = "placeholder";
 
 	before(function(done) {
 
@@ -219,7 +220,6 @@ describe("Sequences", function () {
 
 			});
 		});
-
 	});
 
 	describe("Get sequence state", function() {
@@ -256,6 +256,71 @@ describe("Sequences", function () {
 				return done(err);
 			});
 		});
+	});
 
+	describe("Get sequence activities", function() {
+		it("from latest revision should succeed", function(done) {
+			agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/activities`).expect(200, function(err, res) {
+				return done(err);
+			});
+		});
+
+		it("from revision should succeed", function(done) {
+			agent.get(`/${username}/${model}/revision/${oldRevision}/sequences/${sequenceId}/activities`).expect(200, function(err, res) {
+				return done(err);
+			});
+		});
+
+		it("from federation should fail", function(done) {
+			agent.get(`/${username}/${federation}/revision/master/head/sequences/${sequenceId}/activities`).expect(404, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.NO_FILE_FOUND.value);
+
+				return done(err);
+			});
+		});
+
+		it("using invalid sequence ID should fail", function(done) {
+			agent.get(`/${username}/${model}/revision/master/head/sequences/invalidSequenceId/activities`).expect(404, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.NO_FILE_FOUND.value);
+
+				return done(err);
+			});
+		});
+	});
+
+	describe("Get sequence activity detail", function() {
+		it("from latest revision should succeed", function(done) {
+			agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/activities/${activityId}`).expect(200, function(err, res) {
+				return done(err);
+			});
+		});
+
+		it("from revision should succeed", function(done) {
+			agent.get(`/${username}/${model}/revision/${oldRevision}/sequences/${sequenceId}/activities/${activityId}`).expect(200, function(err, res) {
+				return done(err);
+			});
+		});
+
+		it("from federation should fail", function(done) {
+			agent.get(`/${username}/${federation}/revision/master/head/sequences/${sequenceId}/activities/${activityId}`).expect(404, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.NO_FILE_FOUND.value);
+
+				return done(err);
+			});
+		});
+
+		it("using invalid sequence ID should succeed", function(done) {
+			agent.get(`/${username}/${model}/revision/master/head/sequences/invalidSequenceId/activities/${activityId}`).expect(200, function(err, res) {
+				return done(err);
+			});
+		});
+
+		it("using invalid activity ID should fail", function(done) {
+			agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/activities/invalidActivityId`).expect(404, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.ACTIVITY_NOT_FOUND.value);
+
+				return done(err);
+			});
+		});
 	});
 });
