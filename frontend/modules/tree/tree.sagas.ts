@@ -90,10 +90,16 @@ function* handleMetadata(node: any) {
 	}
 }
 
+function* waitForTreeToBeReady() {
+	const isReady = yield select(selectIsTreeProcessed);
+
+	if (!isReady) {
+		yield take(TreeTypes.SET_IS_TREE_PROCESSED);
+	}
+}
+
 function* expandToNode(node: any) {
-	// if (!(yield isReady)) {
-	// 	return;
-	// }
+	yield waitForTreeToBeReady();
 
 	if (node) {
 		const expandedNodesMap = yield select(selectExpandedNodesMap);
@@ -205,9 +211,7 @@ function* stopListenOnSelections() {
 }
 
 function* handleBackgroundClick() {
-	// if (!(yield isReady)) {
-	// 	return;
-	// }
+	yield waitForTreeToBeReady();
 
 	yield all([
 		clearCurrentlySelected(),
@@ -224,9 +228,7 @@ function* handleBackgroundClick() {
 }
 
 function* handleNodesClick({ nodesIds = [], skipExpand = false}) {
-	// if (!(yield isReady)) {
-	// 	return;
-	// }
+	yield waitForTreeToBeReady();
 
 	const addGroup = MultiSelect.isAccumMode();
 	const removeGroup = MultiSelect.isDecumMode();
@@ -244,18 +246,14 @@ function* handleNodesClick({ nodesIds = [], skipExpand = false}) {
 }
 
 function* handleNodesClickBySharedIds({ objects = [] }) {
-	// if (!(yield isReady)) {
-	// 	return;
-	// }
+	yield waitForTreeToBeReady();
 
 	const nodes = yield select(selectGetNodesIdsFromSharedIds(objects));
 	yield put(TreeActions.handleNodesClick(nodes));
 }
 
 function* getSelectedNodes() {
-	// if (!(yield isReady)) {
-	// 	return;
-	// }
+	yield waitForTreeToBeReady();
 
 	try {
 		yield call(delay, 100);
@@ -270,9 +268,7 @@ function* getSelectedNodes() {
 }
 
 function* clearCurrentlySelected() {
-	// if (!(yield isReady)) {
-	// 	return;
-	// }
+	yield waitForTreeToBeReady();
 
 	Viewer.clearHighlights();
 
@@ -296,14 +292,6 @@ function* clearCurrentlySelected() {
 	}
 
 	yield put(TreeActions.getSelectedNodes());
-}
-
-function* waitForTreeToBeReady() {
-	const isReady = yield select(selectIsTreeProcessed);
-
-	if (!isReady) {
-		yield take(TreeTypes.SET_IS_TREE_PROCESSED);
-	}
 }
 
 /**
