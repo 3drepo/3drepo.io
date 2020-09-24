@@ -331,8 +331,7 @@ describe("Sequences", function () {
 
 		it("from federation should fail", function(done) {
 			agent.get(`/${username}/${federation}/revision/master/head/sequences/${sequenceId}/activities/${activityId}`).expect(404, function(err, res) {
-				console.log(res.body);
-				expect(res.body.value).to.equal(responseCodes.NO_FILE_FOUND.value);
+				expect(res.body.value).to.equal(responseCodes.ACTIVITY_NOT_FOUND.value);
 
 				return done(err);
 			});
