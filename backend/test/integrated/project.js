@@ -230,6 +230,7 @@ describe("Projects", function () {
 	});
 
 	it("should be able to update project permissions", function(done) {
+		const projectName = "project2";
 		const project = {
 			permissions: [{
 				user: "testing",
@@ -239,7 +240,7 @@ describe("Projects", function () {
 
 		async.series([
 			callback => {
-				agent.patch(`/${username}/projects/${project.name}`)
+				agent.patch(`/${username}/projects/${projectName}`)
 					.send(project)
 					.expect(200, function(err, res) {
 						callback(err);
@@ -259,6 +260,7 @@ describe("Projects", function () {
 	});
 
 	it("should be able to remove project permissions", function(done) {
+		const projectName = "project2";
 		const project = {
 			permissions: [{
 				user: "testing",
@@ -268,7 +270,7 @@ describe("Projects", function () {
 
 		async.series([
 			callback => {
-				agent.patch(`/${username}/projects/${project.name}`)
+				agent.patch(`/${username}/projects/${projectName}`)
 					.send(project)
 					.expect(200, function(err, res) {
 						callback(err);
@@ -318,13 +320,14 @@ describe("Projects", function () {
 	});
 
 	it("should be able to update project name", function(done) {
+		const projectName = "project2_new";
 		const project = {
-			name: "project2_new"
+			name: "project2"
 		};
 
 		async.series([
 			callback => {
-				agent.patch(`/${username}/projects/project2`)
+				agent.patch(`/${username}/projects/${projectName}`)
 					.send(project)
 					.expect(200, function(err, res) {
 						callback(err);
