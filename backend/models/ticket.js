@@ -393,14 +393,18 @@ class Ticket extends View {
 		}
 		newTicket.desc = newTicket.desc || "(No Description)";
 
-		if (!newTicket.viewpoints || newTicket.viewpoint) {
-			// FIXME need to revisit this for BCF refactor
-			// This allows BCF import to create new issue with more than 1 viewpoint
-			newTicket.viewpoints = [await this.createViewpoint(account, model, newTicket._id, newTicket.viewpoint, true)];
+		if (!newTicket.viewpoints) {
+			if (newTicket.viewpoint) {
+				// FIXME need to revisit this for BCF refactor
+				// This allows BCF import to create new issue with more than 1 viewpoint
+				newTicket.viewpoints = [await this.createViewpoint(account, model, newTicket._id, newTicket.viewpoint, true)];
 
-			if (newTicket.viewpoints[0].thumbnail) {
-				newTicket.thumbnail = newTicket.viewpoints[0].thumbnail;
-				delete newTicket.viewpoints[0].thumbnail;
+				if (newTicket.viewpoints[0].thumbnail) {
+					newTicket.thumbnail = newTicket.viewpoints[0].thumbnail;
+					delete newTicket.viewpoints[0].thumbnail;
+				}
+			} else {
+				newTicket.viewpoints = [];
 			}
 		}
 
