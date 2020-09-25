@@ -186,7 +186,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	public showSequencingContent = (active) => (
 		<SequencingFormTab
 			active={active}
-			isNewRisk={this.isNewRisk}
+			isNewTicket={this.isNewRisk}
 			{...this.props}
 			showSequenceDate={this.props.showSequenceDate}
 			min={this.props.minSequenceDate}
@@ -267,7 +267,8 @@ export const RiskDetailsForm = withFormik({
 			residual_level_of_risk: risk.residual_level_of_risk,
 			overall_level_of_risk: risk.overall_level_of_risk,
 			residual_risk: risk.residual_risk,
-			sequence_start: risk.sequence_start
+			sequence_start: risk.sequence_start,
+			sequence_end: risk.sequence_end
 		});
 	},
 	handleSubmit: (values, { props }) => {

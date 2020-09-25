@@ -27,6 +27,8 @@ import { Field } from 'formik';
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 import { isDateOusideRange } from '../../../helpers/dateTime';
 import { NAMED_MONTH_DATETIME_FORMAT } from '../../../services/formatting/formatDate';
+import { FieldsRow,
+	StyledFormControl } from '../../viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { SmallIconButton } from '../smallIconButon/smallIconButton.component';
 import { SequenceDateActions, SequenceDateContainer, SequenceDateField } from './sequencingDates.styles';
 
@@ -68,13 +70,29 @@ export class SequencingDates extends React.PureComponent<IProps, IState> {
 	public render() {
 		return (
 			<MuiPickersUtilsProvider utils={DayJsUtils}>
-				<InputLabel shrink>Start time</InputLabel>
-				<Field name="sequence_start" render={({ field }) => (
-					<SequenceDate
-						{...field}
-						{...this.props}
-					/>
-				)} />
+				<FieldsRow container justify="space-between" flex={1}>
+					<StyledFormControl>
+						<InputLabel shrink>Start time</InputLabel>
+						<Field name="sequence_start" render={({ field }) => (
+							<SequenceDate
+								{...field}
+								{...this.props}
+							/>
+						)} />
+					</StyledFormControl>
+				</FieldsRow>
+
+				<FieldsRow container justify="space-between" flex={1}>
+					<StyledFormControl>
+						<InputLabel shrink>End time</InputLabel>
+						<Field name="sequence_end" render={({ field }) => (
+							<SequenceDate
+								{...field}
+								{...this.props}
+							/>
+						)} />
+					</StyledFormControl>
+				</FieldsRow>
 			</MuiPickersUtilsProvider>
 		);
 	}

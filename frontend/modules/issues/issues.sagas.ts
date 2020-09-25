@@ -43,11 +43,12 @@ import { DialogActions } from '../dialog';
 import { selectJobsList, selectMyJob } from '../jobs';
 import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
+import { selectSelectedSequence, selectSelectedStartingDate } from '../sequences';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { selectTopicTypes } from '../teamspace';
 import { ViewpointsActions } from '../viewpoints';
-import { generateViewpoint, showViewpoint } from '../viewpoints/viewpoints.sagas';
+import { generateViewpoint } from '../viewpoints/viewpoints.sagas';
 import { IssuesActions, IssuesTypes } from './issues.redux';
 import {
 	selectActiveIssueDetails,
@@ -480,6 +481,19 @@ export function* setNewIssue() {
 	const topicTypes: any[] = yield select(selectTopicTypes);
 	const topicType =  topicTypes.length > 0 ? (topicTypes.find((t) => t === DEFAULT_PROPERTIES.TOPIC_TYPE) ?
 		DEFAULT_PROPERTIES.TOPIC_TYPE : topicTypes[0]) : undefined;
+
+	const selectedSequence = yield select(selectSelectedSequence);
+
+	// tslint:disable-next-line: variable-name
+	let sequence_start = yield select(selectSelectedStartingDate);
+
+	if (sequence_start) {
+		sequence_start = sequence_start.valueOf();
+	}
+
+	if (!selectedSequence) {
+		sequence_start = null;
+	}
 
 	try {
 		const newIssue = prepareIssue({

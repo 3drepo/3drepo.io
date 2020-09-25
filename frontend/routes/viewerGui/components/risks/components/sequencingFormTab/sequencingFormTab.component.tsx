@@ -24,7 +24,7 @@ interface IProps {
 	active: boolean;
 	canComment: boolean;
 	formRef: any;
-	isNewRisk: boolean;
+	isNewTicket: boolean;
 	showSequenceDate: (value) => void;
 	min: Date;
 	max: Date;
