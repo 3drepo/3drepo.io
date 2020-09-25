@@ -249,6 +249,7 @@ describe("Projects", function () {
 			callback => {
 				agent.get(`/${username}/projects/${project.name}`)
 					.expect(200, function(err, res) {
+						console.log(res.body);
 						const entriesFiltered = res.body.permissions.filter((entry => {
 							return entry.permissions.length > 0;
 						}));
@@ -279,6 +280,7 @@ describe("Projects", function () {
 			callback => {
 				agent.get(`/${username}/projects/${project.name}`)
 					.expect(200, function(err, res) {
+						console.log(res.body);
 						expect(res.body.permissions.length).to.equal(0);
 						callback(err);
 					});
