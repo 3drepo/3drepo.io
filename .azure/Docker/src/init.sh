@@ -16,7 +16,8 @@ if [ "$1" = 'web' ]; then
     fi
 
     umask 2
-    exec gosu $NODE_USERNAME node /home/node/3drepo.io/backend/3drepo.js
+    cd /home/node/3drepo.io
+    exec gosu $NODE_USERNAME ./run/run_app $NODE_ENV
 fi
 
 exec "$@"
