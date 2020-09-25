@@ -165,7 +165,7 @@ describe("Projects", function () {
 			});
 	});
 
-	it("should be able to update project", function(done) {
+	it("should be able to update project [DEPRECATED]", function(done) {
 
 		const project = {
 			name: "project2",
@@ -199,7 +199,92 @@ describe("Projects", function () {
 		], (err, res) => done(err));
 	});
 
-	it("should be able to update project name", function(done) {
+	it("should be able to update project", function(done) {
+		const project = {
+			name: "project2",
+			permissions: [{
+				user: "testing",
+				permissions: ["create_model", "edit_project"]
+			}]
+		};
+
+		async.series([
+			callback => {
+				agent.patch(`/${username}/projects/${project.name}`)
+					.send(project)
+					.expect(200, function(err, res) {
+						callback(err);
+					});
+			},
+			callback => {
+				agent.get(`/${username}/projects/${project.name}`)
+					.expect(200, function(err, res) {
+						const entriesFiltered = res.body.permissions.filter((entry => {
+							return entry.permissions.length > 0;
+						}));
+						expect(entriesFiltered).to.deep.equal(project.permissions);
+						callback(err);
+					});
+			}
+		], (err, res) => done(err));
+	});
+
+	it("should be able to update project permissions", function(done) {
+		const project = {
+			permissions: [{
+				user: "testing",
+				permissions: ["create_model"]
+			}]
+		};
+
+		async.series([
+			callback => {
+				agent.patch(`/${username}/projects/${project.name}`)
+					.send(project)
+					.expect(200, function(err, res) {
+						callback(err);
+					});
+			},
+			callback => {
+				agent.get(`/${username}/projects/${project.name}`)
+					.expect(200, function(err, res) {
+						const entriesFiltered = res.body.permissions.filter((entry => {
+							return entry.permissions.length > 0;
+						}));
+						expect(entriesFiltered).to.deep.equal(project.permissions);
+						callback(err);
+					});
+			}
+		], (err, res) => done(err));
+	});
+
+	it("should be able to remove project permissions", function(done) {
+		const project = {
+			permissions: [{
+				user: "testing",
+				permissions: []
+			}]
+		};
+
+		async.series([
+			callback => {
+				agent.patch(`/${username}/projects/${project.name}`)
+					.send(project)
+					.expect(200, function(err, res) {
+						callback(err);
+					});
+			},
+			callback => {
+				agent.get(`/${username}/projects/${project.name}`)
+					.expect(200, function(err, res) {
+						expect(res.body.permissions.length).to.equal(0);
+						callback(err);
+					});
+			}
+		], (err, res) => done(err));
+	});
+
+	it("should be able to update project name [DEPRECATED]", function(done) {
 
 		const project = {
 			name: "project2_new"
@@ -232,7 +317,35 @@ describe("Projects", function () {
 		], (err, res) => done(err));
 	});
 
-	it("should fail to update project for invalid permissions", function(done) {
+	it("should be able to update project name", function(done) {
+		const project = {
+			name: "project2_new"
+		};
+
+		async.series([
+			callback => {
+				agent.patch(`/${username}/projects/project2`)
+					.send(project)
+					.expect(200, function(err, res) {
+						callback(err);
+					});
+			},
+			callback => {
+				agent.get(`/${username}.json`)
+					.expect(200, function(err, res) {
+						const account = res.body.accounts.find(account => account.account === username);
+						expect(account).to.exist;
+
+						const pg = account.projects.find(pg => pg.name === project.name);
+						expect(pg).to.exist;
+
+						callback(err);
+					});
+			}
+		], (err, res) => done(err));
+	});
+
+	it("should fail to update project for invalid permissions [DEPRECATED]", function(done) {
 
 		const project = {
 			name: "project3",
@@ -250,7 +363,41 @@ describe("Projects", function () {
 			});
 	});
 
-	it("should fail to assign permission to unlicensed user", function(done) {
+	it("should fail to update project for invalid permissions", function(done) {
+		const project = {
+			name: "project3",
+			permissions: [{
+				user: "testing",
+				permissions: ["create_issue"]
+			}]
+		};
+
+		agent.patch(`/${username}/projects/${project.name}`)
+			.send(project)
+			.expect(400, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.INVALID_PERM.value);
+				done(err);
+			});
+	});
+
+	it("should fail to assign permission to unlicensed user [DEPRECATED]", function(done) {
+		const project = {
+			name: "project3",
+			permissions: [{
+				user: "metaTest",
+				permissions: ["edit_project"]
+			}]
+		};
+
+		agent.patch(`/${username}/projects/${project.name}`)
+			.send(project)
+			.expect(400, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+				done(err);
+			});
+	});
+
+	it("should fail to assign permission to unlicensed user [DEPRECATED]", function(done) {
 		const project = {
 			name: "project3",
 			permissions: [{
@@ -260,6 +407,23 @@ describe("Projects", function () {
 		};
 
 		agent.put(`/${username}/projects/${project.name}`)
+			.send(project)
+			.expect(400, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+				done(err);
+			});
+	});
+
+	it("should fail to assign permission to unlicensed user", function(done) {
+		const project = {
+			name: "project3",
+			permissions: [{
+				user: "metaTest",
+				permissions: ["edit_project"]
+			}]
+		};
+
+		agent.patch(`/${username}/projects/${project.name}`)
 			.send(project)
 			.expect(400, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
@@ -301,8 +465,17 @@ describe("Projects", function () {
 
 	});
 
-	it("should fail to update a project that doesnt exist", function(done) {
+	it("should fail to update a project that doesnt exist [DEPRECATED]", function(done) {
 		agent.put(`/${username}/projects/notexist`)
+			.send({})
+			.expect(404, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
+				done(err);
+			});
+	});
+
+	it("should fail to update a project that doesnt exist", function(done) {
+		agent.patch(`/${username}/projects/notexist`)
 			.send({})
 			.expect(404, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
