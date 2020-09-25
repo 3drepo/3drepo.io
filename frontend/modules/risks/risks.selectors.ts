@@ -25,6 +25,7 @@ import { getRiskColor } from '../../helpers/risks';
 import { searchByFilters } from '../../helpers/searching';
 import { selectIssuesMap } from '../issues';
 import { selectQueryParams } from '../router/router.selectors';
+import { selectSelectedEndingDate, selectSelectedSequence, selectSelectedStartingDate } from '../sequences';
 
 export const selectRisksDomain = (state) => state.risks;
 
@@ -132,13 +133,15 @@ export const selectSelectedRisk = createSelector(
 export const selectPins = createSelector(
 	selectFilteredRisks, selectActiveRiskDetails,
 	selectShowPins, selectShowDetails, selectActiveRiskId,
-	(risks: any, detailedRisk, showPins, showDetails, activeRiskId) => {
+	selectSelectedSequence, selectSelectedStartingDate, selectSelectedEndingDate,
+	(risks: any, detailedRisk, showPins, showDetails, activeRiskId,
+		selectedSequence, sequenceStartDate, sequenceEndDate) => {
 
 		let pinsToShow = [];
 
 		if (showPins) {
 			pinsToShow = risks.reduce((pins, risk) => {
-				if (!hasPin(risk)) {
+				if (!hasPin(risk, selectedSequence, sequenceStartDate, sequenceEndDate)) {
 					return pins;
 				}
 

@@ -44,7 +44,6 @@ interface IProps {
 	maxDate: Date;
 	minDate: Date;
 	selectedDate: Date;
-	selectedMinDate: Date;
 	selectedEndingDate: Date;
 	colorOverrides: any;
 	stepInterval: number;

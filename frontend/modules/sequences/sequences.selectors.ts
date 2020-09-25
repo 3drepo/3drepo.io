@@ -268,32 +268,8 @@ const replaceDates = (tasks) => {
 	});
 };
 
-export const selectSelectedMinDate = createSelector(
-	selectSelectedStartingDate, selectMinDate, selectStepInterval, selectStepScale,
-		(date: Date, minDate: Date, stepInterval: number, stepScale: STEP_SCALE) => {
-			if (!date) {
-				return null;
-			}
-			date = new Date(date);
-
-			if (stepScale === STEP_SCALE.DAY) {
-				date = new Date(date.valueOf()  - MILLI_PER_DAY * (stepInterval - 1));
-			}
-
-			if (stepScale === STEP_SCALE.MONTH) {
-				date.setMonth(date.getMonth() - stepInterval);
-			}
-
-			if (stepScale === STEP_SCALE.YEAR) {
-				date.setFullYear(date.getFullYear() - stepInterval);
-			}
-
-			return date < minDate ? new Date(minDate) : date;
-		}
-);
-
 export const selectCurrentActivities = createSelector(
-	selectSelectedMinDate, selectSelectedStartingDate, selectSelectedSequence, selectTasksDefinitions,
+	selectSelectedStartingDate, selectSelectedEndingDate, selectSelectedSequence, selectTasksDefinitions,
 		(minSelectedDate: Date, maxSelectedDate: Date, selectedSequence: any, tasks: any) => {
 			if (!selectedSequence || !selectedSequence.frames) {
 				return [];

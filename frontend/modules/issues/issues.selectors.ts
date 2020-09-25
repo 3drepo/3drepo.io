@@ -24,6 +24,7 @@ import { hasPin, issueToPin } from '../../helpers/pins';
 import { searchByFilters } from '../../helpers/searching';
 import { selectCurrentModel } from '../model';
 import { selectQueryParams } from '../router/router.selectors';
+import { selectSelectedEndingDate, selectSelectedSequence, selectSelectedStartingDate } from '../sequences';
 
 export const selectIssuesDomain = (state) => state.issues;
 
@@ -146,13 +147,15 @@ export const selectSelectedIssue = createSelector(
 export const selectPins = createSelector(
 	selectFilteredIssues, selectActiveIssueDetails,
 	selectShowPins, selectShowDetails, selectActiveIssueId,
-	(issues: any, detailedIssue, showPins, showDetails, activeIssueId) => {
+	selectSelectedSequence, selectSelectedStartingDate, selectSelectedEndingDate,
+	(issues: any, detailedIssue, showPins, showDetails, activeIssueId,
+		selectedSequence, sequenceStartDate, sequenceEndDate) => {
 
 	let pinsToShow = [];
 
 	if (showPins) {
 		pinsToShow =  issues.reduce((pins, issue) => {
-			if (!hasPin(issue)) {
+			if (!hasPin(issue, selectedSequence, sequenceStartDate, sequenceEndDate)) {
 				return pins;
 			}
 
