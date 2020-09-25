@@ -53,6 +53,14 @@ export const selectSequences = createSelector(
 			state.sequences.map((sequence) =>  ({...sequence, ...getModelName(sequence, settings), ...getMinMaxDates(sequence)}))
 );
 
+export const selectInitialised = createSelector(
+	selectSequences, (sequences) => sequences !== null
+);
+
+export const selectHasSequences = createSelector(
+	selectSequences, (sequences) => (sequences || []).length > 0
+);
+
 export const selectStateDefinitions = createSelector(
 	selectSequencesDomain, (state) => state.stateDefinitions
 );
@@ -85,12 +93,17 @@ export const selectFrames = createSelector(
 	}
 );
 
+export const selectDefaultSequence = createSelector(
+	selectSequences, selectSelectedSequence, (allSequences, selectedSequence) =>
+		selectedSequence || (allSequences || [])[0]
+);
+
 export const selectMinDate = createSelector(
-	selectSelectedSequence, (sequence) => (sequence || {}).minDate
+	selectDefaultSequence, (sequence) => (sequence || {}).minDate
 );
 
 export const selectMaxDate = createSelector(
-	selectSelectedSequence, (sequence) => (sequence || {}).maxDate
+	selectDefaultSequence, (sequence) => (sequence || {}).maxDate
 );
 
 export const selectStepInterval = createSelector(
@@ -262,7 +275,6 @@ export const selectSelectedMinDate = createSelector(
 				return null;
 			}
 			date = new Date(date);
-			date.setHours(0, 0, 0, 0);
 
 			if (stepScale === STEP_SCALE.DAY) {
 				date = new Date(date.valueOf()  - MILLI_PER_DAY * (stepInterval - 1));

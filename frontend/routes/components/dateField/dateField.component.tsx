@@ -23,6 +23,7 @@ import { Container, StyledDatePicker, StyledDateTimePicker } from './dateField.s
 interface IProps {
 	inputId: string;
 	value: any;
+	defaultValue?: any;
 	name: string;
 	disabled?: boolean;
 	format?: string;
@@ -68,7 +69,7 @@ export class DateField extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { value } = this.state;
-		const { onBlur, name, placeholder, format, disabled, className, dateTime } = this.props;
+		const { onBlur, name, placeholder, format, disabled, className, dateTime, defaultValue } = this.props;
 
 		const Picker = dateTime ? StyledDateTimePicker : StyledDatePicker;
 
@@ -83,6 +84,7 @@ export class DateField extends React.PureComponent<IProps, IState> {
 					placeholder={placeholder}
 					format={format}
 					shouldDisableDate={this.props.shouldDisableDate}
+					defaultValue={defaultValue}
 				/>
 			</Container>
 		);

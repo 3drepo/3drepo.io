@@ -121,19 +121,6 @@ export function* initializeSequences() {
 	}
 
 	yield put(SequencesActions.setIfcSpacesHidden(ifcSpacesHidden));
-
-	const sequences = (yield select(selectSequences));
-	const modelSettings = yield select(selectSettings);
-
-	if (!sequences || !areSequencesFromModel(modelSettings, sequences)) {
-		yield put(SequencesActions.fetchSequences());
-		yield take(SequencesTypes.FETCH_SEQUENCES_SUCCESS);
-		const date = yield select(selectSelectedStartingDate);
-
-		if (date) {
-			yield put(SequencesActions.setSelectedFrame(date));
-		}
-	}
 }
 
 export function* restoreIfcSpacesHidden() {
@@ -159,22 +146,13 @@ export function* showSequenceDate({ date }) {
 	}
 
 	// 2 - if sequence has not been selected, select it
-	let sequences = (yield select(selectSequences));
-	const modelSettings = yield select(selectSettings);
-
-	if (!sequences || !areSequencesFromModel(modelSettings, sequences)) {
-		yield put(SequencesActions.initializeSequences());
-		yield take(SequencesTypes.FETCH_SEQUENCES_SUCCESS);
-	}
-
 	const selectedSequence = yield select(selectSelectedSequence);
 	if (!selectedSequence) {
-		sequences = yield select(selectSequences);
+		const sequences = yield select(selectSequences);
 		yield put(SequencesActions.setSelectedSequence(sequences[0]._id));
 	}
 
 	// 3 - if the date has not been selected, select it
-
 	yield put(SequencesActions.setSelectedFrame(date));
 }
 

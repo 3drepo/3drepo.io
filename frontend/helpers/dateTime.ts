@@ -27,3 +27,5 @@ export const getDate = (base, days) => {
 	const baseDate = new Date(base).setHours(0, 0, 0, 0);
 	return new Date(baseDate.valueOf() + days * MILLI_PER_DAY);
 };
+
+export const isDateOusideRange = (min, max, date) =>  max < date || min > date;

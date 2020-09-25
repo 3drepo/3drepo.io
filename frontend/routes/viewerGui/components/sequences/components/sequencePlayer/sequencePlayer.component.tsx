@@ -28,6 +28,7 @@ import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 import React from 'react';
 import { STEP_SCALE } from '../../../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../../../constants/viewerGui';
+import { isDateOusideRange } from '../../../../../../helpers/dateTime';
 import { getDateByStep } from '../../../../../../modules/sequences/sequences.helper';
 import { LONG_DATE_TIME_FORMAT_NO_MINUTES } from '../../../../../../services/formatting/formatDate';
 import { DatePicker, IntervalRow, SequencePlayerColumn,
@@ -109,14 +110,6 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 	public setTime = (currentTime) => {
 		const newValue = new Date(this.props.min + currentTime);
 		this.setValue(newValue);
-	}
-
-	public isDateOusideRange = (date) => {
-		const {max, min} = this.props;
-		const maxDate = new Date(max).setHours(23, 59, 59, 99);
-		const minDate = new Date(min).setHours(0, 0, 0, 0);
-
-		return maxDate < date || minDate > date;
 	}
 
 	public goTo = (val) => {
@@ -273,7 +266,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 							</Grid>
 							<Grid item>
 								<DatePicker
-									shouldDisableDate={(date) => this.isDateOusideRange(date.$d)}
+									shouldDisableDate={(date) => isDateOusideRange(this.props.min, this.props.max, date.$d)}
 									name="date"
 									inputId="1"
 									value={value}

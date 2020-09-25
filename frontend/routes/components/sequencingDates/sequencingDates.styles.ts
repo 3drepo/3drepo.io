@@ -14,33 +14,25 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import styled from 'styled-components';
 
-import React from 'react';
+import { DateField } from '../dateField/dateField.component';
 
-import { SequencingDates } from '../../../../../components/sequencingDates/sequencingDates.component';
-import { Content } from '../riskDetails/riskDetails.styles';
+export const SequenceDateField = styled(DateField)`
+	&& {
+		display: inline-block;
+		width: 181px;
+	}
+`;
 
-interface IProps {
-	active: boolean;
-	canComment: boolean;
-	formRef: any;
-	isNewRisk: boolean;
-	showSequenceDate: (value) => void;
-	min: Date;
-	max: Date;
-}
+export const SequenceDateContainer = styled.div`
+	display: block;
+`;
 
-export const SequencingFormTab: React.FunctionComponent<IProps> = ({
-	active, canComment, showSequenceDate, min, max
-}) => {
-	return (
-		<Content active={active}>
-			<SequencingDates
-				showSequenceDate={showSequenceDate}
-				canEdit={canComment}
-				min={min}
-				max={max}
-			/>
-		</Content>
-	);
-};
+export const SequenceDateActions = styled.div`
+	top: 3px;
+	position: relative;
+	display: inline-block;
+	right: 53px;
+	width: 85px;
+`;

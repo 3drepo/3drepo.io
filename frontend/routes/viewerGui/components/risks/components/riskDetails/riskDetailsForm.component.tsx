@@ -70,6 +70,8 @@ interface IProps {
 	onTakeScreenshot: () => void;
 	onUploadScreenshot: (image) => void;
 	showSequenceDate: (date) => void;
+	minSequenceDate: Date;
+	maxSequenceDate: Date;
 }
 
 interface IState {
@@ -187,6 +189,8 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 			isNewRisk={this.isNewRisk}
 			{...this.props}
 			showSequenceDate={this.props.showSequenceDate}
+			min={this.props.minSequenceDate}
+			max={this.props.maxSequenceDate}
 		/>
 	)
 

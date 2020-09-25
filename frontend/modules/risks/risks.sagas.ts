@@ -44,6 +44,7 @@ import { DialogActions } from '../dialog';
 import { selectJobsList, selectMyJob } from '../jobs';
 import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
+import { selectSelectedStartingDate } from '../sequences';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { ViewpointsActions } from '../viewpoints';
@@ -431,6 +432,8 @@ function* cloneRisk({ dialogId }) {
 function* setNewRisk() {
 	const jobs = yield select(selectJobsList);
 	const currentUser = yield select(selectCurrentUser);
+	// tslint:disable-next-line: variable-name
+	const sequence_start = (yield select(selectSelectedStartingDate));
 
 	try {
 		const newRisk = prepareRisk({
@@ -451,7 +454,8 @@ function* setNewRisk() {
 			mitigation_desc: '',
 			residual_risk: '',
 			viewpoint: {},
-			owner: currentUser.username
+			owner: currentUser.username,
+			sequence_start
 		}, jobs);
 
 		yield put(RisksActions.setComponentState({

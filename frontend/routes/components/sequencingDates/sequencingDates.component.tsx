@@ -25,37 +25,43 @@ import DayJsUtils from '@date-io/dayjs';
 
 import { Field } from 'formik';
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';
+import { isDateOusideRange } from '../../../helpers/dateTime';
 import { NAMED_MONTH_DATETIME_FORMAT } from '../../../services/formatting/formatDate';
-import { DateField } from '../dateField/dateField.component';
+import { SmallIconButton } from '../smallIconButon/smallIconButton.component';
+import { SequenceDateActions, SequenceDateContainer, SequenceDateField } from './sequencingDates.styles';
 
 interface IProps {
 	canEdit: boolean;
-	showSequenceDate: (date) => void;
+	min: Date;
+	max: Date;
+	showSequenceDate: (value) => void;
 }
 
 interface IState {
 	valued: any;
 }
 
-const SequenceDateField = ({value, name, onChange, showSequenceDate}) => {
+const SequenceDate = ({value, name, onChange, showSequenceDate, min, max}) => {
 	return (
-		<>
-			<DateField
+		<SequenceDateContainer>
+			<SequenceDateField
+				shouldDisableDate={(date) => isDateOusideRange(min, max, date.$d)}
 				format={NAMED_MONTH_DATETIME_FORMAT}
 				dateTime
 				name={name}
 				inputId={name}
 				value={value}
 				onChange={onChange}
+				defaultValue={min}
 			/>
-
-			<SequencesIcon onClick={(e) => showSequenceDate(value)} />
-			<CloseIcon onClick={(e) => {
-				onChange({target: { value: null, name }});
-			}} />
-		</>
+			{ value &&
+				<SequenceDateActions>
+					<SmallIconButton onClick={(e) => showSequenceDate(value)} Icon={SequencesIcon} />
+					<SmallIconButton onClick={(e) => onChange({target: { value: null, name }})} Icon={CloseIcon} />
+				</SequenceDateActions>
+			}
+		</SequenceDateContainer>
 	);
-
 };
 
 export class SequencingDates extends React.PureComponent<IProps, IState> {
@@ -64,9 +70,9 @@ export class SequencingDates extends React.PureComponent<IProps, IState> {
 			<MuiPickersUtilsProvider utils={DayJsUtils}>
 				<InputLabel shrink>Start time</InputLabel>
 				<Field name="sequence_start" render={({ field }) => (
-					<SequenceDateField
+					<SequenceDate
 						{...field}
-						showSequenceDate={this.props.showSequenceDate}
+						{...this.props}
 					/>
 				)} />
 			</MuiPickersUtilsProvider>
