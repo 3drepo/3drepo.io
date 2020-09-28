@@ -244,6 +244,9 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 			yield Viewer.isViewerReady();
 
 			const viewpoint = view.viewpoint;
+			if (!viewpoint) {
+				return;
+			}
 
 			if (viewpoint?.up && !ignoreCamera) {
 				yield put(ViewerGuiActions.setCamera(viewpoint));
