@@ -292,7 +292,9 @@ describe("Sharing/Unsharing a model", function () {
 					function remove(done) {
 						agent.patch(`/${username}/${model}/permissions`)
 							.send(permissions)
-							.expect(200, done);
+							.expect(200, function(err, res) {
+								done(err);
+							});
 					},
 					function logout(done) {
 						agent.post("/logout")
@@ -322,7 +324,9 @@ describe("Sharing/Unsharing a model", function () {
 					},
 					function notAbleToViewModel(done) {
 						agent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
-							.expect(401, done);
+							.expect(401, function(err, res) {
+								done(err);
+							});
 					}
 				], done);
 			});
@@ -384,7 +388,7 @@ describe("Sharing/Unsharing a model", function () {
 			it("and the viewer should NOT be able to see raise issue", function(done) {
 				agent.post(`/${username}/${model}/issues`)
 					.send({})
-					.expect(401 , done);
+					.expect(401, done);
 			});
 		});
 	});
@@ -621,7 +625,9 @@ describe("Sharing/Unsharing a model", function () {
 					function remove(done) {
 						agent.patch(`/${username}/${model}/permissions`)
 							.send(permissions)
-							.expect(200, done);
+							.expect(200, function(err, res) {
+								done(err);
+							});
 					},
 					function logout(done) {
 						agent.post("/logout")
@@ -951,7 +957,9 @@ describe("Sharing/Unsharing a model", function () {
 					function remove(done) {
 						agent.patch(`/${username}/${model}/permissions`)
 							.send(permissions)
-							.expect(200, done);
+							.expect(200, function(err, res) {
+								done(err);
+							});
 					},
 					function logout(done) {
 						agent.post("/logout")
@@ -981,7 +989,9 @@ describe("Sharing/Unsharing a model", function () {
 					},
 					function notAbleToViewModel(done) {
 						agent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
-							.expect(401, done);
+							.expect(401, function(err, res) {
+								done(err);
+							});
 					}
 				], done);
 			});
