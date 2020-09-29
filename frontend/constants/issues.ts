@@ -99,7 +99,8 @@ export const ISSUE_FILTER_RELATED_FIELDS = {
 	CREATED_BY: 'creator_role',
 	ASSIGNED_TO: 'assigned_roles',
 	TYPE: 'topic_type',
-	CREATED_DATE: 'created'
+	CREATED_DATE: 'created',
+	START_DATETIME: 'sequence_start'
 };
 
 export const ISSUE_FILTERS = [
@@ -131,6 +132,11 @@ export const ISSUE_FILTERS = [
 	{
 		label: 'Date',
 		relatedField: ISSUE_FILTER_RELATED_FIELDS.CREATED_DATE,
+		type: FILTER_TYPES.DATE
+	},
+	{
+		label: 'Starting Date',
+		relatedField: ISSUE_FILTER_RELATED_FIELDS.START_DATETIME,
 		type: FILTER_TYPES.DATE
 	}
 ] as any;

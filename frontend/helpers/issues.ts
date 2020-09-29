@@ -30,6 +30,15 @@ import { getFilterValues, UNASSIGNED_JOB } from '../constants/reportedItems';
 import { getAPIUrl } from '../services/api';
 import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
 
+export const getStatusIcon = (priority, status) => {
+	const statusIcon = {
+		Icon: STATUSES_ICONS[status] || null,
+		color: (ISSUE_COLORS[status] || ISSUE_COLORS[priority] || ISSUE_COLORS[PRIORITIES.NONE]).color
+	};
+
+	return {...statusIcon};
+};
+
 export const prepareIssue = (issue, jobs = []) => {
 	const preparedIssue = {...issue};
 
@@ -46,7 +55,7 @@ export const prepareIssue = (issue, jobs = []) => {
 	}
 
 	if (issue.priority && issue.status) {
-		const { Icon, color } = this.getStatusIcon(issue.priority, issue.status);
+		const { Icon, color } = getStatusIcon(issue.priority, issue.status);
 		preparedIssue.StatusIconComponent = Icon;
 		preparedIssue.statusColor = color;
 	}
@@ -62,15 +71,6 @@ export const prepareIssue = (issue, jobs = []) => {
 	}
 
 	return preparedIssue;
-};
-
-export const getStatusIcon = (priority, status) => {
-	const statusIcon = {
-		Icon: STATUSES_ICONS[status] || null,
-		color: (ISSUE_COLORS[status] || ISSUE_COLORS[priority] || ISSUE_COLORS[PRIORITIES.NONE]).color
-	};
-
-	return {...statusIcon};
 };
 
 export const getIssuePinColor = (issue: any) => {
@@ -137,6 +137,22 @@ export const canComment = (issueData, userJob, permissions, currentUser) => {
 	return ableToComment && isNotClosed;
 };
 
+const getFromToFilter = (label) =>  [{
+	label: 'From',
+	value: {
+		label: label + ' from',
+		value: label + 'from',
+		date: null
+	}
+}, {
+	label: 'To',
+	value: {
+		label: label + ' to',
+		value: label + 'to',
+		date: null
+	}
+}];
+
 export const filtersValuesMap = (jobs, topicTypes) => {
 	const jobsList = [...jobs, UNASSIGNED_JOB];
 
@@ -147,21 +163,8 @@ export const filtersValuesMap = (jobs, topicTypes) => {
 		[ISSUE_FILTER_RELATED_FIELDS.PRIORITY]: getFilterValues(ISSUE_PRIORITIES),
 		[ISSUE_FILTER_RELATED_FIELDS.TYPE]: getFilterValues(topicTypes
 				.map((category) => ({ value: category, name: category }))),
-		[ISSUE_FILTER_RELATED_FIELDS.CREATED_DATE]: [{
-			label: 'From',
-			value: {
-				label: 'From',
-				value: 'from',
-				date: null
-			}
-		}, {
-			label: 'To',
-			value: {
-				label: 'To',
-				value: 'to',
-				date: null
-			}
-		}]
+		[ISSUE_FILTER_RELATED_FIELDS.CREATED_DATE]: getFromToFilter('Created'),
+		[ISSUE_FILTER_RELATED_FIELDS.START_DATETIME]: getFromToFilter('Start')
 	};
 };
 
