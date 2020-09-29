@@ -322,7 +322,7 @@ describe("Sharing/Unsharing a model", function () {
 					},
 					function notAbleToViewModel(done) {
 						agent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
-							.expect(401, done(err);
+							.expect(401, done);
 					}
 				], done);
 			});
