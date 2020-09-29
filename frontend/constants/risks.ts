@@ -127,7 +127,8 @@ export const RISK_FILTER_RELATED_FIELDS = {
 	RESIDUAL_CONSEQUENCE: 'residual_consequence',
 	RESIDUAL_LIKELIHOOD: 'residual_likelihood',
 	RESIDUAL_LEVEL_OF_RISK: 'residual_level_of_risk',
-	OVERALL_LEVEL_OF_RISK: 'overall_level_of_risk'
+	OVERALL_LEVEL_OF_RISK: 'overall_level_of_risk',
+	START_DATETIME: 'sequence_start'
 };
 
 export const RISK_FILTERS = [
@@ -220,6 +221,11 @@ export const RISK_FILTERS = [
 		label: 'Overall level of risk',
 		relatedField: RISK_FILTER_RELATED_FIELDS.OVERALL_LEVEL_OF_RISK,
 		type: RISK_FILTER_FILTER_TYPES.NORMAL
+	},
+	{
+		label: 'Starting Date',
+		relatedField: RISK_FILTER_RELATED_FIELDS.START_DATETIME,
+		type: FILTER_TYPES.DATE
 	}
 ] as any;
 

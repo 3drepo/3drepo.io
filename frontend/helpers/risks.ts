@@ -198,6 +198,22 @@ export const getRiskFilterValues = (property) =>
 		value
 	}));
 
+const getFromToFilter = (label) =>  [{
+		label: 'From',
+		value: {
+			label: label + ' from',
+			value: label + 'from',
+			date: null
+		}
+	}, {
+		label: 'To',
+		value: {
+			label: label + ' to',
+			value: label + 'to',
+			date: null
+		}
+	}];
+
 export const filtersValuesMap = (jobs, settings) => {
 	const jobsList = [...jobs, UNASSIGNED_JOB];
 
@@ -219,7 +235,8 @@ export const filtersValuesMap = (jobs, settings) => {
 		[RISK_FILTER_RELATED_FIELDS.RESIDUAL_LIKELIHOOD]: getFilterValues(RISK_LIKELIHOODS),
 		[RISK_FILTER_RELATED_FIELDS.LEVEL_OF_RISK]: getFilterValues(LEVELS_OF_RISK),
 		[RISK_FILTER_RELATED_FIELDS.RESIDUAL_LEVEL_OF_RISK]: getFilterValues(LEVELS_OF_RISK),
-		[RISK_FILTER_RELATED_FIELDS.OVERALL_LEVEL_OF_RISK]: getFilterValues(LEVELS_OF_RISK)
+		[RISK_FILTER_RELATED_FIELDS.OVERALL_LEVEL_OF_RISK]: getFilterValues(LEVELS_OF_RISK),
+		[RISK_FILTER_RELATED_FIELDS.START_DATETIME]: getFromToFilter('Start')
 	};
 };
 
