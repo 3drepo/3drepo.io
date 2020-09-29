@@ -1209,7 +1209,7 @@ describe("Sharing/Unsharing a model", function () {
 				done => {
 					agent.patch(`/${username}/${model}/permissions`)
 						.send(permissions)
-						.expect(200, done(err);
+						.expect(200, done);
 				},
 				done => {
 					agent.get(`/${username}/${model}/permissions`)
