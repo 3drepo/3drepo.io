@@ -17,7 +17,8 @@
 
 import linkify from 'markdown-linkify';
 import React from 'react';
-import {MarkdownMessage} from '../messagesList/components/message/components/markdownMessage/markdownMessage.component';
+// tslint:disable-next-line:max-line-length
+import { MarkdownMessage } from '../messagesList/components/message/components/markdownMessage/markdownMessage.component';
 
 interface IProps {
 	children?: any;
@@ -25,7 +26,7 @@ interface IProps {
 	style?: any;
 }
 
-export class LinkableField extends React.PureComponent<IProps, null> {
+export class MarkdownField extends React.PureComponent<IProps, null> {
 	public render() {
 		return (<MarkdownMessage className={this.props.className}>{linkify(this.props.children)}</MarkdownMessage>);
 	}

@@ -17,7 +17,7 @@
 
 import { IconButton, InputLabel, TextField } from '@material-ui/core';
 import styled from 'styled-components';
-import { LinkableField } from '../linkableField/linkableField.component';
+import { MarkdownField } from '../markdownField/markdownField.component';
 
 export const Container = styled.div`
 	position: relative;
@@ -48,7 +48,7 @@ export const StyledTextField = styled(TextField)`
 	}
 `;
 
-export const StyledLinkableField = styled(LinkableField)`
+export const StyledMarkdownField = styled(MarkdownField)`
 	&& {
 		display: block;
 		position: relative;
