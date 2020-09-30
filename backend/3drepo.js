@@ -23,10 +23,10 @@ const apm = require('elastic-apm-node').start({
 	serviceName: '',
   
 	// Use if APM Server requires a token
-	secretToken: 'bpAHPHzND2NqriQynx',
+	secretToken: '',
   
 	// Set custom APM Server URL (default: http://localhost:8200)
-	serverUrl: 'https://ebee69cbebb24122bd9743dd04c939f6.apm.eu-west-2.aws.cloud.es.io:443'
+	serverUrl: ''
   })
 
 const express = require("express");
