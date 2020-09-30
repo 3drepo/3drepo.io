@@ -161,6 +161,22 @@ describe("Sharing/Unsharing a model", function () {
 			];
 
 			async.series([
+				function logout(done) {
+					agent.post("/logout")
+						.send({})
+						.expect(200, function(err, res) {
+							expect(res.body.username).to.equal(username_viewer);
+							done(err);
+						});
+				},
+				function login(done) {
+					agent.post("/login")
+						.send({ username: username, password: password })
+						.expect(200, function(err, res) {
+							expect(res.body.username).to.equal(username);
+							done(err);
+						});
+				},
 				function share(done) {
 
 					agent.post(`/${username}/${model}/permissions`)
@@ -336,6 +352,22 @@ describe("Sharing/Unsharing a model", function () {
 				const permissions = [];
 
 				async.waterfall([
+					function logout(done) {
+						agent.post("/logout")
+							.send({})
+							.expect(200, function(err, res) {
+								expect(res.body.username).to.equal(username_viewer);
+								done(err);
+							});
+					},
+					function login(done) {
+						agent.post("/login")
+							.send({ username: username, password: password })
+							.expect(200, function(err, res) {
+								expect(res.body.username).to.equal(username);
+								done(err);
+							});
+					},
 					function remove(done) {
 
 						agent.post(`/${username}/${model}/permissions`)
@@ -468,6 +500,22 @@ describe("Sharing/Unsharing a model", function () {
 			];
 
 			async.series([
+				function logout(done) {
+					agent.post("/logout")
+						.send({})
+						.expect(200, function(err, res) {
+							expect(res.body.username).to.equal(username_commenter);
+							done(err);
+						});
+				},
+				function login(done) {
+					agent.post("/login")
+						.send({ username: username, password: password })
+						.expect(200, function(err, res) {
+							expect(res.body.username).to.equal(username);
+							done(err);
+						});
+				},
 				function share(done) {
 
 					agent.post(`/${username}/${model}/permissions`)
@@ -669,6 +717,22 @@ describe("Sharing/Unsharing a model", function () {
 				const permissions = [];
 
 				async.waterfall([
+					function logout(done) {
+						agent.post("/logout")
+							.send({})
+							.expect(200, function(err, res) {
+								expect(res.body.username).to.equal(username_commenter);
+								done(err);
+							});
+					},
+					function login(done) {
+						agent.post("/login")
+							.send({ username: username, password: password })
+							.expect(200, function(err, res) {
+								expect(res.body.username).to.equal(username);
+								done(err);
+							});
+					},
 					function remove(done) {
 
 						agent.post(`/${username}/${model}/permissions`)
@@ -800,6 +864,22 @@ describe("Sharing/Unsharing a model", function () {
 			];
 
 			async.series([
+				function logout(done) {
+					agent.post("/logout")
+						.send({})
+						.expect(200, function(err, res) {
+							expect(res.body.username).to.equal(username_editor);
+							done(err);
+						});
+				},
+				function login(done) {
+					agent.post("/login")
+						.send({ username: username, password: password })
+						.expect(200, function(err, res) {
+							expect(res.body.username).to.equal(username);
+							done(err);
+						});
+				},
 				function share(done) {
 
 					agent.post(`/${username}/${model}/permissions`)
@@ -1001,6 +1081,22 @@ describe("Sharing/Unsharing a model", function () {
 				const permissions = [];
 
 				async.waterfall([
+					function logout(done) {
+						agent.post("/logout")
+							.send({})
+							.expect(200, function(err, res) {
+								expect(res.body.username).to.equal(username_editor);
+								done(err);
+							});
+					},
+					function login(done) {
+						agent.post("/login")
+							.send({ username: username, password: password })
+							.expect(200, function(err, res) {
+								expect(res.body.username).to.equal(username);
+								done(err);
+							});
+					},
 					function remove(done) {
 
 						agent.post(`/${username}/${model}/permissions`)
