@@ -26,7 +26,7 @@ import * as Yup from 'yup';
 import { getPasswordStrength, getPasswordStrengthMessage, schema } from '../../services/validation';
 import { Panel } from '../components/panel/panel.component';
 import { SubmitButton } from '../components/submitButton/submitButton.component';
-import { Buttons, Container, Message, StyledButton } from './passwordChange.styles';
+import { Buttons, Container, Message, MessageButton, StyledButton } from './passwordChange.styles';
 
 const PasswordChangeSchema = Yup.object().shape({
 	newPassword: schema.password
@@ -170,11 +170,17 @@ export class PasswordChange extends React.PureComponent<IProps, IState> {
 				direction="column"
 				alignItems="center">
 				<Grid item xs={9} sm={7} md={5} lg={3} xl={2}>
-					<Panel title="Forgot password">
+					<Panel title="Reset password">
 						{ this.props.message
 							? <>
 								<Message>{this.props.message}</Message>
-								{this.renderBackToLogin()}
+								<MessageButton
+									color="secondary"
+									component={Link}
+									to="/login"
+								>
+									Back to Login
+								</MessageButton>
 							</>
 							:
 							<>
