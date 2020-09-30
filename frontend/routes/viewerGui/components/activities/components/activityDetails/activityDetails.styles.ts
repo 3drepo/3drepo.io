@@ -18,7 +18,6 @@
 import styled from 'styled-components';
 
 import Grid from '@material-ui/core/Grid';
-import IconButton from '@material-ui/core/IconButton';
 
 export const Container = styled(Grid)`
 	padding: 18px 18px 18px 30px;
@@ -32,10 +31,5 @@ export const Row = styled(Grid)`
 
 	& > div:first-child {
 		padding: 10px 0;
-	}
-`;
-export const StyledIconButton = styled(IconButton)`
-	&& {
-		padding: 6px;
 	}
 `;

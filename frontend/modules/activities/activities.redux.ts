@@ -18,43 +18,30 @@
 import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: ActivitiesTypes, Creators: ActivitiesActions } = createActions({
+	toggleActivitiesPanel: [],
 	setPendingState: ['pendingState'],
-	fetchActivities: [],
-	fetchActivitiesSuccess: ['activities'],
 	setSearchQuery: ['searchQuery'],
 	setComponentState: ['componentState'],
 	fetchDetails: ['activityId']
 }, { prefix: 'ACTIVITIES/' });
 
-export interface IViewpointsComponentState {
+export interface IActivitiesComponentState {
 	details?: any;
 	searchEnabled?: boolean;
 	searchQuery?: string;
-	showDetails: boolean;
-	isPending: boolean;
+	showDetails?: boolean;
+	isPending?: boolean;
 }
 
-export interface IViewpointsState {
-	isPending: boolean;
-	activitiesList: any[];
-	componentState: IViewpointsComponentState;
+export interface IActivitiesState {
+	componentState: IActivitiesComponentState;
 }
 
-export const INITIAL_STATE: IViewpointsState = {
-	isPending: true,
-	activitiesList: [],
+export const INITIAL_STATE: IActivitiesState = {
 	componentState: {
 		showDetails: false,
 		isPending: true,
 	},
-};
-
-const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
-	return { ...state, isPending: pendingState };
-};
-
-const fetchActivitiesSuccess = (state = INITIAL_STATE, { activities = [] }) => {
-	return { ...state, activitiesList: activities };
 };
 
 const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
@@ -62,7 +49,5 @@ const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
-	[ActivitiesTypes.SET_PENDING_STATE]: setPendingState,
-	[ActivitiesTypes.FETCH_ACTIVITIES_SUCCESS]: fetchActivitiesSuccess,
 	[ActivitiesTypes.SET_COMPONENT_STATE]: setComponentState,
 });

@@ -17,32 +17,22 @@
 
 import { put, select, takeLatest } from 'redux-saga/effects';
 
+import { VIEWER_PANELS } from '../../constants/viewerGui';
 import * as API from '../../services/api';
+import { BimActions } from '../bim';
 import { DialogActions } from '../dialog';
 import { selectCurrentModel, selectCurrentModelTeamspace, selectCurrentRevisionId } from '../model';
 import { selectSelectedSequenceId } from '../sequences';
+import { selectRightPanels, ViewerGuiActions} from '../viewerGui';
 import { ActivitiesActions, ActivitiesTypes } from './activities.redux';
-
-export function* fetchActivities() {
-	try {
-		yield put(ActivitiesActions.setPendingState(true));
-
-		const teamspace = yield select(selectCurrentModelTeamspace);
-		const revision = yield select(selectCurrentRevisionId);
-		const model = yield select(selectCurrentModel);
-		const sequenceId =  yield select(selectSelectedSequenceId);
-
-		const { data: activities } = yield API.getSequenceActivities(teamspace, model, revision, sequenceId);
-
-		yield put(ActivitiesActions.fetchActivitiesSuccess(activities));
-		yield put(ActivitiesActions.setPendingState(false));
-	} catch (e) {
-		yield put(DialogActions.showEndpointErrorDialog('get', 'model activities', e.response));
-	}
-}
 
 function* fetchDetails({ activityId }) {
 	try {
+		const rightPanels = yield select(selectRightPanels);
+		if (!rightPanels.includes(VIEWER_PANELS.ACTIVITIES)) {
+			yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.ACTIVITIES, true));
+		}
+
 		yield put(ActivitiesActions.setComponentState({ showDetails: true, isPending: true }));
 
 		const teamspace = yield select(selectCurrentModelTeamspace);
@@ -58,7 +48,22 @@ function* fetchDetails({ activityId }) {
 	}
 }
 
+function* toggleActivitiesPanel() {
+	try {
+		const rightPanels = yield select(selectRightPanels);
+
+		if (rightPanels.includes(VIEWER_PANELS.BIM)) {
+			yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.BIM, false));
+			yield put(BimActions.setIsActive(false));
+		}
+
+		yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.ACTIVITIES));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('display', 'activities panel', error));
+	}
+}
+
 export default function* ActivitiesSaga() {
-	yield takeLatest(ActivitiesTypes.FETCH_ACTIVITIES, fetchActivities);
 	yield takeLatest(ActivitiesTypes.FETCH_DETAILS, fetchDetails);
+	yield takeLatest(ActivitiesTypes.TOGGLE_ACTIVITIES_PANEL, toggleActivitiesPanel);
 }

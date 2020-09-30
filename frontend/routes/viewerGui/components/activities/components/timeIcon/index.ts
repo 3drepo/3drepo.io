@@ -15,22 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-
-import { COLOR } from '../../../../styles';
-import { SequenceTasksListItem } from '../sequences/sequences.styles';
-import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
-
-export const Container = styled(ViewerPanelContent)`
-	font-size: 13px;
-	color: ${COLOR.BLACK_60};
-	padding: 15px;
-
-	& > * {
-		margin-bottom: 15px;
-	}
-
-	${SequenceTasksListItem} {
-		background-color: ${COLOR.LIGHT_GRAY};
-	}
-`;
+export { TimeIcon } from './timeIcon.component';

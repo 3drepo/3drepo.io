@@ -21,7 +21,7 @@ import React from 'react';
 import { SubTasksItemContainer, Task, TaskButton, TaskItemLabel, TaskSmallDot } from '../../sequences.styles';
 
 export interface ITask {
-	_id: string;
+	id: string;
 	name: string;
 	subTasks?: ITask[];
 	startDate: Date;
@@ -49,6 +49,16 @@ export class TaskItem extends React.PureComponent<IProps, IState> {
 		collapsed: this.props.defaultCollapsed  || false
 	};
 
+	public componentDidUpdate(prevProps, prevState) {
+		const { defaultCollapsed } = this.props;
+
+		if (prevProps.defaultCollapsed !== defaultCollapsed) {
+			this.setState({
+				collapsed: defaultCollapsed,
+			});
+		}
+	}
+
 	public toggleCollapse = () => {
 		this.setState({collapsed: !this.state.collapsed});
 	}
@@ -62,23 +72,19 @@ export class TaskItem extends React.PureComponent<IProps, IState> {
 		const { collapsed } = this.state;
 		const subtasks = task.subTasks || [];
 		const hasSubtasks = subtasks.length > 0;
-		const itemProps = hasSubtasks ? {
-			clickable: true,
-			onClick: this.handleItemClick,
-		} : {};
 
 		return (
 			<>
 				<Task>
 					{hasSubtasks && <CollapseButton collapsed={collapsed} onClick={this.toggleCollapse} />}
 					{!hasSubtasks && <TaskSmallDot />}
-					<TaskItemLabel {...itemProps} >
+					<TaskItemLabel clickable onClick={this.handleItemClick} >
 						{task.name || 'Unnamed'}
 					</TaskItemLabel>
 				</Task>
 				<SubTasksItemContainer>
 					{!collapsed && subtasks.map((t) => (
-						<TaskItem key={t._id} task={t} defaultCollapsed={defaultCollapsed} onItemClick={onItemClick} />
+						<TaskItem key={t.id} task={t} defaultCollapsed={defaultCollapsed} onItemClick={onItemClick} />
 					))}
 				</SubTasksItemContainer>
 			</>

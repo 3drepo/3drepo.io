@@ -49,7 +49,7 @@ interface IProps {
 	fetchSelectedFrame: () => void;
 	loadingFrame: boolean;
 	rightPanels: string[];
-	setPanelVisibility: (panelName) => void;
+	toggleActivitiesPanel: () => void;
 }
 
 interface IState {
@@ -307,7 +307,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 					<SwitchItem>
 						<Switch
 							checked={this.props.rightPanels.includes(VIEWER_PANELS.ACTIVITIES)}
-							onChange={() => this.props.setPanelVisibility(VIEWER_PANELS.ACTIVITIES)}
+							onChange={this.props.toggleActivitiesPanel}
 							color="primary"
 						/>
 						Full Activity List

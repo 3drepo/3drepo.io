@@ -18,31 +18,20 @@
 import React from 'react';
 
 import Grid from '@material-ui/core/Grid';
-import ActivitiesIcon from '@material-ui/icons/Movie';
 import { map } from 'lodash';
 
-import { LoaderContainer } from '../../../../../billing/billing.styles';
 import { Loader } from '../../../../../components/loader/loader.component';
-import { Container, Row, StyledIconButton } from './activityDetails.styles';
+import { LoaderContainer } from '../../../viewerPanel/viewerPanel.styles';
+import { TimeIcon } from '../timeIcon/';
+import { Container, Row } from './activityDetails.styles';
 
-const DATE_FIELDS = ['Planned Start', 'Planned Finish', 'Actual Start', 'Actual Finish'];
+interface IProps {
+	isPending: boolean;
+	activityDetails: { data: any[] };
+	setSelectedFrame: (value: number) => void;
+}
 
-const TimeIcon = ({ name, value, handleOnClick }) => {
-
-	if (!DATE_FIELDS.includes(name)) {
-		return null;
-	}
-
-	const handleOnIconClick = () => handleOnClick(value);
-
-	return (
-		<StyledIconButton onClick={handleOnIconClick}>
-			<ActivitiesIcon />
-		</StyledIconButton>
-	);
-};
-
-export const ActivityDetails = ({ isPending, activityDetails, fetchSelectedFrame }) => {
+export const ActivityDetails = ({ isPending, activityDetails, setSelectedFrame }: IProps) => {
 
 	if (isPending) {
 		return (
@@ -52,14 +41,13 @@ export const ActivityDetails = ({ isPending, activityDetails, fetchSelectedFrame
 		);
 	}
 
-	const { data } = activityDetails;
 	return (
 		<Container container direction="row" alignItems="center">
-			{map(data, (value, key) => (
+			{map(activityDetails.data, (value, key: string) => (
 				<Grid key={key} item xs={12} >
 					<Row container justify="center">
 						<Grid item xs={6}>{key}</Grid>
-						<Grid item xs={6}>{value} <TimeIcon name={key} value={value} handleOnClick={fetchSelectedFrame} /></Grid>
+						<Grid item xs={6}>{value} <TimeIcon name={key} value={value} handleOnClick={setSelectedFrame} /></Grid>
 					</Row>
 				</Grid>
 			))}

@@ -63,7 +63,7 @@ export class TasksList extends React.PureComponent<IProps, IState> {
 						<TaskListLabel>{this.durationLabel}</TaskListLabel>
 						{
 							tasks.map((t) => (
-								<SequenceTasksListItem  key={t._id}>
+								<SequenceTasksListItem key={t.id}>
 									<TaskItem task={t} onItemClick={this.handleItemClick} />
 								</SequenceTasksListItem>
 							))

@@ -19,12 +19,13 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
+
+import { ActivitiesActions } from '../../../../modules/activities';
 import { selectCurrentActivities, selectIsLoadingFrame, selectMaxDate, selectMinDate,
 	selectSelectedEndingDate, selectSelectedFrameColors,
 	selectSelectedSequence, selectSelectedStartingDate, selectSequences, selectStepInterval,
 	selectStepScale,
 	SequencesActions} from '../../../../modules/sequences';
-
 import { selectRightPanels, ViewerGuiActions } from '../../../../modules/viewerGui';
 import { Sequences } from './sequences.component';
 
@@ -52,6 +53,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setSelectedSequence: SequencesActions.setSelectedSequence,
 	restoreIfcSpacesHidden: SequencesActions.restoreIfcSpacesHidden,
 	fetchSelectedFrame: SequencesActions.fetchSelectedFrame,
+	toggleActivitiesPanel: ActivitiesActions.toggleActivitiesPanel,
+	fetchActivityDetails: ActivitiesActions.fetchDetails,
 	setPanelVisibility: ViewerGuiActions.setPanelVisibility,
 }, dispatch);
 

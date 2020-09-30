@@ -17,11 +17,13 @@
 
 import React from 'react';
 
+import IconButton from '@material-ui/core/IconButton';
+import ArrowBack from '@material-ui/icons/ArrowBack';
 import ActivitiesIcon from '@material-ui/icons/Movie';
 import { isEqual } from 'lodash';
 
 import { renderWhenTrue } from '../../../../helpers/rendering';
-import { IViewpointsComponentState } from '../../../../modules/viewpoints/viewpoints.redux';
+import { IActivitiesComponentState } from '../../../../modules/activities/activities.redux';
 import { EmptyStateInfo } from '../../../components/components.styles';
 import { PanelBarActions } from '../panelBarActions';
 import { TaskItem } from '../sequences/components/tasksList/sequenceTaskItem.component';
@@ -38,42 +40,78 @@ interface IProps {
 	searchQuery: string;
 	fetchActivities: () => void;
 	activities: any[];
-	setComponentState: (componentState: IViewpointsComponentState) => void;
+	tasks: any[];
+	setComponentState: (componentState: IActivitiesComponentState) => void;
 	showDetails: boolean;
 	fetchDetails: (id: string) => void;
 }
 
 interface IState {
 	filteredActivities: any[];
+	listCollapsed: boolean;
 }
 
 export class Activities extends React.PureComponent<IProps, IState> {
 
 	public state = {
-		filteredActivities: []
+		filteredActivities: [],
+		listCollapsed: true,
 	};
 
 	public componentDidMount() {
 		const { activities, fetchActivities } = this.props;
 
-		if (!activities.length) {
+		if (!activities || !activities.length) {
 			fetchActivities();
 		} else {
-			this.setFilteredViewpoints();
+			this.setFilteredActivities();
 		}
 	}
 
 	public componentDidUpdate(prevProps, prevState) {
-		const { activities, searchQuery } = this.props;
-		const viewpointsChanged = !isEqual(prevProps.activities, activities);
+		const { activities, searchQuery, searchEnabled } = this.props;
+		const { listCollapsed } = this.state;
+		const activitiesChanged = !isEqual(prevProps.activities, activities);
 		const searchQueryChanged = prevProps.searchQuery !== searchQuery;
 
-		if (searchQueryChanged || viewpointsChanged) {
-			this.setFilteredViewpoints();
+		if (searchQueryChanged || activitiesChanged) {
+			this.setFilteredActivities();
+
+			if (listCollapsed) {
+				this.setState({
+					listCollapsed: false,
+				});
+			}
+		}
+
+		if (!searchQuery && !listCollapsed) {
+			this.setState({
+				listCollapsed: true,
+			});
 		}
 	}
 
-	private getTitleIcon = () => <ActivitiesIcon />;
+	public componentWillUnmount() {
+		this.props.setComponentState({
+			showDetails: false,
+			searchEnabled: false,
+			searchQuery: '',
+		});
+	}
+
+	private handleBackArrowClick = () => this.props.setComponentState({ showDetails: false });
+
+	public renderTitleIcon = () => {
+		if (this.props.showDetails) {
+			return (
+				<IconButton onClick={this.handleBackArrowClick}>
+					<ArrowBack />
+				</IconButton>
+			);
+		}
+
+		return <ActivitiesIcon />;
+	}
 
 	private handleCloseSearchMode = () => this.props.setComponentState({ searchEnabled: false, searchQuery: '' });
 
@@ -81,7 +119,7 @@ export class Activities extends React.PureComponent<IProps, IState> {
 
 	private handleItemClick = (task) => this.props.fetchDetails(task.id);
 
-	private renderActions = () => (
+	private renderActions = renderWhenTrue(() => (
 		<PanelBarActions
 			hideLock
 			hideMenu
@@ -89,20 +127,40 @@ export class Activities extends React.PureComponent<IProps, IState> {
 			onSearchOpen={this.handleOpenSearchMode}
 			onSearchClose={this.handleCloseSearchMode}
 		/>
-	)
+	));
 
 	public handleSearchQueryChange = (event) => {
 		const searchQuery = event.currentTarget.value.toLowerCase();
 		this.props.setComponentState({ searchQuery });
 	}
 
-	public setFilteredViewpoints = (onSave = () => {}) => {
-		const { activities, searchQuery, searchEnabled } = this.props;
-		const filteredActivities = searchEnabled ? activities.filter(({ name }) => {
-			return name.toLowerCase().includes(searchQuery.toLowerCase());
-		}) : activities;
+	public filterData = (data, condition) => data.reduce((list, item) => {
+		let result = null;
 
-		this.setState({ filteredActivities }, onSave);
+		if (condition(item)) {
+			result = { ...item };
+		} else if (item.subTasks) {
+			const subTasks = this.filterData(item.subTasks, condition);
+
+			if (subTasks.length > 0) {
+				result = { ...item, subTasks };
+			}
+		}
+
+		if (result) {
+			list.push(result);
+		}
+
+		return list;
+	}, [])
+
+	public setFilteredActivities = () => {
+		const { activities, searchQuery, searchEnabled } = this.props;
+		const query = searchQuery.toLowerCase();
+		const filterCondition = (item) => item.name.toLowerCase().includes(query);
+		const filteredActivities = searchEnabled ? this.filterData(activities, filterCondition) : activities;
+
+		this.setState({ filteredActivities });
 	}
 
 	public renderSearch = renderWhenTrue(() => (
@@ -120,19 +178,15 @@ export class Activities extends React.PureComponent<IProps, IState> {
 		/>
 	));
 
-	public renderNotFound = renderWhenTrue(() => (
-		<EmptyStateInfo>No activities matched</EmptyStateInfo>
-	));
+	public renderNotFound = renderWhenTrue(() => <EmptyStateInfo>No activities matched</EmptyStateInfo>);
 
-	public renderDetailsView = renderWhenTrue(() => (
-		<ActivityDetails />
-	));
+	public renderDetailsView = renderWhenTrue(() => <ActivityDetails />);
 
 	public renderListView = renderWhenTrue(() => (
 		<Container>
 			{this.state.filteredActivities.map((t) => (
-				<SequenceTasksListItem key={t._id}>
-					<TaskItem task={t} defaultCollapsed onItemClick={this.handleItemClick} />
+				<SequenceTasksListItem key={t.id}>
+					<TaskItem task={t} defaultCollapsed={this.state.listCollapsed} onItemClick={this.handleItemClick} />
 				</SequenceTasksListItem>
 			))}
 		</Container>
@@ -144,15 +198,14 @@ export class Activities extends React.PureComponent<IProps, IState> {
 		return (
 			<ViewerPanel
 				title="Activities"
-				Icon={this.getTitleIcon()}
-				renderActions={this.renderActions}
-				pending={isPending}
+				Icon={this.renderTitleIcon()}
+				renderActions={() => this.renderActions(!showDetails)}
+				pending={isPending && !showDetails}
 			>
 				{this.renderSearch(searchEnabled && !showDetails)}
 				{this.renderNotFound(searchEnabled && !showDetails && !this.state.filteredActivities.length)}
 				{this.renderListView(!showDetails)}
 				{this.renderDetailsView(showDetails)}
-
 			</ViewerPanel>
 		);
 	}

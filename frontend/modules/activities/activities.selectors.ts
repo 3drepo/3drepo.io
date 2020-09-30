@@ -19,18 +19,6 @@ import { createSelector } from 'reselect';
 
 export const selectActivitiesDomain = (state) => state.activities;
 
-export const selectIsPending = createSelector(
-		selectActivitiesDomain, (state) => state.isPending
-);
-
-export const selectActivitiesList = createSelector(
-		selectActivitiesDomain, (state) => state.activitiesList
-);
-
-export const selectActivitiesTasks = createSelector(
-		selectActivitiesList, (state) => state.tasks || []
-);
-
 export const selectComponentState = createSelector(
 		selectActivitiesDomain, (state) => state.componentState
 );

@@ -15,22 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import React from 'react';
 
-import { COLOR } from '../../../../styles';
-import { SequenceTasksListItem } from '../sequences/sequences.styles';
-import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
+import MovieIcon from '@material-ui/icons/Movie';
 
-export const Container = styled(ViewerPanelContent)`
-	font-size: 13px;
-	color: ${COLOR.BLACK_60};
-	padding: 15px;
+import { DATE_FIELDS } from './timeIcon.constants';
+import { StyledIconButton } from './timeIcon.styles';
 
-	& > * {
-		margin-bottom: 15px;
+interface IProps {
+	name: string;
+	value: number;
+	handleOnClick: (value: number) => void;
+}
+
+export const TimeIcon = ({ name, value, handleOnClick }: IProps) => {
+	if (!DATE_FIELDS.includes(name)) {
+		return null;
 	}
 
-	${SequenceTasksListItem} {
-		background-color: ${COLOR.LIGHT_GRAY};
-	}
-`;
+	const handleOnIconClick = () => handleOnClick(value);
+
+	return (
+		<StyledIconButton onClick={handleOnIconClick}>
+			<MovieIcon />
+		</StyledIconButton>
+	);
+};

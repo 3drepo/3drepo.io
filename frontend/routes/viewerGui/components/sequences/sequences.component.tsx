@@ -52,7 +52,8 @@ interface IProps {
 	loadingFrame: boolean;
 	selectedSequence: any;
 	rightPanels: string[];
-	setPanelVisibility: (panelName) => void;
+	setPanelVisibility: (panelName, visibility) => void;
+	toggleActivitiesPanel: () => void;
 	fetchActivityDetails: (id: string) => void;
 }
 
@@ -60,7 +61,7 @@ const da =  new Date();
 
 const SequenceDetails = ({
 	minDate, maxDate, selectedDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
-	setStepScale, fetchSelectedFrame, currentTasks, loadingFrame, fetchFrame, rightPanels, setPanelVisibility,
+	setStepScale, fetchSelectedFrame, currentTasks, loadingFrame, fetchFrame, rightPanels, toggleActivitiesPanel,
 	fetchActivityDetails,
 }) => (
 		<>
@@ -78,7 +79,7 @@ const SequenceDetails = ({
 				fetchFrame={fetchFrame}
 				fetchSelectedFrame={fetchSelectedFrame}
 				rightPanels={rightPanels}
-				setPanelVisibility={setPanelVisibility}
+				toggleActivitiesPanel={toggleActivitiesPanel}
 			/>
 			<TasksList
 				tasks={currentTasks}
@@ -99,6 +100,14 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 
 	public componentWillUnmount = () => {
 		this.props.restoreIfcSpacesHidden();
+		this.props.setPanelVisibility(VIEWER_PANELS.ACTIVITIES, false);
+	}
+
+	public componentDidUpdate(prevProps: Readonly<IProps>) {
+		const { selectedSequence, setPanelVisibility } = this.props;
+		if (selectedSequence !== prevProps.selectedSequence && !selectedSequence) {
+			setPanelVisibility(VIEWER_PANELS.ACTIVITIES, false);
+		}
 	}
 
 	public renderTitleIcon = () => {
@@ -131,7 +140,7 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 					<SequenceDetails {...this.props} />
 				}
 
-				{sequences  && !selectedSequence && sequences.length > 0 &&
+				{sequences && !selectedSequence && sequences.length > 0 &&
 					<SequencesList sequences={sequences} setSelectedSequence={setSelectedSequence} />
 				}
 
