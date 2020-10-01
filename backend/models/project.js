@@ -297,10 +297,12 @@
 
 					const userIndex = project.permissions.findIndex(x => x.user === permissionUpdate.user);
 
-					if (-1 !== userIndex && permissionUpdate.permissions && permissionUpdate.permissions.length) {
-						project.permissions[userIndex].permissions = permissionUpdate.permissions;
-					} else if (-1 !== userIndex) {
-						project.permissions.splice(userIndex, 1);
+					if (-1 !== userIndex) {
+						if (permissionUpdate.permissions && permissionUpdate.permissions.length) {
+							project.permissions[userIndex].permissions = permissionUpdate.permissions;
+						} else {
+							project.permissions.splice(userIndex, 1);
+						}
 					} else if (permissionUpdate.permissions && permissionUpdate.permissions.length) {
 						project.permissions.push(permissionUpdate);
 					}

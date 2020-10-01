@@ -316,10 +316,12 @@ ModelSetting.updatePermissions = async function(account, model, permissions = []
 
 			const userIndex = setting.permissions.findIndex(x => x.user === permissionUpdate.user);
 
-			if (-1 !== userIndex && "" !== permissionUpdate.permission) {
-				setting.permissions[userIndex].permission = permissionUpdate.permission;
-			} else if (-1 !== userIndex) {
-				setting.permissions.splice(userIndex, 1);
+			if (-1 !== userIndex) {
+				if ("" !== permissionUpdate.permission) {
+					setting.permissions[userIndex].permission = permissionUpdate.permission;
+				} else {
+					setting.permissions.splice(userIndex, 1);
+				}
 			} else if ("" !== permissionUpdate.permission) {
 				setting.permissions.push(permissionUpdate);
 			}
