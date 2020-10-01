@@ -42,6 +42,7 @@ import {
 	Actions,
 	ActionsGroup,
 	Container,
+	Counter,
 	FileUploadContainer,
 	FileUploadInvoker,
 	RemoveButtonWrapper,
@@ -170,6 +171,7 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 	));
 
 	private renderTextAreaComponent = React.forwardRef((props, ref) => {
+		const counterValue = this.props.commentRef.current?.textareaRef.value.length;
 		return (
 			<>
 				<StyledTextField
@@ -183,6 +185,7 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 					disabled={!this.props.canComment}
 					inputRef={ref}
 				/>
+				<Counter error={counterValue >= 220}>{counterValue}/220</Counter>
 			</>
 		);
 	});
