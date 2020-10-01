@@ -73,6 +73,7 @@ export const MainIssueFormTab: React.FunctionComponent<IProps> = ({
 						disabled={!canEditBasicProperty}
 						validationSchema={IssueSchema}
 						mutable={!isNew}
+						enableMarkdown
 					/>
 				)} />
 			</Container>

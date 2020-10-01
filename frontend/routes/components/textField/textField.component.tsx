@@ -44,7 +44,7 @@ interface IProps extends TextFieldProps {
 	onBeforeConfirmChange?: (event) => void;
 	expandable?: boolean;
 	disableShowDefaultUnderline?: boolean;
-	disableMarkdown?: boolean;
+	enableMarkdown?: boolean;
 }
 
 interface IState {
@@ -269,13 +269,13 @@ export class TextField extends React.PureComponent<IProps, IState> {
 							{!this.isEditMode &&
 							<FieldWrapper line={Number(!disableShowDefaultUnderline)} onClick={this.handlePlaceholderClick}>
 								<FieldLabel shrink>{this.props.label}</FieldLabel>
-								{this.props.disableMarkdown &&
-								<span>{this.fieldValue}</span>
-								}
-								{!this.props.disableMarkdown &&
+								{this.props.enableMarkdown &&
 								<StyledMarkdownField ref={this.markdownFieldRef} {...this.additionalProps()}>
 									{this.fieldValue}
 								</StyledMarkdownField>
+								}
+								{!this.props.enableMarkdown &&
+								<span>{this.fieldValue}</span>
 								}
 							</FieldWrapper>
 							}
