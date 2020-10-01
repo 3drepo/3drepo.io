@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 import { COLOR } from '../../../../../../styles';
-import { MarkdownField } from '../../../../../components/markdownField/markdownField.component';
+import { LinkableField } from '../../../../../components/linkableField/linkableField.component';
 
 export const Container = styled.div`
 	display: flex;
@@ -45,7 +45,7 @@ export const MetaKeyText = styled.div`
 	word-break: break-word;
 `;
 
-export const MetaValue = styled(MarkdownField)`
+export const MetaValue = styled(LinkableField)`
 	width: 50%;
 	color: ${COLOR.BLACK_87};
 	font-size: 14px;

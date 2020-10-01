@@ -173,6 +173,7 @@ export const MeasureItem = ({
 							onKeyDown={this._handleKeyDown}
 							inputProps={{ maxLength: 15 }}
 							disableShowDefaultUnderline
+							disableMarkdown
 						/>
 					</StyledForm>
 				</Tooltip>

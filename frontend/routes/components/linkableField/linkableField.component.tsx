@@ -15,16 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import linkify from 'markdown-linkify';
 import React from 'react';
-// tslint:disable-next-line:max-line-length
-import { MarkdownMessage } from '../messagesList/components/message/components/markdownMessage/markdownMessage.component';
+import Linkify from 'react-linkify';
 
 interface IProps {
 	children?: React.ReactChild;
 	className?: string;
+	style?: any;
 }
 
-export const MarkdownField: React.FunctionComponent<IProps> = ({ className, children }) => (
-	<MarkdownMessage className={className}>{linkify(children)}</MarkdownMessage>
+export const LinkableField: React.FunctionComponent<IProps> = ({ style, className, children }) => (
+	<span style={style} className={className}>
+		<Linkify properties={{target: '_blank', rel: 'noopener noreferrer'}}>{children}</Linkify>
+	</span>
 );
