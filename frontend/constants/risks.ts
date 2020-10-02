@@ -249,10 +249,7 @@ export const RISKS_ACTIONS_MENU = {
 	},
 	SORT_BY_DATE: {
 		label: 'Sort by date',
-		isSorting: true,
-		Icon: {
-			ASC: SortAmountUp,
-			DESC: SortAmountDown
-		}
+		ASC: SortAmountUp,
+		DESC: SortAmountDown,
 	}
 };

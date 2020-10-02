@@ -37,14 +37,13 @@ import {
 	ISSUE_FILTER_PROPS, ISSUE_FILTER_VALUES, RISK_FILTER_PROPS, RISK_FILTER_VALUES
 } from '../../modules/board/board.constants';
 import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
-import {
-	IconWrapper, MenuList, StyledItemText, StyledListItem
-} from '../components/filterPanel/components/filtersMenu/filtersMenu.styles';
+
 import { Loader } from '../components/loader/loader.component';
 import { MenuButton } from '../components/menuButton/menuButton.component';
 import { Panel } from '../components/panel/panel.component';
 
 import { isViewer } from '../../helpers/permissions';
+import { renderActionsMenu } from '../../helpers/reportedItems';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
 import { FilterPanel } from '../components/filterPanel/filterPanel.component';
 import { getProjectModels, getTeamspaceProjects } from './board.helpers';
@@ -96,8 +95,7 @@ interface IProps {
 	topicTypes: any[];
 	selectedIssueFilters: any[];
 	selectedRiskFilters: any[];
-	issuesSortOrder: string;
-	risksSortOrder: string;
+	sortOrder: string;
 	cards: ICard[];
 	projectsMap: any;
 	modelsMap: any;
@@ -117,8 +115,7 @@ interface IProps {
 	exportBCF: (eamspace, modelId) => void;
 	printItems: (teamspace, model) => void;
 	downloadItems: (teamspace, model) => void;
-	toggleIssuesSortOrder: () => void;
-	toggleRisksSortOrder: () => void;
+	toggleSortOrder: () => void;
 	toggleClosedIssues: () => void;
 	showSnackbar: (text) => void;
 	subscribeOnIssueChanges: (teamspace, modelId) => void;
@@ -164,15 +161,8 @@ export function Board(props: IProps) {
 	const isIssuesBoard = type === 'issues';
 	const boardData = { lanes: props.lanes };
 	const selectedFilters = isIssuesBoard ? props.selectedIssueFilters : props.selectedRiskFilters;
+
 	const {
-		printItems,
-		downloadItems,
-		importBCF,
-		exportBCF,
-		toggleIssuesSortOrder,
-		toggleRisksSortOrder,
-		toggleClosedIssues,
-		showClosedIssues,
 		resetModel,
 		resetIssues,
 		resetRisks,
@@ -478,57 +468,13 @@ export function Board(props: IProps) {
 		return <IconButton disabled={!project || !modelId} onClick={props.toggleSearchEnabled}><SearchIcon /></IconButton>;
 	};
 
-	const headerMenu = isIssuesBoard ?
-		getIssueMenuItems(
-			teamspace,
-			modelId,
-			null,
-			printItems,
-			downloadItems,
-			importBCF,
-			exportBCF,
-			toggleIssuesSortOrder,
-			null, null,
-			toggleClosedIssues,
-			showClosedIssues
-		) :
-		getRisksMenuItems(
-			teamspace, modelId, printItems, downloadItems, toggleRisksSortOrder
-		);
-
-	const sortOrder = isIssuesBoard ? props.issuesSortOrder : props.risksSortOrder;
-
-	const renderSortIcon = (Icon) => {
-		if (sortOrder === 'asc') {
-			return <Icon.ASC IconProps={{ fontSize: 'small' }} />;
-		}
-		return <Icon.DESC IconProps={{ fontSize: 'small' }} />;
-	};
-
-	const renderCheckIcon = renderWhenTrue(() => <Check fontSize="small" />);
-
-	const renderActionsMenu = () => (
-		<MenuList>
-			{(headerMenu as any).map(({ label, Icon, onClick, isSorting }, index) => {
-				return (
-					<StyledListItem key={index} button onClick={onClick}>
-						<IconWrapper>
-							{isSorting ? renderSortIcon(Icon) : <Icon fontSize="small" />}
-						</IconWrapper>
-						<StyledItemText>
-							{label}
-							{renderCheckIcon(label === ISSUES_ACTIONS_MENU.SHOW_CLOSED_ISSUES.label && props.showClosedIssues)}
-						</StyledItemText>
-					</StyledListItem>
-				);
-			})}
-		</MenuList>
-	);
+	const menuProps = {...props, teamspace, model: modelId};
+	const headerMenu = isIssuesBoard ? getIssueMenuItems(menuProps) : getRisksMenuItems(menuProps);
 
 	const getMenuButton = () => (
 		<ButtonMenu
 			renderButton={MenuButton}
-			renderContent={renderActionsMenu}
+			renderContent={() => renderActionsMenu(headerMenu)}
 			PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
 			PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
 			ButtonProps={{ disabled: !project || !modelId }}

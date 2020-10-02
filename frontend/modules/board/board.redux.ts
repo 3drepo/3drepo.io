@@ -31,7 +31,8 @@ export const { Types: BoardTypes, Creators: BoardActions } = createActions({
 	setFilters: ['filters'],
 	printItems: ['teamspace', 'modelId'],
 	downloadItems: ['teamspace', 'modelId'],
-	toggleClosedIssues: []
+	toggleClosedIssues: [],
+	toggleSortOrder: []
 }, { prefix: 'BOARD/' });
 
 export const INITIAL_STATE = {

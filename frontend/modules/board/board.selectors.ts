@@ -240,3 +240,9 @@ export const selectCards = createSelector(
 		return cards;
 	}
 );
+
+/** Unified selectors */
+export const selectSortOrder = createSelector(
+	selectBoardType,  selectIssuesSortOrder, selectRisksSortOrder,
+	(type, issuesSortOrder, risksSortOrder) =>   type === 'issues' ? issuesSortOrder : risksSortOrder
+);

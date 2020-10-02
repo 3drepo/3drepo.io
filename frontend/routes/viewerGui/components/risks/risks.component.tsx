@@ -51,8 +51,8 @@ interface IProps {
 	fetchRisks: (teamspace, model, revision) => void;
 	setState: (componentState: any) => void;
 	setNewRisk: () => void;
-	downloadRisks: (teamspace, model) => void;
-	printRisks: (teamspace, model) => void;
+	downloadItems: (teamspace, model) => void;
+	printItems: (teamspace, model) => void;
 	setActiveRisk: (risk, revision?) => void;
 	showRiskDetails: (revision, riskId) => void;
 	goToRisk: (risk) => void;
@@ -83,8 +83,7 @@ export class Risks extends React.PureComponent<IProps, any> {
 	}
 
 	get headerMenuItems() {
-		const { printRisks, downloadRisks, toggleSortOrder, toggleShowPins, teamspace, model, showPins } = this.props;
-		return getHeaderMenuItems(teamspace, model, printRisks, downloadRisks, toggleSortOrder, toggleShowPins, showPins);
+		return getHeaderMenuItems(this.props);
 	}
 
 	get showDefaultHiddenItems() {
