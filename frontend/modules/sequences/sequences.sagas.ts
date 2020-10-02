@@ -144,7 +144,6 @@ export function* setSelectedSequence({ sequenceId }) {
 }
 
 export function* showSequenceDate({ date }) {
-	yield put(SequencesActions.setSelectedSequenceSuccess(sequenceId));
 	// 1 - if sequence panel is closed, open it
 	const sequencePanelVisible = (yield select(selectLeftPanels))[VIEWER_PANELS.SEQUENCES];
 
