@@ -27,12 +27,11 @@ import {
 	selectLanes,
 	selectSearchEnabled,
 	selectShowClosedIssues,
-	selectSortOrder, BoardActions
+	selectSortByField, selectSortOrder, BoardActions
 } from '../../modules/board';
 import { DialogActions } from '../../modules/dialog';
 import {
 	selectSelectedFilters as selectSelectedIssueFilters,
-	selectSortOrder as selectIssuesSortOrder,
 	IssuesActions
 } from '../../modules/issues';
 import { selectJobsList } from '../../modules/jobs';
@@ -65,6 +64,7 @@ const mapStateToProps = createStructuredSelector({
 	modelSettings: selectSettings,
 	criteria: selectMitigationCriteria,
 	sortOrder: selectSortOrder,
+	sortByField: selectSortByField
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -93,6 +93,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	resetModel: ModelActions.reset,
 	resetIssues: IssuesActions.reset,
 	resetRisks: RisksActions.reset,
+	setSortBy: BoardActions.setSortBy
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Board);

@@ -126,6 +126,7 @@ interface IProps {
 	resetIssues: () => void;
 	resetRisks: () => void;
 	openCardDialog: (cardId: string, onChange: (index: number) => void) => void;
+	setSortBy: (field) => void;
 	criteria: any;
 }
 

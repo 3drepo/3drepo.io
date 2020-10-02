@@ -24,9 +24,12 @@ import { createSelector } from 'reselect';
 import { PRIORITIES, STATUSES } from '../../constants/issues';
 import { LEVELS_LIST, RISK_MITIGATION_STATUSES } from '../../constants/risks';
 import { sortByDate } from '../../helpers/sorting';
-import { selectAllFilteredIssues, selectSortOrder as selectIssuesSortOrder } from '../issues';
+import { selectAllFilteredIssues, selectSortByField as selectIssuesSortByField,
+	selectSortOrder as selectIssuesSortOrder } from '../issues';
 import { selectJobs } from '../jobs';
-import { selectAllFilteredRisks, selectRiskCategories, selectSortOrder as selectRisksSortOrder } from '../risks';
+import { selectAllFilteredRisks, selectRiskCategories, selectSortByField as  selectRisksSortByField,
+	selectSortOrder as selectRisksSortOrder
+} from '../risks';
 import { selectTopicTypes } from '../teamspace';
 import { BOARD_TYPES, ISSUE_FILTER_PROPS, NOT_DEFINED_PROP, RISK_FILTER_PROPS } from './board.constants';
 
@@ -95,15 +98,19 @@ const selectRawCardData = createSelector(
 	selectShowClosedIssues,
 	selectIssuesSortOrder,
 	selectRisksSortOrder,
-	({ filterProp }, issues, risks, showClosedIssues, issuesSortOrder, risksSortOrder) => {
+	selectIssuesSortByField,
+	selectRisksSortByField,
+
+	({ filterProp }, issues, risks, showClosedIssues, issuesSortOrder,
+		risksSortOrder, issuesSortByField, risksSortByField) => {
 		const activeIssues = issues.filter(({ status }) => {
 			const activeGroupingByStatus = filterProp === ISSUE_FILTER_PROPS.status.value;
 			return showClosedIssues || activeGroupingByStatus || ![STATUSES.CLOSED, STATUSES.VOID].includes(status);
 		});
 
 		return {
-			[BOARD_TYPES.ISSUES]: sortByDate(activeIssues, { order: issuesSortOrder }),
-			[BOARD_TYPES.RISKS]: sortByDate(risks, { order: risksSortOrder })
+			[BOARD_TYPES.ISSUES]: sortByDate(activeIssues, { order: issuesSortOrder }, issuesSortByField),
+			[BOARD_TYPES.RISKS]: sortByDate(risks, { order: risksSortOrder }, risksSortByField)
 		};
 });
 
@@ -245,4 +252,9 @@ export const selectCards = createSelector(
 export const selectSortOrder = createSelector(
 	selectBoardType,  selectIssuesSortOrder, selectRisksSortOrder,
 	(type, issuesSortOrder, risksSortOrder) =>   type === 'issues' ? issuesSortOrder : risksSortOrder
+);
+
+export const selectSortByField = createSelector(
+	selectBoardType,  selectIssuesSortByField, selectRisksSortByField,
+	(type, issuesSortByField, risksSortByField) =>   type === 'issues' ? issuesSortByField : risksSortByField
 );
