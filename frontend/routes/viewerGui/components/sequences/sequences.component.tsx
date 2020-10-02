@@ -33,14 +33,12 @@ import {
 
 interface IProps {
 	sequences: any;
-	initializeSequences: () => void;
 	setSelectedDate: (date: Date) => void;
 	fetchFrame: (date: Date) => void;
 	fetchSelectedFrame: () => void;
 	setStepInterval: (interval: number) => void;
 	setStepScale: (scale: STEP_SCALE) => void;
 	setSelectedSequence: (id: string) => void;
-	restoreIfcSpacesHidden: () => void;
 	maxDate: Date;
 	minDate: Date;
 	selectedDate: Date;
@@ -94,12 +92,7 @@ const SequenceDetails = ({
 const SequencesLoader = () => (<LoaderContainer><Loader /></LoaderContainer>);
 
 export class Sequences extends React.PureComponent<IProps, {}> {
-	public componentDidMount = () => {
-		this.props.initializeSequences();
-	}
-
 	public componentWillUnmount = () => {
-		this.props.restoreIfcSpacesHidden();
 		this.props.setPanelVisibility(VIEWER_PANELS.ACTIVITIES, false);
 	}
 

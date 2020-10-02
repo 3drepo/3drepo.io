@@ -45,13 +45,11 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	initializeSequences: SequencesActions.initializeSequences,
 	setSelectedDate: SequencesActions.setSelectedDate,
 	setStepInterval: SequencesActions.setStepInterval,
 	setStepScale: SequencesActions.setStepScale,
 	fetchFrame: SequencesActions.fetchFrame,
 	setSelectedSequence: SequencesActions.setSelectedSequence,
-	restoreIfcSpacesHidden: SequencesActions.restoreIfcSpacesHidden,
 	fetchSelectedFrame: SequencesActions.fetchSelectedFrame,
 	toggleActivitiesPanel: ActivitiesActions.toggleActivitiesPanel,
 	fetchActivityDetails: ActivitiesActions.fetchDetails,

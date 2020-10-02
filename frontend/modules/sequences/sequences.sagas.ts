@@ -133,11 +133,18 @@ export function* restoreIfcSpacesHidden() {
 }
 
 export function* setSelectedSequence({ sequenceId }) {
+	if (sequenceId) {
+		yield put(SequencesActions.initializeSequences());
+	} else {
+		yield put(SequencesActions.setStateDefinition(undefined, {});
+		yield put(SequencesActions.restoreIfcSpacesHidden());
+	}
 	yield put(SequencesActions.setSelectedSequenceSuccess(sequenceId));
 	yield put(SequencesActions.fetchTasksDefinitions(sequenceId));
 }
 
 export function* showSequenceDate({ date }) {
+	yield put(SequencesActions.setSelectedSequenceSuccess(sequenceId));
 	// 1 - if sequence panel is closed, open it
 	const sequencePanelVisible = (yield select(selectLeftPanels))[VIEWER_PANELS.SEQUENCES];
 
