@@ -136,7 +136,7 @@ export function* setSelectedSequence({ sequenceId }) {
 	if (sequenceId) {
 		yield put(SequencesActions.initializeSequences());
 	} else {
-		yield put(SequencesActions.setStateDefinition(undefined, {});
+		yield put(SequencesActions.setStateDefinition(undefined, {}));
 		yield put(SequencesActions.restoreIfcSpacesHidden());
 	}
 	yield put(SequencesActions.setSelectedSequenceSuccess(sequenceId));
