@@ -31,8 +31,7 @@ import {
 	selectShowDetails,
 	selectShowPins,
 	selectShowSubmodelIssues,
-	selectSortOrder,
-	IssuesActions
+	selectSortByField, selectSortOrder, IssuesActions
 } from '../../../../modules/issues';
 import { selectJobsList } from '../../../../modules/jobs';
 import { selectSettings } from '../../../../modules/model';
@@ -54,7 +53,8 @@ const mapStateToProps = createStructuredSelector({
 	isImportingBCF: selectIsImportingBCF,
 	sortOrder: selectSortOrder,
 	topicTypes: selectTopicTypes,
-	selectedIssue: selectSelectedIssue
+	selectedIssue: selectSelectedIssue,
+	sortByField: selectSortByField
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -75,6 +75,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	exportBCF: IssuesActions.exportBcf,
 	toggleSortOrder: IssuesActions.toggleSortOrder,
 	setFilters: IssuesActions.setFilters,
+	setSortBy: IssuesActions.setSortBy,
 	fetchSettings: TeamspaceActions.fetchSettings
 }, dispatch);
 

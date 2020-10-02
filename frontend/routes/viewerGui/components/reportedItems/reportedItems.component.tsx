@@ -67,6 +67,7 @@ interface IProps {
 	onChangeFilters: (selectedFilters) => void;
 	toggleShowPins: (showPins: boolean, filteredItems) => void;
 	renderDetailsView: (statement) => React.ReactChildren[];
+	sortByField?: string;
 }
 
 interface IState {
@@ -81,10 +82,10 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	}
 
 	get filteredItems() {
-		const { items, selectedFilters, showDefaultHiddenItems } = this.props;
+		const { items, selectedFilters, showDefaultHiddenItems, sortByField } = this.props;
 		return sortByDate(
 			searchByFilters(items, selectedFilters, showDefaultHiddenItems, ['name', 'desc', 'number']),
-			{ order: this.props.sortOrder }
+			{ order: this.props.sortOrder }, sortByField
 		);
 	}
 
@@ -177,17 +178,20 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		const { items, selectedFilters, showDefaultHiddenItems, searchEnabled, sortOrder, showDetails } = this.props;
+		const { items, selectedFilters, showDefaultHiddenItems, searchEnabled,
+			sortOrder, showDetails, sortByField } = this.props;
 		const itemsChanged = !isEqual(prevProps.items, items);
 		const sortingChanged = prevProps.sortOrder !== sortOrder;
 		const filtersChanged = prevProps.selectedFilters.length !== selectedFilters.length;
 		const showDefaultHiddenItemsChanged = prevProps.showDefaultHiddenItems !== showDefaultHiddenItems;
 		const searchEnabledChange = prevProps.searchEnabled !== searchEnabled;
 		const detailsWasClosed = prevProps.showDetails !== showDetails && !showDetails;
+		const sortByChanged =  prevProps.sortByField !== sortByField && sortByField;
 
 		const changes = {} as IState;
 
-		if (itemsChanged || filtersChanged || showDefaultHiddenItemsChanged || searchEnabledChange || sortingChanged) {
+		if (itemsChanged || filtersChanged || showDefaultHiddenItemsChanged ||
+			searchEnabledChange || sortingChanged || sortByChanged) {
 			changes.filteredItems = this.filteredItems;
 		}
 

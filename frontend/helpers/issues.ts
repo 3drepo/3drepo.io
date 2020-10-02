@@ -177,12 +177,13 @@ export const getHeaderMenuItems = (props) => {
 		importBCF,
 		exportBCF,
 		toggleSortOrder,
-		toggleSortBy,
+		setSortBy,
 		toggleShowPins,
 		showPins,
 		toggleClosedIssues,
 		showClosedIssues,
-		sortOrder
+		sortOrder,
+		sortByField
 		} = props;
 
 	const items = [
@@ -229,19 +230,21 @@ export const getHeaderMenuItems = (props) => {
 		});
 	}
 
-	// extraItems.push({
-	// 	label: 'Sort by',
-	// 	subItems: [
-	// 		{
-	// 			label: 'Created at',
-	// 			onClick: () => {}
-	// 		},
-	// 		{
-	// 			label: 'Start date',
-	// 			onClick: () => {}
-	// 		},
-	// 	]
-	// });
+	extraItems.push({
+		label: 'Sort by',
+		subItems: [
+			{
+				label: 'Created at',
+				onClick: () => setSortBy('created'),
+				enabled: sortByField === 'created'
+			},
+			{
+				label: 'Start date',
+				onClick: () => setSortBy('sequence_start'),
+				enabled: sortByField === 'sequence_start'
+			},
+		]
+	});
 
 	return [...items, ...extraItems];
 };

@@ -136,6 +136,10 @@ export const selectSortOrder = createSelector(
 	selectComponentState, (state) => state.sortOrder
 );
 
+export const selectSortByField = createSelector(
+	selectComponentState, (state) => state.sortBy
+);
+
 export const selectFailedToLoad = createSelector(
 	selectComponentState, (state) => state.failedToLoad
 );

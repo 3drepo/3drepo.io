@@ -40,6 +40,7 @@ interface IProps {
 	activeIssueId?: string;
 	showDetails?: boolean;
 	showPins: boolean;
+	sortByField: string;
 	issueDetails?: any;
 	isImportingBCF?: boolean;
 	searchEnabled: boolean;
@@ -72,6 +73,7 @@ interface IProps {
 	exportBCF: (teamspace, modelId) => void;
 	toggleSortOrder: () => void;
 	setFilters: (filters) => void;
+	setSortBy: (field) => void;
 }
 
 export class Issues extends React.PureComponent<IProps, any> {
@@ -204,6 +206,7 @@ export class Issues extends React.PureComponent<IProps, any> {
 				onCloseDetails={this.closeDetails}
 				renderDetailsView={this.renderDetailsView}
 				type={VIEWER_PANELS.ISSUES}
+				sortByField={this.props.sortByField}
 			/>
 		);
 	}
