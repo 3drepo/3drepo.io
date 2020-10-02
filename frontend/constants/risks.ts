@@ -247,8 +247,8 @@ export const RISKS_ACTIONS_MENU = {
 		label: 'Download JSON',
 		Icon: Download
 	},
-	SORT_BY_DATE: {
-		label: 'Sort by date',
+	SORT_ORDER: {
+		label: 'Sort order',
 		ASC: SortAmountUp,
 		DESC: SortAmountDown,
 	}

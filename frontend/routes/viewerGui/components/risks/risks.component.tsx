@@ -17,7 +17,7 @@
 
 import React from 'react';
 
-import { isEmpty } from 'lodash';
+import { isEmpty, StringNullableChain } from 'lodash';
 
 import { RISK_FILTERS, RISK_LEVELS } from '../../../../constants/risks';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
@@ -48,6 +48,7 @@ interface IProps {
 	};
 	activeRiskDetails: any;
 	sortOrder: string;
+	sortByField: string;
 	fetchRisks: (teamspace, model, revision) => void;
 	setState: (componentState: any) => void;
 	setNewRisk: () => void;
@@ -66,6 +67,7 @@ interface IProps {
 	teamspaceSettings: any;
 	fetchMitigationCriteria: (teamspace: string) => void;
 	criteria: any;
+	setSortBy: (field) => void;
 }
 export class Risks extends React.PureComponent<IProps, any> {
 	get filters() {
@@ -175,6 +177,7 @@ export class Risks extends React.PureComponent<IProps, any> {
 				onCloseDetails={this.closeDetails}
 				renderDetailsView={this.renderDetailsView}
 				type={VIEWER_PANELS.RISKS}
+				sortByField={this.props.sortByField}
 			/>
 		);
 	}

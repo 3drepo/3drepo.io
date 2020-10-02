@@ -241,7 +241,8 @@ export const filtersValuesMap = (jobs, settings) => {
 };
 
 export const getHeaderMenuItems = (props) => {
-	const {teamspace, model, printItems, downloadItems, toggleSortOrder, toggleShowPins ,  showPins, sortOrder} = props;
+	const {teamspace, model, printItems, downloadItems, toggleSortOrder,
+		toggleShowPins ,  showPins, sortOrder, setSortBy, sortByField} = props;
 
 	const items = [{
 		...RISKS_ACTIONS_MENU.PRINT,
@@ -250,11 +251,11 @@ export const getHeaderMenuItems = (props) => {
 		...RISKS_ACTIONS_MENU.DOWNLOAD,
 		onClick: () => downloadItems(teamspace, model)
 	}, {
-		...RISKS_ACTIONS_MENU.SORT_BY_DATE,
+		...RISKS_ACTIONS_MENU.SORT_ORDER,
 		onClick: () => {
 			toggleSortOrder();
 		},
-		Icon: sortOrder === 'asc' ? RISKS_ACTIONS_MENU.SORT_BY_DATE.ASC : RISKS_ACTIONS_MENU.SORT_BY_DATE.DESC
+		Icon: sortOrder === 'asc' ? RISKS_ACTIONS_MENU.SORT_ORDER.ASC : RISKS_ACTIONS_MENU.SORT_ORDER.DESC
 	}];
 
 	const togglePinItem = {
@@ -264,6 +265,22 @@ export const getHeaderMenuItems = (props) => {
 	};
 
 	const menuItems = !!toggleShowPins ? [...items, {...togglePinItem}] : [...items];
+
+	menuItems.push({
+		label: 'Sort by',
+		subItems: [
+			{
+				label: 'Created at',
+				onClick: () => setSortBy('created'),
+				enabled: sortByField === 'created'
+			},
+			{
+				label: 'Start date',
+				onClick: () => setSortBy('sequence_start'),
+				enabled: sortByField === 'sequence_start'
+			},
+			]
+	});
 
 	return menuItems;
 };
