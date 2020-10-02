@@ -168,24 +168,27 @@ export const filtersValuesMap = (jobs, topicTypes) => {
 	};
 };
 
-export const getHeaderMenuItems = (
-	teamspace,
-	model,
-	revision,
-	printIssues,
-	downloadIssues,
-	importBCF,
-	exportBCF,
-	toggleSortOrder,
-	toggleShowPins?,
-	showPins?,
-	toggleClosedIssues?,
-	showClosedIssues?,
-) => {
+export const getHeaderMenuItems = (props) => {
+	const {teamspace,
+		model,
+		revision,
+		printItems,
+		downloadItems,
+		importBCF,
+		exportBCF,
+		toggleSortOrder,
+		toggleSortBy,
+		toggleShowPins,
+		showPins,
+		toggleClosedIssues,
+		showClosedIssues,
+		sortOrder
+		} = props;
+
 	const items = [
 		{
 			...ISSUES_ACTIONS_MENU.PRINT,
-			onClick: () => printIssues(teamspace, model)
+			onClick: () => printItems(teamspace, model)
 		}, {
 			...ISSUES_ACTIONS_MENU.IMPORT_BCF,
 			onClick: () => {
@@ -198,12 +201,13 @@ export const getHeaderMenuItems = (
 			onClick: () => exportBCF(teamspace, model)
 		}, {
 			...ISSUES_ACTIONS_MENU.DOWNLOAD,
-			onClick: () => downloadIssues(teamspace, model)
+			onClick: () => downloadItems(teamspace, model)
 		}, {
-			...ISSUES_ACTIONS_MENU.SORT_BY_DATE,
+			...ISSUES_ACTIONS_MENU.SORT_ORDER,
 			onClick: () => {
 				toggleSortOrder();
-			}
+			},
+			Icon: sortOrder === 'asc' ? ISSUES_ACTIONS_MENU.SORT_ORDER.ASC : ISSUES_ACTIONS_MENU.SORT_ORDER.DESC
 		}
 	];
 
@@ -224,6 +228,20 @@ export const getHeaderMenuItems = (
 			onClick: toggleClosedIssues
 		});
 	}
+
+	// extraItems.push({
+	// 	label: 'Sort by',
+	// 	subItems: [
+	// 		{
+	// 			label: 'Created at',
+	// 			onClick: () => {}
+	// 		},
+	// 		{
+	// 			label: 'Start date',
+	// 			onClick: () => {}
+	// 		},
+	// 	]
+	// });
 
 	return [...items, ...extraItems];
 };

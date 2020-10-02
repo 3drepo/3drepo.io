@@ -240,20 +240,21 @@ export const filtersValuesMap = (jobs, settings) => {
 	};
 };
 
-export const getHeaderMenuItems = (
-		teamspace, model, printRisks, downloadRisks, toggleSortOrder, toggleShowPins?, showPins?
-	) => {
+export const getHeaderMenuItems = (props) => {
+	const {teamspace, model, printItems, downloadItems, toggleSortOrder, toggleShowPins ,  showPins, sortOrder} = props;
+
 	const items = [{
 		...RISKS_ACTIONS_MENU.PRINT,
-		onClick: () => printRisks(teamspace, model)
+		onClick: () => printItems(teamspace, model)
 	}, {
 		...RISKS_ACTIONS_MENU.DOWNLOAD,
-		onClick: () => downloadRisks(teamspace, model)
+		onClick: () => downloadItems(teamspace, model)
 	}, {
 		...RISKS_ACTIONS_MENU.SORT_BY_DATE,
 		onClick: () => {
 			toggleSortOrder();
-		}
+		},
+		Icon: sortOrder === 'asc' ? RISKS_ACTIONS_MENU.SORT_BY_DATE.ASC : RISKS_ACTIONS_MENU.SORT_BY_DATE.DESC
 	}];
 
 	const togglePinItem = {
