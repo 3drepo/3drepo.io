@@ -43,7 +43,7 @@ import { DialogActions } from '../dialog';
 import { selectJobsList, selectMyJob } from '../jobs';
 import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
-import { selectSelectedSequence, selectSelectedStartingDate } from '../sequences';
+import { selectDefaultSequence, selectSelectedSequence, selectSelectedStartingDate } from '../sequences';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { selectTopicTypes } from '../teamspace';
@@ -482,17 +482,11 @@ export function* setNewIssue() {
 	const topicType =  topicTypes.length > 0 ? (topicTypes.find((t) => t === DEFAULT_PROPERTIES.TOPIC_TYPE) ?
 		DEFAULT_PROPERTIES.TOPIC_TYPE : topicTypes[0]) : undefined;
 
-	const selectedSequence = yield select(selectSelectedSequence);
-
 	// tslint:disable-next-line: variable-name
 	let sequence_start = yield select(selectSelectedStartingDate);
 
 	if (sequence_start) {
 		sequence_start = sequence_start.valueOf();
-	}
-
-	if (!selectedSequence) {
-		sequence_start = null;
 	}
 
 	try {
@@ -503,7 +497,8 @@ export function* setNewIssue() {
 			priority: PRIORITIES.NONE,
 			topic_type: topicType,
 			viewpoint: {},
-			owner: currentUser.username
+			owner: currentUser.username,
+			sequence_start
 		}, jobs);
 
 		yield put(IssuesActions.setComponentState({
