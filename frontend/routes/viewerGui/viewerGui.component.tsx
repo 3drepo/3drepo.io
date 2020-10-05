@@ -182,6 +182,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 					onClick={this.handleTogglePanel}
 					label={name}
 					type={type}
+					id={type + '-panel-button'}
 					active={this.props.leftPanels.includes(type)}
 				/>
 			))}
