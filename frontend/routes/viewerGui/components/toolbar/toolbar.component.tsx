@@ -308,7 +308,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		return (
-			<Container visible={!this.props.isFocusMode}>
+			<Container visible={!this.props.isFocusMode} id="bottom-toolbar">
 				{this.renderButtons()}
 			</Container>
 		);
