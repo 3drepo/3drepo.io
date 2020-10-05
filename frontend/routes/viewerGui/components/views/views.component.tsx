@@ -293,6 +293,7 @@ export class Views extends React.PureComponent<IProps, any> {
 				disabled={!!this.props.newViewpoint || !this.props.isCommenter}
 				color="secondary"
 				variant="fab"
+				id={this.props.id + '-add-new-button'}
 			>
 				<AddIcon />
 			</ViewerPanelButton>

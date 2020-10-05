@@ -151,6 +151,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 					color="secondary"
 					variant="fab"
 					disabled={!this.hasPermission(CREATE_ISSUE) || !this.props.isModelLoaded}
+					id={this.props.id + '-add-new-button'}
 				>
 					<AddIcon />
 				</ViewerPanelButton>

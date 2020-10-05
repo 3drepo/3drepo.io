@@ -198,6 +198,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 					color="secondary"
 					variant="fab"
 					disabled={!this.canAddOrUpdate}
+					id={this.props.id + '-add-new-button'}
 				>
 					<AddIcon />
 				</ViewerPanelButton>
@@ -436,7 +437,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 				Icon={this.renderTitleIcon()}
 				renderActions={this.renderActions}
 				pending={this.props.isPending}
-				id={this.props.id}
+				id={this.props.id + (this.props.showDetails ? '-details' : '' )}
 			>
 				{this.renderFilterPanel(this.props.searchEnabled && !this.props.showDetails)}
 				{this.renderListView(!this.props.showDetails)}
