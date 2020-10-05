@@ -32,6 +32,7 @@ import {
 } from '../constants/risks';
 import { getAPIUrl } from '../services/api';
 import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
+import { IHeaderMenuItem } from './reportedItems';
 
 export const prepareRisk = (risk, jobs = []) => {
 	const preparedRisk = {...risk};
@@ -264,7 +265,7 @@ export const getHeaderMenuItems = (props) => {
 		onClick: () => toggleShowPins(!showPins)
 	};
 
-	const menuItems = !!toggleShowPins ? [...items, {...togglePinItem}] : [...items];
+	const menuItems: IHeaderMenuItem[] = !!toggleShowPins ? [...items, {...togglePinItem}] : [...items];
 
 	menuItems.push({
 		label: 'Sort by',

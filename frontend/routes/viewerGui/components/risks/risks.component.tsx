@@ -17,7 +17,7 @@
 
 import React from 'react';
 
-import { isEmpty, StringNullableChain } from 'lodash';
+import { isEmpty } from 'lodash';
 
 import { RISK_FILTERS, RISK_LEVELS } from '../../../../constants/risks';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
