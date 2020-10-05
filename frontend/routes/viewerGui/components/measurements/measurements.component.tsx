@@ -74,6 +74,7 @@ interface IProps {
 	setMeasurementCheckAll: (type) => void;
 	resetMeasurementTool: () => void;
 	modelUnit: string;
+	id?: string;
 }
 
 interface IState {
@@ -236,6 +237,7 @@ export class Measurements extends React.PureComponent<IProps, IState> {
 				Icon={this.getTitleIcon()}
 				renderActions={this.renderActions}
 				pending={!isViewerReady}
+				id={this.props.id}
 			>
 				<Container ref={this.containerRef}>
 					{this.renderEmptyState(isEmpty(areaMeasurements) && isEmpty(lengthMeasurements) && isEmpty(pointMeasurements))}

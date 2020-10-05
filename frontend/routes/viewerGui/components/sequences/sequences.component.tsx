@@ -50,6 +50,7 @@ interface IProps {
 	currentTasks: any[];
 	loadingFrame: boolean;
 	selectedSequence: any;
+	id?: string;
 }
 
 const da =  new Date();
@@ -112,6 +113,7 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 					hideSearch
 					hideMenu
 				/>}
+				id={this.props.id}
 			>
 
 				{!sequences && <SequencesLoader />}

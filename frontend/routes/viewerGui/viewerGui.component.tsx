@@ -205,7 +205,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		<LeftPanels>
 			{panels.map((panel) => {
 				const PanelComponent = this.panelsMap[panel];
-				return PanelComponent && <PanelComponent key={panel} {...this.urlParams} />;
+				return PanelComponent && <PanelComponent key={panel} id={panel + '-card'}{...this.urlParams} />;
 			})}
 		</LeftPanels>
 	)

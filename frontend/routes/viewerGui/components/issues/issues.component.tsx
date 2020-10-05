@@ -71,6 +71,7 @@ interface IProps {
 	exportBCF: (teamspace, modelId) => void;
 	toggleSortOrder: () => void;
 	setFilters: (filters) => void;
+	id?: string;
 }
 
 export class Issues extends React.PureComponent<IProps, any> {
@@ -231,6 +232,7 @@ export class Issues extends React.PureComponent<IProps, any> {
 				onCloseDetails={this.closeDetails}
 				renderDetailsView={this.renderDetailsView}
 				type={VIEWER_PANELS.ISSUES}
+				id={this.props.id}
 			/>
 		);
 	}

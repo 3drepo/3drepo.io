@@ -88,6 +88,7 @@ interface IProps {
 	resetActiveGroup: () => void;
 	subscribeOnChanges: (teamspace, modelId) => void;
 	unsubscribeFromChanges: (teamspace, modelId) => void;
+	id?: string;
 }
 
 interface IState {
@@ -435,6 +436,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 				Icon={this.renderTitleIcon()}
 				renderActions={this.renderActions}
 				pending={this.props.isPending}
+				id={this.props.id}
 			>
 				{this.renderFilterPanel(this.props.searchEnabled && !this.props.showDetails)}
 				{this.renderListView(!this.props.showDetails)}
