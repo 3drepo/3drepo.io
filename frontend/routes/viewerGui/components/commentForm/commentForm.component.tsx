@@ -76,6 +76,7 @@ interface IProps {
 	teamspaceUsers: any[];
 	fetchingDetailsIsPending?: boolean;
 	postCommentIsPending?: boolean;
+	parentId?: string;
 }
 
 interface IState {
@@ -417,6 +418,7 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 										disabled={!hideComment && (!canComment || !form.isValid || form.isValidating) || form.isSubmitting}
 										aria-label="Add new comment"
 										pending={isPending}
+										id={this.props.parentId + (this.props.hideComment ? '-save-button' : '-add-new-comment')}
 									>
 										<SaveIcon fontSize="small" />
 									</ViewerPanelButton>
