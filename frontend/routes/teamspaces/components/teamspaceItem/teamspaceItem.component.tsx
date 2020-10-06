@@ -26,6 +26,7 @@ import { ROW_ACTIONS } from '../../teamspaces.contants';
 import { MyTeamspaceItem } from '../myTeamspaceItem/myTeamspaceItem.component';
 import { TooltipButton } from '../tooltipButton/tooltipButton.component';
 
+import { encodeElementId } from '../../../../helpers/html';
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../../helpers/rendering';
 import { Avatar, Container } from './teamspaceItem.styles';
@@ -106,6 +107,7 @@ export const TeamspaceItem = ({ name, projects, onToggle, active, isMyTeamspace,
 			renderRoot={isMyTeamspace ? MyTeamspaceItem : null}
 			IconProps={{ IconClosed: renderAvatar }}
 			showStarredOnly={props.showStarredOnly}
+			id={'teamspace-' + encodeElementId(name)}
 		>
 		{() => (
 			<>
