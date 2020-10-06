@@ -32,7 +32,7 @@ import {
 	FieldWrapper,
 	MutableActionsLine,
 	StyledIconButton,
-	StyledLinkableField,
+	StyledMarkdownField,
 	StyledTextField,
 } from './textField.styles';
 
@@ -44,6 +44,7 @@ interface IProps extends TextFieldProps {
 	onBeforeConfirmChange?: (event) => void;
 	expandable?: boolean;
 	disableShowDefaultUnderline?: boolean;
+	enableMarkdown?: boolean;
 }
 
 interface IState {
@@ -68,7 +69,7 @@ export class TextField extends React.PureComponent<IProps, IState> {
 	};
 
 	private inputLocalRef = React.createRef();
-	private linkableFieldRef = React.createRef();
+	private markdownFieldRef = React.createRef();
 
 	get isExpandable() {
 		return this.props.expandable && this.state.isLongContent && !this.state.edit;
@@ -90,8 +91,8 @@ export class TextField extends React.PureComponent<IProps, IState> {
 		return this.textFieldRef.current;
 	}
 
-	get linkableFieldElement() {
-		return this.linkableFieldRef && this.linkableFieldRef.current as any;
+	get markdownFieldElement() {
+		return this.markdownFieldRef && this.markdownFieldRef.current as any;
 	}
 
 	get fieldValue() {
@@ -103,7 +104,7 @@ export class TextField extends React.PureComponent<IProps, IState> {
 			return null;
 		}
 
-		const { textRef } = this.linkableFieldElement;
+		const { textRef } = this.markdownFieldElement;
 		if (textRef) {
 			const height = textRef.current.offsetHeight;
 
@@ -134,7 +135,7 @@ export class TextField extends React.PureComponent<IProps, IState> {
 			this.setState({ initialValue: value, currentValue: value, edit: false } as IState);
 		}
 
-		if (this.linkableFieldElement && !this.state.isLongContent) {
+		if (this.markdownFieldElement && !this.state.isLongContent) {
 			setTimeout(() => {
 				this.checkIfGotLongContent();
 			});
@@ -268,9 +269,14 @@ export class TextField extends React.PureComponent<IProps, IState> {
 							{!this.isEditMode &&
 							<FieldWrapper line={Number(!disableShowDefaultUnderline)} onClick={this.handlePlaceholderClick}>
 								<FieldLabel shrink>{this.props.label}</FieldLabel>
-								<StyledLinkableField ref={this.linkableFieldRef} {...this.additionalProps()}>
+								{this.props.enableMarkdown &&
+								<StyledMarkdownField ref={this.markdownFieldRef} {...this.additionalProps()}>
 									{this.fieldValue}
-								</StyledLinkableField>
+								</StyledMarkdownField>
+								}
+								{!this.props.enableMarkdown &&
+								<span>{this.fieldValue}</span>
+								}
 							</FieldWrapper>
 							}
 							{shouldRenderActions && this.renderActionsLine()}
