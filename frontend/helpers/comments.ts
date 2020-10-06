@@ -62,7 +62,7 @@ export const prepareComments = (comments = []) => {
 		return comments;
 	}
 
-	const preparedComments = comments.map((comment) => this.prepareComment(comment));
+	const preparedComments = comments.map((comment) => prepareComment(comment));
 	return sortByDate(preparedComments, {order: 'desc'});
 };
 
