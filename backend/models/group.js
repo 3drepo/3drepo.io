@@ -26,7 +26,6 @@ const Schema = mongoose.Schema;
 const responseCodes = require("../response_codes.js");
 const Meta = require("./meta");
 const History = require("./history");
-const Ref = require("./ref");
 const db = require("../handler/db");
 const ChatEvent = require("./chatEvent");
 
