@@ -185,7 +185,7 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 					disabled={!this.props.canComment}
 					inputRef={ref}
 				/>
-				<Counter error={counterValue >= 220}>{counterValue}/220</Counter>
+				<Counter error={counterValue > 220}>{counterValue}/220</Counter>
 			</>
 		);
 	});
