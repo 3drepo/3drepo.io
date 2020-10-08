@@ -59,13 +59,6 @@ function Utils() {
 		}
 	};
 
-	this.deserialiseFilters = (ids, numbers) => {
-		return {
-			ids: ids ? ids.split(",") : undefined,
-			numbers: numbers ? numbers.split(",") : undefined
-		};
-	};
-
 	this.convertQueryValue = (value, type) => {
 		switch(type) {
 			case "number":

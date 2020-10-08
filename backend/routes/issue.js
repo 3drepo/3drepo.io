@@ -917,7 +917,7 @@ function getIssuesBCF(req, res, next) {
 	const model = req.params.model;
 	const dbCol =  {account: account, model: model};
 
-	const filters = utils.deserialiseFilters(req.query.ids, req.query.numbers);
+	const filters = utils.deserialiseQueryFilters(req.query, C.ISSUE_FILTERS);
 
 	let getBCFZipRS;
 
@@ -961,7 +961,7 @@ function findIssue(req, res, next) {
 function renderIssuesHTML(req, res, next) {
 	const place = utils.APIInfo(req);
 	const {account, model, rid} = req.params;
-	const filters = utils.deserialiseFilters(req.query.ids, req.query.numbers);
+	const filters = utils.deserialiseQueryFilters(req.query, C.ISSUE_FILTERS);
 
 	Issue.getIssuesReport(account, model, rid, filters, res).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

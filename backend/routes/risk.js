@@ -805,7 +805,7 @@ function findRiskById(req, res, next) {
 function renderRisksHTML(req, res, next) {
 	const place = utils.APIInfo(req);
 	const {account, model, rid} = req.params;
-	const filters = utils.deserialiseFilters(req.query.ids, req.query.numbers);
+	const filters = utils.deserialiseQueryFilters(req.query, C.RISK_FILTERS);
 
 	Risk.getRisksReport(account, model, rid, filters, res).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
