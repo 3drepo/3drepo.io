@@ -66,6 +66,30 @@ function Utils() {
 		};
 	};
 
+	this.convertQueryValue = (value, type) => {
+		switch(type) {
+			case "number":
+				value = parseFloat(value);
+				break;
+			case "UUID":
+				value = this.stringToUUID(value);
+				break;
+		}
+
+		return value;
+	};
+
+	this.deserialiseQueryFilters = (queryparams, fields) => {
+		const keys = _.keys(fields);
+		return keys.reduce((acum, key) => {
+			if (queryparams[key]) {
+				acum[fields[key].fieldName] = queryparams[key].split(",").map((val) => this.convertQueryValue(val,fields[key].type));
+			}
+
+			return acum;
+		} , {});
+	};
+
 	/** *****************************************************************************
 	* Convert a string to a UUID
 	* @param {string} uuid - String representation of a UUID

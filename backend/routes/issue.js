@@ -892,7 +892,7 @@ function listIssues(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model, rid } = req.params;
 	const branch = rid ? null : "master";
-	const filters = utils.deserialiseFilters(req.query.ids, req.query.numbers);
+	const filters = utils.deserialiseQueryFilters(req.query, C.ISSUE_FILTERS);
 
 	const convertCoords = !!req.query.convertCoords;
 	let updatedSince = req.query.updatedSince;

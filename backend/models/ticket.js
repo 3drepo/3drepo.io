@@ -451,12 +451,13 @@ class Ticket extends View {
 	async processFilter(account, model, branch, revId, filters) {
 		let filter = {};
 		if (filters) {
-			if (filters.ids) {
-				filter = await this.getIdsFilter(account, model, branch, revId, filters.ids);
+			if (filters.id) {
+				filter = await this.getIdsFilter(account, model, branch, revId, filters.id);
+				delete filters.id;
 			}
-			if (filters.numbers) {
-				filter.number = { "$in": filters.numbers.map((n) => parseInt(n)) };
-			}
+
+			filters = _.mapValues(filters, value =>  ({ "$in": value}));
+			filter = {...filter, ...filters};
 		}
 
 		return filter;

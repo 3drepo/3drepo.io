@@ -772,7 +772,7 @@ function listRisks(req, res, next) {
 	const { account, model, rid } = req.params;
 	const branch = rid ? null : "master";
 
-	const filters = utils.deserialiseFilters(req.query.ids, req.query.numbers);
+	const filters = utils.deserialiseQueryFilters(req.query, C.RISK_FILTERS);
 	const convertCoords = !!req.query.convertCoords;
 	let updatedSince = req.query.updatedSince;
 
