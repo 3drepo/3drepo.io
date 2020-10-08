@@ -20,7 +20,6 @@
 	const express = require("express");
 	const router = express.Router({ mergeParams: true });
 	const responseCodes = require("../response_codes");
-	const ModelHelpers = require("../models/helper/model");
 	const Meta = require("../models/meta");
 	const middlewares = require("../middlewares/middlewares");
 	const utils = require("../utils");
@@ -239,7 +238,7 @@
 	};
 
 	function getMetadata(req, res, next) {
-		ModelHelpers.getMetadata(req.params.account, req.params.model, req.params.id)
+		Meta.getMetadata(req.params.account, req.params.model, req.params.id)
 			.then(meta => {
 				responseCodes.respond(
 					utils.APIInfo(req),
@@ -264,7 +263,7 @@
 			branch = C.MASTER_BRANCH_NAME;
 		}
 
-		ModelHelpers.getAllMetadata(req.params.account, req.params.model, branch, req.params.rev)
+		Meta.getAllMetadata(req.params.account, req.params.model, branch, req.params.rev)
 			.then(obj => {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined, req.param.rev ? config.cachePolicy : undefined);
 			})
@@ -280,7 +279,7 @@
 			branch = C.MASTER_BRANCH_NAME;
 		}
 
-		ModelHelpers.getAllIdsWith4DSequenceTag(req.params.account, req.params.model, branch, req.params.rev)
+		Meta.getAllIdsWith4DSequenceTag(req.params.account, req.params.model, branch, req.params.rev)
 			.then(obj => {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined, req.param.rev ? config.cachePolicy : undefined);
 			})
@@ -296,7 +295,7 @@
 			branch = C.MASTER_BRANCH_NAME;
 		}
 
-		ModelHelpers.getAllIdsWithMetadataField(req.params.account, req.params.model, branch, req.params.rev, req.params.metaKey)
+		Meta.getAllIdsWithMetadataField(req.params.account, req.params.model, branch, req.params.rev, req.params.metaKey)
 			.then(obj => {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined, req.param.rev ? config.cachePolicy : undefined);
 			})
