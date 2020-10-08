@@ -170,7 +170,6 @@ export const MeasureItem = ({
 							name="newName"
 							mutable
 							onChange={handleSave}
-							onKeyDown={this._handleKeyDown}
 							inputProps={{ maxLength: 15 }}
 							disableShowDefaultUnderline
 						/>

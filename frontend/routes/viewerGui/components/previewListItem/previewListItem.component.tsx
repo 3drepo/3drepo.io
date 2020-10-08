@@ -16,6 +16,7 @@
  */
 
 import React from 'react';
+import removeMd from 'remove-markdown';
 
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { PreviewItemInfo } from '../previewItemInfo/previewItemInfo.component';
@@ -127,7 +128,6 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 			roleColor,
 			// tslint:disable-next-line
 			number,
-			desc,
 			owner,
 			hideThumbnail,
 			StatusIconComponent,
@@ -142,6 +142,7 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 			showModelButton
 		} = this.props;
 
+		const desc = removeMd(this.props.desc);
 		const shouldRenderActions = renderActions && active;
 		const createdDate = !shouldRenderActions ? this.props.created : '';
 		const extraInfo = !shouldRenderActions ? this.props.extraInfo : '';

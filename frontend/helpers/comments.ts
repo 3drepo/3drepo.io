@@ -16,6 +16,7 @@
  */
 
 import { uniqBy, values } from 'lodash';
+import linkify from 'markdown-linkify';
 import { getAPIUrl } from '../services/api';
 import { getRiskConsequenceName, getRiskLikelihoodName } from './risks';
 import { sortByDate } from './sorting';
@@ -61,7 +62,7 @@ export const prepareComments = (comments = []) => {
 		return comments;
 	}
 
-	const preparedComments = comments.map((comment) => this.prepareComment(comment));
+	const preparedComments = comments.map((comment) => prepareComment(comment));
 	return sortByDate(preparedComments, {order: 'desc'});
 };
 
@@ -331,6 +332,8 @@ export const transformCustomsLinksToMarkdown = ( comment: IComment, tickets, typ
 				.replace(referenceRegExp, `[${resourceReference}](${resourceReference.replace('#res.', '')} "${type}")`);
 		});
 	}
+
+	text = linkify(text);
 
 	return text;
 };
