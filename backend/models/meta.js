@@ -29,6 +29,7 @@ const responseCodes = require("../response_codes.js");
 const { batchPromises } = require("./helper/promises");
 const {isValidRule, positiveRulesToQueries, negativeRulesToQueries} = require("./helper/rule");
 const {union, intersection, difference} = require("./helper/set");
+const C = require("../constants");
 const utils = require("../utils");
 const systemLogger = require("../logger").systemLogger;
 
@@ -258,7 +259,7 @@ Meta.getAllIdsWithMetadataField = function(account, model, branch, rev, fieldNam
 			}
 
 			getMeta.push(
-				getAllIdsWithMetadataField(ref.owner, ref.project, refBranch, refRev, fieldName, username)
+				this.getAllIdsWithMetadataField(ref.owner, ref.project, refBranch, refRev, fieldName, username)
 					.then(obj => {
 						return Promise.resolve({
 							data: obj.data,
@@ -308,7 +309,7 @@ Meta.getAllIdsWithMetadataField = function(account, model, branch, rev, fieldNam
 };
 
 Meta.getAllMetadata = function(account, model, branch, rev) {
-	return getAllIdsWithMetadataField(account, model, branch, rev, "");
+	return this.getAllIdsWithMetadataField(account, model, branch, rev, "");
 };
 
 Meta.getAllIdsWith4DSequenceTag = function(account, model, branch, rev) {
@@ -320,7 +321,7 @@ Meta.getAllIdsWith4DSequenceTag = function(account, model, branch, rev) {
 		if(!settings.fourDSequenceTag) {
 			return Promise.reject(responseCodes.SEQ_TAG_NOT_FOUND);
 		}
-		return getAllIdsWithMetadataField(account, model,  branch, rev, settings.fourDSequenceTag);
+		return this.getAllIdsWithMetadataField(account, model,  branch, rev, settings.fourDSequenceTag);
 
 	});
 };
