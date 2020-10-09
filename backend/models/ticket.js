@@ -489,24 +489,29 @@ class Ticket extends View {
 		return filter;
 	}
 
-	async findByModelName(account, model, branch, revId, query, projection, filters, noClean = false, convertCoords = false) {
+	async findByModelName(account, model, branch, revId, query, projection, filters, noClean = false, convertCoords = false, filterTicket = null) {
 		const filter = await this.processFilter(account, model, branch, revId, filters);
 		const fullQuery = {...filter, ...query};
 
 		const coll = await this.getCollection(account, model);
 		const tickets = await coll.find(fullQuery, projection).toArray();
-		tickets.forEach((foundTicket, index) => {
-			if (!noClean) {
-				tickets[index] = this.clean(account, model, foundTicket);
+		return tickets.reduce((filteredTickets,  foundTicket) => {
+			if (filterTicket &&  !filterTicket(foundTicket, filters)) {
+				return filteredTickets;
 			}
 
 			if (convertCoords) {
 				this.toDirectXCoords(foundTicket);
 			}
 
-		});
+			if (!noClean) {
+				filteredTickets.push(this.clean(account, model, foundTicket));
+			} else {
+				filteredTickets.push(foundTicket);
+			}
 
-		return tickets;
+			return filteredTickets;
+		}, []);
 	}
 
 	toDirectXCoords(entry) {

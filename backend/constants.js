@@ -554,6 +554,14 @@
 		"likehoods": {
 			"fieldName": "likehood",
 			"type": "number"
+		},
+		"levelOfRisks": {
+			"fieldName": "levelOfRisks",
+			"type": "number"
+		},
+		"residualLevelOfRisks": {
+			"fieldName": "residualLevelOfRisks",
+			"type": "number"
 		}
 	});
 
