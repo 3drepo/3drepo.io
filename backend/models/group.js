@@ -26,6 +26,7 @@ const Schema = mongoose.Schema;
 const responseCodes = require("../response_codes.js");
 const Meta = require("./meta");
 const History = require("./history");
+const { checkRulesValidity } = require("./helper/rule");
 const db = require("../handler/db");
 const ChatEvent = require("./chatEvent");
 
@@ -474,7 +475,7 @@ groupSchema.methods.updateAttrs = function (dbCol, data, user) {
 					} else {
 						if (key === "rules"
 							&& data.rules
-							&& !Meta.checkRulesValidity(data.rules)) {
+							&& !checkRulesValidity(data.rules)) {
 							typeCorrect = false;
 							toUnset.objects = 1;
 							this.objects = undefined;
@@ -554,7 +555,7 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data, creator = ""
 					} else {
 						if (key === "rules"
 							&& data.rules
-							&& !Meta.checkRulesValidity(data.rules)) {
+							&& !checkRulesValidity(data.rules)) {
 							typeCorrect = false;
 						}
 						newGroup[key] = cleanEmbeddedObject(key, data[key]);

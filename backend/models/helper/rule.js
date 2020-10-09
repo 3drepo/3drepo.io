@@ -59,6 +59,27 @@ const isValidRule = (rule) => {
 		rule.values.length % ruleOperators[rule.operator] === 0);
 };
 
+const checkRulesValidity = (rules) => {
+	const fieldsWithRules = new Set();
+	let valid = rules.length > 0;
+	let it = 0;
+	while (valid && it < rules.length) {
+		const rule = rules[it];
+		const hasDuplicate = fieldsWithRules.has(rule.field);
+		valid = rule &&
+			isValidRule(rule) &&
+			!hasDuplicate;
+
+		if (valid) {
+			fieldsWithRules.add(rule.field);
+		} else if (hasDuplicate) {
+			throw responseCodes.MULTIPLE_RULES_PER_FIELD_NOT_ALLOWED;
+		}
+		it++;
+	}
+	return valid;
+};
+
 const buildQueryFromRule = (rule) => {
 	const clauses = [];
 	let expression = {};
@@ -164,6 +185,7 @@ const negativeRulesToQueries = (rules) => {
 
 module.exports = {
 	isValidRule,
+	checkRulesValidity,
 	buildQueryFromRule,
 	positiveRulesToQueries,
 	negativeRulesToQueries

@@ -322,7 +322,6 @@ Meta.getAllIdsWith4DSequenceTag = function(account, model, branch, rev) {
 			return Promise.reject(responseCodes.SEQ_TAG_NOT_FOUND);
 		}
 		return this.getAllIdsWithMetadataField(account, model,  branch, rev, settings.fourDSequenceTag);
-
 	});
 };
 
@@ -449,28 +448,6 @@ Meta.findObjectIdsByRules = async function(account, model, rules, branch, revId,
 			return objectIds.filter((entry) => !!entry);
 		});
 	});
-};
-
-Meta.checkRulesValidity = function(rules) {
-	const fieldsWithRules = new Set();
-	let valid = rules.length > 0;
-	let it = 0;
-	while (valid && it < rules.length) {
-
-		const rule = rules[it];
-		const hasDuplicate = fieldsWithRules.has(rule.field);
-		valid = rule &&
-			isValidRule(rule) &&
-			!hasDuplicate;
-
-		if (valid) {
-			fieldsWithRules.add(rule.field);
-		} else if (hasDuplicate) {
-			throw responseCodes.MULTIPLE_RULES_PER_FIELD_NOT_ALLOWED;
-		}
-		it++;
-	}
-	return valid;
 };
 
 module.exports = Meta;
