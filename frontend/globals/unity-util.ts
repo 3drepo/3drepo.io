@@ -1692,7 +1692,7 @@ export class UnityUtil {
 
 	/**
 	 * Move mesh/meshes by a given transformation matrix.
-	 * NOTE: this currently works if the mesh is not batched with other meshes during optimisations!
+	 * NOTE: this currently only works as desired in Synchro Scenarios
 	 * @category Model Interactions
 	 * @param teamspace teamspace of the model
 	 * @param modelId modelID the meshes belongs in
@@ -1710,7 +1710,7 @@ export class UnityUtil {
 
 	/**
 	 * Move mesh/meshes by a given transformation matrix.
-	 * NOTE: this currently works if the mesh is not batched with other meshes during optimisations!
+	 * NOTE: this currently only works as desired in Synchro Scenarios
 	 * @category Model Interactions
 	 * @param teamspace teamspace of the model
 	 * @param modelId modelID the meshes belongs in
