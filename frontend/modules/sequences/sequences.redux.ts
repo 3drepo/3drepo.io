@@ -35,7 +35,7 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	setStepScale: ['stepScale'],
 	setIfcSpacesHidden: ['ifcSpacesHidden'],
 	fetchActivitiesDefinitions: ['sequenceId'],
-	fetchActivitiesDefinitionsSuccess: ['sequenceId', 'tasks'],
+	fetchActivitiesDefinitionsSuccess: ['sequenceId', 'activities'],
 	showSequenceDate: ['date'],
 	restoreIfcSpacesHidden: [],
 	reset: []
@@ -52,7 +52,7 @@ export const INITIAL_STATE = {
 	stepInterval: 1,
 	stepScale: STEP_SCALE.DAY,
 	ifcSpacesHidden: true,
-	tasks: {}
+	activities: {}
 };
 
 export const fetchSequencesSuccess = (state = INITIAL_STATE, { sequences }) => {
@@ -60,8 +60,8 @@ export const fetchSequencesSuccess = (state = INITIAL_STATE, { sequences }) => {
 	return { ...state, sequences };
 };
 
-export const fetchActivitiesDefinitionsSuccess = (state = INITIAL_STATE, { sequenceId, tasks }) => {
-	return { ...state, tasks: {...state.tasks, [sequenceId]: tasks } };
+export const fetchActivitiesDefinitionsSuccess = (state = INITIAL_STATE, { sequenceId, activities }) => {
+	return { ...state, activities: {...state.activities, [sequenceId]: activities } };
 };
 
 export const setSelectedSequenceSuccess = (state = INITIAL_STATE, { sequenceId }) => {
