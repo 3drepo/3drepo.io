@@ -35,20 +35,20 @@ export const getSelectedFrame = (frames, endingDate) => {
 export const getDateByStep = (date, stepScale, step) => {
 	const newDate = new Date(date);
 
-	if (stepScale === STEP_SCALE.HOUR) {
-		newDate.setHours(newDate.getHours() + step);
-	}
-
-	if (stepScale === STEP_SCALE.DAY) {
-		newDate.setDate(newDate.getDate() + step);
-	}
-
-	if (stepScale === STEP_SCALE.MONTH) {
-		newDate.setMonth(newDate.getMonth() + step);
-	}
-
-	if (stepScale === STEP_SCALE.YEAR) {
-		newDate.setFullYear(newDate.getFullYear() + step);
+	switch (stepScale)
+	{
+		case STEP_SCALE.HOUR:
+			newDate.setHours(newDate.getHours() + step);
+			break;
+		case STEP_SCALE.DAY:
+			newDate.setDate(newDate.getDate() + step);
+			break;
+		case STEP_SCALE.MONTH:
+			newDate.setMonth(newDate.getMonth() + step);
+			break;
+		case STEP_SCALE.YEAR:
+			newDate.setFullYear(newDate.getFullYear() + step);
+			break;
 	}
 
 	return newDate;
