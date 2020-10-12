@@ -51,7 +51,7 @@ export function* fetchSequences() {
 	}
 }
 
-export function* fetchTasksDefinitions({sequenceId}) {
+export function* fetchActivitiesDefinitions({sequenceId}) {
 	try {
 		const teamspace = yield select(selectCurrentModelTeamspace);
 		const revision = yield select(selectCurrentRevisionId);
@@ -61,12 +61,12 @@ export function* fetchTasksDefinitions({sequenceId}) {
 		if (!tasksDefinitions && sequenceId) {
 			// API CALL TO GET TASKS
 			const {data} = yield API.getSequenceActivities(teamspace, model, revision, sequenceId);
-			yield put(SequencesActions.fetchTasksDefinitionsSuccess(sequenceId, data.tasks));
+			yield put(SequencesActions.fetchActivitiesDefinitionsSuccess(sequenceId, data.tasks));
 		}
 
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'sequences', error));
-		yield put(SequencesActions.fetchTasksDefinitionsSuccess(sequenceId, []));
+		yield put(SequencesActions.fetchActivitiesDefinitionsSuccess(sequenceId, []));
 	}
 }
 
@@ -140,7 +140,7 @@ export function* setSelectedSequence({ sequenceId }) {
 		yield put(SequencesActions.restoreIfcSpacesHidden());
 	}
 	yield put(SequencesActions.setSelectedSequenceSuccess(sequenceId));
-	yield put(SequencesActions.fetchTasksDefinitions(sequenceId));
+	yield put(SequencesActions.fetchActivitiesDefinitions(sequenceId));
 }
 
 export function* showSequenceDate({ date }) {
@@ -168,7 +168,7 @@ export default function* SequencesSaga() {
 	yield takeLatest(SequencesTypes.INITIALIZE_SEQUENCES, initializeSequences);
 	yield takeLatest(SequencesTypes.FETCH_FRAME, fetchFrame);
 	yield takeLatest(SequencesTypes.RESTORE_IFC_SPACES_HIDDEN, restoreIfcSpacesHidden);
-	yield takeLatest(SequencesTypes.FETCH_TASKS_DEFINITIONS, fetchTasksDefinitions);
+	yield takeLatest(SequencesTypes.FETCH_ACTIVITIES_DEFINITIONS, fetchActivitiesDefinitions);
 	yield takeLatest(SequencesTypes.SET_SELECTED_SEQUENCE, setSelectedSequence);
 	yield takeLatest(SequencesTypes.FETCH_SELECTED_FRAME, fetchSelectedFrame);
 	yield takeLatest(SequencesTypes.SHOW_SEQUENCE_DATE, showSequenceDate);

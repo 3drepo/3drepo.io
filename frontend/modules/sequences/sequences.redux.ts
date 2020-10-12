@@ -34,8 +34,8 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	setStepInterval: ['stepInterval'],
 	setStepScale: ['stepScale'],
 	setIfcSpacesHidden: ['ifcSpacesHidden'],
-	fetchTasksDefinitions: ['sequenceId'],
-	fetchTasksDefinitionsSuccess: ['sequenceId', 'tasks'],
+	fetchActivitiesDefinitions: ['sequenceId'],
+	fetchActivitiesDefinitionsSuccess: ['sequenceId', 'tasks'],
 	showSequenceDate: ['date'],
 	restoreIfcSpacesHidden: [],
 	reset: []
@@ -60,7 +60,7 @@ export const fetchSequencesSuccess = (state = INITIAL_STATE, { sequences }) => {
 	return { ...state, sequences };
 };
 
-export const fetchTasksDefinitionsSuccess = (state = INITIAL_STATE, { sequenceId, tasks }) => {
+export const fetchActivitiesDefinitionsSuccess = (state = INITIAL_STATE, { sequenceId, tasks }) => {
 	return { ...state, tasks: {...state.tasks, [sequenceId]: tasks } };
 };
 
@@ -110,7 +110,7 @@ export const setIfcSpacesHidden = (state = INITIAL_STATE, { ifcSpacesHidden }) =
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[SequencesTypes.FETCH_SEQUENCES_SUCCESS]: fetchSequencesSuccess,
-	[SequencesTypes.FETCH_TASKS_DEFINITIONS_SUCCESS]: fetchTasksDefinitionsSuccess,
+	[SequencesTypes.FETCH_ACTIVITIES_DEFINITIONS_SUCCESS]: fetchActivitiesDefinitionsSuccess,
 	[SequencesTypes.SET_SELECTED_DATE]: setSelectedDate,
 	[SequencesTypes.SET_STATE_DEFINITION]: setStateDefinition,
 	[SequencesTypes.SET_SELECTED_SEQUENCE_SUCCESS]: setSelectedSequenceSuccess,
