@@ -32,7 +32,7 @@ import { getSelectedFrame } from './sequences.helper';
 import { selectFrames, selectIfcSpacesHiddenSaved,
 	selectSelectedEndingDate, selectSelectedSequence, selectSelectedStartingDate,
 	selectSequences,
-	selectSequenceModel, selectTasksDefinitions} from './sequences.selectors';
+	selectSequenceModel, selectActivitiesDefinitions} from './sequences.selectors';
 
 const areSequencesFromModel = (modelSettings, sequences) => (sequences || [])
 .some((s) => s.model === modelSettings._id || (modelSettings.subModels || []).some((sm) => sm.model === s.model) );
@@ -56,9 +56,9 @@ export function* fetchActivitiesDefinitions({sequenceId}) {
 		const teamspace = yield select(selectCurrentModelTeamspace);
 		const revision = yield select(selectCurrentRevisionId);
 		const model = yield select(selectCurrentModel);
-		const tasksDefinitions = yield select(selectTasksDefinitions);
+		const activitiesDefinitions = yield select(selectActivitiesDefinitions);
 
-		if (!tasksDefinitions && sequenceId) {
+		if (!activitiesDefinitions && sequenceId) {
 			// API CALL TO GET TASKS
 			const {data} = yield API.getSequenceActivities(teamspace, model, revision, sequenceId);
 			yield put(SequencesActions.fetchActivitiesDefinitionsSuccess(sequenceId, data.tasks));

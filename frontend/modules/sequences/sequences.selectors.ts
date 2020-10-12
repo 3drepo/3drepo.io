@@ -69,7 +69,7 @@ export const selectSelectedSequenceId = createSelector(
 	selectSequencesDomain, (state) => state.selectedSequence
 );
 
-export const selectTasksDefinitions = createSelector(
+export const selectActivitiesDefinitions = createSelector(
 	selectSequencesDomain, selectSelectedSequenceId, (state, sequenceId) => (state.activities || {}) [sequenceId]
 );
 
@@ -210,54 +210,24 @@ export const selectSelectedFrameTransformations = createSelector(
 	}
 );
 
-const tasksArrToDict = (tasks) => {
-	return tasks.reduce((dict , task) => {
-		if (!dict[task._id]) {
-			dict[task._id] = omit(task, 'tasks');
-		}
-
-		if (task.subTasks && !dict[task._id].subTasks) {
-			dict[task._id].subTasks =  tasksArrToDict(task.subTasks);
-		} else if (task.subTasks && dict[task._id].subTasks) {
-			dict[task._id].subTasks = merge(dict[task._id].subTasks, tasksArrToDict(task.subTasks));
-		}
-
-		return dict;
-	}, {});
-};
-
-const tasksDictToArr = (taskDict) => {
-	return Object.keys(taskDict).map((id) => {
-		const task = taskDict[id];
-		if (task.subTasks) {
-			task.subTasks = tasksDictToArr(task.subTasks);
-		}
-		return task;
-	});
-};
-
-const mergeTasks = (tasks) => {
-	return tasksDictToArr(tasksArrToDict(tasks));
-};
-
-// Filters the tasks by range as well as it's subtasks
-const getTasksByRange = (tasks, minDate, maxDate) => {
-	return tasks.reduce((filteredTasks, task) => {
-			if (! (task.startDate > maxDate || task.endDate < minDate)) {
-				task = {...task};
-				if ( task.subTasks ) {
-					task.subTasks = getTasksByRange(task.subTasks, minDate, maxDate);
+// Filters the activities by range as well as it's subtasks
+const getActivitiesByRange = (activities, minDate, maxDate) => {
+	return activities.reduce((filteredActivities, activity) => {
+			if (! (activity.startDate > maxDate || activity.endDate < minDate)) {
+				activity = {...activity};
+				if ( activity.subTasks ) {
+					activity.subTasks = getActivitiesByRange(activity.subTasks, minDate, maxDate);
 				}
 
-				filteredTasks.push(task);
+				filteredActivities.push(activity);
 			}
 
-			return filteredTasks;
+			return filteredActivities;
 		}, []);
 };
 
-const replaceDates = (tasks) => {
-	return tasks.map((t) => {
+const replaceDates = (activities) => {
+	return activities.map((t) => {
 		t.startDate = new Date(t.startDate);
 		t.endDate = new Date(t.endDate);
 		if (t.subTasks) {
@@ -269,13 +239,13 @@ const replaceDates = (tasks) => {
 };
 
 export const selectCurrentActivities = createSelector(
-	selectSelectedStartingDate, selectSelectedEndingDate, selectSelectedSequence, selectTasksDefinitions,
-		(minSelectedDate: Date, maxSelectedDate: Date, selectedSequence: any, tasks: any) => {
+	selectSelectedStartingDate, selectSelectedEndingDate, selectSelectedSequence, selectActivitiesDefinitions,
+		(minSelectedDate: Date, maxSelectedDate: Date, selectedSequence: any, activities: any) => {
 			if (!selectedSequence || !selectedSequence.frames) {
 				return [];
 			}
 
-			const foundTasks = getTasksByRange(tasks || [], minSelectedDate, maxSelectedDate);
-			return replaceDates(foundTasks);
+			const foundActivities = getActivitiesByRange(activities || [], minSelectedDate, maxSelectedDate);
+			return replaceDates(foundActivities);
 		}
 );

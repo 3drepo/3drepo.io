@@ -26,14 +26,14 @@ import {
 	selectShowDetails,
 	ActivitiesActions,
 } from '../../../../modules/activities';
-import { selectIsLoadingFrame, selectTasksDefinitions, SequencesActions} from '../../../../modules/sequences';
+import { selectActivitiesDefinitions, selectIsLoadingFrame, SequencesActions} from '../../../../modules/sequences';
 import { Activities } from './activities.component';
 
 const mapStateToProps = createStructuredSelector({
 	searchEnabled: selectSearchEnabled,
 	searchQuery: selectSearchQuery,
 	isPending: selectIsLoadingFrame,
-	activities: selectTasksDefinitions,
+	activities: selectActivitiesDefinitions,
 	showDetails: selectShowDetails,
 	isDetailsPending: selectIsDetailsPending,
 });
