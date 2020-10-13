@@ -329,7 +329,7 @@ groupSchema.methods.getObjectsArray = function (model, branch, revId, convertSha
 };
 
 // FIXME: Why do we have findByUID and findByUIDSerialised? - charence
-groupSchema.statics.findByUID = function (dbCol, uid, branch, revId, convertObjects = true) {
+groupSchema.statics.findByUID = function (dbCol, uid, branch, revId, username, convertObjects = true) {
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
 		.then(group => {
@@ -339,7 +339,7 @@ groupSchema.statics.findByUID = function (dbCol, uid, branch, revId, convertObje
 			}
 
 			if (convertObjects) {
-				return getObjectIds(dbCol, group, branch, revId, false).then((sharedIdObjects) => {
+				return getObjectIds(dbCol, group, branch, revId, username, false).then((sharedIdObjects) => {
 					group.objects = sharedIdObjects;
 					return group;
 				});
@@ -351,7 +351,7 @@ groupSchema.statics.findByUID = function (dbCol, uid, branch, revId, convertObje
 };
 
 // FIXME: Why do we have findByUID and findByUIDSerialised? - charence
-groupSchema.statics.findByUIDSerialised = function (dbCol, uid, branch, revId, showIfcGuids = false) {
+groupSchema.statics.findByUIDSerialised = function (dbCol, uid, branch, revId, username, showIfcGuids = false) {
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
 		.then(group => {
@@ -360,7 +360,7 @@ groupSchema.statics.findByUIDSerialised = function (dbCol, uid, branch, revId, s
 				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 			}
 
-			return getObjectIds(dbCol, group, branch, revId, true, showIfcGuids).then((sharedIdObjects) => {
+			return getObjectIds(dbCol, group, branch, revId, username, true, showIfcGuids).then((sharedIdObjects) => {
 
 				group.objects = sharedIdObjects;
 				return clean(group);
@@ -368,7 +368,7 @@ groupSchema.statics.findByUIDSerialised = function (dbCol, uid, branch, revId, s
 		});
 };
 
-groupSchema.statics.listGroups = function (dbCol, queryParams, branch, revId, ids, showIfcGuids) {
+groupSchema.statics.listGroups = function (dbCol, queryParams, branch, revId, username, ids, showIfcGuids) {
 
 	const query = {};
 
@@ -409,7 +409,7 @@ groupSchema.statics.listGroups = function (dbCol, queryParams, branch, revId, id
 
 		results.forEach(result => {
 			sharedIdConversionPromises.push(
-				getObjectIds(dbCol, result, branch, revId, true, showIfcGuids).then((sharedIdObjects) => {
+				getObjectIds(dbCol, result, branch, revId, username, true, showIfcGuids).then((sharedIdObjects) => {
 					result.objects = sharedIdObjects;
 					return result;
 				})
@@ -448,7 +448,7 @@ groupSchema.statics.updateIssueId = function (dbCol, uid, issueId) {
 // Group Update with Event
 groupSchema.methods.updateGroup = function (dbCol, sessionId, data, user = "", branch = "master", rid = null) {
 	return this.updateAttrs(dbCol, _.cloneDeep(data), user).then((savedGroup) => {
-		return getObjectIds(dbCol, this, branch, rid, true, false).then((objects) => {
+		return getObjectIds(dbCol, this, branch, rid, user, true, false).then((objects) => {
 			savedGroup.objects = objects;
 			ChatEvent.groupChanged(sessionId, dbCol.account, dbCol.model, savedGroup);
 			return savedGroup;
@@ -575,7 +575,7 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data, creator = ""
 		if (typeCorrect) {
 			return newGroup.save().then((savedGroup) => {
 				savedGroup._id = utils.uuidToString(savedGroup._id);
-				return getObjectIds(dbCol, savedGroup, branch, rid, true, false).then((objects) => {
+				return getObjectIds(dbCol, savedGroup, branch, rid, creator, true, false).then((objects) => {
 					savedGroup.objects = objects;
 					if (!data.isIssueGroup && !data.isRiskGroup && sessionId) {
 						ChatEvent.newGroups(sessionId, dbCol.account, model, savedGroup);
@@ -625,9 +625,9 @@ function clean(groupData) {
 	return cleaned;
 }
 
-function getObjectIds(dbCol, groupData, branch, revId, convertSharedIDsToString, showIfcGuids = false) {
+function getObjectIds(dbCol, groupData, branch, revId, username, convertSharedIDsToString, showIfcGuids = false) {
 	if (groupData.rules && groupData.rules.length > 0) {
-		return Meta.findObjectIdsByRules(dbCol.account, dbCol.model, groupData.rules, branch, revId, convertSharedIDsToString, showIfcGuids);
+		return Meta.findObjectIdsByRules(dbCol.account, dbCol.model, groupData.rules, branch, revId, username, convertSharedIDsToString, showIfcGuids);
 	} else {
 		return groupData.getObjectsArray(dbCol.model, branch, revId, convertSharedIDsToString, showIfcGuids);
 	}
