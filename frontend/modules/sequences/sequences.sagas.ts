@@ -24,15 +24,14 @@ import { VIEWER_PANELS } from '../../constants/viewerGui';
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
 import { selectCurrentModel, selectCurrentModelTeamspace,
-	selectCurrentRevisionId, selectSettings } from '../model/model.selectors';
+	selectCurrentRevisionId } from '../model/model.selectors';
 import { dispatch } from '../store';
 import { selectIfcSpacesHidden, TreeActions } from '../tree';
 import { selectLeftPanels, ViewerGuiActions } from '../viewerGui';
 import { getSelectedFrame } from './sequences.helper';
-import { selectFrames, selectIfcSpacesHiddenSaved,
-	selectSelectedEndingDate, selectSelectedSequence, selectSelectedStartingDate,
-	selectSequences,
-	selectSequenceModel, selectActivitiesDefinitions} from './sequences.selectors';
+import { selectActivitiesDefinitions, selectFrames,
+	selectIfcSpacesHiddenSaved, selectSelectedEndingDate, selectSelectedSequence,
+	selectSequences, selectSequenceModel} from './sequences.selectors';
 
 const areSequencesFromModel = (modelSettings, sequences) => (sequences || [])
 .some((s) => s.model === modelSettings._id || (modelSettings.subModels || []).some((sm) => sm.model === s.model) );

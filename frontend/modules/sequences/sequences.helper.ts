@@ -20,23 +20,39 @@ import { Viewer } from '../../services/viewer/viewer';
 import { getState } from '../store';
 import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds } from '../tree';
 
-export const getSelectedFrame = (frames, endingDate) => {
-	let frame = null;
+export const  getSelectedFrame = (frames, endingDate) => {
+	if (!frames.length) {
+		return null;
+	}
 
-	for (let i = frames.length - 1 ; i >= 0 && frame === null; i--) {
-		if (frames[i].dateTime <= endingDate) {
-			frame = frames[i];
+	let leftMargin = 0;
+	let rightMargin = frames.length - 1;
+
+	while (leftMargin < rightMargin - 1) {
+		const i = Math.floor((rightMargin + leftMargin) / 2);
+
+		if (frames[i].dateTime <= endingDate ) {
+			leftMargin = i;
+		} else {
+			rightMargin = i;
 		}
 	}
 
-	return frame;
+	if (frames[rightMargin].dateTime <= endingDate) {
+		return frames[rightMargin];
+	}
+
+	if ( frames[leftMargin].dateTime <= endingDate) {
+		return frames[leftMargin];
+	}
+
+	return null;
 };
 
 export const getDateByStep = (date, stepScale, step) => {
 	const newDate = new Date(date);
 
-	switch (stepScale)
-	{
+	switch (stepScale) {
 		case STEP_SCALE.HOUR:
 			newDate.setHours(newDate.getHours() + step);
 			break;
