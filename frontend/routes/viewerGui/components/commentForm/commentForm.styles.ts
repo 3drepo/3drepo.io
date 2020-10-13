@@ -69,10 +69,11 @@ export const StyledTextFieldContainer = styled(Grid)`
 `;
 
 export const Counter = styled.div`
-	margin-left: 16px;
+	margin-right: 16px;
 	margin-top: 5px;
 	font-size: 14px;
-	color: ${(props) => props.error ? COLOR.VIVID_RED : COLOR.BLACK_20};
+	color: ${(props) => props.error ? COLOR.VIVID_RED : COLOR.BLACK_60};
+	text-align: right;
 `;
 
 export const Actions = styled.div`
