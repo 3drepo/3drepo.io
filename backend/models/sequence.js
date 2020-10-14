@@ -26,34 +26,41 @@ const Ref = require("./ref");
 
 class Sequence {
 
-	clean(toClean, targetType = "[object String]") {
-		const keys = ["_id", "rev_id", "model", "dateTime", "startDate", "endDate", "parents"];
-
+	clean(toClean, keys) {
 		keys.forEach((key) => {
-			if (toClean[key] &&
-				["dateTime", "startDate", "endDate"].includes(key) && utils.isDate(toClean[key])) {
-				toClean[key] = new Date(toClean[key]).getTime();
-			} else if (toClean[key] && "[object String]" === targetType) {
+			if (toClean[key]) {
 				if (utils.isObject(toClean[key])) {
 					toClean[key] = utils.uuidToString(toClean[key]);
 				} else if (Array.isArray(toClean[key])) {
 					toClean[key] = toClean[key].map((elem) => utils.uuidToString(elem));
 				}
-			} else if (toClean[key] && "[object Object]" === targetType) {
-				if (utils.isString(toClean[key])) {
-					toClean[key] = utils.stringToUUID(toClean[key]);
-				} else if (Array.isArray(toClean[key])) {
-					toClean[key] = toClean[key].map((elem) => utils.stringToUUID(elem));
-				}
 			}
 		});
 
+		return toClean;
+	}
+
+	cleanActivityDetail(toClean) {
+		const keys = ["_id"];
+
+		return this.clean(toClean, keys);
+	}
+
+	cleanSequenceList(toClean) {
+		const keys = ["_id", "rev_id", "model"];
+
 		for (let i = 0; toClean["frames"] && i < toClean["frames"].length; i++) {
-			toClean["frames"][i] = this.clean(toClean["frames"][i]);
+			toClean["frames"][i] = this.cleanSequenceFrame(toClean["frames"][i]);
 		}
 
-		for (let i = 0; toClean["tasks"] && i < toClean["tasks"].length; i++) {
-			toClean["tasks"][i] = this.clean(toClean["tasks"][i]);
+		return this.clean(toClean, keys);
+	}
+
+	cleanSequenceFrame(toClean) {
+		const key = "dateTime";
+
+		if (toClean[key] && utils.isDate(toClean[key])) {
+			toClean[key] = new Date(toClean[key]).getTime();
 		}
 
 		return toClean;
@@ -67,7 +74,7 @@ class Sequence {
 			return Promise.reject(responseCodes.ACTIVITY_NOT_FOUND);
 		}
 
-		this.clean(activity);
+		this.cleanActivityDetail(activity);
 
 		return activity;
 	}
@@ -101,7 +108,7 @@ class Sequence {
 			sequence.model = model;
 
 			if (cleanResponse) {
-				this.clean(sequence);
+				this.cleanSequenceList(sequence);
 			}
 		});
 
