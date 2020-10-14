@@ -31,19 +31,18 @@ class Sequence {
 
 		keys.forEach((key) => {
 			if (toClean[key] &&
-				["dateTime", "startDate", "endDate"].includes(key) &&
-				"[object Date]" === Object.prototype.toString.call(toClean[key])) {
+				["dateTime", "startDate", "endDate"].includes(key) && utils.isDate(toClean[key])) {
 				toClean[key] = new Date(toClean[key]).getTime();
 			} else if (toClean[key] && "[object String]" === targetType) {
-				if ("[object Object]" === Object.prototype.toString.call(toClean[key])) {
+				if (utils.isObject(toClean[key])) {
 					toClean[key] = utils.uuidToString(toClean[key]);
-				} else if ("[object Array]" === Object.prototype.toString.call(toClean[key])) {
+				} else if (Array.isArray(toClean[key])) {
 					toClean[key] = toClean[key].map((elem) => utils.uuidToString(elem));
 				}
 			} else if (toClean[key] && "[object Object]" === targetType) {
-				if ("[object String]" === Object.prototype.toString.call(toClean[key])) {
+				if (utils.isString(toClean[key])) {
 					toClean[key] = utils.stringToUUID(toClean[key]);
-				} else if ("[object Array]" === Object.prototype.toString.call(toClean[key])) {
+				} else if (Array.isArray(toClean[key])) {
 					toClean[key] = toClean[key].map((elem) => utils.stringToUUID(elem));
 				}
 			}
@@ -60,19 +59,15 @@ class Sequence {
 		return toClean;
 	}
 
-	async getSequenceActivityDetail(account, model, activityId, cleanResponse = false) {
+	async getSequenceActivityDetail(account, model, activityId) {
 		const dbCol = await db.getCollection(account, model + ".activities");
-		activityId = utils.stringToUUID(activityId);
-
-		const activity = await dbCol.findOne({"_id": activityId});
+		const activity = await dbCol.findOne({"_id": utils.stringToUUID(activityId)});
 
 		if (!activity) {
 			return Promise.reject(responseCodes.ACTIVITY_NOT_FOUND);
 		}
 
-		if (cleanResponse) {
-			this.clean(activity);
-		}
+		this.clean(activity);
 
 		return activity;
 	}

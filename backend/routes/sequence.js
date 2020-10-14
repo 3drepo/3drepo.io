@@ -316,7 +316,7 @@ function getSequenceActivityDetail(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model, activityId } = req.params;
 
-	Sequence.getSequenceActivityDetail(account, model, activityId, true).then(activity => {
+	Sequence.getSequenceActivityDetail(account, model, activityId).then(activity => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, activity);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
