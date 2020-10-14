@@ -22,14 +22,8 @@ const app = require("../../services/api.js").createApp();
 const responseCodes = require("../../response_codes.js");
 const async = require("async");
 const { login } = require("../helpers/users.js");
-
 const { createIssue } = require("../helpers/issues.js");
-
 const { deleteNotifications, fetchNotification } = require("../helpers/notifications.js");
-const { Agent } = require("useragent");
-const supertest = require("supertest");
-const { json } = require("body-parser");
-
 const { createModel } = require("../helpers/models.js");
 
 describe("Issues", function () {
@@ -2041,85 +2035,6 @@ describe("Issues", function () {
 		});
 	});
 
-	describe("Search", function() {
-		const teamspace = "teamSpace1";
-		const password = "password";
-		let model = "";
-
-		before(function(done) {
-			async.series([
-				login(agent, teamspace, password),
-				(next) => {
-					createModel(agent, teamspace,'Query issues').then((res) => {
-						model = res.body.model;
-
-						let createIssueTeamspace1 = createIssue(teamspace,model);
-
-						async.series([
-							createIssueTeamspace1(agent, {topic_type: 'information', number: 0, status: 'closed', priority: 'none', assigned_roles:[]}),
-							createIssueTeamspace1(agent, {topic_type: 'other', number: 1, status: 'open', priority: 'medium', assigned_roles:['Client']}),
-							createIssueTeamspace1(agent, {topic_type: 'information', number: 2, status: 'in progress', priority: 'high', assigned_roles:[]}),
-							login(agent,'adminTeamspace1JobA', password ),
-							createIssueTeamspace1(agent, {topic_type: 'structure', number: 3, status: 'open', priority: 'none', assigned_roles:[]}),
-							createIssueTeamspace1(agent, {topic_type: 'architecture', number: 4, status: 'open', priority: 'none', assigned_roles:['Client']}),
-							login(agent, teamspace, password)
-						], next);
-					})
-				},
-			], done);
-		});
-
-		it(" by topic", function(done) {
-			agent.get(`/${teamspace}/${model}/issues?topicTypes=information,structure`)
-			.expect(200, function(err, res) {
-				expect(res.body.map((issue => issue.topic_type)).sort()).to.eql(['information', 'structure', 'information'].sort())
-				done(err);
-			});
-		});
-
-		it(" by status", function(done) {
-			agent.get(`/${teamspace}/${model}/issues?status=closed,in%20progress`)
-			.expect(200, function(err, res) {
-				expect(res.body.map((issue => issue.status)).sort()).to.eql(['closed', 'in progress'].sort())
-				done(err);
-			});
-		});
-
-		it(" by priority", function(done) {
-			agent.get(`/${teamspace}/${model}/issues?priorities=medium,high`)
-			.expect(200, function(err, res) {
-				expect(res.body.map((issue => issue.priority)).sort()).to.eql(['medium', 'high'].sort())
-				done(err);
-			});
-		});
-
-		it(" by number", function(done) {
-			agent.get(`/${teamspace}/${model}/issues?numbers=1,3,4,39`)
-			.expect(200, function(err, res) {
-				expect(res.body.map((issue => issue.number)).sort()).to.eql([1, 3, 4].sort())
-				done(err);
-			});
-		});
-
-		it(" by assigned role", function(done) {
-			agent.get(`/${teamspace}/${model}/issues/?assignedRoles=Client`)
-			.expect(200, function(err, res) {
-				expect(res.body.map((issue => issue.assigned_roles[0])).sort()).to.eql(['Client','Client'].sort())
-				done(err);
-			});
-		});
-
-		it(" by unassigned role", function(done) {
-			agent.get(`/${teamspace}/${model}/issues/?assignedRoles=Unassigned`)
-			.expect(200, function(err, res) {
-				expect(res.body.map((issue => issue.assigned_roles.length)).sort()).to.eql([0,0,0].sort())
-				done(err);
-			});
-		});
-
-
-	});
-
 	describe("BCF", function() {
 
 		const bcfusername = "testing";
@@ -2482,6 +2397,85 @@ describe("Issues", function () {
 					});
 			});
 		});
+	});
+
+	describe("Search", function() {
+		const teamspace = "teamSpace1";
+		const password = "password";
+		let model = "";
+
+		before(function(done) {
+			async.series([
+				login(agent, teamspace, password),
+				(next) => {
+					createModel(agent, teamspace,'Query issues').then((res) => {
+						model = res.body.model;
+
+						let createIssueTeamspace1 = createIssue(teamspace,model);
+
+						async.series([
+							createIssueTeamspace1(agent, {topic_type: 'information', number: 0, status: 'closed', priority: 'none', assigned_roles:[]}),
+							createIssueTeamspace1(agent, {topic_type: 'other', number: 1, status: 'open', priority: 'medium', assigned_roles:['Client']}),
+							createIssueTeamspace1(agent, {topic_type: 'information', number: 2, status: 'in progress', priority: 'high', assigned_roles:[]}),
+							login(agent,'adminTeamspace1JobA', password ),
+							createIssueTeamspace1(agent, {topic_type: 'structure', number: 3, status: 'open', priority: 'none', assigned_roles:[]}),
+							createIssueTeamspace1(agent, {topic_type: 'architecture', number: 4, status: 'open', priority: 'none', assigned_roles:['Client']}),
+							login(agent, teamspace, password)
+						], next);
+					})
+				},
+			], done);
+		});
+
+		it(" by topic", function(done) {
+			agent.get(`/${teamspace}/${model}/issues?topicTypes=information,structure`)
+			.expect(200, function(err, res) {
+				expect(res.body.map((issue => issue.topic_type)).sort()).to.eql(['information', 'structure', 'information'].sort())
+				done(err);
+			});
+		});
+
+		it(" by status", function(done) {
+			agent.get(`/${teamspace}/${model}/issues?status=closed,in%20progress`)
+			.expect(200, function(err, res) {
+				expect(res.body.map((issue => issue.status)).sort()).to.eql(['closed', 'in progress'].sort())
+				done(err);
+			});
+		});
+
+		it(" by priority", function(done) {
+			agent.get(`/${teamspace}/${model}/issues?priorities=medium,high`)
+			.expect(200, function(err, res) {
+				expect(res.body.map((issue => issue.priority)).sort()).to.eql(['medium', 'high'].sort())
+				done(err);
+			});
+		});
+
+		it(" by number", function(done) {
+			agent.get(`/${teamspace}/${model}/issues?numbers=1,3,4,39`)
+			.expect(200, function(err, res) {
+				expect(res.body.map((issue => issue.number)).sort()).to.eql([1, 3, 4].sort())
+				done(err);
+			});
+		});
+
+		it(" by assigned role", function(done) {
+			agent.get(`/${teamspace}/${model}/issues/?assignedRoles=Client`)
+			.expect(200, function(err, res) {
+				expect(res.body.map((issue => issue.assigned_roles[0])).sort()).to.eql(['Client','Client'].sort())
+				done(err);
+			});
+		});
+
+		it(" by unassigned role", function(done) {
+			agent.get(`/${teamspace}/${model}/issues/?assignedRoles=Unassigned`)
+			.expect(200, function(err, res) {
+				expect(res.body.map((issue => issue.assigned_roles.length)).sort()).to.eql([0,0,0].sort())
+				done(err);
+			});
+		});
+
+
 	});
 
 });

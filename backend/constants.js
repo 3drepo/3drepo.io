@@ -533,7 +533,7 @@
 			"fieldName": "number",
 			"type": "number"
 		},
-		"catiegories": {
+		"categories": {
 			"fieldName": "category"
 		},
 		"mitigationStatus": {
@@ -551,8 +551,8 @@
 			"fieldName": "consequence",
 			"type": "number"
 		},
-		"likehoods": {
-			"fieldName": "likehood",
+		"likelihoods": {
+			"fieldName": "likelihood",
 			"type": "number"
 		},
 		"levelOfRisks": {
