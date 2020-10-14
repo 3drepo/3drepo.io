@@ -67,6 +67,9 @@ function Utils() {
 			case "UUID":
 				value = this.stringToUUID(value);
 				break;
+			case "array":
+				value = value === "Unassigned" ? [] : [value];
+				break;
 		}
 
 		return value;

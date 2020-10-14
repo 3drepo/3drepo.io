@@ -588,7 +588,8 @@
 			"fieldName": "owner"
 		},
 		"assignedRoles" : {
-			"fieldName": "assigned_roles"
+			"fieldName": "assigned_roles",
+			"type": "array"
 		}
 	});
 
