@@ -30,7 +30,7 @@ const utils = require("../utils");
 const FileRef = require("./fileRef");
 const Group = require("./group");
 const Meta = require("./meta");
-const View = require("./viewpoint");
+const Viewpoint = require("./viewpoint");
 
 const statusEnum = C.ISSUE_STATUS;
 
@@ -524,7 +524,7 @@ function parseViewpoints(issueGuid, issueFiles, vps) {
 
 function parseViewpointComponentIfc(model, component, ifcToModelMap, isFederation) {
 	return {
-		model: isFederation ? ifcToModelMap[component["@"].IfcGuid] : model,
+		model: isFederation && ifcToModelMap[component["@"].IfcGuid] ? ifcToModelMap[component["@"].IfcGuid] : model,
 		ifcGuid: component["@"].IfcGuid
 	};
 }
@@ -924,7 +924,8 @@ async function readBCF(account, model, requester, ifcToModelMap, dataBuffer, set
 
 			if (viewpoints[vpGuid].snapshot) {
 				vp.screenshot = viewpoints[vpGuid].snapshot;
-				await View.setExternalScreenshotRef(vp, account, model, "issues");
+				// TODO do not import View
+				await Viewpoint.setExternalScreenshotRef(vp, account, model, "issues");
 			}
 
 			if (_.get(vpXML, "VisualizationInfo.ClippingPlanes")) {

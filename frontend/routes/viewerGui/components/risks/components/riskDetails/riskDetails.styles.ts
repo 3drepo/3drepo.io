@@ -22,9 +22,16 @@ import Grid from '@material-ui/core/Grid';
 import { cond, constant, matches, stubTrue } from 'lodash';
 
 import { COLOR } from '../../../../../../styles';
+import { Image as ImageComponent } from '../../../../../components/image';
 import { MessagesList as MessagesListComponent } from '../../../../../components/messagesList/';
+import {
+	Container as MessageListContainer,
+	FilterWrapper,
+} from '../../../../../components/messagesList/messagesList.styles';
 import * as TextFieldStyles from '../../../../../components/textField/textField.styles';
 import PreviewDetailsBase from '../../../previewDetails/previewDetails.container';
+import { Container as PreviewDetailsContainer } from '../../../previewDetails/previewDetails.styles';
+import { Container as TabContainer } from '../../../risks/components/riskDetails/riskDetails.styles';
 
 export const StyledFormControl = styled(FormControl)`
 `;
@@ -99,10 +106,17 @@ export const FieldsRow = styled(Grid)`
 	}
 ` as any;
 
-export const DescriptionImage = styled.div`
-	max-height: 250px;
-	overflow: hidden;
-`;
+export const DescriptionImage = styled(ImageComponent)`
+	img {
+		display: block;
+		margin-top: 6px;
+		margin-bottom: 8px;
+		max-width: 100%;
+		width: 100%;
+		max-height: 200px;
+		height: auto;
+	}
+` as any;
 
 export const HorizontalView = styled.div`
 	display: flex;
@@ -124,6 +138,14 @@ export const HorizontalView = styled.div`
 			box-shadow: none;
 		}
 	}
+
+	${PreviewDetailsContainer} {
+		background-color: ${COLOR.WHITE};
+	}
+
+	${MessageListContainer}, ${FilterWrapper} {
+		background-color: ${COLOR.BLACK_6};
+	}
 `;
 
 export const TabContent = styled.div`
@@ -139,6 +161,10 @@ export const Content = styled.div`
 	display: ${(props) => props.active ? 'block' : 'none'};
 	width: 100%;
 	margin-bottom: 5px;
+
+	${TabContainer} {
+		margin-top: 6px;
+	}
 `;
 
 export const ExpandAction = styled.span`

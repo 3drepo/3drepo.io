@@ -50,6 +50,7 @@ interface IProps {
 	setState: (componentState) => void;
 	setCriteriaState: (criteriaState) => void;
 	resetToSavedSelection: () => void;
+	isPending: boolean;
 }
 interface IState {
 	isFormValid: boolean;
@@ -114,6 +115,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 			renderNotCollapsable={() => this.renderRulesField(this.groupData.type === GROUPS_TYPES.SMART)}
 			disableExpanding
 			panelName={GROUP_PANEL_NAME}
+			isSmartGroup={this.groupData.type === GROUPS_TYPES.SMART}
 			StatusIconComponent={GROUP_TYPES_ICONS[this.groupData.type]}
 			scrolled={this.state.scrolled}
 			isNew={this.isNewGroup}
@@ -228,6 +230,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 					mini
 					aria-label="Save group"
 					disabled={!this.isFormValid || !this.props.canUpdate}
+					pending={this.props.isPending}
 				>
 					<SaveIcon />
 				</ViewerPanelButton>

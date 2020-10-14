@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -25,9 +25,10 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	fetchIssueFailure: [],
 	setComponentState: ['componentState'],
 	saveIssue: ['teamspace', 'model', 'issueData', 'revision', 'finishSubmitting', 'ignoreViewer'],
-	updateIssue: ['teamspace', 'modelId', 'issueData'],
+	updateActiveIssue: [ 'issueData'],
 	updateBoardIssue: ['teamspace', 'modelId', 'issueData'],
-	postComment: ['teamspace', 'modelId', 'issueData', 'finishSubmitting'],
+	cloneIssue: ['dialogId'],
+	postComment: ['teamspace', 'modelId', 'issueData', 'ignoreViewer', 'finishSubmitting'],
 	removeComment: ['teamspace', 'modelId', 'issueData'],
 	saveIssueSuccess: ['issue'],
 	setNewIssue: [],
@@ -38,9 +39,9 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	setActiveIssue: ['issue', 'revision', 'ignoreViewer'],
 	togglePendingState: ['isPending'],
 	toggleDetailsPendingState: ['isPending'],
+	togglePostCommentPendingState: ['isPending'],
 	subscribeOnIssueChanges: ['teamspace', 'modelId'],
 	unsubscribeOnIssueChanges: ['teamspace', 'modelId'],
-	focusOnIssue: ['issue', 'revision'],
 	toggleIsImportingBcf: ['isImporting'],
 	toggleSubmodelsIssues: ['showSubmodelIssues'],
 	importBcf: ['teamspace', 'modelId', 'file', 'revision'],
@@ -64,11 +65,11 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	updateResourcesSuccess: ['resourcesIds', 'updates', 'issueId' ],
 	reset: [],
 	goToIssue: ['issue'],
-	showMultipleGroups: ['issue', 'revision'],
 	setNewComment: ['newComment'],
 	saveNewScreenshot: ['teamspace', 'model', 'isNewIssue'],
 	updateSelectedIssuePin: ['position'],
-	toggleShowPins: ['showPins']
+	toggleShowPins: ['showPins'],
+	updateActiveIssueViewpoint: ['screenshot']
 }, { prefix: 'ISSUES/' });
 
 export const INITIAL_STATE = {
@@ -84,6 +85,7 @@ export const INITIAL_STATE = {
 		filteredRisks: [],
 		showPins: true,
 		fetchingDetailsIsPending: false,
+		postCommentIsPending: false,
 		isImportingBCF: false,
 		showSubmodelIssues: false,
 		sortOrder: 'desc',
@@ -106,6 +108,10 @@ export const togglePendingState = (state = INITIAL_STATE, { isPending }) => ({ .
 
 export const toggleDetailsPendingState = (state = INITIAL_STATE, { isPending }) => {
 	return setComponentState(state, { componentState: { fetchingDetailsIsPending: isPending } });
+};
+
+export const togglePostCommentPendingState = (state = INITIAL_STATE, { isPending }) => {
+	return setComponentState(state, { componentState: { postCommentIsPending: isPending } });
 };
 
 export const toggleIsImportingBcf = (state = INITIAL_STATE, { isImporting }) => {
@@ -168,7 +174,13 @@ export const createCommentsSuccess = (state = INITIAL_STATE, { comments, issueId
 };
 
 export const createCommentSuccess = (state = INITIAL_STATE, { comment, issueId }) => {
-	return createCommentsSuccess(state, {comments: [comment], issueId } );
+	const alreadyInComments = state.issuesMap[issueId].comments.find(({ guid }) => guid === comment.guid);
+
+	if (!alreadyInComments) {
+		return createCommentsSuccess(state, {comments: [comment], issueId } );
+	}
+
+	return { ...state };
 };
 
 export const updateCommentSuccess = (state = INITIAL_STATE, { comment, issueId }) => {
@@ -247,6 +259,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.SAVE_ISSUE_SUCCESS]: saveIssueSuccess,
 	[IssuesTypes.TOGGLE_PENDING_STATE]: togglePendingState,
 	[IssuesTypes.TOGGLE_DETAILS_PENDING_STATE]: toggleDetailsPendingState,
+	[IssuesTypes.TOGGLE_POST_COMMENT_PENDING_STATE]: togglePostCommentPendingState,
 	[IssuesTypes.TOGGLE_IS_IMPORTING_BCF]: toggleIsImportingBcf,
 	[IssuesTypes.CREATE_COMMENT_SUCCESS]: createCommentSuccess,
 	[IssuesTypes.CREATE_COMMENTS_SUCCESS]: createCommentsSuccess,

@@ -28,22 +28,13 @@ import {
 	ATTACHMENTS_RISK_TYPE, MAIN_RISK_TYPE, RISK_TABS, TREATMENT_RISK_TYPE,
 } from '../../../../../../constants/risks';
 import { VIEWER_PANELS_TITLES } from '../../../../../../constants/viewerGui';
-import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { calculateLevelOfRisk } from '../../../../../../helpers/risks';
-import { canChangeAssigned, canChangeBasicProperty, canChangeStatus } from '../../../../../../helpers/risks';
+import { canChangeBasicProperty } from '../../../../../../helpers/risks';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
-import PinButton from '../../../pinButton/pinButton.container';
 import { AttachmentsFormTab } from '../attachmentsFormTab/attachmentsFormTab.component';
 import { MainRiskFormTab } from '../mainRiskFormTab/mainRiskFormTab.component';
 import { TreatmentRiskFormTab } from '../treatmentFormTab/treatmentFormTab.component';
-import {
-	Container,
-	DescriptionImage,
-	FieldsContainer,
-	FieldsRow,
-	StyledFormControl,
-	TabContent,
-} from './riskDetails.styles';
+import { TabContent } from './riskDetails.styles';
 
 interface IProps {
 	risk: any;
@@ -66,13 +57,17 @@ interface IProps {
 	onRemoveResource: (resource) => void;
 	attachFileResources: () => void;
 	attachLinkResources: () => void;
+	showScreenshotDialog: (config: any) => void;
 	showDialog: (config: any) => void;
 	canComment: boolean;
 	hasPin: boolean;
-	hidePin?: boolean;
+	disableViewer?: boolean;
 	criteria: any;
 	showMitigationSuggestions: (conditions: any, setFieldValue) => void;
 	formRef: any;
+	onUpdateViewpoint: () => void;
+	onTakeScreenshot: () => void;
+	onUploadScreenshot: (image) => void;
 }
 
 interface IState {
@@ -91,19 +86,9 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		return !this.props.risk._id;
 	}
 
-	get canEditRiskStatus() {
-		const { risk, myJob, permissions, currentUser } = this.props;
-		return this.isNewRisk || canChangeStatus(risk, myJob, permissions, currentUser);
-	}
-
 	get canEditBasicProperty() {
 		const { risk, myJob, permissions, currentUser } = this.props;
 		return this.isNewRisk || canChangeBasicProperty(risk, myJob, permissions, currentUser);
-	}
-
-	get canChangeAssigned() {
-		const { risk, myJob, permissions, currentUser } = this.props;
-		return canChangeAssigned(risk, myJob, permissions, currentUser);
 	}
 
 	public state = {
@@ -177,24 +162,11 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		this.setState({ activeTab });
 	}
 
-	public renderPinButton = renderWhenTrue(() => (
-		<StyledFormControl>
-			<PinButton
-				onChange={this.props.onChangePin}
-				onSave={this.props.onSavePin}
-				disabled={!this.isNewRisk && !this.canEditBasicProperty}
-				hasPin={this.props.hasPin}
-			/>
-		</StyledFormControl>
-	));
-
 	public showRiskContent = (active) => (
 		<MainRiskFormTab
 			active={active}
 			isNewRisk={this.isNewRisk}
 			canEditBasicProperty={this.canEditBasicProperty}
-			canChangeAssigned={this.canChangeAssigned}
-			renderPinButton={this.renderPinButton}
 			{...this.props}
 		/>
 	)
@@ -203,14 +175,12 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		<TreatmentRiskFormTab
 			active={active}
 			isNewRisk={this.isNewRisk}
-			canEditBasicProperty={this.canEditBasicProperty}
-			canEditRiskStatus={this.canEditRiskStatus}
 			{...this.props}
 		/>
 	)
 
 	public showAttachmentsContent = (active) => (
-		<AttachmentsFormTab active={active} {...this.props} />
+		<AttachmentsFormTab active={active} resources={this.props.risk.resources} {...this.props} />
 	)
 
 	get attachmentsProps() {

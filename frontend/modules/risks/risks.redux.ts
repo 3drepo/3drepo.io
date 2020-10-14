@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -28,7 +28,8 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	saveRisk: ['teamspace', 'model', 'riskData', 'revision', 'finishSubmitting', 'ignoreViewer'],
 	updateRisk: ['teamspace', 'modelId', 'riskData'],
 	updateBoardRisk: ['teamspace', 'modelId', 'riskData'],
-	postComment: ['teamspace', 'modelId', 'riskData', 'finishSubmitting'],
+	cloneRisk: ['dialogId'],
+	postComment: ['teamspace', 'modelId', 'riskData', 'ignoreViewer', 'finishSubmitting'],
 	removeComment: ['teamspace', 'modelId', 'riskData'],
 	saveRiskSuccess: ['risk'],
 	setNewRisk: [],
@@ -40,13 +41,14 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	setActiveRisk: ['risk', 'revision', 'ignoreViewer'],
 	togglePendingState: ['isPending'],
 	toggleDetailsPendingState: ['isPending'],
+	togglePostCommentPendingState: ['isPending'],
 	subscribeOnRiskChanges: ['teamspace', 'modelId'],
 	unsubscribeOnRiskChanges: ['teamspace', 'modelId'],
-	focusOnRisk: ['risk', 'revision'],
 	toggleShowPins: ['showPins'],
 	subscribeOnRiskCommentsChanges: ['teamspace', 'modelId', 'riskId'],
 	unsubscribeOnRiskCommentsChanges: ['teamspace', 'modelId', 'riskId'],
 	createCommentSuccess: ['comment', 'riskId'],
+	createCommentsSuccess: ['comments', 'riskId'],
 	deleteCommentSuccess: ['commentGuid', 'riskId'],
 	updateCommentSuccess: ['comment', 'riskId'],
 	toggleSortOrder: ['sortOrder'],
@@ -54,7 +56,6 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	setFilters: ['filters'],
 	showCloseInfo: ['riskId'],
 	hideCloseInfo: ['riskId'],
-	showMultipleGroups: ['risk', 'revision'],
 	updateSelectedRiskPin: ['position'],
 	removeResource: ['resource'],
 	removeResourceSuccess: ['resource', 'riskId'],
@@ -66,6 +67,7 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	fetchMitigationCriteriaSuccess: ['criteria', 'teamspace'],
 	fetchMitigationCriteriaFailure: [],
 	showMitigationSuggestions: ['conditions', 'setFieldValue'],
+	updateActiveRiskViewpoint: ['screenshot'],
 	reset: []
 }, { prefix: 'RISKS/' });
 
@@ -99,6 +101,7 @@ export const INITIAL_STATE = {
 		filteredRisks: [],
 		showPins: true,
 		fetchingDetailsIsPending: false,
+		postCommentIsPending: false,
 		associatedActivities: [],
 		sortOrder: 'desc',
 		failedToLoad: false
@@ -120,6 +123,10 @@ export const togglePendingState = (state = INITIAL_STATE, { isPending }) => ({ .
 
 export const toggleDetailsPendingState = (state = INITIAL_STATE, { isPending }) => {
 	return setComponentState(state, { componentState: { fetchingDetailsIsPending: isPending } });
+};
+
+export const togglePostCommentPendingState = (state = INITIAL_STATE, { isPending }) => {
+	return setComponentState(state, { componentState: { postCommentIsPending: isPending } });
 };
 
 export const fetchRisksSuccess = (state = INITIAL_STATE, { risks = [] }) => {
@@ -178,18 +185,22 @@ export const setComponentState = (state = INITIAL_STATE, { componentState = {} }
 	return { ...state, componentState: { ...state.componentState, ...componentState } };
 };
 
-export const createCommentSuccess = (state = INITIAL_STATE, { comment, riskId }) => {
-	let comments;
-
-	if (comment.action || comment.viewpoint) {
-		comments = [comment, ...state.risksMap[riskId].comments.map((log) => ({ ...log, sealed: true, new: true }))];
-	} else {
-		comments = [...state.risksMap[riskId].comments.map((log) => ({ ...log, sealed: true, new: true }))];
-	}
+export const createCommentsSuccess = (state = INITIAL_STATE, { comments, riskId }) => {
+	comments = comments.concat(state.risksMap[riskId].comments);
+	comments = comments.map((log, i) => ({ ...log, sealed: (i !== 0) ? true : log.sealed}));
 
 	const risksMap = updateRiskProps(state.risksMap, riskId, { comments });
-
 	return { ...state, risksMap };
+};
+
+export const createCommentSuccess = (state = INITIAL_STATE, { comment, riskId }) => {
+	const alreadyInComments = state.risksMap[riskId].comments.find(({ guid }) => guid === comment.guid);
+
+	if (!alreadyInComments) {
+		return createCommentsSuccess(state, {comments: [comment], riskId } );
+	}
+
+	return { ...state };
 };
 
 export const updateCommentSuccess = (state = INITIAL_STATE, { comment, riskId }) => {
@@ -272,7 +283,9 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.SAVE_RISK_SUCCESS]: saveRiskSuccess,
 	[RisksTypes.TOGGLE_PENDING_STATE]: togglePendingState,
 	[RisksTypes.TOGGLE_DETAILS_PENDING_STATE]: toggleDetailsPendingState,
+	[RisksTypes.TOGGLE_POST_COMMENT_PENDING_STATE]: togglePostCommentPendingState,
 	[RisksTypes.CREATE_COMMENT_SUCCESS]: createCommentSuccess,
+	[RisksTypes.CREATE_COMMENTS_SUCCESS]: createCommentsSuccess,
 	[RisksTypes.UPDATE_COMMENT_SUCCESS]: updateCommentSuccess,
 	[RisksTypes.DELETE_COMMENT_SUCCESS]: deleteCommentSuccess,
 	[RisksTypes.TOGGLE_SORT_ORDER]: toggleSortOrder,

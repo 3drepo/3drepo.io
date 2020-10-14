@@ -60,7 +60,7 @@ export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActio
 	setCamera: ['params'],
 	setProjectionMode: ['mode'],
 	setProjectionModeSuccess: ['mode'],
-	resetPanels: []
+	resetPanels: [],
 }, { prefix: 'VIEWER_GUI/' });
 
 export interface IViewerGuiState {
@@ -92,7 +92,7 @@ export const INITIAL_STATE: IViewerGuiState = {
 	isClipEdit: false,
 	clipNumber: 0,
 	isPinDropMode: false,
-	pinData: null
+	pinData: null,
 };
 
 const updatePanelsList = (panels, lockedPanels, panelName, visibility) => {

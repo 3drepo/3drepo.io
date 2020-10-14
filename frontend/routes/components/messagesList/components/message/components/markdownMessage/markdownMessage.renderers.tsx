@@ -4,15 +4,15 @@ import { cond, get, mapValues, stubTrue } from 'lodash';
 
 import {
 	MARKDOWN_INTERNAL_IMAGE_PATH_REGEX,
-	MARKDOWN_ISSUE_REFERENCE_REGEX,
 	MARKDOWN_RESOURCE_REFERENCE_REGEX,
+	MARKDOWN_TICKET_REFERENCE_REGEX,
 	MARKDOWN_USER_REFERENCE_REGEX
 } from '../../../../../../../helpers/comments';
 import { getAPIUrl } from '../../../../../../../services/api';
 import { Image } from '../screenshot/screenshot.styles';
-import { IssueReference } from './issueReference/';
 import { Blockquote, Paragraph } from './markdownMessage.styles';
 import { ResourceReference } from './resourceReference/';
+import { TicketReference } from './ticketReference/';
 import { UserReference } from './userReference/userReference.component';
 
 const withStyledRenderer = (StyledComponent) => (props) => <StyledComponent {...props} />;
@@ -35,13 +35,13 @@ const EnhancedLink = ({ children, href, ...props }) => {
 		[() => value.match(MARKDOWN_RESOURCE_REFERENCE_REGEX), () => {
 			return (<ResourceReference id={href} text={value} type={props.title} />);
 		}],
-		[() => value.match(MARKDOWN_ISSUE_REFERENCE_REGEX), () => {
-			return (<IssueReference id={href} text={value} />);
+		[() => value.match(MARKDOWN_TICKET_REFERENCE_REGEX), () => {
+			return (<TicketReference id={href} text={value} />);
 		}],
 		[() => value.match(MARKDOWN_USER_REFERENCE_REGEX), () => {
 			return (<UserReference id={href} text={value} />);
 		}],
-		[stubTrue, () => value]
+		[stubTrue, () => (<a href={href} target="_blank" rel="noopener noreferrer">{value}</a>)]
 	])(value);
 };
 

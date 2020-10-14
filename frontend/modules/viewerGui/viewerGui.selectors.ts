@@ -18,7 +18,14 @@
 import { createSelector } from 'reselect';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
 import * as Bim from '../bim';
+import { selectOverrides as selectGroupsOverrides,
+	selectTransparencies as selectGroupsTransparencies } from '../groups';
 import { selectIsTreeProcessed } from '../tree';
+
+import { selectOverrides as selectViewsOverrides,
+		selectTransparencies as selectViewsTransparencies } from '../viewpoints';
+
+import { selectSelectedFrameColors, selectSelectedFrameTransparencies } from '../sequences';
 
 export const selectViewerGuiDomain = (state) => ({...state.viewerGui});
 
@@ -74,4 +81,16 @@ export const selectIsClipEdit = createSelector(
 
 export const selectClipNumber = createSelector(
 	selectViewerGuiDomain, (state) => state.clipNumber
+);
+
+export const selectColorOverrides = createSelector(
+	selectViewsOverrides, selectGroupsOverrides, selectSelectedFrameColors,
+		(viewsOverrides, groupsOverrides, sequenceFrameOverrides ) =>
+		({...viewsOverrides,  ...groupsOverrides, ...sequenceFrameOverrides})
+);
+
+export const selectAllTransparencyOverrides = createSelector(
+	selectViewsTransparencies, selectGroupsTransparencies, selectSelectedFrameTransparencies,
+		(viewsTransparencies, groupsTransparencies, sequenceTransparencies) =>
+		({...viewsTransparencies, ...groupsTransparencies, ...sequenceTransparencies})
 );

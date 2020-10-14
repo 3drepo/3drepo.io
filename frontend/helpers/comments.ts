@@ -16,13 +16,14 @@
  */
 
 import { uniqBy, values } from 'lodash';
+import linkify from 'markdown-linkify';
 import { getAPIUrl } from '../services/api';
 import { getRiskConsequenceName, getRiskLikelihoodName } from './risks';
 import { sortByDate } from './sorting';
 
 export const INTERNAL_IMAGE_PATH_PREFIX = `API/`;
 export const MARKDOWN_USER_REFERENCE_REGEX = new RegExp('@\\w+', 'gi');
-export const MARKDOWN_ISSUE_REFERENCE_REGEX = new RegExp('#\\d+', 'gi');
+export const MARKDOWN_TICKET_REFERENCE_REGEX = new RegExp('#\\d+', 'gi');
 export const MARKDOWN_RESOURCE_REFERENCE_REGEX = new RegExp('#res.[\\w-]+', 'gi');
 export const MARKDOWN_INTERNAL_IMAGE_PATH_REGEX = new RegExp(`${INTERNAL_IMAGE_PATH_PREFIX}`, 'gi');
 
@@ -61,7 +62,7 @@ export const prepareComments = (comments = []) => {
 		return comments;
 	}
 
-	const preparedComments = comments.map((comment) => this.prepareComment(comment));
+	const preparedComments = comments.map((comment) => prepareComment(comment));
 	return sortByDate(preparedComments, {order: 'desc'});
 };
 
@@ -231,6 +232,16 @@ const convertActionCommentToText = (comment: IComment) => {
 				comment.action.propertyText = 'Pin';
 				break;
 
+			case 'screenshot':
+				comment.action.to = comment.action.from = null;
+				comment.action.propertyText = 'Screenshot';
+				break;
+
+			case 'viewpoint':
+				comment.action.to = comment.action.from = null;
+				comment.action.propertyText = 'Viewpoint';
+				break;
+
 			case 'issue_referenced':
 				comment.action.propertyText = 'Referenced';
 				text = 'Issue referenced in #' + comment.action.to  + ' by ' + comment.owner;
@@ -278,26 +289,27 @@ const convertActionValueToText = (value = '') => {
 	return actionText;
 };
 
-export const transformCustomsLinksToMarkdown = ( comment: IComment, issues, type ) => {
+export const transformCustomsLinksToMarkdown = ( comment: IComment, tickets, type ) => {
 	let text = comment.comment;
 
-	if (!text || (Boolean(comment.action) && comment.action?.property !== 'issue_referenced')) {
+	if (!text || (Boolean(comment.action)
+	&&  !['issue_referenced', 'risk_referenced'].includes(comment.action?.property))) {
 		return text;
 	}
 
 	const usersReferences = text.matchAll(MARKDOWN_USER_REFERENCE_REGEX);
-	const issuesReferences = text.matchAll(MARKDOWN_ISSUE_REFERENCE_REGEX) || [];
+	const ticketsReferences = text.matchAll(MARKDOWN_TICKET_REFERENCE_REGEX) || [];
 	const resourcesReferences = text.matchAll(MARKDOWN_RESOURCE_REFERENCE_REGEX);
 
-	if (issuesReferences) {
-		const uniqIssuesReferences = uniqBy([...issuesReferences], 0);
+	if (ticketsReferences) {
+		const uniqIssuesReferences = uniqBy([...ticketsReferences], 0);
 		uniqIssuesReferences.forEach(({ 0: issueReference }) => {
-			const issueNumber = Number(issueReference.replace('#', ''));
-			const issueData = values(issues).find((issue) => issue.number === issueNumber);
+			const ticketNumber = Number(issueReference.replace('#', ''));
+			const ticketData = values(tickets).find((ticket) => ticket.number === ticketNumber);
 
-			if (issueData && issueData._id) {
+			if (ticketData && ticketData._id) {
 				const referenceRegExp = RegExp(issueReference, 'g');
-				text = text.replace(referenceRegExp, `[${issueReference}](${issueData._id})`);
+				text = text.replace(referenceRegExp, `[${issueReference}](${ticketData._id})`);
 			}
 		});
 	}
@@ -320,6 +332,8 @@ export const transformCustomsLinksToMarkdown = ( comment: IComment, issues, type
 				.replace(referenceRegExp, `[${resourceReference}](${resourceReference.replace('#res.', '')} "${type}")`);
 		});
 	}
+
+	text = linkify(text);
 
 	return text;
 };

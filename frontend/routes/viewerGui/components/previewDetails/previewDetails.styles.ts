@@ -27,15 +27,30 @@ import {
 	Typography as TypographyComponent
 } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import {GROUP_PANEL_NAME, GROUPS_TYPES} from '../../../../constants/groups';
 
 import { COLOR } from '../../../../styles';
 import { Container as MessageListContainer, FilterWrapper } from '../../../components/messagesList/messagesList.styles';
 
-const SUMMARY_HEIGHT = 64;
+const SUMMARY_HEIGHT = 70;
+
+const containerStyle = (edit: boolean, panelName: string = '', isSmartGroup: boolean) => {
+	if (panelName === GROUP_PANEL_NAME) {
+		return isSmartGroup ? COLOR.BLACK_6 : COLOR.WHITE;
+	}
+
+	return !edit ? COLOR.WHITE : COLOR.BLACK_6;
+};
+
+interface IContainer {
+	edit: boolean;
+	panelName: string;
+	isSmartGroup?: boolean;
+}
 
 export const Container = styled.div`
 	color: ${COLOR.BLACK_60};
-	background-color: ${COLOR.WHITE};
+	background-color: ${({ edit, panelName, isSmartGroup }: IContainer) => containerStyle(edit, panelName, isSmartGroup)};
 	overflow: hidden;
 	display: flex;
 	flex-direction: column;
@@ -150,6 +165,7 @@ export const MainInfoContainer = styled.div`
 	display: flex;
 	flex-direction: column;
 	width: 100%;
+	padding-right: 0 !important;
 `;
 
 const unexpandedStyles  = css`
@@ -172,9 +188,6 @@ const expandedStyles = css`
 		height: auto;
 	}
 
-	${FilterWrapper} {
-		display: none;
-	}
 `;
 
 export const ScrollableContainer = styled.div`

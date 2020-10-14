@@ -20,7 +20,9 @@ import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 
 import { ROUTES } from '../../constants/routes';
+import { getCookie, setCookie } from '../../helpers/cookies';
 import { renderWhenTrue } from '../../helpers/rendering';
+import { WebGLChecker } from '../../helpers/webglChecker';
 import { analyticsService } from '../../services/analytics';
 import { clientConfigService } from '../../services/clientConfig';
 import { isStaticRoute, STATIC_ROUTES } from '../../services/staticPages';
@@ -55,6 +57,8 @@ interface IProps {
 	hideDialog: () => void;
 	onLoggedOut: () => void;
 	subscribeToDm: (event, handler) => void;
+	showDialog: (config) => void;
+	dialogs: any[];
 }
 
 interface IState {
@@ -70,6 +74,10 @@ const ANALYTICS_REFERER_ROUTES = [
 ] as any;
 
 export class App extends React.PureComponent<IProps, IState> {
+
+	get WebGLVersion() {
+		return WebGLChecker();
+	}
 
 	public state = {
 		referrer: DEFAULT_REDIRECT,
@@ -117,9 +125,27 @@ export class App extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		if (location.pathname !== prevProps.location.pathname) {
+		if (decodeURIComponent(location.pathname) !== decodeURIComponent(prevProps.location.pathname)) {
 			this.sendAnalyticsPageView(location);
 			this.props.hideDialog();
+		}
+
+		if (!this.props.dialogs.length && this.props.isAuthenticated && this.WebGLVersion !== 2) {
+			const { currentUser: { username }, showDialog } = this.props;
+			const cookieName = `unsupportedViewerWarning_${username}`;
+			const cookie = getCookie(cookieName);
+
+			if (!cookie) {
+				showDialog({
+					title: `3D Repo Error`,
+					content: `
+						Your browser does not support WebGL 2.0 therefore the 3D Viewer will be unavailable.
+						However, you can still other functionalities we offer.<br><br>
+						To get the full experience, please update to the latest Chrome, Firefox or Edge.
+					`,
+					onCancel: () => setCookie(cookieName, true),
+				});
+			}
 		}
 	}
 

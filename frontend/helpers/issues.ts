@@ -46,7 +46,7 @@ export const prepareIssue = (issue, jobs = []) => {
 	}
 
 	if (issue.priority && issue.status) {
-		const { Icon, color } = this.getStatusIcon(issue.priority, issue.status);
+		const { Icon, color } = getStatusIcon(issue.priority, issue.status);
 		preparedIssue.StatusIconComponent = Icon;
 		preparedIssue.statusColor = color;
 	}
@@ -58,7 +58,7 @@ export const prepareIssue = (issue, jobs = []) => {
 	}
 
 	if (issue.status) {
-		preparedIssue.defaultHidden = issue.status === STATUSES.CLOSED;
+		preparedIssue.defaultHidden = [STATUSES.CLOSED, STATUSES.VOID].includes(issue.status);
 	}
 
 	return preparedIssue;

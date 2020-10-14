@@ -24,7 +24,7 @@ import SaveIcon from '@material-ui/icons/Save';
 import ShortTextIcon from '@material-ui/icons/ShortText';
 import ReactTextareaAutocomplete from '@webscopeio/react-textarea-autocomplete';
 import { Field, Formik } from 'formik';
-import { values as _values } from 'lodash';
+import { lowerCase, pick, values as _values } from 'lodash';
 import React from 'react';
 import * as Yup from 'yup';
 
@@ -44,18 +44,19 @@ import {
 	Container,
 	FileUploadContainer,
 	FileUploadInvoker,
-	IssueSuggestion,
 	RemoveButtonWrapper,
 	StyledForm,
 	StyledTextField,
 	TextFieldWrapper,
+	TicketSuggestion,
 	UserSuggestion,
 } from './commentForm.styles';
 
 interface IProps {
 	formRef: any;
+	commentRef: any;
 	horizontal: boolean;
-	issues: any[];
+	tickets: any[];
 	canComment: boolean;
 	comment?: string;
 	screenshot?: string;
@@ -73,7 +74,8 @@ interface IProps {
 	deactivateMeasure: () => void;
 	setIsPinDropMode: (mode: boolean) => void;
 	teamspaceUsers: any[];
-	disableIssuesSuggestions?: boolean;
+	fetchingDetailsIsPending?: boolean;
+	postCommentIsPending?: boolean;
 }
 
 interface IState {
@@ -99,8 +101,8 @@ const UserSuggestionItem = ({ entity: { ...userData } }: ISuggestionItem) => (
 	</UserSuggestion>
 );
 
-const IssueSuggestionItem = ({ entity: { ...issueData } }) => (
-	<IssueSuggestion {...issueData} />
+const TicketSuggestionItem = ({ entity: { ... ticketData } }) => (
+	<TicketSuggestion {...ticketData} />
 );
 
 export class CommentForm extends React.PureComponent<IProps, IState> {
@@ -119,12 +121,13 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 		return 'You are not able to comment';
 	}
 
-	private filteredUsersList = (token) => this.props.teamspaceUsers.filter(({ user }) =>
-		user.startsWith(token)).slice(0, 5)
+	private filteredUsersList = (token) => this.props.teamspaceUsers.filter((user) =>
+			_values(pick(user, ['user', 'firstName', 'lastName']))
+				.map(lowerCase).some((value) => value.includes(lowerCase(token)))).slice(0, 5)
 
-	private filteredIssuesList = (token) =>
-			_values(this.props.issues).filter(({ number: issueNumber }) =>
-			String(issueNumber).startsWith(token)).slice(0, 5)
+	private filteredTicketsList = (token) =>
+			_values(this.props.tickets).filter(({ number: ticketNumber }) =>
+			String(ticketNumber).startsWith(token)).slice(0, 5)
 
 	public state = {
 		isPinActive: false,
@@ -197,16 +200,14 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 			},
 		};
 
-		if (!this.props.disableIssuesSuggestions) {
-			return ({
-				...usersTrigger,
-				'#': {
-					dataProvider: (token) => this.filteredIssuesList(token),
-					component: IssueSuggestionItem,
-					output: this.outputIssue,
-				},
-			});
-		}
+		return ({
+			...usersTrigger,
+			'#': {
+				dataProvider: (token) => this.filteredTicketsList(token),
+				component: TicketSuggestionItem,
+				output: this.outputIssue,
+			},
+		});
 
 		return usersTrigger;
 	}
@@ -221,6 +222,7 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 					renderToBody
 					minChar={0}
 					trigger={this.autocompleteTriggers}
+					ref={this.props.commentRef}
 				/>
 			)} />
 		</TextFieldWrapper>
@@ -316,9 +318,7 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleSave = (values, form) => {
-		const screenshot = values.screenshot.substring(values.screenshot.indexOf(',') + 1);
-		const commentValues = { ...values, screenshot };
-		this.props.onSave(commentValues, () => {
+		this.props.onSave(values, () => {
 			form.resetForm();
 		});
 		this.setState({ newScreenshot: ''});
@@ -384,8 +384,11 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 			hideUploadButton,
 			showResidualRiskInput,
 			formRef,
-			canComment
+			canComment,
+			postCommentIsPending,
+			fetchingDetailsIsPending,
 		} = this.props;
+		const isPending = postCommentIsPending || fetchingDetailsIsPending;
 
 		return (
 			<Container>
@@ -413,6 +416,7 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 										mini
 										disabled={!hideComment && (!canComment || !form.isValid || form.isValidating) || form.isSubmitting}
 										aria-label="Add new comment"
+										pending={isPending}
 									>
 										<SaveIcon fontSize="small" />
 									</ViewerPanelButton>

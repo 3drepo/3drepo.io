@@ -17,9 +17,11 @@
 
 import { values } from 'lodash';
 import { createSelector } from 'reselect';
+
 import { RISK_LEVELS } from '../../constants/risks';
 import { prepareComments, transformCustomsLinksToMarkdown } from '../../helpers/comments';
 import { hasPin, riskToPin } from '../../helpers/pins';
+import { getRiskColor } from '../../helpers/risks';
 import { searchByFilters } from '../../helpers/searching';
 import { selectIssuesMap } from '../issues';
 import { selectQueryParams } from '../router/router.selectors';
@@ -31,7 +33,8 @@ export const selectRisksMap = createSelector(
 );
 
 export const selectRisks = createSelector(
-	selectRisksMap, (risksMap) => values(risksMap)
+	selectRisksMap, (risksMap) => values(risksMap).map((risk) =>
+		({...risk, color: getRiskColor(risk.residual_level_of_risk)}))
 );
 
 export const selectComponentState = createSelector(
@@ -57,10 +60,10 @@ export const selectActiveRiskDetails = createSelector(
 );
 
 export const selectActiveRiskComments = createSelector(
-	selectActiveRiskDetails, selectIssuesMap, (activeRiskDetails, issues) =>
+	selectActiveRiskDetails, selectRisksMap, (activeRiskDetails, risks) =>
 		prepareComments(activeRiskDetails.comments || []).map((comment) => ({
 			...comment,
-			commentWithMarkdown: transformCustomsLinksToMarkdown(comment, issues, 'risk')
+			commentWithMarkdown: transformCustomsLinksToMarkdown(comment, risks, 'risk')
 		}))
 );
 
@@ -91,7 +94,7 @@ export const selectSelectedFilters = createSelector(
 export const selectFilteredRisks = createSelector(
 	selectRisks, selectSelectedFilters, (risks, selectedFilters) => {
 		const returnHiddenRisk = selectedFilters.length && selectedFilters
-			.some(({ value: { value } }) => value === RISK_LEVELS.AGREED_FULLY);
+			.some(({ value: { value } }) => [RISK_LEVELS.AGREED_FULLY, RISK_LEVELS.VOID].includes(value));
 
 		return searchByFilters(risks, selectedFilters, returnHiddenRisk);
 	}
@@ -99,7 +102,7 @@ export const selectFilteredRisks = createSelector(
 
 export const selectAllFilteredRisks = createSelector(
 	selectRisks, selectSelectedFilters, (risks, selectedFilters) =>
-		searchByFilters(risks, selectedFilters, true)
+		searchByFilters(risks, selectedFilters, true, ['name', 'desc', 'number'])
 );
 
 export const selectShowPins = createSelector(
@@ -108,6 +111,10 @@ export const selectShowPins = createSelector(
 
 export const selectFetchingDetailsIsPending = createSelector(
 	selectComponentState, (state) => state.fetchingDetailsIsPending
+);
+
+export const selectPostCommentIsPending = createSelector(
+		selectComponentState, (state) => state.postCommentIsPending
 );
 
 export const selectSortOrder = createSelector(

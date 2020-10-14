@@ -118,6 +118,7 @@ export const VIEWER_TOOLBAR_ITEMS = {
 	SHOW_ALL: 'Show All',
 	HIDE: 'Hide',
 	ISOLATE: 'Isolate',
+	CLEAR_OVERRIDE: 'Clear Override',
 	FOCUS: 'Focus',
 	CLIP: 'Clip',
 	COORDVIEW: 'Show Coordinates',

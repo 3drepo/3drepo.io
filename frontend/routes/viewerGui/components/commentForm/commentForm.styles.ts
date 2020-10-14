@@ -23,7 +23,7 @@ import { Form } from 'formik';
 
 import { COLOR } from '../../../../styles';
 // tslint:disable-next-line:max-line-length
-import { IssuePopover } from '../../../components/messagesList/components/message/components/markdownMessage/issueReference/issuePopover/issuePopover.component';
+import { TicketPopover } from '../../../components/messagesList/components/message/components/markdownMessage/ticketReference/ticketPopover/ticketPopover.component';
 import {
 	UserPopover
 } from '../../../components/messagesList/components/message/components/userPopover/userPopover.component';
@@ -86,8 +86,9 @@ export const FileUploadInvoker = styled.input.attrs({
 	type: 'file',
 	accept: 'image/*'
 })`
-	position:fixed;
+	position: fixed;
 	top: -200%;
+	visibility: hidden;
 `;
 
 export const LoaderContainer = styled.div`
@@ -110,5 +111,5 @@ export const RemoveButtonWrapper = styled.div`
 export const UserSuggestion = styled(UserPopover)`
 `;
 
-export const IssueSuggestion = styled(IssuePopover)`
+export const TicketSuggestion = styled(TicketPopover)`
 `;

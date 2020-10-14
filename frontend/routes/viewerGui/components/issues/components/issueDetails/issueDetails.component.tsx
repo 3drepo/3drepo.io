@@ -17,19 +17,26 @@
 
 import React, { Fragment } from 'react';
 
+import { merge } from 'lodash';
+
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { canComment } from '../../../../../../helpers/issues';
+import { isViewer } from '../../../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
+import { EmptyStateInfo } from '../../../../../components/components.styles';
+import { Copy } from '../../../../../components/fontAwesomeIcon';
+import { ScreenshotDialog } from '../../../../../components/screenshotDialog';
 import { CommentForm } from '../../../commentForm';
+import { ContainedButton } from '../../../containedButton/containedButton.component';
 import { Container } from '../../../risks/components/riskDetails/riskDetails.styles';
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
-import { EmptyStateInfo } from '../../../views/views.styles';
 import { HorizontalView, MessagesList, MessageContainer, PreviewDetails } from './issueDetails.styles';
 import { IssueDetailsForm } from './issueDetailsForm.component';
 
 interface IProps {
 	viewer: any;
 	jobs: any[];
+	issues: any[];
 	topicTypes: any[];
 	issue: any;
 	comments: any[];
@@ -49,18 +56,23 @@ interface IProps {
 	fetchIssue: (teamspace, model, issueId) => void;
 	updateSelectedIssuePin: (position) => void;
 	saveIssue: (teamspace, modelId, issue, revision, finishSubmitting, disableViewer) => void;
-	updateIssue: (teamspace, modelId, issue) => void;
-	postComment: (teamspace, modelId, issueData, finishSubmitting) => void;
+	updateIssue: ( issue) => void;
+	cloneIssue: (dialogId?: string) => void;
+	postComment: (teamspace, modelId, issueData, ignoreViewer, finishSubmitting) => void;
 	removeComment: (teamspace, modelId, issueData) => void;
 	subscribeOnIssueCommentsChanges: (teamspace, modelId, issueId) => void;
 	unsubscribeOnIssueCommentsChanges: (teamspace, modelId, issueId) => void;
 	updateNewIssue: (newIssue) => void;
-	setCameraOnViewpoint: (teamspace, modelId, view) => void;
+	showViewpoint: (teamspace, modelId, view) => void;
 	onRemoveResource: (resource) => void;
 	attachFileResources: (files) => void;
 	attachLinkResources: (links) => void;
 	showDialog: (config: any) => void;
 	showScreenshotDialog: (config: any) => void;
+	showConfirmDialog: (config: any) => void;
+	updateViewpoint: (screenshot?: string) => void;
+	dialogId?: string;
+	postCommentIsPending?: boolean;
 }
 
 interface IState {
@@ -80,6 +92,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	};
 
 	public formRef = React.createRef<any>();
+	public commentRef = React.createRef<any>();
 	public panelRef = React.createRef<any>();
 	public containerRef = React.createRef<any>();
 	public messageContainerRef = React.createRef<any>();
@@ -96,6 +109,19 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		return [...this.props.jobs, UNASSIGNED_JOB];
 	}
 
+	get actionButton() {
+		const hasViewerPermissions = isViewer(this.props.permissions);
+
+		return renderWhenTrue(() => (
+				<ContainedButton
+						icon={Copy}
+						onClick={() => this.props.cloneIssue(this.props.dialogId)}
+				>
+					Clone
+				</ContainedButton>
+		))(!this.isNewIssue && !hasViewerPermissions);
+	}
+
 	get isViewerInitialized() {
 		return this.props.viewer.initialized;
 	}
@@ -104,6 +130,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		return (
 			<MessagesList
 				formRef={this.formRef}
+				commentRef={this.commentRef}
 				messages={this.props.comments}
 				isPending={this.props.fetchingDetailsIsPending}
 				removeMessage={this.removeMessage}
@@ -116,7 +143,6 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public renderPreview = renderWhenTrue(() => {
 		const { expandDetails, horizontal, failedToLoad, disableViewer } = this.props;
-		const { comments } = this.issueData;
 		const isIssueWithComments = Boolean(!this.isNewIssue);
 		const PreviewWrapper = horizontal && isIssueWithComments ? HorizontalView : Fragment;
 		const renderNotCollapsable = () => this.renderMessagesList(!horizontal && isIssueWithComments);
@@ -138,6 +164,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 					scrolled={this.state.scrolled && !horizontal}
 					isNew={this.isNewIssue}
 					showModelButton={disableViewer && !this.isNewIssue}
+					actionButton={this.actionButton}
 				/>
 				<MessageContainer ref={this.messageContainerRef}>
 					{this.renderMessagesList(horizontal && isIssueWithComments)}
@@ -155,15 +182,19 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				screenshot={this.props.newComment.screenshot}
 				viewpoint={this.props.newComment.viewpoint}
 				formRef={this.formRef}
+				commentRef={this.commentRef}
 				onTakeScreenshot={this.handleNewScreenshot}
 				onSave={this.handleSave}
 				canComment={this.userCanComment()}
 				hideComment={this.isNewIssue}
-				hideScreenshot={this.props.disableViewer}
-				hideUploadButton={!this.props.disableViewer}
+				hideScreenshot={this.props.disableViewer || this.isNewIssue}
+				hideUploadButton={this.isNewIssue}
 				messagesContainerRef={this.messageContainerRef}
 				previewWrapperRef={this.containerRef}
 				horizontal={this.props.horizontal}
+				fetchingDetailsIsPending={this.props.fetchingDetailsIsPending}
+				tickets={this.props.issues}
+				postCommentIsPending={this.props.postCommentIsPending}
 			/>
 		</ViewerPanelFooter>
 	));
@@ -191,7 +222,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 			issue, teamspace, model, fetchIssue, subscribeOnIssueCommentsChanges, unsubscribeOnIssueCommentsChanges,
 		} = this.props;
 
-		if (prevProps.issue._id !== issue._id) {
+		if (prevProps.issue._id !== issue._id && issue._id) {
 			unsubscribeOnIssueCommentsChanges(prevProps.teamspace, prevProps.model, prevProps.issue._id);
 			fetchIssue(teamspace, model, issue._id);
 			subscribeOnIssueCommentsChanges(teamspace, model, issue._id);
@@ -200,7 +231,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public handleHeaderClick = () => {
 		if (!this.isNewIssue) { // if its a new issue it shouldnt go to the viewpoint
-			this.setCameraOnViewpoint({ viewpoint: this.issueData.viewpoint });
+			this.setCameraOnViewpoint(this.issueData);
 		}
 	}
 
@@ -218,7 +249,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		if (this.isNewIssue) {
 			updateNewIssue(mergeData(this.issueData, values));
 		} else {
-			updateIssue(teamspace, model, diffData(values, this.issueData));
+			updateIssue(diffData(values, this.issueData));
 		}
 	}
 
@@ -236,15 +267,18 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				topicTypes={topicTypes}
 				currentUser={currentUser}
 				myJob={myJob}
+				onUploadScreenshot={this.handleUpdateScreenshot}
+				onTakeScreenshot={this.handleTakeScreenshot}
+				showScreenshotDialog={showScreenshotDialog}
+				onUpdateViewpoint={this.onUpdateIssueViewpoint}
 				onChangePin={updateSelectedIssuePin}
 				onSavePin={this.onPositionSave}
 				hasPin={!disableViewer && issue.position && issue.position.length}
-				hidePin={disableViewer}
+				disableViewer={disableViewer}
 				onRemoveResource={onRemoveResource}
 				attachFileResources={attachFileResources}
 				attachLinkResources={attachLinkResources}
 				showDialog={showDialog}
-				showScreenshotDialog={showScreenshotDialog}
 				canComment={this.userCanComment}
 				onThumbnailUpdate={this.handleNewScreenshot}
 				formRef={this.formRef}
@@ -263,8 +297,10 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		this.props.removeComment(this.props.teamspace, this.props.model, issueData);
 	}
 
-	public setCameraOnViewpoint = (viewpoint) => {
-		this.props.setCameraOnViewpoint(this.props.teamspace, this.props.model, viewpoint);
+	public setCameraOnViewpoint = (view) => {
+		if (!this.props.disableViewer) {
+			this.props.showViewpoint(this.props.teamspace, this.props.model, view);
+		}
 	}
 
 	public handlePanelScroll = (e) => {
@@ -289,9 +325,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		this.props.setState({ newComment });
 	}
 
-	public handleNewScreenshot = async (screenshot) => {
+	public handleNewScreenshot = (screenshot) => {
 		const { teamspace, model, viewer } = this.props;
-		const viewpoint = this.isViewerInitialized ? await viewer.getCurrentViewpoint({ teamspace, model }) : null;
 
 		if (this.isNewIssue) {
 			this.props.setState({
@@ -301,26 +336,21 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				}
 			});
 		} else {
-			if (viewpoint) {
-				this.setCommentData({ screenshot, viewpoint });
-			} else {
-				this.setCommentData({ screenshot });
-			}
+			this.setCommentData({ screenshot });
 		}
 	}
 
-	public postComment = async (teamspace, model, { comment, screenshot }, finishSubmitting) => {
-		const viewpoint = this.isViewerInitialized ? await this.props.viewer.getCurrentViewpoint({ teamspace, model }) : null;
+	public postComment = (teamspace, model, { comment, screenshot }, finishSubmitting) => {
+		const { disableViewer } = this.props;
 		const issueCommentData = {
 			_id: this.issueData._id,
 			comment,
 			viewpoint: {
-				...viewpoint,
 				screenshot
 			}
 		};
 
-		this.props.postComment(teamspace, model, issueCommentData, finishSubmitting);
+		this.props.postComment(teamspace, model, issueCommentData, disableViewer, finishSubmitting);
 	}
 
 	public handleSave = (formValues, finishSubmitting) => {
@@ -336,8 +366,77 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		const { teamspace, model, issue, updateIssue } = this.props;
 
 		if (!this.isNewIssue) {
-			updateIssue(teamspace, model, {position: issue.position || []});
+			updateIssue({position: issue.position || []});
 		}
+	}
+
+	public handleUpdateScreenshot =
+		(screenshot, disableViewpointSuggestion = false, forceViewpointUpdate = false) => {
+		const {  updateIssue, disableViewer } = this.props;
+
+		if (this.isNewIssue) {
+			this.props.setState({ newIssue: {
+					...this.issueData,
+					descriptionThumbnail: screenshot
+				}});
+		} else {
+			if (screenshot) {
+				const viewpoint = { screenshot };
+
+				if (!disableViewpointSuggestion && !disableViewer) {
+					this.handleViewpointUpdateSuggest(viewpoint);
+				} else {
+					if (forceViewpointUpdate) {
+						this.handleViewpointUpdate(viewpoint);
+					} else {
+						updateIssue( { viewpoint });
+					}
+				}
+			}
+		}
+	}
+
+	public handleTakeScreenshot = (disableViewpointSuggestion: boolean, forceViewpointUpdate) => {
+		const { showScreenshotDialog, viewer } = this.props;
+
+		showScreenshotDialog({
+			sourceImage: viewer.getScreenshot(),
+			onSave: (screenshot) => this.handleUpdateScreenshot(screenshot, disableViewpointSuggestion, forceViewpointUpdate),
+			template: ScreenshotDialog,
+			notFullScreen: true,
+		});
+	}
+
+	public handleViewpointUpdateSuggest = (viewpoint) => {
+		const { showConfirmDialog, updateIssue, viewer } = this.props;
+		showConfirmDialog({
+			title: 'Save Viewpoint?',
+			content: `
+				Would you like to update the viewpoint to your current position?
+			`,
+			onConfirm: async () => {
+				await this.handleViewpointUpdate(viewpoint);
+			},
+			onCancel: () => updateIssue({ viewpoint }),
+		});
+	}
+
+	public handleViewpointUpdate = ( viewpoint? ) => {
+		const { updateViewpoint } = this.props;
+		updateViewpoint(viewpoint?.screenshot);
+	}
+
+	public onUpdateIssueViewpoint = () => {
+		this.props.showConfirmDialog({
+			title: 'Save Screenshot?',
+			content: `
+				Would you like to create a new screenshot?
+			`,
+			onConfirm: () => {
+				this.handleTakeScreenshot(true, true);
+			},
+			onCancel: () => this.handleViewpointUpdate()
+		});
 	}
 
 	public render() {

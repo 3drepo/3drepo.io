@@ -134,7 +134,7 @@ export class Issues extends React.PureComponent<IProps, any> {
 	get showDefaultHiddenItems() {
 		if (this.props.selectedFilters.length) {
 			return this.props.selectedFilters
-				.some(({ value: { value } }) => value === STATUSES.CLOSED);
+				.some(({ value: { value } }) => [STATUSES.CLOSED, STATUSES.VOID].includes(value));
 		}
 		return false;
 	}

@@ -15,16 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import React from 'react';
+
+import Tooltip from '@material-ui/core/Tooltip';
 import RemoveIcon from '@material-ui/icons/Close';
 import { Formik } from 'formik';
-import { cond, eq, matches, stubTrue } from 'lodash';
-import React from 'react';
+import { cond, matches, stubTrue } from 'lodash';
 
 import { parseHex } from '../../../../../../helpers/colors';
 import { getColor, MEASURE_TYPE } from '../../../../../../modules/measurements/measurements.constants';
 import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
 import { SmallIconButton } from '../../../../../components/smallIconButon/smallIconButton.component';
-import { StyledForm } from '../../../views/components/viewItem/viewItem.styles';
 import {
 	Actions,
 	AxisLabel,
@@ -34,7 +35,8 @@ import {
 	MeasurementValue,
 	StyledCheckbox,
 	StyledCheckboxCell,
-	StyledTextField,
+	StyledForm,
+	StyledTextField
 } from './measureItem.styles';
 
 export interface IColor {
@@ -157,21 +159,22 @@ export const MeasureItem = ({
 				initialValues={{ newName: name }}
 				onSubmit={handleSubmit}
 			>
-				<StyledForm>
-					<StyledTextField
-						ref={textFieldRef}
-						left={Number(isPointTypeMeasure)}
-						requiredConfirm
-						fullWidth
-						value={name}
-						name="newName"
-						mutable
-						onChange={handleSave}
-						onKeyDown={this._handleKeyDown}
-						inputProps={{ maxLength: 15 }}
-						disableShowDefaultUnderline
-					/>
-				</StyledForm>
+				<Tooltip title={name} placement="bottom">
+					<StyledForm>
+						<StyledTextField
+							ref={textFieldRef}
+							left={Number(isPointTypeMeasure)}
+							requiredConfirm
+							fullWidth
+							value={name}
+							name="newName"
+							mutable
+							onChange={handleSave}
+							inputProps={{ maxLength: 15 }}
+							disableShowDefaultUnderline
+						/>
+					</StyledForm>
+				</Tooltip>
 			</Formik>
 			<Actions>
 				{

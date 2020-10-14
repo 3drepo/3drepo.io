@@ -98,7 +98,7 @@ const selectRawCardData = createSelector(
 	({ filterProp }, issues, risks, showClosedIssues, issuesSortOrder, risksSortOrder) => {
 		const activeIssues = issues.filter(({ status }) => {
 			const activeGroupingByStatus = filterProp === ISSUE_FILTER_PROPS.status.value;
-			return showClosedIssues || activeGroupingByStatus || status !== STATUSES.CLOSED;
+			return showClosedIssues || activeGroupingByStatus || ![STATUSES.CLOSED, STATUSES.VOID].includes(status);
 		});
 
 		return {
