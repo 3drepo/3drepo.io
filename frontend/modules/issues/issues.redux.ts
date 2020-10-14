@@ -176,7 +176,13 @@ export const createCommentsSuccess = (state = INITIAL_STATE, { comments, issueId
 };
 
 export const createCommentSuccess = (state = INITIAL_STATE, { comment, issueId }) => {
-	return createCommentsSuccess(state, {comments: [comment], issueId } );
+	const alreadyInComments = state.issuesMap[issueId].comments.find(({ guid }) => guid === comment.guid);
+
+	if (!alreadyInComments) {
+		return createCommentsSuccess(state, {comments: [comment], issueId } );
+	}
+
+	return { ...state };
 };
 
 export const updateCommentSuccess = (state = INITIAL_STATE, { comment, issueId }) => {
