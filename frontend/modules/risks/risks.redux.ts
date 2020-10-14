@@ -194,7 +194,13 @@ export const createCommentsSuccess = (state = INITIAL_STATE, { comments, riskId 
 };
 
 export const createCommentSuccess = (state = INITIAL_STATE, { comment, riskId }) => {
-	return createCommentsSuccess(state, {comments: [comment], riskId } );
+	const alreadyInComments = state.risksMap[riskId].comments.find(({ guid }) => guid === comment.guid);
+
+	if (!alreadyInComments) {
+		return createCommentsSuccess(state, {comments: [comment], riskId } );
+	}
+
+	return { ...state };
 };
 
 export const updateCommentSuccess = (state = INITIAL_STATE, { comment, riskId }) => {
