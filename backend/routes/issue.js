@@ -55,6 +55,21 @@ const Comment = require("../models/comment");
  */
 
 /**
+ * @apiDefine listIssuesParams
+ *
+ * @apiParam (Query) {String} [convertCoords] Convert coordinates to user space
+ * @apiParam (Query) {Number} [updatedSince] Only return issues updated since this value (in epoch value)
+ * @apiParam (Query) {Number[]} [numbers] Array of issue numbers to filter for
+ * @apiParam (Query) {String[]} [ids] Array of issue IDs to filter for
+ * @apiParam (Query) {String[]} [topicTypes] Array of topic types to filter
+ * @apiParam (Query) {String[]} [status] Array of status to filter
+ * @apiParam (Query) {String[]} [priorities] Array of priorities to filter
+ * @apiParam (Query) {String[]} [owners] Array of owners to filter
+ * @apiParam (Query) {String[]} [assignedRoles] Array of assigned roles  to filter. For searching unassigned issues the one of the values should be 'Unassigned'.
+ *
+ */
+
+/**
  * @api {get} /:teamspace/:model/issues/:issueId Get issue
  * @apiName findIssue
  * @apiGroup Issues
@@ -118,17 +133,14 @@ router.get("/issues/:issueId", middlewares.issue.canView, findIssue);
 router.get("/issues/:issueId/thumbnail.png", middlewares.issue.canView, getThumbnail);
 
 /**
- * @api {get} /:teamspace/:model/issues?[query] Get all Issues
+ * @api {get} /:teamspace/:model/issues?[query] List Issues
  * @apiName listIssues
  * @apiGroup Issues
  * @apiDescription List all issues for model.
  *
  * @apiUse Issues
+ * @apiUse listIssuesParams
  *
- * @apiParam (Query) {String} [convertCoords] Convert coordinates to user space
- * @apiParam (Query) {Number} [updatedSince] Only return issues updated since this value (in epoch value)
- * @apiParam (Query) {Number} [numbers] Array of issue numbers to filter for
- * @apiParam (Query) {String} [ids] Array of issue IDs to filter for
  *
  * @apiSuccessExample {json} Success-Response.
  * HTTP/1.1 200 OK
@@ -225,15 +237,14 @@ router.get("/issues/:issueId/viewpoints/:vid/screenshot.png", middlewares.issue.
 router.get("/issues/:issueId/viewpoints/:vid/screenshotSmall.png", middlewares.issue.canView, getScreenshot);
 
 /**
- * @api {get} /:teamspace/:model/revision/:revId/issues Get all Issues by revision ID
- * @apiName listIssues
+ * @api {get} /:teamspace/:model/revision/:revId/issues List Issues by revision ID
+ * @apiName listIssuesByRevision
  * @apiGroup Issues
  *
  * @apiUse Issues
  * @apiUse RevIdParam
  *
- * @apiParam (Query) {String} [convertCoords] Convert coordinates to user space
- * @apiParam (Query) {Number} [updatedSince] Only return issues that has been updated since this value (in epoch value)
+ * @apiUse listIssuesParams
  *
  * @apiDescription Get all issues related to specific revision ID.
  *

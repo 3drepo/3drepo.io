@@ -170,8 +170,17 @@ router.get("/risks/:riskId/thumbnail.png", middlewares.issue.canView, getThumbna
  *
  * @apiParam {String} [revId] Revision ID
  * @apiParam (Query) {Number} [updatedSince] Only return issues that has been updated since this value (in epoch value)
- * @apiParam (Query) {Number} [numbers] Array of issue numbers to filter for
- * @apiParam (Query) {String} [ids] Array of issue ids to filter for
+ * @apiParam (Query) {Number[]} [numbers] Array of issue numbers to filter for
+ * @apiParam (Query) {String[]} [ids] Array of issue ids to filter for
+ * @apiParam (Query) {String[]} [categories] Array of categories to filter for
+ * @apiParam (Query) {String[]} [mitigationStatus] Array of mitigation status to filter for
+ * @apiParam (Query) {Number[]} [likelihoods] Array of likelihoods to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
+ * @apiParam (Query) {Number[]} [consequences] Array of consequences to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
+ * @apiParam (Query) {Number[]} [residualLikelihoods] Array of residual likelihoods to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
+ * @apiParam (Query) {Number[]} [levelOfRisks] Array of levels of risks to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
+ * @apiParam (Query) {Number[]} [residualLikelihoods] Array of residual likelihoods to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
+ * @apiParam (Query) {Number[]} [residualConsequences] Array of residual consequences to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
+ * @apiParam (Query) {Number[]} [residualLevelOfRisks] Array of levels of risks to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
  *
  * @apiSuccess (200) {Object[]} risks Risk objects
  *
