@@ -1132,9 +1132,8 @@ describe("Risks", function () {
 			async.series([
 				login(agent, teamspace, password),
 				(next) => {
-					createModel(agent, teamspace,'Query issues').then((res) => {
+					createModel(agent, teamspace,'Query risks').then((res) => {
 						model = res.body.model;
-
 						let createRiskTeamspace1 = createRisk(teamspace,model);
 
 						async.series([
