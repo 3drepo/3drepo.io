@@ -45,71 +45,23 @@ describe("Sequences", function () {
 		"frames":[
 			{
 				"dateTime":1446624000000,
-				"state":"3b4375cf-bf16-4602-87e6-f8e95aff39c3",
-				"tasks":[
-					{
-						"_id":"8aca7c39-b0f2-48b8-b42f-a8be47989a8f",
-						"name":"Site Set-up/ Establishment",
-						"startDate":1446624000000,
-						"endDate":1455292800000
-					}
-				]
+				"state":"3b4375cf-bf16-4602-87e6-f8e95aff39c3"
 			},
 			{
 				"dateTime":1446656400000,
-				"state":"3b4375cf-bf16-4602-87e6-f8e95aff39c3",
-				"tasks":[
-					{
-						"_id":"8aca7c39-b0f2-48b8-b42f-a8be47989a8f",
-						"name":"Site Set-up/ Establishment",
-						"startDate":1446624000000,
-						"endDate":1455292800000
-					}
-				]
+				"state":"3b4375cf-bf16-4602-87e6-f8e95aff39c3"
 			},
 			{
 				"dateTime":1446710400000,
-				"state":"53c3fc3e-3141-4cd6-b323-406a116734ee",
-				"tasks":[
-					{
-						"_id":"8aca7c39-b0f2-48b8-b42f-a8be47989a8f",
-						"name":"Site Set-up/ Establishment",
-						"startDate":1446624000000,
-						"endDate":1455292800000
-					}
-				]
+				"state":"53c3fc3e-3141-4cd6-b323-406a116734ee"
 			},
 			{
 				"dateTime":1446742800000,
-				"state":"53c3fc3e-3141-4cd6-b323-406a116734ee",
-				"tasks":[
-					{
-						"_id":"8aca7c39-b0f2-48b8-b42f-a8be47989a8f",
-						"name":"Site Set-up/ Establishment",
-						"startDate":1446624000000,
-						"endDate":1455292800000
-					}
-				]
+				"state":"53c3fc3e-3141-4cd6-b323-406a116734ee"
 			},
 			{
 				"dateTime":1446796800000,
-				"state":"c58adf37-7694-4b5d-8a46-0be123014460",
-				"tasks":[
-					{
-						"_id":"8aca7c39-b0f2-48b8-b42f-a8be47989a8f",
-						"name":"Site Set-up/ Establishment",
-						"startDate":1446624000000,
-						"endDate":1455292800000,
-						"tasks":[
-							{
-								"_id":"8aca7c39-b0f2-48b8-b42f-a8be47989a8f",
-								"name":"Site Set-up/ Establishment",
-								"startDate":1446624000000,
-								"endDate":1455292800000
-							}
-						]
-					}
-				]
+				"state":"c58adf37-7694-4b5d-8a46-0be123014460"
 			}
 		]
 	};
@@ -123,39 +75,15 @@ describe("Sequences", function () {
 		"frames":[
 			{
 				"dateTime":1446624000000,
-				"state":"3b4375cf-bf16-4602-87e6-f8e95aff39c3",
-				"tasks":[
-					{
-						"_id":"8aca7c39-b0f2-48b8-b42f-a8be47989a8f",
-						"name":"Site Set-up/ Establishment",
-						"startDate":1446624000000,
-						"endDate":1455292800000
-					}
-				]
+				"state":"3b4375cf-bf16-4602-87e6-f8e95aff39c3"
 			},
 			{
 				"dateTime":1446656400000,
-				"state":"3b4375cf-bf16-4602-87e6-f8e95aff39c3",
-				"tasks":[
-					{
-						"_id":"8aca7c39-b0f2-48b8-b42f-a8be47989a8f",
-						"name":"Site Set-up/ Establishment",
-						"startDate":1446624000000,
-						"endDate":1455292800000
-					}
-				]
+				"state":"3b4375cf-bf16-4602-87e6-f8e95aff39c3"
 			},
 			{
 				"dateTime":1446710400000,
 				"state":"53c3fc3e-3141-4cd6-b323-406a116734ee",
-				"tasks":[
-					{
-						"_id":"8aca7c39-b0f2-48b8-b42f-a8be47989a8f",
-						"name":"Site Set-up/ Establishment",
-						"startDate":1446624000000,
-						"endDate":1455292800000
-					}
-				]
 			}
 		]
 	};
