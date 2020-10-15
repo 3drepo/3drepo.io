@@ -22,7 +22,7 @@ const Utils = require(`./utils.js`);
 
 const UserList = {};
 
-UserList.createUsersReport = async  (dbConn, ElasticClient) => {
+UserList.createUsersReport = async (dbConn, ElasticClient) => {
 	console.log('[USERS] Creating users list...');
 
 	const db = dbConn.db('admin');
@@ -30,67 +30,67 @@ UserList.createUsersReport = async  (dbConn, ElasticClient) => {
 	const users = await col.find().toArray();
 
 	// create index of Teamspaces if doesn't exist 
-
-	users.forEach((user) => {
-		if(!Utils.skipUser(user.user) && user.customData) { 
-			if(!ElasticClient.indices.exists({
-				index: Utils.teamspaceIndexPrefix + user.user.toLowerCase(),
-			  })) {
-				ElasticClient.indices.create({  
-					index: Utils.teamspaceIndexPrefix + user.user.toLowerCase()
-				  },function(err,resp,status) {
-					if(err) {
-					  console.log(err,resp);
-					}
-					else {
-					  console.log("created " + user.user + " " + status);
-					}
-				  });	
+	await Promise.all([
+		users.forEach((user) => {
+			if(!Utils.skipUser(user.user) && user.customData) { 
+				if(!ElasticClient.indices.exists({
+					index: Utils.teamspaceIndexPrefix + user.user.toLowerCase(),
+				  })) {
+					ElasticClient.indices.create({  
+						index: Utils.teamspaceIndexPrefix + user.user.toLowerCase()
+					  },function(err,resp,status) {
+						if(err) {
+						  console.log(err,resp);
+						}
+						else {
+						  console.log("created " + user.user + " " + status);
+						}
+					  });	
+				}
 			}
-		}
-	});
+		})
+	]);	
 
 	// create Teamspace details document and update if it exists
+	await Promise.all([
+		users.forEach((user) => {
+			if(!Utils.skipUser(user.user) && user.customData) { 
+				if( ElasticClient.indices.exists({
+					index: Utils.teamspaceIndexPrefix + user.user.toLowerCase(),
+				})) { 
+					const body = {
+						"Teamspace" : user.user,
+						"Email" : user.customData.email, 
+						"First Name" : user.customData.firstName, 
+						"Last Name" : user.customData.lastName, 
+						"Country" : user.customData.countryCode, 
+						"Company" : user.customData.company, 
+						"Date Created" : user.customData.createdAt, 
+						"Mail Optout" : user.customData.mailListOptOut, 
+						"Verified" : user.customData.inactive, 
+					}
+					Utils.createElasticRecord( ElasticClient, Utils.teamspaceIndexPrefix + user.user.toLowerCase(), user, body); 
+				}  else {console.log(user.user + " doesn't exist") }
+			}
+			})
+	]);		
 
-	users.forEach((user) => {
-		if(!Utils.skipUser(user.user) && user.customData) { 
-			if( ElasticClient.indices.exists({
-				index: Utils.teamspaceIndexPrefix + user.user.toLowerCase(),
-			  })) { 
-				const body = {
-					"Teamspace" : user.user,
-					"Email" : user.customData.email, 
-					"First Name" : user.customData.firstName, 
-					"Last Name" : user.customData.lastName, 
-					"Country" : user.customData.countryCode, 
-					"Company" : user.customData.company, 
-					"Date Created" : user.customData.createdAt, 
-					"Mail Optout" : user.customData.mailListOptOut, 
-					"Verified" : user.customData.inactive, 
-				}
-				const message = await Utils.createElasticRecord( ElasticClient, Utils.teamspaceIndexPrefix + user.user.toLowerCase(), user, body) 
-				console.log(message)
-			}  else {console.log(user.user + " doesn't exist") }
-		}
-	});
-	
 	// add new lastLogin document
-
-	users.forEach((user) => {
-		if(!Utils.skipUser(user.user) && user.customData) { 
-			if(ElasticClient.indices.exists({
-				index: Utils.teamspaceIndexPrefix + user.user.toLowerCase(),
-			  })) {
-
-				const body = {
-					"Teamspace" : user.user,
-					"Last Login" : user.customData.lastLoginAt,
-				}
-				var x = await Utils.createElasticRecord( ElasticClient, Utils.teamspaceIndexPrefix + user.user.toLowerCase(), user, body) 
-
-			}  else {console.log(user.user + " doesn't exist") }
-		}
-	});
+	await Promise.all([
+		users.forEach((user) => {
+			if(!Utils.skipUser(user.user) && user.customData) { 
+				if(ElasticClient.indices.exists({
+					index: Utils.teamspaceIndexPrefix + user.user.toLowerCase(),
+				})) {
+					const body = {
+						"Teamspace" : user.user,
+						"Last Login" : user.customData.lastLoginAt,
+					}
+					Utils.createElasticRecord( ElasticClient, Utils.teamspaceIndexPrefix + user.user.toLowerCase(), user, body) 
+				}  else {console.log(user.user + " doesn't exist") }
+			}
+		})
+	]);		
 	console.log('[USERS] users list generated, sending to elastic');
 }
 

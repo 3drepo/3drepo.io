@@ -61,13 +61,12 @@ Utils.teamspaceIndexPrefix = 'io-teamspace-dev-'
 Utils.statsIndexPrefix = 'io-dev-stats'
 
 
-Utils.createElasticRecord = async ( ElasticClient, index, ts, elasticBody ) => {
-	// console.log("createElasticRecord:start\n-----------------------------------------")
-	// console.log(index);
-	// console.log(ts);
-	// console.log(elasticBody);
-	// console.log("createElasticRecord:end\n-----------------------------------------")
-	return new Promise( resolve => {
+Utils.createElasticRecord = ( ElasticClient, index, ts, elasticBody ) => {
+		// console.log("createElasticRecord:start\n-----------------------------------------")
+		// console.log(index);
+		// console.log(ts);
+		// console.log(elasticBody);
+		// console.log("createElasticRecord:end\n-----------------------------------------")
 		if(!Utils.skipUser(ts.user) ) { 
 			if( ElasticClient.indices.exists({
 				index: index,
@@ -83,12 +82,10 @@ Utils.createElasticRecord = async ( ElasticClient, index, ts, elasticBody ) => {
 						console.log(err);
 					}
 					else {
-						resolve(status + " created elastic doc " + index + " " + Object.values(elasticBody).toString() );
+						console.log("created elastic doc " + index + " " + Object.values(elasticBody).toString() );
 					}
 					});	
 			}  else {console.log(user.user + " doesn't exist in elastic yet") }
 		}
-		}
-	)
 }
 module.exports = Utils;

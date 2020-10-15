@@ -67,8 +67,7 @@ const writeQuotaDetails = async(dbConn, col, ElasticClient, enterprise) => {
 			"Expiry Date" : dateString, 
 			"expired" : expired? 'Yes' : '', 
 		}
-		const message = Utils.createElasticRecord(ElasticClient, Utils.teamspaceIndexPrefix + user.user, user, elasticBody)
-		console.log(message)
+		Utils.createElasticRecord(ElasticClient, Utils.teamspaceIndexPrefix + user.user, user, elasticBody)
 		!expired && licensedTS.push({teamspace: user.user, type});
 
 	});
