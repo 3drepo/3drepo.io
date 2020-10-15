@@ -41,7 +41,7 @@ class Sequence {
 	}
 
 	cleanActivityDetail(toClean) {
-		const keys = ["_id"];
+		const keys = ["_id", "parents"];
 
 		return this.clean(toClean, keys);
 	}
