@@ -75,7 +75,7 @@ const checkCameraValues = (output, input) => {
 
 	});
 
-	["near", "far", "fov", "aspect_ratio"].forEach((key) => {
+	["near", "far", "fov", "view_to_world_scale", "aspect_ratio"].forEach((key) => {
 		if(utils.hasField(input, key)) {
 			if(!utils.isNumber(input[key])) {
 				systemLogger.logError(`invalid type ${key}`);
