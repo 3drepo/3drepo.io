@@ -526,7 +526,7 @@
 	// risks
 	define("RISK_FILTERS",{
 		"ids": {
-			"fieldName": "id" ,
+			"fieldName": "_id" ,
 			"type": "UUID"
 		},
 		"numbers": {
@@ -568,7 +568,7 @@
 	// issues
 	define("ISSUE_FILTERS",{
 		"ids": {
-			"fieldName": "id" ,
+			"fieldName": "_id" ,
 			"type": "UUID"
 		},
 		"numbers": {

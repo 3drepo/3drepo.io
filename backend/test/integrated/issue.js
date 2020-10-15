@@ -2427,6 +2427,23 @@ describe("Issues", function () {
 			], done);
 		});
 
+		it(" by id", function(done) {
+			let ids = [];
+
+			agent.get(`/${teamspace}/${model}/issues`)
+			.expect(200, function(err, res) {
+				ids = res.body.map(issue => issue._id);
+				ids = [ids[0], ids[2], ids[4]].sort();
+
+				agent.get(`/${teamspace}/${model}/issues?ids=${ids.join(',')}`)
+				.expect(200, function(err, res) {
+					expect(res.body.map((issue => issue._id)).sort()).to.eql(ids)
+					done(err);
+				});
+
+			});
+		});
+
 		it(" by topic", function(done) {
 			agent.get(`/${teamspace}/${model}/issues?topicTypes=information,structure`)
 			.expect(200, function(err, res) {

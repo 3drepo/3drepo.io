@@ -1148,6 +1148,24 @@ describe("Risks", function () {
 			], done);
 		});
 
+		it(" by id", function(done) {
+			let ids = [];
+
+			agent.get(`/${teamspace}/${model}/risks`)
+			.expect(200, function(err, res) {
+				ids = res.body.map(risk => risk._id);
+				ids = [ids[0], ids[2]].sort();
+
+				agent.get(`/${teamspace}/${model}/risks?ids=${ids.join(',')}`)
+				.expect(200, function(err, res) {
+					expect(res.body.map((risk => risk._id)).sort()).to.eql(ids)
+					done(err);
+				});
+
+			});
+		});
+
+
 		it(" by likelihood", function(done) {
 			agent.get(`/${teamspace}/${model}/risks?likelihoods=0,2`)
 			.expect(200, function(err, res) {
