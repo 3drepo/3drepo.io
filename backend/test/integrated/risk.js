@@ -1067,8 +1067,7 @@ describe("Risks", function () {
 						"aspect_ratio":0.8750189337327384,
 						"far":276.75612077194506 ,
 						"near":76.42411012233212,
-						"type":"orthogonal",
-						"clippingPlanes":[]
+						"type":"orthogonal"
 					}
 				};
 
@@ -1108,7 +1107,10 @@ describe("Risks", function () {
 			it("should succeed if removing an existing comment", function(done) {
 				agent.delete(`/${username}/${model}/risks/${riskId}/comments`)
 					.send({guid:commentId})
-					.expect(200, done);
+					.expect(200, function(err, res) {
+						console.log(err);
+						done(err);
+					});
 			});
 
 			it("should fail if invalid risk ID is given", function(done) {
