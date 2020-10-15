@@ -75,7 +75,7 @@ const checkCameraValues = (output, input) => {
 
 	});
 
-	["near", "far", "fov", "view_to_world_scale", "aspect_ratio"].forEach((key) => {
+	["near", "far", "fov", "aspect_ratio"].forEach((key) => {
 		if(utils.hasField(input, key)) {
 			if(!utils.isNumber(input[key])) {
 				systemLogger.logError(`invalid type ${key}`);
@@ -86,7 +86,7 @@ const checkCameraValues = (output, input) => {
 		}
 	});
 	if(input.type && utils.isString(input.type)) {
-		if(input.type === "orthographic") {
+		if(input.type === "orthogonal") {
 			if(utils.hasField(input, "orthographicSize") && utils.isNumber(input.orthographicSize)) {
 				output.type = input.type;
 				output.orthographicSize = input.orthographicSize;

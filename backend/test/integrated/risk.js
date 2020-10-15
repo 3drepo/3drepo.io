@@ -195,7 +195,7 @@ describe("Risks", function () {
 				"look_at":[0,0,-163.08011914810137],
 				"view_dir":[0,0,-1],
 				"right":[1,0,0],
-				"view_to_world_scale":3.537606904422707,
+				"orthographicSize":3.537606904422707,
 				"aspect_ratio":0.8750189337327384,
 				"far":276.75612077194506 ,
 				"near":76.42411012233212,
@@ -217,7 +217,7 @@ describe("Risks", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function(err, res) {
 						expect(res.body.viewpoint.type).to.equal(risk.viewpoint.type);
-						expect(res.body.viewpoint.view_to_world_scale).to.equal(risk.viewpoint.view_to_world_scale);
+						expect(res.body.viewpoint.orthographicSize).to.equal(risk.viewpoint.orthographicSize);
 						return done(err);
 					});
 				}
@@ -580,7 +580,7 @@ describe("Risks", function () {
 					"look_at":[0,0,-163.08011914810137],
 					"view_dir":[0,0,-1],
 					"right":[1,0,0],
-					"view_to_world_scale":3.537606904422707,
+					"orthographicSize":3.537606904422707,
 					"aspect_ratio":0.8750189337327384,
 					"far":276.75612077194506 ,
 					"near":76.42411012233212,
@@ -1063,7 +1063,7 @@ describe("Risks", function () {
 						"look_at":[0,0,-163.08011914810137],
 						"view_dir":[0,0,-1],
 						"right":[1,0,0],
-						"view_to_world_scale":3.537606904422707,
+						"orthographicSize":3.537606904422707,
 						"aspect_ratio":0.8750189337327384,
 						"far":276.75612077194506 ,
 						"near":76.42411012233212,
