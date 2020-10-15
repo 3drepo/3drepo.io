@@ -1107,10 +1107,7 @@ describe("Risks", function () {
 			it("should succeed if removing an existing comment", function(done) {
 				agent.delete(`/${username}/${model}/risks/${riskId}/comments`)
 					.send({guid:commentId})
-					.expect(200, function(err, res) {
-						console.log(err);
-						done(err);
-					});
+					.expect(200, done);
 			});
 
 			it("should fail if invalid risk ID is given", function(done) {
