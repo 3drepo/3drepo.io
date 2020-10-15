@@ -21,33 +21,16 @@ const fs = require('fs');
 const Utils = require ('./utils');
 
 const writeNewElasticDocument = (ElasticClient, month, year, count, total ) => {
-	const indexPrefix = 'io-dev-'
 	const elasticBody = {
 		"Month" : month,
 		"Year" : year, 
 		"Count" : count, 
-		"Total" : total, 
+		"Total" : total,
+		"DateTime" : new Date(year,month).toISOString(),
 	}
-	const hashCode = Utils.hashCode(Object.values(elasticBody).toString())
-	if( ElasticClient.indices.exists({
-		index: indexPrefix + "stats",
-		})) {
-		ElasticClient.index({  
-			index: indexPrefix + "stats",
-			// type: 'Teamspace',
-			id: hashCode ,
-			refresh: true,
-			body: elasticBody
-			},function(err,resp,status) {
-			if(err) {
-				console.log(err);
-			}
-			else {
-				console.log("created stats doc " + Object.values(elasticBody).toString());
-			}
-			});	
-	}  else {console.log( indexPrefix + "stats" + " doesn't exist in elastic yet") }
-	
+	const user = {}
+	const message = await Utils.createElasticRecord(ElasticClient, Utils.statsIndexPrefix, user, elasticBody)
+	console.log(message)
 } 
 
 const writeNewUserEntry = (ElasticClient, currentY, currentM, count, total, nextM, nextY) => {
@@ -57,12 +40,6 @@ const writeNewUserEntry = (ElasticClient, currentY, currentM, count, total, next
 			let year = currentY;
 			let counter = count;
 			do{
-				const elasticBody = {
-					"Month" : month,
-					"Year" : year, 
-					"Count" : count, 
-					"Total" : total, 
-				}
 				writeNewElasticDocument(ElasticClient, month, year, counter, total);
 				counter = 0;
 				year = month == 12? year + 1 : year;

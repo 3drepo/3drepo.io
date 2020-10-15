@@ -16,7 +16,7 @@
 */
 
 'use strict'
-const fs = require('fs');
+// const fs = require('fs');
 const Utils = require('./utils');
 
 const getNumUsers = async (col, user) => {
@@ -67,8 +67,8 @@ const writeQuotaDetails = async(dbConn, col, ElasticClient, enterprise) => {
 			"Expiry Date" : dateString, 
 			"expired" : expired? 'Yes' : '', 
 		}
-		Utils.createElasticRecord(ElasticClient, Utils.teamspaceIndexPrefix, user, elasticBody)
-		
+		const message = Utils.createElasticRecord(ElasticClient, Utils.teamspaceIndexPrefix + user.user, user, elasticBody)
+		console.log(message)
 		!expired && licensedTS.push({teamspace: user.user, type});
 
 	});
@@ -89,7 +89,7 @@ const reportTeamspaceQuota = async (dbConn, ElasticClient) => {
 
 const TS = {};
 
-TS.createTeamspaceReport = (dbConn, ElasticClient) =>{
+TS.createTeamspaceReport = async (dbConn, ElasticClient) =>{
 	return new Promise((resolve, reject) => {
 		reportTeamspaceQuota(dbConn, ElasticClient).then((ts) => {
 			console.log('[DB] Generated Teamspace Report');

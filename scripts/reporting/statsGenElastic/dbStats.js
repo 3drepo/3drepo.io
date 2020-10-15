@@ -56,7 +56,7 @@ const createReports = async(dbConn, ElasticClient) => {
 
 DBStats.createDBReport = async (dbConn, ElasticClient) => {
 	console.log('[DB] Creating DB statistics report...');
-	createReports(dbConn, ElasticClient);
+	await createReports(dbConn, ElasticClient);
 
 }
 

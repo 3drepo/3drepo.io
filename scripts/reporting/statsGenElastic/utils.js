@@ -61,27 +61,34 @@ Utils.teamspaceIndexPrefix = 'io-teamspace-dev-'
 Utils.statsIndexPrefix = 'io-dev-stats'
 
 
-Utils.createElasticRecord = async ( ElasticClient, indexPrefix, ts, elasticBody ) => {
-	if(!Utils.skipUser(ts.user) ) { 
-		if( ElasticClient.indices.exists({
-			index: indexPrefix + ts.user.toLowerCase(),
-			})) {
-			ElasticClient.index({  
-				index: indexPrefix + ts.user.toLowerCase(),
-				// type: 'Teamspace',
-				id: Utils.hashCode( Object.values(elasticBody).toString() ),
-				refresh: true,
-				body: elasticBody
-				},function(err,resp,status) {
-				if(err) {
-					console.log(err);
-				}
-				else {
-					console.log("created elastic doc " + ts.user + " " + Object.values(elasticBody).toString() );
-				}
-				});	
-		}  else {console.log(user.user + " doesn't exist in elastic yet") }
-	}
-
+Utils.createElasticRecord = async ( ElasticClient, index, ts, elasticBody ) => {
+	// console.log("createElasticRecord:start\n-----------------------------------------")
+	// console.log(index);
+	// console.log(ts);
+	// console.log(elasticBody);
+	// console.log("createElasticRecord:end\n-----------------------------------------")
+	return new Promise( resolve => {
+		if(!Utils.skipUser(ts.user) ) { 
+			if( ElasticClient.indices.exists({
+				index: index,
+				})) {
+				ElasticClient.index({  
+					index: index.toLowerCase(),
+					// type: 'Teamspace',
+					id: Utils.hashCode( Object.values(elasticBody).toString() ),
+					refresh: true,
+					body: elasticBody
+					},function(err,resp,status) {
+					if(err) {
+						console.log(err);
+					}
+					else {
+						resolve(status + " created elastic doc " + index + " " + Object.values(elasticBody).toString() );
+					}
+					});	
+			}  else {console.log(user.user + " doesn't exist in elastic yet") }
+		}
+		}
+	)
 }
 module.exports = Utils;
