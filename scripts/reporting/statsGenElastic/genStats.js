@@ -61,12 +61,8 @@ async function start() {
 		console.log('Connected successfully!');
 		await Promise.all([
 			UserList.createUsersReport(db, ElasticClient),
-		]);
-		
-		await Promise.all([
 			DBStats.createDBReport(db, ElasticClient)
 		]);
-
 		await client.close();
 	} catch (err) {
 		console.error('Connecting failed', err);

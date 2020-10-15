@@ -25,13 +25,13 @@ const Utils = require ('./utils');
 const DBStats = {};
 
 const createReports = async(dbConn, ElasticClient) => {
-	// await Promise.all([
-	// 	DBStats.createDBReport(db, ElasticClient)
-	// ]);
+	const indicesReady = () => {};
+	const indicesCreated = new Promise(indicesReady);
+
 	if(!ElasticClient.indices.exists({
 		index: Utils.statsIndexPrefix,
 	  })) {
-		ElasticClient.indices.create({  
+		const result = await ElasticClient.indices.create({  
 			index: Utils.statsIndexPrefix
 		  },function(err,resp,status) {
 			if(err) {
@@ -40,8 +40,14 @@ const createReports = async(dbConn, ElasticClient) => {
 			else {
 			  console.log("created stats index: " + Utils.statsIndexPrefix);
 			}
-		  });	
-	}
+			indicesReady();
+		  });
+	
+	} else {
+		indicesReady();
+	} 
+	
+	// await indicesCreated;
 
 	await NewUsersPerMonth.createNewUsersReport(dbConn, ElasticClient);
 	const {teamspaces} = await Teamspace.createTeamspaceReport(dbConn, ElasticClient);
