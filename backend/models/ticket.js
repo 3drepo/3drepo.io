@@ -214,7 +214,7 @@ class Ticket extends View {
 
 		if (data.viewpoint) {
 			newViewpoint = await this.createViewpoint(account, model, id, data.viewpoint, true);
-			oldTicket.viewpoint = oldTicket.viewpoints[0];
+			oldTicket.viewpoint = oldTicket.viewpoints[0] || {};
 			oldTicket = super.clean(account, model, oldTicket);
 			delete oldTicket.viewpoint.screenshot;
 			// DEPRECATED
