@@ -33,6 +33,11 @@ function* fetchDetails({ activityId }) {
 			yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.ACTIVITIES, true));
 		}
 
+		if (rightPanels.includes(VIEWER_PANELS.BIM)) {
+			yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.BIM, false));
+			yield put(BimActions.setIsActive(false));
+		}
+
 		yield put(ActivitiesActions.setComponentState({ showDetails: true, isPending: true }));
 
 		const teamspace = yield select(selectCurrentModelTeamspace);
