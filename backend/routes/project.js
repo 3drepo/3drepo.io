@@ -67,9 +67,10 @@
 
 	/**
 	 * @api {put} /:teamspace/projects/:project Update project
-	 * @apiName updateProject
+	 * @apiName updateProjectPut
 	 * @apiGroup Project
 	 * @apiDescription It updates a project. The name can be changed and the permissions as well as the permissions of users
+	 * @apiDeprecated use now (#Project:updateProject)
 	 *
 	 * @apiPermission canUpdateProject
 	 *
@@ -141,8 +142,68 @@
 	 *    models: []
 	 * }
 	 *
-	 * */
-	router.put("/projects/:project", middlewares.project.canUpdate, updateProject);
+	 */
+	router.put("/projects/:project", middlewares.project.canUpdate, changeProject);
+
+	/**
+	 * @api {patch} /:teamspace/projects/:project Update project
+	 * @apiName updateProject
+	 * @apiGroup Project
+	 * @apiDescription Update project properties (name, permissions)
+	 *
+	 * @apiPermission canUpdateProject
+	 *
+	 * @apiParam {String} teamspace Name of teamspace
+	 * @apiParam {String} project Name of project
+	 * @apiParam (Request body) {String} [name] Project name
+	 * @apiParam (Request body) {ProjectPermission[]} [permissions] List of user permissions
+	 *
+	 * @apiParam (Type: ProjectPermission) {String} user Username of user
+	 * @apiParam (Type: ProjectPermission) {String[]} permissions List of user privileges
+	 *
+	 * @apiExample {patch} Example usage (update permissions):
+	 * PATCH /acme/ProjectAnvil HTTP/1.1
+	 * {
+	 *    permissions: [
+	 *       {
+	 *          user: "alice",
+	 *          permissions: [
+	 *             "admin_project"
+	 *          ]
+	 *       },
+	 *       {
+	 *          user: "mike",
+	 *          permissions: []
+	 *       }
+	 *    ]
+	 * }
+	 *
+	 * @apiExample {patch} Example usage (rename project):
+	 * PATCH /acme/ProjectAnvil HTTP/1.1
+	 * {
+	 *    name: "ProjectInstantTunnel"
+	 * }
+	 *
+	 * @apiExample {patch} Example usage:
+	 * PATCH /acme/ProjectInstantTunnel HTTP/1.1
+	 * {
+	 *    name: "Project Trebuchet",
+	 *    permissions: [
+	 *       {
+	 *          user: "bob",
+	 *          permissions: [
+	 *             "admin_project"
+	 *          ]
+	 *       }
+	 *    ]
+	 * }
+	 *
+	 * @apiSuccessExample {json} Success-Response:
+	 * {
+	 *    status: "ok"
+	 * }
+	 */
+	router.patch("/projects/:project", middlewares.project.canUpdate, updateProject);
 
 	/**
 	 * @api {get} /:teamspace/projects List projects
@@ -345,8 +406,7 @@
 		});
 	}
 
-	function updateProject(req, res, next) {
-
+	function changeProject(req, res, next) {
 		Project.findOne({ account: req.params.account }, {name: req.params.project}).then(project => {
 			if(!project) {
 				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
@@ -354,6 +414,14 @@
 				return project.updateAttrs(req.body);
 			}
 		}).then(project => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
+		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+	}
+
+	function updateProject(req, res, next) {
+		Project.updateProject(req.params.account, req.params.project, req.body).then(project => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
