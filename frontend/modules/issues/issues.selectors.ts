@@ -73,7 +73,7 @@ export const selectActiveIssueComments = createSelector(
 	selectActiveIssueDetails, selectIssuesMap, (activeIssueDetails, issues) =>
 		prepareComments(activeIssueDetails.comments || []).map((comment) => ({
 			...comment,
-			commentWithMarkdown: transformCustomsLinksToMarkdown(comment, issues, 'issue')
+			commentWithMarkdown: transformCustomsLinksToMarkdown(activeIssueDetails, comment, issues, 'issue')
 		}))
 );
 
