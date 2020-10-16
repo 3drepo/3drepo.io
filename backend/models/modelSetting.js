@@ -305,4 +305,47 @@ const ModelSetting = ModelFactory.createClass(
 	() => MODELS_COLL
 );
 
+ModelSetting.updatePermissions = async function(account, model, permissions = []) {
+	const setting = await this.findById({account, model}, model);
+
+	if (setting) {
+		permissions.forEach((permissionUpdate) => {
+			if (!setting.permissions) {
+				setting.permissions = [];
+			}
+
+			const userIndex = setting.permissions.findIndex(x => x.user === permissionUpdate.user);
+
+			if (-1 !== userIndex) {
+				if ("" !== permissionUpdate.permission) {
+					setting.permissions[userIndex].permission = permissionUpdate.permission;
+				} else {
+					setting.permissions.splice(userIndex, 1);
+				}
+			} else if ("" !== permissionUpdate.permission) {
+				setting.permissions.push(permissionUpdate);
+			}
+		});
+
+		const updatedSetting = await setting.changePermissions(setting.permissions, account);
+
+		return { "status": updatedSetting.status };
+	} else {
+		return Promise.reject(responseCodes.MODEL_NOT_FOUND);
+	}
+};
+
+ModelSetting.batchUpdatePermissions = async function(account, batchPermissions = []) {
+	const updatePromises = batchPermissions.map((update) => this.updatePermissions(account, update.model, update.permissions));
+	const updateResponses = await Promise.all(updatePromises);
+	const okStatus = "ok";
+	const badStatusIndex = updateResponses.findIndex((response) => okStatus !== response.status);
+
+	if (-1 === badStatusIndex) {
+		return { "status": okStatus };
+	} else {
+		return updateResponses[badStatusIndex];
+	}
+};
+
 module.exports = ModelSetting;
