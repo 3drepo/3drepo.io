@@ -18,8 +18,9 @@
 "use strict";
 const mongoose = require("mongoose");
 const ModelFactory = require("./factory/modelFactory");
+const FileRef = require("./fileRef");
 const History = require("./history");
-const JSONAssets = require("./jsonAssets");
+// const JSONAssets = require("./jsonAssets");
 const ModelSetting = require("./modelSetting");
 const Ref = require("./ref");
 const Scene = require("./scene");
@@ -80,7 +81,7 @@ async function findModelSharedIdsByRulesQueries(account, model, posRuleQueries, 
 		return Promise.reject(responseCodes.INVALID_TAG_NAME);
 	}
 
-	const idToMeshesDict = await JSONAssets.getIdToMeshes(account, model, branch, revId, username);
+	const idToMeshesDict = await getIdToMeshesDict(account, model, branch, revId, username);
 	let allRulesResults = null;
 
 	if (posRuleQueries.length !== 0) {
@@ -151,6 +152,11 @@ async function getIFCGuids(account, model, shared_ids) {
 	const sceneCol =  await db.getCollection(account, model + ".scene");
 	const results = await sceneCol.find({ "parents":{ $in: shared_ids } , "type":"meta"}, {"metadata.IFC GUID":1, "_id":0}).toArray();
 	return results.map(r => r.metadata["IFC GUID"]);
+}
+
+async function getIdToMeshesDict(account, model, revId) {
+	const treeFileName = `${revId}/idToMeshes.json`;
+	return JSON.parse(await FileRef.getJSONFile(account, model, treeFileName));
 }
 
 /**
