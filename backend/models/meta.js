@@ -81,7 +81,7 @@ async function findModelSharedIdsByRulesQueries(account, model, posRuleQueries, 
 		return Promise.reject(responseCodes.INVALID_TAG_NAME);
 	}
 
-	const idToMeshesDict = await getIdToMeshesDict(account, model, branch, revId, username);
+	const idToMeshesDict = await getIdToMeshesDict(account, model, utils.uuidToString(history._id));
 	let allRulesResults = null;
 
 	if (posRuleQueries.length !== 0) {
