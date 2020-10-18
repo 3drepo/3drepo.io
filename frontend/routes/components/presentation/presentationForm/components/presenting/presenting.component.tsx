@@ -17,24 +17,31 @@
 
 import React from 'react';
 
-import { PresentationMode } from '../presentation.constants';
-import { InitialState } from './components/initialState/';
-import { JoinedPresentation } from './components/joinedPresentation/';
-import { Presenting } from './components/presenting/';
-
-const COMPONENTS_MAP = {
-	[PresentationMode.PRESENTER]: Presenting,
-	[PresentationMode.PARTICIPANT]: JoinedPresentation,
-	[PresentationMode.DEFAULT]: InitialState,
-};
+import {
+	AlignRight, CancelButton,
+	CodeLabel,
+	SessionStartedContent
+} from '../../../../../viewerGui/components/presentation/presentation.styles';
 
 interface IProps {
-	mode: PresentationMode;
+	sessionCode: string;
+	stopPresenting: () => void;
 }
 
-export const PresentationForm: React.FunctionComponent<IProps> = ({ mode, ...props }) => {
+export const Presenting: React.FunctionComponent<IProps> = ({ sessionCode, stopPresenting }) => (
+	<SessionStartedContent>
+		Session Started. Please share the following
+		invitation code to your attendees:
+		<CodeLabel>{sessionCode}</CodeLabel>
 
-	const Component = React.useMemo(() => COMPONENTS_MAP[mode] ? COMPONENTS_MAP[mode] : InitialState, [mode]);
-
-	return <Component {...props} />;
-};
+		<AlignRight>
+			<CancelButton
+				variant="raised"
+				color="secondary"
+				onClick={stopPresenting}
+			>
+				End Session
+			</CancelButton>
+		</AlignRight>
+	</SessionStartedContent>
+);

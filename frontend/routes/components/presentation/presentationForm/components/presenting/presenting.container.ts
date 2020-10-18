@@ -15,26 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
 
-import { PresentationMode } from '../presentation.constants';
-import { InitialState } from './components/initialState/';
-import { JoinedPresentation } from './components/joinedPresentation/';
-import { Presenting } from './components/presenting/';
+import { selectSessionCode, PresentationActions } from '../../../../../../modules/presentation';
+import { Presenting } from './presenting.component';
 
-const COMPONENTS_MAP = {
-	[PresentationMode.PRESENTER]: Presenting,
-	[PresentationMode.PARTICIPANT]: JoinedPresentation,
-	[PresentationMode.DEFAULT]: InitialState,
-};
+const mapStateToProps = createStructuredSelector({
+	sessionCode: selectSessionCode,
+});
 
-interface IProps {
-	mode: PresentationMode;
-}
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	stopPresenting: PresentationActions.stopPresenting,
+}, dispatch);
 
-export const PresentationForm: React.FunctionComponent<IProps> = ({ mode, ...props }) => {
-
-	const Component = React.useMemo(() => COMPONENTS_MAP[mode] ? COMPONENTS_MAP[mode] : InitialState, [mode]);
-
-	return <Component {...props} />;
-};
+export default connect(mapStateToProps, mapDispatchToProps)(Presenting);
