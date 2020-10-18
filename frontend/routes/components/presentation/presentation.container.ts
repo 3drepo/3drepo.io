@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,31 +16,18 @@
  */
 
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { selectIsAuthenticated, AuthActions } from '../../../modules/auth';
-import { selectCurrentUser, selectIsInitialised } from '../../../modules/currentUser';
-import { DialogActions } from '../../../modules/dialog';
-import { selectPathname } from '../../../modules/router/router.selectors';
-import { selectSettings, ViewerActions } from '../../../modules/viewer';
-import { selectIsFocusMode } from '../../../modules/viewerGui';
-import { TopMenu } from './topMenu.component';
+import { selectIsPresenting, selectJoinedPresentation } from '../../../modules/presentation';
+import { Presentation } from './presentation.component';
 
 const mapStateToProps = createStructuredSelector({
-	currentUser: selectCurrentUser,
-	isInitialised: selectIsInitialised,
-	visualSettings: selectSettings,
-	isFocusMode: selectIsFocusMode,
-	isAuthenticated: selectIsAuthenticated,
-	pathname: selectPathname,
+	isPresenting: selectIsPresenting,
+	joinedPresentation: selectJoinedPresentation,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	onLogout: AuthActions.logout,
-	showDialog: DialogActions.showDialog,
-	updateSettings: ViewerActions.updateSettings
 }, dispatch);
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(TopMenu));
+export default connect(mapStateToProps, mapDispatchToProps)(Presentation);
