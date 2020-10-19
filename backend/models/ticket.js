@@ -42,6 +42,12 @@ const extensionRe = /\.(\w+)$/;
 
 const getResponse = (responseCodeType) => (type) => responseCodes[responseCodeType + "_" + type];
 
+function verifySequenceDatePrecedence(ticket) {
+	return !utils.hasField(ticket, "sequence_start") ||
+		!utils.hasField(ticket, "sequence_end") ||
+		ticket["sequence_start"] <= ticket["sequence_end"];
+}
+
 class Ticket extends View {
 	constructor(collName, viewpointType, refIdsField, responseCodeType, fieldTypes, ownerPrivilegeAttributes) {
 		super();
@@ -301,15 +307,20 @@ class Ticket extends View {
 
 		const tickets = await this.getCollection(account, model);
 
-		if (Object.keys(data).length > 0) {
-			updateData["$set"] = data;
-			await tickets.update({ _id }, updateData);
-		}
-
 		// 7. Return the updated data and the old ticket
 		const updatedTicket = updateData["$unset"] ?
 			this.filterFields({ ...oldTicket, ...data }, Object.keys(updateData["$unset"])) :
 			{ ...oldTicket, ...data };
+
+		// 8. Check sequence dates in correct order
+		if (!verifySequenceDatePrecedence(newTicket)) {
+			throw responseCodes.INVALID_DATE_ORDER;
+		}
+
+		if (Object.keys(data).length > 0) {
+			updateData["$set"] = data;
+			await tickets.update({ _id }, updateData);
+		}
 
 		this.clean(account, model, updatedTicket);
 		this.clean(account, model, oldTicket);
@@ -390,7 +401,8 @@ class Ticket extends View {
 				}
 
 			}
-			if (key === "due_date" && newTicket[key] === 0) {
+			if ((key === "due_date" || key === "sequence_start" || key === "sequence_end")
+				&& newTicket[key] === 0) {
 				delete newTicket[key];
 			}
 		});
@@ -432,6 +444,11 @@ class Ticket extends View {
 		}
 
 		newTicket = this.filterFields(newTicket, ["viewpoint", "revId"]);
+
+		// Check sequence dates in correct order
+		if (!verifySequenceDatePrecedence(newTicket)) {
+			throw responseCodes.INVALID_DATE_ORDER;
+		}
 
 		const settings = await ModelSetting.findById({ account, model }, model);
 

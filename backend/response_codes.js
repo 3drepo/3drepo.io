@@ -46,6 +46,7 @@
 		NOT_AUTHORIZED: { message: "Not Authorized", status: 401 },
 
 		INVALID_ARGUMENTS: { message: "Missing or invalid arguments", status: 400 },
+		INVALID_DATE_ORDER: { message: "Start date does not precede end date", status: 400 },
 
 		RID_SID_OR_UID_NOT_SPECIFIED: { message: "RID, SID or UID not specified", status: 422 },
 

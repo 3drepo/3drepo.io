@@ -333,6 +333,24 @@ describe("Issues", function () {
 			], done);
 		});
 
+		it("with sequence end date before start should fail", function(done) {
+			const startDate = 1476107839800;
+			const endDate = 1476107839000;
+			const issue = Object.assign({
+				"name":"Issue test",
+				"sequence_start":startDate,
+				"sequence_end":endDate
+			}, baseIssue);
+			let issueId;
+
+			agent.post(`/${username}/${model}/issues`)
+				.send(issue)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_DATE_ORDER.value);
+					done(err);
+				});
+		});
+
 		it("with invalid sequence start/end date should fail", function(done) {
 			const issue = Object.assign({
 				"name":"Issue test",
@@ -341,16 +359,12 @@ describe("Issues", function () {
 			}, baseIssue);
 			let issueId;
 
-			async.series([
-				function(done) {
-					agent.post(`/${username}/${model}/issues`)
-						.send(issue)
-						.expect(400, function(err, res) {
-							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
-							done(err);
-						});
-				}
-			], done);
+			agent.post(`/${username}/${model}/issues`)
+				.send(issue)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
 		});
 
 		it("without name should fail", function(done) {
@@ -615,6 +629,36 @@ describe("Issues", function () {
 			], done);
 		});
 
+		it("add sequence end date before start should fail", function(done) {
+			const startDate = 1476107839800;
+			const endDate = 1476107839000;
+			const issue = {...baseIssue, "name":"Issue test"};
+			const sequenceData = {
+				sequence_start: startDate,
+				sequence_end: endDate
+			};
+			let issueId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200, function(err, res) {
+							issueId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/issues/${issueId}`)
+						.send(sequenceData)
+						.expect(400, function(err, res) {
+							expect(res.body.value).to.equal(responseCodes.INVALID_DATE_ORDER.value);
+							done(err);
+						});
+				}
+			], done);
+		});
+
 		it("change sequence start/end date should succeed", function(done) {
 			const startDate = 1476107839000;
 			const endDate = 1476107839800;
@@ -644,6 +688,34 @@ describe("Issues", function () {
 						.expect(200, function(err, res) {
 							expect(res.body.sequence_start).to.equal(startDate);
 							expect(res.body.sequence_end).to.equal(endDate);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change sequence end date to precede start should fail", function(done) {
+			const endDate = 1476107839000;
+			const issue = {...baseIssue, "name":"Issue test", "sequence_start":1476107839555, "sequence_end":1476107839855};
+			const sequenceData = {
+				sequence_end: endDate
+			};
+			let issueId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200, function(err, res) {
+							issueId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/issues/${issueId}`)
+						.send(sequenceData)
+						.expect(400, function(err, res) {
+							expect(res.body.value).to.equal(responseCodes.INVALID_DATE_ORDER.value);
 							done(err);
 						});
 				}
