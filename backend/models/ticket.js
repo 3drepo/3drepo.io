@@ -313,7 +313,7 @@ class Ticket extends View {
 			{ ...oldTicket, ...data };
 
 		// 8. Check sequence dates in correct order
-		if (!verifySequenceDatePrecedence(newTicket)) {
+		if (!verifySequenceDatePrecedence(updatedTicket)) {
 			throw responseCodes.INVALID_DATE_ORDER;
 		}
 
