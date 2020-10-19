@@ -223,35 +223,6 @@ describe("Groups", function () {
 
 		});
 
-		it("with rules in federation should succeed", function(done) {
-			let groupId;
-
-			async.series([
-				function(done) {
-					const newGroup = Object.assign({}, data);
-					delete newGroup.objects;
-					newGroup.rules = [{
-						field: "TestField",
-						operator: "GTE",
-						values: [1]
-					}];
-					agent.post(`/${username}/${federation}/revision/master/head/groups/`)
-						.send(newGroup)
-						.expect(200, function(err, res) {
-							groupId = res.body._id;
-							done(err);
-					});
-				},
-				function(done) {
-					agent.get(`/${username}/${federation}/revision/master/head/groups/${groupId}`)
-						.expect(200, function(err, res) {
-							expect(res.body.author).to.equal(username);
-							done(err);
-						});
-				}
-			], done);
-		});
-
 		it("with rules (0 args) should succeed", function(done) {
 			let groupId;
 
@@ -744,6 +715,37 @@ describe("Groups", function () {
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
 							expect(res.body.objects).to.deep.equal([]);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("with rules in federation should succeed", function(done) {
+			let groupId;
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						field: "IsExternal",
+						operator: "IS_EMPTY",
+						values: []
+					}];
+					agent.post(`/${username}/${federation}/revision/master/head/groups/`)
+						.send(newGroup)
+						.expect(200, function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${federation}/revision/master/head/groups/${groupId}`)
+						.expect(200, function(err, res) {
+							console.log(res.body);
+							expect(res.body.author).to.equal(username);
+							expect(res.body.objects[0].shared_ids.length).to.equal(74);
 							done(err);
 						});
 				}
