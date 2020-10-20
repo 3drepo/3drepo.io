@@ -105,7 +105,7 @@ export const VIEWER_PANELS = {
 };
 
 export const VIEWER_PROJECTION_MODES = {
-	ORTHOGONAL: 'orthogonal',
+	ORTHOGRAPHIC: 'orthographic',
 	PERSPECTIVE: 'perspective'
 };
 
@@ -114,7 +114,7 @@ export const VIEWER_TOOLBAR_ITEMS = {
 	TURNTABLE: 'Turntable',
 	HELICOPTER: 'Helicopter',
 	PERSPECTIVE_VIEW: 'Perspective View',
-	ORTHOGONAL_VIEW: 'Orthogonal View',
+	ORTHOGRAPHIC_VIEW: 'Orthographic View',
 	SHOW_ALL: 'Show All',
 	HIDE: 'Hide',
 	ISOLATE: 'Isolate',

@@ -193,7 +193,7 @@ describe("Issues", function () {
 				"aspect_ratio":0.8750189337327384,
 				"far":276.75612077194506 ,
 				"near":76.42411012233212,
-				"type":"orthogonal",
+				"type":"orthographic",
 				"clippingPlanes":[]
 			};
 
@@ -683,7 +683,7 @@ describe("Issues", function () {
 					"aspect_ratio":0.8750189337327384,
 					"far":276.75612077194506 ,
 					"near":76.42411012233212,
-					"type":"orthogonal",
+					"type":"orthographic",
 					"clippingPlanes":[]
 				}
 			};
@@ -955,7 +955,7 @@ describe("Issues", function () {
 					"aspect_ratio":0.8750189337327384,
 					"far":276.75612077194506 ,
 					"near":76.42411012233212,
-					"type":"orthogonal",
+					"type":"orthographic",
 					"clippingPlanes":[]
 				}
 			}
@@ -2343,7 +2343,7 @@ describe("Issues", function () {
 								const issue2 = res.body;
 
 								expect(issue2.viewpoint).to.exist;
-								expect(issue2.viewpoint.type).to.equal("orthogonal");
+								expect(issue2.viewpoint.type).to.equal("orthographic");
 								expect(issue2.viewpoint.orthographicSize).to.equal(2.1);
 
 								done(err);

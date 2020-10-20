@@ -199,7 +199,7 @@ describe("Risks", function () {
 				"aspect_ratio":0.8750189337327384,
 				"far":276.75612077194506 ,
 				"near":76.42411012233212,
-				"type":"orthogonal",
+				"type":"orthographic",
 				"clippingPlanes":[]
 			};
 
@@ -584,7 +584,7 @@ describe("Risks", function () {
 					"aspect_ratio":0.8750189337327384,
 					"far":276.75612077194506 ,
 					"near":76.42411012233212,
-					"type":"orthogonal",
+					"type":"orthographic",
 					"clippingPlanes":[]
 				}
 			};
@@ -1067,7 +1067,7 @@ describe("Risks", function () {
 						"aspect_ratio":0.8750189337327384,
 						"far":276.75612077194506 ,
 						"near":76.42411012233212,
-						"type":"orthogonal"
+						"type":"orthographic"
 					}
 				};
 

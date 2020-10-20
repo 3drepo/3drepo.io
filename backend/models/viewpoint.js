@@ -86,7 +86,7 @@ const checkCameraValues = (output, input) => {
 		}
 	});
 	if(input.type && utils.isString(input.type)) {
-		if(input.type === "orthogonal") {
+		if(input.type === "orthographic") {
 			if(utils.hasField(input, "orthographicSize") && utils.isNumber(input.orthographicSize)) {
 				output.type = input.type;
 				output.orthographicSize = input.orthographicSize;

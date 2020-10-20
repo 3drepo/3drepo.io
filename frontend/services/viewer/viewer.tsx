@@ -913,7 +913,7 @@ export class ViewerService {
 	public async setProjectionMode(mode) {
 		await this.isModelReady();
 		switch (mode) {
-			case VIEWER_PROJECTION_MODES.ORTHOGONAL:
+			case VIEWER_PROJECTION_MODES.ORTHOGRAPHIC:
 				UnityUtil.useOrthographicProjection();
 				break;
 			default:
