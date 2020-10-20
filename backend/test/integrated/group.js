@@ -743,7 +743,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${federation}/revision/master/head/groups/${groupId}`)
 						.expect(200, function(err, res) {
-							console.log(res.body);
+							console.log("shared_ids");
+							console.log(res.body.objects[0].shared_ids);
 							expect(res.body.author).to.equal(username);
 							expect(res.body.objects[0].shared_ids.length).to.equal(74);
 							done(err);
@@ -774,7 +775,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							console.log(res.body);
+							console.log("shared_ids");
+							console.log(res.body.objects[0].shared_ids);
 							expect(res.body.author).to.equal(username);
 							expect(res.body.objects[0].shared_ids.length).to.equal(74);
 							done(err);
