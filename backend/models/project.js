@@ -304,21 +304,20 @@
 
 		modelsSettings = await Promise.all(modelsSettings.map(async setting => {
 			const template = setting.findPermissionByUser(username);
-			setting = await setting.clean();
 
 			let settingsPermissions = [];
-
 			if(template) {
 				const permissionTemplate = dbUser.customData.permissionTemplates.findById(template.permission);
-
 				if(permissionTemplate && permissionTemplate.permissions) {
 					settingsPermissions = settingsPermissions.concat(ModelHelper.flattenPermissions(permissionTemplate.permissions, true));
 				}
 			}
 
-			setting.permissions = permissions.concat(settingsPermissions);
+			setting = await setting.clean();
+			setting.permissions = _.uniq(permissions.concat(settingsPermissions));
 			setting.model = setting._id;
 			setting.account = account;
+			setting.subModels = await ModelHelper.listSubModels(account, setting._id, C.MASTER_BRANCH_NAME);
 			setting.headRevisions = {};
 
 			return setting;
