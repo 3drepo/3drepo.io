@@ -876,10 +876,10 @@ async function getModelPermission(username, setting, account) {
 		const template = setting.findPermissionByUser(username);
 
 		if(template) {
-			const permission = dbUser.customData.permissionTemplates.findById(template.permission);
+			const permissionTemplate = dbUser.customData.permissionTemplates.findById(template.permission);
 
-			if(permission && permission.permissions) {
-				permissions = permissions.concat(flattenPermissions(permission.permissions, true));
+			if(permissionTemplate && permissionTemplate.permissions) {
+				permissions = permissions.concat(flattenPermissions(permissionTemplate.permissions, true));
 			}
 		}
 
@@ -1098,7 +1098,6 @@ const getModelSetting = async (account, model, username) => {
 	if (!setting) {
 		throw { resCode: responseCodes.MODEL_INFO_NOT_FOUND};
 	} else {
-		setting = await setting.clean();
 		// compute permissions by user role
 		const [permissions, submodels] = await Promise.all([
 			getModelPermission(
@@ -1109,6 +1108,7 @@ const getModelSetting = async (account, model, username) => {
 			listSubModels(account, model, C.MASTER_BRANCH_NAME)
 		]);
 
+		setting = await setting.clean();
 		setting.model = setting._id;
 		setting.account = account;
 		setting.headRevisions = {};
@@ -1143,5 +1143,6 @@ module.exports = {
 	importSuccess,
 	importFail,
 	getMeshById,
-	getModelSetting
+	getModelSetting,
+	flattenPermissions
 };

@@ -24,6 +24,7 @@
 	const middlewares = require("../middlewares/middlewares");
 	const Project = require("../models/project");
 	const utils = require("../utils");
+	const _ = require("lodash");
 
 	/**
 	 * @api {post} /:teamspace/projects Create project
@@ -204,6 +205,9 @@
 	 * }
 	 */
 	router.patch("/projects/:project", middlewares.project.canUpdate, updateProject);
+
+	// Get models info
+	router.get("/projects/:project/models",  middlewares.project.canList, listModels);
 
 	/**
 	 * @api {get} /:teamspace/projects List projects
@@ -448,9 +452,18 @@
 	function listProject(req, res, next) {
 
 		Project.findOneAndPopulateUsers({ account: req.params.account }, {name: req.params.project}).then(project => {
-
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project.toObject());
+		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+	}
 
+	function listModels(req, res, next) {
+		const filters = _.pick(req.query, "name");
+		const username = req.session.user.username;
+
+		Project.listModels(req.params.account, req.params.project, username, filters).then(models => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, models);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});

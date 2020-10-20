@@ -271,6 +271,62 @@
 		return await projectObj.updateAttrs({ permissions: projectObj.permissions.concat(projectPermission) });
 	};
 
+	schema.statics.listModels = async function(account, project, username, filters) {
+		const User = require("./user");
+		const ModelHelper = require("./helper/model");
+
+		const [dbUser, projectObj] = await  Promise.all([
+			await User.findByUserName(account),
+			Project.findOne({ account }, {name: project})
+		]);
+
+		if (!projectObj) {
+			throw responseCodes.INVALID_PROJECT_NAME;
+		}
+
+		if (filters && filters.name) {
+			filters.name = new RegExp(".*" + filters.name + ".*", "i");
+		}
+
+		let modelsSettings =  await ModelSetting.find({account}, { _id: { $in : projectObj.models }, ...filters});
+		let permissions = [];
+
+		const accountPerm = dbUser.customData.permissions.findByUser(username);
+		const projectPerm = projectObj.permissions.find(p=> p.user === username);
+
+		if (accountPerm && accountPerm.permissions) {
+			permissions = permissions.concat(ModelHelper.flattenPermissions(accountPerm.permissions));
+		}
+
+		if (projectPerm && projectPerm.permissions) {
+			permissions  = permissions.concat(ModelHelper.flattenPermissions(projectPerm.permissions));
+		}
+
+		modelsSettings = await Promise.all(modelsSettings.map(async setting => {
+			const template = setting.findPermissionByUser(username);
+			setting = await setting.clean();
+
+			let settingsPermissions = [];
+
+			if(template) {
+				const permissionTemplate = dbUser.customData.permissionTemplates.findById(template.permission);
+
+				if(permissionTemplate && permissionTemplate.permissions) {
+					settingsPermissions = settingsPermissions.concat(ModelHelper.flattenPermissions(permissionTemplate.permissions, true));
+				}
+			}
+
+			setting.permissions = permissions.concat(settingsPermissions);
+			setting.model = setting._id;
+			setting.account = account;
+			setting.headRevisions = {};
+
+			return setting;
+		}));
+
+		return modelsSettings;
+	};
+
 	const Project = ModelFactory.createClass(
 		"Project",
 		schema,
