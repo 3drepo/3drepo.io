@@ -70,8 +70,8 @@ interface IProps {
 	onTakeScreenshot: () => void;
 	onUploadScreenshot: (image) => void;
 	showSequenceDate: (date) => void;
-	minSequenceDate: Date;
-	maxSequenceDate: Date;
+	minSequenceDate: number;
+	maxSequenceDate: number;
 }
 
 interface IState {

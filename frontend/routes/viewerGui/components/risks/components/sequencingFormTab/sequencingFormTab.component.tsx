@@ -26,8 +26,8 @@ interface IProps {
 	formRef: any;
 	isNewTicket: boolean;
 	showSequenceDate: (value) => void;
-	min: Date;
-	max: Date;
+	min: number;
+	max: number;
 }
 
 export const SequencingFormTab: React.FunctionComponent<IProps> = ({
