@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, select, take, takeLatest } from 'redux-saga/effects';
+import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
 import { selectSelectedSequenceId, selectSelectedStateId, selectStateDefinitions,
 	SequencesActions, SequencesTypes } from '.';
@@ -30,8 +30,8 @@ import { selectIfcSpacesHidden, TreeActions } from '../tree';
 import { selectLeftPanels, ViewerGuiActions } from '../viewerGui';
 import { getSelectedFrame } from './sequences.helper';
 import { selectActivitiesDefinitions, selectFrames,
-	selectIfcSpacesHiddenSaved, selectSelectedEndingDate, selectSelectedSequence,
-	selectSequences, selectSequenceModel} from './sequences.selectors';
+	selectIfcSpacesHiddenSaved, selectNextKeyFramesDates,
+	selectSelectedSequence, selectSequences, selectSequenceModel} from './sequences.selectors';
 
 const areSequencesFromModel = (modelSettings, sequences) => (sequences || [])
 .some((s) => s.model === modelSettings._id || (modelSettings.subModels || []).some((sm) => sm.model === s.model) );
@@ -100,8 +100,8 @@ export function* fetchFrame({date}) {
 }
 
 function * fetchSelectedFrame() {
-	const endingDate = yield select(selectSelectedEndingDate);
-	yield put(SequencesActions.fetchFrame(endingDate));
+	const keyframes = yield select(selectNextKeyFramesDates);
+	yield all(keyframes.map((d) => put(SequencesActions.fetchFrame(d))));
 }
 
 export function* setSelectedFrame({date}) {

@@ -15,13 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { merge, omit } from 'lodash';
 import { createSelector } from 'reselect';
-import { STEP_SCALE } from '../../constants/sequences';
 import { GLToHexColor } from '../../helpers/colors';
-import { MILLI_PER_DAY } from '../../helpers/dateTime';
 import { selectSettings } from '../model';
-import { getSelectedEndingDate, getSelectedFrame } from './sequences.helper';
+import { getDateByStep, getSelectedFrame } from './sequences.helper';
 
 export const selectSequencesDomain = (state) => (state.sequences);
 
@@ -127,11 +124,27 @@ export const selectSelectedStartingDate = createSelector(
 	}
 );
 
-export const selectSelectedEndingDate = createSelector(
+export const selectNextKeyFramesDates =  createSelector(
 	selectSelectedStartingDate, selectStepScale, selectStepInterval , selectMaxDate,
 		(startingDate, scale, interval, maxDate) => {
-			const endingDate = getSelectedEndingDate(startingDate, scale, interval);
-			return  +endingDate > +maxDate ? new Date(maxDate) : endingDate;
+			const keyFrames = [];
+			let date = getDateByStep(startingDate, scale, interval);
+			keyFrames[0] = new Date(Math.min(maxDate, date.valueOf()));
+			maxDate = new Date(maxDate);
+
+			for (let i = 0; i < 3 ; i++) {
+				date = getDateByStep(date scale, interval);
+				keyFrames.push(date);
+			}
+
+			return keyFrames.filter((d) => d <= maxDate);
+		}
+);
+
+export const selectSelectedEndingDate = createSelector(
+	selectNextKeyFramesDates,
+		(keyFrames) => {
+			return  keyFrames[0];
 		}
 );
 

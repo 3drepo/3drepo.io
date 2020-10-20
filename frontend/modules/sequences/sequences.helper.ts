@@ -70,8 +70,6 @@ export const getDateByStep = (date, stepScale, step) => {
 	return newDate;
 };
 
-export const getSelectedEndingDate = (startingDate, scale, interval) => getDateByStep(startingDate, scale, interval);
-
 export const transformationDiffChanges = (prevTransformations: any, currentTransformations: any) => {
 	return  Object.keys(currentTransformations).reduce((currentChanges, sharedId) => {
 		const value = currentTransformations[sharedId];
