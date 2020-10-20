@@ -18,8 +18,8 @@
 "use strict";
 const mongoose = require("mongoose");
 const ModelFactory = require("./factory/modelFactory");
+const FileRef = require("./fileRef");
 const History = require("./history");
-const { getIdToMeshes } = require("./jsonAssets");
 const ModelSetting = require("./modelSetting");
 const Ref = require("./ref");
 const Scene = require("./scene");
@@ -73,14 +73,14 @@ function findObjectsByQuery(account, model, query) {
  *
  * @returns {Promise<Array<string | object>>}
  */
-async function findModelSharedIdsByRulesQueries(account, model, posRuleQueries, negRuleQueries, branch, revId, username, convertSharedIDsToString) {
+async function findModelSharedIdsByRulesQueries(account, model, posRuleQueries, negRuleQueries, branch, revId, convertSharedIDsToString) {
 	const history = await History.getHistory({ account, model }, branch, revId);
 
 	if (!history) {
 		return Promise.reject(responseCodes.INVALID_TAG_NAME);
 	}
 
-	const idToMeshesDict = await getIdToMeshes(account, model, branch, revId, username);
+	const idToMeshesDict = await getIdToMeshesDict(account, model, utils.uuidToString(history._id));
 	let allRulesResults = null;
 
 	if (posRuleQueries.length !== 0) {
@@ -153,6 +153,11 @@ async function getIFCGuids(account, model, shared_ids) {
 	return results.map(r => r.metadata["IFC GUID"]);
 }
 
+async function getIdToMeshesDict(account, model, revId) {
+	const treeFileName = `${revId}/idToMeshes.json`;
+	return JSON.parse(await FileRef.getJSONFile(account, model, treeFileName));
+}
+
 /**
  *
  * @param {string} account
@@ -212,7 +217,7 @@ Meta.getMetadata = function(account, model, id) {
 	});
 };
 
-Meta.getAllIdsWithMetadataField = function(account, model, branch, rev, fieldName, username) {
+Meta.getAllIdsWithMetadataField = function(account, model, branch, rev, fieldName) {
 	// Get the revision object to find all relevant IDs
 	let history;
 	let fullFieldName = "metadata";
@@ -248,7 +253,7 @@ Meta.getAllIdsWithMetadataField = function(account, model, branch, rev, fieldNam
 			}
 
 			getMeta.push(
-				this.getAllIdsWithMetadataField(ref.owner, ref.project, refBranch, refRev, fieldName, username)
+				this.getAllIdsWithMetadataField(ref.owner, ref.project, refBranch, refRev, fieldName)
 					.then(obj => {
 						return Promise.resolve({
 							data: obj.data,
@@ -377,7 +382,7 @@ Meta.getIfcGuids = function(account, model) {
 	return this.find({ account, model }, { type: "meta" }, { "metadata.IFC GUID": 1 });
 };
 
-Meta.findObjectIdsByRules = async function(account, model, rules, branch, revId, username, convertSharedIDsToString, showIfcGuids = false) {
+Meta.findObjectIdsByRules = async function(account, model, rules, branch, revId, convertSharedIDsToString, showIfcGuids = false) {
 	const objectIdPromises = [];
 
 	const positiveQueries = positiveRulesToQueries(rules);
@@ -405,7 +410,6 @@ Meta.findObjectIdsByRules = async function(account, model, rules, branch, revId,
 				negativeQueries,
 				_branch,
 				_revId,
-				username,
 				convertSharedIDsToString && !showIfcGuids // in the case of ifcguids I need the uuid for querying and geting the ifcguids
 			).then(shared_ids => {
 				if(!shared_ids.length) {

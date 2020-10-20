@@ -488,9 +488,9 @@ function listGroups(req, res, next) {
 	}
 
 	if (req.params.rid) {
-		groupList = Group.listGroups(dbCol, req.query, null, req.params.rid, req.session.user.username, ids, showIfcGuids);
+		groupList = Group.listGroups(dbCol, req.query, null, req.params.rid, ids, showIfcGuids);
 	} else {
-		groupList = Group.listGroups(dbCol, req.query, "master", null, req.session.user.username, ids, showIfcGuids);
+		groupList = Group.listGroups(dbCol, req.query, "master", null, ids, showIfcGuids);
 	}
 
 	groupList.then(groups => {
@@ -509,9 +509,9 @@ function findGroup(req, res, next) {
 
 	let groupItem;
 	if (req.params.rid) {
-		groupItem = Group.findByUIDSerialised(dbCol, req.params.uid, null, req.params.rid, req.session.user.username, showIfcGuids);
+		groupItem = Group.findByUIDSerialised(dbCol, req.params.uid, null, req.params.rid, showIfcGuids);
 	} else {
-		groupItem = Group.findByUIDSerialised(dbCol, req.params.uid, "master", null, req.session.user.username, showIfcGuids);
+		groupItem = Group.findByUIDSerialised(dbCol, req.params.uid, "master", null, showIfcGuids);
 	}
 
 	groupItem.then(group => {
@@ -568,7 +568,7 @@ function updateGroup(req, res, next) {
 
 	const rid = req.params.rid ? req.params.rid : null;
 	const branch = rid ? null : "master";
-	const groupItem = Group.findByUID(dbCol, req.params.uid, branch, rid, req.session.user.username, false);
+	const groupItem = Group.findByUID(dbCol, req.params.uid, branch, rid, false);
 	groupItem.then(group => {
 		if (!group) {
 			return Promise.reject({ resCode: responseCodes.GROUP_NOT_FOUND });
