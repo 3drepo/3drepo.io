@@ -34,8 +34,8 @@ import { SequenceDateActions, SequenceDateContainer, SequenceDateField } from '.
 
 interface IProps {
 	canEdit: boolean;
-	min: Date;
-	max: Date;
+	min: number;
+	max: number;
 	showSequenceDate: (value) => void;
 }
 
@@ -73,10 +73,11 @@ export class SequencingDates extends React.PureComponent<IProps, IState> {
 				<FieldsRow container justify="space-between" flex={1}>
 					<StyledFormControl>
 						<InputLabel shrink>Start time</InputLabel>
-						<Field name="sequence_start" render={({ field }) => (
+						<Field name="sequence_start" render={({ field, form }) => (
 							<SequenceDate
 								{...field}
 								{...this.props}
+								min={this.props.max ? Math.max(form.values.sequence_end || 0, this.props.max) : undefined}
 							/>
 						)} />
 					</StyledFormControl>
@@ -85,12 +86,13 @@ export class SequencingDates extends React.PureComponent<IProps, IState> {
 				<FieldsRow container justify="space-between" flex={1}>
 					<StyledFormControl>
 						<InputLabel shrink>End time</InputLabel>
-						<Field name="sequence_end" render={({ field }) => (
+						<Field name="sequence_end" render={({ field, form }) =>  (
 							<SequenceDate
 								{...field}
 								{...this.props}
-							/>
-						)} />
+								min={this.props.min ? Math.max(form.values.sequence_start || 0, this.props.min) : undefined}
+							/>)
+					} />
 					</StyledFormControl>
 				</FieldsRow>
 			</MuiPickersUtilsProvider>
