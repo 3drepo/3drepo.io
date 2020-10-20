@@ -133,7 +133,7 @@ export const selectNextKeyFramesDates =  createSelector(
 			maxDate = new Date(maxDate);
 
 			for (let i = 0; i < 3 ; i++) {
-				date = getDateByStep(date scale, interval);
+				date = getDateByStep(date, scale, interval);
 				keyFrames.push(date);
 			}
 
