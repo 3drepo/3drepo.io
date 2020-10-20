@@ -64,7 +64,7 @@ export const selectActiveRiskComments = createSelector(
 	selectActiveRiskDetails, selectRisksMap, (activeRiskDetails, risks) =>
 		prepareComments(activeRiskDetails.comments || []).map((comment) => ({
 			...comment,
-			commentWithMarkdown: transformCustomsLinksToMarkdown(comment, risks, 'risk')
+			commentWithMarkdown: transformCustomsLinksToMarkdown(activeRiskDetails, comment, risks, 'risk')
 		}))
 );
 

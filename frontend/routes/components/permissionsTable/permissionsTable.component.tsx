@@ -248,6 +248,7 @@ export class PermissionsTable extends React.PureComponent<IProps, IState> {
 
 	public componentDidMount() {
 		const rows = this.getTableRows(this.props.permissions, this.props.roles, []);
+
 		this.setState({
 			cells: this.getTableCells(this.props.roles),
 			rows,
@@ -257,7 +258,6 @@ export class PermissionsTable extends React.PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps, prevState) {
 		const changes = {} as any;
-
 		const selectedPermissionsChanged = (prevState.selectedGlobalPermissions !== this.state.selectedGlobalPermissions) ||
 			prevState.selectedUsers.length !== this.state.selectedUsers.length;
 
@@ -269,8 +269,10 @@ export class PermissionsTable extends React.PureComponent<IProps, IState> {
 			|| (this.state.selectedUsers.length !== prevState.selectedUsers.length);
 
 		if (selectedPermissionsChanged || permissionsChanged) {
+			const rows = this.getTableRows(this.props.permissions, this.props.roles, this.state.selectedUsers);
 			changes.selectedGlobalPermissions = UNDEFINED_PERMISSIONS;
-			changes.rows = this.getTableRows(this.props.permissions, this.props.roles, this.state.selectedUsers);
+			changes.rows = rows;
+			changes.selectedUsers = this.activeSelection ? [] : rows;
 			changes.currentUser = this.props.permissions.find(({ isCurrentUser }) => isCurrentUser) || {};
 		}
 		if (!isEmpty(changes)) {
@@ -298,7 +300,7 @@ export class PermissionsTable extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const {rows, cells } = this.state;
+		const { rows, cells } = this.state;
 		const onSelectionChange = this.activeSelection ? this.handleSelectionChange : null;
 		return (
 			<>

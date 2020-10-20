@@ -55,7 +55,6 @@
 	schema.set("toObject", { getters: true });
 
 	schema.pre("save", function checkInvalidName(next) {
-
 		if(C.PROJECT_DEFAULT_ID === this.name) {
 			return next(utils.makeError(responseCodes.INVALID_PROJECT_NAME));
 		}
@@ -64,7 +63,6 @@
 	});
 
 	schema.pre("save", function checkDupName(next) {
-
 		Project.findOne(this._dbcolOptions, {name: this.name}).then(project => {
 			if(project && project.id !== this.id) {
 				return next(utils.makeError(responseCodes.PROJECT_EXIST));
@@ -75,7 +73,6 @@
 	});
 
 	schema.pre("save", function checkPermissionName(next) {
-
 		for (let i = 0; i < this.permissions.length; i++) {
 			const permission = this.permissions[i];
 
@@ -108,7 +105,6 @@
 		} else {
 			return Promise.reject(responseCodes.INVALID_PROJECT_NAME);
 		}
-
 	};
 
 	schema.statics.delete = function(account, name) {
@@ -117,12 +113,11 @@
 		let project;
 
 		return Project.findOneAndRemove({account}, {name}).then(_project => {
-
 			project = _project;
 
 			// remove all models as well
 
-			if(!project) {
+			if (!project) {
 				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
 			} else {
 				return Promise.resolve();
@@ -141,9 +136,9 @@
 		const User = require("./user");
 
 		let usersToRemove = [];
-
 		let check = Promise.resolve();
-		if(data.permissions) {
+
+		if (data.permissions) {
 			// user to delete
 			for(let i = data.permissions.length - 1; i >= 0; i--) {
 				if(!Array.isArray(data.permissions[i].permissions) || data.permissions[i].permissions.length === 0) {
@@ -154,27 +149,25 @@
 			usersToRemove = _.difference(this.permissions.map(p => p.user), data.permissions.map(p => p.user));
 
 			check = User.findByUserName(this._dbcolOptions.account).then(teamspace => {
-
 				return User.getAllUsersInTeamspace(teamspace.user).then(members => {
 					const someUserNotAssignedWithLicence = data.permissions.some(
 						perm => {
 							return !members.includes(perm.user);
 						}
 					);
-					if(someUserNotAssignedWithLicence) {
+
+					if (someUserNotAssignedWithLicence) {
 						return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
 					}
 				});
-
 			});
 		}
 
-		if(data["name"] && !checkProjectNameValid(data["name"])) {
+		if (data["name"] && !checkProjectNameValid(data["name"])) {
 			return Promise.reject(responseCodes.INVALID_PROJECT_NAME);
 		}
 
 		return check.then(() => {
-
 			Object.keys(data).forEach(key => {
 				if(whitelist.indexOf(key) !== -1) {
 					this[key] = data[key];
@@ -195,52 +188,40 @@
 			});
 
 			return Promise.all(userPromises);
-
 		}).then(() => {
 			return this.save();
 		});
-
 	};
 
 	schema.statics.findAndPopulateUsers = function(account, query) {
-
 		const User = require("./user");
-
 		let userList;
+
 		return User.getAllUsersInTeamspace(account.account).then(users => {
 			userList = users;
 			return Project.find(account, query);
-
 		}).then(projects => {
-
-			if(projects) {
+			if (projects) {
 				projects.forEach(p => Project.populateUsers(userList, p));
 			}
 
 			return projects;
-
 		});
 	};
 
 	schema.statics.findOneAndPopulateUsers = function(account, query) {
-
 		const User = require("./user");
-
 		let userList;
 
 		return User.getAllUsersInTeamspace(account.account).then(users => {
-
 			userList = users;
 			return Project.findOne(account, query);
-
 		}).then(project => {
-
-			if(project) {
+			if (project) {
 				return Project.populateUsers(userList, project);
 			} else {
 				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
 			}
-
 		});
 	};
 
@@ -253,9 +234,7 @@
 	};
 
 	schema.statics.populateUsers = function(userList, project) {
-
 		userList.forEach(user => {
-
 			const userFound = project.permissions.find(perm => perm.user === user);
 
 			if(!userFound) {
@@ -300,6 +279,39 @@
 		}
 	);
 
-	module.exports = Project;
+	Project.updateProject = async function(account, projectName, data) {
+		const project = await this.findOne({ account }, { name: projectName });
 
+		if (!project) {
+			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
+		} else {
+			if (data.name) {
+				project.name = data.name;
+			}
+
+			if (data.permissions) {
+				data.permissions.forEach((permissionUpdate) => {
+					if (!project.permissions) {
+						project.permissions = [];
+					}
+
+					const userIndex = project.permissions.findIndex(x => x.user === permissionUpdate.user);
+
+					if (-1 !== userIndex) {
+						if (permissionUpdate.permissions && permissionUpdate.permissions.length) {
+							project.permissions[userIndex].permissions = permissionUpdate.permissions;
+						} else {
+							project.permissions.splice(userIndex, 1);
+						}
+					} else if (permissionUpdate.permissions && permissionUpdate.permissions.length) {
+						project.permissions.push(permissionUpdate);
+					}
+				});
+			}
+
+			return project.updateAttrs(project);
+		}
+	};
+
+	module.exports = Project;
 })();
