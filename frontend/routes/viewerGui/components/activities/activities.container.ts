@@ -20,20 +20,21 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import {
+	selectFilteredActivities,
 	selectIsDetailsPending,
 	selectSearchEnabled,
 	selectSearchQuery,
 	selectShowDetails,
 	ActivitiesActions,
 } from '../../../../modules/activities';
-import { selectActivitiesDefinitions, selectIsLoadingFrame, SequencesActions} from '../../../../modules/sequences';
+import { selectIsLoadingFrame, SequencesActions } from '../../../../modules/sequences';
 import { Activities } from './activities.component';
 
 const mapStateToProps = createStructuredSelector({
 	searchEnabled: selectSearchEnabled,
 	searchQuery: selectSearchQuery,
 	isPending: selectIsLoadingFrame,
-	activities: selectActivitiesDefinitions,
+	activities: selectFilteredActivities,
 	showDetails: selectShowDetails,
 	isDetailsPending: selectIsDetailsPending,
 });

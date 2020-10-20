@@ -47,14 +47,12 @@ interface IProps {
 }
 
 interface IState {
-	filteredActivities: any[];
 	listCollapsed: boolean;
 }
 
 export class Activities extends React.PureComponent<IProps, IState> {
 
 	public state = {
-		filteredActivities: [],
 		listCollapsed: true,
 	};
 
@@ -63,20 +61,16 @@ export class Activities extends React.PureComponent<IProps, IState> {
 
 		if (!activities || !activities.length) {
 			fetchActivities();
-		} else {
-			this.setFilteredActivities();
 		}
 	}
 
 	public componentDidUpdate(prevProps, prevState) {
-		const { activities, searchQuery, searchEnabled } = this.props;
+		const { activities, searchQuery } = this.props;
 		const { listCollapsed } = this.state;
 		const activitiesChanged = !isEqual(prevProps.activities, activities);
 		const searchQueryChanged = prevProps.searchQuery !== searchQuery;
 
 		if (searchQueryChanged || activitiesChanged) {
-			this.setFilteredActivities();
-
 			if (listCollapsed) {
 				this.setState({
 					listCollapsed: false,
@@ -129,38 +123,9 @@ export class Activities extends React.PureComponent<IProps, IState> {
 		/>
 	));
 
-	public handleSearchQueryChange = (event) => {
-		const searchQuery = event.currentTarget.value.toLowerCase();
+	public handleSearchQueryChange = ({ currentTarget }: React.ChangeEvent<HTMLInputElement>) => {
+		const searchQuery = currentTarget.value.toLowerCase();
 		this.props.setComponentState({ searchQuery });
-	}
-
-	public filterData = (data, condition) => data.reduce((list, item) => {
-		let result = null;
-
-		if (condition(item)) {
-			result = { ...item };
-		} else if (item.subTasks) {
-			const subTasks = this.filterData(item.subTasks, condition);
-
-			if (subTasks.length > 0) {
-				result = { ...item, subTasks };
-			}
-		}
-
-		if (result) {
-			list.push(result);
-		}
-
-		return list;
-	}, [])
-
-	public setFilteredActivities = () => {
-		const { activities, searchQuery, searchEnabled } = this.props;
-		const query = searchQuery.toLowerCase();
-		const filterCondition = (item) => item.name.toLowerCase().includes(query);
-		const filteredActivities = searchEnabled ? this.filterData(activities, filterCondition) : activities;
-
-		this.setState({ filteredActivities });
 	}
 
 	public renderSearch = renderWhenTrue(() => (
@@ -184,7 +149,7 @@ export class Activities extends React.PureComponent<IProps, IState> {
 
 	public renderListView = renderWhenTrue(() => (
 		<Container>
-			{this.state.filteredActivities.map((t) => (
+			{this.props.activities.map((t) => (
 				<SequenceTasksListItem key={t.id}>
 					<TaskItem task={t} defaultCollapsed={this.state.listCollapsed} onItemClick={this.handleItemClick} />
 				</SequenceTasksListItem>
@@ -203,7 +168,7 @@ export class Activities extends React.PureComponent<IProps, IState> {
 				pending={isPending && !showDetails}
 			>
 				{this.renderSearch(searchEnabled && !showDetails)}
-				{this.renderNotFound(searchEnabled && !showDetails && !this.state.filteredActivities.length)}
+				{this.renderNotFound(searchEnabled && !showDetails && !this.props.activities.length)}
 				{this.renderListView(!showDetails)}
 				{this.renderDetailsView(showDetails)}
 			</ViewerPanel>

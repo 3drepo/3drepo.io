@@ -16,6 +16,8 @@
  */
 
 import { createSelector } from 'reselect';
+import { filterNestedData } from '../../helpers/filtering';
+import { selectActivitiesDefinitions } from '../sequences';
 
 export const selectActivitiesDomain = (state) => state.activities;
 
@@ -33,6 +35,20 @@ export const selectSearchQuery = createSelector(
 
 export const selectSearchEnabled = createSelector(
 	selectComponentState, (state) => state.searchEnabled
+);
+
+export const selectFilteredActivities = createSelector(
+	selectActivitiesDefinitions, selectSearchEnabled, selectSearchQuery,
+		(activities, searchEnabled, searchQuery) => {
+			if (!activities) {
+				return [];
+			}
+
+			const query = searchQuery.toLowerCase();
+			const filterCondition = (item) => item.name.toLowerCase().includes(query);
+
+			return searchEnabled ? filterNestedData(activities, filterCondition) : activities;
+		}
 );
 
 export const selectShowDetails = createSelector(
