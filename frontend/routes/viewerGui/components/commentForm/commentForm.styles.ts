@@ -68,6 +68,14 @@ export const StyledTextFieldContainer = styled(Grid)`
 	flex: 1;
 `;
 
+export const Counter = styled.div`
+	margin-right: 16px;
+	margin-top: 5px;
+	font-size: 14px;
+	color: ${(props) => props.error ? COLOR.VIVID_RED : COLOR.BLACK_60};
+	text-align: right;
+`;
+
 export const Actions = styled.div`
 	min-height: inherit;
 	display: flex;
