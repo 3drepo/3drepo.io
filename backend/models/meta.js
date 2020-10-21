@@ -74,7 +74,7 @@ function findObjectsByQuery(account, model, query) {
  * @returns {Promise<Array<string | object>>}
  */
 async function findModelSharedIdsByRulesQueries(account, model, posRuleQueries, negRuleQueries, branch, revId, convertSharedIDsToString) {
-	const ids = await findModelMeshIdsByRulesQueries(account, model, posRuleQueries, negRulesQueries, branch, revId);
+	const ids = await findModelMeshIdsByRulesQueries(account, model, posRuleQueries, negRuleQueries, branch, revId);
 
 	return await idsToSharedIds(account, model, ids, convertSharedIDsToString) ;
 }
