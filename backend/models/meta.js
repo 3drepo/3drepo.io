@@ -74,6 +74,12 @@ function findObjectsByQuery(account, model, query) {
  * @returns {Promise<Array<string | object>>}
  */
 async function findModelSharedIdsByRulesQueries(account, model, posRuleQueries, negRuleQueries, branch, revId, convertSharedIDsToString) {
+	const ids = await findModelMeshIdsByRulesQueries(account, model, posRuleQueries, negRulesQueries, branch, revId);
+
+	return await idsToSharedIds(account, model, ids, convertSharedIDsToString) ;
+}
+
+async function findModelMeshIdsByRulesQueries(account, model, posRuleQueries, negRuleQueries, branch, revId, toString = false) {
 	const history = await History.getHistory({ account, model }, branch, revId);
 
 	if (!history) {
@@ -97,10 +103,14 @@ async function findModelSharedIdsByRulesQueries(account, model, posRuleQueries, 
 
 	const ids = [];
 	for (const id of allRulesResults) {
-		ids.push(utils.stringToUUID(id));
+		if (toString) {
+			ids.push(id);
+		} else {
+			ids.push(utils.stringToUUID(id));
+		}
 	}
 
-	return await idsToSharedIds(account, model, ids, convertSharedIDsToString) ;
+	return ids;
 }
 
 /**
@@ -299,6 +309,44 @@ Meta.getAllIdsWithMetadataField = function(account, model, branch, rev, fieldNam
 			}
 		});
 
+	});
+};
+
+Meta.getMeshIdsByRules = async function(account, model, branch, revId, username, rules) {
+	const objectIdPromises = [];
+
+	const positiveQueries = positiveRulesToQueries(rules);
+	const negativeQueries = negativeRulesToQueries(rules);
+
+	const models = new Set();
+	models.add(model);
+
+	// Check submodels
+	return Ref.find({account, model}, {type: "ref"}).then((refs) => {
+		refs.forEach((ref) => {
+			models.add(ref.project);
+		});
+
+		const modelsIter = models.values();
+
+		for (const submodel of modelsIter) {
+			const _branch = (model === submodel) ? branch : "master";
+			const _revId = (model === submodel) ? revId : null;
+
+			objectIdPromises.push(findModelMeshIdsByRulesQueries(
+				account,
+				submodel,
+				positiveQueries,
+				negativeQueries,
+				_branch,
+				_revId,
+				true
+			));
+		}
+
+		return Promise.all(objectIdPromises).then(objectIds => {
+			return objectIds.reduce((acc, val) => acc.concat(val), []);
+		});
 	});
 };
 

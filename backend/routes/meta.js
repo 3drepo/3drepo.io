@@ -26,10 +26,10 @@
 	const C = require("../constants");
 	const config = require("../config");
 
-	// Get meta data
+	// Get metadata
 
 	/**
-	 * @api {get} /:teamspace/:model/revision/master/head/meta/4DTaskSequence.json  Get All meta data for 4D Sequence Tags
+	 * @api {get} /:teamspace/:model/revision/master/head/meta/4DTaskSequence.json  Get All metadata for 4D Sequence Tags
 	 * @apiName getAllIdsWith4DSequenceTag
 	 * @apiGroup Meta
 	 *
@@ -39,7 +39,7 @@
 	router.get("/revision/master/head/meta/4DTaskSequence.json", middlewares.hasReadAccessToModel, getAllIdsWith4DSequenceTag);
 
 	/**
-	 * @api {get} /:teamspace/:model/revision/:rev/meta/4DTaskSequence.json  Get All meta data with 4D Sequence Tags by revision
+	 * @api {get} /:teamspace/:model/revision/:rev/meta/4DTaskSequence.json  Get All metadata with 4D Sequence Tags by revision
 	 * @apiName getAllIdsWith4DSequenceTagRev
 	 * @apiGroup Meta
 	 *
@@ -50,7 +50,7 @@
 	router.get("/revision/:rev/meta/4DTaskSequence.json", middlewares.hasReadAccessToModel, getAllIdsWith4DSequenceTag);
 
 	/**
-	 * @api {get} /:teamspace/:model/revision/master/head/meta/all.json Get all meta data
+	 * @api {get} /:teamspace/:model/revision/master/head/meta/all.json Get all metadata
 	 * @apiName getAllMetadata
 	 * @apiGroup Meta
 	 * @apiDescription Get all objects in the tree with their metadata.
@@ -118,7 +118,7 @@
 	router.get("/revision/master/head/meta/all.json", middlewares.hasReadAccessToModel, getAllMetadata);
 
 	/**
-	 * @api {get} /:teamspace/:model/revision/:rev/meta/all.json Get all meta data by revision
+	 * @api {get} /:teamspace/:model/revision/:rev/meta/all.json Get all metadata by revision
 	 * @apiName getAllMetadataByRev
 	 * @apiGroup Meta
 	 * @apiDescription Get all tree objects with their metadata tags by revision.
@@ -126,9 +126,35 @@
 	 *
 	 * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam {String} model Model ID
-	 * @apiParam {String} rev Revision to get meta data from
+	 * @apiParam {String} rev Revision to get metadata from
 	 */
 	router.get("/revision/:rev/meta/all.json", middlewares.hasReadAccessToModel, getAllMetadata);
+
+	/**
+	 * @api {post} /:teamspace/:model/revision(/master/head/|/:revId)/meta/meshes Get mesh IDs
+	 * @apiName getMeshIdsByRules
+	 * @apiGroup Meta
+	 * @apiDescription Get all objects matching filter rules in the tree with their metadata.
+	 *
+	 * @apiParam {String} teamspace Name of teamspace
+	 * @apiParam {String} model Model ID
+	 *
+	 * @apiExample {post} Example usage (/master/head)
+	 * POST /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/meta/meshes HTTP/1.1
+	 *
+	 * @apiExample {post} Example usage (/:revId)
+	 * POST /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/00000000-0000-0000-0000-000000000001/meta/meshes HTTP/1.1
+	 *
+	 * @apiSuccessExample {json} Success:
+	 * [
+	 * 	"db18ef69-6d6e-49a0-846e-907346abb39d",
+	 * 	"c532ff34-6669-4807-b7f3-6a0ffb17b027",
+	 * 	"fec16ea6-bb7b-4f12-b39b-f06fe6bf041d",
+	 * 	"3f881fa8-2b7b-443e-920f-396c1c85e903"
+	 * ]
+	 */
+	router.post("/revision/master/head/meta/meshes", middlewares.hasReadAccessToModel, getMeshIdsByRules);
+	router.post("/revision/:rev/meta/meshes", middlewares.hasReadAccessToModel, getMeshIdsByRules);
 
 	/**
 	 * @api {get} /:teamspace/:model/meta/keys Get array of metadata fields
@@ -158,7 +184,7 @@
 	router.get("/meta/keys", middlewares.hasReadAccessToModel, getMetadataFields);
 
 	/**
-	 * @api {get} /:teamspace/:model/meta/:id.json	Get meta data
+	 * @api {get} /:teamspace/:model/meta/:id.json	Get metadata
 	 * @apiName getMetadata
 	 * @apiGroup Meta
 	 * @apiDescription Get all metadata tags by revision. See more details <a href='#api-Meta-getAllMetadata'>here</a>.
@@ -228,7 +254,7 @@
 	 *
 	 * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam {String} model Model ID
-	 * @apiParam {String} rev Revision to get meta data from
+	 * @apiParam {String} rev Revision to get metadata from
 	 * @apiParam {String} metaKey Unique meta key
 	 */
 	router.get("/revision/:rev/meta/findObjsWith/:metaKey.json", middlewares.hasReadAccessToModel, getAllIdsWithMetadataField);
@@ -264,6 +290,23 @@
 		}
 
 		Meta.getAllMetadata(req.params.account, req.params.model, branch, req.params.rev)
+			.then(obj => {
+				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined, req.param.rev ? config.cachePolicy : undefined);
+			})
+			.catch(err => {
+				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+			});
+	}
+
+	function getMeshIdsByRules(req, res, next) {
+		const rules = req.body;
+		let branch;
+
+		if (!req.params.rev) {
+			branch = C.MASTER_BRANCH_NAME;
+		}
+
+		Meta.getMeshIdsByRules(req.params.account, req.params.model, branch, req.params.rev, req.session.user.username, rules)
 			.then(obj => {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined, req.param.rev ? config.cachePolicy : undefined);
 			})
