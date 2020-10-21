@@ -188,9 +188,10 @@ describe("Metadata", function () {
 	});
 
 	it("retrieving mesh IDs with rule query", function(done) {
-		agent.get(`/${username}/${model}/revision/master/head/meta/meshes`)
+		agent.post(`/${username}/${model}/revision/master/head/meta/meshes`)
 			.expect(200, function(err, res) {
 				console.log(res.body);
+				console.log(res.body.length);
 				done(err);
 			});
 	});
