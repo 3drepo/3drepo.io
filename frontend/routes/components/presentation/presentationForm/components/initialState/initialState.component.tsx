@@ -16,11 +16,14 @@
  */
 
 import React, { useState } from 'react';
+
 import {
 	Content, CreateSessionSection,
 	JoinPresentationSection, MainButton,
-	StyledTextfield
 } from '../../../../../viewerGui/components/presentation/presentation.styles';
+import {
+	Container, Link, Paragraph, PrimaryButton, StyledDivider, StyledDividerWithText, StyledTextfield,
+} from '../../presentationForm.styles';
 
 interface IProps {
 	startPresenting: () => void;
@@ -36,31 +39,26 @@ export const InitialState: React.FunctionComponent<IProps> = ({ startPresenting,
 	const handleJoinPresentation = () => joinPresentation(code);
 
 	return (
-		<Content>
-			<JoinPresentationSection>
-				<StyledTextfield
-					label="Enter your invitation code"
-					onChange={handleInputChange}
-					value={code}
-				/>
-				<MainButton
-					variant="raised"
-					color="secondary"
-					disabled={!hasCode}
-					onClick={handleJoinPresentation}
-				>
-					Join Session
-				</MainButton>
-			</JoinPresentationSection>
-			<CreateSessionSection>
-				<MainButton
-					variant="raised"
-					color="secondary"
-					onClick={startPresenting}
-				>
-					Create Session
-				</MainButton>
-			</CreateSessionSection>
-		</Content>
+		<Container>
+			<StyledTextfield
+				label="Invitation code"
+				onChange={handleInputChange}
+				value={code}
+			/>
+			<PrimaryButton disabled={!hasCode} onClick={handleJoinPresentation}>
+				Join Session
+			</PrimaryButton>
+			<StyledDividerWithText>
+				OR
+			</StyledDividerWithText>
+			<PrimaryButton onClick={startPresenting}>
+				Create Session
+			</PrimaryButton>
+			<StyledDivider />
+			<Paragraph component="p">
+				Share your 3D Repo view live with colleagues, or join an existing session.<br /><br />
+				<Link href="https://3drepo.com/" target="_blank">Read more...</Link>
+			</Paragraph>
+		</Container>
 	);
 };

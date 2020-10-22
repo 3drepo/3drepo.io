@@ -17,24 +17,33 @@
 
 import React from 'react';
 
-import { SessionTop } from '../sessionTop';
+import CopyIcon from '@material-ui/icons/FileCopy';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 
-import { Container, Link, Paragraph, StopButton, StyledDivider } from '../../presentationForm.styles';
+import { CopyButton, FieldContainer, Paragraph, StyledDivider, StyledTextfield } from '../../presentationForm.styles';
 
 interface IProps {
+	sessionCode: string;
 	stopPresenting: () => void;
 }
 
-export const Presenting: React.FunctionComponent<IProps> = ({ stopPresenting }) => (
-	<Container>
-		<SessionTop />
-		<StopButton onClick={stopPresenting}>
-			End Session
-		</StopButton>
-		<StyledDivider />
+export const SessionTop: React.FunctionComponent<IProps> = ({ sessionCode }) => (
+	<>
+		<FieldContainer>
+			<StyledTextfield
+					label="Invitation code"
+					value={sessionCode}
+					disabled
+			/>
+			<CopyToClipboard text={sessionCode}>
+				<CopyButton icon={CopyIcon}>
+					Copy
+				</CopyButton>
+			</CopyToClipboard>
+		</FieldContainer>
 		<Paragraph>
-			You are hosting a session, send other users the invitation code<br /><br />
-			<Link href="https://3drepo.com/" target="_blank">Read more...</Link>
+			Share your 3D Repo view live with colleagues
 		</Paragraph>
-	</Container>
+		<StyledDivider />
+	</>
 );

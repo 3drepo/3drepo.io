@@ -15,17 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
-import { createStructuredSelector } from 'reselect';
+import React from 'react';
 
-import { PresentationActions } from '../../../../../../modules/presentation';
-import { Presenting } from './presenting.component';
+import { Content, StyledDivider, Wrapper } from './dividerWithText.styles';
 
-const mapStateToProps = createStructuredSelector({});
+interface IProps {
+	className: string;
+}
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	stopPresenting: PresentationActions.stopPresenting,
-}, dispatch);
-
-export default connect(mapStateToProps, mapDispatchToProps)(Presenting);
+export const DividerWithText: React.FunctionComponent<IProps> = ({ children, className }) => {
+	return (
+		<Wrapper className={className}>
+			<Content>
+				{children}
+			</Content>
+			<StyledDivider />
+		</Wrapper>
+	);
+};

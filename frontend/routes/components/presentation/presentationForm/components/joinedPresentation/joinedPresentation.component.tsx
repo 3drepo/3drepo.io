@@ -17,20 +17,14 @@
 
 import React from 'react';
 
-import {
-	AlignRight,
-	CancelButton, MainButton,
-	SessionStartedContent, StyledButton
-} from '../../../../../viewerGui/components/presentation/presentation.styles';
+import PauseIcon from '@material-ui/icons/Pause';
+import PlayIcon from '@material-ui/icons/PlayArrow';
 
-const TogglePauseButton = ({isPaused, onClick}) => {
-	return (
-			<>
-				{isPaused && (<StyledButton variant="raised"  color="secondary"  onClick={onClick}> Resume </StyledButton>)}
-				{!isPaused && (<MainButton variant="raised"  color="secondary"  onClick={onClick}> Pause </MainButton>)}
-			</>
-	);
-};
+import { renderWhenTrueOtherwise } from '../../../../../../helpers/rendering';
+import {
+	ButtonContainer, Container, Link, Paragraph, SecondaryButton, StopButton, StyledDivider,
+} from '../../presentationForm.styles';
+import { SessionTop } from '../sessionTop';
 
 interface IProps {
 	isPaused: boolean;
@@ -38,19 +32,27 @@ interface IProps {
 	togglePause: () => void;
 }
 
-export const JoinedPresentation: React.FunctionComponent<IProps> = ({ leavePresentation, isPaused, togglePause }) => (
-	<SessionStartedContent>
-		You have entered a presentation session. Your
-		camera will now be controller by the presenter.
-		<AlignRight marginTop={45}>
-			<TogglePauseButton onClick={togglePause} isPaused={isPaused} />
-			<CancelButton
-				variant="raised"
-				color="secondary"
-				onClick={leavePresentation}
-			>
-				Exit Session
-			</CancelButton>
-		</AlignRight>
-	</SessionStartedContent>
+const renderPlayButtonContent = (isPaused: boolean) => renderWhenTrueOtherwise(
+() => <><PlayIcon /> Resume</>,
+() => <><PauseIcon /> Pause</>,
+)(isPaused);
+
+export const JoinedPresentation: React.FC<IProps> = ({ leavePresentation, isPaused, togglePause }) => (
+	<Container>
+		<SessionTop />
+		<ButtonContainer>
+			<StopButton onClick={leavePresentation}>
+				Exit
+			</StopButton>
+			<SecondaryButton onClick={togglePause}>
+				{renderPlayButtonContent(isPaused)}
+			</SecondaryButton>
+		</ButtonContainer>
+		<StyledDivider />
+		<Paragraph>
+			You are participating in a live session.<br />
+			{isPaused ? `Resume to continue following the presenter.` : `Pause to take control of your view.`}<br /><br />
+			<Link href="https://3drepo.com/" target="_blank">Read more...</Link>
+		</Paragraph>
+	</Container>
 );

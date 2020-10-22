@@ -19,13 +19,13 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { PresentationActions } from '../../../../../../modules/presentation';
-import { Presenting } from './presenting.component';
+import { selectSessionCode, PresentationActions } from '../../../../../../modules/presentation';
+import { SessionTop } from './sessionTop.component';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+	sessionCode: selectSessionCode,
+});
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	stopPresenting: PresentationActions.stopPresenting,
-}, dispatch);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(Presenting);
+export default connect(mapStateToProps, mapDispatchToProps)(SessionTop);
