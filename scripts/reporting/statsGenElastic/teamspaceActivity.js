@@ -89,10 +89,7 @@ const accumulateStats = (total, current) => {
 			}
 		}
 	}
-
 	return total;
-
-
 }
 
 const printEmptyRows = (ElasticClient, ts, licenseType, currentM, currentY, month, year) => {
@@ -107,6 +104,7 @@ const printEmptyRows = (ElasticClient, ts, licenseType, currentM, currentY, mont
 				"licenseType" : licenseType,
 				"Year" : year, 
 				"Month" : month, 
+				"DateTime" : new Date(year,month).toISOString(),
 				"Issues" : 0, 
 				"Model Revisions" : 0, 
 			}

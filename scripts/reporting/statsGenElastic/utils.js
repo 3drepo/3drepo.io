@@ -54,13 +54,18 @@ Utils.mkdir = (dir) => {
 }
 
 Utils.skipUser = (username) => {
-	return username === 'adminUser' || username === 'nodeUser';
+	return username === 'adminUser' || username === 'nodeUser' || username === 'undefined';
 }
 
-Utils.teamspaceIndexPrefix = 'io-teamspace-dev-'
-Utils.statsIndexPrefix = 'io-dev-stats'
+Utils.teamspaceIndexPrefix = 'io-teamspace-'
+Utils.statsIndexPrefix = 'io-stats'
 
-
+Utils.isUndefined = (value) => {
+    // Obtain `undefined` value that's
+    // guaranteed to not have been re-assigned
+    var undefined = void(0);
+    return value === undefined;
+}
 Utils.createElasticRecord = ( ElasticClient, index, ts, elasticBody ) => {
 		// console.log("createElasticRecord:start\n-----------------------------------------")
 		// console.log(index);

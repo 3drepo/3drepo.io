@@ -59,10 +59,14 @@ async function start() {
 		// const folder = `${Utils.formatDate(Date.now())}`;
 		// await Utils.mkdir(`${folder}/activity`);
 		console.log('Connected successfully!');
+
+		await UserList.createIndicies(db, ElasticClient),
+ 
 		await Promise.all([
 			UserList.createUsersReport(db, ElasticClient),
 			DBStats.createDBReport(db, ElasticClient)
 		]);
+
 		await client.close();
 	} catch (err) {
 		console.error('Connecting failed', err);
