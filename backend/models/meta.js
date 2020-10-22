@@ -341,7 +341,21 @@ Meta.getMeshIdsByRules = async function(account, model, branch, revId, username,
 				_branch,
 				_revId,
 				true
-			));
+			).then(mesh_ids => {
+				if(!mesh_ids.length) {
+					return undefined;
+				}
+
+				return {
+					account,
+					model: submodel,
+					mesh_ids
+				};
+			}).catch(() => {
+				// If search on a submodel failed (usually due to no revision in the submodel), it should not
+				// fail the whole API request.
+				return undefined;
+			}));
 		}
 
 		return Promise.all(objectIdPromises).then(objectIds => {
