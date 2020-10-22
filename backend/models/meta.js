@@ -359,7 +359,9 @@ Meta.getMeshIdsByRules = async function(account, model, branch, revId, username,
 		}
 
 		return Promise.all(objectIdPromises).then(objectIds => {
-			return objectIds.reduce((acc, val) => acc.concat(val), []);
+			return objectIds
+				.filter((entry) => !!entry)
+				.reduce((acc, val) => acc.concat(val), []);
 		});
 	});
 };
