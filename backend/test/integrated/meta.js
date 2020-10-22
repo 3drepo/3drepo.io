@@ -188,7 +188,16 @@ describe("Metadata", function () {
 	});
 
 	it("retrieving mesh IDs with rule query", function(done) {
+		const query = [
+			{
+				"field": "ColourFamily",
+				"operator": "IS",
+				"values": ["Green"]
+			}
+		];
+
 		agent.post(`/${username}/${model}/revision/master/head/meta/meshes`)
+			.send({ username, password })
 			.expect(200, function(err, res) {
 				console.log(res.body);
 				console.log(res.body.length);
