@@ -128,8 +128,8 @@ export const selectNextKeyFramesDates =  createSelector(
 	selectSelectedStartingDate, selectStepScale, selectStepInterval , selectMaxDate,
 		(startingDate, scale, interval, maxDate) => {
 			const keyFrames = [];
+			keyFrames[0] = new Date(Math.min(maxDate, (startingDate || new Date(0)).valueOf()));
 			let date = getDateByStep(startingDate, scale, interval);
-			keyFrames[0] = new Date(Math.min(maxDate, date.valueOf()));
 			maxDate = new Date(maxDate);
 
 			for (let i = 0; i < 3 ; i++) {
@@ -149,7 +149,7 @@ export const selectSelectedEndingDate = createSelector(
 );
 
 export const selectSelectedFrame = createSelector(
-	selectFrames, selectSelectedEndingDate, getSelectedFrame
+	selectFrames, selectSelectedStartingDate, getSelectedFrame
 );
 
 export const selectLastSuccessfulStateId = createSelector(
