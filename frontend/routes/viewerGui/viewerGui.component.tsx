@@ -30,7 +30,6 @@ import { Groups } from './components/groups';
 import { Issues } from './components/issues';
 import { Measurements } from './components/measurements';
 import { PanelButton } from './components/panelButton/panelButton.component';
-import { Presentation } from './components/presentation';
 import RevisionsSwitch from './components/revisionsSwitch/revisionsSwitch.container';
 import { Risks } from './components/risks';
 import Sequences from './components/sequences/sequences.container';
@@ -199,7 +198,6 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		[VIEWER_PANELS.GIS]: Gis,
 		[VIEWER_PANELS.SEQUENCES]: Sequences,
 		[VIEWER_PANELS.MEASUREMENTS]: Measurements,
-		[VIEWER_PANELS.PRESENTATION]: Presentation,
 	};
 
 	private renderLeftPanels = (panels) => (

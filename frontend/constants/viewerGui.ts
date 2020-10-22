@@ -1,4 +1,3 @@
-import PresentationIcon from '@material-ui/icons/Cast';
 import CompareIcon from '@material-ui/icons/Compare';
 import TreeIcon from '@material-ui/icons/DeviceHub';
 import GroupsIcon from '@material-ui/icons/GroupWork';
@@ -22,7 +21,6 @@ export const VIEWER_PANELS = {
 	COMPARE: 'compare',
 	SEQUENCES: 'sequences',
 	MEASUREMENTS: 'measurements',
-	PRESENTATION: 'presentation'
 };
 
 export const VIEWER_PANELS_ICONS = {
@@ -35,7 +33,6 @@ export const VIEWER_PANELS_ICONS = {
 	[VIEWER_PANELS.GIS]: GisIcon,
 	[VIEWER_PANELS.SEQUENCES]: SequencesIcon,
 	[VIEWER_PANELS.MEASUREMENTS]: MeasureIcon,
-	[VIEWER_PANELS.PRESENTATION]: PresentationIcon
 };
 
 export const VIEWER_PANELS_MIN_HEIGHTS = {
@@ -48,7 +45,6 @@ export const VIEWER_PANELS_MIN_HEIGHTS = {
 	[VIEWER_PANELS.GIS]: 185,
 	[VIEWER_PANELS.SEQUENCES]: 200,
 	[VIEWER_PANELS.MEASUREMENTS]: 200,
-	[VIEWER_PANELS.PRESENTATION]: 200,
 };
 
 export const VIEWER_PANELS_TITLES = {
@@ -61,7 +57,6 @@ export const VIEWER_PANELS_TITLES = {
 	[VIEWER_PANELS.GIS]: 'GIS',
 	[VIEWER_PANELS.SEQUENCES]: 'Sequences',
 	[VIEWER_PANELS.MEASUREMENTS]: 'Measurements',
-	[VIEWER_PANELS.PRESENTATION]: 'Presentation',
 };
 
 const getPanelConfig = (panelType) => ({
@@ -80,11 +75,7 @@ export const VIEWER_LEFT_PANELS = [
 	VIEWER_PANELS.GIS,
 	VIEWER_PANELS.SEQUENCES,
 	VIEWER_PANELS.MEASUREMENTS,
-	VIEWER_PANELS.PRESENTATION,
-].filter((panel) =>
-			(clientConfigService.sequencesEnabled || panel !== VIEWER_PANELS.SEQUENCES) &&
-			(clientConfigService.presenterEnabled || panel !== VIEWER_PANELS.PRESENTATION)
-		).map(getPanelConfig);
+].filter((panel) => clientConfigService.sequencesEnabled || panel !== VIEWER_PANELS.SEQUENCES).map(getPanelConfig);
 
 export const VIEWER_RIGHT_PANELS = [
 	VIEWER_PANELS.BIM
