@@ -241,4 +241,12 @@ JSONAssets.getTreePath = function(account, model, branch, rev, username) {
 	return getHelperJSONFile(account, model, branch, rev, username, "tree_path");
 };
 
+JSONAssets.getGLTF = (account, model, id) => {
+	return FileRef.getGLTFFile(account, model, `${id}.gltf`);
+};
+
+JSONAssets.getGLTFBin = (account, model, id) => {
+	return FileRef.getGLTFFile(account, model, `${id}.bin`);
+};
+
 module.exports = JSONAssets;

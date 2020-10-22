@@ -379,6 +379,9 @@ router.get("/:model/:uid.json.mpc",  middlewares.hasReadAccessToModel, getJsonMp
 
 router.get("/:model/:uid.unity3d", middlewares.hasReadAccessToModel, getUnityBundle);
 
+router.get("/:model/:uid.gltf", middlewares.hasReadAccessToModel, getGLTF);
+router.get("/:model/:uid.bin", middlewares.hasReadAccessToModel, getGLTFBin);
+
 /**
  * @api {put} /:teamspace/:model Update Federated Model
  * @apiName updateModel
@@ -2055,8 +2058,41 @@ function getUnityBundle(req, res, next) {
 	const id = req.params.uid;
 
 	UnityAssets.getUnityBundle(account, model, id).then(file => {
+		console.log(file);
 		req.params.format = "unity3d";
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file, undefined, config.cachePolicy);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function getGLTF(req, res, next) {
+
+	const model = req.params.model;
+	const account = req.params.account;
+	const id = req.params.uid;
+
+	// FIXME: We should probably generalise this and have a model assets object.
+	JSONAssets.getGLTF(account, model, id).then(file => {
+		console.log(file);
+		req.params.format = "gltf";
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file.file, undefined, config.cachePolicy);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function getGLTFBin(req, res, next) {
+
+	const model = req.params.model;
+	const account = req.params.account;
+	const id = req.params.uid;
+
+	// FIXME: We should probably generalise this and have a model assets object.
+	JSONAssets.getGLTFBin(account, model, id).then(file => {
+		console.log(file);
+		req.params.format = "bin";
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file.file, undefined, config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});

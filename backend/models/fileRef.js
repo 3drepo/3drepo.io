@@ -146,6 +146,10 @@ FileRef.getOriginalFile = function(account, model, fileName) {
 	return fetchFileStream(account, model, collection, fileName, false);
 };
 
+FileRef.getGLTFFile = function(account, model, fileName) {
+	return _fetchFile(account, model,  ".stash.gltf.ref", fileName, true);
+};
+
 FileRef.fetchFile = (account, model, collName, ref_id) => {
 	return _fetchFile(account, model, "." + collName + ".ref", ref_id);
 };
