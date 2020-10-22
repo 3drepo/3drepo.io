@@ -19,6 +19,7 @@ import React from 'react';
 
 import { ROUTES } from '../../../constants/routes';
 import { renderWhenTrue } from '../../../helpers/rendering';
+import { clientConfigService } from '../../../services/clientConfig';
 import { TooltipButton } from '../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { Logo } from '../logo/logo.component';
 import Notifications from '../notifications/notifications.container';
@@ -67,7 +68,7 @@ export class TopMenu extends React.PureComponent<IProps, any> {
 		return (
 			<Container hidden={isFocusMode}>
 				<Logo onClick={this.handleGoToHomepage} />
-				{this.renderPresentationItem(this.isViewerPage)}
+				{this.renderPresentationItem(clientConfigService.presenterEnabled && this.isViewerPage)}
 				{this.renderUserNavItems(isAuthenticated)}
 
 				<MainMenu
