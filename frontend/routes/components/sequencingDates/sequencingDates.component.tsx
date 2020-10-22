@@ -77,7 +77,9 @@ export class SequencingDates extends React.PureComponent<IProps, IState> {
 							<SequenceDate
 								{...field}
 								{...this.props}
-								min={this.props.max ? Math.max(form.values.sequence_end || 0, this.props.max) : undefined}
+								max={this.props.max ?
+									new Date(Math.min(form.values.sequence_end || Number.POSITIVE_INFINITY, this.props.max))
+									: undefined}
 							/>
 						)} />
 					</StyledFormControl>
