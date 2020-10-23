@@ -192,7 +192,7 @@ describe("Metadata", function () {
 			});
 	});
 
-	describe("List all groups", function() {
+	describe("Query with rules", function() {
 		const goldenIfcStairFlight = [
 			{
 				account: 'groupUser',
@@ -254,6 +254,47 @@ describe("Metadata", function () {
 				.send(query)
 				.expect(200, function(err, res) {
 					expect(res.body).to.deep.equal(goldenIfcStairFlight);
+					done(err);
+				});
+		});
+
+		it("with mix of IS and IS_NOT should succeed", function(done) {
+			const query = [
+				{
+					"field":"Name",
+					"operator":"IS",
+					"values":[
+						"Level 3",
+						"Level 1"
+					]
+				},
+				{
+					"field":"Category",
+					"operator":"IS_NOT",
+					"values":[
+						"Windows"
+					]
+				}
+			];
+
+			agent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/meshes`)
+				.send(query)
+				.expect(200, function(err, res) {
+					expect(res.body[0].mesh_ids.length).to.equal(200);
+					done(err);
+				});
+		});
+
+		it("retrieving mesh IDs with empty rule query", function(done) {
+			const query = [
+			];
+
+			agent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/meshes`)
+				.send(query)
+				.expect(200, function(err, res) {
+					expect(res.body[0].account).to.equal(groupUser);
+					expect(res.body[0].model).to.equal(groupModel);
+					expect(res.body[0].mesh_ids.length).to.equal(1106);
 					done(err);
 				});
 		});

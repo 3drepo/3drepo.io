@@ -123,8 +123,6 @@ async function findModelMeshIdsByRulesQueries(account, model, posRuleQueries, ne
  * @returns {Promise<Set<string>>} Is a set of the ids that that matches the particular query rule
  */
 async function getRuleQueryResults(account, model, idToMeshesDict, revisionElementsIds, query) {
-	// eslint-disable-next-line no-console
-	console.log("getRuleQueryResults");
 	const metaResults = await findObjectsByQuery(account, model, {type:"meta", ...query});
 	if (metaResults.length === 0) {
 		return new Set();
@@ -136,8 +134,6 @@ async function getRuleQueryResults(account, model, idToMeshesDict, revisionEleme
 		return acc;
 	} ,[]);
 
-	// eslint-disable-next-line no-console
-	console.log("getRuleQueryResults: 2");
 	const res = await batchPromises((parentsForQuery) => {
 		const meshQuery = { _id: { $in: revisionElementsIds }, shared_id: { $in: parentsForQuery }, type: { $in: ["transformation", "mesh"]}};
 		const meshProject = { _id: 1, type: 1 };
@@ -146,8 +142,6 @@ async function getRuleQueryResults(account, model, idToMeshesDict, revisionEleme
 
 	let ids = new Set();
 
-	// eslint-disable-next-line no-console
-	console.log("getRuleQueryResults: 3");
 	for (let i = 0; i < res.length ; i++) {
 		const resBatch = res[i];
 		for (let j = 0; j < resBatch.length ; j++) {
@@ -319,8 +313,6 @@ Meta.getAllIdsWithMetadataField = function(account, model, branch, rev, fieldNam
 };
 
 Meta.getMeshIdsByRules = async function(account, model, branch, revId, username, rules) {
-	// eslint-disable-next-line no-console
-	console.log("getMeshIdsByRules");
 	const objectIdPromises = [];
 
 	const positiveQueries = positiveRulesToQueries(rules);
@@ -330,8 +322,6 @@ Meta.getMeshIdsByRules = async function(account, model, branch, revId, username,
 	models.add(model);
 
 	// Check submodels
-	// eslint-disable-next-line no-console
-	console.log("getMeshIdsByRules: check submodels");
 	return Ref.find({account, model}, {type: "ref"}).then((refs) => {
 		refs.forEach((ref) => {
 			models.add(ref.project);
@@ -352,10 +342,6 @@ Meta.getMeshIdsByRules = async function(account, model, branch, revId, username,
 				_revId,
 				true
 			).then(mesh_ids => {
-				// eslint-disable-next-line no-console
-				console.log("getMeshIdsByRules: mesh ID results");
-				// eslint-disable-next-line no-console
-				console.log(mesh_ids);
 				if(!mesh_ids.length) {
 					return undefined;
 				}
