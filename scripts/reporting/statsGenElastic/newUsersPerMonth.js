@@ -29,7 +29,7 @@ const writeNewElasticDocument = (ElasticClient, month, year, count, total ) => {
 		"DateTime" : new Date(year,month).toISOString(),
 	}
 	const user = {}
-	Utils.createElasticRecord(ElasticClient, Utils.statsIndexPrefix, user, elasticBody)
+	Utils.createElasticRecord(ElasticClient, Utils.statsIndexPrefix, elasticBody)
 } 
 
 const writeNewUserEntry = (ElasticClient, currentY, currentM, count, total, nextM, nextY) => {

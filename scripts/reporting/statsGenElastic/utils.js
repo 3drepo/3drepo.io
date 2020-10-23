@@ -57,7 +57,7 @@ Utils.skipUser = (username) => {
 	return username === 'adminUser' || username === 'nodeUser' || username === 'undefined';
 }
 
-Utils.teamspaceIndexPrefix = 'io-teamspace-'
+Utils.teamspaceIndexPrefix = 'io-teamspace'
 Utils.statsIndexPrefix = 'io-stats'
 
 Utils.isUndefined = (value) => {
@@ -66,31 +66,39 @@ Utils.isUndefined = (value) => {
     var undefined = void(0);
     return value === undefined;
 }
-Utils.createElasticRecord = ( ElasticClient, index, ts, elasticBody ) => {
-		// console.log("createElasticRecord:start\n-----------------------------------------")
-		// console.log(index);
-		// console.log(ts);
-		// console.log(elasticBody);
-		// console.log("createElasticRecord:end\n-----------------------------------------")
-		if(!Utils.skipUser(ts.user) ) { 
-			if( ElasticClient.indices.exists({
-				index: index,
-				})) {
-				ElasticClient.index({  
-					index: index.toLowerCase(),
-					// type: 'Teamspace',
+Utils.createElasticRecord = async ( ElasticClient, Index, elasticBody ) => {
+	try {
+			const indexName = Index.toLowerCase()
+			const configured = await ElasticClient.indices.exists({
+				index: indexName
+			})
+			if (!configured.body) {
+					const created = await ElasticClient.indices.create({
+						index: indexName
+					})
+					console.log("Created " + indexName + created.statusCode)
+			}
+			await ElasticClient.index(
+				{  
+					index: indexName,
 					id: Utils.hashCode( Object.values(elasticBody).toString() ),
 					refresh: true,
 					body: elasticBody
-					},function(err,resp,status) {
-					if(err) {
-						console.log(err);
-					}
-					else {
-						console.log("created elastic doc " + index + " " + Object.values(elasticBody).toString() );
-					}
-					});	
-			}  else {console.log(user.user + " doesn't exist in elastic yet") }
+				}, function(err,resp,status) {
+				if(err) {
+					console.log(err, resp, status);
+					Promise.reject()
+				}
+				else {
+					console.log("created elastic doc " + indexName + " " + Object.values(elasticBody).toString() );
+					return Promise.resolve()
+				}
+				});
+		} catch (error) {
+			console.log("ERROR:" + Index)
+			console.log(error)
+			console.log(error.body.error)
+			Promise.reject()
 		}
-}
+	}
 module.exports = Utils;

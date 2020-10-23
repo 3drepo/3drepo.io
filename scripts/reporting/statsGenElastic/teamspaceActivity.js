@@ -108,7 +108,7 @@ const printEmptyRows = (ElasticClient, ts, licenseType, currentM, currentY, mont
 				"Issues" : 0, 
 				"Model Revisions" : 0, 
 			}
-			Utils.createElasticRecord(ElasticClient, Utils.teamspaceIndexPrefix + ts, ts, elasticBody )
+			Utils.createElasticRecord(ElasticClient, Utils.teamspaceIndexPrefix, elasticBody )
 			nextY = nextM === 12? nextY + 1: nextY;
 			nextM = nextM === 12? 1 : nextM +1;
 		}
@@ -155,7 +155,7 @@ const printStatsToElastic = (ElasticClient, data, ts, licenseType) => {
 				"Issues" : data[year][month].issues, 
 				"Model Revisions" : data[year][month].revisions, 
 			}
-			Utils.createElasticRecord(ElasticClient, Utils.teamspaceIndexPrefix + ts, ts, elasticBody )
+			Utils.createElasticRecord(ElasticClient, Utils.teamspaceIndexPrefix, elasticBody )
 
 			// stream.write(`${year},${month},${data[year][month].issues},${data[year][month].revisions}\n`);
 			lastMonth = month;

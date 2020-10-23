@@ -22,71 +22,6 @@ const Utils = require(`./utils.js`);
 
 const UserList = {};
 
-
-UserList.createIndicies = async (dbConn, ElasticClient) => {
-	console.log('[USERS] Creating index list...');
-
-	const db = dbConn.db('admin');
-	const col = await db.collection('system.users')
-	const users = await col.find().toArray();
-	const indicesReady = () => {};
-	const indicesCreated = new Promise(indicesReady);
-
-	// create index of Teamspaces if doesn't exist 
-		users.forEach((user) => {
-			// console.log("1 going to create " + user.user)
-			if(!Utils.skipUser(user.user) && user.customData && !Utils.isUndefined(user.user)) { 
-				// console.log("2 checking index " + user.user.toLowerCase())
-				const indexName = Utils.teamspaceIndexPrefix + user.user.toLowerCase();
-				const configured = ElasticClient.indices.exists({
-					index: indexName
-				  }).then(function (exists) {
-					if (!exists) {
-					  console.log('Creating index %s ...', indexName)
-					  return ElasticClient.indices.create({
-						index: indexName
-					  }).then(function (r) {
-						console.log('Index %s created:', indexName, r)
-						return Promise.resolve(r)
-					  })
-					} else {
-						console.log('Index %s exists', indexName)
-					  return Promise.resolve()
-					}
-				  }).catch(function (err) {
-					console.log('Unable to create index index %s ...', indexName, err)
-					return Promise.reject(err)
-				  })
-				  configured.then(() => {
-					  return Promise.resolve()
-				  })
-
-				// let indexExists = false;
-				// const indexExistsResult = await ElasticClient.indices.exists({index: Utils.teamspaceIndexPrefix + user.user.toLowerCase()})
-
-				// if(!indexExists) 
-				//   { console.log ("4 making the call " + user.user.toLowerCase())
-				// 	ElasticClient.indices.create(
-				// 			{  
-				// 			index: Utils.teamspaceIndexPrefix + user.user.toLowerCase()
-				// 			},
-				// 		    function(err,resp,status) {
-				// 				if(err) {
-				// 		  			console.log(err,resp);
-				// 				} else {
-				// 		  			console.log("created " + user.user + " " + status);
-				// 				}	
-				// 	  		}
-				// 	  );
-				// } else { console.log("why are we here?" + !indexExists)}
-			}
-		})
-		console.log("end of the user loop")
-	indicesReady()
-	await indicesCreated
-	console.log('[USERS] indicies list generated, sent to elastic');
-}
-
 UserList.createUsersReport = async (dbConn, ElasticClient) => {
 	console.log('[USERS] Creating users list...');
 
@@ -97,11 +32,8 @@ UserList.createUsersReport = async (dbConn, ElasticClient) => {
 	const teamspacesCreated = new Promise(teamspacesReady);
 
 	// create Teamspace details document and update if it exists
-	users.forEach((user) => {
-		if(!Utils.skipUser(user.user) && user.customData) { 
-			if( ElasticClient.indices.exists({
-				index: Utils.teamspaceIndexPrefix + user.user.toLowerCase(),
-			})) { 
+	for (const user in users) {
+		if(!Utils.skipUser(user.user) && user.customData && !Utils.isUndefined(user.user)) {
 				const body = {
 					"Teamspace" : user.user,
 					"Email" : user.customData.email, 
@@ -113,28 +45,22 @@ UserList.createUsersReport = async (dbConn, ElasticClient) => {
 					"Mail Optout" : user.customData.mailListOptOut, 
 					"Verified" : user.customData.inactive, 
 				}
-				Utils.createElasticRecord( ElasticClient, Utils.teamspaceIndexPrefix + user.user.toLowerCase(), user, body); 
-			}  else {console.log(user.user + " doesn't exist") }
+				await Utils.createElasticRecord( ElasticClient, Utils.teamspaceIndexPrefix, body); 
 		}
-		})
-
+	}
+	
 	// add new lastLogin document
-	users.forEach((user) => {
+	for (const user in users) {
 		if(!Utils.skipUser(user.user) && user.customData) { 
-			if(ElasticClient.indices.exists({
-				index: Utils.teamspaceIndexPrefix + user.user.toLowerCase(),
-			})) {
-				const body = {
-					"Teamspace" : user.user,
-					"Last Login" : user.customData.lastLoginAt,
-				}
-				Utils.createElasticRecord( ElasticClient, Utils.teamspaceIndexPrefix + user.user.toLowerCase(), user, body) 
-			}  else {console.log(user.user + " doesn't exist") }
+			const body = {
+				"Teamspace" : user.user,
+				"Last Login" : user.customData.lastLoginAt,
+			}
+			await Utils.createElasticRecord( ElasticClient, Utils.teamspaceIndexPrefix, body) 
 		}
-	})
+	}
 	
 	teamspacesReady()
-	
 	await teamspacesCreated
 	console.log('[USERS] users list generated, sent to elastic');
 }
