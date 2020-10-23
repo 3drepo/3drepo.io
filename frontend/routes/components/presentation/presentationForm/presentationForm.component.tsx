@@ -17,15 +17,15 @@
 
 import React from 'react';
 
-import { PresentationMode } from '../presentation.constants';
-import { InitialState } from './components/initialState/';
-import { JoinedPresentation } from './components/joinedPresentation/';
-import { Presenting } from './components/presenting/';
+import { PresentationMode } from '../../../../modules/presentation/presentation.constants';
+import { Initial } from './components/initial/';
+import { Participant } from './components/participant/';
+import { Presenter } from './components/presenter/';
 
 const COMPONENTS_MAP = {
-	[PresentationMode.PRESENTER]: Presenting,
-	[PresentationMode.PARTICIPANT]: JoinedPresentation,
-	[PresentationMode.DEFAULT]: InitialState,
+	[PresentationMode.PRESENTER]: Presenter,
+	[PresentationMode.PARTICIPANT]: Participant,
+	[PresentationMode.INITIAL]: Initial,
 };
 
 interface IProps {
@@ -34,7 +34,7 @@ interface IProps {
 
 export const PresentationForm: React.FunctionComponent<IProps> = ({ mode, ...props }) => {
 
-	const Component = React.useMemo(() => COMPONENTS_MAP[mode] ? COMPONENTS_MAP[mode] : InitialState, [mode]);
+	const Component = React.useMemo(() => COMPONENTS_MAP[mode] ? COMPONENTS_MAP[mode] : Initial, [mode]);
 
 	return <Component {...props} />;
 };

@@ -15,26 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-
-import { SessionTop } from '../sessionTop';
-
-import { Container, Link, Paragraph, StopButton, StyledDivider } from '../../presentationForm.styles';
-
-interface IProps {
-	stopPresenting: () => void;
-}
-
-export const Presenting: React.FunctionComponent<IProps> = ({ stopPresenting }) => (
-	<Container>
-		<SessionTop />
-		<StopButton onClick={stopPresenting}>
-			End Session
-		</StopButton>
-		<StyledDivider />
-		<Paragraph>
-			You are hosting a session, send other users the invitation code<br /><br />
-			<Link href="https://3drepo.com/" target="_blank">Read more...</Link>
-		</Paragraph>
-	</Container>
-);
+export { default as Initial } from './initial.container';

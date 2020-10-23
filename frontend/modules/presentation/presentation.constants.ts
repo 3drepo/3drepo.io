@@ -1,5 +1,5 @@
 export enum PresentationMode {
-	DEFAULT = '',
+	INITIAL = 'initial',
 	PRESENTER = 'presenter',
 	PARTICIPANT = 'participant',
 }

@@ -15,19 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
-import { createStructuredSelector } from 'reselect';
+import React from 'react';
 
-import { PresentationActions } from '../../../../../../modules/presentation';
-import { InitialState } from './initialState.component';
+import { SessionTop } from '../sessionTop';
 
-const mapStateToProps = createStructuredSelector({
-});
+import { Container, Link, Paragraph, StopButton, StyledDivider } from '../../presentationForm.styles';
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	startPresenting: PresentationActions.startPresenting,
-	joinPresentation: PresentationActions.joinPresentation,
-}, dispatch);
+interface IProps {
+	stopPresenting: () => void;
+}
 
-export default connect(mapStateToProps, mapDispatchToProps)(InitialState);
+export const Presenter: React.FC<IProps> = ({ stopPresenting }) => (
+	<Container>
+		<SessionTop />
+		<StopButton onClick={stopPresenting}>
+			End Session
+		</StopButton>
+		<StyledDivider />
+		<Paragraph>
+			You are hosting a session, send other users the invitation code<br /><br />
+			<Link href="https://3drepo.com/" target="_blank">Read more...</Link>
+		</Paragraph>
+	</Container>
+);

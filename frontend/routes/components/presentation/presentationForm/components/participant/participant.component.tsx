@@ -37,7 +37,7 @@ const renderPlayButtonContent = (isPaused: boolean) => renderWhenTrueOtherwise(
 () => <><PauseIcon /> Pause</>,
 )(isPaused);
 
-export const JoinedPresentation: React.FC<IProps> = ({ leavePresentation, isPaused, togglePause }) => (
+export const Participant: React.FC<IProps> = ({ leavePresentation, isPaused, togglePause }) => (
 	<Container>
 		<SessionTop />
 		<ButtonContainer>

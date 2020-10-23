@@ -20,8 +20,8 @@ import Popover from '@material-ui/core/Popover';
 import VideocamIcon from '@material-ui/icons/Videocam';
 import { cond, matches, stubTrue } from 'lodash';
 
+import { PresentationMode } from '../../../modules/presentation/presentation.constants';
 import { COLOR } from '../../../styles';
-import { PresentationMode } from './presentation.constants';
 
 const getVariantColor = cond([
 	[matches(PresentationMode.PRESENTER), () => COLOR.DUSTY_RED],

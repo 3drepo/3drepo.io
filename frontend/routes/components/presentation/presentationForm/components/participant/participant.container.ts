@@ -19,13 +19,19 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { PresentationActions } from '../../../../../../modules/presentation';
-import { Presenting } from './presenting.component';
+import {
+	selectIsPaused,
+	PresentationActions,
+} from '../../../../../../modules/presentation';
+import { Participant } from './participant.component';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+	isPaused: selectIsPaused,
+});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	stopPresenting: PresentationActions.stopPresenting,
+	leavePresentation: PresentationActions.leavePresentation,
+	togglePause: PresentationActions.togglePause
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(Presenting);
+export default connect(mapStateToProps, mapDispatchToProps)(Participant);

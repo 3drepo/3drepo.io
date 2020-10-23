@@ -15,11 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, select, takeLatest} from 'redux-saga/effects';
+import { put, select, takeLatest } from 'redux-saga/effects';
 
 import { CHAT_CHANNELS } from '../../constants/chat';
 
-import { prepareGroup } from '../../helpers/groups';
 import * as API from '../../services/api';
 import { ChatActions } from '../chat';
 import { DialogActions } from '../dialog';

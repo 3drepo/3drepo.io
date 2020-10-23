@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { createSelector } from 'reselect';
+import { PresentationMode } from './presentation.constants';
 
 export const selectPresentationDomain = (state) => state.presentation;
 
@@ -24,6 +25,12 @@ export const selectIsPresenting = createSelector(
 
 export const selectJoinedPresentation = createSelector(
 	selectPresentationDomain, (state) => state.joinedPresentation
+);
+
+export const selectPresentationMode = createSelector(
+	selectIsPresenting, selectJoinedPresentation, (isPresenting, joinedPresentation) =>
+		isPresenting ? PresentationMode.PRESENTER
+			: joinedPresentation ? PresentationMode.PARTICIPANT : PresentationMode.DEFAULT
 );
 
 export const selectSessionCode = createSelector(

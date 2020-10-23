@@ -15,4 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { default as Presenting } from './presenting.container';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
+
+import { PresentationActions } from '../../../../../../modules/presentation';
+import { Presenter } from './presenter.component';
+
+const mapStateToProps = createStructuredSelector({});
+
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	stopPresenting: PresentationActions.stopPresenting,
+}, dispatch);
+
+export default connect(mapStateToProps, mapDispatchToProps)(Presenter);

@@ -18,10 +18,6 @@
 import React, { useState } from 'react';
 
 import {
-	Content, CreateSessionSection,
-	JoinPresentationSection, MainButton,
-} from '../../../../../viewerGui/components/presentation/presentation.styles';
-import {
 	Container, Link, Paragraph, PrimaryButton, StyledDivider, StyledDividerWithText, StyledTextfield,
 } from '../../presentationForm.styles';
 
@@ -30,7 +26,7 @@ interface IProps {
 	joinPresentation: (code: string) => void;
 }
 
-export const InitialState: React.FunctionComponent<IProps> = ({ startPresenting, joinPresentation }) => {
+export const Initial: React.FC<IProps> = ({ startPresenting, joinPresentation }) => {
 	const [code, setCode] = useState<string>('');
 	const hasCode = code.trim() !== '';
 

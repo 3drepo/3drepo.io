@@ -19,27 +19,23 @@ import React from 'react';
 
 import IconButton from '@material-ui/core/IconButton';
 
+import { PresentationMode } from '../../../modules/presentation/presentation.constants';
 import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
-import { PresentationMode } from './presentation.constants';
 import { PresentationIcon} from './presentation.styles';
 import { PresentationForm } from './presentationForm';
 
 interface IProps {
-	isPresenting: boolean;
-	joinedPresentation: boolean;
+	presentationMode: PresentationMode;
 }
 
-export const Presentation: React.FunctionComponent<IProps> = ({ joinedPresentation, isPresenting }) => {
-	const mode = isPresenting ? PresentationMode.PRESENTER
-			: joinedPresentation ? PresentationMode.PARTICIPANT : PresentationMode.DEFAULT;
-
+export const Presentation: React.FunctionComponent<IProps> = ({ presentationMode}) => {
 	const renderButton = ({ ...props }) => (
 		<IconButton {...props} aria-label="Show Presentation mode options" aria-haspopup="true">
-			<PresentationIcon fontSize="small" mode={mode} />
+			<PresentationIcon fontSize="small" mode={presentationMode} />
 		</IconButton>
 	);
 
-	const renderMenuContent = ({ ...props }) => <PresentationForm {...props} mode={mode} />;
+	const renderMenuContent = ({ ...props }) => <PresentationForm {...props} mode={presentationMode} />;
 
 	return (
 		<ButtonMenu
