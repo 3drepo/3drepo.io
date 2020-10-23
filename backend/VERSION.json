@@ -9,7 +9,7 @@
   },
    "revit" :{
 	"current" : "4.6.1",
-	"supported": ["4.6.0"]
+	"supported": ["4.6.0", "4.10.0"]
   },
   "unitydll" : {
 	"current": "4.4.0",
