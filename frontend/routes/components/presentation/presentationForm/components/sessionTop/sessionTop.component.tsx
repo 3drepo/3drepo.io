@@ -18,32 +18,38 @@
 import React from 'react';
 
 import CopyIcon from '@material-ui/icons/FileCopy';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
+import copy from 'copy-to-clipboard';
 
 import { CopyButton, FieldContainer, Paragraph, StyledDivider, StyledTextfield } from '../../presentationForm.styles';
 
 interface IProps {
 	sessionCode: string;
 	stopPresenting: () => void;
+	showSnackbar: (text: string) => void;
 }
 
-export const SessionTop: React.FunctionComponent<IProps> = ({ sessionCode }) => (
-	<>
-		<FieldContainer>
-			<StyledTextfield
+export const SessionTop: React.FunctionComponent<IProps> = ({ sessionCode, showSnackbar }) => {
+	const handleCopyButtonClick = React.useCallback(() => {
+		copy(sessionCode);
+		showSnackbar('Share link copied to clipboard');
+	}, [sessionCode, showSnackbar]);
+
+	return (
+		<>
+			<FieldContainer>
+				<StyledTextfield
 					label="Invitation code"
 					value={sessionCode}
 					disabled
-			/>
-			<CopyToClipboard text={sessionCode}>
-				<CopyButton icon={CopyIcon}>
+				/>
+				<CopyButton icon={CopyIcon} onClick={handleCopyButtonClick}>
 					Copy
 				</CopyButton>
-			</CopyToClipboard>
-		</FieldContainer>
-		<Paragraph>
-			Share your 3D Repo view live with colleagues
-		</Paragraph>
-		<StyledDivider />
-	</>
-);
+			</FieldContainer>
+			<Paragraph>
+				Share your 3D Repo view live with colleagues
+			</Paragraph>
+			<StyledDivider />
+		</>
+	);
+};

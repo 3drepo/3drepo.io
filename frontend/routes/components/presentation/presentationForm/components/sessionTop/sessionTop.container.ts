@@ -19,13 +19,16 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { selectSessionCode, PresentationActions } from '../../../../../../modules/presentation';
+import { selectSessionCode } from '../../../../../../modules/presentation';
+import { SnackbarActions } from '../../../../../../modules/snackbar';
 import { SessionTop } from './sessionTop.component';
 
 const mapStateToProps = createStructuredSelector({
 	sessionCode: selectSessionCode,
 });
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	showSnackbar: SnackbarActions.show,
+}, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(SessionTop);
