@@ -36,7 +36,8 @@ Utils.concat = (files, dest) => {
 }
 
 Utils.formatDate = (date) => {
-	return dateFormat(date, 'dd-mm-yy');
+	return date.toISOString()
+	// return dateFormat(date, 'dd-mm-yy');
 }
 
 Utils.generateFileName = (prefix) => {
@@ -68,34 +69,28 @@ Utils.isUndefined = (value) => {
 }
 Utils.createElasticRecord = async ( ElasticClient, Index, elasticBody ) => {
 	try {
-			const indexName = Index.toLowerCase()
-			const configured = await ElasticClient.indices.exists({
-				index: indexName
+		const indexName = Index.toLowerCase() // requirement of elastic that indexs be lowercase
+		const configured = await ElasticClient.indices.exists({
+			index: indexName
+		})
+		if (!configured.body) {
+				const created = await ElasticClient.indices.create({
+					index: indexName
+				})
+				console.log("Created " + indexName )
+		}
+		await ElasticClient.index(
+			{  
+				index: indexName,
+				id: Utils.hashCode( Object.values(elasticBody).toString() ),
+				refresh: true,
+				body: elasticBody
 			})
-			if (!configured.body) {
-					const created = await ElasticClient.indices.create({
-						index: indexName
-					})
-					console.log("Created " + indexName + created.statusCode)
-			}
-			await ElasticClient.index(
-				{  
-					index: indexName,
-					id: Utils.hashCode( Object.values(elasticBody).toString() ),
-					refresh: true,
-					body: elasticBody
-				}, function(err,resp,status) {
-				if(err) {
-					console.log(err, resp, status);
-					Promise.reject()
-				}
-				else {
-					console.log("created elastic doc " + indexName + " " + Object.values(elasticBody).toString() );
-					return Promise.resolve()
-				}
-				});
-		} catch (error) {
+		console.log("created elastic doc " + indexName + " " + Object.values(elasticBody).toString() );
+		return Promise.resolve()
+	} catch (error) {
 			console.log("ERROR:" + Index)
+			console.log(elasticBody)
 			console.log(error)
 			console.log(error.body.error)
 			Promise.reject()

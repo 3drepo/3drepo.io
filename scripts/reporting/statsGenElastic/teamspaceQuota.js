@@ -55,21 +55,18 @@ const writeQuotaDetails = async(dbConn, col, ElasticClient, enterprise) => {
 	res.forEach((user) => {
 		const sub = enterprise? user.customData.billing.subscriptions.enterprise :  user.customData.billing.subscriptions.discretionary;
 		const expired = sub.expiryDate && sub.expiryDate < now;
-		const dateString = sub.expiryDate ? Utils.formatDate(sub.expiryDate) : '';
-		//	stream.write('Teamspace,type,No. Users,Max Users,Max Data(GB),Expiry Date, expired?\n');
-		// stream.write(`${user.user},${type},${user.numUsers},${sub.collaborators},${sub.data/1024},${dateString},${expired? 'Yes' : ''}\n`);
+		const dateString = sub.expiryDate ? Utils.formatDate(sub.expiryDate) : Date.MinValue;
 		const elasticBody =  {
 			"Teamspace" : user.user,
 			"Type" : type, 
-			"User Count" : user.numUsers, 
-			"Max Users" : sub.collaborators, 
-			"Max Data(GB)" : sub.data/1024, 
+			"User Count" : Number(user.numUsers), 
+			"Max Users" : Number(sub.collaborators), 
+			"Max Data(GB)" : Number(sub.data/1024), 
 			"Expiry Date" : dateString, 
-			"expired" : expired? 'Yes' : '', 
+			"Expired" : expired? 'True' : 'False', 
 		}
-		Utils.createElasticRecord(ElasticClient, Utils.teamspaceIndexPrefix, elasticBody)
+		Utils.createElasticRecord(ElasticClient, Utils.teamspaceIndexPrefix + '-quota', elasticBody)
 		!expired && licensedTS.push({teamspace: user.user, type});
-
 	});
 
 	return licensedTS;

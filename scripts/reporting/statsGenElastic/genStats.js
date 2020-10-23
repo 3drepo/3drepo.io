@@ -35,7 +35,10 @@ const ElasticClient = new Client({
 	auth: {
 	  username: ELASTIC_CLOUD_AUTH[0],
 	  password: ELASTIC_CLOUD_AUTH[1]
-	}
+	},
+	reload_connections: true,
+	maxRetries: 5,
+	request_timeout: 60
   });
   
 ElasticClient.cluster.health({},function(err,resp,status) {  
@@ -56,10 +59,14 @@ async function start() {
 	console.log(`Trying to connect to ${url}...`);
 	try {
 		const db = await client.connect();
-		// const folder = `${Utils.formatDate(Date.now())}`;
-		// await Utils.mkdir(`${folder}/activity`);
 		console.log('Connected successfully!');
  
+		await Utils.createElasticRecord(ElasticClient,Utils.statsIndexPrefix,{})
+		await Utils.createElasticRecord(ElasticClient,Utils.teamspaceIndexPrefix + "-activity",{})
+		await Utils.createElasticRecord(ElasticClient,Utils.teamspaceIndexPrefix + "-quota",{})
+		await Utils.createElasticRecord(ElasticClient,Utils.teamspaceIndexPrefix + "-users",{})
+		await Utils.createElasticRecord(ElasticClient,Utils.teamspaceIndexPrefix + "-login",{})
+
 		await Promise.all([
 			UserList.createUsersReport(db, ElasticClient),
 			DBStats.createDBReport(db, ElasticClient)
