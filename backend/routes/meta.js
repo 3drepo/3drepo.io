@@ -147,14 +147,92 @@
 	 *
 	 * @apiSuccessExample {json} Success:
 	 * [
-	 * 	"db18ef69-6d6e-49a0-846e-907346abb39d",
-	 * 	"c532ff34-6669-4807-b7f3-6a0ffb17b027",
-	 * 	"fec16ea6-bb7b-4f12-b39b-f06fe6bf041d",
-	 * 	"3f881fa8-2b7b-443e-920f-396c1c85e903"
+	 * 	{
+	 * 		"account": "acme",
+	 * 		"model": "00000000-0000-0000-0000-000000000000",
+	 * 		"mesh_ids": [
+	 * 			"11111111-1111-1111-1111-111111111111",
+	 * 			"22222222-2222-2222-2222-222222222222",
+	 * 			"33333333-3333-3333-3333-333333333333",
+	 * 			"44444444-4444-4444-4444-444444444444"
+	 * 		]
+	 * 	}
 	 * ]
 	 */
 	router.post("/revision/master/head/meta/meshes", middlewares.hasReadAccessToModel, getMeshIdsByRules);
 	router.post("/revision/:rev/meta/meshes", middlewares.hasReadAccessToModel, getMeshIdsByRules);
+
+	/**
+	 * @api {post} /:teamspace/:model/revision(/master/head/|/:revId)/meta Filter metadata
+	 * @apiName getAllMetadataByRules
+	 * @apiGroup Meta
+	 * @apiDescription Get all objects matching filter rules in the tree with their metadata.
+	 *
+	 * @apiParam {String} teamspace Name of teamspace
+	 * @apiParam {String} model Model ID
+	 *
+	 * @apiExample {post} Example usage (/master/head)
+	 * POST /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/meta HTTP/1.1
+	 *
+	 * @apiExample {post} Example usage (/:revId)
+	 * POST /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/00000000-0000-0000-0000-000000000001/meta HTTP/1.1
+	 *
+	 * @apiSuccessExample {json} Success:
+	 * {
+	 *    "data": [
+	 *       {
+	 *          "_id": "2f461edf-4544-412a-bb84-ffdb3bbe563b",
+	 *          "metadata": {
+	 *             "IFC Type": "IfcBuilding",
+	 *             "IFC GUID": "00tMo7QcxqWdIGvc4sMN2A",
+	 *             "BuildingID": "n/a",
+	 *             "IsPermanentID": "True",
+	 *             "OccupancyType": "Private dwelling",
+	 *             "IsLandmarked": "True",
+	 *             "NumberOfStoreys": 2
+	 *          },
+	 *          "parents": [
+	 *             "9eeddbe2-750d-46fb-988f-bcf9ec2ecf51"
+	 *          ]
+	 *       },
+	 *       {
+	 *          "_id": "85ad29bd-cd99-4472-a92f-86266b07e57d",
+	 *          "metadata": {
+	 *             "IFC Type": "IfcSite",
+	 *             "IFC GUID": "20FpTZCqJy2vhVJYtjuIce"
+	 *          },
+	 *          "parents": [
+	 *             "48359ad0-9b6d-44ed-ae93-47e2ec69ea88"
+	 *          ]
+	 *       },
+	 *       {
+	 *          "_id": "b5fe5dcf-ce8c-4b1e-a96b-bdc5aa001963",
+	 *          "metadata": {
+	 *             "IFC Type": "IfcBuildingElementProxy",
+	 *             "IFC GUID": "3VkTAO0fr0XQHS3DxQzfxm",
+	 *             "Reference": "LegoRoundTree"
+	 *          },
+	 *          "parents": [
+	 *             "2bf2a864-5cb0-41ba-85a8-c2cffc3da06d"
+	 *          ]
+	 *       },
+	 *       {
+	 *          "_id": "c4682cf2-7b2a-41c7-8fe2-c0c39512dd99",
+	 *          "metadata": {
+	 *             "IFC Type": "IfcBuildingStorey",
+	 *             "IFC GUID": "1oZ0wPs_PE8ANCPg3bIs4j",
+	 *             "AboveGround": "False"
+	 *          },
+	 *          "parents": [
+	 *             "323a9900-ece1-4857-8980-ec96ffc7f681"
+	 *          ]
+	 *       }
+	 *    ]
+	 * }
+	 *
+	 */
+	// router.post("/revision/master/head/meta", middlewares.hasReadAccessToModel, getAllMetadataByRules);
+	// router.post("/revision/:rev/meta", middlewares.hasReadAccessToModel, getAllMetadataByRules);
 
 	/**
 	 * @api {get} /:teamspace/:model/meta/keys Get array of metadata fields
@@ -314,6 +392,25 @@
 				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 			});
 	}
+
+	/*
+	function getAllMetadataByRules(req, res, next) {
+		const rules = req.body;
+		let branch;
+
+		if (!req.params.rev) {
+			branch = C.MASTER_BRANCH_NAME;
+		}
+
+		Meta.getAllMetadataByRules(req.params.account, req.params.model, branch, req.params.rev, req.session.user.username, rules)
+			.then(obj => {
+				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined, req.param.rev ? config.cachePolicy : undefined);
+			})
+			.catch(err => {
+				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+			});
+	}
+	*/
 
 	function getAllIdsWith4DSequenceTag(req, res, next) {
 		let branch;

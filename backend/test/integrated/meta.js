@@ -42,6 +42,11 @@ describe("Metadata", function () {
 	const model2 = "2fb5635e-f357-410f-a0cd-0df6f1e45a66";
 	const oldRevision = "c01daebe-9fe1-452e-a77e-d201280d1fb9";
 
+	const groupUser = "groupUser";
+	const groupPassword = "password";
+	const groupModel = "4ec71fdd-0450-4b6f-8478-c46633bb66e3";
+	const groupFederation = "80bc4290-0f94-11eb-970b-03c55a1e1b3a";
+
 	before(function(done) {
 
 		server = app.listen(8080, function () {
@@ -187,22 +192,70 @@ describe("Metadata", function () {
 			});
 	});
 
-	it("retrieving mesh IDs with rule query", function(done) {
-		const query = [
+	describe("List all groups", function() {
+		const goldenIfcStairFlight = [
 			{
-				"field": "ColourFamily",
-				"operator": "IS",
-				"values": ["Green"]
+				account: 'groupUser',
+				model: '4ec71fdd-0450-4b6f-8478-c46633bb66e3',
+				mesh_ids: [
+					'08842866-9e52-490c-a7d3-8f82c5fa36c8',
+					'1b59cb25-cc4f-4687-88f7-68f20b7d4660',
+					'225744d6-f2e8-43b0-a204-bb6c286956d7',
+					'31c0eab5-b2e9-4439-9d63-25b3f14c904a',
+					'3ae41768-b022-42e7-b29e-13a56b580d2a',
+					'3c5c7d72-6d93-4ae7-8c03-b707bac26902',
+					'49c28976-a97e-4dee-ae62-9d19972f0a37',
+					'50afd8b2-0d12-48e2-9a97-ec077031d367',
+					'67cb101a-8d79-4a99-834f-adb8f0d7be8c',
+					'6e157266-9280-486e-858c-35daf77916c0',
+					'755c1ae6-517e-4fa9-a8b8-0a4c9f460fe2',
+					'789984a9-8132-41fb-9d60-f1c160944e0d',
+					'7f532831-57f5-406e-a6be-669657e38aca',
+					'8995d54c-a6cd-4f62-a1b4-9737b2286791',
+					'8b74b4df-eee6-4732-989e-48c6c73be1df',
+					'a9f80cb9-4acb-4329-91b4-3365f16f5fbf',
+					'b0b361ba-0fae-49fc-920b-dcdd0301cdef',
+					'c6afd43f-7ece-470d-8f26-1faeaec931ec',
+					'c819d27d-a919-49b6-89f1-ffeda5b7b0dc',
+					'c98a94c5-ede9-47bb-adc1-064578f62a8c',
+					'd76481fa-6277-4ac3-a6e1-4f24f3945074',
+					'd9fd8065-cb16-4b38-a1ad-0f044510dde7',
+					'ea5053ae-0056-48f3-a0ea-5966548ef7b6',
+					'f1023c2d-d65e-4083-81ed-e01bcadda794'
+				]
 			}
 		];
 
-		agent.post(`/${username}/${model}/revision/master/head/meta/meshes`)
-			.send({ username, password })
-			.expect(200, function(err, res) {
-				console.log(res.body);
-				console.log(res.body.length);
-				done(err);
-			});
-	});
+		before(function(done) {
+			async.series([
+				function(done) {
+					agent.post("/logout")
+						.send({})
+						.expect(200, done);
+				},
+				function(done) {
+					agent.post("/login")
+						.send({username: groupUser, password: groupPassword})
+						.expect(200, done);
+				}
+			], done);
+		});
 
+		it("retrieving mesh IDs with rule query", function(done) {
+			const query = [
+				{
+					"field": "IFC Type",
+					"operator": "IS",
+					"values": ["IfcStairFlight"]
+				}
+			];
+
+			agent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/meshes`)
+				.send(query)
+				.expect(200, function(err, res) {
+					expect(res.body).to.deep.equal(goldenIfcStairFlight);
+					done(err);
+				});
+		});
+	});
 });
