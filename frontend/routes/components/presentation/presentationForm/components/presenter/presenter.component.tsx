@@ -23,18 +23,29 @@ import { Container, Link, Paragraph, StopButton, StyledDivider } from '../../pre
 
 interface IProps {
 	stopPresenting: () => void;
+	showConfirmDialog: (config) => void;
 }
 
-export const Presenter: React.FC<IProps> = ({ stopPresenting }) => (
-	<Container>
-		<SessionTop />
-		<StopButton onClick={stopPresenting}>
-			End Session
-		</StopButton>
-		<StyledDivider />
-		<Paragraph>
-			You are hosting a session, send other users the invitation code<br /><br />
-			<Link href="https://3drepo.com/" target="_blank">Read more...</Link>
-		</Paragraph>
-	</Container>
-);
+export const Presenter: React.FC<IProps> = ({ stopPresenting, showConfirmDialog }) => {
+	const handleStopButtonClick = React.useCallback(() => {
+		showConfirmDialog({
+			title: `End Session?`,
+			content: `This will end the session for all users. Continue?`,
+			onConfirm: stopPresenting,
+		});
+	}, [showConfirmDialog, stopPresenting]);
+
+	return (
+		<Container>
+			<SessionTop />
+			<StopButton onClick={handleStopButtonClick}>
+				End Session
+			</StopButton>
+			<StyledDivider />
+			<Paragraph>
+				You are hosting a session, send other users the invitation code<br /><br />
+				<Link href="https://3drepo.com/" target="_blank">Read more...</Link>
+			</Paragraph>
+		</Container>
+	);
+};

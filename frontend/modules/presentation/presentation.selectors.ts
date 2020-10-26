@@ -30,7 +30,7 @@ export const selectJoinedPresentation = createSelector(
 export const selectPresentationMode = createSelector(
 	selectIsPresenting, selectJoinedPresentation, (isPresenting, joinedPresentation) =>
 		isPresenting ? PresentationMode.PRESENTER
-			: joinedPresentation ? PresentationMode.PARTICIPANT : PresentationMode.DEFAULT
+			: joinedPresentation ? PresentationMode.PARTICIPANT : PresentationMode.INITIAL
 );
 
 export const selectSessionCode = createSelector(

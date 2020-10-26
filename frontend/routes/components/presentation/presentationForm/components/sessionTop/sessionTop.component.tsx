@@ -28,7 +28,7 @@ interface IProps {
 	showSnackbar: (text: string) => void;
 }
 
-export const SessionTop: React.FunctionComponent<IProps> = ({ sessionCode, showSnackbar }) => {
+export const SessionTop: React.FC<IProps> = ({ sessionCode, showSnackbar }) => {
 	const handleCopyButtonClick = React.useCallback(() => {
 		copy(sessionCode);
 		showSnackbar('Share link copied to clipboard');

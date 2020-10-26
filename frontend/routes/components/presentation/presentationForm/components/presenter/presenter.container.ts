@@ -19,6 +19,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
+import { DialogActions } from '../../../../../../modules/dialog';
 import { PresentationActions } from '../../../../../../modules/presentation';
 import { Presenter } from './presenter.component';
 
@@ -26,6 +27,7 @@ const mapStateToProps = createStructuredSelector({});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	stopPresenting: PresentationActions.stopPresenting,
+	showConfirmDialog: DialogActions.showConfirmDialog,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Presenter);
