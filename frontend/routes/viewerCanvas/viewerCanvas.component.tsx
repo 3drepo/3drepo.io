@@ -22,8 +22,9 @@ import { difference, isEqual } from 'lodash';
 import { ROUTES } from '../../constants/routes';
 import { addColorOverrides, overridesColorDiff, removeColorOverrides } from '../../helpers/colorOverrides';
 import { pinsDiff } from '../../helpers/pins';
+import { PresentationMode } from '../../modules/presentation/presentation.constants';
 import { ViewerService } from '../../services/viewer/viewer';
-import { Container } from './viewerCanvas.styles';
+import { Border, Container } from './viewerCanvas.styles';
 
 interface IProps {
 	location: any;
@@ -46,6 +47,8 @@ interface IProps {
 	gisCoordinates: any;
 	handleTransparencyOverridesChange: any;
 	viewerManipulationEnabled: boolean;
+	presentationMode: PresentationMode;
+	isPresentationPaused: boolean;
 }
 
 export class ViewerCanvas extends React.PureComponent<IProps, any> {
@@ -151,12 +154,18 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 
 	public render() {
 		return (
-			<Container
-				visible={this.shouldBeVisible}
-				id="viewer"
-				ref={this.containerRef}
-				className={this.props.className}
-			/>
+			<>
+				<Container
+					visible={this.shouldBeVisible}
+					id="viewer"
+					ref={this.containerRef}
+					className={this.props.className}
+				/>
+				<Border
+					presentationMode={this.props.presentationMode}
+					isPresentationPaused={this.props.isPresentationPaused}
+				/>
+			</>
 		);
 	}
 }
