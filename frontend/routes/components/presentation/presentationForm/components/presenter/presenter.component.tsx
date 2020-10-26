@@ -19,7 +19,8 @@ import React from 'react';
 
 import { SessionTop } from '../sessionTop';
 
-import { Container, Link, Paragraph, StopButton, StyledDivider } from '../../presentationForm.styles';
+import { Container, StopButton, StyledDivider } from '../../presentationForm.styles';
+import { SectionBottom } from '../sectionBottom/sectionBottom.component';
 
 interface IProps {
 	stopPresenting: () => void;
@@ -42,10 +43,9 @@ export const Presenter: React.FC<IProps> = ({ stopPresenting, showConfirmDialog 
 				End Session
 			</StopButton>
 			<StyledDivider />
-			<Paragraph>
-				You are hosting a session, send other users the invitation code<br /><br />
-				<Link href="https://3drepo.com/" target="_blank">Read more...</Link>
-			</Paragraph>
+			<SectionBottom>
+				You are hosting a session, send other users the invitation code.
+			</SectionBottom>
 		</Container>
 	);
 };

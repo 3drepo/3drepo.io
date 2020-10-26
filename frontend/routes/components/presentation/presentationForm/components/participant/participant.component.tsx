@@ -21,9 +21,8 @@ import PauseIcon from '@material-ui/icons/Pause';
 import PlayIcon from '@material-ui/icons/PlayArrow';
 
 import { renderWhenTrueOtherwise } from '../../../../../../helpers/rendering';
-import {
-	ButtonContainer, Container, Link, Paragraph, SecondaryButton, StopButton, StyledDivider,
-} from '../../presentationForm.styles';
+import { ButtonContainer, Container, SecondaryButton, StopButton, StyledDivider } from '../../presentationForm.styles';
+import { SectionBottom } from '../sectionBottom/sectionBottom.component';
 import { SessionTop } from '../sessionTop';
 
 interface IProps {
@@ -49,10 +48,9 @@ export const Participant: React.FC<IProps> = ({ leavePresentation, isPaused, tog
 			</SecondaryButton>
 		</ButtonContainer>
 		<StyledDivider />
-		<Paragraph>
+		<SectionBottom>
 			You are participating in a live session.<br />
-			{isPaused ? `Resume to continue following the presenter.` : `Pause to take control of your view.`}<br /><br />
-			<Link href="https://3drepo.com/" target="_blank">Read more...</Link>
-		</Paragraph>
+			{isPaused ? `Resume to continue following the presenter.` : `Pause to take control of your view.`}
+		</SectionBottom>
 	</Container>
 );

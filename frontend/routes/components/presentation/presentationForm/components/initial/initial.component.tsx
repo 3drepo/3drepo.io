@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
 import {
-	Container, Link, Paragraph, PrimaryButton, StyledDivider, StyledDividerWithText, StyledTextfield,
+	Container, PrimaryButton, StyledDivider, StyledDividerWithText, StyledTextfield,
 } from '../../presentationForm.styles';
+import { SectionBottom } from '../sectionBottom/sectionBottom.component';
 
 interface IProps {
 	startPresenting: () => void;
@@ -27,12 +28,12 @@ interface IProps {
 }
 
 export const Initial: React.FC<IProps> = ({ startPresenting, joinPresentation }) => {
-	const [code, setCode] = useState<string>('');
+	const [code, setCode] = React.useState<string>('');
 	const hasCode = code.trim() !== '';
 
 	const handleInputChange = ({ currentTarget }) => setCode(currentTarget?.value);
 
-	const handleJoinPresentation = () => joinPresentation(code);
+	const handleJoinPresentation = React.useCallback(() => joinPresentation(code), [joinPresentation, code]);
 
 	return (
 		<Container>
@@ -51,10 +52,9 @@ export const Initial: React.FC<IProps> = ({ startPresenting, joinPresentation })
 				Create Session
 			</PrimaryButton>
 			<StyledDivider />
-			<Paragraph component="p">
-				Share your 3D Repo view live with colleagues, or join an existing session.<br /><br />
-				<Link href="https://3drepo.com/" target="_blank">Read more...</Link>
-			</Paragraph>
+			<SectionBottom>
+				Share your 3D Repo view live with colleagues, or join an existing session.
+			</SectionBottom>
 		</Container>
 	);
 };
