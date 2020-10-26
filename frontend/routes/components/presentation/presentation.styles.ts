@@ -17,7 +17,7 @@
 import styled from 'styled-components';
 
 import Popover from '@material-ui/core/Popover';
-import VideocamIcon from '@material-ui/icons/Videocam';
+import CameraIcon from '@material-ui/icons/LinkedCamera';
 import { cond, matches, stubTrue } from 'lodash';
 
 import { PresentationMode } from '../../../modules/presentation/presentation.constants';
@@ -33,7 +33,7 @@ export interface IPresentationModeIcon {
 	mode: PresentationMode;
 }
 
-export const PresentationIcon = styled(VideocamIcon)`
+export const PresentationIcon = styled(CameraIcon)`
 	&& {
 		color: ${({ mode }: IPresentationModeIcon) => getVariantColor(mode)};
 		font-size: 24px;

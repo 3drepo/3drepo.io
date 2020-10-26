@@ -21,7 +21,7 @@ import IconButton from '@material-ui/core/IconButton';
 
 import { PresentationMode } from '../../../modules/presentation/presentation.constants';
 import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
-import { PresentationIcon} from './presentation.styles';
+import { PresentationIcon } from './presentation.styles';
 import { PresentationForm } from './presentationForm';
 
 interface IProps {
