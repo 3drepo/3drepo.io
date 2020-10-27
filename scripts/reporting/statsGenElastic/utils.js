@@ -68,6 +68,14 @@ Utils.isUndefined = (value) => {
     return value === undefined;
 }
 
+Utils.clean = (value) => {
+	const FALSY_VALUES = ['', 'null', 'false', 'undefined'];
+	if (!value || FALSY_VALUES.includes(value)) {
+	  return undefined;
+	}
+	return value;
+  }
+
 Utils.createElasticRecord = async ( ElasticClient, Index, elasticBody, id = Utils.hashCode( Object.values(elasticBody).toString() ) ) => {
 	try {
 		const indexName = Index.toLowerCase() // requirement of elastic that indexs be lowercase
