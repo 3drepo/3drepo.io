@@ -20,8 +20,19 @@ const MongoClient = require('mongodb').MongoClient;
 const UserList = require('./userList');
 const DBStats = require('./dbStats');
 const Utils = require('./utils');
+
+function clean(value) {
+	const FALSY_VALUES = ['', 'null', 'false', 'undefined'];
+	if (!value || FALSY_VALUES.includes(value)) {
+	  return undefined;
+	}
+	return value;
+  }
+
 try {
-	
+	if ( clean(process.env.ELASTIC_CLOUD_AUTH === undefined )) { console.log("ELASTIC_CLOUD_AUTH not set"); throw error } 
+	else { testSplit = process.env.ELASTIC_CLOUD_AUTH.split(":") }
+	if ( clean(process.env.ELASTIC_CLOUD_ID === undefined )) { console.log("ELASTIC_CLOUD_ID not set"); throw error }
 } catch (error) {
 	console.log("Not enough settings: ELASTIC")
 }
