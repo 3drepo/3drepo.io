@@ -76,7 +76,7 @@ async function start() {
 
 		await Promise.all([
 			UserList.createUsersReport(db, ElasticClient),
-			// DBStats.createDBReport(db, ElasticClient)
+			DBStats.createDBReport(db, ElasticClient)
 		]);
 
 		await client.close();
