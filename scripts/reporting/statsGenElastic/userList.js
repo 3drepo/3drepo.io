@@ -45,18 +45,13 @@ UserList.createUsersReport = async (dbConn, ElasticClient) => {
 					"Mail Optout" : user.customData.mailListOptOut, 
 					"Verified" : user.customData.inactive, 
 				}
-				await Utils.createElasticRecord( ElasticClient, Utils.teamspaceIndexPrefix + "-users", body); 
-		}
-	}
-	
-	// add new lastLogin document
-	for (const user in users) {
-		if(!Utils.skipUser(user.user) && user.customData) { 
-			const body = {
-				"Teamspace" : user.user,
-				"Last Login" : user.customData.lastLoginAt,
-			}
-			await Utils.createElasticRecord( ElasticClient, Utils.teamspaceIndexPrefix + "-login", body) 
+				await Utils.createElasticRecord( ElasticClient, Utils.teamspaceIndexPrefix + "-users", body);
+				
+				const lastLogin = {
+					"Teamspace" : user.user,
+					"Last Login" : user.customData.lastLoginAt,
+				}
+				await Utils.createElasticRecord( ElasticClient, Utils.teamspaceIndexPrefix + "-login", lastLogin) 
 		}
 	}
 	
