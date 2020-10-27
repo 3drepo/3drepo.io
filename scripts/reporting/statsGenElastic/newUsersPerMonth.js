@@ -17,7 +17,7 @@
 
 'use strict'
 
-const fs = require('fs');
+// const fs = require('fs');
 const Utils = require ('./utils');
 
 const writeNewElasticDocument = (ElasticClient, month, year, count, total ) => {
