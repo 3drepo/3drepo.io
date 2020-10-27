@@ -20,7 +20,11 @@ const MongoClient = require('mongodb').MongoClient;
 const UserList = require('./userList');
 const DBStats = require('./dbStats');
 const Utils = require('./utils');
-const ELASTIC_CLOUD_AUTH = process.env.ELASTIC_CLOUD_AUTH.split(":")
+try {
+	
+} catch (error) {
+	console.log("Not enough settings: ELASTIC")
+}
 
 process.on("unhandledRejection", (error) => {
 	console.error(error); // This prints error with stack included (as for normal errors)
@@ -28,6 +32,7 @@ process.on("unhandledRejection", (error) => {
   })
 
 const { Client } = require('@elastic/elasticsearch')
+const ELASTIC_CLOUD_AUTH = process.env.ELASTIC_CLOUD_AUTH.split(":")
 const ElasticClient = new Client({
 	cloud: {
 	  id: process.env.ELASTIC_CLOUD_ID
@@ -60,7 +65,6 @@ async function start() {
 	try {
 		const db = await client.connect();
 		console.log('Connected successfully!');
- 
 		await Utils.createElasticRecord(ElasticClient,Utils.statsIndexPrefix,{})
 		await Utils.createElasticRecord(ElasticClient,Utils.teamspaceIndexPrefix + "-activity",{})
 		await Utils.createElasticRecord(ElasticClient,Utils.teamspaceIndexPrefix + "-quota",{})

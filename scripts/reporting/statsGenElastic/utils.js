@@ -67,29 +67,30 @@ Utils.isUndefined = (value) => {
     var undefined = void(0);
     return value === undefined;
 }
-Utils.createElasticRecord = async ( ElasticClient, Index, elasticBody ) => {
+
+Utils.createElasticRecord = async ( ElasticClient, Index, elasticBody, id = Utils.hashCode( Object.values(elasticBody).toString() ) ) => {
 	try {
 		const indexName = Index.toLowerCase() // requirement of elastic that indexs be lowercase
 		const configured = await ElasticClient.indices.exists({
 			index: indexName
 		})
 		if (!configured.body) {
-				const created = await ElasticClient.indices.create({
+				await ElasticClient.indices.create({
 					index: indexName
-				})
-				console.log("Created " + indexName )
+					})
+				console.log("[ELASTIC] Created index " + indexName )
 		}
 		await ElasticClient.index(
 			{  
 				index: indexName,
-				id: Utils.hashCode( Object.values(elasticBody).toString() ),
+				id: id,
 				refresh: true,
 				body: elasticBody
 			})
-		console.log("created elastic doc " + indexName + " " + Object.values(elasticBody).toString() );
+		console.log("[ELASTIC] created doc " + indexName + " " + Object.values(elasticBody).toString() );
 		return Promise.resolve()
 	} catch (error) {
-			console.log("ERROR:" + Index)
+			console.log("[ELASTIC] ERROR:" + Index)
 			console.log(elasticBody)
 			console.log(error)
 			console.log(error.body.error)

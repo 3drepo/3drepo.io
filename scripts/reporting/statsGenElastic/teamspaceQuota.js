@@ -16,6 +16,7 @@
 */
 
 'use strict'
+const { Long } = require('mongodb');
 // const fs = require('fs');
 const Utils = require('./utils');
 
@@ -46,8 +47,8 @@ const writeQuotaDetails = async(dbConn, col, ElasticClient, enterprise) => {
 	const promises = [];
 	ts.forEach((user) => {
 		promises.push(getNumUsers(col, user));
-		const sub = enterprise? user.customData.billing.subscriptions.enterprise :
-			user.customData.billing.subscriptions.discretionary;
+		// const sub = enterprise? user.customData.billing.subscriptions.enterprise :
+		// 	user.customData.billing.subscriptions.discretionary;
 	});
 
 	const res = await Promise.all(promises);
@@ -60,8 +61,8 @@ const writeQuotaDetails = async(dbConn, col, ElasticClient, enterprise) => {
 			"Teamspace" : user.user,
 			"Type" : type, 
 			"User Count" : Number(user.numUsers), 
-			"Max Users" : Number(sub.collaborators), 
-			"Max Data(GB)" : Number(sub.data/1024), 
+			"Max Users" : String(sub.collaborators), 
+			"Max Data(GB)" : Long(sub.data/1024), 
 			"Expiry Date" : dateString, 
 			"Expired" : expired? 'True' : 'False', 
 		}
@@ -71,7 +72,6 @@ const writeQuotaDetails = async(dbConn, col, ElasticClient, enterprise) => {
 
 	return licensedTS;
 }
-
 
 const reportTeamspaceQuota = async (dbConn, ElasticClient) => {
 	const col = await dbConn.db('admin').collection('system.users');
