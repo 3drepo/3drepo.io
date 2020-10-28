@@ -16,9 +16,8 @@
  */
 
 import copy from 'copy-to-clipboard';
-import { get, groupBy, over } from 'lodash';
+import { get } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
-import { selectOverrides as selectViewsOverrides } from '.';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { ROUTES } from '../../constants/routes';
 import { UnityUtil } from '../../globals/unity-util';
@@ -28,13 +27,13 @@ import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
 import { DialogActions } from '../dialog';
-import {  selectAllOverridesDict, GroupsActions } from '../groups';
+import { GroupsActions } from '../groups';
 import { ModelActions } from '../model';
 import { selectCurrentRevisionId } from '../model';
 import { SnackbarActions } from '../snackbar';
 import { dispatch } from '../store';
 import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds, selectIfcSpacesHidden, TreeActions } from '../tree';
-import { ViewerGuiActions } from '../viewerGui';
+import { selectColorOverrides, ViewerGuiActions } from '../viewerGui';
 import { PRESET_VIEW } from './viewpoints.constants';
 import { ViewpointsActions, ViewpointsTypes } from './viewpoints.redux';
 
@@ -117,9 +116,10 @@ export function* generateViewpoint(teamspace, modelId, name, withScreenshot = fa
 
 		const objectInfo = yield Viewer.getObjectsStatus();
 
-		let overrides = (yield select(selectAllOverridesDict)).colors;
-		const viewsOverrides =  (yield select(selectViewsOverrides));
-		overrides = {...overrides, ...viewsOverrides };
+		const overrides = yield select(selectColorOverrides);
+		// let overrides = (yield select(selectAllOverridesDict)).colors;
+		// const viewsOverrides =  (yield select(selectViewsOverrides));
+		// overrides = {...overrides, ...viewsOverrides };
 		const newOverrideGroups = yield groupByColor(overrides);
 
 		if (newOverrideGroups.length) {
