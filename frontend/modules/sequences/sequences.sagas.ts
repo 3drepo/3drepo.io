@@ -54,7 +54,7 @@ export function* fetchActivitiesDefinitions({sequenceId}) {
 	try {
 		const teamspace = yield select(selectCurrentModelTeamspace);
 		const revision = yield select(selectCurrentRevisionId);
-		const model = yield select(selectCurrentModel);
+		const model = yield select(selectSequenceModel);
 		const activitiesDefinitions = yield select(selectActivitiesDefinitions);
 
 		if (!activitiesDefinitions && sequenceId) {
