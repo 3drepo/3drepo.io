@@ -80,6 +80,7 @@ interface IProps {
 	onChangeFilters: (selectedFilters) => void;
 	toggleShowPins: (showPins: boolean, filteredItems) => void;
 	renderDetailsView: (statement) => React.ReactChildren[];
+	id?: string;
 }
 
 interface IState {
@@ -150,6 +151,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 					color="secondary"
 					variant="fab"
 					disabled={!this.hasPermission(CREATE_ISSUE) || !this.props.isModelLoaded}
+					id={this.props.id + '-add-new-button'}
 				>
 					<AddIcon />
 				</ViewerPanelButton>
@@ -325,6 +327,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 				Icon={this.renderTitleIcon()}
 				renderActions={this.renderActions}
 				pending={isPending}
+				id={this.props.id + (showDetails ? '-details' : '' )}
 			>
 				{this.renderFilterPanel(searchEnabled && !showDetails)}
 				{this.renderListView(!showDetails)}

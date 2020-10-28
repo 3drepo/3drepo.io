@@ -231,6 +231,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 					aria-label="Save group"
 					disabled={!this.isFormValid || !this.props.canUpdate}
 					pending={this.props.isPending}
+					id="groups-card-save-button"
 				>
 					<SaveIcon />
 				</ViewerPanelButton>
