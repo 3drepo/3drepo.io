@@ -28,8 +28,8 @@ UserList.createUsersReport = async (dbConn, ElasticClient) => {
 	const db = dbConn.db('admin');
 	const col = await db.collection('system.users')
 	const users = await col.find().toArray();
-	const teamspacesReady = () => {};
-	const teamspacesCreated = new Promise(teamspacesReady);
+	// const teamspacesReady = () => {};
+	// const teamspacesCreated = new Promise(teamspacesReady);
 	// create Teamspace details document and update if it exists
 	for (const index in users) {
 		const user = users[index]
@@ -56,8 +56,8 @@ UserList.createUsersReport = async (dbConn, ElasticClient) => {
 		}
 	}
 	
-	teamspacesReady()
-	await teamspacesCreated
+	// teamspacesReady()
+	// await teamspacesCreated
 	console.log('[USERS] users list generated, sent to elastic');
 }
 
