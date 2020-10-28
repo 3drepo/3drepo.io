@@ -24,7 +24,8 @@ import { VIEWER_PANELS } from '../../constants/viewerGui';
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
 import { selectCurrentModel, selectCurrentModelTeamspace,
-	selectCurrentRevisionId } from '../model/model.selectors';
+	selectCurrentRevisionId,
+	selectIsFederation} from '../model/model.selectors';
 import { dispatch } from '../store';
 import { selectIfcSpacesHidden, TreeActions } from '../tree';
 import { selectLeftPanels, ViewerGuiActions } from '../viewerGui';
@@ -53,7 +54,8 @@ export function* fetchSequences() {
 export function* fetchActivitiesDefinitions({sequenceId}) {
 	try {
 		const teamspace = yield select(selectCurrentModelTeamspace);
-		const revision = yield select(selectCurrentRevisionId);
+		const isFederation = yield select(selectIsFederation);
+		const revision = isFederation ? null : yield select(selectCurrentRevisionId);
 		const model = yield select(selectSequenceModel);
 		const activitiesDefinitions = yield select(selectActivitiesDefinitions);
 
