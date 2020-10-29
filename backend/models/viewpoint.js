@@ -30,8 +30,9 @@ const clean = function(routePrefix, viewpointToClean, serialise = true) {
 		"guid",
 		"highlighted_group_id",
 		"hidden_group_id",
+		"override_group_ids",
 		"shown_group_id",
-		"override_group_ids"
+		"transformation_group_id"
 	];
 
 	if (viewpointToClean) {
@@ -117,6 +118,21 @@ const checkCameraValues = (output, input) => {
 				throw responseCodes.INVALID_ARGUMENTS;
 			}
 		});
+	}
+
+	if (input.transformation || input.transformation_group_id) {
+		if (!input.transformation_group_id) {
+			systemLogger.logError("group missing from transformation");
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+
+		if (input.transformation && Array.isArray(input.transformation) && 16 === input.transformation.length) {
+			output.transformation_group_id = input.transformation_group_id;
+			output.transformation = input.transformation;
+		} else {
+			systemLogger.logError("invalid transformation array length");
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
 	}
 
 	if(input.extra) {

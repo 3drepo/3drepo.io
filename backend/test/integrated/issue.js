@@ -367,6 +367,85 @@ describe("Issues", function () {
 				});
 		});
 
+		it("with transformation should succeed", function(done) {
+			const issue = Object.assign({"name":"Issue test"}, baseIssue);
+			issue.viewpoint.transformation = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
+			issue.viewpoint.transformation_group_id = "8d46d1b0-8ef1-11e6-8d05-000000000000";
+			let issueId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200, function(err, res) {
+							issueId = res.body._id;
+							expect(res.body.viewpoint.transformation).to.equal(issue.viewpoint.transformation);
+							expect(res.body.viewpoint.transformation_group_id).to.equal(issue.viewpoint.transformation_group_id);
+
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/issues/${issueId}`).expect(200, function(err , res) {
+						expect(res.body.viewpoint.transformation).to.equal(issue.viewpoint.transformation);
+						expect(res.body.viewpoint.transformation_group_id).to.equal(issue.viewpoint.transformation_group_id);
+
+						return done(err);
+					});
+				}
+			], done);
+		});
+
+		it("with invalid (short) transformation matrix should fail", function(done) {
+			const issue = Object.assign({"name":"Issue test"}, baseIssue);
+			issue.viewpoint.transformation = [1,2,3,4,5,6,7,8];
+			issue.viewpoint.transformation_group_id = "8d46d1b0-8ef1-11e6-8d05-000000000000";
+
+			agent.post(`/${username}/${model}/issues`)
+				.send(issue)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("with invalid (long) transformation matrix should fail", function(done) {
+			const issue = Object.assign({"name":"Issue test"}, baseIssue);
+			issue.viewpoint.transformation = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17];
+			issue.viewpoint.transformation_group_id = "8d46d1b0-8ef1-11e6-8d05-000000000000";
+
+			agent.post(`/${username}/${model}/issues`)
+				.send(issue)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("with transformation group but without matrix should fail", function(done) {
+			const issue = Object.assign({"name":"Issue test"}, baseIssue);
+			issue.viewpoint.transformation_group_id = "8d46d1b0-8ef1-11e6-8d05-000000000000";
+
+			agent.post(`/${username}/${model}/issues`)
+				.send(issue)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("with transformation matrix but without group should fail", function(done) {
+			const issue = Object.assign({"name":"Issue test"}, baseIssue);
+			issue.viewpoint.transformation = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
+
+			agent.post(`/${username}/${model}/issues`)
+				.send(issue)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
 		it("without name should fail", function(done) {
 			const issue = baseIssue;
 
@@ -1074,6 +1153,198 @@ describe("Issues", function () {
 							delete vp.screenshot_ref;
 							expect(vp).to.deep.equal(newViewpoint);
 							expect(res.body.comments[1].owner).to.equal(username);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change viewpoint transformation should succeed and create system comment", function(done) {
+			const issue = Object.assign({"name":"Issue test"}, baseIssue, { assigned_roles:["jobA"]});
+			let issueId;
+			let oldViewpoint;
+			const data = {
+				"viewpoint": {
+					"up":[0,1,0],
+					"position":[20,20,100],
+					"look_at":[0,0,-100],
+					"view_dir":[0,0,-1],
+					"right":[1,0,0],
+					"fov":2,
+					"aspect_ratio":1,
+					"far":300,
+					"near":50,
+					"transformation":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
+					"transformation_group_id":"8d46d1b0-8ef1-11e6-8d05-000000000000"
+				}
+			};
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200 , function(err, res) {
+							issueId = res.body._id;
+							oldViewpoint = res.body.viewpoint;
+							delete oldViewpoint.screenshot;
+							delete oldViewpoint.screenshotSmall;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/issues/${issueId}`)
+						.send(data)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/issues/${issueId}`)
+						.expect(200, function(err, res) {
+							const newViewpoint = { ...oldViewpoint, ...data.viewpoint };
+							newViewpoint.guid = res.body.viewpoint.guid;
+
+							expect(res.body.viewpoint).to.deep.equal(data.viewpoint);
+							expect(res.body.comments[0].action.property).to.equal("viewpoint");
+							expect(res.body.comments[0].action.from).to.equal(JSON.stringify(oldViewpoint));
+							expect(res.body.comments[0].action.to).to.equal(JSON.stringify(newViewpoint));
+							expect(res.body.comments[0].owner).to.equal(username);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change viewpoint transformation with bad matrix should fail", function(done) {
+			const issue = Object.assign({"name":"Issue test"}, baseIssue, { assigned_roles:["jobA"]});
+			let issueId;
+			let oldViewpoint;
+			const data = {
+				"viewpoint": {
+					"up":[0,1,0],
+					"position":[20,20,100],
+					"look_at":[0,0,-100],
+					"view_dir":[0,0,-1],
+					"right":[1,0,0],
+					"fov":2,
+					"aspect_ratio":1,
+					"far":300,
+					"near":50,
+					"transformation":[1,2,3,4,5,6,7,8],
+					"transformation_group_id":"8d46d1b0-8ef1-11e6-8d05-000000000000"
+				}
+			};
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200 , function(err, res) {
+							issueId = res.body._id;
+							oldViewpoint = res.body.viewpoint;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/issues/${issueId}`)
+						.send(data)
+						.expect(400, function(err, res) {
+							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+							done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/issues/${issueId}`)
+						.expect(200, function(err, res) {
+							expect(res.body.viewpoint).to.deep.equal(oldViewpoint);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change viewpoint transformation without matrix should fail", function(done) {
+			const issue = Object.assign({"name":"Issue test"}, baseIssue, { assigned_roles:["jobA"]});
+			let issueId;
+			let oldViewpoint;
+			const data = {
+				"viewpoint": {
+					"up":[0,1,0],
+					"position":[20,20,100],
+					"look_at":[0,0,-100],
+					"view_dir":[0,0,-1],
+					"right":[1,0,0],
+					"fov":2,
+					"aspect_ratio":1,
+					"far":300,
+					"near":50,
+					"transformation_group_id":"8d46d1b0-8ef1-11e6-8d05-000000000000"
+				}
+			};
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200 , function(err, res) {
+							issueId = res.body._id;
+							oldViewpoint = res.body.viewpoint;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/issues/${issueId}`)
+						.send(data)
+						.expect(400, function(err, res) {
+							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+							done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/issues/${issueId}`)
+						.expect(200, function(err, res) {
+							expect(res.body.viewpoint).to.deep.equal(oldViewpoint);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change viewpoint transformation without group should fail", function(done) {
+			const issue = Object.assign({"name":"Issue test"}, baseIssue, { assigned_roles:["jobA"]});
+			let issueId;
+			let oldViewpoint;
+			const data = {
+				"viewpoint": {
+					"up":[0,1,0],
+					"position":[20,20,100],
+					"look_at":[0,0,-100],
+					"view_dir":[0,0,-1],
+					"right":[1,0,0],
+					"fov":2,
+					"aspect_ratio":1,
+					"far":300,
+					"near":50,
+					"transformation":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				}
+			};
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200 , function(err, res) {
+							issueId = res.body._id;
+							oldViewpoint = res.body.viewpoint;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/issues/${issueId}`)
+						.send(data)
+						.expect(400, function(err, res) {
+							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+							done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/issues/${issueId}`)
+						.expect(200, function(err, res) {
+							expect(res.body.viewpoint).to.deep.equal(oldViewpoint);
 							done(err);
 						});
 				}

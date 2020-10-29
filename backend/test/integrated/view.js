@@ -713,7 +713,81 @@ describe("Views", function () {
 			expect(mergeObjects(override_groups_2)).to.deep.equal(mergeObjects(override_groups));
 		});
 
+		it("with transformation should succeed", function(done) {
+			const view = Object.assign({"name":"View test"}, baseView);
+			view.viewpoint.transformation = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
+			view.viewpoint.transformation_group_id = "8d46d1b0-8ef1-11e6-8d05-000000000000";
+			let viewId;
 
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/viewpoints/`)
+						.send(view)
+						.expect(200, function(err, res) {
+							viewId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/viewpoints/${viewId}`).expect(200, function(err, res) {
+						expect(res.body.name).to.equal(view.name);
+						expect(res.body.viewpoint).to.deep.equal(view.viewpoint);
+
+						return done(err);
+					});
+				}
+			], done);
+		});
+
+		it("with invalid (short) transformation matrix should fail", function(done) {
+			const view = Object.assign({"name":"View test"}, baseView);
+			view.viewpoint.transformation = [1,2,3,4,5,6,7,8,9,10,11,12];
+			view.viewpoint.transformation_group_id = "8d46d1b0-8ef1-11e6-8d05-000000000000";
+
+			agent.post(`/${username}/${model}/viewpoints/`)
+				.send(view)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("with invalid (long) transformation matrix should fail", function(done) {
+			const view = Object.assign({"name":"View test"}, baseView);
+			view.viewpoint.transformation = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17];
+			view.viewpoint.transformation_group_id = "8d46d1b0-8ef1-11e6-8d05-000000000000";
+
+			agent.post(`/${username}/${model}/viewpoints/`)
+				.send(view)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("with transformation group but without matrix should fail", function(done) {
+			const view = Object.assign({"name":"View test"}, baseView);
+			view.viewpoint.transformation_group_id = "8d46d1b0-8ef1-11e6-8d05-000000000000";
+
+			agent.post(`/${username}/${model}/viewpoints/`)
+				.send(view)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("with transformation matrix but without group should fail", function(done) {
+			const view = Object.assign({"name":"View test"}, baseView);
+			view.viewpoint.transformation = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
+
+			agent.post(`/${username}/${model}/viewpoints/`)
+				.send(view)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
 	});
 });
 
