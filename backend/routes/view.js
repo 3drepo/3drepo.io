@@ -66,6 +66,8 @@ const config = require("../config");
  * @apiParam (Type: Viewpoint) {Group[]} [override_groups] If the viewpoint has one or more objects with colour override this field has an array of groups with one group for each colour
  * @apiParam (Type: Viewpoint) {Boolean} hide_IFC A flag to hide the IFC
  * @apiParam (Type: Viewpoint) {String} screenshot Base64 string representing the screenshot associated with the viewpoint
+ * @apiParam (Type: Viewpoint) {Number[16]} [transformation] Transformation 4x4 matrix
+ * @apiParam (Type: Viewpoint) {String} [transformation_group_id] Transformation objects group ID
  *
  * @apiParam (Type: Group) {Number[3]} color RGB colour values
  * @apiParam (Type: Group) {ModelObjects} objects List of objects in group
