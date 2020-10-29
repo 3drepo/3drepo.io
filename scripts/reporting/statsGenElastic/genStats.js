@@ -96,11 +96,58 @@ async function start() {
 		console.log('Connected successfully!');
 
 		// initialise indicies if missing
-		await Utils.createElasticRecord(ElasticClient,Utils.statsIndexPrefix,{})
-		await Utils.createElasticRecord(ElasticClient,Utils.teamspaceIndexPrefix + "-activity",{})
-		await Utils.createElasticRecord(ElasticClient,Utils.teamspaceIndexPrefix + "-quota",{})
-		await Utils.createElasticRecord(ElasticClient,Utils.teamspaceIndexPrefix + "-users",{})
-		await Utils.createElasticRecord(ElasticClient,Utils.teamspaceIndexPrefix + "-login",{})
+
+		const activityMapping = {
+			"Teamspace" : { 'type': 'keyword' },
+			"licenseType" : { 'type': 'text' },
+			"Year" : { 'type': 'text' },
+			"Month" : { 'type': 'text' }, 
+			"DateTime" : { 'type': 'date' },
+			"Issues" :  { 'type': 'double' }, 
+			"Model Revisions" : { 'type': 'double' }, 
+		}
+		await Utils.createElasticIndex(ElasticClient,Utils.teamspaceIndexPrefix + "-activity",activityMapping)
+
+		const quotaMapping = {
+			"Teamspace" : { 'type': 'keyword' },
+			"Type" : { 'type': 'text' }, 
+			"User Count" : { 'type': 'double' }, 
+			"Max Users" : { 'type': 'double' }, 
+			"Max Data(GB)" :  { 'type': 'double' }, 
+			"Expiry Date" : { 'type': 'date' }, 
+			"Expired" : { 'type': 'boolean' }, 
+		}
+		await Utils.createElasticIndex(ElasticClient,Utils.teamspaceIndexPrefix + "-quota",quotaMapping)
+
+		const usersMapping = {
+			"Teamspace" : { 'type': 'keyword' },
+			"Email" : { 'type': 'text' }, 
+			"First Name" : { 'type': 'text' }, 
+			"Last Name" : { 'type': 'text' }, 
+			"Country" : { 'type': 'text' }, 
+			"Company" : { 'type': 'text' }, 
+			"Date Created" : { 'type': 'text' },
+			"DateTime" : { 'type': 'date' },
+			"Mail Optout" : { 'type': 'text' }, 
+			"Verified" : { 'type': 'boolean' }, 
+		}
+		await Utils.createElasticIndex(ElasticClient,Utils.teamspaceIndexPrefix + "-users",usersMapping)
+
+		const loginMapping = {
+			"Teamspace" : { 'type': 'keyword' },
+			"Last Login" : { 'type': 'text' },
+			"DateTime" : { 'type': 'date' },
+		}
+		await Utils.createElasticIndex(ElasticClient,Utils.teamspaceIndexPrefix + "-login",loginMapping)
+
+		const statsMapping = {
+			"Month" : { 'type': 'text' },
+			"Year" :{ 'type': 'text' },
+			"Count" : { 'type': 'double' }, 
+			"Total" :{ 'type': 'double' }, 
+			"DateTime" : { 'type': 'date' },
+		}
+		await Utils.createElasticIndex(ElasticClient,Utils.statsIndexPrefix,statsMapping)
 
 		await Promise.all([
 			UserList.createUsersReport(db, ElasticClient),

@@ -76,6 +76,35 @@ Utils.clean = (value) => {
 	return value;
   }
 
+Utils.createElasticIndex = async ( ElasticClient, Index, Mapping ) => {
+	try {
+		const indexName = Index.toLowerCase() // requirement of elastic that indexs be lowercase
+		const configured = await ElasticClient.indices.exists({
+			index: indexName
+		})
+		if (!configured.body) {
+				await ElasticClient.indices.create({
+						index: indexName
+					})
+				console.log("[ELASTIC] Created index " + indexName )
+				await ElasticClient.indices.putMapping({
+					index: Index,
+					body: { properties: Mapping }
+					}
+				)
+				console.log("[ELASTIC] created mapping " + indexName  );
+		}
+		return Promise.resolve()
+		
+	} catch (error) {
+			console.log("[ELASTIC] ERROR:" + Index)
+			console.log(Mapping)
+			console.log(error)
+			console.log(error.body.error)
+			Promise.reject()
+		}
+	}
+
 Utils.createElasticRecord = async ( ElasticClient, Index, elasticBody, id = Utils.hashCode( Object.values(elasticBody).toString() ) ) => {
 	try {
 		const indexName = Index.toLowerCase() // requirement of elastic that indexs be lowercase

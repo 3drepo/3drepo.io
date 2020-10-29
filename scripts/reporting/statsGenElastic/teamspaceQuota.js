@@ -22,9 +22,12 @@ const Utils = require('./utils');
 const getNumUsers = async (col, user) => {
 	const nUsers = await col.find({'roles.db': user.user}).count();
 	user.numUsers = nUsers;
-
 	return user;
 }
+
+const isUnlimited = async (value) => {
+	return ( value === 'unlimited' ? true : false );
+  }
 
 const writeQuotaDetails = async(dbConn, col, ElasticClient, enterprise) => {
 	const type = enterprise? 'enterprise' : 'discretionary';
@@ -53,14 +56,15 @@ const writeQuotaDetails = async(dbConn, col, ElasticClient, enterprise) => {
 		const sub = enterprise? user.customData.billing.subscriptions.enterprise :  user.customData.billing.subscriptions.discretionary;
 		const expired = sub.expiryDate && sub.expiryDate < now;
 		const dateString = sub.expiryDate ? Utils.formatDate(sub.expiryDate) : Date.MinValue;
+		const maxUsers = isUnlimited(sub.collaborators) ? -1 : sub.collaborators ;
 		const elasticBody =  {
-			"Teamspace" : user.user,
-			"Type" : type, 
+			"Teamspace" : String(user.user),
+			"Type" : String(type), 
 			"User Count" : Number(user.numUsers), 
-			"Max Users" : String(sub.collaborators), 
-			"Max Data(GB)" : Long(sub.data/1024), 
+			"Max Users" : Number(maxUsers), 
+			"Max Data(GB)" : Number(sub.data/1024), 
 			"Expiry Date" : dateString, 
-			"Expired" : expired? 'True' : 'False', 
+			"Expired" : Boolean ( expired ), 
 		}
 		Utils.createElasticRecord(ElasticClient, Utils.teamspaceIndexPrefix + '-quota', elasticBody)
 		!expired && licensedTS.push({teamspace: user.user, type});

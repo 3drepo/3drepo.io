@@ -21,10 +21,10 @@ const Utils = require ('./utils');
 
 const writeNewElasticDocument = (ElasticClient, month, year, count, total ) => {
 	const elasticBody = {
-		"Month" : month,
-		"Year" : year, 
-		"Count" : count, 
-		"Total" : total,
+		"Month" : String(month),
+		"Year" : String(year), 
+		"Count" : Number(count), 
+		"Total" : Number(total),
 		"DateTime" : new Date(year,month).toISOString(),
 	}
 	const user = {}

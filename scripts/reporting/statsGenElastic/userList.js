@@ -45,8 +45,8 @@ UserList.createUsersReport = async (dbConn, ElasticClient) => {
 				await Utils.createElasticRecord( ElasticClient, Utils.teamspaceIndexPrefix + "-users", body, user.user.toLowerCase() );
 				if ( !Utils.isUndefined(Utils.clean(user.customData.lastLoginAt))) {
 					const lastLogin = {
-						"Teamspace" : user.user,
-						"Last Login" : user.customData.lastLoginAt,
+						"Teamspace" : String(user.user),
+						"Last Login" : String(user.customData.lastLoginAt),
 						"DateTime" : Utils.formatDate(new Date(user.customData.lastLoginAt))
 					}
 					await Utils.createElasticRecord( ElasticClient, Utils.teamspaceIndexPrefix + "-login", lastLogin) 
