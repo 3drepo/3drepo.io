@@ -149,10 +149,16 @@ async function start() {
 		}
 		await Utils.createElasticIndex(ElasticClient,Utils.statsIndexPrefix,statsMapping)
 
-		await Promise.all([
-			UserList.createUsersReport(db, ElasticClient),
-			DBStats.createDBReport(db, ElasticClient)
-		]);
+		// if we're running on a daily basis to keep the stats up to date we don't want to run the full DB Report
+
+		if ( Utils.clean(process.env.STATS_RUN_DAILY ) ){
+			await UserList.createUsersReport(db, ElasticClient) 
+		} else { 		
+			await Promise.all([
+				UserList.createUsersReport(db, ElasticClient),
+				DBStats.createDBReport(db, ElasticClient)
+			]);
+		}
 
 		await client.close();
 	} catch (err) {
