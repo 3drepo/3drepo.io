@@ -17,7 +17,6 @@
 
 'use strict'
 
-// const fs = require('fs');
 const Utils = require('./utils');
 
 const getNewIssuesByMonth = async (db, model) => {
@@ -98,7 +97,7 @@ const printEmptyRows = (ElasticClient, ts, licenseType, currentM, currentY, mont
 		let nextY = currentM === 12? currentY + 1: currentY;
 
 		while(!(nextM === month && nextY === year)) {
-			// stream.write(`${nextY},${nextM},0,0\n`);
+
 			const elasticBody =  {
 				"Teamspace" : ts,
 				"licenseType" : licenseType,
@@ -115,36 +114,15 @@ const printEmptyRows = (ElasticClient, ts, licenseType, currentM, currentY, mont
 	}
 }
 
-// const printStats = (stream, data) => {
-// 	stream.write('Year,Month,#Issues,#Revisions\n');
-// 	let lastYear = -1, lastMonth = -1;
-// 	Object.keys(data).forEach((_year) => {
-// 		const year = parseInt(_year);
-// 		Object.keys(data[year]).forEach((_month) => {
-// 			const month = parseInt(_month);
-// 			printEmptyRows(stream, lastMonth, lastYear, month, year);
-
-// 			stream.write(`${year},${month},${data[year][month].issues},${data[year][month].revisions}\n`);
-// 			lastMonth = month;
-// 			lastYear = year;
-// 		});
-// 	});
-
-// 	const now = new Date();
-// 	const targetDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-// 	printEmptyRows(stream, lastMonth, lastYear, targetDate.getMonth()+1, targetDate.getFullYear());
-// }
 
 const printStatsToElastic = (ElasticClient, data, ts, licenseType) => {
-	// console.log("printStatsToElastic:TS\n" + ts)
-	// console.log("printStatsToElastic:DATA\n" + data)
 
-	// stream.write('Year,Month,#Issues,#Revisions\n');
 	let lastYear = -1, lastMonth = -1;
 	Object.keys(data).forEach((_year) => {
 		const year = parseInt(_year);
 		Object.keys(data[year]).forEach((_month) => {
 			const month = parseInt(_month);
+
 			printEmptyRows(ElasticClient, ts, licenseType, lastMonth, lastYear, month, year);
 			const elasticBody =  {
 				"Teamspace" : ts,
@@ -156,8 +134,6 @@ const printStatsToElastic = (ElasticClient, data, ts, licenseType) => {
 				"Model Revisions" : data[year][month].revisions, 
 			}
 			Utils.createElasticRecord(ElasticClient, Utils.teamspaceIndexPrefix + '-activity', elasticBody )
-
-			// stream.write(`${year},${month},${data[year][month].issues},${data[year][month].revisions}\n`);
 			lastMonth = month;
 			lastYear = year;
 		});
@@ -187,11 +163,9 @@ const TS = {};
 
 TS.createTeamspaceActivityReport = (dbConn, ElasticClient, ts, licenseType) =>{
 	return new Promise((resolve, reject) => {
-		// const fname = Utils.generateFileName(`${elastic}/activity/${ts}_activity`);
-		// const writeStream = fs.createWriteStream(fname);
 		reportActivity(dbConn.db(ts), ElasticClient, ts, licenseType).then(() => {
 				console.log('[DB] TeamspaceActivityReport created');
-				resolve("something to resolve");
+				resolve();
 			}).catch((err) => {
 				reject(err);
 			});

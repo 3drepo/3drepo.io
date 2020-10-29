@@ -17,7 +17,6 @@
 
 'use strict'
 
-// const fs = require('fs');
 const Utils = require(`./utils.js`);
 
 const UserList = {};
@@ -28,9 +27,7 @@ UserList.createUsersReport = async (dbConn, ElasticClient) => {
 	const db = dbConn.db('admin');
 	const col = await db.collection('system.users')
 	const users = await col.find().toArray();
-	// const teamspacesReady = () => {};
-	// const teamspacesCreated = new Promise(teamspacesReady);
-	// create Teamspace details document and update if it exists
+
 	for (const index in users) {
 		const user = users[index]
 		if(!Utils.skipUser(user.user) && user.customData && !Utils.isUndefined(user.user)) {
@@ -46,18 +43,17 @@ UserList.createUsersReport = async (dbConn, ElasticClient) => {
 					"Verified" : user.customData.inactive, 
 				}
 				await Utils.createElasticRecord( ElasticClient, Utils.teamspaceIndexPrefix + "-users", body, user.user.toLowerCase() );
-				if ( !Utils.clean(user.customData.lastLoginAt === undefined )) {
+				if ( !Utils.isUndefined(Utils.clean(user.customData.lastLoginAt))) {
 					const lastLogin = {
 						"Teamspace" : user.user,
 						"Last Login" : user.customData.lastLoginAt,
+						"DateTime" : Utils.formatDate(new Date(user.customData.lastLoginAt))
 					}
 					await Utils.createElasticRecord( ElasticClient, Utils.teamspaceIndexPrefix + "-login", lastLogin) 
 				}
 		}
 	}
-	
-	// teamspacesReady()
-	// await teamspacesCreated
+
 	console.log('[USERS] users list generated, sent to elastic');
 }
 

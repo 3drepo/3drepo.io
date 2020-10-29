@@ -17,7 +17,6 @@
 
 'use strict'
 const { Long } = require('mongodb');
-// const fs = require('fs');
 const Utils = require('./utils');
 
 const getNumUsers = async (col, user) => {
@@ -26,7 +25,6 @@ const getNumUsers = async (col, user) => {
 
 	return user;
 }
-
 
 const writeQuotaDetails = async(dbConn, col, ElasticClient, enterprise) => {
 	const type = enterprise? 'enterprise' : 'discretionary';
@@ -47,8 +45,6 @@ const writeQuotaDetails = async(dbConn, col, ElasticClient, enterprise) => {
 	const promises = [];
 	ts.forEach((user) => {
 		promises.push(getNumUsers(col, user));
-		// const sub = enterprise? user.customData.billing.subscriptions.enterprise :
-		// 	user.customData.billing.subscriptions.discretionary;
 	});
 
 	const res = await Promise.all(promises);
@@ -75,8 +71,6 @@ const writeQuotaDetails = async(dbConn, col, ElasticClient, enterprise) => {
 
 const reportTeamspaceQuota = async (dbConn, ElasticClient) => {
 	const col = await dbConn.db('admin').collection('system.users');
-	// stream.write('Licenced Teamspaces Quota information\n');
-	// stream.write('Teamspace,type,No. Users,Max Users,Max Data(GB),Expiry Date, expired?\n');
 	console.log ("[QUOTA] Writing Licenced Teamspaces Quota information")
 	const enterpriseTS = await writeQuotaDetails(dbConn, col, ElasticClient, true);
 	const discretionaryTS = await writeQuotaDetails(dbConn, col, ElasticClient, false);

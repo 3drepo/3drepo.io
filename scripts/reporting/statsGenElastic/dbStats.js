@@ -28,15 +28,11 @@ const createReports = async(dbConn, ElasticClient) => {
 
 	await NewUsersPerMonth.createNewUsersReport(dbConn, ElasticClient);
 	const {teamspaces} = await Teamspace.createTeamspaceReport(dbConn, ElasticClient);
-	// const files = [newUserFile, file];
 	for(let i = 0; i < teamspaces.length; ++i) {
 		const ts = teamspaces[i];
 		console.log(`[DB] Creating teamspace activity report for ${ts.teamspace} [${i+1}/${teamspaces.length}]...`);
 		await TSActivity.createTeamspaceActivityReport(dbConn, ElasticClient, ts.teamspace, ts.type);
 	}
-
-	// await Utils.concat(files, `${ElasticClient}/${Utils.generateFileName('dbStats')}`);
-
 }
 
 DBStats.createDBReport = async (dbConn, ElasticClient) => {

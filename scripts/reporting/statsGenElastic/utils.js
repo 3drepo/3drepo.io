@@ -37,7 +37,7 @@ Utils.concat = (files, dest) => {
 
 Utils.formatDate = (date) => {
 	return date.toISOString()
-	// return dateFormat(date, 'dd-mm-yy');
+	// return dateFormat(date, 'dd-mm-yy'); // old format
 }
 
 Utils.generateFileName = (prefix) => {
@@ -84,7 +84,7 @@ Utils.createElasticRecord = async ( ElasticClient, Index, elasticBody, id = Util
 		})
 		if (!configured.body) {
 				await ElasticClient.indices.create({
-					index: indexName
+						index: indexName
 					})
 				console.log("[ELASTIC] Created index " + indexName )
 		}

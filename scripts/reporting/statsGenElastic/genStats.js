@@ -1,5 +1,5 @@
 /**
-*	Copyright (C) 2019 3D Repo Ltd
+*	Copyright (C) 2020 3D Repo Ltd
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU Affero General Public License as
@@ -22,11 +22,37 @@ const DBStats = require('./dbStats');
 const Utils = require('./utils');
 
 try {
-	if ( Utils.clean(process.env.ELASTIC_CLOUD_AUTH === undefined )) { console.log("ELASTIC_CLOUD_AUTH not set"); throw error } 
-	else { testSplit = process.env.ELASTIC_CLOUD_AUTH.split(":") }
-	if ( Utils.clean(process.env.ELASTIC_CLOUD_ID === undefined )) { console.log("ELASTIC_CLOUD_ID not set"); throw error }
+	for (let i=0; i<10; i++) {
+	}
+  
+	if (errors.length > 0) {
+	  throw errors; 
+	}
+  
+  } catch(e) {
+	  for (let i=0; i<e.length; i++) {
+		console.log(e[i]);
+	  }
+  }
+
+var errors = [];
+
+try {
+	if ( Utils.clean(process.env.ELASTIC_CLOUD_AUTH === undefined ) ) { errors.push(new Error('ELASTIC_CLOUD_AUTH is not set')); } 
+	if ( Utils.clean(process.env.ELASTIC_CLOUD_ID === undefined ) ) { errors.push(new Error('ELASTIC_CLOUD_ID is not set')); }
+	if ( errors.length > 0 ) { throw errors }
+} catch (e) {
+    for (let i=0; i<e.length; i++) {
+		console.log(e[i].message);
+	  }
+	process.exit(-1);
+}
+
+try {
+	process.env.ELASTIC_CLOUD_AUTH.split(":")
 } catch (error) {
-	console.log("Not enough settings: ELASTIC")
+	console.log("Error: Failed to split ELASTIC_CLOUD_AUTH, check format " + process.env.ELASTIC_CLOUD_AUTH)
+	process.exit(-1);
 }
 
 process.on("unhandledRejection", (error) => {
@@ -50,7 +76,7 @@ const ElasticClient = new Client({
   });
   
 ElasticClient.cluster.health({},function(err,resp,status) {  
-	console.log("-- Client Health --",resp);
+	console.log("[ELASTIC] -- Client Health --",resp);
 });
 
 if(process.argv.length < 5) {
@@ -68,6 +94,8 @@ async function start() {
 	try {
 		const db = await client.connect();
 		console.log('Connected successfully!');
+
+		// initialise indicies if missing
 		await Utils.createElasticRecord(ElasticClient,Utils.statsIndexPrefix,{})
 		await Utils.createElasticRecord(ElasticClient,Utils.teamspaceIndexPrefix + "-activity",{})
 		await Utils.createElasticRecord(ElasticClient,Utils.teamspaceIndexPrefix + "-quota",{})
