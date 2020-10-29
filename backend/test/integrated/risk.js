@@ -378,8 +378,10 @@ describe("Risks", function () {
 
 		it("with transformation should succeed", function(done) {
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
-			risk.viewpoint.transformation = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
-			risk.viewpoint.transformation_group_id = "8d46d1b0-8ef1-11e6-8d05-000000000000";
+			risk.viewpoint = Object.assign({
+				transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
+				transformation_group_id: "8d46d1b0-8ef1-11e6-8d05-000000000000"
+			}, risk.viewpoint);
 			let riskId;
 
 			async.series([
@@ -407,8 +409,10 @@ describe("Risks", function () {
 
 		it("with invalid (short) transformation matrix should fail", function(done) {
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
-			risk.viewpoint.transformation = [1,2,3,4,5,6,7,8];
-			risk.viewpoint.transformation_group_id = "8d46d1b0-8ef1-11e6-8d05-000000000000";
+			risk.viewpoint = Object.assign({
+				transformation: [1,2,3,4,5,6,7,8],
+				transformation_group_id: "8d46d1b0-8ef1-11e6-8d05-000000000000"
+			}, risk.viewpoint);
 
 			agent.post(`/${username}/${model}/risks`)
 				.send(risk)
@@ -420,8 +424,10 @@ describe("Risks", function () {
 
 		it("with invalid (long) transformation matrix should fail", function(done) {
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
-			risk.viewpoint.transformation = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17];
-			risk.viewpoint.transformation_group_id = "8d46d1b0-8ef1-11e6-8d05-000000000000";
+			risk.viewpoint = Object.assign({
+				transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],
+				transformation_group_id: "8d46d1b0-8ef1-11e6-8d05-000000000000"
+			}, risk.viewpoint);
 
 			agent.post(`/${username}/${model}/risks`)
 				.send(risk)
@@ -433,7 +439,9 @@ describe("Risks", function () {
 
 		it("with transformation group but without matrix should fail", function(done) {
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
-			risk.viewpoint.transformation_group_id = "8d46d1b0-8ef1-11e6-8d05-000000000000";
+			risk.viewpoint = Object.assign({
+				transformation_group_id: "8d46d1b0-8ef1-11e6-8d05-000000000000"
+			}, risk.viewpoint);
 
 			agent.post(`/${username}/${model}/risks`)
 				.send(risk)
@@ -445,7 +453,9 @@ describe("Risks", function () {
 
 		it("with transformation matrix but without group should fail", function(done) {
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
-			risk.viewpoint.transformation = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
+			risk.viewpoint = Object.assign({
+				transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+			}, risk.viewpoint);
 
 			agent.post(`/${username}/${model}/risks`)
 				.send(risk)

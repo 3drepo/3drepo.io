@@ -369,8 +369,10 @@ describe("Issues", function () {
 
 		it("with transformation should succeed", function(done) {
 			const issue = Object.assign({"name":"Issue test"}, baseIssue);
-			issue.viewpoint.transformation = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
-			issue.viewpoint.transformation_group_id = "8d46d1b0-8ef1-11e6-8d05-000000000000";
+			issue.viewpoint = Object.assign({
+				transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
+				transformation_group_id: "8d46d1b0-8ef1-11e6-8d05-000000000000"
+			}, issue.viewpoint);
 			let issueId;
 
 			async.series([
@@ -398,8 +400,10 @@ describe("Issues", function () {
 
 		it("with invalid (short) transformation matrix should fail", function(done) {
 			const issue = Object.assign({"name":"Issue test"}, baseIssue);
-			issue.viewpoint.transformation = [1,2,3,4,5,6,7,8];
-			issue.viewpoint.transformation_group_id = "8d46d1b0-8ef1-11e6-8d05-000000000000";
+			issue.viewpoint = Object.assign({
+				transformation: [1,2,3,4,5,6,7,8],
+				transformation_group_id: "8d46d1b0-8ef1-11e6-8d05-000000000000"
+			}, issue.viewpoint);
 
 			agent.post(`/${username}/${model}/issues`)
 				.send(issue)
@@ -411,8 +415,10 @@ describe("Issues", function () {
 
 		it("with invalid (long) transformation matrix should fail", function(done) {
 			const issue = Object.assign({"name":"Issue test"}, baseIssue);
-			issue.viewpoint.transformation = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17];
-			issue.viewpoint.transformation_group_id = "8d46d1b0-8ef1-11e6-8d05-000000000000";
+			issue.viewpoint = Object.assign({
+				transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],
+				transformation_group_id: "8d46d1b0-8ef1-11e6-8d05-000000000000"
+			}, issue.viewpoint);
 
 			agent.post(`/${username}/${model}/issues`)
 				.send(issue)
@@ -424,7 +430,9 @@ describe("Issues", function () {
 
 		it("with transformation group but without matrix should fail", function(done) {
 			const issue = Object.assign({"name":"Issue test"}, baseIssue);
-			issue.viewpoint.transformation_group_id = "8d46d1b0-8ef1-11e6-8d05-000000000000";
+			issue.viewpoint = Object.assign({
+				transformation_group_id: "8d46d1b0-8ef1-11e6-8d05-000000000000"
+			}, issue.viewpoint)
 
 			agent.post(`/${username}/${model}/issues`)
 				.send(issue)
@@ -436,7 +444,9 @@ describe("Issues", function () {
 
 		it("with transformation matrix but without group should fail", function(done) {
 			const issue = Object.assign({"name":"Issue test"}, baseIssue);
-			issue.viewpoint.transformation = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
+			issue.viewpoint = Object.assign({
+				transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+			}, issue.viewpoint);
 
 			agent.post(`/${username}/${model}/issues`)
 				.send(issue)
