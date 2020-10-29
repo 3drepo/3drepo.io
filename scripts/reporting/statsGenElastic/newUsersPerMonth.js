@@ -17,7 +17,6 @@
 
 'use strict'
 
-// const fs = require('fs');
 const Utils = require ('./utils');
 
 const writeNewElasticDocument = (ElasticClient, month, year, count, total ) => {
@@ -29,48 +28,48 @@ const writeNewElasticDocument = (ElasticClient, month, year, count, total ) => {
 		"DateTime" : new Date(year,month).toISOString(),
 	}
 	const user = {}
-	Utils.createElasticRecord(ElasticClient, Utils.statsIndexPrefix, elasticBody)
+	Utils.createElasticRecord( ElasticClient, Utils.statsIndexPrefix, elasticBody )
 } 
 
-const writeNewUserEntry = (ElasticClient, currentY, currentM, count, total, nextM, nextY) => {
+const writeNewUserEntry = ( ElasticClient, currentY, currentM, count, total, nextM, nextY ) => {
 	if(currentM !== -1) {
 		if(nextY && nextM) {
 			let month = currentM;
 			let year = currentY;
 			let counter = count;
 			do{
-				writeNewElasticDocument(ElasticClient, month, year, counter, total);
+				writeNewElasticDocument( ElasticClient, month, year, counter, total );
 				counter = 0;
 				year = month == 12? year + 1 : year;
 				month = month + 1 > 12? 1 : month+1;
 				if(year > 2018) break;
 			} while(!(month === nextM && year === nextY));
 		} else {
-			writeNewElasticDocument (ElasticClient, currentM, currentY, count, total);
+			writeNewElasticDocument ( ElasticClient, currentM, currentY, count, total );
 		}
 	}
-
 }
 
 const reportNewUsersPerMonth = async (dbConn, ElasticClient) => {
 	const col = await dbConn.db('admin').collection('system.users');
 	const users = await col.find(
-		{'customData.inactive' : {'$ne': true}, 'customData.createdAt': {'$exists': true}},
-	).sort({'customData.createdAt' : 1}).toArray();
+			{
+				'customData.inactive' : {'$ne': true},
+				'customData.createdAt': {'$exists': true}
+			},
+		).sort( { 'customData.createdAt' : 1 } ).toArray();
 
-	// stream.write('New Users Per Month\n');
-	// stream.write('Month, Year, Count, Total\n');
 	let currentMonth = -1, currentYear = -1, currentCount = 0, total = 0;
 	users.forEach((user) => {
 		const createdAt = user.customData.createdAt;
 		const month = createdAt.getMonth() + 1;
 		const year = createdAt.getFullYear();
 
-		if(currentMonth === month && currentYear === year) {
+		if( currentMonth === month && currentYear === year ) {
 			++currentCount;
 		} else {
 			total += currentCount;
-			writeNewUserEntry(ElasticClient, currentYear, currentMonth, currentCount, total, month, year);
+			writeNewUserEntry( ElasticClient, currentYear, currentMonth, currentCount, total, month, year );
 
 			currentMonth = month;
 			currentYear = year;
@@ -90,14 +89,9 @@ const NewUsers = {};
 
 NewUsers.createNewUsersReport = (dbConn, ElasticClient) =>{
 	return new Promise((resolve, reject) => {
-		// const fname = Utils.generateFileName(`${folder}/newUsersPerMonth`);
-		// const writeStream = fs.createWriteStream(fname);
-		// writeStream.once('open', () => {
 			reportNewUsersPerMonth(dbConn, ElasticClient).then(() => {
 				console.log('[DB] Generated NewUsersReport');
-				// writeStream.write('\n\n\n');
-				// writeStream.end();
-				resolve("fname");
+				resolve();
 			}).catch((err) => {
 				reject(err);
 			});
