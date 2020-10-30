@@ -29,8 +29,6 @@ export const getGroupOverride = (overrides, group, value) => {
 	return overrides;
 };
 
-export const getColorOverrides = (groups) => groups.reduce(getGroupOverride, {});
-
 export const overridesDiff = (field) => (overrideA, overrideB) => {
 	const keys = Object.keys(overrideA);
 	const diff = {};

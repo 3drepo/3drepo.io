@@ -21,8 +21,7 @@ import { all, put, select, takeLatest } from 'redux-saga/effects';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { ROUTES } from '../../constants/routes';
 import { UnityUtil } from '../../globals/unity-util';
-import { hexToArray } from '../../helpers/colors';
-import { prepareGroup } from '../../helpers/groups';
+import { createGroupsByColor, createGroupsByTransformations, prepareGroup } from '../../helpers/groups';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
@@ -32,47 +31,10 @@ import { ModelActions } from '../model';
 import { selectCurrentRevisionId } from '../model';
 import { SnackbarActions } from '../snackbar';
 import { dispatch } from '../store';
-import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds, selectIfcSpacesHidden, TreeActions } from '../tree';
-import { selectColorOverrides, ViewerGuiActions } from '../viewerGui';
+import { selectIfcSpacesHidden, TreeActions } from '../tree';
+import { selectColorOverrides, selectTransformations, ViewerGuiActions } from '../viewerGui';
 import { PRESET_VIEW } from './viewpoints.constants';
 import { ViewpointsActions, ViewpointsTypes } from './viewpoints.redux';
-
-function* groupByColor(overrides) {
-	const sharedIdnodes = Object.keys(overrides);
-	const nodes = yield select(selectGetNodesIdsFromSharedIds([{shared_ids: sharedIdnodes}]));
-
-	const modelsDict = (yield select(selectGetMeshesByIds(nodes))).reduce((dict, meshesByModel) => {
-		const { teamspace, modelId } = meshesByModel;
-		const model = { teamspace, modelId};
-		return meshesByModel.meshes.reduce((d, mesh) => {
-			const index = nodes.indexOf(mesh);
-			d[sharedIdnodes[index]] = model;
-			return d;
-		}, dict);
-	}, {});
-
-	return sharedIdnodes.reduce((arr, objectId, i) =>  {
-		const { teamspace, modelId } = modelsDict[objectId];
-		let colorItem = arr.find(({color}) => color.join(',') === hexToArray(overrides[objectId]).join(','));
-
-		if (!colorItem) {
-			colorItem = { color: hexToArray(overrides[objectId]), objects: [] , totalSavedMeshes: 0};
-
-			arr.push(colorItem);
-		}
-
-		let sharedIdsItem =  colorItem.objects.find(({model, account}) => model === modelId && account === teamspace);
-
-		if (!sharedIdsItem) {
-			sharedIdsItem = { shared_ids: [], account: teamspace, model: modelId};
-			colorItem.objects.push(sharedIdsItem);
-			colorItem.totalSavedMeshes ++;
-		}
-
-		sharedIdsItem.shared_ids.push(objectId);
-		return arr;
-	}, []);
-}
 
 export const getThumbnailUrl = (thumbnail) => API.getAPIUrl(thumbnail);
 
@@ -116,14 +78,18 @@ export function* generateViewpoint(teamspace, modelId, name, withScreenshot = fa
 
 		const objectInfo = yield Viewer.getObjectsStatus();
 
-		const overrides = yield select(selectColorOverrides);
-		// let overrides = (yield select(selectAllOverridesDict)).colors;
-		// const viewsOverrides =  (yield select(selectViewsOverrides));
-		// overrides = {...overrides, ...viewsOverrides };
-		const newOverrideGroups = yield groupByColor(overrides);
+		const colorOverrides = yield select(selectColorOverrides);
+		const newOverrideGroups = yield createGroupsByColor(colorOverrides);
+
+		const transformations = yield select(selectTransformations);
+		const newTransformationsGroups = yield createGroupsByTransformations(transformations);
 
 		if (newOverrideGroups.length) {
 			generatedObject.viewpoint.override_groups = newOverrideGroups;
+		}
+
+		if (newTransformationsGroups.length) {
+			// generatedObject.viewpoint.transformations_groups = newTransformationsGroups;
 		}
 
 		if (objectInfo && (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0)) {
