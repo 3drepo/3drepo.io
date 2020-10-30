@@ -1,9 +1,9 @@
 {
-  "name": "3DRepoStatsGen",
+  "name": "3DRepoStatsGenElastic",
   "version": "1.0.0",
-  "description": "Statistics generator base on a 3D Repo database",
+  "description": "Statistics exporter base on a 3D Repo database",
   "main": "genStats.js",
-  "author": "Carmen Fan",
+  "author": "Keif Gwinn",
   "license": "AGPL3",
   "private": false,
   "dependencies": {
@@ -13,6 +13,5 @@
     "dateformat": "^3.0.3",
     "mongodb": "3.3.5",
     "neat-csv": "^5.2.0",
-    "strip-bom-stream": "^4.0.0"
   }
 }

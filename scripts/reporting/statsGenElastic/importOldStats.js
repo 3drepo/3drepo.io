@@ -21,21 +21,6 @@ const Utils = require('./utils');
 const fs = require( 'fs' );
 const path = require( 'path' );
 const csv = require('csv-parser');
-const stripBom = require('strip-bom-stream');
-
-try {
-	for (let i=0; i<10; i++) {
-	}
-  
-	if (errors.length > 0) {
-	  throw errors; 
-	}
-  
-  } catch(e) {
-	  for (let i=0; i<e.length; i++) {
-		console.log(e[i]);
-	  }
-  }
 
 var errors = [];
 
@@ -109,31 +94,21 @@ async function start() {
 		const db = await client.connect();
 		console.log('Connected successfully!');
 
-		// Make an async function that gets executed immediately
 		(async ()=>{
-			// Our starting point
 			try {
 				// Get the files as an array
 				const files = await fs.promises.readdir( importFolder );
 				const seen = [] // array to catch previously seen id's
 
-				// Loop them all with the new for...of
 				for( const file of files ) {
-					// Get the full paths
 					const fullPath = path.join( importFolder, file );
-
-					// Stat the file to see if we have a file or dir
 					const stat = await fs.promises.stat( fullPath );
 					
 					if( stat.isFile() && file.includes(".csv") && !file.includes("com.dropbox.attrs")  ){
 						console.log( "'%s' is a csv file.", fullPath );
 
 						fs.createReadStream(fullPath)
-						// .pipe(stripBom())
 						.pipe(csv({
-								// raw: true,
-								// quote: "'",
-								// headers: ["Teamspace","LastLogin","DateCreated","Email","FirstName","LastName","Subscribed"]
 								headers: ["Teamspace","LastLogin"]
 								}
 							))
@@ -147,12 +122,8 @@ async function start() {
 								}
 
 								const id = Utils.hashCode( Object.values(lastLogin).toString() )
-								// console.log(".",String(id),".")
-								// console.log(id,seen.includes(id))
-								// console.log(seen.length)
 
 								if (!seen.includes(id) ) {
-									// process.stdout.write(".")
 									const request = ElasticClient.search({
 										index: Utils.teamspaceIndexPrefix + "-login",
 										body: {
@@ -164,15 +135,11 @@ async function start() {
 										ignore: [404],
 										maxRetries: 3
 									})
-									
 									request
 									.then(result => {
-										// console.log("never here?")
 										if (result.body.hits.total.value === 0) {
 												console.log("creating",seen.length,":::",id)
 												Utils.createElasticRecord( ElasticClient, Utils.teamspaceIndexPrefix + "-login", lastLogin, id)
-												// async ()=>{ console.log("elastic"); await Utils.createElasticRecord( ElasticClient, Utils.teamspaceIndexPrefix + "-login", lastLogin, id); }
-												// console.log("Created",lastLogin)
 												seen.push(id) // log hash is created to save calls
 											} else {
 												console.log("created",result.body.hits.total.value,":::",id)
@@ -182,21 +149,11 @@ async function start() {
 									)
 									.catch(err => console.log(err)) // RequestAbortedError
 								}
-
-								// console.log(seen.length)
-								// request.abort()
-
-								
-								// console.log(file,data.Teamspace,data.LastLogin) 
 								}
 							}
 						)
 						.on('end', () => {
 						  console.log("end");
-						  // [
-						  //   { NAME: 'Daffy Duck', AGE: '24' },
-						  //   { NAME: 'Bugs Bunny', AGE: '22' }
-						  // ]
 						});
 					}
 					else if( stat.isDirectory() )

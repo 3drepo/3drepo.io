@@ -106,7 +106,7 @@ async function start() {
 			"Issues" :  { 'type': 'double' }, 
 			"Model Revisions" : { 'type': 'double' }, 
 		}
-		await Utils.createElasticIndex(ElasticClient,Utils.teamspaceIndexPrefix + "-activity",activityMapping)
+		await Utils.createElasticIndex(ElasticClient, Utils.teamspaceIndexPrefix + "-activity", activityMapping)
 
 		const quotaMapping = {
 			"Teamspace" : { 'type': 'keyword' },
@@ -117,7 +117,7 @@ async function start() {
 			"Expiry Date" : { 'type': 'date' }, 
 			"Expired" : { 'type': 'boolean' }, 
 		}
-		await Utils.createElasticIndex(ElasticClient,Utils.teamspaceIndexPrefix + "-quota",quotaMapping)
+		await Utils.createElasticIndex(ElasticClient, Utils.teamspaceIndexPrefix + "-quota", quotaMapping)
 
 		const usersMapping = {
 			"Teamspace" : { 'type': 'keyword' },
@@ -131,14 +131,14 @@ async function start() {
 			"Mail Optout" : { 'type': 'text' }, 
 			"Verified" : { 'type': 'boolean' }, 
 		}
-		await Utils.createElasticIndex(ElasticClient,Utils.teamspaceIndexPrefix + "-users",usersMapping)
+		await Utils.createElasticIndex(ElasticClient, Utils.teamspaceIndexPrefix + "-users", usersMapping)
 
 		const loginMapping = {
 			"Teamspace" : { 'type': 'keyword' },
 			"Last Login" : { 'type': 'text' },
 			"DateTime" : { 'type': 'date' },
 		}
-		await Utils.createElasticIndex(ElasticClient,Utils.teamspaceIndexPrefix + "-login",loginMapping)
+		await Utils.createElasticIndex(ElasticClient, Utils.teamspaceIndexPrefix + "-login", loginMapping)
 
 		const statsMapping = {
 			"Month" : { 'type': 'text' },
@@ -147,8 +147,8 @@ async function start() {
 			"Total" :{ 'type': 'double' }, 
 			"DateTime" : { 'type': 'date' },
 		}
-		await Utils.createElasticIndex(ElasticClient,Utils.statsIndexPrefix,statsMapping)
-
+		await Utils.createElasticIndex(ElasticClient, Utils.statsIndexPrefix, statsMapping)
+ 
 		// if we're running on a daily basis to keep the stats up to date we don't want to run the full DB Report
 
 		if ( Utils.clean(process.env.STATS_RUN_DAILY ) ){
