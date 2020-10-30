@@ -29,6 +29,7 @@ interface IUserButtonProps {
 	isMenuOpen?: boolean;
 	IconProps?: any;
 	Icon?: React.ReactNode;
+	id?: string;
 }
 
 export const MainMenuButton: React.FunctionComponent<IUserButtonProps> =

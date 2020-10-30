@@ -195,6 +195,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				fetchingDetailsIsPending={this.props.fetchingDetailsIsPending}
 				tickets={this.props.issues}
 				postCommentIsPending={this.props.postCommentIsPending}
+				parentId={'issues-card'}
 			/>
 		</ViewerPanelFooter>
 	));
