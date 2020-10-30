@@ -29,6 +29,7 @@ import { DialogActions } from '../dialog';
 import { GroupsActions } from '../groups';
 import { ModelActions } from '../model';
 import { selectCurrentRevisionId } from '../model';
+import { SequencesActions } from '../sequences';
 import { SnackbarActions } from '../snackbar';
 import { dispatch } from '../store';
 import { selectIfcSpacesHidden, TreeActions } from '../tree';
@@ -280,6 +281,7 @@ export function* prepareGroupsIfNecessary( teamspace, modelId, viewpoint) {
 
 export function* setActiveViewpoint({ teamspace, modelId, view }) {
 	try {
+		yield put(SequencesActions.setSelectedSequence(null));
 		yield put(ViewpointsActions.showViewpoint(teamspace, modelId, view));
 		yield put(ViewpointsActions.setComponentState({ activeViewpoint: view }));
 	} catch (error) {
