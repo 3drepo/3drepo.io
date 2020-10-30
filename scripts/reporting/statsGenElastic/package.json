@@ -12,6 +12,6 @@
     "crypto-js": "^4.0.0",
     "dateformat": "^3.0.3",
     "mongodb": "3.3.5",
-    "neat-csv": "^5.2.0",
+    "neat-csv": "^5.2.0"
   }
 }
