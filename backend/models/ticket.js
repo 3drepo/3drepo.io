@@ -252,6 +252,9 @@ class Ticket extends View {
 			data.viewpoint = newViewpoint;
 
 			data.viewpoint.guid = utils.uuidToString(data.viewpoint.guid);
+			if (data.viewpoint.transformation_group_id) {
+				data.viewpoint.transformation_group_id = utils.uuidToString(data.viewpoint.transformation_group_id);
+			}
 
 			if (data.viewpoint.thumbnail) {
 				data.thumbnail = data.viewpoint.thumbnail;

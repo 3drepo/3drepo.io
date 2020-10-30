@@ -381,7 +381,7 @@ describe("Issues", function () {
 						.send(issue)
 						.expect(200, function(err, res) {
 							issueId = res.body._id;
-							expect(res.body.viewpoint.transformation).to.equal(issue.viewpoint.transformation);
+							expect(res.body.viewpoint.transformation).to.deep.equal(issue.viewpoint.transformation);
 							expect(res.body.viewpoint.transformation_group_id).to.equal(issue.viewpoint.transformation_group_id);
 
 							return done(err);
@@ -389,7 +389,7 @@ describe("Issues", function () {
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`).expect(200, function(err , res) {
-						expect(res.body.viewpoint.transformation).to.equal(issue.viewpoint.transformation);
+						expect(res.body.viewpoint.transformation).to.deep.equal(issue.viewpoint.transformation);
 						expect(res.body.viewpoint.transformation_group_id).to.equal(issue.viewpoint.transformation_group_id);
 
 						return done(err);
@@ -1210,11 +1210,13 @@ describe("Issues", function () {
 						.expect(200, function(err, res) {
 							const newViewpoint = { ...oldViewpoint, ...data.viewpoint };
 							newViewpoint.guid = res.body.viewpoint.guid;
+							data.viewpoint.guid = res.body.viewpoint.guid;
+							data.viewpoint.thumbnail = res.body.viewpoint.thumbnail;
 
 							expect(res.body.viewpoint).to.deep.equal(data.viewpoint);
 							expect(res.body.comments[0].action.property).to.equal("viewpoint");
-							expect(res.body.comments[0].action.from).to.equal(JSON.stringify(oldViewpoint));
-							expect(res.body.comments[0].action.to).to.equal(JSON.stringify(newViewpoint));
+							expect(JSON.parse(res.body.comments[0].action.from)).to.deep.equal(oldViewpoint);
+							expect(JSON.parse(res.body.comments[0].action.to)).to.deep.equal(newViewpoint);
 							expect(res.body.comments[0].owner).to.equal(username);
 							done(err);
 						});
