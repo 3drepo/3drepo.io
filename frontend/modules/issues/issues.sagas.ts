@@ -18,7 +18,7 @@
 import { push } from 'connected-react-router';
 import filesize from 'filesize';
 import { isEmpty, isEqual, map, omit, pick } from 'lodash';
-import { all, put, select, takeLatest } from 'redux-saga/effects';
+import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
 import * as queryString from 'query-string';
 import { CHAT_CHANNELS } from '../../constants/chat';
@@ -47,7 +47,7 @@ import { selectDefaultSequence, selectSelectedSequence, selectSelectedStartingDa
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { selectTopicTypes } from '../teamspace';
-import { ViewpointsActions } from '../viewpoints';
+import { ViewpointsActions, ViewpointsTypes } from '../viewpoints';
 import { generateViewpoint } from '../viewpoints/viewpoints.sagas';
 import { IssuesActions, IssuesTypes } from './issues.redux';
 import {

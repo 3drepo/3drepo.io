@@ -53,6 +53,7 @@ interface IProps {
 	setPanelVisibility: (panelName, visibility) => void;
 	toggleActivitiesPanel: () => void;
 	fetchActivityDetails: (id: string) => void;
+	deselectViewsAndLeaveClipping: () => void;
 }
 
 const da =  new Date();
@@ -60,7 +61,7 @@ const da =  new Date();
 const SequenceDetails = ({
 	minDate, maxDate, selectedDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
 	setStepScale, fetchSelectedFrame, currentTasks, loadingFrame, fetchFrame, rightPanels, toggleActivitiesPanel,
-	fetchActivityDetails,
+	fetchActivityDetails, onPlayStarted
 }) => (
 		<>
 			<SequencePlayer
@@ -78,6 +79,7 @@ const SequenceDetails = ({
 				fetchSelectedFrame={fetchSelectedFrame}
 				rightPanels={rightPanels}
 				toggleActivitiesPanel={toggleActivitiesPanel}
+				onPlayStarted={onPlayStarted}
 			/>
 			<TasksList
 				tasks={currentTasks}
@@ -114,6 +116,10 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 		return <SequencesIcon />;
 	}
 
+	public onPlayStarted = () => {
+		this.props.deselectViewsAndLeaveClipping();
+	}
+
 	public render = () => {
 		const { selectedSequence, setSelectedSequence, sequences } = this.props;
 
@@ -130,7 +136,7 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 				{!sequences && <SequencesLoader />}
 
 				{sequences && selectedSequence && sequences.length > 0 &&
-					<SequenceDetails {...this.props} />
+					<SequenceDetails {...this.props} onPlayStarted={this.onPlayStarted} />
 				}
 
 				{sequences && !selectedSequence && sequences.length > 0 &&

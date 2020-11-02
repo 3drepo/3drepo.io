@@ -24,6 +24,7 @@ import Stop from '@material-ui/icons/Stop';
 
 import DayJsUtils from '@date-io/dayjs';
 
+import { noop } from 'lodash';
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 import React from 'react';
 import { STEP_SCALE } from '../../../../../../constants/sequences';
@@ -50,6 +51,7 @@ interface IProps {
 	loadingFrame: boolean;
 	rightPanels: string[];
 	toggleActivitiesPanel: () => void;
+	onPlayStarted?: () => void;
 }
 
 interface IState {
@@ -192,7 +194,8 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 		this.props.fetchFrame(date);
 	}
 
-	public play() {
+	public play = () => {
+		(this.props.onPlayStarted || noop )();
 		this.stop();
 		this.fetchNextFrameData();
 

@@ -16,8 +16,9 @@
  */
 
 import copy from 'copy-to-clipboard';
-import { get } from 'lodash';
+import { get, take } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
+import { selectSelectedViewpoint } from '.';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { ROUTES } from '../../constants/routes';
 import { UnityUtil } from '../../globals/unity-util';
@@ -27,8 +28,10 @@ import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
 import { DialogActions } from '../dialog';
 import { GroupsActions } from '../groups';
+import { IssuesActions } from '../issues';
 import { ModelActions } from '../model';
 import { selectCurrentRevisionId } from '../model';
+import { RisksActions } from '../risks';
 import { SequencesActions } from '../sequences';
 import { SnackbarActions } from '../snackbar';
 import { dispatch } from '../store';
@@ -251,6 +254,27 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 	}
 }
 
+export function * deselectViewsAndLeaveClipping() {
+	const selectedViewpoint  = yield select(selectSelectedViewpoint);
+	yield put(IssuesActions.goToIssue(null));
+	yield take('@@router/LOCATION_CHANGE');
+	yield put(IssuesActions.goToRisk(null));
+	yield take('@@router/LOCATION_CHANGE');
+
+	yield all([
+			put(IssuesActions.setActiveIssue({}, null, true)),
+			put(RisksActions.setActiveRisk({}, null, true)),
+			put(ViewpointsActions.setActiveViewpoint(null))]);
+
+	if (selectedViewpoint) {
+		yield take(ViewpointsTypes.SHOW_VIEWPOINT);
+		if (selectedViewpoint.clippingPlanes) {
+			const viewpoint = {viewpoint: {clippingPlanes: selectedViewpoint.clippingPlanes }};
+			yield put(ViewpointsActions.showViewpoint(null, null, viewpoint));
+		}
+	}
+}
+
 export function* prepareGroupsIfNecessary( teamspace, modelId, viewpoint) {
 	try  {
 		const revision = yield select(selectCurrentRevisionId);
@@ -281,7 +305,9 @@ export function* prepareGroupsIfNecessary( teamspace, modelId, viewpoint) {
 
 export function* setActiveViewpoint({ teamspace, modelId, view }) {
 	try {
-		yield put(SequencesActions.setSelectedSequence(null));
+		if (view) {
+			yield put(SequencesActions.setSelectedSequence(null));
+		}
 		yield put(ViewpointsActions.showViewpoint(teamspace, modelId, view));
 		yield put(ViewpointsActions.setComponentState({ activeViewpoint: view }));
 	} catch (error) {
@@ -327,4 +353,5 @@ export default function* ViewpointsSaga() {
 	yield takeLatest(ViewpointsTypes.SHOW_VIEWPOINT, showViewpoint);
 	yield takeLatest(ViewpointsTypes.SHARE_VIEWPOINT_LINK, shareViewpointLink);
 	yield takeLatest(ViewpointsTypes.SET_DEFAULT_VIEWPOINT, setDefaultViewpoint);
+	yield takeLatest(ViewpointsTypes.DESELECT_VIEWS_AND_LEAVE_CLIPPING, deselectViewsAndLeaveClipping);
 }

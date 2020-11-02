@@ -21,12 +21,15 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { ActivitiesActions } from '../../../../modules/activities';
+import { IssuesActions } from '../../../../modules/issues';
+import { RisksActions } from '../../../../modules/risks';
 import { selectCurrentActivities, selectIsLoadingFrame, selectMaxDate, selectMinDate,
 	selectSelectedEndingDate, selectSelectedFrameColors,
 	selectSelectedSequence, selectSelectedStartingDate, selectSequences, selectStepInterval,
 	selectStepScale,
 	SequencesActions} from '../../../../modules/sequences';
 import { selectRightPanels, ViewerGuiActions } from '../../../../modules/viewerGui';
+import { ViewpointsActions } from '../../../../modules/viewpoints';
 import { Sequences } from './sequences.component';
 
 const mapStateToProps = createStructuredSelector({
@@ -54,6 +57,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	toggleActivitiesPanel: ActivitiesActions.toggleActivitiesPanel,
 	fetchActivityDetails: ActivitiesActions.fetchDetails,
 	setPanelVisibility: ViewerGuiActions.setPanelVisibility,
+	deselectViewsAndLeaveClipping: ViewpointsActions.deselectViewsAndLeaveClipping,
+	setActiveViewpoint: ViewpointsActions.setActiveViewpoint,
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Sequences));
