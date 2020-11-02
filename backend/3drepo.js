@@ -16,18 +16,20 @@
 */
 
 "use strict";
-// Add this to the VERY top of the first file loaded in your app
-const apm = require('elastic-apm-node').start({
-	// Override service name from package.json
-	// Allowed characters: a-z, A-Z, 0-9, -, _, and space
-	serviceName: '',
-  
-	// Use if APM Server requires a token
-	secretToken: '',
-  
-	// Set custom APM Server URL (default: http://localhost:8200)
-	serverUrl: ''
-  })
+
+if ("elastic" in config) {
+	const apm = require('elastic-apm-node').start({
+		// Override service name from package.json
+		// Allowed characters: a-z, A-Z, 0-9, -, _, and space
+		serviceName: config.elastic.serviceName ?  config.elastic.serviceName : '',
+
+		// Use if APM Server requires a token
+		secretToken: config.elastic.secretToken ?  config.elastic.secretToken : '',
+	
+		// Set custom APM Server URL (default: http://localhost:8200)
+		serverUrl: config.elastic.serverUrl ?  config.elastic.serverUrl : '',
+	})
+}
 
 const express = require("express");
 const fs = require("fs");
