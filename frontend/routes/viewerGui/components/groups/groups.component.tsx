@@ -150,8 +150,8 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderGroupsList = renderWhenTrue(() => {
-		const Items = this.state.filteredGroups.map((group) => (
-			<GroupListItem
+		const Items = this.state.filteredGroups.map(({ created, ...group} ) => (
+				<GroupListItem
 					{...group}
 					key={group._id}
 					hideThumbnail
@@ -166,7 +166,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 					hasViewPermission={stubTrue}
 					panelName={GROUP_PANEL_NAME}
 					extraInfo={this.renderObjectsNumber(group.totalSavedMeshes)}
-			/>
+				/>
 		));
 
 		return <ListContainer className="groups-list" ref={this.groupsContainerRef}>{Items}</ListContainer>;

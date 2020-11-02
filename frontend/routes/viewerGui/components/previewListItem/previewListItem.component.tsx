@@ -21,6 +21,7 @@ import removeMd from 'remove-markdown';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { PreviewItemInfo } from '../previewItemInfo/previewItemInfo.component';
 
+import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';
 import { Truncate } from '../../../components/truncate/truncate.component';
 import {
@@ -68,6 +69,7 @@ interface IProps {
 	onArrowClick: (event?) => void;
 	renderActions?: () => JSX.Element[];
 	willBeClosed?: boolean;
+	panelType?: string;
 }
 
 export class PreviewListItem extends React.PureComponent<IProps, any> {
@@ -139,13 +141,14 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 			renderActions,
 			willBeRemoved,
 			willBeClosed,
-			showModelButton
+			showModelButton,
+			panelType,
 		} = this.props;
 
 		const desc = removeMd(this.props.desc);
 		const shouldRenderActions = renderActions && active;
 		const createdDate = !shouldRenderActions ? this.props.created : '';
-		const extraInfo = !shouldRenderActions ? this.props.extraInfo : '';
+		const extraInfo = panelType === VIEWER_PANELS.GROUPS || !shouldRenderActions ? this.props.extraInfo : '';
 
 		return (
 			<MenuItemContainer
@@ -170,11 +173,12 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 							statusColor={statusColor}
 							createdAt={createdDate}
 							extraInfo={extraInfo}
+							panelType={panelType}
 						/>
 						<Description>
 							<Truncate lines={3}>{desc || '(no description)'}</Truncate>
 						</Description>
-						{this.renderActions(renderActions && active)}
+						{this.renderActions(renderActions && active || panelType === VIEWER_PANELS.GROUPS)}
 					</Content>
 				</Container>
 				{this.renderArrowButton(active && hasViewPermission)}
