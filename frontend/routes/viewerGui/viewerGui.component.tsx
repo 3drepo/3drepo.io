@@ -94,7 +94,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 
 		viewer.init();
 
-		if ((issueId || !riskId) && !leftPanels.includes(VIEWER_PANELS.ISSUES)) {
+		if (issueId && !leftPanels.includes(VIEWER_PANELS.ISSUES)) {
 			this.props.setPanelVisibility(VIEWER_PANELS.ISSUES, true);
 		}
 
