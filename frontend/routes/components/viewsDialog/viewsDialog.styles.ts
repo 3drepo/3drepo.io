@@ -19,6 +19,7 @@ import styled, { css } from 'styled-components';
 
 import MenuList from '@material-ui/core/MenuList';
 
+import { Name } from '../../viewerGui/components/views/components/viewItem/viewItem.styles';
 import { Loader } from '../loader/loader.component';
 
 export const StyledLoader = styled(Loader)`
@@ -35,6 +36,10 @@ const loadedStyles = css`
 export const Container = styled.div`
 	width: 380px;
 	${({ loaded }: { loaded: boolean }) => loaded ? loadedStyles : ''};
+
+	${Name} {
+		max-width: 210px;
+	}
 `;
 
 export const ViewsWrapper = styled.div`
