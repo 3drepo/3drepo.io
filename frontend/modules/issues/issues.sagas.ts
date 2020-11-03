@@ -35,7 +35,6 @@ import { prepareResources } from '../../helpers/resources';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
-import { Viewer } from '../../services/viewer/viewer';
 import { BoardActions } from '../board';
 import { ChatActions } from '../chat';
 import { selectCurrentUser } from '../currentUser';
@@ -43,7 +42,7 @@ import { DialogActions } from '../dialog';
 import { selectJobsList, selectMyJob } from '../jobs';
 import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
-import { selectDefaultSequence, selectSelectedSequence, selectSelectedStartingDate } from '../sequences';
+import { selectSelectedStartingDate, SequencesActions } from '../sequences';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { selectTopicTypes } from '../teamspace';
@@ -311,6 +310,10 @@ function* showDetails({ revision, issueId }) {
 
 		yield put(IssuesActions.setActiveIssue(issue, revision));
 		yield put(IssuesActions.setComponentState({ showDetails: true, savedPin: issue.position }));
+
+		if (issue.sequence_start) {
+			yield put(SequencesActions.setSelectedDate(issue.sequence_start));
+		}
 
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('display', 'issue details', error));

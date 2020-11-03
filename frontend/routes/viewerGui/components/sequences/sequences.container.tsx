@@ -51,7 +51,6 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setSelectedDate: SequencesActions.setSelectedDate,
 	setStepInterval: SequencesActions.setStepInterval,
 	setStepScale: SequencesActions.setStepScale,
-	fetchFrame: SequencesActions.fetchFrame,
 	setSelectedSequence: SequencesActions.setSelectedSequence,
 	fetchSelectedFrame: SequencesActions.fetchSelectedFrame,
 	toggleActivitiesPanel: ActivitiesActions.toggleActivitiesPanel,

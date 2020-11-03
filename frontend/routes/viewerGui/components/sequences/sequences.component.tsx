@@ -34,7 +34,6 @@ import {
 interface IProps {
 	sequences: any;
 	setSelectedDate: (date: Date) => void;
-	fetchFrame: (date: Date) => void;
 	fetchSelectedFrame: () => void;
 	setStepInterval: (interval: number) => void;
 	setStepScale: (scale: STEP_SCALE) => void;
@@ -60,7 +59,7 @@ const da =  new Date();
 
 const SequenceDetails = ({
 	minDate, maxDate, selectedDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
-	setStepScale, fetchSelectedFrame, currentTasks, loadingFrame, fetchFrame, rightPanels, toggleActivitiesPanel,
+	setStepScale, currentTasks, loadingFrame,  rightPanels, toggleActivitiesPanel,
 	fetchActivityDetails, onPlayStarted
 }) => (
 		<>

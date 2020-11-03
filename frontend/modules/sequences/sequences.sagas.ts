@@ -32,9 +32,6 @@ import { selectActivitiesDefinitions, selectFrames,
 	selectIfcSpacesHiddenSaved, selectNextKeyFramesDates,
 	selectSelectedSequence, selectSequences, selectSequenceModel} from './sequences.selectors';
 
-const areSequencesFromModel = (modelSettings, sequences) => (sequences || [])
-.some((s) => s.model === modelSettings._id || (modelSettings.subModels || []).some((sm) => sm.model === s.model) );
-
 export function* fetchSequences() {
 	try {
 		const teamspace = yield select(selectCurrentModelTeamspace);
@@ -106,8 +103,13 @@ function * fetchSelectedFrame() {
 
 export function* setSelectedDate({date}) {
 	try {
-		yield put(SequencesActions.setSelectedDateSuccess(date));
-		yield put(SequencesActions.fetchSelectedFrame());
+		const selectedSequence = yield select(selectSelectedSequence);
+
+		if (selectedSequence) {
+			yield put(SequencesActions.setSelectedDateSuccess(date));
+			yield put(SequencesActions.fetchSelectedFrame());
+		}
+
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('select frame', 'sequences', error));
 	}
@@ -150,14 +152,7 @@ export function* showSequenceDate({ date }) {
 		yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.SEQUENCES, true));
 	}
 
-	// 2 - if sequence has not been selected, select it
-	const selectedSequence = yield select(selectSelectedSequence);
-	if (!selectedSequence) {
-		const sequences = yield select(selectSequences);
-		yield put(SequencesActions.setSelectedSequence(sequences[0]._id));
-	}
-
-	// 3 - if the date has not been selected, select it
+	// 2 - Select the date
 	yield put(SequencesActions.setSelectedDate(date));
 }
 

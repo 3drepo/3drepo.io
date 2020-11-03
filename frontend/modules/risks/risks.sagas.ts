@@ -44,7 +44,7 @@ import { DialogActions } from '../dialog';
 import { selectJobsList, selectMyJob } from '../jobs';
 import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
-import { selectDefaultSequence, selectSelectedSequence, selectSelectedStartingDate } from '../sequences';
+import { selectSelectedStartingDate, SequencesActions } from '../sequences';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { ViewpointsActions } from '../viewpoints';
@@ -294,6 +294,10 @@ function* showDetails({ revision, riskId }) {
 
 		yield put(RisksActions.setActiveRisk(risk, revision));
 		yield put(RisksActions.setComponentState({ showDetails: true, savedPin: risk.position }));
+
+		if (risk.sequence_start) {
+			yield put(SequencesActions.setSelectedDate(risk.sequence_start));
+		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('display', 'risk details', error));
 	}
