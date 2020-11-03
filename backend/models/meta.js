@@ -55,8 +55,7 @@ schema.options.toJSON.transform = function (doc, ret) {
 	return ret;
 };
 
-function findObjectsByQuery(account, model, query) {
-	const project = { "metadata.IFC GUID": 1, parents: 1 };
+function findObjectsByQuery(account, model, query, project = { "metadata.IFC GUID": 1, parents: 1 }) {
 	return db.getCollection(account, model + ".scene").then((dbCol) => {
 		return dbCol.find(query, project).toArray();
 	});
@@ -312,7 +311,7 @@ Meta.getAllIdsWithMetadataField = function(account, model, branch, rev, fieldNam
 	});
 };
 
-Meta.getMeshIdsByRules = async function(account, model, branch, revId, username, rules) {
+Meta.getMeshIdsByRules = async function(account, model, branch, revId, rules) {
 	const objectIdPromises = [];
 
 	const positiveQueries = positiveRulesToQueries(rules);
@@ -363,6 +362,85 @@ Meta.getMeshIdsByRules = async function(account, model, branch, revId, username,
 				.filter((entry) => !!entry)
 				.reduce((acc, val) => acc.concat(val), []);
 		});
+	});
+};
+
+Meta.getAllMetadataByRules = function(account, model, branch, rev, rules) {
+	// Get the revision object to find all relevant IDs
+	let history;
+	let fullFieldName = "metadata";
+
+	return History.getHistory({ account, model }, branch, rev).then(_history => {
+		history = _history;
+		if(!history) {
+			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
+		}
+		// Check for submodel references
+		const filter = {
+			type: "ref",
+			_id: { $in: history.current }
+		};
+		return Ref.find({ account, model }, filter);
+	}).then(refs =>{
+
+		// for all refs get their tree
+		const getMeta = [];
+
+		refs.forEach(ref => {
+
+			let refBranch, refRev;
+
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
+				refBranch = C.MASTER_BRANCH_NAME;
+			} else {
+				refRev = utils.uuidToString(ref._rid);
+			}
+
+			getMeta.push(
+				this.getAllMetadataByRules(ref.owner, ref.project, refBranch, refRev, rules)
+					.then(obj => {
+						return Promise.resolve({
+							data: obj.data,
+							account: ref.owner,
+							model: ref.project
+						});
+					})
+					.catch(() => {
+					// Just because a sub model fails doesn't mean everything failed. Resolve the promise.
+						return Promise.resolve();
+					})
+			);
+		});
+
+		return Promise.all(getMeta);
+
+	}).then(async _subMeta => {
+		const positiveQueries = positiveRulesToQueries(rules);
+		const negativeQueries = negativeRulesToQueries(rules);
+
+		let allRulesResults = null;
+
+		if (positiveQueries.length !== 0) {
+			const eachPosRuleResults = await Promise.all(positiveQueries.map(ruleQuery => findObjectsByQuery(account, model, {type:"meta", ...ruleQuery}, { "metadata": 1, "parents": 1 })));
+			allRulesResults = intersection(eachPosRuleResults);
+		} else {
+			const rootQuery =  { _id: { $in: history.current }, "parents": {$exists: false}, "type": "meta" };
+			allRulesResults = (await findObjectsByQuery(account, model, rootQuery, { "metadata": 1, "parents": 1 }))[0];
+		}
+
+		const eachNegRuleResults = await Promise.all(negativeQueries.map(ruleQuery => findObjectsByQuery(account, model, {type:"meta", ...ruleQuery}, { "metadata": 1, "parents": 1 })));
+		allRulesResults = difference(allRulesResults, eachNegRuleResults);
+
+		if(allRulesResults) {
+			const parsedObj = {data: [...allRulesResults]};
+			if(_subMeta.length > 0) {
+				parsedObj.subModels = _subMeta;
+			}
+			return parsedObj;
+		} else {
+			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
+		}
+
 	});
 };
 

@@ -231,8 +231,8 @@
 	 * }
 	 *
 	 */
-	// router.post("/revision/master/head/meta", middlewares.hasReadAccessToModel, getAllMetadataByRules);
-	// router.post("/revision/:rev/meta", middlewares.hasReadAccessToModel, getAllMetadataByRules);
+	router.post("/revision/master/head/meta", middlewares.hasReadAccessToModel, getAllMetadataByRules);
+	router.post("/revision/:rev/meta", middlewares.hasReadAccessToModel, getAllMetadataByRules);
 
 	/**
 	 * @api {get} /:teamspace/:model/meta/keys Get array of metadata fields
@@ -384,7 +384,7 @@
 			branch = C.MASTER_BRANCH_NAME;
 		}
 
-		Meta.getMeshIdsByRules(req.params.account, req.params.model, branch, req.params.rev, req.session.user.username, rules)
+		Meta.getMeshIdsByRules(req.params.account, req.params.model, branch, req.params.rev, rules)
 			.then(obj => {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined, req.param.rev ? config.cachePolicy : undefined);
 			})
@@ -393,7 +393,6 @@
 			});
 	}
 
-	/*
 	function getAllMetadataByRules(req, res, next) {
 		const rules = req.body;
 		let branch;
@@ -402,7 +401,7 @@
 			branch = C.MASTER_BRANCH_NAME;
 		}
 
-		Meta.getAllMetadataByRules(req.params.account, req.params.model, branch, req.params.rev, req.session.user.username, rules)
+		Meta.getAllMetadataByRules(req.params.account, req.params.model, branch, req.params.rev, rules)
 			.then(obj => {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined, req.param.rev ? config.cachePolicy : undefined);
 			})
@@ -410,7 +409,6 @@
 				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 			});
 	}
-	*/
 
 	function getAllIdsWith4DSequenceTag(req, res, next) {
 		let branch;
