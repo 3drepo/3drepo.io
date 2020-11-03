@@ -35,7 +35,7 @@ import { RisksActions } from '../risks';
 import { SequencesActions } from '../sequences';
 import { SnackbarActions } from '../snackbar';
 import { dispatch } from '../store';
-import { selectIfcSpacesHidden, TreeActions } from '../tree';
+import { selectHiddenGeometryVisible, TreeActions } from '../tree';
 import { selectColorOverrides, selectTransformations, ViewerGuiActions } from '../viewerGui';
 import { PRESET_VIEW } from './viewpoints.constants';
 import { ViewpointsActions, ViewpointsTypes } from './viewpoints.redux';
@@ -61,7 +61,7 @@ export function* fetchViewpoints({ teamspace, modelId }) {
 
 export function* generateViewpoint(teamspace, modelId, name, withScreenshot = false) {
 	try {
-		const hideIfc = yield select(selectIfcSpacesHidden);
+		const hiddenGeometryVisible = yield select(selectHiddenGeometryVisible);
 
 		const viewpoint = yield Viewer.getCurrentViewpoint({
 			teamspace,
@@ -72,7 +72,7 @@ export function* generateViewpoint(teamspace, modelId, name, withScreenshot = fa
 			name,
 			viewpoint:  {
 				...viewpoint,
-				hideIfc
+				hideIfc: !hiddenGeometryVisible
 			}
 		} as any;
 

@@ -28,10 +28,10 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	showAllNodes: [],
 	hideSelectedNodes: [],
 	isolateSelectedNodes: ['nodeId'],
-	hideIfcSpaces: [],
+	showHiddenGeometry: [],
 	setComponentState: ['componentState'],
 	resetComponentState: [],
-	setIfcSpacesHidden: ['ifcSpacesHidden'],
+	setHiddenGeometryVisible: ['hiddenGeometryVisible'],
 	expandNodes: ['nodesIds'],
 	collapseNodes: ['nodesIds'],
 	setIsPending: ['isPending'],
@@ -63,7 +63,7 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 export interface ITreeComponentState {
 	selectedFilters: any[];
 	searchEnabled: boolean;
-	ifcSpacesHidden: boolean;
+	hiddenGeometryVisible: boolean;
 	activeNode: string;
 }
 
@@ -87,7 +87,7 @@ export const INITIAL_STATE: ITreeState = {
 	componentState: {
 		selectedFilters: [],
 		searchEnabled: false,
-		ifcSpacesHidden: true,
+		hiddenGeometryVisible: false,
 		activeNode: null
 	}
 };
@@ -106,8 +106,8 @@ const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
 	return { ...state, componentState: { ...state.componentState, ...componentState } };
 };
 
-const setIfcSpacesHidden = (state = INITIAL_STATE, { ifcSpacesHidden }) => {
-	return { ...state, componentState: { ...state.componentState, ifcSpacesHidden } };
+const setHiddenGeometryVisible = (state = INITIAL_STATE, { hiddenGeometryVisible }) => {
+	return { ...state, componentState: { ...state.componentState, hiddenGeometryVisible } };
 };
 
 const setNodesSelectionMap = (state = INITIAL_STATE, { nodesSelectionMap }) => {
@@ -152,7 +152,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[TreeTypes.SET_COMPONENT_STATE]: setComponentState,
 	[TreeTypes.SET_IS_PENDING]: setIsPending,
 	[TreeTypes.RESET_COMPONENT_STATE]: resetComponentState,
-	[TreeTypes.SET_IFC_SPACES_HIDDEN]: setIfcSpacesHidden,
+	[TreeTypes.SET_HIDDEN_GEOMETRY_VISIBLE]: setHiddenGeometryVisible,
 	[TreeTypes.EXPAND_NODES]: expandNodes,
 	[TreeTypes.SET_NODES_SELECTION_MAP]: setNodesSelectionMap,
 	[TreeTypes.SET_AUXILIARY_MAPS]: setAuxiliaryMaps,

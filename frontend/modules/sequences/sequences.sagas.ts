@@ -23,11 +23,9 @@ import { VIEWER_PANELS } from '../../constants/viewerGui';
 
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
-import { selectCurrentModel, selectCurrentModelTeamspace,
-	selectCurrentRevisionId,
-	selectIsFederation} from '../model/model.selectors';
+import { selectCurrentModel, selectCurrentModelTeamspace, selectCurrentRevisionId, selectIsFederation } from '../model';
 import { dispatch } from '../store';
-import { selectIfcSpacesHidden, TreeActions } from '../tree';
+import { selectHiddenGeometryVisible, TreeActions } from '../tree';
 import { selectLeftPanels, ViewerGuiActions } from '../viewerGui';
 import { getSelectedFrame } from './sequences.helper';
 import { selectActivitiesDefinitions, selectFrames,
@@ -116,20 +114,20 @@ export function* setSelectedDate({date}) {
 }
 
 export function* initializeSequences() {
-	const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
-	if (ifcSpacesHidden) {
-		yield put(TreeActions.hideIfcSpaces());
+	const hiddenGeometryVisible = yield select(selectHiddenGeometryVisible);
+	if (!hiddenGeometryVisible) {
+		yield put(TreeActions.showHiddenGeometry());
 	}
 
-	yield put(SequencesActions.setIfcSpacesHidden(ifcSpacesHidden));
+	yield put(SequencesActions.setHiddenGeometryVisible(!hiddenGeometryVisible));
 }
 
 export function* restoreIfcSpacesHidden() {
-	const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
+	const hiddenGeometryVisible = yield select(selectHiddenGeometryVisible);
 	const ifcSpacesHiddenSaved =  yield select(selectIfcSpacesHiddenSaved);
 
-	if (ifcSpacesHiddenSaved !== ifcSpacesHidden) {
-		yield put(TreeActions.hideIfcSpaces());
+	if (ifcSpacesHiddenSaved !== !hiddenGeometryVisible) {
+		yield put(TreeActions.showHiddenGeometry());
 	}
 }
 
