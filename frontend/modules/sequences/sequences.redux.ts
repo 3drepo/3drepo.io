@@ -25,8 +25,8 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	fetchSequencesSuccess: ['sequences'],
 	setSelectedSequence: ['sequenceId'],
 	setSelectedSequenceSuccess: ['sequenceId'],
-	setSelectedFrame: ['date'],
 	setSelectedDate: ['date'],
+	setSelectedDateSuccess: ['date'],
 	fetchFrame: ['date'],
 	fetchSelectedFrame: [],
 	setStateDefinition: ['stateId', 'stateDefinition'],
@@ -80,7 +80,7 @@ export const setSelectedSequenceSuccess = (state = INITIAL_STATE, { sequenceId }
 	return {...state, selectedSequence: sequenceId, lastSelectedSequence };
 };
 
-export const setSelectedDate =  (state = INITIAL_STATE, { date }) => {
+export const setSelectedDateSuccess =  (state = INITIAL_STATE, { date }) => {
 	return {...state, selectedDate: date};
 };
 
@@ -111,7 +111,7 @@ export const setIfcSpacesHidden = (state = INITIAL_STATE, { ifcSpacesHidden }) =
 export const reducer = createReducer(INITIAL_STATE, {
 	[SequencesTypes.FETCH_SEQUENCES_SUCCESS]: fetchSequencesSuccess,
 	[SequencesTypes.FETCH_ACTIVITIES_DEFINITIONS_SUCCESS]: fetchActivitiesDefinitionsSuccess,
-	[SequencesTypes.SET_SELECTED_DATE]: setSelectedDate,
+	[SequencesTypes.SET_SELECTED_DATE_SUCCESS]: setSelectedDateSuccess,
 	[SequencesTypes.SET_STATE_DEFINITION]: setStateDefinition,
 	[SequencesTypes.SET_SELECTED_SEQUENCE_SUCCESS]: setSelectedSequenceSuccess,
 	[SequencesTypes.SET_LAST_LOADED_SUCCESFULL_STATE]: setLastLoadedSuccesfullState,

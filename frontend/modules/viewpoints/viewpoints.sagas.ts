@@ -258,7 +258,7 @@ export function * deselectViewsAndLeaveClipping() {
 	const selectedViewpoint  = yield select(selectSelectedViewpoint);
 	yield put(IssuesActions.goToIssue(null));
 	yield take('@@router/LOCATION_CHANGE');
-	yield put(IssuesActions.goToRisk(null));
+	yield put(RisksActions.goToRisk(null));
 	yield take('@@router/LOCATION_CHANGE');
 
 	yield all([

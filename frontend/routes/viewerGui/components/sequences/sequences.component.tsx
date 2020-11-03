@@ -75,8 +75,6 @@ const SequenceDetails = ({
 				onChangeStepScale={setStepScale}
 				onChangeStepInterval={setStepInterval}
 				loadingFrame={loadingFrame}
-				fetchFrame={fetchFrame}
-				fetchSelectedFrame={fetchSelectedFrame}
 				rightPanels={rightPanels}
 				toggleActivitiesPanel={toggleActivitiesPanel}
 				onPlayStarted={onPlayStarted}
@@ -135,7 +133,7 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 
 				{!sequences && <SequencesLoader />}
 
-				{sequences && selectedSequence && sequences.length > 0 &&
+				{selectedSequence && sequences.length > 0 &&
 					<SequenceDetails {...this.props} onPlayStarted={this.onPlayStarted} />
 				}
 

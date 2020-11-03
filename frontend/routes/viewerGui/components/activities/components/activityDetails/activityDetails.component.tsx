@@ -28,10 +28,10 @@ import { Container, Row } from './activityDetails.styles';
 interface IProps {
 	isPending: boolean;
 	activityDetails: { data: any[] };
-	setSelectedFrame: (value: number) => void;
+	setSelectedDate: (value: number) => void;
 }
 
-export const ActivityDetails = ({ isPending, activityDetails, setSelectedFrame }: IProps) => {
+export const ActivityDetails = ({ isPending, activityDetails, setSelectedDate }: IProps) => {
 
 	if (isPending) {
 		return (
@@ -47,7 +47,7 @@ export const ActivityDetails = ({ isPending, activityDetails, setSelectedFrame }
 				<Grid key={key} item xs={12} >
 					<Row container justify="center">
 						<Grid item xs={6}>{key}</Grid>
-						<Grid item xs={6}>{value} <TimeIcon name={key} value={value} handleOnClick={setSelectedFrame} /></Grid>
+						<Grid item xs={6}>{value} <TimeIcon name={key} value={value} handleOnClick={setSelectedDate} /></Grid>
 					</Row>
 				</Grid>
 			))}

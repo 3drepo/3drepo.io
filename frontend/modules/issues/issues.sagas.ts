@@ -104,7 +104,6 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 			};
 		}
 
-			// .substring(screenshot.indexOf(',') + 1);
 		if (issueData.descriptionThumbnail ) {
 			issue.viewpoint = {
 				...(issue.viewpoint || {}),
@@ -312,6 +311,7 @@ function* showDetails({ revision, issueId }) {
 
 		yield put(IssuesActions.setActiveIssue(issue, revision));
 		yield put(IssuesActions.setComponentState({ showDetails: true, savedPin: issue.position }));
+
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('display', 'issue details', error));
 	}

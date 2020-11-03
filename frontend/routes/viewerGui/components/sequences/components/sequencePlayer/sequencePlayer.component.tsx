@@ -46,8 +46,6 @@ interface IProps {
 	stepScale?: STEP_SCALE;
 	onChangeStepInterval?: (value: number) => void;
 	onChangeStepScale?: (value: STEP_SCALE) => void;
-	fetchFrame: (date: Date) => void;
-	fetchSelectedFrame: () => void;
 	loadingFrame: boolean;
 	rightPanels: string[];
 	toggleActivitiesPanel: () => void;
@@ -142,10 +140,6 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 			this.nextStep();
 			this.play();
 		}
-
-		if (+prevProps.endingDate !== +this.props.endingDate) {
-			this.props.fetchSelectedFrame();
-		}
 	}
 
 	public onClickPlayStop = () => {
@@ -188,17 +182,9 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 
 	public prevStep = this.moveStep.bind(this, -1);
 
-	public fetchNextFrameData = () => {
-		const {value, stepInterval, stepScale} = this.state;
-		const date = getDateByStep(value, stepScale, stepInterval);
-		this.props.fetchFrame(date);
-	}
-
 	public play = () => {
 		(this.props.onPlayStarted || noop )();
 		this.stop();
-		this.fetchNextFrameData();
-
 		const intervalId = (setInterval(() => {
 			if (this.props.loadingFrame && this.state.playing) {
 				clearInterval(this.state.intervalId);
@@ -207,7 +193,6 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 			}
 
 			this.nextStep();
-			this.fetchNextFrameData();
 		}, 1000) as unknown) as number;
 
 		this.setState({
@@ -238,8 +223,6 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 		if (this.props.stepScale) {
 			this.setState({stepScale: this.props.stepScale});
 		}
-
-		this.props.fetchSelectedFrame();
 	}
 
 	public componentWillUnmount() {

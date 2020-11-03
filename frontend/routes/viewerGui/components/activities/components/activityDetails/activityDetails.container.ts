@@ -32,7 +32,7 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	setSelectedFrame: SequencesActions.setSelectedFrame,
+	setSelectedDate: SequencesActions.setSelectedDate,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(ActivityDetails);

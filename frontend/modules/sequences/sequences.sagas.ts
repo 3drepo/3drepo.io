@@ -106,9 +106,9 @@ function * fetchSelectedFrame() {
 	yield all(keyframes.map((d) => put(SequencesActions.fetchFrame(d))));
 }
 
-export function* setSelectedFrame({date}) {
+export function* setSelectedDate({date}) {
 	try {
-		yield put(SequencesActions.setSelectedDate(date));
+		yield put(SequencesActions.setSelectedDateSuccess(date));
 		yield put(SequencesActions.fetchSelectedFrame());
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('select frame', 'sequences', error));
@@ -160,12 +160,12 @@ export function* showSequenceDate({ date }) {
 	}
 
 	// 3 - if the date has not been selected, select it
-	yield put(SequencesActions.setSelectedFrame(date));
+	yield put(SequencesActions.setSelectedDate(date));
 }
 
 export default function* SequencesSaga() {
 	yield takeLatest(SequencesTypes.FETCH_SEQUENCES, fetchSequences);
-	yield takeLatest(SequencesTypes.SET_SELECTED_FRAME, setSelectedFrame);
+	yield takeLatest(SequencesTypes.SET_SELECTED_DATE, setSelectedDate);
 	yield takeLatest(SequencesTypes.INITIALIZE_SEQUENCES, initializeSequences);
 	yield takeLatest(SequencesTypes.FETCH_FRAME, fetchFrame);
 	yield takeLatest(SequencesTypes.RESTORE_IFC_SPACES_HIDDEN, restoreIfcSpacesHidden);
