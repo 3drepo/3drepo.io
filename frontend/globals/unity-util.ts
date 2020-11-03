@@ -176,6 +176,21 @@ export class UnityUtil {
 	/**
 	 * @hidden
 	 * @category To Unity
+	 * Quits unity instance & reset all custom callback and promises
+	 */
+	public static quitUnity() {
+		UnityUtil.unityInstance.Quit();
+		UnityUtil.errorCallback = null;
+		UnityUtil.progressCallback = null;
+		UnityUtil.modelLoaderProgressCallback = null;
+		UnityUtil.readyPromise = null;
+		UnityUtil.loadedPromise = null;
+		UnityUtil.loadingPromise = null;
+	}
+
+	/**
+	 * @hidden
+	 * @category To Unity
 	 * Cancels any model that is currently loading. This will reject any model promises with "cancel" as the message
 	 */
 	public static cancelLoadModel() {
