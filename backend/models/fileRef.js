@@ -150,6 +150,10 @@ FileRef.getGLTFFile = function(account, model, fileName) {
 	return _fetchFile(account, model,  ".stash.gltf.ref", fileName, true);
 };
 
+FileRef.getSRCFile = function(account, model, fileName) {
+	return _fetchFile(account, model,  ".stash.src.ref", fileName, true);
+};
+
 FileRef.fetchFile = (account, model, collName, ref_id) => {
 	return _fetchFile(account, model, "." + collName + ".ref", ref_id);
 };
