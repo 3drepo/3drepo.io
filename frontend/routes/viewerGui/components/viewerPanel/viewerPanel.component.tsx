@@ -43,6 +43,7 @@ interface IProps {
 	flexHeight?: boolean;
 	paperProps?: any;
 	renderActions?: () => JSX.Element | JSX.Element[];
+	id?: string;
 }
 
 export class ViewerPanel extends React.PureComponent<IProps, any> {
@@ -81,6 +82,7 @@ export class ViewerPanel extends React.PureComponent<IProps, any> {
 				title={this.renderTitle()}
 				paperProps={paperProps}
 				disableStretching
+				id={this.props.id}
 			>
 				{this.renderLoader(pending)}
 				{this.renderContent(!pending)}

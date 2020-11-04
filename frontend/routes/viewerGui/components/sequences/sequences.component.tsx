@@ -53,6 +53,7 @@ interface IProps {
 	toggleActivitiesPanel: () => void;
 	fetchActivityDetails: (id: string) => void;
 	deselectViewsAndLeaveClipping: () => void;
+	id?: string;
 }
 
 const da =  new Date();
@@ -128,6 +129,7 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 					hideSearch
 					hideMenu
 				/>}
+				id={this.props.id}
 			>
 
 				{!sequences && <SequencesLoader />}

@@ -58,6 +58,7 @@ interface IProps {
 	showHiddenGeometry: () => void;
 	goToRootNode: (nodeId: boolean) => void;
 	selectNodes: (nodesIds: any[]) => void;
+	id?: string;
 }
 
 interface IState {
@@ -168,6 +169,7 @@ export class Tree extends React.PureComponent<IProps, IState> {
 				Icon={<TreeIcon />}
 				renderActions={this.renderActions}
 				pending={isPending}
+				id={this.props.id}
 			>
 				{this.renderFilterPanel(searchEnabled)}
 				{this.renderNodesList(!isPending && !!nodesList.length)}

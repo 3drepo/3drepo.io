@@ -74,6 +74,7 @@ interface IProps {
 	toggleSortOrder: () => void;
 	setFilters: (filters) => void;
 	setSortBy: (field) => void;
+	id?: string;
 }
 
 export class Issues extends React.PureComponent<IProps, any> {
@@ -207,6 +208,7 @@ export class Issues extends React.PureComponent<IProps, any> {
 				renderDetailsView={this.renderDetailsView}
 				type={VIEWER_PANELS.ISSUES}
 				sortByField={this.props.sortByField}
+				id={this.props.id}
 			/>
 		);
 	}

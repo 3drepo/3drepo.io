@@ -26,8 +26,9 @@ export const PanelButton = (props) => {
 	const handleClick = () => onClick(type);
 
 	return (
-		<ButtonWrapper>
+		<ButtonWrapper >
 			<Button
+				id={props.id}
 				className={className}
 				label={label}
 				Icon={VIEWER_PANELS_ICONS[type]}

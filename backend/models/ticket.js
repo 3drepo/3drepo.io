@@ -329,6 +329,12 @@ class Ticket extends View {
 		this.clean(account, model, oldTicket);
 		delete data.comments;
 
+		if (data.viewpoints) {
+			data.thumbnail = updatedTicket.thumbnail;
+			data.viewpoint = updatedTicket.viewpoint;
+			delete data.viewpoints;
+		}
+
 		return { oldTicket, updatedTicket, data };
 	}
 
