@@ -370,7 +370,7 @@ describe("Issues", function () {
 		it("with transformation should succeed", function(done) {
 			const issue = Object.assign({"name":"Issue test"}, baseIssue);
 			issue.viewpoint = Object.assign({
-				transformation_group_ids: "8d46d1b0-8ef1-11e6-8d05-000000000000"
+				transformation_group_ids: ["8d46d1b0-8ef1-11e6-8d05-000000000000"]
 			}, issue.viewpoint);
 			let issueId;
 
@@ -380,14 +380,14 @@ describe("Issues", function () {
 						.send(issue)
 						.expect(200, function(err, res) {
 							issueId = res.body._id;
-							expect(res.body.viewpoint.transformation_group_ids).to.equal(issue.viewpoint.transformation_group_ids);
+							expect(res.body.viewpoint.transformation_group_ids).to.deep.equal(issue.viewpoint.transformation_group_ids);
 
 							return done(err);
 						});
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`).expect(200, function(err , res) {
-						expect(res.body.viewpoint.transformation_group_ids).to.equal(issue.viewpoint.transformation_group_ids);
+						expect(res.body.viewpoint.transformation_group_ids).to.deep.equal(issue.viewpoint.transformation_group_ids);
 
 						return done(err);
 					});
@@ -395,14 +395,31 @@ describe("Issues", function () {
 			], done);
 		});
 
-		/*
 		it("with embedded transformation should succeed", function(done) {
+			const transformation_groups = [
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+			];
+
 			const issue = Object.assign({"name":"Issue test"}, baseIssue);
-			issue.viewpoint = Object.assign({
-				transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
-				transformation_group_ids: "8d46d1b0-8ef1-11e6-8d05-000000000000"
-			}, issue.viewpoint);
+			issue.viewpoint = Object.assign({transformation_groups}, issue.viewpoint);
+
 			let issueId;
+			let transformation_group_ids;
 
 			async.series([
 				function(done) {
@@ -410,31 +427,43 @@ describe("Issues", function () {
 						.send(issue)
 						.expect(200, function(err, res) {
 							issueId = res.body._id;
-							expect(res.body.viewpoint.transformation).to.deep.equal(issue.viewpoint.transformation);
-							expect(res.body.viewpoint.transformation_group_ids).to.equal(issue.viewpoint.transformation_group_ids);
+							transformation_group_ids = res.body.viewpoint.transformation_group_ids;
 
 							return done(err);
 						});
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`).expect(200, function(err , res) {
-						expect(res.body.viewpoint.transformation).to.deep.equal(issue.viewpoint.transformation);
-						expect(res.body.viewpoint.transformation_group_id).to.equal(issue.viewpoint.transformation_group_id);
+						expect(res.body.viewpoint.transformation_group_ids).to.deep.equal(transformation_group_ids);
 
 						return done(err);
 					});
 				}
 			], done);
 		});
-		*/
 
-		/*
 		it("with invalid (short) embedded transformation matrix should fail", function(done) {
+			const transformation_groups = [
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+			];
+
 			const issue = Object.assign({"name":"Issue test"}, baseIssue);
-			issue.viewpoint = Object.assign({
-				transformation: [1,2,3,4,5,6,7,8],
-				transformation_group_id: "8d46d1b0-8ef1-11e6-8d05-000000000000"
-			}, issue.viewpoint);
+			issue.viewpoint = Object.assign({transformation_groups}, issue.viewpoint);
 
 			agent.post(`/${username}/${model}/issues`)
 				.send(issue)
@@ -443,15 +472,29 @@ describe("Issues", function () {
 					done(err);
 				});
 		});
-		*/
 
-		/*
 		it("with invalid (long) embedded transformation matrix should fail", function(done) {
+			const transformation_groups = [
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]
+				},
+			];
+
 			const issue = Object.assign({"name":"Issue test"}, baseIssue);
-			issue.viewpoint = Object.assign({
-				transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],
-				transformation_group_id: "8d46d1b0-8ef1-11e6-8d05-000000000000"
-			}, issue.viewpoint);
+			issue.viewpoint = Object.assign({transformation_groups}, issue.viewpoint);
 
 			agent.post(`/${username}/${model}/issues`)
 				.send(issue)
@@ -460,14 +503,28 @@ describe("Issues", function () {
 					done(err);
 				});
 		});
-		*/
 
-		/*
 		it("with transformation group but without matrix should fail", function(done) {
+			const transformation_groups = [
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+			];
+
 			const issue = Object.assign({"name":"Issue test"}, baseIssue);
-			issue.viewpoint = Object.assign({
-				transformation_group_id: "8d46d1b0-8ef1-11e6-8d05-000000000000"
-			}, issue.viewpoint)
+			issue.viewpoint = Object.assign({transformation_groups}, issue.viewpoint);
 
 			agent.post(`/${username}/${model}/issues`)
 				.send(issue)
@@ -476,14 +533,24 @@ describe("Issues", function () {
 					done(err);
 				});
 		});
-		*/
 
-		/*
-		it("with transformation matrix but without group should fail", function(done) {
+		it("with transformation matrix but without objects should fail", function(done) {
+			const transformation_groups = [
+				{
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+			];
+
 			const issue = Object.assign({"name":"Issue test"}, baseIssue);
-			issue.viewpoint = Object.assign({
-				transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
-			}, issue.viewpoint);
+			issue.viewpoint = Object.assign({transformation_groups}, issue.viewpoint);
 
 			agent.post(`/${username}/${model}/issues`)
 				.send(issue)
@@ -492,7 +559,6 @@ describe("Issues", function () {
 					done(err);
 				});
 		});
-		*/
 
 		it("without name should fail", function(done) {
 			const issue = baseIssue;
@@ -1222,7 +1288,7 @@ describe("Issues", function () {
 					"aspect_ratio":1,
 					"far":300,
 					"near":50,
-					"transformation_group_ids":"8d46d1b0-8ef1-11e6-8d05-000000000000"
+					"transformation_group_ids":["8d46d1b0-8ef1-11e6-8d05-000000000000"]
 				}
 			};
 			async.series([
@@ -1261,11 +1327,27 @@ describe("Issues", function () {
 			], done);
 		});
 
-		/*
 		it("change viewpoint embedded transformation should succeed and create system comment", function(done) {
+			const transformation_groups = [
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+			];
+
 			const issue = Object.assign({"name":"Issue test"}, baseIssue, { assigned_roles:["jobA"]});
-			let issueId;
-			let oldViewpoint;
 			const data = {
 				"viewpoint": {
 					"up":[0,1,0],
@@ -1277,10 +1359,14 @@ describe("Issues", function () {
 					"aspect_ratio":1,
 					"far":300,
 					"near":50,
-					"transformation":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
-					"transformation_group_id":"8d46d1b0-8ef1-11e6-8d05-000000000000"
+					transformation_groups
 				}
 			};
+
+			let issueId;
+			let oldViewpoint;
+			let transformation_group_ids;
+
 			async.series([
 				function(done) {
 					agent.post(`/${username}/${model}/issues`)
@@ -1296,15 +1382,23 @@ describe("Issues", function () {
 				function(done) {
 					agent.patch(`/${username}/${model}/issues/${issueId}`)
 						.send(data)
-						.expect(200, done);
+						.expect(200, function(err, res) {
+							transformation_group_ids = res.body.viewpoint.transformation_group_ids;
+							return done(err);
+						});
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`)
 						.expect(200, function(err, res) {
 							const newViewpoint = { ...oldViewpoint, ...data.viewpoint };
 							newViewpoint.guid = res.body.viewpoint.guid;
+							delete newViewpoint.transformation_groups;
+							newViewpoint.transformation_group_ids = transformation_group_ids;
+
 							data.viewpoint.guid = res.body.viewpoint.guid;
 							data.viewpoint.thumbnail = res.body.viewpoint.thumbnail;
+							delete data.viewpoint.transformation_groups;
+							data.viewpoint.transformation_group_ids = transformation_group_ids;
 
 							expect(res.body.viewpoint).to.deep.equal(data.viewpoint);
 							expect(res.body.comments[0].action.property).to.equal("viewpoint");
@@ -1316,13 +1410,28 @@ describe("Issues", function () {
 				}
 			], done);
 		});
-		*/
 
-		/*
 		it("change viewpoint embedded transformation with bad matrix should fail", function(done) {
+			const transformation_groups = [
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+			];
+
 			const issue = Object.assign({"name":"Issue test"}, baseIssue, { assigned_roles:["jobA"]});
-			let issueId;
-			let oldViewpoint;
 			const data = {
 				"viewpoint": {
 					"up":[0,1,0],
@@ -1334,10 +1443,13 @@ describe("Issues", function () {
 					"aspect_ratio":1,
 					"far":300,
 					"near":50,
-					"transformation":[1,2,3,4,5,6,7,8],
-					"transformation_group_id":"8d46d1b0-8ef1-11e6-8d05-000000000000"
+					transformation_groups
 				}
 			};
+
+			let issueId;
+			let oldViewpoint;
+
 			async.series([
 				function(done) {
 					agent.post(`/${username}/${model}/issues`)
@@ -1365,61 +1477,27 @@ describe("Issues", function () {
 				}
 			], done);
 		});
-		*/
 
-		/*
 		it("change viewpoint embedded transformation without matrix should fail", function(done) {
-			const issue = Object.assign({"name":"Issue test"}, baseIssue, { assigned_roles:["jobA"]});
-			let issueId;
-			let oldViewpoint;
-			const data = {
-				"viewpoint": {
-					"up":[0,1,0],
-					"position":[20,20,100],
-					"look_at":[0,0,-100],
-					"view_dir":[0,0,-1],
-					"right":[1,0,0],
-					"fov":2,
-					"aspect_ratio":1,
-					"far":300,
-					"near":50,
-					"transformation_group_id":"8d46d1b0-8ef1-11e6-8d05-000000000000"
-				}
-			};
-			async.series([
-				function(done) {
-					agent.post(`/${username}/${model}/issues`)
-						.send(issue)
-						.expect(200 , function(err, res) {
-							issueId = res.body._id;
-							oldViewpoint = res.body.viewpoint;
-							return done(err);
-						});
+			const transformation_groups = [
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}]
 				},
-				function(done) {
-					agent.patch(`/${username}/${model}/issues/${issueId}`)
-						.send(data)
-						.expect(400, function(err, res) {
-							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
-							done(err);
-						});
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
 				},
-				function(done) {
-					agent.get(`/${username}/${model}/issues/${issueId}`)
-						.expect(200, function(err, res) {
-							expect(res.body.viewpoint).to.deep.equal(oldViewpoint);
-							done(err);
-						});
-				}
-			], done);
-		});
-		*/
+			];
 
-		/*
-		it("change viewpoint embedded transformation without group should fail", function(done) {
 			const issue = Object.assign({"name":"Issue test"}, baseIssue, { assigned_roles:["jobA"]});
-			let issueId;
-			let oldViewpoint;
 			const data = {
 				"viewpoint": {
 					"up":[0,1,0],
@@ -1431,9 +1509,13 @@ describe("Issues", function () {
 					"aspect_ratio":1,
 					"far":300,
 					"near":50,
-					"transformation":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+					transformation_groups
 				}
 			};
+
+			let issueId;
+			let oldViewpoint;
+
 			async.series([
 				function(done) {
 					agent.post(`/${username}/${model}/issues`)
@@ -1461,7 +1543,68 @@ describe("Issues", function () {
 				}
 			], done);
 		});
-		*/
+
+		it("change viewpoint embedded transformation without objects should fail", function(done) {
+			const transformation_groups = [
+				{
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+			];
+
+			const issue = Object.assign({"name":"Issue test"}, baseIssue, { assigned_roles:["jobA"]});
+			const data = {
+				"viewpoint": {
+					"up":[0,1,0],
+					"position":[20,20,100],
+					"look_at":[0,0,-100],
+					"view_dir":[0,0,-1],
+					"right":[1,0,0],
+					"fov":2,
+					"aspect_ratio":1,
+					"far":300,
+					"near":50,
+					transformation_groups
+				}
+			};
+
+			let issueId;
+			let oldViewpoint;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200 , function(err, res) {
+							issueId = res.body._id;
+							oldViewpoint = res.body.viewpoint;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/issues/${issueId}`)
+						.send(data)
+						.expect(400, function(err, res) {
+							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+							done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/issues/${issueId}`)
+						.expect(200, function(err, res) {
+							expect(res.body.viewpoint).to.deep.equal(oldViewpoint);
+							done(err);
+						});
+				}
+			], done);
+		});
 
 		it("screenshot within comments should work", (done) => {
 			const issue = Object.assign({"name":"Issue test"}, baseIssue, { topic_type: "ru123"});

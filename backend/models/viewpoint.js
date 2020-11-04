@@ -189,6 +189,12 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 		if (vpData[groups]) {
 			const groupsProms = [];
 			vpData[groups].forEach((group) => {
+				if ("transformation_groups" === groups &&
+					!(group.transformation && 16 === group.transformation.length && group.objects)) {
+					systemLogger.logError("invalid transformation group");
+					throw responseCodes.INVALID_ARGUMENTS;
+				}
+
 				groupsProms.push(
 					Groups.createGroup(dbCol, null, {...group, [groupIdField]: utils.stringToUUID(hostId)}).then((groupResult) => {
 						return groupResult._id;
