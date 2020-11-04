@@ -205,7 +205,10 @@ export class Views extends React.PureComponent<IProps, any> {
 	}
 
 	public resetActiveView = () => {
-		this.props.setState({ activeViewpoint: null, editMode: false });
+		const { teamspace, model } = this.props;
+
+		this.props.setState({ editMode: false });
+		this.props.setActiveViewpoint(teamspace, model, null);
 	}
 
 	public handleActiveViewpointChange = (name) => {

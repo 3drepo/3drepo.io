@@ -17,7 +17,7 @@
 
 import { values } from 'lodash';
 import { createSelector } from 'reselect';
-import { getGroupOverride } from '../../helpers/colorOverrides';
+import { addToGroupDictionary } from '../../helpers/colorOverrides';
 import { getTransparency, hasTransparency } from '../../helpers/colors';
 import { searchByFilters } from '../../helpers/searching';
 import { selectFocusedIssueOverrideGroups } from '../issues';
@@ -119,10 +119,10 @@ export const selectAllOverridesDict = createSelector(
 			// filter out the filtered groups and if its showing details the selected group
 			if (filteredGroupsMap[groupId]  && !componentState.showDetails) {
 				const group = filteredGroupsMap[groupId];
-				getGroupOverride(overrides.colors, group, group.color);
+				addToGroupDictionary(overrides.colors, group, group.color);
 
 				if (hasTransparency(group.color)) {
-					getGroupOverride(overrides.transparencies, group, getTransparency(group.color));
+					addToGroupDictionary(overrides.transparencies, group, getTransparency(group.color));
 				}
 			}
 			return overrides;

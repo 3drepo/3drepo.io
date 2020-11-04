@@ -93,7 +93,7 @@ export function* generateViewpoint(teamspace, modelId, name, withScreenshot = fa
 		}
 
 		if (newTransformationsGroups.length) {
-			// generatedObject.viewpoint.transformations_groups = newTransformationsGroups;
+			generatedObject.viewpoint.transformation_groups = newTransformationsGroups;
 		}
 
 		if (objectInfo && (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0)) {
@@ -287,6 +287,14 @@ export function* prepareGroupsIfNecessary( teamspace, modelId, viewpoint) {
 			delete viewpoint.override_group_ids;
 		}
 
+		if (viewpoint?.transformation_group_ids) {
+			viewpoint.transformation_groups =  (yield all(viewpoint.transformation_group_ids.map((groupId) =>
+				API.getGroup(teamspace, modelId, groupId, revision))))
+				.map(({data}) => prepareGroup(data));
+
+			delete viewpoint.transformation_group_ids;
+		}
+
 		if (viewpoint?.highlighted_group_id) {
 			const highlightedGroup = (yield API.getGroup(teamspace, modelId, viewpoint?.highlighted_group_id, revision)).data;
 			viewpoint.highlighted_group = prepareGroup(highlightedGroup);
@@ -307,8 +315,11 @@ export function* setActiveViewpoint({ teamspace, modelId, view }) {
 	try {
 		if (view) {
 			yield put(SequencesActions.setSelectedSequence(null));
+			yield put(ViewpointsActions.showViewpoint(teamspace, modelId, view));
+		} else {
+			yield put(ViewpointsActions.setSelectedViewpoint(null));
 		}
-		yield put(ViewpointsActions.showViewpoint(teamspace, modelId, view));
+
 		yield put(ViewpointsActions.setComponentState({ activeViewpoint: view }));
 	} catch (error) {
 		yield put(ViewpointsActions.setComponentState({ activeViewpoint: null }));

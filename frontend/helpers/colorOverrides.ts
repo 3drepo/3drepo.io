@@ -20,13 +20,15 @@ import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds,
 import { Viewer } from '../services/viewer/viewer';
 import { hexToGLColor } from './colors';
 
-export const getGroupOverride = (overrides, group, value) => {
+// Adds to a dictionary of shared_id -> value a new group with
+// its share_ids from 'objects' field pointing to value
+export const addToGroupDictionary = (dict, group, value) => {
 	group.objects.forEach((object) => {
 		object.shared_ids.forEach((sharedId) => {
-			overrides[sharedId] = value;
+			dict[sharedId] = value;
 		});
 	});
-	return overrides;
+	return dict;
 };
 
 export const overridesDiff = (field) => (overrideA, overrideB) => {

@@ -23,6 +23,7 @@ import { selectOverrides as selectGroupsOverrides,
 import { selectIsTreeProcessed } from '../tree';
 
 import { selectOverrides as selectViewsOverrides,
+		selectTransformations as selectViewsTransformations,
 		selectTransparencies as selectViewsTransparencies } from '../viewpoints';
 
 import { selectSelectedFrameColors, selectSelectedFrameTransformations,
@@ -93,6 +94,7 @@ export const selectAllTransparencyOverrides = createSelector(
 );
 
 export const selectTransformations = createSelector(
-	selectSelectedFrameTransformations,
-	(transformations) => transformations
+	selectViewsTransformations, selectSelectedFrameTransformations,
+		(viewsTransformations, sequenceTransformations) =>
+			({...viewsTransformations , ...sequenceTransformations})
 );
