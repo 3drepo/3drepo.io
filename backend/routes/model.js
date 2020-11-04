@@ -25,6 +25,7 @@ const responseCodes = require("../response_codes");
 const C = require("../constants");
 const ModelHelpers = require("../models/helper/model");
 const UnityAssets = require("../models/unityAssets");
+const SrcAssets = require("../models/srcAssets");
 const JSONAssets = require("../models/jsonAssets");
 const config = require("../config");
 
@@ -381,6 +382,50 @@ router.get("/:model/:uid.unity3d", middlewares.hasReadAccessToModel, getUnityBun
 
 router.get("/:model/:uid.gltf", middlewares.hasReadAccessToModel, getGLTF);
 router.get("/:model/:uid.bin", middlewares.hasReadAccessToModel, getGLTFBin);
+
+router.get("/:model/:uid.src.mpc", middlewares.hasReadAccessToModel, getSRC);
+
+// Shape Resource Container information
+
+/**
+ * @api {get} /:teamspace/:model/revision/:rev/srcAssets.json Get revision's src assets
+ * @apiName getRevSrcAssets
+ * @apiGroup Model
+ * @apiDescription Get the model's assets but of a particular revision
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model The model Id to get unity assets for.
+ * @apiParam {String} rev The revision of the model to get src assets for
+ *
+ * @apiExample {get} Example usage:
+ * GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/07314a08-75da-46bf-9d2c-b7b20109143b/srcAssets.json HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success:
+ * {
+ *   "models": [
+ *     [
+ *       {
+ *         "_id": "153cf665-2c84-4ff9-a9e2-ba495af8e6dc",
+ *         "rev_id": "07314a08-75da-46bf-9d2c-b7b20109143b",
+ *         "asset": "sebjf/9b458610-0c94-11eb-a083-2b878a4dc41e/153cf665-2c84-4ff9-a9e2-ba495af8e6dc"
+ *       },
+ *       {
+ *         "_id": "2967230f-67fa-45dc-9686-161e45c7c8a2",
+ *         "rev_id": "07314a08-75da-46bf-9d2c-b7b20109143b",
+ *         "asset": "sebjf/9b458610-0c94-11eb-a083-2b878a4dc41e/2967230f-67fa-45dc-9686-161e45c7c8a2"
+ *       },
+ *       {
+ *         "_id": "07c67b6c-4b02-435f-8639-ea88403c36f7",
+ *         "rev_id": "07314a08-75da-46bf-9d2c-b7b20109143b",
+ *         "asset": "sebjf/9b458610-0c94-11eb-a083-2b878a4dc41e/07c67b6c-4b02-435f-8639-ea88403c36f7"
+ *       }
+ *     ]
+ *   ]
+ * }
+ *
+ */
+
+router.get("/:model/revision/:rev/srcAssets.json", middlewares.hasReadAccessToModel, getSrcAssets);
 
 /**
  * @api {put} /:teamspace/:model Update Federated Model
@@ -2025,6 +2070,24 @@ function getUnityAssets(req, res, next) {
 	});
 }
 
+function getSrcAssets(req, res, next) {
+
+	const model = req.params.model;
+	const account = req.params.account;
+	const username = req.session.user.username;
+	let branch;
+
+	if (!req.params.rev) {
+		branch = C.MASTER_BRANCH_NAME;
+	}
+
+	SrcAssets.getAssetList(account, model, branch, req.params.rev, username).then(obj => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined, req.param.rev ? config.cachePolicy : undefined);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
+
 function getJsonMpc(req, res, next) {
 	const model = req.params.model;
 	const account = req.params.account;
@@ -2076,6 +2139,22 @@ function getGLTF(req, res, next) {
 	JSONAssets.getGLTF(account, model, id).then(file => {
 		console.log(file);
 		req.params.format = "gltf";
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file.file, undefined, config.cachePolicy);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function getSRC(req, res, next) {
+
+	const model = req.params.model;
+	const account = req.params.account;
+	const id = req.params.uid;
+
+	// FIXME: We should probably generalise this and have a model assets object.
+	SrcAssets.getSRC(account, model, id).then(file => {
+		console.log(file);
+		req.params.format = "src";
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file.file, undefined, config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
