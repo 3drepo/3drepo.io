@@ -379,6 +379,35 @@ describe("Risks", function () {
 		it("with transformation should succeed", function(done) {
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			risk.viewpoint = Object.assign({
+				transformation_group_ids: "8d46d1b0-8ef1-11e6-8d05-000000000000"
+			}, risk.viewpoint);
+			let riskId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200, function(err, res) {
+							riskId = res.body._id;
+							expect(res.body.viewpoint.transformation_group_ids).to.equal(risk.viewpoint.transformation_group_ids);
+
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function(err , res) {
+						expect(res.body.viewpoint.transformation_group_ids).to.equal(risk.viewpoint.transformation_group_ids);
+
+						return done(err);
+					});
+				}
+			], done);
+		});
+
+		/*
+		it("with embedded transformation should succeed", function(done) {
+			const risk = Object.assign({"name":"Risk test"}, baseRisk);
+			risk.viewpoint = Object.assign({
 				transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
 				transformation_group_id: "8d46d1b0-8ef1-11e6-8d05-000000000000"
 			}, risk.viewpoint);
@@ -406,8 +435,10 @@ describe("Risks", function () {
 				}
 			], done);
 		});
+		*/
 
-		it("with invalid (short) transformation matrix should fail", function(done) {
+		/*
+		it("with invalid (short) embedded transformation matrix should fail", function(done) {
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			risk.viewpoint = Object.assign({
 				transformation: [1,2,3,4,5,6,7,8],
@@ -421,8 +452,10 @@ describe("Risks", function () {
 					done(err);
 				});
 		});
+		*/
 
-		it("with invalid (long) transformation matrix should fail", function(done) {
+		/*
+		it("with invalid (long) embedded transformation matrix should fail", function(done) {
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			risk.viewpoint = Object.assign({
 				transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],
@@ -436,8 +469,10 @@ describe("Risks", function () {
 					done(err);
 				});
 		});
+		*/
 
-		it("with transformation group but without matrix should fail", function(done) {
+		/*
+		it("with embedded transformation group but without matrix should fail", function(done) {
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			risk.viewpoint = Object.assign({
 				transformation_group_id: "8d46d1b0-8ef1-11e6-8d05-000000000000"
@@ -450,8 +485,10 @@ describe("Risks", function () {
 					done(err);
 				});
 		});
+		*/
 
-		it("with transformation matrix but without group should fail", function(done) {
+		/*
+		it("with embedded transformation matrix but without group should fail", function(done) {
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			risk.viewpoint = Object.assign({
 				transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
@@ -464,6 +501,7 @@ describe("Risks", function () {
 					done(err);
 				});
 		});
+		*/
 
 		it("without name should fail", function(done) {
 			const risk = baseRisk;
@@ -1305,6 +1343,61 @@ describe("Risks", function () {
 					"aspect_ratio":1,
 					"far":300,
 					"near":50,
+					"transformation_group_ids":"8d46d1b0-8ef1-11e6-8d05-000000000000"
+				}
+			};
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200 , function(err, res) {
+							riskId = res.body._id;
+							oldViewpoint = res.body.viewpoint;
+							delete oldViewpoint.screenshot;
+							delete oldViewpoint.screenshotSmall;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
+						.send(data)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/risks/${riskId}`)
+						.expect(200, function(err, res) {
+							const newViewpoint = { ...oldViewpoint, ...data.viewpoint };
+							newViewpoint.guid = res.body.viewpoint.guid;
+							data.viewpoint.guid = res.body.viewpoint.guid;
+							data.viewpoint.thumbnail = res.body.viewpoint.thumbnail;
+
+							expect(res.body.viewpoint).to.deep.equal(data.viewpoint);
+							expect(res.body.comments[0].action.property).to.equal("viewpoint");
+							expect(JSON.parse(res.body.comments[0].action.from)).to.deep.equal(oldViewpoint);
+							expect(JSON.parse(res.body.comments[0].action.to)).to.deep.equal(newViewpoint);
+							expect(res.body.comments[0].owner).to.equal(username);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		/*
+		it("change viewpoint embedded transformation should succeed and create system comment", function(done) {
+			const risk = Object.assign({"name":"Risk test"}, baseRisk, { assigned_roles:["jobA"]});
+			let riskId;
+			let oldViewpoint;
+			const data = {
+				"viewpoint": {
+					"up":[0,1,0],
+					"position":[20,20,100],
+					"look_at":[0,0,-100],
+					"view_dir":[0,0,-1],
+					"right":[1,0,0],
+					"fov":2,
+					"aspect_ratio":1,
+					"far":300,
+					"near":50,
 					"transformation":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
 					"transformation_group_id":"8d46d1b0-8ef1-11e6-8d05-000000000000"
 				}
@@ -1344,8 +1437,10 @@ describe("Risks", function () {
 				}
 			], done);
 		});
+		*/
 
-		it("change viewpoint transformation with bad matrix should fail", function(done) {
+		/*
+		it("change viewpoint embedded transformation with bad matrix should fail", function(done) {
 			const risk = Object.assign({"name":"Risk test"}, baseRisk, { assigned_roles:["jobA"]});
 			let riskId;
 			let oldViewpoint;
@@ -1391,8 +1486,10 @@ describe("Risks", function () {
 				}
 			], done);
 		});
+		*/
 
-		it("change viewpoint transformation without matrix should fail", function(done) {
+		/*
+		it("change viewpoint embedded transformation without matrix should fail", function(done) {
 			const risk = Object.assign({"name":"Risk test"}, baseRisk, { assigned_roles:["jobA"]});
 			let riskId;
 			let oldViewpoint;
@@ -1437,8 +1534,10 @@ describe("Risks", function () {
 				}
 			], done);
 		});
+		*/
 
-		it("change viewpoint transformation without group should fail", function(done) {
+		/*
+		it("change viewpoint embedded transformation without group should fail", function(done) {
 			const risk = Object.assign({"name":"Risk test"}, baseRisk, { assigned_roles:["jobA"]});
 			let riskId;
 			let oldViewpoint;
@@ -1483,6 +1582,7 @@ describe("Risks", function () {
 				}
 			], done);
 		});
+		*/
 
 		describe("and then commenting", function() {
 			let riskId;
