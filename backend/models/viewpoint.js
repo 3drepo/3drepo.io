@@ -185,7 +185,7 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 		}
 	});
 
-	["override_groups", "transformation_groups"].forEach(groups) => {
+	["override_groups", "transformation_groups"].forEach((groups) => {
 		if (vpData[groups]) {
 			const groupsProms = [];
 			vpData[groups].forEach((group) => {
