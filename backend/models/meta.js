@@ -368,7 +368,6 @@ Meta.getMeshIdsByRules = async function(account, model, branch, revId, rules) {
 Meta.getAllMetadataByRules = function(account, model, branch, rev, rules) {
 	// Get the revision object to find all relevant IDs
 	let history;
-	let fullFieldName = "metadata";
 
 	return History.getHistory({ account, model }, branch, rev).then(_history => {
 		history = _history;
