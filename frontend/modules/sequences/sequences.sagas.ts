@@ -121,7 +121,7 @@ export function* initializeSequences() {
 		yield put(TreeActions.showHiddenGeometry());
 	}
 
-	yield put(SequencesActions.setHiddenGeometryVisible(!hiddenGeometryVisible));
+	yield put(SequencesActions.setIfcSpacesHidden(!hiddenGeometryVisible));
 }
 
 export function* restoreIfcSpacesHidden() {
