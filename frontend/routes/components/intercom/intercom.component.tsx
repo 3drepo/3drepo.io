@@ -46,25 +46,9 @@ export class Intercom extends React.PureComponent<IProps, any> {
 		}
 	}
 
-// //Set your APP_ID
-// var APP_ID = "APP_ID";
-// var current_user_email = "sartre@existentialist.com";
-// var current_user_name = "Jean Paul Sartre";
-// var current_user_id = "1940";
-
-// window.intercomSettings = {
-//     app_id: APP_ID,
-//     name: current_user_name, // Full name
-//     email: current_user_email, // Email address
-//     user_id: current_user_id // current_user_id
-//   };
-
 	public componentDidUpdate(prevProps) {
 		// @ts-ignore
-		window.intercomSettings = window.intercomSettings || {};
-
-		// @ts-ignore
-		if (!Boolean(window.intercomSettings)) { // This is in case the chat was available before the email
+		if (Boolean(window.intercomSettings)) {   		// This is in case the chat was available before the email
 			this.setNameAndMail();						// in this case  the setNameAndEmail must be ran again
 		}
 	}
