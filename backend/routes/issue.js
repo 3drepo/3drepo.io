@@ -403,40 +403,68 @@ router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssues
  *       "aspect_ratio": 4.031496047973633,
  *       "clippingPlanes": [],
  *       "override_groups": [
+ *           {
+ *               "color": [
+ *          	     0,
+ *          	     106,
+ *          	     255,
+ *          	     52
+ *          	 ],
+ *          	 "objects": [
+ *                   {
+ *                       "shared_ids": [
+ *                           "ffd49cfd-57fb-4c31-84f7-02b41352b54f"
+ *                       ],
+ *                       "account": "teamSpace1",
+ *                       "model": "2710bd65-37d3-4e7f-b2e0-ffe743ce943f"
+ *                   }
+ *               ]
+ *          },
  *          {
- *          	   "color": [
- *          	       0,
- *          	       106,
- *          	       255,
- *          	       52
- *          	   ],
- *          	   "objects": [
- *          	   	{
- *          	   	   "shared_ids": [
- *          	   	      "ffd49cfd-57fb-4c31-84f7-02b41352b54f"
- *          	   	   ],
- *          	   	   "account": "teamSpace1",
- *          	   	   "model": "2710bd65-37d3-4e7f-b2e0-ffe743ce943f"
- *          	   	}
- *          	   ],
- *          	   "totalSavedMeshes": 1
- *          }   ,
- *          {
- *             "color": [
+ *              "color": [
  *                  96,
  *                  237,
  *                  61
- *             ],
- *          	   "objects": [
- *          	   	{
- *          	   	   "shared_ids": [
- *          	   	   "a4a14ee6-aa44-4f36-96bd-f80dbabf8ead"
- *          	   	   ],
- *          	   	   "account": "teamSpace1",
- *          	   	   "model": "2710bd65-37d3-4e7f-b2e0-ffe743ce943f"
- *          	   	}
- *          	   ],
- *          	   "totalSavedMeshes": 1
+ *              ],
+ *          	"objects": [
+ *          	    {
+ *                      "shared_ids": [
+ *                          "a4a14ee6-aa44-4f36-96bd-f80dbabf8ead"
+ *                      ],
+ *                      "account": "teamSpace1",
+ *                      "model": "2710bd65-37d3-4e7f-b2e0-ffe743ce943f"
+ *                  }
+ *              ]
+ *          }
+ *       ],
+ *       "transformation_groups": [
+ *           {
+ *               "transformation": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
+ *          	 "objects": [
+ *                   {
+ *                       "shared_ids": [
+ *                           "ffd49cfd-57fb-4c31-84f7-02b41352b54f"
+ *                       ],
+ *                       "account": "teamSpace1",
+ *                       "model": "2710bd65-37d3-4e7f-b2e0-ffe743ce943f"
+ *                   }
+ *               ]
+ *          },
+ *          {
+ *              "color": [
+ *                  96,
+ *                  237,
+ *                  61
+ *              ],
+ *          	"objects": [
+ *          	    {
+ *                      "shared_ids": [
+ *                          "a4a14ee6-aa44-4f36-96bd-f80dbabf8ead"
+ *                      ],
+ *                      "account": "teamSpace1",
+ *                      "model": "2710bd65-37d3-4e7f-b2e0-ffe743ce943f"
+ *                  }
+ *              ]
  *          }
  *       ],
  *       "highlighted_group": {
@@ -540,6 +568,10 @@ router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssues
  *       "override_group_ids": [
  *          "11952060-e223-11ea-8549-49012d4e4956",
  *          "bc5ca80-e6c7-11ea-bd51-ddd919e6418e"
+ *       ],
+ *       "transformation_group_ids": [
+ *          "12345678-e223-11ea-8549-49012d4e4956",
+ *          "12345678-e6c7-11ea-bd51-ddd919e6418e"
  *       ],
  *       "hideIfc": true,
  *       "screenshot": "teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/9ba5fb10-c8db-11e9-8f2a-ada77612c97e/viewpoints/125ce196-852c-49ed-9a2f-f9a77aa03390/screenshot.png",
