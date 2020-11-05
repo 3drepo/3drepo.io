@@ -643,6 +643,7 @@ function clean(groupData) {
 	}
 
 	cleanArray(cleaned, "rules");
+	cleanArray(cleaned, "transformation");
 
 	for (let i = 0; cleaned.objects && i < cleaned.objects.length; i++) {
 		cleanArray(cleaned.objects[i], "ifc_guids");
