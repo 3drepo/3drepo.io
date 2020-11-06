@@ -131,12 +131,10 @@ export class UnityUtil {
 	 * @return returns a promise which resolves when the game is loaded.
 	 *
 	 */
-	// tslint:disable-next-line:max-line-length
-	public static loadUnity(divId: string, unityConfig: string, memory?: number, reinitialization?: boolean): Promise<void> {
-		unityConfig = unityConfig || 'unity/Build/unity.json';
+	public static loadUnity(divId: string, unityConfig = 'unity/Build/unity.json', memory?: number): Promise<void> {
 		memory = memory || 2130706432;
 
-		if (!reinitialization) {
+		if (!window.Module) {
 			// Add withCredentials to XMLHttpRequest prototype to allow unity game to
 			// do CORS request. We used to do this with a .jspre on the unity side but it's no longer supported
 			// as of Unity 2019.1
@@ -152,6 +150,7 @@ export class UnityUtil {
 		const unitySettings: any = {
 			onProgress: this.onProgress
 		};
+
 		UnityLoader.Error.handler = this.onUnityError;
 		if (window) {
 			if (!(window as any).Module) {
@@ -184,13 +183,12 @@ export class UnityUtil {
 	 * Quits unity instance & reset all custom callback and promises
 	 */
 	public static quitUnity() {
-		UnityUtil.unityInstance.Quit();
+		this.reset();
 		UnityUtil.errorCallback = null;
 		UnityUtil.progressCallback = null;
 		UnityUtil.modelLoaderProgressCallback = null;
 		UnityUtil.readyPromise = null;
-		UnityUtil.loadedPromise = null;
-		UnityUtil.loadingPromise = null;
+		UnityUtil.unityInstance.Quit();
 	}
 
 	/**
