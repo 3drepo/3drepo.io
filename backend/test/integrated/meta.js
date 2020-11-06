@@ -361,7 +361,6 @@ describe("Metadata", function () {
 				});
 		});
 
-		/*
 		it("retrieving metadata with mix of IS and IS_NOT rule query should succeed", function(done) {
 			const query = [
 				{
@@ -373,25 +372,54 @@ describe("Metadata", function () {
 					]
 				},
 				{
-					"field":"Category",
-					"operator":"IS_NOT",
-					"values":[
-						"Windows"
-					]
+					"field":"Elevation",
+					"operator":"NOT_EQUALS",
+					"values":[ 140275 ]
 				}
 			];
+
+			const goldenData = {
+				"data": [
+					{
+						"_id": "45f752ac-9ce9-42fd-84e8-464cd522bced",
+						"parents": [ "42028730-2c27-4168-ba60-1a47960063d8" ],
+						"metadata": {
+							"IFC Type": "IfcBuildingStorey",
+							"IFC GUID": "1LBtSXG153dAQAvAekJ8hs",
+							"AboveGround": "False",
+							"Elevation": 133025,
+							"Computation Height": 0,
+							"Structural": "False",
+							"Building Story": "True",
+							"Workset": "Level Types",
+							"Name": "Level 1",
+							"Category": "Levels",
+							"Family": "Level: BDP_FFL Head - Shared Datum",
+							"Family and Type": "Level: BDP_FFL Head - Shared Datum",
+							"Type": "Level: BDP_FFL Head - Shared Datum",
+							"Type Id": "Level: BDP_FFL Head - Shared Datum",
+							"Elevation Base": "Survey Point",
+							"Color": 0,
+							"Line Pattern": "AEC_Centre",
+							"Line Weight": 1,
+							"Symbol": "BDP_LevelHead: BDP_LevelHead",
+							"Symbol at End 1 Default": "True",
+							"Symbol at End 2 Default": "False",
+							"Level_Function": "FFL",
+							"Type Name": "BDP_FFL Head - Shared Datum",
+							"Family Name": "Level"
+						}
+					}
+				]
+			};
 
 			agent.post(`/${groupUser}/${groupModel}/revision/master/head/meta`)
 				.send(query)
 				.expect(200, function(err, res) {
-					console.log(res.body);
-					expect(res.body[0].account).to.equal(groupUser);
-					expect(res.body[0].model).to.equal(groupModel);
-					expect(res.body[0].mesh_ids.length).to.equal(1106);
+					expect(res.body).to.deep.equal(goldenData);
 					done(err);
 				});
 		});
-		*/
 
 		it("retrieving metadata with empty rule query should succeed", function(done) {
 			const query = [];

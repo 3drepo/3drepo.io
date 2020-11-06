@@ -170,6 +170,23 @@ async function getRuleQueryResults(account, model, idToMeshesDict, revisionEleme
 	return ids;
 }
 
+async function getMetadataRuleQueryResults(account, model, query, projection) {
+	const metaResults = await findObjectsByQuery(account, model, query, projection);
+	if (metaResults.length === 0) {
+		return new Set();
+	}
+
+	let results = new Set();
+
+	clean(metaResults);
+
+	for (let i = 0; i < metaResults.length; i++) {
+		results.add(JSON.stringify(metaResults[i]));
+	}
+
+	return results;
+}
+
 async function getIFCGuids(account, model, shared_ids) {
 	const sceneCol =  await db.getCollection(account, model + ".scene");
 	const results = await sceneCol.find({ "parents":{ $in: shared_ids } , "type":"meta"}, {"metadata.IFC GUID":1, "_id":0}).toArray();
@@ -434,17 +451,18 @@ Meta.getAllMetadataByRules = function(account, model, branch, rev, rules) {
 		let allRulesResults = null;
 
 		if (positiveQueries.length !== 0) {
-			const eachPosRuleResults = await Promise.all(positiveQueries.map(ruleQuery => findObjectsByQuery(account, model, {type:"meta", ...ruleQuery}, { "metadata": 1, "parents": 1 })));
+			const eachPosRuleResults = await Promise.all(positiveQueries.map(ruleQuery => getMetadataRuleQueryResults(account, model, {type:"meta", ...ruleQuery}, { "metadata": 1, "parents": 1 })));
 			allRulesResults = intersection(eachPosRuleResults);
 		} else {
 			const rootQuery =  { _id: { $in: history.current }, "type": "meta" };
-			allRulesResults = (await findObjectsByQuery(account, model, rootQuery, { "metadata": 1, "parents": 1 }));
+			allRulesResults = (await getMetadataRuleQueryResults(account, model, rootQuery, { "metadata": 1, "parents": 1 }));
 		}
 
-		const eachNegRuleResults = await Promise.all(negativeQueries.map(ruleQuery => findObjectsByQuery(account, model, {type:"meta", ...ruleQuery}, { "metadata": 1, "parents": 1 })));
+		const eachNegRuleResults = await Promise.all(negativeQueries.map(ruleQuery => getMetadataRuleQueryResults(account, model, {type:"meta", ...ruleQuery}, { "metadata": 1, "parents": 1 })));
 		allRulesResults = difference(allRulesResults, eachNegRuleResults);
 
 		if(allRulesResults) {
+			allRulesResults = [...allRulesResults].map(res => JSON.parse(res));
 			const parsedObj = {data: [...clean(allRulesResults)]};
 			if(_subMeta.length > 0) {
 				parsedObj.subModels = _subMeta;
