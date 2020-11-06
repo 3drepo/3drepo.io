@@ -162,7 +162,6 @@ export class App extends React.PureComponent<IProps, IState> {
 	public render() {
 		return (
 			<AppContainer>
-				<Intercom />
 				<Route component={ViewerCanvas} />
 				{this.renderHeader(!isStaticRoute(location.pathname))}
 				<Switch>
@@ -184,6 +183,7 @@ export class App extends React.PureComponent<IProps, IState> {
 				<DialogContainer />
 				<SnackbarContainer />
 				<LiveChat />
+				<Intercom />
 			</AppContainer>
 		);
 	}
