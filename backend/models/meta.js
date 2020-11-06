@@ -176,7 +176,7 @@ async function getMetadataRuleQueryResults(account, model, query, projection) {
 		return new Set();
 	}
 
-	let results = new Set();
+	const results = new Set();
 
 	clean(metaResults);
 
