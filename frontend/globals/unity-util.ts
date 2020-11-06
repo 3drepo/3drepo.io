@@ -178,8 +178,7 @@ export class UnityUtil {
 	}
 
 	/**
-	 * @hidden
-	 * @category To Unity
+	 * @category Configurations
 	 * Quits unity instance & reset all custom callback and promises
 	 */
 	public static quitUnity() {
