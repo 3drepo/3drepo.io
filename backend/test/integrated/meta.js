@@ -195,33 +195,33 @@ describe("Metadata", function () {
 	describe("Query with rules", function() {
 		const goldenIfcStairFlight = [
 			{
-				account: 'groupUser',
-				model: '4ec71fdd-0450-4b6f-8478-c46633bb66e3',
+				account: "groupUser",
+				model: "4ec71fdd-0450-4b6f-8478-c46633bb66e3",
 				mesh_ids: [
-					'08842866-9e52-490c-a7d3-8f82c5fa36c8',
-					'1b59cb25-cc4f-4687-88f7-68f20b7d4660',
-					'225744d6-f2e8-43b0-a204-bb6c286956d7',
-					'31c0eab5-b2e9-4439-9d63-25b3f14c904a',
-					'3ae41768-b022-42e7-b29e-13a56b580d2a',
-					'3c5c7d72-6d93-4ae7-8c03-b707bac26902',
-					'49c28976-a97e-4dee-ae62-9d19972f0a37',
-					'50afd8b2-0d12-48e2-9a97-ec077031d367',
-					'67cb101a-8d79-4a99-834f-adb8f0d7be8c',
-					'6e157266-9280-486e-858c-35daf77916c0',
-					'755c1ae6-517e-4fa9-a8b8-0a4c9f460fe2',
-					'789984a9-8132-41fb-9d60-f1c160944e0d',
-					'7f532831-57f5-406e-a6be-669657e38aca',
-					'8995d54c-a6cd-4f62-a1b4-9737b2286791',
-					'8b74b4df-eee6-4732-989e-48c6c73be1df',
-					'a9f80cb9-4acb-4329-91b4-3365f16f5fbf',
-					'b0b361ba-0fae-49fc-920b-dcdd0301cdef',
-					'c6afd43f-7ece-470d-8f26-1faeaec931ec',
-					'c819d27d-a919-49b6-89f1-ffeda5b7b0dc',
-					'c98a94c5-ede9-47bb-adc1-064578f62a8c',
-					'd76481fa-6277-4ac3-a6e1-4f24f3945074',
-					'd9fd8065-cb16-4b38-a1ad-0f044510dde7',
-					'ea5053ae-0056-48f3-a0ea-5966548ef7b6',
-					'f1023c2d-d65e-4083-81ed-e01bcadda794'
+					"08842866-9e52-490c-a7d3-8f82c5fa36c8",
+					"1b59cb25-cc4f-4687-88f7-68f20b7d4660",
+					"225744d6-f2e8-43b0-a204-bb6c286956d7",
+					"31c0eab5-b2e9-4439-9d63-25b3f14c904a",
+					"3ae41768-b022-42e7-b29e-13a56b580d2a",
+					"3c5c7d72-6d93-4ae7-8c03-b707bac26902",
+					"49c28976-a97e-4dee-ae62-9d19972f0a37",
+					"50afd8b2-0d12-48e2-9a97-ec077031d367",
+					"67cb101a-8d79-4a99-834f-adb8f0d7be8c",
+					"6e157266-9280-486e-858c-35daf77916c0",
+					"755c1ae6-517e-4fa9-a8b8-0a4c9f460fe2",
+					"789984a9-8132-41fb-9d60-f1c160944e0d",
+					"7f532831-57f5-406e-a6be-669657e38aca",
+					"8995d54c-a6cd-4f62-a1b4-9737b2286791",
+					"8b74b4df-eee6-4732-989e-48c6c73be1df",
+					"a9f80cb9-4acb-4329-91b4-3365f16f5fbf",
+					"b0b361ba-0fae-49fc-920b-dcdd0301cdef",
+					"c6afd43f-7ece-470d-8f26-1faeaec931ec",
+					"c819d27d-a919-49b6-89f1-ffeda5b7b0dc",
+					"c98a94c5-ede9-47bb-adc1-064578f62a8c",
+					"d76481fa-6277-4ac3-a6e1-4f24f3945074",
+					"d9fd8065-cb16-4b38-a1ad-0f044510dde7",
+					"ea5053ae-0056-48f3-a0ea-5966548ef7b6",
+					"f1023c2d-d65e-4083-81ed-e01bcadda794"
 				]
 			}
 		];
@@ -241,7 +241,7 @@ describe("Metadata", function () {
 			], done);
 		});
 
-		it("retrieving mesh IDs with rule query", function(done) {
+		it("retrieving mesh IDs with rule query should succeed", function(done) {
 			const query = [
 				{
 					"field": "IFC Type",
@@ -285,9 +285,8 @@ describe("Metadata", function () {
 				});
 		});
 
-		it("retrieving mesh IDs with empty rule query", function(done) {
-			const query = [
-			];
+		it("retrieving mesh IDs with empty rule query should succeed", function(done) {
+			const query = [];
 
 			agent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/meshes`)
 				.send(query)
@@ -298,5 +297,116 @@ describe("Metadata", function () {
 					done(err);
 				});
 		});
+
+		it("retrieving metadata with rule query should succeed", function(done) {
+			const query = [
+				{
+					"field": "Area",
+					"operator": "GT",
+					"values": [1689]
+				}
+			];
+
+			const goldenData = {
+				data: [
+					{
+						"_id": "d64e734f-6f69-4cf0-9c88-a03af13c49b2",
+						"parents": ["ccd7d618-b0de-4517-8ad0-ed597c7de3df"],
+						"metadata": {
+							"IFC Type": "IfcSlab",
+							"IFC GUID": "2Q2l26McTBDwwH2fEWb4mn",
+							"IsExternal": "False",
+							"LoadBearing": "True",
+							"Reference": "Multi_Layer 300mm",
+							"Related to Mass": "False",
+							"Room Bounding": "True",
+							"Level": "Level: Level 1",
+							"Height Offset From Level": 0,
+							"Area": 1689.080245,
+							"Elevation at Bottom": 262717.2,
+							"Elevation at Top": 263017.2,
+							"Perimeter": 239983.045788,
+							"Thickness": 300,
+							"Volume": 506.722321,
+							"Workset": "Floor Types",
+							"Design Option": "Main Model",
+							"Category": "Floors",
+							"Family": "Floor: Multi_Layer 300mm",
+							"Family and Type": "Floor: Multi_Layer 300mm",
+							"Type": "Floor: Multi_Layer 300mm",
+							"Type Id": "Floor: Multi_Layer 300mm",
+							"Phase Created": "New Construction",
+							"Enable Analytical Model": "False",
+							"Structural": "False",
+							"Renovation Status": "New",
+							"Roughness": 1,
+							"Absorptance": 0.1,
+							"Function": "Interior",
+							"Default Thickness": 300,
+							"Coarse Scale Fill Pattern": "Solid fill",
+							"Coarse Scale Fill Color": 12632256,
+							"Type Name": "Multi_Layer 300mm",
+							"Structural Material": "Concrete - Cast-in-Place Concrete",
+							"Family Name": "Floor"
+						}
+					}
+				]
+			};
+
+			agent.post(`/${groupUser}/${groupModel}/revision/master/head/meta`)
+				.send(query)
+				.expect(200, function(err, res) {
+					expect(res.body).to.deep.equal(goldenData);
+					done(err);
+				});
+		});
+
+		/*
+		it("retrieving metadata with mix of IS and IS_NOT rule query should succeed", function(done) {
+			const query = [
+				{
+					"field":"Name",
+					"operator":"IS",
+					"values":[
+						"Level 3",
+						"Level 1"
+					]
+				},
+				{
+					"field":"Category",
+					"operator":"IS_NOT",
+					"values":[
+						"Windows"
+					]
+				}
+			];
+
+			agent.post(`/${groupUser}/${groupModel}/revision/master/head/meta`)
+				.send(query)
+				.expect(200, function(err, res) {
+					console.log(res.body);
+					expect(res.body[0].account).to.equal(groupUser);
+					expect(res.body[0].model).to.equal(groupModel);
+					expect(res.body[0].mesh_ids.length).to.equal(1106);
+					done(err);
+				});
+		});
+		*/
+
+		/*
+		it("retrieving metadata with empty rule query should succeed", function(done) {
+			const query = [];
+
+			agent.post(`/${groupUser}/${groupModel}/revision/master/head/meta`)
+				.send(query)
+				.expect(200, function(err, res) {
+					console.log(res.body);
+					expect(res.body[0].account).to.equal(groupUser);
+					expect(res.body[0].model).to.equal(groupModel);
+					expect(res.body[0].mesh_ids.length).to.equal(1106);
+					done(err);
+				});
+		});
+		*/
 	});
 });

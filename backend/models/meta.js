@@ -55,6 +55,20 @@ schema.options.toJSON.transform = function (doc, ret) {
 	return ret;
 };
 
+function clean(metaListToClean) {
+	metaListToClean.forEach((metadataToClean) => {
+		if (metadataToClean._id) {
+			metadataToClean._id = utils.uuidToString(metadataToClean._id);
+		}
+
+		if (metadataToClean.parents) {
+			metadataToClean.parents = metadataToClean.parents.map(p => utils.uuidToString(p));
+		}
+	});
+
+	return metaListToClean;
+}
+
 function findObjectsByQuery(account, model, query, project = { "metadata.IFC GUID": 1, parents: 1 }) {
 	return db.getCollection(account, model + ".scene").then((dbCol) => {
 		return dbCol.find(query, project).toArray();
@@ -431,7 +445,7 @@ Meta.getAllMetadataByRules = function(account, model, branch, rev, rules) {
 		allRulesResults = difference(allRulesResults, eachNegRuleResults);
 
 		if(allRulesResults) {
-			const parsedObj = {data: [...allRulesResults]};
+			const parsedObj = {data: [...clean(allRulesResults)]};
 			if(_subMeta.length > 0) {
 				parsedObj.subModels = _subMeta;
 			}
