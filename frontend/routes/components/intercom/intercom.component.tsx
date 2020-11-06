@@ -27,6 +27,8 @@ interface IProps {
 export class Intercom extends React.PureComponent<IProps, any> {
 	public setNameAndMail = () => {
 		try {
+			const { update } = useIntercom();
+
 			const {firstName, lastName, email } = this.props.currentUser;
 
 			if (!email) {
@@ -35,13 +37,12 @@ export class Intercom extends React.PureComponent<IProps, any> {
 
 			const name = `${firstName || ''} ${lastName || ''}`.trim();
 			// @ts-ignore
-			window.intercomSettings = {
-				app_id: clientConfigService.intercomLicense,
-				name: {name}, // Full name
-				email: {email}, // Email address
-				// user_id: email, // current_user_id
-				alignment: 'left'
-			};
+			update( {
+					name: name, // Full name
+					email: email, // Email address
+					alignment: 'left'
+				}
+			);
 
 		} catch (e) {
 			console.debug('Intercom api error: ' + e);
@@ -49,16 +50,20 @@ export class Intercom extends React.PureComponent<IProps, any> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		// @ts-ignore
-		if (!Boolean(window.intercomSettings.name)) {   		// This is in case the chat was available before the email
-			this.setNameAndMail();					        	// in this case  the setNameAndEmail must be ran again
-		}
+		this.setNameAndMail(); // I don't know how to make this conditional
 	}
 
 	public render() {
 		const haveLicense: boolean = Boolean(clientConfigService.intercomLicense);
 		const IntercomPage = () => {
 			const { boot, shutdown, hide, show, update } = useIntercom();
+			// shutdown();
+			hide();
+			update(
+					{
+						alignment: 'left'
+					}
+			);
 			this.setNameAndMail();
 			return <div />;
 		};
