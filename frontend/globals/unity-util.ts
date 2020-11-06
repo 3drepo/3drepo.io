@@ -134,6 +134,9 @@ export class UnityUtil {
 	public static loadUnity(divId: string, unityConfig = 'unity/Build/unity.json', memory?: number): Promise<void> {
 		memory = memory || 2130706432;
 
+		// remove the default background colour that is imposed onto us by unity.
+		delete unityConfig.backgroundColor;
+
 		if (!window.Module) {
 			// Add withCredentials to XMLHttpRequest prototype to allow unity game to
 			// do CORS request. We used to do this with a .jspre on the unity side but it's no longer supported
