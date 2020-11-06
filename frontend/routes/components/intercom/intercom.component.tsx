@@ -38,7 +38,8 @@ export class Intercom extends React.PureComponent<IProps, any> {
 				app_id: clientConfigService.intercomLicense,
 				name: name, // Full name
 				email: email, // Email address
-				user_id: email // current_user_id
+				user_id: email, // current_user_id
+				alignment: "left"
 			}
 			
 		} catch (e) {
@@ -48,8 +49,8 @@ export class Intercom extends React.PureComponent<IProps, any> {
 
 	public componentDidUpdate(prevProps) {
 		// @ts-ignore
-		if (Boolean(window.intercomSettings)) {   		// This is in case the chat was available before the email
-			this.setNameAndMail();						// in this case  the setNameAndEmail must be ran again
+		if (!Boolean(window.intercomSettings.name)) {   		// This is in case the chat was available before the email
+			this.setNameAndMail();					        	// in this case  the setNameAndEmail must be ran again
 		}
 	}
 
@@ -57,6 +58,7 @@ export class Intercom extends React.PureComponent<IProps, any> {
 		const haveLicense: boolean = Boolean(clientConfigService.intercomLicense);
 		const IntercomPage = () => { 
 			const { boot, shutdown, hide, show, update } = useIntercom();
+			this.setNameAndMail();
 			return <div></div>
 		}
 		return (<>{haveLicense && <IntercomProvider appId={clientConfigService.intercomLicense} autoBoot>
