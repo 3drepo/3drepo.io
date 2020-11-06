@@ -437,8 +437,8 @@ Meta.getAllMetadataByRules = function(account, model, branch, rev, rules) {
 			const eachPosRuleResults = await Promise.all(positiveQueries.map(ruleQuery => findObjectsByQuery(account, model, {type:"meta", ...ruleQuery}, { "metadata": 1, "parents": 1 })));
 			allRulesResults = intersection(eachPosRuleResults);
 		} else {
-			const rootQuery =  { _id: { $in: history.current }, "parents": {$exists: false}, "type": "meta" };
-			allRulesResults = (await findObjectsByQuery(account, model, rootQuery, { "metadata": 1, "parents": 1 }))[0];
+			const rootQuery =  { _id: { $in: history.current }, "type": "meta" };
+			allRulesResults = (await findObjectsByQuery(account, model, rootQuery, { "metadata": 1, "parents": 1 }));
 		}
 
 		const eachNegRuleResults = await Promise.all(negativeQueries.map(ruleQuery => findObjectsByQuery(account, model, {type:"meta", ...ruleQuery}, { "metadata": 1, "parents": 1 })));

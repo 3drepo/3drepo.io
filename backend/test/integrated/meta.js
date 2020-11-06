@@ -393,20 +393,16 @@ describe("Metadata", function () {
 		});
 		*/
 
-		/*
 		it("retrieving metadata with empty rule query should succeed", function(done) {
 			const query = [];
 
 			agent.post(`/${groupUser}/${groupModel}/revision/master/head/meta`)
 				.send(query)
 				.expect(200, function(err, res) {
-					console.log(res.body);
-					expect(res.body[0].account).to.equal(groupUser);
-					expect(res.body[0].model).to.equal(groupModel);
-					expect(res.body[0].mesh_ids.length).to.equal(1106);
+					expect(res.body.data).to.exist;
+					expect(res.body.data.length).to.equal(1166);
 					done(err);
 				});
 		});
-		*/
 	});
 });
