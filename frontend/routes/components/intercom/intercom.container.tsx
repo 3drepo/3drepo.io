@@ -26,5 +26,5 @@ const mapStateToProps = createStructuredSelector({
 	isAuthenticated: selectIsAuthenticated,
 	currentUser: selectCurrentUser
 });
- 
+
 export default connect(mapStateToProps, null)(Intercom);

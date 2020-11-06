@@ -16,7 +16,8 @@
  */
 import React from 'react';
 
-import { IntercomProvider, useIntercom } from 'react-use-intercom';
+// @ts-ignore
+import { useIntercom, IntercomProvider } from 'react-use-intercom';
 import { clientConfigService } from '../../../services/clientConfig';
 
 interface IProps {
@@ -36,12 +37,12 @@ export class Intercom extends React.PureComponent<IProps, any> {
 			// @ts-ignore
 			window.intercomSettings = {
 				app_id: clientConfigService.intercomLicense,
-				name: name, // Full name
-				email: email, // Email address
-				user_id: email, // current_user_id
-				alignment: "left"
-			}
-			
+				name: {name}, // Full name
+				email: {email}, // Email address
+				// user_id: email, // current_user_id
+				alignment: 'left'
+			};
+
 		} catch (e) {
 			console.debug('Intercom api error: ' + e);
 		}
@@ -56,13 +57,16 @@ export class Intercom extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const haveLicense: boolean = Boolean(clientConfigService.intercomLicense);
-		const IntercomPage = () => { 
+		const IntercomPage = () => {
 			const { boot, shutdown, hide, show, update } = useIntercom();
 			this.setNameAndMail();
-			return <div></div>
-		}
-		return (<>{haveLicense && <IntercomProvider appId={clientConfigService.intercomLicense} autoBoot>
-			<IntercomPage />
-		</IntercomProvider>}</>);
+			return <div />;
+		};
+		return (
+			<>{haveLicense &&
+			<IntercomProvider appId={clientConfigService.intercomLicense} autoBoot>
+				<IntercomPage />
+			</IntercomProvider>}</>
+		);
 	}
 }
