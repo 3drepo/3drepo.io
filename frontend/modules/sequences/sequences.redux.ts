@@ -30,13 +30,13 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	fetchFrame: ['date'],
 	fetchSelectedFrame: [],
 	setStateDefinition: ['stateId', 'stateDefinition'],
-	setLastLoadedSuccesfullState: ['stateId'],
 	setStepInterval: ['stepInterval'],
 	setStepScale: ['stepScale'],
 	setIfcSpacesHidden: ['ifcSpacesHidden'],
 	fetchActivitiesDefinitions: ['sequenceId'],
 	fetchActivitiesDefinitionsSuccess: ['sequenceId', 'activities'],
 	showSequenceDate: ['date'],
+	handleTransparenciesVisibility: ['transparencies'],
 	restoreIfcSpacesHidden: [],
 	reset: []
 }, { prefix: 'SEQUENCES/' });
@@ -46,7 +46,6 @@ export const INITIAL_STATE = {
 	selectedSequence: null,
 	lastSelectedSequence: null,
 	selectedDate: null,
-	lastSuccesfulStateId: null,
 	stateDefinitions: {},
 	statesPending: false,
 	stepInterval: 1,
@@ -88,10 +87,6 @@ export const setStateDefinition = (state = INITIAL_STATE, { stateId, stateDefini
 	return {...state, stateDefinitions: {...state.stateDefinitions, [stateId]: stateDefinition}};
 };
 
-export const setLastLoadedSuccesfullState =  (state = INITIAL_STATE, { stateId }) => {
-	return {...state, lastSuccesfulStateId: stateId};
-};
-
 export const setStepInterval = (state = INITIAL_STATE, { stepInterval }) => {
 	return {...state, stepInterval};
 };
@@ -114,7 +109,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[SequencesTypes.SET_SELECTED_DATE_SUCCESS]: setSelectedDateSuccess,
 	[SequencesTypes.SET_STATE_DEFINITION]: setStateDefinition,
 	[SequencesTypes.SET_SELECTED_SEQUENCE_SUCCESS]: setSelectedSequenceSuccess,
-	[SequencesTypes.SET_LAST_LOADED_SUCCESFULL_STATE]: setLastLoadedSuccesfullState,
 	[SequencesTypes.SET_STEP_INTERVAL]: setStepInterval,
 	[SequencesTypes.SET_IFC_SPACES_HIDDEN]: setIfcSpacesHidden,
 	[SequencesTypes.SET_STEP_SCALE]: setStepScale,

@@ -241,7 +241,7 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 			if (viewpoint?.hidden_group?.objects?.length > 0) {
 				yield put(TreeActions.hideNodesBySharedIds(viewpoint.hidden_group.objects));
 			} else if (viewpoint?.shown?.objects?.length > 0) {
-				yield put(TreeActions.isolateNodesBySharedIds(viewpoint.shown.objects.length));
+				yield put(TreeActions.isolateNodesBySharedIds(viewpoint.shown.objects));
 			}
 
 			if (viewpoint?.highlighted_group?.objects?.length > 0) {

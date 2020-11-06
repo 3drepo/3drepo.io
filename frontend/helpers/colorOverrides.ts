@@ -90,10 +90,7 @@ export const addColorOverrides = addOverrides('color', hexToGLColor, Viewer.over
 
 export const addTransparencyOverrides = addOverrides('transparency', parseFloat,
 	(teamspace, modelId, meshes, transparency) => {
-		if (transparency === 0) {
-			Viewer.switchObjectVisibility(teamspace, modelId, meshes, false);
-		} else {
-			// Viewer.switchObjectVisibility(teamspace, modelId, meshes, true);
+		if (transparency !== 0) {
 			Viewer.overrideMeshOpacity(teamspace, modelId, meshes, transparency);
 		}
 	});
@@ -128,6 +125,5 @@ export const removeOverrides = (resetMesh) => async (overrides) => {
 
 export const removeColorOverrides = removeOverrides(Viewer.resetMeshColor.bind(Viewer));
 export const removeTransparencyOverrides = removeOverrides((teamspace, modelId, meshes) => {
-	Viewer.switchObjectVisibility(teamspace, modelId, meshes, true);
 	Viewer.resetMeshOpacity(teamspace, modelId, meshes);
 });

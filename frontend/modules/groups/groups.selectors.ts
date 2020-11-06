@@ -22,7 +22,7 @@ import { getTransparency, hasTransparency } from '../../helpers/colors';
 import { searchByFilters } from '../../helpers/searching';
 import { selectFocusedIssueOverrideGroups } from '../issues';
 
-export const selectGroupsDomain = (state) => ({...state.groups});
+export const selectGroupsDomain = (state) => (state.groups);
 
 export const selectGroups = createSelector(
 	selectGroupsDomain, (state) => values(state.groupsMap)

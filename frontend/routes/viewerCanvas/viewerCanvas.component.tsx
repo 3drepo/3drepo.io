@@ -47,6 +47,7 @@ interface IProps {
 	hasGisCoordinates: boolean;
 	gisCoordinates: any;
 	handleTransparencyOverridesChange: any;
+	handleTransparenciesVisibility: any;
 }
 
 export class ViewerCanvas extends React.PureComponent<IProps, any> {
@@ -121,17 +122,17 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 		const { colorOverrides, issuePins, riskPins, measurementPins, hasGisCoordinates,
 			gisCoordinates, gisLayers, transparencies, transformations: transformation } = this.props;
 
-		if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
-			this.renderColorOverrides(prevProps.colorOverrides, colorOverrides);
-		}
+		// if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
+		// 	this.renderColorOverrides(prevProps.colorOverrides, colorOverrides);
+		// }
 
 		if (prevProps.transparencies && !isEqual(transparencies, prevProps.transparencies)) {
 			this.props.handleTransparencyOverridesChange(transparencies, prevProps.transparencies);
 		}
 
-		if (prevProps.transformations && !isEqual(transformation, prevProps.transformations)) {
-			this.renderTransformations(prevProps.transformations, transformation);
-		}
+		// if (prevProps.transformations && !isEqual(transformation, prevProps.transformations)) {
+		// 	this.renderTransformations(prevProps.transformations, transformation);
+		// }
 
 		if (!isEqual(issuePins, prevProps.issuePins)) {
 			this.renderPins(prevProps.issuePins, issuePins);
@@ -153,6 +154,9 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 			this.renderGisLayers(prevProps.gisLayers, gisLayers);
 		}
 
+		if (prevProps.transparencies && transparencies !== prevProps.transparencies) {
+			this.props.handleTransparenciesVisibility(transparencies);
+		}
 	}
 
 	public render() {

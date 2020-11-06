@@ -19,13 +19,14 @@ import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
 import { selectSelectedSequenceId, selectSelectedStateId, selectStateDefinitions,
 	SequencesActions, SequencesTypes } from '.';
+import { VISIBILITY_STATES } from '../../constants/tree';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
 
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
 import { selectCurrentModel, selectCurrentModelTeamspace, selectCurrentRevisionId, selectIsFederation } from '../model';
 import { dispatch } from '../store';
-import { selectHiddenGeometryVisible, TreeActions } from '../tree';
+import { selectHiddenGeometryVisible, TreeActions, TreeTypes } from '../tree';
 import { selectLeftPanels, ViewerGuiActions } from '../viewerGui';
 import { getSelectedFrame } from './sequences.helper';
 import { selectActivitiesDefinitions, selectFrames,
@@ -84,10 +85,8 @@ export function* fetchFrame({date}) {
 			// because with yield it would sometimes stop there forever even though the promise resolved
 			API.getSequenceState(teamspace, model, revision, sequenceId, stateId).then((response) => {
 				dispatch(SequencesActions.setStateDefinition(stateId, response.data));
-				dispatch(SequencesActions.setLastLoadedSuccesfullState(stateId));
 			}).catch((e) => {
 				dispatch(SequencesActions.setStateDefinition(stateId, {}));
-				dispatch(SequencesActions.setLastLoadedSuccesfullState(stateId));
 			});
 
 		}
@@ -156,6 +155,17 @@ export function* showSequenceDate({ date }) {
 	yield put(SequencesActions.setSelectedDate(date));
 }
 
+function* handleTransparenciesVisibility({ transparencies }) {
+	const selectedSequence = yield(select(selectSelectedSequence));
+
+	if (selectedSequence) {
+		yield put(TreeActions.showAllNodes());
+		// tslint:disable-next-line:variable-name
+		const shared_ids = Object.keys(transparencies).filter((nodeId) => transparencies[nodeId] === 0 );
+		yield put(TreeActions.hideNodesBySharedIds([{shared_ids}]));
+	}
+}
+
 export default function* SequencesSaga() {
 	yield takeLatest(SequencesTypes.FETCH_SEQUENCES, fetchSequences);
 	yield takeLatest(SequencesTypes.SET_SELECTED_DATE, setSelectedDate);
@@ -166,4 +176,5 @@ export default function* SequencesSaga() {
 	yield takeLatest(SequencesTypes.SET_SELECTED_SEQUENCE, setSelectedSequence);
 	yield takeLatest(SequencesTypes.FETCH_SELECTED_FRAME, fetchSelectedFrame);
 	yield takeLatest(SequencesTypes.SHOW_SEQUENCE_DATE, showSequenceDate);
+	yield takeLatest(SequencesTypes.HANDLE_TRANSPARENCIES_VISIBILITY, handleTransparenciesVisibility);
 }

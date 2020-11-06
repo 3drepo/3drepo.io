@@ -111,9 +111,13 @@ export const selectStepScale = createSelector(
 	selectSequencesDomain, (state) => state.stepScale
 );
 
+const selectSelectedDate = createSelector(
+	selectSequencesDomain, (state) => state.selectedDate
+);
+
 export const selectSelectedStartingDate = createSelector(
-	selectSequencesDomain, selectMinDate, (state, minDate) => {
-		let date = state.selectedDate || minDate;
+	selectSelectedDate, selectMinDate, (selectedDate, minDate) => {
+		let date = selectedDate || minDate;
 
 		if (!date) {
 			return null;
@@ -152,10 +156,6 @@ export const selectSelectedFrame = createSelector(
 	selectFrames, selectSelectedStartingDate, getSelectedFrame
 );
 
-export const selectLastSuccessfulStateId = createSelector(
-	selectSequencesDomain, (state) => state.lastSuccesfulStateId
-);
-
 export const selectSelectedStateId = createSelector(
 	selectSelectedFrame, (frame) =>  (frame || {}).state
 );
@@ -166,8 +166,8 @@ export const selectIsLoadingFrame = createSelector(
 );
 
 export const selectSelectedState = createSelector(
-	selectLastSuccessfulStateId, selectSelectedStateId, selectStateDefinitions,
-		(lastStateId, stateId, stateDefinitions) => stateDefinitions[stateId] || stateDefinitions[lastStateId]
+	selectSelectedStateId, selectStateDefinitions,
+		(stateId, stateDefinitions) => stateDefinitions[stateId]
 );
 
 const convertToDictionary = (stateChanges) => {
@@ -196,7 +196,7 @@ export const selectSelectedFrameColors = createSelector(
 );
 
 export const selectSelectedFrameTransparencies = createSelector(
-	selectSelectedState, (state) => {
+	selectSelectedState, selectSelectedStartingDate, (state) => {
 		if (!state) {
 			return {};
 		}
