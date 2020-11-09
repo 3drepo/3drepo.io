@@ -322,9 +322,21 @@ class Ticket extends View {
 			await tickets.update({ _id }, updateData);
 		}
 
+		// 7. Return the updated data and the old ticket
+		const updatedTicket = {
+			...oldTicket,
+			...data
+		};
+
 		this.clean(account, model, updatedTicket);
 		this.clean(account, model, oldTicket);
 		delete data.comments;
+
+		if (data.viewpoints) {
+			data.thumbnail = updatedTicket.thumbnail;
+			data.viewpoint = updatedTicket.viewpoint;
+			delete data.viewpoints;
+		}
 
 		return { oldTicket, updatedTicket, data };
 	}

@@ -95,7 +95,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 
 		viewer.init();
 
-		if ((issueId || !riskId) && !leftPanels.includes(VIEWER_PANELS.ISSUES)) {
+		if (issueId && !leftPanels.includes(VIEWER_PANELS.ISSUES)) {
 			this.props.setPanelVisibility(VIEWER_PANELS.ISSUES, true);
 		}
 
@@ -183,6 +183,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 					onClick={this.handleTogglePanel}
 					label={name}
 					type={type}
+					id={type + '-panel-button'}
 					active={this.props.leftPanels.includes(type)}
 				/>
 			))}
@@ -205,7 +206,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		<LeftPanels>
 			{panels.map((panel) => {
 				const PanelComponent = this.panelsMap[panel];
-				return PanelComponent && <PanelComponent key={panel} {...this.urlParams} />;
+				return PanelComponent && <PanelComponent key={panel} id={panel + '-card'}{...this.urlParams} />;
 			})}
 		</LeftPanels>
 	)

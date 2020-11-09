@@ -46,6 +46,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	addToStarred: StarredActions.addToStarredModels,
 	removeFromStarred: StarredActions.removeFromStarredModels,
 	setState: ViewpointsActions.setComponentState,
+	shareViewpointLink: ViewpointsActions.shareViewpointLink,
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(ModelGridItem));

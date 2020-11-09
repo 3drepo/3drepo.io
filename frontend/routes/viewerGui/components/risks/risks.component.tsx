@@ -68,6 +68,7 @@ interface IProps {
 	fetchMitigationCriteria: (teamspace: string) => void;
 	criteria: any;
 	setSortBy: (field) => void;
+	id?: string;
 }
 export class Risks extends React.PureComponent<IProps, any> {
 	get filters() {
@@ -178,6 +179,7 @@ export class Risks extends React.PureComponent<IProps, any> {
 				renderDetailsView={this.renderDetailsView}
 				type={VIEWER_PANELS.RISKS}
 				sortByField={this.props.sortByField}
+				id={this.props.id}
 			/>
 		);
 	}

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,27 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-
-import { Container, Content, ContentWrapper, Title } from './panel.styles';
-
-interface IProps {
-	className?: string;
-	title?: string | JSX.Element;
-	children?: any;
-	paperProps?: any;
-	hiddenScrollbars?: boolean;
-	disableStretching?: boolean;
-	id?: string;
-}
-
-export const Panel = (props: IProps) => (
-	<Container {...props.paperProps} className={props.className} id={props.id}>
-		<Title>{props.title}</Title>
-		<Content>
-			<ContentWrapper disableStretching={props.disableStretching} hiddenScrollbars={props.hiddenScrollbars}>
-				{props.children}
-			</ContentWrapper>
-		</Content>
-	</Container>
-);
+export const encodeElementId = (value: string) => value
+	.toLowerCase()
+	.replace(/\s+/gi, '-');

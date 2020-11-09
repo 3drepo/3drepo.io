@@ -198,6 +198,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				fetchingDetailsIsPending={this.props.fetchingDetailsIsPending}
 				tickets={this.props.risks}
 				postCommentIsPending={this.props.postCommentIsPending}
+				parentId={'risks-card'}
 			/>
 		</ViewerPanelFooter>
 	));
