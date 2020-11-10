@@ -262,3 +262,8 @@ export const selectCurrentActivities = createSelector(
 			return replaceDates(foundActivities);
 		}
 );
+
+export const selectSelectedHiddenNodes = createSelector(
+	selectSelectedFrameTransparencies, (transparencies) =>
+		Object.keys(transparencies).filter((nodeId) => transparencies[nodeId] === 0 )
+);

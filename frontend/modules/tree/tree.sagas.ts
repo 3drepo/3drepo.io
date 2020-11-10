@@ -633,8 +633,7 @@ function* handleTransparencyOverridesChange({ currentOverrides, previousOverride
 function* handleTransparenciesVisibility({ transparencies }) {
 	// 1. get node ids for the hidden nodes
 	// tslint:disable-next-line:variable-name
-	const shared_ids = Object.keys(transparencies).filter((nodeId) => transparencies[nodeId] === 0 );
-	const hiddenSequenceNodesList: any[] = yield select(selectGetNodesIdsFromSharedIds(([{shared_ids}])));
+	const hiddenSequenceNodesList: any[] = yield select(selectGetNodesIdsFromSharedIds(([{shared_ids: transparencies}])));
 	const hiddenSequenceNodesSet = TreeProcessing.getInvisibleNodesResult(hiddenSequenceNodesList);
 
 	// 2. get all the invisible nodes in the tree

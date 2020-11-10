@@ -44,6 +44,7 @@ interface IProps {
 	measurementPins: any[];
 	transformations: any[];
 	gisLayers: string[];
+	sequenceHiddenNodes: string[];
 	hasGisCoordinates: boolean;
 	gisCoordinates: any;
 	handleTransparencyOverridesChange: any;
@@ -121,6 +122,7 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 	public componentDidUpdate(prevProps: IProps) {
 		const { colorOverrides, issuePins, riskPins, measurementPins, hasGisCoordinates,
 			gisCoordinates, gisLayers, transparencies, transformations: transformation,
+			sequenceHiddenNodes
 		} = this.props;
 
 		if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
@@ -155,8 +157,8 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 			this.renderGisLayers(prevProps.gisLayers, gisLayers);
 		}
 
-		if (prevProps.transparencies && transparencies !== prevProps.transparencies) {
-			this.props.handleTransparenciesVisibility(transparencies);
+		if (prevProps.transparencies && !isEqual(prevProps.sequenceHiddenNodes, sequenceHiddenNodes)) {
+			this.props.handleTransparenciesVisibility(sequenceHiddenNodes);
 		}
 	}
 
