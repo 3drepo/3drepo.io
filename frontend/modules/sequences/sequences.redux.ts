@@ -32,12 +32,11 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	setStateDefinition: ['stateId', 'stateDefinition'],
 	setStepInterval: ['stepInterval'],
 	setStepScale: ['stepScale'],
-	setIfcSpacesHidden: ['ifcSpacesHidden'],
 	fetchActivitiesDefinitions: ['sequenceId'],
 	fetchActivitiesDefinitionsSuccess: ['sequenceId', 'activities'],
 	showSequenceDate: ['date'],
 	handleTransparenciesVisibility: ['transparencies'],
-	restoreIfcSpacesHidden: [],
+	restoreModelDefaultVisibility: [],
 	reset: []
 }, { prefix: 'SEQUENCES/' });
 
@@ -50,7 +49,7 @@ export const INITIAL_STATE = {
 	statesPending: false,
 	stepInterval: 1,
 	stepScale: STEP_SCALE.DAY,
-	ifcSpacesHidden: true,
+	hiddenGeometryVisible: true,
 	activities: {}
 };
 
@@ -99,10 +98,6 @@ export const reset = () => {
 	return {...INITIAL_STATE};
 };
 
-export const setIfcSpacesHidden = (state = INITIAL_STATE, { ifcSpacesHidden }) => {
-	return {...state, ifcSpacesHidden};
-};
-
 export const reducer = createReducer(INITIAL_STATE, {
 	[SequencesTypes.FETCH_SEQUENCES_SUCCESS]: fetchSequencesSuccess,
 	[SequencesTypes.FETCH_ACTIVITIES_DEFINITIONS_SUCCESS]: fetchActivitiesDefinitionsSuccess,
@@ -110,7 +105,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[SequencesTypes.SET_STATE_DEFINITION]: setStateDefinition,
 	[SequencesTypes.SET_SELECTED_SEQUENCE_SUCCESS]: setSelectedSequenceSuccess,
 	[SequencesTypes.SET_STEP_INTERVAL]: setStepInterval,
-	[SequencesTypes.SET_IFC_SPACES_HIDDEN]: setIfcSpacesHidden,
 	[SequencesTypes.SET_STEP_SCALE]: setStepScale,
 	[SequencesTypes.RESET]: reset
 });

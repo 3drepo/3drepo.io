@@ -15,28 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { partial } from 'lodash';
-import { all, put, select, take, takeLatest } from 'redux-saga/effects';
+import { all, put, select, takeLatest } from 'redux-saga/effects';
 
-import { selectSelectedSequenceId, selectSelectedStateId, selectStateDefinitions,
+import { selectSelectedSequenceId, selectStateDefinitions,
 	SequencesActions, SequencesTypes } from '.';
-import { VISIBILITY_STATES } from '../../constants/tree';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
 
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
 import { selectCurrentModel, selectCurrentModelTeamspace, selectCurrentRevisionId, selectIsFederation } from '../model';
 import { dispatch } from '../store';
-import { selectGetNodesIdsFromSharedIds,
-	selectHiddenGeometryVisible, selectVisibilityMap, TreeActions, TreeTypes } from '../tree';
-import TreeSaga from '../tree/tree.sagas';
-import TreeProcessing from '../tree/treeProcessing/treeProcessing';
+import { selectHiddenGeometryVisible,  TreeActions } from '../tree';
 
 import { selectLeftPanels, ViewerGuiActions } from '../viewerGui';
 import { getSelectedFrame } from './sequences.helper';
-import { selectActivitiesDefinitions, selectFrames,
-	selectIfcSpacesHiddenSaved, selectIsLoadingFrame,
-	selectNextKeyFramesDates, selectSelectedSequence, selectSequenceModel} from './sequences.selectors';
+import { selectActivitiesDefinitions, selectFrames, selectIsLoadingFrame,
+	selectNextKeyFramesDates,  selectSelectedSequence, selectSequenceModel} from './sequences.selectors';
 
 export function* fetchSequences() {
 	try {
@@ -124,17 +118,11 @@ export function* initializeSequences() {
 	if (!hiddenGeometryVisible) {
 		yield put(TreeActions.showHiddenGeometry());
 	}
-
-	yield put(SequencesActions.setIfcSpacesHidden(!hiddenGeometryVisible));
 }
 
-export function* restoreIfcSpacesHidden() {
-	const hiddenGeometryVisible = yield select(selectHiddenGeometryVisible);
-	const ifcSpacesHiddenSaved =  yield select(selectIfcSpacesHiddenSaved);
-
-	if (ifcSpacesHiddenSaved !== !hiddenGeometryVisible) {
-		yield put(TreeActions.showHiddenGeometry());
-	}
+export function* restoreModelDefaultVisibility() {
+	yield put(TreeActions.showAllNodes());
+	yield put(TreeActions.showHiddenGeometry());
 }
 
 export function* setSelectedSequence({ sequenceId }) {
@@ -142,7 +130,7 @@ export function* setSelectedSequence({ sequenceId }) {
 		yield put(SequencesActions.initializeSequences());
 	} else {
 		yield put(SequencesActions.setStateDefinition(undefined, {}));
-		yield put(SequencesActions.restoreIfcSpacesHidden());
+		yield put(SequencesActions.restoreModelDefaultVisibility());
 	}
 	yield put(SequencesActions.setSelectedSequenceSuccess(sequenceId));
 	yield put(SequencesActions.fetchActivitiesDefinitions(sequenceId));
@@ -162,8 +150,9 @@ export function* showSequenceDate({ date }) {
 
 function* handleTransparenciesVisibility({ transparencies }) {
 	const frameIsLoading = yield select(selectIsLoadingFrame);
+	const selectedSequence = yield select(selectSelectedSequenceId);
 
-	if (!frameIsLoading) {
+	if (!frameIsLoading && selectedSequence) {
 		yield put(TreeActions.handleTransparenciesVisibility(transparencies));
 	}
 }
@@ -173,7 +162,7 @@ export default function* SequencesSaga() {
 	yield takeLatest(SequencesTypes.SET_SELECTED_DATE, setSelectedDate);
 	yield takeLatest(SequencesTypes.INITIALIZE_SEQUENCES, initializeSequences);
 	yield takeLatest(SequencesTypes.FETCH_FRAME, fetchFrame);
-	yield takeLatest(SequencesTypes.RESTORE_IFC_SPACES_HIDDEN, restoreIfcSpacesHidden);
+	yield takeLatest(SequencesTypes.RESTORE_MODEL_DEFAULT_VISIBILITY, restoreModelDefaultVisibility);
 	yield takeLatest(SequencesTypes.FETCH_ACTIVITIES_DEFINITIONS, fetchActivitiesDefinitions);
 	yield takeLatest(SequencesTypes.SET_SELECTED_SEQUENCE, setSelectedSequence);
 	yield takeLatest(SequencesTypes.FETCH_SELECTED_FRAME, fetchSelectedFrame);

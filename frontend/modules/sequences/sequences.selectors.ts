@@ -40,10 +40,6 @@ const getModelName = (sequence, settings) => {
 	return { modelName };
 };
 
-export const selectIfcSpacesHiddenSaved = createSelector(
-	selectSequencesDomain, (state) => state.ifcSpacesHidden
-);
-
 export const selectSequences = createSelector(
 	selectSequencesDomain, selectSettings,
 		(state, settings) => !state.sequences ? null :
