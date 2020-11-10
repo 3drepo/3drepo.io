@@ -20,7 +20,6 @@ const config = require("./config.js");
 
 if ("elastic" in config) {
 	// Any option not supplied via the options object can instead be configured using environment variables, however an empty elastic array required to initialise in the app
-	// eslint:disable-next-line
 	const apm = require("elastic-apm-node");
 	apm.start({
 		// Override service name from package.json
