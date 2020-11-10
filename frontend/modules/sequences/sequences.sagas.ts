@@ -29,13 +29,14 @@ import { selectCurrentModel, selectCurrentModelTeamspace, selectCurrentRevisionI
 import { dispatch } from '../store';
 import { selectGetNodesIdsFromSharedIds,
 	selectHiddenGeometryVisible, selectVisibilityMap, TreeActions, TreeTypes } from '../tree';
+import TreeSaga from '../tree/tree.sagas';
 import TreeProcessing from '../tree/treeProcessing/treeProcessing';
 
 import { selectLeftPanels, ViewerGuiActions } from '../viewerGui';
 import { getSelectedFrame } from './sequences.helper';
 import { selectActivitiesDefinitions, selectFrames,
-	selectIfcSpacesHiddenSaved, selectNextKeyFramesDates,
-	selectSelectedSequence, selectSequences, selectSequenceModel} from './sequences.selectors';
+	selectIfcSpacesHiddenSaved, selectIsLoadingFrame,
+	selectNextKeyFramesDates, selectSelectedSequence, selectSequenceModel} from './sequences.selectors';
 
 export function* fetchSequences() {
 	try {
@@ -160,26 +161,10 @@ export function* showSequenceDate({ date }) {
 }
 
 function* handleTransparenciesVisibility({ transparencies }) {
-	const selectedSequence = yield(select(selectSelectedSequence));
+	const frameIsLoading = yield select(selectIsLoadingFrame);
 
-	if (selectedSequence) {
-		// 1. get node ids for the hidden nodes
-		// tslint:disable-next-line:variable-name
-		const shared_ids = Object.keys(transparencies).filter((nodeId) => transparencies[nodeId] === 0 );
-		const hiddenSequenceNodesList: any[] = yield select(selectGetNodesIdsFromSharedIds(([{shared_ids}])));
-		const hiddenSequenceNodesSet = TreeProcessing.getInvisibleNodesResult(hiddenSequenceNodesList);
-
-		// 2. get all the invisible nodes in the tree
-		const visibilityMap = yield select(selectVisibilityMap);
-		// 3. get the nodes to show
-		// hiddenNodes - hiddenSequenceNodes = the  nodes that should be visible = nodesToShow
-		const nodesToShow = Object.keys(visibilityMap).filter((node) =>
-			visibilityMap[node] === VISIBILITY_STATES.INVISIBLE && !hiddenSequenceNodesSet.has(node)
-		);
-
-		yield put(TreeActions.setTreeNodesVisibility(nodesToShow, VISIBILITY_STATES.VISIBLE));
-		yield put(TreeActions.setTreeNodesVisibility(hiddenSequenceNodesList, VISIBILITY_STATES.INVISIBLE));
-		yield take(TreeTypes.UPDATE_DATA_REVISION);
+	if (!frameIsLoading) {
+		yield put(TreeActions.handleTransparenciesVisibility(transparencies));
 	}
 }
 

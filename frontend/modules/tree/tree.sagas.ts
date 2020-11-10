@@ -35,7 +35,8 @@ import {
 	selectNodesIndexesMap,
 	selectSelectionMap,
 	selectSubModelsRootNodes,
-	selectTreeNodesList
+	selectTreeNodesList,
+	selectVisibilityMap
 } from './tree.selectors';
 import TreeProcessing from './treeProcessing/treeProcessing';
 
@@ -629,6 +630,25 @@ function* handleTransparencyOverridesChange({ currentOverrides, previousOverride
 	yield addTransparencyOverrides(toAdd);
 }
 
+function* handleTransparenciesVisibility({ transparencies }) {
+	// 1. get node ids for the hidden nodes
+	// tslint:disable-next-line:variable-name
+	const shared_ids = Object.keys(transparencies).filter((nodeId) => transparencies[nodeId] === 0 );
+	const hiddenSequenceNodesList: any[] = yield select(selectGetNodesIdsFromSharedIds(([{shared_ids}])));
+	const hiddenSequenceNodesSet = TreeProcessing.getInvisibleNodesResult(hiddenSequenceNodesList);
+
+	// 2. get all the invisible nodes in the tree
+	const visibilityMap = yield select(selectVisibilityMap);
+	// 3. get the nodes to show
+	// hiddenNodes - hiddenSequenceNodes = the  nodes that should be visible = nodesToShow
+	const nodesToShow = Object.keys(visibilityMap).filter((node) =>
+		visibilityMap[node] === VISIBILITY_STATES.INVISIBLE && !hiddenSequenceNodesSet.has(node)
+	);
+
+	yield put(TreeActions.setTreeNodesVisibility(nodesToShow, VISIBILITY_STATES.VISIBLE));
+	yield put(TreeActions.setTreeNodesVisibility(hiddenSequenceNodesList, VISIBILITY_STATES.INVISIBLE));
+}
+
 export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.FETCH_FULL_TREE, fetchFullTree);
 	yield takeLatest(TreeTypes.START_LISTEN_ON_SELECTIONS, startListenOnSelections);
@@ -656,4 +676,5 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.ZOOM_TO_HIGHLIGHTED_NODES, zoomToHighlightedNodes);
 	yield takeLatest(TreeTypes.HANDLE_TRANSPARENCY_OVERRIDES_CHANGE, handleTransparencyOverridesChange);
 	yield takeLatest(TreeTypes.SET_SUBMODELS_VISIBILITY, setSubmodelsVisibility);
+	yield takeLatest(TreeTypes.HANDLE_TRANSPARENCIES_VISIBILITY, handleTransparenciesVisibility);
 }

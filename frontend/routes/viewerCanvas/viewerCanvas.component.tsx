@@ -120,7 +120,8 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 
 	public componentDidUpdate(prevProps: IProps) {
 		const { colorOverrides, issuePins, riskPins, measurementPins, hasGisCoordinates,
-			gisCoordinates, gisLayers, transparencies, transformations: transformation } = this.props;
+			gisCoordinates, gisLayers, transparencies, transformations: transformation,
+		} = this.props;
 
 		if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
 			this.renderColorOverrides(prevProps.colorOverrides, colorOverrides);

@@ -57,7 +57,8 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	goToRootNode: ['nodeId'],
 	zoomToHighlightedNodes: [],
 	handleTransparencyOverridesChange: ['currentOverrides', 'previousOverrides'],
-	setIsTreeProcessed: ['isTreeProcessed']
+	setIsTreeProcessed: ['isTreeProcessed'],
+	handleTransparenciesVisibility: ['transparencies'],
 }, { prefix: 'TREE/' });
 
 export interface ITreeComponentState {

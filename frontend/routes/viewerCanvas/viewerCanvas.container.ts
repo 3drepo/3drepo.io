@@ -24,7 +24,7 @@ import { selectPins as selectIssuePins } from '../../modules/issues';
 import { selectPins as selectMeasurementPins } from '../../modules/measurements';
 import { selectGISCoordinates, selectHasGISCoordinates } from '../../modules/model';
 import { selectPins as selectRiskPins } from '../../modules/risks';
-import { SequencesActions } from '../../modules/sequences';
+import { selectIsLoadingFrame, selectSelectedSequenceId, SequencesActions } from '../../modules/sequences';
 import { TreeActions } from '../../modules/tree';
 import { selectAllTransparencyOverrides, selectColorOverrides, selectTransformations } from '../../modules/viewerGui';
 import { withViewer } from '../../services/viewer/viewer';
@@ -39,7 +39,9 @@ const mapStateToProps = createStructuredSelector({
 	gisCoordinates: selectGISCoordinates,
 	hasGisCoordinates: selectHasGISCoordinates,
 	gisLayers: selectGisLayers,
-	transformations: selectTransformations
+	transformations: selectTransformations,
+	selectedSequenceId: selectSelectedSequenceId,
+	isLoadingSequenceFrame: selectIsLoadingFrame
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
