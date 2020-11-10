@@ -34,9 +34,9 @@ class TreeProcessing {
 
 	public updateVisibility = (payload) => this.processing.updateVisibility(payload);
 
-	public showAllExceptMeshes = (ifcSpacesHidden, meshes) => {
-		if (this.processing && this.processing.showAllExceptMeshes) {
-			return this.processing.showAllExceptMeshes(ifcSpacesHidden, meshes);
+	public showAllExceptMeshIDs = (ifcSpacesHidden, meshes) => {
+		if (this.processing && this.processing.showAllExceptMeshIDs) {
+			return this.processing.showAllExceptMeshIDs(ifcSpacesHidden, meshes);
 		}
 	}
 

@@ -304,18 +304,18 @@ function* clearCurrentlySelected() {
 function* showAllNodes() {
 	yield waitForTreeToBeReady();
 	try {
-		yield showAllExceptMeshes();
+		yield showAllExceptMeshIDs();
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('show', 'all nodes', error));
 	}
 }
 
-function* showAllExceptMeshes(meshes = []) {
+function* showAllExceptMeshIDs(meshes = []) {
 	yield waitForTreeToBeReady();
 
 	try {
 		const hiddenGeometryVisible = yield select(selectHiddenGeometryVisible);
-		const {meshesToShow, meshesToHide } = yield TreeProcessing.showAllExceptMeshes(!hiddenGeometryVisible, meshes);
+		const {meshesToShow, meshesToHide } = yield TreeProcessing.showAllExceptMeshIDs(!hiddenGeometryVisible, meshes);
 		toggleMeshesVisibility(meshesToShow, true);
 		toggleMeshesVisibility(meshesToHide, false);
 	} catch (error) {
@@ -645,7 +645,7 @@ function* handleTransparenciesVisibility({ transparencies }) {
 	// 1. get node ids for the hidden nodes
 	// tslint:disable-next-line:variable-name
 	const meshesToHide: any[] = yield select(selectGetNodesIdsFromSharedIds(([{shared_ids: transparencies}])));
-	yield showAllExceptMeshes(meshesToHide);
+	yield showAllExceptMeshIDs(meshesToHide);
 }
 
 export default function* TreeSaga() {

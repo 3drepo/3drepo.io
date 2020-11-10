@@ -306,7 +306,7 @@ export class Processing {
 		return { meshesToUpdate };
 	}
 
-	public showAllExceptMeshes = (ifcSpacesHidden, meshes) => {
+	public showAllExceptMeshIDs = (ifcSpacesHidden, meshes) => {
 		const nodes = this.nodesList[0].childrenIds;
 
 		if (!meshes || meshes.length === 0) {
