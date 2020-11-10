@@ -16,14 +16,11 @@
  */
 
 "use strict";
-const mongoose = require("mongoose");
-const ModelFactory = require("./factory/modelFactory");
 const FileRef = require("./fileRef");
 const History = require("./history");
 const ModelSetting = require("./modelSetting");
 const Ref = require("./ref");
 const Scene = require("./scene");
-const Schema = mongoose.Schema;
 const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
 const { batchPromises } = require("./helper/promises");
@@ -33,27 +30,375 @@ const C = require("../constants");
 const utils = require("../utils");
 const systemLogger = require("../logger").systemLogger;
 
-const schema = Schema({
-	_id: Object,
-	parents: [],
-	metadata: Object
-});
+class Meta {
+	async getMetadata(account, model, id) {
+		const projection = {
+			shared_id: 0,
+			paths: 0,
+			type: 0,
+			api: 0,
+			parents: 0
+		};
 
-if (!schema.options.toJSON) {
-	schema.options.toJSON = {};
-}
+		const metadata = await Scene.findOne({account, model}, { _id: utils.stringToUUID(id) }, projection);
 
-schema.options.toJSON.transform = function (doc, ret) {
-	ret._id = utils.uuidToString(doc._id);
-	if(doc.parents) {
-		const newParents = [];
-		doc.parents.forEach(function(parentId) {
-			newParents.push(utils.uuidToString(parentId));
-		});
-		ret.parents = newParents;
+		if (!metadata) {
+			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
+		}
+
+		return metadata;
 	}
-	return ret;
-};
+
+	async getAllMetadataByRules(account, model, branch, rev, rules) {
+		// Get the revision object to find all relevant IDs
+		const history = await History.getHistory({ account, model }, branch, rev);
+
+		if (!history) {
+			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
+		}
+
+		// Check for submodel references
+		const filter = {
+			type: "ref",
+			_id: { $in: history.current }
+		};
+
+		const refs = await Ref.find({ account, model }, filter);
+
+		// for all refs get their tree
+		const getMeta = [];
+
+		refs.forEach(ref => {
+			let refBranch, refRev;
+
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
+				refBranch = C.MASTER_BRANCH_NAME;
+			} else {
+				refRev = utils.uuidToString(ref._rid);
+			}
+
+			getMeta.push(
+				this.getAllMetadataByRules(ref.owner, ref.project, refBranch, refRev, rules)
+					.then(obj => {
+						return Promise.resolve({
+							data: obj.data,
+							account: ref.owner,
+							model: ref.project
+						});
+					})
+					.catch(() => {
+					// Just because a sub model fails doesn't mean everything failed. Resolve the promise.
+						return Promise.resolve();
+					})
+			);
+		});
+
+		const subMeta = await Promise.all(getMeta);
+
+		const positiveQueries = positiveRulesToQueries(rules);
+		const negativeQueries = negativeRulesToQueries(rules);
+
+		let allRulesResults = null;
+
+		if (positiveQueries.length !== 0) {
+			const eachPosRuleResults = await Promise.all(positiveQueries.map(ruleQuery => getMetadataRuleQueryResults(account, model, {type:"meta", ...ruleQuery}, { "metadata": 1, "parents": 1 })));
+			allRulesResults = intersection(eachPosRuleResults);
+		} else {
+			const rootQuery =  { _id: { $in: history.current }, "type": "meta" };
+			allRulesResults = (await getMetadataRuleQueryResults(account, model, rootQuery, { "metadata": 1, "parents": 1 }));
+		}
+
+		const eachNegRuleResults = await Promise.all(negativeQueries.map(ruleQuery => getMetadataRuleQueryResults(account, model, {type:"meta", ...ruleQuery}, { "metadata": 1, "parents": 1 })));
+		allRulesResults = difference(allRulesResults, eachNegRuleResults);
+
+		if(allRulesResults) {
+			allRulesResults = [...allRulesResults].map(res => JSON.parse(res));
+			const parsedObj = {data: [...clean(allRulesResults)]};
+			if(subMeta.length > 0) {
+				parsedObj.subModels = subMeta;
+			}
+			return parsedObj;
+		} else {
+			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
+		}
+	}
+
+	async getMetadataFields(account, model) {
+		const subModelRefs = await Ref.getRefNodes(account, model);
+		const subModelMetadataFieldsPromises = [];
+
+		subModelRefs.forEach((ref) => {
+			subModelMetadataFieldsPromises.push(
+				this.getMetadataFields(ref.owner, ref.project).catch(() => {
+					// Suppress submodel metadata failure
+				})
+			);
+		});
+
+		const subModels = await Promise.all(subModelMetadataFieldsPromises);
+		const metaKeys = new Set();
+
+		if (subModels) {
+			subModels.forEach((subModelMetadataFields) => {
+				if (subModelMetadataFields) {
+					subModelMetadataFields.forEach((field) => {
+						metaKeys.add(field);
+					});
+				}
+			});
+		}
+
+		return db.getCollection(account, model + ".scene").then((sceneCollection) => {
+			return sceneCollection.mapReduce(
+				/* eslint-disable */
+				function() {
+					for (var key in this.metadata) {
+						emit(key, null);
+					}
+				},
+				function(key, value) {
+					return null;
+				},
+				{
+					"out": {inline:1},
+					"query" : {type: "meta"},
+					"limit": 10000
+				}
+				/* eslint-enable */
+			).then((uniqueKeys) => {
+				uniqueKeys.forEach((key) => {
+					metaKeys.add(key._id);
+				});
+
+				return Array.from(metaKeys);
+			});
+		}).catch((err) => {
+			// We may fail to get the scene collection if the collection doesn't exist yet.
+			systemLogger.logError("Failed to fetch metaKeys: ", err);
+			return Array.from(metaKeys);
+		});
+	}
+
+	getIfcGuids(account, model) {
+		return this.find({ account, model }, { type: "meta" }, { "metadata.IFC GUID": 1 });
+	}
+
+	async findObjectIdsByRules(account, model, rules, branch, revId, convertSharedIDsToString, showIfcGuids = false) {
+		const objectIdPromises = [];
+
+		const positiveQueries = positiveRulesToQueries(rules);
+		const negativeQueries = negativeRulesToQueries(rules);
+
+		const models = new Set();
+		models.add(model);
+
+		// Check submodels
+		const refs = await Ref.find({account, model}, {type: "ref"});
+
+		refs.forEach((ref) => {
+			models.add(ref.project);
+		});
+
+		const modelsIter = models.values();
+
+		for (const submodel of modelsIter) {
+			const _branch = (model === submodel) ? branch : "master";
+			const _revId = (model === submodel) ? revId : null;
+
+			objectIdPromises.push(findModelSharedIdsByRulesQueries(
+				account,
+				submodel,
+				positiveQueries,
+				negativeQueries,
+				_branch,
+				_revId,
+				convertSharedIDsToString && !showIfcGuids // in the case of ifcguids I need the uuid for querying and geting the ifcguids
+			).then(shared_ids => {
+				if(!shared_ids.length) {
+					return undefined;
+				}
+
+				if (showIfcGuids) {
+					return getIFCGuids(account, submodel, shared_ids).then(ifc_guids => {
+						return {
+							account,
+							model: submodel,
+							ifc_guids
+						};
+					});
+				}
+
+				return {
+					account,
+					model: submodel,
+					shared_ids
+				};
+			}).catch(() => {
+				// If search on a submodel failed (usually due to no revision in the submodel), it should not
+				// fail the whole API request.
+				return undefined;
+			}));
+		}
+
+		const objectIds = await Promise.all(objectIdPromises);
+
+		return objectIds.filter((entry) => !!entry);
+	}
+
+	async getAllIdsWithMetadataField(account, model, branch, rev, fieldName) {
+		// Get the revision object to find all relevant IDs
+		let fullFieldName = "metadata";
+
+		if (fieldName && fieldName.length > 0) {
+			fullFieldName += "." + fieldName;
+		}
+
+		const history = await History.getHistory({ account, model }, branch, rev);
+
+		if (!history) {
+			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
+		}
+
+		// Check for submodel references
+		const filter = {
+			type: "ref",
+			_id: { $in: history.current }
+		};
+
+		const refs = await Ref.find({ account, model }, filter);
+
+		// for all refs get their tree
+		const getMeta = [];
+
+		refs.forEach(ref => {
+			let refBranch, refRev;
+
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
+				refBranch = C.MASTER_BRANCH_NAME;
+			} else {
+				refRev = utils.uuidToString(ref._rid);
+			}
+
+			getMeta.push(
+				this.getAllIdsWithMetadataField(ref.owner, ref.project, refBranch, refRev, fieldName)
+					.then(obj => {
+						return Promise.resolve({
+							data: obj.data,
+							account: ref.owner,
+							model: ref.project
+						});
+					})
+					.catch(() => {
+					// Just because a sub model fails doesn't mean everything failed. Resolve the promise.
+						return Promise.resolve();
+					})
+			);
+		});
+
+		const subMeta = await Promise.all(getMeta);
+
+		const match = {
+			_id: {"$in": history.current}
+		};
+		match[fullFieldName] =  {"$exists" : true};
+
+		const projection = {
+			parents: 1
+		};
+		projection[fullFieldName] = 1;
+
+		const obj = await Scene.find({account, model}, match, projection);
+
+		if (!obj) {
+			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
+		}
+
+		// rename fieldName to "value"
+		const parsedObj = {data: obj};
+		if (obj.length > 0 && fieldName && fieldName.length > 0) {
+			const objStr = JSON.stringify(obj);
+			parsedObj.data = JSON.parse(objStr.replace(new RegExp(fieldName, "g"), "value"));
+		}
+		if (subMeta.length > 0) {
+			parsedObj.subModels = subMeta;
+		}
+
+		return parsedObj;
+	}
+
+	async getAllIdsWith4DSequenceTag(account, model, branch, rev) {
+		// Get sequence tag then call the generic getAllIdsWithMetadataField
+		const settings = await ModelSetting.findOne({account : account}, {_id : model});
+
+		if (!settings) {
+			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
+		}
+
+		if (!settings.fourDSequenceTag) {
+			return Promise.reject(responseCodes.SEQ_TAG_NOT_FOUND);
+		}
+
+		return this.getAllIdsWithMetadataField(account, model,  branch, rev, settings.fourDSequenceTag);
+	}
+
+	getAllMetadata(account, model, branch, rev) {
+		return this.getAllIdsWithMetadataField(account, model, branch, rev, "");
+	}
+
+	async getMeshIdsByRules(account, model, branch, revId, rules) {
+		const objectIdPromises = [];
+
+		const positiveQueries = positiveRulesToQueries(rules);
+		const negativeQueries = negativeRulesToQueries(rules);
+
+		const models = new Set();
+		models.add(model);
+
+		// Check submodels
+		const refs = await Ref.find({account, model}, {type: "ref"});
+
+		refs.forEach((ref) => {
+			models.add(ref.project);
+		});
+
+		const modelsIter = models.values();
+
+		for (const submodel of modelsIter) {
+			const _branch = (model === submodel) ? branch : "master";
+			const _revId = (model === submodel) ? revId : null;
+
+			objectIdPromises.push(findModelMeshIdsByRulesQueries(
+				account,
+				submodel,
+				positiveQueries,
+				negativeQueries,
+				_branch,
+				_revId,
+				true
+			).then(mesh_ids => {
+				if(!mesh_ids.length) {
+					return undefined;
+				}
+
+				return {
+					account,
+					model: submodel,
+					mesh_ids
+				};
+			}).catch(() => {
+				// If search on a submodel failed (usually due to no revision in the submodel), it should not
+				// fail the whole API request.
+				return undefined;
+			}));
+		}
+
+		const objectIds = await Promise.all(objectIdPromises);
+
+		return objectIds
+			.filter((entry) => !!entry)
+			.reduce((acc, val) => acc.concat(val), []);
+	}
+}
 
 function clean(metaListToClean) {
 	metaListToClean.forEach((metadataToClean) => {
@@ -231,390 +576,4 @@ async function idsToSharedIds(account, model, ids, convertSharedIDsToString) {
 	return shared_ids;
 }
 
-const Meta = ModelFactory.createClass(
-	"Meta",
-	schema,
-	arg => {
-		return `${arg.model}.scene`;
-	}
-);
-
-Meta.getMetadata = function(account, model, id) {
-	const projection = {
-		shared_id: 0,
-		paths: 0,
-		type: 0,
-		api: 0,
-		parents: 0
-	};
-
-	return Scene.findOne({account, model}, { _id: utils.stringToUUID(id) }, projection).then(obj => {
-		if(obj) {
-			return obj;
-		} else {
-			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
-		}
-	});
-};
-
-Meta.getAllIdsWithMetadataField = function(account, model, branch, rev, fieldName) {
-	// Get the revision object to find all relevant IDs
-	let history;
-	let fullFieldName = "metadata";
-
-	if (fieldName && fieldName.length > 0) {
-		fullFieldName += "." + fieldName;
-	}
-
-	return History.getHistory({ account, model }, branch, rev).then(_history => {
-		history = _history;
-		if(!history) {
-			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
-		}
-		// Check for submodel references
-		const filter = {
-			type: "ref",
-			_id: { $in: history.current }
-		};
-		return Ref.find({ account, model }, filter);
-	}).then(refs =>{
-
-		// for all refs get their tree
-		const getMeta = [];
-
-		refs.forEach(ref => {
-
-			let refBranch, refRev;
-
-			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
-				refBranch = C.MASTER_BRANCH_NAME;
-			} else {
-				refRev = utils.uuidToString(ref._rid);
-			}
-
-			getMeta.push(
-				this.getAllIdsWithMetadataField(ref.owner, ref.project, refBranch, refRev, fieldName)
-					.then(obj => {
-						return Promise.resolve({
-							data: obj.data,
-							account: ref.owner,
-							model: ref.project
-						});
-					})
-					.catch(() => {
-					// Just because a sub model fails doesn't mean everything failed. Resolve the promise.
-						return Promise.resolve();
-					})
-			);
-		});
-
-		return Promise.all(getMeta);
-
-	}).then(_subMeta => {
-
-		const match = {
-			_id: {"$in": history.current}
-		};
-		match[fullFieldName] =  {"$exists" : true};
-
-		const projection = {
-			parents: 1
-		};
-		projection[fullFieldName] = 1;
-
-		return Scene.find({account, model}, match, projection).then(obj => {
-			if(obj) {
-				// rename fieldName to "value"
-				const parsedObj = {data: obj};
-				if(obj.length > 0 && fieldName && fieldName.length > 0) {
-					const objStr = JSON.stringify(obj);
-					parsedObj.data = JSON.parse(objStr.replace(new RegExp(fieldName, "g"), "value"));
-				}
-				if(_subMeta.length > 0) {
-					parsedObj.subModels = _subMeta;
-				}
-				return parsedObj;
-			} else {
-				return Promise.reject(responseCodes.METADATA_NOT_FOUND);
-			}
-		});
-
-	});
-};
-
-Meta.getMeshIdsByRules = async function(account, model, branch, revId, rules) {
-	const objectIdPromises = [];
-
-	const positiveQueries = positiveRulesToQueries(rules);
-	const negativeQueries = negativeRulesToQueries(rules);
-
-	const models = new Set();
-	models.add(model);
-
-	// Check submodels
-	return Ref.find({account, model}, {type: "ref"}).then((refs) => {
-		refs.forEach((ref) => {
-			models.add(ref.project);
-		});
-
-		const modelsIter = models.values();
-
-		for (const submodel of modelsIter) {
-			const _branch = (model === submodel) ? branch : "master";
-			const _revId = (model === submodel) ? revId : null;
-
-			objectIdPromises.push(findModelMeshIdsByRulesQueries(
-				account,
-				submodel,
-				positiveQueries,
-				negativeQueries,
-				_branch,
-				_revId,
-				true
-			).then(mesh_ids => {
-				if(!mesh_ids.length) {
-					return undefined;
-				}
-
-				return {
-					account,
-					model: submodel,
-					mesh_ids
-				};
-			}).catch(() => {
-				// If search on a submodel failed (usually due to no revision in the submodel), it should not
-				// fail the whole API request.
-				return undefined;
-			}));
-		}
-
-		return Promise.all(objectIdPromises).then(objectIds => {
-			return objectIds
-				.filter((entry) => !!entry)
-				.reduce((acc, val) => acc.concat(val), []);
-		});
-	});
-};
-
-Meta.getAllMetadataByRules = function(account, model, branch, rev, rules) {
-	// Get the revision object to find all relevant IDs
-	let history;
-
-	return History.getHistory({ account, model }, branch, rev).then(_history => {
-		history = _history;
-		if(!history) {
-			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
-		}
-		// Check for submodel references
-		const filter = {
-			type: "ref",
-			_id: { $in: history.current }
-		};
-		return Ref.find({ account, model }, filter);
-	}).then(refs =>{
-
-		// for all refs get their tree
-		const getMeta = [];
-
-		refs.forEach(ref => {
-
-			let refBranch, refRev;
-
-			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
-				refBranch = C.MASTER_BRANCH_NAME;
-			} else {
-				refRev = utils.uuidToString(ref._rid);
-			}
-
-			getMeta.push(
-				this.getAllMetadataByRules(ref.owner, ref.project, refBranch, refRev, rules)
-					.then(obj => {
-						return Promise.resolve({
-							data: obj.data,
-							account: ref.owner,
-							model: ref.project
-						});
-					})
-					.catch(() => {
-					// Just because a sub model fails doesn't mean everything failed. Resolve the promise.
-						return Promise.resolve();
-					})
-			);
-		});
-
-		return Promise.all(getMeta);
-
-	}).then(async _subMeta => {
-		const positiveQueries = positiveRulesToQueries(rules);
-		const negativeQueries = negativeRulesToQueries(rules);
-
-		let allRulesResults = null;
-
-		if (positiveQueries.length !== 0) {
-			const eachPosRuleResults = await Promise.all(positiveQueries.map(ruleQuery => getMetadataRuleQueryResults(account, model, {type:"meta", ...ruleQuery}, { "metadata": 1, "parents": 1 })));
-			allRulesResults = intersection(eachPosRuleResults);
-		} else {
-			const rootQuery =  { _id: { $in: history.current }, "type": "meta" };
-			allRulesResults = (await getMetadataRuleQueryResults(account, model, rootQuery, { "metadata": 1, "parents": 1 }));
-		}
-
-		const eachNegRuleResults = await Promise.all(negativeQueries.map(ruleQuery => getMetadataRuleQueryResults(account, model, {type:"meta", ...ruleQuery}, { "metadata": 1, "parents": 1 })));
-		allRulesResults = difference(allRulesResults, eachNegRuleResults);
-
-		if(allRulesResults) {
-			allRulesResults = [...allRulesResults].map(res => JSON.parse(res));
-			const parsedObj = {data: [...clean(allRulesResults)]};
-			if(_subMeta.length > 0) {
-				parsedObj.subModels = _subMeta;
-			}
-			return parsedObj;
-		} else {
-			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
-		}
-
-	});
-};
-
-Meta.getAllMetadata = function(account, model, branch, rev) {
-	return this.getAllIdsWithMetadataField(account, model, branch, rev, "");
-};
-
-Meta.getAllIdsWith4DSequenceTag = function(account, model, branch, rev) {
-	// Get sequence tag then call the generic getAllIdsWithMetadataField
-	return ModelSetting.findOne({account : account}, {_id : model}).then(settings => {
-		if(!settings) {
-			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
-		}
-		if(!settings.fourDSequenceTag) {
-			return Promise.reject(responseCodes.SEQ_TAG_NOT_FOUND);
-		}
-		return this.getAllIdsWithMetadataField(account, model,  branch, rev, settings.fourDSequenceTag);
-	});
-};
-
-Meta.getMetadataFields = function(account, model) {
-
-	return Ref.getRefNodes(account, model).then((subModelRefs) => {
-		const subModelMetadataFieldsPromises = [];
-
-		subModelRefs.forEach((ref) => {
-			subModelMetadataFieldsPromises.push(
-				this.getMetadataFields(ref.owner, ref.project).catch(() => {
-					// Suppress submodel metadata failure
-				})
-			);
-		});
-
-		return Promise.all(subModelMetadataFieldsPromises).then((subModels) => {
-			const metaKeys = new Set();
-
-			if (subModels) {
-				subModels.forEach((subModelMetadataFields) => {
-					if (subModelMetadataFields) {
-						subModelMetadataFields.forEach((field) => {
-							metaKeys.add(field);
-						});
-					}
-				});
-			}
-
-			return db.getCollection(account, model + ".scene").then((sceneCollection) => {
-				return sceneCollection.mapReduce(
-					/* eslint-disable */
-					function() {
-						for (var key in this.metadata) {
-							emit(key, null);
-						}
-					},
-					function(key, value) {
-						return null;
-					},
-					{
-						"out": {inline:1},
-						"query" : {type: "meta"},
-						"limit": 10000
-					}
-					/* eslint-enable */
-				).then((uniqueKeys) => {
-					uniqueKeys.forEach((key) => {
-						metaKeys.add(key._id);
-					});
-
-					return Array.from(metaKeys);
-				});
-			}).catch((err) => {
-				// We may fail to get the scene collection if the collection doesn't exist yet.
-				systemLogger.logError("Failed to fetch metaKeys: ", err);
-				return Array.from(metaKeys);
-			});
-		});
-	});
-};
-
-Meta.getIfcGuids = function(account, model) {
-	return this.find({ account, model }, { type: "meta" }, { "metadata.IFC GUID": 1 });
-};
-
-Meta.findObjectIdsByRules = async function(account, model, rules, branch, revId, convertSharedIDsToString, showIfcGuids = false) {
-	const objectIdPromises = [];
-
-	const positiveQueries = positiveRulesToQueries(rules);
-	const negativeQueries = negativeRulesToQueries(rules);
-
-	const models = new Set();
-	models.add(model);
-
-	// Check submodels
-	return Ref.find({account, model}, {type: "ref"}).then((refs) => {
-		refs.forEach((ref) => {
-			models.add(ref.project);
-		});
-
-		const modelsIter = models.values();
-
-		for (const submodel of modelsIter) {
-			const _branch = (model === submodel) ? branch : "master";
-			const _revId = (model === submodel) ? revId : null;
-
-			objectIdPromises.push(findModelSharedIdsByRulesQueries(
-				account,
-				submodel,
-				positiveQueries,
-				negativeQueries,
-				_branch,
-				_revId,
-				convertSharedIDsToString && !showIfcGuids // in the case of ifcguids I need the uuid for querying and geting the ifcguids
-			).then(shared_ids => {
-				if(!shared_ids.length) {
-					return undefined;
-				}
-
-				if (showIfcGuids) {
-					return getIFCGuids(account, submodel, shared_ids).then(ifc_guids => {
-						return {
-							account,
-							model: submodel,
-							ifc_guids
-						};
-					});
-				}
-
-				return {
-					account,
-					model: submodel,
-					shared_ids
-				};
-			}).catch(() => {
-				// If search on a submodel failed (usually due to no revision in the submodel), it should not
-				// fail the whole API request.
-				return undefined;
-			}));
-		}
-
-		return Promise.all(objectIdPromises).then(objectIds => {
-			return objectIds.filter((entry) => !!entry);
-		});
-	});
-};
-
-module.exports = Meta;
+module.exports = new Meta();
