@@ -314,6 +314,9 @@ export class Processing {
 			return { meshesToShow: meshesToUpdate, meshesToHide: []};
 		}
 
+		const meshToHide = {};
+		meshes.forEach(mesh => meshToHide[mesh] = true);
+
 		const meshesToCheck = this.getMeshesByNodes(nodes.map((nodeId) => this.nodesList[this.nodesIndexesMap[nodeId]]));
 		const meshesToShow = [];
 		const meshesToHide = [];
@@ -327,7 +330,7 @@ export class Processing {
 
 			meshesToCheck[ns].meshes.forEach((meshId) => {
 				const currentState = this.visibilityMap[meshId];
-				const shouldHide = meshes.includes(meshId);
+				const shouldHide = meshToHide[meshId];
 
 				const desiredState = shouldHide ? VISIBILITY_STATES.INVISIBLE
 					: (ifcSpacesHidden ?  this.defaultVisibilityMap[meshId] : VISIBILITY_STATES.VISIBLE);
