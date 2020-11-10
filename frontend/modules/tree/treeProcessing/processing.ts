@@ -306,9 +306,62 @@ export class Processing {
 		return { meshesToUpdate };
 	}
 
-	public showAllNodes = (ifcSpacesHidden) => {
-		const root = this.nodesList[0];
-		return this.showNodes(root.childrenIds, ifcSpacesHidden);
+	public showAllExceptMeshes = (ifcSpacesHidden, meshes) => {
+		const nodes = this.nodesList[0].childrenIds;
+
+		if (!meshes || meshes.length === 0) {
+			const { meshesToUpdate } =  this.showNodes(nodes);
+			return { meshesToShow: meshesToUpdate, meshesToHide: []};
+		}
+
+		const meshesToCheck = this.getMeshesByNodes(nodes.map((nodeId) => this.nodesList[this.nodesIndexesMap[nodeId]]));
+		const meshesToShow = [];
+		const meshesToHide = [];
+		const parentNodesByLevel = [];
+
+		for (const ns in meshesToCheck) {
+			const toShowEntry = {...meshesToCheck[ns]};
+			const toHideEntry = {...meshesToCheck[ns]};
+			toShowEntry.meshes = [];
+			toHideEntry.meshes = [];
+
+			meshesToCheck[ns].meshes.forEach((meshId) => {
+				const currentState = this.visibilityMap[meshId];
+				const shouldHide = meshes.includes(meshId);
+
+				const desiredState = shouldHide ? VISIBILITY_STATES.INVISIBLE
+					: (ifcSpacesHidden ?  this.defaultVisibilityMap[meshId] : VISIBILITY_STATES.VISIBLE);
+
+				if (currentState !== desiredState) {
+					this.visibilityMap[meshId] = desiredState;
+					if (shouldHide) {
+						toHideEntry.meshes.push(meshId);
+					} else {
+						toShowEntry.meshes.push(meshId);
+					}
+
+					const [meshNode] = this.getNodesByIds([meshId]);
+					const parents = this.getParentsByPath(meshNode);
+					for (let index = 0; index < parents.length ; ++index) {
+						const parentLevel = parents.length - index - 1;
+						if (parentNodesByLevel[parentLevel]) {
+							parentNodesByLevel[parentLevel].add(parents[index]);
+						} else {
+							parentNodesByLevel[parentLevel] = new Set([parents[index]]);
+						}
+					}
+				}
+			});
+
+			meshesToShow.push(toShowEntry);
+			meshesToHide.push(toHideEntry);
+		}
+
+		for (let i =  parentNodesByLevel.length - 1 ; i >= 0; --i) {
+			this.updateParentsVisibility(parentNodesByLevel[i]);
+		}
+
+		return { meshesToShow, meshesToHide };
 	}
 
 	public updateVisibility = ({ nodesIds = [], ifcSpacesHidden, visibility}) => {
@@ -391,41 +444,6 @@ export class Processing {
 	private isVisibleNode = (nodeId) => this.visibilityMap[nodeId] !== VISIBILITY_STATES.INVISIBLE;
 
 	private isSelectedNode = (nodeId) => this.selectionMap[nodeId] !== SELECTION_STATES.UNSELECTED;
-
-	// this returns a list of nodes that will render invisble if the given nodes are to set invisible.
-	// this includes parents of all invisible nodes, and the descendant of the nodes to set invisible
-	public getInvisibleNodesResult = (nodesId: string[]) => {
-		const parents = new Set();
-		const nodesToRenderInvisible =  new Set(nodesId);
-
-		for (let nodeIdx = 0; nodeIdx < nodesId.length; ++nodeIdx) {
-			const nodeID = nodesId[nodeIdx];
-			let idxToList = this.nodesIndexesMap[nodeID];
-			const node = this.nodesList[idxToList];
-
-			if (node.hasChildren) {
-				const lastIdx = idxToList + node.deepChildrenNumber + 1;
-				// Hide all children
-				while  (++idxToList < lastIdx) {
-					const descendent = this.nodesList[idxToList];
-					nodesToRenderInvisible.add(descendent._id);
-				}
-			}
-
-			const nodesParents = this.getParentsByPath(node);
-			nodesParents.forEach((n) => parents.add(n));
-		}
-
-		for (const node of parents) {
-			const hasInvisibleChildren = (node as any).childrenIds.every((id) => nodesToRenderInvisible.has(id));
-
-			if (hasInvisibleChildren) {
-				nodesToRenderInvisible.add((node as any)._id);
-			}
-		}
-
-		return nodesToRenderInvisible;
-	}
 
 	private getMeshesByNodes = (nodes = []) => {
 		if (!nodes.length) {

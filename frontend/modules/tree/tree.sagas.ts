@@ -303,15 +303,26 @@ function* clearCurrentlySelected() {
  */
 function* showAllNodes() {
 	yield waitForTreeToBeReady();
-
 	try {
-		const hiddenGeometryVisible = yield select(selectHiddenGeometryVisible);
-		const result = yield TreeProcessing.showAllNodes(!hiddenGeometryVisible);
-		toggleMeshesVisibility(result.meshesToUpdate, true);
+		yield showAllExceptMeshes();
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('show', 'all nodes', error));
 	}
 }
+
+function* showAllExceptMeshes(meshes = []) {
+	yield waitForTreeToBeReady();
+
+	try {
+		const hiddenGeometryVisible = yield select(selectHiddenGeometryVisible);
+		const {meshesToShow, meshesToHide } = yield TreeProcessing.showAllExceptMeshes(!hiddenGeometryVisible, meshes);
+		toggleMeshesVisibility(meshesToShow, true);
+		toggleMeshesVisibility(meshesToHide, false);
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('show', 'all except nodes', error));
+	}
+}
+
 
 function* showNodesBySharedIds({ objects = [] }) {
 	yield waitForTreeToBeReady();
@@ -633,19 +644,8 @@ function* handleTransparencyOverridesChange({ currentOverrides, previousOverride
 function* handleTransparenciesVisibility({ transparencies }) {
 	// 1. get node ids for the hidden nodes
 	// tslint:disable-next-line:variable-name
-	const hiddenSequenceNodesList: any[] = yield select(selectGetNodesIdsFromSharedIds(([{shared_ids: transparencies}])));
-	const hiddenSequenceNodesSet = TreeProcessing.getInvisibleNodesResult(hiddenSequenceNodesList);
-
-	// 2. get all the invisible nodes in the tree
-	const visibilityMap = yield select(selectVisibilityMap);
-	// 3. get the nodes to show
-	// hiddenNodes - hiddenSequenceNodes = the  nodes that should be visible = nodesToShow
-	const nodesToShow = Object.keys(visibilityMap).filter((node) =>
-		visibilityMap[node] === VISIBILITY_STATES.INVISIBLE && !hiddenSequenceNodesSet.has(node)
-	);
-
-	yield put(TreeActions.setTreeNodesVisibility(nodesToShow, VISIBILITY_STATES.VISIBLE));
-	yield put(TreeActions.setTreeNodesVisibility(hiddenSequenceNodesList, VISIBILITY_STATES.INVISIBLE));
+	const meshesToHide: any[] = yield select(selectGetNodesIdsFromSharedIds(([{shared_ids: transparencies}])));
+	yield showAllExceptMeshes(meshesToHide);
 }
 
 export default function* TreeSaga() {
