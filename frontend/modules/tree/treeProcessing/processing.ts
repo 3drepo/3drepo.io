@@ -392,6 +392,41 @@ export class Processing {
 
 	private isSelectedNode = (nodeId) => this.selectionMap[nodeId] !== SELECTION_STATES.UNSELECTED;
 
+	// this returns a list of nodes that will render invisble if the given nodes are to set invisible.
+	// this includes parents of all invisible nodes, and the descendant of the nodes to set invisible
+	public getInvisibleNodesResult = (nodesId: string[]) => {
+		const parents = new Set();
+		const nodesToRenderInvisible =  new Set(nodesId);
+
+		for (let nodeIdx = 0; nodeIdx < nodesId.length; ++nodeIdx) {
+			const nodeID = nodesId[nodeIdx];
+			let idxToList = this.nodesIndexesMap[nodeID];
+			const node = this.nodesList[idxToList];
+
+			if (node.hasChildren) {
+				const lastIdx = idxToList + node.deepChildrenNumber + 1;
+				// Hide all children
+				while  (++idxToList < lastIdx) {
+					const descendent = this.nodesList[idxToList];
+					nodesToRenderInvisible.add(descendent._id);
+				}
+			}
+
+			const nodesParents = this.getParentsByPath(node);
+			nodesParents.forEach((n) => parents.add(n));
+		}
+
+		for (const node of parents) {
+			const hasInvisibleChildren = (node as any).childrenIds.every((id) => nodesToRenderInvisible.has(id));
+
+			if (hasInvisibleChildren) {
+				nodesToRenderInvisible.add((node as any)._id);
+			}
+		}
+
+		return nodesToRenderInvisible;
+	}
+
 	private getMeshesByNodes = (nodes = []) => {
 		if (!nodes.length) {
 			return [];
