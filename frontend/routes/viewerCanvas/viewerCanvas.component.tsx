@@ -157,7 +157,7 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 			this.renderGisLayers(prevProps.gisLayers, gisLayers);
 		}
 
-		if (prevProps.transparencies && !isEqual(prevProps.sequenceHiddenNodes, sequenceHiddenNodes)) {
+		if (prevProps.transparencies && prevProps.sequenceHiddenNodes !== sequenceHiddenNodes) {
 			this.props.handleTransparenciesVisibility(sequenceHiddenNodes);
 		}
 	}
