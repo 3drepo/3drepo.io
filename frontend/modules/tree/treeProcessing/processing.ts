@@ -315,7 +315,7 @@ export class Processing {
 		}
 
 		const meshToHide = {};
-		meshes.forEach(mesh => meshToHide[mesh] = true);
+		meshes.forEach((mesh) => meshToHide[mesh] = true);
 
 		const meshesToCheck = this.getMeshesByNodes(nodes.map((nodeId) => this.nodesList[this.nodesIndexesMap[nodeId]]));
 		const meshesToShow = [];

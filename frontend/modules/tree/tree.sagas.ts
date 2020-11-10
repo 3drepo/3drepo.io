@@ -323,7 +323,6 @@ function* showAllExceptMeshIDs(meshes = []) {
 	}
 }
 
-
 function* showNodesBySharedIds({ objects = [] }) {
 	yield waitForTreeToBeReady();
 
