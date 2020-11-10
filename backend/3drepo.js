@@ -20,16 +20,18 @@ const config = require("./config.js");
 
 if ("elastic" in config) {
 	// Any option not supplied via the options object can instead be configured using environment variables, however an empty elastic array required to initialise in the app
-	const apm = require('elastic-apm-node').start({
+	// eslint:disable-next-line
+	const apm = require("elastic-apm-node");
+	apm.start({
 		// Override service name from package.json
 		// Allowed characters: a-z, A-Z, 0-9, -, _, and space
-		serviceName: config.elastic.serviceName ? config.elastic.serviceName : '',
+		serviceName: config.elastic.serviceName ? config.elastic.serviceName : "",
 		// Use if APM Server requires a token
-		secretToken: config.elastic.secretToken ? config.elastic.secretToken : '',
+		secretToken: config.elastic.secretToken ? config.elastic.secretToken : "",
 		// Set custom APM Server URL (default: http://localhost:8200)
-		serverUrl: config.elastic.serverUrl ? config.elastic.serverUrl : '',
-		logLevel: config.elastic.logLevel ? config.elastic.logLevel : ''
-	})
+		serverUrl: config.elastic.serverUrl ? config.elastic.serverUrl : "",
+		logLevel: config.elastic.logLevel ? config.elastic.logLevel : ""
+	});
 }
 
 const express = require("express");
