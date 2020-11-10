@@ -74,22 +74,50 @@ describe("Metadata", function () {
 	});
 
 	it("metadata search of a specific revision should succeed", function(done) {
+		const goldenData0 = {
+			"_id": "0062f1bb-b28e-4be2-a9d7-6f73abcdb760",
+			"metadata": { "value": "SYSTEM: PLATES" },
+			"parents": [ "dba918f9-e065-4f98-921e-ab7c05d89ee5" ]
+		};
+
 		agent.get(`/${username}/${model}/revision/${oldRevision}/meta/findObjsWith/Category.json`)
 			.expect(200, function(err, res) {
+				expect(res.body.data).to.exist;
+				expect(res.body.data.length).to.equal(659);
+				expect(res.body.data[0]).to.deep.equal(goldenData0);
 				done(err);
 			});
 	});
 
 	it("metadata search of head master should succeed", function(done) {
+		const goldenData0 = {
+			"_id": "007a7b30-b29d-44c8-b571-e2b1cc1a095c",
+			"metadata": { "value": "SYSTEM: BRICKS" },
+			"parents": [ "916375ad-148a-4eda-a5a9-2b8aa25713ad" ]
+		};
+
 		agent.get(`/${username}/${model}/revision/master/head/meta/findObjsWith/Category.json`)
 			.expect(200, function(err, res) {
+				expect(res.body.data).to.exist;
+				expect(res.body.data.length).to.equal(659);
+				expect(res.body.data[0]).to.deep.equal(goldenData0);
 				done(err);
 			});
 	});
 
 	it("get metadata by revision tag should succeed", function(done) {
+		const goldenData0 = {
+			"_id": "0062f1bb-b28e-4be2-a9d7-6f73abcdb760",
+			"metadata": { "value": "SYSTEM: PLATES" },
+			"parents": [ "dba918f9-e065-4f98-921e-ab7c05d89ee5"
+			]
+		};
+
 		agent.get(`/${username}/${model}/revision/myTag/meta/findObjsWith/Category.json`)
 			.expect(200, function(err, res) {
+				expect(res.body.data).to.exist;
+				expect(res.body.data.length).to.equal(659);
+				expect(res.body.data[0]).to.deep.equal(goldenData0);
 				done(err);
 			});
 	});
@@ -97,34 +125,113 @@ describe("Metadata", function () {
 	it("get metadata of invalid revision should fail", function(done) {
 		agent.get(`/${username}/${model}/revision/blahblah123/meta/findObjsWith/Category.json`)
 			.expect(404, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.METADATA_NOT_FOUND.value);
 				done(err);
 			});
 	});
 
 	it("metadata search of non existent field should succeed", function(done) {
+		const goldenData = { "data": [] };
+
 		agent.get(`/${username}/${model}/revision/${oldRevision}/meta/findObjsWith/blahblah.json`)
 			.expect(200, function(err, res) {
+				expect(res.body).to.deep.equal(goldenData);
 				done(err);
 			});
 	});
 
 	it("metadata search of a specific revision should succeed", function(done) {
+		const goldenData = { "data": [] };
+
 		agent.get(`/${username}/${model}/revision/${oldRevision}/meta/4DTaskSequence.json`)
 			.expect(200, function(err, res) {
+				expect(res.body).to.deep.equal(goldenData);
 				done(err);
 			});
 	});
 
 	it("all metadata of head master should succeed", function(done) {
+		const goldenData0 = {
+			"_id": "007a7b30-b29d-44c8-b571-e2b1cc1a095c",
+			"metadata": {
+				"IFC Type": "IfcBuildingElementProxy",
+				"IFC GUID": "0B97aBkeAuHeytNaMZaPJH",
+				"BrickName": "Brick 1X2",
+				"Category": "SYSTEM: BRICKS",
+				"ColourFamily": "Green",
+				"ExactColour": "EARTH GREEN",
+				"RGB": "#00451A",
+				"ColourType": "Solid",
+				"DesignID": 3004,
+				"ElementID": 4245570,
+				"AppearsIn": "45 Sets",
+				"IntroducedIn": 2003,
+				"OrderReplacementPart": "http://brickset.com/parts/4245570",
+				"LayerName": "A-0140-M_Step40",
+				"BarCode": "n/a",
+				"SerialNumber": "n/a",
+				"TagNumber": "n/a",
+				"AssetIdentifier": "n/a",
+				"InstallationDate": "1900-12-31T23:59:59",
+				"WarrantyStartDate": "1900-12-31T23:59:59",
+				"RequiredForCOBieComponent": "Yes",
+				"Comments": "n/a",
+				"RenovationStatus": "New",
+				"SpecificationType": "n/a",
+				"Floor": "GF Ground Floor",
+				"Renovation Status": "New"
+			},
+			"parents": [ "916375ad-148a-4eda-a5a9-2b8aa25713ad" ]
+		};
+
 		agent.get(`/${username}/${model}/revision/master/head/meta/all.json`)
 			.expect(200, function(err, res) {
+				expect(res.body.data).to.exist;
+				expect(res.body.data.length).to.equal(675);
+				expect(res.body.data[0]).to.deep.equal(goldenData0);
 				done(err);
 			});
 	});
 
 	it("all metadata of revision tag should succeed", function(done) {
+		const goldenData0 = {
+			"_id": "0062f1bb-b28e-4be2-a9d7-6f73abcdb760",
+			"metadata": {
+				"IFC Type": "IfcBuildingElementProxy",
+				"IFC GUID": "0WHuICC7qTG8oNFZ9AvcS0",
+				"BrickName": "Flat Tile 1X1",
+				"Category": "SYSTEM: PLATES",
+				"ColourFamily": "Grey",
+				"ExactColour": "MEDIUM STONE GREY",
+				"RGB": "#969696",
+				"ColourType": "Solid",
+				"DesignID": 3070,
+				"ElementID": 4211415,
+				"AppearsIn": "125 Sets",
+				"IntroducedIn": 2004,
+				"OrderReplacementPart": "http://brickset.com/parts/4211415",
+				"LayerName": "A-0116-M_Step16",
+				"BarCode": "n/a",
+				"SerialNumber": "n/a",
+				"TagNumber": "n/a",
+				"AssetIdentifier": "n/a",
+				"InstallationDate": "1900-12-31T23:59:59",
+				"WarrantyStartDate": "1900-12-31T23:59:59",
+				"RequiredForCOBieComponent": "Yes",
+				"Comments": "n/a",
+				"RenovationStatus": "New",
+				"SpecificationType": "n/a",
+				"Floor": "Datum / Site Model",
+				"Renovation Status": "New"
+			},
+			"parents": [ "dba918f9-e065-4f98-921e-ab7c05d89ee5" ]
+		};
+
 		agent.get(`/${username}/${model}/revision/myTag/meta/all.json`)
 			.expect(200, function(err, res) {
+				expect(res.body.data).to.exist;
+				expect(res.body.data.length).to.equal(675);
+				expect(res.body.data[0]).to.deep.equal(goldenData0);
 				done(err);
 			});
 	});
@@ -132,20 +239,27 @@ describe("Metadata", function () {
 	it("all metadata of non existent revision should fail", function(done) {
 		agent.get(`/${username}/${model}/revision/blahblah123/meta/all.json`)
 			.expect(404, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.METADATA_NOT_FOUND.value);
 				done(err);
 			});
 	});
 
 	it("4D Task Sequence search of head master should succeed", function(done) {
+		const goldenData = { "data": [] };
+
 		agent.get(`/${username}/${model}/revision/master/head/meta/4DTaskSequence.json`)
 			.expect(200, function(err, res) {
+				expect(res.body).to.deep.equal(goldenData);
 				done(err);
 			});
 	});
 
 	it("4D Task Sequence search of revision tag should succeed", function(done) {
+		const goldenData = { "data": [] };
+
 		agent.get(`/${username}/${model}/revision/myTag/meta/4DTaskSequence.json`)
 			.expect(200, function(err, res) {
+				expect(res.body).to.deep.equal(goldenData);
 				done(err);
 			});
 	});
@@ -153,6 +267,7 @@ describe("Metadata", function () {
 	it("4D Task Sequence search of non existent revision should fail", function(done) {
 		agent.get(`/${username}/${model}/revision/blahblah123/meta/4DTaskSequence.json`)
 			.expect(404, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.METADATA_NOT_FOUND.value);
 				done(err);
 			});
 	});
@@ -160,13 +275,52 @@ describe("Metadata", function () {
 	it("4D Task Sequence search of a model with no Sequence Tag should fail", function(done) {
 		agent.get(`/${username}/${model2}/revision/master/head/meta/4DTaskSequence.json`)
 			.expect(404, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.SEQ_TAG_NOT_FOUND.value);
 				done(err);
 			});
 	});
 
 	it("retrieving metadata by existing ID should succeed", function(done) {
+		const goldenData = {
+			"meta": [
+				{
+					"_id": "60fa0851-2fc1-4906-b50d-b9bb9db98db8",
+					"name": "ComponentName:201",
+					"metadata": {
+						"IFC Type": "IfcBuildingElementProxy",
+						"IFC GUID": "3O$ka3lHkYIRKSDSO0b9Bc",
+						"BrickName": "Brick 1X4",
+						"ColourFamily": "Green",
+						"ExactColour": "EARTH GREEN",
+						"Category": "SYSTEM: BRICKS",
+						"ColourType": "Solid",
+						"RGB": "#00451A",
+						"DesignID": 3010,
+						"ElementID": 4245571,
+						"AppearsIn": "22 Sets",
+						"IntroducedIn": 2005,
+						"OrderReplacementPart": "http://brickset.com/parts/4245571",
+						"LayerName": "A-0139-M_Step39",
+						"BarCode": "n/a",
+						"SerialNumber": "n/a",
+						"TagNumber": "n/a",
+						"AssetIdentifier": "n/a",
+						"InstallationDate": "1900-12-31T23:59:59",
+						"WarrantyStartDate": "1900-12-31T23:59:59",
+						"RequiredForCOBieComponent": "Yes",
+						"Comments": "n/a",
+						"RenovationStatus": "New",
+						"SpecificationType": "n/a",
+						"Floor": "GF Ground Floor",
+						"Renovation Status": "New"
+					}
+				}
+			]
+		};
+
 		agent.get(`/${username}/${model}/meta/60fa0851-2fc1-4906-b50d-b9bb9db98db8.json`)
 			.expect(200, function(err, res) {
+				expect(res.body).to.deep.equal(goldenData);
 				done(err);
 			});
 	});
@@ -174,6 +328,7 @@ describe("Metadata", function () {
 	it("retrieving metadata by non-existing ID should fail", function(done) {
 		agent.get(`/${username}/${model}/meta/60fa0851-2fc1-4906-b50d-000000000000.json`)
 			.expect(404, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.METADATA_NOT_FOUND.value);
 				done(err);
 			});
 	});
@@ -181,13 +336,66 @@ describe("Metadata", function () {
 	it("retrieving metadata by invalid ID should fail", function(done) {
 		agent.get(`/${username}/${model}/meta/dslfkdjslkfjsd.json`)
 			.expect(404, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.METADATA_NOT_FOUND.value);
 				done(err);
 			});
 	});
 
 	it("retrieving metadata fields should succeed", function(done) {
+		const goldenData = [
+			"AppearsIn",
+			"AssetIdentifier",
+			"BarCode",
+			"BrickName",
+			"BuildingID",
+			"Category",
+			"CeilingCovering",
+			"ColourFamily",
+			"ColourType",
+			"Comments",
+			"ConcealedCeiling",
+			"DesignID",
+			"ElementID",
+			"ExactColour",
+			"Floor",
+			"Floor Type",
+			"FloorCovering",
+			"IFC GUID",
+			"IFC Type",
+			"InstallationDate",
+			"IntroducedIn",
+			"IsLandmarked",
+			"IsPermanentID",
+			"LayerName",
+			"NumberOfStoreys",
+			"OccupancyType",
+			"OrderReplacementPart",
+			"RGB",
+			"RefEasting",
+			"RefNorthing",
+			"Renovation Status",
+			"RenovationStatus",
+			"RequiredForCOBieComponent",
+			"RoomTag",
+			"SerialNumber",
+			"SkirtingBoard",
+			"SpecificationType",
+			"TOID",
+			"TagNumber",
+			"UPRN",
+			"Uniclass - D - Facilities",
+			"Uniclass - F - Spaces",
+			"Uniclass 2015 - En",
+			"Uniclass 2015 - SL",
+			"Uniclass2 - En",
+			"Uniclass2 - Sp",
+			"WallCovering",
+			"WarrantyStartDate"
+		];
+
 		agent.get(`/${username}/${model}/meta/keys`)
 			.expect(200, function(err, res) {
+				expect(res.body).to.deep.equal(goldenData);
 				done(err);
 			});
 	});
