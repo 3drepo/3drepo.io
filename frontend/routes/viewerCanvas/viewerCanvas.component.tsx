@@ -122,17 +122,17 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 		const { colorOverrides, issuePins, riskPins, measurementPins, hasGisCoordinates,
 			gisCoordinates, gisLayers, transparencies, transformations: transformation } = this.props;
 
-		// if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
-		// 	this.renderColorOverrides(prevProps.colorOverrides, colorOverrides);
-		// }
+		if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
+			this.renderColorOverrides(prevProps.colorOverrides, colorOverrides);
+		}
 
 		if (prevProps.transparencies && !isEqual(transparencies, prevProps.transparencies)) {
 			this.props.handleTransparencyOverridesChange(transparencies, prevProps.transparencies);
 		}
 
-		// if (prevProps.transformations && !isEqual(transformation, prevProps.transformations)) {
-		// 	this.renderTransformations(prevProps.transformations, transformation);
-		// }
+		if (prevProps.transformations && !isEqual(transformation, prevProps.transformations)) {
+			this.renderTransformations(prevProps.transformations, transformation);
+		}
 
 		if (!isEqual(issuePins, prevProps.issuePins)) {
 			this.renderPins(prevProps.issuePins, issuePins);
