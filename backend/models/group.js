@@ -602,6 +602,7 @@ function clean(groupData) {
 	cleaned._id = utils.uuidToString(cleaned._id);
 	cleaned.issue_id = cleaned.issue_id && utils.uuidToString(cleaned.issue_id);
 	cleaned.risk_id = cleaned.risk_id && utils.uuidToString(cleaned.risk_id);
+	cleaned.view_id = cleaned.view_id && utils.uuidToString(cleaned.view_id);
 
 	if (utils.isDate(cleaned.createdAt)) {
 		cleaned.createdAt = cleaned.createdAt.getTime();

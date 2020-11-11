@@ -445,13 +445,11 @@
 	function getMetadataFields(req, res, next) {
 		const dbCol = getDbColOptions(req);
 
-		Meta.getMetadataFields(dbCol.account, dbCol.model)
-			.then(obj => {
-				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined,  {maxAge: 360});
-			})
-			.catch(err => {
-				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-			});
+		Meta.getMetadataFields(dbCol.account, dbCol.model).then(obj => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined,  {maxAge: 360});
+		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
 	}
 
 	module.exports = router;

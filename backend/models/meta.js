@@ -30,6 +30,25 @@ const C = require("../constants");
 const utils = require("../utils");
 const systemLogger = require("../logger").systemLogger;
 
+function clean(metaListToClean) {
+	metaListToClean.forEach((metadataToClean) => {
+		if (metadataToClean._id) {
+			metadataToClean._id = utils.uuidToString(metadataToClean._id);
+		}
+
+		if (metadataToClean.parents) {
+			metadataToClean.parents = metadataToClean.parents.map(p => utils.uuidToString(p));
+		}
+	});
+
+	return metaListToClean;
+}
+
+async function getIdToMeshesDict(account, model, revId) {
+	const treeFileName = `${revId}/idToMeshes.json`;
+	return JSON.parse(await FileRef.getJSONFile(account, model, treeFileName));
+}
+
 class Meta {
 	async getMetadata(account, model, id) {
 		const projection = {
@@ -179,8 +198,9 @@ class Meta {
 		});
 	}
 
-	getIfcGuids(account, model) {
-		return this.find({ account, model }, { type: "meta" }, { "metadata.IFC GUID": 1 });
+	async getIfcGuids(account, model) {
+		const coll = await db.getCollection(account, model + ".scene");
+		return (await coll.find({ type: "meta" }, { "metadata.IFC GUID": 1 })).toArray();
 	}
 
 	async findObjectIdsByRules(account, model, rules, branch, revId, convertSharedIDsToString, showIfcGuids = false) {
@@ -400,20 +420,6 @@ class Meta {
 	}
 }
 
-function clean(metaListToClean) {
-	metaListToClean.forEach((metadataToClean) => {
-		if (metadataToClean._id) {
-			metadataToClean._id = utils.uuidToString(metadataToClean._id);
-		}
-
-		if (metadataToClean.parents) {
-			metadataToClean.parents = metadataToClean.parents.map(p => utils.uuidToString(p));
-		}
-	});
-
-	return metaListToClean;
-}
-
 function findObjectsByQuery(account, model, query, project = { "metadata.IFC GUID": 1, parents: 1 }) {
 	return db.getCollection(account, model + ".scene").then((dbCol) => {
 		return dbCol.find(query, project).toArray();
@@ -536,11 +542,6 @@ async function getIFCGuids(account, model, shared_ids) {
 	const sceneCol =  await db.getCollection(account, model + ".scene");
 	const results = await sceneCol.find({ "parents":{ $in: shared_ids } , "type":"meta"}, {"metadata.IFC GUID":1, "_id":0}).toArray();
 	return results.map(r => r.metadata["IFC GUID"]);
-}
-
-async function getIdToMeshesDict(account, model, revId) {
-	const treeFileName = `${revId}/idToMeshes.json`;
-	return JSON.parse(await FileRef.getJSONFile(account, model, treeFileName));
 }
 
 /**

@@ -319,7 +319,7 @@ class Ticket extends View {
 	}
 
 	handleFieldUpdate(account, model, sessionId, id, user, field, oldTicket, data, systemComments) {
-		if (Object.prototype.toString.call(data[field]) !== this.fieldTypes[field]) {
+		if (data[field] && Object.prototype.toString.call(data[field]) !== this.fieldTypes[field]) {
 			throw responseCodes.INVALID_ARGUMENTS;
 		}
 
