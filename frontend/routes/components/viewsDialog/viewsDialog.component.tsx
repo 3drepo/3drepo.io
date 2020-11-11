@@ -39,6 +39,7 @@ interface IProps {
 	fetchModelSettings: (teamspace: string, modelId: string) => void;
 	modelSettings: any;
 	setState: (componentState: IViewpointsComponentState) => void;
+	onShare?: (teamspace, modelId, viewId) => void;
 }
 
 const renderLoadingState = renderWhenTrue(<StyledLoader />);
@@ -108,9 +109,11 @@ export const ViewsDialog = ({ viewpoints, searchQuery, searchEnabled, teamspace,
 						key={viewpoint._id}
 						viewpoint={viewpoint}
 						onClick={handleViewpointItemClick(viewpoint)}
+						onShare={props.onShare}
 						teamspace={teamspace}
 						modelId={modelId}
 						defaultView={checkIfDefaultView(viewpoint)}
+						displayShare
 					/>
 				))}
 			</ViewList>

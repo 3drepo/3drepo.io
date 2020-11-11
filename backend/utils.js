@@ -59,11 +59,31 @@ function Utils() {
 		}
 	};
 
-	this.deserialiseFilters = (ids, numbers) => {
-		return {
-			ids: ids ? ids.split(",") : undefined,
-			numbers: numbers ? numbers.split(",") : undefined
-		};
+	this.convertQueryValue = (value, type) => {
+		switch(type) {
+			case "number":
+				value = parseFloat(value);
+				break;
+			case "UUID":
+				value = this.stringToUUID(value);
+				break;
+			case "array":
+				value = value === "Unassigned" ? [] : [value];
+				break;
+		}
+
+		return value;
+	};
+
+	this.deserialiseQueryFilters = (queryparams, fields) => {
+		const keys = _.keys(fields);
+		return keys.reduce((acum, key) => {
+			if (queryparams[key]) {
+				acum[fields[key].fieldName] = queryparams[key].split(",").map((val) => this.convertQueryValue(val,fields[key].type));
+			}
+
+			return acum;
+		} , {});
 	};
 
 	/** *****************************************************************************

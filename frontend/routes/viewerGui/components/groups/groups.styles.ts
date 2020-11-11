@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import { COLOR } from '../../../../styles/colors';
+import { COLOR } from '../../../../styles';
 
 import {
 	VIEWER_PANELS,
@@ -51,7 +51,9 @@ const highlightedGroupStyles = css`
 	}
 `;
 
-export const GroupListItem = styled(PreviewListItem)`
+export const GroupListItem = styled(PreviewListItem).attrs({
+	panelType: VIEWER_PANELS.GROUPS,
+})`
 	&& {
 		cursor: inherit;
 		height: 73px;

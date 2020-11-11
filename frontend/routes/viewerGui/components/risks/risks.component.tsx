@@ -66,6 +66,7 @@ interface IProps {
 	teamspaceSettings: any;
 	fetchMitigationCriteria: (teamspace: string) => void;
 	criteria: any;
+	id?: string;
 }
 export class Risks extends React.PureComponent<IProps, any> {
 	get filters() {
@@ -176,6 +177,7 @@ export class Risks extends React.PureComponent<IProps, any> {
 				onCloseDetails={this.closeDetails}
 				renderDetailsView={this.renderDetailsView}
 				type={VIEWER_PANELS.RISKS}
+				id={this.props.id}
 			/>
 		);
 	}

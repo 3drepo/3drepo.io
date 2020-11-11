@@ -299,9 +299,16 @@ class Ticket extends View {
 			...oldTicket,
 			...data
 		};
+
 		this.clean(account, model, updatedTicket);
 		this.clean(account, model, oldTicket);
 		delete data.comments;
+
+		if (data.viewpoints) {
+			data.thumbnail = updatedTicket.thumbnail;
+			data.viewpoint = updatedTicket.viewpoint;
+			delete data.viewpoints;
+		}
 
 		return { oldTicket, updatedTicket, data };
 	}
@@ -451,12 +458,13 @@ class Ticket extends View {
 	async processFilter(account, model, branch, revId, filters) {
 		let filter = {};
 		if (filters) {
-			if (filters.ids) {
-				filter = await this.getIdsFilter(account, model, branch, revId, filters.ids);
+			if (filters.id) {
+				filter = await this.getIdsFilter(account, model, branch, revId, filters.id);
+				delete filters.id;
 			}
-			if (filters.numbers) {
-				filter.number = { "$in": filters.numbers.map((n) => parseInt(n)) };
-			}
+
+			filters = _.mapValues(filters, value =>  ({ "$in": value}));
+			filter = {...filter, ...filters};
 		}
 
 		return filter;
@@ -488,24 +496,29 @@ class Ticket extends View {
 		return filter;
 	}
 
-	async findByModelName(account, model, branch, revId, query, projection, filters, noClean = false, convertCoords = false) {
+	async findByModelName(account, model, branch, revId, query, projection, filters, noClean = false, convertCoords = false, filterTicket = null) {
 		const filter = await this.processFilter(account, model, branch, revId, filters);
 		const fullQuery = {...filter, ...query};
 
 		const coll = await this.getCollection(account, model);
 		const tickets = await coll.find(fullQuery, projection).toArray();
-		tickets.forEach((foundTicket, index) => {
-			if (!noClean) {
-				tickets[index] = this.clean(account, model, foundTicket);
+		return tickets.reduce((filteredTickets,  foundTicket) => {
+			if (filterTicket &&  !filterTicket(foundTicket, filters)) {
+				return filteredTickets;
 			}
 
 			if (convertCoords) {
 				this.toDirectXCoords(foundTicket);
 			}
 
-		});
+			if (!noClean) {
+				filteredTickets.push(this.clean(account, model, foundTicket));
+			} else {
+				filteredTickets.push(foundTicket);
+			}
 
-		return tickets;
+			return filteredTickets;
+		}, []);
 	}
 
 	toDirectXCoords(entry) {

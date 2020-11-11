@@ -168,6 +168,8 @@ function* deleteGroups({ teamspace, modelId, groups }) {
 		const groupsToDelete = groups.split(',');
 		const colorOverrides = yield select(selectColorOverrides);
 		const groupsMap = yield select(selectGroupsMap);
+		const isShowDetails = yield select(selectShowDetails);
+		const activeGroupId = yield select(selectActiveGroupId);
 
 		yield all(groupsToDelete.map((groupId) => {
 			const overriddenGroup = colorOverrides[groupId];
@@ -184,6 +186,12 @@ function* deleteGroups({ teamspace, modelId, groups }) {
 
 			return actions;
 		}));
+
+		if (isShowDetails && groupsToDelete.includes(activeGroupId)) {
+			yield put(GroupsActions.setComponentState({ activeGroup: null, showDetails: false }));
+			const { name } = yield select(selectActiveGroupDetails);
+			yield put(SnackbarActions.show(`Group ${name} removed.`));
+		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('delete', 'groups', error));
 	}

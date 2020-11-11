@@ -65,6 +65,7 @@ interface IProps {
 	unsubscribeOnViewpointChanges: (teamspace, modelId) => void;
 	setState: (componentState: IViewpointsComponentState) => void;
 	fetchModelSettings: (teamspace: string, modelId: string) => void;
+	id?: string;
 }
 
 export class Views extends React.PureComponent<IProps, any> {
@@ -292,6 +293,7 @@ export class Views extends React.PureComponent<IProps, any> {
 				disabled={!!this.props.newViewpoint || !this.props.isCommenter}
 				color="secondary"
 				variant="fab"
+				id={this.props.id + '-add-new-button'}
 			>
 				<AddIcon />
 			</ViewerPanelButton>
@@ -318,6 +320,7 @@ export class Views extends React.PureComponent<IProps, any> {
 				Icon={this.getTitleIcon()}
 				renderActions={this.renderActions}
 				pending={this.props.isPending}
+				id={this.props.id}
 			>
 				<Container ref={this.containerRef}>
 					{this.renderEmptyState(!hasViewpoints && !searchEnabled && !newViewpoint)}

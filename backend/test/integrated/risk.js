@@ -1,5 +1,3 @@
-"use strict";
-
 /**
  *  Copyright (C) 2018 3D Repo Ltd
  *
@@ -16,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+"use strict";
 
 const request = require("supertest");
 const {should, assert, expect, Assertion } = require("chai");
@@ -23,6 +22,8 @@ const app = require("../../services/api.js").createApp();
 const responseCodes = require("../../response_codes.js");
 const async = require("async");
 const { login } = require("../helpers/users.js");
+const { createRisk } = require("../helpers/risks.js");
+const { createModel } = require("../helpers/models.js");
 
 const { deleteNotifications, fetchNotification } = require("../helpers/notifications.js");
 
@@ -1118,6 +1119,122 @@ describe("Risks", function () {
 				},
 			],
 			done);
+		});
+
+	});
+
+	describe("Search", function() {
+		const teamspace = "teamSpace1";
+		const password = "password";
+		let model = "";
+
+		before(function(done) {
+			async.series([
+				login(agent, teamspace, password),
+				(next) => {
+					createModel(agent, teamspace,'Query risks').then((res) => {
+						model = res.body.model;
+						let createRiskTeamspace1 = createRisk(teamspace,model);
+
+						async.series([
+							createRiskTeamspace1(agent, {likelihood: 1, consequence: 1, residual_likelihood: 1, residual_consequence: 2, category: "Environmental Issue", number: 0, mitigation_status: "agreed_partial"}),
+							createRiskTeamspace1(agent, {likelihood: 0, consequence: 2, residual_likelihood: 2, residual_consequence: 1, category: "Commercial Issue", number: 1, mitigation_status: "rejected"}),
+							createRiskTeamspace1(agent, {likelihood: 1, consequence: 2, residual_likelihood: 2, residual_consequence: 3, category: "Social Issue", number: 2, mitigation_status: "proposed"}),
+							createRiskTeamspace1(agent, {likelihood: 2, consequence: -1, residual_likelihood: 3, residual_consequence: 4, number: 3, mitigation_status: ""})
+						], next);
+					})
+				},
+			], done);
+		});
+
+		it(" by id", function(done) {
+			let ids = [];
+
+			agent.get(`/${teamspace}/${model}/risks`)
+			.expect(200, function(err, res) {
+				ids = res.body.map(risk => risk._id);
+				ids = [ids[0], ids[2]].sort();
+
+				agent.get(`/${teamspace}/${model}/risks?ids=${ids.join(',')}`)
+				.expect(200, function(err, res) {
+					expect(res.body.map((risk => risk._id)).sort()).to.eql(ids)
+					done(err);
+				});
+
+			});
+		});
+
+
+		it(" by likelihood", function(done) {
+			agent.get(`/${teamspace}/${model}/risks?likelihoods=0,2`)
+			.expect(200, function(err, res) {
+				expect(res.body.map((risk => risk.likelihood)).sort()).to.eql([0,2].sort())
+				done(err);
+			});
+		});
+
+		it(" by consequence", function(done) {
+			agent.get(`/${teamspace}/${model}/risks?consequences=3,2`)
+			.expect(200, function(err, res) {
+				expect(res.body.map((risk => risk.consequence)).sort()).to.eql([2,2].sort())
+				done(err);
+			});
+		});
+
+		it(" by level of risk", function(done) {
+			agent.get(`/${teamspace}/${model}/risks?levelOfRisks=1,-1`)
+			.expect(200, function(err, res) {
+				expect(res.body.map((risk => risk.level_of_risk)).sort()).to.eql([1,1,-1].sort())
+				done(err);
+			});
+		});
+
+		it(" by residual likelihood", function(done) {
+			agent.get(`/${teamspace}/${model}/risks?residualLikelihoods=1,2`)
+			.expect(200, function(err, res) {
+				expect(res.body.map((risk => risk.residual_likelihood)).sort()).to.eql([1,2,2].sort())
+				done(err);
+			});
+		});
+
+		it(" by residual consequence", function(done) {
+			agent.get(`/${teamspace}/${model}/risks?residualConsequences=3`)
+			.expect(200, function(err, res) {
+				expect(res.body.map((risk => risk.residual_consequence)).sort()).to.eql([3].sort())
+				done(err);
+			});
+		});
+
+		it(" by residual level of risk", function(done) {
+			agent.get(`/${teamspace}/${model}/risks?residualLevelOfRisks=2,4`)
+			.expect(200, function(err, res) {
+				expect(res.body.map((risk => risk.residual_level_of_risk)).sort()).to.eql([2,2,2,4].sort())
+				done(err);
+			});
+		});
+
+		it(" by category", function(done) {
+			agent.get(`/${teamspace}/${model}/risks?categories=Environmental%20Issue,Social%20Issue`)
+			.expect(200, function(err, res) {
+				expect(res.body.map((risk => risk.category)).sort()).to.eql(["Environmental Issue", "Social Issue"].sort())
+				done(err);
+			});
+		});
+
+		it(" by number", function(done) {
+			agent.get(`/${teamspace}/${model}/risks?numbers=1,2`)
+			.expect(200, function(err, res) {
+				expect(res.body.map((risk => risk.number)).sort()).to.eql([1, 2].sort())
+				done(err);
+			});
+		});
+
+		it(" by mitigation status", function(done) {
+			agent.get(`/${teamspace}/${model}/risks?mitigationStatus=rejected,proposed`)
+			.expect(200, function(err, res) {
+				expect(res.body.map((risk => risk.mitigation_status)).sort()).to.eql(["rejected", "proposed"].sort())
+				done(err);
+			});
 		});
 
 	});
