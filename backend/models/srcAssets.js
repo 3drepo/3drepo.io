@@ -33,7 +33,7 @@ function getAssetListFromRef(ref, username) {
 		if(granted) {
 			const revId = utils.uuidToString(ref._rid);
 			const getRevIdPromise = revId === C.MASTER_BRANCH ?
-				History.findLatest({account: ref.owner, model: ref.project}, {_id: 1}) :
+				History.findLatest({account: ref.owner, model: ref.project}, {_id: 1}) : 
 				Promise.resolve({_id : ref._rid});
 
 			return getRevIdPromise.then((revInfo) => {
@@ -47,8 +47,36 @@ function getAssetListFromRef(ref, username) {
 
 function getAssetListEntry(account, model, revId) {
 	return db.getCollection(account, model + ".stash.3drepo").then(dbCol => {
-		return dbCol.find({rev_id: revId, type: "mesh"}, { _id: 1, rev_id: 1}).toArray();
+		return dbCol.find({rev_id: revId, type: "mesh"}, { _id: 1, rev_id: 1}).toArray().then((list) => {
+			return list.map(item => {
+				item._id = utils.uuidToString(item._id);
+				item.rev_id = utils.uuidToString(item.rev_id);
+				item.asset = account + "/" + model + "/" + utils.uuidToString(item._id);
+				return item;
+			});
+		})
 	});
+}
+
+function getAssetRevisionsFromRef(ref, username){
+	return middlewares.hasReadAccessToModelHelper(username, ref.owner, ref.project).then((granted) => {
+		if(granted) {
+			const revId = utils.uuidToString(ref._rid);
+			const getRevIdPromise = revId === C.MASTER_BRANCH ?
+				History.findLatest({account: ref.owner, model: ref.project}, {_id: 1, coordOffset: 1}) :
+				Promise.resolve({_id : ref._rid, coordOffset: ref.coordOffset});
+
+			return getRevIdPromise.then((revInfo) => {
+				if (revInfo) {
+					return getAssetRevision(revInfo);
+				}
+			});
+		}
+	});
+}
+
+function getAssetRevision(revInfo){
+	return {rev_id: utils.uuidToString(revInfo._id), coordOffset: revInfo.coordOffset, type: "revision"};
 }
 
 SrcAssets.getAssetList = function(account, model, branch, rev, username) {
@@ -66,15 +94,35 @@ SrcAssets.getAssetList = function(account, model, branch, rev, username) {
 					fetchPromise.push(getAssetListEntry(account, model, history._id));
 				}
 
-				return Promise.all(fetchPromise).then((assetLists) => {
-                    return {models: assetLists.filter((list) => 
-                        list.filter((item) => {
-                            item._id = utils.uuidToString(item._id);
-                            item.rev_id = utils.uuidToString(item.rev_id);
-                            item.asset = account + "/" + model + "/" + utils.uuidToString(item._id);
-                        })
-                    )};
+				const revisionsPromise = [];
+				if(subModelRefs.length) {
+					subModelRefs.forEach((ref) => {
+						revisionsPromise.push(getAssetRevisionsFromRef(ref, username));
+					});
+				} else {
+					revisionsPromise.push(getAssetRevision(history));
+				}
+
+				const modelsPromises = Promise.all(fetchPromise).then((assetLists) => {
+					var flattened = [].concat.apply([], assetLists);
+					return flattened;
 				});
+
+				const revisionsPromises = Promise.all(revisionsPromise).then((revisions) => {
+					return revisions.reduce((result, filter) => {
+						result[filter.rev_id] = filter.coordOffset; // for now all we are interested in is the world offsets
+						return result;
+					},
+					{});
+				});
+
+				return Promise.all([modelsPromises, revisionsPromises]).then(([models, revisions]) => {
+					return { 
+						models: models, 
+						offsets: revisions
+					};
+				});
+
 
 			});
 		} else {
