@@ -581,8 +581,10 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data, creator = ""
 				if (utils.typeMatch(data[key], fieldTypes[key])) {
 					if (key === "objects" && data.objects) {
 						newGroup.objects = cleanEmbeddedObject(key, convertedObjects);
-					} else if (key === "color" || key === "transformation") {
+					} else if (key === "color") {
 						newGroup[key] = data[key].map((c) => parseInt(c, 10));
+					} else if (key === "transformation") {
+						newGroup[key] = data[key];
 					} else {
 						if (key === "rules"
 							&& data.rules
