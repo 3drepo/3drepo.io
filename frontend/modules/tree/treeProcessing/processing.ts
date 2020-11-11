@@ -310,7 +310,7 @@ export class Processing {
 		const nodes = this.nodesList[0].childrenIds;
 
 		if (!meshes || meshes.length === 0) {
-			const { meshesToUpdate } =  this.showNodes(nodes);
+			const { meshesToUpdate } =  this.showNodes(nodes, ifcSpacesHidden);
 			return { meshesToShow: meshesToUpdate, meshesToHide: []};
 		}
 

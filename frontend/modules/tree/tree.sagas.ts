@@ -77,12 +77,14 @@ const highlightObjects = (objects = [], nodesSelectionMap = {}, colour?) => {
 
 const toggleMeshesVisibility = (meshes, visibility) => {
 	meshes.forEach((entry) => {
-		Viewer.switchObjectVisibility(
-			entry.teamspace,
-			entry.modelId,
-			entry.meshes,
-			visibility
-		);
+		if(entry.meshes && entry.meshes.length) {
+			Viewer.switchObjectVisibility(
+				entry.teamspace,
+				entry.modelId,
+				entry.meshes,
+				visibility
+			);
+		}
 	});
 };
 

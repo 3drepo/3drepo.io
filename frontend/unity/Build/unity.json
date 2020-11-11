@@ -9,7 +9,7 @@
 "webglContextAttributes": {"preserveDrawingBuffer": false},
 "splashScreenStyle": "Light",
 "backgroundColor": "#808080",
-"developmentBuild": false,
+"developmentBuild": true,
 "multithreading": false,
 "unityVersion": "2019.3.12f1"
 }
