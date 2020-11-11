@@ -122,10 +122,8 @@ export function* generateViewpoint(teamspace, modelId, name, withScreenshot = fa
 
 export function* createViewpoint({teamspace, modelId, viewpoint}) {
 	try {
-		const {data: {_id, viewpoint: viewpointData}} = yield API.createModelViewpoint(teamspace, modelId, viewpoint);
+		const {data: {_id}} = yield API.createModelViewpoint(teamspace, modelId, viewpoint);
 		viewpoint._id = _id;
-		viewpoint.viewpoint = { ...viewpointData, screenshot: viewpoint.viewpoint.screenshot} ;
-
 		yield put(ViewpointsActions.createViewpointSuccess(viewpoint));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('create', 'viewpoint', error));
