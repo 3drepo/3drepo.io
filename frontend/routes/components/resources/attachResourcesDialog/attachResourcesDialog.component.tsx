@@ -59,8 +59,8 @@ const schema = Yup.object().shape({
 			Yup.object().shape({
 				name: Yup.string().strict(false).trim().required('Name is required'),
 				link: Yup.string().matches(
-					/^((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-					'Link should be a url').required('Link is required')
+					/^((http(s)?):\/\/(www\.)?)[a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)$/,
+					'Link should be a URL').required('Link is required')
 			})
 		)
 	});
