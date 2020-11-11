@@ -428,6 +428,44 @@ router.get("/:model/:uid.src.mpc", middlewares.hasReadAccessToModel, getSRC);
 router.get("/:model/revision/:rev/srcAssets.json", middlewares.hasReadAccessToModel, getSrcAssets);
 
 /**
+ * @api {get} /:teamspace/:model/revision/master/head/srcAssets.json Get Src assets for the master branch
+ * @apiName getSrcAssets
+ * @apiGroup Model
+ * @apiDescription Get the lastest model's version src assets
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model The model Id to get unity assets for.
+ *
+ * @apiExample {get} Example usage:
+ * GET /sebjf/9b458610-0c94-11eb-a083-2b878a4dc41e/revision/master/head/srcAssets.json HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success:
+ * {
+ *   "models": [
+ *     [
+ *       {
+ *         "_id": "153cf665-2c84-4ff9-a9e2-ba495af8e6dc",
+ *         "rev_id": "07314a08-75da-46bf-9d2c-b7b20109143b",
+ *         "asset": "sebjf/9b458610-0c94-11eb-a083-2b878a4dc41e/153cf665-2c84-4ff9-a9e2-ba495af8e6dc"
+ *       },
+ *       {
+ *         "_id": "2967230f-67fa-45dc-9686-161e45c7c8a2",
+ *         "rev_id": "07314a08-75da-46bf-9d2c-b7b20109143b",
+ *         "asset": "sebjf/9b458610-0c94-11eb-a083-2b878a4dc41e/2967230f-67fa-45dc-9686-161e45c7c8a2"
+ *       },
+ *       {
+ *         "_id": "07c67b6c-4b02-435f-8639-ea88403c36f7",
+ *         "rev_id": "07314a08-75da-46bf-9d2c-b7b20109143b",
+ *         "asset": "sebjf/9b458610-0c94-11eb-a083-2b878a4dc41e/07c67b6c-4b02-435f-8639-ea88403c36f7"
+ *       }
+ *     ]
+ *   ]
+ * }
+ */
+
+router.get("/:model/revision/master/head/srcAssets.json", middlewares.hasReadAccessToModel, getSrcAssets);
+
+/**
  * @api {put} /:teamspace/:model Update Federated Model
  * @apiName updateModel
  * @apiGroup Model
