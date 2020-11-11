@@ -286,7 +286,7 @@ const convertActionValueToText = (value = '') => {
 		'closed': 'Closed'
 	};
 
-	let actionText = value || "";
+	let actionText = value || '';
 
 	const actionKey = actionText.toLowerCase();
 
