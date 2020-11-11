@@ -29,6 +29,7 @@ import {
 	createAttachResourceComments,
 	createRemoveResourceComment
 } from '../../helpers/comments';
+import { mergeGroupsDataFromViewpoint } from '../../helpers/groups';
 import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
 import { prepareIssue } from '../../helpers/issues';
 import { prepareResources } from '../../helpers/resources';
@@ -124,6 +125,8 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 
 		const jobs = yield select(selectJobsList);
 		const preparedIssue = prepareIssue(savedIssue, jobs);
+
+		mergeGroupsDataFromViewpoint(savedIssue.viewpoint, issue.viewpoint);
 
 		finishSubmitting();
 

@@ -174,3 +174,21 @@ export function* createGroupsByTransformations(transformations) {
 	}, []);
 
 }
+
+export const mergeGroupsDataFromViewpoint = (viewpointTarget, viewpointOrigin) => {
+	const groupPropNameMap = {
+		highlighted_group_id : 'highlighted_group',
+		hidden_group_id : 'hidden_group',
+		override_group_ids : 'override_groups',
+	};
+
+	Object.keys(groupPropNameMap).forEach((groupPropNameById) => {
+		const groupPropName =  groupPropNameMap[groupPropNameById];
+
+		if (viewpointTarget[groupPropNameById] && viewpointOrigin[groupPropName]) {
+			delete viewpointTarget[groupPropNameById];
+			viewpointTarget[groupPropName] = viewpointOrigin[groupPropName];
+		}
+	});
+
+};

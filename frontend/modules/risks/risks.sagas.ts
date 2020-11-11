@@ -30,6 +30,7 @@ import {
 } from '../../helpers/comments';
 
 import { EXTENSION_RE } from '../../constants/resources';
+import { mergeGroupsDataFromViewpoint } from '../../helpers/groups';
 import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
 import { prepareResources } from '../../helpers/resources';
 import { prepareRisk } from '../../helpers/risks';
@@ -55,7 +56,6 @@ import {
 	selectActiveRiskId,
 	selectComponentState,
 	selectFilteredRisks,
-	selectRisks,
 	selectRisksMap
 } from './risks.selectors';
 
@@ -140,6 +140,8 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 
 		const jobs = yield select(selectJobsList);
 		const preparedRisk = prepareRisk(savedRisk, jobs);
+
+		mergeGroupsDataFromViewpoint(savedRisk.viewpoint, risk.viewpoint);
 
 		finishSubmitting();
 		yield put(RisksActions.setComponentState({ activeRisk: preparedRisk._id }));
