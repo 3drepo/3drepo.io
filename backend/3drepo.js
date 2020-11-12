@@ -18,7 +18,7 @@
 "use strict";
 const config = require("./config.js");
 
-if ("elastic" in config) {
+if (config.elastic) {
 	// Any option not supplied via the options object can instead be configured using environment variables, however an empty elastic array required to initialise in the app
 	const apm = require("elastic-apm-node");
 	apm.start({
