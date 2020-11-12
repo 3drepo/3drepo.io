@@ -2159,7 +2159,6 @@ function getUnityBundle(req, res, next) {
 	const id = req.params.uid;
 
 	UnityAssets.getUnityBundle(account, model, id).then(file => {
-		console.log(file);
 		req.params.format = "unity3d";
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file, undefined, config.cachePolicy);
 	}).catch(err => {
@@ -2175,7 +2174,6 @@ function getGLTF(req, res, next) {
 
 	// FIXME: We should probably generalise this and have a model assets object.
 	JSONAssets.getGLTF(account, model, id).then(file => {
-		console.log(file);
 		req.params.format = "gltf";
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file.file, undefined, config.cachePolicy);
 	}).catch(err => {
@@ -2191,7 +2189,6 @@ function getSRC(req, res, next) {
 
 	// FIXME: We should probably generalise this and have a model assets object.
 	SrcAssets.getSRC(account, model, id).then(file => {
-		console.log(file);
 		req.params.format = "src";
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file.file, undefined, config.cachePolicy);
 	}).catch(err => {
@@ -2207,7 +2204,6 @@ function getGLTFBin(req, res, next) {
 
 	// FIXME: We should probably generalise this and have a model assets object.
 	JSONAssets.getGLTFBin(account, model, id).then(file => {
-		console.log(file);
 		req.params.format = "bin";
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file.file, undefined, config.cachePolicy);
 	}).catch(err => {

@@ -33,7 +33,7 @@ function getAssetListFromRef(ref, username) {
 		if(granted) {
 			const revId = utils.uuidToString(ref._rid);
 			const getRevIdPromise = revId === C.MASTER_BRANCH ?
-				History.findLatest({account: ref.owner, model: ref.project}, {_id: 1}) : 
+				History.findLatest({account: ref.owner, model: ref.project}, {_id: 1}) :
 				Promise.resolve({_id : ref._rid});
 
 			return getRevIdPromise.then((revInfo) => {
@@ -54,11 +54,11 @@ function getAssetListEntry(account, model, revId) {
 				item.asset = account + "/" + model + "/" + utils.uuidToString(item._id);
 				return item;
 			});
-		})
+		});
 	});
 }
 
-function getAssetRevisionsFromRef(ref, username){
+function getAssetRevisionsFromRef(ref, username) {
 	return middlewares.hasReadAccessToModelHelper(username, ref.owner, ref.project).then((granted) => {
 		if(granted) {
 			const revId = utils.uuidToString(ref._rid);
@@ -75,7 +75,7 @@ function getAssetRevisionsFromRef(ref, username){
 	});
 }
 
-function getAssetRevision(revInfo){
+function getAssetRevision(revInfo) {
 	return {rev_id: utils.uuidToString(revInfo._id), coordOffset: revInfo.coordOffset, type: "revision"};
 }
 
@@ -104,7 +104,7 @@ SrcAssets.getAssetList = function(account, model, branch, rev, username) {
 				}
 
 				const modelsPromises = Promise.all(fetchPromise).then((assetLists) => {
-					var flattened = [].concat.apply([], assetLists);
+					const flattened = [].concat.apply([], assetLists);
 					return flattened;
 				});
 
@@ -117,12 +117,11 @@ SrcAssets.getAssetList = function(account, model, branch, rev, username) {
 				});
 
 				return Promise.all([modelsPromises, revisionsPromises]).then(([models, revisions]) => {
-					return { 
-						models: models, 
+					return {
+						models: models,
 						offsets: revisions
 					};
 				});
-
 
 			});
 		} else {
