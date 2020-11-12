@@ -15,123 +15,67 @@
 *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-'use strict'
-const dateFormat = require('dateformat');
-const fs = require('fs');
-const concat = require('concat-files');
+"use strict";
+const fs = require("fs");
+const concat = require("concat-files");
 const Utils = {};
 const CryptoJS = require("crypto-js");
 
-Utils.hashCode = function(s){
-	return CryptoJS.MD5(s).toString();              
-  }
+Utils.teamspaceIndexPrefix = "io-teamspace";
+Utils.statsIndexPrefix = "io-stats";
+
+Utils.hashCode = function(s) {
+	return CryptoJS.MD5(s).toString();
+};
 
 Utils.concat = (files, dest) => {
 	return new Promise((resolve, error) => {
 		concat(files, dest, (err) => {
-			if(err) error(err);
-			else resolve();
+			if(err) {
+				error(err);
+			} else {
+				resolve();
+			}
 		});
 	});
-}
+};
 
 Utils.formatDate = (date) => {
-	return date.toISOString()
-	// return dateFormat(date, 'dd-mm-yy'); // old format
-}
+	return date.toISOString();
+};
 
 Utils.generateFileName = (prefix) => {
 	const date = Utils.formatDate(new Date());
 	return `${prefix}_${date}.csv`;
-}
+};
 
 Utils.mkdir = (dir) => {
 	return new Promise((resolve, error) => {
 		fs.mkdir(dir, {recursive: true}, (err) => {
-			if(err) error(err);
-			else resolve();
+			if(err) {
+				error(err);
+			} else {
+				resolve();
+			}
 		});
 	});
-}
+};
 
 Utils.skipUser = (username) => {
-	return username === 'adminUser' || username === 'nodeUser' || username === 'undefined';
-}
-
-Utils.teamspaceIndexPrefix = 'io-teamspace'
-Utils.statsIndexPrefix = 'io-stats'
+	return username === "adminUser" || username === "nodeUser" || username === "undefined";
+};
 
 Utils.isUndefined = (value) => {
-    // Obtain `undefined` value that's
-    // guaranteed to not have been re-assigned
-    var undefined = void(0);
-    return value === undefined;
-}
+	const newundefined = void(0);
+	return value === newundefined;
+};
 
 Utils.clean = (value) => {
-	const FALSY_VALUES = ['', 'null', 'false', 'undefined'];
+	const FALSY_VALUES = ["", "null", "false", "undefined"];
 	if (!value || FALSY_VALUES.includes(value)) {
-	  return undefined;
+		return undefined;
 	}
 	return value;
-  }
+};
 
-Utils.createElasticIndex = async ( ElasticClient, Index, Mapping ) => {
-	try {
-		const indexName = Index.toLowerCase() // requirement of elastic that indexs be lowercase
-		const configured = await ElasticClient.indices.exists({
-			index: indexName
-		})
-		if (!configured.body) {
-				await ElasticClient.indices.create({
-						index: indexName
-					})
-				console.log("[ELASTIC] Created index " + indexName )
-				await ElasticClient.indices.putMapping({
-					index: Index,
-					body: { properties: Mapping }
-					}
-				)
-				console.log("[ELASTIC] created mapping " + indexName  );
-		}
-		return Promise.resolve()
-		
-	} catch (error) {
-			console.log("[ELASTIC] ERROR:" + Index)
-			console.log(Mapping)
-			console.log(error)
-			console.log(error.body.error)
-			Promise.reject()
-		}
-	}
-
-Utils.createElasticRecord = async ( ElasticClient, Index, elasticBody, id = Utils.hashCode( Object.values(elasticBody).toString() ) ) => {
-	try {
-		const indexName = Index.toLowerCase() // requirement of elastic that indexs be lowercase
-		const configured = await ElasticClient.indices.exists({
-			index: indexName
-		})
-		if (!configured.body) {
-				await ElasticClient.indices.create({
-						index: indexName
-					})
-				console.log("[ELASTIC] Created index " + indexName )
-		}
-		await ElasticClient.index(
-			{  
-				index: indexName,
-				id: id,
-				refresh: true,
-				body: elasticBody
-			})
-		console.log("[ELASTIC] created doc " + indexName + " " + Object.values(elasticBody).toString() );
-		return Promise.resolve()
-	} catch (error) {
-			console.log("[ELASTIC] ERROR:" + Index)
-			console.log(elasticBody)
-			console.log(error)
-			console.log(error.body.error)
-			Promise.reject()
-		}
-	}
 module.exports = Utils;

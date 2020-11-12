@@ -15,49 +15,51 @@
 *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-'use strict'
+"use strict";
 
-const Utils = require ('./utils');
+const Utils = require ("./utils");
+const Elastic = require("./elastic");
 
-const writeNewElasticDocument = (ElasticClient, month, year, count, total ) => {
+const writeNewElasticDocument = async (ElasticClient, month, year, count, total) => {
 	const elasticBody = {
 		"Month" : String(month),
-		"Year" : String(year), 
-		"Count" : Number(count), 
+		"Year" : String(year),
+		"Count" : Number(count),
 		"Total" : Number(total),
-		"DateTime" : new Date(year,month).toISOString(),
-	}
-	const user = {}
-	Utils.createElasticRecord( ElasticClient, Utils.statsIndexPrefix, elasticBody )
-} 
+		"DateTime" : new Date(year,month).toISOString()
+	};
+	await Elastic.createElasticRecord(ElasticClient, Utils.statsIndexPrefix, elasticBody) ;
+};
 
-const writeNewUserEntry = ( ElasticClient, currentY, currentM, count, total, nextM, nextY ) => {
+const writeNewUserEntry = async (ElasticClient, currentY, currentM, count, total, nextM, nextY) => {
 	if(currentM !== -1) {
 		if(nextY && nextM) {
 			let month = currentM;
 			let year = currentY;
 			let counter = count;
 			do{
-				writeNewElasticDocument( ElasticClient, month, year, counter, total );
+				writeNewElasticDocument(ElasticClient, month, year, counter, total);
 				counter = 0;
-				year = month == 12? year + 1 : year;
-				month = month + 1 > 12? 1 : month+1;
-				if(year > 2018) break;
+				year = month === 12 ? year + 1 : year;
+				month = month + 1 > 12 ? 1 : month + 1;
+				if(year > 2018) {
+					break;
+				}
 			} while(!(month === nextM && year === nextY));
 		} else {
-			writeNewElasticDocument ( ElasticClient, currentM, currentY, count, total );
+			writeNewElasticDocument (ElasticClient, currentM, currentY, count, total);
 		}
 	}
-}
+};
 
 const reportNewUsersPerMonth = async (dbConn, ElasticClient) => {
-	const col = await dbConn.db('admin').collection('system.users');
+	const col = await dbConn.db("admin").collection("system.users");
 	const users = await col.find(
-			{
-				'customData.inactive' : {'$ne': true},
-				'customData.createdAt': {'$exists': true}
-			},
-		).sort( { 'customData.createdAt' : 1 } ).toArray();
+		{
+			"customData.inactive" : {"$ne": true},
+			"customData.createdAt": {"$exists": true}
+		}
+	).sort({ "customData.createdAt" : 1 }).toArray();
 
 	let currentMonth = -1, currentYear = -1, currentCount = 0, total = 0;
 	users.forEach((user) => {
@@ -65,11 +67,11 @@ const reportNewUsersPerMonth = async (dbConn, ElasticClient) => {
 		const month = createdAt.getMonth() + 1;
 		const year = createdAt.getFullYear();
 
-		if( currentMonth === month && currentYear === year ) {
+		if(currentMonth === month && currentYear === year) {
 			++currentCount;
 		} else {
 			total += currentCount;
-			writeNewUserEntry( ElasticClient, currentYear, currentMonth, currentCount, total, month, year );
+			writeNewUserEntry(ElasticClient, currentYear, currentMonth, currentCount, total, month, year);
 
 			currentMonth = month;
 			currentYear = year;
@@ -81,23 +83,23 @@ const reportNewUsersPerMonth = async (dbConn, ElasticClient) => {
 		const now = new Date();
 		const targetDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 		total += currentCount;
-		writeNewUserEntry(ElasticClient, currentYear, currentMonth, currentCount, total, targetDate.getMonth()+1, targetDate.getFullYear());
+		writeNewUserEntry(ElasticClient, currentYear, currentMonth, currentCount, total, targetDate.getMonth() + 1, targetDate.getFullYear());
 	}
-}
+};
 
 const NewUsers = {};
 
 NewUsers.createNewUsersReport = (dbConn, ElasticClient) =>{
 	return new Promise((resolve, reject) => {
-			reportNewUsersPerMonth(dbConn, ElasticClient).then(() => {
-				console.log('[DB] Generated NewUsersReport');
-				resolve();
-			}).catch((err) => {
-				reject(err);
-			});
+		reportNewUsersPerMonth(dbConn, ElasticClient).then(() => {
+			console.log("[DB] Generated NewUsersReport");
+			resolve();
+		}).catch((err) => {
+			reject(err);
+		});
 		// });
 	});
-}
+};
 
 module.exports = NewUsers;
 

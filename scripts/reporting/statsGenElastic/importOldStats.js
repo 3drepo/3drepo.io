@@ -21,6 +21,8 @@ const Utils = require('./utils');
 const fs = require( 'fs' );
 const path = require( 'path' );
 const csv = require('csv-parser');
+const Elastic = require('./elastic');
+
 
 var errors = [];
 
@@ -139,7 +141,7 @@ async function start() {
 									.then(result => {
 										if (result.body.hits.total.value === 0) {
 												console.log("creating",seen.length,":::",id)
-												Utils.createElasticRecord( ElasticClient, Utils.teamspaceIndexPrefix + "-login", lastLogin, id)
+												await Elastic.createElasticRecord( ElasticClient, Utils.teamspaceIndexPrefix + "-login", lastLogin, id)
 												seen.push(id) // log hash is created to save calls
 											} else {
 												console.log("created",result.body.hits.total.value,":::",id)

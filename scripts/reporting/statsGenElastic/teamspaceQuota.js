@@ -18,6 +18,7 @@
 'use strict'
 const { Long } = require('mongodb');
 const Utils = require('./utils');
+const Elastic = require('./elastic');
 
 const getNumUsers = async (col, user) => {
 	const nUsers = await col.find({'roles.db': user.user}).count();
@@ -29,7 +30,7 @@ const isUnlimited = async (value) => {
 	return ( value === 'unlimited' ? true : false );
   }
 
-const writeQuotaDetails = async(dbConn, col, ElasticClient, enterprise) => {
+const writeQuotaDetails = async (dbConn, col, ElasticClient, enterprise) => {
 	const type = enterprise? 'enterprise' : 'discretionary';
 	const now = Date.now();
 
@@ -52,7 +53,7 @@ const writeQuotaDetails = async(dbConn, col, ElasticClient, enterprise) => {
 
 	const res = await Promise.all(promises);
 
-	res.forEach((user) => {
+	res.forEach(async (user) => {
 		const sub = enterprise? user.customData.billing.subscriptions.enterprise :  user.customData.billing.subscriptions.discretionary;
 		const expired = sub.expiryDate && sub.expiryDate < now;
 		const dateString = sub.expiryDate ? Utils.formatDate(sub.expiryDate) : Date.MinValue;
@@ -66,7 +67,7 @@ const writeQuotaDetails = async(dbConn, col, ElasticClient, enterprise) => {
 			"Expiry Date" : dateString, 
 			"Expired" : Boolean ( expired ), 
 		}
-		Utils.createElasticRecord(ElasticClient, Utils.teamspaceIndexPrefix + '-quota', elasticBody)
+		await Elastic.createElasticRecord(ElasticClient, Utils.teamspaceIndexPrefix + '-quota', elasticBody)
 		!expired && licensedTS.push({teamspace: user.user, type});
 	});
 

@@ -18,6 +18,7 @@
 'use strict'
 
 const Utils = require('./utils');
+const Elastic = require('./elastic');
 
 const getNewIssuesByMonth = async (db, model) => {
 	const issues = await db.collection(`${model}.issues`).find({}, {created: 1, _id: -1}).toArray();
@@ -91,7 +92,7 @@ const accumulateStats = (total, current) => {
 	return total;
 }
 
-const printEmptyRows = (ElasticClient, ts, licenseType, currentM, currentY, month, year) => {
+const printEmptyRows = async (ElasticClient, ts, licenseType, currentM, currentY, month, year) => {
 	if(currentM !== -1) {
 		let nextM = currentM === 12? 1 : currentM +1;
 		let nextY = currentM === 12? currentY + 1: currentY;
@@ -107,20 +108,19 @@ const printEmptyRows = (ElasticClient, ts, licenseType, currentM, currentY, mont
 				"Issues" : 0, 
 				"Model Revisions" : 0, 
 			}
-			Utils.createElasticRecord(ElasticClient, Utils.teamspaceIndexPrefix + '-activity', elasticBody )
+			await Elastic.createElasticRecord(ElasticClient, Utils.teamspaceIndexPrefix + '-activity', elasticBody )
 			nextY = nextM === 12? nextY + 1: nextY;
 			nextM = nextM === 12? 1 : nextM +1;
 		}
 	}
 }
 
-
-const printStatsToElastic = (ElasticClient, data, ts, licenseType) => {
+const printStatsToElastic = async (ElasticClient, data, ts, licenseType) => {
 
 	let lastYear = -1, lastMonth = -1;
 	Object.keys(data).forEach((_year) => {
 		const year = parseInt(_year);
-		Object.keys(data[year]).forEach((_month) => {
+		Object.keys(data[year]).forEach(async (_month) => {
 			const month = parseInt(_month);
 
 			printEmptyRows(ElasticClient, ts, licenseType, lastMonth, lastYear, month, year);
@@ -133,7 +133,7 @@ const printStatsToElastic = (ElasticClient, data, ts, licenseType) => {
 				"Issues" : data[year][month].issues, 
 				"Model Revisions" : data[year][month].revisions, 
 			}
-			Utils.createElasticRecord(ElasticClient, Utils.teamspaceIndexPrefix + '-activity', elasticBody )
+			await Elastic.createElasticRecord(ElasticClient, Utils.teamspaceIndexPrefix + '-activity', elasticBody )
 			lastMonth = month;
 			lastYear = year;
 		});

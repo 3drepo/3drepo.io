@@ -14,13 +14,11 @@
 *	You should have received a copy of the GNU Affero General Public License
 *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+"use strict";
 
-const NewUsersPerMonth = require('./newUsersPerMonth');
-const Teamspace = require('./teamspaceQuota');
-const TSActivity = require('./teamspaceActivity');
-const Utils = require ('./utils');
-
-'use strict';
+const NewUsersPerMonth = require("./newUsersPerMonth");
+const Teamspace = require("./teamspaceQuota");
+const TSActivity = require("./teamspaceActivity");
 
 const DBStats = {};
 
@@ -30,15 +28,15 @@ const createReports = async(dbConn, ElasticClient) => {
 	const {teamspaces} = await Teamspace.createTeamspaceReport(dbConn, ElasticClient);
 	for(let i = 0; i < teamspaces.length; ++i) {
 		const ts = teamspaces[i];
-		console.log(`[DB] Creating teamspace activity report for ${ts.teamspace} [${i+1}/${teamspaces.length}]...`);
+		console.log(`[DB] Creating teamspace activity report for ${ts.teamspace} [${i + 1}/${teamspaces.length}]...`);
 		await TSActivity.createTeamspaceActivityReport(dbConn, ElasticClient, ts.teamspace, ts.type);
 	}
-}
+};
 
 DBStats.createDBReport = async (dbConn, ElasticClient) => {
-	console.log('[DB] Creating DB statistics report...');
+	console.log("[DB] Creating DB statistics report...");
 	await createReports(dbConn, ElasticClient);
 
-}
+};
 
 module.exports = DBStats;
