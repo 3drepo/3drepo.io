@@ -263,7 +263,7 @@
 
 	/**
 	 * @api {get} /:teamspace/:model/meta/:id.json	Get metadata
-	 * @apiName getMetadata
+	 * @apiName getMetadataById
 	 * @apiGroup Meta
 	 * @apiDescription Get all metadata tags by revision. See more details <a href='#api-Meta-getAllMetadata'>here</a>.
 	 *
@@ -290,7 +290,7 @@
 	 * }
 	 *
 	 */
-	router.get("/meta/:id.json", middlewares.hasReadAccessToModel, getMetadata);
+	router.get("/meta/:id.json", middlewares.hasReadAccessToModel, getMetadataById);
 
 	/**
 	 * @api {get} /:teamspace/:model/revision/master/head/meta/findObjsWith/:metaKey.json Get ids by metadata
@@ -341,8 +341,8 @@
 		return { account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger };
 	};
 
-	function getMetadata(req, res, next) {
-		Meta.getMetadata(req.params.account, req.params.model, req.params.id)
+	function getMetadataById(req, res, next) {
+		Meta.getMetadataById(req.params.account, req.params.model, req.params.id)
 			.then(meta => {
 				responseCodes.respond(
 					utils.APIInfo(req),
@@ -386,7 +386,7 @@
 
 		Meta.getMeshIdsByRules(req.params.account, req.params.model, branch, req.params.rev, rules)
 			.then(obj => {
-				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined, req.param.rev ? config.cachePolicy : undefined);
+				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined, undefined);
 			})
 			.catch(err => {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -403,7 +403,7 @@
 
 		Meta.getAllMetadataByRules(req.params.account, req.params.model, branch, req.params.rev, rules)
 			.then(obj => {
-				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined, req.param.rev ? config.cachePolicy : undefined);
+				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined, undefined);
 			})
 			.catch(err => {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);

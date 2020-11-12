@@ -45,13 +45,15 @@ const notOperators = {
 	"IS_EMPTY": "IS_NOT_EMPTY"
 };
 
+const RuleHelper = {};
+
 /**
  * Returns true if given rule has:
  * - A field,
  * - A supported operator,
  * - The correct minimum/multiples of values if a value is required
  */
-const isValidRule = (rule) => {
+RuleHelper.isValidRule = (rule) => {
 	return rule.field && rule.field.length > 0 &&
 		Object.keys(ruleOperators).includes(rule.operator) &&
 		(ruleOperators[rule.operator] === 0 ||
@@ -59,7 +61,7 @@ const isValidRule = (rule) => {
 		rule.values.length % ruleOperators[rule.operator] === 0);
 };
 
-const checkRulesValidity = (rules) => {
+RuleHelper.checkRulesValidity = (rules) => {
 	const fieldsWithRules = new Set();
 	let valid = rules.length > 0;
 	let it = 0;
@@ -67,7 +69,7 @@ const checkRulesValidity = (rules) => {
 		const rule = rules[it];
 		const hasDuplicate = fieldsWithRules.has(rule.field);
 		valid = rule &&
-			isValidRule(rule) &&
+			RuleHelper.isValidRule(rule) &&
 			!hasDuplicate;
 
 		if (valid) {
@@ -80,11 +82,11 @@ const checkRulesValidity = (rules) => {
 	return valid;
 };
 
-const buildQueryFromRule = (rule) => {
+RuleHelper.buildQueryFromRule = (rule) => {
 	const clauses = [];
 	let expression = {};
 
-	if (isValidRule(rule)) {
+	if (RuleHelper.isValidRule(rule)) {
 		const fieldName = "metadata." + rule.field;
 		const operatorPerClause =  ruleOperators[rule.operator];
 		const clausesCount = rule.values && rule.values.length > 0 && operatorPerClause > 0 ?
@@ -156,22 +158,21 @@ const buildQueryFromRule = (rule) => {
 	return expression;
 };
 
-const positiveRulesToQueries = (rules) => {
-	const posRules = rules.filter(r=> !notOperators[r.operator]).map(buildQueryFromRule);
+RuleHelper.positiveRulesToQueries = (rules) => {
+	const posRules = rules.filter(r=> !notOperators[r.operator]).map(RuleHelper.buildQueryFromRule);
 
 	// Except IS_EMPTY every neg rule needs that the field exists
-	//
 	rules.forEach(({field, operator})=> {
 		if (notOperators[operator] && operator !== "IS_EMPTY") {
 			const rule = { field, operator: "IS_NOT_EMPTY" };
-			posRules.push(buildQueryFromRule(rule));
+			posRules.push(RuleHelper.buildQueryFromRule(rule));
 		}
 	});
 
 	return posRules;
 };
 
-const negativeRulesToQueries = (rules) => {
+RuleHelper.negativeRulesToQueries = (rules) => {
 	return rules.filter(r=> notOperators[r.operator]).map(({field, values, operator}) => {
 		const negRule = {
 			field,
@@ -179,14 +180,8 @@ const negativeRulesToQueries = (rules) => {
 			operator: notOperators[operator]
 		};
 
-		return buildQueryFromRule(negRule);
+		return RuleHelper.buildQueryFromRule(negRule);
 	});
 };
 
-module.exports = {
-	isValidRule,
-	checkRulesValidity,
-	buildQueryFromRule,
-	positiveRulesToQueries,
-	negativeRulesToQueries
-};
+module.exports = RuleHelper;

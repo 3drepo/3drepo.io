@@ -50,7 +50,7 @@ async function getIdToMeshesDict(account, model, revId) {
 }
 
 class Meta {
-	async getMetadata(account, model, id) {
+	async getMetadataById(account, model, id) {
 		const projection = {
 			shared_id: 0,
 			paths: 0,
@@ -62,7 +62,7 @@ class Meta {
 		const metadata = await Scene.findOne({account, model}, { _id: utils.stringToUUID(id) }, projection);
 
 		if (!metadata) {
-			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
+			throw responseCodes.METADATA_NOT_FOUND;
 		}
 
 		return metadata;
@@ -73,7 +73,7 @@ class Meta {
 		const history = await History.getHistory({ account, model }, branch, rev);
 
 		if (!history) {
-			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
+			throw responseCodes.INVALID_TAG_NAME;
 		}
 
 		// Check for submodel references
@@ -99,15 +99,14 @@ class Meta {
 			getMeta.push(
 				this.getAllMetadataByRules(ref.owner, ref.project, refBranch, refRev, rules)
 					.then(obj => {
-						return Promise.resolve({
+						return {
 							data: obj.data,
 							account: ref.owner,
 							model: ref.project
-						});
+						};
 					})
 					.catch(() => {
-					// Just because a sub model fails doesn't mean everything failed. Resolve the promise.
-						return Promise.resolve();
+						// Just because a sub model fails doesn't mean everything failed - do nothing
 					})
 			);
 		});
@@ -138,7 +137,7 @@ class Meta {
 			}
 			return parsedObj;
 		} else {
-			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
+			throw responseCodes.METADATA_NOT_FOUND;
 		}
 	}
 
@@ -276,7 +275,7 @@ class Meta {
 		const history = await History.getHistory({ account, model }, branch, rev);
 
 		if (!history) {
-			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
+			throw responseCodes.INVALID_TAG_NAME;
 		}
 
 		// Check for submodel references
@@ -287,7 +286,6 @@ class Meta {
 
 		const refs = await Ref.find({ account, model }, filter);
 
-		// for all refs get their tree
 		const getMeta = [];
 
 		refs.forEach(ref => {
@@ -302,15 +300,14 @@ class Meta {
 			getMeta.push(
 				this.getAllIdsWithMetadataField(ref.owner, ref.project, refBranch, refRev, fieldName)
 					.then(obj => {
-						return Promise.resolve({
+						return {
 							data: obj.data,
 							account: ref.owner,
 							model: ref.project
-						});
+						};
 					})
 					.catch(() => {
-					// Just because a sub model fails doesn't mean everything failed. Resolve the promise.
-						return Promise.resolve();
+						// Just because a sub model fails doesn't mean everything failed - do nothing
 					})
 			);
 		});

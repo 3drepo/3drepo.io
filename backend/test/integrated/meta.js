@@ -124,8 +124,8 @@ describe("Metadata", function () {
 
 	it("get metadata of invalid revision should fail", function(done) {
 		agent.get(`/${username}/${model}/revision/blahblah123/meta/findObjsWith/Category.json`)
-			.expect(404, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.METADATA_NOT_FOUND.value);
+			.expect(400, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
 				done(err);
 			});
 	});
@@ -238,8 +238,8 @@ describe("Metadata", function () {
 
 	it("all metadata of non existent revision should fail", function(done) {
 		agent.get(`/${username}/${model}/revision/blahblah123/meta/all.json`)
-			.expect(404, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.METADATA_NOT_FOUND.value);
+			.expect(400, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
 				done(err);
 			});
 	});
@@ -266,8 +266,8 @@ describe("Metadata", function () {
 
 	it("4D Task Sequence search of non existent revision should fail", function(done) {
 		agent.get(`/${username}/${model}/revision/blahblah123/meta/4DTaskSequence.json`)
-			.expect(404, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.METADATA_NOT_FOUND.value);
+			.expect(400, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
 				done(err);
 			});
 	});
