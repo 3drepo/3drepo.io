@@ -131,53 +131,25 @@
 	router.get("/revision/:rev/meta/all.json", middlewares.hasReadAccessToModel, getAllMetadata);
 
 	/**
-	 * @api {post} /:teamspace/:model/revision(/master/head/|/:revId)/meta/meshes Get mesh IDs
-	 * @apiName getMeshIdsByRules
+	 * @api {post} /:teamspace/:model/revision(/master/head/|/:revId)/meta/rules Filter metadata by rules
+	 * @apiName queryMetadataByRules
 	 * @apiGroup Meta
 	 * @apiDescription Get all objects matching filter rules in the tree with their metadata.
 	 *
 	 * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam {String} model Model ID
+	 * @apiParam (Query) {Boolean} [meshids] Flag that returns Mesh IDs for matching rule queries
 	 *
 	 * @apiExample {post} Example usage (/master/head)
-	 * POST /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/meta/meshes HTTP/1.1
+	 * POST /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/meta/rules HTTP/1.1
 	 *
 	 * @apiExample {post} Example usage (/:revId)
-	 * POST /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/00000000-0000-0000-0000-000000000001/meta/meshes HTTP/1.1
+	 * POST /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/00000000-0000-0000-0000-000000000001/meta/rules HTTP/1.1
 	 *
-	 * @apiSuccessExample {json} Success:
-	 * [
-	 * 	{
-	 * 		"account": "acme",
-	 * 		"model": "00000000-0000-0000-0000-000000000000",
-	 * 		"mesh_ids": [
-	 * 			"11111111-1111-1111-1111-111111111111",
-	 * 			"22222222-2222-2222-2222-222222222222",
-	 * 			"33333333-3333-3333-3333-333333333333",
-	 * 			"44444444-4444-4444-4444-444444444444"
-	 * 		]
-	 * 	}
-	 * ]
-	 */
-	router.post("/revision/master/head/meta/meshes", middlewares.hasReadAccessToModel, getMeshIdsByRules);
-	router.post("/revision/:rev/meta/meshes", middlewares.hasReadAccessToModel, getMeshIdsByRules);
-
-	/**
-	 * @api {post} /:teamspace/:model/revision(/master/head/|/:revId)/meta Filter metadata
-	 * @apiName getAllMetadataByRules
-	 * @apiGroup Meta
-	 * @apiDescription Get all objects matching filter rules in the tree with their metadata.
+	 * @apiExample {post} Example usage (mesh IDs)
+	 * POST /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/meta/rules?meshids=true HTTP/1.1
 	 *
-	 * @apiParam {String} teamspace Name of teamspace
-	 * @apiParam {String} model Model ID
-	 *
-	 * @apiExample {post} Example usage (/master/head)
-	 * POST /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/meta HTTP/1.1
-	 *
-	 * @apiExample {post} Example usage (/:revId)
-	 * POST /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/00000000-0000-0000-0000-000000000001/meta HTTP/1.1
-	 *
-	 * @apiSuccessExample {json} Success:
+	 * @apiSuccessExample {json} Success (metadata):
 	 * {
 	 *    "data": [
 	 *       {
@@ -230,9 +202,22 @@
 	 *    ]
 	 * }
 	 *
+	 * @apiSuccessExample {json} Success (mesh IDs):
+	 * [
+	 * 	{
+	 * 		"account": "acme",
+	 * 		"model": "00000000-0000-0000-0000-000000000000",
+	 * 		"mesh_ids": [
+	 * 			"11111111-1111-1111-1111-111111111111",
+	 * 			"22222222-2222-2222-2222-222222222222",
+	 * 			"33333333-3333-3333-3333-333333333333",
+	 * 			"44444444-4444-4444-4444-444444444444"
+	 * 		]
+	 * 	}
+	 * ]
 	 */
-	router.post("/revision/master/head/meta", middlewares.hasReadAccessToModel, getAllMetadataByRules);
-	router.post("/revision/:rev/meta", middlewares.hasReadAccessToModel, getAllMetadataByRules);
+	router.post("/revision/master/head/meta/rules", middlewares.hasReadAccessToModel, queryMetadataByRules);
+	router.post("/revision/:rev/meta/rules", middlewares.hasReadAccessToModel, queryMetadataByRules);
 
 	/**
 	 * @api {get} /:teamspace/:model/meta/keys Get array of metadata fields
@@ -376,7 +361,7 @@
 			});
 	}
 
-	function getMeshIdsByRules(req, res, next) {
+	function queryMetadataByRules(req, res, next) {
 		const rules = req.body;
 		let branch;
 
@@ -384,30 +369,25 @@
 			branch = C.MASTER_BRANCH_NAME;
 		}
 
-		Meta.getMeshIdsByRules(req.params.account, req.params.model, branch, req.params.rev, rules)
-			.then(obj => {
-				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined, undefined);
-			})
-			.catch(err => {
-				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-			});
-	}
+		const showMeshIds = (req.query.meshids) ? JSON.parse(req.query.meshids) : false;
 
-	function getAllMetadataByRules(req, res, next) {
-		const rules = req.body;
-		let branch;
-
-		if (!req.params.rev) {
-			branch = C.MASTER_BRANCH_NAME;
+		if (showMeshIds) {
+			Meta.getMeshIdsByRules(req.params.account, req.params.model, branch, req.params.rev, rules)
+				.then(obj => {
+					responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined, undefined);
+				})
+				.catch(err => {
+					responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+				});
+		} else {
+			Meta.getAllMetadataByRules(req.params.account, req.params.model, branch, req.params.rev, rules)
+				.then(obj => {
+					responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined, undefined);
+				})
+				.catch(err => {
+					responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+				});
 		}
-
-		Meta.getAllMetadataByRules(req.params.account, req.params.model, branch, req.params.rev, rules)
-			.then(obj => {
-				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined, undefined);
-			})
-			.catch(err => {
-				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-			});
 	}
 
 	function getAllIdsWith4DSequenceTag(req, res, next) {

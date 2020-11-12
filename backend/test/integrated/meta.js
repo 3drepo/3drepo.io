@@ -458,7 +458,7 @@ describe("Metadata", function () {
 				}
 			];
 
-			agent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/meshes`)
+			agent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/rules?meshids=true`)
 				.send(query)
 				.expect(200, function(err, res) {
 					expect(res.body).to.deep.equal(goldenIfcStairFlight);
@@ -485,7 +485,7 @@ describe("Metadata", function () {
 				}
 			];
 
-			agent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/meshes`)
+			agent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/rules?meshids=true`)
 				.send(query)
 				.expect(200, function(err, res) {
 					expect(res.body[0].mesh_ids.length).to.equal(200);
@@ -496,7 +496,7 @@ describe("Metadata", function () {
 		it("retrieving mesh IDs with empty rule query should succeed", function(done) {
 			const query = [];
 
-			agent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/meshes`)
+			agent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/rules?meshids=true`)
 				.send(query)
 				.expect(200, function(err, res) {
 					expect(res.body[0].account).to.equal(groupUser);
@@ -561,7 +561,7 @@ describe("Metadata", function () {
 				]
 			};
 
-			agent.post(`/${groupUser}/${groupModel}/revision/master/head/meta`)
+			agent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/rules`)
 				.send(query)
 				.expect(200, function(err, res) {
 					expect(res.body).to.deep.equal(goldenData);
@@ -621,7 +621,7 @@ describe("Metadata", function () {
 				]
 			};
 
-			agent.post(`/${groupUser}/${groupModel}/revision/master/head/meta`)
+			agent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/rules`)
 				.send(query)
 				.expect(200, function(err, res) {
 					expect(res.body).to.deep.equal(goldenData);
@@ -632,7 +632,7 @@ describe("Metadata", function () {
 		it("retrieving metadata with empty rule query should succeed", function(done) {
 			const query = [];
 
-			agent.post(`/${groupUser}/${groupModel}/revision/master/head/meta`)
+			agent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/rules`)
 				.send(query)
 				.expect(200, function(err, res) {
 					expect(res.body.data).to.exist;
