@@ -45,9 +45,9 @@ Elastic.createElasticClient = () => {
 Elastic.createElasticRecord = async (ElasticClient, Index, elasticBody, id, mapping) => {
 	try {
 
-		if (elasticBody) { 
-			id = id || Utils.hashCode(Object.values(elasticBody).toString()); 
-		} else { 
+		if (elasticBody) {
+			id = id || Utils.hashCode(Object.values(elasticBody).toString());
+		} else {
 			id = id || Utils.hashCode(Object.values({}).toString());
 		}
 
