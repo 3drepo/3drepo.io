@@ -222,6 +222,10 @@ function* postComment({ teamspace, modelId, riskData, ignoreViewer, finishSubmit
 
 		const { data: comment } = yield API.addRiskComment(teamspace, modelId, _id, riskData);
 
+		if (comment.viewpoint) {
+			mergeGroupsDataFromViewpoint(comment.viewpoint, riskData.viewpoint);
+		}
+
 		finishSubmitting();
 		yield put(RisksActions.createCommentSuccess(comment, riskData._id));
 		yield put(SnackbarActions.show('Risk comment added'));

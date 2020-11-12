@@ -203,6 +203,11 @@ function* postComment({ issueData, ignoreViewer, finishSubmitting }) {
 
 		const { data: comment } = yield API.addIssueComment(account, model, _id, issueData);
 		finishSubmitting();
+
+		if (comment.viewpoint) {
+			mergeGroupsDataFromViewpoint(comment.viewpoint, issueData.viewpoint);
+		}
+
 		yield put(IssuesActions.createCommentSuccess(comment, _id));
 		yield put(SnackbarActions.show('Issue comment added'));
 	} catch (error) {
