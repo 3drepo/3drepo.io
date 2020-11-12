@@ -2098,17 +2098,12 @@ function getMultipleModelsPermissions(req, res, next) {
 
 function getUnityAssets(req, res, next) {
 
-	const model = req.params.model;
-	const account = req.params.account;
+	const {account, model, rev} = req.params;
 	const username = req.session.user.username;
-	let branch;
-
-	if (!req.params.rev) {
-		branch = C.MASTER_BRANCH_NAME;
-	}
+	const branch = rev ? undefined : C.MASTER_BRANCH_NAME;
 
 	UnityAssets.getAssetList(account, model, branch, req.params.rev, username).then(obj => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined, req.param.rev ? config.cachePolicy : undefined);
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
@@ -2116,17 +2111,12 @@ function getUnityAssets(req, res, next) {
 
 function getSrcAssets(req, res, next) {
 
-	const model = req.params.model;
-	const account = req.params.account;
+	const {account, model, rev} = req.params;
 	const username = req.session.user.username;
-	let branch;
-
-	if (!req.params.rev) {
-		branch = C.MASTER_BRANCH_NAME;
-	}
+	const branch = rev ? undefined : C.MASTER_BRANCH_NAME;
 
 	SrcAssets.getAssetList(account, model, branch, req.params.rev, username).then(obj => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined, req.param.rev ? config.cachePolicy : undefined);
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});

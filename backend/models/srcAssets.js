@@ -18,7 +18,7 @@
 "use strict";
 
 const History = require("./history");
-const middlewares = require("../middlewares/middlewares");
+const { hasReadAccessToModelHelper } = require("../middlewares/middlewares");
 const utils = require("../utils");
 const Ref = require("./ref");
 const C = require("../constants");
@@ -28,38 +28,31 @@ const FileRef = require("./fileRef");
 
 const SrcAssets = {};
 
-function getAssetListFromRef(ref, username) {
-	return middlewares.hasReadAccessToModelHelper(username, ref.owner, ref.project).then((granted) => {
-		if(granted) {
-			const revId = utils.uuidToString(ref._rid);
-			const getRevIdPromise = revId === C.MASTER_BRANCH ?
-				History.findLatest({account: ref.owner, model: ref.project}, {_id: 1}) :
-				Promise.resolve({_id : ref._rid});
+const getAssetListFromRef = async (ref, username) => {
+	if (await hasReadAccessToModelHelper(username, ref.owner, ref.project)) {
+		const revInfo = await History.findLatest({account: ref.owner, model: ref.project}, {_id: 1, coordOffset : 1});
 
-			return getRevIdPromise.then((revInfo) => {
-				if (revInfo) {
-					return getAssetListEntry(ref.owner, ref.project, revInfo._id);
-				}
-			});
+		if (revInfo) {
+			return await getAssetListEntry(ref.owner, ref.project, revInfo);
 		}
-	});
-}
 
-function getAssetListEntry(account, model, revId) {
-	return db.getCollection(account, model + ".stash.3drepo").then(dbCol => {
-		return dbCol.find({rev_id: revId, type: "mesh"}, { _id: 1, rev_id: 1}).toArray().then((list) => {
-			return list.map(item => {
-				item._id = utils.uuidToString(item._id);
-				item.rev_id = utils.uuidToString(item.rev_id);
-				item.asset = account + "/" + model + "/" + utils.uuidToString(item._id);
-				return item;
-			});
-		});
-	});
-}
+	}
+};
+
+const getAssetListEntry = async (database, model, revInfo) => {
+	const dbCol = await db.getCollection(account, model + ".stash.3drepo");
+	const list = await dbCol.find({rev_id: revInfo._id, type: "mesh"}, { _id: 1}).toArray();
+	return {
+		database,
+		model,
+		asset: list.map((meshEntry)=> utils.uuidToString(meshEntry._id)),
+		offset: revInfo.coordOffset
+	};
+
+};
 
 function getAssetRevisionsFromRef(ref, username) {
-	return middlewares.hasReadAccessToModelHelper(username, ref.owner, ref.project).then((granted) => {
+	return hasReadAccessToModelHelper(username, ref.owner, ref.project).then((granted) => {
 		if(granted) {
 			const revId = utils.uuidToString(ref._rid);
 			const getRevIdPromise = revId === C.MASTER_BRANCH ?
@@ -79,56 +72,47 @@ function getAssetRevision(revInfo) {
 	return {rev_id: utils.uuidToString(revInfo._id), coordOffset: revInfo.coordOffset, type: "revision"};
 }
 
-SrcAssets.getAssetList = function(account, model, branch, rev, username) {
-	return History.getHistory({ account, model }, branch, rev).then((history) => {
-		if(history) {
-			return Ref.getRefNodes(account, model, history.current).then((subModelRefs) => {
-				const fetchPromise = [];
-				if(subModelRefs.length) {
-					// This is a federation, get asset lists from subModels and merge them
-					subModelRefs.forEach((ref) => {
-						fetchPromise.push(getAssetListFromRef(ref, username));
-					});
-				} else {
-					// Not a federation, get it's own assetList.
-					fetchPromise.push(getAssetListEntry(account, model, history._id));
-				}
+SrcAssets.getAssetList = async (account, model, branch, rev, username) => {
+	const history = await History.getHistory({ account, model }, branch, rev);
 
-				const revisionsPromise = [];
-				if(subModelRefs.length) {
-					subModelRefs.forEach((ref) => {
-						revisionsPromise.push(getAssetRevisionsFromRef(ref, username));
-					});
-				} else {
-					revisionsPromise.push(getAssetRevision(history));
-				}
+	if (!history) {
+		throw responseCodes.INVALID_TAG_NAME;
+	}
 
-				const modelsPromises = Promise.all(fetchPromise).then((assetLists) => {
-					const flattened = [].concat.apply([], assetLists);
-					return flattened;
-				});
+	const subModelRefs = await Ref.getRefNodes(account, model, history.current);
 
-				const revisionsPromises = Promise.all(revisionsPromise).then((revisions) => {
-					return revisions.reduce((result, filter) => {
-						result[filter.rev_id] = filter.coordOffset; // for now all we are interested in is the world offsets
-						return result;
-					},
-					{});
-				});
+	const fetchPromise = subModelRefs.length ? subModelRefs.map((ref) => getAssetListFromRef(ref, username))
+		: [getAssetListEntry(account, model, history._id)];
 
-				return Promise.all([modelsPromises, revisionsPromises]).then(([models, revisions]) => {
-					return {
-						models: models,
-						offsets: revisions
-					};
-				});
+	const revisionsPromise = [];
+	if(subModelRefs.length) {
+		subModelRefs.forEach((ref) => {
+			revisionsPromise.push(getAssetRevisionsFromRef(ref, username));
+		});
+	} else {
+		revisionsPromise.push(getAssetRevision(history));
+	}
 
-			});
-		} else {
-			return Promise.reject(responseCodes.INVALID_TAG_NAME);
-		}
-
+	const modelsPromises = Promise.all(fetchPromise).then((assetLists) => {
+		const flattened = [].concat.apply([], assetLists);
+		return flattened;
 	});
+
+	const revisionsPromises = Promise.all(revisionsPromise).then((revisions) => {
+		return revisions.reduce((result, filter) => {
+			result[filter.rev_id] = filter.coordOffset; // for now all we are interested in is the world offsets
+			return result;
+		},
+		{});
+	});
+
+	return Promise.all([modelsPromises, revisionsPromises]).then(([models, revisions]) => {
+		return {
+			models: models,
+			offsets: revisions
+		};
+	});
+
 };
 
 SrcAssets.getSRC = (account, model, id) => {
