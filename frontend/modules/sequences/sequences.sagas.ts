@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, select, takeLatest } from 'redux-saga/effects';
+import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
 import { selectSelectedSequenceId, selectStateDefinitions,
 	SequencesActions, SequencesTypes } from '.';
@@ -30,7 +30,7 @@ import { selectHiddenGeometryVisible,  TreeActions } from '../tree';
 import { selectLeftPanels, ViewerGuiActions } from '../viewerGui';
 import { getSelectedFrame } from './sequences.helper';
 import { selectActivitiesDefinitions, selectFrames, selectIsLoadingFrame,
-	selectNextKeyFramesDates,  selectSelectedSequence, selectSequenceModel} from './sequences.selectors';
+	selectNextKeyFramesDates,  selectSelectedSequence, selectSequences, selectSequenceModel} from './sequences.selectors';
 
 export function* fetchSequences() {
 	try {
@@ -142,6 +142,22 @@ export function* showSequenceDate({ date }) {
 
 	if (!sequencePanelVisible) {
 		yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.SEQUENCES, true));
+	}
+
+	// 2 - if there is no sequences loaded, load them
+	let sequences = yield select(selectSequences);
+	if (sequences) {
+		yield put(SequencesActions.fetchSequences());
+		yield take(SequencesTypes.FETCH_SEQUENCES_SUCCESS);
+		sequences = yield select(selectSequences);
+	}
+
+	// 3 - if there is no selected sequence, select the first one
+	const selectedSequenceId = yield select(selectSelectedSequenceId);
+
+	if (!selectedSequenceId && sequences.length > 0) {
+		yield put(SequencesActions.setSelectedSequence(sequences[0]._id));
+		yield take(SequencesTypes.SET_SELECTED_SEQUENCE_SUCCESS);
 	}
 
 	// 2 - Select the date
