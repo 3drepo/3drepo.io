@@ -15,34 +15,34 @@
 *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-'use strict'
-const { Long } = require('mongodb');
-const Utils = require('./utils');
-const Elastic = require('./elastic');
+"use strict";
+// const { Long } = require("mongodb");
+const Utils = require("./utils");
+const Elastic = require("./elastic");
 
 const getNumUsers = async (col, user) => {
-	const nUsers = await col.find({'roles.db': user.user}).count();
+	const nUsers = await col.find({"roles.db": user.user}).count();
 	user.numUsers = nUsers;
 	return user;
-}
+};
 
 const isUnlimited = async (value) => {
-	return ( value === 'unlimited' ? true : false );
-  }
+	return (value === "unlimited" ? true : false);
+};
 
 const writeQuotaDetails = async (dbConn, col, ElasticClient, enterprise) => {
-	const type = enterprise? 'enterprise' : 'discretionary';
+	const type = enterprise ? "enterprise" : "discretionary";
 	const now = Date.now();
 
-	const query = enterprise?
-		{'customData.billing.subscriptions.enterprise': {'$exists' : true}} :
-		{'customData.billing.subscriptions.discretionary': {'$exists' : true}};
+	const query = enterprise ?
+		{"customData.billing.subscriptions.enterprise": {"$exists" : true}} :
+		{"customData.billing.subscriptions.discretionary": {"$exists" : true}};
 
-	const sort = enterprise?
-		{'customData.billing.subscriptions.enterprise.expiryDate' : -1} :
-		{'customData.billing.subscriptions.discretionary.expiryDate' : -1};
+	const sort = enterprise ?
+		{"customData.billing.subscriptions.enterprise.expiryDate" : -1} :
+		{"customData.billing.subscriptions.discretionary.expiryDate" : -1};
 
-	const ts = await col.find(query, {'customData.billing.subscriptions' : 1, 'user' : 1})
+	const ts = await col.find(query, {"customData.billing.subscriptions" : 1, "user" : 1})
 		.sort(sort).toArray();
 
 	const licensedTS = [];
@@ -53,48 +53,53 @@ const writeQuotaDetails = async (dbConn, col, ElasticClient, enterprise) => {
 
 	const res = await Promise.all(promises);
 
+	const recordPromise = [];
+
 	res.forEach(async (user) => {
-		const sub = enterprise? user.customData.billing.subscriptions.enterprise :  user.customData.billing.subscriptions.discretionary;
+		const sub = enterprise ? user.customData.billing.subscriptions.enterprise :  user.customData.billing.subscriptions.discretionary;
 		const expired = sub.expiryDate && sub.expiryDate < now;
 		const dateString = sub.expiryDate ? Utils.formatDate(sub.expiryDate) : Date.MinValue;
 		const maxUsers = isUnlimited(sub.collaborators) ? -1 : sub.collaborators ;
 		const elasticBody =  {
 			"Teamspace" : String(user.user),
-			"Type" : String(type), 
-			"User Count" : Number(user.numUsers), 
-			"Max Users" : Number(maxUsers), 
-			"Max Data(GB)" : Number(sub.data/1024), 
-			"Expiry Date" : dateString, 
-			"Expired" : Boolean ( expired ), 
-		}
-		await Elastic.createElasticRecord(ElasticClient, Utils.teamspaceIndexPrefix + '-quota', elasticBody)
-		!expired && licensedTS.push({teamspace: user.user, type});
+			"Type" : String(type),
+			"User Count" : Number(user.numUsers),
+			"Max Users" : Number(maxUsers),
+			"Max Data(GB)" : Number(sub.data / 1024),
+			"Expiry Date" : dateString,
+			"Expired" : Boolean (expired)
+		};
+		recordPromise.push (
+			Elastic.createElasticRecord(ElasticClient, Utils.teamspaceIndexPrefix + "-quota", elasticBody).then (()=> {
+				!expired && licensedTS.push({teamspace: user.user, type});
+			})
+		);
 	});
-
+	await Promise.all(recordPromise);
 	return licensedTS;
-}
+};
 
 const reportTeamspaceQuota = async (dbConn, ElasticClient) => {
-	const col = await dbConn.db('admin').collection('system.users');
-	console.log ("[QUOTA] Writing Licenced Teamspaces Quota information")
+	const col = await dbConn.db("admin").collection("system.users");
+	console.log ("[QUOTA] Writing Licenced Teamspaces Quota information");
 	const enterpriseTS = await writeQuotaDetails(dbConn, col, ElasticClient, true);
 	const discretionaryTS = await writeQuotaDetails(dbConn, col, ElasticClient, false);
 	return [...enterpriseTS, ...discretionaryTS];
-}
+};
 
 const TS = {};
 
 TS.createTeamspaceReport = async (dbConn, ElasticClient) =>{
 	return new Promise((resolve, reject) => {
 		reportTeamspaceQuota(dbConn, ElasticClient).then((ts) => {
-			console.log('[DB] Generated Teamspace Report');
+			console.log("[DB] Generated Teamspace Report");
 			resolve({teamspaces: ts});
 
 		}).catch((err) => {
 			reject(err);
 		});
 	});
-}
+};
 
 module.exports = TS;
 
