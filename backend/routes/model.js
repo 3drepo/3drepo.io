@@ -374,18 +374,24 @@ router.get("/:model/:uid.json.mpc",  middlewares.hasReadAccessToModel, getJsonMp
  * @apiDescription Gets an actual unity bundle file. The path for this api is provided in the data retrieved by either one of the endpoints /:teamspace/:model/revision/master/head/unityAssets.json or /:teamspace/:model/revision/:rev/unityAssets.json
  *
  * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model id of the model to get JSON Mpc for.
+ * @apiParam {String} model id of the model
  * @apiParam {String} uid id of the unity bundle
  */
 
 router.get("/:model/:uid.unity3d", middlewares.hasReadAccessToModel, getUnityBundle);
 
-router.get("/:model/:uid.gltf", middlewares.hasReadAccessToModel, getGLTF);
-router.get("/:model/:uid.bin", middlewares.hasReadAccessToModel, getGLTFBin);
+/**
+ * @api {get} /:teamspace/:model/:uid.src.mpc Get Model in SRC representation
+ * @apiName getSRC
+ * @apiGroup Model
+ * @apiDescription Get a mesh presented in SRC format.
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model id of the model
+ * @apiParam {String} uid id of the SRC file.
+ */
 
 router.get("/:model/:uid.src.mpc", middlewares.hasReadAccessToModel, getSRC);
-
-// Shape Resource Container information
 
 /**
  * @api {get} /:teamspace/:model/revision/:rev/srcAssets.json Get revision's src assets
@@ -2166,21 +2172,6 @@ function getUnityBundle(req, res, next) {
 	});
 }
 
-function getGLTF(req, res, next) {
-
-	const model = req.params.model;
-	const account = req.params.account;
-	const id = req.params.uid;
-
-	// FIXME: We should probably generalise this and have a model assets object.
-	JSONAssets.getGLTF(account, model, id).then(file => {
-		req.params.format = "gltf";
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file.file, undefined, config.cachePolicy);
-	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	});
-}
-
 function getSRC(req, res, next) {
 
 	const model = req.params.model;
@@ -2190,21 +2181,6 @@ function getSRC(req, res, next) {
 	// FIXME: We should probably generalise this and have a model assets object.
 	SrcAssets.getSRC(account, model, id).then(file => {
 		req.params.format = "src";
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file.file, undefined, config.cachePolicy);
-	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	});
-}
-
-function getGLTFBin(req, res, next) {
-
-	const model = req.params.model;
-	const account = req.params.account;
-	const id = req.params.uid;
-
-	// FIXME: We should probably generalise this and have a model assets object.
-	JSONAssets.getGLTFBin(account, model, id).then(file => {
-		req.params.format = "bin";
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file.file, undefined, config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
