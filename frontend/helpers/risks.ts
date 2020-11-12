@@ -48,27 +48,27 @@ export const prepareRisk = (risk, jobs = []) => {
 		preparedRisk.descriptionThumbnail = descriptionThumbnail;
 	}
 
-	if (preparedRisk.residual_likelihood || preparedRisk.likelihood) {
+	if (!(isNaN(preparedRisk.residual_likelihood) && isNaN(preparedRisk.likelihood))) {
 		preparedRisk.residual_likelihood  = getValidNumber(preparedRisk.residual_likelihood, preparedRisk.likelihood);
 	}
 
-	if (preparedRisk.residual_consequence ||  preparedRisk.consequence) {
+	if (!(isNaN(preparedRisk.residual_consequence) && isNaN(preparedRisk.consequence))) {
 		preparedRisk.residual_consequence = getValidNumber(preparedRisk.residual_consequence, preparedRisk.consequence);
 	}
 
-	if (preparedRisk.residual_likelihood || preparedRisk.residual_consequence ) {
+	if (!(isNaN(preparedRisk.residual_likelihood) && isNaN(preparedRisk.residual_consequence))) {
 		preparedRisk.residual_level_of_risk  = getValidPositiveNumber(
 			preparedRisk.residual_level_of_risk,
 			calculateLevelOfRisk(preparedRisk.residual_likelihood, preparedRisk.residual_consequence )
 		);
 	}
 
-	if (preparedRisk.level_of_risk || preparedRisk.likelihood || preparedRisk.consequence) {
+	if (!(isNaN(preparedRisk.level_of_risk) && isNaN(preparedRisk.likelihood) && isNaN(preparedRisk.consequence))) {
 		preparedRisk.level_of_risk = getValidPositiveNumber(preparedRisk.level_of_risk,
 			calculateLevelOfRisk(preparedRisk.likelihood, preparedRisk.consequence));
 	}
 
-	if (preparedRisk.overall_level_of_risk || preparedRisk.residual_level_of_risk  || preparedRisk.level_of_risk) {
+	if (!(isNaN(preparedRisk.overall_level_of_risk) && isNaN(preparedRisk.residual_level_of_risk) && isNaN(preparedRisk.level_of_risk))) {
 		preparedRisk.overall_level_of_risk = getValidPositiveNumber(
 			preparedRisk.overall_level_of_risk,
 			getValidPositiveNumber(preparedRisk.residual_level_of_risk , preparedRisk.level_of_risk)
@@ -123,7 +123,7 @@ export const getRiskLikelihoodName = (likelihood: number) => {
 };
 
 const getRiskIcon = (mitigationStatus) =>  RISK_LEVELS_ICONS[mitigationStatus] || null;
-export const getRiskColor = (levelOfRisk) => RISK_LEVELS_COLOURS[!isNaN(levelOfRisk) ? levelOfRisk : -1].color;
+export const getRiskColor = (levelOfRisk) => RISK_LEVELS_COLOURS[getValidPositiveNumber(levelOfRisk, -1)].color;
 
 export const getRiskStatus = (levelOfRisk: number, mitigationStatus: string) => {
 	return ({
@@ -133,7 +133,7 @@ export const getRiskStatus = (levelOfRisk: number, mitigationStatus: string) => 
 };
 
 export const getRiskPinColor = (risk) => {
-	const levelOfRisk = (risk.overall_level_of_risk !== undefined) ? risk.overall_level_of_risk : 4;
+	const levelOfRisk = getValidPositiveNumber(risk.overall_level_of_risk, 4);
 	return RISK_LEVELS_COLOURS[levelOfRisk].pinColor;
 };
 
