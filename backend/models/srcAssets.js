@@ -44,7 +44,7 @@ const getAssetListEntry = async (database, model, revInfo) => {
 	return {
 		database,
 		model,
-		asset: list.map((meshEntry)=> utils.uuidToString(meshEntry._id)),
+		assets: list.map((meshEntry)=> utils.uuidToString(meshEntry._id)),
 		offset: revInfo.coordOffset
 	};
 
