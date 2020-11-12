@@ -143,8 +143,10 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 function* updateActiveIssue({ issueData }) {
 	try {
 		const { _id, rev_id, model, account, position } = yield select(selectActiveIssueDetails);
-		const { data: updatedIssue } = yield API.updateIssue(account, model, _id, rev_id, issueData);
+		let { data: updatedIssue } = yield API.updateIssue(account, model, _id, rev_id, issueData);
 		yield analyticsService.sendEvent(EVENT_CATEGORIES.ISSUE, EVENT_ACTIONS.EDIT);
+
+		updatedIssue = {...updatedIssue, ...issueData};
 
 		const jobs = yield select(selectJobsList);
 		const preparedIssue = prepareIssue(updatedIssue, jobs);
