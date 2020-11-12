@@ -120,7 +120,7 @@ const printStatsToElastic = async (ElasticClient, data, ts, licenseType) => {
 	let lastYear = -1, lastMonth = -1;
 	Object.keys(data).forEach((_year) => {
 		const year = parseInt(_year);
-		Object.keys(data[year]).forEach(async (_month) => {
+		Object.keys(data[year]).forEach((_month) => {
 			const month = parseInt(_month);
 
 			printEmptyRows(ElasticClient, ts, licenseType, lastMonth, lastYear, month, year);
@@ -133,7 +133,7 @@ const printStatsToElastic = async (ElasticClient, data, ts, licenseType) => {
 				"Issues" : data[year][month].issues, 
 				"Model Revisions" : data[year][month].revisions, 
 			}
-			await Elastic.createElasticRecord(ElasticClient, Utils.teamspaceIndexPrefix + '-activity', elasticBody )
+			Elastic.createElasticRecord(ElasticClient, Utils.teamspaceIndexPrefix + '-activity', elasticBody )
 			lastMonth = month;
 			lastYear = year;
 		});
@@ -142,6 +142,7 @@ const printStatsToElastic = async (ElasticClient, data, ts, licenseType) => {
 	const now = new Date();
 	const targetDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 	printEmptyRows(ElasticClient, ts, licenseType, lastMonth, lastYear, targetDate.getMonth()+1, targetDate.getFullYear());
+	Promise.resolve()
 }
 
 const reportActivity = async (db, ElasticClient, ts, licenseType) => {
