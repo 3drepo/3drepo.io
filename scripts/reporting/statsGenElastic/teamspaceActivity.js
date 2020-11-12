@@ -92,30 +92,8 @@ const accumulateStats = (total, current) => {
 	return total;
 }
 
-const printEmptyRows = async (ElasticClient, ts, licenseType, currentM, currentY, month, year) => {
-	if(currentM !== -1) {
-		let nextM = currentM === 12? 1 : currentM +1;
-		let nextY = currentM === 12? currentY + 1: currentY;
-
-		while(!(nextM === month && nextY === year)) {
-
-			const elasticBody =  {
-				"Teamspace" : ts,
-				"licenseType" : licenseType,
-				"Year" : year, 
-				"Month" : month, 
-				"DateTime" : new Date(year,month).toISOString(),
-				"Issues" : 0, 
-				"Model Revisions" : 0, 
-			}
-			await Elastic.createElasticRecord(ElasticClient, Utils.teamspaceIndexPrefix + '-activity', elasticBody )
-			nextY = nextM === 12? nextY + 1: nextY;
-			nextM = nextM === 12? 1 : nextM +1;
-		}
-	}
-}
-
 const printStatsToElastic = async (ElasticClient, data, ts, licenseType) => {
+	const recordPromise = [];
 
 	let lastYear = -1, lastMonth = -1;
 	Object.keys(data).forEach((_year) => {
@@ -123,7 +101,6 @@ const printStatsToElastic = async (ElasticClient, data, ts, licenseType) => {
 		Object.keys(data[year]).forEach((_month) => {
 			const month = parseInt(_month);
 
-			printEmptyRows(ElasticClient, ts, licenseType, lastMonth, lastYear, month, year);
 			const elasticBody =  {
 				"Teamspace" : ts,
 				"licenseType" : licenseType,
@@ -133,16 +110,12 @@ const printStatsToElastic = async (ElasticClient, data, ts, licenseType) => {
 				"Issues" : data[year][month].issues, 
 				"Model Revisions" : data[year][month].revisions, 
 			}
-			Elastic.createElasticRecord(ElasticClient, Utils.teamspaceIndexPrefix + '-activity', elasticBody )
+			recordPromise.push ( Elastic.createElasticRecord(ElasticClient, Utils.teamspaceIndexPrefix + '-activity', elasticBody ) )
 			lastMonth = month;
 			lastYear = year;
 		});
 	});
-
-	const now = new Date();
-	const targetDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-	printEmptyRows(ElasticClient, ts, licenseType, lastMonth, lastYear, targetDate.getMonth()+1, targetDate.getFullYear());
-	Promise.resolve()
+	await Promise.all(recordPromise);
 }
 
 const reportActivity = async (db, ElasticClient, ts, licenseType) => {
@@ -156,7 +129,8 @@ const reportActivity = async (db, ElasticClient, ts, licenseType) => {
 	const stats = await Promise.all(modelProm);
 
 	const finalStats = stats.reduce(accumulateStats, {});
-	printStatsToElastic(ElasticClient, finalStats, ts, licenseType);
+	console.log(ts,finalStats);
+	await printStatsToElastic(ElasticClient, finalStats, ts, licenseType);
 
 }
 
