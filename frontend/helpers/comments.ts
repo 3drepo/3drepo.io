@@ -286,12 +286,12 @@ const convertActionValueToText = (value = '') => {
 		'closed': 'Closed'
 	};
 
-	let actionText = value;
+	let actionText = value || '';
 
-	value = value.toLowerCase();
+	const actionKey = actionText.toLowerCase();
 
-	if (actions.hasOwnProperty(value)) {
-		actionText = actions[value];
+	if (value && actions.hasOwnProperty(actionKey)) {
+		actionText = actions[actionKey];
 	}
 
 	return actionText;
