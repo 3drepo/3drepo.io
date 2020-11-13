@@ -162,10 +162,11 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 function* updateRisk({ teamspace, modelId, riskData }) {
 	try {
 		const { _id, rev_id, position } = yield select(selectActiveRiskDetails);
-		const { data: updatedRisk } = yield API.updateRisk(teamspace, modelId, _id, rev_id, riskData);
+		let { data: updatedRisk } = yield API.updateRisk(teamspace, modelId, _id, rev_id, riskData);
 		updatedRisk.resources = prepareResources(teamspace, modelId, updatedRisk.resources);
 
 		analyticsService.sendEvent(EVENT_CATEGORIES.RISK, EVENT_ACTIONS.EDIT);
+		updatedRisk = {...updatedRisk, ...riskData};
 
 		const jobs = yield select(selectJobsList);
 		const preparedRisk = prepareRisk(updatedRisk, jobs);
