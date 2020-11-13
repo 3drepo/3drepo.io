@@ -220,7 +220,7 @@ export const ModelGridItem = memo((props: IProps) => {
 		const { teamspace, name, model, canUpload, projectName } = props;
 
 		props.showDialog({
-			title: `Upload Model`,
+			title: `New Revision: ${name}`,
 			template: UploadModelFileDialog,
 			DialogProps: {
 				disableRestoreFocus: true

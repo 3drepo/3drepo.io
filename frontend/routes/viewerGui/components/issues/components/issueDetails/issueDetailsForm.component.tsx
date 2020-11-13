@@ -26,11 +26,13 @@ import { debounce, get, isEmpty, isEqual } from 'lodash';
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 import * as Yup from 'yup';
 
-import { ATTACHMENTS_ISSUE_TAB, ISSUE_PROPERTIES_TAB, ISSUE_TABS } from '../../../../../../constants/issues';
+import { ATTACHMENTS_ISSUE_TAB, ISSUE_PROPERTIES_TAB,
+	ISSUE_SEQUENCING_TAB, ISSUE_TABS } from '../../../../../../constants/issues';
 import { VIEWER_PANELS_TITLES } from '../../../../../../constants/viewerGui';
 import { canChangeAssigned, canChangeBasicProperty } from '../../../../../../helpers/issues';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { AttachmentsFormTab } from '../../../risks/components/attachmentsFormTab/attachmentsFormTab.component';
+import { SequencingFormTab } from '../../../risks/components/sequencingFormTab/sequencingFormTab.component';
 import { MainIssueFormTab } from '../mainIssueFormTab/mainIssueFormTab.component';
 import { TabContent } from './issueDetails.styles';
 
@@ -64,6 +66,10 @@ interface IProps {
 	onUpdateViewpoint: () => void;
 	onTakeScreenshot: () => void;
 	onUploadScreenshot: (image) => void;
+	showSequenceDate: (date) => void;
+	minSequenceDate: number;
+	maxSequenceDate: number;
+
 }
 
 interface IState {
@@ -141,6 +147,17 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		/>
 	)
 
+	public showSequencingContent = (active) => (
+		<SequencingFormTab
+			active={active}
+			isNewTicket={this.isNewIssue}
+			{...this.props}
+			showSequenceDate={this.props.showSequenceDate}
+			min={this.props.minSequenceDate}
+			max={this.props.maxSequenceDate}
+		/>
+	)
+
 	public showAttachmentsContent = (active) => (
 		<AttachmentsFormTab active={active} resources={this.props.issue.resources} {...this.props} />
 	)
@@ -175,10 +192,12 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						onChange={this.handleChange}
 					>
 						<Tab label={ISSUE_TABS.ISSUE} value={ISSUE_PROPERTIES_TAB} />
+						<Tab label={ISSUE_TABS.SEQUENCING} value={ISSUE_SEQUENCING_TAB} />
 						<Tab {...this.attachmentsProps} value={ATTACHMENTS_ISSUE_TAB} />
 					</Tabs>
 					<TabContent>
 						{this.showIssueContent(activeTab === ISSUE_PROPERTIES_TAB)}
+						{this.showSequencingContent(activeTab === ISSUE_SEQUENCING_TAB)}
 						{this.showAttachmentsContent(activeTab === ATTACHMENTS_ISSUE_TAB)}
 					</TabContent>
 				</Form>
@@ -195,7 +214,9 @@ export const IssueDetailsForm = withFormik({
 			topic_type: issue.topic_type,
 			assigned_roles: get(issue, 'assigned_roles[0]', ''),
 			due_date: issue.due_date,
-			desc: issue.desc
+			desc: issue.desc,
+			sequence_start: issue.sequence_start,
+			sequence_end: issue.sequence_end
 		});
 	},
 	handleSubmit: (values, { props }) => {

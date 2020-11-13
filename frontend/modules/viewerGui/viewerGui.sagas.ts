@@ -64,7 +64,7 @@ function* fetchData({ teamspace, model }) {
 			put(ModelActions.waitForSettingsAndFetchRevisions(teamspace, model)),
 			put(TreeActions.setIsTreeProcessed(false)),
 			put(ViewpointsActions.fetchViewpoints(teamspace, model)),
-			put(CommentsActions.fetchUsers(teamspace)),
+			put(CommentsActions.fetchUsers(teamspace))
 		]);
 
 		yield all([
@@ -82,6 +82,7 @@ function* fetchData({ teamspace, model }) {
 			put(RisksActions.fetchRisks(teamspace, model, revision)),
 			put(GroupsActions.fetchGroups(teamspace, model, revision)),
 			put(ViewerGuiActions.getHelicopterSpeed(teamspace, model)),
+			put(SequencesActions.fetchSequences()),
 			put(StarredActions.fetchStarredMeta())
 		]);
 	} catch (error) {

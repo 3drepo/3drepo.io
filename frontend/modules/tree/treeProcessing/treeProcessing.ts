@@ -34,9 +34,9 @@ class TreeProcessing {
 
 	public updateVisibility = (payload) => this.processing.updateVisibility(payload);
 
-	public showAllNodes = (ifcSpacesHidden) => {
-		if (this.processing && this.processing.showAllNodes) {
-			return this.processing.showAllNodes(ifcSpacesHidden);
+	public showAllExceptMeshIDs = (ifcSpacesHidden, meshes) => {
+		if (this.processing && this.processing.showAllExceptMeshIDs) {
+			return this.processing.showAllExceptMeshIDs(ifcSpacesHidden, meshes);
 		}
 	}
 
@@ -49,6 +49,7 @@ class TreeProcessing {
 	public getParents = (node) => this.processing.getParentsByPath(node);
 
 	public getParentsID = (node) => this.processing.getParentsID(node);
+
 }
 
 export default new TreeProcessing();

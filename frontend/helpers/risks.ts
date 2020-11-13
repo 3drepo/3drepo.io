@@ -32,6 +32,7 @@ import {
 } from '../constants/risks';
 import { getAPIUrl } from '../services/api';
 import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
+import { IHeaderMenuItem } from './reportedItems';
 
 export const prepareRisk = (risk, jobs = []) => {
 	const preparedRisk = {...risk};
@@ -200,6 +201,22 @@ export const getRiskFilterValues = (property) =>
 		value
 	}));
 
+const getFromToFilter = (label) =>  [{
+		label: 'From',
+		value: {
+			label: label + ' from',
+			value: label + 'from',
+			date: null
+		}
+	}, {
+		label: 'To',
+		value: {
+			label: label + ' to',
+			value: label + 'to',
+			date: null
+		}
+	}];
+
 export const filtersValuesMap = (jobs, settings) => {
 	const jobsList = [...jobs, UNASSIGNED_JOB];
 
@@ -221,24 +238,27 @@ export const filtersValuesMap = (jobs, settings) => {
 		[RISK_FILTER_RELATED_FIELDS.RESIDUAL_LIKELIHOOD]: getFilterValues(RISK_LIKELIHOODS),
 		[RISK_FILTER_RELATED_FIELDS.LEVEL_OF_RISK]: getFilterValues(LEVELS_OF_RISK),
 		[RISK_FILTER_RELATED_FIELDS.RESIDUAL_LEVEL_OF_RISK]: getFilterValues(LEVELS_OF_RISK),
-		[RISK_FILTER_RELATED_FIELDS.OVERALL_LEVEL_OF_RISK]: getFilterValues(LEVELS_OF_RISK)
+		[RISK_FILTER_RELATED_FIELDS.OVERALL_LEVEL_OF_RISK]: getFilterValues(LEVELS_OF_RISK),
+		[RISK_FILTER_RELATED_FIELDS.START_DATETIME]: getFromToFilter('Start')
 	};
 };
 
-export const getHeaderMenuItems = (
-		teamspace, model, printRisks, downloadRisks, toggleSortOrder, toggleShowPins?, showPins?
-	) => {
+export const getHeaderMenuItems = (props) => {
+	const {teamspace, model, printItems, downloadItems, toggleSortOrder,
+		toggleShowPins ,  showPins, sortOrder, setSortBy, sortByField} = props;
+
 	const items = [{
 		...RISKS_ACTIONS_MENU.PRINT,
-		onClick: () => printRisks(teamspace, model)
+		onClick: () => printItems(teamspace, model)
 	}, {
 		...RISKS_ACTIONS_MENU.DOWNLOAD,
-		onClick: () => downloadRisks(teamspace, model)
+		onClick: () => downloadItems(teamspace, model)
 	}, {
-		...RISKS_ACTIONS_MENU.SORT_BY_DATE,
+		...RISKS_ACTIONS_MENU.SORT_ORDER,
 		onClick: () => {
 			toggleSortOrder();
-		}
+		},
+		Icon: sortOrder === 'asc' ? RISKS_ACTIONS_MENU.SORT_ORDER.ASC : RISKS_ACTIONS_MENU.SORT_ORDER.DESC
 	}];
 
 	const togglePinItem = {
@@ -247,7 +267,23 @@ export const getHeaderMenuItems = (
 		onClick: () => toggleShowPins(!showPins)
 	};
 
-	const menuItems = !!toggleShowPins ? [...items, {...togglePinItem}] : [...items];
+	const menuItems: IHeaderMenuItem[] = !!toggleShowPins ? [...items, {...togglePinItem}] : [...items];
+
+	menuItems.push({
+		label: 'Sort by',
+		subItems: [
+			{
+				label: 'Created at',
+				onClick: () => setSortBy('created'),
+				enabled: sortByField === 'created'
+			},
+			{
+				label: 'Start date',
+				onClick: () => setSortBy('sequence_start'),
+				enabled: sortByField === 'sequence_start'
+			},
+			]
+	});
 
 	return menuItems;
 };

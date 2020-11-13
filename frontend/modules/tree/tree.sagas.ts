@@ -30,20 +30,24 @@ import {
 	selectFullySelectedNodesIds,
 	selectGetNodesByIds,
 	selectGetNodesIdsFromSharedIds,
-	selectIfcSpacesHidden,
+	selectHiddenGeometryVisible,
 	selectIsTreeProcessed,
 	selectNodesIndexesMap,
 	selectSelectionMap,
 	selectSubModelsRootNodes,
-	selectTreeNodesList
+	selectTreeNodesList,
+	selectVisibilityMap
 } from './tree.selectors';
 import TreeProcessing from './treeProcessing/treeProcessing';
 
 import { SELECTION_STATES, VISIBILITY_STATES } from '../../constants/tree';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
 
-import { addTransparencyOverrides, overridesTransparencyDiff,
-	removeTransparencyOverrides } from '../../helpers/colorOverrides';
+import {
+	addTransparencyOverrides,
+	overridesTransparencyDiff,
+	removeTransparencyOverrides,
+} from '../../helpers/colorOverrides';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { selectActiveMeta, selectIsActive, BimActions } from '../bim';
 import { selectSettings, ModelTypes } from '../model';
@@ -73,12 +77,14 @@ const highlightObjects = (objects = [], nodesSelectionMap = {}, colour?) => {
 
 const toggleMeshesVisibility = (meshes, visibility) => {
 	meshes.forEach((entry) => {
-		Viewer.switchObjectVisibility(
-			entry.teamspace,
-			entry.modelId,
-			entry.meshes,
-			visibility
-		);
+		if (entry.meshes && entry.meshes.length) {
+			Viewer.switchObjectVisibility(
+				entry.teamspace,
+				entry.modelId,
+				entry.meshes,
+				visibility
+			);
+		}
 	});
 };
 
@@ -299,13 +305,23 @@ function* clearCurrentlySelected() {
  */
 function* showAllNodes() {
 	yield waitForTreeToBeReady();
-
 	try {
-		const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
-		const result  = yield TreeProcessing.showAllNodes(ifcSpacesHidden);
-		toggleMeshesVisibility(result.meshesToUpdate, true);
+		yield showAllExceptMeshIDs();
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('show', 'all nodes', error));
+	}
+}
+
+function* showAllExceptMeshIDs(meshes = []) {
+	yield waitForTreeToBeReady();
+
+	try {
+		const hiddenGeometryVisible = yield select(selectHiddenGeometryVisible);
+		const {meshesToShow, meshesToHide } = yield TreeProcessing.showAllExceptMeshIDs(!hiddenGeometryVisible, meshes);
+		toggleMeshesVisibility(meshesToShow, true);
+		toggleMeshesVisibility(meshesToHide, false);
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('show', 'all except nodes', error));
 	}
 }
 
@@ -361,8 +377,8 @@ function* isolateNodes(nodesIds = []) {
 
 	try {
 		if (nodesIds.length) {
-			const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
-			const result = yield TreeProcessing.isolateNodes({ nodesIds, ifcSpacesHidden });
+			const hiddenGeometryVisible = yield select(selectHiddenGeometryVisible);
+			const result = yield TreeProcessing.isolateNodes({ nodesIds, ifcSpacesHidden: !hiddenGeometryVisible });
 
 			if (result.unhighlightedObjects && result.unhighlightedObjects.length) {
 				unhighlightObjects(result.unhighlightedObjects);
@@ -398,18 +414,18 @@ function* isolateNodesBySharedIds({ objects = []}) {
 	yield isolateNodes(nodesIds);
 }
 
-function* hideIfcSpaces() {
+function* showHiddenGeometry() {
 	yield waitForTreeToBeReady();
 
 	try {
-		const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
-		yield put(TreeActions.setIfcSpacesHidden(!ifcSpacesHidden));
+		const hiddenGeometryVisible = yield select(selectHiddenGeometryVisible);
+		yield put(TreeActions.setHiddenGeometryVisible(!hiddenGeometryVisible));
 
-		const ifcSpacesNodesIds = yield select(selectDefaultHiddenNodesIds);
-		const visibility = ifcSpacesHidden ? VISIBILITY_STATES.VISIBLE : VISIBILITY_STATES.INVISIBLE;
-		yield put(TreeActions.setTreeNodesVisibility(ifcSpacesNodesIds, visibility, true));
+		const geometryNodesIds = yield select(selectDefaultHiddenNodesIds);
+		const visibility = !hiddenGeometryVisible ? VISIBILITY_STATES.VISIBLE : VISIBILITY_STATES.INVISIBLE;
+		yield put(TreeActions.setTreeNodesVisibility(geometryNodesIds, visibility, true));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('hide', 'IFC spaces', error));
+		yield put(DialogActions.showErrorDialog('show', 'hidden geometry', error));
 	}
 }
 
@@ -514,17 +530,17 @@ function* setSubmodelsVisibility({ models, visibility}) {
 /**
  * SET VISIBILITY
  */
-function* setTreeNodesVisibility({ nodesIds, visibility}) {
+function* setTreeNodesVisibility({ nodesIds, visibility }) {
 	try {
 		yield waitForTreeToBeReady();
 
 		if (nodesIds.length) {
-			const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
+			const hiddenGeometryVisible = yield select(selectHiddenGeometryVisible);
 
 			const result = yield TreeProcessing.updateVisibility({
 				nodesIds,
 				visibility,
-				ifcSpacesHidden,
+				ifcSpacesHidden: !hiddenGeometryVisible,
 			});
 
 			if (result.unhighlightedObjects && result.unhighlightedObjects.length) {
@@ -626,6 +642,13 @@ function* handleTransparencyOverridesChange({ currentOverrides, previousOverride
 	yield addTransparencyOverrides(toAdd);
 }
 
+function* handleTransparenciesVisibility({ transparencies }) {
+	// 1. get node ids for the hidden nodes
+	// tslint:disable-next-line:variable-name
+	const meshesToHide: any[] = yield select(selectGetNodesIdsFromSharedIds(([{shared_ids: transparencies}])));
+	yield showAllExceptMeshIDs(meshesToHide);
+}
+
 export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.FETCH_FULL_TREE, fetchFullTree);
 	yield takeLatest(TreeTypes.START_LISTEN_ON_SELECTIONS, startListenOnSelections);
@@ -634,7 +657,7 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.SHOW_ALL_NODES, showAllNodes);
 	yield takeLatest(TreeTypes.HIDE_SELECTED_NODES, hideSelectedNodes);
 	yield takeLatest(TreeTypes.ISOLATE_SELECTED_NODES, isolateSelectedNodes);
-	yield takeLatest(TreeTypes.HIDE_IFC_SPACES, hideIfcSpaces);
+	yield takeLatest(TreeTypes.SHOW_HIDDEN_GEOMETRY, showHiddenGeometry);
 	yield takeLatest(TreeTypes.SET_TREE_NODES_VISIBILITY, setTreeNodesVisibility);
 	yield takeLatest(TreeTypes.SET_SELECTED_NODES_VISIBILITY, setSelectedNodesVisibility);
 	yield takeLatest(TreeTypes.HANDLE_NODES_CLICK, handleNodesClick);
@@ -653,4 +676,5 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.ZOOM_TO_HIGHLIGHTED_NODES, zoomToHighlightedNodes);
 	yield takeLatest(TreeTypes.HANDLE_TRANSPARENCY_OVERRIDES_CHANGE, handleTransparencyOverridesChange);
 	yield takeLatest(TreeTypes.SET_SUBMODELS_VISIBILITY, setSubmodelsVisibility);
+	yield takeLatest(TreeTypes.HANDLE_TRANSPARENCIES_VISIBILITY, handleTransparenciesVisibility);
 }

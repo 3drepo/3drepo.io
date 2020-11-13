@@ -306,9 +306,65 @@ export class Processing {
 		return { meshesToUpdate };
 	}
 
-	public showAllNodes = (ifcSpacesHidden) => {
-		const root = this.nodesList[0];
-		return this.showNodes(root.childrenIds, ifcSpacesHidden);
+	public showAllExceptMeshIDs = (ifcSpacesHidden, meshes) => {
+		const nodes = this.nodesList[0].childrenIds;
+
+		if (!meshes || meshes.length === 0) {
+			const { meshesToUpdate } =  this.showNodes(nodes, ifcSpacesHidden);
+			return { meshesToShow: meshesToUpdate, meshesToHide: []};
+		}
+
+		const meshToHide = {};
+		meshes.forEach((mesh) => meshToHide[mesh] = true);
+
+		const meshesToCheck = this.getMeshesByNodes(nodes.map((nodeId) => this.nodesList[this.nodesIndexesMap[nodeId]]));
+		const meshesToShow = [];
+		const meshesToHide = [];
+		const parentNodesByLevel = [];
+
+		for (const ns in meshesToCheck) {
+			const toShowEntry = {...meshesToCheck[ns]};
+			const toHideEntry = {...meshesToCheck[ns]};
+			toShowEntry.meshes = [];
+			toHideEntry.meshes = [];
+
+			meshesToCheck[ns].meshes.forEach((meshId) => {
+				const currentState = this.visibilityMap[meshId];
+				const shouldHide = meshToHide[meshId];
+
+				const desiredState = shouldHide ? VISIBILITY_STATES.INVISIBLE
+					: (ifcSpacesHidden ?  this.defaultVisibilityMap[meshId] : VISIBILITY_STATES.VISIBLE);
+
+				if (currentState !== desiredState) {
+					this.visibilityMap[meshId] = desiredState;
+					if (shouldHide) {
+						toHideEntry.meshes.push(meshId);
+					} else {
+						toShowEntry.meshes.push(meshId);
+					}
+
+					const [meshNode] = this.getNodesByIds([meshId]);
+					const parents = this.getParentsByPath(meshNode);
+					for (let index = 0; index < parents.length ; ++index) {
+						const parentLevel = parents.length - index - 1;
+						if (parentNodesByLevel[parentLevel]) {
+							parentNodesByLevel[parentLevel].add(parents[index]);
+						} else {
+							parentNodesByLevel[parentLevel] = new Set([parents[index]]);
+						}
+					}
+				}
+			});
+
+			meshesToShow.push(toShowEntry);
+			meshesToHide.push(toHideEntry);
+		}
+
+		for (let i =  parentNodesByLevel.length - 1 ; i >= 0; --i) {
+			this.updateParentsVisibility(parentNodesByLevel[i]);
+		}
+
+		return { meshesToShow, meshesToHide };
 	}
 
 	public updateVisibility = ({ nodesIds = [], ifcSpacesHidden, visibility}) => {

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Grid, IconButton, MenuItem, Select } from '@material-ui/core';
+import { Grid, IconButton, MenuItem, Select, Switch } from '@material-ui/core';
 import StepForwardIcon from '@material-ui/icons/FastForward';
 import StepBackIcon from '@material-ui/icons/FastRewind';
 import PlayArrow from '@material-ui/icons/PlayArrow';
@@ -24,26 +24,32 @@ import Stop from '@material-ui/icons/Stop';
 
 import DayJsUtils from '@date-io/dayjs';
 
+import { noop } from 'lodash';
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 import React from 'react';
 import { STEP_SCALE } from '../../../../../../constants/sequences';
-import { getDate, getDays } from '../../../../../../helpers/dateTime';
-import { NAMED_MONTH_DATE_FORMAT } from '../../../../../../services/formatting/formatDate';
+import { VIEWER_PANELS } from '../../../../../../constants/viewerGui';
+import { isDateOusideRange } from '../../../../../../helpers/dateTime';
+import { getDateByStep } from '../../../../../../modules/sequences/sequences.helper';
+import { LONG_DATE_TIME_FORMAT_NO_MINUTES } from '../../../../../../services/formatting/formatDate';
 import { DatePicker, IntervalRow, SequencePlayerColumn,
 	SequencePlayerContainer, SequenceRow, SequenceSlider,
-	SliderRow, StepInput } from '../../sequences.styles';
+	SliderRow, StepInput, SwitchItem } from '../../sequences.styles';
 
 interface IProps {
 	max: Date;
 	min: Date;
 	onChange?: (date: Date) => void;
 	value?: Date;
+	endingDate?: Date;
 	stepInterval?: number;
 	stepScale?: STEP_SCALE;
 	onChangeStepInterval?: (value: number) => void;
 	onChangeStepScale?: (value: STEP_SCALE) => void;
-	fetchFrame: (date: Date) => void;
 	loadingFrame: boolean;
+	rightPanels: string[];
+	toggleActivitiesPanel: () => void;
+	onPlayStarted?: () => void;
 }
 
 interface IState {
@@ -55,24 +61,6 @@ interface IState {
 	waitingForFrameLoad: boolean;
 }
 
-const getDateByStep = (timeStamp, stepScale, step) => {
-	const newDate = new Date(timeStamp);
-
-	if (stepScale === STEP_SCALE.DAY) {
-		newDate.setDate(newDate.getDate() + step);
-	}
-
-	if (stepScale === STEP_SCALE.MONTH) {
-		newDate.setMonth(newDate.getMonth() + step);
-	}
-
-	if (stepScale === STEP_SCALE.YEAR) {
-		newDate.setFullYear(newDate.getFullYear() + step);
-	}
-
-	return newDate;
-};
-
 export class SequencePlayer extends React.PureComponent<IProps, IState> {
 	public state: IState = {
 		value: null,
@@ -83,20 +71,20 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 		waitingForFrameLoad: false,
 	};
 
-	get currentDay() {
-		return getDays(this.props.min, this.state.value);
+	get currentTime() {
+		return (+this.state.value) - (+this.props.min);
 	}
 
-	get totalDays() {
-		return getDays(this.props.min, this.props.max);
+	get totalTime() {
+		return (+this.props.max) - (+this.props.min);
 	}
 
 	get isFirstDay() {
-		return this.currentDay === 0;
+		return this.currentTime === 0;
 	}
 
 	get isLastDay() {
-		return this.currentDay === this.totalDays;
+		return this.currentTime === this.totalTime;
 	}
 
 	get PlayButtonIcon() {
@@ -108,8 +96,8 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 	}
 
 	public setValue = (newValue: Date) => {
-		const maxDate = new Date(this.props.max).setHours(0, 0, 0, 0);
-		const minDate = new Date(this.props.min).setHours(0, 0, 0, 0);
+		const maxDate = this.props.max.valueOf();
+		const minDate = this.props.min.valueOf();
 		newValue = new Date(Math.min(maxDate, Math.max(minDate, newValue.valueOf())));
 
 		if (this.props.onChange) {
@@ -119,21 +107,14 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 		this.setState({value: newValue});
 	}
 
-	public setDayNumber = (dayNumber) => {
-		const newValue = getDate(this.props.min, dayNumber);
+	public setTime = (currentTime) => {
+		const newValue = new Date(this.props.min + currentTime);
 		this.setValue(newValue);
-	}
-
-	public isDateOusideRange = (date) => {
-		const {max, min} = this.props;
-		const maxDate = new Date(max).setHours(0, 0, 0, 0);
-		const minDate = new Date(min).setHours(0, 0, 0, 0);
-		return maxDate < date || minDate > date;
 	}
 
 	public goTo = (val) => {
 		this.stop();
-		this.setDayNumber(val);
+		this.setTime(val);
 	}
 
 	public gotoDate = (val) => {
@@ -187,9 +168,10 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 	}
 
 	public moveStep = (direction) => {
-
 		const {value, stepInterval, stepScale} = this.state;
-		this.setValue(getDateByStep(value, stepScale, stepInterval * direction));
+		const newValue = getDateByStep(value, stepScale, stepInterval * direction);
+
+		this.setValue(newValue);
 
 		if (this.isLastDay) {
 			this.stop();
@@ -200,16 +182,9 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 
 	public prevStep = this.moveStep.bind(this, -1);
 
-	public fetchNextFrameData = () => {
-		const {value, stepInterval, stepScale} = this.state;
-		const date = getDateByStep(value, stepScale, stepInterval);
-		this.props.fetchFrame(date);
-	}
-
-	public play() {
+	public play = () => {
+		(this.props.onPlayStarted || noop )();
 		this.stop();
-		this.fetchNextFrameData();
-
 		const intervalId = (setInterval(() => {
 			if (this.props.loadingFrame && this.state.playing) {
 				clearInterval(this.state.intervalId);
@@ -218,7 +193,6 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 			}
 
 			this.nextStep();
-			this.fetchNextFrameData();
 		}, 1000) as unknown) as number;
 
 		this.setState({
@@ -237,7 +211,9 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 	public componentDidMount() {
 		if (this.props.value) {
 			this.setState({value: this.props.value});
-			this.props.fetchFrame(this.props.value);
+			if (this.props.onChange) {
+				this.props.onChange(this.props.value);
+			}
 		}
 
 		if (this.props.stepInterval) {
@@ -247,7 +223,6 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 		if (this.props.stepScale) {
 			this.setState({stepScale: this.props.stepScale});
 		}
-
 	}
 
 	public componentWillUnmount() {
@@ -277,13 +252,14 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 							</Grid>
 							<Grid item>
 								<DatePicker
-									shouldDisableDate={(date) => this.isDateOusideRange(date.$d)}
+									shouldDisableDate={(date) => isDateOusideRange(this.props.min, this.props.max, date.$d)}
 									name="date"
 									inputId="1"
 									value={value}
-									format={NAMED_MONTH_DATE_FORMAT}
-									onChange={(e) => this.gotoDate(new Date(e.target.value))}
+									format={LONG_DATE_TIME_FORMAT_NO_MINUTES}
+									onChange={(e) => this.gotoDate(new Date(Math.floor(e.target.value / 3600000) * 3600000))}
 									placeholder="date"
+									dateTime
 								/>
 							</Grid>
 							<Grid item>
@@ -294,6 +270,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 							Step interval: <StepInput value={stepInterval} onChange={this.onChangeStepInterval} />
 							&nbsp;
 							<Select value={stepScale} onChange={this.onChangeStepScale} >
+								<MenuItem value={STEP_SCALE.HOUR}>hour(s)</MenuItem>
 								<MenuItem value={STEP_SCALE.DAY}>day(s)</MenuItem>
 								<MenuItem value={STEP_SCALE.MONTH}>month(s)</MenuItem>
 								<MenuItem value={STEP_SCALE.YEAR}>year(s)</MenuItem>
@@ -304,10 +281,23 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 								<IconButton onClick={this.onClickPlayStop} ><this.PlayButtonIcon /></IconButton>
 							</Grid>
 							<Grid item>
-								<SequenceSlider max={this.totalDays} step={1} value={this.currentDay} onChange={(e, val) => this.goTo(val)} />
+								<SequenceSlider
+									max={this.totalTime}
+									step={36000000}
+									value={this.currentTime}
+									onChange={(e, val) => this.goTo(val)}
+								/>
 							</Grid>
 						</SliderRow>
 					</MuiPickersUtilsProvider>
+					<SwitchItem>
+						<Switch
+							checked={this.props.rightPanels.includes(VIEWER_PANELS.ACTIVITIES)}
+							onChange={this.props.toggleActivitiesPanel}
+							color="primary"
+						/>
+						Full Activity List
+					</SwitchItem>
 				</SequencePlayerColumn>
 			</SequencePlayerContainer>
 		);
