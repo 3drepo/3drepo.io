@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -22,8 +22,4 @@ export const HiddenFileInput = styled.input`
 	width: 0;
 `;
 
-export const FileLabel = styled.label`
-	&& {
-		margin: 0 4px 0 0;
-	}
-`;
+export const FileLabel = styled.label``;

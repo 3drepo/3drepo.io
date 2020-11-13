@@ -45,6 +45,7 @@ const systemLogger = require("../logger.js").systemLogger;
  * @apiParam (Request body) {String} name Group name
  * @apiParam (Request body) {Object[]} objects List of objects in group
  * @apiParam (Request body) {Object[]} [rules] List of rules in group
+ * @apiParam (Request body) {Number[]} [transformation] Flat 16 element array representation of 4x4 transformation matrix
  */
 
 /**
@@ -57,6 +58,7 @@ const systemLogger = require("../logger.js").systemLogger;
  * @apiSuccess (200) {String} name Group name
  * @apiSuccess (200) {Object[]} objects List of objects in group
  * @apiSuccess (200) {Object[]} rules List of rules in group
+ * @apiSuccess (200) {Number[]} transformation Flat 16 element array representation of 4x4 transformation matrix
  * @apiSuccess (200) {Number} updatedAt Group update timestamp in milliseconds
  * @apiSuccess (200) {Number} updatedBy Username of last user to amend group
  * @apiSuccess (200) {String} _id Unique ID of group

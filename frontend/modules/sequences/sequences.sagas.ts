@@ -15,26 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, select, take, takeLatest } from 'redux-saga/effects';
+import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
-import { selectSelectedSequenceId, selectSelectedStateId, selectStateDefinitions,
+import { selectSelectedSequenceId, selectStateDefinitions,
 	SequencesActions, SequencesTypes } from '.';
+import { VIEWER_PANELS } from '../../constants/viewerGui';
+
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
-import { selectCurrentModel, selectCurrentModelTeamspace,
-	selectCurrentRevisionId, selectSettings } from '../model/model.selectors';
+import { selectCurrentModel, selectCurrentModelTeamspace, selectCurrentRevisionId, selectIsFederation } from '../model';
 import { dispatch } from '../store';
-import { selectIfcSpacesHidden, TreeActions } from '../tree';
-import { getSelectedFrame, selectFrames, selectIfcSpacesHiddenSaved,
-	selectSelectedDate, selectSequences, selectSequenceModel } from './sequences.selectors';
+import { selectHiddenGeometryVisible,  TreeActions } from '../tree';
 
-const delay = async (time) => {
-	return new Promise( (resolve, reject) => {
-		setTimeout(() => {
-			resolve(true);
-		}, time);
-	});
-};
+import { selectLeftPanels, ViewerGuiActions } from '../viewerGui';
+import { getSelectedFrame } from './sequences.helper';
+import { selectActivitiesDefinitions, selectFrames, selectIsLoadingFrame,
+	selectNextKeyFramesDates,  selectSelectedSequence, selectSequences, selectSequenceModel} from './sequences.selectors';
 
 export function* fetchSequences() {
 	try {
@@ -47,6 +43,26 @@ export function* fetchSequences() {
 
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'sequences', error));
+	}
+}
+
+export function* fetchActivitiesDefinitions({sequenceId}) {
+	try {
+		const teamspace = yield select(selectCurrentModelTeamspace);
+		const isFederation = yield select(selectIsFederation);
+		const revision = isFederation ? null : yield select(selectCurrentRevisionId);
+		const model = yield select(selectSequenceModel);
+		const activitiesDefinitions = yield select(selectActivitiesDefinitions);
+
+		if (!activitiesDefinitions && sequenceId) {
+			// API CALL TO GET TASKS
+			const {data} = yield API.getSequenceActivities(teamspace, model, revision, sequenceId);
+			yield put(SequencesActions.fetchActivitiesDefinitionsSuccess(sequenceId, data.tasks));
+		}
+
+	} catch (error) {
+		yield put(DialogActions.showEndpointErrorDialog('get', 'sequences', error));
+		yield put(SequencesActions.fetchActivitiesDefinitionsSuccess(sequenceId, []));
 	}
 }
 
@@ -68,7 +84,8 @@ export function* fetchFrame({date}) {
 			// because with yield it would sometimes stop there forever even though the promise resolved
 			API.getSequenceState(teamspace, model, revision, sequenceId, stateId).then((response) => {
 				dispatch(SequencesActions.setStateDefinition(stateId, response.data));
-				dispatch(SequencesActions.setLastLoadedSuccesfullState(stateId));
+			}).catch((e) => {
+				dispatch(SequencesActions.setStateDefinition(stateId, {}));
 			});
 
 		}
@@ -77,52 +94,94 @@ export function* fetchFrame({date}) {
 	}
 }
 
-export function* setSelectedFrame({date}) {
+function * fetchSelectedFrame() {
+	const keyframes = yield select(selectNextKeyFramesDates);
+	yield all(keyframes.map((d) => put(SequencesActions.fetchFrame(d))));
+}
+
+export function* setSelectedDate({date}) {
 	try {
-		yield put(SequencesActions.setSelectedDate(date));
-		yield put(SequencesActions.fetchFrame(date));
+		const selectedSequence = yield select(selectSelectedSequence);
+
+		if (selectedSequence) {
+			yield put(SequencesActions.setSelectedDateSuccess(date));
+			yield put(SequencesActions.fetchSelectedFrame());
+		}
+
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('select frame', 'sequences', error));
 	}
 }
 
 export function* initializeSequences() {
-	const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
-	if (ifcSpacesHidden) {
-		yield put(TreeActions.hideIfcSpaces());
-	}
-
-	yield put(SequencesActions.setIfcSpacesHidden(ifcSpacesHidden));
-
-	const sequences = (yield select(selectSequences));
-	const modelSettings = yield select(selectSettings);
-	const areSequencesFromModel = (sequences || [])
-		.some((s) => s.model === modelSettings._id || (modelSettings.subModels || []).some((sm) => sm.model === s.model) );
-
-	if (!sequences || !areSequencesFromModel) {
-		yield put(SequencesActions.fetchSequences());
-		yield take(SequencesTypes.FETCH_SEQUENCES_SUCCESS);
-		const date = yield select(selectSelectedDate);
-
-		if (date) {
-			yield put(SequencesActions.setSelectedFrame(date));
-		}
+	const hiddenGeometryVisible = yield select(selectHiddenGeometryVisible);
+	if (!hiddenGeometryVisible) {
+		yield put(TreeActions.showHiddenGeometry());
 	}
 }
 
-export function* restoreIfcSpacesHidden() {
-	const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
-	const ifcSpacesHiddenSaved =  yield select(selectIfcSpacesHiddenSaved);
+export function* restoreModelDefaultVisibility() {
+	yield put(TreeActions.showAllNodes());
+	yield put(TreeActions.showHiddenGeometry());
+}
 
-	if (ifcSpacesHiddenSaved !== ifcSpacesHidden) {
-		yield put(TreeActions.hideIfcSpaces());
+export function* setSelectedSequence({ sequenceId }) {
+	if (sequenceId) {
+		yield put(SequencesActions.initializeSequences());
+	} else {
+		yield put(SequencesActions.setStateDefinition(undefined, {}));
+		yield put(SequencesActions.restoreModelDefaultVisibility());
+	}
+	yield put(SequencesActions.setSelectedSequenceSuccess(sequenceId));
+	yield put(SequencesActions.fetchActivitiesDefinitions(sequenceId));
+}
+
+export function* showSequenceDate({ date }) {
+	// 1 - if sequence panel is closed, open it
+	const sequencePanelVisible = (yield select(selectLeftPanels))[VIEWER_PANELS.SEQUENCES];
+
+	if (!sequencePanelVisible) {
+		yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.SEQUENCES, true));
+	}
+
+	// 2 - if there is no sequences loaded, load them
+	let sequences = yield select(selectSequences);
+	if (sequences) {
+		yield put(SequencesActions.fetchSequences());
+		yield take(SequencesTypes.FETCH_SEQUENCES_SUCCESS);
+		sequences = yield select(selectSequences);
+	}
+
+	// 3 - if there is no selected sequence, select the first one
+	const selectedSequenceId = yield select(selectSelectedSequenceId);
+
+	if (!selectedSequenceId && sequences.length > 0) {
+		yield put(SequencesActions.setSelectedSequence(sequences[0]._id));
+		yield take(SequencesTypes.SET_SELECTED_SEQUENCE_SUCCESS);
+	}
+
+	// 2 - Select the date
+	yield put(SequencesActions.setSelectedDate(date));
+}
+
+function* handleTransparenciesVisibility({ transparencies }) {
+	const frameIsLoading = yield select(selectIsLoadingFrame);
+	const selectedSequence = yield select(selectSelectedSequenceId);
+
+	if (!frameIsLoading && selectedSequence) {
+		yield put(TreeActions.handleTransparenciesVisibility(transparencies));
 	}
 }
 
 export default function* SequencesSaga() {
 	yield takeLatest(SequencesTypes.FETCH_SEQUENCES, fetchSequences);
-	yield takeLatest(SequencesTypes.SET_SELECTED_FRAME, setSelectedFrame);
+	yield takeLatest(SequencesTypes.SET_SELECTED_DATE, setSelectedDate);
 	yield takeLatest(SequencesTypes.INITIALIZE_SEQUENCES, initializeSequences);
 	yield takeLatest(SequencesTypes.FETCH_FRAME, fetchFrame);
-	yield takeLatest(SequencesTypes.RESTORE_IFC_SPACES_HIDDEN, restoreIfcSpacesHidden);
+	yield takeLatest(SequencesTypes.RESTORE_MODEL_DEFAULT_VISIBILITY, restoreModelDefaultVisibility);
+	yield takeLatest(SequencesTypes.FETCH_ACTIVITIES_DEFINITIONS, fetchActivitiesDefinitions);
+	yield takeLatest(SequencesTypes.SET_SELECTED_SEQUENCE, setSelectedSequence);
+	yield takeLatest(SequencesTypes.FETCH_SELECTED_FRAME, fetchSelectedFrame);
+	yield takeLatest(SequencesTypes.SHOW_SEQUENCE_DATE, showSequenceDate);
+	yield takeLatest(SequencesTypes.HANDLE_TRANSPARENCIES_VISIBILITY, handleTransparenciesVisibility);
 }

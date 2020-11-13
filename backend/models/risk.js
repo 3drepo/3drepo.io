@@ -51,6 +51,8 @@ const fieldTypes = {
 	"risk_factor": "[object String]",
 	"safetibase_id": "[object String]",
 	"scope": "[object String]",
+	"sequence_start": "[object Number]",
+	"sequence_end": "[object Number]",
 	"thumbnail": "[object String]",
 	"viewpoint": "[object Object]",
 	"viewpoints": "[object Array]"

@@ -1,4 +1,5 @@
 import { all, fork } from 'redux-saga/effects';
+import activitiesSaga from './activities/activities.sagas';
 import authSaga from './auth/auth.sagas';
 import billingSaga from './billing/billing.sagas';
 import bimSaga from './bim/bim.sagas';
@@ -54,7 +55,8 @@ export default function* rootSaga() {
 		fork(dialogSaga),
 		fork(teamspaceSaga),
 		fork(boardSaga),
-		fork(sequencesSaga)
+		fork(sequencesSaga),
+		fork(activitiesSaga),
 		// <-- INJECT MODULE SAGA -->
 	]);
 }

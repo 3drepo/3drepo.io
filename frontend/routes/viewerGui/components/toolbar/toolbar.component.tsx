@@ -327,6 +327,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 		} = this.props;
 		setMetadataActive(!isMetadataActive);
 		setPanelVisibility(VIEWER_PANELS.BIM, !isMetadataActive);
+		setPanelVisibility(VIEWER_PANELS.ACTIVITIES, false);
 
 		if (!isMetadataActive) {
 			setMeasureVisibility(false);
