@@ -68,7 +68,9 @@ export const prepareRisk = (risk, jobs = []) => {
 			calculateLevelOfRisk(preparedRisk.likelihood, preparedRisk.consequence));
 	}
 
-	if (!(isNaN(preparedRisk.overall_level_of_risk) && isNaN(preparedRisk.residual_level_of_risk) && isNaN(preparedRisk.level_of_risk))) {
+	if (!(isNaN(preparedRisk.overall_level_of_risk) &&
+		isNaN(preparedRisk.residual_level_of_risk) &&
+		isNaN(preparedRisk.level_of_risk))) {
 		preparedRisk.overall_level_of_risk = getValidPositiveNumber(
 			preparedRisk.overall_level_of_risk,
 			getValidPositiveNumber(preparedRisk.residual_level_of_risk , preparedRisk.level_of_risk)
