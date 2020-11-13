@@ -75,6 +75,9 @@ interface IProps {
 	dialogId?: string;
 	postCommentIsPending?: boolean;
 	updateViewpoint: (screenshot?: string) => void;
+	showSequenceDate: (date) => void;
+	minSequenceDate: Date;
+	maxSequenceDate: Date;
 }
 
 interface IState {
@@ -195,6 +198,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				fetchingDetailsIsPending={this.props.fetchingDetailsIsPending}
 				tickets={this.props.risks}
 				postCommentIsPending={this.props.postCommentIsPending}
+				parentId={'risks-card'}
 			/>
 		</ViewerPanelFooter>
 	));
@@ -286,6 +290,9 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				canComment={this.userCanComment()}
 				showMitigationSuggestions={this.props.showMitigationSuggestions}
 				formRef={this.formRef}
+				showSequenceDate={this.props.showSequenceDate}
+				minSequenceDate={this.props.minSequenceDate}
+				maxSequenceDate={this.props.maxSequenceDate}
 			/>
 		);
 	}
@@ -442,7 +449,6 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { failedToLoad, risk, horizontal } = this.props;
-
 		return (
 			<Container ref={this.containerRef} fill={Number(this.isNewRisk)}>
 				<ViewerPanelContent

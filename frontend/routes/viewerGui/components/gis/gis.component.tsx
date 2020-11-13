@@ -58,6 +58,7 @@ interface IProps {
 	removeVisibleLayer: (layer) => void;
 	resetVisibleLayers: () => void;
 	visibleLayers: any[];
+	id?: string;
 }
 
 interface IState {
@@ -228,6 +229,7 @@ export class Gis extends React.PureComponent<IProps, IState> {
 				Icon={this.getTitleIcon()}
 				renderActions={this.renderActions}
 				pending={this.props.isPending}
+				id={this.props.id}
 			>
 				{(settingsModeActive || !hasGISCoordinates) && (
 					<Settings

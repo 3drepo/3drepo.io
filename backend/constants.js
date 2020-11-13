@@ -523,7 +523,76 @@
 
 	define("PROJECT_DEFAULT_ID", "default");
 
+	// risks
+	define("RISK_FILTERS",{
+		"ids": {
+			"fieldName": "_id" ,
+			"type": "UUID"
+		},
+		"numbers": {
+			"fieldName": "number",
+			"type": "number"
+		},
+		"categories": {
+			"fieldName": "category"
+		},
+		"mitigationStatus": {
+			"fieldName": "mitigation_status"
+		},
+		"residualLikelihoods": {
+			"fieldName": "residual_likelihood",
+			"type": "number"
+		},
+		"residualConsequences": {
+			"fieldName": "residual_consequence",
+			"type": "number"
+		},
+		"consequences": {
+			"fieldName": "consequence",
+			"type": "number"
+		},
+		"likelihoods": {
+			"fieldName": "likelihood",
+			"type": "number"
+		},
+		"levelOfRisks": {
+			"fieldName": "levelOfRisks",
+			"type": "number"
+		},
+		"residualLevelOfRisks": {
+			"fieldName": "residualLevelOfRisks",
+			"type": "number"
+		}
+	});
+
 	// issues
+	define("ISSUE_FILTERS",{
+		"ids": {
+			"fieldName": "_id" ,
+			"type": "UUID"
+		},
+		"numbers": {
+			"fieldName": "number",
+			"type": "number"
+		},
+		"topicTypes": {
+			"fieldName": "topic_type" // if no type is defined string is assumed
+		},
+		"status": {
+			"fieldName": "status"
+		},
+		"priorities": {
+			"fieldName": "priority"
+		},
+		"owners" : {
+			"fieldName": "owner"
+		},
+		"assignedRoles" : {
+			"fieldName": "assigned_roles",
+			"type": "array"
+		}
+	});
+
 	define("ISSUE_STATUS",{
 		"OPEN": "open",
 		"IN_PROGRESS": "in progress",

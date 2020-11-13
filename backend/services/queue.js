@@ -160,7 +160,7 @@ class ImportQueue {
 	 * @param {tag} tag - revision tag
 	 * @param {desc} desc - revison description
 	 *******************************************************************************/
-	importFile(corID, filePath, orgFileName, databaseName, modelName, userName, copy, tag, desc) {
+	importFile(corID, filePath, orgFileName, databaseName, modelName, userName, copy, tag, desc, importAnimations = true) {
 		const jsonFilename = `${this.sharedSpacePath}/${corID}.json`;
 
 		return this._moveFileToSharedSpace(corID, filePath, orgFileName, copy).then(obj => {
@@ -177,6 +177,10 @@ class ImportQueue {
 
 			if (desc) {
 				json.desc = desc;
+			}
+
+			if (importAnimations) {
+				json.importAnimations = importAnimations;
 			}
 
 			return this.writeFile(jsonFilename, JSON.stringify(json)).then(() => {

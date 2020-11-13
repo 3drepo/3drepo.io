@@ -73,6 +73,9 @@ interface IProps {
 	updateViewpoint: (screenshot?: string) => void;
 	dialogId?: string;
 	postCommentIsPending?: boolean;
+	showSequenceDate: (date) => void;
+	minSequenceDate: Date;
+	maxSequenceDate: Date;
 }
 
 interface IState {
@@ -195,6 +198,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				fetchingDetailsIsPending={this.props.fetchingDetailsIsPending}
 				tickets={this.props.issues}
 				postCommentIsPending={this.props.postCommentIsPending}
+				parentId={'issues-card'}
 			/>
 		</ViewerPanelFooter>
 	));
@@ -282,6 +286,9 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				canComment={this.userCanComment}
 				onThumbnailUpdate={this.handleNewScreenshot}
 				formRef={this.formRef}
+				showSequenceDate={this.props.showSequenceDate}
+				minSequenceDate={this.props.minSequenceDate}
+				maxSequenceDate={this.props.maxSequenceDate}
 			/>
 		);
 	}

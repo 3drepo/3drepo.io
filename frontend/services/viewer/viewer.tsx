@@ -263,6 +263,14 @@ export class ViewerService {
 		});
 	}
 
+	public moveMeshes(teamspace: string, modelId: string, meshes: string[], matrix: number[]) {
+		UnityUtil.moveMeshes(teamspace, modelId, meshes, matrix);
+	}
+
+	public resetMovedMeshes(teamspace: string, modelId: string, meshes: string[]) {
+		UnityUtil.resetMovedMeshes(teamspace, modelId, meshes);
+	}
+
 	/**
 	 * Helpers
 	 */

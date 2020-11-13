@@ -21,6 +21,7 @@ export const VIEWER_PANELS = {
 	COMPARE: 'compare',
 	SEQUENCES: 'sequences',
 	MEASUREMENTS: 'measurements',
+	ACTIVITIES: 'activities',
 };
 
 export const VIEWER_PANELS_ICONS = {
@@ -78,7 +79,8 @@ export const VIEWER_LEFT_PANELS = [
 ].filter((panel) => clientConfigService.sequencesEnabled || panel !== VIEWER_PANELS.SEQUENCES).map(getPanelConfig);
 
 export const VIEWER_RIGHT_PANELS = [
-	VIEWER_PANELS.BIM
+	VIEWER_PANELS.BIM,
+	VIEWER_PANELS.ACTIVITIES,
 ].map(getPanelConfig);
 
 export const VIEWER_PANEL_TITLE_HEIGHT = 40;

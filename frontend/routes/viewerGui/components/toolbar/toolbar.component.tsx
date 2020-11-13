@@ -343,7 +343,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		return (
-			<Container visible={!this.props.isFocusMode}>
+			<Container visible={!this.props.isFocusMode} id="bottom-toolbar">
 				{this.renderButtons()}
 			</Container>
 		);
@@ -362,6 +362,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 		} = this.props;
 		setMetadataActive(!isMetadataActive);
 		setPanelVisibility(VIEWER_PANELS.BIM, !isMetadataActive);
+		setPanelVisibility(VIEWER_PANELS.ACTIVITIES, false);
 
 		if (!isMetadataActive) {
 			setMeasureVisibility(false);

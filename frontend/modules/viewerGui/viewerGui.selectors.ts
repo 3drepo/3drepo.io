@@ -23,9 +23,11 @@ import { selectOverrides as selectGroupsOverrides,
 import { selectIsTreeProcessed } from '../tree';
 
 import { selectOverrides as selectViewsOverrides,
+		selectTransformations as selectViewsTransformations,
 		selectTransparencies as selectViewsTransparencies } from '../viewpoints';
 
-import { selectSelectedFrameColors, selectSelectedFrameTransparencies } from '../sequences';
+import { selectSelectedFrameColors, selectSelectedFrameTransformations,
+	selectSelectedFrameTransparencies } from '../sequences';
 
 export const selectViewerGuiDomain = (state) => ({...state.viewerGui});
 
@@ -93,4 +95,10 @@ export const selectAllTransparencyOverrides = createSelector(
 	selectViewsTransparencies, selectGroupsTransparencies, selectSelectedFrameTransparencies,
 		(viewsTransparencies, groupsTransparencies, sequenceTransparencies) =>
 		({...viewsTransparencies, ...groupsTransparencies, ...sequenceTransparencies})
+);
+
+export const selectTransformations = createSelector(
+	selectViewsTransformations, selectSelectedFrameTransformations,
+		(viewsTransformations, sequenceTransformations) =>
+			({...viewsTransformations , ...sequenceTransformations})
 );

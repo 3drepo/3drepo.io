@@ -22,6 +22,7 @@ import { VIEWER_EVENTS } from '../../constants/viewer';
 import { VIEWER_LEFT_PANELS, VIEWER_PANELS } from '../../constants/viewerGui';
 import { renderWhenTrue } from '../../helpers/rendering';
 import { MultiSelect } from '../../services/viewer/multiSelect';
+import { Activities } from './components/activities/';
 import { Bim } from './components/bim';
 import { CloseFocusModeButton } from './components/closeFocusModeButton';
 import { Compare } from './components/compare';
@@ -94,7 +95,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 
 		viewer.init();
 
-		if ((issueId || !riskId) && !leftPanels.includes(VIEWER_PANELS.ISSUES)) {
+		if (issueId && !leftPanels.includes(VIEWER_PANELS.ISSUES)) {
 			this.props.setPanelVisibility(VIEWER_PANELS.ISSUES, true);
 		}
 
@@ -182,6 +183,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 					onClick={this.handleTogglePanel}
 					label={name}
 					type={type}
+					id={type + '-panel-button'}
 					active={this.props.leftPanels.includes(type)}
 				/>
 			))}
@@ -204,7 +206,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		<LeftPanels>
 			{panels.map((panel) => {
 				const PanelComponent = this.panelsMap[panel];
-				return PanelComponent && <PanelComponent key={panel} {...this.urlParams} />;
+				return PanelComponent && <PanelComponent key={panel} id={panel + '-card'}{...this.urlParams} />;
 			})}
 		</LeftPanels>
 	)
@@ -212,6 +214,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	private renderRightPanels = (panels) => (
 		<RightPanels>
 			{panels.includes(VIEWER_PANELS.BIM) && <Bim {...this.urlParams} />}
+			{panels.includes(VIEWER_PANELS.ACTIVITIES) && <Activities {...this.urlParams} />}
 		</RightPanels>
 	)
 }

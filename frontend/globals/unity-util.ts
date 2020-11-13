@@ -134,19 +134,23 @@ export class UnityUtil {
 	public static loadUnity(divId: string, unityConfig = 'unity/Build/unity.json', memory?: number): Promise<void> {
 		memory = memory || 2130706432;
 
-		// Add withCredentials to XMLHttpRequest prototype to allow unity game to
-		// do CORS request. We used to do this with a .jspre on the unity side but it's no longer supported as of Unity 2019.1
-		(XMLHttpRequest.prototype as any).originalOpen = XMLHttpRequest.prototype.open;
-		const newOpen = function(_, url) {
-			const original = this.originalOpen.apply(this, arguments);
-			this.withCredentials = true;
-			return original;
-		};
-		XMLHttpRequest.prototype.open = newOpen;
+		if (!window.Module) {
+			// Add withCredentials to XMLHttpRequest prototype to allow unity game to
+			// do CORS request. We used to do this with a .jspre on the unity side but it's no longer supported
+			// as of Unity 2019.1
+			(XMLHttpRequest.prototype as any).originalOpen = XMLHttpRequest.prototype.open;
+			const newOpen = function(_, url) {
+				const original = this.originalOpen.apply(this, arguments);
+				this.withCredentials = true;
+				return original;
+			};
+			XMLHttpRequest.prototype.open = newOpen;
+		}
 
 		const unitySettings: any = {
 			onProgress: this.onProgress
 		};
+
 		UnityLoader.Error.handler = this.onUnityError;
 		if (window) {
 			if (!(window as any).Module) {
@@ -171,6 +175,19 @@ export class UnityUtil {
 		}
 
 		return UnityUtil.onReady();
+	}
+
+	/**
+	 * @category Configurations
+	 * Quits unity instance & reset all custom callback and promises
+	 */
+	public static quitUnity() {
+		this.reset();
+		UnityUtil.errorCallback = null;
+		UnityUtil.progressCallback = null;
+		UnityUtil.modelLoaderProgressCallback = null;
+		UnityUtil.readyPromise = null;
+		UnityUtil.unityInstance.Quit();
 	}
 
 	/**
@@ -1712,6 +1729,40 @@ export class UnityUtil {
 	/** @hidden */
 	public static toggleCameraPause() {
 		UnityUtil.toUnity('ToggleCameraPause', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/**
+	 * Move mesh/meshes by a given transformation matrix.
+	 * NOTE: this currently only works as desired in Synchro Scenarios
+	 * @category Model Interactions
+	 * @param teamspace teamspace of the model
+	 * @param modelId modelID the meshes belongs in
+	 * @param meshes array of mesh unique IDs
+	 * @param matrix array of 16 numbers, representing the transformation on the meshes (row major)
+	 */
+	public static moveMeshes(teamspace: string, modelId: string, meshes: string[], matrix: number[]) {
+		const param: any = {
+			nameSpace : teamspace + '.' + modelId,
+			meshes,
+			matrix
+		};
+		UnityUtil.toUnity('MoveMeshes', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+	}
+
+	/**
+	 * Move mesh/meshes by a given transformation matrix.
+	 * NOTE: this currently only works as desired in Synchro Scenarios
+	 * @category Model Interactions
+	 * @param teamspace teamspace of the model
+	 * @param modelId modelID the meshes belongs in
+	 * @param meshes array of mesh unique IDs
+	 */
+	public static resetMovedMeshes(teamspace: string, modelId: string, meshes: string[]) {
+		const param: any = {
+			nameSpace : teamspace + '.' + modelId,
+			meshes
+		};
+		UnityUtil.toUnity('ResetMovedMeshes', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 	}
 
 }

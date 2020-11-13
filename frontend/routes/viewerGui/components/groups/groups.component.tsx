@@ -21,7 +21,6 @@ import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import Check from '@material-ui/icons/Check';
-import Delete from '@material-ui/icons/Delete';
 import InvertColors from '@material-ui/icons/InvertColors';
 import Visibility from '@material-ui/icons/VisibilityOutlined';
 import { isEmpty, isEqual, size, stubTrue } from 'lodash';
@@ -88,6 +87,7 @@ interface IProps {
 	resetActiveGroup: () => void;
 	subscribeOnChanges: (teamspace, modelId) => void;
 	unsubscribeFromChanges: (teamspace, modelId) => void;
+	id?: string;
 }
 
 interface IState {
@@ -150,8 +150,8 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderGroupsList = renderWhenTrue(() => {
-		const Items = this.state.filteredGroups.map((group) => (
-			<GroupListItem
+		const Items = this.state.filteredGroups.map(({ created, ...group} ) => (
+				<GroupListItem
 					{...group}
 					key={group._id}
 					hideThumbnail
@@ -166,7 +166,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 					hasViewPermission={stubTrue}
 					panelName={GROUP_PANEL_NAME}
 					extraInfo={this.renderObjectsNumber(group.totalSavedMeshes)}
-			/>
+				/>
 		));
 
 		return <ListContainer className="groups-list" ref={this.groupsContainerRef}>{Items}</ListContainer>;
@@ -197,6 +197,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 					color="secondary"
 					variant="fab"
 					disabled={!this.canAddOrUpdate}
+					id={this.props.id + '-add-new-button'}
 				>
 					<AddIcon />
 				</ViewerPanelButton>
@@ -222,6 +223,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 			saveGroup={this.props.saveGroup}
 			resetToSavedSelection={this.handleResetToSavedSelection}
 			canUpdate={this.canAddOrUpdate}
+			deleteGroup={this.handleGroupDelete}
 		/>
 	));
 
@@ -371,23 +373,23 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		return this.props.activeGroupId === group._id;
 	}
 
-	public handleGroupDelete = (groupId) => () => {
+	public handleGroupDelete = () => {
 		const { teamspace, model, deleteGroups } = this.props;
-		deleteGroups(teamspace, model, groupId);
+		deleteGroups(teamspace, model, this.props.activeGroupId);
 	}
 
-	public handleColorOverride = (group) => () => this.props.toggleColorOverride(group._id);
+	public handleColorOverride = (group) => (e: React.SyntheticEvent) => {
+		e.stopPropagation();
+		this.props.toggleColorOverride(group._id);
+	}
 
-	public handleGroupIsolate = (group) => () => this.props.isolateGroup(group);
+	public handleGroupIsolate = (group) => (e: React.SyntheticEvent) => {
+		e.stopPropagation();
+		this.props.isolateGroup(group);
+	}
 
 	public renderGroupActions = (group) => () => (
 		<>
-			<TooltipButton
-				label="Isolate"
-				action={this.handleGroupIsolate(group)}
-				Icon={Visibility}
-				disabled={!this.props.isModelLoaded}
-			/>
 			<TooltipButton
 				label="Toggle Colour Override"
 				action={this.handleColorOverride(group)}
@@ -395,9 +397,9 @@ export class Groups extends React.PureComponent<IProps, IState> {
 				disabled={!this.props.isModelLoaded}
 			/>
 			<TooltipButton
-				label="Delete"
-				action={this.handleGroupDelete(group._id)}
-				Icon={Delete}
+				label="Isolate"
+				action={this.handleGroupIsolate(group)}
+				Icon={Visibility}
 				disabled={!this.props.isModelLoaded}
 			/>
 		</>
@@ -435,6 +437,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 				Icon={this.renderTitleIcon()}
 				renderActions={this.renderActions}
 				pending={this.props.isPending}
+				id={this.props.id + (this.props.showDetails ? '-details' : '' )}
 			>
 				{this.renderFilterPanel(this.props.searchEnabled && !this.props.showDetails)}
 				{this.renderListView(!this.props.showDetails)}
