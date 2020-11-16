@@ -18,7 +18,7 @@
 import { push } from 'connected-react-router';
 import filesize from 'filesize';
 import { isEmpty, isEqual, map, omit, pick } from 'lodash';
-import { all, put, select, takeLatest } from 'redux-saga/effects';
+import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
 import * as queryString from 'query-string';
 import { CHAT_CHANNELS } from '../../constants/chat';
@@ -35,7 +35,6 @@ import { prepareResources } from '../../helpers/resources';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
-import { Viewer } from '../../services/viewer/viewer';
 import { BoardActions } from '../board';
 import { ChatActions } from '../chat';
 import { selectCurrentUser } from '../currentUser';
@@ -43,11 +42,12 @@ import { DialogActions } from '../dialog';
 import { selectJobsList, selectMyJob } from '../jobs';
 import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
+import { selectSelectedStartingDate, SequencesActions } from '../sequences';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { selectTopicTypes } from '../teamspace';
-import { ViewpointsActions } from '../viewpoints';
-import { generateViewpoint, showViewpoint } from '../viewpoints/viewpoints.sagas';
+import { ViewpointsActions, ViewpointsTypes } from '../viewpoints';
+import { generateViewpoint } from '../viewpoints/viewpoints.sagas';
 import { IssuesActions, IssuesTypes } from './issues.redux';
 import {
 	selectActiveIssueDetails,
@@ -103,7 +103,6 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 			};
 		}
 
-			// .substring(screenshot.indexOf(',') + 1);
 		if (issueData.descriptionThumbnail ) {
 			issue.viewpoint = {
 				...(issue.viewpoint || {}),
@@ -144,8 +143,10 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 function* updateActiveIssue({ issueData }) {
 	try {
 		const { _id, rev_id, model, account, position } = yield select(selectActiveIssueDetails);
-		const { data: updatedIssue } = yield API.updateIssue(account, model, _id, rev_id, issueData);
+		let { data: updatedIssue } = yield API.updateIssue(account, model, _id, rev_id, issueData);
 		yield analyticsService.sendEvent(EVENT_CATEGORIES.ISSUE, EVENT_ACTIONS.EDIT);
+
+		updatedIssue = {...updatedIssue, ...issueData};
 
 		const jobs = yield select(selectJobsList);
 		const preparedIssue = prepareIssue(updatedIssue, jobs);
@@ -311,6 +312,11 @@ function* showDetails({ revision, issueId }) {
 
 		yield put(IssuesActions.setActiveIssue(issue, revision));
 		yield put(IssuesActions.setComponentState({ showDetails: true, savedPin: issue.position }));
+
+		if (issue.sequence_start) {
+			yield put(SequencesActions.setSelectedDate(issue.sequence_start));
+		}
+
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('display', 'issue details', error));
 	}
@@ -481,6 +487,13 @@ export function* setNewIssue() {
 	const topicType =  topicTypes.length > 0 ? (topicTypes.find((t) => t === DEFAULT_PROPERTIES.TOPIC_TYPE) ?
 		DEFAULT_PROPERTIES.TOPIC_TYPE : topicTypes[0]) : undefined;
 
+	// tslint:disable-next-line: variable-name
+	let sequence_start = yield select(selectSelectedStartingDate);
+
+	if (sequence_start) {
+		sequence_start = sequence_start.valueOf();
+	}
+
 	try {
 		const newIssue = prepareIssue({
 			name: 'Untitled Issue',
@@ -489,7 +502,8 @@ export function* setNewIssue() {
 			priority: PRIORITIES.NONE,
 			topic_type: topicType,
 			viewpoint: {},
-			owner: currentUser.username
+			owner: currentUser.username,
+			sequence_start
 		}, jobs);
 
 		yield put(IssuesActions.setComponentState({

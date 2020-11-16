@@ -42,6 +42,12 @@ const extensionRe = /\.(\w+)$/;
 
 const getResponse = (responseCodeType) => (type) => responseCodes[responseCodeType + "_" + type];
 
+function verifySequenceDatePrecedence(ticket) {
+	return !utils.hasField(ticket, "sequence_start") ||
+		!utils.hasField(ticket, "sequence_end") ||
+		ticket["sequence_start"] <= ticket["sequence_end"];
+}
+
 class Ticket extends View {
 	constructor(collName, viewpointType, refIdsField, responseCodeType, fieldTypes, ownerPrivilegeAttributes) {
 		super();
@@ -201,12 +207,22 @@ class Ticket extends View {
 		const systemComments = [];
 		const fields = Object.keys(data);
 
+		const updateData = {};
+
 		let newViewpoint;
 
 		fields.forEach(field => {
 			// handle viewpoint later
 			if (field === "viewpoint") {
 				return;
+			}
+
+			if (null === data[field]) {
+				if (!updateData["$unset"]) {
+					updateData["$unset"] = {};
+				}
+
+				updateData["$unset"][field] = "";
 			}
 
 			this.handleFieldUpdate(account, model, sessionId, id, user, field, oldTicket, data, systemComments);
@@ -236,6 +252,9 @@ class Ticket extends View {
 			data.viewpoint = newViewpoint;
 
 			data.viewpoint.guid = utils.uuidToString(data.viewpoint.guid);
+			if (data.viewpoint.transformation_group_id) {
+				data.viewpoint.transformation_group_id = utils.uuidToString(data.viewpoint.transformation_group_id);
+			}
 
 			if (data.viewpoint.thumbnail) {
 				data.thumbnail = data.viewpoint.thumbnail;
@@ -290,15 +309,21 @@ class Ticket extends View {
 		const _id = utils.stringToUUID(id);
 
 		const tickets = await this.getCollection(account, model);
-		if (Object.keys(data).length > 0) {
-			await tickets.update({ _id }, { $set: data });
-		}
 
 		// 7. Return the updated data and the old ticket
-		const updatedTicket = {
-			...oldTicket,
-			...data
-		};
+		const updatedTicket = updateData["$unset"] ?
+			this.filterFields({ ...oldTicket, ...data }, Object.keys(updateData["$unset"])) :
+			{ ...oldTicket, ...data };
+
+		// 8. Check sequence dates in correct order
+		if (!verifySequenceDatePrecedence(updatedTicket)) {
+			throw responseCodes.INVALID_DATE_ORDER;
+		}
+
+		if (Object.keys(data).length > 0) {
+			updateData["$set"] = data;
+			await tickets.update({ _id }, updateData);
+		}
 
 		this.clean(account, model, updatedTicket);
 		this.clean(account, model, oldTicket);
@@ -319,7 +344,9 @@ class Ticket extends View {
 	}
 
 	handleFieldUpdate(account, model, sessionId, id, user, field, oldTicket, data, systemComments) {
-		if (data[field] && !utils.typeMatch(data[field], this.fieldTypes[field])) {
+		if (null === data[field]) {
+			delete data[field];
+		} else if (!utils.typeMatch(data[field], this.fieldTypes[field])) {
 			throw responseCodes.INVALID_ARGUMENTS;
 		}
 
@@ -383,7 +410,8 @@ class Ticket extends View {
 				}
 
 			}
-			if (key === "due_date" && newTicket[key] === 0) {
+			if ((key === "due_date" || key === "sequence_start" || key === "sequence_end")
+				&& newTicket[key] === 0) {
 				delete newTicket[key];
 			}
 		});
@@ -426,6 +454,11 @@ class Ticket extends View {
 
 		newTicket = this.filterFields(newTicket, ["viewpoint", "revId"]);
 
+		// Check sequence dates in correct order
+		if (!verifySequenceDatePrecedence(newTicket)) {
+			throw responseCodes.INVALID_DATE_ORDER;
+		}
+
 		const settings = await ModelSetting.findById({ account, model }, model);
 
 		await coll.insert(newTicket);
@@ -458,12 +491,13 @@ class Ticket extends View {
 	async processFilter(account, model, branch, revId, filters) {
 		let filter = {};
 		if (filters) {
-			if (filters.ids) {
-				filter = await this.getIdsFilter(account, model, branch, revId, filters.ids);
+			if (filters.id) {
+				filter = await this.getIdsFilter(account, model, branch, revId, filters.id);
+				delete filters.id;
 			}
-			if (filters.numbers) {
-				filter.number = { "$in": filters.numbers.map((n) => parseInt(n)) };
-			}
+
+			filters = _.mapValues(filters, value =>  ({ "$in": value}));
+			filter = {...filter, ...filters};
 		}
 
 		return filter;
@@ -495,24 +529,29 @@ class Ticket extends View {
 		return filter;
 	}
 
-	async findByModelName(account, model, branch, revId, query, projection, filters, noClean = false, convertCoords = false) {
+	async findByModelName(account, model, branch, revId, query, projection, filters, noClean = false, convertCoords = false, filterTicket = null) {
 		const filter = await this.processFilter(account, model, branch, revId, filters);
 		const fullQuery = {...filter, ...query};
 
 		const coll = await this.getCollection(account, model);
 		const tickets = await coll.find(fullQuery, projection).toArray();
-		tickets.forEach((foundTicket, index) => {
-			if (!noClean) {
-				tickets[index] = this.clean(account, model, foundTicket);
+		return tickets.reduce((filteredTickets,  foundTicket) => {
+			if (filterTicket &&  !filterTicket(foundTicket, filters)) {
+				return filteredTickets;
 			}
 
 			if (convertCoords) {
 				this.toDirectXCoords(foundTicket);
 			}
 
-		});
+			if (!noClean) {
+				filteredTickets.push(this.clean(account, model, foundTicket));
+			} else {
+				filteredTickets.push(foundTicket);
+			}
 
-		return tickets;
+			return filteredTickets;
+		}, []);
 	}
 
 	toDirectXCoords(entry) {

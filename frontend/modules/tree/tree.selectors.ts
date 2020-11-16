@@ -130,8 +130,8 @@ export const selectSearchEnabled = createSelector(
 	selectComponentState, (state) => state.searchEnabled
 );
 
-export const selectIfcSpacesHidden = createSelector(
-	selectComponentState, (state) => state.ifcSpacesHidden
+export const selectHiddenGeometryVisible = createSelector(
+	selectComponentState, (state) => state.hiddenGeometryVisible
 );
 
 export const selectDefaultHiddenNodesIds = createSelector(

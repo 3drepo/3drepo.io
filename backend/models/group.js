@@ -42,6 +42,7 @@ const fieldTypes = {
 	"objects": "[object Array]",
 	"rules": "[object Array]",
 	"color": "[object Array]",
+	"transformation": "[object Array]",
 	"issue_id": "[object Object]",
 	"risk_id": "[object Object]",
 	"view_id": "[object Object]"
@@ -97,7 +98,8 @@ const groupSchema = new Schema({
 		type: Object,
 		required: false
 	},
-	color: [Number]
+	color: [Number],
+	transformation: [Number]
 });
 
 groupSchema.statics.ifcGuidsToUUIDs = function (account, model, ifcGuids, branch, revId) {
@@ -460,7 +462,7 @@ groupSchema.methods.updateAttrs = function (dbCol, data, user) {
 	return this.getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
 		const toUpdate = {};
 		const toUnset = {};
-		const fieldsCanBeUpdated = ["description", "name", "rules", "objects", "color", "issue_id", "risk_id"];
+		const fieldsCanBeUpdated = ["description", "name", "rules", "objects", "color", "transformation", "issue_id", "risk_id"];
 
 		let typeCorrect = !(data.rules && data.objects);
 		typeCorrect && fieldsCanBeUpdated.forEach((key) => {
@@ -470,7 +472,7 @@ groupSchema.methods.updateAttrs = function (dbCol, data, user) {
 						toUpdate.objects = cleanEmbeddedObject(key, convertedObjects);
 						toUnset.rules = 1;
 						this.rules = undefined;
-					} else if (key === "color") {
+					} else if (key === "color" || key === "transformation") {
 						toUpdate[key] = data[key].map((c) => parseInt(c, 10));
 					} else {
 						if (key === "rules"
@@ -543,7 +545,7 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data, creator = ""
 
 		let typeCorrect = (!data.objects !== !data.rules);
 
-		const allowedFields = ["description", "name", "objects","rules","color","issue_id","risk_id","view_id"];
+		const allowedFields = ["description", "name", "objects","rules","color","transformation","issue_id","risk_id","view_id"];
 
 		allowedFields.forEach((key) => {
 			if (fieldTypes[key] && utils.hasField(data, key)) {
@@ -552,6 +554,8 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data, creator = ""
 						newGroup.objects = cleanEmbeddedObject(key, convertedObjects);
 					} else if (key === "color") {
 						newGroup[key] = data[key].map((c) => parseInt(c, 10));
+					} else if (key === "transformation") {
+						newGroup[key] = data[key];
 					} else {
 						if (key === "rules"
 							&& data.rules
@@ -613,6 +617,7 @@ function clean(groupData) {
 	}
 
 	cleanArray(cleaned, "rules");
+	cleanArray(cleaned, "transformation");
 
 	for (let i = 0; cleaned.objects && i < cleaned.objects.length; i++) {
 		cleanArray(cleaned.objects[i], "ifc_guids");

@@ -20,21 +20,16 @@ import React from 'react';
 import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
 import ArrowBack from '@material-ui/icons/ArrowBack';
-import Check from '@material-ui/icons/Check';
 import { isEmpty, isEqual } from 'lodash';
 
 import { CREATE_ISSUE, VIEW_ISSUE } from '../../../../constants/issue-permissions';
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
+import { renderActionsMenu, IHeaderMenuItem } from '../../../../helpers/reportedItems';
 import { searchByFilters } from '../../../../helpers/searching';
 import { sortByDate } from '../../../../helpers/sorting';
 import { EmptyStateInfo } from '../../../components/components.styles';
-import {
-	IconWrapper,
-	MenuList,
-	StyledItemText,
-	StyledListItem
-} from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
+
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
 import { ListNavigation } from '../listNavigation/listNavigation.component';
 import { PanelBarActions } from '../panelBarActions';
@@ -42,14 +37,6 @@ import { PreviewListItem } from '../previewListItem/previewListItem.component';
 import { ListContainer, Summary } from '../risks/risks.styles';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ViewerPanelButton, ViewerPanelContent, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
-
-interface IHeaderMenuItem {
-	label: string;
-	enabled?: boolean;
-	Icon?: any;
-	isSorting?: boolean;
-	onClick?: (event?) => void;
-}
 
 interface IProps {
 	className?: string;
@@ -80,6 +67,7 @@ interface IProps {
 	onChangeFilters: (selectedFilters) => void;
 	toggleShowPins: (showPins: boolean, filteredItems) => void;
 	renderDetailsView: (statement) => React.ReactChildren[];
+	sortByField?: string;
 	id?: string;
 }
 
@@ -95,10 +83,10 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	}
 
 	get filteredItems() {
-		const { items, selectedFilters, showDefaultHiddenItems } = this.props;
+		const { items, selectedFilters, showDefaultHiddenItems, sortByField } = this.props;
 		return sortByDate(
 			searchByFilters(items, selectedFilters, showDefaultHiddenItems, ['name', 'desc', 'number']),
-			{ order: this.props.sortOrder }
+			{ order: this.props.sortOrder }, sortByField
 		);
 	}
 
@@ -192,17 +180,20 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		const { items, selectedFilters, showDefaultHiddenItems, searchEnabled, sortOrder, showDetails } = this.props;
+		const { items, selectedFilters, showDefaultHiddenItems, searchEnabled,
+			sortOrder, showDetails, sortByField } = this.props;
 		const itemsChanged = !isEqual(prevProps.items, items);
 		const sortingChanged = prevProps.sortOrder !== sortOrder;
 		const filtersChanged = prevProps.selectedFilters.length !== selectedFilters.length;
 		const showDefaultHiddenItemsChanged = prevProps.showDefaultHiddenItems !== showDefaultHiddenItems;
 		const searchEnabledChange = prevProps.searchEnabled !== searchEnabled;
 		const detailsWasClosed = prevProps.showDetails !== showDetails && !showDetails;
+		const sortByChanged =  prevProps.sortByField !== sortByField && sortByField;
 
 		const changes = {} as IState;
 
-		if (itemsChanged || filtersChanged || showDefaultHiddenItemsChanged || searchEnabledChange || sortingChanged) {
+		if (itemsChanged || filtersChanged || showDefaultHiddenItemsChanged ||
+			searchEnabledChange || sortingChanged || sortByChanged) {
 			changes.filteredItems = this.filteredItems;
 		}
 
@@ -267,31 +258,6 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 		return <Icon />;
 	}
 
-	public renderSortIcon = (Icon) => {
-		if (this.props.sortOrder === 'asc') {
-			return <Icon.ASC IconProps={{ fontSize: 'small' }} /> ;
-		}
-		return <Icon.DESC IconProps={{ fontSize: 'small' }} /> ;
-	}
-
-	public renderActionsMenu = () => (
-		<MenuList>
-			{this.props.headerMenuItems.map(({ label, Icon, onClick, enabled, isSorting }, index) => {
-				return (
-					<StyledListItem key={index} button onClick={onClick}>
-						<IconWrapper>
-							{isSorting ? this.renderSortIcon(Icon) : <Icon fontSize="small" />}
-						</IconWrapper>
-						<StyledItemText>
-							{label}
-							{enabled && <Check fontSize="small" />}
-						</StyledItemText>
-					</StyledListItem>
-				);
-			})}
-		</MenuList>
-	)
-
 	public handleNavigationChange = (currentIndex) => {
 		const itemToShow = this.state.filteredItems[currentIndex] || this.state.filteredItems[0];
 		this.props.onShowDetails(itemToShow);
@@ -309,7 +275,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 			<PanelBarActions
 				type={this.props.type}
 				menuLabel="Show filters menu"
-				menuActions={this.renderActionsMenu}
+				menuActions={() => renderActionsMenu(this.props.headerMenuItems)}
 				isSearchEnabled={this.props.searchEnabled}
 				onSearchOpen={this.handleOpenSearchMode}
 				onSearchClose={this.handleCloseSearchMode}

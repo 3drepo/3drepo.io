@@ -22,13 +22,9 @@ const app = require("../../services/api.js").createApp();
 const responseCodes = require("../../response_codes.js");
 const async = require("async");
 const { login } = require("../helpers/users.js");
-
 const { createIssue } = require("../helpers/issues.js");
-
 const { deleteNotifications, fetchNotification } = require("../helpers/notifications.js");
-const { Agent } = require("useragent");
-const supertest = require("supertest");
-const { json } = require("body-parser");
+const { createModel } = require("../helpers/models.js");
 
 describe("Issues", function () {
 	let server;
@@ -300,6 +296,265 @@ describe("Issues", function () {
 
 		});
 
+		it("with sequence start/end date should succeed", function(done) {
+			const startDate = 1476107839000;
+			const endDate = 1476107839800;
+			const issue = Object.assign({
+				"name":"Issue test",
+				"sequence_start":startDate,
+				"sequence_end":endDate
+			}, baseIssue);
+			let issueId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200 , function(err, res) {
+							issueId = res.body._id;
+							expect(res.body.sequence_start).to.equal(startDate);
+							expect(res.body.sequence_end).to.equal(endDate);
+
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/issues/${issueId}`).expect(200, function(err , res) {
+						expect(res.body.sequence_start).to.equal(startDate);
+						expect(res.body.sequence_end).to.equal(endDate);
+
+						return done(err);
+					});
+				}
+			], done);
+		});
+
+		it("with sequence end date before start should fail", function(done) {
+			const startDate = 1476107839800;
+			const endDate = 1476107839000;
+			const issue = Object.assign({
+				"name":"Issue test",
+				"sequence_start":startDate,
+				"sequence_end":endDate
+			}, baseIssue);
+			let issueId;
+
+			agent.post(`/${username}/${model}/issues`)
+				.send(issue)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_DATE_ORDER.value);
+					done(err);
+				});
+		});
+
+		it("with invalid sequence start/end date should fail", function(done) {
+			const issue = Object.assign({
+				"name":"Issue test",
+				"sequence_start":"invalid data",
+				"sequence_end": false
+			}, baseIssue);
+			let issueId;
+
+			agent.post(`/${username}/${model}/issues`)
+				.send(issue)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("with transformation should succeed", function(done) {
+			const issue = Object.assign({"name":"Issue test"}, baseIssue);
+			issue.viewpoint = Object.assign({
+				transformation_group_ids: ["8d46d1b0-8ef1-11e6-8d05-000000000000"]
+			}, issue.viewpoint);
+			let issueId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200, function(err, res) {
+							issueId = res.body._id;
+							expect(res.body.viewpoint.transformation_group_ids).to.deep.equal(issue.viewpoint.transformation_group_ids);
+
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/issues/${issueId}`).expect(200, function(err , res) {
+						expect(res.body.viewpoint.transformation_group_ids).to.deep.equal(issue.viewpoint.transformation_group_ids);
+
+						return done(err);
+					});
+				}
+			], done);
+		});
+
+		it("with embedded transformation should succeed", function(done) {
+			const transformation_groups = [
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+			];
+
+			const issue = Object.assign({"name":"Issue test"}, baseIssue);
+			issue.viewpoint = Object.assign({transformation_groups}, issue.viewpoint);
+
+			let issueId;
+			let transformation_group_ids;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200, function(err, res) {
+							issueId = res.body._id;
+							transformation_group_ids = res.body.viewpoint.transformation_group_ids;
+
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/issues/${issueId}`).expect(200, function(err , res) {
+						expect(res.body.viewpoint.transformation_group_ids).to.deep.equal(transformation_group_ids);
+
+						return done(err);
+					});
+				}
+			], done);
+		});
+
+		it("with invalid (short) embedded transformation matrix should fail", function(done) {
+			const transformation_groups = [
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+			];
+
+			const issue = Object.assign({"name":"Issue test"}, baseIssue);
+			issue.viewpoint = Object.assign({transformation_groups}, issue.viewpoint);
+
+			agent.post(`/${username}/${model}/issues`)
+				.send(issue)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("with invalid (long) embedded transformation matrix should fail", function(done) {
+			const transformation_groups = [
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]
+				},
+			];
+
+			const issue = Object.assign({"name":"Issue test"}, baseIssue);
+			issue.viewpoint = Object.assign({transformation_groups}, issue.viewpoint);
+
+			agent.post(`/${username}/${model}/issues`)
+				.send(issue)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("with transformation group but without matrix should fail", function(done) {
+			const transformation_groups = [
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+			];
+
+			const issue = Object.assign({"name":"Issue test"}, baseIssue);
+			issue.viewpoint = Object.assign({transformation_groups}, issue.viewpoint);
+
+			agent.post(`/${username}/${model}/issues`)
+				.send(issue)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("with transformation matrix but without objects should fail", function(done) {
+			const transformation_groups = [
+				{
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+			];
+
+			const issue = Object.assign({"name":"Issue test"}, baseIssue);
+			issue.viewpoint = Object.assign({transformation_groups}, issue.viewpoint);
+
+			agent.post(`/${username}/${model}/issues`)
+				.send(issue)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
 
 		it("without name should fail", function(done) {
 			const issue = baseIssue;
@@ -500,7 +755,7 @@ describe("Issues", function () {
 			], done);
 		});
 
-		it("change pin position  should succeed", function(done) {
+		it("change pin position should succeed", function(done) {
 			const issue = {...baseIssue,"name":"Issue test", position:[0,1,2]};
 			let issueId;
 			const position = { position: [1,-1,9] };
@@ -528,6 +783,222 @@ describe("Issues", function () {
 			], done);
 		});
 
+		it("add sequence start/end date should succeed", function(done) {
+			const startDate = 1476107839000;
+			const endDate = 1476107839800;
+			const issue = {...baseIssue, "name":"Issue test"};
+			const sequenceData = {
+				sequence_start: startDate,
+				sequence_end: endDate
+			};
+			let issueId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200, function(err, res) {
+							issueId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/issues/${issueId}`)
+						.send(sequenceData)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/issues/${issueId}`)
+						.expect(200, function(err, res) {
+							expect(res.body.sequence_start).to.equal(startDate);
+							expect(res.body.sequence_end).to.equal(endDate);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("add sequence end date before start should fail", function(done) {
+			const startDate = 1476107839800;
+			const endDate = 1476107839000;
+			const issue = {...baseIssue, "name":"Issue test"};
+			const sequenceData = {
+				sequence_start: startDate,
+				sequence_end: endDate
+			};
+			let issueId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200, function(err, res) {
+							issueId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/issues/${issueId}`)
+						.send(sequenceData)
+						.expect(400, function(err, res) {
+							expect(res.body.value).to.equal(responseCodes.INVALID_DATE_ORDER.value);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change sequence start/end date should succeed", function(done) {
+			const startDate = 1476107839000;
+			const endDate = 1476107839800;
+			const issue = {...baseIssue, "name":"Issue test", "sequence_start":1476107839555, "sequence_end":1476107839855};
+			const sequenceData = {
+				sequence_start: startDate,
+				sequence_end: endDate
+			};
+			let issueId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200, function(err, res) {
+							issueId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/issues/${issueId}`)
+						.send(sequenceData)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/issues/${issueId}`)
+						.expect(200, function(err, res) {
+							expect(res.body.sequence_start).to.equal(startDate);
+							expect(res.body.sequence_end).to.equal(endDate);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change sequence end date to precede start should fail", function(done) {
+			const endDate = 1476107839000;
+			const issue = {...baseIssue, "name":"Issue test", "sequence_start":1476107839555, "sequence_end":1476107839855};
+			const sequenceData = {
+				sequence_end: endDate
+			};
+			let issueId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200, function(err, res) {
+							issueId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/issues/${issueId}`)
+						.send(sequenceData)
+						.expect(400, function(err, res) {
+							expect(res.body.value).to.equal(responseCodes.INVALID_DATE_ORDER.value);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("remove sequence start/end date should succeed", function(done) {
+			const issue = {...baseIssue, "name":"Issue test", "sequence_start":1476107839555, "sequence_end":1476107839855};
+			const sequenceData = {
+				sequence_start: null,
+				sequence_end: null
+			};
+			let issueId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200, function(err, res) {
+							issueId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/issues/${issueId}`)
+						.send(sequenceData)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/issues/${issueId}`)
+						.expect(200, function(err, res) {
+							expect(res.body.sequence_start).to.not.exist;
+							expect(res.body.sequence_end).to.not.exist;
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("add sequence start/end date with invalid data should fail", function(done) {
+			const issue = {...baseIssue, "name":"Issue test"};
+			const sequenceData = {
+				sequence_start: "invalid data",
+				sequence_end: false
+			};
+			let issueId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200, function(err, res) {
+							issueId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/issues/${issueId}`)
+						.send(sequenceData)
+						.expect(400, function(err, res) {
+							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change sequence start/end date with invalid data should fail", function(done) {
+			const issue = {...baseIssue, "name":"Issue test", "sequence_start":1476107839555, "sequence_end":1476107839855};
+			const sequenceData = {
+				sequence_start: "invalid data",
+				sequence_end: false
+			};
+			let issueId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200, function(err, res) {
+							issueId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/issues/${issueId}`)
+						.send(sequenceData)
+						.expect(400, function(err, res) {
+							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+							done(err);
+						});
+				}
+			], done);
+		});
 
 		it("change status should succeed and create system comment", function(done) {
 			const issue = Object.assign({"name":"Issue test"}, baseIssue, { status: "open"});
@@ -792,6 +1263,339 @@ describe("Issues", function () {
 							delete vp.screenshot_ref;
 							expect(vp).to.deep.equal(newViewpoint);
 							expect(res.body.comments[1].owner).to.equal(username);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change viewpoint transformation should succeed and create system comment", function(done) {
+			const issue = Object.assign({"name":"Issue test"}, baseIssue, { assigned_roles:["jobA"]});
+			let issueId;
+			let oldViewpoint;
+			const data = {
+				"viewpoint": {
+					"up":[0,1,0],
+					"position":[20,20,100],
+					"look_at":[0,0,-100],
+					"view_dir":[0,0,-1],
+					"right":[1,0,0],
+					"fov":2,
+					"aspect_ratio":1,
+					"far":300,
+					"near":50,
+					"transformation_group_ids":["8d46d1b0-8ef1-11e6-8d05-000000000000"]
+				}
+			};
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200 , function(err, res) {
+							issueId = res.body._id;
+							oldViewpoint = res.body.viewpoint;
+							delete oldViewpoint.screenshot;
+							delete oldViewpoint.screenshotSmall;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/issues/${issueId}`)
+						.send(data)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/issues/${issueId}`)
+						.expect(200, function(err, res) {
+							const newViewpoint = { ...oldViewpoint, ...data.viewpoint };
+							newViewpoint.guid = res.body.viewpoint.guid;
+							data.viewpoint.guid = res.body.viewpoint.guid;
+							data.viewpoint.thumbnail = res.body.viewpoint.thumbnail;
+
+							expect(res.body.viewpoint).to.deep.equal(data.viewpoint);
+							expect(res.body.comments[0].action.property).to.equal("viewpoint");
+							expect(JSON.parse(res.body.comments[0].action.from)).to.deep.equal(oldViewpoint);
+							expect(JSON.parse(res.body.comments[0].action.to)).to.deep.equal(newViewpoint);
+							expect(res.body.comments[0].owner).to.equal(username);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change viewpoint embedded transformation should succeed and create system comment", function(done) {
+			const transformation_groups = [
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+			];
+
+			const issue = Object.assign({"name":"Issue test"}, baseIssue, { assigned_roles:["jobA"]});
+			const data = {
+				"viewpoint": {
+					"up":[0,1,0],
+					"position":[20,20,100],
+					"look_at":[0,0,-100],
+					"view_dir":[0,0,-1],
+					"right":[1,0,0],
+					"fov":2,
+					"aspect_ratio":1,
+					"far":300,
+					"near":50,
+					transformation_groups
+				}
+			};
+
+			let issueId;
+			let oldViewpoint;
+			let transformation_group_ids;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200 , function(err, res) {
+							issueId = res.body._id;
+							oldViewpoint = res.body.viewpoint;
+							delete oldViewpoint.screenshot;
+							delete oldViewpoint.screenshotSmall;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/issues/${issueId}`)
+						.send(data)
+						.expect(200, function(err, res) {
+							transformation_group_ids = res.body.viewpoint.transformation_group_ids;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/issues/${issueId}`)
+						.expect(200, function(err, res) {
+							const newViewpoint = { ...oldViewpoint, ...data.viewpoint };
+							newViewpoint.guid = res.body.viewpoint.guid;
+							delete newViewpoint.transformation_groups;
+							newViewpoint.transformation_group_ids = transformation_group_ids;
+
+							data.viewpoint.guid = res.body.viewpoint.guid;
+							data.viewpoint.thumbnail = res.body.viewpoint.thumbnail;
+							delete data.viewpoint.transformation_groups;
+							data.viewpoint.transformation_group_ids = transformation_group_ids;
+
+							expect(res.body.viewpoint).to.deep.equal(data.viewpoint);
+							expect(res.body.comments[0].action.property).to.equal("viewpoint");
+							expect(JSON.parse(res.body.comments[0].action.from)).to.deep.equal(oldViewpoint);
+							expect(JSON.parse(res.body.comments[0].action.to)).to.deep.equal(newViewpoint);
+							expect(res.body.comments[0].owner).to.equal(username);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change viewpoint embedded transformation with bad matrix should fail", function(done) {
+			const transformation_groups = [
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+			];
+
+			const issue = Object.assign({"name":"Issue test"}, baseIssue, { assigned_roles:["jobA"]});
+			const data = {
+				"viewpoint": {
+					"up":[0,1,0],
+					"position":[20,20,100],
+					"look_at":[0,0,-100],
+					"view_dir":[0,0,-1],
+					"right":[1,0,0],
+					"fov":2,
+					"aspect_ratio":1,
+					"far":300,
+					"near":50,
+					transformation_groups
+				}
+			};
+
+			let issueId;
+			let oldViewpoint;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200 , function(err, res) {
+							issueId = res.body._id;
+							oldViewpoint = res.body.viewpoint;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/issues/${issueId}`)
+						.send(data)
+						.expect(400, function(err, res) {
+							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+							done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/issues/${issueId}`)
+						.expect(200, function(err, res) {
+							expect(res.body.viewpoint).to.deep.equal(oldViewpoint);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change viewpoint embedded transformation without matrix should fail", function(done) {
+			const transformation_groups = [
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+			];
+
+			const issue = Object.assign({"name":"Issue test"}, baseIssue, { assigned_roles:["jobA"]});
+			const data = {
+				"viewpoint": {
+					"up":[0,1,0],
+					"position":[20,20,100],
+					"look_at":[0,0,-100],
+					"view_dir":[0,0,-1],
+					"right":[1,0,0],
+					"fov":2,
+					"aspect_ratio":1,
+					"far":300,
+					"near":50,
+					transformation_groups
+				}
+			};
+
+			let issueId;
+			let oldViewpoint;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200 , function(err, res) {
+							issueId = res.body._id;
+							oldViewpoint = res.body.viewpoint;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/issues/${issueId}`)
+						.send(data)
+						.expect(400, function(err, res) {
+							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+							done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/issues/${issueId}`)
+						.expect(200, function(err, res) {
+							expect(res.body.viewpoint).to.deep.equal(oldViewpoint);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change viewpoint embedded transformation without objects should fail", function(done) {
+			const transformation_groups = [
+				{
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+			];
+
+			const issue = Object.assign({"name":"Issue test"}, baseIssue, { assigned_roles:["jobA"]});
+			const data = {
+				"viewpoint": {
+					"up":[0,1,0],
+					"position":[20,20,100],
+					"look_at":[0,0,-100],
+					"view_dir":[0,0,-1],
+					"right":[1,0,0],
+					"fov":2,
+					"aspect_ratio":1,
+					"far":300,
+					"near":50,
+					transformation_groups
+				}
+			};
+
+			let issueId;
+			let oldViewpoint;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200 , function(err, res) {
+							issueId = res.body._id;
+							oldViewpoint = res.body.viewpoint;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/issues/${issueId}`)
+						.send(data)
+						.expect(400, function(err, res) {
+							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+							done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/issues/${issueId}`)
+						.expect(200, function(err, res) {
+							expect(res.body.viewpoint).to.deep.equal(oldViewpoint);
 							done(err);
 						});
 				}
@@ -2037,9 +2841,6 @@ describe("Issues", function () {
 			], done);
 
 		});
-
-
-
 	});
 
 	describe("BCF", function() {
@@ -2404,6 +3205,102 @@ describe("Issues", function () {
 					});
 			});
 		});
+	});
+
+	describe("Search", function() {
+		const teamspace = "teamSpace1";
+		const password = "password";
+		let model = "";
+
+		before(function(done) {
+			async.series([
+				login(agent, teamspace, password),
+				(next) => {
+					createModel(agent, teamspace,'Query issues').then((res) => {
+						model = res.body.model;
+
+						let createIssueTeamspace1 = createIssue(teamspace,model);
+
+						async.series([
+							createIssueTeamspace1(agent, {topic_type: 'information', number: 0, status: 'closed', priority: 'none', assigned_roles:[]}),
+							createIssueTeamspace1(agent, {topic_type: 'other', number: 1, status: 'open', priority: 'medium', assigned_roles:['Client']}),
+							createIssueTeamspace1(agent, {topic_type: 'information', number: 2, status: 'in progress', priority: 'high', assigned_roles:[]}),
+							login(agent,'adminTeamspace1JobA', password ),
+							createIssueTeamspace1(agent, {topic_type: 'structure', number: 3, status: 'open', priority: 'none', assigned_roles:[]}),
+							createIssueTeamspace1(agent, {topic_type: 'architecture', number: 4, status: 'open', priority: 'none', assigned_roles:['Client']}),
+							login(agent, teamspace, password)
+						], next);
+					})
+				},
+			], done);
+		});
+
+		it(" by id", function(done) {
+			let ids = [];
+
+			agent.get(`/${teamspace}/${model}/issues`)
+			.expect(200, function(err, res) {
+				ids = res.body.map(issue => issue._id);
+				ids = [ids[0], ids[2], ids[4]].sort();
+
+				agent.get(`/${teamspace}/${model}/issues?ids=${ids.join(',')}`)
+				.expect(200, function(err, res) {
+					expect(res.body.map((issue => issue._id)).sort()).to.eql(ids)
+					done(err);
+				});
+
+			});
+		});
+
+		it(" by topic", function(done) {
+			agent.get(`/${teamspace}/${model}/issues?topicTypes=information,structure`)
+			.expect(200, function(err, res) {
+				expect(res.body.map((issue => issue.topic_type)).sort()).to.eql(['information', 'structure', 'information'].sort())
+				done(err);
+			});
+		});
+
+		it(" by status", function(done) {
+			agent.get(`/${teamspace}/${model}/issues?status=closed,in%20progress`)
+			.expect(200, function(err, res) {
+				expect(res.body.map((issue => issue.status)).sort()).to.eql(['closed', 'in progress'].sort())
+				done(err);
+			});
+		});
+
+		it(" by priority", function(done) {
+			agent.get(`/${teamspace}/${model}/issues?priorities=medium,high`)
+			.expect(200, function(err, res) {
+				expect(res.body.map((issue => issue.priority)).sort()).to.eql(['medium', 'high'].sort())
+				done(err);
+			});
+		});
+
+		it(" by number", function(done) {
+			agent.get(`/${teamspace}/${model}/issues?numbers=1,3,4,39`)
+			.expect(200, function(err, res) {
+				expect(res.body.map((issue => issue.number)).sort()).to.eql([1, 3, 4].sort())
+				done(err);
+			});
+		});
+
+		it(" by assigned role", function(done) {
+			agent.get(`/${teamspace}/${model}/issues/?assignedRoles=Client`)
+			.expect(200, function(err, res) {
+				expect(res.body.map((issue => issue.assigned_roles[0])).sort()).to.eql(['Client','Client'].sort())
+				done(err);
+			});
+		});
+
+		it(" by unassigned role", function(done) {
+			agent.get(`/${teamspace}/${model}/issues/?assignedRoles=Unassigned`)
+			.expect(200, function(err, res) {
+				expect(res.body.map((issue => issue.assigned_roles.length)).sort()).to.eql([0,0,0].sort())
+				done(err);
+			});
+		});
+
+
 	});
 
 });

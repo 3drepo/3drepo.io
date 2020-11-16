@@ -30,6 +30,15 @@ import { getFilterValues, UNASSIGNED_JOB } from '../constants/reportedItems';
 import { getAPIUrl } from '../services/api';
 import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
 
+export const getStatusIcon = (priority, status) => {
+	const statusIcon = {
+		Icon: STATUSES_ICONS[status] || null,
+		color: (ISSUE_COLORS[status] || ISSUE_COLORS[priority] || ISSUE_COLORS[PRIORITIES.NONE]).color
+	};
+
+	return {...statusIcon};
+};
+
 export const prepareIssue = (issue, jobs = []) => {
 	const preparedIssue = {...issue};
 
@@ -62,15 +71,6 @@ export const prepareIssue = (issue, jobs = []) => {
 	}
 
 	return preparedIssue;
-};
-
-export const getStatusIcon = (priority, status) => {
-	const statusIcon = {
-		Icon: STATUSES_ICONS[status] || null,
-		color: (ISSUE_COLORS[status] || ISSUE_COLORS[priority] || ISSUE_COLORS[PRIORITIES.NONE]).color
-	};
-
-	return {...statusIcon};
 };
 
 export const getIssuePinColor = (issue: any) => {
@@ -137,6 +137,22 @@ export const canComment = (issueData, userJob, permissions, currentUser) => {
 	return ableToComment && isNotClosed;
 };
 
+const getFromToFilter = (label) =>  [{
+	label: 'From',
+	value: {
+		label: label + ' from',
+		value: label + 'from',
+		date: null
+	}
+}, {
+	label: 'To',
+	value: {
+		label: label + ' to',
+		value: label + 'to',
+		date: null
+	}
+}];
+
 export const filtersValuesMap = (jobs, topicTypes) => {
 	const jobsList = [...jobs, UNASSIGNED_JOB];
 
@@ -147,42 +163,33 @@ export const filtersValuesMap = (jobs, topicTypes) => {
 		[ISSUE_FILTER_RELATED_FIELDS.PRIORITY]: getFilterValues(ISSUE_PRIORITIES),
 		[ISSUE_FILTER_RELATED_FIELDS.TYPE]: getFilterValues(topicTypes
 				.map((category) => ({ value: category, name: category }))),
-		[ISSUE_FILTER_RELATED_FIELDS.CREATED_DATE]: [{
-			label: 'From',
-			value: {
-				label: 'From',
-				value: 'from',
-				date: null
-			}
-		}, {
-			label: 'To',
-			value: {
-				label: 'To',
-				value: 'to',
-				date: null
-			}
-		}]
+		[ISSUE_FILTER_RELATED_FIELDS.CREATED_DATE]: getFromToFilter('Created'),
+		[ISSUE_FILTER_RELATED_FIELDS.START_DATETIME]: getFromToFilter('Start')
 	};
 };
 
-export const getHeaderMenuItems = (
-	teamspace,
-	model,
-	revision,
-	printIssues,
-	downloadIssues,
-	importBCF,
-	exportBCF,
-	toggleSortOrder,
-	toggleShowPins?,
-	showPins?,
-	toggleClosedIssues?,
-	showClosedIssues?,
-) => {
+export const getHeaderMenuItems = (props) => {
+	const {teamspace,
+		model,
+		revision,
+		printItems,
+		downloadItems,
+		importBCF,
+		exportBCF,
+		toggleSortOrder,
+		setSortBy,
+		toggleShowPins,
+		showPins,
+		toggleClosedIssues,
+		showClosedIssues,
+		sortOrder,
+		sortByField
+		} = props;
+
 	const items = [
 		{
 			...ISSUES_ACTIONS_MENU.PRINT,
-			onClick: () => printIssues(teamspace, model)
+			onClick: () => printItems(teamspace, model)
 		}, {
 			...ISSUES_ACTIONS_MENU.IMPORT_BCF,
 			onClick: () => {
@@ -195,12 +202,13 @@ export const getHeaderMenuItems = (
 			onClick: () => exportBCF(teamspace, model)
 		}, {
 			...ISSUES_ACTIONS_MENU.DOWNLOAD,
-			onClick: () => downloadIssues(teamspace, model)
+			onClick: () => downloadItems(teamspace, model)
 		}, {
-			...ISSUES_ACTIONS_MENU.SORT_BY_DATE,
+			...ISSUES_ACTIONS_MENU.SORT_ORDER,
 			onClick: () => {
 				toggleSortOrder();
-			}
+			},
+			Icon: sortOrder === 'asc' ? ISSUES_ACTIONS_MENU.SORT_ORDER.ASC : ISSUES_ACTIONS_MENU.SORT_ORDER.DESC
 		}
 	];
 
@@ -221,6 +229,22 @@ export const getHeaderMenuItems = (
 			onClick: toggleClosedIssues
 		});
 	}
+
+	extraItems.push({
+		label: 'Sort by',
+		subItems: [
+			{
+				label: 'Created at',
+				onClick: () => setSortBy('created'),
+				enabled: sortByField === 'created'
+			},
+			{
+				label: 'Start date',
+				onClick: () => setSortBy('sequence_start'),
+				enabled: sortByField === 'sequence_start'
+			},
+		]
+	});
 
 	return [...items, ...extraItems];
 };
