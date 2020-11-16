@@ -16,7 +16,7 @@
  */
 
 import React from 'react';
-import { formatShortDate } from '../../../../../../services/formatting/formatDate';
+import { formatDateTime, formatShortDate, formatShortDateTime } from '../../../../../../services/formatting/formatDate';
 import { Loader } from '../../../../../components/loader/loader.component';
 import { SequenceTasksListContainer, SequenceTasksListItem, TaskListLabel } from '../../sequences.styles';
 import { ITask, TaskItem } from './sequenceTaskItem.component';
@@ -26,6 +26,7 @@ interface IProps {
 	minDate: Date;
 	maxDate: Date;
 	loadingFrame: boolean;
+	fetchActivityDetails: (id: string) => void;
 }
 
 interface IState {
@@ -47,14 +48,10 @@ export class TasksList extends React.PureComponent<IProps, IState> {
 	public get durationLabel() {
 		const  {  minDate, maxDate } = this.props;
 
-		return 'Showing activities ' + ( equalsDate(minDate, maxDate) ?
-			'on ' + formatShortDate(maxDate) :
-			'from ' + formatShortDate(minDate) + ' to ' + formatShortDate(maxDate));
+		return 'Activities from ' + formatShortDateTime(minDate) + ' to ' + formatShortDateTime(maxDate);
 	}
 
-	public toggleCollapse = () => {
-		this.setState({collapsed: !this.state.collapsed});
-	}
+	private handleItemClick = (task) => this.props.fetchActivityDetails(task.id);
 
 	public render = () => {
 		const { tasks, loadingFrame } = this.props;
@@ -66,8 +63,8 @@ export class TasksList extends React.PureComponent<IProps, IState> {
 						<TaskListLabel>{this.durationLabel}</TaskListLabel>
 						{
 							tasks.map((t) => (
-								<SequenceTasksListItem  key={t._id}>
-									<TaskItem task={t} />
+								<SequenceTasksListItem key={t.id}>
+									<TaskItem task={t} onItemClick={this.handleItemClick} />
 								</SequenceTasksListItem>
 							))
 						}

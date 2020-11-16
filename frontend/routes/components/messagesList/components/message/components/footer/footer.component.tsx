@@ -17,7 +17,7 @@
 
 import React from 'react';
 
-import { INTERNAL_IMAGE_PATH_PREFIX } from '../../../../../../../helpers/comments';
+import { INTERNAL_IMAGE_PATH_PREFIX, VIEWPOINT_ID_REGEX } from '../../../../../../../helpers/comments';
 import { DATE_TIME_FORMAT } from '../../../../../../../services/formatting/formatDate';
 import { COMMENT_FIELD_NAME } from '../../../../../../viewerGui/components/commentForm/commentForm.constants';
 import { DateTime } from '../../../../../dateTime/dateTime.component';
@@ -53,11 +53,10 @@ export const Footer = ({ name, created, formRef, commentRef, comment, ...props }
 		const additionalNewLine = (!currentFormCommentValue || currentFormCommentValue.endsWith(`\n`)) ? '' : `  \n`;
 		let quoteComment = '';
 
-		if (props.viewpoint && props.viewpoint.screenshotPath) {
-			const screenshotPath = props.viewpoint.screenshotPath.split('/api/');
-			if (screenshotPath[1]) {
-				quoteComment = quoteComment.concat(`> ![](${INTERNAL_IMAGE_PATH_PREFIX}${screenshotPath[1]})`);
-			}
+		if (props.viewpoint?.screenshotPath) {
+			const viewpointId = props.viewpoint?.screenshotPath
+				.split('/api/')[1].match(VIEWPOINT_ID_REGEX)[0].replace('/viewpoints/', '');
+			quoteComment = quoteComment.concat(`> #SS-${viewpointId}`);
 		}
 
 		if (comment) {

@@ -44,6 +44,7 @@ import { DialogActions } from '../dialog';
 import { selectJobsList, selectMyJob } from '../jobs';
 import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
+import { selectSelectedStartingDate, SequencesActions } from '../sequences';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { ViewpointsActions } from '../viewpoints';
@@ -161,10 +162,11 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 function* updateRisk({ teamspace, modelId, riskData }) {
 	try {
 		const { _id, rev_id, position } = yield select(selectActiveRiskDetails);
-		const { data: updatedRisk } = yield API.updateRisk(teamspace, modelId, _id, rev_id, riskData);
+		let { data: updatedRisk } = yield API.updateRisk(teamspace, modelId, _id, rev_id, riskData);
 		updatedRisk.resources = prepareResources(teamspace, modelId, updatedRisk.resources);
 
 		analyticsService.sendEvent(EVENT_CATEGORIES.RISK, EVENT_ACTIONS.EDIT);
+		updatedRisk = {...updatedRisk, ...riskData};
 
 		const jobs = yield select(selectJobsList);
 		const preparedRisk = prepareRisk(updatedRisk, jobs);
@@ -293,6 +295,10 @@ function* showDetails({ revision, riskId }) {
 
 		yield put(RisksActions.setActiveRisk(risk, revision));
 		yield put(RisksActions.setComponentState({ showDetails: true, savedPin: risk.position }));
+
+		if (risk.sequence_start) {
+			yield put(SequencesActions.setSelectedDate(risk.sequence_start));
+		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('display', 'risk details', error));
 	}
@@ -432,6 +438,13 @@ function* setNewRisk() {
 	const jobs = yield select(selectJobsList);
 	const currentUser = yield select(selectCurrentUser);
 
+	// tslint:disable-next-line: variable-name
+	let sequence_start = yield select(selectSelectedStartingDate);
+
+	if (sequence_start) {
+		sequence_start = sequence_start.valueOf();
+	}
+
 	try {
 		const newRisk = prepareRisk({
 			name: 'Untitled risk',
@@ -451,7 +464,8 @@ function* setNewRisk() {
 			mitigation_desc: '',
 			residual_risk: '',
 			viewpoint: {},
-			owner: currentUser.username
+			owner: currentUser.username,
+			sequence_start
 		}, jobs);
 
 		yield put(RisksActions.setComponentState({

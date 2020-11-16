@@ -20,43 +20,71 @@ const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
 
+const FileRef = require("./fileRef");
 const History = require("./history");
 const Ref = require("./ref");
 
 class Sequence {
 
-	clean(toClean, targetType = "[object String]") {
-		const keys = ["_id", "rev_id", "model", "dateTime", "startDate", "endDate"];
-
+	clean(toClean, keys) {
 		keys.forEach((key) => {
-			if (toClean[key] &&
-				["dateTime", "startDate", "endDate"].includes(key) &&
-				"[object Date]" === Object.prototype.toString.call(toClean[key])) {
-				toClean[key] = new Date(toClean[key]).getTime();
-			} else if (toClean[key] && "[object String]" === targetType) {
-				if ("[object Object]" === Object.prototype.toString.call(toClean[key])) {
+			if (toClean[key]) {
+				if (utils.isObject(toClean[key])) {
 					toClean[key] = utils.uuidToString(toClean[key]);
-				} else if ("[object Array]" === Object.prototype.toString.call(toClean[key])) {
+				} else if (Array.isArray(toClean[key])) {
 					toClean[key] = toClean[key].map((elem) => utils.uuidToString(elem));
-				}
-			} else if (toClean[key] && "[object Object]" === targetType) {
-				if ("[object String]" === Object.prototype.toString.call(toClean[key])) {
-					toClean[key] = utils.stringToUUID(toClean[key]);
-				} else if ("[object Array]" === Object.prototype.toString.call(toClean[key])) {
-					toClean[key] = toClean[key].map((elem) => utils.stringToUUID(elem));
 				}
 			}
 		});
 
+		return toClean;
+	}
+
+	cleanActivityDetail(toClean) {
+		const keys = ["_id", "parents"];
+
+		return this.clean(toClean, keys);
+	}
+
+	cleanSequenceList(toClean) {
+		const keys = ["_id", "rev_id", "model"];
+
 		for (let i = 0; toClean["frames"] && i < toClean["frames"].length; i++) {
-			toClean["frames"][i] = this.clean(toClean["frames"][i]);
+			toClean["frames"][i] = this.cleanSequenceFrame(toClean["frames"][i]);
 		}
 
-		for (let i = 0; toClean["tasks"] && i < toClean["tasks"].length; i++) {
-			toClean["tasks"][i] = this.clean(toClean["tasks"][i]);
+		return this.clean(toClean, keys);
+	}
+
+	cleanSequenceFrame(toClean) {
+		const key = "dateTime";
+
+		if (toClean[key] && utils.isDate(toClean[key])) {
+			toClean[key] = new Date(toClean[key]).getTime();
 		}
 
 		return toClean;
+	}
+
+	async getSequenceActivityDetail(account, model, activityId) {
+		const dbCol = await db.getCollection(account, model + ".activities");
+		const activity = await dbCol.findOne({"_id": utils.stringToUUID(activityId)});
+
+		if (!activity) {
+			return Promise.reject(responseCodes.ACTIVITY_NOT_FOUND);
+		}
+
+		this.cleanActivityDetail(activity);
+
+		return activity;
+	}
+
+	async getSequenceActivities(account, model, sequenceId) {
+		return FileRef.getSequenceActivitiesFile(account, model, utils.uuidToString(sequenceId));
+	}
+
+	getSequenceState(account, model, stateId) {
+		return FileRef.getSequenceStateFile(account, model, stateId);
 	}
 
 	async getList(account, model, branch, revision, cleanResponse = false) {
@@ -80,7 +108,7 @@ class Sequence {
 			sequence.model = model;
 
 			if (cleanResponse) {
-				this.clean(sequence);
+				this.cleanSequenceList(sequence);
 			}
 		});
 

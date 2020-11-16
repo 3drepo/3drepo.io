@@ -16,9 +16,11 @@
  */
 import { values } from 'lodash';
 import { createSelector } from 'reselect';
-import { getGroupOverride } from '../../helpers/colorOverrides';
+import { addToGroupDictionary } from '../../helpers/colorOverrides';
 import { getTransparency, hasTransparency } from '../../helpers/colors';
+import { selectActiveIssueDetails } from '../issues';
 import { selectDefaultView } from '../model';
+import { selectActiveRiskDetails } from '../risks';
 import { selectQueryParams } from '../router/router.selectors';
 
 export const selectViewpointsDomain = (state) => state.viewpoints;
@@ -59,8 +61,22 @@ export const selectSelectedViewpoint = createSelector(
 	selectViewpointsDomain, (state) => state.selectedViewpoint
 );
 
+export const selectTransformations = createSelector(
+	selectSelectedViewpoint, (viewpoint) => {
+		if ( !Boolean(viewpoint?.transformation_groups?.length)) {
+			return {};
+		}
+
+		const groups = viewpoint.transformation_groups;
+		return groups.reduce((transformations, group) =>
+			addToGroupDictionary(transformations, group, group.transformation),
+		{});
+	}
+);
+
 export const selectOverridesDict = createSelector(
 	selectSelectedViewpoint, (viewpoint) =>  {
+
 		if ( !Boolean(viewpoint?.override_groups?.length)) {
 			return {};
 		}
@@ -68,10 +84,10 @@ export const selectOverridesDict = createSelector(
 		const groups = viewpoint.override_groups ;
 
 		return groups.reduce((overrides, group) => {
-			getGroupOverride(overrides.colors, group, group.color);
+			addToGroupDictionary(overrides.colors, group, group.color);
 
 			if (hasTransparency(group.color)) {
-				getGroupOverride(overrides.transparencies, group, getTransparency(group.color));
+				addToGroupDictionary(overrides.transparencies, group, getTransparency(group.color));
 			}
 
 			return overrides;
@@ -88,8 +104,8 @@ export const selectTransparencies = createSelector(
 );
 
 export const selectInitialView =  createSelector(
-	selectViewpointsDomain, selectQueryParams,  selectDefaultView,
-		({viewpointsMap}, {viewId},  defaultView) => {
-			return (!viewpointsMap ? null : viewpointsMap[viewId || defaultView?.id]);
+	selectViewpointsDomain, selectQueryParams,  selectDefaultView, selectActiveIssueDetails, selectActiveRiskDetails,
+		({viewpointsMap}, {viewId},  defaultView, activeIssue, activeRisk) => {
+			return activeIssue || activeRisk || (!viewpointsMap ? null : viewpointsMap[viewId || defaultView?.id]);
 		}
 );

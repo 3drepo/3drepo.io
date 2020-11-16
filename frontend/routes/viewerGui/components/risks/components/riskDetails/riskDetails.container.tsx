@@ -35,6 +35,7 @@ import {
 	selectRisks,
 	RisksActions,
 } from '../../../../../../modules/risks';
+import { selectMaxDate, selectMinDate, SequencesActions } from '../../../../../../modules/sequences';
 import { ViewpointsActions } from '../../../../../../modules/viewpoints';
 import { withViewer } from '../../../../../../services/viewer/viewer';
 import { RiskDetails } from './riskDetails.component';
@@ -54,6 +55,8 @@ const mapStateToProps = createStructuredSelector({
 	modelSettings: selectSettings,
 	failedToLoad: selectFailedToLoad,
 	postCommentIsPending: selectPostCommentIsPending,
+	minSequenceDate: selectMinDate,
+	maxSequenceDate: selectMaxDate
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -77,6 +80,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	attachLinkResources: RisksActions.attachLinkResources,
 	showDialog: DialogActions.showDialog,
 	showMitigationSuggestions: RisksActions.showMitigationSuggestions,
+	showSequenceDate: SequencesActions.showSequenceDate,
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(RiskDetails));

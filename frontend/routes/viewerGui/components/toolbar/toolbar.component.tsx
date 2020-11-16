@@ -42,6 +42,8 @@ import {
 	ClipIconWrapper,
 	ClipNumber,
 	Container,
+	OrthogonalIcon,
+	PerspectiveIcon,
 	Submenu,
 	SubmenuDot,
 	ToolbarButton
@@ -53,6 +55,7 @@ import {
 	MIN_HELICOPTER_SPEED,
 	VIEWER_CLIP_MODES,
 	VIEWER_NAV_MODES,
+	VIEWER_PROJECTION_MODES,
 	VIEWER_TOOLBAR_ITEMS
 } from '../../../../constants/viewer';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
@@ -62,6 +65,7 @@ const HelicopterIcon = () => <Helicopter IconProps={{ className: 'fontSizeSmall'
 interface IProps {
 	teamspace: string;
 	model: string;
+	projectionMode: string;
 	navigationMode: string;
 	helicopterSpeed: number;
 	isFocusMode: boolean;
@@ -73,6 +77,7 @@ interface IProps {
 	metaKeysExist: boolean;
 	isMetadataVisible: boolean;
 	goToExtent: () => void;
+	setProjectionMode: (mode) => void;
 	setNavigationMode: (navigationMode) => void;
 	initialiseToolbar: () => void;
 	increaseHelicopterSpeed: (teamspace, modelId) => void;
@@ -116,6 +121,32 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 				label: VIEWER_TOOLBAR_ITEMS.EXTENT,
 				Icon: HomeIcon,
 				action: this.props.goToExtent
+			},
+			{
+				label: VIEWER_TOOLBAR_ITEMS.PERSPECTIVE_VIEW,
+				Icon: PerspectiveIcon,
+				action: () => this.handleShowSubmenu(VIEWER_TOOLBAR_ITEMS.PERSPECTIVE_VIEW),
+				show: this.props.projectionMode !== VIEWER_PROJECTION_MODES.ORTHOGRAPHIC,
+				subMenu: [
+					{
+						label: VIEWER_TOOLBAR_ITEMS.ORTHOGRAPHIC_VIEW,
+						Icon: OrthogonalIcon,
+						action: () => this.handleProjectionModeClick(VIEWER_PROJECTION_MODES.ORTHOGRAPHIC)
+					}
+				]
+			},
+			{
+				label: VIEWER_TOOLBAR_ITEMS.ORTHOGRAPHIC_VIEW,
+				Icon: OrthogonalIcon,
+				action: () => this.handleShowSubmenu(VIEWER_TOOLBAR_ITEMS.ORTHOGRAPHIC_VIEW),
+				show: this.props.projectionMode === VIEWER_PROJECTION_MODES.ORTHOGRAPHIC,
+				subMenu: [
+					{
+						label: VIEWER_TOOLBAR_ITEMS.PERSPECTIVE_VIEW,
+						Icon: PerspectiveIcon,
+						action: () => this.handleProjectionModeClick(VIEWER_PROJECTION_MODES.PERSPECTIVE)
+					}
+				]
 			},
 			{
 				label: VIEWER_TOOLBAR_ITEMS.TURNTABLE,
@@ -257,6 +288,10 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 		this.setState({ activeSubMenu: '' });
 	}
 
+	public handleProjectionModeClick = (mode) => {
+		this.props.setProjectionMode(mode);
+	}
+
 	public handleClickAway = () => {
 		this.setState({ activeSubMenu: '' });
 	}
@@ -308,7 +343,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		return (
-			<Container visible={!this.props.isFocusMode}>
+			<Container visible={!this.props.isFocusMode} id="bottom-toolbar">
 				{this.renderButtons()}
 			</Container>
 		);
@@ -327,6 +362,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 		} = this.props;
 		setMetadataActive(!isMetadataActive);
 		setPanelVisibility(VIEWER_PANELS.BIM, !isMetadataActive);
+		setPanelVisibility(VIEWER_PANELS.ACTIVITIES, false);
 
 		if (!isMetadataActive) {
 			setMeasureVisibility(false);

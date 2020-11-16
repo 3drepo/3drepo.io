@@ -26,10 +26,11 @@ interface IProps {
 	paperProps?: any;
 	hiddenScrollbars?: boolean;
 	disableStretching?: boolean;
+	id?: string;
 }
 
 export const Panel = (props: IProps) => (
-	<Container {...props.paperProps} className={props.className}>
+	<Container {...props.paperProps} className={props.className} id={props.id}>
 		<Title>{props.title}</Title>
 		<Content>
 			<ContentWrapper disableStretching={props.disableStretching} hiddenScrollbars={props.hiddenScrollbars}>

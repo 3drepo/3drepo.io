@@ -15,17 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import AutorenewIcon from '@material-ui/icons/Autorenew';
-import SaveIcon from '@material-ui/icons/Save';
 import React from 'react';
 
-import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
-import { TooltipButton } from '../../../../../teamspaces/components/tooltipButton/tooltipButton.component';
+import AutorenewIcon from '@material-ui/icons/Autorenew';
+import Delete from '@material-ui/icons/Delete';
+import SaveIcon from '@material-ui/icons/Save';
 
 import { GROUP_PANEL_NAME, GROUP_TYPES_ICONS, GROUPS_TYPES } from '../../../../../../constants/groups';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { ICriteriaFieldState } from '../../../../../../modules/groups/groups.redux';
+import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
 import { CriteriaField } from '../../../../../components/criteriaField/criteriaField.component';
+import { TooltipButton } from '../../../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
 import { ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { ViewerPanelButton } from '../../../viewerPanel/viewerPanel.styles';
@@ -51,7 +52,9 @@ interface IProps {
 	setCriteriaState: (criteriaState) => void;
 	resetToSavedSelection: () => void;
 	isPending: boolean;
+	deleteGroup: () => void;
 }
+
 interface IState {
 	isFormValid: boolean;
 	isFormDirty: boolean;
@@ -221,6 +224,12 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 						action={this.props.resetToSavedSelection}
 						Icon={AutorenewIcon}
 					/>
+					<TooltipButton
+						label="Delete"
+						action={this.props.deleteGroup}
+						Icon={Delete}
+						disabled={!this.props.canUpdate}
+					/>
 				</Actions>
 				<ViewerPanelButton
 					variant="fab"
@@ -231,6 +240,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 					aria-label="Save group"
 					disabled={!this.isFormValid || !this.props.canUpdate}
 					pending={this.props.isPending}
+					id="groups-card-save-button"
 				>
 					<SaveIcon />
 				</ViewerPanelButton>

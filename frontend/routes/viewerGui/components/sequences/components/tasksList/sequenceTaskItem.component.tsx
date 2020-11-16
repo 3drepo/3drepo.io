@@ -21,9 +21,9 @@ import React from 'react';
 import { SubTasksItemContainer, Task, TaskButton, TaskItemLabel, TaskSmallDot } from '../../sequences.styles';
 
 export interface ITask {
-	_id: string;
+	id: string;
 	name: string;
-	tasks?: ITask[];
+	subTasks?: ITask[];
 	startDate: Date;
 	endDate: Date;
 }
@@ -31,6 +31,8 @@ export interface ITask {
 interface IProps {
 	task: ITask;
 	nested?: boolean;
+	defaultCollapsed?: boolean;
+	onItemClick?: (value?: any) => void;
 }
 
 interface IState {
@@ -44,17 +46,31 @@ const CollapseButton = ({collapsed, onClick}) => {
 
 export class TaskItem extends React.PureComponent<IProps, IState> {
 	public state: IState = {
-		collapsed: false
+		collapsed: this.props.defaultCollapsed  || false
 	};
+
+	public componentDidUpdate(prevProps, prevState) {
+		const { defaultCollapsed } = this.props;
+
+		if (prevProps.defaultCollapsed !== defaultCollapsed) {
+			this.setState({
+				collapsed: defaultCollapsed,
+			});
+		}
+	}
 
 	public toggleCollapse = () => {
 		this.setState({collapsed: !this.state.collapsed});
 	}
 
+	public handleItemClick = () => {
+		this.props.onItemClick(this.props.task);
+	}
+
 	public render = () => {
-		const { task: task, nested } = this.props;
+		const { task: task, nested, defaultCollapsed, onItemClick } = this.props;
 		const { collapsed } = this.state;
-		const subtasks = task.tasks || [];
+		const subtasks = task.subTasks || [];
 		const hasSubtasks = subtasks.length > 0;
 
 		return (
@@ -62,12 +78,14 @@ export class TaskItem extends React.PureComponent<IProps, IState> {
 				<Task>
 					{hasSubtasks && <CollapseButton collapsed={collapsed} onClick={this.toggleCollapse} />}
 					{!hasSubtasks && <TaskSmallDot />}
-					<TaskItemLabel>
+					<TaskItemLabel clickable onClick={this.handleItemClick} >
 						{task.name || 'Unnamed'}
 					</TaskItemLabel>
 				</Task>
 				<SubTasksItemContainer>
-					{!collapsed && subtasks.map((t) => (<TaskItem key={t._id} task={t} />))}
+					{!collapsed && subtasks.map((t) => (
+						<TaskItem key={t.id} task={t} defaultCollapsed={defaultCollapsed} onItemClick={onItemClick} />
+					))}
 				</SubTasksItemContainer>
 			</>
 		);

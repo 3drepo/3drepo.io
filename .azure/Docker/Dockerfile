@@ -30,7 +30,6 @@ RUN if [ ${NODE_USERNAME} != "root" ] \
 
 WORKDIR /home/node/3drepo.io/
 COPY --chown=node:node --from=builder /home/node/3drepo.io/backend /home/node/3drepo.io/backend
-COPY --chown=node:node --from=builder /home/node/3drepo.io/frontend /home/node/3drepo.io/frontend
 COPY --chown=node:node --from=builder /home/node/3drepo.io/public /home/node/3drepo.io/public
 COPY --chown=node:node --from=builder /home/node/3drepo.io/config /home/node/3drepo.io/config
 COPY --chown=node:node --from=builder /home/node/3drepo.io/resources /home/node/3drepo.io/resources

@@ -83,6 +83,7 @@ interface IProps {
 	setComponentState: (state) => void;
 	setTargetRevision: (modelId, targetRevision, isDiff) => void;
 	getCompareModels: (revision) => void;
+	id?: string;
 }
 
 export class Compare extends React.PureComponent<IProps, any> {
@@ -169,6 +170,7 @@ export class Compare extends React.PureComponent<IProps, any> {
 				renderActions={this.renderActions}
 				pending={isPending}
 				empty={!isPending && !compareModels.length}
+				id={this.props.id}
 			>
 				<ViewerPanelContent scrollDisabled>
 					<Tabs

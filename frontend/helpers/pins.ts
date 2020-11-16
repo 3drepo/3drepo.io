@@ -31,7 +31,21 @@ export const pinsDiff = (pinsA: any[], pinsB: any[]): any[] => {
 	}, []);
 };
 
-export const hasPin = (ticket) => ticket.position && ticket.position.length === 3;
+export const hasPin = (ticket, sequence?, min?, max?) => {
+	let validPin = ticket.position && ticket.position.length === 3;
+
+	if (sequence) {
+		if (ticket.sequence_start) {
+			validPin = validPin && ticket.sequence_start <= max;
+		}
+
+		if (ticket.sequence_end) {
+			validPin = validPin && ticket.sequence_end >= min;
+		}
+	}
+
+	return validPin;
+};
 
 export const ticketToPin = (ticket, type, isSelected, color) =>
 	({

@@ -184,6 +184,34 @@ function* downloadItems({ teamspace, modelId }) {
 	}
 }
 
+function* toggleSortOrder() {
+	try {
+		const boardType = yield select(selectBoardType);
+
+		if (boardType === 'issues') {
+			yield put(IssuesActions.toggleSortOrder());
+		} else {
+			yield put(RisksActions.toggleSortOrder());
+		}
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('toggle sort order', 'board items', error));
+	}
+}
+
+function* setSortBy({field}) {
+	try {
+		const boardType = yield select(selectBoardType);
+
+		if (boardType === 'issues') {
+			yield put(IssuesActions.setSortBy(field));
+		} else {
+			yield put(RisksActions.setSortBy(field));
+		}
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('set sort by', 'board items', error));
+	}
+}
+
 export default function* BoardSaga() {
 	yield takeLatest(BoardTypes.FETCH_DATA, fetchData);
 	yield takeLatest(BoardTypes.FETCH_CARD_DATA, fetchCardData);
@@ -192,4 +220,6 @@ export default function* BoardSaga() {
 	yield takeLatest(BoardTypes.SET_FILTERS, setFilters);
 	yield takeLatest(BoardTypes.PRINT_ITEMS, printItems);
 	yield takeLatest(BoardTypes.DOWNLOAD_ITEMS, downloadItems);
+	yield takeLatest(BoardTypes.TOGGLE_SORT_ORDER, toggleSortOrder);
+	yield takeLatest(BoardTypes.SET_SORT_BY, setSortBy);
 }

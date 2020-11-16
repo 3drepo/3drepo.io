@@ -50,6 +50,13 @@ export const StyledButton = styled(Button)`
 	}
 ` as any;
 
+export const MessageButton = styled(StyledButton)`
+	&& {
+		margin-top: 15px;
+		align-self: start;
+	}
+`;
+
 export const Buttons = styled(Grid)`
 	&& {
 		margin-top: 10px;

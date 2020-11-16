@@ -294,7 +294,7 @@ schema.statics.findUsersWithoutMembership = function (teamspace, searchString) {
 				$and: [{
 					$or: [
 						{ user: new RegExp(`.*${searchString}.*`, "i") },
-						{ "customData.email": searchString }
+						{ "customData.email": new RegExp(searchString, "i") }
 					]
 				},
 				{ "customData.inactive": { "$exists": false }}
