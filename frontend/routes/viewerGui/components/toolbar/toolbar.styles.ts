@@ -20,6 +20,11 @@ import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tool
 
 import { COLOR, FONT_WEIGHT } from '../../../../styles';
 
+// tslint:disable-next-line:no-var-requires
+const OrthogonalIconSVG = require('../../../../icons/orthogonal.svg');
+// tslint:disable-next-line:no-var-requires
+const PerspectiveIconSVG = require('../../../../icons/perspective.svg');
+
 export const Container = styled.div`
 	background-color: ${COLOR.REGENT_GRAY};
 	border: 1px solid ${COLOR.SILVER_CHALICE};
@@ -96,3 +101,16 @@ export const ToolbarButton = styled(TooltipButton)`
 		}
 	}
 ` as any;
+
+export const Icon = styled.img`
+	max-height: 20px;
+	max-width: 20px;
+`;
+
+export const OrthogonalIcon = styled(Icon).attrs({
+	src: OrthogonalIconSVG,
+})``;
+
+export const PerspectiveIcon = styled(Icon).attrs({
+	src: PerspectiveIconSVG,
+})``;

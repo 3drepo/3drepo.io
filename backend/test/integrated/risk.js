@@ -451,6 +451,43 @@ describe("Risks", function () {
 			], done);
 		});
 
+		it("with orthographic viewpoint should succeed", function(done) {
+			const risk = Object.assign({"name":"Risk test"}, baseRisk);
+			risk.viewpoint = {
+				"up":[0,1,0],
+				"position":[38,38 ,125.08011914810137],
+				"look_at":[0,0,-163.08011914810137],
+				"view_dir":[0,0,-1],
+				"right":[1,0,0],
+				"orthographicSize":3.537606904422707,
+				"aspect_ratio":0.8750189337327384,
+				"far":276.75612077194506 ,
+				"near":76.42411012233212,
+				"type":"orthographic",
+				"clippingPlanes":[]
+			};
+
+			let riskId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200, function(err, res) {
+							riskId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function(err, res) {
+						expect(res.body.viewpoint.type).to.equal(risk.viewpoint.type);
+						expect(res.body.viewpoint.orthographicSize).to.equal(risk.viewpoint.orthographicSize);
+						return done(err);
+					});
+				}
+			], done);
+		});
+
 		it("with invalid (short) embedded transformation matrix should fail", function(done) {
 			const transformation_groups = [
 				{

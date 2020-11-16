@@ -1463,6 +1463,20 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Use orthographic view
+	 */
+	public static useOrthographicProjection() {
+		UnityUtil.toUnity('UseOrthographicProjection', UnityUtil.LoadingState.MODEL_LOADING, undefined);
+	}
+
+	/**
+	 * Use perspective view
+	 */
+	public static usePerspectiveProjection() {
+		UnityUtil.toUnity('UsePerspectiveProjection', UnityUtil.LoadingState.MODEL_LOADING, undefined);
+	}
+
+	/**
 	 * Change the camera configuration
 	 * teamspace and model is only needed if the viewpoint is relative to a model
 	 * @category Navigations
@@ -1478,12 +1492,22 @@ export class UnityUtil {
 		up: [number],
 		forward: [number],
 		lookAt: [number],
+		projectionType?: boolean,
+		orthographicSize?: number,
 		account?: string,
 		model?: string
 	) {
 		const param: any = {};
 		if (account && model) {
 			param.nameSpace = account + '.' + model;
+		}
+
+		if (projectionType) {
+			param.type = projectionType;
+		}
+
+		if (orthographicSize) {
+			param.orthographicSize = orthographicSize;
 		}
 
 		param.position = pos;
