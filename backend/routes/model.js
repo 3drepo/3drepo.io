@@ -404,28 +404,49 @@ router.get("/:model/:uid.src.mpc", middlewares.hasReadAccessToModel, getSRC);
  * @apiParam {String} rev The revision of the model to get src assets for
  *
  * @apiExample {get} Example usage:
- * GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/07314a08-75da-46bf-9d2c-b7b20109143b/srcAssets.json HTTP/1.1
+ * GET /Repo3DDemo/01713310-2286-11eb-93c1-296aba26cc11/revision/4d48e3de-1c87-4fdf-87bf-d92c224eb3fe/srcAssets.json HTTP/1.1
  *
  * @apiSuccessExample {json} Success:
  * {
  *   "models": [
- *     [
- *       {
- *         "_id": "153cf665-2c84-4ff9-a9e2-ba495af8e6dc",
- *         "rev_id": "07314a08-75da-46bf-9d2c-b7b20109143b",
- *         "asset": "sebjf/9b458610-0c94-11eb-a083-2b878a4dc41e/153cf665-2c84-4ff9-a9e2-ba495af8e6dc"
- *       },
- *       {
- *         "_id": "2967230f-67fa-45dc-9686-161e45c7c8a2",
- *         "rev_id": "07314a08-75da-46bf-9d2c-b7b20109143b",
- *         "asset": "sebjf/9b458610-0c94-11eb-a083-2b878a4dc41e/2967230f-67fa-45dc-9686-161e45c7c8a2"
- *       },
- *       {
- *         "_id": "07c67b6c-4b02-435f-8639-ea88403c36f7",
- *         "rev_id": "07314a08-75da-46bf-9d2c-b7b20109143b",
- *         "asset": "sebjf/9b458610-0c94-11eb-a083-2b878a4dc41e/07c67b6c-4b02-435f-8639-ea88403c36f7"
- *       }
- *     ]
+ *     {
+ *       "database": "Repo3DDemo",
+ *       "model": "011382b0-2286-11eb-93c1-296aba26cc11",
+ *       "assets": [
+ *         "153cf665-2c84-4ff9-a9e2-ba495af8e6dc",
+ *         "07c67b6c-4b02-435f-8639-ea88403c36f7",
+ *         "2967230f-67fa-45dc-9686-161e45c7c8a2"
+ *       ],
+ *       "offset": [
+ *         9.999999999999787,
+ *         0,
+ *         -9.999999999999787
+ *       ]
+ *     },
+ *     {
+ *       "database": "Repo3DDemo",
+ *       "model": "01168ff0-2286-11eb-93c1-296aba26cc11",
+ *       "assets": [
+ *         "89d5580a-3224-4e50-bbab-89d855c320e0"
+ *       ],
+ *       "offset": [
+ *         1610,
+ *         740,
+ *         -2410
+ *       ]
+ *     },
+ *     {
+ *       "database": "Repo3DDemo",
+ *       "model": "01153060-2286-11eb-93c1-296aba26cc11",
+ *       "assets": [
+ *         "c14dbbee-a8fd-4ed8-8641-9e24737f8238"
+ *       ],
+ *       "offset": [
+ *         -688.095458984375,
+ *         6410.9140625,
+ *         683.460205078125
+ *       ]
+ *     }
  *   ]
  * }
  *
@@ -443,28 +464,49 @@ router.get("/:model/revision/:rev/srcAssets.json", middlewares.hasReadAccessToMo
  * @apiParam {String} model The model Id to get unity assets for.
  *
  * @apiExample {get} Example usage:
- * GET /sebjf/9b458610-0c94-11eb-a083-2b878a4dc41e/revision/master/head/srcAssets.json HTTP/1.1
+ * GET /Repo3DDemo/01713310-2286-11eb-93c1-296aba26cc11/revision/master/head/srcAssets.json HTTP/1.1
  *
  * @apiSuccessExample {json} Success:
  * {
  *   "models": [
- *     [
- *       {
- *         "_id": "153cf665-2c84-4ff9-a9e2-ba495af8e6dc",
- *         "rev_id": "07314a08-75da-46bf-9d2c-b7b20109143b",
- *         "asset": "sebjf/9b458610-0c94-11eb-a083-2b878a4dc41e/153cf665-2c84-4ff9-a9e2-ba495af8e6dc"
- *       },
- *       {
- *         "_id": "2967230f-67fa-45dc-9686-161e45c7c8a2",
- *         "rev_id": "07314a08-75da-46bf-9d2c-b7b20109143b",
- *         "asset": "sebjf/9b458610-0c94-11eb-a083-2b878a4dc41e/2967230f-67fa-45dc-9686-161e45c7c8a2"
- *       },
- *       {
- *         "_id": "07c67b6c-4b02-435f-8639-ea88403c36f7",
- *         "rev_id": "07314a08-75da-46bf-9d2c-b7b20109143b",
- *         "asset": "sebjf/9b458610-0c94-11eb-a083-2b878a4dc41e/07c67b6c-4b02-435f-8639-ea88403c36f7"
- *       }
- *     ]
+ *     {
+ *       "database": "Repo3DDemo",
+ *       "model": "011382b0-2286-11eb-93c1-296aba26cc11",
+ *       "assets": [
+ *         "153cf665-2c84-4ff9-a9e2-ba495af8e6dc",
+ *         "07c67b6c-4b02-435f-8639-ea88403c36f7",
+ *         "2967230f-67fa-45dc-9686-161e45c7c8a2"
+ *       ],
+ *       "offset": [
+ *         9.999999999999787,
+ *         0,
+ *         -9.999999999999787
+ *       ]
+ *     },
+ *     {
+ *       "database": "Repo3DDemo",
+ *       "model": "01168ff0-2286-11eb-93c1-296aba26cc11",
+ *       "assets": [
+ *         "89d5580a-3224-4e50-bbab-89d855c320e0"
+ *       ],
+ *       "offset": [
+ *         1610,
+ *         740,
+ *         -2410
+ *       ]
+ *     },
+ *     {
+ *       "database": "Repo3DDemo",
+ *       "model": "01153060-2286-11eb-93c1-296aba26cc11",
+ *       "assets": [
+ *         "c14dbbee-a8fd-4ed8-8641-9e24737f8238"
+ *       ],
+ *       "offset": [
+ *         -688.095458984375,
+ *         6410.9140625,
+ *         683.460205078125
+ *       ]
+ *     }
  *   ]
  * }
  */
