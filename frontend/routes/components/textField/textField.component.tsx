@@ -32,6 +32,7 @@ import {
 	FieldWrapper,
 	MutableActionsLine,
 	StyledIconButton,
+	StyledLinkableField,
 	StyledMarkdownField,
 	StyledTextField,
 } from './textField.styles';
@@ -275,7 +276,9 @@ export class TextField extends React.PureComponent<IProps, IState> {
 								</StyledMarkdownField>
 								}
 								{!this.props.enableMarkdown &&
-								<span>{this.fieldValue}</span>
+								<StyledLinkableField ref={this.markdownFieldRef}>
+									{this.fieldValue}
+								</StyledLinkableField>
 								}
 							</FieldWrapper>
 							}

@@ -64,7 +64,7 @@ function* fetchData({ teamspace, model }) {
 			put(ModelActions.waitForSettingsAndFetchRevisions(teamspace, model)),
 			put(TreeActions.setIsTreeProcessed(false)),
 			put(ViewpointsActions.fetchViewpoints(teamspace, model)),
-			put(CommentsActions.fetchUsers(teamspace)),
+			put(CommentsActions.fetchUsers(teamspace))
 		]);
 
 		yield all([
@@ -82,6 +82,7 @@ function* fetchData({ teamspace, model }) {
 			put(RisksActions.fetchRisks(teamspace, model, revision)),
 			put(GroupsActions.fetchGroups(teamspace, model, revision)),
 			put(ViewerGuiActions.getHelicopterSpeed(teamspace, model)),
+			put(SequencesActions.fetchSequences()),
 			put(StarredActions.fetchStarredMeta())
 		]);
 	} catch (error) {
@@ -245,6 +246,15 @@ function* goToExtent() {
 	}
 }
 
+function* setProjectionMode({mode}) {
+	try {
+		yield Viewer.setProjectionMode(mode);
+		yield put(ViewerGuiActions.setProjectionModeSuccess(mode));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('set', 'projection mode', error));
+	}
+}
+
 function* setNavigationMode({mode}) {
 	try {
 		yield Viewer.setNavigationMode(mode);
@@ -350,6 +360,7 @@ function* clearHighlights() {
 function* setCamera({ params }) {
 	try {
 		Viewer.setCamera(params);
+		yield put(ViewerGuiActions.setProjectionModeSuccess(params.type));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'camera', error));
 	}
@@ -416,6 +427,7 @@ export default function* ViewerGuiSaga() {
 	yield takeLatest(ViewerGuiTypes.STOP_LISTEN_ON_NUM_CLIP, stopListenOnNumClip);
 	yield takeLatest(ViewerGuiTypes.CLEAR_HIGHLIGHTS, clearHighlights);
 	yield takeLatest(ViewerGuiTypes.SET_CAMERA, setCamera);
+	yield takeLatest(ViewerGuiTypes.SET_PROJECTION_MODE, setProjectionMode);
 	yield takeLatest(ViewerGuiTypes.LOAD_MODEL, loadModel);
 	yield takeLatest(ViewerGuiTypes.SET_IS_PIN_DROP_MODE, setIsPinDropMode);
 }

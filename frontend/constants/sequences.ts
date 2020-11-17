@@ -16,6 +16,7 @@
  */
 
 export enum STEP_SCALE {
+	HOUR,
 	DAY,
 	MONTH,
 	YEAR

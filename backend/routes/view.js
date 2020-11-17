@@ -64,6 +64,8 @@ const config = require("../config");
  * @apiParam (Type: Viewpoint) {Group} [hidden_group] If the viewpoint is associated with one or more hidden objects from the model this field has the value of a group id generated to hold those objects (this shouldnt be use simultaneously with hidden_group_id)
  * @apiParam (Type: Viewpoint) {Group} [shown_group] If the viewpoint is associated with one or more shown objects from the model this field has the definition of the group to hold those objects (this shouldnt be use simultaneously with shown_group_id)
  * @apiParam (Type: Viewpoint) {Group[]} [override_groups] If the viewpoint has one or more objects with colour override this field has an array of groups with one group for each colour
+ * @apiParam (Type: Viewpoint) {Group[]} [transformation_groups] List of groups with transformations
+ * @apiParam (Type: Viewpoint) {String[]} [transformation_group_ids] List of group IDs with transformations
  * @apiParam (Type: Viewpoint) {Boolean} hide_IFC A flag to hide the IFC
  * @apiParam (Type: Viewpoint) {String} screenshot Base64 string representing the screenshot associated with the viewpoint
  *
@@ -97,6 +99,7 @@ const config = require("../config");
  * @apiParam (Type: ResultViewpoint) {String} [hidden_group_id] If the viewpoint is associated with one or more hidden objects from the model this field has the value of a group id generated to hold those objects
  * @apiParam (Type: ResultViewpoint) {String} [shown_group_id] If the viewpoint is associated with one or more shown objects from the model this field has the value of a group id generated to hold those objects
  * @apiParam (Type: ResultViewpoint) {String[]} [override_group_ids] If the viewpoint has one or more objects with colour override this field has an array of groups ids with one group for each colour
+ * @apiParam (Type: ResultViewpoint) {String[]} [transformation_group_ids] List of group IDs with transformations
  * @apiParam (Type: ResultViewpoint) {Boolean} hide_IFC A flag to hide the IFC
  * @apiParam (Type: ResultViewpoint) {String} screenshot A string in base64 representing the screenshot associated with the viewpoint
  *

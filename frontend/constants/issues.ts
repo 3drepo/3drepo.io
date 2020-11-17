@@ -17,10 +17,12 @@ import { COLOR, PIN_COLORS } from '../styles';
 export const ISSUE_PANEL_NAME = 'issue';
 
 export const ISSUE_PROPERTIES_TAB = 'issue';
+export const ISSUE_SEQUENCING_TAB = 'sequencing';
 export const ATTACHMENTS_ISSUE_TAB = 'attachments';
 
 export const ISSUE_TABS = {
 	ISSUE: 'Properties',
+	SEQUENCING: 'Sequencing',
 	ATTACHMENTS: 'Attachments',
 };
 
@@ -97,7 +99,8 @@ export const ISSUE_FILTER_RELATED_FIELDS = {
 	CREATED_BY: 'creator_role',
 	ASSIGNED_TO: 'assigned_roles',
 	TYPE: 'topic_type',
-	CREATED_DATE: 'created'
+	CREATED_DATE: 'created',
+	START_DATETIME: 'sequence_start'
 };
 
 export const ISSUE_FILTERS = [
@@ -130,6 +133,11 @@ export const ISSUE_FILTERS = [
 		label: 'Date',
 		relatedField: ISSUE_FILTER_RELATED_FIELDS.CREATED_DATE,
 		type: FILTER_TYPES.DATE
+	},
+	{
+		label: 'Starting Date',
+		relatedField: ISSUE_FILTER_RELATED_FIELDS.START_DATETIME,
+		type: FILTER_TYPES.DATE
 	}
 ] as any;
 
@@ -154,13 +162,10 @@ export const ISSUES_ACTIONS_MENU = {
 		label: 'Download JSON',
 		Icon: Download
 	},
-	SORT_BY_DATE: {
-		label: 'Sort by date',
-		isSorting: true,
-		Icon: {
-			ASC: SortAmountUp,
-			DESC: SortAmountDown
-		}
+	SORT_ORDER: {
+		label: 'Sort order',
+		ASC: SortAmountUp,
+		DESC: SortAmountDown,
 	},
 	SHOW_PINS: {
 		label: 'Show Pins',

@@ -22,6 +22,8 @@ import { difference, isEqual } from 'lodash';
 import { ROUTES } from '../../constants/routes';
 import { addColorOverrides, overridesColorDiff, removeColorOverrides } from '../../helpers/colorOverrides';
 import { pinsDiff } from '../../helpers/pins';
+import { moveMeshes, resetMovedMeshes, transformationDiffChanges,
+transformationDiffRemoves } from '../../modules/sequences/sequences.helper';
 import { Container } from './viewerCanvas.styles';
 
 interface IProps {
@@ -40,10 +42,13 @@ interface IProps {
 	issuePins: any[];
 	riskPins: any[];
 	measurementPins: any[];
+	transformations: any[];
 	gisLayers: string[];
+	sequenceHiddenNodes: string[];
 	hasGisCoordinates: boolean;
 	gisCoordinates: any;
 	handleTransparencyOverridesChange: any;
+	handleTransparenciesVisibility: any;
 }
 
 export class ViewerCanvas extends React.PureComponent<IProps, any> {
@@ -88,6 +93,14 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 		addColorOverrides(toAdd);
 	}
 
+	public renderTransformations(prev, curr) {
+		const changes = transformationDiffChanges(prev, curr);
+		const removes = transformationDiffRemoves(prev, curr);
+
+		moveMeshes(changes);
+		resetMovedMeshes(removes);
+	}
+
 	public renderGisLayers(prev: string[], curr: string[]) {
 		const { viewer } = this.props;
 		const toAdd = difference(curr, prev);
@@ -108,7 +121,9 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 
 	public componentDidUpdate(prevProps: IProps) {
 		const { colorOverrides, issuePins, riskPins, measurementPins, hasGisCoordinates,
-			gisCoordinates, gisLayers, transparencies } = this.props;
+			gisCoordinates, gisLayers, transparencies, transformations: transformation,
+			sequenceHiddenNodes
+		} = this.props;
 
 		if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
 			this.renderColorOverrides(prevProps.colorOverrides, colorOverrides);
@@ -116,6 +131,10 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 
 		if (prevProps.transparencies && !isEqual(transparencies, prevProps.transparencies)) {
 			this.props.handleTransparencyOverridesChange(transparencies, prevProps.transparencies);
+		}
+
+		if (prevProps.transformations && !isEqual(transformation, prevProps.transformations)) {
+			this.renderTransformations(prevProps.transformations, transformation);
 		}
 
 		if (!isEqual(issuePins, prevProps.issuePins)) {
@@ -138,6 +157,9 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 			this.renderGisLayers(prevProps.gisLayers, gisLayers);
 		}
 
+		if (prevProps.transparencies && prevProps.sequenceHiddenNodes !== sequenceHiddenNodes) {
+			this.props.handleTransparenciesVisibility(sequenceHiddenNodes);
+		}
 	}
 
 	public render() {

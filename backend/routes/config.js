@@ -44,7 +44,7 @@ function createClientConfig(serverConfig, req) {
 		"liveChatLicense" : config.liveChatLicense,
 		"intercomLicense" : config.intercomLicense,
 		"resourceUploadSizeLimit" : config.resourceUploadSizeLimit,
-		"sequencesEnabled": Boolean(config.sequencesEnabled)
+		"sequencesEnabled": true
 	};
 
 	if (utils.hasField(config, "captcha_client_key")) {
