@@ -1474,6 +1474,44 @@ describe("Issues", function () {
 			], done);
 		});
 
+		it("with orthographic viewpoint should succeed", function(done) {
+			const issue = Object.assign({"name":"Issue test"}, baseIssue);
+			issue.viewpoint = {
+				"up":[0,1,0],
+				"position":[38,38 ,125.08011914810137],
+				"look_at":[0,0,-163.08011914810137],
+				"view_dir":[0,0,-1],
+				"right":[1,0,0],
+				"orthographicSize":3.537606904422707,
+				"aspect_ratio":0.8750189337327384,
+				"far":276.75612077194506 ,
+				"near":76.42411012233212,
+				"type":"orthographic",
+				"clippingPlanes":[]
+			};
+
+			let issueId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200 , function(err, res) {
+							issueId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/issues/${issueId}`).expect(200, function(err, res) {
+						expect(res.body.viewpoint.type).to.equal(issue.viewpoint.type);
+						expect(res.body.viewpoint.orthographicSize).to.equal(issue.viewpoint.orthographicSize);
+						return done(err);
+					});
+				}
+			], done);
+		});
+
+
 		it("change viewpoint embedded transformation without matrix should fail", function(done) {
 			const transformation_groups = [
 				{

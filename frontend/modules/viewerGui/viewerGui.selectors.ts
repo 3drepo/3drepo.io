@@ -57,6 +57,10 @@ export const selectIsCoordViewActive = createSelector(
 	selectViewerGuiDomain, (state) => state.coordViewActive
 );
 
+export const selectProjectionMode = createSelector(
+	selectViewerGuiDomain, (state) => state.projectionMode
+);
+
 export const selectNavigationMode = createSelector(
 	selectViewerGuiDomain, (state) => state.navigationMode
 );

@@ -246,6 +246,15 @@ function* goToExtent() {
 	}
 }
 
+function* setProjectionMode({mode}) {
+	try {
+		yield Viewer.setProjectionMode(mode);
+		yield put(ViewerGuiActions.setProjectionModeSuccess(mode));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('set', 'projection mode', error));
+	}
+}
+
 function* setNavigationMode({mode}) {
 	try {
 		yield Viewer.setNavigationMode(mode);
@@ -351,6 +360,7 @@ function* clearHighlights() {
 function* setCamera({ params }) {
 	try {
 		Viewer.setCamera(params);
+		yield put(ViewerGuiActions.setProjectionModeSuccess(params.type));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'camera', error));
 	}
@@ -417,6 +427,7 @@ export default function* ViewerGuiSaga() {
 	yield takeLatest(ViewerGuiTypes.STOP_LISTEN_ON_NUM_CLIP, stopListenOnNumClip);
 	yield takeLatest(ViewerGuiTypes.CLEAR_HIGHLIGHTS, clearHighlights);
 	yield takeLatest(ViewerGuiTypes.SET_CAMERA, setCamera);
+	yield takeLatest(ViewerGuiTypes.SET_PROJECTION_MODE, setProjectionMode);
 	yield takeLatest(ViewerGuiTypes.LOAD_MODEL, loadModel);
 	yield takeLatest(ViewerGuiTypes.SET_IS_PIN_DROP_MODE, setIsPinDropMode);
 }
