@@ -104,10 +104,17 @@ export const VIEWER_PANELS = {
 	GIS: 'gis'
 };
 
+export const VIEWER_PROJECTION_MODES = {
+	ORTHOGRAPHIC: 'orthographic',
+	PERSPECTIVE: 'perspective'
+};
+
 export const VIEWER_TOOLBAR_ITEMS = {
 	EXTENT: 'Extent',
 	TURNTABLE: 'Turntable',
 	HELICOPTER: 'Helicopter',
+	PERSPECTIVE_VIEW: 'Perspective View',
+	ORTHOGRAPHIC_VIEW: 'Orthographic View',
 	SHOW_ALL: 'Show All',
 	HIDE: 'Hide',
 	ISOLATE: 'Isolate',

@@ -15,14 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { merge, omit } from 'lodash';
 import { createSelector } from 'reselect';
-import { STEP_SCALE } from '../../constants/sequences';
 import { GLToHexColor } from '../../helpers/colors';
-import { MILLI_PER_DAY } from '../../helpers/dateTime';
 import { selectSettings } from '../model';
+import { getDateByStep, getSelectedFrame } from './sequences.helper';
 
-export const selectSequencesDomain = (state) => ({...state.sequences});
+export const selectSequencesDomain = (state) => (state.sequences);
 
 const getMinMaxDates = ({frames}) => ({
 	minDate: (frames[0] || {}).dateTime,
@@ -42,14 +40,18 @@ const getModelName = (sequence, settings) => {
 	return { modelName };
 };
 
-export const selectIfcSpacesHiddenSaved  = createSelector(
-	selectSequencesDomain, (state) => state.ifcSpacesHidden
-);
-
 export const selectSequences = createSelector(
 	selectSequencesDomain, selectSettings,
 		(state, settings) => !state.sequences ? null :
 			state.sequences.map((sequence) =>  ({...sequence, ...getModelName(sequence, settings), ...getMinMaxDates(sequence)}))
+);
+
+export const selectInitialised = createSelector(
+	selectSequences, (sequences) => sequences !== null
+);
+
+export const selectHasSequences = createSelector(
+	selectSequences, (sequences) => (sequences || []).length > 0
 );
 
 export const selectStateDefinitions = createSelector(
@@ -58,6 +60,10 @@ export const selectStateDefinitions = createSelector(
 
 export const selectSelectedSequenceId = createSelector(
 	selectSequencesDomain, (state) => state.selectedSequence
+);
+
+export const selectActivitiesDefinitions = createSelector(
+	selectSequencesDomain, selectSelectedSequenceId, (state, sequenceId) => (state.activities || {}) [sequenceId]
 );
 
 export const selectSelectedSequence = createSelector(
@@ -80,27 +86,17 @@ export const selectFrames = createSelector(
 	}
 );
 
+export const selectDefaultSequence = createSelector(
+	selectSequences, selectSelectedSequence, (allSequences, selectedSequence) =>
+		selectedSequence || (allSequences || [])[0]
+);
+
 export const selectMinDate = createSelector(
-	selectSelectedSequence, (sequence) => (sequence || {}).minDate
+	selectDefaultSequence, (sequence) => (sequence || {}).minDate
 );
 
 export const selectMaxDate = createSelector(
-	selectSelectedSequence, (sequence) => (sequence || {}).maxDate
-);
-
-export const selectSelectedDate = createSelector(
-	selectSequencesDomain, selectMinDate, (state, minDate) => {
-		let date = state.selectedDate || minDate;
-
-		if (!date) {
-			return null;
-		}
-
-		date = new Date(date);
-		date.setHours(23, 59, 29, 999);
-
-		return date;
-	}
+	selectDefaultSequence, (sequence) => (sequence || {}).maxDate
 );
 
 export const selectStepInterval = createSelector(
@@ -111,32 +107,49 @@ export const selectStepScale = createSelector(
 	selectSequencesDomain, (state) => state.stepScale
 );
 
-const getFrameIndexByDate = (frames, date) => {
-	let index = 0;
-
-	for (let i = frames.length - 1 ; i >= 0 && index === 0; i--) {
-		if (frames[i].dateTime <= date) {
-			index = i;
-		}
-	}
-
-	return index;
-};
-
-export const getSelectedFrame = (frames, date) => {
-	date = new Date(date);
-	date.setHours(23, 59, 59, 999);
-
-	const index = getFrameIndexByDate(frames, date);
-	return frames[index];
-};
-
-export const selectSelectedFrame = createSelector(
-	selectFrames, selectSelectedDate, getSelectedFrame
+const selectSelectedDate = createSelector(
+	selectSequencesDomain, (state) => state.selectedDate
 );
 
-export const selectLastSuccessfulStateId = createSelector(
-	selectSequencesDomain, (state) => state.lastSuccesfulStateId
+export const selectSelectedStartingDate = createSelector(
+	selectSelectedDate, selectMinDate, (selectedDate, minDate) => {
+		let date = selectedDate || minDate;
+
+		if (!date) {
+			return null;
+		}
+
+		date = new Date(date);
+		return date;
+	}
+);
+
+export const selectNextKeyFramesDates =  createSelector(
+	selectSelectedStartingDate, selectStepScale, selectStepInterval , selectMaxDate,
+		(startingDate, scale, interval, maxDate) => {
+			const keyFrames = [];
+			keyFrames[0] = new Date(Math.min(maxDate, (startingDate || new Date(0)).valueOf()));
+			let date = getDateByStep(startingDate, scale, interval);
+			maxDate = new Date(maxDate);
+
+			for (let i = 0; i < 3 ; i++) {
+				date = getDateByStep(date, scale, interval);
+				keyFrames.push(date);
+			}
+
+			return keyFrames.filter((d) => d <= maxDate);
+		}
+);
+
+export const selectSelectedEndingDate = createSelector(
+	selectNextKeyFramesDates,
+		(keyFrames) => {
+			return  keyFrames[0];
+		}
+);
+
+export const selectSelectedFrame = createSelector(
+	selectFrames, selectSelectedStartingDate, getSelectedFrame
 );
 
 export const selectSelectedStateId = createSelector(
@@ -149,8 +162,8 @@ export const selectIsLoadingFrame = createSelector(
 );
 
 export const selectSelectedState = createSelector(
-	selectLastSuccessfulStateId, selectSelectedStateId, selectStateDefinitions,
-		(lastStateId, stateId, stateDefinitions) => stateDefinitions[stateId] || stateDefinitions[lastStateId]
+	selectSelectedStateId, selectStateDefinitions,
+		(stateId, stateDefinitions) => stateDefinitions[stateId]
 );
 
 const convertToDictionary = (stateChanges) => {
@@ -179,7 +192,7 @@ export const selectSelectedFrameColors = createSelector(
 );
 
 export const selectSelectedFrameTransparencies = createSelector(
-	selectSelectedState, (state) => {
+	selectSelectedState, selectSelectedStartingDate, (state) => {
 		if (!state) {
 			return {};
 		}
@@ -192,115 +205,61 @@ export const selectSelectedFrameTransparencies = createSelector(
 	}
 );
 
-const tasksArrToDict = (tasks) => {
-	return tasks.reduce((dict , task) => {
-		if (!dict[task._id]) {
-			dict[task._id] = omit(task, 'tasks');
+export const selectSelectedFrameTransformations = createSelector(
+	selectSelectedState, (state) => {
+		if (!state) {
+			return {};
 		}
 
-		if (task.tasks && !dict[task._id].tasks) {
-			dict[task._id].tasks =  tasksArrToDict(task.tasks);
-		} else if (task.tasks && dict[task._id].tasks) {
-			dict[task._id].tasks = merge(dict[task._id].tasks, tasksArrToDict(task.tasks));
+		try {
+			return  convertToDictionary(state.transformation);
+		} catch (e) {
+			return {};
 		}
+	}
+);
 
-		return dict;
-	}, {});
-};
-
-const tasksDictToArr = (taskDict) => {
-	return Object.keys(taskDict).map((id) => {
-		const task = taskDict[id];
-		if (task.tasks) {
-			task.tasks = tasksDictToArr(task.tasks);
-		}
-		return task;
-	});
-};
-
-const mergeTasks = (tasks) => {
-	return tasksDictToArr(tasksArrToDict(tasks));
-};
-
-// Filters the tasks by range as well as it's subtasks
-const getTasksByRange = (tasks, minDate, maxDate) => {
-	return tasks.reduce((filteredTasks, task) => {
-			if (! (task.startDate > maxDate || task.endDate < minDate)) {
-				task = {...task};
-				if ( task.tasks ) {
-					task.tasks = getTasksByRange(task.tasks, minDate, maxDate);
+// Filters the activities by range as well as it's subtasks
+const getActivitiesByRange = (activities, minDate, maxDate) => {
+	return activities.reduce((filteredActivities, activity) => {
+			if (! (activity.startDate > maxDate || activity.endDate < minDate)) {
+				activity = {...activity};
+				if ( activity.subTasks ) {
+					activity.subTasks = getActivitiesByRange(activity.subTasks, minDate, maxDate);
 				}
 
-				filteredTasks.push(task);
+				filteredActivities.push(activity);
 			}
 
-			return filteredTasks;
+			return filteredActivities;
 		}, []);
 };
 
-const replaceDates = (tasks) => {
-	return tasks.map((t) => {
+const replaceDates = (activities) => {
+	return activities.map((t) => {
 		t.startDate = new Date(t.startDate);
 		t.endDate = new Date(t.endDate);
-		if (t.tasks) {
-			t.tasks = replaceDates(t.tasks);
+		if (t.subTasks) {
+			t.subTasks = replaceDates(t.subTasks);
 		}
 
 		return t;
 	});
 };
 
-export const selectSelectedMinDate = createSelector(
-	selectSelectedDate, selectMinDate, selectStepInterval, selectStepScale,
-		(date: Date, minDate: Date, stepInterval: number, stepScale: STEP_SCALE) => {
-			if (!date) {
-				return null;
-			}
-			date = new Date(date);
-			date.setHours(0, 0, 0, 0);
-
-			if (stepScale === STEP_SCALE.DAY) {
-				date = new Date(date.valueOf()  - MILLI_PER_DAY * (stepInterval - 1));
-			}
-
-			if (stepScale === STEP_SCALE.MONTH) {
-				date.setMonth(date.getMonth() - stepInterval);
-			}
-
-			if (stepScale === STEP_SCALE.YEAR) {
-				date.setFullYear(date.getFullYear() - stepInterval);
-			}
-
-			return date < minDate ? new Date(minDate) : date;
-		}
-);
-
 export const selectCurrentActivities = createSelector(
-	selectSelectedMinDate, selectSelectedDate, selectSelectedSequence,
-		(minSelectedDate: Date, maxSelectedDate: Date, selectedSequence: any) => {
+	selectSelectedStartingDate, selectSelectedEndingDate, selectSelectedSequence, selectActivitiesDefinitions,
+		(minSelectedDate: Date, maxSelectedDate: Date, selectedSequence: any, activities: any) => {
 			if (!selectedSequence || !selectedSequence.frames) {
 				return [];
 			}
 
-			const frames = selectedSequence.frames;
-			const minIndex = getFrameIndexByDate(frames, minSelectedDate);
-			const maxIndex = getFrameIndexByDate(frames, maxSelectedDate);
-			const candidatesTasks = [];
-
-			for (let i = minIndex; i <= maxIndex ; i++) {
-				let foundTasks =  frames[i].tasks;
-				if (minIndex === i) { // this means is the first tasks I found so they might need to be trimmed
-					foundTasks =  getTasksByRange(foundTasks, minSelectedDate, maxSelectedDate);
-				}
-
-				Array.prototype.push.apply(candidatesTasks, foundTasks);
-			}
-
-			if (maxIndex < frames.length - 1 ) {
-				const nextTasks = getTasksByRange(frames[maxIndex + 1].tasks, minSelectedDate, maxSelectedDate);
-				Array.prototype.push.apply(candidatesTasks, nextTasks);
-			}
-
-			return replaceDates(mergeTasks(candidatesTasks));
+			const foundActivities = getActivitiesByRange(activities || [], minSelectedDate, maxSelectedDate);
+			return replaceDates(foundActivities);
 		}
+);
+
+export const selectSelectedHiddenNodes = createSelector(
+	selectSelectedFrameTransparencies, (transparencies) =>
+		Object.keys(transparencies).filter((nodeId) => transparencies[nodeId] === 0 )
 );

@@ -52,8 +52,6 @@ interface IProps {
 
 interface IState {
 	activeItem: any;
-	from: any;
-	to: any;
 }
 
 export class FiltersMenu extends React.PureComponent<IProps, IState> {
@@ -79,6 +77,17 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 
 	public toggleSelectDataType = (type) => () => {
 		this.props.onToggleDataType(type);
+	}
+
+	public getSelectedDate = (parentItem, itemValue) => {
+		const selectDateItem = this.props.selectedItems.find((selectedItem) =>
+			parentItem.relatedField === selectedItem.relatedField && selectedItem.value.value === itemValue.value);
+
+		if (selectDateItem) {
+			return selectDateItem.value.date;
+		}
+
+		return null;
 	}
 
 	public isSelectedItem = (parentLabel, itemValue) =>
@@ -113,7 +122,7 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 					{name}
 					{item.type === FILTER_TYPES.DATE &&
 						<StyledDatePicker
-							value={subItem.value.value ? this.state[subItem.value.value] : null}
+							value={this.getSelectedDate(item, subItem.value)}
 							placeholder="Select date"
 							onChange={this.onDateChange(item, subItem.value)}
 						/>

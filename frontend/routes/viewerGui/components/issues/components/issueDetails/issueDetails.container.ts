@@ -33,6 +33,7 @@ import {
 } from '../../../../../../modules/issues';
 import { selectJobsList, selectMyJob } from '../../../../../../modules/jobs';
 import { selectPermissions } from '../../../../../../modules/model';
+import { selectMaxDate, selectMinDate, SequencesActions } from '../../../../../../modules/sequences';
 import { selectTopicTypes } from '../../../../../../modules/teamspace';
 import { ViewpointsActions } from '../../../../../../modules/viewpoints';
 import { withViewer } from '../../../../../../services/viewer/viewer';
@@ -51,7 +52,9 @@ const mapStateToProps = createStructuredSelector({
 	topicTypes: selectTopicTypes,
 	failedToLoad: selectFailedToLoad,
 	postCommentIsPending: selectPostCommentIsPending,
-	issues: selectIssues
+	issues: selectIssues,
+	minSequenceDate: selectMinDate,
+	maxSequenceDate: selectMaxDate
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -73,7 +76,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showDialog: DialogActions.showDialog,
 	showScreenshotDialog:  DialogActions.showScreenshotDialog,
 	showConfirmDialog: DialogActions.showConfirmDialog,
-	showViewpoint: ViewpointsActions.showViewpoint
+	showViewpoint: ViewpointsActions.showViewpoint,
+	showSequenceDate: SequencesActions.showSequenceDate,
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(IssueDetails));

@@ -24,8 +24,10 @@ import { selectPins as selectIssuePins } from '../../modules/issues';
 import { selectPins as selectMeasurementPins } from '../../modules/measurements';
 import { selectGISCoordinates, selectHasGISCoordinates } from '../../modules/model';
 import { selectPins as selectRiskPins } from '../../modules/risks';
+import { selectIsLoadingFrame, selectSelectedHiddenNodes,
+	selectSelectedSequenceId, SequencesActions } from '../../modules/sequences';
 import { TreeActions } from '../../modules/tree';
-import { selectAllTransparencyOverrides, selectColorOverrides } from '../../modules/viewerGui';
+import { selectAllTransparencyOverrides, selectColorOverrides, selectTransformations } from '../../modules/viewerGui';
 import { withViewer } from '../../services/viewer/viewer';
 import { ViewerCanvas } from './viewerCanvas.component';
 
@@ -37,11 +39,16 @@ const mapStateToProps = createStructuredSelector({
 	measurementPins: selectMeasurementPins,
 	gisCoordinates: selectGISCoordinates,
 	hasGisCoordinates: selectHasGISCoordinates,
-	gisLayers: selectGisLayers
+	gisLayers: selectGisLayers,
+	transformations: selectTransformations,
+	selectedSequenceId: selectSelectedSequenceId,
+	isLoadingSequenceFrame: selectIsLoadingFrame,
+	sequenceHiddenNodes: selectSelectedHiddenNodes
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	handleTransparencyOverridesChange: TreeActions.handleTransparencyOverridesChange
+	handleTransparencyOverridesChange: TreeActions.handleTransparencyOverridesChange,
+	handleTransparenciesVisibility: SequencesActions.handleTransparenciesVisibility
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(ViewerCanvas));

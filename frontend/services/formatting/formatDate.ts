@@ -3,7 +3,9 @@ import dayjs from 'dayjs';
 export const SHORT_DATE_FORMAT = 'DD/MM/YYYY';
 export const DATE_TIME_FORMAT = 'HH:mm DD MMM';
 export const LONG_DATE_TIME_FORMAT = 'DD/MM/YYYY HH:mm';
+export const LONG_DATE_TIME_FORMAT_NO_MINUTES = 'DD/MM/YYYY HH:00';
 export const NAMED_MONTH_DATE_FORMAT = 'DD MMM YYYY';
+export const NAMED_MONTH_DATETIME_FORMAT = 'DD MMM YYYY HH:mm';
 
 export const invoiceDate = (input) => {
 	const date: Date = new Date(input);
@@ -75,6 +77,8 @@ export const simpleDate = (input) => {
 export const formatDate = (date, format) => dayjs(date).format(format);
 
 export const formatShortDate = (date) => formatDate(date, SHORT_DATE_FORMAT);
+
+export const formatShortDateTime = (date) => formatDate(date, LONG_DATE_TIME_FORMAT);
 
 export const formatDateTime = (date) => formatDate(date, DATE_TIME_FORMAT);
 

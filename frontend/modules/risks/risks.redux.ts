@@ -52,6 +52,7 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	deleteCommentSuccess: ['commentGuid', 'riskId'],
 	updateCommentSuccess: ['comment', 'riskId'],
 	toggleSortOrder: ['sortOrder'],
+	setSortBy: ['field'],
 	updateNewRisk: ['newRisk'],
 	setFilters: ['filters'],
 	showCloseInfo: ['riskId'],
@@ -104,7 +105,8 @@ export const INITIAL_STATE = {
 		postCommentIsPending: false,
 		associatedActivities: [],
 		sortOrder: 'desc',
-		failedToLoad: false
+		failedToLoad: false,
+		sortBy: 'created'
 	},
 	mitigationCriteria: {},
 };
@@ -227,6 +229,15 @@ export const toggleSortOrder = (state = INITIAL_STATE) => {
 	};
 };
 
+export const setSortBy = (state = INITIAL_STATE, {field}) => {
+	return {
+		...state, componentState: {
+			...state.componentState,
+			sortBy: field
+		}
+	};
+};
+
 const showCloseInfo = (state = INITIAL_STATE, { riskId }) => {
 	const risksMap = updateRiskProps(state.risksMap, riskId, { willBeClosed: true });
 	return { ...state, risksMap };
@@ -289,6 +300,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.UPDATE_COMMENT_SUCCESS]: updateCommentSuccess,
 	[RisksTypes.DELETE_COMMENT_SUCCESS]: deleteCommentSuccess,
 	[RisksTypes.TOGGLE_SORT_ORDER]: toggleSortOrder,
+	[RisksTypes.SET_SORT_BY]: setSortBy,
 	[RisksTypes.SHOW_CLOSE_INFO]: showCloseInfo,
 	[RisksTypes.HIDE_CLOSE_INFO]: hideCloseInfo,
 	[RisksTypes.UPDATE_SELECTED_RISK_PIN]: updateSelectedRiskPin,

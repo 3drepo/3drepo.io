@@ -42,6 +42,12 @@ const extensionRe = /\.(\w+)$/;
 
 const getResponse = (responseCodeType) => (type) => responseCodes[responseCodeType + "_" + type];
 
+function verifySequenceDatePrecedence(ticket) {
+	return !utils.hasField(ticket, "sequence_start") ||
+		!utils.hasField(ticket, "sequence_end") ||
+		ticket["sequence_start"] <= ticket["sequence_end"];
+}
+
 class Ticket extends View {
 	constructor(collName, viewpointType, refIdsField, responseCodeType, fieldTypes, ownerPrivilegeAttributes) {
 		super();
@@ -201,6 +207,8 @@ class Ticket extends View {
 		const systemComments = [];
 		const fields = Object.keys(data);
 
+		const updateData = {};
+
 		let newViewpoint;
 
 		fields.forEach(field => {
@@ -209,12 +217,20 @@ class Ticket extends View {
 				return;
 			}
 
+			if (null === data[field]) {
+				if (!updateData["$unset"]) {
+					updateData["$unset"] = {};
+				}
+
+				updateData["$unset"][field] = "";
+			}
+
 			this.handleFieldUpdate(account, model, sessionId, id, user, field, oldTicket, data, systemComments);
 		});
 
 		if (data.viewpoint) {
 			newViewpoint = await this.createViewpoint(account, model, id, data.viewpoint, true);
-			oldTicket.viewpoint = oldTicket.viewpoints[0];
+			oldTicket.viewpoint = oldTicket.viewpoints[0] || {};
 			oldTicket = super.clean(account, model, oldTicket);
 			delete oldTicket.viewpoint.screenshot;
 			// DEPRECATED
@@ -236,6 +252,9 @@ class Ticket extends View {
 			data.viewpoint = newViewpoint;
 
 			data.viewpoint.guid = utils.uuidToString(data.viewpoint.guid);
+			if (data.viewpoint.transformation_group_id) {
+				data.viewpoint.transformation_group_id = utils.uuidToString(data.viewpoint.transformation_group_id);
+			}
 
 			if (data.viewpoint.thumbnail) {
 				data.thumbnail = data.viewpoint.thumbnail;
@@ -290,15 +309,21 @@ class Ticket extends View {
 		const _id = utils.stringToUUID(id);
 
 		const tickets = await this.getCollection(account, model);
-		if (Object.keys(data).length > 0) {
-			await tickets.update({ _id }, { $set: data });
-		}
 
 		// 7. Return the updated data and the old ticket
-		const updatedTicket = {
-			...oldTicket,
-			...data
-		};
+		const updatedTicket = updateData["$unset"] ?
+			this.filterFields({ ...oldTicket, ...data }, Object.keys(updateData["$unset"])) :
+			{ ...oldTicket, ...data };
+
+		// 8. Check sequence dates in correct order
+		if (!verifySequenceDatePrecedence(updatedTicket)) {
+			throw responseCodes.INVALID_DATE_ORDER;
+		}
+
+		if (Object.keys(data).length > 0) {
+			updateData["$set"] = data;
+			await tickets.update({ _id }, updateData);
+		}
 
 		this.clean(account, model, updatedTicket);
 		this.clean(account, model, oldTicket);
@@ -319,7 +344,9 @@ class Ticket extends View {
 	}
 
 	handleFieldUpdate(account, model, sessionId, id, user, field, oldTicket, data, systemComments) {
-		if (Object.prototype.toString.call(data[field]) !== this.fieldTypes[field]) {
+		if (null === data[field]) {
+			delete data[field];
+		} else if (!utils.typeMatch(data[field], this.fieldTypes[field])) {
 			throw responseCodes.INVALID_ARGUMENTS;
 		}
 
@@ -383,7 +410,8 @@ class Ticket extends View {
 				}
 
 			}
-			if (key === "due_date" && newTicket[key] === 0) {
+			if ((key === "due_date" || key === "sequence_start" || key === "sequence_end")
+				&& newTicket[key] === 0) {
 				delete newTicket[key];
 			}
 		});
@@ -425,6 +453,11 @@ class Ticket extends View {
 		}
 
 		newTicket = this.filterFields(newTicket, ["viewpoint", "revId"]);
+
+		// Check sequence dates in correct order
+		if (!verifySequenceDatePrecedence(newTicket)) {
+			throw responseCodes.INVALID_DATE_ORDER;
+		}
 
 		const settings = await ModelSetting.findById({ account, model }, model);
 

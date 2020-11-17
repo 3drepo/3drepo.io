@@ -310,6 +310,302 @@ describe("Risks", function () {
 
 		});
 
+		it("with sequence start/end date should succeed", function(done) {
+			const startDate = 1476107839000;
+			const endDate = 1476107839800;
+			const risk = Object.assign({
+				"name":"Risk test",
+				"sequence_start":startDate,
+				"sequence_end":endDate
+			}, baseRisk);
+			let riskId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200 , function(err, res) {
+							riskId = res.body._id;
+							expect(res.body.sequence_start).to.equal(startDate);
+							expect(res.body.sequence_end).to.equal(endDate);
+
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function(err , res) {
+						expect(res.body.sequence_start).to.equal(startDate);
+						expect(res.body.sequence_end).to.equal(endDate);
+
+						return done(err);
+					});
+				}
+			], done);
+		});
+
+		it("with sequence end date before start should fail", function(done) {
+			const startDate = 1476107839800;
+			const endDate = 1476107839000;
+			const risk = Object.assign({
+				"name":"Risk test",
+				"sequence_start":startDate,
+				"sequence_end":endDate
+			}, baseRisk);
+			let riskId;
+
+			agent.post(`/${username}/${model}/risks`)
+				.send(risk)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_DATE_ORDER.value);
+					done(err);
+				});
+		});
+
+		it("with invalid sequence start/end date should fail", function(done) {
+			const risk = Object.assign({
+				"name":"Risk test",
+				"sequence_start":"invalid data",
+				"sequence_end": false
+			}, baseRisk);
+			let riskId;
+
+			agent.post(`/${username}/${model}/risks`)
+				.send(risk)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("with transformation should succeed", function(done) {
+			const risk = Object.assign({"name":"Risk test"}, baseRisk);
+			risk.viewpoint = Object.assign({
+				transformation_group_ids: ["8d46d1b0-8ef1-11e6-8d05-000000000000"]
+			}, risk.viewpoint);
+			let riskId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200, function(err, res) {
+							riskId = res.body._id;
+							expect(res.body.viewpoint.transformation_group_ids).to.deep.equal(risk.viewpoint.transformation_group_ids);
+
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function(err , res) {
+						expect(res.body.viewpoint.transformation_group_ids).to.deep.equal(risk.viewpoint.transformation_group_ids);
+
+						return done(err);
+					});
+				}
+			], done);
+		});
+
+		it("with embedded transformation should succeed", function(done) {
+			const transformation_groups = [
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+			];
+
+			const risk = Object.assign({"name":"Risk test"}, baseRisk);
+			risk.viewpoint = Object.assign({transformation_groups}, risk.viewpoint);
+
+			let riskId;
+			let transformation_group_ids;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200, function(err, res) {
+							riskId = res.body._id;
+							transformation_group_ids = res.body.viewpoint.transformation_group_ids;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function(err , res) {
+						expect(res.body.viewpoint.transformation_group_ids).to.deep.equal(transformation_group_ids);
+
+						return done(err);
+					});
+				}
+			], done);
+		});
+
+		it("with orthographic viewpoint should succeed", function(done) {
+			const risk = Object.assign({"name":"Risk test"}, baseRisk);
+			risk.viewpoint = {
+				"up":[0,1,0],
+				"position":[38,38 ,125.08011914810137],
+				"look_at":[0,0,-163.08011914810137],
+				"view_dir":[0,0,-1],
+				"right":[1,0,0],
+				"orthographicSize":3.537606904422707,
+				"aspect_ratio":0.8750189337327384,
+				"far":276.75612077194506 ,
+				"near":76.42411012233212,
+				"type":"orthographic",
+				"clippingPlanes":[]
+			};
+
+			let riskId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200, function(err, res) {
+							riskId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function(err, res) {
+						expect(res.body.viewpoint.type).to.equal(risk.viewpoint.type);
+						expect(res.body.viewpoint.orthographicSize).to.equal(risk.viewpoint.orthographicSize);
+						return done(err);
+					});
+				}
+			], done);
+		});
+
+		it("with invalid (short) embedded transformation matrix should fail", function(done) {
+			const transformation_groups = [
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+			];
+
+			const risk = Object.assign({"name":"Risk test"}, baseRisk);
+			risk.viewpoint = Object.assign({transformation_groups}, risk.viewpoint);
+
+			agent.post(`/${username}/${model}/risks`)
+				.send(risk)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("with invalid (long) embedded transformation matrix should fail", function(done) {
+			const transformation_groups = [
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]
+				},
+			];
+
+			const risk = Object.assign({"name":"Risk test"}, baseRisk);
+			risk.viewpoint = Object.assign({transformation_groups}, risk.viewpoint);
+
+			agent.post(`/${username}/${model}/risks`)
+				.send(risk)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("with embedded transformation group but without matrix should fail", function(done) {
+			const transformation_groups = [
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+			];
+
+			const risk = Object.assign({"name":"Risk test"}, baseRisk);
+			risk.viewpoint = Object.assign({transformation_groups}, risk.viewpoint);
+
+			agent.post(`/${username}/${model}/risks`)
+				.send(risk)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("with embedded transformation matrix but without objects should fail", function(done) {
+			const transformation_groups = [
+				{
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+			];
+
+			const risk = Object.assign({"name":"Risk test"}, baseRisk);
+			risk.viewpoint = Object.assign({transformation_groups}, risk.viewpoint);
+
+			agent.post(`/${username}/${model}/risks`)
+				.send(risk)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
 		it("without name should fail", function(done) {
 			const risk = baseRisk;
 
@@ -494,6 +790,223 @@ describe("Risks", function () {
 					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function(err, res) {
 							expect(res.body.assigned_roles).to.deep.equal(assignedRoles.assigned_roles);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("add sequence start/end date should succeed", function(done) {
+			const startDate = 1476107839000;
+			const endDate = 1476107839800;
+			const risk = {...baseRisk, "name":"Risk test"};
+			const sequenceData = {
+				sequence_start: startDate,
+				sequence_end: endDate
+			};
+			let riskId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200, function(err, res) {
+							riskId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
+						.send(sequenceData)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/risks/${riskId}`)
+						.expect(200, function(err, res) {
+							expect(res.body.sequence_start).to.equal(startDate);
+							expect(res.body.sequence_end).to.equal(endDate);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("add sequence end date before start should fail", function(done) {
+			const startDate = 1476107839800;
+			const endDate = 1476107839000;
+			const risk = {...baseRisk, "name":"Risk test"};
+			const sequenceData = {
+				sequence_start: startDate,
+				sequence_end: endDate
+			};
+			let riskId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200, function(err, res) {
+							riskId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
+						.send(sequenceData)
+						.expect(400, function(err, res) {
+							expect(res.body.value).to.equal(responseCodes.INVALID_DATE_ORDER.value);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change sequence start/end date should succeed", function(done) {
+			const startDate = 1476107839000;
+			const endDate = 1476107839800;
+			const risk = {...baseRisk, "name":"Risk test", "sequence_start":1476107839555, "sequence_end":1476107839855};
+			const sequenceData = {
+				sequence_start: startDate,
+				sequence_end: endDate
+			};
+			let riskId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200, function(err, res) {
+							riskId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
+						.send(sequenceData)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/risks/${riskId}`)
+						.expect(200, function(err, res) {
+							expect(res.body.sequence_start).to.equal(startDate);
+							expect(res.body.sequence_end).to.equal(endDate);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change sequence end date to precede start should fail", function(done) {
+			const endDate = 1476107839000;
+			const risk = {...baseRisk, "name":"Risk test", "sequence_start":1476107839555, "sequence_end":1476107839855};
+			const sequenceData = {
+				sequence_end: endDate
+			};
+			let riskId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200, function(err, res) {
+							riskId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
+						.send(sequenceData)
+						.expect(400, function(err, res) {
+							expect(res.body.value).to.equal(responseCodes.INVALID_DATE_ORDER.value);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("remove sequence start/end date should succeed", function(done) {
+			const risk = {...baseRisk, "name":"Risk test", "sequence_start":1476107839555, "sequence_end":1476107839855};
+			const sequenceData = {
+				sequence_start: null,
+				sequence_end: null
+			};
+			let riskId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200, function(err, res) {
+							riskId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
+						.send(sequenceData)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/risks/${riskId}`)
+						.expect(200, function(err, res) {
+							expect(res.body.sequence_start).to.not.exist;
+							expect(res.body.sequence_end).to.not.exist;
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("add sequence start/end date with invalid data should fail", function(done) {
+			const risk = {...baseRisk, "name":"Risk test"};
+			const sequenceData = {
+				sequence_start: "invalid data",
+				sequence_end: false
+			};
+			let riskId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200, function(err, res) {
+							riskId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
+						.send(sequenceData)
+						.expect(400, function(err, res) {
+							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change sequence start/end date with invalid data should fail", function(done) {
+			const risk = {...baseRisk, "name":"Risk test", "sequence_start":1476107839555, "sequence_end":1476107839855};
+			const sequenceData = {
+				sequence_start: "invalid data",
+				sequence_end: false
+			};
+			let riskId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200, function(err, res) {
+							riskId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
+						.send(sequenceData)
+						.expect(400, function(err, res) {
+							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 							done(err);
 						});
 				}
@@ -912,6 +1425,339 @@ describe("Risks", function () {
 							delete vp.screenshot_ref;
 							expect(vp).to.deep.equal(newViewpoint);
 							expect(res.body.comments[1].owner).to.equal(username);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change viewpoint transformation should succeed and create system comment", function(done) {
+			const risk = Object.assign({"name":"Risk test"}, baseRisk, { assigned_roles:["jobA"]});
+			let riskId;
+			let oldViewpoint;
+			const data = {
+				"viewpoint": {
+					"up":[0,1,0],
+					"position":[20,20,100],
+					"look_at":[0,0,-100],
+					"view_dir":[0,0,-1],
+					"right":[1,0,0],
+					"fov":2,
+					"aspect_ratio":1,
+					"far":300,
+					"near":50,
+					"transformation_group_ids":["8d46d1b0-8ef1-11e6-8d05-000000000000"]
+				}
+			};
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200 , function(err, res) {
+							riskId = res.body._id;
+							oldViewpoint = res.body.viewpoint;
+							delete oldViewpoint.screenshot;
+							delete oldViewpoint.screenshotSmall;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
+						.send(data)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/risks/${riskId}`)
+						.expect(200, function(err, res) {
+							const newViewpoint = { ...oldViewpoint, ...data.viewpoint };
+							newViewpoint.guid = res.body.viewpoint.guid;
+							data.viewpoint.guid = res.body.viewpoint.guid;
+							data.viewpoint.thumbnail = res.body.viewpoint.thumbnail;
+
+							expect(res.body.viewpoint).to.deep.equal(data.viewpoint);
+							expect(res.body.comments[0].action.property).to.equal("viewpoint");
+							expect(JSON.parse(res.body.comments[0].action.from)).to.deep.equal(oldViewpoint);
+							expect(JSON.parse(res.body.comments[0].action.to)).to.deep.equal(newViewpoint);
+							expect(res.body.comments[0].owner).to.equal(username);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change viewpoint embedded transformation should succeed and create system comment", function(done) {
+			const transformation_groups = [
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+			];
+
+			const risk = Object.assign({"name":"Risk test"}, baseRisk, { assigned_roles:["jobA"]});
+			const data = {
+				"viewpoint": {
+					"up":[0,1,0],
+					"position":[20,20,100],
+					"look_at":[0,0,-100],
+					"view_dir":[0,0,-1],
+					"right":[1,0,0],
+					"fov":2,
+					"aspect_ratio":1,
+					"far":300,
+					"near":50,
+					transformation_groups
+				}
+			};
+
+			let riskId;
+			let oldViewpoint;
+			let transformation_group_ids;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200 , function(err, res) {
+							riskId = res.body._id;
+							oldViewpoint = res.body.viewpoint;
+							delete oldViewpoint.screenshot;
+							delete oldViewpoint.screenshotSmall;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
+						.send(data)
+						.expect(200, function(err, res) {
+							transformation_group_ids = res.body.viewpoint.transformation_group_ids;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/risks/${riskId}`)
+						.expect(200, function(err, res) {
+							const newViewpoint = { ...oldViewpoint, ...data.viewpoint };
+							newViewpoint.guid = res.body.viewpoint.guid;
+							delete newViewpoint.transformation_groups;
+							newViewpoint.transformation_group_ids = transformation_group_ids;
+
+							data.viewpoint.guid = res.body.viewpoint.guid;
+							data.viewpoint.thumbnail = res.body.viewpoint.thumbnail;
+							delete data.viewpoint.transformation_groups;
+							data.viewpoint.transformation_group_ids = transformation_group_ids;
+
+							expect(res.body.viewpoint).to.deep.equal(data.viewpoint);
+							expect(res.body.comments[0].action.property).to.equal("viewpoint");
+							expect(JSON.parse(res.body.comments[0].action.from)).to.deep.equal(oldViewpoint);
+							expect(JSON.parse(res.body.comments[0].action.to)).to.deep.equal(newViewpoint);
+							expect(res.body.comments[0].owner).to.equal(username);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change viewpoint embedded transformation with bad matrix should fail", function(done) {
+			const transformation_groups = [
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+			];
+
+			const risk = Object.assign({"name":"Risk test"}, baseRisk, { assigned_roles:["jobA"]});
+			const data = {
+				"viewpoint": {
+					"up":[0,1,0],
+					"position":[20,20,100],
+					"look_at":[0,0,-100],
+					"view_dir":[0,0,-1],
+					"right":[1,0,0],
+					"fov":2,
+					"aspect_ratio":1,
+					"far":300,
+					"near":50,
+					transformation_groups
+				}
+			};
+
+			let riskId;
+			let oldViewpoint;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200 , function(err, res) {
+							riskId = res.body._id;
+							oldViewpoint = res.body.viewpoint;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
+						.send(data)
+						.expect(400, function(err, res) {
+							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+							done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/risks/${riskId}`)
+						.expect(200, function(err, res) {
+							expect(res.body.viewpoint).to.deep.equal(oldViewpoint);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change viewpoint embedded transformation without matrix should fail", function(done) {
+			const transformation_groups = [
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+			];
+
+			const risk = Object.assign({"name":"Risk test"}, baseRisk, { assigned_roles:["jobA"]});
+			const data = {
+				"viewpoint": {
+					"up":[0,1,0],
+					"position":[20,20,100],
+					"look_at":[0,0,-100],
+					"view_dir":[0,0,-1],
+					"right":[1,0,0],
+					"fov":2,
+					"aspect_ratio":1,
+					"far":300,
+					"near":50,
+					transformation_groups
+				}
+			};
+
+			let riskId;
+			let oldViewpoint;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200 , function(err, res) {
+							riskId = res.body._id;
+							oldViewpoint = res.body.viewpoint;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
+						.send(data)
+						.expect(400, function(err, res) {
+							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+							done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/risks/${riskId}`)
+						.expect(200, function(err, res) {
+							expect(res.body.viewpoint).to.deep.equal(oldViewpoint);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change viewpoint embedded transformation without objects should fail", function(done) {
+			const transformation_groups = [
+				{
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+			];
+
+			const risk = Object.assign({"name":"Risk test"}, baseRisk, { assigned_roles:["jobA"]});
+			const data = {
+				"viewpoint": {
+					"up":[0,1,0],
+					"position":[20,20,100],
+					"look_at":[0,0,-100],
+					"view_dir":[0,0,-1],
+					"right":[1,0,0],
+					"fov":2,
+					"aspect_ratio":1,
+					"far":300,
+					"near":50,
+					transformation_groups
+				}
+			};
+
+			let riskId;
+			let oldViewpoint;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200 , function(err, res) {
+							riskId = res.body._id;
+							oldViewpoint = res.body.viewpoint;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
+						.send(data)
+						.expect(400, function(err, res) {
+							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+							done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/risks/${riskId}`)
+						.expect(200, function(err, res) {
+							expect(res.body.viewpoint).to.deep.equal(oldViewpoint);
 							done(err);
 						});
 				}
