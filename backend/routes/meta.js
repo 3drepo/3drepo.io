@@ -371,23 +371,15 @@
 
 		const showMeshIds = (req.query.meshids) ? JSON.parse(req.query.meshids) : false;
 
-		if (showMeshIds) {
-			Meta.getMeshIdsByRules(req.params.account, req.params.model, branch, req.params.rev, rules)
-				.then(obj => {
-					responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined, undefined);
-				})
-				.catch(err => {
-					responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-				});
-		} else {
-			Meta.getAllMetadataByRules(req.params.account, req.params.model, branch, req.params.rev, rules)
-				.then(obj => {
-					responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined, undefined);
-				})
-				.catch(err => {
-					responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-				});
-		}
+		const promise = showMeshIds ?
+			Meta.getMeshIdsByRules(req.params.account, req.params.model, branch, req.params.rev, rules) :
+			Meta.getAllMetadataByRules(req.params.account, req.params.model, branch, req.params.rev, rules);
+
+		promise.then(obj => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
+		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
 	}
 
 	function getAllIdsWith4DSequenceTag(req, res, next) {
