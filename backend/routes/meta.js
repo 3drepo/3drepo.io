@@ -142,6 +142,21 @@
 	 *
 	 * @apiExample {post} Example usage (/master/head)
 	 * POST /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/meta/rules HTTP/1.1
+	 * [
+	 * 	{
+	 * 		"field":"Area",
+	 * 		"operator":"GT",
+	 * 		"values":[5]
+	 * 	},
+	 * 	{
+	 * 		"field":"IFC Type",
+	 * 		"operator":"IS",
+	 * 		"values":[
+	 *			"IfcWall",
+	 *			"IfcDoor"
+	 * 		]
+	 * 	}
+	 * ]
 	 *
 	 * @apiExample {post} Example usage (/:revId)
 	 * POST /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/00000000-0000-0000-0000-000000000001/meta/rules HTTP/1.1
@@ -161,6 +176,7 @@
 	 *             "IsPermanentID": "True",
 	 *             "OccupancyType": "Private dwelling",
 	 *             "IsLandmarked": "True",
+	 *             "Area": 9000,
 	 *             "NumberOfStoreys": 2
 	 *          },
 	 *          "parents": [
@@ -170,7 +186,7 @@
 	 *       {
 	 *          "_id": "85ad29bd-cd99-4472-a92f-86266b07e57d",
 	 *          "metadata": {
-	 *             "IFC Type": "IfcSite",
+	 *             "IFC Type": "IfcWall",
 	 *             "IFC GUID": "20FpTZCqJy2vhVJYtjuIce"
 	 *          },
 	 *          "parents": [
@@ -182,6 +198,7 @@
 	 *          "metadata": {
 	 *             "IFC Type": "IfcBuildingElementProxy",
 	 *             "IFC GUID": "3VkTAO0fr0XQHS3DxQzfxm",
+	 *             "Area": 6,
 	 *             "Reference": "LegoRoundTree"
 	 *          },
 	 *          "parents": [
@@ -191,13 +208,97 @@
 	 *       {
 	 *          "_id": "c4682cf2-7b2a-41c7-8fe2-c0c39512dd99",
 	 *          "metadata": {
-	 *             "IFC Type": "IfcBuildingStorey",
+	 *             "IFC Type": "IfcDoor",
 	 *             "IFC GUID": "1oZ0wPs_PE8ANCPg3bIs4j",
 	 *             "AboveGround": "False"
 	 *          },
 	 *          "parents": [
 	 *             "323a9900-ece1-4857-8980-ec96ffc7f681"
 	 *          ]
+	 *       }
+	 *    ]
+	 * }
+	 *
+	 * @apiSuccessExample {json} Success (federation metadata):
+	 * {
+	 *    "data": [],
+	 *    "subModels": [
+	 *       {
+	 *           "data": [
+	 *               {
+	 *                   "_id": "2f461edf-4544-412a-bb84-ffdb3bbe563b",
+	 *                   "metadata": {
+	 *                       "IFC Type": "IfcBuilding",
+	 *                       "IFC GUID": "00tMo7QcxqWdIGvc4sMN2A",
+	 *                       "BuildingID": "n/a",
+	 *                       "IsPermanentID": "True",
+	 *                       "OccupancyType": "Private dwelling",
+	 *                       "IsLandmarked": "True",
+	 *                       "Area": 9000,
+	 *                       "NumberOfStoreys": 2
+	 *                   },
+	 *                   "parents": [
+	 *                       "9eeddbe2-750d-46fb-988f-bcf9ec2ecf51"
+	 *                   ]
+	 *               },
+	 *               {
+	 *                   "_id": "85ad29bd-cd99-4472-a92f-86266b07e57d",
+	 *                   "metadata": {
+	 *                       "IFC Type": "IfcWall",
+	 *                       "IFC GUID": "20FpTZCqJy2vhVJYtjuIce"
+	 *                   },
+	 *                   "parents": [
+	 *                       "48359ad0-9b6d-44ed-ae93-47e2ec69ea88"
+	 *                   ]
+	 *               },
+	 *               {
+	 *                   "_id": "b5fe5dcf-ce8c-4b1e-a96b-bdc5aa001963",
+	 *                   "metadata": {
+	 *                       "IFC Type": "IfcBuildingElementProxy",
+	 *                       "IFC GUID": "3VkTAO0fr0XQHS3DxQzfxm",
+	 *                       "Area": 6,
+	 *                       "Reference": "LegoRoundTree"
+	 *                   },
+	 *                   "parents": [
+	 *                       "2bf2a864-5cb0-41ba-85a8-c2cffc3da06d"
+	 *                   ]
+	 *               },
+	 *               {
+	 *                   "_id": "c4682cf2-7b2a-41c7-8fe2-c0c39512dd99",
+	 *                   "metadata": {
+	 *                       "IFC Type": "IfcDoor",
+	 *                       "IFC GUID": "1oZ0wPs_PE8ANCPg3bIs4j",
+	 *                       "AboveGround": "False"
+	 *                   },
+	 *                   "parents": [
+	 *                       "323a9900-ece1-4857-8980-ec96ffc7f681"
+	 *                   ]
+	 *               }
+	 *          ],
+	 *          "account": "acme",
+	 *          "model": "00000000-0000-0000-0000-000000000001"
+	 *       },
+	 *       {
+	 *           "data": [
+	 *               {
+	 *                   "_id": "2f461edf-4544-412a-bb84-ffdb3bbe563b",
+	 *                   "metadata": {
+	 *                       "IFC Type": "IfcBuilding",
+	 *                       "IFC GUID": "12tTo3QcxqWd5Gvc4sABCA",
+	 *                       "BuildingID": "Site B",
+	 *                       "IsPermanentID": "True",
+	 *                       "OccupancyType": "Private dwelling",
+	 *                       "IsLandmarked": "True",
+	 *                       "Area": 20,
+	 *                       "NumberOfStoreys": 1
+	 *                   },
+	 *                   "parents": [
+	 *                       "9eeddbe2-750d-46fb-988f-bcf9ec2ecf51"
+	 *                   ]
+	 *               }
+	 *          ],
+	 *          "account": "acme",
+	 *          "model": "00000000-0000-0000-0000-000000000002"
 	 *       }
 	 *    ]
 	 * }
