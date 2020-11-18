@@ -30,10 +30,10 @@ import {
 } from '../../helpers/comments';
 
 import { EXTENSION_RE } from '../../constants/resources';
-import { mergeGroupsDataFromViewpoint } from '../../helpers/groups';
 import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
 import { prepareResources } from '../../helpers/resources';
 import { prepareRisk } from '../../helpers/risks';
+import { mergeGroupsDataFromViewpoint } from '../../helpers/viewpoints';
 import { SuggestedTreatmentsDialog } from '../../routes/components/dialogContainer/components';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
 import * as API from '../../services/api';

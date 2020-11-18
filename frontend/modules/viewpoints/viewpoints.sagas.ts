@@ -15,14 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { groupCollapsed } from 'console';
 import copy from 'copy-to-clipboard';
 import { get, take } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
-import { selectSelectedViewpoint } from '.';
+import { selectSelectedViewpoint, selectViewpointsGroups } from '.';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { ROUTES } from '../../constants/routes';
 import { UnityUtil } from '../../globals/unity-util';
 import { createGroupsByColor, createGroupsByTransformations, prepareGroup } from '../../helpers/groups';
+import { mergeGroupsDataFromViewpoint, setGroupData } from '../../helpers/viewpoints';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
@@ -276,34 +278,49 @@ export function * deselectViewsAndLeaveClipping() {
 export function* prepareGroupsIfNecessary( teamspace, modelId, viewpoint) {
 	try  {
 		const revision = yield select(selectCurrentRevisionId);
+		const viewpointsGroups = yield select(selectViewpointsGroups);
 
-		if (viewpoint?.override_group_ids) {
-			viewpoint.override_groups =  (yield all(viewpoint.override_group_ids.map((groupId) =>
+		if (!viewpoint) {
+			return;
+		}
+
+		const groupsProperties = ['override_group_ids', 'transformation_group_ids',
+		'highlighted_group_id', 'hidden_group_id'];
+
+		const groupsToFetch = [];
+
+		// This part discriminates which groups hasnt been loaded yet and add their ids to
+		// the groupsToFetch array
+		for (let i = 0; i < groupsProperties.length ; i++) {
+			const prop = groupsProperties[i];
+			if (viewpoint[prop]) {
+				if (Array.isArray(viewpoint[prop])) { // if the property is an array of groupId
+					(viewpoint[prop] as any[]).forEach((id) => {
+						if (!viewpointsGroups[id]) {
+							groupsToFetch.push(id);
+						}
+					});
+				} else {// if the property is just a groupId
+					if (!viewpointsGroups[viewpoint[prop]]) {
+						groupsToFetch.push(viewpoint[prop]);
+					}
+				}
+			}
+		}
+
+		if (groupsToFetch.length > 0) {
+			const fetchedGroups =  (yield all(groupsToFetch.map((groupId) =>
 				API.getGroup(teamspace, modelId, groupId, revision))))
 				.map(({data}) => prepareGroup(data));
 
-			delete viewpoint.override_group_ids;
+			yield all(fetchedGroups.map((group) => put(ViewpointsActions.fetchGroupSuccess(group))));
+
+			const groupsMap = yield select(selectViewpointsGroups);
+			const groupsObject = setGroupData(viewpoint, groupsMap);
+
+			mergeGroupsDataFromViewpoint(viewpoint, groupsObject);
 		}
 
-		if (viewpoint?.transformation_group_ids) {
-			viewpoint.transformation_groups =  (yield all(viewpoint.transformation_group_ids.map((groupId) =>
-				API.getGroup(teamspace, modelId, groupId, revision))))
-				.map(({data}) => prepareGroup(data));
-
-			delete viewpoint.transformation_group_ids;
-		}
-
-		if (viewpoint?.highlighted_group_id) {
-			const highlightedGroup = (yield API.getGroup(teamspace, modelId, viewpoint?.highlighted_group_id, revision)).data;
-			viewpoint.highlighted_group = prepareGroup(highlightedGroup);
-			delete viewpoint.highlighted_group_id;
-		}
-
-		if (viewpoint?.hidden_group_id) {
-			const hiddenGroup = (yield API.getGroup(teamspace, modelId, viewpoint?.hidden_group_id, revision)).data;
-			viewpoint.hidden_group = prepareGroup(hiddenGroup);
-			delete viewpoint.hidden_group_id;
-		}
 	} catch {
 		// groups doesnt exists, still continue
 	}

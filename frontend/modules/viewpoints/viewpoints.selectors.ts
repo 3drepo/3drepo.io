@@ -109,3 +109,7 @@ export const selectInitialView =  createSelector(
 			return activeIssue || activeRisk || (!viewpointsMap ? null : viewpointsMap[viewId || defaultView?.id]);
 		}
 );
+
+export const selectViewpointsGroups = createSelector(
+	selectViewpointsDomain, (state) => state.viewpointsGroups
+);

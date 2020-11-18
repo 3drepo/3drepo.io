@@ -29,10 +29,10 @@ import {
 	createAttachResourceComments,
 	createRemoveResourceComment
 } from '../../helpers/comments';
-import { mergeGroupsDataFromViewpoint } from '../../helpers/groups';
 import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
 import { prepareIssue } from '../../helpers/issues';
 import { prepareResources } from '../../helpers/resources';
+import { mergeGroupsDataFromViewpoint } from '../../helpers/viewpoints';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
