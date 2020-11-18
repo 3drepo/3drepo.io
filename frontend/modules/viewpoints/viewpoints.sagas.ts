@@ -214,9 +214,6 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 			yield Viewer.isViewerReady();
 
 			const viewpoint = view.viewpoint;
-			if (!viewpoint) {
-				return;
-			}
 
 			if (viewpoint?.up && !ignoreCamera) {
 				yield put(ViewerGuiActions.setCamera(viewpoint));
@@ -224,7 +221,9 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 
 			const clippingPlanes = view.clippingPlanes || get(view, 'viewpoint.clippingPlanes');
 
-			yield put(TreeActions.setHiddenGeometryVisible(viewpoint.hideIfc !== false));
+			if (viewpoint) {
+				yield put(TreeActions.setHiddenGeometryVisible(!viewpoint.hideIfc));
+			}
 
 			yield Viewer.updateClippingPlanes( clippingPlanes, teamspace, modelId);
 
