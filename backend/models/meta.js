@@ -119,14 +119,14 @@ class Meta {
 		let allRulesResults = null;
 
 		if (positiveQueries.length !== 0) {
-			const eachPosRuleResults = await Promise.all(positiveQueries.map(ruleQuery => getMetadataRuleQueryResults(account, model, {type:"meta", ...ruleQuery}, { "metadata": 1, "parents": 1 })));
+			const eachPosRuleResults = await Promise.all(positiveQueries.map(ruleQuery => getMetadataRuleQueryResults(account, model, {_id: { $in: history.current }, type:"meta", ...ruleQuery}, { "metadata": 1, "parents": 1 })));
 			allRulesResults = intersection(eachPosRuleResults);
 		} else {
 			const rootQuery =  { _id: { $in: history.current }, "type": "meta" };
 			allRulesResults = (await getMetadataRuleQueryResults(account, model, rootQuery, { "metadata": 1, "parents": 1 }));
 		}
 
-		const eachNegRuleResults = await Promise.all(negativeQueries.map(ruleQuery => getMetadataRuleQueryResults(account, model, {type:"meta", ...ruleQuery}, { "metadata": 1, "parents": 1 })));
+		const eachNegRuleResults = await Promise.all(negativeQueries.map(ruleQuery => getMetadataRuleQueryResults(account, model, {_id: { $in: history.current }, type:"meta", ...ruleQuery}, { "metadata": 1, "parents": 1 })));
 		allRulesResults = difference(allRulesResults, eachNegRuleResults);
 
 		if(allRulesResults) {
