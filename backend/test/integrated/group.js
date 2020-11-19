@@ -34,6 +34,7 @@ describe("Groups", function () {
 	const password = "password";
 
 	const model = "4ec71fdd-0450-4b6f-8478-c46633bb66e3";
+	const federation = "80bc4290-0f94-11eb-970b-03c55a1e1b3a";
 
 	const goldenData = {
 		"_id":"0e2f7fa0-7ac5-11e8-9567-6b401a084a90",
@@ -714,6 +715,36 @@ describe("Groups", function () {
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
 							expect(res.body.objects).to.deep.equal([]);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("with rules in federation should succeed", function(done) {
+			let groupId;
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						field: "IsExternal",
+						operator: "IS_EMPTY",
+						values: []
+					}];
+					agent.post(`/${username}/${federation}/revision/master/head/groups/`)
+						.send(newGroup)
+						.expect(200, function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${federation}/revision/master/head/groups/${groupId}`)
+						.expect(200, function(err, res) {
+							expect(res.body.author).to.equal(username);
+							expect(res.body.objects[0].shared_ids.length).to.equal(74);
 							done(err);
 						});
 				}

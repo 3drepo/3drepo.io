@@ -22,7 +22,7 @@ const History = require("./history");
 const utils = require("../utils");
 const Ref = require("./ref");
 const C = require("../constants");
-const Middlewares = require("../middlewares/middlewares");
+const { hasReadAccessToModelHelper } = require("../middlewares/checkPermissions");
 const ResponseCodes = require("../response_codes");
 const Stream = require("stream");
 
@@ -60,7 +60,7 @@ function getFileFromSubModels(account, model, currentIds, username, filename) {
 }
 
 function getFileFromRef(ref, username, filename) {
-	return Middlewares.hasReadAccessToModelHelper(username, ref.owner, ref.project).then((granted) => {
+	return hasReadAccessToModelHelper(username, ref.owner, ref.project).then((granted) => {
 		if(granted) {
 
 			const revId = utils.uuidToString(ref._rid);
