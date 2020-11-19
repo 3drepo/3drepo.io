@@ -231,7 +231,8 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 
 			const clippingPlanes = view.clippingPlanes || get(view, 'viewpoint.clippingPlanes');
 
-			yield put(TreeActions.setHiddenGeometryVisible(!viewpoint.hideIfc));
+			// The default value for hideIfc if it doesnt exists is 'true'
+			yield put(TreeActions.setHiddenGeometryVisible(viewpoint.hideIfc === false));
 
 			yield Viewer.updateClippingPlanes( clippingPlanes, teamspace, modelId);
 
