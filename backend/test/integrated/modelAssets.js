@@ -112,5 +112,24 @@ describe("ModelAssets", function () {
 
 		});
 
+
+		it("from invalid teamspace should fail", function(done) {
+			agent.get(`/invalidTeamspaceNameHere/${model}/c4e6d66f-33ab-4dc5-97b6-e3d9a644cde4.src.mpc`)
+				.expect(404, (err, res) => {
+					expect(res.body.value).eq(responseCodes.RESOURCE_NOT_FOUND.value);
+					done(err);
+				});
+
+		});
+
+		it("from invalid model should fail", function(done) {
+			agent.get(`/${username}/dfsfdsg/c4e6d66f-33ab-4dc5-97b6-e3d9a644cde4.src.mpc`)
+				.expect(404, (err, res) => {
+					expect(res.body.value).eq(responseCodes.RESOURCE_NOT_FOUND.value);
+					done(err);
+				});
+
+		});
+
 	});
 });
