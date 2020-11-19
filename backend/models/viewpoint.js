@@ -52,8 +52,6 @@ const clean = function(routePrefix, viewpointToClean, serialise = true) {
 
 		if (serialise) {
 			setViewpointScreenshotURL(routePrefix, viewpointToClean);
-			viewpointToClean.screenshot_ref = undefined;
-
 		}
 	}
 
