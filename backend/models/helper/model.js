@@ -893,129 +893,6 @@ function getModelPermission(username, setting, account) {
 	});
 }
 
-function getAllMetadata(account, model, branch, rev) {
-	return getAllIdsWithMetadataField(account, model, branch, rev, "");
-}
-
-function getAllIdsWith4DSequenceTag(account, model, branch, rev) {
-	// Get sequence tag then call the generic getAllIdsWithMetadataField
-	return ModelSetting.findOne({account : account}, {_id : model}).then(settings => {
-		if(!settings) {
-			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
-		}
-		if(!settings.fourDSequenceTag) {
-			return Promise.reject(responseCodes.SEQ_TAG_NOT_FOUND);
-		}
-		return getAllIdsWithMetadataField(account, model,  branch, rev, settings.fourDSequenceTag);
-
-	});
-}
-
-function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, username) {
-	// Get the revision object to find all relevant IDs
-	let history;
-	let fullFieldName = "metadata";
-
-	if (fieldName && fieldName.length > 0) {
-		fullFieldName += "." + fieldName;
-	}
-
-	return History.getHistory({ account, model }, branch, rev).then(_history => {
-		history = _history;
-		if(!history) {
-			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
-		}
-		// Check for submodel references
-		const filter = {
-			type: "ref",
-			_id: { $in: history.current }
-		};
-		return Ref.find({ account, model }, filter);
-	}).then(refs =>{
-
-		// for all refs get their tree
-		const getMeta = [];
-
-		refs.forEach(ref => {
-
-			let refBranch, refRev;
-
-			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
-				refBranch = C.MASTER_BRANCH_NAME;
-			} else {
-				refRev = utils.uuidToString(ref._rid);
-			}
-
-			getMeta.push(
-				getAllIdsWithMetadataField(ref.owner, ref.project, refBranch, refRev, fieldName, username)
-					.then(obj => {
-						return Promise.resolve({
-							data: obj.data,
-							account: ref.owner,
-							model: ref.project
-						});
-					})
-					.catch(() => {
-					// Just because a sub model fails doesn't mean everything failed. Resolve the promise.
-						return Promise.resolve();
-					})
-			);
-		});
-
-		return Promise.all(getMeta);
-
-	}).then(_subMeta => {
-
-		const match = {
-			_id: {"$in": history.current}
-		};
-		match[fullFieldName] =  {"$exists" : true};
-
-		const projection = {
-			parents: 1
-		};
-		projection[fullFieldName] = 1;
-
-		return Scene.find({account, model}, match, projection).then(obj => {
-			if(obj) {
-				// rename fieldName to "value"
-				const parsedObj = {data: obj};
-				if(obj.length > 0 && fieldName && fieldName.length > 0) {
-					const objStr = JSON.stringify(obj);
-					parsedObj.data = JSON.parse(objStr.replace(new RegExp(fieldName, "g"), "value"));
-				}
-				if(_subMeta.length > 0) {
-					parsedObj.subModels = _subMeta;
-				}
-				return parsedObj;
-			} else {
-				return Promise.reject(responseCodes.METADATA_NOT_FOUND);
-			}
-		});
-
-	});
-
-}
-
-function getMetadata(account, model, id) {
-
-	const projection = {
-		shared_id: 0,
-		paths: 0,
-		type: 0,
-		api: 0,
-		parents: 0
-	};
-
-	return Scene.findOne({account, model}, { _id: utils.stringToUUID(id) }, projection).then(obj => {
-		if(obj) {
-			return obj;
-		} else {
-			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
-		}
-	});
-}
-
 async function getMeshById(account, model, meshId) {
 	const historyRes =  (await History.findByObjectId(account, model, meshId, {current:1}));
 	if (!historyRes) {
@@ -1111,11 +988,7 @@ module.exports = {
 	importModel,
 	removeModel,
 	getModelPermission,
-	getMetadata,
 	resetCorrelationId,
-	getAllMetadata,
-	getAllIdsWith4DSequenceTag,
-	getAllIdsWithMetadataField,
 	getSubModelRevisions,
 	setStatus,
 	importSuccess,
