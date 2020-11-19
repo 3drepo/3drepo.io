@@ -24,7 +24,7 @@ import { CHAT_CHANNELS } from '../../constants/chat';
 import { ROUTES } from '../../constants/routes';
 import { UnityUtil } from '../../globals/unity-util';
 import { createGroupsByColor, createGroupsByTransformations, prepareGroup } from '../../helpers/groups';
-import { mergeGroupsDataFromViewpoint, setGroupData } from '../../helpers/viewpoints';
+import { createGroupsFromViewpoint, mergeGroupsDataFromViewpoint, setGroupData } from '../../helpers/viewpoints';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
@@ -124,9 +124,16 @@ export function* generateViewpoint(teamspace, modelId, name, withScreenshot = fa
 
 export function* createViewpoint({teamspace, modelId, viewpoint}) {
 	try {
-		const {data: {_id}} = yield API.createModelViewpoint(teamspace, modelId, viewpoint);
-		viewpoint._id = _id;
-		yield put(ViewpointsActions.createViewpointSuccess(viewpoint));
+		const {data: updatedViewpoint} = yield API.createModelViewpoint(teamspace, modelId, viewpoint);
+		yield put(ViewpointsActions.cacheGroupsFromViewpoint(updatedViewpoint.viewpoint, viewpoint.viewpoint));
+
+		if (viewpoint.viewpoint.screenshot) {
+			updatedViewpoint.viewpoint.screenshot = viewpoint.viewpoint.screenshot;
+			delete updatedViewpoint.thumbnail;
+			delete updatedViewpoint.screenshot;
+		}
+
+		yield put(ViewpointsActions.createViewpointSuccess(updatedViewpoint));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('create', 'viewpoint', error));
 	}
@@ -314,15 +321,19 @@ export function* prepareGroupsIfNecessary( teamspace, modelId, viewpoint) {
 
 			yield all(fetchedGroups.map((group) => put(ViewpointsActions.fetchGroupSuccess(group))));
 
-			const groupsMap = yield select(selectViewpointsGroups);
-			const groupsObject = setGroupData(viewpoint, groupsMap);
-
-			mergeGroupsDataFromViewpoint(viewpoint, groupsObject);
 		}
 
+		const groupsMap = yield select(selectViewpointsGroups);
+		const groupsObject = setGroupData(viewpoint, groupsMap);
+		mergeGroupsDataFromViewpoint(viewpoint, groupsObject);
 	} catch {
 		// groups doesnt exists, still continue
 	}
+}
+
+export function* cacheGroupsFromViewpoint({ viewpoint,  groupsData }) {
+	const groups = createGroupsFromViewpoint(viewpoint, groupsData);
+	yield all(groups.map((group) => put(ViewpointsActions.fetchGroupSuccess(group))));
 }
 
 export function* setActiveViewpoint({ teamspace, modelId, view }) {
@@ -379,4 +390,5 @@ export default function* ViewpointsSaga() {
 	yield takeLatest(ViewpointsTypes.SHARE_VIEWPOINT_LINK, shareViewpointLink);
 	yield takeLatest(ViewpointsTypes.SET_DEFAULT_VIEWPOINT, setDefaultViewpoint);
 	yield takeLatest(ViewpointsTypes.DESELECT_VIEWS_AND_LEAVE_CLIPPING, deselectViewsAndLeaveClipping);
+	yield takeLatest(ViewpointsTypes.CACHE_GROUPS_FROM_VIEWPOINT, cacheGroupsFromViewpoint);
 }

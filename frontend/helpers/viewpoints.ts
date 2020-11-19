@@ -71,3 +71,26 @@ export const setGroupData = (viewpoint, groupsMaps): any => {
 
 	return groupsData;
 };
+
+export const createGroupsFromViewpoint = (viewpoint, groupsData) => {
+	const groups = [];
+
+	Object.keys(groupPropNameMap).forEach((groupPropNameById) => {
+		const groupPropName =  groupPropNameMap[groupPropNameById];
+		const propValue = viewpoint[groupPropNameById];
+
+		if (propValue && groupsData[groupPropName]) {
+			const groupsDataValue = groupsData[groupPropName];
+
+			if (Array.isArray(propValue)) {
+				propValue.forEach((id, i) => {
+					groups.push({_id: id, ...groupsDataValue[i]});
+				});
+			} else {
+				groups.push({_id: propValue, ...groupsDataValue});
+			}
+		}
+	});
+
+	return groups;
+};

@@ -32,7 +32,7 @@ import {
 import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
 import { prepareIssue } from '../../helpers/issues';
 import { prepareResources } from '../../helpers/resources';
-import { mergeGroupsDataFromViewpoint } from '../../helpers/viewpoints';
+import { createGroupsFromViewpoint, mergeGroupsDataFromViewpoint } from '../../helpers/viewpoints';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
@@ -126,7 +126,7 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 		const jobs = yield select(selectJobsList);
 		const preparedIssue = prepareIssue(savedIssue, jobs);
 
-		mergeGroupsDataFromViewpoint(savedIssue.viewpoint, issue.viewpoint);
+		yield put(ViewpointsActions.cacheGroupsFromViewpoint(savedIssue.viewpoint, issue.viewpoint));
 
 		finishSubmitting();
 
@@ -205,7 +205,7 @@ function* postComment({ issueData, ignoreViewer, finishSubmitting }) {
 		finishSubmitting();
 
 		if (comment.viewpoint) {
-			mergeGroupsDataFromViewpoint(comment.viewpoint, issueData.viewpoint);
+			yield put(ViewpointsActions.cacheGroupsFromViewpoint(comment.viewpoint, issueData.viewpoint));
 		}
 
 		yield put(IssuesActions.createCommentSuccess(comment, _id));

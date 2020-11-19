@@ -141,7 +141,7 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 		const jobs = yield select(selectJobsList);
 		const preparedRisk = prepareRisk(savedRisk, jobs);
 
-		mergeGroupsDataFromViewpoint(savedRisk.viewpoint, risk.viewpoint);
+		yield put(ViewpointsActions.cacheGroupsFromViewpoint(savedRisk.viewpoint, risk.viewpoint));
 
 		finishSubmitting();
 		yield put(RisksActions.setComponentState({ activeRisk: preparedRisk._id }));
@@ -223,7 +223,7 @@ function* postComment({ teamspace, modelId, riskData, ignoreViewer, finishSubmit
 		const { data: comment } = yield API.addRiskComment(teamspace, modelId, _id, riskData);
 
 		if (comment.viewpoint) {
-			mergeGroupsDataFromViewpoint(comment.viewpoint, riskData.viewpoint);
+			yield put(ViewpointsActions.cacheGroupsFromViewpoint(comment.viewpoint, riskData.viewpoint));
 		}
 
 		finishSubmitting();

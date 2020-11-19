@@ -44,6 +44,7 @@ export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createAct
 	deselectViewsAndLeaveClipping: [],
 	showViewpoint: ['teamspace', 'modelId', 'view', 'ignoreCamera'],
 	fetchGroupSuccess: ['group'],
+	cacheGroupsFromViewpoint: ['viewpoint', 'groupsData'],
 }, { prefix: 'VIEWPOINTS/' });
 
 export interface IViewpointsComponentState {
