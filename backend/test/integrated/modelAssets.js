@@ -23,8 +23,11 @@ const responseCodes = require("../../response_codes.js");
 const async = require("async");
 const { login } = require("../helpers/users.js");
 
+
 describe("ModelAssets", function () {
 	const username = 'teamSpace1';
+	const viewerUser = 'viewerTeamspace1Model1JobB';
+	const noAccessUser = "sub_noSub";
 	const password = "password";
 
 	const model = '5bfc11fa-50ac-b7e7-4328-83aa11fa50ac';
@@ -96,7 +99,72 @@ describe("ModelAssets", function () {
 		});
 	});
 
+	describe("Get SRC list (Viewer)", function() {
+		before(function(done) {
+			async.series([
+				function(_done) {
+					agent.post("/logout")
+						.send({})
+						.expect(200, _done);
+				},
+				function(_done) {
+					agent.post("/login")
+						.send({username: viewerUser, password})
+						.expect(200, _done);
+				}
+			], done);
+		});
+
+		it("from the latest revision should succeed", function(done) {
+			agent.get(`/${username}/${model}/revision/master/head/srcAssets.json`)
+				.expect(200, done);
+		});
+
+	});
+
+	describe("Get SRC list (No Access)", function() {
+		before(function(done) {
+			async.series([
+				function(_done) {
+					agent.post("/logout")
+						.send({})
+						.expect(200, _done);
+				},
+				function(_done) {
+					agent.post("/login")
+						.send({username: noAccessUser, password})
+						.expect(200, _done);
+				}
+			], done);
+		});
+
+		it("from the latest revision should fail", function(done) {
+			agent.get(`/${username}/${model}/revision/master/head/srcAssets.json`)
+				.expect(401, (err, res) => {
+					expect(res.body.value).eq(responseCodes.NOT_AUTHORIZED.value);
+					done(err);
+				});
+		});
+
+	});
+
+
 	describe("Get SRC file", function() {
+		before(function(done) {
+			async.series([
+				function(_done) {
+					agent.post("/logout")
+						.send({})
+						.expect(200, _done);
+				},
+				function(_done) {
+					agent.post("/login")
+						.send({username: username, password})
+						.expect(200, _done);
+				}
+			], done);
+		});
+
 		it("of a valid ID should succeed", function(done) {
 			agent.get(`/${username}/${model}/c4e6d66f-33ab-4dc5-97b6-e3d9a644cde4.src.mpc`)
 				.expect(200, done);
@@ -132,4 +200,54 @@ describe("ModelAssets", function () {
 		});
 
 	});
+
+	describe("Get SRC file (Viewer)", function() {
+		before(function(done) {
+			async.series([
+				function(_done) {
+					agent.post("/logout")
+						.send({})
+						.expect(200, _done);
+				},
+				function(_done) {
+					agent.post("/login")
+						.send({username: viewerUser, password})
+						.expect(200, _done);
+				}
+			], done);
+		});
+
+		it("of a valid ID should succeed", function(done) {
+			agent.get(`/${username}/${model}/c4e6d66f-33ab-4dc5-97b6-e3d9a644cde4.src.mpc`)
+				.expect(200, done);
+		});
+
+	});
+
+	describe("Get SRC file (No Access)", function() {
+		before(function(done) {
+			async.series([
+				function(_done) {
+					agent.post("/logout")
+						.send({})
+						.expect(200, _done);
+				},
+				function(_done) {
+					agent.post("/login")
+						.send({username: noAccessUser, password})
+						.expect(200, _done);
+				}
+			], done);
+		});
+
+		it("of a valid ID should fail", function(done) {
+			agent.get(`/${username}/${model}/c4e6d66f-33ab-4dc5-97b6-e3d9a644cde4.src.mpc`)
+				.expect(401, (err,res) => {
+					expect(res.body.value).eq(responseCodes.NOT_AUTHORIZED.value);
+					done(err);
+				});
+		});
+
+	});
+
 });

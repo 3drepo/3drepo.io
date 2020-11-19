@@ -28,13 +28,17 @@ const FileRef = require("./fileRef");
 const SrcAssets = {};
 
 const getAssetListFromRef = async (ref, username) => {
-	if (await hasReadAccessToModelHelper(username, ref.owner, ref.project)) {
-		const revInfo = await History.findLatest({account: ref.owner, model: ref.project}, {_id: 1, coordOffset : 1});
+	try {
+		if (await hasReadAccessToModelHelper(username, ref.owner, ref.project)) {
+			const revInfo = await History.findLatest({account: ref.owner, model: ref.project}, {_id: 1, coordOffset : 1});
 
-		if (revInfo) {
-			return await getAssetListEntry(ref.owner, ref.project, revInfo);
+			if (revInfo) {
+				return await getAssetListEntry(ref.owner, ref.project, revInfo);
+			}
+
 		}
-
+	} catch (err) {
+		// ignore error from submodel. This could still be a value return.
 	}
 };
 
@@ -62,7 +66,10 @@ SrcAssets.getAssetList = async (account, model, branch, rev, username) => {
 	const fetchPromise = subModelRefs.length ? subModelRefs.map((ref) => getAssetListFromRef(ref, username))
 		: [getAssetListEntry(account, model, history)];
 
-	return {models: await Promise.all(fetchPromise)};
+	// remove undefined entries
+	const models = (await Promise.all(fetchPromise)).filter(data => !!data);
+
+	return {models};
 };
 
 SrcAssets.getSRC = (account, model, id) => {
