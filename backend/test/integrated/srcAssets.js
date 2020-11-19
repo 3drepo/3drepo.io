@@ -97,6 +97,14 @@ describe("ModelAssets", function () {
 				});
 
 		});
+
+		it("from an invalid revision should succeed", function(done) {
+			agent.get(`/${username}/${model}/revision/blafldskf/srcAssets.json`)
+				.expect(400, (err, res) => {
+					expect(res.body.value).to.deep.eq(responseCodes.INVALID_TAG_NAME.value);
+					done(err);
+			});
+		});
 	});
 
 	describe("Get SRC list (Viewer)", function() {
