@@ -41,7 +41,8 @@ const getCollection = async () => {
 const invitations = {};
 
 const validateModels = (projectsPermissions, projectsData) => {
-	return projectsPermissions.every((project, index) => {
+	return projectsPermissions.every((project) => {
+		const index = projectsData.map(pr => pr._id).indexOf(project.project);
 		const models = new Set((project.models || []).map(m=> m.model));
 		const allModels = new Set(projectsData[index].models);
 		return setContains(allModels, models);
