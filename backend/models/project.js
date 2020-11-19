@@ -281,7 +281,7 @@
 		]);
 
 		if (!projectObj) {
-			throw responseCodes.INVALID_PROJECT_NAME;
+			throw responseCodes.PROJECT_NOT_FOUND;
 		}
 
 		if (filters && filters.name) {
