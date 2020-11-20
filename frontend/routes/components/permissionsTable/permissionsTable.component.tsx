@@ -272,7 +272,7 @@ export class PermissionsTable extends React.PureComponent<IProps, IState> {
 			const rows = this.getTableRows(this.props.permissions, this.props.roles, this.state.selectedUsers);
 			changes.selectedGlobalPermissions = UNDEFINED_PERMISSIONS;
 			changes.rows = rows;
-			changes.selectedUsers = this.activeSelection ? [] : rows;
+			changes.selectedUsers = this.activeSelection ? this.state.selectedUsers : rows;
 			changes.currentUser = this.props.permissions.find(({ isCurrentUser }) => isCurrentUser) || {};
 		}
 		if (!isEmpty(changes)) {
