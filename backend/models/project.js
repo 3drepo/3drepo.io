@@ -271,6 +271,61 @@
 		return await projectObj.updateAttrs({ permissions: projectObj.permissions.concat(projectPermission) });
 	};
 
+	schema.statics.listModels = async function(account, project, username, filters) {
+		const User = require("./user");
+		const ModelHelper = require("./helper/model");
+
+		const [dbUser, projectObj] = await  Promise.all([
+			await User.findByUserName(account),
+			Project.findOne({ account }, {name: project})
+		]);
+
+		if (!projectObj) {
+			throw responseCodes.PROJECT_NOT_FOUND;
+		}
+
+		if (filters && filters.name) {
+			filters.name = new RegExp(".*" + filters.name + ".*", "i");
+		}
+
+		let modelsSettings =  await ModelSetting.find({account}, { _id: { $in : projectObj.models }, ...filters});
+		let permissions = [];
+
+		const accountPerm = dbUser.customData.permissions.findByUser(username);
+		const projectPerm = projectObj.permissions.find(p=> p.user === username);
+
+		if (accountPerm && accountPerm.permissions) {
+			permissions = permissions.concat(ModelHelper.flattenPermissions(accountPerm.permissions));
+		}
+
+		if (projectPerm && projectPerm.permissions) {
+			permissions  = permissions.concat(ModelHelper.flattenPermissions(projectPerm.permissions));
+		}
+
+		modelsSettings = await Promise.all(modelsSettings.map(async setting => {
+			const template = setting.findPermissionByUser(username);
+
+			let settingsPermissions = [];
+			if(template) {
+				const permissionTemplate = dbUser.customData.permissionTemplates.findById(template.permission);
+				if(permissionTemplate && permissionTemplate.permissions) {
+					settingsPermissions = settingsPermissions.concat(ModelHelper.flattenPermissions(permissionTemplate.permissions, true));
+				}
+			}
+
+			setting = await setting.clean();
+			setting.permissions = _.uniq(permissions.concat(settingsPermissions));
+			setting.model = setting._id;
+			setting.account = account;
+			setting.subModels = await ModelHelper.listSubModels(account, setting._id, C.MASTER_BRANCH_NAME);
+			setting.headRevisions = {};
+
+			return setting;
+		}));
+
+		return modelsSettings;
+	};
+
 	const Project = ModelFactory.createClass(
 		"Project",
 		schema,

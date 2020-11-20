@@ -28,10 +28,6 @@ const UnityAssets = require("../models/unityAssets");
 const JSONAssets = require("../models/jsonAssets");
 const config = require("../config");
 
-function getDbColOptions(req) {
-	return {account: req.params.account, model: req.params.model};
-}
-
 function convertProjectToParam(req, res, next) {
 	if (req.body.project) {
 		req.params.project = req.body.project;
@@ -1560,43 +1556,13 @@ function updateHeliSpeed(req, res, next) {
 	});
 }
 
-const _getModel = async(req) => {
-	// FIXME: this should live in models/modelSetting.
-	const settingRaw = await ModelSetting.findById(getDbColOptions(req), req.params.model);
-	if (!settingRaw) {
-		return Promise.reject({ resCode: responseCodes.MODEL_INFO_NOT_FOUND});
-	} else {
-		const setting = await settingRaw.clean();
-		// compute permissions by user role
-		const [permissions, submodels] = await Promise.all([
-			ModelHelpers.getModelPermission(
-				req.session.user.username,
-				settingRaw,
-				req.params.account
-			),
-			ModelHelpers.listSubModels(req.params.account, req.params.model, C.MASTER_BRANCH_NAME)
-		]);
-
-		setting.permissions = permissions;
-		setting.subModels = submodels;
-		return setting;
-	}
-
-};
-
 function getModelSetting(req, res, next) {
-
 	const place = utils.APIInfo(req);
+	const username = req.session.user.username;
+	const {model, account} = req.params;
 
-	_getModel(req).then(setting => {
-
-		setting.model = setting._id;
-		setting.account = req.params.account;
-
-		setting.headRevisions = {};
-
+	ModelHelpers.getModelSetting(account, model, username).then(setting => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, setting);
-
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});

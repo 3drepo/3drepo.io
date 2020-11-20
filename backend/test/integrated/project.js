@@ -32,6 +32,100 @@ describe("Projects", function () {
 	const username = "projectuser";
 	const password = "projectuser";
 
+	const projectName = "project_exists";
+
+	const goldenTestModelList = [
+		{
+			"_id": "a05974d0-2a8b-11eb-a58a-fde0111b8800",
+			"type": "type",
+			"desc": "desc",
+			"name": "TestModel1",
+			"__v": 0,
+			"subModels": [],
+			"surveyPoints": [],
+			"properties": { "unit": "m", "code": "00011" },
+			"permissions": [
+				"change_model_settings",
+				"upload_files",
+				"create_issue",
+				"comment_issue",
+				"view_issue",
+				"view_model",
+				"download_model",
+				"edit_federation",
+				"delete_federation",
+				"delete_model",
+				"manage_model_permission"
+			],
+			"status": "ok",
+			"id": "a05974d0-2a8b-11eb-a58a-fde0111b8800",
+			"model": "a05974d0-2a8b-11eb-a58a-fde0111b8800",
+			"account": "projectuser",
+			"headRevisions": {}
+		},
+		{
+			"_id": "a5cd0670-2a8b-11eb-9358-1ff831483af6",
+			"type": "type",
+			"desc": "desc",
+			"name": "TestModel2",
+			"__v": 0,
+			"subModels": [],
+			"surveyPoints": [],
+			"properties": { "unit": "m", "code": "00011" },
+			"permissions": [
+				"change_model_settings",
+				"upload_files",
+				"create_issue",
+				"comment_issue",
+				"view_issue",
+				"view_model",
+				"download_model",
+				"edit_federation",
+				"delete_federation",
+				"delete_model",
+				"manage_model_permission"
+			],
+			"status": "ok",
+			"id": "a5cd0670-2a8b-11eb-9358-1ff831483af6",
+			"model": "a5cd0670-2a8b-11eb-9358-1ff831483af6",
+			"account": "projectuser",
+			"headRevisions": {}
+		}
+	];
+
+	const goldenRandomNameList = [
+		{
+			"_id": "ad8a39f0-2a8b-11eb-89a2-59e199077914",
+			"type": "type",
+			"desc": "desc",
+			"name": "RandomName",
+			"__v": 0,
+			"subModels": [],
+			"surveyPoints": [],
+			"properties": { unit: "m", code: "00011" },
+			"permissions": [
+				"change_model_settings",
+				"upload_files",
+				"create_issue",
+				"comment_issue",
+				"view_issue",
+				"view_model",
+				"download_model",
+				"edit_federation",
+				"delete_federation",
+				"delete_model",
+				"manage_model_permission"
+			],
+			"status": "ok",
+			"id": "ad8a39f0-2a8b-11eb-89a2-59e199077914",
+			"model": "ad8a39f0-2a8b-11eb-89a2-59e199077914",
+			"account": "projectuser",
+			"headRevisions": {}
+		}
+	];
+
+	const goldenFullModelList = [...goldenTestModelList, ...goldenRandomNameList];
+
 	before(function(done) {
 		server = app.listen(8080, function () {
 			console.log("API test server is listening on port 8080!");
@@ -98,7 +192,7 @@ describe("Projects", function () {
 	it("should fail to create project with dup name", function(done) {
 
 		const project = {
-			name: "project_exists"
+			name: projectName
 		};
 
 		agent.post(`/${username}/projects`)
@@ -495,4 +589,75 @@ describe("Projects", function () {
 			});
 	});
 
+	it("list all project models should succeed", function(done) {
+		agent.get(`/${username}/projects/${projectName}/models`)
+			.expect(200, function(err, res) {
+				expect(res.body).to.deep.equal(goldenFullModelList);
+				done(err);
+			});
+	});
+
+	it("list all project models from project that doesn't exist should fail", function(done) {
+		agent.get(`/${username}/projects/notexist/models`)
+			.expect(404, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
+				done(err);
+			});
+	});
+
+	it("list project models matching query name should succeed", function(done) {
+		agent.get(`/${username}/projects/${projectName}/models?name=RandomName`)
+			.expect(200, function(err, res) {
+				expect(res.body).to.deep.equal(goldenRandomNameList);
+				done(err);
+			});
+	});
+
+	it("list project models matching partial query name (start) should succeed", function(done) {
+		agent.get(`/${username}/projects/${projectName}/models?name=TestModel`)
+			.expect(200, function(err, res) {
+				expect(res.body).to.deep.equal(goldenTestModelList);
+				done(err);
+			});
+	});
+
+	it("list project models matching partial query name (middle) should succeed", function(done) {
+		agent.get(`/${username}/projects/${projectName}/models?name=Model`)
+			.expect(200, function(err, res) {
+				expect(res.body).to.deep.equal(goldenTestModelList);
+				done(err);
+			});
+	});
+
+	it("list project models matching partial query name (end) should succeed", function(done) {
+		agent.get(`/${username}/projects/${projectName}/models?name=Name`)
+			.expect(200, function(err, res) {
+				expect(res.body).to.deep.equal(goldenRandomNameList);
+				done(err);
+			});
+	});
+
+	it("list project models query with different casing should succeed", function(done) {
+		agent.get(`/${username}/projects/${projectName}/models?name=testmodel`)
+			.expect(200, function(err, res) {
+				expect(res.body).to.deep.equal(goldenTestModelList);
+				done(err);
+			});
+	});
+
+	it("list project models matching no names should succeed", function(done) {
+		agent.get(`/${username}/projects/${projectName}/models?name=DOESNTEXIST`)
+			.expect(200, function(err, res) {
+				expect(res.body).to.deep.equal([]);
+				done(err);
+			});
+	});
+
+	it("list all project models with name query from project that doesn't exist should fail", function(done) {
+		agent.get(`/${username}/projects/notexist/models?name=TestModel`)
+			.expect(404, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
+				done(err);
+			});
+	});
 });

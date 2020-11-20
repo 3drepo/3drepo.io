@@ -839,58 +839,54 @@ function removeModel(account, model, forceRemove) {
 	});
 }
 
-function getModelPermission(username, setting, account) {
-
-	if(!setting) {
-		return Promise.resolve([]);
+const flattenPermissions = (permissions, defaultToPermissionDefinition = false) => {
+	if (!permissions) {
+		return [];
 	}
 
-	let permissions = [];
-	let dbUser;
+	return _.compact(_.flatten(permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || (defaultToPermissionDefinition ? p : null))));
+};
 
-	return User.findByUserName(account).then(_dbUser => {
+async function getModelPermission(username, setting, account) {
+	if(!setting) {
+		return [];
+	}
 
-		dbUser = _dbUser;
-
+	try {
+		let permissions = [];
+		const dbUser = await User.findByUserName(account);
 		if(!dbUser) {
 			return [];
 		}
 
 		const accountPerm = dbUser.customData.permissions.findByUser(username);
-
 		if(accountPerm && accountPerm.permissions) {
-			permissions = _.compact(_.flatten(accountPerm.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || null)));
+			permissions = flattenPermissions(accountPerm.permissions);
 		}
 
 		const projectQuery = { models: setting._id, "permissions.user": username };
-		// project admin have access to models underneath it.
-		return Project.findOne({account}, projectQuery, { "permissions.$" : 1 });
 
-	}).then(project => {
+		// project admin have access to models underneath it.
+		const project = await Project.findOne({account}, projectQuery, { "permissions.$" : 1 });
 
 		if(project && project.permissions) {
-			permissions = permissions.concat(
-				_.compact(_.flatten(project.permissions[0].permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || null)))
-			);
+			permissions = permissions.concat(flattenPermissions(project.permissions[0].permissions));
 		}
 
 		const template = setting.findPermissionByUser(username);
 
 		if(template) {
+			const permissionTemplate = dbUser.customData.permissionTemplates.findById(template.permission);
 
-			const permission = dbUser.customData.permissionTemplates.findById(template.permission);
-
-			if(permission && permission.permissions) {
-				permissions = permissions.concat(
-					_.flatten(permission.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || p))
-				);
+			if(permissionTemplate && permissionTemplate.permissions) {
+				permissions = permissions.concat(flattenPermissions(permissionTemplate.permissions, true));
 			}
 		}
 
 		return _.uniq(permissions);
-	}).catch(err => {
+	} catch(err) {
 		systemLogger.logError("Failed to getModelPermission:", err);
-	});
+	}
 }
 
 async function getMeshById(account, model, meshId) {
@@ -973,6 +969,32 @@ const acceptedFormat = [
 	"rvt", "rfa", "spm"
 ];
 
+const getModelSetting = async (account, model, username) => {
+	let setting = await ModelSetting.findById({account}, model);
+
+	if (!setting) {
+		throw { resCode: responseCodes.MODEL_INFO_NOT_FOUND};
+	} else {
+		// compute permissions by user role
+		const [permissions, submodels] = await Promise.all([
+			getModelPermission(
+				username,
+				setting,
+				account
+			),
+			listSubModels(account, model, C.MASTER_BRANCH_NAME)
+		]);
+
+		setting = await setting.clean();
+		setting.model = setting._id;
+		setting.account = account;
+		setting.headRevisions = {};
+		setting.permissions = permissions;
+		setting.subModels = submodels;
+		return setting;
+	}
+};
+
 module.exports = {
 	createNewModel,
 	createNewFederation,
@@ -993,5 +1015,7 @@ module.exports = {
 	setStatus,
 	importSuccess,
 	importFail,
-	getMeshById
+	getMeshById,
+	getModelSetting,
+	flattenPermissions
 };

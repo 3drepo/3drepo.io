@@ -75,7 +75,7 @@ schema.methods.clean = async function() {
 		delete cleanedData.defaultView;
 		try {
 			const viewIDStr = utils.uuidToString(this.defaultView);
-			const viewData = await views.findByUID(this._dbcolOptions.account, this._dbcolOptions.model,
+			const viewData = await views.findByUID(this._dbcolOptions.account, this._id,
 				viewIDStr, {name: 1});
 			if (viewData) {
 				cleanedData.defaultView = {id: viewIDStr, name: viewData.name};
