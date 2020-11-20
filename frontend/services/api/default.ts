@@ -91,7 +91,7 @@ export const setSocketIdHeader = (socketId) => {
 };
 
 export const getAPIUrl = (url: string) => {
-	return encodeURI(clientConfigService.apiUrl(clientConfigService.GET_API, url));
+	return url.startsWith(`data:image`) ? url : encodeURI(clientConfigService.apiUrl(clientConfigService.GET_API, url));
 };
 
 export const getResponseCode = memoize((errorToFind) => {

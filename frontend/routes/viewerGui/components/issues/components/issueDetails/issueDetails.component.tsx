@@ -333,8 +333,6 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleNewScreenshot = (screenshot) => {
-		const { teamspace, model, viewer } = this.props;
-
 		if (this.isNewIssue) {
 			this.props.setState({
 				newIssue: {
@@ -370,16 +368,16 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public onPositionSave = () => {
-		const { teamspace, model, issue, updateIssue } = this.props;
+		const { issue, updateIssue } = this.props;
 
 		if (!this.isNewIssue) {
-			updateIssue({position: issue.position || []});
+			updateIssue({ position: issue.position || [] });
 		}
 	}
 
 	public handleUpdateScreenshot =
 		(screenshot, disableViewpointSuggestion = false, forceViewpointUpdate = false) => {
-		const {  updateIssue, disableViewer } = this.props;
+		const { updateIssue, disableViewer } = this.props;
 
 		if (this.isNewIssue) {
 			this.props.setState({ newIssue: {
@@ -448,6 +446,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { failedToLoad, issue, horizontal } = this.props;
+
 		return (
 			<Container ref={this.containerRef}>
 				<ViewerPanelContent
