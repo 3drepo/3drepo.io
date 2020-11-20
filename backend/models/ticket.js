@@ -231,6 +231,7 @@ class Ticket extends View {
 		if (data.viewpoint) {
 			newViewpoint = await this.createViewpoint(account, model, id, data.viewpoint, true);
 			oldTicket.viewpoint = oldTicket.viewpoints[0] || {};
+			const oldScreenshotRef = oldTicket.viewpoint.screenshot_ref;
 			oldTicket = super.clean(account, model, oldTicket);
 			delete oldTicket.viewpoint.screenshot;
 			// DEPRECATED
@@ -245,7 +246,7 @@ class Ticket extends View {
 				};
 			} else if (newViewpoint.position && !newViewpoint.screenshot_ref) {
 				// if is updating the viewpoint but not the screenshot, keep the old screenshot
-				newViewpoint.screenshot_ref = oldTicket.viewpoint.screenshot_ref;
+				newViewpoint.screenshot_ref = oldScreenshotRef;
 				newViewpoint.thumbnail = oldTicket.viewpoint.thumbnail;
 			}
 
