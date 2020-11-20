@@ -41,10 +41,11 @@ const getCollection = async () => {
 const invitations = {};
 
 const validateModels = (projectsPermissions, projectsData) => {
+	const projectIDtoData = {};
+	projectsData.forEach((data) => projectIDtoData[data._id] = data);
 	return projectsPermissions.every((project) => {
-		const index = projectsData.map(pr => pr._id).indexOf(project.project);
 		const models = new Set((project.models || []).map(m=> m.model));
-		const allModels = new Set(projectsData[index].models);
+		const allModels = new Set(projectIDtoData[project.project].models);
 		return setContains(allModels, models);
 	});
 };
