@@ -15,14 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { groupCollapsed } from 'console';
 import copy from 'copy-to-clipboard';
 import { get, take } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
-import { selectSelectedViewpoint } from '.';
+import { selectSelectedViewpoint, selectViewpointsGroups } from '.';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { ROUTES } from '../../constants/routes';
 import { UnityUtil } from '../../globals/unity-util';
 import { createGroupsByColor, createGroupsByTransformations, prepareGroup } from '../../helpers/groups';
+import { createGroupsFromViewpoint, mergeGroupsDataFromViewpoint, setGroupData } from '../../helpers/viewpoints';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
@@ -122,11 +124,16 @@ export function* generateViewpoint(teamspace, modelId, name, withScreenshot = fa
 
 export function* createViewpoint({teamspace, modelId, viewpoint}) {
 	try {
-		const {data: {_id, viewpoint: viewpointData}} = yield API.createModelViewpoint(teamspace, modelId, viewpoint);
-		viewpoint._id = _id;
-		viewpoint.viewpoint = { ...viewpointData, screenshot: viewpoint.viewpoint.screenshot} ;
+		const {data: updatedViewpoint} = yield API.createModelViewpoint(teamspace, modelId, viewpoint);
+		yield put(ViewpointsActions.cacheGroupsFromViewpoint(updatedViewpoint.viewpoint, viewpoint.viewpoint));
 
-		yield put(ViewpointsActions.createViewpointSuccess(viewpoint));
+		if (viewpoint.viewpoint.screenshot) {
+			updatedViewpoint.viewpoint.screenshot = viewpoint.viewpoint.screenshot;
+			delete updatedViewpoint.thumbnail;
+			delete updatedViewpoint.screenshot;
+		}
+
+		yield put(ViewpointsActions.createViewpointSuccess(updatedViewpoint));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('create', 'viewpoint', error));
 	}
@@ -224,7 +231,8 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 
 			const clippingPlanes = view.clippingPlanes || get(view, 'viewpoint.clippingPlanes');
 
-			yield put(TreeActions.setHiddenGeometryVisible(viewpoint.hideIfc !== false));
+			// The default value for hideIfc if it doesnt exists is 'false'
+			yield put(TreeActions.setHiddenGeometryVisible(viewpoint.hideIfc === false));
 
 			yield Viewer.updateClippingPlanes( clippingPlanes, teamspace, modelId);
 
@@ -278,37 +286,56 @@ export function * deselectViewsAndLeaveClipping() {
 export function* prepareGroupsIfNecessary( teamspace, modelId, viewpoint) {
 	try  {
 		const revision = yield select(selectCurrentRevisionId);
+		const viewpointsGroups = yield select(selectViewpointsGroups);
 
-		if (viewpoint?.override_group_ids) {
-			viewpoint.override_groups =  (yield all(viewpoint.override_group_ids.map((groupId) =>
+		if (!viewpoint) {
+			return;
+		}
+
+		const groupsProperties = ['override_group_ids', 'transformation_group_ids',
+		'highlighted_group_id', 'hidden_group_id'];
+
+		const groupsToFetch = [];
+
+		// This part discriminates which groups hasnt been loaded yet and add their ids to
+		// the groupsToFetch array
+		for (let i = 0; i < groupsProperties.length ; i++) {
+			const prop = groupsProperties[i];
+			if (viewpoint[prop]) {
+				if (Array.isArray(viewpoint[prop])) { // if the property is an array of groupId
+					(viewpoint[prop] as any[]).forEach((id) => {
+						if (!viewpointsGroups[id]) {
+							groupsToFetch.push(id);
+						}
+					});
+				} else {// if the property is just a groupId
+					if (!viewpointsGroups[viewpoint[prop]]) {
+						groupsToFetch.push(viewpoint[prop]);
+					}
+				}
+			}
+		}
+
+		if (groupsToFetch.length > 0) {
+			const fetchedGroups =  (yield all(groupsToFetch.map((groupId) =>
 				API.getGroup(teamspace, modelId, groupId, revision))))
 				.map(({data}) => prepareGroup(data));
 
-			delete viewpoint.override_group_ids;
+			yield all(fetchedGroups.map((group) => put(ViewpointsActions.fetchGroupSuccess(group))));
+
 		}
 
-		if (viewpoint?.transformation_group_ids) {
-			viewpoint.transformation_groups =  (yield all(viewpoint.transformation_group_ids.map((groupId) =>
-				API.getGroup(teamspace, modelId, groupId, revision))))
-				.map(({data}) => prepareGroup(data));
-
-			delete viewpoint.transformation_group_ids;
-		}
-
-		if (viewpoint?.highlighted_group_id) {
-			const highlightedGroup = (yield API.getGroup(teamspace, modelId, viewpoint?.highlighted_group_id, revision)).data;
-			viewpoint.highlighted_group = prepareGroup(highlightedGroup);
-			delete viewpoint.highlighted_group_id;
-		}
-
-		if (viewpoint?.hidden_group_id) {
-			const hiddenGroup = (yield API.getGroup(teamspace, modelId, viewpoint?.hidden_group_id, revision)).data;
-			viewpoint.hidden_group = prepareGroup(hiddenGroup);
-			delete viewpoint.hidden_group_id;
-		}
+		const groupsMap = yield select(selectViewpointsGroups);
+		const groupsObject = setGroupData(viewpoint, groupsMap);
+		mergeGroupsDataFromViewpoint(viewpoint, groupsObject);
 	} catch {
 		// groups doesnt exists, still continue
 	}
+}
+
+export function* cacheGroupsFromViewpoint({ viewpoint,  groupsData }) {
+	const groups = createGroupsFromViewpoint(viewpoint, groupsData);
+	yield all(groups.map((group) => put(ViewpointsActions.fetchGroupSuccess(group))));
 }
 
 export function* setActiveViewpoint({ teamspace, modelId, view }) {
@@ -365,4 +392,5 @@ export default function* ViewpointsSaga() {
 	yield takeLatest(ViewpointsTypes.SHARE_VIEWPOINT_LINK, shareViewpointLink);
 	yield takeLatest(ViewpointsTypes.SET_DEFAULT_VIEWPOINT, setDefaultViewpoint);
 	yield takeLatest(ViewpointsTypes.DESELECT_VIEWS_AND_LEAVE_CLIPPING, deselectViewsAndLeaveClipping);
+	yield takeLatest(ViewpointsTypes.CACHE_GROUPS_FROM_VIEWPOINT, cacheGroupsFromViewpoint);
 }
