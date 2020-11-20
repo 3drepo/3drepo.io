@@ -281,6 +281,9 @@ class Ticket extends View {
 			}
 
 			if (!_.isEqual(_.omit(oldTicket.viewpoint, ["screenshot_ref"]), _.omit(data.viewpoint, ["screenshot_ref"]))) {
+				if (data.viewpoint.screenshot_ref === oldScreenshotRef) {
+					data.viewpoint.screenshot_ref = undefined;
+				}
 				this.handleFieldUpdate(account, model, sessionId, id, user, "viewpoint", oldTicket, data, systemComments);
 			}
 
