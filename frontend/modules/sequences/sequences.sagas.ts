@@ -129,9 +129,12 @@ export function* setSelectedSequence({ sequenceId }) {
 	if (sequenceId) {
 		yield put(SequencesActions.initializeSequences());
 	} else {
-		yield put(SequencesActions.setStateDefinition(undefined, {}));
-		yield put(SequencesActions.setSelectedDateSuccess(null));
-		yield put(SequencesActions.restoreModelDefaultVisibility());
+		const selectedSequence = yield select(selectSelectedSequence);
+		if (selectedSequence) {
+			yield put(SequencesActions.setStateDefinition(undefined, {}));
+			yield put(SequencesActions.setSelectedDateSuccess(null));
+			yield put(SequencesActions.restoreModelDefaultVisibility());
+		}
 	}
 	yield put(SequencesActions.setSelectedSequenceSuccess(sequenceId));
 	yield put(SequencesActions.fetchActivitiesDefinitions(sequenceId));
