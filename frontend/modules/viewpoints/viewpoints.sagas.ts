@@ -194,6 +194,8 @@ export function* unsubscribeOnViewpointChanges({ teamspace, modelId }) {
 }
 
 export function* showPreset({preset}) {
+	yield Viewer.isViewerReady();
+
 	switch (preset) {
 		case PRESET_VIEW.TOP:
 			yield Viewer.topView();
