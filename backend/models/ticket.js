@@ -570,7 +570,15 @@ class Ticket extends View {
 			}
 		});
 
-		const viewpoint = entry.viewpoint;
+		let viewpoint = entry.viewpoint;
+		if (!entry.viewpoint && entry.viewpoints && entry.viewpoints.length > 0) {
+			viewpoint = entry.viewpoints[0];
+		}
+
+		if (!viewpoint) {
+			return;
+		}
+
 		vpFieldsToConvert.forEach((key) => {
 			if (viewpoint[key]) {
 				viewpoint[key] = utils.webGLtoDirectX(viewpoint[key]);

@@ -130,6 +130,7 @@ export function* setSelectedSequence({ sequenceId }) {
 		yield put(SequencesActions.initializeSequences());
 	} else {
 		yield put(SequencesActions.setStateDefinition(undefined, {}));
+		yield put(SequencesActions.setSelectedDateSuccess(null));
 		yield put(SequencesActions.restoreModelDefaultVisibility());
 	}
 	yield put(SequencesActions.setSelectedSequenceSuccess(sequenceId));
