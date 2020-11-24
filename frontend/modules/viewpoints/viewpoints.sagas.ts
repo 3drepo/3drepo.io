@@ -193,73 +193,73 @@ export function* unsubscribeOnViewpointChanges({ teamspace, modelId }) {
 	}));
 }
 
+export function* showPreset({preset}) {
+	switch (preset) {
+		case PRESET_VIEW.TOP:
+			yield Viewer.topView();
+			break;
+		case PRESET_VIEW.BOTTOM:
+			yield Viewer.bottomView();
+			break;
+		case PRESET_VIEW.FRONT:
+			yield Viewer.frontView();
+			break;
+		case PRESET_VIEW.BACK:
+			yield Viewer.backView();
+			break;
+		case PRESET_VIEW.LEFT:
+			yield Viewer.leftView();
+			break;
+		case PRESET_VIEW.RIGHT:
+			yield Viewer.rightView();
+			break;
+	}
+}
+
 export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 	if (view) {
+		yield Viewer.isViewerReady();
 
-		if (view.preset) {
-			switch (view.preset) {
-				case PRESET_VIEW.TOP:
-					yield Viewer.topView();
-					break;
-				case PRESET_VIEW.BOTTOM:
-					yield Viewer.bottomView();
-					break;
-				case PRESET_VIEW.FRONT:
-					yield Viewer.frontView();
-					break;
-				case PRESET_VIEW.BACK:
-					yield Viewer.backView();
-					break;
-				case PRESET_VIEW.LEFT:
-					yield Viewer.leftView();
-					break;
-				case PRESET_VIEW.RIGHT:
-					yield Viewer.rightView();
-					break;
-			}
-		} else {
-			yield Viewer.isViewerReady();
-
-			const viewpoint = view.viewpoint;
-			if (!viewpoint) {
-				return;
-			}
-
-			if (viewpoint?.up && !ignoreCamera) {
-				yield put(ViewerGuiActions.setCamera(viewpoint));
-			}
-
-			const clippingPlanes = view.clippingPlanes || get(view, 'viewpoint.clippingPlanes');
-
-			// The default value for hideIfc if it doesnt exists is 'false'
-			yield put(TreeActions.setHiddenGeometryVisible(viewpoint.hideIfc === false));
-
-			yield Viewer.updateClippingPlanes( clippingPlanes, teamspace, modelId);
-
-			yield prepareGroupsIfNecessary(teamspace, modelId, view.viewpoint);
-
-			if (viewpoint?.override_groups) {
-				yield put(GroupsActions.clearColorOverrides());
-			}
-
-			yield put(TreeActions.showAllNodes());
-
-			yield put(TreeActions.clearCurrentlySelected());
-
-			if (viewpoint?.hidden_group?.objects?.length > 0) {
-				yield put(TreeActions.hideNodesBySharedIds(viewpoint.hidden_group.objects));
-			} else if (viewpoint?.shown?.objects?.length > 0) {
-				yield put(TreeActions.isolateNodesBySharedIds(viewpoint.shown.objects));
-			}
-
-			if (viewpoint?.highlighted_group?.objects?.length > 0) {
-				yield put(TreeActions.selectNodesBySharedIds(viewpoint.highlighted_group.objects));
-				window.dispatchEvent(new Event('resize'));
-			}
-
-			yield put(ViewpointsActions.setSelectedViewpoint(viewpoint));
+		const viewpoint = view.viewpoint;
+		if (!viewpoint) {
+			return;
 		}
+
+		if (viewpoint?.up && !ignoreCamera) {
+			yield put(ViewerGuiActions.setCamera(viewpoint));
+		}
+
+		const clippingPlanes = view.clippingPlanes || get(view, 'viewpoint.clippingPlanes');
+
+		// The default value for hideIfc if it doesnt exists is 'false'
+		yield put(TreeActions.setHiddenGeometryVisible(viewpoint.hideIfc === false));
+
+		yield Viewer.updateClippingPlanes( clippingPlanes, teamspace, modelId);
+
+		yield prepareGroupsIfNecessary(teamspace, modelId, view.viewpoint);
+
+		if (viewpoint?.override_groups) {
+			yield put(GroupsActions.clearColorOverrides());
+		}
+
+		yield put(TreeActions.showAllNodes());
+
+		yield put(TreeActions.clearCurrentlySelected());
+
+		if (viewpoint?.hidden_group?.objects?.length > 0) {
+			yield put(TreeActions.hideNodesBySharedIds(viewpoint.hidden_group.objects));
+		} else if (viewpoint?.shown?.objects?.length > 0) {
+			yield put(TreeActions.isolateNodesBySharedIds(viewpoint.shown.objects));
+		}
+
+		if (viewpoint?.highlighted_group?.objects?.length > 0) {
+			yield put(TreeActions.selectNodesBySharedIds(viewpoint.highlighted_group.objects));
+			window.dispatchEvent(new Event('resize'));
+		}
+
+		yield put(ViewpointsActions.setSelectedViewpoint(viewpoint));
 	}
+
 }
 
 export function * deselectViewsAndLeaveClipping() {
@@ -393,4 +393,5 @@ export default function* ViewpointsSaga() {
 	yield takeLatest(ViewpointsTypes.SET_DEFAULT_VIEWPOINT, setDefaultViewpoint);
 	yield takeLatest(ViewpointsTypes.DESELECT_VIEWS_AND_LEAVE_CLIPPING, deselectViewsAndLeaveClipping);
 	yield takeLatest(ViewpointsTypes.CACHE_GROUPS_FROM_VIEWPOINT, cacheGroupsFromViewpoint);
+	yield takeLatest(ViewpointsTypes.SHOW_PRESET, showPreset);
 }
