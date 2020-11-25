@@ -102,56 +102,6 @@ const groupSchema = new Schema({
 	transformation: [Number]
 });
 
-groupSchema.statics.ifcGuidsToUUIDs = function (account, model, ifcGuids, branch, revId) {
-	if(!ifcGuids || ifcGuids.length === 0) {
-		return Promise.resolve([]);
-	}
-
-	const query = {"metadata.IFC GUID": { $in: ifcGuids } };
-	const project = { parents: 1, _id: 0 };
-
-	return db.getCollection(account, model + ".scene").then(dbCol => {
-		return dbCol.find(query, project).toArray().then(results => {
-			if(results.length === 0) {
-				return [];
-			}
-			return History.getHistory({ account, model }, branch, revId).then(history => {
-				if (!history) {
-					return Promise.reject(responseCodes.INVALID_TAG_NAME);
-				} else {
-
-					const parents = results.map(x => x = x.parents).reduce((acc, val) => acc.concat(val), []);
-
-					const meshQuery = { _id: { $in: history.current }, shared_id: { $in: parents }, type: "mesh" };
-					const meshProject = { shared_id: 1, _id: 0 };
-
-					return dbCol.find(meshQuery, meshProject).toArray();
-				}
-			});
-		});
-	});
-
-};
-
-groupSchema.statics.uuidToIfcGuids = function (obj) {
-	const account = obj.account;
-	const model = obj.model;
-
-	const uid = ("[object String]" !== Object.prototype.toString.call(uid)) ? utils.uuidToString(uid) : obj.shared_id;
-	const parent = utils.stringToUUID(uid);
-
-	return Meta.find({ account, model }, { type: "meta", parents: parent, "metadata.IFC GUID": { $exists: true } }, { "parents": 1, "metadata.IFC GUID": 1 })
-		.then(results => {
-			const ifcGuids = [];
-			results.forEach(res => {
-				if (this.isIfcGuid(res.metadata["IFC GUID"])) {
-					ifcGuids.push(res.metadata["IFC GUID"]);
-				}
-			});
-			return ifcGuids;
-		});
-};
-
 function uuidsToIfcGuids(account, model, ids) {
 	const query = { type: "meta", parents: { $in: ids }, "metadata.IFC GUID": { $exists: true } };
 	const project = { "metadata.IFC GUID": 1, parents: 1 };
@@ -161,13 +111,6 @@ function uuidsToIfcGuids(account, model, ids) {
 		});
 	});
 }
-
-/**
- * IFC Guid definition: [0-9,A-Z,a-z,_$]* (length = 22)
- */
-groupSchema.statics.isIfcGuid = function (value) {
-	return value && 22 === value.length;
-};
 
 /**
  * Converts all shared IDs to IFC Guids if applicable and return the objects array.
@@ -246,23 +189,6 @@ groupSchema.methods.getObjectsArrayAsIfcGuids = function (data) {
 	return Promise.all(ifcGuidPromises).then(ifcObjects => {
 		return ifcObjects;
 	});
-};
-
-groupSchema.statics.findIfcGroupByUID = function (dbCol, uid) {
-
-	// Extract a unique list of IDs only
-	return this.findOne(dbCol, { _id: uid })
-		.then(group => {
-
-			if (!group) {
-				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
-			}
-
-			return group.getObjectsArrayAsIfcGuids(null, false).then(ifcObjects => {
-				group.objects = ifcObjects;
-				return group;
-			});
-		});
 };
 
 /**
@@ -671,6 +597,50 @@ Group.deleteGroups = function (dbCol, sessionId, ids) {
 Group.deleteGroupsByViewId = async function (account, model, view_id) {
 	const _dbCol = await db.getCollection(account, model + ".groups");
 	return await _dbCol.remove({ view_id });
+};
+
+Group.findIfcGroupByUID = function (dbCol, uid) {
+	// Extract a unique list of IDs only
+	return this.findOne(dbCol, { _id: uid }).then(group => {
+		if (!group) {
+			return Promise.reject(responseCodes.GROUP_NOT_FOUND);
+		}
+
+		return group.getObjectsArrayAsIfcGuids(null, false).then(ifcObjects => {
+			group.objects = ifcObjects;
+			return group;
+		});
+	});
+};
+
+Group.ifcGuidsToUUIDs = function (account, model, ifcGuids, branch, revId) {
+	if(!ifcGuids || ifcGuids.length === 0) {
+		return Promise.resolve([]);
+	}
+
+	const query = {"metadata.IFC GUID": { $in: ifcGuids } };
+	const project = { parents: 1, _id: 0 };
+
+	return db.getCollection(account, model + ".scene").then(dbCol => {
+		return dbCol.find(query, project).toArray().then(results => {
+			if(results.length === 0) {
+				return [];
+			}
+			return History.getHistory({ account, model }, branch, revId).then(history => {
+				if (!history) {
+					return Promise.reject(responseCodes.INVALID_TAG_NAME);
+				} else {
+
+					const parents = results.map(x => x = x.parents).reduce((acc, val) => acc.concat(val), []);
+
+					const meshQuery = { _id: { $in: history.current }, shared_id: { $in: parents }, type: "mesh" };
+					const meshProject = { shared_id: 1, _id: 0 };
+
+					return dbCol.find(meshQuery, meshProject).toArray();
+				}
+			});
+		});
+	});
 };
 
 module.exports = Group;
