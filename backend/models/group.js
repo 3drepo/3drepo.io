@@ -256,123 +256,6 @@ groupSchema.methods.getObjectsArray = function (model, branch, revId, convertSha
 	});
 };
 
-// FIXME: Why do we have findByUID and findByUIDSerialised? - charence
-groupSchema.statics.findByUID = function (dbCol, uid, branch, revId, convertObjects = true) {
-
-	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
-		.then(group => {
-
-			if (!group) {
-				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
-			}
-
-			if (convertObjects) {
-				return getObjectIds(dbCol, group, branch, revId, false).then((sharedIdObjects) => {
-					group.objects = sharedIdObjects;
-					return group;
-				});
-			}
-
-			return group;
-		});
-
-};
-
-// FIXME: Why do we have findByUID and findByUIDSerialised? - charence
-groupSchema.statics.findByUIDSerialised = function (dbCol, uid, branch, revId, showIfcGuids = false) {
-
-	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
-		.then(group => {
-
-			if (!group) {
-				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
-			}
-
-			return getObjectIds(dbCol, group, branch, revId, true, showIfcGuids).then((sharedIdObjects) => {
-
-				group.objects = sharedIdObjects;
-				return clean(group);
-			});
-		});
-};
-
-groupSchema.statics.listGroups = function (dbCol, queryParams, branch, revId, ids, showIfcGuids) {
-
-	const query = {};
-
-	// If we want groups that aren't from issues
-	if (queryParams.noIssues) {
-		query.issue_id = { $exists: false };
-	}
-
-	// If we want groups that aren't from risks
-	if (queryParams.noRisks) {
-		query.risk_id = { $exists: false };
-	}
-
-	// If we want groups that aren't from views
-	if (queryParams.noViews) {
-		query.view_id = { $exists: false };
-	}
-
-	if (queryParams.updatedSince) {
-		const updatedSince = parseFloat(queryParams.updatedSince);
-
-		query.$or = [
-			{
-				createdAt: { $gte: new Date(updatedSince) },  updatedAt: { $exists: false}
-			},
-			{
-				updatedAt: { $gte: updatedSince }
-			}
-		];
-	}
-
-	if (ids) {
-		query._id = {$in: utils.stringsToUUIDs(ids)};
-	}
-
-	return this.find(dbCol, query).then(results => {
-		const sharedIdConversionPromises = [];
-
-		results.forEach(result => {
-			sharedIdConversionPromises.push(
-				getObjectIds(dbCol, result, branch, revId, true, showIfcGuids).then((sharedIdObjects) => {
-					result.objects = sharedIdObjects;
-					return result;
-				})
-			);
-		});
-
-		return Promise.all(sharedIdConversionPromises).then((sharedIdGroups) => {
-			sharedIdGroups.forEach((group, i) => {
-				sharedIdGroups[i] = clean(group);
-			});
-
-			return sharedIdGroups;
-		});
-	});
-};
-
-groupSchema.statics.updateIssueId = function (dbCol, uid, issueId) {
-
-	if ("[object String]" === Object.prototype.toString.call(uid)) {
-		uid = utils.stringToUUID(uid);
-	}
-
-	return this.findOne(dbCol, { _id: uid }).then(group => {
-		if (group) {
-			const issueIdData = {
-				issue_id: issueId
-			};
-
-			return group.updateAttrs(dbCol, issueIdData);
-		} else {
-			return Promise.reject(responseCodes.GROUP_NOT_FOUND);
-		}
-	});
-};
-
 // Group Update with Event
 groupSchema.methods.updateGroup = function (dbCol, sessionId, data, user = "", branch = "master", rid = null) {
 	return this.updateAttrs(dbCol, _.cloneDeep(data), user).then((savedGroup) => {
@@ -459,7 +342,61 @@ function cleanEmbeddedObject(field, data) {
 	return data;
 }
 
-groupSchema.statics.createGroup = function (dbCol, sessionId, data, creator = "", branch = "master", rid = null) {
+function cleanArray(obj, prop) {
+	if (obj[prop] && 0 === obj[prop].length) {
+		delete obj[prop];
+	}
+
+	return obj;
+}
+
+function clean(groupData) {
+	const cleaned = groupData.toObject();
+	cleaned._id = utils.uuidToString(cleaned._id);
+	cleaned.issue_id = cleaned.issue_id && utils.uuidToString(cleaned.issue_id);
+	cleaned.risk_id = cleaned.risk_id && utils.uuidToString(cleaned.risk_id);
+	cleaned.view_id = cleaned.view_id && utils.uuidToString(cleaned.view_id);
+
+	if (utils.isDate(cleaned.createdAt)) {
+		cleaned.createdAt = cleaned.createdAt.getTime();
+	}
+
+	if (utils.isDate(cleaned.updatedAt)) {
+		cleaned.updatedAt = cleaned.updatedAt.getTime();
+	}
+
+	cleanArray(cleaned, "rules");
+	cleanArray(cleaned, "transformation");
+
+	for (let i = 0; cleaned.objects && i < cleaned.objects.length; i++) {
+		cleanArray(cleaned.objects[i], "ifc_guids");
+		cleanArray(cleaned.objects[i], "shared_ids");
+	}
+
+	cleaned.objects = cleaned.objects.filter(obj => obj.ifc_guids || obj.shared_ids);
+
+	delete cleaned.__v;
+
+	return cleaned;
+}
+
+function getObjectIds(dbCol, groupData, branch, revId, convertSharedIDsToString, showIfcGuids = false) {
+	if (groupData.rules && groupData.rules.length > 0) {
+		return Meta.findObjectIdsByRules(dbCol.account, dbCol.model, groupData.rules, branch, revId, convertSharedIDsToString, showIfcGuids);
+	} else {
+		return groupData.getObjectsArray(dbCol.model, branch, revId, convertSharedIDsToString, showIfcGuids);
+	}
+}
+
+const Group = ModelFactory.createClass(
+	"Group",
+	groupSchema,
+	arg => {
+		return `${arg.model}.groups`;
+	}
+);
+
+Group.createGroup = function (dbCol, sessionId, data, creator = "", branch = "master", rid = null) {
 	const model = dbCol.model;
 
 	const newGroup = this.model("Group").createInstance({
@@ -519,60 +456,6 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data, creator = ""
 	});
 };
 
-function cleanArray(obj, prop) {
-	if (obj[prop] && 0 === obj[prop].length) {
-		delete obj[prop];
-	}
-
-	return obj;
-}
-
-function clean(groupData) {
-	const cleaned = groupData.toObject();
-	cleaned._id = utils.uuidToString(cleaned._id);
-	cleaned.issue_id = cleaned.issue_id && utils.uuidToString(cleaned.issue_id);
-	cleaned.risk_id = cleaned.risk_id && utils.uuidToString(cleaned.risk_id);
-	cleaned.view_id = cleaned.view_id && utils.uuidToString(cleaned.view_id);
-
-	if (utils.isDate(cleaned.createdAt)) {
-		cleaned.createdAt = cleaned.createdAt.getTime();
-	}
-
-	if (utils.isDate(cleaned.updatedAt)) {
-		cleaned.updatedAt = cleaned.updatedAt.getTime();
-	}
-
-	cleanArray(cleaned, "rules");
-	cleanArray(cleaned, "transformation");
-
-	for (let i = 0; cleaned.objects && i < cleaned.objects.length; i++) {
-		cleanArray(cleaned.objects[i], "ifc_guids");
-		cleanArray(cleaned.objects[i], "shared_ids");
-	}
-
-	cleaned.objects = cleaned.objects.filter(obj => obj.ifc_guids || obj.shared_ids);
-
-	delete cleaned.__v;
-
-	return cleaned;
-}
-
-function getObjectIds(dbCol, groupData, branch, revId, convertSharedIDsToString, showIfcGuids = false) {
-	if (groupData.rules && groupData.rules.length > 0) {
-		return Meta.findObjectIdsByRules(dbCol.account, dbCol.model, groupData.rules, branch, revId, convertSharedIDsToString, showIfcGuids);
-	} else {
-		return groupData.getObjectsArray(dbCol.model, branch, revId, convertSharedIDsToString, showIfcGuids);
-	}
-}
-
-const Group = ModelFactory.createClass(
-	"Group",
-	groupSchema,
-	arg => {
-		return `${arg.model}.groups`;
-	}
-);
-
 Group.deleteGroups = function (dbCol, sessionId, ids) {
 	const groupsIds = [].concat(ids);
 
@@ -597,6 +480,42 @@ Group.deleteGroups = function (dbCol, sessionId, ids) {
 Group.deleteGroupsByViewId = async function (account, model, view_id) {
 	const _dbCol = await db.getCollection(account, model + ".groups");
 	return await _dbCol.remove({ view_id });
+};
+
+// FIXME: Why do we have findByUID and findByUIDSerialised? - charence
+Group.findByUID = function (dbCol, uid, branch, revId, convertObjects = true) {
+	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
+		.then(group => {
+			if (!group) {
+				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
+			}
+
+			if (convertObjects) {
+				return getObjectIds(dbCol, group, branch, revId, false).then((sharedIdObjects) => {
+					group.objects = sharedIdObjects;
+					return group;
+				});
+			}
+
+			return group;
+		});
+
+};
+
+// FIXME: Why do we have findByUID and findByUIDSerialised? - charence
+Group.findByUIDSerialised = function (dbCol, uid, branch, revId, showIfcGuids = false) {
+	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
+		.then(group => {
+			if (!group) {
+				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
+			}
+
+			return getObjectIds(dbCol, group, branch, revId, true, showIfcGuids).then((sharedIdObjects) => {
+
+				group.objects = sharedIdObjects;
+				return clean(group);
+			});
+		});
 };
 
 Group.findIfcGroupByUID = function (dbCol, uid) {
@@ -640,6 +559,77 @@ Group.ifcGuidsToUUIDs = function (account, model, ifcGuids, branch, revId) {
 				}
 			});
 		});
+	});
+};
+
+Group.listGroups = function (dbCol, queryParams, branch, revId, ids, showIfcGuids) {
+	const query = {};
+
+	// If we want groups that aren't from issues
+	if (queryParams.noIssues) {
+		query.issue_id = { $exists: false };
+	}
+
+	// If we want groups that aren't from risks
+	if (queryParams.noRisks) {
+		query.risk_id = { $exists: false };
+	}
+
+	// If we want groups that aren't from views
+	if (queryParams.noViews) {
+		query.view_id = { $exists: false };
+	}
+
+	if (queryParams.updatedSince) {
+		const updatedSince = parseFloat(queryParams.updatedSince);
+
+		query.$or = [
+			{
+				createdAt: { $gte: new Date(updatedSince) },  updatedAt: { $exists: false}
+			},
+			{
+				updatedAt: { $gte: updatedSince }
+			}
+		];
+	}
+
+	if (ids) {
+		query._id = {$in: utils.stringsToUUIDs(ids)};
+	}
+
+	return this.find(dbCol, query).then(results => {
+		const sharedIdConversionPromises = [];
+
+		results.forEach(result => {
+			sharedIdConversionPromises.push(
+				getObjectIds(dbCol, result, branch, revId, true, showIfcGuids).then((sharedIdObjects) => {
+					result.objects = sharedIdObjects;
+					return result;
+				})
+			);
+		});
+
+		return Promise.all(sharedIdConversionPromises).then((sharedIdGroups) => {
+			sharedIdGroups.forEach((group, i) => {
+				sharedIdGroups[i] = clean(group);
+			});
+
+			return sharedIdGroups;
+		});
+	});
+};
+
+Group.updateIssueId = function (dbCol, uid, issueId) {
+	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) }).then(group => {
+		if (group) {
+			const issueIdData = {
+				issue_id: issueId
+			};
+
+			return group.updateAttrs(dbCol, issueIdData);
+		} else {
+			return Promise.reject(responseCodes.GROUP_NOT_FOUND);
+		}
 	});
 };
 
