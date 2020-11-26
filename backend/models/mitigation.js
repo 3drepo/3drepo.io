@@ -95,7 +95,6 @@ class Mitigation {
 
 	async importCSV(account, data) {
 		const csvFields = Object.keys(fieldTypes);
-		const clearMitigations = this.clearAll(account);
 
 		const records = parse(data, {
 			columns: csvFields,
@@ -104,12 +103,10 @@ class Mitigation {
 			trim: true
 		});
 
-		await clearMitigations;
-
-		return this.insert(account, records);
+		return this.insert(account, records, true);
 	}
 
-	async insert(account, mitigations) {
+	async insert(account, mitigations, purgeOld = false) {
 		const mitigationColl = await this.getMitigationCollection(account);
 		const requiredFields = ["mitigation_desc"];
 		const optionalFields = Object.keys(_.omit(fieldTypes, requiredFields));
@@ -133,6 +130,11 @@ class Mitigation {
 			newMitigation._id = utils.stringToUUID(nodeuuid());
 
 			mitigations[i] = newMitigation;
+		}
+
+		if (purgeOld) {
+			const clearMitigations = this.clearAll(account);
+			await clearMitigations;
 		}
 
 		await mitigationColl.insert(mitigations);
