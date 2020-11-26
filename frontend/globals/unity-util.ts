@@ -16,6 +16,7 @@
 */
 declare var Module;
 declare var SendMessage;
+declare var createUnityInstance;
 
 import { IS_FIREFOX } from '../helpers/browser';
 import { ViewerService } from '../services/viewer/viewer';
@@ -151,10 +152,10 @@ export class UnityUtil {
 
 		const unitySettings = {};
 
-		const config = {
-			dataUrl: buildUrl + "/unity.data.gz",
-			frameworkUrl: buildUrl + "/unity.framework.js.gz",
-			codeUrl: buildUrl + "/unity.wasm.gz",
+		var config = {
+			dataUrl: buildUrl + "/unity.data.unityweb",
+			frameworkUrl: buildUrl + "/unity.framework.js.unityweb",
+			codeUrl: buildUrl + "/unity.wasm.unityweb",
 			streamingAssetsUrl: "StreamingAssets",
 			companyName: "3D Repo Ltd",
 			productName: "3D Repo Unity",
