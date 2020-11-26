@@ -125,20 +125,20 @@ function init() {
 
     function prepareViewer() {
 
-        var unityLoaderPath = PREFIX + "/unity/Build/UnityLoader.js";
+        var unityLoaderPath = PREFIX + "/unity/Build/unity.loader.js";
 
         var unityLoaderScript = document.createElement("script");
         return new Promise(function(resolve, reject) {
 
             unityLoaderScript.async = true;
             unityLoaderScript.addEventListener ("load", function() {
-                console.debug("Loaded UnityLoader.js succesfully");
+                console.debug("Loaded unity.loader.js succesfully");
                 resolve();
             }, false);
 
             unityLoaderScript.addEventListener ("error", function(error) {
-                console.error("Error loading UnityLoader.js", error);
-                reject("Error loading UnityLoader.js");
+                console.error("Error loading unity.loader.js", error);
+                reject("Error loading unity.loader.js");
             }, false);
 
             // Event handlers MUST come first before setting src

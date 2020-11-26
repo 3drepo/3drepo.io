@@ -16,9 +16,9 @@
 */
 declare var Module;
 declare var SendMessage;
-declare var UnityLoader;
 
 import { IS_FIREFOX } from '../helpers/browser';
+import { ViewerService } from '../services/viewer/viewer';
 
 export class UnityUtil {
 	/** @hidden */
@@ -116,7 +116,7 @@ export class UnityUtil {
 	}
 
 	/** @hidden */
-	public static onProgress(gameInstance, progress: number) {
+	public static onProgress(progress: number) {
 		requestAnimationFrame(() => {
 			UnityUtil.progressCallback(progress);
 		});
@@ -131,7 +131,7 @@ export class UnityUtil {
 	 * @return returns a promise which resolves when the game is loaded.
 	 *
 	 */
-	public static loadUnity(divId: string, unityConfig = 'unity/Build/unity.json', memory?: number): Promise<void> {
+	public static loadUnity(viewer: ViewerService, unityConfig = 'unity/Build/unity.json', memory?: number): Promise<void> {
 		memory = memory || 2130706432;
 
 		if (!window.Module) {
@@ -147,11 +147,20 @@ export class UnityUtil {
 			XMLHttpRequest.prototype.open = newOpen;
 		}
 
-		const unitySettings: any = {
-			onProgress: this.onProgress
-		};
+		const buildUrl = "unity/Build";
 
-		UnityLoader.Error.handler = this.onUnityError;
+		const unitySettings = {};
+
+		const config = {
+			dataUrl: buildUrl + "/unity.data.gz",
+			frameworkUrl: buildUrl + "/unity.framework.js.gz",
+			codeUrl: buildUrl + "/unity.wasm.gz",
+			streamingAssetsUrl: "StreamingAssets",
+			companyName: "3D Repo Ltd",
+			productName: "3D Repo Unity",
+			productVersion: "1.0",
+		  };
+
 		if (window) {
 			if (!(window as any).Module) {
 				window.Module = {};
@@ -161,18 +170,15 @@ export class UnityUtil {
 			if (!IS_FIREFOX) {
 				unitySettings.Module.TOTAL_MEMORY = memory;
 			}
-
-			UnityUtil.unityInstance = UnityLoader.instantiate(
-				divId,
-				unityConfig,
-				unitySettings
-			);
-		} else {
-			UnityUtil.unityInstance = UnityLoader.instantiate(
-				divId,
-				unityConfig
-			);
 		}
+
+		createUnityInstance(viewer.canvas, config, (progress) => {
+			this.onProgress(progress);
+		  }).then((unityInstance) => {
+			UnityUtil.unityInstance = unityInstance;
+		  }).catch((message) => {
+			alert(message);
+		  });
 
 		return UnityUtil.onReady();
 	}
