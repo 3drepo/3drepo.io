@@ -59,6 +59,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setSearchQuery: ViewpointsActions.setSearchQuery,
 	setState: ViewpointsActions.setComponentState,
 	shareViewpointLink: ViewpointsActions.shareViewpointLink,
+	showPreset: ViewpointsActions.showPreset,
 	fetchModelSettings: ModelActions.fetchSettings,
 }, dispatch);
 

@@ -65,6 +65,7 @@ interface IProps {
 	unsubscribeOnViewpointChanges: (teamspace, modelId) => void;
 	setState: (componentState: IViewpointsComponentState) => void;
 	fetchModelSettings: (teamspace: string, modelId: string) => void;
+	showPreset: (preset: string) => void;
 	id?: string;
 }
 
@@ -285,9 +286,7 @@ export class Views extends React.PureComponent<IProps, any> {
 		<ViewerPanelFooter alignItems="center">
 			<ViewerBottomActions>
 				<PresetViews
-					teamspace={this.props.teamspace}
-					model={this.props.model}
-					setActiveViewpoint={this.props.setActiveViewpoint}
+					showPreset={this.props.showPreset}
 				/>
 			</ViewerBottomActions>
 			<ViewerPanelButton

@@ -125,7 +125,7 @@ export class App extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		if (location.pathname !== prevProps.location.pathname) {
+		if (decodeURIComponent(location.pathname) !== decodeURIComponent(prevProps.location.pathname)) {
 			this.sendAnalyticsPageView(location);
 			if (this.props.dialogs.length) {
 				this.props.hideDialog();
