@@ -2,12 +2,6 @@
 var PREFIX = "https://www.3drepo.io";
 var API_PREFIX = "https://api1.www.3drepo.io";
 
-// Unity requires its setting in a global 
-// variable called Module
-var Module = {
-    TOTAL_MEMORY: 2130706432,
-};
-
 init();
 
 function init() {
@@ -160,7 +154,7 @@ function init() {
             UnityUtil.init(function(error) {
                 console.error(error);
             });
-            UnityUtil.loadUnity("unity", PREFIX + "/unity/Build/unity.json");
+            UnityUtil.loadUnity(document.getElementById("unity"));
             
             UnityUtil.onReady().then(function() {
                 changeStatus("")

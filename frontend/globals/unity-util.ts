@@ -132,9 +132,7 @@ export class UnityUtil {
 	 * @return returns a promise which resolves when the game is loaded.
 	 *
 	 */
-	public static loadUnity(viewer: ViewerService, unityConfig = 'unity/Build/unity.json', memory?: number): Promise<void> {
-		memory = memory || 2130706432;
-
+	public static loadUnity(viewer: ViewerService): Promise<void> {
 		if (!window.Module) {
 			// Add withCredentials to XMLHttpRequest prototype to allow unity game to
 			// do CORS request. We used to do this with a .jspre on the unity side but it's no longer supported
@@ -150,8 +148,6 @@ export class UnityUtil {
 
 		const buildUrl = "unity/Build";
 
-		const unitySettings = {};
-
 		var config = {
 			dataUrl: buildUrl + "/unity.data.unityweb",
 			frameworkUrl: buildUrl + "/unity.framework.js.unityweb",
@@ -161,17 +157,6 @@ export class UnityUtil {
 			productName: "3D Repo Unity",
 			productVersion: "1.0",
 		  };
-
-		if (window) {
-			if (!(window as any).Module) {
-				window.Module = {};
-			}
-			unitySettings.Module = (window as any).Module;
-
-			if (!IS_FIREFOX) {
-				unitySettings.Module.TOTAL_MEMORY = memory;
-			}
-		}
 
 		createUnityInstance(viewer.canvas, config, (progress) => {
 			this.onProgress(progress);

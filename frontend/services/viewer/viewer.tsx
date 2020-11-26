@@ -144,7 +144,7 @@ export class ViewerService {
 		UnityUtil.viewer = this;
 
 		try {
-			await this.insertUnityLoader(this.memory);
+			await this.insertUnityLoader();
 
 			(async () => {
 				await this.initUnity({
@@ -203,7 +203,7 @@ export class ViewerService {
 		});
 	}
 
-	public insertUnityLoader(memory) {
+	public insertUnityLoader() {
 		if (document.querySelector('.unity-loader')) {
 			return Promise.resolve();
 		}
@@ -212,7 +212,7 @@ export class ViewerService {
 			this.unityLoaderScript.addEventListener ('load', () => {
 				(async () => {
 					console.debug('Loaded unity.loader.js succesfully');
-					await UnityUtil.loadUnity(this, undefined, memory);
+					await UnityUtil.loadUnity(this);
 					resolve();
 				})();
 			}, false);
