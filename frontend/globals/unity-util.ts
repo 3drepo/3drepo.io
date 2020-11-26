@@ -14,7 +14,6 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-declare var Module;
 declare var SendMessage;
 declare var createUnityInstance;
 
@@ -162,9 +161,7 @@ export class UnityUtil {
 			this.onProgress(progress);
 		  }).then((unityInstance) => {
 			UnityUtil.unityInstance = unityInstance;
-		  }).catch((message) => {
-			alert(message);
-		  });
+		  }).catch(UnityUtil.onUnityError);
 
 		return UnityUtil.onReady();
 	}
@@ -219,23 +216,21 @@ export class UnityUtil {
 	 * @hidden
 	 * Handle a error from Unity
 	 */
-	public static onUnityError(errorObject) {
+	public static onUnityError(message) {
 
-		const err = errorObject.message;
-		const line = errorObject.lineno;
 		let reload = false;
 		let conf;
 
-		if (UnityUtil.isUnityError(err)) {
+		if (UnityUtil.isUnityError(message)) {
 			reload = true;
 			conf = `Your browser has failed to load 3D Repo's model viewer. The following occured:
-					<br><br> <code>Error ${err} occured at line ${line}</code>
+					<br><br> <code>${message}</code>
 					<br><br> This may due to insufficient memory. Please ensure you are using a modern 64bit web browser
 					(such as Chrome or Firefox), reduce your memory usage and try again.
 					If you are unable to resolve this problem, please contact support@3drepo.org referencing the above error.
 					<br><md-container>`;
 		} else {
-			conf = `Something went wrong :( <br><br> <code>Error ${err} occured at line ${line}</code><br><br>
+			conf = `Something went wrong :( <br><br> <code>${message}</code><br><br>
 				If you are unable to resolve this problem, please contact support@3drepo.org referencing the above error
 				<br><br> Click OK to refresh this page<md-container>`;
 		}

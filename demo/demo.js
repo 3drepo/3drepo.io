@@ -149,8 +149,6 @@ function init() {
             
             document.body.style.cursor = "wait";
 
-            Module.errorhandler = UnityUtil.onError;
-
             UnityUtil.init(function(error) {
                 console.error(error);
             });

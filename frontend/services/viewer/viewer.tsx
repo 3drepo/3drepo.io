@@ -174,9 +174,6 @@ export class ViewerService {
 			this.emit(VIEWER_EVENTS.VIEWER_INIT);
 			document.body.style.cursor = 'wait';
 
-			// Shouldn't need this, but for something it is not being recognised from unitySettings!
-			Module.errorhandler = UnityUtil.onUnityError;
-
 			if (this.options && this.options.plugins) {
 				this.plugins = this.options.plugins;
 				Object.keys(this.plugins).forEach((key) => {
