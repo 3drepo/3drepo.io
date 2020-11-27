@@ -143,6 +143,15 @@ export const selectSelectedEndingDate = createSelector(
 		}
 );
 
+export const selectStateDefinitions = createSelector(
+	selectSequencesDomain, (state) => state.stateDefinitions
+);
+export const selectLastSelectedFrame = createSelector(
+	selectFrames, selectSequencesDomain, (frames, state) => {
+		return state.lastSelectedDate ? getSelectedFrame(frames, state.lastSelectedDate) : undefined;
+	}
+);
+
 export const selectSelectedFrame = createSelector(
 	selectFrames, selectSelectedStartingDate, getSelectedFrame
 );
@@ -151,14 +160,21 @@ export const selectSelectedStateId = createSelector(
 	selectSelectedFrame, (frame) =>  (frame || {}).state
 );
 
+export const selectLastSelectedStateId = createSelector(
+	selectLastSelectedFrame, (frame) =>  (frame || {}).state
+);
+
 export const selectIsLoadingFrame = createSelector(
 	selectSelectedStateId, selectStateDefinitions,
 		(stateId, stateDefinitions) => !(stateDefinitions || {}).hasOwnProperty(stateId)
 );
 
 export const selectSelectedState = createSelector(
-	selectSelectedStateId, selectStateDefinitions,
-		(stateId, stateDefinitions) => stateDefinitions[stateId]
+	selectSelectedStateId, selectLastSelectedStateId, selectStateDefinitions,
+	(stateId, prevStateId, stateDefinitions) => {
+
+		return stateDefinitions[stateId] || stateDefinitions[prevStateId];
+	}
 );
 
 const convertToDictionary = (stateChanges) => {

@@ -45,6 +45,7 @@ export const INITIAL_STATE = {
 	selectedSequence: null,
 	lastSelectedSequence: null,
 	selectedDate: null,
+	lastSelectedDate: null,
 	stateDefinitions: {},
 	statesPending: false,
 	stepInterval: 1,
@@ -79,7 +80,7 @@ export const setSelectedSequenceSuccess = (state = INITIAL_STATE, { sequenceId }
 };
 
 export const setSelectedDateSuccess =  (state = INITIAL_STATE, { date }) => {
-	return {...state, selectedDate: date};
+	return {...state, selectedDate: date, lastSelectedDate: date ? state.selectedDate : null};
 };
 
 export const setStateDefinition = (state = INITIAL_STATE, { stateId, stateDefinition}) => {
