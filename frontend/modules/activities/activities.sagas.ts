@@ -22,7 +22,7 @@ import * as API from '../../services/api';
 import { BimActions } from '../bim';
 import { DialogActions } from '../dialog';
 import { selectCurrentModel, selectCurrentModelTeamspace, selectCurrentRevisionId } from '../model';
-import { selectSelectedSequenceId } from '../sequences';
+import { selectSelectedSequenceId, selectSequenceModel } from '../sequences';
 import { selectRightPanels, ViewerGuiActions} from '../viewerGui';
 import { ActivitiesActions, ActivitiesTypes } from './activities.redux';
 
@@ -42,10 +42,10 @@ function* fetchDetails({ activityId }) {
 
 		const teamspace = yield select(selectCurrentModelTeamspace);
 		const revision = yield select(selectCurrentRevisionId);
-		const model = yield select(selectCurrentModel);
+		const model =  yield select(selectSequenceModel);
 		const sequenceId =  yield select(selectSelectedSequenceId);
 
-		const { data: activity } = yield API.getSequenceActivityDetail(teamspace, model, revision, sequenceId, activityId);
+		const { data: activity } = yield API.getSequenceActivityDetail(teamspace, model, undefined, sequenceId, activityId);
 
 		yield put(ActivitiesActions.setComponentState({ isPending: false, details: activity }));
 	} catch (error) {
