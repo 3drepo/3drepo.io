@@ -21,7 +21,7 @@ import { VIEWER_PANELS } from '../../constants/viewerGui';
 import * as API from '../../services/api';
 import { BimActions } from '../bim';
 import { DialogActions } from '../dialog';
-import { selectCurrentModel, selectCurrentModelTeamspace, selectCurrentRevisionId } from '../model';
+import { selectCurrentModelTeamspace, selectCurrentRevisionId } from '../model';
 import { selectSelectedSequenceId, selectSequenceModel } from '../sequences';
 import { selectRightPanels, ViewerGuiActions} from '../viewerGui';
 import { ActivitiesActions, ActivitiesTypes } from './activities.redux';
