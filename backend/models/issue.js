@@ -164,7 +164,7 @@ class Issue extends Ticket {
 
 		if (!history) {
 			return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
-		} else if (history) {
+		} else {
 			revId = history._id;
 		}
 

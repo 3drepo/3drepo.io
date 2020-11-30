@@ -33,6 +33,7 @@ import { EXTENSION_RE } from '../../constants/resources';
 import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
 import { prepareResources } from '../../helpers/resources';
 import { prepareRisk } from '../../helpers/risks';
+import { mergeGroupsDataFromViewpoint } from '../../helpers/viewpoints';
 import { SuggestedTreatmentsDialog } from '../../routes/components/dialogContainer/components';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
 import * as API from '../../services/api';
@@ -55,7 +56,6 @@ import {
 	selectActiveRiskId,
 	selectComponentState,
 	selectFilteredRisks,
-	selectRisks,
 	selectRisksMap
 } from './risks.selectors';
 
@@ -141,6 +141,8 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 		const jobs = yield select(selectJobsList);
 		const preparedRisk = prepareRisk(savedRisk, jobs);
 
+		yield put(ViewpointsActions.cacheGroupsFromViewpoint(savedRisk.viewpoint, risk.viewpoint));
+
 		finishSubmitting();
 		yield put(RisksActions.setComponentState({ activeRisk: preparedRisk._id }));
 		yield put(RisksActions.saveRiskSuccess(preparedRisk));
@@ -219,6 +221,10 @@ function* postComment({ teamspace, modelId, riskData, ignoreViewer, finishSubmit
 		}
 
 		const { data: comment } = yield API.addRiskComment(teamspace, modelId, _id, riskData);
+
+		if (comment.viewpoint) {
+			yield put(ViewpointsActions.cacheGroupsFromViewpoint(comment.viewpoint, riskData.viewpoint));
+		}
 
 		finishSubmitting();
 		yield put(RisksActions.createCommentSuccess(comment, riskData._id));

@@ -388,7 +388,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				}});
 		} else {
 			if (screenshot) {
-				const viewpoint = { screenshot: screenshot.replace('data:image/png;base64,', '') };
+				const viewpoint = { screenshot };
 
 				if (!disableViewpointSuggestion && !disableViewer) {
 					this.handleViewpointUpdateSuggest(viewpoint);

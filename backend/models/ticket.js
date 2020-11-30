@@ -231,6 +231,7 @@ class Ticket extends View {
 		if (data.viewpoint) {
 			newViewpoint = await this.createViewpoint(account, model, id, data.viewpoint, true);
 			oldTicket.viewpoint = oldTicket.viewpoints[0] || {};
+			const oldScreenshotRef = oldTicket.viewpoint.screenshot_ref;
 			oldTicket = super.clean(account, model, oldTicket);
 			delete oldTicket.viewpoint.screenshot;
 			// DEPRECATED
@@ -245,7 +246,7 @@ class Ticket extends View {
 				};
 			} else if (newViewpoint.position && !newViewpoint.screenshot_ref) {
 				// if is updating the viewpoint but not the screenshot, keep the old screenshot
-				newViewpoint.screenshot_ref = oldTicket.viewpoint.screenshot_ref;
+				newViewpoint.screenshot_ref = oldScreenshotRef;
 				newViewpoint.thumbnail = oldTicket.viewpoint.thumbnail;
 			}
 
@@ -280,7 +281,12 @@ class Ticket extends View {
 			}
 
 			if (!_.isEqual(_.omit(oldTicket.viewpoint, ["screenshot_ref"]), _.omit(data.viewpoint, ["screenshot_ref"]))) {
-				this.handleFieldUpdate(account, model, sessionId, id, user, "viewpoint", oldTicket, data, systemComments);
+				const dataVP = {...data.viewpoint};
+				if (dataVP.screenshot_ref === oldScreenshotRef) {
+					dataVP.screenshot_ref = dataVP.screenshot = dataVP.screenshotSmall = undefined;
+
+				}
+				this.handleFieldUpdate(account, model, sessionId, id, user, "viewpoint", oldTicket, {viewpoint: dataVP}, systemComments);
 			}
 
 			delete oldTicket.viewpoint;
@@ -564,7 +570,15 @@ class Ticket extends View {
 			}
 		});
 
-		const viewpoint = entry.viewpoint;
+		let viewpoint = entry.viewpoint;
+		if (!entry.viewpoint && entry.viewpoints && entry.viewpoints.length > 0) {
+			viewpoint = entry.viewpoints[0];
+		}
+
+		if (!viewpoint) {
+			return;
+		}
+
 		vpFieldsToConvert.forEach((key) => {
 			if (viewpoint[key]) {
 				viewpoint[key] = utils.webGLtoDirectX(viewpoint[key]);

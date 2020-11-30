@@ -86,17 +86,12 @@ export const selectFrames = createSelector(
 	}
 );
 
-export const selectDefaultSequence = createSelector(
-	selectSequences, selectSelectedSequence, (allSequences, selectedSequence) =>
-		selectedSequence || (allSequences || [])[0]
-);
-
 export const selectMinDate = createSelector(
-	selectDefaultSequence, (sequence) => (sequence || {}).minDate
+	selectSelectedSequence, (sequence) => (sequence || {}).minDate
 );
 
 export const selectMaxDate = createSelector(
-	selectDefaultSequence, (sequence) => (sequence || {}).maxDate
+	selectSelectedSequence, (sequence) => (sequence || {}).maxDate
 );
 
 export const selectStepInterval = createSelector(
