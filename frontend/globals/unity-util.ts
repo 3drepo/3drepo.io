@@ -18,7 +18,6 @@ declare var SendMessage;
 declare var createUnityInstance;
 
 import { IS_FIREFOX } from '../helpers/browser';
-import { ViewerService } from '../services/viewer/viewer';
 
 export class UnityUtil {
 	/** @hidden */
@@ -118,7 +117,9 @@ export class UnityUtil {
 	/** @hidden */
 	public static onProgress(progress: number) {
 		requestAnimationFrame(() => {
-			UnityUtil.progressCallback(progress);
+			if (UnityUtil.progressCallback) {
+				UnityUtil.progressCallback(progress);
+			}
 		});
 	}
 
@@ -131,7 +132,7 @@ export class UnityUtil {
 	 * @return returns a promise which resolves when the game is loaded.
 	 *
 	 */
-	public static loadUnity(viewer: ViewerService): Promise<void> {
+	public static loadUnity(canvas : any, unityURL): Promise<void> {
 		if (!window.Module) {
 			// Add withCredentials to XMLHttpRequest prototype to allow unity game to
 			// do CORS request. We used to do this with a .jspre on the unity side but it's no longer supported
@@ -145,23 +146,23 @@ export class UnityUtil {
 			XMLHttpRequest.prototype.open = newOpen;
 		}
 
-		const buildUrl = "unity/Build";
+		const buildUrl = `${unityURL? unityURL + '/' : ''}unity/Build`;
 
-		var config = {
-			dataUrl: buildUrl + "/unity.data.unityweb",
-			frameworkUrl: buildUrl + "/unity.framework.js.unityweb",
-			codeUrl: buildUrl + "/unity.wasm.unityweb",
-			streamingAssetsUrl: "StreamingAssets",
-			companyName: "3D Repo Ltd",
-			productName: "3D Repo Unity",
-			productVersion: "1.0",
-		  };
+		const config = {
+			dataUrl: `${buildUrl}/unity.data.unityweb`,
+			frameworkUrl: `${buildUrl}/unity.framework.js.unityweb`,
+			codeUrl: `${buildUrl}/unity.wasm.unityweb`,
+			streamingAssetsUrl: 'StreamingAssets',
+			companyName: '3D Repo Ltd',
+			productName: '3D Repo Unity',
+			productVersion: '1.0',
+		};
 
-		createUnityInstance(viewer.canvas, config, (progress) => {
+		createUnityInstance(canvas, config, (progress) => {
 			this.onProgress(progress);
-		  }).then((unityInstance) => {
+		}).then((unityInstance) => {
 			UnityUtil.unityInstance = unityInstance;
-		  }).catch(UnityUtil.onUnityError);
+		}).catch(UnityUtil.onUnityError);
 
 		return UnityUtil.onReady();
 	}

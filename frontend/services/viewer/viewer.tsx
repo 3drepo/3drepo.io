@@ -209,7 +209,7 @@ export class ViewerService {
 			this.unityLoaderScript.addEventListener ('load', () => {
 				(async () => {
 					console.debug('Loaded unity.loader.js succesfully');
-					await UnityUtil.loadUnity(this);
+					await UnityUtil.loadUnity(this.canvas);
 					resolve();
 				})();
 			}, false);
