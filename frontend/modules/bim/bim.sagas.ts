@@ -15,12 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import copy from 'copy-to-clipboard';
 import { sortBy } from 'lodash';
 import { put, select, takeLatest } from 'redux-saga/effects';
 
 import { prepareMetadata } from '../../helpers/bim';
 import * as API from '../../services/api';
+import { Viewer } from '../../services/viewer/viewer';
 import { DialogActions } from '../dialog';
+import { selectCurrentModel, selectCurrentModelTeamspace, selectCurrentRevisionId } from '../model';
+import { SnackbarActions } from '../snackbar';
 import { BimActions, BimTypes } from './bim.redux';
 
 export function* fetchMetadata({ teamspace, model, metadataId }) {
@@ -41,6 +45,28 @@ export function* fetchMetadata({ teamspace, model, metadataId }) {
 	yield put(BimActions.setIsPending(false));
 }
 
+export function* highlightsAllSimilar({ rules }, colour?) {
+	try {
+		const teamspace = yield select(selectCurrentModelTeamspace);
+		const revision = yield select(selectCurrentRevisionId);
+		const model = yield select(selectCurrentModel);
+		const { data } = yield API.getMeshIDsByQuery(teamspace, model, rules, revision);
+
+		return Promise.all(data.map(({ model: modelId, mesh_ids }) => {
+			return Viewer.highlightObjects(teamspace, modelId, colour, true, true, mesh_ids);
+		}));
+	} catch (error) {
+		yield put(DialogActions.showEndpointErrorDialog('highlights', 'elements', error));
+	}
+}
+
+export function* copyRules({ rules }) {
+	copy(JSON.stringify(rules));
+	yield put(SnackbarActions.show('Group filter copied to clipboard'));
+}
+
 export default function* BimSaga() {
 	yield takeLatest(BimTypes.FETCH_METADATA, fetchMetadata);
+	yield takeLatest(BimTypes.HIGHLIGHTS_ALL_SIMILAR, highlightsAllSimilar);
+	yield takeLatest(BimTypes.COPY_RULES, copyRules);
 }
