@@ -143,6 +143,7 @@ export function* setSelectedSequence({ sequenceId }) {
 		if (selectedSequence) {
 			yield put(SequencesActions.setStateDefinition(undefined, {}));
 			yield put(SequencesActions.setSelectedDateSuccess(null));
+			yield put(SequencesActions.setLastSelectedDateSuccess(null));
 			yield put(SequencesActions.restoreModelDefaultVisibility());
 		}
 	}
