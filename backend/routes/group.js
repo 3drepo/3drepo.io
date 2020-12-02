@@ -575,7 +575,7 @@ function updateGroup(req, res, next) {
 		if (!group) {
 			return Promise.reject({ resCode: responseCodes.GROUP_NOT_FOUND });
 		} else {
-			return group.updateGroup(dbCol, sessionId, req.body, req.session.user.username, branch, rid);
+			return Group.updateGroup(dbCol, sessionId, req.params.uid, req.body, req.session.user.username, branch, rid);
 		}
 
 	}).then(group => {

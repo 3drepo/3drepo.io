@@ -112,17 +112,140 @@ function uuidsToIfcGuids(account, model, ids) {
 	});
 }
 
+function cleanEmbeddedObject(field, data) {
+	if(embeddedObjectFields[field]) {
+		const filtered =  data.map((entry) => {
+			const cleaned  = {};
+			embeddedObjectFields[field].forEach((allowedField) => {
+				if(utils.hasField(entry, allowedField)) {
+					cleaned[allowedField] = entry[allowedField];
+				}
+			});
+			return cleaned;
+		});
+		return filtered;
+	}
+	return data;
+}
+
+function cleanArray(obj, prop) {
+	if (obj[prop] && 0 === obj[prop].length) {
+		delete obj[prop];
+	}
+
+	return obj;
+}
+
+function clean(groupData) {
+	const cleaned = groupData.toObject();
+	cleaned._id = utils.uuidToString(cleaned._id);
+	cleaned.issue_id = cleaned.issue_id && utils.uuidToString(cleaned.issue_id);
+	cleaned.risk_id = cleaned.risk_id && utils.uuidToString(cleaned.risk_id);
+	cleaned.view_id = cleaned.view_id && utils.uuidToString(cleaned.view_id);
+
+	if (utils.isDate(cleaned.createdAt)) {
+		cleaned.createdAt = cleaned.createdAt.getTime();
+	}
+
+	if (utils.isDate(cleaned.updatedAt)) {
+		cleaned.updatedAt = cleaned.updatedAt.getTime();
+	}
+
+	cleanArray(cleaned, "rules");
+	cleanArray(cleaned, "transformation");
+
+	for (let i = 0; cleaned.objects && i < cleaned.objects.length; i++) {
+		cleanArray(cleaned.objects[i], "ifc_guids");
+		cleanArray(cleaned.objects[i], "shared_ids");
+	}
+
+	cleaned.objects = cleaned.objects.filter(obj => obj.ifc_guids || obj.shared_ids);
+
+	delete cleaned.__v;
+
+	return cleaned;
+}
+
+function getObjectIds(dbCol, groupData, branch, revId, convertSharedIDsToString, showIfcGuids = false) {
+	if (groupData.rules && groupData.rules.length > 0) {
+		return Meta.findObjectIdsByRules(dbCol.account, dbCol.model, groupData.rules, branch, revId, convertSharedIDsToString, showIfcGuids);
+	} else {
+		return getObjectsArray(dbCol.model, groupData, branch, revId, convertSharedIDsToString, showIfcGuids);
+	}
+}
+
+/**
+ * Converts all IFC Guids to shared IDs if applicable and return the objects array.
+ */
+function getObjectsArray(model, groupData, branch, revId, convertSharedIDsToString, showIfcGuids = false) {
+	const objectIdPromises = [];
+
+	for (let i = 0; i < groupData.objects.length; i++) {
+
+		const objectIdsSet = new Set();
+
+		const objectId = {};
+		objectId.account = groupData.objects[i].account;
+		objectId.model = groupData.objects[i].model;
+
+		const _branch = (model === objectId.model) ? branch : "master";
+		const _revId = (model === objectId.model) ? revId : null;
+
+		const ifcGuids = groupData.objects[i].ifc_guids ? groupData.objects[i].ifc_guids : [];
+
+		for (let j = 0; groupData.objects[i].shared_ids && j < groupData.objects[i].shared_ids.length; j++) {
+			let sharedId = groupData.objects[i].shared_ids[j];
+			if ("[object String]" !== Object.prototype.toString.call(sharedId)) {
+				sharedId = utils.uuidToString(sharedId);
+			}
+			objectIdsSet.add(sharedId);
+		}
+
+		if (showIfcGuids) {
+			objectId.ifc_guids = ifcGuids;
+			objectIdPromises.push(objectId);
+		} else {
+			objectIdPromises.push(Group.ifcGuidsToUUIDs(
+				objectId.account,
+				objectId.model,
+				ifcGuids,
+				_branch,
+				_revId
+			).then(sharedIdResults => {
+				for (let j = 0; j < sharedIdResults.length; j++) {
+					if ("[object String]" !== Object.prototype.toString.call(sharedIdResults[j].shared_id)) {
+						sharedIdResults[j].shared_id = utils.uuidToString(sharedIdResults[j].shared_id);
+					}
+					objectIdsSet.add(sharedIdResults[j].shared_id);
+				}
+
+				if (objectIdsSet.size > 0) {
+					objectId.shared_ids = [];
+					objectIdsSet.forEach(id => {
+						if (!convertSharedIDsToString) {
+							id = utils.stringToUUID(id);
+						}
+						objectId.shared_ids.push(id);
+					});
+				}
+
+				return objectId;
+			}));
+		}
+	}
+
+	return Promise.all(objectIdPromises).then(objectIds => {
+		return objectIds;
+	});
+};
+
 /**
  * Converts all shared IDs to IFC Guids if applicable and return the objects array.
  */
-groupSchema.methods.getObjectsArrayAsIfcGuids = function (data) {
+function getObjectsArrayAsIfcGuids(data) {
 	const ifcGuidPromises = [];
 
-	if (!data) {
-		data = this;
-	}
-
-	for (let i = 0; data.objects && i < data.objects.length; i++) {
+	for (let i = 0; data && data.objects && i < data.objects.length; i++) {
 		const account = data.objects[i].account;
 		const model = data.objects[i].model;
 
@@ -191,203 +314,6 @@ groupSchema.methods.getObjectsArrayAsIfcGuids = function (data) {
 	});
 };
 
-/**
- * Converts all IFC Guids to shared IDs if applicable and return the objects array.
- */
-groupSchema.methods.getObjectsArray = function (model, branch, revId, convertSharedIDsToString, showIfcGuids = false) {
-	const objectIdPromises = [];
-
-	for (let i = 0; i < this.objects.length; i++) {
-
-		const objectIdsSet = new Set();
-
-		const objectId = {};
-		objectId.account = this.objects[i].account;
-		objectId.model = this.objects[i].model;
-
-		const _branch = (model === objectId.model) ? branch : "master";
-		const _revId = (model === objectId.model) ? revId : null;
-
-		const ifcGuids = this.objects[i].ifc_guids ? this.objects[i].ifc_guids : [];
-
-		for (let j = 0; this.objects[i].shared_ids && j < this.objects[i].shared_ids.length; j++) {
-			let sharedId = this.objects[i].shared_ids[j];
-			if ("[object String]" !== Object.prototype.toString.call(sharedId)) {
-				sharedId = utils.uuidToString(sharedId);
-			}
-			objectIdsSet.add(sharedId);
-		}
-
-		if (showIfcGuids) {
-			objectId.ifc_guids = ifcGuids;
-			objectIdPromises.push(objectId);
-		} else {
-			objectIdPromises.push(Group.ifcGuidsToUUIDs(
-				objectId.account,
-				objectId.model,
-				ifcGuids,
-				_branch,
-				_revId
-			).then(sharedIdResults => {
-				for (let j = 0; j < sharedIdResults.length; j++) {
-					if ("[object String]" !== Object.prototype.toString.call(sharedIdResults[j].shared_id)) {
-						sharedIdResults[j].shared_id = utils.uuidToString(sharedIdResults[j].shared_id);
-					}
-					objectIdsSet.add(sharedIdResults[j].shared_id);
-				}
-
-				if (objectIdsSet.size > 0) {
-					objectId.shared_ids = [];
-					objectIdsSet.forEach(id => {
-						if (!convertSharedIDsToString) {
-							id = utils.stringToUUID(id);
-						}
-						objectId.shared_ids.push(id);
-					});
-				}
-
-				return objectId;
-			}));
-		}
-	}
-
-	return Promise.all(objectIdPromises).then(objectIds => {
-		return objectIds;
-	});
-};
-
-// Group Update with Event
-groupSchema.methods.updateGroup = function (dbCol, sessionId, data, user = "", branch = "master", rid = null) {
-	return this.updateAttrs(dbCol, _.cloneDeep(data), user).then((savedGroup) => {
-		return getObjectIds(dbCol, this, branch, rid, true, false).then((objects) => {
-			savedGroup.objects = objects;
-			ChatEvent.groupChanged(sessionId, dbCol.account, dbCol.model, savedGroup);
-			return savedGroup;
-		});
-	});
-};
-
-groupSchema.methods.updateAttrs = function (dbCol, data, user) {
-	return this.getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
-		const toUpdate = {};
-		const toUnset = {};
-		const fieldsCanBeUpdated = ["description", "name", "rules", "objects", "color", "transformation", "issue_id", "risk_id"];
-
-		let typeCorrect = !(data.rules && data.objects);
-		typeCorrect && fieldsCanBeUpdated.forEach((key) => {
-			if (data[key]) {
-				if (Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
-					if (key === "objects" && data.objects) {
-						toUpdate.objects = cleanEmbeddedObject(key, convertedObjects);
-						toUnset.rules = 1;
-						this.rules = undefined;
-					} else if (key === "color" || key === "transformation") {
-						toUpdate[key] = data[key].map((c) => parseInt(c, 10));
-					} else {
-						if (key === "rules"
-							&& data.rules
-							&& !checkRulesValidity(data.rules)) {
-							typeCorrect = false;
-							toUnset.objects = 1;
-							this.objects = undefined;
-						}
-
-						toUpdate[key] = cleanEmbeddedObject(key, data[key]);
-					}
-					this[key] = toUpdate[key];
-				} else {
-					typeCorrect = false;
-				}
-			}
-
-		});
-
-		if (typeCorrect) {
-			if (Object.keys(toUpdate).length !== 0) {
-				toUpdate.updatedBy = user;
-				toUpdate.updatedAt = Date.now();
-				return db.getCollection(dbCol.account, dbCol.model + ".groups").then(_dbCol => {
-					const updateBson = {$set: toUpdate};
-					if(Object.keys(toUnset).length > 0) {
-						updateBson.$unset = toUnset;
-					}
-					return _dbCol.update({ _id: this._id }, updateBson).then(() => {
-						const updatedGroup = clean(this);
-						return updatedGroup;
-					});
-				});
-			} else {
-				const updatedGroup = clean(this);
-				return updatedGroup;
-			}
-		} else {
-			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
-		}
-	});
-};
-
-function cleanEmbeddedObject(field, data) {
-	if(embeddedObjectFields[field]) {
-		const filtered =  data.map((entry) => {
-			const cleaned  = {};
-			embeddedObjectFields[field].forEach((allowedField) => {
-				if(utils.hasField(entry, allowedField)) {
-					cleaned[allowedField] = entry[allowedField];
-				}
-			});
-			return cleaned;
-		});
-		return filtered;
-	}
-	return data;
-}
-
-function cleanArray(obj, prop) {
-	if (obj[prop] && 0 === obj[prop].length) {
-		delete obj[prop];
-	}
-
-	return obj;
-}
-
-function clean(groupData) {
-	const cleaned = groupData.toObject();
-	cleaned._id = utils.uuidToString(cleaned._id);
-	cleaned.issue_id = cleaned.issue_id && utils.uuidToString(cleaned.issue_id);
-	cleaned.risk_id = cleaned.risk_id && utils.uuidToString(cleaned.risk_id);
-	cleaned.view_id = cleaned.view_id && utils.uuidToString(cleaned.view_id);
-
-	if (utils.isDate(cleaned.createdAt)) {
-		cleaned.createdAt = cleaned.createdAt.getTime();
-	}
-
-	if (utils.isDate(cleaned.updatedAt)) {
-		cleaned.updatedAt = cleaned.updatedAt.getTime();
-	}
-
-	cleanArray(cleaned, "rules");
-	cleanArray(cleaned, "transformation");
-
-	for (let i = 0; cleaned.objects && i < cleaned.objects.length; i++) {
-		cleanArray(cleaned.objects[i], "ifc_guids");
-		cleanArray(cleaned.objects[i], "shared_ids");
-	}
-
-	cleaned.objects = cleaned.objects.filter(obj => obj.ifc_guids || obj.shared_ids);
-
-	delete cleaned.__v;
-
-	return cleaned;
-}
-
-function getObjectIds(dbCol, groupData, branch, revId, convertSharedIDsToString, showIfcGuids = false) {
-	if (groupData.rules && groupData.rules.length > 0) {
-		return Meta.findObjectIdsByRules(dbCol.account, dbCol.model, groupData.rules, branch, revId, convertSharedIDsToString, showIfcGuids);
-	} else {
-		return groupData.getObjectsArray(dbCol.model, branch, revId, convertSharedIDsToString, showIfcGuids);
-	}
-}
-
 const Group = ModelFactory.createClass(
 	"Group",
 	groupSchema,
@@ -404,7 +330,7 @@ Group.createGroup = function (dbCol, sessionId, data, creator = "", branch = "ma
 		model: model
 	});
 
-	return newGroup.getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
+	return getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
 
 		let typeCorrect = (!data.objects !== !data.rules);
 
@@ -525,7 +451,7 @@ Group.findIfcGroupByUID = function (dbCol, uid) {
 			return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 		}
 
-		return group.getObjectsArrayAsIfcGuids(null, false).then(ifcObjects => {
+		return getObjectsArrayAsIfcGuids(group, false).then(ifcObjects => {
 			group.objects = ifcObjects;
 			return group;
 		});
@@ -619,6 +545,82 @@ Group.listGroups = function (dbCol, queryParams, branch, revId, ids, showIfcGuid
 	});
 };
 
+Group.updateAttrs = async function (dbCol, uid, data, user) {
+	const group = await this.findOne(dbCol, { _id: utils.stringToUUID(uid) });
+
+	if (group) {
+		return getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
+			const toUpdate = {};
+			const toUnset = {};
+			const fieldsCanBeUpdated = ["description", "name", "rules", "objects", "color", "transformation", "issue_id", "risk_id"];
+
+			let typeCorrect = !(data.rules && data.objects);
+			typeCorrect && fieldsCanBeUpdated.forEach((key) => {
+				if (data[key]) {
+					if (Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
+						if (key === "objects" && data.objects) {
+							toUpdate.objects = cleanEmbeddedObject(key, convertedObjects);
+							toUnset.rules = 1;
+							group.rules = undefined;
+						} else if (key === "color" || key === "transformation") {
+							toUpdate[key] = data[key].map((c) => parseInt(c, 10));
+						} else {
+							if (key === "rules"
+								&& data.rules
+								&& !checkRulesValidity(data.rules)) {
+								typeCorrect = false;
+								toUnset.objects = 1;
+								group.objects = undefined;
+							}
+
+							toUpdate[key] = cleanEmbeddedObject(key, data[key]);
+						}
+						group[key] = toUpdate[key];
+					} else {
+						typeCorrect = false;
+					}
+				}
+
+			});
+
+			if (typeCorrect) {
+				if (Object.keys(toUpdate).length !== 0) {
+					toUpdate.updatedBy = user;
+					toUpdate.updatedAt = Date.now();
+					return db.getCollection(dbCol.account, dbCol.model + ".groups").then(_dbCol => {
+						const updateBson = {$set: toUpdate};
+						if(Object.keys(toUnset).length > 0) {
+							updateBson.$unset = toUnset;
+						}
+						return _dbCol.update({ _id: group._id }, updateBson).then(() => {
+							const updatedGroup = clean(group);
+							return updatedGroup;
+						});
+					});
+				} else {
+					const updatedGroup = clean(group);
+					return updatedGroup;
+				}
+			} else {
+				return Promise.reject(responseCodes.INVALID_ARGUMENTS);
+			}
+		});
+	} else {
+		return Promise.reject(responseCodes.GROUP_NOT_FOUND);
+	}
+};
+
+// Group Update with Event
+Group.updateGroup = function (dbCol, sessionId, uid, data, user = "", branch = "master", rid = null) {
+	return Group.updateAttrs(dbCol, uid, _.cloneDeep(data), user).then((savedGroup) => {
+		return getObjectIds(dbCol, savedGroup, branch, rid, true, false).then((objects) => {
+			savedGroup.objects = objects;
+			ChatEvent.groupChanged(sessionId, dbCol.account, dbCol.model, savedGroup);
+			return savedGroup;
+		});
+	});
+};
+
 Group.updateIssueId = function (dbCol, uid, issueId) {
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) }).then(group => {
 		if (group) {
@@ -626,7 +628,7 @@ Group.updateIssueId = function (dbCol, uid, issueId) {
 				issue_id: issueId
 			};
 
-			return group.updateAttrs(dbCol, issueIdData);
+			return group.updateAttrs(dbCol, uid, issueIdData);
 		} else {
 			return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 		}
