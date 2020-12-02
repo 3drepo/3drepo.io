@@ -79,9 +79,12 @@ export function* fetchFrame({date}) {
 
 		const stateId = frame.state;
 
+		console.log("fetchFrame" + date);
+
 		if (!loadedStates[stateId]) {
 			// Using directly the promise and 'then' to dispatch the rest of the actions
 			// because with yield it would sometimes stop there forever even though the promise resolved
+			console.log("fetch state:" + stateId);
 			API.getSequenceState(teamspace, model, revision, sequenceId, stateId).then((response) => {
 				dispatch(SequencesActions.setStateDefinition(stateId, response.data));
 			}).catch((e) => {
