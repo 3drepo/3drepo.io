@@ -133,7 +133,7 @@ export const selectNextKeyFramesDates =  createSelector(
 				date = getDateByStep(date, scale, interval);
 				nextFrame = getSelectedFrame(frames, date);
 
-				while (lastFrame === nextFrame && nextFrame !== null) {
+				while (lastFrame === nextFrame && date <= maxDate) {
 					date = getDateByStep(date, scale, interval);
 					nextFrame = getSelectedFrame(frames, date);
 				}
