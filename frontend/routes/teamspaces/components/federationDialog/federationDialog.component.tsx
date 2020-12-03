@@ -35,14 +35,16 @@ import {
 import { clientConfigService } from '../../../../services/clientConfig';
 import { schema } from '../../../../services/validation';
 import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
-import { LoadingDialog } from './../../../../routes/components/dialogContainer/components';
+import { LoadingDialog } from '../../../components/dialogContainer/components';
 import { SubModelsField } from './components/subModelsField/subModelsField.component';
 
 import { getTeamspacesList, getTeamspaceProjects } from '../../../../helpers/model';
 import { FieldWrapper, Row, SelectWrapper, StyledDialogContent } from './federationDialog.styles';
 
 const FederationSchema = Yup.object().shape({
-	modelName: schema.firstName.min(2).max(120).required(),
+	modelName: schema.firstName
+			.max(120, 'Federation Name is limited to 120 characters')
+			.required('Federation Name is a required field'),
 	teamspace: Yup.string().required(),
 	projectName: Yup.string().required(),
 	unit: Yup.string().required(),
@@ -221,11 +223,6 @@ export class FederationDialog extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public handleNameChange = (onChange) => (event) => {
-		this.setState({ name: event.currentTarget.value });
-		onChange(event);
-	}
-
 	public handleSelectAllAvailableClick = (event) => {
 		const isChecked = event.target.checked;
 		this.setState((state) => ({
@@ -287,7 +284,7 @@ export class FederationDialog extends React.PureComponent<IProps, IState> {
 	public render() {
 		const { modelName, teamspace, teamspaces, handleClose, editMode, isPending } = this.props;
 		const {
-			name, projectsItems, selectedProject, unit, availableModels, federatedModels,
+			projectsItems, selectedProject, unit, availableModels, federatedModels,
 			selectedFederatedModels, selectedAvailableModels
 		} = this.state;
 
@@ -300,7 +297,6 @@ export class FederationDialog extends React.PureComponent<IProps, IState> {
 				initialValues={{
 					teamspace,
 					projectName: this.projectName,
-					name,
 					modelName,
 					unit,
 					desc: '',
@@ -350,15 +346,13 @@ export class FederationDialog extends React.PureComponent<IProps, IState> {
 								<Field name="modelName" render={ ({ field, form }) => (
 									<TextField
 										{...field}
-										error={Boolean(form.touched.name && form.errors.name)}
-										helperText={form.touched.name && (form.errors.name || '')}
+										error={Boolean(form.touched.modelName && form.errors.modelName)}
+										helperText={form.touched.modelName && (form.errors.modelName || '')}
 										label="Federation Name"
 										margin="normal"
 										disabled={editMode}
 										required
 										fullWidth
-										value={this.state.name}
-										onChange={this.handleNameChange(field.onChange)}
 									/>
 								)} />
 							</FieldWrapper>
