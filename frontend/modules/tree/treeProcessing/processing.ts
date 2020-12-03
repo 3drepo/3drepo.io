@@ -452,7 +452,6 @@ export class Processing {
 		if (!nodes.length) {
 			return [];
 		}
-
 		const meshList = {};
 
 		for (let index = 0; index < nodes.length; ++index) {
@@ -484,7 +483,7 @@ export class Processing {
 							meshes
 						};
 					} else {
-						meshList[node.namespacedId].meshes = meshList[node.namespacedId].meshes.concat(meshes);
+						Array.prototype.push.apply(meshList[node.namespacedId].meshes, meshes);
 					}
 				}
 			}
