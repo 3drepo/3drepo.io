@@ -1148,6 +1148,13 @@ define({ "api": [
             "optional": true,
             "field": "rules",
             "description": "<p>List of rules in group</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "Number[]",
+            "optional": true,
+            "field": "transformation",
+            "description": "<p>Flat 16 element array representation of 4x4 transformation matrix</p>"
           }
         ]
       }
@@ -1232,6 +1239,13 @@ define({ "api": [
             "optional": false,
             "field": "rules",
             "description": "<p>List of rules in group</p>"
+          },
+          {
+            "group": "200",
+            "type": "Number[]",
+            "optional": false,
+            "field": "transformation",
+            "description": "<p>Flat 16 element array representation of 4x4 transformation matrix</p>"
           },
           {
             "group": "200",
@@ -1463,6 +1477,13 @@ define({ "api": [
           },
           {
             "group": "200",
+            "type": "Number[]",
+            "optional": false,
+            "field": "transformation",
+            "description": "<p>Flat 16 element array representation of 4x4 transformation matrix</p>"
+          },
+          {
+            "group": "200",
             "type": "Number",
             "optional": false,
             "field": "updatedAt",
@@ -1689,6 +1710,13 @@ define({ "api": [
             "optional": true,
             "field": "rules",
             "description": "<p>List of rules in group</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "Number[]",
+            "optional": true,
+            "field": "transformation",
+            "description": "<p>Flat 16 element array representation of 4x4 transformation matrix</p>"
           }
         ]
       }
@@ -1763,6 +1791,13 @@ define({ "api": [
             "optional": false,
             "field": "rules",
             "description": "<p>List of rules in group</p>"
+          },
+          {
+            "group": "200",
+            "type": "Number[]",
+            "optional": false,
+            "field": "transformation",
+            "description": "<p>Flat 16 element array representation of 4x4 transformation matrix</p>"
           },
           {
             "group": "200",
@@ -2645,6 +2680,20 @@ define({ "api": [
           },
           {
             "group": "Type: Viewpoint",
+            "type": "Group[]",
+            "optional": true,
+            "field": "transformation_groups",
+            "description": "<p>List of groups with transformations</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "String[]",
+            "optional": true,
+            "field": "transformation_group_ids",
+            "description": "<p>List of group IDs with transformations</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
             "type": "Boolean",
             "optional": false,
             "field": "hide_IFC",
@@ -3232,28 +3281,25 @@ define({ "api": [
   },
   {
     "type": "get",
-    "url": "/:teamspace/:model/revision/:revId/issues",
-    "title": "Get all Issues by revision ID",
+    "url": "/:teamspace/:model/issues?[query]",
+    "title": "List Issues",
     "name": "listIssues",
     "group": "Issues",
+    "description": "<p>List all issues for model.</p>",
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response.",
+          "content": "HTTP/1.1 200 OK\n[\n\t{\n\t\t\"_id\":\"ISSUE_ID\",\n\t\t\"creator_role\":\"Client\",\"scale\":1,\n\t\t\"due_date\":1543881600000,\n\t\t\"priority\":\"low\",\n\t\t\"desc\":\"reverse\",\n\t\t\"topic_type\":\"for_information\",\n\t\t\"status\":\"for approval\",\n\t\t\"owner\":\"username\",\n\t\t\"created\":1546217360002,\n\t\t\"name\":\"Without reverse\",\n\t\t\"number\":2,\n\t\t\"rev_id\":\"REVISION_ID\",\n\t\t\"__v\":0,\n\t\t\"assigned_roles\":[\"Architect\"],\n\t\t\"viewCount\":1,\n\t\t\"commentCount\":0,\n\t\t\"thumbnail\":\"nabile/MODEL_ID/issues/ISSUE_ID/thumbnail.png\",\n\t\t\"position\":[8341.8056640625,1279.962158203125,-3050.34521484375],\n\t\t\"typePrefix\":\"sample\",\n\t\t\"modelCode\":\"\",\n\t\t\"account\":\"username\",\n\t\t\"model\":\"MODEL_ID\",\n\t\t\"viewpoint\":\n\t\t\t{\n\t\t\t\t\"near\":54.739341735839844,\n\t\t\t\t\"far\":27369.669921875,\n\t\t\t\t\"fov\":1.0471975803375244,\n\t\t\t\t\"aspect_ratio\":1.451704502105713,\n\t\t\t\t\"hideIfc\":true,\n\t\t\t\t\"guid\":\"9279d95e-3aee-49c2-ba45-9d2302044597\",\n\t\t\t\t\"_id\":\"5c296790e5f57704580ca00a\",\n\t\t\t\t\"type\":\"perspective\",\n\t\t\t\t\"screenshot\":\"ACCOUNT/MODEL_ID/issues/ISSUE_ID/viewpoints/MODEL_ID/screenshot.png\",\n\t\t\t\t\"clippingPlanes\":[],\"right\":[0.7270411252975464,1.862645149230957e-8,0.6865938901901245],\n\t\t\t\t\"view_dir\":[0.6777805089950562,-0.15971262753009796,-0.7177084684371948],\n\t\t\t\t\"look_at\":[8400.001953125,2339.99951171875,-9599.9990234375],\n\t\t\t\t\"position\":[-3360.6259765625,5111.28125,2853.4453125],\n\t\t\t\t\"up\":[0.10965770483016968,0.9871635437011719,-0.11611767113208771],\n\t\t\t\t\"screenshotSmall\":\"nabile/MODEL_ID/issues/ISSUE_ID/viewpoints/MODEL_ID/screenshotSmall.png\"\n\t\t\t}\n\t}\n]",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/issue.js",
+    "groupTitle": "Issues",
     "parameter": {
       "fields": {
-        "Query": [
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "convertCoords",
-            "description": "<p>Convert coordinates to user space</p>"
-          },
-          {
-            "group": "Query",
-            "type": "Number",
-            "optional": true,
-            "field": "updatedSince",
-            "description": "<p>Only return issues that has been updated since this value (in epoch value)</p>"
-          }
-        ],
         "Parameter": [
           {
             "group": "Parameter",
@@ -3268,17 +3314,82 @@ define({ "api": [
             "optional": false,
             "field": "model",
             "description": "<p>Model ID</p>"
+          }
+        ],
+        "Query": [
+          {
+            "group": "Query",
+            "type": "String",
+            "optional": true,
+            "field": "convertCoords",
+            "description": "<p>Convert coordinates to user space</p>"
           },
           {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "revId",
-            "description": "<p>Revision ID</p>"
+            "group": "Query",
+            "type": "Number",
+            "optional": true,
+            "field": "updatedSince",
+            "description": "<p>Only return issues updated since this value (in epoch value)</p>"
+          },
+          {
+            "group": "Query",
+            "type": "Number[]",
+            "optional": true,
+            "field": "numbers",
+            "description": "<p>Array of issue numbers to filter for</p>"
+          },
+          {
+            "group": "Query",
+            "type": "String[]",
+            "optional": true,
+            "field": "ids",
+            "description": "<p>Array of issue IDs to filter for</p>"
+          },
+          {
+            "group": "Query",
+            "type": "String[]",
+            "optional": true,
+            "field": "topicTypes",
+            "description": "<p>Array of topic types to filter</p>"
+          },
+          {
+            "group": "Query",
+            "type": "String[]",
+            "optional": true,
+            "field": "status",
+            "description": "<p>Array of status to filter</p>"
+          },
+          {
+            "group": "Query",
+            "type": "String[]",
+            "optional": true,
+            "field": "priorities",
+            "description": "<p>Array of priorities to filter</p>"
+          },
+          {
+            "group": "Query",
+            "type": "String[]",
+            "optional": true,
+            "field": "owners",
+            "description": "<p>Array of owners to filter</p>"
+          },
+          {
+            "group": "Query",
+            "type": "String[]",
+            "optional": true,
+            "field": "assignedRoles",
+            "description": "<p>Array of assigned roles  to filter. For searching unassigned issues the one of the values should be 'Unassigned'.</p>"
           }
         ]
       }
-    },
+    }
+  },
+  {
+    "type": "get",
+    "url": "/:teamspace/:model/revision/:revId/issues",
+    "title": "List Issues by revision ID",
+    "name": "listIssuesByRevision",
+    "group": "Issues",
     "description": "<p>Get all issues related to specific revision ID.</p>",
     "success": {
       "fields": {
@@ -3302,17 +3413,32 @@ define({ "api": [
     },
     "version": "0.0.0",
     "filename": "routes/issue.js",
-    "groupTitle": "Issues"
-  },
-  {
-    "type": "get",
-    "url": "/:teamspace/:model/issues?[query]",
-    "title": "Get all Issues",
-    "name": "listIssues",
-    "group": "Issues",
-    "description": "<p>List all issues for model.</p>",
+    "groupTitle": "Issues",
     "parameter": {
       "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "revId",
+            "description": "<p>Revision ID</p>"
+          }
+        ],
         "Query": [
           {
             "group": "Query",
@@ -3330,49 +3456,56 @@ define({ "api": [
           },
           {
             "group": "Query",
-            "type": "Number",
+            "type": "Number[]",
             "optional": true,
             "field": "numbers",
             "description": "<p>Array of issue numbers to filter for</p>"
           },
           {
             "group": "Query",
-            "type": "String",
+            "type": "String[]",
             "optional": true,
             "field": "ids",
             "description": "<p>Array of issue IDs to filter for</p>"
-          }
-        ],
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
           },
           {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
+            "group": "Query",
+            "type": "String[]",
+            "optional": true,
+            "field": "topicTypes",
+            "description": "<p>Array of topic types to filter</p>"
+          },
+          {
+            "group": "Query",
+            "type": "String[]",
+            "optional": true,
+            "field": "status",
+            "description": "<p>Array of status to filter</p>"
+          },
+          {
+            "group": "Query",
+            "type": "String[]",
+            "optional": true,
+            "field": "priorities",
+            "description": "<p>Array of priorities to filter</p>"
+          },
+          {
+            "group": "Query",
+            "type": "String[]",
+            "optional": true,
+            "field": "owners",
+            "description": "<p>Array of owners to filter</p>"
+          },
+          {
+            "group": "Query",
+            "type": "String[]",
+            "optional": true,
+            "field": "assignedRoles",
+            "description": "<p>Array of assigned roles  to filter. For searching unassigned issues the one of the values should be 'Unassigned'.</p>"
           }
         ]
       }
-    },
-    "success": {
-      "examples": [
-        {
-          "title": "Success-Response.",
-          "content": "HTTP/1.1 200 OK\n[\n\t{\n\t\t\"_id\":\"ISSUE_ID\",\n\t\t\"creator_role\":\"Client\",\"scale\":1,\n\t\t\"due_date\":1543881600000,\n\t\t\"priority\":\"low\",\n\t\t\"desc\":\"reverse\",\n\t\t\"topic_type\":\"for_information\",\n\t\t\"status\":\"for approval\",\n\t\t\"owner\":\"username\",\n\t\t\"created\":1546217360002,\n\t\t\"name\":\"Without reverse\",\n\t\t\"number\":2,\n\t\t\"rev_id\":\"REVISION_ID\",\n\t\t\"__v\":0,\n\t\t\"assigned_roles\":[\"Architect\"],\n\t\t\"viewCount\":1,\n\t\t\"commentCount\":0,\n\t\t\"thumbnail\":\"nabile/MODEL_ID/issues/ISSUE_ID/thumbnail.png\",\n\t\t\"position\":[8341.8056640625,1279.962158203125,-3050.34521484375],\n\t\t\"typePrefix\":\"sample\",\n\t\t\"modelCode\":\"\",\n\t\t\"account\":\"username\",\n\t\t\"model\":\"MODEL_ID\",\n\t\t\"viewpoint\":\n\t\t\t{\n\t\t\t\t\"near\":54.739341735839844,\n\t\t\t\t\"far\":27369.669921875,\n\t\t\t\t\"fov\":1.0471975803375244,\n\t\t\t\t\"aspect_ratio\":1.451704502105713,\n\t\t\t\t\"hideIfc\":true,\n\t\t\t\t\"guid\":\"9279d95e-3aee-49c2-ba45-9d2302044597\",\n\t\t\t\t\"_id\":\"5c296790e5f57704580ca00a\",\n\t\t\t\t\"type\":\"perspective\",\n\t\t\t\t\"screenshot\":\"ACCOUNT/MODEL_ID/issues/ISSUE_ID/viewpoints/MODEL_ID/screenshot.png\",\n\t\t\t\t\"clippingPlanes\":[],\"right\":[0.7270411252975464,1.862645149230957e-8,0.6865938901901245],\n\t\t\t\t\"view_dir\":[0.6777805089950562,-0.15971262753009796,-0.7177084684371948],\n\t\t\t\t\"look_at\":[8400.001953125,2339.99951171875,-9599.9990234375],\n\t\t\t\t\"position\":[-3360.6259765625,5111.28125,2853.4453125],\n\t\t\t\t\"up\":[0.10965770483016968,0.9871635437011719,-0.11611767113208771],\n\t\t\t\t\"screenshotSmall\":\"nabile/MODEL_ID/issues/ISSUE_ID/viewpoints/MODEL_ID/screenshotSmall.png\"\n\t\t\t}\n\t}\n]",
-          "type": "json"
-        }
-      ]
-    },
-    "version": "0.0.0",
-    "filename": "routes/issue.js",
-    "groupTitle": "Issues"
+    }
   },
   {
     "type": "post",
@@ -3579,6 +3712,20 @@ define({ "api": [
           },
           {
             "group": "Type: Viewpoint",
+            "type": "Group[]",
+            "optional": true,
+            "field": "transformation_groups",
+            "description": "<p>List of groups with transformations</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "String[]",
+            "optional": true,
+            "field": "transformation_group_ids",
+            "description": "<p>List of group IDs with transformations</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
             "type": "Boolean",
             "optional": false,
             "field": "hide_IFC",
@@ -3659,7 +3806,7 @@ define({ "api": [
     "examples": [
       {
         "title": "Example usage:",
-        "content": "POST /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues HTTP/1.1\n{\n   \"name\": \"Amazing issue\",\n   \"assigned_roles\": [\n      \"jobA\"\n   ],\n   \"status\": \"open\",\n   \"priority\": \"none\",\n   \"topic_type\": \"for_information\",\n   \"viewpoint\": {\n      \"right\": [\n         0.8471935391426086,\n         -2.2351741790771484e-8,\n         0.5312844514846802\n      ],\n      \"up\": [\n         0.14098820090293884,\n         0.9641460180282593,\n         -0.22482173144817352\n      ],\n      \"position\": [\n         -5828.818359375,\n         5268.15625,\n         7829.76171875\n      ],\n      \"look_at\": [\n         -2445.6826171875,\n         3515.4658203125,\n         2434.966552734375\n      ],\n      \"view_dir\": [\n         0.5122357606887817,\n         -0.2653723657131195,\n         -0.8168182373046875\n      ],\n      \"near\": 20.835742950439453,\n      \"far\": 10417.87109375,\n      \"fov\": 1.0471975803375244,\n      \"aspect_ratio\": 4.031496047973633,\n      \"clippingPlanes\": [],\n      \"override_groups\": [\n         {\n         \t   \"color\": [\n         \t       0,\n         \t       106,\n         \t       255,\n         \t       52\n         \t   ],\n         \t   \"objects\": [\n         \t   \t{\n         \t   \t   \"shared_ids\": [\n         \t   \t      \"ffd49cfd-57fb-4c31-84f7-02b41352b54f\"\n         \t   \t   ],\n         \t   \t   \"account\": \"teamSpace1\",\n         \t   \t   \"model\": \"2710bd65-37d3-4e7f-b2e0-ffe743ce943f\"\n         \t   \t}\n         \t   ],\n         \t   \"totalSavedMeshes\": 1\n         }   ,\n         {\n            \"color\": [\n                 96,\n                 237,\n                 61\n            ],\n         \t   \"objects\": [\n         \t   \t{\n         \t   \t   \"shared_ids\": [\n         \t   \t   \"a4a14ee6-aa44-4f36-96bd-f80dbabf8ead\"\n         \t   \t   ],\n         \t   \t   \"account\": \"teamSpace1\",\n         \t   \t   \"model\": \"2710bd65-37d3-4e7f-b2e0-ffe743ce943f\"\n         \t   \t}\n         \t   ],\n         \t   \"totalSavedMeshes\": 1\n         }\n      ],\n      \"highlighted_group\": {\n      \t\"objects\": [\n      \t\t{\n      \t\t\t\"shared_ids\": [\n      \t\t\t\t\"60286d41-d897-4de6-a0ed-0929fa68be96\"\n      \t\t\t],\n      \t\t\t\"account\": \"teamSpace1\",\n      \t\t\t\"model\": \"7cf61b4f-acdf-4295-b2d0-9b45f9f27418\"\n      \t\t}\n      \t],\n      \t\"color\": [\n      \t\t255,\n      \t\t255,\n      \t\t0\n      \t]\n      },\n      \"hidden_group\": {\n      \t\"objects\": [\n      \t\t{\n      \t\t\t\"shared_ids\": [\n      \t\t\t\t\"57b0969f-6009-4e32-9153-2b17d3a3628b\"\n      \t\t\t],\n      \t\t\t\"account\": \"teamSpace1\",\n      \t\t\t\"model\": \"b1fceab8-b0e9-4e45-850b-b9888efd6521\"\n      \t\t}\n      \t]\n      }\n      \"hideIfc\": true,\n      \"screenshot\": \"iVBORw0KGgoAAAANSUhEUgAACAAAA...ggg==\"\n   },\n   \"desc\": \"This is the most awesome issue ever\",\n   \"position\": [\n      -3960.10205078125,\n      4487.1552734375,\n      3326.732177734375\n   ]\n}",
+        "content": "POST /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues HTTP/1.1\n{\n   \"name\": \"Amazing issue\",\n   \"assigned_roles\": [\n      \"jobA\"\n   ],\n   \"status\": \"open\",\n   \"priority\": \"none\",\n   \"topic_type\": \"for_information\",\n   \"viewpoint\": {\n      \"right\": [\n         0.8471935391426086,\n         -2.2351741790771484e-8,\n         0.5312844514846802\n      ],\n      \"up\": [\n         0.14098820090293884,\n         0.9641460180282593,\n         -0.22482173144817352\n      ],\n      \"position\": [\n         -5828.818359375,\n         5268.15625,\n         7829.76171875\n      ],\n      \"look_at\": [\n         -2445.6826171875,\n         3515.4658203125,\n         2434.966552734375\n      ],\n      \"view_dir\": [\n         0.5122357606887817,\n         -0.2653723657131195,\n         -0.8168182373046875\n      ],\n      \"near\": 20.835742950439453,\n      \"far\": 10417.87109375,\n      \"fov\": 1.0471975803375244,\n      \"aspect_ratio\": 4.031496047973633,\n      \"clippingPlanes\": [],\n      \"override_groups\": [\n          {\n              \"color\": [\n         \t     0,\n         \t     106,\n         \t     255,\n         \t     52\n         \t ],\n         \t \"objects\": [\n                  {\n                      \"shared_ids\": [\n                          \"ffd49cfd-57fb-4c31-84f7-02b41352b54f\"\n                      ],\n                      \"account\": \"teamSpace1\",\n                      \"model\": \"2710bd65-37d3-4e7f-b2e0-ffe743ce943f\"\n                  }\n              ]\n         },\n         {\n             \"color\": [\n                 96,\n                 237,\n                 61\n             ],\n         \t\"objects\": [\n         \t    {\n                     \"shared_ids\": [\n                         \"a4a14ee6-aa44-4f36-96bd-f80dbabf8ead\"\n                     ],\n                     \"account\": \"teamSpace1\",\n                     \"model\": \"2710bd65-37d3-4e7f-b2e0-ffe743ce943f\"\n                 }\n             ]\n         }\n      ],\n      \"transformation_groups\": [\n          {\n              \"transformation\": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],\n         \t \"objects\": [\n                  {\n                      \"shared_ids\": [\n                          \"ffd49cfd-57fb-4c31-84f7-02b41352b54f\"\n                      ],\n                      \"account\": \"teamSpace1\",\n                      \"model\": \"2710bd65-37d3-4e7f-b2e0-ffe743ce943f\"\n                  }\n              ]\n         },\n         {\n             \"color\": [\n                 96,\n                 237,\n                 61\n             ],\n         \t\"objects\": [\n         \t    {\n                     \"shared_ids\": [\n                         \"a4a14ee6-aa44-4f36-96bd-f80dbabf8ead\"\n                     ],\n                     \"account\": \"teamSpace1\",\n                     \"model\": \"2710bd65-37d3-4e7f-b2e0-ffe743ce943f\"\n                 }\n             ]\n         }\n      ],\n      \"highlighted_group\": {\n      \t\"objects\": [\n      \t\t{\n      \t\t\t\"shared_ids\": [\n      \t\t\t\t\"60286d41-d897-4de6-a0ed-0929fa68be96\"\n      \t\t\t],\n      \t\t\t\"account\": \"teamSpace1\",\n      \t\t\t\"model\": \"7cf61b4f-acdf-4295-b2d0-9b45f9f27418\"\n      \t\t}\n      \t],\n      \t\"color\": [\n      \t\t255,\n      \t\t255,\n      \t\t0\n      \t]\n      },\n      \"hidden_group\": {\n      \t\"objects\": [\n      \t\t{\n      \t\t\t\"shared_ids\": [\n      \t\t\t\t\"57b0969f-6009-4e32-9153-2b17d3a3628b\"\n      \t\t\t],\n      \t\t\t\"account\": \"teamSpace1\",\n      \t\t\t\"model\": \"b1fceab8-b0e9-4e45-850b-b9888efd6521\"\n      \t\t}\n      \t]\n      }\n      \"hideIfc\": true,\n      \"screenshot\": \"iVBORw0KGgoAAAANSUhEUgAACAAAA...ggg==\"\n   },\n   \"desc\": \"This is the most awesome issue ever\",\n   \"position\": [\n      -3960.10205078125,\n      4487.1552734375,\n      3326.732177734375\n   ]\n}",
         "type": "post"
       }
     ],
@@ -3667,7 +3814,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success:",
-          "content": "{\n   \"name\": \"Amazing issue\",\n   \"assigned_roles\": [\n      \"jobA\"\n   ],\n   \"status\": \"open\",\n   \"priority\": \"none\",\n   \"topic_type\": \"for_information\",\n   \"owner\": \"teamSpace1\",\n   \"desc\": \"This is the most awesome issue ever\",\n   \"rev_id\": \"330f909b-9279-41aa-a87c-1c46f53a8e93\",\n   \"creator_role\": \"jobA\",\n   \"scale\": 1,\n   \"position\": [\n      -3960.10205078125,\n      4487.1552734375,\n      3326.732177734375\n   ],\n   \"_id\": \"9ba5fb10-c8db-11e9-8f2a-ada77612c97e\",\n   \"created\": 1566918114625,\n   \"number\": 1,\n   \"thumbnail\": \"teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/9ba5fb10-c8db-11e9-8f2a-ada77612c97e/thumbnail.png\",\n   \"typePrefix\": \"Structural\",\n   \"modelCode\": \"\",\n   \"account\": \"teamSpace1\",\n   \"model\": \"3549ddf6-885d-4977-87f1-eeac43a0e818\",\n   \"viewpoint\": {\n      \"right\": [\n         0.8471935391426086,\n         -2.2351741790771484e-8,\n         0.5312844514846802\n      ],\n      \"up\": [\n         0.14098820090293884,\n         0.9641460180282593,\n         -0.22482173144817352\n      ],\n      \"position\": [\n         -5828.818359375,\n         5268.15625,\n         7829.76171875\n      ],\n      \"look_at\": [\n         -2445.6826171875,\n         3515.4658203125,\n         2434.966552734375\n      ],\n      \"view_dir\": [\n         0.5122357606887817,\n         -0.2653723657131195,\n         -0.8168182373046875\n      ],\n      \"near\": 20.835742950439453,\n      \"far\": 10417.87109375,\n      \"fov\": 1.0471975803375244,\n      \"aspect_ratio\": 4.031496047973633,\n      \"clippingPlanes\": [],\n      \"hidden_group_id\": \"119d5dc0-e223-11ea-8549-49012d4e4956\",\n      \"highlighted_group_id\" : \"80c5a270-e223-11ea-8549-49012d4e4956\",\n      \"override_group_ids\": [\n         \"11952060-e223-11ea-8549-49012d4e4956\",\n         \"bc5ca80-e6c7-11ea-bd51-ddd919e6418e\"\n      ],\n      \"hideIfc\": true,\n      \"screenshot\": \"teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/9ba5fb10-c8db-11e9-8f2a-ada77612c97e/viewpoints/125ce196-852c-49ed-9a2f-f9a77aa03390/screenshot.png\",\n      \"guid\": \"125ce196-852c-49ed-9a2f-f9a77aa03390\",\n      \"screenshotSmall\": \"teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/9ba5fb10-c8db-11e9-8f2a-ada77612c97e/viewpoints/125ce196-852c-49ed-9a2f-f9a77aa03390/screenshotSmall.png\"\n   },\n   \"comments\": [],\n   \"extras\": {\n   }\n}",
+          "content": "{\n   \"name\": \"Amazing issue\",\n   \"assigned_roles\": [\n      \"jobA\"\n   ],\n   \"status\": \"open\",\n   \"priority\": \"none\",\n   \"topic_type\": \"for_information\",\n   \"owner\": \"teamSpace1\",\n   \"desc\": \"This is the most awesome issue ever\",\n   \"rev_id\": \"330f909b-9279-41aa-a87c-1c46f53a8e93\",\n   \"creator_role\": \"jobA\",\n   \"scale\": 1,\n   \"position\": [\n      -3960.10205078125,\n      4487.1552734375,\n      3326.732177734375\n   ],\n   \"_id\": \"9ba5fb10-c8db-11e9-8f2a-ada77612c97e\",\n   \"created\": 1566918114625,\n   \"number\": 1,\n   \"thumbnail\": \"teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/9ba5fb10-c8db-11e9-8f2a-ada77612c97e/thumbnail.png\",\n   \"typePrefix\": \"Structural\",\n   \"modelCode\": \"\",\n   \"account\": \"teamSpace1\",\n   \"model\": \"3549ddf6-885d-4977-87f1-eeac43a0e818\",\n   \"viewpoint\": {\n      \"right\": [\n         0.8471935391426086,\n         -2.2351741790771484e-8,\n         0.5312844514846802\n      ],\n      \"up\": [\n         0.14098820090293884,\n         0.9641460180282593,\n         -0.22482173144817352\n      ],\n      \"position\": [\n         -5828.818359375,\n         5268.15625,\n         7829.76171875\n      ],\n      \"look_at\": [\n         -2445.6826171875,\n         3515.4658203125,\n         2434.966552734375\n      ],\n      \"view_dir\": [\n         0.5122357606887817,\n         -0.2653723657131195,\n         -0.8168182373046875\n      ],\n      \"near\": 20.835742950439453,\n      \"far\": 10417.87109375,\n      \"fov\": 1.0471975803375244,\n      \"aspect_ratio\": 4.031496047973633,\n      \"clippingPlanes\": [],\n      \"hidden_group_id\": \"119d5dc0-e223-11ea-8549-49012d4e4956\",\n      \"highlighted_group_id\" : \"80c5a270-e223-11ea-8549-49012d4e4956\",\n      \"override_group_ids\": [\n         \"11952060-e223-11ea-8549-49012d4e4956\",\n         \"bc5ca80-e6c7-11ea-bd51-ddd919e6418e\"\n      ],\n      \"transformation_group_ids\": [\n         \"12345678-e223-11ea-8549-49012d4e4956\",\n         \"12345678-e6c7-11ea-bd51-ddd919e6418e\"\n      ],\n      \"hideIfc\": true,\n      \"screenshot\": \"teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/9ba5fb10-c8db-11e9-8f2a-ada77612c97e/viewpoints/125ce196-852c-49ed-9a2f-f9a77aa03390/screenshot.png\",\n      \"guid\": \"125ce196-852c-49ed-9a2f-f9a77aa03390\",\n      \"screenshotSmall\": \"teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/9ba5fb10-c8db-11e9-8f2a-ada77612c97e/viewpoints/125ce196-852c-49ed-9a2f-f9a77aa03390/screenshotSmall.png\"\n   },\n   \"comments\": [],\n   \"extras\": {\n   }\n}",
           "type": "json"
         }
       ]
@@ -4071,6 +4218,20 @@ define({ "api": [
             "optional": true,
             "field": "override_groups",
             "description": "<p>If the viewpoint has one or more objects with colour override this field has an array of groups with one group for each colour</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "Group[]",
+            "optional": true,
+            "field": "transformation_groups",
+            "description": "<p>List of groups with transformations</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "String[]",
+            "optional": true,
+            "field": "transformation_group_ids",
+            "description": "<p>List of group IDs with transformations</p>"
           },
           {
             "group": "Type: Viewpoint",
@@ -6886,7 +7047,7 @@ define({ "api": [
   {
     "type": "get",
     "url": "/:teamspace/:model/revision/master/head/meta/4DTaskSequence.json",
-    "title": "Get All meta data for 4D Sequence Tags",
+    "title": "Get All metadata for 4D Sequence Tags",
     "name": "getAllIdsWith4DSequenceTag",
     "group": "Meta",
     "parameter": {
@@ -6916,7 +7077,7 @@ define({ "api": [
   {
     "type": "get",
     "url": "/:teamspace/:model/revision/:rev/meta/4DTaskSequence.json",
-    "title": "Get All meta data with 4D Sequence Tags by revision",
+    "title": "Get All metadata with 4D Sequence Tags by revision",
     "name": "getAllIdsWith4DSequenceTagRev",
     "group": "Meta",
     "parameter": {
@@ -6953,7 +7114,7 @@ define({ "api": [
   {
     "type": "get",
     "url": "/:teamspace/:model/revision/master/head/meta/all.json",
-    "title": "Get all meta data",
+    "title": "Get all metadata",
     "name": "getAllMetadata",
     "group": "Meta",
     "description": "<p>Get all objects in the tree with their metadata.</p>",
@@ -7000,7 +7161,7 @@ define({ "api": [
   {
     "type": "get",
     "url": "/:teamspace/:model/revision/:rev/meta/all.json",
-    "title": "Get all meta data by revision",
+    "title": "Get all metadata by revision",
     "name": "getAllMetadataByRev",
     "group": "Meta",
     "description": "<p>Get all tree objects with their metadata tags by revision. See more details <a href='#api-Meta-getAllMetadata'>here</a>.</p>",
@@ -7026,7 +7187,7 @@ define({ "api": [
             "type": "String",
             "optional": false,
             "field": "rev",
-            "description": "<p>Revision to get meta data from</p>"
+            "description": "<p>Revision to get metadata from</p>"
           }
         ]
       }
@@ -7118,7 +7279,7 @@ define({ "api": [
             "type": "String",
             "optional": false,
             "field": "rev",
-            "description": "<p>Revision to get meta data from</p>"
+            "description": "<p>Revision to get metadata from</p>"
           },
           {
             "group": "Parameter",
@@ -7137,8 +7298,8 @@ define({ "api": [
   {
     "type": "get",
     "url": "/:teamspace/:model/meta/:id.json",
-    "title": "Get meta data",
-    "name": "getMetadata",
+    "title": "Get metadata",
+    "name": "getMetadataById",
     "group": "Meta",
     "description": "<p>Get all metadata tags by revision. See more details <a href='#api-Meta-getAllMetadata'>here</a>.</p>",
     "parameter": {
@@ -7232,6 +7393,162 @@ define({ "api": [
     "version": "0.0.0",
     "filename": "routes/meta.js",
     "groupTitle": "Meta"
+  },
+  {
+    "type": "post",
+    "url": "/:teamspace/:model/revision(/master/head/|/:revId)/meta/rules",
+    "title": "Filter metadata by rules",
+    "name": "queryMetadataByRules",
+    "group": "Meta",
+    "description": "<p>Get all objects matching filter rules in the tree with their metadata.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          }
+        ],
+        "Query": [
+          {
+            "group": "Query",
+            "type": "Boolean",
+            "optional": true,
+            "field": "meshids",
+            "description": "<p>Flag that returns Mesh IDs for matching rule queries</p>"
+          }
+        ]
+      }
+    },
+    "examples": [
+      {
+        "title": "Example usage (/master/head)",
+        "content": "POST /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/meta/rules HTTP/1.1\n[\n\t{\n\t\t\"field\":\"Area\",\n\t\t\"operator\":\"GT\",\n\t\t\"values\":[5]\n\t},\n\t{\n\t\t\"field\":\"IFC Type\",\n\t\t\"operator\":\"IS\",\n\t\t\"values\":[\n\t\t\t\"IfcWall\",\n\t\t\t\"IfcDoor\"\n\t\t]\n\t}\n]",
+        "type": "post"
+      },
+      {
+        "title": "Example usage (/:revId)",
+        "content": "POST /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/00000000-0000-0000-0000-000000000001/meta/rules HTTP/1.1",
+        "type": "post"
+      },
+      {
+        "title": "Example usage (mesh IDs)",
+        "content": "POST /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/meta/rules?meshids=true HTTP/1.1",
+        "type": "post"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success (metadata):",
+          "content": "{\n   \"data\": [\n      {\n         \"_id\": \"2f461edf-4544-412a-bb84-ffdb3bbe563b\",\n         \"metadata\": {\n            \"IFC Type\": \"IfcBuilding\",\n            \"IFC GUID\": \"00tMo7QcxqWdIGvc4sMN2A\",\n            \"BuildingID\": \"n/a\",\n            \"IsPermanentID\": \"True\",\n            \"OccupancyType\": \"Private dwelling\",\n            \"IsLandmarked\": \"True\",\n            \"Area\": 9000,\n            \"NumberOfStoreys\": 2\n         },\n         \"parents\": [\n            \"9eeddbe2-750d-46fb-988f-bcf9ec2ecf51\"\n         ]\n      },\n      {\n         \"_id\": \"85ad29bd-cd99-4472-a92f-86266b07e57d\",\n         \"metadata\": {\n            \"IFC Type\": \"IfcWall\",\n            \"IFC GUID\": \"20FpTZCqJy2vhVJYtjuIce\"\n         },\n         \"parents\": [\n            \"48359ad0-9b6d-44ed-ae93-47e2ec69ea88\"\n         ]\n      },\n      {\n         \"_id\": \"b5fe5dcf-ce8c-4b1e-a96b-bdc5aa001963\",\n         \"metadata\": {\n            \"IFC Type\": \"IfcBuildingElementProxy\",\n            \"IFC GUID\": \"3VkTAO0fr0XQHS3DxQzfxm\",\n            \"Area\": 6,\n            \"Reference\": \"LegoRoundTree\"\n         },\n         \"parents\": [\n            \"2bf2a864-5cb0-41ba-85a8-c2cffc3da06d\"\n         ]\n      },\n      {\n         \"_id\": \"c4682cf2-7b2a-41c7-8fe2-c0c39512dd99\",\n         \"metadata\": {\n            \"IFC Type\": \"IfcDoor\",\n            \"IFC GUID\": \"1oZ0wPs_PE8ANCPg3bIs4j\",\n            \"AboveGround\": \"False\"\n         },\n         \"parents\": [\n            \"323a9900-ece1-4857-8980-ec96ffc7f681\"\n         ]\n      }\n   ]\n}",
+          "type": "json"
+        },
+        {
+          "title": "Success (federation metadata):",
+          "content": "{\n   \"data\": [],\n   \"subModels\": [\n      {\n          \"data\": [\n              {\n                  \"_id\": \"2f461edf-4544-412a-bb84-ffdb3bbe563b\",\n                  \"metadata\": {\n                      \"IFC Type\": \"IfcBuilding\",\n                      \"IFC GUID\": \"00tMo7QcxqWdIGvc4sMN2A\",\n                      \"BuildingID\": \"n/a\",\n                      \"IsPermanentID\": \"True\",\n                      \"OccupancyType\": \"Private dwelling\",\n                      \"IsLandmarked\": \"True\",\n                      \"Area\": 9000,\n                      \"NumberOfStoreys\": 2\n                  },\n                  \"parents\": [\n                      \"9eeddbe2-750d-46fb-988f-bcf9ec2ecf51\"\n                  ]\n              },\n              {\n                  \"_id\": \"85ad29bd-cd99-4472-a92f-86266b07e57d\",\n                  \"metadata\": {\n                      \"IFC Type\": \"IfcWall\",\n                      \"IFC GUID\": \"20FpTZCqJy2vhVJYtjuIce\"\n                  },\n                  \"parents\": [\n                      \"48359ad0-9b6d-44ed-ae93-47e2ec69ea88\"\n                  ]\n              },\n              {\n                  \"_id\": \"b5fe5dcf-ce8c-4b1e-a96b-bdc5aa001963\",\n                  \"metadata\": {\n                      \"IFC Type\": \"IfcBuildingElementProxy\",\n                      \"IFC GUID\": \"3VkTAO0fr0XQHS3DxQzfxm\",\n                      \"Area\": 6,\n                      \"Reference\": \"LegoRoundTree\"\n                  },\n                  \"parents\": [\n                      \"2bf2a864-5cb0-41ba-85a8-c2cffc3da06d\"\n                  ]\n              },\n              {\n                  \"_id\": \"c4682cf2-7b2a-41c7-8fe2-c0c39512dd99\",\n                  \"metadata\": {\n                      \"IFC Type\": \"IfcDoor\",\n                      \"IFC GUID\": \"1oZ0wPs_PE8ANCPg3bIs4j\",\n                      \"AboveGround\": \"False\"\n                  },\n                  \"parents\": [\n                      \"323a9900-ece1-4857-8980-ec96ffc7f681\"\n                  ]\n              }\n         ],\n         \"account\": \"acme\",\n         \"model\": \"00000000-0000-0000-0000-000000000001\"\n      },\n      {\n          \"data\": [\n              {\n                  \"_id\": \"2f461edf-4544-412a-bb84-ffdb3bbe563b\",\n                  \"metadata\": {\n                      \"IFC Type\": \"IfcBuilding\",\n                      \"IFC GUID\": \"12tTo3QcxqWd5Gvc4sABCA\",\n                      \"BuildingID\": \"Site B\",\n                      \"IsPermanentID\": \"True\",\n                      \"OccupancyType\": \"Private dwelling\",\n                      \"IsLandmarked\": \"True\",\n                      \"Area\": 20,\n                      \"NumberOfStoreys\": 1\n                  },\n                  \"parents\": [\n                      \"9eeddbe2-750d-46fb-988f-bcf9ec2ecf51\"\n                  ]\n              }\n         ],\n         \"account\": \"acme\",\n         \"model\": \"00000000-0000-0000-0000-000000000002\"\n      }\n   ]\n}",
+          "type": "json"
+        },
+        {
+          "title": "Success (mesh IDs):",
+          "content": "[\n\t{\n\t\t\"account\": \"acme\",\n\t\t\"model\": \"00000000-0000-0000-0000-000000000000\",\n\t\t\"mesh_ids\": [\n\t\t\t\"11111111-1111-1111-1111-111111111111\",\n\t\t\t\"22222222-2222-2222-2222-222222222222\",\n\t\t\t\"33333333-3333-3333-3333-333333333333\",\n\t\t\t\"44444444-4444-4444-4444-444444444444\"\n\t\t]\n\t}\n]",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/meta.js",
+    "groupTitle": "Meta"
+  },
+  {
+    "type": "patch",
+    "url": "/:teamspace/models/permissions",
+    "title": "Batch update model permissions",
+    "name": "batchUpdateModelPermissions",
+    "group": "Model",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace.</p>"
+          }
+        ],
+        "Request body": [
+          {
+            "group": "Request body",
+            "type": "ModelPermissions[]",
+            "optional": false,
+            "field": "BODY",
+            "description": "<p>List of model permissions</p>"
+          }
+        ],
+        "Request body: ModelPermissions": [
+          {
+            "group": "Request body: ModelPermissions",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Request body: ModelPermissions",
+            "type": "Permission[]",
+            "optional": false,
+            "field": "permissions",
+            "description": "<p>List of user permissions</p>"
+          }
+        ],
+        "Request body: Permission": [
+          {
+            "group": "Request body: Permission",
+            "type": "string",
+            "optional": false,
+            "field": "user",
+            "description": "<p>User ID</p>"
+          },
+          {
+            "group": "Request body: Permission",
+            "type": "string",
+            "optional": false,
+            "field": "permission",
+            "description": "<p>Permission type ('viewer'|'commenter'|'collaborator'|'').</p>"
+          }
+        ]
+      }
+    },
+    "examples": [
+      {
+        "title": "Example usage:",
+        "content": "PATCH /acme/models/permissions HTTP/1.1\n[\n   {\n      model: \"00000000-0000-0000-0000-000000000000\",\n      permissions: [\n         {\n            user: \"alice\",\n            permission: \"collaborator\"\n         },\n         {\n            user: \"bob\",\n            permission: \"commenter\"\n         },\n         {\n            user: \"mike\",\n            permission: \"\"\n         }\n      ]\n   },\n   {\n      model: \"11111111-1111-1111-1111-111111111111\",\n      permissions: [\n         {\n            user: \"charlie\",\n            permission: \"viewer\"\n         }\n      ]\n   },\n   {\n      model: \"22222222-2222-2222-2222-222222222222\",\n      permissions: [\n         {\n            user: \"dave\",\n            permission: \"commenter\"\n         },\n         {\n            user: \"eve\",\n            permission: \"\"\n         }\n      ]\n   }\n]",
+        "type": "patch"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success:",
+          "content": "{\n   status: \"ok\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/model.js",
+    "groupTitle": "Model"
   },
   {
     "type": "post",
@@ -8523,11 +8840,95 @@ define({ "api": [
     "groupTitle": "Model"
   },
   {
+    "type": "patch",
+    "url": "/:teamspace/:model/permissions",
+    "title": "Update model permissions",
+    "name": "updateModelPermissions",
+    "group": "Model",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          }
+        ],
+        "Request body": [
+          {
+            "group": "Request body",
+            "type": "Permission[]",
+            "optional": false,
+            "field": "BODY",
+            "description": "<p>List of user permissions</p>"
+          }
+        ],
+        "Request body: Permission": [
+          {
+            "group": "Request body: Permission",
+            "type": "string",
+            "optional": false,
+            "field": "user",
+            "description": "<p>User ID</p>"
+          },
+          {
+            "group": "Request body: Permission",
+            "type": "string",
+            "optional": false,
+            "field": "permission",
+            "description": "<p>Permission type ('viewer'|'commenter'|'collaborator'|'').</p>"
+          }
+        ]
+      }
+    },
+    "examples": [
+      {
+        "title": "Example usage (add user permission):",
+        "content": "PATCH /acme/00000000-0000-0000-0000-000000000000/permissions HTTP/1.1\n[\n   {\n      user: \"alice\",\n      permission: \"collaborator\"\n   }\n]",
+        "type": "patch"
+      },
+      {
+        "title": "Example usage (add multiple user permissions):",
+        "content": "PATCH /acme/00000000-0000-0000-0000-000000000000/permissions HTTP/1.1\n[\n   {\n      user: \"bob\",\n      permission: \"commenter\"\n   },\n   {\n      user: \"mike\",\n      permission: \"viewer\"\n   }\n]",
+        "type": "patch"
+      },
+      {
+        "title": "Example usage (remove user permission):",
+        "content": "PATCH /acme/00000000-0000-0000-0000-000000000000/permissions HTTP/1.1\n[\n   {\n      user: \"mike\",\n      permission: \"\"\n   }\n]",
+        "type": "patch"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success:",
+          "content": "{\n   status: \"ok\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/model.js",
+    "groupTitle": "Model"
+  },
+  {
     "type": "post",
     "url": "/:teamspace/models/permissions",
     "title": "Update multiple models permissions",
     "name": "updateMultiplePermissions",
     "group": "Model",
+    "deprecated": {
+      "content": "use now (#Model:batchUpdateModelPermissions)"
+    },
     "parameter": {
       "fields": {
         "Parameter": [
@@ -8570,14 +8971,14 @@ define({ "api": [
             "type": "string",
             "optional": false,
             "field": "user",
-            "description": "<p>The user id associated with this permission.</p>"
+            "description": "<p>User ID</p>"
           },
           {
             "group": "Request body: Permission",
             "type": "string",
             "optional": false,
             "field": "permission",
-            "description": "<p>The type of permission. This can has the value of 'viewer', 'commenter' or 'collaborator'.</p>"
+            "description": "<p>Permission type ('viewer'|'commenter'|'collaborator'|'').</p>"
           }
         ]
       }
@@ -8608,6 +9009,9 @@ define({ "api": [
     "title": "Update model permissions",
     "name": "updatePermissions",
     "group": "Model",
+    "deprecated": {
+      "content": "use now (#Model:updateModelPermissions)"
+    },
     "parameter": {
       "fields": {
         "Parameter": [
@@ -8641,14 +9045,14 @@ define({ "api": [
             "type": "string",
             "optional": false,
             "field": "user",
-            "description": "<p>The user id associated with this permission.</p>"
+            "description": "<p>User ID</p>"
           },
           {
             "group": "Request body: Permission",
             "type": "string",
             "optional": false,
             "field": "permission",
-            "description": "<p>The type of permission. This can has the value of 'viewer', 'commenter' or 'collaborator'.</p>"
+            "description": "<p>Permission type ('viewer'|'commenter'|'collaborator'|'').</p>"
           }
         ]
       }
@@ -8818,6 +9222,13 @@ define({ "api": [
             "optional": false,
             "field": "desc",
             "description": "<p>the description for the new revision</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "Boolean",
+            "optional": true,
+            "field": "importAnimations",
+            "description": "<p>whether to import animations within a sequence</p>"
           }
         ],
         "Request body: Attachment": [
@@ -8909,16 +9320,6 @@ define({ "api": [
   },
   {
     "type": "patch",
-    "url": "/notifications",
-    "title": "Patch all the user notifications",
-    "name": "patchNotification",
-    "group": "Notification",
-    "version": "0.0.0",
-    "filename": "routes/notification.js",
-    "groupTitle": "Notification"
-  },
-  {
-    "type": "patch",
     "url": "/notifications/:id",
     "title": "Patch a notification",
     "name": "patchNotification",
@@ -8936,6 +9337,16 @@ define({ "api": [
         ]
       }
     },
+    "version": "0.0.0",
+    "filename": "routes/notification.js",
+    "groupTitle": "Notification"
+  },
+  {
+    "type": "patch",
+    "url": "/notifications",
+    "title": "Patch all the user notifications",
+    "name": "patchNotification",
+    "group": "Notification",
     "version": "0.0.0",
     "filename": "routes/notification.js",
     "groupTitle": "Notification"
@@ -9270,6 +9681,67 @@ define({ "api": [
   },
   {
     "type": "get",
+    "url": "/:teamspace/projects/:project/models",
+    "title": "List models of the project",
+    "name": "listModels",
+    "group": "Project",
+    "description": "<p>It returns a list of models .</p>",
+    "permission": [
+      {
+        "name": "canListProjects"
+      }
+    ],
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of the teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "project",
+            "description": "<p>The name of the project to list models</p>"
+          }
+        ],
+        "Query": [
+          {
+            "group": "Query",
+            "type": "String",
+            "optional": true,
+            "field": "name",
+            "description": "<p>Filters models by name</p>"
+          }
+        ]
+      }
+    },
+    "examples": [
+      {
+        "title": "Example usage:",
+        "content": "GET /teamSpace1/projects/Bim%20Logo/models?name=log HTTP/1.1",
+        "type": "get"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success:",
+          "content": "[\n  {\n    \"_id\": \"5ce7dd19-1252-4548-a9c9-4a5414f2e0c5\",\n    \"federate\": true,\n    \"desc\": \"\",\n    \"name\": \"Full Logo\",\n    \"__v\": 17,\n    \"timestamp\": \"2019-05-02T16:17:37.902Z\",\n    \"type\": \"Federation\",\n    \"subModels\": [\n      {\n        \"database\": \"teamSpace1\",\n        \"model\": \"b1fceab8-b0e9-4e45-850b-b9888efd6521\",\n        \"name\": \"block\"\n      },\n      {\n        \"database\": \"teamSpace1\",\n        \"model\": \"7cf61b4f-acdf-4295-b2d0-9b45f9f27418\",\n        \"name\": \"letters\"\n      },\n      {\n        \"database\": \"teamSpace1\",\n        \"model\": \"2710bd65-37d3-4e7f-b2e0-ffe743ce943f\",\n        \"name\": \"pipes\"\n      }\n    ],\n    \"surveyPoints\": [\n      {\n        \"position\": [\n          0,\n          0,\n          0\n        ],\n        \"latLong\": [\n          -34.459127,\n          0\n        ]\n      }\n    ],\n    \"properties\": {\n      \"unit\": \"mm\",\n      \"topicTypes\": [\n        {\n          \"label\": \"Clash\",\n          \"value\": \"clash\"\n        },\n        {\n          \"label\": \"Diff\",\n          \"value\": \"diff\"\n        },\n        {\n          \"label\": \"RFI\",\n          \"value\": \"rfi\"\n        },\n        {\n          \"label\": \"Risk\",\n          \"value\": \"risk\"\n        },\n        {\n          \"label\": \"H&S\",\n          \"value\": \"hs\"\n        },\n        {\n          \"label\": \"Design\",\n          \"value\": \"design\"\n        },\n        {\n          \"label\": \"Constructibility\",\n          \"value\": \"constructibility\"\n        },\n        {\n          \"label\": \"GIS\",\n          \"value\": \"gis\"\n        },\n        {\n          \"label\": \"For information\",\n          \"value\": \"for_information\"\n        },\n        {\n          \"label\": \"VR\",\n          \"value\": \"vr\"\n        }\n      ]\n    },\n    \"permissions\": [\n      \"change_model_settings\",\n      \"upload_files\",\n      \"create_issue\",\n      \"comment_issue\",\n      \"view_issue\",\n      \"view_model\",\n      \"download_model\",\n      \"edit_federation\",\n      \"delete_federation\",\n      \"delete_model\",\n      \"manage_model_permission\"\n    ],\n    \"status\": \"ok\",\n    \"id\": \"5ce7dd19-1252-4548-a9c9-4a5414f2e0c5\",\n    \"model\": \"5ce7dd19-1252-4548-a9c9-4a5414f2e0c5\",\n    \"account\": \"teamSpace1\",\n    \"headRevisions\": {\n    }\n  }\n]\t *",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/project.js",
+    "groupTitle": "Project"
+  },
+  {
+    "type": "get",
     "url": "/:teamspace/projects/:project",
     "title": "Get project",
     "name": "listProject",
@@ -9366,12 +9838,109 @@ define({ "api": [
     "groupTitle": "Project"
   },
   {
-    "type": "put",
+    "type": "patch",
     "url": "/:teamspace/projects/:project",
     "title": "Update project",
     "name": "updateProject",
     "group": "Project",
+    "description": "<p>Update project properties (name, permissions)</p>",
+    "permission": [
+      {
+        "name": "canUpdateProject"
+      }
+    ],
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "project",
+            "description": "<p>Name of project</p>"
+          }
+        ],
+        "Request body": [
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": true,
+            "field": "name",
+            "description": "<p>Project name</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "ProjectPermission[]",
+            "optional": true,
+            "field": "permissions",
+            "description": "<p>List of user permissions</p>"
+          }
+        ],
+        "Type: ProjectPermission": [
+          {
+            "group": "Type: ProjectPermission",
+            "type": "String",
+            "optional": false,
+            "field": "user",
+            "description": "<p>Username of user</p>"
+          },
+          {
+            "group": "Type: ProjectPermission",
+            "type": "String[]",
+            "optional": false,
+            "field": "permissions",
+            "description": "<p>List of user privileges</p>"
+          }
+        ]
+      }
+    },
+    "examples": [
+      {
+        "title": "Example usage (update permissions):",
+        "content": "PATCH /acme/ProjectAnvil HTTP/1.1\n{\n   permissions: [\n      {\n         user: \"alice\",\n         permissions: [\n            \"admin_project\"\n         ]\n      },\n      {\n         user: \"mike\",\n         permissions: []\n      }\n   ]\n}",
+        "type": "patch"
+      },
+      {
+        "title": "Example usage (rename project):",
+        "content": "PATCH /acme/ProjectAnvil HTTP/1.1\n{\n   name: \"ProjectInstantTunnel\"\n}",
+        "type": "patch"
+      },
+      {
+        "title": "Example usage:",
+        "content": "PATCH /acme/ProjectInstantTunnel HTTP/1.1\n{\n   name: \"Project Trebuchet\",\n   permissions: [\n      {\n         user: \"bob\",\n         permissions: [\n            \"admin_project\"\n         ]\n      }\n   ]\n}",
+        "type": "patch"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "{\n   status: \"ok\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/project.js",
+    "groupTitle": "Project"
+  },
+  {
+    "type": "put",
+    "url": "/:teamspace/projects/:project",
+    "title": "Update project",
+    "name": "updateProjectPut",
+    "group": "Project",
     "description": "<p>It updates a project. The name can be changed and the permissions as well as the permissions of users</p>",
+    "deprecated": {
+      "content": "use now (#Project:updateProject)"
+    },
     "permission": [
       {
         "name": "canUpdateProject"
@@ -10244,17 +10813,73 @@ define({ "api": [
           },
           {
             "group": "Query",
-            "type": "Number",
+            "type": "Number[]",
             "optional": true,
             "field": "numbers",
             "description": "<p>Array of issue numbers to filter for</p>"
           },
           {
             "group": "Query",
-            "type": "String",
+            "type": "String[]",
             "optional": true,
             "field": "ids",
             "description": "<p>Array of issue ids to filter for</p>"
+          },
+          {
+            "group": "Query",
+            "type": "String[]",
+            "optional": true,
+            "field": "categories",
+            "description": "<p>Array of categories to filter for</p>"
+          },
+          {
+            "group": "Query",
+            "type": "String[]",
+            "optional": true,
+            "field": "mitigationStatus",
+            "description": "<p>Array of mitigation status to filter for</p>"
+          },
+          {
+            "group": "Query",
+            "type": "Number[]",
+            "optional": true,
+            "field": "likelihoods",
+            "description": "<p>Array of likelihoods to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .</p>"
+          },
+          {
+            "group": "Query",
+            "type": "Number[]",
+            "optional": true,
+            "field": "consequences",
+            "description": "<p>Array of consequences to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .</p>"
+          },
+          {
+            "group": "Query",
+            "type": "Number[]",
+            "optional": true,
+            "field": "residualLikelihoods",
+            "description": "<p>Array of residual likelihoods to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .</p>"
+          },
+          {
+            "group": "Query",
+            "type": "Number[]",
+            "optional": true,
+            "field": "levelOfRisks",
+            "description": "<p>Array of levels of risks to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .</p>"
+          },
+          {
+            "group": "Query",
+            "type": "Number[]",
+            "optional": true,
+            "field": "residualConsequences",
+            "description": "<p>Array of residual consequences to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .</p>"
+          },
+          {
+            "group": "Query",
+            "type": "Number[]",
+            "optional": true,
+            "field": "residualLevelOfRisks",
+            "description": "<p>Array of levels of risks to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .</p>"
           }
         ]
       }
@@ -10677,6 +11302,20 @@ define({ "api": [
           },
           {
             "group": "Type: Viewpoint",
+            "type": "Group[]",
+            "optional": true,
+            "field": "transformation_groups",
+            "description": "<p>List of groups with transformations</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
+            "type": "String[]",
+            "optional": true,
+            "field": "transformation_group_ids",
+            "description": "<p>List of group IDs with transformations</p>"
+          },
+          {
+            "group": "Type: Viewpoint",
             "type": "Boolean",
             "optional": false,
             "field": "hide_IFC",
@@ -10996,6 +11635,145 @@ define({ "api": [
   },
   {
     "type": "get",
+    "url": "/:teamspace/:model/revision(/master/head/|/:revId)/sequences/:sequenceId/activities",
+    "title": "Get all activities",
+    "name": "getSequenceActivities",
+    "group": "Sequences",
+    "description": "<p>Get all sequence activities.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "sequenceId",
+            "description": "<p>Sequence unique ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "revId",
+            "description": "<p>Revision unique ID</p>"
+          }
+        ]
+      }
+    },
+    "examples": [
+      {
+        "title": "Example usage (/master/head)",
+        "content": "GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences/00000000-0000-0000-0001-000000000001/activities HTTP/1.1",
+        "type": "get"
+      },
+      {
+        "title": "Example usage (/:revId)",
+        "content": "GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/sequences/00000000-0000-0000-0001-000000000001/activities HTTP/1.1",
+        "type": "get"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "HTTP/1.1 200 OK\n{\n\t\"tasks\":[\n\t\t{\n\t\t\t\"id\":\"00000000-0000-0001-0001-000000000001\",\n\t\t\t\"name\":\"Construction\",\n\t\t\t\"startDate\":1244246400000,\n\t\t\t\"endDate\":1244246450000,\n\t\t\t\"subTasks\":[\n\t\t\t\t{\n\t\t\t\t\t\"id\":\"00000000-0001-0001-0001-000000000001\",\n\t\t\t\t\t\"name\":\"Prepare site\",\n\t\t\t\t\t\"startDate\":1244246400000,\n\t\t\t\t\t\"endDate\":1244246430000,\n\t\t\t\t\t\"subTasks\":[\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"id\":\"00000001-0001-0001-0001-000000000001\",\n\t\t\t\t\t\t\t\"name\":\"Erect site hoarding\",\n\t\t\t\t\t\t\t\"startDate\":1244246400000,\n\t\t\t\t\t\t\t\"endDate\":1244246410000\n\t\t\t\t\t\t},\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"id\":\"00000002-0001-0001-0001-000000000001\",\n\t\t\t\t\t\t\t\"name\":\"Clear existing structures\",\n\t\t\t\t\t\t\t\"startDate\":1244246410000,\n\t\t\t\t\t\t\t\"endDate\":1244246420000\n\t\t\t\t\t\t},\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"id\":\"00000003-0001-0001-0001-000000000001\",\n\t\t\t\t\t\t\t\"name\":\"Smooth work surfaces\",\n\t\t\t\t\t\t\t\"startDate\":1244246420000,\n\t\t\t\t\t\t\t\"endDate\":1244246430000\n\t\t\t\t\t\t}\n\t\t\t\t\t]\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"id\":\"00000001-0002-0001-0001-000000000001\",\n\t\t\t\t\t\"name\":\"Construct tunnel\",\n\t\t\t\t\t\"startDate\":1244246430000,\n\t\t\t\t\t\"endDate\":1244246450000,\n\t\t\t\t\t\"subTasks\":[\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"id\":\"00000001-0002-0001-0001-000000000001\",\n\t\t\t\t\t\t\t\"name\":\"Deploy instant tunnel\",\n\t\t\t\t\t\t\t\"startDate\":1244246430000,\n\t\t\t\t\t\t\t\"endDate\":1244246440000\n\t\t\t\t\t\t},\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"id\":\"00000002-0002-0001-0001-000000000001\",\n\t\t\t\t\t\t\t\"name\":\"Add road markings\",\n\t\t\t\t\t\t\t\"startDate\":1244246440000,\n\t\t\t\t\t\t\t\"endDate\":1244246450000\n\t\t\t\t\t\t}\n\t\t\t\t\t]\n\t\t\t\t}\n\t\t\t]\n\t\t}\n\t]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/sequence.js",
+    "groupTitle": "Sequences"
+  },
+  {
+    "type": "get",
+    "url": "/:teamspace/:model/revision(/master/head/|/:revId)/sequences/:sequenceId/activities/:activityId",
+    "title": "Get activity",
+    "name": "getSequenceActivityDetail",
+    "group": "Sequences",
+    "description": "<p>Get sequence activity details.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "sequenceId",
+            "description": "<p>Sequence ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "activityId",
+            "description": "<p>Activity ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "revId",
+            "description": "<p>Revision unique ID</p>"
+          }
+        ]
+      }
+    },
+    "examples": [
+      {
+        "title": "Example usage (/master/head)",
+        "content": "GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences/00000000-0000-0000-0001-000000000001/activities/00000000-0000-0002-0001-000000000001 HTTP/1.1",
+        "type": "get"
+      },
+      {
+        "title": "Example usage (/:revId)",
+        "content": "GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/sequences/00000000-0000-0000-0001-000000000001/activities/00000000-0000-0002-0001-000000000001 HTTP/1.1",
+        "type": "get"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "HTTP/1.1 200 OK\n{\n\t\"id\":\"00000000-0000-0002-0001-000000000001\",\n\t\"name\":\"Construct tunnel\",\n\t\"data\":{\n\t\t\"Name\":\"Construction\",\n\t\t\"Status\":\"Planned\",\n\t\t\"Is Compound Task\":\"Yes\",\n\t\t\"Code\":\"ST00020\",\n\t\t\"Planned Start\":\"15 Apr 2020 10:00:00\",\n\t\t\"Type\":\"Work\",\n\t\t\"Constraint\":\"No Constraint\",\n\t\t\"Planned Finish\":\"11 Sep 2020 18:00:00\",\n\t\t\"Percentage Complete\":0,\n\t\t\"Physical Volume Unity\":\"Unknown\",\n\t\t\"Estimated Rate\":0.0,\n\t\t\"Planned Physical Volume\":6.6,\n\t\t\"Actual Physical Volume\":0.9,\n\t\t\"Remaining Physical Volume\":5.7,\n\t\t\"Budgeted Cost\":30.0,\n\t\t\"Actual Cost\":9999.99,\n\t}\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/sequence.js",
+    "groupTitle": "Sequences"
+  },
+  {
+    "type": "get",
     "url": "/:teamspace/:model/revision(/master/head/|/:revId)/sequences/:sequenceId/state/:stateId",
     "title": "Get state",
     "name": "getSequenceState",
@@ -11045,12 +11823,12 @@ define({ "api": [
     "examples": [
       {
         "title": "Example usage (/master/head)",
-        "content": "GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences/00000000-0000-0000-0000-000000000002/state/00000000-0000-0000-0001-000000000002 HTTP/1.1",
+        "content": "GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences/00000000-0000-0000-0001-000000000001/state/00000000-0000-0000-0001-000000000002 HTTP/1.1",
         "type": "get"
       },
       {
         "title": "Example usage (/:revId)",
-        "content": "GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/sequences/00000000-0000-0000-0000-000000000002/state/00000000-0000-0000-0001-000000000002 HTTP/1.1",
+        "content": "GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/sequences/00000000-0000-0000-0001-000000000001/state/00000000-0000-0000-0001-000000000002 HTTP/1.1",
         "type": "get"
       }
     ],
@@ -11090,7 +11868,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response",
-          "content": "HTTP/1.1 200 OK\n[\n\t{\n\t\t\"teamspace\":\"alice\",\n\t\t\"model\":\"00000000-0000-0000-0000-000000000000\",\n\t\t\"rev_id\":\"00000000-0000-0000-0000-000000000001\",\n\t\t\"name\":\"Sequence 1\",\n\t\t\"frames\":[\n\t\t\t{\n\t\t\t\t\"dateTime\":1244246400000,\n\t\t\t\t\"state\":\"00000000-0000-0000-0001-000000000002\",\n\t\t\t\t\"tasks\":[\n\t\t\t\t\t{\n\t\t\t\t\t\t\"name\":\"Task 1\",\n\t\t\t\t\t\t\"startDate\":1244246400000,\n\t\t\t\t\t\t\"endDate\":1244246410000,\n\t\t\t\t\t\t\"_id\":\"00000000-0000-0001-0001-000000000002\"\n\t\t\t\t\t},\n\t\t\t\t\t{\n\t\t\t\t\t\t\"name\":\"Task 2\",\n\t\t\t\t\t\t\"startDate\":1244246410000,\n\t\t\t\t\t\t\"endDate\":1244246420000,\n\t\t\t\t\t\t\"_id\":\"00000000-0000-0002-0001-000000000002\"\n\t\t\t\t\t},\n\t\t\t\t\t{\n\t\t\t\t\t\t\"name\":\"Task 3\",\n\t\t\t\t\t\t\"startDate\":1244246420000,\n\t\t\t\t\t\t\"endDate\":1244246430000,\n\t\t\t\t\t\t\"_id\":\"00000000-0000-0003-0001-000000000002\"\n\t\t\t\t\t}\n\t\t\t\t]\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"dateTime\":1244419200000,\n\t\t\t\t\"state\":\"00000000-0000-0000-0002-000000000002\"\n\t\t\t\t\"tasks\":[\n\t\t\t\t\t{\n\t\t\t\t\t\t\"name\":\"Task 2\",\n\t\t\t\t\t\t\"startDate\":1244419200000,\n\t\t\t\t\t\t\"endDate\":1245369600000,\n\t\t\t\t\t\t\"_id\":\"00000000-0000-0001-0002-000000000002\"\n\t\t\t\t\t}\n\t\t\t\t]\n\t\t\t}\n\t\t],\n\t\t\"_id\":\"00000000-0000-0000-0000-000000000002\"\n\t}\n]",
+          "content": "HTTP/1.1 200 OK\n[\n\t{\n\t\t\"teamspace\":\"alice\",\n\t\t\"model\":\"00000000-0000-0000-0000-000000000000\",\n\t\t\"rev_id\":\"00000000-0000-0000-0000-000000000001\",\n\t\t\"name\":\"Sequence 1\",\n\t\t\"frames\":[\n\t\t\t{\n\t\t\t\t\"dateTime\":1244246400000,\n\t\t\t\t\"state\":\"00000000-0000-0000-0001-000000000002\"\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"dateTime\":1244419200000,\n\t\t\t\t\"state\":\"00000000-0000-0000-0002-000000000002\"\n\t\t\t}\n\t\t],\n\t\t\"_id\":\"00000000-0000-0000-0000-000000000002\"\n\t}\n]",
           "type": "json"
         }
       ]
@@ -12419,6 +13197,13 @@ define({ "api": [
           },
           {
             "group": "Type: ResultViewpoint",
+            "type": "String[]",
+            "optional": true,
+            "field": "transformation_group_ids",
+            "description": "<p>List of group IDs with transformations</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
             "type": "Boolean",
             "optional": false,
             "field": "hide_IFC",
@@ -12774,6 +13559,13 @@ define({ "api": [
             "optional": true,
             "field": "override_group_ids",
             "description": "<p>If the viewpoint has one or more objects with colour override this field has an array of groups ids with one group for each colour</p>"
+          },
+          {
+            "group": "Type: ResultViewpoint",
+            "type": "String[]",
+            "optional": true,
+            "field": "transformation_group_ids",
+            "description": "<p>List of group IDs with transformations</p>"
           },
           {
             "group": "Type: ResultViewpoint",
