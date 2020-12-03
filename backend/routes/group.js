@@ -468,7 +468,7 @@ router.delete("/groups/", middlewares.issue.canCreate, deleteGroups);
 
 function listGroups(req, res, next) {
 	const place = utils.APIInfo(req);
-	const { account, model, rid } = req.params;
+	const { account, model } = req.params;
 	const rid = req.params.rid ? req.params.rid : null;
 	const branch = rid ? null : "master";
 
@@ -485,7 +485,7 @@ function listGroups(req, res, next) {
 		}
 	}
 
-	Group.listGroups(account, model, branch, rid, ids, req.query, showIfcGuids).then(groups => {
+	Group.getList(account, model, branch, rid, ids, req.query, showIfcGuids).then(groups => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, groups);
 	}).catch(err => {
 		systemLogger.logError(err.stack);
@@ -495,7 +495,7 @@ function listGroups(req, res, next) {
 
 function findGroup(req, res, next) {
 	const place = utils.APIInfo(req);
-	const { account, model, rid, uid } = req.params;
+	const { account, model, uid } = req.params;
 	const rid = req.params.rid ? req.params.rid : null;
 	const branch = rid ? null : "master";
 	const showIfcGuids = (req.query.ifcguids) ? JSON.parse(req.query.ifcguids) : false;
@@ -517,7 +517,7 @@ function createGroup(req, res, next) {
 	const rid = req.params.rid ? req.params.rid : null;
 	const branch = rid ? null : "master";
 
-	Group.createGroup(account, model, sessionId, req.body, req.session.user.username, branch, rid).then(group => {
+	Group.create(account, model, branch, rid, sessionId, req.session.user.username, req.body).then(group => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
@@ -550,7 +550,7 @@ function updateGroup(req, res, next) {
 	const rid = req.params.rid ? req.params.rid : null;
 	const branch = rid ? null : "master";
 
-	Group.updateGroup(account, model, sessionId, uid, req.body, req.session.user.username, branch, rid).then(group => {
+	Group.update(account, model, branch, rid, sessionId, req.session.user.username, uid, req.body).then(group => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 	}).catch(err => {
 		systemLogger.logError(err.stack);

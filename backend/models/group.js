@@ -159,12 +159,12 @@ function getObjectsArray(model, branch, revId, groupData, convertSharedIDsToStri
 			objectId.ifc_guids = ifcGuids;
 			objectIdPromises.push(objectId);
 		} else {
-			objectIdPromises.push(Group.ifcGuidsToUUIDs(
+			objectIdPromises.push(ifcGuidsToUUIDs(
 				objectId.account,
 				objectId.model,
-				ifcGuids,
 				_branch,
-				_revId
+				_revId,
+				ifcGuids
 			).then(sharedIdResults => {
 				for (let j = 0; j < sharedIdResults.length; j++) {
 					if ("[object String]" !== Object.prototype.toString.call(sharedIdResults[j].shared_id)) {
@@ -268,6 +268,36 @@ function getObjectsArrayAsIfcGuids(data) {
 	});
 }
 
+function ifcGuidsToUUIDs(account, model, branch, revId, ifcGuids) {
+	if(!ifcGuids || ifcGuids.length === 0) {
+		return Promise.resolve([]);
+	}
+
+	const query = {"metadata.IFC GUID": { $in: ifcGuids } };
+	const project = { parents: 1, _id: 0 };
+
+	return db.getCollection(account, model + ".scene").then(dbCol => {
+		return dbCol.find(query, project).toArray().then(results => {
+			if(results.length === 0) {
+				return [];
+			}
+			return History.getHistory({ account, model }, branch, revId).then(history => {
+				if (!history) {
+					return Promise.reject(responseCodes.INVALID_TAG_NAME);
+				} else {
+
+					const parents = results.map(x => x = x.parents).reduce((acc, val) => acc.concat(val), []);
+
+					const meshQuery = { _id: { $in: history.current }, shared_id: { $in: parents }, type: "mesh" };
+					const meshProject = { shared_id: 1, _id: 0 };
+
+					return dbCol.find(meshQuery, meshProject).toArray();
+				}
+			});
+		});
+	});
+}
+
 async function updateAttrs(account, model, uid, branch, revId, data, user) {
 	const group = await Group.findByUID(account, model, branch, revId, uid);
 
@@ -331,7 +361,7 @@ async function updateAttrs(account, model, uid, branch, revId, data, user) {
 
 const Group = {};
 
-Group.createGroup = async function (account, model, sessionId, data, creator = "", branch = "master", rid = null) {
+Group.create = async function (account, model, branch = "master", rid = null, sessionId, creator = "", data) {
 	const newGroup = Object.assign({}, data);
 
 	const convertedObjects = await getObjectsArrayAsIfcGuids(data, false);
@@ -439,37 +469,7 @@ Group.findIfcGroupByUID = async function (account, model, uid) {
 	return foundGroup;
 };
 
-Group.ifcGuidsToUUIDs = function (account, model, ifcGuids, branch, revId) {
-	if(!ifcGuids || ifcGuids.length === 0) {
-		return Promise.resolve([]);
-	}
-
-	const query = {"metadata.IFC GUID": { $in: ifcGuids } };
-	const project = { parents: 1, _id: 0 };
-
-	return db.getCollection(account, model + ".scene").then(dbCol => {
-		return dbCol.find(query, project).toArray().then(results => {
-			if(results.length === 0) {
-				return [];
-			}
-			return History.getHistory({ account, model }, branch, revId).then(history => {
-				if (!history) {
-					return Promise.reject(responseCodes.INVALID_TAG_NAME);
-				} else {
-
-					const parents = results.map(x => x = x.parents).reduce((acc, val) => acc.concat(val), []);
-
-					const meshQuery = { _id: { $in: history.current }, shared_id: { $in: parents }, type: "mesh" };
-					const meshProject = { shared_id: 1, _id: 0 };
-
-					return dbCol.find(meshQuery, meshProject).toArray();
-				}
-			});
-		});
-	});
-};
-
-Group.listGroups = async function (account, model, branch, revId, ids, queryParams, showIfcGuids) {
+Group.getList = async function (account, model, branch, revId, ids, queryParams, showIfcGuids) {
 	const query = {};
 
 	// If we want groups that aren't from issues
@@ -527,8 +527,8 @@ Group.listGroups = async function (account, model, branch, revId, ids, queryPara
 };
 
 // Group Update with Event
-Group.updateGroup = function (account, model, sessionId, uid, data, user = "", branch = "master", rid = null) {
-	return updateAttrs(account, model, uid, branch, rid, _.cloneDeep(data), user).then((savedGroup) => {
+Group.update = function (account, model, branch = "master", rid = null, sessionId, user = "", groupId, data) {
+	return updateAttrs(account, model, groupId, branch, rid, _.cloneDeep(data), user).then((savedGroup) => {
 		return getObjectIds(account, model, branch, rid, savedGroup, true, false).then((objects) => {
 			savedGroup.objects = objects;
 			ChatEvent.groupChanged(sessionId, account, model, savedGroup);
