@@ -18,11 +18,9 @@
 "use strict";
 
 const _ = require("lodash");
-const mongoose = require("mongoose");
 const ModelFactory = require("./factory/modelFactory");
 const utils = require("../utils");
 const nodeuuid = require("uuid/v1");
-const Schema = mongoose.Schema;
 const responseCodes = require("../response_codes.js");
 const Meta = require("./meta");
 const History = require("./history");
@@ -52,55 +50,6 @@ const embeddedObjectFields = {
 	"objects" : ["account", "model", "shared_ids", "ifc_guids"],
 	"rules" : ["field", "operator", "values"]
 };
-
-const groupSchema = new Schema({
-	_id: Object,
-	name: String,
-	author: String,
-	description: String,
-	createdAt: Date,
-	updatedAt: Number,
-	updatedBy: String,
-	objects: {
-		type: [{
-			_id: false,
-			account: String,
-			model: String,
-			shared_ids: {
-				type: [],
-				required: false
-			},
-			ifc_guids: {
-				type: [String],
-				required: false
-			}
-		}],
-		required: false
-	},
-	rules: {
-		type: [{
-			_id: false,
-			field: String,
-			operator: String,
-			values: []
-		}],
-		required: false
-	},
-	issue_id: {
-		type: Object,
-		required: false
-	},
-	risk_id: {
-		type: Object,
-		required: false
-	},
-	view_id: {
-		type: Object,
-		required: false
-	},
-	color: [Number],
-	transformation: [Number]
-});
 
 function uuidsToIfcGuids(account, model, ids) {
 	const query = { type: "meta", parents: { $in: ids }, "metadata.IFC GUID": { $exists: true } };
@@ -172,18 +121,18 @@ function getCollection(account, model) {
 	return db.getCollection(account, model + ".groups");
 }
 
-function getObjectIds(dbCol, groupData, branch, revId, convertSharedIDsToString, showIfcGuids = false) {
+function getObjectIds(account, model, branch, revId, groupData, convertSharedIDsToString, showIfcGuids = false) {
 	if (groupData.rules && groupData.rules.length > 0) {
-		return Meta.findObjectIdsByRules(dbCol.account, dbCol.model, groupData.rules, branch, revId, convertSharedIDsToString, showIfcGuids);
+		return Meta.findObjectIdsByRules(account, model, groupData.rules, branch, revId, convertSharedIDsToString, showIfcGuids);
 	} else {
-		return getObjectsArray(dbCol.model, groupData, branch, revId, convertSharedIDsToString, showIfcGuids);
+		return getObjectsArray(model, branch, revId, groupData, convertSharedIDsToString, showIfcGuids);
 	}
 }
 
 /**
  * Converts all IFC Guids to shared IDs if applicable and return the objects array.
  */
-function getObjectsArray(model, groupData, branch, revId, convertSharedIDsToString, showIfcGuids = false) {
+function getObjectsArray(model, branch, revId, groupData, convertSharedIDsToString, showIfcGuids = false) {
 	const objectIdPromises = [];
 
 	for (let i = 0; i < groupData.objects.length; i++) {
@@ -320,18 +269,70 @@ function getObjectsArrayAsIfcGuids(data) {
 	});
 }
 
-const Group = ModelFactory.createClass(
-	"Group",
-	groupSchema,
-	arg => {
-		return `${arg.model}.groups`;
-	}
-);
+async function updateAttrs(account, model, uid, branch, revId, data, user) {
+	const group = await Group.findByUID(account, model, branch, revId, uid);
 
-Group.createGroup = async function (dbCol, sessionId, data, creator = "", branch = "master", rid = null) {
-	const account = dbCol.account;
-	const model = dbCol.model;
+	return getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
+		const toUpdate = {};
+		const toUnset = {};
+		const fieldsCanBeUpdated = ["description", "name", "rules", "objects", "color", "transformation", "issue_id", "risk_id"];
 
+		let typeCorrect = !(data.rules && data.objects);
+		typeCorrect && fieldsCanBeUpdated.forEach((key) => {
+			if (data[key]) {
+				if (Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
+					if (key === "objects" && data.objects) {
+						toUpdate.objects = cleanEmbeddedObject(key, convertedObjects);
+						toUnset.rules = 1;
+						group.rules = undefined;
+					} else if (key === "color" || key === "transformation") {
+						toUpdate[key] = data[key].map((c) => parseInt(c, 10));
+					} else {
+						if (key === "rules"
+							&& data.rules
+							&& !checkRulesValidity(data.rules)) {
+							typeCorrect = false;
+							toUnset.objects = 1;
+							group.objects = undefined;
+						}
+
+						toUpdate[key] = cleanEmbeddedObject(key, data[key]);
+					}
+					group[key] = toUpdate[key];
+				} else {
+					typeCorrect = false;
+				}
+			}
+
+		});
+
+		if (typeCorrect) {
+			if (Object.keys(toUpdate).length !== 0) {
+				toUpdate.updatedBy = user;
+				toUpdate.updatedAt = Date.now();
+				return db.getCollection(account, model + ".groups").then(_dbCol => {
+					const updateBson = {$set: toUpdate};
+					if(Object.keys(toUnset).length > 0) {
+						updateBson.$unset = toUnset;
+					}
+					return _dbCol.update({ _id: group._id }, updateBson).then(() => {
+						const updatedGroup = clean(group);
+						return updatedGroup;
+					});
+				});
+			} else {
+				const updatedGroup = clean(group);
+				return updatedGroup;
+			}
+		} else {
+			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
+		}
+	});
+}
+
+const Group = {};
+
+Group.createGroup = async function (account, model, sessionId, data, creator = "", branch = "master", rid = null) {
 	const newGroup = Object.assign({}, data);
 
 	const convertedObjects = await getObjectsArrayAsIfcGuids(data, false);
@@ -372,10 +373,10 @@ Group.createGroup = async function (dbCol, sessionId, data, creator = "", branch
 		await groupsColl.insert(newGroup);
 
 		newGroup._id = utils.uuidToString(newGroup._id);
-		newGroup.objects = await getObjectIds(dbCol, newGroup, branch, rid, true, false);
+		newGroup.objects = await getObjectIds(account, model, branch, rid, newGroup, true, false);
 
 		if (!data.isIssueGroup && !data.isRiskGroup && sessionId) {
-			ChatEvent.newGroups(sessionId, dbCol.account, model, newGroup);
+			ChatEvent.newGroups(sessionId, account, model, newGroup);
 		}
 
 		return newGroup;
@@ -384,7 +385,7 @@ Group.createGroup = async function (dbCol, sessionId, data, creator = "", branch
 	}
 };
 
-Group.deleteGroups = async function (dbCol, sessionId, ids) {
+Group.deleteGroups = async function (account, model, sessionId, ids) {
 	const groupsIds = [].concat(ids);
 
 	for (let i = 0; i < ids.length; i++) {
@@ -393,8 +394,6 @@ Group.deleteGroups = async function (dbCol, sessionId, ids) {
 		}
 	}
 
-	const account = dbCol.account;
-	const model = dbCol.model;
 	const groupsColl = await getCollection(account, model);
 	const deleteResponse = await groupsColl.remove({ _id: { $in: ids } });
 
@@ -402,7 +401,7 @@ Group.deleteGroups = async function (dbCol, sessionId, ids) {
 		return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 	}
 
-	ChatEvent.groupsDeleted(sessionId, dbCol.account, dbCol.model, groupsIds);
+	ChatEvent.groupsDeleted(sessionId, account, model, groupsIds);
 };
 
 Group.deleteGroupsByViewId = async function (account, model, view_id) {
@@ -410,9 +409,7 @@ Group.deleteGroupsByViewId = async function (account, model, view_id) {
 	return await groupsColl.remove({ view_id });
 };
 
-Group.findByUID = async function (dbCol, uid, branch, revId, showIfcGuids = false, noClean = true) {
-	const account = dbCol.account;
-	const model = dbCol.model;
+Group.findByUID = async function (account, model, branch, revId, uid, showIfcGuids = false, noClean = true) {
 	const groupsColl = await getCollection(account, model);
 	const foundGroup = await groupsColl.findOne({ _id: utils.stringToUUID(uid) });
 
@@ -420,7 +417,7 @@ Group.findByUID = async function (dbCol, uid, branch, revId, showIfcGuids = fals
 		return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 	}
 
-	foundGroup.objects = await getObjectIds(dbCol, foundGroup, branch, revId, showIfcGuids);
+	foundGroup.objects = await getObjectIds(account, model, branch, revId, foundGroup, showIfcGuids);
 
 	if (!noClean) {
 		return clean(foundGroup);
@@ -429,9 +426,7 @@ Group.findByUID = async function (dbCol, uid, branch, revId, showIfcGuids = fals
 	return foundGroup;
 };
 
-Group.findIfcGroupByUID = async function (dbCol, uid) {
-	const account = dbCol.account;
-	const model = dbCol.model;
+Group.findIfcGroupByUID = async function (account, model, uid) {
 	const groupsColl = await getCollection(account, model);
 	const foundGroup = await groupsColl.findOne({ _id: utils.stringToUUID(uid) });
 
@@ -475,7 +470,7 @@ Group.ifcGuidsToUUIDs = function (account, model, ifcGuids, branch, revId) {
 	});
 };
 
-Group.listGroups = async function (dbCol, queryParams, branch, revId, ids, showIfcGuids) {
+Group.listGroups = async function (account, model, queryParams, branch, revId, ids, showIfcGuids) {
 	const query = {};
 
 	// If we want groups that aren't from issues
@@ -510,15 +505,13 @@ Group.listGroups = async function (dbCol, queryParams, branch, revId, ids, showI
 		query._id = {$in: utils.stringsToUUIDs(ids)};
 	}
 
-	const account = dbCol.account;
-	const model = dbCol.model;
 	const groupsColl = await getCollection(account, model);
 	const results = await groupsColl.find(query).toArray();
 	const sharedIdConversionPromises = [];
 
 	results.forEach(result => {
 		sharedIdConversionPromises.push(
-			getObjectIds(dbCol, result, branch, revId, true, showIfcGuids).then((sharedIdObjects) => {
+			getObjectIds(account, model, branch, revId, result, true, showIfcGuids).then((sharedIdObjects) => {
 				result.objects = sharedIdObjects;
 				return result;
 			})
@@ -534,73 +527,12 @@ Group.listGroups = async function (dbCol, queryParams, branch, revId, ids, showI
 	});
 };
 
-Group.updateAttrs = async function (dbCol, uid, branch, revId, data, user) {
-	const group = await Group.findByUID(dbCol, uid, branch, revId);
-
-	return getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
-		const toUpdate = {};
-		const toUnset = {};
-		const fieldsCanBeUpdated = ["description", "name", "rules", "objects", "color", "transformation", "issue_id", "risk_id"];
-
-		let typeCorrect = !(data.rules && data.objects);
-		typeCorrect && fieldsCanBeUpdated.forEach((key) => {
-			if (data[key]) {
-				if (Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
-					if (key === "objects" && data.objects) {
-						toUpdate.objects = cleanEmbeddedObject(key, convertedObjects);
-						toUnset.rules = 1;
-						group.rules = undefined;
-					} else if (key === "color" || key === "transformation") {
-						toUpdate[key] = data[key].map((c) => parseInt(c, 10));
-					} else {
-						if (key === "rules"
-							&& data.rules
-							&& !checkRulesValidity(data.rules)) {
-							typeCorrect = false;
-							toUnset.objects = 1;
-							group.objects = undefined;
-						}
-
-						toUpdate[key] = cleanEmbeddedObject(key, data[key]);
-					}
-					group[key] = toUpdate[key];
-				} else {
-					typeCorrect = false;
-				}
-			}
-
-		});
-
-		if (typeCorrect) {
-			if (Object.keys(toUpdate).length !== 0) {
-				toUpdate.updatedBy = user;
-				toUpdate.updatedAt = Date.now();
-				return db.getCollection(dbCol.account, dbCol.model + ".groups").then(_dbCol => {
-					const updateBson = {$set: toUpdate};
-					if(Object.keys(toUnset).length > 0) {
-						updateBson.$unset = toUnset;
-					}
-					return _dbCol.update({ _id: group._id }, updateBson).then(() => {
-						const updatedGroup = clean(group);
-						return updatedGroup;
-					});
-				});
-			} else {
-				const updatedGroup = clean(group);
-				return updatedGroup;
-			}
-		} else {
-			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
-		}
-	});
-};
-
 // Group Update with Event
-Group.updateGroup = function (dbCol, sessionId, uid, data, user = "", branch = "master", rid = null) {
-	return Group.updateAttrs(dbCol, uid, branch, rid, _.cloneDeep(data), user).then((savedGroup) => {
-		return getObjectIds(dbCol, savedGroup, branch, rid, true, false).then((objects) => {
+Group.updateGroup = function (account, model, sessionId, uid, data, user = "", branch = "master", rid = null) {
+	return updateAttrs(account, model, uid, branch, rid, _.cloneDeep(data), user).then((savedGroup) => {
+		return getObjectIds(account, model, branch, rid, savedGroup, true, false).then((objects) => {
 			savedGroup.objects = objects;
-			ChatEvent.groupChanged(sessionId, dbCol.account, dbCol.model, savedGroup);
+			ChatEvent.groupChanged(sessionId, account, model, savedGroup);
 			return savedGroup;
 		});
 	});

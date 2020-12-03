@@ -474,6 +474,7 @@ function listGroups(req, res, next) {
 
 	const dbCol = getDbColOptions(req);
 	const place = utils.APIInfo(req);
+	const { account, model } = req.params;
 
 	const showIfcGuids = (req.query.ifcguids) ? JSON.parse(req.query.ifcguids) : false;
 
@@ -490,9 +491,9 @@ function listGroups(req, res, next) {
 	}
 
 	if (req.params.rid) {
-		groupList = Group.listGroups(dbCol, req.query, null, req.params.rid, ids, showIfcGuids);
+		groupList = Group.listGroups(account, model, req.query, null, req.params.rid, ids, showIfcGuids);
 	} else {
-		groupList = Group.listGroups(dbCol, req.query, "master", null, ids, showIfcGuids);
+		groupList = Group.listGroups(account, model, req.query, "master", null, ids, showIfcGuids);
 	}
 
 	groupList.then(groups => {
@@ -507,13 +508,14 @@ function findGroup(req, res, next) {
 
 	const dbCol = getDbColOptions(req);
 	const place = utils.APIInfo(req);
+	const { account, model, uid } = req.params;
 	const showIfcGuids = (req.query.ifcguids) ? JSON.parse(req.query.ifcguids) : false;
 
 	let groupItem;
 	if (req.params.rid) {
-		groupItem = Group.findByUID(dbCol, req.params.uid, null, req.params.rid, showIfcGuids, false);
+		groupItem = Group.findByUID(account, model, null, req.params.rid, uid, showIfcGuids, false);
 	} else {
-		groupItem = Group.findByUID(dbCol, req.params.uid, "master", null, showIfcGuids, false);
+		groupItem = Group.findByUID(account, model, "master", null, uid, showIfcGuids, false);
 	}
 
 	groupItem.then(group => {
@@ -532,10 +534,11 @@ function findGroup(req, res, next) {
 
 function createGroup(req, res, next) {
 	const place = utils.APIInfo(req);
+	const { account, model } = req.params;
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 	const rid = req.params.rid ? req.params.rid : null;
 	const branch = rid ? null : "master";
-	const create = Group.createGroup(getDbColOptions(req), sessionId, req.body, req.session.user.username, branch, rid);
+	const create = Group.createGroup(account, model, sessionId, req.body, req.session.user.username, branch, rid);
 
 	create.then(group => {
 
@@ -549,11 +552,12 @@ function createGroup(req, res, next) {
 function deleteGroups(req, res, next) {
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 	const place = utils.APIInfo(req);
+	const { account, model } = req.params;
 
 	if (req.query.ids) {
 		const ids = req.query.ids.split(",");
 
-		Group.deleteGroups(getDbColOptions(req), sessionId, ids).then(() => {
+		Group.deleteGroups(account, model, sessionId, ids).then(() => {
 			responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "success" });
 		}).catch(err => {
 			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
@@ -566,16 +570,17 @@ function deleteGroups(req, res, next) {
 function updateGroup(req, res, next) {
 	const dbCol = getDbColOptions(req);
 	const place = utils.APIInfo(req);
+	const { account, model, uid } = req.params;
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
 	const rid = req.params.rid ? req.params.rid : null;
 	const branch = rid ? null : "master";
-	const groupItem = Group.findByUID(dbCol, req.params.uid, branch, rid, false);
+	const groupItem = Group.findByUID(account, model, branch, rid, uid, false);
 	groupItem.then(group => {
 		if (!group) {
 			return Promise.reject({ resCode: responseCodes.GROUP_NOT_FOUND });
 		} else {
-			return Group.updateGroup(dbCol, sessionId, req.params.uid, req.body, req.session.user.username, branch, rid);
+			return Group.updateGroup(account, model, sessionId, uid, req.body, req.session.user.username, branch, rid);
 		}
 
 	}).then(group => {

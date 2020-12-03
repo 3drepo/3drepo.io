@@ -277,7 +277,7 @@ async function getIssueBCF(issue, account, model, unit) {
 			if (_.get(vp, "highlighted_group_id")) {
 				const highlightedGroupId = _.get(vp, "highlighted_group_id");
 				componentsPromises.push(
-					Group.findIfcGroupByUID({account: account, model: model}, highlightedGroupId).then(group => {
+					Group.findIfcGroupByUID(account, model, highlightedGroupId).then(group => {
 						if (group && group.objects && group.objects.length > 0) {
 							for (let i = 0; i < group.objects.length; i++) {
 								const groupObject = group.objects[i];
@@ -308,7 +308,7 @@ async function getIssueBCF(issue, account, model, unit) {
 			if (_.get(vp, "hidden_group_id")) {
 				const hiddenGroupId = _.get(vp, "hidden_group_id");
 				componentsPromises.push(
-					Group.findIfcGroupByUID({account: account, model: model}, hiddenGroupId).then(group => {
+					Group.findIfcGroupByUID(account, model, hiddenGroupId).then(group => {
 						if (group && group.objects && group.objects.length > 0) {
 							for (let i = 0; i < group.objects.length; i++) {
 								const groupObject = group.objects[i];
@@ -344,7 +344,7 @@ async function getIssueBCF(issue, account, model, unit) {
 			if (_.get(vp, "shown_group_id")) {
 				const shownGroupId = _.get(vp, "shown_group_id");
 				componentsPromises.push(
-					Group.findIfcGroupByUID({account: account, model: model}, shownGroupId).then(group => {
+					Group.findIfcGroupByUID(account, model, shownGroupId).then(group => {
 						if (group && group.objects && group.objects.length > 0) {
 							for (let i = 0; i < group.objects.length; i++) {
 								const groupObject = group.objects[i];
@@ -746,7 +746,7 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 			};
 
 			groupPromises.push(
-				Group.createGroup(groupDbCol, undefined, groupData).then(group => {
+				Group.createGroup(groupDbCol.account, groupDbCol.model, undefined, groupData).then(group => {
 					return vp.highlighted_group_id = utils.stringToUUID(group._id);
 				})
 			);
@@ -760,7 +760,7 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 			};
 
 			groupPromises.push(
-				Group.createGroup(groupDbCol, undefined, groupData).then(group => {
+				Group.createGroup(groupDbCol.account, groupDbCol.model, undefined, groupData).then(group => {
 					return vp.shown_group_id = utils.stringToUUID(group._id);
 				})
 			);
@@ -774,7 +774,7 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 			};
 
 			groupPromises.push(
-				Group.createGroup(groupDbCol, undefined, groupData).then(group => {
+				Group.createGroup(groupDbCol.account, groupDbCol.model, undefined, groupData).then(group => {
 					return vp.hidden_group_id = utils.stringToUUID(group._id);
 				})
 			);
