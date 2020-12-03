@@ -24,13 +24,14 @@ import { VIEWER_PANELS } from '../../constants/viewerGui';
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
 import { selectCurrentModel, selectCurrentModelTeamspace, selectCurrentRevisionId, selectIsFederation } from '../model';
-import { dispatch } from '../store';
+import { dispatch, getState } from '../store';
 import { selectHiddenGeometryVisible,  TreeActions } from '../tree';
 
 import { selectLeftPanels, ViewerGuiActions } from '../viewerGui';
 import { getSelectedFrame } from './sequences.helper';
-import { selectActivitiesDefinitions, selectFrames, selectIsLoadingFrame,
-	selectNextKeyFramesDates,  selectSelectedSequence, selectSequences, selectSequenceModel} from './sequences.selectors';
+import { selectActivitiesDefinitions, selectFrames,  selectNextKeyFramesDates,
+	selectSelectedDate, selectSelectedSequence, selectSequences,
+	selectSequenceModel} from './sequences.selectors';
 
 export function* fetchSequences() {
 	try {
@@ -83,11 +84,20 @@ export function* fetchFrame({date}) {
 			// Using directly the promise and 'then' to dispatch the rest of the actions
 			// because with yield it would sometimes stop there forever even though the promise resolved
 			API.getSequenceState(teamspace, model, revision, sequenceId, stateId).then((response) => {
+				const selectedDate = selectSelectedDate(getState());
+				if (selectedDate.valueOf() === date.valueOf()) {
+					dispatch(SequencesActions.setLastSelectedDateSuccess(date));
+				}
+
 				dispatch(SequencesActions.setStateDefinition(stateId, response.data));
 			}).catch((e) => {
 				dispatch(SequencesActions.setStateDefinition(stateId, {}));
 			});
-
+		} else {
+			const selectedDate =  yield select(selectSelectedDate);
+			if (selectedDate.valueOf() === date.valueOf()) {
+				yield put(SequencesActions.setLastSelectedDateSuccess(date));
+			}
 		}
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('fetch frame', 'sequences', error));
@@ -129,8 +139,13 @@ export function* setSelectedSequence({ sequenceId }) {
 	if (sequenceId) {
 		yield put(SequencesActions.initializeSequences());
 	} else {
-		yield put(SequencesActions.setStateDefinition(undefined, {}));
-		yield put(SequencesActions.restoreModelDefaultVisibility());
+		const selectedSequence = yield select(selectSelectedSequence);
+		if (selectedSequence) {
+			yield put(SequencesActions.setStateDefinition(undefined, {}));
+			yield put(SequencesActions.setSelectedDateSuccess(null));
+			yield put(SequencesActions.setLastSelectedDateSuccess(null));
+			yield put(SequencesActions.restoreModelDefaultVisibility());
+		}
 	}
 	yield put(SequencesActions.setSelectedSequenceSuccess(sequenceId));
 	yield put(SequencesActions.fetchActivitiesDefinitions(sequenceId));
@@ -165,10 +180,9 @@ export function* showSequenceDate({ date }) {
 }
 
 function* handleTransparenciesVisibility({ transparencies }) {
-	const frameIsLoading = yield select(selectIsLoadingFrame);
 	const selectedSequence = yield select(selectSelectedSequenceId);
 
-	if (!frameIsLoading && selectedSequence) {
+	if (selectedSequence) {
 		yield put(TreeActions.handleTransparenciesVisibility(transparencies));
 	}
 }

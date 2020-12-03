@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { values } from 'lodash';
+import { isEmpty, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { addToGroupDictionary } from '../../helpers/colorOverrides';
 import { getTransparency, hasTransparency } from '../../helpers/colors';
@@ -76,7 +76,6 @@ export const selectTransformations = createSelector(
 
 export const selectOverridesDict = createSelector(
 	selectSelectedViewpoint, (viewpoint) =>  {
-
 		if ( !Boolean(viewpoint?.override_groups?.length)) {
 			return {};
 		}
@@ -106,6 +105,12 @@ export const selectTransparencies = createSelector(
 export const selectInitialView =  createSelector(
 	selectViewpointsDomain, selectQueryParams,  selectDefaultView, selectActiveIssueDetails, selectActiveRiskDetails,
 		({viewpointsMap}, {viewId},  defaultView, activeIssue, activeRisk) => {
-			return activeIssue || activeRisk || (!viewpointsMap ? null : viewpointsMap[viewId || defaultView?.id]);
+			return !isEmpty(activeIssue) ? activeIssue :
+				!isEmpty(activeRisk) ?  activeRisk :
+				(!viewpointsMap ? null : viewpointsMap[viewId || defaultView?.id]);
 		}
+);
+
+export const selectViewpointsGroups = createSelector(
+	selectViewpointsDomain, (state) => state.viewpointsGroups
 );

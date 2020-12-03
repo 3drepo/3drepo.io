@@ -42,7 +42,10 @@ export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createAct
 	setDefaultViewpoint: ['teamspace', 'modelId', 'view'],
 	setSelectedViewpoint: ['selectedViewpoint'],
 	deselectViewsAndLeaveClipping: [],
-	showViewpoint: ['teamspace', 'modelId', 'view', 'ignoreCamera']
+	showViewpoint: ['teamspace', 'modelId', 'view', 'ignoreCamera'],
+	fetchGroupSuccess: ['group'],
+	cacheGroupsFromViewpoint: ['viewpoint', 'groupsData'],
+	showPreset: ['preset']
 }, { prefix: 'VIEWPOINTS/' });
 
 export interface IViewpointsComponentState {
@@ -56,6 +59,7 @@ export interface IViewpointsComponentState {
 export interface IViewpointsState {
 	isPending: boolean;
 	viewpointsMap: any[];
+	viewpointsGroups: any;
 	componentState: IViewpointsComponentState;
 	selectedViewpoint: any;
 }
@@ -63,6 +67,7 @@ export interface IViewpointsState {
 export const INITIAL_STATE: IViewpointsState = {
 	isPending: true,
 	viewpointsMap: [],
+	viewpointsGroups: {},
 	componentState: {},
 	selectedViewpoint: null
 };
@@ -124,6 +129,10 @@ const setSelectedViewpoint = (state = INITIAL_STATE, { selectedViewpoint }) => {
 	return { ...state, selectedViewpoint };
 };
 
+const fetchGroupSuccess = (state = INITIAL_STATE, { group }) => {
+	return { ...state, viewpointsGroups: { ...state.viewpointsGroups, [group._id]: group } };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[ViewpointsTypes.SET_PENDING_STATE]: setPendingState,
 	[ViewpointsTypes.FETCH_VIEWPOINTS_SUCCESS]: fetchViewpointsSuccess,
@@ -132,5 +141,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ViewpointsTypes.DELETE_VIEWPOINT_SUCCESS]: deleteViewpointSuccess,
 	[ViewpointsTypes.SHOW_DELETE_INFO]: showDeleteInfo,
 	[ViewpointsTypes.SET_COMPONENT_STATE]: setComponentState,
-	[ViewpointsTypes.SET_SELECTED_VIEWPOINT]: setSelectedViewpoint
+	[ViewpointsTypes.SET_SELECTED_VIEWPOINT]: setSelectedViewpoint,
+	[ViewpointsTypes.FETCH_GROUP_SUCCESS]: fetchGroupSuccess,
 });

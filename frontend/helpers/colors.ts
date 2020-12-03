@@ -2,6 +2,10 @@ import { memoize } from 'lodash';
 import { WHITE } from './../styles/colors';
 
 export const parseHex = (hex) => {
+	if (Array.isArray(hex)) { // if is already a rgb array return it
+		return hex;
+	}
+
 	hex = hex.replace(/^#/, '');
 
 	if (hex.length <= 4) {

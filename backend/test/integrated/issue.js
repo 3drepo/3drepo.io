@@ -1294,8 +1294,6 @@ describe("Issues", function () {
 						.expect(200 , function(err, res) {
 							issueId = res.body._id;
 							oldViewpoint = res.body.viewpoint;
-							delete oldViewpoint.screenshot;
-							delete oldViewpoint.screenshotSmall;
 							return done(err);
 						});
 				},
@@ -1311,8 +1309,13 @@ describe("Issues", function () {
 							newViewpoint.guid = res.body.viewpoint.guid;
 							data.viewpoint.guid = res.body.viewpoint.guid;
 							data.viewpoint.thumbnail = res.body.viewpoint.thumbnail;
+							const { screenshotSmall, screenshot, ...viewpoint} = res.body.viewpoint;
+							expect(viewpoint).to.deep.equal(data.viewpoint);
 
-							expect(res.body.viewpoint).to.deep.equal(data.viewpoint);
+							delete oldViewpoint.screenshotSmall;
+							delete oldViewpoint.screenshot;
+							delete newViewpoint.screenshotSmall;
+							delete newViewpoint.screenshot;
 							expect(res.body.comments[0].action.property).to.equal("viewpoint");
 							expect(JSON.parse(res.body.comments[0].action.from)).to.deep.equal(oldViewpoint);
 							expect(JSON.parse(res.body.comments[0].action.to)).to.deep.equal(newViewpoint);
@@ -1396,7 +1399,13 @@ describe("Issues", function () {
 							delete data.viewpoint.transformation_groups;
 							data.viewpoint.transformation_group_ids = transformation_group_ids;
 
-							expect(res.body.viewpoint).to.deep.equal(data.viewpoint);
+							const { screenshotSmall, screenshot, ...viewpoint} = res.body.viewpoint;
+							expect(viewpoint).to.deep.equal(data.viewpoint);
+
+							delete oldViewpoint.screenshotSmall;
+							delete oldViewpoint.screenshot;
+							delete newViewpoint.screenshotSmall;
+							delete newViewpoint.screenshot;
 							expect(res.body.comments[0].action.property).to.equal("viewpoint");
 							expect(JSON.parse(res.body.comments[0].action.from)).to.deep.equal(oldViewpoint);
 							expect(JSON.parse(res.body.comments[0].action.to)).to.deep.equal(newViewpoint);

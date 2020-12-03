@@ -32,6 +32,7 @@ import {
 import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
 import { prepareIssue } from '../../helpers/issues';
 import { prepareResources } from '../../helpers/resources';
+import { createGroupsFromViewpoint, mergeGroupsDataFromViewpoint } from '../../helpers/viewpoints';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
@@ -125,6 +126,8 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 		const jobs = yield select(selectJobsList);
 		const preparedIssue = prepareIssue(savedIssue, jobs);
 
+		yield put(ViewpointsActions.cacheGroupsFromViewpoint(savedIssue.viewpoint, issue.viewpoint));
+
 		finishSubmitting();
 
 		if (!ignoreViewer) {
@@ -200,6 +203,11 @@ function* postComment({ issueData, ignoreViewer, finishSubmitting }) {
 
 		const { data: comment } = yield API.addIssueComment(account, model, _id, issueData);
 		finishSubmitting();
+
+		if (comment.viewpoint) {
+			yield put(ViewpointsActions.cacheGroupsFromViewpoint(comment.viewpoint, issueData.viewpoint));
+		}
+
 		yield put(IssuesActions.createCommentSuccess(comment, _id));
 		yield put(SnackbarActions.show('Issue comment added'));
 	} catch (error) {

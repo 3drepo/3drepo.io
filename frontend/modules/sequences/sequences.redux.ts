@@ -27,6 +27,7 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	setSelectedSequenceSuccess: ['sequenceId'],
 	setSelectedDate: ['date'],
 	setSelectedDateSuccess: ['date'],
+	setLastSelectedDateSuccess: ['date'],
 	fetchFrame: ['date'],
 	fetchSelectedFrame: [],
 	setStateDefinition: ['stateId', 'stateDefinition'],
@@ -37,6 +38,7 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	showSequenceDate: ['date'],
 	handleTransparenciesVisibility: ['transparencies'],
 	restoreModelDefaultVisibility: [],
+
 	reset: []
 }, { prefix: 'SEQUENCES/' });
 
@@ -45,6 +47,7 @@ export const INITIAL_STATE = {
 	selectedSequence: null,
 	lastSelectedSequence: null,
 	selectedDate: null,
+	lastSelectedDate: null,
 	stateDefinitions: {},
 	statesPending: false,
 	stepInterval: 1,
@@ -79,7 +82,11 @@ export const setSelectedSequenceSuccess = (state = INITIAL_STATE, { sequenceId }
 };
 
 export const setSelectedDateSuccess =  (state = INITIAL_STATE, { date }) => {
-	return {...state, selectedDate: date};
+	return {...state, selectedDate: date };
+};
+
+export const setLastSelectedDateSuccess =  (state = INITIAL_STATE, { date }) => {
+	return {...state, lastSelectedDate: date};
 };
 
 export const setStateDefinition = (state = INITIAL_STATE, { stateId, stateDefinition}) => {
@@ -102,6 +109,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[SequencesTypes.FETCH_SEQUENCES_SUCCESS]: fetchSequencesSuccess,
 	[SequencesTypes.FETCH_ACTIVITIES_DEFINITIONS_SUCCESS]: fetchActivitiesDefinitionsSuccess,
 	[SequencesTypes.SET_SELECTED_DATE_SUCCESS]: setSelectedDateSuccess,
+	[SequencesTypes.SET_LAST_SELECTED_DATE_SUCCESS]: setLastSelectedDateSuccess,
 	[SequencesTypes.SET_STATE_DEFINITION]: setStateDefinition,
 	[SequencesTypes.SET_SELECTED_SEQUENCE_SUCCESS]: setSelectedSequenceSuccess,
 	[SequencesTypes.SET_STEP_INTERVAL]: setStepInterval,
