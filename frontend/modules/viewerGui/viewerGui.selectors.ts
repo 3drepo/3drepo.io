@@ -99,6 +99,6 @@ export const selectAllTransparencyOverrides = createSelector(
 
 export const selectTransformations = createSelector(
 	selectViewsTransformations, selectSelectedFrameTransformations,
-		(viewsTransformations, sequenceTransformations) =>
-			({...viewsTransformations , ...sequenceTransformations})
+	(viewsTransformations, sequenceTransformations) =>
+			({...sequenceTransformations, ...viewsTransformations})
 );
