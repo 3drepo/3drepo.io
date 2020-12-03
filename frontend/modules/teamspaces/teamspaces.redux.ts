@@ -154,9 +154,9 @@ const updateModelSuccess = (state = INITIAL_STATE, { modelId, modelData }) => {
 	const allFederations = values({ ...state.models })
 		.filter((modelItem: IModel) => modelItem.federate);
 
-	const federationWithModel = allFederations
-		.find((federation) => federation.subModels
-			.find(({ model: subModelId }) => subModelId === modelId )
+	const federationsWithModel = allFederations
+		.filter((federation) => federation.subModels
+			.filter(({ model: subModelId }) => subModelId === modelId ).length
 		);
 
 	const model = { ...state.models[modelId],
@@ -171,21 +171,24 @@ const updateModelSuccess = (state = INITIAL_STATE, { modelId, modelData }) => {
 		const models = { ...state.models, [modelId]: model };
 		return { ...state, models };
 	} else {
-		if (federationWithModel?.subModels) {
-			federationWithModel.subModels = federationWithModel.subModels
-				.map((subModel) => subModel.model === modelId ? {
-					...subModel,
-					name: modelData.name || state.models[modelId].name,
-				} : {
-					...subModel
-				});
+		if (federationsWithModel.length) {
+			federationsWithModel.forEach((_, index) => {
+				federationsWithModel[index].subModels = federationsWithModel[index].subModels
+					.map((subModel) => subModel.model === modelId ? {
+						...subModel,
+						name: modelData.name || state.models[modelId].name,
+					} : {
+						...subModel
+					});
+			});
 		}
 
-		const updatedFederation = federationWithModel ? {
-			[federationWithModel.model]: federationWithModel
-		} : {};
+		const updatedFederations = federationsWithModel.reduce((federations, federation) => {
+			federations[federation.model] = federation;
+			return federations;
+		}, {});
 
-		const models = { ...state.models, [modelId]: model, ...updatedFederation };
+		const models = { ...state.models, [modelId]: model, ...updatedFederations };
 		return { ...state, models };
 	}
 };
