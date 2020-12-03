@@ -106,7 +106,7 @@ async function start() {
 					const fullPath = path.join( importFolder, file );
 					const stat = await fs.promises.stat( fullPath );
 					
-					if( stat.isFile() && file.includes(".csv") && !file.includes("com.dropbox.attrs")  ){
+					if( stat.isFile() && file.endsWith(".csv") && !file.includes("com.dropbox.attrs")  ){
 						console.log( "'%s' is a csv file.", fullPath );
 
 						fs.createReadStream(fullPath)
@@ -142,11 +142,10 @@ async function start() {
 										if (result.body.hits.total.value === 0) {
 												console.log("creating",seen.length,":::",id)
 												await Elastic.createElasticRecord( ElasticClient, Utils.teamspaceIndexPrefix + "-login", lastLogin, id)
-												seen.push(id) // log hash is created to save calls
 											} else {
 												console.log("created",result.body.hits.total.value,":::",id)
-												seen.push(id) // log hash is created to save calls
 											} 
+											seen.push(id) // log hash is created to save calls
 										}
 									)
 									.catch(err => console.log(err)) // RequestAbortedError
