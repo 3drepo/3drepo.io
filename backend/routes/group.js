@@ -476,7 +476,6 @@ function listGroups(req, res, next) {
 	const ids = req.query.ids ? req.query.ids.split(",") : null;
 
 	let updatedSince = req.query.updatedSince;
-	let groupList;
 
 	if (updatedSince) {
 		updatedSince = parseInt(updatedSince, 10);
@@ -500,9 +499,7 @@ function findGroup(req, res, next) {
 	const branch = rid ? null : "master";
 	const showIfcGuids = (req.query.ifcguids) ? JSON.parse(req.query.ifcguids) : false;
 
-	let groupItem;
-
-	groupItem = Group.findByUID(account, model, branch, rid, uid, showIfcGuids, false).then(group => {
+	Group.findByUID(account, model, branch, rid, uid, showIfcGuids, false).then(group => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 	}).catch(err => {
 		systemLogger.logError(err.stack);
