@@ -237,7 +237,7 @@ function getObjectsArray(model, groupData, branch, revId, convertSharedIDsToStri
 	return Promise.all(objectIdPromises).then(objectIds => {
 		return objectIds;
 	});
-};
+}
 
 /**
  * Converts all shared IDs to IFC Guids if applicable and return the objects array.
@@ -312,7 +312,7 @@ function getObjectsArrayAsIfcGuids(data) {
 	return Promise.all(ifcGuidPromises).then(ifcObjects => {
 		return ifcObjects;
 	});
-};
+}
 
 const Group = ModelFactory.createClass(
 	"Group",
