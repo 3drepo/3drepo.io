@@ -511,9 +511,9 @@ function findGroup(req, res, next) {
 
 	let groupItem;
 	if (req.params.rid) {
-		groupItem = Group.findByUIDSerialised(dbCol, req.params.uid, null, req.params.rid, showIfcGuids);
+		groupItem = Group.findByUID(dbCol, req.params.uid, null, req.params.rid, showIfcGuids, false);
 	} else {
-		groupItem = Group.findByUIDSerialised(dbCol, req.params.uid, "master", null, showIfcGuids);
+		groupItem = Group.findByUID(dbCol, req.params.uid, "master", null, showIfcGuids, false);
 	}
 
 	groupItem.then(group => {
