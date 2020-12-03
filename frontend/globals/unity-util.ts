@@ -155,6 +155,10 @@ export class UnityUtil {
 			companyName: "3D Repo Ltd",
 			productName: "3D Repo Unity",
 			productVersion: "1.0",
+			errorHandler: (e,t,n) => { 	// This member is not part of the documented API, but the current version of loader.js checks for it
+				UnityUtil.onUnityError(e); 
+				return true; // Returning true suppresses loader.js' alert call
+			}
 		  };
 
 		createUnityInstance(viewer.canvas, config, (progress) => {
