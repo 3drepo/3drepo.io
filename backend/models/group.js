@@ -17,7 +17,6 @@
 
 "use strict";
 
-const _ = require("lodash");
 const utils = require("../utils");
 const nodeuuid = require("uuid/v1");
 const responseCodes = require("../response_codes.js");
