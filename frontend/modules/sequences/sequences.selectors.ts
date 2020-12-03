@@ -102,7 +102,7 @@ export const selectStepScale = createSelector(
 	selectSequencesDomain, (state) => state.stepScale
 );
 
-const selectSelectedDate = createSelector(
+export const selectSelectedDate = createSelector(
 	selectSequencesDomain, (state) => state.selectedDate
 );
 
