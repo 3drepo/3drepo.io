@@ -328,67 +328,63 @@ const Group = ModelFactory.createClass(
 	}
 );
 
-Group.createGroup = function (dbCol, sessionId, data, creator = "", branch = "master", rid = null) {
+Group.createGroup = async function (dbCol, sessionId, data, creator = "", branch = "master", rid = null) {
+	const account = dbCol.account;
 	const model = dbCol.model;
 
-	const newGroup = this.model("Group").createInstance({
-		account: dbCol.account,
-		model: model
-	});
+	const newGroup = Object.assign({}, data);
 
-	return getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
+	const convertedObjects = await getObjectsArrayAsIfcGuids(data, false);
+	const allowedFields = ["description", "name", "objects","rules","color","transformation","issue_id","risk_id","view_id"];
 
-		let typeCorrect = (!data.objects !== !data.rules);
+	let typeCorrect = (!data.objects !== !data.rules);
 
-		const allowedFields = ["description", "name", "objects","rules","color","transformation","issue_id","risk_id","view_id"];
-
-		allowedFields.forEach((key) => {
-			if (fieldTypes[key] && utils.hasField(data, key)) {
-				if (utils.typeMatch(data[key], fieldTypes[key])) {
-					if (key === "objects" && data.objects) {
-						newGroup.objects = cleanEmbeddedObject(key, convertedObjects);
-					} else if (key === "color") {
-						newGroup[key] = data[key].map((c) => parseInt(c, 10));
-					} else if (key === "transformation") {
-						newGroup[key] = data[key];
-					} else {
-						if (key === "rules"
-							&& data.rules
-							&& !checkRulesValidity(data.rules)) {
-							typeCorrect = false;
-						}
-						newGroup[key] = cleanEmbeddedObject(key, data[key]);
-					}
+	allowedFields.forEach((key) => {
+		if (fieldTypes[key] && utils.hasField(data, key)) {
+			if (utils.typeMatch(data[key], fieldTypes[key])) {
+				if (key === "objects" && data.objects) {
+					newGroup.objects = cleanEmbeddedObject(key, convertedObjects);
+				} else if (key === "color") {
+					newGroup[key] = data[key].map((c) => parseInt(c, 10));
+				} else if (key === "transformation") {
+					newGroup[key] = data[key];
 				} else {
-					systemLogger.logError(`Type mismatch ${key} ${data[key]}`);
-					typeCorrect = false;
-				}
-			}
-
-		});
-
-		newGroup._id = utils.stringToUUID(nodeuuid());
-		newGroup.author = creator;
-		newGroup.createdAt = Date.now();
-
-		if (typeCorrect) {
-			return newGroup.save().then((savedGroup) => {
-				savedGroup._id = utils.uuidToString(savedGroup._id);
-				return getObjectIds(dbCol, savedGroup, branch, rid, true, false).then((objects) => {
-					savedGroup.objects = objects;
-					if (!data.isIssueGroup && !data.isRiskGroup && sessionId) {
-						ChatEvent.newGroups(sessionId, dbCol.account, model, savedGroup);
+					if (key === "rules"
+						&& data.rules
+						&& !checkRulesValidity(data.rules)) {
+						typeCorrect = false;
 					}
-					return savedGroup;
-				});
-			});
-		} else {
-			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
+					newGroup[key] = cleanEmbeddedObject(key, data[key]);
+				}
+			} else {
+				systemLogger.logError(`Type mismatch ${key} ${data[key]}`);
+				typeCorrect = false;
+			}
 		}
 	});
+
+	newGroup._id = utils.stringToUUID(nodeuuid());
+	newGroup.author = creator;
+	newGroup.createdAt = Date.now();
+
+	if (typeCorrect) {
+		const groupsColl = await getCollection(account, model);
+		await groupsColl.insert(newGroup);
+
+		newGroup._id = utils.uuidToString(newGroup._id);
+		newGroup.objects = await getObjectIds(dbCol, newGroup, branch, rid, true, false);
+
+		if (!data.isIssueGroup && !data.isRiskGroup && sessionId) {
+			ChatEvent.newGroups(sessionId, dbCol.account, model, newGroup);
+		}
+
+		return newGroup;
+	} else {
+		return Promise.reject(responseCodes.INVALID_ARGUMENTS);
+	}
 };
 
-Group.deleteGroups = function (dbCol, sessionId, ids) {
+Group.deleteGroups = async function (dbCol, sessionId, ids) {
 	const groupsIds = [].concat(ids);
 
 	for (let i = 0; i < ids.length; i++) {
@@ -397,21 +393,21 @@ Group.deleteGroups = function (dbCol, sessionId, ids) {
 		}
 	}
 
-	return db.getCollection(dbCol.account, dbCol.model + ".groups").then((_dbCol) => {
-		return _dbCol.remove({ _id: { $in: ids } }).then((deleteResponse) => {
-			if (!deleteResponse.result.ok) {
-				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
-			}
+	const account = dbCol.account;
+	const model = dbCol.model;
+	const groupsColl = await getCollection(account, model);
+	const deleteResponse = await groupsColl.remove({ _id: { $in: ids } });
 
-			// Success!
-			ChatEvent.groupsDeleted(sessionId, dbCol.account, dbCol.model, groupsIds);
-		});
-	});
+	if (!deleteResponse.result.ok) {
+		return Promise.reject(responseCodes.GROUP_NOT_FOUND);
+	}
+
+	ChatEvent.groupsDeleted(sessionId, dbCol.account, dbCol.model, groupsIds);
 };
 
 Group.deleteGroupsByViewId = async function (account, model, view_id) {
-	const _dbCol = await db.getCollection(account, model + ".groups");
-	return await _dbCol.remove({ view_id });
+	const groupsColl = await getCollection(account, model);
+	return await groupsColl.remove({ view_id });
 };
 
 Group.findByUID = async function (dbCol, uid, branch, revId, showIfcGuids = false, noClean = true) {
@@ -433,18 +429,20 @@ Group.findByUID = async function (dbCol, uid, branch, revId, showIfcGuids = fals
 	return foundGroup;
 };
 
-Group.findIfcGroupByUID = function (dbCol, uid) {
-	// Extract a unique list of IDs only
-	return this.findOne(dbCol, { _id: uid }).then(group => {
-		if (!group) {
-			return Promise.reject(responseCodes.GROUP_NOT_FOUND);
-		}
+Group.findIfcGroupByUID = async function (dbCol, uid) {
+	const account = dbCol.account;
+	const model = dbCol.model;
+	const groupsColl = await getCollection(account, model);
+	const foundGroup = await groupsColl.findOne({ _id: utils.stringToUUID(uid) });
 
-		return getObjectsArrayAsIfcGuids(group, false).then(ifcObjects => {
-			group.objects = ifcObjects;
-			return group;
-		});
-	});
+	// Extract a unique list of IDs only
+	if (!foundGroup) {
+		return Promise.reject(responseCodes.GROUP_NOT_FOUND);
+	}
+
+	foundGroup.objects = await getObjectsArrayAsIfcGuids(foundGroup, false);
+
+	return foundGroup;
 };
 
 Group.ifcGuidsToUUIDs = function (account, model, ifcGuids, branch, revId) {
