@@ -176,7 +176,7 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 	].forEach((group) => {
 		if(vpData[group]) {
 			groupPromises.push(
-				Groups.createGroup(account, model, null, {...vpData[group], [groupIdField]: utils.stringToUUID(hostId)}).then((groupResult) => {
+				Groups.create(account, model, undefined, undefined, null, undefined, {...vpData[group], [groupIdField]: utils.stringToUUID(hostId)}).then((groupResult) => {
 					viewpoint[`${group}_id`] = groupResult._id;
 				})
 			);
@@ -194,7 +194,7 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 				}
 
 				groupsProms.push(
-					Groups.createGroup(account, model, null, {...group, [groupIdField]: utils.stringToUUID(hostId)}).then((groupResult) => {
+					Groups.create(account, model, undefined, undefined, null, undefined, {...group, [groupIdField]: utils.stringToUUID(hostId)}).then((groupResult) => {
 						return groupResult._id;
 					})
 				);
