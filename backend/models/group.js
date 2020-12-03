@@ -18,7 +18,6 @@
 "use strict";
 
 const _ = require("lodash");
-const ModelFactory = require("./factory/modelFactory");
 const utils = require("../utils");
 const nodeuuid = require("uuid/v1");
 const responseCodes = require("../response_codes.js");
@@ -470,7 +469,7 @@ Group.ifcGuidsToUUIDs = function (account, model, ifcGuids, branch, revId) {
 	});
 };
 
-Group.listGroups = async function (account, model, queryParams, branch, revId, ids, showIfcGuids) {
+Group.listGroups = async function (account, model, branch, revId, ids, queryParams, showIfcGuids) {
 	const query = {};
 
 	// If we want groups that aren't from issues

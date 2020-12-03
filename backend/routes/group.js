@@ -466,22 +466,17 @@ router.post("/revision/:rid/groups/", middlewares.issue.canCreate, createGroup);
  */
 router.delete("/groups/", middlewares.issue.canCreate, deleteGroups);
 
-const getDbColOptions = function (req) {
-	return { account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger };
-};
-
 function listGroups(req, res, next) {
-
-	const dbCol = getDbColOptions(req);
 	const place = utils.APIInfo(req);
-	const { account, model } = req.params;
+	const { account, model, rid } = req.params;
+	const rid = req.params.rid ? req.params.rid : null;
+	const branch = rid ? null : "master";
 
 	const showIfcGuids = (req.query.ifcguids) ? JSON.parse(req.query.ifcguids) : false;
-
 	const ids = req.query.ids ? req.query.ids.split(",") : null;
-	let groupList;
 
 	let updatedSince = req.query.updatedSince;
+	let groupList;
 
 	if (updatedSince) {
 		updatedSince = parseInt(updatedSince, 10);
@@ -490,13 +485,7 @@ function listGroups(req, res, next) {
 		}
 	}
 
-	if (req.params.rid) {
-		groupList = Group.listGroups(account, model, req.query, null, req.params.rid, ids, showIfcGuids);
-	} else {
-		groupList = Group.listGroups(account, model, req.query, "master", null, ids, showIfcGuids);
-	}
-
-	groupList.then(groups => {
+	Group.listGroups(account, model, branch, rid, ids, req.query, showIfcGuids).then(groups => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, groups);
 	}).catch(err => {
 		systemLogger.logError(err.stack);
@@ -505,26 +494,15 @@ function listGroups(req, res, next) {
 }
 
 function findGroup(req, res, next) {
-
-	const dbCol = getDbColOptions(req);
 	const place = utils.APIInfo(req);
-	const { account, model, uid } = req.params;
+	const { account, model, rid, uid } = req.params;
+	const rid = req.params.rid ? req.params.rid : null;
+	const branch = rid ? null : "master";
 	const showIfcGuids = (req.query.ifcguids) ? JSON.parse(req.query.ifcguids) : false;
 
 	let groupItem;
-	if (req.params.rid) {
-		groupItem = Group.findByUID(account, model, null, req.params.rid, uid, showIfcGuids, false);
-	} else {
-		groupItem = Group.findByUID(account, model, "master", null, uid, showIfcGuids, false);
-	}
 
-	groupItem.then(group => {
-		if (!group) {
-			return Promise.reject({ resCode: responseCodes.GROUP_NOT_FOUND });
-		} else {
-			return Promise.resolve(group);
-		}
-	}).then(group => {
+	groupItem = Group.findByUID(account, model, branch, rid, uid, showIfcGuids, false).then(group => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 	}).catch(err => {
 		systemLogger.logError(err.stack);
@@ -538,12 +516,9 @@ function createGroup(req, res, next) {
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 	const rid = req.params.rid ? req.params.rid : null;
 	const branch = rid ? null : "master";
-	const create = Group.createGroup(account, model, sessionId, req.body, req.session.user.username, branch, rid);
 
-	create.then(group => {
-
+	Group.createGroup(account, model, sessionId, req.body, req.session.user.username, branch, rid).then(group => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
-
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
 	});
@@ -568,22 +543,14 @@ function deleteGroups(req, res, next) {
 }
 
 function updateGroup(req, res, next) {
-	const dbCol = getDbColOptions(req);
 	const place = utils.APIInfo(req);
 	const { account, model, uid } = req.params;
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
 	const rid = req.params.rid ? req.params.rid : null;
 	const branch = rid ? null : "master";
-	const groupItem = Group.findByUID(account, model, branch, rid, uid, false);
-	groupItem.then(group => {
-		if (!group) {
-			return Promise.reject({ resCode: responseCodes.GROUP_NOT_FOUND });
-		} else {
-			return Group.updateGroup(account, model, sessionId, uid, req.body, req.session.user.username, branch, rid);
-		}
 
-	}).then(group => {
+	Group.updateGroup(account, model, sessionId, uid, req.body, req.session.user.username, branch, rid).then(group => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 	}).catch(err => {
 		systemLogger.logError(err.stack);
