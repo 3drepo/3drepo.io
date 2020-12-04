@@ -19,8 +19,10 @@ import React from 'react';
 
 import MenuItem from '@material-ui/core/MenuItem';
 import Paper from '@material-ui/core/Paper';
+import Portal from '@material-ui/core/Portal';
 import TextField from '@material-ui/core/TextField';
 import Autosuggest from 'react-autosuggest';
+import { Manager, Target } from 'react-popper';
 
 import {Highlight} from '../../../../../components/highlight/highlight.component';
 import { getSuggestions } from './autosuggestField.helpers';
@@ -30,16 +32,18 @@ const renderInputComponent = (inputProps) => {
 	const { classes, inputRef = () => {}, ref, ...other } = inputProps;
 
 	return (
-		<TextField
-			fullWidth
-			InputProps={{
-				inputRef: (node) => {
-					ref(node);
-					inputRef.current = node;
-				},
-			}}
-			{...other}
-		/>
+		<Target>
+			<TextField
+				fullWidth
+				InputProps={{
+					inputRef: (node) => {
+						ref(node);
+						inputRef.current = node;
+					},
+				}}
+				{...other}
+			/>
+		</Target>
 	);
 };
 
@@ -110,8 +114,9 @@ export const AutoSuggestField: React.FunctionComponent<IProps> = ({
 	};
 
 	return (
-		<Autosuggest
-			{...autosuggestProps}
+		<Manager>
+			<Autosuggest
+				{...autosuggestProps}
 			inputProps={{
 				label,
 				placeholder,
@@ -121,21 +126,22 @@ export const AutoSuggestField: React.FunctionComponent<IProps> = ({
 				onBlur: handleBlur,
 				inputRef: nodeRef,
 			}}
-			renderSuggestionsContainer={(options) => (
-				<StyledPopper
-					anchorEl={nodeRef.current}
-					open={Boolean(options.children)}
-					placement="bottom-start"
-				>
-					<Paper
-						square
-						{...options.containerProps}
-						style={{ minWidth: nodeRef.current ? nodeRef.current.clientWidth : null }}
-					>
-						{options.children}
-					</Paper>
-				</StyledPopper>
-			)}
-		/>
+				renderSuggestionsContainer={(options) => (
+					<Portal>
+						<StyledPopper placement="bottom-start">
+							<Paper
+								square
+								{...options.containerProps}
+								style={{
+									minWidth: nodeRef.current ? nodeRef.current.clientWidth : null,
+								}}
+							>
+								{options.children}
+							</Paper>
+						</StyledPopper>
+					</Portal>
+				)}
+			/>
+		</Manager>
 	);
 };

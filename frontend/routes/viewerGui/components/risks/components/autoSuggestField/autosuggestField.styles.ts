@@ -17,18 +17,18 @@
 
 import styled from 'styled-components';
 
-import Popper from '@material-ui/core/Popper';
+import { Popper } from 'react-popper';
 
 import { COLOR } from '../../../../../../styles';
 
 export const StyledPopper = styled(Popper)`
 	z-index: 12323;
-	margin-top: -15px;
 
 	.react-autosuggest__suggestions-list {
 		max-height: 250px;
 		overflow: auto;
 		padding-left: 0;
+		margin: 0;
 	}
 
 	.react-autosuggest__suggestion {
