@@ -29,12 +29,11 @@ RUN if [ ${NODE_USERNAME} != "root" ] \
     fi
 
 WORKDIR /home/node/3drepo.io/
-COPY --chown=node:node --from=builder /home/node/3drepo.io/backend /home/node/3drepo.io/backend
-COPY --chown=node:node --from=builder /home/node/3drepo.io/public /home/node/3drepo.io/public
-COPY --chown=node:node --from=builder /home/node/3drepo.io/config /home/node/3drepo.io/config
-COPY --chown=node:node --from=builder /home/node/3drepo.io/resources /home/node/3drepo.io/resources
-COPY --chown=node:node --from=builder /home/node/3drepo.io/run /home/node/3drepo.io/run
-
+COPY --chown=root:node --from=builder /home/node/3drepo.io/backend /home/node/3drepo.io/backend
+COPY --chown=root:node --from=builder /home/node/3drepo.io/public /home/node/3drepo.io/public
+COPY --chown=root:node --from=builder /home/node/3drepo.io/config /home/node/3drepo.io/config
+COPY --chown=root:node --from=builder /home/node/3drepo.io/resources /home/node/3drepo.io/resources
+COPY --chown=root:node --from=builder /home/node/3drepo.io/run /home/node/3drepo.io/run
 ARG NODE_ENV=local
 ENV NODE_ENV ${NODE_ENV:-"production"}
 ENV NODE_CONFIG_DIR='./config'
