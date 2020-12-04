@@ -22,7 +22,7 @@
 export const mergeArrays = (arr1, arr2) => {
 	const arr1Length = arr1.length;
 	arr1.length += arr2.length;
-	for(let i = 0; i < arr2.length; ++i) {
-		arr1[arr1Length+i] = arr2[i];
+	for (let i = 0; i < arr2.length; ++i) {
+		arr1[arr1Length + i] = arr2[i];
 	}
 };

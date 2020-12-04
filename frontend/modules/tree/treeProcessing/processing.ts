@@ -1,6 +1,6 @@
 import { intersection, keys, memoize, pickBy, uniqBy } from 'lodash';
 import { NODE_TYPES, SELECTION_STATES, VISIBILITY_STATES } from '../../../constants/tree';
-import { mergeArrays } from '../../../helpers/arrays'
+import { mergeArrays } from '../../../helpers/arrays';
 
 export class Processing {
 	public get fullySelectedNodesIds() {

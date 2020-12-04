@@ -1568,7 +1568,7 @@ export class UnityUtil {
 	public static multipleCallInChunks(arrLength: [string], func: (start: number, end: number) => any, chunkSize = 20000) {
 		let index = 0;
 		while (index < arrLength) {
-			const end = index + chunkSize >= arrLength? undefined : chunkSize;
+			const end = index + chunkSize >= arrLength ? undefined : chunkSize;
 			func(index, end);
 			index += chunkSize;
 		}
