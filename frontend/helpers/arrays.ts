@@ -16,7 +16,7 @@
  */
 
 // Naive implementation of .push with an array
-// This is done as using Array.prototype.push.apply()
+// This is used as using Array.prototype.push.apply()
 // causes stack overflow when the array lengths are huge,
 // and concat is very slow.
 export const mergeArrays = (arr1, arr2) => {

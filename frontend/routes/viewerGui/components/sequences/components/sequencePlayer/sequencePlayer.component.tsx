@@ -140,7 +140,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 			setTimeout(() => {
 				this.nextStep();
 				this.play();
-			}, 2000);
+			}, 1000);
 		}
 	}
 
