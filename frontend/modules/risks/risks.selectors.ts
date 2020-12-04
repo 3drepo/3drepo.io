@@ -21,9 +21,9 @@ import { createSelector } from 'reselect';
 import { RISK_LEVELS } from '../../constants/risks';
 import { prepareComments, transformCustomsLinksToMarkdown } from '../../helpers/comments';
 import { hasPin, riskToPin } from '../../helpers/pins';
-import { getRiskColor } from '../../helpers/risks';
+import { prepareRisk } from '../../helpers/risks';
 import { searchByFilters } from '../../helpers/searching';
-import { selectIssuesMap } from '../issues';
+import { selectJobsList } from '../jobs';
 import { selectQueryParams } from '../router/router.selectors';
 import { selectSelectedEndingDate, selectSelectedSequence, selectSelectedStartingDate } from '../sequences';
 
@@ -34,8 +34,8 @@ export const selectRisksMap = createSelector(
 );
 
 export const selectRisks = createSelector(
-	selectRisksMap, (risksMap) => values(risksMap).map((risk) =>
-		({...risk, color: getRiskColor(risk.residual_level_of_risk)}))
+	selectRisksMap, selectJobsList, (risksMap, jobs) => values(risksMap).map((risk) =>
+		prepareRisk(risk, jobs))
 );
 
 export const selectComponentState = createSelector(
@@ -77,7 +77,7 @@ export const selectExpandDetails = createSelector(
 );
 
 export const selectNewRiskDetails = createSelector(
-	selectComponentState, (state) => state.newRisk
+	selectComponentState, selectJobsList, (state, jobs) => prepareRisk(state.newRisk, jobs)
 );
 
 export const selectNewComment = createSelector(
