@@ -70,12 +70,11 @@ export const addOverrides = (field, valueConvert, addOverride) => async (overrid
 		const value = valueConvert(override[field]);
 
 		if (treeNodes.length) {
-			const selectNodes = selectGetNodesIdsFromSharedIds([override]);
-			const nodes = selectNodes(state);
+			const selectNodesFn = selectGetNodesIdsFromSharedIds([override]);
+			const nodes = selectNodesFn(state);
 
 			if (nodes) {
-				const filteredNodes = nodes.filter((n) => n !== undefined);
-				const modelsList = selectGetMeshesByIds(filteredNodes)(state);
+				const modelsList = selectGetMeshesByIds(nodes)(state);
 
 				for (let j = 0; j < modelsList.length; j++) {
 					const { meshes, teamspace, modelId } = modelsList[j] as any;
@@ -111,8 +110,7 @@ export const removeOverrides = (resetMesh) => async (overrides) => {
 			const nodes = selectNodes(state);
 
 			if (nodes) {
-				const filteredNodes = nodes.filter((n) => n !== undefined);
-				const modelsList = selectGetMeshesByIds(filteredNodes)(state);
+				const modelsList = selectGetMeshesByIds(nodes)(state);
 
 				for (let j = 0; j < modelsList.length; j++) {
 					const { meshes, teamspace, modelId } = modelsList[j] as any;
