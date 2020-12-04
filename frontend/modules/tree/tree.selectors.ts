@@ -271,10 +271,12 @@ export const selectGetNodesIdsFromSharedIds = (objects = []) => createSelector(
 		if (!objects.length) {
 			return [];
 		}
-		const objectsSharedIds = objects.map(({ shared_ids }) => shared_ids);
-		const sharedIds = flatten(objectsSharedIds) as string[];
-		const nodesIdsBySharedIds = values(pick(nodesBySharedIds, sharedIds));
-		return uniq(nodesIdsBySharedIds);
+
+		const ids = new Set();
+		objects.forEach((obj) => {
+			obj.shared_ids.forEach((sharedId) => ids.add(nodesBySharedIds[sharedId]));
+		});
+		return Array.from(ids);
 	}
 );
 
