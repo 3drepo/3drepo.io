@@ -247,7 +247,7 @@ export const selectGetMeshesByIds = (nodesIds = []) => createSelector(
 				}
 
 				if (meshes) {
-					meshesByNodes[node.namespacedId].meshes = meshesByNodes[node.namespacedId].meshes.concat(meshes);
+					Array.prototype.push.apply(meshesByNodes[node.namespacedId].meshes, meshes);
 				} else if (!childrenMap[node._id] && node.hasChildren) {
 					// This should only happen in federations.
 					// Traverse down the tree to find submodel nodes
