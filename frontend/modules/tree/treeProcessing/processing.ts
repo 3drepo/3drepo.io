@@ -1,5 +1,6 @@
 import { intersection, keys, memoize, pickBy, uniqBy } from 'lodash';
 import { NODE_TYPES, SELECTION_STATES, VISIBILITY_STATES } from '../../../constants/tree';
+import { mergeArrays } from '../../../helpers/arrays'
 
 export class Processing {
 	public get fullySelectedNodesIds() {
@@ -453,7 +454,6 @@ export class Processing {
 			return [];
 		}
 		const meshList = {};
-
 		for (let index = 0; index < nodes.length; ++index) {
 			const node = nodes[index];
 			if (node.subTreeRoots.length) {
@@ -483,7 +483,7 @@ export class Processing {
 							meshes
 						};
 					} else {
-						Array.prototype.push.apply(meshList[node.namespacedId].meshes, meshes);
+						mergeArrays(meshList[node.namespacedId].meshes, meshes);
 					}
 				}
 			}

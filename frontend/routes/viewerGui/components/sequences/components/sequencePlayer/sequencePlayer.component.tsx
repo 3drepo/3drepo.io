@@ -137,8 +137,10 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 
 		if (prevProps.loadingFrame !== this.props.loadingFrame &&
 			!this.props.loadingFrame && this.state.waitingForFrameLoad) {
-			this.nextStep();
-			this.play();
+			setTimeout(() => {
+				this.nextStep();
+				this.play();
+			}, 2000);
 		}
 	}
 

@@ -19,6 +19,7 @@ import { flatten, pick, uniq, values } from 'lodash';
 import { createSelector } from 'reselect';
 
 import { NODE_TYPES, VISIBILITY_STATES } from '../../constants/tree';
+import { mergeArrays } from '../../helpers/arrays';
 import { searchByFilters } from '../../helpers/searching';
 import { calculateTotalMeshes } from '../../helpers/tree';
 
@@ -247,7 +248,7 @@ export const selectGetMeshesByIds = (nodesIds = []) => createSelector(
 				}
 
 				if (meshes) {
-					Array.prototype.push.apply(meshesByNodes[node.namespacedId].meshes, meshes);
+					mergeArrays(meshesByNodes[node.namespacedId].meshes, meshes);
 				} else if (!childrenMap[node._id] && node.hasChildren) {
 					// This should only happen in federations.
 					// Traverse down the tree to find submodel nodes
