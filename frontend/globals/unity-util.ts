@@ -1042,33 +1042,18 @@ export class UnityUtil {
 		toggleMode: boolean,
 		forceReHighlight: boolean
 	) {
-		const maxNodesPerReq = 20000;
-		const promises = [];
-		for (let i = 0 ; i < idArr.length; i += maxNodesPerReq) {
-			const promise = new Promise((resolve, reject) => {
-				setTimeout(() => {
-					try {
-						const endIdx = i + maxNodesPerReq < idArr.length ? i + maxNodesPerReq : idArr.length ;
-						const arr = idArr.slice(i, endIdx);
-						const params: any = {
-							database : account,
-							model,
-							ids : arr,
-							toggle : toggleMode,
-							forceReHighlight,
-							color: color ? color : UnityUtil.defaultHighlightColor
-						};
-						UnityUtil.toUnity('HighlightObjects', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
-						resolve();
-					} catch (error) {
-						reject(error);
-					}
-				}, i > 0 ? 100 : 0);
-			});
-			promises.push(promise);
-		}
-
-		return Promise.all(promises);
+		UnityUtil.multipleCallInChunks(idArr.length, (start, end) => {
+			const arr = idArr.slice(start, end);
+			const params: any = {
+				database : account,
+				model,
+				ids : arr,
+				toggle : toggleMode,
+				forceReHighlight,
+				color: color ? color : UnityUtil.defaultHighlightColor
+			};
+			UnityUtil.toUnity('HighlightObjects', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+		});
 	}
 
 	/**
@@ -1079,13 +1064,16 @@ export class UnityUtil {
 	 * @param idArr - array of unique IDs associated with the objects to highlight
 	 */
 	public static unhighlightObjects(account: string, model: string, idArr: [string]) {
-		const params: any = {
-			database : account,
-			model,
-			ids : idArr
-		};
+		UnityUtil.multipleCallInChunks(idArr.length, (start, end) => {
+			const arr = idArr.slice(start, end);
+			const params: any = {
+				database : account,
+				model,
+				ids : idArr
+			};
 
-		UnityUtil.toUnity('UnhighlightObjects', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+			UnityUtil.toUnity('UnhighlightObjects', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+		});
 	}
 
 	public static pauseRendering() {
@@ -1215,13 +1203,15 @@ export class UnityUtil {
 	 * @param color - RGB value of the override color (note: alpha will be ignored)
 	 */
 	public static overrideMeshColor(account: string, model: string, meshIDs: [string], color: [number]) {
-		const param: any = {};
-		if (account && model) {
-			param.nameSpace = account + '.' + model;
-		}
-		param.ids = meshIDs;
-		param.color = color;
-		UnityUtil.toUnity('OverrideMeshColor', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
+			const param: any = {};
+			if (account && model) {
+				param.nameSpace = account + '.' + model;
+			}
+			param.ids = meshIDs.slice(start, end);
+			param.color = color;
+			UnityUtil.toUnity('OverrideMeshColor', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		});
 	}
 
 	/**
@@ -1232,12 +1222,14 @@ export class UnityUtil {
 	 * @param meshIDs - unique IDs of the meshes to operate on
 	 */
 	public static resetMeshColor(account: string, model: string, meshIDs: [string]) {
-		const param: any = {};
-		if (account && model) {
-			param.nameSpace = account + '.' + model;
-		}
-		param.ids = meshIDs;
-		UnityUtil.toUnity('ResetMeshColor', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
+			const param: any = {};
+			if (account && model) {
+				param.nameSpace = account + '.' + model;
+			}
+			param.ids = meshIDs.slice(start, end);
+			UnityUtil.toUnity('ResetMeshColor', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		});
 	}
 
 	/**
@@ -1250,13 +1242,15 @@ export class UnityUtil {
 	 * @param opacity - opacity (>0 - 1) value to override with
 	 */
 	public static overrideMeshOpacity(account: string, model: string, meshIDs: [string], opacity: number) {
-		const param: any = {};
-		if (account && model) {
-			param.nameSpace = account + '.' + model;
-		}
-		param.ids = meshIDs;
-		param.opacity = opacity;
-		UnityUtil.toUnity('OverrideMeshOpacity', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
+			const param: any = {};
+			if (account && model) {
+				param.nameSpace = account + '.' + model;
+			}
+			param.ids = meshIDs.slice(start, end);
+			param.opacity = opacity;
+			UnityUtil.toUnity('OverrideMeshOpacity', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		});
 	}
 
 	/**
@@ -1267,12 +1261,14 @@ export class UnityUtil {
 	 * @param meshIDs - unique IDs of the meshes to operate on
 	 */
 	public static resetMeshOpacity(account: string, model: string, meshIDs: [string]) {
-		const param: any = {};
-		if (account && model) {
-			param.nameSpace = account + '.' + model;
-		}
-		param.ids = meshIDs;
-		UnityUtil.toUnity('ResetMeshOpacity', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
+			const param: any = {};
+			if (account && model) {
+				param.nameSpace = account + '.' + model;
+			}
+			param.ids = meshIDs.slice(start, end);
+			UnityUtil.toUnity('ResetMeshOpacity', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		});
 	}
 
 	/**
@@ -1566,6 +1562,19 @@ export class UnityUtil {
 	}
 
 	/**
+	 * @hidden
+	 * A helper function to split the calls into multiple calls when the array is too large for SendMessage to handle
+	 */
+	public static multipleCallInChunks(arrLength: [string], func: (start: number, end: number) => any, chunkSize = 20000) {
+		let index = 0;
+		while (index < arrLength) {
+			const end = index + chunkSize >= arrLength ? undefined : chunkSize;
+			func(index, end);
+			index += chunkSize;
+		}
+	}
+
+	/**
 	 * Toggle visibility of the given list of objects
 	 * @category Model Interactions
 	 * @param account - name of teamspace
@@ -1574,15 +1583,16 @@ export class UnityUtil {
 	 * @param visibility - true = visible, false = invisible
 	 */
 	public static toggleVisibility(account: string, model: string, ids: [string], visibility: boolean) {
-		const param: any = {};
-		if (account && model) {
-			param.nameSpace = account + '.' + model;
-		}
+		UnityUtil.multipleCallInChunks(ids.length, (start, end) => {
+			const param: any = {};
+			if (account && model) {
+				param.nameSpace = account + '.' + model;
+			}
 
-		param.ids = ids;
-		param.visible = visibility;
-		UnityUtil.toUnity('ToggleVisibility', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
-
+			param.ids = ids.slice(start, end);
+			param.visible = visibility;
+			UnityUtil.toUnity('ToggleVisibility', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		});
 	}
 
 	/**
@@ -1741,12 +1751,14 @@ export class UnityUtil {
 	 * @param matrix array of 16 numbers, representing the transformation on the meshes (row major)
 	 */
 	public static moveMeshes(teamspace: string, modelId: string, meshes: string[], matrix: number[]) {
-		const param: any = {
-			nameSpace : teamspace + '.' + modelId,
-			meshes,
-			matrix
-		};
-		UnityUtil.toUnity('MoveMeshes', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		UnityUtil.multipleCallInChunks(meshes.length, (start, end) => {
+			const param: any = {
+				nameSpace : teamspace + '.' + modelId,
+				meshes: meshes.slice(start, end),
+				matrix
+			};
+			UnityUtil.toUnity('MoveMeshes', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		});
 	}
 
 	/**
@@ -1758,11 +1770,13 @@ export class UnityUtil {
 	 * @param meshes array of mesh unique IDs
 	 */
 	public static resetMovedMeshes(teamspace: string, modelId: string, meshes: string[]) {
-		const param: any = {
-			nameSpace : teamspace + '.' + modelId,
-			meshes
-		};
-		UnityUtil.toUnity('ResetMovedMeshes', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		UnityUtil.multipleCallInChunks(meshes.length, (start, end) => {
+			const param: any = {
+				nameSpace : teamspace + '.' + modelId,
+				meshes: meshes.slice(start, end),
+			};
+			UnityUtil.toUnity('ResetMovedMeshes', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		});
 	}
 
 }
