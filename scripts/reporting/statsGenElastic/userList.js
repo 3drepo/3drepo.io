@@ -40,6 +40,7 @@ UserList.createUsersReport = async (dbConn, ElasticClient) => {
 				"Country" : user.customData.countryCode,
 				"Company" : user.customData.company,
 				"Date Created" : user.customData.createdAt,
+				"DateTime" : Utils.formatDate(new Date(user.customData.createdAt)),
 				"Mail Optout" : user.customData.mailListOptOut,
 				"Verified" : user.customData.inactive
 			};
