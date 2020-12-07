@@ -22,28 +22,26 @@ import Paper from '@material-ui/core/Paper';
 import Portal from '@material-ui/core/Portal';
 import TextField from '@material-ui/core/TextField';
 import Autosuggest from 'react-autosuggest';
-import { Manager, Target } from 'react-popper';
+import { usePopper } from 'react-popper';
 
-import {Highlight} from '../../../../../components/highlight/highlight.component';
+import { Highlight } from '../../../../../components/highlight/highlight.component';
 import { getSuggestions } from './autosuggestField.helpers';
-import { StyledPopper } from './autosuggestField.styles';
+import { Wrapper } from './autosuggestField.styles';
 
 const renderInputComponent = (inputProps) => {
 	const { classes, inputRef = () => {}, ref, ...other } = inputProps;
 
 	return (
-		<Target>
-			<TextField
-				fullWidth
-				InputProps={{
-					inputRef: (node) => {
-						ref(node);
-						inputRef.current = node;
-					},
-				}}
-				{...other}
-			/>
-		</Target>
+		<TextField
+			fullWidth
+			InputProps={{
+				inputRef: (node) => {
+					ref(node);
+					inputRef(node);
+				},
+			}}
+			{...other}
+		/>
 	);
 };
 
@@ -75,7 +73,9 @@ export const AutoSuggestField: React.FunctionComponent<IProps> = ({
 }) => {
 	const [suggestions, setSuggestions] = React.useState([]);
 	const [value, setValue] = React.useState('');
-	const nodeRef = React.useRef(null);
+	const [nodeRef, setNodeRef] = React.useState(null);
+	const [popperElement, setPopperElement] = React.useState(null);
+	const { styles, attributes } = usePopper(nodeRef, popperElement, { placement: 'top-start' });
 
 	React.useEffect(() => {
 		setValue(field.value);
@@ -95,13 +95,9 @@ export const AutoSuggestField: React.FunctionComponent<IProps> = ({
 
 	const handleSuggestionsClearRequested = () => setSuggestions([]);
 
-	const handleBlur = () => {
-		form.setFieldValue(field.name, value);
-	};
+	const handleBlur = () => form.setFieldValue(field.name, value);
 
-	const handleChange = (event, { newValue }) => {
-		setValue(newValue);
-	};
+	const handleChange = (event, { newValue }) => setValue(newValue);
 
 	const autosuggestProps = {
 		renderInputComponent,
@@ -114,9 +110,8 @@ export const AutoSuggestField: React.FunctionComponent<IProps> = ({
 	};
 
 	return (
-		<Manager>
-			<Autosuggest
-				{...autosuggestProps}
+		<Autosuggest
+			{...autosuggestProps}
 			inputProps={{
 				label,
 				placeholder,
@@ -124,24 +119,27 @@ export const AutoSuggestField: React.FunctionComponent<IProps> = ({
 				value,
 				onChange: handleChange,
 				onBlur: handleBlur,
-				inputRef: nodeRef,
+				inputRef: setNodeRef,
 			}}
-				renderSuggestionsContainer={(options) => (
-					<Portal>
-						<StyledPopper placement="bottom-start">
-							<Paper
-								square
-								{...options.containerProps}
-								style={{
-									minWidth: nodeRef.current ? nodeRef.current.clientWidth : null,
-								}}
-							>
-								{options.children}
-							</Paper>
-						</StyledPopper>
-					</Portal>
-				)}
-			/>
-		</Manager>
+			renderSuggestionsContainer={(options) => (
+				<Portal>
+					<Wrapper
+						ref={setPopperElement}
+						style={styles.popper}
+						{...attributes.popper}
+					>
+						<Paper
+							square
+							{...options.containerProps}
+							style={{
+								minWidth: nodeRef?.clientWidth,
+							}}
+						>
+							{options.children}
+						</Paper>
+					</Wrapper>
+				</Portal>
+			)}
+		/>
 	);
 };

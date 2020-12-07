@@ -17,11 +17,9 @@
 
 import styled from 'styled-components';
 
-import { Popper } from 'react-popper';
-
 import { COLOR } from '../../../../../../styles';
 
-export const StyledPopper = styled(Popper)`
+export const Wrapper = styled.div`
 	z-index: 12323;
 
 	.react-autosuggest__suggestions-list {
