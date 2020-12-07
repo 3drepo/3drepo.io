@@ -14,9 +14,8 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-declare var Module;
 declare var SendMessage;
-declare var UnityLoader;
+declare var createUnityInstance;
 
 import { IS_FIREFOX } from '../helpers/browser';
 
@@ -116,9 +115,11 @@ export class UnityUtil {
 	}
 
 	/** @hidden */
-	public static onProgress(gameInstance, progress: number) {
+	public static onProgress(progress: number) {
 		requestAnimationFrame(() => {
-			UnityUtil.progressCallback(progress);
+			if (UnityUtil.progressCallback) {
+				UnityUtil.progressCallback(progress);
+			}
 		});
 	}
 
@@ -131,9 +132,7 @@ export class UnityUtil {
 	 * @return returns a promise which resolves when the game is loaded.
 	 *
 	 */
-	public static loadUnity(divId: string, unityConfig = 'unity/Build/unity.json', memory?: number): Promise<void> {
-		memory = memory || 2130706432;
-
+	public static loadUnity(canvas : any, unityURL): Promise<void> {
 		if (!window.Module) {
 			// Add withCredentials to XMLHttpRequest prototype to allow unity game to
 			// do CORS request. We used to do this with a .jspre on the unity side but it's no longer supported
@@ -147,32 +146,27 @@ export class UnityUtil {
 			XMLHttpRequest.prototype.open = newOpen;
 		}
 
-		const unitySettings: any = {
-			onProgress: this.onProgress
-		};
+		const buildUrl = `${unityURL? unityURL + '/' : ''}unity/Build`;
 
-		UnityLoader.Error.handler = this.onUnityError;
-		if (window) {
-			if (!(window as any).Module) {
-				window.Module = {};
+		var config = {
+			dataUrl: buildUrl + "/unity.data.unityweb",
+			frameworkUrl: buildUrl + "/unity.framework.js.unityweb",
+			codeUrl: buildUrl + "/unity.wasm.unityweb",
+			streamingAssetsUrl: "StreamingAssets",
+			companyName: "3D Repo Ltd",
+			productName: "3D Repo Unity",
+			productVersion: "1.0",
+			errorHandler: (e,t,n) => { 	// This member is not part of the documented API, but the current version of loader.js checks for it
+				UnityUtil.onUnityError(e); 
+				return true; // Returning true suppresses loader.js' alert call
 			}
-			unitySettings.Module = (window as any).Module;
+		  };
 
-			if (!IS_FIREFOX) {
-				unitySettings.Module.TOTAL_MEMORY = memory;
-			}
-
-			UnityUtil.unityInstance = UnityLoader.instantiate(
-				divId,
-				unityConfig,
-				unitySettings
-			);
-		} else {
-			UnityUtil.unityInstance = UnityLoader.instantiate(
-				divId,
-				unityConfig
-			);
-		}
+		createUnityInstance(canvas, config, (progress) => {
+			this.onProgress(progress);
+		}).then((unityInstance) => {
+			UnityUtil.unityInstance = unityInstance;
+		}).catch(UnityUtil.onUnityError);
 
 		return UnityUtil.onReady();
 	}
@@ -227,23 +221,21 @@ export class UnityUtil {
 	 * @hidden
 	 * Handle a error from Unity
 	 */
-	public static onUnityError(errorObject) {
+	public static onUnityError(message) {
 
-		const err = errorObject.message;
-		const line = errorObject.lineno;
 		let reload = false;
 		let conf;
 
-		if (UnityUtil.isUnityError(err)) {
+		if (UnityUtil.isUnityError(message)) {
 			reload = true;
 			conf = `Your browser has failed to load 3D Repo's model viewer. The following occured:
-					<br><br> <code>Error ${err} occured at line ${line}</code>
+					<br><br> <code>${message}</code>
 					<br><br> This may due to insufficient memory. Please ensure you are using a modern 64bit web browser
 					(such as Chrome or Firefox), reduce your memory usage and try again.
 					If you are unable to resolve this problem, please contact support@3drepo.org referencing the above error.
 					<br><md-container>`;
 		} else {
-			conf = `Something went wrong :( <br><br> <code>Error ${err} occured at line ${line}</code><br><br>
+			conf = `Something went wrong :( <br><br> <code>${message}</code><br><br>
 				If you are unable to resolve this problem, please contact support@3drepo.org referencing the above error
 				<br><br> Click OK to refresh this page<md-container>`;
 		}

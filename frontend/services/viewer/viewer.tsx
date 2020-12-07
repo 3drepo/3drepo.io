@@ -33,7 +33,7 @@ import { PIN_COLORS } from '../../styles';
 import { clientConfigService } from '../clientConfig';
 import { MultiSelect } from './multiSelect';
 
-const UNITY_LOADER_PATH = 'unity/Build/UnityLoader.js';
+const UNITY_LOADER_PATH = 'unity/Build/unity.loader.js';
 
 declare const Module;
 
@@ -62,6 +62,7 @@ export class ViewerService {
 	public measuringUnits = '';
 	public modelString = null;
 	public divId = 'unityViewer';
+	public canvas = null;
 	private numClips = 0;
 	private stats: boolean = false;
 	private emitter = new EventEmitter();
@@ -102,7 +103,7 @@ export class ViewerService {
 		UnityUtil.init(this.handleUnityError, this.onUnityProgress, this.onModelProgress);
 		UnityUtil.hideProgressBar();
 
-		const unityHolder = document.createElement('div');
+		const unityHolder = document.createElement('canvas');
 		unityHolder.className = 'emscripten';
 		unityHolder.setAttribute('id', this.divId);
 		unityHolder.removeAttribute('style');
@@ -119,6 +120,7 @@ export class ViewerService {
 
 		this.element.appendChild(this.viewer);
 		this.viewer.appendChild(unityHolder);
+		this.canvas = unityHolder;
 
 		this.unityLoaderScript = document.createElement('script');
 	}
@@ -142,7 +144,7 @@ export class ViewerService {
 		UnityUtil.viewer = this;
 
 		try {
-			await this.insertUnityLoader(this.memory);
+			await this.insertUnityLoader();
 
 			(async () => {
 				await this.initUnity({
@@ -172,9 +174,6 @@ export class ViewerService {
 			this.emit(VIEWER_EVENTS.VIEWER_INIT);
 			document.body.style.cursor = 'wait';
 
-			// Shouldn't need this, but for something it is not being recognised from unitySettings!
-			Module.errorhandler = UnityUtil.onUnityError;
-
 			if (this.options && this.options.plugins) {
 				this.plugins = this.options.plugins;
 				Object.keys(this.plugins).forEach((key) => {
@@ -201,7 +200,7 @@ export class ViewerService {
 		});
 	}
 
-	public insertUnityLoader(memory) {
+	public insertUnityLoader() {
 		if (document.querySelector('.unity-loader')) {
 			return Promise.resolve();
 		}
@@ -209,14 +208,14 @@ export class ViewerService {
 		return new Promise((resolve, reject) => {
 			this.unityLoaderScript.addEventListener ('load', () => {
 				(async () => {
-					await UnityUtil.loadUnity(this.divId, undefined, memory);
-					console.debug('Loaded UnityLoader.js succesfully');
+					console.debug('Loaded unity.loader.js succesfully');
+					await UnityUtil.loadUnity(this.canvas);
 					resolve();
 				})();
 			}, false);
 			this.unityLoaderScript.addEventListener ('error', (error) => {
-				console.error('Error loading UnityLoader.js', error);
-				reject('Error loading UnityLoader.js');
+				console.error('Error loading unity.loader.js', error);
+				reject('Error loading unity.loader.js');
 			}, false);
 
 			// Event handlers MUST come first before setting src
