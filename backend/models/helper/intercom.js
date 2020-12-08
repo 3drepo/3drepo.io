@@ -19,6 +19,10 @@ const crypto = require("crypto");
 const { intercomSecretKey } = require("../../config");
 
 const setIntercomHash = (userProfile) => {
+	if (!intercomSecretKey) {
+		return;
+	}
+
 	userProfile.intercomHash = crypto.createHmac("sha256", intercomSecretKey)
 		.update(userProfile.email)
 		.digest("hex");
