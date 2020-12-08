@@ -149,9 +149,48 @@ describe("Projects", function () {
 	});
 
 	it("list all projects should succeed", function(done) {
+		const goldenProjects = [
+			{
+				"_id": "WPc09MqFPRXl6wygAAAAAA==",
+				"name": "project_exists",
+				"__v": 3,
+				"permissions": [],
+				"models": [
+					"a05974d0-2a8b-11eb-a58a-fde0111b8800",
+					"a5cd0670-2a8b-11eb-9358-1ff831483af6",
+					"ad8a39f0-2a8b-11eb-89a2-59e199077914"
+				]
+			},
+			{
+				"_id": "WPc1CcqFPRXl6wyhAAAAAA==",
+				"name": "project2",
+				"permissions": [],
+				"models": []
+			},
+			{
+				"_id": "WPc1PsqFPRXl6wyiAAAAAA==",
+				"name": "project3",
+				"permissions": [],
+				"models": []
+			},
+			{
+				"_id": "WPc1VcqFPRXl6wyjAAAAAA==",
+				"name": "project4",
+				"permissions": [],
+				"models": []
+			}
+		];
+
 		agent.get(`/${username}/projects`)
 			.expect(200, function(err, res) {
-				console.log(res.body);
+				console.log("==== res.body[0].permissions ====");
+				console.log(res.body[0].permissions);
+				console.log("==== res.body[1].permissions ====");
+				console.log(res.body[1].permissions);
+				console.log("==== res.body[2].permissions ====");
+				console.log(res.body[2].permissions);
+				console.log("==== res.body[3].permissions ====");
+				console.log(res.body[3].permissions);
 				done(err);
 			});
 	});
