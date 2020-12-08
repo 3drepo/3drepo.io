@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 
 // @ts-ignore
 import { useIntercom, IntercomProvider } from 'react-use-intercom';
@@ -24,12 +24,13 @@ interface IProps {
 	currentUser: any;
 }
 
-export class Intercom extends React.PureComponent<IProps, any> {
-	public setNameAndMail = () => {
-		try {
-			const { update } = useIntercom();
+const IntercomPage = (props: IProps) => {
+	const {  boot, hardShutdown } = useIntercom();
 
-			const {firstName, lastName, email } = this.props.currentUser;
+	const setNameAndMail = () => {
+		try {
+
+			const {firstName, lastName, email, userHash } = props.currentUser;
 
 			if (!email) {
 				return;
@@ -37,41 +38,31 @@ export class Intercom extends React.PureComponent<IProps, any> {
 
 			const name = `${firstName || ''} ${lastName || ''}`.trim();
 			// @ts-ignore
-			update( {
-					name: name, // Full name
-					email: email, // Email address
-					alignment: 'left'
+			boot( {
+					name, // Full name
+					email, // Email address
+					alignment: 'left',
 				}
 			);
 
 		} catch (e) {
 			console.debug('Intercom api error: ' + e);
 		}
-	}
+	};
 
-	public componentDidUpdate(prevProps) {
-		this.setNameAndMail(); // I don't know how to make this conditional
-	}
+	useEffect(() => {
+		if (props.currentUser?.email) {
+			setNameAndMail();
+		} else {
+			hardShutdown();
+		}
 
-	public render() {
-		const haveLicense: boolean = Boolean(clientConfigService.intercomLicense);
-		const IntercomPage = () => {
-			const { boot, shutdown, hide, show, update } = useIntercom();
-			// shutdown();
-			hide();
-			update(
-					{
-						alignment: 'left'
-					}
-			);
-			this.setNameAndMail();
-			return <div />;
-		};
-		return (
-			<>{haveLicense &&
-			<IntercomProvider appId={clientConfigService.intercomLicense} autoBoot>
-				<IntercomPage />
-			</IntercomProvider>}</>
-		);
-	}
-}
+	}, [props.currentUser?.email]);
+
+	return (<div />);
+};
+
+const {intercomLicense} = clientConfigService;
+const haveLicense: boolean = Boolean(intercomLicense);
+export const  Intercom = (props: IProps) =>
+	(<>{haveLicense && <IntercomProvider appId={intercomLicense} > <IntercomPage {...props} /> </IntercomProvider>}</>);
