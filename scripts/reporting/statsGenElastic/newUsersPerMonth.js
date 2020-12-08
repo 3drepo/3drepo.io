@@ -20,7 +20,7 @@
 const Utils = require ("./utils");
 const Elastic = require("./elastic");
 
-const writeNewElasticDocument = async (ElasticClient, month, year, count, total) => {
+const writeNewElasticDocument = async (elasticClient, month, year, count, total) => {
 	const elasticBody = {
 		"Month" : String(month),
 		"Year" : String(year),
@@ -28,17 +28,17 @@ const writeNewElasticDocument = async (ElasticClient, month, year, count, total)
 		"Total" : Number(total),
 		"DateTime" : new Date(year,month).toISOString()
 	};
-	await Elastic.createElasticRecord(ElasticClient, Utils.statsIndexPrefix, elasticBody) ;
+	await Elastic.createElasticRecord(elasticClient, Utils.statsIndexPrefix, elasticBody) ;
 };
 
-const writeNewUserEntry = async (ElasticClient, currentY, currentM, count, total, nextM, nextY) => {
+const writeNewUserEntry = async (elasticClient, currentY, currentM, count, total, nextM, nextY) => {
 	if(currentM !== -1) {
 		if(nextY && nextM) {
 			let month = currentM;
 			let year = currentY;
 			let counter = count;
 			do{
-				writeNewElasticDocument(ElasticClient, month, year, counter, total);
+				await writeNewElasticDocument(elasticClient, month, year, counter, total);
 				counter = 0;
 				year = month === 12 ? year + 1 : year;
 				month = month + 1 > 12 ? 1 : month + 1;
@@ -47,12 +47,12 @@ const writeNewUserEntry = async (ElasticClient, currentY, currentM, count, total
 				}
 			} while(!(month === nextM && year === nextY));
 		} else {
-			writeNewElasticDocument (ElasticClient, currentM, currentY, count, total);
+			await writeNewElasticDocument (elasticClient, currentM, currentY, count, total);
 		}
 	}
 };
 
-const reportNewUsersPerMonth = async (dbConn, ElasticClient) => {
+const reportNewUsersPerMonth = async (dbConn, elasticClient) => {
 	const col = await dbConn.db("admin").collection("system.users");
 	const users = await col.find(
 		{
@@ -62,7 +62,7 @@ const reportNewUsersPerMonth = async (dbConn, ElasticClient) => {
 	).sort({ "customData.createdAt" : 1 }).toArray();
 
 	let currentMonth = -1, currentYear = -1, currentCount = 0, total = 0;
-	users.forEach((user) => {
+	users.forEach( async (user) => {
 		const createdAt = user.customData.createdAt;
 		const month = createdAt.getMonth() + 1;
 		const year = createdAt.getFullYear();
@@ -71,7 +71,7 @@ const reportNewUsersPerMonth = async (dbConn, ElasticClient) => {
 			++currentCount;
 		} else {
 			total += currentCount;
-			writeNewUserEntry(ElasticClient, currentYear, currentMonth, currentCount, total, month, year);
+			await writeNewUserEntry(elasticClient, currentYear, currentMonth, currentCount, total, month, year);
 
 			currentMonth = month;
 			currentYear = year;
@@ -83,23 +83,15 @@ const reportNewUsersPerMonth = async (dbConn, ElasticClient) => {
 		const now = new Date();
 		const targetDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 		total += currentCount;
-		writeNewUserEntry(ElasticClient, currentYear, currentMonth, currentCount, total, targetDate.getMonth() + 1, targetDate.getFullYear());
+		await writeNewUserEntry(elasticClient, currentYear, currentMonth, currentCount, total, targetDate.getMonth() + 1, targetDate.getFullYear());
 	}
 };
 
 const NewUsers = {};
 
-NewUsers.createNewUsersReport = (dbConn, ElasticClient) =>{
-	return new Promise((resolve, reject) => {
-		reportNewUsersPerMonth(dbConn, ElasticClient).then(() => {
-			console.log("[DB] Generated NewUsersReport");
-			resolve();
-		}).catch((err) => {
-			reject(err);
-		});
-		// });
-	});
+NewUsers.createNewUsersReport = async (dbConn, elasticClient) =>{
+		await reportNewUsersPerMonth(dbConn, elasticClient)
+		console.log("[DB] Generated NewUsersReport");
 };
 
 module.exports = NewUsers;
-

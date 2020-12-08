@@ -71,19 +71,19 @@ async function start() {
 		const db = await client.connect();
 		console.log("Connected successfully!");
 
-		const ElasticClient = Elastic.createElasticClient();
-		await Elastic.createMissingIndicies(ElasticClient); // initalise the indicies if we're running for the first time
+		const elasticClient = Elastic.createElasticClient();
+		await Elastic.createMissingIndicies(elasticClient); // initalise the indicies if we're running for the first time
 
 		// if we're running on a daily basis to keep the stats up to date we don't want to run the full DB Report
 		if (Utils.clean(process.env.STATS_RUN_DAILY)) {
-			await UserList.createUsersReport(db, ElasticClient);
+			await UserList.createUsersReport(db, elasticClient);
 		} else {
 			await Promise.all([
-				UserList.createUsersReport(db, ElasticClient),
-				DBStats.createDBReport(db, ElasticClient)
+				UserList.createUsersReport(db, elasticClient),
+				DBStats.createDBReport(db, elasticClient)
 			]);
 		}
-		await ElasticClient.close();
+		await elasticClient.close();
 		await client.close();
 
 	} catch (err) {

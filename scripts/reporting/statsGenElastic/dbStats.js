@@ -22,20 +22,20 @@ const TSActivity = require("./teamspaceActivity");
 
 const DBStats = {};
 
-const createReports = async(dbConn, ElasticClient) => {
+const createReports = async(dbConn, elasticClient) => {
 
-	await NewUsersPerMonth.createNewUsersReport(dbConn, ElasticClient);
-	const {teamspaces} = await Teamspace.createTeamspaceReport(dbConn, ElasticClient);
+	await NewUsersPerMonth.createNewUsersReport(dbConn, elasticClient);
+	const {teamspaces} = await Teamspace.createTeamspaceReport(dbConn, elasticClient);
 	for(let i = 0; i < teamspaces.length; ++i) {
 		const ts = teamspaces[i];
 		console.log(`[DB] Creating teamspace activity report for ${ts.teamspace} [${i + 1}/${teamspaces.length}]...`);
-		await TSActivity.createTeamspaceActivityReport(dbConn, ElasticClient, ts.teamspace, ts.type);
+		await TSActivity.createTeamspaceActivityReport(dbConn, elasticClient, ts.teamspace, ts.type);
 	}
 };
 
-DBStats.createDBReport = async (dbConn, ElasticClient) => {
+DBStats.createDBReport = async (dbConn, elasticClient) => {
 	console.log("[DB] Creating DB statistics report...");
-	await createReports(dbConn, ElasticClient);
+	await createReports(dbConn, elasticClient);
 
 };
 

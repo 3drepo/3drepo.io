@@ -30,7 +30,7 @@ const isUnlimited = async (value) => {
 	return (value === "unlimited" ? true : false);
 };
 
-const writeQuotaDetails = async (dbConn, col, ElasticClient, enterprise) => {
+const writeQuotaDetails = async (dbConn, col, elasticClient, enterprise) => {
 	const type = enterprise ? "enterprise" : "discretionary";
 	const now = Date.now();
 
@@ -70,7 +70,7 @@ const writeQuotaDetails = async (dbConn, col, ElasticClient, enterprise) => {
 			"Expired" : Boolean (expired)
 		};
 		recordPromise.push (
-			Elastic.createElasticRecord(ElasticClient, Utils.teamspaceIndexPrefix + "-quota", elasticBody).then (()=> {
+			Elastic.createElasticRecord(elasticClient, Utils.teamspaceIndexPrefix + "-quota", elasticBody).then (()=> {
 				!expired && licensedTS.push({teamspace: user.user, type});
 			})
 		);
@@ -79,27 +79,19 @@ const writeQuotaDetails = async (dbConn, col, ElasticClient, enterprise) => {
 	return licensedTS;
 };
 
-const reportTeamspaceQuota = async (dbConn, ElasticClient) => {
+const reportTeamspaceQuota = async (dbConn, elasticClient) => {
 	const col = await dbConn.db("admin").collection("system.users");
 	console.log ("[QUOTA] Writing Licenced Teamspaces Quota information");
-	const enterpriseTS = await writeQuotaDetails(dbConn, col, ElasticClient, true);
-	const discretionaryTS = await writeQuotaDetails(dbConn, col, ElasticClient, false);
+	const enterpriseTS = await writeQuotaDetails(dbConn, col, elasticClient, true);
+	const discretionaryTS = await writeQuotaDetails(dbConn, col, elasticClient, false);
 	return [...enterpriseTS, ...discretionaryTS];
 };
 
 const TS = {};
 
-TS.createTeamspaceReport = async (dbConn, ElasticClient) =>{
-	return new Promise((resolve, reject) => {
-		reportTeamspaceQuota(dbConn, ElasticClient).then((ts) => {
-			console.log("[DB] Generated Teamspace Report");
-			resolve({teamspaces: ts});
-
-		}).catch((err) => {
-			reject(err);
-		});
-	});
+TS.createTeamspaceReport = async (dbConn, elasticClient) =>{
+	await reportTeamspaceQuota(dbConn, elasticClient)
+	console.log("[DB] Generated Teamspace Report");
 };
 
 module.exports = TS;
-

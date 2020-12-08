@@ -23,7 +23,7 @@ const Elastic = {};
 
 Elastic.createElasticClient = () => {
 	const ELASTIC_CLOUD_AUTH = process.env.ELASTIC_CLOUD_AUTH.split(":");
-	const ElasticClient = new Client({
+	const elasticClient = new Client({
 		cloud: {
 			id: process.env.ELASTIC_CLOUD_ID
 		},
@@ -36,32 +36,28 @@ Elastic.createElasticClient = () => {
 		request_timeout: 60
 	});
 
-	ElasticClient.cluster.health({},function(err,resp) {
+	elasticClient.cluster.health({},function(err,resp) {
 		console.log("[ELASTIC] -- Client Health --",resp);
 	});
-	return ElasticClient;
+	return elasticClient;
 };
 
-Elastic.createElasticRecord = async (ElasticClient, Index, elasticBody, id, mapping) => {
+Elastic.createElasticRecord = async (elasticClient, index, elasticBody, id, mapping) => {
 	try {
 
-		if (elasticBody) {
-			id = id || Utils.hashCode(Object.values(elasticBody).toString());
-		} else {
-			id = id || Utils.hashCode(Object.values({}).toString());
-		}
+		id = id || Utils.hashCode(Object.values(elasticBody || {}).toString());
 
-		const indexName = Index.toLowerCase(); // requirement of elastic that indexs be lowercase
-		const configured = await ElasticClient.indices.exists({ index: indexName });
+		const indexName = index.toLowerCase(); // requirement of elastic that indexs be lowercase
+		const configured = await elasticClient.indices.exists({ index: indexName });
 		if (!configured.body) {
-			await ElasticClient.indices.create({
+			await elasticClient.indices.create({
 				index: indexName
 			});
 			console.log("[ELASTIC] Created index " + indexName);
 
 			if (mapping) {
-				await ElasticClient.indices.putMapping({
-					index: Index,
+				await elasticClient.indices.putMapping({
+					index: index,
 					body: { properties: mapping }
 				});
 			}
@@ -69,7 +65,7 @@ Elastic.createElasticRecord = async (ElasticClient, Index, elasticBody, id, mapp
 		}
 
 		if (elasticBody) {
-			await ElasticClient.index({
+			await elasticClient.index({
 				index: indexName,
 				id: id,
 				refresh: true,
@@ -77,24 +73,22 @@ Elastic.createElasticRecord = async (ElasticClient, Index, elasticBody, id, mapp
 			});
 			console.log("[ELASTIC] created doc " + indexName + " " + Object.values(elasticBody).toString());
 		}
-		return Promise.resolve();
+
 	} catch (error) {
-		console.error("[ELASTIC] ERROR:" + Index, elasticBody, error);
-		Promise.reject();
+		console.error("[ELASTIC] ERROR:" + index, elasticBody, error);
 		throw(error.body.error);
 	}
 };
 
-Elastic.createElasticIndex = async (ElasticClient, Index, mapping) => {
+Elastic.createElasticIndex = async (elasticClient, index, mapping) => {
 	try {
-		Elastic.createElasticRecord (ElasticClient, Index, undefined, undefined, mapping);
+		await Elastic.createElasticRecord (elasticClient, index, undefined, undefined, mapping);
 	} catch (error) {
-		Promise.reject();
 		throw(error.body.error);
 	}
 };
 
-Elastic.createMissingIndicies = async (ElasticClient) => {
+Elastic.createMissingIndicies = async (elasticClient) => {
 	// initialise indicies if missing
 
 	const activityMapping = {
@@ -106,8 +100,7 @@ Elastic.createMissingIndicies = async (ElasticClient) => {
 		"Issues" :  { "type": "double" },
 		"Model Revisions" : { "type": "double" }
 	};
-
-	await Elastic.createElasticIndex(ElasticClient, Utils.teamspaceIndexPrefix + "-activity", activityMapping);
+	await Elastic.createElasticIndex(elasticClient, Utils.teamspaceIndexPrefix + "-activity", activityMapping);
 
 	const quotaMapping = {
 		"Teamspace" : { "type": "keyword" },
@@ -118,7 +111,7 @@ Elastic.createMissingIndicies = async (ElasticClient) => {
 		"Expiry Date" : { "type": "date" },
 		"Expired" : { "type": "boolean" }
 	};
-	await Elastic.createElasticIndex(ElasticClient, Utils.teamspaceIndexPrefix + "-quota", quotaMapping);
+	await Elastic.createElasticIndex(elasticClient, Utils.teamspaceIndexPrefix + "-quota", quotaMapping);
 
 	const usersMapping = {
 		"Teamspace" : { "type": "keyword" },
@@ -132,14 +125,14 @@ Elastic.createMissingIndicies = async (ElasticClient) => {
 		"Mail Optout" : { "type": "text" },
 		"Verified" : { "type": "boolean" }
 	};
-	await Elastic.createElasticIndex(ElasticClient, Utils.teamspaceIndexPrefix + "-users", usersMapping);
+	await Elastic.createElasticIndex(elasticClient, Utils.teamspaceIndexPrefix + "-users", usersMapping);
 
 	const loginMapping = {
 		"Teamspace" : { "type": "keyword" },
 		"Last Login" : { "type": "text" },
 		"DateTime" : { "type": "date" }
 	};
-	await Elastic.createElasticIndex(ElasticClient, Utils.teamspaceIndexPrefix + "-login", loginMapping);
+	await Elastic.createElasticIndex(elasticClient, Utils.teamspaceIndexPrefix + "-login", loginMapping);
 
 	const statsMapping = {
 		"Month" : { "type": "text" },
@@ -148,7 +141,7 @@ Elastic.createMissingIndicies = async (ElasticClient) => {
 		"Total" :{ "type": "double" },
 		"DateTime" : { "type": "date" }
 	};
-	await Elastic.createElasticIndex(ElasticClient, Utils.statsIndexPrefix, statsMapping);
+	await Elastic.createElasticIndex(elasticClient, Utils.statsIndexPrefix, statsMapping);
 
 };
 

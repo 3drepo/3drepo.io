@@ -22,7 +22,7 @@ const Elastic = require("./elastic");
 
 const UserList = {};
 
-UserList.createUsersReport = async (dbConn, ElasticClient) => {
+UserList.createUsersReport = async (dbConn, elasticClient) => {
 	console.log("[USERS] Creating users list...");
 
 	const db = dbConn.db("admin");
@@ -44,14 +44,14 @@ UserList.createUsersReport = async (dbConn, ElasticClient) => {
 				"Mail Optout" : user.customData.mailListOptOut,
 				"Verified" : user.customData.inactive
 			};
-			await Elastic.createElasticRecord(ElasticClient, Utils.teamspaceIndexPrefix + "-users", body, user.user.toLowerCase());
+			await Elastic.createElasticRecord(elasticClient, Utils.teamspaceIndexPrefix + "-users", body, user.user.toLowerCase());
 			if (!Utils.isUndefined(Utils.clean(user.customData.lastLoginAt))) {
 				const lastLogin = {
 					"Teamspace" : String(user.user),
 					"Last Login" : String(user.customData.lastLoginAt),
 					"DateTime" : Utils.formatDate(new Date(user.customData.lastLoginAt))
 				};
-				await Elastic.createElasticRecord(ElasticClient, Utils.teamspaceIndexPrefix + "-login", lastLogin);
+				await Elastic.createElasticRecord(elasticClient, Utils.teamspaceIndexPrefix + "-login", lastLogin);
 			}
 		}
 	}

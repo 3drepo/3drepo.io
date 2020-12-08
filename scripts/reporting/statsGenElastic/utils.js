@@ -17,7 +17,6 @@
 
 "use strict";
 const fs = require("fs");
-const concat = require("concat-files");
 const Utils = {};
 const CryptoJS = require("crypto-js");
 
@@ -27,19 +26,7 @@ Utils.statsIndexPrefix = "io-stats";
 Utils.hashCode = function(s) {
 	return CryptoJS.MD5(s).toString();
 };
-
-Utils.concat = (files, dest) => {
-	return new Promise((resolve, error) => {
-		concat(files, dest, (err) => {
-			if(err) {
-				error(err);
-			} else {
-				resolve();
-			}
-		});
-	});
-};
-
+ 
 Utils.formatDate = (date) => {
 	return date.toISOString();
 };

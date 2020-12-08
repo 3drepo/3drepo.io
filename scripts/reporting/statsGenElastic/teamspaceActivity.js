@@ -118,7 +118,7 @@ const printStatsToElastic = async (ElasticClient, data, ts, licenseType) => {
 	await Promise.all(recordPromise);
 }
 
-const reportActivity = async (db, ElasticClient, ts, licenseType) => {
+const reportActivity = async (db, elasticClient, ts, licenseType) => {
 	const modelSettings = await db.collection('settings').find({},{_id: 1}).toArray();
 
 	const modelProm = [];
@@ -134,9 +134,9 @@ const reportActivity = async (db, ElasticClient, ts, licenseType) => {
 
 const TS = {};
 
-TS.createTeamspaceActivityReport = (dbConn, ElasticClient, ts, licenseType) =>{
+TS.createTeamspaceActivityReport = (dbConn, elasticClient, ts, licenseType) =>{
 	return new Promise((resolve, reject) => {
-		reportActivity(dbConn.db(ts), ElasticClient, ts, licenseType).then(() => {
+		reportActivity(dbConn.db(ts), elasticClient, ts, licenseType).then(() => {
 				console.log('[DB] TeamspaceActivityReport created');
 				resolve();
 			}).catch((err) => {
