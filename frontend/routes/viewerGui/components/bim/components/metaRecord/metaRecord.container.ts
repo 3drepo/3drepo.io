@@ -28,7 +28,7 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	highlightsAllSimilar: BimActions.highlightsAllSimilar,
+	selectAllSimilar: BimActions.selectAllSimilar,
 	copyRules: BimActions.copyRules,
 }, dispatch);
 

@@ -45,7 +45,7 @@ export function* fetchMetadata({ teamspace, model, metadataId }) {
 	yield put(BimActions.setIsPending(false));
 }
 
-export function* highlightsAllSimilar({ rules }, colour?) {
+export function* selectAllSimilar({ rules }, colour?) {
 	try {
 		const teamspace = yield select(selectCurrentModelTeamspace);
 		const revision = yield select(selectCurrentRevisionId);
@@ -66,6 +66,6 @@ export function* copyRules({ rules }) {
 
 export default function* BimSaga() {
 	yield takeLatest(BimTypes.FETCH_METADATA, fetchMetadata);
-	yield takeLatest(BimTypes.HIGHLIGHTS_ALL_SIMILAR, highlightsAllSimilar);
+	yield takeLatest(BimTypes.SELECT_ALL_SIMILAR, selectAllSimilar);
 	yield takeLatest(BimTypes.COPY_RULES, copyRules);
 }

@@ -17,6 +17,8 @@
 
 import React from 'react';
 
+import Tooltip from '@material-ui/core/Tooltip';
+
 import { StarIcon } from '../../../../../components/starIcon/starIcon.component';
 import {
 	Actions, Container, MetaKey, MetaKeyText, MetaValue, StarIconWrapper, StyledCopyIcon, StyledIconButton,
@@ -29,7 +31,7 @@ interface IProps {
 	className?: string;
 	value?: string;
 	onStarClick: () => void;
-	highlightsAllSimilar: (rules) => void;
+	selectAllSimilar: (rules) => void;
 	copyRules: (rules) => void;
 }
 
@@ -86,18 +88,22 @@ export class MetaRecord extends React.PureComponent<IProps, IState> {
 				</MetaKey>
 				<MetaValue>{value}</MetaValue>
 				<Actions>
-					<StyledIconButton onClick={() => copyRules(this.rules)}>
-						<StyledCopyIcon />
-					</StyledIconButton>
-					<StyledIconButton onClick={this.handleHighlightsAllSimilar}>
-						<StyledSelectSimilarIcon />
-					</StyledIconButton>
+					<Tooltip title="Copy group filter to clipboard">
+						<StyledIconButton onClick={() => copyRules(this.rules)}>
+							<StyledCopyIcon />
+						</StyledIconButton>
+					</Tooltip>
+					<Tooltip title="Select elements with same parameter value">
+						<StyledIconButton onClick={this.handleSelectAllSimilar}>
+							<StyledSelectSimilarIcon />
+						</StyledIconButton>
+					</Tooltip>
 				</Actions>
 			</Container>
 		);
 	}
 
-	private handleHighlightsAllSimilar = () => this.props.highlightsAllSimilar(this.rules);
+	private handleSelectAllSimilar = () => this.props.selectAllSimilar(this.rules);
 
 	private handleStarClick = () => {
 		if (this.starClickTimeout) {

@@ -26,7 +26,7 @@ export const { Types: BimTypes, Creators: BimActions } = createActions({
 	setComponentState: ['componentState'],
 	setActiveMeta: ['activeMeta'],
 	resetBimState: [],
-	highlightsAllSimilar: ['rules'],
+	selectAllSimilar: ['rules'],
 	copyRules: ['rules'],
 }, { prefix: 'BIM/' });
 
