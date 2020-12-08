@@ -103,10 +103,10 @@ class Mitigation {
 			trim: true
 		});
 
-		return this.insert(account, records, true);
+		return this.insert(account, records);
 	}
 
-	async insert(account, mitigations, purgeOld = false) {
+	async insert(account, mitigations) {
 		const mitigationColl = await this.getMitigationCollection(account);
 		const requiredFields = ["mitigation_desc"];
 		const optionalFields = Object.keys(_.omit(fieldTypes, requiredFields));
@@ -132,11 +132,7 @@ class Mitigation {
 			mitigations[i] = newMitigation;
 		}
 
-		if (purgeOld) {
-			const clearMitigations = this.clearAll(account);
-			await clearMitigations;
-		}
-
+		await this.clearAll(account);
 		await mitigationColl.insert(mitigations);
 
 		return mitigations;
