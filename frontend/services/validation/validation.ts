@@ -67,7 +67,7 @@ export const schema = {
 
 	revisionName: Yup.string()
 		.required(VALIDATIONS_MESSAGES.REQUIRED)
-		.max(20, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
+		.max(50, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
 		.matches(/^[A-Za-z0-9_]+$/, VALIDATIONS_MESSAGES.NOT_ALPHANUMERIC),
 
 	username: Yup.string()

@@ -190,7 +190,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		}
 
 		if (!values.revisionName) {
-			setFieldValue('revisionName', snakeCase(fileName.replace(extension, '').substring(0, 20)));
+			setFieldValue('revisionName', snakeCase(fileName.replace(extension, '').substring(0, 50)));
 		}
 
 		onChange(event, ...params);
