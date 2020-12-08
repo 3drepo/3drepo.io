@@ -53,7 +53,7 @@ export function* selectAllSimilar({ rules }, colour?) {
 		const { data } = yield API.getMeshIDsByQuery(teamspace, model, rules, revision);
 		const ids = data.map(({ mesh_ids }) => mesh_ids);
 
-		yield put(TreeActions.selectNodes([].concat(...ids)));
+		yield put(TreeActions.selectNodes([].concat(...ids), false, true, true));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('highlights', 'elements', error));
 	}
