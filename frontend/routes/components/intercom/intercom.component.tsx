@@ -30,18 +30,20 @@ const IntercomPage = (props: IProps) => {
 	const setNameAndMail = () => {
 		try {
 
-			const {firstName, lastName, email, userHash } = props.currentUser;
+			const {firstName, lastName, email, intercomHash } = props.currentUser;
 
 			if (!email) {
 				return;
 			}
 
 			const name = `${firstName || ''} ${lastName || ''}`.trim();
+			hardShutdown();
 			// @ts-ignore
 			boot( {
 					name, // Full name
 					email, // Email address
 					alignment: 'left',
+					userHash: intercomHash
 				}
 			);
 
@@ -56,7 +58,6 @@ const IntercomPage = (props: IProps) => {
 		} else {
 			hardShutdown();
 		}
-
 	}, [props.currentUser?.email]);
 
 	return (<div />);
