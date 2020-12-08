@@ -148,6 +148,14 @@ describe("Projects", function () {
 		});
 	});
 
+	it("list all projects should succeed", function(done) {
+		agent.get(`/${username}/projects`)
+			.expect(200, function(err, res) {
+				console.log(res.body);
+				done(err);
+			});
+	});
+
 	it("should able to create project", function(done) {
 
 		const project = {
