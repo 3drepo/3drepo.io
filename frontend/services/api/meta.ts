@@ -77,14 +77,3 @@ export const overrideStarredMeta = (starredMeta) => {
 export const getMeshIDsByQuery = (teamspace, modelId, rules, revision = 'master/head') => {
 	return api.post(`${teamspace}/${modelId}/revision/${revision}/meta/rules?meshids=true`, rules);
 };
-
-/**
- * Get Metadata by query
- * @param teamspace
- * @param modelId
- * @param rules
- * @param revision
- */
-export const getMetadataByQuery = (teamspace, modelId, rules, revision = 'master/head') => {
-	return api.post(`${teamspace}/${modelId}/revision/${revision}/meta/rules`, rules);
-};
