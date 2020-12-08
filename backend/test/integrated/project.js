@@ -154,7 +154,10 @@ describe("Projects", function () {
 				"_id": "WPc09MqFPRXl6wygAAAAAA==",
 				"name": "project_exists",
 				"__v": 3,
-				"permissions": [],
+				"permissions": [
+					{ "user": "testing", "permissions": [] },
+					{ "user": "projectuser", "permissions": [] }
+				],
 				"models": [
 					"a05974d0-2a8b-11eb-a58a-fde0111b8800",
 					"a5cd0670-2a8b-11eb-9358-1ff831483af6",
@@ -164,33 +167,35 @@ describe("Projects", function () {
 			{
 				"_id": "WPc1CcqFPRXl6wyhAAAAAA==",
 				"name": "project2",
-				"permissions": [],
+				"permissions": [
+					{ "user": "testing", "permissions": [] },
+					{ "user": "projectuser", "permissions": [] }
+				],
 				"models": []
 			},
 			{
 				"_id": "WPc1PsqFPRXl6wyiAAAAAA==",
 				"name": "project3",
-				"permissions": [],
+				"permissions": [
+					{ "user": "testing", "permissions": [] },
+					{ "user": "projectuser", "permissions": [] }
+				],
 				"models": []
 			},
 			{
 				"_id": "WPc1VcqFPRXl6wyjAAAAAA==",
 				"name": "project4",
-				"permissions": [],
+				"permissions": [
+					{ "user": "testing", "permissions": [] },
+					{ "user": "projectuser", "permissions": [] }
+				],
 				"models": []
 			}
 		];
 
 		agent.get(`/${username}/projects`)
 			.expect(200, function(err, res) {
-				console.log("==== res.body[0].permissions ====");
-				console.log(res.body[0].permissions);
-				console.log("==== res.body[1].permissions ====");
-				console.log(res.body[1].permissions);
-				console.log("==== res.body[2].permissions ====");
-				console.log(res.body[2].permissions);
-				console.log("==== res.body[3].permissions ====");
-				console.log(res.body[3].permissions);
+				expect(res.body).to.deep.equal(goldenProjects);
 				done(err);
 			});
 	});
