@@ -37,7 +37,6 @@ const IntercomPage = (props: IProps) => {
 			}
 
 			const name = `${firstName || ''} ${lastName || ''}`.trim();
-			hardShutdown();
 			// @ts-ignore
 			boot( {
 					name, // Full name
