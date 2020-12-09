@@ -1,3 +1,4 @@
+import { sortBy } from 'lodash';
 /**
  *  Copyright (C) 2020 3D Repo Ltd
  *
@@ -39,6 +40,7 @@ interface IProps {
 	activeIssueId?: string;
 	showDetails?: boolean;
 	showPins: boolean;
+	sortByField: string;
 	issueDetails?: any;
 	isImportingBCF?: boolean;
 	searchEnabled: boolean;
@@ -57,8 +59,8 @@ interface IProps {
 	fetchIssues: (teamspace, model, revision) => void;
 	setState: (componentState: any) => void;
 	setNewIssue: () => void;
-	downloadIssues: (teamspace, model) => void;
-	printIssues: (teamspace, model) => void;
+	downloadItems: (teamspace, model) => void;
+	printItems: (teamspace, model) => void;
 	setActiveIssue: (issue, revision?) => void;
 	showIssueDetails: (revision, issueId ) => void;
 	goToIssue: (issue) => void;
@@ -71,6 +73,8 @@ interface IProps {
 	exportBCF: (teamspace, modelId) => void;
 	toggleSortOrder: () => void;
 	setFilters: (filters) => void;
+	setSortBy: (field) => void;
+	id?: string;
 }
 
 export class Issues extends React.PureComponent<IProps, any> {
@@ -80,34 +84,6 @@ export class Issues extends React.PureComponent<IProps, any> {
 			issueFilter.values = filterValuesMap[issueFilter.relatedField];
 			return issueFilter;
 		});
-	}
-
-	get commonHeaderMenuItems() {
-		const {
-			printIssues,
-			downloadIssues,
-			importBCF,
-			exportBCF,
-			teamspace,
-			model,
-			revision,
-			toggleSortOrder,
-			toggleShowPins,
-			showPins
-		} = this.props;
-
-		return getHeaderMenuItems(
-			teamspace,
-			model,
-			revision,
-			printIssues,
-			downloadIssues,
-			importBCF,
-			exportBCF,
-			toggleSortOrder,
-			toggleShowPins,
-			showPins
-		);
 	}
 
 	get toggleSubmodelsMenuItem() {
@@ -124,7 +100,7 @@ export class Issues extends React.PureComponent<IProps, any> {
 	}
 
 	get headerMenuItems() {
-		return this.commonHeaderMenuItems;
+		return getHeaderMenuItems(this.props);
 		/* NOTE: We no longer supper submodel issues in federation.
 		 * return !this.props.modelSettings.federate ?
 			this.commonHeaderMenuItems :
@@ -231,6 +207,8 @@ export class Issues extends React.PureComponent<IProps, any> {
 				onCloseDetails={this.closeDetails}
 				renderDetailsView={this.renderDetailsView}
 				type={VIEWER_PANELS.ISSUES}
+				sortByField={this.props.sortByField}
+				id={this.props.id}
 			/>
 		);
 	}

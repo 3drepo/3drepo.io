@@ -30,6 +30,7 @@ interface IProps {
 	statusColor: string;
 	extraInfo?: string;
 	actionButton?: React.ReactNode;
+	panelType?: string;
 }
 
 export class PreviewItemInfo extends React.PureComponent<IProps, any> {
@@ -59,11 +60,11 @@ export class PreviewItemInfo extends React.PureComponent<IProps, any> {
 	});
 
 	public render() {
-		const { author, createdAt, statusColor, StatusIconComponent, extraInfo, actionButton } = this.props;
+		const { author, createdAt, statusColor, StatusIconComponent, extraInfo, actionButton, panelType } = this.props;
 
 		return(
 			<Container>
-				<Details>
+				<Details panelType={panelType}>
 					<UserMarker name={author}>
 						<Status color={statusColor}>
 							{this.renderStatusIcon(StatusIconComponent)}

@@ -18,6 +18,7 @@
 import { IconButton, InputLabel, TextField } from '@material-ui/core';
 import styled from 'styled-components';
 import { LinkableField } from '../linkableField/linkableField.component';
+import { MarkdownField } from '../markdownField/markdownField.component';
 
 export const Container = styled.div`
 	position: relative;
@@ -45,6 +46,17 @@ export const StyledTextField = styled(TextField)`
 			padding-right: 56px;
 			box-sizing: border-box;
 		}
+	}
+`;
+
+export const StyledMarkdownField = styled(MarkdownField)`
+	&& {
+		display: block;
+		position: relative;
+		margin: 8px 0;
+		min-height: 14px;
+		font-size: 14px;
+		overflow: hidden;
 	}
 `;
 

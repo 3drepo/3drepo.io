@@ -78,6 +78,7 @@ interface IProps {
 	removeFromStarred: (modelName) => void;
 	setState: (componentState: IViewpointsComponentState) => void;
 	searchEnabled?: boolean;
+	shareViewpointLink: (teamspace, modelId, viewId) => void;
 }
 
 export const ModelGridItem = memo((props: IProps) => {
@@ -164,7 +165,7 @@ export const ModelGridItem = memo((props: IProps) => {
 	};
 
 	const handleLoadModelClick = () => {
-		const { teamspace, model } = props;
+		const { teamspace, model, shareViewpointLink } = props;
 
 		props.showDialog({
 			title: 'Load model with...',
@@ -173,6 +174,7 @@ export const ModelGridItem = memo((props: IProps) => {
 				teamspace,
 				modelId: model,
 				onChange,
+				onShare: shareViewpointLink,
 			},
 			search: {
 				enabled: props.searchEnabled,
@@ -218,7 +220,7 @@ export const ModelGridItem = memo((props: IProps) => {
 		const { teamspace, name, model, canUpload, projectName } = props;
 
 		props.showDialog({
-			title: `Upload Model`,
+			title: `New Revision: ${name}`,
 			template: UploadModelFileDialog,
 			DialogProps: {
 				disableRestoreFocus: true

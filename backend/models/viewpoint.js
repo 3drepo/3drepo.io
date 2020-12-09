@@ -30,8 +30,9 @@ const clean = function(routePrefix, viewpointToClean, serialise = true) {
 		"guid",
 		"highlighted_group_id",
 		"hidden_group_id",
+		"override_group_ids",
 		"shown_group_id",
-		"override_group_ids"
+		"transformation_group_ids"
 	];
 
 	if (viewpointToClean) {
@@ -52,7 +53,6 @@ const clean = function(routePrefix, viewpointToClean, serialise = true) {
 		if (serialise) {
 			setViewpointScreenshotURL(routePrefix, viewpointToClean);
 			viewpointToClean.screenshot_ref = undefined;
-
 		}
 	}
 
@@ -153,16 +153,18 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 
 	});
 
-	if (vpData.override_group_ids) {
-		if (Array.isArray(vpData.override_group_ids)) {
-			if (vpData.override_groups_id.length) {
-				viewpoint.override_groups_id = vpData.override_groups_id;
+	["override_group_ids", "transformation_group_ids"].forEach((groupIdName) => {
+		if (vpData[groupIdName]) {
+			if (Array.isArray(vpData[groupIdName])) {
+				if (vpData[groupIdName].length) {
+					viewpoint[groupIdName] = vpData[groupIdName];
+				}
+			} else {
+				systemLogger.logError("invalid type " + groupIdName);
+				throw responseCodes.INVALID_ARGUMENTS;
 			}
-		} else {
-			systemLogger.logError("invalid type override_groups_id");
-			throw responseCodes.INVALID_ARGUMENTS;
 		}
-	}
+	});
 
 	const groupPromises = [];
 
@@ -182,22 +184,40 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 		}
 	});
 
-	if (vpData.override_groups) {
-		const overrideGroupsProms = [];
-		vpData.override_groups.forEach((group) => {
-			overrideGroupsProms.push(
-				Groups.createGroup(dbCol, null, {...group, [groupIdField]: utils.stringToUUID(hostId)}).then((groupResult) => {
-					return groupResult._id;
+	["override_groups", "transformation_groups"].forEach((groups) => {
+		if (vpData[groups]) {
+			const groupsProms = [];
+			vpData[groups].forEach((group) => {
+				if ("transformation_groups" === groups &&
+					!(group.transformation && 16 === group.transformation.length && group.objects)) {
+					systemLogger.logError("invalid transformation group");
+					throw responseCodes.INVALID_ARGUMENTS;
+				}
+
+				groupsProms.push(
+					Groups.createGroup(dbCol, null, {...group, [groupIdField]: utils.stringToUUID(hostId)}).then((groupResult) => {
+						return groupResult._id;
+					})
+				);
+			});
+
+			groupPromises.push(
+				Promise.all(groupsProms).then((groupIds) => {
+					switch (groups) {
+						case "override_groups":
+							viewpoint.override_group_ids = groupIds;
+							break;
+						case "transformation_groups":
+							viewpoint.transformation_group_ids = groupIds;
+							break;
+						default:
+							systemLogger.logError("unrecognised group name: " + groups);
+							throw responseCodes.INVALID_ARGUMENTS;
+					}
 				})
 			);
-		});
-
-		groupPromises.push(
-			Promise.all(overrideGroupsProms).then((overrideGroups) => {
-				viewpoint.override_group_ids = overrideGroups;
-			})
-		);
-	}
+		}
+	});
 
 	await Promise.all(groupPromises);
 	if (vpData.screenshot && vpData.screenshot !== "") {

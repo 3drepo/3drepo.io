@@ -67,7 +67,7 @@ export const searchByFilters = (
 						const boundryType = filter.value.value;
 						const boundryValue = filter.value.date;
 
-						if (boundryType === 'from') {
+						if (boundryType.includes('from')) {
 							return itemValue >= dateFloor(boundryValue);
 						}
 

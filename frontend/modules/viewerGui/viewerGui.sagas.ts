@@ -64,7 +64,7 @@ function* fetchData({ teamspace, model }) {
 			put(ModelActions.waitForSettingsAndFetchRevisions(teamspace, model)),
 			put(TreeActions.setIsTreeProcessed(false)),
 			put(ViewpointsActions.fetchViewpoints(teamspace, model)),
-			put(CommentsActions.fetchUsers(teamspace)),
+			put(CommentsActions.fetchUsers(teamspace))
 		]);
 
 		yield all([
@@ -82,6 +82,7 @@ function* fetchData({ teamspace, model }) {
 			put(RisksActions.fetchRisks(teamspace, model, revision)),
 			put(GroupsActions.fetchGroups(teamspace, model, revision)),
 			put(ViewerGuiActions.getHelicopterSpeed(teamspace, model)),
+			put(SequencesActions.fetchSequences()),
 			put(StarredActions.fetchStarredMeta())
 		]);
 	} catch (error) {
@@ -245,6 +246,15 @@ function* goToExtent() {
 	}
 }
 
+function* setProjectionMode({mode}) {
+	try {
+		yield Viewer.setProjectionMode(mode);
+		yield put(ViewerGuiActions.setProjectionModeSuccess(mode));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('set', 'projection mode', error));
+	}
+}
+
 function* setNavigationMode({mode}) {
 	try {
 		yield Viewer.setNavigationMode(mode);
@@ -350,6 +360,7 @@ function* clearHighlights() {
 function* setCamera({ params }) {
 	try {
 		Viewer.setCamera(params);
+		yield put(ViewerGuiActions.setProjectionModeSuccess(params.type));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'camera', error));
 	}
@@ -357,16 +368,17 @@ function* setCamera({ params }) {
 
 function* loadModel() {
 	try {
+		yield Viewer.isViewerReady();
+
 		const { teamspace, model } = yield select(selectUrlParams);
 		const revision = yield select(selectCurrentRevisionId);
 		const modelSettings = yield select(selectSettings);
 		const selectedViewpoint = yield select(selectInitialView);
 
-		yield Viewer.isViewerReady();
 		yield Viewer.loadViewerModel(teamspace, model, 'master', revision || 'head', selectedViewpoint?.viewpoint);
 		yield Viewer.updateViewerSettings(modelSettings);
 
-		if (selectedViewpoint) {
+		if (selectedViewpoint) { // This is to have the viewpoint state in redux the same as in unity
 			yield put(ViewpointsActions.showViewpoint(teamspace, model, selectedViewpoint, true));
 		}
 
@@ -415,6 +427,7 @@ export default function* ViewerGuiSaga() {
 	yield takeLatest(ViewerGuiTypes.STOP_LISTEN_ON_NUM_CLIP, stopListenOnNumClip);
 	yield takeLatest(ViewerGuiTypes.CLEAR_HIGHLIGHTS, clearHighlights);
 	yield takeLatest(ViewerGuiTypes.SET_CAMERA, setCamera);
+	yield takeLatest(ViewerGuiTypes.SET_PROJECTION_MODE, setProjectionMode);
 	yield takeLatest(ViewerGuiTypes.LOAD_MODEL, loadModel);
 	yield takeLatest(ViewerGuiTypes.SET_IS_PIN_DROP_MODE, setIsPinDropMode);
 }

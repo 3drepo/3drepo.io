@@ -58,6 +58,8 @@ export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActio
 	deactivateMeasure: [],
 	clearHighlights: [],
 	setCamera: ['params'],
+	setProjectionMode: ['mode'],
+	setProjectionModeSuccess: ['mode'],
 	resetPanels: [],
 }, { prefix: 'VIEWER_GUI/' });
 
@@ -134,6 +136,10 @@ export const setPanelLock = (state = INITIAL_STATE, { panelName }) => {
 	return { ...state, lockedPanels: [panelName], leftPanels: [panelName, ...leftPanels] };
 };
 
+const setProjectionModeSuccess = (state = INITIAL_STATE, { mode }) => {
+	return { ...state, projectionMode: mode };
+};
+
 const setNavigationModeSuccess = (state = INITIAL_STATE, { mode }) => {
 	return { ...state, navigationMode: mode };
 };
@@ -183,6 +189,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ViewerGuiTypes.SET_PANEL_LOCK]: setPanelLock,
 	[ViewerGuiTypes.SET_IS_MODEL_LOADED] : setIsModelLoaded,
 	[ViewerGuiTypes.SET_NAVIGATION_MODE_SUCCESS] : setNavigationModeSuccess,
+	[ViewerGuiTypes.SET_PROJECTION_MODE_SUCCESS] : setProjectionModeSuccess,
 	[ViewerGuiTypes.SET_CLIPPING_MODE_SUCCESS] : setClippingModeSuccess,
 	[ViewerGuiTypes.SET_HELICOPTER_SPEED] : setHelicopterSpeed,
 	[ViewerGuiTypes.SET_IS_FOCUS_MODE] : setIsFocusMode,

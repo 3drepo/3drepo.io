@@ -40,11 +40,13 @@ export const LEVELS_OF_RISK = [...LEVELS_LIST];
 
 export const MAIN_RISK_TYPE = 'risk';
 export const TREATMENT_RISK_TYPE = 'treatment';
+export const SEQUENCING_RISK_TYPE = 'sequencing';
 export const ATTACHMENTS_RISK_TYPE = 'attachments';
 
 export const RISK_TABS = {
 	RISK: 'Risk',
 	TREATMENT: 'Treatment',
+	SEQUENCING: 'Sequencing',
 	ATTACHMENTS: 'Attachments',
 };
 
@@ -125,7 +127,8 @@ export const RISK_FILTER_RELATED_FIELDS = {
 	RESIDUAL_CONSEQUENCE: 'residual_consequence',
 	RESIDUAL_LIKELIHOOD: 'residual_likelihood',
 	RESIDUAL_LEVEL_OF_RISK: 'residual_level_of_risk',
-	OVERALL_LEVEL_OF_RISK: 'overall_level_of_risk'
+	OVERALL_LEVEL_OF_RISK: 'overall_level_of_risk',
+	START_DATETIME: 'sequence_start'
 };
 
 export const RISK_FILTERS = [
@@ -218,6 +221,11 @@ export const RISK_FILTERS = [
 		label: 'Overall level of risk',
 		relatedField: RISK_FILTER_RELATED_FIELDS.OVERALL_LEVEL_OF_RISK,
 		type: RISK_FILTER_FILTER_TYPES.NORMAL
+	},
+	{
+		label: 'Starting Date',
+		relatedField: RISK_FILTER_RELATED_FIELDS.START_DATETIME,
+		type: FILTER_TYPES.DATE
 	}
 ] as any;
 
@@ -239,12 +247,9 @@ export const RISKS_ACTIONS_MENU = {
 		label: 'Download JSON',
 		Icon: Download
 	},
-	SORT_BY_DATE: {
-		label: 'Sort by date',
-		isSorting: true,
-		Icon: {
-			ASC: SortAmountUp,
-			DESC: SortAmountDown
-		}
+	SORT_ORDER: {
+		label: 'Sort order',
+		ASC: SortAmountUp,
+		DESC: SortAmountDown,
 	}
 };

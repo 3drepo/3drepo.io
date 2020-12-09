@@ -45,6 +45,8 @@ const fieldTypes = {
 	"priority_last_changed": "[object Number]",
 	"rev_id": ["[object String]", "[object Object]"],
 	"scale": "[object Number]",
+	"sequence_start": "[object Number]",
+	"sequence_end": "[object Number]",
 	"status": "[object String]",
 	"status_last_changed": "[object Number]",
 	"topic_type": "[object String]",
@@ -162,7 +164,7 @@ class Issue extends Ticket {
 
 		if (!history) {
 			return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
-		} else if (history) {
+		} else {
 			revId = history._id;
 		}
 

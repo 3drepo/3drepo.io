@@ -26,6 +26,7 @@ import { IconButton, MenuItem, Tab, Tabs } from '@material-ui/core';
 import Add from '@material-ui/icons/Add';
 import Check from '@material-ui/icons/Check';
 
+import { encodeElementId } from '../../helpers/html';
 import { renderWhenTrue } from '../../helpers/rendering';
 import { sortModels } from '../../modules/teamspaces/teamspaces.helpers';
 import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
@@ -446,7 +447,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	})(models.length)
 
 	private renderProjectContainer = (models, project) => renderWhenTrue(() => (
-		<GridContainer key={`container-${project.id}`}>
+		<GridContainer  key={`container-${project.id}`} id={`models-container-${encodeElementId(project.name)}`}>
 			{this.renderAddModelGridItem(project.teamspace, project.id)}
 			{this.renderModels(models)}
 		</GridContainer>

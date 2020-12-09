@@ -33,61 +33,74 @@ import {
 
 interface IProps {
 	sequences: any;
-	initializeSequences: () => void;
-	setSelectedFrame: (date: Date) => void;
-	fetchFrame: (date: Date) => void;
+	setSelectedDate: (date: Date) => void;
+	fetchSelectedFrame: () => void;
 	setStepInterval: (interval: number) => void;
 	setStepScale: (scale: STEP_SCALE) => void;
 	setSelectedSequence: (id: string) => void;
-	restoreIfcSpacesHidden: () => void;
 	maxDate: Date;
 	minDate: Date;
 	selectedDate: Date;
-	selectedMinDate: Date;
+	selectedEndingDate: Date;
 	colorOverrides: any;
 	stepInterval: number;
 	stepScale: STEP_SCALE;
 	currentTasks: any[];
 	loadingFrame: boolean;
 	selectedSequence: any;
+	rightPanels: string[];
+	setPanelVisibility: (panelName, visibility) => void;
+	toggleActivitiesPanel: () => void;
+	fetchActivityDetails: (id: string) => void;
+	deselectViewsAndLeaveClipping: () => void;
+	id?: string;
 }
 
 const da =  new Date();
 
-const SequenceDetails = ({ minDate, maxDate, selectedDate,
-	setSelectedFrame, stepInterval,
-	stepScale, setStepInterval, setStepScale,
-	currentTasks, selectedMinDate, loadingFrame,
-	fetchFrame }) => (
+const SequenceDetails = ({
+	minDate, maxDate, selectedDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
+	setStepScale, currentTasks, loadingFrame,  rightPanels, toggleActivitiesPanel,
+	fetchActivityDetails, onPlayStarted
+}) => (
 		<>
 			<SequencePlayer
 				min={minDate}
 				max={maxDate}
 				value={selectedDate}
+				endingDate={selectedEndingDate}
 				stepInterval={stepInterval}
 				stepScale={stepScale}
-				onChange={setSelectedFrame}
+				onChange={setSelectedDate}
 				onChangeStepScale={setStepScale}
 				onChangeStepInterval={setStepInterval}
 				loadingFrame={loadingFrame}
-				fetchFrame={fetchFrame}
+				rightPanels={rightPanels}
+				toggleActivitiesPanel={toggleActivitiesPanel}
+				onPlayStarted={onPlayStarted}
 			/>
-			<TasksList tasks={currentTasks}
-				minDate={selectedMinDate}
-				maxDate={selectedDate}
-				loadingFrame={loadingFrame} />
+			<TasksList
+				tasks={currentTasks}
+				minDate={selectedDate}
+				maxDate={selectedEndingDate}
+				loadingFrame={loadingFrame}
+				fetchActivityDetails={fetchActivityDetails}
+			/>
 		</>
 	);
 
 const SequencesLoader = () => (<LoaderContainer><Loader /></LoaderContainer>);
 
 export class Sequences extends React.PureComponent<IProps, {}> {
-	public componentDidMount = () => {
-		this.props.initializeSequences();
+	public componentWillUnmount = () => {
+		this.props.setPanelVisibility(VIEWER_PANELS.ACTIVITIES, false);
 	}
 
-	public componentWillUnmount = () => {
-		this.props.restoreIfcSpacesHidden();
+	public componentDidUpdate(prevProps: Readonly<IProps>) {
+		const { selectedSequence, setPanelVisibility } = this.props;
+		if (selectedSequence !== prevProps.selectedSequence && !selectedSequence) {
+			setPanelVisibility(VIEWER_PANELS.ACTIVITIES, false);
+		}
 	}
 
 	public renderTitleIcon = () => {
@@ -101,6 +114,10 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 		return <SequencesIcon />;
 	}
 
+	public onPlayStarted = () => {
+		this.props.deselectViewsAndLeaveClipping();
+	}
+
 	public render = () => {
 		const { selectedSequence, setSelectedSequence, sequences } = this.props;
 
@@ -112,15 +129,16 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 					hideSearch
 					hideMenu
 				/>}
+				id={this.props.id}
 			>
 
 				{!sequences && <SequencesLoader />}
 
-				{sequences && selectedSequence && sequences.length > 0 &&
-					<SequenceDetails {...this.props} />
+				{selectedSequence && sequences.length > 0 &&
+					<SequenceDetails {...this.props} onPlayStarted={this.onPlayStarted} />
 				}
 
-				{sequences  && !selectedSequence && sequences.length > 0 &&
+				{sequences && !selectedSequence && sequences.length > 0 &&
 					<SequencesList sequences={sequences} setSelectedSequence={setSelectedSequence} />
 				}
 

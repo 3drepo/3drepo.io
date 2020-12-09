@@ -61,6 +61,7 @@ interface IProps {
 	onClick?: (viewpoint) => void;
 	onChangeName?: (viewpointName) => void;
 	defaultView?: boolean;
+	displayShare?: boolean;
 }
 
 const ViewItemSchema = Yup.object().shape({
@@ -138,6 +139,15 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 		<Small>(Default View)</Small>
 	));
 
+	public renderViewpointNameWithShare = renderWhenTrue(() => (
+		<NameRow>
+			{this.renderViewpointName(true)}
+				<IconsGroup disabled={this.state.isDeletePending}>
+					{this.props.onShare && <StyledShareIcon onClick={this.handleShareLink} />}
+				</IconsGroup>
+		</NameRow>
+	));
+
 	public renderViewpointData = renderWhenTrue(() => (
 		<NameRow>
 			{this.renderViewpointName(true)}
@@ -196,7 +206,7 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 					)} />
 					<IconsGroup disabled={this.state.isDeletePending}>
 						<StyledCancelIcon onClick={this.props.onCancelEditMode} />
-						<SaveIconButton type="submit" disableRipple>
+						<SaveIconButton type="submit" disableRipple id="views-card-save-button">
 							<StyledSaveIcon />
 						</SaveIconButton>
 					</IconsGroup>
@@ -219,7 +229,8 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 		this._handleDelete(event);
 	}
 
-	public handleShareLink = () => {
+	public handleShareLink = (event: React.MouseEvent) => {
+		event.stopPropagation();
 		const { teamspace, modelId, viewpoint: {_id} } = this.props;
 		this.props.onShare(teamspace, modelId, _id);
 	}
@@ -251,7 +262,8 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 				{this.renderScreenshotPlaceholder(!this.screenshot)}
 				{this.renderViewpointForm(this.props.active && this.props.editMode)}
 				{this.renderViewpointData(this.props.active && !this.props.editMode)}
-				{this.renderViewpointName(!this.props.active)}
+				{this.renderViewpointName(!this.props.active && !this.props.displayShare)}
+				{this.renderViewpointNameWithShare(this.props.displayShare)}
 			</ViewpointItem>
 		);
 	}

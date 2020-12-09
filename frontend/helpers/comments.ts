@@ -16,15 +16,18 @@
  */
 
 import { uniqBy, values } from 'lodash';
+import linkify from 'markdown-linkify';
 import { getAPIUrl } from '../services/api';
 import { getRiskConsequenceName, getRiskLikelihoodName } from './risks';
 import { sortByDate } from './sorting';
 
 export const INTERNAL_IMAGE_PATH_PREFIX = `API/`;
+export const INTERNAL_VIEWPOINT_ID_REGEX = new RegExp('#SS-[\\w-]+', 'gi');
 export const MARKDOWN_USER_REFERENCE_REGEX = new RegExp('@\\w+', 'gi');
 export const MARKDOWN_TICKET_REFERENCE_REGEX = new RegExp('#\\d+', 'gi');
 export const MARKDOWN_RESOURCE_REFERENCE_REGEX = new RegExp('#res.[\\w-]+', 'gi');
 export const MARKDOWN_INTERNAL_IMAGE_PATH_REGEX = new RegExp(`${INTERNAL_IMAGE_PATH_PREFIX}`, 'gi');
+export const VIEWPOINT_ID_REGEX = new RegExp('/viewpoints/[\\w-]+', 'gi');
 
 export interface IComment {
 	action?: {property: string, from: string, to: string, propertyText: string, text: string};
@@ -33,6 +36,12 @@ export interface IComment {
 	guid: number;
 	owner: string;
 	sealed: boolean;
+}
+
+export interface IDetails {
+	account: string;
+	_id: string;
+	model: string;
 }
 
 export const createAttachResourceComments = (owner: string,  resources = []) =>
@@ -61,7 +70,7 @@ export const prepareComments = (comments = []) => {
 		return comments;
 	}
 
-	const preparedComments = comments.map((comment) => this.prepareComment(comment));
+	const preparedComments = comments.map((comment) => prepareComment(comment));
 	return sortByDate(preparedComments, {order: 'desc'});
 };
 
@@ -277,18 +286,18 @@ const convertActionValueToText = (value = '') => {
 		'closed': 'Closed'
 	};
 
-	let actionText = value;
+	let actionText = value || '';
 
-	value = value.toLowerCase();
+	const actionKey = actionText.toLowerCase();
 
-	if (actions.hasOwnProperty(value)) {
-		actionText = actions[value];
+	if (value && actions.hasOwnProperty(actionKey)) {
+		actionText = actions[actionKey];
 	}
 
 	return actionText;
 };
 
-export const transformCustomsLinksToMarkdown = ( comment: IComment, tickets, type ) => {
+export const transformCustomsLinksToMarkdown = ( details: IDetails, comment: IComment, tickets, type ) => {
 	let text = comment.comment;
 
 	if (!text || (Boolean(comment.action)
@@ -299,6 +308,22 @@ export const transformCustomsLinksToMarkdown = ( comment: IComment, tickets, typ
 	const usersReferences = text.matchAll(MARKDOWN_USER_REFERENCE_REGEX);
 	const ticketsReferences = text.matchAll(MARKDOWN_TICKET_REFERENCE_REGEX) || [];
 	const resourcesReferences = text.matchAll(MARKDOWN_RESOURCE_REFERENCE_REGEX);
+	const viewpointReferences = text.matchAll(INTERNAL_VIEWPOINT_ID_REGEX);
+
+	if (viewpointReferences) {
+		const { account: teamspace, model: projectId, _id: ticketId } = details;
+		const referenceType = type === 'risk' ? 'risk' : 'issues';
+
+		const uniqViewpointReferences = uniqBy([...viewpointReferences], 0);
+		uniqViewpointReferences.forEach(({ 0: viewpointReference }) => {
+			const viewpointId = viewpointReference.replace('#SS-', '');
+			const referenceRegExp = RegExp(viewpointReference);
+			text = text
+				.replace(referenceRegExp,
+				// tslint:disable-next-line:max-line-length
+				`![](${INTERNAL_IMAGE_PATH_PREFIX}${teamspace}/${projectId}/${referenceType}/${ticketId}/viewpoints/${viewpointId}/screenshot.png)`);
+		});
+	}
 
 	if (ticketsReferences) {
 		const uniqIssuesReferences = uniqBy([...ticketsReferences], 0);
@@ -331,6 +356,8 @@ export const transformCustomsLinksToMarkdown = ( comment: IComment, tickets, typ
 				.replace(referenceRegExp, `[${resourceReference}](${resourceReference.replace('#res.', '')} "${type}")`);
 		});
 	}
+
+	text = linkify(text);
 
 	return text;
 };

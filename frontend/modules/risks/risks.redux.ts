@@ -48,9 +48,11 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	subscribeOnRiskCommentsChanges: ['teamspace', 'modelId', 'riskId'],
 	unsubscribeOnRiskCommentsChanges: ['teamspace', 'modelId', 'riskId'],
 	createCommentSuccess: ['comment', 'riskId'],
+	createCommentsSuccess: ['comments', 'riskId'],
 	deleteCommentSuccess: ['commentGuid', 'riskId'],
 	updateCommentSuccess: ['comment', 'riskId'],
 	toggleSortOrder: ['sortOrder'],
+	setSortBy: ['field'],
 	updateNewRisk: ['newRisk'],
 	setFilters: ['filters'],
 	showCloseInfo: ['riskId'],
@@ -103,7 +105,8 @@ export const INITIAL_STATE = {
 		postCommentIsPending: false,
 		associatedActivities: [],
 		sortOrder: 'desc',
-		failedToLoad: false
+		failedToLoad: false,
+		sortBy: 'created'
 	},
 	mitigationCriteria: {},
 };
@@ -184,18 +187,22 @@ export const setComponentState = (state = INITIAL_STATE, { componentState = {} }
 	return { ...state, componentState: { ...state.componentState, ...componentState } };
 };
 
-export const createCommentSuccess = (state = INITIAL_STATE, { comment, riskId }) => {
-	let comments;
-
-	if (comment.action || comment.viewpoint) {
-		comments = [comment, ...state.risksMap[riskId].comments.map((log) => ({ ...log, sealed: true, new: true }))];
-	} else {
-		comments = [...state.risksMap[riskId].comments.map((log) => ({ ...log, sealed: true, new: true }))];
-	}
+export const createCommentsSuccess = (state = INITIAL_STATE, { comments, riskId }) => {
+	comments = comments.concat(state.risksMap[riskId].comments);
+	comments = comments.map((log, i) => ({ ...log, sealed: (i !== 0) ? true : log.sealed}));
 
 	const risksMap = updateRiskProps(state.risksMap, riskId, { comments });
-
 	return { ...state, risksMap };
+};
+
+export const createCommentSuccess = (state = INITIAL_STATE, { comment, riskId }) => {
+	const alreadyInComments = state.risksMap[riskId].comments.find(({ guid }) => guid === comment.guid);
+
+	if (!alreadyInComments) {
+		return createCommentsSuccess(state, {comments: [comment], riskId } );
+	}
+
+	return { ...state };
 };
 
 export const updateCommentSuccess = (state = INITIAL_STATE, { comment, riskId }) => {
@@ -218,6 +225,15 @@ export const toggleSortOrder = (state = INITIAL_STATE) => {
 		...state, componentState: {
 			...state.componentState,
 			sortOrder: state.componentState.sortOrder === 'asc' ? 'desc' : 'asc'
+		}
+	};
+};
+
+export const setSortBy = (state = INITIAL_STATE, {field}) => {
+	return {
+		...state, componentState: {
+			...state.componentState,
+			sortBy: field
 		}
 	};
 };
@@ -280,9 +296,11 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.TOGGLE_DETAILS_PENDING_STATE]: toggleDetailsPendingState,
 	[RisksTypes.TOGGLE_POST_COMMENT_PENDING_STATE]: togglePostCommentPendingState,
 	[RisksTypes.CREATE_COMMENT_SUCCESS]: createCommentSuccess,
+	[RisksTypes.CREATE_COMMENTS_SUCCESS]: createCommentsSuccess,
 	[RisksTypes.UPDATE_COMMENT_SUCCESS]: updateCommentSuccess,
 	[RisksTypes.DELETE_COMMENT_SUCCESS]: deleteCommentSuccess,
 	[RisksTypes.TOGGLE_SORT_ORDER]: toggleSortOrder,
+	[RisksTypes.SET_SORT_BY]: setSortBy,
 	[RisksTypes.SHOW_CLOSE_INFO]: showCloseInfo,
 	[RisksTypes.HIDE_CLOSE_INFO]: hideCloseInfo,
 	[RisksTypes.UPDATE_SELECTED_RISK_PIN]: updateSelectedRiskPin,

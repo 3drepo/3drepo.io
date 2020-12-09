@@ -51,6 +51,8 @@ const fieldTypes = {
 	"risk_factor": "[object String]",
 	"safetibase_id": "[object String]",
 	"scope": "[object String]",
+	"sequence_start": "[object Number]",
+	"sequence_end": "[object Number]",
 	"thumbnail": "[object String]",
 	"viewpoint": "[object Object]",
 	"viewpoints": "[object Array]"
@@ -144,6 +146,28 @@ class Risk extends Ticket {
 	clean(account, model, riskToClean) {
 		riskToClean = super.clean(account, model, riskToClean);
 		return { ...riskToClean, ...getLevelOfRisk(riskToClean) };
+	}
+
+	async findByModelName(account, model, branch, revId, query, projection, filters, noClean = false, convertCoords = false) {
+		// eslint-disable-next-line prefer-const
+		let { levelOfRisks, residualLevelOfRisks, ...queryFilters} = filters;
+
+		const filterRisk = (risk) => {
+			const levelOfRisk = getLevelOfRisk(risk);
+			let valid = true;
+
+			if (levelOfRisks) {
+				valid = levelOfRisks.includes(levelOfRisk.level_of_risk);
+			}
+
+			if (residualLevelOfRisks) {
+				valid = valid && residualLevelOfRisks.includes(levelOfRisk.residual_level_of_risk);
+			}
+
+			return valid;
+		};
+
+		return super.findByModelName(account, model, branch, revId, query, projection, queryFilters, noClean, convertCoords, filterRisk);
 	}
 }
 

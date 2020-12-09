@@ -24,15 +24,21 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	initializeSequences: [],
 	fetchSequencesSuccess: ['sequences'],
 	setSelectedSequence: ['sequenceId'],
-	setSelectedFrame: ['date'],
+	setSelectedSequenceSuccess: ['sequenceId'],
 	setSelectedDate: ['date'],
+	setSelectedDateSuccess: ['date'],
+	setLastSelectedDateSuccess: ['date'],
 	fetchFrame: ['date'],
+	fetchSelectedFrame: [],
 	setStateDefinition: ['stateId', 'stateDefinition'],
-	setLastLoadedSuccesfullState: ['stateId'],
 	setStepInterval: ['stepInterval'],
 	setStepScale: ['stepScale'],
-	setIfcSpacesHidden: ['ifcSpacesHidden'],
-	restoreIfcSpacesHidden: [],
+	fetchActivitiesDefinitions: ['sequenceId'],
+	fetchActivitiesDefinitionsSuccess: ['sequenceId', 'activities'],
+	showSequenceDate: ['date'],
+	handleTransparenciesVisibility: ['transparencies'],
+	restoreModelDefaultVisibility: [],
+
 	reset: []
 }, { prefix: 'SEQUENCES/' });
 
@@ -41,12 +47,13 @@ export const INITIAL_STATE = {
 	selectedSequence: null,
 	lastSelectedSequence: null,
 	selectedDate: null,
-	lastSuccesfulStateId: null,
+	lastSelectedDate: null,
 	stateDefinitions: {},
 	statesPending: false,
 	stepInterval: 1,
 	stepScale: STEP_SCALE.DAY,
-	ifcSpacesHidden: true
+	hiddenGeometryVisible: true,
+	activities: {}
 };
 
 export const fetchSequencesSuccess = (state = INITIAL_STATE, { sequences }) => {
@@ -54,7 +61,11 @@ export const fetchSequencesSuccess = (state = INITIAL_STATE, { sequences }) => {
 	return { ...state, sequences };
 };
 
-export const setSelectedSequence = (state = INITIAL_STATE, { sequenceId }) => {
+export const fetchActivitiesDefinitionsSuccess = (state = INITIAL_STATE, { sequenceId, activities }) => {
+	return { ...state, activities: {...state.activities, [sequenceId]: activities } };
+};
+
+export const setSelectedSequenceSuccess = (state = INITIAL_STATE, { sequenceId }) => {
 	let lastSelectedSequence = state.lastSelectedSequence;
 
 	if (sequenceId !== null && state.lastSelectedSequence !== sequenceId) {
@@ -70,16 +81,16 @@ export const setSelectedSequence = (state = INITIAL_STATE, { sequenceId }) => {
 	return {...state, selectedSequence: sequenceId, lastSelectedSequence };
 };
 
-export const setSelectedDate =  (state = INITIAL_STATE, { date }) => {
-	return {...state, selectedDate: date};
+export const setSelectedDateSuccess =  (state = INITIAL_STATE, { date }) => {
+	return {...state, selectedDate: date };
+};
+
+export const setLastSelectedDateSuccess =  (state = INITIAL_STATE, { date }) => {
+	return {...state, lastSelectedDate: date};
 };
 
 export const setStateDefinition = (state = INITIAL_STATE, { stateId, stateDefinition}) => {
 	return {...state, stateDefinitions: {...state.stateDefinitions, [stateId]: stateDefinition}};
-};
-
-export const setLastLoadedSuccesfullState =  (state = INITIAL_STATE, { stateId }) => {
-	return {...state, lastSuccesfulStateId: stateId};
 };
 
 export const setStepInterval = (state = INITIAL_STATE, { stepInterval }) => {
@@ -94,18 +105,14 @@ export const reset = () => {
 	return {...INITIAL_STATE};
 };
 
-export const setIfcSpacesHidden = (state = INITIAL_STATE, { ifcSpacesHidden }) => {
-	return {...state, ifcSpacesHidden};
-};
-
 export const reducer = createReducer(INITIAL_STATE, {
 	[SequencesTypes.FETCH_SEQUENCES_SUCCESS]: fetchSequencesSuccess,
-	[SequencesTypes.SET_SELECTED_DATE]: setSelectedDate,
+	[SequencesTypes.FETCH_ACTIVITIES_DEFINITIONS_SUCCESS]: fetchActivitiesDefinitionsSuccess,
+	[SequencesTypes.SET_SELECTED_DATE_SUCCESS]: setSelectedDateSuccess,
+	[SequencesTypes.SET_LAST_SELECTED_DATE_SUCCESS]: setLastSelectedDateSuccess,
 	[SequencesTypes.SET_STATE_DEFINITION]: setStateDefinition,
-	[SequencesTypes.SET_SELECTED_SEQUENCE]: setSelectedSequence,
-	[SequencesTypes.SET_LAST_LOADED_SUCCESFULL_STATE]: setLastLoadedSuccesfullState,
+	[SequencesTypes.SET_SELECTED_SEQUENCE_SUCCESS]: setSelectedSequenceSuccess,
 	[SequencesTypes.SET_STEP_INTERVAL]: setStepInterval,
-	[SequencesTypes.SET_IFC_SPACES_HIDDEN]: setIfcSpacesHidden,
 	[SequencesTypes.SET_STEP_SCALE]: setStepScale,
 	[SequencesTypes.RESET]: reset
 });

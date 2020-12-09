@@ -28,6 +28,7 @@ import {
 	selectIsFocusMode,
 	selectIsMetadataVisible,
 	selectNavigationMode,
+	selectProjectionMode,
 	ViewerGuiActions
 } from '../../../../modules/viewerGui';
 import { Toolbar } from './toolbar.component';
@@ -39,6 +40,7 @@ import { GroupsActions } from '../../../../modules/groups';
 import { selectMetaKeysExist } from '../../../../modules/model';
 
 const mapStateToProps = createStructuredSelector({
+	projectionMode: selectProjectionMode,
 	navigationMode: selectNavigationMode,
 	helicopterSpeed: selectHelicopterSpeed,
 	isFocusMode: selectIsFocusMode,
@@ -65,6 +67,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setMeasureVisibility: ViewerGuiActions.setMeasureVisibility,
 	setCoordView: ViewerGuiActions.setCoordView,
 	setPanelVisibility: ViewerGuiActions.setPanelVisibility,
+	setProjectionMode: ViewerGuiActions.setProjectionMode,
 	setMetadataActive: BimActions.setIsActive,
 	showAllNodes: TreeActions.showAllNodes,
 	hideSelectedNodes: TreeActions.hideSelectedNodes,

@@ -85,7 +85,9 @@ function translateBouncerErrCode(bouncerErrorCode) {
 		{ res: responseCodes.FILE_IMPORT_NO_3D_VIEW, softFail: false, userErr: true},
 		{ res: responseCodes.FILE_IMPORT_UNKNOWN_ERR, softFail: false, userErr: false},
 		{ res: responseCodes.FILE_IMPORT_TIMED_OUT, softFail: false, userErr: false},
-		{ res: responseCodes.FILE_IMPORT_SYNCHRO_NOT_SUPPORTED, softFail: false, userErr: false}
+		{ res: responseCodes.FILE_IMPORT_SYNCHRO_NOT_SUPPORTED, softFail: false, userErr: false},
+		{ res: responseCodes.FILE_IMPORT_MAX_NODE_EXCEEDED, softFail: false, userErr: true},
+		{ res: responseCodes.FILE_IMPORT_PROCESS_ERR, softFail: false, userErr: false}
 	];
 
 	const errObj =  bouncerErrToWebErr.length > bouncerErrorCode ?
@@ -734,7 +736,8 @@ function _handleUpload(correlationId, account, model, username, file, data) {
 		username,
 		null,
 		data.tag,
-		data.desc
+		data.desc,
+		data.importAnimations
 	);
 }
 
@@ -836,181 +839,54 @@ function removeModel(account, model, forceRemove) {
 	});
 }
 
-function getModelPermission(username, setting, account) {
-
-	if(!setting) {
-		return Promise.resolve([]);
+const flattenPermissions = (permissions, defaultToPermissionDefinition = false) => {
+	if (!permissions) {
+		return [];
 	}
 
-	let permissions = [];
-	let dbUser;
+	return _.compact(_.flatten(permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || (defaultToPermissionDefinition ? p : null))));
+};
 
-	return User.findByUserName(account).then(_dbUser => {
+async function getModelPermission(username, setting, account) {
+	if(!setting) {
+		return [];
+	}
 
-		dbUser = _dbUser;
-
+	try {
+		let permissions = [];
+		const dbUser = await User.findByUserName(account);
 		if(!dbUser) {
 			return [];
 		}
 
 		const accountPerm = dbUser.customData.permissions.findByUser(username);
-
 		if(accountPerm && accountPerm.permissions) {
-			permissions = _.compact(_.flatten(accountPerm.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || null)));
+			permissions = flattenPermissions(accountPerm.permissions);
 		}
 
 		const projectQuery = { models: setting._id, "permissions.user": username };
-		// project admin have access to models underneath it.
-		return Project.findOne({account}, projectQuery, { "permissions.$" : 1 });
 
-	}).then(project => {
+		// project admin have access to models underneath it.
+		const project = await Project.findOne({account}, projectQuery, { "permissions.$" : 1 });
 
 		if(project && project.permissions) {
-			permissions = permissions.concat(
-				_.compact(_.flatten(project.permissions[0].permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || null)))
-			);
+			permissions = permissions.concat(flattenPermissions(project.permissions[0].permissions));
 		}
 
 		const template = setting.findPermissionByUser(username);
 
 		if(template) {
+			const permissionTemplate = dbUser.customData.permissionTemplates.findById(template.permission);
 
-			const permission = dbUser.customData.permissionTemplates.findById(template.permission);
-
-			if(permission && permission.permissions) {
-				permissions = permissions.concat(
-					_.flatten(permission.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || p))
-				);
+			if(permissionTemplate && permissionTemplate.permissions) {
+				permissions = permissions.concat(flattenPermissions(permissionTemplate.permissions, true));
 			}
 		}
 
 		return _.uniq(permissions);
-	}).catch(err => {
+	} catch(err) {
 		systemLogger.logError("Failed to getModelPermission:", err);
-	});
-}
-
-function getAllMetadata(account, model, branch, rev) {
-	return getAllIdsWithMetadataField(account, model, branch, rev, "");
-}
-
-function getAllIdsWith4DSequenceTag(account, model, branch, rev) {
-	// Get sequence tag then call the generic getAllIdsWithMetadataField
-	return ModelSetting.findOne({account : account}, {_id : model}).then(settings => {
-		if(!settings) {
-			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
-		}
-		if(!settings.fourDSequenceTag) {
-			return Promise.reject(responseCodes.SEQ_TAG_NOT_FOUND);
-		}
-		return getAllIdsWithMetadataField(account, model,  branch, rev, settings.fourDSequenceTag);
-
-	});
-}
-
-function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, username) {
-	// Get the revision object to find all relevant IDs
-	let history;
-	let fullFieldName = "metadata";
-
-	if (fieldName && fieldName.length > 0) {
-		fullFieldName += "." + fieldName;
 	}
-
-	return History.getHistory({ account, model }, branch, rev).then(_history => {
-		history = _history;
-		if(!history) {
-			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
-		}
-		// Check for submodel references
-		const filter = {
-			type: "ref",
-			_id: { $in: history.current }
-		};
-		return Ref.find({ account, model }, filter);
-	}).then(refs =>{
-
-		// for all refs get their tree
-		const getMeta = [];
-
-		refs.forEach(ref => {
-
-			let refBranch, refRev;
-
-			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
-				refBranch = C.MASTER_BRANCH_NAME;
-			} else {
-				refRev = utils.uuidToString(ref._rid);
-			}
-
-			getMeta.push(
-				getAllIdsWithMetadataField(ref.owner, ref.project, refBranch, refRev, fieldName, username)
-					.then(obj => {
-						return Promise.resolve({
-							data: obj.data,
-							account: ref.owner,
-							model: ref.project
-						});
-					})
-					.catch(() => {
-					// Just because a sub model fails doesn't mean everything failed. Resolve the promise.
-						return Promise.resolve();
-					})
-			);
-		});
-
-		return Promise.all(getMeta);
-
-	}).then(_subMeta => {
-
-		const match = {
-			_id: {"$in": history.current}
-		};
-		match[fullFieldName] =  {"$exists" : true};
-
-		const projection = {
-			parents: 1
-		};
-		projection[fullFieldName] = 1;
-
-		return Scene.find({account, model}, match, projection).then(obj => {
-			if(obj) {
-				// rename fieldName to "value"
-				const parsedObj = {data: obj};
-				if(obj.length > 0 && fieldName && fieldName.length > 0) {
-					const objStr = JSON.stringify(obj);
-					parsedObj.data = JSON.parse(objStr.replace(new RegExp(fieldName, "g"), "value"));
-				}
-				if(_subMeta.length > 0) {
-					parsedObj.subModels = _subMeta;
-				}
-				return parsedObj;
-			} else {
-				return Promise.reject(responseCodes.METADATA_NOT_FOUND);
-			}
-		});
-
-	});
-
-}
-
-function getMetadata(account, model, id) {
-
-	const projection = {
-		shared_id: 0,
-		paths: 0,
-		type: 0,
-		api: 0,
-		parents: 0
-	};
-
-	return Scene.findOne({account, model}, { _id: utils.stringToUUID(id) }, projection).then(obj => {
-		if(obj) {
-			return obj;
-		} else {
-			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
-		}
-	});
 }
 
 async function getMeshById(account, model, meshId) {
@@ -1093,6 +969,32 @@ const acceptedFormat = [
 	"rvt", "rfa", "spm"
 ];
 
+const getModelSetting = async (account, model, username) => {
+	let setting = await ModelSetting.findById({account}, model);
+
+	if (!setting) {
+		throw { resCode: responseCodes.MODEL_INFO_NOT_FOUND};
+	} else {
+		// compute permissions by user role
+		const [permissions, submodels] = await Promise.all([
+			getModelPermission(
+				username,
+				setting,
+				account
+			),
+			listSubModels(account, model, C.MASTER_BRANCH_NAME)
+		]);
+
+		setting = await setting.clean();
+		setting.model = setting._id;
+		setting.account = account;
+		setting.headRevisions = {};
+		setting.permissions = permissions;
+		setting.subModels = submodels;
+		return setting;
+	}
+};
+
 module.exports = {
 	createNewModel,
 	createNewFederation,
@@ -1108,14 +1010,12 @@ module.exports = {
 	importModel,
 	removeModel,
 	getModelPermission,
-	getMetadata,
 	resetCorrelationId,
-	getAllMetadata,
-	getAllIdsWith4DSequenceTag,
-	getAllIdsWithMetadataField,
 	getSubModelRevisions,
 	setStatus,
 	importSuccess,
 	importFail,
-	getMeshById
+	getMeshById,
+	getModelSetting,
+	flattenPermissions
 };

@@ -55,8 +55,9 @@ export class TopMenu extends React.PureComponent<IProps, any> {
 					label="Back to teamspaces"
 					Icon={BackIcon}
 					action={this.handleGoToTeamspaces}
+					id="top-menu-back-button"
 				/>
-				<Notifications />
+				<Notifications id="top-menu-notifications-button" />
 			</>
 		);
 	});
@@ -76,6 +77,7 @@ export class TopMenu extends React.PureComponent<IProps, any> {
 					onTeamspacesClick={this.handleGoToTeamspaces}
 					onSettingClick={this.handleOpenSettingsDialog}
 					isAuthenticated={isAuthenticated}
+					id="top-menu-profile-button"
 				/>
 			</Container>
 		);

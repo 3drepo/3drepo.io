@@ -52,7 +52,8 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	createCommentsSuccess: ['comments', 'issueId'],
 	deleteCommentSuccess: ['commentGuid', 'issueId'],
 	updateCommentSuccess: ['comment', 'issueId'],
-	toggleSortOrder: ['sortOrder'],
+	toggleSortOrder: [],
+	setSortBy: ['field'],
 	updateNewIssue: ['newIssue'],
 	setFilters: ['filters'],
 	showCloseInfo: ['issueId'],
@@ -89,6 +90,7 @@ export const INITIAL_STATE = {
 		isImportingBCF: false,
 		showSubmodelIssues: false,
 		sortOrder: 'desc',
+		sortBy: 'created',
 		failedToLoad: false,
 		savedPin: null
 	}
@@ -174,7 +176,13 @@ export const createCommentsSuccess = (state = INITIAL_STATE, { comments, issueId
 };
 
 export const createCommentSuccess = (state = INITIAL_STATE, { comment, issueId }) => {
-	return createCommentsSuccess(state, {comments: [comment], issueId } );
+	const alreadyInComments = state.issuesMap[issueId].comments.find(({ guid }) => guid === comment.guid);
+
+	if (!alreadyInComments) {
+		return createCommentsSuccess(state, {comments: [comment], issueId } );
+	}
+
+	return { ...state };
 };
 
 export const updateCommentSuccess = (state = INITIAL_STATE, { comment, issueId }) => {
@@ -197,6 +205,15 @@ export const toggleSortOrder = (state = INITIAL_STATE) => {
 		...state, componentState: {
 			...state.componentState,
 			sortOrder: state.componentState.sortOrder === 'asc' ? 'desc' : 'asc'
+		}
+	};
+};
+
+export const setSortBy = (state = INITIAL_STATE, {field}) => {
+	return {
+		...state, componentState: {
+			...state.componentState,
+			sortBy: field
 		}
 	};
 };
@@ -260,6 +277,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.UPDATE_COMMENT_SUCCESS]: updateCommentSuccess,
 	[IssuesTypes.DELETE_COMMENT_SUCCESS]: deleteCommentSuccess,
 	[IssuesTypes.TOGGLE_SORT_ORDER]: toggleSortOrder,
+	[IssuesTypes.SET_SORT_BY]: setSortBy,
 	[IssuesTypes.SHOW_CLOSE_INFO]: showCloseInfo,
 	[IssuesTypes.HIDE_CLOSE_INFO]: hideCloseInfo,
 	[IssuesTypes.RESET]: reset,

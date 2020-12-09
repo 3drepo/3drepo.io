@@ -31,7 +31,7 @@ export const fetchModelsPermissions = (teamspace, models) => {
 };
 
 export const updateModelsPermissions = (teamspace, permissionsList) => {
-	return api.post(`${teamspace}/models/permissions`, permissionsList);
+	return api.patch(`${teamspace}/models/permissions`, permissionsList);
 };
 
 /**

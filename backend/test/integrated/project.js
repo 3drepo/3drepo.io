@@ -32,6 +32,100 @@ describe("Projects", function () {
 	const username = "projectuser";
 	const password = "projectuser";
 
+	const projectName = "project_exists";
+
+	const goldenTestModelList = [
+		{
+			"_id": "a05974d0-2a8b-11eb-a58a-fde0111b8800",
+			"type": "type",
+			"desc": "desc",
+			"name": "TestModel1",
+			"__v": 0,
+			"subModels": [],
+			"surveyPoints": [],
+			"properties": { "unit": "m", "code": "00011" },
+			"permissions": [
+				"change_model_settings",
+				"upload_files",
+				"create_issue",
+				"comment_issue",
+				"view_issue",
+				"view_model",
+				"download_model",
+				"edit_federation",
+				"delete_federation",
+				"delete_model",
+				"manage_model_permission"
+			],
+			"status": "ok",
+			"id": "a05974d0-2a8b-11eb-a58a-fde0111b8800",
+			"model": "a05974d0-2a8b-11eb-a58a-fde0111b8800",
+			"account": "projectuser",
+			"headRevisions": {}
+		},
+		{
+			"_id": "a5cd0670-2a8b-11eb-9358-1ff831483af6",
+			"type": "type",
+			"desc": "desc",
+			"name": "TestModel2",
+			"__v": 0,
+			"subModels": [],
+			"surveyPoints": [],
+			"properties": { "unit": "m", "code": "00011" },
+			"permissions": [
+				"change_model_settings",
+				"upload_files",
+				"create_issue",
+				"comment_issue",
+				"view_issue",
+				"view_model",
+				"download_model",
+				"edit_federation",
+				"delete_federation",
+				"delete_model",
+				"manage_model_permission"
+			],
+			"status": "ok",
+			"id": "a5cd0670-2a8b-11eb-9358-1ff831483af6",
+			"model": "a5cd0670-2a8b-11eb-9358-1ff831483af6",
+			"account": "projectuser",
+			"headRevisions": {}
+		}
+	];
+
+	const goldenRandomNameList = [
+		{
+			"_id": "ad8a39f0-2a8b-11eb-89a2-59e199077914",
+			"type": "type",
+			"desc": "desc",
+			"name": "RandomName",
+			"__v": 0,
+			"subModels": [],
+			"surveyPoints": [],
+			"properties": { unit: "m", code: "00011" },
+			"permissions": [
+				"change_model_settings",
+				"upload_files",
+				"create_issue",
+				"comment_issue",
+				"view_issue",
+				"view_model",
+				"download_model",
+				"edit_federation",
+				"delete_federation",
+				"delete_model",
+				"manage_model_permission"
+			],
+			"status": "ok",
+			"id": "ad8a39f0-2a8b-11eb-89a2-59e199077914",
+			"model": "ad8a39f0-2a8b-11eb-89a2-59e199077914",
+			"account": "projectuser",
+			"headRevisions": {}
+		}
+	];
+
+	const goldenFullModelList = [...goldenTestModelList, ...goldenRandomNameList];
+
 	before(function(done) {
 		server = app.listen(8080, function () {
 			console.log("API test server is listening on port 8080!");
@@ -98,7 +192,7 @@ describe("Projects", function () {
 	it("should fail to create project with dup name", function(done) {
 
 		const project = {
-			name: "project_exists"
+			name: projectName
 		};
 
 		agent.post(`/${username}/projects`)
@@ -165,7 +259,7 @@ describe("Projects", function () {
 			});
 	});
 
-	it("should be able to update project", function(done) {
+	it("should be able to update project [DEPRECATED]", function(done) {
 
 		const project = {
 			name: "project2",
@@ -199,7 +293,95 @@ describe("Projects", function () {
 		], (err, res) => done(err));
 	});
 
-	it("should be able to update project name", function(done) {
+	it("should be able to update project", function(done) {
+		const project = {
+			name: "project2",
+			permissions: [{
+				user: "testing",
+				permissions: ["create_model", "edit_project"]
+			}]
+		};
+
+		async.series([
+			callback => {
+				agent.patch(`/${username}/projects/${project.name}`)
+					.send(project)
+					.expect(200, function(err, res) {
+						callback(err);
+					});
+			},
+			callback => {
+				agent.get(`/${username}/projects/${project.name}`)
+					.expect(200, function(err, res) {
+						const entriesFiltered = res.body.permissions.filter((entry => {
+							return entry.permissions.length > 0;
+						}));
+						expect(entriesFiltered).to.deep.equal(project.permissions);
+						callback(err);
+					});
+			}
+		], (err, res) => done(err));
+	});
+
+	it("should be able to update project permissions", function(done) {
+		const projectName = "project2";
+		const project = {
+			permissions: [{
+				user: "testing",
+				permissions: ["create_model"]
+			}]
+		};
+
+		async.series([
+			callback => {
+				agent.patch(`/${username}/projects/${projectName}`)
+					.send(project)
+					.expect(200, function(err, res) {
+						callback(err);
+					});
+			},
+			callback => {
+				agent.get(`/${username}/projects/${projectName}`)
+					.expect(200, function(err, res) {
+						const entriesFiltered = res.body.permissions.filter((entry => {
+							return entry.permissions.length > 0;
+						}));
+						expect(entriesFiltered).to.deep.equal(project.permissions);
+						callback(err);
+					});
+			}
+		], (err, res) => done(err));
+	});
+
+	it("should be able to remove project permissions", function(done) {
+		const projectName = "project2";
+		const testUser = "testing";
+		const project = {
+			permissions: [{
+				user: testUser,
+				permissions: []
+			}]
+		};
+
+		async.series([
+			callback => {
+				agent.patch(`/${username}/projects/${projectName}`)
+					.send(project)
+					.expect(200, function(err, res) {
+						callback(err);
+					});
+			},
+			callback => {
+				agent.get(`/${username}/projects/${projectName}`)
+					.expect(200, function(err, res) {
+						expect(res.body.permissions.find(x => x.user === testUser).permissions.length).to.equal(0);
+						callback(err);
+					});
+			}
+		], (err, res) => done(err));
+	});
+
+	it("should be able to update project name [DEPRECATED]", function(done) {
 
 		const project = {
 			name: "project2_new"
@@ -232,7 +414,36 @@ describe("Projects", function () {
 		], (err, res) => done(err));
 	});
 
-	it("should fail to update project for invalid permissions", function(done) {
+	it("should be able to update project name", function(done) {
+		const projectName = "project2_new";
+		const project = {
+			name: "project2"
+		};
+
+		async.series([
+			callback => {
+				agent.patch(`/${username}/projects/${projectName}`)
+					.send(project)
+					.expect(200, function(err, res) {
+						callback(err);
+					});
+			},
+			callback => {
+				agent.get(`/${username}.json`)
+					.expect(200, function(err, res) {
+						const account = res.body.accounts.find(account => account.account === username);
+						expect(account).to.exist;
+
+						const pg = account.projects.find(pg => pg.name === project.name);
+						expect(pg).to.exist;
+
+						callback(err);
+					});
+			}
+		], (err, res) => done(err));
+	});
+
+	it("should fail to update project for invalid permissions [DEPRECATED]", function(done) {
 
 		const project = {
 			name: "project3",
@@ -250,7 +461,41 @@ describe("Projects", function () {
 			});
 	});
 
-	it("should fail to assign permission to unlicensed user", function(done) {
+	it("should fail to update project for invalid permissions", function(done) {
+		const project = {
+			name: "project3",
+			permissions: [{
+				user: "testing",
+				permissions: ["create_issue"]
+			}]
+		};
+
+		agent.patch(`/${username}/projects/${project.name}`)
+			.send(project)
+			.expect(400, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.INVALID_PERM.value);
+				done(err);
+			});
+	});
+
+	it("should fail to assign permission to unlicensed user [DEPRECATED]", function(done) {
+		const project = {
+			name: "project3",
+			permissions: [{
+				user: "metaTest",
+				permissions: ["edit_project"]
+			}]
+		};
+
+		agent.patch(`/${username}/projects/${project.name}`)
+			.send(project)
+			.expect(400, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+				done(err);
+			});
+	});
+
+	it("should fail to assign permission to unlicensed user [DEPRECATED]", function(done) {
 		const project = {
 			name: "project3",
 			permissions: [{
@@ -260,6 +505,23 @@ describe("Projects", function () {
 		};
 
 		agent.put(`/${username}/projects/${project.name}`)
+			.send(project)
+			.expect(400, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+				done(err);
+			});
+	});
+
+	it("should fail to assign permission to unlicensed user", function(done) {
+		const project = {
+			name: "project3",
+			permissions: [{
+				user: "metaTest",
+				permissions: ["edit_project"]
+			}]
+		};
+
+		agent.patch(`/${username}/projects/${project.name}`)
 			.send(project)
 			.expect(400, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
@@ -301,8 +563,17 @@ describe("Projects", function () {
 
 	});
 
-	it("should fail to update a project that doesnt exist", function(done) {
+	it("should fail to update a project that doesnt exist [DEPRECATED]", function(done) {
 		agent.put(`/${username}/projects/notexist`)
+			.send({})
+			.expect(404, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
+				done(err);
+			});
+	});
+
+	it("should fail to update a project that doesnt exist", function(done) {
+		agent.patch(`/${username}/projects/notexist`)
 			.send({})
 			.expect(404, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
@@ -318,4 +589,75 @@ describe("Projects", function () {
 			});
 	});
 
+	it("list all project models should succeed", function(done) {
+		agent.get(`/${username}/projects/${projectName}/models`)
+			.expect(200, function(err, res) {
+				expect(res.body).to.deep.equal(goldenFullModelList);
+				done(err);
+			});
+	});
+
+	it("list all project models from project that doesn't exist should fail", function(done) {
+		agent.get(`/${username}/projects/notexist/models`)
+			.expect(404, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
+				done(err);
+			});
+	});
+
+	it("list project models matching query name should succeed", function(done) {
+		agent.get(`/${username}/projects/${projectName}/models?name=RandomName`)
+			.expect(200, function(err, res) {
+				expect(res.body).to.deep.equal(goldenRandomNameList);
+				done(err);
+			});
+	});
+
+	it("list project models matching partial query name (start) should succeed", function(done) {
+		agent.get(`/${username}/projects/${projectName}/models?name=TestModel`)
+			.expect(200, function(err, res) {
+				expect(res.body).to.deep.equal(goldenTestModelList);
+				done(err);
+			});
+	});
+
+	it("list project models matching partial query name (middle) should succeed", function(done) {
+		agent.get(`/${username}/projects/${projectName}/models?name=Model`)
+			.expect(200, function(err, res) {
+				expect(res.body).to.deep.equal(goldenTestModelList);
+				done(err);
+			});
+	});
+
+	it("list project models matching partial query name (end) should succeed", function(done) {
+		agent.get(`/${username}/projects/${projectName}/models?name=Name`)
+			.expect(200, function(err, res) {
+				expect(res.body).to.deep.equal(goldenRandomNameList);
+				done(err);
+			});
+	});
+
+	it("list project models query with different casing should succeed", function(done) {
+		agent.get(`/${username}/projects/${projectName}/models?name=testmodel`)
+			.expect(200, function(err, res) {
+				expect(res.body).to.deep.equal(goldenTestModelList);
+				done(err);
+			});
+	});
+
+	it("list project models matching no names should succeed", function(done) {
+		agent.get(`/${username}/projects/${projectName}/models?name=DOESNTEXIST`)
+			.expect(200, function(err, res) {
+				expect(res.body).to.deep.equal([]);
+				done(err);
+			});
+	});
+
+	it("list all project models with name query from project that doesn't exist should fail", function(done) {
+		agent.get(`/${username}/projects/notexist/models?name=TestModel`)
+			.expect(404, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
+				done(err);
+			});
+	});
 });

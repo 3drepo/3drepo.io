@@ -32,6 +32,7 @@ import {
 } from '../constants/risks';
 import { getAPIUrl } from '../services/api';
 import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
+import { IHeaderMenuItem } from './reportedItems';
 
 export const prepareRisk = (risk, jobs = []) => {
 	const preparedRisk = {...risk};
@@ -48,27 +49,29 @@ export const prepareRisk = (risk, jobs = []) => {
 		preparedRisk.descriptionThumbnail = descriptionThumbnail;
 	}
 
-	if (preparedRisk.residual_likelihood || preparedRisk.likelihood) {
+	if (!(isNaN(preparedRisk.residual_likelihood) && isNaN(preparedRisk.likelihood))) {
 		preparedRisk.residual_likelihood  = getValidNumber(preparedRisk.residual_likelihood, preparedRisk.likelihood);
 	}
 
-	if (preparedRisk.residual_consequence ||  preparedRisk.consequence) {
+	if (!(isNaN(preparedRisk.residual_consequence) && isNaN(preparedRisk.consequence))) {
 		preparedRisk.residual_consequence = getValidNumber(preparedRisk.residual_consequence, preparedRisk.consequence);
 	}
 
-	if (preparedRisk.residual_likelihood || preparedRisk.residual_consequence ) {
+	if (!(isNaN(preparedRisk.residual_likelihood) && isNaN(preparedRisk.residual_consequence))) {
 		preparedRisk.residual_level_of_risk  = getValidPositiveNumber(
 			preparedRisk.residual_level_of_risk,
 			calculateLevelOfRisk(preparedRisk.residual_likelihood, preparedRisk.residual_consequence )
 		);
 	}
 
-	if (preparedRisk.level_of_risk || preparedRisk.likelihood || preparedRisk.consequence) {
+	if (!(isNaN(preparedRisk.level_of_risk) && isNaN(preparedRisk.likelihood) && isNaN(preparedRisk.consequence))) {
 		preparedRisk.level_of_risk = getValidPositiveNumber(preparedRisk.level_of_risk,
 			calculateLevelOfRisk(preparedRisk.likelihood, preparedRisk.consequence));
 	}
 
-	if (preparedRisk.overall_level_of_risk || preparedRisk.residual_level_of_risk  || preparedRisk.level_of_risk) {
+	if (!(isNaN(preparedRisk.overall_level_of_risk) &&
+		isNaN(preparedRisk.residual_level_of_risk) &&
+		isNaN(preparedRisk.level_of_risk))) {
 		preparedRisk.overall_level_of_risk = getValidPositiveNumber(
 			preparedRisk.overall_level_of_risk,
 			getValidPositiveNumber(preparedRisk.residual_level_of_risk , preparedRisk.level_of_risk)
@@ -123,7 +126,7 @@ export const getRiskLikelihoodName = (likelihood: number) => {
 };
 
 const getRiskIcon = (mitigationStatus) =>  RISK_LEVELS_ICONS[mitigationStatus] || null;
-export const getRiskColor = (levelOfRisk) => RISK_LEVELS_COLOURS[levelOfRisk].color;
+export const getRiskColor = (levelOfRisk) => RISK_LEVELS_COLOURS[getValidPositiveNumber(levelOfRisk, -1)].color;
 
 export const getRiskStatus = (levelOfRisk: number, mitigationStatus: string) => {
 	return ({
@@ -133,7 +136,7 @@ export const getRiskStatus = (levelOfRisk: number, mitigationStatus: string) => 
 };
 
 export const getRiskPinColor = (risk) => {
-	const levelOfRisk = (risk.overall_level_of_risk !== undefined) ? risk.overall_level_of_risk : 4;
+	const levelOfRisk = getValidPositiveNumber(risk.overall_level_of_risk, 4);
 	return RISK_LEVELS_COLOURS[levelOfRisk].pinColor;
 };
 
@@ -198,6 +201,22 @@ export const getRiskFilterValues = (property) =>
 		value
 	}));
 
+const getFromToFilter = (label) =>  [{
+		label: 'From',
+		value: {
+			label: label + ' from',
+			value: label + 'from',
+			date: null
+		}
+	}, {
+		label: 'To',
+		value: {
+			label: label + ' to',
+			value: label + 'to',
+			date: null
+		}
+	}];
+
 export const filtersValuesMap = (jobs, settings) => {
 	const jobsList = [...jobs, UNASSIGNED_JOB];
 
@@ -219,24 +238,27 @@ export const filtersValuesMap = (jobs, settings) => {
 		[RISK_FILTER_RELATED_FIELDS.RESIDUAL_LIKELIHOOD]: getFilterValues(RISK_LIKELIHOODS),
 		[RISK_FILTER_RELATED_FIELDS.LEVEL_OF_RISK]: getFilterValues(LEVELS_OF_RISK),
 		[RISK_FILTER_RELATED_FIELDS.RESIDUAL_LEVEL_OF_RISK]: getFilterValues(LEVELS_OF_RISK),
-		[RISK_FILTER_RELATED_FIELDS.OVERALL_LEVEL_OF_RISK]: getFilterValues(LEVELS_OF_RISK)
+		[RISK_FILTER_RELATED_FIELDS.OVERALL_LEVEL_OF_RISK]: getFilterValues(LEVELS_OF_RISK),
+		[RISK_FILTER_RELATED_FIELDS.START_DATETIME]: getFromToFilter('Start')
 	};
 };
 
-export const getHeaderMenuItems = (
-		teamspace, model, printRisks, downloadRisks, toggleSortOrder, toggleShowPins?, showPins?
-	) => {
+export const getHeaderMenuItems = (props) => {
+	const {teamspace, model, printItems, downloadItems, toggleSortOrder,
+		toggleShowPins ,  showPins, sortOrder, setSortBy, sortByField} = props;
+
 	const items = [{
 		...RISKS_ACTIONS_MENU.PRINT,
-		onClick: () => printRisks(teamspace, model)
+		onClick: () => printItems(teamspace, model)
 	}, {
 		...RISKS_ACTIONS_MENU.DOWNLOAD,
-		onClick: () => downloadRisks(teamspace, model)
+		onClick: () => downloadItems(teamspace, model)
 	}, {
-		...RISKS_ACTIONS_MENU.SORT_BY_DATE,
+		...RISKS_ACTIONS_MENU.SORT_ORDER,
 		onClick: () => {
 			toggleSortOrder();
-		}
+		},
+		Icon: sortOrder === 'asc' ? RISKS_ACTIONS_MENU.SORT_ORDER.ASC : RISKS_ACTIONS_MENU.SORT_ORDER.DESC
 	}];
 
 	const togglePinItem = {
@@ -245,7 +267,23 @@ export const getHeaderMenuItems = (
 		onClick: () => toggleShowPins(!showPins)
 	};
 
-	const menuItems = !!toggleShowPins ? [...items, {...togglePinItem}] : [...items];
+	const menuItems: IHeaderMenuItem[] = !!toggleShowPins ? [...items, {...togglePinItem}] : [...items];
+
+	menuItems.push({
+		label: 'Sort by',
+		subItems: [
+			{
+				label: 'Created at',
+				onClick: () => setSortBy('created'),
+				enabled: sortByField === 'created'
+			},
+			{
+				label: 'Start date',
+				onClick: () => setSortBy('sequence_start'),
+				enabled: sortByField === 'sequence_start'
+			},
+			]
+	});
 
 	return menuItems;
 };

@@ -43,7 +43,7 @@ function createClientConfig(serverConfig, req) {
 		"customLogins" : config.customLogins,
 		"liveChatLicense" : config.liveChatLicense,
 		"resourceUploadSizeLimit" : config.resourceUploadSizeLimit,
-		"sequencesEnabled": Boolean(config.sequencesEnabled),
+		"sequencesEnabled": true,
 		"presenterEnabled": Boolean(config.presenterEnabled)
 	};
 

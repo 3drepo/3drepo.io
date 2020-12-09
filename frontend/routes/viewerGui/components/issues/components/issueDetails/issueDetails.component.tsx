@@ -73,6 +73,9 @@ interface IProps {
 	updateViewpoint: (screenshot?: string) => void;
 	dialogId?: string;
 	postCommentIsPending?: boolean;
+	showSequenceDate: (date) => void;
+	minSequenceDate: Date;
+	maxSequenceDate: Date;
 }
 
 interface IState {
@@ -195,6 +198,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				fetchingDetailsIsPending={this.props.fetchingDetailsIsPending}
 				tickets={this.props.issues}
 				postCommentIsPending={this.props.postCommentIsPending}
+				parentId={'issues-card'}
 			/>
 		</ViewerPanelFooter>
 	));
@@ -282,6 +286,9 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				canComment={this.userCanComment}
 				onThumbnailUpdate={this.handleNewScreenshot}
 				formRef={this.formRef}
+				showSequenceDate={this.props.showSequenceDate}
+				minSequenceDate={this.props.minSequenceDate}
+				maxSequenceDate={this.props.maxSequenceDate}
 			/>
 		);
 	}
@@ -326,8 +333,6 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleNewScreenshot = (screenshot) => {
-		const { teamspace, model, viewer } = this.props;
-
 		if (this.isNewIssue) {
 			this.props.setState({
 				newIssue: {
@@ -363,16 +368,16 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public onPositionSave = () => {
-		const { teamspace, model, issue, updateIssue } = this.props;
+		const { issue, updateIssue } = this.props;
 
 		if (!this.isNewIssue) {
-			updateIssue({position: issue.position || []});
+			updateIssue({ position: issue.position || [] });
 		}
 	}
 
 	public handleUpdateScreenshot =
 		(screenshot, disableViewpointSuggestion = false, forceViewpointUpdate = false) => {
-		const {  updateIssue, disableViewer } = this.props;
+		const { updateIssue, disableViewer } = this.props;
 
 		if (this.isNewIssue) {
 			this.props.setState({ newIssue: {
@@ -441,6 +446,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { failedToLoad, issue, horizontal } = this.props;
+
 		return (
 			<Container ref={this.containerRef}>
 				<ViewerPanelContent

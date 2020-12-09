@@ -713,7 +713,200 @@ describe("Views", function () {
 			expect(mergeObjects(override_groups_2)).to.deep.equal(mergeObjects(override_groups));
 		});
 
+		it("with transformation should succeed", function(done) {
+			const view = Object.assign({"name":"View test"}, baseView);
+			view.viewpoint = Object.assign({
+				transformation_group_ids: ["8d46d1b0-8ef1-11e6-8d05-000000000000"]
+			}, view.viewpoint);
+			let viewId;
 
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/viewpoints/`)
+						.send(view)
+						.expect(200, function(err, res) {
+							viewId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/viewpoints/${viewId}`).expect(200, function(err, res) {
+						expect(res.body.name).to.equal(view.name);
+						expect(res.body.viewpoint).to.deep.equal(view.viewpoint);
+
+						return done(err);
+					});
+				}
+			], done);
+		});
+
+		it("with embedded transformation should succeed", function(done) {
+			const transformation_groups = [
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+			];
+
+			const view = Object.assign({"name":"View test"}, baseView);
+			view.viewpoint = Object.assign({transformation_groups}, view.viewpoint);
+
+			let viewId;
+			let transformation_group_ids;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/viewpoints/`)
+						.send(view)
+						.expect(200, function(err, res) {
+							viewId = res.body._id;
+							transformation_group_ids = res.body.viewpoint.transformation_group_ids;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/viewpoints/${viewId}`).expect(200, function(err, res) {
+						delete view.viewpoint.transformation_groups;
+						view.viewpoint.transformation_group_ids = transformation_group_ids;
+
+						expect(res.body.name).to.equal(view.name);
+						expect(res.body.viewpoint).to.deep.equal(view.viewpoint);
+
+						return done(err);
+					});
+				}
+			], done);
+		});
+
+		it("with invalid (short) embedded transformation matrix should fail", function(done) {
+			const transformation_groups = [
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+			];
+
+			const view = Object.assign({"name":"View test"}, baseView);
+			view.viewpoint = Object.assign({transformation_groups}, view.viewpoint);
+
+			agent.post(`/${username}/${model}/viewpoints/`)
+				.send(view)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("with invalid (long) embedded transformation matrix should fail", function(done) {
+			const transformation_groups = [
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]
+				},
+			];
+
+			const view = Object.assign({"name":"View test"}, baseView);
+			view.viewpoint = Object.assign({transformation_groups}, view.viewpoint);
+
+			agent.post(`/${username}/${model}/viewpoints/`)
+				.send(view)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("with embedded transformation group but without matrix should fail", function(done) {
+			const transformation_groups = [
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+			];
+
+			const view = Object.assign({"name":"View test"}, baseView);
+			view.viewpoint = Object.assign({transformation_groups}, view.viewpoint);
+
+			agent.post(`/${username}/${model}/viewpoints/`)
+				.send(view)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("with embedded transformation matrix but without objects should fail", function(done) {
+			const transformation_groups = [
+				{
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+			];
+
+			const view = Object.assign({"name":"View test"}, baseView);
+			view.viewpoint = Object.assign({transformation_groups}, view.viewpoint);
+
+			agent.post(`/${username}/${model}/viewpoints/`)
+				.send(view)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
 	});
 });
 

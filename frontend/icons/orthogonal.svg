@@ -1,0 +1,7 @@
+<svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="26 93 78 78">
+  <title>
+    orthogonal
+  </title>
+  <path fill="#fff" stroke="rgba(0,0,0,0.01)" d="M 30,167 V 117 H 80 30 L 55,97 h 45 l -20,20 20,-20 v 45 l -20,25 v -50 50 z" style="fill:none;stroke:#fff;stroke-width:8;stroke-linecap:butt;stroke-linejoin:round;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"/>
+  <path fill="#fff" stroke="rgba(0,0,0,0.01)" d="m 30,167 25,-25 45,0 -45,0 V 96.999998" style="fill:none;stroke:#fff;stroke-width:4;stroke-linecap:butt;stroke-linejoin:round;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:12.00000033, 12.00000033000000066;stroke-dashoffset:0"/>
+</svg>

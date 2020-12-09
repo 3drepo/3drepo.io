@@ -5,6 +5,7 @@ import undoable from 'redux-undo';
 import { CanvasHistoryTypes } from './canvasHistory';
 import { batchGroupBy } from './canvasHistory/canvasHistory.helpers';
 
+import { reducer as activitiesReducer } from './activities/activities.redux';
 import { reducer as authReducer } from './auth/auth.redux';
 import { reducer as billingReducer } from './billing/billing.redux';
 import { reducer as bimReducer } from './bim/bim.redux';
@@ -73,6 +74,7 @@ export default function createReducer(history) {
 		teamspace: teamspaceReducer,
 		sequences: sequencesReducer,
 		presentation: presentationReducer,
+		activities: activitiesReducer,
 		board: boardReducer // <-- INJECT MODULE REDUCER -->
 	});
 }

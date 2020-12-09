@@ -19,35 +19,45 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { selectCurrentActivities, selectIsLoadingFrame, selectMaxDate, selectMinDate,
-	selectSelectedDate, selectSelectedFrameColors, selectSelectedMinDate,
-	selectSelectedSequence, selectSequences, selectStepInterval, selectStepScale,
-	SequencesActions } from '../../../../modules/sequences';
 
+import { ActivitiesActions } from '../../../../modules/activities';
+import { IssuesActions } from '../../../../modules/issues';
+import { RisksActions } from '../../../../modules/risks';
+import { selectCurrentActivities, selectIsLoadingFrame, selectMaxDate, selectMinDate,
+	selectSelectedEndingDate, selectSelectedFrameColors,
+	selectSelectedSequence, selectSelectedStartingDate, selectSequences, selectStepInterval,
+	selectStepScale,
+	SequencesActions} from '../../../../modules/sequences';
+import { selectRightPanels, ViewerGuiActions } from '../../../../modules/viewerGui';
+import { ViewpointsActions } from '../../../../modules/viewpoints';
 import { Sequences } from './sequences.component';
 
 const mapStateToProps = createStructuredSelector({
 	sequences: selectSequences,
 	minDate: selectMinDate,
 	maxDate: selectMaxDate,
-	selectedDate: selectSelectedDate,
-	selectedMinDate: selectSelectedMinDate,
+	selectedDate: selectSelectedStartingDate,
+	selectedEndingDate: selectSelectedEndingDate,
 	colorOverrides: selectSelectedFrameColors,
 	stepInterval: selectStepInterval,
 	stepScale: selectStepScale,
 	currentTasks: selectCurrentActivities,
 	loadingFrame: selectIsLoadingFrame,
-	selectedSequence: selectSelectedSequence
+	selectedSequence: selectSelectedSequence,
+	rightPanels: selectRightPanels,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	initializeSequences: SequencesActions.initializeSequences,
-	setSelectedFrame: SequencesActions.setSelectedFrame,
+	setSelectedDate: SequencesActions.setSelectedDate,
 	setStepInterval: SequencesActions.setStepInterval,
 	setStepScale: SequencesActions.setStepScale,
-	fetchFrame: SequencesActions.fetchFrame,
 	setSelectedSequence: SequencesActions.setSelectedSequence,
-	restoreIfcSpacesHidden: SequencesActions.restoreIfcSpacesHidden
+	fetchSelectedFrame: SequencesActions.fetchSelectedFrame,
+	toggleActivitiesPanel: ActivitiesActions.toggleActivitiesPanel,
+	fetchActivityDetails: ActivitiesActions.fetchDetails,
+	setPanelVisibility: ViewerGuiActions.setPanelVisibility,
+	deselectViewsAndLeaveClipping: ViewpointsActions.deselectViewsAndLeaveClipping,
+	setActiveViewpoint: ViewpointsActions.setActiveViewpoint,
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Sequences));

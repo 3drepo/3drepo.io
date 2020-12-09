@@ -58,10 +58,6 @@ schema.statics.getObjectById = async (account, model, id, projection = {}) => {
 	return await dbFindOne(account, model, {_id: id}, projection);
 };
 
-schema.statics.getObjectById = async (account, model, id, projection = {}) => {
-	return await dbFindOne(account, model, {_id: id}, projection);
-};
-
 schema.statics.getGridfsFileStream = async (account, model, filename) => {
 	return await ExternalServices.getFileStream(account, model + ".scene", "gridfs", filename);
 };

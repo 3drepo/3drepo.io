@@ -22,6 +22,7 @@ import { IS_DEVELOPMENT } from '../../constants/environment';
 import {
 	VIEWER_EVENTS,
 	VIEWER_NAV_MODES,
+	VIEWER_PROJECTION_MODES
 } from '../../constants/viewer';
 import { UnityUtil } from '../../globals/unity-util';
 import { asyncTimeout } from '../../helpers/aync';
@@ -260,6 +261,14 @@ export class ViewerService {
 			screenPos : pointInfo.mousePos,
 			selectColour : PIN_COLORS.YELLOW,
 		});
+	}
+
+	public moveMeshes(teamspace: string, modelId: string, meshes: string[], matrix: number[]) {
+		UnityUtil.moveMeshes(teamspace, modelId, meshes, matrix);
+	}
+
+	public resetMovedMeshes(teamspace: string, modelId: string, meshes: string[]) {
+		UnityUtil.resetMovedMeshes(teamspace, modelId, meshes);
 	}
 
 	/**
@@ -909,9 +918,29 @@ export class ViewerService {
 		return this.showAll();
 	}
 
-	public async setCamera({ position, up, view_dir, look_at, animate, rollerCoasterMode, account, model }) {
+	public async setProjectionMode(mode) {
 		await this.isModelReady();
-		UnityUtil.setViewpoint(position, up, view_dir, look_at, animate !== undefined ? animate : true, rollerCoasterMode);
+		switch (mode) {
+			case VIEWER_PROJECTION_MODES.ORTHOGRAPHIC:
+				UnityUtil.useOrthographicProjection();
+				break;
+			default:
+				UnityUtil.usePerspectiveProjection();
+		}
+	}
+
+	public async setCamera({ position, up, view_dir, look_at, type, orthographicSize, account, model }) {
+		await this.isModelReady();
+		UnityUtil.setViewpoint(
+			position,
+			up,
+			view_dir,
+			look_at,
+			type,
+			orthographicSize,
+			account,
+			model
+		);
 	}
 
 	/**

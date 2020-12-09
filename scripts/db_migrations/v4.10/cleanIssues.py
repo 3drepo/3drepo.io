@@ -39,10 +39,11 @@ for database in db.database_names():
 ##### Handle comments and viewpoints IDs #####
                 for field in ["comments", "viewpoints"]:
                     if field in issue:
-                        for idx, entry in enumerate(issue.get(field)):
-                            if "_id" in entry:
-                                unsetFields["$unset"][field + "." + str(idx) + "._id"] = ""
-                                print("\t\t\tremove unexpected " + field + " _id")
+                        if issue.get(field):
+                            for idx, entry in enumerate(issue.get(field)):
+                                if "_id" in entry:
+                                    unsetFields["$unset"][field + "." + str(idx) + "._id"] = ""
+                                    print("\t\t\tremove unexpected " + field + " _id")
 
                 if not dryRun and any(unsetFields.get("$unset")):
                     db[modelId + ".issues"].update_one({"_id":issueId}, unsetFields)

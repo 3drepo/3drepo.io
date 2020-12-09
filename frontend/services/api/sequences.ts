@@ -16,6 +16,7 @@
  */
 
 import api from './';
+const HEAD = 'master/head';
 
 /**
  * Get sequences list
@@ -24,9 +25,18 @@ import api from './';
  * @returns {*|promise}
  */
 export const getSequences = (teamspace, modelId, revision): Promise<any> => {
-	return api.get(`${teamspace}/${modelId}/revision/${revision}/sequences`);
+	return api.get(`${teamspace}/${modelId}/revision/${revision || HEAD}/sequences`);
 };
 
 export const getSequenceState = (teamspace, modelId, revision, sequenceId, stateId): Promise<any> => {
-	return api.get(`${teamspace}/${modelId}/revision/${revision}/sequences/${sequenceId}/state/${stateId}`);
+	return api.get(`${teamspace}/${modelId}/revision/${revision || HEAD}/sequences/${sequenceId}/state/${stateId}`);
+};
+
+export const getSequenceActivityDetail = (teamspace, modelId, revision, sequenceId, activityId): Promise<any> => {
+	// tslint:disable-next-line:max-line-length
+	return api.get(`${teamspace}/${modelId}/revision/${revision || HEAD}/sequences/${sequenceId}/activities/${activityId}`);
+};
+
+export const getSequenceActivities = (teamspace, modelId, revision, sequenceId): Promise<any> => {
+	return api.get(`${teamspace}/${modelId}/revision/${revision || HEAD}/sequences/${sequenceId}/activities`);
 };
