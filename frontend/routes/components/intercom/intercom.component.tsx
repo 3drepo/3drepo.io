@@ -32,10 +32,6 @@ const IntercomPage = (props: IProps) => {
 
 			const {firstName, lastName, email, intercomHash } = props.currentUser;
 
-			if (!email) {
-				return;
-			}
-
 			const name = `${firstName || ''} ${lastName || ''}`.trim();
 			// @ts-ignore
 			boot( {
