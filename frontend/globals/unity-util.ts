@@ -150,14 +150,14 @@ export class UnityUtil {
 
 		var config = {
 			dataUrl: buildUrl + "/unity.data.unityweb",
-			frameworkUrl: buildUrl + "/unity.framework.js.unityweb",
-			codeUrl: buildUrl + "/unity.wasm.unityweb",
+			frameworkUrl: buildUrl + "/unity.framework.js.gz",
+			codeUrl: buildUrl + "/unity.wasm.gz",
 			streamingAssetsUrl: "StreamingAssets",
 			companyName: "3D Repo Ltd",
 			productName: "3D Repo Unity",
 			productVersion: "1.0",
 			errorHandler: (e,t,n) => { 	// This member is not part of the documented API, but the current version of loader.js checks for it
-				UnityUtil.onUnityError(e); 
+				UnityUtil.onUnityError(e);
 				return true; // Returning true suppresses loader.js' alert call
 			}
 		  };
