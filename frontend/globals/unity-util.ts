@@ -132,7 +132,7 @@ export class UnityUtil {
 	 * @return returns a promise which resolves when the game is loaded.
 	 *
 	 */
-	public static loadUnity(canvas : any, unityURL): Promise<void> {
+	public static loadUnity(canvas: any, unityURL): Promise<void> {
 		if (!window.Module) {
 			// Add withCredentials to XMLHttpRequest prototype to allow unity game to
 			// do CORS request. We used to do this with a .jspre on the unity side but it's no longer supported
@@ -146,21 +146,22 @@ export class UnityUtil {
 			XMLHttpRequest.prototype.open = newOpen;
 		}
 
-		const buildUrl = `${unityURL? unityURL + '/' : ''}unity/Build`;
+		const buildUrl = `${unityURL ? unityURL + '/' : ''}unity/Build`;
 
-		var config = {
-			dataUrl: buildUrl + "/unity.data.unityweb",
-			frameworkUrl: buildUrl + "/unity.framework.js.gz",
-			codeUrl: buildUrl + "/unity.wasm.gz",
-			streamingAssetsUrl: "StreamingAssets",
-			companyName: "3D Repo Ltd",
-			productName: "3D Repo Unity",
-			productVersion: "1.0",
-			errorHandler: (e,t,n) => { 	// This member is not part of the documented API, but the current version of loader.js checks for it
+		const config = {
+			dataUrl: buildUrl + '/unity.data.unityweb',
+			frameworkUrl: buildUrl + '/unity.framework.js.gz',
+			codeUrl: buildUrl + '/unity.wasm.gz',
+			streamingAssetsUrl: 'StreamingAssets',
+			companyName: '3D Repo Ltd',
+			productName: '3D Repo Unity',
+			productVersion: '1.0',
+			errorHandler: (e, t, n) => {
+				// This member is not part of the documented API, but the current version of loader.js checks for it
 				UnityUtil.onUnityError(e);
 				return true; // Returning true suppresses loader.js' alert call
 			}
-		  };
+		};
 
 		createUnityInstance(canvas, config, (progress) => {
 			this.onProgress(progress);
