@@ -102,16 +102,15 @@ class TeamspaceSettings {
 			}
 
 			const Mitigation = require("./mitigation");
-			const readCSVProm = await Mitigation.importCSV(account, file);
+			const importedMitigations = await Mitigation.importCSV(account, file);
 
-			const storeFileProm = FileRef.storeMitigationsFile(account, username, filename, file).then(async () => {
-				const settingsCol = await this.getTeamspaceSettingsCollection(account, true);
-				const updatedAt = new Date();
-				await settingsCol.update({_id: account}, {$set: {"mitigationsUpdatedAt":updatedAt}});
-				return updatedAt;
-			});
+			await FileRef.storeMitigationsFile(account, username, filename, file);
 
-			return Promise.all([storeFileProm, readCSVProm]);
+			const settingsCol = await this.getTeamspaceSettingsCollection(account, true);
+			const updatedAt = new Date();
+			await settingsCol.update({_id: account}, {$set: {"mitigationsUpdatedAt":updatedAt}});
+
+			return Promise.resolve([updatedAt, importedMitigations]);
 		} else {
 			return Promise.reject(responseCodes.SIZE_LIMIT_PAY);
 		}
