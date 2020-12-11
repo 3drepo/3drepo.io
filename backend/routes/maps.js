@@ -476,7 +476,7 @@ function listMaps(req, res) {
 	];
 
 	User.isHereEnabled(teamspace).then((hereEnabled) => {
-		if (hereEnabled && (config.here && config.here.appID && config.here.appCode)) {
+		if (hereEnabled && (config.here && ((config.here.appID && config.here.appCode) || config.here.apiKey))) {
 			maps = maps.concat([
 				{ name: "Here", layers: [
 					{ name: "Map Tiles", source: "HERE" },
@@ -546,7 +546,7 @@ function requestMapTile(req, res, domain, uri) {
 }
 
 function requestHereMapTile(req, res, domain, uri) {
-	if (config.here && config.here.apiKey) {
+	if (config.here.apiKey) {
 		uri += "?apiKey=" + config.here.apiKey;
 	} else {
 		// api.here domain required for app_id/app_code auth
