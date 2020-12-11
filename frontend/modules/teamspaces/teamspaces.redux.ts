@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { cloneDeep, keyBy, omit } from 'lodash';
+import { omit } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 import { DATA_TYPES } from '../../routes/components/filterPanel/filterPanel.component';
 import { SORTING_BY_LAST_UPDATED } from '../../routes/teamspaces/teamspaces.contants';
@@ -43,6 +43,8 @@ export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createAct
 	createModelSuccess: ['teamspace', 'modelData'],
 	updateModelSuccess: ['teamspace', 'modelId', 'modelData'],
 	removeModelSuccess: ['teamspace', 'modelData'],
+	subscribeOnChanges: [],
+	unsubscribeFromChanges: [],
 }, { prefix: 'TEAMSPACES/' });
 
 export interface ITeamspace {
