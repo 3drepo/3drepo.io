@@ -476,7 +476,7 @@ function listMaps(req, res) {
 	];
 
 	User.isHereEnabled(teamspace).then((hereEnabled) => {
-		if (hereEnabled && (config.here && ((config.here.appID && config.here.appCode) || config.here.apiKey))) {
+		if (hereEnabled && config.here && config.here.apiKey) {
 			maps = maps.concat([
 				{ name: "Here", layers: [
 					{ name: "Map Tiles", source: "HERE" },
@@ -546,13 +546,7 @@ function requestMapTile(req, res, domain, uri) {
 }
 
 function requestHereMapTile(req, res, domain, uri) {
-	if (config.here.apiKey) {
-		uri += "?apiKey=" + config.here.apiKey;
-	} else {
-		// api.here domain required for app_id/app_code auth
-		domain = domain.replace("ls.hereapi","api.here");
-		uri += "?app_id=" + config.here.appID + "&app_code=" + config.here.appCode;
-	}
+	uri += "?apiKey=" + config.here.apiKey;
 
 	if (req.query.congestion) {
 		uri += "&congestion=" + req.query.congestion;
@@ -603,7 +597,7 @@ function getOSMTile(req, res) {
 function getHereBaseInfo(req, res) {
 	const domain = "1" + hereBaseDomain;
 	let uri = "/maptile/2.1/info";
-	uri += "?app_id=" + config.here.appID + "&app_code=" + config.here.appCode;
+	uri += "?apiKey=" + config.here.apiKey;
 	httpsGet.get(domain, uri).then(info =>{
 		res.setHeader("Cache-Control", `private, max-age=${config.cachePolicy.maxAge}`);
 		res.write(info);
@@ -747,7 +741,7 @@ function getHereBuildingsFromLongLat(req, res) {
 	const domain = "pde.api.here.com";
 	let uri = "/1/tile.json?&layer=BUILDING&level=" + zoomLevel + "&tilex=" + tileX + "&tiley=" + tileY + "&region=WEU";
 	systemLogger.logInfo("Fetching Here building platform data extensions: " + uri);
-	uri += "&app_id=" + config.here.appID + "&app_code=" + config.here.appCode;
+	uri += "&apiKey=" + config.here.apiKey;
 
 	httpsGet.get(domain, uri).then(buildings =>{
 		res.status(200).json(buildings);
