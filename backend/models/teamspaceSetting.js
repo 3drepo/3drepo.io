@@ -94,11 +94,11 @@ class TeamspaceSettings {
 		if (hasSufficientQuota) {
 			const fileSizeLimit = require("../config").uploadSizeLimit;
 			if(file.byteLength > fileSizeLimit) {
-				return Promise.reject(responseCodes.SIZE_LIMIT);
+				throw responseCodes.SIZE_LIMIT;
 			}
 			const fNameArr = filename.split(".");
 			if (fNameArr.length < 2 || fNameArr[fNameArr.length - 1].toLowerCase() !== "csv") {
-				return Promise.reject(responseCodes.FILE_FORMAT_NOT_SUPPORTED);
+				throw responseCodes.FILE_FORMAT_NOT_SUPPORTED;
 			}
 
 			const Mitigation = require("./mitigation");
@@ -110,9 +110,19 @@ class TeamspaceSettings {
 			const updatedAt = new Date();
 			await settingsCol.update({_id: account}, {$set: {"mitigationsUpdatedAt":updatedAt}});
 
-			return Promise.resolve([updatedAt, importedMitigations]);
+			const result = { "status":"ok" };
+
+			if (updatedAt) {
+				result.mitigationsUpdatedAt = updatedAt;
+			}
+
+			if (importedMitigations) {
+				result.records = importedMitigations.length;
+			}
+
+			return result;
 		} else {
-			return Promise.reject(responseCodes.SIZE_LIMIT_PAY);
+			throw responseCodes.SIZE_LIMIT_PAY;
 		}
 	}
 
