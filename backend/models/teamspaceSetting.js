@@ -110,17 +110,7 @@ class TeamspaceSettings {
 			const updatedAt = new Date();
 			await settingsCol.update({_id: account}, {$set: {"mitigationsUpdatedAt":updatedAt}});
 
-			const result = { "status":"ok" };
-
-			if (updatedAt) {
-				result.mitigationsUpdatedAt = updatedAt;
-			}
-
-			if (importedMitigations) {
-				result.records = importedMitigations.length;
-			}
-
-			return result;
+			return { "status":"ok", mitigationsUpdatedAt: updatedAt, records: importedMitigations.length };
 		} else {
 			throw responseCodes.SIZE_LIMIT_PAY;
 		}

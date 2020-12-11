@@ -54,7 +54,7 @@
 
 	/**
 	 * @api {post} /:teamspace/settings/mitigations.csv Upload mitigations file
-	 * @apiName upload//MitigationsFile
+	 * @apiName uploadMitigationsFile
 	 * @apiGroup Teamspace
 	 * @apiDescription Upload a risk mitigations CSV file to a teamspace.
 	 *
