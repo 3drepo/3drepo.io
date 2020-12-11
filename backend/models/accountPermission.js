@@ -120,7 +120,7 @@
 					return Project.find({ account: this.user.user },{ "permissions.user": user});
 				}).then(projects => {
 					return Promise.all(
-						projects.map(proj => proj.updateAttrs({
+						projects.map(proj => Project.updateAttrs(this.user.user, proj.name, {
 							permissions: proj.permissions.filter(perm => perm.user !== user)
 						}))
 					);
