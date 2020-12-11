@@ -24,9 +24,9 @@ const httpsGet = require("../libs/httpsReq");
 const config = require("../config");
 const User = require("../models/user");
 
-const hereBaseDomain = ".base.maps.cit.api.here.com";
-const hereAerialDomain = ".aerial.maps.cit.api.here.com";
-const hereTrafficDomain = ".traffic.maps.cit.api.here.com";
+const hereBaseDomain = ".base.maps.ls.hereapi.com";
+const hereAerialDomain = ".aerial.maps.ls.hereapi.com";
+const hereTrafficDomain = ".traffic.maps.ls.hereapi.com";
 
 /**
  * @apiDefine Maps Maps
@@ -546,7 +546,14 @@ function requestMapTile(req, res, domain, uri) {
 }
 
 function requestHereMapTile(req, res, domain, uri) {
-	uri += "?app_id=" + config.here.appID + "&app_code=" + config.here.appCode;
+	if (config.here && config.here.apiKey) {
+		uri += "?apiKey=" + config.here.apiKey;
+	} else {
+		// api.here domain required for app_id/app_code auth
+		domain = domain.replace("ls.hereapi","api.here");
+		uri += "?app_id=" + config.here.appID + "&app_code=" + config.here.appCode;
+	}
+
 	if (req.query.congestion) {
 		uri += "&congestion=" + req.query.congestion;
 	}
