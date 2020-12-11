@@ -23,7 +23,7 @@ export const VALIDATIONS_MESSAGES = {
 	// tslint:disable-next-line: no-invalid-template-strings
 	TOO_SHORT_STRING: 'Must be at least ${min} characters',
 	// tslint:disable-next-line: no-invalid-template-strings
-	TOO_LONG_STRING: 'Must be at most ${max} characters',
+	TOO_LONG_STRING: 'This field is limited to ${max} characters',
 	NOT_ALPHANUMERIC: 'Must use alphanumeric characters',
 	DECIMAL: 'Must be a decimal number or integer',
 	INTEGER: 'Must be an integer',

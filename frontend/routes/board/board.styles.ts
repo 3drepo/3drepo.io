@@ -81,6 +81,9 @@ export const BoardContainer = styled.div`
 
 			> span:nth-child(1) {
 				font-size: 14px;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
 			}
 			> span:nth-child(2) {
 				font-size: 12px;
@@ -94,7 +97,6 @@ export const Config = styled.div`
 	background-color: ${COLOR.WHITE};
 	min-height: 30px;
 	padding: 10px 15px;
-	padding-left: 15px;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
