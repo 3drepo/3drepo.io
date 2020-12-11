@@ -86,6 +86,7 @@ export const prepareRisk = (risk, jobs = []) => {
 	}
 
 	preparedRisk.defaultHidden = [RISK_LEVELS.AGREED_FULLY, RISK_LEVELS.VOID].includes(preparedRisk.mitigation_status);
+	preparedRisk.color = getRiskColor(risk.residual_level_of_risk);
 
 	return preparedRisk;
 };
