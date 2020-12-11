@@ -19,6 +19,7 @@ import { flatten, pick, uniq, values } from 'lodash';
 import { createSelector } from 'reselect';
 
 import { NODE_TYPES, VISIBILITY_STATES } from '../../constants/tree';
+import { mergeArrays } from '../../helpers/arrays';
 import { searchByFilters } from '../../helpers/searching';
 import { calculateTotalMeshes } from '../../helpers/tree';
 
@@ -247,7 +248,7 @@ export const selectGetMeshesByIds = (nodesIds = []) => createSelector(
 				}
 
 				if (meshes) {
-					meshesByNodes[node.namespacedId].meshes = meshesByNodes[node.namespacedId].meshes.concat(meshes);
+					mergeArrays(meshesByNodes[node.namespacedId].meshes, meshes);
 				} else if (!childrenMap[node._id] && node.hasChildren) {
 					// This should only happen in federations.
 					// Traverse down the tree to find submodel nodes
@@ -271,10 +272,17 @@ export const selectGetNodesIdsFromSharedIds = (objects = []) => createSelector(
 		if (!objects.length) {
 			return [];
 		}
-		const objectsSharedIds = objects.map(({ shared_ids }) => shared_ids);
-		const sharedIds = flatten(objectsSharedIds) as string[];
-		const nodesIdsBySharedIds = values(pick(nodesBySharedIds, sharedIds));
-		return uniq(nodesIdsBySharedIds);
+
+		const ids = new Set();
+		objects.forEach((obj) => {
+			obj.shared_ids.forEach((sharedId) => {
+				const id = nodesBySharedIds[sharedId];
+				if (id) {
+					ids.add(id);
+				}
+			});
+		});
+		return Array.from(ids);
 	}
 );
 
