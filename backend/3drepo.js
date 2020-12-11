@@ -18,6 +18,7 @@
 "use strict";
 
 const express = require("express");
+const compression = require("compression");
 const fs = require("fs");
 
 const logger = require("./logger.js");
@@ -113,6 +114,7 @@ function handleHTTPSRedirect() {
 function runServer() {
 	// The core express application
 	const mainApp = express();
+	mainApp.use(compression());
 
 	if(utils.hasField(config, "umask")) {
 		systemLogger.logInfo("Setting umask: " + config.umask);
