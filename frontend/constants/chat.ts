@@ -6,5 +6,6 @@ export const CHAT_CHANNELS = {
 	MODEL: 'model',
 	NOTIFICATIONS: 'notifications',
 	RESOURCES: 'resources',
+	TEAMSPACES: 'teamspaces',
 	PRESENTATION: 'presentation'
 };

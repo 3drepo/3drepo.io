@@ -23,6 +23,7 @@ const onSuccess = responseCodes.onSuccessfulOperation;
 const middlewares = require("../middlewares/middlewares");
 const User =  require("../models/user");
 const utils = require("../utils");
+const { setIntercomHash } = require("../models/helper/intercom");
 const { isString, isArray, isObject } = require("lodash");
 
 /**
@@ -215,6 +216,7 @@ router.delete("/starredModels", middlewares.loggedIn, deleteStarredModels, onSuc
 async function getProfile(req, res, next) {
 	const username = req.session.user.username;
 	req.dataModel = await User.getProfileByUsername(username);
+	setIntercomHash(req.dataModel);
 	next();
 }
 

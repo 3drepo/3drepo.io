@@ -32,8 +32,6 @@ import {
 import { EXTENSION_RE } from '../../constants/resources';
 import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
 import { prepareResources } from '../../helpers/resources';
-import { prepareRisk } from '../../helpers/risks';
-import { mergeGroupsDataFromViewpoint } from '../../helpers/viewpoints';
 import { SuggestedTreatmentsDialog } from '../../routes/components/dialogContainer/components';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
 import * as API from '../../services/api';
@@ -42,7 +40,7 @@ import { BoardActions } from '../board';
 import { ChatActions } from '../chat';
 import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
-import { selectJobsList, selectMyJob } from '../jobs';
+import { selectMyJob } from '../jobs';
 import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
 import { selectSelectedStartingDate, SequencesActions } from '../sequences';
@@ -63,10 +61,7 @@ function* fetchRisks({teamspace, modelId, revision}) {
 	yield put(RisksActions.togglePendingState(true));
 	try {
 		const {data} = yield API.getRisks(teamspace, modelId, revision);
-		const jobs = yield select(selectJobsList);
-		const preparedRisks = data.map((risk) => prepareRisk(risk, jobs));
-
-		yield put(RisksActions.fetchRisksSuccess(preparedRisks));
+		yield put(RisksActions.fetchRisksSuccess(data));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('get', 'risks', error));
 	}
@@ -138,18 +133,15 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 
 		analyticsService.sendEvent(EVENT_CATEGORIES.RISK, EVENT_ACTIONS.CREATE);
 
-		const jobs = yield select(selectJobsList);
-		const preparedRisk = prepareRisk(savedRisk, jobs);
-
 		yield put(ViewpointsActions.cacheGroupsFromViewpoint(savedRisk.viewpoint, risk.viewpoint));
 
 		finishSubmitting();
-		yield put(RisksActions.setComponentState({ activeRisk: preparedRisk._id }));
-		yield put(RisksActions.saveRiskSuccess(preparedRisk));
+		yield put(RisksActions.setComponentState({ activeRisk: savedRisk._id }));
+		yield put(RisksActions.saveRiskSuccess(savedRisk));
 
 		if (!ignoreViewer) {
-			yield put(RisksActions.showDetails(revision, preparedRisk._id));
-			yield put(RisksActions.goToRisk(preparedRisk));
+			yield put(RisksActions.showDetails(revision, savedRisk._id));
+			yield put(RisksActions.goToRisk(savedRisk));
 		} else {
 			yield put(DialogActions.hideDialog());
 		}
@@ -170,11 +162,8 @@ function* updateRisk({ teamspace, modelId, riskData }) {
 		analyticsService.sendEvent(EVENT_CATEGORIES.RISK, EVENT_ACTIONS.EDIT);
 		updatedRisk = {...updatedRisk, ...riskData};
 
-		const jobs = yield select(selectJobsList);
-		const preparedRisk = prepareRisk(updatedRisk, jobs);
-
 		yield put(RisksActions.setComponentState({ savedPin: position }));
-		yield put(RisksActions.saveRiskSuccess(preparedRisk));
+		yield put(RisksActions.saveRiskSuccess(updatedRisk));
 		yield put(SnackbarActions.show('Risk updated'));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('update', 'risk', error));
@@ -185,9 +174,7 @@ function* updateBoardRisk({ teamspace, modelId, riskData }) {
 	try {
 		const { _id, ...changedData } = riskData;
 		const { data: updatedRisk } = yield API.updateRisk(teamspace, modelId, _id, null, changedData);
-		const jobs = yield select(selectJobsList);
-		const preparedIssue = prepareRisk(updatedRisk, jobs);
-		yield put(RisksActions.saveRiskSuccess(preparedIssue));
+		yield put(RisksActions.saveRiskSuccess(updatedRisk));
 		yield put(SnackbarActions.show('Risk updated'));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('update', 'board risk', error));
@@ -196,10 +183,7 @@ function* updateBoardRisk({ teamspace, modelId, riskData }) {
 
 function* updateNewRisk({ newRisk }) {
 	try {
-		const jobs = yield select(selectJobsList);
-		const preparedRisk = prepareRisk(newRisk, jobs);
-
-		yield put(RisksActions.setComponentState({ newRisk: preparedRisk }));
+		yield put(RisksActions.setComponentState({ newRisk }));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'new risk', error));
 	}
@@ -328,24 +312,21 @@ function* closeDetails() {
 }
 
 const onUpdateEvent = (updatedRisk) => {
-	const jobs = selectJobsList(getState());
-
 	if ([RISK_LEVELS.AGREED_FULLY, RISK_LEVELS.VOID].includes(updatedRisk.mitigation_status)) {
 		dispatch(RisksActions.showCloseInfo(updatedRisk._id));
 		setTimeout(() => {
-			dispatch(RisksActions.saveRiskSuccess(prepareRisk(updatedRisk, jobs)));
+			dispatch(RisksActions.saveRiskSuccess(updatedRisk));
 		}, 5000);
 		setTimeout(() => {
 			dispatch(RisksActions.hideCloseInfo(updatedRisk._id));
 		}, 6000);
 	} else {
-		dispatch(RisksActions.saveRiskSuccess(prepareRisk(updatedRisk, jobs)));
+		dispatch(RisksActions.saveRiskSuccess(updatedRisk));
 	}
 };
 
 const onCreateEvent = (createdRisk) => {
-	const jobs = selectJobsList(getState());
-	dispatch(RisksActions.saveRiskSuccess(prepareRisk(createdRisk[0], jobs)));
+	dispatch(RisksActions.saveRiskSuccess(createdRisk[0]));
 };
 
 function* subscribeOnRiskChanges({ teamspace, modelId }) {
@@ -395,7 +376,6 @@ function* unsubscribeOnRiskCommentsChanges({ teamspace, modelId, riskId }) {
 
 function* cloneRisk({ dialogId }) {
 	const activeRisk = yield select(selectActiveRiskDetails);
-	const jobs = yield select(selectJobsList);
 	const currentUser = yield select(selectCurrentUser);
 	const clonedProperties = omit(activeRisk, [
 		'_id',
@@ -419,11 +399,11 @@ function* cloneRisk({ dialogId }) {
 	}
 
 	try {
-		const newRisk = prepareRisk({
+		const newRisk = {
 			...clonedProperties,
 			owner: currentUser.username,
 			clone: true,
-		}, jobs);
+		};
 
 		if (dialogId) {
 			yield put(DialogActions.hideDialog(dialogId));
@@ -441,7 +421,6 @@ function* cloneRisk({ dialogId }) {
 }
 
 function* setNewRisk() {
-	const jobs = yield select(selectJobsList);
 	const currentUser = yield select(selectCurrentUser);
 
 	// tslint:disable-next-line: variable-name
@@ -452,7 +431,7 @@ function* setNewRisk() {
 	}
 
 	try {
-		const newRisk = prepareRisk({
+		const newRisk = {
 			name: 'Untitled risk',
 			associated_activity: '',
 			assigned_roles: [],
@@ -472,7 +451,7 @@ function* setNewRisk() {
 			viewpoint: {},
 			owner: currentUser.username,
 			sequence_start
-		}, jobs);
+		};
 
 		yield put(RisksActions.setComponentState({
 			showDetails: true,
