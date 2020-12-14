@@ -65,29 +65,20 @@ interface IProps {
 	onCloseDetails: () => void;
 	onToggleFilters: (isActive) => void;
 	onChangeFilters: (selectedFilters) => void;
-	toggleShowPins: (showPins: boolean, filteredItems) => void;
+	toggleShowPins: (showPins: boolean) => void;
 	renderDetailsView: (statement) => React.ReactChildren[];
 	sortByField?: string;
 	id?: string;
 }
 
 interface IState {
-	filteredItems: any[];
 	prevScroll: number;
 }
 
 export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 	get activeItemIndex() {
-		return this.state.filteredItems.findIndex((item) => item._id === this.props.activeItemId);
-	}
-
-	get filteredItems() {
-		const { items, selectedFilters, showDefaultHiddenItems, sortByField } = this.props;
-		return sortByDate(
-			searchByFilters(items, selectedFilters, showDefaultHiddenItems, ['name', 'desc', 'number']),
-			{ order: this.props.sortOrder }, sortByField
-		);
+		return this.props.items.findIndex((item) => item._id === this.props.activeItemId);
 	}
 
 	get listFooterText() {
@@ -95,12 +86,11 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 			return 'Uploading BCF...';
 		}
 		if (this.props.isModelLoaded) {
-			return `${this.state.filteredItems.length} results displayed`;
+			return `${this.props.items.length} results displayed`;
 		}
 		return 'Model is loading';
 	}
 	public state = {
-		filteredItems: [],
 		prevScroll: 0
 	};
 
@@ -109,7 +99,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 	public renderItemsList = renderWhenTrue(() => (
 		<ListContainer ref={this.listContainerRef}>
-			{this.state.filteredItems.map((item, index) => (
+			{this.props.items.map((item, index) => (
 				<PreviewListItem
 					{...item}
 					key={index}
@@ -127,9 +117,9 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	public renderListView = renderWhenTrue(() => (
 		<>
 			<ViewerPanelContent ref={this.listViewRef}>
-				{this.renderEmptyState(!this.props.searchEnabled && !this.state.filteredItems.length)}
-				{this.renderNotFound(this.props.searchEnabled && !this.state.filteredItems.length)}
-				{this.renderItemsList(this.state.filteredItems.length)}
+				{this.renderEmptyState(!this.props.searchEnabled && !this.props.items.length)}
+				{this.renderNotFound(this.props.searchEnabled && !this.props.items.length)}
+				{this.renderItemsList(this.props.items)}
 			</ViewerPanelContent>
 			<ViewerPanelFooter alignItems="center" justify="space-between">
 				<Summary>{this.listFooterText}</Summary>
@@ -156,12 +146,12 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	));
 
 	public renderHeaderNavigation = () => {
-		const initialIndex = this.state.filteredItems.findIndex(({ _id }) => this.props.activeItemId === _id);
+		const initialIndex = this.props.items.findIndex(({ _id }) => this.props.activeItemId === _id);
 		return (
 			<ListNavigation
 				panelType={this.props.type}
 				initialIndex={initialIndex}
-				lastIndex={this.state.filteredItems.length - 1}
+				itemsCount={this.props.items.length}
 				onChange={this.handleNavigationChange}
 			/>
 		);
@@ -175,39 +165,18 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 		<EmptyStateInfo>No entry matched</EmptyStateInfo>
 	));
 
-	public componentDidMount() {
-		this.setState({ filteredItems: this.filteredItems });
-	}
-
 	public componentDidUpdate(prevProps) {
-		const { items, selectedFilters, showDefaultHiddenItems, searchEnabled,
-			sortOrder, showDetails, sortByField } = this.props;
-		const itemsChanged = !isEqual(prevProps.items, items);
-		const sortingChanged = prevProps.sortOrder !== sortOrder;
-		const filtersChanged = prevProps.selectedFilters.length !== selectedFilters.length;
-		const showDefaultHiddenItemsChanged = prevProps.showDefaultHiddenItems !== showDefaultHiddenItems;
-		const searchEnabledChange = prevProps.searchEnabled !== searchEnabled;
+		const { showDetails } = this.props;
 		const detailsWasClosed = prevProps.showDetails !== showDetails && !showDetails;
-		const sortByChanged =  prevProps.sortByField !== sortByField && sortByField;
 
 		const changes = {} as IState;
 
-		if (itemsChanged || filtersChanged || showDefaultHiddenItemsChanged ||
-			searchEnabledChange || sortingChanged || sortByChanged) {
-			changes.filteredItems = this.filteredItems;
-		}
-
-		const filteredItems = changes.filteredItems || this.state.filteredItems;
-		if (detailsWasClosed && this.listViewRef.current && this.props.activeItemId && filteredItems.length) {
+		if (detailsWasClosed) {
 			this.listViewRef.current.scrollTop = this.state.prevScroll;
 		}
 
 		if (this.listViewRef.current) {
 			this.setState({prevScroll: this.listViewRef.current.scrollTop});
-		}
-
-		if (!isEmpty(changes)) {
-			this.setState(changes);
 		}
 	}
 
@@ -238,9 +207,6 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	public handleCloseSearchMode = () => {
 		this.props.onToggleFilters(false);
 		this.props.onChangeFilters([]);
-		this.setState({
-			filteredItems: this.props.items
-		});
 	}
 
 	public handleOpenSearchMode = () => this.props.onToggleFilters(true);
@@ -259,14 +225,13 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleNavigationChange = (currentIndex) => {
-		const itemToShow = this.state.filteredItems[currentIndex] || this.state.filteredItems[0];
+		const itemToShow = this.props.items[currentIndex] || this.props.items[0];
 		this.props.onShowDetails(itemToShow);
 	}
 
 	public renderActions = () => {
 		if (this.props.showDetails && this.props.activeItemId) {
-			const canBeNavigated = this.state.filteredItems.length > 1 ||
-					(this.state.filteredItems.length === 1 && this.state.filteredItems[0]._id !== this.props.activeItemId);
+			const canBeNavigated = this.props.items.length > 1;
 			return canBeNavigated ?
 					this.renderHeaderNavigation() : <PanelBarActions type={this.props.type} hideSearch hideMenu />;
 		}

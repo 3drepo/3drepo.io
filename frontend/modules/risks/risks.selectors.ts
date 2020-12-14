@@ -23,6 +23,7 @@ import { prepareComments, transformCustomsLinksToMarkdown } from '../../helpers/
 import { hasPin, riskToPin } from '../../helpers/pins';
 import { prepareRisk } from '../../helpers/risks';
 import { searchByFilters } from '../../helpers/searching';
+import { sortByDate } from '../../helpers/sorting';
 import { selectJobsList } from '../jobs';
 import { selectQueryParams } from '../router/router.selectors';
 import { selectSelectedEndingDate, selectSelectedSequence, selectSelectedStartingDate } from '../sequences';
@@ -88,17 +89,27 @@ export const selectSearchEnabled = createSelector(
 	selectComponentState, (state) => state.searchEnabled
 );
 
+export const selectSortOrder = createSelector(
+	selectComponentState, (state) => state.sortOrder
+);
+
+export const selectSortByField = createSelector(
+	selectComponentState, (state) => state.sortBy
+);
+
 export const selectSelectedFilters = createSelector(
 	selectComponentState, (state) => state.selectedFilters
 );
 
 export const selectFilteredRisks = createSelector(
-	selectRisks, selectSelectedFilters, (risks, selectedFilters) => {
-		const returnHiddenRisk = selectedFilters.length && selectedFilters
-			.some(({ value: { value } }) => [RISK_LEVELS.AGREED_FULLY, RISK_LEVELS.VOID].includes(value));
+	selectRisks, selectSelectedFilters, selectSortOrder, selectSortByField,
+		(risks, selectedFilters, sortOrder, sortByField) => {
+			const returnHiddenRisk = selectedFilters.length && selectedFilters
+				.some(({ value: { value } }) => [RISK_LEVELS.AGREED_FULLY, RISK_LEVELS.VOID].includes(value));
 
-		return searchByFilters(risks, selectedFilters, returnHiddenRisk);
-	}
+			return sortByDate(searchByFilters(risks, selectedFilters, returnHiddenRisk),
+				{ order: sortOrder }, sortByField );
+		}
 );
 
 export const selectAllFilteredRisks = createSelector(
@@ -116,14 +127,6 @@ export const selectFetchingDetailsIsPending = createSelector(
 
 export const selectPostCommentIsPending = createSelector(
 		selectComponentState, (state) => state.postCommentIsPending
-);
-
-export const selectSortOrder = createSelector(
-	selectComponentState, (state) => state.sortOrder
-);
-
-export const selectSortByField = createSelector(
-	selectComponentState, (state) => state.sortBy
 );
 
 export const selectFailedToLoad = createSelector(
