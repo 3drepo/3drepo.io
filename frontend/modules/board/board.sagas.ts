@@ -92,7 +92,6 @@ function* fetchCardData({ teamspace, modelId, cardId }) {
 			yield put(IssuesActions.setActiveIssue(cardData, null, true));
 		} else {
 			yield put(RisksActions.setActiveRisk(cardData, null, true));
-			yield put(RisksActions.fetchRisk(teamspace, modelId, cardId));
 		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('fetch', 'card data', error));
