@@ -43,6 +43,8 @@ export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createAct
 	createModelSuccess: ['teamspace', 'modelData'],
 	updateModelSuccess: ['teamspace', 'modelId', 'modelData'],
 	removeModelSuccess: ['teamspace', 'modelData'],
+	subscribeOnChanges: [],
+	unsubscribeFromChanges: [],
 }, { prefix: 'TEAMSPACES/' });
 
 interface ISubModel {

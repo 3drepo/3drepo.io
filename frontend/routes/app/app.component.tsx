@@ -27,6 +27,7 @@ import { analyticsService } from '../../services/analytics';
 import { clientConfigService } from '../../services/clientConfig';
 import { isStaticRoute, STATIC_ROUTES } from '../../services/staticPages';
 import { DialogContainer } from '../components/dialogContainer';
+import { Intercom } from '../components/intercom';
 import { LiveChat } from '../components/liveChat';
 import { PrivateRoute } from '../components/privateRoute';
 import { SnackbarContainer } from '../components/snackbarContainer';
@@ -183,7 +184,8 @@ export class App extends React.PureComponent<IProps, IState> {
 				</Switch>
 				<DialogContainer />
 				<SnackbarContainer />
-				<LiveChat />
+				{!Boolean(clientConfigService.intercomLicense) &&  <LiveChat />}
+				<Intercom />
 			</AppContainer>
 		);
 	}

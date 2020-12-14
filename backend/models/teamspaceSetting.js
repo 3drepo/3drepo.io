@@ -94,25 +94,25 @@ class TeamspaceSettings {
 		if (hasSufficientQuota) {
 			const fileSizeLimit = require("../config").uploadSizeLimit;
 			if(file.byteLength > fileSizeLimit) {
-				return Promise.reject(responseCodes.SIZE_LIMIT);
+				throw responseCodes.SIZE_LIMIT;
 			}
 			const fNameArr = filename.split(".");
 			if (fNameArr.length < 2 || fNameArr[fNameArr.length - 1].toLowerCase() !== "csv") {
-				return Promise.reject(responseCodes.FILE_FORMAT_NOT_SUPPORTED);
+				throw responseCodes.FILE_FORMAT_NOT_SUPPORTED;
 			}
 
-			const storeFileProm = FileRef.storeMitigationsFile(account, username, filename, file).then(async () => {
-				const settingsCol = await this.getTeamspaceSettingsCollection(account, true);
-				const updatedAt = new Date();
-				await settingsCol.update({_id: account}, {$set: {"mitigationsUpdatedAt":updatedAt}});
-				return updatedAt;
-			});
-
 			const Mitigation = require("./mitigation");
-			const readCSVProm = Mitigation.importCSV(account, file);
-			return Promise.all([storeFileProm, readCSVProm]);
+			const importedMitigations = await Mitigation.importCSV(account, file);
+
+			await FileRef.storeMitigationsFile(account, username, filename, file);
+
+			const settingsCol = await this.getTeamspaceSettingsCollection(account, true);
+			const updatedAt = new Date();
+			await settingsCol.update({_id: account}, {$set: {"mitigationsUpdatedAt":updatedAt}});
+
+			return { "status":"ok", mitigationsUpdatedAt: updatedAt, records: importedMitigations.length };
 		} else {
-			return Promise.reject(responseCodes.SIZE_LIMIT_PAY);
+			throw responseCodes.SIZE_LIMIT_PAY;
 		}
 	}
 
