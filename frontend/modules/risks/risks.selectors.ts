@@ -23,7 +23,6 @@ import { prepareComments, transformCustomsLinksToMarkdown } from '../../helpers/
 import { hasPin, riskToPin } from '../../helpers/pins';
 import { getRiskColor } from '../../helpers/risks';
 import { searchByFilters } from '../../helpers/searching';
-import { selectIssuesMap } from '../issues';
 import { selectQueryParams } from '../router/router.selectors';
 import { selectSelectedEndingDate, selectSelectedSequence, selectSelectedStartingDate } from '../sequences';
 

@@ -17,7 +17,7 @@
 
 import React, { Fragment } from 'react';
 
-import { merge, size } from 'lodash';
+import { size } from 'lodash';
 
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { isViewer } from '../../../../../../helpers/permissions';
