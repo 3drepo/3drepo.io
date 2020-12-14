@@ -37,7 +37,6 @@ const IntercomPage = (props: IProps) => {
 			boot( {
 					name, // Full name
 					email, // Email address
-					alignment: 'left',
 					userHash: intercomHash
 				}
 			);
