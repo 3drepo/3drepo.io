@@ -20,14 +20,11 @@ import React from 'react';
 import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
 import ArrowBack from '@material-ui/icons/ArrowBack';
-import { isEmpty, isEqual } from 'lodash';
 
 import { CREATE_ISSUE, VIEW_ISSUE } from '../../../../constants/issue-permissions';
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { renderActionsMenu, IHeaderMenuItem } from '../../../../helpers/reportedItems';
-import { searchByFilters } from '../../../../helpers/searching';
-import { sortByDate } from '../../../../helpers/sorting';
 import { EmptyStateInfo } from '../../../components/components.styles';
 
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
