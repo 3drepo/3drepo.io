@@ -2,17 +2,11 @@
 var PREFIX = "https://www.3drepo.io";
 var API_PREFIX = "https://api1.www.3drepo.io";
 
-// Unity requires its setting in a global 
-// variable called Module
-var Module = {
-    TOTAL_MEMORY: 2130706432,
-};
-
 init();
 
 function init() {
 
-    // Replace as appropriate 
+    // Replace as appropriate
     var API = API_PREFIX + "/api/";
     var account;
 
@@ -30,8 +24,8 @@ function init() {
         var password = prompt("Please enter your 3drepo.io password");
         var credentials = {username: username, password: password};
         account = username;
-        
-        var post = { 
+
+        var post = {
             method: 'POST',
             headers: {
                 'Access-Control-Allow-Origin': "*",
@@ -55,14 +49,14 @@ function init() {
                 response.json()
                     .then(function(json){
                         if (validResponse) {
-                           
+
                             if (json.code === "ALREADY_LOGGED_IN") {
                                 console.log("Already logged in!")
                                 initialiseViewer()
                             } else {
                                 confirm(json.message)
                             }
-                            
+
                         } else {
                             // If we log in succesfully than initialise the viewer
                             initialiseViewer()
@@ -71,7 +65,7 @@ function init() {
                     .catch(function(error){
                         confirm("Error getting JSON: ", error)
                     })
-            
+
             })
             .catch(function(error) {
                 if (error.code === "ALREADY_LOGGED_IN") {
@@ -120,25 +114,25 @@ function init() {
         } else {
             console.error("Model or account not valid: ", account, model);
         }
-        
+
     }
 
     function prepareViewer() {
 
-        var unityLoaderPath = PREFIX + "/unity/Build/UnityLoader.js";
+        var unityLoaderPath = PREFIX + "/unity/Build/unity.loader.js";
 
         var unityLoaderScript = document.createElement("script");
         return new Promise(function(resolve, reject) {
 
             unityLoaderScript.async = true;
             unityLoaderScript.addEventListener ("load", function() {
-                console.debug("Loaded UnityLoader.js succesfully");
+                console.debug("Loaded unity.loader.js succesfully");
                 resolve();
             }, false);
 
             unityLoaderScript.addEventListener ("error", function(error) {
-                console.error("Error loading UnityLoader.js", error);
-                reject("Error loading UnityLoader.js");
+                console.error("Error loading unity.loader.js", error);
+                reject("Error loading unity.loader.js");
             }, false);
 
             // Event handlers MUST come first before setting src
@@ -147,21 +141,19 @@ function init() {
             // This kicks off the actual loading of Unity
             viewer.appendChild(unityLoaderScript);
         });
-        
+
     };
 
     function initUnity() {
         return new Promise(function(resolve, reject) {
-            
-            document.body.style.cursor = "wait";
 
-            Module.errorhandler = UnityUtil.onError;
+            document.body.style.cursor = "wait";
 
             UnityUtil.init(function(error) {
                 console.error(error);
             });
-            UnityUtil.loadUnity("unity", PREFIX + "/unity/Build/unity.json");
-            
+			UnityUtil.loadUnity(document.getElementById("unity"), PREFIX);
+
             UnityUtil.onReady().then(function() {
                 changeStatus("")
                 resolve();
@@ -169,7 +161,7 @@ function init() {
                 console.error("UnityUtil.onReady failed: ", error);
                 reject(error);
             });
-            
+
         });
     }
 

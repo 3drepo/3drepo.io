@@ -219,6 +219,10 @@ function* stopListenOnSelections() {
 function* handleBackgroundClick() {
 	yield waitForTreeToBeReady();
 
+	if (MultiSelect.isAccumMode()) {
+		return;
+	}
+
 	yield all([
 		clearCurrentlySelected(),
 		put(GroupsActions.clearSelectionHighlights(false))

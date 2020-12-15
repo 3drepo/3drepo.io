@@ -26,6 +26,7 @@
 module.exports.createApp = function () {
 
 	const express = require("express");
+	const compression = require("compression");
 	const bodyParser = require("body-parser");
 	const compress = require("compression");
 	const favicon = require("serve-favicon");
@@ -34,6 +35,7 @@ module.exports.createApp = function () {
 	const configRoute = require("../routes/config");
 	const cors = require("cors");
 
+	app.use(compression());
 	app.use("/config", configRoute);
 
 	const publicDir = __dirname + "/../../public";

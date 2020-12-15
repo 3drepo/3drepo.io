@@ -95,7 +95,6 @@ class Mitigation {
 
 	async importCSV(account, data) {
 		const csvFields = Object.keys(fieldTypes);
-		const clearMitigations = this.clearAll(account);
 
 		const records = parse(data, {
 			columns: csvFields,
@@ -103,8 +102,6 @@ class Mitigation {
 			from_line: 2,
 			trim: true
 		});
-
-		await clearMitigations;
 
 		return this.insert(account, records);
 	}
@@ -135,6 +132,7 @@ class Mitigation {
 			mitigations[i] = newMitigation;
 		}
 
+		await this.clearAll(account);
 		await mitigationColl.insert(mitigations);
 
 		return mitigations;

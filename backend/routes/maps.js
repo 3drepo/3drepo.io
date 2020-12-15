@@ -24,9 +24,9 @@ const httpsGet = require("../libs/httpsReq");
 const config = require("../config");
 const User = require("../models/user");
 
-const hereBaseDomain = ".base.maps.cit.api.here.com";
-const hereAerialDomain = ".aerial.maps.cit.api.here.com";
-const hereTrafficDomain = ".traffic.maps.cit.api.here.com";
+const hereBaseDomain = ".base.maps.ls.hereapi.com";
+const hereAerialDomain = ".aerial.maps.ls.hereapi.com";
+const hereTrafficDomain = ".traffic.maps.ls.hereapi.com";
 
 /**
  * @apiDefine Maps Maps
@@ -476,7 +476,7 @@ function listMaps(req, res) {
 	];
 
 	User.isHereEnabled(teamspace).then((hereEnabled) => {
-		if (hereEnabled && (config.here && config.here.appID && config.here.appCode)) {
+		if (hereEnabled && config.here && config.here.apiKey) {
 			maps = maps.concat([
 				{ name: "Here", layers: [
 					{ name: "Map Tiles", source: "HERE" },
@@ -546,7 +546,8 @@ function requestMapTile(req, res, domain, uri) {
 }
 
 function requestHereMapTile(req, res, domain, uri) {
-	uri += "?app_id=" + config.here.appID + "&app_code=" + config.here.appCode;
+	uri += "?apiKey=" + config.here.apiKey;
+
 	if (req.query.congestion) {
 		uri += "&congestion=" + req.query.congestion;
 	}
@@ -596,7 +597,7 @@ function getOSMTile(req, res) {
 function getHereBaseInfo(req, res) {
 	const domain = "1" + hereBaseDomain;
 	let uri = "/maptile/2.1/info";
-	uri += "?app_id=" + config.here.appID + "&app_code=" + config.here.appCode;
+	uri += "?apiKey=" + config.here.apiKey;
 	httpsGet.get(domain, uri).then(info =>{
 		res.setHeader("Cache-Control", `private, max-age=${config.cachePolicy.maxAge}`);
 		res.write(info);
@@ -740,7 +741,7 @@ function getHereBuildingsFromLongLat(req, res) {
 	const domain = "pde.api.here.com";
 	let uri = "/1/tile.json?&layer=BUILDING&level=" + zoomLevel + "&tilex=" + tileX + "&tiley=" + tileY + "&region=WEU";
 	systemLogger.logInfo("Fetching Here building platform data extensions: " + uri);
-	uri += "&app_id=" + config.here.appID + "&app_code=" + config.here.appCode;
+	uri += "&apiKey=" + config.here.apiKey;
 
 	httpsGet.get(domain, uri).then(buildings =>{
 		res.status(200).json(buildings);

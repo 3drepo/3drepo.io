@@ -16,7 +16,7 @@
  */
 
 import { invoke } from 'lodash';
-import { put, takeLatest } from 'redux-saga/effects';
+import { takeLatest } from 'redux-saga/effects';
 import io from 'socket.io-client';
 
 import * as API from '../../services/api';

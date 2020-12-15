@@ -98,6 +98,8 @@ interface IProps {
 	fetchStarredModels: () => void;
 	leaveTeamspace: (Teamspace) => void;
 	setState: (componentState: any) => void;
+	subscribeOnChanges: () => void;
+	unsubscribeFromChanges: () => void;
 }
 
 interface IState {
@@ -167,7 +169,8 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			visibleItems,
 			starredVisibleItems,
 			fetchStarredModels,
-			showStarredOnly
+			showStarredOnly,
+			subscribeOnChanges,
 		} = this.props;
 
 		if (!items.length) {
@@ -179,6 +182,8 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			visibleItems: showStarredOnly ? starredVisibleItems : visibleItems,
 			lastVisibleItems: visibleItems
 		});
+
+		subscribeOnChanges();
 	}
 
 	public componentDidUpdate(prevProps) {
@@ -215,7 +220,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				visibleItems: this.state.visibleItems
 			});
 		}
-
+		this.props.unsubscribeFromChanges();
 	}
 
 	private shouldBeVisible = cond([

@@ -25,6 +25,7 @@ const responseCodes = require("../response_codes");
 const C = require("../constants");
 const ModelHelpers = require("../models/helper/model");
 const UnityAssets = require("../models/unityAssets");
+const SrcAssets = require("../models/srcAssets");
 const JSONAssets = require("../models/jsonAssets");
 const config = require("../config");
 
@@ -369,11 +370,144 @@ router.get("/:model/:uid.json.mpc",  middlewares.hasReadAccessToModel, getJsonMp
  * @apiDescription Gets an actual unity bundle file. The path for this api is provided in the data retrieved by either one of the endpoints /:teamspace/:model/revision/master/head/unityAssets.json or /:teamspace/:model/revision/:rev/unityAssets.json
  *
  * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model id of the model to get JSON Mpc for.
+ * @apiParam {String} model id of the model
  * @apiParam {String} uid id of the unity bundle
  */
 
 router.get("/:model/:uid.unity3d", middlewares.hasReadAccessToModel, getUnityBundle);
+
+/**
+ * @api {get} /:teamspace/:model/:uid.src.mpc Get Model in SRC representation
+ * @apiName getSRC
+ * @apiGroup Model
+ * @apiDescription Get a mesh presented in SRC format.
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model id of the model
+ * @apiParam {String} uid id of the SRC file.
+ */
+
+router.get("/:model/:uid.src.mpc", middlewares.hasReadAccessToModel, getSRC);
+
+/**
+ * @api {get} /:teamspace/:model/revision/:rev/srcAssets.json Get revision's src assets
+ * @apiName getRevSrcAssets
+ * @apiGroup Model
+ * @apiDescription Get the model's assets but of a particular revision
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model The model Id to get unity assets for.
+ * @apiParam {String} rev The revision of the model to get src assets for
+ *
+ * @apiExample {get} Example usage:
+ * GET /Repo3DDemo/01713310-2286-11eb-93c1-296aba26cc11/revision/4d48e3de-1c87-4fdf-87bf-d92c224eb3fe/srcAssets.json HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success:
+ * {
+ *   "models": [
+ *     {
+ *       "database": "Repo3DDemo",
+ *       "model": "011382b0-2286-11eb-93c1-296aba26cc11",
+ *       "assets": [
+ *         "153cf665-2c84-4ff9-a9e2-ba495af8e6dc",
+ *         "07c67b6c-4b02-435f-8639-ea88403c36f7",
+ *         "2967230f-67fa-45dc-9686-161e45c7c8a2"
+ *       ],
+ *       "offset": [
+ *         9.999999999999787,
+ *         0,
+ *         -9.999999999999787
+ *       ]
+ *     },
+ *     {
+ *       "database": "Repo3DDemo",
+ *       "model": "01168ff0-2286-11eb-93c1-296aba26cc11",
+ *       "assets": [
+ *         "89d5580a-3224-4e50-bbab-89d855c320e0"
+ *       ],
+ *       "offset": [
+ *         1610,
+ *         740,
+ *         -2410
+ *       ]
+ *     },
+ *     {
+ *       "database": "Repo3DDemo",
+ *       "model": "01153060-2286-11eb-93c1-296aba26cc11",
+ *       "assets": [
+ *         "c14dbbee-a8fd-4ed8-8641-9e24737f8238"
+ *       ],
+ *       "offset": [
+ *         -688.095458984375,
+ *         6410.9140625,
+ *         683.460205078125
+ *       ]
+ *     }
+ *   ]
+ * }
+ *
+ */
+
+router.get("/:model/revision/:rev/srcAssets.json", middlewares.hasReadAccessToModel, getSrcAssets);
+
+/**
+ * @api {get} /:teamspace/:model/revision/master/head/srcAssets.json Get Src assets for the master branch
+ * @apiName getSrcAssets
+ * @apiGroup Model
+ * @apiDescription Get the lastest model's version src assets
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model The model Id to get unity assets for.
+ *
+ * @apiExample {get} Example usage:
+ * GET /Repo3DDemo/01713310-2286-11eb-93c1-296aba26cc11/revision/master/head/srcAssets.json HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success:
+ * {
+ *   "models": [
+ *     {
+ *       "database": "Repo3DDemo",
+ *       "model": "011382b0-2286-11eb-93c1-296aba26cc11",
+ *       "assets": [
+ *         "153cf665-2c84-4ff9-a9e2-ba495af8e6dc",
+ *         "07c67b6c-4b02-435f-8639-ea88403c36f7",
+ *         "2967230f-67fa-45dc-9686-161e45c7c8a2"
+ *       ],
+ *       "offset": [
+ *         9.999999999999787,
+ *         0,
+ *         -9.999999999999787
+ *       ]
+ *     },
+ *     {
+ *       "database": "Repo3DDemo",
+ *       "model": "01168ff0-2286-11eb-93c1-296aba26cc11",
+ *       "assets": [
+ *         "89d5580a-3224-4e50-bbab-89d855c320e0"
+ *       ],
+ *       "offset": [
+ *         1610,
+ *         740,
+ *         -2410
+ *       ]
+ *     },
+ *     {
+ *       "database": "Repo3DDemo",
+ *       "model": "01153060-2286-11eb-93c1-296aba26cc11",
+ *       "assets": [
+ *         "c14dbbee-a8fd-4ed8-8641-9e24737f8238"
+ *       ],
+ *       "offset": [
+ *         -688.095458984375,
+ *         6410.9140625,
+ *         683.460205078125
+ *       ]
+ *     }
+ *   ]
+ * }
+ */
+
+router.get("/:model/revision/master/head/srcAssets.json", middlewares.hasReadAccessToModel, getSrcAssets);
 
 /**
  * @api {put} /:teamspace/:model Update Federated Model
@@ -1974,17 +2108,25 @@ function getMultipleModelsPermissions(req, res, next) {
 
 function getUnityAssets(req, res, next) {
 
-	const model = req.params.model;
-	const account = req.params.account;
+	const {account, model, rev} = req.params;
 	const username = req.session.user.username;
-	let branch;
-
-	if (!req.params.rev) {
-		branch = C.MASTER_BRANCH_NAME;
-	}
+	const branch = rev ? undefined : C.MASTER_BRANCH_NAME;
 
 	UnityAssets.getAssetList(account, model, branch, req.params.rev, username).then(obj => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined, req.param.rev ? config.cachePolicy : undefined);
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
+
+function getSrcAssets(req, res, next) {
+
+	const {account, model, rev} = req.params;
+	const username = req.session.user.username;
+	const branch = rev ? undefined : C.MASTER_BRANCH_NAME;
+
+	SrcAssets.getAssetList(account, model, branch, req.params.rev, username).then(obj => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
@@ -2025,6 +2167,21 @@ function getUnityBundle(req, res, next) {
 	UnityAssets.getUnityBundle(account, model, id).then(file => {
 		req.params.format = "unity3d";
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file, undefined, config.cachePolicy);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function getSRC(req, res, next) {
+
+	const model = req.params.model;
+	const account = req.params.account;
+	const id = req.params.uid;
+
+	// FIXME: We should probably generalise this and have a model assets object.
+	SrcAssets.getSRC(account, model, id).then(file => {
+		req.params.format = "src";
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file.file, undefined, config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
