@@ -642,8 +642,10 @@ function* handleTransparencyOverridesChange({ currentOverrides, previousOverride
 	const toRemove = overridesTransparencyDiff(previousOverrides, currentOverrides);
 
 	yield waitForTreeToBeReady();
-	yield removeTransparencyOverrides(toRemove);
-	yield addTransparencyOverrides(toAdd);
+	yield all([
+		removeTransparencyOverrides(toRemove),
+		addTransparencyOverrides(toAdd)
+	]);
 }
 
 function* handleTransparenciesVisibility({ transparencies }) {
