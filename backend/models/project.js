@@ -159,12 +159,14 @@
 		}
 	};
 
-	Project.findByNames = function(account, projectNames) {
-		return Project.find({account}, { name: { $in:projectNames } });
+	Project.findByNames = async function(account, projectNames) {
+		const projectsColl = await getCollection(account);
+		return projectsColl.find({ name: { $in:projectNames } });
 	};
 
-	Project.findByIds = function(account, ids) {
-		return Project.find({account}, { _id: { $in: ids.map(utils.stringToUUID) } });
+	Project.findByIds = async function(account, ids) {
+		const projectsColl = await getCollection(account);
+		return projectsColl.find({ _id: { $in: ids.map(utils.stringToUUID) } });
 	};
 
 	Project.findPermsByUser = async function(account, model, username) {
@@ -180,10 +182,11 @@
 	Project.listModels = async function(account, project, username, filters) {
 		const User = require("./user");
 		const ModelHelper = require("./helper/model");
+		const projectsColl = await getCollection(account);
 
 		const [dbUser, projectObj] = await Promise.all([
 			await User.findByUserName(account),
-			Project.findOne({ account }, {name: project})
+			projectsColl.findOne({name: project})
 		]);
 
 		if (!projectObj) {
@@ -234,7 +237,8 @@
 
 	Project.isProjectAdmin = async function(account, model, user) {
 		const projection = { "permissions": { "$elemMatch": { user: user } }};
-		const project = await Project.findOne({account}, {models: model}, projection);
+		const projectsColl = await getCollection(account);
+		const project = await projectsColl.findOne({models: model}, projection);
 		const hasProjectPermissions = project && project.permissions.length > 0;
 
 		return hasProjectPermissions && project.permissions[0].permissions.includes(C.PERM_PROJECT_ADMIN);
@@ -259,13 +263,15 @@
 	};
 
 	Project.setUserAsProjectAdmin = async function(teamspace, project, user) {
-		const projectObj = await Project.findOne({ account: teamspace }, {name: project});
+		const projectsColl = await getCollection(teamspace);
+		const projectObj = await projectsColl.findOne({name: project});
 		const projectPermission = { user, permissions: ["admin_project"]};
 		return await Project.updateAttrs(teamspace, project, { permissions: projectObj.permissions.concat(projectPermission) });
 	};
 
 	Project.setUserAsProjectAdminById = async function(teamspace, project, user) {
-		const projectObj = await Project.findOne({ account: teamspace }, {_id: utils.stringToUUID(project)});
+		const projectsColl = await getCollection(teamspace);
+		const projectObj = await projectsColl.findOne({_id: utils.stringToUUID(project)});
 		const projectPermission = { user, permissions: ["admin_project"]};
 		return await Project.updateAttrs(teamspace, project, { permissions: projectObj.permissions.concat(projectPermission) });
 	};
