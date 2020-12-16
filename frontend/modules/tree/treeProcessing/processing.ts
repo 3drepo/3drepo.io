@@ -453,6 +453,7 @@ export class Processing {
 		if (!nodes.length) {
 			return [];
 		}
+
 		const meshList = {};
 		for (let index = 0; index < nodes.length; ++index) {
 			const node = nodes[index];
@@ -466,7 +467,7 @@ export class Processing {
 							meshList[stRoot.namespacedId] = {
 								modelId: stRoot.model,
 								teamspace: stRoot.teamspace,
-								meshes
+								meshes : [...meshes]
 							};
 						} else {
 							mergeArrays(meshList[stRoot.namespacedId].meshes, meshes);
@@ -480,7 +481,7 @@ export class Processing {
 						meshList[node.namespacedId] = {
 							modelId: node.model,
 							teamspace: node.teamspace,
-							meshes
+							meshes:  [...meshes]
 						};
 					} else {
 						mergeArrays(meshList[node.namespacedId].meshes, meshes);
