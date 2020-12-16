@@ -32,11 +32,11 @@ interface IProps {
 export const SubmitButton = ({ pending, disabled, children, ...props}: IProps) => {
 	const additionalProps = merge({
 		type: 'submit',
-		variant: 'raised',
+		variant: 'contained',
 		color: 'secondary',
 	}, props);
 
-	const Button = props.variant === 'fab' ? StyledButton : StyledFab;
+	const Button = props.variant === 'fab' ? StyledFab : StyledButton;
 
 	return (
 		<Button
