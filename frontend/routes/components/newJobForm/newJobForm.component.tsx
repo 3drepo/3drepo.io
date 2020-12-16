@@ -73,7 +73,7 @@ export class NewJobForm extends React.PureComponent<IProps, any> {
 						item
 						container
 						direction="row"
-						spacing={16}
+						spacing={2}
 						wrap="nowrap"
 					>
 						<StyledTextFieldContainer item>

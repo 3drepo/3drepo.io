@@ -27,7 +27,7 @@ interface IProps extends ButtonProps {
 	onClick?: (e) => void;
 }
 
-export const ContainedButton = ({ children, icon, onClick, ...props }: IProps) => {
+export const ContainedButton: React.FC<IProps> = ({ children, icon, onClick, ...props }) => {
 	const IconComponent = icon;
 
 	return (
