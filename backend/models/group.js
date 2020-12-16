@@ -49,14 +49,12 @@ const embeddedObjectFields = {
 	"rules" : ["field", "operator", "values"]
 };
 
-function uuidsToIfcGuids(account, model, ids) {
+async function uuidsToIfcGuids(account, model, ids) {
 	const query = { type: "meta", parents: { $in: ids }, "metadata.IFC GUID": { $exists: true } };
 	const project = { "metadata.IFC GUID": 1, parents: 1 };
-	return db.getCollection(account, model + ".scene").then(dbCol => {
-		return dbCol.find(query, project).toArray().then(results => {
-			return results;
-		});
-	});
+	const sceneColl = await db.getCollection(account, model + ".scene");
+
+	return await sceneColl.find(query, project).toArray();
 }
 
 function cleanEmbeddedObject(field, data) {
@@ -259,34 +257,33 @@ function getObjectsArrayAsIfcGuids(data) {
 	});
 }
 
-function ifcGuidsToUUIDs(account, model, branch, revId, ifcGuids) {
-	if(!ifcGuids || ifcGuids.length === 0) {
+async function ifcGuidsToUUIDs(account, model, branch, revId, ifcGuids) {
+	if (!ifcGuids || ifcGuids.length === 0) {
 		return Promise.resolve([]);
 	}
 
 	const query = {"metadata.IFC GUID": { $in: ifcGuids } };
 	const project = { parents: 1, _id: 0 };
 
-	return db.getCollection(account, model + ".scene").then(dbCol => {
-		return dbCol.find(query, project).toArray().then(results => {
-			if(results.length === 0) {
-				return [];
-			}
-			return History.getHistory({ account, model }, branch, revId).then(history => {
-				if (!history) {
-					return Promise.reject(responseCodes.INVALID_TAG_NAME);
-				} else {
+	const sceneColl = await db.getCollection(account, model + ".scene");
+	const results = await sceneColl.find(query, project).toArray();
 
-					const parents = results.map(x => x = x.parents).reduce((acc, val) => acc.concat(val), []);
+	if (results.length === 0) {
+		return [];
+	}
 
-					const meshQuery = { _id: { $in: history.current }, shared_id: { $in: parents }, type: "mesh" };
-					const meshProject = { shared_id: 1, _id: 0 };
+	const history = await History.getHistory({ account, model }, branch, revId);
 
-					return dbCol.find(meshQuery, meshProject).toArray();
-				}
-			});
-		});
-	});
+	if (!history) {
+		throw responseCodes.INVALID_TAG_NAME;
+	} else {
+		const parents = results.map(x => x = x.parents).reduce((acc, val) => acc.concat(val), []);
+
+		const meshQuery = { _id: { $in: history.current }, shared_id: { $in: parents }, type: "mesh" };
+		const meshProject = { shared_id: 1, _id: 0 };
+
+		return sceneColl.find(meshQuery, meshProject).toArray();
+	}
 }
 
 const Group = {};
@@ -334,13 +331,14 @@ Group.create = async function (account, model, branch = "master", rid = null, se
 		newGroup._id = utils.uuidToString(newGroup._id);
 		newGroup.objects = await getObjectIds(account, model, branch, rid, newGroup, true, false);
 
+		// TODO: consider unused isIssueGroup from frontend
 		if (!data.isIssueGroup && !data.isRiskGroup && sessionId) {
 			ChatEvent.newGroups(sessionId, account, model, newGroup);
 		}
 
 		return newGroup;
 	} else {
-		return Promise.reject(responseCodes.INVALID_ARGUMENTS);
+		throw responseCodes.INVALID_ARGUMENTS;
 	}
 };
 
@@ -374,11 +372,7 @@ Group.findByUID = async function (account, model, branch, revId, uid, showIfcGui
 
 	foundGroup.objects = await getObjectIds(account, model, branch, revId, foundGroup, showIfcGuids);
 
-	if (!noClean) {
-		return clean(foundGroup);
-	}
-
-	return foundGroup;
+	return (noClean) ? foundGroup : clean(foundGroup);
 };
 
 Group.findIfcGroupByUID = async function (account, model, uid) {
@@ -453,7 +447,6 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 };
 
 Group.update = async function (account, model, branch = "master", revId = null, sessionId, user = "", groupId, data) {
-	// return updateAttrs(account, model, groupId, branch, rid, _.cloneDeep(data), user).then((savedGroup) => {
 	const group = await Group.findByUID(account, model, branch, revId, groupId);
 
 	const convertedObjects = await getObjectsArrayAsIfcGuids(data, false);
@@ -507,7 +500,7 @@ Group.update = async function (account, model, branch = "master", revId = null, 
 
 		clean(group);
 	} else {
-		return Promise.reject(responseCodes.INVALID_ARGUMENTS);
+		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
 	group.objects = await getObjectIds(account, model, branch, revId, group, true, false);
