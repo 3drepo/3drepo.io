@@ -145,7 +145,7 @@ export const MuiTheme = createMuiTheme({
 			}
 		},
 		MuiTypography: {
-			title: {
+			h6: {
 				fontSize: 20,
 				fontWeight: 400
 			}

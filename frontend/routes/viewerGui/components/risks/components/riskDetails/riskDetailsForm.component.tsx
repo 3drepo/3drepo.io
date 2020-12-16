@@ -223,7 +223,6 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					value={activeTab}
 					indicatorColor="secondary"
 					textColor="primary"
-					fullWidth
 					onChange={this.handleChange}
 				>
 					<Tab label={RISK_TABS.RISK} value={MAIN_RISK_TYPE} />

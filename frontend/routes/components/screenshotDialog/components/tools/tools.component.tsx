@@ -167,7 +167,7 @@ export class Tools extends React.PureComponent<IProps, any> {
 	});
 
 	public renderSaveButton = renderWhenTrue(() => (
-			<StyledButton onClick={this.props.onSave} color="secondary" variant="raised">Save</StyledButton>
+			<StyledButton onClick={this.props.onSave} color="secondary" variant="contained">Save</StyledButton>
 	));
 
 	public renderSelectableTools = (value, onChange, items) => (

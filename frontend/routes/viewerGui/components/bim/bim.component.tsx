@@ -169,7 +169,6 @@ export class Bim extends React.PureComponent<IProps, any> {
 					<Tabs
 						indicatorColor="primary"
 						textColor="primary"
-						fullWidth
 						value={Number(showStarred)}
 						onChange={this.handleTabChange}
 					>

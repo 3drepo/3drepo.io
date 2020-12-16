@@ -20,12 +20,13 @@ import React from 'react';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { merge } from 'lodash';
 
-import { LoaderContainer, StyledButton } from './submitButton.styles';
+import { LoaderContainer, StyledButton, StyledFab } from './submitButton.styles';
 
 interface IProps {
 	children: any;
 	pending?: boolean;
 	disabled?: boolean;
+	variant?: string;
 }
 
 export const SubmitButton = ({ pending, disabled, children, ...props}: IProps) => {
@@ -35,8 +36,10 @@ export const SubmitButton = ({ pending, disabled, children, ...props}: IProps) =
 		color: 'secondary',
 	}, props);
 
+	const Button = props.variant === 'fab' ? StyledButton : StyledFab;
+
 	return (
-		<StyledButton
+		<Button
 			disabled={pending || disabled}
 			{...additionalProps}
 		>
@@ -46,6 +49,6 @@ export const SubmitButton = ({ pending, disabled, children, ...props}: IProps) =
 					<CircularProgress size={16} />
 				</LoaderContainer>
 			)}
-		</StyledButton>
+		</Button>
 	);
 };

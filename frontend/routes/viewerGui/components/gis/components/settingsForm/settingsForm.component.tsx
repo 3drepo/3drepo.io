@@ -37,7 +37,7 @@ export const SettingsForm = (props) => {
 				<Header>
 					To visualize map tiles match GIS point with project base point
 				</Header>
-				<Headline color="primary" variant="subheading">
+				<Headline color="primary" variant="subtitle1">
 					GIS Point - World Coordinates
 				</Headline>
 				<Field name="latitude" render={ ({ field, form }) => (
@@ -67,7 +67,7 @@ export const SettingsForm = (props) => {
 						label="Angle from North (Clockwise Degrees)"
 					/>
 				)} />
-				<Headline color="primary" variant="subheading">
+				<Headline color="primary" variant="subtitle1">
 					Project Base Point - Model Coordinates
 				</Headline>
 

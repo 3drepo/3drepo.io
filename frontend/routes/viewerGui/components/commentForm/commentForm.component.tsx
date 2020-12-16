@@ -417,7 +417,7 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 										variant="fab"
 										color="secondary"
 										type="submit"
-										mini
+										size="small"
 										disabled={!hideComment && (!canComment || !form.isValid || form.isValidating) || form.isSubmitting}
 										aria-label="Add new comment"
 										pending={isPending}

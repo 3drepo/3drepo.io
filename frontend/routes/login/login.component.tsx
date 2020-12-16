@@ -25,7 +25,6 @@ import * as Yup from 'yup';
 import { ROUTES } from '../../constants/routes';
 import { clientConfigService } from '../../services/clientConfig';
 import { schema } from '../../services/validation';
-import { Logo } from '../components/logo/logo.component';
 import { Panel } from '../components/panel/panel.component';
 import { SubmitButton } from '../components/submitButton/submitButton.component';
 import { Footer } from './components/footer';
@@ -68,10 +67,6 @@ export class Login extends React.PureComponent<IProps, IState> {
 		login: '',
 		password: ''
 	};
-
-	public componentDidUpdate(prevPops) {
-		const { isAuthenticated } = prevPops;
-	}
 
 	public handleSubmit = (data) => {
 		this.props.onLogin(data.login, data.password);

@@ -177,7 +177,6 @@ export class Compare extends React.PureComponent<IProps, any> {
 						value={activeTab}
 						indicatorColor="secondary"
 						textColor="primary"
-						fullWidth
 						onChange={this.handleChange}
 					>
 						<Tab label={COMPARE_TABS.DIFF} value={DIFF_COMPARE_TYPE} disabled={isCompareProcessed} />

@@ -21,7 +21,7 @@ export const ConfirmDialog = (props: IProps) => {
 
 			<DialogActions>
 				<Button onClick={props.handleClose} color="secondary">No</Button>;
-				<Button onClick={props.handleResolve} variant="raised" color="secondary">Yes</Button>;
+				<Button onClick={props.handleResolve} variant="contained" color="secondary">Yes</Button>;
 			</DialogActions>
 		</>
 	);

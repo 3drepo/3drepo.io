@@ -16,6 +16,7 @@
  */
 
 import Button from '@material-ui/core/Button';
+import Fab from '@material-ui/core/Fab';
 import styled from 'styled-components';
 import { COLOR } from '../../styles';
 
@@ -57,7 +58,7 @@ export const GridContainer = styled.div`
 	background-color: ${COLOR.WHITE};
 `;
 
-export const MenuButton = styled(Button).attrs({
+export const MenuButton = styled(Fab).attrs({
 	classes: {
 		disabled: 'button--disabled'
 	}

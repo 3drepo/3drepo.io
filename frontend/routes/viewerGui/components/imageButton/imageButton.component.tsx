@@ -119,11 +119,11 @@ const CreateScreenshot = ({ disableScreenshot, onTakeScreenshot, ...props }) => 
 	);
 };
 
-export const UpdateImageButton = ({ hasImage, disabled, ...props }: IProps) => {
+export const UpdateImageButton: React.FC<IProps> = React.forwardRef(({ hasImage, disabled, ...props }, ref) => {
 	const imageLabel = !hasImage ? 'Add Image' : 'Edit Image';
 
 	return (
-		<ButtonContainer {...props}>
+		<ButtonContainer ref={ref} {...props}>
 			{renderWhenTrueOtherwise(() => (
 				<UploadImage
 					asMenuItem={false}
@@ -166,7 +166,7 @@ export const UpdateImageButton = ({ hasImage, disabled, ...props }: IProps) => {
 
 		</ButtonContainer>
 	);
-};
+});
 
 export const ImageButton = ({ ...props }: IProps) => {
 	return (

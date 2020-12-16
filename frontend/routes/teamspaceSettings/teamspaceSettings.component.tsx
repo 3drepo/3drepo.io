@@ -198,10 +198,10 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 	private renderTreatmentSuggestionsSection = () => {
 		return (
 			<SuggestionsContainer container direction="column" wrap="nowrap">
-				<Headline color="textPrimary" variant="subheading">Treatment Suggestions</Headline>
+				<Headline color="textPrimary" variant="subtitle1">Treatment Suggestions</Headline>
 				<FileGrid container direction="row" justify="space-between" alignItems="center" wrap="nowrap">
 					<InfoColumnWrapper container>
-						<DataText variant="body2">
+						<DataText variant="body1">
 							{this.renderLastTreatmentsUpdated()}
 						</DataText>
 					</InfoColumnWrapper>
@@ -281,7 +281,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 							<Field render={({ form }) =>
 								<Button
 									type="submit"
-									variant="raised"
+									variant="contained"
 									color="secondary"
 									disabled={!form.isValid || form.isSubmitting}
 								>
