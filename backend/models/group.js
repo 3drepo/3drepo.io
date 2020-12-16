@@ -141,7 +141,7 @@ function getObjectsArray(model, branch, revId, groupData, convertSharedIDsToStri
 		const _branch = (model === objectId.model) ? branch : "master";
 		const _revId = (model === objectId.model) ? revId : null;
 
-		const ifcGuids = groupData.objects[i].ifc_guids ? groupData.objects[i].ifc_guids : [];
+		const ifcGuids = groupData.objects[i].ifc_guids || [];
 
 		for (let j = 0; groupData.objects[i].shared_ids && j < groupData.objects[i].shared_ids.length; j++) {
 			objectIdsSet.add(utils.uuidToString(groupData.objects[i].shared_ids[j]));
@@ -177,9 +177,7 @@ function getObjectsArray(model, branch, revId, groupData, convertSharedIDsToStri
 		}
 	}
 
-	return Promise.all(objectIdPromises).then(objectIds => {
-		return objectIds;
-	});
+	return Promise.all(objectIdPromises);
 }
 
 /**
@@ -351,7 +349,7 @@ Group.deleteGroups = async function (account, model, sessionId, ids) {
 	const deleteResponse = await groupsColl.remove({ _id: { $in: ids } });
 
 	if (!deleteResponse.result.ok) {
-		return Promise.reject(responseCodes.GROUP_NOT_FOUND);
+		throw responseCodes.GROUP_NOT_FOUND;
 	}
 
 	ChatEvent.groupsDeleted(sessionId, account, model, groupIds);
@@ -367,7 +365,7 @@ Group.findByUID = async function (account, model, branch, revId, uid, showIfcGui
 	const foundGroup = await groupsColl.findOne({ _id: utils.stringToUUID(uid) });
 
 	if (!foundGroup) {
-		return Promise.reject(responseCodes.GROUP_NOT_FOUND);
+		throw responseCodes.GROUP_NOT_FOUND;
 	}
 
 	foundGroup.objects = await getObjectIds(account, model, branch, revId, foundGroup, showIfcGuids);
@@ -381,7 +379,7 @@ Group.findIfcGroupByUID = async function (account, model, uid) {
 
 	// Extract a unique list of IDs only
 	if (!foundGroup) {
-		return Promise.reject(responseCodes.GROUP_NOT_FOUND);
+		throw responseCodes.GROUP_NOT_FOUND;
 	}
 
 	foundGroup.objects = await getObjectsArrayAsIfcGuids(foundGroup, false);
