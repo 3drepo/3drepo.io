@@ -27,23 +27,30 @@
 		autoReconnect: true
 	};
 
+	const Handler = {};
+
 	let db;
 
-	function disconnect() {
+	Handler.disconnect = function () {
 		if(db) {
 			db.close();
 			db = null;
 		}
-	}
+	};
 
-	function dropCollection(database, collection) {
-		getDB(database).then(dbConn => {
+	Handler.dropCollection = function (database, collection) {
+		Handler.getDB(database).then(dbConn => {
 			dbConn.dropCollection(collection.name);
 		}).catch(err => {
-			disconnect();
+			Handler.disconnect();
 			return Promise.reject(err);
 		});
-	}
+	};
+
+	Handler.find = async function (database, colName, query, projection) {
+		const collection = await Handler.getCollection(database, colName);
+		return await collection.find(query, projection);
+	};
 
 	function getURL(database) {
 		// Generate connection string that could include multiple hosts that
@@ -66,7 +73,7 @@
 		return connectString;
 	}
 
-	function getDB(database) {
+	Handler.getDB = function (database) {
 		if(db) {
 			return Promise.resolve(db.db(database));
 		} else {
@@ -75,34 +82,34 @@
 				return db;
 			});
 		}
-	}
+	};
 
-	function getAuthDB() {
+	Handler.getAuthDB = function () {
 		return MongoClient.connect(getURL("admin"), connConfig).then(_db => {
 			return _db;
 		});
-	}
+	};
 
-	function getCollection(database, colName)	{
-		return getDB(database).then(dbConn => {
+	Handler.getCollection = function (database, colName) {
+		return Handler.getDB(database).then(dbConn => {
 			return dbConn.collection(colName);
 		}).catch(err => {
-			disconnect();
+			Handler.disconnect();
 			return Promise.reject(err);
 		});
-	}
+	};
 
-	function getCollectionStats(database, colName)	{
-		return getDB(database).then(dbConn => {
+	Handler.getCollectionStats = function (database, colName) {
+		return Handler.getDB(database).then(dbConn => {
 			return dbConn.collection(colName).stats();
 		}).catch(err => {
-			disconnect();
+			Handler.disconnect();
 			return Promise.reject(err);
 		});
-	}
+	};
 
 	function getGridFSBucket(database, collection, chunksize = null) {
-		return getDB(database).then(dbConn => {
+		return Handler.getDB(database).then(dbConn => {
 			const options = {bucketName: collection};
 			if (chunksize) {
 				options.chunksize =  chunksize;
@@ -110,12 +117,12 @@
 
 			return new GridFSBucket(dbConn, options);
 		}).catch(err => {
-			disconnect();
+			Handler.disconnect();
 			return Promise.reject(err);
 		});
 	}
 
-	function getFileStreamFromGridFS(database, collection, filename) {
+	Handler.getFileStreamFromGridFS = function (database, collection, filename) {
 		return getGridFSBucket(database,collection).then((bucket) => {
 			return bucket.find({filename}).toArray().then(file => {
 				if(file.length === 0) {
@@ -124,10 +131,10 @@
 				return Promise.resolve({stream: bucket.openDownloadStream(file[0]._id), size: file[0].length});
 			});
 		});
-	}
+	};
 
-	function getFileFromGridFS(database, collection, filename) {
-		return getFileStreamFromGridFS(database, collection, filename).then((file) => {
+	Handler.getFileFromGridFS = function (database, collection, filename) {
+		return Handler.getFileStreamFromGridFS(database, collection, filename).then((file) => {
 			const fileStream = file.stream;
 			return new Promise((resolve) => {
 				const bufs = [];
@@ -140,9 +147,9 @@
 				});
 			});
 		});
-	}
+	};
 
-	function storeFileInGridFS(database, collection, filename, buffer) {
+	Handler.storeFileInGridFS = function (database, collection, filename, buffer) {
 		return getGridFSBucket(database, collection).then(bucket => {
 			return new Promise(function(resolve, reject) {
 				try {
@@ -163,55 +170,40 @@
 				}
 			});
 		});
-	}
+	};
 
 	// FIXME: this exist as a (temp) workaround because modelFactory has one call that doesn't expect promise!
-	function _getCollection(database, colName)	{
+	Handler._getCollection = function (database, colName) {
 		return db.db(database).collection(colName);
-	}
+	};
 
-	function listCollections(database) {
-		return getDB(database).then(dbConn => {
+	Handler.listCollections = function (database) {
+		return Handler.getDB(database).then(dbConn => {
 			return dbConn.listCollections().toArray();
 		}).catch(err => {
-			disconnect();
+			Handler.disconnect();
 			return Promise.reject(err);
 		});
 
-	}
+	};
 
-	function runCommand(database, cmd) {
-		return getDB(database).then(dbConn => {
+	Handler.runCommand = function (database, cmd) {
+		return Handler.getDB(database).then(dbConn => {
 			return dbConn.command(cmd);
 		}).catch(err => {
-			disconnect();
+			Handler.disconnect();
 			return Promise.reject(err);
 		});
-	}
+	};
 
-	function getSessionStore(session) {
+	Handler.getSessionStore = function (session) {
 		const MongoDBStore = require("connect-mongodb-session")(session);
 		return new MongoDBStore({
 			uri: getURL("admin"),
 			collection: "sessions"
 		});
-	}
-
-	module.exports = {
-		disconnect,
-		dropCollection,
-		getDB,
-		getAuthDB,
-		getCollection,
-		getCollectionStats,
-		getFileStreamFromGridFS,
-		getFileFromGridFS,
-		storeFileInGridFS,
-		_getCollection,
-		listCollections,
-		getSessionStore,
-		runCommand
 	};
 
+	module.exports = Handler;
 }());
 
