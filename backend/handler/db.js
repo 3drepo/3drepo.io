@@ -210,6 +210,11 @@
 		});
 	};
 
+	Handler.update = async function (database, colName, query, data) {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.update(query, data);
+	};
+
 	module.exports = Handler;
 }());
 

@@ -493,8 +493,7 @@ Group.update = async function (account, model, branch = "master", revId = null, 
 				updateBson.$unset = toUnset;
 			}
 
-			const groupsColl = await getGroupCollection(account, model);
-			await groupsColl.update({ _id: group._id }, updateBson);
+			await db.update(account, getGroupCollectionName(model), { _id: group._id }, updateBson);
 		}
 
 		clean(group);
