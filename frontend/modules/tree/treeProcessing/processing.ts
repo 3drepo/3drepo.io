@@ -95,47 +95,47 @@ export class Processing {
 	}
 
 	public selectNodes = ({ nodesIds = [], ...extraData }) => {
-		const nodes = [];
+		const nodes = new Set();
 		nodesIds.forEach((id) => {
 			if (this.visibilityMap[id] !== VISIBILITY_STATES.INVISIBLE) {
 				const node = this.nodesList[this.nodesIndexesMap[id]];
 				if (node.type === 'mesh' && !node.name) {
-					nodes.push(this.nodesList[this.nodesIndexesMap[node.parentId]]);
+					nodes.add(this.nodesList[this.nodesIndexesMap[node.parentId]]);
 				} else {
-					nodes.push(node);
+					nodes.add(node);
 				}
 			}
 		});
 
-		if (!nodes.length) {
+		if (!nodes.size) {
 			return { highlightedObjects: [] };
 		}
 
-		const highlightedObjects = this.handleSelection(nodes, SELECTION_STATES.SELECTED);
+		const highlightedObjects = this.handleSelection(Array.from(nodes), SELECTION_STATES.SELECTED);
 
 		return { highlightedObjects };
 	}
 
 	public deselectNodes = ({ nodesIds = [] }) => {
-		const nodes = [];
+		const nodes = new Set();
 		for (let index = 0, size = nodesIds.length; index < size; index++) {
 			const nodeId = nodesIds[index];
 			if (this.selectionMap[nodeId] !== SELECTION_STATES.UNSELECTED) {
 				this.selectionMap[nodeId] = SELECTION_STATES.UNSELECTED;
 				const [node] = this.getNodesByIds([nodeId]);
 				if (node.type === 'mesh' && !node.name) {
-					nodes.push(this.nodesList[this.nodesIndexesMap[node.parentId]]);
+					nodes.add(this.nodesList[this.nodesIndexesMap[node.parentId]]);
 				} else {
-					nodes.push(node);
+					nodes.add(node);
 				}
 			}
 		}
 
-		if (!nodes.length) {
+		if (!nodes.size) {
 			return { unhighlightedObjects: [] };
 		}
 
-		const unhighlightedObjects = this.handleSelection(nodes, SELECTION_STATES.UNSELECTED);
+		const unhighlightedObjects = this.handleSelection(Array.from(nodes), SELECTION_STATES.UNSELECTED);
 		return { unhighlightedObjects };
 	}
 
@@ -453,6 +453,7 @@ export class Processing {
 		if (!nodes.length) {
 			return [];
 		}
+
 		const meshList = {};
 		for (let index = 0; index < nodes.length; ++index) {
 			const node = nodes[index];
@@ -466,10 +467,10 @@ export class Processing {
 							meshList[stRoot.namespacedId] = {
 								modelId: stRoot.model,
 								teamspace: stRoot.teamspace,
-								meshes
+								meshes : [...meshes]
 							};
 						} else {
-							meshList[stRoot.namespacedId].meshes = meshList[stRoot.namespacedId].meshes.concat(meshes);
+							mergeArrays(meshList[stRoot.namespacedId].meshes, meshes);
 						}
 					}
 				});
@@ -480,7 +481,7 @@ export class Processing {
 						meshList[node.namespacedId] = {
 							modelId: node.model,
 							teamspace: node.teamspace,
-							meshes
+							meshes:  [...meshes]
 						};
 					} else {
 						mergeArrays(meshList[node.namespacedId].meshes, meshes);
