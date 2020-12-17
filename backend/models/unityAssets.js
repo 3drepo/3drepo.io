@@ -23,7 +23,6 @@ const utils = require("../utils");
 const Ref = require("./ref");
 const C = require("../constants");
 const db = require("../handler/db");
-const responseCodes = require("../response_codes");
 const FileRef = require("./fileRef");
 
 const UnityAssets = {};

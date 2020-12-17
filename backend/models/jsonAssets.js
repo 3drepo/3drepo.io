@@ -23,7 +23,6 @@ const utils = require("../utils");
 const Ref = require("./ref");
 const C = require("../constants");
 const { hasReadAccessToModelHelper } = require("../middlewares/checkPermissions");
-const ResponseCodes = require("../response_codes");
 const Stream = require("stream");
 
 const JSONAssets = {};
