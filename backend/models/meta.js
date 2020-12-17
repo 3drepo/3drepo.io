@@ -72,10 +72,6 @@ class Meta {
 		// Get the revision object to find all relevant IDs
 		const history = await History.getHistory({ account, model }, branch, rev);
 
-		if (!history) {
-			throw responseCodes.INVALID_TAG_NAME;
-		}
-
 		// Check for submodel references
 		const filter = {
 			type: "ref",
@@ -274,10 +270,6 @@ class Meta {
 
 		const history = await History.getHistory({ account, model }, branch, rev);
 
-		if (!history) {
-			throw responseCodes.INVALID_TAG_NAME;
-		}
-
 		// Check for submodel references
 		const filter = {
 			type: "ref",
@@ -442,10 +434,6 @@ async function findModelSharedIdsByRulesQueries(account, model, posRuleQueries, 
 
 async function findModelMeshIdsByRulesQueries(account, model, posRuleQueries, negRuleQueries, branch, revId, toString = false) {
 	const history = await History.getHistory({ account, model }, branch, revId);
-
-	if (!history) {
-		return Promise.reject(responseCodes.INVALID_TAG_NAME);
-	}
 
 	const idToMeshesDict = await getIdToMeshesDict(account, model, utils.uuidToString(history._id));
 	let allRulesResults = null;

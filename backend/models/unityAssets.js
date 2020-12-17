@@ -53,28 +53,23 @@ function getAssetListEntry(account, model, revId) {
 
 UnityAssets.getAssetList = function(account, model, branch, rev, username) {
 	return History.getHistory({ account, model }, branch, rev).then((history) => {
-		if(history) {
-			return Ref.getRefNodes(account, model, history.current).then((subModelRefs) => {
-				const fetchPromise = [];
-				if(subModelRefs.length) {
-					// This is a federation, get asset lists from subModels and merge them
-					subModelRefs.forEach((ref) => {
-						fetchPromise.push(getAssetListFromRef(ref, username));
-					});
-				} else {
-					// Not a federation, get it's own assetList.
-					fetchPromise.push(getAssetListEntry(account, model, history._id));
-				}
-
-				return Promise.all(fetchPromise).then((assetLists) => {
-					return {models: assetLists.filter((list) => list)};
+		return Ref.getRefNodes(account, model, history.current).then((subModelRefs) => {
+			const fetchPromise = [];
+			if(subModelRefs.length) {
+				// This is a federation, get asset lists from subModels and merge them
+				subModelRefs.forEach((ref) => {
+					fetchPromise.push(getAssetListFromRef(ref, username));
 				});
+			} else {
+				// Not a federation, get it's own assetList.
+				fetchPromise.push(getAssetListEntry(account, model, history._id));
+			}
 
+			return Promise.all(fetchPromise).then((assetLists) => {
+				return {models: assetLists.filter((list) => list)};
 			});
-		} else {
-			return Promise.reject(responseCodes.INVALID_TAG_NAME);
-		}
 
+		});
 	});
 };
 

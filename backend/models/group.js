@@ -271,17 +271,12 @@ async function ifcGuidsToUUIDs(account, model, branch, revId, ifcGuids) {
 	}
 
 	const history = await History.getHistory({ account, model }, branch, revId);
+	const parents = results.map(x => x = x.parents).reduce((acc, val) => acc.concat(val), []);
 
-	if (!history) {
-		throw responseCodes.INVALID_TAG_NAME;
-	} else {
-		const parents = results.map(x => x = x.parents).reduce((acc, val) => acc.concat(val), []);
+	const meshQuery = { _id: { $in: history.current }, shared_id: { $in: parents }, type: "mesh" };
+	const meshProject = { shared_id: 1, _id: 0 };
 
-		const meshQuery = { _id: { $in: history.current }, shared_id: { $in: parents }, type: "mesh" };
-		const meshProject = { shared_id: 1, _id: 0 };
-
-		return db.find(account, sceneCollName, meshQuery, meshProject);
-	}
+	return db.find(account, sceneCollName, meshQuery, meshProject);
 }
 
 const Group = {};
