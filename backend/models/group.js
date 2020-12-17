@@ -365,8 +365,7 @@ Group.deleteGroupsByViewId = async function (account, model, view_id) {
 };
 
 Group.findByUID = async function (account, model, branch, revId, uid, showIfcGuids = false, noClean = true) {
-	const groupsColl = await getGroupCollection(account, model);
-	const foundGroup = await groupsColl.findOne({ _id: utils.stringToUUID(uid) });
+	const foundGroup = await db.findOne(account, getGroupCollectionName(model), { _id: utils.stringToUUID(uid) });
 
 	if (!foundGroup) {
 		throw responseCodes.GROUP_NOT_FOUND;
@@ -378,8 +377,7 @@ Group.findByUID = async function (account, model, branch, revId, uid, showIfcGui
 };
 
 Group.findIfcGroupByUID = async function (account, model, uid) {
-	const groupsColl = await getGroupCollection(account, model);
-	const foundGroup = await groupsColl.findOne({ _id: utils.stringToUUID(uid) });
+	const foundGroup = await db.findOne(account, getGroupCollectionName(model), { _id: utils.stringToUUID(uid) });
 
 	// Extract a unique list of IDs only
 	if (!foundGroup) {

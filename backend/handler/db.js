@@ -53,6 +53,11 @@
 		return results.toArray();
 	};
 
+	Handler.findOne = async function (database, colName, query, projection) {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.findOne(query, projection);
+	};
+
 	function getURL(database) {
 		// Generate connection string that could include multiple hosts that
 		// represent a replica set.
