@@ -327,8 +327,7 @@ Group.create = async function (account, model, branch = "master", rid = null, se
 	newGroup.createdAt = Date.now();
 
 	if (typeCorrect) {
-		const groupsColl = await getGroupCollection(account, model);
-		await groupsColl.insert(newGroup);
+		await db.insert(account, getGroupCollectionName(model), newGroup);
 
 		newGroup._id = utils.uuidToString(newGroup._id);
 		newGroup.objects = await getObjectIds(account, model, branch, rid, newGroup, true, false);
