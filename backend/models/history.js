@@ -62,11 +62,11 @@ historySchema.statics.getHistory = async function(dbColOptions, branch, revId, p
 	let history;
 
 	if (revId && utils.isUUID(revId)) {
-		history = this.findByUID(dbColOptions, revId, projection);
+		history = await this.findByUID(dbColOptions, revId, projection);
 	} else if (revId && !utils.isUUID(revId)) {
-		history = this.findByTag(dbColOptions, revId, projection);
+		history = await this.findByTag(dbColOptions, revId, projection);
 	} else if (branch) {
-		history = this.findByBranch(dbColOptions, branch, projection);
+		history = await this.findByBranch(dbColOptions, branch, projection);
 	}
 
 	if (!history) {
