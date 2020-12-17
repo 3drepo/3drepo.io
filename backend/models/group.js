@@ -52,9 +52,9 @@ const embeddedObjectFields = {
 async function uuidsToIfcGuids(account, model, ids) {
 	const query = { type: "meta", parents: { $in: ids }, "metadata.IFC GUID": { $exists: true } };
 	const project = { "metadata.IFC GUID": 1, parents: 1 };
-	const sceneColl = await db.getCollection(account, model + ".scene");
+	const sceneCollName = model + ".scene";
 
-	return await sceneColl.find(query, project).toArray();
+	return await db.find(account, sceneCollName, query, project);
 }
 
 function cleanEmbeddedObject(field, data) {
@@ -113,8 +113,12 @@ function clean(groupData) {
 	return groupData;
 }
 
-function getCollection(account, model) {
-	return db.getCollection(account, model + ".groups");
+function getGroupCollection(account, model) {
+	return db.getCollection(account, getGroupCollectionName(model));
+}
+
+function getGroupCollectionName(model) {
+	return model + ".groups";
 }
 
 function getObjectIds(account, model, branch, revId, groupData, convertSharedIDsToString, showIfcGuids = false) {
@@ -323,7 +327,7 @@ Group.create = async function (account, model, branch = "master", rid = null, se
 	newGroup.createdAt = Date.now();
 
 	if (typeCorrect) {
-		const groupsColl = await getCollection(account, model);
+		const groupsColl = await getGroupCollection(account, model);
 		await groupsColl.insert(newGroup);
 
 		newGroup._id = utils.uuidToString(newGroup._id);
@@ -345,7 +349,7 @@ Group.deleteGroups = async function (account, model, sessionId, ids) {
 
 	ids = [].concat(ids).map(x => utils.stringToUUID(x));
 
-	const groupsColl = await getCollection(account, model);
+	const groupsColl = await getGroupCollection(account, model);
 	const deleteResponse = await groupsColl.remove({ _id: { $in: ids } });
 
 	if (!deleteResponse.result.ok) {
@@ -356,12 +360,12 @@ Group.deleteGroups = async function (account, model, sessionId, ids) {
 };
 
 Group.deleteGroupsByViewId = async function (account, model, view_id) {
-	const groupsColl = await getCollection(account, model);
+	const groupsColl = await getGroupCollection(account, model);
 	return await groupsColl.remove({ view_id });
 };
 
 Group.findByUID = async function (account, model, branch, revId, uid, showIfcGuids = false, noClean = true) {
-	const groupsColl = await getCollection(account, model);
+	const groupsColl = await getGroupCollection(account, model);
 	const foundGroup = await groupsColl.findOne({ _id: utils.stringToUUID(uid) });
 
 	if (!foundGroup) {
@@ -374,7 +378,7 @@ Group.findByUID = async function (account, model, branch, revId, uid, showIfcGui
 };
 
 Group.findIfcGroupByUID = async function (account, model, uid) {
-	const groupsColl = await getCollection(account, model);
+	const groupsColl = await getGroupCollection(account, model);
 	const foundGroup = await groupsColl.findOne({ _id: utils.stringToUUID(uid) });
 
 	// Extract a unique list of IDs only
@@ -422,8 +426,7 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 		query._id = {$in: utils.stringsToUUIDs(ids)};
 	}
 
-	const groupsColl = await getCollection(account, model);
-	const results = await groupsColl.find(query).toArray();
+	const results = await db.find(account, getGroupCollectionName(model), query);
 	const sharedIdConversionPromises = [];
 
 	results.forEach(result => {
@@ -492,7 +495,7 @@ Group.update = async function (account, model, branch = "master", revId = null, 
 				updateBson.$unset = toUnset;
 			}
 
-			const groupsColl = await getCollection(account, model);
+			const groupsColl = await getGroupCollection(account, model);
 			await groupsColl.update({ _id: group._id }, updateBson);
 		}
 

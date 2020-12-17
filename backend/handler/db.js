@@ -49,7 +49,8 @@
 
 	Handler.find = async function (database, colName, query, projection) {
 		const collection = await Handler.getCollection(database, colName);
-		return await collection.find(query, projection);
+		const results = await collection.find(query, projection);
+		return results.toArray();
 	};
 
 	function getURL(database) {
