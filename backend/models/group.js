@@ -113,10 +113,6 @@ function clean(groupData) {
 	return groupData;
 }
 
-function getGroupCollection(account, model) {
-	return db.getCollection(account, getGroupCollectionName(model));
-}
-
 function getGroupCollectionName(model) {
 	return model + ".groups";
 }
@@ -348,8 +344,7 @@ Group.deleteGroups = async function (account, model, sessionId, ids) {
 
 	ids = [].concat(ids).map(x => utils.stringToUUID(x));
 
-	const groupsColl = await getGroupCollection(account, model);
-	const deleteResponse = await groupsColl.remove({ _id: { $in: ids } });
+	const deleteResponse = await db.remove(account, getGroupCollectionName(model), { _id: { $in: ids } });
 
 	if (!deleteResponse.result.ok) {
 		throw responseCodes.GROUP_NOT_FOUND;
@@ -359,8 +354,7 @@ Group.deleteGroups = async function (account, model, sessionId, ids) {
 };
 
 Group.deleteGroupsByViewId = async function (account, model, view_id) {
-	const groupsColl = await getGroupCollection(account, model);
-	return await groupsColl.remove({ view_id });
+	return await db.remove(account, getGroupCollectionName(model), { view_id });
 };
 
 Group.findByUID = async function (account, model, branch, revId, uid, showIfcGuids = false, noClean = true) {
