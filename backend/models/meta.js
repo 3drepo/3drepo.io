@@ -49,6 +49,10 @@ async function getIdToMeshesDict(account, model, revId) {
 	return JSON.parse(await FileRef.getJSONFile(account, model, treeFileName));
 }
 
+function getSceneCollectionName(model) {
+	return model + ".scene";
+}
+
 class Meta {
 	async getMetadataById(account, model, id) {
 		const projection = {
@@ -196,6 +200,36 @@ class Meta {
 	async getIfcGuids(account, model) {
 		const coll = await db.getCollection(account, model + ".scene");
 		return (await coll.find({ type: "meta" }, { "metadata.IFC GUID": 1 })).toArray();
+	}
+
+	async ifcGuidsToUUIDs(account, model, branch, revId, ifcGuids) {
+		if (!ifcGuids || ifcGuids.length === 0) {
+			return Promise.resolve([]);
+		}
+
+		const query = {"metadata.IFC GUID": { $in: ifcGuids } };
+		const project = { parents: 1, _id: 0 };
+
+		const results = await db.find(account, getSceneCollectionName(model), query, project);
+
+		if (results.length === 0) {
+			return [];
+		}
+
+		const history = await History.getHistory({ account, model }, branch, revId);
+		const parents = results.map(x => x = x.parents).reduce((acc, val) => acc.concat(val), []);
+
+		const meshQuery = { _id: { $in: history.current }, shared_id: { $in: parents }, type: "mesh" };
+		const meshProject = { shared_id: 1, _id: 0 };
+
+		return db.find(account, getSceneCollectionName(model), meshQuery, meshProject);
+	}
+
+	async uuidsToIfcGuids(account, model, ids) {
+		const query = { type: "meta", parents: { $in: ids }, "metadata.IFC GUID": { $exists: true } };
+		const project = { "metadata.IFC GUID": 1, parents: 1 };
+
+		return await db.find(account, getSceneCollectionName(model), query, project);
 	}
 
 	async findObjectIdsByRules(account, model, rules, branch, revId, convertSharedIDsToString, showIfcGuids = false) {

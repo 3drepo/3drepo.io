@@ -49,14 +49,6 @@ const embeddedObjectFields = {
 	"rules" : ["field", "operator", "values"]
 };
 
-async function uuidsToIfcGuids(account, model, ids) {
-	const query = { type: "meta", parents: { $in: ids }, "metadata.IFC GUID": { $exists: true } };
-	const project = { "metadata.IFC GUID": 1, parents: 1 };
-	const sceneCollName = model + ".scene";
-
-	return await db.find(account, sceneCollName, query, project);
-}
-
 function cleanEmbeddedObject(field, data) {
 	if(embeddedObjectFields[field]) {
 		const filtered =  data.map((entry) => {
@@ -151,7 +143,7 @@ function getObjectsArray(model, branch, revId, groupData, convertSharedIDsToStri
 			objectId.ifc_guids = ifcGuids;
 			objectIdPromises.push(objectId);
 		} else {
-			objectIdPromises.push(ifcGuidsToUUIDs(
+			objectIdPromises.push(Meta.ifcGuidsToUUIDs(
 				objectId.account,
 				objectId.model,
 				_branch,
@@ -215,7 +207,7 @@ function getObjectsArrayAsIfcGuids(data) {
 		}
 
 		ifcGuidPromises.push(
-			uuidsToIfcGuids(account, model, sharedIds).then(ifcGuids => {
+			Meta.uuidsToIfcGuids(account, model, sharedIds).then(ifcGuids => {
 				if (ifcGuids && ifcGuids.length > 0) {
 					for (let j = 0; j < ifcGuids.length; j++) {
 						ifcGuidsSet.add(ifcGuids[j].metadata["IFC GUID"]);
@@ -253,30 +245,6 @@ function getObjectsArrayAsIfcGuids(data) {
 	return Promise.all(ifcGuidPromises).then(ifcObjects => {
 		return ifcObjects;
 	});
-}
-
-async function ifcGuidsToUUIDs(account, model, branch, revId, ifcGuids) {
-	if (!ifcGuids || ifcGuids.length === 0) {
-		return Promise.resolve([]);
-	}
-
-	const query = {"metadata.IFC GUID": { $in: ifcGuids } };
-	const project = { parents: 1, _id: 0 };
-
-	const sceneCollName = model + ".scene";
-	const results = await db.find(account, sceneCollName, query, project);
-
-	if (results.length === 0) {
-		return [];
-	}
-
-	const history = await History.getHistory({ account, model }, branch, revId);
-	const parents = results.map(x => x = x.parents).reduce((acc, val) => acc.concat(val), []);
-
-	const meshQuery = { _id: { $in: history.current }, shared_id: { $in: parents }, type: "mesh" };
-	const meshProject = { shared_id: 1, _id: 0 };
-
-	return db.find(account, sceneCollName, meshQuery, meshProject);
 }
 
 const Group = {};
