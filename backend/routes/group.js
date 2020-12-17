@@ -468,8 +468,7 @@ router.delete("/groups/", middlewares.issue.canCreate, deleteGroups);
 
 function listGroups(req, res, next) {
 	const place = utils.APIInfo(req);
-	const { account, model } = req.params;
-	const rid = req.params.rid ? req.params.rid : null;
+	const { account, model, rid } = req.params;
 	const branch = rid ? null : "master";
 
 	const showIfcGuids = (req.query.ifcguids) ? JSON.parse(req.query.ifcguids) : false;
@@ -494,8 +493,7 @@ function listGroups(req, res, next) {
 
 function findGroup(req, res, next) {
 	const place = utils.APIInfo(req);
-	const { account, model, uid } = req.params;
-	const rid = req.params.rid ? req.params.rid : null;
+	const { account, model, rid, uid } = req.params;
 	const branch = rid ? null : "master";
 	const showIfcGuids = (req.query.ifcguids) ? JSON.parse(req.query.ifcguids) : false;
 
