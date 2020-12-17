@@ -21,7 +21,6 @@ const utils = require("../utils");
 const nodeuuid = require("uuid/v1");
 const responseCodes = require("../response_codes.js");
 const Meta = require("./meta");
-const History = require("./history");
 const { checkRulesValidity } = require("./helper/rule");
 const db = require("../handler/db");
 const ChatEvent = require("./chatEvent");
