@@ -267,8 +267,8 @@ async function ifcGuidsToUUIDs(account, model, branch, revId, ifcGuids) {
 	const query = {"metadata.IFC GUID": { $in: ifcGuids } };
 	const project = { parents: 1, _id: 0 };
 
-	const sceneColl = await db.getCollection(account, model + ".scene");
-	const results = await sceneColl.find(query, project).toArray();
+	const sceneCollName = model + ".scene";
+	const results = await db.find(account, sceneCollName, query, project);
 
 	if (results.length === 0) {
 		return [];
@@ -284,7 +284,7 @@ async function ifcGuidsToUUIDs(account, model, branch, revId, ifcGuids) {
 		const meshQuery = { _id: { $in: history.current }, shared_id: { $in: parents }, type: "mesh" };
 		const meshProject = { shared_id: 1, _id: 0 };
 
-		return sceneColl.find(meshQuery, meshProject).toArray();
+		return db.find(account, sceneCollName, meshQuery, meshProject);
 	}
 }
 
