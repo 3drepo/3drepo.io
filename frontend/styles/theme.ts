@@ -46,19 +46,20 @@ export const MuiTheme = createMuiTheme({
 	overrides: {
 		MuiInput: {
 			root: {
-				fontSize: '14px'
+				'fontSize': '14px',
+				'&$disabled': {
+					color: 'gainsboro'
+				},
 			},
 			underline: {
 				'&:before': {
 					borderBottomColor: 'rgba(0, 0, 0, .12) !important'
 				}
 			},
-			disabled: {
-				color: 'gainsboro'
-			}
 		},
 		MuiInputBase: {
 			root: {
+				'overflow': 'hidden',
 				'&$disabled': {
 					color: theme.colors.BLACK_60
 				}
@@ -99,7 +100,7 @@ export const MuiTheme = createMuiTheme({
 		},
 		MuiDialog: {
 			paper: {
-				background: '#fafafa'
+				background: theme.colors.LIGHT_GRAY
 			},
 			paperFullScreen: {
 				maxWidth: 'calc(100% - 96px)',
@@ -168,7 +169,7 @@ export const MuiTheme = createMuiTheme({
 		},
 		MuiDrawer: {
 			paper: {
-				backgroundColor: 'rgb(250,250,250)',
+				backgroundColor: theme.colors.WHITE,
 				boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.2)',
 				zIndex: 10
 			},
@@ -200,7 +201,7 @@ export const MuiTheme = createMuiTheme({
 				pointerEvents: 'none'
 			},
 			colorPrimary: {
-				backgroundColor: '#e8004e'
+				backgroundColor: theme.colors.VIVID_RED,
 			},
 			colorSecondary: { // Secondary color is used to make the badge disappear
 				backgroundColor: 'transparent',

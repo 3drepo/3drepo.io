@@ -38,8 +38,9 @@ export const StyledList = styled(List)`
 `;
 
 export const UserContainer = styled(ListItem)`
-	display: flex;
-	flex-direction: row;
+	&& {
+		padding: 12px 24px;
+	}
 `;
 
 export const UserData = styled.div`

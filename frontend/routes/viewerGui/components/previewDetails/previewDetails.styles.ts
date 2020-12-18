@@ -78,7 +78,8 @@ export const Details = styled(ExpansionPanelDetails)`
 
 export const Summary = styled(ExpansionPanelSummary).attrs({
 	classes: {
-		expandIcon: 'summary-icon'
+		focused: 'focused',
+		expandIcon: 'summary-icon',
 	}
 })`
 	&& {
@@ -88,6 +89,10 @@ export const Summary = styled(ExpansionPanelSummary).attrs({
 		padding: 0 12px;
 		background-color: ${COLOR.WHITE};
 		z-index: 2;
+
+		&.focused {
+			background-color: ${COLOR.WHITE};
+		}
 
 		.summary-icon {
 			display: none;

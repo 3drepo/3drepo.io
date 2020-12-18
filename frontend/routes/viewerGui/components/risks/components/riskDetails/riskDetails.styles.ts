@@ -19,6 +19,7 @@ import styled from 'styled-components';
 
 import FormControl from '@material-ui/core/FormControl';
 import Grid from '@material-ui/core/Grid';
+import Tab from '@material-ui/core/Tab';
 import { cond, constant, matches, stubTrue } from 'lodash';
 
 import { COLOR } from '../../../../../../styles';
@@ -155,6 +156,12 @@ export const TabContent = styled.div`
 	overflow: hidden;
 	display: flex;
 	height: inherit;
+`;
+
+export const StyledTab = styled(Tab)`
+	&& {
+		font-size: 13px;
+	}
 `;
 
 export const Content = styled.div`

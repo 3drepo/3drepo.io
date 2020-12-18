@@ -35,7 +35,7 @@ import { AttachmentsFormTab } from '../attachmentsFormTab/attachmentsFormTab.com
 import { MainRiskFormTab } from '../mainRiskFormTab/mainRiskFormTab.component';
 import { SequencingFormTab } from '../sequencingFormTab/sequencingFormTab.component';
 import { TreatmentRiskFormTab } from '../treatmentFormTab/treatmentFormTab.component';
-import { TabContent } from './riskDetails.styles';
+import { StyledTab, TabContent } from './riskDetails.styles';
 
 interface IProps {
 	risk: any;
@@ -225,10 +225,10 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					textColor="primary"
 					onChange={this.handleChange}
 				>
-					<Tab label={RISK_TABS.RISK} value={MAIN_RISK_TYPE} />
-					<Tab label={RISK_TABS.TREATMENT} value={TREATMENT_RISK_TYPE} />
-					<Tab label={RISK_TABS.SEQUENCING} value={SEQUENCING_RISK_TYPE} />
-					<Tab {...this.attachmentsProps} value={ATTACHMENTS_RISK_TYPE} />
+					<StyledTab label={RISK_TABS.RISK} value={MAIN_RISK_TYPE} />
+					<StyledTab label={RISK_TABS.TREATMENT} value={TREATMENT_RISK_TYPE} />
+					<StyledTab label={RISK_TABS.SEQUENCING} value={SEQUENCING_RISK_TYPE} />
+					<StyledTab {...this.attachmentsProps} value={ATTACHMENTS_RISK_TYPE} />
 				</Tabs>
 				<TabContent>
 					{this.showRiskContent(activeTab === MAIN_RISK_TYPE)}
