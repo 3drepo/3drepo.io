@@ -31,7 +31,7 @@ import {
 } from './newJobForm.styles';
 
 const NewJobSchema = Yup.object().shape({
-	modelName: Yup.string()
+	name: Yup.string()
 		.max(50, 'Job name is limited to 50 characters')
 		.required('Job name is a required field')
 });
