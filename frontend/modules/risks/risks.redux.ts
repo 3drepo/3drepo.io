@@ -158,8 +158,8 @@ export const fetchRiskFailure = (state = INITIAL_STATE) => {
 
 export const saveRiskSuccess = (state = INITIAL_STATE, { risk }) => {
 	const risksMap = updateRiskProps(state.risksMap, risk._id, risk);
-	const { position: oldPosition } = state.risksMap[state.componentState.activeRisk];
-	const { position: newPosition } = risksMap[state.componentState.activeRisk];
+	const oldPosition = state.risksMap[state.componentState.activeRisk]?.position;
+	const newPosition = risksMap[state.componentState.activeRisk]?.position;
 
 	if (!isEqual(oldPosition, newPosition)) {
 		risksMap[state.componentState.activeRisk].position = oldPosition;
