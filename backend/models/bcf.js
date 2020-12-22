@@ -277,7 +277,7 @@ async function getIssueBCF(issue, account, model, unit) {
 			if (_.get(vp, "highlighted_group_id")) {
 				const highlightedGroupId = _.get(vp, "highlighted_group_id");
 				componentsPromises.push(
-					Group.findIfcGroupByUID(account, model, highlightedGroupId).then(group => {
+					Group.findByUID(account, model, undefined, undefined, highlightedGroupId, false, true, true).then(group => {
 						if (group && group.objects && group.objects.length > 0) {
 							for (let i = 0; i < group.objects.length; i++) {
 								const groupObject = group.objects[i];
@@ -308,7 +308,7 @@ async function getIssueBCF(issue, account, model, unit) {
 			if (_.get(vp, "hidden_group_id")) {
 				const hiddenGroupId = _.get(vp, "hidden_group_id");
 				componentsPromises.push(
-					Group.findIfcGroupByUID(account, model, hiddenGroupId).then(group => {
+					Group.findByUID(account, model, undefined, undefined, hiddenGroupId, false, true, true).then(group => {
 						if (group && group.objects && group.objects.length > 0) {
 							for (let i = 0; i < group.objects.length; i++) {
 								const groupObject = group.objects[i];
@@ -344,7 +344,7 @@ async function getIssueBCF(issue, account, model, unit) {
 			if (_.get(vp, "shown_group_id")) {
 				const shownGroupId = _.get(vp, "shown_group_id");
 				componentsPromises.push(
-					Group.findIfcGroupByUID(account, model, shownGroupId).then(group => {
+					Group.findByUID(account, model, undefined, undefined, shownGroupId, false, true, true).then(group => {
 						if (group && group.objects && group.objects.length > 0) {
 							for (let i = 0; i < group.objects.length; i++) {
 								const groupObject = group.objects[i];

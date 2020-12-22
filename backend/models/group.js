@@ -123,8 +123,6 @@ function getObjectsArray(model, branch, revId, groupData, convertSharedIDsToStri
 	const objectIdPromises = [];
 
 	for (let i = 0; i < groupData.objects.length; i++) {
-		const objectIdsSet = new Set();
-
 		const objectId = {};
 		objectId.account = groupData.objects[i].account;
 		objectId.model = groupData.objects[i].model;
@@ -134,9 +132,7 @@ function getObjectsArray(model, branch, revId, groupData, convertSharedIDsToStri
 
 		const ifcGuids = groupData.objects[i].ifc_guids || [];
 
-		for (let j = 0; groupData.objects[i].shared_ids && j < groupData.objects[i].shared_ids.length; j++) {
-			objectIdsSet.add(utils.uuidToString(groupData.objects[i].shared_ids[j]));
-		}
+		const objectIdsSet = groupData.objects[i].shared_ids ? new Set(groupData.objects[i].shared_ids.map(utils.uuidToString)) : new Set();
 
 		if (showIfcGuids) {
 			objectId.ifc_guids = ifcGuids;
@@ -304,7 +300,7 @@ Group.create = async function (account, model, branch = "master", rid = null, se
 Group.deleteGroups = async function (account, model, sessionId, ids) {
 	const groupIds = [].concat(ids);
 
-	ids = [].concat(ids).map(x => utils.stringToUUID(x));
+	ids = ids.map(utils.stringToUUID);
 
 	const deleteResponse = await db.remove(account, getGroupCollectionName(model), { _id: { $in: ids } });
 
@@ -319,29 +315,20 @@ Group.deleteGroupsByViewId = async function (account, model, view_id) {
 	return await db.remove(account, getGroupCollectionName(model), { view_id });
 };
 
-Group.findByUID = async function (account, model, branch, revId, uid, showIfcGuids = false, noClean = true) {
+Group.findByUID = async function (account, model, branch, revId, uid, showIfcGuids = false, noClean = true, convertToIfcGuids = false) {
 	const foundGroup = await db.findOne(account, getGroupCollectionName(model), { _id: utils.stringToUUID(uid) });
 
 	if (!foundGroup) {
 		throw responseCodes.GROUP_NOT_FOUND;
 	}
 
-	foundGroup.objects = await getObjectIds(account, model, branch, revId, foundGroup, showIfcGuids);
+	if (convertToIfcGuids) {
+		foundGroup.objects = await getObjectsArrayAsIfcGuids(foundGroup, false);
+	} else {
+		foundGroup.objects = await getObjectIds(account, model, branch, revId, foundGroup, showIfcGuids);
+	}
 
 	return (noClean) ? foundGroup : clean(foundGroup);
-};
-
-Group.findIfcGroupByUID = async function (account, model, uid) {
-	const foundGroup = await db.findOne(account, getGroupCollectionName(model), { _id: utils.stringToUUID(uid) });
-
-	// Extract a unique list of IDs only
-	if (!foundGroup) {
-		throw responseCodes.GROUP_NOT_FOUND;
-	}
-
-	foundGroup.objects = await getObjectsArrayAsIfcGuids(foundGroup, false);
-
-	return foundGroup;
 };
 
 Group.getList = async function (account, model, branch, revId, ids, queryParams, showIfcGuids) {
