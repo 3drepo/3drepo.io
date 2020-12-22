@@ -295,15 +295,19 @@ describe("Invitations ", function () {
 			.send({ email, job: inviteJob, permissions: team1Perm })
 			.expect(200);
 
-		expect(true).to.equal(true);
-
 		const User = require("../../models/user");
 		const { token } = await User.createUser(null, username, 'password', {email}, 200000);
 		await User.verify(username, token, {skipImportToyModel : true, skipCreateBasicPlan: true});
 
 		const { body: { permissions } } = await agents.teamSpace1.get('/teamSpace1/projects/project1').expect(200);
 
+		console.log("permissions");
+		console.log(permissions);
+		console.log("selectInvitedUser");
+		console.log(selectInvitedUser);
 		const invitedPermission = permissions.find(selectInvitedUser);
+		console.log("invitedPermission");
+		console.log(invitedPermission);
 	 	expect(invitedPermission.permissions[0], 'should be a project admin').to.equal('admin_project');
 
 	});
