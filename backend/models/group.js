@@ -317,17 +317,10 @@ Group.create = async function (account, model, branch = "master", rid = null, se
 };
 
 Group.deleteGroups = async function (account, model, sessionId, ids) {
-	const groupIds = [].concat(ids);
+	const groupIds = ids.map(utils.stringToUUID);
+	const deleteResponse = await db.remove(account, getGroupCollectionName(model), { _id: { $in: groupIds } });
 
-	ids = ids.map(utils.stringToUUID);
-
-	const deleteResponse = await db.remove(account, getGroupCollectionName(model), { _id: { $in: ids } });
-
-	if (!deleteResponse.result.ok) {
-		throw responseCodes.GROUP_NOT_FOUND;
-	}
-
-	ChatEvent.groupsDeleted(sessionId, account, model, groupIds);
+	ChatEvent.groupsDeleted(sessionId, account, model, ids);
 };
 
 Group.deleteGroupsByViewId = async function (account, model, view_id) {
