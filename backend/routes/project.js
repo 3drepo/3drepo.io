@@ -551,7 +551,6 @@
 	}
 
 	function deleteProject(req, res, next) {
-
 		Project.delete(req.params.account, req.params.project).then(project => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
 		}).catch(err => {

@@ -581,40 +581,6 @@ describe("Projects", function () {
 			});
 	});
 
-	it("should able to delete project", function(done) {
-
-		const project = {
-			name: "project4"
-		};
-
-		async.series([
-
-			callback => {
-				agent.delete(`/${username}/projects/${project.name}`)
-					.expect(200, function(err, res) {
-						callback(err);
-					});
-
-			},
-
-			callback => {
-				agent.get(`/${username}.json`)
-					.expect(200, function(err, res) {
-
-						const account = res.body.accounts.find(account => account.account === username);
-						expect(account).to.exist;
-
-						const pg = account.projects.find(pg => pg.name === project.name);
-						expect(pg).to.not.exist;
-
-						callback(err);
-					});
-			}
-
-		], (err, res) => done(err));
-
-	});
-
 	it("should fail to update a project that doesnt exist [DEPRECATED]", function(done) {
 		agent.put(`/${username}/projects/notexist`)
 			.send({})
@@ -627,14 +593,6 @@ describe("Projects", function () {
 	it("should fail to update a project that doesnt exist", function(done) {
 		agent.patch(`/${username}/projects/notexist`)
 			.send({})
-			.expect(404, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
-				done(err);
-			});
-	});
-
-	it("should fail to delete a project that doesnt exist", function(done) {
-		agent.delete(`/${username}/projects/notexist`)
 			.expect(404, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
 				done(err);
@@ -707,6 +665,82 @@ describe("Projects", function () {
 
 	it("list all project models with name query from project that doesn't exist should fail", function(done) {
 		agent.get(`/${username}/projects/notexist/models?name=TestModel`)
+			.expect(404, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
+				done(err);
+			});
+	});
+
+	it("should able to delete project", function(done) {
+
+		const project = {
+			name: "project_exists"
+		};
+
+		async.series([
+
+			callback => {
+				agent.delete(`/${username}/projects/${project.name}`)
+					.expect(200, function(err, res) {
+						callback(err);
+					});
+
+			},
+
+			callback => {
+				agent.get(`/${username}.json`)
+					.expect(200, function(err, res) {
+
+						const account = res.body.accounts.find(account => account.account === username);
+						expect(account).to.exist;
+
+						const pg = account.projects.find(pg => pg.name === project.name);
+						expect(pg).to.not.exist;
+
+						callback(err);
+					});
+			}
+
+		], (err, res) => done(err));
+
+	});
+
+	it("should able to delete empty project", function(done) {
+
+		const project = {
+			name: "project4"
+		};
+
+		async.series([
+
+			callback => {
+				agent.delete(`/${username}/projects/${project.name}`)
+					.expect(200, function(err, res) {
+						callback(err);
+					});
+
+			},
+
+			callback => {
+				agent.get(`/${username}.json`)
+					.expect(200, function(err, res) {
+
+						const account = res.body.accounts.find(account => account.account === username);
+						expect(account).to.exist;
+
+						const pg = account.projects.find(pg => pg.name === project.name);
+						expect(pg).to.not.exist;
+
+						callback(err);
+					});
+			}
+
+		], (err, res) => done(err));
+
+	});
+
+	it("should fail to delete a project that doesnt exist", function(done) {
+		agent.delete(`/${username}/projects/notexist`)
 			.expect(404, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
 				done(err);

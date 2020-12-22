@@ -123,14 +123,18 @@
 	Project.delete = async function(account, name) {
 		const ModelHelper = require("./helper/model");
 
-		const project = await Project.findOneAndRemove({account}, {name});
+		const projectsColl = await getCollection(account);
+		const project = await projectsColl.findOne({name});
 
 		if (!project) {
 			throw responseCodes.PROJECT_NOT_FOUND;
 		}
 
+		await projectsColl.findOneAndDelete({name});
 		// remove all models as well
-		await Promise.all(project.models.map(m => ModelHelper.removeModel(account, m, true)));
+		if (project.models) {
+			await Promise.all(project.models.map(m => ModelHelper.removeModel(account, m, true)));
+		}
 
 		return project;
 	};
