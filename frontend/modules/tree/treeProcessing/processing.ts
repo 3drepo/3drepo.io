@@ -99,7 +99,7 @@ export class Processing {
 		nodesIds.forEach((id) => {
 			if (this.visibilityMap[id] !== VISIBILITY_STATES.INVISIBLE) {
 				const node = this.nodesList[this.nodesIndexesMap[id]];
-				if(node) {
+				if (node) {
 					if (node.type === 'mesh' && !node.name) {
 						nodes.push(this.nodesList[this.nodesIndexesMap[node.parentId]]);
 					} else {
