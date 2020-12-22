@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { isEmpty, values } from 'lodash';
+import { isEmpty, orderBy, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { addToGroupDictionary } from '../../helpers/colorOverrides';
 import { getTransparency, hasTransparency } from '../../helpers/colors';
@@ -57,13 +57,25 @@ export const selectEditMode = createSelector(
 	selectComponentState, (state) => state.editMode
 );
 
+export const selectSortOrder = createSelector(
+		selectComponentState, (state) => state.sortOrder
+);
+
 export const selectSelectedViewpoint = createSelector(
 	selectViewpointsDomain, (state) => state.selectedViewpoint
 );
 
+export const selectSortedViewpointsList = createSelector(
+	selectViewpointsList, selectSortOrder, (viewpointsMap, sortOrder) => orderBy(
+				viewpointsMap,
+	['name'],
+	[sortOrder]
+		)
+);
+
 export const selectTransformations = createSelector(
 	selectSelectedViewpoint, (viewpoint) => {
-		if ( !Boolean(viewpoint?.transformation_groups?.length)) {
+		if (!Boolean(viewpoint?.transformation_groups?.length)) {
 			return {};
 		}
 

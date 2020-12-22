@@ -48,6 +48,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	stopListenOnModelLoaded: ViewerGuiActions.stopListenOnModelLoaded,
 	stopListenOnClickPin: ViewerGuiActions.stopListenOnClickPin,
 	resetModel: ModelActions.reset,
+	resetViewerGui: ViewerGuiActions.reset,
 	removeMeasurement: MeasurementsActions.removeMeasurement,
 }, dispatch);
 

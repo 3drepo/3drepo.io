@@ -17,7 +17,7 @@
 
 import ExpandIcon from '@material-ui/icons/ChevronRight';
 import CollapseIcon from '@material-ui/icons/ExpandMore';
-import { isNil, keyBy, omit, uniqBy } from 'lodash';
+import { isEqual, isNil, keyBy, omit, uniqBy } from 'lodash';
 import React from 'react';
 import Autosuggest from 'react-autosuggest';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
@@ -223,7 +223,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps, prevState) {
 		const filtersChanged = this.props.filters.length !== prevProps.filters.length;
-		const selectedFiltersChanged = this.state.selectedFilters.length !== prevState.selectedFilters.length;
+		const selectedFiltersChanged = isEqual(this.state.selectedFilters, prevState.selectedFilters);
 		if (filtersChanged || selectedFiltersChanged) {
 			this.filterSuggestions = mapFiltersToSuggestions(
 				this.props.filters,
@@ -262,6 +262,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 				const newFilters = [...prevState.selectedFilters];
 				newFilters[selectedFilterIndex].label = child.label;
 				newFilters[selectedFilterIndex].value.label = formatShortDate(child.date);
+				newFilters[selectedFilterIndex].value.date = child.date;
 				return newFilters as any;
 			}, this.handleFiltersChange);
 		} else {
