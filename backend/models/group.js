@@ -412,29 +412,45 @@ Group.update = async function (account, model, branch = "master", revId = null, 
 	const convertedObjects = await getObjectsArrayAsIfcGuids(data, false);
 	const toUpdate = {};
 	const toUnset = {};
-	const fieldsCanBeUpdated = ["description", "name", "rules", "objects", "color", "transformation", "issue_id", "risk_id"];
 
 	let typeCorrect = !(data.rules && data.objects);
 
-	typeCorrect && fieldsCanBeUpdated.forEach((key) => {
+	typeCorrect && Object.keys(data).forEach((key) => {
 		if (data[key]) {
 			if (utils.typeMatch(data[key], fieldTypes[key])) {
-				if (key === "objects" && data.objects) {
-					toUpdate.objects = cleanEmbeddedObject(key, convertedObjects);
-					toUnset.rules = 1;
-					group.rules = undefined;
-				} else if (key === "color" || key === "transformation") {
-					toUpdate[key] = data[key].map((c) => parseInt(c, 10));
-				} else {
-					if (key === "rules"
-						&& data.rules
-						&& !checkRulesValidity(data.rules)) {
-						typeCorrect = false;
-						toUnset.objects = 1;
-						group.objects = undefined;
-					}
+				switch (key) {
+					case "description":
+						toUpdate[key] = data[key];
+						break;
+					case "name":
+						toUpdate[key] = data[key];
+						break;
+					case "rules":
+						if (!checkRulesValidity(data.rules)) {
+							typeCorrect = false;
+							toUnset.objects = 1;
+							group.objects = undefined;
+						}
 
-					toUpdate[key] = cleanEmbeddedObject(key, data[key]);
+						toUpdate[key] = cleanEmbeddedObject(key, data[key]);
+						break;
+					case "objects":
+						toUpdate.objects = cleanEmbeddedObject(key, convertedObjects);
+						toUnset.rules = 1;
+						group.rules = undefined;
+						break;
+					case "color":
+						toUpdate[key] = data[key].map((c) => parseInt(c, 10));
+						break;
+					case "transformation":
+						toUpdate[key] = data[key].map((c) => parseInt(c, 10));
+						break;
+					case "issue_id":
+						toUpdate[key] = data[key];
+						break;
+					case "risk_id":
+						toUpdate[key] = data[key];
+						break;
 				}
 				group[key] = toUpdate[key];
 			} else {
