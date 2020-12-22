@@ -248,26 +248,45 @@ Group.create = async function (account, model, branch = "master", rid = null, se
 	const newGroup = Object.assign({}, data);
 
 	const convertedObjects = await getObjectsArrayAsIfcGuids(data, false);
-	const allowedFields = ["description", "name", "objects","rules","color","transformation","issue_id","risk_id","view_id"];
 
 	let typeCorrect = (!data.objects !== !data.rules);
 
-	allowedFields.forEach((key) => {
-		if (fieldTypes[key] && utils.hasField(data, key)) {
+	Object.keys(data).forEach((key) => {
+		if (fieldTypes[key]) {
 			if (utils.typeMatch(data[key], fieldTypes[key])) {
-				if (key === "objects" && data.objects) {
-					newGroup.objects = cleanEmbeddedObject(key, convertedObjects);
-				} else if (key === "color") {
-					newGroup[key] = data[key].map((c) => parseInt(c, 10));
-				} else if (key === "transformation") {
-					newGroup[key] = data[key];
-				} else {
-					if (key === "rules"
-						&& data.rules
-						&& !checkRulesValidity(data.rules)) {
-						typeCorrect = false;
-					}
-					newGroup[key] = cleanEmbeddedObject(key, data[key]);
+				switch (key) {
+					case "description":
+						newGroup[key] = data[key];
+						break;
+					case "name":
+						newGroup[key] = data[key];
+						break;
+					case "objects":
+						if (data.objects) {
+							newGroup.objects = cleanEmbeddedObject(key, convertedObjects);
+						}
+						break;
+					case "rules":
+						if (data.rules && !checkRulesValidity(data.rules)) {
+							typeCorrect = false;
+						}
+						newGroup[key] = cleanEmbeddedObject(key, data[key]);
+						break;
+					case "color":
+						newGroup[key] = data[key].map((c) => parseInt(c, 10));
+						break;
+					case "transformation":
+						newGroup[key] = data[key];
+						break;
+					case "issue_id":
+						newGroup[key] = data[key];
+						break;
+					case "risk_id":
+						newGroup[key] = data[key];
+						break;
+					case "view_id":
+						newGroup[key] = data[key];
+						break;
 				}
 			} else {
 				systemLogger.logError(`Type mismatch ${key} ${data[key]}`);
@@ -276,11 +295,11 @@ Group.create = async function (account, model, branch = "master", rid = null, se
 		}
 	});
 
-	newGroup._id = utils.stringToUUID(nodeuuid());
-	newGroup.author = creator;
-	newGroup.createdAt = Date.now();
-
 	if (typeCorrect) {
+		newGroup._id = utils.stringToUUID(nodeuuid());
+		newGroup.author = creator;
+		newGroup.createdAt = Date.now();
+
 		await db.insert(account, getGroupCollectionName(model), newGroup);
 
 		newGroup._id = utils.uuidToString(newGroup._id);
