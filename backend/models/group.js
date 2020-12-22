@@ -305,8 +305,7 @@ Group.create = async function (account, model, branch = "master", rid = null, se
 		newGroup._id = utils.uuidToString(newGroup._id);
 		newGroup.objects = await getObjectIds(account, model, branch, rid, newGroup, true, false);
 
-		// TODO: consider unused isIssueGroup from frontend
-		if (!data.isIssueGroup && !data.isRiskGroup && sessionId) {
+		if (sessionId) {
 			ChatEvent.newGroups(sessionId, account, model, newGroup);
 		}
 
