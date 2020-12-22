@@ -75,14 +75,17 @@ export const StyledButton = styled(Button)`
 
 export const DataText = styled(Typography)`
 	&& {
-		color:${COLOR.BLACK_60}
+		color:${COLOR.BLACK_60};
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 `;
 
 export const Headline = styled(Typography)`
 	&& {
 		font-size: 11px;
-		color:${COLOR.BLACK_60}
+		color:${COLOR.BLACK_60};
 	}
 `;
 
