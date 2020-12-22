@@ -182,11 +182,10 @@
 	Project.listModels = async function(account, project, username, filters) {
 		const User = require("./user");
 		const ModelHelper = require("./helper/model");
-		const projectsColl = await getCollection(account);
 
 		const [dbUser, projectObj] = await Promise.all([
 			await User.findByUserName(account),
-			projectsColl.findOne({name: project})
+			Project.findOne({ account }, {name: project})
 		]);
 
 		if (!projectObj) {
