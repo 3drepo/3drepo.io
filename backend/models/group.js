@@ -318,7 +318,7 @@ Group.create = async function (account, model, branch = "master", rid = null, se
 
 Group.deleteGroups = async function (account, model, sessionId, ids) {
 	const groupIds = ids.map(utils.stringToUUID);
-	const deleteResponse = await db.remove(account, getGroupCollectionName(model), { _id: { $in: groupIds } });
+	await db.remove(account, getGroupCollectionName(model), { _id: { $in: groupIds } });
 
 	ChatEvent.groupsDeleted(sessionId, account, model, ids);
 };
@@ -385,18 +385,12 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 		sharedIdConversionPromises.push(
 			getObjectIds(account, model, branch, revId, result, true, showIfcGuids).then((sharedIdObjects) => {
 				result.objects = sharedIdObjects;
-				return result;
+				return clean(result);
 			})
 		);
 	});
 
-	const sharedIdGroups = await Promise.all(sharedIdConversionPromises);
-
-	sharedIdGroups.forEach((group, i) => {
-		sharedIdGroups[i] = clean(group);
-	});
-
-	return sharedIdGroups;
+	return await Promise.all(sharedIdConversionPromises);
 };
 
 Group.update = async function (account, model, branch = "master", revId = null, sessionId, user = "", groupId, data) {
