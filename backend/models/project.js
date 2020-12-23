@@ -110,6 +110,10 @@
 		return next();
 	});
 
+	schema.methods.findPermsByUser = function(username) {
+		return this.permissions.find(perm => perm.user === username);
+	};
+
 	const Project = ModelFactory.createClass(
 		"Project",
 		schema,
@@ -222,6 +226,7 @@
 	};
 
 	// seems ok
+	/*
 	Project.findPermsByUser = async function(account, model, username) {
 		const projectsColl = await getCollection(account);
 		const project = await projectsColl.findOne({name: model});
@@ -232,6 +237,7 @@
 			return project.permissions.find(perm => perm.user === username);
 		}
 	};
+	*/
 
 	// seems ok
 	Project.listModels = async function(account, project, username, filters) {

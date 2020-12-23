@@ -54,7 +54,13 @@
 			},
 
 			projectLevel: function(username, modelName) {
-				return Project.findPermsByUser(account, modelName, username).then(permission => {
+				return Project.findOne({account}, {name: modelName}).then(project => {
+					if (!project) {
+						return [];
+					}
+
+					const permission = project.findPermsByUser(username);
+
 					if (!permission) {
 						return [];
 					}
