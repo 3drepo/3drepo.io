@@ -110,7 +110,7 @@
 		return next();
 	});
 
-	function checkPermissionName(permissions) {
+	function _checkPermissionName(permissions) {
 		for (let i = 0; i < permissions.length; i++) {
 			const permission = permissions[i];
 
@@ -434,7 +434,7 @@
 
 		await Promise.all(userPromises);
 
-		await checkPermissionName(project.permissions);
+		await _checkPermissionName(project.permissions);
 		await projectsColl.update({name: projectName}, project);
 
 		return project;
