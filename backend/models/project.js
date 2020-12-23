@@ -110,10 +110,6 @@
 		return next();
 	});
 
-	schema.methods.findPermsByUser = function(username) {
-		return this.permissions.find(perm => perm.user === username);
-	};
-
 	const Project = ModelFactory.createClass(
 		"Project",
 		schema,
@@ -226,7 +222,6 @@
 	};
 
 	// seems ok
-	/*
 	Project.findPermsByUser = async function(account, model, username) {
 		const projectsColl = await getCollection(account);
 		const project = await projectsColl.findOne({name: model});
@@ -237,7 +232,6 @@
 			return project.permissions.find(perm => perm.user === username);
 		}
 	};
-	*/
 
 	// seems ok
 	Project.listModels = async function(account, project, username, filters) {
@@ -315,8 +309,9 @@
 		return hasProjectPermissions && project.permissions[0].permissions.includes(C.PERM_PROJECT_ADMIN);
 	};
 
-	Project.removeModel = function(account, model) {
-		return Project.update({account}, { models: model }, { "$pull" : { "models": model}}, {"multi": true});
+	Project.removeModel = async function(account, model) {
+		const projectsColl = await getCollection(account);
+		return projectsColl.update({ models: model }, { "$pull" : { "models": model}}, {"multi": true});
 	};
 
 	// seems ok
