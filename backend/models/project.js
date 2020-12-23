@@ -181,9 +181,10 @@
 	};
 
 	Project.findPermsByUser = async function(account, model, username) {
-		const project = await Project.findOne({account}, { name: model});
+		const projectsColl = await getCollection(account);
+		const project = await projectsColl.findOne({name: model});
 
-		if (!project) {
+		if (!project || !project.permissions) {
 			return [];
 		} else {
 			return project.permissions.find(perm => perm.user === username);
