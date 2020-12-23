@@ -197,10 +197,11 @@
 		return projectsColl.find({ name: { $in:projectNames } });
 	};
 
-	Project.findByIds = async function(account, ids) {
-		const projectsColl = await getCollection(account);
-		const projects = await projectsColl.find({ _id: { $in: ids.map(utils.stringToUUID) } });
+	Project.findByIds = function(account, ids) {
+		// const projectsColl = await getCollection(account);
+		const projects = Project.find({account}, { _id: { $in: ids.map(utils.stringToUUID) } });
 
+		/*
 		projects.forEach(p => {
 			if (!p.models) {
 				p.models = [];
@@ -210,6 +211,7 @@
 				p.permissions = [];
 			}
 		});
+		*/
 
 		return projects;
 	};
