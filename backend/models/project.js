@@ -253,7 +253,13 @@
 
 	Project.isProjectAdmin = async function(account, model, user) {
 		const projection = { "permissions": { "$elemMatch": { user: user } }};
-		const project = await Project.findOne({account}, {models: model}, projection);
+		const projectsColl = await getCollection(account);
+		const project = await projectsColl.findOne({models: model}, projection);
+
+		if (!project.permissions) {
+			project.permissions = [];
+		}
+
 		const hasProjectPermissions = project && project.permissions.length > 0;
 
 		return hasProjectPermissions && project.permissions[0].permissions.includes(C.PERM_PROJECT_ADMIN);
