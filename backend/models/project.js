@@ -110,6 +110,24 @@
 		return next();
 	});
 
+	function _checkInvalidName(projectName) {
+		if (C.PROJECT_DEFAULT_ID === projectName) {
+			throw responseCodes.INVALID_PROJECT_NAME;
+		}
+
+		return true;
+	}
+
+	async function _checkDupName(account, project) {
+		const foundProject = await Project.findOneAndClean(account, {name: project.name});
+
+		if (foundProject && foundProject.id !== project.id) {
+			throw responseCodes.PROJECT_EXIST;
+		}
+
+		return true;
+	}
+
 	function _checkPermissionName(permissions) {
 		for (let i = 0; i < permissions.length; i++) {
 			const permission = permissions[i];
@@ -156,14 +174,13 @@
 	// seems ok
 	Project.delete = async function(account, name) {
 		const ModelHelper = require("./helper/model");
-
-		const projectsColl = await getCollection(account);
-		const project = await projectsColl.findOne({name});
+		const project = await Project.findOneAndClean(account, {name});
 
 		if (!project) {
 			throw responseCodes.PROJECT_NOT_FOUND;
 		}
 
+		const projectsColl = await getCollection(account);
 		await projectsColl.findOneAndDelete({name});
 		// remove all models as well
 		if (project.models) {
@@ -198,8 +215,7 @@
 	Project.findOneAndPopulateUsers = async function(account, query) {
 		const User = require("./user");
 		const userList = await User.getAllUsersInTeamspace(account.account);
-		const projectsColl = await getCollection(account.account);
-		const project = await projectsColl.findOne(query);
+		const project = await Project.findOneAndClean(account.account, query);
 
 		if (project) {
 			return populateUsers(userList, project);
@@ -233,12 +249,28 @@
 		return projects;
 	};
 
+	Project.findOneAndClean = async function(teamspace, query, projection) {
+		const projectsColl = await getCollection(teamspace);
+		const foundProject = await projectsColl.findOne(query, projection);
+
+		if (foundProject) {
+			if (!foundProject.models) {
+				foundProject.models = [];
+			}
+
+			if (!foundProject.permissions) {
+				foundProject.permissions = [];
+			}
+		}
+
+		return foundProject;
+	};
+
 	// seems ok
 	Project.findPermsByUser = async function(account, model, username) {
-		const projectsColl = await getCollection(account);
-		const project = await projectsColl.findOne({name: model});
+		const project = await Project.findOneAndClean(account, {name: model});
 
-		if (!project || !project.permissions) {
+		if (!project) {
 			return [];
 		} else {
 			return project.permissions.find(perm => perm.user === username);
@@ -249,19 +281,14 @@
 	Project.listModels = async function(account, project, username, filters) {
 		const User = require("./user");
 		const ModelHelper = require("./helper/model");
-		const projectsColl = await getCollection(account);
 
 		const [dbUser, projectObj] = await Promise.all([
 			await User.findByUserName(account),
-			projectsColl.findOne({name: project})
+			Project.findOneAndClean(account, {name: project})
 		]);
 
 		if (!projectObj) {
 			throw responseCodes.PROJECT_NOT_FOUND;
-		}
-
-		if (!projectObj.permissions) {
-			projectObj.permissions = [];
 		}
 
 		if (filters && filters.name) {
@@ -309,13 +336,7 @@
 	// seems ok
 	Project.isProjectAdmin = async function(account, model, user) {
 		const projection = { "permissions": { "$elemMatch": { user: user } }};
-		const projectsColl = await getCollection(account);
-		const project = await projectsColl.findOne({models: model}, projection);
-
-		if (!project.permissions) {
-			project.permissions = [];
-		}
-
+		const project = await Project.findOneAndClean(account, {models: model}, projection);
 		const hasProjectPermissions = project && project.permissions.length > 0;
 
 		return hasProjectPermissions && project.permissions[0].permissions.includes(C.PERM_PROJECT_ADMIN);
@@ -328,52 +349,25 @@
 
 	// seems ok
 	Project.setUserAsProjectAdmin = async function(teamspace, project, user) {
-		const projectsColl = await getCollection(teamspace);
-		const projectObj = await projectsColl.findOne({name: project});
-
-		if (!projectObj.models) {
-			projectObj.models = [];
-		}
-
-		if (!projectObj.permissions) {
-			projectObj.permissions = [];
-		}
-
+		const projectObj = await Project.findOneAndClean(teamspace, {name: project});
 		const projectPermission = { user, permissions: ["admin_project"]};
+
 		return await Project.updateAttrs(teamspace, project, { permissions: projectObj.permissions.concat(projectPermission) });
 	};
 
 	// seems ok
 	Project.setUserAsProjectAdminById = async function(teamspace, project, user) {
-		const projectsColl = await getCollection(teamspace);
-		const projectObj = await projectsColl.findOne({_id: utils.stringToUUID(project)});
-
-		if (!projectObj.models) {
-			projectObj.models = [];
-		}
-
-		if (!projectObj.permissions) {
-			projectObj.permissions = [];
-		}
-
+		const projectObj = await Project.findOneAndClean(teamspace, {_id: utils.stringToUUID(project)});
 		const projectPermission = { user, permissions: ["admin_project"]};
+
 		return await Project.updateAttrs(teamspace, project, { permissions: projectObj.permissions.concat(projectPermission) });
 	};
 
 	Project.updateAttrs = async function(account, projectName, data) {
-		const projectsColl = await getCollection(account);
-		const project = await projectsColl.findOne({name: projectName});
+		const project = await Project.findOneAndClean(account, {name: projectName});
 
 		if (!project) {
 			throw responseCodes.PROJECT_NOT_FOUND;
-		}
-
-		if (!project.models) {
-			project.models = [];
-		}
-
-		if (!project.permissions) {
-			project.permissions = [];
 		}
 
 		const whitelist = ["name", "permissions"];
@@ -434,15 +428,18 @@
 
 		await Promise.all(userPromises);
 
+		await _checkInvalidName(projectName);
+		await _checkDupName(account, project);
 		await _checkPermissionName(project.permissions);
+
+		const projectsColl = await getCollection(account);
 		await projectsColl.update({name: projectName}, project);
 
 		return project;
 	};
 
 	Project.updateProject = async function(account, projectName, data) {
-		const projectsColl = await getCollection(account);
-		const project = await projectsColl.findOne({ name: projectName });
+		const project = await Project.findOneAndClean(account, { name: projectName });
 
 		if (!project) {
 			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
@@ -453,10 +450,6 @@
 
 			if (data.permissions) {
 				data.permissions.forEach((permissionUpdate) => {
-					if (!project.permissions) {
-						project.permissions = [];
-					}
-
 					const userIndex = project.permissions.findIndex(x => x.user === permissionUpdate.user);
 
 					if (-1 !== userIndex) {
