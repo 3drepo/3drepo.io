@@ -321,7 +321,7 @@
 
 	Project.setUserAsProjectAdminById = async function(teamspace, project, user) {
 		const projectsColl = await getCollection(teamspace);
-		const projectObj = await Project.findOne({_id: utils.stringToUUID(project)});
+		const projectObj = await projectsColl.findOne({_id: utils.stringToUUID(project)});
 
 		if (!projectObj.models) {
 			projectObj.models = [];
