@@ -147,7 +147,7 @@
 
 		if (projects) {
 			projects.forEach(p => {
-				Project.populateUsers(userList, p)
+				Project.populateUsers(userList, p);
 
 				if (!p.models) {
 					p.models = [];
@@ -161,7 +161,8 @@
 	Project.findOneAndPopulateUsers = async function(account, query) {
 		const User = require("./user");
 		const userList = await User.getAllUsersInTeamspace(account.account);
-		const project = await Project.findOne(account, query);
+		const projectsColl = await getCollection(account.account);
+		const project = await projectsColl.findOne(query);
 
 		if (project) {
 			return Project.populateUsers(userList, project);
