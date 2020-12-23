@@ -141,6 +141,7 @@
 		}
 	};
 
+	// seems ok
 	Project.delete = async function(account, name) {
 		const ModelHelper = require("./helper/model");
 
@@ -160,6 +161,7 @@
 		return project;
 	};
 
+	// seems ok
 	Project.findAndPopulateUsers = async function(account, query) {
 		const User = require("./user");
 		const userList = await User.getAllUsersInTeamspace(account.account);
@@ -179,6 +181,8 @@
 		return projects;
 	};
 
+	// called by invitation test
+	// seems ok
 	Project.findOneAndPopulateUsers = async function(account, query) {
 		const User = require("./user");
 		const userList = await User.getAllUsersInTeamspace(account.account);
@@ -192,6 +196,7 @@
 		}
 	};
 
+	// seems ok
 	Project.findByNames = async function(account, projectNames) {
 		const projectsColl = await getCollection(account);
 		return projectsColl.find({ name: { $in:projectNames } });
@@ -216,6 +221,7 @@
 		return projects;
 	};
 
+	// seems ok
 	Project.findPermsByUser = async function(account, model, username) {
 		const projectsColl = await getCollection(account);
 		const project = await projectsColl.findOne({name: model});
@@ -227,6 +233,7 @@
 		}
 	};
 
+	// seems ok
 	Project.listModels = async function(account, project, username, filters) {
 		const User = require("./user");
 		const ModelHelper = require("./helper/model");
@@ -287,6 +294,7 @@
 		return modelsSettings;
 	};
 
+	// seems ok
 	Project.isProjectAdmin = async function(account, model, user) {
 		const projection = { "permissions": { "$elemMatch": { user: user } }};
 		const projectsColl = await getCollection(account);
@@ -305,6 +313,7 @@
 		return Project.update({account}, { models: model }, { "$pull" : { "models": model}}, {"multi": true});
 	};
 
+	// seems ok
 	Project.setUserAsProjectAdmin = async function(teamspace, project, user) {
 		const projectsColl = await getCollection(teamspace);
 		const projectObj = await projectsColl.findOne({name: project});
@@ -321,6 +330,7 @@
 		return await Project.updateAttrs(teamspace, project, { permissions: projectObj.permissions.concat(projectPermission) });
 	};
 
+	// seems ok
 	Project.setUserAsProjectAdminById = async function(teamspace, project, user) {
 		const projectsColl = await getCollection(teamspace);
 		const projectObj = await projectsColl.findOne({_id: utils.stringToUUID(project)});
