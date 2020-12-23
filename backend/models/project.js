@@ -320,7 +320,17 @@
 	};
 
 	Project.setUserAsProjectAdminById = async function(teamspace, project, user) {
-		const projectObj = await Project.findOne({ account: teamspace }, {_id: utils.stringToUUID(project)});
+		const projectsColl = await getCollection(teamspace);
+		const projectObj = await Project.findOne({_id: utils.stringToUUID(project)});
+
+		if (!projectObj.models) {
+			projectObj.models = [];
+		}
+
+		if (!projectObj.permissions) {
+			projectObj.permissions = [];
+		}
+
 		const projectPermission = { user, permissions: ["admin_project"]};
 		return await Project.updateAttrs(teamspace, project, { permissions: projectObj.permissions.concat(projectPermission) });
 	};
