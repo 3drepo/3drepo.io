@@ -142,10 +142,17 @@
 	Project.findAndPopulateUsers = async function(account, query) {
 		const User = require("./user");
 		const userList = await User.getAllUsersInTeamspace(account.account);
-		const projects = await Project.find(account, query);
+		const projectsColl = await getCollection(account.account);
+		const projects = await (await projectsColl.find(query)).toArray();
 
 		if (projects) {
-			projects.forEach(p => Project.populateUsers(userList, p));
+			projects.forEach(p => {
+				Project.populateUsers(userList, p)
+
+				if (!p.models) {
+					p.models = [];
+				}
+			});
 		}
 
 		return projects;
@@ -247,10 +254,17 @@
 
 	Project.populateUsers = function(userList, project) {
 		userList.forEach(user => {
-			const userFound = project.permissions.find(perm => perm.user === user);
+			let userFound;
+
+			if (project.permissions && Array.isArray(project.permissions)) {
+				userFound = project.permissions.find(perm => perm.user === user);
+			} else {
+				project.permissions = [];
+			}
 
 			if (!userFound) {
 				project.permissions.push({
+					permissions: [],
 					user
 				});
 			}
