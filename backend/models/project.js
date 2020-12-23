@@ -57,6 +57,27 @@
 		return db.getCollection(teamspace, "projects");
 	}
 
+	function populateUsers(userList, project) {
+		userList.forEach(user => {
+			let userFound;
+
+			if (project.permissions && Array.isArray(project.permissions)) {
+				userFound = project.permissions.find(perm => perm.user === user);
+			} else {
+				project.permissions = [];
+			}
+
+			if (!userFound) {
+				project.permissions.push({
+					permissions: [],
+					user
+				});
+			}
+		});
+
+		return project;
+	}
+
 	schema.set("toObject", { getters: true });
 
 	schema.pre("save", function checkInvalidName(next) {
@@ -147,7 +168,7 @@
 
 		if (projects) {
 			projects.forEach(p => {
-				Project.populateUsers(userList, p);
+				populateUsers(userList, p);
 
 				if (!p.models) {
 					p.models = [];
@@ -165,7 +186,7 @@
 		const project = await projectsColl.findOne(query);
 
 		if (project) {
-			return Project.populateUsers(userList, project);
+			return populateUsers(userList, project);
 		} else {
 			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
 		}
@@ -176,8 +197,21 @@
 		return projectsColl.find({ name: { $in:projectNames } });
 	};
 
-	Project.findByIds = function(account, ids) {
-		return Project.find({account}, { _id: { $in: ids.map(utils.stringToUUID) } });
+	Project.findByIds = async function(account, ids) {
+		const projectsColl = await getCollection(account);
+		const projects = await projectsColl.find({ _id: { $in: ids.map(utils.stringToUUID) } });
+
+		projects.forEach(p => {
+			if (!p.models) {
+				p.models = [];
+			}
+
+			if (!p.permissions) {
+				p.permissions = [];
+			}
+		});
+
+		return projects;
 	};
 
 	Project.findPermsByUser = async function(account, model, username) {
@@ -263,27 +297,6 @@
 		const hasProjectPermissions = project && project.permissions.length > 0;
 
 		return hasProjectPermissions && project.permissions[0].permissions.includes(C.PERM_PROJECT_ADMIN);
-	};
-
-	Project.populateUsers = function(userList, project) {
-		userList.forEach(user => {
-			let userFound;
-
-			if (project.permissions && Array.isArray(project.permissions)) {
-				userFound = project.permissions.find(perm => perm.user === user);
-			} else {
-				project.permissions = [];
-			}
-
-			if (!userFound) {
-				project.permissions.push({
-					permissions: [],
-					user
-				});
-			}
-		});
-
-		return project;
 	};
 
 	Project.removeModel = function(account, model) {
