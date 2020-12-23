@@ -110,6 +110,18 @@
 		return next();
 	});
 
+	function checkPermissionName(permissions) {
+		for (let i = 0; i < permissions.length; i++) {
+			const permission = permissions[i];
+
+			if (_.intersection(C.PROJECT_PERM_LIST, permission.permissions).length < permission.permissions.length) {
+				throw responseCodes.INVALID_PERM;
+			}
+		}
+
+		return true;
+	}
+
 	const Project = ModelFactory.createClass(
 		"Project",
 		schema,
@@ -349,10 +361,19 @@
 	};
 
 	Project.updateAttrs = async function(account, projectName, data) {
-		const project = await Project.findOne({ account }, {name: projectName});
+		const projectsColl = await getCollection(account);
+		const project = await projectsColl.findOne({name: projectName});
 
 		if (!project) {
 			throw responseCodes.PROJECT_NOT_FOUND;
+		}
+
+		if (!project.models) {
+			project.models = [];
+		}
+
+		if (!project.permissions) {
+			project.permissions = [];
 		}
 
 		const whitelist = ["name", "permissions"];
@@ -371,7 +392,7 @@
 
 			usersToRemove = _.difference(project.permissions.map(p => p.user), data.permissions.map(p => p.user));
 
-			check = User.findByUserName(project._dbcolOptions.account).then(teamspace => {
+			check = User.findByUserName(account).then(teamspace => {
 				return User.getAllUsersInTeamspace(teamspace.user).then(members => {
 					const someUserNotAssignedWithLicence = data.permissions.some(
 						perm => {
@@ -403,7 +424,7 @@
 		usersToRemove.forEach(user => {
 			// remove all model permissions in this project as well, if any
 			userPromises.push(
-				ModelSetting.find(project._dbcolOptions, { "permissions.user": user}).then(settings =>
+				ModelSetting.find({ account }, { "permissions.user": user}).then(settings =>
 					Promise.all(
 						settings.map(s => s.changePermissions(s.permissions.filter(perm => perm.user !== user)))
 					)
@@ -412,7 +433,9 @@
 		});
 
 		await Promise.all(userPromises);
-		await project.save();
+
+		await checkPermissionName(project.permissions);
+		await projectsColl.update({name: projectName}, project);
 
 		return project;
 	};
