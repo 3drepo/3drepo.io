@@ -70,7 +70,7 @@
 
 				const projectQuery = { models: model, "permissions.user": username };
 				// project admin have access to models underneath it.
-				return Project.findOne({account}, projectQuery, { "permissions.$" : 1 }).then(project => {
+				return Project.findOneAndClean(account, projectQuery, { "permissions.$" : 1 }).then(project => {
 					if(project && project.permissions) {
 						projectPerms = project.permissions[0].permissions;
 					}

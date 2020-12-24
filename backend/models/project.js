@@ -78,38 +78,6 @@
 		return project;
 	}
 
-	schema.set("toObject", { getters: true });
-
-	schema.pre("save", function checkInvalidName(next) {
-		if(C.PROJECT_DEFAULT_ID === this.name) {
-			return next(utils.makeError(responseCodes.INVALID_PROJECT_NAME));
-		}
-
-		return next();
-	});
-
-	schema.pre("save", function checkDupName(next) {
-		Project.findOne(this._dbcolOptions, {name: this.name}).then(project => {
-			if(project && project.id !== this.id) {
-				return next(utils.makeError(responseCodes.PROJECT_EXIST));
-			} else {
-				return next();
-			}
-		});
-	});
-
-	schema.pre("save", function checkPermissionName(next) {
-		for (let i = 0; i < this.permissions.length; i++) {
-			const permission = this.permissions[i];
-
-			if (_.intersection(C.PROJECT_PERM_LIST, permission.permissions).length < permission.permissions.length) {
-				return next(utils.makeError(responseCodes.INVALID_PERM));
-			}
-		}
-
-		return next();
-	});
-
 	function _checkInvalidName(projectName) {
 		if (C.PROJECT_DEFAULT_ID === projectName) {
 			throw responseCodes.INVALID_PROJECT_NAME;
