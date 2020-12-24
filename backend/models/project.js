@@ -108,6 +108,20 @@
 		return true;
 	}
 
+	function clean(project) {
+		if (project) {
+			if (!project.models) {
+				project.models = [];
+			}
+
+			if (!project.permissions) {
+				project.permissions = [];
+			}
+		}
+
+		return project;
+	}
+
 	const Project = ModelFactory.createClass(
 		"Project",
 		schema,
@@ -170,17 +184,10 @@
 	Project.findAndPopulateUsers = async function(account, query) {
 		const User = require("./user");
 		const userList = await User.getAllUsersInTeamspace(account.account);
-		const projectsColl = await getCollection(account.account);
-		const projects = await (await projectsColl.find(query)).toArray();
+		const projects = await Project.findAndClean(account.account, query);
 
 		if (projects) {
-			projects.forEach(p => {
-				populateUsers(userList, p);
-
-				if (!p.models) {
-					p.models = [];
-				}
-			});
+			projects.forEach(p => populateUsers(userList, p));
 		}
 
 		return projects;
@@ -200,27 +207,21 @@
 		}
 	};
 
+	Project.findAndClean = async function(teamspace, query, projection) {
+		const projectsColl = await getCollection(teamspace);
+		const foundProjects = await (await projectsColl.find(query, projection)).toArray();
+
+		return foundProjects.map(clean);
+	};
+
 	// seems ok
 	Project.findByNames = async function(account, projectNames) {
-		const projectsColl = await getCollection(account);
-		return projectsColl.find({ name: { $in:projectNames } });
+		return Project.findAndClean(account, { name: { $in:projectNames } });
 	};
 
 	Project.findByIds = function(account, ids) {
 		// const projectsColl = await getCollection(account);
 		const projects = Project.find({account}, { _id: { $in: ids.map(utils.stringToUUID) } });
-
-		/*
-		projects.forEach(p => {
-			if (!p.models) {
-				p.models = [];
-			}
-
-			if (!p.permissions) {
-				p.permissions = [];
-			}
-		});
-		*/
 
 		return projects;
 	};
@@ -229,17 +230,7 @@
 		const projectsColl = await getCollection(teamspace);
 		const foundProject = await projectsColl.findOne(query, projection);
 
-		if (foundProject) {
-			if (!foundProject.models) {
-				foundProject.models = [];
-			}
-
-			if (!foundProject.permissions) {
-				foundProject.permissions = [];
-			}
-		}
-
-		return foundProject;
+		return clean(foundProject);
 	};
 
 	// seems ok
