@@ -22,6 +22,7 @@ const mongoose = require("mongoose");
 const ModelFactory = require("./factory/modelFactory");
 const responseCodes = require("../response_codes.js");
 const C = require("../constants.js");
+const db = require("../handler/db");
 const schema = mongoose.Schema({
 	_id: String,
 	color: String,
@@ -78,11 +79,6 @@ schema.statics.findUsersWithJobs = function (teamspace, jobs) {
 		.then(items => items.reduce((users, jobitem) => users.concat(jobitem.users),[]));
 };
 
-schema.statics.findByJob = function(teamspace, job) {
-	return this.findOne({account: teamspace}, {_id: job});
-
-};
-
 schema.statics.findByUser = function(teamspace, user) {
 	return this.findOne({account: teamspace}, {users: user});
 };
@@ -109,7 +105,7 @@ schema.statics.addJob = function(teamspace, jobData) {
 	if(!jobData._id || !validateJobName(jobData._id)) {
 		return Promise.reject(responseCodes.JOB_ID_INVALID);
 	}
-	return this.findByJob(teamspace, jobData._id).then(jobFound => {
+	return Job.findByJob(teamspace, jobData._id).then(jobFound => {
 		if(jobFound) {
 			return Promise.reject(responseCodes.DUP_JOB);
 		}
@@ -131,23 +127,6 @@ schema.methods.updateJob = function(updatedData) {
 	return this.save();
 };
 
-schema.statics.removeJob = function(teamspace, jobName) {
-
-	return this.findByJob(teamspace, jobName).then(jobFound => {
-		if(!jobFound) {
-			return Promise.reject(responseCodes.JOB_NOT_FOUND);
-		}
-
-		if(jobFound.users.length > 0) {
-			return Promise.reject(responseCodes.JOB_ASSIGNED);
-		}
-
-		return Job.remove({account: teamspace}, {_id: jobName});
-
-	});
-
-};
-
 schema.statics.getAllJobs = function(teamspace) {
 	return this.find({account: teamspace}).then(jobs => {
 		return jobs.map(({_id, color}) => {
@@ -162,11 +141,53 @@ schema.statics.getAllColors = function(teamspace) {
 	});
 };
 
+schema.statics.findByJob = function(teamspace, job) {
+	return this.findOne({account: teamspace}, {_id: job});
+};
+
+function getCollection(teamspace) {
+	return db.getCollection(teamspace, "jobs");
+}
+
 const Job = ModelFactory.createClass(
 	"Job",
 	schema,
 	() => {
 		return "jobs";
 	});
+
+/*
+Job.findByJob = async function(teamspace, job) {
+	console.log("findByJob");
+	console.log("teamspace");
+	console.log(teamspace);
+	console.log("job");
+	console.log(job);
+	const jobsColl = await getCollection(teamspace);
+	console.log("jobsColl");
+	console.log(jobsColl);
+	const foundJob = await jobsColl.findOne({_id: job});
+
+	console.log("foundJob");
+	console.log(foundJob);
+	return foundJob;
+};
+*/
+
+Job.removeJob = async function(teamspace, jobName) {
+	const foundJob = await Job.findByJob(teamspace, jobName);
+
+	if (!foundJob) {
+		throw responseCodes.JOB_NOT_FOUND;
+	}
+
+	if (foundJob.users.length > 0) {
+		throw responseCodes.JOB_ASSIGNED;
+	}
+
+	const jobsColl = await getCollection(teamspace);
+	return jobsColl.remove({_id: jobName});
+};
+
 module.exports = Job;
 
