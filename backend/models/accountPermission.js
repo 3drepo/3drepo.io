@@ -117,7 +117,7 @@
 				this.permissions.splice(index, 1);
 				return this.user.save().then(() => {
 					// remove all project permissions in this project as well, if any
-					return Project.find({ account: this.user.user },{ "permissions.user": user});
+					return Project.findAndClean(this.user.user,{ "permissions.user": user});
 				}).then(projects => {
 					return Promise.all(
 						projects.map(proj => Project.updateAttrs(this.user.user, proj.name, {
