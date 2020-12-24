@@ -242,7 +242,6 @@ describe("Projects", function () {
 	});
 
 	it("should fail to create project with dup name", function(done) {
-
 		const project = {
 			name: projectName
 		};

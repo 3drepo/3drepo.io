@@ -121,7 +121,7 @@
 	async function _checkDupName(account, project) {
 		const foundProject = await Project.findOneAndClean(account, {name: project.name});
 
-		if (foundProject && foundProject.id !== project.id) {
+		if (foundProject && utils.uuidToString(foundProject._id) !== utils.uuidToString(project._id)) {
 			throw responseCodes.PROJECT_EXIST;
 		}
 
@@ -148,24 +148,32 @@
 		}
 	);
 
-	Project.createProject = function(account, name, username, userPermissions) {
+	Project.createProject = async function(account, name, username, userPermissions) {
 		if (checkProjectNameValid(name)) {
-			const project = Project.createInstance({account});
-			project.name = name;
-			project._id = nodeuuid();
+			const project = {
+				_id: nodeuuid(),
+				name,
+				models: [],
+				permissions: []
+			};
 
-			if(userPermissions.indexOf(C.PERM_TEAMSPACE_ADMIN) === -1) {
+			if (userPermissions.indexOf(C.PERM_TEAMSPACE_ADMIN) === -1) {
 				project.permissions = [{
 					user: username,
 					permissions: [C.PERM_PROJECT_ADMIN]
 				}];
 			}
 
-			return project.save().then(() => {
-				const proj = project.toObject();
-				proj.permissions = C.IMPLIED_PERM[C.PERM_PROJECT_ADMIN].project;
-				return proj;
-			});
+			await _checkInvalidName(name);
+			await _checkDupName(account, project);
+			await _checkPermissionName(project.permissions);
+
+			const projectsColl = await getCollection(account);
+			await projectsColl.insert(project);
+
+			project.permissions = C.IMPLIED_PERM[C.PERM_PROJECT_ADMIN].project;
+
+			return project;
 		} else {
 			return Promise.reject(responseCodes.INVALID_PROJECT_NAME);
 		}
