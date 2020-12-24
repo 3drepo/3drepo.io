@@ -220,10 +220,7 @@
 	};
 
 	Project.findByIds = function(account, ids) {
-		// const projectsColl = await getCollection(account);
-		const projects = Project.find({account}, { _id: { $in: ids.map(utils.stringToUUID) } });
-
-		return projects;
+		return Project.findAndClean(account, { _id: { $in: ids.map(utils.stringToUUID) } });
 	};
 
 	Project.findOneAndClean = async function(teamspace, query, projection) {
