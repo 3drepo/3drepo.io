@@ -36,7 +36,7 @@ import { PanelBarActions } from '../panelBarActions';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
 import { Container, Tabs } from './bim.styles';
-import { MetaRecord } from './components/metaRecord/metaRecord.component';
+import { MetaRecord } from './components/metaRecord/';
 
 interface IProps {
 	className: string;

@@ -51,7 +51,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	clearStarredMetadata: StarredActions.clearStarredMeta,
 	addMetaRecordToStarred: StarredActions.addToStarredMeta,
 	removeMetaRecordFromStarred: StarredActions.removeFromStarredMeta,
-	showConfirmDialog: DialogActions.showConfirmDialog
+	showConfirmDialog: DialogActions.showConfirmDialog,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Bim);
