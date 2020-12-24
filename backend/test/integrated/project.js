@@ -219,6 +219,7 @@ describe("Projects", function () {
 			callback => {
 				agent.get(`/${username}.json`)
 					.expect(200, function(err, res) {
+						console.log(res.body);
 						const account = res.body.accounts.find(account => account.account === username);
 						expect(account).to.exist;
 
@@ -451,6 +452,7 @@ describe("Projects", function () {
 			callback => {
 				agent.get(`/${username}.json`)
 					.expect(200, function(err, res) {
+						console.log(res.body);
 
 						const account = res.body.accounts.find(account => account.account === username);
 						expect(account).to.exist;
@@ -482,6 +484,7 @@ describe("Projects", function () {
 			callback => {
 				agent.get(`/${username}.json`)
 					.expect(200, function(err, res) {
+						console.log(res.body);
 						const account = res.body.accounts.find(account => account.account === username);
 						expect(account).to.exist;
 
@@ -689,6 +692,7 @@ describe("Projects", function () {
 			callback => {
 				agent.get(`/${username}.json`)
 					.expect(200, function(err, res) {
+						console.log(res.body);
 
 						const account = res.body.accounts.find(account => account.account === username);
 						expect(account).to.exist;
@@ -723,6 +727,7 @@ describe("Projects", function () {
 			callback => {
 				agent.get(`/${username}.json`)
 					.expect(200, function(err, res) {
+						console.log(res.body);
 
 						const account = res.body.accounts.find(account => account.account === username);
 						expect(account).to.exist;
