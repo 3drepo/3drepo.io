@@ -995,7 +995,7 @@ function _createAccounts(roles, userName) {
 											}
 
 											// push result to account object
-											return Project.findOne({ account: account.account }, { models: _model.model }).then(projectObj => {
+											return Project.findOneAndClean(account.account, { models: _model.model }).then(projectObj => {
 												if (projectObj) {
 
 													let project = account.projects.find(p => p.name === projectObj.name);
@@ -1135,8 +1135,7 @@ schema.methods.removeTeamMember = function (username, cascadeRemove) {
 
 	const teamspacePerm = this.customData.permissions.findByUser(username);
 	// check if they have any permissions assigned
-	return Project.find({ account: this.user }, { "permissions.user": username }).then(projects => {
-
+	return Project.findAndClean(this.user, { "permissions.user": username }).then(projects => {
 		foundProjects = projects;
 		return ModelSetting.find({ account: this.user }, { "permissions.user": username });
 
