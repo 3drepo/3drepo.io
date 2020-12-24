@@ -198,7 +198,10 @@ describe("Job", function () {
 			function(done) {
 				agent.put(`/${username}/jobs/${job2._id}`)
 					.send(updatedJob)
-					.expect(500, done);
+					.expect(404, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.JOB_NOT_FOUND.value);
+						done(err);
+					});
 			}
 		], done);
 	});

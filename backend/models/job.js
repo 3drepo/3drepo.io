@@ -119,25 +119,11 @@ schema.statics.addJob = function(teamspace, jobData) {
 	});
 };
 
-schema.methods.updateJob = function(updatedData) {
-	if(updatedData.color) {
-		this.color = updatedData.color;
-	}
-
-	return this.save();
-};
-
 schema.statics.getAllJobs = function(teamspace) {
 	return this.find({account: teamspace}).then(jobs => {
 		return jobs.map(({_id, color}) => {
 			return {_id, color};
 		});
-	});
-};
-
-schema.statics.getAllColors = function(teamspace) {
-	return Job.getAllJobs(teamspace).then((jobs) => {
-		return compact(uniq(map(jobs, "color")));
 	});
 };
 
@@ -174,6 +160,11 @@ Job.findByJob = async function(teamspace, job) {
 };
 */
 
+Job.getAllColors = async function(teamspace) {
+	const jobs = await Job.getAllJobs(teamspace);
+	return compact(uniq(map(jobs, "color")));
+};
+
 Job.removeJob = async function(teamspace, jobName) {
 	const foundJob = await Job.findByJob(teamspace, jobName);
 
@@ -187,6 +178,29 @@ Job.removeJob = async function(teamspace, jobName) {
 
 	const jobsColl = await getCollection(teamspace);
 	return jobsColl.remove({_id: jobName});
+};
+
+Job.updateJob = async function(teamspace, jobName, updatedData) {
+	if (!jobName) {
+		throw responseCodes.JOB_ID_INVALID;
+	}
+
+	const foundJob = await Job.findByJob(teamspace, jobName);
+	let result;
+
+	if (!foundJob) {
+		throw responseCodes.JOB_NOT_FOUND;
+	}
+
+	if (updatedData.color) {
+		const jobsColl = await getCollection(teamspace);
+		result = await jobsColl.update({_id: jobName}, {
+			users: foundJob.users,
+			color: updatedData.color
+		});
+	}
+
+	return result;
 };
 
 module.exports = Job;

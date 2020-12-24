@@ -247,19 +247,12 @@
 	}
 
 	function updateJob(req, res, next) {
-
-		if(!req.body._id) {
-			return Promise.reject(responseCodes.JOB_ID_INVALID);
-		}
-		Job.findByJob(req.params.account, req.body._id).then(job => {
-			return job.updateJob(req.body).then(() => {
-				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
-			});
+		// FIXME: should consider using req.params.jobId instead of body._id
+		Job.updateJob(req.params.account, req.body._id, req.body).then(() => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
 		}).catch(err => {
-
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
-
 	}
 
 	function deleteJob(req, res, next) {
