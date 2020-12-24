@@ -74,11 +74,6 @@ schema.methods.removeUserFromJob = function(user) {
 	return this.save();
 };
 
-schema.statics.findUsersWithJobs = function (teamspace, jobs) {
-	return this.find({ account: teamspace }, { _id: { $in: jobs } })
-		.then(items => items.reduce((users, jobitem) => users.concat(jobitem.users),[]));
-};
-
 schema.statics.findByUser = function(teamspace, user) {
 	return this.findOne({account: teamspace}, {users: user});
 };
@@ -159,6 +154,13 @@ Job.findByJob = async function(teamspace, job) {
 	return foundJob;
 };
 */
+
+Job.findUsersWithJobs = async function(teamspace, jobNames) {
+	const jobsColl = await getCollection(teamspace);
+	const foundJobs = await (await jobsColl.find({ _id: { $in: jobNames } })).toArray();
+
+	return foundJobs.reduce((users, jobItem) => users.concat(jobItem.users), []);
+};
 
 Job.getAllColors = async function(teamspace) {
 	const jobs = await Job.getAllJobs(teamspace);
