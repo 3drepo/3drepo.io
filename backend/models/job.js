@@ -34,10 +34,6 @@ function validateJobName(job) {
 	return job && job.match(regex);
 }
 
-schema.statics.findByUser = function(teamspace, user) {
-	return this.findOne({account: teamspace}, {users: user});
-};
-
 schema.statics.addUserToJob = function(teamspace, user, jobName) {
 	// Check if user is member of teamspace
 	const User = require("./user");
@@ -155,12 +151,22 @@ Job.findByJob = async function(teamspace, job) {
 };
 */
 
-/*
 Job.findByUser = async function(teamspace, user) {
 	const jobsColl = await getCollection(teamspace);
-	return jobsColl.findOne({users: user});
+	const foundJob = await jobsColl.findOne({users: user});
+
+	if (foundJob) {
+		if (!foundJob.color) {
+			foundJob.color = [];
+		}
+
+		if (!foundJob.users) {
+			foundJob.users = [];
+		}
+	}
+
+	return foundJob;
 };
-*/
 
 Job.findUsersWithJobs = async function(teamspace, jobNames) {
 	const jobsColl = await getCollection(teamspace);
