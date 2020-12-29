@@ -18,16 +18,9 @@
 "use strict";
 
 const {map, compact, uniq} = require("lodash");
-const mongoose = require("mongoose");
-const ModelFactory = require("./factory/modelFactory");
 const responseCodes = require("../response_codes.js");
 const C = require("../constants.js");
 const db = require("../handler/db");
-const schema = mongoose.Schema({
-	_id: String,
-	color: String,
-	users: [String]
-});
 
 function validateJobName(job) {
 	const regex = "^[^/?=#+]{0,119}[^/?=#+ ]{1}$";
@@ -38,12 +31,7 @@ function getCollection(teamspace) {
 	return db.getCollection(teamspace, "jobs");
 }
 
-const Job = ModelFactory.createClass(
-	"Job",
-	schema,
-	() => {
-		return "jobs";
-	});
+const Job = {};
 
 Job.addDefaultJobs = function(teamspace) {
 	const promises = [];
