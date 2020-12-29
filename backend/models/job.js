@@ -34,16 +34,6 @@ function validateJobName(job) {
 	return job && job.match(regex);
 }
 
-schema.statics.addDefaultJobs = function(teamspace) {
-	const promises = [];
-	C.DEFAULT_JOBS.forEach(job => {
-		promises.push(this.addJob(teamspace, job));
-	});
-
-	return Promise.all(promises);
-
-};
-
 schema.statics.findByUser = function(teamspace, user) {
 	return this.findOne({account: teamspace}, {users: user});
 };
@@ -98,6 +88,16 @@ const Job = ModelFactory.createClass(
 	() => {
 		return "jobs";
 	});
+
+Job.addDefaultJobs = function(teamspace) {
+	const promises = [];
+
+	C.DEFAULT_JOBS.forEach(job => {
+		promises.push(Job.addJob(teamspace, job));
+	});
+
+	return Promise.all(promises);
+};
 
 /*
 Job.addUserToJob = async function(teamspace, user, jobName) {
