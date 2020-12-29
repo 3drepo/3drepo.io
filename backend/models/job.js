@@ -34,10 +34,6 @@ function validateJobName(job) {
 	return job && job.match(regex);
 }
 
-schema.statics.findByJob = function(teamspace, job) {
-	return this.findOne({account: teamspace}, {_id: job});
-};
-
 function getCollection(teamspace) {
 	return db.getCollection(teamspace, "jobs");
 }
@@ -102,7 +98,6 @@ Job.addUserToJob = async function(teamspace, user, jobName) {
 	return jobsColl.update({_id: jobName}, {$set: {users: job.users}});
 };
 
-/*
 Job.findByJob = async function(teamspace, job) {
 	const jobsColl = await getCollection(teamspace);
 	const foundJob = await jobsColl.findOne({_id: job});
@@ -113,11 +108,8 @@ Job.findByJob = async function(teamspace, job) {
 		}
 	}
 
-	console.log("foundJob");
-	console.log(foundJob);
 	return foundJob;
 };
-*/
 
 Job.findByUser = async function(teamspace, user) {
 	const jobsColl = await getCollection(teamspace);
