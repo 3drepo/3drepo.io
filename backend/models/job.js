@@ -44,15 +44,6 @@ schema.statics.addDefaultJobs = function(teamspace) {
 
 };
 
-schema.statics.removeUserFromAnyJob = function(teamspace, user) {
-	return Job.findByUser(teamspace, user).then(job => {
-		if(job) {
-			return Job.removeUserFromJob(teamspace, job._id, user);
-		}
-	});
-
-};
-
 schema.statics.findByUser = function(teamspace, user) {
 	return this.findOne({account: teamspace}, {users: user});
 };
@@ -205,6 +196,17 @@ Job.removeJob = async function(teamspace, jobName) {
 
 	const jobsColl = await getCollection(teamspace);
 	return jobsColl.remove({_id: jobName});
+};
+
+Job.removeUserFromAnyJob = async function(teamspace, user) {
+	const job = await Job.findByUser(teamspace, user);
+	let result;
+
+	if (job) {
+		result = Job.removeUserFromJob(teamspace, job._id, user);
+	}
+
+	return result;
 };
 
 Job.removeUserFromJob = async function(teamspace, jobName, user) {
