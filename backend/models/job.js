@@ -34,24 +34,6 @@ function validateJobName(job) {
 	return job && job.match(regex);
 }
 
-schema.statics.addUserToJob = function(teamspace, user, jobName) {
-	// Check if user is member of teamspace
-	const User = require("./user");
-	return User.teamspaceMemberCheck(teamspace, user).then(() => {
-		return Job.findByJob(teamspace, jobName).then((job) => {
-			if(!job) {
-				return Promise.reject(responseCodes.JOB_NOT_FOUND);
-			}
-
-			return Job.removeUserFromAnyJob(teamspace, user).then(() => {
-				job.users.push(user);
-				return job.save();
-			});
-
-		});
-	});
-};
-
 schema.statics.findByJob = function(teamspace, job) {
 	return this.findOne({account: teamspace}, {_id: job});
 };
@@ -101,19 +83,12 @@ Job.addJob = async function(teamspace, jobData) {
 	return jobsColl.insert(newJobEntry);
 };
 
-/*
 Job.addUserToJob = async function(teamspace, user, jobName) {
-	console.log("addUserToJob");
-	console.log(teamspace)
-	console.log(user);
-	console.log(jobName);
 	// Check if user is member of teamspace
 	const User = require("./user");
 	await User.teamspaceMemberCheck(teamspace, user);
 
 	const job = await Job.findByJob(teamspace, jobName);
-	console.log("job");
-	console.log(job);
 
 	if (!job) {
 		return Promise.reject(responseCodes.JOB_NOT_FOUND);
@@ -121,23 +96,11 @@ Job.addUserToJob = async function(teamspace, user, jobName) {
 
 	await Job.removeUserFromAnyJob(teamspace, user);
 
-	console.log("job2");
-	console.log(job);
 	job.users.push(user);
 
-	console.log("job3");
-	console.log(job);
 	const jobsColl = await getCollection(teamspace);
-	const result = jobsColl.update({_id: jobName}, job);
-	console.log(result);
-	console.log(await result);
-	// error due to cyclic dependency on serialisation
-	// rejected> Error: cyclic dependency detected
-	// at serializeObject (/Users/charencewong/Workspace/3drepo.io/backend/node_modules/bson/lib/bson/parser/serializer.js:333:34)
-	// at serializeInto (/Users/charencewong/Workspace/3drepo.io/backend/node_modules/bson/lib/bson/parser/serializer.js:937:17)
-	return result;
+	return jobsColl.update({_id: jobName}, {$set: {users: job.users}});
 };
-*/
 
 /*
 Job.findByJob = async function(teamspace, job) {
