@@ -44,22 +44,6 @@ schema.statics.addDefaultJobs = function(teamspace) {
 
 };
 
-schema.statics.usersWithJob = function(teamspace) {
-	return this.find({account: teamspace}, {}, {_id: 1, users : 1}).then((jobs) => {
-		const userToJob  = {};
-
-		jobs.forEach(job => {
-			job.users.forEach(user => {
-				userToJob[user] = job._id;
-			});
-		});
-
-		return userToJob;
-
-	});
-
-};
-
 schema.statics.removeUserFromAnyJob = function(teamspace, user) {
 	return Job.findByUser(teamspace, user).then(job => {
 		if(job) {
@@ -242,6 +226,20 @@ Job.updateJob = async function(teamspace, jobName, updatedData) {
 	}
 
 	return result;
+};
+
+Job.usersWithJob = async function(teamspace) {
+	const jobsColl = await getCollection(teamspace);
+	const jobs = await (await jobsColl.find({}, {_id: 1, users : 1})).toArray();
+	const userToJob = {};
+
+	jobs.forEach(job => {
+		job.users.forEach(user => {
+			userToJob[user] = job._id;
+		});
+	});
+
+	return userToJob;
 };
 
 module.exports = Job;
