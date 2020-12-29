@@ -135,7 +135,7 @@ Job.getUserJob = async function(teamspace, user) {
 	return foundJob ? {
 		_id: foundJob._id,
 		color: foundJob.color
-	} || {};
+	} : {};
 };
 
 Job.removeJob = async function(teamspace, jobName) {
