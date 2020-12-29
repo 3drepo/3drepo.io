@@ -52,24 +52,6 @@ schema.statics.addUserToJob = function(teamspace, user, jobName) {
 	});
 };
 
-schema.statics.addJob = function(teamspace, jobData) {
-	if(!jobData._id || !validateJobName(jobData._id)) {
-		return Promise.reject(responseCodes.JOB_ID_INVALID);
-	}
-	return Job.findByJob(teamspace, jobData._id).then(jobFound => {
-		if(jobFound) {
-			return Promise.reject(responseCodes.DUP_JOB);
-		}
-
-		const newJobEntry = this.model("Job").createInstance({account: teamspace});
-		newJobEntry._id = jobData._id;
-		if(jobData.color) {
-			newJobEntry.color = jobData.color;
-		}
-		return newJobEntry.save();
-	});
-};
-
 schema.statics.findByJob = function(teamspace, job) {
 	return this.findOne({account: teamspace}, {_id: job});
 };
@@ -93,6 +75,30 @@ Job.addDefaultJobs = function(teamspace) {
 	});
 
 	return Promise.all(promises);
+};
+
+Job.addJob = async function(teamspace, jobData) {
+	if (!jobData._id || !validateJobName(jobData._id)) {
+		throw responseCodes.JOB_ID_INVALID;
+	}
+
+	const foundJob = await Job.findByJob(teamspace, jobData._id);
+
+	if (foundJob) {
+		throw responseCodes.DUP_JOB;
+	}
+
+	const newJobEntry = {
+		_id: jobData._id,
+		users: []
+	};
+
+	if (jobData.color) {
+		newJobEntry.color = jobData.color;
+	}
+
+	const jobsColl = await getCollection(teamspace);
+	return jobsColl.insert(newJobEntry);
 };
 
 /*
@@ -135,15 +141,14 @@ Job.addUserToJob = async function(teamspace, user, jobName) {
 
 /*
 Job.findByJob = async function(teamspace, job) {
-	console.log("findByJob");
-	console.log("teamspace");
-	console.log(teamspace);
-	console.log("job");
-	console.log(job);
 	const jobsColl = await getCollection(teamspace);
-	console.log("jobsColl");
-	console.log(jobsColl);
 	const foundJob = await jobsColl.findOne({_id: job});
+
+	if (foundJob) {
+		if (!foundJob.users) {
+			foundJob.users = [];
+		}
+	}
 
 	console.log("foundJob");
 	console.log(foundJob);
@@ -156,10 +161,6 @@ Job.findByUser = async function(teamspace, user) {
 	const foundJob = await jobsColl.findOne({users: user});
 
 	if (foundJob) {
-		if (!foundJob.color) {
-			foundJob.color = [];
-		}
-
 		if (!foundJob.users) {
 			foundJob.users = [];
 		}
