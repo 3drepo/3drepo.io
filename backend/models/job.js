@@ -47,15 +47,10 @@ schema.statics.addDefaultJobs = function(teamspace) {
 schema.statics.removeUserFromAnyJob = function(teamspace, user) {
 	return Job.findByUser(teamspace, user).then(job => {
 		if(job) {
-			return job.removeUserFromJob(user);
+			return Job.removeUserFromJob(teamspace, job._id, user);
 		}
 	});
 
-};
-
-schema.methods.removeUserFromJob = function(user) {
-	this.users.splice(this.users.indexOf(user), 1);
-	return this.save();
 };
 
 schema.statics.findByUser = function(teamspace, user) {
@@ -169,6 +164,13 @@ Job.findByJob = async function(teamspace, job) {
 };
 */
 
+/*
+Job.findByUser = async function(teamspace, user) {
+	const jobsColl = await getCollection(teamspace);
+	return jobsColl.findOne({users: user});
+};
+*/
+
 Job.findUsersWithJobs = async function(teamspace, jobNames) {
 	const jobsColl = await getCollection(teamspace);
 	const foundJobs = await (await jobsColl.find({ _id: { $in: jobNames } })).toArray();
@@ -205,6 +207,26 @@ Job.removeJob = async function(teamspace, jobName) {
 	return jobsColl.remove({_id: jobName});
 };
 
+Job.removeUserFromJob = async function(teamspace, jobName, user) {
+	const foundJob = await Job.findByJob(teamspace, jobName);
+	let result;
+
+	if (!foundJob) {
+		throw responseCodes.JOB_NOT_FOUND;
+	}
+
+	if (foundJob.users) {
+		const jobsColl = await getCollection(teamspace);
+		foundJob.users.splice(foundJob.users.indexOf(user), 1);
+		result = await jobsColl.update({_id: jobName}, {
+			user: foundJob.users,
+			color: foundJob.color
+		});
+	}
+
+	return result;
+};
+
 Job.updateJob = async function(teamspace, jobName, updatedData) {
 	if (!jobName) {
 		throw responseCodes.JOB_ID_INVALID;
@@ -234,9 +256,11 @@ Job.usersWithJob = async function(teamspace) {
 	const userToJob = {};
 
 	jobs.forEach(job => {
-		job.users.forEach(user => {
-			userToJob[user] = job._id;
-		});
+		if (job.users) {
+			job.users.forEach(user => {
+				userToJob[user] = job._id;
+			});
+		}
 	});
 
 	return userToJob;
