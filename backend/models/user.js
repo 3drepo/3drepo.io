@@ -1201,7 +1201,7 @@ schema.methods.addTeamMember = function (user, job, permissions) {
 
 				return Role.grantTeamSpaceRoleToUser(user, this.user).then(() => {
 					const promises = [];
-					promises.push(Job.addUserToJob(this.user, user, job));
+					promises.push(Job.addUserToJob(this.user, job, user));
 
 					if (permissions && permissions.length) {
 						promises.push(this.customData.permissions.add({user, permissions}));
