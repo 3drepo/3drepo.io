@@ -114,14 +114,6 @@ schema.statics.addJob = function(teamspace, jobData) {
 	});
 };
 
-schema.statics.getAllJobs = function(teamspace) {
-	return this.find({account: teamspace}).then(jobs => {
-		return jobs.map(({_id, color}) => {
-			return {_id, color};
-		});
-	});
-};
-
 schema.statics.findByJob = function(teamspace, job) {
 	return this.findOne({account: teamspace}, {_id: job});
 };
@@ -136,6 +128,44 @@ const Job = ModelFactory.createClass(
 	() => {
 		return "jobs";
 	});
+
+/*
+Job.addUserToJob = async function(teamspace, user, jobName) {
+	console.log("addUserToJob");
+	console.log(teamspace)
+	console.log(user);
+	console.log(jobName);
+	// Check if user is member of teamspace
+	const User = require("./user");
+	await User.teamspaceMemberCheck(teamspace, user);
+
+	const job = await Job.findByJob(teamspace, jobName);
+	console.log("job");
+	console.log(job);
+
+	if (!job) {
+		return Promise.reject(responseCodes.JOB_NOT_FOUND);
+	}
+
+	await Job.removeUserFromAnyJob(teamspace, user);
+
+	console.log("job2");
+	console.log(job);
+	job.users.push(user);
+
+	console.log("job3");
+	console.log(job);
+	const jobsColl = await getCollection(teamspace);
+	const result = jobsColl.update({_id: jobName}, job);
+	console.log(result);
+	console.log(await result);
+	// error due to cyclic dependency on serialisation
+	// rejected> Error: cyclic dependency detected
+	// at serializeObject (/Users/charencewong/Workspace/3drepo.io/backend/node_modules/bson/lib/bson/parser/serializer.js:333:34)
+	// at serializeInto (/Users/charencewong/Workspace/3drepo.io/backend/node_modules/bson/lib/bson/parser/serializer.js:937:17)
+	return result;
+};
+*/
 
 /*
 Job.findByJob = async function(teamspace, job) {
@@ -165,6 +195,15 @@ Job.findUsersWithJobs = async function(teamspace, jobNames) {
 Job.getAllColors = async function(teamspace) {
 	const jobs = await Job.getAllJobs(teamspace);
 	return compact(uniq(map(jobs, "color")));
+};
+
+Job.getAllJobs = async function(teamspace) {
+	const jobsColl = await getCollection(teamspace);
+	const jobs = await (await jobsColl.find()).toArray();
+
+	return jobs.map(({_id, color}) => {
+		return {_id, color};
+	});
 };
 
 Job.removeJob = async function(teamspace, jobName) {
