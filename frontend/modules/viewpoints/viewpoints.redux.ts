@@ -17,6 +17,7 @@
 
 import { cloneDeep, keyBy } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
+import { SORT_ORDER_TYPES } from '../../constants/sorting';
 import { prepareGroup } from '../../helpers/groups';
 
 export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createActions({
@@ -45,10 +46,12 @@ export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createAct
 	showViewpoint: ['teamspace', 'modelId', 'view', 'ignoreCamera'],
 	fetchGroupSuccess: ['group'],
 	cacheGroupsFromViewpoint: ['viewpoint', 'groupsData'],
-	showPreset: ['preset']
+	showPreset: ['preset'],
+	toggleSortOrder: [],
 }, { prefix: 'VIEWPOINTS/' });
 
 export interface IViewpointsComponentState {
+	sortOrder?: string;
 	activeViewpoint?: number;
 	editMode?: boolean;
 	newViewpoint?: any;
@@ -68,7 +71,9 @@ export const INITIAL_STATE: IViewpointsState = {
 	isPending: true,
 	viewpointsMap: [],
 	viewpointsGroups: {},
-	componentState: {},
+	componentState: {
+		sortOrder: SORT_ORDER_TYPES.ASCENDING,
+	},
 	selectedViewpoint: null
 };
 

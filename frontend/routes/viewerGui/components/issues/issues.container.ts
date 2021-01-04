@@ -22,7 +22,7 @@ import { createStructuredSelector } from 'reselect';
 import {
 	selectActiveIssueId,
 	selectFetchingDetailsIsPending,
-	selectIssues,
+	selectFilteredIssues,
 	selectIsImportingBCF,
 	selectIsIssuesPending,
 	selectSearchEnabled,
@@ -30,8 +30,7 @@ import {
 	selectSelectedIssue,
 	selectShowDetails,
 	selectShowPins,
-	selectShowSubmodelIssues,
-	selectSortByField, selectSortOrder, IssuesActions
+	selectShowSubmodelIssues, selectSortByField, selectSortOrder, IssuesActions
 } from '../../../../modules/issues';
 import { selectJobsList } from '../../../../modules/jobs';
 import { selectSettings } from '../../../../modules/model';
@@ -39,7 +38,7 @@ import { selectTopicTypes, TeamspaceActions } from '../../../../modules/teamspac
 import { Issues } from './issues.component';
 
 const mapStateToProps = createStructuredSelector({
-	issues: selectIssues,
+	issues: selectFilteredIssues,
 	jobs: selectJobsList,
 	activeIssueId: selectActiveIssueId,
 	showDetails: selectShowDetails,

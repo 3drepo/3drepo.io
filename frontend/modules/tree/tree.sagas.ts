@@ -470,7 +470,7 @@ function* deselectNodesBySharedIds({ objects = [] }) {
 /**
  * SELECT NODES
  */
-function* selectNodes({ nodesIds = [], skipExpand = false, colour }) {
+function* selectNodes({ nodesIds = [], skipExpand = false, skipSelecting = false, colour }) {
 	try {
 		yield waitForTreeToBeReady();
 
@@ -480,27 +480,37 @@ function* selectNodes({ nodesIds = [], skipExpand = false, colour }) {
 			return;
 		}
 
-		let lastNodeId = nodesIds[nodesIds.length - 1];
-		let [lastNode] = yield select(selectGetNodesByIds([lastNodeId]));
+		if (!skipSelecting) {
+			let lastNodeId = nodesIds[nodesIds.length - 1];
+			let [lastNode] = yield select(selectGetNodesByIds([lastNodeId]));
 
-		if (lastNode && lastNode.type === 'mesh' && !lastNode.name) {
-			lastNodeId = lastNode.parentId;
-			[lastNode] = yield select(selectGetNodesByIds([lastNodeId]));
+			if (lastNode && lastNode.type === 'mesh' && !lastNode.name) {
+				lastNodeId = lastNode.parentId;
+				[lastNode] = yield select(selectGetNodesByIds([lastNodeId]));
+			}
+
+			const [result] = yield all([
+				call(TreeProcessing.selectNodes, { nodesIds }),
+				call(handleMetadata, lastNode)
+			]);
+
+			if (!skipExpand) {
+				yield call(expandToNode, lastNode);
+			}
+
+			const selectionMap = yield select(selectSelectionMap);
+			highlightObjects(result.highlightedObjects, selectionMap, colour);
+
+			yield put(TreeActions.setActiveNode(lastNodeId));
+		} else {
+			const [result] = yield all([
+				call(TreeProcessing.selectNodes, { nodesIds }),
+			]);
+
+			const selectionMap = yield select(selectSelectionMap);
+			highlightObjects(result.highlightedObjects, selectionMap, colour);
 		}
 
-		const [result] = yield all([
-			call(TreeProcessing.selectNodes, { nodesIds }),
-			call(handleMetadata, lastNode)
-		]);
-
-		const selectionMap = yield select(selectSelectionMap);
-		highlightObjects(result.highlightedObjects, selectionMap, colour);
-
-		if (!skipExpand) {
-			yield call(expandToNode, lastNode);
-		}
-
-		yield put(TreeActions.setActiveNode(lastNodeId));
 		yield put(TreeActions.updateDataRevision());
 		yield put(TreeActions.getSelectedNodes());
 	} catch (error) {
@@ -512,7 +522,7 @@ function* selectNodesBySharedIds({ objects = [], colour }: { objects: any[], col
 	yield waitForTreeToBeReady();
 
 	const nodesIds = yield select(selectGetNodesIdsFromSharedIds(objects));
-	yield put(TreeActions.selectNodes(nodesIds, false, true, colour));
+	yield put(TreeActions.selectNodes(nodesIds, false, true, true, colour));
 }
 
 function* setSubmodelsVisibility({ models, visibility}) {

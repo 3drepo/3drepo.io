@@ -15,6 +15,7 @@ export const Container = styled.div`
 export const UserData = styled.div`
 	margin-left: 10px;
 	margin-right: 10px;
+	overflow: hidden;
 `;
 
 export const Name = styled.span`
@@ -26,4 +27,7 @@ export const Details = styled.p`
 	font-size: 10px;
 	margin-top: 0;
 	margin-bottom: 2px;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
 `;

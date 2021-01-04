@@ -15,30 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
 
-import { COLOR } from '../../../../../../styles';
+import {
+	BimActions
+} from '../../../../../../modules/bim';
+import { MetaRecord } from './metaRecord.component';
 
-export const Wrapper = styled.div`
-	z-index: 12323;
+const mapStateToProps = createStructuredSelector({
+});
 
-	.react-autosuggest__suggestions-list {
-		max-height: 250px;
-		overflow: auto;
-		padding-left: 0;
-		margin: 0;
-	}
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	selectAllSimilar: BimActions.selectAllSimilar,
+	copyRules: BimActions.copyRules,
+}, dispatch);
 
-	.react-autosuggest__suggestion {
-		list-style: none;
-		height: 62px;
-		border-bottom: 1px solid ${COLOR.BLACK_6};
-		display: flex;
-		flex: 1;
-		align-items: center;
-	}
-
-	.react-autosuggest__suggestion > div {
-		flex: 1;
-	}
-`;
+export default connect(mapStateToProps, mapDispatchToProps)(MetaRecord);

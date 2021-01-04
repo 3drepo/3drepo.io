@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { cloneDeep, keyBy } from 'lodash';
+import { cloneDeep, isEqual, keyBy } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: RisksTypes, Creators: RisksActions } = createActions({
@@ -158,6 +158,12 @@ export const fetchRiskFailure = (state = INITIAL_STATE) => {
 
 export const saveRiskSuccess = (state = INITIAL_STATE, { risk }) => {
 	const risksMap = updateRiskProps(state.risksMap, risk._id, risk);
+	const oldPosition = state.risksMap[state.componentState.activeRisk]?.position;
+	const newPosition = risksMap[state.componentState.activeRisk]?.position;
+
+	if (!isEqual(oldPosition, newPosition)) {
+		risksMap[state.componentState.activeRisk].position = oldPosition;
+	}
 
 	return {
 		...state,
@@ -169,13 +175,20 @@ export const saveRiskSuccess = (state = INITIAL_STATE, { risk }) => {
 export const updateSelectedRiskPin =  (state = INITIAL_STATE, { position }) => {
 	if (state.componentState.activeRisk) {
 		const risk = state.risksMap[state.componentState.activeRisk];
-		return saveRiskSuccess(state, { risk: {...risk, position} });
+		const risksMap = updateRiskProps(state.risksMap, risk._id, { ...risk, position });
+
+		return {
+			...state,
+			risksMap,
+			componentState: { ...state.componentState, newRisk: {}}
+		};
 	}
 
 	if (state.componentState.newRisk) {
 		const componentState = state.componentState;
 
-		return {...state,
+		return {
+			...state,
 			componentState: { ...componentState , newRisk: { ...componentState.newRisk, position } }
 		};
 	}
