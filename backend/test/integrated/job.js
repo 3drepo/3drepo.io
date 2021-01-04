@@ -177,8 +177,6 @@ describe("Job", function () {
 		], done);
 	});
 
-	// not sure if we want to change the behaviour for job update
-	// it currently is only reading the job ID from the PUT body
 	it("update job id should fail", function(done) {
 		const updatedJob = {
 			_id: "new name",
@@ -198,8 +196,15 @@ describe("Job", function () {
 			function(done) {
 				agent.put(`/${username}/jobs/${job2._id}`)
 					.send(updatedJob)
-					.expect(404, function(err, res) {
-						expect(res.body.value).to.equal(responseCodes.JOB_NOT_FOUND.value);
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+						done(err);
+					});
+			},
+			function(done) {
+				agent.get(`/${username}/jobs`)
+					.expect(200, function(err, res) {
+						expect(res.body).to.deep.equal(oldJobs);
 						done(err);
 					});
 			}

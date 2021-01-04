@@ -146,14 +146,10 @@ Job.removeJob = async function(teamspace, jobName) {
 
 Job.removeUserFromAnyJob = async function(teamspace, user) {
 	const job = await Job.findJobByUser(teamspace, user);
-	let result;
 
 	if (job) {
-		// FIXME
-		result = Job.removeUserFromJob(teamspace, job._id, user);
+		await Job.removeUserFromJob(teamspace, job._id, user);
 	}
-
-	return result;
 };
 
 Job.removeUserFromJob = async function(teamspace, jobName, user) {
@@ -175,6 +171,10 @@ Job.removeUserFromJob = async function(teamspace, jobName, user) {
 Job.updateJob = async function(teamspace, jobName, updatedData) {
 	if (!jobName) {
 		throw responseCodes.JOB_ID_INVALID;
+	}
+
+	if (updatedData._id && updatedData._id !== jobName) {
+		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
 	const foundJob = await Job.findByJob(teamspace, jobName);

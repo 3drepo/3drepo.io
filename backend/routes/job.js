@@ -230,8 +230,7 @@
 	}
 
 	function updateJob(req, res, next) {
-		// FIXME: should consider using req.params.jobId instead of body._id
-		Job.updateJob(req.params.account, req.body._id, req.body).then(() => {
+		Job.updateJob(req.params.account, req.params.jobId, req.body).then(() => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
