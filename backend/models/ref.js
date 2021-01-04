@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,13 +16,10 @@
  */
 
 "use strict";
-const mongoose = require("mongoose");
 const db = require("../handler/db");
-const ModelFactory = require("./factory/modelFactory");
 const ModelSettings = require("./modelSetting");
 
-const Schema = mongoose.Schema;
-
+/*
 const refSchema = Schema({
 	_id: Object,
 	shared_id: Object,
@@ -33,20 +30,13 @@ const refSchema = Schema({
 	parents: [],
 	name: String
 });
-
-refSchema.methods = {};
+*/
 
 function getRefCollectionName(model) {
 	return model + ".scene";
 }
 
-const Ref = ModelFactory.createClass(
-	"Ref",
-	refSchema,
-	arg => {
-		return `${arg.model}.scene`;
-	}
-);
+const Ref = {};
 
 Ref.findRef = async function(account, model, query, projection) {
 	return db.find(account, getRefCollectionName(model), query, projection);
