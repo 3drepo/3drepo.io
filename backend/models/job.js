@@ -92,7 +92,7 @@ Job.findByJob = async function(teamspace, jobName) {
 	return foundJob;
 };
 
-Job.findByUser = async function(teamspace, user) {
+Job.findJobByUser = async function(teamspace, user) {
 	const foundJob = await db.findOne(teamspace, JOBS_COLLECTION_NAME, {users: user});
 
 	if (foundJob && !foundJob.users) {
@@ -122,7 +122,7 @@ Job.getAllJobs = async function(teamspace) {
 };
 
 Job.getUserJob = async function(teamspace, user) {
-	const foundJob = await Job.findByUser(teamspace, user);
+	const foundJob = await Job.findJobByUser(teamspace, user);
 
 	return foundJob ? {
 		_id: foundJob._id,
@@ -145,7 +145,7 @@ Job.removeJob = async function(teamspace, jobName) {
 };
 
 Job.removeUserFromAnyJob = async function(teamspace, user) {
-	const job = await Job.findByUser(teamspace, user);
+	const job = await Job.findJobByUser(teamspace, user);
 	let result;
 
 	if (job) {
