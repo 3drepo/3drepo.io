@@ -23,7 +23,7 @@ const utils = require("../utils");
 const nodeuuid = require("uuid/v1");
 const db = require("../handler/db");
 const _ = require("lodash");
-const { findByUserName, getAllUsersInTeamspace } = require("./user");
+const User = require("./user");
 
 const types = {
 	ISSUE_ASSIGNED : "ISSUE_ASSIGNED",
@@ -283,7 +283,7 @@ module.exports = {
 	 *
 	 */
 	upsertModelUpdatedNotifications: async function(teamSpace, modelId, revision) {
-		const allUsers = await getAllUsersInTeamspace(teamSpace);
+		const allUsers = await User.getAllUsersInTeamspace(teamSpace);
 		const users = [];
 		await Promise.all(allUsers.map(async user => {
 			const access = await hasReadAccessToModelHelper(user, teamSpace, modelId);
@@ -400,7 +400,7 @@ module.exports = {
 
 	insertUserReferencedNotification: async function (referrer, teamspace, modelId, type, _id, referee) {
 		try {
-			const user = await findByUserName(referee);
+			const user = await User.findByUserName(referee);
 			if (await user.isMemberOfTeamspace(teamspace)) {
 				const notification = await insertUserReferencedNotification(referrer, teamspace, modelId, type, _id, referee);
 				return await fillModelData([{username: referee, notification}]);
