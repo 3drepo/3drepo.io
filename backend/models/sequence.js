@@ -22,7 +22,7 @@ const utils = require("../utils");
 
 const FileRef = require("./fileRef");
 const History = require("./history");
-const Ref = require("./ref");
+const { findRef } = require("./ref");
 
 class Sequence {
 
@@ -92,7 +92,7 @@ class Sequence {
 		let submodels = [];
 
 		if (history.current) {
-			submodels = await Ref.find({account, model}, {type: "ref", _id: {"$in": history.current}}, {project:1});
+			submodels = await findRef(account, model, {type: "ref", _id: {"$in": history.current}}, {project:1});
 			submodels = submodels.map(r => r.project);
 		}
 
