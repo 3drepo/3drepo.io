@@ -17,6 +17,7 @@
 
 "use strict";
 const mongoose = require("mongoose");
+const db = require("../handler/db");
 const ModelFactory = require("./factory/modelFactory");
 const ModelSettings = require("./modelSetting");
 
@@ -33,24 +34,11 @@ const refSchema = Schema({
 	name: String
 });
 
-refSchema.statics.getRefNodes = function(account, model, ids) {
-	return ModelSettings.findById({account}, model).then((settings) => {
-		if(settings.federate) {
-			const filter = {
-				type: "ref"
-			};
-
-			if (ids && ids.length > 0) {
-				filter._id = { $in: ids };
-			}
-
-			return Ref.find({ account, model }, filter);
-		}
-		return [];
-	});
-};
-
 refSchema.methods = {};
+
+function getRefCollectionName(model) {
+	return model + ".scene";
+}
 
 const Ref = ModelFactory.createClass(
 	"Ref",
@@ -59,5 +47,27 @@ const Ref = ModelFactory.createClass(
 		return `${arg.model}.scene`;
 	}
 );
+
+Ref.findRef = async function(account, model, query, projection) {
+	return db.find(account, getRefCollectionName(model), query, projection);
+};
+
+Ref.getRefNodes = async function(account, model, ids) {
+	const settings = await ModelSettings.findById({account}, model);
+
+	if (settings.federate) {
+		const filter = {
+			type: "ref"
+		};
+
+		if (ids && ids.length > 0) {
+			filter._id = { $in: ids };
+		}
+
+		return Ref.findRef(account, model, filter);
+	}
+
+	return [];
+};
 
 module.exports = Ref;
