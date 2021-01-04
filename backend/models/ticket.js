@@ -450,13 +450,15 @@ class Ticket extends View {
 		}
 
 		// Assign rev_id for issue
-		const history = await History.getHistory({ account, model }, branch, newTicket.revId, { _id: 1 });
-
-		if (!history && (newTicket.revId || (newTicket.viewpoint || {}).highlighted_group_id)) {
-			throw (responseCodes.MODEL_HISTORY_NOT_FOUND);
-		} else if (history) {
-			newTicket.rev_id = history._id;
-		}
+		History.getHistory({ account, model }, branch, newTicket.revId, { _id: 1 }).then((history) => {
+			if (history) {
+				newTicket.rev_id = history._id;
+			}
+		}).catch(() => {
+			if (newTicket.revId || (newTicket.viewpoint || {}).highlighted_group_id) {
+				throw responseCodes.INVALID_TAG_NAME;
+			}
+		});
 
 		newTicket = this.filterFields(newTicket, ["viewpoint", "revId"]);
 
@@ -523,11 +525,10 @@ class Ticket extends View {
 		if (branch || revId) {
 			// searches for the first rev id
 			const history = await History.getHistory({ account, model }, branch, revId);
-			if (history) {
-				// Uses the first revsion searched to get all posterior revisions
-				invalidRevIds = await History.find({ account, model }, { timestamp: { "$gt": history.timestamp } }, { _id: 1 });
-				invalidRevIds = invalidRevIds.map(r => r._id);
-			}
+
+			// Uses the first revsion searched to get all posterior revisions
+			invalidRevIds = await History.find({ account, model }, { timestamp: { "$gt": history.timestamp } }, { _id: 1 });
+			invalidRevIds = invalidRevIds.map(r => r._id);
 		}
 
 		filter.rev_id = { "$not": { "$in": invalidRevIds } };

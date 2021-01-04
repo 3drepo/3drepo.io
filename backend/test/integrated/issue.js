@@ -101,7 +101,6 @@ describe("Issues", function () {
 					agent.post(`/${username}/${model}/issues`)
 						.send(issue)
 						.expect(200 , function(err, res) {
-
 							issueId = res.body._id;
 							expect(res.body.name).to.equal(issue.name);
 							expect(res.body.scale).to.equal(issue.scale);

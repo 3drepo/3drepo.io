@@ -91,9 +91,7 @@ class Sequence {
 		const history = await History.getHistory({account, model}, branch, revision);
 		let submodels = [];
 
-		if (!history) {
-			return Promise.reject(responseCodes.INVALID_TAG_NAME);
-		} else if (history.current) {
+		if (history.current) {
 			submodels = await Ref.find({account, model}, {type: "ref", _id: {"$in": history.current}}, {project:1});
 			submodels = submodels.map(r => r.project);
 		}
