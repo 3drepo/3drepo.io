@@ -26,8 +26,8 @@ import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { dispatch, getState } from '../store';
 import { ViewpointsActions } from '../viewpoints';
 import { generateViewpoint } from '../viewpoints/viewpoints.sagas';
-import {  selectIsPaused, selectIsPresenting, selectSessionCode,
-	PresentationActions, PresentationTypes } from './index';
+import {  selectIsPaused, selectIsPresenting, selectJoinedPresentation,
+	selectSessionCode, PresentationActions, PresentationTypes } from './index';
 
 let intervalId = 0;
 
@@ -129,6 +129,7 @@ function* togglePause() {
 function* reset() {
 	const isPresenting = yield select(selectIsPresenting);
 	const isPaused = yield select(selectIsPaused);
+	const hasjoinedPresentation = yield select(selectJoinedPresentation);
 
 	if (isPresenting) {
 		yield put(PresentationActions.stopPresenting());
@@ -136,6 +137,10 @@ function* reset() {
 
 	if (isPaused) {
 		yield put(PresentationActions.setPaused(false));
+	}
+
+	if (hasjoinedPresentation) {
+		yield put(PresentationActions.leavePresentation());
 	}
 }
 
