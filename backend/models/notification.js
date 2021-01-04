@@ -17,7 +17,7 @@
 
 "use strict";
 const { hasWriteAccessToModelHelper, hasReadAccessToModelHelper } = require("../middlewares/checkPermissions");
-const { getModelsData } = require("../models/modelSetting");
+const ModelSetting = require("../models/modelSetting");
 const { findByJob, findUsersWithJobs } = require("./job");
 const utils = require("../utils");
 const nodeuuid = require("uuid/v1");
@@ -120,7 +120,7 @@ const fillModelData = function(fullNotifications) {
 	}
 
 	const teamSpaces = extractTeamSpaceInfo(notifications);
-	return  getModelsData(teamSpaces).then((modelsData) => { // fills out the models name with data from the database
+	return ModelSetting.getModelsData(teamSpaces).then((modelsData) => { // fills out the models name with data from the database
 		notifications.forEach (notification => {
 			const teamSpace = modelsData[notification.teamSpace] || {};
 			const {name, federate} = teamSpace[notification.modelId] || {};
