@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2020 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -27,9 +27,7 @@ function validateJobName(jobName) {
 	return jobName && jobName.match(regex);
 }
 
-function getCollection(teamspace) {
-	return db.getCollection(teamspace, "jobs");
-}
+const JOBS_COLLECTION_NAME = "jobs";
 
 const Job = {};
 
@@ -54,7 +52,6 @@ Job.addJob = async function(teamspace, jobData) {
 		throw responseCodes.DUP_JOB;
 	}
 
-	const jobsColl = await getCollection(teamspace);
 	const newJobEntry = {
 		_id: jobData._id,
 		users: []
@@ -64,7 +61,7 @@ Job.addJob = async function(teamspace, jobData) {
 		newJobEntry.color = jobData.color;
 	}
 
-	return jobsColl.insert(newJobEntry);
+	return db.insert(teamspace, JOBS_COLLECTION_NAME, newJobEntry);
 };
 
 Job.addUserToJob = async function(teamspace, jobName, user) {
@@ -82,13 +79,11 @@ Job.addUserToJob = async function(teamspace, jobName, user) {
 
 	job.users.push(user);
 
-	const jobsColl = await getCollection(teamspace);
-	return jobsColl.update({_id: jobName}, {$set: {users: job.users}});
+	return db.update(teamspace, JOBS_COLLECTION_NAME, {_id: jobName}, {$set: {users: job.users}});
 };
 
 Job.findByJob = async function(teamspace, jobName) {
-	const jobsColl = await getCollection(teamspace);
-	const foundJob = await jobsColl.findOne({_id: jobName});
+	const foundJob = await db.findOne(teamspace, JOBS_COLLECTION_NAME, {_id: jobName});
 
 	if (foundJob && !foundJob.users) {
 		foundJob.users = [];
@@ -98,8 +93,7 @@ Job.findByJob = async function(teamspace, jobName) {
 };
 
 Job.findByUser = async function(teamspace, user) {
-	const jobsColl = await getCollection(teamspace);
-	const foundJob = await jobsColl.findOne({users: user});
+	const foundJob = await db.findOne(teamspace, JOBS_COLLECTION_NAME, {users: user});
 
 	if (foundJob && !foundJob.users) {
 		foundJob.users = [];
@@ -109,8 +103,7 @@ Job.findByUser = async function(teamspace, user) {
 };
 
 Job.findUsersWithJobs = async function(teamspace, jobNames) {
-	const jobsColl = await getCollection(teamspace);
-	const foundJobs = await (await jobsColl.find({ _id: { $in: jobNames } })).toArray();
+	const foundJobs = await db.find(teamspace, JOBS_COLLECTION_NAME, { _id: { $in: jobNames } });
 
 	return foundJobs.reduce((users, jobItem) => users.concat(jobItem.users), []);
 };
@@ -121,8 +114,7 @@ Job.getAllColors = async function(teamspace) {
 };
 
 Job.getAllJobs = async function(teamspace) {
-	const jobsColl = await getCollection(teamspace);
-	const foundJobs = await (await jobsColl.find()).toArray();
+	const foundJobs = await db.find(teamspace, JOBS_COLLECTION_NAME, {});
 
 	return foundJobs.map(({_id, color}) => {
 		return {_id, color};
@@ -149,8 +141,7 @@ Job.removeJob = async function(teamspace, jobName) {
 		throw responseCodes.JOB_ASSIGNED;
 	}
 
-	const jobsColl = await getCollection(teamspace);
-	return jobsColl.remove({_id: jobName});
+	return db.remove(teamspace, JOBS_COLLECTION_NAME, {_id: jobName});
 };
 
 Job.removeUserFromAnyJob = async function(teamspace, user) {
@@ -158,6 +149,7 @@ Job.removeUserFromAnyJob = async function(teamspace, user) {
 	let result;
 
 	if (job) {
+		// FIXME
 		result = Job.removeUserFromJob(teamspace, job._id, user);
 	}
 
@@ -173,10 +165,8 @@ Job.removeUserFromJob = async function(teamspace, jobName, user) {
 	}
 
 	if (job.users) {
-		const jobsColl = await getCollection(teamspace);
-
 		job.users.splice(job.users.indexOf(user), 1);
-		result = await jobsColl.update({_id: jobName}, {$set: {users: job.users}});
+		result = await db.update(teamspace, JOBS_COLLECTION_NAME, {_id: jobName}, {$set: {users: job.users}});
 	}
 
 	return result;
@@ -195,16 +185,14 @@ Job.updateJob = async function(teamspace, jobName, updatedData) {
 	}
 
 	if (updatedData.color) {
-		const jobsColl = await getCollection(teamspace);
-		result = await jobsColl.update({_id: jobName}, {$set: {color: updatedData.color}});
+		result = await db.update(teamspace, JOBS_COLLECTION_NAME, {_id: jobName}, {$set: {color: updatedData.color}});
 	}
 
 	return result;
 };
 
 Job.usersWithJob = async function(teamspace) {
-	const jobsColl = await getCollection(teamspace);
-	const foundJobs = await (await jobsColl.find({}, {_id: 1, users : 1})).toArray();
+	const foundJobs = await db.find(teamspace, JOBS_COLLECTION_NAME, {}, {_id: 1, users : 1});
 	const userToJob = {};
 
 	foundJobs.forEach(job => {
