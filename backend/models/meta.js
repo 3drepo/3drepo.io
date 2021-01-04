@@ -19,7 +19,7 @@
 const FileRef = require("./fileRef");
 const History = require("./history");
 const ModelSetting = require("./modelSetting");
-const Ref = require("./ref");
+const { findRef, getRefNodes } = require("./ref");
 const Scene = require("./scene");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
@@ -82,7 +82,7 @@ class Meta {
 			_id: { $in: history.current }
 		};
 
-		const refs = await Ref.find({ account, model }, filter);
+		const refs = await findRef(account, model, filter);
 
 		// for all refs get their tree
 		const getMeta = [];
@@ -142,7 +142,7 @@ class Meta {
 	}
 
 	async getMetadataFields(account, model) {
-		const subModelRefs = await Ref.getRefNodes(account, model);
+		const subModelRefs = await getRefNodes(account, model);
 		const subModelMetadataFieldsPromises = [];
 
 		subModelRefs.forEach((ref) => {
@@ -241,7 +241,7 @@ class Meta {
 		models.add(model);
 
 		// Check submodels
-		const refs = await Ref.find({account, model}, {type: "ref"});
+		const refs = await findRef(account, model, {type: "ref"});
 
 		refs.forEach((ref) => {
 			models.add(ref.project);
@@ -309,7 +309,7 @@ class Meta {
 			_id: { $in: history.current }
 		};
 
-		const refs = await Ref.find({ account, model }, filter);
+		const refs = await findRef(account, model, filter);
 
 		const getMeta = [];
 
@@ -397,7 +397,7 @@ class Meta {
 		models.add(model);
 
 		// Check submodels
-		const refs = await Ref.find({account, model}, {type: "ref"});
+		const refs = await findRef(account, model, {type: "ref"});
 
 		refs.forEach((ref) => {
 			models.add(ref.project);

@@ -20,7 +20,7 @@
 const FileRef = require("./fileRef");
 const History = require("./history");
 const utils = require("../utils");
-const Ref = require("./ref");
+const { getRefNodes } = require("./ref");
 const C = require("../constants");
 const { hasReadAccessToModelHelper } = require("../middlewares/checkPermissions");
 const Stream = require("stream");
@@ -28,7 +28,7 @@ const Stream = require("stream");
 const JSONAssets = {};
 
 async function getSubTreeInfo(account, model, currentIds) {
-	const subModelRefs = await Ref.getRefNodes(account, model, currentIds);
+	const subModelRefs = await getRefNodes(account, model, currentIds);
 	const subTreeInfo = [];
 	subModelRefs.forEach((ref) => {
 		const prom = History.findLatest({account: ref.owner, model: ref.project}, {_id: 1}).then((rev) => ({
@@ -43,7 +43,7 @@ async function getSubTreeInfo(account, model, currentIds) {
 }
 
 function getFileFromSubModels(account, model, currentIds, username, filename) {
-	return Ref.getRefNodes(account, model, currentIds).then((subModelRefs) => {
+	return getRefNodes(account, model, currentIds).then((subModelRefs) => {
 		const getFileProm = [];
 		subModelRefs.forEach((ref) => {
 			getFileProm.push(getFileFromRef(ref, username, filename).catch(() => {
