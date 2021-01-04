@@ -26,7 +26,8 @@ import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { dispatch, getState } from '../store';
 import { ViewpointsActions } from '../viewpoints';
 import { generateViewpoint } from '../viewpoints/viewpoints.sagas';
-import {  selectIsPaused, selectSessionCode, PresentationActions, PresentationTypes } from './index';
+import {  selectIsPaused, selectIsPresenting, selectSessionCode,
+	PresentationActions, PresentationTypes } from './index';
 
 let intervalId = 0;
 
@@ -125,6 +126,19 @@ function* togglePause() {
 	yield put(PresentationActions.setPaused(paused));
 }
 
+function* reset() {
+	const isPresenting = yield select(selectIsPresenting);
+	const isPaused = yield select(selectIsPaused);
+
+	if (isPresenting) {
+		yield put(PresentationActions.stopPresenting());
+	}
+
+	if (isPaused) {
+		yield put(PresentationActions.setPaused(false));
+	}
+}
+
 export default function* PresentationSaga() {
 	yield takeLatest(PresentationTypes.START_PRESENTING, startPresenting);
 	yield takeLatest(PresentationTypes.STOP_PRESENTING, stopPresenting);
@@ -132,4 +146,5 @@ export default function* PresentationSaga() {
 	yield takeLatest(PresentationTypes.LEAVE_PRESENTATION, leavePresentation);
 	yield takeLatest(PresentationTypes.TOGGLE_PAUSE, togglePause);
 	yield takeLatest(PresentationTypes.STREAM_VIEWPOINT, streamViewpoint);
+	yield takeLatest(PresentationTypes.RESET, reset);
 }

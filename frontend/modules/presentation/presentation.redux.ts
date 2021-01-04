@@ -26,7 +26,8 @@ export const { Types: PresentationTypes, Creators: PresentationActions } = creat
 	togglePause: [],
 	setPaused: ['isPaused'],
 	setLoading: ['loading'],
-	streamViewpoint: []
+	streamViewpoint: [],
+	reset: [],
 }, { prefix: 'PRESENTATION/' });
 
 export const INITIAL_STATE = {
