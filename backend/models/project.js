@@ -48,13 +48,11 @@
 		}]
 	});
 
+	const PROJECTS_COLLECTION_NAME = "projects";
+
 	function checkProjectNameValid (project) {
 		const regex = "^[^/?=#+]{0,119}[^/?=#+ ]{1}$";
 		return project && project.match(regex);
-	}
-
-	function getCollection(teamspace) {
-		return db.getCollection(teamspace, "projects");
 	}
 
 	function populateUsers(userList, project) {
@@ -150,8 +148,7 @@
 			await _checkDupName(account, project);
 			await _checkPermissionName(project.permissions);
 
-			const projectsColl = await getCollection(account);
-			await projectsColl.insert(project);
+			await db.insert(account, PROJECTS_COLLECTION_NAME, project);
 
 			project.permissions = C.IMPLIED_PERM[C.PERM_PROJECT_ADMIN].project;
 
@@ -170,8 +167,7 @@
 			throw responseCodes.PROJECT_NOT_FOUND;
 		}
 
-		const projectsColl = await getCollection(account);
-		await projectsColl.findOneAndDelete({name});
+		await db.remove(account, PROJECTS_COLLECTION_NAME, {name});
 		// remove all models as well
 		if (project.models) {
 			await Promise.all(project.models.map(m => ModelHelper.removeModel(account, m, true)));
@@ -208,8 +204,7 @@
 	};
 
 	Project.findAndClean = async function(teamspace, query, projection) {
-		const projectsColl = await getCollection(teamspace);
-		const foundProjects = await (await projectsColl.find(query, projection)).toArray();
+		const foundProjects = await db.find(teamspace, PROJECTS_COLLECTION_NAME, query, projection);
 
 		return foundProjects.map(clean);
 	};
@@ -224,8 +219,7 @@
 	};
 
 	Project.findOneAndClean = async function(teamspace, query, projection) {
-		const projectsColl = await getCollection(teamspace);
-		const foundProject = await projectsColl.findOne(query, projection);
+		const foundProject = await db.findOne(teamspace, PROJECTS_COLLECTION_NAME, query, projection);
 
 		return clean(foundProject);
 	};
@@ -307,8 +301,7 @@
 	};
 
 	Project.removeModel = async function(account, model) {
-		const projectsColl = await getCollection(account);
-		return projectsColl.update({ models: model }, { "$pull" : { "models": model}}, {"multi": true});
+		return db.update(account, PROJECTS_COLLECTION_NAME, { models: model }, { "$pull" : { "models": model}}, {"multi": true});
 	};
 
 	// seems ok
@@ -396,8 +389,7 @@
 		await _checkDupName(account, project);
 		await _checkPermissionName(project.permissions);
 
-		const projectsColl = await getCollection(account);
-		await projectsColl.update({name: projectName}, project);
+		await db.update(account, PROJECTS_COLLECTION_NAME, {name: projectName}, project);
 
 		return project;
 	};
