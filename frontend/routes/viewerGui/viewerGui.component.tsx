@@ -57,6 +57,7 @@ interface IProps {
 	queryParams: {
 		issueId?: string;
 		riskId?: string;
+		presenter?: string;
 	};
 	leftPanels: string[];
 	rightPanels: string[];
@@ -71,6 +72,7 @@ interface IProps {
 	removeMeasurement: (uuid) => void;
 	resetViewerGui: () => void;
 	resetCompareComponent: () => void;
+	joinPresentation: (code) => void;
 }
 
 interface IState {
@@ -95,7 +97,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	public renderViewerLoader = renderWhenTrue(() => <ViewerLoader />);
 
 	public componentDidMount() {
-		const { queryParams: { issueId, riskId }, match: { params }, viewer, leftPanels } = this.props;
+		const { queryParams: { issueId, riskId, presenter}, match: { params }, viewer, leftPanels } = this.props;
 
 		viewer.init();
 
@@ -110,6 +112,10 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		MultiSelect.initKeyWatchers();
 		this.props.fetchData(params.teamspace, params.model);
 		this.toggleViewerListeners(true);
+
+		if (presenter) {
+			this.props.joinPresentation(presenter);
+		}
 	}
 
 	public componentDidUpdate(prevProps: IProps, prevState: IState) {

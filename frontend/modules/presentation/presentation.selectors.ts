@@ -17,6 +17,7 @@
 import { createSelector } from 'reselect';
 import { ROUTES } from '../../constants/routes';
 import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
+import { selectUrlParams } from '../router/router.selectors';
 import { PresentationMode } from './presentation.constants';
 
 export const selectPresentationDomain = (state) => state.presentation;

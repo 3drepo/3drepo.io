@@ -23,7 +23,7 @@ import { CompareActions } from '../../modules/compare';
 import { selectCurrentUser } from '../../modules/currentUser';
 import { MeasurementsActions } from '../../modules/measurements';
 import { selectIsPending, selectSettings, ModelActions } from '../../modules/model';
-import { selectIsPresentationActive } from '../../modules/presentation';
+import { selectIsPresentationActive, PresentationActions } from '../../modules/presentation';
 import { selectQueryParams } from '../../modules/router/router.selectors';
 import { TreeActions } from '../../modules/tree';
 import {
@@ -55,7 +55,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	resetModel: ModelActions.reset,
 	resetViewerGui: ViewerGuiActions.reset,
 	removeMeasurement: MeasurementsActions.removeMeasurement,
-	resetCompareComponent: CompareActions.resetComponentState
+	resetCompareComponent: CompareActions.resetComponentState,
+	joinPresentation: PresentationActions.joinPresentation,
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(ViewerGui));

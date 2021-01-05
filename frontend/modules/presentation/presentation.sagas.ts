@@ -23,6 +23,7 @@ import * as API from '../../services/api';
 import { ChatActions } from '../chat';
 import { DialogActions } from '../dialog';
 import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
+import { selectUrlParams } from '../router/router.selectors';
 import { dispatch, getState } from '../store';
 import { ViewpointsActions } from '../viewpoints';
 import { generateViewpoint } from '../viewpoints/viewpoints.sagas';
@@ -83,14 +84,13 @@ const onEndPresentationEvent = () => {
 };
 
 function* joinPresentation({ sessionCode }) {
-	const teamspace = yield select(selectCurrentModelTeamspace);
-	const currentModel = yield select(selectCurrentModel);
+	const {teamspace, model} = yield select(selectUrlParams);
 
-	const { data: {exists} } = yield API.existsPresentation(teamspace, currentModel, sessionCode);
+	const { data: {exists} } = yield API.existsPresentation(teamspace, model, sessionCode);
 
 	if (exists) {
 		yield put(PresentationActions.setJoinPresentation(true, sessionCode));
-		yield put(ChatActions.callChannelActions(CHAT_CHANNELS.PRESENTATION, teamspace, currentModel, {
+		yield put(ChatActions.callChannelActions(CHAT_CHANNELS.PRESENTATION, teamspace, model, {
 			subscribeToStream: [sessionCode, onStreamPresentationEvent],
 			subscribeToEnd: [sessionCode, onEndPresentationEvent]
 		}));
