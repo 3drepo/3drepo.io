@@ -28,7 +28,7 @@ const systemLogger = require("../../logger.js").systemLogger;
 const config = require("../../config");
 const History = require("../history");
 const Scene = require("../scene");
-const Ref = require("../ref");
+const { findRef, getRefNodes } = require("../ref");
 const utils = require("../../utils");
 const middlewares = require("../../middlewares/middlewares");
 const multer = require("multer");
@@ -503,7 +503,7 @@ function searchTree(account, model, branch, rev, searchString, username) {
 
 			});
 
-			return Ref.find({account, model}, {
+			return findRef(account, model, {
 				_id: {"$in": history.current },
 				type: "ref"
 			});
@@ -569,7 +569,7 @@ function listSubModels(account, model, branch) {
 				_id: { $in: history.current }
 			};
 
-			return Ref.find({ account, model }, filter);
+			return findRef(account, model, filter);
 		} else {
 			return [];
 		}
@@ -925,7 +925,7 @@ async function getSubModelRevisions(account, model, branch, rev) {
 		return Promise.reject(responseCodes.INVALID_TAG_NAME);
 	}
 
-	const refNodes = await Ref.getRefNodes(account, model, history.current);
+	const refNodes = await getRefNodes(account, model, history.current);
 	const modelIds = refNodes.map((refNode) => refNode.project);
 	const results = {};
 
