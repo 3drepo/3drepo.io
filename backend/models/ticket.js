@@ -454,7 +454,7 @@ class Ticket extends View {
 			if (newTicket.revId || (newTicket.viewpoint || {}).highlighted_group_id) {
 				throw responseCodes.INVALID_TAG_NAME;
 			}
-		});;
+		});
 
 		if (history) {
 			newTicket.rev_id = history._id;
