@@ -18,10 +18,12 @@
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
+import { CompareActions } from '../../modules/compare';
 
 import { selectCurrentUser } from '../../modules/currentUser';
 import { MeasurementsActions } from '../../modules/measurements';
 import { selectIsPending, selectSettings, ModelActions } from '../../modules/model';
+import { selectIsPresentationActive } from '../../modules/presentation';
 import { selectQueryParams } from '../../modules/router/router.selectors';
 import { TreeActions } from '../../modules/tree';
 import {
@@ -39,7 +41,8 @@ const mapStateToProps = createStructuredSelector({
 	leftPanels: selectLeftPanels,
 	rightPanels: selectRightPanels,
 	isFocusMode: selectIsFocusMode,
-	disabledPanelButtons: selectDisabledPanelButtons
+	disabledPanelButtons: selectDisabledPanelButtons,
+	isPresentationActive: selectIsPresentationActive
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -52,6 +55,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	resetModel: ModelActions.reset,
 	resetViewerGui: ViewerGuiActions.reset,
 	removeMeasurement: MeasurementsActions.removeMeasurement,
+	resetCompareComponent: CompareActions.resetComponentState
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(ViewerGui));

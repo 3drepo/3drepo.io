@@ -45,6 +45,7 @@ interface IProps {
 	className?: string;
 	modelSettings: any;
 	isModelPending: boolean;
+	isPresentationActive: boolean;
 	isFocusMode: boolean;
 	match: {
 		params: {
@@ -69,6 +70,7 @@ interface IProps {
 	setPanelVisibility: (panelName, visibility?) => void;
 	removeMeasurement: (uuid) => void;
 	resetViewerGui: () => void;
+	resetCompareComponent: () => void;
 }
 
 interface IState {
@@ -116,6 +118,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		const teamspaceChanged = params.teamspace !== prevProps.match.params.teamspace;
 		const modelChanged = params.model !== prevProps.match.params.model;
 		const revisionChanged = params.revision !== prevProps.match.params.revision;
+		const presentationActivityChanged = prevProps.isPresentationActive !== this.props.isPresentationActive;
 
 		const { issueId, riskId } = queryParams;
 
@@ -132,6 +135,11 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 
 		if (!isEmpty(changes)) {
 			this.setState(changes);
+		}
+
+		if (presentationActivityChanged && this.props.isPresentationActive) {
+			this.props.setPanelVisibility(VIEWER_PANELS.COMPARE, false);
+			this.props.resetCompareComponent();
 		}
 	}
 
