@@ -85,7 +85,7 @@
 	}
 
 	async function _checkDupName(account, project) {
-		const foundProject = await Project.findOneAndClean(account, {name: project.name});
+		const foundProject = await Project.findOneProject(account, {name: project.name});
 
 		if (foundProject && utils.uuidToString(foundProject._id) !== utils.uuidToString(project._id)) {
 			throw responseCodes.PROJECT_EXIST;
@@ -161,7 +161,7 @@
 	// seems ok
 	Project.delete = async function(account, name) {
 		const ModelHelper = require("./helper/model");
-		const project = await Project.findOneAndClean(account, {name});
+		const project = await Project.findOneProject(account, {name});
 
 		if (!project) {
 			throw responseCodes.PROJECT_NOT_FOUND;
@@ -194,7 +194,7 @@
 	Project.findOneAndPopulateUsers = async function(account, query) {
 		const User = require("./user");
 		const userList = await User.getAllUsersInTeamspace(account.account);
-		const project = await Project.findOneAndClean(account.account, query);
+		const project = await Project.findOneProject(account.account, query);
 
 		if (project) {
 			return populateUsers(userList, project);
@@ -218,15 +218,15 @@
 		return Project.findAndClean(account, { _id: { $in: ids.map(utils.stringToUUID) } });
 	};
 
-	Project.findOneAndClean = async function(teamspace, query, projection) {
+	Project.findOneProject = async function(teamspace, query, projection) {
 		const foundProject = await db.findOne(teamspace, PROJECTS_COLLECTION_NAME, query, projection);
 
 		return clean(foundProject);
 	};
 
 	// seems ok
-	Project.findPermsByUser = async function(account, model, username) {
-		const project = await Project.findOneAndClean(account, {name: model});
+	Project.findProjectPermsByUser = async function(account, model, username) {
+		const project = await Project.findOneProject(account, {name: model});
 
 		if (!project) {
 			return [];
@@ -242,7 +242,7 @@
 
 		const [dbUser, projectObj] = await Promise.all([
 			await User.findByUserName(account),
-			Project.findOneAndClean(account, {name: project})
+			Project.findOneProject(account, {name: project})
 		]);
 
 		if (!projectObj) {
@@ -294,7 +294,7 @@
 	// seems ok
 	Project.isProjectAdmin = async function(account, model, user) {
 		const projection = { "permissions": { "$elemMatch": { user: user } }};
-		const project = await Project.findOneAndClean(account, {models: model}, projection);
+		const project = await Project.findOneProject(account, {models: model}, projection);
 		const hasProjectPermissions = project && project.permissions.length > 0;
 
 		return hasProjectPermissions && project.permissions[0].permissions.includes(C.PERM_PROJECT_ADMIN);
@@ -306,7 +306,7 @@
 
 	// seems ok
 	Project.setUserAsProjectAdmin = async function(teamspace, project, user) {
-		const projectObj = await Project.findOneAndClean(teamspace, {name: project});
+		const projectObj = await Project.findOneProject(teamspace, {name: project});
 		const projectPermission = { user, permissions: ["admin_project"]};
 
 		return await Project.updateAttrs(teamspace, project, { permissions: projectObj.permissions.concat(projectPermission) });
@@ -314,14 +314,14 @@
 
 	// seems ok
 	Project.setUserAsProjectAdminById = async function(teamspace, project, user) {
-		const projectObj = await Project.findOneAndClean(teamspace, {_id: utils.stringToUUID(project)});
+		const projectObj = await Project.findOneProject(teamspace, {_id: utils.stringToUUID(project)});
 		const projectPermission = { user, permissions: ["admin_project"]};
 
 		return await Project.updateAttrs(teamspace, project, { permissions: projectObj.permissions.concat(projectPermission) });
 	};
 
 	Project.updateAttrs = async function(account, projectName, data) {
-		const project = await Project.findOneAndClean(account, {name: projectName});
+		const project = await Project.findOneProject(account, {name: projectName});
 
 		if (!project) {
 			throw responseCodes.PROJECT_NOT_FOUND;
@@ -395,7 +395,7 @@
 	};
 
 	Project.updateProject = async function(account, projectName, data) {
-		const project = await Project.findOneAndClean(account, { name: projectName });
+		const project = await Project.findOneProject(account, { name: projectName });
 
 		if (!project) {
 			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);

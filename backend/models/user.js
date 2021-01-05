@@ -995,7 +995,7 @@ function _createAccounts(roles, userName) {
 											}
 
 											// push result to account object
-											return Project.findOneAndClean(account.account, { models: _model.model }).then(projectObj => {
+											return Project.findOneProject(account.account, { models: _model.model }).then(projectObj => {
 												if (projectObj) {
 
 													let project = account.projects.find(p => p.name === projectObj.name);

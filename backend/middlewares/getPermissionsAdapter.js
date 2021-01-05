@@ -18,7 +18,7 @@
 "use strict";
 (() => {
 	const ModelSetting = require("../models/modelSetting");
-	const Project = require("../models/project");
+	const { findOneProject, findProjectPermsByUser } = require("../models/project");
 	const User = require("../models/user");
 	const ResponseCodes = require("../response_codes");
 
@@ -54,7 +54,7 @@
 			},
 
 			projectLevel: function(username, modelName) {
-				return Project.findPermsByUser(account, modelName, username).then(permission => {
+				return findProjectPermsByUser(account, modelName, username).then(permission => {
 					if (!permission) {
 						return [];
 					}
@@ -70,7 +70,7 @@
 
 				const projectQuery = { models: model, "permissions.user": username };
 				// project admin have access to models underneath it.
-				return Project.findOneAndClean(account, projectQuery, { "permissions.$" : 1 }).then(project => {
+				return findOneProject(account, projectQuery, { "permissions.$" : 1 }).then(project => {
 					if(project && project.permissions) {
 						projectPerms = project.permissions[0].permissions;
 					}
