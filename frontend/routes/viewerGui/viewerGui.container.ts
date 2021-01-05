@@ -25,6 +25,7 @@ import { selectIsPending, selectSettings, ModelActions } from '../../modules/mod
 import { selectQueryParams } from '../../modules/router/router.selectors';
 import { TreeActions } from '../../modules/tree';
 import {
+	selectDisabledPanelButtons,
 	selectIsFocusMode, selectLeftPanels, selectRightPanels, ViewerGuiActions,
 } from '../../modules/viewerGui';
 import { withViewer } from '../../services/viewer/viewer';
@@ -37,7 +38,8 @@ const mapStateToProps = createStructuredSelector({
 	isModelPending: selectIsPending,
 	leftPanels: selectLeftPanels,
 	rightPanels: selectRightPanels,
-	isFocusMode: selectIsFocusMode
+	isFocusMode: selectIsFocusMode,
+	disabledPanelButtons: selectDisabledPanelButtons
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

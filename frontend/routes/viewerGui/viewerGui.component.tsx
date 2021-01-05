@@ -59,6 +59,7 @@ interface IProps {
 	};
 	leftPanels: string[];
 	rightPanels: string[];
+	disabledPanelButtons: Set<string>;
 	stopListenOnSelections: () => void;
 	stopListenOnModelLoaded: () => void;
 	stopListenOnClickPin: () => void;
@@ -187,6 +188,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 					type={type}
 					id={type + '-panel-button'}
 					active={this.props.leftPanels.includes(type)}
+					disabled={this.props.disabledPanelButtons.has(type)}
 				/>
 			))}
 		</LeftPanelsButtons>

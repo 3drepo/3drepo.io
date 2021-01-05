@@ -32,7 +32,10 @@ export const Presenter: React.FC<IProps> = ({ stopPresenting, showConfirmDialog 
 		showConfirmDialog({
 			title: `End Session?`,
 			content: `This will end the session for all users. Continue?`,
-			onConfirm: stopPresenting,
+			onConfirm: () => {
+				// If stopPresenting is directly pass as onConfirm, stopPresenting might be called twice  ¯\_(ツ)_/¯
+				stopPresenting();
+			},
 		});
 	}, [showConfirmDialog, stopPresenting]);
 

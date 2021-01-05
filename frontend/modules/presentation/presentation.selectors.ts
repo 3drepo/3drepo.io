@@ -44,3 +44,7 @@ export const selectIsPaused = createSelector(
 export const selectIsViewerManipulationEnabled = createSelector(
 	selectJoinedPresentation, selectIsPaused,  (joined, paused) => !joined || paused
 );
+
+export const selectIsPresentationActive = createSelector(
+	selectPresentationMode, (mode) => mode !== PresentationMode.INITIAL
+);
