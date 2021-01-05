@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -255,12 +255,6 @@ Group.create = async function (account, model, branch = "master", rid = null, se
 		if (fieldTypes[key]) {
 			if (utils.typeMatch(data[key], fieldTypes[key])) {
 				switch (key) {
-					case "description":
-						newGroup[key] = data[key];
-						break;
-					case "name":
-						newGroup[key] = data[key];
-						break;
 					case "objects":
 						if (data.objects) {
 							newGroup.objects = cleanEmbeddedObject(key, convertedObjects);
@@ -275,18 +269,8 @@ Group.create = async function (account, model, branch = "master", rid = null, se
 					case "color":
 						newGroup[key] = data[key].map((c) => parseInt(c, 10));
 						break;
-					case "transformation":
+					default:
 						newGroup[key] = data[key];
-						break;
-					case "issue_id":
-						newGroup[key] = data[key];
-						break;
-					case "risk_id":
-						newGroup[key] = data[key];
-						break;
-					case "view_id":
-						newGroup[key] = data[key];
-						break;
 				}
 			} else {
 				systemLogger.logError(`Type mismatch ${key} ${data[key]}`);
@@ -405,12 +389,6 @@ Group.update = async function (account, model, branch = "master", revId = null, 
 		if (data[key]) {
 			if (utils.typeMatch(data[key], fieldTypes[key])) {
 				switch (key) {
-					case "description":
-						toUpdate[key] = data[key];
-						break;
-					case "name":
-						toUpdate[key] = data[key];
-						break;
 					case "rules":
 						if (!checkRulesValidity(data.rules)) {
 							typeCorrect = false;
@@ -428,15 +406,8 @@ Group.update = async function (account, model, branch = "master", revId = null, 
 					case "color":
 						toUpdate[key] = data[key].map((c) => parseInt(c, 10));
 						break;
-					case "transformation":
-						toUpdate[key] = data[key].map((c) => parseInt(c, 10));
-						break;
-					case "issue_id":
+					default:
 						toUpdate[key] = data[key];
-						break;
-					case "risk_id":
-						toUpdate[key] = data[key];
-						break;
 				}
 				group[key] = toUpdate[key];
 			} else {
