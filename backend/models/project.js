@@ -214,7 +214,7 @@
 		return Project.findAndClean(account, { name: { $in:projectNames } });
 	};
 
-	Project.findByIds = function(account, ids) {
+	Project.findProjectsById = function(account, ids) {
 		return Project.findAndClean(account, { _id: { $in: ids.map(utils.stringToUUID) } });
 	};
 

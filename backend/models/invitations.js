@@ -19,7 +19,7 @@
 const db = require("../handler/db");
 const User = require("./user");
 const Job = require("./job");
-const Project = require("./project");
+const { findProjectsById, setUserAsProjectAdminById } = require("./project");
 const ModelSetting = require("./modelSetting");
 const systemLogger = require("../logger.js").systemLogger;
 const Mailer = require("../mailer/mailer");
@@ -97,7 +97,7 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 	const [emailUser, teamspaceJob, projects, teamspaceObject] = await Promise.all([
 		User.findByEmail(email),
 		Job.findByJob(teamspace, job),
-		Project.findByIds(teamspace, projectIds),
+		findProjectsById(teamspace, projectIds),
 		User.findByUserName(teamspace)
 	]);
 
@@ -208,7 +208,7 @@ const applyModelPermissions = (teamspace, invitedUser, modelsPermissions) => asy
 
 const applyProjectPermissions = (teamspace, invitedUser) => async ({ project_admin , project, models}) => {
 	if (project_admin) {
-		await Project.setUserAsProjectAdminById(teamspace, project, invitedUser);
+		await setUserAsProjectAdminById(teamspace, project, invitedUser);
 	} else {
 		const modelsIds = models.map(({model}) => model);
 		const modelsList = await ModelSetting.find({ account: teamspace }, {"_id" : {"$in" : modelsIds}});
