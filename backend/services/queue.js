@@ -29,6 +29,7 @@ const systemLogger = require("../logger").systemLogger;
 const Mailer = require("../mailer/mailer");
 const config = require("../config");
 const responseCodes = require("../response_codes");
+const Utils = require("../utils");
 
 class ImportQueue {
 	constructor() {
@@ -310,23 +311,18 @@ class ImportQueue {
 	processCallbackMsg(res) {
 		systemLogger.logInfo("Job request id " + res.properties.correlationId
 				+ " returned with: " + res.content);
-		const resData = JSON.parse(res.content);
 
-		const resErrorCode = resData.value;
-		const resErrorMessage = resData.message;
-		const resDatabase = resData.database;
-		const resProject = resData.project;
-		const resUser = resData.user ? resData.user : "unknown";
+		const {value, message, database, project, user = "unknown" , status} = JSON.parse(res.content);
 
 		const ModelHelper = require("../models/helper/model");
 
-		if ("processing" === resData.status) {
-			ModelHelper.setStatus(resDatabase, resProject, "processing", resUser);
+		if (status && Utils.isString(status)) {
+			ModelHelper.setStatus(database, project, status, user);
 		} else {
-			if (resErrorCode === 0) {
-				ModelHelper.importSuccess(resDatabase, resProject, this.sharedSpacePath, resUser);
+			if (value === 0) {
+				ModelHelper.importSuccess(database, project, this.sharedSpacePath, user);
 			} else {
-				ModelHelper.importFail(resDatabase, resProject, this.sharedSpacePath, resUser, resErrorCode, resErrorMessage);
+				ModelHelper.importFail(database, project, this.sharedSpacePath, user, value, message);
 			}
 		}
 	}
