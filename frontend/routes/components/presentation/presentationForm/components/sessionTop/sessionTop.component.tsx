@@ -18,20 +18,28 @@
 import React from 'react';
 
 import CopyIcon from '@material-ui/icons/FileCopy';
+import ShareIcon from '@material-ui/icons/Share';
+
 import copy from 'copy-to-clipboard';
 
 import { CopyButton, FieldContainer, Paragraph, StyledDivider, StyledTextfield } from '../../presentationForm.styles';
 
 interface IProps {
 	sessionCode: string;
+	presentationUrl: string;
 	stopPresenting: () => void;
 	showSnackbar: (text: string) => void;
 }
 
-export const SessionTop: React.FC<IProps> = ({ sessionCode, showSnackbar }) => {
+export const SessionTop: React.FC<IProps> = ({ sessionCode, showSnackbar, presentationUrl }) => {
 	const handleCopyButtonClick = React.useCallback(() => {
 		copy(sessionCode);
-		showSnackbar('Share link copied to clipboard');
+		showSnackbar('Invitation code copied to the clipboard');
+	}, [sessionCode, showSnackbar]);
+
+	const handleShareButtonClick = React.useCallback(() => {
+		copy(presentationUrl);
+		showSnackbar('Invitation link copied to clipboard');
 	}, [sessionCode, showSnackbar]);
 
 	return (
@@ -44,6 +52,9 @@ export const SessionTop: React.FC<IProps> = ({ sessionCode, showSnackbar }) => {
 				/>
 				<CopyButton icon={CopyIcon} onClick={handleCopyButtonClick}>
 					Copy
+				</CopyButton>
+				<CopyButton icon={ShareIcon} onClick={handleShareButtonClick}>
+					Share
 				</CopyButton>
 			</FieldContainer>
 			<Paragraph>

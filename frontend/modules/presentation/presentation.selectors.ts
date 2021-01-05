@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { createSelector } from 'reselect';
+import { ROUTES } from '../../constants/routes';
+import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { PresentationMode } from './presentation.constants';
 
 export const selectPresentationDomain = (state) => state.presentation;
@@ -47,4 +49,9 @@ export const selectIsViewerManipulationEnabled = createSelector(
 
 export const selectIsPresentationActive = createSelector(
 	selectPresentationMode, (mode) => mode !== PresentationMode.INITIAL
+);
+
+export const selectPresentationUrl = createSelector(
+	selectSessionCode, selectCurrentModelTeamspace, selectCurrentModel, (code, teamspace, modelId) =>
+		`${location.protocol}//${location.hostname}${ROUTES.VIEWER}/${teamspace}/${modelId}?presenter=${code}`
 );
