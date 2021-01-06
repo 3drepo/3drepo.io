@@ -30,18 +30,20 @@ const C = require("../constants");
 const utils = require("../utils");
 const systemLogger = require("../logger").systemLogger;
 
+function cleanOne(metadataToClean) {
+	if (metadataToClean._id) {
+		metadataToClean._id = utils.uuidToString(metadataToClean._id);
+	}
+
+	if (metadataToClean.parents) {
+		metadataToClean.parents = metadataToClean.parents.map(p => utils.uuidToString(p));
+	}
+
+	return metadataToClean;
+}
+
 function clean(metaListToClean) {
-	metaListToClean.forEach((metadataToClean) => {
-		if (metadataToClean._id) {
-			metadataToClean._id = utils.uuidToString(metadataToClean._id);
-		}
-
-		if (metadataToClean.parents) {
-			metadataToClean.parents = metadataToClean.parents.map(p => utils.uuidToString(p));
-		}
-	});
-
-	return metaListToClean;
+	return metaListToClean.map(clean);
 }
 
 async function getIdToMeshesDict(account, model, revId) {
@@ -69,7 +71,7 @@ class Meta {
 			throw responseCodes.METADATA_NOT_FOUND;
 		}
 
-		return metadata;
+		return cleanOne(metadata);
 	}
 
 	async getAllMetadataByRules(account, model, branch, rev, rules) {
