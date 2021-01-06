@@ -237,7 +237,7 @@ class View {
 
 			const  [deleteResponse] =  await Promise.all([
 				coll.findOneAndDelete({ _id: uid }),
-				Groups.deleteGroupsByViewId(account,model, uid)
+				Groups.deleteGroupsByViewId(account, model, uid)
 			]);
 
 			if (!deleteResponse.value) {
