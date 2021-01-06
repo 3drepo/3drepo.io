@@ -71,7 +71,7 @@ class Meta {
 			throw responseCodes.METADATA_NOT_FOUND;
 		}
 
-		return cleanOne(metadata);
+		return metadata;
 	}
 
 	async getAllMetadataByRules(account, model, branch, rev, rules) {
@@ -356,8 +356,6 @@ class Meta {
 		if (!obj) {
 			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
 		}
-
-		await clean(obj);
 
 		// rename fieldName to "value"
 		const parsedObj = {data: obj};

@@ -16,53 +16,41 @@
  */
 
 "use strict";
-const mongoose = require("mongoose");
-const ModelFactory = require("./factory/modelFactory");
-const Schema = mongoose.Schema;
 const utils = require("../utils");
 const db = require("../handler/db");
 const ExternalServices = require("../handler/externalServices");
 const matrix = require("./helper/matrix");
 
-const schema = Schema({
-	_id: Object,
-	parents: []
-});
-
-if (!schema.options.toJSON) {
-	schema.options.toJSON = {};
-}
-
 const dbFindOne = async (account, model, query, projection) => {
 	return await db.findOne(account, model + ".scene", query, projection);
 };
 
-schema.options.toJSON.transform = function (doc, ret) {
-	ret._id = utils.uuidToString(doc._id);
-	if(doc.parents) {
-		const newParents = [];
-		doc.parents.forEach(function(parentId) {
-			newParents.push(utils.uuidToString(parentId));
-		});
-		ret.parents = newParents;
-	}
-	return ret;
-};
+function cleanOne(sceneToClean) {
+	if (sceneToClean) {
+		if (sceneToClean._id) {
+			sceneToClean._id = utils.uuidToString(sceneToClean._id);
+		}
 
-const Scene = ModelFactory.createClass(
-	"Scene",
-	schema,
-	arg => {
-		return `${arg.model}.scene`;
+		if (sceneToClean.parents) {
+			sceneToClean.parents = sceneToClean.parents.map(p => utils.uuidToString(p));
+		}
 	}
-);
+
+	return sceneToClean;
+}
+
+function clean(scenesToClean) {
+	return scenesToClean.map(cleanOne);
+}
+
+const Scene = {};
 
 Scene.findOneScene = async function (account, model, query, projection) {
-	return db.findOne(account, model + ".scene", query, projection);
+	return cleanOne(await db.findOne(account, model + ".scene", query, projection));
 };
 
 Scene.findScenes = async function (account, model, query, projection) {
-	return db.find(account, model + ".scene", query, projection);
+	return clean(await db.find(account, model + ".scene", query, projection));
 };
 
 Scene.getBySharedId = async (account, model, shared_id, revisionIds, projection = {}) => {
