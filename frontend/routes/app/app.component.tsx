@@ -19,7 +19,7 @@ import { memoize } from 'lodash';
 import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 
-import { ROUTES } from '../../constants/routes';
+import { PUBLIC_ROUTES, ROUTES } from '../../constants/routes';
 import { getCookie, setCookie } from '../../helpers/cookies';
 import { renderWhenTrue } from '../../helpers/rendering';
 import { WebGLChecker } from '../../helpers/webglChecker';
@@ -107,7 +107,10 @@ export class App extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		this.props.authenticate();
+		if (!PUBLIC_ROUTES.includes(location.pathname)) {
+			this.props.authenticate();
+		}
+
 		this.sendAnalyticsPageView(location);
 
 		if ('serviceWorker' in navigator) {
