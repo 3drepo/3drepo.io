@@ -43,7 +43,7 @@ function cleanOne(metadataToClean) {
 }
 
 function clean(metaListToClean) {
-	return metaListToClean.map(clean);
+	return metaListToClean.map(cleanOne);
 }
 
 async function getIdToMeshesDict(account, model, revId) {
@@ -356,6 +356,8 @@ class Meta {
 		if (!obj) {
 			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
 		}
+
+		await clean(obj);
 
 		// rename fieldName to "value"
 		const parsedObj = {data: obj};
