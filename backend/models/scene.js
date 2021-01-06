@@ -49,19 +49,6 @@ schema.options.toJSON.transform = function (doc, ret) {
 	return ret;
 };
 
-schema.statics.getParentMatrix = async (account, model, parent, revisionIds) => {
-	const mesh = await Scene.getBySharedId(account, model, parent, revisionIds);
-
-	if ((mesh.parents || []).length > 0) {
-		const parentMatrix = await Scene.getParentMatrix(account, model, mesh.parents[0], revisionIds);
-		if (mesh.matrix) {
-			return matrix.multiply(parentMatrix, mesh.matrix);
-		}
-	}
-
-	return mesh.matrix || matrix.getIdentity(4);
-};
-
 const Scene = ModelFactory.createClass(
 	"Scene",
 	schema,
@@ -88,6 +75,19 @@ Scene.getGridfsFileStream = async (account, model, filename) => {
 
 Scene.getObjectById = async (account, model, id, projection = {}) => {
 	return await dbFindOne(account, model, {_id: id}, projection);
+};
+
+Scene.getParentMatrix = async (account, model, parent, revisionIds) => {
+	const mesh = await Scene.getBySharedId(account, model, parent, revisionIds);
+
+	if ((mesh.parents || []).length > 0) {
+		const parentMatrix = await Scene.getParentMatrix(account, model, mesh.parents[0], revisionIds);
+		if (mesh.matrix) {
+			return matrix.multiply(parentMatrix, mesh.matrix);
+		}
+	}
+
+	return mesh.matrix || matrix.getIdentity(4);
 };
 
 module.exports = Scene;
