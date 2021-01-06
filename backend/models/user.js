@@ -736,7 +736,7 @@ function _addProjects(account, username, models) {
 		query = { models: { $in: models } };
 	}
 
-	return Project.find({ account: account.account }, query).then(projects => {
+	return Project.findAndClean(account.account, query).then(projects => {
 
 		projects.forEach((project, i) => {
 
@@ -915,7 +915,7 @@ function _createAccounts(roles, userName) {
 				let account = null;
 				const query = { "permissions": { "$elemMatch": { user: userName } } };
 				const projection = { "permissions": { "$elemMatch": { user: userName } }, "models": 1, "name": 1 };
-				return Project.find({ account: user.user }, query, projection).then(projects => {
+				return Project.findAndClean(user.user, query, projection).then(projects => {
 
 					projects.forEach(_proj => {
 						projPromises.push(new Promise(function (resolve) {
