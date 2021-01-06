@@ -90,3 +90,10 @@ submodules/tests
 scripts/reporting/statsGen/yarn.lock
 scripts/reporting/statsGen/*/*.csv
 scripts/reporting/statsGen/*/*/*.csv
+scripts/reporting/statsGenElastic/yarn.lock
+scripts/reporting/statsGenElastic/*/*.csv
+scripts/reporting/statsGenElastic/*/*.txt
+scripts/reporting/statsGenElastic/*/*.tsv
+scripts/reporting/statsGenElastic/*/*/*.csv
+scripts/reporting/statsGenElastic/*/*/*.txt
+scripts/reporting/statsGenElastic/*.log

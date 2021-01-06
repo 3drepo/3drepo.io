@@ -1,5 +1,6 @@
 import { intersection, keys, memoize, pickBy, uniqBy } from 'lodash';
 import { NODE_TYPES, SELECTION_STATES, VISIBILITY_STATES } from '../../../constants/tree';
+import { mergeArrays } from '../../../helpers/arrays';
 
 export class Processing {
 	public get fullySelectedNodesIds() {
@@ -98,10 +99,12 @@ export class Processing {
 		nodesIds.forEach((id) => {
 			if (this.visibilityMap[id] !== VISIBILITY_STATES.INVISIBLE) {
 				const node = this.nodesList[this.nodesIndexesMap[id]];
-				if (node.type === 'mesh' && !node.name) {
-					nodes.push(this.nodesList[this.nodesIndexesMap[node.parentId]]);
-				} else {
-					nodes.push(node);
+				if (node) {
+					if (node.type === 'mesh' && !node.name) {
+						nodes.push(this.nodesList[this.nodesIndexesMap[node.parentId]]);
+					} else {
+						nodes.push(node);
+					}
 				}
 			}
 		});
@@ -452,9 +455,7 @@ export class Processing {
 		if (!nodes.length) {
 			return [];
 		}
-
 		const meshList = {};
-
 		for (let index = 0; index < nodes.length; ++index) {
 			const node = nodes[index];
 			if (node.subTreeRoots.length) {
@@ -484,7 +485,7 @@ export class Processing {
 							meshes
 						};
 					} else {
-						meshList[node.namespacedId].meshes = meshList[node.namespacedId].meshes.concat(meshes);
+						mergeArrays(meshList[node.namespacedId].meshes, meshes);
 					}
 				}
 			}

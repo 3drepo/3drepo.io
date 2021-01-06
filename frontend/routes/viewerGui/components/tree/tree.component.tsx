@@ -135,6 +135,7 @@ export class Tree extends React.PureComponent<IProps, IState> {
 							itemCount={size}
 							itemSize={TREE_ITEM_SIZE}
 							itemKey={this.getNodeId}
+							className="tree-list"
 						>
 							{this.renderTreeNode}
 						</List>

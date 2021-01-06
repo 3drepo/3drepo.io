@@ -120,16 +120,26 @@ export const selectSelectedStartingDate = createSelector(
 );
 
 export const selectNextKeyFramesDates =  createSelector(
-	selectSelectedStartingDate, selectStepScale, selectStepInterval , selectMaxDate,
-		(startingDate, scale, interval, maxDate) => {
+	selectSelectedStartingDate, selectStepScale, selectStepInterval , selectMaxDate, selectFrames,
+		(startingDate, scale, interval, maxDate, frames) => {
 			const keyFrames = [];
 			keyFrames[0] = new Date(Math.min(maxDate, (startingDate || new Date(0)).valueOf()));
+			let lastFrame = getSelectedFrame(frames, keyFrames[0]);
+			let nextFrame = null;
 			let date = getDateByStep(startingDate, scale, interval);
 			maxDate = new Date(maxDate);
 
 			for (let i = 0; i < 3 ; i++) {
 				date = getDateByStep(date, scale, interval);
+				nextFrame = getSelectedFrame(frames, date);
+
+				while (lastFrame === nextFrame && date <= maxDate) {
+					date = getDateByStep(date, scale, interval);
+					nextFrame = getSelectedFrame(frames, date);
+				}
+
 				keyFrames.push(date);
+				lastFrame = nextFrame;
 			}
 
 			return keyFrames.filter((d) => d <= maxDate);

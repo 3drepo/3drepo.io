@@ -108,3 +108,9 @@ export const BodyWrapper = styled.div`
 	position: relative;
 	height: inherit;
 `;
+
+export const HighlightWrapper = styled.span`
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+`;
