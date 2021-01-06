@@ -450,14 +450,15 @@ class Ticket extends View {
 		}
 
 		// Assign rev_id for issue
-		const history = await History.getHistory({ account, model }, branch, newTicket.revId, { _id: 1 }).catch(() => {
+		try {
+			const history = await History.getHistory({ account, model }, branch, newTicket.revId, { _id: 1 });
+			if (history) {
+				newTicket.rev_id = history._id;
+			}
+		} catch(err) {
 			if (newTicket.revId || (newTicket.viewpoint || {}).highlighted_group_id) {
 				throw responseCodes.INVALID_TAG_NAME;
 			}
-		});
-
-		if (history) {
-			newTicket.rev_id = history._id;
 		}
 
 		newTicket = this.filterFields(newTicket, ["viewpoint", "revId"]);
