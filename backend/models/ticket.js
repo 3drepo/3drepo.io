@@ -17,7 +17,7 @@
 "use strict";
 const _ = require("lodash");
 
-const Project = require("./project");
+const { isProjectAdmin } = require("./project");
 const View = require("./view");
 const User = require("./user");
 const Job = require("./job");
@@ -164,7 +164,7 @@ class Ticket extends View {
 			// 2. Get user permissions
 			User.findByUserName(account),
 			Job.findByUser(account, user),
-			Project.isProjectAdmin(
+			isProjectAdmin(
 				account,
 				model,
 				user
