@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2016 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -34,8 +34,7 @@ if (!schema.options.toJSON) {
 }
 
 const dbFindOne = async (account, model, query, projection) => {
-	const coll = await db.getCollection(account, model + ".scene");
-	return await coll.findOne(query, projection);
+	return await db.findOne(account, model + ".scene", query, projection);
 };
 
 schema.options.toJSON.transform = function (doc, ret) {
@@ -48,18 +47,6 @@ schema.options.toJSON.transform = function (doc, ret) {
 		ret.parents = newParents;
 	}
 	return ret;
-};
-
-schema.statics.getBySharedId = async (account, model, shared_id, revisionIds, projection = {}) => {
-	return await dbFindOne(account, model, {shared_id, _id :{$in: revisionIds}}, projection);
-};
-
-schema.statics.getObjectById = async (account, model, id, projection = {}) => {
-	return await dbFindOne(account, model, {_id: id}, projection);
-};
-
-schema.statics.getGridfsFileStream = async (account, model, filename) => {
-	return await ExternalServices.getFileStream(account, model + ".scene", "gridfs", filename);
 };
 
 schema.statics.getParentMatrix = async (account, model, parent, revisionIds) => {
@@ -82,5 +69,17 @@ const Scene = ModelFactory.createClass(
 		return `${arg.model}.scene`;
 	}
 );
+
+Scene.getBySharedId = async (account, model, shared_id, revisionIds, projection = {}) => {
+	return await dbFindOne(account, model, {shared_id, _id :{$in: revisionIds}}, projection);
+};
+
+Scene.getGridfsFileStream = async (account, model, filename) => {
+	return await ExternalServices.getFileStream(account, model + ".scene", "gridfs", filename);
+};
+
+Scene.getObjectById = async (account, model, id, projection = {}) => {
+	return await dbFindOne(account, model, {_id: id}, projection);
+};
 
 module.exports = Scene;
