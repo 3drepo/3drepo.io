@@ -736,12 +736,14 @@ function _addProjects(account, username, models) {
 		query = { models: { $in: models } };
 	}
 
-	return Project.findAndClean(account.account, query).then(projects => {
+	return Project.find({ account: account.account }, query).then(projects => {
 
 		projects.forEach((project, i) => {
 
 			project = project.toObject();
 
+			// FIXME
+			// console.log("ln 745 in user.js");
 			let permissions = project.permissions.find(p => p.user === username);
 			permissions = _.get(permissions, "permissions") || [];
 			// show inherited and implied permissions
@@ -915,7 +917,7 @@ function _createAccounts(roles, userName) {
 				let account = null;
 				const query = { "permissions": { "$elemMatch": { user: userName } } };
 				const projection = { "permissions": { "$elemMatch": { user: userName } }, "models": 1, "name": 1 };
-				return Project.findAndClean(user.user, query, projection).then(projects => {
+				return Project.find({ account: user.user }, query, projection).then(projects => {
 
 					projects.forEach(_proj => {
 						projPromises.push(new Promise(function (resolve) {
@@ -925,7 +927,8 @@ function _createAccounts(roles, userName) {
 								return;
 							}
 							if (!account) {
-
+								// FIXME
+								// console.log("ln 929 in user.js");
 								account = accounts.find(_account => _account.account === user.user);
 								if (!account) {
 									account = _makeAccountObject(user.user);
@@ -934,6 +937,8 @@ function _createAccounts(roles, userName) {
 								}
 							}
 
+							// FIXME
+							// console.log("ln 938 in user.js");
 							myProj = account.projects.find(p => p.name === _proj.name);
 
 							if (!myProj) {
@@ -967,11 +972,15 @@ function _createAccounts(roles, userName) {
 						// model permissions
 						const modelPromises = [];
 						const dbUserCache = {};
+						// FIXME
+						// console.log("ln 972 in user.js");
 						return ModelSetting.find({ account: user.user }, query, projection).then(models => {
 
 							models.forEach(model => {
 								if (model.permissions.length > 0) {
 									if (!account) {
+										// FIXME
+										// console.log("ln 978 in user.js");
 										account = accounts.find(_account => _account.account === user.user);
 										if (!account) {
 											account = _makeAccountObject(user.user);
@@ -998,6 +1007,8 @@ function _createAccounts(roles, userName) {
 											return Project.findOneProject(account.account, { models: _model.model }).then(projectObj => {
 												if (projectObj) {
 
+													// FIXME
+													// console.log("ln 1005 in user.js");
 													let project = account.projects.find(p => p.name === projectObj.name);
 
 													if (!project) {
@@ -1036,6 +1047,8 @@ function _createAccounts(roles, userName) {
 
 									allFedModels.forEach(fed => {
 										fed.subModels.forEach(subModel => {
+											// FIXME
+											// console.log("ln 1044 in user.js");
 											const foundModel = allModels.find(m => m.model === subModel.model);
 											subModel.name = foundModel && foundModel.name;
 										});
