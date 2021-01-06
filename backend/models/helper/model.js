@@ -281,6 +281,7 @@ function createNewModel(teamspace, modelName, data) {
 	}
 
 	const projectName = data.project;
+	// FIXME use findOneProject instead
 	return Project.findOne({account: teamspace}, {name: projectName}).then((project) => {
 		if(!project) {
 			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
@@ -868,7 +869,7 @@ async function getModelPermission(username, setting, account) {
 		const projectQuery = { models: setting._id, "permissions.user": username };
 
 		// project admin have access to models underneath it.
-		const project = await Project.findOne({account}, projectQuery, { "permissions.$" : 1 });
+		const project = await Project.findOneProject(account, projectQuery, { "permissions.$" : 1 });
 
 		if(project && project.permissions) {
 			permissions = permissions.concat(flattenPermissions(project.permissions[0].permissions));
