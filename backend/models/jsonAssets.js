@@ -23,7 +23,6 @@ const utils = require("../utils");
 const Ref = require("./ref");
 const C = require("../constants");
 const { hasReadAccessToModelHelper } = require("../middlewares/checkPermissions");
-const ResponseCodes = require("../response_codes");
 const Stream = require("stream");
 
 const JSONAssets = {};
@@ -117,55 +116,51 @@ function appendSubModelFiles(subTreeFiles, outStream) {
 
 function getHelperJSONFile(account, model, branch, rev, username, filename, prefix = "mainTree", allowNotFound, defaultValues = {}) {
 	return History.getHistory({ account, model }, branch, rev).then((history) => {
-		if(history) {
-			const revId = utils.uuidToString(history._id);
-			const treeFileName = `${revId}/${filename}.json`;
-			let mainTreePromise;
-			const subTreesPromise = getFileFromSubModels(account, model, history.current, username, `${filename}.json`);
+		const revId = utils.uuidToString(history._id);
+		const treeFileName = `${revId}/${filename}.json`;
+		let mainTreePromise;
+		const subTreesPromise = getFileFromSubModels(account, model, history.current, username, `${filename}.json`);
 
-			if (allowNotFound) {
-				mainTreePromise = FileRef.getJSONFileStream(account, model, treeFileName).catch(() => {
-					const fakeStream = Stream.PassThrough();
-					fakeStream.write(JSON.stringify(defaultValues));
-					fakeStream.end();
-					return { fileName: treeFileName, readStream: fakeStream };
-				});
-			} else {
-				mainTreePromise = FileRef.getJSONFileStream(account, model, treeFileName);
-			}
-
-			return mainTreePromise.then((file) => {
-				const outStream = Stream.PassThrough();
-				const readStream = file.readStream;
-				file.readStream = outStream;
-				delete file.size;
-				new Promise(function(resolve) {
-					outStream.write(`{"${prefix}":`);
-					if(readStream) {
-						readStream.on("data", d => outStream.write(d));
-						readStream.on("end", ()=> resolve());
-						readStream.on("error", err => outStream.emit("error", err));
-					} else {
-						resolve();
-					}
-				}).then(() => {
-					return subTreesPromise.then((subTreeFiles) => {
-						outStream.write(",");
-						return appendSubModelFiles(subTreeFiles, outStream).then(() => {
-							outStream.write("}");
-							outStream.end();
-						});
-					});
-				}).catch((err) => {
-					outStream.emit("error", err);
-					outStream.end();
-				});
-				return file;
-
+		if (allowNotFound) {
+			mainTreePromise = FileRef.getJSONFileStream(account, model, treeFileName).catch(() => {
+				const fakeStream = Stream.PassThrough();
+				fakeStream.write(JSON.stringify(defaultValues));
+				fakeStream.end();
+				return { fileName: treeFileName, readStream: fakeStream };
 			});
 		} else {
-			return Promise.reject(ResponseCodes.INVALID_TAG_NAME);
+			mainTreePromise = FileRef.getJSONFileStream(account, model, treeFileName);
 		}
+
+		return mainTreePromise.then((file) => {
+			const outStream = Stream.PassThrough();
+			const readStream = file.readStream;
+			file.readStream = outStream;
+			delete file.size;
+			new Promise(function(resolve) {
+				outStream.write(`{"${prefix}":`);
+				if(readStream) {
+					readStream.on("data", d => outStream.write(d));
+					readStream.on("end", ()=> resolve());
+					readStream.on("error", err => outStream.emit("error", err));
+				} else {
+					resolve();
+				}
+			}).then(() => {
+				return subTreesPromise.then((subTreeFiles) => {
+					outStream.write(",");
+					return appendSubModelFiles(subTreeFiles, outStream).then(() => {
+						outStream.write("}");
+						outStream.end();
+					});
+				});
+			}).catch((err) => {
+				outStream.emit("error", err);
+				outStream.end();
+			});
+
+			return file;
+		});
 	});
 }
 
@@ -176,52 +171,47 @@ JSONAssets.getSuperMeshMapping = function(account, model, id) {
 
 JSONAssets.getTree = function(account, model, branch, rev) {
 	return History.getHistory({ account, model }, branch, rev).then((history) => {
-		if(history) {
-			const revId = utils.uuidToString(history._id);
-			const treeFileName = `${revId}/fulltree.json`;
-			const mainTreePromise = FileRef.getJSONFileStream(account, model, treeFileName);
-			const subTreesPromise = getSubTreeInfo(account, model, history.current);
+		const revId = utils.uuidToString(history._id);
+		const treeFileName = `${revId}/fulltree.json`;
+		const mainTreePromise = FileRef.getJSONFileStream(account, model, treeFileName);
+		const subTreesPromise = getSubTreeInfo(account, model, history.current);
 
-			return mainTreePromise.then((file) => {
-				const outStream = Stream.PassThrough();
-				const readStream = file.readStream;
-				file.readStream = outStream;
-				delete file.size;
-				new Promise(function(resolve) {
-					outStream.write("{\"mainTree\": ");
-					readStream.on("data", d => outStream.write(d));
-					readStream.on("end", ()=> resolve());
-					readStream.on("error", err => outStream.emit("error", err));
-				}).then(() => {
-					return subTreesPromise.then((subTreeInfo) => {
-						outStream.write(", \"subTrees\":[");
-						for(let i = 0; i < subTreeInfo.length; ++i) {
-							if(subTreeInfo[i]) {
-								if(i > 0) {
-									outStream.write(",");
-								}
-								const url = subTreeInfo[i].rid !== C.MASTER_BRANCH ?
-									`/${subTreeInfo[i].teamspace}/${subTreeInfo[i].model}/revision/${subTreeInfo[i].rid}/fulltree.json` :
-									`/${subTreeInfo[i].teamspace}/${subTreeInfo[i].model}/revision/master/head/fulltree.json`;
-								subTreeInfo[i].url = url;
-								outStream.write(JSON.stringify(subTreeInfo[i]));
+		return mainTreePromise.then((file) => {
+			const outStream = Stream.PassThrough();
+			const readStream = file.readStream;
+			file.readStream = outStream;
+			delete file.size;
+			new Promise(function(resolve) {
+				outStream.write("{\"mainTree\": ");
+				readStream.on("data", d => outStream.write(d));
+				readStream.on("end", ()=> resolve());
+				readStream.on("error", err => outStream.emit("error", err));
+			}).then(() => {
+				return subTreesPromise.then((subTreeInfo) => {
+					outStream.write(", \"subTrees\":[");
+					for(let i = 0; i < subTreeInfo.length; ++i) {
+						if(subTreeInfo[i]) {
+							if(i > 0) {
+								outStream.write(",");
 							}
+							const url = subTreeInfo[i].rid !== C.MASTER_BRANCH ?
+								`/${subTreeInfo[i].teamspace}/${subTreeInfo[i].model}/revision/${subTreeInfo[i].rid}/fulltree.json` :
+								`/${subTreeInfo[i].teamspace}/${subTreeInfo[i].model}/revision/master/head/fulltree.json`;
+							subTreeInfo[i].url = url;
+							outStream.write(JSON.stringify(subTreeInfo[i]));
 						}
-						outStream.write("]}");
-						outStream.end();
-					});
-
-				}).catch((err) => {
-					outStream.emit("error", err);
+					}
+					outStream.write("]}");
 					outStream.end();
 				});
 
-				return subTreesPromise.then((subTreeInfo) => ({ file, isFed: subTreeInfo.length > 0 })) ;
-
+			}).catch((err) => {
+				outStream.emit("error", err);
+				outStream.end();
 			});
-		} else {
-			return Promise.reject(ResponseCodes.INVALID_TAG_NAME);
-		}
+
+			return subTreesPromise.then((subTreeInfo) => ({ file, isFed: subTreeInfo.length > 0 })) ;
+		});
 	});
 };
 
