@@ -70,6 +70,14 @@ const Scene = ModelFactory.createClass(
 	}
 );
 
+Scene.findOneScene = async function (account, model, query, projection) {
+	return db.findOne(account, model + ".scene", query, projection);
+};
+
+Scene.findScenes = async function (account, model, query, projection) {
+	return db.find(account, model + ".scene", query, projection);
+};
+
 Scene.getBySharedId = async (account, model, shared_id, revisionIds, projection = {}) => {
 	return await dbFindOne(account, model, {shared_id, _id :{$in: revisionIds}}, projection);
 };

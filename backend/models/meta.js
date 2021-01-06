@@ -20,7 +20,7 @@ const FileRef = require("./fileRef");
 const History = require("./history");
 const ModelSetting = require("./modelSetting");
 const Ref = require("./ref");
-const Scene = require("./scene");
+const { findOneScene, findScenes } = require("./scene");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
 const { batchPromises } = require("./helper/promises");
@@ -63,7 +63,7 @@ class Meta {
 			parents: 0
 		};
 
-		const metadata = await Scene.findOne({account, model}, { _id: utils.stringToUUID(id) }, projection);
+		const metadata = await findOneScene(account, model, { _id: utils.stringToUUID(id) }, projection);
 
 		if (!metadata) {
 			throw responseCodes.METADATA_NOT_FOUND;
@@ -349,7 +349,7 @@ class Meta {
 		};
 		projection[fullFieldName] = 1;
 
-		const obj = await Scene.find({account, model}, match, projection);
+		const obj = await findScenes(account, model, match, projection);
 
 		if (!obj) {
 			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
