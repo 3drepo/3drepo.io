@@ -14,9 +14,8 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-declare var Module;
 declare var SendMessage;
-declare var UnityLoader;
+declare var createUnityInstance;
 
 import { IS_FIREFOX } from '../helpers/browser';
 
@@ -116,9 +115,11 @@ export class UnityUtil {
 	}
 
 	/** @hidden */
-	public static onProgress(gameInstance, progress: number) {
+	public static onProgress(progress: number) {
 		requestAnimationFrame(() => {
-			UnityUtil.progressCallback(progress);
+			if (UnityUtil.progressCallback) {
+				UnityUtil.progressCallback(progress);
+			}
 		});
 	}
 
@@ -131,9 +132,7 @@ export class UnityUtil {
 	 * @return returns a promise which resolves when the game is loaded.
 	 *
 	 */
-	public static loadUnity(divId: string, unityConfig = 'unity/Build/unity.json', memory?: number): Promise<void> {
-		memory = memory || 2130706432;
-
+	public static loadUnity(canvas: any, unityURL): Promise<void> {
 		if (!window.Module) {
 			// Add withCredentials to XMLHttpRequest prototype to allow unity game to
 			// do CORS request. We used to do this with a .jspre on the unity side but it's no longer supported
@@ -147,32 +146,28 @@ export class UnityUtil {
 			XMLHttpRequest.prototype.open = newOpen;
 		}
 
-		const unitySettings: any = {
-			onProgress: this.onProgress
+		const buildUrl = `${unityURL ? unityURL + '/' : ''}unity/Build`;
+
+		const config = {
+			dataUrl: buildUrl + '/unity.data.unityweb',
+			frameworkUrl: buildUrl + '/unity.framework.js.unityweb',
+			codeUrl: buildUrl + '/unity.wasm.unityweb',
+			streamingAssetsUrl: 'StreamingAssets',
+			companyName: '3D Repo Ltd',
+			productName: '3D Repo Unity',
+			productVersion: '1.0',
+			errorHandler: (e, t, n) => {
+				// This member is not part of the documented API, but the current version of loader.js checks for it
+				UnityUtil.onUnityError(e);
+				return true; // Returning true suppresses loader.js' alert call
+			}
 		};
 
-		UnityLoader.Error.handler = this.onUnityError;
-		if (window) {
-			if (!(window as any).Module) {
-				window.Module = {};
-			}
-			unitySettings.Module = (window as any).Module;
-
-			if (!IS_FIREFOX) {
-				unitySettings.Module.TOTAL_MEMORY = memory;
-			}
-
-			UnityUtil.unityInstance = UnityLoader.instantiate(
-				divId,
-				unityConfig,
-				unitySettings
-			);
-		} else {
-			UnityUtil.unityInstance = UnityLoader.instantiate(
-				divId,
-				unityConfig
-			);
-		}
+		createUnityInstance(canvas, config, (progress) => {
+			this.onProgress(progress);
+		}).then((unityInstance) => {
+			UnityUtil.unityInstance = unityInstance;
+		}).catch(UnityUtil.onUnityError);
 
 		return UnityUtil.onReady();
 	}
@@ -227,23 +222,21 @@ export class UnityUtil {
 	 * @hidden
 	 * Handle a error from Unity
 	 */
-	public static onUnityError(errorObject) {
+	public static onUnityError(message) {
 
-		const err = errorObject.message;
-		const line = errorObject.lineno;
 		let reload = false;
 		let conf;
 
-		if (UnityUtil.isUnityError(err)) {
+		if (UnityUtil.isUnityError(message)) {
 			reload = true;
 			conf = `Your browser has failed to load 3D Repo's model viewer. The following occured:
-					<br><br> <code>Error ${err} occured at line ${line}</code>
+					<br><br> <code>${message}</code>
 					<br><br> This may due to insufficient memory. Please ensure you are using a modern 64bit web browser
 					(such as Chrome or Firefox), reduce your memory usage and try again.
 					If you are unable to resolve this problem, please contact support@3drepo.org referencing the above error.
 					<br><md-container>`;
 		} else {
-			conf = `Something went wrong :( <br><br> <code>Error ${err} occured at line ${line}</code><br><br>
+			conf = `Something went wrong :( <br><br> <code>${message}</code><br><br>
 				If you are unable to resolve this problem, please contact support@3drepo.org referencing the above error
 				<br><br> Click OK to refresh this page<md-container>`;
 		}
@@ -1042,33 +1035,18 @@ export class UnityUtil {
 		toggleMode: boolean,
 		forceReHighlight: boolean
 	) {
-		const maxNodesPerReq = 20000;
-		const promises = [];
-		for (let i = 0 ; i < idArr.length; i += maxNodesPerReq) {
-			const promise = new Promise((resolve, reject) => {
-				setTimeout(() => {
-					try {
-						const endIdx = i + maxNodesPerReq < idArr.length ? i + maxNodesPerReq : idArr.length ;
-						const arr = idArr.slice(i, endIdx);
-						const params: any = {
-							database : account,
-							model,
-							ids : arr,
-							toggle : toggleMode,
-							forceReHighlight,
-							color: color ? color : UnityUtil.defaultHighlightColor
-						};
-						UnityUtil.toUnity('HighlightObjects', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
-						resolve();
-					} catch (error) {
-						reject(error);
-					}
-				}, i > 0 ? 100 : 0);
-			});
-			promises.push(promise);
-		}
-
-		return Promise.all(promises);
+		UnityUtil.multipleCallInChunks(idArr.length, (start, end) => {
+			const arr = idArr.slice(start, end);
+			const params: any = {
+				database : account,
+				model,
+				ids : arr,
+				toggle : toggleMode,
+				forceReHighlight,
+				color: color ? color : UnityUtil.defaultHighlightColor
+			};
+			UnityUtil.toUnity('HighlightObjects', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+		});
 	}
 
 	/**
@@ -1079,13 +1057,16 @@ export class UnityUtil {
 	 * @param idArr - array of unique IDs associated with the objects to highlight
 	 */
 	public static unhighlightObjects(account: string, model: string, idArr: [string]) {
-		const params: any = {
-			database : account,
-			model,
-			ids : idArr
-		};
+		UnityUtil.multipleCallInChunks(idArr.length, (start, end) => {
+			const arr = idArr.slice(start, end);
+			const params: any = {
+				database : account,
+				model,
+				ids : idArr
+			};
 
-		UnityUtil.toUnity('UnhighlightObjects', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+			UnityUtil.toUnity('UnhighlightObjects', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+		});
 	}
 
 	public static pauseRendering() {
@@ -1215,13 +1196,15 @@ export class UnityUtil {
 	 * @param color - RGB value of the override color (note: alpha will be ignored)
 	 */
 	public static overrideMeshColor(account: string, model: string, meshIDs: [string], color: [number]) {
-		const param: any = {};
-		if (account && model) {
-			param.nameSpace = account + '.' + model;
-		}
-		param.ids = meshIDs;
-		param.color = color;
-		UnityUtil.toUnity('OverrideMeshColor', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
+			const param: any = {};
+			if (account && model) {
+				param.nameSpace = account + '.' + model;
+			}
+			param.ids = meshIDs.slice(start, end);
+			param.color = color;
+			UnityUtil.toUnity('OverrideMeshColor', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		});
 	}
 
 	/**
@@ -1232,12 +1215,14 @@ export class UnityUtil {
 	 * @param meshIDs - unique IDs of the meshes to operate on
 	 */
 	public static resetMeshColor(account: string, model: string, meshIDs: [string]) {
-		const param: any = {};
-		if (account && model) {
-			param.nameSpace = account + '.' + model;
-		}
-		param.ids = meshIDs;
-		UnityUtil.toUnity('ResetMeshColor', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
+			const param: any = {};
+			if (account && model) {
+				param.nameSpace = account + '.' + model;
+			}
+			param.ids = meshIDs.slice(start, end);
+			UnityUtil.toUnity('ResetMeshColor', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		});
 	}
 
 	/**
@@ -1250,13 +1235,15 @@ export class UnityUtil {
 	 * @param opacity - opacity (>0 - 1) value to override with
 	 */
 	public static overrideMeshOpacity(account: string, model: string, meshIDs: [string], opacity: number) {
-		const param: any = {};
-		if (account && model) {
-			param.nameSpace = account + '.' + model;
-		}
-		param.ids = meshIDs;
-		param.opacity = opacity;
-		UnityUtil.toUnity('OverrideMeshOpacity', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
+			const param: any = {};
+			if (account && model) {
+				param.nameSpace = account + '.' + model;
+			}
+			param.ids = meshIDs.slice(start, end);
+			param.opacity = opacity;
+			UnityUtil.toUnity('OverrideMeshOpacity', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		});
 	}
 
 	/**
@@ -1267,12 +1254,14 @@ export class UnityUtil {
 	 * @param meshIDs - unique IDs of the meshes to operate on
 	 */
 	public static resetMeshOpacity(account: string, model: string, meshIDs: [string]) {
-		const param: any = {};
-		if (account && model) {
-			param.nameSpace = account + '.' + model;
-		}
-		param.ids = meshIDs;
-		UnityUtil.toUnity('ResetMeshOpacity', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
+			const param: any = {};
+			if (account && model) {
+				param.nameSpace = account + '.' + model;
+			}
+			param.ids = meshIDs.slice(start, end);
+			UnityUtil.toUnity('ResetMeshOpacity', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		});
 	}
 
 	/**
@@ -1566,6 +1555,19 @@ export class UnityUtil {
 	}
 
 	/**
+	 * @hidden
+	 * A helper function to split the calls into multiple calls when the array is too large for SendMessage to handle
+	 */
+	public static multipleCallInChunks(arrLength: number, func: (start: number, end: number) => any, chunkSize = 20000) {
+		let index = 0;
+		while (index < arrLength) {
+			const end = index + chunkSize >= arrLength ? undefined : chunkSize;
+			func(index, end);
+			index += chunkSize;
+		}
+	}
+
+	/**
 	 * Toggle visibility of the given list of objects
 	 * @category Model Interactions
 	 * @param account - name of teamspace
@@ -1574,15 +1576,16 @@ export class UnityUtil {
 	 * @param visibility - true = visible, false = invisible
 	 */
 	public static toggleVisibility(account: string, model: string, ids: [string], visibility: boolean) {
-		const param: any = {};
-		if (account && model) {
-			param.nameSpace = account + '.' + model;
-		}
+		UnityUtil.multipleCallInChunks(ids.length, (start, end) => {
+			const param: any = {};
+			if (account && model) {
+				param.nameSpace = account + '.' + model;
+			}
 
-		param.ids = ids;
-		param.visible = visibility;
-		UnityUtil.toUnity('ToggleVisibility', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
-
+			param.ids = ids.slice(start, end);
+			param.visible = visibility;
+			UnityUtil.toUnity('ToggleVisibility', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		});
 	}
 
 	/**
@@ -1741,12 +1744,14 @@ export class UnityUtil {
 	 * @param matrix array of 16 numbers, representing the transformation on the meshes (row major)
 	 */
 	public static moveMeshes(teamspace: string, modelId: string, meshes: string[], matrix: number[]) {
-		const param: any = {
-			nameSpace : teamspace + '.' + modelId,
-			meshes,
-			matrix
-		};
-		UnityUtil.toUnity('MoveMeshes', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		UnityUtil.multipleCallInChunks(meshes.length, (start, end) => {
+			const param: any = {
+				nameSpace : teamspace + '.' + modelId,
+				meshes: meshes.slice(start, end),
+				matrix
+			};
+			UnityUtil.toUnity('MoveMeshes', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		});
 	}
 
 	/**
@@ -1758,11 +1763,13 @@ export class UnityUtil {
 	 * @param meshes array of mesh unique IDs
 	 */
 	public static resetMovedMeshes(teamspace: string, modelId: string, meshes: string[]) {
-		const param: any = {
-			nameSpace : teamspace + '.' + modelId,
-			meshes
-		};
-		UnityUtil.toUnity('ResetMovedMeshes', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		UnityUtil.multipleCallInChunks(meshes.length, (start, end) => {
+			const param: any = {
+				nameSpace : teamspace + '.' + modelId,
+				meshes: meshes.slice(start, end),
+			};
+			UnityUtil.toUnity('ResetMovedMeshes', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		});
 	}
 
 }

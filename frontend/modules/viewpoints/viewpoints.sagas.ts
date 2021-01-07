@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { groupCollapsed } from 'console';
 import copy from 'copy-to-clipboard';
 import { get, take } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
-import { selectSelectedViewpoint, selectViewpointsGroups } from '.';
+
+import { selectSelectedViewpoint, selectSortOrder, selectViewpointsGroups } from '.';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { ROUTES } from '../../constants/routes';
+import { SORT_ORDER_TYPES } from '../../constants/sorting';
 import { UnityUtil } from '../../globals/unity-util';
 import { createGroupsByColor, createGroupsByTransformations, prepareGroup } from '../../helpers/groups';
 import { createGroupsFromViewpoint, mergeGroupsDataFromViewpoint, setGroupData } from '../../helpers/viewpoints';
@@ -157,6 +158,19 @@ export function* deleteViewpoint({teamspace, modelId, viewpointId}) {
 		yield put(ViewpointsActions.deleteViewpointSuccess(viewpointId));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('remove', 'viewpoint', error));
+	}
+}
+
+function* toggleSortOrder() {
+	try {
+		const currentSortOrder = yield select(selectSortOrder);
+		const isASC = currentSortOrder === SORT_ORDER_TYPES.ASCENDING;
+
+		yield put(ViewpointsActions.setComponentState({
+			sortOrder: isASC ? SORT_ORDER_TYPES.DESCENDING : SORT_ORDER_TYPES.ASCENDING,
+		}));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('set', 'sort order', error.message));
 	}
 }
 
@@ -386,6 +400,7 @@ export default function* ViewpointsSaga() {
 	yield takeLatest(ViewpointsTypes.CREATE_VIEWPOINT, createViewpoint);
 	yield takeLatest(ViewpointsTypes.UPDATE_VIEWPOINT, updateViewpoint);
 	yield takeLatest(ViewpointsTypes.DELETE_VIEWPOINT, deleteViewpoint);
+	yield takeLatest(ViewpointsTypes.TOGGLE_SORT_ORDER, toggleSortOrder);
 	yield takeLatest(ViewpointsTypes.SET_ACTIVE_VIEWPOINT, setActiveViewpoint);
 	yield takeLatest(ViewpointsTypes.SUBSCRIBE_ON_VIEWPOINT_CHANGES, subscribeOnViewpointChanges);
 	yield takeLatest(ViewpointsTypes.UNSUBSCRIBE_ON_VIEWPOINT_CHANGES, unsubscribeOnViewpointChanges);

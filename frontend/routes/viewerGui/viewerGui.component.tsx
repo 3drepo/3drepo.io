@@ -67,6 +67,7 @@ interface IProps {
 	resetModel: () => void;
 	setPanelVisibility: (panelName, visibility?) => void;
 	removeMeasurement: (uuid) => void;
+	resetViewerGui: () => void;
 }
 
 interface IState {
@@ -141,6 +142,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		this.props.resetPanelsStates();
 		this.props.viewer.destroy();
 		this.props.resetModel();
+		this.props.resetViewerGui();
 		this.toggleViewerListeners(false);
 	}
 

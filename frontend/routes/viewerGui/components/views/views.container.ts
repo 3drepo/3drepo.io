@@ -18,6 +18,7 @@
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
+
 import { selectSettings, ModelActions } from '../../../../modules/model';
 import { selectIsAdmin, selectIsCommenter } from '../../../../modules/model/permissions.selectors';
 import {
@@ -27,13 +28,14 @@ import {
 	selectNewViewpoint,
 	selectSearchEnabled,
 	selectSearchQuery,
-	selectViewpointsList,
-	ViewpointsActions
+	selectSortedViewpointsList,
+	selectSortOrder,
+	ViewpointsActions,
 } from '../../../../modules/viewpoints';
 import { Views } from './views.component';
 
 const mapStateToProps = createStructuredSelector({
-	viewpoints: selectViewpointsList,
+	viewpoints: selectSortedViewpointsList,
 	newViewpoint: selectNewViewpoint,
 	activeViewpoint: selectActiveViewpoint,
 	isPending: selectIsPending,
@@ -43,6 +45,7 @@ const mapStateToProps = createStructuredSelector({
 	searchEnabled: selectSearchEnabled,
 	isCommenter: selectIsCommenter,
 	modelSettings: selectSettings,
+	sortOrder: selectSortOrder,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -51,6 +54,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	createViewpoint: ViewpointsActions.createViewpoint,
 	updateViewpoint: ViewpointsActions.updateViewpoint,
 	deleteViewpoint: ViewpointsActions.deleteViewpoint,
+	toggleSortOrder: ViewpointsActions.toggleSortOrder,
 	subscribeOnViewpointChanges: ViewpointsActions.subscribeOnViewpointChanges,
 	unsubscribeOnViewpointChanges: ViewpointsActions.unsubscribeOnViewpointChanges,
 	setActiveViewpoint: ViewpointsActions.setActiveViewpoint,
