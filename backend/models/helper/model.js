@@ -28,7 +28,7 @@ const systemLogger = require("../../logger.js").systemLogger;
 const config = require("../../config");
 const History = require("../history");
 const Scene = require("../scene");
-const { findRef, getRefNodes } = require("../ref");
+const { getRefNodes } = require("../ref");
 const utils = require("../../utils");
 const middlewares = require("../../middlewares/middlewares");
 const multer = require("multer");
@@ -504,10 +504,7 @@ function searchTree(account, model, branch, rev, searchString, username) {
 
 			});
 
-			return findRef(account, model, {
-				_id: {"$in": history.current },
-				type: "ref"
-			});
+			return getRefNodes(account, model, history.current);
 
 		}).then(refs => {
 
@@ -565,12 +562,7 @@ function listSubModels(account, model, branch) {
 	return History.findByBranch({ account, model }, branch).then(history => {
 
 		if(history) {
-			const filter = {
-				type: "ref",
-				_id: { $in: history.current }
-			};
-
-			return findRef(account, model, filter);
+			return getRefNodes(account, model, history.current);
 		} else {
 			return [];
 		}
