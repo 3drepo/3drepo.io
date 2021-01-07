@@ -17,6 +17,7 @@
 
 import React from 'react';
 
+import { Prompt } from 'react-router';
 import { ROUTES } from '../../../constants/routes';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { clientConfigService } from '../../../services/clientConfig';
@@ -34,10 +35,12 @@ interface IProps {
 	history: any;
 	isFocusMode: boolean;
 	isAuthenticated: boolean;
+	isPresenting: boolean;
 	visualSettings?: any;
 	onLogout?: () => void;
 	onLogoClick?: () => void;
 	showDialog?: (config: any) => void;
+	showConfirmDialog: (config) => void;
 	updateSettings?: (settings: any) => void;
 	pathname: string;
 }
@@ -46,6 +49,28 @@ export class TopMenu extends React.PureComponent<IProps, any> {
 
 	get isViewerPage() {
 		return this.props.pathname.includes(ROUTES.VIEWER);
+	}
+
+	private wrapConfirmEndPresentation = (callback) => () => {
+		const {showConfirmDialog, isPresenting} = this.props;
+
+		if (isPresenting) {
+			showConfirmDialog({
+				title: `End Session?`,
+				content: `This will end the session for all users. Continue?`,
+				onConfirm: () => {
+					// the actual .stopPresenting call is in presentation.sagas / reset() that gets called when leaving the viewergui
+					callback();
+				},
+			});
+		} else  {
+			callback();
+		}
+	}
+
+	public componentDidMount() {
+		this.handleGoToHomepage = this.wrapConfirmEndPresentation(this.handleGoToHomepage);
+		this.handleGoToTeamspaces = this.wrapConfirmEndPresentation(this.handleGoToTeamspaces);
 	}
 
 	public renderUserNavItems = renderWhenTrue(() => {
@@ -79,6 +104,8 @@ export class TopMenu extends React.PureComponent<IProps, any> {
 					isAuthenticated={isAuthenticated}
 					id="top-menu-profile-button"
 				/>
+
+				<Prompt when={this.props.isPresenting} message="This will end the session for all users. Continue?" />
 			</Container>
 		);
 	}
