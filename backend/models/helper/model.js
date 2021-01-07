@@ -27,7 +27,7 @@ const Mailer = require("../../mailer/mailer");
 const systemLogger = require("../../logger.js").systemLogger;
 const config = require("../../config");
 const History = require("../history");
-const { findScenes, getGridfsFileStream, getObjectById, getParentMatrix } = require("../scene");
+const { findScenes, getGridfsFileStream, getNodeById, getParentMatrix } = require("../scene");
 const Ref = require("../ref");
 const utils = require("../../utils");
 const middlewares = require("../../middlewares/middlewares");
@@ -904,7 +904,7 @@ async function getMeshById(account, model, meshId) {
 		"_extRef":1
 	};
 
-	const mesh = await getObjectById(account, model, utils.stringToUUID(meshId), projection);
+	const mesh = await getNodeById(account, model, utils.stringToUUID(meshId), projection);
 	mesh.matrix = await getParentMatrix(account, model, mesh.parents[0], revisionIds);
 
 	const vertices =  mesh.vertices ? new StreamBuffer({buffer: mesh.vertices.buffer, chunkSize: mesh.vertices.buffer.length}) : await getGridfsFileStream(account, model, mesh._extRef.vertices);

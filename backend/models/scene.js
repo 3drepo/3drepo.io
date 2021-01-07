@@ -21,52 +21,52 @@ const db = require("../handler/db");
 const ExternalServices = require("../handler/externalServices");
 const matrix = require("./helper/matrix");
 
-function cleanOne(sceneToClean) {
-	if (sceneToClean) {
-		if (sceneToClean._id) {
-			sceneToClean._id = utils.uuidToString(sceneToClean._id);
+function clean(nodeToClean) {
+	if (nodeToClean) {
+		if (nodeToClean._id) {
+			nodeToClean._id = utils.uuidToString(nodeToClean._id);
 		}
 
-		if (sceneToClean.parents) {
-			sceneToClean.parents = sceneToClean.parents.map(p => utils.uuidToString(p));
+		if (nodeToClean.parents) {
+			nodeToClean.parents = nodeToClean.parents.map(p => utils.uuidToString(p));
 		}
 	}
 
-	return sceneToClean;
+	return nodeToClean;
 }
 
-function clean(scenesToClean) {
-	return scenesToClean.map(cleanOne);
+function cleanAll(nodesToClean) {
+	return nodesToClean.map(clean);
 }
 
 function getSceneCollectionName(model) {
 	return model + ".scene";
 }
 
-const Scene = {};
-
-Scene.findOneScene = async function (account, model, query, projection) {
-	return cleanOne(await db.findOne(account, getSceneCollectionName(model), query, projection));
-};
-
-Scene.findScenes = async function (account, model, query, projection) {
-	return clean(await db.find(account, getSceneCollectionName(model), query, projection));
-};
-
-Scene.getBySharedId = async function (account, model, shared_id, revisionIds, projection = {}) {
+async function getNodeBySharedId(account, model, shared_id, revisionIds, projection = {}) {
 	return await db.findOne(account, getSceneCollectionName(model), {shared_id, _id :{$in: revisionIds}}, projection);
 };
 
-Scene.getGridfsFileStream = async function (account, model, filename) {
-	return await ExternalServices.getFileStream(account, model + ".scene", "gridfs", filename);
+const Scene = {};
+
+Scene.findOneScene = async function (account, model, query, projection) {
+	return clean(await db.findOne(account, getSceneCollectionName(model), query, projection));
 };
 
-Scene.getObjectById = async function (account, model, id, projection = {}) {
+Scene.findScenes = async function (account, model, query, projection) {
+	return cleanAll(await db.find(account, getSceneCollectionName(model), query, projection));
+};
+
+Scene.getGridfsFileStream = async function (account, model, filename) {
+	return await ExternalServices.getFileStream(account, getSceneCollectionName(model), "gridfs", filename);
+};
+
+Scene.getNodeById = async function (account, model, id, projection = {}) {
 	return await db.findOne(account, getSceneCollectionName(model), {_id: id}, projection);
 };
 
 Scene.getParentMatrix = async function (account, model, parent, revisionIds) {
-	const mesh = await Scene.getBySharedId(account, model, parent, revisionIds);
+	const mesh = await getNodeBySharedId(account, model, parent, revisionIds);
 
 	if ((mesh.parents || []).length > 0) {
 		const parentMatrix = await Scene.getParentMatrix(account, model, mesh.parents[0], revisionIds);
