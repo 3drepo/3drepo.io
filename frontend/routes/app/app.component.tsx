@@ -19,7 +19,7 @@ import { memoize } from 'lodash';
 import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 
-import { ROUTES } from '../../constants/routes';
+import { PUBLIC_ROUTES, ROUTES } from '../../constants/routes';
 import { getCookie, setCookie } from '../../helpers/cookies';
 import { renderWhenTrue } from '../../helpers/rendering';
 import { WebGLChecker } from '../../helpers/webglChecker';
@@ -27,6 +27,7 @@ import { analyticsService } from '../../services/analytics';
 import { clientConfigService } from '../../services/clientConfig';
 import { isStaticRoute, STATIC_ROUTES } from '../../services/staticPages';
 import { DialogContainer } from '../components/dialogContainer';
+import { Intercom } from '../components/intercom';
 import { LiveChat } from '../components/liveChat';
 import { PrivateRoute } from '../components/privateRoute';
 import { SnackbarContainer } from '../components/snackbarContainer';
@@ -106,7 +107,10 @@ export class App extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		this.props.authenticate();
+		if (!PUBLIC_ROUTES.includes(location.pathname)) {
+			this.props.authenticate();
+		}
+
 		this.sendAnalyticsPageView(location);
 
 		if ('serviceWorker' in navigator) {
@@ -183,7 +187,8 @@ export class App extends React.PureComponent<IProps, IState> {
 				</Switch>
 				<DialogContainer />
 				<SnackbarContainer />
-				<LiveChat />
+				{!Boolean(clientConfigService.intercomLicense) &&  <LiveChat />}
+				<Intercom />
 			</AppContainer>
 		);
 	}

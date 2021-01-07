@@ -18,6 +18,7 @@
 
 const ChatEvent = require("./chatEvent");
 const Ticket = require("./ticket");
+const utils = require("../utils");
 
 const fieldTypes = {
 	"_id": "[object Object]",
@@ -135,7 +136,18 @@ class Risk extends Ticket {
 			"viewpoints"
 		];
 
-		return await super.update(attributeBlacklist, user, sessionId, account, model, issueId, data);
+		const updatedRisk = await super.update(attributeBlacklist, user, sessionId, account, model, issueId, data);
+
+		if (utils.hasField(updatedRisk.data, "consequence") ||
+			utils.hasField(updatedRisk.data, "likelihood") ||
+			utils.hasField(updatedRisk.data, "residual_consequence") ||
+			utils.hasField(updatedRisk.data, "residual_likelihood")) {
+			const levelOfRisk = getLevelOfRisk(updatedRisk.updatedTicket);
+			updatedRisk.updatedTicket = {...updatedRisk.updatedTicket, ...levelOfRisk};
+			updatedRisk.data = {...updatedRisk.data, ...levelOfRisk};
+		}
+
+		return updatedRisk;
 	}
 
 	async getRisksReport(account, model, rid, filters, res) {

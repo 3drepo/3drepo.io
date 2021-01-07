@@ -76,7 +76,7 @@ historySchema.statics.getHistory = async function(dbColOptions, branch, revId, p
 	return history;
 };
 
-historySchema.statics.tagRegExp = /^[a-zA-Z0-9_-]{1,20}$/;
+historySchema.statics.tagRegExp = /^[a-zA-Z0-9_-]{1,50}$/;
 // list revisions by branch
 historySchema.statics.listByBranch = function(dbColOptions, branch, projection, showVoid = false) {
 

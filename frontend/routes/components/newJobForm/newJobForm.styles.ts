@@ -28,8 +28,11 @@ export const Title = styled.div`
 `;
 
 export const StyledTextField = styled(TextField) `
-	font-size: 14px;
-	margin-bottom: 12px;
+	&& {
+		font-size: 14px;
+		margin-top: 0;
+		margin-bottom: 12px;
+	}
 `;
 
 export const StyledTextFieldContainer = styled(Grid) `

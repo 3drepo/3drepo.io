@@ -20,12 +20,20 @@ import React from 'react';
 import AddIcon from '@material-ui/icons/Add';
 import { isEqual } from 'lodash';
 
+import { SORT_ORDER_TYPES } from '../../../../constants/sorting';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
+import { VIEWS_ACTIONS_ITEMS, VIEWS_ACTIONS_MENU } from '../../../../constants/views';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { IViewpointsComponentState } from '../../../../modules/viewpoints/viewpoints.redux';
 import { Viewer } from '../../../../services/viewer/viewer';
 import { EmptyStateInfo } from '../../../components/components.styles';
+import {
+	IconWrapper,
+	MenuList, StyledItemText,
+	StyledListItem
+} from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
+import { SortAmountDown, SortAmountUp } from '../../../components/fontAwesomeIcon';
 import { PanelBarActions } from '../panelBarActions';
 import { ViewerPanelButton, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
 import { PresetViews } from './components/presetViews/presetViews.component';
@@ -67,6 +75,8 @@ interface IProps {
 	fetchModelSettings: (teamspace: string, modelId: string) => void;
 	showPreset: (preset: string) => void;
 	id?: string;
+	sortOrder?: string;
+	toggleSortOrder: () => void;
 }
 
 export class Views extends React.PureComponent<IProps, any> {
@@ -78,6 +88,12 @@ export class Views extends React.PureComponent<IProps, any> {
 
 	get type() {
 		return VIEWER_PANELS.VIEWS;
+	}
+
+	get menuActionsMap() {
+		return {
+			[VIEWS_ACTIONS_ITEMS.SORT_BY]: this.props.toggleSortOrder,
+		};
 	}
 
 	public renderSearch = renderWhenTrue(() => (
@@ -302,10 +318,29 @@ export class Views extends React.PureComponent<IProps, any> {
 		</ViewerPanelFooter>
 	)
 
+	public renderActionsMenu = () => (
+		<MenuList>
+			{VIEWS_ACTIONS_MENU.map(({ name, label, sortType }) => {
+				const isAscending = this.props.sortOrder === SORT_ORDER_TYPES.ASCENDING;
+				return (
+					<StyledListItem key={name} button onClick={this.menuActionsMap[name]}>
+						<IconWrapper>
+							{isAscending ? <SortAmountUp fontSize="small" /> : <SortAmountDown fontSize="small" />}
+						</IconWrapper>
+						<StyledItemText>
+							{label}
+						</StyledItemText>
+					</StyledListItem>
+				);
+			})}
+		</MenuList>
+	)
+
 	public renderActions = () => (
 		<PanelBarActions
 			type={this.type}
-			hideMenu
+			menuLabel="Show views menu"
+			menuActions={this.renderActionsMenu}
 			isSearchEnabled={this.props.searchEnabled}
 			onSearchOpen={this.handleOpenSearchMode}
 			onSearchClose={this.handleCloseSearchMode}

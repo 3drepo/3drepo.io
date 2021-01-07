@@ -307,10 +307,11 @@ function createNewModel(teamspace, modelName, data) {
 						model:  settings._id,
 						name: modelName,
 						permissions: C.MODEL_PERM_LIST,
-						timestamp: undefined
+						timestamp: undefined,
+						projectName
 					};
 
-					// ChatEvent.newModel(data.sessionId, teamspace, modelData);
+					ChatEvent.newModel(data.sessionId, teamspace, modelData);
 					return {modelData, settings};
 				});
 			});

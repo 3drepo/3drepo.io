@@ -34,7 +34,9 @@ import { MODEL_SUBTYPES } from '../../teamspaces.contants';
 import { FieldWrapper, Row, SelectWrapper } from './modelDialog.styles';
 
 const ModelSchema = Yup.object().shape({
-	modelName: schema.firstName.max(120).required(),
+	modelName: schema.firstName
+			.max(120, 'Model Name is limited to 120 characters')
+			.required('Model Name is a required field'),
 	teamspace: Yup.string().required(),
 	project: Yup.string().required(),
 	unit: Yup.string().required(),
