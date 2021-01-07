@@ -22,7 +22,7 @@ const utils = require("../utils");
 
 const FileRef = require("./fileRef");
 const History = require("./history");
-const { findRef } = require("./ref");
+const { getRefNodes } = require("./ref");
 
 class Sequence {
 
@@ -92,7 +92,7 @@ class Sequence {
 		let submodels = [];
 
 		if (history.current) {
-			submodels = await findRef(account, model, {type: "ref", _id: {"$in": history.current}}, {project:1});
+			submodels = await getRefNodes(account, model, history.current, {project:1});
 			submodels = submodels.map(r => r.project);
 		}
 

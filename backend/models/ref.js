@@ -25,11 +25,7 @@ function getRefCollectionName(model) {
 
 const Ref = {};
 
-Ref.findRef = async function(account, model, query, projection) {
-	return db.find(account, getRefCollectionName(model), query, projection);
-};
-
-Ref.getRefNodes = async function(account, model, ids) {
+Ref.getRefNodes = async function(account, model, ids, projection) {
 	const settings = await ModelSettings.findById({account}, model);
 
 	if (settings.federate) {
@@ -41,7 +37,7 @@ Ref.getRefNodes = async function(account, model, ids) {
 			filter._id = { $in: ids };
 		}
 
-		return Ref.findRef(account, model, filter);
+		return db.find(account, getRefCollectionName(model), filter, projection);
 	}
 
 	return [];

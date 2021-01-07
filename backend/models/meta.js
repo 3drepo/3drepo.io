@@ -19,7 +19,7 @@
 const FileRef = require("./fileRef");
 const History = require("./history");
 const ModelSetting = require("./modelSetting");
-const { findRef, getRefNodes } = require("./ref");
+const { getRefNodes } = require("./ref");
 const Scene = require("./scene");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
@@ -77,12 +77,7 @@ class Meta {
 		const history = await History.getHistory({ account, model }, branch, rev);
 
 		// Check for submodel references
-		const filter = {
-			type: "ref",
-			_id: { $in: history.current }
-		};
-
-		const refs = await findRef(account, model, filter);
+		const refs = await getRefNodes(account, model, history.current);
 
 		// for all refs get their tree
 		const getMeta = [];
@@ -240,8 +235,10 @@ class Meta {
 		const models = new Set();
 		models.add(model);
 
+		const history = await History.getHistory({ account, model }, branch, revId);
+
 		// Check submodels
-		const refs = await findRef(account, model, {type: "ref"});
+		const refs = await getRefNodes(account, model, history.current);
 
 		refs.forEach((ref) => {
 			models.add(ref.project);
@@ -304,12 +301,7 @@ class Meta {
 		const history = await History.getHistory({ account, model }, branch, rev);
 
 		// Check for submodel references
-		const filter = {
-			type: "ref",
-			_id: { $in: history.current }
-		};
-
-		const refs = await findRef(account, model, filter);
+		const refs = await getRefNodes(account, model, history.current);
 
 		const getMeta = [];
 
@@ -396,8 +388,10 @@ class Meta {
 		const models = new Set();
 		models.add(model);
 
+		const history = await History.getHistory({ account, model }, branch, revId);
+
 		// Check submodels
-		const refs = await findRef(account, model, {type: "ref"});
+		const refs = await getRefNodes(account, model, history.current);
 
 		refs.forEach((ref) => {
 			models.add(ref.project);
