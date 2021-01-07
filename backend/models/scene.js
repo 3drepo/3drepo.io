@@ -45,7 +45,7 @@ function getSceneCollectionName(model) {
 
 async function getNodeBySharedId(account, model, shared_id, revisionIds, projection = {}) {
 	return await db.findOne(account, getSceneCollectionName(model), {shared_id, _id :{$in: revisionIds}}, projection);
-};
+}
 
 const Scene = {};
 
