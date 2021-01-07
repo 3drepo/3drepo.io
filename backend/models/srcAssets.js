@@ -20,7 +20,7 @@
 const History = require("./history");
 const { hasReadAccessToModelHelper } = require("../middlewares/middlewares");
 const utils = require("../utils");
-const Ref = require("./ref");
+const { getRefNodes } = require("./ref");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes");
 const FileRef = require("./fileRef");
@@ -61,7 +61,7 @@ SrcAssets.getAssetList = async (account, model, branch, rev, username) => {
 		throw responseCodes.INVALID_TAG_NAME;
 	}
 
-	const subModelRefs = await Ref.getRefNodes(account, model, history.current);
+	const subModelRefs = await getRefNodes(account, model, history.current);
 
 	const fetchPromise = subModelRefs.length ? subModelRefs.map((ref) => getAssetListFromRef(ref, username))
 		: [getAssetListEntry(account, model, history)];
