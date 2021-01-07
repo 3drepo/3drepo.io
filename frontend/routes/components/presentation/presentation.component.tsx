@@ -26,9 +26,10 @@ import { PresentationForm } from './presentationForm';
 
 interface IProps {
 	presentationMode: PresentationMode;
+	joinedUrlQueryPresentation: boolean;
 }
 
-export const Presentation: React.FunctionComponent<IProps> = ({ presentationMode}) => {
+export const Presentation: React.FunctionComponent<IProps> = ({ presentationMode, joinedUrlQueryPresentation}) => {
 	const renderButton = ({ ...props }) => (
 		<IconButton {...props} aria-label="Show Presentation mode options" aria-haspopup="true">
 			<PresentationIcon fontSize="small" mode={presentationMode} />
@@ -39,6 +40,7 @@ export const Presentation: React.FunctionComponent<IProps> = ({ presentationMode
 
 	return (
 		<ButtonMenu
+			open={joinedUrlQueryPresentation}
 			ripple
 			renderButton={renderButton}
 			renderContent={renderMenuContent}

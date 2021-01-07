@@ -17,7 +17,7 @@
 import { createSelector } from 'reselect';
 import { ROUTES } from '../../constants/routes';
 import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
-import { selectUrlParams } from '../router/router.selectors';
+import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
 import { PresentationMode } from './presentation.constants';
 
 export const selectPresentationDomain = (state) => state.presentation;
@@ -55,4 +55,9 @@ export const selectIsPresentationActive = createSelector(
 export const selectPresentationUrl = createSelector(
 	selectSessionCode, selectCurrentModelTeamspace, selectCurrentModel, (code, teamspace, modelId) =>
 		`${location.protocol}//${location.hostname}${ROUTES.VIEWER}/${teamspace}/${modelId}?presenter=${code}`
+);
+
+export const selectJoinedUrlQueryPresentation = createSelector(
+	selectQueryParams, selectSessionCode, selectJoinedPresentation, ( params, code, joined) =>
+		params.presenter === code && joined
 );

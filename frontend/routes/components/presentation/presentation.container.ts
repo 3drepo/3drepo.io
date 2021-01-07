@@ -19,11 +19,12 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { selectPresentationMode } from '../../../modules/presentation';
+import { selectJoinedUrlQueryPresentation, selectPresentationMode } from '../../../modules/presentation';
 import { Presentation } from './presentation.component';
 
 const mapStateToProps = createStructuredSelector({
 	presentationMode: selectPresentationMode,
+	joinedUrlQueryPresentation: selectJoinedUrlQueryPresentation
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
