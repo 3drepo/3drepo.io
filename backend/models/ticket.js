@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 3D Repo Ltd
+ * Copyright (C) 2021 3D Repo Ltd
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -450,15 +450,16 @@ class Ticket extends View {
 		}
 
 		// Assign rev_id for issue
-		History.getHistory({ account, model }, branch, newTicket.revId, { _id: 1 }).then((history) => {
+		try {
+			const history = await History.getHistory({ account, model }, branch, newTicket.revId, { _id: 1 });
 			if (history) {
 				newTicket.rev_id = history._id;
 			}
-		}).catch(() => {
+		} catch(err) {
 			if (newTicket.revId || (newTicket.viewpoint || {}).highlighted_group_id) {
 				throw responseCodes.INVALID_TAG_NAME;
 			}
-		});
+		}
 
 		newTicket = this.filterFields(newTicket, ["viewpoint", "revId"]);
 
