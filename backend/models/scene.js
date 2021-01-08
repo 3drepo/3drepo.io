@@ -20,6 +20,7 @@ const utils = require("../utils");
 const db = require("../handler/db");
 const ExternalServices = require("../handler/externalServices");
 const matrix = require("./helper/matrix");
+const History = require("./history");
 
 function clean(nodeToClean) {
 	if (nodeToClean) {
@@ -47,14 +48,39 @@ async function getNodeBySharedId(account, model, shared_id, revisionIds, project
 	return await db.findOne(account, getSceneCollectionName(model), {shared_id, _id :{$in: revisionIds}}, projection);
 }
 
+async function findNodes(account, model, branch, revision, query = {}, projection = {}) {
+	const history = await History.getHistory({ account, model }, branch, revision);
+
+	if (!query._id) {
+		query._id = {"$in": history.current };
+	}
+
+	return cleanAll(await db.find(account, getSceneCollectionName(model), query, projection));
+}
+
 const Scene = {};
 
 Scene.findOneScene = async function (account, model, query, projection) {
 	return clean(await db.findOne(account, getSceneCollectionName(model), query, projection));
 };
 
-Scene.findScenes = async function (account, model, query, projection) {
-	return cleanAll(await db.find(account, getSceneCollectionName(model), query, projection));
+Scene.findNodesByField = async function (account, model, branch, revision, fieldName, projection = {}) {
+	const query = {};
+	query[fieldName] = {"$exists" : true};
+
+	projection.parents = 1;
+	projection[fieldName] = 1;
+
+	return findNodes(account, model, branch, revision, query, projection);
+};
+
+Scene.findNodesByType = async function (account, model, branch, revision, type, searchString, projection) {
+	const query = {
+		type,
+		name: new RegExp(searchString, "i")
+	};
+
+	return findNodes(account, model, branch, revision, query, projection);
 };
 
 Scene.getGridfsFileStream = async function (account, model, filename) {

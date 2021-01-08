@@ -27,7 +27,7 @@ const Mailer = require("../../mailer/mailer");
 const systemLogger = require("../../logger.js").systemLogger;
 const config = require("../../config");
 const History = require("../history");
-const { findScenes, getGridfsFileStream, getNodeById, getParentMatrix } = require("../scene");
+const { findNodesByType, getGridfsFileStream, getNodeById, getParentMatrix } = require("../scene");
 const Ref = require("../ref");
 const utils = require("../../utils");
 const middlewares = require("../../middlewares/middlewares");
@@ -487,13 +487,9 @@ function searchTree(account, model, branch, rev, searchString, username) {
 
 		let items = [];
 
-		const filter = {
-			_id: {"$in": history.current },
-			type: {"$in": ["transformation", "mesh"]},
-			name: new RegExp(searchString, "i")
-		};
+		const type = {"$in": ["transformation", "mesh"]};
 
-		return findScenes(account, model, filter, { name: 1 }).then(objs => {
+		return findNodesByType(account, model, branch, rev, type, searchString, { name: 1 }).then(objs => {
 
 			objs.forEach((obj, i) => {
 

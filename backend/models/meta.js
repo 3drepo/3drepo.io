@@ -20,7 +20,7 @@ const FileRef = require("./fileRef");
 const History = require("./history");
 const ModelSetting = require("./modelSetting");
 const Ref = require("./ref");
-const { findOneScene, findScenes } = require("./scene");
+const { findOneScene, findNodesByField } = require("./scene");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
 const { batchPromises } = require("./helper/promises");
@@ -341,17 +341,7 @@ class Meta {
 
 		const subMeta = await Promise.all(getMeta);
 
-		const match = {
-			_id: {"$in": history.current}
-		};
-		match[fullFieldName] =  {"$exists" : true};
-
-		const projection = {
-			parents: 1
-		};
-		projection[fullFieldName] = 1;
-
-		const obj = await findScenes(account, model, match, projection);
+		const obj = await findNodesByField(account, model, branch, rev, fullFieldName);
 
 		if (!obj) {
 			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
