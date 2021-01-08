@@ -267,14 +267,6 @@ schema.statics.createNewSetting = function(teamspace, modelName, data) {
 	return setting.save();
 };
 
-schema.statics.populateUsersForMultiplePermissions = function (account, permissionsList) {
-	const promises = permissionsList.map((permissions) => {
-		return schema.statics.populateUsers(account, permissions);
-	});
-
-	return Promise.all(promises);
-};
-
 /**
  * Fills out the models data for the  modelids passed through parameter.
  * @param {Object} teamSpaces an object which keys are teamspaces ids and values are an array of modelids
@@ -305,6 +297,27 @@ const ModelSetting = ModelFactory.createClass(
 	() => MODELS_COLL
 );
 
+ModelSetting.batchUpdatePermissions = async function(account, batchPermissions = []) {
+	const updatePromises = batchPermissions.map((update) => this.updatePermissions(account, update.model, update.permissions));
+	const updateResponses = await Promise.all(updatePromises);
+	const okStatus = "ok";
+	const badStatusIndex = updateResponses.findIndex((response) => okStatus !== response.status);
+
+	if (-1 === badStatusIndex) {
+		return { "status": okStatus };
+	} else {
+		return updateResponses[badStatusIndex];
+	}
+};
+
+ModelSetting.populateUsersForMultiplePermissions = function (account, permissionsList) {
+	const promises = permissionsList.map((permissions) => {
+		return ModelSetting.populateUsers(account, permissions);
+	});
+
+	return Promise.all(promises);
+};
+
 ModelSetting.updatePermissions = async function(account, model, permissions = []) {
 	const setting = await this.findById({account, model}, model);
 
@@ -332,19 +345,6 @@ ModelSetting.updatePermissions = async function(account, model, permissions = []
 		return { "status": updatedSetting.status };
 	} else {
 		return Promise.reject(responseCodes.MODEL_NOT_FOUND);
-	}
-};
-
-ModelSetting.batchUpdatePermissions = async function(account, batchPermissions = []) {
-	const updatePromises = batchPermissions.map((update) => this.updatePermissions(account, update.model, update.permissions));
-	const updateResponses = await Promise.all(updatePromises);
-	const okStatus = "ok";
-	const badStatusIndex = updateResponses.findIndex((response) => okStatus !== response.status);
-
-	if (-1 === badStatusIndex) {
-		return { "status": okStatus };
-	} else {
-		return updateResponses[badStatusIndex];
 	}
 };
 
