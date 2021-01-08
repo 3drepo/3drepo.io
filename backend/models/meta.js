@@ -30,7 +30,7 @@ const C = require("../constants");
 const utils = require("../utils");
 const systemLogger = require("../logger").systemLogger;
 
-function cleanOne(metadataToClean) {
+function clean(metadataToClean) {
 	if (metadataToClean._id) {
 		metadataToClean._id = utils.uuidToString(metadataToClean._id);
 	}
@@ -42,8 +42,8 @@ function cleanOne(metadataToClean) {
 	return metadataToClean;
 }
 
-function clean(metaListToClean) {
-	return metaListToClean.map(cleanOne);
+function cleanAll(metaListToClean) {
+	return metaListToClean.map(clean);
 }
 
 async function getIdToMeshesDict(account, model, revId) {
@@ -133,7 +133,7 @@ class Meta {
 
 		if(allRulesResults) {
 			allRulesResults = [...allRulesResults].map(res => JSON.parse(res));
-			const parsedObj = {data: [...clean(allRulesResults)]};
+			const parsedObj = {data: [...cleanAll(allRulesResults)]};
 			if(subMeta.length > 0) {
 				parsedObj.subModels = subMeta;
 			}
@@ -536,7 +536,7 @@ async function getMetadataRuleQueryResults(account, model, query, projection) {
 
 	const results = new Set();
 
-	clean(metaResults);
+	cleanAll(metaResults);
 
 	for (let i = 0; i < metaResults.length; i++) {
 		results.add(JSON.stringify(metaResults[i]));
