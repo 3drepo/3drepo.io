@@ -41,6 +41,16 @@ describe("Revision", function () {
 	const model = "monkeys";
 	let revisions;
 
+
+	const getRevision = async (rev, querystring = '') => {
+		if (querystring) {
+			querystring = `?${querystring}`;
+		}
+
+		var { body: allRevisions } = await agent.get(`/${username}/${model}/revisions.json${querystring}`)
+		return allRevisions.find(({_id}) => _id === rev);
+	}
+
 	before(function(done) {
 
 		server = app.listen(8080, function () {
@@ -239,4 +249,44 @@ describe("Revision", function () {
 			});
 
 	});
+
+	it("update revision tag", async () => {
+		const tag = 'RenamedTag';
+		const revisionId = '7349c6eb-4009-4a4a-af66-701a496dbe2e';
+
+		const revisionBeforeUpdate = await getRevision(revisionId);
+
+		await agent.put(`/${username}/${model}/revisions/${revisionId}/tag`)
+				.send({tag})
+				.expect(200);
+
+		const revisionAfterUpdate = await getRevision(revisionId);
+
+		expect(revisionAfterUpdate.tag).to.not.be.equal(revisionBeforeUpdate.tag);
+		expect(revisionAfterUpdate.tag).to.be.equal(tag);
+	});
+
+	it("update revision", async () => {
+		const revisionId = '7349c6eb-4009-4a4a-af66-701a496dbe2e';;
+
+		await agent.patch(`/${username}/${model}/revisions/${revisionId}`)
+				.send({void: true})
+				.expect(200);
+
+		let revision = await getRevision(revisionId);
+		expect(revision).to.be.undefined;
+
+		revision = await getRevision(revisionId, 'showVoid=1');
+		expect(revision.void).to.be.true;
+
+
+
+		await agent.patch(`/${username}/${model}/revisions/${revisionId}`)
+				.send({void: false})
+				.expect(200);
+
+		revision = await getRevision(revisionId);
+		expect(revision).not.to.be.undefined;
+	});
+
 });
