@@ -22,7 +22,7 @@ import * as Yup from 'yup';
 
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 
-import { Menu, MenuItem } from '@material-ui/core';
+import { Menu, MenuItem, Tooltip } from '@material-ui/core';
 import MoreVert from '@material-ui/icons/MoreVert';
 import { getViewNameFieldErrorMsg } from '../../../../../../helpers/views';
 import { ActionMessage } from '../../../../../components/actionMessage/actionMessage.component';
@@ -130,9 +130,11 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 	));
 
 	public renderViewpointName = renderWhenTrue(() => (
-		<Name active={Number(this.props.active)}>
-			{this.props.viewpoint.name}{this.renderViewpointDefault(this.props.defaultView)}
-		</Name>
+		<Tooltip title={this.props.viewpoint.name} placement="bottom">
+			<Name active={Number(this.props.active)}>
+				{this.props.viewpoint.name}{this.renderViewpointDefault(this.props.defaultView)}
+			</Name>
+		</Tooltip>
 	));
 
 	public renderViewpointDefault = renderWhenTrue(() => (

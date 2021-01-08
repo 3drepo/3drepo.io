@@ -80,14 +80,14 @@ export const getDialogTitle = ({ cardId, isIssuesBoard, cards, onNavigationChang
 	const titlePrefix = cardId ? 'Edit' : 'Add new';
 	const dataType = isIssuesBoard ? 'issue' : 'risk';
 	const initialIndex = cards.findIndex((card) => card.id === cardId);
-	const lastIndex = cards.length - 1;
+	const itemsCount = cards.length;
 
 	return cardId ? (
 		<BoardDialogTitle>
 			<Title>{titlePrefix} {dataType}</Title>
 			<ListNavigation
 				initialIndex={initialIndex}
-				lastIndex={lastIndex}
+				itemsCount={itemsCount}
 				onChange={onNavigationChange}
 			/>
 		</BoardDialogTitle>

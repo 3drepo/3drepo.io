@@ -26,23 +26,22 @@ import {
 	selectActiveRiskDetails,
 	selectActiveRiskId,
 	selectFetchingDetailsIsPending,
+	selectFilteredRisks,
 	selectIsRisksPending,
 	selectMitigationCriteria,
-	selectRisks,
 	selectSearchEnabled,
 	selectSelectedFilters,
 	selectSelectedRisk,
 	selectShowDetails,
 	selectShowPins,
-	selectSortByField,
-	selectSortOrder, RisksActions
+	selectSortByField, selectSortOrder, RisksActions
 } from '../../../../modules/risks';
 import { selectSettings as selectTeamspaceSettings } from '../../../../modules/teamspace';
 import { Risks } from './risks.component';
 
 const mapStateToProps = createStructuredSelector({
 	modelSettings: selectSettings,
-	risks: selectRisks,
+	risks: selectFilteredRisks,
 	jobs: selectJobsList,
 	activeRiskId: selectActiveRiskId,
 	activeRiskDetails: selectActiveRiskDetails,

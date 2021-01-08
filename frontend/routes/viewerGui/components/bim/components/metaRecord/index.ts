@@ -15,30 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-
-import { COLOR } from '../../../../../../styles';
-
-export const Wrapper = styled.div`
-	z-index: 12323;
-
-	.react-autosuggest__suggestions-list {
-		max-height: 250px;
-		overflow: auto;
-		padding-left: 0;
-		margin: 0;
-	}
-
-	.react-autosuggest__suggestion {
-		list-style: none;
-		height: 62px;
-		border-bottom: 1px solid ${COLOR.BLACK_6};
-		display: flex;
-		flex: 1;
-		align-items: center;
-	}
-
-	.react-autosuggest__suggestion > div {
-		flex: 1;
-	}
-`;
+export { default as MetaRecord } from './metaRecord.container';

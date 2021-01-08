@@ -23,19 +23,38 @@ import { prepareComments, transformCustomsLinksToMarkdown } from '../../helpers/
 import { hasPin, riskToPin } from '../../helpers/pins';
 import { prepareRisk } from '../../helpers/risks';
 import { searchByFilters } from '../../helpers/searching';
+import { sortByDate } from '../../helpers/sorting';
 import { selectJobsList } from '../jobs';
 import { selectQueryParams } from '../router/router.selectors';
 import { selectSelectedEndingDate, selectSelectedSequence, selectSelectedStartingDate } from '../sequences';
 
 export const selectRisksDomain = (state) => state.risks;
 
-export const selectRisksMap = createSelector(
+export const selectRawRisksMap = createSelector(
 	selectRisksDomain, (state) => state.risksMap
 );
 
+const selectPreparedRisks = createSelector(
+	selectRawRisksMap, selectJobsList, (risksMap, jobs) =>  {
+		const map = {};
+		const list = [];
+		values(risksMap).forEach((risk) => {
+			risk = prepareRisk(risk, jobs);
+
+			list.push(risk);
+			map[risk._id] = risk;
+		});
+
+		return {map, list};
+	}
+);
+
+export const selectRisksMap = createSelector(
+	selectPreparedRisks, (prepRisks) => prepRisks.map
+);
+
 export const selectRisks = createSelector(
-	selectRisksMap, selectJobsList, (risksMap, jobs) => values(risksMap).map((risk) =>
-		prepareRisk(risk, jobs))
+	selectPreparedRisks, (prepRisks) => prepRisks.list
 );
 
 export const selectComponentState = createSelector(
@@ -54,9 +73,17 @@ export const selectActiveRiskId = createSelector(
 	selectComponentState, (state) => state.activeRisk
 );
 
+export const selectActiveRisk = createSelector(
+	selectRisksMap, selectActiveRiskId, (risksMap, riskId) => risksMap[riskId]
+);
+
+export const selectNewRiskDetails = createSelector(
+	selectComponentState, selectJobsList, (state, jobs) => prepareRisk(state.newRisk, jobs)
+);
+
 export const selectActiveRiskDetails = createSelector(
-	selectRisksDomain, selectComponentState, (state, componentState) => {
-		return state.risksMap[componentState.activeRisk] || componentState.newRisk;
+	selectActiveRisk, selectNewRiskDetails, (activeRisk, newRisk) => {
+		return activeRisk || newRisk;
 	}
 );
 
@@ -76,10 +103,6 @@ export const selectExpandDetails = createSelector(
 	selectComponentState, (state) => state.expandDetails
 );
 
-export const selectNewRiskDetails = createSelector(
-	selectComponentState, selectJobsList, (state, jobs) => prepareRisk(state.newRisk, jobs)
-);
-
 export const selectNewComment = createSelector(
 	selectComponentState, (state) => state.newComment
 );
@@ -88,17 +111,27 @@ export const selectSearchEnabled = createSelector(
 	selectComponentState, (state) => state.searchEnabled
 );
 
+export const selectSortOrder = createSelector(
+	selectComponentState, (state) => state.sortOrder
+);
+
+export const selectSortByField = createSelector(
+	selectComponentState, (state) => state.sortBy
+);
+
 export const selectSelectedFilters = createSelector(
 	selectComponentState, (state) => state.selectedFilters
 );
 
 export const selectFilteredRisks = createSelector(
-	selectRisks, selectSelectedFilters, (risks, selectedFilters) => {
-		const returnHiddenRisk = selectedFilters.length && selectedFilters
-			.some(({ value: { value } }) => [RISK_LEVELS.AGREED_FULLY, RISK_LEVELS.VOID].includes(value));
+	selectRisks, selectSelectedFilters, selectSortOrder, selectSortByField,
+		(risks, selectedFilters, sortOrder, sortByField) => {
+			const returnHiddenRisk = selectedFilters.length && selectedFilters
+				.some(({ value: { value } }) => [RISK_LEVELS.AGREED_FULLY, RISK_LEVELS.VOID].includes(value));
 
-		return searchByFilters(risks, selectedFilters, returnHiddenRisk);
-	}
+			return sortByDate(searchByFilters(risks, selectedFilters, returnHiddenRisk),
+				{ order: sortOrder }, sortByField );
+		}
 );
 
 export const selectAllFilteredRisks = createSelector(
@@ -116,14 +149,6 @@ export const selectFetchingDetailsIsPending = createSelector(
 
 export const selectPostCommentIsPending = createSelector(
 		selectComponentState, (state) => state.postCommentIsPending
-);
-
-export const selectSortOrder = createSelector(
-	selectComponentState, (state) => state.sortOrder
-);
-
-export const selectSortByField = createSelector(
-	selectComponentState, (state) => state.sortBy
 );
 
 export const selectFailedToLoad = createSelector(
