@@ -60,10 +60,6 @@ async function findNodes(account, model, branch, revision, query = {}, projectio
 
 const Scene = {};
 
-Scene.findOneScene = async function (account, model, query, projection) {
-	return clean(await db.findOne(account, getSceneCollectionName(model), query, projection));
-};
-
 Scene.findNodesByField = async function (account, model, branch, revision, fieldName, projection = {}) {
 	const query = {};
 	query[fieldName] = {"$exists" : true};
@@ -88,7 +84,7 @@ Scene.getGridfsFileStream = async function (account, model, filename) {
 };
 
 Scene.getNodeById = async function (account, model, id, projection = {}) {
-	return await db.findOne(account, getSceneCollectionName(model), {_id: id}, projection);
+	return clean(await db.findOne(account, getSceneCollectionName(model), {_id: id}, projection));
 };
 
 Scene.getParentMatrix = async function (account, model, parent, revisionIds) {
