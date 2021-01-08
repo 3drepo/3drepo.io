@@ -19,7 +19,7 @@ import React from 'react';
 
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import { COLOR } from '../../../../../../styles';
-import { MenuItem, MenuText } from '../../mainMenu/menuContent/menuContent.styles';
+import { MenuIcon, MenuItem, MenuText } from '../../mainMenu/menuContent/menuContent.styles';
 
 interface IProps {
 	IconProps?: any;
@@ -35,7 +35,9 @@ export const MenuButton: React.FunctionComponent<IProps> = ({ IconProps, Icon, l
 		aria-label={label}
 		disableRipple
 	>
-		{icon}
+		<MenuIcon>
+			{icon}
+		</MenuIcon>
 		<MenuText icon="true">
 			{label}
 		</MenuText>

@@ -177,9 +177,37 @@ export const MuiTheme = createMuiTheme({
 				borderLeft: 'none'
 			}
 		},
+		MuiListItem: {
+			root: {
+				paddingTop: '12px',
+				paddingBottom: '12px',
+			},
+			gutters: {
+				'@media (min-width: 600px)': {
+					paddingLeft: '24px',
+					paddingRight: '24px',
+				}
+			}
+		},
+		MuiListItemIcon: {
+			root: {
+				minWidth: 'auto',
+			},
+		},
+		MuiListItemAvatar: {
+			root: {
+				minWidth: 'auto',
+			},
+		},
 		MuiListItemText: {
 			root: {
-				minWidth: 10
+				/* tslint:disable */
+				minWidth: 10,
+				padding: '0 16px',
+				'&:first-child': {
+					paddingLeft: 0,
+				},
+				/* tslint:enable */
 			},
 			primary: {
 				overflow: 'hidden',
