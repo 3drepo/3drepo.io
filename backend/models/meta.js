@@ -137,7 +137,10 @@ class Meta {
 	}
 
 	async getMetadataFields(account, model) {
-		const subModelRefs = await getRefNodes(account, model);
+		// Get the revision object to find all relevant IDs
+		const history = await History.getHistory({ account, model }, "master");
+
+		const subModelRefs = await getRefNodes(account, model, history.current);
 		const subModelMetadataFieldsPromises = [];
 
 		subModelRefs.forEach((ref) => {
