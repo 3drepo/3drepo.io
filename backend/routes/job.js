@@ -1,5 +1,5 @@
 /**
- *	Copyright (C) 2017 3D Repo Ltd
+ *	Copyright (C) 2020 3D Repo Ltd
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,6 @@
 
 "use strict";
 (function() {
-
 	const express = require("express");
 	const router = express.Router({mergeParams: true});
 	const responseCodes = require("../response_codes");
@@ -201,37 +200,23 @@
 	router.get("/jobs/colors", middlewares.isTeamspaceMember, listColors);
 
 	function addUserToJob(req, res, next) {
-
-		Job.addUserToJob(req.params.account, req.params.user, req.params.jobId).then(() => {
+		Job.addUserToJob(req.params.account, req.params.jobId, req.params.user).then(() => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
 		}).catch(err => {
-
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
-
 	}
 
 	function getUserJob(req, res, next) {
-		const teamspace = req.params.account;
-		const user = req.session.user.username;
-
 		// middleware checks if user is in teamspace, so this member check should not be necessary here.
-		Job.findByUser(teamspace, user).then((job) => {
-			const result = {};
-			if(job) {
-				result._id = job._id;
-				result.color = job.color;
-			}
-
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, result);
+		Job.getUserJob(req.params.account, req.session.user.username).then((job) => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, job);
 		}).catch(err => {
-
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
 	}
 
 	function createJob(req, res, next) {
-
 		const newJob = {
 			_id: req.body._id,
 			color: req.body.color
@@ -240,35 +225,22 @@
 		Job.addJob(req.params.account, newJob).then(() => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, newJob);
 		}).catch(err => {
-
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
-
 	}
 
 	function updateJob(req, res, next) {
-
-		if(!req.body._id) {
-			return Promise.reject(responseCodes.JOB_ID_INVALID);
-		}
-		Job.findByJob(req.params.account, req.body._id).then(job => {
-			return job.updateJob(req.body).then(() => {
-				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
-			});
+		Job.updateJob(req.params.account, req.params.jobId, req.body).then(() => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
 		}).catch(err => {
-
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
-
 	}
 
 	function deleteJob(req, res, next) {
-
 		Job.removeJob(req.params.account, req.params.jobId).then(() => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
-
 		}).catch(err => {
-
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
 	}
