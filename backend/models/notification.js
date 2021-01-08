@@ -17,8 +17,8 @@
 
 "use strict";
 const { hasWriteAccessToModelHelper, hasReadAccessToModelHelper } = require("../middlewares/checkPermissions");
-const modelSettings = require("../models/modelSetting");
-const job = require("./job");
+const ModelSetting = require("../models/modelSetting");
+const { findByJob, findUsersWithJobs } = require("./job");
 const utils = require("../utils");
 const nodeuuid = require("uuid/v1");
 const db = require("../handler/db");
@@ -120,7 +120,7 @@ const fillModelData = function(fullNotifications) {
 	}
 
 	const teamSpaces = extractTeamSpaceInfo(notifications);
-	return  modelSettings.getModelsData(teamSpaces).then((modelsData) => { // fills out the models name with data from the database
+	return ModelSetting.getModelsData(teamSpaces).then((modelsData) => { // fills out the models name with data from the database
 		notifications.forEach (notification => {
 			const teamSpace = modelsData[notification.teamSpace] || {};
 			const {name, federate} = teamSpace[notification.modelId] || {};
@@ -257,7 +257,7 @@ module.exports = {
 	 */
 	upsertIssueAssignedNotifications : async function(username, teamSpace, modelId, issue) {
 		const assignedRole = issue.assigned_roles[0];
-		const rs = await job.findByJob(teamSpace,assignedRole);
+		const rs = await findByJob(teamSpace,assignedRole);
 		if (!rs || !rs.users) {
 			return [];
 		}
@@ -323,7 +323,7 @@ module.exports = {
 
 		const assignedRole = issue.assigned_roles[0];
 
-		return job.findByJob(teamSpace,assignedRole)
+		return findByJob(teamSpace,assignedRole)
 			.then(rs => {
 				if (!rs || !rs.users) {
 					return [];
@@ -350,7 +350,7 @@ module.exports = {
 		const assignedRoles = getHistoricAssignedRoles(issue);
 		const issueType = types.ISSUE_CLOSED;
 
-		const matchedUsers = await job.findUsersWithJobs(teamSpace, [...assignedRoles]);
+		const matchedUsers = await findUsersWithJobs(teamSpace, [...assignedRoles]);
 
 		// Leave out the current user , closing the issue.
 		const users = matchedUsers.filter(m => m !== username);
@@ -370,7 +370,7 @@ module.exports = {
 
 	upsertIssueClosedNotifications: async function (username, teamSpace, modelId, issue) {
 		const assignedRoles = getHistoricAssignedRoles(issue);
-		const matchedUsers = await job.findUsersWithJobs(teamSpace, [...assignedRoles]);
+		const matchedUsers = await findUsersWithJobs(teamSpace, [...assignedRoles]);
 
 		const users = [];
 		const getUserPromises = [];
