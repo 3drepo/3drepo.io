@@ -111,14 +111,13 @@ History.revisionCount = async function(teamspace, model) {
 };
 
 // get the head of default branch (master)
-History.findLatest = function(account, model, projection) {
-	return this.findByBranch(account, model, null, projection);
+History.findLatest = async function(account, model, projection) {
+	return await this.findByBranch(account, model, null, projection);
 };
 
-History.findByUID = function(account, model, revId, projection) {
+History.findByUID = async function(account, model, revId, projection) {
 	projection = projection || {};
-	return findOne(account, model, { _id: stringToUUID(revId)}, projection);
-
+	return await findOne(account, model, { _id: stringToUUID(revId)}, projection);
 };
 
 History.updateRevision = async function(account, model, modelId, data) {
@@ -142,9 +141,8 @@ History.updateRevision = async function(account, model, modelId, data) {
 	}
 };
 
-History.findByTag = function(account, model, tag, projection) {
-	projection = projection || {};
-	return findOne(account, model, { tag, incomplete: {"$exists": false }}, projection);
+History.findByTag = async function(account, model, tag, projection = {}) {
+	return await findOne(account, model, { tag, incomplete: {"$exists": false }}, projection);
 };
 
 History.findByObjectId = async (account, model, id, projection) =>

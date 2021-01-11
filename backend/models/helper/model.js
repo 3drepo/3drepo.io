@@ -608,7 +608,26 @@ function downloadLatest(account, model) {
 	});
 }
 
-function uploadFile(req) {
+const checkTag = async (account, model, tag) => {
+	if(!tag) {
+		return null;
+	} else {
+
+		if (!tag.match(History.tagRegExp)) {
+			throw responseCodes.INVALID_TAG_NAME;
+		}
+
+		const _tag = await History.findByTag(account, model, tag, {_id: 1});
+
+		if (!_tag) {
+			return null;
+		} else {
+			throw responseCodes.DUPLICATE_TAG;
+		}
+	}
+};
+
+async function uploadFile(req) {
 	if (!config.cn_queue) {
 		return Promise.reject(responseCodes.QUEUE_NO_CONFIG);
 	}
@@ -619,25 +638,8 @@ function uploadFile(req) {
 
 	ChatEvent.modelStatusChanged(null, account, model, { status: "uploading", user });
 	// upload model with tag
-	const checkTag = tag => {
-		if(!tag) {
-			return Promise.resolve();
-		} else {
-			return (tag.match(History.tagRegExp) ? Promise.resolve() : Promise.reject(responseCodes.INVALID_TAG_NAME)).then(() => {
-				return History.findByTag({account, model}, tag, {_id: 1});
-			}).then(_tag => {
-				if (!_tag) {
-					return Promise.resolve();
-				} else {
-					return Promise.reject(responseCodes.DUPLICATE_TAG);
-				}
-			});
 
-		}
-	};
-
-	return new Promise((resolve, reject) => {
-
+	const uploadedFile = await new Promise((resolve, reject) => {
 		const upload = multer({
 			dest: config.cn_queue.upload_dir,
 			fileFilter: function(fileReq, file, cb) {
@@ -686,11 +688,12 @@ function uploadFile(req) {
 				return resolve(req.file);
 			}
 		});
-
-	}).then(file => {
-		return checkTag(req.body.tag).then(() => file);
 	});
 
+	// req.body.tag wont be defined after the file has been uploaded
+	await checkTag(account, model, req.body.tag);
+
+	return uploadedFile;
 }
 
 function _deleteFiles(files) {
