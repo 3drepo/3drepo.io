@@ -30,13 +30,31 @@ import { selectSelectedEndingDate, selectSelectedSequence, selectSelectedStartin
 
 export const selectRisksDomain = (state) => state.risks;
 
-export const selectRisksMap = createSelector(
+export const selectRawRisksMap = createSelector(
 	selectRisksDomain, (state) => state.risksMap
 );
 
+const selectPreparedRisks = createSelector(
+	selectRawRisksMap, selectJobsList, (risksMap, jobs) =>  {
+		const map = {};
+		const list = [];
+		values(risksMap).forEach((risk) => {
+			risk = prepareRisk(risk, jobs);
+
+			list.push(risk);
+			map[risk._id] = risk;
+		});
+
+		return {map, list};
+	}
+);
+
+export const selectRisksMap = createSelector(
+	selectPreparedRisks, (prepRisks) => prepRisks.map
+);
+
 export const selectRisks = createSelector(
-	selectRisksMap, selectJobsList, (risksMap, jobs) => values(risksMap).map((risk) =>
-		prepareRisk(risk, jobs))
+	selectPreparedRisks, (prepRisks) => prepRisks.list
 );
 
 export const selectComponentState = createSelector(
@@ -55,9 +73,17 @@ export const selectActiveRiskId = createSelector(
 	selectComponentState, (state) => state.activeRisk
 );
 
+export const selectActiveRisk = createSelector(
+	selectRisksMap, selectActiveRiskId, (risksMap, riskId) => risksMap[riskId]
+);
+
+export const selectNewRiskDetails = createSelector(
+	selectComponentState, selectJobsList, (state, jobs) => prepareRisk(state.newRisk, jobs)
+);
+
 export const selectActiveRiskDetails = createSelector(
-	selectRisksDomain, selectComponentState, (state, componentState) => {
-		return state.risksMap[componentState.activeRisk] || componentState.newRisk;
+	selectActiveRisk, selectNewRiskDetails, (activeRisk, newRisk) => {
+		return activeRisk || newRisk;
 	}
 );
 
@@ -75,10 +101,6 @@ export const selectShowDetails = createSelector(
 
 export const selectExpandDetails = createSelector(
 	selectComponentState, (state) => state.expandDetails
-);
-
-export const selectNewRiskDetails = createSelector(
-	selectComponentState, selectJobsList, (state, jobs) => prepareRisk(state.newRisk, jobs)
 );
 
 export const selectNewComment = createSelector(

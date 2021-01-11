@@ -20,7 +20,7 @@ const FileRef = require("./fileRef");
 const History = require("./history");
 const ModelSetting = require("./modelSetting");
 const { getRefNodes } = require("./ref");
-const Scene = require("./scene");
+const { findNodesByField, getNodeById } = require("./scene");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
 const { batchPromises } = require("./helper/promises");
@@ -30,18 +30,20 @@ const C = require("../constants");
 const utils = require("../utils");
 const systemLogger = require("../logger").systemLogger;
 
-function clean(metaListToClean) {
-	metaListToClean.forEach((metadataToClean) => {
-		if (metadataToClean._id) {
-			metadataToClean._id = utils.uuidToString(metadataToClean._id);
-		}
+function clean(metadataToClean) {
+	if (metadataToClean._id) {
+		metadataToClean._id = utils.uuidToString(metadataToClean._id);
+	}
 
-		if (metadataToClean.parents) {
-			metadataToClean.parents = metadataToClean.parents.map(p => utils.uuidToString(p));
-		}
-	});
+	if (metadataToClean.parents) {
+		metadataToClean.parents = metadataToClean.parents.map(p => utils.uuidToString(p));
+	}
 
-	return metaListToClean;
+	return metadataToClean;
+}
+
+function cleanAll(metaListToClean) {
+	return metaListToClean.map(clean);
 }
 
 async function getIdToMeshesDict(account, model, revId) {
@@ -63,7 +65,7 @@ class Meta {
 			parents: 0
 		};
 
-		const metadata = await Scene.findOne({account, model}, { _id: utils.stringToUUID(id) }, projection);
+		const metadata = await getNodeById(account, model, utils.stringToUUID(id), projection);
 
 		if (!metadata) {
 			throw responseCodes.METADATA_NOT_FOUND;
@@ -126,7 +128,7 @@ class Meta {
 
 		if(allRulesResults) {
 			allRulesResults = [...allRulesResults].map(res => JSON.parse(res));
-			const parsedObj = {data: [...clean(allRulesResults)]};
+			const parsedObj = {data: [...cleanAll(allRulesResults)]};
 			if(subMeta.length > 0) {
 				parsedObj.subModels = subMeta;
 			}
@@ -334,17 +336,7 @@ class Meta {
 
 		const subMeta = await Promise.all(getMeta);
 
-		const match = {
-			_id: {"$in": history.current}
-		};
-		match[fullFieldName] =  {"$exists" : true};
-
-		const projection = {
-			parents: 1
-		};
-		projection[fullFieldName] = 1;
-
-		const obj = await Scene.find({account, model}, match, projection);
+		const obj = await findNodesByField(account, model, branch, rev, fullFieldName);
 
 		if (!obj) {
 			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
@@ -541,7 +533,7 @@ async function getMetadataRuleQueryResults(account, model, query, projection) {
 
 	const results = new Set();
 
-	clean(metaResults);
+	cleanAll(metaResults);
 
 	for (let i = 0; i < metaResults.length; i++) {
 		results.add(JSON.stringify(metaResults[i]));

@@ -27,8 +27,8 @@ const Mailer = require("../../mailer/mailer");
 const systemLogger = require("../../logger.js").systemLogger;
 const config = require("../../config");
 const History = require("../history");
-const Scene = require("../scene");
 const { getRefNodes } = require("../ref");
+const { findNodesByType, getGridfsFileStream, getNodeById, getParentMatrix } = require("../scene");
 const utils = require("../../utils");
 const middlewares = require("../../middlewares/middlewares");
 const multer = require("multer");
@@ -487,17 +487,13 @@ function searchTree(account, model, branch, rev, searchString, username) {
 
 		let items = [];
 
-		const filter = {
-			_id: {"$in": history.current },
-			type: {"$in": ["transformation", "mesh"]},
-			name: new RegExp(searchString, "i")
-		};
+		const type = {"$in": ["transformation", "mesh"]};
 
-		return Scene.find({account, model}, filter, { name: 1 }).then(objs => {
+		return findNodesByType(account, model, branch, rev, type, searchString, { name: 1 }).then(objs => {
 
 			objs.forEach((obj, i) => {
 
-				objs[i] = obj.toJSON();
+				objs[i] = obj;
 				objs[i].account = account;
 				objs[i].model = model;
 				items.push(objs[i]);
@@ -896,11 +892,11 @@ async function getMeshById(account, model, meshId) {
 		"_extRef":1
 	};
 
-	const mesh = await Scene.getObjectById(account, model, utils.stringToUUID(meshId), projection);
-	mesh.matrix = await Scene.getParentMatrix(account, model, mesh.parents[0], revisionIds);
+	const mesh = await getNodeById(account, model, utils.stringToUUID(meshId), projection);
+	mesh.matrix = await getParentMatrix(account, model, mesh.parents[0], revisionIds);
 
-	const vertices =  mesh.vertices ? new StreamBuffer({buffer: mesh.vertices.buffer, chunkSize: mesh.vertices.buffer.length}) : await Scene.getGridfsFileStream(account, model, mesh._extRef.vertices);
-	const triangles = mesh.faces ?  new StreamBuffer({buffer: mesh.faces.buffer, chunkSize: mesh.faces.buffer.length})  : await Scene.getGridfsFileStream(account, model, mesh._extRef.faces);
+	const vertices =  mesh.vertices ? new StreamBuffer({buffer: mesh.vertices.buffer, chunkSize: mesh.vertices.buffer.length}) : await getGridfsFileStream(account, model, mesh._extRef.vertices);
+	const triangles = mesh.faces ?  new StreamBuffer({buffer: mesh.faces.buffer, chunkSize: mesh.faces.buffer.length})  : await getGridfsFileStream(account, model, mesh._extRef.faces);
 
 	const combinedStream = CombinedStream.create();
 	combinedStream.append(stringToStream(["{\"matrix\":", JSON.stringify(mesh.matrix), ",\"vertices\":["].join("")));
