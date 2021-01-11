@@ -294,9 +294,9 @@ ModelSetting.batchUpdatePermissions = async function(account, batchPermissions =
 };
 
 ModelSetting.populateUsers = async function(account, permissions) {
-	const { getAllUsersInTeamspace } = require("./user");
+	const User = require("./user");
 
-	const users = getAllUsersInTeamspace(account);
+	const users = await User.getAllUsersInTeamspace(account);
 
 	users.forEach(user => {
 		const permissionFound = permissions && permissions.find(p => p.user ===  user);
