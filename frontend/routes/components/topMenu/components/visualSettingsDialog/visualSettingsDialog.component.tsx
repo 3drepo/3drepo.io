@@ -31,7 +31,7 @@ import { DialogTab, DialogTabs, ErrorTooltip, FormListItem, NegativeActionButton
 
 const SettingsSchema = Yup.object().shape({
 	nearPlane: schema.number(0, Number.POSITIVE_INFINITY),
-	memory: schema.integer(16, 3900),
+	memory: schema.integer(16, 3000),
 	farPlaneSamplingPoints: schema.integer(1, Number.POSITIVE_INFINITY),
 	maxShadowDistance: schema.integer(1, Number.POSITIVE_INFINITY),
 	numCacheThreads: schema.integer(1, 15),
