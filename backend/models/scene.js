@@ -72,9 +72,12 @@ Scene.findNodesByField = async function (account, model, branch, revision, field
 
 Scene.findNodesByType = async function (account, model, branch, revision, type, searchString, projection) {
 	const query = {
-		type,
-		name: new RegExp(searchString, "i")
+		type
 	};
+
+	if (searchString) {
+		query.name = new RegExp(searchString, "i");
+	}
 
 	return findNodes(account, model, branch, revision, query, projection);
 };

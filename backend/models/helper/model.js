@@ -483,7 +483,7 @@ function createFederatedModel(account, model, username, subModels, modelSettings
 
 function searchTree(account, model, branch, rev, searchString, username) {
 
-	const search = (history) => {
+	const search = () => {
 
 		let items = [];
 
@@ -500,7 +500,7 @@ function searchTree(account, model, branch, rev, searchString, username) {
 
 			});
 
-			return getRefNodes(account, model, history.current);
+			return getRefNodes(account, model, branch, rev);
 
 		}).then(refs => {
 
@@ -538,7 +538,7 @@ function searchTree(account, model, branch, rev, searchString, username) {
 
 			return History.getHistory({ account, model }, branch, rev).then(history => {
 				if(history) {
-					return search(history);
+					return search();
 				} else {
 					return Promise.resolve([]);
 				}
@@ -558,7 +558,7 @@ function listSubModels(account, model, branch) {
 	return History.findByBranch({ account, model }, branch).then(history => {
 
 		if(history) {
-			return getRefNodes(account, model, history.current);
+			return getRefNodes(account, model, branch);
 		} else {
 			return [];
 		}
@@ -914,7 +914,7 @@ async function getSubModelRevisions(account, model, branch, rev) {
 		return Promise.reject(responseCodes.INVALID_TAG_NAME);
 	}
 
-	const refNodes = await getRefNodes(account, model, history.current);
+	const refNodes = await getRefNodes(account, model, branch, rev);
 	const modelIds = refNodes.map((refNode) => refNode.project);
 	const results = {};
 

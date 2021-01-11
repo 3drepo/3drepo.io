@@ -16,28 +16,16 @@
  */
 
 "use strict";
-const db = require("../handler/db");
 const ModelSettings = require("./modelSetting");
-
-function getRefCollectionName(model) {
-	return model + ".scene";
-}
+const { findNodesByType } = require("./scene");
 
 const Ref = {};
 
-Ref.getRefNodes = async function(account, model, ids, projection) {
+Ref.getRefNodes = async function(account, model, branch, revision, projection) {
 	const settings = await ModelSettings.findById({account}, model);
 
 	if (settings.federate) {
-		const filter = {
-			type: "ref"
-		};
-
-		if (ids && ids.length > 0) {
-			filter._id = { $in: ids };
-		}
-
-		return db.find(account, getRefCollectionName(model), filter, projection);
+		return findNodesByType(account, model, branch, revision, "ref", undefined, projection);
 	}
 
 	return [];

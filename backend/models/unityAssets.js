@@ -52,7 +52,7 @@ function getAssetListEntry(account, model, revId) {
 
 UnityAssets.getAssetList = function(account, model, branch, rev, username) {
 	return History.getHistory({ account, model }, branch, rev).then((history) => {
-		return getRefNodes(account, model, history.current).then((subModelRefs) => {
+		return getRefNodes(account, model, branch, rev).then((subModelRefs) => {
 			const fetchPromise = [];
 			if(subModelRefs.length) {
 				// This is a federation, get asset lists from subModels and merge them

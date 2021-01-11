@@ -79,7 +79,7 @@ class Meta {
 		const history = await History.getHistory({ account, model }, branch, rev);
 
 		// Check for submodel references
-		const refs = await getRefNodes(account, model, history.current);
+		const refs = await getRefNodes(account, model, branch, rev);
 
 		// for all refs get their tree
 		const getMeta = [];
@@ -139,10 +139,7 @@ class Meta {
 	}
 
 	async getMetadataFields(account, model) {
-		// Get the revision object to find all relevant IDs
-		const history = await History.getHistory({ account, model }, "master");
-
-		const subModelRefs = await getRefNodes(account, model, history.current);
+		const subModelRefs = await getRefNodes(account, model, "master");
 		const subModelMetadataFieldsPromises = [];
 
 		subModelRefs.forEach((ref) => {
@@ -240,10 +237,8 @@ class Meta {
 		const models = new Set();
 		models.add(model);
 
-		const history = await History.getHistory({ account, model }, branch, revId);
-
 		// Check submodels
-		const refs = await getRefNodes(account, model, history.current);
+		const refs = await getRefNodes(account, model, branch, revId);
 
 		refs.forEach((ref) => {
 			models.add(ref.project);
@@ -303,10 +298,8 @@ class Meta {
 			fullFieldName += "." + fieldName;
 		}
 
-		const history = await History.getHistory({ account, model }, branch, rev);
-
 		// Check for submodel references
-		const refs = await getRefNodes(account, model, history.current);
+		const refs = await getRefNodes(account, model, branch, rev);
 
 		const getMeta = [];
 
@@ -383,10 +376,8 @@ class Meta {
 		const models = new Set();
 		models.add(model);
 
-		const history = await History.getHistory({ account, model }, branch, revId);
-
 		// Check submodels
-		const refs = await getRefNodes(account, model, history.current);
+		const refs = await getRefNodes(account, model, branch, revId);
 
 		refs.forEach((ref) => {
 			models.add(ref.project);

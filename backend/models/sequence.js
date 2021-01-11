@@ -92,7 +92,7 @@ class Sequence {
 		let submodels = [];
 
 		if (history.current) {
-			submodels = await getRefNodes(account, model, history.current, {project:1});
+			submodels = await getRefNodes(account, model, branch, revision, {project:1});
 			submodels = submodels.map(r => r.project);
 		}
 

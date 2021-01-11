@@ -61,7 +61,7 @@ SrcAssets.getAssetList = async (account, model, branch, rev, username) => {
 		throw responseCodes.INVALID_TAG_NAME;
 	}
 
-	const subModelRefs = await getRefNodes(account, model, history.current);
+	const subModelRefs = await getRefNodes(account, model, branch, rev);
 
 	const fetchPromise = subModelRefs.length ? subModelRefs.map((ref) => getAssetListFromRef(ref, username))
 		: [getAssetListEntry(account, model, history)];
