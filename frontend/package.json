@@ -100,7 +100,6 @@
     "simplebar-react": "1.0.0",
     "socket.io-client": "2.0.4",
     "sw-precache": "5.2.0",
-    "uuid": "3.3.3",
     "uuidv4": "5.0.1",
     "worker-loader": "2.0.0",
     "yup": "0.26.10",

@@ -166,6 +166,63 @@ describe("Model", function () {
 
 	});
 
+	describe("Search model tree", function(done) {
+		const testModel = "2d4a6208-6847-4a25-9d9e-097a63f2de93";
+
+		it("should succeed", function(done) {
+			agent.get(`/${username}/${testModel}/revision/master/head/searchtree.json`)
+				.expect(200, function(err, res) {
+					expect(res.body).to.be.an("array").and.to.have.length(683);
+					done(err);
+				});
+		});
+
+		it("with searchString should succeed", function(done) {
+			const goldenTreeItem = [{
+				"_id": "64cd352f-60fe-4cd6-9a42-da2d5f3892b0",
+				"name": "ComponentName:204",
+				"account": "project_username",
+				"model": "2d4a6208-6847-4a25-9d9e-097a63f2de93"
+			}];
+
+			agent.get(`/${username}/${testModel}/revision/master/head/searchtree.json?searchString=204`)
+				.expect(200, function(err, res) {
+					expect(res.body).to.deep.equal(goldenTreeItem);
+					done(err);
+				});
+		});
+
+		it("with searchString should succeed", function(done) {
+			const goldenTreeItem = [{
+				"_id": "64cd352f-60fe-4cd6-9a42-da2d5f3892b0",
+				"name": "ComponentName:204",
+				"account": "project_username",
+				"model": "2d4a6208-6847-4a25-9d9e-097a63f2de93"
+			}];
+
+			agent.get(`/${username}/${testModel}/revision/master/head/searchtree.json?searchString=ComponentName:20`)
+				.expect(200, function(err, res) {
+					expect(res.body).to.be.an("array").and.to.have.length(10);
+					done(err);
+				});
+		});
+
+		it("with non-matching searchString should succeed", function(done) {
+			agent.get(`/${username}/${testModel}/revision/master/head/searchtree.json?searchString=nomatches`)
+				.expect(200, function(err, res) {
+					expect(res.body).to.deep.equal([]);
+					done(err);
+				});
+		});
+
+		it("with non-existent model should fail", function(done) {
+			agent.get(`/${username}/invalidModel/revision/master/head/searchtree.json`)
+				.expect(404, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+					done(err);
+				});
+		});
+	});
 
 	it("model added to a project should be listed on top level models array", function(done) {
 

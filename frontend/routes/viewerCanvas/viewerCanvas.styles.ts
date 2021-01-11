@@ -15,11 +15,42 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
-export const Container = styled.div`
+import { PresentationMode } from '../../modules/presentation/presentation.constants';
+import { COLOR } from '../../styles';
+
+interface IContainer {
+	visibility: boolean;
+	presentationMode?: PresentationMode;
+	isPresentationPaused?: boolean;
+}
+
+const PRESENTATION_OUTLINE_COLORS = {
+	[PresentationMode.PRESENTER]: COLOR.DUSTY_RED,
+	[PresentationMode.PARTICIPANT]: COLOR.SOFT_BLUE,
+};
+
+const getAdditionalStyles = ({ presentationMode, isPresentationPaused }) => {
+	if (!isPresentationPaused && PRESENTATION_OUTLINE_COLORS[presentationMode]) {
+		return css`
+			border: 2px solid ${PRESENTATION_OUTLINE_COLORS[presentationMode]};
+		`;
+	}
+};
+
+export const Container = styled.div<IContainer>`
 	position: absolute;
 	width: 100%;
 	height: 100%;
-	visibility: ${(props: any) => props.visible ? 'visible' : 'hidden'};
+	visibility: ${({ visible }) => visible ? 'visible' : 'hidden'};
+`;
+
+export const Border = styled.div<IContainer>`
+	pointer-events: none;
+	box-sizing: border-box;
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	${(props) => getAdditionalStyles(props)};
 `;

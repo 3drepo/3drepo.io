@@ -7,4 +7,5 @@ export const CHAT_CHANNELS = {
 	NOTIFICATIONS: 'notifications',
 	RESOURCES: 'resources',
 	TEAMSPACES: 'teamspaces',
+	PRESENTATION: 'presentation'
 };

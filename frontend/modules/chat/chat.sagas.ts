@@ -98,8 +98,12 @@ const getChannel = (teamspace, model = '') => {
 const invokeChannelHandlers = (channel, handlers) => {
 	for (const handler in handlers) {
 		if (handlers.hasOwnProperty(handler)) {
-			const args = handlers[handler];
-			invoke(channel, handler, args);
+			let args = handlers[handler];
+			if (!Array.isArray(args)) {
+				args = [args];
+			}
+
+			invoke(channel, handler, ...args);
 		}
 	}
 };
