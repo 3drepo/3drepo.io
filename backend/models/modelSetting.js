@@ -184,23 +184,6 @@ schema.methods.findPermissionByUser = function(username) {
 	return this.permissions.find(perm => perm.user === username);
 };
 
-schema.statics.populateUsers = function(account, permissions) {
-	const User = require("./user");
-
-	return User.getAllUsersInTeamspace(account).then(users => {
-		users.forEach(user => {
-
-			const permissionFound = permissions && permissions.find(p => p.user ===  user);
-
-			if (!permissionFound) {
-				permissions.push({ user });
-			}
-		});
-
-		return permissions;
-	});
-};
-
 schema.statics.createNewSetting = function(teamspace, modelName, data) {
 	const modelNameRegExp = /^[\x00-\x7F]{1,120}$/;
 	if(!modelName.match(modelNameRegExp)) {
@@ -308,6 +291,22 @@ ModelSetting.batchUpdatePermissions = async function(account, batchPermissions =
 	} else {
 		return updateResponses[badStatusIndex];
 	}
+};
+
+ModelSetting.populateUsers = async function(account, permissions) {
+	const { getAllUsersInTeamspace } = require("./user");
+
+	const users = getAllUsersInTeamspace(account);
+
+	users.forEach(user => {
+		const permissionFound = permissions && permissions.find(p => p.user ===  user);
+
+		if (!permissionFound) {
+			permissions.push({ user });
+		}
+	});
+
+	return permissions;
 };
 
 ModelSetting.populateUsersForMultiplePermissions = function (account, permissionsList) {
