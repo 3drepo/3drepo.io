@@ -1855,6 +1855,7 @@ function getIdToMeshes(req, res, next) {
 
 function getModelTree(req, res, next) {
 	const revId = req.params.rev;
+
 	JSONAssets.getTree(
 		req.params.account,
 		req.params.model,

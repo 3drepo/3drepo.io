@@ -55,7 +55,7 @@ const getAssetListEntry = async (database, model, revInfo) => {
 };
 
 SrcAssets.getAssetList = async (account, model, branch, rev, username) => {
-	const history = await History.getHistory({ account, model }, branch, rev);
+	const history = await  History.getHistory(account, model, branch, rev);
 
 	if (!history) {
 		throw responseCodes.INVALID_TAG_NAME;

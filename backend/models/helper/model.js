@@ -536,7 +536,7 @@ function searchTree(account, model, branch, rev, searchString, username) {
 
 		if(granted) {
 
-			return History.getHistory({ account, model }, branch, rev).then(history => {
+			return  History.getHistory(account, model, branch, rev).then(history => {
 				if(history) {
 					return search();
 				} else {
@@ -908,7 +908,7 @@ async function getMeshById(account, model, meshId) {
 }
 
 async function getSubModelRevisions(account, model, branch, rev) {
-	const history = await History.getHistory({ account, model }, branch, rev);
+	const history = await  History.getHistory(account, model, branch, rev);
 
 	if(!history) {
 		return Promise.reject(responseCodes.INVALID_TAG_NAME);
