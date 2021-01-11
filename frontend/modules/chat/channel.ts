@@ -20,6 +20,7 @@ import { ChatEvents } from './chat.events';
 import { IssuesChatEvents } from './issues.chat.events';
 import { ModelChatEvents } from './models.chat.events';
 import { NotificationsChatEvents } from './notifications.chat.events';
+import { PresentationChatEvents } from './presentation.chat.events';
 import { RisksChatEvents } from './risks.chat.events';
 import { Subscriptions } from './subscriptions';
 import { TeamspacesChatEvents } from './teamspaces.chat.events';
@@ -93,6 +94,7 @@ export class Channel {
 		this[CHAT_CHANNELS.VIEWS] = new ChatEvents(this, 'view');
 		this[CHAT_CHANNELS.RESOURCES] = new ChatEvents(this, 'resource');
 		this[CHAT_CHANNELS.NOTIFICATIONS] = new NotificationsChatEvents(this);
+		this[CHAT_CHANNELS.PRESENTATION] = new PresentationChatEvents(this);
 		this[CHAT_CHANNELS.TEAMSPACES] = new TeamspacesChatEvents(this);
 	}
 
