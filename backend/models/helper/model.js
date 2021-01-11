@@ -551,7 +551,7 @@ function searchTree(account, model, branch, rev, searchString, username) {
 
 }
 
-function listSubModels(account, model, branch) {
+function listSubModels(account, model, branch = "master") {
 
 	const subModels = [];
 
