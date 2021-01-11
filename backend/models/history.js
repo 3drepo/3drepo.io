@@ -120,25 +120,25 @@ History.findByUID = async function(account, model, revId, projection) {
 	return await findOne(account, model, { _id: stringToUUID(revId)}, projection);
 };
 
-History.updateRevision = async function(account, model, modelId, data) {
-	if(utils.hasField(data, "void") &&
-		Object.prototype.toString.call(data.void) === "[object Boolean]") {
-		const rev = await History.findByUID(account, modelId);
-		if(!rev) {
-			return Promise.reject(responseCodes.INVALID_TAG_NAME);
+History.updateRevision = async function(account, model, revId, voidValue) {
+	if(Object.prototype.toString.call(voidValue) === "[object Boolean]") {
+		voidValue = voidValue ? true : undefined;
+
+		const {result} = await db.update(account, getCollName(model), {_id: utils.stringToUUID(revId)} , { $set:  {void: voidValue}});
+
+		if(!result.n) {
+			throw responseCodes.INVALID_TAG_NAME;
 		}
 
-		if(data.void) {
-			rev.void = true;
-		} else {
-			rev.void = undefined;
-		}
-
-		return rev.save().then(() => responseCodes.OK);
+		return responseCodes.OK;
 
 	} else {
-		return Promise.reject(responseCodes.INVALID_ARGUMENTS);
+		throw responseCodes.INVALID_ARGUMENTS;
 	}
+};
+
+History.renameRevisionTag = async function() {
+
 };
 
 History.findByTag = async function(account, model, tag, projection = {}) {

@@ -139,11 +139,12 @@ router.patch("/revisions/:id", middlewares.hasReadAccessToModel, updateRevision)
 
 function listRevisions(req, res, next) {
 	const place = utils.APIInfo(req);
-	const {account, model, branch, showVoid} = req.params;
+	const {account, model, branch } = req.params;
+	const showVoid = req.query.showVoid !== undefined;
 
 	const projection = {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1, void: 1, rFile: 1};
 
-	History.listByBranch(account, model, branch || null, projection, Boolean(showVoid)).then(histories => {
+	History.listByBranch(account, model, branch || null, projection, showVoid).then(histories => {
 		histories = History.clean(histories, branch);
 		responseCodes.respond(place, req, res, next, responseCodes.OK, histories);
 	}).catch(err => {
@@ -166,8 +167,9 @@ function listRevisionsByBranch(req, res, next) {
 function updateRevision(req, res, next) {
 	const place = utils.APIInfo(req);
 	const {account, model, id} = req.params;
+	const voidValue = req.body.void;
 
-	History.updateRevision(account, model, id, req.body).then(() => {
+	History.updateRevision(account, model, id, voidValue).then(() => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, {});
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
