@@ -179,14 +179,10 @@ function updateRevision(req, res, next) {
 function updateRevisionTag(req, res, next) {
 	const place = utils.APIInfo(req);
 	const {account, model, id} = req.params;
+	const tag = req.body.tag;
 
 	History.findByUID(account, model, id, {_id : 1, tag: 1}).then(history => {
-		if (!history) {
-			return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
-		} else {
-			history.tag = req.body.tag;
-			return history.save();
-		}
+		return History.renameRevisionTag(account, model, id, tag).then(() => ({...history, tag}));
 	}).then(history => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, History.clean(history));
 	}).catch(err => {

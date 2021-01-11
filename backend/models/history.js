@@ -137,8 +137,19 @@ History.updateRevision = async function(account, model, revId, voidValue) {
 	}
 };
 
-History.renameRevisionTag = async function() {
+History.renameRevisionTag = async function(account, model, revId, tag) {
+	if(Object.prototype.toString.call(tag) === "[object String]") {
+		const {result} = await db.update(account, getCollName(model), {_id: utils.stringToUUID(revId)} , { $set:  {tag}});
 
+		if(!result.n) {
+			throw responseCodes.MODEL_HISTORY_NOT_FOUND;
+		}
+
+		return responseCodes.OK;
+
+	} else {
+		throw responseCodes.INVALID_ARGUMENTS;
+	}
 };
 
 History.findByTag = async function(account, model, tag, projection = {}) {
