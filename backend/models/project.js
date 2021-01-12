@@ -56,6 +56,8 @@
 	}
 
 	function populateUsers(userList, project) {
+		project._id = utils.uuidToString(project._id);
+
 		userList.forEach(user => {
 			let userFound;
 
@@ -108,8 +110,6 @@
 
 	function clean(project) {
 		if (project) {
-			project._id = utils.uuidToString(project._id);
-
 			if (!project.models) {
 				project.models = [];
 			}
@@ -216,8 +216,14 @@
 		return Project.findAndClean(account, { name: { $in:projectNames } });
 	};
 
-	Project.findProjectsById = function(account, ids) {
-		return Project.findAndClean(account, { _id: { $in: ids.map(utils.stringToUUID) } });
+	Project.findProjectsById = async function(account, ids) {
+		const foundProjects = await Project.findAndClean(account, { _id: { $in: ids.map(utils.stringToUUID) } });
+
+		foundProjects.forEach((project) => {
+			project._id = utils.uuidToString(project._id);
+		});
+
+		return foundProjects;
 	};
 
 	Project.findOneProject = async function(teamspace, query, projection) {

@@ -121,7 +121,6 @@ describe("Invitations ", function () {
 			});
 	});
 
-
 	it("sent with project admin should work for the teamspace admin", function(done) {
 		const inviteEmail = '93393d28f953@mail.com';
 		const inviteJob = 'jobA';
@@ -273,6 +272,7 @@ describe("Invitations ", function () {
 		expect(permsForModel.permission, 'should be a commenter for this model').to.equal('commenter');
 	});
 
+	// FIXME
 	it("that are unpacked with a project_admin should have the correct permission", async function() {
 		AssertionError.includeStack = true;
 		const username = 'projectAdminInvited';

@@ -151,7 +151,7 @@ describe("Projects", function () {
 	it("list all projects should succeed", function(done) {
 		const goldenProjects = [
 			{
-				"_id": "WPc09MqFPRXl6wygAAAAAA==",
+				"_id": "58f734f4-ca85-3d15-e5eb-0ca000000000",
 				"name": "project_exists",
 				"__v": 3,
 				"permissions": [
@@ -165,7 +165,7 @@ describe("Projects", function () {
 				]
 			},
 			{
-				"_id": "WPc1CcqFPRXl6wyhAAAAAA==",
+				"_id": "58f73509-ca85-3d15-e5eb-0ca100000000",
 				"name": "project2",
 				"permissions": [
 					{ "user": "testing", "permissions": [] },
@@ -174,7 +174,7 @@ describe("Projects", function () {
 				"models": []
 			},
 			{
-				"_id": "WPc1PsqFPRXl6wyiAAAAAA==",
+				"_id": "58f7353e-ca85-3d15-e5eb-0ca200000000",
 				"name": "project3",
 				"permissions": [
 					{ "user": "testing", "permissions": [] },
@@ -183,7 +183,7 @@ describe("Projects", function () {
 				"models": []
 			},
 			{
-				"_id": "WPc1VcqFPRXl6wyjAAAAAA==",
+				"_id": "58f73555-ca85-3d15-e5eb-0ca300000000",
 				"name": "project4",
 				"permissions": [
 					{ "user": "testing", "permissions": [] },
@@ -327,6 +327,7 @@ describe("Projects", function () {
 				agent.put(`/${username}/projects/${project.name}`)
 					.send(project)
 					.expect(200, function(err, res) {
+						console.log(res.body);
 						callback(err);
 					});
 			},
@@ -334,6 +335,7 @@ describe("Projects", function () {
 			callback => {
 				agent.get(`/${username}/projects/${project.name}`)
 					.expect(200, function(err, res) {
+						console.log(res.body);
 						const entriesFiltered = res.body.permissions.filter((entry => {
 							return entry.permissions.length > 0;
 						}));
@@ -359,12 +361,14 @@ describe("Projects", function () {
 				agent.patch(`/${username}/projects/${project.name}`)
 					.send(project)
 					.expect(200, function(err, res) {
+						console.log(res.body);
 						callback(err);
 					});
 			},
 			callback => {
 				agent.get(`/${username}/projects/${project.name}`)
 					.expect(200, function(err, res) {
+						console.log(res.body);
 						const entriesFiltered = res.body.permissions.filter((entry => {
 							return entry.permissions.length > 0;
 						}));
@@ -389,12 +393,14 @@ describe("Projects", function () {
 				agent.patch(`/${username}/projects/${projectName}`)
 					.send(project)
 					.expect(200, function(err, res) {
+						console.log(res.body);
 						callback(err);
 					});
 			},
 			callback => {
 				agent.get(`/${username}/projects/${projectName}`)
 					.expect(200, function(err, res) {
+						console.log(res.body);
 						const entriesFiltered = res.body.permissions.filter((entry => {
 							return entry.permissions.length > 0;
 						}));
@@ -420,12 +426,14 @@ describe("Projects", function () {
 				agent.patch(`/${username}/projects/${projectName}`)
 					.send(project)
 					.expect(200, function(err, res) {
+						console.log(res.body);
 						callback(err);
 					});
 			},
 			callback => {
 				agent.get(`/${username}/projects/${projectName}`)
 					.expect(200, function(err, res) {
+						console.log(res.body);
 						expect(res.body.permissions.find(x => x.user === testUser).permissions.length).to.equal(0);
 						callback(err);
 					});
@@ -445,6 +453,7 @@ describe("Projects", function () {
 				agent.put(`/${username}/projects/project2`)
 					.send(project)
 					.expect(200, function(err, res) {
+						console.log(res.body);
 						callback(err);
 					});
 			},
@@ -478,6 +487,7 @@ describe("Projects", function () {
 				agent.patch(`/${username}/projects/${projectName}`)
 					.send(project)
 					.expect(200, function(err, res) {
+						console.log(res.body);
 						callback(err);
 					});
 			},

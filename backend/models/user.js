@@ -736,11 +736,11 @@ function _addProjects(account, username, models) {
 		query = { models: { $in: models } };
 	}
 
-	return Project.find({ account: account.account }, query).then(projects => {
+	return Project.findAndClean(account.account, query).then(projects => {
 
 		projects.forEach((project, i) => {
 
-			project = project.toObject();
+			project._id = utils.uuidToString(project._id);
 
 			// FIXME
 			// console.log("ln 745 in user.js");
