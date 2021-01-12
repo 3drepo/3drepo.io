@@ -250,30 +250,6 @@ schema.statics.createNewSetting = function(teamspace, modelName, data) {
 	return setting.save();
 };
 
-/**
- * Fills out the models data for the  modelids passed through parameter.
- * @param {Object} teamSpaces an object which keys are teamspaces ids and values are an array of modelids
- * @returns {Object} which contains the models data
-  */
-schema.statics.getModelsData = function(teamSpaces) {
-	return Promise.all(
-		Object.keys(teamSpaces).map(accountDB => {
-			const modelsIds = teamSpaces[accountDB];
-
-			return db.getCollection(accountDB, MODELS_COLL)
-				.then(collection => collection.find({_id: {$in:modelsIds}},{ name: 1, federate: 1, _id: 1}).toArray())
-				.then(models => {
-					const res = {};
-					const indexedModels = models.reduce((ac,c) => {
-						const obj = {}; obj[c._id] = c; return Object.assign(ac,obj); // indexing by model._id
-					} ,{});
-					res[accountDB] = indexedModels;
-					return res;
-				});
-		})
-	).then((modelData)=> modelData.reduce((ac,cur) => Object.assign(ac, cur),{})); // Turns the array to an object (quick indexing);
-};
-
 const ModelSetting = ModelFactory.createClass(
 	"ModelSetting",
 	schema,
@@ -291,6 +267,31 @@ ModelSetting.batchUpdatePermissions = async function(account, batchPermissions =
 	} else {
 		return updateResponses[badStatusIndex];
 	}
+};
+
+/**
+ * Fills out the models data for the  modelids passed through parameter.
+ * @param {Object} teamspaces an object which keys are teamspaces ids and values are an array of modelids
+ * @returns {Object} which contains the models data
+  */
+ModelSetting.getModelsData = async function(teamspaces) {
+	const promises = [];
+
+	Object.keys(teamspaces).forEach(async (account) => {
+		const modelsIds = teamspaces[account];
+		const models = await db.find(account, MODELS_COLL, {_id: {$in:modelsIds}}, { name: 1, federate: 1, _id: 1});
+		const res = {};
+		const indexedModels = models.reduce((ac,c) => {
+			const obj = {}; obj[c._id] = c; return Object.assign(ac,obj); // indexing by model._id
+		} ,{});
+		res[account] = indexedModels;
+
+		promises.push(res);
+	});
+
+	const modelData = await Promise.all(promises);
+
+	return modelData.reduce((ac,cur) => Object.assign(ac, cur),{}); // Turns the array to an object (quick indexing);
 };
 
 ModelSetting.populateUsers = async function(account, permissions) {
