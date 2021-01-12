@@ -51,9 +51,10 @@ const WELCOME_MESSAGE = clientConfigService.getCustomLoginMessage() || 'Welcome 
 interface IProps {
 	history: any;
 	location: any;
-	onLogin: (login, password) => void;
 	isPending: boolean;
 	isAuthenticated: boolean;
+	onLogin: (login, password) => void;
+	authenticate: () => void;
 }
 
 interface IState {
@@ -68,6 +69,10 @@ export class Login extends React.PureComponent<IProps, IState> {
 		login: '',
 		password: ''
 	};
+
+	public componentDidMount() {
+		this.props.authenticate();
+	}
 
 	public componentDidUpdate(prevPops) {
 		const { isAuthenticated } = prevPops;
@@ -102,8 +107,8 @@ export class Login extends React.PureComponent<IProps, IState> {
 		const { login, password } = this.state;
 
 		if (this.props.isAuthenticated) {
-			const pathname = ((this.props.location.state ||  {}).from || {}).pathname || ROUTES.TEAMSPACES;
-			return (<Redirect to={{	pathname, state: { from: pathname} }} /> );
+			const from = this.props.location?.state?.from || {};
+			return (<Redirect to={{	...from, state: { referrer: '/login' } }} /> );
 		}
 
 		return (

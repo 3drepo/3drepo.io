@@ -1080,6 +1080,14 @@ export class ViewerService {
 	public stopClipEdit() {
 		UnityUtil.stopClipEdit();
 	}
+
+	public setNavigationOn() {
+		UnityUtil.setNavigationOn();
+	}
+
+	public setNavigationOff() {
+		UnityUtil.setNavigationOff();
+	}
 }
 
 export const Viewer = new ViewerService({});

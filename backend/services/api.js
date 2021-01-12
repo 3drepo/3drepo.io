@@ -145,6 +145,9 @@ module.exports.createApp = function (config) {
 	// history handler
 	app.use("/:account/:model", require("../routes/history"));
 
+	// presentation handler
+	app.use("/:account/:model", require("../routes/presentation"));
+
 	app.use(function(err, req, res, next) {
 		if(err) {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);

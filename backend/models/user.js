@@ -25,7 +25,7 @@ const DB = require("../handler/db");
 const crypto = require("crypto");
 const utils = require("../utils");
 const Role = require("./role");
-const Job = require("./job");
+const { addDefaultJobs, addUserToJob, findJobByUser, removeUserFromAnyJob, usersWithJob } = require("./job");
 const History = require("./history");
 const TeamspaceSettings = require("./teamspaceSetting");
 const Mailer = require("../mailer/mailer");
@@ -573,7 +573,7 @@ schema.statics.verify = function (username, token, options) {
 			systemLogger.logError("Failed to create role for ", username, err);
 		});
 
-		Job.addDefaultJobs(username).catch((err) => {
+		addDefaultJobs(username).catch((err) => {
 			systemLogger.logError("Failed to create default jobs for ", username, err);
 		});
 
@@ -1183,7 +1183,7 @@ schema.methods.removeTeamMember = function (username, cascadeRemove) {
 			promises.push(foundProjects.map(project =>
 				project.updateAttrs({ permissions: project.permissions.filter(p => p.user !== username) })));
 
-			promises.push(Job.removeUserFromAnyJob(this.user, username));
+			promises.push(removeUserFromAnyJob(this.user, username));
 			return Promise.all(promises);
 		}
 
@@ -1213,7 +1213,7 @@ schema.methods.addTeamMember = function (user, job, permissions) {
 
 				return Role.grantTeamSpaceRoleToUser(user, this.user).then(() => {
 					const promises = [];
-					promises.push(Job.addUserToJob(this.user, user, job));
+					promises.push(addUserToJob(this.user, job, user));
 
 					if (permissions && permissions.length) {
 						promises.push(this.customData.permissions.add({user, permissions}));
@@ -1277,7 +1277,7 @@ schema.statics.getMembers = function (teamspace) {
 		user: 1,
 		customData: 1
 	});
-	const getJobInfo = Job.usersWithJob(teamspace);
+	const getJobInfo = usersWithJob(teamspace);
 
 	const getTeamspacePermissions = User.findByUserName(teamspace)
 		.then(user => user.toObject().customData.permissions);
@@ -1334,7 +1334,7 @@ schema.statics.getTeamMemberInfo = async (teamspace, user)  => {
 	if(!userEntry || !userEntry.isMemberOfTeamspace(teamspace)) {
 		throw responseCodes.USER_NOT_FOUND;
 	} else {
-		const job = await Job.findByUser(teamspace, user);
+		const job = await findJobByUser(teamspace, user);
 		const result = {
 			user,
 			firstName: userEntry.customData.firstName,

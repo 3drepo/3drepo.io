@@ -20,7 +20,7 @@ const _ = require("lodash");
 const { isProjectAdmin } = require("./project");
 const View = require("./view");
 const User = require("./user");
-const Job = require("./job");
+const { findJobByUser } = require("./job");
 const History = require("./history");
 
 const ModelSetting = require("./modelSetting");
@@ -163,7 +163,7 @@ class Ticket extends View {
 			this.findByUID(account, model, id, {}, true),
 			// 2. Get user permissions
 			User.findByUserName(account),
-			Job.findByUser(account, user),
+			findJobByUser(account, user),
 			isProjectAdmin(
 				account,
 				model,
@@ -426,7 +426,7 @@ class Ticket extends View {
 		newTicket.assigned_roles = newTicket.assigned_roles || [];
 		newTicket._id = utils.stringToUUID(newTicket._id || nodeuuid());
 		newTicket.created = parseInt(newTicket.created || (new Date()).getTime());
-		const ownerJob = await Job.findByUser(account, newTicket.owner);
+		const ownerJob = await findJobByUser(account, newTicket.owner);
 		if (ownerJob) {
 			newTicket.creator_role = ownerJob._id;
 		} else {
@@ -450,14 +450,15 @@ class Ticket extends View {
 		}
 
 		// Assign rev_id for issue
-		const history = await History.getHistory({ account, model }, branch, newTicket.revId, { _id: 1 }).catch(() => {
+		try {
+			const history = await History.getHistory({ account, model }, branch, newTicket.revId, { _id: 1 });
+			if (history) {
+				newTicket.rev_id = history._id;
+			}
+		} catch(err) {
 			if (newTicket.revId || (newTicket.viewpoint || {}).highlighted_group_id) {
 				throw responseCodes.INVALID_TAG_NAME;
 			}
-		});
-
-		if (history) {
-			newTicket.rev_id = history._id;
 		}
 
 		newTicket = this.filterFields(newTicket, ["viewpoint", "revId"]);

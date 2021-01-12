@@ -20,14 +20,13 @@ import { VIEWER_PANELS } from '../../constants/viewerGui';
 import * as Bim from '../bim';
 import { selectOverrides as selectGroupsOverrides,
 	selectTransparencies as selectGroupsTransparencies } from '../groups';
+import { selectIsPresentationActive } from '../presentation';
+import { selectSelectedFrameColors, selectSelectedFrameTransformations,
+	selectSelectedFrameTransparencies } from '../sequences';
 import { selectIsTreeProcessed } from '../tree';
-
 import { selectOverrides as selectViewsOverrides,
 		selectTransformations as selectViewsTransformations,
 		selectTransparencies as selectViewsTransparencies } from '../viewpoints';
-
-import { selectSelectedFrameColors, selectSelectedFrameTransformations,
-	selectSelectedFrameTransparencies } from '../sequences';
 
 export const selectViewerGuiDomain = (state) => ({...state.viewerGui});
 
@@ -101,4 +100,16 @@ export const selectTransformations = createSelector(
 	selectViewsTransformations, selectSelectedFrameTransformations,
 	(viewsTransformations, sequenceTransformations) =>
 			({...sequenceTransformations, ...viewsTransformations})
+);
+
+export const selectDisabledPanelButtons = createSelector(
+	selectIsPresentationActive, (isPresentationActive) => {
+		const disabledPanelButtons = new Set();
+
+		if (isPresentationActive) {
+			disabledPanelButtons.add(VIEWER_PANELS.COMPARE);
+		}
+
+		return disabledPanelButtons;
+	}
 );
