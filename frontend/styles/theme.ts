@@ -44,6 +44,12 @@ export const MuiTheme = createMuiTheme({
 		}
 	},
 	overrides: {
+		MuiButton: {
+			root: {
+				lineHeight: '1.4em',
+				letterSpacing: 'normal',
+			}
+		},
 		MuiInput: {
 			root: {
 				'fontSize': '14px',
@@ -116,7 +122,13 @@ export const MuiTheme = createMuiTheme({
 		},
 		MuiTab: {
 			root: {
-				minWidth: '0 !important'
+				/* tslint:disable */
+				minWidth: '0 !important',
+				letterSpacing: 'normal',
+				'@media (min-width: 960px)': {
+					fontSize: '13px',
+				}
+				/* tslint:enable */
 			}
 		},
 		MuiMenuItem: {
@@ -212,12 +224,14 @@ export const MuiTheme = createMuiTheme({
 			primary: {
 				overflow: 'hidden',
 				textOverflow: 'ellipsis',
-				whiteSpace: 'nowrap'
+				whiteSpace: 'nowrap',
+				letterSpacing: 'normal',
 			},
 			secondary: {
 				overflow: 'hidden',
 				textOverflow: 'ellipsis',
-				whiteSpace: 'nowrap'
+				whiteSpace: 'nowrap',
+				letterSpacing: 'normal',
 			}
 		},
 		MuiBadge: {

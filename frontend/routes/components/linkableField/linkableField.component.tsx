@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -24,8 +24,10 @@ interface IProps {
 	style?: any;
 }
 
-export const LinkableField: React.FunctionComponent<IProps> = ({ style, className, children }) => (
-	<span style={style} className={className}>
-		<Linkify properties={{target: '_blank', rel: 'noopener noreferrer'}}>{children}</Linkify>
-	</span>
+export const LinkableField: React.FC<IProps> = React.forwardRef(
+	({ style, className, children }: IProps, ref: React.Ref<HTMLSpanElement>) => (
+		<span style={style} ref={ref} className={className}>
+			<Linkify properties={{target: '_blank', rel: 'noopener noreferrer'}}>{children}</Linkify>
+		</span>
+	)
 );

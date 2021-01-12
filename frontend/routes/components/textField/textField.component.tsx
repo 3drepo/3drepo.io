@@ -236,6 +236,7 @@ export class TextField extends React.PureComponent<IProps, IState> {
 			className,
 			mutable,
 			disableShowDefaultUnderline,
+			enableMarkdown,
 			...props
 		} = this.props;
 		const { initialValue } = this.state;
@@ -270,12 +271,12 @@ export class TextField extends React.PureComponent<IProps, IState> {
 							{!this.isEditMode &&
 							<FieldWrapper line={Number(!disableShowDefaultUnderline)} onClick={this.handlePlaceholderClick}>
 								<FieldLabel shrink>{this.props.label}</FieldLabel>
-								{this.props.enableMarkdown &&
+								{enableMarkdown &&
 								<StyledMarkdownField ref={this.markdownFieldRef} {...this.additionalProps()}>
 									{this.fieldValue}
 								</StyledMarkdownField>
 								}
-								{!this.props.enableMarkdown &&
+								{!enableMarkdown &&
 								<StyledLinkableField ref={this.markdownFieldRef}>
 									{this.fieldValue}
 								</StyledLinkableField>

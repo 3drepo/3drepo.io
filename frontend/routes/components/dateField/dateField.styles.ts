@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DatePicker,  DateTimePicker } from 'material-ui-pickers';
+import { DatePicker, DateTimePicker } from 'material-ui-pickers';
 import styled from 'styled-components';
 
 export const Container = styled.div`
