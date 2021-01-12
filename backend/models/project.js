@@ -108,6 +108,8 @@
 
 	function clean(project) {
 		if (project) {
+			project._id = utils.uuidToString(project._id);
+
 			if (!project.models) {
 				project.models = [];
 			}
