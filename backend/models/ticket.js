@@ -528,7 +528,7 @@ class Ticket extends View {
 			const history = await  History.getHistory(account, model, branch, revId);
 
 			// Uses the first revsion searched to get all posterior revisions
-			invalidRevIds = await History.find({ account, model }, { timestamp: { "$gt": history.timestamp } }, { _id: 1 });
+			invalidRevIds = await History.find(account, model , { timestamp: { "$gt": history.timestamp } }, { _id: 1 });
 			invalidRevIds = invalidRevIds.map(r => r._id);
 		}
 

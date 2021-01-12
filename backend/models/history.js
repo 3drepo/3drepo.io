@@ -25,9 +25,6 @@ const uuidToString = utils.uuidToString;
 
 const getCollName = (model) => model + ".history";
 
-const find = async (account, model, query, projection = {}) =>
-	await db.find(account, getCollName(model), query, projection);
-
 const findOne = async (account, model, query, projection = {}) =>
 	await db.findOne(account, getCollName(model), query, projection);
 
@@ -51,6 +48,10 @@ History.getHistory = async function(account, model, branch, revId, projection) {
 	return history;
 };
 
+History.find = async function(account, model, query, projection = {}) {
+	return await db.find(account, getCollName(model), query, projection);
+};
+
 History.tagRegExp = /^[a-zA-Z0-9_-]{1,50}$/;
 // list revisions by branch
 History.listByBranch = async function(account, model, branch, projection, showVoid = false) {
@@ -67,7 +68,7 @@ History.listByBranch = async function(account, model, branch, projection, showVo
 		query.shared_id = stringToUUID(branch);
 	}
 
-	return await find(
+	return await this.find(
 		account, model,
 		query,
 		projection,

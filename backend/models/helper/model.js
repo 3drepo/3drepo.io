@@ -97,7 +97,7 @@ function translateBouncerErrCode(bouncerErrorCode) {
 }
 
 function insertModelUpdatedNotificationsLatestReview(account, model) {
-	History.findLatest({account, model},{tag:1}).then(h => {
+	History.findLatest(account, model,{tag:1}).then(h => {
 		const revision = (!h || !h.tag) ? "" : h.tag;
 		return notifications.upsertModelUpdatedNotifications(account, model, revision);
 	}).then(n => n.forEach(ChatEvent.upsertedNotification.bind(null,null)));
@@ -555,7 +555,7 @@ function listSubModels(account, model, branch = "master") {
 
 	const subModels = [];
 
-	return History.findByBranch({ account, model }, branch).then(history => {
+	return History.findByBranch(account, model, branch).then(history => {
 
 		if(history) {
 			return getRefNodes(account, model, branch);
@@ -587,7 +587,7 @@ function listSubModels(account, model, branch = "master") {
 }
 
 function downloadLatest(account, model) {
-	return History.findLatest({account, model}, {rFile: 1}).then((fileEntry) => {
+	return History.findLatest(account, model, {rFile: 1}).then((fileEntry) => {
 		if(!fileEntry || !fileEntry.rFile || !fileEntry.rFile.length) {
 			return Promise.reject(responseCodes.NO_FILE_FOUND);
 		}
@@ -929,7 +929,7 @@ async function getSubModelRevisions(account, model, branch, rev) {
 	const projection = {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1};
 	modelIds.forEach((modelId) => {
 		results[modelId] = {};
-		promises.push(History.listByBranch({account, model: modelId}, null, projection).then((revisions) => {
+		promises.push(History.listByBranch(account, modelId, null, projection).then((revisions) => {
 			revisions = History.clean(revisions);
 
 			revisions.forEach(function(revision) {

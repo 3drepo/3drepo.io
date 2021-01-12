@@ -31,7 +31,7 @@ async function getSubTreeInfo(account, model, currentIds) {
 	const subModelRefs = await getRefNodes(account, model, currentIds);
 	const subTreeInfo = [];
 	subModelRefs.forEach((ref) => {
-		const prom = History.findLatest({account: ref.owner, model: ref.project}, {_id: 1}).then((rev) => ({
+		const prom = History.findLatest(ref.owner, ref.project, {_id: 1}).then((rev) => ({
 			_id: utils.uuidToString(ref._id),
 			rid: utils.uuidToString(rev ? rev._id : ref._rid),
 			teamspace:ref.owner,
@@ -64,7 +64,7 @@ function getFileFromRef(ref, username, filename) {
 
 			const revId = utils.uuidToString(ref._rid);
 			const getRevIdPromise = revId === C.MASTER_BRANCH ?
-				History.findLatest({account: ref.owner, model: ref.project}, {_id: 1}) :
+				History.findLatest(ref.owner, ref.project, {_id: 1}) :
 				Promise.resolve({_id : ref._rid});
 
 			return getRevIdPromise.then((revInfo) => {
