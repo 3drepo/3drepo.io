@@ -49,7 +49,7 @@ async function getNodeBySharedId(account, model, shared_id, revisionIds, project
 }
 
 async function findNodes(account, model, branch, revision, query = {}, projection = {}) {
-	const history = await History.getHistory({ account, model }, branch, revision);
+	const history = await History.getHistory(account, model, branch, revision);
 
 	if (!query._id) {
 		query._id = {"$in": history.current };
