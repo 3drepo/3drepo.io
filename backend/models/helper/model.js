@@ -27,8 +27,8 @@ const Mailer = require("../../mailer/mailer");
 const systemLogger = require("../../logger.js").systemLogger;
 const config = require("../../config");
 const History = require("../history");
+const { getRefNodes } = require("../ref");
 const { findNodesByType, getGridfsFileStream, getNodeById, getParentMatrix } = require("../scene");
-const Ref = require("../ref");
 const utils = require("../../utils");
 const middlewares = require("../../middlewares/middlewares");
 const multer = require("multer");
@@ -483,7 +483,7 @@ function createFederatedModel(account, model, username, subModels, modelSettings
 
 function searchTree(account, model, branch, rev, searchString, username) {
 
-	const search = (history) => {
+	const search = () => {
 
 		let items = [];
 
@@ -500,10 +500,7 @@ function searchTree(account, model, branch, rev, searchString, username) {
 
 			});
 
-			return Ref.find({account, model}, {
-				_id: {"$in": history.current },
-				type: "ref"
-			});
+			return getRefNodes(account, model, branch, rev);
 
 		}).then(refs => {
 
@@ -541,7 +538,7 @@ function searchTree(account, model, branch, rev, searchString, username) {
 
 			return History.getHistory({ account, model }, branch, rev).then(history => {
 				if(history) {
-					return search(history);
+					return search();
 				} else {
 					return Promise.resolve([]);
 				}
@@ -554,19 +551,14 @@ function searchTree(account, model, branch, rev, searchString, username) {
 
 }
 
-function listSubModels(account, model, branch) {
+function listSubModels(account, model, branch = "master") {
 
 	const subModels = [];
 
 	return History.findByBranch({ account, model }, branch).then(history => {
 
 		if(history) {
-			const filter = {
-				type: "ref",
-				_id: { $in: history.current }
-			};
-
-			return Ref.find({ account, model }, filter);
+			return getRefNodes(account, model, branch);
 		} else {
 			return [];
 		}
@@ -922,7 +914,7 @@ async function getSubModelRevisions(account, model, branch, rev) {
 		return Promise.reject(responseCodes.INVALID_TAG_NAME);
 	}
 
-	const refNodes = await Ref.getRefNodes(account, model, history.current);
+	const refNodes = await getRefNodes(account, model, branch, rev);
 	const modelIds = refNodes.map((refNode) => refNode.project);
 	const results = {};
 
