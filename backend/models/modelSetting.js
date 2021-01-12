@@ -176,10 +176,6 @@ schema.methods.changePermissions = function(permissions, account = this._dbcolOp
 	});
 };
 
-schema.methods.isPermissionAssigned = function(permission) {
-	return this.permissions.find(perm => perm.permission === permission);
-};
-
 schema.methods.findPermissionByUser = function(username) {
 	return this.permissions.find(perm => perm.user === username);
 };
