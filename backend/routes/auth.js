@@ -548,6 +548,10 @@ router.put("/:account", middlewares.isAccountAdmin, updateUser);
 router.put("/:account/password", resetPassword);
 
 function createSession(place, req, res, next, user) {
+	const termsPrompt = !User.hasReadLatestTerms(user);
+	user = { username: user.user, flags:{termsPrompt } };
+	req.body.username = user.username;
+
 	regenerateAuthSession(req, config, user)
 		.then(() => getSessionsByUsername(user.username))
 		.then(sessions => { // Remove other sessions with the same username
@@ -566,9 +570,11 @@ function createSession(place, req, res, next, user) {
 			});
 
 			return removeSessions(ids);
-		}).then(() =>
-			responseCodes.respond(place, req, res, next, responseCodes.OK, user)
-		).catch((err) => {
+		}).then(() => {
+
+			responseCodes.respond(place, req, res, next, responseCodes.OK, user);
+
+		}).catch((err) => {
 			responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {username: user.username});
 		});
 }
@@ -585,22 +591,7 @@ function login(req, res, next) {
 		}
 
 		User.authenticate(req[C.REQ_REPO].logger, req.body.username, req.body.password).then(user => {
-
-			const responseData = { username: user.user };
-
-			req[C.REQ_REPO].logger.logInfo("User is logged in", responseData);
-
-			responseData.flags = {};
-
-			responseData.flags.termsPrompt = !user.hasReadLatestTerms();
-
-			user.customData.lastLoginAt = new Date();
-
-			req.body.username = user.user;
-
-			user.save().then(() => {
-				createSession(responsePlace, req, res, next, responseData);
-			});
+			createSession(responsePlace, req, res, next, user);
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
 		});

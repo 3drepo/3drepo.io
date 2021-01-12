@@ -17,7 +17,8 @@
  */
 "use strict";
 
-const mongoose = require("mongoose");
+// const mongoose = require("mongoose");
+
 const ModelFactory = require("./factory/modelFactory");
 const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
@@ -36,65 +37,73 @@ const config = require("../config");
 
 const ModelSetting = require("./modelSetting");
 const C = require("../constants");
-const userBilling = require("./userBilling");
-const permissionTemplate = require("./permissionTemplate");
-const accountPermission = require("./accountPermission");
+// const userBilling = require("./userBilling");
+// const permissionTemplate = require("./permissionTemplate");
+// const accountPermission = require("./accountPermission");
 const Project = require("./project");
 const FileRef = require("./fileRef");
 
-const schema = mongoose.Schema({
-	_id: String,
-	user: String,
-	customData: {
-		firstName: String,
-		lastName: String,
-		email: String,
-		apiKey: String,
-		mailListOptOut: Boolean,
-		createdAt: Date,
-		inactive: Boolean,
-		resetPasswordToken: {
-			expiredAt: Date,
-			token: String
-		},
-		emailVerifyToken: {
-			expiredAt: Date,
-			token: String
-		},
-		billing: {
-			_id: false,
-			type: userBilling,
-			default: userBilling,
-			get: function (billing) {
-				if (billing) {
-					billing._parent = this;
-				}
-				return billing;
-			}
+// const schema = mongoose.Schema({
+// 	_id: String,
+// 	user: String,
+// 	customData: {
+// 		firstName: String,
+// 		lastName: String,
+// 		email: String,
+// 		apiKey: String,
+// 		mailListOptOut: Boolean,
+// 		createdAt: Date,
+// 		inactive: Boolean,
+// 		resetPasswordToken: {
+// 			expiredAt: Date,
+// 			token: String
+// 		},
+// 		emailVerifyToken: {
+// 			expiredAt: Date,
+// 			token: String
+// 		},
+// 		billing: {
+// 			_id: false,
+// 			type: userBilling,
+// 			default: userBilling,
+// 			get: function (billing) {
+// 				if (billing) {
+// 					billing._parent = this;
+// 				}
+// 				return billing;
+// 			}
 
-		},
-		avatar: Object,
-		lastLoginAt: Date,
-		permissionTemplates: {
-			type: [permissionTemplate.schema],
-			get: function (permissionTemplates) {
-				return permissionTemplate.methods.init(this, permissionTemplates);
-			}
-		},
-		// teamspace level permissions
-		permissions: {
-			type: [accountPermission.schema],
-			get: function (permissions) {
-				return accountPermission.methods.init(this, permissions);
-			}
-		},
-		hereEnabled: Boolean,
-		vrEnabled: Boolean
-	},
-	roles: [{}]
-});
+// 		},
+// 		avatar: Object,
+// 		lastLoginAt: Date,
+// 		permissionTemplates: {
+// 			type: [permissionTemplate.schema],
+// 			get: function (permissionTemplates) {
+// 				return permissionTemplate.methods.init(this, permissionTemplates);
+// 			}
+// 		},
+// 		// teamspace level permissions
+// 		permissions: {
+// 			type: [accountPermission.schema],
+// 			get: function (permissions) {
+// 				return accountPermission.methods.init(this, permissions);
+// 			}
+// 		},
+// 		hereEnabled: Boolean,
+// 		vrEnabled: Boolean
+// 	},
+// 	roles: [{}]
+// });
 
-schema.statics.getTeamspaceSpaceUsed = function (dbName) {
+const COLL_NAME = "system.users";
+
+const User = {};
+
+User.update = async function (username, data) {
+	return DB.update("admin", COLL_NAME, {user: username}, {$set: data});
+};
+
+User.getTeamspaceSpaceUsed = async function (dbName) {
 	return DB.getCollection(dbName, "settings").then((col) => {
 		return col.find({}, {_id: 1}).toArray().then((settings) => {
 			const spaceUsedProm = [];
@@ -109,7 +118,7 @@ schema.statics.getTeamspaceSpaceUsed = function (dbName) {
 	});
 };
 
-schema.statics.authenticate =  async function (logger, username, password) {
+User.authenticate =  async function (logger, username, password) {
 	if (!username || !password) {
 		throw({ resCode: responseCodes.INCORRECT_USERNAME_OR_PASSWORD });
 	}
@@ -142,7 +151,13 @@ schema.statics.authenticate =  async function (logger, username, password) {
 			user.customData = {};
 		}
 
-		return await user.save();
+		user.customData.lastLoginAt = new Date();
+
+		await this.update(username, {"customData.lastLoginAt": user.customData.lastLoginAt});
+
+		logger.logInfo("User has logged in", {username});
+
+		return user;
 	} catch(err) {
 		if (authDB) {
 			authDB.close();
@@ -152,16 +167,20 @@ schema.statics.authenticate =  async function (logger, username, password) {
 	}
 };
 
-schema.statics.findByUserName = function (user) {
-	return this.findOne({ account: "admin" }, { user });
+User.findOne = async function (account, query, projection) {
+	return await DB.findOne(account, COLL_NAME, query, projection);
 };
 
-schema.statics.getProfileByUsername = async function (username) {
+User.findByUserName = function (user) {
+	return this.findOne("admin", { user });
+};
+
+User.getProfileByUsername = async function (username) {
 	if (!username) {
 		return null;
 	}
 
-	const dbCol = await DB.getCollection("admin", "system.users");
+	const dbCol = await DB.getCollection("admin", COLL_NAME);
 	const user = await dbCol.findOne({user: username}, {user: 1,
 		"customData.firstName" : 1,
 		"customData.lastName" : 1,
@@ -182,8 +201,8 @@ schema.statics.getProfileByUsername = async function (username) {
 	};
 };
 
-schema.statics.getStarredMetadataTags = async function (username) {
-	const dbCol = await DB.getCollection("admin", "system.users");
+User.getStarredMetadataTags = async function (username) {
+	const dbCol = await DB.getCollection("admin", COLL_NAME);
 	const userProfile = await dbCol.findOne({user: username}, {user: 1,
 		"customData.StarredMetadataTags" : 1
 	});
@@ -191,27 +210,27 @@ schema.statics.getStarredMetadataTags = async function (username) {
 	return _.get(userProfile, "customData.StarredMetadataTags") || [];
 };
 
-schema.statics.appendStarredMetadataTag = async function (username, tag) {
-	const dbCol = await DB.getCollection("admin", "system.users");
+User.appendStarredMetadataTag = async function (username, tag) {
+	const dbCol = await DB.getCollection("admin", COLL_NAME);
 	await dbCol.update({user: username}, {$addToSet: { "customData.StarredMetadataTags" : tag } });
 	return {};
 };
 
-schema.statics.setStarredMetadataTags = async function (username, tags) {
-	const dbCol = await DB.getCollection("admin", "system.users");
+User.setStarredMetadataTags = async function (username, tags) {
+	const dbCol = await DB.getCollection("admin", COLL_NAME);
 	tags = _.uniq(tags);
 	await dbCol.update({user: username}, {$set: { "customData.StarredMetadataTags" : tags}});
 	return {};
 };
 
-schema.statics.deleteStarredMetadataTag = async function (username, tag) {
-	const dbCol = await DB.getCollection("admin", "system.users");
+User.deleteStarredMetadataTag = async function (username, tag) {
+	const dbCol = await DB.getCollection("admin", COLL_NAME);
 	await dbCol.update({user: username}, {$pull: { "customData.StarredMetadataTags" : tag } });
 	return {};
 };
 
-schema.statics.getStarredModels = async function (username) {
-	const dbCol = await DB.getCollection("admin", "system.users");
+User.getStarredModels = async function (username) {
+	const dbCol = await DB.getCollection("admin", COLL_NAME);
 	const userProfile = await dbCol.findOne({user: username}, {user: 1,
 		"customData.starredModels" : 1
 	});
@@ -219,8 +238,8 @@ schema.statics.getStarredModels = async function (username) {
 	return _.get(userProfile, "customData.starredModels") || {};
 };
 
-schema.statics.appendStarredModels = async function (username, ts, modelID) {
-	const dbCol = await DB.getCollection("admin", "system.users");
+User.appendStarredModels = async function (username, ts, modelID) {
+	const dbCol = await DB.getCollection("admin", COLL_NAME);
 	const userProfile = await dbCol.findOne({user: username}, {user: 1,
 		"customData.starredModels" : 1
 	});
@@ -237,14 +256,14 @@ schema.statics.appendStarredModels = async function (username, ts, modelID) {
 	return {};
 };
 
-schema.statics.setStarredModels = async function (username, models) {
-	const dbCol = await DB.getCollection("admin", "system.users");
+User.setStarredModels = async function (username, models) {
+	const dbCol = await DB.getCollection("admin", COLL_NAME);
 	await dbCol.update({user: username}, {$set: { "customData.starredModels" : models}});
 	return {};
 };
 
-schema.statics.deleteStarredModel = async function (username, ts, modelID) {
-	const dbCol = await DB.getCollection("admin", "system.users");
+User.deleteStarredModel = async function (username, ts, modelID) {
+	const dbCol = await DB.getCollection("admin", COLL_NAME);
 	const userProfile = await dbCol.findOne({user: username}, {user: 1,
 		"customData.starredModels" : 1
 	});
@@ -265,30 +284,30 @@ schema.statics.deleteStarredModel = async function (username, ts, modelID) {
 	return {};
 };
 
-schema.statics.findByAPIKey = async function (key) {
+User.findByAPIKey = async function (key) {
 	if (!key) {
 		return null;
 	}
 
-	const dbCol = await DB.getCollection("admin", "system.users");
+	const dbCol = await DB.getCollection("admin", COLL_NAME);
 	const user = await dbCol.findOne({"customData.apiKey" : key});
 	return user;
 };
 
-schema.statics.generateApiKey = async function (username) {
+User.generateApiKey = async function (username) {
 	const apiKey = crypto.randomBytes(16).toString("hex");
-	const dbCol = await DB.getCollection("admin", "system.users");
+	const dbCol = await DB.getCollection("admin", COLL_NAME);
 	await dbCol.update({ user: username}, {$set: {"customData.apiKey" : apiKey}});
 	return apiKey;
 };
 
-schema.statics.deleteApiKey = async function (username) {
-	const dbCol = await DB.getCollection("admin", "system.users");
+User.deleteApiKey = async function (username) {
+	const dbCol = await DB.getCollection("admin", COLL_NAME);
 	await dbCol.update({ user: username}, {$unset: {"customData.apiKey" : 1}});
 };
 
-schema.statics.findUsersWithoutMembership = function (teamspace, searchString) {
-	return DB.getCollection("admin", "system.users").then(dbCol => {
+User.findUsersWithoutMembership = function (teamspace, searchString) {
+	return DB.getCollection("admin", COLL_NAME).then(dbCol => {
 		return dbCol
 			.find({
 				$and: [{
@@ -324,7 +343,7 @@ schema.statics.findUsersWithoutMembership = function (teamspace, searchString) {
 };
 
 // case insenstive
-schema.statics.checkUserNameAvailableAndValid = function (username) {
+User.checkUserNameAvailableAndValid = function (username) {
 
 	if (!this.usernameRegExp.test(username) ||
 		-1 !== C.REPO_BLACKLIST_USERNAME.indexOf(username.toLowerCase())
@@ -341,15 +360,15 @@ schema.statics.checkUserNameAvailableAndValid = function (username) {
 	});
 };
 
-schema.statics.findByEmail = function (email) {
+User.findByEmail = function (email) {
 	return this.findOne({ account: "admin" }, { "customData.email":  new RegExp("^" + utils.sanitizeString(email) + "$", "i") });
 };
 
-schema.statics.findByPaypalPaymentToken = function (token) {
+User.findByPaypalPaymentToken = function (token) {
 	return this.findOne({ account: "admin" }, { "customData.billing.paypalPaymentToken": token });
 };
 
-schema.statics.checkEmailAvailableAndValid = function (email, exceptUser) {
+User.checkEmailAvailableAndValid = function (email, exceptUser) {
 	const emailRegex = /^(['a-zA-Z0-9_\-.]+)@([a-zA-Z0-9_\-.]+)\.([a-zA-Z]{2,})$/;
 	if(email.match(emailRegex)) {
 
@@ -367,11 +386,11 @@ schema.statics.checkEmailAvailableAndValid = function (email, exceptUser) {
 
 };
 
-schema.statics.findUserByBillingId = function (billingAgreementId) {
+User.findUserByBillingId = function (billingAgreementId) {
 	return this.findOne({ account: "admin" }, { "customData.billing.billingAgreementId": billingAgreementId });
 };
 
-schema.statics.updatePassword = function (logger, username, oldPassword, token, newPassword) {
+User.updatePassword = function (logger, username, oldPassword, token, newPassword) {
 
 	if (!((oldPassword || token) && newPassword)) {
 		return Promise.reject({ resCode: responseCodes.INVALID_INPUTS_TO_PASSWORD_UPDATE });
@@ -426,9 +445,9 @@ schema.statics.updatePassword = function (logger, username, oldPassword, token, 
 
 };
 
-schema.statics.usernameRegExp = /^[a-zA-Z][\w]{1,63}$/;
+User.usernameRegExp = /^[a-zA-Z][\w]{1,63}$/;
 
-schema.statics.createUser = function (logger, username, password, customData, tokenExpiryTime) {
+User.createUser = function (logger, username, password, customData, tokenExpiryTime) {
 	const Invitations =  require("./invitations");
 
 	if (customData) {
@@ -519,7 +538,7 @@ function formatPronouns(str) {
 	return strArr.map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
 }
 
-schema.statics.verify = function (username, token, options) {
+User.verify = function (username, token, options) {
 
 	options = options || {};
 
@@ -583,10 +602,11 @@ schema.statics.verify = function (username, token, options) {
 	});
 };
 
-schema.methods.hasReadLatestTerms = function () {
-	return new Date(config.termsUpdatedAt) < this.customData.lastLoginAt;
+User.hasReadLatestTerms = function (user) {
+	return new Date(config.termsUpdatedAt) < user.customData.lastLoginAt;
 };
 
+/*
 schema.methods.getAvatar = function () {
 	return this.customData && this.customData.avatar || null;
 };
@@ -616,8 +636,10 @@ schema.methods.updateInfo = function (updateObj) {
 	});
 };
 
-schema.statics.findUsernameOrEmail = function (userNameOrEmail) {
-	return DB.getCollection("admin", "system.users").then(dbCol => {
+*/
+
+User.findUsernameOrEmail = function (userNameOrEmail) {
+	return DB.getCollection("admin", COLL_NAME).then(dbCol => {
 		return dbCol
 			.findOne({
 				$or: [
@@ -629,7 +651,7 @@ schema.statics.findUsernameOrEmail = function (userNameOrEmail) {
 	});
 };
 
-schema.statics.getForgotPasswordToken = function (userNameOrEmail) {
+User.getForgotPasswordToken = function (userNameOrEmail) {
 
 	const expiryAt = new Date();
 	expiryAt.setHours(expiryAt.getHours() + config.tokenExpiry.forgotPassword);
@@ -864,7 +886,6 @@ function _makeAccountObject(name) {
 }
 
 function _createAccounts(roles, userName) {
-
 	const accounts = [];
 	const promises = [];
 
@@ -1070,6 +1091,9 @@ function _createAccounts(roles, userName) {
 	});
 
 }
+
+/*
+
 schema.methods.listAccounts = function () {
 	return _createAccounts(this.roles, this.user);
 };
@@ -1090,14 +1114,16 @@ schema.methods.updateSubscriptions = function (plans, billingUser, billingAddres
 		});
 };
 
+*/
+
 function updateUser(username, update) {
-	return DB.getCollection("admin", "system.users").then(dbCol => {
+	return DB.getCollection("admin", COLL_NAME).then(dbCol => {
 		return dbCol.update({ user: username }, update);
 	});
 
 }
 
-schema.statics.activateSubscription = function (billingAgreementId, paymentInfo, raw) {
+User.activateSubscription = function (billingAgreementId, paymentInfo, raw) {
 
 	let dbUser;
 	return this.findUserByBillingId(billingAgreementId).then(user => {
@@ -1116,6 +1142,8 @@ schema.statics.activateSubscription = function (billingAgreementId, paymentInfo,
 	});
 
 };
+
+/*
 
 schema.methods.executeBillingAgreement = function () {
 	return this.customData.billing.executeBillingAgreement(this.user).then(() => {
@@ -1229,7 +1257,9 @@ schema.methods.isMemberOfTeamspace = function (teamspace) {
 	return this.roles.filter(role => role.db === teamspace && role.role === C.DEFAULT_MEMBER_ROLE).length > 0;
 };
 
-schema.statics.getQuotaInfo = function (teamspace) {
+*/
+
+User.getQuotaInfo = function (teamspace) {
 	return this.findByUserName(teamspace).then((user) => {
 		if (!user) {
 			return Promise.reject(responseCodes.USER_NOT_FOUND);
@@ -1239,12 +1269,13 @@ schema.statics.getQuotaInfo = function (teamspace) {
 	});
 };
 
-schema.statics.hasSufficientQuota = async (teamspace, size) => {
+User.hasSufficientQuota = async (teamspace, size) => {
 	const quota = await User.getQuotaInfo(teamspace);
 	const spaceLeft = ((quota.spaceLimit === null || quota.spaceLimit === undefined ? Infinity : quota.spaceLimit) - quota.spaceUsed) * 1024 * 1024;
 	return spaceLeft >= size;
 };
 
+/*
 schema.methods.hasReachedLicenceLimit = async function () {
 	const Invitations =  require("./invitations");
 	const [userArr, invitations] = await Promise.all([
@@ -1257,8 +1288,9 @@ schema.methods.hasReachedLicenceLimit = async function () {
 	const seatedLicences = userArr.length + invitations.length;
 	return (limits.collaboratorLimit !== "unlimited" &&  seatedLicences >= limits.collaboratorLimit);
 };
+*/
 
-schema.statics.getMembers = function (teamspace) {
+User.getMembers = function (teamspace) {
 	const promises = [];
 
 	const getTeamspaceMembers = this.findUsersInTeamspace(teamspace, {
@@ -1293,19 +1325,19 @@ schema.statics.getMembers = function (teamspace) {
 		});
 };
 
-schema.statics.getAllUsersInTeamspace = function (teamspace) {
+User.getAllUsersInTeamspace = function (teamspace) {
 	return this.findUsersInTeamspace(teamspace, {user: 1}).then(users => {
 		const results = users.map(({user}) => user);
 		return results;
 	});
 };
 
-schema.statics.findUsersInTeamspace = function (teamspace, fields) {
+User.findUsersInTeamspace = function (teamspace, fields) {
 	const query = { "roles.db": teamspace, "roles.role" : C.DEFAULT_MEMBER_ROLE };
 	return this.find({account: "admin"}, query , fields);
 };
 
-schema.statics.teamspaceMemberCheck = function (teamspace, user) {
+User.teamspaceMemberCheck = function (teamspace, user) {
 	return User.findByUserName(user).then((userEntry) => {
 		if (!userEntry) {
 			return Promise.reject(responseCodes.USER_NOT_FOUND);
@@ -1317,7 +1349,7 @@ schema.statics.teamspaceMemberCheck = function (teamspace, user) {
 	});
 };
 
-schema.statics.getTeamMemberInfo = async (teamspace, user)  => {
+User.getTeamMemberInfo = async (teamspace, user)  => {
 	const userEntry = await User.findByUserName(user);
 	if(!userEntry || !userEntry.isMemberOfTeamspace(teamspace)) {
 		throw responseCodes.USER_NOT_FOUND;
@@ -1337,25 +1369,17 @@ schema.statics.getTeamMemberInfo = async (teamspace, user)  => {
 	}
 };
 
-schema.statics.isHereEnabled = function (username) {
+User.isHereEnabled = function (username) {
 	return _isHereEnabled(username);
 };
 
 function _isHereEnabled(username) {
-	return DB.getCollection("admin", "system.users").then(dbCol => {
+	return DB.getCollection("admin", COLL_NAME).then(dbCol => {
 		return dbCol.findOne({ user: username }, { _id: 0, "customData.hereEnabled": 1 })
 			.then((isHereEnabledResult) => {
 				return isHereEnabledResult.customData.hereEnabled;
 			});
 	});
 }
-
-const User = ModelFactory.createClass(
-	"User",
-	schema,
-	() => {
-		return "system.users";
-	}
-);
 
 module.exports = User;
