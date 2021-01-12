@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2018 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -20,7 +20,7 @@
 const History = require("./history");
 const middlewares = require("../middlewares/middlewares");
 const utils = require("../utils");
-const Ref = require("./ref");
+const { getRefNodes } = require("./ref");
 const C = require("../constants");
 const db = require("../handler/db");
 const FileRef = require("./fileRef");
@@ -52,7 +52,7 @@ function getAssetListEntry(account, model, revId) {
 
 UnityAssets.getAssetList = function(account, model, branch, rev, username) {
 	return History.getHistory({ account, model }, branch, rev).then((history) => {
-		return Ref.getRefNodes(account, model, history.current).then((subModelRefs) => {
+		return getRefNodes(account, model, branch, rev).then((subModelRefs) => {
 			const fetchPromise = [];
 			if(subModelRefs.length) {
 				// This is a federation, get asset lists from subModels and merge them

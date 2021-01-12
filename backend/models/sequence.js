@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -22,7 +22,7 @@ const utils = require("../utils");
 
 const FileRef = require("./fileRef");
 const History = require("./history");
-const Ref = require("./ref");
+const { getRefNodes } = require("./ref");
 
 class Sequence {
 
@@ -92,7 +92,7 @@ class Sequence {
 		let submodels = [];
 
 		if (history.current) {
-			submodels = await Ref.find({account, model}, {type: "ref", _id: {"$in": history.current}}, {project:1});
+			submodels = await getRefNodes(account, model, branch, revision, {project:1});
 			submodels = submodels.map(r => r.project);
 		}
 

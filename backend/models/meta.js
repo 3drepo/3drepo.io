@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2016 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -19,7 +19,7 @@
 const FileRef = require("./fileRef");
 const History = require("./history");
 const ModelSetting = require("./modelSetting");
-const Ref = require("./ref");
+const { getRefNodes } = require("./ref");
 const { findNodesByField, getNodeById } = require("./scene");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
@@ -79,12 +79,7 @@ class Meta {
 		const history = await History.getHistory({ account, model }, branch, rev);
 
 		// Check for submodel references
-		const filter = {
-			type: "ref",
-			_id: { $in: history.current }
-		};
-
-		const refs = await Ref.find({ account, model }, filter);
+		const refs = await getRefNodes(account, model, branch, rev);
 
 		// for all refs get their tree
 		const getMeta = [];
@@ -144,7 +139,7 @@ class Meta {
 	}
 
 	async getMetadataFields(account, model) {
-		const subModelRefs = await Ref.getRefNodes(account, model);
+		const subModelRefs = await getRefNodes(account, model, "master");
 		const subModelMetadataFieldsPromises = [];
 
 		subModelRefs.forEach((ref) => {
@@ -243,7 +238,7 @@ class Meta {
 		models.add(model);
 
 		// Check submodels
-		const refs = await Ref.find({account, model}, {type: "ref"});
+		const refs = await getRefNodes(account, model, branch, revId);
 
 		refs.forEach((ref) => {
 			models.add(ref.project);
@@ -303,15 +298,8 @@ class Meta {
 			fullFieldName += "." + fieldName;
 		}
 
-		const history = await History.getHistory({ account, model }, branch, rev);
-
 		// Check for submodel references
-		const filter = {
-			type: "ref",
-			_id: { $in: history.current }
-		};
-
-		const refs = await Ref.find({ account, model }, filter);
+		const refs = await getRefNodes(account, model, branch, rev);
 
 		const getMeta = [];
 
@@ -389,7 +377,7 @@ class Meta {
 		models.add(model);
 
 		// Check submodels
-		const refs = await Ref.find({account, model}, {type: "ref"});
+		const refs = await getRefNodes(account, model, branch, revId);
 
 		refs.forEach((ref) => {
 			models.add(ref.project);
