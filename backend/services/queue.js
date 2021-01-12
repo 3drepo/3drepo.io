@@ -31,6 +31,8 @@ const config = require("../config");
 const responseCodes = require("../response_codes");
 const Utils = require("../utils");
 
+const sharedSpacePH = "$SHARED_SPACE";
+
 class ImportQueue {
 	constructor() {
 		if(!config.cn_queue ||
@@ -164,9 +166,9 @@ class ImportQueue {
 	importFile(corID, filePath, orgFileName, databaseName, modelName, userName, copy, tag, desc, importAnimations = true) {
 		const jsonFilename = `${this.sharedSpacePath}/${corID}.json`;
 
-		return this._moveFileToSharedSpace(corID, filePath, orgFileName, copy).then(obj => {
+		return this._moveFileToSharedSpace(corID, filePath, orgFileName, copy).then(newFilePath => {
 			const json = {
-				file: obj.filePath,
+				file: `${sharedSpacePH}/${newFilePath}`,
 				database: databaseName,
 				project: modelName,
 				owner: userName
@@ -185,7 +187,7 @@ class ImportQueue {
 			}
 
 			return this.writeFile(jsonFilename, JSON.stringify(json)).then(() => {
-				const msg = `import -f ${jsonFilename}`;
+				const msg = `import -f ${sharedSpacePH}/${corID}.json`;
 				return this._dispatchWork(corID, msg, true);
 			});
 
@@ -205,7 +207,7 @@ class ImportQueue {
 		return this.mkdir(this.sharedSpacePath).then(() => {
 			return this.mkdir(newFileDir).then(() => {
 				return this.writeFile(filename, JSON.stringify(defObj)).then(() => {
-					const msg = `genFed ${filename} ${account}`;
+					const msg = `genFed ${sharedSpacePH}/${corID}/obj.json ${account}`;
 					return this._dispatchWork(corID, msg);
 				});
 			});
@@ -249,7 +251,7 @@ class ImportQueue {
 					if (moveErr) {
 						reject(moveErr);
 					} else {
-						resolve({ filePath, newFileDir });
+						resolve(`${corID}/${newFileName}`);
 					}
 				});
 			});
