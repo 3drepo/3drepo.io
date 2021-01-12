@@ -107,7 +107,7 @@ History.findByBranch = async function(account, model, branch, projection, showVo
 
 History.revisionCount = async function(teamspace, model) {
 	const query = {"incomplete": {"$exists": false}, "void": {"$ne": true}};
-	return (await find(teamspace, model, query)).count();
+	return await db.count(teamspace, getCollName(model), query);
 };
 
 // get the head of default branch (master)
