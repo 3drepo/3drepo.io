@@ -865,35 +865,26 @@ function resetPassword(req, res, next) {
 	}
 }
 
-function listUserInfo(req, res, next) {
+async function listUserInfo(req, res, next) {
 
 	const responsePlace = utils.APIInfo(req);
-	let user;
+	const user = await User.findByUserName(req.params.account);
 
-	User.findByUserName(req.params.account).then(_user => {
+	if(!user) {
+		throw {resCode: responseCodes.USER_NOT_FOUND};
+	}
 
-		if(!_user) {
-			return Promise.reject({resCode: responseCodes.USER_NOT_FOUND});
-		}
+	const accounts = await User.listAccounts(user);
 
-		user = _user;
-		return user.listAccounts();
+	const {firstName, lastName, email, avatar, billing: { billingInfo }}  = user.customData;
 
-	}).then(databases => {
-
-		const customData = user.customData.toObject();
-
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
-			accounts: databases,
-			firstName: customData.firstName,
-			lastName: customData.lastName,
-			email: customData.email,
-			billingInfo: customData.billing.billingInfo,
-			hasAvatar: customData.avatar ? true : false
-		});
-
-	}).catch(err => {
-		responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode ? {} : err);
+	responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
+		accounts,
+		firstName,
+		lastName,
+		email,
+		billingInfo: billingInfo,
+		hasAvatar:  Boolean(avatar)
 	});
 }
 
@@ -924,7 +915,9 @@ function listInfo(req, res, next) {
 		});
 
 	} else {
-		listUserInfo(req, res, next);
+		listUserInfo(req, res, next).catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode ? {} : err);
+		});
 	}
 }
 

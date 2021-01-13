@@ -26,7 +26,8 @@ const DB = require("../handler/db");
 const crypto = require("crypto");
 const utils = require("../utils");
 const Role = require("./role");
-const { addDefaultJobs, addUserToJob, findJobByUser, removeUserFromAnyJob, usersWithJob } = require("./job");
+const { addDefaultJobs,  findJobByUser, usersWithJob } = require("./job");
+// addUserToJob, removeUserFromAnyJob
 const History = require("./history");
 const TeamspaceSettings = require("./teamspaceSetting");
 const Mailer = require("../mailer/mailer");
@@ -39,7 +40,8 @@ const ModelSetting = require("./modelSetting");
 const C = require("../constants");
 // const userBilling = require("./userBilling");
 // const permissionTemplate = require("./permissionTemplate");
-// const accountPermission = require("./accountPermission");
+// const AccountPermission = require("./accountPermission");
+const AccountPermissions = require("./accountPermissions");
 const Project = require("./project");
 const FileRef = require("./fileRef");
 
@@ -171,8 +173,8 @@ User.findOne = async function (account, query, projection) {
 	return await DB.findOne(account, COLL_NAME, query, projection);
 };
 
-User.findByUserName = function (user) {
-	return this.findOne("admin", { user });
+User.findByUserName = function (username) {
+	return this.findOne("admin", { user: username });
 };
 
 User.getProfileByUsername = async function (username) {
@@ -890,12 +892,13 @@ function _createAccounts(roles, userName) {
 	const promises = [];
 
 	roles.forEach(role => {
+
 		promises.push(User.findByUserName(role.db).then(user => {
 			if (!user) {
 				return;
 			}
 			const tsPromises = [];
-			const permission = user.customData.permissions.findByUser(userName);
+			const permission = AccountPermissions.findByUser(user.customData.permissions, userName);
 			if (permission) {
 				// Check for admin Privileges first
 				const isTeamspaceAdmin = permission.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
@@ -1089,15 +1092,13 @@ function _createAccounts(roles, userName) {
 	return Promise.all(promises).then(() => {
 		return accounts;
 	});
-
 }
 
-/*
-
-schema.methods.listAccounts = function () {
-	return _createAccounts(this.roles, this.user);
+User.listAccounts = async function (user) {
+	return _createAccounts(user.roles, user.user);
 };
 
+/*
 schema.methods.updateSubscriptions = function (plans, billingUser, billingAddress) {
 
 	let billingAgreement;
