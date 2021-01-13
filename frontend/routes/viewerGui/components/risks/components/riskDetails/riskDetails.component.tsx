@@ -17,7 +17,7 @@
 
 import React, { Fragment } from 'react';
 
-import { merge, size } from 'lodash';
+import { size } from 'lodash';
 
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { isViewer } from '../../../../../../helpers/permissions';
@@ -335,8 +335,6 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleNewScreenshot = (screenshot) => {
-		const { teamspace, model, viewer } = this.props;
-
 		if (this.isNewRisk) {
 			this.props.setState({ newRisk: {
 				...this.riskData,
