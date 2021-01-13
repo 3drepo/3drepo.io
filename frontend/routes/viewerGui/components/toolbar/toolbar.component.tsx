@@ -60,7 +60,7 @@ import {
 } from '../../../../constants/viewer';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 
-const HelicopterIcon = () => <Helicopter IconProps={{ className: 'fontSizeSmall' }} />;
+const HelicopterIcon = () => <Helicopter fontSize="small" />;
 
 interface IProps {
 	teamspace: string;

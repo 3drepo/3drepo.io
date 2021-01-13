@@ -140,7 +140,7 @@ export class Tools extends React.PureComponent<IProps, any> {
 					label="Erase"
 					color={this.getToolColor(MODES.ERASER)}
 					action={onEraseClick}
-					Icon={(props) => <Eraser IconProps={props} />}
+					Icon={(props) => <Eraser {...props} />}
 				/>
 				<OptionsDivider />
 				<TooltipButton
