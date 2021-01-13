@@ -252,22 +252,6 @@ describe("Revision", function () {
 
 	});
 
-	it("update revision tag", async () => {
-		const tag = 'RenamedTag';
-		const revisionId = '7349c6eb-4009-4a4a-af66-701a496dbe2e';
-
-		const revisionBeforeUpdate = await getRevision(revisionId);
-
-		await agent.put(`/${username}/${model}/revisions/${revisionId}/tag`)
-				.send({tag})
-				.expect(200);
-
-		const revisionAfterUpdate = await getRevision(revisionId);
-
-		expect(revisionAfterUpdate.tag).to.not.be.equal(revisionBeforeUpdate.tag);
-		expect(revisionAfterUpdate.tag).to.be.equal(tag);
-	});
-
 	it("update revision", async () => {
 		const revisionId = '7349c6eb-4009-4a4a-af66-701a496dbe2e';;
 
