@@ -36,7 +36,13 @@ export const SubmitButton = ({ pending, disabled, children, ...props}: IProps) =
 		color: 'secondary',
 	}, props);
 
-	const Button = props.variant === 'fab' ? StyledFab : StyledButton;
+	const isFabVariant = props.variant === 'fab';
+
+	const Button = isFabVariant ? StyledFab : StyledButton;
+
+	if (additionalProps.hasOwnProperty('variant') && isFabVariant) {
+		delete additionalProps.variant;
+	}
 
 	return (
 		<Button
