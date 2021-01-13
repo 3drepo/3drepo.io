@@ -122,7 +122,7 @@ History.findByUID = async function(account, model, revId, projection) {
 };
 
 History.updateRevision = async function(account, model, revId, voidValue) {
-	if(Object.prototype.toString.call(voidValue) === "[object Boolean]") {
+	if(utils.isBoolean(voidValue)) {
 		voidValue = voidValue ? true : undefined;
 
 		const {result} = await db.update(account, getCollName(model), {_id: utils.stringToUUID(revId)} , { $set:  {void: voidValue}});
