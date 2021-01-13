@@ -16,6 +16,9 @@
  */
 
 "use strict";
+
+const AccountPermissions = require("../models/accountPermissions");
+
 (() => {
 	const ModelSetting = require("../models/modelSetting");
 	const Project = require("../models/project");
@@ -43,7 +46,7 @@
 						throw ResponseCodes.RESOURCE_NOT_FOUND;
 					}
 
-					const permission = user.customData.permissions.findByUser(username);
+					const permission = AccountPermissions.findByUser(user.customData.permissions, username);
 
 					if(!permission) {
 						return [];
