@@ -82,7 +82,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 						label="Description"
 						disabled={!canEditBasicProperty}
 						mutable={!isNewRisk}
-						enableMarkdown
+						enableMarkdown={1}
 					/>
 				)} />
 			</Container>

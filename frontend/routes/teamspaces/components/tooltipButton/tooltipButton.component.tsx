@@ -55,7 +55,8 @@ export const TooltipButton = (props: IProps) => {
 			onClick={onClick || action}
 			disabled={disabled}
 			className={className}
-			active={Number(active)}>
+			active={Number(active)}
+		>
 			<Icon {...iconProps} />
 		</StyledIconButton>
 	);

@@ -264,7 +264,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 				<Summary
 					expandIcon={this.renderExpandIcon(!disableExpanding && !editable)}
 					onClick={handleHeaderClick}
-					expanded={this.state.expanded && this.props.scrolled}
+					expanded={this.state.expanded && this.props.scrolled ? 1 : 0}
 				>
 					<RoleIndicator color={roleColor} ref={this.headerRef} />
 					<MainInfoContainer>
