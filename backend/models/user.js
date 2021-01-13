@@ -26,8 +26,8 @@ const DB = require("../handler/db");
 const crypto = require("crypto");
 const utils = require("../utils");
 const Role = require("./role");
-const { addDefaultJobs,  findJobByUser, usersWithJob } = require("./job");
-// addUserToJob, removeUserFromAnyJob
+const { addDefaultJobs,  findJobByUser, usersWithJob, removeUserFromAnyJob } = require("./job");
+// addUserToJob
 const History = require("./history");
 const TeamspaceSettings = require("./teamspaceSetting");
 const Mailer = require("../mailer/mailer");
@@ -1152,22 +1152,24 @@ schema.methods.executeBillingAgreement = function () {
 	});
 };
 
-schema.methods.removeTeamMember = function (username, cascadeRemove) {
+*/
+
+User.removeTeamMember = function (accountUser, username, cascadeRemove) {
 
 	let foundProjects = [];
 	let foundModels = [];
 
-	if (this.user === username) {
+	if (accountUser.user === username) {
 		// The user should not be able to remove itself from the teamspace
 		return Promise.reject(responseCodes.SUBSCRIPTION_CANNOT_REMOVE_SELF);
 	}
 
-	const teamspacePerm = this.customData.permissions.findByUser(username);
+	const teamspacePerm = accountUser.customData.permissions.findByUser(username);
 	// check if they have any permissions assigned
-	return Project.find({ account: this.user }, { "permissions.user": username }).then(projects => {
+	return Project.find({ account: accountUser.user }, { "permissions.user": username }).then(projects => {
 
 		foundProjects = projects;
-		return ModelSetting.find({ account: this.user }, { "permissions.user": username });
+		return ModelSetting.find({ account: accountUser.user }, { "permissions.user": username });
 
 	}).then(models => {
 
@@ -1191,7 +1193,7 @@ schema.methods.removeTeamMember = function (username, cascadeRemove) {
 			const promises = [];
 
 			if (teamspacePerm) {
-				promises.push(this.customData.permissions.remove(username));
+				promises.push(accountUser.customData.permissions.remove(username));
 			}
 
 			promises.push(foundModels.map(model =>
@@ -1200,16 +1202,16 @@ schema.methods.removeTeamMember = function (username, cascadeRemove) {
 			promises.push(foundProjects.map(project =>
 				project.updateAttrs({ permissions: project.permissions.filter(p => p.user !== username) })));
 
-			promises.push(removeUserFromAnyJob(this.user, username));
+			promises.push(removeUserFromAnyJob(accountUser.user, username));
 			return Promise.all(promises);
 		}
 
 	}).then(() => {
-		return Role.revokeTeamSpaceRoleFromUser(username, this.user);
+		return Role.revokeTeamSpaceRoleFromUser(username, accountUser.user);
 	});
-
 };
 
+/*
 schema.methods.addTeamMember = function (user, job, permissions) {
 	return  this.hasReachedLicenceLimit().then((reachedLimit) => {
 		if (reachedLimit) {
@@ -1224,7 +1226,7 @@ schema.methods.addTeamMember = function (user, job, permissions) {
 					return Promise.reject(responseCodes.USER_NOT_ASSIGNED_JOB);
 				}
 
-				if (userEntry.isMemberOfTeamspace(this.user)) {
+				if (this.isMemberOfTeamspace(userEntry, this.user)) {
 					return Promise.reject(responseCodes.USER_ALREADY_ASSIGNED);
 				}
 
@@ -1253,12 +1255,11 @@ schema.methods.getBasicDetails = function() {
 		company: _.get(customData, "billing.billingInfo.company", null)
 	};
 };
-
-schema.methods.isMemberOfTeamspace = function (teamspace) {
-	return this.roles.filter(role => role.db === teamspace && role.role === C.DEFAULT_MEMBER_ROLE).length > 0;
-};
-
 */
+
+User.isMemberOfTeamspace = function (user, teamspace) {
+	return user.roles.filter(role => role.db === teamspace && role.role === C.DEFAULT_MEMBER_ROLE).length > 0;
+};
 
 User.getQuotaInfo = function (teamspace) {
 	return this.findByUserName(teamspace).then((user) => {
@@ -1291,7 +1292,7 @@ schema.methods.hasReachedLicenceLimit = async function () {
 };
 */
 
-User.getMembers = function (teamspace) {
+User.getMembers = async function (teamspace) {
 	const promises = [];
 
 	const getTeamspaceMembers = this.findUsersInTeamspace(teamspace, {
@@ -1301,7 +1302,7 @@ User.getMembers = function (teamspace) {
 	const getJobInfo = usersWithJob(teamspace);
 
 	const getTeamspacePermissions = User.findByUserName(teamspace)
-		.then(user => user.toObject().customData.permissions);
+		.then(user => user.customData.permissions);
 
 	promises.push(
 		getTeamspaceMembers,
@@ -1309,21 +1310,20 @@ User.getMembers = function (teamspace) {
 		getJobInfo
 	);
 
-	return Promise.all(promises)
-		.then(([members = [], teamspacePermissions, memToJob = {}]) => {
-			return members.map(({user, customData}) => {
-				const permissions = _.find(teamspacePermissions, {user});
+	const [members = [], teamspacePermissions, memToJob = {}] = await Promise.all(promises);
 
-				return {
-					user,
-					firstName: customData.firstName,
-					lastName: customData.lastName,
-					company: _.get(customData, "billing.billingInfo.company", null),
-					permissions: _.get(permissions, "permissions", []),
-					job: _.get(memToJob, user)
-				};
-			});
-		});
+	return members.map(({user, customData}) => {
+		const permissions = _.find(teamspacePermissions, {user});
+
+		return {
+			user,
+			firstName: customData.firstName,
+			lastName: customData.lastName,
+			company: _.get(customData, "billing.billingInfo.company", null),
+			permissions: _.get(permissions, "permissions", []),
+			job: _.get(memToJob, user)
+		};
+	});
 };
 
 User.getAllUsersInTeamspace = function (teamspace) {
@@ -1333,9 +1333,9 @@ User.getAllUsersInTeamspace = function (teamspace) {
 	});
 };
 
-User.findUsersInTeamspace = function (teamspace, fields) {
+User.findUsersInTeamspace =  async function (teamspace, fields) {
 	const query = { "roles.db": teamspace, "roles.role" : C.DEFAULT_MEMBER_ROLE };
-	return this.find({account: "admin"}, query , fields);
+	return await DB.find("admin", COLL_NAME, query, fields);
 };
 
 User.teamspaceMemberCheck = function (teamspace, user) {
@@ -1344,7 +1344,7 @@ User.teamspaceMemberCheck = function (teamspace, user) {
 			return Promise.reject(responseCodes.USER_NOT_FOUND);
 		}
 
-		if (!userEntry.isMemberOfTeamspace(teamspace)) {
+		if (!this.isMemberOfTeamspace(userEntry, teamspace)) {
 			return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
 		}
 	});
@@ -1352,7 +1352,7 @@ User.teamspaceMemberCheck = function (teamspace, user) {
 
 User.getTeamMemberInfo = async (teamspace, user)  => {
 	const userEntry = await User.findByUserName(user);
-	if(!userEntry || !userEntry.isMemberOfTeamspace(teamspace)) {
+	if(!userEntry || !this.isMemberOfTeamspace(userEntry,teamspace)) {
 		throw responseCodes.USER_NOT_FOUND;
 	} else {
 		const job = await findJobByUser(teamspace, user);
