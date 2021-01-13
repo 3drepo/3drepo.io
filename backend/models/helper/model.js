@@ -608,25 +608,6 @@ function downloadLatest(account, model) {
 	});
 }
 
-const checkTag = async (account, model, tag) => {
-	if(!tag) {
-		return null;
-	} else {
-
-		if (!tag.match(History.tagRegExp)) {
-			throw responseCodes.INVALID_TAG_NAME;
-		}
-
-		const _tag = await History.findByTag(account, model, tag, {_id: 1});
-
-		if (!_tag) {
-			return null;
-		} else {
-			throw responseCodes.DUPLICATE_TAG;
-		}
-	}
-};
-
 async function uploadFile(req) {
 	if (!config.cn_queue) {
 		return Promise.reject(responseCodes.QUEUE_NO_CONFIG);
@@ -691,7 +672,7 @@ async function uploadFile(req) {
 	});
 
 	// req.body.tag wont be defined after the file has been uploaded
-	await checkTag(account, model, req.body.tag);
+	await History.isValidTag(account, model, req.body.tag);
 
 	return uploadedFile;
 }
