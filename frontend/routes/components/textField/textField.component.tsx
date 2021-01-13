@@ -246,10 +246,10 @@ export class TextField extends React.PureComponent<IProps, IState> {
 		return (
 				<>
 					<Formik
-							enableReinitialize
-							initialValues={{ [name]: initialValue }}
-							validationSchema={validationSchema}
-							onSubmit={this.saveChange}
+						enableReinitialize
+						initialValues={{ [name]: initialValue }}
+						validationSchema={validationSchema}
+						onSubmit={this.saveChange}
 					>
 						<Container onBlur={this.onBlur} className={className}>
 							{this.isEditMode &&

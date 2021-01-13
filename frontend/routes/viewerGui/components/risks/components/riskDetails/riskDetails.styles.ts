@@ -167,8 +167,10 @@ export const StyledTab = styled(Tab)`
 
 export const StyledTabs = styled(Tabs)`
 	&& {
-		${StyledTab}:first-of-type {
-		  max-width: 52px;
+		${StyledTab} {
+			&:first-of-type {
+				max-width: 52px;
+			}
 		}
 	}
 `;
