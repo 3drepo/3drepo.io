@@ -99,7 +99,7 @@ export const SettingsForm = (props) => {
 					/>
 				)} />
 			</Container>
-			<ViewerPanelFooter alignItems="center" justify="flex-end">
+			<ViewerPanelFooter container alignItems="center" justify="flex-end">
 				<Field render={({ form }) => (
 					<ViewerPanelButton
 						type="submit"

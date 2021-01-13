@@ -194,7 +194,7 @@ export class Measurements extends React.PureComponent<IProps, IState> {
 	));
 
 	private renderFooterContent = () => (
-		<ViewerPanelFooter alignItems="center">
+		<ViewerPanelFooter container alignItems="center">
 			<ViewerBottomActions id={this.props.id + '-add-new-container'}>
 				<MeasuringType {...this.props} />
 			</ViewerBottomActions>

@@ -209,7 +209,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 
 	public renderFooter = () => {
 		return (
-			<ViewerPanelFooter alignItems="center">
+			<ViewerPanelFooter container alignItems="center">
 				<Actions>
 					<ColorPickerWrapper>
 						<ColorPicker
