@@ -378,8 +378,9 @@ billingSchema.methods.getActiveSubscriptions = function() {
 	return res;
 };
 
-billingSchema.methods.getSubscriptionLimits = function() {
+const UserBilling = {};
 
+UserBilling.getSubscriptionLimits = function(userBilling) {
 	const sumLimits = {};
 	if(config.subscriptions.basic) {
 		sumLimits.spaceLimit = config.subscriptions.basic.data;
@@ -393,11 +394,11 @@ billingSchema.methods.getSubscriptionLimits = function() {
 	if(!sumLimits.collaboratorLimit) {
 		sumLimits.collaboratorLimit = 0;
 	}
-	if(this.subscriptions)	{
-		Object.keys(this.subscriptions).forEach(key => {
+	if(userBilling.subscriptions)	{
+		Object.keys(userBilling.subscriptions).forEach(key => {
 			if(key === "paypal") {
-				if (this.subscriptions.paypal.length > 0) {
-					this.subscriptions.paypal.forEach(ppPlan => {
+				if (userBilling.subscriptions.paypal.length > 0) {
+					userBilling.subscriptions.paypal.forEach(ppPlan => {
 						const plan = config.subscriptions.plans[ppPlan.plan];
 						if(plan &&
 							(!ppPlan.expiryDate || ppPlan.expiryDate > Date.now())) {
@@ -410,12 +411,12 @@ billingSchema.methods.getSubscriptionLimits = function() {
 					});
 				}
 			} else {
-				if(!this.subscriptions[key].expiryDate ||
-					this.subscriptions[key].expiryDate > Date.now()) {
-					sumLimits.spaceLimit += this.subscriptions[key].data;
+				if(!userBilling.subscriptions[key].expiryDate ||
+					userBilling.subscriptions[key].expiryDate > Date.now()) {
+					sumLimits.spaceLimit += userBilling.subscriptions[key].data;
 					if(sumLimits.collaboratorLimit !== "unlimited") {
-						sumLimits.collaboratorLimit = this.subscriptions[key].collaborators === "unlimited" ?
-							"unlimited" : sumLimits.collaboratorLimit + this.subscriptions[key].collaborators;
+						sumLimits.collaboratorLimit = userBilling.subscriptions[key].collaborators === "unlimited" ?
+							"unlimited" : sumLimits.collaboratorLimit + userBilling.subscriptions[key].collaborators;
 					}
 				}
 
@@ -536,4 +537,4 @@ billingSchema.methods.activateSubscriptions = function(user, paymentInfo, raw) {
 
 };
 
-module.exports = billingSchema;
+module.exports = { ...billingSchema, ...UserBilling };

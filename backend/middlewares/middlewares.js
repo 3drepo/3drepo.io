@@ -61,7 +61,7 @@
 		let limits;
 		return User.findByUserName(account).then(dbUser => {
 
-			limits = dbUser.customData.billing.getSubscriptionLimits();
+			limits = User.getSubscriptionLimits(dbUser);
 			return User.getTeamspaceSpaceUsed(account);
 
 		}).then(totalSize => {
@@ -94,7 +94,7 @@
 
 		return User.findByUserName(account).then(dbUser => {
 
-			limits = dbUser.customData.billing.getSubscriptionLimits();
+			limits = User.getSubscriptionLimits(dbUser);
 
 			return ModelSetting.findById({account}, model);
 

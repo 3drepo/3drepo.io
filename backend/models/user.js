@@ -38,7 +38,7 @@ const config = require("../config");
 
 const ModelSetting = require("./modelSetting");
 const C = require("../constants");
-// const userBilling = require("./userBilling");
+const UserBilling = require("./userBilling");
 // const permissionTemplate = require("./permissionTemplate");
 // const AccountPermission = require("./accountPermission");
 const AccountPermissions = require("./accountPermissions");
@@ -835,7 +835,7 @@ function _findModelDetails(dbUserCache, username, model) {
 }
 
 function _calSpace(user) {
-	const quota = user.customData.billing.getSubscriptionLimits();
+	const quota = UserBilling.getSubscriptionLimits(user.customData.billing);
 	return User.getTeamspaceSpaceUsed(user.user).then(sizeInBytes => {
 
 		if (quota.spaceLimit > 0) {
@@ -1094,7 +1094,11 @@ function _createAccounts(roles, userName) {
 	});
 }
 
-User.listAccounts = async function (user) {
+User.getSubscriptionLimits = function(user) {
+	return UserBilling.getSubscriptionLimits(user.customData.billing);
+};
+
+User.listAccounts = async function(user) {
 	return _createAccounts(user.roles, user.user);
 };
 
