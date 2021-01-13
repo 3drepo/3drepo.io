@@ -181,7 +181,6 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 					placeholder={this.commentPlaceholder}
 					multiline
 					fullWidth
-					InputLabelProps={{ shrink: true }}
 					inputProps={{ rowsMax: 4, maxLength: 220 }}
 					disabled={!this.props.canComment}
 					inputRef={ref}

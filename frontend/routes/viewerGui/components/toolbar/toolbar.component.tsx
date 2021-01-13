@@ -60,7 +60,7 @@ import {
 } from '../../../../constants/viewer';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 
-const HelicopterIcon = () => <Helicopter fontSize="small" />;
+const HelicopterIcon = () => <Helicopter className="fontSizeSmall" />;
 
 interface IProps {
 	teamspace: string;
@@ -324,19 +324,22 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 		const condition = this.state.activeSubMenu === label;
 		return (
 			<Fade in={condition}>
-				<ClickAwayListener onClickAway={this.handleClickAway}>
-					<Submenu>{subMenu.map((subButton, subKey) => (
-						<ToolbarButton
-							key={subKey}
-							variant="secondary"
-							coloured={subButton.specificOption ? 1 : 0}
-							label={subButton.label}
-							Icon={subButton.Icon}
-							action={subButton.action}
-							disabled={subButton.disabled} />)
+				<div>
+					<ClickAwayListener onClickAway={this.handleClickAway}>
+						<Submenu>{subMenu.map((subButton, subKey) => (
+							<ToolbarButton
+								key={subKey}
+								variant="secondary"
+								coloured={subButton.specificOption ? 1 : 0}
+								label={subButton.label}
+								Icon={subButton.Icon}
+								action={subButton.action}
+								disabled={subButton.disabled}
+							/>)
 						)}
-					</Submenu>
-				</ClickAwayListener>
+						</Submenu>
+					</ClickAwayListener>
+				</div>
 			</Fade>
 		);
 	})(subMenu.length && this.state.activeSubMenu === label)

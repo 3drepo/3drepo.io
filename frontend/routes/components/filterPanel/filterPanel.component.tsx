@@ -101,7 +101,7 @@ interface IState {
 	filtersOpen: boolean;
 }
 
-const FilterIcon = () => <Filter IconProps={{ className: 'fontSizeTiny' }} />;
+const FilterIcon = () => <Filter className="fontSizeTiny" />;
 
 const getMenuButton = (InitialIcon) => ({ IconProps, Icon, ...props }: { Icon?, IconProps: any }) => (
 	<ButtonWrapper>
@@ -184,7 +184,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 	public renderCopyButton = renderWhenTrue(() => (
 		<CopyToClipboard text={JSON.stringify(this.props.selectedFilters)}>
 			<ButtonContainer>
-				<CopyButton IconProps={{size: 'small'}} disabled={!this.props.selectedFilters.length} />
+				<CopyButton fontSize="small" disabled={!this.props.selectedFilters.length} />
 			</ButtonContainer>
 		</CopyToClipboard>
 	));
