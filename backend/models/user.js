@@ -608,11 +608,11 @@ User.hasReadLatestTerms = function (user) {
 	return new Date(config.termsUpdatedAt) < user.customData.lastLoginAt;
 };
 
-/*
-schema.methods.getAvatar = function () {
-	return this.customData && this.customData.avatar || null;
+User.getAvatar = function (user) {
+	return user.customData && user.customData.avatar || null;
 };
 
+/*
 schema.methods.updateInfo = function (updateObj) {
 
 	const updateableFields = ["firstName", "lastName", "email"];

@@ -787,20 +787,17 @@ function getAvatar(req, res, next) {
 
 	// Update user info
 	User.findByUserName(req.params[C.REPO_REST_API_ACCOUNT]).then(user => {
+		const avatar = User.getAvatar(user);
 
-		if(!user.getAvatar()) {
+		if(!avatar) {
 			return Promise.reject({resCode: responseCodes.USER_DOES_NOT_HAVE_AVATAR });
 		}
 
-		return Promise.resolve(user.getAvatar());
-
+		return Promise.resolve(avatar);
 	}).then(avatar => {
-
 		res.write(avatar.data.buffer);
 		res.end();
-
 	}).catch((err) => {
-
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
