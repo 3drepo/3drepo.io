@@ -535,7 +535,14 @@
 	}
 
 	function changeProject(req, res, next) {
-		Project.updateAttrs(req.params.account, req.params.project, req.body).then(project => {
+		// Project.updateAttrs(req.params.account, req.params.project, req.body).then(project => {
+		Project.findOne({ account: req.params.account }, {name: req.params.project}).then(project => {
+			if(!project) {
+				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
+			} else {
+				return project.updateAttrs(req.body);
+			}
+		}).then(project => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
