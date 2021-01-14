@@ -259,6 +259,13 @@ export const MuiTheme = createMuiTheme({
 			popper: {
 				pointerEvents: 'none'
 			}
+		},
+		MuiAccordion: {
+			root: {
+				'&$expanded': {
+					margin: 0,
+				},
+			}
 		}
 	}
 });

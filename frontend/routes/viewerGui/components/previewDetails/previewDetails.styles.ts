@@ -20,9 +20,9 @@ import styled, { css } from 'styled-components';
 import { Form } from 'formik';
 
 import {
-	ExpansionPanel,
-	ExpansionPanelDetails,
-	ExpansionPanelSummary,
+	Accordion,
+	AccordionDetails,
+	AccordionSummary,
 	IconButton,
 	Typography as TypographyComponent
 } from '@material-ui/core';
@@ -57,7 +57,7 @@ export const Container = styled.div`
 	height: 100%;
 `;
 
-export const Collapsable = styled(ExpansionPanel)`
+export const Collapsable = styled(Accordion)`
 	&& {
 		box-shadow: none;
 		padding: 0 12px;
@@ -66,7 +66,7 @@ export const Collapsable = styled(ExpansionPanel)`
 	}
 `;
 
-export const Details = styled(ExpansionPanelDetails)`
+export const Details = styled(AccordionDetails)`
 	&& {
 		display: flex;
 		flex-direction: column;
@@ -76,7 +76,13 @@ export const Details = styled(ExpansionPanelDetails)`
 	}
 `;
 
-export const Summary = styled(ExpansionPanelSummary).attrs({
+export const Summary = styled(AccordionSummary)`
+	&& {
+		display: none;
+	}
+` as any;
+
+export const Header = styled(AccordionSummary).attrs({
 	classes: {
 		focused: 'focused',
 		expandIcon: 'summary-icon',
@@ -98,7 +104,7 @@ export const Summary = styled(ExpansionPanelSummary).attrs({
 			display: none;
 		}
 
-		box-shadow: ${({ expanded }: { expanded: boolean }) => expanded ? `0 4px 7px -4px ${COLOR.BLACK_30};` : 'none'};
+		box-shadow: ${({expanded}: { expanded: boolean }) => expanded ? `0 4px 7px -4px ${COLOR.BLACK_30};` : 'none'};
 	}
 ` as any;
 
