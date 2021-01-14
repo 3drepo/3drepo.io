@@ -165,7 +165,7 @@ History.clean = function(histories, branch) { // or history
 		clean(histories, branch);
 };
 
-History.isValidTag = async (account, model, tag) => {
+History.isValidTag = async function(account, model, tag) {
 	if(!tag) {
 		return null;
 	} else {
@@ -173,7 +173,6 @@ History.isValidTag = async (account, model, tag) => {
 		if (!tag.match(this.tagRegExp)) {
 			throw responseCodes.INVALID_TAG_NAME;
 		}
-
 		const _tag = await this.findByTag(account, model, tag, {_id: 1});
 
 		if (!_tag) {
