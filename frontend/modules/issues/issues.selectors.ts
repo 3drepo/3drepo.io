@@ -22,6 +22,7 @@ import { STATUSES } from '../../constants/issues';
 import { prepareComments, transformCustomsLinksToMarkdown } from '../../helpers/comments';
 import { hasPin, issueToPin } from '../../helpers/pins';
 import { searchByFilters } from '../../helpers/searching';
+import { sortByDate } from '../../helpers/sorting';
 import { selectCurrentModel } from '../model';
 import { selectQueryParams } from '../router/router.selectors';
 import { selectSelectedEndingDate, selectSelectedSequence, selectSelectedStartingDate } from '../sequences';
@@ -98,17 +99,27 @@ export const selectSearchEnabled = createSelector(
 	selectComponentState, (state) => state.searchEnabled
 );
 
+export const selectSortOrder = createSelector(
+	selectComponentState, (state) => state.sortOrder
+);
+
+export const selectSortByField = createSelector(
+	selectComponentState, (state) => state.sortBy
+);
+
 export const selectSelectedFilters = createSelector(
 	selectComponentState, (state) => state.selectedFilters
 );
 
 export const selectFilteredIssues = createSelector(
-	selectIssues, selectSelectedFilters, (issues, selectedFilters) => {
-		const returnHiddenIssue = selectedFilters.length && selectedFilters
-			.some(({ value: { value } }) => [STATUSES.CLOSED, STATUSES.VOID].includes(value));
+	selectIssues, selectSelectedFilters, selectSortOrder, selectSortByField,
+		(issues, selectedFilters, sortOrder, sortByField) => {
+			const returnHiddenIssue = selectedFilters.length && selectedFilters
+				.some(({ value: { value } }) => [STATUSES.CLOSED, STATUSES.VOID].includes(value));
 
-		return searchByFilters(issues, selectedFilters, returnHiddenIssue);
-	}
+			return sortByDate(searchByFilters(issues, selectedFilters, returnHiddenIssue),
+				{ order: sortOrder }, sortByField );
+		}
 );
 
 export const selectAllFilteredIssues = createSelector(
@@ -130,14 +141,6 @@ export const selectPostCommentIsPending = createSelector(
 
 export const selectIsImportingBCF = createSelector(
 	selectComponentState, (state) => state.isImportingBCF
-);
-
-export const selectSortOrder = createSelector(
-	selectComponentState, (state) => state.sortOrder
-);
-
-export const selectSortByField = createSelector(
-	selectComponentState, (state) => state.sortBy
 );
 
 export const selectFailedToLoad = createSelector(

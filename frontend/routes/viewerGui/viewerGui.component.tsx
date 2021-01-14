@@ -45,6 +45,7 @@ interface IProps {
 	className?: string;
 	modelSettings: any;
 	isModelPending: boolean;
+	isPresentationActive: boolean;
 	isFocusMode: boolean;
 	match: {
 		params: {
@@ -56,9 +57,11 @@ interface IProps {
 	queryParams: {
 		issueId?: string;
 		riskId?: string;
+		presenter?: string;
 	};
 	leftPanels: string[];
 	rightPanels: string[];
+	disabledPanelButtons: Set<string>;
 	stopListenOnSelections: () => void;
 	stopListenOnModelLoaded: () => void;
 	stopListenOnClickPin: () => void;
@@ -67,6 +70,9 @@ interface IProps {
 	resetModel: () => void;
 	setPanelVisibility: (panelName, visibility?) => void;
 	removeMeasurement: (uuid) => void;
+	resetViewerGui: () => void;
+	resetCompareComponent: () => void;
+	joinPresentation: (code) => void;
 }
 
 interface IState {
@@ -91,7 +97,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	public renderViewerLoader = renderWhenTrue(() => <ViewerLoader />);
 
 	public componentDidMount() {
-		const { queryParams: { issueId, riskId }, match: { params }, viewer, leftPanels } = this.props;
+		const { queryParams: { issueId, riskId, presenter}, match: { params }, viewer, leftPanels } = this.props;
 
 		viewer.init();
 
@@ -106,6 +112,10 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		MultiSelect.initKeyWatchers();
 		this.props.fetchData(params.teamspace, params.model);
 		this.toggleViewerListeners(true);
+
+		if (presenter) {
+			this.props.joinPresentation(presenter);
+		}
 	}
 
 	public componentDidUpdate(prevProps: IProps, prevState: IState) {
@@ -114,6 +124,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		const teamspaceChanged = params.teamspace !== prevProps.match.params.teamspace;
 		const modelChanged = params.model !== prevProps.match.params.model;
 		const revisionChanged = params.revision !== prevProps.match.params.revision;
+		const presentationActivityChanged = prevProps.isPresentationActive !== this.props.isPresentationActive;
 
 		const { issueId, riskId } = queryParams;
 
@@ -131,6 +142,11 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		if (!isEmpty(changes)) {
 			this.setState(changes);
 		}
+
+		if (presentationActivityChanged && this.props.isPresentationActive) {
+			this.props.setPanelVisibility(VIEWER_PANELS.COMPARE, false);
+			this.props.resetCompareComponent();
+		}
 	}
 
 	public componentWillUnmount() {
@@ -141,6 +157,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		this.props.resetPanelsStates();
 		this.props.viewer.destroy();
 		this.props.resetModel();
+		this.props.resetViewerGui();
 		this.toggleViewerListeners(false);
 	}
 
@@ -185,6 +202,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 					type={type}
 					id={type + '-panel-button'}
 					active={this.props.leftPanels.includes(type)}
+					disabled={this.props.disabledPanelButtons.has(type)}
 				/>
 			))}
 		</LeftPanelsButtons>

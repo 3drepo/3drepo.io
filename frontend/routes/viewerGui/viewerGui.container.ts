@@ -18,13 +18,16 @@
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
+import { CompareActions } from '../../modules/compare';
 
 import { selectCurrentUser } from '../../modules/currentUser';
 import { MeasurementsActions } from '../../modules/measurements';
 import { selectIsPending, selectSettings, ModelActions } from '../../modules/model';
+import { selectIsPresentationActive, PresentationActions } from '../../modules/presentation';
 import { selectQueryParams } from '../../modules/router/router.selectors';
 import { TreeActions } from '../../modules/tree';
 import {
+	selectDisabledPanelButtons,
 	selectIsFocusMode, selectLeftPanels, selectRightPanels, ViewerGuiActions,
 } from '../../modules/viewerGui';
 import { withViewer } from '../../services/viewer/viewer';
@@ -37,7 +40,9 @@ const mapStateToProps = createStructuredSelector({
 	isModelPending: selectIsPending,
 	leftPanels: selectLeftPanels,
 	rightPanels: selectRightPanels,
-	isFocusMode: selectIsFocusMode
+	isFocusMode: selectIsFocusMode,
+	disabledPanelButtons: selectDisabledPanelButtons,
+	isPresentationActive: selectIsPresentationActive
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -48,7 +53,10 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	stopListenOnModelLoaded: ViewerGuiActions.stopListenOnModelLoaded,
 	stopListenOnClickPin: ViewerGuiActions.stopListenOnClickPin,
 	resetModel: ModelActions.reset,
+	resetViewerGui: ViewerGuiActions.reset,
 	removeMeasurement: MeasurementsActions.removeMeasurement,
+	resetCompareComponent: CompareActions.resetComponentState,
+	joinPresentation: PresentationActions.joinPresentation,
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(ViewerGui));

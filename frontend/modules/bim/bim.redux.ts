@@ -26,6 +26,8 @@ export const { Types: BimTypes, Creators: BimActions } = createActions({
 	setComponentState: ['componentState'],
 	setActiveMeta: ['activeMeta'],
 	resetBimState: [],
+	selectAllSimilar: ['rules'],
+	copyRules: ['rules'],
 }, { prefix: 'BIM/' });
 
 export interface IMetaRecord {

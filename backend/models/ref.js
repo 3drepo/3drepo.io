@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,48 +16,19 @@
  */
 
 "use strict";
-const mongoose = require("mongoose");
-const ModelFactory = require("./factory/modelFactory");
 const ModelSettings = require("./modelSetting");
+const { findNodesByType } = require("./scene");
 
-const Schema = mongoose.Schema;
+const Ref = {};
 
-const refSchema = Schema({
-	_id: Object,
-	shared_id: Object,
-	type: { type: String, default: "ref"},
-	project: String,
-	owner: String,
-	_rid: Object,
-	parents: [],
-	name: String
-});
+Ref.getRefNodes = async function(account, model, branch, revision, projection) {
+	const settings = await ModelSettings.findById({account}, model);
 
-refSchema.statics.getRefNodes = function(account, model, ids) {
-	return ModelSettings.findById({account}, model).then((settings) => {
-		if(settings.federate) {
-			const filter = {
-				type: "ref"
-			};
-
-			if (ids && ids.length > 0) {
-				filter._id = { $in: ids };
-			}
-
-			return Ref.find({ account, model }, filter);
-		}
-		return [];
-	});
-};
-
-refSchema.methods = {};
-
-const Ref = ModelFactory.createClass(
-	"Ref",
-	refSchema,
-	arg => {
-		return `${arg.model}.scene`;
+	if (settings.federate) {
+		return findNodesByType(account, model, branch, revision, "ref", undefined, projection);
 	}
-);
+
+	return [];
+};
 
 module.exports = Ref;

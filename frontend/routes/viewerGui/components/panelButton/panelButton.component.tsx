@@ -21,7 +21,7 @@ import { VIEWER_PANELS_ICONS } from '../../../../constants/viewerGui';
 import { Button, ButtonWrapper } from './panelButton.styles';
 
 export const PanelButton = (props) => {
-	const { active, label, onClick, type, className } = props;
+	const { active, label, onClick, type, className, disabled } = props;
 
 	const handleClick = () => onClick(type);
 
@@ -35,6 +35,7 @@ export const PanelButton = (props) => {
 				placement="right"
 				active={Boolean(active)}
 				action={handleClick}
+				disabled={disabled}
 			/>
 		</ButtonWrapper>
 	);

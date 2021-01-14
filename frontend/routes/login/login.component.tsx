@@ -23,7 +23,6 @@ import React from 'react';
 import { Link, Redirect } from 'react-router-dom';
 import * as Yup from 'yup';
 
-import { ROUTES } from '../../constants/routes';
 import { clientConfigService } from '../../services/clientConfig';
 import { schema } from '../../services/validation';
 import { Panel } from '../components/panel/panel.component';
@@ -51,9 +50,10 @@ const WELCOME_MESSAGE = clientConfigService.getCustomLoginMessage() || 'Welcome 
 interface IProps {
 	history: any;
 	location: any;
-	onLogin: (login, password) => void;
 	isPending: boolean;
 	isAuthenticated: boolean;
+	onLogin: (login, password) => void;
+	authenticate: () => void;
 }
 
 interface IState {
@@ -68,6 +68,14 @@ export class Login extends React.PureComponent<IProps, IState> {
 		login: '',
 		password: ''
 	};
+
+	public componentDidMount() {
+		this.props.authenticate();
+	}
+
+	public componentDidUpdate(prevPops) {
+		const { isAuthenticated } = prevPops;
+	}
 
 	public handleSubmit = (data) => {
 		this.props.onLogin(data.login, data.password);
@@ -98,8 +106,8 @@ export class Login extends React.PureComponent<IProps, IState> {
 		const { login, password } = this.state;
 
 		if (this.props.isAuthenticated) {
-			const pathname = ((this.props.location.state ||  {}).from || {}).pathname || ROUTES.TEAMSPACES;
-			return (<Redirect to={{	pathname, state: { from: pathname} }} /> );
+			const from = this.props.location?.state?.from || {};
+			return (<Redirect to={{	...from, state: { referrer: '/login' } }} /> );
 		}
 
 		return (

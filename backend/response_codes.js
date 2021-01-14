@@ -62,7 +62,6 @@
 
 		INVALID_INPUTS_TO_PASSWORD_UPDATE: { message: "Invalid new or old password", status: 422 },
 
-		MODEL_HISTORY_NOT_FOUND: { message: "Model history not found", status: 404 },
 		MODEL_INFO_NOT_FOUND: { message: "Model info not found", status: 404 },
 
 		BRANCH_NOT_FOUND: { message: "Branch not found", status: 404 },
@@ -276,8 +275,9 @@
 		VAT_CODE_ERROR:{ message: "Error validating VAT number", status: 500},
 
 		TEAMSPACE_SETTINGS_NOT_FOUND: { message: "Teamspace settings not found", status: 404 },
-		NOTIFICATION_NOT_FOUND: { message: "Notification not found", status: 404}
+		NOTIFICATION_NOT_FOUND: { message: "Notification not found", status: 404},
 
+		INVALID_STREAM_SESSION: { message: "The streaming session code is not valid",  status:400 }
 	};
 
 	let valueCounter = 0;

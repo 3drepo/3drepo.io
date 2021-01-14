@@ -20,7 +20,7 @@ const mongoose = require("mongoose");
 const ModelFactory = require("./factory/modelFactory");
 const utils = require("../utils");
 const C = require("../constants");
-const ResponseCodes = require("../response_codes");
+const responseCodes = require("../response_codes");
 const db = require("../handler/db");
 const stringToUUID = utils.stringToUUID;
 const uuidToString = utils.uuidToString;
@@ -58,22 +58,25 @@ const findOne = async (account, model, query, projection = {}) =>  {
 	return await col.findOne(query, projection);
 };
 
-historySchema.statics.getHistory = function(dbColOptions, branch, revId, projection) {
-
+historySchema.statics.getHistory = async function(dbColOptions, branch, revId, projection) {
 	let history;
 
 	if (revId && utils.isUUID(revId)) {
-		history = this.findByUID(dbColOptions, revId, projection);
+		history = await this.findByUID(dbColOptions, revId, projection);
 	} else if (revId && !utils.isUUID(revId)) {
-		history = this.findByTag(dbColOptions, revId, projection);
+		history = await this.findByTag(dbColOptions, revId, projection);
 	} else if (branch) {
-		history = this.findByBranch(dbColOptions, branch, projection);
+		history = await this.findByBranch(dbColOptions, branch, projection);
+	}
+
+	if (!history) {
+		throw responseCodes.INVALID_TAG_NAME;
 	}
 
 	return history;
 };
 
-historySchema.statics.tagRegExp = /^[a-zA-Z0-9_-]{1,20}$/;
+historySchema.statics.tagRegExp = /^[a-zA-Z0-9_-]{1,50}$/;
 // list revisions by branch
 historySchema.statics.listByBranch = function(dbColOptions, branch, projection, showVoid = false) {
 
@@ -144,7 +147,7 @@ historySchema.statics.updateRevision = async function(dbColOptions, modelId, dat
 		Object.prototype.toString.call(data.void) === "[object Boolean]") {
 		const rev = await History.findByUID(dbColOptions, modelId);
 		if(!rev) {
-			return Promise.reject(ResponseCodes.MODEL_HISTORY_NOT_FOUND);
+			return Promise.reject(responseCodes.INVALID_TAG_NAME);
 		}
 
 		if(data.void) {
@@ -153,10 +156,10 @@ historySchema.statics.updateRevision = async function(dbColOptions, modelId, dat
 			rev.void = undefined;
 		}
 
-		return rev.save().then(() => ResponseCodes.OK);
+		return rev.save().then(() => responseCodes.OK);
 
 	} else {
-		return Promise.reject(ResponseCodes.INVALID_ARGUMENTS);
+		return Promise.reject(responseCodes.INVALID_ARGUMENTS);
 	}
 };
 

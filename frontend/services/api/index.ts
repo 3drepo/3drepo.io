@@ -18,5 +18,6 @@ export * from './issues';
 export * from './tree';
 export * from './invitations';
 export * from './sequences';
+export * from './presentation';
 
 export default API;
