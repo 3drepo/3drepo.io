@@ -16,11 +16,24 @@
  */
 
 "use strict";
+const responseCodes = require("../response_codes.js");
 
 const AccountPermissions = {};
 
 AccountPermissions.findByUser = function(permissions, username) {
 	return permissions.find(perm => perm.user === username);
+};
+
+AccountPermissions.remove = async function(teamspace, userTobeRemoved) {
+	const User = require("./user");
+
+	const updatedPermissions = teamspace.permissions.filter(perm => perm.user !== userTobeRemoved);
+
+	if (updatedPermissions.length !==  teamspace.permissions.length) {
+		throw responseCodes.ACCOUNT_PERM_NOT_FOUND;
+	}
+
+	await User.update(userTobeRemoved, {"permissions": updatedPermissions});
 };
 
 module.exports = AccountPermissions;

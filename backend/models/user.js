@@ -1158,61 +1158,51 @@ schema.methods.executeBillingAgreement = function () {
 
 */
 
-User.removeTeamMember = function (accountUser, username, cascadeRemove) {
-
-	let foundProjects = [];
-	let foundModels = [];
-
-	if (accountUser.user === username) {
+User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove) {
+	if (teamspace.user === userToRemove) {
 		// The user should not be able to remove itself from the teamspace
 		return Promise.reject(responseCodes.SUBSCRIPTION_CANNOT_REMOVE_SELF);
 	}
 
-	const teamspacePerm = accountUser.customData.permissions.findByUser(username);
+	const teamspacePerm =  AccountPermissions.findByUser(teamspace.customData.permissions, userToRemove);
+
 	// check if they have any permissions assigned
-	return Project.find({ account: accountUser.user }, { "permissions.user": username }).then(projects => {
+	const [projects, models] = await Promise.all([
+		Project.find({ account: teamspace.user }, { "permissions.user": userToRemove }),
+		ModelSetting.find({ account: teamspace.user }, { "permissions.user": userToRemove })
+	]);
 
-		foundProjects = projects;
-		return ModelSetting.find({ account: accountUser.user }, { "permissions.user": username });
-
-	}).then(models => {
-
-		foundModels = models;
-
-		if (!cascadeRemove && (foundModels.length || foundProjects.length || teamspacePerm)) {
-
-			return Promise.reject({
-				resCode: responseCodes.USER_IN_COLLABORATOR_LIST,
-				info: {
-					models: foundModels.map(m => {
-						return { model: m.name };
-					}),
-					projects: foundProjects.map(p => p.name),
-					teamspace: teamspacePerm
-				}
-			});
-
-		} else {
-
-			const promises = [];
-
-			if (teamspacePerm) {
-				promises.push(accountUser.customData.permissions.remove(username));
+	if (!cascadeRemove && (models.length || projects.length || teamspacePerm)) {
+		throw({
+			resCode: responseCodes.USER_IN_COLLABORATOR_LIST,
+			info: {
+				models: models.map(m => {
+					return { model: m.name };
+				}),
+				projects: projects.map(p => p.name),
+				teamspace: teamspacePerm
 			}
+		});
+	} else {
 
-			promises.push(foundModels.map(model =>
-				model.changePermissions(model.permissions.filter(p => p.user !== username))));
+		const promises = [];
 
-			promises.push(foundProjects.map(project =>
-				project.updateAttrs({ permissions: project.permissions.filter(p => p.user !== username) })));
-
-			promises.push(removeUserFromAnyJob(accountUser.user, username));
-			return Promise.all(promises);
+		if (teamspacePerm) {
+			promises.push(AccountPermissions.remove(teamspace.user, userToRemove));
 		}
 
-	}).then(() => {
-		return Role.revokeTeamSpaceRoleFromUser(username, accountUser.user);
-	});
+		promises.push(models.map(model =>
+			model.changePermissions(model.permissions.filter(p => p.user !== userToRemove))));
+
+		promises.push(projects.map(project =>
+			project.updateAttrs({ permissions: project.permissions.filter(p => p.user !== userToRemove) })));
+
+		promises.push(removeUserFromAnyJob(teamspace.user, userToRemove));
+
+		await Promise.all(promises);
+	}
+
+	return await Role.revokeTeamSpaceRoleFromUser(userToRemove, teamspace.user);
 };
 
 /*

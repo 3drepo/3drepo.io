@@ -498,7 +498,7 @@
 		const responsePlace = utils.APIInfo(req);
 		User.findByUserName(req.params.account)
 			.then(dbUser => {
-				return dbUser.removeTeamMember(req.params.user, req.query.cascadeRemove);
+				return User.removeTeamMember(dbUser, req.params.user, req.query.cascadeRemove);
 			})
 			.then(() => {
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {user: req.params.user});
