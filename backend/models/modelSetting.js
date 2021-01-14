@@ -270,24 +270,23 @@ ModelSetting.batchUpdatePermissions = async function(account, batchPermissions =
  * @param {Object} teamspaces an object which keys are teamspaces ids and values are an array of modelids
  * @returns {Object} which contains the models data
   */
-ModelSetting.getModelsData = async function(teamspaces) {
-	const promises = [];
+ModelSetting.getModelsData = function(teamspaces) {
+	return Promise.all(
+		Object.keys(teamspaces).map((account) => {
+			const modelsIds = teamspaces[account];
 
-	Object.keys(teamspaces).forEach(async (account) => {
-		const modelsIds = teamspaces[account];
-		const models = await db.find(account, MODELS_COLL, {_id: {$in:modelsIds}}, { name: 1, federate: 1, _id: 1});
-		const res = {};
-		const indexedModels = models.reduce((ac,c) => {
-			const obj = {}; obj[c._id] = c; return Object.assign(ac,obj); // indexing by model._id
-		} ,{});
-		res[account] = indexedModels;
+			return db.find(account, MODELS_COLL, {_id: {$in:modelsIds}}, { name: 1, federate: 1, _id: 1})
+				.then((models) => {
+					const res = {};
+					const indexedModels = models.reduce((ac,c) => {
+						const obj = {}; obj[c._id] = c; return Object.assign(ac,obj); // indexing by model._id
+					} ,{});
+					res[account] = indexedModels;
 
-		promises.push(res);
-	});
-
-	const modelData = await Promise.all(promises);
-
-	return modelData.reduce((ac,cur) => Object.assign(ac, cur),{}); // Turns the array to an object (quick indexing);
+					return res;
+				});
+		})
+	).then((modelData) => modelData.reduce((ac,cur) => Object.assign(ac, cur),{})); // Turns the array to an object (quick indexing);
 };
 
 ModelSetting.populateUsers = async function(account, permissions) {
