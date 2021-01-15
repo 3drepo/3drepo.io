@@ -301,13 +301,7 @@ describe("Invitations ", function () {
 
 		const { body: { permissions } } = await agents.teamSpace1.get('/teamSpace1/projects/project1').expect(200);
 
-		console.log("permissions");
-		console.log(permissions);
-		console.log("selectInvitedUser");
-		console.log(selectInvitedUser);
 		const invitedPermission = permissions.find(selectInvitedUser);
-		console.log("invitedPermission");
-		console.log(invitedPermission);
 	 	expect(invitedPermission.permissions[0], 'should be a project admin').to.equal('admin_project');
 
 	});

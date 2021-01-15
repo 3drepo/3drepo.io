@@ -39,7 +39,7 @@ const C = require("../constants");
 const userBilling = require("./userBilling");
 const permissionTemplate = require("./permissionTemplate");
 const accountPermission = require("./accountPermission");
-const Project = require("./project");
+const { findAndClean, findOneProject } = require("./project");
 const FileRef = require("./fileRef");
 
 const schema = mongoose.Schema({
@@ -736,7 +736,7 @@ function _addProjects(account, username, models) {
 		query = { models: { $in: models } };
 	}
 
-	return Project.findAndClean(account.account, query).then(projects => {
+	return findAndClean(account.account, query).then(projects => {
 
 		projects.forEach((project, i) => {
 
@@ -917,7 +917,7 @@ function _createAccounts(roles, userName) {
 				let account = null;
 				const query = { "permissions": { "$elemMatch": { user: userName } } };
 				const projection = { "permissions": { "$elemMatch": { user: userName } }, "models": 1, "name": 1 };
-				return Project.findAndClean(user.user, query, projection).then(projects => {
+				return findAndClean(user.user, query, projection).then(projects => {
 					projects.forEach(_proj => {
 						projPromises.push(new Promise(function (resolve) {
 							let myProj;
@@ -1003,7 +1003,7 @@ function _createAccounts(roles, userName) {
 											}
 
 											// push result to account object
-											return Project.findOneProject(account.account, { models: _model.model }).then(projectObj => {
+											return findOneProject(account.account, { models: _model.model }).then(projectObj => {
 												if (projectObj) {
 
 													// FIXME
@@ -1147,7 +1147,7 @@ schema.methods.removeTeamMember = function (username, cascadeRemove) {
 
 	const teamspacePerm = this.customData.permissions.findByUser(username);
 	// check if they have any permissions assigned
-	return Project.findAndClean(this.user, { "permissions.user": username }).then(projects => {
+	return findAndClean(this.user, { "permissions.user": username }).then(projects => {
 		foundProjects = projects;
 		return ModelSetting.find({ account: this.user }, { "permissions.user": username });
 
