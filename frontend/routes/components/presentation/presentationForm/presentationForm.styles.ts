@@ -32,7 +32,7 @@ export const Container = styled.div`
 `;
 
 export const PrimaryButton = styled(Button).attrs({
-	variant: 'raised',
+	variant: 'contained',
 	color: 'secondary',
 })`
 	&& {

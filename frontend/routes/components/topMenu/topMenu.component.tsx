@@ -91,6 +91,7 @@ export class TopMenu extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const { isFocusMode, isAuthenticated, ...props } = this.props;
+
 		return (
 			<Container hidden={isFocusMode}>
 				<Logo onClick={this.handleGoToHomepage} />

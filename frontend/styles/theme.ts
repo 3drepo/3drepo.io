@@ -46,6 +46,7 @@ export const MuiTheme = createMuiTheme({
 	overrides: {
 		MuiButton: {
 			root: {
+				padding: '8px 16px',
 				lineHeight: '1.4em',
 				letterSpacing: 'normal',
 			}
@@ -69,6 +70,9 @@ export const MuiTheme = createMuiTheme({
 				'&$disabled': {
 					color: theme.colors.BLACK_60
 				}
+			},
+			input: {
+				letterSpacing: 'normal',
 			}
 		},
 		MuiFormControlLabel: {

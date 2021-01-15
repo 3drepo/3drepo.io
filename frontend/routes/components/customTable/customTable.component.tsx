@@ -444,7 +444,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 									{
 										CellComponent ?
 											(<CellComponent {...cellComponentProps} />) :
-											(<Tooltip title={cellComponentProps.value} placement="bottom">
+											(<Tooltip title={cellComponentProps?.value || ''} placement="bottom">
 												<HighlightWrapper>
 													<Highlight text={cellComponentProps.value} search={cellComponentProps.searchText} />
 												</HighlightWrapper>

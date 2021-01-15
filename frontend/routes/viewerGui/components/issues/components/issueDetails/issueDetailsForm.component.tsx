@@ -192,7 +192,6 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						value={activeTab}
 						indicatorColor="secondary"
 						textColor="primary"
-						fullWidth
 						onChange={this.handleChange}
 					>
 						<StyledTab label={ISSUE_TABS.ISSUE} value={ISSUE_PROPERTIES_TAB} />
