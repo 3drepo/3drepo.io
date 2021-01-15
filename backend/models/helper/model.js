@@ -299,9 +299,7 @@ function createNewModel(teamspace, modelName, data) {
 			// Create a model setting
 			return ModelSetting.createNewSetting(teamspace, modelName, data).then((settings) => {
 				// Add model into project
-				project.models.push(settings._id);
-
-				return project.save().then(() => {
+				return Project.addModelToProject(teamspace, projectName, settings._id).then(() => {
 					// call chat to indicate a new model has been created
 					const modelData = {
 						account: teamspace,

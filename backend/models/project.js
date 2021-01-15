@@ -130,6 +130,13 @@
 		}
 	);
 
+	Project.addModelToProject = async function(teamspace, projectName, modelId) {
+		const foundProject = await Project.findOneProject(teamspace, {name: projectName});
+		foundProject.models.push(modelId);
+
+		return Project.updateAttrs(teamspace, projectName, { models: foundProject.models });
+	};
+
 	Project.createProject = async function(account, name, username, userPermissions) {
 		if (checkProjectNameValid(name)) {
 			const project = {
@@ -335,7 +342,7 @@
 			throw responseCodes.PROJECT_NOT_FOUND;
 		}
 
-		const whitelist = ["name", "permissions"];
+		const whitelist = ["name", "permissions", "models"];
 		const User = require("./user");
 
 		let usersToRemove = [];
