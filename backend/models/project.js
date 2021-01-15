@@ -188,12 +188,6 @@
 		});
 	};
 
-	schema.statics.setUserAsProjectAdminById = async function(teamspace, project, user) {
-		const projectObj = await Project.findOne({ account: teamspace }, {_id: utils.stringToUUID(project)});
-		const projectPermission = { user, permissions: ["admin_project"]};
-		return await projectObj.updateAttrs({ permissions: projectObj.permissions.concat(projectPermission) });
-	};
-
 	const Project = ModelFactory.createClass(
 		"Project",
 		schema,
@@ -394,15 +388,14 @@
 	};
 
 	// seems ok
-	/*
 	Project.setUserAsProjectAdminById = async function(teamspace, project, user) {
-		const projectObj = await Project.findOneProject(teamspace, {_id: utils.stringToUUID(project)});
+		const projectObj = await Project.findOne({ account: teamspace }, {_id: utils.stringToUUID(project)});
+		// const projectObj = await Project.findOneProject(teamspace, {_id: utils.stringToUUID(project)});
 		const projectPermission = { user, permissions: ["admin_project"]};
 
 		// return await Project.updateAttrs(teamspace, project, { permissions: projectObj.permissions.concat(projectPermission) });
 		return await projectObj.updateAttrs({ permissions: projectObj.permissions.concat(projectPermission) });
 	};
-	*/
 
 	/*
 	Project.updateAttrs = async function(account, projectName, data) {
