@@ -122,72 +122,6 @@
 		return project;
 	}
 
-	schema.methods.updateAttrs = function(data) {
-		const whitelist = ["name", "permissions"];
-		const User = require("./user");
-
-		let usersToRemove = [];
-		let check = Promise.resolve();
-
-		if (data.permissions) {
-			// user to delete
-			for(let i = data.permissions.length - 1; i >= 0; i--) {
-				if(!Array.isArray(data.permissions[i].permissions) || data.permissions[i].permissions.length === 0) {
-					data.permissions.splice(i ,1);
-				}
-			}
-
-			usersToRemove = _.difference(this.permissions.map(p => p.user), data.permissions.map(p => p.user));
-
-			check = User.findByUserName(this._dbcolOptions.account).then(teamspace => {
-				return User.getAllUsersInTeamspace(teamspace.user).then(members => {
-					const someUserNotAssignedWithLicence = data.permissions.some(
-						perm => {
-							return !members.includes(perm.user);
-						}
-					);
-
-					if (someUserNotAssignedWithLicence) {
-						return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
-					}
-				});
-			});
-		}
-
-		if (data["name"] && !checkProjectNameValid(data["name"])) {
-			return Promise.reject(responseCodes.INVALID_PROJECT_NAME);
-		}
-
-		return check.then(() => {
-			Object.keys(data).forEach(key => {
-				if(whitelist.indexOf(key) !== -1) {
-					this[key] = data[key];
-				}
-			});
-
-			const userPromises = [];
-
-			usersToRemove.forEach(user => {
-				// remove all model permissions in this project as well, if any
-				userPromises.push(
-					ModelSetting.find(this._dbcolOptions, { "permissions.user": user}).then(settings =>
-						Promise.all(
-							settings.map(s => s.changePermissions(s.permissions.filter(perm => perm.user !== user)))
-						)
-					)
-				);
-			});
-
-			return Promise.all(userPromises);
-		}).then(async () => {
-			await _checkInvalidName(this.name);
-			await _checkDupName(this._dbcolOptions.account, this.id);
-			await _checkPermissionName(this.permissions);
-
-			return this.save();
-		});
-	};
-
 	const Project = ModelFactory.createClass(
 		"Project",
 		schema,
@@ -383,21 +317,17 @@
 		const projectObj = await Project.findOneProject(teamspace, {name: project});
 		const projectPermission = { user, permissions: ["admin_project"]};
 
-		// return await Project.updateAttrs(teamspace, project, { permissions: projectObj.permissions.concat(projectPermission) });
-		return await projectObj.updateAttrs({ permissions: projectObj.permissions.concat(projectPermission) });
+		return await Project.updateAttrs(teamspace, project, { permissions: projectObj.permissions.concat(projectPermission) });
 	};
 
 	// seems ok
 	Project.setUserAsProjectAdminById = async function(teamspace, project, user) {
-		const projectObj = await Project.findOne({ account: teamspace }, {_id: utils.stringToUUID(project)});
-		// const projectObj = await Project.findOneProject(teamspace, {_id: utils.stringToUUID(project)});
+		const projectObj = await Project.findOneProject(teamspace, {_id: utils.stringToUUID(project)});
 		const projectPermission = { user, permissions: ["admin_project"]};
 
-		// return await Project.updateAttrs(teamspace, project, { permissions: projectObj.permissions.concat(projectPermission) });
-		return await projectObj.updateAttrs({ permissions: projectObj.permissions.concat(projectPermission) });
+		return await Project.updateAttrs(teamspace, projectObj.name, { permissions: projectObj.permissions.concat(projectPermission) });
 	};
 
-	/*
 	Project.updateAttrs = async function(account, projectName, data) {
 		const project = await Project.findOneProject(account, {name: projectName});
 
@@ -471,11 +401,9 @@
 
 		return project;
 	};
-	*/
 
 	Project.updateProject = async function(account, projectName, data) {
-		const project = await Project.findOne({ account }, { name: projectName });
-		// const project = await Project.findOneProject(account, { name: projectName });
+		const project = await Project.findOneProject(account, { name: projectName });
 
 		if (!project) {
 			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
@@ -500,8 +428,7 @@
 				});
 			}
 
-			// return Project.updateAttrs(account, projectName, project);
-			return project.updateAttrs(project);
+			return Project.updateAttrs(account, projectName, project);
 		}
 	};
 
