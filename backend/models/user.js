@@ -917,8 +917,7 @@ function _createAccounts(roles, userName) {
 				let account = null;
 				const query = { "permissions": { "$elemMatch": { user: userName } } };
 				const projection = { "permissions": { "$elemMatch": { user: userName } }, "models": 1, "name": 1 };
-				return Project.find({ account: user.user }, query, projection).then(projects => {
-
+				return Project.findAndClean(user.user, query, projection).then(projects => {
 					projects.forEach(_proj => {
 						projPromises.push(new Promise(function (resolve) {
 							let myProj;
@@ -942,11 +941,11 @@ function _createAccounts(roles, userName) {
 							myProj = account.projects.find(p => p.name === _proj.name);
 
 							if (!myProj) {
-								myProj = _proj.toObject();
+								myProj = _proj;
 								account.projects.push(myProj);
 								myProj.permissions = myProj.permissions[0].permissions;
 							} else {
-								myProj.permissions = _.uniq(myProj.permissions.concat(_proj.toObject().permissions[0].permissions));
+								myProj.permissions = _.uniq(myProj.permissions.concat(_proj.permissions[0].permissions));
 							}
 
 							// show implied and inherited permissions
