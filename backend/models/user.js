@@ -1337,7 +1337,7 @@ User.teamspaceMemberCheck = function (teamspace, user) {
 	});
 };
 
-User.getTeamMemberInfo = async (teamspace, user)  => {
+User.getTeamMemberInfo = async function(teamspace, user) {
 	const userEntry = await User.findByUserName(user);
 	if(!userEntry || !this.isMemberOfTeamspace(userEntry,teamspace)) {
 		throw responseCodes.USER_NOT_FOUND;
