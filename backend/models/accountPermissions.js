@@ -18,6 +18,12 @@
 "use strict";
 const responseCodes = require("../response_codes.js");
 
+const updatePermissions = async function(teamspace, updatedPermissions) {
+	const User = require("./user");
+	await User.update(teamspace.user, {"customData.permissions": updatedPermissions});
+	return updatedPermissions;
+};
+
 const AccountPermissions = {};
 
 AccountPermissions.findByUser = function(user, username) {
@@ -28,9 +34,16 @@ AccountPermissions.get = function(teamspace) {
 	return  teamspace.customData.permissions;
 };
 
-const updatePermissions = async function(teamspace, updatedPermissions) {
-	const User = require("./user");
-	await User.update(teamspace.user, {"customData.permissions": updatedPermissions});
+AccountPermissions.update = async function(teamspace, username, permissions) {
+	if(permissions && permissions.length === 0) {
+		// this is actually a remove
+		return await this.remove(teamspace, username);
+	}
+
+	const updatedPermissions = this.get(teamspace).filter(perm => perm.user !== username)
+		.concat({user: username, permissions});
+
+	return await updatePermissions(teamspace, updatedPermissions);
 };
 
 AccountPermissions.add = async function(teamspace, userToAdd, permissions) {
@@ -40,7 +53,7 @@ AccountPermissions.add = async function(teamspace, userToAdd, permissions) {
 		throw responseCodes.DUP_ACCOUNT_PERM;
 	}
 
-	await updatePermissions(teamspace, this.get(teamspace).concat({user: userToAdd, permissions}));
+	return await updatePermissions(teamspace, this.get(teamspace).concat({user: userToAdd, permissions}));
 };
 
 AccountPermissions.remove = async function(teamspace, userToRemove) {
@@ -50,7 +63,7 @@ AccountPermissions.remove = async function(teamspace, userToRemove) {
 		throw responseCodes.ACCOUNT_PERM_NOT_FOUND;
 	}
 
-	await updatePermissions(teamspace, updatedPermissions);
+	return await updatePermissions(teamspace, updatedPermissions);
 };
 
 module.exports = AccountPermissions;
