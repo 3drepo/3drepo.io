@@ -39,9 +39,7 @@ function checkPermissionsHelper(username, account, project, model, requiredPerms
 	}
 
 	if(_.intersection(C.MODEL_PERM_LIST, flattenRequiredPerms).length > 0) {
-
 		getPermPromises.push(getPermissions(account).modelLevel(username, model));
-
 	}
 
 	return Promise.all(getPermPromises).then(userPermissions => {

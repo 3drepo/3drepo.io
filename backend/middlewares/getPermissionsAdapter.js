@@ -18,6 +18,7 @@
 "use strict";
 
 const AccountPermissions = require("../models/accountPermissions");
+const PermissionTemplates = require("../models/permissionTemplates");
 
 (() => {
 	const ModelSetting = require("../models/modelSetting");
@@ -46,7 +47,7 @@ const AccountPermissions = require("../models/accountPermissions");
 						throw ResponseCodes.RESOURCE_NOT_FOUND;
 					}
 
-					const permission = AccountPermissions.findByUser(user.customData.permissions, username);
+					const permission = AccountPermissions.findByUser(user, username);
 
 					if(!permission) {
 						return [];
@@ -105,7 +106,7 @@ const AccountPermissions = require("../models/accountPermissions");
 						return projectPerms;
 					}
 
-					return projectPerms.concat(user.customData.permissionTemplates.findById(perm.permission).permissions);
+					return projectPerms.concat(PermissionTemplates.findById(user, perm.permission).permissions);
 				});
 			}
 		};

@@ -23,6 +23,7 @@ const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
 const utils = require("../utils");
 const db = require("../handler/db");
+const PermissionTemplates = require("./permissionTemplates");
 
 const MODELS_COLL = "settings";
 
@@ -147,7 +148,7 @@ schema.methods.changePermissions = function(permissions, account = this._dbcolOp
 				throw responseCodes.INVALID_ARGUMENTS;
 			}
 
-			if (!dbUser.customData.permissionTemplates.findById(permission.permission)) {
+			if (!PermissionTemplates.findById(dbUser, permission.permission)) {
 				return promises.push(Promise.reject(responseCodes.PERM_NOT_FOUND));
 			}
 
@@ -156,7 +157,8 @@ schema.methods.changePermissions = function(permissions, account = this._dbcolOp
 					return Promise.reject(responseCodes.USER_NOT_FOUND);
 				}
 
-				const isMember = assignedUser.isMemberOfTeamspace(dbUser.user);
+				const isMember = User.isMemberOfTeamspace(assignedUser, dbUser.user);
+
 				if (!isMember) {
 					return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
 				}

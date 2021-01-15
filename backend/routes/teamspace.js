@@ -480,7 +480,7 @@
 		User.findByUserName(req.params.account)
 			.then(dbUser => {
 				if(req.body.user) {
-					return dbUser.addTeamMember(req.body.user, req.body.job, req.body.permissions);
+					return User.addTeamMember(dbUser, req.body.user, req.body.job, req.body.permissions);
 				} else {
 					return Promise.reject(responseCodes.USER_NOT_FOUND);
 				}

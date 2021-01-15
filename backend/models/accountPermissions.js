@@ -20,20 +20,37 @@ const responseCodes = require("../response_codes.js");
 
 const AccountPermissions = {};
 
-AccountPermissions.findByUser = function(permissions, username) {
-	return permissions.find(perm => perm.user === username);
+AccountPermissions.findByUser = function(user, username) {
+	return this.get(user).find(perm => perm.user === username);
 };
 
-AccountPermissions.remove = async function(teamspace, userTobeRemoved) {
+AccountPermissions.get = function(teamspace) {
+	return  teamspace.customData.permissions;
+};
+
+const updatePermissions = async function(teamspace, updatedPermissions) {
 	const User = require("./user");
+	await User.update(teamspace.user, {"customData.permissions": updatedPermissions});
+};
 
-	const updatedPermissions = teamspace.permissions.filter(perm => perm.user !== userTobeRemoved);
+AccountPermissions.add = async function(teamspace, userToAdd, permissions) {
+	const permissionsToBeUpdated = this.get(teamspace).filter(perm => perm.user !== userToAdd);
 
-	if (updatedPermissions.length !==  teamspace.permissions.length) {
+	if (permissionsToBeUpdated.length <= this.get(teamspace).length) {
+		throw responseCodes.DUP_ACCOUNT_PERM;
+	}
+
+	await updatePermissions(teamspace, this.get(teamspace).concat({user: userToAdd, permissions}));
+};
+
+AccountPermissions.remove = async function(teamspace, userToRemove) {
+	const updatedPermissions = this.get(teamspace).filter(perm => perm.user !== userToRemove);
+
+	if (updatedPermissions.length >=  this.get(teamspace).length) {
 		throw responseCodes.ACCOUNT_PERM_NOT_FOUND;
 	}
 
-	await User.update(userTobeRemoved, {"permissions": updatedPermissions});
+	await updatePermissions(teamspace, updatedPermissions);
 };
 
 module.exports = AccountPermissions;
