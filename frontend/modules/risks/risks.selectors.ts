@@ -18,7 +18,7 @@
 import { values } from 'lodash';
 import { createSelector } from 'reselect';
 
-import { RISK_LEVELS } from '../../constants/risks';
+import { RISK_DEFAULT_HIDDEN_LEVELS } from '../../constants/risks';
 import { prepareComments, transformCustomsLinksToMarkdown } from '../../helpers/comments';
 import { hasPin, riskToPin } from '../../helpers/pins';
 import { prepareRisk } from '../../helpers/risks';
@@ -127,7 +127,7 @@ export const selectFilteredRisks = createSelector(
 	selectRisks, selectSelectedFilters, selectSortOrder, selectSortByField,
 		(risks, selectedFilters, sortOrder, sortByField) => {
 			const returnHiddenRisk = selectedFilters.length && selectedFilters
-				.some(({ value: { value } }) => [RISK_LEVELS.AGREED_FULLY, RISK_LEVELS.VOID].includes(value));
+				.some(({ value: { value } }) => RISK_DEFAULT_HIDDEN_LEVELS.includes(value));
 
 			return sortByDate(searchByFilters(risks, selectedFilters, returnHiddenRisk),
 				{ order: sortOrder }, sortByField );
