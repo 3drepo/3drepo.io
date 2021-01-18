@@ -27,8 +27,8 @@ const Stream = require("stream");
 
 const JSONAssets = {};
 
-async function getSubTreeInfo(account, model, currentIds) {
-	const subModelRefs = await getRefNodes(account, model, currentIds);
+async function getSubTreeInfo(account, model, branch, revision) {
+	const subModelRefs = await getRefNodes(account, model, branch, revision);
 	const subTreeInfo = [];
 	subModelRefs.forEach((ref) => {
 		const prom = History.findLatest(ref.owner, ref.project, {_id: 1}).then((rev) => ({
@@ -42,8 +42,8 @@ async function getSubTreeInfo(account, model, currentIds) {
 	return Promise.all(subTreeInfo);
 }
 
-function getFileFromSubModels(account, model, currentIds, username, filename) {
-	return getRefNodes(account, model, currentIds).then((subModelRefs) => {
+function getFileFromSubModels(account, model, branch, revision, username, filename) {
+	return getRefNodes(account, model, branch, revision).then((subModelRefs) => {
 		const getFileProm = [];
 		subModelRefs.forEach((ref) => {
 			getFileProm.push(getFileFromRef(ref, username, filename).catch(() => {
@@ -119,7 +119,7 @@ function getHelperJSONFile(account, model, branch, rev, username, filename, pref
 		const revId = utils.uuidToString(history._id);
 		const treeFileName = `${revId}/${filename}.json`;
 		let mainTreePromise;
-		const subTreesPromise = getFileFromSubModels(account, model, history.current, username, `${filename}.json`);
+		const subTreesPromise = getFileFromSubModels(account, model, branch, rev, username, `${filename}.json`);
 
 		if (allowNotFound) {
 			mainTreePromise = FileRef.getJSONFileStream(account, model, treeFileName).catch(() => {
@@ -190,7 +190,7 @@ JSONAssets.getTree = async function(account, model, branch, rev) {
 			readStream.on("error", err => outStream.emit("error", err));
 		});
 
-		const subTreeInfo =  await getSubTreeInfo(account, model, history.current);
+		const subTreeInfo =  await getSubTreeInfo(account, model, , branch, rev);
 		isFed = subTreeInfo.length > 0;
 
 		outStream.write(", \"subTrees\":[");
