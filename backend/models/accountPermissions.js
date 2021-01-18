@@ -55,7 +55,7 @@ AccountPermissions.get = function(teamspace) {
 	return  (teamspace.customData || {}).permissions || [];
 };
 
-AccountPermissions.update = async function(teamspace, username, permissions) {
+AccountPermissions.updateOrCreate = async function(teamspace, username, permissions) {
 	await checkValidUpdate(teamspace, username, permissions);
 
 	if(permissions && permissions.length === 0) {
@@ -69,14 +69,16 @@ AccountPermissions.update = async function(teamspace, username, permissions) {
 	return await updatePermissions(teamspace, updatedPermissions);
 };
 
-AccountPermissions.add = async function(teamspace, userToAdd, permissions) {
-	const permissionsToBeUpdated = this.get(teamspace).filter(perm => perm.user !== userToAdd);
+AccountPermissions.update = async function(teamspace, username, permissions) {
+	await checkValidUpdate(teamspace, username, permissions);
 
-	if (permissionsToBeUpdated.length <= this.get(teamspace).length) {
-		throw responseCodes.DUP_ACCOUNT_PERM;
+	const currPermission = this.findByUser(teamspace, username);
+
+	if(!currPermission) {
+		throw (responseCodes.ACCOUNT_PERM_NOT_FOUND);
 	}
 
-	return await updatePermissions(teamspace, this.get(teamspace).concat({user: userToAdd, permissions}));
+	return await this.updateOrCreate(teamspace, username, permissions);
 };
 
 AccountPermissions.remove = async function(teamspace, userToRemove) {

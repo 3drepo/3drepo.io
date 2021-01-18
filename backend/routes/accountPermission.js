@@ -179,7 +179,7 @@
 			} else {
 				User.findByUserName(req.params.account)
 					.then(teamspace => {
-						return AccountPermissions.update(teamspace, req.body.user, req.body.permissions);
+						return AccountPermissions.updateOrCreate(teamspace, req.body.user, req.body.permissions);
 					})
 					.then(permission => {
 						responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
