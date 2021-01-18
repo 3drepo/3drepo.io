@@ -66,6 +66,15 @@ describe("Account permission::", function () {
 
 	it("should fail to assign non team space permissions to a user", function(done) {
 		agent.post(`/${username}/permissions`)
+			.send({ user: "issue_username", permissions: ["create_project"]})
+			.expect(400, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+				done(err);
+			});
+	});
+
+	it("should fail to assign invalid permissions to a user", function(done) {
+		agent.post(`/${username}/permissions`)
 			.send({ user: "user1", permissions: ["view_issue"]})
 			.expect(400, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.INVALID_PERM.value);

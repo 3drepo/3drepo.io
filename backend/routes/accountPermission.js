@@ -142,7 +142,8 @@
 	function listPermissions(req, res, next) {
 		User.findByUserName(req.params.account)
 			.then(user => {
-				const permissions = user.toObject().customData.permissions;
+				const permissions = user.customData.permissions;
+
 				return User.getAllUsersInTeamspace(req.params.account).then(
 					users => {
 						users.forEach(_user => {
@@ -188,6 +189,7 @@
 					});
 			}
 		} else {
+
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
 		}
 	}
