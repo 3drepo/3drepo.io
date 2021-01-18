@@ -138,7 +138,9 @@ export const MuiTheme = createMuiTheme({
 		MuiMenuItem: {
 			root: {
 				fontSize: '14px',
-				color: theme.colors.BLACK_60
+				color: theme.colors.BLACK_60,
+				paddingTop: '12px',
+				paddingBottom: '12px',
 			}
 		},
 		MuiSnackbarContent: {
