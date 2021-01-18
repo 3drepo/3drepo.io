@@ -317,32 +317,21 @@ describe("Account permission::", function () {
 			.expect(200, done);
 	});
 
-	it("non teamspace admin users will have permissions revoked on any projects including the one created by themselves if parent teamspace level permissions has been revoked", function(done) {
-
+	it("non teamspace admin users will have permissions revoked on any projects including the one created by themselves if parent teamspace level permissions has been revoked", async function() {
 		const teamspace = "testing";
 
-		async.series([
-			callback => {
-				agentAdmin = request.agent(server);
-				agentAdmin.post("/login")
-					.send({ username: "testing", password: "testing" })
-					.expect(200, function(err, res) {
-						expect(res.body.username).to.equal("testing");
-						callback(err);
-					});
-			},
+		agentAdmin = request.agent(server);
+		const {body} =  await agentAdmin.post("/login")
+			.send({ username: "testing", password: "testing" })
+			.expect(200);
 
-			callback => {
-				agentAdmin.delete(`/${teamspace}/permissions/${username}`)
-					.expect(200, callback);
-			},
+		expect(body.username).to.equal("testing")
 
-			callback => {
-				agent.get(`/${teamspace}/projects/${projectName}`)
-					.expect(401, callback);
-			}
+		await agentAdmin.delete(`/${teamspace}/permissions/${username}`)
+			.expect(200);
 
-		], done);
+		await agent.get(`/${teamspace}/projects/${projectName}`)
+			.expect(401);
 	});
 
 });
