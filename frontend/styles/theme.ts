@@ -270,6 +270,11 @@ export const MuiTheme = createMuiTheme({
 					margin: 0,
 				},
 			}
+		},
+		MuiTableRow: {
+			root: {
+				height: '48px',
+			}
 		}
 	}
 });
