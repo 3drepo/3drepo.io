@@ -39,6 +39,7 @@ const config = require("../config");
 const ModelSetting = require("./modelSetting");
 const C = require("../constants");
 const UserBilling = require("./userBilling");
+
 // const AccountPermission = require("./accountPermission");
 const AccountPermissions = require("./accountPermissions");
 const Project = require("./project");
@@ -344,21 +345,19 @@ User.findUsersWithoutMembership = function (teamspace, searchString) {
 };
 
 // case insenstive
-User.checkUserNameAvailableAndValid = function (username) {
+User.checkUserNameAvailableAndValid = async function (username) {
 
 	if (!this.usernameRegExp.test(username) ||
 		-1 !== C.REPO_BLACKLIST_USERNAME.indexOf(username.toLowerCase())
 	) {
-		return Promise.reject(responseCodes.INVALID_USERNAME);
+		throw (responseCodes.INVALID_USERNAME);
 	}
 
-	return this.count({ account: "admin" }, {
-		user: new RegExp(`^${username}$`, "i")
-	}).then((count) => {
-		if(count > 0) {
-			return Promise.reject(responseCodes.USER_EXISTS);
-		}
-	});
+	const count = await DB.count("admin", COLL_NAME, { user: new RegExp(`^${username}$`, "i")});
+
+	if(count > 0) {
+		throw (responseCodes.USER_EXISTS);
+	}
 };
 
 User.findByEmail = function (email) {
@@ -369,26 +368,24 @@ User.findByPaypalPaymentToken = function (token) {
 	return this.findOne("admin", { "customData.billing.paypalPaymentToken": token });
 };
 
-User.checkEmailAvailableAndValid = function (email, exceptUser) {
+User.checkEmailAvailableAndValid = async function (email, exceptUser) {
 	const emailRegex = /^(['a-zA-Z0-9_\-.]+)@([a-zA-Z0-9_\-.]+)\.([a-zA-Z]{2,})$/;
-	if(email.match(emailRegex)) {
-
-		const query =  exceptUser ? { "customData.email": email, "user": { "$ne": exceptUser } }
-			: { "customData.email": email };
-
-		return this.count({ account: "admin" }, query).then((count) => {
-			if(count > 0) {
-				return Promise.reject(responseCodes.EMAIL_EXISTS);
-			}
-		});
-	} else {
-		return Promise.reject(responseCodes.EMAIL_INVALID);
+	if (!email.match(emailRegex)) {
+		throw(responseCodes.EMAIL_INVALID);
 	}
 
+	const query =  exceptUser ? { "customData.email": email, "user": { "$ne": exceptUser } }
+		: { "customData.email": email };
+
+	const count = await DB.count("admin", COLL_NAME, query);
+
+	if(count > 0) {
+		throw (responseCodes.EMAIL_EXISTS);
+	}
 };
 
 User.findUserByBillingId = function (billingAgreementId) {
-	return this.findOne({ account: "admin" }, { "customData.billing.billingAgreementId": billingAgreementId });
+	return this.findOne("admin", { "customData.billing.billingAgreementId": billingAgreementId });
 };
 
 User.updatePassword = function (logger, username, oldPassword, token, newPassword) {
@@ -448,90 +445,85 @@ User.updatePassword = function (logger, username, oldPassword, token, newPasswor
 
 User.usernameRegExp = /^[a-zA-Z][\w]{1,63}$/;
 
-User.createUser = function (logger, username, password, customData, tokenExpiryTime) {
+User.createUser = async function (logger, username, password, customData, tokenExpiryTime) {
 	const Invitations =  require("./invitations");
-
-	if (customData) {
-		const validityChecks = [
-			this.checkUserNameAvailableAndValid(username),
-			this.checkEmailAvailableAndValid(customData.email)
-		];
-
-		return Promise.all(validityChecks).then(() => {
-			return ModelFactory.dbManager.getAuthDB().then(adminDB => {
-
-				const cleanedCustomData = {
-					createdAt: new Date(),
-					inactive: true
-				};
-
-				["firstName", "lastName", "email", "mailListOptOut"].forEach(key => {
-					if (customData[key]) {
-						cleanedCustomData[key] = customData[key];
-					}
-				});
-
-				const billingInfo = {};
-
-				["firstName", "lastName", "countryCode", "company"].forEach(key => {
-					if (customData[key]) {
-						billingInfo[key] = customData[key];
-					}
-				});
-
-				const expiryAt = new Date();
-				expiryAt.setHours(expiryAt.getHours() + tokenExpiryTime);
-
-				// default permission
-				cleanedCustomData.permissions = [{
-					user: username,
-					permissions: [C.PERM_TEAMSPACE_ADMIN]
-				}];
-
-				// default templates
-				cleanedCustomData.permissionTemplates = [
-					{
-						_id: C.ADMIN_TEMPLATE,
-						permissions: C.ADMIN_TEMPLATE_PERMISSIONS
-					},
-					{
-						_id: C.VIEWER_TEMPLATE,
-						permissions: C.VIEWER_TEMPLATE_PERMISSIONS
-					},
-					{
-						_id: C.COMMENTER_TEMPLATE,
-						permissions: C.COMMENTER_TEMPLATE_PERMISSIONS
-					},
-					{
-						_id: C.COLLABORATOR_TEMPLATE,
-						permissions: C.COLLABORATOR_TEMPLATE_PERMISSIONS
-					}
-				];
-
-				cleanedCustomData.emailVerifyToken = {
-					token: crypto.randomBytes(64).toString("hex"),
-					expiredAt: expiryAt
-				};
-
-				const addUserProm = adminDB.addUser(username, password, { customData: cleanedCustomData, roles: [] }).then(() => {
-					return Promise.resolve(cleanedCustomData.emailVerifyToken);
-				}).catch(err => {
-					return Promise.reject({ resCode: utils.mongoErrorToResCode(err) });
-				});
-
-				return addUserProm.then(() => {
-					return this.findByUserName(username);
-				}).then(user => {
-					user.customData.billing.billingInfo.changeBillingAddress(billingInfo);
-					return user.save();
-				}).then(user => Invitations.unpack(user)).then(() => {
-					return Promise.resolve(cleanedCustomData.emailVerifyToken);
-				});
-			});
-		});
-	} else {
-		return Promise.reject({ resCode: responseCodes.EMAIL_INVALID });
+	if (!customData) {
+		throw ({ resCode: responseCodes.EMAIL_INVALID });
 	}
+
+	await Promise.all([
+		this.checkUserNameAvailableAndValid(username),
+		this.checkEmailAvailableAndValid(customData.email)
+	]);
+
+	const adminDB = await ModelFactory.dbManager.getAuthDB();
+
+	const cleanedCustomData = {
+		createdAt: new Date(),
+		inactive: true
+	};
+
+	["firstName", "lastName", "email", "mailListOptOut"].forEach(key => {
+		if (customData[key]) {
+			cleanedCustomData[key] = customData[key];
+		}
+	});
+
+	const billingInfo = {};
+
+	["firstName", "lastName", "countryCode", "company"].forEach(key => {
+		if (customData[key]) {
+			billingInfo[key] = customData[key];
+		}
+	});
+
+	const expiryAt = new Date();
+	expiryAt.setHours(expiryAt.getHours() + tokenExpiryTime);
+
+	// default permission
+	cleanedCustomData.permissions = [{
+		user: username,
+		permissions: [C.PERM_TEAMSPACE_ADMIN]
+	}];
+
+	// default templates
+	cleanedCustomData.permissionTemplates = [
+		{
+			_id: C.ADMIN_TEMPLATE,
+			permissions: C.ADMIN_TEMPLATE_PERMISSIONS
+		},
+		{
+			_id: C.VIEWER_TEMPLATE,
+			permissions: C.VIEWER_TEMPLATE_PERMISSIONS
+		},
+		{
+			_id: C.COMMENTER_TEMPLATE,
+			permissions: C.COMMENTER_TEMPLATE_PERMISSIONS
+		},
+		{
+			_id: C.COLLABORATOR_TEMPLATE,
+			permissions: C.COLLABORATOR_TEMPLATE_PERMISSIONS
+		}
+	];
+
+	cleanedCustomData.emailVerifyToken = {
+		token: crypto.randomBytes(64).toString("hex"),
+		expiredAt: expiryAt
+	};
+
+	cleanedCustomData.billing = await UserBilling.changeBillingAddress(cleanedCustomData.billing || {}, billingInfo);
+
+	try {
+		await adminDB.addUser(username, password, { customData: cleanedCustomData, roles: [] });
+	} catch(err) {
+		throw ({ resCode: utils.mongoErrorToResCode(err) });
+	}
+
+	const user = await this.findByUserName(username);
+
+	await Invitations.unpack(user);
+
+	return cleanedCustomData.emailVerifyToken;
 };
 
 function formatPronouns(str) {

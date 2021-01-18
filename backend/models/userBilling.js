@@ -18,7 +18,7 @@
 "use strict";
 
 const mongoose = require("mongoose");
-const billingAddressInfo = require("./billingAddress");
+const BillingAddress = require("./billingAddress");
 const moment = require("moment");
 const vat = require("./vat");
 const utils = require("../utils");
@@ -32,7 +32,7 @@ const systemLogger = require("../logger.js").systemLogger;
 
 const billingSchema = mongoose.Schema({
 	subscriptions: Object,
-	billingInfo: { type: billingAddressInfo, default: {}  },
+	billingInfo: Object,
 	// global billing info
 	billingAgreementId: String,
 	paypalPaymentToken: String,
@@ -220,7 +220,7 @@ billingSchema.methods.updateSubscriptions = function (plans, user, billingUser, 
 	// Update subscriptions with new plans
 	this.billingUser = billingUser;
 
-	return this.billingInfo.changeBillingAddress(billingAddress).then(() => {
+	return this.changeBillingAddress(this, billingAddress).then(() => {
 		this.markModified("billingInfo");
 		return this.writeSubscriptionChanges(plans);
 
@@ -425,6 +425,11 @@ UserBilling.getSubscriptionLimits = function(userBilling) {
 	}
 
 	return sumLimits;
+};
+
+UserBilling.changeBillingAddress = async function(billing, billingAddress) {
+	billing.billingInfo = await BillingAddress.changeBillingAddress(billing.billingInfo, billingAddress);
+	return billing;
 };
 
 billingSchema.methods.activateSubscriptions = function(user, paymentInfo, raw) {

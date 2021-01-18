@@ -121,7 +121,7 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 		throw responseCodes.INVALID_MODEL_ID;
 	}
 
-	if (await teamspaceObject.hasReachedLicenceLimit()) {
+	if (await User.hasReachedLicenceLimit(teamspaceObject)) {
 		throw responseCodes.LICENCE_LIMIT_REACHED;
 	}
 

@@ -58,9 +58,8 @@ describe("Sign up", function() {
 
 	const User = require("../../models/user");
 
-	it("with available username should return success", function(done) {
-
-		request(server)
+	it("with available username should return success", async function() {
+		const {body} = await request(server)
 			.post(`/${username}`)
 			.send({
 
@@ -72,12 +71,9 @@ describe("Sign up", function() {
 				"company": company,
 				"mailListAgreed": mailListAgreed
 
-			}).expect(200, function(err, res) {
+			}).expect(200);
 
-				expect(res.body.account).to.equal(username);
-				done(err);
-			});
-
+		expect(body.account).to.equal(username);
 	});
 
 	it("with same username but different case should fail", function(done) {
