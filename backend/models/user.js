@@ -362,11 +362,11 @@ User.checkUserNameAvailableAndValid = function (username) {
 };
 
 User.findByEmail = function (email) {
-	return this.findOne({ account: "admin" }, { "customData.email":  new RegExp("^" + utils.sanitizeString(email) + "$", "i") });
+	return this.findOne("admin", { "customData.email":  new RegExp("^" + utils.sanitizeString(email) + "$", "i") });
 };
 
 User.findByPaypalPaymentToken = function (token) {
-	return this.findOne({ account: "admin" }, { "customData.billing.paypalPaymentToken": token });
+	return this.findOne("admin", { "customData.billing.paypalPaymentToken": token });
 };
 
 User.checkEmailAvailableAndValid = function (email, exceptUser) {

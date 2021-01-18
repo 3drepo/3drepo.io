@@ -90,7 +90,7 @@ AccountPermissions.remove = async function(teamspace, userToRemove) {
 	}
 
 	const projects = await Project.find({ account: teamspace.user },{ "permissions.user": userToRemove});
-	await  Promise.all(
+	await Promise.all(
 		projects.map(proj => proj.updateAttrs({
 			permissions: proj.permissions.filter(perm => perm.user !== userToRemove)
 		}))

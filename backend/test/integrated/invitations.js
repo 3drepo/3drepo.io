@@ -48,17 +48,16 @@ describe("Invitations ", function () {
 
 	after(() => agents.done());
 
-	it("sent with a registered email should fail", function(done) {
+	it("sent with a registered email should fail", async function() {
 		const inviteEmail = 'mail@teamspace1.com';
 		const inviteJob = 'jobA';
 		const permissions = { teamspace_admin: true };
 
-		agents.teamSpace1.post(inviteUrl(account))
+		const {body} = await agents.teamSpace1.post(inviteUrl(account))
 			.send({ email: inviteEmail, job: inviteJob, permissions })
-			.expect(USER_ALREADY_EXISTS.status, (err, res) => {
- 				expect(res.body.message).to.equal(USER_ALREADY_EXISTS.message);
-				done();
-			});
+			.expect(USER_ALREADY_EXISTS.status)
+
+		expect(body.message).to.equal(USER_ALREADY_EXISTS.message);
 	});
 
 
