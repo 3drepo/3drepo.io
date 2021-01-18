@@ -82,30 +82,18 @@ describe("Account permission::", function () {
 			});
 	});
 
-	it("should able to assign permissions to a user", function(done) {
+	it("should able to assign permissions to a user", async function() {
 
 		const permission = { user: "testing", permissions: ["create_project"]};
 
-		async.series([
-			callback => {
-				agent.post(`/${username}/permissions`)
+		await agent.post(`/${username}/permissions`)
 					.send(permission)
-					.expect(200, function(err, res) {
-						callback(err);
-					});
-			},
+					.expect(200);
 
-			callback => {
-				agent.get(`/${username}/permissions`)
-					.expect(200, function(err, res) {
+		const {body} = await agent.get(`/${username}/permissions`)
+					.expect(200);
 
-						expect(res.body.find(perm => perm.user === permission.user)).to.deep.equal(permission);
-						callback(err);
-					});
-			}
-
-		], (err, res) => done(err));
-
+		expect(body.find(perm => perm.user === permission.user)).to.deep.equal(permission);
 	});
 
 	it("should not be able to assign permissions of owner", function(done) {
@@ -204,27 +192,15 @@ describe("Account permission::", function () {
 
 	});
 
-	it("should not be able to update user's permissions after it has been removed", function(done) {
-
-		async.series([
-			callback => {
-				agent.put(`/${username}/permissions/user2`)
+	it("should not be able to update user's permissions after it has been removed", async function() {
+		await agent.put(`/${username}/permissions/user2`)
 					.send({ permissions: ["create_project"]})
-					.expect(404, function(err, res) {
-						callback(err);
-					});
-			},
+					.expect(404);
 
-			callback => {
-				agent.get(`/${username}/permissions`)
-					.expect(200, function(err, res) {
-						expect(res.body.find(perm => perm.user === "user2")).to.deep.equal({user: "user2", permissions:[]});
-						callback(err);
-					});
-			}
+		const {body} = await agent.get(`/${username}/permissions`)
+					.expect(200);
 
-		], (err, res) => done(err));
-
+		expect(body.find(perm => perm.user === "user2")).to.deep.equal({user: "user2", permissions:[]});
 	});
 
 	it("should be able to add user's permissions after it has been removed", function(done) {
