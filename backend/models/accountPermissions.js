@@ -17,11 +17,36 @@
 
 "use strict";
 const responseCodes = require("../response_codes.js");
+const C = require("../constants");
+const { intersection } = require("lodash");
 
 const updatePermissions = async function(teamspace, updatedPermissions) {
 	const User = require("./user");
 	await User.update(teamspace.user, {"customData.permissions": updatedPermissions});
 	return updatedPermissions;
+};
+
+const checkValidUpdate = async (teamspace, teamMember, permission) => {
+	const User = require("./user");
+	const userToCheck = await User.findByUserName(teamMember);
+	if(!userToCheck) {
+		throw (responseCodes.USER_NOT_FOUND);
+	}
+
+	console.log("user exists");
+
+	if(!User.isMemberOfTeamspace(userToCheck, teamspace.user)) {
+		throw(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
+	}
+
+	console.log("user is member of teamspace");
+
+	const isPermissionInvalid = permission.permissions &&
+		intersection(permission.permissions, C.ACCOUNT_PERM_LIST).length !== permission.permissions.length;
+
+	if (isPermissionInvalid) {
+		throw(responseCodes.INVALID_PERM);
+	}
 };
 
 const AccountPermissions = {};
@@ -35,6 +60,8 @@ AccountPermissions.get = function(teamspace) {
 };
 
 AccountPermissions.update = async function(teamspace, username, permissions) {
+	await checkValidUpdate(teamspace, username, permissions);
+
 	if(permissions && permissions.length === 0) {
 		// this is actually a remove
 		return await this.remove(teamspace, username);
