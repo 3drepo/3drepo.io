@@ -1639,19 +1639,9 @@ router.get("/:model/download/latest", middlewares.hasDownloadAccessToModel, down
 router.get("/:model/meshes/:meshId", middlewares.hasReadAccessToModel, getMesh);
 
 function updateSettings(req, res, next) {
-
 	const place = utils.APIInfo(req);
-	const dbCol = {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 
-	return ModelSetting.findById(dbCol, req.params.model).then(modelSetting => {
-
-		if (!modelSetting) {
-			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
-		}
-
-		return modelSetting.updateProperties(req.body);
-
-	}).then(modelSetting => {
+	return ModelSetting.updateSettings(req.params.account, req.params.model, req.body).then(modelSetting => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, modelSetting.properties);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -1674,16 +1664,7 @@ function updateHeliSpeed(req, res, next) {
 	const place = utils.APIInfo(req);
 	const dbCol = {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 
-	return ModelSetting.findById(dbCol, req.params.model).then(modelSetting => {
-		if (!modelSetting) {
-			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
-		}
-		if (!Number.isInteger(req.body.heliSpeed)) {
-			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
-		}
-
-		return modelSetting.updateProperties({heliSpeed: req.body.heliSpeed});
-	}).then(() => {
+	return ModelSetting.updateHeliSpeed(req.params.account, req.params.model, req.body.heliSpeed).then(() => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, {});
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
