@@ -248,7 +248,6 @@ ModelSetting.batchUpdatePermissions = async function(account, batchPermissions =
 ModelSetting.clean = async function(account, model, dataToClean) {
 	const views = new (require("./view"))();
 	if (dataToClean.defaultView) {
-		delete dataToClean.defaultView;
 		try {
 			const viewIDStr = utils.uuidToString(dataToClean.defaultView);
 			const viewData = await views.findByUID(account, model,
