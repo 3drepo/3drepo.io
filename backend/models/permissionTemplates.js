@@ -48,7 +48,7 @@ PermissionTemplates.add = async function (teamspace, permission) {
 		throw (responseCodes.INVALID_PERM);
 	}
 
-	return await updatePermissions(teamspace.user, this.get(teamspace).concat(permission));
+	return await updatePermissions(teamspace, this.get(teamspace).concat(permission));
 };
 
 PermissionTemplates.remove = async function(teamspace, id) {
@@ -63,7 +63,7 @@ PermissionTemplates.remove = async function(teamspace, id) {
 		throw (responseCodes.PERM_NOT_FOUND);
 	}
 
-	return await updatePermissions(teamspace.user, this.get(teamspace).filter(({_id}) => _id !== id));
+	return await updatePermissions(teamspace, this.get(teamspace).filter(({_id}) => _id !== id));
 };
 
 module.exports = PermissionTemplates;
