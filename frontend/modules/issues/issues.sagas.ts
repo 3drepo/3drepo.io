@@ -17,12 +17,12 @@
 
 import { push } from 'connected-react-router';
 import filesize from 'filesize';
-import { isEmpty, isEqual, map, omit, pick } from 'lodash';
-import { all, put, select, take, takeLatest } from 'redux-saga/effects';
+import { isEmpty, isEqual, map, omit } from 'lodash';
+import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import * as queryString from 'query-string';
 import { CHAT_CHANNELS } from '../../constants/chat';
-import { DEFAULT_PROPERTIES, PRIORITIES, STATUSES } from '../../constants/issues';
+import { DEFAULT_PROPERTIES, ISSUE_DEFAULT_HIDDEN_STATUSES, PRIORITIES, STATUSES } from '../../constants/issues';
 import { EXTENSION_RE } from '../../constants/resources';
 import { ROUTES } from '../../constants/routes';
 import {
@@ -32,7 +32,6 @@ import {
 import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
 import { prepareIssue } from '../../helpers/issues';
 import { prepareResources } from '../../helpers/resources';
-import { createGroupsFromViewpoint, mergeGroupsDataFromViewpoint } from '../../helpers/viewpoints';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
