@@ -451,7 +451,7 @@ class Ticket extends View {
 
 		// Assign rev_id for issue
 		try {
-			const history = await History.getHistory({ account, model }, branch, newTicket.revId, { _id: 1 });
+			const history = await  History.getHistory(account, model, branch, newTicket.revId, { _id: 1 });
 			if (history) {
 				newTicket.rev_id = history._id;
 			}
@@ -525,10 +525,10 @@ class Ticket extends View {
 
 		if (branch || revId) {
 			// searches for the first rev id
-			const history = await History.getHistory({ account, model }, branch, revId);
+			const history = await  History.getHistory(account, model, branch, revId);
 
 			// Uses the first revsion searched to get all posterior revisions
-			invalidRevIds = await History.find({ account, model }, { timestamp: { "$gt": history.timestamp } }, { _id: 1 });
+			invalidRevIds = await History.find(account, model , { timestamp: { "$gt": history.timestamp } }, { _id: 1 });
 			invalidRevIds = invalidRevIds.map(r => r._id);
 		}
 

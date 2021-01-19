@@ -88,7 +88,7 @@ class Sequence {
 	}
 
 	async getList(account, model, branch, revision, cleanResponse = false) {
-		const history = await History.getHistory({account, model}, branch, revision);
+		const history = await History.getHistory(account, model, branch, revision);
 		let submodels = [];
 
 		if (history.current) {
