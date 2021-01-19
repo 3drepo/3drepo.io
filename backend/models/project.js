@@ -313,7 +313,7 @@
 				}
 			}
 
-			setting = await setting.clean();
+			setting = await ModelSetting.clean(account, setting._id, setting.toObject());
 			setting.permissions = _.uniq(permissions.concat(settingsPermissions));
 			setting.model = setting._id;
 			setting.account = account;
