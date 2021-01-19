@@ -601,17 +601,16 @@ User.getAvatar = function (user) {
 	return user.customData && user.customData.avatar || null;
 };
 
-/*
-schema.methods.updateInfo = function (updateObj) {
+User.updateInfo = async function(username, updateObj) {
+	const updateableFields = new Set(["firstName", "lastName", "email"]);
 
-	const updateableFields = ["firstName", "lastName", "email"];
-
-	this.customData = this.customData || {};
 	let validUpdates = true;
+	const updateData = {};
+
 	updateableFields.forEach(field => {
-		if (utils.hasField(updateObj, field)) {
-			if (Object.prototype.toString.call(updateObj[field]) === "[object String]") {
-				this.customData[field] = updateObj[field];
+		if (utils.hasField(updateObj, field) && validUpdates) {
+			if (utils.isString(updateObj[field])) {
+				updateData[`customData.${field}`] = updateObj[field];
 			} else {
 				validUpdates = false;
 			}
@@ -619,15 +618,15 @@ schema.methods.updateInfo = function (updateObj) {
 	});
 
 	if (!validUpdates) {
-		return Promise.reject({ resCode: responseCodes.INVALID_ARGUMENTS });
+		throw ({ resCode: responseCodes.INVALID_ARGUMENTS });
 	}
 
-	return User.checkEmailAvailableAndValid(this.customData.email, this.user).then(() => {
-		return this.save();
-	});
-};
+	if (updateObj.email) {
+		await User.checkEmailAvailableAndValid(updateObj.email, username);
+	}
 
-*/
+	await User.update(username, updateData);
+};
 
 User.findUsernameOrEmail = function (userNameOrEmail) {
 	return DB.getCollection("admin", COLL_NAME).then(dbCol => {

@@ -641,9 +641,7 @@ function updateUser(req, res, next) {
 
 	} else {
 		// Update user info
-		User.findByUserName(req.params[C.REPO_REST_API_ACCOUNT]).then(user => {
-			return user.updateInfo(req.body);
-		}).then(() => {
+		User.updateInfo(req.params[C.REPO_REST_API_ACCOUNT], req.body).then(() => {
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
