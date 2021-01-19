@@ -190,7 +190,7 @@ JSONAssets.getTree = async function(account, model, branch, rev) {
 			readStream.on("error", err => outStream.emit("error", err));
 		});
 
-		const subTreeInfo =  await getSubTreeInfo(account, model, , branch, rev);
+		const subTreeInfo =  await getSubTreeInfo(account, model, branch, rev);
 		isFed = subTreeInfo.length > 0;
 
 		outStream.write(", \"subTrees\":[");
