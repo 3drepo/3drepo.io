@@ -11,7 +11,7 @@ import { SortAmountDown, SortAmountUp } from '../routes/components/fontAwesomeIc
 
 import ViewModule from '@material-ui/icons/ViewModule';
 
-import { DATA_TYPES, FILTER_TYPES } from '../routes/components/filterPanel/filterPanel.component';
+import { FILTER_TYPES } from '../routes/components/filterPanel/filterPanel.component';
 import { COLOR, PIN_COLORS } from '../styles';
 
 export const ISSUE_PANEL_NAME = 'issue';
@@ -33,6 +33,8 @@ export const STATUSES = {
 	CLOSED: 'closed',
 	VOID: 'void',
 };
+
+export const ISSUE_DEFAULT_HIDDEN_STATUSES = [STATUSES.CLOSED, STATUSES.VOID];
 
 export const PRIORITIES = {
 	NONE: 'none',

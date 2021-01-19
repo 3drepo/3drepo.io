@@ -18,12 +18,12 @@
 import fileDialog from 'file-dialog';
 import {
 	ISSUE_COLORS,
+	ISSUE_DEFAULT_HIDDEN_STATUSES,
 	ISSUE_FILTER_RELATED_FIELDS,
 	ISSUE_PRIORITIES,
 	ISSUE_STATUSES,
 	ISSUES_ACTIONS_MENU,
 	PRIORITIES,
-	STATUSES,
 	STATUSES_ICONS
 } from '../constants/issues';
 import { getFilterValues, UNASSIGNED_JOB } from '../constants/reportedItems';
@@ -67,7 +67,7 @@ export const prepareIssue = (issue, jobs = []) => {
 	}
 
 	if (issue.status) {
-		preparedIssue.defaultHidden = [STATUSES.CLOSED, STATUSES.VOID].includes(issue.status);
+		preparedIssue.defaultHidden = ISSUE_DEFAULT_HIDDEN_STATUSES.includes(issue.status);
 	}
 
 	return preparedIssue;
