@@ -499,30 +499,18 @@ describe("Model", function () {
 			});
 		});
 
-		it("should be removed from collaborator's model listing", function(done) {
+		it("should be removed from collaborator's model listing", async function() {
 
 			const agent2 = request.agent(server);
 
-			async.series([
-				callback => {
-					agent2.post("/login").send({ username: "testing", password: "testing" }).expect(200, callback);
-				},
-				callback => {
-					agent2.get("/testing.json").expect(200, function(err, res) {
+			await agent2.post("/login").send({ username: "testing", password: "testing" }).expect(200);
 
-						const account = res.body.accounts.find(account => account.account === username);
-						const modelExists = account.models.find(m => m.model === model);
+			const {body} =  await agent2.get("/testing.json").expect(200);
 
-						expect(modelExists).to.not.exist;
+			const account = body.accounts.find(account => account.account === username);
+			const modelExists = account.models.find(m => m.model === model);
 
-						// const mm = account.models.find(m => m.model === model);
-						// expect(mm).to.not.exist;
-
-						callback(err);
-					});
-				}
-			], done);
-
+			expect(modelExists).to.not.exist;
 		});
 
 		it("should be removed from model group", function(done) {

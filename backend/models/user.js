@@ -44,6 +44,7 @@ const UserBilling = require("./userBilling");
 const AccountPermissions = require("./accountPermissions");
 const Project = require("./project");
 const FileRef = require("./fileRef");
+const PermissionTemplates = require("./permissionTemplates");
 
 // const schema = mongoose.Schema({
 // 	_id: String,
@@ -813,7 +814,7 @@ function _findModelDetails(dbUserCache, username, model) {
 			const template = setting.findPermissionByUser(username);
 
 			if (template) {
-				permissions = AccountPermissions.findById(dbUser, template.permission).permissions;
+				permissions = PermissionTemplates.findById(dbUser, template.permission).permissions;
 			}
 		}
 
