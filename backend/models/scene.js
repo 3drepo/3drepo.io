@@ -91,7 +91,7 @@ Scene.getNodeById = async function (account, model, id, projection = {}) {
 };
 
 Scene.getParentMatrix = async function (account, model, parent, revisionIds) {
-	const mesh = await getNodeBySharedId(account, model, parent, revisionIds);
+	const mesh = await getNodeBySharedId(account, model, utils.stringToUUID(parent), revisionIds);
 
 	if ((mesh.parents || []).length > 0) {
 		const parentMatrix = await Scene.getParentMatrix(account, model, mesh.parents[0], revisionIds);
