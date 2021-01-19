@@ -351,7 +351,7 @@ function* closeDetails() {
 const onUpdateEvent = (updatedIssue) => {
 	const jobs = selectJobsList(getState());
 
-	if ([STATUSES.CLOSED, STATUSES.VOID].includes(updatedIssue.status)) {
+	if (ISSUE_DEFAULT_HIDDEN_STATUSES.includes(updatedIssue.status)) {
 		dispatch(IssuesActions.showCloseInfo(updatedIssue._id));
 		setTimeout(() => {
 			dispatch(IssuesActions.saveIssueSuccess(prepareIssue(updatedIssue, jobs)));

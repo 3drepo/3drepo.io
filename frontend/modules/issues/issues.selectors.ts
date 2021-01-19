@@ -115,7 +115,7 @@ export const selectFilteredIssues = createSelector(
 	selectIssues, selectSelectedFilters, selectSortOrder, selectSortByField,
 		(issues, selectedFilters, sortOrder, sortByField) => {
 			const returnHiddenIssue = selectedFilters.length && selectedFilters
-				.some(({ value: { value } }) => [STATUSES.CLOSED, STATUSES.VOID].includes(value));
+				.some(({ value: { value } }) => ISSUE_DEFAULT_HIDDEN_STATUSES.includes(value));
 
 			return sortByDate(searchByFilters(issues, selectedFilters, returnHiddenIssue),
 				{ order: sortOrder }, sortByField );

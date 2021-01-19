@@ -18,7 +18,11 @@ import { sortBy } from 'lodash';
 
 import React from 'react';
 
-import { ISSUE_FILTERS, ISSUES_ACTIONS_MENU, STATUSES } from '../../../../constants/issues';
+import {
+	ISSUE_DEFAULT_HIDDEN_STATUSES,
+	ISSUE_FILTERS,
+	ISSUES_ACTIONS_MENU,
+} from '../../../../constants/issues';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { filtersValuesMap, getHeaderMenuItems } from '../../../../helpers/issues';
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -110,7 +114,7 @@ export class Issues extends React.PureComponent<IProps, any> {
 	get showDefaultHiddenItems() {
 		if (this.props.selectedFilters.length) {
 			return this.props.selectedFilters
-				.some(({ value: { value } }) => [STATUSES.CLOSED, STATUSES.VOID].includes(value));
+				.some(({ value: { value } }) => ISSUE_DEFAULT_HIDDEN_STATUSES.includes(value));
 		}
 		return false;
 	}

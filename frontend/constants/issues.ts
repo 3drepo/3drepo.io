@@ -34,6 +34,8 @@ export const STATUSES = {
 	VOID: 'void',
 };
 
+export const ISSUE_DEFAULT_HIDDEN_STATUSES = [STATUSES.CLOSED, STATUSES.VOID];
+
 export const PRIORITIES = {
 	NONE: 'none',
 	LOW: 'low',
