@@ -531,68 +531,65 @@ function formatPronouns(str) {
 	return strArr.map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
 }
 
-User.verify = function (username, token, options) {
-
+User.verify = async function (username, token, options) {
 	options = options || {};
 
 	const allowRepeatedVerify = options.allowRepeatedVerify;
 	const skipImportToyModel = options.skipImportToyModel;
 
-	return this.findByUserName(username).then(_user => {
+	const user = await this.findByUserName(username);
 
-		const user = _user;
+	const tokenData = user && user.customData && user.customData.emailVerifyToken;
 
-		const tokenData = user && user.customData && user.customData.emailVerifyToken;
+	if (!user) {
 
-		if (!user) {
+		throw ({ resCode: responseCodes.TOKEN_INVALID });
 
-			return Promise.reject({ resCode: responseCodes.TOKEN_INVALID });
+	} else if (!user.customData.inactive && !allowRepeatedVerify) {
 
-		} else if (!user.customData.inactive && !allowRepeatedVerify) {
+		throw ({ resCode: responseCodes.ALREADY_VERIFIED });
 
-			return Promise.reject({ resCode: responseCodes.ALREADY_VERIFIED });
+	} else if (tokenData.token === token && tokenData.expiredAt > new Date()) {
 
-		} else if (tokenData.token === token && tokenData.expiredAt > new Date()) {
+		await User.update(username, {"customData.inactive": undefined, "customData.emailVerifyToken": undefined });
 
-			user.customData.inactive = undefined;
-			user.customData.emailVerifyToken = undefined;
-			return user.save();
+	} else {
+		throw ({ resCode: responseCodes.TOKEN_INVALID });
+	}
 
-		} else {
-			return Promise.reject({ resCode: responseCodes.TOKEN_INVALID });
-		}
+	const name = user.customData.firstName && user.customData.firstName.length > 0 ?
+		formatPronouns(user.customData.firstName) : user.user;
+	Mailer.sendWelcomeUserEmail(user.customData.email, {user: name})
+		.catch(err => systemLogger.logError(err));
 
-	}).then((user) => {
-		const name = user.customData.firstName && user.customData.firstName.length > 0 ?
-			formatPronouns(user.customData.firstName) : user.user;
-		Mailer.sendWelcomeUserEmail(user.customData.email, {user: name})
-			.catch(err => systemLogger.logError(err));
+	if (!skipImportToyModel) {
 
-		if (!skipImportToyModel) {
+		// import toy model
+		const ModelHelper = require("./helper/model");
 
-			// import toy model
-			const ModelHelper = require("./helper/model");
-
-			ModelHelper.importToyProject(username, username).catch(err => {
-				systemLogger.logError("Failed to import toy model", { err: err && err.stack ? err.stack : err });
-			});
-		}
-
-		Role.createTeamSpaceRole(username).then(() => {
-			return Role.grantTeamSpaceRoleToUser(username, username);
-		}
-		).catch((err) => {
-			systemLogger.logError("Failed to create role for ", username, err);
+		ModelHelper.importToyProject(username, username).catch(err => {
+			systemLogger.logError("Failed to import toy model", { err: err && err.stack ? err.stack : err });
 		});
+	}
 
-		addDefaultJobs(username).catch((err) => {
-			systemLogger.logError("Failed to create default jobs for ", username, err);
-		});
+	try {
+		await Role.createTeamSpaceRole(username);
+		await Role.grantTeamSpaceRoleToUser(username, username);
+	} catch(err) {
+		systemLogger.logError("Failed to create role for ", username, err);
+	}
 
-		TeamspaceSettings.createTeamspaceSettings(username).catch((err) => {
-			systemLogger.logError("Failed to create teamspace settings for ", username, err);
-		});
-	});
+	try {
+		await addDefaultJobs(username);
+	} catch(err) {
+		systemLogger.logError("Failed to create default jobs for ", username, err);
+	}
+
+	try {
+		await TeamspaceSettings.createTeamspaceSettings(username);
+	} catch(err) {
+		systemLogger.logError("Failed to create teamspace settings for ", username, err);
+	}
 };
 
 User.hasReadLatestTerms = function (user) {
@@ -1220,7 +1217,7 @@ User.addTeamMember = async function(teamspace, userToAdd, job, permissions) {
 	promises.push(addUserToJob(teamspace.user, job, userToAdd));
 
 	if (permissions && permissions.length) {
-		promises.push(AccountPermissions.add(teamspace, userToAdd, permissions));
+		promises.push(AccountPermissions.updateOrCreate(teamspace, userToAdd, permissions));
 	}
 
 	await Promise.all(promises);

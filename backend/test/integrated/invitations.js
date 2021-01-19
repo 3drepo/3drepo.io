@@ -220,6 +220,30 @@ describe("Invitations ", function () {
 		expect(invitations).to.be.an('array').and.to.have.length(0);
 	});
 
+	it("with teamspace admin that are unpacked should generate the proper user permissions the teamspace", async function() {
+		AssertionError.includeStack = true;
+		const username = 'adminInvitedUser2';
+		const email = 'adminInvitedUser2@mail.com';
+		const inviteJob = 'jobA';
+
+		const selectInvitedUser = ({ user }) => user === username;
+
+		await agents.sub_all.post(inviteUrl("sub_all"))
+			.send({ email, job: inviteJob, permissions: {teamspace_admin: true}})
+			.expect(200);
+
+		const User = require("../../models/user");
+		const { token } = await User.createUser(null, username, 'password', {email}, 200000);
+
+		await User.verify(username, token, {skipImportToyModel : true, skipCreateBasicPlan: true});
+
+
+		const { body: {members}} = await agents.sub_all.get(membersUrl('sub_all'));
+		let invited = members.find(selectInvitedUser);
+		expect(invited.permissions[0],'invited user should be a teamspace admin').to.equal("teamspace_admin");
+	});
+
+
 	it("that are unpacked should generate the proper user permissions for two teamspaces", async function() {
 		AssertionError.includeStack = true;
 		const username = 'invitedUser';

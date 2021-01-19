@@ -221,7 +221,7 @@ const applyTeamspacePermissions = (invitedUser) => async ({ teamspace, job, perm
 	const teamPerms = permissions.teamspace_admin ? ["teamspace_admin"] : [];
 
 	try {
-		await teamspaceUser.addTeamMember(invitedUser, job, teamPerms);
+		await User.addTeamMember(teamspaceUser, invitedUser, job, teamPerms);
 
 		if (!permissions.teamspace_admin) {
 			await Promise.all(permissions.projects.map(applyProjectPermissions(teamspace, invitedUser)));

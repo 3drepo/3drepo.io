@@ -29,7 +29,6 @@
 	const Counter = require("./counter");
 	const Mailer = require("../mailer/mailer");
 	const vat = require("./vat");
-	const BillingAddress = require("./billingAddress");
 	const utils = require("../utils");
 	const C = require("../constants");
 	const responseCodes = require("../response_codes.js");
