@@ -264,6 +264,13 @@ ModelSetting.clean = async function(account, model, dataToClean) {
 	return dataToClean;
 };
 
+ModelSetting.getHeliSpeed = async function(account, model) {
+	const modelSetting = await ModelSetting.findById({account, model}, model);
+	const speed = modelSetting.heliSpeed ? modelSetting.heliSpeed : 1;
+
+	return {heliSpeed: speed};
+};
+
 /**
  * Fills out the models data for the  modelids passed through parameter.
  * @param {Object} teamspaces an object which keys are teamspaces ids and values are an array of modelids

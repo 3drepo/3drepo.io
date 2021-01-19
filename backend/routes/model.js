@@ -1650,11 +1650,9 @@ function updateSettings(req, res, next) {
 
 function getHeliSpeed(req, res, next) {
 	const place = utils.APIInfo(req);
-	const dbCol = {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 
-	return ModelSetting.findById(dbCol, req.params.model).then(modelSetting => {
-		const speed = modelSetting.heliSpeed ? modelSetting.heliSpeed : 1;
-		responseCodes.respond(place, req, res, next, responseCodes.OK, {heliSpeed: speed});
+	return ModelSetting.getHeliSpeed(req.params.account, req.params.model).then(heliSpeed => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, heliSpeed);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
