@@ -70,7 +70,7 @@ export class ButtonMenu extends React.PureComponent<IProps, IState> {
 
 	public componentDidMount() {
 		this.setState({
-			activeMenu: this.props.open
+			activeMenu: !!this.props.open
 		});
 	}
 

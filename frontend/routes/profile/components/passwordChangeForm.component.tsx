@@ -87,7 +87,7 @@ export class PasswordChangeForm extends React.PureComponent<IProps, IState> {
 			>
 				<Form>
 					<FormContainer container direction="column">
-						<Headline color="primary" variant="subheading">Password Settings</Headline>
+						<Headline color="primary" variant="subtitle1">Password Settings</Headline>
 						<FieldsRow container wrap="nowrap">
 							<Field name="oldPassword" render={ ({ field, form }) => (
 								<StyledTextField
@@ -130,7 +130,7 @@ export class PasswordChangeForm extends React.PureComponent<IProps, IState> {
 						<Field render={ ({ form }) => (
 							<StyledButton
 								color="secondary"
-								variant="raised"
+								variant="contained"
 								disabled={!form.isValid || form.isValidating}
 								type="submit"
 							>

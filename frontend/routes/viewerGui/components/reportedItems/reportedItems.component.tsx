@@ -118,7 +118,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 				{this.renderNotFound(this.props.searchEnabled && !this.props.items.length)}
 				{this.renderItemsList(this.props.items)}
 			</ViewerPanelContent>
-			<ViewerPanelFooter alignItems="center" justify="space-between">
+			<ViewerPanelFooter container alignItems="center" justify="space-between">
 				<Summary>{this.listFooterText}</Summary>
 				<ViewerPanelButton
 					aria-label="Add item"

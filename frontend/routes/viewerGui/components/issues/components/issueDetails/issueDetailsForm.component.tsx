@@ -18,23 +18,26 @@
 import React from 'react';
 
 import DayJsUtils from '@date-io/dayjs';
-import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 import Tooltip from '@material-ui/core/Tooltip';
-import { withFormik, Field, Form } from 'formik';
+import { withFormik, Form } from 'formik';
 import { debounce, get, isEmpty, isEqual } from 'lodash';
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 import * as Yup from 'yup';
 
-import { ATTACHMENTS_ISSUE_TAB, ISSUE_PROPERTIES_TAB,
-	ISSUE_SEQUENCING_TAB, ISSUE_TABS } from '../../../../../../constants/issues';
+import {
+	ATTACHMENTS_ISSUE_TAB,
+	ISSUE_PROPERTIES_TAB,
+	ISSUE_SEQUENCING_TAB,
+	ISSUE_TABS,
+} from '../../../../../../constants/issues';
 import { VIEWER_PANELS_TITLES } from '../../../../../../constants/viewerGui';
 import { canChangeAssigned, canChangeBasicProperty } from '../../../../../../helpers/issues';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { AttachmentsFormTab } from '../../../risks/components/attachmentsFormTab/attachmentsFormTab.component';
 import { SequencingFormTab } from '../../../risks/components/sequencingFormTab/sequencingFormTab.component';
 import { MainIssueFormTab } from '../mainIssueFormTab/mainIssueFormTab.component';
-import { TabContent } from './issueDetails.styles';
+import { StyledTab, TabContent } from './issueDetails.styles';
 
 interface IProps {
 	issue: any;
@@ -189,12 +192,11 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						value={activeTab}
 						indicatorColor="secondary"
 						textColor="primary"
-						fullWidth
 						onChange={this.handleChange}
 					>
-						<Tab label={ISSUE_TABS.ISSUE} value={ISSUE_PROPERTIES_TAB} />
-						<Tab label={ISSUE_TABS.SEQUENCING} value={ISSUE_SEQUENCING_TAB} />
-						<Tab {...this.attachmentsProps} value={ATTACHMENTS_ISSUE_TAB} />
+						<StyledTab label={ISSUE_TABS.ISSUE} value={ISSUE_PROPERTIES_TAB} />
+						<StyledTab label={ISSUE_TABS.SEQUENCING} value={ISSUE_SEQUENCING_TAB} />
+						<StyledTab {...this.attachmentsProps} value={ATTACHMENTS_ISSUE_TAB} />
 					</Tabs>
 					<TabContent>
 						{this.showIssueContent(activeTab === ISSUE_PROPERTIES_TAB)}

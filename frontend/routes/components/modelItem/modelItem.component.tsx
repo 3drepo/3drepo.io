@@ -29,10 +29,6 @@ interface IProps {
 }
 
 export const ModelItem = ({name, isFederation, searchText = ''}: IProps) => {
-	const highlightProps = {
-		search: searchText || ''
-	};
-
 	return (
 		<Container>
 			<Tooltip title={name}>

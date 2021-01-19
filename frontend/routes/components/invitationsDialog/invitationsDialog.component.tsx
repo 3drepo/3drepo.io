@@ -100,7 +100,7 @@ export const InvitationsDialog = (props: IProps) => {
 				</CancelButton>
 				<Button
 					type="button"
-					variant="raised"
+					variant="contained"
 					color="secondary"
 					onClick={handleInvitationClick({})}
 				>

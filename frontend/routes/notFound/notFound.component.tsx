@@ -34,7 +34,7 @@ export const NotFound = (props: IProps) => {
 			title: 'Wrong URL address',
 			content: 'Page not found',
 			closeText,
-			buttonVariant: 'raised',
+			buttonVariant: 'contained',
 			onCancel: () => {
 				props.history.push(ROUTES.TEAMSPACES);
 			}

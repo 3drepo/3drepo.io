@@ -31,6 +31,7 @@ import {
 	CollapsableContent,
 	Container,
 	Details,
+	Header,
 	MainInfoContainer,
 	NotCollapsableContent,
 	ScrollableContainer,
@@ -54,7 +55,6 @@ interface IProps {
 	StatusIconComponent: any;
 	statusColor: string;
 	defaultExpanded: boolean;
-	disableExpanding: boolean;
 	editable?: boolean;
 	willBeRemoved?: boolean;
 	willBeUpdated?: boolean;
@@ -149,20 +149,16 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		<ActionMessage content={`This ${this.props.panelName} has been deleted by someone else`} />
 	);
 
-	public renderToggleButtonContainer = renderWhenTrue(() => (
-		<ToggleButtonContainer onClick={this.handleToggle}>
-			<ToggleButton>
-				{this.renderExpandIcon(!this.props.editable)}
-			</ToggleButton>
-		</ToggleButtonContainer>
-	));
-
 	public renderNotCollapsableContent = () => {
 		const Component = this.props.renderNotCollapsable && this.props.renderNotCollapsable();
 
 		return renderWhenTrue(() => (
 			<>
-				{this.renderToggleButtonContainer(!this.props.disableExpanding)}
+				<ToggleButtonContainer onClick={this.handleToggle}>
+					<ToggleButton>
+						{this.renderExpandIcon(!this.props.editable)}
+					</ToggleButton>
+				</ToggleButtonContainer>
 				<NotCollapsableContent>
 					{this.props.renderNotCollapsable()}
 				</NotCollapsableContent>
@@ -246,7 +242,6 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			StatusIconComponent,
 			statusColor,
 			editable,
-			disableExpanding,
 			willBeUpdated,
 			willBeRemoved,
 			renderCollapsable,
@@ -261,10 +256,9 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			<Container className={className} edit={!this.props.isNew} panelName={panelName} isSmartGroup={isSmartGroup}>
 				{this.renderUpdateMessage(willBeUpdated)}
 				{this.renderDeleteMessage(willBeRemoved)}
-				<Summary
-					expandIcon={this.renderExpandIcon(!disableExpanding && !editable)}
+				<Header
 					onClick={handleHeaderClick}
-					expanded={this.state.expanded && this.props.scrolled}
+					expanded={this.state.expanded && this.props.scrolled ? 1 : 0}
 				>
 					<RoleIndicator color={roleColor} ref={this.headerRef} />
 					<MainInfoContainer>
@@ -280,10 +274,11 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 							actionButton={actionButton}
 						/>
 					</MainInfoContainer>
-				</Summary>
+				</Header>
 
 				<ScrollableContainer ref={this.scrollableContainerRef} expanded={!this.state.collapsed}>
 					<Collapsable onChange={this.handleToggle} expanded={this.state.expanded}>
+						<Summary />
 						<Details>
 							{this.renderCollapsable(Boolean(renderCollapsable))}
 						</Details>

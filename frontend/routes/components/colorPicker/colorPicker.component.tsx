@@ -389,7 +389,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 	public renderFooter = () => (
 		<Footer>
 			<StyledButton
-				variant="raised"
+				variant="contained"
 				color="secondary"
 				onClick={this.handleSave}
 			>

@@ -29,7 +29,7 @@ export const Footer = () => (
 	<FooterContainer container alignItems="center" justify="space-between">
 		<Version flex-direction="row">
 			Version:
-				<Tooltip title="Release notes">
+			<Tooltip title="Release notes">
 				<StyledButton
 					href={`https://github.com/3drepo/3drepo.io/releases/tag/${APP_VERSION}`}
 					target="_blank"

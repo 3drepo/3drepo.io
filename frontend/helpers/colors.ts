@@ -1,5 +1,5 @@
 import { memoize } from 'lodash';
-import { WHITE } from './../styles/colors';
+import { WHITE } from '../styles';
 
 export const parseHex = (hex) => {
 	if (Array.isArray(hex)) { // if is already a rgb array return it

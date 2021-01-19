@@ -206,7 +206,7 @@ export class Notifications extends React.PureComponent<IProps, any> {
 
 	private renderNotificationsHeader = () => (
 		<ListSubheaderToolbar rightContent={this.renderRightContent()}>
-			<Typography variant="title" color="inherit">
+			<Typography variant="h6" color="inherit">
 				Notifications
 			</Typography>
 		</ListSubheaderToolbar>
