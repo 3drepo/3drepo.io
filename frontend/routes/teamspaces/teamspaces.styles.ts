@@ -16,6 +16,8 @@
  */
 
 import Button from '@material-ui/core/Button';
+import Fab from '@material-ui/core/Fab';
+import Tab from '@material-ui/core/Tab';
 import styled from 'styled-components';
 import { COLOR } from '../../styles';
 
@@ -57,14 +59,14 @@ export const GridContainer = styled.div`
 	background-color: ${COLOR.WHITE};
 `;
 
-export const MenuButton = styled(Button).attrs({
+export const MenuButton = styled(Fab).attrs({
 	classes: {
 		disabled: 'button--disabled'
 	}
 })`
 	&&.button--disabled {
-		background: #d9d9d9;
-		color: #868686;
+		background: ${COLOR.LIGHT_GRAY_89};
+		color: ${COLOR.GRAY_60};
 	}
 
 	&& {
@@ -137,4 +139,11 @@ export const OtherTeamspacesLabel = styled.div`
 	margin-bottom: 0;
 	font-weight: 400;
 	border-bottom: 1px solid ${COLOR.BLACK_6};
+`;
+
+export const StyledTab = styled(Tab)`
+	&& {
+		padding-left: 24px;
+		padding-right: 24px;
+	}
 `;

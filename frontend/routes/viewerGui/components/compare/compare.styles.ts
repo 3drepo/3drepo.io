@@ -16,7 +16,7 @@
  */
 
 import { List, Tabs as TabsComponent } from '@material-ui/core';
-import SliderComponent from '@material-ui/lab/Slider';
+import SliderComponent from '@material-ui/core/Slider';
 import styled from 'styled-components';
 
 import { COLOR } from '../../../../styles';

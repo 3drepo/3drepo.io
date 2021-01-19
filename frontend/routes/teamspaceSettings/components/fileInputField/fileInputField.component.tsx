@@ -62,7 +62,7 @@ export class FileInputField extends React.PureComponent<IProps, IState> {
 		return (
 			<Button
 				component="span"
-				variant="raised"
+				variant="contained"
 				color="secondary"
 			>
 				Browser

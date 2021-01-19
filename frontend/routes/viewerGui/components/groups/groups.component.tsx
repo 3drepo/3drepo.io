@@ -187,7 +187,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 				{this.renderNotFound(this.props.searchEnabled && !this.state.filteredGroups.length)}
 				{this.renderGroupsList(this.state.filteredGroups.length)}
 			</ViewerPanelContent>
-			<ViewerPanelFooter alignItems="center" justify="space-between">
+			<ViewerPanelFooter container alignItems="center" justify="space-between">
 				<Summary>
 					{`${this.state.filteredGroups.length} groups displayed`}
 				</Summary>

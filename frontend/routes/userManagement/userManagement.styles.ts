@@ -17,6 +17,8 @@
 
 import styled from 'styled-components';
 
+import Tab from '@material-ui/core/Tab';
+
 import { media, COLOR } from '../../styles';
 import { LoaderContainer as
 	DialogLoaderContainer } from '../components/dialogContainer/components/loadingDialog/loadingDialog.styles';
@@ -39,4 +41,11 @@ export const TeamspaceSelectContainer = styled.div`
 
 export const LoaderContainer = styled(DialogLoaderContainer)`
 	height: calc(100% - 65px);
+`;
+
+export const StyledTab = styled(Tab)`
+	&& {
+		padding-left: 24px;
+		padding-right: 24px;
+	}
 `;

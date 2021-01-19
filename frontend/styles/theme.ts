@@ -44,24 +44,35 @@ export const MuiTheme = createMuiTheme({
 		}
 	},
 	overrides: {
+		MuiButton: {
+			root: {
+				padding: '8px 16px',
+				lineHeight: '1.4em',
+				letterSpacing: 'normal',
+			}
+		},
 		MuiInput: {
 			root: {
-				fontSize: '14px'
+				'fontSize': '14px',
+				'&$disabled': {
+					color: 'gainsboro'
+				},
 			},
 			underline: {
 				'&:before': {
 					borderBottomColor: 'rgba(0, 0, 0, .12) !important'
 				}
 			},
-			disabled: {
-				color: 'gainsboro'
-			}
 		},
 		MuiInputBase: {
 			root: {
+				'overflow': 'hidden',
 				'&$disabled': {
 					color: theme.colors.BLACK_60
 				}
+			},
+			input: {
+				letterSpacing: 'normal',
 			}
 		},
 		MuiFormControlLabel: {
@@ -99,7 +110,7 @@ export const MuiTheme = createMuiTheme({
 		},
 		MuiDialog: {
 			paper: {
-				background: '#fafafa'
+				background: theme.colors.LIGHT_GRAY
 			},
 			paperFullScreen: {
 				maxWidth: 'calc(100% - 96px)',
@@ -115,13 +126,21 @@ export const MuiTheme = createMuiTheme({
 		},
 		MuiTab: {
 			root: {
-				minWidth: '0 !important'
+				/* tslint:disable */
+				minWidth: '0 !important',
+				letterSpacing: 'normal',
+				'@media (min-width: 960px)': {
+					fontSize: '13px',
+				}
+				/* tslint:enable */
 			}
 		},
 		MuiMenuItem: {
 			root: {
 				fontSize: '14px',
-				color: theme.colors.BLACK_60
+				color: theme.colors.BLACK_60,
+				paddingTop: '12px',
+				paddingBottom: '12px',
 			}
 		},
 		MuiSnackbarContent: {
@@ -145,7 +164,7 @@ export const MuiTheme = createMuiTheme({
 			}
 		},
 		MuiTypography: {
-			title: {
+			h6: {
 				fontSize: 20,
 				fontWeight: 400
 			}
@@ -168,7 +187,7 @@ export const MuiTheme = createMuiTheme({
 		},
 		MuiDrawer: {
 			paper: {
-				backgroundColor: 'rgb(250,250,250)',
+				backgroundColor: theme.colors.WHITE,
 				boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.2)',
 				zIndex: 10
 			},
@@ -176,19 +195,49 @@ export const MuiTheme = createMuiTheme({
 				borderLeft: 'none'
 			}
 		},
+		MuiListItem: {
+			root: {
+				paddingTop: '12px',
+				paddingBottom: '12px',
+			},
+			gutters: {
+				'@media (min-width: 600px)': {
+					paddingLeft: '24px',
+					paddingRight: '24px',
+				}
+			}
+		},
+		MuiListItemIcon: {
+			root: {
+				minWidth: 'auto',
+			},
+		},
+		MuiListItemAvatar: {
+			root: {
+				minWidth: 'auto',
+			},
+		},
 		MuiListItemText: {
 			root: {
-				minWidth: 10
+				/* tslint:disable */
+				minWidth: 10,
+				padding: '0 16px',
+				'&:first-child': {
+					paddingLeft: 0,
+				},
+				/* tslint:enable */
 			},
 			primary: {
 				overflow: 'hidden',
 				textOverflow: 'ellipsis',
-				whiteSpace: 'nowrap'
+				whiteSpace: 'nowrap',
+				letterSpacing: 'normal',
 			},
 			secondary: {
 				overflow: 'hidden',
 				textOverflow: 'ellipsis',
-				whiteSpace: 'nowrap'
+				whiteSpace: 'nowrap',
+				letterSpacing: 'normal',
 			}
 		},
 		MuiBadge: {
@@ -200,7 +249,7 @@ export const MuiTheme = createMuiTheme({
 				pointerEvents: 'none'
 			},
 			colorPrimary: {
-				backgroundColor: '#e8004e'
+				backgroundColor: theme.colors.VIVID_RED,
 			},
 			colorSecondary: { // Secondary color is used to make the badge disappear
 				backgroundColor: 'transparent',
@@ -215,6 +264,18 @@ export const MuiTheme = createMuiTheme({
 		MuiTooltip: {
 			popper: {
 				pointerEvents: 'none'
+			}
+		},
+		MuiAccordion: {
+			root: {
+				'&$expanded': {
+					margin: 0,
+				},
+			}
+		},
+		MuiTableRow: {
+			root: {
+				height: '48px',
 			}
 		}
 	}

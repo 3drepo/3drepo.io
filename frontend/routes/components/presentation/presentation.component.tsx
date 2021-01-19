@@ -30,7 +30,7 @@ interface IProps {
 }
 
 export const Presentation: React.FunctionComponent<IProps> = ({ presentationMode, joinedUrlQueryPresentation}) => {
-	const renderButton = ({ ...props }) => (
+	const renderButton = ({ Icon, IconProps, ...props }) => (
 		<IconButton {...props} aria-label="Show Presentation mode options" aria-haspopup="true">
 			<PresentationIcon fontSize="small" mode={presentationMode} />
 		</IconButton>
@@ -41,7 +41,6 @@ export const Presentation: React.FunctionComponent<IProps> = ({ presentationMode
 	return (
 		<ButtonMenu
 			open={joinedUrlQueryPresentation}
-			ripple
 			renderButton={renderButton}
 			renderContent={renderMenuContent}
 			PopoverProps={{

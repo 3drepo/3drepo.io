@@ -46,5 +46,6 @@ export const MenuText = styled(ListItemText).attrs({
 	&& {
 		color: ${COLOR.BLACK_60};
 		font-size: 14px;
+		padding-left: ${({ submenu }) => submenu ? 0 : 'inherit'};
 	}
 `;

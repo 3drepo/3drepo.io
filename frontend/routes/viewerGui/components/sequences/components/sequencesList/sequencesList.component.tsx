@@ -30,7 +30,7 @@ const SequenceItem = ({name, modelName, minDate, maxDate, onClick}) => (
 	<SequenceItemContainer onClick={onClick}>
 		<Grid container direction="row" alignItems="center">
 			<SequenceItemIcon />
-			<Grid item direction="column">
+			<Grid item>
 				<SequenceName>{name}</SequenceName>
 				<Grid item>{modelName}</Grid>
 				<SequenceDatesContainer>

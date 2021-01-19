@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,7 @@
 
 import React from 'react';
 
-import { TextFieldProps } from '@material-ui/core/TextField';
+import { StandardTextFieldProps } from '@material-ui/core/TextField';
 import CancelIcon from '@material-ui/icons/Cancel';
 import EditIcon from '@material-ui/icons/Edit';
 import SaveIcon from '@material-ui/icons/Save';
@@ -37,7 +37,7 @@ import {
 	StyledTextField,
 } from './textField.styles';
 
-interface IProps extends TextFieldProps {
+interface IProps extends StandardTextFieldProps {
 	className?: string;
 	requiredConfirm?: boolean;
 	validationSchema?: any;
@@ -236,6 +236,7 @@ export class TextField extends React.PureComponent<IProps, IState> {
 			className,
 			mutable,
 			disableShowDefaultUnderline,
+			enableMarkdown,
 			...props
 		} = this.props;
 		const { initialValue } = this.state;
@@ -245,10 +246,10 @@ export class TextField extends React.PureComponent<IProps, IState> {
 		return (
 				<>
 					<Formik
-							enableReinitialize
-							initialValues={{ [name]: initialValue }}
-							validationSchema={validationSchema}
-							onSubmit={this.saveChange}
+						enableReinitialize
+						initialValues={{ [name]: initialValue }}
+						validationSchema={validationSchema}
+						onSubmit={this.saveChange}
 					>
 						<Container onBlur={this.onBlur} className={className}>
 							{this.isEditMode &&
@@ -270,12 +271,12 @@ export class TextField extends React.PureComponent<IProps, IState> {
 							{!this.isEditMode &&
 							<FieldWrapper line={Number(!disableShowDefaultUnderline)} onClick={this.handlePlaceholderClick}>
 								<FieldLabel shrink>{this.props.label}</FieldLabel>
-								{this.props.enableMarkdown &&
+								{enableMarkdown &&
 								<StyledMarkdownField ref={this.markdownFieldRef} {...this.additionalProps()}>
 									{this.fieldValue}
 								</StyledMarkdownField>
 								}
-								{!this.props.enableMarkdown &&
+								{!enableMarkdown &&
 								<StyledLinkableField ref={this.markdownFieldRef}>
 									{this.fieldValue}
 								</StyledLinkableField>

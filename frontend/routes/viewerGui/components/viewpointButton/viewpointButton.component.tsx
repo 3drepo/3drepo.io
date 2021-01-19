@@ -29,16 +29,18 @@ interface IProps {
 	disabled?: boolean;
 }
 
-const UpdateViewpointButton = ({ disabled, onUpdate, ...props }: IProps) => (
-	<ButtonContainer {...props}>
-		<ContainedButton
-			onClick={onUpdate}
-			icon={StreetView}
-			disabled={disabled}
-		>
-			Update Viewpoint
-		</ContainedButton>
-	</ButtonContainer>
+const UpdateViewpointButton: React.FC<IProps> = React.forwardRef(
+	({ disabled, onUpdate, ...props }: IProps, ref: React.Ref<HTMLSpanElement>) => (
+		<ButtonContainer ref={ref} {...props}>
+			<ContainedButton
+				onClick={onUpdate}
+				icon={StreetView}
+				disabled={disabled}
+			>
+				Update Viewpoint
+			</ContainedButton>
+		</ButtonContainer>
+	)
 );
 
 export const ViewpointButton = ({ ...props }: IProps) => {

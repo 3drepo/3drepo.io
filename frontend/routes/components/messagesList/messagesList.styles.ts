@@ -38,6 +38,7 @@ export const LoaderContainer = styled.div`
 export const Label = styled(Typography)`
 	&& {
 		color: ${COLOR.BLACK_60};
+		font-size: 14px;
 		margin-right: 5px;
 		margin-bottom: 1px;
 	}

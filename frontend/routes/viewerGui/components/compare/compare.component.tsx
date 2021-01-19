@@ -177,8 +177,8 @@ export class Compare extends React.PureComponent<IProps, any> {
 						value={activeTab}
 						indicatorColor="secondary"
 						textColor="primary"
-						fullWidth
 						onChange={this.handleChange}
+						variant="fullWidth"
 					>
 						<Tab label={COMPARE_TABS.DIFF} value={DIFF_COMPARE_TYPE} disabled={isCompareProcessed} />
 						<Tab
@@ -193,10 +193,7 @@ export class Compare extends React.PureComponent<IProps, any> {
 						{this.renderClashContent(!this.isDiffTabActive)}
 					</TabContent>
 				</ViewerPanelContent>
-				<ViewerPanelFooter
-						alignItems="center"
-						justify="space-between"
-				>
+				<ViewerPanelFooter container alignItems="center" justify="space-between">
 					{this.renderSlider()}
 					<ViewerPanelButton
 							aria-label="Compare"

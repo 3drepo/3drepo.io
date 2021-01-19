@@ -347,7 +347,6 @@ export function Board(props: IProps) {
 
 	const renderAddButton = () => (
 		<AddButton
-			variant="fab"
 			color="secondary"
 			aria-label="Add new card"
 			aria-haspopup="true"
