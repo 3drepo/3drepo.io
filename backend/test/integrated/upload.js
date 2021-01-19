@@ -99,18 +99,16 @@ describe("Uploading a model", function () {
 
 	describe("with not enough quota", function() {
 
-		before(function() {
-			// give some money to this guy
-			return User.findByUserName(username).then(user => {
-				user.customData.billing.subscriptions  = {
-					"discretionary" : {
-		                 		"collaborators" : 2,
-			                 	"data" : 4,
-        	            			"expiryDate" : moment().utc().add(1, "month")
-		                	}
-				};
-				return user.save();
-			});
+		before(async function() {
+			const subscriptions = {
+				"discretionary" : {
+						"collaborators" : 2,
+						"data" : 4,
+						"expiryDate" : moment().utc().add(1, "month").valueOf()
+				}
+			};
+
+			await User.update(username, { "customData.billing.subscriptions" : subscriptions});
 		});
 
 
@@ -127,26 +125,23 @@ describe("Uploading a model", function () {
 
 	describe("with quota", function() {
 
-		before(function() {
+		before(async function() {
 			// give some money to this guy
-			return User.findByUserName(username).then(user => {
-				user.customData.billing.subscriptions  = {
-					"discretionary" : {
-		                 		"collaborators" : 2,
-			                 	"data" : 1024,
-        	            			"expiryDate" : moment().utc().add(1, "month")
-		                	}
-				};
-				return user.save();
-			});
+			const subscriptions = {
+				"discretionary" : {
+						"collaborators" : 2,
+						"data" : 1024,
+						"expiryDate" : moment().utc().add(1, "month").valueOf()
+				}
+			};
+
+			await User.update(username, { "customData.billing.subscriptions" : subscriptions});
 		});
 
-		it("should succee", function(done) {
-			agent.post(`/${username}/${modelId}/upload`)
+		it("should succeed", async function() {
+			await agent.post(`/${username}/${modelId}/upload`)
 				.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
-				.expect(200, function(err, res) {
-					done(err);
-				});
+				.expect(200);
 		});
 
 		it("should have one item inserted into the queue", function(done) {
@@ -170,7 +165,7 @@ describe("Uploading a model", function () {
 
 		});
 
-		it("should succee (uppercase extension)", function(done) {
+		it("should succeed (uppercase extension)", function(done) {
 			agent.post(`/${username}/${modelId}/upload`)
 				.attach("file", __dirname + "/../../statics/3dmodels/upper.OBJ")
 				.expect(200, function(err, res) {

@@ -65,7 +65,7 @@ describe("Updating user info", function () {
 		const firstName = "abc";
 		const lastName = "def";
 		await agent.put(`/${username}`)
-			.send({ firstName, lastName, email })
+			.send({ firstName, lastName })
 			.expect(200);
 
 		const {body} = await agent.get(`/${username}.json`)
@@ -73,6 +73,7 @@ describe("Updating user info", function () {
 
 		expect(body.firstName).to.equal(firstName);
 		expect(body.lastName).to.equal(lastName);
+		expect(body.email).to.equal(email);
 	});
 
 	it("should succeed if provide new info and new email address", async function() {
