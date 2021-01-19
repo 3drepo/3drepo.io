@@ -27,7 +27,6 @@
 	const nodeuuid = require("uuid/v1");
 	const ModelSetting = require("./modelSetting");
 	const PermissionTemplates = require("./permissionTemplates");
-	const AccountPermissions = require("./accountPermissions");
 
 	const schema = mongoose.Schema({
 		_id: {
@@ -275,6 +274,7 @@
 	};
 
 	schema.statics.listModels = async function(account, project, username, filters) {
+		const AccountPermissions = require("./accountPermissions");
 		const User = require("./user");
 		const ModelHelper = require("./helper/model");
 
