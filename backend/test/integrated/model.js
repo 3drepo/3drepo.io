@@ -323,6 +323,38 @@ describe("Model", function () {
 			});
 	});
 
+	it("get helicopter speed should succeed", function(done) {
+		const mymodel = "project6";
+
+		agent.get(`/${username}/${mymodel}/settings/heliSpeed`)
+			.expect(200, function(err, res) {
+				expect(res.body.heliSpeed).to.equal(1);
+				done(err);
+			});
+	});
+
+	it("update helicopter speed should succeed", function(done) {
+		const mymodel = "project6";
+		const newSpeed = {
+			heliSpeed: 3
+		};
+
+		async.series([
+			function(done) {
+				agent.put(`/${username}/${mymodel}/settings/heliSpeed`)
+					.send(newSpeed)
+					.expect(200, done);
+			},
+			function(done) {
+				agent.get(`/${username}/${mymodel}/settings/heliSpeed`)
+					.expect(200, function(err, res) {
+						expect(res.body.heliSpeed).to.equal(newSpeed.heliSpeed);
+						done(err);
+					});
+			}
+		], done);
+	});
+
 	it("should return error message if model name already exists", function(done) {
 
 		const model = "project7";

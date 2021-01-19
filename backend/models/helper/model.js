@@ -974,7 +974,7 @@ const getModelSetting = async (account, model, username) => {
 			listSubModels(account, model, C.MASTER_BRANCH_NAME)
 		]);
 
-		setting = await setting.clean();
+		setting = await ModelSetting.clean(account, model, setting);
 		setting.model = setting._id;
 		setting.account = account;
 		setting.headRevisions = {};

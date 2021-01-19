@@ -68,26 +68,6 @@ schema.set("toObject", { getters: true });
 
 schema.statics.modelCodeRegExp = /^[a-zA-Z0-9]{0,50}$/;
 
-schema.methods.clean = async function() {
-	const views = new (require("./view"))();
-	const cleanedData = this.toObject();
-	if (this.defaultView) {
-		delete cleanedData.defaultView;
-		try {
-			const viewIDStr = utils.uuidToString(this.defaultView);
-			const viewData = await views.findByUID(this._dbcolOptions.account, this._id,
-				viewIDStr, {name: 1});
-			if (viewData) {
-				cleanedData.defaultView = {id: viewIDStr, name: viewData.name};
-			}
-		} catch (err) {
-			// This should technically never happen.
-		}
-	}
-
-	return cleanedData;
-};
-
 schema.methods.updateProperties = async function (updateObj) {
 	const views = new (require("./view"))();
 	const keys = Object.keys(updateObj);
@@ -124,7 +104,7 @@ schema.methods.updateProperties = async function (updateObj) {
 		}
 	}
 	await this.save();
-	return this.clean();
+	return ModelSetting.clean(this._dbcolOptions.account, this._dbcolOptions.model, this.toObject());
 };
 
 schema.methods.changePermissions = function(permissions, account = this._dbcolOptions.account) {
@@ -263,6 +243,25 @@ ModelSetting.batchUpdatePermissions = async function(account, batchPermissions =
 	} else {
 		return updateResponses[badStatusIndex];
 	}
+};
+
+ModelSetting.clean = async function(account, model, dataToClean) {
+	const views = new (require("./view"))();
+	if (dataToClean.defaultView) {
+		delete dataToClean.defaultView;
+		try {
+			const viewIDStr = utils.uuidToString(dataToClean.defaultView);
+			const viewData = await views.findByUID(account, model,
+				viewIDStr, {name: 1});
+			if (viewData) {
+				dataToClean.defaultView = {id: viewIDStr, name: viewData.name};
+			}
+		} catch (err) {
+			// This should technically never happen.
+		}
+	}
+
+	return dataToClean;
 };
 
 /**
