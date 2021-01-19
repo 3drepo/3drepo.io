@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -18,35 +18,13 @@
 "use strict";
 (() => {
 
-	const mongoose = require("mongoose");
 	const C = require("../constants");
 	const db = require("../handler/db");
 	const responseCodes = require("../response_codes.js");
-	const ModelFactory = require("./factory/modelFactory");
 	const utils = require("../utils");
 	const _ = require("lodash");
 	const nodeuuid = require("uuid/v1");
 	const ModelSetting = require("./modelSetting");
-	const schema = mongoose.Schema({
-		_id: {
-			type: Object,
-			get: v => {
-				if(v.id) {
-					return v;
-				}
-
-				return utils.uuidToString(v);
-			},
-			set: utils.stringToUUID
-		},
-		name: { type: String, unique: true},
-		models: [String],
-		permissions: [{
-			_id: false,
-			user: { type: String, required: true },
-			permissions: [String]
-		}]
-	});
 
 	const PROJECTS_COLLECTION_NAME = "projects";
 
@@ -122,13 +100,7 @@
 		return project;
 	}
 
-	const Project = ModelFactory.createClass(
-		"Project",
-		schema,
-		() => {
-			return "projects";
-		}
-	);
+	const Project = {};
 
 	Project.addModelToProject = async function(teamspace, projectName, modelId) {
 		const foundProject = await Project.findOneProject(teamspace, {name: projectName});

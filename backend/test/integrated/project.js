@@ -201,13 +201,11 @@ describe("Projects", function () {
 	});
 
 	it("should able to create project", function(done) {
-
 		const project = {
 			name: "project1"
 		};
 
 		async.series([
-
 			callback => {
 				agent.post(`/${username}/projects`)
 					.send(project)
@@ -215,11 +213,9 @@ describe("Projects", function () {
 						callback(err);
 					});
 			},
-
 			callback => {
 				agent.get(`/${username}.json`)
 					.expect(200, function(err, res) {
-						console.log(res.body);
 						const account = res.body.accounts.find(account => account.account === username);
 						expect(account).to.exist;
 
@@ -229,7 +225,6 @@ describe("Projects", function () {
 						callback(err);
 					});
 			}
-
 		], (err, res) => done(err));
 	});
 
@@ -256,7 +251,6 @@ describe("Projects", function () {
 	});
 
 	it("should fail to create project with invalid name(1)", function(done) {
-
 		const project = {
 			name: " "
 		};
@@ -270,7 +264,6 @@ describe("Projects", function () {
 	});
 
 	it("should fail to create project with invalid name(2)", function(done) {
-
 		const project = {
 			name: "!?/#&"
 		};
@@ -284,7 +277,6 @@ describe("Projects", function () {
 	});
 
 	it("should fail to create project with no name", function(done) {
-
 		const project = {
 			name: ""
 		};
@@ -298,7 +290,6 @@ describe("Projects", function () {
 	});
 
 	it("should fail to create project with name longer than 120 characters", function(done) {
-
 		const project = {
 			name: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 		};
@@ -312,7 +303,6 @@ describe("Projects", function () {
 	});
 
 	it("should be able to update project [DEPRECATED]", function(done) {
-
 		const project = {
 			name: "project2",
 			permissions: [{
@@ -322,20 +312,16 @@ describe("Projects", function () {
 		};
 
 		async.series([
-
 			callback => {
 				agent.put(`/${username}/projects/${project.name}`)
 					.send(project)
 					.expect(200, function(err, res) {
-						console.log(res.body);
 						callback(err);
 					});
 			},
-
 			callback => {
 				agent.get(`/${username}/projects/${project.name}`)
 					.expect(200, function(err, res) {
-						console.log(res.body);
 						const entriesFiltered = res.body.permissions.filter((entry => {
 							return entry.permissions.length > 0;
 						}));
@@ -343,7 +329,6 @@ describe("Projects", function () {
 						callback(err);
 					});
 			}
-
 		], (err, res) => done(err));
 	});
 
@@ -361,14 +346,12 @@ describe("Projects", function () {
 				agent.patch(`/${username}/projects/${project.name}`)
 					.send(project)
 					.expect(200, function(err, res) {
-						console.log(res.body);
 						callback(err);
 					});
 			},
 			callback => {
 				agent.get(`/${username}/projects/${project.name}`)
 					.expect(200, function(err, res) {
-						console.log(res.body);
 						const entriesFiltered = res.body.permissions.filter((entry => {
 							return entry.permissions.length > 0;
 						}));
@@ -393,14 +376,12 @@ describe("Projects", function () {
 				agent.patch(`/${username}/projects/${projectName}`)
 					.send(project)
 					.expect(200, function(err, res) {
-						console.log(res.body);
 						callback(err);
 					});
 			},
 			callback => {
 				agent.get(`/${username}/projects/${projectName}`)
 					.expect(200, function(err, res) {
-						console.log(res.body);
 						const entriesFiltered = res.body.permissions.filter((entry => {
 							return entry.permissions.length > 0;
 						}));
@@ -426,14 +407,12 @@ describe("Projects", function () {
 				agent.patch(`/${username}/projects/${projectName}`)
 					.send(project)
 					.expect(200, function(err, res) {
-						console.log(res.body);
 						callback(err);
 					});
 			},
 			callback => {
 				agent.get(`/${username}/projects/${projectName}`)
 					.expect(200, function(err, res) {
-						console.log(res.body);
 						expect(res.body.permissions.find(x => x.user === testUser).permissions.length).to.equal(0);
 						callback(err);
 					});
@@ -442,27 +421,21 @@ describe("Projects", function () {
 	});
 
 	it("should be able to update project name [DEPRECATED]", function(done) {
-
 		const project = {
 			name: "project2_new"
 		};
 
 		async.series([
-
 			callback => {
 				agent.put(`/${username}/projects/project2`)
 					.send(project)
 					.expect(200, function(err, res) {
-						console.log(res.body);
 						callback(err);
 					});
 			},
-
 			callback => {
 				agent.get(`/${username}.json`)
 					.expect(200, function(err, res) {
-						console.log(res.body);
-
 						const account = res.body.accounts.find(account => account.account === username);
 						expect(account).to.exist;
 
@@ -472,7 +445,6 @@ describe("Projects", function () {
 						callback(err);
 					});
 			}
-
 		], (err, res) => done(err));
 	});
 
@@ -487,14 +459,12 @@ describe("Projects", function () {
 				agent.patch(`/${username}/projects/${projectName}`)
 					.send(project)
 					.expect(200, function(err, res) {
-						console.log(res.body);
 						callback(err);
 					});
 			},
 			callback => {
 				agent.get(`/${username}.json`)
 					.expect(200, function(err, res) {
-						console.log(res.body);
 						const account = res.body.accounts.find(account => account.account === username);
 						expect(account).to.exist;
 
@@ -508,7 +478,6 @@ describe("Projects", function () {
 	});
 
 	it("should fail to update project for invalid permissions [DEPRECATED]", function(done) {
-
 		const project = {
 			name: "project3",
 			permissions: [{
@@ -684,26 +653,20 @@ describe("Projects", function () {
 	});
 
 	it("should able to delete project", function(done) {
-
 		const project = {
 			name: "project_exists"
 		};
 
 		async.series([
-
 			callback => {
 				agent.delete(`/${username}/projects/${project.name}`)
 					.expect(200, function(err, res) {
 						callback(err);
 					});
-
 			},
-
 			callback => {
 				agent.get(`/${username}.json`)
 					.expect(200, function(err, res) {
-						console.log(res.body);
-
 						const account = res.body.accounts.find(account => account.account === username);
 						expect(account).to.exist;
 
@@ -713,32 +676,24 @@ describe("Projects", function () {
 						callback(err);
 					});
 			}
-
 		], (err, res) => done(err));
-
 	});
 
 	it("should able to delete empty project", function(done) {
-
 		const project = {
 			name: "project4"
 		};
 
 		async.series([
-
 			callback => {
 				agent.delete(`/${username}/projects/${project.name}`)
 					.expect(200, function(err, res) {
 						callback(err);
 					});
-
 			},
-
 			callback => {
 				agent.get(`/${username}.json`)
 					.expect(200, function(err, res) {
-						console.log(res.body);
-
 						const account = res.body.accounts.find(account => account.account === username);
 						expect(account).to.exist;
 
@@ -748,9 +703,7 @@ describe("Projects", function () {
 						callback(err);
 					});
 			}
-
 		], (err, res) => done(err));
-
 	});
 
 	it("should fail to delete a project that doesnt exist", function(done) {
