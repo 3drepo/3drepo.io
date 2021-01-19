@@ -1662,7 +1662,6 @@ function getHeliSpeed(req, res, next) {
 
 function updateHeliSpeed(req, res, next) {
 	const place = utils.APIInfo(req);
-	const dbCol = {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 
 	return ModelSetting.updateHeliSpeed(req.params.account, req.params.model, req.body.heliSpeed).then(() => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, {});
