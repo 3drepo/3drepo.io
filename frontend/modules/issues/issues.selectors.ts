@@ -18,7 +18,7 @@
 import { values } from 'lodash';
 import { createSelector } from 'reselect';
 
-import { STATUSES } from '../../constants/issues';
+import { ISSUE_DEFAULT_HIDDEN_STATUSES } from '../../constants/issues';
 import { prepareComments, transformCustomsLinksToMarkdown } from '../../helpers/comments';
 import { hasPin, issueToPin } from '../../helpers/pins';
 import { searchByFilters } from '../../helpers/searching';
