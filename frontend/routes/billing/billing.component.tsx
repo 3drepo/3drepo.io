@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 import { values } from 'lodash';
 import * as queryString from 'query-string';
@@ -25,7 +24,7 @@ import { Link, Redirect, Route, Switch } from 'react-router-dom';
 import { Panel } from '../components/panel/panel.component';
 import History from './../history/history.container';
 import Subscription from './../subscription/subscription.container';
-import { Header, TabContent } from './billing.styles';
+import { Header, StyledTab, TabContent } from './billing.styles';
 
 const TABS = {
 	SUBSCRIPTION: {
@@ -86,7 +85,7 @@ export class Billing extends React.PureComponent<IProps, IState> {
 								value: path,
 								to: `${this.props.match.url}/${path}`
 							};
-							return <Tab key={index} {...props} />;
+							return <StyledTab key={index} {...props} />;
 						})}
 					</Tabs>
 				</Header>

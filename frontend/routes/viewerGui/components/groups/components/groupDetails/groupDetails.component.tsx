@@ -116,7 +116,6 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 			onNameChange={this.handleFieldChange}
 			renderCollapsable={this.renderGroupForm}
 			renderNotCollapsable={() => this.renderRulesField(this.groupData.type === GROUPS_TYPES.SMART)}
-			disableExpanding
 			panelName={GROUP_PANEL_NAME}
 			isSmartGroup={this.groupData.type === GROUPS_TYPES.SMART}
 			StatusIconComponent={GROUP_TYPES_ICONS[this.groupData.type]}
@@ -209,7 +208,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 
 	public renderFooter = () => {
 		return (
-			<ViewerPanelFooter alignItems="center">
+			<ViewerPanelFooter container alignItems="center">
 				<Actions>
 					<ColorPickerWrapper>
 						<ColorPicker
@@ -236,7 +235,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 					color="secondary"
 					type="submit"
 					onClick={this.handleGroupFormSubmit}
-					mini
+					size="small"
 					aria-label="Save group"
 					disabled={!this.isFormValid || !this.props.canUpdate}
 					pending={this.props.isPending}

@@ -16,6 +16,9 @@
  */
 
 import styled from 'styled-components';
+
+import Tab from '@material-ui/core/Tab';
+
 import { COLOR } from '../../styles';
 
 export const Header = styled.div`
@@ -45,4 +48,13 @@ export const LoaderContainer = styled.div`
 	align-items: flex-start;
 	padding-top: 100px;
 	box-sizing: border-box;
+`;
+
+export const StyledTab = styled(Tab)`
+	&& {
+		padding-left: 24px;
+		padding-right: 24px;
+		font-size: 13px;
+		letter-spacing: initial;
+	}
 `;

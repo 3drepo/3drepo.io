@@ -204,7 +204,7 @@ const Buttons = (props) => {
 			<Field render={ ({ form }) => (
 			<NegativeActionButton
 				color="primary"
-				variant="raised"
+				variant="contained"
 				disabled={isEqual(form.values, DEFAULT_SETTINGS)}
 				type="button"
 				onClick={() => form.setValues(DEFAULT_SETTINGS)}
@@ -214,7 +214,7 @@ const Buttons = (props) => {
 			)} />
 			<NeutralActionButton
 				color="primary"
-				variant="raised"
+				variant="contained"
 				disabled={false}
 				type="button"
 				onClick={props.onClickCancel}
@@ -224,7 +224,7 @@ const Buttons = (props) => {
 			<Field render={ ({ form }) => (
 					<Button
 						color="secondary"
-						variant="raised"
+						variant="contained"
 						type="submit"
 						disabled={!form.isValid || form.isValidating}
 						>

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -22,8 +22,6 @@ import styled from 'styled-components';
 import { COLOR, FONT_WEIGHT } from '../../styles';
 import * as PanelStyles from '../components/panel/panel.styles';
 
-const CONTENT_PADDING = 20;
-
 export const Container = styled(Grid)`
 	&& {
 		height: 100%;
@@ -35,7 +33,7 @@ export const Container = styled(Grid)`
 	}
 
 	${PanelStyles.Content} {
-		padding: ${CONTENT_PADDING}px;
+		padding: 20px 20px 10px;
 		overflow-y: auto;
 		overflow-x: hidden;
 	}
@@ -49,20 +47,14 @@ export const Headline = styled.h3`
 
 export const StyledButton: any = styled(Button)`
 	&& {
-		padding: 0 5px;
-		margin: 0;
-		min-width: auto;
+		padding-left: 0;
+		padding-right: 0;
 	}
 `;
 
 export const LoginButtons = styled(Grid)`
 	&& {
-		padding: 10px 0;
-		padding-bottom: 25px;
-	}
-
-	${StyledButton} {
-		margin-left: -5px;
+		padding: 10px 0 25px;
 	}
 `;
 
@@ -71,14 +63,11 @@ export const UserNotice = styled.span`
 	margin: 10px 0;
 `;
 
-export const FooterContainer = styled(Grid)`
+export const FooterContainer = styled.aside`
 	&& {
-		border-top: 1px solid ${COLOR.BLACK_6};
-		margin-left: -${CONTENT_PADDING}px;
-		width: calc(100% + ${CONTENT_PADDING * 2}px);
-		padding: ${(CONTENT_PADDING / 2)}px ${CONTENT_PADDING}px;
-		padding-right: ${CONTENT_PADDING - 5}px;
-		margin-bottom: -${CONTENT_PADDING}px;
+		display: flex;
+		justify-content: space-between;
+		padding-top: 10px;
 		font-size: 14px;
 
 		${StyledButton} {
@@ -90,6 +79,7 @@ export const FooterContainer = styled(Grid)`
 
 export const Version = styled(Grid)`
 	&&, && ${StyledButton} {
+		margin-left: 0;
 		color: ${COLOR.BLACK_30};
 	}
 `;

@@ -39,7 +39,7 @@ interface IProps {
 export const DefaultViewField = ({ onSelectView, value, onChange }: IProps) => {
 	if (!value) {
 		return (
-			<StyledContainedButton onClick={onSelectView} variant="raised">
+			<StyledContainedButton onClick={onSelectView} variant="contained">
 				Select View
 			</StyledContainedButton>
 		);
@@ -49,7 +49,7 @@ export const DefaultViewField = ({ onSelectView, value, onChange }: IProps) => {
 
 	return (
 			<ViewRow>
-				<ViewName variant="body2">{value.name}</ViewName>
+				<ViewName variant="body1">{value.name}</ViewName>
 				<IconsGroup>
 					<StyledEditIcon onClick={onSelectView} />
 					<StyledDeleteIcon onClick={onRemove} />

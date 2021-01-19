@@ -18,6 +18,7 @@
 import * as React from 'react';
 
 import Divider from '@material-ui/core/Divider';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import LogoutIcon from '@material-ui/icons/ExitToApp';
 import PATIcon from '@material-ui/icons/InsertDriveFileOutlined';
 import SettingsIcon from '@material-ui/icons/Settings';
@@ -35,8 +36,10 @@ const ExternalLink = ({ ...props }) => {
 	const iconProps = props.icon ? { style: { color: COLOR.BLACK_54 } } : {};
 	return (
 		<MenuItem button aria-label={props.label} onClick={props.onButtonClick}>
-			<Icon {...iconProps} />
-			<MenuText primary={props.label} />
+			<MenuIcon>
+				<Icon {...iconProps} />
+			</MenuIcon>
+			<MenuText primary={props.label} submenu={props.submenu} />
 		</MenuItem>
 	);
 };
@@ -82,12 +85,14 @@ export const MenuContent: React.FunctionComponent<IProps> = ({
 		menuItems.push(
 			<React.Fragment key="accountSettings">
 				<MenuUser>
-					<Avatar
-						name={userData.name}
-						size={26}
-						url={userData.avatarUrl}
-						fontSize={12}
-					/>
+					<ListItemAvatar>
+						<Avatar
+							name={userData.name}
+							size={26}
+							url={userData.avatarUrl}
+							fontSize={12}
+						/>
+					</ListItemAvatar>
 					<MenuText primary={userData.username} />
 				</MenuUser>
 				<Divider />
@@ -125,6 +130,7 @@ export const MenuContent: React.FunctionComponent<IProps> = ({
 					key={index}
 					label={title}
 					onButtonClick={invokeAndClose(path)}
+					submenu={1}
 				/>
 			))}
 		/>

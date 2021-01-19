@@ -144,7 +144,7 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 				<DialogActions>
 					<Button
 						onClick={this.props.handleClose}
-						variant="raised"
+						variant="contained"
 						color="secondary"
 					>Ok</Button>
 				</DialogActions>

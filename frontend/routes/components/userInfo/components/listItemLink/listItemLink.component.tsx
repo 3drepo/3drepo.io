@@ -18,6 +18,7 @@
 import React from 'react';
 
 import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
 import { ListItemContainer, StyledLink } from './listItemLink.styles';
 
 interface IProps {
@@ -26,12 +27,20 @@ interface IProps {
 	key: string;
 }
 
-export const ListItemLink = ({ to, title }: IProps) => {
-	const renderLink = (itemProps) => <StyledLink to={to} {...itemProps} />;
+export const ListItemLink = ({ title, to }: IProps) => {
+	const renderLink = React.useMemo(
+		() => React.forwardRef((itemProps, ref) =>
+			<StyledLink to={to} ref={ref} {...itemProps} />),
+		[to],
+	);
 
 	return (
 		<ListItemContainer>
-			<ListItem component={renderLink}>{title}</ListItem>
+			<ListItem button component={renderLink}>
+				<ListItemText>
+					{title}
+				</ListItemText>
+			</ListItem>
 		</ListItemContainer>
 	);
 };
