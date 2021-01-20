@@ -89,7 +89,7 @@
 				}).then(_user => {
 
 					user = _user;
-					return ModelSetting.findById({account, model}, model);
+					return ModelSetting.findModelSettingById(account, model);
 
 				}).then(async setting => {
 					if(!setting) {

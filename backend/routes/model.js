@@ -2035,18 +2035,7 @@ function updateMultiplePermissions(req, res, next) {
 }
 
 function getSingleModelPermissions(req, res, next) {
-
-	const account = req.params.account;
-	const model = req.params.model;
-
-	return ModelSetting.findById({account, model}, model).then(setting => {
-		if (!setting) {
-			return Promise.reject({ resCode: responseCodes.MODEL_INFO_NOT_FOUND});
-		} else {
-			return ModelSetting.populateUsers(account, setting.permissions);
-		}
-
-	}).then(permissions => {
+	return ModelSetting.getSingleModelPermissions(req.params.account, req.params.model).then(permissions => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permissions);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);

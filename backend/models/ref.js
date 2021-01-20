@@ -22,7 +22,7 @@ const { findNodesByType } = require("./scene");
 const Ref = {};
 
 Ref.getRefNodes = async function(account, model, branch, revision, projection) {
-	const settings = await ModelSettings.findById({account}, model);
+	const settings = await ModelSettings.findModelSettingById(account, model);
 
 	if (settings.federate) {
 		return findNodesByType(account, model, branch, revision, "ref", undefined, projection);

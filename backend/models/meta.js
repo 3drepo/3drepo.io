@@ -350,7 +350,7 @@ class Meta {
 
 	async getAllIdsWith4DSequenceTag(account, model, branch, rev) {
 		// Get sequence tag then call the generic getAllIdsWithMetadataField
-		const settings = await ModelSetting.findOne({account : account}, {_id : model});
+		const settings = await ModelSetting.findModelSettingById(account, model);
 
 		if (!settings) {
 			return Promise.reject(responseCodes.MODEL_NOT_FOUND);

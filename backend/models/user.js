@@ -790,10 +790,9 @@ function _findModelDetails(dbUserCache, username, model) {
 
 	return getUser.then(_user => {
 		dbUser = _user;
-		return ModelSetting.findById({ account: model.account }, model.model);
-
+		// return ModelSetting.findModelSettingById(model.account, model.model);
+		return ModelSetting.findById({account: model.account, model: model.model}, model.model);
 	}).then(async setting => {
-
 		let permissions = [];
 
 		if (!setting) {

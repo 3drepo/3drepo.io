@@ -526,7 +526,8 @@ describe("Model", function () {
 		});
 
 		it("should remove setting in settings collection", function() {
-			return ModelSetting.findById({account: username, model: model}, model).then(setting => {
+			// FIXME why does this test directly import ModelSetting?!
+			return ModelSetting.findModelSettingById(username, model).then(setting => {
 				expect(setting).to.be.null;
 			});
 		});

@@ -96,7 +96,7 @@
 
 			limits = dbUser.customData.billing.getSubscriptionLimits();
 
-			return ModelSetting.findById({account}, model);
+			return ModelSetting.findModelSettingById(account, model);
 
 		}).then(modelSetting => {
 

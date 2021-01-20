@@ -266,6 +266,16 @@ ModelSetting.getHeliSpeed = async function(account, model) {
 	return {heliSpeed: speed};
 };
 
+ModelSetting.getSingleModelPermissions = async function(account, model) {
+	const setting = await ModelSetting.findModelSettingById(account, model);
+
+	if (!setting) {
+		throw responseCodes.MODEL_INFO_NOT_FOUND;
+	}
+
+	return ModelSetting.populateUsers(account, setting.permissions);
+};
+
 /**
  * Fills out the models data for the  modelids passed through parameter.
  * @param {Object} teamspaces an object which keys are teamspaces ids and values are an array of modelids
@@ -294,6 +304,10 @@ ModelSetting.findModelSettingById = async function(account, model, projection) {
 	const foundSetting = await db.findOne(account, MODELS_COLL, {_id: model}, projection);
 
 	if (foundSetting) {
+		if (!foundSetting.id) {
+			foundSetting.id = foundSetting._id;
+		}
+
 		if (!foundSetting.permissions) {
 			foundSetting.permissions = [];
 		}

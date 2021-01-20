@@ -109,7 +109,7 @@ class ReportGenerator {
 
 	getModelName() {
 		this.promises.push(
-			ModelSetting.findById(this.getDBCol(), this.modelID).then((setting) => {
+			ModelSetting.findModelSettingById(this.teamspace, this.modelID).then((setting) => {
 				this.modelName = setting.name;
 			})
 		);
