@@ -354,31 +354,29 @@ billingSchema.methods.executeBillingAgreement = function(user) {
 	});
 };
 
-billingSchema.methods.getActiveSubscriptions = function() {
+const UserBilling = {};
+
+UserBilling.getActiveSubscriptions = function(userBilling) {
 	const res = { basic: config.subscriptions.basic};
-	if(this.subscriptions) {
-		Object.keys(this.subscriptions).forEach(key => {
-			if(key === "paypal") {
-				res.paypal = [];
-				this.subscriptions.paypal.forEach(ppPlan => {
-					if(!ppPlan.expiryDate || ppPlan.expiryDate > Date.now()) {
-						res.paypal.push(ppPlan);
-					}
-				});
-			} else {
-				if(!this.subscriptions[key].expiryDate ||
-					this.subscriptions[key].expiryDate > Date.now()) {
-					res[key] = this.subscriptions[key];
+	Object.keys(userBilling.subscriptions || {subscriptions:{}}).forEach(key => {
+		if(key === "paypal") {
+			res.paypal = [];
+			userBilling.subscriptions.paypal.forEach(ppPlan => {
+				if(!ppPlan.expiryDate || ppPlan.expiryDate > Date.now()) {
+					res.paypal.push(ppPlan);
 				}
-
+			});
+		} else {
+			if(!userBilling.subscriptions[key].expiryDate ||
+				userBilling.subscriptions[key].expiryDate > Date.now()) {
+				res[key] = userBilling.subscriptions[key];
 			}
-		});
 
-	}
+		}
+	});
+
 	return res;
 };
-
-const UserBilling = {};
 
 UserBilling.getSubscriptionLimits = function(userBilling) {
 	const sumLimits = {};

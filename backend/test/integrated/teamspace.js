@@ -54,7 +54,30 @@ describe("Teamspace", function() {
 	const mixedUser1 = {
 		user: "sub_all",
 		password: "password",
-		quota: {spaceLimit: 23553, collaboratorLimit: "unlimited", spaceUsed: 0}
+		quota: {spaceLimit: 23553, collaboratorLimit: "unlimited", spaceUsed: 0},
+		subscriptions : {
+			"basic": {
+			  "collaborators": 0,
+			  "data": 1
+			},
+			"paypal": [
+			  {
+				"expiryDate": "2118-07-29T10:29:39.000Z",
+				"quantity": 2,
+				"plan": "hundredQuidPlan"
+			  }
+			],
+			"enterprise": {
+			  "collaborators": 2,
+			  "data": 1024,
+			  "expiryDate": "2118-07-29T10:29:39.000Z"
+			},
+			"discretionary": {
+			  "collaborators": "unlimited",
+			  "data": 2048,
+			  "expiryDate": "2118-08-29T10:29:39.000Z"
+			}
+		  }
 	};
 
 	const mixedUser2 = {
@@ -211,28 +234,34 @@ describe("Teamspace", function() {
 		});
 	});
 
-	describe("user with mixed subscription", function(done) {
+	describe("user with mixed subscription",  function() {
 		const user =  mixedUser1;
-		before(function(done) {
+		before(async function() {
 			this.timeout(timeout);
-			agent.post("/login")
+			await agent.post("/login")
 				.send({username: user.user, password: user.password})
-				.expect(200, done);
+				.expect(200);
 
 		});
 
-		it("should have the correct aggregated quota", function(done) {
-			agent.get(`/${user.user}/quota`)
-				.expect(200, function(err, res) {
-					expect(res.body).to.deep.equal(user.quota);
-					done(err);
-				});
+		it("should have the correct aggregated quota", async function() {
+			const {body} = await agent.get(`/${user.user}/quota`)
+				.expect(200);
+
+			expect(body).to.deep.equal(user.quota);
 		});
 
-		after(function(done) {
+		it("should be able to fetch suscriptions", async function() {
+			const { body } = await agent.get(`/${user.user}/subscriptions`)
+				.expect(200);
+
+			expect(body).to.deep.equal(user.subscriptions);
+		});
+
+		after(async function() {
 			this.timeout(timeout);
-			agent.post("/logout")
-				.expect(200, done);
+			await agent.post("/logout")
+				.expect(200);
 		});
 	});
 
@@ -887,4 +916,5 @@ describe("Teamspace", function() {
 				.expect(200, done);
 		});
 	});
+
 });

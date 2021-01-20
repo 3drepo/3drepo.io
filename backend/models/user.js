@@ -46,58 +46,6 @@ const Project = require("./project");
 const FileRef = require("./fileRef");
 const PermissionTemplates = require("./permissionTemplates");
 
-// const schema = mongoose.Schema({
-// 	_id: String,
-// 	user: String,
-// 	customData: {
-// 		firstName: String,
-// 		lastName: String,
-// 		email: String,
-// 		apiKey: String,
-// 		mailListOptOut: Boolean,
-// 		createdAt: Date,
-// 		inactive: Boolean,
-// 		resetPasswordToken: {
-// 			expiredAt: Date,
-// 			token: String
-// 		},
-// 		emailVerifyToken: {
-// 			expiredAt: Date,
-// 			token: String
-// 		},
-// 		billing: {
-// 			_id: false,
-// 			type: userBilling,
-// 			default: userBilling,
-// 			get: function (billing) {
-// 				if (billing) {
-// 					billing._parent = this;
-// 				}
-// 				return billing;
-// 			}
-
-// 		},
-// 		avatar: Object,
-// 		lastLoginAt: Date,
-// 		permissionTemplates: {
-// 			type: [permissionTemplate.schema],
-// 			get: function (permissionTemplates) {
-// 				return permissionTemplate.methods.init(this, permissionTemplates);
-// 			}
-// 		},
-// 		// teamspace level permissions
-// 		permissions: {
-// 			type: [accountPermission.schema],
-// 			get: function (permissions) {
-// 				return accountPermission.methods.init(this, permissions);
-// 			}
-// 		},
-// 		hereEnabled: Boolean,
-// 		vrEnabled: Boolean
-// 	},
-// 	roles: [{}]
-// });
-
 const COLL_NAME = "system.users";
 
 const User = {};

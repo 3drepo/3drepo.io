@@ -151,6 +151,9 @@ describe("Enrolling to a subscription", function () {
 		}
 	};
 
+	/*
+	COMMENTED OUT PAYPAL TESTS
+
 	it("should succeed no VAT is supplied", function(done) {
 		this.timeout(timeout);
 
@@ -1152,5 +1155,6 @@ describe("Enrolling to a subscription", function () {
 			});
 		});
 	});
+	*/
 
 });
