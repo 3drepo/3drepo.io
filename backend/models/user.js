@@ -17,8 +17,6 @@
  */
 "use strict";
 
-// const mongoose = require("mongoose");
-
 const ModelFactory = require("./factory/modelFactory");
 const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
@@ -40,7 +38,6 @@ const ModelSetting = require("./modelSetting");
 const C = require("../constants");
 const UserBilling = require("./userBilling");
 
-// const AccountPermission = require("./accountPermission");
 const AccountPermissions = require("./accountPermissions");
 const Project = require("./project");
 const FileRef = require("./fileRef");
@@ -55,18 +52,13 @@ User.update = async function (username, data) {
 };
 
 User.getTeamspaceSpaceUsed = async function (dbName) {
-	return DB.getCollection(dbName, "settings").then((col) => {
-		return col.find({}, {_id: 1}).toArray().then((settings) => {
-			const spaceUsedProm = [];
-			settings.forEach((setting) => {
-				spaceUsedProm.push(FileRef.getTotalModelFileSize(dbName, setting._id));
-			});
+	const settings = await DB.find(dbName, "setting", {}, {_id: 1});
 
-			return Promise.all(spaceUsedProm).then((spacePerModel) => {
-				return spacePerModel.reduce((total, value) => total + value, 0);
-			});
-		});
-	});
+	const spacePerModel = await Promise.all(settings.map(async (setting) =>
+		await FileRef.getTotalModelFileSize(dbName, setting._id))
+	);
+
+	return spacePerModel.reduce((total, value) => total + value, 0);
 };
 
 User.authenticate =  async function (logger, username, password) {
@@ -118,21 +110,12 @@ User.authenticate =  async function (logger, username, password) {
 	}
 };
 
-User.findOne = async function (account, query, projection) {
-	return await DB.findOne(account, COLL_NAME, query, projection);
-};
-
-User.findByUserName = function (username) {
-	return this.findOne("admin", { user: username });
-};
-
 User.getProfileByUsername = async function (username) {
 	if (!username) {
 		return null;
 	}
 
-	const dbCol = await DB.getCollection("admin", COLL_NAME);
-	const user = await dbCol.findOne({user: username}, {user: 1,
+	const user = await this.findByUserName(username, {user: 1,
 		"customData.firstName" : 1,
 		"customData.lastName" : 1,
 		"customData.email" : 1,
@@ -153,8 +136,7 @@ User.getProfileByUsername = async function (username) {
 };
 
 User.getStarredMetadataTags = async function (username) {
-	const dbCol = await DB.getCollection("admin", COLL_NAME);
-	const userProfile = await dbCol.findOne({user: username}, {user: 1,
+	const userProfile = await this.findByUserName(username, {user: 1,
 		"customData.StarredMetadataTags" : 1
 	});
 
@@ -235,16 +217,6 @@ User.deleteStarredModel = async function (username, ts, modelID) {
 	return {};
 };
 
-User.findByAPIKey = async function (key) {
-	if (!key) {
-		return null;
-	}
-
-	const dbCol = await DB.getCollection("admin", COLL_NAME);
-	const user = await dbCol.findOne({"customData.apiKey" : key});
-	return user;
-};
-
 User.generateApiKey = async function (username) {
 	const apiKey = crypto.randomBytes(16).toString("hex");
 	const dbCol = await DB.getCollection("admin", COLL_NAME);
@@ -309,14 +281,6 @@ User.checkUserNameAvailableAndValid = async function (username) {
 	}
 };
 
-User.findByEmail = function (email) {
-	return this.findOne("admin", { "customData.email":  new RegExp("^" + utils.sanitizeString(email) + "$", "i") });
-};
-
-User.findByPaypalPaymentToken = function (token) {
-	return this.findOne("admin", { "customData.billing.paypalPaymentToken": token });
-};
-
 User.checkEmailAvailableAndValid = async function (email, exceptUser) {
 	const emailRegex = /^(['a-zA-Z0-9_\-.]+)@([a-zA-Z0-9_\-.]+)\.([a-zA-Z]{2,})$/;
 	if (!email.match(emailRegex)) {
@@ -331,10 +295,6 @@ User.checkEmailAvailableAndValid = async function (email, exceptUser) {
 	if(count > 0) {
 		throw (responseCodes.EMAIL_EXISTS);
 	}
-};
-
-User.findUserByBillingId = function (billingAgreementId) {
-	return this.findOne("admin", { "customData.billing.billingAgreementId": billingAgreementId });
 };
 
 User.updatePassword = function (logger, username, oldPassword, token, newPassword) {
@@ -1245,21 +1205,41 @@ User.getTeamMemberInfo = async function(teamspace, user) {
 	}
 };
 
-User.isHereEnabled = function (username) {
-	return _isHereEnabled(username);
+User.isHereEnabled = async function (username) {
+	const user = await this.findByUserName(username,  { _id: 0, "customData.hereEnabled": 1 });
+	return user.customData.hereEnabled;
 };
 
-function _isHereEnabled(username) {
-	return DB.getCollection("admin", COLL_NAME).then(dbCol => {
-		return dbCol.findOne({ user: username }, { _id: 0, "customData.hereEnabled": 1 })
-			.then((isHereEnabledResult) => {
-				return isHereEnabledResult.customData.hereEnabled;
-			});
-	});
-}
+// Find functions
+User.findOne = async function (query, projection) {
+	return await DB.findOne("admin", COLL_NAME, query, projection);
+};
+
+User.findByUserName = async function (username, projection) {
+	return await this.findOne({ user: username }, projection);
+};
+
+User.findByAPIKey = async function (key) {
+	if (!key) {
+		return null;
+	}
+
+	return await this.findOne({"customData.apiKey" : key});
+};
+
+User.findByEmail = async function (email) {
+	return await this.findOne({ "customData.email":  new RegExp("^" + utils.sanitizeString(email) + "$", "i") });
+};
+
+User.findByPaypalPaymentToken = async function (token) {
+	return await this.findOne({ "customData.billing.paypalPaymentToken": token });
+};
+
+User.findUserByBillingId = async function (billingAgreementId) {
+	return await this.findOne({ "customData.billing.billingAgreementId": billingAgreementId });
+};
 
 /*
-
 Payment (paypal) stuff
 
 schema.methods.executeBillingAgreement = function () {
