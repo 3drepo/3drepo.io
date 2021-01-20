@@ -513,21 +513,7 @@ User.updateInfo = async function(username, updateObj) {
 	await User.update(username, updateData);
 };
 
-User.findUsernameOrEmail = function (userNameOrEmail) {
-	return DB.getCollection("admin", COLL_NAME).then(dbCol => {
-		return dbCol
-			.findOne({
-				$or: [
-					{ user: userNameOrEmail },
-					{ "customData.email": userNameOrEmail }
-				]
-			}
-			);
-	});
-};
-
-User.getForgotPasswordToken = function (userNameOrEmail) {
-
+User.getForgotPasswordToken = async function (userNameOrEmail) {
 	const expiryAt = new Date();
 	expiryAt.setHours(expiryAt.getHours() + config.tokenExpiry.forgotPassword);
 
@@ -538,31 +524,24 @@ User.getForgotPasswordToken = function (userNameOrEmail) {
 
 	let resetPasswordUserInfo = {};
 
-	let user;
+	const user = await this.findByUsernameOrEmail(userNameOrEmail);
 
-	return this.findUsernameOrEmail(userNameOrEmail).then(_user => {
+	// set token only if username is found.
+	if (user) {
+		user.customData.resetPasswordToken = resetPasswordToken;
+		resetPasswordUserInfo = {
+			token: resetPasswordToken.token,
+			email: user.customData.email,
+			username: user.user,
+			firstName:user.customData.firstName
+		};
 
-		user = _user;
+		await this.update(user.user, { "customData.resetPasswordToken": resetPasswordToken });
 
-		// set token only if username is found.
-		if (user) {
-			user.customData.resetPasswordToken = resetPasswordToken;
-			resetPasswordUserInfo = {
-				token: resetPasswordToken.token,
-				email: user.customData.email,
-				username: user.user,
-				firstName:user.customData.firstName
-			};
+		return resetPasswordUserInfo;
+	}
 
-			return updateUser(user.user, { $set: { "customData.resetPasswordToken": resetPasswordToken } });
-		} else {
-			return Promise.resolve();
-		}
-
-	}).then(() => {
-		return Promise.resolve(resetPasswordUserInfo);
-	});
-
+	return {};
 };
 
 async function _fillInModelDetails(accountName, setting, permissions) {
@@ -589,10 +568,10 @@ async function _fillInModelDetails(accountName, setting, permissions) {
 
 	model.nRevisions = nRev;
 
-	return Promise.resolve(model);
+	return model;
 }
 // list all models in an account
-function _getModels(accountName, ids, permissions) {
+async function _getModels(teamspace, ids, permissions) {
 
 	const models = [];
 	const fedModels = [];
@@ -603,28 +582,21 @@ function _getModels(accountName, ids, permissions) {
 		query = { _id: { "$in": ids } };
 	}
 
-	return ModelSetting.find({ account: accountName }, query).then(settings => {
+	const settings = await ModelSetting.find({ account: teamspace }, query);
 
-		const promises = [];
+	await Promise.all(settings.map(async setting => {
+		const model = await _fillInModelDetails(teamspace, setting, permissions);
 
-		settings.forEach(setting => {
-			promises.push(
-				_fillInModelDetails(accountName, setting, permissions).then(model => {
-					if (!(model.permissions.length === 1 && model.permissions[0] === null)) {
-						setting.federate ? fedModels.push(model) : models.push(model);
-					}
-				})
-			);
-		});
+		if (!(model.permissions.length === 1 && model.permissions[0] === null)) {
+			setting.federate ? fedModels.push(model) : models.push(model);
+		}
+	}));
 
-		return Promise.all(promises).then(() => {
-			return { models, fedModels };
-		});
-	});
+	return { models, fedModels };
 }
 
 // find projects and put models into project
-function _addProjects(account, username, models) {
+async function _addProjects(account, username, models) {
 
 	let query = {};
 
@@ -632,92 +604,80 @@ function _addProjects(account, username, models) {
 		query = { models: { $in: models } };
 	}
 
-	return Project.find({ account: account.account }, query).then(projects => {
+	const projects = await Project.find({ account: account.account }, query);
 
-		projects.forEach((project, i) => {
+	projects.forEach((project, i) => {
 
-			project = project.toObject();
+		project = project.toObject();
 
-			let permissions = project.permissions.find(p => p.user === username);
-			permissions = _.get(permissions, "permissions") || [];
-			// show inherited and implied permissions
-			permissions = permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].project || p);
-			permissions = permissions.concat(account.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].project || null));
+		let permissions = project.permissions.find(p => p.user === username);
+		permissions = _.get(permissions, "permissions") || [];
+		// show inherited and implied permissions
+		permissions = permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].project || p);
+		permissions = permissions.concat(account.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].project || null));
 
-			project.permissions = _.uniq(_.compact(_.flatten(permissions)));
+		project.permissions = _.uniq(_.compact(_.flatten(permissions)));
 
-			projects[i] = project;
+		projects[i] = project;
 
-			const findModel = model => (m, index, modelList) => {
-				if (m.model === model) {
-					modelList.splice(index, 1);
-					return true;
-				}
-			};
+		const findModel = model => (m, index, modelList) => {
+			if (m.model === model) {
+				modelList.splice(index, 1);
+				return true;
+			}
+		};
 
-			project.models.forEach((model, j) => {
+		project.models.forEach((model, j) => {
 
-				const fullModel = account.models.find(findModel(model)) || account.fedModels.find(findModel(model));
-				project.models[j] = fullModel;
-
-			});
-
-			project.models = _.compact(project.models);
+			const fullModel = account.models.find(findModel(model)) || account.fedModels.find(findModel(model));
+			project.models[j] = fullModel;
 
 		});
 
-		account.projects = account.projects.concat(projects);
+		project.models = _.compact(project.models);
+
 	});
+
+	account.projects = account.projects.concat(projects);
 }
 
-function _findModelDetails(dbUserCache, username, model) {
-
-	let getUser;
-	let dbUser;
+async function _findModelDetails(dbUserCache, username, model) {
+	let user;
 
 	if (dbUserCache[model.account]) {
-		getUser = Promise.resolve(dbUserCache[model.account]);
+		user = dbUserCache[model.account];
 	} else {
-		getUser = User.findByUserName(model.account).then(user => {
-			dbUserCache[model.account] = user;
-			return dbUserCache[model.account];
-		});
+		user = await User.findByUserName(model.account);
+		dbUserCache[model.account] = user;
 	}
 
-	return getUser.then(_user => {
-		dbUser = _user;
-		return ModelSetting.findById({ account: model.account }, model.model);
+	let setting  = await ModelSetting.findById({ account: model.account }, model.model);
 
-	}).then(setting => {
+	let permissions = [];
 
-		let permissions = [];
+	if (!setting) {
+		setting = { _id: model.model };
+	} else {
+		const template = setting.findPermissionByUser(username);
 
-		if (!setting) {
-			setting = { _id: model.model };
-		} else {
-			const template = setting.findPermissionByUser(username);
-
-			if (template) {
-				permissions = PermissionTemplates.findById(dbUser, template.permission).permissions;
-			}
+		if (template) {
+			permissions = PermissionTemplates.findById(user, template.permission).permissions;
 		}
+	}
 
-		return { setting, permissions };
-	});
+	return { setting, permissions };
 }
 
-function _calSpace(user) {
+async function _calSpace(user) {
 	const quota = UserBilling.getSubscriptionLimits(user.customData.billing);
-	return User.getTeamspaceSpaceUsed(user.user).then(sizeInBytes => {
+	const sizeInBytes = await User.getTeamspaceSpaceUsed(user.user);
 
-		if (quota.spaceLimit > 0) {
-			quota.spaceUsed = sizeInBytes / (1024 * 1024); // In MiB
-		} else if (quota) {
-			quota.spaceUsed = 0;
-		}
-		return quota;
-	});
-
+	if (quota.spaceLimit > 0) {
+		quota.spaceUsed = sizeInBytes / (1024 * 1024); // In MiB
+	} else if (quota) {
+		quota.spaceUsed = 0;
+	}
+	return quota;
 }
 
 function _sortAccountsAndModels(accounts) {
@@ -974,13 +934,6 @@ User.listAccounts = async function(user) {
 	return _createAccounts(user.roles, user.user);
 };
 
-function updateUser(username, update) {
-	return DB.getCollection("admin", COLL_NAME).then(dbCol => {
-		return dbCol.update({ user: username }, update);
-	});
-
-}
-
 User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove) {
 	if (teamspace.user === userToRemove) {
 		// The user should not be able to remove itself from the teamspace
@@ -1192,16 +1145,25 @@ User.findByUserName = async function (username, projection) {
 	return await this.findOne({ user: username }, projection);
 };
 
+User.findByEmail = async function (email) {
+	return await this.findOne({ "customData.email":  new RegExp("^" + utils.sanitizeString(email) + "$", "i") });
+};
+
+User.findByUsernameOrEmail = async function (userNameOrEmail) {
+	return await this.findOne({
+		$or: [
+			{ user: userNameOrEmail },
+			{ "customData.email": userNameOrEmail }
+		]
+	});
+};
+
 User.findByAPIKey = async function (key) {
 	if (!key) {
 		return null;
 	}
 
 	return await this.findOne({"customData.apiKey" : key});
-};
-
-User.findByEmail = async function (email) {
-	return await this.findOne({ "customData.email":  new RegExp("^" + utils.sanitizeString(email) + "$", "i") });
 };
 
 User.findByPaypalPaymentToken = async function (token) {
@@ -1217,7 +1179,7 @@ Payment (paypal) stuff
 
 schema.methods.executeBillingAgreement = function () {
 	return this.customData.billing.executeBillingAgreement(this.user).then(() => {
-		return updateUser(this.user, { $set: { "customData.billing": this.customData.billing } });
+		return this.update(this.user,  { "customData.billing": this.customData.billing });
 	});
 };
 
@@ -1231,7 +1193,7 @@ schema.methods.updateSubscriptions = function (plans, billingUser, billingAddres
 		.then(_billingAgreement => {
 
 			billingAgreement = _billingAgreement;
-			return updateUser(this.user, { $set: { "customData.billing": this.customData.billing } });
+			return this.update(this.user, { "customData.billing": this.customData.billing });
 		}).then(() => {
 			return Promise.resolve(billingAgreement || {});
 		});
@@ -1250,7 +1212,7 @@ User.activateSubscription = function (billingAgreementId, paymentInfo, raw) {
 		return dbUser.customData.billing.activateSubscriptions(dbUser.user, paymentInfo, raw);
 
 	}).then(() => {
-		return updateUser(dbUser.user, { $set: { "customData.billing": dbUser.customData.billing } });
+		return this.update(dbUser.user,  { "customData.billing": dbUser.customData.billing  });
 	}).then(() => {
 		return Promise.resolve({ subscriptions: dbUser.customData.billing.subscriptions, account: dbUser, payment: paymentInfo });
 	});
