@@ -47,15 +47,15 @@
 		});
 	};
 
-	Handler.find = async function (database, colName, query, projection) {
+	Handler.find = async function (database, colName, query, projection, sort) {
 		const collection = await Handler.getCollection(database, colName);
-		const results = await collection.find(query, projection);
+		const results = await collection.find(query, {projection, sort});
 		return results.toArray();
 	};
 
-	Handler.findOne = async function (database, colName, query, projection) {
+	Handler.findOne = async function (database, colName, query, projection, sort) {
 		const collection = await Handler.getCollection(database, colName);
-		return collection.findOne(query, projection);
+		return collection.findOne(query, { projection, sort});
 	};
 
 	function getURL(database) {
