@@ -49,8 +49,7 @@
 
 	Handler.find = async function (database, colName, query, projection, sort) {
 		const collection = await Handler.getCollection(database, colName);
-		const results = await collection.find(query, {projection, sort});
-		return results.toArray();
+		return collection.find(query, {projection, sort}).toArray();
 	};
 
 	Handler.findOne = async function (database, colName, query, projection, sort) {
