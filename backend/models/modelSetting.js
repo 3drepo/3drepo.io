@@ -26,6 +26,8 @@ const db = require("../handler/db");
 
 const MODELS_COLL = "settings";
 
+const MODEL_CODE_REGEX = /^[a-zA-Z0-9]{0,50}$/;
+
 const schema = mongoose.Schema({
 	_id : String,
 	name: String, // model name
@@ -66,8 +68,6 @@ const schema = mongoose.Schema({
 
 schema.set("toObject", { getters: true });
 
-schema.statics.modelCodeRegExp = /^[a-zA-Z0-9]{0,50}$/;
-
 schema.methods.updateProperties = async function (updateObj) {
 	const views = new (require("./view"))();
 	const keys = Object.keys(updateObj);
@@ -81,7 +81,7 @@ schema.methods.updateProperties = async function (updateObj) {
 		}
 		switch (key) {
 			case "code":
-				if (!schema.statics.modelCodeRegExp.test(updateObj[key])) {
+				if (!MODEL_CODE_REGEX.test(updateObj[key])) {
 					throw responseCodes.INVALID_MODEL_CODE;
 				}
 			case "unit":
@@ -156,17 +156,13 @@ schema.methods.changePermissions = function(permissions, account = this._dbcolOp
 	});
 };
 
-schema.methods.findPermissionByUser = function(username) {
-	return this.permissions.find(perm => perm.user === username);
-};
-
 schema.statics.createNewSetting = function(teamspace, modelName, data) {
 	const modelNameRegExp = /^[\x00-\x7F]{1,120}$/;
 	if(!modelName.match(modelNameRegExp)) {
 		return Promise.reject({ resCode: responseCodes.INVALID_MODEL_NAME });
 	}
 
-	if(data.code && !ModelSetting.modelCodeRegExp.test(data.code)) {
+	if(data.code && !MODEL_CODE_REGEX.test(data.code)) {
 		return Promise.reject({ resCode: responseCodes.INVALID_MODEL_CODE });
 	}
 
@@ -211,7 +207,7 @@ schema.statics.createNewSetting = function(teamspace, modelName, data) {
 	}
 
 	if(data.code) {
-		if (!schema.statics.modelCodeRegExp.test(data.code)) {
+		if (!MODEL_CODE_REGEX.test(data.code)) {
 			return Promise.reject(responseCodes.INVALID_MODEL_CODE);
 		}
 		setting.properties.code = data.code;
@@ -292,6 +288,11 @@ ModelSetting.getModelsData = function(teamspaces) {
 				});
 		})
 	).then((modelData) => modelData.reduce((ac,cur) => Object.assign(ac, cur),{})); // Turns the array to an object (quick indexing);
+};
+
+ModelSetting.findPermissionByUser = async function(account, model, username) {
+	const modelSetting = await ModelSetting.findById({account, model}, model);
+	return modelSetting.permissions.find(perm => perm.user === username);
 };
 
 ModelSetting.populateUsers = async function(account, permissions) {

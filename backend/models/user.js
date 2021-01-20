@@ -792,14 +792,14 @@ function _findModelDetails(dbUserCache, username, model) {
 		dbUser = _user;
 		return ModelSetting.findById({ account: model.account }, model.model);
 
-	}).then(setting => {
+	}).then(async setting => {
 
 		let permissions = [];
 
 		if (!setting) {
 			setting = { _id: model.model };
 		} else {
-			const template = setting.findPermissionByUser(username);
+			const template = await ModelSetting.findPermissionByUser(model.account, model.model, username);
 
 			if (template) {
 				permissions = dbUser.customData.permissionTemplates.findById(template.permission).permissions;

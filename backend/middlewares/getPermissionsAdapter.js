@@ -91,12 +91,12 @@
 					user = _user;
 					return ModelSetting.findById({account, model}, model);
 
-				}).then(setting => {
+				}).then(async setting => {
 					if(!setting) {
 						throw ResponseCodes.RESOURCE_NOT_FOUND;
 					}
 
-					const perm = setting.findPermissionByUser(username);
+					const perm = await ModelSetting.findPermissionByUser(account, model, username);
 
 					if(!perm) {
 						return projectPerms;

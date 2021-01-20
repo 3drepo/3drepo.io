@@ -303,7 +303,7 @@
 		}
 
 		modelsSettings = await Promise.all(modelsSettings.map(async setting => {
-			const template = setting.findPermissionByUser(username);
+			const template = await ModelSetting.findPermissionByUser(account, setting._id, username);
 
 			let settingsPermissions = [];
 			if(template) {
