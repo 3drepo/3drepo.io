@@ -223,5 +223,55 @@ describe("Login", function () {
 	});
 
 
+	describe("Forgot password ", function() {
+		let token = null
+		const newPassword = "someCrazyNewPassword2999";
+
+		it("with username should succeed", async function() {
+			const data = await User.getForgotPasswordToken(username);
+
+			expect(data.email).to.equal( email("success"));
+			expect(data.username).to.equal(username);
+			expect(data.token).to.not.be.undefined;
+		});
+
+		it("with email should succeed", async function() {
+			const data = await User.getForgotPasswordToken(email("success"));
+
+			expect(data.email).to.equal(email("success"));
+			expect(data.username).to.equal(username);
+			expect(data.token).to.not.be.undefined;
+
+			token = data.token;
+		});
+
+
+		it("reset password with token should succeed", async function() {
+			await request(server)
+				.put(`/${username}/password`)
+				.send({token, newPassword})
+				.expect(200);
+		});
+
+
+		it("login with new password should succeed", async function() {
+			const {body}  = await request(server)
+				.post("/login")
+				.send({ username, password: newPassword})
+				.expect(200);
+
+			expect(body.username).to.equal(username);
+		});
+
+		it("reset password with expired token should fail", async function() {
+			const {body} = await request(server)
+				.put(`/${username}/password`)
+				.send({token, newPassword: "anotherPassword98"})
+				.expect(400);
+
+			expect(body.value).to.equal(responseCodes.TOKEN_INVALID.value);
+		});
+	});
+
 
 });

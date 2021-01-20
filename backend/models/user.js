@@ -17,7 +17,6 @@
  */
 "use strict";
 
-const ModelFactory = require("./factory/modelFactory");
 const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
 const DB = require("../handler/db");
@@ -219,50 +218,42 @@ User.deleteStarredModel = async function (username, ts, modelID) {
 
 User.generateApiKey = async function (username) {
 	const apiKey = crypto.randomBytes(16).toString("hex");
-	const dbCol = await DB.getCollection("admin", COLL_NAME);
-	await dbCol.update({ user: username}, {$set: {"customData.apiKey" : apiKey}});
+	await this.update(username, {"customData.apiKey" : apiKey});
 	return apiKey;
 };
 
 User.deleteApiKey = async function (username) {
-	const dbCol = await DB.getCollection("admin", COLL_NAME);
-	await dbCol.update({ user: username}, {$unset: {"customData.apiKey" : 1}});
+	await DB.update("admin", { user: username}, {$unset: {"customData.apiKey" : 1}});
 };
 
-User.findUsersWithoutMembership = function (teamspace, searchString) {
-	return DB.getCollection("admin", COLL_NAME).then(dbCol => {
-		return dbCol
-			.find({
-				$and: [{
-					$or: [
-						{ user: new RegExp(`.*${searchString}.*`, "i") },
-						{ "customData.email": new RegExp(searchString, "i") }
-					]
-				},
-				{ "customData.inactive": { "$exists": false }}
-				]
-			}).toArray();
-	}).then((users) => {
-		const notMembers = users.reduce((members, {user, roles, customData}) => {
-			const isMemberOfTeamspace = roles.some((roleItem) => {
-				return roleItem.db === teamspace && roleItem.role === C.DEFAULT_MEMBER_ROLE;
-			});
-
-			if (!isMemberOfTeamspace) {
-				members.push({
-					user,
-					roles,
-					firstName: customData.firstName,
-					lastName: customData.lastName,
-					company: _.get(customData, "billing.billingInfo.company", null)
-				});
-			}
-
-			return members;
-		}, []);
-
-		return Promise.resolve(notMembers);
+User.findUsersWithoutMembership = async function (teamspace, searchString) {
+	const users = await DB.find("admin", COLL_NAME, {
+		$and: [{
+			$or: [
+				{ user: new RegExp(`.*${searchString}.*`, "i") },
+				{ "customData.email": new RegExp(searchString, "i") }
+			]
+		},
+		{ "customData.inactive": { "$exists": false }}
+		]
 	});
+
+	const notMembers = users.reduce((members, userentry) => {
+		if (!User.isMemberOfTeamspace(userentry, teamspace)) {
+			const {user, roles, customData } = userentry;
+			members.push({
+				user,
+				roles,
+				firstName: customData.firstName,
+				lastName: customData.lastName,
+				company: _.get(customData, "billing.billingInfo.company", null)
+			});
+		}
+
+		return members;
+	}, []);
+
+	return notMembers;
 };
 
 // case insenstive
@@ -297,59 +288,45 @@ User.checkEmailAvailableAndValid = async function (email, exceptUser) {
 	}
 };
 
-User.updatePassword = function (logger, username, oldPassword, token, newPassword) {
+User.updatePassword = async function (logger, username, oldPassword, token, newPassword) {
 
 	if (!((oldPassword || token) && newPassword)) {
-		return Promise.reject({ resCode: responseCodes.INVALID_INPUTS_TO_PASSWORD_UPDATE });
+		throw ({ resCode: responseCodes.INVALID_INPUTS_TO_PASSWORD_UPDATE });
 	}
 
-	let checkUser;
 	let user;
 
 	if (oldPassword) {
 
 		if (oldPassword === newPassword) {
-			return Promise.reject(responseCodes.NEW_OLD_PASSWORD_SAME);
+			throw (responseCodes.NEW_OLD_PASSWORD_SAME);
 		}
 
-		checkUser = this.authenticate(logger, username, oldPassword);
+		await this.authenticate(logger, username, oldPassword);
 	} else if (token) {
+		user = await this.findByUserName(username);
 
-		checkUser = this.findByUserName(username).then(_user => {
+		const tokenData = user.customData.resetPasswordToken;
 
-			user = _user;
-
-			const tokenData = user.customData.resetPasswordToken;
-			if (tokenData && tokenData.token === token && tokenData.expiredAt > new Date()) {
-				return Promise.resolve();
-			} else {
-				return Promise.reject({ resCode: responseCodes.TOKEN_INVALID });
-			}
-		});
+		if (!tokenData || tokenData.token !== token || tokenData.expiredAt < new Date()) {
+			throw ({ resCode: responseCodes.TOKEN_INVALID });
+		}
 	}
 
-	return checkUser.then(() => {
-
-		const updateUserCmd = {
-			"updateUser": username,
-			"pwd": newPassword
-		};
-
-		return ModelFactory.dbManager.runCommand("admin", updateUserCmd);
-
-	}).then(() => {
+	const updateUserCmd = {
+		"updateUser": username,
+		"pwd": newPassword
+	};
+	try {
+		await DB.runCommand("admin", updateUserCmd);
 
 		if (user) {
-			user.customData.resetPasswordToken = undefined;
-			return user.save().then(() => Promise.resolve());
+			await this.update(username, {"customData.resetPasswordToken" : undefined });
 		}
 
-		return Promise.resolve();
-
-	}).catch(err => {
-		return Promise.reject(err.resCode ? err : { resCode: utils.mongoErrorToResCode(err) });
-	});
-
+	} catch(err) {
+		throw (err.resCode ? err : { resCode: utils.mongoErrorToResCode(err) });
+	}
 };
 
 User.usernameRegExp = /^[a-zA-Z][\w]{1,63}$/;
@@ -365,7 +342,7 @@ User.createUser = async function (logger, username, password, customData, tokenE
 		this.checkEmailAvailableAndValid(customData.email)
 	]);
 
-	const adminDB = await ModelFactory.dbManager.getAuthDB();
+	const adminDB = await DB.getAuthDB();
 
 	const cleanedCustomData = {
 		createdAt: new Date(),
@@ -1098,14 +1075,13 @@ User.isMemberOfTeamspace = function (user, teamspace) {
 	return user.roles.filter(role => role.db === teamspace && role.role === C.DEFAULT_MEMBER_ROLE).length > 0;
 };
 
-User.getQuotaInfo = function (teamspace) {
-	return this.findByUserName(teamspace).then((user) => {
-		if (!user) {
-			return Promise.reject(responseCodes.USER_NOT_FOUND);
-		}
+User.getQuotaInfo = async function (teamspace) {
+	const teamspaceFound = await this.findByUserName(teamspace);
+	if (!teamspaceFound) {
+		throw (responseCodes.USER_NOT_FOUND);
+	}
 
-		return _calSpace(user);
-	});
+	return _calSpace(teamspaceFound);
 };
 
 User.hasSufficientQuota = async (teamspace, size) => {
@@ -1136,8 +1112,7 @@ User.getMembers = async function (teamspace) {
 	});
 	const getJobInfo = usersWithJob(teamspace);
 
-	const getTeamspacePermissions = User.findByUserName(teamspace)
-		.then(user => user.customData.permissions);
+	const getTeamspacePermissions = User.findByUserName(teamspace).then(user => user.customData.permissions);
 
 	promises.push(
 		getTeamspaceMembers,
@@ -1161,11 +1136,9 @@ User.getMembers = async function (teamspace) {
 	});
 };
 
-User.getAllUsersInTeamspace = function (teamspace) {
-	return this.findUsersInTeamspace(teamspace, {user: 1}).then(users => {
-		const results = users.map(({user}) => user);
-		return results;
-	});
+User.getAllUsersInTeamspace = async function (teamspace) {
+	const users =  await this.findUsersInTeamspace(teamspace, {user: 1});
+	return users.map(({user}) => user);
 };
 
 User.findUsersInTeamspace =  async function (teamspace, fields) {
@@ -1173,16 +1146,16 @@ User.findUsersInTeamspace =  async function (teamspace, fields) {
 	return await DB.find("admin", COLL_NAME, query, fields);
 };
 
-User.teamspaceMemberCheck = function (teamspace, user) {
-	return User.findByUserName(user).then((userEntry) => {
-		if (!userEntry) {
-			return Promise.reject(responseCodes.USER_NOT_FOUND);
-		}
+User.teamspaceMemberCheck = async function (teamspace, user) {
+	const userEntry = await User.findByUserName(user);
 
-		if (!this.isMemberOfTeamspace(userEntry, teamspace)) {
-			return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
-		}
-	});
+	if (!userEntry) {
+		throw (responseCodes.USER_NOT_FOUND);
+	}
+
+	if (!this.isMemberOfTeamspace(userEntry, teamspace)) {
+		throw (responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
+	}
 };
 
 User.getTeamMemberInfo = async function(teamspace, user) {
