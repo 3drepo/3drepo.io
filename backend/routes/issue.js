@@ -973,7 +973,7 @@ function getIssuesBCF(req, res, next) {
 	getBCFZipRS.then(zipRS => {
 		const timestamp = (new Date()).toLocaleString();
 
-		ModelSetting.findById(dbCol, dbCol.model).then((settings) => {
+		ModelSetting.findModelSettingById(account, model).then((settings) => {
 			const filenamePrefix = (settings.name + "_" + timestamp + "_").replace(/\W+/g, "_");
 
 			const headers = {
