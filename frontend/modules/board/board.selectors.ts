@@ -21,7 +21,8 @@ import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { get, groupBy, memoize, startCase, values } from 'lodash';
 import { createSelector } from 'reselect';
-import { PRIORITIES, STATUSES } from '../../constants/issues';
+
+import { ISSUE_DEFAULT_HIDDEN_STATUSES, PRIORITIES, STATUSES } from '../../constants/issues';
 import { LEVELS_LIST, RISK_MITIGATION_STATUSES } from '../../constants/risks';
 import { sortByDate } from '../../helpers/sorting';
 import { selectAllFilteredIssues, selectSortByField as selectIssuesSortByField,
@@ -105,7 +106,7 @@ const selectRawCardData = createSelector(
 		risksSortOrder, issuesSortByField, risksSortByField) => {
 		const activeIssues = issues.filter(({ status }) => {
 			const activeGroupingByStatus = filterProp === ISSUE_FILTER_PROPS.status.value;
-			return showClosedIssues || activeGroupingByStatus || ![STATUSES.CLOSED, STATUSES.VOID].includes(status);
+			return showClosedIssues || activeGroupingByStatus || !ISSUE_DEFAULT_HIDDEN_STATUSES.includes(status);
 		});
 
 		return {

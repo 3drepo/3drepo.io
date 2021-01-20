@@ -29,7 +29,7 @@ interface IProps {
 }
 
 export default (props: IProps) => (
-	<IconContainer {...props.IconProps}>
+	<IconContainer {...props}>
 		<FontAwesomeIconComponent icon={props.icon} />
 	</IconContainer>
 );

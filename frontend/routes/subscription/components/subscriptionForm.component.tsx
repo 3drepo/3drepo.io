@@ -359,7 +359,7 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 									<PayPalLogo src="/images/paypal.png" />
 									<StyledButton
 										color="secondary"
-										variant="raised"
+										variant="contained"
 										disabled
 										type="submit">
 										Confirm

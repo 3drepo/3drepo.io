@@ -49,7 +49,7 @@ async function getNodeBySharedId(account, model, shared_id, revisionIds, project
 }
 
 async function findNodes(account, model, branch, revision, query = {}, projection = {}) {
-	const history = await History.getHistory({ account, model }, branch, revision);
+	const history = await History.getHistory(account, model, branch, revision);
 
 	if (!query._id) {
 		query._id = {"$in": history.current };
@@ -91,7 +91,7 @@ Scene.getNodeById = async function (account, model, id, projection = {}) {
 };
 
 Scene.getParentMatrix = async function (account, model, parent, revisionIds) {
-	const mesh = await getNodeBySharedId(account, model, parent, revisionIds);
+	const mesh = await getNodeBySharedId(account, model, utils.stringToUUID(parent), revisionIds);
 
 	if ((mesh.parents || []).length > 0) {
 		const parentMatrix = await Scene.getParentMatrix(account, model, mesh.parents[0], revisionIds);

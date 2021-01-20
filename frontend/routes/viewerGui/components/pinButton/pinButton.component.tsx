@@ -36,16 +36,24 @@ interface IProps {
 	deactivateMeasure: () => void;
 }
 
-const UpdatePinButton = ({ pinLabel, disabled, onClickButton, ...props }) => (
-	<Container {...props}>
-		<ContainedButton
-			onClick={onClickButton}
-			icon={PinIcon}
-			disabled={disabled}
-		>
-			{pinLabel}
-		</ContainedButton>
-	</Container>
+interface IUpdatePinButtonProps {
+	pinLabel: string;
+	disabled?: boolean;
+	onClickButton: () => void;
+}
+
+const UpdatePinButton: React.FC<IUpdatePinButtonProps> = React.forwardRef(
+	({ pinLabel, disabled, onClickButton, ...props }, ref: React.Ref<HTMLSpanElement>) => (
+		<Container ref={ref} {...props}>
+			<ContainedButton
+				onClick={onClickButton}
+				icon={PinIcon}
+				disabled={disabled}
+			>
+				{pinLabel}
+			</ContainedButton>
+		</Container>
+	)
 );
 
 export class PinButton extends React.PureComponent<IProps, any> {

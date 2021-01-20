@@ -17,12 +17,12 @@
 
 import { push } from 'connected-react-router';
 import filesize from 'filesize';
-import { isEmpty, isEqual, map, omit, pick } from 'lodash';
+import { isEmpty, isEqual, map, omit } from 'lodash';
 import * as queryString from 'query-string';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import { CHAT_CHANNELS } from '../../constants/chat';
-import { RISK_LEVELS } from '../../constants/risks';
+import { RISK_DEFAULT_HIDDEN_LEVELS } from '../../constants/risks';
 import { ROUTES } from '../../constants/routes';
 import {
 	createAttachResourceComments,
@@ -312,7 +312,7 @@ function* closeDetails() {
 }
 
 const onUpdateEvent = (updatedRisk) => {
-	if ([RISK_LEVELS.AGREED_FULLY, RISK_LEVELS.VOID].includes(updatedRisk.mitigation_status)) {
+	if (RISK_DEFAULT_HIDDEN_LEVELS.includes(updatedRisk.mitigation_status)) {
 		dispatch(RisksActions.showCloseInfo(updatedRisk._id));
 		setTimeout(() => {
 			dispatch(RisksActions.saveRiskSuccess(updatedRisk));

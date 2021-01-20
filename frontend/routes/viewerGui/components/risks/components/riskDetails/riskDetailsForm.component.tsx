@@ -17,8 +17,6 @@
 
 import React from 'react';
 
-import Tab from '@material-ui/core/Tab';
-import Tabs from '@material-ui/core/Tabs';
 import Tooltip from '@material-ui/core/Tooltip';
 import { withFormik, Form } from 'formik';
 import { debounce, get, isEmpty, isEqual } from 'lodash';
@@ -35,7 +33,7 @@ import { AttachmentsFormTab } from '../attachmentsFormTab/attachmentsFormTab.com
 import { MainRiskFormTab } from '../mainRiskFormTab/mainRiskFormTab.component';
 import { SequencingFormTab } from '../sequencingFormTab/sequencingFormTab.component';
 import { TreatmentRiskFormTab } from '../treatmentFormTab/treatmentFormTab.component';
-import { TabContent } from './riskDetails.styles';
+import { StyledTab, StyledTabs, TabContent } from './riskDetails.styles';
 
 interface IProps {
 	risk: any;
@@ -219,18 +217,18 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		const { activeTab } = this.state;
 		return (
 			<Form>
-				<Tabs
+				<StyledTabs
 					value={activeTab}
 					indicatorColor="secondary"
 					textColor="primary"
-					fullWidth
 					onChange={this.handleChange}
+					variant="fullWidth"
 				>
-					<Tab label={RISK_TABS.RISK} value={MAIN_RISK_TYPE} />
-					<Tab label={RISK_TABS.TREATMENT} value={TREATMENT_RISK_TYPE} />
-					<Tab label={RISK_TABS.SEQUENCING} value={SEQUENCING_RISK_TYPE} />
-					<Tab {...this.attachmentsProps} value={ATTACHMENTS_RISK_TYPE} />
-				</Tabs>
+					<StyledTab label={RISK_TABS.RISK} value={MAIN_RISK_TYPE} />
+					<StyledTab label={RISK_TABS.TREATMENT} value={TREATMENT_RISK_TYPE} />
+					<StyledTab label={RISK_TABS.SEQUENCING} value={SEQUENCING_RISK_TYPE} />
+					<StyledTab {...this.attachmentsProps} value={ATTACHMENTS_RISK_TYPE} />
+				</StyledTabs>
 				<TabContent>
 					{this.showRiskContent(activeTab === MAIN_RISK_TYPE)}
 					{this.showTreatmentContent(activeTab === TREATMENT_RISK_TYPE)}

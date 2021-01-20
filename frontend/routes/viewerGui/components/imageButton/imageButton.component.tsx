@@ -35,16 +35,16 @@ import { Container as ButtonContainer } from '../pinButton/pinButton.styles';
 
 interface IProps {
 	hasImage?: boolean;
-	onShowScreenshotDialog: (config: any) => void;
-	onTakeScreenshot?: (disableViewpointSuggestion: boolean) => void;
-	onUploadScreenshot?: (image, disableViewpointSuggestion: boolean) => void;
-	onUploadImage?: () => void;
+	showScreenshotDialog: (config: any) => void;
+	takeScreenshot?: (disableViewpointSuggestion: boolean) => void;
+	uploadScreenshot?: (image, disableViewpointSuggestion: boolean) => void;
+	uploadImage?: () => void;
 	disabled?: boolean;
 	disableScreenshot?: boolean;
 	close?: (e) => void;
 }
 
-const UploadImage = ({ onUploadScreenshot, onShowScreenshotDialog, close = noop, asMenuItem = false, ...props }) => {
+const UploadImage = ({ uploadScreenshot, showScreenshotDialog, close = noop, asMenuItem = false, ...props }) => {
 	const fileInputRef = React.useRef<HTMLInputElement>(null);
 
 	const resetFileInput = (e) => {
@@ -59,10 +59,10 @@ const UploadImage = ({ onUploadScreenshot, onShowScreenshotDialog, close = noop,
 		const reader = new FileReader();
 
 		reader.addEventListener('load', () => {
-			onShowScreenshotDialog({
+			showScreenshotDialog({
 				sourceImage: reader.result,
 				onSave: (screenshot) => {
-					onUploadScreenshot(screenshot, false);
+					uploadScreenshot(screenshot, false);
 					resetFileInput(event);
 				},
 				onCancel: () => resetFileInput(event),
@@ -101,9 +101,9 @@ const UploadImage = ({ onUploadScreenshot, onShowScreenshotDialog, close = noop,
 	);
 };
 
-const CreateScreenshot = ({ disableScreenshot, onTakeScreenshot, ...props }) => {
+const CreateScreenshot = ({ disableScreenshot, takeScreenshot, ...props }) => {
 	const handleOnClick = (e) => {
-		onTakeScreenshot(false);
+		takeScreenshot(false);
 		props.close(e);
 	};
 	return (
@@ -119,23 +119,23 @@ const CreateScreenshot = ({ disableScreenshot, onTakeScreenshot, ...props }) => 
 	);
 };
 
-export const UpdateImageButton = ({ hasImage, disabled, ...props }: IProps) => {
+export const UpdateImageButton: React.FC<IProps> = React.forwardRef(({ hasImage, disabled, ...props }, ref) => {
 	const imageLabel = !hasImage ? 'Add Image' : 'Edit Image';
 
 	return (
-		<ButtonContainer {...props}>
+		<ButtonContainer ref={ref} {...props}>
 			{renderWhenTrueOtherwise(() => (
 				<UploadImage
 					asMenuItem={false}
-					onShowScreenshotDialog={props.onShowScreenshotDialog}
-					onUploadScreenshot={props.onUploadScreenshot}
+					showScreenshotDialog={props.showScreenshotDialog}
+					uploadScreenshot={props.uploadScreenshot}
 					icon={ImageIcon}
 				>
 					{imageLabel}
 				</UploadImage>
 			), () => (
 				<ButtonMenu
-					renderButton={(p) => (
+					renderButton={({ IconProps, Icon, ...p }) => (
 						<ContainedButton
 							icon={ImageIcon}
 							disabled={disabled}
@@ -149,13 +149,13 @@ export const UpdateImageButton = ({ hasImage, disabled, ...props }: IProps) => {
 							<CreateScreenshot
 								close={close}
 								disableScreenshot={props.disableScreenshot}
-								onTakeScreenshot={props.onTakeScreenshot}
+								takeScreenshot={props.takeScreenshot}
 							/>
 							<UploadImage
 								asMenuItem
 								close={close}
-								onShowScreenshotDialog={props.onShowScreenshotDialog}
-								onUploadScreenshot={props.onUploadScreenshot}
+								showScreenshotDialog={props.showScreenshotDialog}
+								uploadScreenshot={props.uploadScreenshot}
 							/>
 						</MenuList>
 					)}
@@ -166,7 +166,7 @@ export const UpdateImageButton = ({ hasImage, disabled, ...props }: IProps) => {
 
 		</ButtonContainer>
 	);
-};
+});
 
 export const ImageButton = ({ ...props }: IProps) => {
 	return (

@@ -59,6 +59,8 @@ export const RISK_LEVELS = {
 	VOID: 'void',
 };
 
+export const RISK_DEFAULT_HIDDEN_LEVELS = [RISK_LEVELS.AGREED_FULLY, RISK_LEVELS.VOID];
+
 export const RISK_MITIGATION_STATUSES = [
 	{ value: RISK_LEVELS.UNMITIGATED, name: 'Unmitigated' },
 	{ value: RISK_LEVELS.PROPOSED, name: 'Proposed'},

@@ -41,7 +41,7 @@ export const NewTermsDialog = (props: IProps) => (
 			</p>
 		</DialogContent>
 		<DialogActions>
-			<Button onClick={props.handleResolve} variant="raised" color="secondary">ok</Button>
+			<Button onClick={props.handleResolve} variant="contained" color="secondary">ok</Button>
 		</DialogActions>
 	</Container>
 );

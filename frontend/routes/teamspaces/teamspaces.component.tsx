@@ -22,7 +22,7 @@ import memoizeOne from 'memoize-one';
 import React from 'react';
 import SimpleBar from 'simplebar-react';
 
-import { IconButton, MenuItem, Tab, Tabs } from '@material-ui/core';
+import { IconButton, MenuItem, Tabs } from '@material-ui/core';
 import Add from '@material-ui/icons/Add';
 import Check from '@material-ui/icons/Check';
 
@@ -67,7 +67,8 @@ import {
 	List,
 	LoaderContainer,
 	MenuButton,
-	OtherTeamspacesLabel
+	OtherTeamspacesLabel,
+	StyledTab,
 } from './teamspaces.styles';
 
 interface IProps {
@@ -493,11 +494,10 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	private renderMenuButton = (isPending, props) => (
 		<MenuButton
 			buttonRef={props.buttonRef}
-			variant="fab"
 			color="secondary"
 			aria-label="Toggle menu"
 			aria-haspopup="true"
-			mini
+			size="small"
 			onClick={props.onClick}
 			disabled={isPending}
 		>
@@ -538,7 +538,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	));
 
 	public renderEmptyState = renderWhenTrue(() => (
-		<EmptyStateInfo>No favorites models have been added yet</EmptyStateInfo>
+		<EmptyStateInfo>No favourites models have been added yet</EmptyStateInfo>
 	));
 
 	public renderMyTeamspace = () => {
@@ -588,8 +588,8 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 						value={Number(showStarredOnly)}
 						onChange={this.handleTabChange}
 					>
-						<Tab label="All" />
-						<Tab label="Favourites" />
+						<StyledTab label="All" />
+						<StyledTab label="Favourites" />
 					</Tabs>
 					<ButtonMenu
 						renderButton={this.renderMenuButton.bind(this, isPending)}

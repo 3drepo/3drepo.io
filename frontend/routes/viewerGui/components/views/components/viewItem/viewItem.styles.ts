@@ -42,6 +42,7 @@ export const ViewpointItem = styled(MenuItem)`
 		padding: 8px;
 		background-color: ${(props: any) => props.active ? `${COLOR.BLACK_6}` : 'initial'};
 		border-bottom: 1px solid ${COLOR.BLACK_20};
+		box-sizing: content-box;
 	}
 ` as any;
 

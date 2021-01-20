@@ -20,6 +20,7 @@ export const COLOR = {
 
 	WHITE,
 	WHITE_20: hexToRgba(WHITE, .2),
+	WHITE_10: hexToRgba(WHITE, .1),
 	WHITE_87: hexToRgba(WHITE, 0.87),
 
 	TRANSPARENT : hexToRgba(WHITE, 0),
@@ -40,6 +41,7 @@ export const COLOR = {
 	BLACK_87: hexToRgba(BLACK, .87),
 
 	DARK_GRAY: '#bfbfbf',
+	DARK_GRAY_20: 'rgba(158, 158, 158, .2)',
 	GRAY: '#f0f0f0',
 	GRAY_60: 'rgba(189, 189, 189, .6)',
 	GRAY_50: 'rgba(189, 189, 189, .5)',
@@ -52,6 +54,7 @@ export const COLOR = {
 	MAROON: '#c9241c',
 	CRIMSON: '#dc143c',
 	VIVID_RED: '#f00000',
+	red: '#e8004e',
 	DUSTY_RED: '#d3494e',
 	CORAL_RED: '#ff073a',
 	SOFT_RED: '#c27676',

@@ -16,9 +16,17 @@
  */
 
 import Button from '@material-ui/core/Button';
+import Fab from '@material-ui/core/Fab';
 import styled from 'styled-components';
 
 export const StyledButton = styled(Button)`
+	&& {
+		position: relative;
+		overflow: hidden;
+	}
+`;
+
+export const StyledFab = styled(Fab)`
 	&& {
 		position: relative;
 		overflow: hidden;

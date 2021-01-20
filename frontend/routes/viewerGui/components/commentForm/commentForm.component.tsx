@@ -181,7 +181,6 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 					placeholder={this.commentPlaceholder}
 					multiline
 					fullWidth
-					InputLabelProps={{ shrink: true }}
 					inputProps={{ rowsMax: 4, maxLength: 220 }}
 					disabled={!this.props.canComment}
 					inputRef={ref}
@@ -417,7 +416,7 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 										variant="fab"
 										color="secondary"
 										type="submit"
-										mini
+										size="small"
 										disabled={!hideComment && (!canComment || !form.isValid || form.isValidating) || form.isSubmitting}
 										aria-label="Add new comment"
 										pending={isPending}

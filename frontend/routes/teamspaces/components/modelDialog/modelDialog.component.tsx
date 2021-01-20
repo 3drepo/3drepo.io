@@ -160,7 +160,7 @@ export const ModelDialog = (props: IProps) => {
 					<Field render={({ form }) =>
 						<Button
 							type="submit"
-							variant="raised"
+							variant="contained"
 							color="secondary"
 							disabled={(!form.isValid || form.isValidating)}>
 							Save

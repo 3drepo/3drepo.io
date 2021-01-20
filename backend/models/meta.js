@@ -76,7 +76,7 @@ class Meta {
 
 	async getAllMetadataByRules(account, model, branch, rev, rules) {
 		// Get the revision object to find all relevant IDs
-		const history = await History.getHistory({ account, model }, branch, rev);
+		const history = await  History.getHistory(account, model, branch, rev);
 
 		// Check for submodel references
 		const refs = await getRefNodes(account, model, branch, rev);
@@ -212,7 +212,7 @@ class Meta {
 			return [];
 		}
 
-		const history = await History.getHistory({ account, model }, branch, revId);
+		const history = await  History.getHistory(account, model, branch, revId);
 		const parents = results.map(x => x = x.parents).reduce((acc, val) => acc.concat(val), []);
 
 		const meshQuery = { _id: { $in: history.current }, shared_id: { $in: parents }, type: "mesh" };
@@ -444,7 +444,7 @@ async function findModelSharedIdsByRulesQueries(account, model, posRuleQueries, 
 }
 
 async function findModelMeshIdsByRulesQueries(account, model, posRuleQueries, negRuleQueries, branch, revId, toString = false) {
-	const history = await History.getHistory({ account, model }, branch, revId);
+	const history = await  History.getHistory(account, model, branch, revId);
 
 	const idToMeshesDict = await getIdToMeshesDict(account, model, utils.uuidToString(history._id));
 	let allRulesResults = null;

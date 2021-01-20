@@ -49,7 +49,7 @@ export const Image = ({ src, enablePlaceholder, enablePreview, showScreenshotDia
 	return (
 		<Container className={props.className} enablePreview={enablePreview} onLoad={handleLoaded} onClick={handlePreview}>
 			{enablePlaceholder && !loaded && <ImagePlaceholder />}
-			<StyledImage loading={enablePlaceholder && !loaded} src={src} alt={props.alt} />
+			<StyledImage loading={enablePlaceholder && !loaded ? 1 : 0} src={src} alt={props.alt} />
 		</Container>
 	);
 };

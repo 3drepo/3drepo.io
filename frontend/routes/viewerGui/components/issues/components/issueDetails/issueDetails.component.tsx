@@ -17,8 +17,6 @@
 
 import React, { Fragment } from 'react';
 
-import { merge } from 'lodash';
-
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { canComment } from '../../../../../../helpers/issues';
 import { isViewer } from '../../../../../../helpers/permissions';
@@ -116,12 +114,12 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		const hasViewerPermissions = isViewer(this.props.permissions);
 
 		return renderWhenTrue(() => (
-				<ContainedButton
-						icon={Copy}
-						onClick={() => this.props.cloneIssue(this.props.dialogId)}
-				>
-					Clone
-				</ContainedButton>
+			<ContainedButton
+				icon={Copy}
+				onClick={() => this.props.cloneIssue(this.props.dialogId)}
+			>
+				Clone
+			</ContainedButton>
 		))(!this.isNewIssue && !hasViewerPermissions);
 	}
 
@@ -178,7 +176,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	});
 
 	public renderFooter = renderWhenTrue(() => (
-		<ViewerPanelFooter alignItems="center" padding="0">
+		<ViewerPanelFooter container alignItems="center" padding="0">
 			<CommentForm
 				disableViewer={this.props.disableViewer}
 				comment={this.props.newComment.comment}

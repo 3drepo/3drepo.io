@@ -184,7 +184,7 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, IState> {
 					<Field render={({ form }) => (
 						<Button
 							type="button"
-							variant="raised"
+							variant="contained"
 							color="secondary"
 							onClick={this.props.handleSubmit}
 							disabled={!form.isValid || form.isValidating || this.state.filterAlreadyExistsError}

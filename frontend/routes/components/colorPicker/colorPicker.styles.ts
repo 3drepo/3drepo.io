@@ -22,9 +22,9 @@ import IconButton from '@material-ui/core/IconButton';
 import Input from '@material-ui/core/Input';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Popover from '@material-ui/core/Popover';
+import Slider from '@material-ui/core/Slider';
 import styled from 'styled-components';
 
-import Slider from '@material-ui/lab/Slider';
 import { COLOR, FONT_WEIGHT } from '../../../styles';
 import { CheckboxField } from '../customTable/customTable.component';
 

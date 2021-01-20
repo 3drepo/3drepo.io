@@ -38,7 +38,7 @@ interface IProps {
 	searchEnabled?: boolean;
 }
 
-export const Dialog = (props: IProps) => {
+export const Dialog: React.FunctionComponent<IProps> = React.forwardRef((props, ref) => {
 	const [isOpen, setIsOpen] = useState(true);
 	const [closeDisabled, setCloseDisabled] = useState(false);
 
@@ -78,7 +78,7 @@ export const Dialog = (props: IProps) => {
 				onOpen={search.onOpen}
 				onClose={search.onClose}
 			/>}
-			<IconButton onClick={handleClose}><CloseIcon nativeColor={COLOR.WHITE} /></IconButton>
+			<IconButton onClick={handleClose}><CloseIcon htmlColor={COLOR.WHITE} /></IconButton>
 		</TopDialogActions>
 	);
 
@@ -132,11 +132,11 @@ export const Dialog = (props: IProps) => {
 	};
 
 	return (
-		<DialogBase {...DialogProps} open={isOpen} onClose={handleClose}>
+		<DialogBase {...DialogProps} ref={ref} open={isOpen} onClose={handleClose}>
 			<DialogTitle disableTypography>{title}{renderCloseButton()}</DialogTitle>
 			{renderContent(content && !DialogTemplate)}
 			{renderTemplate(!!DialogTemplate)}
 			{renderActions(content && onCancel && !props.config.onConfirm)}
 		</DialogBase>
 	);
-};
+});
