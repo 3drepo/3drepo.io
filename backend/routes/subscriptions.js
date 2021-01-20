@@ -75,7 +75,7 @@ function updateSubscription(req, res, next) {
 	User.findByUserName(req.params.account)
 		.then(dbUser => {
 			const billingUser = req.session.user.username;
-			return dbUser.updateSubscriptions(req.body.plans, billingUser, req.body.billingAddress || {});
+			return User.updateSubscriptions(dbUser, req.body.plans, billingUser, req.body.billingAddress || {});
 		})
 		.then(agreement => {
 

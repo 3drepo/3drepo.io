@@ -1089,61 +1089,12 @@ User.listAccounts = async function(user) {
 	return _createAccounts(user.roles, user.user);
 };
 
-/*
-schema.methods.updateSubscriptions = function (plans, billingUser, billingAddress) {
-
-	let billingAgreement;
-
-	plans = plans || [];
-
-	return this.customData.billing.updateSubscriptions(plans, this.user, billingUser, billingAddress)
-		.then(_billingAgreement => {
-
-			billingAgreement = _billingAgreement;
-			return updateUser(this.user, { $set: { "customData.billing": this.customData.billing } });
-		}).then(() => {
-			return Promise.resolve(billingAgreement || {});
-		});
-};
-
-*/
-
 function updateUser(username, update) {
 	return DB.getCollection("admin", COLL_NAME).then(dbCol => {
 		return dbCol.update({ user: username }, update);
 	});
 
 }
-
-User.activateSubscription = function (billingAgreementId, paymentInfo, raw) {
-
-	let dbUser;
-	return this.findUserByBillingId(billingAgreementId).then(user => {
-		dbUser = user;
-
-		if (!dbUser) {
-			return Promise.reject({ message: `No users found with billingAgreementId ${billingAgreementId}` });
-		}
-
-		return dbUser.customData.billing.activateSubscriptions(dbUser.user, paymentInfo, raw);
-
-	}).then(() => {
-		return updateUser(dbUser.user, { $set: { "customData.billing": dbUser.customData.billing } });
-	}).then(() => {
-		return Promise.resolve({ subscriptions: dbUser.customData.billing.subscriptions, account: dbUser, payment: paymentInfo });
-	});
-
-};
-
-/*
-
-schema.methods.executeBillingAgreement = function () {
-	return this.customData.billing.executeBillingAgreement(this.user).then(() => {
-		return updateUser(this.user, { $set: { "customData.billing": this.customData.billing } });
-	});
-};
-
-*/
 
 User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove) {
 	if (teamspace.user === userToRemove) {
@@ -1358,5 +1309,52 @@ function _isHereEnabled(username) {
 			});
 	});
 }
+
+/*
+
+Payment (paypal) stuff
+
+schema.methods.executeBillingAgreement = function () {
+	return this.customData.billing.executeBillingAgreement(this.user).then(() => {
+		return updateUser(this.user, { $set: { "customData.billing": this.customData.billing } });
+	});
+};
+
+schema.methods.updateSubscriptions = function (plans, billingUser, billingAddress) {
+
+	let billingAgreement;
+
+	plans = plans || [];
+
+	return this.customData.billing.updateSubscriptions(plans, this.user, billingUser, billingAddress)
+		.then(_billingAgreement => {
+
+			billingAgreement = _billingAgreement;
+			return updateUser(this.user, { $set: { "customData.billing": this.customData.billing } });
+		}).then(() => {
+			return Promise.resolve(billingAgreement || {});
+		});
+};
+
+User.activateSubscription = function (billingAgreementId, paymentInfo, raw) {
+
+	let dbUser;
+	return this.findUserByBillingId(billingAgreementId).then(user => {
+		dbUser = user;
+
+		if (!dbUser) {
+			return Promise.reject({ message: `No users found with billingAgreementId ${billingAgreementId}` });
+		}
+
+		return dbUser.customData.billing.activateSubscriptions(dbUser.user, paymentInfo, raw);
+
+	}).then(() => {
+		return updateUser(dbUser.user, { $set: { "customData.billing": dbUser.customData.billing } });
+	}).then(() => {
+		return Promise.resolve({ subscriptions: dbUser.customData.billing.subscriptions, account: dbUser, payment: paymentInfo });
+	});
+
+};
+*/
 
 module.exports = User;
