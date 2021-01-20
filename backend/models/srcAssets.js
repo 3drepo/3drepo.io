@@ -30,7 +30,7 @@ const SrcAssets = {};
 const getAssetListFromRef = async (ref, username) => {
 	try {
 		if (await hasReadAccessToModelHelper(username, ref.owner, ref.project)) {
-			const revInfo = await History.findLatest({account: ref.owner, model: ref.project}, {_id: 1, coordOffset : 1});
+			const revInfo = await History.findLatest(ref.owner, ref.project, {_id: 1, coordOffset : 1});
 
 			if (revInfo) {
 				return await getAssetListEntry(ref.owner, ref.project, revInfo);
@@ -55,7 +55,7 @@ const getAssetListEntry = async (database, model, revInfo) => {
 };
 
 SrcAssets.getAssetList = async (account, model, branch, rev, username) => {
-	const history = await History.getHistory({ account, model }, branch, rev);
+	const history = await  History.getHistory(account, model, branch, rev);
 
 	if (!history) {
 		throw responseCodes.INVALID_TAG_NAME;

@@ -40,6 +40,16 @@ describe("Revision", function () {
 	const model = "monkeys";
 	let revisions;
 
+
+	const getRevision = async (rev, querystring = '') => {
+		if (querystring) {
+			querystring = `?${querystring}`;
+		}
+
+		var { body: allRevisions } = await agent.get(`/${username}/${model}/revisions.json${querystring}`)
+		return allRevisions.find(({_id}) => _id === rev);
+	}
+
 	before(function(done) {
 
 		server = app.listen(8080, function () {
@@ -227,6 +237,8 @@ describe("Revision", function () {
 
 	});
 
+
+	
 	it("upload with invalid tag name should fail", function(done) {
 
 		agent.post(`/${username}/${model}/upload`)
@@ -238,4 +250,28 @@ describe("Revision", function () {
 			});
 
 	});
+
+	it("update revision", async () => {
+		const revisionId = '7349c6eb-4009-4a4a-af66-701a496dbe2e';;
+
+		await agent.patch(`/${username}/${model}/revisions/${revisionId}`)
+				.send({void: true})
+				.expect(200);
+
+		let revision = await getRevision(revisionId);
+		expect(revision).to.be.undefined;
+
+		revision = await getRevision(revisionId, 'showVoid=1');
+		expect(revision.void).to.be.true;
+
+
+
+		await agent.patch(`/${username}/${model}/revisions/${revisionId}`)
+				.send({void: false})
+				.expect(200);
+
+		revision = await getRevision(revisionId);
+		expect(revision).not.to.be.undefined;
+	});
+
 });

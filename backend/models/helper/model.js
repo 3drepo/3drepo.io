@@ -97,7 +97,7 @@ function translateBouncerErrCode(bouncerErrorCode) {
 }
 
 function insertModelUpdatedNotificationsLatestReview(account, model) {
-	History.findLatest({account, model},{tag:1}).then(h => {
+	History.findLatest(account, model,{tag:1}).then(h => {
 		const revision = (!h || !h.tag) ? "" : h.tag;
 		return notifications.upsertModelUpdatedNotifications(account, model, revision);
 	}).then(n => n.forEach(ChatEvent.upsertedNotification.bind(null,null)));
@@ -536,7 +536,7 @@ function searchTree(account, model, branch, rev, searchString, username) {
 
 		if(granted) {
 
-			return History.getHistory({ account, model }, branch, rev).then(history => {
+			return  History.getHistory(account, model, branch, rev).then(history => {
 				if(history) {
 					return search();
 				} else {
@@ -555,7 +555,7 @@ function listSubModels(account, model, branch = "master") {
 
 	const subModels = [];
 
-	return History.findByBranch({ account, model }, branch).then(history => {
+	return History.findByBranch(account, model, branch).then(history => {
 
 		if(history) {
 			return getRefNodes(account, model, branch);
@@ -587,7 +587,7 @@ function listSubModels(account, model, branch = "master") {
 }
 
 function downloadLatest(account, model) {
-	return History.findLatest({account, model}, {rFile: 1}).then((fileEntry) => {
+	return History.findLatest(account, model, {rFile: 1}).then((fileEntry) => {
 		if(!fileEntry || !fileEntry.rFile || !fileEntry.rFile.length) {
 			return Promise.reject(responseCodes.NO_FILE_FOUND);
 		}
@@ -608,7 +608,7 @@ function downloadLatest(account, model) {
 	});
 }
 
-function uploadFile(req) {
+async function uploadFile(req) {
 	if (!config.cn_queue) {
 		return Promise.reject(responseCodes.QUEUE_NO_CONFIG);
 	}
@@ -619,25 +619,8 @@ function uploadFile(req) {
 
 	ChatEvent.modelStatusChanged(null, account, model, { status: "uploading", user });
 	// upload model with tag
-	const checkTag = tag => {
-		if(!tag) {
-			return Promise.resolve();
-		} else {
-			return (tag.match(History.tagRegExp) ? Promise.resolve() : Promise.reject(responseCodes.INVALID_TAG_NAME)).then(() => {
-				return History.findByTag({account, model}, tag, {_id: 1});
-			}).then(_tag => {
-				if (!_tag) {
-					return Promise.resolve();
-				} else {
-					return Promise.reject(responseCodes.DUPLICATE_TAG);
-				}
-			});
 
-		}
-	};
-
-	return new Promise((resolve, reject) => {
-
+	const uploadedFile = await new Promise((resolve, reject) => {
 		const upload = multer({
 			dest: config.cn_queue.upload_dir,
 			fileFilter: function(fileReq, file, cb) {
@@ -686,11 +669,12 @@ function uploadFile(req) {
 				return resolve(req.file);
 			}
 		});
-
-	}).then(file => {
-		return checkTag(req.body.tag).then(() => file);
 	});
 
+	// req.body.tag wont be defined after the file has been uploaded
+	await History.isValidTag(account, model, req.body.tag);
+
+	return uploadedFile;
 }
 
 function _deleteFiles(files) {
@@ -908,7 +892,7 @@ async function getMeshById(account, model, meshId) {
 }
 
 async function getSubModelRevisions(account, model, branch, rev) {
-	const history = await History.getHistory({ account, model }, branch, rev);
+	const history = await  History.getHistory(account, model, branch, rev);
 
 	if(!history) {
 		return Promise.reject(responseCodes.INVALID_TAG_NAME);
@@ -926,7 +910,7 @@ async function getSubModelRevisions(account, model, branch, rev) {
 	const projection = {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1};
 	modelIds.forEach((modelId) => {
 		results[modelId] = {};
-		promises.push(History.listByBranch({account, model: modelId}, null, projection).then((revisions) => {
+		promises.push(History.listByBranch(account, modelId, null, projection).then((revisions) => {
 			revisions = History.clean(revisions);
 
 			revisions.forEach(function(revision) {

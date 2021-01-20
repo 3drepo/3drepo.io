@@ -27,21 +27,20 @@ const FileRef = require("./fileRef");
 
 const UnityAssets = {};
 
-function getAssetListFromRef(ref, username) {
-	return middlewares.hasReadAccessToModelHelper(username, ref.owner, ref.project).then((granted) => {
-		if(granted) {
-			const revId = utils.uuidToString(ref._rid);
-			const getRevIdPromise = revId === C.MASTER_BRANCH ?
-				History.findLatest({account: ref.owner, model: ref.project}, {_id: 1}) :
-				Promise.resolve({_id : ref._rid});
+async function getAssetListFromRef(ref, username) {
+	const granted = await middlewares.hasReadAccessToModelHelper(username, ref.owner, ref.project);
 
-			return getRevIdPromise.then((revInfo) => {
-				if (revInfo) {
-					return getAssetListEntry(ref.owner, ref.project, revInfo._id);
-				}
-			});
+	if(granted) {
+		const revId = utils.uuidToString(ref._rid);
+
+		const revInfo =  revId === C.MASTER_BRANCH ?
+			await History.findLatest(ref.owner, ref.project, {_id: 1}) :
+			{_id : ref._rid};
+
+		if (revInfo) {
+			return await  getAssetListEntry(ref.owner, ref.project, revInfo._id);
 		}
-	});
+	}
 }
 
 function getAssetListEntry(account, model, revId) {
@@ -51,7 +50,7 @@ function getAssetListEntry(account, model, revId) {
 }
 
 UnityAssets.getAssetList = function(account, model, branch, rev, username) {
-	return History.getHistory({ account, model }, branch, rev).then((history) => {
+	return History.getHistory(account, model , branch, rev).then((history) => {
 		return getRefNodes(account, model, branch, rev).then((subModelRefs) => {
 			const fetchPromise = [];
 			if(subModelRefs.length) {
