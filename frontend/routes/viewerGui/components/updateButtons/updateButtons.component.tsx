@@ -41,40 +41,40 @@ interface IProps {
 export const UpdateButtons = ({
 	isNew, canEditBasicProperty, disableViewer, onSavePin, onChangePin, onUpdateViewpoint, hasImage, hasPin, ...props
 }: IProps) => (
-		<FieldsRow container alignItems="center" justify="space-between">
-			{renderWhenTrueOtherwise(() => (
-				<UpdateButtonsContainer center={!isNew}>
-					<PinButton
-						onChange={onChangePin}
-						onSave={onSavePin}
-						disabled={!isNew && !canEditBasicProperty}
-						hasPin={hasPin}
-					/>
-					<ImageButton
-						hasImage={Boolean(hasImage)}
-						onTakeScreenshot={props.onTakeScreenshot}
-						onUploadScreenshot={props.onUploadScreenshot}
-						onShowScreenshotDialog={props.onShowScreenshotDialog}
+	<FieldsRow container alignItems="center" justify="space-between">
+		{renderWhenTrueOtherwise(() => (
+			<UpdateButtonsContainer center={!isNew ? 1 : 0}>
+				<PinButton
+					onChange={onChangePin}
+					onSave={onSavePin}
+					disabled={!isNew && !canEditBasicProperty}
+					hasPin={hasPin}
+				/>
+				<ImageButton
+					hasImage={Boolean(hasImage)}
+					takeScreenshot={props.onTakeScreenshot}
+					uploadScreenshot={props.onUploadScreenshot}
+					showScreenshotDialog={props.onShowScreenshotDialog}
+					disabled={!canEditBasicProperty}
+				/>
+				{renderWhenTrue(() => (
+					<ViewpointButton
+						onUpdate={onUpdateViewpoint}
 						disabled={!canEditBasicProperty}
 					/>
-					{renderWhenTrue(() => (
-						<ViewpointButton
-							onUpdate={onUpdateViewpoint}
-							disabled={!canEditBasicProperty}
-						/>
-					))(!isNew)}
-				</UpdateButtonsContainer>
-			), () => (
-				<UpdateButtonsContainer>
-					<ImageButton
-						hasImage={Boolean(hasImage)}
-						onTakeScreenshot={props.onTakeScreenshot}
-						onUploadScreenshot={props.onUploadScreenshot}
-						onShowScreenshotDialog={props.onShowScreenshotDialog}
-						disabled={!canEditBasicProperty}
-						disableScreenshot
-					/>
-				</UpdateButtonsContainer>
-			))(!disableViewer)}
-		</FieldsRow>
+				))(!isNew)}
+			</UpdateButtonsContainer>
+		), () => (
+			<UpdateButtonsContainer>
+				<ImageButton
+					hasImage={Boolean(hasImage)}
+					takeScreenshot={props.onTakeScreenshot}
+					uploadScreenshot={props.onUploadScreenshot}
+					showScreenshotDialog={props.onShowScreenshotDialog}
+					disabled={!canEditBasicProperty}
+					disableScreenshot
+				/>
+			</UpdateButtonsContainer>
+		))(!disableViewer)}
+	</FieldsRow>
 );

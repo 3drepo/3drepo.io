@@ -24,8 +24,8 @@ export const NewUpdateDialog = (props: IProps) => {
 			</DialogContent>
 
 			<DialogActions>
-				<Button onClick={handleClose} color="primary">I'll reload in a moment</Button>;
-				<Button onClick={handleResolve} variant="raised" color="secondary">Reload</Button>;
+				<Button onClick={handleClose} color="primary">I'll reload in a moment</Button>
+				<Button onClick={handleResolve} variant="contained" color="secondary">Reload</Button>
 			</DialogActions>
 		</>
 	);

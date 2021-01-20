@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2018 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -20,29 +20,27 @@
 const History = require("./history");
 const middlewares = require("../middlewares/middlewares");
 const utils = require("../utils");
-const Ref = require("./ref");
+const { getRefNodes } = require("./ref");
 const C = require("../constants");
 const db = require("../handler/db");
-const responseCodes = require("../response_codes");
 const FileRef = require("./fileRef");
 
 const UnityAssets = {};
 
-function getAssetListFromRef(ref, username) {
-	return middlewares.hasReadAccessToModelHelper(username, ref.owner, ref.project).then((granted) => {
-		if(granted) {
-			const revId = utils.uuidToString(ref._rid);
-			const getRevIdPromise = revId === C.MASTER_BRANCH ?
-				History.findLatest({account: ref.owner, model: ref.project}, {_id: 1}) :
-				Promise.resolve({_id : ref._rid});
+async function getAssetListFromRef(ref, username) {
+	const granted = await middlewares.hasReadAccessToModelHelper(username, ref.owner, ref.project);
 
-			return getRevIdPromise.then((revInfo) => {
-				if (revInfo) {
-					return getAssetListEntry(ref.owner, ref.project, revInfo._id);
-				}
-			});
+	if(granted) {
+		const revId = utils.uuidToString(ref._rid);
+
+		const revInfo =  revId === C.MASTER_BRANCH ?
+			await History.findLatest(ref.owner, ref.project, {_id: 1}) :
+			{_id : ref._rid};
+
+		if (revInfo) {
+			return await  getAssetListEntry(ref.owner, ref.project, revInfo._id);
 		}
-	});
+	}
 }
 
 function getAssetListEntry(account, model, revId) {
@@ -52,29 +50,24 @@ function getAssetListEntry(account, model, revId) {
 }
 
 UnityAssets.getAssetList = function(account, model, branch, rev, username) {
-	return History.getHistory({ account, model }, branch, rev).then((history) => {
-		if(history) {
-			return Ref.getRefNodes(account, model, history.current).then((subModelRefs) => {
-				const fetchPromise = [];
-				if(subModelRefs.length) {
-					// This is a federation, get asset lists from subModels and merge them
-					subModelRefs.forEach((ref) => {
-						fetchPromise.push(getAssetListFromRef(ref, username));
-					});
-				} else {
-					// Not a federation, get it's own assetList.
-					fetchPromise.push(getAssetListEntry(account, model, history._id));
-				}
-
-				return Promise.all(fetchPromise).then((assetLists) => {
-					return {models: assetLists.filter((list) => list)};
+	return History.getHistory(account, model , branch, rev).then((history) => {
+		return getRefNodes(account, model, branch, rev).then((subModelRefs) => {
+			const fetchPromise = [];
+			if(subModelRefs.length) {
+				// This is a federation, get asset lists from subModels and merge them
+				subModelRefs.forEach((ref) => {
+					fetchPromise.push(getAssetListFromRef(ref, username));
 				});
+			} else {
+				// Not a federation, get it's own assetList.
+				fetchPromise.push(getAssetListEntry(account, model, history._id));
+			}
 
+			return Promise.all(fetchPromise).then((assetLists) => {
+				return {models: assetLists.filter((list) => list)};
 			});
-		} else {
-			return Promise.reject(responseCodes.INVALID_TAG_NAME);
-		}
 
+		});
 	});
 };
 

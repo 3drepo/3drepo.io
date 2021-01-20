@@ -68,10 +68,16 @@ export class ButtonMenu extends React.PureComponent<IProps, IState> {
 		});
 	}
 
+	public componentDidMount() {
+		this.setState({
+			activeMenu: !!this.props.open
+		});
+	}
+
 	public componentDidUpdate(prevProps) {
 		if (this.props.open !== prevProps.open) {
 			this.setState({
-				activeMenu: this.props.open
+				activeMenu: true
 			});
 		}
 	}

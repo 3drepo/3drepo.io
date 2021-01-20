@@ -178,7 +178,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	});
 
 	public renderFooter = renderWhenTrue(() => (
-		<ViewerPanelFooter alignItems="center" padding="0">
+		<ViewerPanelFooter container alignItems="center" padding="0">
 			<CommentForm
 				disableViewer={this.props.disableViewer}
 				comment={this.props.newComment.comment}
@@ -335,8 +335,6 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleNewScreenshot = (screenshot) => {
-		const { teamspace, model, viewer } = this.props;
-
 		if (this.isNewRisk) {
 			this.props.setState({ newRisk: {
 				...this.riskData,

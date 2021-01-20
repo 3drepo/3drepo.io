@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 3D Repo Ltd
+ * Copyright (C) 2021 3D Repo Ltd
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -20,7 +20,7 @@ const _ = require("lodash");
 const Project = require("./project");
 const View = require("./view");
 const User = require("./user");
-const Job = require("./job");
+const { findJobByUser } = require("./job");
 const History = require("./history");
 
 const ModelSetting = require("./modelSetting");
@@ -163,7 +163,7 @@ class Ticket extends View {
 			this.findByUID(account, model, id, {}, true),
 			// 2. Get user permissions
 			User.findByUserName(account),
-			Job.findByUser(account, user),
+			findJobByUser(account, user),
 			Project.isProjectAdmin(
 				account,
 				model,
@@ -426,7 +426,7 @@ class Ticket extends View {
 		newTicket.assigned_roles = newTicket.assigned_roles || [];
 		newTicket._id = utils.stringToUUID(newTicket._id || nodeuuid());
 		newTicket.created = parseInt(newTicket.created || (new Date()).getTime());
-		const ownerJob = await Job.findByUser(account, newTicket.owner);
+		const ownerJob = await findJobByUser(account, newTicket.owner);
 		if (ownerJob) {
 			newTicket.creator_role = ownerJob._id;
 		} else {
@@ -450,12 +450,15 @@ class Ticket extends View {
 		}
 
 		// Assign rev_id for issue
-		const history = await History.getHistory({ account, model }, branch, newTicket.revId, { _id: 1 });
-
-		if (!history && (newTicket.revId || (newTicket.viewpoint || {}).highlighted_group_id)) {
-			throw (responseCodes.MODEL_HISTORY_NOT_FOUND);
-		} else if (history) {
-			newTicket.rev_id = history._id;
+		try {
+			const history = await  History.getHistory(account, model, branch, newTicket.revId, { _id: 1 });
+			if (history) {
+				newTicket.rev_id = history._id;
+			}
+		} catch(err) {
+			if (newTicket.revId || (newTicket.viewpoint || {}).highlighted_group_id) {
+				throw responseCodes.INVALID_TAG_NAME;
+			}
 		}
 
 		newTicket = this.filterFields(newTicket, ["viewpoint", "revId"]);
@@ -522,12 +525,11 @@ class Ticket extends View {
 
 		if (branch || revId) {
 			// searches for the first rev id
-			const history = await History.getHistory({ account, model }, branch, revId);
-			if (history) {
-				// Uses the first revsion searched to get all posterior revisions
-				invalidRevIds = await History.find({ account, model }, { timestamp: { "$gt": history.timestamp } }, { _id: 1 });
-				invalidRevIds = invalidRevIds.map(r => r._id);
-			}
+			const history = await  History.getHistory(account, model, branch, revId);
+
+			// Uses the first revsion searched to get all posterior revisions
+			invalidRevIds = await History.find(account, model , { timestamp: { "$gt": history.timestamp } }, { _id: 1 });
+			invalidRevIds = invalidRevIds.map(r => r._id);
 		}
 
 		filter.rev_id = { "$not": { "$in": invalidRevIds } };

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -22,7 +22,7 @@ const utils = require("../utils");
 
 const FileRef = require("./fileRef");
 const History = require("./history");
-const Ref = require("./ref");
+const { getRefNodes } = require("./ref");
 
 class Sequence {
 
@@ -88,13 +88,11 @@ class Sequence {
 	}
 
 	async getList(account, model, branch, revision, cleanResponse = false) {
-		const history = await History.getHistory({account, model}, branch, revision);
+		const history = await History.getHistory(account, model, branch, revision);
 		let submodels = [];
 
-		if (!history) {
-			return Promise.reject(responseCodes.INVALID_TAG_NAME);
-		} else if (history.current) {
-			submodels = await Ref.find({account, model}, {type: "ref", _id: {"$in": history.current}}, {project:1});
+		if (history.current) {
+			submodels = await getRefNodes(account, model, branch, revision, {project:1});
 			submodels = submodels.map(r => r.project);
 		}
 

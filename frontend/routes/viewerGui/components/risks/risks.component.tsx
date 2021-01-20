@@ -19,7 +19,7 @@ import React from 'react';
 
 import { isEmpty } from 'lodash';
 
-import { RISK_FILTERS, RISK_LEVELS } from '../../../../constants/risks';
+import { RISK_DEFAULT_HIDDEN_LEVELS, RISK_FILTERS } from '../../../../constants/risks';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { filtersValuesMap, getHeaderMenuItems } from '../../../../helpers/risks';
@@ -92,7 +92,7 @@ export class Risks extends React.PureComponent<IProps, any> {
 	get showDefaultHiddenItems() {
 		if (this.props.selectedFilters.length) {
 			return this.props.selectedFilters
-				.some(({ value: { value } }) => value === RISK_LEVELS.AGREED_FULLY);
+				.some(({ value: { value } }) => RISK_DEFAULT_HIDDEN_LEVELS.includes(value));
 		}
 		return false;
 	}

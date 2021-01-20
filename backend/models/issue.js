@@ -160,13 +160,9 @@ class Issue extends Ticket {
 			branch = "master";
 		}
 
-		const history = await History.getHistory({ account, model }, branch, revId, {_id: 1});
+		const history = await  History.getHistory(account, model, branch, revId, {_id: 1});
 
-		if (!history) {
-			return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
-		} else {
-			revId = history._id;
-		}
+		revId = history._id;
 
 		const settings = await ModelSetting.findById({account, model}, model);
 		const bcfIssues = await BCF.importBCF(requester, account, model, dataBuffer, settings);

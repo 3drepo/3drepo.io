@@ -22,8 +22,8 @@ import {
 	LEVELS,
 	LEVELS_OF_RISK,
 	RISK_CONSEQUENCES,
+	RISK_DEFAULT_HIDDEN_LEVELS,
 	RISK_FILTER_RELATED_FIELDS,
-	RISK_LEVELS,
 	RISK_LEVELS_COLOURS,
 	RISK_LEVELS_ICONS,
 	RISK_LIKELIHOODS,
@@ -85,7 +85,7 @@ export const prepareRisk = (risk, jobs = []) => {
 		preparedRisk.roleColor = get(jobs.find((job) => job.name === get(preparedRisk.assigned_roles, '[0]')), 'color');
 	}
 
-	preparedRisk.defaultHidden = [RISK_LEVELS.AGREED_FULLY, RISK_LEVELS.VOID].includes(preparedRisk.mitigation_status);
+	preparedRisk.defaultHidden = RISK_DEFAULT_HIDDEN_LEVELS.includes(preparedRisk.mitigation_status);
 	preparedRisk.color = getRiskColor(risk.residual_level_of_risk);
 
 	return preparedRisk;

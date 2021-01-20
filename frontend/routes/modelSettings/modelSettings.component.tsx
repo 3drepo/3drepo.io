@@ -259,7 +259,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 					onSubmit={this.handleUpdateSettings}
 				>
 					<StyledForm>
-						<Headline color="primary" variant="subheading">Model Information</Headline>
+						<Headline color="primary" variant="subtitle1">Model Information</Headline>
 						<Grid>
 							<FieldsRow container wrap="nowrap">
 								<Field name="id" render={ ({ field }) => (
@@ -321,16 +321,16 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 							</FieldsRow>
 						</Grid>
 						<ViewContainer container direction="column" wrap="nowrap" alignItems="flex-start">
-							<SubHeadline color="textPrimary" variant="subheading">Default View</SubHeadline>
+							<SubHeadline color="textPrimary" variant="subtitle1">Default View</SubHeadline>
 							<Field name="defaultView" render={ ({ field }) => (
 									<DefaultViewField onSelectView={this.handleSelectView(field.onChange)} {...field} />
 							)} />
 						</ViewContainer>
-						<Headline color="primary" variant="subheading">GIS Reference Information</Headline>
+						<Headline color="primary" variant="subtitle1">GIS Reference Information</Headline>
 						<Grid container direction="column" wrap="nowrap">
 							<Grid container direction="row" wrap="nowrap">
 								<GridColumn container direction="column" wrap="nowrap">
-									<Headline color="textPrimary" variant="subheading">Survey Point</Headline>
+									<Headline color="textPrimary" variant="subtitle1">Survey Point</Headline>
 									<Field name="latitude" render={ ({ field, form }) => (
 										<StyledTextField
 											{...field}
@@ -370,7 +370,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 									)} />
 								</GridColumn>
 								<GridColumn container direction="column" wrap="nowrap">
-									<Headline color="textPrimary" variant="subheading">Project Point</Headline>
+									<Headline color="textPrimary" variant="subtitle1">Project Point</Headline>
 									<Field name="axisX" render={ ({ field, form }) => (
 										<StyledTextField
 											{...field}
@@ -406,7 +406,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 							<Field render={ ({ form }) =>
 								<Button
 									type="submit"
-									variant="raised"
+									variant="contained"
 									color="secondary"
 									disabled={!form.isValid || form.isValidating}
 								>

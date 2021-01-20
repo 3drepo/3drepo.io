@@ -269,7 +269,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 							<Field render={ ({ form }) =>
 								<Button
 									type="submit"
-									variant="raised"
+									variant="contained"
 									color="secondary"
 									disabled={(!form.isValid || form.isValidating)}
 								>

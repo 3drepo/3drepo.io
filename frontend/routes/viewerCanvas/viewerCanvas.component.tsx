@@ -22,14 +22,16 @@ import { difference, isEqual } from 'lodash';
 import { ROUTES } from '../../constants/routes';
 import { addColorOverrides, overridesColorDiff, removeColorOverrides } from '../../helpers/colorOverrides';
 import { pinsDiff } from '../../helpers/pins';
+import { PresentationMode } from '../../modules/presentation/presentation.constants';
 import { moveMeshes, resetMovedMeshes, transformationDiffChanges,
 transformationDiffRemoves } from '../../modules/sequences/sequences.helper';
-import { Container } from './viewerCanvas.styles';
+import { ViewerService } from '../../services/viewer/viewer';
+import { Border, Container } from './viewerCanvas.styles';
 
 interface IProps {
 	location: any;
 	className?: string;
-	viewer: any;
+	viewer: ViewerService;
 	match: {
 		params: {
 			model: string;
@@ -48,6 +50,9 @@ interface IProps {
 	hasGisCoordinates: boolean;
 	gisCoordinates: any;
 	handleTransparencyOverridesChange: any;
+	viewerManipulationEnabled: boolean;
+	presentationMode: PresentationMode;
+	isPresentationPaused: boolean;
 	handleTransparenciesVisibility: any;
 }
 
@@ -122,7 +127,7 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 	public componentDidUpdate(prevProps: IProps) {
 		const { colorOverrides, issuePins, riskPins, measurementPins, hasGisCoordinates,
 			gisCoordinates, gisLayers, transparencies, transformations: transformation,
-			sequenceHiddenNodes
+			sequenceHiddenNodes, viewerManipulationEnabled, viewer
 		} = this.props;
 
 		if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
@@ -157,6 +162,13 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 			this.renderGisLayers(prevProps.gisLayers, gisLayers);
 		}
 
+		if (prevProps.viewerManipulationEnabled !== viewerManipulationEnabled) {
+			if (viewerManipulationEnabled) {
+				viewer.setNavigationOn();
+			} else {
+				viewer.setNavigationOff();
+			}
+		}
 		if (prevProps.transparencies && prevProps.sequenceHiddenNodes !== sequenceHiddenNodes) {
 			this.props.handleTransparenciesVisibility(sequenceHiddenNodes);
 		}
@@ -164,12 +176,18 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 
 	public render() {
 		return (
-			<Container
-				visible={this.shouldBeVisible}
-				id="viewer"
-				ref={this.containerRef}
-				className={this.props.className}
-			/>
+			<>
+				<Container
+					visible={this.shouldBeVisible}
+					id="viewer"
+					ref={this.containerRef}
+					className={this.props.className}
+				/>
+				<Border
+					presentationMode={this.props.presentationMode}
+					isPresentationPaused={this.props.isPresentationPaused}
+				/>
+			</>
 		);
 	}
 }

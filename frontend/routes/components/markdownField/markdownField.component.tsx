@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -25,6 +25,10 @@ interface IProps {
 	className?: string;
 }
 
-export const MarkdownField: React.FunctionComponent<IProps> = ({ className, children }) => (
-	<MarkdownMessage className={className}>{linkify(children)}</MarkdownMessage>
+export const MarkdownField: React.FC<IProps> = React.forwardRef(
+	({ className, children }: IProps, ref: React.Ref<HTMLSpanElement>) => (
+		<span ref={ref}>
+			<MarkdownMessage className={className}>{linkify(children)}</MarkdownMessage>
+		</span>
+	)
 );

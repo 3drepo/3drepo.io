@@ -17,6 +17,8 @@
 
 import styled from 'styled-components';
 
+import Tab from '@material-ui/core/Tab';
+
 import { COLOR } from '../../../../../../styles';
 import { Image as ImageComponent } from '../../../../../components/image';
 import { MessagesList as MessagesListComponent } from '../../../../../components/messagesList/';
@@ -92,6 +94,12 @@ export const TabContent = styled.div`
 	overflow: hidden;
 	display: flex;
 	height: inherit;
+`;
+
+export const StyledTab = styled(Tab)`
+	&& {
+		font-size: 13px;
+	}
 `;
 
 export const Content = styled.div`

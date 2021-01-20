@@ -295,7 +295,7 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 		return (
 			<Container className={className}>
 				<FiltersContainer>
-					<InputLabel shrink>{label}</InputLabel>
+					<InputLabel>{label}</InputLabel>
 					<SelectedCriteria>
 						{this.renderPlaceholder(placeholder && !value.length && !isPasteEnabled)}
 						{this.renderCriteriaChips(!!value.length)}

@@ -58,6 +58,7 @@ export class FileInputField extends React.PureComponent<IProps, IState> {
 	public getAcceptedFormats = () => clientConfigService.acceptedFormat.map((format) => `.${format}`).toString();
 
 	public render() {
+		const buttonProps = { component: 'span' };
 		return (
 			<>
 				<HiddenFileInput
@@ -67,7 +68,7 @@ export class FileInputField extends React.PureComponent<IProps, IState> {
 					onChange={this.handleChange}
 				/>
 				<FileLabel htmlFor="flat-button-file">
-					<ContainedButton component="span">{this.props.update ? `Update File` : `Select File`}</ContainedButton>
+					<ContainedButton {...buttonProps}>{this.props.update ? `Update File` : `Select File`}</ContainedButton>
 				</FileLabel>
 			</>
 		);

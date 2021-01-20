@@ -29,7 +29,7 @@ export interface IDialogConfig {
 	data?: any;
 	logError?: string;
 	DialogProps?: IDialogProps;
-	buttonVariant?: 'text' | 'flat' | 'outlined' | 'contained' | 'raised' | 'fab' | 'extendedFab';
+	buttonVariant?: 'text' | 'outlined' | 'contained';
 	closeText?: string;
 	onConfirm?: () => void;
 	onCancel?: () => void;

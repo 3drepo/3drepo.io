@@ -1855,6 +1855,7 @@ function getIdToMeshes(req, res, next) {
 
 function getModelTree(req, res, next) {
 	const revId = req.params.rev;
+
 	JSONAssets.getTree(
 		req.params.account,
 		req.params.model,
@@ -1946,6 +1947,7 @@ function uploadModel(req, res, next) {
 	const account = req.params.account;
 	const model = req.params.model;
 	const username = req.session.user.username;
+
 	let modelSetting;
 
 	// check model exists before upload

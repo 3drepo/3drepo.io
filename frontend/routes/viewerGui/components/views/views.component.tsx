@@ -299,7 +299,7 @@ export class Views extends React.PureComponent<IProps, any> {
 	public getTitleIcon = () => <ViewsIcon />;
 
 	public renderFooterContent = () => (
-		<ViewerPanelFooter alignItems="center">
+		<ViewerPanelFooter container alignItems="center">
 			<ViewerBottomActions>
 				<PresetViews
 					showPreset={this.props.showPreset}

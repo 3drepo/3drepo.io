@@ -55,7 +55,7 @@ export const renderActionsMenu = (headerMenuItems: IHeaderMenuItem[]) => (
 				if (!item.subItems) {
 					return renderMenuItem(item, index);
 				} else {
-					return (<SubMenu left>
+					return (<SubMenu key={index} left>
 						{renderMenuItem(item, index)}
 						{renderActionsMenu(item.subItems)}
 					</SubMenu>);

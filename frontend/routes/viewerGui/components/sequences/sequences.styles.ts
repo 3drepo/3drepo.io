@@ -17,16 +17,16 @@
 
 import styled, { css } from 'styled-components';
 
+import { Grid, IconButton, Input, ListItem } from '@material-ui/core';
+import Slider from '@material-ui/core/Slider';
+import DotIcon from '@material-ui/icons/FiberManualRecord';
+
 import {
 	VIEWER_PANELS,
 	VIEWER_PANELS_ICONS,
 	VIEWER_PANELS_MIN_HEIGHTS,
 	VIEWER_PANELS_TITLES
 } from '../../../../constants/viewerGui';
-
-import { Grid, IconButton, Input, ListItem } from '@material-ui/core';
-import DotIcon from '@material-ui/icons/FiberManualRecord';
-import Slider from '@material-ui/lab/Slider';
 import { COLOR, FONT_WEIGHT } from '../../../../styles';
 import { DateField } from '../../../components/dateField/dateField.component';
 import { MenuItemContainer } from '../previewListItem/previewListItem.styles';

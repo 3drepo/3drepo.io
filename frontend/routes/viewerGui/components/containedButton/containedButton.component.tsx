@@ -27,7 +27,7 @@ interface IProps extends ButtonProps {
 	onClick?: (e) => void;
 }
 
-export const ContainedButton = ({ children, icon, onClick, ...props }: IProps) => {
+export const ContainedButton: React.FC<IProps> = ({ children, icon, onClick, ...props }) => {
 	const IconComponent = icon;
 
 	return (
@@ -35,7 +35,7 @@ export const ContainedButton = ({ children, icon, onClick, ...props }: IProps) =
 			color="primary"
 			variant="contained"
 			size="small"
-			squeezed={Boolean(icon)}
+			squeezed={Boolean(icon) ? 1 : 0}
 			onClick={onClick}
 			{...props}
 		>

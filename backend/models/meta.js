@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2016 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -19,8 +19,8 @@
 const FileRef = require("./fileRef");
 const History = require("./history");
 const ModelSetting = require("./modelSetting");
-const Ref = require("./ref");
-const Scene = require("./scene");
+const { getRefNodes } = require("./ref");
+const { findNodesByField, getNodeById } = require("./scene");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
 const { batchPromises } = require("./helper/promises");
@@ -30,23 +30,29 @@ const C = require("../constants");
 const utils = require("../utils");
 const systemLogger = require("../logger").systemLogger;
 
-function clean(metaListToClean) {
-	metaListToClean.forEach((metadataToClean) => {
-		if (metadataToClean._id) {
-			metadataToClean._id = utils.uuidToString(metadataToClean._id);
-		}
+function clean(metadataToClean) {
+	if (metadataToClean._id) {
+		metadataToClean._id = utils.uuidToString(metadataToClean._id);
+	}
 
-		if (metadataToClean.parents) {
-			metadataToClean.parents = metadataToClean.parents.map(p => utils.uuidToString(p));
-		}
-	});
+	if (metadataToClean.parents) {
+		metadataToClean.parents = metadataToClean.parents.map(p => utils.uuidToString(p));
+	}
 
-	return metaListToClean;
+	return metadataToClean;
+}
+
+function cleanAll(metaListToClean) {
+	return metaListToClean.map(clean);
 }
 
 async function getIdToMeshesDict(account, model, revId) {
 	const treeFileName = `${revId}/idToMeshes.json`;
 	return JSON.parse(await FileRef.getJSONFile(account, model, treeFileName));
+}
+
+function getSceneCollectionName(model) {
+	return model + ".scene";
 }
 
 class Meta {
@@ -59,7 +65,7 @@ class Meta {
 			parents: 0
 		};
 
-		const metadata = await Scene.findOne({account, model}, { _id: utils.stringToUUID(id) }, projection);
+		const metadata = await getNodeById(account, model, utils.stringToUUID(id), projection);
 
 		if (!metadata) {
 			throw responseCodes.METADATA_NOT_FOUND;
@@ -70,19 +76,10 @@ class Meta {
 
 	async getAllMetadataByRules(account, model, branch, rev, rules) {
 		// Get the revision object to find all relevant IDs
-		const history = await History.getHistory({ account, model }, branch, rev);
-
-		if (!history) {
-			throw responseCodes.INVALID_TAG_NAME;
-		}
+		const history = await  History.getHistory(account, model, branch, rev);
 
 		// Check for submodel references
-		const filter = {
-			type: "ref",
-			_id: { $in: history.current }
-		};
-
-		const refs = await Ref.find({ account, model }, filter);
+		const refs = await getRefNodes(account, model, branch, rev);
 
 		// for all refs get their tree
 		const getMeta = [];
@@ -131,7 +128,7 @@ class Meta {
 
 		if(allRulesResults) {
 			allRulesResults = [...allRulesResults].map(res => JSON.parse(res));
-			const parsedObj = {data: [...clean(allRulesResults)]};
+			const parsedObj = {data: [...cleanAll(allRulesResults)]};
 			if(subMeta.length > 0) {
 				parsedObj.subModels = subMeta;
 			}
@@ -142,7 +139,7 @@ class Meta {
 	}
 
 	async getMetadataFields(account, model) {
-		const subModelRefs = await Ref.getRefNodes(account, model);
+		const subModelRefs = await getRefNodes(account, model, "master");
 		const subModelMetadataFieldsPromises = [];
 
 		subModelRefs.forEach((ref) => {
@@ -166,7 +163,7 @@ class Meta {
 			});
 		}
 
-		return db.getCollection(account, model + ".scene").then((sceneCollection) => {
+		return db.getCollection(account, getSceneCollectionName(model)).then((sceneCollection) => {
 			return sceneCollection.mapReduce(
 				/* eslint-disable */
 				function() {
@@ -198,8 +195,37 @@ class Meta {
 	}
 
 	async getIfcGuids(account, model) {
-		const coll = await db.getCollection(account, model + ".scene");
-		return (await coll.find({ type: "meta" }, { "metadata.IFC GUID": 1 })).toArray();
+		return await db.find(account, getSceneCollectionName(model), { type: "meta" }, { "metadata.IFC GUID": 1 });
+	}
+
+	async ifcGuidsToUUIDs(account, model, branch, revId, ifcGuids) {
+		if (!ifcGuids || ifcGuids.length === 0) {
+			return Promise.resolve([]);
+		}
+
+		const query = {"metadata.IFC GUID": { $in: ifcGuids } };
+		const project = { parents: 1, _id: 0 };
+
+		const results = await db.find(account, getSceneCollectionName(model), query, project);
+
+		if (results.length === 0) {
+			return [];
+		}
+
+		const history = await  History.getHistory(account, model, branch, revId);
+		const parents = results.map(x => x = x.parents).reduce((acc, val) => acc.concat(val), []);
+
+		const meshQuery = { _id: { $in: history.current }, shared_id: { $in: parents }, type: "mesh" };
+		const meshProject = { shared_id: 1, _id: 0 };
+
+		return db.find(account, getSceneCollectionName(model), meshQuery, meshProject);
+	}
+
+	async uuidsToIfcGuids(account, model, ids) {
+		const query = { type: "meta", parents: { $in: ids }, "metadata.IFC GUID": { $exists: true } };
+		const project = { "metadata.IFC GUID": 1, parents: 1 };
+
+		return await db.find(account, getSceneCollectionName(model), query, project);
 	}
 
 	async findObjectIdsByRules(account, model, rules, branch, revId, convertSharedIDsToString, showIfcGuids = false) {
@@ -212,7 +238,7 @@ class Meta {
 		models.add(model);
 
 		// Check submodels
-		const refs = await Ref.find({account, model}, {type: "ref"});
+		const refs = await getRefNodes(account, model, branch, revId);
 
 		refs.forEach((ref) => {
 			models.add(ref.project);
@@ -272,19 +298,8 @@ class Meta {
 			fullFieldName += "." + fieldName;
 		}
 
-		const history = await History.getHistory({ account, model }, branch, rev);
-
-		if (!history) {
-			throw responseCodes.INVALID_TAG_NAME;
-		}
-
 		// Check for submodel references
-		const filter = {
-			type: "ref",
-			_id: { $in: history.current }
-		};
-
-		const refs = await Ref.find({ account, model }, filter);
+		const refs = await getRefNodes(account, model, branch, rev);
 
 		const getMeta = [];
 
@@ -314,17 +329,7 @@ class Meta {
 
 		const subMeta = await Promise.all(getMeta);
 
-		const match = {
-			_id: {"$in": history.current}
-		};
-		match[fullFieldName] =  {"$exists" : true};
-
-		const projection = {
-			parents: 1
-		};
-		projection[fullFieldName] = 1;
-
-		const obj = await Scene.find({account, model}, match, projection);
+		const obj = await findNodesByField(account, model, branch, rev, fullFieldName);
 
 		if (!obj) {
 			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
@@ -372,7 +377,7 @@ class Meta {
 		models.add(model);
 
 		// Check submodels
-		const refs = await Ref.find({account, model}, {type: "ref"});
+		const refs = await getRefNodes(account, model, branch, revId);
 
 		refs.forEach((ref) => {
 			models.add(ref.project);
@@ -418,9 +423,7 @@ class Meta {
 }
 
 function findObjectsByQuery(account, model, query, project = { "metadata.IFC GUID": 1, parents: 1 }) {
-	return db.getCollection(account, model + ".scene").then((dbCol) => {
-		return dbCol.find(query, project).toArray();
-	});
+	return db.find(account, getSceneCollectionName(model), query, project);
 }
 
 /**
@@ -441,11 +444,7 @@ async function findModelSharedIdsByRulesQueries(account, model, posRuleQueries, 
 }
 
 async function findModelMeshIdsByRulesQueries(account, model, posRuleQueries, negRuleQueries, branch, revId, toString = false) {
-	const history = await History.getHistory({ account, model }, branch, revId);
-
-	if (!history) {
-		return Promise.reject(responseCodes.INVALID_TAG_NAME);
-	}
+	const history = await  History.getHistory(account, model, branch, revId);
 
 	const idToMeshesDict = await getIdToMeshesDict(account, model, utils.uuidToString(history._id));
 	let allRulesResults = null;
@@ -489,7 +488,6 @@ async function getRuleQueryResults(account, model, idToMeshesDict, revisionEleme
 		return new Set();
 	}
 
-	const sceneCol = await db.getCollection(account, model + ".scene");
 	const parents = metaResults.reduce((acc, val) => {
 		Array.prototype.push.apply(acc, val.parents);
 		return acc;
@@ -498,7 +496,7 @@ async function getRuleQueryResults(account, model, idToMeshesDict, revisionEleme
 	const res = await batchPromises((parentsForQuery) => {
 		const meshQuery = { _id: { $in: revisionElementsIds }, shared_id: { $in: parentsForQuery }, type: { $in: ["transformation", "mesh"]}};
 		const meshProject = { _id: 1, type: 1 };
-		return sceneCol.find(meshQuery, meshProject).toArray();
+		return db.find(account, getSceneCollectionName(model), meshQuery, meshProject);
 	}, parents, 7000);
 
 	let ids = new Set();
@@ -526,7 +524,7 @@ async function getMetadataRuleQueryResults(account, model, query, projection) {
 
 	const results = new Set();
 
-	clean(metaResults);
+	cleanAll(metaResults);
 
 	for (let i = 0; i < metaResults.length; i++) {
 		results.add(JSON.stringify(metaResults[i]));
@@ -536,8 +534,10 @@ async function getMetadataRuleQueryResults(account, model, query, projection) {
 }
 
 async function getIFCGuids(account, model, shared_ids) {
-	const sceneCol =  await db.getCollection(account, model + ".scene");
-	const results = await sceneCol.find({ "parents":{ $in: shared_ids } , "type":"meta"}, {"metadata.IFC GUID":1, "_id":0}).toArray();
+	const results = await db.find(account,
+		getSceneCollectionName(model),
+		{ "parents":{ $in: shared_ids } , "type":"meta"},
+		{"metadata.IFC GUID":1, "_id":0});
 	return results.map(r => r.metadata["IFC GUID"]);
 }
 
@@ -551,10 +551,8 @@ async function getIFCGuids(account, model, shared_ids) {
  * @returns {Promise<Array<string | object>>}
  */
 async function idsToSharedIds(account, model, ids, convertSharedIDsToString) {
-	const sceneCol = await db.getCollection(account, model + ".scene");
-
 	const treeItems = await batchPromises((_idsForquery) => {
-		return sceneCol.find({_id: {$in : _idsForquery}}, {shared_id:1 , _id:0}).toArray();
+		return db.find(account, getSceneCollectionName(model), {_id: {$in : _idsForquery}}, {shared_id:1 , _id:0});
 	}, ids , 7000);
 
 	const shared_ids = [];

@@ -27,8 +27,8 @@ const Mailer = require("../../mailer/mailer");
 const systemLogger = require("../../logger.js").systemLogger;
 const config = require("../../config");
 const History = require("../history");
-const Scene = require("../scene");
-const Ref = require("../ref");
+const { getRefNodes } = require("../ref");
+const { findNodesByType, getGridfsFileStream, getNodeById, getParentMatrix } = require("../scene");
 const utils = require("../../utils");
 const middlewares = require("../../middlewares/middlewares");
 const multer = require("multer");
@@ -98,7 +98,7 @@ function translateBouncerErrCode(bouncerErrorCode) {
 }
 
 function insertModelUpdatedNotificationsLatestReview(account, model) {
-	History.findLatest({account, model},{tag:1}).then(h => {
+	History.findLatest(account, model,{tag:1}).then(h => {
 		const revision = (!h || !h.tag) ? "" : h.tag;
 		return notifications.upsertModelUpdatedNotifications(account, model, revision);
 	}).then(n => n.forEach(ChatEvent.upsertedNotification.bind(null,null)));
@@ -484,31 +484,24 @@ function createFederatedModel(account, model, username, subModels, modelSettings
 
 function searchTree(account, model, branch, rev, searchString, username) {
 
-	const search = (history) => {
+	const search = () => {
 
 		let items = [];
 
-		const filter = {
-			_id: {"$in": history.current },
-			type: {"$in": ["transformation", "mesh"]},
-			name: new RegExp(searchString, "i")
-		};
+		const type = {"$in": ["transformation", "mesh"]};
 
-		return Scene.find({account, model}, filter, { name: 1 }).then(objs => {
+		return findNodesByType(account, model, branch, rev, type, searchString, { name: 1 }).then(objs => {
 
 			objs.forEach((obj, i) => {
 
-				objs[i] = obj.toJSON();
+				objs[i] = obj;
 				objs[i].account = account;
 				objs[i].model = model;
 				items.push(objs[i]);
 
 			});
 
-			return Ref.find({account, model}, {
-				_id: {"$in": history.current },
-				type: "ref"
-			});
+			return getRefNodes(account, model, branch, rev);
 
 		}).then(refs => {
 
@@ -544,9 +537,9 @@ function searchTree(account, model, branch, rev, searchString, username) {
 
 		if(granted) {
 
-			return History.getHistory({ account, model }, branch, rev).then(history => {
+			return  History.getHistory(account, model, branch, rev).then(history => {
 				if(history) {
-					return search(history);
+					return search();
 				} else {
 					return Promise.resolve([]);
 				}
@@ -559,19 +552,14 @@ function searchTree(account, model, branch, rev, searchString, username) {
 
 }
 
-function listSubModels(account, model, branch) {
+function listSubModels(account, model, branch = "master") {
 
 	const subModels = [];
 
-	return History.findByBranch({ account, model }, branch).then(history => {
+	return History.findByBranch(account, model, branch).then(history => {
 
 		if(history) {
-			const filter = {
-				type: "ref",
-				_id: { $in: history.current }
-			};
-
-			return Ref.find({ account, model }, filter);
+			return getRefNodes(account, model, branch);
 		} else {
 			return [];
 		}
@@ -600,7 +588,7 @@ function listSubModels(account, model, branch) {
 }
 
 function downloadLatest(account, model) {
-	return History.findLatest({account, model}, {rFile: 1}).then((fileEntry) => {
+	return History.findLatest(account, model, {rFile: 1}).then((fileEntry) => {
 		if(!fileEntry || !fileEntry.rFile || !fileEntry.rFile.length) {
 			return Promise.reject(responseCodes.NO_FILE_FOUND);
 		}
@@ -621,7 +609,7 @@ function downloadLatest(account, model) {
 	});
 }
 
-function uploadFile(req) {
+async function uploadFile(req) {
 	if (!config.cn_queue) {
 		return Promise.reject(responseCodes.QUEUE_NO_CONFIG);
 	}
@@ -632,25 +620,8 @@ function uploadFile(req) {
 
 	ChatEvent.modelStatusChanged(null, account, model, { status: "uploading", user });
 	// upload model with tag
-	const checkTag = tag => {
-		if(!tag) {
-			return Promise.resolve();
-		} else {
-			return (tag.match(History.tagRegExp) ? Promise.resolve() : Promise.reject(responseCodes.INVALID_TAG_NAME)).then(() => {
-				return History.findByTag({account, model}, tag, {_id: 1});
-			}).then(_tag => {
-				if (!_tag) {
-					return Promise.resolve();
-				} else {
-					return Promise.reject(responseCodes.DUPLICATE_TAG);
-				}
-			});
 
-		}
-	};
-
-	return new Promise((resolve, reject) => {
-
+	const uploadedFile = await new Promise((resolve, reject) => {
 		const upload = multer({
 			dest: config.cn_queue.upload_dir,
 			fileFilter: function(fileReq, file, cb) {
@@ -699,11 +670,12 @@ function uploadFile(req) {
 				return resolve(req.file);
 			}
 		});
-
-	}).then(file => {
-		return checkTag(req.body.tag).then(() => file);
 	});
 
+	// req.body.tag wont be defined after the file has been uploaded
+	await History.isValidTag(account, model, req.body.tag);
+
+	return uploadedFile;
 }
 
 function _deleteFiles(files) {
@@ -905,11 +877,11 @@ async function getMeshById(account, model, meshId) {
 		"_extRef":1
 	};
 
-	const mesh = await Scene.getObjectById(account, model, utils.stringToUUID(meshId), projection);
-	mesh.matrix = await Scene.getParentMatrix(account, model, mesh.parents[0], revisionIds);
+	const mesh = await getNodeById(account, model, utils.stringToUUID(meshId), projection);
+	mesh.matrix = await getParentMatrix(account, model, mesh.parents[0], revisionIds);
 
-	const vertices =  mesh.vertices ? new StreamBuffer({buffer: mesh.vertices.buffer, chunkSize: mesh.vertices.buffer.length}) : await Scene.getGridfsFileStream(account, model, mesh._extRef.vertices);
-	const triangles = mesh.faces ?  new StreamBuffer({buffer: mesh.faces.buffer, chunkSize: mesh.faces.buffer.length})  : await Scene.getGridfsFileStream(account, model, mesh._extRef.faces);
+	const vertices =  mesh.vertices ? new StreamBuffer({buffer: mesh.vertices.buffer, chunkSize: mesh.vertices.buffer.length}) : await getGridfsFileStream(account, model, mesh._extRef.vertices);
+	const triangles = mesh.faces ?  new StreamBuffer({buffer: mesh.faces.buffer, chunkSize: mesh.faces.buffer.length})  : await getGridfsFileStream(account, model, mesh._extRef.faces);
 
 	const combinedStream = CombinedStream.create();
 	combinedStream.append(stringToStream(["{\"matrix\":", JSON.stringify(mesh.matrix), ",\"vertices\":["].join("")));
@@ -921,13 +893,13 @@ async function getMeshById(account, model, meshId) {
 }
 
 async function getSubModelRevisions(account, model, branch, rev) {
-	const history = await History.getHistory({ account, model }, branch, rev);
+	const history = await  History.getHistory(account, model, branch, rev);
 
 	if(!history) {
 		return Promise.reject(responseCodes.INVALID_TAG_NAME);
 	}
 
-	const refNodes = await Ref.getRefNodes(account, model, history.current);
+	const refNodes = await getRefNodes(account, model, branch, rev);
 	const modelIds = refNodes.map((refNode) => refNode.project);
 	const results = {};
 
@@ -939,7 +911,7 @@ async function getSubModelRevisions(account, model, branch, rev) {
 	const projection = {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1};
 	modelIds.forEach((modelId) => {
 		results[modelId] = {};
-		promises.push(History.listByBranch({account, model: modelId}, null, projection).then((revisions) => {
+		promises.push(History.listByBranch(account, modelId, null, projection).then((revisions) => {
 			revisions = History.clean(revisions);
 
 			revisions.forEach(function(revision) {

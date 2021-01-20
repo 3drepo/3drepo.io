@@ -47,6 +47,10 @@ function Utils() {
 		return type === Object.prototype.toString.call(value);
 	};
 
+	this.isBoolean =  (value) => {
+		return "[object Boolean]" === Object.prototype.toString.call(value);
+	};
+
 	this.hasField = (obj, field) => {
 		return Object.prototype.hasOwnProperty.call(obj, field);
 	};

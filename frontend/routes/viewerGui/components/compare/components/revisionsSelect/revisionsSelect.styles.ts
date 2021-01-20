@@ -50,6 +50,7 @@ export const SelectField = styled(SelectFieldComponent).attrs({
 
 export const MenuItem = styled(MenuItemComponent)`
 	&& {
+		box-sizing: content-box;
 		min-width: 200px;
 		display: flex;
 		justify-content: space-between;

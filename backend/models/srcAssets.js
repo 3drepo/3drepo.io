@@ -20,7 +20,7 @@
 const History = require("./history");
 const { hasReadAccessToModelHelper } = require("../middlewares/middlewares");
 const utils = require("../utils");
-const Ref = require("./ref");
+const { getRefNodes } = require("./ref");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes");
 const FileRef = require("./fileRef");
@@ -30,7 +30,7 @@ const SrcAssets = {};
 const getAssetListFromRef = async (ref, username) => {
 	try {
 		if (await hasReadAccessToModelHelper(username, ref.owner, ref.project)) {
-			const revInfo = await History.findLatest({account: ref.owner, model: ref.project}, {_id: 1, coordOffset : 1});
+			const revInfo = await History.findLatest(ref.owner, ref.project, {_id: 1, coordOffset : 1});
 
 			if (revInfo) {
 				return await getAssetListEntry(ref.owner, ref.project, revInfo);
@@ -55,13 +55,13 @@ const getAssetListEntry = async (database, model, revInfo) => {
 };
 
 SrcAssets.getAssetList = async (account, model, branch, rev, username) => {
-	const history = await History.getHistory({ account, model }, branch, rev);
+	const history = await  History.getHistory(account, model, branch, rev);
 
 	if (!history) {
 		throw responseCodes.INVALID_TAG_NAME;
 	}
 
-	const subModelRefs = await Ref.getRefNodes(account, model, history.current);
+	const subModelRefs = await getRefNodes(account, model, branch, rev);
 
 	const fetchPromise = subModelRefs.length ? subModelRefs.map((ref) => getAssetListFromRef(ref, username))
 		: [getAssetListEntry(account, model, history)];
