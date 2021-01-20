@@ -66,6 +66,28 @@ const schema = mongoose.Schema({
 	heliSpeed: Number
 });
 
+function prepareSetting(setting) {
+	if (setting) {
+		if (!setting.id) {
+			setting.id = setting._id;
+		}
+
+		if (!setting.permissions) {
+			setting.permissions = [];
+		}
+
+		if (!setting.surveyPoints) {
+			setting.surveyPoints = [];
+		}
+
+		if (!setting.subModels) {
+			setting.subModels = [];
+		}
+	}
+
+	return setting;
+}
+
 schema.set("toObject", { getters: true });
 
 schema.methods.updateProperties = async function (updateObj) {
@@ -303,25 +325,13 @@ ModelSetting.getModelsData = function(teamspaces) {
 ModelSetting.findModelSettingById = async function(account, model, projection) {
 	const foundSetting = await db.findOne(account, MODELS_COLL, {_id: model}, projection);
 
-	if (foundSetting) {
-		if (!foundSetting.id) {
-			foundSetting.id = foundSetting._id;
-		}
+	return prepareSetting(foundSetting);
+};
 
-		if (!foundSetting.permissions) {
-			foundSetting.permissions = [];
-		}
+ModelSetting.findModelSettings = async function(account, query, projection) {
+	const foundSettings = await db.find(account, MODELS_COLL, query, projection);
 
-		if (!foundSetting.surveyPoints) {
-			foundSetting.surveyPoints = [];
-		}
-
-		if (!foundSetting.subModels) {
-			foundSetting.subModels = [];
-		}
-	}
-
-	return foundSetting;
+	return foundSettings.map(prepareSetting);
 };
 
 ModelSetting.findPermissionByUser = async function(account, model, username) {

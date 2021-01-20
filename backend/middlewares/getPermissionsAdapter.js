@@ -17,7 +17,7 @@
 
 "use strict";
 (() => {
-	const ModelSetting = require("../models/modelSetting");
+	const { findModelSettingById, findPermissionByUser } = require("../models/modelSetting");
 	const Project = require("../models/project");
 	const User = require("../models/user");
 	const ResponseCodes = require("../response_codes");
@@ -89,14 +89,14 @@
 				}).then(_user => {
 
 					user = _user;
-					return ModelSetting.findModelSettingById(account, model);
+					return findModelSettingById(account, model);
 
 				}).then(async setting => {
 					if(!setting) {
 						throw ResponseCodes.RESOURCE_NOT_FOUND;
 					}
 
-					const perm = await ModelSetting.findPermissionByUser(account, model, username);
+					const perm = await findPermissionByUser(account, model, username);
 
 					if(!perm) {
 						return projectPerms;

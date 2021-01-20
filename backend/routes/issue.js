@@ -26,7 +26,7 @@ const Issue = require("../models/issue");
 const utils = require("../utils");
 const multer = require("multer");
 const config = require("../config.js");
-const ModelSetting = require("../models/modelSetting");
+const { findModelSettingById } = require("../models/modelSetting");
 const Comment = require("../models/comment");
 
 /**
@@ -958,7 +958,6 @@ function getIssuesBCF(req, res, next) {
 	const place = utils.APIInfo(req);
 	const account = req.params.account;
 	const model = req.params.model;
-	const dbCol =  {account: account, model: model};
 
 	const filters = utils.deserialiseQueryFilters(req.query, C.ISSUE_FILTERS);
 
@@ -973,7 +972,7 @@ function getIssuesBCF(req, res, next) {
 	getBCFZipRS.then(zipRS => {
 		const timestamp = (new Date()).toLocaleString();
 
-		ModelSetting.findModelSettingById(account, model).then((settings) => {
+		findModelSettingById(account, model).then((settings) => {
 			const filenamePrefix = (settings.name + "_" + timestamp + "_").replace(/\W+/g, "_");
 
 			const headers = {

@@ -20,7 +20,7 @@
 
 	const responseCodes = require("../response_codes");
 	const C				= require("../constants");
-	const ModelSetting = require("../models/modelSetting");
+	const { findModelSettingById } = require("../models/modelSetting");
 	// var History = require('../models/history');
 	const User = require("../models/user");
 	const utils = require("../utils");
@@ -96,7 +96,7 @@
 
 			limits = dbUser.customData.billing.getSubscriptionLimits();
 
-			return ModelSetting.findModelSettingById(account, model);
+			return findModelSettingById(account, model);
 
 		}).then(modelSetting => {
 

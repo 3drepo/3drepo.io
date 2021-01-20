@@ -2047,7 +2047,7 @@ function getMultipleModelsPermissions(req, res, next) {
 	const account = req.params.account;
 	const models = req.query.models.split(",");
 
-	return ModelSetting.find({account}, {"_id" : {"$in" : models}}).then((modelsList) => {
+	return ModelSetting.findModelSettings(account, {"_id" : {"$in" : models}}).then((modelsList) => {
 		if (!modelsList.length) {
 			return Promise.reject({ resCode: responseCodes.MODEL_INFO_NOT_FOUND });
 		} else {
