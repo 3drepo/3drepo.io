@@ -966,7 +966,7 @@ function _createAccounts(roles, userName) {
 						// model permissions
 						const modelPromises = [];
 						const dbUserCache = {};
-						return ModelSetting.find({ account: user.user }, query, projection).then(models => {
+						return ModelSetting.findModelSettings(user.user, query, projection).then(models => {
 
 							models.forEach(model => {
 								if (model.permissions.length > 0) {

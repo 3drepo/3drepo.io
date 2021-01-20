@@ -288,7 +288,7 @@
 			filters.name = new RegExp(".*" + filters.name + ".*", "i");
 		}
 
-		let modelsSettings =  await ModelSetting.find({account}, { _id: { $in : projectObj.models }, ...filters});
+		let modelsSettings =  await ModelSetting.findModelSettings(account, { _id: { $in : projectObj.models }, ...filters});
 		let permissions = [];
 
 		const accountPerm = dbUser.customData.permissions.findByUser(username);
@@ -313,7 +313,7 @@
 				}
 			}
 
-			setting = await ModelSetting.clean(account, setting._id, setting.toObject());
+			setting = await ModelSetting.clean(account, setting._id, setting);
 			setting.permissions = _.uniq(permissions.concat(settingsPermissions));
 			setting.model = setting._id;
 			setting.account = account;

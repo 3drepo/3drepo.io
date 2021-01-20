@@ -16,13 +16,13 @@
  */
 
 "use strict";
-const ModelSettings = require("./modelSetting");
+const { findModelSettingById } = require("./modelSetting");
 const { findNodesByType } = require("./scene");
 
 const Ref = {};
 
 Ref.getRefNodes = async function(account, model, branch, revision, projection) {
-	const settings = await ModelSettings.findModelSettingById(account, model);
+	const settings = await findModelSettingById(account, model);
 
 	if (settings.federate) {
 		return findNodesByType(account, model, branch, revision, "ref", undefined, projection);
