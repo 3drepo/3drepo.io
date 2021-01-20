@@ -435,7 +435,7 @@ function createFederatedModel(account, model, username, subModels, modelSettings
 			return;
 		}
 
-		addSubModelsPromise.push(ModelSetting.findById({account, model: subModel.model}, subModel.model).then(setting => {
+		addSubModelsPromise.push(ModelSetting.findModelSettingById(account, subModel.model).then(setting => {
 			if(!setting) {
 				return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 			}
@@ -567,7 +567,7 @@ function listSubModels(account, model, branch = "master") {
 
 		const proms = refs.map(ref =>
 
-			ModelSetting.findById({ account: ref.owner}, ref.project, { name: 1 }).then(subModel => {
+			ModelSetting.findModelSettingById(ref.owner, ref.project, { name: 1 }).then(subModel => {
 				// TODO: Why would this return null?
 				if (subModel) {
 					subModels.push({
@@ -959,7 +959,7 @@ const acceptedFormat = [
 ];
 
 const getModelSetting = async (account, model, username) => {
-	let setting = await ModelSetting.findById({account}, model);
+	let setting = await ModelSetting.findModelSettingById(account, model);
 
 	if (!setting) {
 		throw { resCode: responseCodes.MODEL_INFO_NOT_FOUND};
@@ -974,7 +974,7 @@ const getModelSetting = async (account, model, username) => {
 			listSubModels(account, model, C.MASTER_BRANCH_NAME)
 		]);
 
-		setting = await ModelSetting.clean(account, model, setting.toObject());
+		setting = await ModelSetting.clean(account, model, setting);
 
 		return {
 			...setting,

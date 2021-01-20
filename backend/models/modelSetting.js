@@ -260,7 +260,7 @@ ModelSetting.clean = async function(account, model, dataToClean) {
 };
 
 ModelSetting.getHeliSpeed = async function(account, model) {
-	const modelSetting = await ModelSetting.findById({account, model}, model);
+	const modelSetting = await ModelSetting.findModelSettingById(account, model);
 	const speed = modelSetting.heliSpeed ? modelSetting.heliSpeed : 1;
 
 	return {heliSpeed: speed};
@@ -290,8 +290,28 @@ ModelSetting.getModelsData = function(teamspaces) {
 	).then((modelData) => modelData.reduce((ac,cur) => Object.assign(ac, cur),{})); // Turns the array to an object (quick indexing);
 };
 
+ModelSetting.findModelSettingById = async function(account, model, projection) {
+	const foundSetting = await db.findOne(account, MODELS_COLL, {_id: model}, projection);
+
+	if (foundSetting) {
+		if (!foundSetting.permissions) {
+			foundSetting.permissions = [];
+		}
+
+		if (!foundSetting.surveyPoints) {
+			foundSetting.surveyPoints = [];
+		}
+
+		if (!foundSetting.subModels) {
+			foundSetting.subModels = [];
+		}
+	}
+
+	return foundSetting;
+};
+
 ModelSetting.findPermissionByUser = async function(account, model, username) {
-	const modelSetting = await ModelSetting.findById({account, model}, model);
+	const modelSetting = await ModelSetting.findModelSettingById(account, model);
 	return modelSetting.permissions.find(perm => perm.user === username);
 };
 
@@ -334,7 +354,7 @@ ModelSetting.updateHeliSpeed = async function(account, model, newSpeed) {
 };
 
 ModelSetting.updatePermissions = async function(account, model, permissions = []) {
-	const setting = await this.findById({account, model}, model);
+	const setting = await ModelSetting.findById({account, model}, model);
 
 	if (setting) {
 		permissions.forEach((permissionUpdate) => {
