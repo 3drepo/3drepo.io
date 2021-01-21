@@ -53,9 +53,13 @@
 		return collection.find(query).project(projection).sort(sort).toArray();
 	};
 
-	Handler.findOne = async function (database, colName, query, projection = {}, sort = {}) {
+	Handler.findOne = async function (database, colName, query, projection = {}, sort = undefined) {
 		const collection = await Handler.getCollection(database, colName);
-		return collection.findOne(query, { ...projection, sort});
+		// NOTE: documentation states it should be { projection, sort } so when we upgrade we may have to change.
+		if(sort) {
+			projection.sort = sort;
+		}
+		return collection.findOne(query, projection);
 	};
 
 	function getURL(database) {
