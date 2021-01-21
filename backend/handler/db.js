@@ -53,9 +53,10 @@
 		return collection.find(query).project(projection).sort(sort).toArray();
 	};
 
-	Handler.findOne = async function (database, colName, query, projection = {}, sort = undefined) {
+	Handler.findOne = async function (database, colName, query, projection = {}, sort) {
 		const collection = await Handler.getCollection(database, colName);
 		// NOTE: documentation states it should be { projection, sort } so when we upgrade we may have to change.
+		//       Also: projection stops working if you pass in a sort with empty obj.
 		if(sort) {
 			projection.sort = sort;
 		}
