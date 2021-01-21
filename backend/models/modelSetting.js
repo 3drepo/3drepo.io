@@ -214,7 +214,7 @@ ModelSetting.batchUpdatePermissions = async function(account, batchPermissions =
 	}
 };
 
-ModelSetting.changePermissions = async function(account, model, permissions) { //, account = this._dbcolOptions.account) {
+ModelSetting.changePermissions = async function(account, model, permissions) {
 	const setting = await ModelSetting.findById({account, model}, model);
 
 	const User = require("./user");
