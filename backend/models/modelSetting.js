@@ -129,55 +129,6 @@ schema.methods.updateProperties = async function (updateObj) {
 	return ModelSetting.clean(this._dbcolOptions.account, this._dbcolOptions.model, this.toObject());
 };
 
-schema.methods.changePermissions = function(permissions, account = this._dbcolOptions.account) {
-
-	const User = require("./user");
-
-	if (Object.prototype.toString.call(permissions) !== "[object Array]") {
-		throw responseCodes.INVALID_ARGUMENTS;
-	}
-
-	// get list of valid permission name
-	permissions = _.uniq(permissions, "user");
-	return User.findByUserName(account).then(dbUser => {
-
-		const promises = [];
-
-		permissions.forEach(permission => {
-			if (Object.prototype.toString.call(permission.user) !== "[object String]" ||
-					Object.prototype.toString.call(permission.permission) !== "[object String]") {
-				throw responseCodes.INVALID_ARGUMENTS;
-			}
-
-			if (!dbUser.customData.permissionTemplates.findById(permission.permission)) {
-				return promises.push(Promise.reject(responseCodes.PERM_NOT_FOUND));
-			}
-
-			promises.push(User.findByUserName(permission.user).then(assignedUser => {
-				if (!assignedUser) {
-					return Promise.reject(responseCodes.USER_NOT_FOUND);
-				}
-
-				const isMember = assignedUser.isMemberOfTeamspace(dbUser.user);
-				if (!isMember) {
-					return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
-				}
-
-				const perm = this.permissions.find(_perm => _perm.user === permission.user);
-
-				if(perm) {
-					perm.permission = permission.permission;
-				}
-			}));
-		});
-
-		return Promise.all(promises).then(() => {
-			this.permissions = permissions;
-			return this.save();
-		});
-	});
-};
-
 schema.statics.createNewSetting = function(teamspace, modelName, data) {
 	const modelNameRegExp = /^[\x00-\x7F]{1,120}$/;
 	if(!modelName.match(modelNameRegExp)) {
@@ -261,6 +212,56 @@ ModelSetting.batchUpdatePermissions = async function(account, batchPermissions =
 	} else {
 		return updateResponses[badStatusIndex];
 	}
+};
+
+ModelSetting.changePermissions = async function(account, model, permissions) { //, account = this._dbcolOptions.account) {
+	const setting = await ModelSetting.findById({account, model}, model);
+
+	const User = require("./user");
+
+	if (Object.prototype.toString.call(permissions) !== "[object Array]") {
+		throw responseCodes.INVALID_ARGUMENTS;
+	}
+
+	// get list of valid permission name
+	permissions = _.uniq(permissions, "user");
+	return User.findByUserName(account).then(dbUser => {
+
+		const promises = [];
+
+		permissions.forEach(permission => {
+			if (Object.prototype.toString.call(permission.user) !== "[object String]" ||
+					Object.prototype.toString.call(permission.permission) !== "[object String]") {
+				throw responseCodes.INVALID_ARGUMENTS;
+			}
+
+			if (!dbUser.customData.permissionTemplates.findById(permission.permission)) {
+				return promises.push(Promise.reject(responseCodes.PERM_NOT_FOUND));
+			}
+
+			promises.push(User.findByUserName(permission.user).then(assignedUser => {
+				if (!assignedUser) {
+					return Promise.reject(responseCodes.USER_NOT_FOUND);
+				}
+
+				const isMember = assignedUser.isMemberOfTeamspace(dbUser.user);
+				if (!isMember) {
+					return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
+				}
+
+				const perm = setting.permissions.find(_perm => _perm.user === permission.user);
+
+				if(perm) {
+					perm.permission = permission.permission;
+				}
+			}));
+		});
+
+		return Promise.all(promises).then(() => {
+			setting.permissions = permissions;
+			return setting.save();
+		});
+	});
 };
 
 ModelSetting.clean = async function(account, model, dataToClean) {
@@ -399,7 +400,7 @@ ModelSetting.updatePermissions = async function(account, model, permissions = []
 			}
 		});
 
-		const updatedSetting = await setting.changePermissions(setting.permissions, account);
+		const updatedSetting = await setting.changePermissions(account, model, setting.permissions);
 
 		return { "status": updatedSetting.status };
 	} else {

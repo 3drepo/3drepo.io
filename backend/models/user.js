@@ -1165,7 +1165,7 @@ schema.methods.removeTeamMember = function (username, cascadeRemove) {
 			}
 
 			promises.push(foundModels.map(model =>
-				model.changePermissions(model.permissions.filter(p => p.user !== username))));
+				ModelSetting.changePermissions(this.user, model._id, model.permissions.filter(p => p.user !== username))));
 
 			promises.push(foundProjects.map(project =>
 				project.updateAttrs({ permissions: project.permissions.filter(p => p.user !== username) })));

@@ -1983,7 +1983,7 @@ function changePermissions(req, res, next) {
 			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 		}
 
-		return modelSetting.changePermissions(req.body);
+		return ModelSetting.changePermissions(account, model, req.body);
 
 	}).then(permission => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
@@ -2013,7 +2013,7 @@ function updateMultiplePermissions(req, res, next) {
 		} else {
 			const modelsPromises = modelsList.map((model) => {
 				const newModelPermissions = req.body.find((modelPermissions) => modelPermissions.model === model._id);
-				return model.changePermissions(newModelPermissions.permissions || {}, account);
+				return ModelSetting.changePermissions(account, model._id, newModelPermissions.permissions || {});
 			});
 
 			return Promise.all(modelsPromises).then((models) => {
