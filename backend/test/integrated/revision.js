@@ -85,6 +85,7 @@ describe("Revision", function () {
 				expect(res.body[0]).to.have.property("_id");
 				expect(res.body[0]).to.have.property("timestamp");
 				expect(res.body[0]).to.have.property("author");
+				expect(Date.parse(res.body[0].timestamp).to.be.above(Date.parse(res.body[2].timestamp));
 				done(err);
 			});
 	});
