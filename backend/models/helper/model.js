@@ -34,7 +34,7 @@ const middlewares = require("../../middlewares/middlewares");
 const multer = require("multer");
 const fs = require("fs");
 const ChatEvent = require("../chatEvent");
-const Project = require("../project");
+const { addModelToProject, createProject, findOneProject, removeProjectModel } = require("../project");
 const _ = require("lodash");
 const nodeuuid = require("uuid/v1");
 const FileRef = require("../fileRef");
@@ -281,8 +281,7 @@ function createNewModel(teamspace, modelName, data) {
 	}
 
 	const projectName = data.project;
-	// FIXME use findOneProject instead
-	return Project.findOne({account: teamspace}, {name: projectName}).then((project) => {
+	return findOneProject(teamspace, {name: projectName}).then((project) => {
 		if(!project) {
 			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
 		}
@@ -299,7 +298,7 @@ function createNewModel(teamspace, modelName, data) {
 			// Create a model setting
 			return ModelSetting.createNewSetting(teamspace, modelName, data).then((settings) => {
 				// Add model into project
-				return Project.addModelToProject(teamspace, projectName, settings._id).then(() => {
+				return addModelToProject(teamspace, projectName, settings._id).then(() => {
 					// call chat to indicate a new model has been created
 					const modelData = {
 						account: teamspace,
@@ -330,7 +329,7 @@ function createNewFederation(teamspace, modelName, username, data, toyFed) {
 function importToyProject(account, username) {
 
 	// create a project named Sample_Project
-	return Project.createProject(username, "Sample_Project", username, [C.PERM_TEAMSPACE_ADMIN]).then(project => {
+	return createProject(username, "Sample_Project", username, [C.PERM_TEAMSPACE_ADMIN]).then(project => {
 
 		return Promise.all([
 
@@ -801,7 +800,7 @@ function removeModel(account, model, forceRemove) {
 			return removeModelCollections(account, model).then(() => {
 				const deletePromises = [];
 				deletePromises.push(setting.remove());
-				deletePromises.push(Project.removeModel(account, model));
+				deletePromises.push(removeProjectModel(account, model));
 				return Promise.all(deletePromises);
 			}).catch((err) => {
 				systemLogger.logError("Failed to remove collections: ", err);
@@ -839,7 +838,7 @@ async function getModelPermission(username, setting, account) {
 		const projectQuery = { models: setting._id, "permissions.user": username };
 
 		// project admin have access to models underneath it.
-		const project = await Project.findOneProject(account, projectQuery, { "permissions.$" : 1 });
+		const project = await findOneProject(account, projectQuery, { "permissions.$" : 1 });
 
 		if(project && project.permissions) {
 			permissions = permissions.concat(flattenPermissions(project.permissions[0].permissions));

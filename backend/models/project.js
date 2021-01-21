@@ -287,7 +287,7 @@
 		return hasProjectPermissions && project.permissions[0].permissions.includes(C.PERM_PROJECT_ADMIN);
 	};
 
-	Project.removeModel = async function(account, model) {
+	Project.removeProjectModel = async function(account, model) {
 		return db.update(account, PROJECTS_COLLECTION_NAME, { models: model }, { "$pull" : { "models": model}}, {"multi": true});
 	};
 
