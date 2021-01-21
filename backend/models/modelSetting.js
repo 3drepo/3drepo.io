@@ -325,18 +325,13 @@ ModelSetting.populateUsersForMultiplePermissions = function (account, permission
 	return Promise.all(promises);
 };
 
-ModelSetting.resetCorrelationId = async function(account, model) {
-	const setting = await ModelSetting.findById({account, model}, model);
-	setting.corID = undefined;
-
-	return setting.save();
-};
-
 ModelSetting.setModelStatus = async function(account, model, status) {
 	const setting = await ModelSetting.findById({account, model}, model);
 	setting.status = status;
 
-	return setting.save();
+	await setting.save();
+
+	return setting;
 };
 
 ModelSetting.updateHeliSpeed = async function(account, model, newSpeed) {
