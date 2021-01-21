@@ -90,45 +90,6 @@ function prepareSetting(setting) {
 
 schema.set("toObject", { getters: true });
 
-schema.methods.updateProperties = async function (updateObj) {
-	const views = new (require("./view"))();
-	const keys = Object.keys(updateObj);
-	for(let i = 0; i < keys.length; ++i) {
-		const key = keys[i];
-		if(!updateObj[key]) {
-			if (key === "defaultView") {
-				this[key] = undefined;
-			}
-			continue;
-		}
-		switch (key) {
-			case "code":
-				if (!MODEL_CODE_REGEX.test(updateObj[key])) {
-					throw responseCodes.INVALID_MODEL_CODE;
-				}
-			case "unit":
-				if (utils.isString(updateObj[key])) {
-					this.properties[key] = updateObj[key];
-				} else {
-					throw responseCodes.INVALID_ARGUMENTS;
-				}
-				break;
-			case "defaultView":
-				if (utils.isString(updateObj[key]) && utils.isUUID(updateObj[key])) {
-					const res = await views.findByUID(this._dbcolOptions.account, this._dbcolOptions.model, updateObj[key], {_id: 1});
-					this[key] = res._id;
-				} else {
-					throw responseCodes.INVALID_ARGUMENTS;
-				}
-				break;
-			default:
-				this[key] = updateObj[key];
-		}
-	}
-	await this.save();
-	return ModelSetting.clean(this._dbcolOptions.account, this._dbcolOptions.model, this.toObject());
-};
-
 schema.statics.createNewSetting = function(teamspace, modelName, data) {
 	const modelNameRegExp = /^[\x00-\x7F]{1,120}$/;
 	if(!modelName.match(modelNameRegExp)) {
@@ -375,7 +336,7 @@ ModelSetting.updateHeliSpeed = async function(account, model, newSpeed) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	return modelSetting.updateProperties({heliSpeed: newSpeed});
+	return modelSetting.updateProperties(account, model, {heliSpeed: newSpeed});
 };
 
 ModelSetting.updatePermissions = async function(account, model, permissions = []) {
@@ -408,6 +369,47 @@ ModelSetting.updatePermissions = async function(account, model, permissions = []
 	}
 };
 
+ModelSetting.updateProperties = async function (account, model, updateObj) {
+	const setting = await ModelSetting.findById({account, model}, model);
+
+	const views = new (require("./view"))();
+	const keys = Object.keys(updateObj);
+	for(let i = 0; i < keys.length; ++i) {
+		const key = keys[i];
+		if(!updateObj[key]) {
+			if (key === "defaultView") {
+				setting[key] = undefined;
+			}
+			continue;
+		}
+		switch (key) {
+			case "code":
+				if (!MODEL_CODE_REGEX.test(updateObj[key])) {
+					throw responseCodes.INVALID_MODEL_CODE;
+				}
+			case "unit":
+				if (utils.isString(updateObj[key])) {
+					setting.properties[key] = updateObj[key];
+				} else {
+					throw responseCodes.INVALID_ARGUMENTS;
+				}
+				break;
+			case "defaultView":
+				if (utils.isString(updateObj[key]) && utils.isUUID(updateObj[key])) {
+					const res = await views.findByUID(account, model, updateObj[key], {_id: 1});
+					setting[key] = res._id;
+				} else {
+					throw responseCodes.INVALID_ARGUMENTS;
+				}
+				break;
+			default:
+				setting[key] = updateObj[key];
+		}
+	}
+	await setting.save();
+	return ModelSetting.clean(account, model, setting);
+};
+
 ModelSetting.updateSettings = async function(account, model, data) {
 	const modelSetting = await ModelSetting.findById({account, model}, model);
 
@@ -415,7 +417,7 @@ ModelSetting.updateSettings = async function(account, model, data) {
 		throw responseCodes.MODEL_NOT_FOUND;
 	}
 
-	return modelSetting.updateProperties(data);
+	return modelSetting.updateProperties(account, model, data);
 };
 
 module.exports = ModelSetting;
