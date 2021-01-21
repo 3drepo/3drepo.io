@@ -325,6 +325,15 @@ ModelSetting.populateUsersForMultiplePermissions = function (account, permission
 	return Promise.all(promises);
 };
 
+ModelSetting.setModelStatus = async function(account, model, status) {
+	const setting = await ModelSetting.findById({account, model}, model);
+
+	setting.status = status;
+	systemLogger.logInfo(`Model status changed to ${status}`);
+
+	return setting.save();
+};
+
 ModelSetting.updateHeliSpeed = async function(account, model, newSpeed) {
 	const modelSetting = await ModelSetting.findById({account, model}, model);
 
@@ -336,7 +345,7 @@ ModelSetting.updateHeliSpeed = async function(account, model, newSpeed) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	return modelSetting.updateProperties(account, model, {heliSpeed: newSpeed});
+	return ModelSetting.updateProperties(account, model, {heliSpeed: newSpeed});
 };
 
 ModelSetting.updatePermissions = async function(account, model, permissions = []) {
@@ -361,7 +370,7 @@ ModelSetting.updatePermissions = async function(account, model, permissions = []
 			}
 		});
 
-		const updatedSetting = await setting.changePermissions(account, model, setting.permissions);
+		const updatedSetting = await ModelSetting.changePermissions(account, model, setting.permissions);
 
 		return { "status": updatedSetting.status };
 	} else {
@@ -417,7 +426,7 @@ ModelSetting.updateSettings = async function(account, model, data) {
 		throw responseCodes.MODEL_NOT_FOUND;
 	}
 
-	return modelSetting.updateProperties(account, model, data);
+	return ModelSetting.updateProperties(account, model, data);
 };
 
 module.exports = ModelSetting;

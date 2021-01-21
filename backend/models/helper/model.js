@@ -223,15 +223,13 @@ function importFail(account, model, sharedSpacePath, user, errCode, errMsg) {
  * @param {model} model - Model
  * @param {user} user - The user who triggered the status
  */
-function setStatus(account, model, status, user) {
-	ChatEvent.modelStatusChanged(null, account, model, { status, user });
-	return ModelSetting.findById({account, model}, model).then(setting => {
-		setting.status = status;
-		systemLogger.logInfo(`Model status changed to ${status}`);
-		return setting.save();
-	}).catch(err => {
+async function setStatus(account, model, status, user) {
+	try {
+		await ModelSetting.setModelStatus(account, model, status);
+		ChatEvent.modelStatusChanged(null, account, model, { status, user });
+	} catch(err) {
 		systemLogger.logError("Failed to invoke setStatus:", err);
-	});
+	}
 }
 
 /**

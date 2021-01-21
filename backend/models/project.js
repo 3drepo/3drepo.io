@@ -181,7 +181,7 @@
 				userPromises.push(
 					ModelSetting.find(this._dbcolOptions, { "permissions.user": user}).then(settings =>
 						Promise.all(
-							settings.map(s => s.changePermissions(this._dbcolOptions.account, s._id, s.permissions.filter(perm => perm.user !== user)))
+							settings.map(s => ModelSetting.changePermissions(this._dbcolOptions.account, s._id, s.permissions.filter(perm => perm.user !== user)))
 						)
 					)
 				);
