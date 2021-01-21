@@ -49,12 +49,13 @@
 
 	Handler.find = async function (database, colName, query, projection = {}, sort = {}) {
 		const collection = await Handler.getCollection(database, colName);
+		// NOTE: v3.6 driver find take sort/projection as 2nd argument like findOne
 		return collection.find(query).project(projection).sort(sort).toArray();
 	};
 
 	Handler.findOne = async function (database, colName, query, projection = {}, sort = {}) {
 		const collection = await Handler.getCollection(database, colName);
-		return collection.findOne(query, { projection, sort});
+		return collection.findOne(query, { ...projection, sort});
 	};
 
 	function getURL(database) {
