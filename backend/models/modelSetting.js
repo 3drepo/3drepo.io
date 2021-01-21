@@ -325,11 +325,16 @@ ModelSetting.populateUsersForMultiplePermissions = function (account, permission
 	return Promise.all(promises);
 };
 
+ModelSetting.resetCorrelationId = async function(account, model) {
+	const setting = await ModelSetting.findById({account, model}, model);
+	setting.corID = undefined;
+
+	return setting.save();
+};
+
 ModelSetting.setModelStatus = async function(account, model, status) {
 	const setting = await ModelSetting.findById({account, model}, model);
-
 	setting.status = status;
-	systemLogger.logInfo(`Model status changed to ${status}`);
 
 	return setting.save();
 };

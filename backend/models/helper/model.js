@@ -226,6 +226,7 @@ function importFail(account, model, sharedSpacePath, user, errCode, errMsg) {
 async function setStatus(account, model, status, user) {
 	try {
 		await ModelSetting.setModelStatus(account, model, status);
+		systemLogger.logInfo(`Model status changed to ${status}`);
 		ChatEvent.modelStatusChanged(null, account, model, { status, user });
 	} catch(err) {
 		systemLogger.logError("Failed to invoke setStatus:", err);
@@ -263,14 +264,13 @@ function createCorrelationId(setting, addTimestamp = false) {
  * @param {account} account - User account
  * @param {model} model - Model
  */
-function resetCorrelationId(account, model) {
-	ModelSetting.findById({account, model}, model).then(setting => {
-		setting.corID = undefined;
+async function resetCorrelationId(account, model) {
+	try {
+		await ModelSetting.resetCorrelationId(account, model);
 		systemLogger.logInfo("Correlation ID reset");
-		setting.save();
-	}).catch(err => {
+	} catch(err) {
 		systemLogger.logError("Failed to resetCorrelationId:", err);
-	});
+	}
 }
 
 function createNewModel(teamspace, modelName, data) {
