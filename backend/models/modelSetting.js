@@ -255,8 +255,7 @@ ModelSetting.getHeliSpeed = async function(account, model) {
 };
 
 ModelSetting.getMultipleModelsPermissions = async function(account, models) {
-	const models = models.split(",");
-	const modelsList = await ModelSetting.findModelSettings(account, {"_id" : {"$in" : models}});
+	const modelsList = await ModelSetting.findModelSettings(account, {"_id" : {"$in" : models.split(",")}});
 
 	if (!modelsList.length) {
 		throw responseCodes.MODEL_INFO_NOT_FOUND;
