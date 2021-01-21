@@ -47,12 +47,12 @@
 		});
 	};
 
-	Handler.find = async function (database, colName, query, projection, sort) {
+	Handler.find = async function (database, colName, query, projection = {}, sort = {}) {
 		const collection = await Handler.getCollection(database, colName);
-		return collection.find(query, {projection, sort}).toArray();
+		return collection.find(query).project(projection).sort(sort).toArray();
 	};
 
-	Handler.findOne = async function (database, colName, query, projection, sort) {
+	Handler.findOne = async function (database, colName, query, projection = {}, sort = {}) {
 		const collection = await Handler.getCollection(database, colName);
 		return collection.findOne(query, { projection, sort});
 	};
