@@ -1973,19 +1973,7 @@ function updatePermissions(req, res, next) {
 }
 
 function changePermissions(req, res, next) {
-
-	const account = req.params.account;
-	const model = req.params.model;
-
-	return ModelSetting.findById({account, model}, model).then(modelSetting => {
-
-		if (!modelSetting) {
-			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
-		}
-
-		return ModelSetting.changePermissions(account, model, req.body);
-
-	}).then(permission => {
+	return ModelSetting.changePermissions(req.params.account, req.params.model, req.body).then(permission => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -2045,30 +2033,7 @@ function getSingleModelPermissions(req, res, next) {
 }
 
 function getMultipleModelsPermissions(req, res, next) {
-
-	const account = req.params.account;
-	const models = req.query.models.split(",");
-
-	return ModelSetting.findModelSettings(account, {"_id" : {"$in" : models}}).then((modelsList) => {
-		if (!modelsList.length) {
-			return Promise.reject({ resCode: responseCodes.MODEL_INFO_NOT_FOUND });
-		} else {
-			const permissionsList = modelsList.map(({permissions}) => permissions || []);
-			return ModelSetting.populateUsersForMultiplePermissions(account, permissionsList)
-				.then((populatedPermissions) => {
-					return populatedPermissions.map((permissions, index) => {
-						const {_id, federate, name, subModels} = modelsList[index];
-						return {
-							model:_id,
-							federate,
-							name,
-							permissions,
-							subModels
-						};
-					});
-				});
-		}
-	}).then(permissions => {
+	return ModelSetting.getMultipleModelsPermissions(req.params.account, req.query.models).then(permissions => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permissions);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);

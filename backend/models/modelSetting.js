@@ -178,6 +178,10 @@ ModelSetting.batchUpdatePermissions = async function(account, batchPermissions =
 ModelSetting.changePermissions = async function(account, model, permissions) {
 	const setting = await ModelSetting.findById({account, model}, model);
 
+	if (!setting) {
+		throw responseCodes.MODEL_NOT_FOUND;
+	}
+
 	const User = require("./user");
 
 	if (Object.prototype.toString.call(permissions) !== "[object Array]") {
@@ -250,6 +254,29 @@ ModelSetting.getHeliSpeed = async function(account, model) {
 	return {heliSpeed: speed};
 };
 
+ModelSetting.getMultipleModelsPermissions = async function(account, models) {
+	const models = models.split(",");
+	const modelsList = await ModelSetting.findModelSettings(account, {"_id" : {"$in" : models}});
+
+	if (!modelsList.length) {
+		throw responseCodes.MODEL_INFO_NOT_FOUND;
+	}
+
+	const permissionsList = modelsList.map(({permissions}) => permissions || []);
+	const populatedPermissions = await ModelSetting.populateUsersForMultiplePermissions(account, permissionsList);
+
+	return populatedPermissions.map((permissions, index) => {
+		const {_id, federate, name, subModels} = modelsList[index];
+		return {
+			model:_id,
+			federate,
+			name,
+			permissions,
+			subModels
+		};
+	});
+};
+
 ModelSetting.getSingleModelPermissions = async function(account, model) {
 	const setting = await ModelSetting.findModelSettingById(account, model);
 
@@ -301,7 +328,7 @@ ModelSetting.findPermissionByUser = async function(account, model, username) {
 	return modelSetting.permissions.find(perm => perm.user === username);
 };
 
-ModelSetting.isSubModel = function(account, model) {
+ModelSetting.isSubModel = function(account) {
 	return ModelSetting.findModelSettings(account, { federate: true });
 };
 
