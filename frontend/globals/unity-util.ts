@@ -139,8 +139,8 @@ export class UnityUtil {
 			console.warn('[DEPRECATED WARNING] loadUnity() no longer takes in a string and a URL to the unity config. Please check the API documentation and update your function.');
 			const divDom = document.getElementById(canvas);
 			canvasDom = document.createElement('canvas');
-			canvas.id = 'unity';
-			divDom.appedChild(canvas);
+			canvasDom.id = 'unity';
+			divDom.appendChild(canvasDom);
 
 			if (host) {
 				// Old schema asks for a json file location, we now take the domain url
