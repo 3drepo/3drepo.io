@@ -735,7 +735,7 @@ function importModel(account, model, username, modelSetting, source, data) {
 }
 
 function isSubModel(account, model) {
-	return ModelSetting.find({ account, model}, { federate: true }).then((feds) => {
+	return ModelSetting.isSubModel(account, model).then((feds) => {
 		const promises = [];
 
 		feds.forEach(modelSetting => {

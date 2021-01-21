@@ -301,6 +301,10 @@ ModelSetting.findPermissionByUser = async function(account, model, username) {
 	return modelSetting.permissions.find(perm => perm.user === username);
 };
 
+ModelSetting.isSubModel = function(account, model) {
+	return ModelSetting.findModelSettings(account, { federate: true });
+};
+
 ModelSetting.populateUsers = async function(account, permissions) {
 	const User = require("./user");
 
