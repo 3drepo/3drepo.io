@@ -247,6 +247,23 @@ ModelSetting.clean = async function(account, model, dataToClean) {
 	return dataToClean;
 };
 
+ModelSetting.findModelSettingById = async function(account, model, projection) {
+	const foundSetting = await db.findOne(account, MODELS_COLL, {_id: model}, projection);
+
+	return prepareSetting(foundSetting);
+};
+
+ModelSetting.findModelSettings = async function(account, query, projection) {
+	const foundSettings = await db.find(account, MODELS_COLL, query, projection);
+
+	return foundSettings.map(prepareSetting);
+};
+
+ModelSetting.findPermissionByUser = async function(account, model, username) {
+	const modelSetting = await ModelSetting.findModelSettingById(account, model);
+	return modelSetting.permissions.find(perm => perm.user === username);
+};
+
 ModelSetting.getHeliSpeed = async function(account, model) {
 	const modelSetting = await ModelSetting.findModelSettingById(account, model);
 	const speed = modelSetting.heliSpeed ? modelSetting.heliSpeed : 1;
@@ -310,21 +327,16 @@ ModelSetting.getModelsData = function(teamspaces) {
 	).then((modelData) => modelData.reduce((ac,cur) => Object.assign(ac, cur),{})); // Turns the array to an object (quick indexing);
 };
 
-ModelSetting.findModelSettingById = async function(account, model, projection) {
-	const foundSetting = await db.findOne(account, MODELS_COLL, {_id: model}, projection);
-
-	return prepareSetting(foundSetting);
-};
-
-ModelSetting.findModelSettings = async function(account, query, projection) {
-	const foundSettings = await db.find(account, MODELS_COLL, query, projection);
-
-	return foundSettings.map(prepareSetting);
-};
-
-ModelSetting.findPermissionByUser = async function(account, model, username) {
+ModelSetting.isFederation = async function(account, model) {
 	const modelSetting = await ModelSetting.findModelSettingById(account, model);
-	return modelSetting.permissions.find(perm => perm.user === username);
+
+	if (!modelSetting) {
+		throw responseCodes.MODEL_NOT_FOUND;
+	} else if (!modelSetting.federate) {
+		throw responseCodes.MODEL_IS_NOT_A_FED;
+	}
+
+	return true;
 };
 
 ModelSetting.isSubModel = function(account) {
@@ -358,6 +370,16 @@ ModelSetting.populateUsersForMultiplePermissions = function (account, permission
 ModelSetting.setModelStatus = async function(account, model, status) {
 	const setting = await ModelSetting.findById({account, model}, model);
 	setting.status = status;
+
+	await setting.save();
+
+	return setting;
+};
+
+ModelSetting.updateSubModels = async function(account, model, subModels) {
+	const setting = await ModelSetting.findById({account, model}, model);
+	setting.subModels = subModels;
+	setting.timestamp = new Date();
 
 	await setting.save();
 

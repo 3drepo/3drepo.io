@@ -1729,33 +1729,18 @@ function createModel(req, res, next) {
 }
 
 function updateModel(req, res, next) {
-
 	const responsePlace = utils.APIInfo(req);
-	const account = req.params.account;
-	const model = req.params.model;
+	const {account, model} = req.params;
 	const username = req.session.user.username;
 
 	let promise = null;
-	let setting;
 
 	if (Object.keys(req.body).length >= 1 && Array.isArray(req.body.subModels)) {
 		if (req.body.subModels.length > 0) {
-			promise = ModelSetting.findById({account}, model).then(_setting => {
-
-				setting = _setting;
-
-				if (!setting) {
-					return Promise.reject(responseCodes.MODEL_NOT_FOUND);
-				} else if (!setting.federate) {
-					return Promise.reject(responseCodes.MODEL_IS_NOT_A_FED);
-				} else {
-					return ModelHelpers.createFederatedModel(account, model, username, req.body.subModels);
-				}
-
+			promise = ModelSetting.isFederation(account, model).then(() => {
+				return ModelHelpers.createFederatedModel(account, model, username, req.body.subModels);
 			}).then(() => {
-				setting.subModels = req.body.subModels;
-				setting.timestamp = new Date();
-				return setting.save();
+				return ModelSetting.updateSubModels(account, model, req.body.subModels);
 			});
 		} else {
 			promise = Promise.reject(responseCodes.SUBMODEL_IS_MISSING);
@@ -1764,7 +1749,7 @@ function updateModel(req, res, next) {
 		promise = Promise.reject(responseCodes.INVALID_ARGUMENTS);
 	}
 
-	promise.then(() => {
+	promise.then((setting) => {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, model, setting });
 	}).catch(err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
