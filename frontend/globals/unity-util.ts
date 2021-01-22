@@ -136,6 +136,7 @@ export class UnityUtil {
 		let domainURL = host;
 		if (Object.prototype.toString.call(canvas) === '[object String]') {
 			// The user is calling it like Unity 2019. Convert it to a dom an create a canvas
+			// tslint:disable-next-line
 			console.warn('[DEPRECATED WARNING] loadUnity() no longer takes in a string and a URL to the unity config. Please check the API documentation and update your function.');
 			const divDom = document.getElementById(canvas);
 			canvasDom = document.createElement('canvas');
@@ -154,7 +155,7 @@ export class UnityUtil {
 	}
 
 	/** @hidden */
-	public static _loadUnity(canvas: any, unityURL):Promise<void> {
+	public static _loadUnity(canvas: any, unityURL): Promise<void> {
 
 		if (!window.Module) {
 			// Add withCredentials to XMLHttpRequest prototype to allow unity game to
