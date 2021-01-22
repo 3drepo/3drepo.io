@@ -39,7 +39,7 @@ const C = require("../constants");
 const userBilling = require("./userBilling");
 const permissionTemplate = require("./permissionTemplate");
 const accountPermission = require("./accountPermission");
-const { findAndClean, findOneProject } = require("./project");
+const { listProjects, findOneProject } = require("./project");
 const FileRef = require("./fileRef");
 
 const schema = mongoose.Schema({
@@ -736,7 +736,7 @@ function _addProjects(account, username, models) {
 		query = { models: { $in: models } };
 	}
 
-	return findAndClean(account.account, query).then(projects => {
+	return listProjects(account.account, query).then(projects => {
 
 		projects.forEach((project, i) => {
 
@@ -917,7 +917,7 @@ function _createAccounts(roles, userName) {
 				let account = null;
 				const query = { "permissions": { "$elemMatch": { user: userName } } };
 				const projection = { "permissions": { "$elemMatch": { user: userName } }, "models": 1, "name": 1 };
-				return findAndClean(user.user, query, projection).then(projects => {
+				return listProjects(user.user, query, projection).then(projects => {
 					projects.forEach(_proj => {
 						projPromises.push(new Promise(function (resolve) {
 							let myProj;
@@ -1147,7 +1147,7 @@ schema.methods.removeTeamMember = function (username, cascadeRemove) {
 
 	const teamspacePerm = this.customData.permissions.findByUser(username);
 	// check if they have any permissions assigned
-	return findAndClean(this.user, { "permissions.user": username }).then(projects => {
+	return listProjects(this.user, { "permissions.user": username }).then(projects => {
 		foundProjects = projects;
 		return ModelSetting.find({ account: this.user }, { "permissions.user": username });
 

@@ -27,7 +27,7 @@
 	const responseCodes = require("../response_codes.js");
 	const C = require("../constants");
 	const _ = require("lodash");
-	const { findAndClean, updateAttrs } = require("./project");
+	const { listProjects, updateAttrs } = require("./project");
 
 	const methods = {
 		init(user, permissions) {
@@ -117,7 +117,7 @@
 				this.permissions.splice(index, 1);
 				return this.user.save().then(() => {
 					// remove all project permissions in this project as well, if any
-					return findAndClean(this.user.user,{ "permissions.user": user});
+					return listProjects(this.user.user,{ "permissions.user": user});
 				}).then(projects => {
 					return Promise.all(
 						projects.map(proj => updateAttrs(this.user.user, proj.name, {

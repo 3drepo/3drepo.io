@@ -559,7 +559,7 @@
 	}
 
 	function listProjects(req, res, next) {
-		Project.findAndPopulateUsers({ account: req.params.account }, {}).then(projects => {
+		Project.listProjects(req.params.account).then(projects => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, projects);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -567,8 +567,7 @@
 	}
 
 	function listProject(req, res, next) {
-
-		Project.findOneAndPopulateUsers({ account: req.params.account }, {name: req.params.project}).then(project => {
+		Project.findProjectAndPopulateUsers(req.params.account, req.params.project).then(project => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
