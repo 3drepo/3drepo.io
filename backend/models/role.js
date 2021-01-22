@@ -28,7 +28,7 @@ Role.createTeamSpaceRole = async function (account) {
 	const roleFound = await Role.findByRoleID(roleId);
 
 	if(roleFound) {
-		return { role: roleFound.role, db: roleFound.db};
+		return ;
 	}
 
 	const roleName = C.DEFAULT_MEMBER_ROLE;
@@ -45,7 +45,6 @@ Role.createTeamSpaceRole = async function (account) {
 	};
 
 	await DB.runCommand(account, createRoleCmd);
-	return {role: roleName, db: account};
 };
 
 Role.dropTeamSpaceRole = async function (account) {
