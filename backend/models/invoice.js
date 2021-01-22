@@ -103,6 +103,7 @@ Invoice.cleanItem = function(item) {
 	addDescription(item);
 	item.amount = roundTo2DP(item.amount);
 	item.taxAmount = roundTo2DP(item.taxAmount);
+	item.id = item._id;
 	return item;
 };
 
