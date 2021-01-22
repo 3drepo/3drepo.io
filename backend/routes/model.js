@@ -1772,10 +1772,8 @@ function updateModel(req, res, next) {
 }
 
 function deleteModel(req, res, next) {
-
 	const responsePlace = utils.APIInfo(req);
-	const account = req.params.account;
-	const model = req.params.model;
+	const {account, model} = req.params;
 
 	// delete
 	ModelHelpers.removeModel(account, model).then((removedModel) => {
@@ -1798,6 +1796,7 @@ function getHeaders(cache = false) {
 
 function getIdMap(req, res, next) {
 	const revId = req.params.rev;
+
 	JSONAssets.getIdMap(
 		req.params.account,
 		req.params.model,
@@ -1805,10 +1804,8 @@ function getIdMap(req, res, next) {
 		revId,
 		req.session.user.username
 	).then(file => {
-
 		const headers = getHeaders(false);
 		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
-
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
@@ -1962,10 +1959,7 @@ function uploadModel(req, res, next) {
 }
 
 function updatePermissions(req, res, next) {
-	const account = req.params.account;
-	const model = req.params.model;
-
-	return ModelSetting.updatePermissions(account, model, req.body).then(response => {
+	return ModelSetting.updatePermissions(req.params.account, req.params.model, req.body).then(response => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, response);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -1981,9 +1975,7 @@ function changePermissions(req, res, next) {
 }
 
 function batchUpdatePermissions(req, res, next) {
-	const account = req.params.account;
-
-	return ModelSetting.batchUpdatePermissions(account, req.body).then(response => {
+	return ModelSetting.batchUpdatePermissions(req.params.account, req.body).then(response => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, response);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -1991,33 +1983,9 @@ function batchUpdatePermissions(req, res, next) {
 }
 
 function updateMultiplePermissions(req, res, next) {
-
-	const account = req.params.account;
 	const modelsIds = req.body.map(({model}) => model);
 
-	return ModelSetting.find({account}, {"_id" : {"$in" : modelsIds}}).then((modelsList) => {
-		if (!modelsList.length) {
-			return Promise.reject({resCode: responseCodes.MODEL_INFO_NOT_FOUND});
-		} else {
-			const modelsPromises = modelsList.map((model) => {
-				const newModelPermissions = req.body.find((modelPermissions) => modelPermissions.model === model._id);
-				return ModelSetting.changePermissions(account, model._id, newModelPermissions.permissions || {});
-			});
-
-			return Promise.all(modelsPromises).then((models) => {
-				const populatedPermissionsPromises = models.map(({permissions}) => {
-					return ModelSetting.populateUsers(account, permissions);
-				});
-
-				return Promise.all(populatedPermissionsPromises).then((populatedPermissions) => {
-					return populatedPermissions.map((permissions, index) => {
-						const {name, federate, _id: model, subModels} =  models[index] || {};
-						return {name, federate, model, permissions, subModels};
-					});
-				});
-			});
-		}
-	}).then(permissions => {
+	return ModelSetting.updateMultiplePermissions(req.params.account, modelsIds, res.body).then(permissions => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permissions);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -2041,7 +2009,6 @@ function getMultipleModelsPermissions(req, res, next) {
 }
 
 function getUnityAssets(req, res, next) {
-
 	const {account, model, rev} = req.params;
 	const username = req.session.user.username;
 	const branch = rev ? undefined : C.MASTER_BRANCH_NAME;
@@ -2054,7 +2021,6 @@ function getUnityAssets(req, res, next) {
 }
 
 function getSrcAssets(req, res, next) {
-
 	const {account, model, rev} = req.params;
 	const username = req.session.user.username;
 	const branch = rev ? undefined : C.MASTER_BRANCH_NAME;
@@ -2067,11 +2033,7 @@ function getSrcAssets(req, res, next) {
 }
 
 function getJsonMpc(req, res, next) {
-	const model = req.params.model;
-	const account = req.params.account;
-	const id = req.params.uid;
-
-	JSONAssets.getSuperMeshMapping(account, model, id).then(file => {
+	JSONAssets.getSuperMeshMapping(req.params.account, req.params.model, req.params.uid).then(file => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file, undefined, config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -2079,10 +2041,7 @@ function getJsonMpc(req, res, next) {
 }
 
 function getSubModelRevisions(req, res, next) {
-
-	const model = req.params.model;
-	const account = req.params.account;
-	const revId = req.params.revId;
+	const {account, model, revId} = req.params;
 	const branch = revId ? undefined : "master";
 
 	ModelHelpers.getSubModelRevisions(account, model, branch, revId).then((result) => {
@@ -2093,12 +2052,7 @@ function getSubModelRevisions(req, res, next) {
 }
 
 function getUnityBundle(req, res, next) {
-
-	const model = req.params.model;
-	const account = req.params.account;
-	const id = req.params.uid;
-
-	UnityAssets.getUnityBundle(account, model, id).then(file => {
+	UnityAssets.getUnityBundle(req.params.account, req.params.model, req.params.uid).then(file => {
 		req.params.format = "unity3d";
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file, undefined, config.cachePolicy);
 	}).catch(err => {
@@ -2107,13 +2061,8 @@ function getUnityBundle(req, res, next) {
 }
 
 function getSRC(req, res, next) {
-
-	const model = req.params.model;
-	const account = req.params.account;
-	const id = req.params.uid;
-
 	// FIXME: We should probably generalise this and have a model assets object.
-	SrcAssets.getSRC(account, model, id).then(file => {
+	SrcAssets.getSRC(req.params.account, req.params.model, req.params.uid).then(file => {
 		req.params.format = "src";
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file.file, undefined, config.cachePolicy);
 	}).catch(err => {
