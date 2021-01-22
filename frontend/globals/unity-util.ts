@@ -150,7 +150,7 @@ export class UnityUtil {
 			}
 		}
 
-		UnityUtil._loadUnity(canvasDom, domainURL);
+		return UnityUtil._loadUnity(canvasDom, domainURL);
 
 	}
 
