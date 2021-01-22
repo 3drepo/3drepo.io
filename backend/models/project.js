@@ -58,7 +58,7 @@
 		return true;
 	}
 
-	function checkProjectNameValid (project) {
+	function checkProjectNameValid(project) {
 		const regex = "^[^/?=#+]{0,119}[^/?=#+ ]{1}$";
 		return project && project.match(regex);
 	}
@@ -159,10 +159,13 @@
 	Project.listProjects = async function(teamspace, query = {}, projection) {
 		const User = require("./user");
 		const userList = await User.getAllUsersInTeamspace(teamspace);
-		const projects = await Project.findAndClean(teamspace, query, projection);
+		const projects = await db.find(teamspace, PROJECTS_COLLECTION_NAME, query, projection);
 
 		if (projects) {
-			projects.forEach(p => populateUsers(userList, p));
+			projects.forEach(p => {
+				prepareProject(p);
+				populateUsers(userList, p);
+			});
 		}
 
 		return projects;
@@ -180,14 +183,8 @@
 		return populateUsers(userList, project);
 	};
 
-	Project.findAndClean = async function(teamspace, query, projection) {
-		const foundProjects = await db.find(teamspace, PROJECTS_COLLECTION_NAME, query, projection);
-
-		return foundProjects.map(prepareProject);
-	};
-
 	Project.findProjectsById = async function(teamspace, ids) {
-		const foundProjects = await Project.findAndClean(teamspace, { _id: { $in: ids.map(utils.stringToUUID) } });
+		const foundProjects = await Project.listProjects(teamspace, { _id: { $in: ids.map(utils.stringToUUID) } });
 
 		foundProjects.forEach((project) => {
 			project._id = utils.uuidToString(project._id);
