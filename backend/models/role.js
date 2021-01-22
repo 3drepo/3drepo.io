@@ -20,12 +20,16 @@
 const C = require("../constants");
 const DB = require("../handler/db");
 
+const findByRoleID = async function(id) {
+	return await DB.findOne("admin", "system.roles", { _id: id});
+};
+
 const Role = {};
 
 Role.createTeamSpaceRole = async function (account) {
 	const roleId = `${account}.${C.DEFAULT_MEMBER_ROLE}`;
 
-	const roleFound = await Role.findByRoleID(roleId);
+	const roleFound = await findByRoleID(roleId);
 
 	if(roleFound) {
 		return ;
@@ -52,7 +56,7 @@ Role.dropTeamSpaceRole = async function (account) {
 		"dropRole" : C.DEFAULT_MEMBER_ROLE
 	};
 
-	const role = await this.findByRoleID(`${account}.${C.DEFAULT_MEMBER_ROLE}`);
+	const role = await findByRoleID(`${account}.${C.DEFAULT_MEMBER_ROLE}`);
 
 	if(!role) {
 		return;
@@ -68,10 +72,6 @@ Role.grantTeamSpaceRoleToUser = async function (username, account) {
 	};
 
 	return await DB.runCommand("admin", grantRoleCmd);
-};
-
-Role.findByRoleID = async function(id) {
-	return await DB.findOne("admin", "system.roles", { _id: id});
 };
 
 Role.revokeTeamSpaceRoleFromUser = async function(username, account) {
