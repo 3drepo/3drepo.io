@@ -51,20 +51,6 @@ Role.createTeamSpaceRole = async function (account) {
 	await DB.runCommand(account, createRoleCmd);
 };
 
-Role.dropTeamSpaceRole = async function (account) {
-	const dropRoleCmd = {
-		"dropRole" : C.DEFAULT_MEMBER_ROLE
-	};
-
-	const role = await findByRoleID(`${account}.${C.DEFAULT_MEMBER_ROLE}`);
-
-	if(!role) {
-		return;
-	}
-
-	return await DB.runCommand(account, dropRoleCmd);
-};
-
 Role.grantTeamSpaceRoleToUser = async function (username, account) {
 	const grantRoleCmd = {
 		grantRolesToUser: username,
