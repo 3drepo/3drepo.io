@@ -173,7 +173,7 @@
 		const userList = await User.getAllUsersInTeamspace(teamspace);
 		const project = await Project.findOneProject(teamspace, {name: projectName});
 
-		if (project) {
+		if (!project) {
 			throw responseCodes.PROJECT_NOT_FOUND;
 		}
 
