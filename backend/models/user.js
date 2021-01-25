@@ -42,6 +42,10 @@ const Project = require("./project");
 const FileRef = require("./fileRef");
 const PermissionTemplates = require("./permissionTemplates");
 
+const isMemberOfTeamspace = function (user, teamspace) {
+	return user.roles.filter(role => role.db === teamspace && role.role === C.DEFAULT_MEMBER_ROLE).length > 0;
+};
+
 const COLL_NAME = "system.users";
 
 const User = {};
@@ -239,7 +243,7 @@ User.findUsersWithoutMembership = async function (teamspace, searchString) {
 	});
 
 	const notMembers = users.reduce((members, userentry) => {
-		if (!User.isMemberOfTeamspace(userentry, teamspace)) {
+		if (!isMemberOfTeamspace(userentry, teamspace)) {
 			const {user, roles, customData } = userentry;
 			members.push({
 				user,
@@ -996,7 +1000,7 @@ User.addTeamMember = async function(teamspace, userToAdd, job, permissions) {
 		throw (responseCodes.USER_NOT_ASSIGNED_JOB);
 	}
 
-	if (this.isMemberOfTeamspace(userEntry, teamspace.user)) {
+	if (isMemberOfTeamspace(userEntry, teamspace.user)) {
 		throw (responseCodes.USER_ALREADY_ASSIGNED);
 	}
 
@@ -1022,10 +1026,6 @@ User.getBasicDetails = function(userObj) {
 		lastName: customData.lastName,
 		company: _.get(customData, "billing.billingInfo.company", null)
 	};
-};
-
-User.isMemberOfTeamspace = function (user, teamspace) {
-	return user.roles.filter(role => role.db === teamspace && role.role === C.DEFAULT_MEMBER_ROLE).length > 0;
 };
 
 User.getQuotaInfo = async function (teamspace) {
@@ -1099,21 +1099,21 @@ User.findUsersInTeamspace =  async function (teamspace, fields) {
 	return await DB.find("admin", COLL_NAME, query, fields);
 };
 
-User.teamspaceMemberCheck = async function (teamspace, user) {
-	const userEntry = await User.findByUserName(user);
+User.teamspaceMemberCheck = async function (user, teamspace) {
+	const userEntry = await User.findByUserName(user, {roles: 1});
 
 	if (!userEntry) {
 		throw (responseCodes.USER_NOT_FOUND);
 	}
 
-	if (!this.isMemberOfTeamspace(userEntry, teamspace)) {
+	if (!isMemberOfTeamspace(userEntry, teamspace)) {
 		throw (responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
 	}
 };
 
 User.getTeamMemberInfo = async function(teamspace, user) {
 	const userEntry = await User.findByUserName(user);
-	if(!userEntry || !this.isMemberOfTeamspace(userEntry,teamspace)) {
+	if(!userEntry || !isMemberOfTeamspace(userEntry,teamspace)) {
 		throw responseCodes.USER_NOT_FOUND;
 	} else {
 		const job = await findJobByUser(teamspace, user);

@@ -29,14 +29,7 @@ const updatePermissions = async function(teamspace, updatedPermissions) {
 
 const checkValidUpdate = async (teamspace, teamMember, permissions) => {
 	const User = require("./user");
-	const userToCheck = await User.findByUserName(teamMember);
-	if(!userToCheck) {
-		throw (responseCodes.USER_NOT_FOUND);
-	}
-
-	if(!User.isMemberOfTeamspace(userToCheck, teamspace.user)) {
-		throw(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
-	}
+	await User.teamspaceMemberCheck(teamMember, teamspace);
 
 	const isPermissionInvalid = permissions &&
 		intersection(permissions, C.ACCOUNT_PERM_LIST).length !== permissions.length;
@@ -71,8 +64,6 @@ AccountPermissions.updateOrCreate = async function(teamspace, username, permissi
 };
 
 AccountPermissions.update = async function(teamspace, username, permissions) {
-	await checkValidUpdate(teamspace, username, permissions);
-
 	const currPermission = this.findByUser(teamspace, username);
 
 	if(!currPermission) {

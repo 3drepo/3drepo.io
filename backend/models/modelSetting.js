@@ -152,16 +152,7 @@ schema.methods.changePermissions = function(permissions, account = this._dbcolOp
 				return promises.push(Promise.reject(responseCodes.PERM_NOT_FOUND));
 			}
 
-			promises.push(User.findByUserName(permission.user).then(assignedUser => {
-				if (!assignedUser) {
-					return Promise.reject(responseCodes.USER_NOT_FOUND);
-				}
-
-				const isMember = User.isMemberOfTeamspace(assignedUser, dbUser.user);
-
-				if (!isMember) {
-					return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
-				}
+			promises.push(User.teamspaceMemberCheck(permission.user,  dbUser.user).then(() => {
 
 				const perm = this.permissions.find(_perm => _perm.user === permission.user);
 

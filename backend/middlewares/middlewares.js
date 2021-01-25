@@ -75,7 +75,7 @@
 		return validateUserSession(req).then(() => {
 			const teamspace = req.params.account;
 			const user = req.session.user.username;
-			return User.teamspaceMemberCheck(teamspace, user).then(() => {
+			return User.teamspaceMemberCheck(user, teamspace).then(() => {
 				next();
 			}).catch(err => {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
