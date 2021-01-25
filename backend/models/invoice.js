@@ -31,17 +31,17 @@ const { set } = require("lodash");
 
 // Various getter/setter helper functions
 const roundTo2DP = function(x) {
-	return utils.roundToNDP(x, 2.0);
+	return Math.abs(utils.roundToNDP(x, 2.0));
 };
+
 const roundTo3DP = function(x) {
 	return utils.roundToNDP(x, 3.0);
 };
-const signAndRoundTo2DP = function(type, x) {
-	return type === C.INV_TYPE_REFUND ? roundTo2DP(-x) : roundTo2DP(x);
-};
+
 const dateToString = function(date) {
 	return moment(date).utc().format(C.DATE_FORMAT);
 };
+
 const dateToDateTimeString = function(date) {
 	return moment(date).utc().format(C.DATE_TIME_FORMAT);
 };
@@ -108,6 +108,10 @@ Invoice.cleanItem = function(item) {
 };
 
 Invoice.clean = (invoice) => {
+	invoice.amount = roundTo2DP(invoice.amount);
+	invoice.nextPaymentAmount = roundTo2DP(invoice.nextPaymentAmount);
+	invoice.taxAmount = roundTo2DP(invoice.taxAmount);
+
 	addNetAmount(invoice);
 	addCreatedAtDate(invoice);
 	addCountryName(invoice);
@@ -118,13 +122,11 @@ Invoice.clean = (invoice) => {
 	addProRata(invoice);
 	invoice.id = invoice._id;
 	invoice.items = invoice.items.map(Invoice.cleanItem);
+
 	invoice.createdAt = dateToDateTimeString(invoice.createdAt);
-	invoice.amount = signAndRoundTo2DP(invoice.type,invoice.amount);
 	invoice.periodStart = dateToString(invoice.periodStart);
 	invoice.periodEnd = dateToString(invoice.periodEnd);
 	invoice.nextPaymentDate = dateToString(invoice.nextPaymentDate);
-	invoice.nextPaymentAmount = roundTo2DP(invoice.nextPaymentAmount);
-	invoice.taxAmount = signAndRoundTo2DP(invoice.type,invoice.taxAmount);
 	return invoice;
 };
 
