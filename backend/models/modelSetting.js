@@ -376,6 +376,21 @@ ModelSetting.setModelStatus = async function(account, model, status) {
 	return setting;
 };
 
+ModelSetting.updateCorId = async function(account, model, correlationId, addTimestamp = false) {
+	const setting = await ModelSetting.findById({account, model}, model);
+	setting.corID = correlationId;
+
+	if (addTimestamp) {
+		// FIXME: This is a temporary workaround, needed because federation
+		// doesn't update it's own timestamp (and also not wired into the chat)
+		setting.timestamp = new Date();
+	}
+
+	await setting.save();
+
+	return correlationId;
+};
+
 ModelSetting.updateSubModels = async function(account, model, subModels) {
 	const setting = await ModelSetting.findById({account, model}, model);
 	setting.subModels = subModels;

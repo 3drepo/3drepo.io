@@ -243,24 +243,16 @@ async function setStatus(account, model, status, user) {
  * @param {model} model - Model
  * @param {addTimestamp} - add a timestamp to the model settings while you're at it
  */
-function createCorrelationId(setting, addTimestamp = false) {
+async function createCorrelationId(account, model, setting, addTimestamp = false) {
 	const correlationId = nodeuuid();
+	let result = Promise.reject("setting is undefined");
 
-	if(setting) {
-		setting.corID = correlationId;
-		if (addTimestamp) {
-			// FIXME: This is a temporary workaround, needed because federation
-			// doesn't update it's own timestamp (and also not wired into the chat)
-			setting.timestamp = new Date();
-		}
+	if (setting) {
+		result = await ModelSetting.updateCorId(account, model, correlationId, addTimestamp);
 		systemLogger.logInfo(`Correlation ID ${setting.corID} set`);
-
-		return setting.save().then(() => {
-			return correlationId;
-		});
 	}
 
-	return Promise.reject("setting is undefined");
+	return result;
 }
 
 function createNewModel(teamspace, modelName, data) {
@@ -448,7 +440,7 @@ function createFederatedModel(account, model, username, subModels, modelSettings
 
 	return Promise.all(addSubModelsPromise).then(() => {
 		return fedSettings.then((settings) => {
-			return createCorrelationId(settings, true).then(correlationId => {
+			return createCorrelationId(account, model, settings, true).then(correlationId => {
 				setStatus(account, model, "queued", username).then(() => {
 					const federatedJSON = {
 						database: account,
@@ -708,7 +700,7 @@ function importModel(account, model, username, modelSetting, source, data) {
 		return Promise.reject({ message: `modelSetting is ${modelSetting}`});
 	}
 
-	return createCorrelationId(modelSetting).then(correlationId => {
+	return createCorrelationId(account, model, modelSetting).then(correlationId => {
 		return setStatus(account, model, "queued", username).then(setting => {
 
 			modelSetting = setting;
