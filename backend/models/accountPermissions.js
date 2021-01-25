@@ -29,7 +29,7 @@ const updatePermissions = async function(teamspace, updatedPermissions) {
 
 const checkValidUpdate = async (teamspace, teamMember, permissions) => {
 	const User = require("./user");
-	await User.teamspaceMemberCheck(teamMember, teamspace);
+	await User.teamspaceMemberCheck(teamMember, teamspace.user);
 
 	const isPermissionInvalid = permissions &&
 		intersection(permissions, C.ACCOUNT_PERM_LIST).length !== permissions.length;

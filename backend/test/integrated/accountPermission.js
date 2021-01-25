@@ -73,13 +73,12 @@ describe("Account permission::", function () {
 			});
 	});
 
-	it("should fail to assign invalid permissions to a user", function(done) {
-		agent.post(`/${username}/permissions`)
-			.send({ user: "user1", permissions: ["view_issue"]})
-			.expect(400, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.INVALID_PERM.value);
-				done(err);
-			});
+	it("should fail to assign invalid permissions to a user", async function() {
+		const { body } = await agent.post(`/${username}/permissions`)
+			.send({ user: "user1", permissions: ["view_issue"]});
+
+		console.log(body);
+		expect(body.value).to.equal(responseCodes.INVALID_PERM.value);
 	});
 
 	it("should able to assign permissions to a user", async function() {
