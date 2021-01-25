@@ -255,6 +255,10 @@ ModelSetting.clean = async function(account, model, dataToClean) {
 	return dataToClean;
 };
 
+ModelSetting.deleteModelSetting = function(account, model) {
+	return db.remove(account, MODELS_COLL, { _id: model });
+};
+
 ModelSetting.findModelSettingById = async function(account, model, projection) {
 	const foundSetting = await db.findOne(account, MODELS_COLL, {_id: model}, projection);
 

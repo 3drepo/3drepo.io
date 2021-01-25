@@ -750,7 +750,7 @@ async function removeModelCollections(account, model) {
 }
 
 function removeModel(account, model, forceRemove) {
-	return ModelSetting.findById({account, model}, model).then(setting => {
+	return ModelSetting.findModelSettingById(account, model).then(setting => {
 		if (!setting) {
 			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 		}
@@ -769,7 +769,7 @@ function removeModel(account, model, forceRemove) {
 			}
 			return removeModelCollections(account, model).then(() => {
 				const deletePromises = [];
-				deletePromises.push(setting.remove());
+				deletePromises.push(ModelSetting.deleteModelSetting(account, model));
 				deletePromises.push(Project.removeModel(account, model));
 				return Promise.all(deletePromises);
 			}).catch((err) => {
