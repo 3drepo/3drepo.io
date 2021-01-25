@@ -15,26 +15,39 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import React from 'react';
+
+import DayJsUtils from '@date-io/dayjs';
 import { Grid, IconButton, MenuItem, Select, Switch } from '@material-ui/core';
 import StepForwardIcon from '@material-ui/icons/FastForward';
 import StepBackIcon from '@material-ui/icons/FastRewind';
 import PlayArrow from '@material-ui/icons/PlayArrow';
 import Replay from '@material-ui/icons/Replay';
 import Stop from '@material-ui/icons/Stop';
+import { findIndex, noop } from 'lodash';
 
-import DayJsUtils from '@date-io/dayjs';
-
-import { noop } from 'lodash';
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';
-import React from 'react';
 import { STEP_SCALE } from '../../../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../../../constants/viewerGui';
 import { isDateOusideRange } from '../../../../../../helpers/dateTime';
-import { getDateByStep } from '../../../../../../modules/sequences/sequences.helper';
+import { getDateByStep, getSelectedFrame } from '../../../../../../modules/sequences/sequences.helper';
 import { LONG_DATE_TIME_FORMAT_NO_MINUTES } from '../../../../../../services/formatting/formatDate';
-import { DatePicker, IntervalRow, SequencePlayerColumn,
-	SequencePlayerContainer, SequenceRow, SequenceSlider,
-	SliderRow, StepInput, SwitchItem } from '../../sequences.styles';
+import {
+	DatePicker,
+	IntervalRow,
+	SequencePlayerColumn,
+	SequencePlayerContainer,
+	SequenceRow,
+	SequenceSlider,
+	SliderRow,
+	StepInput,
+	SwitchItem
+} from '../../sequences.styles';
+
+interface IFrame {
+	dateTime: Date;
+	state: string;
+}
 
 interface IProps {
 	max: Date;
@@ -50,6 +63,7 @@ interface IProps {
 	rightPanels: string[];
 	toggleActivitiesPanel: () => void;
 	onPlayStarted?: () => void;
+	frames: IFrame[];
 }
 
 interface IState {
@@ -89,10 +103,10 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 
 	get PlayButtonIcon() {
 		return this.state.playing ?
-					Stop :
-				this.isLastDay ?
-					Replay :
-					PlayArrow;
+				Stop :
+			this.isLastDay ?
+				Replay :
+				PlayArrow;
 	}
 
 	public setValue = (newValue: Date) => {
@@ -170,10 +184,19 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 	}
 
 	public moveStep = (direction) => {
-		const {value, stepInterval, stepScale} = this.state;
-		const newValue = getDateByStep(value, stepScale, stepInterval * direction);
+		const { frames } = this.props;
+		const { value, stepInterval, stepScale } = this.state;
+		const { state } = getSelectedFrame(frames, value);
+		const index = findIndex(frames, (f) => f.state === state);
 
-		this.setValue(newValue);
+		if (stepScale === STEP_SCALE.FRAME) {
+			const newValue = frames[index + stepInterval * direction]?.dateTime;
+			if (newValue) {
+				this.setValue(newValue);
+			}
+		} else {
+			this.setValue(getDateByStep(value, stepScale, stepInterval * direction));
+		}
 
 		if (this.isLastDay) {
 			this.stop();
@@ -276,6 +299,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 								<MenuItem value={STEP_SCALE.DAY}>day(s)</MenuItem>
 								<MenuItem value={STEP_SCALE.MONTH}>month(s)</MenuItem>
 								<MenuItem value={STEP_SCALE.YEAR}>year(s)</MenuItem>
+								<MenuItem value={STEP_SCALE.FRAME}>frame(s)</MenuItem>
 							</Select>
 						</IntervalRow>
 						<SliderRow>

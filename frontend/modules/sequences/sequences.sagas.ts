@@ -47,7 +47,7 @@ export function* fetchSequences() {
 	}
 }
 
-export function* fetchActivitiesDefinitions({sequenceId}) {
+export function* fetchActivitiesDefinitions({ sequenceId }) {
 	try {
 		const teamspace = yield select(selectCurrentModelTeamspace);
 		const isFederation = yield select(selectIsFederation);
@@ -67,18 +67,15 @@ export function* fetchActivitiesDefinitions({sequenceId}) {
 	}
 }
 
-export function* fetchFrame({date}) {
+export function* fetchFrame({ date }) {
 	try {
 		const teamspace = yield select(selectCurrentModelTeamspace);
 		const revision = yield select(selectCurrentRevisionId);
 		const model = yield select(selectSequenceModel);
 		const sequenceId =  yield select(selectSelectedSequenceId);
-
 		const loadedStates = yield select(selectStateDefinitions);
 		const frames = yield select(selectFrames);
-		const frame = getSelectedFrame(frames, date);
-
-		const stateId = frame.state;
+		const { state: stateId } = getSelectedFrame(frames, date);
 
 		if (!loadedStates[stateId]) {
 			// Using directly the promise and 'then' to dispatch the rest of the actions
@@ -109,7 +106,7 @@ function * fetchSelectedFrame() {
 	yield all(keyframes.map((d) => put(SequencesActions.fetchFrame(d))));
 }
 
-export function* setSelectedDate({date}) {
+export function* setSelectedDate({ date }) {
 	try {
 		const selectedSequence = yield select(selectSelectedSequence);
 

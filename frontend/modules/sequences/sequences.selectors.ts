@@ -16,6 +16,8 @@
  */
 
 import { createSelector } from 'reselect';
+
+import { STEP_SCALE } from '../../constants/sequences';
 import { GLToHexColor } from '../../helpers/colors';
 import { selectSettings } from '../model';
 import { getDateByStep, getSelectedFrame } from './sequences.helper';
@@ -133,9 +135,11 @@ export const selectNextKeyFramesDates =  createSelector(
 				date = getDateByStep(date, scale, interval);
 				nextFrame = getSelectedFrame(frames, date);
 
-				while (lastFrame === nextFrame && date <= maxDate) {
-					date = getDateByStep(date, scale, interval);
-					nextFrame = getSelectedFrame(frames, date);
+				if (scale !== STEP_SCALE.FRAME) {
+					while (lastFrame === nextFrame && date <= maxDate) {
+						date = getDateByStep(date, scale, interval);
+						nextFrame = getSelectedFrame(frames, date);
+					}
 				}
 
 				keyFrames.push(date);

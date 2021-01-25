@@ -20,7 +20,7 @@ import { Viewer } from '../../services/viewer/viewer';
 import { getState } from '../store';
 import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds } from '../tree';
 
-export const  getSelectedFrame = (frames, endingDate) => {
+export const getSelectedFrame = (frames, endingDate) => {
 	if (!frames.length) {
 		return null;
 	}

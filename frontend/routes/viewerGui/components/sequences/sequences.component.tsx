@@ -40,6 +40,7 @@ interface IProps {
 	setSelectedSequence: (id: string) => void;
 	maxDate: Date;
 	minDate: Date;
+	frames: any[];
 	selectedDate: Date;
 	selectedEndingDate: Date;
 	colorOverrides: any;
@@ -61,7 +62,7 @@ const da =  new Date();
 const SequenceDetails = ({
 	minDate, maxDate, selectedDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
 	setStepScale, currentTasks, loadingFrame,  rightPanels, toggleActivitiesPanel,
-	fetchActivityDetails, onPlayStarted
+	fetchActivityDetails, onPlayStarted, frames,
 }) => (
 		<>
 			<SequencePlayer
@@ -78,6 +79,7 @@ const SequenceDetails = ({
 				rightPanels={rightPanels}
 				toggleActivitiesPanel={toggleActivitiesPanel}
 				onPlayStarted={onPlayStarted}
+				frames={frames}
 			/>
 			<TasksList
 				tasks={currentTasks}
