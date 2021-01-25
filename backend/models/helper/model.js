@@ -436,7 +436,7 @@ function createFederatedModel(account, model, username, subModels, modelSettings
 	});
 
 	const fedSettings = modelSettings ? Promise.resolve(modelSettings)
-		: ModelSetting.findById({account}, model);
+		: ModelSetting.findModelSettingById(account, model);
 
 	return Promise.all(addSubModelsPromise).then(() => {
 		return fedSettings.then((settings) => {

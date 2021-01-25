@@ -25,7 +25,7 @@
 	const utils = require("../utils");
 	const _ = require("lodash");
 	const nodeuuid = require("uuid/v1");
-	const ModelSetting = require("./modelSetting");
+	const { changePermissions, clean, findModelSettings, findPermissionByUser } = require("./modelSetting");
 	const schema = mongoose.Schema({
 		_id: {
 			type: Object,
@@ -179,9 +179,9 @@
 			usersToRemove.forEach(user => {
 				// remove all model permissions in this project as well, if any
 				userPromises.push(
-					ModelSetting.find(this._dbcolOptions, { "permissions.user": user}).then(settings =>
+					findModelSettings(this._dbcolOptions, { "permissions.user": user}).then(settings =>
 						Promise.all(
-							settings.map(s => ModelSetting.changePermissions(this._dbcolOptions.account, s._id, s.permissions.filter(perm => perm.user !== user)))
+							settings.map(s => changePermissions(this._dbcolOptions.account, s._id, s.permissions.filter(perm => perm.user !== user)))
 						)
 					)
 				);
@@ -288,7 +288,7 @@
 			filters.name = new RegExp(".*" + filters.name + ".*", "i");
 		}
 
-		let modelsSettings =  await ModelSetting.findModelSettings(account, { _id: { $in : projectObj.models }, ...filters});
+		let modelsSettings =  await findModelSettings(account, { _id: { $in : projectObj.models }, ...filters});
 		let permissions = [];
 
 		const accountPerm = dbUser.customData.permissions.findByUser(username);
@@ -303,7 +303,7 @@
 		}
 
 		modelsSettings = await Promise.all(modelsSettings.map(async setting => {
-			const template = await ModelSetting.findPermissionByUser(account, setting._id, username);
+			const template = await findPermissionByUser(account, setting._id, username);
 
 			let settingsPermissions = [];
 			if(template) {
@@ -313,7 +313,7 @@
 				}
 			}
 
-			setting = await ModelSetting.clean(account, setting._id, setting);
+			setting = await clean(account, setting._id, setting);
 			setting.permissions = _.uniq(permissions.concat(settingsPermissions));
 			setting.model = setting._id;
 			setting.account = account;

@@ -34,7 +34,7 @@ const systemLogger = require("../logger.js").systemLogger;
 
 const config = require("../config");
 
-const ModelSetting = require("./modelSetting");
+const { changePermissions, findModelSettingById, findModelSettings, findPermissionByUser } = require("./modelSetting");
 const C = require("../constants");
 const userBilling = require("./userBilling");
 const permissionTemplate = require("./permissionTemplate");
@@ -683,7 +683,7 @@ async function _fillInModelDetails(accountName, setting, permissions) {
 		name: setting.name,
 		status: setting.status,
 		errorReason: setting.errorReason,
-		subModels: setting.federate && setting.toObject().subModels || undefined,
+		subModels: setting.federate && setting.subModels || undefined,
 		timestamp: setting.timestamp || null,
 		code: setting.properties ? setting.properties.code || undefined : undefined
 
@@ -707,7 +707,7 @@ function _getModels(accountName, ids, permissions) {
 		query = { _id: { "$in": ids } };
 	}
 
-	return ModelSetting.find({ account: accountName }, query).then(settings => {
+	return findModelSettings(accountName, query).then(settings => {
 
 		const promises = [];
 
@@ -790,15 +790,14 @@ function _findModelDetails(dbUserCache, username, model) {
 
 	return getUser.then(_user => {
 		dbUser = _user;
-		// return ModelSetting.findModelSettingById(model.account, model.model);
-		return ModelSetting.findById({account: model.account, model: model.model}, model.model);
+		return findModelSettingById(model.account, model.model);
 	}).then(async setting => {
 		let permissions = [];
 
 		if (!setting) {
 			setting = { _id: model.model };
 		} else {
-			const template = await ModelSetting.findPermissionByUser(model.account, model.model, username);
+			const template = await findPermissionByUser(model.account, model.model, username);
 
 			if (template) {
 				permissions = dbUser.customData.permissionTemplates.findById(template.permission).permissions;
@@ -966,7 +965,7 @@ function _createAccounts(roles, userName) {
 						// model permissions
 						const modelPromises = [];
 						const dbUserCache = {};
-						return ModelSetting.findModelSettings(user.user, query, projection).then(models => {
+						return findModelSettings(user.user, query, projection).then(models => {
 
 							models.forEach(model => {
 								if (model.permissions.length > 0) {
@@ -1137,7 +1136,7 @@ schema.methods.removeTeamMember = function (username, cascadeRemove) {
 	return Project.find({ account: this.user }, { "permissions.user": username }).then(projects => {
 
 		foundProjects = projects;
-		return ModelSetting.find({ account: this.user }, { "permissions.user": username });
+		return findModelSettings(this.user, { "permissions.user": username });
 
 	}).then(models => {
 
@@ -1165,7 +1164,7 @@ schema.methods.removeTeamMember = function (username, cascadeRemove) {
 			}
 
 			promises.push(foundModels.map(model =>
-				ModelSetting.changePermissions(this.user, model._id, model.permissions.filter(p => p.user !== username))));
+				changePermissions(this.user, model._id, model.permissions.filter(p => p.user !== username))));
 
 			promises.push(foundProjects.map(project =>
 				project.updateAttrs({ permissions: project.permissions.filter(p => p.user !== username) })));

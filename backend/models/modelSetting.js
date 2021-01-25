@@ -72,8 +72,16 @@ function prepareSetting(setting) {
 			setting.id = setting._id;
 		}
 
+		if (!setting.status) {
+			setting.status = "ok";
+		}
+
 		if (!setting.permissions) {
 			setting.permissions = [];
+		}
+
+		if (!setting.properties) {
+			setting.properties = {};
 		}
 
 		if (!setting.surveyPoints) {
