@@ -708,24 +708,22 @@ function importModel(account, model, username, modelSetting, source, data) {
 		return Promise.reject({ message: `modelSetting is ${modelSetting}`});
 	}
 
-	return modelSetting.save().then(() => {
-		return createCorrelationId(modelSetting).then(correlationId => {
-			return setStatus(account, model, "queued", username).then(setting => {
+	return createCorrelationId(modelSetting).then(correlationId => {
+		return setStatus(account, model, "queued", username).then(setting => {
 
-				modelSetting = setting;
+			modelSetting = setting;
 
-				if (source.type === "upload") {
-					return _handleUpload(correlationId, account, model, username, source.file, data);
+			if (source.type === "upload") {
+				return _handleUpload(correlationId, account, model, username, source.file, data);
 
-				} else if (source.type === "toy") {
+			} else if (source.type === "toy") {
 
-					return importQueue.importToyModel(correlationId, account, model, source).then(() => {
-						systemLogger.logInfo(`Job ${modelSetting.corID} imported without error`,{account, model, username});
-						return modelSetting;
-					});
-				}
+				return importQueue.importToyModel(correlationId, account, model, source).then(() => {
+					systemLogger.logInfo(`Job ${modelSetting.corID} imported without error`,{account, model, username});
+					return modelSetting;
+				});
+			}
 
-			});
 		});
 	}).catch(err => {
 		systemLogger.logError("Failed to importModel:", err);

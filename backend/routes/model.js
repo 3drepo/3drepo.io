@@ -1911,7 +1911,7 @@ function uploadModel(req, res, next) {
 	let modelSetting;
 
 	// check model exists before upload
-	return ModelSetting.findById({account, model}, model).then(_modelSetting => {
+	return ModelSetting.findModelSettingById(account, model).then(_modelSetting => {
 
 		modelSetting = _modelSetting;
 
