@@ -18,7 +18,19 @@
 "use strict";
 
 const ModelFactory = require("../factory/modelFactory");
-const ModelSetting = require("../modelSetting");
+const {
+	clean,
+	createNewSetting,
+	deleteModelSetting,
+	findModelSettingById,
+	findModelSettings,
+	findPermissionByUser,
+	getModelsData,
+	isModelNameExists,
+	setModelImportFail,
+	setModelStatus,
+	updateCorId
+} = require("../modelSetting");
 const User = require("../user");
 const responseCodes = require("../../response_codes");
 const importQueue = require("../../services/queue");
@@ -155,7 +167,7 @@ function importSuccess(account, model, sharedSpacePath, user) {
 function importFail(account, model, sharedSpacePath, user, errCode, errMsg) {
 	const translatedError = translateBouncerErrCode(errCode);
 
-	ModelSetting.setModelImportFail(account, model, translatedError.res).then(setting => {
+	setModelImportFail(account, model, translatedError.res).then(setting => {
 		// hack to add the user field to send to the user
 		const data = Object.assign({user}, JSON.parse(JSON.stringify(setting)));
 		ChatEvent.modelStatusChanged(null, account, model, data);
@@ -217,7 +229,7 @@ async function setStatus(account, model, status, user) {
 	let setting;
 
 	try {
-		setting = await ModelSetting.setModelStatus(account, model, status);
+		setting = await setModelStatus(account, model, status);
 		systemLogger.logInfo(`Model status changed to ${status}`);
 		ChatEvent.modelStatusChanged(null, account, model, { status, user });
 	} catch(err) {
@@ -238,7 +250,7 @@ async function createCorrelationId(account, model, setting, addTimestamp = false
 	let result = Promise.reject("setting is undefined");
 
 	if (setting) {
-		result = await ModelSetting.updateCorId(account, model, correlationId, addTimestamp);
+		result = await updateCorId(account, model, correlationId, addTimestamp);
 		systemLogger.logInfo(`Correlation ID ${setting.corID} set`);
 	}
 
@@ -256,17 +268,15 @@ function createNewModel(teamspace, modelName, data) {
 			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
 		}
 
+		// FIXME when project changes are merged, consider using func in project
 		// Check there's no other model within the same project with the model name
-		return ModelSetting.count({account: teamspace},
-			{name: modelName, _id: {"$in": project.models}}).then((count) => {
-			return count > 0;
-		}).then((modelNameExists) => {
+		return isModelNameExists(teamspace, project.models, modelName).then((modelNameExists) => {
 			if(modelNameExists) {
 				return Promise.reject({resCode: responseCodes.MODEL_EXIST});
 			}
 
 			// Create a model setting
-			return ModelSetting.createNewSetting(teamspace, modelName, data).then((settings) => {
+			return createNewSetting(teamspace, modelName, data).then((settings) => {
 				// Add model into project
 				project.models.push(settings._id);
 
@@ -405,7 +415,7 @@ function createFederatedModel(account, model, username, subModels, modelSettings
 			return;
 		}
 
-		addSubModelsPromise.push(ModelSetting.findModelSettingById(account, subModel.model).then(setting => {
+		addSubModelsPromise.push(findModelSettingById(account, subModel.model).then(setting => {
 			if(!setting) {
 				return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 			}
@@ -426,7 +436,7 @@ function createFederatedModel(account, model, username, subModels, modelSettings
 	});
 
 	const fedSettings = modelSettings ? Promise.resolve(modelSettings)
-		: ModelSetting.findModelSettingById(account, model);
+		: findModelSettingById(account, model);
 
 	return Promise.all(addSubModelsPromise).then(() => {
 		return fedSettings.then((settings) => {
@@ -537,7 +547,7 @@ function listSubModels(account, model, branch = "master") {
 
 		const proms = refs.map(ref =>
 
-			ModelSetting.findModelSettingById(ref.owner, ref.project, { name: 1 }).then(subModel => {
+			findModelSettingById(ref.owner, ref.project, { name: 1 }).then(subModel => {
 				// TODO: Why would this return null?
 				if (subModel) {
 					subModels.push({
@@ -715,7 +725,7 @@ function importModel(account, model, username, modelSetting, source, data) {
 }
 
 function isSubModel(account, model) {
-	return ModelSetting.isSubModel(account, model).then((feds) => {
+	return findModelSettings(account, { federate: true }).then((feds) => {
 		const promises = [];
 
 		feds.forEach(modelSetting => {
@@ -750,7 +760,7 @@ async function removeModelCollections(account, model) {
 }
 
 function removeModel(account, model, forceRemove) {
-	return ModelSetting.findModelSettingById(account, model).then(setting => {
+	return findModelSettingById(account, model).then(setting => {
 		if (!setting) {
 			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 		}
@@ -769,7 +779,7 @@ function removeModel(account, model, forceRemove) {
 			}
 			return removeModelCollections(account, model).then(() => {
 				const deletePromises = [];
-				deletePromises.push(ModelSetting.deleteModelSetting(account, model));
+				deletePromises.push(deleteModelSetting(account, model));
 				deletePromises.push(Project.removeModel(account, model));
 				return Promise.all(deletePromises);
 			}).catch((err) => {
@@ -814,7 +824,7 @@ async function getModelPermission(username, setting, account) {
 			permissions = permissions.concat(flattenPermissions(project.permissions[0].permissions));
 		}
 
-		const template = await ModelSetting.findPermissionByUser(account, setting._id, username);
+		const template = await findPermissionByUser(account, setting._id, username);
 
 		if(template) {
 			const permissionTemplate = dbUser.customData.permissionTemplates.findById(template.permission);
@@ -888,7 +898,7 @@ async function getSubModelRevisions(account, model, branch, rev) {
 		}));
 	});
 
-	promises.push(ModelSetting.getModelsData(param).then((modelNameResult) => {
+	promises.push(getModelsData(param).then((modelNameResult) => {
 		const lookUp = modelNameResult[account];
 		modelIds.forEach((modelId) => {
 			results[modelId].name = lookUp[modelId].name;
@@ -911,7 +921,7 @@ const acceptedFormat = [
 ];
 
 const getModelSetting = async (account, model, username) => {
-	let setting = await ModelSetting.findModelSettingById(account, model);
+	let setting = await findModelSettingById(account, model);
 
 	if (!setting) {
 		throw { resCode: responseCodes.MODEL_INFO_NOT_FOUND};
@@ -926,7 +936,7 @@ const getModelSetting = async (account, model, username) => {
 			listSubModels(account, model, C.MASTER_BRANCH_NAME)
 		]);
 
-		setting = await ModelSetting.clean(account, model, setting);
+		setting = await clean(account, model, setting);
 
 		return {
 			...setting,

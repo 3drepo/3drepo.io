@@ -351,8 +351,10 @@ ModelSetting.isFederation = async function(account, model) {
 	return true;
 };
 
-ModelSetting.isSubModel = function(account) {
-	return ModelSetting.findModelSettings(account, { federate: true });
+// FIXME when project changes are merged, consider using func in project
+ModelSetting.isModelNameExists = async function(account, models, modelName) {
+	const count = await ModelSetting.count({ account }, {name: modelName, _id: {"$in": models}});
+	return count > 0;
 };
 
 ModelSetting.populateUsers = async function(account, permissions) {
