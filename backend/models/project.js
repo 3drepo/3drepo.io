@@ -179,7 +179,7 @@
 			usersToRemove.forEach(user => {
 				// remove all model permissions in this project as well, if any
 				userPromises.push(
-					findModelSettings(this._dbcolOptions, { "permissions.user": user}).then(settings =>
+					findModelSettings(this._dbcolOptions.account, { "permissions.user": user}).then(settings =>
 						Promise.all(
 							settings.map(s => changePermissions(this._dbcolOptions.account, s._id, s.permissions.filter(perm => perm.user !== user)))
 						)
