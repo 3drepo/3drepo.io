@@ -375,6 +375,24 @@ ModelSetting.populateUsersForMultiplePermissions = function (account, permission
 	return Promise.all(promises);
 };
 
+ModelSetting.setModelImportFail = async function(account, model, errorReason) {
+	const setting = await ModelSetting.findById({account, model}, model);
+
+	// mark model failed
+	setting.status = "failed";
+
+	if(setting.type === "toy" || setting.type === "sample") {
+		setting.timestamp = undefined;
+	}
+
+	setting.errorReason = errorReason;
+	setting.markModified("errorReason");
+
+	await setting.save();
+
+	return setting;
+};
+
 ModelSetting.setModelStatus = async function(account, model, status) {
 	const setting = await ModelSetting.findById({account, model}, model);
 	setting.status = status;

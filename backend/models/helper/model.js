@@ -153,22 +153,12 @@ function importSuccess(account, model, sharedSpacePath, user) {
  * @param {errMsg} errMsg - Verbose error message (errCode.message will be used if undefined)
  */
 function importFail(account, model, sharedSpacePath, user, errCode, errMsg) {
-	ModelSetting.findById({account, model}, model).then(setting => {
-		// mark model failed
-		setting.status = "failed";
-		if(setting.type === "toy" || setting.type === "sample") {
-			setting.timestamp = undefined;
-		}
+	const translatedError = translateBouncerErrCode(errCode);
 
-		const translatedError = translateBouncerErrCode(errCode);
-		setting.errorReason = translatedError.res;
-
-		setting.markModified("errorReason");
-		setting.save().then(() => {
-			// hack to add the user field to send to the user
-			const data = Object.assign({user}, JSON.parse(JSON.stringify(setting)));
-			ChatEvent.modelStatusChanged(null, account, model, data);
-		});
+	ModelSetting.setModelImportFail(account, model, translatedError.res).then(setting => {
+		// hack to add the user field to send to the user
+		const data = Object.assign({user}, JSON.parse(JSON.stringify(setting)));
+		ChatEvent.modelStatusChanged(null, account, model, data);
 
 		if (!errMsg) {
 			errMsg = setting.errorReason.message;
