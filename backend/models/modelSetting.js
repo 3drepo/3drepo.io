@@ -389,7 +389,7 @@ ModelSetting.setModelImportFail = async function(account, model, errorReason) {
 	const data = {
 		status: "failed",
 		errorReason
-	}
+	};
 
 	if (setting.type === "toy" || setting.type === "sample") {
 		data.timestamp = undefined;
@@ -434,8 +434,7 @@ ModelSetting.updateHeliSpeed = async function(account, model, newSpeed) {
 };
 
 ModelSetting.updateMultiplePermissions = async function(account, modelIds, updatedData) {
-	// FIXME
-	const modelsList = await ModelSetting.find({account}, {"_id" : {"$in" : modelIds}});
+	const modelsList = await ModelSetting.findModelSettings(account, {"_id" : {"$in" : modelIds}});
 
 	if (!modelsList.length) {
 		throw responseCodes.MODEL_INFO_NOT_FOUND;
@@ -459,8 +458,7 @@ ModelSetting.updateMultiplePermissions = async function(account, modelIds, updat
 };
 
 ModelSetting.updatePermissions = async function(account, model, permissions = []) {
-	// FIXME
-	const setting = await ModelSetting.findById({account, model}, model);
+	const setting = await ModelSetting.findModelSettingById(account, model);
 
 	if (setting) {
 		permissions.forEach((permissionUpdate) => {
