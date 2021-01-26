@@ -130,9 +130,9 @@ const invoicesData = [
 			"pending": false,
 			"proRata": true,
 			"id": "600ad1935912e2437c029b60",
-			"periodStart": "2021-01-25",
-			"periodEnd": "2021-01-25",
-			"nextPaymentDate": "2021-01-25"
+			"periodStart": null,
+			"periodEnd": null,
+			"nextPaymentDate": null
 	},
 	{
 			"_id": "600ad18f5912e2437c029aac",

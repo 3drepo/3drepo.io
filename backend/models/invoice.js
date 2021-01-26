@@ -39,11 +39,11 @@ const roundTo3DP = function(x) {
 };
 
 const dateToString = function(date) {
-	return moment(date).utc().format(C.DATE_FORMAT);
+	return date ? moment(date).utc().format(C.DATE_FORMAT) : null;
 };
 
 const dateToDateTimeString = function(date) {
-	return moment(date).utc().format(C.DATE_TIME_FORMAT);
+	return  date ? moment(date).utc().format(C.DATE_TIME_FORMAT) : null;
 };
 
 const addProp = (propName, funct) => (obj) => set(obj, propName, funct.apply(obj));

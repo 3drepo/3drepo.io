@@ -1155,6 +1155,6 @@ describe("Enrolling to a subscription", function () {
 			});
 		});
 	});
-	*/
 
+	*/
 });
