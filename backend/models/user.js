@@ -1003,7 +1003,9 @@ User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove) 
 };
 
 User.addTeamMember = async function(teamspace, userToAdd, job, permissions) {
-	await hasReachedLicenceLimit(teamspace);
+	const teamspaceUser = await User.findByUserName(teamspace);
+
+	await hasReachedLicenceLimit(teamspaceUser);
 
 	const userEntry = await User.findByUserName(userToAdd);
 
@@ -1015,17 +1017,17 @@ User.addTeamMember = async function(teamspace, userToAdd, job, permissions) {
 		throw (responseCodes.USER_NOT_ASSIGNED_JOB);
 	}
 
-	if (isMemberOfTeamspace(userEntry, teamspace.user)) {
+	if (isMemberOfTeamspace(userEntry, teamspace)) {
 		throw (responseCodes.USER_ALREADY_ASSIGNED);
 	}
 
-	await Role.grantTeamSpaceRoleToUser(userToAdd, teamspace.user);
+	await Role.grantTeamSpaceRoleToUser(userToAdd, teamspace);
 
 	const promises = [];
-	promises.push(addUserToJob(teamspace.user, job, userToAdd));
+	promises.push(addUserToJob(teamspace, job, userToAdd));
 
 	if (permissions && permissions.length) {
-		promises.push(AccountPermissions.updateOrCreate(teamspace, userToAdd, permissions));
+		promises.push(AccountPermissions.updateOrCreate(teamspaceUser, userToAdd, permissions));
 	}
 
 	await Promise.all(promises);

@@ -213,11 +213,10 @@ const applyProjectPermissions = (teamspace, invitedUser) => async ({ project_adm
 };
 
 const applyTeamspacePermissions = (invitedUser) => async ({ teamspace, job, permissions  }) => {
-	const teamspaceUser = await User.findByUserName(teamspace);
 	const teamPerms = permissions.teamspace_admin ? ["teamspace_admin"] : [];
 
 	try {
-		await User.addTeamMember(teamspaceUser, invitedUser, job, teamPerms);
+		await User.addTeamMember(teamspace, invitedUser, job, teamPerms);
 
 		if (!permissions.teamspace_admin) {
 			await Promise.all(permissions.projects.map(applyProjectPermissions(teamspace, invitedUser)));
