@@ -46,6 +46,23 @@ const isMemberOfTeamspace = function (user, teamspace) {
 	return user.roles.filter(role => role.db === teamspace && role.role === C.DEFAULT_MEMBER_ROLE).length > 0;
 };
 
+const hasReachedLicenceLimit = async function (teamspace) {
+	const Invitations =  require("./invitations");
+	const [userArr, invitations] = await Promise.all([
+		User.getAllUsersInTeamspace(teamspace.user),
+		Invitations.getInvitationsByTeamspace(teamspace.user)
+	]);
+
+	const limits =  UserBilling.getSubscriptionLimits(teamspace.customData.billing);
+
+	const seatedLicences = userArr.length + invitations.length;
+	const reachedLimit =  (limits.collaboratorLimit !== "unlimited" &&  seatedLicences >= limits.collaboratorLimit);
+
+	if (reachedLimit) {
+		throw (responseCodes.LICENCE_LIMIT_REACHED);
+	}
+};
+
 const COLL_NAME = "system.users";
 
 const User = {};
@@ -986,10 +1003,8 @@ User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove) 
 };
 
 User.addTeamMember = async function(teamspace, userToAdd, job, permissions) {
-	const reachedLimit = await this.hasReachedLicenceLimit(teamspace);
-	if (reachedLimit) {
-		throw (responseCodes.LICENCE_LIMIT_REACHED);
-	}
+	await hasReachedLicenceLimit(teamspace);
+
 	const userEntry = await User.findByUserName(userToAdd);
 
 	if (!userEntry) {
@@ -1043,17 +1058,9 @@ User.hasSufficientQuota = async (teamspace, size) => {
 	return spaceLeft >= size;
 };
 
-User.hasReachedLicenceLimit = async function (teamspace) {
-	const Invitations =  require("./invitations");
-	const [userArr, invitations] = await Promise.all([
-		User.getAllUsersInTeamspace(teamspace.user),
-		Invitations.getInvitationsByTeamspace(teamspace.user)
-	]);
-
-	const limits =   UserBilling.getSubscriptionLimits(teamspace.customData.billing);
-
-	const seatedLicences = userArr.length + invitations.length;
-	return (limits.collaboratorLimit !== "unlimited" &&  seatedLicences >= limits.collaboratorLimit);
+User.hasReachedLicenceLimitCheck = async function(teamspace) {
+	const teamspaceUser = this.findByUserName(teamspace);
+	await hasReachedLicenceLimit(teamspaceUser);
 };
 
 User.getMembers = async function (teamspace) {

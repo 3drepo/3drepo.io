@@ -94,11 +94,11 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 
 	const projectIds = projectsPermissions.map(pr => pr.project);
 
-	const [emailUser, teamspaceJob, projects, teamspaceObject] = await Promise.all([
+	const [emailUser, teamspaceJob, projects] = await Promise.all([
 		User.findByEmail(email),
 		Job.findByJob(teamspace, job),
 		Project.findByIds(teamspace, projectIds),
-		User.findByUserName(teamspace)
+		User.hasReachedLicenceLimitCheck(teamspace)
 	]);
 
 	if (emailUser) { // If there is already a user registered with that email
@@ -119,10 +119,6 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 
 	if (!validateModels(projectsPermissions, projects)) {
 		throw responseCodes.INVALID_MODEL_ID;
-	}
-
-	if (await User.hasReachedLicenceLimit(teamspaceObject)) {
-		throw responseCodes.LICENCE_LIMIT_REACHED;
 	}
 
 	permissions = cleanPermissions(permissions);
