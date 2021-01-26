@@ -1641,7 +1641,7 @@ router.get("/:model/meshes/:meshId", middlewares.hasReadAccessToModel, getMesh);
 function updateSettings(req, res, next) {
 	const place = utils.APIInfo(req);
 
-	return ModelSetting.updateSettings(req.params.account, req.params.model, req.body).then(modelSetting => {
+	return ModelSetting.updateModelSetting(req.params.account, req.params.model, req.body).then(modelSetting => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, modelSetting.properties);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

@@ -184,6 +184,7 @@ ModelSetting.batchUpdatePermissions = async function(account, batchPermissions =
 };
 
 ModelSetting.changePermissions = async function(account, model, permissions) {
+	// FIXME
 	const setting = await ModelSetting.findById({account, model}, model);
 
 	if (!setting) {
@@ -382,72 +383,58 @@ ModelSetting.populateUsersForMultiplePermissions = function (account, permission
 };
 
 ModelSetting.setModelImportFail = async function(account, model, errorReason) {
-	const setting = await ModelSetting.findById({account, model}, model);
+	const setting = await ModelSetting.findModelSettingById(account, model);
 
 	// mark model failed
-	setting.status = "failed";
-
-	if(setting.type === "toy" || setting.type === "sample") {
-		setting.timestamp = undefined;
+	const data = {
+		status: "failed",
+		errorReason
 	}
 
-	setting.errorReason = errorReason;
-	setting.markModified("errorReason");
+	if (setting.type === "toy" || setting.type === "sample") {
+		data.timestamp = undefined;
+	}
 
-	await setting.save();
-
-	return setting;
+	return ModelSetting.updateModelSetting(account, model, data);
 };
 
 ModelSetting.setModelStatus = async function(account, model, status) {
-	const setting = await ModelSetting.findById({account, model}, model);
-	setting.status = status;
-
-	await setting.save();
-
-	return setting;
+	return ModelSetting.updateModelSetting(account, model, { status });
 };
 
 ModelSetting.updateCorId = async function(account, model, correlationId, addTimestamp = false) {
-	const setting = await ModelSetting.findById({account, model}, model);
-	setting.corID = correlationId;
+	const data = { corID: correlationId };
 
 	if (addTimestamp) {
 		// FIXME: This is a temporary workaround, needed because federation
 		// doesn't update it's own timestamp (and also not wired into the chat)
-		setting.timestamp = new Date();
+		data.timestamp = new Date();
 	}
 
-	await setting.save();
+	await ModelSetting.updateModelSetting(account, model, data);
 
 	return correlationId;
 };
 
 ModelSetting.updateSubModels = async function(account, model, subModels) {
-	const setting = await ModelSetting.findById({account, model}, model);
-	setting.subModels = subModels;
-	setting.timestamp = new Date();
+	const data = {
+		subModels,
+		timestamp: new Date()
+	};
 
-	await setting.save();
-
-	return setting;
+	return ModelSetting.updateModelSetting(account, model, data);
 };
 
 ModelSetting.updateHeliSpeed = async function(account, model, newSpeed) {
-	const modelSetting = await ModelSetting.findById({account, model}, model);
-
-	if (!modelSetting) {
-		throw responseCodes.MODEL_NOT_FOUND;
-	}
-
 	if (!Number.isInteger(newSpeed)) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	return ModelSetting.updateProperties(account, model, {heliSpeed: newSpeed});
+	return ModelSetting.updateModelSetting(account, model, {heliSpeed: newSpeed});
 };
 
 ModelSetting.updateMultiplePermissions = async function(account, modelIds, updatedData) {
+	// FIXME
 	const modelsList = await ModelSetting.find({account}, {"_id" : {"$in" : modelIds}});
 
 	if (!modelsList.length) {
@@ -472,6 +459,7 @@ ModelSetting.updateMultiplePermissions = async function(account, modelIds, updat
 };
 
 ModelSetting.updatePermissions = async function(account, model, permissions = []) {
+	// FIXME
 	const setting = await ModelSetting.findById({account, model}, model);
 
 	if (setting) {
@@ -501,8 +489,13 @@ ModelSetting.updatePermissions = async function(account, model, permissions = []
 	}
 };
 
-ModelSetting.updateProperties = async function (account, model, updateObj) {
+ModelSetting.updateModelSetting = async function (account, model, updateObj) {
+	// FIXME
 	const setting = await ModelSetting.findById({account, model}, model);
+
+	if (!setting) {
+		throw responseCodes.MODEL_NOT_FOUND;
+	}
 
 	const views = new (require("./view"))();
 	const keys = Object.keys(updateObj);
@@ -540,16 +533,6 @@ ModelSetting.updateProperties = async function (account, model, updateObj) {
 	}
 	await setting.save();
 	return ModelSetting.clean(account, model, setting);
-};
-
-ModelSetting.updateSettings = async function(account, model, data) {
-	const modelSetting = await ModelSetting.findById({account, model}, model);
-
-	if (!modelSetting) {
-		throw responseCodes.MODEL_NOT_FOUND;
-	}
-
-	return ModelSetting.updateProperties(account, model, data);
 };
 
 module.exports = ModelSetting;
