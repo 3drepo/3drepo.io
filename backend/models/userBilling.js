@@ -24,7 +24,7 @@ const vat = require("./vat");
 const utils = require("../utils");
 const C = require("../constants");
 const config = require("../config");
-const Paypal = require("./paypal.js");
+// const Paypal = require("./paypal.js");
 const Invoice = require("./invoice.js");
 const responseCodes = require("../response_codes.js");
 const Mailer = require("../mailer/mailer");
@@ -141,6 +141,7 @@ billingSchema.statics.getNextPaymentDate = function (date) {
 	return next.toDate();
 };
 
+/*
 billingSchema.methods.cancelAgreement = function() {
 	return Paypal.cancelOldAgreement(this.billingAgreementId).then(() => {
 		this.billingAgreementId = undefined;
@@ -151,6 +152,7 @@ billingSchema.methods.cancelAgreement = function() {
 const getImmediatePaymentStartDate = function() {
 	return moment().utc().add(60, "second");
 };
+*/
 
 function getCleanedUpPayPalSubscriptions(currentSubs) {
 	const subs = [];
@@ -215,6 +217,7 @@ billingSchema.methods.writeSubscriptionChanges = function(newPlans) {
 
 };
 
+/*
 billingSchema.methods.updateSubscriptions = function (plans, user, billingUser, billingAddress) {
 	// User want to buy new subscriptions.
 	// Update subscriptions with new plans
@@ -283,6 +286,7 @@ billingSchema.methods.updateSubscriptions = function (plans, user, billingUser, 
 		}
 	});
 };
+*/
 
 function renewAndCleanSubscriptions(subs, newExpiryDate) {
 	const updatedSubs = [];
@@ -298,6 +302,8 @@ function renewAndCleanSubscriptions(subs, newExpiryDate) {
 	}
 	return updatedSubs;
 }
+
+/*
 
 billingSchema.methods.executeBillingAgreement = function(user) {
 
@@ -353,6 +359,7 @@ billingSchema.methods.executeBillingAgreement = function(user) {
 		}
 	});
 };
+*/
 
 const UserBilling = {};
 

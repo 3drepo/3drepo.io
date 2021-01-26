@@ -130,6 +130,8 @@ describe("Enrolling to a subscription", function () {
 
 	});
 
+
+	/*
 	const plans = {
 		"plans": [
 			{
@@ -1156,5 +1158,6 @@ describe("Enrolling to a subscription", function () {
 		});
 	});
 
+	Paypal commented out
 	*/
 });
