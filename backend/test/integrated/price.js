@@ -596,5 +596,8 @@ describe("Billing agreement price from PayPal", function () {
 				taxAmount: "40"
 			}, stub, done);
 		});
-	}); */
+	});
+
+	Paypal commented out
+	*/
 });
