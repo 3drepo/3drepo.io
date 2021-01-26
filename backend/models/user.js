@@ -47,7 +47,7 @@ const isMemberOfTeamspace = function (user, teamspace) {
 };
 
 const hasReachedLicenceLimit = async function (teamspace) {
-	const Invitations =  require("./invitations");
+	const Invitations = require("./invitations");
 	const [userArr, invitations] = await Promise.all([
 		User.getAllUsersInTeamspace(teamspace.user),
 		Invitations.getInvitationsByTeamspace(teamspace.user)
@@ -1061,7 +1061,7 @@ User.hasSufficientQuota = async (teamspace, size) => {
 };
 
 User.hasReachedLicenceLimitCheck = async function(teamspace) {
-	const teamspaceUser = this.findByUserName(teamspace);
+	const teamspaceUser = await this.findByUserName(teamspace);
 	await hasReachedLicenceLimit(teamspaceUser);
 };
 
