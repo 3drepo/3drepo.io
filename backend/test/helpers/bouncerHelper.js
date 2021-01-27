@@ -37,7 +37,7 @@ const replaceSharedDirPlaceHolder = (command) => {
  * handle queue message
  */
 function handleMessage(commandMsg, rid, callback){
-	const cmd = replaceSharedDirPlaceHoldeer(commandMsg);
+	const cmd = replaceSharedDirPlaceHolder(commandMsg);
 	// command start with importToy is handled here instead of passing it to bouncer
 	if(cmd.startsWith('importToy')){
 		const  args = cmd.split(' ');
