@@ -21,6 +21,7 @@
 	const router = express.Router({ mergeParams: true });
 	const responseCodes = require("../response_codes");
 	const middlewares = require("../middlewares/middlewares");
+	const AccountPermissions = require("../models/accountPermissions");
 	const User = require("../models/user");
 	const utils = require("../utils");
 	const _ = require("lodash");
@@ -141,7 +142,8 @@
 	function listPermissions(req, res, next) {
 		User.findByUserName(req.params.account)
 			.then(user => {
-				const permissions = user.toObject().customData.permissions;
+				const permissions = user.customData.permissions;
+
 				return User.getAllUsersInTeamspace(req.params.account).then(
 					users => {
 						users.forEach(_user => {
@@ -176,8 +178,8 @@
 				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OWNER_MUST_BE_ADMIN);
 			} else {
 				User.findByUserName(req.params.account)
-					.then(user => {
-						return user.customData.permissions.add(req.body);
+					.then(teamspace => {
+						return AccountPermissions.updateOrCreate(teamspace, req.body.user, req.body.permissions);
 					})
 					.then(permission => {
 						responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
@@ -187,6 +189,7 @@
 					});
 			}
 		} else {
+
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
 		}
 	}
@@ -197,8 +200,8 @@
 				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OWNER_MUST_BE_ADMIN);
 			} else {
 				User.findByUserName(req.params.account)
-					.then(user => {
-						return user.customData.permissions.update(req.params.user, req.body);
+					.then(teamspace => {
+						return AccountPermissions.update(teamspace, req.params.user, req.body.permissions);
 					})
 					.then(permission => {
 						responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
@@ -215,7 +218,7 @@
 	function deletePermission(req, res, next) {
 		User.findByUserName(req.params.account)
 			.then(user => {
-				return user.customData.permissions.remove(req.params.user);
+				return AccountPermissions.remove(user, req.params.user);
 			})
 			.then(() => {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});

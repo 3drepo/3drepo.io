@@ -68,6 +68,10 @@ describe("Billing agreement price from PayPal", function () {
 		});
 	});
 
+
+	/*
+	COMMENTED OUT FOR PAYPAL SUPPORT
+
 	function makeTest(options, stubs, done) {
 		const plans = {
 			"plans": [
@@ -592,5 +596,5 @@ describe("Billing agreement price from PayPal", function () {
 				taxAmount: "40"
 			}, stub, done);
 		});
-	});
+	}); */
 });

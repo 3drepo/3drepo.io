@@ -23,6 +23,7 @@ const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
 const utils = require("../utils");
 const db = require("../handler/db");
+const PermissionTemplates = require("./permissionTemplates");
 
 const MODELS_COLL = "settings";
 
@@ -209,23 +210,14 @@ ModelSetting.changePermissions = async function(account, model, permissions) {
 				throw responseCodes.INVALID_ARGUMENTS;
 			}
 
-			if (!dbUser.customData.permissionTemplates.findById(permission.permission)) {
+			if (!PermissionTemplates.findById(dbUser, permission.permission)) {
 				return promises.push(Promise.reject(responseCodes.PERM_NOT_FOUND));
 			}
 
-			promises.push(User.findByUserName(permission.user).then(assignedUser => {
-				if (!assignedUser) {
-					return Promise.reject(responseCodes.USER_NOT_FOUND);
-				}
-
-				const isMember = assignedUser.isMemberOfTeamspace(dbUser.user);
-				if (!isMember) {
-					return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
-				}
-
+			promises.push(User.teamspaceMemberCheck(permission.user, dbUser.user).then(() => {
 				const perm = setting.permissions.find(_perm => _perm.user === permission.user);
 
-				if(perm) {
+				if (perm) {
 					perm.permission = permission.permission;
 				}
 			}));

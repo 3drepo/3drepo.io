@@ -67,7 +67,7 @@ Job.addJob = async function(teamspace, jobData) {
 Job.addUserToJob = async function(teamspace, jobName, user) {
 	// Check if user is member of teamspace
 	const User = require("./user");
-	await User.teamspaceMemberCheck(teamspace, user);
+	await User.teamspaceMemberCheck(user, teamspace);
 
 	const job = await Job.findByJob(teamspace, jobName);
 

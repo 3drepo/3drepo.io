@@ -55,6 +55,8 @@ const CombinedStream = require("combined-stream");
 const stringToStream = require("string-to-stream");
 const { StreamBuffer } = require("./stream");
 const { BinToTriangleStringStream, BinToVector3dStringStream } = require("./binary");
+const PermissionTemplates = require("../permissionTemplates");
+const AccountPermissions = require("../accountPermissions");
 
 /** *****************************************************************************
  * Converts error code from repobouncerclient to a response error object.
@@ -810,7 +812,7 @@ async function getModelPermission(username, setting, account) {
 			return [];
 		}
 
-		const accountPerm = dbUser.customData.permissions.findByUser(username);
+		const accountPerm = AccountPermissions.findByUser(dbUser, username);
 		if(accountPerm && accountPerm.permissions) {
 			permissions = flattenPermissions(accountPerm.permissions);
 		}
@@ -827,7 +829,7 @@ async function getModelPermission(username, setting, account) {
 		const template = await findPermissionByUser(account, setting._id, username);
 
 		if(template) {
-			const permissionTemplate = dbUser.customData.permissionTemplates.findById(template.permission);
+			const permissionTemplate = PermissionTemplates.findById(dbUser, template.permission);
 
 			if(permissionTemplate && permissionTemplate.permissions) {
 				permissions = permissions.concat(flattenPermissions(permissionTemplate.permissions, true));
