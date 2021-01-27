@@ -29,6 +29,9 @@ const systemLogger = require("../logger").systemLogger;
 const Mailer = require("../mailer/mailer");
 const config = require("../config");
 const responseCodes = require("../response_codes");
+const Utils = require("../utils");
+
+const sharedSpacePH = "$SHARED_SPACE";
 
 class ImportQueue {
 	constructor() {
@@ -163,9 +166,9 @@ class ImportQueue {
 	importFile(corID, filePath, orgFileName, databaseName, modelName, userName, copy, tag, desc, importAnimations = true) {
 		const jsonFilename = `${this.sharedSpacePath}/${corID}.json`;
 
-		return this._moveFileToSharedSpace(corID, filePath, orgFileName, copy).then(obj => {
+		return this._moveFileToSharedSpace(corID, filePath, orgFileName, copy).then(newFilePath => {
 			const json = {
-				file: obj.filePath,
+				file: `${sharedSpacePH}/${newFilePath}`,
 				database: databaseName,
 				project: modelName,
 				owner: userName
@@ -184,7 +187,7 @@ class ImportQueue {
 			}
 
 			return this.writeFile(jsonFilename, JSON.stringify(json)).then(() => {
-				const msg = `import -f ${jsonFilename}`;
+				const msg = `import -f ${sharedSpacePH}/${corID}.json`;
 				return this._dispatchWork(corID, msg, true);
 			});
 
@@ -204,7 +207,7 @@ class ImportQueue {
 		return this.mkdir(this.sharedSpacePath).then(() => {
 			return this.mkdir(newFileDir).then(() => {
 				return this.writeFile(filename, JSON.stringify(defObj)).then(() => {
-					const msg = `genFed ${filename} ${account}`;
+					const msg = `genFed ${sharedSpacePH}/${corID}/obj.json ${account}`;
 					return this._dispatchWork(corID, msg);
 				});
 			});
@@ -248,7 +251,7 @@ class ImportQueue {
 					if (moveErr) {
 						reject(moveErr);
 					} else {
-						resolve({ filePath, newFileDir });
+						resolve(`${corID}/${newFileName}`);
 					}
 				});
 			});
@@ -310,23 +313,18 @@ class ImportQueue {
 	processCallbackMsg(res) {
 		systemLogger.logInfo("Job request id " + res.properties.correlationId
 				+ " returned with: " + res.content);
-		const resData = JSON.parse(res.content);
 
-		const resErrorCode = resData.value;
-		const resErrorMessage = resData.message;
-		const resDatabase = resData.database;
-		const resProject = resData.project;
-		const resUser = resData.user ? resData.user : "unknown";
+		const {value, message, database, project, user = "unknown" , status} = JSON.parse(res.content);
 
 		const ModelHelper = require("../models/helper/model");
 
-		if ("processing" === resData.status) {
-			ModelHelper.setStatus(resDatabase, resProject, "processing", resUser);
+		if (status && Utils.isString(status)) {
+			ModelHelper.setStatus(database, project, status, user);
 		} else {
-			if (resErrorCode === 0) {
-				ModelHelper.importSuccess(resDatabase, resProject, this.sharedSpacePath, resUser);
+			if (value === 0) {
+				ModelHelper.importSuccess(database, project, this.sharedSpacePath, user);
 			} else {
-				ModelHelper.importFail(resDatabase, resProject, this.sharedSpacePath, resUser, resErrorCode, resErrorMessage);
+				ModelHelper.importFail(database, project, this.sharedSpacePath, user, value, message);
 			}
 		}
 	}
