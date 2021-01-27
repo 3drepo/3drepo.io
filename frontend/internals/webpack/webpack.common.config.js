@@ -41,7 +41,9 @@ module.exports = (options) => {
         { from: 'manifest.json', to: '../' },
         { from: 'images/**', to: '../' },
         { from: 'icons/*', to: '../' },
-        { from: 'unity/**', to: '../' },
+		{ from: 'unity/**', to: '../' },
+		//backwards compatibility to Unity 2019 (added on 4.12)
+	  	{ from: 'unity/Build/unity.loader.js', to: '../unity/Build/UnityLoader.js' },
         { from: 'manifest-icons/*', to: '../' },
         { from: 'serviceWorkerExtras.js', to: '../' },
         { context: '../resources', from: '**/*.html', to: '../templates' },

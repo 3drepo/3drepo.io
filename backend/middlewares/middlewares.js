@@ -61,7 +61,7 @@
 		let limits;
 		return User.findByUserName(account).then(dbUser => {
 
-			limits = dbUser.customData.billing.getSubscriptionLimits();
+			limits = User.getSubscriptionLimits(dbUser);
 			return User.getTeamspaceSpaceUsed(account);
 
 		}).then(totalSize => {
@@ -75,7 +75,7 @@
 		return validateUserSession(req).then(() => {
 			const teamspace = req.params.account;
 			const user = req.session.user.username;
-			return User.teamspaceMemberCheck(teamspace, user).then(() => {
+			return User.teamspaceMemberCheck(user, teamspace).then(() => {
 				next();
 			}).catch(err => {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -94,7 +94,7 @@
 
 		return User.findByUserName(account).then(dbUser => {
 
-			limits = dbUser.customData.billing.getSubscriptionLimits();
+			limits = User.getSubscriptionLimits(dbUser);
 
 			return ModelSetting.findById({account}, model);
 

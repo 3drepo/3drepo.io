@@ -29,7 +29,6 @@
 	const Counter = require("./counter");
 	const Mailer = require("../mailer/mailer");
 	const vat = require("./vat");
-	const billingAddressInfo = require("./billingAddress");
 	const utils = require("../utils");
 	const C = require("../constants");
 	const responseCodes = require("../response_codes.js");
@@ -85,7 +84,7 @@
 		nextPaymentAmount: { type: SchemaTypes.Double, get: roundTo2DP, set: roundTo2DP },  // gross+tax
 		transactionId: String,
 		taxAmount: { type: SchemaTypes.Double, get: signAndRoundTo2DP, set: roundTo2DP },
-		info: billingAddressInfo,
+		info: Object,
 		state: {type: String, default: C.INV_INIT, enum: [C.INV_INIT, C.INV_PENDING, C.INV_COMPLETE]},
 		paypalPaymentToken: String
 	});

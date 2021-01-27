@@ -39,6 +39,7 @@ const Comment = require("./comment");
 const FileRef = require("./fileRef");
 const config = require("../config.js");
 const extensionRe = /\.(\w+)$/;
+const AccountPermissions = require("./accountPermissions");
 
 const getResponse = (responseCodeType) => (type) => responseCodes[responseCodeType + "_" + type];
 
@@ -183,7 +184,7 @@ class Ticket extends View {
 
 		job = (job || {})._id;
 
-		const accountPerm = dbUser.customData.permissions.findByUser(user);
+		const accountPerm = AccountPermissions.findByUser(dbUser, user);
 		const tsAdmin = accountPerm && accountPerm.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
 		const isAdmin = projAdmin || tsAdmin;
 		const hasOwnerJob = oldTicket.creator_role === job;

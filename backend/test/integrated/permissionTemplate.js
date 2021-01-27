@@ -68,19 +68,15 @@ describe("Permission templates", function () {
 
 	});
 
-	it("should fail to create duplicated template", function(done) {
-
-		agent.post(`/${username}/permission-templates`)
+	it("should fail to create duplicated template", async function() {
+		const {body} = await agent.post(`/${username}/permission-templates`)
 			.send(permission)
-			.expect(400, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.DUP_PERM_TEMPLATE.value);
-				done(err);
-			});
+			.expect(400);
 
+		expect(body.value).to.equal(responseCodes.DUP_PERM_TEMPLATE.value);
 	});
 
 	it("should able to create another template", function(done) {
-
 		agent.post(`/${username}/permission-templates`)
 			.send(permission1)
 			.expect(200, function(err, res) {

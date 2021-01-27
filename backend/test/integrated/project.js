@@ -580,6 +580,14 @@ describe("Projects", function () {
 			});
 	});
 
+	it("should fail to delete a project that doesnt exist", function(done) {
+		agent.delete(`/${username}/projects/notexist`)
+			.expect(404, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
+				done(err);
+			});
+	});
+
 	it("list all project models should succeed", function(done) {
 		agent.get(`/${username}/projects/${projectName}/models`)
 			.expect(200, function(err, res) {
@@ -588,12 +596,11 @@ describe("Projects", function () {
 			});
 	});
 
-	it("list all project models from project that doesn't exist should fail", function(done) {
-		agent.get(`/${username}/projects/notexist/models`)
-			.expect(404, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
-				done(err);
-			});
+	it("list all project models from project that doesn't exist should fail", async function() {
+		const { body } =  await agent.get(`/${username}/projects/notexist/models`)
+			.expect(404);
+
+		expect(body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
 	});
 
 	it("list project models matching query name should succeed", function(done) {

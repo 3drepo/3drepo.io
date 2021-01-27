@@ -25,6 +25,7 @@
 	const _ = require("lodash");
 	const nodeuuid = require("uuid/v1");
 	const ModelSetting = require("./modelSetting");
+	const PermissionTemplates = require("./permissionTemplates");
 
 	const PROJECTS_COLLECTION_NAME = "projects";
 
@@ -210,6 +211,8 @@
 	};
 
 	Project.listModels = async function(account, project, username, filters) {
+	schema.statics.listModels = async function(account, project, username, filters) {
+		const AccountPermissions = require("./accountPermissions");
 		const User = require("./user");
 		const ModelHelper = require("./helper/model");
 
@@ -229,7 +232,7 @@
 		let modelsSettings =  await ModelSetting.find({account}, { _id: { $in : projectObj.models }, ...filters});
 		let permissions = [];
 
-		const accountPerm = dbUser.customData.permissions.findByUser(username);
+		const accountPerm = AccountPermissions.findByUser(dbUser, username);
 		const projectPerm = projectObj.permissions.find(p=> p.user === username);
 
 		if (accountPerm && accountPerm.permissions) {
@@ -245,7 +248,7 @@
 
 			let settingsPermissions = [];
 			if(template) {
-				const permissionTemplate = dbUser.customData.permissionTemplates.findById(template.permission);
+				const permissionTemplate = PermissionTemplates.findById(dbUser, template.permission);
 				if (permissionTemplate && permissionTemplate.permissions) {
 					settingsPermissions = settingsPermissions.concat(ModelHelper.flattenPermissions(permissionTemplate.permissions, true));
 				}
