@@ -23,11 +23,12 @@ const replaceSharedDirPlaceHolder = (command) => {
 	// messages coming in has a placeholder for $SHARED_SPACE.
 	// we need to do a find/replace to make it use rabbitmq sharedDir instead
 	let cmd = command;
-	cmd = cmd.replace(tagToReplace, conf.cn_queue.shared_storage);
+	const sharedDir = conf.cn_queue.shared_storage;
+	cmd = cmd.replace(tagToReplace, sharedDir);
 	const cmdArr = cmd.split(/\s+/);
 	if (cmdArr[0] === 'import') {
 		const data = fs.readFileSync(cmdArr[2], 'utf8');
-		const result = data.replace(tagToReplace, config.rabbitmq.sharedDir);
+		const result = data.replace(tagToReplace, sharedDir);
 		fs.writeFileSync(cmdArr[2], result, 'utf8');
 	}
 	return cmd;
