@@ -89,7 +89,7 @@
 		FILE_IMPORT_LOAD_SCENE_INVALID_MESHES: { message: "Import failed: Untriangulated meshes", status: 400 },
 		FILE_IMPORT_NO_MESHES: { message: "Import failed: Model does not have geometry", status: 400 },
 		FILE_IMPORT_BAD_EXT: { message: "Import failed: Unsupported file type", status: 400 },
-		FILE_IMPORT_UNSUPPORTED_VERSION_BIM: { message: "Import failed: Unsupported navisworks plugin version", status: 400 },
+		FILE_IMPORT_UNSUPPORTED_VERSION_BIM: { message: "Import failed: Unsupported plugin version", status: 400 },
 		FILE_IMPORT_UNSUPPORTED_VERSION_FBX: { message: "Import failed: Unsupported FBX version (Supported: 2011, 2012, 2013)", status: 400 },
 		FILE_IMPORT_UNSUPPORTED_VERSION: { message: "Unsupported file version", status: 400 },
 		FILE_IMPORT_MAX_NODES_EXCEEDED: { message: "Import failed: Too many objects, consider splitting up the model", status: 400 },
