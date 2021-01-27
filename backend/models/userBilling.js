@@ -17,30 +17,10 @@
 
 "use strict";
 
-const mongoose = require("mongoose");
 const BillingAddress = require("./billingAddress");
-const moment = require("moment");
-const vat = require("./vat");
-const utils = require("../utils");
-const C = require("../constants");
 const config = require("../config");
-// const Paypal = require("./paypal.js");
-const Invoice = require("./invoice.js");
-const responseCodes = require("../response_codes.js");
-const Mailer = require("../mailer/mailer");
-const systemLogger = require("../logger.js").systemLogger;
 
-const billingSchema = mongoose.Schema({
-	subscriptions: Object,
-	billingInfo: Object,
-	// global billing info
-	billingAgreementId: String,
-	paypalPaymentToken: String,
-	billingUser: String,
-	lastAnniversaryDate: Date,
-	nextPaymentDate: Date
-});
-
+/*
 // Wrapper for VAT calculation and payment information
 const calTax = function(gross, countryCode, isBusiness) {
 	return gross * vat.getByCountryCode(countryCode, isBusiness);
@@ -141,7 +121,6 @@ billingSchema.statics.getNextPaymentDate = function (date) {
 	return next.toDate();
 };
 
-/*
 billingSchema.methods.cancelAgreement = function() {
 	return Paypal.cancelOldAgreement(this.billingAgreementId).then(() => {
 		this.billingAgreementId = undefined;
@@ -152,7 +131,116 @@ billingSchema.methods.cancelAgreement = function() {
 const getImmediatePaymentStartDate = function() {
 	return moment().utc().add(60, "second");
 };
-*/
+
+billingSchema.methods.activateSubscriptions = function(user, paymentInfo, raw) {
+	const User = require("./user");
+
+	if(this.nextPaymentDate > paymentInfo.nextPaymentDate) {
+		return Promise.reject({ message: "Received ipn message older than the one in database. Activation halt." });
+	}
+
+	const promise = Invoice.findByTransactionId(user, paymentInfo.transactionId).then(invoice => {
+		if(invoice) {
+			return Promise.reject({ message: "Duplicated ipn message. Activation halt."});
+		}
+
+	}).then(() => {
+		if(this.nextPaymentDate &&
+			moment(paymentInfo.nextPaymentDate).utc().startOf("date").toISOString() !== moment(this.nextPaymentDate).utc().startOf("date").toISOString()) {
+			this.lastAnniversaryDate = new Date(this.nextPaymentDate);
+		}
+
+		this.nextPaymentDate = moment(paymentInfo.nextPaymentDate).utc().startOf("date").toDate();
+
+		// set to to next 3rd of next month, give 3 days cushion
+		const expiredAt = moment(paymentInfo.nextPaymentDate).utc()
+			.add(3, "day")
+			.hours(0).minutes(0).seconds(0).milliseconds(0)
+			.toDate();
+
+		this.subscriptions.paypal = renewAndCleanSubscriptions(this.subscriptions.paypal, expiredAt);
+	});
+
+	let _invoice;
+	promise.then(() => {
+		return Invoice.findPendingInvoice(user, this.billingAgreementId).then(pendingInvoice => {
+			_invoice = pendingInvoice;
+
+			if(!_invoice) {
+
+				_invoice = Invoice.createInstance({ account: user });
+				return _invoice.initInvoice({
+					nextPaymentDate: this.nextPaymentDate,
+					billingAgreementId: this.billingAgreementId,
+					billingInfo: this.billingInfo,
+					startDate: this.lastAnniversaryDate,
+					account: user
+				});
+			}
+
+		}).then(() => {
+
+			_invoice.changeState(C.INV_COMPLETE, {
+				raw: raw,
+				gateway: paymentInfo.gateway,
+				currency: paymentInfo.currency,
+				amount: paymentInfo.amount,
+				billingAgreementId: this.billingAgreementId,
+				nextPaymentDate: this.nextPaymentDate,
+				taxAmount: paymentInfo.taxAmount,
+				nextPaymentAmount: paymentInfo.nextAmount,
+				transactionId: paymentInfo.transactionId
+			});
+
+			return _invoice.save();
+
+		}).then(invoice => {
+
+			return invoice.generatePDF().then(pdf => {
+
+				invoice.pdf = pdf;
+				// also save the pdf to database for ref.
+				return invoice.save();
+			});
+
+		}).then(invoice => {
+
+			// email
+			const attachments = [{
+				filename: `${invoice.createdAtDate}_invoice-${invoice.invoiceNo}.pdf`,
+				content: invoice.pdf
+			}];
+
+			// send invoice
+			const amount = invoice.amount;
+			const currency = invoice.currency;
+
+			return User.findByUserName(this.billingUser).then(billingUser => {
+
+				return Promise.all([
+					// make a copy to sales
+					Mailer.sendPaymentReceivedEmailToSales({
+						account: user,
+						amount: `${currency}${amount}`,
+						email: billingUser.customData.email,
+						invoiceNo: invoice.invoiceNo,
+						type: invoice.type
+					}, attachments),
+
+					Mailer.sendPaymentReceivedEmail(billingUser.customData.email, {
+						account: user,
+						amount: `${currency}${amount}`
+					}, attachments)
+				]);
+
+			}).catch(err => {
+				systemLogger.logError(`Email error - ${err.message}`);
+			});
+		});
+	});
+	return promise;
+
+};
 
 function getCleanedUpPayPalSubscriptions(currentSubs) {
 	const subs = [];
@@ -217,7 +305,6 @@ billingSchema.methods.writeSubscriptionChanges = function(newPlans) {
 
 };
 
-/*
 billingSchema.methods.updateSubscriptions = function (plans, user, billingUser, billingAddress) {
 	// User want to buy new subscriptions.
 	// Update subscriptions with new plans
@@ -286,7 +373,6 @@ billingSchema.methods.updateSubscriptions = function (plans, user, billingUser, 
 		}
 	});
 };
-*/
 
 function renewAndCleanSubscriptions(subs, newExpiryDate) {
 	const updatedSubs = [];
@@ -302,8 +388,6 @@ function renewAndCleanSubscriptions(subs, newExpiryDate) {
 	}
 	return updatedSubs;
 }
-
-/*
 
 billingSchema.methods.executeBillingAgreement = function(user) {
 
@@ -437,114 +521,4 @@ UserBilling.changeBillingAddress = async function(billing, billingAddress) {
 	return billing;
 };
 
-billingSchema.methods.activateSubscriptions = function(user, paymentInfo, raw) {
-	const User = require("./user");
-
-	if(this.nextPaymentDate > paymentInfo.nextPaymentDate) {
-		return Promise.reject({ message: "Received ipn message older than the one in database. Activation halt." });
-	}
-
-	const promise = Invoice.findByTransactionId(user, paymentInfo.transactionId).then(invoice => {
-		if(invoice) {
-			return Promise.reject({ message: "Duplicated ipn message. Activation halt."});
-		}
-
-	}).then(() => {
-		if(this.nextPaymentDate &&
-			moment(paymentInfo.nextPaymentDate).utc().startOf("date").toISOString() !== moment(this.nextPaymentDate).utc().startOf("date").toISOString()) {
-			this.lastAnniversaryDate = new Date(this.nextPaymentDate);
-		}
-
-		this.nextPaymentDate = moment(paymentInfo.nextPaymentDate).utc().startOf("date").toDate();
-
-		// set to to next 3rd of next month, give 3 days cushion
-		const expiredAt = moment(paymentInfo.nextPaymentDate).utc()
-			.add(3, "day")
-			.hours(0).minutes(0).seconds(0).milliseconds(0)
-			.toDate();
-
-		this.subscriptions.paypal = renewAndCleanSubscriptions(this.subscriptions.paypal, expiredAt);
-	});
-
-	let _invoice;
-	promise.then(() => {
-		return Invoice.findPendingInvoice(user, this.billingAgreementId).then(pendingInvoice => {
-			_invoice = pendingInvoice;
-
-			if(!_invoice) {
-
-				_invoice = Invoice.createInstance({ account: user });
-				return _invoice.initInvoice({
-					nextPaymentDate: this.nextPaymentDate,
-					billingAgreementId: this.billingAgreementId,
-					billingInfo: this.billingInfo,
-					startDate: this.lastAnniversaryDate,
-					account: user
-				});
-			}
-
-		}).then(() => {
-
-			_invoice.changeState(C.INV_COMPLETE, {
-				raw: raw,
-				gateway: paymentInfo.gateway,
-				currency: paymentInfo.currency,
-				amount: paymentInfo.amount,
-				billingAgreementId: this.billingAgreementId,
-				nextPaymentDate: this.nextPaymentDate,
-				taxAmount: paymentInfo.taxAmount,
-				nextPaymentAmount: paymentInfo.nextAmount,
-				transactionId: paymentInfo.transactionId
-			});
-
-			return _invoice.save();
-
-		}).then(invoice => {
-
-			return invoice.generatePDF().then(pdf => {
-
-				invoice.pdf = pdf;
-				// also save the pdf to database for ref.
-				return invoice.save();
-			});
-
-		}).then(invoice => {
-
-			// email
-			const attachments = [{
-				filename: `${invoice.createdAtDate}_invoice-${invoice.invoiceNo}.pdf`,
-				content: invoice.pdf
-			}];
-
-			// send invoice
-			const amount = invoice.amount;
-			const currency = invoice.currency;
-
-			return User.findByUserName(this.billingUser).then(billingUser => {
-
-				return Promise.all([
-					// make a copy to sales
-					Mailer.sendPaymentReceivedEmailToSales({
-						account: user,
-						amount: `${currency}${amount}`,
-						email: billingUser.customData.email,
-						invoiceNo: invoice.invoiceNo,
-						type: invoice.type
-					}, attachments),
-
-					Mailer.sendPaymentReceivedEmail(billingUser.customData.email, {
-						account: user,
-						amount: `${currency}${amount}`
-					}, attachments)
-				]);
-
-			}).catch(err => {
-				systemLogger.logError(`Email error - ${err.message}`);
-			});
-		});
-	});
-	return promise;
-
-};
-
-module.exports = { ...billingSchema, ...UserBilling };
+module.exports = UserBilling;
