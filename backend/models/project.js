@@ -43,8 +43,6 @@
 		if (C.PROJECT_DEFAULT_ID === projectName) {
 			throw responseCodes.INVALID_PROJECT_NAME;
 		}
-
-		return true;
 	}
 
 	function checkPermissionName(permissions) {
@@ -55,8 +53,6 @@
 				throw responseCodes.INVALID_PERM;
 			}
 		}
-
-		return true;
 	}
 
 	function checkProjectNameValid(project) {
@@ -129,9 +125,9 @@
 			}];
 		}
 
-		await checkInvalidName(name);
+		checkInvalidName(name);
 		await checkDupName(teamspace, project);
-		await checkPermissionName(project.permissions);
+		checkPermissionName(project.permissions);
 
 		await db.insert(teamspace, PROJECTS_COLLECTION_NAME, project);
 
@@ -358,9 +354,9 @@
 
 		await Promise.all(userPromises);
 
-		await checkInvalidName(projectName);
+		checkInvalidName(projectName);
 		await checkDupName(account, project);
-		await checkPermissionName(project.permissions);
+		checkPermissionName(project.permissions);
 
 		await db.update(account, PROJECTS_COLLECTION_NAME, {name: projectName}, project);
 
