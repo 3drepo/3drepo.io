@@ -480,8 +480,7 @@ ModelSetting.updatePermissions = async function(account, model, permissions = []
 };
 
 ModelSetting.updateModelSetting = async function (account, model, updateObj) {
-	// FIXME
-	const setting = await ModelSetting.findById({account, model}, model);
+	const setting = await ModelSetting.findModelSettingById(account, model);
 
 	if (!setting) {
 		throw responseCodes.MODEL_NOT_FOUND;
@@ -489,39 +488,64 @@ ModelSetting.updateModelSetting = async function (account, model, updateObj) {
 
 	const views = new (require("./view"))();
 	const keys = Object.keys(updateObj);
-	for(let i = 0; i < keys.length; ++i) {
+	const toUpdate = {};
+	const toUnset = {};
+
+	for (let i = 0; i < keys.length; i++) {
 		const key = keys[i];
-		if(!updateObj[key]) {
+
+		if (updateObj[key]) {
+			switch (key) {
+				case "code":
+					if (!MODEL_CODE_REGEX.test(updateObj[key])) {
+						throw responseCodes.INVALID_MODEL_CODE;
+					}
+				case "unit":
+					if (utils.isString(updateObj[key])) {
+						if (!toUpdate.properties) {
+							toUpdate.properties = {};
+						}
+						toUpdate.properties[key] = updateObj[key];
+						setting.properties[key] = updateObj[key];
+					} else {
+						throw responseCodes.INVALID_ARGUMENTS;
+					}
+					break;
+				case "defaultView":
+					if (utils.isString(updateObj[key]) && utils.isUUID(updateObj[key])) {
+						const res = await views.findByUID(account, model, updateObj[key], {_id: 1});
+						toUpdate[key] = res._id;
+						setting[key] = res._id;
+					} else {
+						throw responseCodes.INVALID_ARGUMENTS;
+					}
+					break;
+				default:
+					toUpdate[key] = updateObj[key];
+					setting[key] = updateObj[key];
+			}
+		} else {
 			if (key === "defaultView") {
+				toUnset[key] = 1;
 				setting[key] = undefined;
 			}
-			continue;
-		}
-		switch (key) {
-			case "code":
-				if (!MODEL_CODE_REGEX.test(updateObj[key])) {
-					throw responseCodes.INVALID_MODEL_CODE;
-				}
-			case "unit":
-				if (utils.isString(updateObj[key])) {
-					setting.properties[key] = updateObj[key];
-				} else {
-					throw responseCodes.INVALID_ARGUMENTS;
-				}
-				break;
-			case "defaultView":
-				if (utils.isString(updateObj[key]) && utils.isUUID(updateObj[key])) {
-					const res = await views.findByUID(account, model, updateObj[key], {_id: 1});
-					setting[key] = res._id;
-				} else {
-					throw responseCodes.INVALID_ARGUMENTS;
-				}
-				break;
-			default:
-				setting[key] = updateObj[key];
 		}
 	}
-	await setting.save();
+
+	const updateBson = {};
+
+	if (Object.keys(toUpdate).length > 0) {
+		updateBson.$set = toUpdate;
+	}
+
+	if (Object.keys(toUnset).length > 0) {
+		updateBson.$unset = toUnset;
+	}
+
+	if (Object.keys(updateBson).length > 0) {
+		await db.update(account, MODELS_COLL, {_id: model}, updateBson);
+	}
+
 	return ModelSetting.clean(account, model, setting);
 };
 
