@@ -548,6 +548,10 @@ router.put("/:account", middlewares.isAccountAdmin, updateUser);
 router.put("/:account/password", resetPassword);
 
 function createSession(place, req, res, next, user) {
+	const termsPrompt = !User.hasReadLatestTerms(user);
+	user = { username: user.user, flags:{termsPrompt } };
+	req.body.username = user.username;
+
 	regenerateAuthSession(req, config, user)
 		.then(() => getSessionsByUsername(user.username))
 		.then(sessions => { // Remove other sessions with the same username
@@ -566,9 +570,11 @@ function createSession(place, req, res, next, user) {
 			});
 
 			return removeSessions(ids);
-		}).then(() =>
-			responseCodes.respond(place, req, res, next, responseCodes.OK, user)
-		).catch((err) => {
+		}).then(() => {
+
+			responseCodes.respond(place, req, res, next, responseCodes.OK, user);
+
+		}).catch((err) => {
 			responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {username: user.username});
 		});
 }
@@ -585,22 +591,7 @@ function login(req, res, next) {
 		}
 
 		User.authenticate(req[C.REQ_REPO].logger, req.body.username, req.body.password).then(user => {
-
-			const responseData = { username: user.user };
-
-			req[C.REQ_REPO].logger.logInfo("User is logged in", responseData);
-
-			responseData.flags = {};
-
-			responseData.flags.termsPrompt = !user.hasReadLatestTerms();
-
-			user.customData.lastLoginAt = new Date();
-
-			req.body.username = user.user;
-
-			user.save().then(() => {
-				createSession(responsePlace, req, res, next, responseData);
-			});
+			createSession(responsePlace, req, res, next, user);
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
 		});
@@ -650,9 +641,7 @@ function updateUser(req, res, next) {
 
 	} else {
 		// Update user info
-		User.findByUserName(req.params[C.REPO_REST_API_ACCOUNT]).then(user => {
-			return user.updateInfo(req.body);
-		}).then(() => {
+		User.updateInfo(req.params[C.REPO_REST_API_ACCOUNT], req.body).then(() => {
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
@@ -796,20 +785,17 @@ function getAvatar(req, res, next) {
 
 	// Update user info
 	User.findByUserName(req.params[C.REPO_REST_API_ACCOUNT]).then(user => {
+		const avatar = User.getAvatar(user);
 
-		if(!user.getAvatar()) {
+		if(!avatar) {
 			return Promise.reject({resCode: responseCodes.USER_DOES_NOT_HAVE_AVATAR });
 		}
 
-		return Promise.resolve(user.getAvatar());
-
+		return Promise.resolve(avatar);
 	}).then(avatar => {
-
 		res.write(avatar.data.buffer);
 		res.end();
-
 	}).catch((err) => {
-
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
@@ -874,35 +860,26 @@ function resetPassword(req, res, next) {
 	}
 }
 
-function listUserInfo(req, res, next) {
+async function listUserInfo(req, res, next) {
 
 	const responsePlace = utils.APIInfo(req);
-	let user;
+	const user = await User.findByUserName(req.params.account);
 
-	User.findByUserName(req.params.account).then(_user => {
+	if(!user) {
+		throw {resCode: responseCodes.USER_NOT_FOUND};
+	}
 
-		if(!_user) {
-			return Promise.reject({resCode: responseCodes.USER_NOT_FOUND});
-		}
+	const accounts = await User.listAccounts(user);
 
-		user = _user;
-		return user.listAccounts();
+	const {firstName, lastName, email, avatar, billing: { billingInfo }}  = user.customData;
 
-	}).then(databases => {
-
-		const customData = user.customData.toObject();
-
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
-			accounts: databases,
-			firstName: customData.firstName,
-			lastName: customData.lastName,
-			email: customData.email,
-			billingInfo: customData.billing.billingInfo,
-			hasAvatar: customData.avatar ? true : false
-		});
-
-	}).catch(err => {
-		responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode ? {} : err);
+	responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
+		accounts,
+		firstName,
+		lastName,
+		email,
+		billingInfo: billingInfo,
+		hasAvatar:  Boolean(avatar)
 	});
 }
 
@@ -933,7 +910,9 @@ function listInfo(req, res, next) {
 		});
 
 	} else {
-		listUserInfo(req, res, next);
+		listUserInfo(req, res, next).catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode ? {} : err);
+		});
 	}
 }
 

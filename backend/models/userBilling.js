@@ -18,7 +18,7 @@
 "use strict";
 
 const mongoose = require("mongoose");
-const billingAddressInfo = require("./billingAddress");
+const BillingAddress = require("./billingAddress");
 const moment = require("moment");
 const vat = require("./vat");
 const utils = require("../utils");
@@ -32,7 +32,7 @@ const systemLogger = require("../logger.js").systemLogger;
 
 const billingSchema = mongoose.Schema({
 	subscriptions: Object,
-	billingInfo: { type: billingAddressInfo, default: {}  },
+	billingInfo: Object,
 	// global billing info
 	billingAgreementId: String,
 	paypalPaymentToken: String,
@@ -220,7 +220,7 @@ billingSchema.methods.updateSubscriptions = function (plans, user, billingUser, 
 	// Update subscriptions with new plans
 	this.billingUser = billingUser;
 
-	return this.billingInfo.changeBillingAddress(billingAddress).then(() => {
+	return this.changeBillingAddress(this, billingAddress).then(() => {
 		this.markModified("billingInfo");
 		return this.writeSubscriptionChanges(plans);
 
@@ -354,32 +354,31 @@ billingSchema.methods.executeBillingAgreement = function(user) {
 	});
 };
 
-billingSchema.methods.getActiveSubscriptions = function() {
+const UserBilling = {};
+
+UserBilling.getActiveSubscriptions = function(userBilling) {
 	const res = { basic: config.subscriptions.basic};
-	if(this.subscriptions) {
-		Object.keys(this.subscriptions).forEach(key => {
-			if(key === "paypal") {
-				res.paypal = [];
-				this.subscriptions.paypal.forEach(ppPlan => {
-					if(!ppPlan.expiryDate || ppPlan.expiryDate > Date.now()) {
-						res.paypal.push(ppPlan);
-					}
-				});
-			} else {
-				if(!this.subscriptions[key].expiryDate ||
-					this.subscriptions[key].expiryDate > Date.now()) {
-					res[key] = this.subscriptions[key];
+	Object.keys(userBilling.subscriptions || {subscriptions:{}}).forEach(key => {
+		if(key === "paypal") {
+			res.paypal = [];
+			userBilling.subscriptions.paypal.forEach(ppPlan => {
+				if(!ppPlan.expiryDate || ppPlan.expiryDate > Date.now()) {
+					res.paypal.push(ppPlan);
 				}
-
+			});
+		} else {
+			if(!userBilling.subscriptions[key].expiryDate ||
+				userBilling.subscriptions[key].expiryDate > Date.now()) {
+				res[key] = userBilling.subscriptions[key];
 			}
-		});
 
-	}
+		}
+	});
+
 	return res;
 };
 
-billingSchema.methods.getSubscriptionLimits = function() {
-
+UserBilling.getSubscriptionLimits = function(userBilling) {
 	const sumLimits = {};
 	if(config.subscriptions.basic) {
 		sumLimits.spaceLimit = config.subscriptions.basic.data;
@@ -393,11 +392,11 @@ billingSchema.methods.getSubscriptionLimits = function() {
 	if(!sumLimits.collaboratorLimit) {
 		sumLimits.collaboratorLimit = 0;
 	}
-	if(this.subscriptions)	{
-		Object.keys(this.subscriptions).forEach(key => {
+	if(userBilling.subscriptions)	{
+		Object.keys(userBilling.subscriptions).forEach(key => {
 			if(key === "paypal") {
-				if (this.subscriptions.paypal.length > 0) {
-					this.subscriptions.paypal.forEach(ppPlan => {
+				if (userBilling.subscriptions.paypal.length > 0) {
+					userBilling.subscriptions.paypal.forEach(ppPlan => {
 						const plan = config.subscriptions.plans[ppPlan.plan];
 						if(plan &&
 							(!ppPlan.expiryDate || ppPlan.expiryDate > Date.now())) {
@@ -410,12 +409,12 @@ billingSchema.methods.getSubscriptionLimits = function() {
 					});
 				}
 			} else {
-				if(!this.subscriptions[key].expiryDate ||
-					this.subscriptions[key].expiryDate > Date.now()) {
-					sumLimits.spaceLimit += this.subscriptions[key].data;
+				if(!userBilling.subscriptions[key].expiryDate ||
+					userBilling.subscriptions[key].expiryDate > Date.now()) {
+					sumLimits.spaceLimit += userBilling.subscriptions[key].data;
 					if(sumLimits.collaboratorLimit !== "unlimited") {
-						sumLimits.collaboratorLimit = this.subscriptions[key].collaborators === "unlimited" ?
-							"unlimited" : sumLimits.collaboratorLimit + this.subscriptions[key].collaborators;
+						sumLimits.collaboratorLimit = userBilling.subscriptions[key].collaborators === "unlimited" ?
+							"unlimited" : sumLimits.collaboratorLimit + userBilling.subscriptions[key].collaborators;
 					}
 				}
 
@@ -424,6 +423,11 @@ billingSchema.methods.getSubscriptionLimits = function() {
 	}
 
 	return sumLimits;
+};
+
+UserBilling.changeBillingAddress = async function(billing, billingAddress) {
+	billing.billingInfo = await BillingAddress.changeBillingAddress(billing.billingInfo, billingAddress);
+	return billing;
 };
 
 billingSchema.methods.activateSubscriptions = function(user, paymentInfo, raw) {
@@ -536,4 +540,4 @@ billingSchema.methods.activateSubscriptions = function(user, paymentInfo, raw) {
 
 };
 
-module.exports = billingSchema;
+module.exports = { ...billingSchema, ...UserBilling };
