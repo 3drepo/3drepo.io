@@ -17,10 +17,27 @@ const logger = new (winston.Logger)({
 	transports: [new (winston.transports.File)({'filename': conf.logLocation? conf.logLocation : "./bouncer_worker.log"})]
 });
 
+const replaceSharedDirPlaceHolder = (command) => {
+	const tagToReplace = '$SHARED_SPACE';
+	// messages coming in has a placeholder for $SHARED_SPACE.
+	// we need to do a find/replace to make it use rabbitmq sharedDir instead
+	let cmd = command;
+	cmd = cmd.replace(tagToReplace, conf.cn_queue.shared_storage);
+	const cmdArr = cmd.split(/\s+/);
+	if (cmdArr[0] === 'import') {
+		const data = fs.readFileSync(cmdArr[2], 'utf8');
+		const result = data.replace(tagToReplace, config.rabbitmq.sharedDir);
+		fs.writeFileSync(cmdArr[2], result, 'utf8');
+	}
+	return cmd;
+};
+
+
 /**
  * handle queue message
  */
-function handleMessage(cmd, rid, callback){
+function handleMessage(commandMsg, rid, callback){
+	const cmd = replaceSharedDirPlaceHoldeer(commandMsg);
 	// command start with importToy is handled here instead of passing it to bouncer
 	if(cmd.startsWith('importToy')){
 		const  args = cmd.split(' ');
