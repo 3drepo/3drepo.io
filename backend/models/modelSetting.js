@@ -185,8 +185,7 @@ ModelSetting.batchUpdatePermissions = async function(account, batchPermissions =
 };
 
 ModelSetting.changePermissions = async function(account, model, permissions) {
-	// FIXME
-	const setting = await ModelSetting.findById({account, model}, model);
+	const setting = await ModelSetting.findModelSettingById(account, model);
 
 	if (!setting) {
 		throw responseCodes.MODEL_NOT_FOUND;
@@ -224,8 +223,7 @@ ModelSetting.changePermissions = async function(account, model, permissions) {
 		});
 
 		return Promise.all(promises).then(() => {
-			setting.permissions = permissions;
-			return setting.save();
+			return ModelSetting.updateModelSetting(account, model, { permissions });
 		});
 	});
 };
@@ -452,35 +450,36 @@ ModelSetting.updateMultiplePermissions = async function(account, modelIds, updat
 ModelSetting.updatePermissions = async function(account, model, permissions = []) {
 	const setting = await ModelSetting.findModelSettingById(account, model);
 
-	if (setting) {
-		permissions.forEach((permissionUpdate) => {
-			if (!setting.permissions) {
-				setting.permissions = [];
-			}
-
-			const userIndex = setting.permissions.findIndex(x => x.user === permissionUpdate.user);
-
-			if (-1 !== userIndex) {
-				if ("" !== permissionUpdate.permission) {
-					setting.permissions[userIndex].permission = permissionUpdate.permission;
-				} else {
-					setting.permissions.splice(userIndex, 1);
-				}
-			} else if ("" !== permissionUpdate.permission) {
-				setting.permissions.push(permissionUpdate);
-			}
-		});
-
-		const updatedSetting = await ModelSetting.changePermissions(account, model, setting.permissions);
-
-		return { "status": updatedSetting.status };
-	} else {
-		return Promise.reject(responseCodes.MODEL_NOT_FOUND);
+	if (!setting) {
+		throw responseCodes.MODEL_NOT_FOUND;
 	}
+
+	permissions.forEach((permissionUpdate) => {
+		if (!setting.permissions) {
+			setting.permissions = [];
+		}
+
+		const userIndex = setting.permissions.findIndex(x => x.user === permissionUpdate.user);
+
+		if (-1 !== userIndex) {
+			if ("" !== permissionUpdate.permission) {
+				setting.permissions[userIndex].permission = permissionUpdate.permission;
+			} else {
+				setting.permissions.splice(userIndex, 1);
+			}
+		} else if ("" !== permissionUpdate.permission) {
+			setting.permissions.push(permissionUpdate);
+		}
+	});
+
+	const updatedSetting = await ModelSetting.changePermissions(account, model, setting.permissions);
+
+	return { "status": updatedSetting.status };
 };
 
 ModelSetting.updateModelSetting = async function (account, model, updateObj) {
-	const setting = await ModelSetting.findModelSettingById(account, model);
+	// const setting = await ModelSetting.findModelSettingById(account, model);
+	const setting = await ModelSetting.findById({account, model}, model);
 
 	if (!setting) {
 		throw responseCodes.MODEL_NOT_FOUND;
@@ -543,7 +542,8 @@ ModelSetting.updateModelSetting = async function (account, model, updateObj) {
 	}
 
 	if (Object.keys(updateBson).length > 0) {
-		await db.update(account, MODELS_COLL, {_id: model}, updateBson);
+		// await db.update(account, MODELS_COLL, {_id: utils.stringToUUID(model)}, updateBson);
+		await setting.save();
 	}
 
 	return ModelSetting.clean(account, model, setting);
