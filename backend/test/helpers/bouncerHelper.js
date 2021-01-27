@@ -2,6 +2,7 @@
 const amqp = require("amqplib/callback_api");
 const conf = require("../../config");
 const path = require("path");
+const fs = require("fs");
 const winston = require('winston');
 //Note: these error codes corresponds to error_codes.h in bouncerclient
 const ERRCODE_BOUNCER_CRASH = 12;
