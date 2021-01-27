@@ -542,8 +542,7 @@ ModelSetting.updateModelSetting = async function (account, model, updateObj) {
 	}
 
 	if (Object.keys(updateBson).length > 0) {
-		// await db.update(account, MODELS_COLL, {_id: utils.stringToUUID(model)}, updateBson);
-		await setting.save();
+		await db.update(account, MODELS_COLL, {_id: model}, updateBson);
 	}
 
 	return ModelSetting.clean(account, model, setting);
