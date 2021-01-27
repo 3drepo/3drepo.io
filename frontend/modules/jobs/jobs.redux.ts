@@ -98,5 +98,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[JobsTypes.CREATE_JOB_SUCCESS]: createJobSuccess,
 	[JobsTypes.UPDATE_JOB_SUCCESS]: updateJobSuccess,
 	[JobsTypes.REMOVE_JOB_SUCCESS]: removeJobSuccess,
-	[JobsTypes.GET_MY_JOB_SUCCESS]: getMyJobSuccess
+	[JobsTypes.GET_MY_JOB_SUCCESS]: getMyJobSuccess,
+	[JobsTypes.SET_JOBS_PENDING]: setJobsPending
 });

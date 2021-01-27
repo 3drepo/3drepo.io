@@ -47,14 +47,19 @@
 		});
 	};
 
-	Handler.find = async function (database, colName, query, projection) {
+	Handler.find = async function (database, colName, query, projection = {}, sort = {}) {
 		const collection = await Handler.getCollection(database, colName);
-		const results = await collection.find(query, projection);
-		return results.toArray();
+		// NOTE: v3.6 driver find take sort/projection as 2nd argument like findOne
+		return collection.find(query).project(projection).sort(sort).toArray();
 	};
 
-	Handler.findOne = async function (database, colName, query, projection) {
+	Handler.findOne = async function (database, colName, query, projection = {}, sort) {
 		const collection = await Handler.getCollection(database, colName);
+		// NOTE: documentation states it should be { projection, sort } so when we upgrade we may have to change.
+		//       Also: projection stops working if you pass in a sort with empty obj.
+		if(sort) {
+			projection.sort = sort;
+		}
 		return collection.findOne(query, projection);
 	};
 
