@@ -189,7 +189,7 @@ export class Processing {
 			++nodeIdx;
 		}
 
-		const { unhighlightedObjects, meshToHide } = this.hideNodes(toHide, true);
+		const { unhighlightedObjects, meshesToHide } = this.hideNodes(toHide, true);
 		const { meshesToShow, meshesToHide: extraMeshesToHide }  = this.showNodes(toShow, ifcSpacesHidden);
 		mergeArrays(meshesToHide, extraMeshesToHide);
 
@@ -198,7 +198,7 @@ export class Processing {
 			this.updateParentsSelection(parentNodesByLevel[i]);
 		}
 
-		return { unhighlightedObjects, meshToHide, meshToShow};
+		return { unhighlightedObjects, meshesToHide, meshesToShow};
 	}
 
 	private hideNodes = (nodesId, skipParent = false) => {
