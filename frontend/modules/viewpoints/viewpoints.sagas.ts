@@ -38,6 +38,7 @@ import { SequencesActions } from '../sequences';
 import { SnackbarActions } from '../snackbar';
 import { dispatch } from '../store';
 import { selectHiddenGeometryVisible, TreeActions } from '../tree';
+import { waitForTreeToBeReady } from '../tree/tree.sagas';
 import { selectColorOverrides, selectTransformations, ViewerGuiActions } from '../viewerGui';
 import { PRESET_VIEW } from './viewpoints.constants';
 import { ViewpointsActions, ViewpointsTypes } from './viewpoints.redux';
@@ -220,7 +221,7 @@ export function* showPreset({preset}) {
 
 export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 	if (view) {
-		yield Viewer.isViewerReady();
+		yield waitForTreeToBeReady();
 
 		const viewpoint = view.viewpoint;
 		if (!viewpoint) {

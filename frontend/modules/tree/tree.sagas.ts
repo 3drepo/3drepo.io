@@ -96,7 +96,7 @@ function* handleMetadata(node: any) {
 	}
 }
 
-function* waitForTreeToBeReady() {
+export function* waitForTreeToBeReady() {
 	const isReady = yield select(selectIsTreeProcessed);
 
 	if (!isReady) {
