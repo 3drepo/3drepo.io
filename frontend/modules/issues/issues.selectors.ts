@@ -60,9 +60,15 @@ export const selectActiveIssueId = createSelector(
 	selectComponentState, (state) => state.activeIssue
 );
 
+export const selectActiveIssue = createSelector(
+	selectIssuesMap, selectActiveIssueId, (issuesMap, activeIssueId) => {
+		return issuesMap[activeIssueId] ;
+	}
+);
+
 export const selectActiveIssueDetails = createSelector(
-	selectIssuesDomain, selectComponentState, (state, componentState) => {
-		return state.issuesMap[componentState.activeIssue] || componentState.newIssue;
+	selectActiveIssue, selectComponentState, (activeIssue, componentState) => {
+		return activeIssue || componentState.newIssue;
 	}
 );
 
