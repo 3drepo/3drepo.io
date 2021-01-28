@@ -1,5 +1,5 @@
 /**
- *	Copyright (C) 2014 3D Repo Ltd
+ *	Copyright (C) 2021 3D Repo Ltd
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU Affero General Public License as
@@ -127,19 +127,17 @@ ModelSetting.changePermissions = async function(account, model, permissions) {
 
 	const User = require("./user");
 
-	if (Object.prototype.toString.call(permissions) !== "[object Array]") {
+	if (!Array.isArray(permissions)) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
 	// get list of valid permission name
 	permissions = _.uniq(permissions, "user");
 	return User.findByUserName(account).then(dbUser => {
-
 		const promises = [];
 
 		permissions.forEach(permission => {
-			if (Object.prototype.toString.call(permission.user) !== "[object String]" ||
-					Object.prototype.toString.call(permission.permission) !== "[object String]") {
+			if (!utils.isString(permission.user) || !utils.isString(permission.permission)) {
 				throw responseCodes.INVALID_ARGUMENTS;
 			}
 
@@ -198,13 +196,12 @@ ModelSetting.createNewSetting = async function(teamspace, modelName, data) {
 	const modelID = utils.generateUUID({string: true});
 
 	const setting = {
+		_id: modelID,
+		name: modelName,
+		desc: data.desc,
+		type: data.type,
 		account: teamspace
 	};
-
-	setting._id = modelID;
-	setting.name = modelName;
-	setting.desc = data.desc;
-	setting.type = data.type;
 
 	if (data.defaultView) {
 		if (utils.isUUID(data.defaultView)) {
@@ -238,7 +235,7 @@ ModelSetting.createNewSetting = async function(teamspace, modelName, data) {
 		setting.properties = { code: data.code };
 	}
 
-	if (Object.prototype.toString.call(data.unit) === "[object String]") {
+	if (utils.isString(data.unit)) {
 		if (!setting.properties) {
 			setting.properties = {};
 		}
@@ -351,7 +348,9 @@ ModelSetting.isFederation = async function(account, model) {
 
 // FIXME when project changes are merged, consider using func in project
 ModelSetting.isModelNameExists = async function(account, models, modelName) {
-	const count = await ModelSetting.count({ account }, {name: modelName, _id: {"$in": models}});
+	const coll = await db.getCollection(account, MODELS_COLL);
+	const count = await coll.find({name: modelName, _id: {"$in": models}}).count();
+
 	return count > 0;
 };
 
