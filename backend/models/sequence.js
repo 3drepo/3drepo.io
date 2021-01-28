@@ -24,6 +24,8 @@ const FileRef = require("./fileRef");
 const History = require("./history");
 const { getRefNodes } = require("./ref");
 
+const sequenceCol = (modelId) => `${modelId}.sequences`;
+
 class Sequence {
 
 	clean(toClean, keys) {
@@ -98,9 +100,7 @@ class Sequence {
 
 		const submodelSequencesPromises = Promise.all(submodels.map((submodel) => this.getList(account, submodel, "master", null, cleanResponse)));
 
-		const dbCol = await db.getCollection(account, model + ".sequences");
-
-		const sequences = await (dbCol.find({"rev_id": history._id}).toArray());
+		const sequences = await db.find(account, sequenceCol(model), {"rev_id": history._id});
 		sequences.forEach((sequence) => {
 			sequence.teamspace = account;
 			sequence.model = model;
@@ -114,6 +114,14 @@ class Sequence {
 		submodelSequences.forEach((s) => sequences.push(...s));
 
 		return sequences;
+	}
+
+	async updateSequence(account, model, sequenceId, data) {
+		if (data && data.name && utils.isString(data.name) && data.name !== "") {
+			const res = await db.update(account, sequenceCol(model), {_id: utils.stringToUUID(sequenceId)}, {$set: {name: data.name}});
+		} else {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
 	}
 }
 

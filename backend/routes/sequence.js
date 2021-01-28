@@ -245,6 +245,9 @@ router.get("/revision/:revId/sequences/:sequenceId/activities", middlewares.issu
 router.get("/revision/master/head/sequences/:sequenceId/state/:stateId", middlewares.issue.canView, getSequenceState);
 router.get("/revision/:revId/sequences/:sequenceId/state/:stateId", middlewares.issue.canView, getSequenceState);
 
+router.get("/revision/master/head/sequences/:sequenceId", middlewares.hasUploadAccessToModel, updateSequence);
+router.get("/revision/:revId/sequences/:sequenceId", middlewares.hasUploadAccessToModel, updateSequence);
+
 /**
  * @api {get} /:teamspace/:model/revision(/master/head/|/:revId)/sequences List all sequences
  * @apiName listSequences
@@ -312,6 +315,17 @@ function getSequenceState(req, res, next) {
 
 	Sequence.getSequenceState(account, model, stateId).then(state => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, state);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function updateSequence(req, res, next) {
+	const place = utils.APIInfo(req);
+	const { account, model, sequenceId } = req.params;
+
+	Sequence.updateSequence(account, model, sequenceId, req.body).then(() => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, {});
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
