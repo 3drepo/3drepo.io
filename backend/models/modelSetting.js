@@ -99,72 +99,6 @@ function prepareSetting(setting) {
 
 schema.set("toObject", { getters: true });
 
-schema.statics.createNewSetting = function(teamspace, modelName, data) {
-	const modelNameRegExp = /^[\x00-\x7F]{1,120}$/;
-	if(!modelName.match(modelNameRegExp)) {
-		return Promise.reject({ resCode: responseCodes.INVALID_MODEL_NAME });
-	}
-
-	if(data.code && !MODEL_CODE_REGEX.test(data.code)) {
-		return Promise.reject({ resCode: responseCodes.INVALID_MODEL_CODE });
-	}
-
-	if(!data.unit) {
-		return Promise.reject({ resCode: responseCodes.MODEL_NO_UNIT });
-	}
-
-	const modelID = utils.generateUUID({string: true});
-
-	const setting = ModelSetting.createInstance({
-		account: teamspace
-	});
-
-	setting._id = modelID;
-	setting.name = modelName;
-	setting.desc = data.desc;
-	setting.type = data.type;
-
-	if(data.defaultView) {
-		if (utils.isUUID(data.defaultView)) {
-			setting.defaultView = data.defaultView;
-		} else {
-			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
-		}
-	}
-
-	if(data.subModels) {
-		setting.federate = true;
-		setting.subModels = data.subModels;
-	}
-
-	if(data.surveyPoints) {
-		setting.surveyPoints = data.surveyPoints;
-	}
-
-	if(data.angleFromNorth) {
-		setting.angleFromNorth = data.angleFromNorth;
-	}
-
-	if(data.elevation) {
-		setting.elevation = data.elevation;
-	}
-
-	if(data.code) {
-		if (!MODEL_CODE_REGEX.test(data.code)) {
-			return Promise.reject(responseCodes.INVALID_MODEL_CODE);
-		}
-		setting.properties.code = data.code;
-	}
-
-	if (Object.prototype.toString.call(data.unit) === "[object String]") {
-		setting.properties.unit = data.unit;
-	} else {
-		return Promise.reject(responseCodes.INVALID_ARGUMENTS);
-	}
-
-	return setting.save();
-};
-
 const ModelSetting = ModelFactory.createClass(
 	"ModelSetting",
 	schema,
@@ -244,6 +178,79 @@ ModelSetting.clean = async function(account, model, dataToClean) {
 	}
 
 	return dataToClean;
+};
+
+ModelSetting.createNewSetting = async function(teamspace, modelName, data) {
+	const modelNameRegExp = /^[\x00-\x7F]{1,120}$/;
+
+	if (!modelName.match(modelNameRegExp)) {
+		throw responseCodes.INVALID_MODEL_NAME;
+	}
+
+	if (data.code && !MODEL_CODE_REGEX.test(data.code)) {
+		throw responseCodes.INVALID_MODEL_CODE;
+	}
+
+	if (!data.unit) {
+		throw responseCodes.MODEL_NO_UNIT;
+	}
+
+	const modelID = utils.generateUUID({string: true});
+
+	const setting = {
+		account: teamspace
+	};
+
+	setting._id = modelID;
+	setting.name = modelName;
+	setting.desc = data.desc;
+	setting.type = data.type;
+
+	if (data.defaultView) {
+		if (utils.isUUID(data.defaultView)) {
+			setting.defaultView = data.defaultView;
+		} else {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+	}
+
+	if (data.subModels) {
+		setting.federate = true;
+		setting.subModels = data.subModels;
+	}
+
+	if (data.surveyPoints) {
+		setting.surveyPoints = data.surveyPoints;
+	}
+
+	if (data.angleFromNorth) {
+		setting.angleFromNorth = data.angleFromNorth;
+	}
+
+	if (data.elevation) {
+		setting.elevation = data.elevation;
+	}
+
+	if (data.code) {
+		if (!MODEL_CODE_REGEX.test(data.code)) {
+			throw responseCodes.INVALID_MODEL_CODE;
+		}
+		setting.properties = { code: data.code };
+	}
+
+	if (Object.prototype.toString.call(data.unit) === "[object String]") {
+		if (!setting.properties) {
+			setting.properties = {};
+		}
+
+		setting.properties.unit = data.unit;
+	} else {
+		throw responseCodes.INVALID_ARGUMENTS;
+	}
+
+	await db.insert(teamspace, MODELS_COLL, setting);
+
+	return setting;
 };
 
 ModelSetting.deleteModelSetting = function(account, model) {
