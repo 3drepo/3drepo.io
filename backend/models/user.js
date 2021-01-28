@@ -25,6 +25,8 @@ const utils = require("../utils");
 const Role = require("./role");
 const { addDefaultJobs,  findJobByUser, usersWithJob, removeUserFromAnyJob, addUserToJob } = require("./job");
 
+const Intercom = require("./intercom");
+
 const History = require("./history");
 const TeamspaceSettings = require("./teamspaceSetting");
 const Mailer = require("../mailer/mailer");
@@ -61,6 +63,11 @@ const hasReachedLicenceLimit = async function (teamspace) {
 	if (reachedLimit) {
 		throw (responseCodes.LICENCE_LIMIT_REACHED);
 	}
+};
+
+// Find functions
+const findOne = async function (query, projection) {
+	return await DB.findOne("admin", COLL_NAME, query, projection);
 };
 
 const COLL_NAME = "system.users";
@@ -422,6 +429,7 @@ User.createUser = async function (logger, username, password, customData, tokenE
 
 	try {
 		await adminDB.addUser(username, password, { customData: cleanedCustomData, roles: [] });
+		Intercom.createContact(username, customData.firstName + " " + customData.lastName, customData.email);
 	} catch(err) {
 		throw ({ resCode: utils.mongoErrorToResCode(err) });
 	}
@@ -1145,21 +1153,16 @@ User.isHereEnabled = async function (username) {
 	return user.customData.hereEnabled;
 };
 
-// Find functions
-User.findOne = async function (query, projection) {
-	return await DB.findOne("admin", COLL_NAME, query, projection);
-};
-
 User.findByUserName = async function (username, projection) {
-	return await this.findOne({ user: username }, projection);
+	return await findOne({ user: username }, projection);
 };
 
 User.findByEmail = async function (email) {
-	return await this.findOne({ "customData.email":  new RegExp("^" + utils.sanitizeString(email) + "$", "i") });
+	return await findOne({ "customData.email":  new RegExp("^" + utils.sanitizeString(email) + "$", "i") });
 };
 
 User.findByUsernameOrEmail = async function (userNameOrEmail) {
-	return await this.findOne({
+	return await findOne({
 		$or: [
 			{ user: userNameOrEmail },
 			{ "customData.email": userNameOrEmail }
@@ -1172,15 +1175,15 @@ User.findByAPIKey = async function (key) {
 		return null;
 	}
 
-	return await this.findOne({"customData.apiKey" : key});
+	return await findOne({"customData.apiKey" : key});
 };
 
 User.findByPaypalPaymentToken = async function (token) {
-	return await this.findOne({ "customData.billing.paypalPaymentToken": token });
+	return await findOne({ "customData.billing.paypalPaymentToken": token });
 };
 
 User.findUserByBillingId = async function (billingAgreementId) {
-	return await this.findOne({ "customData.billing.billingAgreementId": billingAgreementId });
+	return await findOne({ "customData.billing.billingAgreementId": billingAgreementId });
 };
 
 /*

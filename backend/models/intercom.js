@@ -16,16 +16,43 @@
  */
 "use strict";
 const crypto = require("crypto");
-const { intercomSecretKey } = require("../../config");
+const { intercom: { secretKey, accessToken } } = require("../config");
+const axios = require("axios");
 
-const setIntercomHash = (userProfile) => {
-	if (!intercomSecretKey) {
+const headers = {
+	"Authorization": `Bearer ${accessToken}`,
+	"Accept": "application/json",
+	"Content-Type": "application/json"
+};
+
+const getEndpoint = (endpoint) => `https://api.intercom.io/${endpoint}`;
+
+const Intercom = {};
+
+Intercom.setIntercomHash = (userProfile) => {
+	if (!secretKey) {
 		return;
 	}
 
-	userProfile.intercomHash = crypto.createHmac("sha256", intercomSecretKey)
+	userProfile.intercomHash = crypto.createHmac("sha256", secretKey)
 		.update(userProfile.email)
 		.digest("hex");
 };
 
-module.exports = {setIntercomHash};
+Intercom.createContact = async (external_id, name, email) => {
+	if (!accessToken) {
+		return;
+	}
+
+	await axios.post(getEndpoint("contacts"),
+		{
+			external_id,
+			role: "user",
+			email,
+			name
+		}
+		, { headers });
+
+};
+
+module.exports = Intercom;
