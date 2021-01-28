@@ -61,9 +61,7 @@ export const selectActiveIssueId = createSelector(
 );
 
 export const selectActiveIssue = createSelector(
-	selectIssuesMap, selectActiveIssueId, (issuesMap, activeIssueId) => {
-		return issuesMap[activeIssueId] ;
-	}
+	selectIssuesMap, selectActiveIssueId, (issuesMap, activeIssueId) => issuesMap[activeIssueId]
 );
 
 export const selectActiveIssueDetails = createSelector(
