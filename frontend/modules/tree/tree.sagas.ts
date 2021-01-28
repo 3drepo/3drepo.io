@@ -76,16 +76,18 @@ const highlightObjects = (objects = [], nodesSelectionMap = {}, colour?) => {
 };
 
 const toggleMeshesVisibility = (meshes, visibility) => {
-	meshes.forEach((entry) => {
-		if (entry.meshes && entry.meshes.length) {
-			Viewer.switchObjectVisibility(
-				entry.teamspace,
-				entry.modelId,
-				entry.meshes,
-				visibility
-			);
-		}
-	});
+	if(meshes && meshes.length > 0) {
+		meshes.forEach((entry) => {
+			if (entry.meshes && entry.meshes.length) {
+				Viewer.switchObjectVisibility(
+					entry.teamspace,
+					entry.modelId,
+					entry.meshes,
+					visibility
+				);
+			}
+		});
+	}
 };
 
 function* handleMetadata(node: any) {
@@ -416,7 +418,6 @@ function* isolateNodesBySharedIds({ objects = []}) {
 
 function* showHiddenGeometry() {
 	yield waitForTreeToBeReady();
-
 	try {
 		const hiddenGeometryVisible = yield select(selectHiddenGeometryVisible);
 		yield put(TreeActions.setHiddenGeometryVisible(!hiddenGeometryVisible));
@@ -547,7 +548,8 @@ function* setTreeNodesVisibility({ nodesIds, visibility }) {
 				unhighlightObjects(result.unhighlightedObjects);
 			}
 
-			toggleMeshesVisibility(result.meshesToUpdate, visibility === VISIBILITY_STATES.VISIBLE);
+			toggleMeshesVisibility(result.meshesToShow, true);
+			toggleMeshesVisibility(result.meshesToHide, false);
 			yield put(TreeActions.updateDataRevision());
 		}
 	} catch (error) {
@@ -648,6 +650,9 @@ function* handleTransparenciesVisibility({ transparencies }) {
 	// 1. get node ids for the hidden nodes
 	// tslint:disable-next-line:variable-name
 	const meshesToHide: any[] = yield select(selectGetNodesIdsFromSharedIds(([{shared_ids: transparencies}])));
+
+	// This function is used by sequences, it will always want to show all hidden geometry.
+	yield put(TreeActions.setHiddenGeometryVisible(true));
 	yield showAllExceptMeshIDs(meshesToHide);
 }
 
