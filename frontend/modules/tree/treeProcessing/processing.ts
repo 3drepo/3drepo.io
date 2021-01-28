@@ -265,20 +265,26 @@ export class Processing {
 		return this.showNodesExceptMeshIDs(nodesIds, ifcSpacesHidden, []);
 	}
 
-	private showNodesExceptMeshIDs = (nodesIds, ifcSpacesHidden, meshes) => {
+	private showNodesExceptMeshIDs = (nodesIds, ifcSpacesHidden, meshes = []) => {
 		const meshToHide = {};
 		meshes.forEach((mesh) => meshToHide[mesh] = true);
 
 		const filteredNodes = [];
-		for (let nodeIdx = 0; nodeIdx < nodesIds.length; ++nodeIdx) {
-			const nodeID = nodesIds[nodeIdx];
-			const currentState = this.visibilityMap[nodeID];
-			const shouldHide = meshToHide[nodeID];
+		if(meshes.length === 0) {
+			for (let nodeIdx = 0; nodeIdx < nodesIds.length; ++nodeIdx) {
+				const nodeID = nodesIds[nodeIdx];
+				const currentState = this.visibilityMap[nodeID];
 
-			const desiredState = shouldHide ? VISIBILITY_STATES.INVISIBLE
-				: (ifcSpacesHidden ?  this.defaultVisibilityMap[nodeID] : VISIBILITY_STATES.VISIBLE);
+				const desiredState = ifcSpacesHidden ?  this.defaultVisibilityMap[nodeID] : VISIBILITY_STATES.VISIBLE;
 
-			if (currentState !== desiredState) {
+				if (currentState !== desiredState) {
+					const node = this.nodesList[this.nodesIndexesMap[nodeID]];
+					filteredNodes.push(node);
+				}
+			}
+		} else {
+			for (let nodeIdx = 0; nodeIdx < nodesIds.length; ++nodeIdx) {
+				const nodeID = nodesIds[nodeIdx];
 				const node = this.nodesList[this.nodesIndexesMap[nodeID]];
 				filteredNodes.push(node);
 			}
