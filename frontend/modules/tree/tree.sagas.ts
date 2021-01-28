@@ -650,6 +650,9 @@ function* handleTransparenciesVisibility({ transparencies }) {
 	// 1. get node ids for the hidden nodes
 	// tslint:disable-next-line:variable-name
 	const meshesToHide: any[] = yield select(selectGetNodesIdsFromSharedIds(([{shared_ids: transparencies}])));
+
+	// This function is used by sequences, it will always want to show all hidden geometry.
+	yield put(TreeActions.setHiddenGeometryVisible(true));
 	yield showAllExceptMeshIDs(meshesToHide);
 }
 
