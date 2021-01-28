@@ -221,7 +221,7 @@ export function* showPreset({preset}) {
 
 export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 	if (view) {
-		yield waitForTreeToBeReady();
+		yield Viewer.isViewerReady();
 
 		const viewpoint = view.viewpoint;
 		if (!viewpoint) {
@@ -239,6 +239,7 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 
 		yield Viewer.updateClippingPlanes( clippingPlanes, teamspace, modelId);
 
+		yield waitForTreeToBeReady();
 		yield prepareGroupsIfNecessary(teamspace, modelId, view.viewpoint);
 
 		if (viewpoint?.override_groups) {

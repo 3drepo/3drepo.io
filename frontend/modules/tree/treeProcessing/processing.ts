@@ -270,7 +270,7 @@ export class Processing {
 		meshes.forEach((mesh) => meshToHide[mesh] = true);
 
 		const filteredNodes = [];
-		if(meshes.length === 0) {
+		if (meshes.length === 0) {
 			for (let nodeIdx = 0; nodeIdx < nodesIds.length; ++nodeIdx) {
 				const nodeID = nodesIds[nodeIdx];
 				const currentState = this.visibilityMap[nodeID];

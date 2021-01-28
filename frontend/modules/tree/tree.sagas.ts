@@ -76,7 +76,7 @@ const highlightObjects = (objects = [], nodesSelectionMap = {}, colour?) => {
 };
 
 const toggleMeshesVisibility = (meshes, visibility) => {
-	if(meshes && meshes.length > 0) {
+	if (meshes && meshes.length > 0) {
 		meshes.forEach((entry) => {
 			if (entry.meshes && entry.meshes.length) {
 				Viewer.switchObjectVisibility(
