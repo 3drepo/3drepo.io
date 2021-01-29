@@ -120,7 +120,7 @@ function insertModelUpdatedNotificationsLatestReview(account, model) {
 
 async function importSuccess(account, model, sharedSpacePath, user) {
 	try {
-		let [setting, nRevisions] = await Promise.all([
+		const [setting, nRevisions] = await Promise.all([
 			setStatus(account, model, "ok", user),
 			History.revisionCount(account, model)
 		]);
@@ -141,10 +141,10 @@ async function importSuccess(account, model, sharedSpacePath, user) {
 			}
 			systemLogger.logInfo(`Model status changed to ${setting.status} and correlation ID reset`);
 
-			setting = await setModelImportSuccess(account, model, setting.type === "toy" || setting.type === "sample");
+			const updatedSetting = await setModelImportSuccess(account, model, setting.type === "toy" || setting.type === "sample");
 
 			// hack to add the user field to send to the user
-			const data = {user, nRevisions ,...JSON.parse(JSON.stringify(setting))};
+			const data = {user, nRevisions ,...JSON.parse(JSON.stringify(updatedSetting))};
 			ChatEvent.modelStatusChanged(null, account, model, data);
 
 			// Creates model updated notification.
