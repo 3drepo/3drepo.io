@@ -17,8 +17,6 @@
 
 "use strict";
 
-const mongoose = require("mongoose");
-const ModelFactory = require("./factory/modelFactory");
 const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
 const utils = require("../utils");
@@ -28,44 +26,6 @@ const PermissionTemplates = require("./permissionTemplates");
 const MODELS_COLL = "settings";
 
 const MODEL_CODE_REGEX = /^[a-zA-Z0-9]{0,50}$/;
-
-const schema = mongoose.Schema({
-	_id : String,
-	name: String, // model name
-	desc: String,
-	type: String,
-	corID: String,
-	status: {type: String, default: "ok"},
-	errorReason: Object,
-	federate: Boolean,
-	defaultView: Object,
-	permissions: [{
-		_id: false,
-		user: String,
-		permission: String
-	}],
-	properties: {
-		unit: String, // cm, m, ft, mm
-		code: String
-	},
-	surveyPoints: [
-		{
-			_id: false,
-			latLong: [Number],
-			position: [Number]
-		}
-	],
-	angleFromNorth : Number,
-	elevation: Number,
-	fourDSequenceTag: String,
-	timestamp: Date,
-	subModels: [{
-		_id: false,
-		database: String,
-		model: String
-	}],
-	heliSpeed: Number
-});
 
 function prepareSetting(setting) {
 	if (setting) {
@@ -97,11 +57,7 @@ function prepareSetting(setting) {
 	return setting;
 }
 
-const ModelSetting = ModelFactory.createClass(
-	"ModelSetting",
-	schema,
-	() => MODELS_COLL
-);
+const ModelSetting = {};
 
 ModelSetting.batchUpdatePermissions = async function(account, batchPermissions = []) {
 	const updatePromises = batchPermissions.map((update) => this.updatePermissions(account, update.model, update.permissions));
