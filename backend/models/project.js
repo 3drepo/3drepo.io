@@ -25,7 +25,7 @@
 	const utils = require("../utils");
 	const _ = require("lodash");
 	const nodeuuid = require("uuid/v1");
-	const { changePermissions, clean, findModelSettings, findPermissionByUser } = require("./modelSetting");
+	const { changePermissions, prepareDefaultView, findModelSettings, findPermissionByUser } = require("./modelSetting");
 	const PermissionTemplates = require("./permissionTemplates");
 
 	const schema = mongoose.Schema({
@@ -316,7 +316,7 @@
 				}
 			}
 
-			setting = await clean(account, setting._id, setting);
+			setting = await prepareDefaultView(account, setting._id, setting);
 			setting.permissions = _.uniq(permissions.concat(settingsPermissions));
 			setting.model = setting._id;
 			setting.account = account;

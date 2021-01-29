@@ -19,7 +19,7 @@
 
 const ModelFactory = require("../factory/modelFactory");
 const {
-	clean,
+	prepareDefaultView,
 	createNewSetting,
 	deleteModelSetting,
 	findModelSettingById,
@@ -936,7 +936,7 @@ const getModelSetting = async (account, model, username) => {
 			listSubModels(account, model, C.MASTER_BRANCH_NAME)
 		]);
 
-		setting = await clean(account, model, setting);
+		setting = await prepareDefaultView(account, model, setting);
 
 		return {
 			...setting,

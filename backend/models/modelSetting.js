@@ -79,7 +79,7 @@ ModelSetting.changePermissions = async function(account, model, permissions) {
 		throw responseCodes.MODEL_NOT_FOUND;
 	}
 
-	const User = require("./user");
+	const { findByUserName, teamspaceMemberCheck } = require("./user");
 
 	if (!Array.isArray(permissions)) {
 		throw responseCodes.INVALID_ARGUMENTS;
@@ -87,7 +87,7 @@ ModelSetting.changePermissions = async function(account, model, permissions) {
 
 	// get list of valid permission name
 	permissions = _.uniq(permissions, "user");
-	return User.findByUserName(account).then(dbUser => {
+	return findByUserName(account).then(dbUser => {
 		const promises = [];
 
 		permissions.forEach(permission => {
@@ -99,7 +99,7 @@ ModelSetting.changePermissions = async function(account, model, permissions) {
 				return promises.push(Promise.reject(responseCodes.PERM_NOT_FOUND));
 			}
 
-			promises.push(User.teamspaceMemberCheck(permission.user, dbUser.user).then(() => {
+			promises.push(teamspaceMemberCheck(permission.user, dbUser.user).then(() => {
 				const perm = setting.permissions.find(_perm => _perm.user === permission.user);
 
 				if (perm) {
@@ -114,8 +114,9 @@ ModelSetting.changePermissions = async function(account, model, permissions) {
 	});
 };
 
-ModelSetting.clean = async function(account, model, dataToClean) {
+ModelSetting.prepareDefaultView = async function(account, model, dataToClean) {
 	const views = new (require("./view"))();
+
 	if (dataToClean.defaultView) {
 		try {
 			const viewIDStr = utils.uuidToString(dataToClean.defaultView);
@@ -308,9 +309,9 @@ ModelSetting.isModelNameExists = async function(account, models, modelName) {
 };
 
 ModelSetting.populateUsers = async function(account, permissions) {
-	const User = require("./user");
+	const { getAllUsersInTeamspace } = require("./user");
 
-	const users = await User.getAllUsersInTeamspace(account);
+	const users = await getAllUsersInTeamspace(account);
 
 	users.forEach(user => {
 		const permissionFound = permissions && permissions.find(p => p.user ===  user);
@@ -516,7 +517,7 @@ ModelSetting.updateModelSetting = async function (account, model, updateObj) {
 		await db.update(account, MODELS_COLL, {_id: model}, updateBson);
 	}
 
-	return ModelSetting.clean(account, model, setting);
+	return ModelSetting.prepareDefaultView(account, model, setting);
 };
 
 module.exports = ModelSetting;
