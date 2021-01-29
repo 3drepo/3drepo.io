@@ -512,7 +512,6 @@ UserBilling.getSubscriptionLimits = function(userBilling) {
 			}
 		});
 	}
-
 	return sumLimits;
 };
 
