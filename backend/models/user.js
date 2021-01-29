@@ -29,7 +29,6 @@ const Intercom = require("./intercom");
 
 const History = require("./history");
 const TeamspaceSettings = require("./teamspaceSetting");
-const Mailer = require("../mailer/mailer");
 
 const systemLogger = require("../logger.js").systemLogger;
 
@@ -429,7 +428,6 @@ User.createUser = async function (logger, username, password, customData, tokenE
 
 	try {
 		await adminDB.addUser(username, password, { customData: cleanedCustomData, roles: [] });
-		Intercom.createContact(username, customData.firstName + " " + customData.lastName, customData.email);
 	} catch(err) {
 		throw ({ resCode: utils.mongoErrorToResCode(err) });
 	}
@@ -472,10 +470,8 @@ User.verify = async function (username, token, options) {
 		throw ({ resCode: responseCodes.TOKEN_INVALID });
 	}
 
-	const name = user.customData.firstName && user.customData.firstName.length > 0 ?
-		formatPronouns(user.customData.firstName) : user.user;
-	Mailer.sendWelcomeUserEmail(user.customData.email, {user: name})
-		.catch(err => systemLogger.logError(err));
+	const { customData: {firstName, lastName, email} } = user;
+	Intercom.createContact(username, formatPronouns(firstName + " " + lastName), email);
 
 	if (!skipImportToyModel) {
 
