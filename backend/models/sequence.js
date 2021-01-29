@@ -118,7 +118,12 @@ class Sequence {
 
 	async updateSequence(account, model, sequenceId, data) {
 		if (data && data.name && utils.isString(data.name) && data.name !== "") {
-			const res = await db.update(account, sequenceCol(model), {_id: utils.stringToUUID(sequenceId)}, {$set: {name: data.name}});
+			const { result } = await db.update(account, sequenceCol(model),
+				{_id: utils.stringToUUID(sequenceId)}, {$set: {name: data.name}});
+			if(result.nModified === 0) {
+				throw responseCodes.SEQUENCE_NOT_FOUND;
+			}
+
 		} else {
 			throw responseCodes.INVALID_ARGUMENTS;
 		}

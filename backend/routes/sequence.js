@@ -245,8 +245,8 @@ router.get("/revision/:revId/sequences/:sequenceId/activities", middlewares.issu
 router.get("/revision/master/head/sequences/:sequenceId/state/:stateId", middlewares.issue.canView, getSequenceState);
 router.get("/revision/:revId/sequences/:sequenceId/state/:stateId", middlewares.issue.canView, getSequenceState);
 
-router.get("/revision/master/head/sequences/:sequenceId", middlewares.hasUploadAccessToModel, updateSequence);
-router.get("/revision/:revId/sequences/:sequenceId", middlewares.hasUploadAccessToModel, updateSequence);
+router.patch("/revision/master/head/sequences/:sequenceId", middlewares.hasUploadAccessToModel, updateSequence);
+router.patch("/revision/:revId/sequences/:sequenceId", middlewares.hasUploadAccessToModel, updateSequence);
 
 /**
  * @api {get} /:teamspace/:model/revision(/master/head/|/:revId)/sequences List all sequences
