@@ -245,6 +245,32 @@ router.get("/revision/:revId/sequences/:sequenceId/activities", middlewares.issu
 router.get("/revision/master/head/sequences/:sequenceId/state/:stateId", middlewares.issue.canView, getSequenceState);
 router.get("/revision/:revId/sequences/:sequenceId/state/:stateId", middlewares.issue.canView, getSequenceState);
 
+/**
+ * @api {patch} /:teamspace/:model/revision(/master/head/|/:revId)/sequences/:sequenceID Update a sequence
+ * @apiName updateSequence
+ * @apiGroup Sequences
+ * @apiDescription Update a sequence (note: currently only name chance is supported
+ *
+ * @apiUse Sequences
+ *
+ * @apiExample {get} Example usage (/master/head)
+ * GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences/00000000-0000-0000-0000-000000000002 HTTP/1.1
+ *
+ * @apiExample {get} Example usage (/:revId)
+ * GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/sequences/00000000-0000-0000-0000-000000000002 HTTP/1.1
+ *
+ * @apiParam (Request body) {String} name The new name of the sequence
+ *
+ * @apiExample {patch} Example usage:
+ * {
+ * 	  "name": "Building works"
+ * }
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {}
+ */
+
 router.patch("/revision/master/head/sequences/:sequenceId", middlewares.hasUploadAccessToModel, updateSequence);
 router.patch("/revision/:revId/sequences/:sequenceId", middlewares.hasUploadAccessToModel, updateSequence);
 
