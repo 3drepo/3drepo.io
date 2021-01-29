@@ -28,6 +28,7 @@ const {
 	getModelsData,
 	isModelNameExists,
 	setModelImportFail,
+	setModelImportSuccess,
 	setModelStatus,
 	updateCorId
 } = require("../modelSetting");
@@ -116,11 +117,14 @@ function insertModelUpdatedNotificationsLatestReview(account, model) {
 		return notifications.upsertModelUpdatedNotifications(account, model, revision);
 	}).then(n => n.forEach(ChatEvent.upsertedNotification.bind(null,null)));
 }
-function importSuccess(account, model, sharedSpacePath, user) {
-	Promise.all([
-		setStatus(account, model, "ok", user),
-		History.revisionCount(account, model)
-	]).then(([setting, nRevisions]) => {
+
+async function importSuccess(account, model, sharedSpacePath, user) {
+	try {
+		let [setting, nRevisions] = await Promise.all([
+			setStatus(account, model, "ok", user),
+			History.revisionCount(account, model)
+		]);
+
 		if (setting) {
 			if (sharedSpacePath && setting.corID) {
 				const path = require("path");
@@ -136,12 +140,8 @@ function importSuccess(account, model, sharedSpacePath, user) {
 				_deleteFiles([{desc: "tmp dir", type: "dir", path: tmpDir}]);
 			}
 			systemLogger.logInfo(`Model status changed to ${setting.status} and correlation ID reset`);
-			setting.corID = undefined;
-			setting.errorReason = undefined;
-			if(setting.type === "toy" || setting.type === "sample") {
-				setting.timestamp = new Date();
-			}
-			setting.markModified("errorReason");
+
+			setting = await setModelImportSuccess(account, model, setting.type === "toy" || setting.type === "sample");
 
 			// hack to add the user field to send to the user
 			const data = {user, nRevisions ,...JSON.parse(JSON.stringify(setting))};
@@ -149,12 +149,10 @@ function importSuccess(account, model, sharedSpacePath, user) {
 
 			// Creates model updated notification.
 			insertModelUpdatedNotificationsLatestReview(account, model);
-
-			setting.save();
 		}
-	}).catch(err => {
+	} catch (err) {
 		systemLogger.logError("Failed to invoke importSuccess:" +  err);
-	});
+	}
 }
 
 /**

@@ -97,8 +97,6 @@ function prepareSetting(setting) {
 	return setting;
 }
 
-schema.set("toObject", { getters: true });
-
 const ModelSetting = ModelFactory.createClass(
 	"ModelSetting",
 	schema,
@@ -346,7 +344,6 @@ ModelSetting.isFederation = async function(account, model) {
 	return true;
 };
 
-// FIXME when project changes are merged, consider using func in project
 ModelSetting.isModelNameExists = async function(account, models, modelName) {
 	const coll = await db.getCollection(account, MODELS_COLL);
 	const count = await coll.find({name: modelName, _id: {"$in": models}}).count();
@@ -389,6 +386,19 @@ ModelSetting.setModelImportFail = async function(account, model, errorReason) {
 
 	if (setting.type === "toy" || setting.type === "sample") {
 		data.timestamp = undefined;
+	}
+
+	return ModelSetting.updateModelSetting(account, model, data);
+};
+
+ModelSetting.setModelImportSuccess = async function(account, model, isToy) {
+	const data = {
+		corID: undefined,
+		errorReason: undefined
+	};
+
+	if (isToy) {
+		data.timestamp = new Date();
 	}
 
 	return ModelSetting.updateModelSetting(account, model, data);
@@ -484,8 +494,7 @@ ModelSetting.updatePermissions = async function(account, model, permissions = []
 };
 
 ModelSetting.updateModelSetting = async function (account, model, updateObj) {
-	// const setting = await ModelSetting.findModelSettingById(account, model);
-	const setting = await ModelSetting.findById({account, model}, model);
+	const setting = await ModelSetting.findModelSettingById(account, model);
 
 	if (!setting) {
 		throw responseCodes.MODEL_NOT_FOUND;
@@ -530,7 +539,7 @@ ModelSetting.updateModelSetting = async function (account, model, updateObj) {
 					setting[key] = updateObj[key];
 			}
 		} else {
-			if (key === "defaultView") {
+			if (["defaultView", "corID", "errorReason"].includes(key)) {
 				toUnset[key] = 1;
 				setting[key] = undefined;
 			}
