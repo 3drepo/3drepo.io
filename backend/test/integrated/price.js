@@ -22,8 +22,8 @@ const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp();
 const logger = require("../../logger.js");
 const systemLogger = logger.systemLogger;
-const UserBilling = require("../../models/userBilling");
-const getNextPaymentDate = UserBilling.statics.getNextPaymentDate;
+// const UserBilling = require("../../models/userBilling");
+// const getNextPaymentDate = UserBilling.statics.getNextPaymentDate;
 const helpers = require("../helpers/signUp");
 const moment = require("moment-timezone");
 const User = require("../../models/user");
@@ -596,5 +596,8 @@ describe("Billing agreement price from PayPal", function () {
 				taxAmount: "40"
 			}, stub, done);
 		});
-	}); */
+	});
+
+	Paypal commented out
+	*/
 });
