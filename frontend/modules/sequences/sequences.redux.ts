@@ -45,7 +45,35 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	reset: []
 }, { prefix: 'SEQUENCES/' });
 
-export const INITIAL_STATE = {
+export interface IFrame {
+	dateTime: Date;
+	state: string;
+}
+
+export interface ISequance {
+	_id: string;
+	rev_id: string;
+	name: string;
+	frames: any[];
+	teamspace: string;
+	model: string;
+}
+
+export interface ISequencesState {
+	sequences: null | ISequance[];
+	selectedSequence: null | string;
+	lastSelectedSequence: null | string;
+	selectedDate: null | Date;
+	lastSelectedDate: null | Date;
+	stateDefinitions: any;
+	statesPending: boolean;
+	stepInterval: number;
+	stepScale: STEP_SCALE;
+	hiddenGeometryVisible: boolean;
+	activities: any;
+}
+
+export const INITIAL_STATE: ISequencesState = {
 	sequences: null,
 	selectedSequence: null,
 	lastSelectedSequence: null,

@@ -25,11 +25,12 @@ import PlayArrow from '@material-ui/icons/PlayArrow';
 import Replay from '@material-ui/icons/Replay';
 import Stop from '@material-ui/icons/Stop';
 import { findIndex, noop } from 'lodash';
-
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';
+
 import { STEP_SCALE } from '../../../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../../../constants/viewerGui';
 import { isDateOutsideRange, MILLI_PER_HOUR } from '../../../../../../helpers/dateTime';
+import { IFrame } from '../../../../../../modules/sequences';
 import { getDateByStep, getSelectedFrame } from '../../../../../../modules/sequences/sequences.helper';
 import { LONG_DATE_TIME_FORMAT_NO_MINUTES } from '../../../../../../services/formatting/formatDate';
 import {
@@ -43,11 +44,6 @@ import {
 	StepInput,
 	SwitchItem
 } from '../../sequences.styles';
-
-interface IFrame {
-	dateTime: Date;
-	state: string;
-}
 
 interface IProps {
 	max: Date;

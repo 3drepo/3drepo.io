@@ -17,7 +17,8 @@
 
 export {
 	SequencesTypes,
-	SequencesActions
+	SequencesActions,
+	IFrame
 } from './sequences.redux';
 
 export * from './sequences.selectors';

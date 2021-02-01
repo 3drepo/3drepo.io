@@ -20,10 +20,7 @@ import styled from 'styled-components';
 import { Form } from 'formik';
 
 import { TextField } from '../../../../../components/textField/textField.component';
-import {
-	StyledLinkableField,
-	StyledMarkdownField,
-} from '../../../../../components/textField/textField.styles';
+import { StyledLinkableField, StyledMarkdownField } from '../../../../../components/textField/textField.styles';
 
 export const StyledForm = styled(Form)`
 	display: flex;
@@ -35,19 +32,21 @@ export const StyledTextField = styled(TextField)`
 	width: 100%;
 	max-width: 250px;
 	overflow: hidden;
-  font-size: 24px;
+	font-size: 24px;
 
 	&& > div {
-    margin: 0;
-  }
+		margin: 0;
+	}
 
-  ${StyledMarkdownField}, ${StyledLinkableField}, input {
-    text-overflow: ellipsis;
-    font-size: 24px;
-	  text-align: center;
-  }
+	${/* sc-selector */ StyledMarkdownField},
+	${/* sc-selector */ StyledLinkableField},
+	input {
+		text-overflow: ellipsis;
+		font-size: 24px;
+		text-align: center;
+	}
 
-  input {
-    margin-right: 60px;
-  }
+	input {
+		margin-right: 60px;
+	}
 `;
