@@ -42,6 +42,7 @@ const AccountPermissions = require("./accountPermissions");
 const Project = require("./project");
 const FileRef = require("./fileRef");
 const PermissionTemplates = require("./permissionTemplates");
+const { get } = require("lodash");
 
 const isMemberOfTeamspace = function (user, teamspace) {
 	return user.roles.filter(role => role.db === teamspace && role.role === C.DEFAULT_MEMBER_ROLE).length > 0;
@@ -470,8 +471,15 @@ User.verify = async function (username, token, options) {
 		throw ({ resCode: responseCodes.TOKEN_INVALID });
 	}
 
-	const { customData: {firstName, lastName, email} } = user;
-	Intercom.createContact(username, formatPronouns(firstName + " " + lastName), email);
+	try {
+		const { customData: {firstName, lastName, email, billing, mailListOptOut} } = user;
+		const subscribed = !mailListOptOut;
+		const company = get(billing, "billingInfo.company");
+
+		await Intercom.createContact(username, formatPronouns(firstName + " " + lastName), email, subscribed, company);
+	} catch (err) {
+		systemLogger.logError("Failed to create contact in intercom when verifying user", username, err);
+	}
 
 	if (!skipImportToyModel) {
 

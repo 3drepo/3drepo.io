@@ -21,7 +21,6 @@ const axios = require("axios");
 
 const headers = {
 	"Authorization": `Bearer ${accessToken}`,
-	"Accept": "application/json",
 	"Content-Type": "application/json"
 };
 
@@ -39,17 +38,23 @@ Intercom.setIntercomHash = (userProfile) => {
 		.digest("hex");
 };
 
-Intercom.createContact = async (external_id, name, email) => {
+Intercom.createContact = async (external_id, name, email, subscribed, company) => {
 	if (!accessToken) {
 		return;
 	}
 
-	await axios.post(getEndpoint("contacts"),
+	const custom_attributes = {subscribed};
+	if (company) {
+		custom_attributes.company = company;
+	}
+
+	return await axios.post(getEndpoint("contacts"),
 		{
 			external_id,
 			role: "user",
 			email,
-			name
+			name,
+			custom_attributes
 		}
 		, { headers });
 
