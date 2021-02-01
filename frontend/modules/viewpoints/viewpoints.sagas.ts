@@ -39,6 +39,7 @@ import { SequencesActions } from '../sequences';
 import { SnackbarActions } from '../snackbar';
 import { dispatch } from '../store';
 import { selectHiddenGeometryVisible, TreeActions } from '../tree';
+import { waitForTreeToBeReady } from '../tree/tree.sagas';
 import { selectColorOverrides, selectTransformations, ViewerGuiActions } from '../viewerGui';
 import { PRESET_VIEW } from './viewpoints.constants';
 import { ViewpointsActions, ViewpointsTypes } from './viewpoints.redux';
@@ -252,6 +253,7 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 
 		yield Viewer.updateClippingPlanes( clippingPlanes, teamspace, modelId);
 
+		yield waitForTreeToBeReady();
 		yield prepareGroupsIfNecessary(teamspace, modelId, view.viewpoint);
 
 		if (viewpoint?.override_groups) {

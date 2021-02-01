@@ -138,6 +138,10 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 		viewpoint.guid = utils.generateUUID();
 	}
 
+	if (utils.hasField(vpData, "hideIfc")) {
+		viewpoint.hideIfc = !!vpData.hideIfc;
+	}
+
 	["highlighted_group_id",
 		"hidden_group_id",
 		"shown_group_id"
