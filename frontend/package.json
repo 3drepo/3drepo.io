@@ -53,6 +53,7 @@
     "font-awesome": "4.7.0",
     "formik": "1.5.7",
     "history": "4.9.0",
+    "idb": "6.0.0",
     "konva": "4.0.9",
     "lodash": "4.17.15",
     "markdown-linkify": "1.0.3",
