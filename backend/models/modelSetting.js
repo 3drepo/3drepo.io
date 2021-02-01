@@ -19,15 +19,17 @@
 
 const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
+const nodeuuid = require("uuid/v1");
 const utils = require("../utils");
 const db = require("../handler/db");
+const systemLogger = require("../logger.js").systemLogger;
 const PermissionTemplates = require("./permissionTemplates");
 
 const MODELS_COLL = "settings";
 
 const MODEL_CODE_REGEX = /^[a-zA-Z0-9]{0,50}$/;
 
-function prepareSetting(setting) {
+function clean(setting) {
 	if (setting) {
 		if (!setting.id) {
 			setting.id = setting._id;
@@ -212,25 +214,24 @@ ModelSetting.deleteModelSetting = function(account, model) {
 ModelSetting.findModelSettingById = async function(account, model, projection) {
 	const foundSetting = await db.findOne(account, MODELS_COLL, {_id: model}, projection);
 
-	return prepareSetting(foundSetting);
+	return clean(foundSetting);
 };
 
 ModelSetting.findModelSettings = async function(account, query, projection) {
 	const foundSettings = await db.find(account, MODELS_COLL, query, projection);
 
-	return foundSettings.map(prepareSetting);
+	return foundSettings.map(clean);
 };
 
 ModelSetting.findPermissionByUser = async function(account, model, username) {
-	const modelSetting = await ModelSetting.findModelSettingById(account, model);
+	const modelSetting = await ModelSetting.findModelSettingById(account, model, {permissions: 1});
 	return modelSetting.permissions.find(perm => perm.user === username);
 };
 
 ModelSetting.getHeliSpeed = async function(account, model) {
-	const modelSetting = await ModelSetting.findModelSettingById(account, model);
-	const speed = modelSetting.heliSpeed ? modelSetting.heliSpeed : 1;
+	const modelSetting = await ModelSetting.findModelSettingById(account, model, {heliSpeed: 1});
 
-	return {heliSpeed: speed};
+	return {heliSpeed: modelSetting.heliSpeed || 1};
 };
 
 ModelSetting.getMultipleModelsPermissions = async function(account, models) {
@@ -365,7 +366,14 @@ ModelSetting.setModelStatus = async function(account, model, status) {
 	return ModelSetting.updateModelSetting(account, model, { status });
 };
 
-ModelSetting.updateCorId = async function(account, model, correlationId, addTimestamp = false) {
+/**
+ * Create correlation ID, store it in model setting, and return it
+ * @param {account} account - User account
+ * @param {model} model - Model
+ * @param {addTimestamp} - add a timestamp to the model settings while you're at it
+ */
+ModelSetting.createCorrelationId = async function(account, model, addTimestamp = false) {
+	const correlationId = nodeuuid();
 	const data = { corID: correlationId };
 
 	if (addTimestamp) {
@@ -374,7 +382,8 @@ ModelSetting.updateCorId = async function(account, model, correlationId, addTime
 		data.timestamp = new Date();
 	}
 
-	await ModelSetting.updateModelSetting(account, model, data);
+	const setting = await ModelSetting.updateModelSetting(account, model, data);
+	systemLogger.logInfo(`Correlation ID ${setting.corID} set`);
 
 	return correlationId;
 };

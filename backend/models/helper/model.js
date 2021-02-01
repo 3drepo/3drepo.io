@@ -30,7 +30,7 @@ const {
 	setModelImportFail,
 	setModelImportSuccess,
 	setModelStatus,
-	updateCorId
+	createCorrelationId
 } = require("../modelSetting");
 const User = require("../user");
 const responseCodes = require("../../response_codes");
@@ -49,7 +49,6 @@ const fs = require("fs");
 const ChatEvent = require("../chatEvent");
 const Project = require("../project");
 const _ = require("lodash");
-const nodeuuid = require("uuid/v1");
 const FileRef = require("../fileRef");
 const notifications = require("../notification");
 const CombinedStream = require("combined-stream");
@@ -239,24 +238,6 @@ async function setStatus(account, model, status, user) {
 	return setting;
 }
 
-/**
- * Create correlation ID, store it in model setting, and return it
- * @param {account} account - User account
- * @param {model} model - Model
- * @param {addTimestamp} - add a timestamp to the model settings while you're at it
- */
-async function createCorrelationId(account, model, setting, addTimestamp = false) {
-	const correlationId = nodeuuid();
-	let result = Promise.reject("setting is undefined");
-
-	if (setting) {
-		result = await updateCorId(account, model, correlationId, addTimestamp);
-		systemLogger.logInfo(`Correlation ID ${setting.corID} set`);
-	}
-
-	return result;
-}
-
 function createNewModel(teamspace, modelName, data) {
 	if(!utils.hasField(data, "project")) {
 		return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
@@ -435,28 +416,22 @@ function createFederatedModel(account, model, username, subModels, modelSettings
 
 	});
 
-	const fedSettings = modelSettings ? Promise.resolve(modelSettings)
-		: findModelSettingById(account, model);
-
 	return Promise.all(addSubModelsPromise).then(() => {
-		return fedSettings.then((settings) => {
-			return createCorrelationId(account, model, settings, true).then(correlationId => {
-				setStatus(account, model, "queued", username).then(() => {
-					const federatedJSON = {
-						database: account,
-						project: model,
-						subProjects: subModelArr
-					};
+		return createCorrelationId(account, model, true).then(correlationId => {
+			setStatus(account, model, "queued", username).then(() => {
+				const federatedJSON = {
+					database: account,
+					project: model,
+					subProjects: subModelArr
+				};
 
-					if(toyFed) {
-						federatedJSON.toyFed = toyFed;
-					}
+				if(toyFed) {
+					federatedJSON.toyFed = toyFed;
+				}
 
-					return importQueue.createFederatedModel(correlationId, account, federatedJSON);
-				});
+				return importQueue.createFederatedModel(correlationId, account, federatedJSON);
 			});
 		});
-
 	});
 
 }
@@ -700,7 +675,7 @@ function importModel(account, model, username, modelSetting, source, data) {
 		return Promise.reject({ message: `modelSetting is ${modelSetting}`});
 	}
 
-	return createCorrelationId(account, model, modelSetting).then(correlationId => {
+	return createCorrelationId(account, model).then(correlationId => {
 		return setStatus(account, model, "queued", username).then(setting => {
 
 			modelSetting = setting;
