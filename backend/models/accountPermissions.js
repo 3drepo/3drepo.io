@@ -19,7 +19,7 @@
 const responseCodes = require("../response_codes.js");
 const C = require("../constants");
 const { intersection } = require("lodash");
-const { removeUserFromProjects, updateAttrs } = require("./project");
+const { removeUserFromProjects } = require("./project");
 
 const updatePermissions = async function(teamspace, updatedPermissions) {
 	const User = require("./user");

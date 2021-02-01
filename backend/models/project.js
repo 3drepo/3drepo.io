@@ -269,7 +269,6 @@
 	};
 
 	Project.removeUserFromProjects = async function(teamspace, userToRemove) {
-		console.log(teamspace);
 		const projects = await Project.listProjects(teamspace, { "permissions.user": userToRemove});
 		await Promise.all(
 			projects.map(proj => Project.updateAttrs(teamspace, proj.name, {
