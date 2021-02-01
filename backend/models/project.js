@@ -274,6 +274,16 @@
 		return db.update(teamspace, PROJECTS_COLLECTION_NAME, { models: model }, { "$pull" : { "models": model}}, {"multi": true});
 	};
 
+	Project.removeUserFromProjects = async function(teamspace, userToRemove) {
+		console.log(teamspace);
+		const projects = await Project.listProjects(teamspace, { "permissions.user": userToRemove});
+		await Promise.all(
+			projects.map(proj => Project.updateAttrs(teamspace, proj.name, {
+				permissions: proj.permissions.filter(perm => perm.user !== userToRemove)
+			}))
+		);
+	};
+
 	Project.setUserAsProjectAdmin = async function(teamspace, project, user) {
 		const projectObj = await Project.findOneProject(teamspace, {name: project});
 		const projectPermission = { user, permissions: ["admin_project"]};

@@ -77,7 +77,6 @@ describe("Account permission::", function () {
 		const { body } = await agent.post(`/${username}/permissions`)
 			.send({ user: "user1", permissions: ["view_issue"]});
 
-		console.log(body);
 		expect(body.value).to.equal(responseCodes.INVALID_PERM.value);
 	});
 

@@ -37,7 +37,7 @@ const ModelSetting = require("./modelSetting");
 const C = require("../constants");
 const UserBilling = require("./userBilling");
 const AccountPermissions = require("./accountPermissions");
-const { listProjects, findOneProject } = require("./project");
+const { listProjects, findOneProject, removeUserFromProjects } = require("./project");
 const FileRef = require("./fileRef");
 const PermissionTemplates = require("./permissionTemplates");
 
@@ -987,8 +987,7 @@ User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove) 
 		promises.push(models.map(model =>
 			model.changePermissions(model.permissions.filter(p => p.user !== userToRemove))));
 
-		promises.push(projects.map(project =>
-			project.updateAttrs({ permissions: project.permissions.filter(p => p.user !== userToRemove) })));
+		promises.push(removeUserFromProjects(teamspace.user, userToRemove));
 
 		promises.push(removeUserFromAnyJob(teamspace.user, userToRemove));
 
