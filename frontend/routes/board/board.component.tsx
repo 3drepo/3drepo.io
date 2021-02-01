@@ -266,13 +266,25 @@ export function Board(props: IProps) {
 		handleOpenDialog();
 	};
 
+	const getUpdatedProps = ({ filterProp, toLaneId }) => {
+		if (filterProp === ISSUE_FILTER_PROPS.assigned_roles.value) {
+			return [toLaneId];
+		}
+
+		if (filterProp === RISK_FILTER_PROPS.mitigation_status.value && filterProp === toLaneId ) {
+			return '';
+		}
+
+		return toLaneId;
+	};
+
 	const handleCardMove = (fromLaneId, toLaneId, cardId) => {
 		if (fromLaneId === toLaneId) {
 			return;
 		}
 
 		const updatedProps = {
-			[props.filterProp]: props.filterProp === ISSUE_FILTER_PROPS.assigned_roles.value ? [toLaneId] : toLaneId
+			[props.filterProp]: getUpdatedProps({ filterProp: props.filterProp, toLaneId })
 		};
 
 		if (isIssuesBoard) {

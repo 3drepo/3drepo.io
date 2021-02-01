@@ -19,7 +19,7 @@ const UserBilling = proxyquire("../../../models/userBilling", {
 const C = require("../../../constants");
 
 describe("UserBilling", function() {
-
+/*
 	describe(".getNextPaymentDate", function() {
 
 		it("should = 2016-02-01 if payment date is 2016-01-01", function() {
@@ -442,4 +442,7 @@ describe("UserBilling", function() {
 		});
 
 	});
+
+	Paypal commented out
+	*/
 });
