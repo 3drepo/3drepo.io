@@ -47,6 +47,23 @@ export function* fetchSequences() {
 	}
 }
 
+export function* updateSequence({ sequenceId, newName }) {
+	try {
+		const teamspace = yield select(selectCurrentModelTeamspace);
+		const isFederation = yield select(selectIsFederation);
+		const revision = isFederation ? null : yield select(selectCurrentRevisionId);
+		const model = yield select(selectSequenceModel);
+
+		if (sequenceId) {
+			// yield API.patchSequence(teamspace, model, revision, sequenceId, newName);
+			yield put(SequencesActions.updateSequenceSuccess(sequenceId, newName));
+		}
+
+	} catch (error) {
+		yield put(DialogActions.showEndpointErrorDialog('update', 'sequence', error));
+	}
+}
+
 export function* fetchActivitiesDefinitions({ sequenceId }) {
 	try {
 		const teamspace = yield select(selectCurrentModelTeamspace);
@@ -186,6 +203,7 @@ function* handleTransparenciesVisibility({ transparencies }) {
 
 export default function* SequencesSaga() {
 	yield takeLatest(SequencesTypes.FETCH_SEQUENCES, fetchSequences);
+	yield takeLatest(SequencesTypes.UPDATE_SEQUENCE, updateSequence);
 	yield takeLatest(SequencesTypes.SET_SELECTED_DATE, setSelectedDate);
 	yield takeLatest(SequencesTypes.INITIALIZE_SEQUENCES, initializeSequences);
 	yield takeLatest(SequencesTypes.FETCH_FRAME, fetchFrame);

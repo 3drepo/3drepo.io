@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { findIndex } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 import { STEP_SCALE } from '../../constants/sequences';
 import { sortByField } from '../../helpers/sorting';
@@ -23,6 +24,8 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	fetchSequences: [],
 	initializeSequences: [],
 	fetchSequencesSuccess: ['sequences'],
+	updateSequence: ['sequenceId', 'newName'],
+	updateSequenceSuccess: ['sequenceId', 'newName'],
 	setSelectedSequence: ['sequenceId'],
 	setSelectedSequenceSuccess: ['sequenceId'],
 	setSelectedDate: ['date'],
@@ -59,6 +62,17 @@ export const INITIAL_STATE = {
 export const fetchSequencesSuccess = (state = INITIAL_STATE, { sequences }) => {
 	sequences = sortByField([...sequences], { order: 'asc', config: { field: '_id' } });
 	return { ...state, sequences };
+};
+
+export const updateSequenceSuccess = (state = INITIAL_STATE, { sequenceId, newName }) => {
+	const sequencesList = [...state.sequences];
+	const index = findIndex(state.sequences, (sequence) => sequence._id === sequenceId);
+	sequencesList[index].name = newName;
+
+	return {
+		...state,
+		sequences: sequencesList
+	};
 };
 
 export const fetchActivitiesDefinitionsSuccess = (state = INITIAL_STATE, { sequenceId, activities }) => {
@@ -107,6 +121,7 @@ export const reset = () => {
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[SequencesTypes.FETCH_SEQUENCES_SUCCESS]: fetchSequencesSuccess,
+	[SequencesTypes.UPDATE_SEQUENCE_SUCCESS]: updateSequenceSuccess,
 	[SequencesTypes.FETCH_ACTIVITIES_DEFINITIONS_SUCCESS]: fetchActivitiesDefinitionsSuccess,
 	[SequencesTypes.SET_SELECTED_DATE_SUCCESS]: setSelectedDateSuccess,
 	[SequencesTypes.SET_LAST_SELECTED_DATE_SUCCESS]: setLastSelectedDateSuccess,

@@ -24,6 +24,7 @@ import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { EmptyStateInfo } from '../../../components/components.styles';
 import { Loader } from '../../../components/loader/loader.component';
 import { PanelBarActions } from '../panelBarActions';
+import { SequenceForm } from './components/sequenceForm/';
 import { SequencePlayer } from './components/sequencePlayer/sequencePlayer.component';
 import { SequencesList } from './components/sequencesList/sequencesList.component';
 import { TasksList } from './components/tasksList/sequenceTasksList.component';
@@ -65,6 +66,7 @@ const SequenceDetails = ({
 	fetchActivityDetails, onPlayStarted, frames,
 }) => (
 		<>
+			<SequenceForm />
 			<SequencePlayer
 				min={minDate}
 				max={maxDate}

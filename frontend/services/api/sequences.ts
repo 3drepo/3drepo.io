@@ -28,6 +28,10 @@ export const getSequences = (teamspace, modelId, revision): Promise<any> => {
 	return api.get(`${teamspace}/${modelId}/revision/${revision || HEAD}/sequences`);
 };
 
+export const patchSequence = (teamspace, modelId, revision, sequenceId, newName): Promise<any> => {
+	return api.get(`${teamspace}/${modelId}/revision/${revision || HEAD}/sequences/${sequenceId}`, { name: newName });
+};
+
 export const getSequenceState = (teamspace, modelId, revision, sequenceId, stateId): Promise<any> => {
 	return api.get(`${teamspace}/${modelId}/revision/${revision || HEAD}/sequences/${sequenceId}/state/${stateId}`);
 };

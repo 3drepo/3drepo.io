@@ -96,6 +96,14 @@ export const selectMaxDate = createSelector(
 	selectSelectedSequence, (sequence) => (sequence || {}).maxDate
 );
 
+export const selectSelectedSequenceName = createSelector(
+	selectSelectedSequence, (sequence) => sequence?.name
+);
+
+export const selectSelectedSequenceID = createSelector(
+	selectSelectedSequence, (sequence) => sequence?._id
+);
+
 export const selectStepInterval = createSelector(
 	selectSequencesDomain, (state) => state.stepInterval
 );
