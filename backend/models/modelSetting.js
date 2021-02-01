@@ -81,8 +81,7 @@ ModelSetting.changePermissions = async function(account, model, permissions) {
 		throw responseCodes.MODEL_NOT_FOUND;
 	}
 
-	// const { findByUserName, teamspaceMemberCheck } = require("./user");
-	const User = require("./user");
+	const { findByUserName, teamspaceMemberCheck } = require("./user");
 
 	if (!Array.isArray(permissions)) {
 		throw responseCodes.INVALID_ARGUMENTS;
@@ -90,7 +89,7 @@ ModelSetting.changePermissions = async function(account, model, permissions) {
 
 	// get list of valid permission name
 	permissions = _.uniq(permissions, "user");
-	return User.findByUserName(account).then(dbUser => {
+	return findByUserName(account).then(dbUser => {
 		const promises = [];
 
 		permissions.forEach(permission => {
@@ -102,7 +101,7 @@ ModelSetting.changePermissions = async function(account, model, permissions) {
 				return promises.push(Promise.reject(responseCodes.PERM_NOT_FOUND));
 			}
 
-			promises.push(User.teamspaceMemberCheck(permission.user, dbUser.user).then(() => {
+			promises.push(teamspaceMemberCheck(permission.user, dbUser.user).then(() => {
 				const perm = setting.permissions.find(_perm => _perm.user === permission.user);
 
 				if (perm) {
@@ -311,10 +310,9 @@ ModelSetting.isModelNameExists = async function(account, models, modelName) {
 };
 
 ModelSetting.populateUsers = async function(account, permissions) {
-	// const { getAllUsersInTeamspace } = require("./user");
-	const User = require("./user");
+	const { getAllUsersInTeamspace } = require("./user");
 
-	const users = await User.getAllUsersInTeamspace(account);
+	const users = await getAllUsersInTeamspace(account);
 
 	users.forEach(user => {
 		const permissionFound = permissions && permissions.find(p => p.user ===  user);
