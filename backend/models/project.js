@@ -85,13 +85,7 @@
 
 	function prepareProject(project) {
 		if (project) {
-			if (!project.models) {
-				project.models = [];
-			}
-
-			if (!project.permissions) {
-				project.permissions = [];
-			}
+			project = { models: [], permissions: [], ...project };
 		}
 
 		return project;
@@ -118,7 +112,7 @@
 			permissions: []
 		};
 
-		if (userPermissions.indexOf(C.PERM_TEAMSPACE_ADMIN) === -1) {
+		if (!userPermissions.includes(C.PERM_TEAMSPACE_ADMIN)) {
 			project.permissions = [{
 				user: username,
 				permissions: [C.PERM_PROJECT_ADMIN]
@@ -197,7 +191,7 @@
 	};
 
 	Project.findProjectPermsByUser = async function(teamspace, model, username) {
-		const project = await Project.findOneProject(teamspace, {name: model});
+		const project = await Project.findOneProject(teamspace, {name: model}, {permissions: 1});
 
 		if (!project) {
 			return [];
