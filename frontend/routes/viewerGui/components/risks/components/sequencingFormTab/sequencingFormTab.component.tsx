@@ -28,11 +28,17 @@ interface IProps {
 	showSequenceDate: (value) => void;
 	min: number;
 	max: number;
+	selectedDate?: Date;
+	endTimeValue?: Date;
+	startTimeValue?: Date;
+	sequences?: any[];
 }
 
 export const SequencingFormTab: React.FunctionComponent<IProps> = ({
-	active, canComment, showSequenceDate, min, max
+	active, canComment, showSequenceDate, min, max, selectedDate, endTimeValue, startTimeValue, sequences
 }) => {
+	const minDate = sequences ? sequences[0]?.minDate : undefined;
+
 	return (
 		<Content active={active}>
 			<SequencingDates
@@ -40,6 +46,10 @@ export const SequencingFormTab: React.FunctionComponent<IProps> = ({
 				canEdit={canComment}
 				min={min}
 				max={max}
+				selectedDate={selectedDate}
+				endTimeValue={endTimeValue}
+				startTimeValue={startTimeValue}
+				minDate={minDate}
 			/>
 		</Content>
 	);

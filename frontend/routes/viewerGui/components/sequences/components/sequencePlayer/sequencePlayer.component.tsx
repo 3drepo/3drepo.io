@@ -29,7 +29,7 @@ import { findIndex, noop } from 'lodash';
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 import { STEP_SCALE } from '../../../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../../../constants/viewerGui';
-import { isDateOusideRange } from '../../../../../../helpers/dateTime';
+import { isDateOutsideRange, MILLI_PER_HOUR } from '../../../../../../helpers/dateTime';
 import { getDateByStep, getSelectedFrame } from '../../../../../../modules/sequences/sequences.helper';
 import { LONG_DATE_TIME_FORMAT_NO_MINUTES } from '../../../../../../services/formatting/formatDate';
 import {
@@ -265,7 +265,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const {value, playing, stepScale , stepInterval} = this.state;
+		const { value, stepScale , stepInterval } = this.state;
 
 		return (
 			<SequencePlayerContainer>
@@ -277,12 +277,12 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 							</Grid>
 							<Grid item>
 								<DatePicker
-									shouldDisableDate={(date) => isDateOusideRange(this.props.min, this.props.max, date.$d)}
+									shouldDisableDate={(date) => isDateOutsideRange(this.props.min, this.props.max, date.$d)}
 									name="date"
 									inputId="1"
 									value={value}
 									format={LONG_DATE_TIME_FORMAT_NO_MINUTES}
-									onChange={(e) => this.gotoDate(new Date(Math.floor(e.target.value / 3600000) * 3600000))}
+									onChange={(e) => this.gotoDate(new Date(Math.floor(e.target.value / MILLI_PER_HOUR) * MILLI_PER_HOUR))}
 									placeholder="date"
 									dateTime
 								/>

@@ -74,6 +74,8 @@ interface IProps {
 	showSequenceDate: (date) => void;
 	minSequenceDate: Date;
 	maxSequenceDate: Date;
+	selectedDate: Date;
+	sequences: any[];
 }
 
 interface IState {
@@ -247,7 +249,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleIssueFormSubmit = (values) => {
-		const { teamspace, model, updateIssue, updateNewIssue } = this.props;
+		const { updateIssue, updateNewIssue } = this.props;
+
 		if (this.isNewIssue) {
 			updateNewIssue(mergeData(this.issueData, values));
 		} else {
@@ -287,6 +290,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				showSequenceDate={this.props.showSequenceDate}
 				minSequenceDate={this.props.minSequenceDate}
 				maxSequenceDate={this.props.maxSequenceDate}
+				selectedDate={this.props.selectedDate}
+				sequences={this.props.sequences}
 			/>
 		);
 	}

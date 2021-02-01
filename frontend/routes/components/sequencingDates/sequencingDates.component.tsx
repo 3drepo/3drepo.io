@@ -25,7 +25,7 @@ import DayJsUtils from '@date-io/dayjs';
 
 import { Field } from 'formik';
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';
-import { isDateOusideRange } from '../../../helpers/dateTime';
+import { isDateOutsideRange } from '../../../helpers/dateTime';
 import { NAMED_MONTH_DATETIME_FORMAT } from '../../../services/formatting/formatDate';
 import { FieldsRow,
 	StyledFormControl } from '../../viewerGui/components/risks/components/riskDetails/riskDetails.styles';
@@ -37,17 +37,21 @@ interface IProps {
 	min: number;
 	max: number;
 	showSequenceDate: (value) => void;
+	selectedDate?: Date;
+	endTimeValue?: Date;
+	startTimeValue?: Date;
+	minDate?: Date;
 }
 
 interface IState {
 	valued: any;
 }
 
-const SequenceDate = ({value, name, onChange, showSequenceDate, min, max}) => {
+const SequenceDate = ({ value, name, onChange, showSequenceDate, min, max, initialFocusedDate }) => {
 	return (
 		<SequenceDateContainer>
 			<SequenceDateField
-				shouldDisableDate={(date) => isDateOusideRange(min, max, date.$d)}
+				shouldDisableDate={(date) => isDateOutsideRange(min, max, date.$d)}
 				format={NAMED_MONTH_DATETIME_FORMAT}
 				dateTime
 				name={name}
@@ -55,6 +59,7 @@ const SequenceDate = ({value, name, onChange, showSequenceDate, min, max}) => {
 				value={value}
 				onChange={onChange}
 				defaultValue={min}
+				initialFocusedDate={initialFocusedDate}
 			/>
 			{ value &&
 				<SequenceDateActions>
@@ -67,6 +72,15 @@ const SequenceDate = ({value, name, onChange, showSequenceDate, min, max}) => {
 };
 
 export class SequencingDates extends React.PureComponent<IProps, IState> {
+	get additionalProps() {
+		const { endTimeValue, startTimeValue, selectedDate, minDate } = this.props;
+		const newTime = selectedDate ? selectedDate : endTimeValue;
+
+		return !startTimeValue ? {
+			initialFocusedDate: newTime ? newTime : minDate,
+		} : {};
+	}
+
 	public render() {
 		return (
 			<MuiPickersUtilsProvider utils={DayJsUtils}>
@@ -80,6 +94,7 @@ export class SequencingDates extends React.PureComponent<IProps, IState> {
 								max={this.props.max ?
 									new Date(Math.min(form.values.sequence_end || Number.POSITIVE_INFINITY, this.props.max))
 									: undefined}
+								{...this.additionalProps}
 							/>
 						)} />
 					</StyledFormControl>

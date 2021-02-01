@@ -35,7 +35,13 @@ import {
 	selectRisks,
 	RisksActions,
 } from '../../../../../../modules/risks';
-import { selectMaxDate, selectMinDate, SequencesActions } from '../../../../../../modules/sequences';
+import {
+	selectMaxDate,
+	selectMinDate,
+	selectSelectedStartingDate,
+	selectSequences,
+	SequencesActions
+} from '../../../../../../modules/sequences';
 import { ViewpointsActions } from '../../../../../../modules/viewpoints';
 import { withViewer } from '../../../../../../services/viewer/viewer';
 import { RiskDetails } from './riskDetails.component';
@@ -56,7 +62,9 @@ const mapStateToProps = createStructuredSelector({
 	failedToLoad: selectFailedToLoad,
 	postCommentIsPending: selectPostCommentIsPending,
 	minSequenceDate: selectMinDate,
-	maxSequenceDate: selectMaxDate
+	maxSequenceDate: selectMaxDate,
+	selectedDate: selectSelectedStartingDate,
+	sequences: selectSequences,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

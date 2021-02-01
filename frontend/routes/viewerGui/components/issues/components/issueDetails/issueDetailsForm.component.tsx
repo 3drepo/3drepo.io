@@ -72,7 +72,8 @@ interface IProps {
 	showSequenceDate: (date) => void;
 	minSequenceDate: number;
 	maxSequenceDate: number;
-
+	selectedDate: Date;
+	sequences: any[];
 }
 
 interface IState {
@@ -158,6 +159,9 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 			showSequenceDate={this.props.showSequenceDate}
 			min={this.props.minSequenceDate}
 			max={this.props.maxSequenceDate}
+			startTimeValue={this.props.values.sequence_start}
+			endTimeValue={this.props.values.sequence_end}
+			sequences={this.props.sequences}
 		/>
 	)
 
