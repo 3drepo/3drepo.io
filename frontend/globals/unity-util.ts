@@ -1120,7 +1120,6 @@ export class UnityUtil {
 		if (initView) {
 			params.initView = initView;
 		}
-
 		UnityUtil.onLoaded();
 		// tslint:disable-next-line
 		console.log(`[${new Date()}]Loading model: `, params);

@@ -18,9 +18,9 @@ import { isEmpty, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { addToGroupDictionary } from '../../helpers/colorOverrides';
 import { getTransparency, hasTransparency } from '../../helpers/colors';
-import { selectActiveIssueDetails } from '../issues';
+import { selectActiveIssue } from '../issues';
 import { selectDefaultView } from '../model';
-import { selectActiveRiskDetails } from '../risks';
+import { selectActiveRisk } from '../risks';
 import { selectQueryParams } from '../router/router.selectors';
 
 export const selectViewpointsDomain = (state) => state.viewpoints;
@@ -63,6 +63,7 @@ export const selectSelectedViewpoint = createSelector(
 
 export const selectTransformations = createSelector(
 	selectSelectedViewpoint, (viewpoint) => {
+
 		if ( !Boolean(viewpoint?.transformation_groups?.length)) {
 			return {};
 		}
@@ -103,7 +104,7 @@ export const selectTransparencies = createSelector(
 );
 
 export const selectInitialView =  createSelector(
-	selectViewpointsDomain, selectQueryParams,  selectDefaultView, selectActiveIssueDetails, selectActiveRiskDetails,
+	selectViewpointsDomain, selectQueryParams,  selectDefaultView, selectActiveIssue, selectActiveRisk,
 		({viewpointsMap}, {viewId},  defaultView, activeIssue, activeRisk) => {
 			return !isEmpty(activeIssue) ? activeIssue :
 				!isEmpty(activeRisk) ?  activeRisk :
