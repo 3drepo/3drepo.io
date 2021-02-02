@@ -16,8 +16,12 @@
  */
 "use strict";
 const crypto = require("crypto");
-const { intercom: { secretKey, accessToken } } = require("../config");
+const { intercom } = require("../config");
+const { get } = require("lodash");
 const axios = require("axios");
+
+const accessToken = get(intercom, "accessToken");
+const secretKey = get(intercom, "secretKey");
 
 const headers = {
 	"Authorization": `Bearer ${accessToken}`,
