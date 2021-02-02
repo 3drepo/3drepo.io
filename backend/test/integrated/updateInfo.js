@@ -136,5 +136,24 @@ describe("Updating user info", function () {
 
 		expect(body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 	});
+
+	it("should fail to get avatar if the user doesnt have one", async function() {
+		const { body } = await agent.get(`/${username}/avatar`)
+			.expect(404);
+
+		expect(body.value).to.equal(responseCodes.USER_DOES_NOT_HAVE_AVATAR.value);
+	})
+
+	it("should succeed to update the avatar", async function() {
+		await agent.post(`/${username}/avatar`)
+			.attach("file", __dirname + "/../../statics/images/avatar.png")
+			.expect(200);
+	})
+
+	it("should succeed to get avatar if a user has one", async function() {
+		await agent.get(`/${username}/avatar`)
+			.expect(200);
+
+	})
 });
 
