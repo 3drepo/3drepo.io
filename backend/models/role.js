@@ -16,95 +16,57 @@
  */
 
 "use strict";
-(() => {
 
-	const mongoose = require("mongoose");
-	const ModelFactory = require("./factory/modelFactory");
-	const C = require("../constants");
+const C = require("../constants");
+const DB = require("../handler/db");
 
-	const schema = mongoose.Schema({
-		_id : String,
-		role: String,
-		privileges: {},
-		roles: []
-	});
+const findByRoleID = async function(id) {
+	return await DB.findOne("admin", "system.roles", { _id: id});
+};
 
-	schema.statics.createTeamSpaceRole = function (account) {
-		const roleId = `${account}.${C.DEFAULT_MEMBER_ROLE}`;
+const Role = {};
 
-		return Role.findByRoleID(roleId).then(roleFound => {
-			if(roleFound) {
-				roleFound = roleFound.toObject();
-				return { role: roleFound.role, db: roleFound.db};
-			} else {
-				const roleName = C.DEFAULT_MEMBER_ROLE;
-				const createRoleCmd = {
-					"createRole": roleName,
-					"privileges":[{
-						"resource":{
-							"db": account,
-							"collection": "settings"
-						},
-						"actions": ["find"]}
-					],
-					"roles": []
-				};
+Role.createTeamSpaceRole = async function (account) {
+	const roleId = `${account}.${C.DEFAULT_MEMBER_ROLE}`;
 
-				return ModelFactory.dbManager.runCommand(account, createRoleCmd).then(()=> {
-					return {role: roleName, db: account};
-				});
-			}
-		});
+	const roleFound = await findByRoleID(roleId);
 
+	if(roleFound) {
+		return ;
+	}
+
+	const roleName = C.DEFAULT_MEMBER_ROLE;
+	const createRoleCmd = {
+		"createRole": roleName,
+		"privileges":[{
+			"resource":{
+				"db": account,
+				"collection": "settings"
+			},
+			"actions": ["find"]}
+		],
+		"roles": []
 	};
 
-	schema.statics.dropTeamSpaceRole = function (account) {
-		const dropRoleCmd = {
-			"dropRole" : C.DEFAULT_MEMBER_ROLE
-		};
+	await DB.runCommand(account, createRoleCmd);
+};
 
-		return this.findByRoleID(`${account}.${C.DEFAULT_MEMBER_ROLE}`).then(role => {
-			if(!role) {
-				return Promise.resolve();
-			} else {
-				return ModelFactory.dbManager.runCommand(account, dropRoleCmd);
-			}
-		});
-
+Role.grantTeamSpaceRoleToUser = async function (username, account) {
+	const grantRoleCmd = {
+		grantRolesToUser: username,
+		roles: [{role: C.DEFAULT_MEMBER_ROLE, db: account}]
 	};
 
-	schema.statics.grantTeamSpaceRoleToUser = function (username, account) {
+	return await DB.runCommand("admin", grantRoleCmd);
+};
 
-		const grantRoleCmd = {
-			grantRolesToUser: username,
-			roles: [{role: C.DEFAULT_MEMBER_ROLE, db: account}]
-		};
-
-		return ModelFactory.dbManager.runCommand("admin", grantRoleCmd);
+Role.revokeTeamSpaceRoleFromUser = async function(username, account) {
+	const cmd = {
+		revokeRolesFromUser: username,
+		roles: [{role: C.DEFAULT_MEMBER_ROLE, db: account}]
 	};
 
-	schema.statics.findByRoleID = function(id) {
-		return this.findOne({ account: "admin"}, { _id: id});
-	};
+	return await DB.runCommand("admin", cmd);
+};
 
-	schema.statics.revokeTeamSpaceRoleFromUser = function(username, account) {
-
-		const cmd = {
-			revokeRolesFromUser: username,
-			roles: [{role: C.DEFAULT_MEMBER_ROLE, db: account}]
-		};
-
-		return ModelFactory.dbManager.runCommand("admin", cmd);
-	};
-
-	const Role = ModelFactory.createClass(
-		"Role",
-		schema,
-		() => {
-			return "system.roles";
-		}
-	);
-
-	module.exports = Role;
-
-})();
+module.exports = Role;

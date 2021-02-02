@@ -126,13 +126,37 @@ export class UnityUtil {
 	/**
 	 * Launch the Unity Game.
  	 * @category Configurations
-	 * @param divId - the html div tag this game should be loaded into.
-	 * @param unityConfig - url to find the game configuration
-	 * @param memory - Amount of memory the game should start with (in bytes)
+	 * @param canvas - the html dom of the unity canvas
+	 * @param host - host server URL (e.g. https://www.3drepo.io)
 	 * @return returns a promise which resolves when the game is loaded.
 	 *
 	 */
-	public static loadUnity(canvas: any, unityURL): Promise<void> {
+	public static loadUnity(canvas: any, host): Promise<void> {
+		let canvasDom = canvas;
+		let domainURL = host;
+		if (Object.prototype.toString.call(canvas) === '[object String]') {
+			// The user is calling it like Unity 2019. Convert it to a dom an create a canvas
+			// tslint:disable-next-line
+			console.warn('[DEPRECATED WARNING] loadUnity() no longer takes in a string and a URL to the unity config. Please check the API documentation and update your function.');
+			const divDom = document.getElementById(canvas);
+			canvasDom = document.createElement('canvas');
+			canvasDom.id = 'unity';
+			divDom.appendChild(canvasDom);
+
+			if (host) {
+				// Old schema asks for a json file location, we now take the domain url
+				// and generate the object at run time.
+				domainURL = host.match('^https?:\/\/[^\/]+');
+			}
+		}
+
+		return UnityUtil._loadUnity(canvasDom, domainURL);
+
+	}
+
+	/** @hidden */
+	public static _loadUnity(canvas: any, unityURL): Promise<void> {
+
 		if (!window.Module) {
 			// Add withCredentials to XMLHttpRequest prototype to allow unity game to
 			// do CORS request. We used to do this with a .jspre on the unity side but it's no longer supported
@@ -1113,7 +1137,6 @@ export class UnityUtil {
 		if (initView) {
 			params.initView = initView;
 		}
-
 		UnityUtil.onLoaded();
 		// tslint:disable-next-line
 		console.log(`[${new Date()}]Loading model: `, params);

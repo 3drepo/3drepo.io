@@ -400,13 +400,9 @@ module.exports = {
 
 	insertUserReferencedNotification: async function (referrer, teamspace, modelId, type, _id, referee) {
 		try {
-			const user = await User.findByUserName(referee);
-			if (await user.isMemberOfTeamspace(teamspace)) {
-				const notification = await insertUserReferencedNotification(referrer, teamspace, modelId, type, _id, referee);
-				return await fillModelData([{username: referee, notification}]);
-			} else {
-				return [];
-			}
+			await User.teamspaceMemberCheck(referee, teamspace);
+			const notification = await insertUserReferencedNotification(referrer, teamspace, modelId, type, _id, referee);
+			return await fillModelData([{username: referee, notification}]);
 		} catch (e) {
 			return [];
 		}

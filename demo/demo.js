@@ -1,4 +1,3 @@
-
 var PREFIX = "https://www.3drepo.io";
 var API_PREFIX = "https://api1.www.3drepo.io";
 
@@ -13,74 +12,16 @@ function init() {
     // Set the API for the viewer (for fetching models etc)
     setAPI();
 
-    // Login using JavaScript prompts and fetch
-    login();
-
-    function login() {
-
-
-        // Get user credentials
-        var username = prompt("Please enter your 3drepo.io username");
-        var password = prompt("Please enter your 3drepo.io password");
-        var credentials = {username: username, password: password};
-        account = username;
-
-        var post = {
-            method: 'POST',
-            headers: {
-                'Access-Control-Allow-Origin': "*",
-                'Access-Control-Allow-Credentials': 'true',
-                'Accept': 'application/json, text/plain, */*',
-                'Content-Type': 'application/json'
-            },
-            credentials: 'include', // include, same-origin, *omit
-            mode: "cors",
-            body: JSON.stringify(credentials)
-        };
-
-        var LOGIN_URL = API + "login";
-
-        // Use the Fetch API
-        fetch(LOGIN_URL, post)
-            .then(function(response) {
-
-                var validResponse = response.status !== 200;
-
-                response.json()
-                    .then(function(json){
-                        if (validResponse) {
-
-                            if (json.code === "ALREADY_LOGGED_IN") {
-                                console.log("Already logged in!")
-                                initialiseViewer()
-                            } else {
-                                confirm(json.message)
-                            }
-
-                        } else {
-                            // If we log in succesfully than initialise the viewer
-                            initialiseViewer()
-                        }
-                    })
-                    .catch(function(error){
-                        confirm("Error getting JSON: ", error)
-                    })
-
-            })
-            .catch(function(error) {
-                if (error.code === "ALREADY_LOGGED_IN") {
-                    initialiseViewer()
-                } else {
-                    confirm("Error logging in: ", error)
-                }
-            })
-
-    }
-
     function setAPI() {
         UnityUtil.setAPIHost({
             hostNames: [API]
-        });
+		});
+
+		var apiKey = prompt("Please enter your API key.");
+		if(apiKey) {
+			UnityUtil.setAPIKey(apiKey);
+    		initialiseViewer()
+		}
     }
 
     function initialiseViewer() {
@@ -101,8 +42,9 @@ function init() {
 
     function handleModelInput() {
 
+        var account = document.getElementById("teamspace").value;
         var model = document.getElementById("model").value;
-        changeStatus("Loading Model...", account, model);
+		changeStatus("Loading Model...", account, model);
         document.getElementById("modelSubmit").disabled = true;
         if (account && model) {
             UnityUtil.loadModel(account, model)

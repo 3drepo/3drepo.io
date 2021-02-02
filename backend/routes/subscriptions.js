@@ -24,6 +24,7 @@ const User = require("../models/user");
 const responseCodes = require("../response_codes.js");
 const config = require("../config");
 const utils = require("../utils");
+const UserBilling = require("../models/userBilling");
 
 /**
  * @api {get} /:teamspace/subscriptions List subscriptions
@@ -75,7 +76,7 @@ function updateSubscription(req, res, next) {
 	User.findByUserName(req.params.account)
 		.then(dbUser => {
 			const billingUser = req.session.user.username;
-			return dbUser.updateSubscriptions(req.body.plans, billingUser, req.body.billingAddress || {});
+			return User.updateSubscriptions(dbUser, req.body.plans, billingUser, req.body.billingAddress || {});
 		})
 		.then(agreement => {
 
@@ -100,7 +101,7 @@ function listSubscriptions(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 	User.findByUserName(req.params.account)
 		.then(user => {
-			const subscriptions = user.customData.billing.getActiveSubscriptions();
+			const subscriptions =  UserBilling.getActiveSubscriptions(user.customData.billing);
 
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscriptions);
 		})

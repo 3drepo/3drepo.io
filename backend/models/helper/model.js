@@ -43,6 +43,8 @@ const CombinedStream = require("combined-stream");
 const stringToStream = require("string-to-stream");
 const { StreamBuffer } = require("./stream");
 const { BinToFaceStringStream, BinToVector3dStringStream } = require("./binary");
+const PermissionTemplates = require("../permissionTemplates");
+const AccountPermissions = require("../accountPermissions");
 
 /** *****************************************************************************
  * Converts error code from repobouncerclient to a response error object.
@@ -87,6 +89,7 @@ function translateBouncerErrCode(bouncerErrorCode) {
 		{ res: responseCodes.FILE_IMPORT_TIMED_OUT, softFail: false, userErr: false},
 		{ res: responseCodes.FILE_IMPORT_SYNCHRO_NOT_SUPPORTED, softFail: false, userErr: false},
 		{ res: responseCodes.FILE_IMPORT_MAX_NODE_EXCEEDED, softFail: false, userErr: true},
+		{ res: responseCodes.FILE_IMPORT_PROCESS_ERR, softFail: false, userErr: false},
 		{ res: responseCodes.FILE_IMPORT_PROCESS_ERR, softFail: false, userErr: false}
 	];
 
@@ -832,7 +835,7 @@ async function getModelPermission(username, setting, account) {
 			return [];
 		}
 
-		const accountPerm = dbUser.customData.permissions.findByUser(username);
+		const accountPerm = AccountPermissions.findByUser(dbUser, username);
 		if(accountPerm && accountPerm.permissions) {
 			permissions = flattenPermissions(accountPerm.permissions);
 		}
@@ -849,7 +852,7 @@ async function getModelPermission(username, setting, account) {
 		const template = setting.findPermissionByUser(username);
 
 		if(template) {
-			const permissionTemplate = dbUser.customData.permissionTemplates.findById(template.permission);
+			const permissionTemplate = PermissionTemplates.findById(dbUser, template.permission);
 
 			if(permissionTemplate && permissionTemplate.permissions) {
 				permissions = permissions.concat(flattenPermissions(permissionTemplate.permissions, true));

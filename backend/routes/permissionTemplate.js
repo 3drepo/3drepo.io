@@ -24,6 +24,7 @@
 	const middlewares = require("../middlewares/middlewares");
 	const User = require("../models/user");
 	const utils = require("../utils");
+	const PermissionTemplates = require("../models/permissionTemplates");
 
 	/**
 	 * @apiDefine PermissionTemplate Permission Template
@@ -143,11 +144,8 @@
 	router.delete("/permission-templates/:permissionId", middlewares.isAccountAdmin, deleteTemplate);
 
 	function listTemplates(req, res, next) {
-
 		User.findByUserName(req.params.account).then(user => {
-
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, user.customData.permissionTemplates.get());
-
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, PermissionTemplates.get(user));
 		}).catch(err => {
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -163,11 +161,12 @@
 				permissions: req.body.permissions
 			};
 
-			return user.customData.permissionTemplates.add(permission);
+			return PermissionTemplates.add(user, permission);
 
 		}).then(permission => {
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
+
 		}).catch(err => {
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -179,7 +178,7 @@
 
 		User.findByUserName(req.params.account).then(user => {
 
-			return user.customData.permissionTemplates.remove(req.params.permissionId);
+			return PermissionTemplates.remove(user, req.params.permissionId);
 
 		}).then(() => {
 

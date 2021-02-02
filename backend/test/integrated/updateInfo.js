@@ -61,70 +61,49 @@ describe("Updating user info", function () {
 		});
 	});
 
-	it("should succeed if provide new info and same email address", function(done) {
-
+	it("should succeed if provide new info and same email address", async function() {
 		const firstName = "abc";
 		const lastName = "def";
-		async.series([
-			function update(done) {
-				agent.put(`/${username}`)
-					.send({ firstName, lastName, email })
-					.expect(200, done);
-			},
+		await agent.put(`/${username}`)
+			.send({ firstName, lastName })
+			.expect(200);
 
-			function check(done) {
-				agent.get(`/${username}.json`)
-					.expect(200, function(err, res) {
-						expect(res.body.firstName).to.equal(firstName);
-						expect(res.body.lastName).to.equal(lastName);
-						done(err);
-					});
-			}
-		], done);
+		const {body} = await agent.get(`/${username}.json`)
+					.expect(200)
 
+		expect(body.firstName).to.equal(firstName);
+		expect(body.lastName).to.equal(lastName);
+		expect(body.email).to.equal(email);
 	});
 
-	it("should succeed if provide new info and new email address", function(done) {
-
+	it("should succeed if provide new info and new email address", async function() {
 		const firstName = "abc";
 		const lastName = "def";
-		async.series([
-			function update(done) {
-				agent.put(`/${username}`)
-					.send({ firstName, lastName, email: newEmail})
-					.expect(200, done);
-			},
 
-			function check(done) {
-				agent.get(`/${username}.json`)
-					.expect(200, function(err, res) {
-						expect(res.body.firstName).to.equal(firstName);
-						expect(res.body.lastName).to.equal(lastName);
-						expect(res.body.email).to.equal(newEmail);
-						done(err);
-					});
-			}
-		], done);
+		await agent.put(`/${username}`)
+			.send({ firstName, lastName, email: newEmail})
+			.expect(200);
 
+		const {body} = await agent.get(`/${username}.json`)
+					.expect(200)
+
+		expect(body.firstName).to.equal(firstName);
+		expect(body.lastName).to.equal(lastName);
+		expect(body.email).to.equal(newEmail);
 	});
 
-	it("should fail if email provided is taken", function(done) {
-
+	it("should fail if email provided is taken", async function() {
 		const firstName = "abc";
 		const lastName = "def";
 
-		agent.put(`/${username}`)
+		const { body }  = await agent.put(`/${username}`)
 			.send({ firstName, lastName, email: takenEmail })
-			.expect(400, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.EMAIL_EXISTS.value);
-				done(err);
-			});
+			.expect(400)
 
+		expect(body.value).to.equal(responseCodes.EMAIL_EXISTS.value);
 	});
 
 	it("should fail if firstname is not a string", function(done) {
-
-		const firstName = "abc";
 		const lastName = "def";
 
 		agent.put(`/${username}`)
