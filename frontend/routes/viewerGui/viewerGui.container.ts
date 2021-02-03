@@ -26,10 +26,12 @@ import { selectIsPending, selectSettings, ModelActions } from '../../modules/mod
 import { selectIsPresentationActive, PresentationActions } from '../../modules/presentation';
 import { selectQueryParams } from '../../modules/router/router.selectors';
 import { TreeActions } from '../../modules/tree';
+import { selectCacheSetting } from '../../modules/viewer';
 import {
 	selectDisabledPanelButtons,
 	selectIsFocusMode, selectLeftPanels, selectRightPanels, ViewerGuiActions,
 } from '../../modules/viewerGui';
+import { withDataCache } from '../../services/dataCache';
 import { withViewer } from '../../services/viewer/viewer';
 import { ViewerGui } from './viewerGui.component';
 
@@ -42,7 +44,8 @@ const mapStateToProps = createStructuredSelector({
 	rightPanels: selectRightPanels,
 	isFocusMode: selectIsFocusMode,
 	disabledPanelButtons: selectDisabledPanelButtons,
-	isPresentationActive: selectIsPresentationActive
+	isPresentationActive: selectIsPresentationActive,
+	cacheEnabled: selectCacheSetting,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -59,4 +62,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	joinPresentation: PresentationActions.joinPresentation,
 }, dispatch);
 
-export default withViewer(connect(mapStateToProps, mapDispatchToProps)(ViewerGui));
+export default withDataCache(withViewer(connect(mapStateToProps, mapDispatchToProps)(ViewerGui)));

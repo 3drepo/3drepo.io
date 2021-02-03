@@ -266,7 +266,7 @@ export class VisualSettingsDialog extends React.PureComponent<IProps, IState> {
 		this.setState({showCacheWarning : event.target.checked});
 	}
 
-	public onSubmit = (values, { resetForm }) => {
+	public onSubmit = (values) => {
 		const { updateSettings, currentUser} = this.props;
 
 		values.nearPlane = Number(values.nearPlane);

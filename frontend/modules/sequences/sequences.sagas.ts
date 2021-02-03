@@ -22,11 +22,13 @@ import { selectSelectedSequenceId, selectStateDefinitions,
 import { VIEWER_PANELS } from '../../constants/viewerGui';
 
 import * as API from '../../services/api';
+import { DataCache, STORE_NAME } from '../../services/dataCache';
 import { DialogActions } from '../dialog';
 import { selectCurrentModel, selectCurrentModelTeamspace, selectCurrentRevisionId, selectIsFederation } from '../model';
 import { dispatch, getState } from '../store';
 import { selectHiddenGeometryVisible,  TreeActions } from '../tree';
 
+import { selectCacheSetting } from '../viewer';
 import { selectLeftPanels, ViewerGuiActions } from '../viewerGui';
 import { getSelectedFrame } from './sequences.helper';
 import { selectActivitiesDefinitions, selectFrames,  selectNextKeyFramesDates,
@@ -93,8 +95,22 @@ export function* fetchFrame({ date }) {
 		const loadedStates = yield select(selectStateDefinitions);
 		const frames = yield select(selectFrames);
 		const { state: stateId } = getSelectedFrame(frames, date);
+		const cacheEnabled = yield select(selectCacheSetting);
+		const IndexedDBKey = `${teamspace}.${model}.${stateId}.3DRepo`;
+		let cachedData;
 
-		if (!loadedStates[stateId]) {
+		if (cacheEnabled) {
+			cachedData = yield DataCache.getValue(STORE_NAME.FRAMES, IndexedDBKey);
+			const selectedDate = yield select(selectSelectedDate);
+			if (cachedData) {
+				yield put(SequencesActions.setStateDefinition(stateId, cachedData));
+				if (selectedDate.valueOf() === date.valueOf()) {
+					yield put(SequencesActions.setLastSelectedDateSuccess(date));
+				}
+			}
+		}
+
+		if (!cachedData && !loadedStates[stateId]) {
 			// Using directly the promise and 'then' to dispatch the rest of the actions
 			// because with yield it would sometimes stop there forever even though the promise resolved
 			API.getSequenceState(teamspace, model, revision, sequenceId, stateId).then((response) => {
@@ -103,7 +119,13 @@ export function* fetchFrame({ date }) {
 					dispatch(SequencesActions.setLastSelectedDateSuccess(date));
 				}
 
-				dispatch(SequencesActions.setStateDefinition(stateId, response.data));
+				if (cacheEnabled) {
+					DataCache.putValue(STORE_NAME.FRAMES, IndexedDBKey, response.data).then(() => {
+						dispatch(SequencesActions.setStateDefinition(stateId, response.data));
+					});
+				} else {
+					dispatch(SequencesActions.setStateDefinition(stateId, response.data));
+				}
 			}).catch((e) => {
 				dispatch(SequencesActions.setStateDefinition(stateId, {}));
 			});

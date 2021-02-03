@@ -21,6 +21,7 @@ import React from 'react';
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import { VIEWER_LEFT_PANELS, VIEWER_PANELS } from '../../constants/viewerGui';
 import { renderWhenTrue } from '../../helpers/rendering';
+import { IDataCache, STORE_NAME } from '../../services/dataCache';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { Activities } from './components/activities/';
 import { Bim } from './components/bim';
@@ -42,6 +43,7 @@ import { Container, GuiContainer, LeftPanels, LeftPanelsButtons, RightPanels } f
 
 interface IProps {
 	viewer: any;
+	dataCache: IDataCache;
 	className?: string;
 	modelSettings: any;
 	isModelPending: boolean;
@@ -73,6 +75,7 @@ interface IProps {
 	resetViewerGui: () => void;
 	resetCompareComponent: () => void;
 	joinPresentation: (code) => void;
+	cacheEnabled: boolean;
 }
 
 interface IState {
@@ -97,7 +100,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	public renderViewerLoader = renderWhenTrue(() => <ViewerLoader />);
 
 	public componentDidMount() {
-		const { queryParams: { issueId, riskId, presenter}, match: { params }, viewer, leftPanels } = this.props;
+		const { queryParams: { issueId, riskId, presenter }, match: { params }, viewer, leftPanels } = this.props;
 
 		viewer.init();
 
@@ -120,7 +123,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps: IProps, prevState: IState) {
 		const changes = {} as IState;
-		const { match: { params }, queryParams, leftPanels } = this.props;
+		const { match: { params }, queryParams, leftPanels, cacheEnabled } = this.props;
 		const teamspaceChanged = params.teamspace !== prevProps.match.params.teamspace;
 		const modelChanged = params.model !== prevProps.match.params.model;
 		const revisionChanged = params.revision !== prevProps.match.params.revision;
@@ -146,6 +149,12 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		if (presentationActivityChanged && this.props.isPresentationActive) {
 			this.props.setPanelVisibility(VIEWER_PANELS.COMPARE, false);
 			this.props.resetCompareComponent();
+		}
+
+		if (cacheEnabled !== prevProps.cacheEnabled && cacheEnabled) {
+			(async () => {
+				await this.props.dataCache.create([STORE_NAME.FRAMES]);
+			})();
 		}
 	}
 
