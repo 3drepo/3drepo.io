@@ -334,17 +334,11 @@ ModelSetting.populateUsersForMultiplePermissions = function (account, permission
 };
 
 ModelSetting.setModelImportFail = async function(account, model, errorReason) {
-	const setting = await ModelSetting.findModelSettingById(account, model);
-
 	// mark model failed
 	const data = {
 		status: "failed",
 		errorReason
 	};
-
-	if (setting.type === "toy" || setting.type === "sample") {
-		data.timestamp = undefined;
-	}
 
 	return ModelSetting.updateModelSetting(account, model, data);
 };
