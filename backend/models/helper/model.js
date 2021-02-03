@@ -225,17 +225,15 @@ function importFail(account, model, sharedSpacePath, user, errCode, errMsg) {
  * @param {user} user - The user who triggered the status
  */
 async function setStatus(account, model, status, user) {
-	let setting;
-
 	try {
-		setting = await setModelStatus(account, model, status);
+		const setting = await setModelStatus(account, model, status);
 		systemLogger.logInfo(`Model status changed to ${status}`);
 		ChatEvent.modelStatusChanged(null, account, model, { status, user });
+
+		return setting;
 	} catch(err) {
 		systemLogger.logError("Failed to invoke setStatus:", err);
 	}
-
-	return setting;
 }
 
 function createNewModel(teamspace, modelName, data) {
