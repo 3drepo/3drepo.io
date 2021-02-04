@@ -618,9 +618,7 @@ async function _getModels(teamspace, ids, permissions) {
 // find projects and put models into project
 async function _addProjects(account, username) {
 
-	let query = {};
-
-	const projects = await listProjects(account.account, query);
+	const projects = await listProjects(account.account, {});
 
 	projects.forEach((project, i) => {
 		project._id = utils.uuidToString(project._id);
