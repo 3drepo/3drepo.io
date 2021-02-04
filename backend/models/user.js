@@ -37,7 +37,7 @@ const ModelSetting = require("./modelSetting");
 const C = require("../constants");
 const UserBilling = require("./userBilling");
 const AccountPermissions = require("./accountPermissions");
-const { listProjects, findOneProject, removeUserFromProjects } = require("./project");
+const { listProjects, findOneProject, getProjectNamesAccessibleToUser, removeUserFromProjects } = require("./project");
 const FileRef = require("./fileRef");
 const PermissionTemplates = require("./permissionTemplates");
 
@@ -616,13 +616,9 @@ async function _getModels(teamspace, ids, permissions) {
 }
 
 // find projects and put models into project
-async function _addProjects(account, username, models) {
+async function _addProjects(account, username) {
 
 	let query = {};
-
-	if (models) {
-		query = { models: { $in: models } };
-	}
 
 	const projects = await listProjects(account.account, query);
 
@@ -960,19 +956,19 @@ User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove) 
 	const teamspacePerm = AccountPermissions.findByUser(teamspace, userToRemove);
 
 	// check if they have any permissions assigned
-	const [projects, models] = await Promise.all([
-		listProjects(teamspace.user, { "permissions.user": userToRemove }),
+	const [projectNames, models] = await Promise.all([
+		getProjectNamesAccessibleToUser(teamspace.user, userToRemove),
 		ModelSetting.find({ account: teamspace.user }, { "permissions.user": userToRemove })
 	]);
 
-	if (!cascadeRemove && (models.length || projects.length || teamspacePerm)) {
+	if (!cascadeRemove && (models.length || projectNames.length || teamspacePerm)) {
 		throw({
 			resCode: responseCodes.USER_IN_COLLABORATOR_LIST,
 			info: {
 				models: models.map(m => {
 					return { model: m.name };
 				}),
-				projects: projects.map(p => p.name),
+				projects: projectNames,
 				teamspace: teamspacePerm
 			}
 		});

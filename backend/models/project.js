@@ -161,20 +161,6 @@
 		return projects;
 	};
 
-	Project.getProjectUserPermissions = async function(teamspace, projectName) {
-		const User = require("./user");
-		const [userList, project] = await Promise.all([
-			User.getAllUsersInTeamspace(teamspace),
-			Project.findOneProject(teamspace, {name: projectName})
-		]);
-
-		if (!project) {
-			throw responseCodes.PROJECT_NOT_FOUND;
-		}
-
-		return populateUsers(userList, project);
-	};
-
 	Project.findProjectsById = async function(teamspace, ids) {
 		const foundProjects = await Project.listProjects(teamspace, { _id: { $in: ids.map(utils.stringToUUID) } });
 
@@ -197,6 +183,25 @@
 		} else {
 			return project.permissions.find(perm => perm.user === username);
 		}
+	};
+
+	Project.getProjectUserPermissions = async function(teamspace, projectName) {
+		const User = require("./user");
+		const [userList, project] = await Promise.all([
+			User.getAllUsersInTeamspace(teamspace),
+			Project.findOneProject(teamspace, {name: projectName})
+		]);
+
+		if (!project) {
+			throw responseCodes.PROJECT_NOT_FOUND;
+		}
+
+		return populateUsers(userList, project);
+	};
+
+	Project.getProjectNamesAccessibleToUser = async function(teamspace, username) {
+		const projects = await Project.listProjects(teamspace, { "permissions.user": username }, {name: 1});
+		return projects.map(p => p.name);
 	};
 
 	Project.listModels = async function(account, project, username, filters) {
