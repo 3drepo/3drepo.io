@@ -35,14 +35,6 @@
 		if (foundProject && utils.uuidToString(foundProject._id) !== utils.uuidToString(project._id)) {
 			throw responseCodes.PROJECT_EXIST;
 		}
-
-		return true;
-	}
-
-	function checkInvalidName(projectName) {
-		if (C.PROJECT_DEFAULT_ID === projectName) {
-			throw responseCodes.INVALID_PROJECT_NAME;
-		}
 	}
 
 	function checkPermissionName(permissions) {
@@ -55,9 +47,11 @@
 		}
 	}
 
-	function checkProjectNameValid(project) {
+	function checkProjectNameValid(projectName) {
 		const regex = "^[^/?=#+]{0,119}[^/?=#+ ]{1}$";
-		return project && project.match(regex);
+		if (!projectName || !projectName.match(regex) || C.PROJECT_DEFAULT_ID === projectName) {
+			throw responseCodes.INVALID_PROJECT_NAME;
+		}
 	}
 
 	function populateUsers(userList, project) {
@@ -101,9 +95,8 @@
 	};
 
 	Project.createProject = async function(teamspace, name, username, userPermissions) {
-		if (!checkProjectNameValid(name)) {
-			throw responseCodes.INVALID_PROJECT_NAME;
-		}
+		checkProjectNameValid(name);
+		checkDupName(teamspace, project);
 
 		const project = {
 			_id: nodeuuid(),
@@ -118,10 +111,6 @@
 				permissions: [C.PERM_PROJECT_ADMIN]
 			}];
 		}
-
-		checkInvalidName(name);
-		await checkDupName(teamspace, project);
-		checkPermissionName(project.permissions);
 
 		await db.insert(teamspace, PROJECTS_COLLECTION_NAME, project);
 
@@ -326,8 +315,8 @@
 			});
 		}
 
-		if (data["name"] && !checkProjectNameValid(data["name"])) {
-			return Promise.reject(responseCodes.INVALID_PROJECT_NAME);
+		if (data["name"]) {
+			checkProjectNameValid(data["name"]);
 		}
 
 		await check;
@@ -353,8 +342,8 @@
 
 		await Promise.all(userPromises);
 
-		checkInvalidName(projectName);
-		await checkDupName(account, project);
+		checkProjectNameValid(projectName);
+		checkDupName(account, project);
 		checkPermissionName(project.permissions);
 
 		await db.update(account, PROJECTS_COLLECTION_NAME, {name: projectName}, project);
