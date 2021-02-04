@@ -38,10 +38,10 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	setStepScale: ['stepScale'],
 	fetchActivitiesDefinitions: ['sequenceId'],
 	fetchActivitiesDefinitionsSuccess: ['sequenceId', 'activities'],
+	setActivitiesPending: ['isPending'],
 	showSequenceDate: ['date'],
 	handleTransparenciesVisibility: ['transparencies'],
 	restoreModelDefaultVisibility: [],
-
 	reset: []
 }, { prefix: 'SEQUENCES/' });
 
@@ -71,6 +71,7 @@ export interface ISequencesState {
 	stepScale: STEP_SCALE;
 	hiddenGeometryVisible: boolean;
 	activities: any;
+	activitiesPending: any;
 }
 
 export const INITIAL_STATE: ISequencesState = {
@@ -84,7 +85,8 @@ export const INITIAL_STATE: ISequencesState = {
 	stepInterval: 1,
 	stepScale: STEP_SCALE.DAY,
 	hiddenGeometryVisible: true,
-	activities: {}
+	activities: {},
+	activitiesPending: true,
 };
 
 export const fetchSequencesSuccess = (state = INITIAL_STATE, { sequences }) => {
@@ -105,6 +107,10 @@ export const updateSequenceSuccess = (state = INITIAL_STATE, { sequenceId, newNa
 
 export const fetchActivitiesDefinitionsSuccess = (state = INITIAL_STATE, { sequenceId, activities }) => {
 	return { ...state, activities: {...state.activities, [sequenceId]: activities } };
+};
+
+export const setActivitiesPending = (state = INITIAL_STATE, { isPending }) => {
+	return {...state, activitiesPending: isPending };
 };
 
 export const setSelectedSequenceSuccess = (state = INITIAL_STATE, { sequenceId }) => {
@@ -151,6 +157,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[SequencesTypes.FETCH_SEQUENCES_SUCCESS]: fetchSequencesSuccess,
 	[SequencesTypes.UPDATE_SEQUENCE_SUCCESS]: updateSequenceSuccess,
 	[SequencesTypes.FETCH_ACTIVITIES_DEFINITIONS_SUCCESS]: fetchActivitiesDefinitionsSuccess,
+	[SequencesTypes.SET_ACTIVITIES_PENDING]: setActivitiesPending,
 	[SequencesTypes.SET_SELECTED_DATE_SUCCESS]: setSelectedDateSuccess,
 	[SequencesTypes.SET_LAST_SELECTED_DATE_SUCCESS]: setLastSelectedDateSuccess,
 	[SequencesTypes.SET_STATE_DEFINITION]: setStateDefinition,

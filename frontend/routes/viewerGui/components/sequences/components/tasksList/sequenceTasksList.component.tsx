@@ -25,7 +25,6 @@ interface IProps {
 	tasks: ITask[];
 	minDate: Date;
 	maxDate: Date;
-	loadingFrame: boolean;
 	fetchActivityDetails: (id: string) => void;
 }
 
@@ -53,23 +52,21 @@ export class TasksList extends React.PureComponent<IProps, IState> {
 
 	private handleItemClick = (task) => this.props.fetchActivityDetails(task.id);
 
+	private renderTaskList = () => this.props.tasks.map((t) => (
+		<SequenceTasksListItem key={t.id}>
+			<TaskItem task={t} onItemClick={this.handleItemClick} />
+		</SequenceTasksListItem>
+	))
+
 	public render = () => {
-		const { tasks, loadingFrame } = this.props;
+		if (!this.props.tasks.length) {
+			return <Loader content="Loading activity list..." />;
+		}
+
 		return (
 			<SequenceTasksListContainer>
-				{loadingFrame && <Loader content="Loading frame..." />}
-				{!loadingFrame &&
-					<>
-						<TaskListLabel>{this.durationLabel}</TaskListLabel>
-						{
-							tasks.map((t) => (
-								<SequenceTasksListItem key={t.id}>
-									<TaskItem task={t} onItemClick={this.handleItemClick} />
-								</SequenceTasksListItem>
-							))
-						}
-					</>
-				}
+				<TaskListLabel>{this.durationLabel}</TaskListLabel>
+				{this.renderTaskList()}
 			</SequenceTasksListContainer>
 		);
 	}

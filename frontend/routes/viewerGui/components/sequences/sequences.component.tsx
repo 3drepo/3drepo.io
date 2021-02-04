@@ -56,6 +56,7 @@ interface IProps {
 	fetchActivityDetails: (id: string) => void;
 	deselectViewsAndLeaveClipping: () => void;
 	id?: string;
+	isActivitiesPending: boolean;
 }
 
 const da =  new Date();
@@ -63,7 +64,7 @@ const da =  new Date();
 const SequenceDetails = ({
 	minDate, maxDate, selectedDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
 	setStepScale, currentTasks, loadingFrame,  rightPanels, toggleActivitiesPanel,
-	fetchActivityDetails, onPlayStarted, frames,
+	fetchActivityDetails, onPlayStarted, frames, isActivitiesPending,
 }) => (
 		<>
 			<SequenceForm />
@@ -82,12 +83,12 @@ const SequenceDetails = ({
 				toggleActivitiesPanel={toggleActivitiesPanel}
 				onPlayStarted={onPlayStarted}
 				frames={frames}
+				isActivitiesPending={isActivitiesPending}
 			/>
 			<TasksList
 				tasks={currentTasks}
 				minDate={selectedDate}
 				maxDate={selectedEndingDate}
-				loadingFrame={loadingFrame}
 				fetchActivityDetails={fetchActivityDetails}
 			/>
 		</>

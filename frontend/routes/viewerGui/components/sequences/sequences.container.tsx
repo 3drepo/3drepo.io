@@ -22,7 +22,7 @@ import { createStructuredSelector } from 'reselect';
 
 import { ActivitiesActions } from '../../../../modules/activities';
 import {
-	selectCurrentActivities, selectFrames, selectIsLoadingFrame, selectMaxDate,
+	selectActivitiesPending, selectCurrentActivities, selectFrames, selectIsLoadingFrame, selectMaxDate,
 	selectMinDate, selectSelectedEndingDate, selectSelectedFrameColors, selectSelectedSequence,
 	selectSelectedStartingDate, selectSequences, selectStepInterval, selectStepScale, SequencesActions,
 } from '../../../../modules/sequences';
@@ -44,6 +44,7 @@ const mapStateToProps = createStructuredSelector({
 	loadingFrame: selectIsLoadingFrame,
 	selectedSequence: selectSelectedSequence,
 	rightPanels: selectRightPanels,
+	isActivitiesPending: selectActivitiesPending,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

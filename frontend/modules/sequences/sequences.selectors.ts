@@ -68,6 +68,10 @@ export const selectActivitiesDefinitions = createSelector(
 	selectSequencesDomain, selectSelectedSequenceId, (state, sequenceId) => (state.activities || {}) [sequenceId]
 );
 
+export const selectActivitiesPending = createSelector(
+	selectSequencesDomain, (state) => state.activitiesPending
+);
+
 export const selectSelectedSequence = createSelector(
 	selectSequences, selectSelectedSequenceId,
 		(sequences, id) => !sequences ? null :

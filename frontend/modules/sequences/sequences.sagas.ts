@@ -31,9 +31,10 @@ import { selectHiddenGeometryVisible,  TreeActions } from '../tree';
 import { selectCacheSetting } from '../viewer';
 import { selectLeftPanels, ViewerGuiActions } from '../viewerGui';
 import { getSelectedFrame } from './sequences.helper';
-import { selectActivitiesDefinitions, selectFrames,  selectNextKeyFramesDates,
-	selectSelectedDate, selectSelectedSequence, selectSequences,
-	selectSequenceModel} from './sequences.selectors';
+import {
+	selectActivitiesDefinitions, selectFrames, selectNextKeyFramesDates, selectSelectedDate, selectSelectedSequence,
+	selectSequences, selectSequenceModel,
+} from './sequences.selectors';
 
 export function* fetchSequences() {
 	try {
@@ -68,6 +69,7 @@ export function* updateSequence({ sequenceId, newName }) {
 
 export function* fetchActivitiesDefinitions({ sequenceId }) {
 	try {
+		yield put(SequencesActions.setActivitiesPending(true));
 		const teamspace = yield select(selectCurrentModelTeamspace);
 		const isFederation = yield select(selectIsFederation);
 		const revision = isFederation ? null : yield select(selectCurrentRevisionId);
@@ -78,6 +80,7 @@ export function* fetchActivitiesDefinitions({ sequenceId }) {
 			// API CALL TO GET TASKS
 			const {data} = yield API.getSequenceActivities(teamspace, model, revision, sequenceId);
 			yield put(SequencesActions.fetchActivitiesDefinitionsSuccess(sequenceId, data.tasks));
+			yield put(SequencesActions.setActivitiesPending(false));
 		}
 
 	} catch (error) {

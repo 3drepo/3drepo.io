@@ -18,7 +18,7 @@
 import React from 'react';
 
 import DayJsUtils from '@date-io/dayjs';
-import { Grid, IconButton, MenuItem, Select, Switch } from '@material-ui/core';
+import { FormControlLabel, FormGroup, Grid, IconButton, MenuItem, Select, Switch } from '@material-ui/core';
 import StepForwardIcon from '@material-ui/icons/FastForward';
 import StepBackIcon from '@material-ui/icons/FastRewind';
 import PlayArrow from '@material-ui/icons/PlayArrow';
@@ -30,6 +30,7 @@ import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 import { STEP_SCALE } from '../../../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../../../constants/viewerGui';
 import { isDateOutsideRange, MILLI_PER_HOUR } from '../../../../../../helpers/dateTime';
+import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { IFrame } from '../../../../../../modules/sequences';
 import { getDateByStep, getSelectedFrame } from '../../../../../../modules/sequences/sequences.helper';
 import { LONG_DATE_TIME_FORMAT_NO_MINUTES } from '../../../../../../services/formatting/formatDate';
@@ -42,7 +43,7 @@ import {
 	SequenceSlider,
 	SliderRow,
 	StepInput,
-	SwitchItem
+	StyledLoader,
 } from '../../sequences.styles';
 
 interface IProps {
@@ -60,6 +61,7 @@ interface IProps {
 	toggleActivitiesPanel: () => void;
 	onPlayStarted?: () => void;
 	frames: IFrame[];
+	isActivitiesPending: boolean;
 }
 
 interface IState {
@@ -260,6 +262,10 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 		this.nextStep();
 	}
 
+	private renderLoader = renderWhenTrue(() => (
+		<StyledLoader horizontal size={14} content="Loading frame..." />
+	));
+
 	public render() {
 		const { value, stepScale , stepInterval } = this.state;
 
@@ -312,14 +318,25 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 							</Grid>
 						</SliderRow>
 					</MuiPickersUtilsProvider>
-					<SwitchItem>
-						<Switch
-							checked={this.props.rightPanels.includes(VIEWER_PANELS.ACTIVITIES)}
-							onChange={this.props.toggleActivitiesPanel}
-							color="primary"
+					<FormGroup row>
+						<FormControlLabel
+							control={<Switch
+								checked={this.props.rightPanels.includes(VIEWER_PANELS.ACTIVITIES)}
+								onChange={this.props.toggleActivitiesPanel}
+								color="primary"
+							/>}
+							label="Show Legend"
 						/>
-						Full Activity List
-					</SwitchItem>
+						<FormControlLabel
+							control={<Switch
+								checked={this.props.rightPanels.includes(VIEWER_PANELS.ACTIVITIES)}
+								onChange={this.props.toggleActivitiesPanel}
+								color="primary"
+							/>}
+							label="Full Activity List"
+						/>
+					</FormGroup>
+					{this.renderLoader(this.props.loadingFrame && !this.props.isActivitiesPending)}
 				</SequencePlayerColumn>
 			</SequencePlayerContainer>
 		);
