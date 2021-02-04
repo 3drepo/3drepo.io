@@ -55,6 +55,14 @@
 		}
 	}
 
+	function clean(projectToClean) {
+		if (projectToClean) {
+			projectToClean._id = utils.uuidToString(projectToClean._id);
+		}
+
+		return projectToClean;
+	}
+
 	function populateUsers(userList, project) {
 		project._id = utils.uuidToString(project._id);
 
@@ -84,6 +92,13 @@
 		}
 
 		return project;
+	}
+
+	async function setUserAsProjectAdminByQuery(teamspace, user, query) {
+		const foundProject = await Project.findOneProject(teamspace, query);
+		const projectPermission = { user, permissions: ["admin_project"]};
+
+		return await Project.updateAttrs(teamspace, foundProject.name, { permissions: foundProject.permissions.concat(projectPermission) });
 	}
 
 	const Project = {};
@@ -120,13 +135,12 @@
 
 	Project.delete = async function(teamspace, name) {
 		const ModelHelper = require("./helper/model");
-		const project = await Project.findOneProject(teamspace, {name});
+		const project = await db.findOneAndDelete(teamspace, PROJECTS_COLLECTION_NAME, {name}, {models: 1});
 
 		if (!project) {
 			throw responseCodes.PROJECT_NOT_FOUND;
 		}
 
-		await db.remove(teamspace, PROJECTS_COLLECTION_NAME, {name});
 		// remove all models as well
 		if (project.models) {
 			await Promise.all(project.models.map(m => ModelHelper.removeModel(teamspace, m, true)));
@@ -147,10 +161,12 @@
 		return projects;
 	};
 
-	Project.findProjectAndPopulateUsers = async function(teamspace, projectName) {
+	Project.getProjectUserPermissions = async function(teamspace, projectName) {
 		const User = require("./user");
-		const userList = await User.getAllUsersInTeamspace(teamspace);
-		const project = await Project.findOneProject(teamspace, {name: projectName});
+		const [userList, project] = await Promise.all([
+			User.getAllUsersInTeamspace(teamspace),
+			Project.findOneProject(teamspace, {name: projectName})
+		]);
 
 		if (!project) {
 			throw responseCodes.PROJECT_NOT_FOUND;
@@ -162,9 +178,7 @@
 	Project.findProjectsById = async function(teamspace, ids) {
 		const foundProjects = await Project.listProjects(teamspace, { _id: { $in: ids.map(utils.stringToUUID) } });
 
-		foundProjects.forEach((project) => {
-			project._id = utils.uuidToString(project._id);
-		});
+		foundProjects.forEach(clean);
 
 		return foundProjects;
 	};
@@ -262,18 +276,12 @@
 		);
 	};
 
-	Project.setUserAsProjectAdmin = async function(teamspace, project, user) {
-		const projectObj = await Project.findOneProject(teamspace, {name: project});
-		const projectPermission = { user, permissions: ["admin_project"]};
-
-		return await Project.updateAttrs(teamspace, project, { permissions: projectObj.permissions.concat(projectPermission) });
+	Project.setUserAsProjectAdmin = async function(teamspace, projectName, user) {
+		return setUserAsProjectAdminByQuery(teamspace, user, {name: projectName});
 	};
 
-	Project.setUserAsProjectAdminById = async function(teamspace, project, user) {
-		const projectObj = await Project.findOneProject(teamspace, {_id: utils.stringToUUID(project)});
-		const projectPermission = { user, permissions: ["admin_project"]};
-
-		return await Project.updateAttrs(teamspace, projectObj.name, { permissions: projectObj.permissions.concat(projectPermission) });
+	Project.setUserAsProjectAdminById = async function(teamspace, projectId, user) {
+		return setUserAsProjectAdminByQuery(teamspace, user, {_id: utils.stringToUUID(projectId)});
 	};
 
 	Project.updateAttrs = async function(account, projectName, data) {

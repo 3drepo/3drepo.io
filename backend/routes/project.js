@@ -567,7 +567,7 @@
 	}
 
 	function listProject(req, res, next) {
-		Project.findProjectAndPopulateUsers(req.params.account, req.params.project).then(project => {
+		Project.getProjectUserPermissions(req.params.account, req.params.project).then(project => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
