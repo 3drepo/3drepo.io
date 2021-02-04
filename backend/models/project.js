@@ -89,10 +89,7 @@
 	const Project = {};
 
 	Project.addModelToProject = async function(teamspace, projectName, modelId) {
-		const foundProject = await Project.findOneProject(teamspace, {name: projectName});
-		foundProject.models.push(modelId);
-
-		return Project.updateAttrs(teamspace, projectName, { models: foundProject.models });
+		return db.update(teamspace, PROJECTS_COLLECTION_NAME, { name: projectName }, { "$push" : { "models": modelId } });
 	};
 
 	Project.createProject = async function(teamspace, name, username, userPermissions) {
