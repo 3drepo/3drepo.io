@@ -150,13 +150,10 @@
 	Project.listProjects = async function(teamspace, query = {}, projection) {
 		const User = require("./user");
 		const userList = await User.getAllUsersInTeamspace(teamspace);
-		const projects = await db.find(teamspace, PROJECTS_COLLECTION_NAME, query, projection);
+		let projects = await db.find(teamspace, PROJECTS_COLLECTION_NAME, query, projection);
 
 		if (projects) {
-			projects.forEach(p => {
-				prepareProject(p);
-				populateUsers(userList, p);
-			});
+			projects = projects.map(p => populateUsers(userList, prepareProject(p)));
 		}
 
 		return projects;
