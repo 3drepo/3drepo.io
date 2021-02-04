@@ -49,7 +49,7 @@ Intercom.createContact = async (external_id, name, email, subscribed, company) =
 
 	const custom_attributes = {subscribed};
 	if (company) {
-		custom_attributes.company = company;
+		custom_attributes.company_entered = company;
 	}
 
 	return await axios.post(getEndpoint("contacts"),
