@@ -445,7 +445,7 @@
 				}
 			}
 
-			if (Buffer.isBuffer(extraInfo)) {
+			if (extraInfo && Buffer.isBuffer(extraInfo)) {
 
 				res.status(resCode.status);
 
@@ -467,10 +467,12 @@
 
 			} else {
 
-				meta.contentLength = typeof extraInfo === "string" ? extraInfo.length : JSON.stringify(extraInfo)
-					.length;
-				res.status(resCode.status)
-					.send(extraInfo);
+				if(extraInfo) {
+					meta.contentLength = typeof extraInfo === "string" ? extraInfo.length : JSON.stringify(extraInfo)
+						.length;
+
+				}
+				res.status(resCode.status).send(extraInfo);
 			}
 
 			// log bandwidth and http status code

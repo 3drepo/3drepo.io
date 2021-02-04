@@ -25,6 +25,7 @@ const History = require("./history");
 const { getRefNodes } = require("./ref");
 
 const sequenceCol = (modelId) => `${modelId}.sequences`;
+const legendCol = (modelId) => `${modelId}.sequences.legends`;
 
 class Sequence {
 
@@ -127,6 +128,36 @@ class Sequence {
 		} else {
 			throw responseCodes.INVALID_ARGUMENTS;
 		}
+	}
+
+	async getSequenceById(account, model, sequenceId, projection) {
+		return await db.findOne(account, sequenceCol(model), { _id: sequenceId}, projection);
+	}
+
+	async sequenceExists(account, model, sequenceId) {
+		if(!(await this.getSequenceById(account, model, utils.stringToUUID(sequenceId), {_id: 1}))) {
+			throw responseCodes.SEQUENCE_NOT_FOUND;
+		}
+	}
+
+	async updateLegend(account, model, sequenceId, data) {
+		const id = utils.stringToUUID(sequenceId);
+		await this.sequenceExists(account, model, id);
+		const prunedData = {};
+		for(const entry in data) {
+			if(utils.hasField(data, entry)) {
+				const value = data[entry];
+				if(utils.isHexColor(value)) {
+					prunedData[entry] = value;
+				} else {
+					throw responseCodes.INVALID_ARGUMENTS;
+				}
+
+			}
+		}
+
+		await db.updateOne(account,legendCol(model), { _id: id }, { $set: {legend: prunedData}}, true);
+
 	}
 }
 
