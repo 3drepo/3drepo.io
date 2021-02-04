@@ -30,9 +30,10 @@
 	const PROJECTS_COLLECTION_NAME = "projects";
 
 	async function checkDupName(teamspace, project) {
-		const foundProject = await Project.findOneProject(teamspace, {name: project.name});
+		const coll = await db.getCollection(teamspace, PROJECTS_COLLECTION_NAME);
+		const count = await coll.find({_id: {$ne: project._id}, name: project.name}).count();
 
-		if (foundProject && utils.uuidToString(foundProject._id) !== utils.uuidToString(project._id)) {
+		if (count > 0) {
 			throw responseCodes.PROJECT_EXIST;
 		}
 	}
@@ -96,10 +97,9 @@
 
 	Project.createProject = async function(teamspace, name, username, userPermissions) {
 		checkProjectNameValid(name);
-		checkDupName(teamspace, project);
 
 		const project = {
-			_id: nodeuuid(),
+			_id: utils.stringToUUID(nodeuuid()),
 			name,
 			models: [],
 			permissions: []
@@ -111,6 +111,8 @@
 				permissions: [C.PERM_PROJECT_ADMIN]
 			}];
 		}
+
+		await checkDupName(teamspace, project);
 
 		await db.insert(teamspace, PROJECTS_COLLECTION_NAME, project);
 
@@ -343,7 +345,7 @@
 		await Promise.all(userPromises);
 
 		checkProjectNameValid(projectName);
-		checkDupName(account, project);
+		await checkDupName(account, project);
 		checkPermissionName(project.permissions);
 
 		await db.update(account, PROJECTS_COLLECTION_NAME, {name: projectName}, project);
