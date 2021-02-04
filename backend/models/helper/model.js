@@ -886,7 +886,7 @@ async function getMeshById(account, model, meshId) {
 	const vertices =  mesh.vertices ? new StreamBuffer({buffer: mesh.vertices.buffer, chunkSize: mesh.vertices.buffer.length}) : await getGridfsFileStream(account, model, mesh._extRef.vertices);
 	const faces = mesh.faces ?  new StreamBuffer({buffer: mesh.faces.buffer, chunkSize: mesh.faces.buffer.length})  : await getGridfsFileStream(account, model, mesh._extRef.faces);
 
-	if(!("primitive" in mesh)){ // if the primitive type is missing, then set it to triangles for backwards compatibility. this matches the behaviour of the bouncer api.
+	if (!("primitive" in mesh)) { // if the primitive type is missing, then set it to triangles for backwards compatibility. this matches the behaviour of the bouncer api.
 		mesh.primitive = 3;
 	}
 

@@ -112,16 +112,16 @@ const binToFacesString = (buffer, isLittleEndian = false) => {
 	// so we only need to define this once.
 	const FACE_SIZE = getUint32(0);
 	const ITEM_LEAP = INT_BYTE_SIZE * (FACE_SIZE + 1);
-	
+
 	let result = "";
 
 	for (let i = 0; i < bufferLength ; i = i + ITEM_LEAP) {
-		if(i !== 0){
+		if (i !== 0) {
 			result += ",";
 		}
-		for (let j = 1; j <= FACE_SIZE; j++){
+		for (let j = 1; j <= FACE_SIZE; j++) {
 			result += getUint32(i + j * INT_BYTE_SIZE);
-			if(j < FACE_SIZE){
+			if (j < FACE_SIZE) {
 				result += ",";
 			}
 		}
