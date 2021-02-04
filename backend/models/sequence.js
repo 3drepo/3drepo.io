@@ -140,6 +140,15 @@ class Sequence {
 		}
 	}
 
+	async getLegend(account, model, sequenceId) {
+		await this.sequenceExists(account, model, sequenceId);
+
+		const legend = await db.findOne(account, legendCol(model), { _id: utils.stringToUUID(sequenceId) });
+
+		// TODO: if it doesn't exist, fetch the default
+		return legend || { legend: {} };
+	}
+
 	async updateLegend(account, model, sequenceId, data) {
 		const id = utils.stringToUUID(sequenceId);
 		await this.sequenceExists(account, model, id);
