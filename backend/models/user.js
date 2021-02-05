@@ -248,33 +248,21 @@ User.deleteApiKey = async function (username) {
 };
 
 User.findUsersWithoutMembership = async function (teamspace, searchString) {
-	const users = await DB.find("admin", COLL_NAME, {
-		$and: [{
-			$or: [
-				{ user: new RegExp(`.*${searchString}.*`, "i") },
-				{ "customData.email": new RegExp(searchString, "i") }
-			]
-		},
-		{ "customData.inactive": { "$exists": false }}
-		]
+	const notMembers = await DB.find("admin", COLL_NAME, {
+		"customData.email": new RegExp(`${searchString}$`, "i"),
+		"customData.inactive": { "$exists": false },
+		"roles.db": {$ne: teamspace }
 	});
 
-	const notMembers = users.reduce((members, userentry) => {
-		if (!isMemberOfTeamspace(userentry, teamspace)) {
-			const {user, roles, customData } = userentry;
-			members.push({
-				user,
-				roles,
-				firstName: customData.firstName,
-				lastName: customData.lastName,
-				company: _.get(customData, "billing.billingInfo.company", null)
-			});
-		}
+	return notMembers.map(({user, customData }) => {
+		return {
+			user,
+			firstName: customData.firstName,
+			lastName: customData.lastName,
+			company: _.get(customData, "billing.billingInfo.company", null)
+		};
+	});
 
-		return members;
-	}, []);
-
-	return notMembers;
 };
 
 // case insenstive
@@ -545,7 +533,7 @@ User.getForgotPasswordToken = async function (userNameOrEmail) {
 
 	let resetPasswordUserInfo = {};
 
-	const user = await this.findByUsernameOrEmail(userNameOrEmail);
+	const user = await User.findByUsernameOrEmail(userNameOrEmail);
 
 	// set token only if username is found.
 	if (user) {
@@ -557,7 +545,7 @@ User.getForgotPasswordToken = async function (userNameOrEmail) {
 			firstName:user.customData.firstName
 		};
 
-		await this.update(user.user, { "customData.resetPasswordToken": resetPasswordToken });
+		await User.update(user.user, { "customData.resetPasswordToken": resetPasswordToken });
 
 		return resetPasswordUserInfo;
 	}
@@ -1032,7 +1020,7 @@ User.addTeamMember = async function(teamspace, userToAdd, job, permissions) {
 
 	await Promise.all(promises);
 
-	return  { job, permissions, ... this.getBasicDetails(userEntry) };
+	return  { job, permissions, ... User.getBasicDetails(userEntry) };
 };
 
 User.getBasicDetails = function(userObj) {
@@ -1046,7 +1034,7 @@ User.getBasicDetails = function(userObj) {
 };
 
 User.getQuotaInfo = async function (teamspace) {
-	const teamspaceFound = await this.findByUserName(teamspace);
+	const teamspaceFound = await User.findByUserName(teamspace);
 	if (!teamspaceFound) {
 		throw (responseCodes.USER_NOT_FOUND);
 	}
@@ -1061,14 +1049,14 @@ User.hasSufficientQuota = async (teamspace, size) => {
 };
 
 User.hasReachedLicenceLimitCheck = async function(teamspace) {
-	const teamspaceUser = await this.findByUserName(teamspace);
+	const teamspaceUser = await User.findByUserName(teamspace);
 	await hasReachedLicenceLimit(teamspaceUser);
 };
 
 User.getMembers = async function (teamspace) {
 	const promises = [];
 
-	const getTeamspaceMembers = this.findUsersInTeamspace(teamspace, {
+	const getTeamspaceMembers = User.findUsersInTeamspace(teamspace, {
 		user: 1,
 		customData: 1
 	});
@@ -1099,7 +1087,7 @@ User.getMembers = async function (teamspace) {
 };
 
 User.getAllUsersInTeamspace = async function (teamspace) {
-	const users =  await this.findUsersInTeamspace(teamspace, {user: 1});
+	const users =  await User.findUsersInTeamspace(teamspace, {user: 1});
 	return users.map(({user}) => user);
 };
 
@@ -1141,7 +1129,7 @@ User.getTeamMemberInfo = async function(teamspace, user) {
 };
 
 User.isHereEnabled = async function (username) {
-	const user = await this.findByUserName(username,  { _id: 0, "customData.hereEnabled": 1 });
+	const user = await User.findByUserName(username,  { _id: 0, "customData.hereEnabled": 1 });
 	return user.customData.hereEnabled;
 };
 
@@ -1151,15 +1139,15 @@ User.findOne = async function (query, projection) {
 };
 
 User.findByUserName = async function (username, projection) {
-	return await this.findOne({ user: username }, projection);
+	return await User.findOne({ user: username }, projection);
 };
 
 User.findByEmail = async function (email) {
-	return await this.findOne({ "customData.email":  new RegExp("^" + utils.sanitizeString(email) + "$", "i") });
+	return await User.findOne({ "customData.email":  new RegExp("^" + utils.sanitizeString(email) + "$", "i") });
 };
 
 User.findByUsernameOrEmail = async function (userNameOrEmail) {
-	return await this.findOne({
+	return await User.findOne({
 		$or: [
 			{ user: userNameOrEmail },
 			{ "customData.email": userNameOrEmail }
@@ -1172,15 +1160,19 @@ User.findByAPIKey = async function (key) {
 		return null;
 	}
 
-	return await this.findOne({"customData.apiKey" : key});
+	return await User.findOne({"customData.apiKey" : key});
 };
 
 User.findByPaypalPaymentToken = async function (token) {
-	return await this.findOne({ "customData.billing.paypalPaymentToken": token });
+	return await User.findOne({ "customData.billing.paypalPaymentToken": token });
 };
 
 User.findUserByBillingId = async function (billingAgreementId) {
-	return await this.findOne({ "customData.billing.billingAgreementId": billingAgreementId });
+	return await User.findOne({ "customData.billing.billingAgreementId": billingAgreementId });
+};
+
+User.updateAvatar = async function(username, avatarBuffer) {
+	await User.update(username, {"customData.avatar" : {data: avatarBuffer}});
 };
 
 /*

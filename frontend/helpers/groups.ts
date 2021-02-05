@@ -47,7 +47,7 @@ export const prepareGroup = (group) => {
 export const normalizeGroup = (group) => {
 	const normalizedGroup = {
 		color: hexToArray(group.color),
-		...pick(group, ['name', 'author', '_id']),
+		...pick(group, ['name', 'author']),
 		description: group.desc || group.description
 	} as any;
 

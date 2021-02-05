@@ -833,10 +833,7 @@ function uploadAvatar(req, res, next) {
 		if (err) {
 			return responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err , err.resCode ?  err.resCode : err);
 		} else {
-			User.findByUserName(req.params[C.REPO_REST_API_ACCOUNT]).then(user => {
-				user.customData.avatar = { data: req.file.buffer};
-				return user.save();
-			}).then(() => {
+			User.updateAvatar(req.params[C.REPO_REST_API_ACCOUNT], req.file.buffer).then(() => {
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "success" });
 			}).catch(error => {
 				responseCodes.respond(responsePlace, req, res, next, error.resCode ? error.resCode : error, error.resCode ? error.resCode : error);
