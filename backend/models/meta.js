@@ -18,7 +18,7 @@
 "use strict";
 const FileRef = require("./fileRef");
 const History = require("./history");
-const ModelSetting = require("./modelSetting");
+const { findModelSettingById } = require("./modelSetting");
 const { getRefNodes } = require("./ref");
 const { findNodesByField, getNodeById } = require("./scene");
 const db = require("../handler/db");
@@ -350,7 +350,7 @@ class Meta {
 
 	async getAllIdsWith4DSequenceTag(account, model, branch, rev) {
 		// Get sequence tag then call the generic getAllIdsWithMetadataField
-		const settings = await ModelSetting.findOne({account : account}, {_id : model});
+		const settings = await findModelSettingById(account, model);
 
 		if (!settings) {
 			return Promise.reject(responseCodes.MODEL_NOT_FOUND);

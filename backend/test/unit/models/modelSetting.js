@@ -47,34 +47,6 @@ describe("Model Settings", function() {
 
 	});
 
-	describe("#updateProperties", function() {
-
-		it("should have updateProperties function", function() {
-			const modelSetting = new ModelSetting();
-			expect(modelSetting).to.have.property("updateProperties");
-		});
-
-		it("should update properties", function() {
-
-			const props = {
-				_id: "xmb3ZydpSM",
-				unit: "metre",
-				code: "09ABC"
-
-			};
-
-			const expectedReturn = {
-				unit: "metre",
-				code: "09ABC"
-			};
-
-			const modelSetting = new ModelSetting();
-
-			modelSetting.updateProperties(props);
-			expect(modelSetting.toObject().properties).to.deep.equal(expectedReturn);
-		});
-	});
-
 	after(function(done) {
 		mockgoose.reset(function() {
 			mongoose.unmock(function() {

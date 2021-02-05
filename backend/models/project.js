@@ -24,7 +24,7 @@
 	const utils = require("../utils");
 	const _ = require("lodash");
 	const nodeuuid = require("uuid/v1");
-	const ModelSetting = require("./modelSetting");
+	const { changePermissions, prepareDefaultView, findModelSettings, findPermissionByUser } = require("./modelSetting");
 	const PermissionTemplates = require("./permissionTemplates");
 
 	const PROJECTS_COLLECTION_NAME = "projects";
@@ -301,7 +301,7 @@
 			filters.name = new RegExp(".*" + filters.name + ".*", "i");
 		}
 
-		let modelsSettings =  await ModelSetting.find({account}, { _id: { $in : projectObj.models }, ...filters});
+		let modelsSettings =  await findModelSettings(account, { _id: { $in : projectObj.models }, ...filters});
 		let permissions = [];
 
 		const accountPerm = AccountPermissions.findByUser(dbUser, username);
@@ -316,7 +316,7 @@
 		}
 
 		modelsSettings = await Promise.all(modelsSettings.map(async setting => {
-			const template = setting.findPermissionByUser(username);
+			const template = await findPermissionByUser(account, setting._id, username);
 
 			let settingsPermissions = [];
 			if(template) {
@@ -326,7 +326,7 @@
 				}
 			}
 
-			setting = await setting.clean();
+			setting = await prepareDefaultView(account, setting._id, setting);
 			setting.permissions = _.uniq(permissions.concat(settingsPermissions));
 			setting.model = setting._id;
 			setting.account = account;

@@ -22,7 +22,7 @@ const responseCodes = require("../response_codes.js");
 const History = require("./history");
 
 const ChatEvent = require("./chatEvent");
-const ModelSetting = require("../models/modelSetting");
+const { findModelSettingById } = require("../models/modelSetting");
 
 const BCF = require("./bcf");
 const Ticket = require("./ticket");
@@ -141,7 +141,7 @@ class Issue extends Ticket {
 		const projection = {};
 		const noClean = true;
 
-		const settings = await ModelSetting.findById({account, model}, model);
+		const settings = await findModelSettingById(account, model);
 
 		const issues = await this.findByModelName(account, model, branch, revId, undefined, projection,
 			filters, noClean);
@@ -164,7 +164,7 @@ class Issue extends Ticket {
 
 		revId = history._id;
 
-		const settings = await ModelSetting.findById({account, model}, model);
+		const settings = await findModelSettingById(account, model);
 		const bcfIssues = await BCF.importBCF(requester, account, model, dataBuffer, settings);
 
 		return this.merge(account, model, branch, revId, bcfIssues, requester.socketId, requester.user);

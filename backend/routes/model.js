@@ -1639,19 +1639,9 @@ router.get("/:model/download/latest", middlewares.hasDownloadAccessToModel, down
 router.get("/:model/meshes/:meshId", middlewares.hasReadAccessToModel, getMesh);
 
 function updateSettings(req, res, next) {
-
 	const place = utils.APIInfo(req);
-	const dbCol = {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 
-	return ModelSetting.findById(dbCol, req.params.model).then(modelSetting => {
-
-		if (!modelSetting) {
-			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
-		}
-
-		return modelSetting.updateProperties(req.body);
-
-	}).then(modelSetting => {
+	return ModelSetting.updateModelSetting(req.params.account, req.params.model, req.body).then(modelSetting => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, modelSetting.properties);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -1660,11 +1650,9 @@ function updateSettings(req, res, next) {
 
 function getHeliSpeed(req, res, next) {
 	const place = utils.APIInfo(req);
-	const dbCol = {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 
-	return ModelSetting.findById(dbCol, req.params.model).then(modelSetting => {
-		const speed = modelSetting.heliSpeed ? modelSetting.heliSpeed : 1;
-		responseCodes.respond(place, req, res, next, responseCodes.OK, {heliSpeed: speed});
+	return ModelSetting.getHeliSpeed(req.params.account, req.params.model).then(heliSpeed => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, heliSpeed);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
@@ -1672,18 +1660,8 @@ function getHeliSpeed(req, res, next) {
 
 function updateHeliSpeed(req, res, next) {
 	const place = utils.APIInfo(req);
-	const dbCol = {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 
-	return ModelSetting.findById(dbCol, req.params.model).then(modelSetting => {
-		if (!modelSetting) {
-			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
-		}
-		if (!Number.isInteger(req.body.heliSpeed)) {
-			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
-		}
-
-		return modelSetting.updateProperties({heliSpeed: req.body.heliSpeed});
-	}).then(() => {
+	return ModelSetting.updateHeliSpeed(req.params.account, req.params.model, req.body.heliSpeed).then(() => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, {});
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -1751,33 +1729,18 @@ function createModel(req, res, next) {
 }
 
 function updateModel(req, res, next) {
-
 	const responsePlace = utils.APIInfo(req);
-	const account = req.params.account;
-	const model = req.params.model;
+	const {account, model} = req.params;
 	const username = req.session.user.username;
 
 	let promise = null;
-	let setting;
 
 	if (Object.keys(req.body).length >= 1 && Array.isArray(req.body.subModels)) {
 		if (req.body.subModels.length > 0) {
-			promise = ModelSetting.findById({account}, model).then(_setting => {
-
-				setting = _setting;
-
-				if (!setting) {
-					return Promise.reject(responseCodes.MODEL_NOT_FOUND);
-				} else if (!setting.federate) {
-					return Promise.reject(responseCodes.MODEL_IS_NOT_A_FED);
-				} else {
-					return ModelHelpers.createFederatedModel(account, model, username, req.body.subModels);
-				}
-
+			promise = ModelSetting.isFederation(account, model).then(() => {
+				return ModelHelpers.createFederatedModel(account, model, username, req.body.subModels);
 			}).then(() => {
-				setting.subModels = req.body.subModels;
-				setting.timestamp = new Date();
-				return setting.save();
+				return ModelSetting.updateSubModels(account, model, req.body.subModels);
 			});
 		} else {
 			promise = Promise.reject(responseCodes.SUBMODEL_IS_MISSING);
@@ -1786,7 +1749,7 @@ function updateModel(req, res, next) {
 		promise = Promise.reject(responseCodes.INVALID_ARGUMENTS);
 	}
 
-	promise.then(() => {
+	promise.then((setting) => {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, model, setting });
 	}).catch(err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -1794,10 +1757,8 @@ function updateModel(req, res, next) {
 }
 
 function deleteModel(req, res, next) {
-
 	const responsePlace = utils.APIInfo(req);
-	const account = req.params.account;
-	const model = req.params.model;
+	const {account, model} = req.params;
 
 	// delete
 	ModelHelpers.removeModel(account, model).then((removedModel) => {
@@ -1820,6 +1781,7 @@ function getHeaders(cache = false) {
 
 function getIdMap(req, res, next) {
 	const revId = req.params.rev;
+
 	JSONAssets.getIdMap(
 		req.params.account,
 		req.params.model,
@@ -1827,10 +1789,8 @@ function getIdMap(req, res, next) {
 		revId,
 		req.session.user.username
 	).then(file => {
-
 		const headers = getHeaders(false);
 		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
-
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
@@ -1951,7 +1911,7 @@ function uploadModel(req, res, next) {
 	let modelSetting;
 
 	// check model exists before upload
-	return ModelSetting.findById({account, model}, model).then(_modelSetting => {
+	return ModelSetting.findModelSettingById(account, model).then(_modelSetting => {
 
 		modelSetting = _modelSetting;
 
@@ -1984,10 +1944,7 @@ function uploadModel(req, res, next) {
 }
 
 function updatePermissions(req, res, next) {
-	const account = req.params.account;
-	const model = req.params.model;
-
-	return ModelSetting.updatePermissions(account, model, req.body).then(response => {
+	return ModelSetting.updatePermissions(req.params.account, req.params.model, req.body).then(response => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, response);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -1995,19 +1952,7 @@ function updatePermissions(req, res, next) {
 }
 
 function changePermissions(req, res, next) {
-
-	const account = req.params.account;
-	const model = req.params.model;
-
-	return ModelSetting.findById({account, model}, model).then(modelSetting => {
-
-		if (!modelSetting) {
-			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
-		}
-
-		return modelSetting.changePermissions(req.body);
-
-	}).then(permission => {
+	return ModelSetting.changePermissions(req.params.account, req.params.model, req.body).then(permission => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -2015,9 +1960,7 @@ function changePermissions(req, res, next) {
 }
 
 function batchUpdatePermissions(req, res, next) {
-	const account = req.params.account;
-
-	return ModelSetting.batchUpdatePermissions(account, req.body).then(response => {
+	return ModelSetting.batchUpdatePermissions(req.params.account, req.body).then(response => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, response);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -2025,33 +1968,9 @@ function batchUpdatePermissions(req, res, next) {
 }
 
 function updateMultiplePermissions(req, res, next) {
-
-	const account = req.params.account;
 	const modelsIds = req.body.map(({model}) => model);
 
-	return ModelSetting.find({account}, {"_id" : {"$in" : modelsIds}}).then((modelsList) => {
-		if (!modelsList.length) {
-			return Promise.reject({resCode: responseCodes.MODEL_INFO_NOT_FOUND});
-		} else {
-			const modelsPromises = modelsList.map((model) => {
-				const newModelPermissions = req.body.find((modelPermissions) => modelPermissions.model === model._id);
-				return model.changePermissions(newModelPermissions.permissions || {}, account);
-			});
-
-			return Promise.all(modelsPromises).then((models) => {
-				const populatedPermissionsPromises = models.map(({permissions}) => {
-					return ModelSetting.populateUsers(account, permissions);
-				});
-
-				return Promise.all(populatedPermissionsPromises).then((populatedPermissions) => {
-					return populatedPermissions.map((permissions, index) => {
-						const {name, federate, _id: model, subModels} =  models[index] || {};
-						return {name, federate, model, permissions, subModels};
-					});
-				});
-			});
-		}
-	}).then(permissions => {
+	return ModelSetting.updateMultiplePermissions(req.params.account, modelsIds, res.body).then(permissions => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permissions);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -2059,18 +1978,7 @@ function updateMultiplePermissions(req, res, next) {
 }
 
 function getSingleModelPermissions(req, res, next) {
-
-	const account = req.params.account;
-	const model = req.params.model;
-
-	return ModelSetting.findById({account, model}, model).then(setting => {
-		if (!setting) {
-			return Promise.reject({ resCode: responseCodes.MODEL_INFO_NOT_FOUND});
-		} else {
-			return ModelSetting.populateUsers(account, setting.permissions);
-		}
-
-	}).then(permissions => {
+	return ModelSetting.getSingleModelPermissions(req.params.account, req.params.model).then(permissions => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permissions);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -2078,30 +1986,7 @@ function getSingleModelPermissions(req, res, next) {
 }
 
 function getMultipleModelsPermissions(req, res, next) {
-
-	const account = req.params.account;
-	const models = req.query.models.split(",");
-
-	return ModelSetting.find({account}, {"_id" : {"$in" : models}}).then((modelsList) => {
-		if (!modelsList.length) {
-			return Promise.reject({ resCode: responseCodes.MODEL_INFO_NOT_FOUND });
-		} else {
-			const permissionsList = modelsList.map(({permissions}) => permissions || []);
-			return ModelSetting.populateUsersForMultiplePermissions(account, permissionsList)
-				.then((populatedPermissions) => {
-					return populatedPermissions.map((permissions, index) => {
-						const {_id, federate, name, subModels} = modelsList[index];
-						return {
-							model:_id,
-							federate,
-							name,
-							permissions,
-							subModels
-						};
-					});
-				});
-		}
-	}).then(permissions => {
+	return ModelSetting.getMultipleModelsPermissions(req.params.account, req.query.models).then(permissions => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permissions);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -2109,7 +1994,6 @@ function getMultipleModelsPermissions(req, res, next) {
 }
 
 function getUnityAssets(req, res, next) {
-
 	const {account, model, rev} = req.params;
 	const username = req.session.user.username;
 	const branch = rev ? undefined : C.MASTER_BRANCH_NAME;
@@ -2122,7 +2006,6 @@ function getUnityAssets(req, res, next) {
 }
 
 function getSrcAssets(req, res, next) {
-
 	const {account, model, rev} = req.params;
 	const username = req.session.user.username;
 	const branch = rev ? undefined : C.MASTER_BRANCH_NAME;
@@ -2135,11 +2018,7 @@ function getSrcAssets(req, res, next) {
 }
 
 function getJsonMpc(req, res, next) {
-	const model = req.params.model;
-	const account = req.params.account;
-	const id = req.params.uid;
-
-	JSONAssets.getSuperMeshMapping(account, model, id).then(file => {
+	JSONAssets.getSuperMeshMapping(req.params.account, req.params.model, req.params.uid).then(file => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file, undefined, config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -2147,10 +2026,7 @@ function getJsonMpc(req, res, next) {
 }
 
 function getSubModelRevisions(req, res, next) {
-
-	const model = req.params.model;
-	const account = req.params.account;
-	const revId = req.params.revId;
+	const {account, model, revId} = req.params;
 	const branch = revId ? undefined : "master";
 
 	ModelHelpers.getSubModelRevisions(account, model, branch, revId).then((result) => {
@@ -2161,12 +2037,7 @@ function getSubModelRevisions(req, res, next) {
 }
 
 function getUnityBundle(req, res, next) {
-
-	const model = req.params.model;
-	const account = req.params.account;
-	const id = req.params.uid;
-
-	UnityAssets.getUnityBundle(account, model, id).then(file => {
+	UnityAssets.getUnityBundle(req.params.account, req.params.model, req.params.uid).then(file => {
 		req.params.format = "unity3d";
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file, undefined, config.cachePolicy);
 	}).catch(err => {
@@ -2175,13 +2046,8 @@ function getUnityBundle(req, res, next) {
 }
 
 function getSRC(req, res, next) {
-
-	const model = req.params.model;
-	const account = req.params.account;
-	const id = req.params.uid;
-
 	// FIXME: We should probably generalise this and have a model assets object.
-	SrcAssets.getSRC(account, model, id).then(file => {
+	SrcAssets.getSRC(req.params.account, req.params.model, req.params.uid).then(file => {
 		req.params.format = "src";
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file.file, undefined, config.cachePolicy);
 	}).catch(err => {
