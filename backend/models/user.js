@@ -37,7 +37,13 @@ const ModelSetting = require("./modelSetting");
 const C = require("../constants");
 const UserBilling = require("./userBilling");
 const AccountPermissions = require("./accountPermissions");
-const { listProjects, findOneProject, getProjectNamesAccessibleToUser, removeUserFromProjects } = require("./project");
+const {
+	listProjects,
+	findOneProject,
+	getProjectsAndModelsForUser,
+	getProjectNamesAccessibleToUser,
+	removeUserFromProjects
+} = require("./project");
 const FileRef = require("./fileRef");
 const PermissionTemplates = require("./permissionTemplates");
 
@@ -617,40 +623,7 @@ async function _getModels(teamspace, ids, permissions) {
 
 // find projects and put models into project
 async function _addProjects(account, username) {
-
-	const projects = await listProjects(account.account, {});
-
-	projects.forEach((project, i) => {
-		project._id = utils.uuidToString(project._id);
-
-		let permissions = project.permissions.find(p => p.user === username);
-		permissions = _.get(permissions, "permissions") || [];
-		// show inherited and implied permissions
-		permissions = permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].project || p);
-		permissions = permissions.concat(account.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].project || null));
-
-		project.permissions = _.uniq(_.compact(_.flatten(permissions)));
-
-		projects[i] = project;
-
-		const findModel = model => (m, index, modelList) => {
-			if (m.model === model) {
-				modelList.splice(index, 1);
-				return true;
-			}
-		};
-
-		project.models.forEach((model, j) => {
-
-			const fullModel = account.models.find(findModel(model)) || account.fedModels.find(findModel(model));
-			project.models[j] = fullModel;
-
-		});
-
-		project.models = _.compact(project.models);
-
-	});
-
+	const projects = await getProjectsAndModelsForUser(account.account, account.permissions, account.models, account.fedModels, username);
 	account.projects = account.projects.concat(projects);
 }
 

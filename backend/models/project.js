@@ -199,6 +199,40 @@
 		return populateUsers(userList, project);
 	};
 
+	Project.getProjectsAndModelsForUser = async function(teamspace, teamspacePermissions, teamspaceModels, teamspaceFeds, username) {
+		const projects = await Project.listProjects(teamspace, {});
+
+		projects.forEach((project, i) => {
+			project._id = utils.uuidToString(project._id);
+
+			let permissions = project.permissions.find(p => p.user === username);
+			permissions = _.get(permissions, "permissions") || [];
+			// show inherited and implied permissions
+			permissions = permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].project || p);
+			permissions = permissions.concat(teamspacePermissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].project || null));
+
+			project.permissions = _.uniq(_.compact(_.flatten(permissions)));
+
+			projects[i] = project;
+
+			const findModel = model => (m, index, modelList) => {
+				if (m.model === model) {
+					modelList.splice(index, 1);
+					return true;
+				}
+			};
+
+			project.models.forEach((model, j) => {
+				const fullModel = teamspaceModels.find(findModel(model)) || teamspaceFeds.find(findModel(model));
+				project.models[j] = fullModel;
+			});
+
+			project.models = _.compact(project.models);
+		});
+
+		return projects;
+	};
+
 	Project.getProjectNamesAccessibleToUser = async function(teamspace, username) {
 		const projects = await Project.listProjects(teamspace, { "permissions.user": username }, {name: 1});
 		return projects.map(p => p.name);
