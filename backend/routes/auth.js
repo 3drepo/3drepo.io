@@ -699,21 +699,6 @@ function signUp(req, res, next) {
 			}
 
 		}).then(data => {
-
-			const country = addressMeta.countries.find(_country => _country.code === req.body.countryCode);
-			// send to sales
-			Mailer.sendNewUser({
-				user: req.params.account,
-				email: req.body.email,
-				firstName: req.body.firstName,
-				lastName: req.body.lastName,
-				country: country && country.name,
-				company: req.body.company
-			}).catch(err => {
-				// catch email error instead of returning to client
-				req[C.REQ_REPO].logger.logError(`Email error - ${err.message}`);
-				return Promise.resolve(err);
-			});
 			// send verification email
 			return Mailer.sendVerifyUserEmail(req.body.email, {
 				token : data.token,
