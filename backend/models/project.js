@@ -423,9 +423,9 @@
 		usersToRemove.forEach(user => {
 			// remove all model permissions in this project as well, if any
 			userPromises.push(
-				ModelSetting.find({ account }, { "permissions.user": user}).then(settings =>
+				findModelSettings(account, { "permissions.user": user}).then(settings =>
 					Promise.all(
-						settings.map(s => s.changePermissions(s.permissions.filter(perm => perm.user !== user)))
+						settings.map(s => changePermissions(account, s._id, s.permissions.filter(perm => perm.user !== user)))
 					)
 				)
 			);
