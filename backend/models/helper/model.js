@@ -305,9 +305,6 @@ function importToyProject(account, username) {
 			const skip = { tree: 1 };
 
 			const subModels = models.map(m => {
-
-				m = m.toObject();
-
 				importSuccess(account, m._id);
 
 				return {
