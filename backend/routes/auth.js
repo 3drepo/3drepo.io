@@ -26,7 +26,6 @@ const config = require("../config");
 const utils = require("../utils");
 // const ChatEvent = require("../models/chatEvent");
 const User = require("../models/user");
-const addressMeta = require("../models/addressMeta");
 const Mailer = require("../mailer/mailer");
 const httpsPost = require("../libs/httpsReq").post;
 
