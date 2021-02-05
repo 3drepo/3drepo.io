@@ -754,9 +754,17 @@ function _createAccounts(roles, userName) {
 			return Promise.all(tsPromises).then(() => {
 				// check project scope permissions
 				const projPromises = [];
-				let account = null;
 				const query = { "permissions": { "$elemMatch": { user: userName } } };
 				const projection = { "permissions": { "$elemMatch": { user: userName } }, "models": 1, "name": 1 };
+				let account = accounts.find(_account => _account.account === user.user);
+
+				if (!account) {
+					account = _makeAccountObject(user.user);
+					account.hasAvatar = !!user.customData.avatar;
+					accounts.push(account);
+				}
+
+				// return getProjectsForNewUser(user.user, account.projects, query, projection).then(projects => {
 				return listProjects(user.user, query, projection).then(projects => {
 					projects.forEach(_proj => {
 						projPromises.push(new Promise(function (resolve) {
@@ -764,14 +772,6 @@ function _createAccounts(roles, userName) {
 							if (!_proj || _proj.permissions.length === 0) {
 								resolve();
 								return;
-							}
-							if (!account) {
-								account = accounts.find(_account => _account.account === user.user);
-								if (!account) {
-									account = _makeAccountObject(user.user);
-									account.hasAvatar = !!user.customData.avatar;
-									accounts.push(account);
-								}
 							}
 
 							myProj = account.projects.find(p => p.name === _proj.name);

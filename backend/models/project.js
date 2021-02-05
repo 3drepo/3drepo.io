@@ -233,6 +233,51 @@
 		return projects;
 	};
 
+	/*
+	Project.getProjectsForNewUser = async function(teamspace, teamspaceProjects, query, projection)
+		const projPromises = [];
+		const projects = await Project.listProjects(teamspace, query, projection);
+
+		projects.forEach(_proj => {
+			projPromises.push(new Promise(function (resolve) {
+				let myProj;
+				if (!_proj || _proj.permissions.length === 0) {
+					resolve();
+					return;
+				}
+
+				myProj = teamspaceProjects.find(p => p.name === _proj.name);
+
+				if (!myProj) {
+					myProj = _proj;
+					teamspaceProjects.push(myProj);
+					myProj.permissions = myProj.permissions[0].permissions;
+				} else {
+					myProj.permissions = _.uniq(myProj.permissions.concat(_proj.permissions[0].permissions));
+				}
+
+				// show implied and inherited permissions
+				myProj.permissions = myProj.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].project || p);
+				myProj.permissions = _.uniq(_.flatten(myProj.permissions));
+
+				let inheritedModelPerms = myProj.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || null);
+				inheritedModelPerms = _.uniq(_.flatten(inheritedModelPerms));
+
+				const newModelIds = _.difference(_proj.models, myProj.models.map(m => m.model));
+				if (newModelIds.length) {
+					_getModels(account.account, newModelIds, inheritedModelPerms).then(models => {
+						myProj.models = models.models.concat(models.fedModels);
+						resolve();
+					});
+				} else {
+					resolve();
+				}
+			}));
+
+		});
+	};
+	*/
+
 	Project.getProjectNamesAccessibleToUser = async function(teamspace, username) {
 		const projects = await Project.listProjects(teamspace, { "permissions.user": username }, {name: 1});
 		return projects.map(p => p.name);
