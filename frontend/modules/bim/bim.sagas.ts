@@ -16,10 +16,8 @@
  */
 
 import copy from 'copy-to-clipboard';
-import { sortBy } from 'lodash';
 import { put, select, takeLatest } from 'redux-saga/effects';
 
-import { prepareMetadata } from '../../helpers/bim';
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
 import { selectCurrentModel, selectCurrentModelTeamspace, selectCurrentRevisionId } from '../model';
@@ -33,8 +31,7 @@ export function* fetchMetadata({ teamspace, model, metadataId }) {
 	try {
 		if (metadataId) {
 			const { data } = yield API.getMetadata(teamspace, model, metadataId);
-			const sortedData = sortBy(prepareMetadata(data.meta[0].metadata), 'key');
-			yield put(BimActions.fetchMetadataSuccess(sortedData));
+			yield put(BimActions.fetchMetadataSuccess(data.meta[0].metadata));
 		}
 		yield put(BimActions.setActiveMeta(metadataId));
 

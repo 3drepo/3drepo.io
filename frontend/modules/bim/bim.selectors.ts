@@ -15,13 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { get, sortBy } from 'lodash';
 import { createSelector } from 'reselect';
+import { prepareMetadata } from '../../helpers/bim';
 import { searchByFilters } from '../../helpers/searching';
 
 export const selectBimDomain = (state) => ({...state.bim});
 
 export const selectMetadata = createSelector(
-	selectBimDomain, (state) => state.metadata
+	selectBimDomain, (state) => sortBy(prepareMetadata(state.metadata), 'key')
 );
 
 export const selectIsPending = createSelector(
