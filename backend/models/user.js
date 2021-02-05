@@ -249,14 +249,7 @@ User.deleteApiKey = async function (username) {
 
 User.findUsersWithoutMembership = async function (teamspace, searchString) {
 	const users = await DB.find("admin", COLL_NAME, {
-		$and: [{
-			$or: [
-				{ user: new RegExp(`.*${searchString}.*`, "i") },
-				{ "customData.email": new RegExp(searchString, "i") }
-			]
-		},
-		{ "customData.inactive": { "$exists": false }}
-		]
+		"customData.email": new RegExp(searchString, "i"), "customData.inactive": { "$exists": false }
 	});
 
 	const notMembers = users.reduce((members, userentry) => {
