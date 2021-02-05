@@ -248,33 +248,21 @@ User.deleteApiKey = async function (username) {
 };
 
 User.findUsersWithoutMembership = async function (teamspace, searchString) {
-	const users = await DB.find("admin", COLL_NAME, {
-		$and: [{
-			$or: [
-				{ user: new RegExp(`.*${searchString}.*`, "i") },
-				{ "customData.email": new RegExp(searchString, "i") }
-			]
-		},
-		{ "customData.inactive": { "$exists": false }}
-		]
+	const notMembers = await DB.find("admin", COLL_NAME, {
+		"customData.email": new RegExp(`${searchString}$`, "i"),
+		"customData.inactive": { "$exists": false },
+		"roles.db": {$ne: teamspace }
 	});
 
-	const notMembers = users.reduce((members, userentry) => {
-		if (!isMemberOfTeamspace(userentry, teamspace)) {
-			const {user, roles, customData } = userentry;
-			members.push({
-				user,
-				roles,
-				firstName: customData.firstName,
-				lastName: customData.lastName,
-				company: _.get(customData, "billing.billingInfo.company", null)
-			});
-		}
+	return notMembers.map(({user, customData }) => {
+		return {
+			user,
+			firstName: customData.firstName,
+			lastName: customData.lastName,
+			company: _.get(customData, "billing.billingInfo.company", null)
+		};
+	});
 
-		return members;
-	}, []);
-
-	return notMembers;
 };
 
 // case insenstive
@@ -1181,6 +1169,10 @@ User.findByPaypalPaymentToken = async function (token) {
 
 User.findUserByBillingId = async function (billingAgreementId) {
 	return await User.findOne({ "customData.billing.billingAgreementId": billingAgreementId });
+};
+
+User.updateAvatar = async function(username, avatarBuffer) {
+	await User.update(username, {"customData.avatar" : {data: avatarBuffer}});
 };
 
 /*

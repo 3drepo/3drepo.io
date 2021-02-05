@@ -19,6 +19,7 @@ import React from 'react';
 
 import Tooltip from '@material-ui/core/Tooltip';
 
+import { isNumber } from 'lodash';
 import { StarIcon } from '../../../../../components/starIcon/starIcon.component';
 import {
 	Actions, Container, MetaKey, MetaKeyText, MetaValue, StarIconWrapper, StyledCopyIcon, StyledIconButton,
@@ -49,7 +50,7 @@ export class MetaRecord extends React.PureComponent<IProps, IState> {
 
 		return [{
 			field: name,
-			operator: 'IS',
+			operator: isNumber(value) ? 'EQUALS' : 'IS',
 			values: [value],
 		}];
 	}

@@ -96,51 +96,64 @@ describe("Updating user info", function () {
 		const firstName = "abc";
 		const lastName = "def";
 
-		const { body }  = await agent.put(`/${username}`)
+		const { body } = await agent.put(`/${username}`)
 			.send({ firstName, lastName, email: takenEmail })
 			.expect(400)
 
 		expect(body.value).to.equal(responseCodes.EMAIL_EXISTS.value);
 	});
 
-	it("should fail if firstname is not a string", function(done) {
+	it("should fail if firstname is not a string", async function() {
 		const lastName = "def";
 
-		agent.put(`/${username}`)
+		const { body } = await agent.put(`/${username}`)
 			.send({ firstName : true, lastName, email })
-			.expect(400, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
-				done(err);
-			});
+			.expect(400);
 
+		expect(body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 	});
 
-	it("should fail if last name is not a string", function(done) {
+	it("should fail if last name is not a string", async function() {
 
 		const firstName = "abc";
 		const lastName = "def";
 
-		agent.put(`/${username}`)
+		const { body } = await agent.put(`/${username}`)
 			.send({ firstName, lastName: true, email })
-			.expect(400, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
-				done(err);
-			});
+			.expect(400);
 
+		expect(body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 	});
 
-	it("should fail if emailed is not a string", function(done) {
+	it("should fail if emailed is not a string", async function() {
 
 		const firstName = "abc";
 		const lastName = "def";
 
-		agent.put(`/${username}`)
+		const { body } = await agent.put(`/${username}`)
 			.send({ firstName, lastName, email : true })
-			.expect(400, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
-				done(err);
-			});
+			.expect(400);
 
+		expect(body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 	});
+
+	it("should fail to get avatar if the user doesnt have one", async function() {
+		const { body } = await agent.get(`/${username}/avatar`)
+			.expect(404);
+
+		expect(body.value).to.equal(responseCodes.USER_DOES_NOT_HAVE_AVATAR.value);
+	})
+
+	it("should succeed to update the avatar", async function() {
+		await agent.post(`/${username}/avatar`)
+			.attach("file", __dirname + "/../../statics/images/avatar.png")
+			.expect(200);
+	})
+
+	it("should succeed to get avatar if a user has one", async function() {
+		await agent.get(`/${username}/avatar`)
+			.expect(200);
+
+	})
 });
 
