@@ -302,6 +302,7 @@ Group.create = async function (account, model, branch = "master", rid = null, se
 Group.deleteGroups = async function (account, model, sessionId, ids) {
 	const groupIds = ids.map(utils.stringToUUID);
 	await db.remove(account, getGroupCollectionName(model), { _id: { $in: groupIds } });
+
 	ChatEvent.groupsDeleted(sessionId, account, model, ids);
 };
 

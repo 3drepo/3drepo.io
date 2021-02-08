@@ -63,6 +63,12 @@
 		return collection.findOne(query, projection);
 	};
 
+	Handler.findOneAndDelete = async function (database, colName, query, projection = {}) {
+		const collection = await Handler.getCollection(database, colName);
+		const findResult = await collection.findOneAndDelete(query, projection);
+		return findResult.value;
+	};
+
 	function getURL(database) {
 		// Generate connection string that could include multiple hosts that
 		// represent a replica set.

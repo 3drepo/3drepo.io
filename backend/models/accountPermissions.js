@@ -19,7 +19,7 @@
 const responseCodes = require("../response_codes.js");
 const C = require("../constants");
 const { intersection } = require("lodash");
-const Project = require("./project");
+const { removeUserFromProjects } = require("./project");
 
 const updatePermissions = async function(teamspace, updatedPermissions) {
 	const User = require("./user");
@@ -80,12 +80,7 @@ AccountPermissions.remove = async function(teamspace, userToRemove) {
 		throw responseCodes.ACCOUNT_PERM_NOT_FOUND;
 	}
 
-	const projects = await Project.find({ account: teamspace.user },{ "permissions.user": userToRemove});
-	await Promise.all(
-		projects.map(proj => proj.updateAttrs({
-			permissions: proj.permissions.filter(perm => perm.user !== userToRemove)
-		}))
-	);
+	await removeUserFromProjects(teamspace.user, userToRemove);
 
 	return await updatePermissions(teamspace, updatedPermissions);
 };
