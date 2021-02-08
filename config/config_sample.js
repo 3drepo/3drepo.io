@@ -119,5 +119,11 @@ module.exports = {
 			skipChecking: true
 		}
 	},
+	intercom: {
+		license: "",    // This is for identifying which app is yours in the intercom client
+		secretKey: "",  // This is for validating the user identity in intercom
+		accessToken: "" // This is for the api request to intercom in the backend
+	},
+
 	termsUpdatedAt: 1520592720000,
 }

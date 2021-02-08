@@ -25,9 +25,10 @@ const utils = require("../utils");
 const Role = require("./role");
 const { addDefaultJobs,  findJobByUser, usersWithJob, removeUserFromAnyJob, addUserToJob } = require("./job");
 
+const Intercom = require("./intercom");
+
 const History = require("./history");
 const TeamspaceSettings = require("./teamspaceSetting");
-const Mailer = require("../mailer/mailer");
 
 const systemLogger = require("../logger.js").systemLogger;
 
@@ -41,6 +42,7 @@ const AccountPermissions = require("./accountPermissions");
 const Project = require("./project");
 const FileRef = require("./fileRef");
 const PermissionTemplates = require("./permissionTemplates");
+const { get } = require("lodash");
 
 const isMemberOfTeamspace = function (user, teamspace) {
 	return user.roles.filter(role => role.db === teamspace && role.role === C.DEFAULT_MEMBER_ROLE).length > 0;
@@ -61,6 +63,11 @@ const hasReachedLicenceLimit = async function (teamspace) {
 	if (reachedLimit) {
 		throw (responseCodes.LICENCE_LIMIT_REACHED);
 	}
+};
+
+// Find functions
+const findOne = async function (query, projection) {
+	return await DB.findOne("admin", COLL_NAME, query, projection);
 };
 
 const COLL_NAME = "system.users";
@@ -452,10 +459,15 @@ User.verify = async function (username, token, options) {
 		throw ({ resCode: responseCodes.TOKEN_INVALID });
 	}
 
-	const name = user.customData.firstName && user.customData.firstName.length > 0 ?
-		formatPronouns(user.customData.firstName) : user.user;
-	Mailer.sendWelcomeUserEmail(user.customData.email, {user: name})
-		.catch(err => systemLogger.logError(err));
+	try {
+		const { customData: {firstName, lastName, email, billing, mailListOptOut} } = user;
+		const subscribed = !mailListOptOut;
+		const company = get(billing, "billingInfo.company");
+
+		await Intercom.createContact(username, formatPronouns(firstName + " " + lastName), email, subscribed, company);
+	} catch (err) {
+		systemLogger.logError("Failed to create contact in intercom when verifying user", username, err);
+	}
 
 	if (!skipImportToyModel) {
 
@@ -1133,21 +1145,16 @@ User.isHereEnabled = async function (username) {
 	return user.customData.hereEnabled;
 };
 
-// Find functions
-User.findOne = async function (query, projection) {
-	return await DB.findOne("admin", COLL_NAME, query, projection);
-};
-
 User.findByUserName = async function (username, projection) {
-	return await User.findOne({ user: username }, projection);
+	return await findOne({ user: username }, projection);
 };
 
 User.findByEmail = async function (email) {
-	return await User.findOne({ "customData.email":  new RegExp("^" + utils.sanitizeString(email) + "$", "i") });
+	return await findOne({ "customData.email":  new RegExp("^" + utils.sanitizeString(email) + "$", "i") });
 };
 
 User.findByUsernameOrEmail = async function (userNameOrEmail) {
-	return await User.findOne({
+	return await findOne({
 		$or: [
 			{ user: userNameOrEmail },
 			{ "customData.email": userNameOrEmail }
@@ -1159,16 +1166,15 @@ User.findByAPIKey = async function (key) {
 	if (!key) {
 		return null;
 	}
-
-	return await User.findOne({"customData.apiKey" : key});
+	return await findOne({"customData.apiKey" : key});
 };
 
 User.findByPaypalPaymentToken = async function (token) {
-	return await User.findOne({ "customData.billing.paypalPaymentToken": token });
+	return await findOne({ "customData.billing.paypalPaymentToken": token });
 };
 
 User.findUserByBillingId = async function (billingAgreementId) {
-	return await User.findOne({ "customData.billing.billingAgreementId": billingAgreementId });
+	return await findOne({ "customData.billing.billingAgreementId": billingAgreementId });
 };
 
 User.updateAvatar = async function(username, avatarBuffer) {
