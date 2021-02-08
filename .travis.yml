@@ -48,7 +48,7 @@ install:
     - cd ./../frontend
     - DETECT_CHROMEDRIVER_VERSION=true yarn install
     - if test $TYPECHECK = true; then yarn lint ;fi
-    - if test $TYPECHECK = false; then yarn build:test ;fi
+    - if test $TYPECHECK = true; then yarn build:test ;fi
 
 cache:
   yarn: true
