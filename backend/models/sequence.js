@@ -140,6 +140,11 @@ class Sequence {
 		}
 	}
 
+	async deleteLegend(account, model, sequenceId) {
+		await this.sequenceExists(account, model, sequenceId);
+		await db.remove(account, legendCol(model), { _id: utils.stringToUUID(sequenceId) });
+	}
+
 	async getLegend(account, model, sequenceId) {
 		await this.sequenceExists(account, model, sequenceId);
 

@@ -280,6 +280,9 @@ router.put("/revision/:revId/sequences/:sequenceId/legend", middlewares.hasUploa
 router.get("/revision/master/head/sequences/:sequenceId/legend", middlewares.hasUploadAccessToModel, getLegend);
 router.get("/revision/:revId/sequences/:sequenceId/legend", middlewares.hasUploadAccessToModel, getLegend);
 
+router.delete("/revision/master/head/sequences/:sequenceId/legend", middlewares.hasUploadAccessToModel, deleteLegend);
+router.delete("/revision/:revId/sequences/:sequenceId/legend", middlewares.hasUploadAccessToModel, deleteLegend);
+
 /**
  * @api {get} /:teamspace/:model/revision(/master/head/|/:revId)/sequences List all sequences
  * @apiName listSequences
@@ -358,6 +361,17 @@ function getLegend(req, res, next) {
 
 	Sequence.getLegend(account, model, sequenceId).then(({ legend }) => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, legend);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function deleteLegend(req, res, next) {
+	const place = utils.APIInfo(req);
+	const { account, model, sequenceId } = req.params;
+
+	Sequence.deleteLegend(account, model, sequenceId).then(() => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
