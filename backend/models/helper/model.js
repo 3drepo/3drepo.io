@@ -58,6 +58,61 @@ const { BinToTriangleStringStream, BinToVector3dStringStream } = require("./bina
 const PermissionTemplates = require("../permissionTemplates");
 const AccountPermissions = require("../accountPermissions");
 
+async function _fillInModelDetails(accountName, setting, permissions) {
+	if (permissions.indexOf(C.PERM_MANAGE_MODEL_PERMISSION) !== -1) {
+		permissions = C.MODEL_PERM_LIST.slice(0);
+	}
+
+	const model = {
+		federate: setting.federate,
+		permissions: permissions,
+		model: setting._id,
+		type: setting.type,
+		units: setting.properties.unit,
+		name: setting.name,
+		status: setting.status,
+		errorReason: setting.errorReason,
+		subModels: setting.federate && setting.subModels || undefined,
+		timestamp: setting.timestamp || null,
+		code: setting.properties ? setting.properties.code || undefined : undefined
+
+	};
+
+	const nRev = await History.revisionCount(accountName, setting._id);
+
+	model.nRevisions = nRev;
+
+	return model;
+}
+
+// list all models in an account
+async function _getModels(teamspace, ids, permissions) {
+	const models = [];
+	const fedModels = [];
+
+	let query = {};
+
+	if (ids) {
+		query = { _id: { "$in": ids } };
+	}
+
+	const settings = await findModelSettings(teamspace, query);
+
+	await Promise.all(settings.map(async setting => {
+		const model = await _fillInModelDetails(teamspace, setting, permissions);
+
+		if (!(model.permissions.length === 1 && model.permissions[0] === null)) {
+			setting.federate ? fedModels.push(model) : models.push(model);
+		}
+	}));
+
+	return { models, fedModels };
+}
+
+function _makeAccountObject(name) {
+	return { account: name, models: [], fedModels: [], projects: [], permissions: [], isAdmin: false };
+}
+
 /** *****************************************************************************
  * Converts error code from repobouncerclient to a response error object.
  * Uncaught error codes that are valid responseCodes will be returned,
@@ -919,6 +974,9 @@ const getModelSetting = async (account, model, username) => {
 };
 
 module.exports = {
+	_fillInModelDetails,
+	_getModels,
+	_makeAccountObject,
 	createNewModel,
 	createNewFederation,
 	importToyModel,

@@ -27,7 +27,6 @@ const { addDefaultJobs,  findJobByUser, usersWithJob, removeUserFromAnyJob, addU
 
 const Intercom = require("./intercom");
 
-const History = require("./history");
 const TeamspaceSettings = require("./teamspaceSetting");
 
 const systemLogger = require("../logger.js").systemLogger;
@@ -570,57 +569,6 @@ User.getForgotPasswordToken = async function (userNameOrEmail) {
 	return {};
 };
 
-async function _fillInModelDetails(accountName, setting, permissions) {
-	if (permissions.indexOf(C.PERM_MANAGE_MODEL_PERMISSION) !== -1) {
-		permissions = C.MODEL_PERM_LIST.slice(0);
-	}
-
-	const model = {
-		federate: setting.federate,
-		permissions: permissions,
-		model: setting._id,
-		type: setting.type,
-		units: setting.properties.unit,
-		name: setting.name,
-		status: setting.status,
-		errorReason: setting.errorReason,
-		subModels: setting.federate && setting.subModels || undefined,
-		timestamp: setting.timestamp || null,
-		code: setting.properties ? setting.properties.code || undefined : undefined
-
-	};
-
-	const nRev = await History.revisionCount(accountName, setting._id);
-
-	model.nRevisions = nRev;
-
-	return model;
-}
-// list all models in an account
-async function _getModels(teamspace, ids, permissions) {
-
-	const models = [];
-	const fedModels = [];
-
-	let query = {};
-
-	if (ids) {
-		query = { _id: { "$in": ids } };
-	}
-
-	const settings = await findModelSettings(teamspace, query);
-
-	await Promise.all(settings.map(async setting => {
-		const model = await _fillInModelDetails(teamspace, setting, permissions);
-
-		if (!(model.permissions.length === 1 && model.permissions[0] === null)) {
-			setting.federate ? fedModels.push(model) : models.push(model);
-		}
-	}));
-
-	return { models, fedModels };
-}
-
 // find projects and put models into project
 async function _addProjects(account, username) {
 	const projects = await getProjectsAndModelsForUser(account.account, account.permissions, account.models, account.fedModels, username);
@@ -701,10 +649,6 @@ function _findModel(id, account) {
 		account.projects.reduce((target, project) => target || project.models.find(m => m.model === id), null);
 }
 
-function _makeAccountObject(name) {
-	return { account: name, models: [], fedModels: [], projects: [], permissions: [], isAdmin: false };
-}
-
 async function _createAccounts(roles, userName) {
 	const accounts = [];
 	const promises = [];
@@ -737,6 +681,7 @@ async function _createAccounts(roles, userName) {
 					// show all implied and inherted permissions
 					const inheritedModelPermissions = _.uniq(_.flatten(account.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || [])));
 
+					const {_getModels} = require("./helper/model");
 					tsPromises.push(
 						// list all models under this account as they have full access
 						_getModels(account.account, null, inheritedModelPermissions).then(data => {
@@ -750,7 +695,6 @@ async function _createAccounts(roles, userName) {
 			await Promise.all(tsPromises);
 
 			// check project scope permissions
-			const projPromises = [];
 			const query = { "permissions": { "$elemMatch": { user: userName } } };
 			const projection = { "permissions": { "$elemMatch": { user: userName } }, "models": 1, "name": 1 };
 			let account = null;
@@ -767,6 +711,7 @@ async function _createAccounts(roles, userName) {
 					if (!account) {
 						account = accounts.find(_account => _account.account === user.user);
 						if (!account) {
+							const {_makeAccountObject} = require("./helper/model");
 							account = _makeAccountObject(user.user);
 							account.hasAvatar = !!user.customData.avatar;
 							accounts.push(account);
@@ -777,6 +722,7 @@ async function _createAccounts(roles, userName) {
 						_findModelDetails(dbUserCache, userName, {
 							account: user.user, model: model._id
 						}).then(data => {
+							const {_fillInModelDetails} = require("./helper/model");
 							return _fillInModelDetails(account.account, data.setting, data.permissions);
 
 						}).then(_model => {

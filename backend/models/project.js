@@ -252,7 +252,8 @@
 					account = accounts.find(_account => _account.account === teamspace);
 
 					if (!account) {
-						account = { account: teamspace, models: [], fedModels: [], projects: [], permissions: [], isAdmin: false };
+						const {_makeAccountObject} = require("./helper/model");
+						account = _makeAccountObject(teamspace);
 						account.hasAvatar = hasAvatar;
 						accounts.push(account);
 					}
@@ -277,6 +278,7 @@
 
 				const newModelIds = _.difference(_proj.models, myProj.models.map(m => m.model));
 				if (newModelIds.length) {
+					const {_getModels} = require("./helper/model");
 					_getModels(account.account, newModelIds, inheritedModelPerms).then(models => {
 						myProj.models = models.models.concat(models.fedModels);
 						resolve();
