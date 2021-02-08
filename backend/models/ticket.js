@@ -23,7 +23,7 @@ const User = require("./user");
 const { findJobByUser } = require("./job");
 const History = require("./history");
 
-const ModelSetting = require("./modelSetting");
+const { findModelSettingById } = require("./modelSetting");
 
 const utils = require("../utils");
 const responseCodes = require("../response_codes.js");
@@ -469,7 +469,7 @@ class Ticket extends View {
 			throw responseCodes.INVALID_DATE_ORDER;
 		}
 
-		const settings = await ModelSetting.findById({ account, model }, model);
+		const settings = await findModelSettingById(account, model);
 
 		await coll.insert(newTicket);
 		newTicket.typePrefix = newTicket.typePrefix || settings.type || "";

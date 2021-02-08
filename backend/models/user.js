@@ -34,7 +34,7 @@ const systemLogger = require("../logger.js").systemLogger;
 
 const config = require("../config");
 
-const ModelSetting = require("./modelSetting");
+const { changePermissions, findModelSettingById, findModelSettings, findPermissionByUser } = require("./modelSetting");
 const C = require("../constants");
 const UserBilling = require("./userBilling");
 
@@ -97,7 +97,7 @@ User.authenticate =  async function (logger, username, password) {
 	let authDB = null;
 	try {
 		if (C.EMAIL_REGEXP.test(username)) { // if the submited username is the email
-			user = await this.findByEmail(username);
+			user = await User.findByEmail(username);
 			if (!user) {
 				throw ({ resCode: responseCodes.INCORRECT_USERNAME_OR_PASSWORD });
 			}
@@ -110,7 +110,7 @@ User.authenticate =  async function (logger, username, password) {
 		authDB.close();
 
 		if (!user)  {
-			user = await this.findByUserName(username);
+			user = await User.findByUserName(username);
 		}
 
 		if (user.customData && user.customData.inactive) {
@@ -123,7 +123,7 @@ User.authenticate =  async function (logger, username, password) {
 
 		user.customData.lastLoginAt = new Date();
 
-		await this.update(username, {"customData.lastLoginAt": user.customData.lastLoginAt});
+		await User.update(username, {"customData.lastLoginAt": user.customData.lastLoginAt});
 
 		logger.logInfo("User has logged in", {username});
 
@@ -142,7 +142,7 @@ User.getProfileByUsername = async function (username) {
 		return null;
 	}
 
-	const user = await this.findByUserName(username, {user: 1,
+	const user = await User.findByUserName(username, {user: 1,
 		"customData.firstName" : 1,
 		"customData.lastName" : 1,
 		"customData.email" : 1,
@@ -163,7 +163,7 @@ User.getProfileByUsername = async function (username) {
 };
 
 User.getStarredMetadataTags = async function (username) {
-	const userProfile = await this.findByUserName(username, {user: 1,
+	const userProfile = await User.findByUserName(username, {user: 1,
 		"customData.StarredMetadataTags" : 1
 	});
 
@@ -246,7 +246,7 @@ User.deleteStarredModel = async function (username, ts, modelID) {
 
 User.generateApiKey = async function (username) {
 	const apiKey = crypto.randomBytes(16).toString("hex");
-	await this.update(username, {"customData.apiKey" : apiKey});
+	await User.update(username, {"customData.apiKey" : apiKey});
 	return apiKey;
 };
 
@@ -275,7 +275,7 @@ User.findUsersWithoutMembership = async function (teamspace, searchString) {
 // case insenstive
 User.checkUserNameAvailableAndValid = async function (username) {
 
-	if (!this.usernameRegExp.test(username) ||
+	if (!User.usernameRegExp.test(username) ||
 		-1 !== C.REPO_BLACKLIST_USERNAME.indexOf(username.toLowerCase())
 	) {
 		throw (responseCodes.INVALID_USERNAME);
@@ -318,9 +318,9 @@ User.updatePassword = async function (logger, username, oldPassword, token, newP
 			throw (responseCodes.NEW_OLD_PASSWORD_SAME);
 		}
 
-		await this.authenticate(logger, username, oldPassword);
+		await User.authenticate(logger, username, oldPassword);
 	} else if (token) {
-		user = await this.findByUserName(username);
+		user = await User.findByUserName(username);
 
 		const tokenData = user.customData.resetPasswordToken;
 
@@ -337,7 +337,7 @@ User.updatePassword = async function (logger, username, oldPassword, token, newP
 		await DB.runCommand("admin", updateUserCmd);
 
 		if (user) {
-			await this.update(username, {"customData.resetPasswordToken" : undefined });
+			await User.update(username, {"customData.resetPasswordToken" : undefined });
 		}
 
 	} catch(err) {
@@ -354,8 +354,8 @@ User.createUser = async function (logger, username, password, customData, tokenE
 	}
 
 	await Promise.all([
-		this.checkUserNameAvailableAndValid(username),
-		this.checkEmailAvailableAndValid(customData.email)
+		User.checkUserNameAvailableAndValid(username),
+		User.checkEmailAvailableAndValid(customData.email)
 	]);
 
 	const adminDB = await DB.getAuthDB();
@@ -421,7 +421,7 @@ User.createUser = async function (logger, username, password, customData, tokenE
 		throw ({ resCode: utils.mongoErrorToResCode(err) });
 	}
 
-	const user = await this.findByUserName(username);
+	const user = await User.findByUserName(username);
 
 	await Invitations.unpack(user);
 
@@ -439,7 +439,7 @@ User.verify = async function (username, token, options) {
 	const allowRepeatedVerify = options.allowRepeatedVerify;
 	const skipImportToyModel = options.skipImportToyModel;
 
-	const user = await this.findByUserName(username);
+	const user = await User.findByUserName(username);
 
 	const tokenData = user && user.customData && user.customData.emailVerifyToken;
 
@@ -579,7 +579,7 @@ async function _fillInModelDetails(accountName, setting, permissions) {
 		name: setting.name,
 		status: setting.status,
 		errorReason: setting.errorReason,
-		subModels: setting.federate && setting.toObject().subModels || undefined,
+		subModels: setting.federate && setting.subModels || undefined,
 		timestamp: setting.timestamp || null,
 		code: setting.properties ? setting.properties.code || undefined : undefined
 
@@ -603,7 +603,7 @@ async function _getModels(teamspace, ids, permissions) {
 		query = { _id: { "$in": ids } };
 	}
 
-	const settings = await ModelSetting.find({ account: teamspace }, query);
+	const settings = await findModelSettings(teamspace, query);
 
 	await Promise.all(settings.map(async setting => {
 		const model = await _fillInModelDetails(teamspace, setting, permissions);
@@ -672,14 +672,14 @@ async function _findModelDetails(dbUserCache, username, model) {
 		dbUserCache[model.account] = user;
 	}
 
-	let setting  = await ModelSetting.findById({ account: model.account }, model.model);
+	let setting  = await findModelSettingById(model.account, model.model);
 
 	let permissions = [];
 
 	if (!setting) {
 		setting = { _id: model.model };
 	} else {
-		const template = setting.findPermissionByUser(username);
+		const template = await findPermissionByUser(model.account, model.model, username);
 
 		if (template) {
 			permissions = PermissionTemplates.findById(user, template.permission).permissions;
@@ -844,7 +844,7 @@ function _createAccounts(roles, userName) {
 						// model permissions
 						const modelPromises = [];
 						const dbUserCache = {};
-						return ModelSetting.find({ account: user.user }, query, projection).then(models => {
+						return findModelSettings(user.user, query, projection).then(models => {
 
 							models.forEach(model => {
 								if (model.permissions.length > 0) {
@@ -966,7 +966,7 @@ User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove) 
 	// check if they have any permissions assigned
 	const [projects, models] = await Promise.all([
 		Project.find({ account: teamspace.user }, { "permissions.user": userToRemove }),
-		ModelSetting.find({ account: teamspace.user }, { "permissions.user": userToRemove })
+		findModelSettings(teamspace.user, { "permissions.user": userToRemove })
 	]);
 
 	if (!cascadeRemove && (models.length || projects.length || teamspacePerm)) {
@@ -989,7 +989,7 @@ User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove) 
 		}
 
 		promises.push(models.map(model =>
-			model.changePermissions(model.permissions.filter(p => p.user !== userToRemove))));
+			changePermissions(teamspace.user, model._id, model.permissions.filter(p => p.user !== userToRemove))));
 
 		promises.push(projects.map(project =>
 			project.updateAttrs({ permissions: project.permissions.filter(p => p.user !== userToRemove) })));
@@ -1185,7 +1185,7 @@ User.updateAvatar = async function(username, avatarBuffer) {
 Payment (paypal) stuff
 
 schema.methods.executeBillingAgreement = function () {
-	return this.customData.billing.executeBillingAgreement(this.user).then(() => {
+	return User.customData.billing.executeBillingAgreement(User.user).then(() => {
 		return this.update(this.user,  { "customData.billing": this.customData.billing });
 	});
 };
