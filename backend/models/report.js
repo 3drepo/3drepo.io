@@ -18,7 +18,7 @@
 "use strict";
 
 const moment = require("moment");
-const ModelSetting = require("./modelSetting");
+const { findModelSettingById } = require("./modelSetting");
 const User = require ("./user");
 const config = require("../config");
 const C = require("../constants");
@@ -109,7 +109,7 @@ class ReportGenerator {
 
 	getModelName() {
 		this.promises.push(
-			ModelSetting.findById(this.getDBCol(), this.modelID).then((setting) => {
+			findModelSettingById(this.teamspace, this.modelID).then((setting) => {
 				this.modelName = setting.name;
 			})
 		);

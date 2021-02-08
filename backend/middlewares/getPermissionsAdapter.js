@@ -21,7 +21,7 @@ const AccountPermissions = require("../models/accountPermissions");
 const PermissionTemplates = require("../models/permissionTemplates");
 
 (() => {
-	const ModelSetting = require("../models/modelSetting");
+	const { findModelSettingById, findPermissionByUser } = require("../models/modelSetting");
 	const Project = require("../models/project");
 	const User = require("../models/user");
 	const ResponseCodes = require("../response_codes");
@@ -93,14 +93,14 @@ const PermissionTemplates = require("../models/permissionTemplates");
 				}).then(_user => {
 
 					user = _user;
-					return ModelSetting.findById({account, model}, model);
+					return findModelSettingById(account, model);
 
-				}).then(setting => {
+				}).then(async setting => {
 					if(!setting) {
 						throw ResponseCodes.RESOURCE_NOT_FOUND;
 					}
 
-					const perm = setting.findPermissionByUser(username);
+					const perm = await findPermissionByUser(account, model, username);
 
 					if(!perm) {
 						return projectPerms;

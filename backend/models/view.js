@@ -224,9 +224,9 @@ class View {
 
 	async deleteViewpoint(account, model, id, sessionId) {
 		id = utils.uuidToString(id);
-		const ModelSettings = require("./modelSetting");
+		const { findModelSettingById } = require("./modelSetting");
 
-		const setting = await ModelSettings.findById({account, model}, model);
+		const setting = await findModelSettingById(account, model);
 
 		if(setting.defaultView && utils.uuidToString(setting.defaultView) === id) {
 			throw responseCodes.CANNOT_DELETE_DEFAULT_VIEW;

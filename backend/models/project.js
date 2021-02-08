@@ -25,7 +25,7 @@
 	const utils = require("../utils");
 	const _ = require("lodash");
 	const nodeuuid = require("uuid/v1");
-	const ModelSetting = require("./modelSetting");
+	const { changePermissions, prepareDefaultView, findModelSettings, findPermissionByUser } = require("./modelSetting");
 	const PermissionTemplates = require("./permissionTemplates");
 
 	const schema = mongoose.Schema({
@@ -181,9 +181,9 @@
 			usersToRemove.forEach(user => {
 				// remove all model permissions in this project as well, if any
 				userPromises.push(
-					ModelSetting.find(this._dbcolOptions, { "permissions.user": user}).then(settings =>
+					findModelSettings(this._dbcolOptions.account, { "permissions.user": user}).then(settings =>
 						Promise.all(
-							settings.map(s => s.changePermissions(s.permissions.filter(perm => perm.user !== user)))
+							settings.map(s => changePermissions(this._dbcolOptions.account, s._id, s.permissions.filter(perm => perm.user !== user)))
 						)
 					)
 				);
@@ -291,7 +291,7 @@
 			filters.name = new RegExp(".*" + filters.name + ".*", "i");
 		}
 
-		let modelsSettings =  await ModelSetting.find({account}, { _id: { $in : projectObj.models }, ...filters});
+		let modelsSettings =  await findModelSettings(account, { _id: { $in : projectObj.models }, ...filters});
 		let permissions = [];
 
 		const accountPerm = AccountPermissions.findByUser(dbUser, username);
@@ -306,7 +306,7 @@
 		}
 
 		modelsSettings = await Promise.all(modelsSettings.map(async setting => {
-			const template = setting.findPermissionByUser(username);
+			const template = await findPermissionByUser(account, setting._id, username);
 
 			let settingsPermissions = [];
 			if(template) {
@@ -316,7 +316,7 @@
 				}
 			}
 
-			setting = await setting.clean();
+			setting = await prepareDefaultView(account, setting._id, setting);
 			setting.permissions = _.uniq(permissions.concat(settingsPermissions));
 			setting.model = setting._id;
 			setting.account = account;

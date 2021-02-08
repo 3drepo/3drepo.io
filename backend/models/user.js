@@ -25,15 +25,16 @@ const utils = require("../utils");
 const Role = require("./role");
 const { addDefaultJobs,  findJobByUser, usersWithJob, removeUserFromAnyJob, addUserToJob } = require("./job");
 
+const Intercom = require("./intercom");
+
 const History = require("./history");
 const TeamspaceSettings = require("./teamspaceSetting");
-const Mailer = require("../mailer/mailer");
 
 const systemLogger = require("../logger.js").systemLogger;
 
 const config = require("../config");
 
-const ModelSetting = require("./modelSetting");
+const { changePermissions, findModelSettingById, findModelSettings, findPermissionByUser } = require("./modelSetting");
 const C = require("../constants");
 const UserBilling = require("./userBilling");
 
@@ -41,6 +42,7 @@ const AccountPermissions = require("./accountPermissions");
 const Project = require("./project");
 const FileRef = require("./fileRef");
 const PermissionTemplates = require("./permissionTemplates");
+const { get } = require("lodash");
 
 const isMemberOfTeamspace = function (user, teamspace) {
 	return user.roles.filter(role => role.db === teamspace && role.role === C.DEFAULT_MEMBER_ROLE).length > 0;
@@ -61,6 +63,11 @@ const hasReachedLicenceLimit = async function (teamspace) {
 	if (reachedLimit) {
 		throw (responseCodes.LICENCE_LIMIT_REACHED);
 	}
+};
+
+// Find functions
+const findOne = async function (query, projection) {
+	return await DB.findOne("admin", COLL_NAME, query, projection);
 };
 
 const COLL_NAME = "system.users";
@@ -90,7 +97,7 @@ User.authenticate =  async function (logger, username, password) {
 	let authDB = null;
 	try {
 		if (C.EMAIL_REGEXP.test(username)) { // if the submited username is the email
-			user = await this.findByEmail(username);
+			user = await User.findByEmail(username);
 			if (!user) {
 				throw ({ resCode: responseCodes.INCORRECT_USERNAME_OR_PASSWORD });
 			}
@@ -103,7 +110,7 @@ User.authenticate =  async function (logger, username, password) {
 		authDB.close();
 
 		if (!user)  {
-			user = await this.findByUserName(username);
+			user = await User.findByUserName(username);
 		}
 
 		if (user.customData && user.customData.inactive) {
@@ -116,7 +123,7 @@ User.authenticate =  async function (logger, username, password) {
 
 		user.customData.lastLoginAt = new Date();
 
-		await this.update(username, {"customData.lastLoginAt": user.customData.lastLoginAt});
+		await User.update(username, {"customData.lastLoginAt": user.customData.lastLoginAt});
 
 		logger.logInfo("User has logged in", {username});
 
@@ -135,7 +142,7 @@ User.getProfileByUsername = async function (username) {
 		return null;
 	}
 
-	const user = await this.findByUserName(username, {user: 1,
+	const user = await User.findByUserName(username, {user: 1,
 		"customData.firstName" : 1,
 		"customData.lastName" : 1,
 		"customData.email" : 1,
@@ -156,7 +163,7 @@ User.getProfileByUsername = async function (username) {
 };
 
 User.getStarredMetadataTags = async function (username) {
-	const userProfile = await this.findByUserName(username, {user: 1,
+	const userProfile = await User.findByUserName(username, {user: 1,
 		"customData.StarredMetadataTags" : 1
 	});
 
@@ -239,7 +246,7 @@ User.deleteStarredModel = async function (username, ts, modelID) {
 
 User.generateApiKey = async function (username) {
 	const apiKey = crypto.randomBytes(16).toString("hex");
-	await this.update(username, {"customData.apiKey" : apiKey});
+	await User.update(username, {"customData.apiKey" : apiKey});
 	return apiKey;
 };
 
@@ -248,39 +255,27 @@ User.deleteApiKey = async function (username) {
 };
 
 User.findUsersWithoutMembership = async function (teamspace, searchString) {
-	const users = await DB.find("admin", COLL_NAME, {
-		$and: [{
-			$or: [
-				{ user: new RegExp(`.*${searchString}.*`, "i") },
-				{ "customData.email": new RegExp(searchString, "i") }
-			]
-		},
-		{ "customData.inactive": { "$exists": false }}
-		]
+	const notMembers = await DB.find("admin", COLL_NAME, {
+		"customData.email": new RegExp(`${searchString}$`, "i"),
+		"customData.inactive": { "$exists": false },
+		"roles.db": {$ne: teamspace }
 	});
 
-	const notMembers = users.reduce((members, userentry) => {
-		if (!isMemberOfTeamspace(userentry, teamspace)) {
-			const {user, roles, customData } = userentry;
-			members.push({
-				user,
-				roles,
-				firstName: customData.firstName,
-				lastName: customData.lastName,
-				company: _.get(customData, "billing.billingInfo.company", null)
-			});
-		}
+	return notMembers.map(({user, customData }) => {
+		return {
+			user,
+			firstName: customData.firstName,
+			lastName: customData.lastName,
+			company: _.get(customData, "billing.billingInfo.company", null)
+		};
+	});
 
-		return members;
-	}, []);
-
-	return notMembers;
 };
 
 // case insenstive
 User.checkUserNameAvailableAndValid = async function (username) {
 
-	if (!this.usernameRegExp.test(username) ||
+	if (!User.usernameRegExp.test(username) ||
 		-1 !== C.REPO_BLACKLIST_USERNAME.indexOf(username.toLowerCase())
 	) {
 		throw (responseCodes.INVALID_USERNAME);
@@ -323,9 +318,9 @@ User.updatePassword = async function (logger, username, oldPassword, token, newP
 			throw (responseCodes.NEW_OLD_PASSWORD_SAME);
 		}
 
-		await this.authenticate(logger, username, oldPassword);
+		await User.authenticate(logger, username, oldPassword);
 	} else if (token) {
-		user = await this.findByUserName(username);
+		user = await User.findByUserName(username);
 
 		const tokenData = user.customData.resetPasswordToken;
 
@@ -342,7 +337,7 @@ User.updatePassword = async function (logger, username, oldPassword, token, newP
 		await DB.runCommand("admin", updateUserCmd);
 
 		if (user) {
-			await this.update(username, {"customData.resetPasswordToken" : undefined });
+			await User.update(username, {"customData.resetPasswordToken" : undefined });
 		}
 
 	} catch(err) {
@@ -359,8 +354,8 @@ User.createUser = async function (logger, username, password, customData, tokenE
 	}
 
 	await Promise.all([
-		this.checkUserNameAvailableAndValid(username),
-		this.checkEmailAvailableAndValid(customData.email)
+		User.checkUserNameAvailableAndValid(username),
+		User.checkEmailAvailableAndValid(customData.email)
 	]);
 
 	const adminDB = await DB.getAuthDB();
@@ -426,7 +421,7 @@ User.createUser = async function (logger, username, password, customData, tokenE
 		throw ({ resCode: utils.mongoErrorToResCode(err) });
 	}
 
-	const user = await this.findByUserName(username);
+	const user = await User.findByUserName(username);
 
 	await Invitations.unpack(user);
 
@@ -444,7 +439,7 @@ User.verify = async function (username, token, options) {
 	const allowRepeatedVerify = options.allowRepeatedVerify;
 	const skipImportToyModel = options.skipImportToyModel;
 
-	const user = await this.findByUserName(username);
+	const user = await User.findByUserName(username);
 
 	const tokenData = user && user.customData && user.customData.emailVerifyToken;
 
@@ -464,10 +459,15 @@ User.verify = async function (username, token, options) {
 		throw ({ resCode: responseCodes.TOKEN_INVALID });
 	}
 
-	const name = user.customData.firstName && user.customData.firstName.length > 0 ?
-		formatPronouns(user.customData.firstName) : user.user;
-	Mailer.sendWelcomeUserEmail(user.customData.email, {user: name})
-		.catch(err => systemLogger.logError(err));
+	try {
+		const { customData: {firstName, lastName, email, billing, mailListOptOut} } = user;
+		const subscribed = !mailListOptOut;
+		const company = get(billing, "billingInfo.company");
+
+		await Intercom.createContact(username, formatPronouns(firstName + " " + lastName), email, subscribed, company);
+	} catch (err) {
+		systemLogger.logError("Failed to create contact in intercom when verifying user", username, err);
+	}
 
 	if (!skipImportToyModel) {
 
@@ -545,7 +545,7 @@ User.getForgotPasswordToken = async function (userNameOrEmail) {
 
 	let resetPasswordUserInfo = {};
 
-	const user = await this.findByUsernameOrEmail(userNameOrEmail);
+	const user = await User.findByUsernameOrEmail(userNameOrEmail);
 
 	// set token only if username is found.
 	if (user) {
@@ -557,7 +557,7 @@ User.getForgotPasswordToken = async function (userNameOrEmail) {
 			firstName:user.customData.firstName
 		};
 
-		await this.update(user.user, { "customData.resetPasswordToken": resetPasswordToken });
+		await User.update(user.user, { "customData.resetPasswordToken": resetPasswordToken });
 
 		return resetPasswordUserInfo;
 	}
@@ -579,7 +579,7 @@ async function _fillInModelDetails(accountName, setting, permissions) {
 		name: setting.name,
 		status: setting.status,
 		errorReason: setting.errorReason,
-		subModels: setting.federate && setting.toObject().subModels || undefined,
+		subModels: setting.federate && setting.subModels || undefined,
 		timestamp: setting.timestamp || null,
 		code: setting.properties ? setting.properties.code || undefined : undefined
 
@@ -603,7 +603,7 @@ async function _getModels(teamspace, ids, permissions) {
 		query = { _id: { "$in": ids } };
 	}
 
-	const settings = await ModelSetting.find({ account: teamspace }, query);
+	const settings = await findModelSettings(teamspace, query);
 
 	await Promise.all(settings.map(async setting => {
 		const model = await _fillInModelDetails(teamspace, setting, permissions);
@@ -672,14 +672,14 @@ async function _findModelDetails(dbUserCache, username, model) {
 		dbUserCache[model.account] = user;
 	}
 
-	let setting  = await ModelSetting.findById({ account: model.account }, model.model);
+	let setting  = await findModelSettingById(model.account, model.model);
 
 	let permissions = [];
 
 	if (!setting) {
 		setting = { _id: model.model };
 	} else {
-		const template = setting.findPermissionByUser(username);
+		const template = await findPermissionByUser(model.account, model.model, username);
 
 		if (template) {
 			permissions = PermissionTemplates.findById(user, template.permission).permissions;
@@ -844,7 +844,7 @@ function _createAccounts(roles, userName) {
 						// model permissions
 						const modelPromises = [];
 						const dbUserCache = {};
-						return ModelSetting.find({ account: user.user }, query, projection).then(models => {
+						return findModelSettings(user.user, query, projection).then(models => {
 
 							models.forEach(model => {
 								if (model.permissions.length > 0) {
@@ -966,7 +966,7 @@ User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove) 
 	// check if they have any permissions assigned
 	const [projects, models] = await Promise.all([
 		Project.find({ account: teamspace.user }, { "permissions.user": userToRemove }),
-		ModelSetting.find({ account: teamspace.user }, { "permissions.user": userToRemove })
+		findModelSettings(teamspace.user, { "permissions.user": userToRemove })
 	]);
 
 	if (!cascadeRemove && (models.length || projects.length || teamspacePerm)) {
@@ -989,7 +989,7 @@ User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove) 
 		}
 
 		promises.push(models.map(model =>
-			model.changePermissions(model.permissions.filter(p => p.user !== userToRemove))));
+			changePermissions(teamspace.user, model._id, model.permissions.filter(p => p.user !== userToRemove))));
 
 		promises.push(projects.map(project =>
 			project.updateAttrs({ permissions: project.permissions.filter(p => p.user !== userToRemove) })));
@@ -1032,7 +1032,7 @@ User.addTeamMember = async function(teamspace, userToAdd, job, permissions) {
 
 	await Promise.all(promises);
 
-	return  { job, permissions, ... this.getBasicDetails(userEntry) };
+	return  { job, permissions, ... User.getBasicDetails(userEntry) };
 };
 
 User.getBasicDetails = function(userObj) {
@@ -1046,7 +1046,7 @@ User.getBasicDetails = function(userObj) {
 };
 
 User.getQuotaInfo = async function (teamspace) {
-	const teamspaceFound = await this.findByUserName(teamspace);
+	const teamspaceFound = await User.findByUserName(teamspace);
 	if (!teamspaceFound) {
 		throw (responseCodes.USER_NOT_FOUND);
 	}
@@ -1061,14 +1061,14 @@ User.hasSufficientQuota = async (teamspace, size) => {
 };
 
 User.hasReachedLicenceLimitCheck = async function(teamspace) {
-	const teamspaceUser = await this.findByUserName(teamspace);
+	const teamspaceUser = await User.findByUserName(teamspace);
 	await hasReachedLicenceLimit(teamspaceUser);
 };
 
 User.getMembers = async function (teamspace) {
 	const promises = [];
 
-	const getTeamspaceMembers = this.findUsersInTeamspace(teamspace, {
+	const getTeamspaceMembers = User.findUsersInTeamspace(teamspace, {
 		user: 1,
 		customData: 1
 	});
@@ -1099,7 +1099,7 @@ User.getMembers = async function (teamspace) {
 };
 
 User.getAllUsersInTeamspace = async function (teamspace) {
-	const users =  await this.findUsersInTeamspace(teamspace, {user: 1});
+	const users =  await User.findUsersInTeamspace(teamspace, {user: 1});
 	return users.map(({user}) => user);
 };
 
@@ -1141,25 +1141,20 @@ User.getTeamMemberInfo = async function(teamspace, user) {
 };
 
 User.isHereEnabled = async function (username) {
-	const user = await this.findByUserName(username,  { _id: 0, "customData.hereEnabled": 1 });
+	const user = await User.findByUserName(username,  { _id: 0, "customData.hereEnabled": 1 });
 	return user.customData.hereEnabled;
 };
 
-// Find functions
-User.findOne = async function (query, projection) {
-	return await DB.findOne("admin", COLL_NAME, query, projection);
-};
-
 User.findByUserName = async function (username, projection) {
-	return await this.findOne({ user: username }, projection);
+	return await findOne({ user: username }, projection);
 };
 
 User.findByEmail = async function (email) {
-	return await this.findOne({ "customData.email":  new RegExp("^" + utils.sanitizeString(email) + "$", "i") });
+	return await findOne({ "customData.email":  new RegExp("^" + utils.sanitizeString(email) + "$", "i") });
 };
 
 User.findByUsernameOrEmail = async function (userNameOrEmail) {
-	return await this.findOne({
+	return await findOne({
 		$or: [
 			{ user: userNameOrEmail },
 			{ "customData.email": userNameOrEmail }
@@ -1171,23 +1166,26 @@ User.findByAPIKey = async function (key) {
 	if (!key) {
 		return null;
 	}
-
-	return await this.findOne({"customData.apiKey" : key});
+	return await findOne({"customData.apiKey" : key});
 };
 
 User.findByPaypalPaymentToken = async function (token) {
-	return await this.findOne({ "customData.billing.paypalPaymentToken": token });
+	return await findOne({ "customData.billing.paypalPaymentToken": token });
 };
 
 User.findUserByBillingId = async function (billingAgreementId) {
-	return await this.findOne({ "customData.billing.billingAgreementId": billingAgreementId });
+	return await findOne({ "customData.billing.billingAgreementId": billingAgreementId });
+};
+
+User.updateAvatar = async function(username, avatarBuffer) {
+	await User.update(username, {"customData.avatar" : {data: avatarBuffer}});
 };
 
 /*
 Payment (paypal) stuff
 
 schema.methods.executeBillingAgreement = function () {
-	return this.customData.billing.executeBillingAgreement(this.user).then(() => {
+	return User.customData.billing.executeBillingAgreement(User.user).then(() => {
 		return this.update(this.user,  { "customData.billing": this.customData.billing });
 	});
 };
