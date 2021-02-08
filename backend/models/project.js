@@ -233,10 +233,12 @@
 		return projects;
 	};
 
-	/*
-	Project.getProjectsForNewUser = async function(teamspace, teamspaceProjects, query, projection)
+	Project.getProjectsForAccountsList = async function(teamspace, accounts, username, hasAvatar) {
 		const projPromises = [];
+		const query = { "permissions": { "$elemMatch": { user: username } } };
+		const projection = { "permissions": { "$elemMatch": { user: username } }, "models": 1, "name": 1 };
 		const projects = await Project.listProjects(teamspace, query, projection);
+		let account = null;
 
 		projects.forEach(_proj => {
 			projPromises.push(new Promise(function (resolve) {
@@ -246,11 +248,21 @@
 					return;
 				}
 
-				myProj = teamspaceProjects.find(p => p.name === _proj.name);
+				if (!account) {
+					account = accounts.find(_account => _account.account === teamspace);
+
+					if (!account) {
+						account = { account: teamspace, models: [], fedModels: [], projects: [], permissions: [], isAdmin: false };
+						account.hasAvatar = hasAvatar;
+						accounts.push(account);
+					}
+				}
+
+				myProj = account.projects.find(p => p.name === _proj.name);
 
 				if (!myProj) {
 					myProj = _proj;
-					teamspaceProjects.push(myProj);
+					account.projects.push(myProj);
 					myProj.permissions = myProj.permissions[0].permissions;
 				} else {
 					myProj.permissions = _.uniq(myProj.permissions.concat(_proj.permissions[0].permissions));
@@ -273,10 +285,12 @@
 					resolve();
 				}
 			}));
-
 		});
+
+		await Promise.all(projPromises);
+
+		return account;
 	};
-	*/
 
 	Project.getProjectNamesAccessibleToUser = async function(teamspace, username) {
 		const projects = await Project.listProjects(teamspace, { "permissions.user": username }, {name: 1});
