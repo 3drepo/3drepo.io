@@ -248,6 +248,7 @@ function createNewModel(teamspace, modelName, data) {
 			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
 		}
 
+		// FIXME when project changes are merged, consider using func in project
 		// Check there's no other model within the same project with the model name
 		return isModelNameExists(teamspace, project.models, modelName).then((modelNameExists) => {
 			if(modelNameExists) {

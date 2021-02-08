@@ -15,16 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import MenuItem from '@material-ui/core/MenuItem';
+import Paper from '@material-ui/core/Paper';
 import ExpandIcon from '@material-ui/icons/ChevronRight';
 import CollapseIcon from '@material-ui/icons/ExpandMore';
+import SearchIcon from '@material-ui/icons/Search';
 import { isEqual, isNil, keyBy, omit, uniqBy } from 'lodash';
 import React from 'react';
 import Autosuggest from 'react-autosuggest';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-
-import MenuItem from '@material-ui/core/MenuItem';
-import Paper from '@material-ui/core/Paper';
-import SearchIcon from '@material-ui/icons/Search';
+import * as yup from 'yup';
 import { BACKSPACE, ENTER_KEY } from '../../../constants/keys';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { compareStrings } from '../../../helpers/searching';
@@ -79,6 +79,17 @@ export interface IDataType {
 	label?: string;
 	type?: number;
 }
+
+const filterItemSchema = yup.object().shape({
+	label: yup.string(),
+	type: yup.number().required().positive().integer(),
+	value: yup.object().shape({
+		label: yup.string(),
+		value: yup.string().required()
+	})
+});
+
+const filterItemsSchema = yup.array().of(filterItemSchema);
 
 interface IProps {
 	filters?: IFilter[];
@@ -339,6 +350,10 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 
 		try {
 			const newSelectedFilters = JSON.parse(event.clipboardData.getData('text'));
+
+			if (!filterItemsSchema.isValidSync(newSelectedFilters)) {
+				return;
+			}
 
 			this.setState((prevState) => ({
 				selectedFilters: uniqBy([

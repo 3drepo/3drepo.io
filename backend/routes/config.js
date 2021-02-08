@@ -42,7 +42,7 @@ function createClientConfig(serverConfig, req) {
 		"userNotice" : config.userNotice,
 		"customLogins" : config.customLogins,
 		"liveChatLicense" : config.liveChatLicense,
-		"intercomLicense" : config.intercomLicense,
+		"intercomLicense" : _.get(config, "intercom.license"),
 		"resourceUploadSizeLimit" : config.resourceUploadSizeLimit,
 		"sequencesEnabled": true,
 		"presenterEnabled": Boolean(config.presenterEnabled)
