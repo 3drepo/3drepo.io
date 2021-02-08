@@ -735,7 +735,9 @@ function _createAccounts(roles, userName) {
 
 				// show all implied and inherted permissions
 				account.permissions = _.uniq(_.flatten(account.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].account || p)));
-				accounts.push(account);
+				if (account.permissions.length > 0) {
+					accounts.push(account);
+				}
 				if (isTeamspaceAdmin || canViewProjects) {
 					// show all implied and inherted permissions
 					const inheritedModelPermissions = _.uniq(_.flatten(account.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || [])));
@@ -761,7 +763,10 @@ function _createAccounts(roles, userName) {
 				if (!account) {
 					account = _makeAccountObject(user.user);
 					account.hasAvatar = !!user.customData.avatar;
-					accounts.push(account);
+
+					if (account.permissions.length > 0) {
+						accounts.push(account);
+					}
 				}
 
 				// return getProjectsForNewUser(user.user, account.projects, query, projection).then(projects => {
@@ -815,7 +820,10 @@ function _createAccounts(roles, userName) {
 										if (!account) {
 											account = _makeAccountObject(user.user);
 											account.hasAvatar = !!user.customData.avatar;
-											accounts.push(account);
+
+											if (account.permissions.length > 0) {
+												accounts.push(account);
+											}
 										}
 									}
 									const existingModel = _findModel(model._id, account);
