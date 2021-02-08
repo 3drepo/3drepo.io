@@ -162,19 +162,6 @@ export function* deleteViewpoint({teamspace, modelId, viewpointId}) {
 	}
 }
 
-function* toggleSortOrder() {
-	try {
-		const currentSortOrder = yield select(selectSortOrder);
-		const isASC = currentSortOrder === SORT_ORDER_TYPES.ASCENDING;
-
-		yield put(ViewpointsActions.setComponentState({
-			sortOrder: isASC ? SORT_ORDER_TYPES.DESCENDING : SORT_ORDER_TYPES.ASCENDING,
-		}));
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('set', 'sort order', error.message));
-	}
-}
-
 const onUpdated = (updatedView) => dispatch(ViewpointsActions.updateViewpointSuccess(updatedView));
 
 const onDeleted = (deletedView) => {
@@ -402,7 +389,6 @@ export default function* ViewpointsSaga() {
 	yield takeLatest(ViewpointsTypes.CREATE_VIEWPOINT, createViewpoint);
 	yield takeLatest(ViewpointsTypes.UPDATE_VIEWPOINT, updateViewpoint);
 	yield takeLatest(ViewpointsTypes.DELETE_VIEWPOINT, deleteViewpoint);
-	yield takeLatest(ViewpointsTypes.TOGGLE_SORT_ORDER, toggleSortOrder);
 	yield takeLatest(ViewpointsTypes.SET_ACTIVE_VIEWPOINT, setActiveViewpoint);
 	yield takeLatest(ViewpointsTypes.SUBSCRIBE_ON_VIEWPOINT_CHANGES, subscribeOnViewpointChanges);
 	yield takeLatest(ViewpointsTypes.UNSUBSCRIBE_ON_VIEWPOINT_CHANGES, unsubscribeOnViewpointChanges);

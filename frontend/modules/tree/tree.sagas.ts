@@ -390,8 +390,8 @@ function* isolateNodes(nodesIds = []) {
 				unhighlightObjects(result.unhighlightedObjects);
 			}
 
-			toggleMeshesVisibility(result.meshToHide, false);
-			toggleMeshesVisibility(result.meshToShow, true);
+			toggleMeshesVisibility(result.meshesToHide, false);
+			toggleMeshesVisibility(result.meshesToShow, true);
 
 			yield put(TreeActions.updateDataRevision());
 		}
