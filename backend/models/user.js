@@ -735,9 +735,7 @@ function _createAccounts(roles, userName) {
 
 				// show all implied and inherted permissions
 				account.permissions = _.uniq(_.flatten(account.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].account || p)));
-				if (account.permissions.length > 0) {
-					accounts.push(account);
-				}
+				accounts.push(account);
 				if (isTeamspaceAdmin || canViewProjects) {
 					// show all implied and inherted permissions
 					const inheritedModelPermissions = _.uniq(_.flatten(account.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || [])));
@@ -758,16 +756,7 @@ function _createAccounts(roles, userName) {
 				const projPromises = [];
 				const query = { "permissions": { "$elemMatch": { user: userName } } };
 				const projection = { "permissions": { "$elemMatch": { user: userName } }, "models": 1, "name": 1 };
-				let account = accounts.find(_account => _account.account === user.user);
-
-				if (!account) {
-					account = _makeAccountObject(user.user);
-					account.hasAvatar = !!user.customData.avatar;
-
-					if (account.permissions.length > 0) {
-						accounts.push(account);
-					}
-				}
+				let account = null;
 
 				// return getProjectsForNewUser(user.user, account.projects, query, projection).then(projects => {
 				return listProjects(user.user, query, projection).then(projects => {
@@ -777,6 +766,16 @@ function _createAccounts(roles, userName) {
 							if (!_proj || _proj.permissions.length === 0) {
 								resolve();
 								return;
+							}
+
+							if (!account) {
+								account = accounts.find(_account => _account.account === user.user);
+
+								if (!account) {
+									account = _makeAccountObject(user.user);
+									account.hasAvatar = !!user.customData.avatar;
+									accounts.push(account);
+								}
 							}
 
 							myProj = account.projects.find(p => p.name === _proj.name);
@@ -820,10 +819,7 @@ function _createAccounts(roles, userName) {
 										if (!account) {
 											account = _makeAccountObject(user.user);
 											account.hasAvatar = !!user.customData.avatar;
-
-											if (account.permissions.length > 0) {
-												accounts.push(account);
-											}
+											accounts.push(account);
 										}
 									}
 									const existingModel = _findModel(model._id, account);
