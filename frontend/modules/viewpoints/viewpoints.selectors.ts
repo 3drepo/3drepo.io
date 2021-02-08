@@ -65,14 +65,6 @@ export const selectSelectedViewpoint = createSelector(
 	selectViewpointsDomain, (state) => state.selectedViewpoint
 );
 
-export const selectSortedViewpointsList = createSelector(
-	selectViewpointsList, selectSortOrder, (viewpointsMap, sortOrder) => orderBy(
-				viewpointsMap,
-	['name'],
-	[sortOrder]
-		)
-);
-
 export const selectTransformations = createSelector(
 	selectSelectedViewpoint, (viewpoint) => {
 		if (!Boolean(viewpoint?.transformation_groups?.length)) {

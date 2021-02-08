@@ -28,14 +28,14 @@ import {
 	selectNewViewpoint,
 	selectSearchEnabled,
 	selectSearchQuery,
-	selectSortedViewpointsList,
 	selectSortOrder,
+	selectViewpointsList,
 	ViewpointsActions,
 } from '../../../../modules/viewpoints';
 import { Views } from './views.component';
 
 const mapStateToProps = createStructuredSelector({
-	viewpoints: selectSortedViewpointsList,
+	viewpoints: selectViewpointsList,
 	newViewpoint: selectNewViewpoint,
 	activeViewpoint: selectActiveViewpoint,
 	isPending: selectIsPending,
