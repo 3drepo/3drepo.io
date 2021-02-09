@@ -54,6 +54,10 @@ function clean(setting) {
 		if (!setting.subModels) {
 			setting.subModels = [];
 		}
+
+		if(setting.defaultLegend) {
+			setting.defaultLegend = utils.uuidToString(setting.defaultLegend);
+		}
 	}
 
 	return setting;
@@ -62,7 +66,7 @@ function clean(setting) {
 const ModelSetting = {};
 
 ModelSetting.batchUpdatePermissions = async function(account, batchPermissions = []) {
-	const updatePromises = batchPermissions.map((update) => this.updatePermissions(account, update.model, update.permissions));
+	const updatePromises = batchPermissions.map((update) => ModelSetting.updatePermissions(account, update.model, update.permissions));
 	const updateResponses = await Promise.all(updatePromises);
 	const okStatus = "ok";
 	const badStatusIndex = updateResponses.findIndex((response) => okStatus !== response.status);
@@ -168,6 +172,14 @@ ModelSetting.createNewSetting = async function(teamspace, modelName, data) {
 		}
 	}
 
+	if (data.defaultLegend) {
+		if (utils.isUUID(data.defaultLegend)) {
+			setting.defaultLegend = utils.stringToUUID(data.defaultLegend);
+		} else {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+	}
+
 	if (data.subModels) {
 		setting.federate = true;
 		setting.subModels = data.subModels;
@@ -211,10 +223,10 @@ ModelSetting.deleteModelSetting = function(account, model) {
 	return db.remove(account, MODELS_COLL, { _id: model });
 };
 
-ModelSetting.findModelSettingById = async function(account, model, projection) {
+ModelSetting.findModelSettingById = async function(account, model, projection, toClean = true) {
 	const foundSetting = await db.findOne(account, MODELS_COLL, {_id: model}, projection);
 
-	return clean(foundSetting);
+	return toClean ? clean(foundSetting) : foundSetting;
 };
 
 ModelSetting.findModelSettings = async function(account, query, projection) {
@@ -453,6 +465,11 @@ ModelSetting.updatePermissions = async function(account, model, permissions = []
 	return { "status": updatedSetting.status };
 };
 
+ModelSetting.getDefaultLegendId = async (account, model) => {
+	const setting = await ModelSetting.findModelSettingById(account, model, {defaultLegend : 1}, false);
+	return setting ? setting.defaultLegend : undefined;
+};
+
 ModelSetting.updateModelSetting = async function (account, model, updateObj) {
 	const setting = await ModelSetting.findModelSettingById(account, model);
 
@@ -490,6 +507,15 @@ ModelSetting.updateModelSetting = async function (account, model, updateObj) {
 						const res = await views.findByUID(account, model, updateObj[key], {_id: 1});
 						toUpdate[key] = res._id;
 						setting[key] = res._id;
+					} else {
+						throw responseCodes.INVALID_ARGUMENTS;
+					}
+					break;
+				case "defaultLegend":
+					if (utils.isString(updateObj[key]) && utils.isUUID(updateObj[key])) {
+						const legendId = utils.stringToUUID(updateObj[key]);
+						toUpdate[key] = legendId;
+						setting[key] = legendId;
 					} else {
 						throw responseCodes.INVALID_ARGUMENTS;
 					}

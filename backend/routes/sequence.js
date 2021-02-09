@@ -277,8 +277,8 @@ router.patch("/revision/:revId/sequences/:sequenceId", middlewares.hasUploadAcce
 router.put("/revision/master/head/sequences/:sequenceId/legend", middlewares.hasUploadAccessToModel, updateLegend);
 router.put("/revision/:revId/sequences/:sequenceId/legend", middlewares.hasUploadAccessToModel, updateLegend);
 
-router.get("/revision/master/head/sequences/:sequenceId/legend", middlewares.hasUploadAccessToModel, getLegend);
-router.get("/revision/:revId/sequences/:sequenceId/legend", middlewares.hasUploadAccessToModel, getLegend);
+router.get("/revision/master/head/sequences/:sequenceId/legend", middlewares.issue.canView, getLegend);
+router.get("/revision/:revId/sequences/:sequenceId/legend", middlewares.issue.canView, getLegend);
 
 router.delete("/revision/master/head/sequences/:sequenceId/legend", middlewares.hasUploadAccessToModel, deleteLegend);
 router.delete("/revision/:revId/sequences/:sequenceId/legend", middlewares.hasUploadAccessToModel, deleteLegend);
