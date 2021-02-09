@@ -21,6 +21,7 @@ const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
 const DB = require("../handler/db");
 const crypto = require("crypto");
+const zxcvbn = require('zxcvbn');
 const utils = require("../utils");
 const Role = require("./role");
 const { addDefaultJobs,  findJobByUser, usersWithJob, removeUserFromAnyJob, addUserToJob } = require("./job");
@@ -355,6 +356,15 @@ User.createUser = async function (logger, username, password, customData, tokenE
 	const Invitations =  require("./invitations");
 	if (!customData) {
 		throw ({ resCode: responseCodes.EMAIL_INVALID });
+	}
+
+	if (utils.isString(password) && password.length < C.MIN_PASSWORD_LENGTH) {
+		throw responseCodes.PASSWORD_TOO_SHORT;
+	}
+
+	const passwordScore = zxcvbn(password).score;
+	if (passwordScore < C.MIN_PASSWORD_STRENGTH) {
+		throw responseCodes.PASSWORD_TOO_WEAK;
 	}
 
 	await Promise.all([
