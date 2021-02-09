@@ -31,7 +31,7 @@ describe("Updating user info", function () {
 	let server;
 	let agent;
 	const username = "updateinfo_username";
-	const password = "password";
+	const password = "Str0ngPassword!";
 	const email = "test3drepo_updateinfo@mailinator.com";
 	const newEmail = "test3drepo_updateinfo_1@mailinator.com";
 	const takenEmail = "test3drepo@mailinator.com";

@@ -29,7 +29,7 @@ describe("Login", function () {
 	let server;
 	const username = "login_username";
 	const username_not_verified = "login_nonverified";
-	const password = "password";
+	const password = "Str0ngPassword!";
 	const email = suf => `test3drepo_login_${suf}@mailinator.com`;
 
 	before(function(done) {
