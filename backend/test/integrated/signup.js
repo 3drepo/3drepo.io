@@ -58,7 +58,6 @@ describe("Sign up", function() {
 
 	const User = require("../../models/user");
 
-	// add tests for simple passwords
 	it("with available username should return success", async function() {
 		const {body} = await request(server)
 			.post(`/${username}`)
@@ -459,5 +458,4 @@ describe("Sign up", function() {
 				done(err);
 			});
 	});
-
 });
