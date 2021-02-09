@@ -245,7 +245,7 @@ function getObjectsArrayAsIfcGuids(data) {
 const Group = {};
 
 Group.create = async function (account, model, branch = "master", rid = null, sessionId, creator = "", data) {
-	const newGroup = Object.assign({}, data);
+	const newGroup = {};
 
 	const convertedObjects = await getObjectsArrayAsIfcGuids(data, false);
 
