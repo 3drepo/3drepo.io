@@ -245,6 +245,23 @@ describe("Login", function () {
 			token = data.token;
 		});
 
+		it("reset with short password using token should fail", async function() {
+			const {body} = await request(server)
+				.put(`/${username}/password`)
+				.send({token, "Sh0rt!})
+				.expect(400);
+
+			expect(body.value).to.equal(responseCodes.PASSWORD_TOO_SHORT.value);
+		});
+
+		it("reset with weak password using token should fail", async function() {
+			const {body} = await request(server)
+				.put(`/${username}/password`)
+				.send({token, "password"})
+				.expect(400);
+
+			expect(body.value).to.equal(responseCodes.PASSWORD_TOO_WEAK.value);
+		});
 
 		it("reset password with token should succeed", async function() {
 			await request(server)
@@ -253,9 +270,8 @@ describe("Login", function () {
 				.expect(200);
 		});
 
-
 		it("login with new password should succeed", async function() {
-			const {body}  = await request(server)
+			const {body} = await request(server)
 				.post("/login")
 				.send({ username, password: newPassword})
 				.expect(200);

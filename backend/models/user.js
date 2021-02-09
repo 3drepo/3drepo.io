@@ -315,6 +315,15 @@ User.updatePassword = async function (logger, username, oldPassword, token, newP
 		throw ({ resCode: responseCodes.INVALID_INPUTS_TO_PASSWORD_UPDATE });
 	}
 
+	if (utils.isString(newPassword) && newPassword.length < C.MIN_PASSWORD_LENGTH) {
+		throw responseCodes.PASSWORD_TOO_SHORT;
+	}
+
+	const passwordScore = zxcvbn(newPassword).score;
+	if (passwordScore < C.MIN_PASSWORD_STRENGTH) {
+		throw responseCodes.PASSWORD_TOO_WEAK;
+	}
+
 	let user;
 
 	if (oldPassword) {
