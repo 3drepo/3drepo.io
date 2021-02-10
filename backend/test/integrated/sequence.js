@@ -534,5 +534,13 @@ describe("Sequences", function () {
 				});
 		});
 
+		it("name as viewer should fail", function(done) {
+			const update = { name: "Viewer's attempt"};
+			agent.patch(`/${username}/${model}/revision/master/head/sequences/${sequenceId}?key=${viewerApiKey}`)
+				.send(update)
+				.expect(401, done);
+		});
+
+
 	});
 });
