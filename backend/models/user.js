@@ -49,6 +49,15 @@ const FileRef = require("./fileRef");
 const PermissionTemplates = require("./permissionTemplates");
 const { get } = require("lodash");
 
+const appendRemainingLoginsInfo = function (resCode, remaining) {
+	if (resCode.value === responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value &&
+		remaining <= C.REMAINING_LOGIN_ATTEMPTS_PROMPT_THRESHOLD) {
+		resCode.message += " (Remaining attempts: " + remaining + ")";
+	}
+
+	return resCode;
+};
+
 const isMemberOfTeamspace = function (user, teamspace) {
 	return user.roles.filter(role => role.db === teamspace && role.role === C.DEFAULT_MEMBER_ROLE).length > 0;
 };
@@ -196,7 +205,7 @@ User.authenticate =  async function (logger, username, password) {
 
 		const remainingLoginAttempts = await handleAuthenticateFail(username);
 
-		throw (err.resCode ? err : { resCode: { ...utils.mongoErrorToResCode(err), remainingLoginAttempts }});
+		throw (err.resCode ? err : { resCode: appendRemainingLoginsInfo(utils.mongoErrorToResCode(err), remainingLoginAttempts) });
 	}
 };
 

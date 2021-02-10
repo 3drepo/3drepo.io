@@ -493,6 +493,7 @@
 	// -----------------------------------------------------------------------------
 
 	define("MAX_UNSUCCESSFUL_LOGIN_ATTEMPTS", 10);
+	define("REMAINING_LOGIN_ATTEMPTS_PROMPT_THRESHOLD", 5);
 	define("LOCKOUT_DURATION", 900000);
 
 	// -----------------------------------------------------------------------------
