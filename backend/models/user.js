@@ -81,7 +81,7 @@ const handleAuthenticateFail = async function (username) {
 	try {
 		const user = await User.findByUserName(username);
 		const elapsedTime = user.customData.lastFailedLoginAt ?
-			currentTime - new Date(user.customData.lastFailedLoginAt) : undefined;
+			currentTime - user.customData.lastFailedLoginAt : undefined;
 
 		const failedLoginCount = user.customData.failedLoginCount && elapsedTime && elapsedTime < C.LOCKOUT_DURATION ?
 			user.customData.failedLoginCount + 1 : 1;
@@ -153,13 +153,20 @@ User.authenticate =  async function (logger, username, password) {
 			username = user.user;
 		}
 
-		authDB = await DB.getAuthDB();
-		await authDB.authenticate(username, password);
-		authDB.close();
-
 		if (!user)  {
 			user = await User.findByUserName(username);
 		}
+
+		if (user && user.customData &&
+			user.customData.failedLoginCount && user.customData.lastFailedLoginAt &&
+			user.customData.failedLoginCount >= C.MAX_UNSUCCESSFUL_LOGIN_ATTEMPTS &&
+			Date.now() - user.customData.lastFailedLoginAt < C.LOCKOUT_DURATION) {
+			throw responseCodes.TOO_MANY_LOGIN_ATTEMPTS;
+		}
+
+		authDB = await DB.getAuthDB();
+		await authDB.authenticate(username, password);
+		authDB.close();
 
 		if (user.customData && user.customData.inactive) {
 			throw ({ resCode: responseCodes.USER_NOT_VERIFIED });
