@@ -20,15 +20,14 @@ import * as React from 'react';
 import InputLabel from '@material-ui/core/InputLabel';
 import CloseIcon from '@material-ui/icons/Close';
 import SequencesIcon from '@material-ui/icons/Movie';
-
-import DayJsUtils from '@date-io/dayjs';
-
 import { Field } from 'formik';
-import { MuiPickersUtilsProvider } from 'material-ui-pickers';
+
 import { isDateOutsideRange } from '../../../helpers/dateTime';
 import { NAMED_MONTH_DATETIME_FORMAT } from '../../../services/formatting/formatDate';
-import { FieldsRow,
-	StyledFormControl } from '../../viewerGui/components/risks/components/riskDetails/riskDetails.styles';
+import {
+	FieldsRow,
+	StyledFormControl,
+} from '../../viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { SmallIconButton } from '../smallIconButon/smallIconButton.component';
 import { SequenceDateActions, SequenceDateContainer, SequenceDateField } from './sequencingDates.styles';
 
@@ -83,7 +82,7 @@ export class SequencingDates extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		return (
-			<MuiPickersUtilsProvider utils={DayJsUtils}>
+			<>
 				<FieldsRow container justify="space-between" flex={1}>
 					<StyledFormControl>
 						<InputLabel shrink>Start time</InputLabel>
@@ -112,7 +111,7 @@ export class SequencingDates extends React.PureComponent<IProps, IState> {
 					} />
 					</StyledFormControl>
 				</FieldsRow>
-			</MuiPickersUtilsProvider>
+			</>
 		);
 	}
 }

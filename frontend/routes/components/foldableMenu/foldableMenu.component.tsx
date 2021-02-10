@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import DayJsUtils from '@date-io/dayjs';
+import React, { ReactNode } from 'react';
+
 import { ListItemProps } from '@material-ui/core/ListItem';
 import { Check } from '@material-ui/icons';
-import { MuiPickersUtilsProvider } from 'material-ui-pickers';
-import React, { ReactNode } from 'react';
+
 import { IconWrapper, MenuList, NestedWrapper, StyledItemText, StyledListItem, Wrapper } from './foldableMenu.style';
 
 /**
@@ -122,21 +122,19 @@ export class FoldableMenu extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		return (
-			<MuiPickersUtilsProvider utils={DayJsUtils}>
-				<MenuList>
-					{(this.props.children as any[]).map((child, index) => {
-						if (child.type === SubMenu) {
-							return (<SubMenu
-								key={index}
-								active={index === this.state.activeItem}
-								{...child.props} onMouseEnter={() => this.showSubMenu(index)} onMouseLeave={this.hideSubMenu}
-							/>);
-						} else {
-							return child;
-						}
-					})}
-				</MenuList>
-			</MuiPickersUtilsProvider>
+			<MenuList>
+				{(this.props.children as any[]).map((child, index) => {
+					if (child.type === SubMenu) {
+						return (<SubMenu
+							key={index}
+							active={index === this.state.activeItem}
+							{...child.props} onMouseEnter={() => this.showSubMenu(index)} onMouseLeave={this.hideSubMenu}
+						/>);
+					} else {
+						return child;
+					}
+				})}
+			</MenuList>
 		);
 	}
 }

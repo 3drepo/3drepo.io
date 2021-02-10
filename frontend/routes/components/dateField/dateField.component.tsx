@@ -17,7 +17,7 @@
 
 import React from 'react';
 
-import { MaterialUiPickersDate } from 'material-ui-pickers/typings/date';
+import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date';
 import { Container, StyledDatePicker, StyledDateTimePicker } from './dateField.styles';
 
 interface IProps {

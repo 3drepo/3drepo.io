@@ -17,12 +17,10 @@
 
 import React from 'react';
 
-import DayJsUtils from '@date-io/dayjs';
 import Tabs from '@material-ui/core/Tabs';
 import Tooltip from '@material-ui/core/Tooltip';
 import { withFormik, Form } from 'formik';
 import { debounce, get, isEmpty, isEqual } from 'lodash';
-import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 import * as Yup from 'yup';
 
 import {
@@ -190,25 +188,23 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		const { activeTab } = this.state;
 
 		return (
-			<MuiPickersUtilsProvider utils={DayJsUtils}>
-				<Form>
-					<Tabs
-						value={activeTab}
-						indicatorColor="secondary"
-						textColor="primary"
-						onChange={this.handleChange}
-					>
-						<StyledTab label={ISSUE_TABS.ISSUE} value={ISSUE_PROPERTIES_TAB} />
-						<StyledTab label={ISSUE_TABS.SEQUENCING} value={ISSUE_SEQUENCING_TAB} />
-						<StyledTab {...this.attachmentsProps} value={ATTACHMENTS_ISSUE_TAB} />
-					</Tabs>
-					<TabContent>
-						{this.showIssueContent(activeTab === ISSUE_PROPERTIES_TAB)}
-						{this.showSequencingContent(activeTab === ISSUE_SEQUENCING_TAB)}
-						{this.showAttachmentsContent(activeTab === ATTACHMENTS_ISSUE_TAB)}
-					</TabContent>
-				</Form>
-			</MuiPickersUtilsProvider>
+			<Form>
+				<Tabs
+					value={activeTab}
+					indicatorColor="secondary"
+					textColor="primary"
+					onChange={this.handleChange}
+				>
+					<StyledTab label={ISSUE_TABS.ISSUE} value={ISSUE_PROPERTIES_TAB} />
+					<StyledTab label={ISSUE_TABS.SEQUENCING} value={ISSUE_SEQUENCING_TAB} />
+					<StyledTab {...this.attachmentsProps} value={ATTACHMENTS_ISSUE_TAB} />
+				</Tabs>
+				<TabContent>
+					{this.showIssueContent(activeTab === ISSUE_PROPERTIES_TAB)}
+					{this.showSequencingContent(activeTab === ISSUE_SEQUENCING_TAB)}
+					{this.showAttachmentsContent(activeTab === ATTACHMENTS_ISSUE_TAB)}
+				</TabContent>
+			</Form>
 		);
 	}
 }

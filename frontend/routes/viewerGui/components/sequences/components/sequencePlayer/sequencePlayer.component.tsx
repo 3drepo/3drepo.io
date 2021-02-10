@@ -17,7 +17,6 @@
 
 import React from 'react';
 
-import DayJsUtils from '@date-io/dayjs';
 import { FormControlLabel, FormGroup, Grid, IconButton, MenuItem, Select, Switch } from '@material-ui/core';
 import StepForwardIcon from '@material-ui/icons/FastForward';
 import StepBackIcon from '@material-ui/icons/FastRewind';
@@ -25,7 +24,6 @@ import PlayArrow from '@material-ui/icons/PlayArrow';
 import Replay from '@material-ui/icons/Replay';
 import Stop from '@material-ui/icons/Stop';
 import { findIndex, noop } from 'lodash';
-import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 
 import { STEP_SCALE } from '../../../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../../../constants/viewerGui';
@@ -272,52 +270,50 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 		return (
 			<SequencePlayerContainer>
 				<SequencePlayerColumn>
-					<MuiPickersUtilsProvider utils={DayJsUtils}>
-						<SequenceRow>
-							<Grid item>
-								<IconButton disabled={this.isFirstDay} onClick={this.rewind}><StepBackIcon fontSize="large" /></IconButton>
-							</Grid>
-							<Grid item>
-								<DatePicker
-									shouldDisableDate={(date) => isDateOutsideRange(this.props.min, this.props.max, date.$d)}
-									name="date"
-									inputId="1"
-									value={value}
-									format={LONG_DATE_TIME_FORMAT_NO_MINUTES}
-									onChange={(e) => this.gotoDate(new Date(Math.floor(e.target.value / MILLI_PER_HOUR) * MILLI_PER_HOUR))}
-									placeholder="date"
-									dateTime
-								/>
-							</Grid>
-							<Grid item>
-								<IconButton disabled={this.isLastDay} onClick={this.forward}><StepForwardIcon fontSize="large" /></IconButton>
-							</Grid>
-						</SequenceRow>
-						<IntervalRow>
-							Step interval: <StepInput value={stepInterval} onChange={this.onChangeStepInterval} />
-							&nbsp;
-							<Select value={stepScale} onChange={this.onChangeStepScale} >
-								<MenuItem value={STEP_SCALE.HOUR}>hour(s)</MenuItem>
-								<MenuItem value={STEP_SCALE.DAY}>day(s)</MenuItem>
-								<MenuItem value={STEP_SCALE.MONTH}>month(s)</MenuItem>
-								<MenuItem value={STEP_SCALE.YEAR}>year(s)</MenuItem>
-								<MenuItem value={STEP_SCALE.FRAME}>frame(s)</MenuItem>
-							</Select>
-						</IntervalRow>
-						<SliderRow>
-							<Grid item>
-								<IconButton onClick={this.onClickPlayStop} ><this.PlayButtonIcon /></IconButton>
-							</Grid>
-							<Grid item>
-								<SequenceSlider
-									max={this.totalTime}
-									step={36000000}
-									value={this.currentTime}
-									onChange={(e, val) => this.goTo(val)}
-								/>
-							</Grid>
-						</SliderRow>
-					</MuiPickersUtilsProvider>
+					<SequenceRow>
+						<Grid item>
+							<IconButton disabled={this.isFirstDay} onClick={this.rewind}><StepBackIcon fontSize="large" /></IconButton>
+						</Grid>
+						<Grid item>
+							<DatePicker
+								shouldDisableDate={(date) => isDateOutsideRange(this.props.min, this.props.max, date.$d)}
+								name="date"
+								inputId="1"
+								value={value}
+								format={LONG_DATE_TIME_FORMAT_NO_MINUTES}
+								onChange={(e) => this.gotoDate(new Date(Math.floor(e.target.value / MILLI_PER_HOUR) * MILLI_PER_HOUR))}
+								placeholder="date"
+								dateTime
+							/>
+						</Grid>
+						<Grid item>
+							<IconButton disabled={this.isLastDay} onClick={this.forward}><StepForwardIcon fontSize="large" /></IconButton>
+						</Grid>
+					</SequenceRow>
+					<IntervalRow>
+						Step interval: <StepInput value={stepInterval} onChange={this.onChangeStepInterval} />
+						&nbsp;
+						<Select value={stepScale} onChange={this.onChangeStepScale} >
+							<MenuItem value={STEP_SCALE.HOUR}>hour(s)</MenuItem>
+							<MenuItem value={STEP_SCALE.DAY}>day(s)</MenuItem>
+							<MenuItem value={STEP_SCALE.MONTH}>month(s)</MenuItem>
+							<MenuItem value={STEP_SCALE.YEAR}>year(s)</MenuItem>
+							<MenuItem value={STEP_SCALE.FRAME}>frame(s)</MenuItem>
+						</Select>
+					</IntervalRow>
+					<SliderRow>
+						<Grid item>
+							<IconButton onClick={this.onClickPlayStop} ><this.PlayButtonIcon /></IconButton>
+						</Grid>
+						<Grid item>
+							<SequenceSlider
+								max={this.totalTime}
+								step={36000000}
+								value={this.currentTime}
+								onChange={(e, val) => this.goTo(val)}
+							/>
+						</Grid>
+					</SliderRow>
 					<FormGroup row>
 						<FormControlLabel
 							control={<Switch
