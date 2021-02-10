@@ -541,6 +541,139 @@ describe("Sequences", function () {
 				.expect(401, done);
 		});
 
+	});
+
+	const goldenLegendData = {
+        "Chairs" : "#ffffaa",
+        "Apples" : "#aaaaaa11"
+	};
+
+	describe("Getting a legend", function() {
+		it("from a sequence that does not exist should fail", function(done) {
+			agent.get(`/${username}/${model}/revision/master/head/sequences/invalidSequence/legend?key=${userApiKey}`)
+				.expect(404, (err, res) => {
+					expect(res.body.value).to.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
+					done(err);
+				});
+		});
+
+		it("from a sequence that already has a legend should succeed", function(done) {
+			agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/legend?key=${userApiKey}`)
+				.expect(200, (err, res) => {
+					expect(res.body).to.deep.equal(goldenLegendData);
+					done(err);
+				});
+		});
+
+		it("from a sequence that already has a legend as a viewer should succeed", function(done) {
+			agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/legend?key=${viewerApiKey}`)
+				.expect(200, (err, res) => {
+					expect(res.body).to.deep.equal(goldenLegendData);
+					done(err);
+				});
+		});
+
+		it("from a sequence that does not have a legend should succeed", function(done) {
+			agent.get(`/${username}/${model}/revision/master/head/sequences/${latestGoldenData._id}/legend?key=${userApiKey}`)
+				.expect(200, (err, res) => {
+					expect(res.body).to.deep.equal({});
+					done(err);
+				});
+		});
 
 	});
+
+	describe("Setting a legend as default", function() {
+		it("updating the default legend as a viewer should fail", function(done) {
+			agent.put(`/${username}/${model}/settings?key=${viewerApiKey}`)
+				.send({defaultLegend : sequenceId })
+				.expect(401, done);
+		});
+
+		it("updating the default legend should succeed", function(done) {
+			async.series([
+				(done) => {
+					agent.put(`/${username}/${model}/settings?key=${userApiKey}`)
+						.send({defaultLegend : sequenceId })
+						.expect(200, done);
+				},
+				(done) => {
+					agent.get(`/${username}/${model}.json?key=${userApiKey}`)
+						.expect(200, (err, res) => {
+							expect(res.body.defaultLegend).to.equal(sequenceId);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("sequences with no legend should get be getting the default legend instead of empty legend", function(done) {
+			agent.get(`/${username}/${model}/revision/master/head/sequences/${latestGoldenData._id}/legend?key=${userApiKey}`)
+				.expect(200, (err, res) => {
+					expect(res.body).to.deep.equal(goldenLegendData);
+					done(err);
+				});
+		});
+	});
+
+
+	describe("Updating a legend", function() {
+		it("of a valid sequence should succeed", function(done) {
+			const newLegend = { a: "#123456", b: "#ffffffaa" };
+			async.series([
+				(done) => {
+					agent.put(`/${username}/${model}/revision/master/head/sequences/${latestGoldenData._id}/legend?key=${userApiKey}`)
+						.send(newLegend)
+						.expect(200, done);
+				},
+				(done) => {
+					agent.get(`/${username}/${model}/revision/master/head/sequences/${latestGoldenData._id}/legend?key=${userApiKey}`)
+					.expect(200, (err, res) => {
+						expect(res.body).to.deep.equal(newLegend);
+						done(err);
+					});
+				}
+			], done);
+
+		});
+
+		it("of an invalid sequence should fail", function(done) {
+			const newLegend = { a: "#123456", b: "#ffffffaa" };
+			agent.put(`/${username}/${model}/revision/master/head/sequences/invalidSequenceID/legend?key=${userApiKey}`)
+				.send(newLegend)
+				.expect(404, (err, res) => {
+					expect(res.body.value).to.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
+					done(err);
+				});
+		});
+
+		it("with the wrong data type should fail", function(done) {
+			const newLegend = { a: "#123456", b: false };
+			agent.put(`/${username}/${model}/revision/master/head/sequences/${latestGoldenData._id}/legend?key=${userApiKey}`)
+				.send(newLegend)
+				.expect(400, (err, res) => {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("with the string that isn't in hex colour format should fail", function(done) {
+			const newLegend = { a: "#123456", b: "hello" };
+			agent.put(`/${username}/${model}/revision/master/head/sequences/${latestGoldenData._id}/legend?key=${userApiKey}`)
+				.send(newLegend)
+				.expect(400, (err, res) => {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("as a viewer should fail", function(done) {
+			const newLegend = { a: "#123456" };
+			agent.put(`/${username}/${model}/revision/master/head/sequences/${latestGoldenData._id}/legend?key=${viewerApiKey}`)
+				.send(newLegend)
+				.expect(401, done);
+		});
+	});
+
+
 });
