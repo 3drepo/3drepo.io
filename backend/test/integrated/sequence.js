@@ -480,11 +480,10 @@ describe("Sequences", function () {
 			const update = { name: "New name for the sequence"};
 			async.series([
 				(done) => {
-					agent.post(`/${username}/${model}/revision/master/head/sequences/${sequenceId}?key=${userApiKey}`)
+					agent.patch(`/${username}/${model}/revision/master/head/sequences/${sequenceId}?key=${userApiKey}`)
 						.send(update)
-						.expect(200, (err,res ) => { console.log(`/${username}/${model}/revision/master/head/sequences/${sequenceId}?key=${userApiKey}`) ;done(err);});
+						.expect(200, done);
 				},
-
 				(done) => {
 					agent.get(`/${username}/${model}/revision/${oldRevision}/sequences?key=${userApiKey}`).expect(200, function(err , res) {
 						expect(res.body.length).to.equal(1);
@@ -492,7 +491,6 @@ describe("Sequences", function () {
 						done(err);
 					});
 				}
-
 			], done);
 		});
 
@@ -530,7 +528,7 @@ describe("Sequences", function () {
 			const update = { name: "abc"};
 			agent.patch(`/${username}/${model}/revision/master/head/sequences/invalidSequence?key=${userApiKey}`)
 				.send(update)
-				.expect(400, (err, res) => {
+				.expect(404, (err, res) => {
 					expect(res.body.value).to.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
 					done(err);
 				});
