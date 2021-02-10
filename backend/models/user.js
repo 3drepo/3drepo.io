@@ -98,7 +98,7 @@ const handleAuthenticateFail = async function (username) {
 	} catch(err) {
 		// suppress update failure
 	}
-}
+};
 
 const COLL_NAME = "system.users";
 
