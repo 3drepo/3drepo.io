@@ -676,4 +676,37 @@ describe("Sequences", function () {
 	});
 
 
+	describe("Deleting a legend", function() {
+		it("as a viewer should fail", function(done) {
+			agent.delete(`/${username}/${model}/revision/master/head/sequences/${latestGoldenData._id}/legend?key=${viewerApiKey}`)
+				.expect(401, done);
+		});
+
+		it("of an invalid sequence ID should fail", function(done) {
+			agent.delete(`/${username}/${model}/revision/master/head/sequences/aaa/legend?key=${userApiKey}`)
+				.expect(404, (err, res) => {
+					expect(res.body.value).to.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
+					done(err);
+				});
+		});
+
+		it("should succeed", function(done) {
+			async.series([
+				(done) => {
+					agent.delete(`/${username}/${model}/revision/master/head/sequences/${latestGoldenData._id}/legend?key=${userApiKey}`)
+						.expect(200, done);
+				},
+				(done) => {
+					agent.get(`/${username}/${model}/revision/master/head/sequences/${latestGoldenData._id}/legend?key=${userApiKey}`)
+					.expect(200, (err, res) => {
+						expect(res.body).to.deep.equal(goldenLegendData);
+						done(err);
+					});
+				}
+			], done);
+
+		});
+	});
+
+
 });
