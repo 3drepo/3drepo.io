@@ -482,7 +482,7 @@ describe("Sequences", function () {
 				(done) => {
 					agent.post(`/${username}/${model}/revision/master/head/sequences/${sequenceId}?key=${userApiKey}`)
 						.send(update)
-						.expect(200, done);
+						.expect(200, (err,res ) => { console.log(`/${username}/${model}/revision/master/head/sequences/${sequenceId}?key=${userApiKey}`) ;done(err);});
 				},
 
 				(done) => {
@@ -500,7 +500,7 @@ describe("Sequences", function () {
 			const update = { frames: [], name: "another name"};
 			async.series([
 				(done) => {
-					agent.post(`/${username}/${model}/revision/master/head/sequences/${sequenceId}?key=${userApiKey}`)
+					agent.patch(`/${username}/${model}/revision/master/head/sequences/${sequenceId}?key=${userApiKey}`)
 						.send(update)
 						.expect(200, done);
 				},
@@ -518,7 +518,7 @@ describe("Sequences", function () {
 
 		it("anything but the name should fail", function(done) {
 			const update = { frames: []};
-			agent.post(`/${username}/${model}/revision/master/head/sequences/${sequenceId}?key=${userApiKey}`)
+			agent.patch(`/${username}/${model}/revision/master/head/sequences/${sequenceId}?key=${userApiKey}`)
 				.send(update)
 				.expect(400, (err, res) => {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -528,7 +528,7 @@ describe("Sequences", function () {
 
 		it("that does not exist should fail", function(done) {
 			const update = { name: "abc"};
-			agent.post(`/${username}/${model}/revision/master/head/sequences/invalidSequence?key=${userApiKey}`)
+			agent.patch(`/${username}/${model}/revision/master/head/sequences/invalidSequence?key=${userApiKey}`)
 				.send(update)
 				.expect(400, (err, res) => {
 					expect(res.body.value).to.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
