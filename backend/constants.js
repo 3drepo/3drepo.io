@@ -482,8 +482,18 @@
 	//
 	// -----------------------------------------------------------------------------
 
-	define("MIN_PASSWORD_LENGTH",  8);
-	define("MIN_PASSWORD_STRENGTH",  2);
+	define("MIN_PASSWORD_LENGTH", 8);
+	define("MIN_PASSWORD_STRENGTH", 2);
+
+	// -----------------------------------------------------------------------------
+	//
+	// Login (lockout) policy
+	// Note: time duration in seconds
+	//
+	// -----------------------------------------------------------------------------
+
+	define("MAX_UNSUCCESSFUL_LOGIN_ATTEMPTS", 10);
+	define("LOCKOUT_DURATION", 900);
 
 	// -----------------------------------------------------------------------------
 	//
