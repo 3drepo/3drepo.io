@@ -93,6 +93,8 @@ const handleAuthenticateFail = async function (username) {
 			"customData.failedLoginCount": failedLoginCount,
 			"customData.loginLocked": loginLocked
 		});
+
+		return Math.max(C.MAX_UNSUCCESSFUL_LOGIN_ATTEMPTS - failedLoginCount, 0);
 	} catch(err) {
 		// suppress update failure
 	}
@@ -161,7 +163,7 @@ User.authenticate =  async function (logger, username, password) {
 			user.customData.failedLoginCount && user.customData.lastFailedLoginAt &&
 			user.customData.failedLoginCount >= C.MAX_UNSUCCESSFUL_LOGIN_ATTEMPTS &&
 			Date.now() - user.customData.lastFailedLoginAt < C.LOCKOUT_DURATION) {
-			throw responseCodes.TOO_MANY_LOGIN_ATTEMPTS;
+			throw ({ resCode: responseCodes.TOO_MANY_LOGIN_ATTEMPTS });
 		}
 
 		authDB = await DB.getAuthDB();
@@ -188,9 +190,9 @@ User.authenticate =  async function (logger, username, password) {
 			authDB.close();
 		}
 
-		await handleAuthenticateFail(username);
+		const remainingLoginAttempts = await handleAuthenticateFail(username);
 
-		throw (err.resCode ? err : { resCode: utils.mongoErrorToResCode(err) });
+		throw (err.resCode ? err : { resCode: { ...utils.mongoErrorToResCode(err), remainingLoginAttempts }});
 	}
 };
 
