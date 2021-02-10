@@ -75,12 +75,55 @@ const findOne = async function (query, projection) {
 	return await DB.findOne("admin", COLL_NAME, query, projection);
 };
 
+const handleAuthenticateFail = async function (username) {
+	const currentTime = Date.now();
+
+	try {
+		const user = await User.findByUserName(username);
+		const elapsedTime = user.customData.lastFailedLoginAt ?
+			currentTime - new Date(user.customData.lastFailedLoginAt) : undefined;
+
+		const failedLoginCount = user.customData.failedLoginCount && elapsedTime && elapsedTime < C.LOCKOUT_DURATION ?
+			user.customData.failedLoginCount + 1 : 1;
+
+		const loginLocked = failedLoginCount >= C.MAX_UNSUCCESSFUL_LOGIN_ATTEMPTS ? true : undefined;
+
+		await User.update(username, {
+			"customData.lastFailedLoginAt": currentTime,
+			"customData.failedLoginCount": failedLoginCount,
+			"customData.loginLocked": loginLocked
+		});
+	} catch(err) {
+		// suppress update failure
+	}
+}
+
 const COLL_NAME = "system.users";
 
 const User = {};
 
 User.update = async function (username, data) {
-	return DB.update("admin", COLL_NAME, {user: username}, {$set: data});
+	const toUpdate = {};
+	const toSet = {};
+	const toUnset = {};
+
+	Object.keys(data).forEach((key) => {
+		if (data[key]) {
+			toSet[key] = data[key];
+		} else {
+			toUnset[key] = data[key];
+		}
+	});
+
+	if (Object.keys(toSet).length > 0) {
+		toUpdate["$set"] = toSet;
+	}
+
+	if (Object.keys(toUnset).length > 0) {
+		toUpdate["$unset"] = toUnset;
+	}
+
+	return DB.update("admin", COLL_NAME, {user: username}, toUpdate);
 };
 
 User.getTeamspaceSpaceUsed = async function (dbName) {
@@ -137,6 +180,8 @@ User.authenticate =  async function (logger, username, password) {
 		if (authDB) {
 			authDB.close();
 		}
+
+		await handleAuthenticateFail(username);
 
 		throw (err.resCode ? err : { resCode: utils.mongoErrorToResCode(err) });
 	}

@@ -488,12 +488,12 @@
 	// -----------------------------------------------------------------------------
 	//
 	// Login (lockout) policy
-	// Note: time duration in seconds
+	// Note: time duration in milliseconds
 	//
 	// -----------------------------------------------------------------------------
 
 	define("MAX_UNSUCCESSFUL_LOGIN_ATTEMPTS", 10);
-	define("LOCKOUT_DURATION", 900);
+	define("LOCKOUT_DURATION", 900000);
 
 	// -----------------------------------------------------------------------------
 	//
