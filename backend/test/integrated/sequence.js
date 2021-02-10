@@ -29,7 +29,9 @@ describe("Sequences", function () {
 	let agent;
 
 	const username = "metaTest";
-	const password = "123456";
+	const userApiKey = "d3900e3d5f81b13af626579ec1ead4a9";
+
+	const viewerApiKey = "ba7a87507986da2619fc448cae0d93e4";
 
 	const model = "4d3df6a7-b4d5-4304-a6e1-dc192a761490";
 	const oldRevision = "c01daebe-9fe1-452e-a77e-d201280d1fb9";
@@ -316,14 +318,8 @@ describe("Sequences", function () {
 
 		server = app.listen(8080, function () {
 			console.log("API test server is listening on port 8080!");
-
 			agent = request.agent(server);
-			agent.post("/login")
-				.send({ username, password })
-                .expect(200, function (err, res) {
-					expect(res.body.username).to.equal(username);
-					done(err);
-				});
+			done();
 		});
 
 	});
@@ -337,7 +333,7 @@ describe("Sequences", function () {
 
 	describe("List all sequences", function() {
 		it("from latest revision should succeed", function(done) {
-			agent.get(`/${username}/${model}/revision/master/head/sequences`).expect(200, function(err , res) {
+			agent.get(`/${username}/${model}/revision/master/head/sequences?key=${userApiKey}`).expect(200, function(err , res) {
 
 				expect(res.body.length).to.equal(1);
 				expect(res.body[0]).to.deep.equal(latestGoldenData);
@@ -348,7 +344,7 @@ describe("Sequences", function () {
 		});
 
 		it("from revision should succeed", function(done) {
-			agent.get(`/${username}/${model}/revision/${oldRevision}/sequences`).expect(200, function(err , res) {
+			agent.get(`/${username}/${model}/revision/${oldRevision}/sequences?key=${userApiKey}`).expect(200, function(err , res) {
 
 				expect(res.body.length).to.equal(1);
 				expect(res.body[0]).to.deep.equal(oldGoldenData);
@@ -359,7 +355,7 @@ describe("Sequences", function () {
 		});
 
 		it("from federation should succeed", function(done) {
-			agent.get(`/${username}/${federation}/revision/master/head/sequences`).expect(200, function(err , res) {
+			agent.get(`/${username}/${federation}/revision/master/head/sequences?key=${userApiKey}`).expect(200, function(err , res) {
 
 				expect(res.body.length).to.equal(1);
 				expect(res.body[0]).to.deep.equal(latestGoldenData);
@@ -372,7 +368,7 @@ describe("Sequences", function () {
 
 	describe("Get sequence state", function() {
 		it("from latest revision should succeed", function(done) {
-			agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/state/${stateId}`).expect(200, function(err , res) {
+			agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/state/${stateId}?key=${userApiKey}`).expect(200, function(err , res) {
 				expect(Object.keys(res.body)).to.deep.equal(["transparency", "color"]);
 
 				return done(err);
@@ -380,7 +376,7 @@ describe("Sequences", function () {
 		});
 
 		it("from revision should succeed", function(done) {
-			agent.get(`/${username}/${model}/revision/${oldRevision}/sequences/${sequenceId}/state/${stateId}`).expect(200, function(err , res) {
+			agent.get(`/${username}/${model}/revision/${oldRevision}/sequences/${sequenceId}/state/${stateId}?key=${userApiKey}`).expect(200, function(err , res) {
 				expect(Object.keys(res.body)).to.deep.equal(["transparency", "color"]);
 
 				return done(err);
@@ -388,7 +384,7 @@ describe("Sequences", function () {
 		});
 
 		it("from federation should fail", function(done) {
-			agent.get(`/${username}/${federation}/revision/master/head/sequences/${sequenceId}/state/${stateId}`).expect(404, function(err , res) {
+			agent.get(`/${username}/${federation}/revision/master/head/sequences/${sequenceId}/state/${stateId}?key=${userApiKey}`).expect(404, function(err , res) {
 				expect(res.body.value).to.equal(responseCodes.NO_FILE_FOUND.value);
 
 				return done(err);
@@ -396,7 +392,7 @@ describe("Sequences", function () {
 		});
 
 		it("with invalid state ID should fail", function(done) {
-			agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/state/invalidId`).expect(404, function(err , res) {
+			agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/state/invalidId?key=${userApiKey}`).expect(404, function(err , res) {
 				expect(res.body.value).to.equal(responseCodes.NO_FILE_FOUND.value);
 
 				return done(err);
@@ -406,7 +402,7 @@ describe("Sequences", function () {
 
 	describe("Get sequence activities", function() {
 		it("from latest revision should succeed", function(done) {
-			agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/activities`).expect(200, function(err, res) {
+			agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/activities?key=${userApiKey}`).expect(200, function(err, res) {
 				expect(res.body).to.deep.equal(goldenActivity);
 
 				return done(err);
@@ -414,7 +410,7 @@ describe("Sequences", function () {
 		});
 
 		it("from revision should succeed", function(done) {
-			agent.get(`/${username}/${model}/revision/${oldRevision}/sequences/${sequenceId}/activities`).expect(200, function(err, res) {
+			agent.get(`/${username}/${model}/revision/${oldRevision}/sequences/${sequenceId}/activities?key=${userApiKey}`).expect(200, function(err, res) {
 				expect(res.body).to.deep.equal(goldenActivity);
 
 				return done(err);
@@ -422,7 +418,7 @@ describe("Sequences", function () {
 		});
 
 		it("from federation should fail", function(done) {
-			agent.get(`/${username}/${federation}/revision/master/head/sequences/${sequenceId}/activities`).expect(404, function(err, res) {
+			agent.get(`/${username}/${federation}/revision/master/head/sequences/${sequenceId}/activities?key=${userApiKey}`).expect(404, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.NO_FILE_FOUND.value);
 
 				return done(err);
@@ -430,7 +426,7 @@ describe("Sequences", function () {
 		});
 
 		it("using invalid sequence ID should fail", function(done) {
-			agent.get(`/${username}/${model}/revision/master/head/sequences/invalidSequenceId/activities`).expect(404, function(err, res) {
+			agent.get(`/${username}/${model}/revision/master/head/sequences/invalidSequenceId/activities?key=${userApiKey}`).expect(404, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.NO_FILE_FOUND.value);
 
 				return done(err);
@@ -440,7 +436,7 @@ describe("Sequences", function () {
 
 	describe("Get sequence activity detail", function() {
 		it("from latest revision should succeed", function(done) {
-			agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/activities/${activityId}`).expect(200, function(err, res) {
+			agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/activities/${activityId}?key=${userApiKey}`).expect(200, function(err, res) {
 				expect(res.body).to.deep.equal(goldenActivityDetail);
 
 				return done(err);
@@ -448,7 +444,7 @@ describe("Sequences", function () {
 		});
 
 		it("from revision should succeed", function(done) {
-			agent.get(`/${username}/${model}/revision/${oldRevision}/sequences/${sequenceId}/activities/${activityId}`).expect(200, function(err, res) {
+			agent.get(`/${username}/${model}/revision/${oldRevision}/sequences/${sequenceId}/activities/${activityId}?key=${userApiKey}`).expect(200, function(err, res) {
 				expect(res.body).to.deep.equal(goldenActivityDetail);
 
 				return done(err);
@@ -456,7 +452,7 @@ describe("Sequences", function () {
 		});
 
 		it("from federation should fail", function(done) {
-			agent.get(`/${username}/${federation}/revision/master/head/sequences/${sequenceId}/activities/${activityId}`).expect(404, function(err, res) {
+			agent.get(`/${username}/${federation}/revision/master/head/sequences/${sequenceId}/activities/${activityId}?key=${userApiKey}`).expect(404, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.ACTIVITY_NOT_FOUND.value);
 
 				return done(err);
@@ -464,18 +460,81 @@ describe("Sequences", function () {
 		});
 
 		it("using invalid sequence ID should succeed", function(done) {
-			agent.get(`/${username}/${model}/revision/master/head/sequences/invalidSequenceId/activities/${activityId}`).expect(200, function(err, res) {
+			agent.get(`/${username}/${model}/revision/master/head/sequences/invalidSequenceId/activities/${activityId}?key=${userApiKey}`).expect(200, function(err, res) {
 				expect(res.body).to.deep.equal(goldenActivityDetail);
 				return done(err);
 			});
 		});
 
 		it("using invalid activity ID should fail", function(done) {
-			agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/activities/invalidActivityId`).expect(404, function(err, res) {
+			agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/activities/invalidActivityId?key=${userApiKey}`).expect(404, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.ACTIVITY_NOT_FOUND.value);
 
 				return done(err);
 			});
 		});
+	});
+
+	describe("Update Sequence", function() {
+		it("name with a new string should succeed", function(done) {
+			const update = { name: "New name for the sequence"};
+			async.series([
+				(done) => {
+					agent.post(`/${username}/${model}/revision/master/head/sequences/${sequenceId}?key=${userApiKey}`)
+						.send(update)
+						.expect(200, done);
+				},
+
+				(done) => {
+					agent.get(`/${username}/${model}/revision/${oldRevision}/sequences?key=${userApiKey}`).expect(200, function(err , res) {
+						expect(res.body.length).to.equal(1);
+						expect(res.body[0]).to.deep.equal({...oldGoldenData, ...update});
+						done(err);
+					});
+				}
+
+			], done);
+		});
+
+		it("name and frame should only update the name", function(done) {
+			const update = { frames: [], name: "another name"};
+			async.series([
+				(done) => {
+					agent.post(`/${username}/${model}/revision/master/head/sequences/${sequenceId}?key=${userApiKey}`)
+						.send(update)
+						.expect(200, done);
+				},
+
+				(done) => {
+					agent.get(`/${username}/${model}/revision/${oldRevision}/sequences?key=${userApiKey}`).expect(200, function(err , res) {
+						expect(res.body.length).to.equal(1);
+						expect(res.body[0]).to.deep.equal({...oldGoldenData, name: update.name});
+						done(err);
+					});
+				}
+
+			], done);
+		});
+
+		it("anything but the name should fail", function(done) {
+			const update = { frames: []};
+			agent.post(`/${username}/${model}/revision/master/head/sequences/${sequenceId}?key=${userApiKey}`)
+				.send(update)
+				.expect(400, (err, res) => {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("that does not exist should fail", function(done) {
+			const update = { name: "abc"};
+			agent.post(`/${username}/${model}/revision/master/head/sequences/invalidSequence?key=${userApiKey}`)
+				.send(update)
+				.expect(400, (err, res) => {
+					expect(res.body.value).to.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
+					done(err);
+				});
+		});
+
 	});
 });
