@@ -50,12 +50,12 @@ const PermissionTemplates = require("./permissionTemplates");
 const { get } = require("lodash");
 
 const appendRemainingLoginsInfo = function (resCode, remaining) {
-	if (resCode.value === responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value &&
-		remaining <= C.REMAINING_LOGIN_ATTEMPTS_PROMPT_THRESHOLD) {
-		resCode.message += " (Remaining attempts: " + remaining + ")";
-	}
-
-	return resCode;
+	return (resCode.value === responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value &&
+		remaining <= config.remainingLoginAttemptsPromptThreshold) ?
+		{
+			...resCode,
+			message: resCode.message + " (Remaining attempts: " + remaining + ")"
+		} : resCode;
 };
 
 const isMemberOfTeamspace = function (user, teamspace) {
@@ -65,8 +65,8 @@ const isMemberOfTeamspace = function (user, teamspace) {
 const hasReachedFailedLoginLimit = function (user) {
 	return user && user.customData &&
 		user.customData.failedLoginCount && user.customData.lastFailedLoginAt &&
-		user.customData.failedLoginCount >= C.MAX_UNSUCCESSFUL_LOGIN_ATTEMPTS &&
-		Date.now() - user.customData.lastFailedLoginAt < C.LOCKOUT_DURATION;
+		user.customData.failedLoginCount >= config.maxUnsuccessfulLoginAttempts &&
+		Date.now() - user.customData.lastFailedLoginAt < config.lockoutDuration;
 };
 
 const hasReachedLicenceLimit = async function (teamspace) {
@@ -99,10 +99,10 @@ const handleAuthenticateFail = async function (username) {
 		const elapsedTime = user.customData.lastFailedLoginAt ?
 			currentTime - user.customData.lastFailedLoginAt : undefined;
 
-		const failedLoginCount = user.customData.failedLoginCount && elapsedTime && elapsedTime < C.LOCKOUT_DURATION ?
+		const failedLoginCount = user.customData.failedLoginCount && elapsedTime && elapsedTime < config.lockoutDuration ?
 			user.customData.failedLoginCount + 1 : 1;
 
-		const loginLocked = failedLoginCount >= C.MAX_UNSUCCESSFUL_LOGIN_ATTEMPTS ? true : undefined;
+		const loginLocked = failedLoginCount >= config.maxUnsuccessfulLoginAttempts ? true : undefined;
 
 		await User.update(username, {
 			"customData.lastFailedLoginAt": currentTime,
@@ -110,7 +110,7 @@ const handleAuthenticateFail = async function (username) {
 			"customData.loginLocked": loginLocked
 		});
 
-		return Math.max(C.MAX_UNSUCCESSFUL_LOGIN_ATTEMPTS - failedLoginCount, 0);
+		return Math.max(config.maxUnsuccessfulLoginAttempts - failedLoginCount, 0);
 	} catch(err) {
 		// suppress update failure
 	}
