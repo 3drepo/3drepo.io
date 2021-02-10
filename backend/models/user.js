@@ -53,6 +53,13 @@ const isMemberOfTeamspace = function (user, teamspace) {
 	return user.roles.filter(role => role.db === teamspace && role.role === C.DEFAULT_MEMBER_ROLE).length > 0;
 };
 
+const hasReachedFailedLoginLimit = function (user) {
+	return user && user.customData &&
+		user.customData.failedLoginCount && user.customData.lastFailedLoginAt &&
+		user.customData.failedLoginCount >= C.MAX_UNSUCCESSFUL_LOGIN_ATTEMPTS &&
+		Date.now() - user.customData.lastFailedLoginAt < C.LOCKOUT_DURATION;
+};
+
 const hasReachedLicenceLimit = async function (teamspace) {
 	const Invitations = require("./invitations");
 	const [userArr, invitations] = await Promise.all([
@@ -159,10 +166,7 @@ User.authenticate =  async function (logger, username, password) {
 			user = await User.findByUserName(username);
 		}
 
-		if (user && user.customData &&
-			user.customData.failedLoginCount && user.customData.lastFailedLoginAt &&
-			user.customData.failedLoginCount >= C.MAX_UNSUCCESSFUL_LOGIN_ATTEMPTS &&
-			Date.now() - user.customData.lastFailedLoginAt < C.LOCKOUT_DURATION) {
+		if (hasReachedFailedLoginLimit(user)) {
 			throw ({ resCode: responseCodes.TOO_MANY_LOGIN_ATTEMPTS });
 		}
 
@@ -626,6 +630,10 @@ User.getForgotPasswordToken = async function (userNameOrEmail) {
 
 	// set token only if username is found.
 	if (user) {
+		if (hasReachedFailedLoginLimit(user)) {
+			throw responseCodes.ACCOUNT_LOGIN_LOCKED;
+		}
+
 		user.customData.resetPasswordToken = resetPasswordToken;
 		resetPasswordUserInfo = {
 			token: resetPasswordToken.token,

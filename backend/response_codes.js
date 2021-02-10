@@ -136,6 +136,7 @@
 		PROJECT_EXIST: { message: "Project already exists", status: 400 },
 		DATABASE_EXIST: { message: "Database already exists", status: 400 },
 		TOO_MANY_LOGIN_ATTEMPTS: { message: "Too many unsuccessful login attempts! Account locked", status: 400 },
+		ACCOUNT_LOGIN_LOCKED: { message: "Account locked. Please try again later", status: 400 },
 
 		SIZE_LIMIT_PAY: { message: "Teamspace quota exceeded.", status: 400 },
 		INVALID_SUBSCRIPTION_PLAN: { message: "Invalid subscription plan", status: 400 },
