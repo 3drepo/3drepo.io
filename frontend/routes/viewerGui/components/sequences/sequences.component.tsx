@@ -17,7 +17,7 @@
 
 import React from 'react';
 
-import { IconButton } from '@material-ui/core';
+import {FormControlLabel, FormGroup, IconButton, Switch} from '@material-ui/core';
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import { STEP_SCALE } from '../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
@@ -31,6 +31,7 @@ import { TasksList } from './components/tasksList/sequenceTasksList.component';
 import {
 	LoaderContainer, SequencesContainer, SequencesIcon
 } from './sequences.styles';
+// import {ViewerPanelContent} from "../viewerPanel/viewerPanel.styles";
 
 interface IProps {
 	sequences: any;
@@ -148,6 +149,16 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 				}
 
 				{sequences && sequences.length === 0 && <EmptyStateInfo>No sequences found</EmptyStateInfo>}
+				<FormGroup row>
+					<FormControlLabel
+							control={<Switch
+									checked={false}
+									// onChange={this.props.toggleActivitiesPanel}
+									color="primary"
+							/>}
+							label="Show Legend"
+					/>
+				</FormGroup>
 			</SequencesContainer>
 		);
 	}

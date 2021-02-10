@@ -15,11 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Grid } from '@material-ui/core';
+import {FormControlLabel, FormGroup, Grid, Switch} from '@material-ui/core';
 import React from 'react';
 import { formatShortDate } from '../../../../../../services/formatting/formatDate';
 import { ViewerPanelContent } from '../../../viewerPanel/viewerPanel.styles';
-import { SequenceDatesContainer, SequenceItemContainer, SequenceItemIcon, SequenceName } from '../../sequences.styles';
+import {
+	SequenceDatesContainer,
+	SequenceItemContainer,
+	SequenceItemIcon,
+	SequenceName,
+} from '../../sequences.styles';
+// import {VIEWER_PANELS} from "../../../../../../constants/viewerGui";
 
 interface IProps {
 	sequences: any;
