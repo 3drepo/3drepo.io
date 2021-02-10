@@ -253,11 +253,11 @@ router.get("/revision/:revId/sequences/:sequenceId/state/:stateId", middlewares.
  *
  * @apiUse Sequences
  *
- * @apiExample {get} Example usage (/master/head)
- * GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences/00000000-0000-0000-0000-000000000002 HTTP/1.1
+ * @apiExample {patch} Example usage (/master/head)
+ * PATCH /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences/00000000-0000-0000-0000-000000000002 HTTP/1.1
  *
- * @apiExample {get} Example usage (/:revId)
- * GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/sequences/00000000-0000-0000-0000-000000000002 HTTP/1.1
+ * @apiExample {patch} Example usage (/:revId)
+ * PATCH /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/sequences/00000000-0000-0000-0000-000000000002 HTTP/1.1
  *
  * @apiParam (Request body) {String} name The new name of the sequence
  *
@@ -274,11 +274,77 @@ router.get("/revision/:revId/sequences/:sequenceId/state/:stateId", middlewares.
 router.patch("/revision/master/head/sequences/:sequenceId", middlewares.hasUploadAccessToModel, updateSequence);
 router.patch("/revision/:revId/sequences/:sequenceId", middlewares.hasUploadAccessToModel, updateSequence);
 
+/**
+ * @api {put} /:teamspace/:model/revision(/master/head/|/:revId)/sequences/:sequenceID/legend Add/Update legend
+ * @apiName updateLegend
+ * @apiGroup Sequences
+ * @apiDescription Update/add a legend to this sequence
+ *
+ * @apiUse Sequences
+ *
+ * @apiExample {put} Example usage (/master/head)
+ * PUT /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences/00000000-0000-0000-0000-000000000002/legend HTTP/1.1
+ *
+ * @apiExample {put} Example usage (/:revId)
+ * PUT /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/sequences/00000000-0000-0000-0000-000000000002/legend HTTP/1.1
+ *
+ * @apiExample {put} Example usage:
+ * {
+ * 	  "Building works": "#aabbcc"
+ * 	  "Temporary works": "#ffffff66"
+ * }
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {}
+ */
+
 router.put("/revision/master/head/sequences/:sequenceId/legend", middlewares.hasUploadAccessToModel, updateLegend);
 router.put("/revision/:revId/sequences/:sequenceId/legend", middlewares.hasUploadAccessToModel, updateLegend);
 
+/**
+ * @api {get} /:teamspace/:model/revision(/master/head/|/:revId)/sequences/:sequenceID/legend get the legend
+ * @apiName getLegend
+ * @apiGroup Sequences
+ * @apiDescription Get the legend for this sequence
+ *
+ * @apiUse Sequences
+ *
+ * @apiExample {get} Example usage (/master/head)
+ * GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences/00000000-0000-0000-0000-000000000002/legend HTTP/1.1
+ *
+ * @apiExample {get} Example usage (/:revId)
+ * GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/sequences/00000000-0000-0000-0000-000000000002/legend HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {
+ * 	  "Building works": "#aabbcc"
+ * 	  "Temporary works": "#ffffff66"
+ * }
+ *
+ */
 router.get("/revision/master/head/sequences/:sequenceId/legend", middlewares.issue.canView, getLegend);
 router.get("/revision/:revId/sequences/:sequenceId/legend", middlewares.issue.canView, getLegend);
+
+/**
+ * @api {delete} /:teamspace/:model/revision(/master/head/|/:revId)/sequences/:sequenceID/legend Delete legend
+ * @apiName deleteLegend
+ * @apiGroup Sequences
+ * @apiDescription Delete the legend associated to this sequence
+ *
+ * @apiUse Sequences
+ *
+ * @apiExample {delete} Example usage (/master/head)
+ * DELETE /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences/00000000-0000-0000-0000-000000000002/legend HTTP/1.1
+ *
+ * @apiExample {delete} Example usage (/:revId)
+ * DELETE /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/sequences/00000000-0000-0000-0000-000000000002/legend HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {}
+ */
 
 router.delete("/revision/master/head/sequences/:sequenceId/legend", middlewares.hasUploadAccessToModel, deleteLegend);
 router.delete("/revision/:revId/sequences/:sequenceId/legend", middlewares.hasUploadAccessToModel, deleteLegend);
