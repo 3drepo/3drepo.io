@@ -45,7 +45,7 @@ const DEFAULT_INPUT_PROPS = {
 };
 
 const USER_NOTICE = clientConfigService.userNotice;
-const WELCOME_MESSAGE = 'Hello I am an apple.'; // clientConfigService.getCustomLoginMessage() || 'Welcome to 3D Repo';
+const WELCOME_MESSAGE = 'Hello I am an orange.'; // clientConfigService.getCustomLoginMessage() || 'Welcome to 3D Repo';
 
 interface IProps {
 	history: any;
