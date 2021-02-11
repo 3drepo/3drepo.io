@@ -115,6 +115,7 @@ export class App extends React.PureComponent<IProps, IState> {
 
 		if ('serviceWorker' in navigator) {
 			navigator.serviceWorker.addEventListener('message', (event) => {
+				console.debug(`[SERVICE WORKER EVENT] -`, event);
 				if (event.data.type === 'UPDATE') {
 					this.props.showNewUpdateDialog({
 						onConfirm: () => {
