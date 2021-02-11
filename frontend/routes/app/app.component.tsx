@@ -113,19 +113,6 @@ export class App extends React.PureComponent<IProps, IState> {
 
 		this.sendAnalyticsPageView(location);
 
-		/*		if ('serviceWorker' in navigator) {
-			navigator.serviceWorker.addEventListener('message', (event) => {
-				if (event.data.type === 'UPDATE') {
-					this.props.showNewUpdateDialog({
-						onConfirm: () => {
-							location.reload();
-						}
-					});
-				}
-			});
-		}
-		 */
-
 		this.props.subscribeToDm('loggedOut', this.props.onLoggedOut);
 	}
 
