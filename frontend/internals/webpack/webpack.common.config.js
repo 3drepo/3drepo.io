@@ -79,12 +79,13 @@ module.exports = (options) => {
 
   if (options.mode !== MODES.DEVELOPMENT) {
     config.plugins.push(
-      new OfflinePlugin({
-        ServiceWorker: {
-          output: '../sw.js',
-          entry: './serviceWorkerExtras.js'
-        },
-        excludes: ['**/*.map']
+		new OfflinePlugin({
+			responseStrategy: 'network-first',
+	        ServiceWorker: {
+    	      output: '../sw.js',
+        	  entry: './serviceWorkerExtras.js'
+	        },
+    	    excludes: ['**/*.map']
       })
     );
   }

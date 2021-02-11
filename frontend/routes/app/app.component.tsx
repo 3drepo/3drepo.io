@@ -113,7 +113,7 @@ export class App extends React.PureComponent<IProps, IState> {
 
 		this.sendAnalyticsPageView(location);
 
-		if ('serviceWorker' in navigator) {
+		/*		if ('serviceWorker' in navigator) {
 			navigator.serviceWorker.addEventListener('message', (event) => {
 				if (event.data.type === 'UPDATE') {
 					this.props.showNewUpdateDialog({
@@ -124,6 +124,7 @@ export class App extends React.PureComponent<IProps, IState> {
 				}
 			});
 		}
+		 */
 
 		this.props.subscribeToDm('loggedOut', this.props.onLoggedOut);
 	}
