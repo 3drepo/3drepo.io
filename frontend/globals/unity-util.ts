@@ -1312,6 +1312,7 @@ export class UnityUtil {
 		UnityUtil.disableMeasuringTool();
 		UnityUtil.clearAllMeasurements();
 		UnityUtil.diffToolDisableAndClear();
+		UnityUtil.usePerspectiveProjection();
 		UnityUtil.toUnity('ClearCanvas', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
