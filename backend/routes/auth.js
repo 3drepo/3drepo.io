@@ -786,12 +786,10 @@ function getAvatar(req, res, next) {
 
 function uploadAvatar(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
+	const acceptedFormat = ["png", "jpg", "gif"];
 
 	// check space and format
 	function fileFilter(fileReq, file, cb) {
-
-		const acceptedFormat = ["png", "jpg", "gif"];
-
 		let format = file.originalname.split(".");
 		format = format.length <= 1 ? "" : format.splice(-1)[0];
 
@@ -813,12 +811,20 @@ function uploadAvatar(req, res, next) {
 		fileFilter: fileFilter
 	});
 
+	const FileType = require("file-type");
+
 	upload.single("file")(req, res, function (err) {
 		if (err) {
 			return responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err , err.resCode ?  err.resCode : err);
 		} else {
-			User.updateAvatar(req.params[C.REPO_REST_API_ACCOUNT], req.file.buffer).then(() => {
-				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "success" });
+			FileType.fromBuffer(req.file.buffer).then(type => {
+				if (!acceptedFormat.includes(type.ext)) {
+					throw(responseCodes.FILE_FORMAT_NOT_SUPPORTED);
+				}
+			}).then(() => {
+				return User.updateAvatar(req.params[C.REPO_REST_API_ACCOUNT], req.file.buffer).then(() => {
+					responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "success" });
+				});
 			}).catch(error => {
 				responseCodes.respond(responsePlace, req, res, next, error.resCode ? error.resCode : error, error.resCode ? error.resCode : error);
 			});
