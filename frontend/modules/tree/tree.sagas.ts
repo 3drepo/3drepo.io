@@ -291,7 +291,7 @@ function* clearCurrentlySelected(keepMetadataOpen = false) {
 	const activeMeta = yield select(selectActiveMeta);
 	const activeNode = yield select(selectActiveNode);
 
-	if(!keepMetadataOpen) {
+	if (!keepMetadataOpen) {
 		if (isBimVisible) {
 			yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.BIM, false));
 		}
