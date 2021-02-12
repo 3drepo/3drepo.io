@@ -73,6 +73,10 @@ interface IProps {
 	resetViewerGui: () => void;
 	resetCompareComponent: () => void;
 	joinPresentation: (code) => void;
+	subscribeOnIssueChanges: (teamspace, modelId) => void;
+	unsubscribeOnIssueChanges: (teamspace, modelId) => void;
+	subscribeOnRiskChanges: (teamspace, modelId) => void;
+	unsubscribeOnRiskChanges: (teamspace, modelId) => void;
 }
 
 interface IState {
@@ -111,6 +115,8 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 
 		MultiSelect.initKeyWatchers();
 		this.props.fetchData(params.teamspace, params.model);
+		this.props.subscribeOnIssueChanges(params.teamspace, params.model);
+		this.props.subscribeOnRiskChanges(params.teamspace, params.model);
 		this.toggleViewerListeners(true);
 
 		if (presenter) {
@@ -136,7 +142,11 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		}
 
 		if (teamspaceChanged || modelChanged || revisionChanged) {
+			this.props.unsubscribeOnIssueChanges(prevProps.match.params.teamspace, prevProps.match.params.model);
+			this.props.unsubscribeOnRiskChanges(prevProps.match.params.teamspace, prevProps.match.params.model);
 			this.props.fetchData(params.teamspace, params.model);
+			this.props.subscribeOnIssueChanges(params.teamspace, params.model);
+			this.props.subscribeOnRiskChanges(params.teamspace, params.model);
 		}
 
 		if (!isEmpty(changes)) {
@@ -150,7 +160,11 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentWillUnmount() {
+		const { match: { params } } = this.props;
+
 		MultiSelect.removeKeyWatchers();
+		this.props.unsubscribeOnIssueChanges(params.teamspace, params.model);
+		this.props.unsubscribeOnRiskChanges(params.teamspace, params.model);
 		this.props.stopListenOnSelections();
 		this.props.stopListenOnModelLoaded();
 		this.props.stopListenOnClickPin();
