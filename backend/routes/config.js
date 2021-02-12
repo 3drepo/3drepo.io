@@ -45,7 +45,7 @@ function createClientConfig(serverConfig, req) {
 		"intercomLicense" : _.get(config, "intercom.license"),
 		"resourceUploadSizeLimit" : config.resourceUploadSizeLimit,
 		"sequencesEnabled": true,
-		"presenterEnabled": true,
+		"presenterEnabled": true
 	};
 
 	if (utils.hasField(config, "captcha_client_key")) {
