@@ -73,7 +73,7 @@ interface IProps {
 	compareDisabled: boolean;
 	selectedItemsMap: any[];
 	isCompareProcessed: boolean;
-	isAnyTargetClashModel: boolean;
+	canTestForClash: boolean;
 	revision?: string;
 	toggleCompare: () => void;
 	setSortType: (sortType) => void;
@@ -162,7 +162,7 @@ export class Compare extends React.PureComponent<IProps, any> {
 			compareDisabled,
 			isCompareProcessed,
 			isFederation,
-			isAnyTargetClashModel,
+			canTestForClash,
 		} = this.props;
 		return (
 			<CompareContainer
@@ -200,7 +200,7 @@ export class Compare extends React.PureComponent<IProps, any> {
 							onClick={toggleCompare}
 							color="secondary"
 							variant="fab"
-							disabled={compareDisabled || (!this.isDiffTabActive && !isAnyTargetClashModel)}
+							disabled={compareDisabled || (!this.isDiffTabActive && !canTestForClash)}
 							active={Number(isActive)}
 					>
 						<CompareIcon />
