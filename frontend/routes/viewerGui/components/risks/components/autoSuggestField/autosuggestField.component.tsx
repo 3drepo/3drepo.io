@@ -95,9 +95,10 @@ export const AutoSuggestField: React.FunctionComponent<IProps> = ({
 
 	const handleSuggestionsClearRequested = () => setSuggestions([]);
 
-	const handleBlur = () => form.setFieldValue(field.name, value);
-
-	const handleChange = (event, { newValue }) => setValue(newValue);
+	const handleChange = (event, { newValue }) => {
+		setValue(newValue);
+		form.setFieldValue(field.name, newValue);
+	};
 
 	const autosuggestProps = {
 		renderInputComponent,
@@ -118,7 +119,6 @@ export const AutoSuggestField: React.FunctionComponent<IProps> = ({
 				disabled,
 				value,
 				onChange: handleChange,
-				onBlur: handleBlur,
 				inputRef: setNodeRef,
 			}}
 			renderSuggestionsContainer={(options) => (
