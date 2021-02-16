@@ -130,7 +130,6 @@ module.exports.createApp = function (config) {
 	app.use("/:account/:model", require("../routes/view"));
 
 	// issues handler
-	app.use("/:account/:model", require("../routes/issueAnalytic"));
 	app.use("/:account/:model", require("../routes/issue"));
 
 	// resources handler
