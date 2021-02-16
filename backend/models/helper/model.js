@@ -17,7 +17,7 @@
 
 "use strict";
 
-const ModelFactory = require("../factory/modelFactory");
+const db = require("../../handler/db");
 const {
 	prepareDefaultView,
 	createNewSetting,
@@ -740,12 +740,12 @@ async function removeModelCollections(account, model) {
 		systemLogger.logError("Failed to remove files", err);
 	}
 
-	const collections = await ModelFactory.dbManager.listCollections(account);
+	const collections = await db.listCollections(account);
 	const promises = [];
 
 	collections.forEach(collection => {
 		if(collection.name.startsWith(model + ".")) {
-			promises.push(ModelFactory.dbManager.dropCollection(account, collection));
+			promises.push(db.dropCollection(account, collection));
 		}
 	});
 
