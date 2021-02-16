@@ -66,10 +66,11 @@ interface IProps {
 	form: any;
 	suggestions: any[];
 	disabled?: boolean;
+	saveOnChange?: boolean;
 }
 
 export const AutoSuggestField: React.FunctionComponent<IProps> = ({
-	label, placeholder, field, form, disabled, suggestions: allSuggestions = []
+	label, placeholder, field, form, disabled, saveOnChange, suggestions: allSuggestions = []
 }) => {
 	const [suggestions, setSuggestions] = React.useState([]);
 	const [value, setValue] = React.useState('');
@@ -95,9 +96,17 @@ export const AutoSuggestField: React.FunctionComponent<IProps> = ({
 
 	const handleSuggestionsClearRequested = () => setSuggestions([]);
 
+	const handleBlur = () => {
+		if (!saveOnChange) {
+			form.setFieldValue(field.name, value);
+		}
+	};
+
 	const handleChange = (event, { newValue }) => {
 		setValue(newValue);
-		form.setFieldValue(field.name, newValue);
+		if (saveOnChange) {
+			form.setFieldValue(field.name, newValue);
+		}
 	};
 
 	const autosuggestProps = {
@@ -119,6 +128,7 @@ export const AutoSuggestField: React.FunctionComponent<IProps> = ({
 				disabled,
 				value,
 				onChange: handleChange,
+				onBlur: handleBlur,
 				inputRef: setNodeRef,
 			}}
 			renderSuggestionsContainer={(options) => (
