@@ -88,30 +88,29 @@ function* reset() {
 		const model =  yield select(selectSequenceModel);
 		const sequenceId =  yield select(selectSelectedSequenceId);
 
-		const { data } = yield API.deleteSequenceLegend(teamspace, model, revision, sequenceId);
-
-		const legend = transformLegend(data);
-
-		if (legend.length) {
-			yield put(LegendActions.togglePendingState(false));
-			yield put(LegendActions.fetchSuccess(legend));
-			yield put(SnackbarActions.show('Legend reset to default'));
-		}
-
+		yield API.deleteSequenceLegend(teamspace, model, revision, sequenceId);
+		yield put(LegendActions.fetch());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'legend', error));
 	}
 }
 
-function* updateLegendItem({ legendItem }) {
+function* updateLegendItem({ legendItem: { oldName, name, color } }) {
 	try {
 		const legend = yield select(selectLegend);
-		const index = legend.findIndex(({ name }) => name === legendItem.name);
+		const valueToCompare = oldName || name;
+		const index = legend.findIndex((item) => item.name === valueToCompare);
 
 		if (!legend[index]) {
-			legend.push(legendItem);
+			legend.push({
+				name,
+				color,
+			});
 		} else {
-			legend[index] = legendItem;
+			legend[index] = {
+				name,
+				color,
+			};
 		}
 
 		yield put(LegendActions.update(legend));

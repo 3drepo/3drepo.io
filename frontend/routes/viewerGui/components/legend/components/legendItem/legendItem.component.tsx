@@ -32,7 +32,7 @@ import {
 import { Container } from './legendItem.styles';
 
 interface IProps extends ILegend {
-	updateLegendItem: (legendItem: ILegend) => void;
+	updateLegendItem: (legendItem: ILegend & { oldName?: string }) => void;
 	deleteLegendItem: (legendItem: ILegend) => void;
 }
 
@@ -44,8 +44,9 @@ export const LegendItem = ({ name, color, updateLegendItem, deleteLegendItem }: 
 		color: colorValue,
 	});
 
-	const handleSave = ({ target: { value: nameValue }}) => updateLegendItem({
-		name: nameValue,
+	const handleSave = ({ target: { value: newName }}) => updateLegendItem({
+		oldName: name,
+		name: newName,
 		color,
 	});
 

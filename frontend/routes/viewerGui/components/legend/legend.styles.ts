@@ -25,14 +25,6 @@ export const Container = styled(ViewerPanelContent)`
 	font-size: 13px;
 	color: ${COLOR.BLACK_60};
 
-	& > * {
-		margin-bottom: 15px;
-	}
-
-	${TitleContainer} {
-		cursor: pointer;
-	}
-
 	${SequenceTasksListItem} {
 		background-color: ${COLOR.LIGHT_GRAY};
 	}

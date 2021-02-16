@@ -20,7 +20,7 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { selectIsPending, selectLegend, LegendActions } from '../../../../modules/legend';
-import { Legend } from './Legend.component';
+import { Legend } from './legend.component';
 
 const mapStateToProps = createStructuredSelector({
 	isPending: selectIsPending,
