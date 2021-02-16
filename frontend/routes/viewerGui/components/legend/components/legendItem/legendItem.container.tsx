@@ -15,14 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
 
-export const selectLegendDomain = (state) => ({...state.legend});
+import { LegendActions } from '../../../../../../modules/legend';
+import { LegendItem } from './legendItem.component';
 
-export const selectIsPending = createSelector(
-		selectLegendDomain, (state) => state.isPending
-);
+const mapStateToProps = createStructuredSelector({
+});
 
-export const selectLegend = createSelector(
-		selectLegendDomain, (state) => state.legend
-);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	updateLegendItem: LegendActions.updateLegendItem,
+	deleteLegendItem: LegendActions.deleteLegendItem,
+}, dispatch);
+
+export default connect(mapStateToProps, mapDispatchToProps)(LegendItem);

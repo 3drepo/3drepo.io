@@ -19,22 +19,36 @@ import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: LegendTypes, Creators: LegendActions } = createActions({
 	togglePanel: [],
-	setPendingState: ['pendingState'],
-	fetch: ['activityId']
+	togglePendingState: ['isPending'],
+	fetch: [],
+	fetchSuccess: ['legend'],
+	update: ['legend'],
+	updateLegendItem: ['legendItem'],
+	deleteLegendItem: ['legendItem'],
+	setDefault: [],
+	reset: [],
 }, { prefix: 'LEGEND/' });
+
+export interface ILegend {
+	name: string;
+	color: string;
+}
 
 export interface ILegendState {
 	isPending?: boolean;
+	legend: ILegend[];
 }
 
 export const INITIAL_STATE: ILegendState = {
 	isPending: true,
+	legend: [],
 };
 
-const setComponentState = (state = INITIAL_STATE, { pendingState = {} }) => {
-	return { ...state, isPending: pendingState };
-};
+export const togglePendingState = (state = INITIAL_STATE, { isPending }) => ({ ...state, isPending });
+
+export const fetchSuccess = (state = INITIAL_STATE, { legend }) => ({ ...state, legend });
 
 export const reducer = createReducer(INITIAL_STATE, {
-	[LegendTypes.SET_COMPONENT_STATE]: setComponentState,
+	[LegendTypes.TOGGLE_PENDING_STATE]: togglePendingState,
+	[LegendTypes.FETCH_SUCCESS]: fetchSuccess,
 });

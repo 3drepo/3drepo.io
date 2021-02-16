@@ -22,6 +22,7 @@ export const VIEWER_PANELS = {
 	SEQUENCES: 'sequences',
 	MEASUREMENTS: 'measurements',
 	ACTIVITIES: 'activities',
+	LEGEND: 'legend',
 };
 
 export const VIEWER_PANELS_ICONS = {
@@ -77,6 +78,10 @@ export const VIEWER_LEFT_PANELS = [
 	VIEWER_PANELS.SEQUENCES,
 	VIEWER_PANELS.MEASUREMENTS,
 ].filter((panel) => clientConfigService.sequencesEnabled || panel !== VIEWER_PANELS.SEQUENCES).map(getPanelConfig);
+
+export const VIEWER_DRAGGABLE_PANELS = [
+	VIEWER_PANELS.LEGEND,
+];
 
 export const VIEWER_RIGHT_PANELS = [
 	VIEWER_PANELS.BIM,

@@ -60,6 +60,8 @@ interface IProps {
 	onPlayStarted?: () => void;
 	frames: IFrame[];
 	isActivitiesPending: boolean;
+	draggablePanels: string[];
+	toggleLegend: () => void;
 }
 
 interface IState {
@@ -317,8 +319,8 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 					<FormGroup row>
 						<FormControlLabel
 							control={<Switch
-								checked={this.props.rightPanels.includes(VIEWER_PANELS.ACTIVITIES)}
-								onChange={this.props.toggleActivitiesPanel}
+								checked={this.props.draggablePanels.includes(VIEWER_PANELS.LEGEND)}
+								onChange={this.props.toggleLegend}
 								color="primary"
 							/>}
 							label="Show Legend"

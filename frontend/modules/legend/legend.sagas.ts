@@ -19,35 +19,32 @@ import { put, select, takeLatest } from 'redux-saga/effects';
 
 import { VIEWER_PANELS } from '../../constants/viewerGui';
 import * as API from '../../services/api';
-import { BimActions } from '../bim';
 import { DialogActions } from '../dialog';
-import { selectCurrentModelTeamspace, selectCurrentRevisionId } from '../model';
+import { selectCurrentModelTeamspace, selectCurrentRevisionId, ModelActions } from '../model';
 import { selectSelectedSequenceId, selectSequenceModel } from '../sequences';
-import { selectRightPanels, ViewerGuiActions} from '../viewerGui';
+import { SnackbarActions } from '../snackbar';
+import { ViewerGuiActions} from '../viewerGui';
+import { transformLegend, transformToLegendObj } from './legend.helpers';
 import { LegendActions, LegendTypes } from './legend.redux';
+import { selectLegend } from './legend.selectors';
 
-function* fetchDetails({ activityId }) {
+function* fetch() {
 	try {
-		// const rightPanels = yield select(selectRightPanels);
-		// if (!rightPanels.includes(VIEWER_PANELS.ACTIVITIES)) {
-		// 	yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.ACTIVITIES, true));
-		// }
-		//
-		// if (rightPanels.includes(VIEWER_PANELS.BIM)) {
-		// 	yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.BIM, false));
-		// 	yield put(BimActions.setIsActive(false));
-		// }
-		//
-		// yield put(LegendActions.setComponentState({ showDetails: true, isPending: true }));
-		//
-		// const teamspace = yield select(selectCurrentModelTeamspace);
-		// const revision = yield select(selectCurrentRevisionId);
-		// const model =  yield select(selectSequenceModel);
-		// const sequenceId =  yield select(selectSelectedSequenceId);
+		yield put(LegendActions.togglePendingState(true));
+		const teamspace = yield select(selectCurrentModelTeamspace);
+		const revision = yield select(selectCurrentRevisionId);
+		const model =  yield select(selectSequenceModel);
+		const sequenceId =  yield select(selectSelectedSequenceId);
 
-		const { data: activity } = yield API.getSequenceActivityDetail(teamspace, model, undefined, sequenceId, activityId);
+		const { data } = yield API.getSequenceLegend(teamspace, model, revision, sequenceId);
 
-		// yield put(LegendActions.setComponentState({ isPending: false, details: activity }));
+		const legend = transformLegend(data);
+
+		if (legend.length) {
+			yield put(LegendActions.togglePendingState(false));
+			yield put(LegendActions.fetchSuccess(legend));
+		}
+
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('display', 'legend', error));
 	}
@@ -55,20 +52,110 @@ function* fetchDetails({ activityId }) {
 
 function* toggleLegendPanel() {
 	try {
-		const rightPanels = yield select(selectRightPanels);
+		yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.LEGEND));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('display', 'legend', error));
+	}
+}
 
-		if (rightPanels.includes(VIEWER_PANELS.BIM)) {
-			yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.BIM, false));
-			yield put(BimActions.setIsActive(false));
+function* update({ legend }) {
+	try {
+		const teamspace = yield select(selectCurrentModelTeamspace);
+		const revision = yield select(selectCurrentRevisionId);
+		const model =  yield select(selectSequenceModel);
+		const sequenceId =  yield select(selectSelectedSequenceId);
+
+		const updatedLegend = [...legend];
+		const legendObj = transformToLegendObj(legend);
+
+		const response = yield API.putSequenceLegend(teamspace, model, revision, sequenceId, legendObj);
+
+		if (response.status === 200) {
+			yield put(LegendActions.fetchSuccess(updatedLegend));
+			yield put(SnackbarActions.show('Legend updated'));
 		}
 
-		yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.ACTIVITIES));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('display', 'activities panel', error));
+		yield put(DialogActions.showErrorDialog('update', 'legend', error));
+	}
+}
+
+function* reset() {
+	try {
+		yield put(LegendActions.togglePendingState(true));
+		const teamspace = yield select(selectCurrentModelTeamspace);
+		const revision = yield select(selectCurrentRevisionId);
+		const model =  yield select(selectSequenceModel);
+		const sequenceId =  yield select(selectSelectedSequenceId);
+
+		const { data } = yield API.deleteSequenceLegend(teamspace, model, revision, sequenceId);
+
+		const legend = transformLegend(data);
+
+		if (legend.length) {
+			yield put(LegendActions.togglePendingState(false));
+			yield put(LegendActions.fetchSuccess(legend));
+			yield put(SnackbarActions.show('Legend reset to default'));
+		}
+
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('update', 'legend', error));
+	}
+}
+
+function* updateLegendItem({ legendItem }) {
+	try {
+		const legend = yield select(selectLegend);
+		const index = legend.findIndex(({ name }) => name === legendItem.name);
+
+		if (!legend[index]) {
+			legend.push(legendItem);
+		} else {
+			legend[index] = legendItem;
+		}
+
+		yield put(LegendActions.update(legend));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('update item', 'legend', error));
+	}
+}
+
+function* deleteLegendItem({ legendItem }) {
+	try {
+		const legend = yield select(selectLegend);
+		const index = legend.findIndex(({ name }) => name === legendItem.name);
+
+		if (index > -1) {
+			legend.splice(index, 1);
+		}
+
+		yield put(LegendActions.update(legend));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('update item', 'legend', error));
+	}
+}
+
+function* setDefaultLegend() {
+	try {
+		const teamspace = yield select(selectCurrentModelTeamspace);
+		const model =  yield select(selectSequenceModel);
+		const sequenceId =  yield select(selectSelectedSequenceId);
+		const modelData = { teamspace, model };
+
+		yield put(ModelActions.updateSettings(modelData, {
+			defaultLegend: sequenceId,
+		}));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('set default', 'legend', error));
 	}
 }
 
 export default function* LegendSaga() {
-	yield takeLatest(LegendTypes.FETCH, fetchDetails);
+	yield takeLatest(LegendTypes.FETCH, fetch);
 	yield takeLatest(LegendTypes.TOGGLE_PANEL, toggleLegendPanel);
+	yield takeLatest(LegendTypes.UPDATE, update);
+	yield takeLatest(LegendTypes.RESET, reset);
+	yield takeLatest(LegendTypes.SET_DEFAULT, setDefaultLegend);
+	yield takeLatest(LegendTypes.UPDATE_LEGEND_ITEM, updateLegendItem);
+	yield takeLatest(LegendTypes.DELETE_LEGEND_ITEM, deleteLegendItem);
 }

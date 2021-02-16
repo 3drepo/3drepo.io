@@ -58,14 +58,16 @@ interface IProps {
 	deselectViewsAndLeaveClipping: () => void;
 	id?: string;
 	isActivitiesPending: boolean;
+	draggablePanels: string[];
+	toggleLegend: () => void;
 }
 
 const da =  new Date();
 
 const SequenceDetails = ({
 	minDate, maxDate, selectedDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
-	setStepScale, currentTasks, loadingFrame,  rightPanels, toggleActivitiesPanel,
-	fetchActivityDetails, onPlayStarted, frames, isActivitiesPending,
+	setStepScale, currentTasks, loadingFrame,  rightPanels, toggleActivitiesPanel, fetchActivityDetails, onPlayStarted,
+	frames, isActivitiesPending, toggleLegend, draggablePanels
 }) => (
 		<>
 			<SequenceForm />
@@ -85,6 +87,8 @@ const SequenceDetails = ({
 				onPlayStarted={onPlayStarted}
 				frames={frames}
 				isActivitiesPending={isActivitiesPending}
+				toggleLegend={toggleLegend}
+				draggablePanels={draggablePanels}
 			/>
 			<TasksList
 				tasks={currentTasks}
@@ -149,16 +153,6 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 				}
 
 				{sequences && sequences.length === 0 && <EmptyStateInfo>No sequences found</EmptyStateInfo>}
-				<FormGroup row>
-					<FormControlLabel
-							control={<Switch
-									checked={false}
-									// onChange={this.props.toggleActivitiesPanel}
-									color="primary"
-							/>}
-							label="Show Legend"
-					/>
-				</FormGroup>
 			</SequencesContainer>
 		);
 	}

@@ -44,3 +44,15 @@ export const getSequenceActivityDetail = (teamspace, modelId, revision, sequence
 export const getSequenceActivities = (teamspace, modelId, revision, sequenceId): Promise<any> => {
 	return api.get(`${teamspace}/${modelId}/revision/${revision || HEAD}/sequences/${sequenceId}/activities`);
 };
+
+export const getSequenceLegend = (teamspace, modelId, revision, sequenceId): Promise<any> => {
+	return api.get(`${teamspace}/${modelId}/revision/${revision || HEAD}/sequences/${sequenceId}/legend`);
+};
+
+export const putSequenceLegend = (teamspace, modelId, revision, sequenceId, legendItems): Promise<any> => {
+	return api.put(`${teamspace}/${modelId}/revision/${revision || HEAD}/sequences/${sequenceId}/legend`, legendItems);
+};
+
+export const deleteSequenceLegend = (teamspace, modelId, revision, sequenceId): Promise<any> => {
+	return api.delete(`${teamspace}/${modelId}/revision/${revision || HEAD}/sequences/${sequenceId}/legend`);
+};

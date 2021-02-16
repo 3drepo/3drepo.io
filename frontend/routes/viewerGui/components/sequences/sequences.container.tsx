@@ -21,12 +21,13 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { ActivitiesActions } from '../../../../modules/activities';
+import { LegendActions } from '../../../../modules/legend';
 import {
 	selectActivitiesPending, selectCurrentActivities, selectFrames, selectIsLoadingFrame, selectMaxDate,
 	selectMinDate, selectSelectedEndingDate, selectSelectedFrameColors, selectSelectedSequence,
 	selectSelectedStartingDate, selectSequences, selectStepInterval, selectStepScale, SequencesActions,
 } from '../../../../modules/sequences';
-import { selectRightPanels, ViewerGuiActions } from '../../../../modules/viewerGui';
+import { selectDraggablePanels, selectRightPanels, ViewerGuiActions } from '../../../../modules/viewerGui';
 import { ViewpointsActions } from '../../../../modules/viewpoints';
 import { Sequences } from './sequences.component';
 
@@ -44,6 +45,7 @@ const mapStateToProps = createStructuredSelector({
 	loadingFrame: selectIsLoadingFrame,
 	selectedSequence: selectSelectedSequence,
 	rightPanels: selectRightPanels,
+	draggablePanels: selectDraggablePanels,
 	isActivitiesPending: selectActivitiesPending,
 });
 
@@ -54,6 +56,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setSelectedSequence: SequencesActions.setSelectedSequence,
 	fetchSelectedFrame: SequencesActions.fetchSelectedFrame,
 	toggleActivitiesPanel: ActivitiesActions.toggleActivitiesPanel,
+	toggleLegend: LegendActions.togglePanel,
 	fetchActivityDetails: ActivitiesActions.fetchDetails,
 	setPanelVisibility: ViewerGuiActions.setPanelVisibility,
 	deselectViewsAndLeaveClipping: ViewpointsActions.deselectViewsAndLeaveClipping,

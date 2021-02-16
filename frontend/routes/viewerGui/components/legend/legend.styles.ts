@@ -15,14 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+import styled from 'styled-components';
 
-export const selectLegendDomain = (state) => ({...state.legend});
+import { COLOR } from '../../../../styles';
+import { SequenceTasksListItem } from '../sequences/sequences.styles';
+import { TitleContainer, ViewerPanelContent} from '../viewerPanel/viewerPanel.styles';
 
-export const selectIsPending = createSelector(
-		selectLegendDomain, (state) => state.isPending
-);
+export const Container = styled(ViewerPanelContent)`
+	font-size: 13px;
+	color: ${COLOR.BLACK_60};
 
-export const selectLegend = createSelector(
-		selectLegendDomain, (state) => state.legend
-);
+	& > * {
+		margin-bottom: 15px;
+	}
+
+	${TitleContainer} {
+		cursor: pointer;
+	}
+
+	${SequenceTasksListItem} {
+		background-color: ${COLOR.LIGHT_GRAY};
+	}
+`;

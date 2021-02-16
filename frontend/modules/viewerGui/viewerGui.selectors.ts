@@ -42,6 +42,10 @@ export const selectLockedPanels = createSelector(
 	selectViewerGuiDomain, (state) => state.lockedPanels || []
 );
 
+export const selectDraggablePanels = createSelector(
+	selectViewerGuiDomain, (state) => state.draggablePanels || []
+);
+
 export const selectIsMetadataVisible = createSelector(
 		selectRightPanels, Bim.selectIsPending,
 	(state, isPending) => state[VIEWER_PANELS.BIM] && !isPending

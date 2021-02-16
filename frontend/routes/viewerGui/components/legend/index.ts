@@ -15,14 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
-
-export const selectLegendDomain = (state) => ({...state.legend});
-
-export const selectIsPending = createSelector(
-		selectLegendDomain, (state) => state.isPending
-);
-
-export const selectLegend = createSelector(
-		selectLegendDomain, (state) => state.legend
-);
+export { default as Legend } from './legend.container';

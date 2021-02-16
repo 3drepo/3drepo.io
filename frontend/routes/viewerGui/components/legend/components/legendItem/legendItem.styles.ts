@@ -15,14 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+import styled from 'styled-components';
 
-export const selectLegendDomain = (state) => ({...state.legend});
+import { COLOR } from '../../../../../../styles';
 
-export const selectIsPending = createSelector(
-		selectLegendDomain, (state) => state.isPending
-);
+export const Container = styled.li`
+	color: ${COLOR.BLACK_60};
+	border-bottom: 1px solid ${COLOR.BLACK_6};
+	background-color: ${COLOR.WHITE};
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	height: 56px;
+	box-sizing: border-box;
+	padding: 0 8px;
 
-export const selectLegend = createSelector(
-		selectLegendDomain, (state) => state.legend
-);
+	&:last-of-type {
+		border-bottom: none;
+	}
+`;
