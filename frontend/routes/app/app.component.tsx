@@ -166,10 +166,7 @@ export class App extends React.PureComponent<IProps, IState> {
 					<Route exact path={ROUTES.REGISTER_VERIFY} component={RegisterVerify} />
 					<Redirect exact from={ROUTES.HOME} to={ROUTES.TEAMSPACES} />
 					<PrivateRoute path={ROUTES.DASHBOARD} component={Dashboard} />
-					<PrivateRoute
-						path={`${ROUTES.VIEWER}/:teamspace/:model/:revision?`}
-						component={ViewerGui}
-					/>
+					<PrivateRoute path={ROUTES.MODEL_VIEWER} component={ViewerGui} />
 					{this.renderStaticRoutes()}
 					<Route component={NotFound} />
 				</Switch>

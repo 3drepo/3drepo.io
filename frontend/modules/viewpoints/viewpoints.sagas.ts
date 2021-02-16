@@ -231,6 +231,9 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 
 		if (viewpoint?.up && !ignoreCamera) {
 			yield put(ViewerGuiActions.setCamera(viewpoint));
+		} else {
+			// If we're not moving the camera, ensure the projection mode icon ion the gui matches the viewpoint
+			yield put(ViewerGuiActions.setProjectionModeSuccess(viewpoint.type));
 		}
 
 		const clippingPlanes = view.clippingPlanes || get(view, 'viewpoint.clippingPlanes');

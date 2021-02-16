@@ -113,6 +113,7 @@ export const TreatmentRiskFormTab: React.FunctionComponent<IProps> = ({
 							form={form}
 							field={field}
 							disabled={!canComment}
+							saveOnChange={isNewRisk}
 						/>
 					)} />
 				</StyledFormControl>
@@ -124,6 +125,7 @@ export const TreatmentRiskFormTab: React.FunctionComponent<IProps> = ({
 							form={form}
 							field={field}
 							disabled={!canComment}
+							saveOnChange={isNewRisk}
 						/>
 					)} />
 				</StyledFormControl>

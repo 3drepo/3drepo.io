@@ -51,8 +51,8 @@ export const RemoveUserDialog = (props: IProps) => {
 			</DialogContent>
 
 			<DialogActions>
-				<Button onClick={props.handleClose} color="secondary">Cancel</Button>;
-				<Button onClick={props.handleResolve} variant="contained" color="secondary">Remove</Button>;
+				<Button onClick={props.handleClose} color="secondary">Cancel</Button>
+				<Button onClick={props.handleResolve} variant="contained" color="secondary">Remove</Button>
 			</DialogActions>
 		</>
 	);

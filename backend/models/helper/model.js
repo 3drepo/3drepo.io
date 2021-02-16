@@ -17,7 +17,7 @@
 
 "use strict";
 
-const ModelFactory = require("../factory/modelFactory");
+const db = require("../../handler/db");
 const {
 	prepareDefaultView,
 	createNewSetting,
@@ -181,19 +181,6 @@ async function importSuccess(account, model, sharedSpacePath, user) {
 		]);
 
 		if (setting) {
-			if (sharedSpacePath && setting.corID) {
-				const path = require("path");
-				const tmpDir = path.join(sharedSpacePath, setting.corID);
-				const tmpModelFile = path.join(sharedSpacePath, `${setting.corID}.json`);
-				const filesToDelete  = [{ type:"file", path: tmpModelFile}];
-
-				fs.readdirSync(tmpDir).forEach((file) => {
-					filesToDelete.push({ type: "file", path: path.join(tmpDir, file)});
-				});
-
-				_deleteFiles(filesToDelete);
-				_deleteFiles([{desc: "tmp dir", type: "dir", path: tmpDir}]);
-			}
 			systemLogger.logInfo(`Model status changed to ${setting.status} and correlation ID reset`);
 
 			const updatedSetting = await setModelImportSuccess(account, model, setting.type === "toy" || setting.type === "sample");
@@ -681,24 +668,6 @@ async function uploadFile(req) {
 	return uploadedFile;
 }
 
-function _deleteFiles(files) {
-
-	files.forEach(file => {
-
-		const deleteFile = (file.type === "file" ? fs.unlinkSync : fs.rmdirSync);
-
-		try {
-			deleteFile(file.path);
-		} catch(err) {
-			systemLogger.logError("error while deleting file",{
-				message: err.message,
-				err: err,
-				file: file.path
-			});
-		}
-	});
-}
-
 /**
  * Called by importModel to perform model upload
  */
@@ -771,12 +740,12 @@ async function removeModelCollections(account, model) {
 		systemLogger.logError("Failed to remove files", err);
 	}
 
-	const collections = await ModelFactory.dbManager.listCollections(account);
+	const collections = await db.listCollections(account);
 	const promises = [];
 
 	collections.forEach(collection => {
 		if(collection.name.startsWith(model + ".")) {
-			promises.push(ModelFactory.dbManager.dropCollection(account, collection));
+			promises.push(db.dropCollection(account, collection));
 		}
 	});
 

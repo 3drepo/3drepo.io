@@ -59,8 +59,6 @@ interface IProps {
 	goToRisk: (risk) => void;
 	closeDetails: () => void;
 	toggleShowPins: (showPins: boolean) => void;
-	subscribeOnRiskChanges: (teamspace, modelId) => void;
-	unsubscribeOnRiskChanges: (teamspace, modelId) => void;
 	saveRisk: (teamspace, modelId, risk) => void;
 	toggleSortOrder: () => void;
 	setFilters: (filters) => void;
@@ -106,8 +104,7 @@ export class Risks extends React.PureComponent<IProps, any> {
 	));
 
 	public componentDidMount() {
-		const { subscribeOnRiskChanges, teamspace, model, fetchMitigationCriteria } = this.props;
-		subscribeOnRiskChanges(teamspace, model);
+		const { teamspace, model, fetchMitigationCriteria } = this.props;
 		fetchMitigationCriteria(teamspace);
 		this.handleSelectedIssue();
 	}
@@ -123,7 +120,6 @@ export class Risks extends React.PureComponent<IProps, any> {
 	}
 
 	public componentWillUnmount() {
-		this.props.unsubscribeOnRiskChanges(this.props.teamspace, this.props.model);
 	}
 
 	public setActiveRisk = (item) => {
