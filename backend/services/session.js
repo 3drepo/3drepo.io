@@ -42,7 +42,7 @@ module.exports.session = function(config) {
 			// None can only applied with secure set to true, which requires SSL.
 			// None is required for embeddable viewer to work.
 			// sameSite:  isSSL ? "None" : "Lax"
-			sameSite:  "Strict"
+			sameSite:  "Lax"
 		},
 		store: store
 	});
