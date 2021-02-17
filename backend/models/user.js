@@ -461,7 +461,8 @@ User.verify = async function (username, token, options) {
 
 	} else if (tokenData.token === token && tokenData.expiredAt > new Date()) {
 
-		await User.update(username, {"customData.inactive": undefined, "customData.emailVerifyToken": undefined });
+		await DB.update("admin", COLL_NAME, { user: username },
+			{ $unset: {"customData.inactive": "", "customData.emailVerifyToken": "" }});
 
 	} else {
 		throw ({ resCode: responseCodes.TOKEN_INVALID });
