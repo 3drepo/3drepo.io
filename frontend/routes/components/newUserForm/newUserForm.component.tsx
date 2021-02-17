@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { debounce } from 'lodash';
 import React, { ReactNodeArray } from 'react';
 import Autosuggest from 'react-autosuggest';
 
@@ -122,8 +123,10 @@ export class NewUserForm extends React.PureComponent<IProps, IState> {
 		this.setState({name: this.getSuggestionValue(suggestion)});
 	}
 
+	private debounceUsersSuggestion = debounce(this.props.getUsersSuggestions, 1000);
+
 	public onSuggestionsFetchRequested = ({value}) => {
-		this.props.getUsersSuggestions(value);
+		this.debounceUsersSuggestion(value);
 	}
 
 	public openInvitationDialog = () => {
