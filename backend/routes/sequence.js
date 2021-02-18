@@ -23,6 +23,7 @@ const middlewares = require("../middlewares/middlewares");
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
 const Sequence = require("../models/sequence");
+const SequenceActivities = require("../models/sequenceActivities");
 
 /**
  * @apiDefine Sequences Sequences
@@ -388,6 +389,13 @@ router.delete("/revision/:revId/sequences/:sequenceId/legend", middlewares.hasUp
 router.get("/revision/master/head/sequences", middlewares.issue.canView, listSequences);
 router.get("/revision/:revId/sequences", middlewares.issue.canView, listSequences);
 
+/*
+TODO:
+	- document this endpoint
+	- permissions
+*/
+router.post("/sequences/:sequenceId/activities", middlewares.issue.canView, createActivity);
+
 function getSequenceActivityDetail(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model, activityId } = req.params;
@@ -477,4 +485,14 @@ function listSequences(req, res, next) {
 	});
 }
 
+function createActivity(req, res, next) {
+	const { account, model, sequenceId } = req.params;
+	const place = utils.APIInfo(req);
+
+	SequenceActivities.create(account, model, sequenceId, req.body).then(activity => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, activity);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
 module.exports = router;

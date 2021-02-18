@@ -161,6 +161,10 @@ FileRef.removeFile = async (account, model, collName, ref_id) => {
 	const col = await DB.getCollection(account, refCollName);
 	const entry = await col.findOne({_id: ref_id});
 
+	if (!entry) {
+		return [];
+	}
+
 	return await Promise.all([
 		ExternalServices.removeFiles(account, refCollName, entry.type, [entry.link]),
 		col.remove({_id:entry._id})
