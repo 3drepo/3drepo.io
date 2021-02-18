@@ -28,7 +28,7 @@ module.exports = async (req, res, next) => {
 	}
 
 	if (req.headers.host !== config.cookie_domain) {
-		req[C.REQ_REPO].logger.logError(`express-session internal error: host and cookie domain mismatch`);
+		req[C.REQ_REPO].logger.logError(`express-session internal error: host ${req.headers.host} and cookie ${config.cookie_domain} domain mismatch`);
 		return;
 	}
 
