@@ -27,6 +27,11 @@ module.exports = async (req, res, next) => {
 		return;
 	}
 
+	if (req.headers.host !== config.cookie_domain) {
+		req[C.REQ_REPO].logger.logError(`express-session internal error: host and cookie domain mismatch`);
+		return;
+	}
+
 	session(req, res, function(err) {
 		if(err) {
 			// something is wrong with the library or the session (i.e. corrupted json file) itself, log the user out
