@@ -49,7 +49,7 @@ module.exports.createApp = function (config) {
 	app.use(keyAuthentication, sessionManager);
 
 	// app.use(cors({ origin: true, credentials: true }));
-	const whitelist = ["https://127.0.0.1", config.host];
+	const whitelist = ["https://127.0.0.1", config.base_url_no_port];
 	const corsOptions = {
 		origin: function (origin, callback) {
 			if (whitelist.indexOf(origin) !== -1) {
