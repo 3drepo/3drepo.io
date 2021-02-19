@@ -27,6 +27,7 @@ module.exports = async (req, res, next) => {
 		return;
 	}
 
+	req[C.REQ_REPO].logger.logError(`DEBUG: host (${req.headers.referer}) referer`);
 	req[C.REQ_REPO].logger.logError(`DEBUG: host (${req.headers.host}) and cookie (${config.cookie_domain}) domain`);
 	if (!req.headers.host.match(`${config.cookie_domain}$`)) {
 		req[C.REQ_REPO].logger.logError(`express-session internal error: host (${req.headers.host}) and cookie (${config.cookie_domain}) domain mismatch`);
