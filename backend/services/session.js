@@ -27,7 +27,7 @@ const C = require("../constants");
 const store = getSessionStore(expressSession);
 const useragent = require("useragent");
 
-module.exports.session = function(config, req) {
+module.exports.session = function(config) {
 	const isSSL = config.public_protocol === "https";
 	return expressSession({
 		secret: config.cookie.secret,
