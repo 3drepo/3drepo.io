@@ -27,9 +27,7 @@ module.exports = async (req, res, next) => {
 		return;
 	}
 
-	req[C.REQ_REPO].logger.logError(`DEBUG: referer (${req.headers.referer})`);
-	req[C.REQ_REPO].logger.logError(`DEBUG: referer (${req.headers.referer}) and cookie (${config.cookie_domain}) domain`);
-	if (!req.headers.referer.match(`^${config.public_protocol}:\/\/${config.cookie_domain}`)) {
+	if (!req.headers.referer.match(`^${config.public_protocol}://${config.cookie_domain}`)) {
 		req[C.REQ_REPO].logger.logError(`express-session internal error: referer (${req.headers.referer}) and cookie (${config.cookie_domain}) domain mismatch`);
 		return;
 	}
