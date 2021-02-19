@@ -443,7 +443,6 @@
 
 	function getTeamspaceAddOns(req, res, next) {
 		User.getAddOnsForTeamspace(req.params.account).then((addOns) => {
-			console.log(addOns);
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, addOns);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
