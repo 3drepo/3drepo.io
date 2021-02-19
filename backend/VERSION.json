@@ -1,4 +1,4 @@
-{ "VERSION" : "4.13.4",
+{ "VERSION" : "4.13.5",
   "unity" : {
 	"current" : "2.20.0",
 	"supported": []
@@ -18,5 +18,9 @@
   "vba" : {
 	"current" : "4.6.0",
 	"supported": []
+  },
+  "unreal" : {
+    "current" : "1.0.0",
+    "supported": []
   }
 }

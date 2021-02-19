@@ -166,6 +166,19 @@ User.getProfileByUsername = async function (username) {
 	};
 };
 
+User.getAddOnsForTeamspace = async (user) => {
+	const { customData } = await DB.findOne("admin", COLL_NAME, { user }, {
+		"customData.addOns" : 1,
+		"customData.vrEnabled": 1,
+		"customData.hereEnabled": 1,
+		"customData.srcEnabled": 1
+	});
+
+	const embeddedObj = customData.addOns || {};
+	delete customData.addOns;
+	return { ...customData, ...embeddedObj};
+};
+
 User.getStarredMetadataTags = async function (username) {
 	const userProfile = await User.findByUserName(username, {user: 1,
 		"customData.StarredMetadataTags" : 1
@@ -259,8 +272,12 @@ User.deleteApiKey = async function (username) {
 };
 
 User.findUsersWithoutMembership = async function (teamspace, searchString) {
+	const regex = new RegExp(`^${searchString}$`, "i");
 	const notMembers = await DB.find("admin", COLL_NAME, {
-		"customData.email": new RegExp(`${searchString}$`, "i"),
+		$or: [
+			{"customData.email": regex},
+			{"user": regex}
+		],
 		"customData.inactive": { "$exists": false },
 		"roles.db": {$ne: teamspace }
 	});
@@ -457,7 +474,8 @@ User.verify = async function (username, token, options) {
 
 	} else if (tokenData.token === token && tokenData.expiredAt > new Date()) {
 
-		await User.update(username, {"customData.inactive": undefined, "customData.emailVerifyToken": undefined });
+		await DB.update("admin", COLL_NAME, { user: username },
+			{ $unset: {"customData.inactive": "", "customData.emailVerifyToken": "" }});
 
 	} else {
 		throw ({ resCode: responseCodes.TOKEN_INVALID });
