@@ -431,22 +431,10 @@
 	 *
 	 * @apiParam {String} teamspace Name of teamspace
 	 *
-	 * @apiExample {get} Example usage:
-	 * GET /teamSpace1/members HTTP/1.1
-	 * {
-	 *    job: "jobA",
-	 *    user: "projectshared",
-	 *    permissions: []
-	 * }
-	 *
 	 * @apiSuccessExample {json} Success
 	 * {
-	 *    job: "jobA",
-	 *    permissions: [],
-	 *    user: "projectshared",
-	 *    firstName: "Drink",
-	 *    lastName: "Coffee",
-	 *    company: null
+	 *   vrEnabled: true,
+	 *   hereEnabled: true
 	 * }
 	 *
 	 */
