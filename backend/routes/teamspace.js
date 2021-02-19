@@ -421,6 +421,47 @@
 	 */
 	router.post("/members", middlewares.isAccountAdmin, addTeamMember);
 
+	/**
+	 * @api {get} /:teamspace/addOns get enabled add ons
+	 * @apiName getAddOns
+	 * @apiGroup Teamspace
+	 * @apiDescription view the list of addOns enabled on this teamspace
+	 *
+	 * @apiPermission teamspace member
+	 *
+	 * @apiParam {String} teamspace Name of teamspace
+	 *
+	 * @apiExample {get} Example usage:
+	 * GET /teamSpace1/members HTTP/1.1
+	 * {
+	 *    job: "jobA",
+	 *    user: "projectshared",
+	 *    permissions: []
+	 * }
+	 *
+	 * @apiSuccessExample {json} Success
+	 * {
+	 *    job: "jobA",
+	 *    permissions: [],
+	 *    user: "projectshared",
+	 *    firstName: "Drink",
+	 *    lastName: "Coffee",
+	 *    company: null
+	 * }
+	 *
+	 */
+
+	router.get("/addOns", middlewares.isTeamspaceMember, getTeamspaceAddOns);
+
+	function getTeamspaceAddOns(req, res, next) {
+		User.getAddOnsForTeamspace(req.params.account).then((addOns) => {
+			console.log(addOns);
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, addOns);
+		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+	}
+
 	function getBillingInfo(req, res, next) {
 		User.findByUserName(req.params.account).then(user => {
 			let billingInfo = (user.customData.billing || {}).billingInfo;

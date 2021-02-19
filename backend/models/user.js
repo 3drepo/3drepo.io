@@ -166,6 +166,19 @@ User.getProfileByUsername = async function (username) {
 	};
 };
 
+User.getAddOnsForTeamspace = async (user) => {
+	const { customData } = await DB.findOne("admin", COLL_NAME, { user }, {
+		"customData.addOns" : 1,
+		"customData.vrEnabled": 1,
+		"customData.hereEnabled": 1,
+		"customData.srcEnabled": 1
+	});
+
+	const embeddedObj = customData.addOns || {};
+	delete customData.addOns;
+	return { ...customData, ...embeddedObj};
+};
+
 User.getStarredMetadataTags = async function (username) {
 	const userProfile = await User.findByUserName(username, {user: 1,
 		"customData.StarredMetadataTags" : 1
