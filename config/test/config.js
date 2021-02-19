@@ -25,7 +25,8 @@ module.exports = {
 	cookie: {
 		secret: "a",
 		parser_secret : "b",
-		maxAge: 1000 * 60 * 60
+		maxAge: 1000 * 60 * 60,
+		skipMissingReferer: true
 	},
 	servers: [
 		{
@@ -154,7 +155,4 @@ module.exports = {
 		{title: "Cookies", type: "haveRead", page: "cookies", fileName: "cookies.html"}
 	],
 	userNotice: false,
-	unitySettings: {
-        TOTAL_MEMORY: 2130706432 / 10,
-    },
 }
