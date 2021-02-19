@@ -41,6 +41,9 @@ const coalesce = function (variable, value) {
  *******************************************************************************/
 
 function createRoundRobinAlgorithm(algoConfig) {
+	algoConfig.apiUrls = {
+		all: ["https://api1.issue-2449.dev.3drepo.io/api"]
+	};
 
 	const roundRobin = {
 		apiUrls : algoConfig.apiUrls,
