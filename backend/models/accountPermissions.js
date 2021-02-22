@@ -46,7 +46,7 @@ AccountPermissions.findByUser = function(user, username) {
 };
 
 AccountPermissions.get = function(teamspace) {
-	return  (teamspace.customData || {}).permissions || [];
+	return  ((teamspace && teamspace.customData) || {}).permissions || [];
 };
 
 AccountPermissions.updateOrCreate = async function(teamspace, username, permissions) {

@@ -71,8 +71,6 @@ interface IProps {
 	closeDetails: () => void;
 	toggleShowPins: (showPins: boolean) => void;
 	toggleSubmodelsIssues: (showSubmodelIssues: boolean) => void;
-	subscribeOnIssueChanges: (teamspace, modelId) => void;
-	unsubscribeOnIssueChanges: (teamspace, modelId) => void;
 	importBCF: (teamspace, modelId, file, revision) => void;
 	exportBCF: (teamspace, modelId) => void;
 	toggleSortOrder: () => void;
@@ -128,7 +126,6 @@ export class Issues extends React.PureComponent<IProps, any> {
 	));
 
 	public componentDidMount() {
-		this.props.subscribeOnIssueChanges(this.props.teamspace, this.props.model);
 		this.props.fetchSettings(this.props.teamspace); // This is to fetch topic_types
 		this.handleSelectedIssue();
 	}
@@ -145,7 +142,6 @@ export class Issues extends React.PureComponent<IProps, any> {
 	}
 
 	public componentWillUnmount() {
-		this.props.unsubscribeOnIssueChanges(this.props.teamspace, this.props.model);
 	}
 
 	public setActiveIssue = (item) => {

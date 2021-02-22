@@ -21,8 +21,8 @@ import { createStructuredSelector } from 'reselect';
 
 import {
 	selectActiveTab,
+	selectCanTestForClash,
 	selectFilteredCompareModels,
-	selectIsAnyTargetClashModel,
 	selectIsCompareActive,
 	selectIsCompareButtonDisabled,
 	selectIsCompareProcessed,
@@ -50,7 +50,7 @@ const mapStateToProps = createStructuredSelector({
 	compareDisabled: selectIsCompareButtonDisabled,
 	selectedItemsMap: selectSelectedModelsMap,
 	isCompareProcessed: selectIsCompareProcessed,
-	isAnyTargetClashModel: selectIsAnyTargetClashModel,
+	canTestForClash: selectCanTestForClash,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

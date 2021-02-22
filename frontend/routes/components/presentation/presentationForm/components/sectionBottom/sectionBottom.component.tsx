@@ -23,7 +23,7 @@ export const SectionBottom: React.FC = ({ children }) => {
 	return (
 		<Paragraph>
 			{children}<br /><br />
-			<Link href="https://3drepo.com/support/presenter-mode" target="_blank">Read more...</Link>
+			<Link href="https://help.3drepo.com/en/articles/4894459-presenter-mode" target="_blank">Read more...</Link>
 		</Paragraph>
 	);
 };

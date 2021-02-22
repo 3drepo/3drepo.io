@@ -242,7 +242,17 @@ export function Board(props: IProps) {
 	};
 
 	const handleModelChange = (e) => {
-		const url = `${ROUTES.BOARD_MAIN}/${type}/${teamspace}/${project}/${e.target.value}`;
+		const newModelId = e.target.value;
+		const url = `${ROUTES.BOARD_MAIN}/${type}/${teamspace}/${project}/${newModelId}`;
+
+		if (!isIssuesBoard) {
+			props.unsubscribeOnRiskChanges(teamspace, modelId);
+			props.subscribeOnRiskChanges(teamspace, newModelId);
+		} else {
+			props.unsubscribeOnIssueChanges(teamspace, modelId);
+			props.subscribeOnIssueChanges(teamspace, newModelId);
+		}
+
 		props.history.push(url);
 	};
 

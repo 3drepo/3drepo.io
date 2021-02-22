@@ -115,20 +115,19 @@ export const selectSelectedFilters = createSelector(
 	selectComponentState, (state) => state.selectedFilters
 );
 
-export const selectFilteredIssues = createSelector(
+export const selectAllFilteredIssuesGetter = createSelector(
 	selectIssues, selectSelectedFilters, selectSortOrder, selectSortByField,
-		(issues, selectedFilters, sortOrder, sortByField) => {
+		(issues, selectedFilters, sortOrder, sortByField) => (forceReturnHiddenIssue = false) =>  {
 			const returnHiddenIssue = selectedFilters.length && selectedFilters
 				.some(({ value: { value } }) => ISSUE_DEFAULT_HIDDEN_STATUSES.includes(value));
 
-			return sortByDate(searchByFilters(issues, selectedFilters, returnHiddenIssue),
+			return sortByDate(searchByFilters(issues, selectedFilters, returnHiddenIssue || forceReturnHiddenIssue),
 				{ order: sortOrder }, sortByField );
 		}
 );
 
-export const selectAllFilteredIssues = createSelector(
-	selectIssues, selectSelectedFilters, (issues, selectedFilters) =>
-		searchByFilters(issues, selectedFilters, true, ['name', 'desc', 'number'])
+export const selectFilteredIssues = createSelector(
+	selectAllFilteredIssuesGetter, (allFilteredIssuesGetter) => allFilteredIssuesGetter()
 );
 
 export const selectShowPins = createSelector(

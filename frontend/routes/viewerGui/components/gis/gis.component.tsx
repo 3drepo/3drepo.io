@@ -142,8 +142,10 @@ export class Gis extends React.PureComponent<IProps, IState> {
 	)
 
 	public renderActions = () => {
+		let  menuOpenProp = {};
+
 		if (this.state.settingsModeActive) {
-			return <PanelBarActions type={this.type} hideSearch hideMenu menuDisabled menuOpen={false} />;
+			menuOpenProp = {menuOpen: false};
 		}
 
 		return (
@@ -153,6 +155,7 @@ export class Gis extends React.PureComponent<IProps, IState> {
 				menuActions={this.renderActionsMenu}
 				menuDisabled={this.props.isPending || this.state.settingsModeActive}
 				hideSearch
+				{...menuOpenProp}
 			/>
 		);
 	}

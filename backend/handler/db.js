@@ -194,11 +194,6 @@
 		});
 	};
 
-	// FIXME: this exist as a (temp) workaround because modelFactory has one call that doesn't expect promise!
-	Handler._getCollection = function (database, colName) {
-		return db.db(database).collection(colName);
-	};
-
 	Handler.listCollections = function (database) {
 		return Handler.getDB(database).then(dbConn => {
 			return dbConn.listCollections().toArray();

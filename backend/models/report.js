@@ -103,10 +103,6 @@ class ReportGenerator {
 		this.getUsersToJobs();
 	}
 
-	getDBCol() {
-		return { account: this.teamspace, model: this.modelID };
-	}
-
 	getModelName() {
 		this.promises.push(
 			findModelSettingById(this.teamspace, this.modelID).then((setting) => {
@@ -117,7 +113,7 @@ class ReportGenerator {
 
 	getRevisionID() {
 		this.promises.push(
-			require("./history").findLatest(this.getDBCol(), {timestamp: 1, tag: 1}).then((entry) => {
+			require("./history").findLatest(this.teamspace, this.modelID, {timestamp: 1, tag: 1}).then((entry) => {
 				this.rev = entry.tag ? entry.tag : "uploaded at " + formatDate(entry.timestamp);
 			})
 		);
