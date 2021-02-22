@@ -70,28 +70,45 @@ describe("Sequences", function () {
 	}
 
 	describe("create activity", function() {
-		it("should failed with made up sequence id", async() => {
-			const { body } = await agent.post(`/${username}/${model}/sequences/non_existing_id/activities`)
-				.send(activity)
-				.expect(404);
-		});
+		// it("should failed with made up sequence id", async() => {
+		// 	const { body } = await agent.post(`/${username}/${model}/sequences/non_existing_id/activities`)
+		// 		.send(activity)
+		// 		.expect(404);
+		// });
 
-		it("should failed with wrong activity schema", async() => {
-			const wrongActivity = {...activity};
-			delete wrongActivity.name;
+		// it("should failed with wrong activity schema", async() => {
+		// 	const wrongActivity = {...activity};
+		// 	delete wrongActivity.name;
 
-			const { body } = await agent.post(`/${username}/${model}/sequences/${sequenceId}/activities`)
-				.send(wrongActivity)
-				.expect(responseCodes.INVALID_ARGUMENTS.status);
-		});
+		// 	const { body } = await agent.post(`/${username}/${model}/sequences/${sequenceId}/activities`)
+		// 		.send(wrongActivity)
+		// 		.expect(responseCodes.INVALID_ARGUMENTS.status);
+		// });
 
-		it("should be created succesfully", async() => {
-			const { body } = await agent.post(`/${username}/${model}/sequences/${sequenceId}/activities`)
-				.send(activity)
+		// it("should be created succesfully", async() => {
+		// 	const { body } = await agent.post(`/${username}/${model}/sequences/${sequenceId}/activities`)
+		// 		.send(activity)
+		// 		.expect(200);
+
+		// 	expect(body._id).to.be.string;
+		// 	expect(body.sequence_id).to.be.equal(sequenceId);
+		// });
+	});
+
+
+	describe("get activities list", function() {
+		it("should work", async() => {
+			let { body } = await agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/activities`)
 				.expect(200);
 
-			expect(body._id).to.be.string;
-			expect(body.sequence_id).to.be.equal(sequenceId);
+			console.log(JSON.stringify(body, null, '\t'));
+
+
+
+			const res  = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities`)
+				.expect(200);
+
+			console.log(JSON.stringify(res.body, null, '\t'));
 		});
-	});
+	})
 });
