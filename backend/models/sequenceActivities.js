@@ -22,6 +22,7 @@ const utils = require("../utils");
 const nodeuuid = require("uuid/v1");
 const FileRef = require("./fileRef");
 const yup = require("yup");
+const { groupBy } = require("lodash");
 
 const keyValueSchema = yup.object().shape({
 	key: yup.string().required(),
@@ -36,6 +37,60 @@ const activitySchema = yup.object().shape({
 	resources: yup.object(),
 	data: yup.array().of(keyValueSchema).required()
 }).noUnknown();
+
+/**
+ * @typedef {{_id: string, parents: Array<string>}} Activity
+ * @param {string} id
+ * @param {Array<Activity>} activities;
+ * @return {Array<Activity>}
+ */
+const getSubtasks = (id, activities) => {
+	// console.log("getSubtasks");
+	return activities.filter(activity => {
+		const parents = (activity.parents ||  []);
+
+		if (id) {
+			return parents.includes(id);
+		} else {
+			return !parents.length;
+		}
+	}).map(activity => {
+		// console.log(activity);
+		// console.log(getSubtasks);
+
+		const subTasks = getSubtasks(activity._id, activities);
+
+		//	console.log("llego a subtasks");
+		if (subTasks.length) {
+			activity.subTasks = subTasks;
+		}
+
+		return activity;
+	});
+};
+
+const createActivitiesTree = async(account, model, sequenceId) => {
+	// try{
+	// console.log("llegamos");
+	const activities = await db.find(account, model + ".activities",{}); // filter by sequenceId
+	activities.forEach(activity => {
+		activity._id = utils.uuidToString(activity._id);
+
+		activity.resources = [];
+
+		if (activity.parents) {
+			activity.parents = activity.parents.map(utils.uuidToString);
+		}
+
+	});
+
+	const tasks = getSubtasks(null, activities);
+	// } catch(e) {
+	// 	console.log(e);
+	// }
+
+	return {tasks};
+};
 
 const SequenceActivities = {};
 
@@ -61,5 +116,8 @@ SequenceActivities.create = async (account, model, sequenceId, activity) => {
 	return {...activity, _id, sequence_id: sequenceId};
 };
 
-module.exports =  SequenceActivities;
+SequenceActivities.get = async (account, model, sequenceId) => {
+	return await createActivitiesTree(account, model, sequenceId);
+};
 
+module.exports =  SequenceActivities;

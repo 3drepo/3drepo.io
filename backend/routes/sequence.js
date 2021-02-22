@@ -394,6 +394,13 @@ TODO:
 	- document this endpoint
 	- permissions
 */
+router.get("/sequences/:sequenceId/activities", middlewares.issue.canView, getSequenceActivities2);
+
+/*
+TODO:
+	- document this endpoint
+	- permissions
+*/
 router.post("/sequences/:sequenceId/activities", middlewares.issue.canView, createActivity);
 
 function getSequenceActivityDetail(req, res, next) {
@@ -495,4 +502,16 @@ function createActivity(req, res, next) {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
+
+function getSequenceActivities2(req, res, next) {
+	const { account, model, sequenceId } = req.params;
+	const place = utils.APIInfo(req);
+
+	SequenceActivities.get(account, model, sequenceId).then(activites => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, activites);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
 module.exports = router;
