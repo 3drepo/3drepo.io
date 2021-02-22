@@ -786,7 +786,6 @@ function getAvatar(req, res, next) {
 
 function uploadAvatar(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
-	const acceptedFormat = ["png", "jpg", "gif"];
 
 	// check space and format
 	function fileFilter(fileReq, file, cb) {
@@ -795,7 +794,7 @@ function uploadAvatar(req, res, next) {
 
 		const size = parseInt(fileReq.headers["content-length"]);
 
-		if(acceptedFormat.indexOf(format.toLowerCase()) === -1) {
+		if(C.ACCEPTED_IMAGE_FORMATS.includes(format.toLowerCase())) {
 			return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
 		}
 
@@ -818,7 +817,7 @@ function uploadAvatar(req, res, next) {
 			return responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err , err.resCode ?  err.resCode : err);
 		} else {
 			FileType.fromBuffer(req.file.buffer).then(type => {
-				if (!acceptedFormat.includes(type.ext)) {
+				if (!C.ACCEPTED_IMAGE_FORMATS.includes(type.ext)) {
 					throw(responseCodes.FILE_FORMAT_NOT_SUPPORTED);
 				}
 			}).then(() => {

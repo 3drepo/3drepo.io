@@ -39,8 +39,10 @@ describe("Issues", function () {
 
 	const model = "project1";
 
-	const pngBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVR42mPUjrj6n4EIwDiqkL4KAV6SF3F1FmGrAAAAAElFTkSuQmCC";
-	const altBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==";
+	const pngBase64 = require("../../statics/images/avatar.base64");
+	const altBase64 = require("../../statics/images/dog.base64");
+	const pdfBase64 = require("../../statics/documents/tocatta_pdf");
+
 	const baseIssue = {
 		"status": "open",
 		"priority": "low",
@@ -174,6 +176,15 @@ describe("Issues", function () {
 					});
 				}
 			], done);
+		});
+
+		it("with screenshot using the wrong file format should fail", async function() {
+			const issue = Object.assign({"name":"Wrong file issue"}, baseIssue);
+			issue.viewpoint.screenshot = pdfBase64;
+
+			await agent.post(`/${username}/${model}/issues`)
+					.send(issue)
+					.expect(responseCodes.FILE_FORMAT_NOT_SUPPORTED.status);
 		});
 
 		it("with an existing group associated should succeed", function(done) {
@@ -1648,12 +1659,11 @@ describe("Issues", function () {
 			], done);
 		});
 
-		it("screenshot within comments should work", (done) => {
+		it("screenshot within comments should work", async () => {
 			const issue = Object.assign({"name":"Issue test"}, baseIssue, { topic_type: "ru123"});
-			let issueId;
-			let commentId;
+
 			const data = { topic_type: "abc123"};
-			const comment = {
+			let commentData = {
 				comment:'',
 				viewpoint:{
 					up:[0,1,0],
@@ -1670,41 +1680,29 @@ describe("Issues", function () {
 				}
 			}
 
-			async.series([
-				next => {
-					agent.post(`/${username}/${model}/issues`)
-						.send(issue)
-						.expect(200 , function(err, res) {
-							issueId = res.body._id;
-							return next(err);
-						});
-				},
-				next => {
-					agent.post(`/${username}/${model}/issues/${issueId}/comments`)
-						.send(comment)
-						.expect(200 , (err, res) => {
-							const comment = res.body;
-							expect(comment.viewpoint.screenshot).to.exist
-								.and.to.be.not.equal(pngBase64);
-							expect(comment.viewpoint.screenshotSmall).to.exist;
-							commentId = comment.guid;
-							return next(err);
-						});
-				},
-				next => {
-					agent.patch(`/${username}/${model}/issues/${issueId}`)
-						.send(data)
-						.expect(200, (err, res) => {
-							const comment = res.body.comments.filter(c=> c.guid == commentId)[0];
-							expect(comment.viewpoint.screenshot).to.exist
-								.and.to.be.not.equal(pngBase64);
-							expect(comment.viewpoint.screenshotSmall).to.exist;
+			// Creating an issue
+			const issueId = (await agent.post(`/${username}/${model}/issues`)
+				.send(issue)
+				.expect(200)).body._id;
 
-							return next(err);
-						});
-				}
-			],done);
-		})
+
+			// Commenting the issue
+			commentData = (await agent.post(`/${username}/${model}/issues/${issueId}/comments`).send(commentData).expect(200)).body;
+
+			expect(commentData.viewpoint.screenshot).to.exist.and.to.be.not.equal(pngBase64);
+			expect(commentData.viewpoint.screenshotSmall).to.exist;
+			const commentId = commentData.guid;
+
+			// patch stuff 
+			let res = await agent.patch(`/${username}/${model}/issues/${issueId}`)
+				.send(data)
+				.expect(200);
+
+			let comment = res.body.comments.filter(c=> c.guid == commentId)[0];
+			expect(commentData.viewpoint.screenshot).to.exist
+				.and.to.be.not.equal(pngBase64);
+			expect(commentData.viewpoint.screenshotSmall).to.exist;
+		});
 
 		it("seal last non system comment when adding system comment", function(done) {
 			const issue = Object.assign({"name":"Issue test"}, baseIssue, { topic_type: "ru123"});
@@ -3190,13 +3188,12 @@ describe("Issues", function () {
 					});
 			});
 
-			it("if teamspace does not exist should fail", function(done) {
-				agent.post(`/${fakeTeamspace}/${viewerModel}/issues.bcfzip`)
+			it("if teamspace does not exist should fail", async function() {
+				const res = await agent.post(`/${fakeTeamspace}/${viewerModel}/issues.bcfzip`)
 					.attach("file", __dirname + bcf.path)
-					.expect(404, function(err, res) {
-						expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
-						done(err);
-					});
+					.expect(404)
+
+				expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
 			});
 
 			it("if file is not BCF file should fail", function(done) {
