@@ -54,6 +54,7 @@ describe("Teamspace", function() {
 	const mixedUser1 = {
 		user: "sub_all",
 		password: "password",
+		key: "eef3a905644d9cdcea53cf60ebc344d7",
 		quota: {spaceLimit: 23553, collaboratorLimit: "unlimited", spaceUsed: 0},
 		subscriptions : {
 			"basic": {
@@ -83,7 +84,8 @@ describe("Teamspace", function() {
 	const mixedUser2 = {
 		user: "sub_all2",
 		password: "password",
-		quota: {spaceLimit: 22529, collaboratorLimit: "unlimited", spaceUsed: 0}
+		quota: {spaceLimit: 22529, collaboratorLimit: "unlimited", spaceUsed: 0},
+		key: "bfc07b68267ab54bfdeb891fe77187be"
 	};
 
 	const mixedUser3 = {
@@ -100,7 +102,8 @@ describe("Teamspace", function() {
 
 	const imsharedTeamspace = {
 		user: "imsharedTeamspace",
-		password: "imsharedTeamspace"
+		password: "imsharedTeamspace",
+		key: "c6e96d6ed8e95745fd9a222a82113a16"
 	};
 
 	const metaTestTeamspace = {
@@ -315,6 +318,7 @@ describe("Teamspace", function() {
 		});
 	});
 
+
 	describe("user with mixed subscription with expired subscriptions (3)", function(done) {
 		const user =  mixedUser4;
 		before(function(done) {
@@ -337,6 +341,37 @@ describe("Teamspace", function() {
 			this.timeout(timeout);
 			agent.post("/logout")
 				.expect(200, done);
+		});
+	});
+
+	describe("Trying to get addOns information of a teamspace", function(done) {
+		const expectedAddOns = {
+			vrEnabled: true,
+			srcEnabled: true,
+			hereEnabled: true,
+			powerBIEnabled: true
+		}
+		it("as the teamspace owner should succeed", function(done) {
+			agent.get(`/${mixedUser1.user}/addOns?key=${mixedUser1.key}`)
+				.expect(200, function(err, res) {
+					expect(res.body).to.deep.equal(expectedAddOns);
+					done(err);
+				});
+		});
+
+		it("as a member of the teamspace should succeed", function(done) {
+			agent.get(`/${mixedUser1.user}/addOns?key=${mixedUser2.key}`)
+				.expect(200, function(err, res) {
+					expect(res.body).to.deep.equal(expectedAddOns);
+					done(err);
+				});
+		});
+		it("as a non-member of the teamspace should fail", function(done) {
+			agent.get(`/${mixedUser1.user}/addOns?key=${imsharedTeamspace.key}`)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+					done(err);
+				});
 		});
 	});
 

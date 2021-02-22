@@ -189,6 +189,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 							form={form}
 							field={field}
 							disabled={!canComment}
+							saveOnChange={isNewRisk}
 						/>
 					)} />
 				</StyledFormControl>
@@ -200,6 +201,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 							form={form}
 							field={field}
 							disabled={!canComment}
+							saveOnChange={isNewRisk}
 						/>
 					)} />
 				</StyledFormControl>
@@ -214,6 +216,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 							form={form}
 							field={field}
 							disabled={!canComment}
+							saveOnChange={isNewRisk}
 						/>
 					)} />
 					<Field name="location_desc" render={({ field, form }) => (
@@ -223,6 +226,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 							form={form}
 							field={field}
 							disabled={!canComment}
+							saveOnChange={isNewRisk}
 						/>
 					)} />
 				</FieldsContainer>
@@ -234,6 +238,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 							form={form}
 							field={field}
 							disabled={!canComment}
+							saveOnChange={isNewRisk}
 						/>
 					)} />
 				</FieldsContainer>

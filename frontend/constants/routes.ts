@@ -7,6 +7,7 @@ export const ROUTES = {
 	REGISTER_REQUEST: '/register-request',
 	REGISTER_VERIFY: '/register-verify',
 	VIEWER: '/viewer',
+	MODEL_VIEWER: '/viewer/:teamspace/:model/:revision?',
 	DASHBOARD: '/dashboard',
 	TEAMSPACES: '/dashboard/teamspaces',
 	TEAMSPACE_SETTINGS: '/dashboard/teamspaces/:teamspace',

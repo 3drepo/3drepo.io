@@ -66,8 +66,6 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showIssueDetails: IssuesActions.showDetails,
 	goToIssue: IssuesActions.goToIssue,
 	toggleShowPins: IssuesActions.toggleShowPins,
-	subscribeOnIssueChanges: IssuesActions.subscribeOnIssueChanges,
-	unsubscribeOnIssueChanges: IssuesActions.unsubscribeOnIssueChanges,
 	closeDetails: IssuesActions.closeDetails,
 	toggleSubmodelsIssues: IssuesActions.toggleSubmodelsIssues,
 	importBCF: IssuesActions.importBcf,

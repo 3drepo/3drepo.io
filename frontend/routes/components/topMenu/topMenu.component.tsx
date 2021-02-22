@@ -17,7 +17,7 @@
 
 import React from 'react';
 
-import { Prompt } from 'react-router';
+import { matchPath, Prompt } from 'react-router';
 import { ROUTES } from '../../../constants/routes';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { clientConfigService } from '../../../services/clientConfig';
@@ -92,6 +92,23 @@ export class TopMenu extends React.PureComponent<IProps, any> {
 	public render() {
 		const { isFocusMode, isAuthenticated, ...props } = this.props;
 
+		const check = (location, action) => {
+			if (matchPath(location.pathname, { path: ROUTES.MODEL_VIEWER })) {
+				return true;
+			}
+
+			// this is to fix a bug with prompt that leaves the wrong url when using the back button:
+			// in the case that you cancel the navigation props.history keeps the correct target page
+			// while location changes to the back page
+			setTimeout(() => {
+				if (location !== this.props.history.location) {
+					window.history.forward();
+				}
+			}, 1);
+
+			return 'This will end the session for all users. Continue?';
+		};
+
 		return (
 			<Container hidden={isFocusMode}>
 				<Logo onClick={this.handleGoToHomepage} />
@@ -106,7 +123,7 @@ export class TopMenu extends React.PureComponent<IProps, any> {
 					id="top-menu-profile-button"
 				/>
 
-				<Prompt when={this.props.isPresenting} message="This will end the session for all users. Continue?" />
+				<Prompt when={this.props.isPresenting} message={check}  />
 			</Container>
 		);
 	}
