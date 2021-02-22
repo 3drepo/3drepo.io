@@ -65,10 +65,10 @@ const isMemberOfTeamspace = function (user, teamspace) {
 };
 
 const isAccountLocked = function (user) {
-	return user && user.customData &&
-		user.customData.failedLoginCount && user.customData.lastFailedLoginAt &&
-		user.customData.failedLoginCount >= config.loginPolicy.maxUnsuccessfulLoginAttempts &&
-		Date.now() - user.customData.lastFailedLoginAt < config.loginPolicy.lockoutDuration;
+	return user && user.customData && user.customData.loginInfo &&
+		user.customData.loginInfo.failedLoginCount && user.customData.loginInfo.lastFailedLoginAt &&
+		user.customData.loginInfo.failedLoginCount >= config.loginPolicy.maxUnsuccessfulLoginAttempts &&
+		Date.now() - user.customData.loginInfo.lastFailedLoginAt < config.loginPolicy.lockoutDuration;
 };
 
 const hasReachedLicenceLimit = async function (teamspace) {
@@ -98,15 +98,16 @@ const handleAuthenticateFail = async function (username) {
 
 	try {
 		const user = await User.findByUserName(username);
-		const elapsedTime = user.customData.lastFailedLoginAt ?
-			currentTime - user.customData.lastFailedLoginAt : undefined;
+		const elapsedTime = user.customData.loginInfo && user.customData.loginInfo.lastFailedLoginAt ?
+			currentTime - user.customData.loginInfo.lastFailedLoginAt : undefined;
 
-		const failedLoginCount = user.customData.failedLoginCount && elapsedTime && elapsedTime < config.loginPolicy.lockoutDuration ?
-			user.customData.failedLoginCount + 1 : 1;
+		const failedLoginCount = user.customData.loginInfo && user.customData.loginInfo.failedLoginCount &&
+			elapsedTime && elapsedTime < config.loginPolicy.lockoutDuration ?
+			user.customData.loginInfo.failedLoginCount + 1 : 1;
 
 		await User.update(username, {
-			"customData.lastFailedLoginAt": currentTime,
-			"customData.failedLoginCount": failedLoginCount
+			"customData.loginInfo.lastFailedLoginAt": currentTime,
+			"customData.loginInfo.failedLoginCount": failedLoginCount
 		});
 
 		return Math.max(config.loginPolicy.maxUnsuccessfulLoginAttempts - failedLoginCount, 0);
