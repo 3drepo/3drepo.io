@@ -17,7 +17,7 @@
 
 "use strict";
 
-const ModelFactory = require("../factory/modelFactory");
+const db = require("../../handler/db");
 const {
 	prepareDefaultView,
 	createNewSetting,
@@ -47,7 +47,7 @@ const middlewares = require("../../middlewares/middlewares");
 const multer = require("multer");
 const fs = require("fs");
 const ChatEvent = require("../chatEvent");
-const Project = require("../project");
+const { addModelToProject, createProject, findOneProject, removeProjectModel } = require("../project");
 const _ = require("lodash");
 const FileRef = require("../fileRef");
 const notifications = require("../notification");
@@ -57,6 +57,61 @@ const { StreamBuffer } = require("./stream");
 const { BinToTriangleStringStream, BinToVector3dStringStream } = require("./binary");
 const PermissionTemplates = require("../permissionTemplates");
 const AccountPermissions = require("../accountPermissions");
+
+async function _fillInModelDetails(accountName, setting, permissions) {
+	if (permissions.indexOf(C.PERM_MANAGE_MODEL_PERMISSION) !== -1) {
+		permissions = C.MODEL_PERM_LIST.slice(0);
+	}
+
+	const model = {
+		federate: setting.federate,
+		permissions: permissions,
+		model: setting._id,
+		type: setting.type,
+		units: setting.properties.unit,
+		name: setting.name,
+		status: setting.status,
+		errorReason: setting.errorReason,
+		subModels: setting.federate && setting.subModels || undefined,
+		timestamp: setting.timestamp || null,
+		code: setting.properties ? setting.properties.code || undefined : undefined
+
+	};
+
+	const nRev = await History.revisionCount(accountName, setting._id);
+
+	model.nRevisions = nRev;
+
+	return model;
+}
+
+// list all models in an account
+async function _getModels(teamspace, ids, permissions) {
+	const models = [];
+	const fedModels = [];
+
+	let query = {};
+
+	if (ids) {
+		query = { _id: { "$in": ids } };
+	}
+
+	const settings = await findModelSettings(teamspace, query);
+
+	await Promise.all(settings.map(async setting => {
+		const model = await _fillInModelDetails(teamspace, setting, permissions);
+
+		if (!(model.permissions.length === 1 && model.permissions[0] === null)) {
+			setting.federate ? fedModels.push(model) : models.push(model);
+		}
+	}));
+
+	return { models, fedModels };
+}
+
+function _makeAccountObject(name) {
+	return { account: name, models: [], fedModels: [], projects: [], permissions: [], isAdmin: false };
+}
 
 /** *****************************************************************************
  * Converts error code from repobouncerclient to a response error object.
@@ -126,19 +181,6 @@ async function importSuccess(account, model, sharedSpacePath, user) {
 		]);
 
 		if (setting) {
-			if (sharedSpacePath && setting.corID) {
-				const path = require("path");
-				const tmpDir = path.join(sharedSpacePath, setting.corID);
-				const tmpModelFile = path.join(sharedSpacePath, `${setting.corID}.json`);
-				const filesToDelete  = [{ type:"file", path: tmpModelFile}];
-
-				fs.readdirSync(tmpDir).forEach((file) => {
-					filesToDelete.push({ type: "file", path: path.join(tmpDir, file)});
-				});
-
-				_deleteFiles(filesToDelete);
-				_deleteFiles([{desc: "tmp dir", type: "dir", path: tmpDir}]);
-			}
 			systemLogger.logInfo(`Model status changed to ${setting.status} and correlation ID reset`);
 
 			const updatedSetting = await setModelImportSuccess(account, model, setting.type === "toy" || setting.type === "sample");
@@ -243,7 +285,7 @@ function createNewModel(teamspace, modelName, data) {
 	}
 
 	const projectName = data.project;
-	return Project.findOne({account: teamspace}, {name: projectName}).then((project) => {
+	return findOneProject(teamspace, {name: projectName}).then((project) => {
 		if(!project) {
 			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
 		}
@@ -258,9 +300,7 @@ function createNewModel(teamspace, modelName, data) {
 			// Create a model setting
 			return createNewSetting(teamspace, modelName, data).then((settings) => {
 				// Add model into project
-				project.models.push(settings._id);
-
-				return project.save().then(() => {
+				return addModelToProject(teamspace, projectName, settings._id).then(() => {
 					// call chat to indicate a new model has been created
 					const modelData = {
 						account: teamspace,
@@ -291,7 +331,7 @@ function createNewFederation(teamspace, modelName, username, data, toyFed) {
 function importToyProject(account, username) {
 
 	// create a project named Sample_Project
-	return Project.createProject(username, "Sample_Project", username, [C.PERM_TEAMSPACE_ADMIN]).then(project => {
+	return createProject(username, "Sample_Project", username, [C.PERM_TEAMSPACE_ADMIN]).then(project => {
 
 		return Promise.all([
 
@@ -628,24 +668,6 @@ async function uploadFile(req) {
 	return uploadedFile;
 }
 
-function _deleteFiles(files) {
-
-	files.forEach(file => {
-
-		const deleteFile = (file.type === "file" ? fs.unlinkSync : fs.rmdirSync);
-
-		try {
-			deleteFile(file.path);
-		} catch(err) {
-			systemLogger.logError("error while deleting file",{
-				message: err.message,
-				err: err,
-				file: file.path
-			});
-		}
-	});
-}
-
 /**
  * Called by importModel to perform model upload
  */
@@ -718,12 +740,12 @@ async function removeModelCollections(account, model) {
 		systemLogger.logError("Failed to remove files", err);
 	}
 
-	const collections = await ModelFactory.dbManager.listCollections(account);
+	const collections = await db.listCollections(account);
 	const promises = [];
 
 	collections.forEach(collection => {
 		if(collection.name.startsWith(model + ".")) {
-			promises.push(ModelFactory.dbManager.dropCollection(account, collection));
+			promises.push(db.dropCollection(account, collection));
 		}
 	});
 
@@ -751,7 +773,7 @@ function removeModel(account, model, forceRemove) {
 			return removeModelCollections(account, model).then(() => {
 				const deletePromises = [];
 				deletePromises.push(deleteModelSetting(account, model));
-				deletePromises.push(Project.removeModel(account, model));
+				deletePromises.push(removeProjectModel(account, model));
 				return Promise.all(deletePromises);
 			}).catch((err) => {
 				systemLogger.logError("Failed to remove collections: ", err);
@@ -789,7 +811,7 @@ async function getModelPermission(username, setting, account) {
 		const projectQuery = { models: setting._id, "permissions.user": username };
 
 		// project admin have access to models underneath it.
-		const project = await Project.findOne({account}, projectQuery, { "permissions.$" : 1 });
+		const project = await findOneProject(account, projectQuery, { "permissions.$" : 1 });
 
 		if(project && project.permissions) {
 			permissions = permissions.concat(flattenPermissions(project.permissions[0].permissions));
@@ -921,6 +943,9 @@ const getModelSetting = async (account, model, username) => {
 };
 
 module.exports = {
+	_fillInModelDetails,
+	_getModels,
+	_makeAccountObject,
 	createNewModel,
 	createNewFederation,
 	importToyModel,

@@ -83,10 +83,14 @@ export const selectTargetClashModels = createSelector(
 	selectComponentState, (state) => state.targetClashModels
 );
 
-export const selectIsAnyTargetClashModel = createSelector(
-	selectTargetClashModels, (targetClashModels) => {
-		const allTargetAreFalse = values(targetClashModels).every((model) => !model);
-		return !allTargetAreFalse;
+export const selectCanTestForClash = createSelector(
+	selectSelectedModelsMap,  selectTargetClashModels, (selectedModelsMap, targetClashModels) => {
+		const selectedModels = Object.keys(selectedModelsMap).filter((model) => selectedModelsMap[model]);
+		const selectedTargetModels =  Object.keys(targetClashModels).filter((model) => targetClashModels[model]);
+
+		return selectedModels.some((model) => !targetClashModels[model]) // there must be at least one base model
+				&& selectedModels.length >= 2
+				&& selectedTargetModels.length >= 1 ; // there must be at least one target model
 	}
 );
 

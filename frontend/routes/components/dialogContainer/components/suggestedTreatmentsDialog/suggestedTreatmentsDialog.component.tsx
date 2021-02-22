@@ -68,11 +68,11 @@ const SuggestionsList = ({ suggestions, onClick }) => (
 );
 
 const getStageOptions = (suggestions) => [{ value: '', name: 'All' }, ...uniq(suggestions
-		.map(({ mitigation_stage }) => mitigation_stage))
+		.map(({ mitigation_stage }) => mitigation_stage).filter(Boolean))
 		.map((value) => ({ value, name: value }))];
 
 const getTypeOptions = (suggestions) => [{ value: '', name: 'All' }, ...uniq(suggestions
-		.map(({ mitigation_type }) => mitigation_type))
+		.map(({ mitigation_type }) => mitigation_type).filter(Boolean))
 		.map((value) => ({ value, name: value }))];
 
 interface ISuggestion {

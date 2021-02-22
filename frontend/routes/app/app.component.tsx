@@ -113,18 +113,6 @@ export class App extends React.PureComponent<IProps, IState> {
 
 		this.sendAnalyticsPageView(location);
 
-		if ('serviceWorker' in navigator) {
-			navigator.serviceWorker.addEventListener('message', (event) => {
-				if (event.data.type === 'UPDATE') {
-					this.props.showNewUpdateDialog({
-						onConfirm: () => {
-							location.reload();
-						}
-					});
-				}
-			});
-		}
-
 		this.props.subscribeToDm('loggedOut', this.props.onLoggedOut);
 	}
 
@@ -178,10 +166,7 @@ export class App extends React.PureComponent<IProps, IState> {
 					<Route exact path={ROUTES.REGISTER_VERIFY} component={RegisterVerify} />
 					<Redirect exact from={ROUTES.HOME} to={ROUTES.TEAMSPACES} />
 					<PrivateRoute path={ROUTES.DASHBOARD} component={Dashboard} />
-					<PrivateRoute
-						path={`${ROUTES.VIEWER}/:teamspace/:model/:revision?`}
-						component={ViewerGui}
-					/>
+					<PrivateRoute path={ROUTES.MODEL_VIEWER} component={ViewerGui} />
 					{this.renderStaticRoutes()}
 					<Route component={NotFound} />
 				</Switch>

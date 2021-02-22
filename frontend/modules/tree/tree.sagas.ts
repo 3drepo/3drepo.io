@@ -279,7 +279,7 @@ function* getSelectedNodes() {
 	}
 }
 
-function* clearCurrentlySelected() {
+function* clearCurrentlySelected(keepMetadataOpen = false) {
 	yield waitForTreeToBeReady();
 
 	Viewer.clearHighlights();
@@ -291,16 +291,18 @@ function* clearCurrentlySelected() {
 	const activeMeta = yield select(selectActiveMeta);
 	const activeNode = yield select(selectActiveNode);
 
-	if (isBimVisible) {
-		yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.BIM, false));
-	}
+	if (!keepMetadataOpen) {
+		if (isBimVisible) {
+			yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.BIM, false));
+		}
 
-	if (activeMeta) {
-		yield put(BimActions.setActiveMeta(null));
-	}
+		if (activeMeta) {
+			yield put(BimActions.setActiveMeta(null));
+		}
 
-	if (activeNode) {
-		yield put(TreeActions.setActiveNode(null));
+		if (activeNode) {
+			yield put(TreeActions.setActiveNode(null));
+		}
 	}
 
 	yield put(TreeActions.getSelectedNodes());
@@ -390,8 +392,8 @@ function* isolateNodes(nodesIds = []) {
 				unhighlightObjects(result.unhighlightedObjects);
 			}
 
-			toggleMeshesVisibility(result.meshToHide, false);
-			toggleMeshesVisibility(result.meshToShow, true);
+			toggleMeshesVisibility(result.meshesToHide, false);
+			toggleMeshesVisibility(result.meshesToShow, true);
 
 			yield put(TreeActions.updateDataRevision());
 		}

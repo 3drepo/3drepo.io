@@ -148,14 +148,64 @@ describe("Projects", function () {
 		});
 	});
 
-	it("should able to create project", function(done) {
+	it("list all projects should succeed", function(done) {
+		const goldenProjects = [
+			{
+				"_id": "58f734f4-ca85-3d15-e5eb-0ca000000000",
+				"name": "project_exists",
+				"__v": 3,
+				"permissions": [
+					{ "user": "testing", "permissions": [] },
+					{ "user": "projectuser", "permissions": [] }
+				],
+				"models": [
+					"a05974d0-2a8b-11eb-a58a-fde0111b8800",
+					"a5cd0670-2a8b-11eb-9358-1ff831483af6",
+					"ad8a39f0-2a8b-11eb-89a2-59e199077914"
+				]
+			},
+			{
+				"_id": "58f73509-ca85-3d15-e5eb-0ca100000000",
+				"name": "project2",
+				"permissions": [
+					{ "user": "testing", "permissions": [] },
+					{ "user": "projectuser", "permissions": [] }
+				],
+				"models": []
+			},
+			{
+				"_id": "58f7353e-ca85-3d15-e5eb-0ca200000000",
+				"name": "project3",
+				"permissions": [
+					{ "user": "testing", "permissions": [] },
+					{ "user": "projectuser", "permissions": [] }
+				],
+				"models": []
+			},
+			{
+				"_id": "58f73555-ca85-3d15-e5eb-0ca300000000",
+				"name": "project4",
+				"permissions": [
+					{ "user": "testing", "permissions": [] },
+					{ "user": "projectuser", "permissions": [] }
+				],
+				"models": []
+			}
+		];
 
+		agent.get(`/${username}/projects`)
+			.expect(200, function(err, res) {
+				expect(res.body).to.deep.equal(goldenProjects);
+				done(err);
+			});
+	});
+
+	it("should able to create project", function(done) {
 		const project = {
 			name: "project1"
 		};
 
 		async.series([
-
 			callback => {
 				agent.post(`/${username}/projects`)
 					.send(project)
@@ -163,7 +213,6 @@ describe("Projects", function () {
 						callback(err);
 					});
 			},
-
 			callback => {
 				agent.get(`/${username}.json`)
 					.expect(200, function(err, res) {
@@ -176,7 +225,6 @@ describe("Projects", function () {
 						callback(err);
 					});
 			}
-
 		], (err, res) => done(err));
 	});
 
@@ -190,7 +238,6 @@ describe("Projects", function () {
 	});
 
 	it("should fail to create project with dup name", function(done) {
-
 		const project = {
 			name: projectName
 		};
@@ -204,7 +251,6 @@ describe("Projects", function () {
 	});
 
 	it("should fail to create project with invalid name(1)", function(done) {
-
 		const project = {
 			name: " "
 		};
@@ -218,7 +264,6 @@ describe("Projects", function () {
 	});
 
 	it("should fail to create project with invalid name(2)", function(done) {
-
 		const project = {
 			name: "!?/#&"
 		};
@@ -232,7 +277,6 @@ describe("Projects", function () {
 	});
 
 	it("should fail to create project with no name", function(done) {
-
 		const project = {
 			name: ""
 		};
@@ -246,7 +290,6 @@ describe("Projects", function () {
 	});
 
 	it("should fail to create project with name longer than 120 characters", function(done) {
-
 		const project = {
 			name: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 		};
@@ -260,7 +303,6 @@ describe("Projects", function () {
 	});
 
 	it("should be able to update project [DEPRECATED]", function(done) {
-
 		const project = {
 			name: "project2",
 			permissions: [{
@@ -270,7 +312,6 @@ describe("Projects", function () {
 		};
 
 		async.series([
-
 			callback => {
 				agent.put(`/${username}/projects/${project.name}`)
 					.send(project)
@@ -278,7 +319,6 @@ describe("Projects", function () {
 						callback(err);
 					});
 			},
-
 			callback => {
 				agent.get(`/${username}/projects/${project.name}`)
 					.expect(200, function(err, res) {
@@ -289,7 +329,6 @@ describe("Projects", function () {
 						callback(err);
 					});
 			}
-
 		], (err, res) => done(err));
 	});
 
@@ -382,13 +421,11 @@ describe("Projects", function () {
 	});
 
 	it("should be able to update project name [DEPRECATED]", function(done) {
-
 		const project = {
 			name: "project2_new"
 		};
 
 		async.series([
-
 			callback => {
 				agent.put(`/${username}/projects/project2`)
 					.send(project)
@@ -396,11 +433,9 @@ describe("Projects", function () {
 						callback(err);
 					});
 			},
-
 			callback => {
 				agent.get(`/${username}.json`)
 					.expect(200, function(err, res) {
-
 						const account = res.body.accounts.find(account => account.account === username);
 						expect(account).to.exist;
 
@@ -410,7 +445,6 @@ describe("Projects", function () {
 						callback(err);
 					});
 			}
-
 		], (err, res) => done(err));
 	});
 
@@ -444,7 +478,6 @@ describe("Projects", function () {
 	});
 
 	it("should fail to update project for invalid permissions [DEPRECATED]", function(done) {
-
 		const project = {
 			name: "project3",
 			permissions: [{
@@ -529,40 +562,6 @@ describe("Projects", function () {
 			});
 	});
 
-	it("should able to delete project", function(done) {
-
-		const project = {
-			name: "project4"
-		};
-
-		async.series([
-
-			callback => {
-				agent.delete(`/${username}/projects/${project.name}`)
-					.expect(200, function(err, res) {
-						callback(err);
-					});
-
-			},
-
-			callback => {
-				agent.get(`/${username}.json`)
-					.expect(200, function(err, res) {
-
-						const account = res.body.accounts.find(account => account.account === username);
-						expect(account).to.exist;
-
-						const pg = account.projects.find(pg => pg.name === project.name);
-						expect(pg).to.not.exist;
-
-						callback(err);
-					});
-			}
-
-		], (err, res) => done(err));
-
-	});
-
 	it("should fail to update a project that doesnt exist [DEPRECATED]", function(done) {
 		agent.put(`/${username}/projects/notexist`)
 			.send({})
@@ -589,11 +588,12 @@ describe("Projects", function () {
 			});
 	});
 
-	it("list all project models should succeed", async function() {
-		const { body } = await agent.get(`/${username}/projects/${projectName}/models`)
-			.expect(200);
-
-		expect(body).to.deep.equal(goldenFullModelList);
+	it("list all project models should succeed", function(done) {
+		agent.get(`/${username}/projects/${projectName}/models`)
+			.expect(200, function(err, res) {
+				expect(res.body).to.deep.equal(goldenFullModelList);
+				done(err);
+			});
 	});
 
 	it("list all project models from project that doesn't exist should fail", async function() {
@@ -653,6 +653,68 @@ describe("Projects", function () {
 
 	it("list all project models with name query from project that doesn't exist should fail", function(done) {
 		agent.get(`/${username}/projects/notexist/models?name=TestModel`)
+			.expect(404, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
+				done(err);
+			});
+	});
+
+	it("should able to delete project", function(done) {
+		const project = {
+			name: "project_exists"
+		};
+
+		async.series([
+			callback => {
+				agent.delete(`/${username}/projects/${project.name}`)
+					.expect(200, function(err, res) {
+						callback(err);
+					});
+			},
+			callback => {
+				agent.get(`/${username}.json`)
+					.expect(200, function(err, res) {
+						const account = res.body.accounts.find(account => account.account === username);
+						expect(account).to.exist;
+
+						const pg = account.projects.find(pg => pg.name === project.name);
+						expect(pg).to.not.exist;
+
+						callback(err);
+					});
+			}
+		], (err, res) => done(err));
+	});
+
+	it("should able to delete empty project", function(done) {
+		const project = {
+			name: "project4"
+		};
+
+		async.series([
+			callback => {
+				agent.delete(`/${username}/projects/${project.name}`)
+					.expect(200, function(err, res) {
+						callback(err);
+					});
+			},
+			callback => {
+				agent.get(`/${username}.json`)
+					.expect(200, function(err, res) {
+						const account = res.body.accounts.find(account => account.account === username);
+						expect(account).to.exist;
+
+						const pg = account.projects.find(pg => pg.name === project.name);
+						expect(pg).to.not.exist;
+
+						callback(err);
+					});
+			}
+		], (err, res) => done(err));
+	});
+
+	it("should fail to delete a project that doesnt exist", function(done) {
+		agent.delete(`/${username}/projects/notexist`)
 			.expect(404, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
 				done(err);

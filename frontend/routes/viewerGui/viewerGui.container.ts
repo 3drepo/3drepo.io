@@ -21,9 +21,11 @@ import { createStructuredSelector } from 'reselect';
 import { CompareActions } from '../../modules/compare';
 
 import { selectCurrentUser } from '../../modules/currentUser';
+import { IssuesActions } from '../../modules/issues';
 import { MeasurementsActions } from '../../modules/measurements';
 import { selectIsPending, selectSettings, ModelActions } from '../../modules/model';
 import { selectIsPresentationActive, PresentationActions } from '../../modules/presentation';
+import { RisksActions } from '../../modules/risks';
 import { selectQueryParams } from '../../modules/router/router.selectors';
 import { TreeActions } from '../../modules/tree';
 import {
@@ -57,6 +59,10 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	removeMeasurement: MeasurementsActions.removeMeasurement,
 	resetCompareComponent: CompareActions.resetComponentState,
 	joinPresentation: PresentationActions.joinPresentation,
+	subscribeOnIssueChanges: IssuesActions.subscribeOnIssueChanges,
+	unsubscribeOnIssueChanges: IssuesActions.unsubscribeOnIssueChanges,
+	subscribeOnRiskChanges: RisksActions.subscribeOnRiskChanges,
+	unsubscribeOnRiskChanges: RisksActions.unsubscribeOnRiskChanges,
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(ViewerGui));

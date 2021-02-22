@@ -68,8 +68,6 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showRiskDetails: RisksActions.showDetails,
 	goToRisk: RisksActions.goToRisk,
 	toggleShowPins: RisksActions.toggleShowPins,
-	subscribeOnRiskChanges: RisksActions.subscribeOnRiskChanges,
-	unsubscribeOnRiskChanges: RisksActions.unsubscribeOnRiskChanges,
 	closeDetails: RisksActions.closeDetails,
 	saveRisk: RisksActions.saveRisk,
 	toggleSortOrder: RisksActions.toggleSortOrder,

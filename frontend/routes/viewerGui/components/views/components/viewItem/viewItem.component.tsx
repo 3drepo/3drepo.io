@@ -204,6 +204,7 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 							label="View name"
 							placeholder={this.props.viewpoint.name}
 							autoFocus
+							onKeyDown={(e) => e.stopPropagation()/* this is to prevent <Menulist/> to change focus */}
 						/>
 					)} />
 					<IconsGroup disabled={this.state.isDeletePending}>

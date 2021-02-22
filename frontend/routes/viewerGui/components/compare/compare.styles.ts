@@ -81,6 +81,9 @@ export const SliderContainer = styled.div`
 
 export const SliderWrapper = styled.div`
 	padding-left: 15px;
+	position: absolute;
+	bottom: 21px;
+	width: 255px;
 `;
 
 export const Slider = styled(SliderComponent).attrs({

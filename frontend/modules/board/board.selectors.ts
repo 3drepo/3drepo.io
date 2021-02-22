@@ -22,13 +22,12 @@ import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { get, groupBy, memoize, startCase, values } from 'lodash';
 import { createSelector } from 'reselect';
 
-import { ISSUE_DEFAULT_HIDDEN_STATUSES, PRIORITIES, STATUSES } from '../../constants/issues';
+import {  PRIORITIES, STATUSES } from '../../constants/issues';
 import { LEVELS_LIST, RISK_MITIGATION_STATUSES } from '../../constants/risks';
-import { sortByDate } from '../../helpers/sorting';
-import { selectAllFilteredIssues, selectSortByField as selectIssuesSortByField,
+import {  selectAllFilteredIssuesGetter, selectSortByField as selectIssuesSortByField,
 	selectSortOrder as selectIssuesSortOrder } from '../issues';
 import { selectJobs } from '../jobs';
-import { selectAllFilteredRisks, selectRiskCategories, selectSortByField as  selectRisksSortByField,
+import { selectAllFilteredRisksGetter, selectRiskCategories, selectSortByField as  selectRisksSortByField,
 	selectSortOrder as selectRisksSortOrder
 } from '../risks';
 import { selectTopicTypes } from '../teamspace';
@@ -38,7 +37,7 @@ dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isBetween);
 
-export const selectBoardDomain = (state) => ({...state.board});
+export const selectBoardDomain = (state) => state.board;
 
 export const selectIsPending = createSelector(
 	selectBoardDomain, (state) => state.isPending
@@ -92,26 +91,29 @@ const selectJobsValues = createSelector(
 	return jobs.map(({ _id }) => ({ name: _id, value: _id }));
 });
 
+const selectIssues = createSelector(
+	selectBoardDomain,  selectShowClosedIssues, selectAllFilteredIssuesGetter,
+	({ filterProp }, showClosedIssues, selectAllFilteredIssuessGetter) => {
+		const forceShowHidden = filterProp === ISSUE_FILTER_PROPS.status.value || showClosedIssues;
+		return  selectAllFilteredIssuessGetter(forceShowHidden);
+	}
+);
+
+const selectRisks = createSelector(
+	selectBoardDomain, selectAllFilteredRisksGetter,
+	({ filterProp }, risksGetter) => {
+		const forceShowHidden = filterProp === RISK_FILTER_PROPS.mitigation_status.value;
+		return risksGetter(forceShowHidden);
+	}
+);
+
 const selectRawCardData = createSelector(
-	selectBoardDomain,
-	selectAllFilteredIssues,
-	selectAllFilteredRisks,
-	selectShowClosedIssues,
-	selectIssuesSortOrder,
-	selectRisksSortOrder,
-	selectIssuesSortByField,
-	selectRisksSortByField,
-
-	({ filterProp }, issues, risks, showClosedIssues, issuesSortOrder,
-		risksSortOrder, issuesSortByField, risksSortByField) => {
-		const activeIssues = issues.filter(({ status }) => {
-			const activeGroupingByStatus = filterProp === ISSUE_FILTER_PROPS.status.value;
-			return showClosedIssues || activeGroupingByStatus || !ISSUE_DEFAULT_HIDDEN_STATUSES.includes(status);
-		});
-
+	selectIssues,
+	selectRisks,
+	(issues, risks ) => {
 		return {
-			[BOARD_TYPES.ISSUES]: sortByDate(activeIssues, { order: issuesSortOrder }, issuesSortByField),
-			[BOARD_TYPES.RISKS]: sortByDate(risks, { order: risksSortOrder }, risksSortByField)
+			[BOARD_TYPES.ISSUES]: issues,
+			[BOARD_TYPES.RISKS]: risks
 		};
 });
 

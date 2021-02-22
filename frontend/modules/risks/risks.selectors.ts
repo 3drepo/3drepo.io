@@ -123,20 +123,19 @@ export const selectSelectedFilters = createSelector(
 	selectComponentState, (state) => state.selectedFilters
 );
 
-export const selectFilteredRisks = createSelector(
+export const selectAllFilteredRisksGetter = createSelector(
 	selectRisks, selectSelectedFilters, selectSortOrder, selectSortByField,
-		(risks, selectedFilters, sortOrder, sortByField) => {
+		(risks, selectedFilters, sortOrder, sortByField) => (forceReturnHiddenRisk = false) => {
 			const returnHiddenRisk = selectedFilters.length && selectedFilters
 				.some(({ value: { value } }) => RISK_DEFAULT_HIDDEN_LEVELS.includes(value));
 
-			return sortByDate(searchByFilters(risks, selectedFilters, returnHiddenRisk),
+			return sortByDate(searchByFilters(risks, selectedFilters, returnHiddenRisk || forceReturnHiddenRisk),
 				{ order: sortOrder }, sortByField );
-		}
-);
+});
 
-export const selectAllFilteredRisks = createSelector(
-	selectRisks, selectSelectedFilters, (risks, selectedFilters) =>
-		searchByFilters(risks, selectedFilters, true, ['name', 'desc', 'number'])
+export const selectFilteredRisks = createSelector(
+	selectAllFilteredRisksGetter,
+		(allFilteredRisksGetter) => allFilteredRisksGetter()
 );
 
 export const selectShowPins = createSelector(

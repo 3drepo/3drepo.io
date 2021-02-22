@@ -535,13 +535,7 @@
 	}
 
 	function changeProject(req, res, next) {
-		Project.findOne({ account: req.params.account }, {name: req.params.project}).then(project => {
-			if(!project) {
-				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
-			} else {
-				return project.updateAttrs(req.body);
-			}
-		}).then(project => {
+		Project.updateAttrs(req.params.account, req.params.project, req.body).then(project => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -557,7 +551,6 @@
 	}
 
 	function deleteProject(req, res, next) {
-
 		Project.delete(req.params.account, req.params.project).then(project => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
 		}).catch(err => {
@@ -566,7 +559,7 @@
 	}
 
 	function listProjects(req, res, next) {
-		Project.findAndPopulateUsers({ account: req.params.account }, {}).then(projects => {
+		Project.listProjects(req.params.account).then(projects => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, projects);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -574,9 +567,8 @@
 	}
 
 	function listProject(req, res, next) {
-
-		Project.findOneAndPopulateUsers({ account: req.params.account }, {name: req.params.project}).then(project => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project.toObject());
+		Project.getProjectUserPermissions(req.params.account, req.params.project).then(project => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
