@@ -49,9 +49,11 @@ const FileRef = require("./fileRef");
 const PermissionTemplates = require("./permissionTemplates");
 const { get } = require("lodash");
 
+const COLL_NAME = "system.users";
+
 const appendRemainingLoginsInfo = function (resCode, remaining) {
 	return (resCode.value === responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value &&
-		remaining <= config.remainingLoginAttemptsPromptThreshold) ?
+		remaining <= config.loginPolicy.remainingLoginAttemptsPromptThreshold) ?
 		{
 			...resCode,
 			message: resCode.message + " (Remaining attempts: " + remaining + ")"
@@ -62,11 +64,11 @@ const isMemberOfTeamspace = function (user, teamspace) {
 	return user.roles.filter(role => role.db === teamspace && role.role === C.DEFAULT_MEMBER_ROLE).length > 0;
 };
 
-const hasReachedFailedLoginLimit = function (user) {
+const isAccountLocked = function (user) {
 	return user && user.customData &&
 		user.customData.failedLoginCount && user.customData.lastFailedLoginAt &&
-		user.customData.failedLoginCount >= config.maxUnsuccessfulLoginAttempts &&
-		Date.now() - user.customData.lastFailedLoginAt < config.lockoutDuration;
+		user.customData.failedLoginCount >= config.loginPolicy.maxUnsuccessfulLoginAttempts &&
+		Date.now() - user.customData.lastFailedLoginAt < config.loginPolicy.lockoutDuration;
 };
 
 const hasReachedLicenceLimit = async function (teamspace) {
@@ -99,24 +101,19 @@ const handleAuthenticateFail = async function (username) {
 		const elapsedTime = user.customData.lastFailedLoginAt ?
 			currentTime - user.customData.lastFailedLoginAt : undefined;
 
-		const failedLoginCount = user.customData.failedLoginCount && elapsedTime && elapsedTime < config.lockoutDuration ?
+		const failedLoginCount = user.customData.failedLoginCount && elapsedTime && elapsedTime < config.loginPolicy.lockoutDuration ?
 			user.customData.failedLoginCount + 1 : 1;
-
-		const loginLocked = failedLoginCount >= config.maxUnsuccessfulLoginAttempts ? true : undefined;
 
 		await User.update(username, {
 			"customData.lastFailedLoginAt": currentTime,
-			"customData.failedLoginCount": failedLoginCount,
-			"customData.loginLocked": loginLocked
+			"customData.failedLoginCount": failedLoginCount
 		});
 
-		return Math.max(config.maxUnsuccessfulLoginAttempts - failedLoginCount, 0);
+		return Math.max(config.loginPolicy.maxUnsuccessfulLoginAttempts - failedLoginCount, 0);
 	} catch(err) {
 		// suppress update failure
 	}
 };
-
-const COLL_NAME = "system.users";
 
 const User = {};
 
@@ -175,17 +172,17 @@ User.authenticate =  async function (logger, username, password) {
 			user = await User.findByUserName(username);
 		}
 
-		if (hasReachedFailedLoginLimit(user)) {
+		if (isAccountLocked(user)) {
 			throw ({ resCode: responseCodes.TOO_MANY_LOGIN_ATTEMPTS });
+		}
+
+		if (user.customData && user.customData.inactive) {
+			throw ({ resCode: responseCodes.USER_NOT_VERIFIED });
 		}
 
 		authDB = await DB.getAuthDB();
 		await authDB.authenticate(username, password);
 		authDB.close();
-
-		if (user.customData && user.customData.inactive) {
-			throw ({ resCode: responseCodes.USER_NOT_VERIFIED });
-		}
 
 		if (!user.customData) {
 			user.customData = {};
@@ -657,7 +654,7 @@ User.getForgotPasswordToken = async function (userNameOrEmail) {
 
 	// set token only if username is found.
 	if (user) {
-		if (hasReachedFailedLoginLimit(user)) {
+		if (isAccountLocked(user)) {
 			throw responseCodes.ACCOUNT_LOGIN_LOCKED;
 		}
 
