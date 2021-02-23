@@ -52,12 +52,10 @@ const { get } = require("lodash");
 const COLL_NAME = "system.users";
 
 const appendRemainingLoginsInfo = function (resCode, remaining) {
-	return (resCode.value === responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value &&
-		remaining <= config.loginPolicy.remainingLoginAttemptsPromptThreshold) ?
-		{
-			...resCode,
-			message: resCode.message + " (Remaining attempts: " + remaining + ")"
-		} : resCode;
+	return {
+		...resCode,
+		message: `${resCode.message} (Remaining attempts: ${remaining})`
+	};
 };
 
 const isMemberOfTeamspace = function (user, teamspace) {
@@ -93,54 +91,25 @@ const findOne = async function (query, projection) {
 	return await db.findOne("admin", COLL_NAME, query, projection);
 };
 
-const handleAuthenticateFail = async function (username) {
+const handleAuthenticateFail = async function (user, username) {
 	const currentTime = Date.now();
 
-	try {
-		const user = await User.findByUserName(username);
-		const elapsedTime = user.customData.loginInfo && user.customData.loginInfo.lastFailedLoginAt ?
-			currentTime - user.customData.loginInfo.lastFailedLoginAt : undefined;
+	const elapsedTime = user.customData.loginInfo && user.customData.loginInfo.lastFailedLoginAt ?
+		currentTime - user.customData.loginInfo.lastFailedLoginAt : undefined;
 
-		const failedLoginCount = user.customData.loginInfo && user.customData.loginInfo.failedLoginCount &&
-			elapsedTime && elapsedTime < config.loginPolicy.lockoutDuration ?
-			user.customData.loginInfo.failedLoginCount + 1 : 1;
+	const failedLoginCount = user.customData.loginInfo && user.customData.loginInfo.failedLoginCount &&
+		elapsedTime && elapsedTime < config.loginPolicy.lockoutDuration ?
+		user.customData.loginInfo.failedLoginCount + 1 : 1;
 
-		await db.update("admin", COLL_NAME, {user: username}, {$set: {
-			"customData.loginInfo.lastFailedLoginAt": currentTime,
-			"customData.loginInfo.failedLoginCount": failedLoginCount
-		}});
+	await db.update("admin", COLL_NAME, {user: username}, {$set: {
+		"customData.loginInfo.lastFailedLoginAt": currentTime,
+		"customData.loginInfo.failedLoginCount": failedLoginCount
+	}});
 
-		return Math.max(config.loginPolicy.maxUnsuccessfulLoginAttempts - failedLoginCount, 0);
-	} catch(err) {
-		// suppress update failure
-	}
+	return Math.max(config.loginPolicy.maxUnsuccessfulLoginAttempts - failedLoginCount, 0);
 };
 
 const User = {};
-
-User.update = async function (username, data) {
-	const toUpdate = {};
-	const toSet = {};
-	const toUnset = {};
-
-	Object.keys(data).forEach((key) => {
-		if (data[key]) {
-			toSet[key] = data[key];
-		} else {
-			toUnset[key] = data[key];
-		}
-	});
-
-	if (Object.keys(toSet).length > 0) {
-		toUpdate["$set"] = toSet;
-	}
-
-	if (Object.keys(toUnset).length > 0) {
-		toUpdate["$unset"] = toUnset;
-	}
-
-	return db.update("admin", COLL_NAME, {user: username}, toUpdate);
-};
 
 User.getTeamspaceSpaceUsed = async function (dbName) {
 	const settings = await db.find(dbName, "setting", {}, {_id: 1});
@@ -197,13 +166,22 @@ User.authenticate =  async function (logger, username, password) {
 
 		return user;
 	} catch(err) {
+		err = err.resCode ? err : { resCode: utils.mongoErrorToResCode(err) };
+
 		if (authDB) {
 			authDB.close();
 		}
 
-		const remainingLoginAttempts = await handleAuthenticateFail(username);
+		if (user) {
+			const remainingLoginAttempts = await handleAuthenticateFail(user, username);
 
-		throw (err.resCode ? err : { resCode: appendRemainingLoginsInfo(utils.mongoErrorToResCode(err), remainingLoginAttempts) });
+			if (err.resCode.value === responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value &&
+				remainingLoginAttempts <= config.loginPolicy.remainingLoginAttemptsPromptThreshold) {
+				err = { resCode: appendRemainingLoginsInfo(err.resCode, remainingLoginAttempts) };
+			}
+		}
+
+		throw err;
 	}
 };
 
