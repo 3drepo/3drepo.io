@@ -18,6 +18,13 @@
 import styled from 'styled-components';
 
 import { COLOR } from '../../../../../../styles';
+import {
+	ActionsLine,
+	StyledLinkableField,
+	StyledMarkdownField
+} from '../../../../../components/textField/textField.styles';
+import { StyledTextField as TextField  } from '../../../measurements/components/measureItem/measureItem.styles';
+import { StyledForm as Form } from '../../../views/components/viewItem/viewItem.styles';
 
 export const Container = styled.li`
 	color: ${COLOR.BLACK_60};
@@ -26,11 +33,33 @@ export const Container = styled.li`
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	height: 56px;
+	height: 66px;
 	box-sizing: border-box;
 	padding: 0 8px;
 
 	&:last-of-type {
 		border-bottom: none;
 	}
+`;
+
+export const StyledTextField = styled(TextField)`
+	${ActionsLine} {
+		top: 7px;
+		bottom: inherit;
+	}
+
+	${StyledMarkdownField} {
+		margin-top: 14px;
+	}
+
+	${StyledLinkableField} {
+		margin-top: 14px;
+	}
+`;
+
+export const StyledForm = styled(Form)`
+	height: 100%;
+	align-items: flex-start;
+	overflow: hidden;
+	margin-top: 20px;
 `;

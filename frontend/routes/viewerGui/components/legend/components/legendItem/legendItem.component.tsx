@@ -18,26 +18,38 @@
 import React from 'react';
 
 import { Tooltip } from '@material-ui/core';
-import { Formik } from 'formik';
+import { Field, Formik } from 'formik';
+import { remove } from 'lodash';
+import * as Yup from 'yup';
 
 import RemoveIcon from '@material-ui/icons/Close';
 import { ILegend } from '../../../../../../modules/legend/legend.redux';
 import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
-import {SmallIconButton} from '../../../../../components/smallIconButon/smallIconButton.component';
-import {
-	Actions,
-	StyledForm,
-	StyledTextField
-} from '../../../measurements/components/measureItem/measureItem.styles';
-import { Container } from './legendItem.styles';
+import { SmallIconButton } from '../../../../../components/smallIconButon/smallIconButton.component';
+import { Actions } from '../../../measurements/components/measureItem/measureItem.styles';
+import { Container, StyledForm, StyledTextField } from './legendItem.styles';
+
+const LegendSchema = (names) => Yup.object().shape({
+	newName: Yup.string()
+		.test('Unique', 'This name is already in use', (values) => {
+			return names.filter((name) => name === values).length < 1;
+		})
+});
 
 interface IProps extends ILegend {
 	updateLegendItem: (legendItem: ILegend & { oldName?: string }) => void;
 	deleteLegendItem: (legendItem: ILegend) => void;
+	legendNames: string[];
+	onPickerOpen: () => void;
+	onPickerClose: () => void;
 }
 
-export const LegendItem = ({ name, color, updateLegendItem, deleteLegendItem }: IProps) => {
+export const LegendItem = ({
+	name, color, updateLegendItem, deleteLegendItem, legendNames, onPickerOpen, onPickerClose,
+}: IProps) => {
 	const textFieldRef = React.useRef(null);
+
+	const getLegendSchema = LegendSchema(remove(legendNames, (item) => item !== name));
 
 	const handleColorChange = (colorValue: string) => updateLegendItem({
 		name,
@@ -62,23 +74,34 @@ export const LegendItem = ({ name, color, updateLegendItem, deleteLegendItem }: 
 			<ColorPicker
 				value={color}
 				onChange={handleColorChange}
+				onOpen={onPickerOpen}
+				onClose={onPickerClose}
 			/>
 			<Formik
 				initialValues={{ newName: name }}
 				onSubmit={handleSubmit}
+				validationSchema={LegendSchema}
+				validateOnBlur={false}
+				validateOnChange={false}
+				enableReinitialize
 			>
 				<Tooltip title={name} placement="bottom">
 					<StyledForm>
-						<StyledTextField
-							ref={textFieldRef}
-							requiredConfirm
-							fullWidth
-							value={name}
-							name="newName"
-							mutable
-							onChange={handleSave}
-							disableShowDefaultUnderline
-						/>
+						<Field name="newName" render={({ field, form }) => (
+							<StyledTextField
+								{...field}
+								ref={textFieldRef}
+								requiredConfirm
+								fullWidth
+								validationSchema={getLegendSchema}
+								mutable
+								error={Boolean(form.errors.desc)}
+								helperText={form.errors.desc}
+								onChange={handleSave}
+								disableShowDefaultUnderline
+								inputProps={{ maxLength: 20 }}
+							/>
+						)} />
 					</StyledForm>
 				</Tooltip>
 			</Formik>

@@ -19,10 +19,11 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { LegendActions } from '../../../../../../modules/legend';
+import { selectLegendNames, LegendActions } from '../../../../../../modules/legend';
 import { LegendItem } from './legendItem.component';
 
 const mapStateToProps = createStructuredSelector({
+	legendNames: selectLegendNames,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

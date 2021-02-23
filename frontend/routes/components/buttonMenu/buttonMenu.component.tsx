@@ -32,6 +32,8 @@ interface IProps {
 	container?: any;
 	renderButton?: (props?) => React.ReactNode;
 	renderContent?: (props?) => React.ReactNode;
+	onClose?: () => void;
+	onOpen?: () => void;
 }
 
 interface IState {
@@ -63,9 +65,19 @@ export class ButtonMenu extends React.PureComponent<IProps, IState> {
 	public toggleMenu = (forceHide) => (event) => {
 		event.stopPropagation();
 
+		if (this.props.onClose) {
+			this.props.onClose();
+		}
+
 		this.setState({
 			activeMenu: forceHide ? false : !this.state.activeMenu
 		});
+	}
+
+	public handleOnOpen = () => {
+		if (this.props.onOpen) {
+			this.props.onOpen();
+		}
 	}
 
 	public componentDidMount() {
@@ -107,6 +119,7 @@ export class ButtonMenu extends React.PureComponent<IProps, IState> {
 					open={activeMenu}
 					anchorEl={this.buttonRef.current}
 					onClose={this.toggleMenu(false)}
+					onEntering={this.handleOnOpen}
 					disableRestoreFocus
 				>
 					{renderContent({ close: this.toggleMenu(false) })}

@@ -20,7 +20,7 @@ import React from 'react';
 
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import { VIEWER_LEFT_PANELS, VIEWER_PANELS } from '../../constants/viewerGui';
-import { renderWhenTrue } from '../../helpers/rendering';
+import { getWindowHeight, getWindowWidth, renderWhenTrue } from '../../helpers/rendering';
 import { IDataCache, STORE_NAME } from '../../services/dataCache';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { Activities } from './components/activities';
@@ -31,6 +31,7 @@ import Gis from './components/gis/gis.container';
 import { Groups } from './components/groups';
 import { Issues } from './components/issues';
 import { Legend } from './components/legend';
+import { PANEL_DEFAULT_HEIGHT, PANEL_DEFAULT_WIDTH } from './components/legend/legend.constants';
 import { Measurements } from './components/measurements';
 import { PanelButton } from './components/panelButton/panelButton.component';
 import RevisionsSwitch from './components/revisionsSwitch/revisionsSwitch.container';
@@ -94,6 +95,12 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	private get urlParams() {
 		return this.props.match.params;
 	}
+
+	private get minPanelHeight() {
+		const height = getWindowHeight() * 0.3;
+		return height < 300 ? 300 : height;
+	}
+
 	public state = {
 		loadedModelId: null,
 		showLoader: false,
@@ -189,7 +196,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		return (
 			<GuiContainer>
 				<CloseFocusModeButton isFocusMode={isFocusMode} />
-				<Container className={this.props.className} hidden={isFocusMode}>
+				<Container id="gui-container" className={this.props.className} hidden={isFocusMode}>
 					<RevisionsSwitch />
 					<Toolbar {...this.urlParams} />
 					{this.renderLeftPanelsButtons()}
@@ -252,7 +259,13 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 
 	private renderDraggablePanels = (panels) => (
 		<DraggablePanels>
-			{panels.includes(VIEWER_PANELS.LEGEND) && <Legend />}
+			{panels.includes(VIEWER_PANELS.LEGEND) && <Legend
+				defaultPosition={{
+					x: getWindowWidth() - PANEL_DEFAULT_WIDTH - 20,
+					y: getWindowHeight() - this.minPanelHeight - 90 - 70,
+				}}
+				height={this.minPanelHeight}
+			/>}
 		</DraggablePanels>
 	)
 }

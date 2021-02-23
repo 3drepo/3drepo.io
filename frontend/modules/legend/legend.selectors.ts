@@ -20,9 +20,17 @@ import { createSelector } from 'reselect';
 export const selectLegendDomain = (state) => ({...state.legend});
 
 export const selectIsPending = createSelector(
-		selectLegendDomain, (state) => state.isPending
+	selectLegendDomain, (state) => state.isPending
 );
 
 export const selectLegend = createSelector(
-		selectLegendDomain, (state) => state.legend
+	selectLegendDomain, (state) => state.legend
+);
+
+export const selectLegendCount = createSelector(
+	selectLegendDomain, (state) => state.legend.length
+);
+
+export const selectLegendNames = createSelector(
+		selectLegend, (state) => state.map(({ name }) => name )
 );

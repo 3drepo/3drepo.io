@@ -40,11 +40,8 @@ function* fetch() {
 
 		const legend = transformLegend(data);
 
-		if (legend.length) {
-			yield put(LegendActions.togglePendingState(false));
-			yield put(LegendActions.fetchSuccess(legend));
-		}
-
+		yield put(LegendActions.togglePendingState(false));
+		yield put(LegendActions.fetchSuccess(legend));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('display', 'legend', error));
 	}

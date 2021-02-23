@@ -17,9 +17,11 @@
 
 import styled from 'styled-components';
 
+import { ResizableBox } from 'react-resizable';
+
 import { COLOR } from '../../../../styles';
 import { SequenceTasksListItem } from '../sequences/sequences.styles';
-import { TitleContainer, ViewerPanelContent} from '../viewerPanel/viewerPanel.styles';
+import { ViewerPanelContent} from '../viewerPanel/viewerPanel.styles';
 
 export const Container = styled(ViewerPanelContent)`
 	font-size: 13px;
@@ -27,5 +29,17 @@ export const Container = styled(ViewerPanelContent)`
 
 	${SequenceTasksListItem} {
 		background-color: ${COLOR.LIGHT_GRAY};
+	}
+`;
+
+export const StyledResizableBox = styled(ResizableBox)`
+	position: relative;
+	& .react-resizable-handle {
+		position: absolute;
+		width: 20px;
+		height: 20px;
+		bottom: -5px;
+		right: -5px;
+		cursor: se-resize;
 	}
 `;

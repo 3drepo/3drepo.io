@@ -26,12 +26,12 @@ interface IProps {
 	isPending: boolean;
 	updateLegendItem: (legendItem: ILegend) => void;
 	colors: string[];
+	legendCount: number;
 }
 
-export const LegendFooter = ({ isPending, updateLegendItem, colors }: IProps) => {
-
+export const LegendFooter = ({ isPending, updateLegendItem, colors, legendCount }: IProps) => {
 	const handleAddNewLegendItem = () => updateLegendItem({
-		name: 'New legend item',
+		name: `Item ${legendCount + 1}`,
 		color: colors[Math.floor(Math.random() * colors.length)],
 	});
 

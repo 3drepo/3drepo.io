@@ -18,9 +18,11 @@
 import React from 'react';
 
 import { isEqual } from 'lodash';
-import { Rnd } from 'react-rnd';
+import Draggable from 'react-draggable';
 
+import { renderWhenTrue } from '../../../../helpers/rendering';
 import { ILegend } from '../../../../modules/legend/legend.redux';
+import { EmptyStateInfo } from '../../../components/components.styles';
 import {
 	MenuList,
 	StyledItemText,
@@ -30,7 +32,8 @@ import { PanelBarActions } from '../panelBarActions';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { LegendFooter } from './components/legendFooter';
 import { LegendItem } from './components/legendItem';
-import { Container } from './legend.styles';
+import { PANEL_DEFAULT_HEIGHT, PANEL_DEFAULT_WIDTH } from './legend.constants';
+import { Container, StyledResizableBox } from './legend.styles';
 
 interface IProps {
 	isPending: boolean;
@@ -38,15 +41,22 @@ interface IProps {
 	setDefault: () => void;
 	reset: () => void;
 	legend: ILegend[];
+	defaultPosition: {
+		x: number;
+		y: number;
+	};
+	height: number;
 }
 
 interface IState {
 	legend: ILegend[];
+	draggableDisabled: boolean;
 }
 
-export class Legend extends React.Component<IProps, IState> {
+export class Legend extends React.PureComponent<IProps, IState> {
 	public state = {
 		legend: [],
+		draggableDisabled: false,
 	};
 
 	public componentDidMount() {
@@ -64,6 +74,10 @@ export class Legend extends React.Component<IProps, IState> {
 			this.setState({ legend });
 		}
 	}
+
+	public renderEmptyState = renderWhenTrue(() => (
+		<EmptyStateInfo>No legend have been created yet</EmptyStateInfo>
+	));
 
 	public renderActionsMenu = () => (
 		<MenuList>
@@ -86,40 +100,50 @@ export class Legend extends React.Component<IProps, IState> {
 			menuActions={this.renderActionsMenu}
 			hideLock
 			hideSearch
+			onMenuOpen={() => this.setState({ draggableDisabled: true })}
+			onMenuClose={() => this.setState({ draggableDisabled: false })}
 		/>
 	)
 
 	public renderLegendList = () => (
 		<Container>
 			{this.state.legend.map((item) => (
-				<LegendItem key={`${item.name}-${item.color}`} {...item} />
+				<LegendItem
+					key={item.name}
+					{...item}
+					onPickerOpen={() => this.setState({ draggableDisabled: true })}
+					onPickerClose={() => this.setState({ draggableDisabled: false })}
+				/>
 			))}
 		</Container>
 	)
 
 	public render() {
-		const { isPending } = this.props;
+		const { isPending, defaultPosition, height } = this.props;
 
 		return (
-			<Rnd
-				default={{
-					x: 500,
-					y: 300,
-					width: 380,
-					height: '30%',
-				}}
-				minHeight="30%"
-				dragHandleClassName="panelTitle"
+			<Draggable
+				handle=".panelTitle"
+				bounds="#gui-container"
+				disabled={this.state.draggableDisabled}
+				defaultPosition={defaultPosition}
 			>
-				<ViewerPanel
-					title="Sequence Legend"
-					renderActions={() => this.renderActions()}
-					pending={isPending}
+				<StyledResizableBox
+					width={PANEL_DEFAULT_WIDTH}
+					minConstraints={[PANEL_DEFAULT_WIDTH - 100, PANEL_DEFAULT_HEIGHT]}
+					height={height}
 				>
-					{this.renderLegendList()}
-					<LegendFooter isPending={isPending} />
-				</ViewerPanel>
-			</Rnd>
+					<ViewerPanel
+						title="Sequence Legend"
+						renderActions={() => this.renderActions()}
+						pending={isPending}
+					>
+						{this.renderEmptyState(!this.state.legend.length)}
+						{this.renderLegendList()}
+						<LegendFooter isPending={isPending} />
+					</ViewerPanel>
+				</StyledResizableBox>
+			</Draggable>
 		);
 	}
 }
