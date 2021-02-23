@@ -166,8 +166,6 @@ User.authenticate =  async function (logger, username, password) {
 
 		return user;
 	} catch(err) {
-		err = err.resCode ? err : { resCode: utils.mongoErrorToResCode(err) };
-
 		if (authDB) {
 			authDB.close();
 		}
@@ -177,11 +175,11 @@ User.authenticate =  async function (logger, username, password) {
 
 			if (err.resCode.value === responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value &&
 				remainingLoginAttempts <= config.loginPolicy.remainingLoginAttemptsPromptThreshold) {
-				err = { resCode: appendRemainingLoginsInfo(err.resCode, remainingLoginAttempts) };
+				throw { resCode: appendRemainingLoginsInfo(utils.mongoErrorToResCode(err), remainingLoginAttempts) };
 			}
+		} else {
+			throw err.resCode ? err : { resCode: utils.mongoErrorToResCode(err) };
 		}
-
-		throw err;
 	}
 };
 
