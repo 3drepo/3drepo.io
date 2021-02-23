@@ -2005,51 +2005,6 @@ define({ "api": [
     "groupTitle": "History"
   },
   {
-    "type": "put",
-    "url": "/:teamspace/:model/revisions/:id/tag",
-    "title": "Update revision tag",
-    "name": "updateRevisionTag",
-    "group": "History",
-    "description": "<p>Update revision tag</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "id",
-            "description": "<p>Unique Revision ID or tag</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "tag",
-            "description": "<p>Tag to update</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/history.js",
-    "groupTitle": "History"
-  },
-  {
     "type": "post",
     "url": "/:teamspace/invitations",
     "title": "Create/Update invitation",
@@ -2395,42 +2350,6 @@ define({ "api": [
     "version": "0.0.0",
     "filename": "routes/invoice.js",
     "groupTitle": "Invoice"
-  },
-  {
-    "type": "get",
-    "url": "/:teamspace/:model/issues/analytics.:format",
-    "title": "Get Issue Analytics",
-    "name": "getIssueAnalytics",
-    "group": "Issues_Analytics",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "optional": false,
-            "field": "analytics.:format",
-            "description": "<p>Analytics file to create</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/issueAnalytic.js",
-    "groupTitle": "Issues_Analytics"
   },
   {
     "type": "post",
@@ -8263,6 +8182,60 @@ define({ "api": [
   },
   {
     "type": "get",
+    "url": "/:teamspace/:model/revision/:rev/srcAssets.json",
+    "title": "Get revision's src assets",
+    "name": "getRevSrcAssets",
+    "group": "Model",
+    "description": "<p>Get the model's assets but of a particular revision</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>The model Id to get unity assets for.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "rev",
+            "description": "<p>The revision of the model to get src assets for</p>"
+          }
+        ]
+      }
+    },
+    "examples": [
+      {
+        "title": "Example usage:",
+        "content": "GET /Repo3DDemo/01713310-2286-11eb-93c1-296aba26cc11/revision/4d48e3de-1c87-4fdf-87bf-d92c224eb3fe/srcAssets.json HTTP/1.1",
+        "type": "get"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success:",
+          "content": "{\n  \"models\": [\n    {\n      \"database\": \"Repo3DDemo\",\n      \"model\": \"011382b0-2286-11eb-93c1-296aba26cc11\",\n      \"assets\": [\n        \"153cf665-2c84-4ff9-a9e2-ba495af8e6dc\",\n        \"07c67b6c-4b02-435f-8639-ea88403c36f7\",\n        \"2967230f-67fa-45dc-9686-161e45c7c8a2\"\n      ],\n      \"offset\": [\n        9.999999999999787,\n        0,\n        -9.999999999999787\n      ]\n    },\n    {\n      \"database\": \"Repo3DDemo\",\n      \"model\": \"01168ff0-2286-11eb-93c1-296aba26cc11\",\n      \"assets\": [\n        \"89d5580a-3224-4e50-bbab-89d855c320e0\"\n      ],\n      \"offset\": [\n        1610,\n        740,\n        -2410\n      ]\n    },\n    {\n      \"database\": \"Repo3DDemo\",\n      \"model\": \"01153060-2286-11eb-93c1-296aba26cc11\",\n      \"assets\": [\n        \"c14dbbee-a8fd-4ed8-8641-9e24737f8238\"\n      ],\n      \"offset\": [\n        -688.095458984375,\n        6410.9140625,\n        683.460205078125\n      ]\n    }\n  ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/model.js",
+    "groupTitle": "Model"
+  },
+  {
+    "type": "get",
     "url": "/:teamspace/:model/revision/:rev/unityAssets.json",
     "title": "Get revision's unity assets",
     "name": "getRevUnityAssets",
@@ -8317,6 +8290,44 @@ define({ "api": [
   },
   {
     "type": "get",
+    "url": "/:teamspace/:model/:uid.src.mpc",
+    "title": "Get Model in SRC representation",
+    "name": "getSRC",
+    "group": "Model",
+    "description": "<p>Get a mesh presented in SRC format.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>id of the model</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "uid",
+            "description": "<p>id of the SRC file.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/model.js",
+    "groupTitle": "Model"
+  },
+  {
+    "type": "get",
     "url": "/:teamspace/:model/permissions",
     "title": "Get model permissions",
     "name": "getSingleModelPermissions",
@@ -8354,6 +8365,53 @@ define({ "api": [
         {
           "title": "Success:",
           "content": "[\n   {\n      user: \"viewerTeamspace1Model1JobA\",\n      permission: \"viewer\"\n   },\n   {\n      user: \"commenterTeamspace1Model1JobA\",\n      permission: \"viewer\"\n   },\n   {\n      user: \"collaboratorTeamspace1Model1JobA\",\n      permission: \"commenter\"\n   },\n   {\n      user: \"commenterTeamspace1Model1JobB\",\n      permission: \"commenter\"\n   },\n   {\n      user: \"collaboratorTeamspace1Model1JobB\",\n      permission: \"collaborator\"\n   },\n   {\n      user: \"projectshared\",\n      permission: \"collaborator\"\n   },\n   {\n      user: \"fed\"\n   },\n   {\n      user: \"teamSpace1\"\n   },\n   {\n      user: \"unassignedTeamspace1UserJobA\"\n   },\n   {\n      user: \"viewerTeamspace1Model1JobB\"\n   },\n   {\n      user: \"adminTeamspace1JobA\"\n   },\n   {\n      user: \"adminTeamspace1JobB\"\n   },\n   {\n      user: \"weirdTeamspace\"\n   }\n]",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/model.js",
+    "groupTitle": "Model"
+  },
+  {
+    "type": "get",
+    "url": "/:teamspace/:model/revision/master/head/srcAssets.json",
+    "title": "Get Src assets for the master branch",
+    "name": "getSrcAssets",
+    "group": "Model",
+    "description": "<p>Get the lastest model's version src assets</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>The model Id to get unity assets for.</p>"
+          }
+        ]
+      }
+    },
+    "examples": [
+      {
+        "title": "Example usage:",
+        "content": "GET /Repo3DDemo/01713310-2286-11eb-93c1-296aba26cc11/revision/master/head/srcAssets.json HTTP/1.1",
+        "type": "get"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success:",
+          "content": "{\n  \"models\": [\n    {\n      \"database\": \"Repo3DDemo\",\n      \"model\": \"011382b0-2286-11eb-93c1-296aba26cc11\",\n      \"assets\": [\n        \"153cf665-2c84-4ff9-a9e2-ba495af8e6dc\",\n        \"07c67b6c-4b02-435f-8639-ea88403c36f7\",\n        \"2967230f-67fa-45dc-9686-161e45c7c8a2\"\n      ],\n      \"offset\": [\n        9.999999999999787,\n        0,\n        -9.999999999999787\n      ]\n    },\n    {\n      \"database\": \"Repo3DDemo\",\n      \"model\": \"01168ff0-2286-11eb-93c1-296aba26cc11\",\n      \"assets\": [\n        \"89d5580a-3224-4e50-bbab-89d855c320e0\"\n      ],\n      \"offset\": [\n        1610,\n        740,\n        -2410\n      ]\n    },\n    {\n      \"database\": \"Repo3DDemo\",\n      \"model\": \"01153060-2286-11eb-93c1-296aba26cc11\",\n      \"assets\": [\n        \"c14dbbee-a8fd-4ed8-8641-9e24737f8238\"\n      ],\n      \"offset\": [\n        -688.095458984375,\n        6410.9140625,\n        683.460205078125\n      ]\n    }\n  ]\n}",
           "type": "json"
         }
       ]
@@ -8601,7 +8659,7 @@ define({ "api": [
             "type": "String",
             "optional": false,
             "field": "model",
-            "description": "<p>id of the model to get JSON Mpc for.</p>"
+            "description": "<p>id of the model</p>"
           },
           {
             "group": "Parameter",
@@ -9320,6 +9378,16 @@ define({ "api": [
   },
   {
     "type": "patch",
+    "url": "/notifications",
+    "title": "Patch all the user notifications",
+    "name": "patchNotification",
+    "group": "Notification",
+    "version": "0.0.0",
+    "filename": "routes/notification.js",
+    "groupTitle": "Notification"
+  },
+  {
+    "type": "patch",
     "url": "/notifications/:id",
     "title": "Patch a notification",
     "name": "patchNotification",
@@ -9337,16 +9405,6 @@ define({ "api": [
         ]
       }
     },
-    "version": "0.0.0",
-    "filename": "routes/notification.js",
-    "groupTitle": "Notification"
-  },
-  {
-    "type": "patch",
-    "url": "/notifications",
-    "title": "Patch all the user notifications",
-    "name": "patchNotification",
-    "group": "Notification",
     "version": "0.0.0",
     "filename": "routes/notification.js",
     "groupTitle": "Notification"
@@ -9572,6 +9630,151 @@ define({ "api": [
     "version": "0.0.0",
     "filename": "routes/plan.js",
     "groupTitle": "Plan"
+  },
+  {
+    "type": "put",
+    "url": "/:teamspace/:model/presentation/:code/start",
+    "title": "Starts a presentation session and returns the presentation code",
+    "name": "startPresentation",
+    "group": "Presentation",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>The teamspace where the presentation is taking place</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>The model where the presentation is taking place</p>"
+          }
+        ]
+      }
+    },
+    "examples": [
+      {
+        "title": "Example usage:",
+        "content": "POST /teamSpace1/5ce7dd19-1252-4548-a9c9-4a5414f2e0c5/presentation/start HTTP/1.1",
+        "type": "get"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success:",
+          "content": "{ code: \"aASnk\" }",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/presentation.js",
+    "groupTitle": "Presentation"
+  },
+  {
+    "type": "put",
+    "url": "/:teamspace/:model/presentation/:code/start",
+    "title": "Starts a presentation session and returns the presentation code",
+    "name": "startPresentation",
+    "group": "Presentation",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>The teamspace where the presentation is taking place</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>The model where the presentation is taking place</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "code",
+            "description": "<p>The code that users need to join in order to get the viewpoint.</p>"
+          }
+        ]
+      }
+    },
+    "examples": [
+      {
+        "title": "Example usage:",
+        "content": "POST /teamSpace1/5ce7dd19-1252-4548-a9c9-4a5414f2e0c5/presentation/start HTTP/1.1",
+        "type": "get"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success:",
+          "content": "{ code: \"aASnk\" }",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/presentation.js",
+    "groupTitle": "Presentation"
+  },
+  {
+    "type": "put",
+    "url": "/:teamspace/:model/presentation/:code/stream",
+    "title": "Streams a viewpoint",
+    "name": "streamPresentation",
+    "group": "Presentation",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>The teamspace where the presentation is taking place</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>The model where the presentation is taking place</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "code",
+            "description": "<p>The code that users need to join in order to get the viewpoint.</p>"
+          }
+        ],
+        "Request body": [
+          {
+            "group": "Request body",
+            "type": "StreamingViewpoint",
+            "optional": false,
+            "field": "The",
+            "description": "<p>viewpoint</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/presentation.js",
+    "groupTitle": "Presentation"
   },
   {
     "type": "post",
@@ -12083,6 +12286,44 @@ define({ "api": [
   },
   {
     "type": "get",
+    "url": "/:teamspace/addOns",
+    "title": "get enabled add ons",
+    "name": "getAddOns",
+    "group": "Teamspace",
+    "description": "<p>view the list of addOns enabled on this teamspace</p>",
+    "permission": [
+      {
+        "name": "teamspace member"
+      }
+    ],
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success",
+          "content": "{\n  vrEnabled: true,\n  hereEnabled: true\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/teamspace.js",
+    "groupTitle": "Teamspace"
+  },
+  {
+    "type": "get",
     "url": "/:teamspace/billingInfo",
     "title": "Get billing info",
     "name": "getBillingInfo",
@@ -12492,7 +12733,7 @@ define({ "api": [
     "type": "post",
     "url": "/:teamspace/settings/mitigations.csv",
     "title": "Upload mitigations file",
-    "name": "upload__MitigationsFile",
+    "name": "uploadMitigationsFile",
     "group": "Teamspace",
     "description": "<p>Upload a risk mitigations CSV file to a teamspace.</p>",
     "examples": [

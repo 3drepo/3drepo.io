@@ -1,13 +1,13 @@
 define({
   "name": "3drepo.io",
-  "version": "4.12.0",
+  "version": "4.14.0",
   "description": "The backend for 3drepo.io",
   "sampleUrl": false,
   "defaultVersion": "0.0.0",
   "apidoc": "0.3.0",
   "generator": {
     "name": "apidoc",
-    "time": "2020-12-03T15:19:03.227Z",
+    "time": "2021-02-23T10:38:14.934Z",
     "url": "http://apidocjs.com",
     "version": "0.17.7"
   }
