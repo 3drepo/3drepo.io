@@ -50,7 +50,8 @@ export const Participant: React.FC<IProps> = ({ leavePresentation, isPaused, tog
 		<StyledDivider />
 		<SectionBottom>
 			You are participating in a live session.<br />
-			{isPaused ? `Resume to continue following the presenter.` : `Pause to take control of your view.`}
+			{isPaused ? 'Resume to continue following the presenter.' :
+						'Pause to take control of your view, select objects and add pins'}
 		</SectionBottom>
 	</Container>
 );

@@ -23,7 +23,7 @@ import { VIEWER_LEFT_PANELS, VIEWER_PANELS } from '../../constants/viewerGui';
 import { getWindowHeight, getWindowWidth, renderWhenTrue } from '../../helpers/rendering';
 import { IDataCache, STORE_NAME } from '../../services/dataCache';
 import { MultiSelect } from '../../services/viewer/multiSelect';
-import { Activities } from './components/activities';
+import { Activities } from './components/activities/';
 import { Bim } from './components/bim';
 import { CloseFocusModeButton } from './components/closeFocusModeButton';
 import { Compare } from './components/compare';
@@ -31,7 +31,7 @@ import Gis from './components/gis/gis.container';
 import { Groups } from './components/groups';
 import { Issues } from './components/issues';
 import { Legend } from './components/legend';
-import { PANEL_DEFAULT_HEIGHT, PANEL_DEFAULT_WIDTH } from './components/legend/legend.constants';
+import { PANEL_DEFAULT_WIDTH } from './components/legend/legend.constants';
 import { Measurements } from './components/measurements';
 import { PanelButton } from './components/panelButton/panelButton.component';
 import RevisionsSwitch from './components/revisionsSwitch/revisionsSwitch.container';
@@ -81,6 +81,10 @@ interface IProps {
 	resetCompareComponent: () => void;
 	joinPresentation: (code) => void;
 	cacheEnabled: boolean;
+	subscribeOnIssueChanges: (teamspace, modelId) => void;
+	unsubscribeOnIssueChanges: (teamspace, modelId) => void;
+	subscribeOnRiskChanges: (teamspace, modelId) => void;
+	unsubscribeOnRiskChanges: (teamspace, modelId) => void;
 }
 
 interface IState {
@@ -125,6 +129,8 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 
 		MultiSelect.initKeyWatchers();
 		this.props.fetchData(params.teamspace, params.model);
+		this.props.subscribeOnIssueChanges(params.teamspace, params.model);
+		this.props.subscribeOnRiskChanges(params.teamspace, params.model);
 		this.toggleViewerListeners(true);
 
 		if (presenter) {
@@ -150,7 +156,11 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		}
 
 		if (teamspaceChanged || modelChanged || revisionChanged) {
+			this.props.unsubscribeOnIssueChanges(prevProps.match.params.teamspace, prevProps.match.params.model);
+			this.props.unsubscribeOnRiskChanges(prevProps.match.params.teamspace, prevProps.match.params.model);
 			this.props.fetchData(params.teamspace, params.model);
+			this.props.subscribeOnIssueChanges(params.teamspace, params.model);
+			this.props.subscribeOnRiskChanges(params.teamspace, params.model);
 		}
 
 		if (!isEmpty(changes)) {
@@ -170,7 +180,11 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentWillUnmount() {
+		const { match: { params } } = this.props;
+
 		MultiSelect.removeKeyWatchers();
+		this.props.unsubscribeOnIssueChanges(params.teamspace, params.model);
+		this.props.unsubscribeOnRiskChanges(params.teamspace, params.model);
 		this.props.stopListenOnSelections();
 		this.props.stopListenOnModelLoaded();
 		this.props.stopListenOnClickPin();

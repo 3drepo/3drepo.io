@@ -17,8 +17,21 @@
 
 "use strict";
 
-const ModelFactory = require("../factory/modelFactory");
-const ModelSetting = require("../modelSetting");
+const db = require("../../handler/db");
+const {
+	prepareDefaultView,
+	createNewSetting,
+	deleteModelSetting,
+	findModelSettingById,
+	findModelSettings,
+	findPermissionByUser,
+	getModelsData,
+	isModelNameExists,
+	setModelImportFail,
+	setModelImportSuccess,
+	setModelStatus,
+	createCorrelationId
+} = require("../modelSetting");
 const User = require("../user");
 const responseCodes = require("../../response_codes");
 const importQueue = require("../../services/queue");
@@ -34,15 +47,71 @@ const middlewares = require("../../middlewares/middlewares");
 const multer = require("multer");
 const fs = require("fs");
 const ChatEvent = require("../chatEvent");
-const Project = require("../project");
+const { addModelToProject, createProject, findOneProject, removeProjectModel } = require("../project");
 const _ = require("lodash");
-const nodeuuid = require("uuid/v1");
 const FileRef = require("../fileRef");
 const notifications = require("../notification");
 const CombinedStream = require("combined-stream");
 const stringToStream = require("string-to-stream");
 const { StreamBuffer } = require("./stream");
 const { BinToTriangleStringStream, BinToVector3dStringStream } = require("./binary");
+const PermissionTemplates = require("../permissionTemplates");
+const AccountPermissions = require("../accountPermissions");
+
+async function _fillInModelDetails(accountName, setting, permissions) {
+	if (permissions.indexOf(C.PERM_MANAGE_MODEL_PERMISSION) !== -1) {
+		permissions = C.MODEL_PERM_LIST.slice(0);
+	}
+
+	const model = {
+		federate: setting.federate,
+		permissions: permissions,
+		model: setting._id,
+		type: setting.type,
+		units: setting.properties.unit,
+		name: setting.name,
+		status: setting.status,
+		errorReason: setting.errorReason,
+		subModels: setting.federate && setting.subModels || undefined,
+		timestamp: setting.timestamp || null,
+		code: setting.properties ? setting.properties.code || undefined : undefined
+
+	};
+
+	const nRev = await History.revisionCount(accountName, setting._id);
+
+	model.nRevisions = nRev;
+
+	return model;
+}
+
+// list all models in an account
+async function _getModels(teamspace, ids, permissions) {
+	const models = [];
+	const fedModels = [];
+
+	let query = {};
+
+	if (ids) {
+		query = { _id: { "$in": ids } };
+	}
+
+	const settings = await findModelSettings(teamspace, query);
+
+	await Promise.all(settings.map(async setting => {
+		const model = await _fillInModelDetails(teamspace, setting, permissions);
+
+		if (!(model.permissions.length === 1 && model.permissions[0] === null)) {
+			setting.federate ? fedModels.push(model) : models.push(model);
+		}
+	}));
+
+	return { models, fedModels };
+}
+
+function _makeAccountObject(name) {
+	return { account: name, models: [], fedModels: [], projects: [], permissions: [], isAdmin: false };
+}
 
 /** *****************************************************************************
  * Converts error code from repobouncerclient to a response error object.
@@ -87,6 +156,7 @@ function translateBouncerErrCode(bouncerErrorCode) {
 		{ res: responseCodes.FILE_IMPORT_TIMED_OUT, softFail: false, userErr: false},
 		{ res: responseCodes.FILE_IMPORT_SYNCHRO_NOT_SUPPORTED, softFail: false, userErr: false},
 		{ res: responseCodes.FILE_IMPORT_MAX_NODE_EXCEEDED, softFail: false, userErr: true},
+		{ res: responseCodes.FILE_IMPORT_PROCESS_ERR, softFail: false, userErr: false},
 		{ res: responseCodes.FILE_IMPORT_PROCESS_ERR, softFail: false, userErr: false}
 	];
 
@@ -102,45 +172,29 @@ function insertModelUpdatedNotificationsLatestReview(account, model) {
 		return notifications.upsertModelUpdatedNotifications(account, model, revision);
 	}).then(n => n.forEach(ChatEvent.upsertedNotification.bind(null,null)));
 }
-function importSuccess(account, model, sharedSpacePath, user) {
-	Promise.all([
-		setStatus(account, model, "ok", user),
-		History.revisionCount(account, model)
-	]).then(([setting, nRevisions]) => {
+
+async function importSuccess(account, model, sharedSpacePath, user) {
+	try {
+		const [setting, nRevisions] = await Promise.all([
+			setStatus(account, model, "ok", user),
+			History.revisionCount(account, model)
+		]);
+
 		if (setting) {
-			if (sharedSpacePath && setting.corID) {
-				const path = require("path");
-				const tmpDir = path.join(sharedSpacePath, setting.corID);
-				const tmpModelFile = path.join(sharedSpacePath, `${setting.corID}.json`);
-				const filesToDelete  = [{ type:"file", path: tmpModelFile}];
-
-				fs.readdirSync(tmpDir).forEach((file) => {
-					filesToDelete.push({ type: "file", path: path.join(tmpDir, file)});
-				});
-
-				_deleteFiles(filesToDelete);
-				_deleteFiles([{desc: "tmp dir", type: "dir", path: tmpDir}]);
-			}
 			systemLogger.logInfo(`Model status changed to ${setting.status} and correlation ID reset`);
-			setting.corID = undefined;
-			setting.errorReason = undefined;
-			if(setting.type === "toy" || setting.type === "sample") {
-				setting.timestamp = new Date();
-			}
-			setting.markModified("errorReason");
+
+			const updatedSetting = await setModelImportSuccess(account, model, setting.type === "toy" || setting.type === "sample");
 
 			// hack to add the user field to send to the user
-			const data = {user, nRevisions ,...JSON.parse(JSON.stringify(setting))};
+			const data = {user, nRevisions ,...JSON.parse(JSON.stringify(updatedSetting))};
 			ChatEvent.modelStatusChanged(null, account, model, data);
 
 			// Creates model updated notification.
 			insertModelUpdatedNotificationsLatestReview(account, model);
-
-			setting.save();
 		}
-	}).catch(err => {
+	} catch (err) {
 		systemLogger.logError("Failed to invoke importSuccess:" +  err);
-	});
+	}
 }
 
 /**
@@ -153,22 +207,12 @@ function importSuccess(account, model, sharedSpacePath, user) {
  * @param {errMsg} errMsg - Verbose error message (errCode.message will be used if undefined)
  */
 function importFail(account, model, sharedSpacePath, user, errCode, errMsg) {
-	ModelSetting.findById({account, model}, model).then(setting => {
-		// mark model failed
-		setting.status = "failed";
-		if(setting.type === "toy" || setting.type === "sample") {
-			setting.timestamp = undefined;
-		}
+	const translatedError = translateBouncerErrCode(errCode);
 
-		const translatedError = translateBouncerErrCode(errCode);
-		setting.errorReason = translatedError.res;
-
-		setting.markModified("errorReason");
-		setting.save().then(() => {
-			// hack to add the user field to send to the user
-			const data = Object.assign({user}, JSON.parse(JSON.stringify(setting)));
-			ChatEvent.modelStatusChanged(null, account, model, data);
-		});
+	setModelImportFail(account, model, translatedError.res).then(setting => {
+		// hack to add the user field to send to the user
+		const data = Object.assign({user}, JSON.parse(JSON.stringify(setting)));
+		ChatEvent.modelStatusChanged(null, account, model, data);
 
 		if (!errMsg) {
 			errMsg = setting.errorReason.message;
@@ -223,56 +267,16 @@ function importFail(account, model, sharedSpacePath, user, errCode, errMsg) {
  * @param {model} model - Model
  * @param {user} user - The user who triggered the status
  */
-function setStatus(account, model, status, user) {
-	ChatEvent.modelStatusChanged(null, account, model, { status, user });
-	return ModelSetting.findById({account, model}, model).then(setting => {
-		setting.status = status;
+async function setStatus(account, model, status, user) {
+	try {
+		const setting = await setModelStatus(account, model, status);
 		systemLogger.logInfo(`Model status changed to ${status}`);
-		return setting.save();
-	}).catch(err => {
+		ChatEvent.modelStatusChanged(null, account, model, { status, user });
+
+		return setting;
+	} catch(err) {
 		systemLogger.logError("Failed to invoke setStatus:", err);
-	});
-}
-
-/**
- * Create correlation ID, store it in model setting, and return it
- * @param {account} account - User account
- * @param {model} model - Model
- * @param {addTimestamp} - add a timestamp to the model settings while you're at it
- */
-function createCorrelationId(setting, addTimestamp = false) {
-	const correlationId = nodeuuid();
-
-	if(setting) {
-		setting.corID = correlationId;
-		if (addTimestamp) {
-			// FIXME: This is a temporary workaround, needed because federation
-			// doesn't update it's own timestamp (and also not wired into the chat)
-			setting.timestamp = new Date();
-		}
-		systemLogger.logInfo(`Correlation ID ${setting.corID} set`);
-
-		return setting.save().then(() => {
-			return correlationId;
-		});
 	}
-
-	return Promise.reject("setting is undefined");
-}
-
-/**
- * Clear correlation ID from model setting when processing returns
- * @param {account} account - User account
- * @param {model} model - Model
- */
-function resetCorrelationId(account, model) {
-	ModelSetting.findById({account, model}, model).then(setting => {
-		setting.corID = undefined;
-		systemLogger.logInfo("Correlation ID reset");
-		setting.save();
-	}).catch(err => {
-		systemLogger.logError("Failed to resetCorrelationId:", err);
-	});
 }
 
 function createNewModel(teamspace, modelName, data) {
@@ -281,26 +285,22 @@ function createNewModel(teamspace, modelName, data) {
 	}
 
 	const projectName = data.project;
-	return Project.findOne({account: teamspace}, {name: projectName}).then((project) => {
+	return findOneProject(teamspace, {name: projectName}).then((project) => {
 		if(!project) {
 			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
 		}
 
+		// FIXME when project changes are merged, consider using func in project
 		// Check there's no other model within the same project with the model name
-		return ModelSetting.count({account: teamspace},
-			{name: modelName, _id: {"$in": project.models}}).then((count) => {
-			return count > 0;
-		}).then((modelNameExists) => {
+		return isModelNameExists(teamspace, project.models, modelName).then((modelNameExists) => {
 			if(modelNameExists) {
 				return Promise.reject({resCode: responseCodes.MODEL_EXIST});
 			}
 
 			// Create a model setting
-			return ModelSetting.createNewSetting(teamspace, modelName, data).then((settings) => {
+			return createNewSetting(teamspace, modelName, data).then((settings) => {
 				// Add model into project
-				project.models.push(settings._id);
-
-				return project.save().then(() => {
+				return addModelToProject(teamspace, projectName, settings._id).then(() => {
 					// call chat to indicate a new model has been created
 					const modelData = {
 						account: teamspace,
@@ -331,7 +331,7 @@ function createNewFederation(teamspace, modelName, username, data, toyFed) {
 function importToyProject(account, username) {
 
 	// create a project named Sample_Project
-	return Project.createProject(username, "Sample_Project", username, [C.PERM_TEAMSPACE_ADMIN]).then(project => {
+	return createProject(username, "Sample_Project", username, [C.PERM_TEAMSPACE_ADMIN]).then(project => {
 
 		return Promise.all([
 
@@ -345,9 +345,6 @@ function importToyProject(account, username) {
 			const skip = { tree: 1 };
 
 			const subModels = models.map(m => {
-
-				m = m.toObject();
-
 				importSuccess(account, m._id);
 
 				return {
@@ -435,7 +432,7 @@ function createFederatedModel(account, model, username, subModels, modelSettings
 			return;
 		}
 
-		addSubModelsPromise.push(ModelSetting.findById({account, model: subModel.model}, subModel.model).then(setting => {
+		addSubModelsPromise.push(findModelSettingById(account, subModel.model).then(setting => {
 			if(!setting) {
 				return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 			}
@@ -455,28 +452,22 @@ function createFederatedModel(account, model, username, subModels, modelSettings
 
 	});
 
-	const fedSettings = modelSettings ? Promise.resolve(modelSettings)
-		: ModelSetting.findById({account}, model);
-
 	return Promise.all(addSubModelsPromise).then(() => {
-		return fedSettings.then((settings) => {
-			return createCorrelationId(settings, true).then(correlationId => {
-				setStatus(account, model, "queued", username).then(() => {
-					const federatedJSON = {
-						database: account,
-						project: model,
-						subProjects: subModelArr
-					};
+		return createCorrelationId(account, model, true).then(correlationId => {
+			setStatus(account, model, "queued", username).then(() => {
+				const federatedJSON = {
+					database: account,
+					project: model,
+					subProjects: subModelArr
+				};
 
-					if(toyFed) {
-						federatedJSON.toyFed = toyFed;
-					}
+				if(toyFed) {
+					federatedJSON.toyFed = toyFed;
+				}
 
-					return importQueue.createFederatedModel(correlationId, account, federatedJSON);
-				});
+				return importQueue.createFederatedModel(correlationId, account, federatedJSON);
 			});
 		});
-
 	});
 
 }
@@ -567,7 +558,7 @@ function listSubModels(account, model, branch = "master") {
 
 		const proms = refs.map(ref =>
 
-			ModelSetting.findById({ account: ref.owner}, ref.project, { name: 1 }).then(subModel => {
+			findModelSettingById(ref.owner, ref.project, { name: 1 }).then(subModel => {
 				// TODO: Why would this return null?
 				if (subModel) {
 					subModels.push({
@@ -677,24 +668,6 @@ async function uploadFile(req) {
 	return uploadedFile;
 }
 
-function _deleteFiles(files) {
-
-	files.forEach(file => {
-
-		const deleteFile = (file.type === "file" ? fs.unlinkSync : fs.rmdirSync);
-
-		try {
-			deleteFile(file.path);
-		} catch(err) {
-			systemLogger.logError("error while deleting file",{
-				message: err.message,
-				err: err,
-				file: file.path
-			});
-		}
-	});
-}
-
 /**
  * Called by importModel to perform model upload
  */
@@ -720,24 +693,22 @@ function importModel(account, model, username, modelSetting, source, data) {
 		return Promise.reject({ message: `modelSetting is ${modelSetting}`});
 	}
 
-	return modelSetting.save().then(() => {
-		return createCorrelationId(modelSetting).then(correlationId => {
-			return setStatus(account, model, "queued", username).then(setting => {
+	return createCorrelationId(account, model).then(correlationId => {
+		return setStatus(account, model, "queued", username).then(setting => {
 
-				modelSetting = setting;
+			modelSetting = setting;
 
-				if (source.type === "upload") {
-					return _handleUpload(correlationId, account, model, username, source.file, data);
+			if (source.type === "upload") {
+				return _handleUpload(correlationId, account, model, username, source.file, data);
 
-				} else if (source.type === "toy") {
+			} else if (source.type === "toy") {
 
-					return importQueue.importToyModel(correlationId, account, model, source).then(() => {
-						systemLogger.logInfo(`Job ${modelSetting.corID} imported without error`,{account, model, username});
-						return modelSetting;
-					});
-				}
+				return importQueue.importToyModel(correlationId, account, model, source).then(() => {
+					systemLogger.logInfo(`Job ${modelSetting.corID} imported without error`,{account, model, username});
+					return modelSetting;
+				});
+			}
 
-			});
 		});
 	}).catch(err => {
 		systemLogger.logError("Failed to importModel:", err);
@@ -747,7 +718,7 @@ function importModel(account, model, username, modelSetting, source, data) {
 }
 
 function isSubModel(account, model) {
-	return ModelSetting.find({ account, model}, { federate: true }).then((feds) => {
+	return findModelSettings(account, { federate: true }).then((feds) => {
 		const promises = [];
 
 		feds.forEach(modelSetting => {
@@ -769,12 +740,12 @@ async function removeModelCollections(account, model) {
 		systemLogger.logError("Failed to remove files", err);
 	}
 
-	const collections = await ModelFactory.dbManager.listCollections(account);
+	const collections = await db.listCollections(account);
 	const promises = [];
 
 	collections.forEach(collection => {
 		if(collection.name.startsWith(model + ".")) {
-			promises.push(ModelFactory.dbManager.dropCollection(account, collection));
+			promises.push(db.dropCollection(account, collection));
 		}
 	});
 
@@ -782,7 +753,7 @@ async function removeModelCollections(account, model) {
 }
 
 function removeModel(account, model, forceRemove) {
-	return ModelSetting.findById({account, model}, model).then(setting => {
+	return findModelSettingById(account, model).then(setting => {
 		if (!setting) {
 			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 		}
@@ -801,8 +772,8 @@ function removeModel(account, model, forceRemove) {
 			}
 			return removeModelCollections(account, model).then(() => {
 				const deletePromises = [];
-				deletePromises.push(setting.remove());
-				deletePromises.push(Project.removeModel(account, model));
+				deletePromises.push(deleteModelSetting(account, model));
+				deletePromises.push(removeProjectModel(account, model));
 				return Promise.all(deletePromises);
 			}).catch((err) => {
 				systemLogger.logError("Failed to remove collections: ", err);
@@ -832,7 +803,7 @@ async function getModelPermission(username, setting, account) {
 			return [];
 		}
 
-		const accountPerm = dbUser.customData.permissions.findByUser(username);
+		const accountPerm = AccountPermissions.findByUser(dbUser, username);
 		if(accountPerm && accountPerm.permissions) {
 			permissions = flattenPermissions(accountPerm.permissions);
 		}
@@ -840,16 +811,16 @@ async function getModelPermission(username, setting, account) {
 		const projectQuery = { models: setting._id, "permissions.user": username };
 
 		// project admin have access to models underneath it.
-		const project = await Project.findOne({account}, projectQuery, { "permissions.$" : 1 });
+		const project = await findOneProject(account, projectQuery, { "permissions.$" : 1 });
 
 		if(project && project.permissions) {
 			permissions = permissions.concat(flattenPermissions(project.permissions[0].permissions));
 		}
 
-		const template = setting.findPermissionByUser(username);
+		const template = await findPermissionByUser(account, setting._id, username);
 
 		if(template) {
-			const permissionTemplate = dbUser.customData.permissionTemplates.findById(template.permission);
+			const permissionTemplate = PermissionTemplates.findById(dbUser, template.permission);
 
 			if(permissionTemplate && permissionTemplate.permissions) {
 				permissions = permissions.concat(flattenPermissions(permissionTemplate.permissions, true));
@@ -920,7 +891,7 @@ async function getSubModelRevisions(account, model, branch, rev) {
 		}));
 	});
 
-	promises.push(ModelSetting.getModelsData(param).then((modelNameResult) => {
+	promises.push(getModelsData(param).then((modelNameResult) => {
 		const lookUp = modelNameResult[account];
 		modelIds.forEach((modelId) => {
 			results[modelId].name = lookUp[modelId].name;
@@ -943,7 +914,7 @@ const acceptedFormat = [
 ];
 
 const getModelSetting = async (account, model, username) => {
-	let setting = await ModelSetting.findById({account}, model);
+	let setting = await findModelSettingById(account, model);
 
 	if (!setting) {
 		throw { resCode: responseCodes.MODEL_INFO_NOT_FOUND};
@@ -958,17 +929,23 @@ const getModelSetting = async (account, model, username) => {
 			listSubModels(account, model, C.MASTER_BRANCH_NAME)
 		]);
 
-		setting = await setting.clean();
-		setting.model = setting._id;
-		setting.account = account;
-		setting.headRevisions = {};
-		setting.permissions = permissions;
-		setting.subModels = submodels;
-		return setting;
+		setting = await prepareDefaultView(account, model, setting);
+
+		return {
+			...setting,
+			account,
+			model: setting._id,
+			headRevisions: {},
+			permissions,
+			subModels: submodels
+		};
 	}
 };
 
 module.exports = {
+	_fillInModelDetails,
+	_getModels,
+	_makeAccountObject,
 	createNewModel,
 	createNewFederation,
 	importToyModel,
@@ -983,7 +960,6 @@ module.exports = {
 	importModel,
 	removeModel,
 	getModelPermission,
-	resetCorrelationId,
 	getSubModelRevisions,
 	setStatus,
 	importSuccess,

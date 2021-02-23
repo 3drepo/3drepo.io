@@ -89,7 +89,7 @@ export class ButtonMenu extends React.PureComponent<IProps, IState> {
 	public componentDidUpdate(prevProps) {
 		if (this.props.open !== prevProps.open) {
 			this.setState({
-				activeMenu: true
+				activeMenu: this.props.open
 			});
 		}
 	}

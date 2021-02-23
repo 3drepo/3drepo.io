@@ -173,7 +173,7 @@
 				template = "refund.pug";
 			}
 
-			res.render(template, {billing : invoice.toJSON(), baseURL: config.getBaseURL()});
+			res.render(template, {billing : invoice, baseURL: config.getBaseURL()});
 
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err, undefined, config.cachePolicy);

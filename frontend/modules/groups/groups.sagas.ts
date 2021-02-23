@@ -298,17 +298,13 @@ function* updateGroup({ teamspace, modelId, revision, groupId }) {
 
 		const isNormalGroup = groupDetails.type === GROUPS_TYPES.NORMAL;
 		const objectsStatus = yield Viewer.getObjectsStatus();
+
 		if (isNormalGroup) {
-			groupToSave.totalSavedMeshes = calculateTotalMeshes(objectsStatus.highlightedNodes);
 			groupToSave.objects = objectsStatus.highlightedNodes;
 		}
 
 		const { data } = yield API.updateGroup(teamspace, modelId, revision, groupId, groupToSave);
 		const preparedGroup = prepareGroup(data);
-
-		if (isNormalGroup) {
-			preparedGroup.totalSavedMeshes = groupToSave.totalSavedMeshes;
-		}
 
 		yield put(GroupsActions.updateGroupSuccess(preparedGroup));
 		yield put(GroupsActions.highlightGroup(preparedGroup));

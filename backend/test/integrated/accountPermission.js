@@ -66,37 +66,32 @@ describe("Account permission::", function () {
 
 	it("should fail to assign non team space permissions to a user", function(done) {
 		agent.post(`/${username}/permissions`)
-			.send({ user: "user1", permissions: ["view_issue"]})
+			.send({ user: "issue_username", permissions: ["create_project"]})
 			.expect(400, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.INVALID_PERM.value);
+				expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
 				done(err);
 			});
 	});
 
-	it("should able to assign permissions to a user", function(done) {
+	it("should fail to assign invalid permissions to a user", async function() {
+		const { body } = await agent.post(`/${username}/permissions`)
+			.send({ user: "user1", permissions: ["view_issue"]});
+
+		expect(body.value).to.equal(responseCodes.INVALID_PERM.value);
+	});
+
+	it("should able to assign permissions to a user", async function() {
 
 		const permission = { user: "testing", permissions: ["create_project"]};
 
-		async.series([
-			callback => {
-				agent.post(`/${username}/permissions`)
+		await agent.post(`/${username}/permissions`)
 					.send(permission)
-					.expect(200, function(err, res) {
-						callback(err);
-					});
-			},
+					.expect(200);
 
-			callback => {
-				agent.get(`/${username}/permissions`)
-					.expect(200, function(err, res) {
+		const {body} = await agent.get(`/${username}/permissions`)
+					.expect(200);
 
-						expect(res.body.find(perm => perm.user === permission.user)).to.deep.equal(permission);
-						callback(err);
-					});
-			}
-
-		], (err, res) => done(err));
-
+		expect(body.find(perm => perm.user === permission.user)).to.deep.equal(permission);
 	});
 
 	it("should not be able to assign permissions of owner", function(done) {
@@ -195,27 +190,15 @@ describe("Account permission::", function () {
 
 	});
 
-	it("should not be able to update user's permissions after it has been removed", function(done) {
-
-		async.series([
-			callback => {
-				agent.put(`/${username}/permissions/user2`)
+	it("should not be able to update user's permissions after it has been removed", async function() {
+		await agent.put(`/${username}/permissions/user2`)
 					.send({ permissions: ["create_project"]})
-					.expect(404, function(err, res) {
-						callback(err);
-					});
-			},
+					.expect(404);
 
-			callback => {
-				agent.get(`/${username}/permissions`)
-					.expect(200, function(err, res) {
-						expect(res.body.find(perm => perm.user === "user2")).to.deep.equal({user: "user2", permissions:[]});
-						callback(err);
-					});
-			}
+		const {body} = await agent.get(`/${username}/permissions`)
+					.expect(200);
 
-		], (err, res) => done(err));
-
+		expect(body.find(perm => perm.user === "user2")).to.deep.equal({user: "user2", permissions:[]});
 	});
 
 	it("should be able to add user's permissions after it has been removed", function(done) {
@@ -332,32 +315,21 @@ describe("Account permission::", function () {
 			.expect(200, done);
 	});
 
-	it("non teamspace admin users will have permissions revoked on any projects including the one created by themselves if parent teamspace level permissions has been revoked", function(done) {
-
+	it("non teamspace admin users will have permissions revoked on any projects including the one created by themselves if parent teamspace level permissions has been revoked", async function() {
 		const teamspace = "testing";
 
-		async.series([
-			callback => {
-				agentAdmin = request.agent(server);
-				agentAdmin.post("/login")
-					.send({ username: "testing", password: "testing" })
-					.expect(200, function(err, res) {
-						expect(res.body.username).to.equal("testing");
-						callback(err);
-					});
-			},
+		agentAdmin = request.agent(server);
+		const {body} =  await agentAdmin.post("/login")
+			.send({ username: "testing", password: "testing" })
+			.expect(200);
 
-			callback => {
-				agentAdmin.delete(`/${teamspace}/permissions/${username}`)
-					.expect(200, callback);
-			},
+		expect(body.username).to.equal("testing")
 
-			callback => {
-				agent.get(`/${teamspace}/projects/${projectName}`)
-					.expect(401, callback);
-			}
+		await agentAdmin.delete(`/${teamspace}/permissions/${username}`)
+			.expect(200);
 
-		], done);
+		await agent.get(`/${teamspace}/projects/${projectName}`)
+			.expect(401);
 	});
 
 });

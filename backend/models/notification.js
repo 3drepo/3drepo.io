@@ -17,7 +17,7 @@
 
 "use strict";
 const { hasWriteAccessToModelHelper, hasReadAccessToModelHelper } = require("../middlewares/checkPermissions");
-const ModelSetting = require("../models/modelSetting");
+const { getModelsData } = require("./modelSetting");
 const { findByJob, findUsersWithJobs } = require("./job");
 const utils = require("../utils");
 const nodeuuid = require("uuid/v1");
@@ -120,7 +120,7 @@ const fillModelData = function(fullNotifications) {
 	}
 
 	const teamSpaces = extractTeamSpaceInfo(notifications);
-	return ModelSetting.getModelsData(teamSpaces).then((modelsData) => { // fills out the models name with data from the database
+	return getModelsData(teamSpaces).then((modelsData) => { // fills out the models name with data from the database
 		notifications.forEach (notification => {
 			const teamSpace = modelsData[notification.teamSpace] || {};
 			const {name, federate} = teamSpace[notification.modelId] || {};
@@ -400,13 +400,9 @@ module.exports = {
 
 	insertUserReferencedNotification: async function (referrer, teamspace, modelId, type, _id, referee) {
 		try {
-			const user = await User.findByUserName(referee);
-			if (await user.isMemberOfTeamspace(teamspace)) {
-				const notification = await insertUserReferencedNotification(referrer, teamspace, modelId, type, _id, referee);
-				return await fillModelData([{username: referee, notification}]);
-			} else {
-				return [];
-			}
+			await User.teamspaceMemberCheck(referee, teamspace);
+			const notification = await insertUserReferencedNotification(referrer, teamspace, modelId, type, _id, referee);
+			return await fillModelData([{username: referee, notification}]);
 		} catch (e) {
 			return [];
 		}

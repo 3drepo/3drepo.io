@@ -39,6 +39,7 @@ import { SequencesActions } from '../sequences';
 import { SnackbarActions } from '../snackbar';
 import { dispatch } from '../store';
 import { selectHiddenGeometryVisible, TreeActions } from '../tree';
+import { waitForTreeToBeReady } from '../tree/tree.sagas';
 import { selectColorOverrides, selectTransformations, ViewerGuiActions } from '../viewerGui';
 import { PRESET_VIEW } from './viewpoints.constants';
 import { ViewpointsActions, ViewpointsTypes } from './viewpoints.redux';
@@ -161,19 +162,6 @@ export function* deleteViewpoint({teamspace, modelId, viewpointId}) {
 	}
 }
 
-function* toggleSortOrder() {
-	try {
-		const currentSortOrder = yield select(selectSortOrder);
-		const isASC = currentSortOrder === SORT_ORDER_TYPES.ASCENDING;
-
-		yield put(ViewpointsActions.setComponentState({
-			sortOrder: isASC ? SORT_ORDER_TYPES.DESCENDING : SORT_ORDER_TYPES.ASCENDING,
-		}));
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('set', 'sort order', error.message));
-	}
-}
-
 const onUpdated = (updatedView) => dispatch(ViewpointsActions.updateViewpointSuccess(updatedView));
 
 const onDeleted = (deletedView) => {
@@ -243,6 +231,9 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 
 		if (viewpoint?.up && !ignoreCamera) {
 			yield put(ViewerGuiActions.setCamera(viewpoint));
+		} else {
+			// If we're not moving the camera, ensure the projection mode icon ion the gui matches the viewpoint
+			yield put(ViewerGuiActions.setProjectionModeSuccess(viewpoint.type));
 		}
 
 		const clippingPlanes = view.clippingPlanes || get(view, 'viewpoint.clippingPlanes');
@@ -252,6 +243,7 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 
 		yield Viewer.updateClippingPlanes( clippingPlanes, teamspace, modelId);
 
+		yield waitForTreeToBeReady();
 		yield prepareGroupsIfNecessary(teamspace, modelId, view.viewpoint);
 
 		if (viewpoint?.override_groups) {
@@ -400,7 +392,6 @@ export default function* ViewpointsSaga() {
 	yield takeLatest(ViewpointsTypes.CREATE_VIEWPOINT, createViewpoint);
 	yield takeLatest(ViewpointsTypes.UPDATE_VIEWPOINT, updateViewpoint);
 	yield takeLatest(ViewpointsTypes.DELETE_VIEWPOINT, deleteViewpoint);
-	yield takeLatest(ViewpointsTypes.TOGGLE_SORT_ORDER, toggleSortOrder);
 	yield takeLatest(ViewpointsTypes.SET_ACTIVE_VIEWPOINT, setActiveViewpoint);
 	yield takeLatest(ViewpointsTypes.SUBSCRIBE_ON_VIEWPOINT_CHANGES, subscribeOnViewpointChanges);
 	yield takeLatest(ViewpointsTypes.UNSUBSCRIBE_ON_VIEWPOINT_CHANGES, unsubscribeOnViewpointChanges);

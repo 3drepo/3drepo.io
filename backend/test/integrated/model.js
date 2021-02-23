@@ -323,6 +323,38 @@ describe("Model", function () {
 			});
 	});
 
+	it("get helicopter speed should succeed", function(done) {
+		const mymodel = "project6";
+
+		agent.get(`/${username}/${mymodel}/settings/heliSpeed`)
+			.expect(200, function(err, res) {
+				expect(res.body.heliSpeed).to.equal(1);
+				done(err);
+			});
+	});
+
+	it("update helicopter speed should succeed", function(done) {
+		const mymodel = "project6";
+		const newSpeed = {
+			heliSpeed: 3
+		};
+
+		async.series([
+			function(done) {
+				agent.put(`/${username}/${mymodel}/settings/heliSpeed`)
+					.send(newSpeed)
+					.expect(200, done);
+			},
+			function(done) {
+				agent.get(`/${username}/${mymodel}/settings/heliSpeed`)
+					.expect(200, function(err, res) {
+						expect(res.body.heliSpeed).to.equal(newSpeed.heliSpeed);
+						done(err);
+					});
+			}
+		], done);
+	});
+
 	it("should return error message if model name already exists", function(done) {
 
 		const model = "project7";
@@ -494,35 +526,24 @@ describe("Model", function () {
 		});
 
 		it("should remove setting in settings collection", function() {
-			return ModelSetting.findById({account: username, model: model}, model).then(setting => {
+			// FIXME why does this test directly import ModelSetting?!
+			return ModelSetting.findModelSettingById(username, model).then(setting => {
 				expect(setting).to.be.null;
 			});
 		});
 
-		it("should be removed from collaborator's model listing", function(done) {
+		it("should be removed from collaborator's model listing", async function() {
 
 			const agent2 = request.agent(server);
 
-			async.series([
-				callback => {
-					agent2.post("/login").send({ username: "testing", password: "testing" }).expect(200, callback);
-				},
-				callback => {
-					agent2.get("/testing.json").expect(200, function(err, res) {
+			await agent2.post("/login").send({ username: "testing", password: "testing" }).expect(200);
 
-						const account = res.body.accounts.find(account => account.account === username);
-						const modelExists = account.models.find(m => m.model === model);
+			const {body} =  await agent2.get("/testing.json").expect(200);
 
-						expect(modelExists).to.not.exist;
+			const account = body.accounts.find(account => account.account === username);
+			const modelExists = account.models.find(m => m.model === model);
 
-						// const mm = account.models.find(m => m.model === model);
-						// expect(mm).to.not.exist;
-
-						callback(err);
-					});
-				}
-			], done);
-
+			expect(modelExists).to.not.exist;
 		});
 
 		it("should be removed from model group", function(done) {

@@ -63,6 +63,12 @@
 		return collection.findOne(query, projection);
 	};
 
+	Handler.findOneAndDelete = async function (database, colName, query, projection = {}) {
+		const collection = await Handler.getCollection(database, colName);
+		const findResult = await collection.findOneAndDelete(query, projection);
+		return findResult.value;
+	};
+
 	function getURL(database) {
 		// Generate connection string that could include multiple hosts that
 		// represent a replica set.
@@ -186,11 +192,6 @@
 				}
 			});
 		});
-	};
-
-	// FIXME: this exist as a (temp) workaround because modelFactory has one call that doesn't expect promise!
-	Handler._getCollection = function (database, colName) {
-		return db.db(database).collection(colName);
 	};
 
 	Handler.listCollections = function (database) {

@@ -247,6 +247,13 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 
 export const RiskDetailsForm = withFormik({
 	mapPropsToValues: ({ risk }) => {
+		const setMitigationStatusValue = () => {
+			if (risk.mitigation_status && risk.mitigation_status !== 'mitigation_status') {
+				return risk.mitigation_status;
+			}
+			return '';
+		};
+
 		return ({
 			safetibase_id: risk.safetibase_id || '',
 			associated_activity: risk.associated_activity || '',
@@ -254,7 +261,7 @@ export const RiskDetailsForm = withFormik({
 			risk_factor: risk.risk_factor || '',
 			scope: risk.scope || '',
 			location_desc: risk.location_desc || '',
-			mitigation_status: risk.mitigation_status || '',
+			mitigation_status: setMitigationStatusValue(),
 			mitigation_desc: risk.mitigation_desc || '',
 			mitigation_detail: risk.mitigation_detail || '',
 			mitigation_stage: risk.mitigation_stage || '',

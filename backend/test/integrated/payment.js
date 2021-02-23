@@ -28,8 +28,8 @@ const async = require("async");
 const moment = require("moment-timezone");
 
 const Paypal = require("../../models/paypal");
-const UserBilling = require("../../models/userBilling");
-const getNextPaymentDate = UserBilling.statics.getNextPaymentDate;
+//const UserBilling = require("../../models/userBilling");
+//const getNextPaymentDate = UserBilling.statics.getNextPaymentDate;
 const url = require("url");
 
 const sinon = require("sinon");
@@ -62,6 +62,7 @@ describe("Enrolling to a subscription", function () {
 	const billingId = "I-000000000000";
 
 	const timeout = 30000;
+	/*
 
 	before(function(done) {
 
@@ -130,6 +131,7 @@ describe("Enrolling to a subscription", function () {
 
 	});
 
+
 	const plans = {
 		"plans": [
 			{
@@ -150,6 +152,9 @@ describe("Enrolling to a subscription", function () {
 			"vat": "123456"
 		}
 	};
+
+	/*
+	COMMENTED OUT PAYPAL TESTS
 
 	it("should succeed no VAT is supplied", function(done) {
 		this.timeout(timeout);
@@ -1153,4 +1158,6 @@ describe("Enrolling to a subscription", function () {
 		});
 	});
 
+	Paypal commented out
+	*/
 });

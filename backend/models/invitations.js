@@ -19,8 +19,8 @@
 const db = require("../handler/db");
 const User = require("./user");
 const Job = require("./job");
-const Project = require("./project");
-const ModelSetting = require("./modelSetting");
+const { changePermissions, findModelSettings } = require("./modelSetting");
+const { findProjectsById, setUserAsProjectAdminById } = require("./project");
 const systemLogger = require("../logger.js").systemLogger;
 const Mailer = require("../mailer/mailer");
 
@@ -94,11 +94,11 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 
 	const projectIds = projectsPermissions.map(pr => pr.project);
 
-	const [emailUser, teamspaceJob, projects, teamspaceObject] = await Promise.all([
+	const [emailUser, teamspaceJob, projects] = await Promise.all([
 		User.findByEmail(email),
 		Job.findByJob(teamspace, job),
-		Project.findByIds(teamspace, projectIds),
-		User.findByUserName(teamspace)
+		findProjectsById(teamspace, projectIds),
+		User.hasReachedLicenceLimitCheck(teamspace)
 	]);
 
 	if (emailUser) { // If there is already a user registered with that email
@@ -119,10 +119,6 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 
 	if (!validateModels(projectsPermissions, projects)) {
 		throw responseCodes.INVALID_MODEL_ID;
-	}
-
-	if (await teamspaceObject.hasReachedLicenceLimit()) {
-		throw responseCodes.LICENCE_LIMIT_REACHED;
 	}
 
 	permissions = cleanPermissions(permissions);
@@ -203,25 +199,24 @@ invitations.teamspaceInvitationCheck = async (email, teamspace) => {
 
 const applyModelPermissions = (teamspace, invitedUser, modelsPermissions) => async modelSetting=> {
 	const {permission} = modelsPermissions.find(({model}) => model === modelSetting._id);
-	return await modelSetting.changePermissions(modelSetting.permissions.concat({user: invitedUser, permission}), teamspace);
+	return await changePermissions(teamspace, modelSetting._id, modelSetting.permissions.concat({user: invitedUser, permission}));
 };
 
 const applyProjectPermissions = (teamspace, invitedUser) => async ({ project_admin , project, models}) => {
 	if (project_admin) {
-		await Project.setUserAsProjectAdminById(teamspace, project, invitedUser);
+		await setUserAsProjectAdminById(teamspace, project, invitedUser);
 	} else {
 		const modelsIds = models.map(({model}) => model);
-		const modelsList = await ModelSetting.find({ account: teamspace }, {"_id" : {"$in" : modelsIds}});
+		const modelsList = await findModelSettings(teamspace, {"_id" : {"$in" : modelsIds}});
 		await Promise.all(modelsList.map(applyModelPermissions(teamspace, invitedUser, models)));
 	}
 };
 
 const applyTeamspacePermissions = (invitedUser) => async ({ teamspace, job, permissions  }) => {
-	const teamspaceUser = await User.findByUserName(teamspace);
 	const teamPerms = permissions.teamspace_admin ? ["teamspace_admin"] : [];
 
 	try {
-		await teamspaceUser.addTeamMember(invitedUser, job, teamPerms);
+		await User.addTeamMember(teamspace, invitedUser, job, teamPerms);
 
 		if (!permissions.teamspace_admin) {
 			await Promise.all(permissions.projects.map(applyProjectPermissions(teamspace, invitedUser)));

@@ -242,7 +242,17 @@ export function Board(props: IProps) {
 	};
 
 	const handleModelChange = (e) => {
-		const url = `${ROUTES.BOARD_MAIN}/${type}/${teamspace}/${project}/${e.target.value}`;
+		const newModelId = e.target.value;
+		const url = `${ROUTES.BOARD_MAIN}/${type}/${teamspace}/${project}/${newModelId}`;
+
+		if (!isIssuesBoard) {
+			props.unsubscribeOnRiskChanges(teamspace, modelId);
+			props.subscribeOnRiskChanges(teamspace, newModelId);
+		} else {
+			props.unsubscribeOnIssueChanges(teamspace, modelId);
+			props.subscribeOnIssueChanges(teamspace, newModelId);
+		}
+
 		props.history.push(url);
 	};
 
@@ -266,13 +276,25 @@ export function Board(props: IProps) {
 		handleOpenDialog();
 	};
 
+	const getUpdatedProps = ({ filterProp, toLaneId }) => {
+		if (filterProp === ISSUE_FILTER_PROPS.assigned_roles.value) {
+			return [toLaneId];
+		}
+
+		if (filterProp === RISK_FILTER_PROPS.mitigation_status.value && filterProp === toLaneId ) {
+			return '';
+		}
+
+		return toLaneId;
+	};
+
 	const handleCardMove = (fromLaneId, toLaneId, cardId) => {
 		if (fromLaneId === toLaneId) {
 			return;
 		}
 
 		const updatedProps = {
-			[props.filterProp]: props.filterProp === ISSUE_FILTER_PROPS.assigned_roles.value ? [toLaneId] : toLaneId
+			[props.filterProp]: getUpdatedProps({ filterProp: props.filterProp, toLaneId })
 		};
 
 		if (isIssuesBoard) {

@@ -17,13 +17,13 @@
 "use strict";
 const _ = require("lodash");
 
-const Project = require("./project");
+const { isProjectAdmin } = require("./project");
 const View = require("./view");
 const User = require("./user");
 const { findJobByUser } = require("./job");
 const History = require("./history");
 
-const ModelSetting = require("./modelSetting");
+const { findModelSettingById } = require("./modelSetting");
 
 const utils = require("../utils");
 const responseCodes = require("../response_codes.js");
@@ -39,6 +39,7 @@ const Comment = require("./comment");
 const FileRef = require("./fileRef");
 const config = require("../config.js");
 const extensionRe = /\.(\w+)$/;
+const AccountPermissions = require("./accountPermissions");
 
 const getResponse = (responseCodeType) => (type) => responseCodes[responseCodeType + "_" + type];
 
@@ -164,7 +165,7 @@ class Ticket extends View {
 			// 2. Get user permissions
 			User.findByUserName(account),
 			findJobByUser(account, user),
-			Project.isProjectAdmin(
+			isProjectAdmin(
 				account,
 				model,
 				user
@@ -183,7 +184,7 @@ class Ticket extends View {
 
 		job = (job || {})._id;
 
-		const accountPerm = dbUser.customData.permissions.findByUser(user);
+		const accountPerm = AccountPermissions.findByUser(dbUser, user);
 		const tsAdmin = accountPerm && accountPerm.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
 		const isAdmin = projAdmin || tsAdmin;
 		const hasOwnerJob = oldTicket.creator_role === job;
@@ -468,7 +469,7 @@ class Ticket extends View {
 			throw responseCodes.INVALID_DATE_ORDER;
 		}
 
-		const settings = await ModelSetting.findById({ account, model }, model);
+		const settings = await findModelSettingById(account, model);
 
 		await coll.insert(newTicket);
 		newTicket.typePrefix = newTicket.typePrefix || settings.type || "";

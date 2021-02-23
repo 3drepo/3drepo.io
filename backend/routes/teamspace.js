@@ -421,6 +421,34 @@
 	 */
 	router.post("/members", middlewares.isAccountAdmin, addTeamMember);
 
+	/**
+	 * @api {get} /:teamspace/addOns get enabled add ons
+	 * @apiName getAddOns
+	 * @apiGroup Teamspace
+	 * @apiDescription view the list of addOns enabled on this teamspace
+	 *
+	 * @apiPermission teamspace member
+	 *
+	 * @apiParam {String} teamspace Name of teamspace
+	 *
+	 * @apiSuccessExample {json} Success
+	 * {
+	 *   vrEnabled: true,
+	 *   hereEnabled: true
+	 * }
+	 *
+	 */
+
+	router.get("/addOns", middlewares.isTeamspaceMember, getTeamspaceAddOns);
+
+	function getTeamspaceAddOns(req, res, next) {
+		User.getAddOnsForTeamspace(req.params.account).then((addOns) => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, addOns);
+		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+	}
+
 	function getBillingInfo(req, res, next) {
 		User.findByUserName(req.params.account).then(user => {
 			let billingInfo = (user.customData.billing || {}).billingInfo;
@@ -477,14 +505,7 @@
 
 	function addTeamMember(req, res, next) {
 		const responsePlace = utils.APIInfo(req);
-		User.findByUserName(req.params.account)
-			.then(dbUser => {
-				if(req.body.user) {
-					return dbUser.addTeamMember(req.body.user, req.body.job, req.body.permissions);
-				} else {
-					return Promise.reject(responseCodes.USER_NOT_FOUND);
-				}
-			})
+		User.addTeamMember(req.params.account, req.body.user, req.body.job, req.body.permissions)
 			.then((user) => {
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, user);
 			})
@@ -498,7 +519,7 @@
 		const responsePlace = utils.APIInfo(req);
 		User.findByUserName(req.params.account)
 			.then(dbUser => {
-				return dbUser.removeTeamMember(req.params.user, req.query.cascadeRemove);
+				return User.removeTeamMember(dbUser, req.params.user, req.query.cascadeRemove);
 			})
 			.then(() => {
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {user: req.params.user});
