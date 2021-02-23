@@ -25,6 +25,8 @@ const { login } = require("../helpers/users.js");
 const { createIssue } = require("../helpers/issues.js");
 const { deleteNotifications, fetchNotification } = require("../helpers/notifications.js");
 const { createModel } = require("../helpers/models.js");
+const { cloneDeep } = require("lodash");
+
 
 describe("Issues", function () {
 	let server;
@@ -94,92 +96,70 @@ describe("Issues", function () {
 	});
 
 	describe("Creating an issue", function() {
-		it("should succeed", function(done) {
-			const issue = Object.assign({"name":"Issue test"}, baseIssue);
-			let issueId;
-
-			async.series([
-				function(done) {
-					agent.post(`/${username}/${model}/issues`)
+		it("should succeed", async function() {
+			const issue = { "name":"Issue test", ...cloneDeep(baseIssue) };
+			let res = (await agent.post(`/${username}/${model}/issues`)
 						.send(issue)
-						.expect(200 , function(err, res) {
-							issueId = res.body._id;
-							expect(res.body.name).to.equal(issue.name);
-							expect(res.body.scale).to.equal(issue.scale);
-							expect(res.body.status).to.equal(issue.status);
-							expect(res.body.topic_type).to.equal(issue.topic_type);
-							expect(res.body.priority).to.equal(issue.priority);
-							expect(res.body.creator_role).to.equal(issue.creator_role);
-							expect(res.body.assigned_roles).to.deep.equal(issue.assigned_roles);
-							expect(res.body.viewpoint.up).to.deep.equal(issue.viewpoint.up);
-							expect(res.body.viewpoint.position).to.deep.equal(issue.viewpoint.position);
-							expect(res.body.viewpoint.look_at).to.deep.equal(issue.viewpoint.look_at);
-							expect(res.body.viewpoint.view_dir).to.deep.equal(issue.viewpoint.view_dir);
-							expect(res.body.viewpoint.right).to.deep.equal(issue.viewpoint.right);
-							expect(res.body.viewpoint.unityHeight).to.equal(issue.viewpoint.unityHeight);
-							expect(res.body.viewpoint.fov).to.equal(issue.viewpoint.fov);
-							expect(res.body.viewpoint.aspect_ratio).to.equal(issue.viewpoint.aspect_ratio);
-							expect(res.body.viewpoint.far).to.equal(issue.viewpoint.far);
-							expect(res.body.viewpoint.near).to.equal(issue.viewpoint.near);
+						.expect(200));
 
-							return done(err);
-						});
-				},
+			const issueId = res.body._id;
 
-				function(done) {
-					agent.get(`/${username}/${model}/issues/${issueId}`).expect(200, function(err , res) {
+			expect(res.body.name).to.equal(issue.name);
+			expect(res.body.scale).to.equal(issue.scale);
+			expect(res.body.status).to.equal(issue.status);
+			expect(res.body.topic_type).to.equal(issue.topic_type);
+			expect(res.body.priority).to.equal(issue.priority);
+			expect(res.body.creator_role).to.equal(issue.creator_role);
+			expect(res.body.assigned_roles).to.deep.equal(issue.assigned_roles);
+			expect(res.body.viewpoint.up).to.deep.equal(issue.viewpoint.up);
+			expect(res.body.viewpoint.position).to.deep.equal(issue.viewpoint.position);
+			expect(res.body.viewpoint.look_at).to.deep.equal(issue.viewpoint.look_at);
+			expect(res.body.viewpoint.view_dir).to.deep.equal(issue.viewpoint.view_dir);
+			expect(res.body.viewpoint.right).to.deep.equal(issue.viewpoint.right);
+			expect(res.body.viewpoint.unityHeight).to.equal(issue.viewpoint.unityHeight);
+			expect(res.body.viewpoint.fov).to.equal(issue.viewpoint.fov);
+			expect(res.body.viewpoint.aspect_ratio).to.equal(issue.viewpoint.aspect_ratio);
+			expect(res.body.viewpoint.far).to.equal(issue.viewpoint.far);
+			expect(res.body.viewpoint.near).to.equal(issue.viewpoint.near);
 
-						expect(res.body.name).to.equal(issue.name);
-						expect(res.body.scale).to.equal(issue.scale);
-						expect(res.body.status).to.equal(issue.status);
-						expect(res.body.topic_type).to.equal(issue.topic_type);
-						expect(res.body.priority).to.equal(issue.priority);
-						expect(res.body.creator_role).to.equal(issue.creator_role);
-						expect(res.body.assigned_roles).to.deep.equal(issue.assigned_roles);
-						expect(res.body.viewpoint.up).to.deep.equal(issue.viewpoint.up);
-						expect(res.body.viewpoint.position).to.deep.equal(issue.viewpoint.position);
-						expect(res.body.viewpoint.look_at).to.deep.equal(issue.viewpoint.look_at);
-						expect(res.body.viewpoint.view_dir).to.deep.equal(issue.viewpoint.view_dir);
-						expect(res.body.viewpoint.right).to.deep.equal(issue.viewpoint.right);
-						expect(res.body.viewpoint.unityHeight).to.equal(issue.viewpoint.unityHeight);
-						expect(res.body.viewpoint.fov).to.equal(issue.viewpoint.fov);
-						expect(res.body.viewpoint.aspect_ratio).to.equal(issue.viewpoint.aspect_ratio);
-						expect(res.body.viewpoint.far).to.equal(issue.viewpoint.far);
-						expect(res.body.viewpoint.near).to.equal(issue.viewpoint.near);
+			res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200)
 
-						return done(err);
-					});
-				}
-			], done);
+			expect(res.body.name).to.equal(issue.name);
+			expect(res.body.scale).to.equal(issue.scale);
+			expect(res.body.status).to.equal(issue.status);
+			expect(res.body.topic_type).to.equal(issue.topic_type);
+			expect(res.body.priority).to.equal(issue.priority);
+			expect(res.body.creator_role).to.equal(issue.creator_role);
+			expect(res.body.assigned_roles).to.deep.equal(issue.assigned_roles);
+			expect(res.body.viewpoint.up).to.deep.equal(issue.viewpoint.up);
+			expect(res.body.viewpoint.position).to.deep.equal(issue.viewpoint.position);
+			expect(res.body.viewpoint.look_at).to.deep.equal(issue.viewpoint.look_at);
+			expect(res.body.viewpoint.view_dir).to.deep.equal(issue.viewpoint.view_dir);
+			expect(res.body.viewpoint.right).to.deep.equal(issue.viewpoint.right);
+			expect(res.body.viewpoint.unityHeight).to.equal(issue.viewpoint.unityHeight);
+			expect(res.body.viewpoint.fov).to.equal(issue.viewpoint.fov);
+			expect(res.body.viewpoint.aspect_ratio).to.equal(issue.viewpoint.aspect_ratio);
+			expect(res.body.viewpoint.far).to.equal(issue.viewpoint.far);
+			expect(res.body.viewpoint.near).to.equal(issue.viewpoint.near);
 		});
 
-		it("with screenshot should succeed", function(done) {
-			const issue = Object.assign({"name":"Issue test"}, baseIssue);
+		it("with screenshot should succeed", async function() {
+			const issue = {"name":"Issue test", ...cloneDeep(baseIssue)};
 			issue.viewpoint.screenshot = pngBase64;
 
-			let issueId;
-
-			async.series([
-				function(done) {
-					agent.post(`/${username}/${model}/issues`)
+			let res = await agent.post(`/${username}/${model}/issues`)
 						.send(issue)
-						.expect(200 , function(err, res) {
+						.expect(200)
 
-							issueId = res.body._id;
-							return done(err);
-						});
-				},
-				function(done) {
-					agent.get(`/${username}/${model}/issues/${issueId}`).expect(200, function(err , res) {
-						expect(res.body.viewpoint.screenshot).to.equal(`${username}/${model}/issues/${issueId}/viewpoints/${res.body.viewpoint.guid}/screenshot.png`);
-						return done(err);
-					});
-				}
-			], done);
+			let issueId = res.body._id;
+
+			res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
+
+			expect(res.body.viewpoint.screenshot).to.equal(`${username}/${model}/issues/${issueId}/viewpoints/${res.body.viewpoint.guid}/screenshot.png`);
 		});
 
 		it("with screenshot using the wrong file format should fail", async function() {
-			const issue = Object.assign({"name":"Wrong file issue"}, baseIssue);
+			const issue ={"name":"Wrong file issue", ...cloneDeep(baseIssue)};
 			issue.viewpoint.screenshot = pdfBase64;
 
 			await agent.post(`/${username}/${model}/issues`)
@@ -187,7 +167,7 @@ describe("Issues", function () {
 					.expect(responseCodes.FILE_FORMAT_NOT_SUPPORTED.status);
 		});
 
-		it("with an existing group associated should succeed", function(done) {
+		it("with an existing group associated should succeed", async function() {
 			const username3 = 'teamSpace1';
 			const model2 = '5bfc11fa-50ac-b7e7-4328-83aa11fa50ac';
 
@@ -203,41 +183,24 @@ describe("Issues", function () {
 
 			const issue = {...baseIssue, "name":"Issue group test"};
 
-			let issueId;
-			let groupId;
+			agent2 = await request.agent(server);
+			await agent2.post("/login")
+				.send({ username: 'teamSpace1', password })
+				.expect(200);
 
-			async.series([
-				function(done) {
-					agent2 = request.agent(server);
-					agent2.post("/login")
-						.send({ username: 'teamSpace1', password })
-						.expect(200, done);
-				},
-				function(done) {
-					agent2.post(`/${username3}/${model2}/revision/master/head/groups/`)
-						.send(groupData)
-						.expect(200 , function(err, res) {
-							groupId = res.body._id;
-							done(err);
-					});
-				},
-				function(done) {
-					issue.viewpoint = { ...issue.viewpoint, highlighted_group_id:groupId};
+			const groupId = (await agent2.post(`/${username3}/${model2}/revision/master/head/groups/`)
+					.send(groupData)
+					.expect(200)).body._id;
 
-					agent2.post(`/${username3}/${model2}/issues`)
+			issue.viewpoint = { ...issue.viewpoint, highlighted_group_id:groupId};
+
+			const issueId = (await agent2.post(`/${username3}/${model2}/issues`)
 						.send(issue)
-						.expect(200 , function(err, res) {
-							issueId = res.body._id;
-							return done(err);
-						});
-				},
-				function(done) {
-					agent2.get(`/${username3}/${model2}/issues/${issueId}`).expect(200, function(err , res) {
-						expect(res.body.viewpoint.highlighted_group_id).to.equal(groupId);
-						return done(err);
-					});
-				}
-			], done);
+						.expect(200)).body._id;
+
+			const res = await agent2.get(`/${username3}/${model2}/issues/${issueId}`).expect(200);
+			expect(res.body.viewpoint.highlighted_group_id).to.equal(groupId);
+
 		});
 
 		it("with a embeded group should succeed", function(done) {
@@ -1702,6 +1665,37 @@ describe("Issues", function () {
 			expect(commentData.viewpoint.screenshot).to.exist
 				.and.to.be.not.equal(pngBase64);
 			expect(commentData.viewpoint.screenshotSmall).to.exist;
+		});
+
+		it("bad screenshot format within comments should fail", async () => {
+			const issue = Object.assign({"name":"Bad screenshot Issue test"}, baseIssue, { topic_type: "ru123"});
+
+			let commentData = {
+				comment:'',
+				viewpoint:{
+					up:[0,1,0],
+					position:[38,38 ,125.08011914810137],
+					look_at:[0,0,-163.08011914810137],
+					view_dir:[0,0,-1],
+					right:[1,0,0],
+					unityHeight :3.537606904422707,
+					fov:2.1124830653010416,
+					aspect_ratio:0.8750189337327384,
+					far:276.75612077194506 ,
+					near:76.42411012233212,
+					screenshot: pdfBase64
+				}
+			}
+
+			// Creating an issue
+			const issueId = (await agent.post(`/${username}/${model}/issues`)
+				.send(issue)
+				.expect(200)).body._id;
+
+			// Commenting the issue
+			await agent.post(`/${username}/${model}/issues/${issueId}/comments`)
+				.send(commentData)
+				.expect(responseCodes.FILE_FORMAT_NOT_SUPPORTED.status);
 		});
 
 		it("seal last non system comment when adding system comment", function(done) {

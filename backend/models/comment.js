@@ -22,8 +22,6 @@ const utils = require("../utils");
 const Viewpoint = require("../models/viewpoint");
 const db = require("../handler/db");
 const FileRef = require("./fileRef");
-const C = require("../constants");
-const FileType = require("file-type");
 
 const fieldTypes = {
 	"action": "[object Object]",
@@ -147,19 +145,6 @@ const addComment = async function(account, model, colName, id, user, data, route
 
 	if (!(data.comment || "").trim() && !get(data,"viewpoint.screenshot")) {
 		throw { resCode: responseCodes.ISSUE_COMMENT_NO_TEXT};
-	}
-
-	if (get(data,"viewpoint.screenshot")) {
-		try {
-			const fileBuffer = Buffer.from(data.viewpoint.screenshot, "base64");
-			const type = await FileType.fromBuffer(fileBuffer);
-
-			if (!C.ACCEPTED_IMAGE_FORMATS.includes(type.ext)) {
-				throw  { resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED};
-			}
-		} catch(e) {
-			throw  { resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED};
-		}
 	}
 
 	// 1. Fetch comments

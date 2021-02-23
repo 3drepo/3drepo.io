@@ -23,6 +23,8 @@ const FileRef = require("./fileRef");
 const Groups = require("./group");
 const responseCodes = require("../response_codes.js");
 const { systemLogger } = require("../logger.js");
+const C = require("../constants");
+const FileType = require("file-type");
 
 const clean = function(routePrefix, viewpointToClean, serialise = true) {
 	const viewpointFields = [
@@ -223,6 +225,7 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 	});
 
 	await Promise.all(groupPromises);
+
 	if (vpData.screenshot && vpData.screenshot !== "") {
 		if (!utils.isString(vpData.screenshot)) {
 			throw responseCodes.INVALID_ARGUMENTS;
@@ -231,6 +234,16 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 			vpData.screenshot.substring(vpData.screenshot.indexOf(",") + 1),
 			"base64"
 		);
+
+		try {
+			const type = await FileType.fromBuffer(imageBuffer);
+
+			if (!C.ACCEPTED_IMAGE_FORMATS.includes(type.ext)) {
+				throw  { resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED};
+			}
+		} catch(e) {
+			throw  { resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED};
+		}
 
 		viewpoint.screenshot = imageBuffer;
 
