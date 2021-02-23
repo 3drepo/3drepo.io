@@ -30,6 +30,7 @@ const Mailer = require("../mailer/mailer");
 const httpsPost = require("../libs/httpsReq").post;
 
 const chatEvent = require("../models/chatEvent");
+const FileType = require("file-type");
 
 const multer = require("multer");
 
@@ -786,7 +787,6 @@ function getAvatar(req, res, next) {
 
 function uploadAvatar(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
-
 	// check space and format
 	function fileFilter(fileReq, file, cb) {
 		let format = file.originalname.split(".");
@@ -794,7 +794,7 @@ function uploadAvatar(req, res, next) {
 
 		const size = parseInt(fileReq.headers["content-length"]);
 
-		if(C.ACCEPTED_IMAGE_FORMATS.includes(format.toLowerCase())) {
+		if(!C.ACCEPTED_IMAGE_FORMATS.includes(format.toLowerCase())) {
 			return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
 		}
 
@@ -809,8 +809,6 @@ function uploadAvatar(req, res, next) {
 		storage: multer.memoryStorage(),
 		fileFilter: fileFilter
 	});
-
-	const FileType = require("file-type");
 
 	upload.single("file")(req, res, function (err) {
 		if (err) {
