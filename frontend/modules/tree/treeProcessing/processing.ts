@@ -277,9 +277,7 @@ export class Processing {
 				const nodeID = nodesIds[nodeIdx];
 				const currentState = this.visibilityMap[nodeID];
 
-				const desiredState = ifcSpacesHidden ?  this.defaultVisibilityMap[nodeID] : VISIBILITY_STATES.VISIBLE;
-
-				if (currentState !== desiredState) {
+				if (currentState !== VISIBILITY_STATES.VISIBLE) {
 					const node = this.nodesList[this.nodesIndexesMap[nodeID]];
 					filteredNodes.push(node);
 				}
