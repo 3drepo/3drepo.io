@@ -69,7 +69,7 @@ Intercom.submitLoginLockoutEvent = async (email) => {
 		return;
 	}
 
-	const created_at = Date.now();
+	const created_at = Date.now()/1000;
 	console.log(created_at);
 	console.log(email);
 	console.log(headers);
