@@ -74,7 +74,8 @@ Intercom.submitLoginLockoutEvent = async (email) => {
 			event_name: "Password Lockout",
 			created_at: Date.now(),
 			email
-		});
+		}
+		, { headers });
 };
 
 module.exports = Intercom;
