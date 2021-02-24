@@ -111,6 +111,7 @@ const handleAuthenticateFail = async function (user, username) {
 			const result = await Intercom.submitLoginLockoutEvent(user.customData.email);
 			console.log(result);
 		} catch (err) {
+			console.log(err);
 			systemLogger.logError("Failed to submit login lockout event in intercom", username, err);
 		}
 	}

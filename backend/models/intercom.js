@@ -69,10 +69,15 @@ Intercom.submitLoginLockoutEvent = async (email) => {
 		return;
 	}
 
+	const created_at = Date.now();
+	console.log(created_at);
+	console.log(email);
+	console.log(headers);
+
 	return await axios.post(getEndpoint("events"),
 		{
 			event_name: "Password Lockout",
-			created_at: Date.now(),
+			created_at,
 			email
 		}
 		, { headers });
