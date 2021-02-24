@@ -1709,7 +1709,8 @@ function createModel(req, res, next) {
 		data.userPermissions = req.session.user.permissions;
 
 		let createModelPromise;
-		if (req.body.subModels) {
+		const isFed = !!req.body.subModels;
+		if (isFed) {
 			createModelPromise = ModelHelpers.createNewFederation(account, modelName, username, data);
 		} else {
 			createModelPromise = ModelHelpers.createNewModel(account, modelName, data);
@@ -1718,6 +1719,12 @@ function createModel(req, res, next) {
 		createModelPromise.then(result => {
 			const modelData = result.modelData;
 			modelData.setting = result.settings;
+
+			if (isFed) {
+				// hack: we need to wire federations properly onto the queue and follow the same process as model uploads. But it's
+				//       not happening right now.
+				modelData.setting.timestamp = new Date();
+			}
 
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, modelData);
 		}).catch(err => {
