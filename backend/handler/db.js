@@ -60,6 +60,7 @@
 		if(sort) {
 			projection.sort = sort;
 		}
+
 		return collection.findOne(query, projection);
 	};
 
@@ -226,9 +227,16 @@
 		});
 	};
 
-	Handler.update = async function (database, colName, query, data) {
+	Handler.update = async function (database, colName, query, data, upsert = false) {
 		const collection = await Handler.getCollection(database, colName);
-		return collection.update(query, data);
+		const options = upsert ? { upsert } : undefined;
+		return collection.update(query, data, options);
+	};
+
+	Handler.updateOne = async function (database, colName, query, data, upsert = false) {
+		const collection = await Handler.getCollection(database, colName);
+		const options = upsert ? { upsert } : undefined;
+		return collection.updateOne(query, data, options);
 	};
 
 	Handler.count = async function (database, colName, query, data) {
