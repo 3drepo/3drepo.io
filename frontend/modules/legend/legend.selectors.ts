@@ -23,6 +23,10 @@ export const selectIsPending = createSelector(
 	selectLegendDomain, (state) => state.isPending
 );
 
+export const selectLegendUpdatePending = createSelector(
+	selectLegendDomain, (state) => state.isUpdatePending
+);
+
 export const selectLegend = createSelector(
 	selectLegendDomain, (state) => state.legend
 );
@@ -32,5 +36,5 @@ export const selectLegendCount = createSelector(
 );
 
 export const selectLegendNames = createSelector(
-		selectLegend, (state) => state.map(({ name }) => name )
+		selectLegend, (state) => [...state].map(({ name }) => name )
 );

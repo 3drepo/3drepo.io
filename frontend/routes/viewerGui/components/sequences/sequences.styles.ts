@@ -205,6 +205,10 @@ export const SequenceName = styled(Grid).attrs({
 	&& {
 		font-size: 18px;
 		font-weight: 500;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		white-space: nowrap;
+		max-width: 250px;
 	}
 `;
 

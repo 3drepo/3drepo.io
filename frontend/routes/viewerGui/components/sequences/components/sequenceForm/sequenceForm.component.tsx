@@ -17,9 +17,10 @@
 
 import React from 'react';
 
+import { Tooltip } from '@material-ui/core';
 import { Formik } from 'formik';
 
-import { StyledForm, StyledTextField } from './sequenceForm.styles';
+import { StyledForm, StyledTextField, TextFieldWrapper } from './sequenceForm.styles';
 
 export const SequenceForm = ({ id, name, updateSequence }) => {
 	const textFieldRef = React.useRef(null);
@@ -34,17 +35,21 @@ export const SequenceForm = ({ id, name, updateSequence }) => {
 			onSubmit={handleSubmit}
 		>
 		<StyledForm>
-			<StyledTextField
-				ref={textFieldRef}
-				requiredConfirm
-				fullWidth
-				value={name}
-				name="newName"
-				mutable
-				onChange={handleSave}
-				inputProps={{ maxLength: 15 }}
-				disableShowDefaultUnderline
-			/>
+			<Tooltip title={name}>
+				<TextFieldWrapper>
+					<StyledTextField
+						ref={textFieldRef}
+						requiredConfirm
+						fullWidth
+						value={name}
+						name="newName"
+						mutable
+						onChange={handleSave}
+						inputProps={{ maxLength: 29 }}
+						disableShowDefaultUnderline
+					/>
+				</TextFieldWrapper>
+			</Tooltip>
 		</StyledForm>
 	</Formik>
 	);

@@ -27,9 +27,10 @@ interface IProps {
 	updateLegendItem: (legendItem: ILegend) => void;
 	colors: string[];
 	legendCount: number;
+	updatePending: boolean;
 }
 
-export const LegendFooter = ({ isPending, updateLegendItem, colors, legendCount }: IProps) => {
+export const LegendFooter = ({ isPending, updateLegendItem, colors, legendCount, updatePending }: IProps) => {
 	const handleAddNewLegendItem = () => updateLegendItem({
 		name: `Item ${legendCount + 1}`,
 		color: colors[Math.floor(Math.random() * colors.length)],
@@ -44,6 +45,7 @@ export const LegendFooter = ({ isPending, updateLegendItem, colors, legendCount 
 				color="secondary"
 				variant="fab"
 				id="legend-add-new-button"
+				pending={updatePending}
 			>
 				<AddIcon />
 			</ViewerPanelButton>

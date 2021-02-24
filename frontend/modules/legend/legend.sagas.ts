@@ -57,6 +57,7 @@ function* toggleLegendPanel() {
 
 function* update({ legend }) {
 	try {
+		yield put(LegendActions.toggleUpdatePendingState(true));
 		const teamspace = yield select(selectCurrentModelTeamspace);
 		const revision = yield select(selectCurrentRevisionId);
 		const model =  yield select(selectSequenceModel);
@@ -68,6 +69,7 @@ function* update({ legend }) {
 		const response = yield API.putSequenceLegend(teamspace, model, revision, sequenceId, legendObj);
 
 		if (response.status === 200) {
+			yield put(LegendActions.toggleUpdatePendingState(false));
 			yield put(LegendActions.fetchSuccess(updatedLegend));
 			yield put(SnackbarActions.show('Legend updated'));
 		}
@@ -134,9 +136,9 @@ function* deleteLegendItem({ legendItem }) {
 function* setDefaultLegend() {
 	try {
 		const teamspace = yield select(selectCurrentModelTeamspace);
-		const model =  yield select(selectSequenceModel);
+		const modelId =  yield select(selectSequenceModel);
 		const sequenceId =  yield select(selectSelectedSequenceId);
-		const modelData = { teamspace, model };
+		const modelData = { teamspace, modelId };
 
 		yield put(ModelActions.updateSettings(modelData, {
 			defaultLegend: sequenceId,

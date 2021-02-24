@@ -130,7 +130,7 @@ export class Legend extends React.PureComponent<IProps, IState> {
 			>
 				<StyledResizableBox
 					width={PANEL_DEFAULT_WIDTH}
-					minConstraints={[PANEL_DEFAULT_WIDTH - 100, PANEL_DEFAULT_HEIGHT]}
+					minConstraints={[PANEL_DEFAULT_WIDTH - 90, PANEL_DEFAULT_HEIGHT]}
 					height={height}
 				>
 					<ViewerPanel

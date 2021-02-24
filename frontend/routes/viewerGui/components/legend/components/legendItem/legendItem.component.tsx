@@ -19,7 +19,6 @@ import React from 'react';
 
 import { Tooltip } from '@material-ui/core';
 import { Field, Formik } from 'formik';
-import { remove } from 'lodash';
 import * as Yup from 'yup';
 
 import RemoveIcon from '@material-ui/icons/Close';
@@ -49,7 +48,7 @@ export const LegendItem = ({
 }: IProps) => {
 	const textFieldRef = React.useRef(null);
 
-	const getLegendSchema = LegendSchema(remove(legendNames, (item) => item !== name));
+	const getLegendSchema = LegendSchema(legendNames.filter((item) => item !== name));
 
 	const handleColorChange = (colorValue: string) => updateLegendItem({
 		name,

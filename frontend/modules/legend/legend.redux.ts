@@ -20,6 +20,7 @@ import { createActions, createReducer } from 'reduxsauce';
 export const { Types: LegendTypes, Creators: LegendActions } = createActions({
 	togglePanel: [],
 	togglePendingState: ['isPending'],
+	toggleUpdatePendingState: ['isUpdatePending'],
 	fetch: [],
 	fetchSuccess: ['legend'],
 	update: ['legend'],
@@ -37,18 +38,23 @@ export interface ILegend {
 export interface ILegendState {
 	isPending?: boolean;
 	legend: ILegend[];
+	isUpdatePending?: boolean;
 }
 
 export const INITIAL_STATE: ILegendState = {
 	isPending: true,
 	legend: [],
+	isUpdatePending: false,
 };
 
 export const togglePendingState = (state = INITIAL_STATE, { isPending }) => ({ ...state, isPending });
+
+export const toggleUpdatePendingState = (state = INITIAL_STATE, { isUpdatePending }) => ({ ...state, isUpdatePending });
 
 export const fetchSuccess = (state = INITIAL_STATE, { legend }) => ({ ...state, legend });
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[LegendTypes.TOGGLE_PENDING_STATE]: togglePendingState,
+	[LegendTypes.TOGGLE_UPDATE_PENDING_STATE]: toggleUpdatePendingState,
 	[LegendTypes.FETCH_SUCCESS]: fetchSuccess,
 });

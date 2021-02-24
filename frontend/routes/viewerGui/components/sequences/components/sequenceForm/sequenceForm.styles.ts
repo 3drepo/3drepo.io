@@ -50,3 +50,9 @@ export const StyledTextField = styled(TextField)`
 		margin-right: 60px;
 	}
 `;
+
+export const TextFieldWrapper = styled.div`
+	width: 100%;
+	display: flex;
+	justify-content: center;
+`;

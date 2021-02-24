@@ -15,8 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {FormControlLabel, FormGroup, Grid, Switch} from '@material-ui/core';
 import React from 'react';
+
+import { Grid, Tooltip } from '@material-ui/core';
+
 import { formatShortDate } from '../../../../../../services/formatting/formatDate';
 import { ViewerPanelContent } from '../../../viewerPanel/viewerPanel.styles';
 import {
@@ -25,7 +27,6 @@ import {
 	SequenceItemIcon,
 	SequenceName,
 } from '../../sequences.styles';
-// import {VIEWER_PANELS} from "../../../../../../constants/viewerGui";
 
 interface IProps {
 	sequences: any;
@@ -37,7 +38,9 @@ const SequenceItem = ({name, modelName, minDate, maxDate, onClick}) => (
 		<Grid container direction="row" alignItems="center">
 			<SequenceItemIcon />
 			<Grid item>
-				<SequenceName>{name}</SequenceName>
+				<Tooltip title={name}>
+					<SequenceName>{name}</SequenceName>
+				</Tooltip>
 				<Grid item>{modelName}</Grid>
 				<SequenceDatesContainer>
 					<Grid item>Start: {formatShortDate(new Date(minDate))} </Grid>
@@ -50,7 +53,7 @@ const SequenceItem = ({name, modelName, minDate, maxDate, onClick}) => (
 
 export class SequencesList extends React.PureComponent<IProps, {}> {
 	public render = () => {
-		const {setSelectedSequence, sequences} = this.props;
+		const { setSelectedSequence, sequences } = this.props;
 
 		return (
 			<ViewerPanelContent>
