@@ -64,7 +64,7 @@ Intercom.createContact = async (external_id, name, email, subscribed, company) =
 
 };
 
-Intercom.submitLoginLockoutEvent = async (user_id) => {
+Intercom.submitLoginLockoutEvent = async (email) => {
 	if (!accessToken) {
 		return;
 	}
@@ -73,7 +73,7 @@ Intercom.submitLoginLockoutEvent = async (user_id) => {
 		{
 			event_name: "Password Lockout",
 			created_at: Date.now(),
-			user_id
+			email
 		});
 };
 
