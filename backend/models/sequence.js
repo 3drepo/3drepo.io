@@ -20,101 +20,173 @@ const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
 
-const FileRef = require("./fileRef");
 const History = require("./history");
+const FileRef = require("./fileRef");
 const { getRefNodes } = require("./ref");
+const { getDefaultLegendId } = require("./modelSetting");
 
-class Sequence {
+const activityCol = (modelId) => `${modelId}.activities`;
+const sequenceCol = (modelId) => `${modelId}.sequences`;
+const legendCol = (modelId) => `${modelId}.sequences.legends`;
 
-	clean(toClean, keys) {
-		keys.forEach((key) => {
-			if (toClean[key]) {
-				if (utils.isObject(toClean[key])) {
-					toClean[key] = utils.uuidToString(toClean[key]);
-				} else if (Array.isArray(toClean[key])) {
-					toClean[key] = toClean[key].map((elem) => utils.uuidToString(elem));
-				}
+const clean = (toClean, keys) => {
+	keys.forEach((key) => {
+		if (toClean[key]) {
+			if (utils.isObject(toClean[key])) {
+				toClean[key] = utils.uuidToString(toClean[key]);
+			} else if (Array.isArray(toClean[key])) {
+				toClean[key] = toClean[key].map((elem) => utils.uuidToString(elem));
 			}
-		});
-
-		return toClean;
-	}
-
-	cleanActivityDetail(toClean) {
-		const keys = ["_id", "parents"];
-
-		return this.clean(toClean, keys);
-	}
-
-	cleanSequenceList(toClean) {
-		const keys = ["_id", "rev_id", "model"];
-
-		for (let i = 0; toClean["frames"] && i < toClean["frames"].length; i++) {
-			toClean["frames"][i] = this.cleanSequenceFrame(toClean["frames"][i]);
 		}
+	});
 
-		return this.clean(toClean, keys);
+	return toClean;
+};
+
+const cleanActivityDetail = (toClean) => {
+	const keys = ["_id", "parents"];
+
+	return clean(toClean, keys);
+};
+
+const cleanSequenceList = (toClean) => {
+	const keys = ["_id", "rev_id", "model"];
+
+	for (let i = 0; toClean["frames"] && i < toClean["frames"].length; i++) {
+		toClean["frames"][i] = cleanSequenceFrame(toClean["frames"][i]);
 	}
 
-	cleanSequenceFrame(toClean) {
-		const key = "dateTime";
+	return clean(toClean, keys);
+};
 
-		if (toClean[key] && utils.isDate(toClean[key])) {
-			toClean[key] = new Date(toClean[key]).getTime();
+const cleanSequenceFrame = (toClean) => {
+	const key = "dateTime";
+
+	if (toClean[key] && utils.isDate(toClean[key])) {
+		toClean[key] = new Date(toClean[key]).getTime();
+	}
+
+	return toClean;
+};
+
+const getSequenceById = async (account, model, sequenceId, projection) => {
+	return db.findOne(account, sequenceCol(model), { _id: sequenceId}, projection);
+};
+
+const sequenceExists = async (account, model, sequenceId) => {
+	if(!(await getSequenceById(account, model, utils.stringToUUID(sequenceId), {_id: 1}))) {
+		throw responseCodes.SEQUENCE_NOT_FOUND;
+	}
+};
+
+const getLegendById = (account, model, sequenceId) => {
+	return db.findOne(account, legendCol(model), { _id: utils.stringToUUID(sequenceId) });
+};
+
+const getDefaultLegend = async (account, model) => {
+	const defaultLegendId = await getDefaultLegendId(account, model);
+	if(defaultLegendId) {
+		const defaultLegend = await getLegendById(account, model, defaultLegendId);
+		if (defaultLegend) {
+			return defaultLegend;
 		}
-
-		return toClean;
 	}
 
-	async getSequenceActivityDetail(account, model, activityId) {
-		const dbCol = await db.getCollection(account, model + ".activities");
-		const activity = await dbCol.findOne({"_id": utils.stringToUUID(activityId)});
+	return {legend: {}};
+};
 
-		if (!activity) {
-			return Promise.reject(responseCodes.ACTIVITY_NOT_FOUND);
+const Sequence = {};
+
+Sequence.getSequenceActivityDetail = async (account, model, activityId) => {
+	const activity = await db.findOne(account, activityCol(model), {"_id": utils.stringToUUID(activityId)});
+
+	if (!activity) {
+		throw responseCodes.ACTIVITY_NOT_FOUND;
+	}
+
+	return cleanActivityDetail(activity);
+};
+
+Sequence.getSequenceActivities = async (account, model, sequenceId) => {
+	return FileRef.getSequenceActivitiesFile(account, model, utils.uuidToString(sequenceId));
+};
+
+Sequence.getSequenceState = async (account, model, stateId) => {
+	return FileRef.getSequenceStateFile(account, model, stateId);
+};
+
+Sequence.getList = async (account, model, branch, revision, cleanResponse = false) => {
+	const history = await History.getHistory(account, model, branch, revision);
+
+	if(!history) {
+		throw responseCodes.INVALID_TAG_NAME;
+	}
+
+	const refNodes = await getRefNodes(account, model, branch, revision, {project:1});
+	const submodels = refNodes.map(r => r.project);
+
+	const submodelSequencesPromises = Promise.all(submodels.map((submodel) => Sequence.getList(account, submodel, "master", null, cleanResponse)));
+
+	const sequences = await db.find(account, sequenceCol(model), {"rev_id": history._id});
+	sequences.forEach((sequence) => {
+		sequence.teamspace = account;
+		sequence.model = model;
+
+		if (cleanResponse) {
+			cleanSequenceList(sequence);
 		}
+	});
 
-		this.cleanActivityDetail(activity);
+	const submodelSequences = await submodelSequencesPromises;
+	submodelSequences.forEach((s) => sequences.push(...s));
 
-		return activity;
+	return sequences;
+};
+
+Sequence.updateSequence = async (account, model, sequenceId, data) => {
+	if (!data || !data.name || !utils.isString(data.name) || data.name === ""  || data.name.length >= 30) {
+		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	async getSequenceActivities(account, model, sequenceId) {
-		return FileRef.getSequenceActivitiesFile(account, model, utils.uuidToString(sequenceId));
+	const { result } = await db.update(account, sequenceCol(model),
+		{_id: utils.stringToUUID(sequenceId)}, {$set: {name: data.name}});
+	if (result.nModified === 0) {
+		throw responseCodes.SEQUENCE_NOT_FOUND;
 	}
 
-	getSequenceState(account, model, stateId) {
-		return FileRef.getSequenceStateFile(account, model, stateId);
-	}
+};
 
-	async getList(account, model, branch, revision, cleanResponse = false) {
-		const history = await History.getHistory(account, model, branch, revision);
-		let submodels = [];
+Sequence.deleteLegend = async (account, model, sequenceId) => {
+	await sequenceExists(account, model, sequenceId);
+	await db.remove(account, legendCol(model), { _id: utils.stringToUUID(sequenceId) });
+};
 
-		if (history.current) {
-			submodels = await getRefNodes(account, model, branch, revision, {project:1});
-			submodels = submodels.map(r => r.project);
-		}
+Sequence.getLegend = async (account, model, sequenceId) => {
+	await sequenceExists(account, model, sequenceId);
 
-		const submodelSequencesPromises = Promise.all(submodels.map((submodel) => this.getList(account, submodel, "master", null, cleanResponse)));
+	const legend = await getLegendById(account, model, sequenceId);
 
-		const dbCol = await db.getCollection(account, model + ".sequences");
+	return legend ? legend : getDefaultLegend(account, model);
+};
 
-		const sequences = await (dbCol.find({"rev_id": history._id}).toArray());
-		sequences.forEach((sequence) => {
-			sequence.teamspace = account;
-			sequence.model = model;
-
-			if (cleanResponse) {
-				this.cleanSequenceList(sequence);
+Sequence.updateLegend = async (account, model, sequenceId, data) => {
+	const id = utils.stringToUUID(sequenceId);
+	await sequenceExists(account, model, id);
+	const prunedData = {};
+	for(const entry in data) {
+		if(utils.hasField(data, entry)) {
+			const value = data[entry];
+			if(utils.isHexColor(value)) {
+				prunedData[entry] = value;
+			} else {
+				throw responseCodes.INVALID_ARGUMENTS;
 			}
-		});
 
-		const submodelSequences = await submodelSequencesPromises;
-		submodelSequences.forEach((s) => sequences.push(...s));
-
-		return sequences;
+		}
 	}
-}
 
-module.exports = new Sequence();
+	await db.updateOne(account,legendCol(model), { _id: id }, { $set: {legend: prunedData}}, true);
+
+};
+
+module.exports = Sequence;
