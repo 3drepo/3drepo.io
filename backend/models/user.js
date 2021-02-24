@@ -106,6 +106,14 @@ const handleAuthenticateFail = async function (user, username) {
 		"customData.loginInfo.failedLoginCount": failedLoginCount
 	}});
 
+	if (failedLoginCount >= config.loginPolicy.maxUnsuccessfulLoginAttempts) {
+		try {
+			await Intercom.submitLoginLockoutEvent(username);
+		} catch (err) {
+			systemLogger.logError("Failed to submit login lockout event in intercom", username, err);
+		}
+	}
+
 	return Math.max(config.loginPolicy.maxUnsuccessfulLoginAttempts - failedLoginCount, 0);
 };
 

@@ -64,4 +64,17 @@ Intercom.createContact = async (external_id, name, email, subscribed, company) =
 
 };
 
+Intercom.submitLoginLockoutEvent = async (user_id) => {
+	if (!accessToken) {
+		return;
+	}
+
+	return await axios.post(getEndpoint("events"),
+		{
+			event_name: "Password Lockout",
+			created_at: Date.now(),
+			user_id
+		});
+};
+
 module.exports = Intercom;
