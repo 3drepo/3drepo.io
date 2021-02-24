@@ -246,6 +246,110 @@ router.get("/revision/master/head/sequences/:sequenceId/state/:stateId", middlew
 router.get("/revision/:revId/sequences/:sequenceId/state/:stateId", middlewares.issue.canView, getSequenceState);
 
 /**
+ * @api {patch} /:teamspace/:model/revision(/master/head/|/:revId)/sequences/:sequenceID Update a sequence
+ * @apiName updateSequence
+ * @apiGroup Sequences
+ * @apiDescription Update a sequence (note: currently only name chance is supported
+ *
+ * @apiUse Sequences
+ *
+ * @apiExample {patch} Example usage (/master/head)
+ * PATCH /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences/00000000-0000-0000-0000-000000000002 HTTP/1.1
+ *
+ * @apiExample {patch} Example usage (/:revId)
+ * PATCH /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/sequences/00000000-0000-0000-0000-000000000002 HTTP/1.1
+ *
+ * @apiParam (Request body) {String} name The new name of the sequence
+ *
+ * @apiExample {patch} Example usage:
+ * {
+ * 	  "name": "Building works"
+ * }
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {}
+ */
+
+router.patch("/revision/master/head/sequences/:sequenceId", middlewares.hasUploadAccessToModel, updateSequence);
+router.patch("/revision/:revId/sequences/:sequenceId", middlewares.hasUploadAccessToModel, updateSequence);
+
+/**
+ * @api {put} /:teamspace/:model/revision(/master/head/|/:revId)/sequences/:sequenceID/legend Add/Update legend
+ * @apiName updateLegend
+ * @apiGroup Sequences
+ * @apiDescription Update/add a legend to this sequence
+ *
+ * @apiUse Sequences
+ *
+ * @apiExample {put} Example usage (/master/head)
+ * PUT /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences/00000000-0000-0000-0000-000000000002/legend HTTP/1.1
+ *
+ * @apiExample {put} Example usage (/:revId)
+ * PUT /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/sequences/00000000-0000-0000-0000-000000000002/legend HTTP/1.1
+ *
+ * @apiExample {put} Example usage:
+ * {
+ * 	  "Building works": "#aabbcc"
+ * 	  "Temporary works": "#ffffff66"
+ * }
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {}
+ */
+
+router.put("/revision/master/head/sequences/:sequenceId/legend", middlewares.hasUploadAccessToModel, updateLegend);
+router.put("/revision/:revId/sequences/:sequenceId/legend", middlewares.hasUploadAccessToModel, updateLegend);
+
+/**
+ * @api {get} /:teamspace/:model/revision(/master/head/|/:revId)/sequences/:sequenceID/legend get the legend
+ * @apiName getLegend
+ * @apiGroup Sequences
+ * @apiDescription Get the legend for this sequence
+ *
+ * @apiUse Sequences
+ *
+ * @apiExample {get} Example usage (/master/head)
+ * GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences/00000000-0000-0000-0000-000000000002/legend HTTP/1.1
+ *
+ * @apiExample {get} Example usage (/:revId)
+ * GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/sequences/00000000-0000-0000-0000-000000000002/legend HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {
+ * 	  "Building works": "#aabbcc"
+ * 	  "Temporary works": "#ffffff66"
+ * }
+ *
+ */
+router.get("/revision/master/head/sequences/:sequenceId/legend", middlewares.issue.canView, getLegend);
+router.get("/revision/:revId/sequences/:sequenceId/legend", middlewares.issue.canView, getLegend);
+
+/**
+ * @api {delete} /:teamspace/:model/revision(/master/head/|/:revId)/sequences/:sequenceID/legend Delete legend
+ * @apiName deleteLegend
+ * @apiGroup Sequences
+ * @apiDescription Delete the legend associated to this sequence
+ *
+ * @apiUse Sequences
+ *
+ * @apiExample {delete} Example usage (/master/head)
+ * DELETE /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences/00000000-0000-0000-0000-000000000002/legend HTTP/1.1
+ *
+ * @apiExample {delete} Example usage (/:revId)
+ * DELETE /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/sequences/00000000-0000-0000-0000-000000000002/legend HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {}
+ */
+
+router.delete("/revision/master/head/sequences/:sequenceId/legend", middlewares.hasUploadAccessToModel, deleteLegend);
+router.delete("/revision/:revId/sequences/:sequenceId/legend", middlewares.hasUploadAccessToModel, deleteLegend);
+
+/**
  * @api {get} /:teamspace/:model/revision(/master/head/|/:revId)/sequences List all sequences
  * @apiName listSequences
  * @apiGroup Sequences
@@ -312,6 +416,50 @@ function getSequenceState(req, res, next) {
 
 	Sequence.getSequenceState(account, model, stateId).then(state => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, state);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function getLegend(req, res, next) {
+	const place = utils.APIInfo(req);
+	const { account, model, sequenceId } = req.params;
+
+	Sequence.getLegend(account, model, sequenceId).then(({ legend }) => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, legend);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function deleteLegend(req, res, next) {
+	const place = utils.APIInfo(req);
+	const { account, model, sequenceId } = req.params;
+
+	Sequence.deleteLegend(account, model, sequenceId).then(() => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function updateLegend(req, res, next) {
+	const place = utils.APIInfo(req);
+	const { account, model, sequenceId } = req.params;
+
+	Sequence.updateLegend(account, model, sequenceId, req.body).then(() => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function updateSequence(req, res, next) {
+	const place = utils.APIInfo(req);
+	const { account, model, sequenceId } = req.params;
+
+	Sequence.updateSequence(account, model, sequenceId, req.body).then(() => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});

@@ -35,6 +35,10 @@ function Utils() {
 		return "[object String]" === Object.prototype.toString.call(value);
 	};
 
+	this.isHexColor = (value) => {
+		return this.isString(value) && value.match(/^#(?:(?:[\da-f]{3}){1,2}|(?:[\da-f]{4}){1,2})$/i);
+	};
+
 	this.isNumber = (value) => {
 		return "[object Number]" === Object.prototype.toString.call(value);
 	};
