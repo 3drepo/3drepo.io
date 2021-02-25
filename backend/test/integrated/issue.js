@@ -162,9 +162,11 @@ describe("Issues", function () {
 			const issue ={"name":"Wrong file issue", ...cloneDeep(baseIssue)};
 			issue.viewpoint.screenshot = pdfBase64;
 
-			await agent.post(`/${username}/${model}/issues`)
+			const res = await agent.post(`/${username}/${model}/issues`)
 					.send(issue)
 					.expect(responseCodes.FILE_FORMAT_NOT_SUPPORTED.status);
+
+			expect(res.body.value).to.equal(responseCodes.FILE_FORMAT_NOT_SUPPORTED.value);
 		});
 
 		it("with an existing group associated should succeed", async function() {
@@ -1693,9 +1695,11 @@ describe("Issues", function () {
 				.expect(200)).body._id;
 
 			// Commenting the issue
-			await agent.post(`/${username}/${model}/issues/${issueId}/comments`)
+			const res = await agent.post(`/${username}/${model}/issues/${issueId}/comments`)
 				.send(commentData)
 				.expect(responseCodes.FILE_FORMAT_NOT_SUPPORTED.status);
+
+			expect(res.body.value).to.equal(responseCodes.FILE_FORMAT_NOT_SUPPORTED.value);
 		});
 
 		it("seal last non system comment when adding system comment", function(done) {

@@ -239,10 +239,10 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 			const type = await FileType.fromBuffer(imageBuffer);
 
 			if (!C.ACCEPTED_IMAGE_FORMATS.includes(type.ext)) {
-				throw  { resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED};
+				throw responseCodes.FILE_FORMAT_NOT_SUPPORTED;
 			}
 		} catch(e) {
-			throw  { resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED};
+			throw responseCodes.FILE_FORMAT_NOT_SUPPORTED;
 		}
 
 		viewpoint.screenshot = imageBuffer;
