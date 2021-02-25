@@ -58,6 +58,17 @@ const appendRemainingLoginsInfo = function (resCode, remaining) {
 	};
 };
 
+const checkPasswordStrength = function (password) {
+	if (utils.isString(password) && password.length < C.MIN_PASSWORD_LENGTH) {
+		throw responseCodes.PASSWORD_TOO_SHORT;
+	}
+
+	const passwordScore = zxcvbn(password).score;
+	if (passwordScore < C.MIN_PASSWORD_STRENGTH) {
+		throw responseCodes.PASSWORD_TOO_WEAK;
+	}
+};
+
 const isMemberOfTeamspace = function (user, teamspace) {
 	return user.roles.filter(role => role.db === teamspace && role.role === C.DEFAULT_MEMBER_ROLE).length > 0;
 };
@@ -374,14 +385,7 @@ User.updatePassword = async function (logger, username, oldPassword, token, newP
 		throw ({ resCode: responseCodes.INVALID_INPUTS_TO_PASSWORD_UPDATE });
 	}
 
-	if (utils.isString(newPassword) && newPassword.length < C.MIN_PASSWORD_LENGTH) {
-		throw responseCodes.PASSWORD_TOO_SHORT;
-	}
-
-	const passwordScore = zxcvbn(newPassword).score;
-	if (passwordScore < C.MIN_PASSWORD_STRENGTH) {
-		throw responseCodes.PASSWORD_TOO_WEAK;
-	}
+	checkPasswordStrength(newPassword);
 
 	let user;
 
@@ -425,14 +429,7 @@ User.createUser = async function (logger, username, password, customData, tokenE
 		throw ({ resCode: responseCodes.EMAIL_INVALID });
 	}
 
-	if (utils.isString(password) && password.length < C.MIN_PASSWORD_LENGTH) {
-		throw responseCodes.PASSWORD_TOO_SHORT;
-	}
-
-	const passwordScore = zxcvbn(password).score;
-	if (passwordScore < C.MIN_PASSWORD_STRENGTH) {
-		throw responseCodes.PASSWORD_TOO_WEAK;
-	}
+	checkPasswordStrength(password);
 
 	await Promise.all([
 		User.checkUserNameAvailableAndValid(username),
