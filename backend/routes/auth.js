@@ -547,8 +547,6 @@ router.put("/:account", middlewares.isAccountAdmin, updateUser);
 router.put("/:account/password", resetPassword);
 
 function createSession(place, req, res, next, user) {
-	const termsPrompt = !User.hasReadLatestTerms(user);
-	user = { username: user.user, flags:{termsPrompt } };
 	req.body.username = user.username;
 
 	regenerateAuthSession(req, config, user)
@@ -570,9 +568,7 @@ function createSession(place, req, res, next, user) {
 
 			return removeSessions(ids);
 		}).then(() => {
-
 			responseCodes.respond(place, req, res, next, responseCodes.OK, user);
-
 		}).catch((err) => {
 			responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {username: user.username});
 		});

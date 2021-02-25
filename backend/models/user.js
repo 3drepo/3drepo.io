@@ -125,13 +125,15 @@ User.authenticate =  async function (logger, username, password) {
 			user.customData = {};
 		}
 
+		const termsPrompt = !User.hasReadLatestTerms(user);
+
 		user.customData.lastLoginAt = new Date();
 
 		await User.update(username, {"customData.lastLoginAt": user.customData.lastLoginAt});
 
 		logger.logInfo("User has logged in", {username});
 
-		return user;
+		return { username: user.user, flags:{ termsPrompt } };
 	} catch(err) {
 		if (authDB) {
 			authDB.close();
@@ -522,7 +524,7 @@ User.verify = async function (username, token, options) {
 };
 
 User.hasReadLatestTerms = function (user) {
-	return new Date(config.termsUpdatedAt) < user.customData.lastLoginAt;
+	return user.customData.lastLoginAt && new Date(config.termsUpdatedAt) < user.customData.lastLoginAt;
 };
 
 User.getAvatar = function (user) {
