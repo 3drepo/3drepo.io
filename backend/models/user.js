@@ -146,62 +146,56 @@ User.authenticate =  async function (logger, username, password) {
 	}
 
 	let user = null;
-	let authDB = null;
+
+	if (C.EMAIL_REGEXP.test(username)) { // if the submited username is the email
+		user = await User.findByEmail(username);
+		if (!user) {
+			throw ({ resCode: responseCodes.INCORRECT_USERNAME_OR_PASSWORD });
+		}
+
+		username = user.user;
+	}
+
+	if (!user)  {
+		user = await User.findByUserName(username);
+	}
+
+	if (isAccountLocked(user)) {
+		throw ({ resCode: responseCodes.TOO_MANY_LOGIN_ATTEMPTS });
+	}
+
 	try {
-		if (C.EMAIL_REGEXP.test(username)) { // if the submited username is the email
-			user = await User.findByEmail(username);
-			if (!user) {
-				throw ({ resCode: responseCodes.INCORRECT_USERNAME_OR_PASSWORD });
-			}
-
-			username = user.user;
-		}
-
-		if (!user)  {
-			user = await User.findByUserName(username);
-		}
-
-		if (isAccountLocked(user)) {
-			throw ({ resCode: responseCodes.TOO_MANY_LOGIN_ATTEMPTS });
-		}
-
-		authDB = await db.getAuthDB();
-		await authDB.authenticate(username, password);
-		authDB.close();
-
-		if (user.customData && user.customData.inactive) {
-			throw ({ resCode: responseCodes.USER_NOT_VERIFIED });
-		}
-
-		if (!user.customData) {
-			user.customData = {};
-		}
-
-		user.customData.lastLoginAt = new Date();
-
-		await db.update("admin", COLL_NAME, {user: username}, {$set: {"customData.lastLoginAt": user.customData.lastLoginAt}});
-
-		logger.logInfo("User has logged in", {username});
-
-		return user;
-	} catch(err) {
-		let resCodeError = err.resCode ? err : { resCode: utils.mongoErrorToResCode(err) };
-
-		if (authDB) {
-			authDB.close();
-		}
+		await db.authenticate(username, password);
+	} catch (err) {
+		const resCode = utils.mongoErrorToResCode(err);
 
 		if (user) {
 			const remainingLoginAttempts = await handleAuthenticateFail(user, username);
 
-			if (resCodeError.resCode.value === responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value &&
+			if (resCode.value === responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value &&
 				remainingLoginAttempts <= config.loginPolicy.remainingLoginAttemptsPromptThreshold) {
-				resCodeError = { resCode: appendRemainingLoginsInfo(resCodeError.resCode, remainingLoginAttempts) };
+				throw { resCode: appendRemainingLoginsInfo(resCode, remainingLoginAttempts) };
 			}
 		}
 
-		throw resCodeError;
+		throw { resCode };
 	}
+
+	if (user.customData && user.customData.inactive) {
+		throw ({ resCode: responseCodes.USER_NOT_VERIFIED });
+	}
+
+	if (!user.customData) {
+		user.customData = {};
+	}
+
+	user.customData.lastLoginAt = new Date();
+
+	await db.update("admin", COLL_NAME, {user: username}, {$set: {"customData.lastLoginAt": user.customData.lastLoginAt}});
+
+	logger.logInfo("User has logged in", {username});
+
+	return user;
 };
 
 User.getProfileByUsername = async function (username) {
