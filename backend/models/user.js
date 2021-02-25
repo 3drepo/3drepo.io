@@ -149,36 +149,35 @@ User.authenticate =  async function (logger, username, password) {
 
 	if (C.EMAIL_REGEXP.test(username)) { // if the submited username is the email
 		user = await User.findByEmail(username);
-		username = user.user;
 	} else {
 		user = await User.findByUserName(username);
 	}
 
 	if (!user) {
-		throw ({ resCode: responseCodes.INCORRECT_USERNAME_OR_PASSWORD });
+		throw responseCodes.INCORRECT_USERNAME_OR_PASSWORD;
 	}
 
 	if (isAccountLocked(user)) {
-		throw ({ resCode: responseCodes.TOO_MANY_LOGIN_ATTEMPTS });
+		throw responseCodes.TOO_MANY_LOGIN_ATTEMPTS;
 	}
 
 	try {
-		await db.authenticate(username, password);
+		await db.authenticate(user.user, password);
 	} catch (err) {
 		const resCode = utils.mongoErrorToResCode(err);
 
-		const remainingLoginAttempts = await handleAuthenticateFail(user, username);
+		const remainingLoginAttempts = await handleAuthenticateFail(user, user.user);
 
 		if (resCode.value === responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value &&
 			remainingLoginAttempts <= config.loginPolicy.remainingLoginAttemptsPromptThreshold) {
-			throw { resCode: appendRemainingLoginsInfo(resCode, remainingLoginAttempts) };
+			throw appendRemainingLoginsInfo(resCode, remainingLoginAttempts);
 		}
 
 		throw { resCode };
 	}
 
 	if (user.customData && user.customData.inactive) {
-		throw ({ resCode: responseCodes.USER_NOT_VERIFIED });
+		throw responseCodes.USER_NOT_VERIFIED;
 	}
 
 	if (!user.customData) {
