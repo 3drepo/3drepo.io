@@ -1121,6 +1121,14 @@ User.updateAvatar = async function(username, avatarBuffer) {
 	await db.update("admin", COLL_NAME, {user: username}, {$set: {"customData.avatar" : {data: avatarBuffer}}});
 };
 
+User.updatePermissions = async function(username, updatedPermissions) {
+	await db.update("admin", COLL_NAME, {user: username}, {$set: {"customData.permissions": updatedPermissions}});
+};
+
+User.updatePermissionTemplates = async function(username, updatedPermissions) {
+	await db.update("admin", COLL_NAME, {user: username}, {$set: {"customData.permissionTemplates": updatedPermissions}});
+};
+
 /*
 Payment (paypal) stuff
 
