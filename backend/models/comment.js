@@ -142,9 +142,11 @@ const identifyReferences = (comment) => {
 };
 
 const addComment = async function(account, model, colName, id, user, data, routePrefix, ticketType) {
+
 	if (!(data.comment || "").trim() && !get(data,"viewpoint.screenshot")) {
 		throw { resCode: responseCodes.ISSUE_COMMENT_NO_TEXT};
 	}
+
 	// 1. Fetch comments
 	const _id = utils.stringToUUID(id) ;
 	const col = await db.getCollection(account, model + "." + colName);
