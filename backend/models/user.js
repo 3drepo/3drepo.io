@@ -1129,6 +1129,10 @@ User.updatePermissionTemplates = async function(username, updatedPermissions) {
 	await db.update("admin", COLL_NAME, {user: username}, {$set: {"customData.permissionTemplates": updatedPermissions}});
 };
 
+User.updateSubscriptions = async function(username, subscriptions) {
+	await db.update("admin", COLL_NAME, {user: username}, {$set: {"customData.billing.subscriptions": subscriptions}});
+};
+
 /*
 Payment (paypal) stuff
 
