@@ -21,6 +21,7 @@ const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
 const DB = require("../handler/db");
 const crypto = require("crypto");
+const zxcvbn = require("zxcvbn");
 const utils = require("../utils");
 const Role = require("./role");
 const { addDefaultJobs,  findJobByUser, usersWithJob, removeUserFromAnyJob, addUserToJob } = require("./job");
@@ -47,6 +48,17 @@ const {
 const FileRef = require("./fileRef");
 const PermissionTemplates = require("./permissionTemplates");
 const { get } = require("lodash");
+
+const checkPasswordStrength = function (password) {
+	if (utils.isString(password) && password.length < C.MIN_PASSWORD_LENGTH) {
+		throw responseCodes.PASSWORD_TOO_SHORT;
+	}
+
+	const passwordScore = zxcvbn(password).score;
+	if (passwordScore < C.MIN_PASSWORD_STRENGTH) {
+		throw responseCodes.PASSWORD_TOO_WEAK;
+	}
+};
 
 const isMemberOfTeamspace = function (user, teamspace) {
 	return user.roles.filter(role => role.db === teamspace && role.role === C.DEFAULT_MEMBER_ROLE).length > 0;
@@ -326,10 +338,11 @@ User.checkEmailAvailableAndValid = async function (email, exceptUser) {
 };
 
 User.updatePassword = async function (logger, username, oldPassword, token, newPassword) {
-
 	if (!((oldPassword || token) && newPassword)) {
 		throw ({ resCode: responseCodes.INVALID_INPUTS_TO_PASSWORD_UPDATE });
 	}
+
+	checkPasswordStrength(newPassword);
 
 	let user;
 
@@ -373,6 +386,8 @@ User.createUser = async function (logger, username, password, customData, tokenE
 	if (!customData) {
 		throw ({ resCode: responseCodes.EMAIL_INVALID });
 	}
+
+	checkPasswordStrength(password);
 
 	await Promise.all([
 		User.checkUserNameAvailableAndValid(username),

@@ -693,7 +693,6 @@ function signUp(req, res, next) {
 
 				}, config.tokenExpiry.emailVerify);
 			} else {
-				// console.log(resBody);
 				return Promise.reject({ resCode: responseCodes.INVALID_CAPTCHA_RES});
 			}
 

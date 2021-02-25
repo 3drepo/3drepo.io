@@ -29,7 +29,7 @@ describe("Logout", function () {
 	let server;
 	const username = "logout_username";
 	const username_not_verified = "logout_username_not_verified";
-	const password = "password";
+	const password = "Str0ngPassword!";
 	const email = "test3drepo_logout@mailinator.com";
 
 	before(function(done) {
