@@ -25,8 +25,7 @@ module.exports = {
 	cookie: {
 		secret: "a",
 		parser_secret : "b",
-		maxAge: 1000 * 60 * 60,
-		skipMissingReferer: true
+		maxAge: 1000 * 60 * 60
 	},
 	servers: [
 		{
