@@ -125,6 +125,8 @@
 		USER_EXISTS: { message: "User already exists", status: 400 },
 		OWNER_MUST_BE_ADMIN: {message: "Cannot alter permissions of teamspace owner", status: 400},
 		SIGN_UP_PASSWORD_MISSING: { message: "Password is missing", status: 400 },
+		PASSWORD_TOO_SHORT: { message: "Password is too short", status: 400 },
+		PASSWORD_TOO_WEAK: { message: "Password is too weak", status: 400 },
 		TOKEN_INVALID: { message: "Token is invalid or expired", status: 400 },
 		ALREADY_VERIFIED: { message: "Already verified", status: 400 },
 		USER_NOT_VERIFIED: { message: "Account not yet verified. Please check your email.", status: 400 },
@@ -442,7 +444,7 @@
 				res.setHeader("Cache-Control", `private, max-age=${cache.maxAge || config.cachePolicy.maxAge}`);
 			}
 
-			if (Buffer.isBuffer(extraInfo)) {
+			if (extraInfo && Buffer.isBuffer(extraInfo)) {
 
 				res.status(resCode.status);
 
@@ -464,10 +466,12 @@
 
 			} else {
 
-				meta.contentLength = typeof extraInfo === "string" ? extraInfo.length : JSON.stringify(extraInfo)
-					.length;
-				res.status(resCode.status)
-					.send(extraInfo);
+				if(extraInfo) {
+					meta.contentLength = typeof extraInfo === "string" ? extraInfo.length : JSON.stringify(extraInfo)
+						.length;
+
+				}
+				res.status(resCode.status).send(extraInfo);
 			}
 
 			// log bandwidth and http status code

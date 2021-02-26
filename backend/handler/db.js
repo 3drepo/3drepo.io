@@ -60,7 +60,14 @@
 		if(sort) {
 			projection.sort = sort;
 		}
+
 		return collection.findOne(query, projection);
+	};
+
+	Handler.findOneAndDelete = async function (database, colName, query, projection = {}) {
+		const collection = await Handler.getCollection(database, colName);
+		const findResult = await collection.findOneAndDelete(query, projection);
+		return findResult.value;
 	};
 
 	function getURL(database) {
@@ -188,11 +195,6 @@
 		});
 	};
 
-	// FIXME: this exist as a (temp) workaround because modelFactory has one call that doesn't expect promise!
-	Handler._getCollection = function (database, colName) {
-		return db.db(database).collection(colName);
-	};
-
 	Handler.listCollections = function (database) {
 		return Handler.getDB(database).then(dbConn => {
 			return dbConn.listCollections().toArray();
@@ -225,9 +227,16 @@
 		});
 	};
 
-	Handler.update = async function (database, colName, query, data) {
+	Handler.update = async function (database, colName, query, data, upsert = false) {
 		const collection = await Handler.getCollection(database, colName);
-		return collection.update(query, data);
+		const options = upsert ? { upsert } : undefined;
+		return collection.update(query, data, options);
+	};
+
+	Handler.updateOne = async function (database, colName, query, data, upsert = false) {
+		const collection = await Handler.getCollection(database, colName);
+		const options = upsert ? { upsert } : undefined;
+		return collection.updateOne(query, data, options);
 	};
 
 	Handler.count = async function (database, colName, query, data) {

@@ -32,7 +32,7 @@ describe("Uploading a model", function () {
 	let server;
 	let agent;
 	const username = "upload_username";
-	const password = "password";
+	const password = "Str0ngPassword!";
 	const email = "test3drepo_upload@mailinator.com";
 	const model = "project1";
 	let modelId;

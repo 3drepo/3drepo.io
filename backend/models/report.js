@@ -18,7 +18,7 @@
 "use strict";
 
 const moment = require("moment");
-const ModelSetting = require("./modelSetting");
+const { findModelSettingById } = require("./modelSetting");
 const User = require ("./user");
 const config = require("../config");
 const C = require("../constants");
@@ -103,13 +103,9 @@ class ReportGenerator {
 		this.getUsersToJobs();
 	}
 
-	getDBCol() {
-		return { account: this.teamspace, model: this.modelID };
-	}
-
 	getModelName() {
 		this.promises.push(
-			ModelSetting.findById(this.getDBCol(), this.modelID).then((setting) => {
+			findModelSettingById(this.teamspace, this.modelID).then((setting) => {
 				this.modelName = setting.name;
 			})
 		);
@@ -117,7 +113,7 @@ class ReportGenerator {
 
 	getRevisionID() {
 		this.promises.push(
-			require("./history").findLatest(this.getDBCol(), {timestamp: 1, tag: 1}).then((entry) => {
+			require("./history").findLatest(this.teamspace, this.modelID, {timestamp: 1, tag: 1}).then((entry) => {
 				this.rev = entry.tag ? entry.tag : "uploaded at " + formatDate(entry.timestamp);
 			})
 		);

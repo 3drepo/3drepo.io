@@ -40,7 +40,7 @@ export const selectHash = createSelector(
 
 export const selectUrlParams = createSelector(
 	selectLocation, (location) => {
-		const viewerPath = `${ROUTES.VIEWER}/:teamspace/:model/:revision?`;
+		const viewerPath = ROUTES.MODEL_VIEWER;
 		const boardPath = ROUTES.BOARD_SPECIFIC;
 
 		const viewerParams = matchPath(location.pathname, { path: viewerPath });

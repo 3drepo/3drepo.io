@@ -41,7 +41,7 @@ export function* fetchTeamspaces({ username }) {
 		yield put(TeamspacesActions.subscribeOnChanges());
 
 	} catch (e) {
-		yield put(DialogActions.showEndpointErrorDialog('fetch', 'team spaces', e));
+		yield put(DialogActions.showEndpointErrorDialog('fetch', 'teamspaces', e));
 	}
 
 	yield put(TeamspacesActions.setPendingState(false));

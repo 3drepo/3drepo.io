@@ -1123,7 +1123,7 @@ export class UnityUtil {
 		clearCanvas = true
 	): Promise<void> {
 		if (clearCanvas) {
-			UnityUtil.reset();
+			UnityUtil.reset(!initView);
 		}
 		const params: any = {
 			database : account,
@@ -1300,7 +1300,7 @@ export class UnityUtil {
 	 * Clear the canvas and reset all settings
 	 * @category Configurations
 	 */
-	public static reset() {
+	public static reset(resetProjection = true) {
 		UnityUtil.cancelLoadModel();
 		UnityUtil.loadedPromise = null;
 		UnityUtil.loadedResolve = null;
@@ -1312,6 +1312,9 @@ export class UnityUtil {
 		UnityUtil.disableMeasuringTool();
 		UnityUtil.clearAllMeasurements();
 		UnityUtil.diffToolDisableAndClear();
+		if (resetProjection) {
+			UnityUtil.usePerspectiveProjection();
+		}
 		UnityUtil.toUnity('ClearCanvas', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 

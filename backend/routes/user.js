@@ -23,7 +23,7 @@ const onSuccess = responseCodes.onSuccessfulOperation;
 const middlewares = require("../middlewares/middlewares");
 const User =  require("../models/user");
 const utils = require("../utils");
-const { setIntercomHash } = require("../models/helper/intercom");
+const { setIntercomHash } = require("../models/intercom");
 const { isString, isArray, isObject } = require("lodash");
 
 /**

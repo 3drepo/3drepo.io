@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { cloneDeep, keyBy } from 'lodash';
+import { cloneDeep, keyBy, orderBy } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 import { SORT_ORDER_TYPES } from '../../constants/sorting';
 import { prepareGroup } from '../../helpers/groups';
@@ -138,6 +138,17 @@ const fetchGroupSuccess = (state = INITIAL_STATE, { group }) => {
 	return { ...state, viewpointsGroups: { ...state.viewpointsGroups, [group._id]: group } };
 };
 
+const toggleSortOrder = (state = INITIAL_STATE) => {
+	const currentSortOrder = state.componentState.sortOrder;
+	const isASC = currentSortOrder === SORT_ORDER_TYPES.ASCENDING;
+	const sortOrder = isASC ? SORT_ORDER_TYPES.DESCENDING : SORT_ORDER_TYPES.ASCENDING;
+
+	const viewpoints =  orderBy(state.viewpointsMap, ['name'], [sortOrder as ('asc' | 'desc')]);
+
+	state = setComponentState(state, {componentState: { sortOrder }});
+	return fetchViewpointsSuccess(state,  {viewpoints});
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[ViewpointsTypes.SET_PENDING_STATE]: setPendingState,
 	[ViewpointsTypes.FETCH_VIEWPOINTS_SUCCESS]: fetchViewpointsSuccess,
@@ -148,4 +159,5 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ViewpointsTypes.SET_COMPONENT_STATE]: setComponentState,
 	[ViewpointsTypes.SET_SELECTED_VIEWPOINT]: setSelectedViewpoint,
 	[ViewpointsTypes.FETCH_GROUP_SUCCESS]: fetchGroupSuccess,
+	[ViewpointsTypes.TOGGLE_SORT_ORDER]: toggleSortOrder,
 });

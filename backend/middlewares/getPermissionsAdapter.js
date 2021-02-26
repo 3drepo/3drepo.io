@@ -21,8 +21,8 @@ const AccountPermissions = require("../models/accountPermissions");
 const PermissionTemplates = require("../models/permissionTemplates");
 
 (() => {
-	const ModelSetting = require("../models/modelSetting");
-	const Project = require("../models/project");
+	const { findModelSettingById, findPermissionByUser } = require("../models/modelSetting");
+	const { findOneProject, findProjectPermsByUser } = require("../models/project");
 	const User = require("../models/user");
 	const ResponseCodes = require("../response_codes");
 
@@ -58,21 +58,12 @@ const PermissionTemplates = require("../models/permissionTemplates");
 			},
 
 			projectLevel: function(username, modelName) {
-
-				return Project.findOne({account}, { name: modelName}).then(project => {
-
-					if(!project) {
-						return [];
-					}
-
-					const permission = project.findPermsByUser(username);
-
-					if(!permission) {
+				return findProjectPermsByUser(account, modelName, username).then(permission => {
+					if (!permission) {
 						return [];
 					}
 
 					return permission.permissions;
-
 				});
 			},
 
@@ -83,7 +74,7 @@ const PermissionTemplates = require("../models/permissionTemplates");
 
 				const projectQuery = { models: model, "permissions.user": username };
 				// project admin have access to models underneath it.
-				return Project.findOne({account}, projectQuery, { "permissions.$" : 1 }).then(project => {
+				return findOneProject(account, projectQuery, { "permissions.$" : 1 }).then(project => {
 					if(project && project.permissions) {
 						projectPerms = project.permissions[0].permissions;
 					}
@@ -93,14 +84,14 @@ const PermissionTemplates = require("../models/permissionTemplates");
 				}).then(_user => {
 
 					user = _user;
-					return ModelSetting.findById({account, model}, model);
+					return findModelSettingById(account, model);
 
-				}).then(setting => {
+				}).then(async setting => {
 					if(!setting) {
 						throw ResponseCodes.RESOURCE_NOT_FOUND;
 					}
 
-					const perm = setting.findPermissionByUser(username);
+					const perm = await findPermissionByUser(account, model, username);
 
 					if(!perm) {
 						return projectPerms;

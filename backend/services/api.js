@@ -50,22 +50,6 @@ module.exports.createApp = function (config) {
 
 	app.use(cors({ origin: true, credentials: true }));
 
-	// init the singleton db connection for modelFactory
-	app.use((req, res, next) => {
-		// init the singleton db connection
-		const DB = require("../handler/db");
-		DB.getDB("admin")
-			.then(() => {
-				// set db to singleton modelFactory class
-				require("../models/factory/modelFactory")
-					.setDB(DB);
-				next();
-			})
-			.catch(err => {
-				responseCodes.respond("Express Middleware", req, res, next, responseCodes.DB_ERROR(err), err);
-			});
-	});
-
 	app.use(bodyParser.urlencoded({
 		extended: true
 	}));
@@ -130,7 +114,6 @@ module.exports.createApp = function (config) {
 	app.use("/:account/:model", require("../routes/view"));
 
 	// issues handler
-	app.use("/:account/:model", require("../routes/issueAnalytic"));
 	app.use("/:account/:model", require("../routes/issue"));
 
 	// resources handler

@@ -118,8 +118,8 @@ export class MultiSelectService {
 			canvasIcon = panelIcon = this.cursorIcons.decumMode;
 		}
 
-		if (document.getElementById('#canvas')) {
-			document.getElementById('#canvas').style.cursor = canvasIcon;
+		if (document.getElementById('unityViewer')) {
+			document.getElementById('unityViewer').style.cursor = canvasIcon;
 		}
 
 		const groupElements: any = document.getElementsByClassName('groups-list');

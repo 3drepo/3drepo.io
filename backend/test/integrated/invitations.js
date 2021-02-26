@@ -22,6 +22,7 @@ const { expect, AssertionError } = require("chai");
 const { USER_ALREADY_EXISTS, JOB_NOT_FOUND, INVALID_PROJECT_ID,
 	INVALID_MODEL_ID, NOT_AUTHORIZED, INVALID_MODEL_PERMISSION,
 	LICENCE_LIMIT_REACHED } = require("../../response_codes.js");
+const STRONG_PASSWORD = "Str0ngPassword!";
 
 const inviteUrl = (account) => `/${account}/invitations`;
 const membersUrl = (account) => `/${account}/members`;
@@ -119,7 +120,6 @@ describe("Invitations ", function () {
 				done();
 			});
 	});
-
 
 	it("sent with project admin should work for the teamspace admin", function(done) {
 		const inviteEmail = '93393d28f953@mail.com';
@@ -233,7 +233,7 @@ describe("Invitations ", function () {
 			.expect(200);
 
 		const User = require("../../models/user");
-		const { token } = await User.createUser(null, username, 'password', {email}, 200000);
+		const { token } = await User.createUser(null, username, STRONG_PASSWORD, {email}, 200000);
 
 		await User.verify(username, token, {skipImportToyModel : true, skipCreateBasicPlan: true});
 
@@ -277,7 +277,7 @@ describe("Invitations ", function () {
 			.expect(200);
 
 		const User = require("../../models/user");
-		const { token } = await User.createUser(null, username, 'password', {email}, 200000);
+		const { token } = await User.createUser(null, username, STRONG_PASSWORD, {email}, 200000);
 		await User.verify(username, token, {skipImportToyModel : true, skipCreateBasicPlan: true});
 
 
@@ -318,10 +318,8 @@ describe("Invitations ", function () {
 			.send({ email, job: inviteJob, permissions: team1Perm })
 			.expect(200);
 
-		expect(true).to.equal(true);
-
 		const User = require("../../models/user");
-		const { token } = await User.createUser(null, username, 'password', {email}, 200000);
+		const { token } = await User.createUser(null, username, STRONG_PASSWORD, {email}, 200000);
 		await User.verify(username, token, {skipImportToyModel : true, skipCreateBasicPlan: true});
 
 		const { body: { permissions } } = await agents.teamSpace1.get('/teamSpace1/projects/project1').expect(200);

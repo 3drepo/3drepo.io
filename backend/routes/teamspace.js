@@ -421,6 +421,34 @@
 	 */
 	router.post("/members", middlewares.isAccountAdmin, addTeamMember);
 
+	/**
+	 * @api {get} /:teamspace/addOns get enabled add ons
+	 * @apiName getAddOns
+	 * @apiGroup Teamspace
+	 * @apiDescription view the list of addOns enabled on this teamspace
+	 *
+	 * @apiPermission teamspace member
+	 *
+	 * @apiParam {String} teamspace Name of teamspace
+	 *
+	 * @apiSuccessExample {json} Success
+	 * {
+	 *   vrEnabled: true,
+	 *   hereEnabled: true
+	 * }
+	 *
+	 */
+
+	router.get("/addOns", middlewares.isTeamspaceMember, getTeamspaceAddOns);
+
+	function getTeamspaceAddOns(req, res, next) {
+		User.getAddOnsForTeamspace(req.params.account).then((addOns) => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, addOns);
+		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+	}
+
 	function getBillingInfo(req, res, next) {
 		User.findByUserName(req.params.account).then(user => {
 			let billingInfo = (user.customData.billing || {}).billingInfo;
