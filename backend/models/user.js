@@ -78,10 +78,12 @@ const hasReadLatestTerms = function (user) {
 };
 
 const isAccountLocked = function (user) {
+	const currentTime = new Date();
+
 	return user && user.customData && user.customData.loginInfo &&
 		user.customData.loginInfo.failedLoginCount && user.customData.loginInfo.lastFailedLoginAt &&
 		user.customData.loginInfo.failedLoginCount >= config.loginPolicy.maxUnsuccessfulLoginAttempts &&
-		Date.now() - user.customData.loginInfo.lastFailedLoginAt < config.loginPolicy.lockoutDuration;
+		currentTime - user.customData.loginInfo.lastFailedLoginAt < config.loginPolicy.lockoutDuration;
 };
 
 const hasReachedLicenceLimit = async function (teamspace) {
@@ -107,7 +109,7 @@ const findOne = async function (query, projection) {
 };
 
 const handleAuthenticateFail = async function (user, username) {
-	const currentTime = Date.now();
+	const currentTime = new Date();
 
 	const elapsedTime = user.customData.loginInfo && user.customData.loginInfo.lastFailedLoginAt ?
 		currentTime - user.customData.loginInfo.lastFailedLoginAt : undefined;
