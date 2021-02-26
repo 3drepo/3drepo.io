@@ -17,7 +17,7 @@
 
 import React from 'react';
 
-import {FormControlLabel, FormGroup, IconButton, Switch} from '@material-ui/core';
+import { IconButton } from '@material-ui/core';
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import { STEP_SCALE } from '../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
@@ -31,7 +31,6 @@ import { TasksList } from './components/tasksList/sequenceTasksList.component';
 import {
 	LoaderContainer, SequencesContainer, SequencesIcon
 } from './sequences.styles';
-// import {ViewerPanelContent} from "../viewerPanel/viewerPanel.styles";
 
 interface IProps {
 	sequences: any;
@@ -60,6 +59,7 @@ interface IProps {
 	isActivitiesPending: boolean;
 	draggablePanels: string[];
 	toggleLegend: () => void;
+	resetLegendPanel: () => void;
 }
 
 const da =  new Date();
@@ -104,12 +104,14 @@ const SequencesLoader = () => (<LoaderContainer><Loader /></LoaderContainer>);
 export class Sequences extends React.PureComponent<IProps, {}> {
 	public componentWillUnmount = () => {
 		this.props.setPanelVisibility(VIEWER_PANELS.ACTIVITIES, false);
+		this.props.resetLegendPanel();
 	}
 
 	public componentDidUpdate(prevProps: Readonly<IProps>) {
-		const { selectedSequence, setPanelVisibility } = this.props;
+		const { selectedSequence, setPanelVisibility, resetLegendPanel } = this.props;
 		if (selectedSequence !== prevProps.selectedSequence && !selectedSequence) {
 			setPanelVisibility(VIEWER_PANELS.ACTIVITIES, false);
+			resetLegendPanel();
 		}
 	}
 

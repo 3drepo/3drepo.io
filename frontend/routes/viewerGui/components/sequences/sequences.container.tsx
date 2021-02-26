@@ -57,6 +57,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchSelectedFrame: SequencesActions.fetchSelectedFrame,
 	toggleActivitiesPanel: ActivitiesActions.toggleActivitiesPanel,
 	toggleLegend: LegendActions.togglePanel,
+	resetLegendPanel: LegendActions.resetPanel,
 	fetchActivityDetails: ActivitiesActions.fetchDetails,
 	setPanelVisibility: ViewerGuiActions.setPanelVisibility,
 	deselectViewsAndLeaveClipping: ViewpointsActions.deselectViewsAndLeaveClipping,

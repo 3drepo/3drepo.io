@@ -64,6 +64,8 @@ export class Legend extends React.PureComponent<IProps, IState> {
 
 		if (!legend || !legend.length) {
 			fetchLegend();
+		} else {
+			this.setState({ legend });
 		}
 	}
 

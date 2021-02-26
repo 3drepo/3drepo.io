@@ -148,6 +148,14 @@ function* setDefaultLegend() {
 	}
 }
 
+function* resetPanel() {
+	try {
+		yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.LEGEND, false));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('display', 'legend', error));
+	}
+}
+
 export default function* LegendSaga() {
 	yield takeLatest(LegendTypes.FETCH, fetch);
 	yield takeLatest(LegendTypes.TOGGLE_PANEL, toggleLegendPanel);
@@ -156,4 +164,5 @@ export default function* LegendSaga() {
 	yield takeLatest(LegendTypes.SET_DEFAULT, setDefaultLegend);
 	yield takeLatest(LegendTypes.UPDATE_LEGEND_ITEM, updateLegendItem);
 	yield takeLatest(LegendTypes.DELETE_LEGEND_ITEM, deleteLegendItem);
+	yield takeLatest(LegendTypes.RESET_PANEL, resetPanel);
 }

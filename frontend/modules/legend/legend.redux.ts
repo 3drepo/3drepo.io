@@ -28,6 +28,7 @@ export const { Types: LegendTypes, Creators: LegendActions } = createActions({
 	deleteLegendItem: ['legendItem'],
 	setDefault: [],
 	reset: [],
+	resetPanel: [],
 }, { prefix: 'LEGEND/' });
 
 export interface ILegend {
@@ -53,8 +54,11 @@ export const toggleUpdatePendingState = (state = INITIAL_STATE, { isUpdatePendin
 
 export const fetchSuccess = (state = INITIAL_STATE, { legend }) => ({ ...state, legend });
 
+const resetPanel = (state = INITIAL_STATE) => ({ ...INITIAL_STATE });
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[LegendTypes.TOGGLE_PENDING_STATE]: togglePendingState,
 	[LegendTypes.TOGGLE_UPDATE_PENDING_STATE]: toggleUpdatePendingState,
 	[LegendTypes.FETCH_SUCCESS]: fetchSuccess,
+	[LegendTypes.RESET_PANEL]: resetPanel,
 });
