@@ -277,7 +277,6 @@
 		TEAMSPACE_SETTINGS_NOT_FOUND: { message: "Teamspace settings not found", status: 404 },
 		NOTIFICATION_NOT_FOUND: { message: "Notification not found", status: 404},
 
-		REQUEST_ORIGIN_MISMATCH: { message: "Request host does not match cookie domain. Use API key",  status:400 },
 		INVALID_STREAM_SESSION: { message: "The streaming session code is not valid",  status:400 }
 	};
 

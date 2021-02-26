@@ -30,7 +30,7 @@ module.exports = async (req, res, next) => {
 	}
 
 	if (req.headers.referer && !req.headers.referer.match(`^${config.public_protocol}://${config.cookie_domain}`)) {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.REQUEST_ORIGIN_MISMATCH, null, {});
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.NOT_LOGGED_IN, null, {});
 		return;
 	}
 
