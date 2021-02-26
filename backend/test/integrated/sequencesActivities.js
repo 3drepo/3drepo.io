@@ -21,6 +21,7 @@ const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp();
 const responseCodes = require("../../response_codes.js");
+const { cloneDeep } = require("lodash");
 
 
 describe("Sequences", function () {
@@ -69,46 +70,97 @@ describe("Sequences", function () {
 		]
 	}
 
+	let activityId = null;
+
 	describe("create activity", function() {
-		// it("should failed with made up sequence id", async() => {
-		// 	const { body } = await agent.post(`/${username}/${model}/sequences/non_existing_id/activities`)
-		// 		.send(activity)
-		// 		.expect(404);
-		// });
+		it("should fail with made up sequence id", async() => {
+			const { body } = await agent.post(`/${username}/${model}/sequences/non_existing_id/activities`)
+				.send(activity)
+				.expect(responseCodes.SEQUENCE_NOT_FOUND.status);
 
-		// it("should failed with wrong activity schema", async() => {
-		// 	const wrongActivity = {...activity};
-		// 	delete wrongActivity.name;
+			expect(body.value).to.be.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
 
-		// 	const { body } = await agent.post(`/${username}/${model}/sequences/${sequenceId}/activities`)
-		// 		.send(wrongActivity)
-		// 		.expect(responseCodes.INVALID_ARGUMENTS.status);
-		// });
+		});
 
-		// it("should be created succesfully", async() => {
-		// 	const { body } = await agent.post(`/${username}/${model}/sequences/${sequenceId}/activities`)
-		// 		.send(activity)
-		// 		.expect(200);
+		it("should fail with wrong activity schema", async() => {
+			const wrongActivity = {...activity};
+			delete wrongActivity.name;
 
-		// 	expect(body._id).to.be.string;
-		// 	expect(body.sequence_id).to.be.equal(sequenceId);
-		// });
+			const { body } = await agent.post(`/${username}/${model}/sequences/${sequenceId}/activities`)
+				.send(wrongActivity)
+				.expect(responseCodes.INVALID_ARGUMENTS.status);
+
+			expect(body.value).to.be.equal(responseCodes.INVALID_ARGUMENTS.value);
+
+		});
+
+		it("should be created succesfully", async() => {
+			const { body } = await agent.post(`/${username}/${model}/sequences/${sequenceId}/activities`)
+				.send(activity)
+				.expect(200);
+
+			expect(body._id).to.be.string;
+			expect(body.sequence_id).to.be.equal(sequenceId);
+
+			activityId = body._id;
+		});
+	});
+
+	describe("edit activty", function() {
+
+		it("should fail with made up sequence id", async() => {
+			const { body } = await agent.put(`/${username}/${model}/sequences/non_existing_id/activities/${activityId}`)
+				.send(activity)
+				.expect(responseCodes.SEQUENCE_NOT_FOUND.status);
+
+			expect(body.value).to.be.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
+		});
+
+		it("should fail with made up activity id", async() => {
+			const { body } = await agent.put(`/${username}/${model}/sequences/${sequenceId}/activities/non_existent_actity`)
+				.send(activity)
+				.expect(responseCodes.ACTIVITY_NOT_FOUND.status);
+
+			expect(body.value).to.be.equal(responseCodes.ACTIVITY_NOT_FOUND.value);
+		});
+
+		it("should fail with wrong activity schema", async() => {
+			const wrongActivity = { madeUpProp: true };
+
+			const { body } = await agent.put(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}`)
+				.send(wrongActivity)
+				.expect(responseCodes.INVALID_ARGUMENTS.status);
+
+			expect(body.value).to.be.equal(responseCodes.INVALID_ARGUMENTS.value);
+		});
+
+		it("should succeed", async() => {
+			const activity = { name: "updated name" };
+
+			const { body } = await agent.put(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}`)
+				.send(activity)
+				.expect(200);
+
+			const updatedActivity =  {...cloneDeep(activity),_id: activityId, sequence_id: sequenceId, ...activity };
+			expect(body).to.be.deep.equal(updatedActivity);
+		});
+
 	});
 
 
-	describe("get activities list", function() {
-		it("should work", async() => {
-			let { body } = await agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/activities`)
-				.expect(200);
+	// describe("get activities list", function() {
+	// 	it("should work", async() => {
+	// 		let { body } = await agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/activities`)
+	// 			.expect(200);
 
-			console.log(JSON.stringify(body, null, '\t'));
+	// 		console.log(JSON.stringify(body, null, '\t'));
 
 
 
-			const res  = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities`)
-				.expect(200);
+	// 		const res  = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities`)
+	// 			.expect(200);
 
-			console.log(JSON.stringify(res.body, null, '\t'));
-		});
-	})
+	// 		console.log(JSON.stringify(res.body, null, '\t'));
+	// 	});
+	// })
 });

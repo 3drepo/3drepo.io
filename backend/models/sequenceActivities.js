@@ -22,12 +22,20 @@ const utils = require("../utils");
 const nodeuuid = require("uuid/v1");
 const FileRef = require("./fileRef");
 const yup = require("yup");
-const { groupBy } = require("lodash");
 
 const keyValueSchema = yup.object().shape({
 	key: yup.string().required(),
 	value: yup.mixed().required()
 });
+
+const activityEditSchema = yup.object().shape({
+	name: yup.string(),
+	startDate: yup.number(),
+	endDate: yup.number(),
+	parent: yup.array().of(yup.string()),
+	resources: yup.object(),
+	data: yup.array().of(keyValueSchema)
+}).noUnknown();
 
 const activitySchema = yup.object().shape({
 	name: yup.string().required(),
@@ -45,7 +53,6 @@ const activitySchema = yup.object().shape({
  * @return {Array<Activity>}
  */
 const getSubtasks = (id, activities) => {
-	// console.log("getSubtasks");
 	return activities.filter(activity => {
 		const parents = (activity.parents ||  []);
 
@@ -55,12 +62,8 @@ const getSubtasks = (id, activities) => {
 			return !parents.length;
 		}
 	}).map(activity => {
-		// console.log(activity);
-		// console.log(getSubtasks);
-
 		const subTasks = getSubtasks(activity._id, activities);
 
-		//	console.log("llego a subtasks");
 		if (subTasks.length) {
 			activity.subTasks = subTasks;
 		}
@@ -71,8 +74,7 @@ const getSubtasks = (id, activities) => {
 
 const createActivitiesTree = async(account, model, sequenceId) => {
 	// try{
-	// console.log("llegamos");
-	const activities = await db.find(account, model + ".activities",{}); // filter by sequenceId
+	const activities = await db.find(account, model + ".activities",{sequenceId}); // filter by sequenceId
 	activities.forEach(activity => {
 		activity._id = utils.uuidToString(activity._id);
 
@@ -101,7 +103,7 @@ SequenceActivities.create = async (account, model, sequenceId, activity) => {
 		throw responseCodes.SEQUENCE_NOT_FOUND;
 	}
 
-	if (!activitySchema.isValidSync(activity)) {
+	if (!activitySchema.isValidSync(activity, { strict: true })) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
@@ -114,6 +116,29 @@ SequenceActivities.create = async (account, model, sequenceId, activity) => {
 	]);
 
 	return {...activity, _id, sequence_id: sequenceId};
+};
+
+SequenceActivities.edit = async (account, model, sequenceId, activityId, activity) => {
+	const sequence = await db.findOne(account, model + ".sequences", { _id: utils.stringToUUID(sequenceId)});
+
+	if (!sequence) {
+		throw responseCodes.SEQUENCE_NOT_FOUND;
+	}
+
+	if (!activityEditSchema.isValidSync(activity, { strict: true })) {
+		throw responseCodes.INVALID_ARGUMENTS;
+	}
+
+	const query =  {_id: utils.stringToUUID(activityId), sequence_id: utils.stringToUUID(sequenceId)};
+	const {result} = await db.update(account, model + ".activities", query, activity);
+
+	if (!result.n) {
+		throw responseCodes.ACTIVITY_NOT_FOUND;
+	}
+
+	await FileRef.removeFile(account, model, "activities", sequenceId);
+
+	return {...activity, _id: activityId, sequence_id: sequenceId};
 };
 
 SequenceActivities.get = async (account, model, sequenceId) => {
