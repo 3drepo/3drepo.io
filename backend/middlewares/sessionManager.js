@@ -18,7 +18,9 @@
 "use strict";
 const C = require("../constants");
 const config = require("../config");
+const responseCodes = require("../response_codes");
 const session = require("../services/session").session(config);
+const utils = require("../utils");
 
 module.exports = async (req, res, next) => {
 	// In case other middleware sets the session
@@ -27,9 +29,8 @@ module.exports = async (req, res, next) => {
 		return;
 	}
 
-	if ((req.headers.referer && !req.headers.referer.match(`^${config.public_protocol}://${config.cookie_domain}`)) ||
-		(!req.headers.referer && !config.cookie.skipMissingReferer)) {
-		req[C.REQ_REPO].logger.logError(`express-session internal error: referer (${req.headers.referer}) and cookie (${config.cookie_domain}) domain mismatch`);
+	if (req.headers.referer && !req.headers.referer.match(`^${config.public_protocol}://${config.cookie_domain}`)) {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.REQUEST_ORIGIN_MISMATCH, null, {});
 		return;
 	}
 
