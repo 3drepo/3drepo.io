@@ -130,7 +130,7 @@ SequenceActivities.edit = async (account, model, sequenceId, activityId, activit
 	}
 
 	const query =  {_id: utils.stringToUUID(activityId), sequence_id: utils.stringToUUID(sequenceId)};
-	const {result} = await db.update(account, model + ".activities", query, activity);
+	const {result} = await db.update(account, model + ".activities", query, {$set: activity});
 
 	if (!result.n) {
 		throw responseCodes.ACTIVITY_NOT_FOUND;
@@ -139,6 +139,25 @@ SequenceActivities.edit = async (account, model, sequenceId, activityId, activit
 	await FileRef.removeFile(account, model, "activities", sequenceId);
 
 	return {...activity, _id: activityId, sequence_id: sequenceId};
+};
+
+SequenceActivities.remove = async (account, model, sequenceId, activityId) => {
+	const sequence = await db.findOne(account, model + ".sequences", { _id: utils.stringToUUID(sequenceId)});
+
+	if (!sequence) {
+		throw responseCodes.SEQUENCE_NOT_FOUND;
+	}
+
+	const query =  {_id: utils.stringToUUID(activityId), sequence_id: utils.stringToUUID(sequenceId)};
+	const {result} = await db.remove(account, model + ".activities", query);
+
+	if (!result.n) {
+		throw responseCodes.ACTIVITY_NOT_FOUND;
+	}
+
+	await FileRef.removeFile(account, model, "activities", sequenceId);
+
+	return { _id: activityId};
 };
 
 SequenceActivities.get = async (account, model, sequenceId) => {

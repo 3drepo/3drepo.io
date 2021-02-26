@@ -91,7 +91,6 @@ describe("Sequences", function () {
 				.expect(responseCodes.INVALID_ARGUMENTS.status);
 
 			expect(body.value).to.be.equal(responseCodes.INVALID_ARGUMENTS.value);
-
 		});
 
 		it("should be created succesfully", async() => {
@@ -147,6 +146,28 @@ describe("Sequences", function () {
 
 	});
 
+	describe("remove activity", function() {
+
+		it("should fail with made up sequence id", async() => {
+			const { body } = await agent.delete(`/${username}/${model}/sequences/non_existing_id/activities/${activityId}`)
+				.send(activity)
+				.expect(responseCodes.SEQUENCE_NOT_FOUND.status);
+
+			expect(body.value).to.be.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
+		});
+
+		it("should fail with made up activity id", async() => {
+			const { body } = await agent.delete(`/${username}/${model}/sequences/${sequenceId}/activities/non_existent_actity`)
+				.expect(responseCodes.ACTIVITY_NOT_FOUND.status);
+
+			expect(body.value).to.be.equal(responseCodes.ACTIVITY_NOT_FOUND.value);
+		});
+
+		it("should succeed", async() => {
+			await agent.delete(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}`)
+				.expect(200);
+		});
+	});
 
 	// describe("get activities list", function() {
 	// 	it("should work", async() => {
