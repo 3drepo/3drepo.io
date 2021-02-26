@@ -194,7 +194,10 @@ User.authenticate =  async function (logger, username, password) {
 
 	user.customData.lastLoginAt = new Date();
 
-	await db.update("admin", COLL_NAME, {user: username}, {$set: {"customData.lastLoginAt": user.customData.lastLoginAt}});
+	await db.update("admin", COLL_NAME, {user: username}, {
+		$set: {"customData.lastLoginAt": user.customData.lastLoginAt},
+		$unset: {"customData.loginInfo.failedLoginCount":""}
+	});
 
 	logger.logInfo("User has logged in", {username});
 

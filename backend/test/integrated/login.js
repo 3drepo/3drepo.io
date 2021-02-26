@@ -305,22 +305,30 @@ describe("Login", function () {
 		});
 
 		it("remaining attempts warning should warn user of imminent account locking", async function() {
-			const attempts = 3;
+			const attempts = 8;
 
 			for (let i = 0; i < attempts; i++) {
-				const remaining = 5 - i;
+				const remaining = 9 - i;
 				const {body} = await request(server)
 					.post("/login")
 					.send({ username, password: "wrongPassword" })
 					.expect(400);
 
 				expect(body.value).to.equal(responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value);
-				expect(body.message).to.equal("Incorrect username or password (Remaining attempts: " + remaining + ")");
+
+				if (remaining <= 5) {
+					expect(body.message).to.equal("Incorrect username or password (Remaining attempts: " + remaining + ")");
+				}
 			}
+
+			const {body} = await request(server)
+				.post("/login")
+				.send({ username, password: newPassword })
+				.expect(200);
 		});
 
 		it("too many bad login attempts should lock account", async function() {
-			const attempts = 9;
+			const attempts = 10;
 
 			for (let i = 0; i < attempts; i++) {
 				await request(server)
