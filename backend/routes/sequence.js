@@ -410,6 +410,13 @@ TODO:
 */
 router.put("/sequences/:sequenceId/activities/:activityId", middlewares.issue.canView, editActivity);
 
+/*
+TODO:
+	- document this endpoint
+	- permissions
+*/
+router.delete("/sequences/:sequenceId/activities/:activityId", middlewares.hasUploadAccessToModel, removeActivity);
+
 function getSequenceActivityDetail(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model, activityId } = req.params;
@@ -516,6 +523,17 @@ function editActivity(req, res, next) {
 
 	SequenceActivities.edit(account, model, sequenceId, activityId, req.body).then(activity => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, activity);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function removeActivity(req, res, next) {
+	const { account, model, sequenceId, activityId } = req.params;
+	const place = utils.APIInfo(req);
+
+	SequenceActivities.remove(account, model, sequenceId, activityId).then(() => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
