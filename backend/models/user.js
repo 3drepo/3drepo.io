@@ -73,6 +73,10 @@ const isMemberOfTeamspace = function (user, teamspace) {
 	return user.roles.filter(role => role.db === teamspace && role.role === C.DEFAULT_MEMBER_ROLE).length > 0;
 };
 
+const hasReadLatestTerms = function (user) {
+	return user.customData.lastLoginAt && new Date(config.termsUpdatedAt) < user.customData.lastLoginAt;
+};
+
 const isAccountLocked = function (user) {
 	return user && user.customData && user.customData.loginInfo &&
 		user.customData.loginInfo.failedLoginCount && user.customData.loginInfo.lastFailedLoginAt &&
@@ -184,7 +188,7 @@ User.authenticate =  async function (logger, username, password) {
 		user.customData = {};
 	}
 
-	const termsPrompt = !User.hasReadLatestTerms(user);
+	const termsPrompt = !hasReadLatestTerms(user);
 
 	user.customData.lastLoginAt = new Date();
 
@@ -567,10 +571,6 @@ User.verify = async function (username, token, options) {
 	} catch(err) {
 		systemLogger.logError("Failed to create teamspace settings for ", username, err);
 	}
-};
-
-User.hasReadLatestTerms = function (user) {
-	return user.customData.lastLoginAt && new Date(config.termsUpdatedAt) < user.customData.lastLoginAt;
 };
 
 User.getAvatar = function (user) {
