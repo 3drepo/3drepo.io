@@ -73,10 +73,6 @@ const isMemberOfTeamspace = function (user, teamspace) {
 	return user.roles.filter(role => role.db === teamspace && role.role === C.DEFAULT_MEMBER_ROLE).length > 0;
 };
 
-const hasReadLatestTerms = function (user) {
-	return user.customData.lastLoginAt && new Date(config.termsUpdatedAt) < user.customData.lastLoginAt;
-};
-
 const isAccountLocked = function (user) {
 	const currentTime = new Date();
 
