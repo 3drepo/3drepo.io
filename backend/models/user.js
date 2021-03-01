@@ -70,7 +70,7 @@ const hasReachedLicenceLimit = async function (teamspace) {
 };
 
 const hasReadLatestTerms = function (user) {
-	return user.customData.lastLoginAt && new Date(config.termsUpdatedAt) < user.customData.lastLoginAt;
+	return !user.customData.lastLoginAt || new Date(config.termsUpdatedAt) < user.customData.lastLoginAt;
 };
 
 // Find functions
