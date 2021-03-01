@@ -69,6 +69,10 @@ const hasReachedLicenceLimit = async function (teamspace) {
 	}
 };
 
+const hasReadLatestTerms = function (user) {
+	return !user.customData.lastLoginAt || new Date(config.termsUpdatedAt) < user.customData.lastLoginAt;
+};
+
 // Find functions
 const findOne = async function (query, projection) {
 	return await DB.findOne("admin", COLL_NAME, query, projection);
@@ -125,13 +129,15 @@ User.authenticate =  async function (logger, username, password) {
 			user.customData = {};
 		}
 
+		const termsPrompt = !hasReadLatestTerms(user);
+
 		user.customData.lastLoginAt = new Date();
 
 		await User.update(username, {"customData.lastLoginAt": user.customData.lastLoginAt});
 
 		logger.logInfo("User has logged in", {username});
 
-		return user;
+		return { username: user.user, flags:{ termsPrompt } };
 	} catch(err) {
 		if (authDB) {
 			authDB.close();
@@ -519,10 +525,6 @@ User.verify = async function (username, token, options) {
 	} catch(err) {
 		systemLogger.logError("Failed to create teamspace settings for ", username, err);
 	}
-};
-
-User.hasReadLatestTerms = function (user) {
-	return new Date(config.termsUpdatedAt) < user.customData.lastLoginAt;
 };
 
 User.getAvatar = function (user) {
