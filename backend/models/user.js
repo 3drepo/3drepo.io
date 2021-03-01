@@ -103,6 +103,10 @@ const hasReachedLicenceLimit = async function (teamspace) {
 	}
 };
 
+const hasReadLatestTerms = function (user) {
+	return !user.customData.lastLoginAt || new Date(config.termsUpdatedAt) < user.customData.lastLoginAt;
+};
+
 // Find functions
 const findOne = async function (query, projection) {
 	return await db.findOne("admin", COLL_NAME, query, projection);

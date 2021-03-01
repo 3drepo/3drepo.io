@@ -629,4 +629,6 @@
 		{ _id: "Supplier", "color": "#6a3d9a"}
 	]);
 
+	define("ACCEPTED_IMAGE_FORMATS",  ["png", "jpg", "gif"]);
+
 })();
