@@ -331,6 +331,7 @@ describe("Sequences", function () {
 		});
 	});
 
+	/*
 	describe("List all sequences", function() {
 		it("from latest revision should succeed", function(done) {
 			agent.get(`/${username}/${model}/revision/master/head/sequences?key=${userApiKey}`).expect(200, function(err , res) {
@@ -675,7 +676,6 @@ describe("Sequences", function () {
 		});
 	});
 
-
 	describe("Deleting a legend", function() {
 		it("as a viewer should fail", function(done) {
 			agent.delete(`/${username}/${model}/revision/master/head/sequences/${latestGoldenData._id}/legend?key=${viewerApiKey}`)
@@ -707,6 +707,311 @@ describe("Sequences", function () {
 
 		});
 	});
+	*/
 
+	describe("Creating a custom sequence", function() {
+		const baseCustomSequence = {
+			frames: [
+				{
+					"dateTime":1446624000000,
+					"viewpoint": {
+						"up":[0,1,0],
+						"position":[38,38 ,125.08011914810137],
+						"look_at":[0,0,-163.08011914810137],
+						"view_dir":[0,0,-1],
+						"right":[1,0,0],
+						"fov":2.1124830653010416,
+						"aspect_ratio":0.8750189337327384,
+						"far":276.75612077194506 ,
+						"near":76.42411012233212
+					}
+				},
+				{
+					"dateTime":1446710400000,
+					"viewpoint": {
+						"up":[0,1,0],
+						"position":[30,35 ,100],
+						"look_at":[0,0,-150],
+						"view_dir":[0,0,-1],
+						"right":[1,0,0],
+						"fov":2.1124830653010416,
+						"aspect_ratio":0.8750189337327384,
+						"far":276.75612077194506 ,
+						"near":76.42411012233212
+					}
+				}
+			]
+		};
 
+		it("should succeed", function(done) {
+			const sequence = Object.assign({"name":"Sequence test"}, baseCustomSequence);
+			let sequenceId;
+
+			console.log(sequence);
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/sequences?key=${userApiKey}`)
+						.send(sequence)
+						.expect(200, function(err, res) {
+							console.log(res.body);
+
+							sequenceId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
+						.send(sequence)
+						.expect(200, function(err, res) {
+							console.log(res.body);
+							expect(res.body.customSequence).to.equal(true);
+							expect(res.body.name).to.equal(sequence.name);
+							expect(res.body.frames).to.deep.equal(sequence.frames);
+
+							return done(err);
+						});
+				}
+			]);
+		});
+
+		it("with highlighted objects should succeed", function(done) {
+			const highlighted_group = {
+				objects: [{
+					"account": username,
+					model: model2,
+					"shared_ids":["8b9259d2-316d-4295-9591-ae020bfcce48"]
+				}],
+				color: [2555, 255, 0]
+			};
+
+			const hidden_group = {
+				objects: [{
+					"account": username,
+					model: model2,
+					"shared_ids":["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+				}]
+			};
+
+			const override_groups = [
+				{
+					objects: [{
+						"account": username,
+						model: model2,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}],
+					color: [1, 2, 3],
+					totalSavedMeshes: 1
+				},
+				{
+					objects: [{
+						"account": username,
+						model: model2,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					color: [4, 5, 6],
+					totalSavedMeshes: 1
+				},
+			];
+
+			const sequence = Object.assign({"name":"Sequence test"}, baseCustomSequence);
+			sequence.frames[0].highlighted_group = highlighted_group;
+			sequence.frames[0].hidden_group = hidden_group;
+			sequence.frames[0].override_groups = override_groups;
+			let sequenceId;
+
+			console.log(sequence);
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/sequences?key=${userApiKey}`)
+						.send(sequence)
+						.expect(200, function(err, res) {
+							console.log(res.body);
+
+							sequenceId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
+						.send(sequence)
+						.expect(200, function(err, res) {
+							console.log(res.body);
+							expect(res.body.customSequence).to.equal(true);
+							expect(res.body.name).to.equal(sequence.name);
+							expect(res.body.frames).to.deep.equal(sequence.frames);
+
+							return done(err);
+						});
+				}
+			]);
+		});
+
+		it("with viewpointId should succeed", function(done) {
+			const baseView = {
+				"viewpoint":{
+					"up":[0,1,0],
+					"position":[38,38 ,125.08011914810137],
+					"look_at":[0,0,-163.08011914810137],
+					"view_dir":[0,0,-1],
+					"right":[1,0,0],
+					"fov":2.1124830653010416,
+					"aspect_ratio":0.8750189337327384,
+					"far":276.75612077194506 ,
+					"near":76.42411012233212
+				}
+			};
+
+			const view = Object.assign({"name":"View test"}, baseView);
+			const sequence = Object.assign({"name":"Sequence test"}, baseCustomSequence);
+			let sequenceId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/viewpoints/`)
+						.send(view)
+						.expect(200, function(err, res) {
+							sequence.frames[0].viewpointId = res.body._id;
+							console.log(sequence);
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.post(`/${username}/${model}/sequences?key=${userApiKey}`)
+						.send({ username, password })
+						.expect(200, function(err, res) {
+							expect(res.body.length).to.equal(1);
+							expect(res.body[0]).to.deep.equal(latestGoldenData);
+
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
+						.send(sequence)
+						.expect(200, function(err, res) {
+							console.log(res.body);
+							expect(res.body.customSequence).to.equal(true);
+							expect(res.body.name).to.equal(sequence.name);
+							expect(res.body.frames).to.deep.equal(sequence.frames);
+
+							return done(err);
+						});
+				}
+			], done);
+		});
+
+		it("with transformation in viewpoint should fail", function(done) {
+			const transformation_groups = [
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+			];
+
+			const sequence = Object.assign({"name":"Sequence test"}, baseCustomSequence);
+			sequence.frames[0].transformation_groups = transformation_groups;
+			let sequenceId;
+
+			console.log(sequence);
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/sequences?key=${userApiKey}`)
+						.send(sequence)
+						.expect(200, function(err, res) {
+							console.log(res.body);
+
+							sequenceId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
+						.send(sequence)
+						.expect(200, function(err, res) {
+							console.log(res.body);
+							expect(res.body.customSequence).to.equal(true);
+							expect(res.body.name).to.equal(sequence.name);
+							expect(res.body.frames).to.deep.equal(sequence.frames);
+
+							return done(err);
+						});
+				}
+			]);
+		});
+
+		it("with revision should succeed", function(done) {
+			const sequence = Object.assign({"name":"Sequence test", "revId": oldRevision}, baseCustomSequence);
+			let sequenceId;
+
+			console.log(sequence);
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/sequences?key=${userApiKey}`)
+						.send(sequence)
+						.expect(200, function(err, res) {
+							console.log(res.body);
+
+							sequenceId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
+						.send(sequence)
+						.expect(200, function(err, res) {
+							console.log(res.body);
+							expect(res.body.customSequence).to.equal(true);
+							expect(res.body.name).to.equal(sequence.name);
+							expect(res.body.frames).to.deep.equal(sequence.frames);
+
+							return done(err);
+						});
+				}
+			]);
+		});
+
+		it("with invalid revision should fail", function(done) {
+			const sequence = Object.assign({"name":"Sequence test", "revId": "badRevision"}, baseCustomSequence);
+			let sequenceId;
+
+			console.log(sequence);
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/sequences?key=${userApiKey}`)
+						.send(sequence)
+						.expect(200, function(err, res) {
+							console.log(res.body);
+
+							sequenceId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
+						.send(sequence)
+						.expect(200, function(err, res) {
+							console.log(res.body);
+							expect(res.body.customSequence).to.equal(true);
+							expect(res.body.name).to.equal(sequence.name);
+							expect(res.body.frames).to.deep.equal(sequence.frames);
+
+							return done(err);
+						});
+				}
+			]);
+		});
+
+	});
 });
