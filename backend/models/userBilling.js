@@ -450,7 +450,6 @@ const UserBilling = {};
 UserBilling.getActiveSubscriptions = function(userBilling) {
 	const res = { basic: config.subscriptions.basic};
 	Object.keys(userBilling.subscriptions || {}).forEach(key => {
-		console.log(key);
 		if(key === "paypal") {
 			res.paypal = [];
 			userBilling.subscriptions.paypal.forEach(ppPlan => {
