@@ -35,13 +35,6 @@ function* login({ username, password }) {
 		const flags = data.flags;
 		username = data.username;
 
-		if (flags && flags.termsPrompt) {
-			yield put(DialogActions.showDialog({
-				title: 'Terms and Privacy Policy Update',
-				template: NewTermsDialog
-			}));
-		}
-
 		yield analyticsService.setUserId(username);
 
 		yield put(CurrentUserActions.fetchUserSuccess({
@@ -49,6 +42,13 @@ function* login({ username, password }) {
 			avatarUrl: API.getAvatarUrl(username)
 		}));
 		yield put(AuthActions.loginSuccess());
+
+		if (flags && flags.termsPrompt) {
+			yield put(DialogActions.showDialog({
+				title: 'Terms and Privacy Policy Update',
+				template: NewTermsDialog
+			}));
+		}
 	} catch (e) {
 		if (e.response.status === 401) {
 			yield put(AuthActions.loginFailure());
