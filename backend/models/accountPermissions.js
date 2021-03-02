@@ -23,7 +23,7 @@ const { removeUserFromProjects } = require("./project");
 
 const updatePermissions = async function(teamspace, updatedPermissions) {
 	const User = require("./user");
-	await User.update(teamspace.user, {"customData.permissions": updatedPermissions});
+	await User.updatePermissions(teamspace.user, updatedPermissions);
 	return updatedPermissions;
 };
 

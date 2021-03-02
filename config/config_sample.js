@@ -50,6 +50,11 @@ module.exports = {
 		console_level: 'info',
 		file_level: 'debug'
 	},
+	loginPolicy: {
+		maxUnsuccessfulLoginAttempts: 10,
+		remainingLoginAttemptsPromptThreshold: 5,
+		lockoutDuration: 900000
+	},
 	db: {
 		host: 'localhost',
 		port: 27017,

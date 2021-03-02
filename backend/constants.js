@@ -482,8 +482,8 @@
 	//
 	// -----------------------------------------------------------------------------
 
-	define("MIN_PASSWORD_LENGTH",  8);
-	define("MIN_PASSWORD_STRENGTH",  2);
+	define("MIN_PASSWORD_LENGTH", 8);
+	define("MIN_PASSWORD_STRENGTH", 2);
 
 	// -----------------------------------------------------------------------------
 	//
