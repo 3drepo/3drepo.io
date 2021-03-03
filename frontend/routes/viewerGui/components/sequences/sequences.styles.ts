@@ -161,7 +161,7 @@ export const IntervalRow = styled(SequenceRow)`
 export const DatePicker = styled(DateField)`
 	&& {
 		width: 160px;
-		margin-top: 0;
+		margin: 0 9px 12px;
 	}
 
 	input {

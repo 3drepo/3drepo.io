@@ -274,7 +274,9 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 				<SequencePlayerColumn>
 					<SequenceRow>
 						<Grid item>
-							<IconButton disabled={this.isFirstDay} onClick={this.rewind}><StepBackIcon fontSize="large" /></IconButton>
+							<IconButton disabled={this.isFirstDay} onClick={this.rewind} size="small">
+								<StepBackIcon fontSize="large" />
+							</IconButton>
 						</Grid>
 						<Grid item>
 							<DatePicker
@@ -289,7 +291,9 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 							/>
 						</Grid>
 						<Grid item>
-							<IconButton disabled={this.isLastDay} onClick={this.forward}><StepForwardIcon fontSize="large" /></IconButton>
+							<IconButton disabled={this.isLastDay} onClick={this.forward} size="small">
+								<StepForwardIcon fontSize="large" />
+							</IconButton>
 						</Grid>
 					</SequenceRow>
 					<IntervalRow>
