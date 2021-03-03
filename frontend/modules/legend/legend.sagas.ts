@@ -137,12 +137,11 @@ function* setDefaultLegend() {
 	try {
 		const teamspace = yield select(selectCurrentModelTeamspace);
 		const modelId =  yield select(selectSequenceModel);
-		const sequenceId =  yield select(selectSelectedSequenceId);
-		const modelData = { teamspace, modelId };
+		const defaultLegend =  yield select(selectSelectedSequenceId);
 
-		yield put(ModelActions.updateSettings(modelData, {
-			defaultLegend: sequenceId,
-		}));
+		yield API.editModelSettings(teamspace, modelId, { defaultLegend });
+		yield put(ModelActions.updateSettingsSuccess({ defaultLegend }));
+		yield put(SnackbarActions.show('Legend set as default'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set default', 'legend', error));
 	}

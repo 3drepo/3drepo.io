@@ -57,14 +57,11 @@ export function* updateSettings({ modelData: { teamspace, project, modelId }, se
 		const modifiedSettings = cloneDeep(settings);
 
 		yield API.editModelSettings(teamspace, modelId, modifiedSettings);
-
-		if (modifiedSettings.name && modifiedSettings.code) {
-			yield put(
-				TeamspacesActions.updateModelSuccess(
-					teamspace, modelId, { project, model: modelId, name: modifiedSettings.name, code: modifiedSettings.code }
-				)
-			);
-		}
+		yield put(
+			TeamspacesActions.updateModelSuccess(
+				teamspace, modelId, { project, model: modelId, name: modifiedSettings.name, code: modifiedSettings.code }
+			)
+		);
 
 		yield put(ModelActions.updateSettingsSuccess(settings));
 		yield put(SnackbarActions.show('Updated model settings'));
