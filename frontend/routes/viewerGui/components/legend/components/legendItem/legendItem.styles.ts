@@ -35,7 +35,7 @@ export const Container = styled.li`
 	align-items: center;
 	height: 66px;
 	box-sizing: border-box;
-	padding: 0 8px;
+	padding: 0 8px 0 18px;
 
 	&:last-of-type {
 		border-bottom: none;
