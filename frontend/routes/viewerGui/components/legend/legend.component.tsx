@@ -41,6 +41,7 @@ interface IProps {
 	setDefault: () => void;
 	reset: () => void;
 	legend: ILegend[];
+	isCurrentLegendDefault?: boolean;
 	defaultPosition: {
 		x: number;
 		y: number;
@@ -83,12 +84,12 @@ export class Legend extends React.PureComponent<IProps, IState> {
 
 	public renderActionsMenu = () => (
 		<MenuList>
-			<StyledListItem button onClick={this.props.setDefault}>
+			<StyledListItem disabled={this.props.isCurrentLegendDefault} button onClick={this.props.setDefault}>
 				<StyledItemText>
 					Set as default
 				</StyledItemText>
 			</StyledListItem>
-			<StyledListItem button onClick={this.props.reset}>
+			<StyledListItem disabled={this.props.isCurrentLegendDefault} button onClick={this.props.reset}>
 				<StyledItemText>
 					Reset to default
 				</StyledItemText>

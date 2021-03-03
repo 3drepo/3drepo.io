@@ -17,6 +17,9 @@
 
 import { createSelector } from 'reselect';
 
+import { selectDefaultLegend } from '../model';
+import { selectSelectedSequenceId } from '../sequences';
+
 export const selectLegendDomain = (state) => ({...state.legend});
 
 export const selectIsPending = createSelector(
@@ -36,5 +39,10 @@ export const selectLegendCount = createSelector(
 );
 
 export const selectLegendNames = createSelector(
-		selectLegend, (state) => [...state].map(({ name }) => name )
+	selectLegend, (state) => [...state].map(({ name }) => name )
+);
+
+export const selectIsCurrentLegendDefault = createSelector(
+	selectDefaultLegend, selectSelectedSequenceId, (defaultLegend, sequenceId) =>
+	defaultLegend === sequenceId
 );
