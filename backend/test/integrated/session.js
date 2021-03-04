@@ -121,7 +121,6 @@ describe("Cross-site requests", function () {
 					.send({ username, password })
 					.set({"Referer":`${config.public_protocol}://3rdparty.net`})
 					.expect(200, function(err, res) {
-						console.log(res.body);
 						expect(res.body.username).to.equal(username);
 						done(err);
 					});
@@ -152,7 +151,6 @@ describe("Cross-site requests", function () {
 					.send({ username, password })
 					.set({"Referer":`${config.public_protocol}://3rdparty.net/login`})
 					.expect(200, function(err, res) {
-						console.log(res.body);
 						expect(res.body.username).to.equal(username);
 						done(err);
 					});
