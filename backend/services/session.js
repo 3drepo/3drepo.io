@@ -64,7 +64,7 @@ module.exports.regenerateAuthSession = (req, config, user) => {
 				}
 
 				if (req.headers.referer) {
-					user.referer = req.headers.referer.match(/^(\w)*\:\/\/.*?\//)[0].slice(0, -1);
+					user.referer = req.headers.referer.match(/^(\w)*:\/\/.*?\//)[0].slice(0, -1);
 				}
 
 				req.session[C.REPO_SESSION_USER] = user;
