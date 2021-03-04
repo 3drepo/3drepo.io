@@ -38,6 +38,7 @@ describe("Cross-site requests", function () {
 			agent = request.agent(server);
 			agent.post("/login")
 				.send({ username, password })
+				.set({"Referer":`${config.public_protocol}://${config.cookie_domain}`})
 				.expect(200, function(err, res) {
 					expect(res.body.username).to.equal(username);
 					done(err);
