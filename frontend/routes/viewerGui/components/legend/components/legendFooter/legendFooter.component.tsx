@@ -24,15 +24,17 @@ import { ViewerPanelButton, ViewerPanelFooter } from '../../../viewerPanel/viewe
 
 interface IProps {
 	isPending: boolean;
-	updateLegendItem: (legendItem: ILegend) => void;
+	prepareNewLegendItem: (legendItem: ILegend) => void;
 	colors: string[];
-	legendCount: number;
 	updatePending: boolean;
+	newLegendEditMode: boolean;
 }
 
-export const LegendFooter = ({ isPending, updateLegendItem, colors, legendCount, updatePending }: IProps) => {
-	const handleAddNewLegendItem = () => updateLegendItem({
-		name: `Item ${legendCount + 1}`,
+export const LegendFooter = ({
+	isPending, prepareNewLegendItem, colors, updatePending, newLegendEditMode,
+}: IProps) => {
+	const handleAddNewLegendItem = () => prepareNewLegendItem({
+		name: '',
 		color: colors[Math.floor(Math.random() * colors.length)],
 	});
 
@@ -41,7 +43,7 @@ export const LegendFooter = ({ isPending, updateLegendItem, colors, legendCount,
 			<ViewerPanelButton
 				aria-label="Add legend"
 				onClick={handleAddNewLegendItem}
-				disabled={isPending}
+				disabled={isPending || newLegendEditMode}
 				color="secondary"
 				variant="fab"
 				id="legend-add-new-button"

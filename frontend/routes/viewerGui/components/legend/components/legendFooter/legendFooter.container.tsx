@@ -20,17 +20,21 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { selectJobsColors } from '../../../../../../modules/jobs';
-import { selectLegendCount, selectLegendUpdatePending, LegendActions } from '../../../../../../modules/legend';
+import {
+	selectLegendUpdatePending,
+	selectNewLegendEditMode,
+	LegendActions
+} from '../../../../../../modules/legend';
 import { LegendFooter } from './legendFooter.component';
 
 const mapStateToProps = createStructuredSelector({
 	colors: selectJobsColors,
-	legendCount: selectLegendCount,
 	updatePending: selectLegendUpdatePending,
+	newLegendEditMode: selectNewLegendEditMode,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	updateLegendItem: LegendActions.updateLegendItem,
+	prepareNewLegendItem: LegendActions.prepareNewLegendItem,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(LegendFooter);

@@ -276,7 +276,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 			{panels.includes(VIEWER_PANELS.LEGEND) && <Legend
 				defaultPosition={{
 					x: getWindowWidth() - PANEL_DEFAULT_WIDTH - 20,
-					y: getWindowHeight() - this.minPanelHeight - 90 - 70,
+					y: getWindowHeight() - this.minPanelHeight - 170,
 				}}
 				height={this.minPanelHeight}
 			/>}

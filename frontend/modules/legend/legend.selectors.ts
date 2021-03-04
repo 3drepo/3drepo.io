@@ -34,8 +34,12 @@ export const selectLegend = createSelector(
 	selectLegendDomain, (state) => state.legend
 );
 
-export const selectLegendCount = createSelector(
-	selectLegendDomain, (state) => state.legend.length
+export const selectComponentState = createSelector(
+	selectLegendDomain, (state) => state.componentState
+);
+
+export const selectNewLegendEditMode = createSelector(
+	selectComponentState, (state) => state?.editMode
 );
 
 export const selectLegendNames = createSelector(

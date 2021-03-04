@@ -23,6 +23,7 @@ import * as Yup from 'yup';
 
 import RemoveIcon from '@material-ui/icons/Close';
 import { ILegend } from '../../../../../../modules/legend/legend.redux';
+import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
 import { SmallIconButton } from '../../../../../components/smallIconButon/smallIconButton.component';
 import { Actions } from '../../../measurements/components/measureItem/measureItem.styles';
@@ -30,6 +31,7 @@ import { Container, StyledForm, StyledTextField } from './legendItem.styles';
 
 const LegendSchema = (names) => Yup.object().shape({
 	newName: Yup.string()
+		.required(VALIDATIONS_MESSAGES.REQUIRED)
 		.test('Unique', 'This name is already in use', (values) => {
 			return names.filter((name) => name === values).length < 1;
 		})
@@ -41,10 +43,13 @@ interface IProps extends ILegend {
 	legendNames: string[];
 	onPickerOpen: () => void;
 	onPickerClose: () => void;
+	resetComponentState: () => void;
+	editMode?: boolean;
+	autoFocus?: boolean;
 }
 
 export const LegendItem = ({
-	name, color, updateLegendItem, deleteLegendItem, legendNames, onPickerOpen, onPickerClose,
+	name, color, updateLegendItem, deleteLegendItem, legendNames, editMode, ...props
 }: IProps) => {
 	const textFieldRef = React.useRef(null);
 
@@ -55,50 +60,62 @@ export const LegendItem = ({
 		color: colorValue,
 	});
 
-	const handleSave = ({ target: { value: newName }}) => updateLegendItem({
-		oldName: name,
-		name: newName,
-		color,
-	});
+	const handleSave = ({ target: { value: newName }}) => {
+		if (newName) {
+			if (editMode) {
+				props.resetComponentState();
+			}
 
-	const handleRemove = () => deleteLegendItem({
+			updateLegendItem({
+				oldName: name,
+				name: newName,
+				color,
+			});
+		}
+	};
+
+	const handleRemove = () => editMode ? props.resetComponentState() : deleteLegendItem({
 		name,
 		color,
 	});
 
 	const handleSubmit = () => textFieldRef.current.saveChange();
 
+	const additionalTextFieldProps = editMode ? {
+		forceEdit: true,
+		onCancel: handleRemove,
+	} : {};
+
 	return (
 		<Container>
 			<ColorPicker
 				value={color}
 				onChange={handleColorChange}
-				onOpen={onPickerOpen}
-				onClose={onPickerClose}
+				onOpen={props.onPickerOpen}
+				onClose={props.onPickerClose}
 			/>
 			<Formik
 				initialValues={{ newName: name }}
 				onSubmit={handleSubmit}
 				validationSchema={LegendSchema}
-				validateOnBlur={false}
-				validateOnChange={false}
 				enableReinitialize
 			>
 				<Tooltip title={name} placement="bottom">
 					<StyledForm>
-						<Field name="newName" render={({ field, form }) => (
+						<Field name="newName" render={({ field }) => (
 							<StyledTextField
 								{...field}
+								name="newName"
 								ref={textFieldRef}
 								requiredConfirm
 								fullWidth
 								validationSchema={getLegendSchema}
 								mutable
-								error={Boolean(form.errors.desc)}
-								helperText={form.errors.desc}
+								autoFocus={props.autoFocus}
 								onChange={handleSave}
 								disableShowDefaultUnderline
 								inputProps={{ maxLength: 20 }}
+								{...additionalTextFieldProps}
 							/>
 						)} />
 					</StyledForm>

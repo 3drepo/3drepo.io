@@ -155,6 +155,14 @@ function* resetPanel() {
 	}
 }
 
+export function* prepareNewLegendItem({ legendItem }) {
+	try {
+		yield put(LegendActions.setComponentState({ ...legendItem, editMode: true }));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('prepare', 'new legend'));
+	}
+}
+
 export default function* LegendSaga() {
 	yield takeLatest(LegendTypes.FETCH, fetch);
 	yield takeLatest(LegendTypes.TOGGLE_PANEL, toggleLegendPanel);
@@ -163,5 +171,6 @@ export default function* LegendSaga() {
 	yield takeLatest(LegendTypes.SET_DEFAULT, setDefaultLegend);
 	yield takeLatest(LegendTypes.UPDATE_LEGEND_ITEM, updateLegendItem);
 	yield takeLatest(LegendTypes.DELETE_LEGEND_ITEM, deleteLegendItem);
+	yield takeLatest(LegendTypes.PREPARE_NEW_LEGEND_ITEM, prepareNewLegendItem);
 	yield takeLatest(LegendTypes.RESET_PANEL, resetPanel);
 }

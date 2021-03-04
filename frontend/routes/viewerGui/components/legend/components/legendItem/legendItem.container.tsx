@@ -29,6 +29,7 @@ const mapStateToProps = createStructuredSelector({
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	updateLegendItem: LegendActions.updateLegendItem,
 	deleteLegendItem: LegendActions.deleteLegendItem,
+	resetComponentState: LegendActions.resetComponentState,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(LegendItem);

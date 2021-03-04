@@ -26,7 +26,10 @@ export const { Types: LegendTypes, Creators: LegendActions } = createActions({
 	update: ['legend'],
 	updateLegendItem: ['legendItem'],
 	deleteLegendItem: ['legendItem'],
+	prepareNewLegendItem: ['legendItem'],
 	setDefault: [],
+	setComponentState: ['componentState'],
+	resetComponentState: [],
 	reset: [],
 	resetPanel: [],
 }, { prefix: 'LEGEND/' });
@@ -36,10 +39,15 @@ export interface ILegend {
 	color: string;
 }
 
+export interface ILegendComponentState extends ILegend {
+	editMode?: boolean;
+}
+
 export interface ILegendState {
 	isPending?: boolean;
 	legend: ILegend[];
 	isUpdatePending?: boolean;
+	componentState?: ILegendComponentState;
 }
 
 export const INITIAL_STATE: ILegendState = {
@@ -54,11 +62,19 @@ export const toggleUpdatePendingState = (state = INITIAL_STATE, { isUpdatePendin
 
 export const fetchSuccess = (state = INITIAL_STATE, { legend }) => ({ ...state, legend });
 
+const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
+	return { ...state, componentState: {...state.componentState, ...componentState} };
+};
+
+const resetComponentState = (state = INITIAL_STATE) => ({ ...state, componentState: {} });
+
 const resetPanel = (state = INITIAL_STATE) => ({ ...INITIAL_STATE });
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[LegendTypes.TOGGLE_PENDING_STATE]: togglePendingState,
 	[LegendTypes.TOGGLE_UPDATE_PENDING_STATE]: toggleUpdatePendingState,
 	[LegendTypes.FETCH_SUCCESS]: fetchSuccess,
+	[LegendTypes.SET_COMPONENT_STATE]: setComponentState,
+	[LegendTypes.RESET_COMPONENT_STATE]: resetComponentState,
 	[LegendTypes.RESET_PANEL]: resetPanel,
 });

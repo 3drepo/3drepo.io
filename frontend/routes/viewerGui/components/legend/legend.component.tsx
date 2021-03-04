@@ -21,7 +21,7 @@ import { isEqual } from 'lodash';
 import Draggable from 'react-draggable';
 
 import { renderWhenTrue } from '../../../../helpers/rendering';
-import { ILegend } from '../../../../modules/legend/legend.redux';
+import { ILegend, ILegendComponentState } from '../../../../modules/legend/legend.redux';
 import { EmptyStateInfo } from '../../../components/components.styles';
 import {
 	MenuList,
@@ -42,6 +42,8 @@ interface IProps {
 	reset: () => void;
 	legend: ILegend[];
 	isCurrentLegendDefault?: boolean;
+	componentState: ILegendComponentState;
+	newLegendEditMode: boolean;
 	defaultPosition: {
 		x: number;
 		y: number;
@@ -108,6 +110,15 @@ export class Legend extends React.PureComponent<IProps, IState> {
 		/>
 	)
 
+	public renderNewLegendItem = renderWhenTrue(() => (
+		<LegendItem
+			{...this.props.componentState}
+			autoFocus
+			onPickerOpen={() => this.setState({ draggableDisabled: true })}
+			onPickerClose={() => this.setState({ draggableDisabled: false })}
+		/>
+	));
+
 	public renderLegendList = () => (
 		<Container>
 			{this.state.legend.map((item) => (
@@ -118,6 +129,7 @@ export class Legend extends React.PureComponent<IProps, IState> {
 					onPickerClose={() => this.setState({ draggableDisabled: false })}
 				/>
 			))}
+			{this.renderNewLegendItem(this.props.newLegendEditMode)}
 		</Container>
 	)
 
@@ -141,7 +153,7 @@ export class Legend extends React.PureComponent<IProps, IState> {
 						renderActions={() => this.renderActions()}
 						pending={isPending}
 					>
-						{this.renderEmptyState(!this.state.legend.length)}
+						{this.renderEmptyState(!this.state.legend.length && !this.props.newLegendEditMode)}
 						{this.renderLegendList()}
 						<LegendFooter isPending={isPending} />
 					</ViewerPanel>
