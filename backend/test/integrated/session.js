@@ -104,4 +104,64 @@ describe("Cross-site requests", function () {
 				done(err);
 			});
 	});
+
+	it("get account if cookie and request referer consistent should succeed", function(done) {
+		async.series([
+			function(done) {
+				agent.post("/logout")
+					.send({})
+					.expect(200, function(err, res) {
+						expect(res.body.username).to.equal(username);
+						done(err);
+					});
+			},
+			function(done) {
+				agent.post("/login")
+					.send({ username, password })
+					.set({"Referer":`${config.public_protocol}://3rdparty.net`})
+					.expect(200, function(err, res) {
+						expect(res.body.username).to.equal(username_viewer);
+						done(err);
+					});
+			},
+			function(done) {
+				agent.get(`/${username}.json`)
+					.set({"Referer":`${config.public_protocol}://3rdparty.net/${username}.json`})
+					.expect(200, function(err, res) {
+						expect(res.body).to.exist
+						done(err);
+					});
+			}
+		], done);
+	});
+
+	it("get account if cookie and request referer domain consistent should succeed", function(done) {
+		async.series([
+			function(done) {
+				agent.post("/logout")
+					.send({})
+					.expect(200, function(err, res) {
+						expect(res.body.username).to.equal(username);
+						done(err);
+					});
+			},
+			function(done) {
+				agent.post("/login")
+					.send({ username, password })
+					.set({"Referer":`${config.public_protocol}://3rdparty.net/login`})
+					.expect(200, function(err, res) {
+						expect(res.body.username).to.equal(username_viewer);
+						done(err);
+					});
+			},
+			function(done) {
+				agent.get(`/${username}.json`)
+					.set({"Referer":`${config.public_protocol}://3rdparty.net/${username}.json`})
+					.expect(200, function(err, res) {
+						expect(res.body).to.exist
+						done(err);
+					});
+			}
+		], done);
+	});
 });
