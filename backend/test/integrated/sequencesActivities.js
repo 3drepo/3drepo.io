@@ -169,19 +169,19 @@ describe("Sequences", function () {
 		});
 	});
 
-	// describe("get activities list", function() {
-	// 	it("should work", async() => {
-	// 		let { body } = await agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/activities`)
-	// 			.expect(200);
+	describe("get activities list", function() {
+		it("should work", async() => {
+			let { body } = await agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/activities`)
+				.expect(200);
 
-	// 		console.log(JSON.stringify(body, null, '\t'));
+			console.log(JSON.stringify(body, null, '\t'));
 
 
 
-	// 		const res  = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities`)
-	// 			.expect(200);
+			const res  = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities`)
+				.expect(200);
 
-	// 		console.log(JSON.stringify(res.body, null, '\t'));
-	// 	});
-	// })
+			console.log(JSON.stringify(res.body, null, '\t'));
+		});
+	})
 });
