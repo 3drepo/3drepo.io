@@ -47,6 +47,10 @@ def updateActivities(coll, activities, sequenceId, parent = None):
 
     query = {"_id": uuid.UUID(activity["id"])}
 
+    currentActivity = coll.find_one(query, {"resources": 1})
+    if  "resources" in currentActivity and type(currentActivity["resources"]) is list:
+      updateProps["$set"]["resources"] = { "shared_id": currentActivity["resources"] }
+
     coll.update_one(query, updateProps)
 
     if "subTasks" in activity:
@@ -56,7 +60,7 @@ def updateActivities(coll, activities, sequenceId, parent = None):
 
 if len(sys.argv) < 6:
     print("Not enough arguments.")
-    print("fixMitigationStatus.py <mongoURL> <mongoPort> <userName> <password> <fsDirectory> [<dryRun>]")
+    print("python " + os.path.basename(__file__) + " <mongoURL> <mongoPort> <userName> <password> <fsDirectory> [<dryRun>]")
     print("<dryRun> is true by default")
     sys.exit(0)
 
@@ -65,7 +69,7 @@ mongoPort = sys.argv[2]
 userName = sys.argv[3]
 password = sys.argv[4]
 fsDirectory = sys.argv[5]
-dryRun = True if len(sys.argv) < 7 else sys.argv[6] == "false"
+dryRun = True if len(sys.argv) < 7 else sys.argv[6] != "false"
 
 if not dryRun:
   print("dryRun = False: Commiting to database")
