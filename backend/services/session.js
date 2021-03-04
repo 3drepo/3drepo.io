@@ -63,8 +63,13 @@ module.exports.regenerateAuthSession = (req, config, user) => {
 						some(browserType => ua[browserType]); // If any of these browser types matches then is a websession
 				}
 
+				if (req.headers.referer) {
+					user.referer = req.headers.referer.match(/^(\w)*\:\/\/.*?\//)[0].slice(0, -1);
+				}
+
 				req.session[C.REPO_SESSION_USER] = user;
 				req.session.cookie.domain = config.cookie_domain;
+
 				if (config.cookie.maxAge) {
 					req.session.cookie.maxAge = config.cookie.maxAge;
 				}

@@ -29,12 +29,12 @@ module.exports = async (req, res, next) => {
 		return;
 	}
 
-	if (req.headers.referer && !req.headers.referer.match(`^${config.public_protocol}://${config.cookie_domain}`)) {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.NOT_LOGGED_IN, null, {});
-		return;
-	}
-
 	session(req, res, function(err) {
+		if (req.headers.referer && req.session.user && req.session.user.referer && !req.headers.referer.match(req.session.user.referer)) {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.NOT_LOGGED_IN, null, {});
+			return;
+		}
+
 		if(err) {
 			// something is wrong with the library or the session (i.e. corrupted json file) itself, log the user out
 			req[C.REQ_REPO].logger.logError(`express-session internal error: ${err}`);
