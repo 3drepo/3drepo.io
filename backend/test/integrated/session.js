@@ -22,6 +22,7 @@ const expect = require("chai").expect;
 const config = require("../../config");
 const responseCodes = require("../../response_codes.js");
 const app = require("../../services/api.js").createApp();
+const async = require("async");
 
 describe("Cross-site requests", function () {
 	let server;
