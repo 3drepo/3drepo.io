@@ -52,7 +52,7 @@ const clean = function(routePrefix, viewpointToClean, serialise = true) {
 			}
 		});
 
-		if (serialise) {
+		if (serialise && routePrefix) {
 			setViewpointScreenshotURL(routePrefix, viewpointToClean);
 			viewpointToClean.screenshot_ref = undefined;
 		}
@@ -252,14 +252,16 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 				systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
 					account,
 					model,
-					type: this.collName,
+					type: collName,
 					id: hostId,
 					err
 				});
 			});
 		}
 
-		await setExternalScreenshotRef(viewpoint, account, model, collName);
+		if (collName) {
+			await setExternalScreenshotRef(viewpoint, account, model, collName);
+		}
 	}
 
 	return clean(routePrefix, viewpoint, false);

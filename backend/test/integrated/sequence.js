@@ -846,7 +846,7 @@ describe("Sequences", function () {
 			]);
 		});
 
-		it("with viewpointId should succeed", function(done) {
+		it("with viewId should succeed", function(done) {
 			const baseView = {
 				"viewpoint":{
 					"up":[0,1,0],
@@ -870,7 +870,7 @@ describe("Sequences", function () {
 					agent.post(`/${username}/${model}/viewpoints/`)
 						.send(view)
 						.expect(200, function(err, res) {
-							sequence.frames[0].viewpointId = res.body._id;
+							sequence.frames[0].viewId = res.body._id;
 							console.log(sequence);
 							return done(err);
 						});

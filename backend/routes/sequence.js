@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -350,6 +350,39 @@ router.delete("/revision/master/head/sequences/:sequenceId/legend", middlewares.
 router.delete("/revision/:revId/sequences/:sequenceId/legend", middlewares.hasUploadAccessToModel, deleteLegend);
 
 /**
+ * @api {post} /:teamspace/:model/sequences Create custom sequence
+ * @apiName createSequence
+ * @apiGroup Sequences
+ * @apiDescription Create custom sequence for model.
+ *
+ * @apiUse Sequences
+ *
+ * @apiExample {post} Example usage
+ * POST /acme/00000000-0000-0000-0000-000000000000/sequences HTTP/1.1
+ * {
+ * 	"name":"Custom Sequence 1",
+ * 	"frames":[
+ * 		{
+ * 			"dateTime":1244246400000,
+ * 			"state":"00000000-0000-0000-0001-000000000002"
+ * 		},
+ * 		{
+ * 			"dateTime":1244419200000,
+ * 			"state":"00000000-0000-0000-0002-000000000002"
+ * 		}
+ * 	]
+ * }
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {
+ * 	"_id":"00000000-0000-0000-0000-000000000002"
+ * }
+ */
+router.post("/sequences", middlewares.issue.canCreate, createSequence);
+router.post("/sequences", middlewares.issue.canCreate, createSequence);
+
+/**
  * @api {get} /:teamspace/:model/revision(/master/head/|/:revId)/sequences List all sequences
  * @apiName listSequences
  * @apiGroup Sequences
@@ -387,6 +420,17 @@ router.delete("/revision/:revId/sequences/:sequenceId/legend", middlewares.hasUp
  */
 router.get("/revision/master/head/sequences", middlewares.issue.canView, listSequences);
 router.get("/revision/:revId/sequences", middlewares.issue.canView, listSequences);
+
+function createSequence(req, res, next) {
+	const place = utils.APIInfo(req);
+	const { account, model } = req.params;
+
+	Sequence.createSequence(account, model, req.body).then(sequenceId => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, sequenceId);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
 
 function getSequenceActivityDetail(req, res, next) {
 	const place = utils.APIInfo(req);

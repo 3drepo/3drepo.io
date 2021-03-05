@@ -24,10 +24,18 @@ const History = require("./history");
 const FileRef = require("./fileRef");
 const { getRefNodes } = require("./ref");
 const { getDefaultLegendId } = require("./modelSetting");
+const View = new (require("./view"))();
+const { createViewpoint } = require("./viewpoint");
 
 const activityCol = (modelId) => `${modelId}.activities`;
 const sequenceCol = (modelId) => `${modelId}.sequences`;
 const legendCol = (modelId) => `${modelId}.sequences.legends`;
+
+const fieldTypes = {
+	"name": "[object String]",
+	"rev_id": "[object Object]",
+	"frames": "[object Array]"
+};
 
 const clean = (toClean, keys) => {
 	keys.forEach((key) => {
@@ -96,6 +104,69 @@ const getDefaultLegend = async (account, model) => {
 };
 
 const Sequence = {};
+
+Sequence.createSequence = async (account, model, data) => {
+	const newSequence = {
+		"_id": utils.generateUUID(),
+		"customSequence": true,
+		"frames": []
+	};
+
+	if (!data ||
+		!data.name || !utils.typeMatch(data.name, fieldTypes["name"]) ||
+		!data.frames || !utils.typeMatch(data.frames, fieldTypes["frames"])) {
+		throw responseCodes.INVALID_ARGUMENTS;
+	} else {
+		newSequence.name = data.name;
+	}
+
+	if (data.revId) {
+		const history = await History.getHistory(account, model, undefined, data.revId);
+
+		newSequence.rev_id = history._id;
+	}
+
+	for (let i = 0; i < data.frames.length; i++) {
+		const frame = data.frames[i];
+		let viewpoint;
+
+		if (frame.viewpoint && utils.isObject(frame.viewpoint)) {
+			viewpoint = await createViewpoint(
+				account,
+				model,
+				undefined,
+				undefined,
+				newSequence._id,
+				frame.viewpoint,
+				false,
+				"sequence"
+			);
+		} else if (frame.viewId && utils.isString(frame.viewId)) {
+			const view = await View.findByUID(account, model, frame.viewId, {});
+
+			if (view) {
+				viewpoint = view.viewpoint;
+			}
+		}
+
+		if (!viewpoint) {
+			// frame missing viewpoint
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+
+		if (viewpoint.transformation_group_id) {
+			// sequence viewpoints do not accept transformations
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+
+		newSequence.frames.push({
+			dateTime: frame.dateTime,
+			viewpoint
+		});
+	}
+
+	return clean(newSequence, ["_id", "rev_id"]);
+};
 
 Sequence.getSequenceActivityDetail = async (account, model, activityId) => {
 	const activity = await db.findOne(account, activityCol(model), {"_id": utils.stringToUUID(activityId)});
