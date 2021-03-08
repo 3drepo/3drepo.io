@@ -33,9 +33,21 @@ def getFile(db, fsfolder, collection_name, id):
     if fileContent:
       return fileContent
     else:
+      print ("error fetching file fs for entry" + id)
       return getFileGridFS(db, collection_name, id)
 
   return getFileGridFS(db, collection_name,entry["link"])
+
+
+def migrateData(data):
+  migratedData = []
+
+  for key in data:
+    migratedData.append({ "key": key, "value": data[key]})
+
+  return migratedData
+
+
 
 
 def updateActivities(coll, activities, sequenceId, parent = None):
@@ -47,15 +59,17 @@ def updateActivities(coll, activities, sequenceId, parent = None):
 
     query = {"_id": uuid.UUID(activity["id"])}
 
-    currentActivity = coll.find_one(query, {"resources": 1})
-    if  "resources" in currentActivity and type(currentActivity["resources"]) is list:
+    currentActivity = coll.find_one(query, {"resources": 1, "data":1})
+    if "resources" in currentActivity and type(currentActivity["resources"]) is list:
       updateProps["$set"]["resources"] = { "shared_id": currentActivity["resources"] }
+
+    if "data" in currentActivity and type(currentActivity["data"]) is dict:
+      updateProps["$set"]["data"] = migrateData(currentActivity["data"])
 
     coll.update_one(query, updateProps)
 
     if "subTasks" in activity:
       updateActivities(coll, activity["subTasks"], sequenceId, activity["id"])
-
 
 
 if len(sys.argv) < 6:
