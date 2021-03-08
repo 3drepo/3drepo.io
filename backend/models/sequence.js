@@ -77,12 +77,8 @@ const cleanSequenceFrame = (toClean) => {
 	return toClean;
 };
 
-const getSequenceById = async (account, model, sequenceId, projection) => {
-	return db.findOne(account, sequenceCol(model), { _id: sequenceId}, projection);
-};
-
 const sequenceExists = async (account, model, sequenceId) => {
-	if(!(await getSequenceById(account, model, utils.stringToUUID(sequenceId), {_id: 1}))) {
+	if(!(await Sequence.getSequenceById(account, model, sequenceId, {_id: 1}))) {
 		throw responseCodes.SEQUENCE_NOT_FOUND;
 	}
 };
@@ -165,7 +161,13 @@ Sequence.createSequence = async (account, model, data) => {
 		});
 	}
 
+	await db.insert(account, sequenceCol(model), newSequence);
+
 	return clean(newSequence, ["_id", "rev_id"]);
+};
+
+Sequence.getSequenceById = async (account, model, sequenceId, projection = {}) => {
+	return db.findOne(account, sequenceCol(model), { _id: utils.stringToUUID(sequenceId)}, projection);
 };
 
 Sequence.getSequenceActivityDetail = async (account, model, activityId) => {
@@ -198,7 +200,9 @@ Sequence.getList = async (account, model, branch, revision, cleanResponse = fals
 
 	const submodelSequencesPromises = Promise.all(submodels.map((submodel) => Sequence.getList(account, submodel, "master", null, cleanResponse)));
 
-	const sequences = await db.find(account, sequenceCol(model), {"rev_id": history._id});
+	const sequences = await db.find(account, sequenceCol(model), {
+		"$or":[{"rev_id": history._id}, {"rev_id": {"$exists": false}}]
+	});
 	sequences.forEach((sequence) => {
 		sequence.teamspace = account;
 		sequence.model = model;

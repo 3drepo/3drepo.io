@@ -76,6 +76,7 @@ const Sequence = require("../models/sequence");
  */
 router.get("/revision/master/head/sequences/:sequenceId/activities/:activityId", middlewares.issue.canView, getSequenceActivityDetail);
 router.get("/revision/:revId/sequences/:sequenceId/activities/:activityId", middlewares.issue.canView, getSequenceActivityDetail);
+router.get("/sequences/:sequenceId/activities/:activityId", middlewares.issue.canView, getSequenceActivityDetail);
 
 /**
  * @api {get} /:teamspace/:model/revision(/master/head/|/:revId)/sequences/:sequenceId/activities Get all activities
@@ -156,6 +157,7 @@ router.get("/revision/:revId/sequences/:sequenceId/activities/:activityId", midd
  */
 router.get("/revision/master/head/sequences/:sequenceId/activities", middlewares.issue.canView, getSequenceActivities);
 router.get("/revision/:revId/sequences/:sequenceId/activities", middlewares.issue.canView, getSequenceActivities);
+router.get("/sequences/:sequenceId/activities", middlewares.issue.canView, getSequenceActivities);
 
 /**
  * @api {get} /:teamspace/:model/revision(/master/head/|/:revId)/sequences/:sequenceId/state/:stateId Get state
@@ -244,6 +246,40 @@ router.get("/revision/:revId/sequences/:sequenceId/activities", middlewares.issu
  */
 router.get("/revision/master/head/sequences/:sequenceId/state/:stateId", middlewares.issue.canView, getSequenceState);
 router.get("/revision/:revId/sequences/:sequenceId/state/:stateId", middlewares.issue.canView, getSequenceState);
+router.get("/sequences/:sequenceId/state/:stateId", middlewares.issue.canView, getSequenceState);
+
+/**
+ * @api {get} /:teamspace/:model/sequences/:sequenceID Get sequence
+ * @apiName getSequence
+ * @apiGroup Sequences
+ * @apiDescription Get sequence by ID
+ *
+ * @apiUse Sequences
+ *
+ * @apiExample {get}
+ * GET /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0000-000000000002 HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {
+ * 	"teamspace":"alice",
+ * 	"model":"00000000-0000-0000-0000-000000000000",
+ * 	"rev_id":"00000000-0000-0000-0000-000000000001",
+ * 	"name":"Sequence 1",
+ * 	"frames":[
+ * 		{
+ * 			"dateTime":1244246400000,
+ * 			"state":"00000000-0000-0000-0001-000000000002"
+ * 		},
+ * 		{
+ * 			"dateTime":1244419200000,
+ * 			"state":"00000000-0000-0000-0002-000000000002"
+ *		}
+ * 	],
+ * 	"_id":"00000000-0000-0000-0000-000000000002"
+ * }
+ */
+router.get("/sequences/:sequenceId", middlewares.issue.canView, getSequence);
 
 /**
  * @api {patch} /:teamspace/:model/revision(/master/head/|/:revId)/sequences/:sequenceID Update a sequence
@@ -270,9 +306,9 @@ router.get("/revision/:revId/sequences/:sequenceId/state/:stateId", middlewares.
  * HTTP/1.1 200 OK
  * {}
  */
-
 router.patch("/revision/master/head/sequences/:sequenceId", middlewares.hasUploadAccessToModel, updateSequence);
 router.patch("/revision/:revId/sequences/:sequenceId", middlewares.hasUploadAccessToModel, updateSequence);
+router.patch("/sequences/:sequenceId", middlewares.hasUploadAccessToModel, updateSequence);
 
 /**
  * @api {put} /:teamspace/:model/revision(/master/head/|/:revId)/sequences/:sequenceID/legend Add/Update legend
@@ -298,9 +334,9 @@ router.patch("/revision/:revId/sequences/:sequenceId", middlewares.hasUploadAcce
  * HTTP/1.1 200 OK
  * {}
  */
-
 router.put("/revision/master/head/sequences/:sequenceId/legend", middlewares.hasUploadAccessToModel, updateLegend);
 router.put("/revision/:revId/sequences/:sequenceId/legend", middlewares.hasUploadAccessToModel, updateLegend);
+router.put("/sequences/:sequenceId/legend", middlewares.hasUploadAccessToModel, updateLegend);
 
 /**
  * @api {get} /:teamspace/:model/revision(/master/head/|/:revId)/sequences/:sequenceID/legend get the legend
@@ -326,6 +362,7 @@ router.put("/revision/:revId/sequences/:sequenceId/legend", middlewares.hasUploa
  */
 router.get("/revision/master/head/sequences/:sequenceId/legend", middlewares.issue.canView, getLegend);
 router.get("/revision/:revId/sequences/:sequenceId/legend", middlewares.issue.canView, getLegend);
+router.get("/sequences/:sequenceId/legend", middlewares.issue.canView, getLegend);
 
 /**
  * @api {delete} /:teamspace/:model/revision(/master/head/|/:revId)/sequences/:sequenceID/legend Delete legend
@@ -345,9 +382,9 @@ router.get("/revision/:revId/sequences/:sequenceId/legend", middlewares.issue.ca
  * HTTP/1.1 200 OK
  * {}
  */
-
 router.delete("/revision/master/head/sequences/:sequenceId/legend", middlewares.hasUploadAccessToModel, deleteLegend);
 router.delete("/revision/:revId/sequences/:sequenceId/legend", middlewares.hasUploadAccessToModel, deleteLegend);
+router.delete("/sequences/:sequenceId/legend", middlewares.hasUploadAccessToModel, deleteLegend);
 
 /**
  * @api {post} /:teamspace/:model/sequences Create custom sequence
@@ -379,7 +416,6 @@ router.delete("/revision/:revId/sequences/:sequenceId/legend", middlewares.hasUp
  * 	"_id":"00000000-0000-0000-0000-000000000002"
  * }
  */
-router.post("/sequences", middlewares.issue.canCreate, createSequence);
 router.post("/sequences", middlewares.issue.canCreate, createSequence);
 
 /**
@@ -420,6 +456,7 @@ router.post("/sequences", middlewares.issue.canCreate, createSequence);
  */
 router.get("/revision/master/head/sequences", middlewares.issue.canView, listSequences);
 router.get("/revision/:revId/sequences", middlewares.issue.canView, listSequences);
+router.get("/sequences", middlewares.issue.canView, listSequences);
 
 function createSequence(req, res, next) {
 	const place = utils.APIInfo(req);
@@ -427,6 +464,17 @@ function createSequence(req, res, next) {
 
 	Sequence.createSequence(account, model, req.body).then(sequenceId => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, sequenceId);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function getSequence(req, res, next) {
+	const place = utils.APIInfo(req);
+	const { account, model, sequenceId } = req.params;
+
+	Sequence.getSequenceById(account, model, sequenceId).then(sequence => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, activity);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
