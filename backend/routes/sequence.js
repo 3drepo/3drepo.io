@@ -474,7 +474,7 @@ function getSequence(req, res, next) {
 	const { account, model, sequenceId } = req.params;
 
 	Sequence.getSequenceById(account, model, sequenceId).then(sequence => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, activity);
+		responseCodes.respond(place, req, res, next, responseCodes.OK, sequence);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
