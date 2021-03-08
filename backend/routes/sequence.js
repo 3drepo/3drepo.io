@@ -473,7 +473,7 @@ function getSequence(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model, sequenceId } = req.params;
 
-	Sequence.getSequenceById(account, model, sequenceId).then(sequence => {
+	Sequence.getSequenceById(account, model, sequenceId, {}, false).then(sequence => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, sequence);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

@@ -166,8 +166,10 @@ Sequence.createSequence = async (account, model, data) => {
 	return clean(newSequence, ["_id", "rev_id"]);
 };
 
-Sequence.getSequenceById = async (account, model, sequenceId, projection = {}) => {
-	return db.findOne(account, sequenceCol(model), { _id: utils.stringToUUID(sequenceId)}, projection);
+Sequence.getSequenceById = async (account, model, sequenceId, projection = {}, noClean = true) => {
+	const sequence = await db.findOne(account, sequenceCol(model), { _id: utils.stringToUUID(sequenceId)}, projection);
+
+	return noClean ? sequence : clean(sequence, ["_id", "rev_id"]);
 };
 
 Sequence.getSequenceActivityDetail = async (account, model, activityId) => {
