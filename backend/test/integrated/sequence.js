@@ -611,6 +611,7 @@ describe("Sequences", function () {
 	});
 
 	describe("Update Sequence", function() {
+		/*
 		it("name with a new string should succeed [deprecated]", function(done) {
 			const update = { name: "New name for the sequence"};
 			async.series([
@@ -628,6 +629,7 @@ describe("Sequences", function () {
 				}
 			], done);
 		});
+		*/
 
 		it("name with a new string should succeed", function(done) {
 			const update = { name: "New name for the sequence"};
@@ -639,6 +641,7 @@ describe("Sequences", function () {
 				},
 				(done) => {
 					agent.get(`/${username}/${model}/sequences?revId=${oldRevision}&key=${userApiKey}`).expect(200, function(err , res) {
+						console.log(res.body);
 						expect(res.body.length).to.equal(1);
 						expect(res.body[0]).to.deep.equal({...oldGoldenData, ...update});
 						done(err);
@@ -647,6 +650,7 @@ describe("Sequences", function () {
 			], done);
 		});
 
+		/*
 		it("name and frame should only update the name [deprecated]", function(done) {
 			const update = { frames: [], name: "another name"};
 			async.series([
@@ -666,6 +670,7 @@ describe("Sequences", function () {
 
 			], done);
 		});
+		*/
 
 		it("name and frame should only update the name", function(done) {
 			const update = { frames: [], name: "another name"};
@@ -1095,7 +1100,7 @@ describe("Sequences", function () {
 			const highlighted_group = {
 				objects: [{
 					"account": username,
-					model: model2,
+					model,
 					"shared_ids":["8b9259d2-316d-4295-9591-ae020bfcce48"]
 				}],
 				color: [2555, 255, 0]
@@ -1104,7 +1109,7 @@ describe("Sequences", function () {
 			const hidden_group = {
 				objects: [{
 					"account": username,
-					model: model2,
+					model,
 					"shared_ids":["69b60e77-e049-492f-b8a3-5f5b2730129c"]
 				}]
 			};
@@ -1113,7 +1118,7 @@ describe("Sequences", function () {
 				{
 					objects: [{
 						"account": username,
-						model: model2,
+						model,
 						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
 					}],
 					color: [1, 2, 3],
@@ -1122,7 +1127,7 @@ describe("Sequences", function () {
 				{
 					objects: [{
 						"account": username,
-						model: model2,
+						model,
 						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
 					}],
 					color: [4, 5, 6],
@@ -1131,9 +1136,11 @@ describe("Sequences", function () {
 			];
 
 			const sequence = Object.assign({"name":"Sequence test"}, baseCustomSequence);
-			sequence.frames[0].highlighted_group = highlighted_group;
-			sequence.frames[0].hidden_group = hidden_group;
-			sequence.frames[0].override_groups = override_groups;
+			sequence.frames[0] = Object.assign({
+				highlighted_group,
+				hidden_group,
+				override_groups
+			}, baseCustomSequence.frames[0]);
 			let sequenceId;
 
 			console.log(sequence);
@@ -1176,7 +1183,9 @@ describe("Sequences", function () {
 					agent.post(`/${username}/${model}/viewpoints/`)
 						.send(view)
 						.expect(200, function(err, res) {
-							sequence.frames[0].viewId = res.body._id;
+							sequence.frames[0] = Object.assign({
+								viewId: res.body._id
+							}, baseCustomSequence.frames[0]);
 							console.log(sequence);
 							return done(err);
 						});
@@ -1227,7 +1236,7 @@ describe("Sequences", function () {
 			];
 
 			const sequence = Object.assign({"name":"Sequence test"}, baseCustomSequence);
-			sequence.frames[0].transformation_groups = transformation_groups;
+			sequence.frames[0] = Object.assign({transformation_groups}, baseCustomSequence.frames[0]);
 			let sequenceId;
 
 			console.log(sequence);
@@ -1245,12 +1254,9 @@ describe("Sequences", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
 						.send(sequence)
-						.expect(200, function(err, res) {
+						.expect(400, function(err, res) {
 							console.log(res.body);
-							expect(res.body.customSequence).to.equal(true);
-							expect(res.body.name).to.equal(sequence.name);
-							expect(res.body.frames).to.deep.equal(sequence.frames);
-
+							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 							return done(err);
 						});
 				}
@@ -1307,17 +1313,14 @@ describe("Sequences", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
 						.send(sequence)
-						.expect(200, function(err, res) {
+						.expect(400, function(err, res) {
 							console.log(res.body);
-							expect(res.body.customSequence).to.equal(true);
-							expect(res.body.name).to.equal(sequence.name);
-							expect(res.body.frames).to.deep.equal(sequence.frames);
+							expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
 
 							return done(err);
 						});
 				}
 			], done);
 		});
-
 	});
 });

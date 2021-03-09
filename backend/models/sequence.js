@@ -119,6 +119,10 @@ Sequence.createSequence = async (account, model, data) => {
 	if (data.revId) {
 		const history = await History.getHistory(account, model, undefined, data.revId);
 
+		if (!history) {
+			throw responseCodes.INVALID_TAG_NAME;
+		}
+
 		newSequence.rev_id = history._id;
 	}
 
@@ -150,7 +154,7 @@ Sequence.createSequence = async (account, model, data) => {
 			throw responseCodes.INVALID_ARGUMENTS;
 		}
 
-		if (viewpoint.transformation_group_id) {
+		if (viewpoint.transformation_group_id || viewpoint.transformation_groups) {
 			// sequence viewpoints do not accept transformations
 			throw responseCodes.INVALID_ARGUMENTS;
 		}
