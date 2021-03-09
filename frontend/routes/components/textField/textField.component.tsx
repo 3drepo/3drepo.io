@@ -257,11 +257,13 @@ export class TextField extends React.PureComponent<IProps, IState> {
 	public onBlur = (e) => {
 		const currentTarget = e.currentTarget;
 
-		setTimeout(() => {
-			if (!currentTarget.contains(document.activeElement)) {
-				this.declineChange();
-			}
-		}, 0);
+		if (!this.props.forceEdit) {
+			setTimeout(() => {
+				if (!currentTarget.contains(document.activeElement)) {
+					this.declineChange();
+				}
+			}, 0);
+		}
 	}
 
 	private additionalProps = () => {

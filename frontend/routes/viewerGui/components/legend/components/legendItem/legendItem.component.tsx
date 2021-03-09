@@ -55,7 +55,7 @@ export const LegendItem = ({
 
 	const getLegendSchema = LegendSchema(legendNames.filter((item) => item !== name));
 
-	const handleColorChange = (colorValue: string) => updateLegendItem({
+	const handleColorChange = (colorValue: string) => !editMode && updateLegendItem({
 		name,
 		color: colorValue,
 	});
