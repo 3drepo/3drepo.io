@@ -641,7 +641,6 @@ describe("Sequences", function () {
 				},
 				(done) => {
 					agent.get(`/${username}/${model}/sequences?revId=${oldRevision}&key=${userApiKey}`).expect(200, function(err , res) {
-						console.log(res.body);
 						expect(res.body.length).to.equal(1);
 						expect(res.body[0]).to.deep.equal({...oldGoldenData, ...update});
 						done(err);
@@ -1136,11 +1135,10 @@ describe("Sequences", function () {
 			];
 
 			const sequence = Object.assign({"name":"Sequence test"}, baseCustomSequence);
-			sequence.frames[0] = Object.assign({
-				highlighted_group,
-				hidden_group,
-				override_groups
-			}, baseCustomSequence.frames[0]);
+			sequence.frames = [
+				Object.assign({highlighted_group, hidden_group, override_groups}, baseCustomSequence.frames[0]),
+				baseCustomSequence.frames[1]
+			];
 			let sequenceId;
 
 			console.log(sequence);
@@ -1236,7 +1234,10 @@ describe("Sequences", function () {
 			];
 
 			const sequence = Object.assign({"name":"Sequence test"}, baseCustomSequence);
-			sequence.frames[0] = Object.assign({transformation_groups}, baseCustomSequence.frames[0]);
+			sequence.frames = [
+				Object.assign({transformation_groups}, baseCustomSequence.frames[0]),
+				baseCustomSequence.frames[1]
+			];
 			let sequenceId;
 
 			console.log(sequence);
