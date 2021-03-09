@@ -1068,14 +1068,11 @@ describe("Sequences", function () {
 			const sequence = Object.assign({"name":"Sequence test"}, baseCustomSequence);
 			let sequenceId;
 
-			console.log(sequence);
 			async.series([
 				function(done) {
 					agent.post(`/${username}/${model}/sequences?key=${userApiKey}`)
 						.send(sequence)
 						.expect(200, function(err, res) {
-							console.log(res.body);
-
 							sequenceId = res.body._id;
 							return done(err);
 						});
@@ -1084,7 +1081,6 @@ describe("Sequences", function () {
 					agent.get(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
 						.send(sequence)
 						.expect(200, function(err, res) {
-							console.log(res.body);
 							expect(res.body.customSequence).to.equal(true);
 							expect(res.body.name).to.equal(sequence.name);
 							expect(res.body.frames).to.deep.equal(sequence.frames);

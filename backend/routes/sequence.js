@@ -559,7 +559,8 @@ function updateSequence(req, res, next) {
 
 function listSequences(req, res, next) {
 	const place = utils.APIInfo(req);
-	const { account, model, revId } = req.params;
+	const { account, model } = req.params;
+	const revId = req.query && req.query.revId ? req.query.revId : req.params.revId;
 	const branch = revId ? null : "master";
 
 	Sequence.getList(account, model, branch, revId, true).then(sequences => {
