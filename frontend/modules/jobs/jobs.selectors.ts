@@ -28,6 +28,10 @@ export const selectJobsColors = createSelector(
 	selectJobs, (jobs) => uniq(jobs.map(({color}) => color))
 );
 
+export const selectTruthyJobsColors = createSelector(
+		selectJobsColors, (colors) => colors.filter(Boolean)
+);
+
 export const selectJobsList = createSelector(
 	selectJobs, (jobs) => jobs.map(({ _id: name, color }) => ({ name, color, value: name }))
 );

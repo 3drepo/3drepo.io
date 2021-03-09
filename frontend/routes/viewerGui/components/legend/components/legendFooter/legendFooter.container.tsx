@@ -19,7 +19,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { selectJobsColors } from '../../../../../../modules/jobs';
+import { selectTruthyJobsColors } from '../../../../../../modules/jobs';
 import {
 	selectLegendUpdatePending,
 	selectNewLegendEditMode,
@@ -28,7 +28,7 @@ import {
 import { LegendFooter } from './legendFooter.component';
 
 const mapStateToProps = createStructuredSelector({
-	colors: selectJobsColors,
+	colors: selectTruthyJobsColors,
 	updatePending: selectLegendUpdatePending,
 	newLegendEditMode: selectNewLegendEditMode,
 });
