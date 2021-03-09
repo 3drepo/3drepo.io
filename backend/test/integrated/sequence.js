@@ -1181,9 +1181,10 @@ describe("Sequences", function () {
 					agent.post(`/${username}/${model}/viewpoints/`)
 						.send(view)
 						.expect(200, function(err, res) {
-							sequence.frames[0] = Object.assign({
-								viewId: res.body._id
-							}, baseCustomSequence.frames[0]);
+							sequence.frames = [
+								Object.assign({viewId: res.body._id}, baseCustomSequence.frames[0]),
+								baseCustomSequence.frames[1]
+							];
 							console.log(sequence);
 							return done(err);
 						});
@@ -1241,27 +1242,13 @@ describe("Sequences", function () {
 			let sequenceId;
 
 			console.log(sequence);
-			async.series([
-				function(done) {
-					agent.post(`/${username}/${model}/sequences?key=${userApiKey}`)
-						.send(sequence)
-						.expect(200, function(err, res) {
-							console.log(res.body);
-
-							sequenceId = res.body._id;
-							return done(err);
-						});
-				},
-				function(done) {
-					agent.get(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
-						.send(sequence)
-						.expect(400, function(err, res) {
-							console.log(res.body);
-							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
-							return done(err);
-						});
-				}
-			], done);
+			agent.post(`/${username}/${model}/sequences?key=${userApiKey}`)
+				.send(sequence)
+				.expect(200, function(err, res) {
+					console.log(res.body);
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					return done(err);
+				});
 		});
 
 		it("with revision should succeed", function(done) {
@@ -1297,31 +1284,13 @@ describe("Sequences", function () {
 
 		it("with invalid revision should fail", function(done) {
 			const sequence = Object.assign({"name":"Sequence test", "revId": "badRevision"}, baseCustomSequence);
-			let sequenceId;
 
-			console.log(sequence);
-			async.series([
-				function(done) {
-					agent.post(`/${username}/${model}/sequences?key=${userApiKey}`)
-						.send(sequence)
-						.expect(200, function(err, res) {
-							console.log(res.body);
-
-							sequenceId = res.body._id;
-							return done(err);
-						});
-				},
-				function(done) {
-					agent.get(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
-						.send(sequence)
-						.expect(400, function(err, res) {
-							console.log(res.body);
-							expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
-
-							return done(err);
-						});
-				}
-			], done);
+			agent.post(`/${username}/${model}/sequences?key=${userApiKey}`)
+				.send(sequence)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
+					return done(err);
+				});
 		});
 	});
 });
