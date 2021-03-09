@@ -27,16 +27,49 @@ def getFile(db, fsfolder, collection_name, id):
   if entry == None:
     return None
 
-  if entry.get("type") == "fs":
+  if entry["type"] == "fs":
     fileContent = getFileFs(fsfolder,entry["link"])
 
     if fileContent:
       return fileContent
     else:
-      print ("error fetching file fs for entry" + id)
       return getFileGridFS(db, collection_name, id)
 
   return getFileGridFS(db, collection_name,entry["link"])
+
+
+def removeFileFs(fsfolder, link):
+  filename = os.path.join(fsfolder, link)
+
+  if not os.path.isfile(filename):
+    return False
+
+  os.remove(filename)
+  return True
+
+def removeFileGridFs(db, collection_name, link):
+  fs = gridfs.GridFS(db, collection_name)
+  gridfsfile =  fs.find_one({ "filename": link })
+
+  if gridfsfile:
+    fs.delete(gridfsfile._id)
+
+def removeFile(db, fsfolder, collection_name, id):
+
+  entry = db[collection_name + ".ref"].find_one({"_id": id})
+
+  if entry:
+    if entry["type"] == "fs":
+      if removeFileFs(fsfolder, entry["link"]):
+        print "File succesfully removed from filesystem" + entry["link"]
+      else:
+        print "File unsuccesfully removed from filesystem" + entry["link"]
+
+    removeFileGridFs(db, collection_name, entry["link"])
+  else:
+    print "Fileref not found " + id
+
+  db[collection_name + ".ref"].delete_one({"_id": id})
 
 
 def migrateData(data):
@@ -46,9 +79,6 @@ def migrateData(data):
     migratedData.append({ "key": key, "value": data[key]})
 
   return migratedData
-
-
-
 
 def updateActivities(coll, activities, sequenceId, parent = None):
   for activity in activities:
@@ -99,6 +129,9 @@ def updateActivitiesSchema(db, modelId, sequenceId):
   if fileContents:
     activities = json.loads(fileContents)["tasks"]
     updateActivities(db[activitiesCollName], activities, sequenceId)
+  else:
+    print ("error fetching file fs for sequence: " + str(sequenceId))
+
 
 
 #### Connect to the Database #####
@@ -117,3 +150,4 @@ for database in db.database_names():
                 print("\t\t--sequence: " + str(entryId))
                 if not dryRun:
                   updateActivitiesSchema(db, modelId, entryId)
+                  removeFile(db, fsDirectory , str(modelId) + ".activities",  str(entryId))

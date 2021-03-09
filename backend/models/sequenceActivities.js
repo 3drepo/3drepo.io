@@ -53,7 +53,7 @@ const activitySchema = yup.object().shape({
  * @param {Array<Activity>} activities;
  * @return {Array<Activity>}
  */
-const getSubtasks = (parentId, activities) => {
+const getSubActivities = (parentId, activities) => {
 	return activities.filter(activity => {
 		const parent = activity.parent;
 
@@ -64,23 +64,23 @@ const getSubtasks = (parentId, activities) => {
 		}
 	}).map(activity => {
 		const id = utils.uuidToString(activity._id);
-		let subTasks = getSubtasks(id, activities);
+		let subActivities = getSubActivities(id, activities);
 
-		if (subTasks.length) {
-			subTasks = { subTasks };
+		if (subActivities.length) {
+			subActivities = { subActivities };
 		} else {
-			subTasks = {};
+			subActivities = {};
 		}
 
-		return  { id, ...pick(activity, "name", "startDate", "endDate"), ...subTasks };
+		return  { id, ...pick(activity, "name", "startDate", "endDate"), ...subActivities };
 	});
 };
 
 const createActivitiesTree = async(account, model, sequenceId) => {
-	const activities = await db.find(account, model + ".activities",{sequenceId: utils.stringToUUID(sequenceId)}); // filter by sequenceId
-	const tasks = getSubtasks(null, activities);
+	const foundActivities = await db.find(account, model + ".activities",{sequenceId: utils.stringToUUID(sequenceId)}); // filter by sequenceId
+	const activities = getSubActivities(null, foundActivities);
 
-	return {tasks};
+	return { activities };
 };
 
 const SequenceActivities = {};
@@ -93,6 +93,10 @@ SequenceActivities.create = async (account, model, sequenceId, activity) => {
 	}
 
 	if (!activitySchema.isValidSync(activity, { strict: true })) {
+		throw responseCodes.INVALID_ARGUMENTS;
+	}
+
+	if (activity.parent && !await db.findOne(account, model + ".activities", { _id: utils.stringToUUID(activity.parent)})) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
@@ -115,6 +119,10 @@ SequenceActivities.edit = async (account, model, sequenceId, activityId, activit
 	}
 
 	if (!activityEditSchema.isValidSync(activity, { strict: true })) {
+		throw responseCodes.INVALID_ARGUMENTS;
+	}
+
+	if (activity.parent && !await db.findOne(account, model + ".activities", { _id: utils.stringToUUID(activity.parent)})) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
@@ -150,7 +158,21 @@ SequenceActivities.remove = async (account, model, sequenceId, activityId) => {
 };
 
 SequenceActivities.get = async (account, model, sequenceId) => {
-	return await createActivitiesTree(account, model, sequenceId);
+	const sequence = await db.findOne(account, model + ".sequences", { _id: utils.stringToUUID(sequenceId)});
+
+	if (!sequence) {
+		throw responseCodes.SEQUENCE_NOT_FOUND;
+	}
+
+	let activities = {};
+	try {
+		activities = await FileRef.getSequenceActivitiesFile(account, model, utils.uuidToString(sequenceId));
+	} catch(e) {
+		activities = await createActivitiesTree(account, model, sequenceId);
+		await FileRef.storeFile(account, model + ".activities.ref", account, sequenceId, JSON.stringify(activities),  {"_id":sequenceId});
+	}
+
+	return activities;
 };
 
 module.exports =  SequenceActivities;

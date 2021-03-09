@@ -394,21 +394,21 @@ TODO:
 	- document this endpoint
 	- permissions
 */
-router.get("/sequences/:sequenceId/activities", middlewares.issue.canView, getSequenceActivities2);
+router.get("/sequences/:sequenceId/activities", middlewares.hasReadAccessToModel, getSequenceActivities2);
 
 /*
 TODO:
 	- document this endpoint
 	- permissions
 */
-router.post("/sequences/:sequenceId/activities", middlewares.issue.canView, createActivity);
+router.post("/sequences/:sequenceId/activities", middlewares.hasUploadAccessToModel, createActivity);
 
 /*
 TODO:
 	- document this endpoint
 	- permissions
 */
-router.put("/sequences/:sequenceId/activities/:activityId", middlewares.issue.canView, editActivity);
+router.put("/sequences/:sequenceId/activities/:activityId",middlewares.hasUploadAccessToModel, editActivity);
 
 /*
 TODO:
