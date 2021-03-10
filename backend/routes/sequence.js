@@ -521,8 +521,8 @@ function editActivity(req, res, next) {
 	const { account, model, sequenceId, activityId } = req.params;
 	const place = utils.APIInfo(req);
 
-	SequenceActivities.edit(account, model, sequenceId, activityId, req.body).then(activity => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, activity);
+	SequenceActivities.edit(account, model, sequenceId, activityId, req.body).then(() => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
