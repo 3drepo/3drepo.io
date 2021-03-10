@@ -31,6 +31,22 @@
 
 	let db;
 
+	Handler.authenticate = async function (database, password) {
+		const authDB = await Handler.getAuthDB();
+
+		try {
+			await authDB.authenticate(database, password);
+		} catch (err) {
+			if (authDB) {
+				authDB.close();
+			}
+
+			throw err;
+		}
+
+		authDB.close();
+	};
+
 	Handler.disconnect = function () {
 		if(db) {
 			db.close();

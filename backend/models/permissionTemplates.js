@@ -32,7 +32,7 @@ PermissionTemplates.findById = function(user, id) {
 
 const updatePermissions = async (teamspace, updatedPermissions) => {
 	const User = require("./user");
-	await User.update(teamspace.user, {"customData.permissionTemplates": updatedPermissions});
+	await User.updatePermissionTemplates(teamspace.user, updatedPermissions);
 	return updatedPermissions;
 };
 

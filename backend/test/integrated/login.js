@@ -30,6 +30,7 @@ describe("Login", function () {
 	const username = "login_username";
 	const username_not_verified = "login_nonverified";
 	const password = "Str0ngPassword!";
+	const newPassword = "someCrazyNewPassword2999";
 	const email = suf => `test3drepo_login_${suf}@mailinator.com`;
 
 	before(function(done) {
@@ -113,7 +114,6 @@ describe("Login", function () {
 					.send({ username: username_not_verified, password })
 					.expect(400, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.USER_NOT_VERIFIED.value);
-						console.log(err);
 						err ? reject(err) : resolve();
 					});
 			});
@@ -222,10 +222,8 @@ describe("Login", function () {
 			});
 	});
 
-
 	describe("Forgot password ", function() {
 		let token = null
-		const newPassword = "someCrazyNewPassword2999";
 
 		it("with username should succeed", async function() {
 			const data = await User.getForgotPasswordToken(username);
@@ -289,5 +287,69 @@ describe("Login", function () {
 		});
 	});
 
+	describe("Lockout password ", function() {
+		it("few incorrect login attempts should not lock account", async function() {
+			const attempts = 3;
 
+			for (let i = 0; i < attempts; i++) {
+				await request(server)
+					.post("/login")
+					.send({ username, password: "wrongPassword" })
+					.expect(400);
+			}
+
+			const {body} = await request(server)
+				.post("/login")
+				.send({ username, password: newPassword })
+				.expect(200);
+		});
+
+		it("remaining attempts warning should warn user of imminent account locking", async function() {
+			const attempts = 8;
+
+			for (let i = 0; i < attempts; i++) {
+				const remaining = 9 - i;
+				const {body} = await request(server)
+					.post("/login")
+					.send({ username, password: "wrongPassword" })
+					.expect(400);
+
+				expect(body.value).to.equal(responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value);
+
+				if (remaining <= 5) {
+					expect(body.message).to.equal("Incorrect username or password (Remaining attempts: " + remaining + ")");
+				}
+			}
+
+			const {body} = await request(server)
+				.post("/login")
+				.send({ username, password: newPassword })
+				.expect(200);
+		});
+
+		it("too many bad login attempts should lock account", async function() {
+			const attempts = 10;
+
+			for (let i = 0; i < attempts; i++) {
+				await request(server)
+					.post("/login")
+					.send({ username, password: "wrongPassword" })
+					.expect(400);
+			}
+
+			const {body} = await request(server)
+				.post("/login")
+				.send({ username, password: newPassword })
+				.expect(400);
+
+			expect(body.value).to.equal(responseCodes.TOO_MANY_LOGIN_ATTEMPTS.value);
+		});
+
+		it("correct credentials for expired lockout should succeed", async function() {
+			await request(server)
+				.post("/login")
+				.send({ username: "login_lockout_expired_user", password })
+				.expect(200);
+		});
+	});
 });

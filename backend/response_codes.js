@@ -97,6 +97,7 @@
 		FILE_IMPORT_SYNCHRO_NOT_SUPPORTED: { message: "SPM import is currently not supported", status: 400 },
 		FILE_IMPORT_NO_3D_VIEW: { message: "Cannot find a 3D View within the model.", status: 400 },
 		FILE_IMPORT_TIMED_OUT: { message: "Process timed out. Consider splitting up the model", status: 500 },
+		FILE_IMPORT_GEOMETRY_ERR: { message: "File contains geometry that are not polylines/triangles", status: 400 },
 
 		QUEUE_CONN_ERR: { message: "Failed to queue your request. Please try again later.", status: 500},
 		QUEUE_NO_CONFIG: { message: "Server has no queue configuration", status: 500 },
@@ -135,6 +136,8 @@
 		MODEL_EXIST: { message: "Model already exists with that name", status: 400 },
 		PROJECT_EXIST: { message: "Project already exists", status: 400 },
 		DATABASE_EXIST: { message: "Database already exists", status: 400 },
+		TOO_MANY_LOGIN_ATTEMPTS: { message: "Too many unsuccessful login attempts! Account locked", status: 400 },
+		ACCOUNT_LOGIN_LOCKED: { message: "Account locked. Please try again later", status: 400 },
 
 		SIZE_LIMIT_PAY: { message: "Teamspace quota exceeded.", status: 400 },
 		INVALID_SUBSCRIPTION_PLAN: { message: "Invalid subscription plan", status: 400 },

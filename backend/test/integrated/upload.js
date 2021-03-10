@@ -108,7 +108,7 @@ describe("Uploading a model", function () {
 				}
 			};
 
-			await User.update(username, { "customData.billing.subscriptions" : subscriptions});
+			await User.updateSubscriptions(username, subscriptions);
 		});
 
 
@@ -135,7 +135,7 @@ describe("Uploading a model", function () {
 				}
 			};
 
-			await User.update(username, { "customData.billing.subscriptions" : subscriptions});
+			await User.updateSubscriptions(username, subscriptions);
 		});
 
 		it("should succeed", async function() {

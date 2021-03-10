@@ -54,7 +54,7 @@ const notifications = require("../notification");
 const CombinedStream = require("combined-stream");
 const stringToStream = require("string-to-stream");
 const { StreamBuffer } = require("./stream");
-const { BinToTriangleStringStream, BinToVector3dStringStream } = require("./binary");
+const { BinToFaceStringStream, BinToVector3dStringStream } = require("./binary");
 const PermissionTemplates = require("../permissionTemplates");
 const AccountPermissions = require("../accountPermissions");
 
@@ -157,7 +157,8 @@ function translateBouncerErrCode(bouncerErrorCode) {
 		{ res: responseCodes.FILE_IMPORT_SYNCHRO_NOT_SUPPORTED, softFail: false, userErr: false},
 		{ res: responseCodes.FILE_IMPORT_MAX_NODE_EXCEEDED, softFail: false, userErr: true},
 		{ res: responseCodes.FILE_IMPORT_PROCESS_ERR, softFail: false, userErr: false},
-		{ res: responseCodes.FILE_IMPORT_PROCESS_ERR, softFail: false, userErr: false}
+		{ res: responseCodes.FILE_IMPORT_PROCESS_ERR, softFail: false, userErr: false},
+		{ res: responseCodes.FILE_IMPORT_GEOMETRY_ERR, softFail: false, userErr: false} // 34
 	];
 
 	const errObj =  bouncerErrToWebErr.length > bouncerErrorCode ?
@@ -844,20 +845,27 @@ async function getMeshById(account, model, meshId) {
 		"parents": 1,
 		"vertices": 1,
 		"faces": 1,
-		"_extRef":1
+		"_extRef": 1,
+		"primitive": 1
 	};
 
 	const mesh = await getNodeById(account, model, utils.stringToUUID(meshId), projection);
 	mesh.matrix = await getParentMatrix(account, model, mesh.parents[0], revisionIds);
 
 	const vertices =  mesh.vertices ? new StreamBuffer({buffer: mesh.vertices.buffer, chunkSize: mesh.vertices.buffer.length}) : await getGridfsFileStream(account, model, mesh._extRef.vertices);
-	const triangles = mesh.faces ?  new StreamBuffer({buffer: mesh.faces.buffer, chunkSize: mesh.faces.buffer.length})  : await getGridfsFileStream(account, model, mesh._extRef.faces);
+	const faces = mesh.faces ?  new StreamBuffer({buffer: mesh.faces.buffer, chunkSize: mesh.faces.buffer.length})  : await getGridfsFileStream(account, model, mesh._extRef.faces);
+
+	if (!("primitive" in mesh)) { // if the primitive type is missing, then set it to triangles for backwards compatibility. this matches the behaviour of the bouncer api.
+		mesh.primitive = 3;
+	}
 
 	const combinedStream = CombinedStream.create();
-	combinedStream.append(stringToStream(["{\"matrix\":", JSON.stringify(mesh.matrix), ",\"vertices\":["].join("")));
+	combinedStream.append(stringToStream(["{\"matrix\":", JSON.stringify(mesh.matrix)].join("")));
+	combinedStream.append(stringToStream([",\"primitive\":", mesh.primitive].join("")));
+	combinedStream.append(stringToStream(",\"vertices\":["));
 	combinedStream.append(vertices.pipe(new BinToVector3dStringStream({isLittleEndian: true})));
-	combinedStream.append(stringToStream("],\"triangles\":["));
-	combinedStream.append(triangles.pipe(new BinToTriangleStringStream({isLittleEndian: true})));
+	combinedStream.append(stringToStream("],\"faces\":["));
+	combinedStream.append(faces.pipe(new BinToFaceStringStream({isLittleEndian: true})));
 	combinedStream.append(stringToStream("]}"));
 	return 	combinedStream;
 }

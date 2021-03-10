@@ -86,8 +86,12 @@ class Ticket extends View {
 			}
 		}
 
-		if (!ticketToClean.viewpoint && ticketToClean.viewpoints && ticketToClean.viewpoints.length > 0) {
-			ticketToClean.viewpoint = ticketToClean.viewpoints[0];
+		if (!ticketToClean.viewpoint) {
+			if (ticketToClean.viewpoints && ticketToClean.viewpoints.length > 0) {
+				ticketToClean.viewpoint = ticketToClean.viewpoints[0];
+			} else {
+				ticketToClean.viewpoint = {};
+			}
 		}
 
 		if (ticketToClean.comments) {
@@ -99,19 +103,9 @@ class Ticket extends View {
 				const commentCleaned = Comment.clean(routePrefix, comment);
 				comment = commentCleaned;
 			});
+		} else {
+			ticketToClean.comments = [];
 		}
-
-		// Return empty arrays as frontend expects them
-		// Return empty objects as frontend expects them
-		Object.keys(this.fieldTypes).forEach((field) => {
-			if (!ticketToClean[field]) {
-				if ("[object Array]" === this.fieldTypes[field]) {
-					ticketToClean[field] = [];
-				} else if ("[object Object]" === this.fieldTypes[field] && field !== "thumbnail") {
-					ticketToClean[field] = {};
-				}
-			}
-		});
 
 		delete ticketToClean.viewpoints;
 		delete ticketToClean.viewCount;
@@ -387,7 +381,6 @@ class Ticket extends View {
 	* @param {object} newTicket
 	*/
 	async create(account, model, newTicket) {
-		// const sessionId = newTicket.sessionId;
 		if (!newTicket.name) {
 			return Promise.reject({ resCode: responseCodes.INVALID_ARGUMENTS });
 		}
