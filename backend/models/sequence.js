@@ -25,7 +25,7 @@ const FileRef = require("./fileRef");
 const { getRefNodes } = require("./ref");
 const { getDefaultLegendId } = require("./modelSetting");
 const View = new (require("./view"))();
-const { createViewpoint } = require("./viewpoint");
+const { cleanViewpoint, createViewpoint } = require("./viewpoint");
 
 const activityCol = (modelId) => `${modelId}.activities`;
 const sequenceCol = (modelId) => `${modelId}.sequences`;
@@ -57,7 +57,7 @@ const cleanActivityDetail = (toClean) => {
 	return clean(toClean, keys);
 };
 
-const cleanSequenceList = (toClean) => {
+const cleanSequence = (toClean) => {
 	const keys = ["_id", "rev_id", "model"];
 
 	for (let i = 0; toClean["frames"] && i < toClean["frames"].length; i++) {
@@ -68,10 +68,12 @@ const cleanSequenceList = (toClean) => {
 };
 
 const cleanSequenceFrame = (toClean) => {
-	const key = "dateTime";
+	if (toClean.dateTime && utils.isDate(toClean.dateTime)) {
+		toClean.dateTime = new Date(toClean.dateTime).getTime();
+	}
 
-	if (toClean[key] && utils.isDate(toClean[key])) {
-		toClean[key] = new Date(toClean[key]).getTime();
+	if (toClean.viewpoint) {
+		toClean.viewpoint = cleanViewpoint(undefined, toClean.viewpoint);
 	}
 
 	return toClean;
@@ -154,7 +156,7 @@ Sequence.createSequence = async (account, model, data) => {
 			throw responseCodes.INVALID_ARGUMENTS;
 		}
 
-		if (viewpoint.transformation_group_id || viewpoint.transformation_groups) {
+		if (viewpoint.transformation_group_ids || viewpoint.transformation_groups) {
 			// sequence viewpoints do not accept transformations
 			throw responseCodes.INVALID_ARGUMENTS;
 		}
@@ -173,7 +175,7 @@ Sequence.createSequence = async (account, model, data) => {
 Sequence.getSequenceById = async (account, model, sequenceId, projection = {}, noClean = true) => {
 	const sequence = await db.findOne(account, sequenceCol(model), { _id: utils.stringToUUID(sequenceId)}, projection);
 
-	return noClean ? sequence : clean(sequence, ["_id", "rev_id"]);
+	return noClean ? sequence : cleanSequence(sequence);
 };
 
 Sequence.getSequenceActivityDetail = async (account, model, activityId) => {
@@ -214,7 +216,7 @@ Sequence.getList = async (account, model, branch, revision, cleanResponse = fals
 		sequence.model = model;
 
 		if (cleanResponse) {
-			cleanSequenceList(sequence);
+			cleanSequence(sequence);
 		}
 	});
 

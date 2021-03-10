@@ -26,41 +26,6 @@ const { systemLogger } = require("../logger.js");
 const C = require("../constants");
 const FileType = require("file-type");
 
-const clean = function(routePrefix, viewpointToClean, serialise = true) {
-	const viewpointFields = [
-		"group_id",
-		"guid",
-		"highlighted_group_id",
-		"hidden_group_id",
-		"override_group_ids",
-		"shown_group_id",
-		"transformation_group_ids"
-	];
-
-	if (viewpointToClean) {
-		viewpointFields.forEach((field) => {
-			if (_.get(viewpointToClean, field)) {
-				if (serialise) {
-					if (Array.isArray(_.get(viewpointToClean, field))) {
-						viewpointToClean[field] = viewpointToClean[field].map(utils.uuidToString);
-					} else {
-						viewpointToClean[field] = utils.uuidToString(viewpointToClean[field]);
-					}
-				} else {
-					viewpointToClean[field] = utils.stringToUUID(viewpointToClean[field]);
-				}
-			}
-		});
-
-		if (serialise && routePrefix) {
-			setViewpointScreenshotURL(routePrefix, viewpointToClean);
-			viewpointToClean.screenshot_ref = undefined;
-		}
-	}
-
-	return viewpointToClean;
-};
-
 const checkCameraValues = (output, input) => {
 	// Check vectors/points
 	["right", "up", "view_dir", "position", "look_at"].forEach((key) => {
@@ -127,7 +92,66 @@ const checkCameraValues = (output, input) => {
 
 };
 
-const createViewpoint = async (account, model, collName, routePrefix, hostId, vpData, addGUID, viewpointType, createThumbnail = false) => {
+const setViewpointScreenshotURL = function(routePrefix, viewpoint) {
+	if (!viewpoint || !viewpoint.guid || (!viewpoint.screenshot && !viewpoint.screenshot_ref)) {
+		return viewpoint;
+	}
+
+	const viewpointId = utils.uuidToString(viewpoint.guid);
+
+	viewpoint.screenshot = `${routePrefix}/viewpoints/${viewpointId}/screenshot.png`;
+
+	// ===============================
+	// DEPRECATED LEGACY SUPPORT START
+	// ===============================
+	if (!viewpoint.screenshotSmall) {
+		viewpoint.screenshotSmall = viewpoint.screenshot;
+	}
+	// =============================
+	// DEPRECATED LEGACY SUPPORT END
+	// =============================
+
+	return viewpoint;
+};
+
+const Viewpoint = {};
+
+Viewpoint.cleanViewpoint = function(routePrefix, viewpointToClean, serialise = true) {
+	const viewpointFields = [
+		"group_id",
+		"guid",
+		"highlighted_group_id",
+		"hidden_group_id",
+		"override_group_ids",
+		"shown_group_id",
+		"transformation_group_ids"
+	];
+
+	if (viewpointToClean) {
+		viewpointFields.forEach((field) => {
+			if (_.get(viewpointToClean, field)) {
+				if (serialise) {
+					if (Array.isArray(_.get(viewpointToClean, field))) {
+						viewpointToClean[field] = viewpointToClean[field].map(utils.uuidToString);
+					} else {
+						viewpointToClean[field] = utils.uuidToString(viewpointToClean[field]);
+					}
+				} else {
+					viewpointToClean[field] = utils.stringToUUID(viewpointToClean[field]);
+				}
+			}
+		});
+
+		if (serialise && routePrefix) {
+			setViewpointScreenshotURL(routePrefix, viewpointToClean);
+			// viewpointToClean.screenshot_ref = undefined;
+		}
+	}
+
+	return viewpointToClean;
+};
+
+Viewpoint.createViewpoint = async (account, model, collName, routePrefix, hostId, vpData, addGUID, viewpointType, createThumbnail = false) => {
 	if (!vpData) {
 		return;
 	}
@@ -260,14 +284,14 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 		}
 
 		if (collName) {
-			await setExternalScreenshotRef(viewpoint, account, model, collName);
+			await Viewpoint.setExternalScreenshotRef(viewpoint, account, model, collName);
 		}
 	}
 
-	return clean(routePrefix, viewpoint, false);
+	return Viewpoint.cleanViewpoint(routePrefix, viewpoint, false);
 };
 
-const setExternalScreenshotRef = async function(viewpoint, account, model, collName) {
+Viewpoint.setExternalScreenshotRef = async function(viewpoint, account, model, collName) {
 	const screenshot = viewpoint.screenshot;
 	const ref = await FileRef.storeFile(account, model + "." + collName + ".ref", null, null, screenshot);
 	delete viewpoint.screenshot;
@@ -275,30 +299,4 @@ const setExternalScreenshotRef = async function(viewpoint, account, model, collN
 	return viewpoint;
 };
 
-const setViewpointScreenshotURL = function(routePrefix, viewpoint) {
-	if (!viewpoint || !viewpoint.guid || (!viewpoint.screenshot && !viewpoint.screenshot_ref)) {
-		return viewpoint;
-	}
-
-	const viewpointId = utils.uuidToString(viewpoint.guid);
-
-	viewpoint.screenshot = `${routePrefix}/viewpoints/${viewpointId}/screenshot.png`;
-
-	// ===============================
-	// DEPRECATED LEGACY SUPPORT START
-	// ===============================
-	if (!viewpoint.screenshotSmall) {
-		viewpoint.screenshotSmall = viewpoint.screenshot;
-	}
-	// =============================
-	// DEPRECATED LEGACY SUPPORT END
-	// =============================
-
-	return viewpoint;
-};
-
-module.exports = {
-	clean,
-	createViewpoint,
-	setExternalScreenshotRef
-};
+module.exports = Viewpoint;
