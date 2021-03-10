@@ -1136,9 +1136,13 @@ describe("Sequences", function () {
 
 			const sequence = Object.assign({"name":"Sequence test"}, baseCustomSequence);
 			sequence.frames = [
-				Object.assign({highlighted_group, hidden_group, override_groups}, baseCustomSequence.frames[0]),
+				Object.assign({}, baseCustomSequence.frames[0]),
 				baseCustomSequence.frames[1]
 			];
+			sequence.frames[0].viewpoint = Object.assign(
+				{highlighted_group, hidden_group, override_groups},
+				baseCustomSequence.frames[0].viewpoint
+			);
 			let sequenceId;
 
 			console.log(sequence);
@@ -1157,9 +1161,47 @@ describe("Sequences", function () {
 					agent.get(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
 						.send(sequence)
 						.expect(200, function(err, res) {
-							console.log(res.body);
 							expect(res.body.customSequence).to.equal(true);
 							expect(res.body.name).to.equal(sequence.name);
+
+							highlighted_group_id = res.body.frames[0].viewpoint.highlighted_group_id;
+							console.log(highlighted_group_id);
+							delete res.body.frames[0].viewpoint.highlighted_group_id;
+							delete sequence.frames[0].viewpoint.highlighted_group;
+
+							hidden_group_id = res.body.frames[0].viewpoint.hidden_group_id;
+							delete res.body.frames[0].viewpoint.hidden_group_id;
+							delete sequence.frames[0].viewpoint.hidden_group;
+
+							override_group_ids = res.body.frames[0].viewpoint.override_group_ids;
+							delete res.body.frames[0].viewpoint.override_group_ids;
+							delete sequence.frames[0].viewpoint.override_groups;
+
+							expect(res.body.frames).to.deep.equal(sequence.frames);
+
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${highlighted_group_id}?key=${userApiKey}`)
+						.send(sequence)
+						.expect(200, function(err, res) {
+							expect(res.body.customSequence).to.equal(true);
+							expect(res.body.name).to.equal(sequence.name);
+
+							highlighted_group_id = res.body.frames[0].viewpoint.highlighted_group_id;
+							console.log(highlighted_group_id);
+							delete res.body.frames[0].viewpoint.highlighted_group_id;
+							delete sequence.frames[0].viewpoint.highlighted_group;
+
+							hidden_group_id = res.body.frames[0].viewpoint.hidden_group_id;
+							delete res.body.frames[0].viewpoint.hidden_group_id;
+							delete sequence.frames[0].viewpoint.hidden_group;
+
+							override_group_ids = res.body.frames[0].viewpoint.override_group_ids;
+							delete res.body.frames[0].viewpoint.override_group_ids;
+							delete sequence.frames[0].viewpoint.override_groups;
+
 							expect(res.body.frames).to.deep.equal(sequence.frames);
 
 							return done(err);
@@ -1181,10 +1223,14 @@ describe("Sequences", function () {
 					agent.post(`/${username}/${model}/viewpoints/`)
 						.send(view)
 						.expect(200, function(err, res) {
+							console.log("--- post view result ---");
+							console.log(res.body._id);
 							sequence.frames = [
 								Object.assign({viewId: res.body._id}, baseCustomSequence.frames[0]),
 								baseCustomSequence.frames[1]
 							];
+							delete sequence.frames[0].viewpoint;
+							console.log("--- prepared sequence---");
 							console.log(sequence);
 							return done(err);
 						});
@@ -1206,7 +1252,7 @@ describe("Sequences", function () {
 							console.log(res.body);
 							expect(res.body.customSequence).to.equal(true);
 							expect(res.body.name).to.equal(sequence.name);
-							expect(res.body.frames).to.deep.equal(sequence.frames);
+							expect(res.body.frames).to.deep.equal(baseCustomSequence.frames);
 
 							return done(err);
 						});
@@ -1236,9 +1282,10 @@ describe("Sequences", function () {
 
 			const sequence = Object.assign({"name":"Sequence test"}, baseCustomSequence);
 			sequence.frames = [
-				Object.assign({transformation_groups}, baseCustomSequence.frames[0]),
+				Object.assign({}, baseCustomSequence.frames[0]),
 				baseCustomSequence.frames[1]
 			];
+			sequence.frames[0].viewpoint = Object.assign({transformation_groups}, baseCustomSequence.frames[0].viewpoint);
 			let sequenceId;
 
 			console.log(sequence);
