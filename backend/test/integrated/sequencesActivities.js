@@ -21,7 +21,7 @@ const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp();
 const responseCodes = require("../../response_codes.js");
-const { cloneDeep } = require("lodash");
+const { cloneDeep, pick } = require("lodash");
 
 
 describe("Sequences", function () {
@@ -84,7 +84,15 @@ describe("Sequences", function () {
 		}).sort((a, b)=> b.id < a.id? 1 : -1)
 	}
 
-/*
+	describe("get unmodified activities list", function() {
+		it("should work", async() => {
+			let	res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities`)
+				.expect(200);
+
+			expect(sortById(res.body.activities)).to.deep.equal(sortById(activities.activities))
+		});
+	})
+
 	describe("create activity", function() {
 		it("should fail with made up sequence id", async() => {
 			const { body } = await agent.post(`/${username}/${model}/sequences/non_existing_id/activities`)
@@ -112,55 +120,115 @@ describe("Sequences", function () {
 				.expect(200);
 
 			expect(body._id).to.be.string;
-			expect(body.sequence_id).to.be.equal(sequenceId);
+
+			const newActivity = {...cloneDeep(activity), sequenceId, _id: body._id};
+			expect(body).to.be.deep.equal(newActivity);
 
 			activityId = body._id;
 		});
-	});
 
-	describe("edit activty", function() {
+		it("should be reflected when fetching the activity list", async() => {
+			const newActivity = {...cloneDeep(activity), sequenceId, id: activityId};
 
-		it("should fail with made up sequence id", async() => {
-			const { body } = await agent.put(`/${username}/${model}/sequences/non_existing_id/activities/${activityId}`)
-				.send(activity)
-				.expect(responseCodes.SEQUENCE_NOT_FOUND.status);
+			const newActivitiesList = cloneDeep(activities);
+			newActivitiesList.activities.push(pick(newActivity, "name", "startDate", "endDate", "id"));
 
-			expect(body.value).to.be.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
-		});
-
-		it("should fail with made up activity id", async() => {
-			const { body } = await agent.put(`/${username}/${model}/sequences/${sequenceId}/activities/non_existent_actity`)
-				.send(activity)
-				.expect(responseCodes.ACTIVITY_NOT_FOUND.status);
-
-			expect(body.value).to.be.equal(responseCodes.ACTIVITY_NOT_FOUND.value);
-		});
-
-		it("should fail with wrong activity schema", async() => {
-			const wrongActivity = { madeUpProp: true };
-
-			const { body } = await agent.put(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}`)
-				.send(wrongActivity)
-				.expect(responseCodes.INVALID_ARGUMENTS.status);
-
-			expect(body.value).to.be.equal(responseCodes.INVALID_ARGUMENTS.value);
-		});
-
-		it("should succeed", async() => {
-			const activity = { name: "updated name" };
-
-			const { body } = await agent.put(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}`)
-				.send(activity)
+			const res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities`)
 				.expect(200);
 
-			const updatedActivity =  {...cloneDeep(activity),_id: activityId, sequence_id: sequenceId, ...activity };
-			expect(body).to.be.deep.equal(updatedActivity);
+			expect(sortById(res.body.activities)).to.deep.equal(sortById(newActivitiesList.activities))
 		});
-
 	});
 
-	describe("remove activity", function() {
+	describe("edit activity", function() {
 
+		describe("when changing basic fields", function() {
+			it("should fail with made up sequence id", async() => {
+				const { body } = await agent.put(`/${username}/${model}/sequences/non_existing_id/activities/${activityId}`)
+					.send(activity)
+					.expect(responseCodes.SEQUENCE_NOT_FOUND.status);
+
+				expect(body.value).to.be.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
+			});
+
+			it("should fail with made up activity id", async() => {
+				const { body } = await agent.put(`/${username}/${model}/sequences/${sequenceId}/activities/non_existent_actity`)
+					.send(activity)
+					.expect(responseCodes.ACTIVITY_NOT_FOUND.status);
+
+				expect(body.value).to.be.equal(responseCodes.ACTIVITY_NOT_FOUND.value);
+			});
+
+			it("should fail with wrong activity schema", async() => {
+				const wrongActivity = { madeUpProp: true };
+
+				const { body } = await agent.put(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}`)
+					.send(wrongActivity)
+					.expect(responseCodes.INVALID_ARGUMENTS.status);
+
+				expect(body.value).to.be.equal(responseCodes.INVALID_ARGUMENTS.value);
+			});
+
+			it("should succeed", async() => {
+				const activityChanges = { name: "updated name" };
+
+				await agent.put(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}`)
+					.send(activityChanges)
+					.expect(200);
+			});
+
+			it("should be reflected when fetching the activity list", async() => {
+				const newActivity = {...pick(activity, "startDate", "endDate"), id: activityId, name: "updated name"};
+
+				const newActivitiesList = cloneDeep(activities);
+				newActivitiesList.activities.push(newActivity);
+
+				const res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities`)
+					.expect(200);
+
+				expect(sortById(res.body.activities)).to.deep.equal(sortById(newActivitiesList.activities))
+			});
+		});
+
+		describe("when changing parent", function() {
+
+			it("should fail if parent is non existent", async() => {
+				const activityChanges = { parent: "non_existent" };
+
+				const res = await agent.put(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}`)
+					.send(activityChanges)
+					.expect(responseCodes.INVALID_ARGUMENTS.status);
+
+				expect(res.body.value).to.be.equal(responseCodes.INVALID_ARGUMENTS.value);
+			});
+
+
+			it("should succeed", async() => {
+				const activityChanges = { parent: "e8cc4f69-9c94-46b3-9656-73ede938f5bf" };
+
+				await agent.put(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}`)
+					.send(activityChanges)
+					.expect(200);
+			});
+
+			it("should be reflected when fetching the activity list", async() => {
+				const newActivity = {...pick(activity, "startDate", "endDate"), id: activityId, name: "updated name"};
+
+				const newActivitiesList = cloneDeep(activities);
+
+				/// newActivitiesList.activities[0] corresponds to activity with id "e8cc4f69-9c94-46b3-9656-73ede938f5bf"
+				newActivitiesList.activities[0].subActivities.push(newActivity);
+
+				const res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities`)
+					.expect(200);
+
+				expect(sortById(res.body.activities)).to.deep.equal(sortById(newActivitiesList.activities))
+			});
+		})
+	});
+
+
+	describe("remove activity", function() {
 		it("should fail with made up sequence id", async() => {
 			const { body } = await agent.delete(`/${username}/${model}/sequences/non_existing_id/activities/${activityId}`)
 				.send(activity)
@@ -180,19 +248,13 @@ describe("Sequences", function () {
 			await agent.delete(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}`)
 				.expect(200);
 		});
-	});*/
 
-	describe("get activities list", function() {
-		it("should work", async() => {
-			// let res = await agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/activities`)
-			// 	.expect(200);
-
+		it("should be reflected when fetching the activity list", async() => {
 			let	res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities`)
 				.expect(200);
 
 			expect(sortById(res.body.activities)).to.deep.equal(sortById(activities.activities))
-			// console.log(JSON.stringify(res.body));
 		});
-	})
+	});
 
 });
