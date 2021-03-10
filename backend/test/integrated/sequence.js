@@ -611,6 +611,7 @@ describe("Sequences", function () {
 	});
 
 	describe("Update Sequence", function() {
+		/*
 		it("name with a new string should succeed [deprecated]", function(done) {
 			const update = { name: "New name for the sequence"};
 			async.series([
@@ -628,6 +629,7 @@ describe("Sequences", function () {
 				}
 			], done);
 		});
+		*/
 
 		it("name with a new string should succeed", function(done) {
 			const update = { name: "New name for the sequence"};
@@ -647,6 +649,7 @@ describe("Sequences", function () {
 			], done);
 		});
 
+		/*
 		it("name and frame should only update the name [deprecated]", function(done) {
 			const update = { frames: [], name: "another name"};
 			async.series([
@@ -666,6 +669,7 @@ describe("Sequences", function () {
 
 			], done);
 		});
+		*/
 
 		it("name and frame should only update the name", function(done) {
 			const update = { frames: [], name: "another name"};
@@ -1247,6 +1251,7 @@ describe("Sequences", function () {
 					agent.get(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
 						.send(sequence)
 						.expect(200, function(err, res) {
+							delete res.body.frames[0].viewpoint.screenshot_ref;
 							expect(res.body.customSequence).to.equal(true);
 							expect(res.body.name).to.equal(sequence.name);
 							expect(res.body.frames).to.deep.equal(baseCustomSequence.frames);
