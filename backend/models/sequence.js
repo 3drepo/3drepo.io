@@ -25,7 +25,6 @@ const FileRef = require("./fileRef");
 const { getRefNodes } = require("./ref");
 const { getDefaultLegendId } = require("./modelSetting");
 
-const activityCol = (modelId) => `${modelId}.activities`;
 const sequenceCol = (modelId) => `${modelId}.sequences`;
 const legendCol = (modelId) => `${modelId}.sequences.legends`;
 
@@ -41,12 +40,6 @@ const clean = (toClean, keys) => {
 	});
 
 	return toClean;
-};
-
-const cleanActivityDetail = (toClean) => {
-	const keys = ["_id", "parents"];
-
-	return clean(toClean, keys);
 };
 
 const cleanSequenceList = (toClean) => {
@@ -96,20 +89,6 @@ const getDefaultLegend = async (account, model) => {
 };
 
 const Sequence = {};
-
-Sequence.getSequenceActivityDetail = async (account, model, activityId) => {
-	const activity = await db.findOne(account, activityCol(model), {"_id": utils.stringToUUID(activityId)});
-
-	if (!activity) {
-		throw responseCodes.ACTIVITY_NOT_FOUND;
-	}
-
-	return cleanActivityDetail(activity);
-};
-
-Sequence.getSequenceActivities = async (account, model, sequenceId) => {
-	return FileRef.getSequenceActivitiesFile(account, model, utils.uuidToString(sequenceId));
-};
 
 Sequence.getSequenceState = async (account, model, stateId) => {
 	return FileRef.getSequenceStateFile(account, model, stateId);
