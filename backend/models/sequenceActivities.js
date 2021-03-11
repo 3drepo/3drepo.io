@@ -44,7 +44,7 @@ const activitySchema = yup.object().shape({
 	endDate: yup.number().required(),
 	parent: yup.string(),
 	resources: yup.object(),
-	data: yup.array().of(keyValueSchema).required()
+	data: yup.array().of(keyValueSchema)
 }).noUnknown();
 
 const activityCol = (modelId) => `${modelId}.activities`;

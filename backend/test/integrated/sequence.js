@@ -320,7 +320,6 @@ describe("Sequences", function () {
 		});
 	});
 
-
 	describe("Updating a legend", function() {
 		it("of a valid sequence should succeed", function(done) {
 			const newLegend = { a: "#123456", b: "#ffffffaa" };
