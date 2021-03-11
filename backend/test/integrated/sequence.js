@@ -741,7 +741,7 @@ describe("Sequences", function () {
 		});
 		*/
 
-		it("name and frame on ready only sequence should fail", function(done) {
+		it("name and frame on read only sequence should fail", function(done) {
 			const update = { frames: [], name: "another name"};
 			agent.patch(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
 				.send(update)
@@ -750,27 +750,6 @@ describe("Sequences", function () {
 					done(err);
 				});
 		});
-
-		/*
-		it("name and frame on custom sequence should succeed", function(done) {
-			const update = { frames: [], name: "another name"};
-			async.series([
-				(done) => {
-					agent.patch(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
-						.send(update)
-						.expect(200, done);
-				},
-				(done) => {
-					agent.get(`/${username}/${model}/sequences?revId=${oldRevision}&key=${userApiKey}`).expect(200, function(err , res) {
-						expect(res.body.length).to.equal(1);
-						expect(res.body[0]).to.deep.equal({...oldGoldenData, name: update.name});
-						done(err);
-					});
-				}
-
-			], done);
-		});
-		*/
 
 		it("anything but the name on read only sequence should fail [deprecated]", function(done) {
 			const update = { frames: []};
@@ -789,6 +768,260 @@ describe("Sequences", function () {
 				.expect(400, (err, res) => {
 					expect(res.body.value).to.equal(responseCodes.SEQUENCE_READ_ONLY.value);
 					done(err);
+				});
+		});
+
+		it("name on custom sequence should succeed", function(done) {
+			const update = {name: "only name"};
+			async.series([
+				(done) => {
+					agent.patch(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`)
+						.send(update)
+						.expect(200, done);
+				},
+				(done) => {
+					agent.get(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`).expect(200, function(err, res) {
+						expect(res.body.name).to.equal(update.name);
+						done(err);
+					});
+				}
+			], done);
+		});
+
+		it("name and frame on custom sequence should succeed", function(done) {
+			const update = { frames: [], name: "another name"};
+			async.series([
+				(done) => {
+					agent.patch(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`)
+						.send(update)
+						.expect(200, done);
+				},
+				(done) => {
+					agent.get(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`).expect(200, function(err, res) {
+						expect(res.body.name).to.equal(update.name);
+						expect(res.body.frames).to.deep.equal(update.frames);
+						done(err);
+					});
+				}
+			], done);
+		});
+
+		it("frame on custom sequence should succeed", function(done) {
+			const update = { frames: customGoldenData.frames };
+			async.series([
+				(done) => {
+					agent.patch(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`)
+						.send(update)
+						.expect(200, done);
+				},
+				(done) => {
+					agent.get(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`).expect(200, function(err, res) {
+						expect(res.body.frames).to.deep.equal(update.frames);
+						done(err);
+					});
+				}
+			], done);
+		});
+
+		it("frame with groups on custom sequence should succeed", function(done) {
+			const highlighted_group = {
+				objects: [{
+					"account": username,
+					model,
+					"shared_ids":["8b9259d2-316d-4295-9591-ae020bfcce48"]
+				}],
+				color: [2555, 255, 0]
+			};
+
+			const hidden_group = {
+				objects: [{
+					"account": username,
+					model,
+					"shared_ids":["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+				}]
+			};
+
+			const override_groups = [
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}],
+					color: [1, 2, 3],
+					totalSavedMeshes: 1
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					color: [4, 5, 6],
+					totalSavedMeshes: 1
+				},
+			];
+
+			const update = { frames: [ Object.assign({}, customGoldenData.frames[0]) ] };
+			update.frames[0].viewpoint = Object.assign(
+				{highlighted_group, hidden_group, override_groups},
+				update.frames[0].viewpoint
+			);
+
+			let highlightedGroupId;
+			let hiddenGroupId;
+			let overrideGroupIds;
+
+			async.series([
+				(done) => {
+					agent.patch(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`)
+						.send(update)
+						.expect(200, done);
+				},
+				(done) => {
+					agent.get(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`).expect(200, function(err, res) {
+						highlightedGroupId = res.body.frames[0].viewpoint.highlighted_group_id;
+						delete res.body.frames[0].viewpoint.highlighted_group_id;
+						delete update.frames[0].viewpoint.highlighted_group;
+
+						hiddenGroupId = res.body.frames[0].viewpoint.hidden_group_id;
+						delete res.body.frames[0].viewpoint.hidden_group_id;
+						delete update.frames[0].viewpoint.hidden_group;
+
+						overrideGroupIds = res.body.frames[0].viewpoint.override_group_ids;
+						delete res.body.frames[0].viewpoint.override_group_ids;
+						delete update.frames[0].viewpoint.override_groups;
+
+						expect(res.body.frames).to.deep.equal(update.frames);
+
+						done(err);
+					});
+				},
+				(done) => {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${highlightedGroupId}?key=${userApiKey}`)
+						.expect(200, function(err, res) {
+							expect(res.body.objects).to.deep.equal(highlighted_group.objects);
+							expect(res.body.color).to.deep.equal(highlighted_group.color);
+							done(err);
+						});
+				},
+				(done) => {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${hiddenGroupId}?key=${userApiKey}`)
+						.expect(200, function(err, res) {
+							expect(res.body.objects).to.deep.equal(hidden_group.objects);
+							expect(res.body.color).to.deep.equal(hidden_group.color);
+							done(err);
+						});
+				},
+				(done) => {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${overrideGroupIds[0]}?key=${userApiKey}`)
+						.expect(200, function(err, res) {
+							expect(res.body.objects).to.deep.equal(override_groups[0].objects);
+							expect(res.body.color).to.deep.equal(override_groups[0].color);
+							done(err);
+						});
+				},
+				(done) => {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${overrideGroupIds[1]}?key=${userApiKey}`)
+						.expect(200, function(err, res) {
+							expect(res.body.objects).to.deep.equal(override_groups[1].objects);
+							expect(res.body.color).to.deep.equal(override_groups[1].color);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("frame with viewId on custom sequence should succeed", function(done) {
+			const view = {
+				"name":"View test",
+				"viewpoint": customGoldenData.frames[0].viewpoint
+			};
+			const update = {};
+			async.series([
+				(done) => {
+					agent.post(`/${username}/${model}/viewpoints?key=${userApiKey}`)
+						.send(view)
+						.expect(200, function(err, res) {
+							update.frames = [
+								Object.assign({viewId: res.body._id}, customGoldenData.frames[0])
+							];
+							delete update.frames[0].viewpoint;
+							done(err);
+						});
+				},
+				(done) => {
+					agent.patch(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`)
+						.send(update)
+						.expect(200, done);
+				},
+				(done) => {
+					agent.get(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`).expect(200, function(err, res) {
+						delete res.body.frames[0].viewpoint.screenshot_ref;
+						expect(res.body.frames[0]).to.deep.equal(customGoldenData.frames[0]);
+						done(err);
+					});
+				}
+			], done);
+		});
+
+		it("frame with transformation on custom sequence should fail", function(done) {
+			const transformation_groups = [
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+				},
+			];
+
+			const update = { frames: [ Object.assign({}, customGoldenData.frames[0]) ] };
+			update.frames[0].viewpoint = Object.assign({transformation_groups}, update.frames[0].viewpoint);
+
+			agent.patch(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`)
+				.send(update)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					return done(err);
+				});
+		});
+
+		it("revision on custom sequence should succeed", function(done) {
+			const update = {"revId": oldRevision};
+
+			async.series([
+				(done) => {
+					agent.patch(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`)
+						.send(update)
+						.expect(200, done);
+				},
+				(done) => {
+					agent.get(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`).expect(200, function(err, res) {
+						expect(res.body.rev_id).to.deep.equal(update.revId);
+						done(err);
+					});
+				}
+			], done);
+		});
+
+		it("invalid revision on custom sequence should fail", function(done) {
+			const update = {"revId": "badRevision"};
+
+			agent.patch(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`)
+				.send(update)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
+					return done(err);
 				});
 		});
 
@@ -1174,7 +1407,7 @@ describe("Sequences", function () {
 			], done);
 		});
 
-		it("with highlighted objects should succeed", function(done) {
+		it("with groups should succeed", function(done) {
 			const highlighted_group = {
 				objects: [{
 					"account": username,

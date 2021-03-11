@@ -79,6 +79,51 @@ const cleanSequenceFrame = (toClean) => {
 	return toClean;
 };
 
+const handleFrames = async (account, model, sequenceId, sequenceFrames) => {
+	const processedFrames = [];
+
+	for (let i = 0; i < sequenceFrames.length; i++) {
+		const frame = sequenceFrames[i];
+		let viewpoint;
+
+		if (frame.viewpoint && utils.isObject(frame.viewpoint)) {
+			viewpoint = await createViewpoint(
+				account,
+				model,
+				undefined,
+				undefined,
+				sequenceId,
+				frame.viewpoint,
+				false,
+				"sequence"
+			);
+		} else if (frame.viewId && utils.isString(frame.viewId)) {
+			const view = await View.findByUID(account, model, frame.viewId, {});
+
+			if (view) {
+				viewpoint = view.viewpoint;
+			}
+		}
+
+		if (!viewpoint) {
+			// frame missing viewpoint
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+
+		if (viewpoint.transformation_group_ids || viewpoint.transformation_groups) {
+			// sequence viewpoints do not accept transformations
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+
+		processedFrames.push({
+			dateTime: frame.dateTime,
+			viewpoint
+		});
+	}
+
+	return processedFrames;
+};
+
 const sequenceExists = async (account, model, sequenceId) => {
 	if(!(await Sequence.getSequenceById(account, model, sequenceId, {_id: 1}))) {
 		throw responseCodes.SEQUENCE_NOT_FOUND;
@@ -128,44 +173,7 @@ Sequence.createSequence = async (account, model, data) => {
 		newSequence.rev_id = history._id;
 	}
 
-	for (let i = 0; i < data.frames.length; i++) {
-		const frame = data.frames[i];
-		let viewpoint;
-
-		if (frame.viewpoint && utils.isObject(frame.viewpoint)) {
-			viewpoint = await createViewpoint(
-				account,
-				model,
-				undefined,
-				undefined,
-				newSequence._id,
-				frame.viewpoint,
-				false,
-				"sequence"
-			);
-		} else if (frame.viewId && utils.isString(frame.viewId)) {
-			const view = await View.findByUID(account, model, frame.viewId, {});
-
-			if (view) {
-				viewpoint = view.viewpoint;
-			}
-		}
-
-		if (!viewpoint) {
-			// frame missing viewpoint
-			throw responseCodes.INVALID_ARGUMENTS;
-		}
-
-		if (viewpoint.transformation_group_ids || viewpoint.transformation_groups) {
-			// sequence viewpoints do not accept transformations
-			throw responseCodes.INVALID_ARGUMENTS;
-		}
-
-		newSequence.frames.push({
-			dateTime: frame.dateTime,
-			viewpoint
-		});
-	}
+	newSequence.frames = await handleFrames(account, model, newSequence._id, data.frames);
 
 	await db.insert(account, sequenceCol(model), newSequence);
 
@@ -231,12 +239,28 @@ Sequence.getList = async (account, model, branch, revision, cleanResponse = fals
 };
 
 Sequence.updateSequence = async (account, model, sequenceId, data) => {
+	const toSet = {};
+
 	if (!data) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	if (data.name && (!utils.isString(data.name) || data.name === "" || data.name.length >= 30)) {
-		throw responseCodes.INVALID_ARGUMENTS;
+	if (data.name) {
+		if (!utils.isString(data.name) || data.name === "" || data.name.length >= 30) {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+
+		toSet.name = data.name;
+	}
+
+	if (data.revId) {
+		const history = await History.getHistory(account, model, undefined, data.revId);
+
+		if (!history) {
+			throw responseCodes.INVALID_TAG_NAME;
+		}
+
+		toSet.rev_id = history._id;
 	}
 
 	if (data.frames) {
@@ -246,10 +270,12 @@ Sequence.updateSequence = async (account, model, sequenceId, data) => {
 		if (!customSequence) {
 			throw responseCodes.SEQUENCE_READ_ONLY;
 		}
+
+		toSet.frames = await handleFrames(account, model, sequenceId, data.frames);
 	}
 
 	const { result } = await db.update(account, sequenceCol(model),
-		{_id: utils.stringToUUID(sequenceId)}, {$set: {name: data.name}});
+		{_id: utils.stringToUUID(sequenceId)}, {$set: toSet});
 	if (result.nModified === 0) {
 		throw responseCodes.SEQUENCE_NOT_FOUND;
 	}
