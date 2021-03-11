@@ -265,7 +265,7 @@ router.get("/revision/master/head/sequences", middlewares.issue.canView, listSeq
 router.get("/revision/:revId/sequences", middlewares.issue.canView, listSequences);
 
 /**
- * @api {get} /:teamspace/:model/:sequenceId/activities/:activityId Get activity
+ * @api {get} /:teamspace/:model/sequences/:sequenceId/activities/:activityId Get activity
  * @apiName getSequenceActivityDetail
  * @apiGroup Sequences
  * @apiDescription Get sequence activity details.
@@ -276,10 +276,10 @@ router.get("/revision/:revId/sequences", middlewares.issue.canView, listSequence
  * @apiParam {String} activityId Activity ID
  *
  * @apiExample {get} Example usage (/master/head)
- * GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences/00000000-0000-0000-0001-000000000001/activities/00000000-0000-0002-0001-000000000001 HTTP/1.1
+ * GET /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0001-000000000001/activities/00000000-0000-0002-0001-000000000001 HTTP/1.1
  *
  * @apiExample {get} Example usage (/:revId)
- * GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/sequences/00000000-0000-0000-0001-000000000001/activities/00000000-0000-0002-0001-000000000001 HTTP/1.1
+ * GET /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0001-000000000001/activities/00000000-0000-0002-0001-000000000001 HTTP/1.1
  *
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
@@ -306,10 +306,10 @@ router.get("/revision/:revId/sequences", middlewares.issue.canView, listSequence
  * 	}
  * }
  */
-router.get("/:sequenceId/activities/:activityId", middlewares.issue.canView, getSequenceActivityDetail);
+router.get("/sequences/:sequenceId/activities/:activityId", middlewares.issue.canView, getSequenceActivityDetail);
 
 /**
- * @api {get} /:teamspace/:model/revision(/master/head/|/:revId)/sequences/:sequenceId/activities Get all activities
+ * @api {get} /:teamspace/:model/sequences/:sequenceId/activities Get all activities
  * @apiName getSequenceActivities
  * @apiGroup Sequences
  * @apiDescription Get all sequence activities.
@@ -319,7 +319,7 @@ router.get("/:sequenceId/activities/:activityId", middlewares.issue.canView, get
  * @apiParam {String} sequenceId Sequence unique ID
  *
  * @apiExample {get} Example usage
- * GET /acme/00000000-0000-0000-0000-000000000000/00000000-0000-0000-0001-000000000001/activities HTTP/1.1
+ * GET /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0001-000000000001/activities HTTP/1.1
  * *
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
@@ -474,9 +474,9 @@ function listSequences(req, res, next) {
 
 function getSequenceActivityDetail(req, res, next) {
 	const place = utils.APIInfo(req);
-	const { account, model, activityId } = req.params;
+	const { account, model, activityId, sequenceId } = req.params;
 
-	SequenceActivities.getSequenceActivityDetail(account, model, activityId).then(activity => {
+	SequenceActivities.getSequenceActivityDetail(account, model, sequenceId, activityId).then(activity => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, activity);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
