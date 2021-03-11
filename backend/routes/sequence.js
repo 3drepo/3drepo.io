@@ -34,6 +34,24 @@ const SequenceActivities = require("../models/sequenceActivities");
  */
 
 /**
+ * @apiDefine ActivityBodyObject
+ *
+ * @apiParam (Request body) {String} name The name of the activity
+ * @apiParam (Request body) {Number} startDate The starting timestamp date of the activity
+ * @apiParam (Request body) {Number} endDate The ending timestamp date of the activity
+ * @apiParam (Request body) {String} [parent] The parent id if it has one. This parent must exist previously
+ * @apiParam (Request body) {Object} [resources] The resources asoociated with the activity
+ * @apiParam (Request body) {KeyValue[]} [data] An array of key value pairs with metadata for the activity
+ */
+
+/**
+ * @apiDefine KeyValueObject
+ *
+ * @apiParam (Type: KeyValue) {String} key The key of the pair
+ * @apiParam (Type: KeyValue) {Any} value The value of the pair
+ */
+
+/**
  * @api {get} /:teamspace/:model/revision(/master/head/|/:revId)/sequences/:sequenceId/state/:stateId Get state
  * @apiName getSequenceState
  * @apiGroup Sequences
@@ -275,10 +293,7 @@ router.get("/revision/:revId/sequences", middlewares.issue.canView, listSequence
  * @apiParam {String} sequenceId Sequence ID
  * @apiParam {String} activityId Activity ID
  *
- * @apiExample {get} Example usage (/master/head)
- * GET /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0001-000000000001/activities/00000000-0000-0002-0001-000000000001 HTTP/1.1
- *
- * @apiExample {get} Example usage (/:revId)
+ * @apiExample {get} Example usage
  * GET /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0001-000000000001/activities/00000000-0000-0002-0001-000000000001 HTTP/1.1
  *
  * @apiSuccessExample {json} Success-Response
@@ -286,24 +301,28 @@ router.get("/revision/:revId/sequences", middlewares.issue.canView, listSequence
  * {
  * 	"id":"00000000-0000-0002-0001-000000000001",
  * 	"name":"Construct tunnel",
- * 	"data":{
- * 		"Name":"Construction",
- * 		"Status":"Planned",
- * 		"Is Compound Task":"Yes",
- * 		"Code":"ST00020",
- * 		"Planned Start":"15 Apr 2020 10:00:00",
- * 		"Type":"Work",
- * 		"Constraint":"No Constraint",
- * 		"Planned Finish":"11 Sep 2020 18:00:00",
- * 		"Percentage Complete":0,
- * 		"Physical Volume Unity":"Unknown",
- * 		"Estimated Rate":0.0,
- * 		"Planned Physical Volume":6.6,
- * 		"Actual Physical Volume":0.9,
- * 		"Remaining Physical Volume":5.7,
- * 		"Budgeted Cost":30.0,
- * 		"Actual Cost":9999.99,
- * 	}
+ *  "sequenceId": "00000000-0000-0000-0001-000000000001",
+ *  "parent": "00000130-2300-0002-0001-000567000001"
+ * 	"startDate": 1610000000000,
+ *  "endDate": 1615483938124,
+ * 	"data":[
+ *	   {"key":"Name","value":"Construction"},
+ *	   {"key":"Status","value":"Planned"},
+ *	   {"key":"Is Compound Task","value":"Yes"},
+ *	   {"key":"Code","value":"ST00020"},
+ *	   {"key":"Planned Start","value":"15 Apr 2020 10:00:00"},
+ *	   {"key":"Type","value":"Work"},
+ *	   {"key":"Constraint","value":"No Constraint"},
+ *	   {"key":"Planned Finish","value":"11 Sep 2020 18:00:00"},
+ *	   {"key":"Percentage Complete","value":0},
+ *	   {"key":"Physical Volume Unity","value":"Unknown"},
+ *	   {"key":"Estimated Rate","value":0},
+ *	   {"key":"Planned Physical Volume","value":6.6},
+ *	   {"key":"Actual Physical Volume","value":0.9},
+ *	   {"key":"Remaining Physical Volume","value":5.7},
+ *	   {"key":"Budgeted Cost","value":30},
+ *	   {"key":"Actual Cost","value":9999.99}
+ *	 ]
  * }
  */
 router.get("/sequences/:sequenceId/activities/:activityId", middlewares.issue.canView, getSequenceActivityDetail);
@@ -384,11 +403,36 @@ router.get("/sequences/:sequenceId/activities/:activityId", middlewares.issue.ca
  */
 router.get("/sequences/:sequenceId/activities", middlewares.hasReadAccessToModel, getSequenceActivities);
 
-/*
-TODO:
-	- document this endpoint
-	- permissions
-*/
+/**
+ * @api {post} /:teamspace/:model/sequences/:sequenceId/activities Create an activity
+ * @apiName createSequenceActivity
+ * @apiGroup Sequences
+ * @apiDescription Create a sequence activity.
+ *
+ * @apiUse Sequences
+ *
+ * @apiParam {String} sequenceId Sequence unique ID
+ *
+ * @apiUse ActivityBodyObject
+ * @apiUse KeyValueObject
+ *
+ * @apiExample {post} Example usage
+ * POST /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0001-000000000001/activities HTTP/1.1
+ * {
+ * 	"name":"Custom activity",
+ *  "startDate": 1610000000000,
+ *  "endDate": 1615483938124,
+ * 	"data":[
+ *	   {"key":"Name","value":"Custom activity"},
+ *	   {"key":"Status","value":"Planned"},
+ * 	]
+ * }
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {
+ * }
+ */
 router.post("/sequences/:sequenceId/activities", middlewares.hasUploadAccessToModel, createActivity);
 
 /*
