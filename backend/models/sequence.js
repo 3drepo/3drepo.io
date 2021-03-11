@@ -180,6 +180,18 @@ Sequence.createSequence = async (account, model, data) => {
 	return clean(newSequence, ["_id", "rev_id"]);
 };
 
+Sequence.deleteSequence = async (account, model, sequenceId) => {
+	await sequenceExists(account, model, sequenceId);
+	const { result } = await db.remove(account, sequenceCol(model), {
+		_id: utils.stringToUUID(sequenceId),
+		customSequence: true
+	});
+
+	if (result.n === 0) {
+		throw responseCodes.SEQUENCE_READ_ONLY;
+	}
+};
+
 Sequence.getSequenceById = async (account, model, sequenceId, projection = {}, noClean = true) => {
 	const sequence = await db.findOne(account, sequenceCol(model), { _id: utils.stringToUUID(sequenceId)}, projection);
 

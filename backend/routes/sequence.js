@@ -664,6 +664,23 @@ router.delete("/revision/:revId/sequences/:sequenceId/legend", middlewares.hasUp
 router.delete("/sequences/:sequenceId/legend", middlewares.hasUploadAccessToModel, deleteLegend);
 
 /**
+ * @api {delete} /:teamspace/:model/sequences/:sequenceID Delete sequence
+ * @apiName deleteSequence
+ * @apiGroup Sequences
+ * @apiDescription Delete the custom sequence by ID
+ *
+ * @apiUse Sequences
+ *
+ * @apiExample {delete} Example usage
+ * DELETE /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0000-000000000002 HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {}
+ */
+router.delete("/sequences/:sequenceId", middlewares.issue.canCreate, deleteSequence);
+
+/**
  * @api {post} /:teamspace/:model/sequences Create custom sequence
  * @apiName createSequence
  * @apiGroup Sequences
@@ -780,6 +797,17 @@ function createSequence(req, res, next) {
 
 	Sequence.createSequence(account, model, req.body).then(sequenceId => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, sequenceId);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function deleteSequence(req, res, next) {
+	const place = utils.APIInfo(req);
+	const { account, model, sequenceId } = req.params;
+
+	Sequence.deleteSequence(account, model, sequenceId).then(() => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});

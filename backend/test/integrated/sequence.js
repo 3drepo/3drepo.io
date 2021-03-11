@@ -1060,6 +1060,29 @@ describe("Sequences", function () {
 		});
 	});
 
+	describe("Delete sequence", function() {
+		it("custom sequence should succeed", function(done) {
+			agent.delete(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`)
+				.expect(200, done);
+		});
+
+		it("read only sequence should fail", function(done) {
+			agent.delete(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.SEQUENCE_READ_ONLY.value);
+					return done(err);
+				});
+		});
+
+		it("non-existent sequence should fail", function(done) {
+			agent.delete(`/${username}/${model}/sequences/invalidId?key=${userApiKey}`)
+				.expect(404, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
+					return done(err);
+				});
+		});
+	});
+
 	const goldenLegendData = {
         "Chairs" : "#ffffaa",
         "Apples" : "#aaaaaa11"
