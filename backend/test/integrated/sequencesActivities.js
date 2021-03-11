@@ -127,6 +127,10 @@ describe("Sequences", function () {
 			activityId = body._id;
 		});
 
+		it("should be reflected when fetching the detail of the activity", async() => {
+			expect(false).to.be(true);
+		})
+
 		it("should be reflected when fetching the activity list", async() => {
 			const newActivity = {...cloneDeep(activity), sequenceId, id: activityId};
 

@@ -47,6 +47,17 @@ const activitySchema = yup.object().shape({
 	data: yup.array().of(keyValueSchema).required()
 }).noUnknown();
 
+const activityCol = (modelId) => `${modelId}.activities`;
+
+const cleanActivityDetail = (activity) => {
+	activity._id = utils.uuidToString(activity._id);
+	if (activity.parent) {
+		activity.parent = utils.uuidToString(activity.parent);
+	}
+
+	return activity;
+};
+
 /**
  * @typedef {{_id: string, parents: Array<string>}} Activity
  * @param {string} parentId
@@ -85,6 +96,16 @@ const createActivitiesTree = async(account, model, sequenceId) => {
 
 const SequenceActivities = {};
 
+SequenceActivities.getSequenceActivityDetail = async (account, model, activityId) => {
+	const activity = await db.findOne(account, activityCol(model), {"_id": utils.stringToUUID(activityId)});
+
+	if (!activity) {
+		throw responseCodes.ACTIVITY_NOT_FOUND;
+	}
+
+	return cleanActivityDetail(activity);
+};
+
 SequenceActivities.create = async (account, model, sequenceId, activity) => {
 	const sequence = await db.findOne(account, model + ".sequences", { _id: utils.stringToUUID(sequenceId)});
 
@@ -96,7 +117,7 @@ SequenceActivities.create = async (account, model, sequenceId, activity) => {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	if (activity.parent && !await db.findOne(account, model + ".activities", { _id: utils.stringToUUID(activity.parent)})) {
+	if (activity.parent && !await db.findOne(account,  activityCol(model), { _id: utils.stringToUUID(activity.parent)})) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
@@ -104,7 +125,7 @@ SequenceActivities.create = async (account, model, sequenceId, activity) => {
 	activity = {...activity, sequenceId:  utils.stringToUUID(sequenceId), _id: utils.stringToUUID(_id)};
 
 	await Promise.all([
-		db.insert(account, model + ".activities", activity),
+		db.insert(account,  activityCol(model), activity),
 		FileRef.removeFile(account, model, "activities", sequenceId)
 	]);
 
@@ -122,12 +143,12 @@ SequenceActivities.edit = async (account, model, sequenceId, activityId, activit
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	if (activity.parent && !await db.findOne(account, model + ".activities", { _id: utils.stringToUUID(activity.parent)})) {
+	if (activity.parent && !await db.findOne(account, activityCol(model), { _id: utils.stringToUUID(activity.parent)})) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
 	const query =  {_id: utils.stringToUUID(activityId), sequenceId: utils.stringToUUID(sequenceId)};
-	const {result} = await db.update(account, model + ".activities", query, {$set: activity});
+	const {result} = await db.update(account, activityCol(model), query, {$set: activity});
 
 	if (!result.n) {
 		throw responseCodes.ACTIVITY_NOT_FOUND;
@@ -144,7 +165,7 @@ SequenceActivities.remove = async (account, model, sequenceId, activityId) => {
 	}
 
 	const query =  {_id: utils.stringToUUID(activityId), sequenceId: utils.stringToUUID(sequenceId)};
-	const {result} = await db.remove(account, model + ".activities", query);
+	const {result} = await db.remove(account,  activityCol(model), query);
 
 	if (!result.n) {
 		throw responseCodes.ACTIVITY_NOT_FOUND;
@@ -167,7 +188,7 @@ SequenceActivities.get = async (account, model, sequenceId) => {
 		activities = await FileRef.getSequenceActivitiesFile(account, model, utils.uuidToString(sequenceId));
 	} catch(e) {
 		activities = await createActivitiesTree(account, model, sequenceId);
-		await FileRef.storeFile(account, model + ".activities.ref", account, utils.uuidToString(nodeuuid()), JSON.stringify(activities),  {"_id": sequenceId});
+		await FileRef.storeFile(account, activityCol(model) + ".ref", account, utils.uuidToString(nodeuuid()), JSON.stringify(activities),  {"_id": sequenceId});
 	}
 
 	return activities;
