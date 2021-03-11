@@ -51,6 +51,8 @@ const activityCol = (modelId) => `${modelId}.activities`;
 
 const cleanActivityDetail = (activity) => {
 	activity._id = utils.uuidToString(activity._id);
+	activity.sequenceId = utils.uuidToString(activity.sequenceId);
+
 	if (activity.parent) {
 		activity.parent = utils.uuidToString(activity.parent);
 	}
@@ -96,7 +98,13 @@ const createActivitiesTree = async(account, model, sequenceId) => {
 
 const SequenceActivities = {};
 
-SequenceActivities.getSequenceActivityDetail = async (account, model, activityId) => {
+SequenceActivities.getSequenceActivityDetail = async (account, model, sequenceId, activityId) => {
+	const sequence = await db.findOne(account, model + ".sequences", { _id: utils.stringToUUID(sequenceId)});
+
+	if (!sequence) {
+		throw responseCodes.SEQUENCE_NOT_FOUND;
+	}
+
 	const activity = await db.findOne(account, activityCol(model), {"_id": utils.stringToUUID(activityId)});
 
 	if (!activity) {

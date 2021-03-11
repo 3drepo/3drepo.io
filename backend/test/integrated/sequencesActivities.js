@@ -84,7 +84,8 @@ describe("Sequences", function () {
 		}).sort((a, b)=> b.id < a.id? 1 : -1)
 	}
 
-	describe("get unmodified activities list", function() {
+	/*
+	describe("get unmodified activities", function() {
 		it("should work", async() => {
 			let	res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities`)
 				.expect(200);
@@ -92,6 +93,46 @@ describe("Sequences", function () {
 			expect(sortById(res.body.activities)).to.deep.equal(sortById(activities.activities))
 		});
 	})
+	*/
+
+	describe("Get sequence activity detail", function() {
+		it("using invalid sequence ID should fail", async function() {
+			const res = await agent.get(`/${username}/${model}/sequences/invalidSequenceId/activities/${activityId}`)
+				.expect(responseCodes.SEQUENCE_NOT_FOUND.status);
+
+			expect(res.body.value).to.be.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
+		});
+
+		it("using invalid activity ID should fail", async function() {
+			const res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities/invalidActivityId`)
+				.expect(responseCodes.ACTIVITY_NOT_FOUND.status)
+
+			expect(res.body.value).to.be.equal(responseCodes.ACTIVITY_NOT_FOUND.value);
+		});
+
+		it("should succeed", async function() {
+			const existingActivityId = "a745267e-65a8-4a99-acfd-b11694ca87ac";
+
+			const res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities/${existingActivityId}`)
+				.expect(200)
+
+			const existingActivity = {
+				"_id" : "a745267e-65a8-4a99-acfd-b11694ca87ac",
+				"startDate" : 1590742800000,
+				"sequenceId" : "8a64539a-c78f-41f4-8e9e-29034dc6c293",
+				"endDate" : 1591027200000,
+				"name" : "Testing",
+				"parent" : "2c3299ec-761a-43b7-afb3-3c5c296fd3bc",
+				"data" : [{"value":"Testing","key":"Name"},{"value":"PLANNED","key":"Status"},{"value":"No","key":"Is Compound Task"},{"value":"ST003560","key":"Code"},{"value":"Fri May 29 2020 10:00:00 GMT+0100 (British Summer Time)","key":"Planned Start"},{"value":"WORK","key":"Type"},{"value":"No Constraint","key":"Constraint"},{"value":"Mon Jun 01 2020 17:00:00 GMT+0100 (British Summer Time)","key":"Planned Finish"},{"value":0,"key":"Percentage Complete"},{"value":"Unknown","key":"Physical Volume Unity"},{"value":0,"key":"Estimated Rate"},{"value":0,"key":"Planned Physical Volume"},{"value":0,"key":"Actual Physical Volume"},{"value":0,"key":"Remaining Physical Volume"},{"value":0,"key":"Budgeted Cost"},{"value":0,"key":"Actual Cost"}]
+			};
+
+			expect(res.body).to.be.deep.equal(existingActivity);
+		});
+
+	});
+
+
+	/*
 
 	describe("create activity", function() {
 		it("should fail with made up sequence id", async() => {
@@ -259,5 +300,7 @@ describe("Sequences", function () {
 			expect(sortById(res.body.activities)).to.deep.equal(sortById(activities.activities))
 		});
 	});
+
+	*/
 
 });
