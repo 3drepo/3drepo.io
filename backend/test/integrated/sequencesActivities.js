@@ -84,7 +84,6 @@ describe("Sequences", function () {
 		}).sort((a, b)=> b.id < a.id? 1 : -1)
 	}
 
-	/*
 	describe("get unmodified activities", function() {
 		it("should work", async() => {
 			let	res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities`)
@@ -93,7 +92,6 @@ describe("Sequences", function () {
 			expect(sortById(res.body.activities)).to.deep.equal(sortById(activities.activities))
 		});
 	})
-	*/
 
 	describe("Get sequence activity detail", function() {
 		it("using invalid sequence ID should fail", async function() {
@@ -131,9 +129,6 @@ describe("Sequences", function () {
 
 	});
 
-
-	/*
-
 	describe("create activity", function() {
 		it("should fail with made up sequence id", async() => {
 			const { body } = await agent.post(`/${username}/${model}/sequences/non_existing_id/activities`)
@@ -141,7 +136,6 @@ describe("Sequences", function () {
 				.expect(responseCodes.SEQUENCE_NOT_FOUND.status);
 
 			expect(body.value).to.be.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
-
 		});
 
 		it("should fail with wrong activity schema", async() => {
@@ -169,7 +163,12 @@ describe("Sequences", function () {
 		});
 
 		it("should be reflected when fetching the detail of the activity", async() => {
-			expect(false).to.be(true);
+			const res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}`)
+				.expect(200);
+
+			const newActivity = {...cloneDeep(activity), sequenceId, _id: activityId};
+
+			expect(res.body).to.be.deep.equal(newActivity);
 		})
 
 		it("should be reflected when fetching the activity list", async() => {
@@ -221,6 +220,15 @@ describe("Sequences", function () {
 					.send(activityChanges)
 					.expect(200);
 			});
+
+			it("should be reflected when fetching the detail of the activity", async() => {
+				const res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}`)
+					.expect(200);
+
+				const newActivity = {...cloneDeep(activity), sequenceId, _id: activityId, name: "updated name"};
+
+				expect(res.body).to.be.deep.equal(newActivity);
+			})
 
 			it("should be reflected when fetching the activity list", async() => {
 				const newActivity = {...pick(activity, "startDate", "endDate"), id: activityId, name: "updated name"};
@@ -300,7 +308,5 @@ describe("Sequences", function () {
 			expect(sortById(res.body.activities)).to.deep.equal(sortById(activities.activities))
 		});
 	});
-
-	*/
 
 });
