@@ -999,7 +999,6 @@ describe("Sequences", function () {
 				});
 		});
 
-		/*
 		it("should succeed [deprecated]", function(done) {
 			async.series([
 				(done) => {
@@ -1015,7 +1014,6 @@ describe("Sequences", function () {
 				}
 			], done);
 		});
-		*/
 
 		it("should succeed", function(done) {
 			async.series([
@@ -1144,15 +1142,15 @@ describe("Sequences", function () {
 				baseCustomSequence.frames[0].viewpoint
 			);
 			let sequenceId;
+			let highlightedGroupId;
+			let hiddenGroupId;
+			let overrideGroupIds;
 
-			console.log(sequence);
 			async.series([
 				function(done) {
 					agent.post(`/${username}/${model}/sequences?key=${userApiKey}`)
 						.send(sequence)
 						.expect(200, function(err, res) {
-							console.log(res.body);
-
 							sequenceId = res.body._id;
 							return done(err);
 						});
@@ -1164,16 +1162,15 @@ describe("Sequences", function () {
 							expect(res.body.customSequence).to.equal(true);
 							expect(res.body.name).to.equal(sequence.name);
 
-							highlighted_group_id = res.body.frames[0].viewpoint.highlighted_group_id;
-							console.log(highlighted_group_id);
+							highlightedGroupId = res.body.frames[0].viewpoint.highlighted_group_id;
 							delete res.body.frames[0].viewpoint.highlighted_group_id;
 							delete sequence.frames[0].viewpoint.highlighted_group;
 
-							hidden_group_id = res.body.frames[0].viewpoint.hidden_group_id;
+							hiddenGroupId = res.body.frames[0].viewpoint.hidden_group_id;
 							delete res.body.frames[0].viewpoint.hidden_group_id;
 							delete sequence.frames[0].viewpoint.hidden_group;
 
-							override_group_ids = res.body.frames[0].viewpoint.override_group_ids;
+							overrideGroupIds = res.body.frames[0].viewpoint.override_group_ids;
 							delete res.body.frames[0].viewpoint.override_group_ids;
 							delete sequence.frames[0].viewpoint.override_groups;
 
@@ -1183,27 +1180,38 @@ describe("Sequences", function () {
 						});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/revision/master/head/groups/${highlighted_group_id}?key=${userApiKey}`)
+					agent.get(`/${username}/${model}/revision/master/head/groups/${highlightedGroupId}?key=${userApiKey}`)
 						.send(sequence)
 						.expect(200, function(err, res) {
-							expect(res.body.customSequence).to.equal(true);
-							expect(res.body.name).to.equal(sequence.name);
-
-							highlighted_group_id = res.body.frames[0].viewpoint.highlighted_group_id;
-							console.log(highlighted_group_id);
-							delete res.body.frames[0].viewpoint.highlighted_group_id;
-							delete sequence.frames[0].viewpoint.highlighted_group;
-
-							hidden_group_id = res.body.frames[0].viewpoint.hidden_group_id;
-							delete res.body.frames[0].viewpoint.hidden_group_id;
-							delete sequence.frames[0].viewpoint.hidden_group;
-
-							override_group_ids = res.body.frames[0].viewpoint.override_group_ids;
-							delete res.body.frames[0].viewpoint.override_group_ids;
-							delete sequence.frames[0].viewpoint.override_groups;
-
-							expect(res.body.frames).to.deep.equal(sequence.frames);
-
+							expect(res.body.objects).to.deep.equal(highlighted_group.objects);
+							expect(res.body.color).to.deep.equal(highlighted_group.color);
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${hiddenGroupId}?key=${userApiKey}`)
+						.send(sequence)
+						.expect(200, function(err, res) {
+							expect(res.body.objects).to.deep.equal(hidden_group.objects);
+							expect(res.body.color).to.deep.equal(hidden_group.color);
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${overrideGroupIds[0]}?key=${userApiKey}`)
+						.send(sequence)
+						.expect(200, function(err, res) {
+							expect(res.body.objects).to.deep.equal(override_groups[0].objects);
+							expect(res.body.color).to.deep.equal(override_groups[0].color);
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${overrideGroupIds[1]}?key=${userApiKey}`)
+						.send(sequence)
+						.expect(200, function(err, res) {
+							expect(res.body.objects).to.deep.equal(override_groups[1].objects);
+							expect(res.body.color).to.deep.equal(override_groups[1].color);
 							return done(err);
 						});
 				}
@@ -1220,27 +1228,21 @@ describe("Sequences", function () {
 
 			async.series([
 				function(done) {
-					agent.post(`/${username}/${model}/viewpoints/`)
+					agent.post(`/${username}/${model}/viewpoints?key=${userApiKey}`)
 						.send(view)
 						.expect(200, function(err, res) {
-							console.log("--- post view result ---");
-							console.log(res.body._id);
 							sequence.frames = [
 								Object.assign({viewId: res.body._id}, baseCustomSequence.frames[0]),
 								baseCustomSequence.frames[1]
 							];
 							delete sequence.frames[0].viewpoint;
-							console.log("--- prepared sequence---");
-							console.log(sequence);
 							return done(err);
 						});
 				},
 				function(done) {
 					agent.post(`/${username}/${model}/sequences?key=${userApiKey}`)
-						.send({ username, password })
+						.send(sequence)
 						.expect(200, function(err, res) {
-							console.log(res.body);
-
 							sequenceId = res.body._id;
 							return done(err);
 						});
@@ -1249,7 +1251,7 @@ describe("Sequences", function () {
 					agent.get(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
 						.send(sequence)
 						.expect(200, function(err, res) {
-							console.log(res.body);
+							delete res.body.frames[0].viewpoint.screenshot_ref;
 							expect(res.body.customSequence).to.equal(true);
 							expect(res.body.name).to.equal(sequence.name);
 							expect(res.body.frames).to.deep.equal(baseCustomSequence.frames);
@@ -1288,11 +1290,9 @@ describe("Sequences", function () {
 			sequence.frames[0].viewpoint = Object.assign({transformation_groups}, baseCustomSequence.frames[0].viewpoint);
 			let sequenceId;
 
-			console.log(sequence);
 			agent.post(`/${username}/${model}/sequences?key=${userApiKey}`)
 				.send(sequence)
-				.expect(200, function(err, res) {
-					console.log(res.body);
+				.expect(400, function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 					return done(err);
 				});
@@ -1302,14 +1302,11 @@ describe("Sequences", function () {
 			const sequence = Object.assign({"name":"Sequence test", "revId": oldRevision}, baseCustomSequence);
 			let sequenceId;
 
-			console.log(sequence);
 			async.series([
 				function(done) {
 					agent.post(`/${username}/${model}/sequences?key=${userApiKey}`)
 						.send(sequence)
 						.expect(200, function(err, res) {
-							console.log(res.body);
-
 							sequenceId = res.body._id;
 							return done(err);
 						});
@@ -1318,7 +1315,6 @@ describe("Sequences", function () {
 					agent.get(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
 						.send(sequence)
 						.expect(200, function(err, res) {
-							console.log(res.body);
 							expect(res.body.customSequence).to.equal(true);
 							expect(res.body.name).to.equal(sequence.name);
 							expect(res.body.frames).to.deep.equal(sequence.frames);

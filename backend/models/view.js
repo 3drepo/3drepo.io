@@ -57,7 +57,7 @@ class View {
 			const routePrefix = this.routePrefix(account, model, id);
 
 			if (viewToClean.viewpoint) {
-				viewToClean.viewpoint = Viewpoint.clean(routePrefix, viewToClean.viewpoint);
+				viewToClean.viewpoint = Viewpoint.cleanViewpoint(routePrefix, viewToClean.viewpoint);
 			}
 
 			if (viewToClean.thumbnail) {
