@@ -227,7 +227,6 @@ describe("Sequences", function () {
 		})
 	});
 
-
 	describe("remove activity", function() {
 		it("should fail with made up sequence id", async() => {
 			const { body } = await agent.delete(`/${username}/${model}/sequences/non_existing_id/activities/${activityId}`)
