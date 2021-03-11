@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -86,6 +86,44 @@ describe("Sequences", function () {
 			{
 				"dateTime":1446710400000,
 				"state":"53c3fc3e-3141-4cd6-b323-406a116734ee",
+			}
+		]
+	};
+
+	const customGoldenData = {
+		"_id":"4ddbe3e0-826b-11eb-8137-17014c88d41b",
+		"teamspace":username,
+		"model":model,
+		"customSequence":true,
+		"name":"Custom Sequence",
+		"frames":[
+			{
+				"dateTime":1446624000000,
+				"viewpoint":{
+					"up":[0,1,0],
+					"position":[38,38 ,125.080119148101],
+					"look_at":[0,0,-163.080119148101],
+					"view_dir":[0,0,-1],
+					"right":[1,0,0],
+					"fov":2.11248306530104,
+					"aspect_ratio":0.875018933732738,
+					"far":276.756120771945,
+					"near":76.4241101223321
+				}
+			},
+			{
+				"dateTime":1446710400000,
+				"viewpoint":{
+					"up":[0,1,0],
+					"position":[30,35,100],
+					"look_at":[0,0,-150],
+					"view_dir":[0,0,-1],
+					"right":[1,0,0],
+					"fov":2.11248306530104,
+					"aspect_ratio":0.875018933732738,
+					"far":276.756120771945,
+					"near":76.4241101223321
+				}
 			}
 		]
 	};
@@ -313,6 +351,7 @@ describe("Sequences", function () {
 	const sequenceId = oldGoldenData._id;
 	const stateId = oldGoldenData.frames[0].state;
 	const activityId = goldenActivityDetail["_id"];
+	const customSequenceId = customGoldenData._id;
 
 	before(function(done) {
 
@@ -334,29 +373,27 @@ describe("Sequences", function () {
 	describe("List all sequences", function() {
 		it("should succeed", function(done) {
 			agent.get(`/${username}/${model}/sequences?key=${userApiKey}`).expect(200, function(err , res) {
-				expect(res.body.length).to.equal(1);
+				expect(res.body.length).to.equal(2);
 				expect(res.body[0]).to.deep.equal(latestGoldenData);
 
 				return done(err);
-
 			});
 		});
 
 		it("from latest revision should succeed [deprecated]", function(done) {
 			agent.get(`/${username}/${model}/revision/master/head/sequences?key=${userApiKey}`).expect(200, function(err , res) {
 
-				expect(res.body.length).to.equal(1);
+				expect(res.body.length).to.equal(2);
 				expect(res.body[0]).to.deep.equal(latestGoldenData);
 
 				return done(err);
-
 			});
 		});
 
 		it("from revision should succeed [deprecated]", function(done) {
 			agent.get(`/${username}/${model}/revision/${oldRevision}/sequences?key=${userApiKey}`).expect(200, function(err , res) {
 
-				expect(res.body.length).to.equal(1);
+				expect(res.body.length).to.equal(2);
 				expect(res.body[0]).to.deep.equal(oldGoldenData);
 
 				return done(err);
@@ -367,34 +404,63 @@ describe("Sequences", function () {
 		it("from revision should succeed", function(done) {
 			agent.get(`/${username}/${model}/sequences?revId=${oldRevision}&key=${userApiKey}`).expect(200, function(err , res) {
 
-				expect(res.body.length).to.equal(1);
+				expect(res.body.length).to.equal(2);
 				expect(res.body[0]).to.deep.equal(oldGoldenData);
 
 				return done(err);
-
 			});
 		});
 
 		it("from federation should succeed [deprecated]", function(done) {
 			agent.get(`/${username}/${federation}/revision/master/head/sequences?key=${userApiKey}`).expect(200, function(err , res) {
 
-				expect(res.body.length).to.equal(1);
+				expect(res.body.length).to.equal(2);
 				expect(res.body[0]).to.deep.equal(latestGoldenData);
 
 				return done(err);
-
 			});
 		});
 
 		it("from federation should succeed", function(done) {
 			agent.get(`/${username}/${federation}/sequences?key=${userApiKey}`).expect(200, function(err , res) {
 
-				expect(res.body.length).to.equal(1);
+				expect(res.body.length).to.equal(2);
 				expect(res.body[0]).to.deep.equal(latestGoldenData);
 
 				return done(err);
-
 			});
+		});
+	});
+
+	describe("Get sequence", function() {
+		it("should succeed", function(done) {
+			agent.get(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
+				.expect(200, function(err, res) {
+					expect(res.body.name).to.equal(oldGoldenData.name);
+					expect(res.body.frames).to.deep.equal(oldGoldenData.frames);
+
+					return done(err);
+				});
+		});
+
+		it("custom sequence should succeed", function(done) {
+			agent.get(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`)
+				.expect(200, function(err, res) {
+					expect(res.body.customSequence).to.equal(true);
+					expect(res.body.name).to.equal(customGoldenData.name);
+					expect(res.body.frames).to.deep.equal(customGoldenData.frames);
+
+					return done(err);
+				});
+		});
+
+		it("with invalid ID should fail", function(done) {
+			agent.get(`/${username}/${model}/sequences/invalidId?key=${userApiKey}`)
+				.expect(404, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
+
+					return done(err);
+				});
 		});
 	});
 
@@ -464,6 +530,7 @@ describe("Sequences", function () {
 		});
 	});
 
+	/*
 	describe("Get sequence activities", function() {
 		it("should succeed", function(done) {
 			agent.get(`/${username}/${model}/sequences/${sequenceId}/activities?key=${userApiKey}`).expect(200, function(err, res) {
@@ -529,7 +596,9 @@ describe("Sequences", function () {
 			});
 		});
 	});
+	*/
 
+	/*
 	describe("Get sequence activity detail", function() {
 		it("should succeed", function(done) {
 			agent.get(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}?key=${userApiKey}`).expect(200, function(err, res) {
@@ -609,6 +678,7 @@ describe("Sequences", function () {
 			});
 		});
 	});
+	*/
 
 	describe("Update Sequence", function() {
 		/*
@@ -641,7 +711,7 @@ describe("Sequences", function () {
 				},
 				(done) => {
 					agent.get(`/${username}/${model}/sequences?revId=${oldRevision}&key=${userApiKey}`).expect(200, function(err , res) {
-						expect(res.body.length).to.equal(1);
+						expect(res.body.length).to.equal(2);
 						expect(res.body[0]).to.deep.equal({...oldGoldenData, ...update});
 						done(err);
 					});
@@ -671,7 +741,18 @@ describe("Sequences", function () {
 		});
 		*/
 
-		it("name and frame should only update the name", function(done) {
+		it("name and frame on ready only sequence should fail", function(done) {
+			const update = { frames: [], name: "another name"};
+			agent.patch(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
+				.send(update)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.SEQUENCE_READ_ONLY.value);
+					done(err);
+				});
+		});
+
+		/*
+		it("name and frame on custom sequence should succeed", function(done) {
 			const update = { frames: [], name: "another name"};
 			async.series([
 				(done) => {
@@ -689,23 +770,24 @@ describe("Sequences", function () {
 
 			], done);
 		});
+		*/
 
-		it("anything but the name should fail [deprecated]", function(done) {
+		it("anything but the name on read only sequence should fail [deprecated]", function(done) {
 			const update = { frames: []};
 			agent.patch(`/${username}/${model}/revision/master/head/sequences/${sequenceId}?key=${userApiKey}`)
 				.send(update)
 				.expect(400, (err, res) => {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).to.equal(responseCodes.SEQUENCE_READ_ONLY.value);
 					done(err);
 				});
 		});
 
-		it("anything but the name should fail", function(done) {
+		it("anything but the name on read only sequence should fail", function(done) {
 			const update = { frames: []};
 			agent.patch(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
 				.send(update)
 				.expect(400, (err, res) => {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).to.equal(responseCodes.SEQUENCE_READ_ONLY.value);
 					done(err);
 				});
 		});
@@ -1081,7 +1163,6 @@ describe("Sequences", function () {
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
-						.send(sequence)
 						.expect(200, function(err, res) {
 							expect(res.body.customSequence).to.equal(true);
 							expect(res.body.name).to.equal(sequence.name);
@@ -1157,7 +1238,6 @@ describe("Sequences", function () {
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
-						.send(sequence)
 						.expect(200, function(err, res) {
 							expect(res.body.customSequence).to.equal(true);
 							expect(res.body.name).to.equal(sequence.name);
@@ -1181,7 +1261,6 @@ describe("Sequences", function () {
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${highlightedGroupId}?key=${userApiKey}`)
-						.send(sequence)
 						.expect(200, function(err, res) {
 							expect(res.body.objects).to.deep.equal(highlighted_group.objects);
 							expect(res.body.color).to.deep.equal(highlighted_group.color);
@@ -1190,7 +1269,6 @@ describe("Sequences", function () {
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${hiddenGroupId}?key=${userApiKey}`)
-						.send(sequence)
 						.expect(200, function(err, res) {
 							expect(res.body.objects).to.deep.equal(hidden_group.objects);
 							expect(res.body.color).to.deep.equal(hidden_group.color);
@@ -1199,7 +1277,6 @@ describe("Sequences", function () {
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${overrideGroupIds[0]}?key=${userApiKey}`)
-						.send(sequence)
 						.expect(200, function(err, res) {
 							expect(res.body.objects).to.deep.equal(override_groups[0].objects);
 							expect(res.body.color).to.deep.equal(override_groups[0].color);
@@ -1208,7 +1285,6 @@ describe("Sequences", function () {
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${overrideGroupIds[1]}?key=${userApiKey}`)
-						.send(sequence)
 						.expect(200, function(err, res) {
 							expect(res.body.objects).to.deep.equal(override_groups[1].objects);
 							expect(res.body.color).to.deep.equal(override_groups[1].color);
@@ -1249,7 +1325,6 @@ describe("Sequences", function () {
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
-						.send(sequence)
 						.expect(200, function(err, res) {
 							delete res.body.frames[0].viewpoint.screenshot_ref;
 							expect(res.body.customSequence).to.equal(true);
@@ -1313,7 +1388,6 @@ describe("Sequences", function () {
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
-						.send(sequence)
 						.expect(200, function(err, res) {
 							expect(res.body.customSequence).to.equal(true);
 							expect(res.body.name).to.equal(sequence.name);

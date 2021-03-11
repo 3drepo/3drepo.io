@@ -175,6 +175,10 @@ Sequence.createSequence = async (account, model, data) => {
 Sequence.getSequenceById = async (account, model, sequenceId, projection = {}, noClean = true) => {
 	const sequence = await db.findOne(account, sequenceCol(model), { _id: utils.stringToUUID(sequenceId)}, projection);
 
+	if (!sequence) {
+		throw responseCodes.SEQUENCE_NOT_FOUND;
+	}
+
 	return noClean ? sequence : cleanSequence(sequence);
 };
 
@@ -227,8 +231,21 @@ Sequence.getList = async (account, model, branch, revision, cleanResponse = fals
 };
 
 Sequence.updateSequence = async (account, model, sequenceId, data) => {
-	if (!data || !data.name || !utils.isString(data.name) || data.name === ""  || data.name.length >= 30) {
+	if (!data) {
 		throw responseCodes.INVALID_ARGUMENTS;
+	}
+
+	if (data.name && (!utils.isString(data.name) || data.name === "" || data.name.length >= 30)) {
+		throw responseCodes.INVALID_ARGUMENTS;
+	}
+
+	if (data.frames) {
+		const customSequence = await db.findOne(account, sequenceCol(model),
+			{_id: utils.stringToUUID(sequenceId), customSequence: true});
+
+		if (!customSequence) {
+			throw responseCodes.SEQUENCE_READ_ONLY;
+		}
 	}
 
 	const { result } = await db.update(account, sequenceCol(model),
