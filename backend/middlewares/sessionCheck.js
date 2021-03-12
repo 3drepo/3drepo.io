@@ -20,7 +20,7 @@ const C = require("../constants");
 const utils = require("../utils");
 
 module.exports = (req) => {
-	return !req.session ||
-		!utils.hasField(req.session, C.REPO_SESSION_USER) ||
-		req.headers.referer && req.session.user && req.session.user.referer && !req.headers.referer.match(req.session.user.referer);
+	return req.session &&
+		utils.hasField(req.session, C.REPO_SESSION_USER) &&
+		!(req.headers.referer && req.session.user && req.session.user.referer && !req.headers.referer.match(req.session.user.referer));
 };

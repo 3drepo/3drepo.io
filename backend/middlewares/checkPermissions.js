@@ -72,7 +72,7 @@ function checkPermissionsHelper(username, account, project, model, requiredPerms
 }
 
 function validateUserSession(req) {
-	if (sessionCheck(req)) {
+	if (!sessionCheck(req)) {
 		return Promise.reject(responseCodes.NOT_LOGGED_IN);
 	}
 

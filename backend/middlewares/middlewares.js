@@ -50,7 +50,7 @@
 	function loggedIn(req, res, next) {
 		if (skipLoggedIn(req)) {
 			next();
-		} else if (sessionCheck(req)) {
+		} else if (!sessionCheck(req)) {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.NOT_LOGGED_IN, null, {});
 		} else {
 			next();
