@@ -17,7 +17,6 @@
 
 "use strict";
 const C = require("../constants");
-const responseCodes = require("../response_codes");
 const utils = require("../utils");
 
 module.exports = (req) => {
