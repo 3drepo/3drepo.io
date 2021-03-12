@@ -64,6 +64,8 @@ module.exports.regenerateAuthSession = (req, config, user) => {
 				}
 
 				if (req.headers.referer) {
+					// Only store the `protocol://domain` part of the referrer
+					// e.g. If referrer is `https://3drepo.org/abc/xyz` we only store `https://3drepo.org`
 					const refererDomain = req.headers.referer.match(/^(\w)*:\/\/.*?\//);
 					user.referer = refererDomain ? refererDomain[0].slice(0, -1) : req.headers.referer;
 				}
