@@ -32,6 +32,7 @@
 	const hasReadAccessToModelHelper = require("./checkPermissions").hasReadAccessToModelHelper;
 	const isAccountAdminHelper = require("./checkPermissions").isAccountAdminHelper;
 	const validateUserSession = require("./checkPermissions").validateUserSession;
+	const sessionCheck = require("./sessionCheck");
 
 	const readAccessToModel = [C.PERM_VIEW_MODEL];
 
@@ -49,8 +50,8 @@
 	function loggedIn(req, res, next) {
 		if (skipLoggedIn(req)) {
 			next();
-		} else if (!req.session || !utils.hasField(req.session, C.REPO_SESSION_USER)) {
-			responseCodes.respond("Check logged in middleware", req, res, next, responseCodes.AUTH_ERROR, null, req.params);
+		} else if (sessionCheck(req)) {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.NOT_LOGGED_IN, null, {});
 		} else {
 			next();
 		}
