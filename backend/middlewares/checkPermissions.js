@@ -22,7 +22,6 @@ const C	= require("../constants");
 const getPermissionsAdapter = require("./getPermissionsAdapter");
 const sessionCheck = require("./sessionCheck");
 const responseCodes = require("../response_codes");
-const utils = require("../utils");
 
 // logic to check permissions
 function checkPermissionsHelper(username, account, project, model, requiredPerms, getPermissions) {
