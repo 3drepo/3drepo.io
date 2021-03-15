@@ -374,6 +374,7 @@ describe("Sequences", function () {
 		it("should succeed", function(done) {
 			agent.get(`/${username}/${model}/sequences?key=${userApiKey}`).expect(200, function(err , res) {
 				expect(res.body.length).to.equal(2);
+				res.body[0].frames = latestGoldenData.frames;
 				expect(res.body[0]).to.deep.equal(latestGoldenData);
 
 				return done(err);
@@ -382,8 +383,8 @@ describe("Sequences", function () {
 
 		it("from latest revision should succeed [deprecated]", function(done) {
 			agent.get(`/${username}/${model}/revision/master/head/sequences?key=${userApiKey}`).expect(200, function(err , res) {
-
 				expect(res.body.length).to.equal(2);
+				res.body[0].frames = latestGoldenData.frames;
 				expect(res.body[0]).to.deep.equal(latestGoldenData);
 
 				return done(err);
@@ -392,19 +393,18 @@ describe("Sequences", function () {
 
 		it("from revision should succeed [deprecated]", function(done) {
 			agent.get(`/${username}/${model}/revision/${oldRevision}/sequences?key=${userApiKey}`).expect(200, function(err , res) {
-
 				expect(res.body.length).to.equal(2);
+				res.body[0].frames = oldGoldenData.frames;
 				expect(res.body[0]).to.deep.equal(oldGoldenData);
 
 				return done(err);
-
 			});
 		});
 
 		it("from revision should succeed", function(done) {
 			agent.get(`/${username}/${model}/sequences?revId=${oldRevision}&key=${userApiKey}`).expect(200, function(err , res) {
-
 				expect(res.body.length).to.equal(2);
+				res.body[0].frames = oldGoldenData.frames;
 				expect(res.body[0]).to.deep.equal(oldGoldenData);
 
 				return done(err);
@@ -413,8 +413,8 @@ describe("Sequences", function () {
 
 		it("from federation should succeed [deprecated]", function(done) {
 			agent.get(`/${username}/${federation}/revision/master/head/sequences?key=${userApiKey}`).expect(200, function(err , res) {
-
 				expect(res.body.length).to.equal(2);
+				res.body[0].frames = latestGoldenData.frames;
 				expect(res.body[0]).to.deep.equal(latestGoldenData);
 
 				return done(err);
@@ -423,8 +423,8 @@ describe("Sequences", function () {
 
 		it("from federation should succeed", function(done) {
 			agent.get(`/${username}/${federation}/sequences?key=${userApiKey}`).expect(200, function(err , res) {
-
 				expect(res.body.length).to.equal(2);
+				res.body[0].frames = latestGoldenData.frames;
 				expect(res.body[0]).to.deep.equal(latestGoldenData);
 
 				return done(err);
@@ -712,6 +712,7 @@ describe("Sequences", function () {
 				(done) => {
 					agent.get(`/${username}/${model}/sequences?revId=${oldRevision}&key=${userApiKey}`).expect(200, function(err , res) {
 						expect(res.body.length).to.equal(2);
+						res.body[0].frames = oldGoldenData.frames;
 						expect(res.body[0]).to.deep.equal({...oldGoldenData, ...update});
 						done(err);
 					});

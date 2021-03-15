@@ -33,14 +33,29 @@ import { selectActivitiesDefinitions, selectFrames,  selectNextKeyFramesDates,
 	selectSelectedDate, selectSelectedSequence, selectSequences,
 	selectSequenceModel} from './sequences.selectors';
 
-export function* fetchSequences() {
+export function* fetchSequence({sequenceId}) {
+	try {
+		const teamspace = yield select(selectCurrentModelTeamspace);
+		const model = yield select(selectSequenceModel);
+
+		const response = yield API.getSequence(teamspace, model, sequenceId);
+		yield put(SequencesActions.fetchSequenceSuccess(response.data));
+		yield put(SequencesActions.initializeSequences());
+	} catch (error) {
+		yield put(DialogActions.showEndpointErrorDialog('get', 'sequences', error));
+	}
+	yield put(SequencesActions.setSelectedSequenceSuccess(sequenceId));
+	yield put(SequencesActions.fetchActivitiesDefinitions(sequenceId));
+}
+
+export function* fetchSequenceList() {
 	try {
 		const teamspace = yield select(selectCurrentModelTeamspace);
 		const revision = yield select(selectCurrentRevisionId);
 		const model = yield select(selectCurrentModel);
 
-		const response = yield API.getSequences(teamspace, model, revision);
-		yield put(SequencesActions.fetchSequencesSuccess(response.data));
+		const response = yield API.getSequenceList(teamspace, model, revision);
+		yield put(SequencesActions.fetchSequenceListSuccess(response.data));
 
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'sequences', error));
@@ -57,7 +72,7 @@ export function* fetchActivitiesDefinitions({sequenceId}) {
 
 		if (!activitiesDefinitions && sequenceId) {
 			// API CALL TO GET TASKS
-			const {data} = yield API.getSequenceActivities(teamspace, model, revision, sequenceId);
+			const {data} = yield API.getSequenceActivities(teamspace, model, sequenceId);
 			yield put(SequencesActions.fetchActivitiesDefinitionsSuccess(sequenceId, data.tasks));
 		}
 
@@ -83,7 +98,7 @@ export function* fetchFrame({date}) {
 		if (!loadedStates[stateId]) {
 			// Using directly the promise and 'then' to dispatch the rest of the actions
 			// because with yield it would sometimes stop there forever even though the promise resolved
-			API.getSequenceState(teamspace, model, revision, sequenceId, stateId).then((response) => {
+			API.getSequenceState(teamspace, model, sequenceId, stateId).then((response) => {
 				const selectedDate = selectSelectedDate(getState());
 				if (selectedDate.valueOf() === date.valueOf()) {
 					dispatch(SequencesActions.setLastSelectedDateSuccess(date));
@@ -137,7 +152,8 @@ export function* restoreModelDefaultVisibility() {
 
 export function* setSelectedSequence({ sequenceId }) {
 	if (sequenceId) {
-		yield put(SequencesActions.initializeSequences());
+		yield put(SequencesActions.fetchSequence(sequenceId));
+		// yield put(SequencesActions.initializeSequences());
 	} else {
 		const selectedSequence = yield select(selectSelectedSequence);
 		if (selectedSequence) {
@@ -146,9 +162,11 @@ export function* setSelectedSequence({ sequenceId }) {
 			yield put(SequencesActions.setLastSelectedDateSuccess(null));
 			yield put(SequencesActions.restoreModelDefaultVisibility());
 		}
+		yield put(SequencesActions.setSelectedSequenceSuccess(sequenceId));
+		yield put(SequencesActions.fetchActivitiesDefinitions(sequenceId));
 	}
-	yield put(SequencesActions.setSelectedSequenceSuccess(sequenceId));
-	yield put(SequencesActions.fetchActivitiesDefinitions(sequenceId));
+	// yield put(SequencesActions.setSelectedSequenceSuccess(sequenceId));
+	// yield put(SequencesActions.fetchActivitiesDefinitions(sequenceId));
 }
 
 export function* showSequenceDate({ date }) {
@@ -162,8 +180,8 @@ export function* showSequenceDate({ date }) {
 	// 2 - if there is no sequences loaded, load them
 	let sequences = yield select(selectSequences);
 	if (sequences) {
-		yield put(SequencesActions.fetchSequences());
-		yield take(SequencesTypes.FETCH_SEQUENCES_SUCCESS);
+		yield put(SequencesActions.fetchSequenceList());
+		yield take(SequencesTypes.FETCH_SEQUENCE_LIST_SUCCESS);
 		sequences = yield select(selectSequences);
 	}
 
@@ -188,7 +206,8 @@ function* handleTransparenciesVisibility({ transparencies }) {
 }
 
 export default function* SequencesSaga() {
-	yield takeLatest(SequencesTypes.FETCH_SEQUENCES, fetchSequences);
+	yield takeLatest(SequencesTypes.FETCH_SEQUENCE, fetchSequence);
+	yield takeLatest(SequencesTypes.FETCH_SEQUENCE_LIST, fetchSequenceList);
 	yield takeLatest(SequencesTypes.SET_SELECTED_DATE, setSelectedDate);
 	yield takeLatest(SequencesTypes.INITIALIZE_SEQUENCES, initializeSequences);
 	yield takeLatest(SequencesTypes.FETCH_FRAME, fetchFrame);

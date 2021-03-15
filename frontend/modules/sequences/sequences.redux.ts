@@ -20,9 +20,11 @@ import { STEP_SCALE } from '../../constants/sequences';
 import { sortByField } from '../../helpers/sorting';
 
 export const { Types: SequencesTypes, Creators: SequencesActions } = createActions({
-	fetchSequences: [],
+	fetchSequence: ['sequenceId'],
+	fetchSequenceList: [],
 	initializeSequences: [],
-	fetchSequencesSuccess: ['sequences'],
+	fetchSequenceSuccess: ['sequence'],
+	fetchSequenceListSuccess: ['sequences'],
 	setSelectedSequence: ['sequenceId'],
 	setSelectedSequenceSuccess: ['sequenceId'],
 	setSelectedDate: ['date'],
@@ -56,7 +58,21 @@ export const INITIAL_STATE = {
 	activities: {}
 };
 
-export const fetchSequencesSuccess = (state = INITIAL_STATE, { sequences }) => {
+export const fetchSequenceSuccess = (state = INITIAL_STATE, { sequence }) => {
+	if (state.sequences && state.sequences.length > 0) {
+		const sequenceIndex = state.sequences.findIndex(s => s._id === sequence._id);
+
+		if (sequenceIndex >= 0) {
+			state.sequences[sequenceIndex] = sequence;
+		}
+	} else {
+		state.sequences = [ sequence ];
+	}
+
+	return { ...state };
+};
+
+export const fetchSequenceListSuccess = (state = INITIAL_STATE, { sequences }) => {
 	sequences = sortByField([...sequences], { order: 'asc', config: { field: '_id' } });
 	return { ...state, sequences };
 };
@@ -106,7 +122,8 @@ export const reset = () => {
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
-	[SequencesTypes.FETCH_SEQUENCES_SUCCESS]: fetchSequencesSuccess,
+	[SequencesTypes.FETCH_SEQUENCE_SUCCESS]: fetchSequenceSuccess,
+	[SequencesTypes.FETCH_SEQUENCE_LIST_SUCCESS]: fetchSequenceListSuccess,
 	[SequencesTypes.FETCH_ACTIVITIES_DEFINITIONS_SUCCESS]: fetchActivitiesDefinitionsSuccess,
 	[SequencesTypes.SET_SELECTED_DATE_SUCCESS]: setSelectedDateSuccess,
 	[SequencesTypes.SET_LAST_SELECTED_DATE_SUCCESS]: setLastSelectedDateSuccess,

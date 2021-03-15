@@ -83,7 +83,7 @@ function* fetchData({ teamspace, model }) {
 			put(RisksActions.fetchRisks(teamspace, model, revision)),
 			put(GroupsActions.fetchGroups(teamspace, model, revision)),
 			put(ViewerGuiActions.getHelicopterSpeed(teamspace, model)),
-			put(SequencesActions.fetchSequences()),
+			put(SequencesActions.fetchSequenceList()),
 			put(StarredActions.fetchStarredMeta())
 		]);
 	} catch (error) {
