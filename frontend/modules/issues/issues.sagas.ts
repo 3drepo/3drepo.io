@@ -134,6 +134,7 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 		} else {
 			yield put(DialogActions.hideDialog());
 		}
+
 		yield put(IssuesActions.saveIssueSuccess(preparedIssue));
 		yield put(SnackbarActions.show('Issue created'));
 	} catch (error) {

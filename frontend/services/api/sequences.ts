@@ -41,8 +41,8 @@ export const getSequenceActivityDetail = (teamspace, modelId, revision, sequence
 	return api.get(`${teamspace}/${modelId}/revision/${revision || HEAD}/sequences/${sequenceId}/activities/${activityId}`);
 };
 
-export const getSequenceActivities = (teamspace, modelId, revision, sequenceId): Promise<any> => {
-	return api.get(`${teamspace}/${modelId}/revision/${revision || HEAD}/sequences/${sequenceId}/activities`);
+export const getSequenceActivities = (teamspace, modelId, sequenceId): Promise<any> => {
+	return api.get(`${teamspace}/${modelId}/sequences/${sequenceId}/activities`);
 };
 
 export const getSequenceLegend = (teamspace, modelId, revision, sequenceId): Promise<any> => {
