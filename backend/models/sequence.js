@@ -239,7 +239,7 @@ Sequence.getList = async (account, model, branch, revision, cleanResponse = fals
 		sequence.teamspace = account;
 		sequence.model = model;
 		sequence.minDate = (sequence.frames[0] || {}).dateTime;
-		sequence.maxDate = (sequence.frames[sequence.frames.length - 1] || {}).dateTime
+		sequence.maxDate = (sequence.frames[sequence.frames.length - 1] || {}).dateTime;
 
 		delete sequence.frames;
 
