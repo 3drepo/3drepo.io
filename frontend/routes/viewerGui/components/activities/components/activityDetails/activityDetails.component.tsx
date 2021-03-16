@@ -43,7 +43,7 @@ export const ActivityDetails = ({ isPending, activityDetails, setSelectedDate }:
 
 	return (
 		<Container container direction="row" alignItems="center">
-			{map(activityDetails.data, (value, key: string) => (
+			{activityDetails.data.map(({value, key}) => (
 				<Grid key={key} item xs={12} >
 					<Row container justify="center">
 						<Grid item xs={6}>{key}</Grid>

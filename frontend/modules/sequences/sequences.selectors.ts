@@ -253,13 +253,13 @@ export const selectSelectedFrameTransformations = createSelector(
 	}
 );
 
-// Filters the activities by range as well as it's subtasks
+// Filters the activities by range as well as it's subActivities
 const getActivitiesByRange = (activities, minDate, maxDate) => {
 	return activities.reduce((filteredActivities, activity) => {
 			if (! (activity.startDate > maxDate || activity.endDate < minDate)) {
 				activity = {...activity};
-				if ( activity.subTasks ) {
-					activity.subTasks = getActivitiesByRange(activity.subTasks, minDate, maxDate);
+				if ( activity.subActivities ) {
+					activity.subActivities = getActivitiesByRange(activity.subActivities, minDate, maxDate);
 				}
 
 				filteredActivities.push(activity);
@@ -273,8 +273,8 @@ const replaceDates = (activities) => {
 	return activities.map((t) => {
 		t.startDate = new Date(t.startDate);
 		t.endDate = new Date(t.endDate);
-		if (t.subTasks) {
-			t.subTasks = replaceDates(t.subTasks);
+		if (t.subActivities) {
+			t.subActivities = replaceDates(t.subActivities);
 		}
 
 		return t;

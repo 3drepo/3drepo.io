@@ -36,9 +36,9 @@ export const getSequenceState = (teamspace, modelId, revision, sequenceId, state
 	return api.get(`${teamspace}/${modelId}/revision/${revision || HEAD}/sequences/${sequenceId}/state/${stateId}`);
 };
 
-export const getSequenceActivityDetail = (teamspace, modelId, revision, sequenceId, activityId): Promise<any> => {
+export const getSequenceActivityDetail = (teamspace, modelId, sequenceId, activityId): Promise<any> => {
 	// tslint:disable-next-line:max-line-length
-	return api.get(`${teamspace}/${modelId}/revision/${revision || HEAD}/sequences/${sequenceId}/activities/${activityId}`);
+	return api.get(`${teamspace}/${modelId}/sequences/${sequenceId}/activities/${activityId}`);
 };
 
 export const getSequenceActivities = (teamspace, modelId, sequenceId): Promise<any> => {
