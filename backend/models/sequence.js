@@ -116,7 +116,7 @@ const handleFrames = async (account, model, sequenceId, sequenceFrames) => {
 		}
 
 		processedFrames.push({
-			dateTime: frame.dateTime,
+			dateTime: new Date(frame.dateTime),
 			viewpoint
 		});
 	}
@@ -238,8 +238,8 @@ Sequence.getList = async (account, model, branch, revision, cleanResponse = fals
 	sequences.forEach((sequence) => {
 		sequence.teamspace = account;
 		sequence.model = model;
-		sequence.minDate = (sequence.frames[0] || {}).dateTime;
-		sequence.maxDate = (sequence.frames[sequence.frames.length - 1] || {}).dateTime;
+		sequence.minDate = new Date((sequence.frames[0] || {}).dateTime).getTime();
+		sequence.maxDate = new Date((sequence.frames[sequence.frames.length - 1] || {}).dateTime).getTime();
 
 		delete sequence.frames;
 
