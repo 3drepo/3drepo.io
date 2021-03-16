@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { findIndex } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 import { STEP_SCALE } from '../../constants/sequences';
 import { sortByField } from '../../helpers/sorting';
@@ -23,6 +24,8 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	fetchSequences: [],
 	initializeSequences: [],
 	fetchSequencesSuccess: ['sequences'],
+	updateSequence: ['sequenceId', 'newName'],
+	updateSequenceSuccess: ['sequenceId', 'newName'],
 	setSelectedSequence: ['sequenceId'],
 	setSelectedSequenceSuccess: ['sequenceId'],
 	setSelectedDate: ['date'],
@@ -35,14 +38,43 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	setStepScale: ['stepScale'],
 	fetchActivitiesDefinitions: ['sequenceId'],
 	fetchActivitiesDefinitionsSuccess: ['sequenceId', 'activities'],
+	setActivitiesPending: ['isPending'],
 	showSequenceDate: ['date'],
 	handleTransparenciesVisibility: ['transparencies'],
 	restoreModelDefaultVisibility: [],
-
 	reset: []
 }, { prefix: 'SEQUENCES/' });
 
-export const INITIAL_STATE = {
+export interface IFrame {
+	dateTime: Date;
+	state: string;
+}
+
+export interface ISequance {
+	_id: string;
+	rev_id: string;
+	name: string;
+	frames: any[];
+	teamspace: string;
+	model: string;
+}
+
+export interface ISequencesState {
+	sequences: null | ISequance[];
+	selectedSequence: null | string;
+	lastSelectedSequence: null | string;
+	selectedDate: null | Date;
+	lastSelectedDate: null | Date;
+	stateDefinitions: any;
+	statesPending: boolean;
+	stepInterval: number;
+	stepScale: STEP_SCALE;
+	hiddenGeometryVisible: boolean;
+	activities: any;
+	activitiesPending: any;
+}
+
+export const INITIAL_STATE: ISequencesState = {
 	sequences: null,
 	selectedSequence: null,
 	lastSelectedSequence: null,
@@ -53,7 +85,8 @@ export const INITIAL_STATE = {
 	stepInterval: 1,
 	stepScale: STEP_SCALE.DAY,
 	hiddenGeometryVisible: true,
-	activities: {}
+	activities: {},
+	activitiesPending: true,
 };
 
 export const fetchSequencesSuccess = (state = INITIAL_STATE, { sequences }) => {
@@ -61,8 +94,23 @@ export const fetchSequencesSuccess = (state = INITIAL_STATE, { sequences }) => {
 	return { ...state, sequences };
 };
 
+export const updateSequenceSuccess = (state = INITIAL_STATE, { sequenceId, newName }) => {
+	const sequencesList = [...state.sequences];
+	const index = findIndex(state.sequences, (sequence) => sequence._id === sequenceId);
+	sequencesList[index].name = newName;
+
+	return {
+		...state,
+		sequences: sequencesList
+	};
+};
+
 export const fetchActivitiesDefinitionsSuccess = (state = INITIAL_STATE, { sequenceId, activities }) => {
 	return { ...state, activities: {...state.activities, [sequenceId]: activities } };
+};
+
+export const setActivitiesPending = (state = INITIAL_STATE, { isPending }) => {
+	return {...state, activitiesPending: isPending };
 };
 
 export const setSelectedSequenceSuccess = (state = INITIAL_STATE, { sequenceId }) => {
@@ -107,7 +155,9 @@ export const reset = () => {
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[SequencesTypes.FETCH_SEQUENCES_SUCCESS]: fetchSequencesSuccess,
+	[SequencesTypes.UPDATE_SEQUENCE_SUCCESS]: updateSequenceSuccess,
 	[SequencesTypes.FETCH_ACTIVITIES_DEFINITIONS_SUCCESS]: fetchActivitiesDefinitionsSuccess,
+	[SequencesTypes.SET_ACTIVITIES_PENDING]: setActivitiesPending,
 	[SequencesTypes.SET_SELECTED_DATE_SUCCESS]: setSelectedDateSuccess,
 	[SequencesTypes.SET_LAST_SELECTED_DATE_SUCCESS]: setLastSelectedDateSuccess,
 	[SequencesTypes.SET_STATE_DEFINITION]: setStateDefinition,

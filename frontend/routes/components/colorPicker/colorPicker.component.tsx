@@ -95,6 +95,8 @@ interface IProps {
 	disableUnderline?: boolean;
 	disableButtons?: boolean;
 	opacityEnabled?: boolean;
+	onOpen?: () => void;
+	onClose?: () => void;
 }
 
 interface IState {
@@ -375,6 +377,10 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleClose = () => {
+		if (this.props.onClose) {
+			this.props.onClose();
+		}
+
 		this.setState({
 			open: false,
 		});
@@ -419,6 +425,10 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 
 	public onPanelOpen = () => {
 		const value = this.hexValue;
+
+		if (this.props.onOpen) {
+			this.props.onOpen();
+		}
 
 		this.setState({
 			baseColor: stripAlpha(value),

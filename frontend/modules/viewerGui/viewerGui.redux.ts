@@ -18,7 +18,7 @@
 import { cloneDeep } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 import { INITIAL_HELICOPTER_SPEED, VIEWER_NAV_MODES } from '../../constants/viewer';
-import { VIEWER_LEFT_PANELS, VIEWER_RIGHT_PANELS } from '../../constants/viewerGui';
+import { VIEWER_DRAGGABLE_PANELS, VIEWER_LEFT_PANELS, VIEWER_RIGHT_PANELS } from '../../constants/viewerGui';
 
 export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActions({
 	fetchData: ['teamspace', 'model'],
@@ -69,6 +69,7 @@ export interface IViewerGuiState {
 	leftPanels: string[];
 	rightPanels: string[];
 	lockedPanels: string[];
+	draggablePanels: string[];
 	coordViewActive: boolean;
 	isModelLoaded: boolean;
 	navigationMode: string;
@@ -85,6 +86,7 @@ export const INITIAL_STATE: IViewerGuiState = {
 	leftPanels: [],
 	rightPanels: [],
 	lockedPanels: [],
+	draggablePanels: [],
 	isModelLoaded: false,
 	coordViewActive: false,
 	navigationMode: VIEWER_NAV_MODES.TURNTABLE,
@@ -125,7 +127,10 @@ export const setPanelVisibility = (state = INITIAL_STATE, { panelName, visibilit
 			updatePanelsList([...state.rightPanels], locked, panelName, visibility) : [...state.rightPanels];
 	const lockedPanels = locked.includes(panelName) ? [] : locked;
 
-	return { ...state, leftPanels, rightPanels, lockedPanels };
+	const draggablePanels = VIEWER_DRAGGABLE_PANELS.includes(panelName) ?
+			updatePanelsList([...state.draggablePanels], locked, panelName, visibility) : [...state.draggablePanels];
+
+	return { ...state, leftPanels, rightPanels, lockedPanels, draggablePanels };
 };
 
 export const setPanelLock = (state = INITIAL_STATE, { panelName }) => {

@@ -22,16 +22,19 @@ import { selectSelectedSequenceId, selectStateDefinitions,
 import { VIEWER_PANELS } from '../../constants/viewerGui';
 
 import * as API from '../../services/api';
+import { DataCache, STORE_NAME } from '../../services/dataCache';
 import { DialogActions } from '../dialog';
 import { selectCurrentModel, selectCurrentModelTeamspace, selectCurrentRevisionId, selectIsFederation } from '../model';
 import { dispatch, getState } from '../store';
 import { selectHiddenGeometryVisible,  TreeActions } from '../tree';
 
+import { selectCacheSetting } from '../viewer';
 import { selectLeftPanels, ViewerGuiActions } from '../viewerGui';
 import { getSelectedFrame } from './sequences.helper';
-import { selectActivitiesDefinitions, selectFrames,  selectNextKeyFramesDates,
-	selectSelectedDate, selectSelectedSequence, selectSequences,
-	selectSequenceModel} from './sequences.selectors';
+import {
+	selectActivitiesDefinitions, selectFrames, selectNextKeyFramesDates, selectSelectedDate, selectSelectedSequence,
+	selectSequences, selectSequenceModel,
+} from './sequences.selectors';
 
 export function* fetchSequences() {
 	try {
@@ -47,8 +50,26 @@ export function* fetchSequences() {
 	}
 }
 
-export function* fetchActivitiesDefinitions({sequenceId}) {
+export function* updateSequence({ sequenceId, newName }) {
 	try {
+		const teamspace = yield select(selectCurrentModelTeamspace);
+		const isFederation = yield select(selectIsFederation);
+		const revision = isFederation ? null : yield select(selectCurrentRevisionId);
+		const model = yield select(selectSequenceModel);
+
+		if (sequenceId) {
+			yield API.patchSequence(teamspace, model, revision, sequenceId, newName);
+			yield put(SequencesActions.updateSequenceSuccess(sequenceId, newName));
+		}
+
+	} catch (error) {
+		yield put(DialogActions.showEndpointErrorDialog('update', 'sequence', error));
+	}
+}
+
+export function* fetchActivitiesDefinitions({ sequenceId }) {
+	try {
+		yield put(SequencesActions.setActivitiesPending(true));
 		const teamspace = yield select(selectCurrentModelTeamspace);
 		const isFederation = yield select(selectIsFederation);
 		const revision = isFederation ? null : yield select(selectCurrentRevisionId);
@@ -59,6 +80,7 @@ export function* fetchActivitiesDefinitions({sequenceId}) {
 			// API CALL TO GET TASKS
 			const {data} = yield API.getSequenceActivities(teamspace, model, revision, sequenceId);
 			yield put(SequencesActions.fetchActivitiesDefinitionsSuccess(sequenceId, data.tasks));
+			yield put(SequencesActions.setActivitiesPending(false));
 		}
 
 	} catch (error) {
@@ -67,20 +89,31 @@ export function* fetchActivitiesDefinitions({sequenceId}) {
 	}
 }
 
-export function* fetchFrame({date}) {
+export function* fetchFrame({ date }) {
 	try {
 		const teamspace = yield select(selectCurrentModelTeamspace);
 		const revision = yield select(selectCurrentRevisionId);
 		const model = yield select(selectSequenceModel);
 		const sequenceId =  yield select(selectSelectedSequenceId);
-
 		const loadedStates = yield select(selectStateDefinitions);
 		const frames = yield select(selectFrames);
-		const frame = getSelectedFrame(frames, date);
+		const { state: stateId } = getSelectedFrame(frames, date);
+		const cacheEnabled = yield select(selectCacheSetting);
+		const IndexedDBKey = `${teamspace}.${model}.${stateId}.3DRepo`;
+		let cachedData;
 
-		const stateId = frame.state;
+		if (cacheEnabled) {
+			cachedData = yield DataCache.getValue(STORE_NAME.FRAMES, IndexedDBKey);
+			const selectedDate = yield select(selectSelectedDate);
+			if (cachedData) {
+				yield put(SequencesActions.setStateDefinition(stateId, cachedData));
+				if (selectedDate.valueOf() === date.valueOf()) {
+					yield put(SequencesActions.setLastSelectedDateSuccess(date));
+				}
+			}
+		}
 
-		if (!loadedStates[stateId]) {
+		if (!cachedData && !loadedStates[stateId]) {
 			// Using directly the promise and 'then' to dispatch the rest of the actions
 			// because with yield it would sometimes stop there forever even though the promise resolved
 			API.getSequenceState(teamspace, model, revision, sequenceId, stateId).then((response) => {
@@ -89,7 +122,13 @@ export function* fetchFrame({date}) {
 					dispatch(SequencesActions.setLastSelectedDateSuccess(date));
 				}
 
-				dispatch(SequencesActions.setStateDefinition(stateId, response.data));
+				if (cacheEnabled) {
+					DataCache.putValue(STORE_NAME.FRAMES, IndexedDBKey, response.data).then(() => {
+						dispatch(SequencesActions.setStateDefinition(stateId, response.data));
+					});
+				} else {
+					dispatch(SequencesActions.setStateDefinition(stateId, response.data));
+				}
 			}).catch((e) => {
 				dispatch(SequencesActions.setStateDefinition(stateId, {}));
 			});
@@ -109,7 +148,7 @@ function * fetchSelectedFrame() {
 	yield all(keyframes.map((d) => put(SequencesActions.fetchFrame(d))));
 }
 
-export function* setSelectedDate({date}) {
+export function* setSelectedDate({ date }) {
 	try {
 		const selectedSequence = yield select(selectSelectedSequence);
 
@@ -189,6 +228,7 @@ function* handleTransparenciesVisibility({ transparencies }) {
 
 export default function* SequencesSaga() {
 	yield takeLatest(SequencesTypes.FETCH_SEQUENCES, fetchSequences);
+	yield takeLatest(SequencesTypes.UPDATE_SEQUENCE, updateSequence);
 	yield takeLatest(SequencesTypes.SET_SELECTED_DATE, setSelectedDate);
 	yield takeLatest(SequencesTypes.INITIALIZE_SEQUENCES, initializeSequences);
 	yield takeLatest(SequencesTypes.FETCH_FRAME, fetchFrame);

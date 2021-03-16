@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import styled from 'styled-components';
+
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import { DatePicker } from 'material-ui-pickers';
-import styled from 'styled-components';
+import { DatePicker } from '@material-ui/pickers';
 
 import { COLOR } from '../../../../../styles';
 import { FileUploadInvoker } from '../../../../viewerGui/components/commentForm/commentForm.styles';

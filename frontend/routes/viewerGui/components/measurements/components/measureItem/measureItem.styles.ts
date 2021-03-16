@@ -26,6 +26,7 @@ import { TextField } from '../../../../../components/textField/textField.compone
 import {
 	ActionsLine,
 	MutableActionsLine,
+	StyledLinkableField,
 	StyledMarkdownField,
 } from '../../../../../components/textField/textField.styles';
 import { StyledForm as StyledFormComponent } from '../../../views/components/viewItem/viewItem.styles';
@@ -126,6 +127,11 @@ export const StyledTextField = styled(TextField)`
 	}
 
 	${StyledMarkdownField} {
+		text-overflow: ellipsis;
+		margin-right: 30px;
+	}
+
+	${StyledLinkableField} {
 		text-overflow: ellipsis;
 		margin-right: 30px;
 	}

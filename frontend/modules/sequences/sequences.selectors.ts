@@ -16,6 +16,8 @@
  */
 
 import { createSelector } from 'reselect';
+
+import { STEP_SCALE } from '../../constants/sequences';
 import { GLToHexColor } from '../../helpers/colors';
 import { selectSettings } from '../model';
 import { getDateByStep, getSelectedFrame } from './sequences.helper';
@@ -66,6 +68,10 @@ export const selectActivitiesDefinitions = createSelector(
 	selectSequencesDomain, selectSelectedSequenceId, (state, sequenceId) => (state.activities || {}) [sequenceId]
 );
 
+export const selectActivitiesPending = createSelector(
+	selectSequencesDomain, (state) => state.activitiesPending
+);
+
 export const selectSelectedSequence = createSelector(
 	selectSequences, selectSelectedSequenceId,
 		(sequences, id) => !sequences ? null :
@@ -92,6 +98,14 @@ export const selectMinDate = createSelector(
 
 export const selectMaxDate = createSelector(
 	selectSelectedSequence, (sequence) => (sequence || {}).maxDate
+);
+
+export const selectSelectedSequenceName = createSelector(
+	selectSelectedSequence, (sequence) => sequence?.name
+);
+
+export const selectSelectedSequenceID = createSelector(
+	selectSelectedSequence, (sequence) => sequence?._id
 );
 
 export const selectStepInterval = createSelector(
@@ -133,9 +147,11 @@ export const selectNextKeyFramesDates =  createSelector(
 				date = getDateByStep(date, scale, interval);
 				nextFrame = getSelectedFrame(frames, date);
 
-				while (lastFrame === nextFrame && date <= maxDate) {
-					date = getDateByStep(date, scale, interval);
-					nextFrame = getSelectedFrame(frames, date);
+				if (scale !== STEP_SCALE.FRAME) {
+					while (lastFrame === nextFrame && date <= maxDate) {
+						date = getDateByStep(date, scale, interval);
+						nextFrame = getSelectedFrame(frames, date);
+					}
 				}
 
 				keyFrames.push(date);

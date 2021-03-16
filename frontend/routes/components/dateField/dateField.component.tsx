@@ -17,13 +17,14 @@
 
 import React from 'react';
 
-import { MaterialUiPickersDate } from 'material-ui-pickers/typings/date';
+import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date';
 import { Container, StyledDatePicker, StyledDateTimePicker } from './dateField.styles';
 
 interface IProps {
 	inputId: string;
 	value: any;
 	defaultValue?: any;
+	initialFocusedDate?: any;
 	name: string;
 	disabled?: boolean;
 	format?: string;
@@ -61,10 +62,15 @@ export class DateField extends React.PureComponent<IProps, IState> {
 	public handleChange = (newDate) => {
 		if (this.props.onChange) {
 			this.props.onChange({
-				target: { value: newDate.valueOf(), name: this.props.name }
+				target: {
+					value: newDate.valueOf(),
+					name: this.props.name,
+				}
 			});
 		}
-		this.setState({ value: newDate.valueOf() });
+		this.setState({
+			value: newDate.valueOf()
+		});
 	}
 
 	public render() {
@@ -85,6 +91,7 @@ export class DateField extends React.PureComponent<IProps, IState> {
 					format={format}
 					shouldDisableDate={this.props.shouldDisableDate}
 					defaultValue={defaultValue}
+					initialFocusedDate={this.props.initialFocusedDate}
 				/>
 			</Container>
 		);

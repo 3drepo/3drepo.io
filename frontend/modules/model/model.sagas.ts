@@ -57,7 +57,6 @@ export function* updateSettings({ modelData: { teamspace, project, modelId }, se
 		const modifiedSettings = cloneDeep(settings);
 
 		yield API.editModelSettings(teamspace, modelId, modifiedSettings);
-
 		yield put(
 			TeamspacesActions.updateModelSuccess(
 				teamspace, modelId, { project, model: modelId, name: modifiedSettings.name, code: modifiedSettings.code }

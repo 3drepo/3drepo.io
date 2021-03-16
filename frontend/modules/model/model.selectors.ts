@@ -88,6 +88,10 @@ export const selectDefaultView = createSelector(
 	selectSettings, (state) => state.defaultView
 );
 
+export const selectDefaultLegend = createSelector(
+	selectSettings, (state) => state.defaultLegend
+);
+
 export const selectMetaKeys = createSelector(
 	selectModelDomain, (state) => state.metaKeys
 );

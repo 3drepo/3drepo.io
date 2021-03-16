@@ -24,6 +24,7 @@ import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { EmptyStateInfo } from '../../../components/components.styles';
 import { Loader } from '../../../components/loader/loader.component';
 import { PanelBarActions } from '../panelBarActions';
+import { SequenceForm } from './components/sequenceForm/';
 import { SequencePlayer } from './components/sequencePlayer/sequencePlayer.component';
 import { SequencesList } from './components/sequencesList/sequencesList.component';
 import { TasksList } from './components/tasksList/sequenceTasksList.component';
@@ -40,6 +41,7 @@ interface IProps {
 	setSelectedSequence: (id: string) => void;
 	maxDate: Date;
 	minDate: Date;
+	frames: any[];
 	selectedDate: Date;
 	selectedEndingDate: Date;
 	colorOverrides: any;
@@ -54,16 +56,21 @@ interface IProps {
 	fetchActivityDetails: (id: string) => void;
 	deselectViewsAndLeaveClipping: () => void;
 	id?: string;
+	isActivitiesPending: boolean;
+	draggablePanels: string[];
+	toggleLegend: () => void;
+	resetLegendPanel: () => void;
 }
 
 const da =  new Date();
 
 const SequenceDetails = ({
 	minDate, maxDate, selectedDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
-	setStepScale, currentTasks, loadingFrame,  rightPanels, toggleActivitiesPanel,
-	fetchActivityDetails, onPlayStarted
+	setStepScale, currentTasks, loadingFrame,  rightPanels, toggleActivitiesPanel, fetchActivityDetails, onPlayStarted,
+	frames, isActivitiesPending, toggleLegend, draggablePanels
 }) => (
 		<>
+			<SequenceForm />
 			<SequencePlayer
 				min={minDate}
 				max={maxDate}
@@ -78,12 +85,15 @@ const SequenceDetails = ({
 				rightPanels={rightPanels}
 				toggleActivitiesPanel={toggleActivitiesPanel}
 				onPlayStarted={onPlayStarted}
+				frames={frames}
+				isActivitiesPending={isActivitiesPending}
+				toggleLegend={toggleLegend}
+				draggablePanels={draggablePanels}
 			/>
 			<TasksList
 				tasks={currentTasks}
 				minDate={selectedDate}
 				maxDate={selectedEndingDate}
-				loadingFrame={loadingFrame}
 				fetchActivityDetails={fetchActivityDetails}
 			/>
 		</>
@@ -94,12 +104,14 @@ const SequencesLoader = () => (<LoaderContainer><Loader /></LoaderContainer>);
 export class Sequences extends React.PureComponent<IProps, {}> {
 	public componentWillUnmount = () => {
 		this.props.setPanelVisibility(VIEWER_PANELS.ACTIVITIES, false);
+		this.props.resetLegendPanel();
 	}
 
 	public componentDidUpdate(prevProps: Readonly<IProps>) {
-		const { selectedSequence, setPanelVisibility } = this.props;
+		const { selectedSequence, setPanelVisibility, resetLegendPanel } = this.props;
 		if (selectedSequence !== prevProps.selectedSequence && !selectedSequence) {
 			setPanelVisibility(VIEWER_PANELS.ACTIVITIES, false);
+			resetLegendPanel();
 		}
 	}
 
