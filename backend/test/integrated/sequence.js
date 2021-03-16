@@ -374,8 +374,13 @@ describe("Sequences", function () {
 		it("should succeed", function(done) {
 			agent.get(`/${username}/${model}/sequences?key=${userApiKey}`).expect(200, function(err , res) {
 				expect(res.body.length).to.equal(2);
-				res.body[0].frames = latestGoldenData.frames;
-				expect(res.body[0]).to.deep.equal(latestGoldenData);
+				expect(res.body[0]._id).to.equal(latestGoldenData._id);
+				expect(res.body[0].teamspace).to.equal(latestGoldenData.teamspace);
+				expect(res.body[0].model).to.equal(latestGoldenData.model);
+				expect(res.body[0].rev_id).to.equal(latestGoldenData.rev_id);
+				expect(res.body[0].name).to.equal(latestGoldenData.name);
+				expect(res.body[0].minDate).to.equal(latestGoldenData.frames[0].dateTime);
+				expect(res.body[0].maxDate).to.equal(latestGoldenData.frames[latestGoldenData.frames.length - 1].dateTime);
 
 				return done(err);
 			});
@@ -384,8 +389,13 @@ describe("Sequences", function () {
 		it("from latest revision should succeed [deprecated]", function(done) {
 			agent.get(`/${username}/${model}/revision/master/head/sequences?key=${userApiKey}`).expect(200, function(err , res) {
 				expect(res.body.length).to.equal(2);
-				res.body[0].frames = latestGoldenData.frames;
-				expect(res.body[0]).to.deep.equal(latestGoldenData);
+				expect(res.body[0]._id).to.equal(latestGoldenData._id);
+				expect(res.body[0].teamspace).to.equal(latestGoldenData.teamspace);
+				expect(res.body[0].model).to.equal(latestGoldenData.model);
+				expect(res.body[0].rev_id).to.equal(latestGoldenData.rev_id);
+				expect(res.body[0].name).to.equal(latestGoldenData.name);
+				expect(res.body[0].minDate).to.equal(latestGoldenData.frames[0].dateTime);
+				expect(res.body[0].maxDate).to.equal(latestGoldenData.frames[latestGoldenData.frames.length - 1].dateTime);
 
 				return done(err);
 			});
@@ -394,8 +404,13 @@ describe("Sequences", function () {
 		it("from revision should succeed [deprecated]", function(done) {
 			agent.get(`/${username}/${model}/revision/${oldRevision}/sequences?key=${userApiKey}`).expect(200, function(err , res) {
 				expect(res.body.length).to.equal(2);
-				res.body[0].frames = oldGoldenData.frames;
-				expect(res.body[0]).to.deep.equal(oldGoldenData);
+				expect(res.body[0]._id).to.equal(oldGoldenData._id);
+				expect(res.body[0].teamspace).to.equal(oldGoldenData.teamspace);
+				expect(res.body[0].model).to.equal(oldGoldenData.model);
+				expect(res.body[0].rev_id).to.equal(oldGoldenData.rev_id);
+				expect(res.body[0].name).to.equal(oldGoldenData.name);
+				expect(res.body[0].minDate).to.equal(oldGoldenData.frames[0].dateTime);
+				expect(res.body[0].maxDate).to.equal(oldGoldenData.frames[oldGoldenData.frames.length - 1].dateTime);
 
 				return done(err);
 			});
@@ -404,8 +419,13 @@ describe("Sequences", function () {
 		it("from revision should succeed", function(done) {
 			agent.get(`/${username}/${model}/sequences?revId=${oldRevision}&key=${userApiKey}`).expect(200, function(err , res) {
 				expect(res.body.length).to.equal(2);
-				res.body[0].frames = oldGoldenData.frames;
-				expect(res.body[0]).to.deep.equal(oldGoldenData);
+				expect(res.body[0]._id).to.equal(oldGoldenData._id);
+				expect(res.body[0].teamspace).to.equal(oldGoldenData.teamspace);
+				expect(res.body[0].model).to.equal(oldGoldenData.model);
+				expect(res.body[0].rev_id).to.equal(oldGoldenData.rev_id);
+				expect(res.body[0].name).to.equal(oldGoldenData.name);
+				expect(res.body[0].minDate).to.equal(oldGoldenData.frames[0].dateTime);
+				expect(res.body[0].maxDate).to.equal(oldGoldenData.frames[oldGoldenData.frames.length - 1].dateTime);
 
 				return done(err);
 			});
@@ -414,8 +434,13 @@ describe("Sequences", function () {
 		it("from federation should succeed [deprecated]", function(done) {
 			agent.get(`/${username}/${federation}/revision/master/head/sequences?key=${userApiKey}`).expect(200, function(err , res) {
 				expect(res.body.length).to.equal(2);
-				res.body[0].frames = latestGoldenData.frames;
-				expect(res.body[0]).to.deep.equal(latestGoldenData);
+				expect(res.body[0]._id).to.equal(latestGoldenData._id);
+				expect(res.body[0].teamspace).to.equal(latestGoldenData.teamspace);
+				expect(res.body[0].model).to.equal(latestGoldenData.model);
+				expect(res.body[0].rev_id).to.equal(latestGoldenData.rev_id);
+				expect(res.body[0].name).to.equal(latestGoldenData.name);
+				expect(res.body[0].minDate).to.equal(latestGoldenData.frames[0].dateTime);
+				expect(res.body[0].maxDate).to.equal(latestGoldenData.frames[latestGoldenData.frames.length - 1].dateTime);
 
 				return done(err);
 			});
@@ -424,8 +449,13 @@ describe("Sequences", function () {
 		it("from federation should succeed", function(done) {
 			agent.get(`/${username}/${federation}/sequences?key=${userApiKey}`).expect(200, function(err , res) {
 				expect(res.body.length).to.equal(2);
-				res.body[0].frames = latestGoldenData.frames;
-				expect(res.body[0]).to.deep.equal(latestGoldenData);
+				expect(res.body[0]._id).to.equal(latestGoldenData._id);
+				expect(res.body[0].teamspace).to.equal(latestGoldenData.teamspace);
+				expect(res.body[0].model).to.equal(latestGoldenData.model);
+				expect(res.body[0].rev_id).to.equal(latestGoldenData.rev_id);
+				expect(res.body[0].name).to.equal(latestGoldenData.name);
+				expect(res.body[0].minDate).to.equal(latestGoldenData.frames[0].dateTime);
+				expect(res.body[0].maxDate).to.equal(latestGoldenData.frames[latestGoldenData.frames.length - 1].dateTime);
 
 				return done(err);
 			});
@@ -712,8 +742,16 @@ describe("Sequences", function () {
 				(done) => {
 					agent.get(`/${username}/${model}/sequences?revId=${oldRevision}&key=${userApiKey}`).expect(200, function(err , res) {
 						expect(res.body.length).to.equal(2);
-						res.body[0].frames = oldGoldenData.frames;
-						expect(res.body[0]).to.deep.equal({...oldGoldenData, ...update});
+						const updatedData = {...oldGoldenData, ...update};
+
+						expect(res.body[0]._id).to.equal(updatedData._id);
+						expect(res.body[0].teamspace).to.equal(updatedData.teamspace);
+						expect(res.body[0].model).to.equal(updatedData.model);
+						expect(res.body[0].rev_id).to.equal(updatedData.rev_id);
+						expect(res.body[0].name).to.equal(updatedData.name);
+						expect(res.body[0].minDate).to.equal(updatedData.frames[0].dateTime);
+						expect(res.body[0].maxDate).to.equal(updatedData.frames[updatedData.frames.length - 1].dateTime);
+
 						done(err);
 					});
 				}
