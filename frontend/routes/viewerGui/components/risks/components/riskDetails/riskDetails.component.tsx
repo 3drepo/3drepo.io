@@ -78,6 +78,8 @@ interface IProps {
 	showSequenceDate: (date) => void;
 	minSequenceDate: Date;
 	maxSequenceDate: Date;
+	selectedDate: Date;
+	sequences: any[];
 }
 
 interface IState {
@@ -293,6 +295,8 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				showSequenceDate={this.props.showSequenceDate}
 				minSequenceDate={this.props.minSequenceDate}
 				maxSequenceDate={this.props.maxSequenceDate}
+				selectedDate={this.props.selectedDate}
+				sequences={this.props.sequences}
 			/>
 		);
 	}

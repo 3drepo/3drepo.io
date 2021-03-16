@@ -12,6 +12,7 @@ import dialogSaga from './dialog/dialog.sagas';
 import groupsSaga from './groups/groups.sagas';
 import issuesSaga from './issues/issues.sagas';
 import jobsSaga from './jobs/jobs.sagas';
+import legendSaga from './legend/legend.sagas';
 import measurementsSaga from './measurements/measurements.sagas';
 import modelSaga from './model/model.sagas';
 import notificationsSaga from './notifications/notifications.sagas';
@@ -59,7 +60,8 @@ export default function* rootSaga() {
 		fork(boardSaga),
 		fork(sequencesSaga),
 		fork(activitiesSaga),
-		fork(presentationSaga)
+		fork(presentationSaga),
+		fork(legendSaga),
 		// <-- INJECT MODULE SAGA -->
 	]);
 }

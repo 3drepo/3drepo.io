@@ -17,6 +17,8 @@
 
 import React from 'react';
 
+import { pick } from 'lodash';
+
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { Loader } from '../../../components/loader/loader.component';
 import {
@@ -29,7 +31,7 @@ import {
 } from './viewerPanel.styles';
 
 const ViewerPanelTitle = ({title, Icon, renderActions}) => (
-	<TitleContainer>
+	<TitleContainer className="panelTitle">
 		<Title><TitleIcon>{Icon}</TitleIcon>{title}</Title>
 		{renderActions && renderActions()}
 	</TitleContainer>
@@ -44,6 +46,7 @@ interface IProps {
 	paperProps?: any;
 	renderActions?: () => JSX.Element | JSX.Element[];
 	id?: string;
+	style?: any;
 }
 
 export class ViewerPanel extends React.PureComponent<IProps, any> {
@@ -72,17 +75,20 @@ export class ViewerPanel extends React.PureComponent<IProps, any> {
 	)
 
 	public render() {
-		const { pending, className, paperProps, flexHeight } = this.props;
+		const { pending, className, paperProps, flexHeight, style } = this.props;
+		const draggableProps = pick(this.props, ['onMouseDown', 'onMouseUp', 'onTouchStart', 'onTouchEnd']);
 
 		return (
 			<Panel
 				className={className}
+				style={style}
 				isPending={pending}
 				flexHeight={flexHeight}
 				title={this.renderTitle()}
 				paperProps={paperProps}
 				disableStretching
 				id={this.props.id}
+				{...draggableProps}
 			>
 				{this.renderLoader(pending)}
 				{this.renderContent(!pending)}

@@ -15,13 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import DayJsUtils from '@date-io/dayjs';
+import React from 'react';
+
 import List from '@material-ui/core/List';
 import ArrowRight from '@material-ui/icons/ArrowRight';
 import Check from '@material-ui/icons/Check';
 import Copy from '@material-ui/icons/FileCopy';
-import { MuiPickersUtilsProvider } from 'material-ui-pickers';
-import React from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
@@ -192,13 +191,11 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		return (
-			<MuiPickersUtilsProvider utils={DayJsUtils}>
-				<MenuList>
-					{this.renderMenuDataTypes(this.props.dataTypes && this.props.dataTypes.length)}
-					{this.renderMenuItems(this.props.items)}
-					{this.renderFooter()}
-				</MenuList>
-			</MuiPickersUtilsProvider>
+			<MenuList>
+				{this.renderMenuDataTypes(this.props.dataTypes && this.props.dataTypes.length)}
+				{this.renderMenuItems(this.props.items)}
+				{this.renderFooter()}
+			</MenuList>
 		);
 	}
 }
