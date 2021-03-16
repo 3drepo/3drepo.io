@@ -60,7 +60,7 @@ export const INITIAL_STATE = {
 
 export const fetchSequenceSuccess = (state = INITIAL_STATE, { sequence }) => {
 	if (state.sequences && state.sequences.length > 0) {
-		const sequenceIndex = state.sequences.findIndex(s => s._id === sequence._id);
+		const sequenceIndex = state.sequences.findIndex((s) => s._id === sequence._id);
 
 		if (sequenceIndex >= 0) {
 			state.sequences[sequenceIndex] = sequence;
