@@ -43,7 +43,7 @@ export function* fetchSequence({sequenceId}) {
 
 		const response = yield API.getSequence(teamspace, model, sequenceId);
 		yield put(SequencesActions.fetchSequenceSuccess(response.data));
-		yield put(SequencesActions.initializeSequences());
+		// yield put(SequencesActions.initializeSequences());
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'sequences', error));
 	}
@@ -191,8 +191,8 @@ export function* restoreModelDefaultVisibility() {
 
 export function* setSelectedSequence({ sequenceId }) {
 	if (sequenceId) {
+		yield put(SequencesActions.initializeSequences());
 		yield put(SequencesActions.fetchSequence(sequenceId));
-		// yield put(SequencesActions.initializeSequences());
 	} else {
 		const selectedSequence = yield select(selectSelectedSequence);
 		if (selectedSequence) {
