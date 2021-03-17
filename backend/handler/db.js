@@ -94,6 +94,12 @@
 		return findResult.value;
 	};
 
+	Handler.deleteMany = async function (database, colName, query) {
+		const collection = await Handler.getCollection(database, colName);
+		const findResult = await collection.deleteMany(query);
+		return findResult.value;
+	};
+
 	function getURL(database) {
 		// Generate connection string that could include multiple hosts that
 		// represent a replica set.
@@ -178,6 +184,11 @@
 	Handler.insert = async function (database, colName, data) {
 		const collection = await Handler.getCollection(database, colName);
 		return collection.insert(data);
+	};
+
+	Handler.insertMany = async function (database, colName, data) {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.insertMany(data);
 	};
 
 	Handler.getFileFromGridFS = function (database, collection, filename) {

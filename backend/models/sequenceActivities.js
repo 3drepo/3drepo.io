@@ -27,7 +27,7 @@ const {pick} = require("lodash");
 const keyValueSchema = yup.object().shape({
 	key: yup.string().required(),
 	value: yup.mixed().required()
-});
+}).noUnknown();
 
 const activityEditSchema = yup.object().shape({
 	name: yup.string(),
@@ -44,8 +44,11 @@ const activitySchema = yup.object().shape({
 	endDate: yup.number().required(),
 	parent: yup.string(),
 	resources: yup.object(),
-	data: yup.array().of(keyValueSchema)
+	data: yup.array().of(keyValueSchema),
+	subActivities: yup.array().of(yup.lazy(() => activitySchema.default(undefined)))
 }).noUnknown();
+
+const activityTreeSchema = yup.array().of(activitySchema).required();
 
 const activityCol = (modelId) => `${modelId}.activities`;
 
@@ -58,6 +61,57 @@ const cleanActivityDetail = (activity) => {
 	}
 
 	return activity;
+};
+
+const fillIds = (activityTrees, sequenceId) => {
+	activityTrees.forEach((activity) => {
+		const _id = utils.stringToUUID(nodeuuid());
+
+		activity._id = _id;
+
+		if (activity.subActivities) {
+			fillIds(activity.subActivities, sequenceId);
+		}
+	});
+};
+
+const unrollActivities = (activityTrees, sequenceId, parentId, plainActivities = []) => {
+	activityTrees.forEach((activity) => {
+		const plainActivity = pick(activity,"_id", "name", "startDate", "endDate", "data", "resources");
+		plainActivity.sequenceId = sequenceId;
+
+		if (parentId) {
+			plainActivity.parent = parentId;
+		}
+
+		plainActivities.push(plainActivity);
+
+		if (activity.subActivities) {
+			unrollActivities(activity.subActivities, sequenceId, activity._id, plainActivities);
+		}
+
+	});
+
+	return plainActivities;
+};
+
+const simplifyActivity = (activity, subActivities) => {
+	const id = activity._id ? utils.uuidToString(activity._id) : null;
+
+	if (subActivities && subActivities.length) {
+		subActivities = { subActivities };
+	} else {
+		subActivities = {};
+	}
+
+	return  { id, ...pick(activity, "name", "startDate", "endDate"), ...subActivities };
+};
+
+const simplifyActivityTree = (activities) => {
+	return activities.map(activity => {
+		const subActivities = activity.subActivities ? simplifyActivityTree(activity.subActivities) : null;
+		return simplifyActivity(activity, subActivities);
+	});
 };
 
 /**
@@ -76,22 +130,15 @@ const getSubActivities = (parentId, activities) => {
 			return !parent;
 		}
 	}).map(activity => {
-		const id = utils.uuidToString(activity._id);
-		let subActivities = getSubActivities(id, activities);
-
-		if (subActivities.length) {
-			subActivities = { subActivities };
-		} else {
-			subActivities = {};
-		}
-
-		return  { id, ...pick(activity, "name", "startDate", "endDate"), ...subActivities };
+		const subActivities = getSubActivities(utils.uuidToString(activity._id), activities);
+		return  simplifyActivity(activity, subActivities);
 	});
 };
 
 const createActivitiesTree = async(account, model, sequenceId) => {
+	let activities = {};
 	const foundActivities = await db.find(account, model + ".activities",{sequenceId: utils.stringToUUID(sequenceId)}); // filter by sequenceId
-	const activities = getSubActivities(null, foundActivities);
+	activities = getSubActivities(null, foundActivities);
 
 	return { activities };
 };
@@ -200,6 +247,35 @@ SequenceActivities.get = async (account, model, sequenceId) => {
 	}
 
 	return activities;
+};
+
+SequenceActivities.createActivities = async (account, model, sequenceId, activitiesTree, overwrite) => {
+	const sequence = await db.findOne(account, model + ".sequences", { _id: utils.stringToUUID(sequenceId)});
+
+	if (!sequence) {
+		throw responseCodes.SEQUENCE_NOT_FOUND;
+	}
+
+	if (!activityTreeSchema.isValidSync(activitiesTree, { strict: true })) {
+		throw responseCodes.INVALID_ARGUMENTS;
+	}
+
+	fillIds(activitiesTree);
+
+	const activitiesList = unrollActivities(activitiesTree, utils.stringToUUID(sequenceId));
+
+	await FileRef.removeFile(account, model, "activities", sequenceId);
+
+	if(overwrite) {
+		const activityTreeFile = JSON.stringify(simplifyActivityTree(activitiesTree));
+
+		await Promise.all([
+			db.deleteMany(account, activityCol(model),{}),
+			FileRef.storeFile(account, activityCol(model) + ".ref", account, utils.uuidToString(nodeuuid()), activityTreeFile, {"_id": sequenceId})
+		]);
+	}
+
+	await db.insertMany(account, activityCol(model), activitiesList);
 };
 
 module.exports =  SequenceActivities;

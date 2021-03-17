@@ -415,45 +415,9 @@ router.get("/sequences/:sequenceId/activities/:activityId", middlewares.issue.ca
 router.get("/sequences/:sequenceId/activities", middlewares.hasReadAccessToModel, getSequenceActivities);
 
 /**
- * @api {post} /:teamspace/:model/sequences/:sequenceId/activities Create an activity
- * @apiName createSequenceActivity
- * @apiGroup Sequences
- * @apiDescription Create a sequence activity. It returns the full activity with the generated Id.
- *
- * @apiUse Sequences
- *
- * @apiParam {String} sequenceId Sequence unique ID
- *
- * @apiUse ActivityBodyObject
- * @apiUse KeyValueObject
- *
- * @apiExample {post} Example usage
- * POST /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0001-000000000001/activities HTTP/1.1
- * {
- *    "name":"Custom activity",
- *    "startDate": 1610000000000,
- *    "endDate": 1615483938124,
- *    "data": [
- *       {"key":"Name","value":"Custom activity"},
- *       {"key":"Status","value":"Planned"},
- *    ]
- * }
- *
- * @apiSuccessExample {json} Success-Response
- * HTTP/1.1 200 OK
- * {
- *    "_id": "fe94be44-5cd8-4aaf-b020-afc1456680d3",
- *    "sequenceId": "00000000-0000-0000-0001-000000000001",
- *    "name": "Custom activity",
- *    "startDate": 1610000000000,
- *    "endDate": 1615483938124,
- *    "data": [
- *       {"key":"Name","value":"Custom activity"},
- *       {"key":"Status","value":"Planned"},
- *    ]
- * }
+ * TODO: Fill me up
  * */
-router.post("/sequences/:sequenceId/activities", middlewares.hasUploadAccessToModel, createActivity);
+router.post("/sequences/:sequenceId/activities", middlewares.hasUploadAccessToModel, createActivities);
 
 /**
  * @api {put} /:teamspace/:model/sequences/:sequenceId/activities/:activityId Edit an activity
@@ -590,12 +554,12 @@ function getSequenceActivities(req, res, next) {
 	});
 }
 
-function createActivity(req, res, next) {
+function createActivities(req, res, next) {
 	const { account, model, sequenceId } = req.params;
 	const place = utils.APIInfo(req);
 
-	SequenceActivities.create(account, model, sequenceId, req.body).then(activity => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, activity);
+	SequenceActivities.createActivities(account, model, sequenceId, req.body.activities, req.body.ovewrite).then(() => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
