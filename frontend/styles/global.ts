@@ -21,6 +21,7 @@ export const GlobalStyle = createGlobalStyle`
 		-ms-text-size-adjust: 100%;
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
+		/* NOTE: Do not set overflow:hidden here */
 	}
 
 	body {
