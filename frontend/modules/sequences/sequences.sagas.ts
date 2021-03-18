@@ -74,7 +74,7 @@ export function* updateSequence({ sequenceId, newName }) {
 		const model = yield select(selectSequenceModel);
 
 		if (sequenceId) {
-			yield API.patchSequence(teamspace, model, revision, sequenceId, newName);
+			yield API.patchSequence(teamspace, model, sequenceId, newName);
 			yield put(SequencesActions.updateSequenceSuccess(sequenceId, newName));
 		}
 
