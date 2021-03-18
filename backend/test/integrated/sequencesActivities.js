@@ -330,8 +330,8 @@ describe("Sequences", function () {
 		});
 	});
 
-	describe("replace activities", function() {
-		it("should succeed", async() => {
+	describe("bulk activities", function() {
+		it("created to replace the old ones should succeed", async() => {
 			await agent.post(`/${username}/${model}/sequences/${sequenceId}/activities/`)
 				.send(bulkActivities)
 				.expect(200);
@@ -339,6 +339,9 @@ describe("Sequences", function () {
 
 		/*
 		it("get details of old activity should fail", async() => {
+		});
+
+		it("to add to the current activities array should work", async() => {
 		}); */
 
 		it("should be reflected when fetching the activity list", async() => {

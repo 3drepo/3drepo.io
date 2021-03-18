@@ -56,6 +56,18 @@ const SequenceActivities = require("../models/sequenceActivities");
  */
 
 /**
+ * @apiDefine ActivityTreeObject
+ *
+ * @apiParam (Type: Activity) {String} name The name of the activity
+ * @apiParam (Type: Activity) {Number} startDate The starting timestamp date of the activity
+ * @apiParam (Type: Activity) {Number} endDate The ending timestamp date of the activity
+ * @apiParam (Type: Activity) {Object} [resources] The resources asoociated with the activity
+ * @apiParam (Type: Activity) {KeyValue[]} [data] An array of key value pairs with metadata for the activity
+ * @apiParam (Type: Activity) {Activity[]} [subActivities] An array of activities that will be children of the activity
+ *
+ */
+
+/**
  * @apiDefine KeyValueObject
  *
  * @apiParam (Type: KeyValue) {String} key The key of the pair
@@ -415,8 +427,72 @@ router.get("/sequences/:sequenceId/activities/:activityId", middlewares.issue.ca
 router.get("/sequences/:sequenceId/activities", middlewares.hasReadAccessToModel, getSequenceActivities);
 
 /**
- * TODO: Fill me up
- * */
+ * @api {post} /:teamspace/:model/sequences/:sequenceId/activities/ Create one or more activities
+ * @apiName createSequenceActivities
+ * @apiGroup Sequences
+ * @apiDescription Creates a sequence activity tree.
+ *
+ * @apiUse Sequences
+ * @apiParam (Request body) {Activity[]} activity An array of the activity tree that will be created
+ * @apiParam (Request body) {Boolean} [overwrite] This flag indicates whether the request will replace the currently stored activities or just added at the end of the currently stored activities array. If not present it will be considered as false.
+ *
+ * @apiParam {String} sequenceId Sequence unique ID
+ * @apiUse ActivityTreeObject
+ * @apiUse KeyValueObject
+ *
+ * @apiExample {post} Example usage
+ * POST /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0001-000000000001/activities HTTP/1.1
+ * {
+ *   "overwrite": true,
+ *   "activities": [
+ *     {
+ *       "name": "Clinc Construction",
+ *       "startDate": 1603184400000,
+ *       "endDate": 1613062800000,
+ *       "data": [
+ *         {
+ *           "key": "Color",
+ *           "value": "green"
+ *         }
+ *       ],
+ *       "subActivities": [
+ *         {
+ *           "name": "Site Work & Logistics",
+ *           "startDate": 1603184400000,
+ *           "endDate": 1613062800000,
+ *           "data": [
+ *             {
+ *               "key": "Heigh",
+ *               "value": 12
+ *             }
+ *           ],
+ *           "subActivities": [
+ *             {
+ *               "name": "Site Office Installation",
+ *               "startDate": 1603184400000,
+ *               "endDate": 1603213200000,
+ *               "data": [
+ *                 {
+ *                   "key": "Size",
+ *                   "value": "Big"
+ *                 }
+ *               ]
+ *             },
+ *             {
+ *               "name": "Excavation",
+ *               "startDate": 1603270800000,
+ *               "endDate": 1603299600000
+ *             }
+ *           ]
+ *         }
+ *       ]
+ *     }
+ *   ]
+ * }
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ **/
 router.post("/sequences/:sequenceId/activities", middlewares.hasUploadAccessToModel, createActivities);
 
 /**
