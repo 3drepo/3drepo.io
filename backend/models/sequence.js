@@ -57,8 +57,11 @@ const cleanActivityDetail = (toClean) => {
 	return clean(toClean, keys);
 };
 
-const cleanSequence = (toClean) => {
+const cleanSequence = (account, model, toClean) => {
 	const keys = ["_id", "rev_id", "model"];
+
+	toClean.teamspace = account;
+	toClean.model = model;
 
 	for (let i = 0; toClean["frames"] && i < toClean["frames"].length; i++) {
 		toClean["frames"][i] = cleanSequenceFrame(toClean["frames"][i]);
@@ -199,7 +202,7 @@ Sequence.getSequenceById = async (account, model, sequenceId, projection = {}, n
 		throw responseCodes.SEQUENCE_NOT_FOUND;
 	}
 
-	return noClean ? sequence : cleanSequence(sequence);
+	return noClean ? sequence : cleanSequence(account, model, sequence);
 };
 
 Sequence.getSequenceActivityDetail = async (account, model, activityId) => {
@@ -236,15 +239,13 @@ Sequence.getList = async (account, model, branch, revision, cleanResponse = fals
 		"$or":[{"rev_id": history._id}, {"rev_id": {"$exists": false}}]
 	});
 	sequences.forEach((sequence) => {
-		sequence.teamspace = account;
-		sequence.model = model;
 		sequence.minDate = new Date((sequence.frames[0] || {}).dateTime).getTime();
 		sequence.maxDate = new Date((sequence.frames[sequence.frames.length - 1] || {}).dateTime).getTime();
 
 		delete sequence.frames;
 
 		if (cleanResponse) {
-			cleanSequence(sequence);
+			cleanSequence(account, model, sequence);
 		}
 	});
 

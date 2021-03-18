@@ -92,17 +92,18 @@ export const INITIAL_STATE: ISequencesState = {
 };
 
 export const fetchSequenceSuccess = (state = INITIAL_STATE, { sequence }) => {
-	if (state.sequences && state.sequences.length > 0) {
-		const sequenceIndex = state.sequences.findIndex((s) => s._id === sequence._id);
+	let sequences = state.sequences;
+	if (sequences && sequences.length > 0) {
+		const sequenceIndex = sequences.findIndex((s) => s._id === sequence._id);
 
 		if (sequenceIndex >= 0) {
-			state.sequences[sequenceIndex] = sequence;
+			sequences[sequenceIndex] = sequence;
 		}
 	} else {
-		state.sequences = [ sequence ];
+		sequences = [ sequence ];
 	}
 
-	return { ...state };
+	return { ...state, sequences };
 };
 
 export const fetchSequenceListSuccess = (state = INITIAL_STATE, { sequences }) => {
