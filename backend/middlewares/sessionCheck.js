@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -17,24 +17,10 @@
 
 "use strict";
 const C = require("../constants");
-const config = require("../config");
-const session = require("../services/session").session(config);
+const utils = require("../utils");
 
-module.exports = async (req, res, next) => {
-	// In case other middleware sets the session
-	if (req.session) {
-		next();
-		return;
-	}
-
-	session(req, res, function(err) {
-		if(err) {
-			// something is wrong with the library or the session (i.e. corrupted json file) itself, log the user out
-			req[C.REQ_REPO].logger.logError(`express-session internal error: ${err}`);
-			req[C.REQ_REPO].logger.logError(`express-session internal error: ${JSON.stringify(err)}`);
-			req[C.REQ_REPO].logger.logError(`express-session internal error: ${err.stack}`);
-		} else {
-			next();
-		}
-	});
+module.exports = (req) => {
+	return req.session &&
+		utils.hasField(req.session, C.REPO_SESSION_USER) &&
+		!(req.headers.referer && req.session.user && req.session.user.referer && !req.headers.referer.match(req.session.user.referer));
 };

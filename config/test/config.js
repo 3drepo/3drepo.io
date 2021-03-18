@@ -154,7 +154,4 @@ module.exports = {
 		{title: "Cookies", type: "haveRead", page: "cookies", fileName: "cookies.html"}
 	],
 	userNotice: false,
-	unitySettings: {
-        TOTAL_MEMORY: 2130706432 / 10,
-    },
 }
