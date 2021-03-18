@@ -147,6 +147,7 @@ describe("Sequences", function () {
 			return activity;
 		}).sort((a, b)=> b.name < a.name? 1 : -1)
 	}
+
 	const createPayload = (act, overwrite = false) => ({ activities: [act], overwrite });
 
 	describe("get unmodified activities", function() {
@@ -364,14 +365,31 @@ describe("Sequences", function () {
 				.expect(200);
 		});
 
-		// it("should fail to fetch any descendant from the activity", async() => {
-		// });
-
 		it("should be reflected when fetching the activity list", async() => {
 			let	res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities`)
 				.expect(200);
 
 			expect(sortById(res.body.activities)).to.deep.equal(sortById(activities.activities))
+		});
+
+		it("which has descendants should succeed",  async() => {
+			await agent.delete(`/${username}/${model}/sequences/${sequenceId}/activities/cdadc91b-8050-4fbb-beac-faed568da929`)
+				.expect(200);
+		});
+
+		it("which has descendants should be reflected when fetching the activities",  async() => {
+			let res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities`)
+				.expect(200);
+
+			let choppedActivities = cloneDeep(activities);
+			choppedActivities.activities[0].subActivities.splice(1,1);
+
+			expect(sortById(res.body.activities)).to.deep.equal(sortById(choppedActivities.activities))
+		})
+
+		it("which has descendants should fail when getting the details of its descendants", async() => {
+			await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities/06d22b37-8198-400a-b8e0-e1e58801902c`)
+				.expect(404);
 		});
 	});
 
@@ -409,10 +427,6 @@ describe("Sequences", function () {
 
 			expect(sortByName(pruneActivities(res.body.activities))).to.deep.equal(sortByName(pruneActivities(allActivities)))
 		});
-
-
-
-
 	})
 
 });

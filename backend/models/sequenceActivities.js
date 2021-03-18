@@ -114,6 +114,17 @@ const simplifyActivityTree = (activities) => {
 	});
 };
 
+const getDescendantsIds = (activities, parentId, ids = []) => {
+	activities.forEach(activity => {
+		if (utils.uuidToString(activity.parent) === parentId) {
+			ids.push(activity._id);
+			getDescendantsIds(activities, utils.uuidToString(activity._id), ids);
+		}
+	});
+
+	return ids;
+};
+
 /**
  * @typedef {{_id: string, parents: Array<string>}} Activity
  * @param {string} parentId
@@ -218,8 +229,14 @@ SequenceActivities.remove = async (account, model, sequenceId, activityId) => {
 	if (!sequence) {
 		throw responseCodes.SEQUENCE_NOT_FOUND;
 	}
+	const activities = await db.find(account,activityCol(model), {sequenceId: utils.stringToUUID(sequenceId), parent:{$exists: true}} , {parent:1, _id:1});
 
-	const query =  {_id: utils.stringToUUID(activityId), sequenceId: utils.stringToUUID(sequenceId)};
+	const idsToDelete = getDescendantsIds(activities, activityId);
+	idsToDelete.push(utils.stringToUUID(activityId));
+
+	// console.log(idsToDelete.map(utils.uuidToString));
+
+	const query = {_id:{ $in: idsToDelete}, sequenceId: utils.stringToUUID(sequenceId)};
 	const {result} = await db.remove(account,  activityCol(model), query);
 
 	if (!result.n) {
