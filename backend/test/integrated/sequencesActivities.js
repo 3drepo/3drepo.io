@@ -74,6 +74,13 @@ describe("Sequences", function () {
 
 	const bulkActivities = {"overwrite":true,"activities":[{"name":"Clinc Construction","startDate":1603184400000,"endDate":1613062800000,"data":[{"key":"Color","value":"green"}],"subActivities":[{"name":"Site Work & Logistics","startDate":1603184400000,"endDate":1613062800000,"data":[{"key":"Heigh","value":12}],"subActivities":[{"name":"Site Office Installation","startDate":1603184400000,"endDate":1603213200000,"data":[{"key":"Size","value":"Big"}]},{"name":"Excavation","startDate":1603270800000,"endDate":1603299600000}]}]}]};
 
+	const pruneActivities = (activities) => {
+		return activities.map(activity => {
+			const subActivities = activity.subActivities ? { subActivities: pruneActivities(activity.subActivities) }:{};
+			return {...pick(activity, "name", "startDate", "endDate"), ...subActivities};
+		});
+	}
+
 	let activityId = null;
 
 	const sortById = (activities) => {
@@ -86,6 +93,15 @@ describe("Sequences", function () {
 		}).sort((a, b)=> b.id < a.id? 1 : -1)
 	}
 
+	const sortByName = (activities) => {
+		return activities.map( activity => {
+			if (activity.subActivities) {
+				activity.subActivities = sortByName(activity.subActivities);
+			}
+
+			return activity;
+		}).sort((a, b)=> b.name < a.name? 1 : -1)
+	}
 	const createPayload = (act, overwrite = false) => ({ activities: [act], overwrite });
 
 	describe("get unmodified activities", function() {
@@ -303,6 +319,9 @@ describe("Sequences", function () {
 				.expect(200);
 		});
 
+		// it("should fail to fetch any descendant from the activity", async() => {
+		// });
+
 		it("should be reflected when fetching the activity list", async() => {
 			let	res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities`)
 				.expect(200);
@@ -310,5 +329,24 @@ describe("Sequences", function () {
 			expect(sortById(res.body.activities)).to.deep.equal(sortById(activities.activities))
 		});
 	});
+
+	describe("replace activities", function() {
+		it("should succeed", async() => {
+			await agent.post(`/${username}/${model}/sequences/${sequenceId}/activities/`)
+				.send(bulkActivities)
+				.expect(200);
+		});
+
+		/*
+		it("get details of old activity should fail", async() => {
+		}); */
+
+		it("should be reflected when fetching the activity list", async() => {
+			let	res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities`)
+				.expect(200);
+
+			expect(sortByName(pruneActivities(res.body.activities))).to.deep.equal(sortByName(pruneActivities(bulkActivities.activities)))
+		});
+	})
 
 });

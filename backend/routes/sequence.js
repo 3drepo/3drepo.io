@@ -558,7 +558,7 @@ function createActivities(req, res, next) {
 	const { account, model, sequenceId } = req.params;
 	const place = utils.APIInfo(req);
 
-	SequenceActivities.createActivities(account, model, sequenceId, req.body.activities, req.body.ovewrite).then(() => {
+	SequenceActivities.createActivities(account, model, sequenceId, req.body.activities, req.body.overwrite).then(() => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

@@ -267,7 +267,7 @@ SequenceActivities.createActivities = async (account, model, sequenceId, activit
 	await FileRef.removeFile(account, model, "activities", sequenceId);
 
 	if(overwrite) {
-		const activityTreeFile = JSON.stringify(simplifyActivityTree(activitiesTree));
+		const activityTreeFile = JSON.stringify({activities: simplifyActivityTree(activitiesTree) });
 
 		await Promise.all([
 			db.deleteMany(account, activityCol(model),{}),
