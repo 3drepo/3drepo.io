@@ -24,9 +24,9 @@ import { getDateByStep, getSelectedFrame } from './sequences.helper';
 
 export const selectSequencesDomain = (state) => (state.sequences);
 
-const getMinMaxDates = ({minDate, maxDate}) => ({
-	minDate,
-	maxDate
+const getMinMaxDates = ({frames, minDate, maxDate}) => ({
+	minDate: minDate || (frames[0] || {}).dateTime,
+	maxDate: maxDate || (frames[frames.length - 1] || {}).dateTime
 });
 
 const getModelName = (sequence, settings) => {
