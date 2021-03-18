@@ -74,6 +74,51 @@ describe("Sequences", function () {
 
 	const bulkActivities = {"overwrite":true,"activities":[{"name":"Clinc Construction","startDate":1603184400000,"endDate":1613062800000,"data":[{"key":"Color","value":"green"}],"subActivities":[{"name":"Site Work & Logistics","startDate":1603184400000,"endDate":1613062800000,"data":[{"key":"Heigh","value":12}],"subActivities":[{"name":"Site Office Installation","startDate":1603184400000,"endDate":1603213200000,"data":[{"key":"Size","value":"Big"}]},{"name":"Excavation","startDate":1603270800000,"endDate":1603299600000}]}]}]};
 
+	const addedActivities = { activities: [
+		{
+			"startDate": 1590742800000,
+			"endDate": 1591027200000,
+			"name": "Crazy activity",
+			"data": [
+				{
+					"value": "PLANNED",
+					"key": "Status"
+				},
+				{
+					"value": "No",
+					"key": "Is Compound Task"
+				}
+			]
+		},
+		{
+			"startDate":1512307920000,
+			"endDate":  1516396680000,
+			"name": "Insane activity",
+			"data" : [{"key": "Color", "value": "burble"}],
+			"subActivities": [
+				{
+					"name": "Somewhat sane actitivy",
+					"startDate": 1461097080000,
+					"endDate": 1461183480000,
+					"data" : [{ "key": "Level of insanity", "value": 0.3}]
+				},
+				{
+					"name": "Sane actitivy",
+					"startDate": 1461183480000,
+					"endDate": 1492719480000,
+					"data" : [{ "key": "Roundness", "value": true}],
+					"subActivities": [{
+						"name": "Boring actitivy",
+						"startDate": 1461183480000,
+						"endDate": 1492719480000
+					}]
+				}
+			]
+		}
+
+	]}
+
+
 	const pruneActivities = (activities) => {
 		return activities.map(activity => {
 			const subActivities = activity.subActivities ? { subActivities: pruneActivities(activity.subActivities) }:{};
@@ -331,25 +376,43 @@ describe("Sequences", function () {
 	});
 
 	describe("bulk activities", function() {
+
 		it("created to replace the old ones should succeed", async() => {
 			await agent.post(`/${username}/${model}/sequences/${sequenceId}/activities/`)
 				.send(bulkActivities)
 				.expect(200);
 		});
 
-		/*
 		it("get details of old activity should fail", async() => {
+			await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities/${activities.activities[0].id}`)
+				.expect(404);
 		});
 
-		it("to add to the current activities array should work", async() => {
-		}); */
-
-		it("should be reflected when fetching the activity list", async() => {
+		it("created as replacemente should be reflected when fetching the activity list", async() => {
 			let	res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities`)
 				.expect(200);
 
 			expect(sortByName(pruneActivities(res.body.activities))).to.deep.equal(sortByName(pruneActivities(bulkActivities.activities)))
 		});
+
+		it("to add to the current activities array should work", async() => {
+			await agent.post(`/${username}/${model}/sequences/${sequenceId}/activities/`)
+				.send(addedActivities)
+				.expect(200);
+		});
+
+		it("added as bulk should be reflected when fetching the activity list", async() => {
+			let	res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities`)
+				.expect(200);
+
+			const allActivities = bulkActivities.activities.concat(addedActivities.activities);
+
+			expect(sortByName(pruneActivities(res.body.activities))).to.deep.equal(sortByName(pruneActivities(allActivities)))
+		});
+
+
+
+
 	})
 
 });
