@@ -27,7 +27,7 @@ import {
 } from '../../../../../../constants/risks';
 import { VIEWER_PANELS_TITLES } from '../../../../../../constants/viewerGui';
 import { calculateLevelOfRisk } from '../../../../../../helpers/risks';
-import { canChangeBasicProperty } from '../../../../../../helpers/risks';
+import { canComment } from '../../../../../../helpers/risks';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { AttachmentsFormTab } from '../attachmentsFormTab/attachmentsFormTab.component';
 import { MainRiskFormTab } from '../mainRiskFormTab/mainRiskFormTab.component';
@@ -92,7 +92,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 
 	get canEditBasicProperty() {
 		const { risk, myJob, permissions, currentUser } = this.props;
-		return this.isNewRisk || canChangeBasicProperty(risk, myJob, permissions, currentUser);
+		return this.isNewRisk || canComment(risk, myJob, permissions, currentUser);
 	}
 
 	public state = {
