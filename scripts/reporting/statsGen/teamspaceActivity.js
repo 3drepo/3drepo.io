@@ -130,13 +130,12 @@ const printStats = (stream, data) => {
 
 const reportActivity = async (db, stream) => {
 	const modelSettings = await db.collection('settings').find({},{_id: 1}).toArray();
-
-	const modelProm = [];
-	modelSettings.forEach((model) => {
-		modelProm.push(getStatsForModel(db, model._id));
-	});
-
-	const stats = await Promise.all(modelProm);
+	const stats = [];
+	for(var i = 0; i < modelSettings.length; ++i) {
+		const model = modelSettings[i];
+		console.log(`\t[${i}/${modelSettings.length}]processing  ${model._id}`);
+		stats.push(await getStatsForModel(db, model._id));
+	};
 
 	const finalStats = stats.reduce(accumulateStats, {});
 	printStats(stream, finalStats);
