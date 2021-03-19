@@ -35,7 +35,7 @@ import {
 import { PanelBarActions } from '../panelBarActions';
 import { ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
 import { IMeasure } from './components/measureItem/measureItem.component';
-import { MeasurementsList } from './components/measurementsList/measurementsList.component';
+import { AllMeasurementsList } from './components/measurementsList/allMeasurementsList.component';
 import { MeasuringType } from './components/measuringType';
 import {
 	Container,
@@ -85,8 +85,6 @@ export class Measurements extends React.PureComponent<IProps, IState> {
 	public state = {
 		isViewerReady: false,
 	};
-
-	public containerRef = React.createRef<any>();
 
 	get type() {
 		return VIEWER_PANELS.MEASUREMENTS;
@@ -143,54 +141,8 @@ export class Measurements extends React.PureComponent<IProps, IState> {
 
 	private getTitleIcon = () => <MeasureIcon />;
 
-	private renderAreasMeasurements = renderWhenTrue(() => (
-		<MeasurementsList
-			measurements={this.props.areaMeasurements}
-			units={this.props.measureUnits}
-			measureType={MEASURE_TYPE.AREA}
-			setMeasurementCheck={this.props.setMeasurementCheck}
-			setMeasurementCheckAll={this.props.setMeasurementCheckAll}
-			removeMeasurement={this.props.removeMeasurement}
-			setMeasurementColor={this.props.setMeasurementColor}
-			setMeasurementName={this.props.setMeasurementName}
-			modelUnit={this.props.modelUnit}
-		/>
-	));
-
-	private renderLengthsMeasurements = renderWhenTrue(() => (
-		<MeasurementsList
-			measurements={this.props.lengthMeasurements}
-			units={this.props.measureUnits}
-			measureType={MEASURE_TYPE.LENGTH}
-			setMeasurementCheck={this.props.setMeasurementCheck}
-			setMeasurementCheckAll={this.props.setMeasurementCheckAll}
-			removeMeasurement={this.props.removeMeasurement}
-			setMeasurementColor={this.props.setMeasurementColor}
-			setMeasurementName={this.props.setMeasurementName}
-			modelUnit={this.props.modelUnit}
-		/>
-	));
-
-	private renderPointMeasurements = renderWhenTrue(() => (
-		<MeasurementsList
-			measurements={this.props.pointMeasurements}
-			units={this.props.measureUnits}
-			measureType={MEASURE_TYPE.POINT}
-			setMeasurementCheck={this.props.setMeasurementCheck}
-			setMeasurementCheckAll={this.props.setMeasurementCheckAll}
-			removeMeasurement={this.props.removeMeasurement}
-			setMeasurementColor={this.props.setMeasurementColor}
-			setMeasurementName={this.props.setMeasurementName}
-			modelUnit={this.props.modelUnit}
-		/>
-	));
-
 	private renderMeasurementDetails = renderWhenTrue(() => (
-		<div>
-			{this.renderPointMeasurements(!isEmpty(this.props.pointMeasurements))}
-			{this.renderLengthsMeasurements(!isEmpty(this.props.lengthMeasurements))}
-			{this.renderAreasMeasurements(!isEmpty(this.props.areaMeasurements))}
-		</div>
+		<AllMeasurementsList {...this.props} units={this.props.measureUnits} />
 	));
 
 	private renderFooterContent = () => (
@@ -239,7 +191,7 @@ export class Measurements extends React.PureComponent<IProps, IState> {
 				pending={!isViewerReady}
 				id={this.props.id}
 			>
-				<Container ref={this.containerRef}>
+				<Container>
 					{this.renderEmptyState(isEmpty(areaMeasurements) && isEmpty(lengthMeasurements) && isEmpty(pointMeasurements))}
 					{this.renderMeasurementDetails(
 							!isEmpty(areaMeasurements) || !isEmpty(lengthMeasurements) || !isEmpty(pointMeasurements)

@@ -23,7 +23,7 @@ import { debounce, get, isEmpty, isEqual } from 'lodash';
 import * as Yup from 'yup';
 
 import {
-	ATTACHMENTS_RISK_TYPE, MAIN_RISK_TYPE, RISK_TABS, SEQUENCING_RISK_TYPE, TREATMENT_RISK_TYPE,
+	ATTACHMENTS_RISK_TYPE, MAIN_RISK_TYPE, RISK_TABS, SEQUENCING_RISK_TYPE, SHAPES_RISK_TYPE, TREATMENT_RISK_TYPE,
 } from '../../../../../../constants/risks';
 import { VIEWER_PANELS_TITLES } from '../../../../../../constants/viewerGui';
 import { calculateLevelOfRisk } from '../../../../../../helpers/risks';
@@ -197,6 +197,10 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		/>
 	)
 
+	public showShapesContent = (active) => (
+		<div>Shapes content</div>
+	)
+
 	public showAttachmentsContent = (active) => (
 		<AttachmentsFormTab active={active} resources={this.props.risk.resources} {...this.props} />
 	)
@@ -232,12 +236,14 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					<StyledTab label={RISK_TABS.RISK} value={MAIN_RISK_TYPE} />
 					<StyledTab label={RISK_TABS.TREATMENT} value={TREATMENT_RISK_TYPE} />
 					<StyledTab label={RISK_TABS.SEQUENCING} value={SEQUENCING_RISK_TYPE} />
+					<StyledTab label={RISK_TABS.SHAPES} value={SHAPES_RISK_TYPE} />
 					<StyledTab {...this.attachmentsProps} value={ATTACHMENTS_RISK_TYPE} />
 				</StyledTabs>
 				<TabContent>
 					{this.showRiskContent(activeTab === MAIN_RISK_TYPE)}
 					{this.showTreatmentContent(activeTab === TREATMENT_RISK_TYPE)}
 					{this.showSequencingContent(activeTab === SEQUENCING_RISK_TYPE)}
+					{this.showShapesContent(activeTab === ATTACHMENTS_RISK_TYPE)}
 					{this.showAttachmentsContent(activeTab === ATTACHMENTS_RISK_TYPE)}
 				</TabContent>
 			</Form>
