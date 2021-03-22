@@ -35,6 +35,7 @@ interface IProps {
 	setMeasurementName: (uuid, type, name) => void;
 	measureType: number;
 	modelUnit: string;
+	colors: string[];
 }
 
 const getTotal = (measurements, type, units, modelUnit) => {
@@ -44,7 +45,7 @@ const getTotal = (measurements, type, units, modelUnit) => {
 
 export const MeasurementsList = ({
 	measurements, units, measureType, removeMeasurement,
-	setMeasurementColor, setMeasurementName, ...props
+	setMeasurementColor, setMeasurementName, colors, ...props
 }: IProps) => {
 	const [expanded, setExpanded] = React.useState(true);
 
@@ -83,6 +84,7 @@ export const MeasurementsList = ({
 							setMeasurementColor={setMeasurementColor}
 							setMeasurementName={setMeasurementName}
 							{...measurement}
+							colors={colors}
 						/>
 					))}
 				</List>

@@ -16,8 +16,8 @@
  */
 
 import { isEmpty } from 'lodash';
-import React from 'react';
-import { MEASURE_TYPE } from '../../../../../../modules/measurements/measurements.constants';
+import React, { useEffect, useState } from 'react';
+import { getColor, MEASURE_TYPE } from '../../../../../../modules/measurements/measurements.constants';
 import { IMeasure } from '../measureItem/measureItem.component';
 import { MeasurementsList } from './measurementsList.component';
 
@@ -32,19 +32,30 @@ export interface IProps {
 	modelUnit: string;
 }
 
-export const AllMeasurementsList = (props: IProps) => (
-	<div>
-		{
-			!isEmpty(props.pointMeasurements) &&
-			<MeasurementsList {...props} measureType={MEASURE_TYPE.POINT} measurements={props.pointMeasurements} />
-		}
-		{
-			!isEmpty(props.lengthMeasurements) &&
-			<MeasurementsList {...props} measureType={MEASURE_TYPE.LENGTH} measurements={props.lengthMeasurements} />
-		}
-		{
-			!isEmpty(props.areaMeasurements) &&
-			<MeasurementsList {...props} measureType={MEASURE_TYPE.AREA} measurements={props.areaMeasurements} />
-		}
-	</div>
-);
+export const AllMeasurementsList = ({areaMeasurements, lengthMeasurements, pointMeasurements, ...props}: IProps) => {
+	const [colors, setColors] = useState([]);
+
+	useEffect(() => {
+		const addColors = [...areaMeasurements, ...lengthMeasurements, ...pointMeasurements]
+			.map(({customColor, color}) => getColor(customColor || color));
+
+		setColors(Array.from(new Set(addColors)));
+	}, [pointMeasurements, lengthMeasurements, areaMeasurements]);
+
+	return (
+		<div>
+			{
+				!isEmpty(pointMeasurements) &&
+				<MeasurementsList {...props} measureType={MEASURE_TYPE.POINT} measurements={pointMeasurements} colors={colors} />
+			}
+			{
+				!isEmpty(lengthMeasurements) &&
+				<MeasurementsList {...props} measureType={MEASURE_TYPE.LENGTH} measurements={lengthMeasurements} colors={colors} />
+			}
+			{
+				!isEmpty(areaMeasurements) &&
+				<MeasurementsList {...props} measureType={MEASURE_TYPE.AREA} measurements={areaMeasurements} colors={colors} />
+			}
+		</div>
+	);
+};
