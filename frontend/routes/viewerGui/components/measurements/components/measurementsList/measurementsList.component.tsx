@@ -52,10 +52,6 @@ export const MeasurementsList = ({
 
 	const isCountable = ![MEASURE_TYPE.POINT].includes(measureType);
 
-	const getTitleProperties = isCountable ? ({}) : ({
-		left: true,
-	});
-
 	return (
 		<>
 			<SectionHeader>
@@ -63,7 +59,7 @@ export const MeasurementsList = ({
 					{expanded ? <LessIcon /> : <MoreIcon />}
 				</StyledIconButton>
 
-				<Title {...getTitleProperties}>{MEASURE_TYPE_NAME[measureType]}</Title>
+				<Title >{MEASURE_TYPE_NAME[measureType]}</Title>
 				{
 					isCountable &&
 					<>

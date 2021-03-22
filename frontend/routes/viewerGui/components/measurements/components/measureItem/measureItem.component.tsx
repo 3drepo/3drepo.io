@@ -143,7 +143,6 @@ export const MeasureItem = ({
 					<StyledForm>
 						<StyledTextField
 							ref={textFieldRef}
-							left={Number(isPointTypeMeasure)}
 							requiredConfirm
 							fullWidth
 							value={name}
