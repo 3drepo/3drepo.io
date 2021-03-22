@@ -16,22 +16,29 @@
 */
 
 import React from 'react';
+import { IMeasure } from '../../../measurements/components/measureItem/measureItem.component';
 
 // tslint:disable-next-line:max-line-length
-import { AllMeasurementsList, IProps as IMeasusermentsListProps } from '../../../measurements/components/measurementsList/allMeasurementsList.component';
+import { AllMeasurementsList } from '../../../measurements/components/measurementsList/allMeasurementsList.component';
 import { Content } from '../riskDetails/riskDetails.styles';
 
-interface IProps extends IMeasusermentsListProps {
+interface IProps {
 	active: boolean;
+	lengthMeasurements: IMeasure[];
+	areaMeasurements: IMeasure[];
+	units: string;
+	removeMeasurement: (uuid) => void;
+	setMeasurementColor: (uuid, color) => void;
+	setMeasurementName: (uuid, type, name) => void;
 }
 
-export const AttachmentsFormTab: React.FunctionComponent<IProps> = ({
+export const ShapesFormTab = ({
 	active,
 	...props
-}) => {
+}: IProps) => {
 	return (
 		<Content active={active}>
-			<AllMeasurementsList {...props} />
+			<AllMeasurementsList {...props} pointMeasurements={[]} modelUnit={props.units} />
 		</Content>
 		);
 };

@@ -21,14 +21,16 @@ import { createStructuredSelector } from 'reselect';
 import { selectCurrentUser } from '../../../../../../modules/currentUser';
 import { DialogActions } from '../../../../../../modules/dialog';
 import { selectJobsList, selectMyJob } from '../../../../../../modules/jobs';
-import { selectSettings } from '../../../../../../modules/model';
+import { selectSettings, selectUnit } from '../../../../../../modules/model';
 import {
 	selectActiveRiskComments,
 	selectActiveRiskDetails,
+	selectAreaMeasurements,
 	selectAssociatedActivities,
 	selectExpandDetails,
 	selectFailedToLoad,
 	selectFetchingDetailsIsPending,
+	selectLengthMeasurements,
 	selectMitigationCriteria,
 	selectNewComment,
 	selectPostCommentIsPending,
@@ -65,6 +67,9 @@ const mapStateToProps = createStructuredSelector({
 	maxSequenceDate: selectMaxDate,
 	selectedDate: selectSelectedStartingDate,
 	sequences: selectSequences,
+	units: selectUnit,
+	lengthMeasurements: selectLengthMeasurements,
+	areaMeasurements: selectAreaMeasurements
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

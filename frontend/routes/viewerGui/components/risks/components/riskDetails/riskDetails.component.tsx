@@ -28,6 +28,7 @@ import { Copy } from '../../../../../components/fontAwesomeIcon';
 import { ScreenshotDialog } from '../../../../../components/screenshotDialog';
 import { CommentForm } from '../../../commentForm';
 import { ContainedButton } from '../../../containedButton/containedButton.component';
+import { IMeasure } from '../../../measurements/components/measureItem/measureItem.component';
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { Container, HorizontalView, MessagesList, MessageContainer, PreviewDetails } from './riskDetails.styles';
 import { RiskDetailsForm } from './riskDetailsForm.component';
@@ -80,6 +81,9 @@ interface IProps {
 	maxSequenceDate: Date;
 	selectedDate: Date;
 	sequences: any[];
+	units: string;
+	lengthMeasurements: IMeasure[];
+	areaMeasurements: IMeasure[];
 }
 
 interface IState {
@@ -292,11 +296,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				canComment={this.userCanComment()}
 				showMitigationSuggestions={this.props.showMitigationSuggestions}
 				formRef={this.formRef}
-				showSequenceDate={this.props.showSequenceDate}
-				minSequenceDate={this.props.minSequenceDate}
-				maxSequenceDate={this.props.maxSequenceDate}
-				selectedDate={this.props.selectedDate}
-				sequences={this.props.sequences}
+				{...this.props}
 			/>
 		);
 	}

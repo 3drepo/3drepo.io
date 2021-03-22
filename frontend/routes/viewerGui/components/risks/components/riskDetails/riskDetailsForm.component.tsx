@@ -32,6 +32,7 @@ import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { AttachmentsFormTab } from '../attachmentsFormTab/attachmentsFormTab.component';
 import { MainRiskFormTab } from '../mainRiskFormTab/mainRiskFormTab.component';
 import { SequencingFormTab } from '../sequencingFormTab/sequencingFormTab.component';
+import { ShapesFormTab } from '../shapesFormTab/shapesFormTab.component';
 import { TreatmentRiskFormTab } from '../treatmentFormTab/treatmentFormTab.component';
 import { StyledTab, StyledTabs, TabContent } from './riskDetails.styles';
 
@@ -72,6 +73,9 @@ interface IProps {
 	maxSequenceDate: number;
 	selectedDate: Date;
 	sequences: any[];
+	units: string;
+	lengthMeasurements: any;
+	areaMeasurements: any;
 }
 
 interface IState {
@@ -198,7 +202,15 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	)
 
 	public showShapesContent = (active) => (
-		<div>Shapes content</div>
+		<ShapesFormTab
+			active={active}
+			units={this.props.units}
+			lengthMeasurements={this.props.lengthMeasurements}
+			areaMeasurements={this.props.areaMeasurements}
+			removeMeasurement={() => {}}
+			setMeasurementColor={() => {}}
+			setMeasurementName={() => {}}
+		/>
 	)
 
 	public showAttachmentsContent = (active) => (
@@ -243,7 +255,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					{this.showRiskContent(activeTab === MAIN_RISK_TYPE)}
 					{this.showTreatmentContent(activeTab === TREATMENT_RISK_TYPE)}
 					{this.showSequencingContent(activeTab === SEQUENCING_RISK_TYPE)}
-					{this.showShapesContent(activeTab === ATTACHMENTS_RISK_TYPE)}
+					{this.showShapesContent(activeTab === SHAPES_RISK_TYPE)}
 					{this.showAttachmentsContent(activeTab === ATTACHMENTS_RISK_TYPE)}
 				</TabContent>
 			</Form>

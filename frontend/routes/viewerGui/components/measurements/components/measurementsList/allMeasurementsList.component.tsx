@@ -36,8 +36,12 @@ export const AllMeasurementsList = ({areaMeasurements, lengthMeasurements, point
 	const [colors, setColors] = useState([]);
 
 	useEffect(() => {
-		const addColors = [...areaMeasurements, ...lengthMeasurements, ...pointMeasurements]
-			.map(({customColor, color}) => getColor(customColor || color));
+
+		const addColors = [
+			...(areaMeasurements || []),
+			...(lengthMeasurements || []),
+			...(pointMeasurements || [])
+		].map(({customColor, color}) => getColor(customColor || color));
 
 		setColors(Array.from(new Set(addColors)));
 	}, [pointMeasurements, lengthMeasurements, areaMeasurements]);
