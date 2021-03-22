@@ -224,20 +224,28 @@ Sequence.getSequenceState = async (account, model, stateId) => {
 };
 
 Sequence.getList = async (account, model, branch, revision, cleanResponse = false) => {
-	const history = await History.getHistory(account, model, branch, revision);
+	let submodelBranch;
+	let sequencesQuery = {};
 
-	if(!history) {
-		throw responseCodes.INVALID_TAG_NAME;
+	if (branch || revision) {
+		const history = await History.getHistory(account, model, branch, revision);
+
+		if (!history) {
+			throw responseCodes.INVALID_TAG_NAME;
+		}
+
+		submodelBranch = "master";
+		sequencesQuery = {"$or":[{"rev_id": history._id}, {"rev_id": {"$exists": false}}]};
 	}
 
-	const refNodes = await getRefNodes(account, model, branch, revision, {project:1});
+	const refNodesBranch = revision ? undefined : "master";
+	const refNodes = await getRefNodes(account, model, refNodesBranch, revision, {project:1});
 	const submodels = refNodes.map(r => r.project);
 
-	const submodelSequencesPromises = Promise.all(submodels.map((submodel) => Sequence.getList(account, submodel, "master", null, cleanResponse)));
+	const submodelSequencesPromises = Promise.all(submodels.map((submodel) => Sequence.getList(account, submodel, submodelBranch, undefined, cleanResponse)));
 
-	const sequences = await db.find(account, sequenceCol(model), {
-		"$or":[{"rev_id": history._id}, {"rev_id": {"$exists": false}}]
-	});
+	const sequences = await db.find(account, sequenceCol(model), sequencesQuery);
+
 	sequences.forEach((sequence) => {
 		sequence.minDate = new Date((sequence.frames[0] || {}).dateTime).getTime();
 		sequence.maxDate = new Date((sequence.frames[sequence.frames.length - 1] || {}).dateTime).getTime();

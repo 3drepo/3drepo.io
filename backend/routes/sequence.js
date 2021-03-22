@@ -749,7 +749,7 @@ router.post("/sequences", middlewares.issue.canCreate, createSequence);
  * 	}
  * ]
  */
-router.get("/revision/master/head/sequences", middlewares.issue.canView, listSequences);
+router.get("/revision/master/head/sequences", middlewares.issue.canView, listSequencesMaster);
 router.get("/revision/:revId/sequences", middlewares.issue.canView, listSequences);
 /**
  * @api {get} /:teamspace/:model/sequences List all sequences
@@ -905,9 +905,23 @@ function listSequences(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model } = req.params;
 	const revId = req.query && req.query.revId ? req.query.revId : req.params.revId;
-	const branch = revId ? null : "master";
 
-	Sequence.getList(account, model, branch, revId, true).then(sequences => {
+	Sequence.getList(account, model, undefined, revId, true).then(sequences => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, sequences);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+/**
+ * Support for deprecated /revision/master/head endpoint
+ * Remove this function along with endpoint
+ */
+function listSequencesMaster(req, res, next) {
+	const place = utils.APIInfo(req);
+	const { account, model } = req.params;
+
+	Sequence.getList(account, model, "master", undefined, true).then(sequences => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, sequences);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
