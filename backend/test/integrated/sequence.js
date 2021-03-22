@@ -373,7 +373,7 @@ describe("Sequences", function () {
 	describe("List all sequences", function() {
 		it("should succeed", function(done) {
 			agent.get(`/${username}/${model}/sequences?key=${userApiKey}`).expect(200, function(err , res) {
-				expect(res.body.length).to.equal(2);
+				expect(res.body.length).to.equal(3);
 				expect(res.body[0]._id).to.equal(latestGoldenData._id);
 				expect(res.body[0].teamspace).to.equal(latestGoldenData.teamspace);
 				expect(res.body[0].model).to.equal(latestGoldenData.model);
@@ -448,7 +448,7 @@ describe("Sequences", function () {
 
 		it("from federation should succeed", function(done) {
 			agent.get(`/${username}/${federation}/sequences?key=${userApiKey}`).expect(200, function(err , res) {
-				expect(res.body.length).to.equal(2);
+				expect(res.body.length).to.equal(3);
 				expect(res.body[0]._id).to.equal(latestGoldenData._id);
 				expect(res.body[0].teamspace).to.equal(latestGoldenData.teamspace);
 				expect(res.body[0].model).to.equal(latestGoldenData.model);
