@@ -58,11 +58,9 @@ const fieldTypes = {
 };
 
 const ownerPrivilegeAttributes = [
-	"position",
 	"desc",
 	"due_date",
-	"priority",
-	"viewpoint"
+	"priority"
 ];
 
 const statusEnum = C.ISSUE_STATUS;

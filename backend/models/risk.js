@@ -60,9 +60,7 @@ const fieldTypes = {
 };
 
 const ownerPrivilegeAttributes = [
-	"position",
-	"desc",
-	"viewpoint"
+	"desc"
 ];
 
 const LEVELS = {
