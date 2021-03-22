@@ -33,8 +33,6 @@ import {
 	Container,
 	MeasurementPoint,
 	MeasurementValue,
-	StyledCheckbox,
-	StyledCheckboxCell,
 	StyledForm,
 	StyledTextField
 } from './measureItem.styles';
@@ -59,7 +57,6 @@ export interface IMeasure {
 	position?: number[];
 	value: number;
 	color: IColor;
-	checked: boolean;
 	customColor: IColor;
 	type: number;
 }
@@ -70,7 +67,6 @@ interface IProps extends IMeasure {
 	removeMeasurement: (uuid) => void;
 	units: string;
 	setMeasurementColor: (uuid, color) => void;
-	setMeasurementCheck?: (uuid, type) => void;
 	setMeasurementName: (uuid, type, name) => void;
 	modelUnit: string;
 	colors: string[];
@@ -112,18 +108,12 @@ export const getUnits = (units: string, type: number) => {
 };
 
 export const MeasureItem = ({
-	uuid, index, name, typeName, value, units, color, removeMeasurement, type, position, customColor, checked, ...props
+	uuid, index, name, typeName, value, units, color, removeMeasurement, type, position, customColor, ...props
 }: IProps) => {
 	const textFieldRef = React.useRef(null);
 
 	const handleRemoveMeasurement = () => {
 		removeMeasurement(uuid);
-	};
-
-	const handleCheckChange = () => {
-		if (props.setMeasurementCheck) {
-			props.setMeasurementCheck(uuid, type);
-		}
 	};
 
 	const handleColorChange = (hexColor) => {
@@ -145,16 +135,6 @@ export const MeasureItem = ({
 
 	return (
 		<Container tall={Number(isPointTypeMeasure)}>
-			{
-				!isPointTypeMeasure &&
-				<StyledCheckboxCell>
-					<StyledCheckbox
-						color="primary"
-						onChange={handleCheckChange}
-						checked={checked}
-					/>
-				</StyledCheckboxCell>
-			}
 			<Formik
 				initialValues={{ newName: name }}
 				onSubmit={handleSubmit}

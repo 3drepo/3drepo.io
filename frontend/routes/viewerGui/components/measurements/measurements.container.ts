@@ -53,8 +53,6 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setMeasureUnits: MeasurementsActions.setMeasureUnits,
 	setMeasureEdgeSnapping: MeasurementsActions.setMeasureEdgeSnapping,
 	setMeasureXYZDisplay: MeasurementsActions.setMeasureXyzDisplay,
-	setMeasurementCheck: MeasurementsActions.setMeasurementCheck,
-	setMeasurementCheckAll: MeasurementsActions.setMeasurementCheckAll,
 	setMeasurementName: MeasurementsActions.setMeasurementName,
 	resetMeasurementTool: MeasurementsActions.resetMeasurementTool,
 }, dispatch);

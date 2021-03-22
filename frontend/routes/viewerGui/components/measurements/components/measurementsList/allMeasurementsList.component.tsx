@@ -21,13 +21,11 @@ import { MEASURE_TYPE } from '../../../../../../modules/measurements/measurement
 import { IMeasure } from '../measureItem/measureItem.component';
 import { MeasurementsList } from './measurementsList.component';
 
-interface IProps {
+export interface IProps {
 	pointMeasurements: IMeasure[];
 	lengthMeasurements: IMeasure[];
 	areaMeasurements: IMeasure[];
 	units: string;
-	setMeasurementCheck?: (uuid, type) => void;
-	setMeasurementCheckAll?: (type) => void;
 	removeMeasurement: (uuid) => void;
 	setMeasurementColor: (uuid, color) => void;
 	setMeasurementName: (uuid, type, name) => void;

@@ -88,7 +88,6 @@ export function* addMeasurement({ measurement }) {
 			const index = measurementsState[measurementStateName].length + 1;
 
 			measurement.name = `${MEASURE_TYPE_NAME[measurement.type]} ${index}`;
-			measurement.checked = true;
 			measurement.color.r = measurement.color.r * 255;
 			measurement.color.g = measurement.color.g * 255;
 			measurement.color.b = measurement.color.b * 255;

@@ -70,8 +70,6 @@ interface IProps {
 	edgeSnappingEnabled: boolean;
 	setMeasureXYZDisplay: (XYZDisplay: boolean) => void;
 	XYZdisplay: boolean;
-	setMeasurementCheck: (uuid, type) => void;
-	setMeasurementCheckAll: (type) => void;
 	resetMeasurementTool: () => void;
 	modelUnit: string;
 	id?: string;

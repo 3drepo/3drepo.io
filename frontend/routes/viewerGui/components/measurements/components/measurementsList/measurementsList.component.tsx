@@ -23,7 +23,6 @@ import LessIcon from '@material-ui/icons/ExpandMore';
 import { MEASURE_TYPE, MEASURE_TYPE_NAME} from '../../../../../../modules/measurements/measurements.constants';
 import { MeasureItem } from '../measureItem/';
 import { getUnits, getValue, IMeasure } from '../measureItem/measureItem.component';
-import { StyledCheckbox } from '../measureItem/measureItem.styles';
 import {
 	List, SectionHeader, StyledCheckboxCell, StyledIconButton, Title, Total, Units,
 } from './measurementsList.styles';
@@ -31,8 +30,6 @@ import {
 interface IProps {
 	measurements: IMeasure[];
 	units: string;
-	setMeasurementCheck?: (uuid, type) => void;
-	setMeasurementCheckAll?: (type) => void;
 	removeMeasurement: (uuid) => void;
 	setMeasurementColor: (uuid, color) => void;
 	setMeasurementName: (uuid, type, name) => void;
@@ -41,31 +38,17 @@ interface IProps {
 }
 
 const getTotal = (measurements, type, units, modelUnit) => {
-	const sum = measurements.reduce((acc, { checked, value }) => {
-		if (checked) {
-			return acc + value;
-		}
-		return acc;
-	}, 0);
-
+	const sum = measurements.reduce((acc, { value }) =>  acc + value, 0);
 	return getValue(sum, units, type, modelUnit);
 };
 
 export const MeasurementsList = ({
-	measurements, units, measureType, setMeasurementCheck, setMeasurementCheckAll, removeMeasurement,
+	measurements, units, measureType, removeMeasurement,
 	setMeasurementColor, setMeasurementName, ...props
 }: IProps) => {
 	const [expanded, setExpanded] = React.useState(true);
 
 	const handleOnClick = () => setExpanded(!expanded);
-
-	const handleOnChange = () => setMeasurementCheckAll(measureType);
-
-	const numberOfCheckedMeasurements = measurements.filter(({checked}) => checked).length;
-
-	const selectedAll = numberOfCheckedMeasurements && numberOfCheckedMeasurements === measurements.length;
-
-	const isIndeterminate = Boolean(numberOfCheckedMeasurements && !selectedAll);
 
 	const isCountable = ![MEASURE_TYPE.POINT].includes(measureType);
 
@@ -79,20 +62,13 @@ export const MeasurementsList = ({
 				<StyledIconButton onClick={handleOnClick}>
 					{expanded ? <LessIcon /> : <MoreIcon />}
 				</StyledIconButton>
-				{isCountable && <StyledCheckboxCell>
-					<StyledCheckbox
-						color="primary"
-						onChange={handleOnChange}
-						indeterminate={isIndeterminate}
-						checked={selectedAll || isIndeterminate}
-					/>
-				</StyledCheckboxCell>}
+
 				<Title {...getTitleProperties}>{MEASURE_TYPE_NAME[measureType]}</Title>
 				{
 					isCountable &&
 					<>
 						<Total>
-							Selected total:&nbsp;
+							Total:&nbsp;
 							{getTotal(measurements, measureType, units, props.modelUnit)}
 						</Total>
 						<Units sum>{getUnits(units, measureType)}</Units>
@@ -109,7 +85,6 @@ export const MeasurementsList = ({
 							units={units}
 							removeMeasurement={removeMeasurement}
 							setMeasurementColor={setMeasurementColor}
-							setMeasurementCheck={setMeasurementCheck}
 							setMeasurementName={setMeasurementName}
 							{...measurement}
 						/>
