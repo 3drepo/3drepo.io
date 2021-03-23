@@ -29,6 +29,11 @@ const getNewIssuesByMonth = async (db, model) => {
 		const month = date.getMonth() + 1;
 		const year = date.getFullYear();
 
+		if (year < 2014 || isNaN(year)) {
+			//this issue has an invalid date, ignore this issue
+			return;
+		}
+
 		if(!res[year]) res[year] = {};
 
 		if(!res[year][month]) {
