@@ -23,6 +23,7 @@ const nodeuuid = require("uuid/v1");
 const FileRef = require("./fileRef");
 const yup = require("yup");
 const {pick} = require("lodash");
+const Sequence = require("./sequence");
 
 const keyValueSchema = yup.object().shape({
 	key: yup.string().required(),
@@ -157,11 +158,7 @@ const createActivitiesTree = async(account, model, sequenceId) => {
 const SequenceActivities = {};
 
 SequenceActivities.getSequenceActivityDetail = async (account, model, sequenceId, activityId) => {
-	const sequence = await db.findOne(account, model + ".sequences", { _id: utils.stringToUUID(sequenceId)});
-
-	if (!sequence) {
-		throw responseCodes.SEQUENCE_NOT_FOUND;
-	}
+	await Sequence.sequenceExists(account, model, sequenceId);
 
 	const activity = await db.findOne(account, activityCol(model), {"_id": utils.stringToUUID(activityId)});
 
@@ -173,11 +170,7 @@ SequenceActivities.getSequenceActivityDetail = async (account, model, sequenceId
 };
 
 SequenceActivities.create = async (account, model, sequenceId, activity) => {
-	const sequence = await db.findOne(account, model + ".sequences", { _id: utils.stringToUUID(sequenceId)});
-
-	if (!sequence) {
-		throw responseCodes.SEQUENCE_NOT_FOUND;
-	}
+	await Sequence.sequenceExists(account, model, sequenceId);
 
 	if (!activitySchema.isValidSync(activity, { strict: true })) {
 		throw responseCodes.INVALID_ARGUMENTS;
@@ -199,11 +192,7 @@ SequenceActivities.create = async (account, model, sequenceId, activity) => {
 };
 
 SequenceActivities.edit = async (account, model, sequenceId, activityId, activity) => {
-	const sequence = await db.findOne(account, model + ".sequences", { _id: utils.stringToUUID(sequenceId)});
-
-	if (!sequence) {
-		throw responseCodes.SEQUENCE_NOT_FOUND;
-	}
+	await Sequence.sequenceExists(account, model, sequenceId);
 
 	if (!activityEditSchema.isValidSync(activity, { strict: true })) {
 		throw responseCodes.INVALID_ARGUMENTS;
@@ -224,11 +213,8 @@ SequenceActivities.edit = async (account, model, sequenceId, activityId, activit
 };
 
 SequenceActivities.remove = async (account, model, sequenceId, activityId) => {
-	const sequence = await db.findOne(account, model + ".sequences", { _id: utils.stringToUUID(sequenceId)});
+	await Sequence.sequenceExists(account, model, sequenceId);
 
-	if (!sequence) {
-		throw responseCodes.SEQUENCE_NOT_FOUND;
-	}
 	const activities = await db.find(account,activityCol(model), {sequenceId: utils.stringToUUID(sequenceId), parent:{$exists: true}} , {parent:1, _id:1});
 
 	const idsToDelete = getDescendantsIds(activities, activityId);
@@ -249,11 +235,7 @@ SequenceActivities.remove = async (account, model, sequenceId, activityId) => {
 };
 
 SequenceActivities.get = async (account, model, sequenceId) => {
-	const sequence = await db.findOne(account, model + ".sequences", { _id: utils.stringToUUID(sequenceId)});
-
-	if (!sequence) {
-		throw responseCodes.SEQUENCE_NOT_FOUND;
-	}
+	await Sequence.sequenceExists(account, model, sequenceId);
 
 	let activities = {};
 	try {
@@ -267,11 +249,7 @@ SequenceActivities.get = async (account, model, sequenceId) => {
 };
 
 SequenceActivities.createActivities = async (account, model, sequenceId, activitiesTree, overwrite) => {
-	const sequence = await db.findOne(account, model + ".sequences", { _id: utils.stringToUUID(sequenceId)});
-
-	if (!sequence) {
-		throw responseCodes.SEQUENCE_NOT_FOUND;
-	}
+	await Sequence.sequenceExists(account, model, sequenceId);
 
 	if (!activityTreeSchema.isValidSync(activitiesTree, { strict: true })) {
 		throw responseCodes.INVALID_ARGUMENTS;
