@@ -386,36 +386,6 @@ describe("Sequences", function () {
 			});
 		});
 
-		it("from latest revision should succeed [deprecated]", function(done) {
-			agent.get(`/${username}/${model}/revision/master/head/sequences?key=${userApiKey}`).expect(200, function(err , res) {
-				expect(res.body.length).to.equal(2);
-				expect(res.body[0]._id).to.equal(latestGoldenData._id);
-				expect(res.body[0].teamspace).to.equal(latestGoldenData.teamspace);
-				expect(res.body[0].model).to.equal(latestGoldenData.model);
-				expect(res.body[0].rev_id).to.equal(latestGoldenData.rev_id);
-				expect(res.body[0].name).to.equal(latestGoldenData.name);
-				expect(res.body[0].minDate).to.equal(latestGoldenData.frames[0].dateTime);
-				expect(res.body[0].maxDate).to.equal(latestGoldenData.frames[latestGoldenData.frames.length - 1].dateTime);
-
-				return done(err);
-			});
-		});
-
-		it("from revision should succeed [deprecated]", function(done) {
-			agent.get(`/${username}/${model}/revision/${oldRevision}/sequences?key=${userApiKey}`).expect(200, function(err , res) {
-				expect(res.body.length).to.equal(2);
-				expect(res.body[0]._id).to.equal(oldGoldenData._id);
-				expect(res.body[0].teamspace).to.equal(oldGoldenData.teamspace);
-				expect(res.body[0].model).to.equal(oldGoldenData.model);
-				expect(res.body[0].rev_id).to.equal(oldGoldenData.rev_id);
-				expect(res.body[0].name).to.equal(oldGoldenData.name);
-				expect(res.body[0].minDate).to.equal(oldGoldenData.frames[0].dateTime);
-				expect(res.body[0].maxDate).to.equal(oldGoldenData.frames[oldGoldenData.frames.length - 1].dateTime);
-
-				return done(err);
-			});
-		});
-
 		it("from revision should succeed", function(done) {
 			agent.get(`/${username}/${model}/sequences?revId=${oldRevision}&key=${userApiKey}`).expect(200, function(err , res) {
 				expect(res.body.length).to.equal(2);
@@ -426,21 +396,6 @@ describe("Sequences", function () {
 				expect(res.body[0].name).to.equal(oldGoldenData.name);
 				expect(res.body[0].minDate).to.equal(oldGoldenData.frames[0].dateTime);
 				expect(res.body[0].maxDate).to.equal(oldGoldenData.frames[oldGoldenData.frames.length - 1].dateTime);
-
-				return done(err);
-			});
-		});
-
-		it("from federation should succeed [deprecated]", function(done) {
-			agent.get(`/${username}/${federation}/revision/master/head/sequences?key=${userApiKey}`).expect(200, function(err , res) {
-				expect(res.body.length).to.equal(2);
-				expect(res.body[0]._id).to.equal(latestGoldenData._id);
-				expect(res.body[0].teamspace).to.equal(latestGoldenData.teamspace);
-				expect(res.body[0].model).to.equal(latestGoldenData.model);
-				expect(res.body[0].rev_id).to.equal(latestGoldenData.rev_id);
-				expect(res.body[0].name).to.equal(latestGoldenData.name);
-				expect(res.body[0].minDate).to.equal(latestGoldenData.frames[0].dateTime);
-				expect(res.body[0].maxDate).to.equal(latestGoldenData.frames[latestGoldenData.frames.length - 1].dateTime);
 
 				return done(err);
 			});
@@ -503,22 +458,6 @@ describe("Sequences", function () {
 			});
 		});
 
-		it("from latest revision should succeed [deprecated]", function(done) {
-			agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/state/${stateId}?key=${userApiKey}`).expect(200, function(err , res) {
-				expect(Object.keys(res.body)).to.deep.equal(["transparency", "color"]);
-
-				return done(err);
-			});
-		});
-
-		it("from revision should succeed [deprecated]", function(done) {
-			agent.get(`/${username}/${model}/revision/${oldRevision}/sequences/${sequenceId}/state/${stateId}?key=${userApiKey}`).expect(200, function(err , res) {
-				expect(Object.keys(res.body)).to.deep.equal(["transparency", "color"]);
-
-				return done(err);
-			});
-		});
-
 		it("from revision should succeed", function(done) {
 			agent.get(`/${username}/${model}/sequences/${sequenceId}/state/${stateId}?revId=${oldRevision}&key=${userApiKey}`).expect(200, function(err , res) {
 				expect(Object.keys(res.body)).to.deep.equal(["transparency", "color"]);
@@ -527,24 +466,8 @@ describe("Sequences", function () {
 			});
 		});
 
-		it("from federation should fail [deprecated]", function(done) {
-			agent.get(`/${username}/${federation}/revision/master/head/sequences/${sequenceId}/state/${stateId}?key=${userApiKey}`).expect(404, function(err , res) {
-				expect(res.body.value).to.equal(responseCodes.NO_FILE_FOUND.value);
-
-				return done(err);
-			});
-		});
-
 		it("from federation should fail", function(done) {
 			agent.get(`/${username}/${federation}/sequences/${sequenceId}/state/${stateId}?key=${userApiKey}`).expect(404, function(err , res) {
-				expect(res.body.value).to.equal(responseCodes.NO_FILE_FOUND.value);
-
-				return done(err);
-			});
-		});
-
-		it("with invalid state ID should fail [deprecated]", function(done) {
-			agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/state/invalidId?key=${userApiKey}`).expect(404, function(err , res) {
 				expect(res.body.value).to.equal(responseCodes.NO_FILE_FOUND.value);
 
 				return done(err);
@@ -570,22 +493,6 @@ describe("Sequences", function () {
 			});
 		});
 
-		it("from latest revision should succeed [deprecated]", function(done) {
-			agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/activities?key=${userApiKey}`).expect(200, function(err, res) {
-				expect(res.body).to.deep.equal(goldenActivity);
-
-				return done(err);
-			});
-		});
-
-		it("from revision should succeed [deprecated]", function(done) {
-			agent.get(`/${username}/${model}/revision/${oldRevision}/sequences/${sequenceId}/activities?key=${userApiKey}`).expect(200, function(err, res) {
-				expect(res.body).to.deep.equal(goldenActivity);
-
-				return done(err);
-			});
-		});
-
 		it("from revision should succeed", function(done) {
 			agent.get(`/${username}/${model}/sequences/${sequenceId}/activities?revId=${oldRevision}&key=${userApiKey}`).expect(200, function(err, res) {
 				expect(res.body).to.deep.equal(goldenActivity);
@@ -594,24 +501,8 @@ describe("Sequences", function () {
 			});
 		});
 
-		it("from federation should fail [deprecated]", function(done) {
-			agent.get(`/${username}/${federation}/revision/master/head/sequences/${sequenceId}/activities?key=${userApiKey}`).expect(404, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.NO_FILE_FOUND.value);
-
-				return done(err);
-			});
-		});
-
 		it("from federation should fail", function(done) {
 			agent.get(`/${username}/${federation}/sequences/${sequenceId}/activities?key=${userApiKey}`).expect(404, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.NO_FILE_FOUND.value);
-
-				return done(err);
-			});
-		});
-
-		it("using invalid sequence ID should fail [deprecated]", function(done) {
-			agent.get(`/${username}/${model}/revision/master/head/sequences/invalidSequenceId/activities?key=${userApiKey}`).expect(404, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.NO_FILE_FOUND.value);
 
 				return done(err);
@@ -638,33 +529,9 @@ describe("Sequences", function () {
 			});
 		});
 
-		it("from latest revision should succeed [deprecated]", function(done) {
-			agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/activities/${activityId}?key=${userApiKey}`).expect(200, function(err, res) {
-				expect(res.body).to.deep.equal(goldenActivityDetail);
-
-				return done(err);
-			});
-		});
-
-		it("from revision should succeed [deprecated]", function(done) {
-			agent.get(`/${username}/${model}/revision/${oldRevision}/sequences/${sequenceId}/activities/${activityId}?key=${userApiKey}`).expect(200, function(err, res) {
-				expect(res.body).to.deep.equal(goldenActivityDetail);
-
-				return done(err);
-			});
-		});
-
 		it("from revision should succeed", function(done) {
 			agent.get(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}?revId=${oldRevision}&key=${userApiKey}`).expect(200, function(err, res) {
 				expect(res.body).to.deep.equal(goldenActivityDetail);
-
-				return done(err);
-			});
-		});
-
-		it("from federation should fail [deprecated]", function(done) {
-			agent.get(`/${username}/${federation}/revision/master/head/sequences/${sequenceId}/activities/${activityId}?key=${userApiKey}`).expect(404, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.ACTIVITY_NOT_FOUND.value);
 
 				return done(err);
 			});
@@ -678,24 +545,9 @@ describe("Sequences", function () {
 			});
 		});
 
-		it("using invalid sequence ID should succeed [deprecated]", function(done) {
-			agent.get(`/${username}/${model}/revision/master/head/sequences/invalidSequenceId/activities/${activityId}?key=${userApiKey}`).expect(200, function(err, res) {
-				expect(res.body).to.deep.equal(goldenActivityDetail);
-				return done(err);
-			});
-		});
-
 		it("using invalid sequence ID should succeed", function(done) {
 			agent.get(`/${username}/${model}/sequences/invalidSequenceId/activities/${activityId}?key=${userApiKey}`).expect(200, function(err, res) {
 				expect(res.body).to.deep.equal(goldenActivityDetail);
-				return done(err);
-			});
-		});
-
-		it("using invalid activity ID should fail [deprecated]", function(done) {
-			agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/activities/invalidActivityId?key=${userApiKey}`).expect(404, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.ACTIVITY_NOT_FOUND.value);
-
 				return done(err);
 			});
 		});
@@ -711,26 +563,6 @@ describe("Sequences", function () {
 	*/
 
 	describe("Update Sequence", function() {
-		/*
-		it("name with a new string should succeed [deprecated]", function(done) {
-			const update = { name: "New name for the sequence"};
-			async.series([
-				(done) => {
-					agent.patch(`/${username}/${model}/revision/master/head/sequences/${sequenceId}?key=${userApiKey}`)
-						.send(update)
-						.expect(200, done);
-				},
-				(done) => {
-					agent.get(`/${username}/${model}/revision/${oldRevision}/sequences?key=${userApiKey}`).expect(200, function(err , res) {
-						expect(res.body.length).to.equal(1);
-						expect(res.body[0]).to.deep.equal({...oldGoldenData, ...update});
-						done(err);
-					});
-				}
-			], done);
-		});
-		*/
-
 		it("name with a new string should succeed", function(done) {
 			const update = { name: "New name for the sequence"};
 			async.series([
@@ -758,43 +590,11 @@ describe("Sequences", function () {
 			], done);
 		});
 
-		/*
-		it("name and frame should only update the name [deprecated]", function(done) {
-			const update = { frames: [], name: "another name"};
-			async.series([
-				(done) => {
-					agent.patch(`/${username}/${model}/revision/master/head/sequences/${sequenceId}?key=${userApiKey}`)
-						.send(update)
-						.expect(200, done);
-				},
-
-				(done) => {
-					agent.get(`/${username}/${model}/revision/${oldRevision}/sequences?key=${userApiKey}`).expect(200, function(err , res) {
-						expect(res.body.length).to.equal(1);
-						expect(res.body[0]).to.deep.equal({...oldGoldenData, name: update.name});
-						done(err);
-					});
-				}
-
-			], done);
-		});
-		*/
-
 		it("name and frame on read only sequence should fail", function(done) {
 			const update = { frames: [], name: "another name"};
 			agent.patch(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
 				.send(update)
 				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.SEQUENCE_READ_ONLY.value);
-					done(err);
-				});
-		});
-
-		it("anything but the name on read only sequence should fail [deprecated]", function(done) {
-			const update = { frames: []};
-			agent.patch(`/${username}/${model}/revision/master/head/sequences/${sequenceId}?key=${userApiKey}`)
-				.send(update)
-				.expect(400, (err, res) => {
 					expect(res.body.value).to.equal(responseCodes.SEQUENCE_READ_ONLY.value);
 					done(err);
 				});
@@ -1064,16 +864,6 @@ describe("Sequences", function () {
 				});
 		});
 
-		it("that does not exist should fail [deprecated]", function(done) {
-			const update = { name: "abc"};
-			agent.patch(`/${username}/${model}/revision/master/head/sequences/invalidSequence?key=${userApiKey}`)
-				.send(update)
-				.expect(404, (err, res) => {
-					expect(res.body.value).to.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
-					done(err);
-				});
-		});
-
 		it("that does not exist should fail", function(done) {
 			const update = { name: "abc"};
 			agent.patch(`/${username}/${model}/sequences/invalidSequence?key=${userApiKey}`)
@@ -1082,13 +872,6 @@ describe("Sequences", function () {
 					expect(res.body.value).to.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
 					done(err);
 				});
-		});
-
-		it("name as viewer should fail [deprecated]", function(done) {
-			const update = { name: "Viewer's attempt"};
-			agent.patch(`/${username}/${model}/revision/master/head/sequences/${sequenceId}?key=${viewerApiKey}`)
-				.send(update)
-				.expect(401, done);
 		});
 
 		it("name as viewer should fail", function(done) {
@@ -1128,26 +911,10 @@ describe("Sequences", function () {
 	};
 
 	describe("Getting a legend", function() {
-		it("from a sequence that does not exist should fail [deprecated]", function(done) {
-			agent.get(`/${username}/${model}/revision/master/head/sequences/invalidSequence/legend?key=${userApiKey}`)
-				.expect(404, (err, res) => {
-					expect(res.body.value).to.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
-					done(err);
-				});
-		});
-
 		it("from a sequence that does not exist should fail", function(done) {
 			agent.get(`/${username}/${model}/sequences/invalidSequence/legend?key=${userApiKey}`)
 				.expect(404, (err, res) => {
 					expect(res.body.value).to.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
-					done(err);
-				});
-		});
-
-		it("from a sequence that already has a legend should succeed [deprecated]", function(done) {
-			agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/legend?key=${userApiKey}`)
-				.expect(200, (err, res) => {
-					expect(res.body).to.deep.equal(goldenLegendData);
 					done(err);
 				});
 		});
@@ -1160,26 +927,10 @@ describe("Sequences", function () {
 				});
 		});
 
-		it("from a sequence that already has a legend as a viewer should succeed [deprecated]", function(done) {
-			agent.get(`/${username}/${model}/revision/master/head/sequences/${sequenceId}/legend?key=${viewerApiKey}`)
-				.expect(200, (err, res) => {
-					expect(res.body).to.deep.equal(goldenLegendData);
-					done(err);
-				});
-		});
-
 		it("from a sequence that already has a legend as a viewer should succeed", function(done) {
 			agent.get(`/${username}/${model}/sequences/${sequenceId}/legend?key=${viewerApiKey}`)
 				.expect(200, (err, res) => {
 					expect(res.body).to.deep.equal(goldenLegendData);
-					done(err);
-				});
-		});
-
-		it("from a sequence that does not have a legend should succeed [deprecated]", function(done) {
-			agent.get(`/${username}/${model}/revision/master/head/sequences/${latestGoldenData._id}/legend?key=${userApiKey}`)
-				.expect(200, (err, res) => {
-					expect(res.body).to.deep.equal({});
 					done(err);
 				});
 		});
@@ -1217,14 +968,6 @@ describe("Sequences", function () {
 			], done);
 		});
 
-		it("sequences with no legend should get be getting the default legend instead of empty legend [deprecated]", function(done) {
-			agent.get(`/${username}/${model}/revision/master/head/sequences/${latestGoldenData._id}/legend?key=${userApiKey}`)
-				.expect(200, (err, res) => {
-					expect(res.body).to.deep.equal(goldenLegendData);
-					done(err);
-				});
-		});
-
 		it("sequences with no legend should get be getting the default legend instead of empty legend", function(done) {
 			agent.get(`/${username}/${model}/sequences/${latestGoldenData._id}/legend?key=${userApiKey}`)
 				.expect(200, (err, res) => {
@@ -1236,25 +979,6 @@ describe("Sequences", function () {
 
 
 	describe("Updating a legend", function() {
-		it("of a valid sequence should succeed [deprecated]", function(done) {
-			const newLegend = { a: "#123456", b: "#ffffffaa" };
-			async.series([
-				(done) => {
-					agent.put(`/${username}/${model}/revision/master/head/sequences/${latestGoldenData._id}/legend?key=${userApiKey}`)
-						.send(newLegend)
-						.expect(200, done);
-				},
-				(done) => {
-					agent.get(`/${username}/${model}/revision/master/head/sequences/${latestGoldenData._id}/legend?key=${userApiKey}`)
-					.expect(200, (err, res) => {
-						expect(res.body).to.deep.equal(newLegend);
-						done(err);
-					});
-				}
-			], done);
-
-		});
-
 		it("of a valid sequence should succeed", function(done) {
 			const newLegend = { a: "#123456", b: "#ffffffaa" };
 			async.series([
@@ -1274,16 +998,6 @@ describe("Sequences", function () {
 
 		});
 
-		it("of an invalid sequence should fail [deprecated]", function(done) {
-			const newLegend = { a: "#123456", b: "#ffffffaa" };
-			agent.put(`/${username}/${model}/revision/master/head/sequences/invalidSequenceID/legend?key=${userApiKey}`)
-				.send(newLegend)
-				.expect(404, (err, res) => {
-					expect(res.body.value).to.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
-					done(err);
-				});
-		});
-
 		it("of an invalid sequence should fail", function(done) {
 			const newLegend = { a: "#123456", b: "#ffffffaa" };
 			agent.put(`/${username}/${model}/sequences/invalidSequenceID/legend?key=${userApiKey}`)
@@ -1294,29 +1008,9 @@ describe("Sequences", function () {
 				});
 		});
 
-		it("with the wrong data type should fail [deprecated]", function(done) {
-			const newLegend = { a: "#123456", b: false };
-			agent.put(`/${username}/${model}/revision/master/head/sequences/${latestGoldenData._id}/legend?key=${userApiKey}`)
-				.send(newLegend)
-				.expect(400, (err, res) => {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
-					done(err);
-				});
-		});
-
 		it("with the wrong data type should fail", function(done) {
 			const newLegend = { a: "#123456", b: false };
 			agent.put(`/${username}/${model}/sequences/${latestGoldenData._id}/legend?key=${userApiKey}`)
-				.send(newLegend)
-				.expect(400, (err, res) => {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
-					done(err);
-				});
-		});
-
-		it("with the string that isn't in hex colour format should fail [deprecated]", function(done) {
-			const newLegend = { a: "#123456", b: "hello" };
-			agent.put(`/${username}/${model}/revision/master/head/sequences/${latestGoldenData._id}/legend?key=${userApiKey}`)
 				.send(newLegend)
 				.expect(400, (err, res) => {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -1334,13 +1028,6 @@ describe("Sequences", function () {
 				});
 		});
 
-		it("as a viewer should fail [deprecated]", function(done) {
-			const newLegend = { a: "#123456" };
-			agent.put(`/${username}/${model}/revision/master/head/sequences/${latestGoldenData._id}/legend?key=${viewerApiKey}`)
-				.send(newLegend)
-				.expect(401, done);
-		});
-
 		it("as a viewer should fail", function(done) {
 			const newLegend = { a: "#123456" };
 			agent.put(`/${username}/${model}/sequences/${latestGoldenData._id}/legend?key=${viewerApiKey}`)
@@ -1350,22 +1037,9 @@ describe("Sequences", function () {
 	});
 
 	describe("Deleting a legend", function() {
-		it("as a viewer should fail [deprecated]", function(done) {
-			agent.delete(`/${username}/${model}/sequences/${latestGoldenData._id}/legend?key=${viewerApiKey}`)
-				.expect(401, done);
-		});
-
 		it("as a viewer should fail", function(done) {
 			agent.delete(`/${username}/${model}/revision/master/head/sequences/${latestGoldenData._id}/legend?key=${viewerApiKey}`)
 				.expect(401, done);
-		});
-
-		it("of an invalid sequence ID should fail [deprecated]", function(done) {
-			agent.delete(`/${username}/${model}/revision/master/head/sequences/aaa/legend?key=${userApiKey}`)
-				.expect(404, (err, res) => {
-					expect(res.body.value).to.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
-					done(err);
-				});
 		});
 
 		it("of an invalid sequence ID should fail", function(done) {
@@ -1374,22 +1048,6 @@ describe("Sequences", function () {
 					expect(res.body.value).to.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
 					done(err);
 				});
-		});
-
-		it("should succeed [deprecated]", function(done) {
-			async.series([
-				(done) => {
-					agent.delete(`/${username}/${model}/revision/master/head/sequences/${latestGoldenData._id}/legend?key=${userApiKey}`)
-						.expect(200, done);
-				},
-				(done) => {
-					agent.get(`/${username}/${model}/revision/master/head/sequences/${latestGoldenData._id}/legend?key=${userApiKey}`)
-					.expect(200, (err, res) => {
-						expect(res.body).to.deep.equal(goldenLegendData);
-						done(err);
-					});
-				}
-			], done);
 		});
 
 		it("should succeed", function(done) {
