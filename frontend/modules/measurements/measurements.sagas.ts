@@ -203,7 +203,7 @@ export function* resetMeasurementColors() {
 
 export function* setMeasureEdgeSnapping({ edgeSnapping }) {
 	try {
-		if (yield select(selectAreaMeasurements)) {
+		if (yield select(selectIsMeasureActive)) {
 			if (edgeSnapping) {
 				yield Viewer.enableEdgeSnapping();
 			} else {
