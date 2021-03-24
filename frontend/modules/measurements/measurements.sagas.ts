@@ -22,9 +22,9 @@ import { DialogActions } from '../dialog';
 import {
 	selectAreaMeasurements,
 	selectEdgeSnapping,
-	selectIsMeasureActive,
 	selectLengthMeasurements,
 	selectMeasurementsDomain,
+	selectMeasureMode,
 	selectMeasureUnits,
 	selectPointMeasurements,
 	MeasurementsActions,
@@ -203,7 +203,7 @@ export function* resetMeasurementColors() {
 
 export function* setMeasureEdgeSnapping({ edgeSnapping }) {
 	try {
-		if (yield select(selectIsMeasureActive)) {
+		if (yield select(selectMeasureMode) !==  '') {
 			if (edgeSnapping) {
 				yield Viewer.enableEdgeSnapping();
 			} else {
