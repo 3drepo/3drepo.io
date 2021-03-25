@@ -108,9 +108,9 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 	}
 
 	public setValue = (newValue: Date) => {
-		const maxDate = this.props.max.valueOf();
-		const minDate = this.props.min.valueOf();
-		newValue = new Date(Math.min(maxDate, Math.max(minDate, newValue.valueOf())));
+		const endDate = this.props.max.valueOf();
+		const startDate = this.props.min.valueOf();
+		newValue = new Date(Math.min(endDate, Math.max(startDate, newValue.valueOf())));
 
 		if (this.props.onChange) {
 			this.props.onChange(newValue);

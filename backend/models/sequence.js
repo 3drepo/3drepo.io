@@ -247,8 +247,8 @@ Sequence.getList = async (account, model, branch, revision, cleanResponse = fals
 	const sequences = await db.find(account, sequenceCol(model), sequencesQuery);
 
 	sequences.forEach((sequence) => {
-		sequence.minDate = new Date((sequence.frames[0] || {}).dateTime).getTime();
-		sequence.maxDate = new Date((sequence.frames[sequence.frames.length - 1] || {}).dateTime).getTime();
+		sequence.startDate = new Date((sequence.frames[0] || {}).dateTime).getTime();
+		sequence.endDate = new Date((sequence.frames[sequence.frames.length - 1] || {}).dateTime).getTime();
 
 		delete sequence.frames;
 

@@ -39,8 +39,8 @@ interface IProps {
 	setStepInterval: (interval: number) => void;
 	setStepScale: (scale: STEP_SCALE) => void;
 	setSelectedSequence: (id: string) => void;
-	maxDate: Date;
-	minDate: Date;
+	endDate: Date;
+	startDate: Date;
 	frames: any[];
 	selectedDate: Date;
 	selectedEndingDate: Date;
@@ -65,15 +65,15 @@ interface IProps {
 const da =  new Date();
 
 const SequenceDetails = ({
-	minDate, maxDate, selectedDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
+	startDate, endDate, selectedDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
 	setStepScale, currentTasks, loadingFrame,  rightPanels, toggleActivitiesPanel, fetchActivityDetails, onPlayStarted,
 	frames, isActivitiesPending, toggleLegend, draggablePanels
 }) => (
 		<>
 			<SequenceForm />
 			<SequencePlayer
-				min={minDate}
-				max={maxDate}
+				min={startDate}
+				max={endDate}
 				value={selectedDate}
 				endingDate={selectedEndingDate}
 				stepInterval={stepInterval}
@@ -92,8 +92,8 @@ const SequenceDetails = ({
 			/>
 			<TasksList
 				tasks={currentTasks}
-				minDate={selectedDate}
-				maxDate={selectedEndingDate}
+				startDate={selectedDate}
+				endDate={selectedEndingDate}
 				fetchActivityDetails={fetchActivityDetails}
 			/>
 		</>

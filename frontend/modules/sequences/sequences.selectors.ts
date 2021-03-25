@@ -24,9 +24,9 @@ import { getDateByStep, getSelectedFrame } from './sequences.helper';
 
 export const selectSequencesDomain = (state) => (state.sequences);
 
-const getMinMaxDates = ({frames, minDate, maxDate}) => ({
-	minDate: minDate || (frames[0] || {}).dateTime,
-	maxDate: maxDate || (frames[frames.length - 1] || {}).dateTime
+const getStartEndDates = ({frames, startDate, endDate}) => ({
+	startDate: startDate || (frames[0] || {}).dateTime,
+	endDate: endDate || (frames[frames.length - 1] || {}).dateTime
 });
 
 const getModelName = (sequence, settings) => {
@@ -45,7 +45,7 @@ const getModelName = (sequence, settings) => {
 export const selectSequences = createSelector(
 	selectSequencesDomain, selectSettings,
 		(state, settings) => !state.sequences ? null :
-			state.sequences.map((sequence) =>  ({...sequence, ...getModelName(sequence, settings), ...getMinMaxDates(sequence)}))
+			state.sequences.map((sequence) =>  ({...sequence, ...getModelName(sequence, settings), ...getStartEndDates(sequence)}))
 );
 
 export const selectInitialised = createSelector(
@@ -92,12 +92,12 @@ export const selectFrames = createSelector(
 	}
 );
 
-export const selectMinDate = createSelector(
-	selectSelectedSequence, (sequence) => (sequence || {}).minDate
+export const selectStartDate = createSelector(
+	selectSelectedSequence, (sequence) => (sequence || {}).startDate
 );
 
-export const selectMaxDate = createSelector(
-	selectSelectedSequence, (sequence) => (sequence || {}).maxDate
+export const selectEndDate = createSelector(
+	selectSelectedSequence, (sequence) => (sequence || {}).endDate
 );
 
 export const selectSelectedSequenceName = createSelector(
@@ -121,8 +121,8 @@ export const selectSelectedDate = createSelector(
 );
 
 export const selectSelectedStartingDate = createSelector(
-	selectSelectedDate, selectMinDate, (selectedDate, minDate) => {
-		let date = selectedDate || minDate;
+	selectSelectedDate, selectStartDate, (selectedDate, startDate) => {
+		let date = selectedDate || startDate;
 
 		if (!date) {
 			return null;
@@ -134,21 +134,21 @@ export const selectSelectedStartingDate = createSelector(
 );
 
 export const selectNextKeyFramesDates =  createSelector(
-	selectSelectedStartingDate, selectStepScale, selectStepInterval , selectMaxDate, selectFrames,
-		(startingDate, scale, interval, maxDate, frames) => {
+	selectSelectedStartingDate, selectStepScale, selectStepInterval , selectEndDate, selectFrames,
+		(startingDate, scale, interval, endDate, frames) => {
 			const keyFrames = [];
-			keyFrames[0] = new Date(Math.min(maxDate, (startingDate || new Date(0)).valueOf()));
+			keyFrames[0] = new Date(Math.min(endDate, (startingDate || new Date(0)).valueOf()));
 			let lastFrame = getSelectedFrame(frames, keyFrames[0]);
 			let nextFrame = null;
 			let date = getDateByStep(startingDate, scale, interval);
-			maxDate = new Date(maxDate);
+			endDate = new Date(endDate);
 
 			for (let i = 0; i < 3 ; i++) {
 				date = getDateByStep(date, scale, interval);
 				nextFrame = getSelectedFrame(frames, date);
 
 				if (scale !== STEP_SCALE.FRAME) {
-					while (lastFrame === nextFrame && date <= maxDate) {
+					while (lastFrame === nextFrame && date <= endDate) {
 						date = getDateByStep(date, scale, interval);
 						nextFrame = getSelectedFrame(frames, date);
 					}
@@ -158,7 +158,7 @@ export const selectNextKeyFramesDates =  createSelector(
 				lastFrame = nextFrame;
 			}
 
-			return keyFrames.filter((d) => d <= maxDate);
+			return keyFrames.filter((d) => d <= endDate);
 		}
 );
 
@@ -254,12 +254,12 @@ export const selectSelectedFrameTransformations = createSelector(
 );
 
 // Filters the activities by range as well as it's subtasks
-const getActivitiesByRange = (activities, minDate, maxDate) => {
+const getActivitiesByRange = (activities, startDate, endDate) => {
 	return activities.reduce((filteredActivities, activity) => {
-			if (! (activity.startDate > maxDate || activity.endDate < minDate)) {
+			if (! (activity.startDate > endDate || activity.endDate < startDate)) {
 				activity = {...activity};
 				if ( activity.subTasks ) {
-					activity.subTasks = getActivitiesByRange(activity.subTasks, minDate, maxDate);
+					activity.subTasks = getActivitiesByRange(activity.subTasks, startDate, endDate);
 				}
 
 				filteredActivities.push(activity);

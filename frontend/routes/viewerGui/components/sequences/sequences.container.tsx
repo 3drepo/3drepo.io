@@ -23,8 +23,8 @@ import { createStructuredSelector } from 'reselect';
 import { ActivitiesActions } from '../../../../modules/activities';
 import { LegendActions } from '../../../../modules/legend';
 import {
-	selectActivitiesPending, selectCurrentActivities, selectFrames, selectIsLoadingFrame, selectMaxDate,
-	selectMinDate, selectSelectedEndingDate, selectSelectedFrameColors, selectSelectedSequence,
+	selectActivitiesPending, selectCurrentActivities, selectFrames, selectIsLoadingFrame, selectEndDate,
+	selectStartDate, selectSelectedEndingDate, selectSelectedFrameColors, selectSelectedSequence,
 	selectSelectedStartingDate, selectSequences, selectStepInterval, selectStepScale, SequencesActions,
 } from '../../../../modules/sequences';
 import { selectDraggablePanels, selectRightPanels, ViewerGuiActions } from '../../../../modules/viewerGui';
@@ -33,8 +33,8 @@ import { Sequences } from './sequences.component';
 
 const mapStateToProps = createStructuredSelector({
 	sequences: selectSequences,
-	minDate: selectMinDate,
-	maxDate: selectMaxDate,
+	startDate: selectStartDate,
+	endDate: selectEndDate,
 	frames: selectFrames,
 	selectedDate: selectSelectedStartingDate,
 	selectedEndingDate: selectSelectedEndingDate,

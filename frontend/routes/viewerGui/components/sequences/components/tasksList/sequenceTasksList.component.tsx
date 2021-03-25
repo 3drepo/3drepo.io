@@ -23,8 +23,8 @@ import { ITask, TaskItem } from './sequenceTaskItem.component';
 
 interface IProps {
 	tasks: ITask[];
-	minDate: Date;
-	maxDate: Date;
+	startDate: Date;
+	endDate: Date;
 	fetchActivityDetails: (id: string) => void;
 }
 
@@ -45,9 +45,9 @@ export class TasksList extends React.PureComponent<IProps, IState> {
 	};
 
 	public get durationLabel() {
-		const  {  minDate, maxDate } = this.props;
+		const  {  startDate, endDate } = this.props;
 
-		return 'Activities from ' + formatShortDateTime(minDate) + ' to ' + formatShortDateTime(maxDate);
+		return 'Activities from ' + formatShortDateTime(startDate) + ' to ' + formatShortDateTime(endDate);
 	}
 
 	private handleItemClick = (task) => this.props.fetchActivityDetails(task.id);

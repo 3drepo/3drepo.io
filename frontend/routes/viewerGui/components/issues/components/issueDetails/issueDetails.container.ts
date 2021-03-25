@@ -34,8 +34,8 @@ import {
 import { selectJobsList, selectMyJob } from '../../../../../../modules/jobs';
 import { selectPermissions } from '../../../../../../modules/model';
 import {
-	selectMaxDate,
-	selectMinDate,
+	selectEndDate,
+	selectStartDate,
 	selectSelectedStartingDate,
 	selectSequences,
 	SequencesActions
@@ -59,8 +59,8 @@ const mapStateToProps = createStructuredSelector({
 	failedToLoad: selectFailedToLoad,
 	postCommentIsPending: selectPostCommentIsPending,
 	issues: selectIssues,
-	minSequenceDate: selectMinDate,
-	maxSequenceDate: selectMaxDate,
+	minSequenceDate: selectStartDate,
+	maxSequenceDate: selectEndDate,
 	selectedDate: selectSelectedStartingDate,
 	sequences: selectSequences,
 });
