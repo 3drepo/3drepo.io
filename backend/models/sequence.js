@@ -66,12 +66,6 @@ const getSequenceById = async (account, model, sequenceId, projection) => {
 	return db.findOne(account, sequenceCol(model), { _id: sequenceId}, projection);
 };
 
-const sequenceExists = async (account, model, sequenceId) => {
-	if(!(await getSequenceById(account, model, utils.stringToUUID(sequenceId), {_id: 1}))) {
-		throw responseCodes.SEQUENCE_NOT_FOUND;
-	}
-};
-
 const getLegendById = (account, model, sequenceId) => {
 	return db.findOne(account, legendCol(model), { _id: utils.stringToUUID(sequenceId) });
 };
@@ -89,6 +83,12 @@ const getDefaultLegend = async (account, model) => {
 };
 
 const Sequence = {};
+
+Sequence.sequenceExists = async (account, model, sequenceId) => {
+	if(!(await getSequenceById(account, model, utils.stringToUUID(sequenceId), {_id: 1}))) {
+		throw responseCodes.SEQUENCE_NOT_FOUND;
+	}
+};
 
 Sequence.getSequenceState = async (account, model, stateId) => {
 	return FileRef.getSequenceStateFile(account, model, stateId);
@@ -136,12 +136,12 @@ Sequence.updateSequence = async (account, model, sequenceId, data) => {
 };
 
 Sequence.deleteLegend = async (account, model, sequenceId) => {
-	await sequenceExists(account, model, sequenceId);
+	await Sequence.sequenceExists(account, model, sequenceId);
 	await db.remove(account, legendCol(model), { _id: utils.stringToUUID(sequenceId) });
 };
 
 Sequence.getLegend = async (account, model, sequenceId) => {
-	await sequenceExists(account, model, sequenceId);
+	await Sequence.sequenceExists(account, model, sequenceId);
 
 	const legend = await getLegendById(account, model, sequenceId);
 
@@ -150,7 +150,7 @@ Sequence.getLegend = async (account, model, sequenceId) => {
 
 Sequence.updateLegend = async (account, model, sequenceId, data) => {
 	const id = utils.stringToUUID(sequenceId);
-	await sequenceExists(account, model, id);
+	await Sequence.sequenceExists(account, model, id);
 	const prunedData = {};
 	for(const entry in data) {
 		if(utils.hasField(data, entry)) {

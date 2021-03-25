@@ -22,7 +22,7 @@ const utils = require("../utils");
 const nodeuuid = require("uuid/v1");
 const FileRef = require("./fileRef");
 const yup = require("yup");
-const {pick} = require("lodash");
+const {pick, last} = require("lodash");
 const Sequence = require("./sequence");
 
 const keyValueSchema = yup.object().shape({
@@ -40,16 +40,17 @@ const activityEditSchema = yup.object().shape({
 }).noUnknown();
 
 const activitySchema = yup.object().shape({
+	_id: yup.object(),
 	name: yup.string().required(),
 	startDate: yup.number().required(),
 	endDate: yup.number().required(),
 	parent: yup.string(),
 	resources: yup.object(),
 	data: yup.array().of(keyValueSchema),
-	subActivities: yup.array().of(yup.lazy(() => activitySchema.default(undefined)))
+	subActivities: yup.array()
 }).noUnknown();
 
-const activityTreeSchema = yup.array().of(activitySchema).required();
+// const activityTreeSchema = yup.array().of(activitySchema).required();
 
 const activityCol = (modelId) => `${modelId}.activities`;
 
@@ -64,36 +65,37 @@ const cleanActivityDetail = (activity) => {
 	return activity;
 };
 
-const fillIds = (activityTrees, sequenceId) => {
-	activityTrees.forEach((activity) => {
-		const _id = utils.stringToUUID(nodeuuid());
+const traverseActivities = (activities, callback) => {
+	const visited = [];
+	const indexArr = [0];
 
-		activity._id = _id;
+	let actual = activities[0];
 
-		if (activity.subActivities) {
-			fillIds(activity.subActivities, sequenceId);
-		}
-	});
-};
-
-const unrollActivities = (activityTrees, sequenceId, parentId, plainActivities = []) => {
-	activityTrees.forEach((activity) => {
-		const plainActivity = pick(activity,"_id", "name", "startDate", "endDate", "data", "resources");
-		plainActivity.sequenceId = sequenceId;
-
-		if (parentId) {
-			plainActivity.parent = parentId;
+	do {
+		while(actual) {
+			visited.push(actual);
+			indexArr.push(0);
+			actual = (actual.subActivities || [])[0];
 		}
 
-		plainActivities.push(plainActivity);
+		if (visited.length > 0) {
+			const temp = visited.pop();
+			indexArr.pop(); //  Get rid of leaf index;
 
-		if (activity.subActivities) {
-			unrollActivities(activity.subActivities, sequenceId, activity._id, plainActivities);
+			const index = last(indexArr) + 1;
+			indexArr[indexArr.length - 1] = index; // Set index for sibling
+
+			const parent = last(visited);
+
+			if (visited.length > 0) {
+				actual = parent.subActivities[index];
+			} else {
+				actual = activities[index];
+			}
+
+			callback(temp, parent);
 		}
-
-	});
-
-	return plainActivities;
+	} while (visited.length > 0 || actual);
 };
 
 const simplifyActivity = (activity, subActivities) => {
@@ -153,6 +155,27 @@ const createActivitiesTree = async(account, model, sequenceId) => {
 	activities = getSubActivities(null, foundActivities);
 
 	return { activities };
+};
+
+const addToActivityList = (activitiesList, sequenceIdUUID) => (activity, parent) => {
+
+	// TODO: test that _id is a bson object
+	if (!activitySchema.isValidSync(activity, { strict: true })) {
+		throw responseCodes.INVALID_ARGUMENTS;
+	}
+
+	if (parent && !parent._id) {
+		parent._id = utils.stringToUUID(nodeuuid());
+	}
+
+	if (!activity._id) {
+		activity._id = utils.stringToUUID(nodeuuid());
+	}
+
+	const plainActivity = pick(activity,"_id", "name", "startDate", "endDate", "data", "resources");
+	plainActivity.sequenceId = sequenceIdUUID;
+
+	activitiesList.push(plainActivity);
 };
 
 const SequenceActivities = {};
@@ -220,8 +243,6 @@ SequenceActivities.remove = async (account, model, sequenceId, activityId) => {
 	const idsToDelete = getDescendantsIds(activities, activityId);
 	idsToDelete.push(utils.stringToUUID(activityId));
 
-	// console.log(idsToDelete.map(utils.uuidToString));
-
 	const query = {_id:{ $in: idsToDelete}, sequenceId: utils.stringToUUID(sequenceId)};
 	const {result} = await db.remove(account,  activityCol(model), query);
 
@@ -238,6 +259,7 @@ SequenceActivities.get = async (account, model, sequenceId) => {
 	await Sequence.sequenceExists(account, model, sequenceId);
 
 	let activities = {};
+
 	try {
 		activities = await FileRef.getSequenceActivitiesFile(account, model, utils.uuidToString(sequenceId));
 	} catch(e) {
@@ -248,21 +270,20 @@ SequenceActivities.get = async (account, model, sequenceId) => {
 	return activities;
 };
 
-SequenceActivities.createActivities = async (account, model, sequenceId, activitiesTree, overwrite) => {
+SequenceActivities.createActivities = async (account, model, sequenceId, activities, overwrite) => {
 	await Sequence.sequenceExists(account, model, sequenceId);
 
-	if (!activityTreeSchema.isValidSync(activitiesTree, { strict: true })) {
+	if (!yup.array().isValidSync(activities, { strict: true })) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	fillIds(activitiesTree);
-
-	const activitiesList = unrollActivities(activitiesTree, utils.stringToUUID(sequenceId));
+	const activitiesList = [];
+	traverseActivities(activities, addToActivityList(activitiesList, utils.stringToUUID(sequenceId)));
 
 	await FileRef.removeFile(account, model, "activities", sequenceId);
 
 	if(overwrite) {
-		const activityTreeFile = JSON.stringify({activities: simplifyActivityTree(activitiesTree) });
+		const activityTreeFile = JSON.stringify({activities: simplifyActivityTree(activities) });
 
 		await Promise.all([
 			db.deleteMany(account, activityCol(model),{}),
