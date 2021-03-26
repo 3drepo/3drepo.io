@@ -35,9 +35,9 @@ import { selectJobsList, selectMyJob } from '../../../../../../modules/jobs';
 import { selectPermissions } from '../../../../../../modules/model';
 import {
 	selectEndDate,
-	selectStartDate,
 	selectSelectedStartingDate,
 	selectSequences,
+	selectStartDate,
 	SequencesActions
 } from '../../../../../../modules/sequences';
 import { selectTopicTypes } from '../../../../../../modules/teamspace';

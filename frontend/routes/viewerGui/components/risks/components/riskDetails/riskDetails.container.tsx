@@ -37,9 +37,9 @@ import {
 } from '../../../../../../modules/risks';
 import {
 	selectEndDate,
-	selectStartDate,
 	selectSelectedStartingDate,
 	selectSequences,
+	selectStartDate,
 	SequencesActions
 } from '../../../../../../modules/sequences';
 import { ViewpointsActions } from '../../../../../../modules/viewpoints';

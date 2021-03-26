@@ -63,6 +63,9 @@ const cleanSequence = (account, model, toClean) => {
 	toClean.teamspace = account;
 	toClean.model = model;
 
+	toClean.startDate = new Date(toClean.startDate).getTime();
+	toClean.endDate = new Date(toClean.endDate).getTime();
+
 	for (let i = 0; toClean["frames"] && i < toClean["frames"].length; i++) {
 		toClean["frames"][i] = cleanSequenceFrame(toClean["frames"][i]);
 	}
@@ -87,7 +90,12 @@ const handleFrames = async (account, model, sequenceId, sequenceFrames) => {
 
 	for (let i = 0; i < sequenceFrames.length; i++) {
 		const frame = sequenceFrames[i];
+		const dateTime = new Date(frame.dateTime);
 		let viewpoint;
+
+		if (!utils.isDate(dateTime)) {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
 
 		if (frame.viewpoint && utils.isObject(frame.viewpoint)) {
 			viewpoint = await createViewpoint(
@@ -119,7 +127,7 @@ const handleFrames = async (account, model, sequenceId, sequenceFrames) => {
 		}
 
 		processedFrames.push({
-			dateTime: new Date(frame.dateTime),
+			dateTime,
 			viewpoint
 		});
 	}
@@ -178,9 +186,12 @@ Sequence.createSequence = async (account, model, data) => {
 
 	newSequence.frames = await handleFrames(account, model, newSequence._id, data.frames);
 
+	newSequence.startDate = new Date((newSequence.frames[0] || {}).dateTime);
+	newSequence.endDate = new Date((newSequence.frames[newSequence.frames.length - 1] || {}).dateTime);
+
 	await db.insert(account, sequenceCol(model), newSequence);
 
-	return clean(newSequence, ["_id", "rev_id"]);
+	return { _id: utils.uuidToString(newSequence._id) };
 };
 
 Sequence.deleteSequence = async (account, model, sequenceId) => {
@@ -244,18 +255,11 @@ Sequence.getList = async (account, model, branch, revision, cleanResponse = fals
 
 	const submodelSequencesPromises = Promise.all(submodels.map((submodel) => Sequence.getList(account, submodel, submodelBranch, undefined, cleanResponse)));
 
-	const sequences = await db.find(account, sequenceCol(model), sequencesQuery);
+	const sequences = await db.find(account, sequenceCol(model), sequencesQuery, {frames: 0});
 
-	sequences.forEach((sequence) => {
-		sequence.startDate = new Date((sequence.frames[0] || {}).dateTime).getTime();
-		sequence.endDate = new Date((sequence.frames[sequence.frames.length - 1] || {}).dateTime).getTime();
-
-		delete sequence.frames;
-
-		if (cleanResponse) {
-			cleanSequence(account, model, sequence);
-		}
-	});
+	if (cleanResponse) {
+		sequences.forEach((sequence) => cleanSequence(account, model, sequence));
+	}
 
 	const submodelSequences = await submodelSequencesPromises;
 	submodelSequences.forEach((s) => sequences.push(...s));
@@ -264,7 +268,9 @@ Sequence.getList = async (account, model, branch, revision, cleanResponse = fals
 };
 
 Sequence.updateSequence = async (account, model, sequenceId, data) => {
+	const toUpdate = {};
 	const toSet = {};
+	const toUnset = {};
 
 	if (!data) {
 		throw responseCodes.INVALID_ARGUMENTS;
@@ -286,6 +292,8 @@ Sequence.updateSequence = async (account, model, sequenceId, data) => {
 		}
 
 		toSet.rev_id = history._id;
+	} else if (data.revId === null) {
+		toUnset.revId = 1;
 	}
 
 	if (data.frames) {
@@ -297,6 +305,21 @@ Sequence.updateSequence = async (account, model, sequenceId, data) => {
 		}
 
 		toSet.frames = await handleFrames(account, model, sequenceId, data.frames);
+
+		toSet.startDate = new Date((toSet.frames[0] || {}).dateTime);
+		toSet.endDate = new Date((toSet.frames[toSet.frames.length - 1] || {}).dateTime);
+	}
+
+	if (Object.keys(toSet).length > 0) {
+		toUpdate.$set = toSet;
+	}
+
+	if (Object.keys(toUnset).length > 0) {
+		toUpdate.$unset = toUnset;
+	}
+
+	if (Object.keys(toUpdate).length === 0) {
+		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
 	const { result } = await db.update(account, sequenceCol(model),
@@ -304,7 +327,6 @@ Sequence.updateSequence = async (account, model, sequenceId, data) => {
 	if (result.nModified === 0) {
 		throw responseCodes.SEQUENCE_NOT_FOUND;
 	}
-
 };
 
 Sequence.deleteLegend = async (account, model, sequenceId) => {

@@ -23,9 +23,9 @@ import { createStructuredSelector } from 'reselect';
 import { ActivitiesActions } from '../../../../modules/activities';
 import { LegendActions } from '../../../../modules/legend';
 import {
-	selectActivitiesPending, selectCurrentActivities, selectFrames, selectIsLoadingFrame, selectEndDate,
-	selectStartDate, selectSelectedEndingDate, selectSelectedFrameColors, selectSelectedSequence,
-	selectSelectedStartingDate, selectSequences, selectStepInterval, selectStepScale, SequencesActions,
+	selectActivitiesPending, selectCurrentActivities, selectEndDate, selectFrames, selectIsLoadingFrame,
+	selectSelectedEndingDate, selectSelectedFrameColors, selectSelectedSequence, selectSelectedStartingDate,
+	selectSequences, selectStartDate, selectStepInterval, selectStepScale, SequencesActions,
 } from '../../../../modules/sequences';
 import { selectDraggablePanels, selectRightPanels, ViewerGuiActions } from '../../../../modules/viewerGui';
 import { ViewpointsActions } from '../../../../modules/viewpoints';
