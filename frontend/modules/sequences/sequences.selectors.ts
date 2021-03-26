@@ -24,11 +24,6 @@ import { getDateByStep, getSelectedFrame } from './sequences.helper';
 
 export const selectSequencesDomain = (state) => (state.sequences);
 
-const getStartEndDates = ({frames, startDate, endDate}) => ({
-	startDate: startDate || (frames[0] || {}).dateTime,
-	endDate: endDate || (frames[frames.length - 1] || {}).dateTime
-});
-
 const getModelName = (sequence, settings) => {
 	let modelName = '';
 
@@ -45,7 +40,7 @@ const getModelName = (sequence, settings) => {
 export const selectSequences = createSelector(
 	selectSequencesDomain, selectSettings,
 		(state, settings) => !state.sequences ? null :
-			state.sequences.map((sequence) =>  ({...sequence, ...getModelName(sequence, settings), ...getStartEndDates(sequence)}))
+			state.sequences.map((sequence) =>  ({...sequence, ...getModelName(sequence, settings)}))
 );
 
 export const selectInitialised = createSelector(
