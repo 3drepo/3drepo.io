@@ -400,31 +400,30 @@ describe("Sequences", function () {
 				.expect(200);
 		});
 
-		// it("get details of old activity should fail", async() => {
-		// 	await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities/${activities.activities[0].id}`)
-		// 		.expect(404);
-		// });
+		it("get details of old activity should fail", async() => {
+			await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities/${activities.activities[0].id}`)
+				.expect(404);
+		});
 
-		// it("created as replacemente should be reflected when fetching the activity list", async() => {
-		// 	let	res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities`)
-		// 		.expect(200);
+		it("created as replacemente should be reflected when fetching the activity list", async() => {
+			let	res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities`)
+				.expect(200);
 
-		// 	expect(sortByName(pruneActivities(res.body.activities))).to.deep.equal(sortByName(pruneActivities(bulkActivities.activities)))
-		// });
+			expect(sortByName(pruneActivities(res.body.activities))).to.deep.equal(sortByName(pruneActivities(bulkActivities.activities)))
+		});
 
-		// it("to add to the current activities array should work", async() => {
-		// 	await agent.post(`/${username}/${model}/sequences/${sequenceId}/activities/`)
-		// 		.send(addedActivities)
-		// 		.expect(200);
-		// });
+		it("to add to the current activities array should work", async() => {
+			await agent.post(`/${username}/${model}/sequences/${sequenceId}/activities/`)
+				.send(addedActivities)
+				.expect(200);
+		});
 
-		// it("added as bulk should be reflected when fetching the activity list", async() => {
-		// 	let	res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities`)
-		// 		.expect(200);
+		it("added as bulk should be reflected when fetching the activity list", async() => {
+			let	res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities`)
+				.expect(200);
 
-		// 	const allActivities = bulkActivities.activities.concat(addedActivities.activities);
-
-		// 	expect(sortByName(pruneActivities(res.body.activities))).to.deep.equal(sortByName(pruneActivities(allActivities)))
-		// });
+			const allActivities = bulkActivities.activities.concat(addedActivities.activities);
+			expect(sortByName(pruneActivities(res.body.activities))).to.deep.equal(sortByName(pruneActivities(allActivities)))
+		});
 	})
 });

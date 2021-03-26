@@ -110,13 +110,6 @@ const simplifyActivity = (activity, subActivities) => {
 	return  { id, ...pick(activity, "name", "startDate", "endDate"), ...subActivities };
 };
 
-const simplifyActivityTree = (activities) => {
-	return activities.map(activity => {
-		const subActivities = activity.subActivities ? simplifyActivityTree(activity.subActivities) : null;
-		return simplifyActivity(activity, subActivities);
-	});
-};
-
 const getDescendantsIds = (activities, parentId, ids = []) => {
 	activities.forEach(activity => {
 		if (utils.uuidToString(activity.parent) === parentId) {
@@ -157,25 +150,72 @@ const createActivitiesTree = async(account, model, sequenceId) => {
 	return { activities };
 };
 
-const addToActivityList = (activitiesList, sequenceIdUUID) => (activity, parent) => {
+// This function is used for validation the receive data from the request,
+// add an activity to a plain array and create the treefile for saving afterwards
+const addToActivityListAndCreateTreeFile = (activitiesList, sequenceIdUUID, treeFile, createFile) => {
+//	let i = new Date().getTime();
+	const treeFileDictionary = {};
 
-	// TODO: test that _id is a bson object
-	if (!activitySchema.isValidSync(activity, { strict: true })) {
-		throw responseCodes.INVALID_ARGUMENTS;
-	}
+	let id = null;
+	const idsDictionary = {};
 
-	if (parent && !parent._id) {
-		parent._id = utils.stringToUUID(nodeuuid());
-	}
+	return (activity, parent) => {
+		// TODO: test that _id is a bson object
+		if (!activitySchema.isValidSync(activity, { strict: true })) {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
 
-	if (!activity._id) {
-		activity._id = utils.stringToUUID(nodeuuid());
-	}
+		if (parent && !parent._id) {
+			id = utils.stringToUUID(nodeuuid());
 
-	const plainActivity = pick(activity,"_id", "name", "startDate", "endDate", "data", "resources");
-	plainActivity.sequenceId = sequenceIdUUID;
+			while (idsDictionary[id]) { // if the id is already there, create a new one
+				id = utils.stringToUUID(nodeuuid());
+			}
 
-	activitiesList.push(plainActivity);
+			idsDictionary[id] = true;
+
+			parent._id = id ;
+		}
+
+		if (!activity._id) {
+			id = utils.stringToUUID(nodeuuid());
+
+			while (idsDictionary[id]) { // if the id is already there, create a new one
+				id = utils.stringToUUID(nodeuuid());
+			}
+
+			idsDictionary[id] = true;
+			activity._id =  id;
+		}
+
+		const plainActivity = pick(activity,"_id", "name", "startDate", "endDate", "data", "resources");
+		plainActivity.sequenceId = sequenceIdUUID;
+
+		if (parent) {
+			plainActivity.parent = parent._id;
+		}
+
+		activitiesList.push(plainActivity);
+
+		if (createFile) {
+			// The treeFileDictionary is being use for quick access to the activity,
+			// in particular to add the subactivities to its parents
+			if (parent && !treeFileDictionary[parent._id]) {
+				treeFileDictionary[parent._id] = simplifyActivity(parent);
+				treeFileDictionary[parent._id].subActivities = [];
+			}
+
+			if (!treeFileDictionary[activity._id]) {
+				treeFileDictionary[activity._id] = simplifyActivity(activity);
+			}
+
+			if (parent) {
+				treeFileDictionary[parent._id].subActivities.push(treeFileDictionary[activity._id]);
+			} else {
+				treeFile.push(treeFileDictionary[activity._id]);
+			}
+		}
+	};
 };
 
 const SequenceActivities = {};
@@ -278,12 +318,15 @@ SequenceActivities.createActivities = async (account, model, sequenceId, activit
 	}
 
 	const activitiesList = [];
-	traverseActivities(activities, addToActivityList(activitiesList, utils.stringToUUID(sequenceId)));
+	const treeFile = [];
+	const tempDictionary = {};
+
+	traverseActivities(activities, addToActivityListAndCreateTreeFile(activitiesList, utils.stringToUUID(sequenceId), treeFile, overwrite, tempDictionary));
 
 	await FileRef.removeFile(account, model, "activities", sequenceId);
 
 	if(overwrite) {
-		const activityTreeFile = JSON.stringify({activities: simplifyActivityTree(activities) });
+		const activityTreeFile = JSON.stringify({activities: treeFile});
 
 		await Promise.all([
 			db.deleteMany(account, activityCol(model),{}),
