@@ -40,6 +40,7 @@ const fieldTypes = {
 	"transformation": "[object Array]",
 	"issue_id": "[object Object]",
 	"risk_id": "[object Object]",
+	"sequence_id": "[object Object]",
 	"view_id": "[object Object]"
 };
 
@@ -76,6 +77,7 @@ function clean(groupData) {
 	groupData._id = utils.uuidToString(groupData._id);
 	groupData.issue_id = groupData.issue_id && utils.uuidToString(groupData.issue_id);
 	groupData.risk_id = groupData.risk_id && utils.uuidToString(groupData.risk_id);
+	groupData.sequence_id = groupData.sequence_id && utils.uuidToString(groupData.sequence_id);
 	groupData.view_id = groupData.view_id && utils.uuidToString(groupData.view_id);
 
 	if (utils.isDate(groupData.createdAt)) {
@@ -339,6 +341,11 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 		query.risk_id = { $exists: false };
 	}
 
+	// If we want groups that aren't from risks
+	if (queryParams.noSequences) {
+		query.sequence_id = { $exists: false };
+	}
+
 	// If we want groups that aren't from views
 	if (queryParams.noViews) {
 		query.view_id = { $exists: false };
@@ -436,7 +443,10 @@ Group.update = async function (account, model, branch = "master", revId = null, 
 	}
 
 	group.objects = await getObjectIds(account, model, branch, revId, group, true, false);
-	ChatEvent.groupChanged(sessionId, account, model, group);
+
+	if (sessionId) {
+		ChatEvent.groupChanged(sessionId, account, model, group);
+	}
 
 	return group;
 };

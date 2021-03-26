@@ -19,7 +19,9 @@
 const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
-
+const yup = require("yup");
+ 
+const { update: updateGroup } = require("./group");
 const History = require("./history");
 const FileRef = require("./fileRef");
 const { getRefNodes } = require("./ref");
@@ -31,11 +33,21 @@ const activityCol = (modelId) => `${modelId}.activities`;
 const sequenceCol = (modelId) => `${modelId}.sequences`;
 const legendCol = (modelId) => `${modelId}.sequences.legends`;
 
-const fieldTypes = {
-	"name": "[object String]",
-	"rev_id": "[object Object]",
-	"frames": "[object Array]"
-};
+const sequenceSchema = yup.object().shape({
+	_id: yup.object().required(),
+	name: yup.string().required(),
+	customSequence: yup.bool(),
+	startDate: yup.date().required(),
+	endDate: yup.date().required(),
+	rev_id: yup.object(),
+	frames: yup.array().required()
+}).noUnknown();
+
+const sequenceEditSchema = yup.object().shape({
+	name: yup.string(),
+	revId: yup.string(),
+	frames: yup.array()
+}).noUnknown();
 
 const clean = (toClean, keys) => {
 	keys.forEach((key) => {
@@ -113,6 +125,39 @@ const handleFrames = async (account, model, sequenceId, sequenceFrames) => {
 
 			if (view) {
 				viewpoint = view.viewpoint;
+
+				["highlighted_group_id",
+					"hidden_group_id",
+					"shown_group_id"
+				].forEach(async (groupIDName) => {
+					if (viewpoint[groupIDName]) {
+						await updateGroup(
+							account,
+							model,
+							undefined,
+							undefined,
+							undefined,
+							undefined,
+							viewpoint[groupIDName],
+							{ sequence_id: sequenceId }
+						);
+					}
+				});
+
+				if (viewpoint["override_group_ids"]) {
+					viewpoint["override_group_ids"].forEach(async (overrideGroupId) => {
+						await updateGroup(
+							account,
+							model,
+							undefined,
+							undefined,
+							undefined,
+							undefined,
+							overrideGroupId,
+							{ sequence_id: sequenceId }
+						);
+					});
+				}
 			}
 		}
 
@@ -166,9 +211,7 @@ Sequence.createSequence = async (account, model, data) => {
 		"frames": []
 	};
 
-	if (!data ||
-		!data.name || !utils.typeMatch(data.name, fieldTypes["name"]) ||
-		!data.frames || !utils.typeMatch(data.frames, fieldTypes["frames"])) {
+	if (!data || !data.name || !data.frames) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	} else {
 		newSequence.name = data.name;
@@ -184,6 +227,10 @@ Sequence.createSequence = async (account, model, data) => {
 
 	newSequence.startDate = new Date((newSequence.frames[0] || {}).dateTime);
 	newSequence.endDate = new Date((newSequence.frames[newSequence.frames.length - 1] || {}).dateTime);
+
+	if (!sequenceSchema.isValidSync(newSequence, { strict: true })) {
+		throw responseCodes.INVALID_ARGUMENTS;
+	}
 
 	await db.insert(account, sequenceCol(model), newSequence);
 
@@ -264,7 +311,7 @@ Sequence.updateSequence = async (account, model, sequenceId, data) => {
 	const toSet = {};
 	const toUnset = {};
 
-	if (!data) {
+	if (!data || !sequenceEditSchema.isValidSync(data, { strict: true })) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
