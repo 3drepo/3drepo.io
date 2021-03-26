@@ -379,8 +379,8 @@ describe("Sequences", function () {
 				expect(res.body[1].model).to.equal(latestGoldenData.model);
 				expect(res.body[1].rev_id).to.equal(latestGoldenData.rev_id);
 				expect(res.body[1].name).to.equal(latestGoldenData.name);
-				expect(res.body[1].minDate).to.equal(latestGoldenData.frames[0].dateTime);
-				expect(res.body[1].maxDate).to.equal(latestGoldenData.frames[latestGoldenData.frames.length - 1].dateTime);
+				expect(res.body[1].startDate).to.equal(latestGoldenData.frames[0].dateTime);
+				expect(res.body[1].endDate).to.equal(latestGoldenData.frames[latestGoldenData.frames.length - 1].dateTime);
 
 				return done(err);
 			});
@@ -394,8 +394,8 @@ describe("Sequences", function () {
 				expect(res.body[0].model).to.equal(oldGoldenData.model);
 				expect(res.body[0].rev_id).to.equal(oldGoldenData.rev_id);
 				expect(res.body[0].name).to.equal(oldGoldenData.name);
-				expect(res.body[0].minDate).to.equal(oldGoldenData.frames[0].dateTime);
-				expect(res.body[0].maxDate).to.equal(oldGoldenData.frames[oldGoldenData.frames.length - 1].dateTime);
+				expect(res.body[0].startDate).to.equal(oldGoldenData.frames[0].dateTime);
+				expect(res.body[0].endDate).to.equal(oldGoldenData.frames[oldGoldenData.frames.length - 1].dateTime);
 
 				return done(err);
 			});
@@ -409,8 +409,8 @@ describe("Sequences", function () {
 				expect(res.body[1].model).to.equal(latestGoldenData.model);
 				expect(res.body[1].rev_id).to.equal(latestGoldenData.rev_id);
 				expect(res.body[1].name).to.equal(latestGoldenData.name);
-				expect(res.body[1].minDate).to.equal(latestGoldenData.frames[0].dateTime);
-				expect(res.body[1].maxDate).to.equal(latestGoldenData.frames[latestGoldenData.frames.length - 1].dateTime);
+				expect(res.body[1].startDate).to.equal(latestGoldenData.frames[0].dateTime);
+				expect(res.body[1].endDate).to.equal(latestGoldenData.frames[latestGoldenData.frames.length - 1].dateTime);
 
 				return done(err);
 			});
@@ -581,8 +581,8 @@ describe("Sequences", function () {
 						expect(res.body[0].model).to.equal(updatedData.model);
 						expect(res.body[0].rev_id).to.equal(updatedData.rev_id);
 						expect(res.body[0].name).to.equal(updatedData.name);
-						expect(res.body[0].minDate).to.equal(updatedData.frames[0].dateTime);
-						expect(res.body[0].maxDate).to.equal(updatedData.frames[updatedData.frames.length - 1].dateTime);
+						expect(res.body[0].startDate).to.equal(updatedData.frames[0].dateTime);
+						expect(res.body[0].endDate).to.equal(updatedData.frames[updatedData.frames.length - 1].dateTime);
 
 						done(err);
 					});
@@ -1038,7 +1038,7 @@ describe("Sequences", function () {
 
 	describe("Deleting a legend", function() {
 		it("as a viewer should fail", function(done) {
-			agent.delete(`/${username}/${model}/revision/master/head/sequences/${latestGoldenData._id}/legend?key=${viewerApiKey}`)
+			agent.delete(`/${username}/${model}/sequences/${latestGoldenData._id}/legend?key=${viewerApiKey}`)
 				.expect(401, done);
 		});
 

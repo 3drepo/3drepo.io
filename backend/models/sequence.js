@@ -175,11 +175,7 @@ Sequence.createSequence = async (account, model, data) => {
 	}
 
 	if (data.revId) {
-		const history = await History.getHistory(account, model, undefined, data.revId);
-
-		if (!history) {
-			throw responseCodes.INVALID_TAG_NAME;
-		}
+		const history = await History.getHistory(account, model, undefined, data.revId, {_id: 1});
 
 		newSequence.rev_id = history._id;
 	}
@@ -239,11 +235,7 @@ Sequence.getList = async (account, model, branch, revision, cleanResponse = fals
 	let sequencesQuery = {};
 
 	if (branch || revision) {
-		const history = await History.getHistory(account, model, branch, revision);
-
-		if (!history) {
-			throw responseCodes.INVALID_TAG_NAME;
-		}
+		const history = await History.getHistory(account, model, branch, revision, {_id: 1});
 
 		submodelBranch = "master";
 		sequencesQuery = {"$or":[{"rev_id": history._id}, {"rev_id": {"$exists": false}}]};
@@ -276,6 +268,8 @@ Sequence.updateSequence = async (account, model, sequenceId, data) => {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
+	await sequenceExists(account, model, sequenceId);
+
 	if (data.name) {
 		if (!utils.isString(data.name) || data.name === "" || data.name.length >= 30) {
 			throw responseCodes.INVALID_ARGUMENTS;
@@ -285,11 +279,7 @@ Sequence.updateSequence = async (account, model, sequenceId, data) => {
 	}
 
 	if (data.revId) {
-		const history = await History.getHistory(account, model, undefined, data.revId);
-
-		if (!history) {
-			throw responseCodes.INVALID_TAG_NAME;
-		}
+		const history = await History.getHistory(account, model, undefined, data.revId, {_id: 1});
 
 		toSet.rev_id = history._id;
 	} else if (data.revId === null) {
@@ -322,11 +312,7 @@ Sequence.updateSequence = async (account, model, sequenceId, data) => {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	const { result } = await db.update(account, sequenceCol(model),
-		{_id: utils.stringToUUID(sequenceId)}, {$set: toSet});
-	if (result.nModified === 0) {
-		throw responseCodes.SEQUENCE_NOT_FOUND;
-	}
+	await db.update(account, sequenceCol(model), {_id: utils.stringToUUID(sequenceId)}, toUpdate);
 };
 
 Sequence.deleteLegend = async (account, model, sequenceId) => {
