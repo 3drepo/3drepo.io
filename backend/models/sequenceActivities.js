@@ -98,16 +98,9 @@ const traverseActivities = (activities, callback) => {
 	} while (visited.length > 0 || actual);
 };
 
-const simplifyActivity = (activity, subActivities) => {
+const simplifyActivity = (activity) => {
 	const id = activity._id ? utils.uuidToString(activity._id) : null;
-
-	if (subActivities && subActivities.length) {
-		subActivities = { subActivities };
-	} else {
-		subActivities = {};
-	}
-
-	return  { id, ...pick(activity, "name", "startDate", "endDate"), ...subActivities };
+	return  { id, ...pick(activity, "name", "startDate", "endDate") };
 };
 
 const getDescendantsIds = async (account, model, sequenceId, parent) => {
@@ -129,31 +122,45 @@ const getDescendantsIds = async (account, model, sequenceId, parent) => {
 	return ids;
 };
 
-/**
- * @typedef {{_id: string, parents: Array<string>}} Activity
- * @param {string} parentId
- * @param {Array<Activity>} activities;
- * @return {Array<Activity>}
- */
-const getSubActivities = (parentId, activities) => {
-	return activities.filter(activity => {
-		const parent = activity.parent;
+const addToActivityTree = (activity, parent, treeFile, treeFileDictionary) => {
+	// The treeFileDictionary is being use for quick access to the activity,
+	// in particular to add the subactivities to its parents
+	const parentId = parent ? utils.uuidToString(parent._id || parent.id) : null ;
+	const id = utils.uuidToString(activity._id || activity.id);
 
-		if (parentId) {
-			return parent && utils.uuidToString(parent) === parentId;
-		} else {
-			return !parent;
+	if (parent && !treeFileDictionary[parentId]) {
+		treeFileDictionary[parentId] = simplifyActivity(parent);
+	}
+
+	if (!treeFileDictionary[id]) {
+		treeFileDictionary[id] = simplifyActivity(activity);
+	}
+
+	if (parent) {
+		if (!treeFileDictionary[parentId].subActivities) {
+			treeFileDictionary[parentId].subActivities = [];
 		}
-	}).map(activity => {
-		const subActivities = getSubActivities(utils.uuidToString(activity._id), activities);
-		return  simplifyActivity(activity, subActivities);
-	});
+
+		treeFileDictionary[parentId].subActivities.push(treeFileDictionary[id]);
+	} else {
+		treeFile.push(treeFileDictionary[id]);
+	}
 };
 
 const createActivitiesTree = async(account, model, sequenceId) => {
-	let activities = {};
-	const foundActivities = await db.find(account, model + ".activities",{sequenceId: utils.stringToUUID(sequenceId)}); // filter by sequenceId
-	activities = getSubActivities(null, foundActivities);
+	const foundActivities = await db.find(account, model + ".activities", {sequenceId: utils.stringToUUID(sequenceId)}, { metadata: 0, resources: 0 });
+
+	const activities = [];
+	const activitiesDictionary = {};
+
+	foundActivities.forEach((activity) => {
+		activitiesDictionary[utils.uuidToString(activity._id)] = simplifyActivity(activity);
+	});
+
+	foundActivities.forEach((activity) => {
+		const parent = activity.parent ? activitiesDictionary[utils.uuidToString(activity.parent)] : null;
+		addToActivityTree(activity, parent, activities, activitiesDictionary);
+	});
 
 	return { activities };
 };
@@ -205,22 +212,7 @@ const addToActivityListAndCreateTreeFile = (activitiesList, sequenceIdUUID, tree
 		activitiesList.push(plainActivity);
 
 		if (createFile) {
-			// The treeFileDictionary is being use for quick access to the activity,
-			// in particular to add the subactivities to its parents
-			if (parent && !treeFileDictionary[parent._id]) {
-				treeFileDictionary[parent._id] = simplifyActivity(parent);
-				treeFileDictionary[parent._id].subActivities = [];
-			}
-
-			if (!treeFileDictionary[activity._id]) {
-				treeFileDictionary[activity._id] = simplifyActivity(activity);
-			}
-
-			if (parent) {
-				treeFileDictionary[parent._id].subActivities.push(treeFileDictionary[activity._id]);
-			} else {
-				treeFile.push(treeFileDictionary[activity._id]);
-			}
+			addToActivityTree(activity, parent, treeFile, treeFileDictionary);
 		}
 	};
 };
