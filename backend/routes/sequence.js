@@ -348,7 +348,7 @@ router.get("/revision/:revId/sequences", middlewares.issue.canView, listSequence
  *  ]
  * }
  */
-router.get("/sequences/:sequenceId/activities/:activityId", middlewares.issue.canView, getSequenceActivityDetail);
+router.get("/sequences/:sequenceId/activities/:activityId", middlewares.hasReadAccessToModel, getSequenceActivityDetail);
 
 /**
  * @api {get} /:teamspace/:model/sequences/:sequenceId/activities Get all activities

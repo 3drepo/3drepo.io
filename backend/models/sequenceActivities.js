@@ -110,13 +110,21 @@ const simplifyActivity = (activity, subActivities) => {
 	return  { id, ...pick(activity, "name", "startDate", "endDate"), ...subActivities };
 };
 
-const getDescendantsIds = (activities, parentId, ids = []) => {
-	activities.forEach(activity => {
-		if (utils.uuidToString(activity.parent) === parentId) {
-			ids.push(activity._id);
-			getDescendantsIds(activities, utils.uuidToString(activity._id), ids);
-		}
-	});
+const getDescendantsIds = async (account, model, sequenceId, parent) => {
+	let parents = [utils.stringToUUID(parent)];
+	sequenceId = utils.stringToUUID(sequenceId);
+
+	const ids = [utils.stringToUUID(parent)];
+	let currentDescendants = [];
+
+	do {
+		currentDescendants = await db.find(account,activityCol(model), {sequenceId, parent: {$in: parents}} , {_id:1});
+		parents = [];
+		(currentDescendants || []).forEach(({_id}) => {
+			parents.push(_id);
+			ids.push(_id);
+		});
+	} while(currentDescendants.length);
 
 	return ids;
 };
@@ -153,7 +161,6 @@ const createActivitiesTree = async(account, model, sequenceId) => {
 // This function is used for validation the receive data from the request,
 // add an activity to a plain array and create the treefile for saving afterwards
 const addToActivityListAndCreateTreeFile = (activitiesList, sequenceIdUUID, treeFile, createFile) => {
-//	let i = new Date().getTime();
 	const treeFileDictionary = {};
 
 	let id = null;
@@ -278,10 +285,7 @@ SequenceActivities.edit = async (account, model, sequenceId, activityId, activit
 SequenceActivities.remove = async (account, model, sequenceId, activityId) => {
 	await Sequence.sequenceExists(account, model, sequenceId);
 
-	const activities = await db.find(account,activityCol(model), {sequenceId: utils.stringToUUID(sequenceId), parent:{$exists: true}} , {parent:1, _id:1});
-
-	const idsToDelete = getDescendantsIds(activities, activityId);
-	idsToDelete.push(utils.stringToUUID(activityId));
+	const idsToDelete = await getDescendantsIds(account, model, sequenceId, activityId);
 
 	const query = {_id:{ $in: idsToDelete}, sequenceId: utils.stringToUUID(sequenceId)};
 	const {result} = await db.remove(account,  activityCol(model), query);
@@ -319,9 +323,7 @@ SequenceActivities.createActivities = async (account, model, sequenceId, activit
 
 	const activitiesList = [];
 	const treeFile = [];
-	const tempDictionary = {};
-
-	traverseActivities(activities, addToActivityListAndCreateTreeFile(activitiesList, utils.stringToUUID(sequenceId), treeFile, overwrite, tempDictionary));
+	traverseActivities(activities, addToActivityListAndCreateTreeFile(activitiesList, utils.stringToUUID(sequenceId), treeFile, overwrite));
 
 	await FileRef.removeFile(account, model, "activities", sequenceId);
 
