@@ -33,6 +33,9 @@ describe("Sequences", function () {
 
 	const viewerApiKey = "ba7a87507986da2619fc448cae0d93e4";
 
+	// This user is still member of metaTest but has no access to the model
+	const noPermissionApiKey = "c434c0d7cce73ef5bc84168147632662";
+
 	before(function(done) {
 
 		server = app.listen(8080, function () {
@@ -159,12 +162,18 @@ describe("Sequences", function () {
 			expect(sortById(res.body.activities)).to.deep.equal(sortById(activities.activities))
 		});
 
-		it("as a viewer should suceed", async() => {
+		it("should suceed as a viewer", async() => {
 			let	res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities?key=${viewerApiKey}`)
 				.expect(200);
 
 			expect(sortById(res.body.activities)).to.deep.equal(sortById(activities.activities))
 		});
+
+		it("should fail as a member without access to the model ", async() => {
+			await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities?key=${noPermissionApiKey}`)
+				.expect(401);
+		});
+
 	})
 
 	describe("Get sequence activity detail", function() {
@@ -204,8 +213,15 @@ describe("Sequences", function () {
 		it("should succeed as a viewer", async function() {
 			const existingActivityId = "a745267e-65a8-4a99-acfd-b11694ca87ac";
 
-			const res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities/${existingActivityId}?key${viewerApiKey}`)
+			await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities/${existingActivityId}?key=${viewerApiKey}`)
 				.expect(200)
+		});
+
+		it("should fail as a member without access to the model ", async() => {
+			const existingActivityId = "a745267e-65a8-4a99-acfd-b11694ca87ac";
+
+			await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities/${existingActivityId}?key=${noPermissionApiKey}`)
+				.expect(401)
 		});
 
 	});
@@ -230,6 +246,18 @@ describe("Sequences", function () {
 
 			expect(body.value).to.be.equal(responseCodes.INVALID_ARGUMENTS.value);
 		});
+
+		it("should fail as viewer", async() => {
+			 await agent.post(`/${username}/${model}/sequences/${sequenceId}/activities?key=${viewerApiKey}`)
+				.send(createPayload(activity))
+				.expect(401);
+		});
+
+		it("should fail as a member without access to the model ", async() => {
+			await agent.post(`/${username}/${model}/sequences/${sequenceId}/activities?key=${noPermissionApiKey}`)
+			   .send(createPayload(activity))
+			   .expect(401);
+	   });
 
 		it("should be created succesfully", async() => {
 			const { body } = await agent.post(`/${username}/${model}/sequences/${sequenceId}/activities`)
@@ -293,10 +321,19 @@ describe("Sequences", function () {
 			it("should fail if its done by a viewer", async() => {
 				const activityChanges = { name: "updated name" };
 
-				const res = await agent.patch(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}?key=${viewerApiKey}`)
+				await agent.patch(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}?key=${viewerApiKey}`)
 					.send(activityChanges)
 					.expect(401);
 			});
+
+			it("should fail as a member without access to the model ", async() => {
+				const activityChanges = { name: "updated name" };
+
+				await agent.patch(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}?key=${noPermissionApiKey}`)
+					.send(activityChanges)
+					.expect(401);
+			});
+
 
 			it("should succeed", async() => {
 				const activityChanges = { name: "updated name" };
@@ -383,6 +420,11 @@ describe("Sequences", function () {
 
 		it("should fail as a viewer", async() => {
 			await agent.delete(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}?key=${viewerApiKey}`)
+				.expect(401);
+		});
+
+		it("should fail as a member without access to the model ", async() => {
+			await agent.delete(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}?key=${noPermissionApiKey}`)
 				.expect(401);
 		});
 
