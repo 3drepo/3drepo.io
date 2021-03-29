@@ -19,10 +19,10 @@ import React from 'react';
 import { formatDateTime, formatShortDate, formatShortDateTime } from '../../../../../../services/formatting/formatDate';
 import { Loader } from '../../../../../components/loader/loader.component';
 import { SequenceTasksListContainer, SequenceTasksListItem, TaskListLabel } from '../../sequences.styles';
-import { ITask, TaskItem } from './sequenceTaskItem.component';
+import { IActivity, TaskItem } from './sequenceTaskItem.component';
 
 interface IProps {
-	tasks: ITask[];
+	tasks: IActivity[];
 	minDate: Date;
 	maxDate: Date;
 	fetchActivityDetails: (id: string) => void;

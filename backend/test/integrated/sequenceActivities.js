@@ -201,6 +201,13 @@ describe("Sequences", function () {
 			expect(res.body).to.be.deep.equal(existingActivity);
 		});
 
+		it("should succeed as a viewer", async function() {
+			const existingActivityId = "a745267e-65a8-4a99-acfd-b11694ca87ac";
+
+			const res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities/${existingActivityId}?key${viewerApiKey}`)
+				.expect(200)
+		});
+
 	});
 
 	describe("create activity", function() {
