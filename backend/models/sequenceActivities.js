@@ -65,6 +65,9 @@ const cleanActivityDetail = (activity) => {
 	return activity;
 };
 
+const clearActivityListCache = async (account, model, sequenceId)  =>
+	await FileRef.removeFile(account, model, "activities", sequenceId);
+
 const traverseActivities = (activities, callback) => {
 	const visited = [];
 	const indexArr = [0];
@@ -247,7 +250,7 @@ SequenceActivities.create = async (account, model, sequenceId, activity) => {
 
 	await Promise.all([
 		db.insert(account,  activityCol(model), activity),
-		FileRef.removeFile(account, model, "activities", sequenceId)
+		await clearActivityListCache(account, model, sequenceId)
 	]);
 
 	return {...activity, _id, sequenceId: sequenceId};
@@ -271,7 +274,7 @@ SequenceActivities.edit = async (account, model, sequenceId, activityId, activit
 		throw responseCodes.ACTIVITY_NOT_FOUND;
 	}
 
-	await FileRef.removeFile(account, model, "activities", sequenceId);
+	await clearActivityListCache(account, model, sequenceId);
 };
 
 SequenceActivities.remove = async (account, model, sequenceId, activityId) => {
@@ -286,7 +289,7 @@ SequenceActivities.remove = async (account, model, sequenceId, activityId) => {
 		throw responseCodes.ACTIVITY_NOT_FOUND;
 	}
 
-	await FileRef.removeFile(account, model, "activities", sequenceId);
+	await clearActivityListCache(account, model, sequenceId);
 
 	return { _id: activityId};
 };
@@ -300,7 +303,7 @@ SequenceActivities.get = async (account, model, sequenceId) => {
 		activities = await FileRef.getSequenceActivitiesFile(account, model, utils.uuidToString(sequenceId));
 	} catch(e) {
 		activities = await createActivitiesTree(account, model, sequenceId);
-		await FileRef.storeFile(account, activityCol(model) + ".ref", account, utils.uuidToString(nodeuuid()), JSON.stringify(activities),  {"_id": sequenceId});
+		FileRef.storeFile(account, activityCol(model) + ".ref", account, utils.uuidToString(nodeuuid()), JSON.stringify(activities),  {"_id": sequenceId});
 	}
 
 	return activities;
@@ -317,7 +320,7 @@ SequenceActivities.createActivities = async (account, model, sequenceId, activit
 	const treeFile = [];
 	traverseActivities(activities, addToActivityListAndCreateTreeFile(activitiesList, utils.stringToUUID(sequenceId), treeFile, overwrite));
 
-	await FileRef.removeFile(account, model, "activities", sequenceId);
+	await clearActivityListCache(account, model, sequenceId);
 
 	if(overwrite) {
 		const activityTreeFile = JSON.stringify({activities: treeFile});
