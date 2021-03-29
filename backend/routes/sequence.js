@@ -509,8 +509,8 @@ router.post("/sequences/:sequenceId/activities", middlewares.hasUploadAccessToMo
  * @apiUse ActivityBodyObjectOptional
  * @apiUse KeyValueObject
  *
- * @apiExample {put} Example usage
- * PUT /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0001-000000000001/activities/fe94be44-5cd8-4aaf-b020-afc1456680d3 HTTP/1.1
+ * @apiExample {patch} Example usage
+ * PATCH /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0001-000000000001/activities/fe94be44-5cd8-4aaf-b020-afc1456680d3 HTTP/1.1
  * {
  *    "name":"Renamed activity"
  * }
@@ -519,7 +519,7 @@ router.post("/sequences/:sequenceId/activities", middlewares.hasUploadAccessToMo
  * HTTP/1.1 200 OK
  *
  * */
-router.put("/sequences/:sequenceId/activities/:activityId",middlewares.hasUploadAccessToModel, editActivity);
+router.patch("/sequences/:sequenceId/activities/:activityId",middlewares.hasUploadAccessToModel, editActivity);
 
 /**
  * @api {delete} /:teamspace/:model/sequences/:sequenceId/activities/:activityId Edit an activity

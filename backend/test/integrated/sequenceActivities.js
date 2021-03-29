@@ -31,6 +31,8 @@ describe("Sequences", function () {
 	const username = "metaTest";
 	const password = "123456";
 
+	const viewerApiKey = "ba7a87507986da2619fc448cae0d93e4";
+
 	before(function(done) {
 
 		server = app.listen(8080, function () {
@@ -156,6 +158,13 @@ describe("Sequences", function () {
 
 			expect(sortById(res.body.activities)).to.deep.equal(sortById(activities.activities))
 		});
+
+		it("as a viewer should suceed", async() => {
+			let	res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities?key=${viewerApiKey}`)
+				.expect(200);
+
+			expect(sortById(res.body.activities)).to.deep.equal(sortById(activities.activities))
+		});
 	})
 
 	describe("Get sequence activity detail", function() {
@@ -235,7 +244,6 @@ describe("Sequences", function () {
 			expect(newActivityReturned).to.be.deep.equal(newActivity);
 		});
 
-
 		it("should be reflected when fetching the detail of the activity", async() => {
 			const res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}`)
 				.expect(200);
@@ -248,10 +256,9 @@ describe("Sequences", function () {
 	});
 
 	describe("edit activity", function() {
-
 		describe("when changing basic fields", function() {
 			it("should fail with made up sequence id", async() => {
-				const { body } = await agent.put(`/${username}/${model}/sequences/non_existing_id/activities/${activityId}`)
+				const { body } = await agent.patch(`/${username}/${model}/sequences/non_existing_id/activities/${activityId}`)
 					.send(activity)
 					.expect(responseCodes.SEQUENCE_NOT_FOUND.status);
 
@@ -259,7 +266,7 @@ describe("Sequences", function () {
 			});
 
 			it("should fail with made up activity id", async() => {
-				const { body } = await agent.put(`/${username}/${model}/sequences/${sequenceId}/activities/non_existent_actity`)
+				const { body } = await agent.patch(`/${username}/${model}/sequences/${sequenceId}/activities/non_existent_actity`)
 					.send(activity)
 					.expect(responseCodes.ACTIVITY_NOT_FOUND.status);
 
@@ -269,17 +276,25 @@ describe("Sequences", function () {
 			it("should fail with wrong activity schema", async() => {
 				const wrongActivity = { madeUpProp: true };
 
-				const { body } = await agent.put(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}`)
+				const { body } = await agent.patch(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}`)
 					.send(wrongActivity)
 					.expect(responseCodes.INVALID_ARGUMENTS.status);
 
 				expect(body.value).to.be.equal(responseCodes.INVALID_ARGUMENTS.value);
 			});
 
+			it("should fail if its done by a viewer", async() => {
+				const activityChanges = { name: "updated name" };
+
+				const res = await agent.patch(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}?key=${viewerApiKey}`)
+					.send(activityChanges)
+					.expect(401);
+			});
+
 			it("should succeed", async() => {
 				const activityChanges = { name: "updated name" };
 
-				await agent.put(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}`)
+				await agent.patch(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}`)
 					.send(activityChanges)
 					.expect(200);
 			});
@@ -311,7 +326,7 @@ describe("Sequences", function () {
 			it("should fail if parent is non existent", async() => {
 				const activityChanges = { parent: "non_existent" };
 
-				const res = await agent.put(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}`)
+				const res = await agent.patch(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}`)
 					.send(activityChanges)
 					.expect(responseCodes.INVALID_ARGUMENTS.status);
 
@@ -322,7 +337,7 @@ describe("Sequences", function () {
 			it("should succeed", async() => {
 				const activityChanges = { parent: "e8cc4f69-9c94-46b3-9656-73ede938f5bf" };
 
-				await agent.put(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}`)
+				await agent.patch(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}`)
 					.send(activityChanges)
 					.expect(200);
 			});
@@ -359,6 +374,11 @@ describe("Sequences", function () {
 			expect(body.value).to.be.equal(responseCodes.ACTIVITY_NOT_FOUND.value);
 		});
 
+		it("should fail as a viewer", async() => {
+			await agent.delete(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}?key=${viewerApiKey}`)
+				.expect(401);
+		});
+
 		it("should succeed", async() => {
 			await agent.delete(`/${username}/${model}/sequences/${sequenceId}/activities/${activityId}`)
 				.expect(200);
@@ -393,6 +413,11 @@ describe("Sequences", function () {
 	});
 
 	describe("bulk activities", function() {
+		it("created to replace the old ones should fail as a viewer", async() => {
+			await agent.post(`/${username}/${model}/sequences/${sequenceId}/activities/?key=${viewerApiKey}`)
+				.send(bulkActivities)
+				.expect(401);
+		});
 
 		it("created to replace the old ones should succeed", async() => {
 			await agent.post(`/${username}/${model}/sequences/${sequenceId}/activities/`)
