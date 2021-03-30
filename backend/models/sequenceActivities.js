@@ -22,7 +22,7 @@ const utils = require("../utils");
 const nodeuuid = require("uuid/v1");
 const FileRef = require("./fileRef");
 const yup = require("yup");
-const {pick, last} = require("lodash");
+const {pick} = require("lodash");
 const Sequence = require("./sequence");
 
 const keyValueSchema = yup.object().shape({
@@ -44,13 +44,11 @@ const activitySchema = yup.object().shape({
 	name: yup.string().required(),
 	startDate: yup.number().required(),
 	endDate: yup.number().required(),
-	parent: yup.string(),
+	parent: yup.object(),
 	resources: yup.object(),
 	data: yup.array().of(keyValueSchema),
 	subActivities: yup.array()
 }).noUnknown();
-
-// const activityTreeSchema = yup.array().of(activitySchema).required();
 
 const activityCol = (modelId) => `${modelId}.activities`;
 
@@ -69,36 +67,28 @@ const clearActivityListCache = async (account, model, sequenceId)  =>
 	await FileRef.removeFile(account, model, "activities", sequenceId);
 
 const traverseActivities = (activities, callback) => {
-	const visited = [];
-	const indexArr = [0];
+	const stack = [...activities];
+	const generatedIDs = new Set();
 
-	let actual = activities[0];
+	while (stack.length > 0) {
+		const currentActivity = stack.pop();
+		let _id = nodeuuid();
 
-	do {
-		while(actual) {
-			visited.push(actual);
-			indexArr.push(0);
-			actual = (actual.subActivities || [])[0];
+		while (generatedIDs.has(_id)) { // guarantee uniqueness
+			_id = nodeuuid();
 		}
 
-		if (visited.length > 0) {
-			const temp = visited.pop();
-			indexArr.pop(); //  Get rid of leaf index;
+		generatedIDs.add(_id);
+		currentActivity._id = utils.stringToUUID(_id);
 
-			const index = last(indexArr) + 1;
-			indexArr[indexArr.length - 1] = index; // Set index for sibling
-
-			const parent = last(visited);
-
-			if (visited.length > 0) {
-				actual = parent.subActivities[index];
-			} else {
-				actual = activities[index];
-			}
-
-			callback(temp, parent);
+		callback(currentActivity);
+		if(currentActivity.subActivities) {
+			currentActivity.subActivities.forEach((child) => {
+				child.parent = currentActivity._id;
+				stack.push(child);
+			});
 		}
-	} while (visited.length > 0 || actual);
+	}
 };
 
 const simplifyActivity = (activity) => {
@@ -125,21 +115,21 @@ const getDescendantsIds = async (account, model, sequenceId, parent) => {
 	return ids;
 };
 
-const addToActivityTree = (activity, parent, treeFile, treeFileDictionary) => {
+const addToActivityTree = (activity, treeFile, treeFileDictionary) => {
 	// The treeFileDictionary is being use for quick access to the activity,
 	// in particular to add the subactivities to its parents
-	const parentId = parent ? utils.uuidToString(parent._id || parent.id) : null ;
-	const id = utils.uuidToString(activity._id || activity.id);
+	const parentId =  activity.parent ? utils.uuidToString(activity.parent) : null;
 
-	if (parent && !treeFileDictionary[parentId]) {
-		treeFileDictionary[parentId] = simplifyActivity(parent);
+	const id = utils.uuidToString(activity._id);
+
+	if (parentId && !treeFileDictionary[parentId]) {
+		treeFileDictionary[parentId] = {subActivities:[]};
 	}
 
-	if (!treeFileDictionary[id]) {
-		treeFileDictionary[id] = simplifyActivity(activity);
-	}
+	const simpleActivity = simplifyActivity(activity);
+	treeFileDictionary[id] = {...simpleActivity, ...(treeFileDictionary[id] || {})};
 
-	if (parent) {
+	if (parentId) {
 		if (!treeFileDictionary[parentId].subActivities) {
 			treeFileDictionary[parentId].subActivities = [];
 		}
@@ -156,14 +146,7 @@ const createActivitiesTree = async(account, model, sequenceId) => {
 	const activities = [];
 	const activitiesDictionary = {};
 
-	foundActivities.forEach((activity) => {
-		activitiesDictionary[utils.uuidToString(activity._id)] = simplifyActivity(activity);
-	});
-
-	foundActivities.forEach((activity) => {
-		const parent = activity.parent ? activitiesDictionary[utils.uuidToString(activity.parent)] : null;
-		addToActivityTree(activity, parent, activities, activitiesDictionary);
-	});
+	foundActivities.forEach((activity) => addToActivityTree(activity, activities, activitiesDictionary));
 
 	return { activities };
 };
@@ -173,49 +156,18 @@ const createActivitiesTree = async(account, model, sequenceId) => {
 const addToActivityListAndCreateTreeFile = (activitiesList, sequenceIdUUID, treeFile, createFile) => {
 	const treeFileDictionary = {};
 
-	let id = null;
-	const idsDictionary = {};
-
-	return (activity, parent) => {
-		// TODO: test that _id is a bson object
-		if (!activitySchema.isValidSync(activity, { strict: true })) {
+	return (activity) => {
+		if (!activitySchema.isValidSync(activity, { strict: true }) || (activity.parent && !utils.isUUIDObject(activity.parent))) {
 			throw responseCodes.INVALID_ARGUMENTS;
 		}
 
-		if (parent && !parent._id) {
-			id = utils.stringToUUID(nodeuuid());
-
-			while (idsDictionary[id]) { // if the id is already there, create a new one
-				id = utils.stringToUUID(nodeuuid());
-			}
-
-			idsDictionary[id] = true;
-
-			parent._id = id ;
-		}
-
-		if (!activity._id) {
-			id = utils.stringToUUID(nodeuuid());
-
-			while (idsDictionary[id]) { // if the id is already there, create a new one
-				id = utils.stringToUUID(nodeuuid());
-			}
-
-			idsDictionary[id] = true;
-			activity._id =  id;
-		}
-
-		const plainActivity = pick(activity,"_id", "name", "startDate", "endDate", "data", "resources");
+		const plainActivity = pick(activity, "_id", "parent", "name", "startDate", "endDate", "data", "resources");
 		plainActivity.sequenceId = sequenceIdUUID;
-
-		if (parent) {
-			plainActivity.parent = parent._id;
-		}
 
 		activitiesList.push(plainActivity);
 
 		if (createFile) {
-			addToActivityTree(activity, parent, treeFile, treeFileDictionary);
+			addToActivityTree(activity, treeFile, treeFileDictionary);
 		}
 	};
 };
@@ -232,28 +184,6 @@ SequenceActivities.getSequenceActivityDetail = async (account, model, sequenceId
 	}
 
 	return cleanActivityDetail(activity);
-};
-
-SequenceActivities.create = async (account, model, sequenceId, activity) => {
-	await Sequence.sequenceExists(account, model, sequenceId);
-
-	if (!activitySchema.isValidSync(activity, { strict: true })) {
-		throw responseCodes.INVALID_ARGUMENTS;
-	}
-
-	if (activity.parent && !await db.findOne(account,  activityCol(model), { _id: utils.stringToUUID(activity.parent)})) {
-		throw responseCodes.INVALID_ARGUMENTS;
-	}
-
-	const _id = nodeuuid();
-	activity = {...activity, sequenceId:  utils.stringToUUID(sequenceId), _id: utils.stringToUUID(_id)};
-
-	await Promise.all([
-		db.insert(account,  activityCol(model), activity),
-		await clearActivityListCache(account, model, sequenceId)
-	]);
-
-	return {...activity, _id, sequenceId: sequenceId};
 };
 
 SequenceActivities.edit = async (account, model, sequenceId, activityId, activity) => {
