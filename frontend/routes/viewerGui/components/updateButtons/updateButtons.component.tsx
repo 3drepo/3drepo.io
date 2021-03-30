@@ -26,7 +26,7 @@ import { UpdateButtonsContainer } from './updateButtons.styles';
 
 interface IProps {
 	isNew: boolean;
-	canEditBasicProperty: boolean;
+	canEditViewpoint: boolean;
 	disableViewer?: boolean;
 	hasPin: boolean;
 	onSavePin: (position) => void;
@@ -39,7 +39,7 @@ interface IProps {
 }
 
 export const UpdateButtons = ({
-	isNew, canEditBasicProperty, disableViewer, onSavePin, onChangePin, onUpdateViewpoint, hasImage, hasPin, ...props
+	isNew, canEditViewpoint, disableViewer, onSavePin, onChangePin, onUpdateViewpoint, hasImage, hasPin, ...props
 }: IProps) => (
 	<FieldsRow container alignItems="center" justify="space-between">
 		{renderWhenTrueOtherwise(() => (
@@ -47,7 +47,7 @@ export const UpdateButtons = ({
 				<PinButton
 					onChange={onChangePin}
 					onSave={onSavePin}
-					disabled={!isNew && !canEditBasicProperty}
+					disabled={!isNew && !canEditViewpoint}
 					hasPin={hasPin}
 				/>
 				<ImageButton
@@ -55,12 +55,12 @@ export const UpdateButtons = ({
 					takeScreenshot={props.onTakeScreenshot}
 					uploadScreenshot={props.onUploadScreenshot}
 					showScreenshotDialog={props.onShowScreenshotDialog}
-					disabled={!canEditBasicProperty}
+					disabled={!canEditViewpoint}
 				/>
 				{renderWhenTrue(() => (
 					<ViewpointButton
 						onUpdate={onUpdateViewpoint}
-						disabled={!canEditBasicProperty}
+						disabled={!canEditViewpoint}
 					/>
 				))(!isNew)}
 			</UpdateButtonsContainer>
@@ -71,7 +71,7 @@ export const UpdateButtons = ({
 					takeScreenshot={props.onTakeScreenshot}
 					uploadScreenshot={props.onUploadScreenshot}
 					showScreenshotDialog={props.onShowScreenshotDialog}
-					disabled={!canEditBasicProperty}
+					disabled={!canEditViewpoint}
 					disableScreenshot
 				/>
 			</UpdateButtonsContainer>

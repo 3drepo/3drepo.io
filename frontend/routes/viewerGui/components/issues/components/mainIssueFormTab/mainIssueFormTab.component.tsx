@@ -44,6 +44,7 @@ interface IProps {
 	myJob: any;
 	isNew: boolean;
 	canEditBasicProperty: boolean;
+	canEditViewpoint: boolean;
 	canChangeAssigned: boolean;
 	jobs: any[];
 	disableViewer?: boolean;
@@ -57,8 +58,8 @@ interface IProps {
 }
 
 export const MainIssueFormTab: React.FunctionComponent<IProps> = ({
-	active, issue, permissions, topicTypes, currentUser, myJob, isNew, canChangeAssigned, canEditBasicProperty,
-	jobs, disableViewer, ...props
+	active, issue, permissions, topicTypes, currentUser, myJob, isNew, canChangeAssigned,
+	canEditBasicProperty, canEditViewpoint, jobs, disableViewer, ...props
 }) => {
 	return (
 		<Content active={active}>
@@ -89,7 +90,7 @@ export const MainIssueFormTab: React.FunctionComponent<IProps> = ({
 				<UpdateButtons
 					isNew={isNew}
 					disableViewer={disableViewer}
-					canEditBasicProperty={canEditBasicProperty}
+					canEditViewpoint={canEditViewpoint}
 					onChangePin={props.onChangePin}
 					onSavePin={props.onSavePin}
 					onUpdateViewpoint={props.onUpdateViewpoint}
