@@ -23,6 +23,7 @@ const middlewares = require("../middlewares/middlewares");
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
 const Sequence = require("../models/sequence");
+const SequenceActivities = require("../models/sequenceActivities");
 
 /**
  * @apiDefine Sequences Sequences
@@ -32,129 +33,45 @@ const Sequence = require("../models/sequence");
  */
 
 /**
- * @api {get} /:teamspace/:model/revision(/master/head/|/:revId)/sequences/:sequenceId/activities/:activityId Get activity
- * @apiName getSequenceActivityDetail
- * @apiGroup Sequences
- * @apiDescription Get sequence activity details.
+ * @apiDefine ActivityBodyObject
  *
- * @apiUse Sequences
- *
- * @apiParam {String} sequenceId Sequence ID
- * @apiParam {String} activityId Activity ID
- *
- * @apiExample {get} Example usage (/master/head)
- * GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences/00000000-0000-0000-0001-000000000001/activities/00000000-0000-0002-0001-000000000001 HTTP/1.1
- *
- * @apiExample {get} Example usage (/:revId)
- * GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/sequences/00000000-0000-0000-0001-000000000001/activities/00000000-0000-0002-0001-000000000001 HTTP/1.1
- *
- * @apiSuccessExample {json} Success-Response
- * HTTP/1.1 200 OK
- * {
- * 	"id":"00000000-0000-0002-0001-000000000001",
- * 	"name":"Construct tunnel",
- * 	"data":{
- * 		"Name":"Construction",
- * 		"Status":"Planned",
- * 		"Is Compound Task":"Yes",
- * 		"Code":"ST00020",
- * 		"Planned Start":"15 Apr 2020 10:00:00",
- * 		"Type":"Work",
- * 		"Constraint":"No Constraint",
- * 		"Planned Finish":"11 Sep 2020 18:00:00",
- * 		"Percentage Complete":0,
- * 		"Physical Volume Unity":"Unknown",
- * 		"Estimated Rate":0.0,
- * 		"Planned Physical Volume":6.6,
- * 		"Actual Physical Volume":0.9,
- * 		"Remaining Physical Volume":5.7,
- * 		"Budgeted Cost":30.0,
- * 		"Actual Cost":9999.99,
- * 	}
- * }
+ * @apiParam (Request body) {String} name The name of the activity
+ * @apiParam (Request body) {Number} startDate The starting timestamp date of the activity
+ * @apiParam (Request body) {Number} endDate The ending timestamp date of the activity
+ * @apiParam (Request body) {String} [parent] The parent id if it has one. This parent must exist previously
+ * @apiParam (Request body) {Object} [resources] The resources asoociated with the activity
+ * @apiParam (Request body) {KeyValue[]} [data] An array of key value pairs with metadata for the activity
  */
-router.get("/revision/master/head/sequences/:sequenceId/activities/:activityId", middlewares.issue.canView, getSequenceActivityDetail);
-router.get("/revision/:revId/sequences/:sequenceId/activities/:activityId", middlewares.issue.canView, getSequenceActivityDetail);
 
 /**
- * @api {get} /:teamspace/:model/revision(/master/head/|/:revId)/sequences/:sequenceId/activities Get all activities
- * @apiName getSequenceActivities
- * @apiGroup Sequences
- * @apiDescription Get all sequence activities.
+ * @apiDefine ActivityBodyObjectOptional
  *
- * @apiUse Sequences
- *
- * @apiParam {String} sequenceId Sequence unique ID
- *
- * @apiExample {get} Example usage (/master/head)
- * GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences/00000000-0000-0000-0001-000000000001/activities HTTP/1.1
- *
- * @apiExample {get} Example usage (/:revId)
- * GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/sequences/00000000-0000-0000-0001-000000000001/activities HTTP/1.1
- *
- * @apiSuccessExample {json} Success-Response
- * HTTP/1.1 200 OK
- * {
- * 	"tasks":[
- * 		{
- * 			"id":"00000000-0000-0001-0001-000000000001",
- * 			"name":"Construction",
- * 			"startDate":1244246400000,
- * 			"endDate":1244246450000,
- * 			"subTasks":[
- * 				{
- * 					"id":"00000000-0001-0001-0001-000000000001",
- * 					"name":"Prepare site",
- * 					"startDate":1244246400000,
- * 					"endDate":1244246430000,
- * 					"subTasks":[
- * 						{
- * 							"id":"00000001-0001-0001-0001-000000000001",
- * 							"name":"Erect site hoarding",
- * 							"startDate":1244246400000,
- * 							"endDate":1244246410000
- * 						},
- * 						{
- * 							"id":"00000002-0001-0001-0001-000000000001",
- * 							"name":"Clear existing structures",
- * 							"startDate":1244246410000,
- * 							"endDate":1244246420000
- * 						},
- * 						{
- * 							"id":"00000003-0001-0001-0001-000000000001",
- * 							"name":"Smooth work surfaces",
- * 							"startDate":1244246420000,
- * 							"endDate":1244246430000
- * 						}
- * 					]
- * 				},
- * 				{
- * 					"id":"00000001-0002-0001-0001-000000000001",
- * 					"name":"Construct tunnel",
- * 					"startDate":1244246430000,
- * 					"endDate":1244246450000,
- * 					"subTasks":[
- * 						{
- * 							"id":"00000001-0002-0001-0001-000000000001",
- * 							"name":"Deploy instant tunnel",
- * 							"startDate":1244246430000,
- * 							"endDate":1244246440000
- * 						},
- * 						{
- * 							"id":"00000002-0002-0001-0001-000000000001",
- * 							"name":"Add road markings",
- * 							"startDate":1244246440000,
- * 							"endDate":1244246450000
- * 						}
- * 					]
- * 				}
- * 			]
- * 		}
- * 	]
- * }
+ * @apiParam (Request body) {String} [name] The name of the activity
+ * @apiParam (Request body) {Number} [startDate] The starting timestamp date of the activity
+ * @apiParam (Request body) {Number} [endDate] The ending timestamp date of the activity
+ * @apiParam (Request body) {String} [parent] The parent id if it has one. This parent must exist previously
+ * @apiParam (Request body) {Object} [resources] The resources asoociated with the activity
+ * @apiParam (Request body) {KeyValue[]} [data] An array of key value pairs with metadata for the activity
  */
-router.get("/revision/master/head/sequences/:sequenceId/activities", middlewares.issue.canView, getSequenceActivities);
-router.get("/revision/:revId/sequences/:sequenceId/activities", middlewares.issue.canView, getSequenceActivities);
+
+/**
+ * @apiDefine ActivityTreeObject
+ *
+ * @apiParam (Type: Activity) {String} name The name of the activity
+ * @apiParam (Type: Activity) {Number} startDate The starting timestamp date of the activity
+ * @apiParam (Type: Activity) {Number} endDate The ending timestamp date of the activity
+ * @apiParam (Type: Activity) {Object} [resources] The resources asoociated with the activity
+ * @apiParam (Type: Activity) {KeyValue[]} [data] An array of key value pairs with metadata for the activity
+ * @apiParam (Type: Activity) {Activity[]} [subActivities] An array of activities that will be children of the activity
+ *
+ */
+
+/**
+ * @apiDefine KeyValueObject
+ *
+ * @apiParam (Type: KeyValue) {String} key The key of the pair
+ * @apiParam (Type: KeyValue) {Any} value The value of the pair
+ */
 
 /**
  * @api {get} /:teamspace/:model/sequences/:sequenceId/state/:stateId Get state
@@ -479,27 +396,241 @@ function getSequence(req, res, next) {
 	});
 }
 
-function getSequenceActivityDetail(req, res, next) {
-	const place = utils.APIInfo(req);
-	const { account, model, activityId } = req.params;
+/**
+ * @api {get} /:teamspace/:model/sequences/:sequenceId/activities/:activityId Get activity
+ * @apiName getSequenceActivityDetail
+ * @apiGroup Sequences
+ * @apiDescription Get sequence activity details.
+ *
+ * @apiUse Sequences
+ *
+ * @apiParam {String} sequenceId Sequence ID
+ * @apiParam {String} activityId Activity ID
+ *
+ * @apiExample {get} Example usage
+ * GET /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0001-000000000001/activities/00000000-0000-0002-0001-000000000001 HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {
+ *  "id":"00000000-0000-0002-0001-000000000001",
+ *  "name":"Construct tunnel",
+ *  "sequenceId": "00000000-0000-0000-0001-000000000001",
+ *  "parent": "00000130-2300-0002-0001-000567000001"
+ *  "startDate": 1610000000000,
+ *  "endDate": 1615483938124,
+ *  "data":[
+ *    {"key":"Name","value":"Construction"},
+ *    {"key":"Status","value":"Planned"},
+ *    {"key":"Is Compound Task","value":"Yes"},
+ *    {"key":"Code","value":"ST00020"},
+ *    {"key":"Planned Start","value":"15 Apr 2020 10:00:00"},
+ *    {"key":"Type","value":"Work"},
+ *    {"key":"Constraint","value":"No Constraint"},
+ *    {"key":"Planned Finish","value":"11 Sep 2020 18:00:00"},
+ *    {"key":"Percentage Complete","value":0},
+ *    {"key":"Physical Volume Unity","value":"Unknown"},
+ *    {"key":"Estimated Rate","value":0},
+ *    {"key":"Planned Physical Volume","value":6.6},
+ *    {"key":"Actual Physical Volume","value":0.9},
+ *    {"key":"Remaining Physical Volume","value":5.7},
+ *    {"key":"Budgeted Cost","value":30},
+ *    {"key":"Actual Cost","value":9999.99}
+ *  ]
+ * }
+ */
+router.get("/sequences/:sequenceId/activities/:activityId", middlewares.hasReadAccessToModel, getSequenceActivityDetail);
 
-	Sequence.getSequenceActivityDetail(account, model, activityId).then(activity => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, activity);
-	}).catch(err => {
-		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	});
-}
+/**
+ * @api {get} /:teamspace/:model/sequences/:sequenceId/activities Get all activities
+ * @apiName getSequenceActivities
+ * @apiGroup Sequences
+ * @apiDescription Get all sequence activities.
+ *
+ * @apiUse Sequences
+ *
+ * @apiParam {String} sequenceId Sequence unique ID
+ *
+ * @apiExample {get} Example usage
+ * GET /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0001-000000000001/activities HTTP/1.1
+ * *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {
+ * 	"activities":[
+ * 		{
+ * 			"id":"00000000-0000-0001-0001-000000000001",
+ * 			"name":"Construction",
+ * 			"startDate":1244246400000,
+ * 			"endDate":1244246450000,
+ * 			"subActivities":[
+ * 				{
+ * 					"id":"00000000-0001-0001-0001-000000000001",
+ * 					"name":"Prepare site",
+ * 					"startDate":1244246400000,
+ * 					"endDate":1244246430000,
+ * 					"subActivities":[
+ * 						{
+ * 							"id":"00000001-0001-0001-0001-000000000001",
+ * 							"name":"Erect site hoarding",
+ * 							"startDate":1244246400000,
+ * 							"endDate":1244246410000
+ * 						},
+ * 						{
+ * 							"id":"00000002-0001-0001-0001-000000000001",
+ * 							"name":"Clear existing structures",
+ * 							"startDate":1244246410000,
+ * 							"endDate":1244246420000
+ * 						},
+ * 						{
+ * 							"id":"00000003-0001-0001-0001-000000000001",
+ * 							"name":"Smooth work surfaces",
+ * 							"startDate":1244246420000,
+ * 							"endDate":1244246430000
+ * 						}
+ * 					]
+ * 				},
+ * 				{
+ * 					"id":"00000001-0002-0001-0001-000000000001",
+ * 					"name":"Construct tunnel",
+ * 					"startDate":1244246430000,
+ * 					"endDate":1244246450000,
+ * 					"subActivities":[
+ * 						{
+ * 							"id":"00000001-0002-0001-0001-000000000001",
+ * 							"name":"Deploy instant tunnel",
+ * 							"startDate":1244246430000,
+ * 							"endDate":1244246440000
+ * 						},
+ * 						{
+ * 							"id":"00000002-0002-0001-0001-000000000001",
+ * 							"name":"Add road markings",
+ * 							"startDate":1244246440000,
+ * 							"endDate":1244246450000
+ * 						}
+ * 					]
+ * 				}
+ * 			]
+ * 		}
+ * 	]
+ * }
+ */
+router.get("/sequences/:sequenceId/activities", middlewares.hasReadAccessToModel, getSequenceActivities);
 
-function getSequenceActivities(req, res, next) {
-	const place = utils.APIInfo(req);
-	const { account, model, sequenceId } = req.params;
+/**
+ * @api {post} /:teamspace/:model/sequences/:sequenceId/activities/ Create one or more activities
+ * @apiName createSequenceActivities
+ * @apiGroup Sequences
+ * @apiDescription Creates a sequence activity tree.
+ *
+ * @apiUse Sequences
+ * @apiParam (Request body) {Activity[]} activity An array of the activity tree that will be created
+ * @apiParam (Request body) {Boolean} [overwrite] This flag indicates whether the request will replace the currently stored activities or just added at the end of the currently stored activities array. If not present it will be considered as false.
+ *
+ * @apiParam {String} sequenceId Sequence unique ID
+ * @apiUse ActivityTreeObject
+ * @apiUse KeyValueObject
+ *
+ * @apiExample {post} Example usage
+ * POST /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0001-000000000001/activities HTTP/1.1
+ * {
+ *   "overwrite": true,
+ *   "activities": [
+ *     {
+ *       "name": "Clinc Construction",
+ *       "startDate": 1603184400000,
+ *       "endDate": 1613062800000,
+ *       "data": [
+ *         {
+ *           "key": "Color",
+ *           "value": "green"
+ *         }
+ *       ],
+ *       "subActivities": [
+ *         {
+ *           "name": "Site Work & Logistics",
+ *           "startDate": 1603184400000,
+ *           "endDate": 1613062800000,
+ *           "data": [
+ *             {
+ *               "key": "Heigh",
+ *               "value": 12
+ *             }
+ *           ],
+ *           "subActivities": [
+ *             {
+ *               "name": "Site Office Installation",
+ *               "startDate": 1603184400000,
+ *               "endDate": 1603213200000,
+ *               "data": [
+ *                 {
+ *                   "key": "Size",
+ *                   "value": "Big"
+ *                 }
+ *               ]
+ *             },
+ *             {
+ *               "name": "Excavation",
+ *               "startDate": 1603270800000,
+ *               "endDate": 1603299600000
+ *             }
+ *           ]
+ *         }
+ *       ]
+ *     }
+ *   ]
+ * }
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ **/
+router.post("/sequences/:sequenceId/activities", middlewares.hasUploadAccessToModel, createActivities);
 
-	Sequence.getSequenceActivities(account, model, sequenceId).then(activities => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, activities);
-	}).catch(err => {
-		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	});
-}
+/**
+ * @api {put} /:teamspace/:model/sequences/:sequenceId/activities/:activityId Edit an activity
+ * @apiName editSequenceActivity
+ * @apiGroup Sequences
+ * @apiDescription Edits a sequence activity.
+ *
+ * @apiUse Sequences
+ *
+ * @apiParam {String} sequenceId Sequence unique ID
+ * @apiParam {String} activityId The activity unique ID
+ *
+ * @apiUse ActivityBodyObjectOptional
+ * @apiUse KeyValueObject
+ *
+ * @apiExample {patch} Example usage
+ * PATCH /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0001-000000000001/activities/fe94be44-5cd8-4aaf-b020-afc1456680d3 HTTP/1.1
+ * {
+ *    "name":"Renamed activity"
+ * }
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ *
+ * */
+router.patch("/sequences/:sequenceId/activities/:activityId",middlewares.hasUploadAccessToModel, editActivity);
+
+/**
+ * @api {delete} /:teamspace/:model/sequences/:sequenceId/activities/:activityId Edit an activity
+ * @apiName deleteSequenceActivity
+ * @apiGroup Sequences
+ * @apiDescription Delete a sequence activity.
+ *
+ * @apiUse Sequences
+ *
+ * @apiParam {String} sequenceId Sequence unique ID
+ * @apiParam {String} activityId The activity unique ID
+ *
+ * @apiExample {delete} Example usage
+ * DELETE /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0001-000000000001/activities/fe94be44-5cd8-4aaf-b020-afc1456680d3 HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ *
+ * */
+router.delete("/sequences/:sequenceId/activities/:activityId", middlewares.hasUploadAccessToModel, removeActivity);
 
 function getSequenceState(req, res, next) {
 	const place = utils.APIInfo(req);
@@ -563,6 +694,61 @@ function listSequences(req, res, next) {
 
 	Sequence.getList(account, model, undefined, revId, true).then(sequences => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, sequences);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function getSequenceActivityDetail(req, res, next) {
+	const place = utils.APIInfo(req);
+	const { account, model, activityId, sequenceId } = req.params;
+
+	SequenceActivities.getSequenceActivityDetail(account, model, sequenceId, activityId).then(activity => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, activity);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function getSequenceActivities(req, res, next) {
+	const { account, model, sequenceId } = req.params;
+	const place = utils.APIInfo(req);
+
+	SequenceActivities.get(account, model, sequenceId).then(activites => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, activites);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function createActivities(req, res, next) {
+	const { account, model, sequenceId } = req.params;
+	const place = utils.APIInfo(req);
+
+	SequenceActivities.createActivities(account, model, sequenceId, req.body.activities, req.body.overwrite).then(() => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function editActivity(req, res, next) {
+	const { account, model, sequenceId, activityId } = req.params;
+	const place = utils.APIInfo(req);
+
+	SequenceActivities.edit(account, model, sequenceId, activityId, req.body).then(() => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function removeActivity(req, res, next) {
+	const { account, model, sequenceId, activityId } = req.params;
+	const place = utils.APIInfo(req);
+
+	SequenceActivities.remove(account, model, sequenceId, activityId).then(() => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});

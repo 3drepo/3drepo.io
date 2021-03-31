@@ -92,7 +92,7 @@ export function* fetchActivitiesDefinitions({ sequenceId }) {
 		if (!activitiesDefinitions && sequenceId) {
 			// API CALL TO GET TASKS
 			const {data} = yield API.getSequenceActivities(teamspace, model, sequenceId);
-			yield put(SequencesActions.fetchActivitiesDefinitionsSuccess(sequenceId, data.tasks));
+			yield put(SequencesActions.fetchActivitiesDefinitionsSuccess(sequenceId, data.activities));
 			yield put(SequencesActions.setActivitiesPending(false));
 		}
 

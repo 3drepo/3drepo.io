@@ -1929,24 +1929,19 @@ describe("Issues", function () {
 					});
 			});
 
-			it("not change screenshot", function(done) {
-
+			it("change screenshot", function(done) {
 				const updateData = {
 					"viewpoint": {
 						"screenshot": altBase64
 					}
 				};
+
 				agent.patch(`/${username}/${model}/issues/${issueId}`)
 					.send(updateData)
-					.expect(400, function(err, res) {
-						expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
-						done(err);
-					});
-
+					.expect(200, done);
 			});
 
-			it("not change viewpoint", function(done) {
-
+			it("change viewpoint", function(done) {
 				const updateData = {
 					"viewpoint": {
 							"up":[0,1,0],
@@ -1960,10 +1955,29 @@ describe("Issues", function () {
 							"near":50,
 					}
 				};
+
 				agent.patch(`/${username}/${model}/issues/${issueId}`)
 					.send(updateData)
-					.expect(400, function(err, res) {
-						expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
+					.expect(200, function(err, res) {
+						expect(res.body.viewpoint.up).to.deep.equal(updateData.viewpoint.up);
+						expect(res.body.viewpoint.position).to.deep.equal(updateData.viewpoint.position);
+						expect(res.body.viewpoint.look_at).to.deep.equal(updateData.viewpoint.look_at);
+						expect(res.body.viewpoint.view_dir).to.deep.equal(updateData.viewpoint.view_dir);
+						expect(res.body.viewpoint.right).to.deep.equal(updateData.viewpoint.right);
+						expect(res.body.viewpoint.fov).to.equal(updateData.viewpoint.fov);
+						expect(res.body.viewpoint.aspect_ratio).to.equal(updateData.viewpoint.aspect_ratio);
+						expect(res.body.viewpoint.far).to.equal(updateData.viewpoint.far);
+						expect(res.body.viewpoint.near).to.equal(updateData.viewpoint.near);
+						done(err);
+					});
+			});
+
+			it("change pin", function(done) {
+				const updateData = { "position":[20,20,100] };
+				agent.patch(`/${username}/${model}/issues/${issueId}`)
+					.send(updateData)
+					.expect(200, function(err, res) {
+						expect(res.body.position).to.deep.equal(updateData.position);
 						done(err);
 					});
 
@@ -2110,8 +2124,7 @@ describe("Issues", function () {
 					});
 			});
 
-			it("not change screenshot", function(done) {
-
+			it("change screenshot", function(done) {
 				const updateData = {
 					"viewpoint": {
 						"screenshot": altBase64
@@ -2119,15 +2132,11 @@ describe("Issues", function () {
 				};
 				agent.patch(`/${username}/${model}/issues/${issueId}`)
 					.send(updateData)
-					.expect(400, function(err, res) {
-						expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
-						done(err);
-					});
+					.expect(200, done);
 
 			});
 
-			it("not change viewpoint", function(done) {
-
+			it("change viewpoint", function(done) {
 				const updateData = {
 					"viewpoint": {
 							"up":[0,1,0],
@@ -2143,8 +2152,27 @@ describe("Issues", function () {
 				};
 				agent.patch(`/${username}/${model}/issues/${issueId}`)
 					.send(updateData)
-					.expect(400, function(err, res) {
-						expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
+					.expect(200, function(err, res) {
+						expect(res.body.viewpoint.up).to.deep.equal(updateData.viewpoint.up);
+						expect(res.body.viewpoint.position).to.deep.equal(updateData.viewpoint.position);
+						expect(res.body.viewpoint.look_at).to.deep.equal(updateData.viewpoint.look_at);
+						expect(res.body.viewpoint.view_dir).to.deep.equal(updateData.viewpoint.view_dir);
+						expect(res.body.viewpoint.right).to.deep.equal(updateData.viewpoint.right);
+						expect(res.body.viewpoint.fov).to.equal(updateData.viewpoint.fov);
+						expect(res.body.viewpoint.aspect_ratio).to.equal(updateData.viewpoint.aspect_ratio);
+						expect(res.body.viewpoint.far).to.equal(updateData.viewpoint.far);
+						expect(res.body.viewpoint.near).to.equal(updateData.viewpoint.near);
+						done(err);
+					});
+
+			});
+
+			it("change pin", function(done) {
+				const updateData = { "position":[20,20,100] };
+				agent.patch(`/${username}/${model}/issues/${issueId}`)
+					.send(updateData)
+					.expect(200, function(err, res) {
+						expect(res.body.position).to.deep.equal(updateData.position);
 						done(err);
 					});
 

@@ -30,7 +30,7 @@ import {
 	ISSUE_TABS,
 } from '../../../../../../constants/issues';
 import { VIEWER_PANELS_TITLES } from '../../../../../../constants/viewerGui';
-import { canChangeAssigned, canChangeBasicProperty } from '../../../../../../helpers/issues';
+import { canChangeAssigned, canChangeBasicProperty, canComment } from '../../../../../../helpers/issues';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { AttachmentsFormTab } from '../../../risks/components/attachmentsFormTab/attachmentsFormTab.component';
 import { SequencingFormTab } from '../../../risks/components/sequencingFormTab/sequencingFormTab.component';
@@ -93,6 +93,11 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		return this.isNewIssue || canChangeBasicProperty(issue, myJob, permissions, currentUser);
 	}
 
+	get canEditViewpoint() {
+		const { issue, myJob, permissions, currentUser } = this.props;
+		return this.isNewIssue || canComment(issue, myJob, permissions, currentUser);
+	}
+
 	get canChangeAssigned() {
 		const { issue, myJob, permissions, currentUser } = this.props;
 		return canChangeAssigned(issue, myJob, permissions, currentUser);
@@ -144,6 +149,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 			active={active}
 			isNew={this.isNewIssue}
 			canEditBasicProperty={this.canEditBasicProperty}
+			canEditViewpoint={this.canEditViewpoint}
 			canChangeAssigned={this.canChangeAssigned}
 			{...this.props}
 		/>

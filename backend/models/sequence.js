@@ -29,7 +29,6 @@ const { getDefaultLegendId } = require("./modelSetting");
 const View = new (require("./view"))();
 const { cleanViewpoint, createViewpoint } = require("./viewpoint");
 
-const activityCol = (modelId) => `${modelId}.activities`;
 const sequenceCol = (modelId) => `${modelId}.sequences`;
 const legendCol = (modelId) => `${modelId}.sequences.legends`;
 
@@ -61,12 +60,6 @@ const clean = (toClean, keys) => {
 	});
 
 	return toClean;
-};
-
-const cleanActivityDetail = (toClean) => {
-	const keys = ["_id", "parents"];
-
-	return clean(toClean, keys);
 };
 
 const cleanSequence = (account, model, toClean) => {
@@ -180,12 +173,6 @@ const handleFrames = async (account, model, sequenceId, sequenceFrames) => {
 	return processedFrames;
 };
 
-const sequenceExists = async (account, model, sequenceId) => {
-	if(!(await Sequence.getSequenceById(account, model, sequenceId, {_id: 1}))) {
-		throw responseCodes.SEQUENCE_NOT_FOUND;
-	}
-};
-
 const getLegendById = (account, model, sequenceId) => {
 	return db.findOne(account, legendCol(model), { _id: utils.stringToUUID(sequenceId) });
 };
@@ -238,7 +225,7 @@ Sequence.createSequence = async (account, model, data) => {
 };
 
 Sequence.deleteSequence = async (account, model, sequenceId) => {
-	await sequenceExists(account, model, sequenceId);
+	await Sequence.sequenceExists(account, model, sequenceId);
 	const { result } = await db.remove(account, sequenceCol(model), {
 		_id: utils.stringToUUID(sequenceId),
 		customSequence: true
@@ -259,18 +246,10 @@ Sequence.getSequenceById = async (account, model, sequenceId, projection = {}, n
 	return noClean ? sequence : cleanSequence(account, model, sequence);
 };
 
-Sequence.getSequenceActivityDetail = async (account, model, activityId) => {
-	const activity = await db.findOne(account, activityCol(model), {"_id": utils.stringToUUID(activityId)});
-
-	if (!activity) {
-		throw responseCodes.ACTIVITY_NOT_FOUND;
+Sequence.sequenceExists = async (account, model, sequenceId) => {
+	if(!(await getSequenceById(account, model, utils.stringToUUID(sequenceId), {_id: 1}))) {
+		throw responseCodes.SEQUENCE_NOT_FOUND;
 	}
-
-	return cleanActivityDetail(activity);
-};
-
-Sequence.getSequenceActivities = async (account, model, sequenceId) => {
-	return FileRef.getSequenceActivitiesFile(account, model, utils.uuidToString(sequenceId));
 };
 
 Sequence.getSequenceState = async (account, model, stateId) => {
@@ -315,7 +294,7 @@ Sequence.updateSequence = async (account, model, sequenceId, data) => {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	await sequenceExists(account, model, sequenceId);
+	await Sequence.sequenceExists(account, model, sequenceId);
 
 	if (data.name) {
 		if (!utils.isString(data.name) || data.name === "" || data.name.length >= 30) {
@@ -363,12 +342,12 @@ Sequence.updateSequence = async (account, model, sequenceId, data) => {
 };
 
 Sequence.deleteLegend = async (account, model, sequenceId) => {
-	await sequenceExists(account, model, sequenceId);
+	await Sequence.sequenceExists(account, model, sequenceId);
 	await db.remove(account, legendCol(model), { _id: utils.stringToUUID(sequenceId) });
 };
 
 Sequence.getLegend = async (account, model, sequenceId) => {
-	await sequenceExists(account, model, sequenceId);
+	await Sequence.sequenceExists(account, model, sequenceId);
 
 	const legend = await getLegendById(account, model, sequenceId);
 
@@ -377,7 +356,7 @@ Sequence.getLegend = async (account, model, sequenceId) => {
 
 Sequence.updateLegend = async (account, model, sequenceId, data) => {
 	const id = utils.stringToUUID(sequenceId);
-	await sequenceExists(account, model, id);
+	await Sequence.sequenceExists(account, model, id);
 	const prunedData = {};
 	for(const entry in data) {
 		if(utils.hasField(data, entry)) {
