@@ -304,15 +304,7 @@ Sequence.updateSequence = async (account, model, sequenceId, data) => {
 		toSet.name = data.name;
 	}
 
-	if (data.revId) {
-		const history = await History.getHistory(account, model, undefined, data.revId, {_id: 1});
-
-		toSet.rev_id = history._id;
-	} else if (data.revId === null) {
-		toUnset.revId = 1;
-	}
-
-	if (data.frames) {
+	if (data.revId || data.revId === null || data.frames) {
 		const customSequence = await db.findOne(account, sequenceCol(model),
 			{_id: utils.stringToUUID(sequenceId), customSequence: true});
 
@@ -320,10 +312,20 @@ Sequence.updateSequence = async (account, model, sequenceId, data) => {
 			throw responseCodes.SEQUENCE_READ_ONLY;
 		}
 
-		toSet.frames = await handleFrames(account, model, sequenceId, data.frames);
+		if (data.revId) {
+			const history = await History.getHistory(account, model, undefined, data.revId, {_id: 1});
 
-		toSet.startDate = new Date((toSet.frames[0] || {}).dateTime);
-		toSet.endDate = new Date((toSet.frames[toSet.frames.length - 1] || {}).dateTime);
+			toSet.rev_id = history._id;
+		} else if (data.revId === null) {
+			toUnset.revId = 1;
+		}
+
+		if (data.frames) {
+			toSet.frames = await handleFrames(account, model, sequenceId, data.frames);
+
+			toSet.startDate = new Date((toSet.frames[0] || {}).dateTime);
+			toSet.endDate = new Date((toSet.frames[toSet.frames.length - 1] || {}).dateTime);
+		}
 	}
 
 	if (Object.keys(toSet).length > 0) {

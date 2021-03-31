@@ -341,7 +341,7 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 		query.risk_id = { $exists: false };
 	}
 
-	// If we want groups that aren't from risks
+	// If we want groups that aren't from sequences
 	if (queryParams.noSequences) {
 		query.sequence_id = { $exists: false };
 	}
