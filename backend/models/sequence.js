@@ -20,7 +20,7 @@ const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
 const yup = require("yup");
- 
+
 const { update: updateGroup } = require("./group");
 const History = require("./history");
 const FileRef = require("./fileRef");
@@ -247,7 +247,7 @@ Sequence.getSequenceById = async (account, model, sequenceId, projection = {}, n
 };
 
 Sequence.sequenceExists = async (account, model, sequenceId) => {
-	if(!(await getSequenceById(account, model, utils.stringToUUID(sequenceId), {_id: 1}))) {
+	if(!(await Sequence.getSequenceById(account, model, utils.stringToUUID(sequenceId), {_id: 1}))) {
 		throw responseCodes.SEQUENCE_NOT_FOUND;
 	}
 };
