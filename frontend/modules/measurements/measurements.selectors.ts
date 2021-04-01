@@ -17,14 +17,14 @@
 
 import { createSelector } from 'reselect';
 
-export const selectMeasurementsDomain = (state) => ({...state.measurements});
-
-export const selectIsMeasureActive = createSelector(
-	selectMeasurementsDomain, (state) => state.isActive
-);
+export const selectMeasurementsDomain = (state) => state.measurements;
 
 export const selectMeasureMode = createSelector(
 	selectMeasurementsDomain, (state) => state.mode
+);
+
+export const selectIsMeasureActive = createSelector(
+	selectMeasureMode, (mode) => mode !== ''
 );
 
 export const selectMeasureUnits = createSelector(

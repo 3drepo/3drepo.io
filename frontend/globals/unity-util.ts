@@ -851,6 +851,18 @@ export class UnityUtil {
 		UnityUtil.toUnity('DisableMeasureToolXYZDisplay');
 	}
 
+	public static addMeasurement(measurement) {
+		UnityUtil.toUnity('AddMeasurement', undefined, JSON.stringify(measurement));
+	}
+
+	public static hideNewMeasurementsLabels() {
+		UnityUtil.toUnity('HideNewMeasurementsLabels');
+	}
+
+	public static showNewMeasurementsLabels() {
+		UnityUtil.toUnity('ShowNewMeasurementsLabels');
+	}
+
 	/**
 	 * Add a Risk pin
 	 * @category Pins

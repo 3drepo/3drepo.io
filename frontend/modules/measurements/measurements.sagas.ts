@@ -16,9 +16,12 @@
  */
 
 import { all, put, select, takeLatest } from 'redux-saga/effects';
+import { VIEWER_EVENTS } from '../../constants/viewer';
+import { uuid as UUID } from '../../helpers/uuid';
 
 import { Viewer } from '../../services/viewer/viewer';
 import { DialogActions } from '../dialog';
+import { dispatch } from '../store';
 import {
 	selectAreaMeasurements,
 	selectLengthMeasurements,
@@ -28,41 +31,42 @@ import {
 	MeasurementsActions,
 	MeasurementsTypes,
 } from './';
-import { MEASURE_TYPE_NAME, MEASURE_TYPE_STATE_MAP, MEASURING_MODE } from './measurements.constants';
+import { MEASURE_TYPE, MEASURE_TYPE_NAME, MEASURE_TYPE_STATE_MAP, MEASURING_MODE } from './measurements.constants';
 
-export function* activateMeasure() {
-	try {
-		yield all([
-			Viewer.activateMeasure(),
-			put(MeasurementsActions.setActiveSuccess(true))
-		]);
-	} catch (error) {
-		DialogActions.showErrorDialog('activate', 'measure', error);
-	}
-}
+const onMeasurementDropped = (measure) => {
+	dispatch(MeasurementsActions.addMeasurement(measure));
+};
 
-export function* deactivateMeasure() {
-	try {
-		yield all([
-			Viewer.disableMeasure(),
-			put(MeasurementsActions.setActiveSuccess(false))
-		]);
-	} catch (error) {
-		DialogActions.showErrorDialog('deactivate', 'measure', error);
+const onPointDropped =  ({ trans, position }) => {
+	if (trans) {
+		position = trans.inverse().multMatrixPnt(position);
 	}
-}
+	const measure = {
+		uuid: UUID(),
+		position,
+		type: MEASURE_TYPE.POINT,
+		color: { r: 0, g: 1, b: 1, a: 1},
+	};
+	dispatch(MeasurementsActions.addMeasurement(measure));
+};
 
 export function* setMeasureMode({ mode }) {
 	try {
-		if (mode === '' || mode === MEASURING_MODE.POINT) {
-			yield put(MeasurementsActions.setMeasureActive(false));
-			yield put(MeasurementsActions.setMeasureModeSuccess(mode));
-		} else {
-			yield all([
-				Viewer.setMeasureMode(mode),
-				put(MeasurementsActions.setMeasureModeSuccess(mode))
-			]);
+		yield Viewer.off(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementDropped);
+		yield Viewer.off(VIEWER_EVENTS.PICK_POINT, onPointDropped);
+		yield Viewer.disableMeasure();
+		yield Viewer.setPinDropMode(false);
+
+		if (mode === MEASURING_MODE.POINT) {
+			yield Viewer.setPinDropMode(true);
+			yield Viewer.on(VIEWER_EVENTS.PICK_POINT, onPointDropped);
+		} else if (mode !== '' ) {
+			yield Viewer.setMeasureMode(mode);
+			yield Viewer.activateMeasure();
+			yield Viewer.on(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementDropped);
 		}
+
+		yield put(MeasurementsActions.setMeasureModeSuccess(mode));
 	} catch (error) {
 		DialogActions.showErrorDialog('set', `measure mode to ${mode}`, error);
 	}
@@ -108,30 +112,6 @@ export function* removeMeasurement({ uuid }) {
 		]);
 	} catch (error) {
 		DialogActions.showErrorDialog('remove', `measurement`, error);
-	}
-}
-
-export function* setMeasureActive({ isActive }) {
-	try {
-		if (isActive) {
-			yield put(MeasurementsActions.activateMeasure());
-		} else {
-			yield put(MeasurementsActions.deactivateMeasure());
-		}
-	} catch (error) {
-		DialogActions.showErrorDialog('toggle', 'measure', error);
-	}
-}
-
-export function* setDisabled({ isDisabled }) {
-	try {
-		yield put(MeasurementsActions.setDisabledSuccess(isDisabled));
-
-		if (isDisabled) {
-			yield put(MeasurementsActions.setActiveSuccess(false));
-		}
-	} catch (error) {
-		DialogActions.showErrorDialog('deactivate', 'measure', error);
 	}
 }
 
@@ -229,10 +209,6 @@ export function* resetMeasurementTool() {
 }
 
 export default function* MeasurementsSaga() {
-	yield takeLatest(MeasurementsTypes.ACTIVATE_MEASURE, activateMeasure);
-	yield takeLatest(MeasurementsTypes.DEACTIVATE_MEASURE, deactivateMeasure);
-	yield takeLatest(MeasurementsTypes.SET_MEASURE_ACTIVE, setMeasureActive);
-	yield takeLatest(MeasurementsTypes.SET_DISABLED, setDisabled);
 	yield takeLatest(MeasurementsTypes.SET_MEASURE_MODE, setMeasureMode);
 	yield takeLatest(MeasurementsTypes.SET_MEASURE_UNITS, setMeasureUnits);
 	yield takeLatest(MeasurementsTypes.ADD_MEASUREMENT, addMeasurement);

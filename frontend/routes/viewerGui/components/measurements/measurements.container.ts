@@ -41,13 +41,9 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	disableMeasure: MeasurementsActions.setDisabled,
-	activateMeasure: MeasurementsActions.activateMeasure,
-	deactivateMeasure: MeasurementsActions.deactivateMeasure,
 	setMeasureMode: MeasurementsActions.setMeasureMode,
 	removeMeasurement: MeasurementsActions.removeMeasurement,
 	clearMeasurements: MeasurementsActions.clearMeasurements,
-	addMeasurement: MeasurementsActions.addMeasurement,
 	setMeasurementColor: MeasurementsActions.setMeasurementColor,
 	resetMeasurementColors: MeasurementsActions.resetMeasurementColors,
 	setMeasureUnits: MeasurementsActions.setMeasureUnits,

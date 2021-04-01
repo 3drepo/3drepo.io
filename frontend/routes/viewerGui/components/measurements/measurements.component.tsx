@@ -49,14 +49,12 @@ interface IProps {
 	teamspace: string;
 	model: string;
 	isMeasureActive: boolean;
-	disableMeasure: (isDisabled) => void;
 	deactivateMeasure: () => void;
 	activateMeasure: () => void;
 	measurements: IMeasure[];
 	areaMeasurements: IMeasure[];
 	lengthMeasurements: IMeasure[];
 	pointMeasurements: IMeasure[];
-	addMeasurement: (measure: IMeasure) => void;
 	removeMeasurement: (uuid) => void;
 	clearMeasurements: () => void;
 	setMeasureMode: (mode) => void;
@@ -103,7 +101,6 @@ export class Measurements extends React.PureComponent<IProps, IState> {
 			await Viewer.isViewerReady();
 			this.setState({ isViewerReady: true });
 		})();
-		this.toggleMeasureListeners(true);
 
 		if (this.props.modelUnit === 'ft') {
 			this.props.setMeasureUnits(this.props.modelUnit);
@@ -111,14 +108,7 @@ export class Measurements extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentWillUnmount = () => {
-		this.toggleMeasureListeners(false);
-	}
-
-	private toggleMeasureListeners = (enabled: boolean) => {
-		const resolver = enabled ? 'on' : 'off';
-		const { viewer } = this.props;
-
-		viewer[resolver](VIEWER_EVENTS.MEASUREMENT_CREATED, this.handleMeasureCreated);
+		this.props.setMeasureMode('');
 	}
 
 	private handleToggleEdgeSnapping = () => this.props.setMeasureEdgeSnapping(!this.props.edgeSnappingEnabled);
@@ -126,8 +116,6 @@ export class Measurements extends React.PureComponent<IProps, IState> {
 	private handleToggleXYZdisplay = () => this.props.setMeasureXYZDisplay(!this.props.XYZdisplay);
 
 	private handleToggleMeasureUnits = () => this.props.setMeasureUnits(this.props.measureUnits === 'm' ? 'mm' : 'm' );
-
-	private handleMeasureCreated = (measure) => this.props.addMeasurement(measure);
 
 	private handleClearMeasurements = () => this.props.clearMeasurements();
 

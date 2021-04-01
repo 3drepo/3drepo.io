@@ -19,12 +19,6 @@ import { createActions, createReducer } from 'reduxsauce';
 import { MEASURE_TYPE, MEASURE_TYPE_NAME, MEASURE_TYPE_STATE_MAP } from './measurements.constants';
 
 export const { Types: MeasurementsTypes, Creators: MeasurementsActions } = createActions({
-	activateMeasure: [],
-	deactivateMeasure: [],
-	setMeasureActive: ['isActive'],
-	setDisabled: ['isDisabled'],
-	setActiveSuccess: ['isActive'],
-	setDisabledSuccess: ['isDisabled'],
 	setMeasureMode: ['mode'],
 	setMeasureModeSuccess: ['mode'],
 	setMeasureUnits: ['units'],
@@ -51,7 +45,6 @@ export const { Types: MeasurementsTypes, Creators: MeasurementsActions } = creat
 
 export interface IMeasurementState {
 	isDisabled: boolean;
-	isActive: boolean;
 	mode: string;
 	units: string;
 	areaMeasurements: any[];
@@ -63,7 +56,6 @@ export interface IMeasurementState {
 
 export const INITIAL_STATE: IMeasurementState = {
 	isDisabled: false,
-	isActive: false,
 	mode: '',
 	units: 'm',
 	areaMeasurements: [],
@@ -72,10 +64,6 @@ export const INITIAL_STATE: IMeasurementState = {
 	edgeSnapping: true,
 	xyzDisplay: false,
 };
-
-export const setActiveSuccess = (state = INITIAL_STATE, { isActive }) => ({ ...state, isActive });
-
-export const setDisabledSuccess = (state = INITIAL_STATE, { isDisabled }) => ({ ...state, isDisabled });
 
 export const setMeasureModeSuccess = (state = INITIAL_STATE, { mode }) => ({ ...state, mode });
 
@@ -157,9 +145,7 @@ export const resetMeasurementColorsSuccess = (state = INITIAL_STATE, {}) => {
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
-	[MeasurementsTypes.SET_ACTIVE_SUCCESS]: setActiveSuccess,
-	[MeasurementsTypes.SET_DISABLED_SUCCESS]: setDisabledSuccess,
-	[MeasurementsTypes.SET_MEASURE_MODE]: setMeasureModeSuccess,
+	[MeasurementsTypes.SET_MEASURE_MODE_SUCCESS]: setMeasureModeSuccess,
 	[MeasurementsTypes.SET_MEASURE_UNITS_SUCCESS]: setMeasureUnitsSuccess,
 	[MeasurementsTypes.ADD_MEASUREMENT_SUCCESS]: addMeasurementSuccess,
 	[MeasurementsTypes.CLEAR_MEASUREMENTS_SUCCESS]: clearMeasurementsSuccess,

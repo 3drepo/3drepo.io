@@ -84,7 +84,7 @@ export const selectNewRiskDetails = createSelector(
 export const selectLengthMeasurements = createSelector(
 	selectRisksDomain, (state) => {
 		// tslint:disable-next-line:max-line-length
-		return [{uuid: '054b576e-6f54-499d-9d67-b6fa0aa5b1f1', positions: [{x: -59.25340270996094, y: -13.999282836914062, z: 29.996967315673828}, {x: -0.05361175537109375, y: -12.080501556396484, z: -0.0009403228759765625}], value: 66.39405822753906, color: {r: 11.99774980545044, g: 46.99905104935169, b: 83.99954661726952, a: 1}, type: 0, name: 'Length 1', checked: true}];
+		return [{uuid: '054b576e-6f54-499d-9d67-b6fa0aa5b1f1', positions: [{x: -59.25340270996094, y: -13.999282836914062, z: 29.996967315673828}, {x: -0.05361175537109375, y: -12.080501556396484, z: -0.0009403228759765625}], value: 66.39405822753906, color: {r: 11.99774980545044, g: 46.99905104935169, b: 83.99954661726952, a: 1}, type: 0, name: 'Length 1'}];
 	}
 );
 
