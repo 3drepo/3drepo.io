@@ -20,8 +20,10 @@ import { VIEWER_EVENTS } from '../../constants/viewer';
 import { uuid as UUID } from '../../helpers/uuid';
 
 import { Viewer } from '../../services/viewer/viewer';
+import { BimActions } from '../bim';
 import { DialogActions } from '../dialog';
 import { dispatch } from '../store';
+import { ViewerGuiActions } from '../viewerGui';
 import {
 	selectAreaMeasurements,
 	selectLengthMeasurements,
@@ -33,11 +35,11 @@ import {
 } from './';
 import { MEASURE_TYPE, MEASURE_TYPE_NAME, MEASURE_TYPE_STATE_MAP, MEASURING_MODE } from './measurements.constants';
 
-const onMeasurementDropped = (measure) => {
+const onMeasurementCreated = (measure) => {
 	dispatch(MeasurementsActions.addMeasurement(measure));
 };
 
-const onPointDropped =  ({ trans, position }) => {
+const onPointPicked =  ({ trans, position }) => {
 	if (trans) {
 		position = trans.inverse().multMatrixPnt(position);
 	}
@@ -52,21 +54,27 @@ const onPointDropped =  ({ trans, position }) => {
 
 export function* setMeasureMode({ mode }) {
 	try {
-		yield Viewer.off(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementDropped);
-		yield Viewer.off(VIEWER_EVENTS.PICK_POINT, onPointDropped);
+		yield Viewer.off(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
+		yield Viewer.off(VIEWER_EVENTS.PICK_POINT, onPointPicked);
 		yield Viewer.disableMeasure();
 		yield Viewer.setPinDropMode(false);
+		yield put(MeasurementsActions.setMeasureModeSuccess(mode));
+
+		if (mode === '') {
+			return;
+		}
 
 		if (mode === MEASURING_MODE.POINT) {
 			yield Viewer.setPinDropMode(true);
-			yield Viewer.on(VIEWER_EVENTS.PICK_POINT, onPointDropped);
+			yield Viewer.on(VIEWER_EVENTS.PICK_POINT, onPointPicked);
 		} else if (mode !== '' ) {
 			yield Viewer.setMeasureMode(mode);
 			yield Viewer.activateMeasure();
-			yield Viewer.on(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementDropped);
+			yield Viewer.on(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
 		}
 
-		yield put(MeasurementsActions.setMeasureModeSuccess(mode));
+		ViewerGuiActions.setClipEdit(false);
+		BimActions.setIsActive(false);
 	} catch (error) {
 		DialogActions.showErrorDialog('set', `measure mode to ${mode}`, error);
 	}

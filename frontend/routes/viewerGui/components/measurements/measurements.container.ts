@@ -20,7 +20,7 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import {
-	selectAreaMeasurements, selectEdgeSnapping, selectIsMeasureActive, selectLengthMeasurements,
+	selectAreaMeasurements, selectEdgeSnapping, selectLengthMeasurements,
 	selectMeasureMode, selectMeasureUnits, selectPointMeasurements, selectXyzDisplay, MeasurementsActions
 } from '../../../../modules/measurements';
 import { selectUnit } from '../../../../modules/model';
@@ -29,7 +29,6 @@ import { withViewer } from '../../../../services/viewer/viewer';
 import { Measurements } from './measurements.component';
 
 const mapStateToProps = createStructuredSelector({
-	isMeasureActive: selectIsMeasureActive,
 	areaMeasurements: selectAreaMeasurements,
 	lengthMeasurements: selectLengthMeasurements,
 	pointMeasurements: selectPointMeasurements,

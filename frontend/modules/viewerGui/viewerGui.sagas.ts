@@ -110,19 +110,6 @@ function* resetPanelsStates() {
 	}
 }
 
-function* setMeasureVisibility({ visible }) {
-	try {
-		const metadataActive = yield select(selectIsMetadataVisible);
-
-		if (visible && metadataActive) {
-			yield put(BimActions.setIsActive(false));
-		}
-		yield put(MeasurementsActions.setMeasureActive(visible));
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('set', 'measure visibility', error));
-	}
-}
-
 function* setCoordView({ visible }) {
 	try {
 		if (visible) {
@@ -408,7 +395,6 @@ function* setIsPinDropMode({ mode }: { mode: boolean }) {
 export default function* ViewerGuiSaga() {
 	yield takeLatest(ViewerGuiTypes.FETCH_DATA, fetchData);
 	yield takeLatest(ViewerGuiTypes.RESET_PANELS_STATES, resetPanelsStates);
-	yield takeLatest(ViewerGuiTypes.SET_MEASURE_VISIBILITY, setMeasureVisibility);
 	yield takeLatest(ViewerGuiTypes.SET_COORD_VIEW, setCoordView);
 	yield takeLatest(ViewerGuiTypes.START_LISTEN_ON_MODEL_LOADED, startListenOnModelLoaded);
 	yield takeLatest(ViewerGuiTypes.STOP_LISTEN_ON_MODEL_LOADED, stopListenOnModelLoaded);

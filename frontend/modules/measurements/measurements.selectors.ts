@@ -23,10 +23,6 @@ export const selectMeasureMode = createSelector(
 	selectMeasurementsDomain, (state) => state.mode
 );
 
-export const selectIsMeasureActive = createSelector(
-	selectMeasureMode, (mode) => mode !== ''
-);
-
 export const selectMeasureUnits = createSelector(
 	selectMeasurementsDomain, (state) => state.units
 );

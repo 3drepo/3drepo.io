@@ -48,9 +48,6 @@ interface IProps {
 	viewer: any;
 	teamspace: string;
 	model: string;
-	isMeasureActive: boolean;
-	deactivateMeasure: () => void;
-	activateMeasure: () => void;
 	measurements: IMeasure[];
 	areaMeasurements: IMeasure[];
 	lengthMeasurements: IMeasure[];

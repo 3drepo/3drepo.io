@@ -25,11 +25,19 @@ import { Icon, Wrapper } from './measuringType.styles';
 interface IProps {
 	setMeasureMode: (mode) => void;
 	measureMode: string;
+	isMetadataActive: boolean;
+	isClipEdit: boolean;
 }
 
 export const MeasuringType = ({
-	setMeasureMode, measureMode
+	setMeasureMode, measureMode, isMetadataActive, isClipEdit
 }: IProps) => {
+	React.useEffect(() => {
+		if (isMetadataActive || isClipEdit) {
+			setMeasureMode('');
+		}
+	}, [isMetadataActive, isClipEdit]);
+
 	const handleMeasuringTypeClick = (mode) => () => {
 		if (mode === measureMode) {
 			setMeasureMode('');
