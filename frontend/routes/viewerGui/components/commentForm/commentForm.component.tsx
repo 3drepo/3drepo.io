@@ -71,8 +71,6 @@ interface IProps {
 	onSave: (commentData, finishSubmitting) => void;
 	onTakeScreenshot: (screenshot) => void;
 	showScreenshotDialog: (options) => void;
-	setDisabled: (isDisabled) => void;
-	deactivateMeasure: () => void;
 	setIsPinDropMode: (mode: boolean) => void;
 	teamspaceUsers: any[];
 	fetchingDetailsIsPending?: boolean;
@@ -317,7 +315,6 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 
 	public componentWillUnmount() {
 		this.props.viewer.setPinDropMode(false);
-		this.props.setDisabled(false);
 	}
 
 	public handleSave = (values, form) => {

@@ -19,7 +19,7 @@ import React from 'react';
 
 import { Tooltip } from '@material-ui/core';
 
-import { MEASURING_TYPES } from './measuringType.constants';
+import { BASIC_TYPES, MEASURING_TYPES } from './measuringType.constants';
 import { Icon, Wrapper } from './measuringType.styles';
 
 interface IProps {
@@ -27,11 +27,14 @@ interface IProps {
 	measureMode: string;
 	isMetadataActive: boolean;
 	isClipEdit: boolean;
+	basicTypes?: boolean;
 }
+
+const isBasicType = (({mode}) => BASIC_TYPES.includes(mode));
 
 export const MeasuringType = ({
 	setMeasureMode, measureMode, isMetadataActive, isClipEdit
-}: IProps) => {
+, basicTypes}: IProps) => {
 	React.useEffect(() => {
 		if (isMetadataActive || isClipEdit) {
 			setMeasureMode('');
@@ -46,9 +49,11 @@ export const MeasuringType = ({
 		}
 	};
 
+	const AVAILABLE_TYPES = !basicTypes ? MEASURING_TYPES : MEASURING_TYPES.filter(isBasicType);
+
 	return (
 			<>
-				{MEASURING_TYPES.map(({ icon, activeIcon, name, mode }) => (
+				{AVAILABLE_TYPES.map(({ icon, activeIcon, name, mode }) => (
 					<Tooltip title={name} key={name}>
 						<Wrapper>
 							<Icon

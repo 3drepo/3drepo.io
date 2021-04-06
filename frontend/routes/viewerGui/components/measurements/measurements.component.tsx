@@ -55,7 +55,6 @@ interface IProps {
 	removeMeasurement: (uuid) => void;
 	clearMeasurements: () => void;
 	setMeasureMode: (mode) => void;
-	measureMode: string;
 	setMeasurementName: (uuid, type, name) => void;
 	setMeasurementColor: (uuid, color) => void;
 	resetMeasurementColors: () => void;
@@ -131,7 +130,7 @@ export class Measurements extends React.PureComponent<IProps, IState> {
 	private renderFooterContent = () => (
 		<ViewerPanelFooter container alignItems="center">
 			<ViewerBottomActions id={this.props.id + '-add-new-container'}>
-				<MeasuringType {...this.props} />
+				<MeasuringType />
 			</ViewerBottomActions>
 		</ViewerPanelFooter>
 	)

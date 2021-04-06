@@ -20,6 +20,7 @@ import { IMeasure } from '../../../measurements/components/measureItem/measureIt
 
 // tslint:disable-next-line:max-line-length
 import { AllMeasurementsList } from '../../../measurements/components/measurementsList/allMeasurementsList.component';
+import { MeasuringType } from '../../../measurements/components/measuringType';
 import { Content } from '../riskDetails/riskDetails.styles';
 
 interface IProps {
@@ -38,6 +39,7 @@ export const ShapesFormTab = ({
 }: IProps) => {
 	return (
 		<Content active={active}>
+			<MeasuringType basicTypes />
 			<AllMeasurementsList {...props} pointMeasurements={[]} modelUnit={props.units} />
 		</Content>
 		);

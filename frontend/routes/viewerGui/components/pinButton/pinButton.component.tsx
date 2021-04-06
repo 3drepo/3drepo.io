@@ -33,7 +33,7 @@ interface IProps {
 	onChange: (pin) => void;
 	onSave: () => void;
 	disableMeasure: (isDisabled) => void;
-	deactivateMeasure: () => void;
+	setMeasureMode: (mode) => void;
 }
 
 interface IUpdatePinButtonProps {
@@ -73,16 +73,14 @@ export class PinButton extends React.PureComponent<IProps, any> {
 	}
 
 	public handleChangeEditMode = (active) => {
-		const { deactivateMeasure, disableMeasure, viewer, onSave } = this.props;
+		const { viewer, onSave, setMeasureMode } = this.props;
 
 		if (active) {
 			viewer.setPinDropMode(true);
-			deactivateMeasure();
-			disableMeasure(true);
+			setMeasureMode('');
 			this.togglePinListeners(true);
 		} else {
 			viewer.setPinDropMode(false);
-			disableMeasure(false);
 			this.togglePinListeners(false);
 
 			if (onSave) {

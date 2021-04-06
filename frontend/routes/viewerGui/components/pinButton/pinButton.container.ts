@@ -25,8 +25,7 @@ import { PinButton } from './pinButton.component';
 const mapStateToProps = createStructuredSelector({});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	disableMeasure: MeasurementsActions.setDisabled,
-	deactivateMeasure: MeasurementsActions.deactivateMeasure,
+	setMeasureMode: MeasurementsActions.setMeasureMode,
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(PinButton));
