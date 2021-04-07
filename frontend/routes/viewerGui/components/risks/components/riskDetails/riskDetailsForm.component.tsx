@@ -80,9 +80,9 @@ interface IState {
 }
 
 export const RiskSchema = Yup.object().shape({
-	description: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
-	mitigation_desc: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
-	residual_risk: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
+	description: Yup.string().max(660, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
+	mitigation_desc: Yup.string().max(660, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
+	residual_risk: Yup.string().max(660, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
 });
 
 class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
