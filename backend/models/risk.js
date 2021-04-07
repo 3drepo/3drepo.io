@@ -93,12 +93,12 @@ const riskSchema = yup.object().shape({
 	risk_factor: yup.string(),
 	safetibase_id: yup.string(),
 	scope: yup.string(),
-	sequence_start: yup.number(),
-	sequence_end: yup.number(),
+	sequence_start: yup.number().nullable(),
+	sequence_end: yup.number().nullable(),
 	thumbnail: yup.string(),
 	viewpoint: yup.object(),
 	viewpoints: yup.array()
-}).noUnknown();
+});
 
 const ownerPrivilegeAttributes = [
 	"desc"
