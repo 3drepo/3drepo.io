@@ -108,7 +108,7 @@ describe("Shapes", () => {
 
 	let issueId = null;
 
-	const shapeIssue =  { "name":"shapes issue", ...cloneDeep(baseIssue), shapes = [ polygonShape, pointToPointShape]};
+	const shapeIssue =  { "name":"shapes issue", ...cloneDeep(baseIssue), shapes : [ polygonShape, pointToPointShape]};
 
 	describe("in issue", function() {
 		it("when created should succeed", async () => {
@@ -120,9 +120,11 @@ describe("Shapes", () => {
 		});
 
 		it ("should be reflected when fetching the issue", async()=> {
-			const res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200)
+			const res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
 			const createdIssue = {...cloneDeep(baseIssue), _id: issueId};
 			expect(res.body).to.be.deep.equal(createdIssue);
+
+			// console.log(JSON.stringify(res.body, null, '\t'));
 		});
 	})
 
