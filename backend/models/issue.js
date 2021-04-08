@@ -16,6 +16,7 @@
  */
 "use strict";
 
+const yup = require("yup");
 const utils = require("../utils");
 const responseCodes = require("../response_codes.js");
 
@@ -57,6 +58,10 @@ const fieldTypes = {
 	"extras": "[object Object]"
 };
 
+const issueSchema = yup.object().shape({
+	desc: yup.string().max(C.LONG_TEXT_CHAR_LIM)
+});
+
 const ownerPrivilegeAttributes = [
 	"desc",
 	"due_date",
@@ -71,6 +76,10 @@ class Issue extends Ticket {
 	}
 
 	async create(account, model, newIssue, sessionId) {
+		if (!issueSchema.isValidSync(newIssue, { strict: true })) {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+
 		newIssue = await super.create(account, model, newIssue);
 		ChatEvent.newIssues(sessionId, account, model, [newIssue]);
 		return newIssue;
@@ -116,6 +125,10 @@ class Issue extends Ticket {
 	}
 
 	async update(user, sessionId, account, model, issueId, data) {
+		if (!data || !issueSchema.isValidSync(data, { strict: true })) {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+
 		// 0. Set the black list for attributes
 		const attributeBlacklist = [
 			"_id",

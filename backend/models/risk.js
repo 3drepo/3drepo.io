@@ -17,6 +17,7 @@
 "use strict";
 
 const yup = require("yup");
+const C = require("../constants");
 const responseCodes = require("../response_codes.js");
 const ChatEvent = require("./chatEvent");
 const Ticket = require("./ticket");
@@ -73,11 +74,11 @@ const riskSchema = yup.object().shape({
 	created: yup.number(),
 	createdAt: yup.number(),
 	creator_role: yup.string(),
-	desc: yup.string().max(660),
+	desc: yup.string().max(C.LONG_TEXT_CHAR_LIM),
 	element: yup.string(),
 	likelihood: yup.number(),
 	location_desc: yup.string(),
-	mitigation_desc: yup.string().max(660),
+	mitigation_desc: yup.string().max(C.LONG_TEXT_CHAR_LIM),
 	mitigation_detail: yup.string(),
 	mitigation_stage: yup.string(),
 	mitigation_status: yup.string(),
@@ -88,7 +89,7 @@ const riskSchema = yup.object().shape({
 	position: yup.array(),
 	residual_consequence: yup.number(),
 	residual_likelihood: yup.number(),
-	residual_risk: yup.string().max(660),
+	residual_risk: yup.string().max(C.LONG_TEXT_CHAR_LIM),
 	rev_id: yup.object(),
 	risk_factor: yup.string(),
 	safetibase_id: yup.string(),

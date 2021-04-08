@@ -495,7 +495,7 @@
 
 	// -----------------------------------------------------------------------------
 	//
-	// Invocie state
+	// Invoice state
 	//
 	// -----------------------------------------------------------------------------
 	define("INV_INIT", "init");
@@ -531,6 +531,9 @@
 	define("HEADER_SOCKET_ID", "x-socket-id");
 
 	define("PROJECT_DEFAULT_ID", "default");
+
+	// tickets
+	define("LONG_TEXT_CHAR_LIM", 660);
 
 	// risks
 	define("RISK_FILTERS",{
