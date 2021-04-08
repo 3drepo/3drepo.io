@@ -17,7 +17,6 @@
 
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 import { VIEWER_EVENTS } from '../../constants/viewer';
-// import { uuid as UUID } from '../../helpers/uuid';
 
 import { Viewer } from '../../services/viewer/viewer';
 import { BimActions } from '../bim';

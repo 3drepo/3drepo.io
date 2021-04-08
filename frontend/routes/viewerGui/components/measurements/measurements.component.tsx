@@ -66,6 +66,7 @@ interface IProps {
 	XYZdisplay: boolean;
 	resetMeasurementTool: () => void;
 	modelUnit: string;
+	measureMode: string;
 	id?: string;
 }
 
@@ -130,7 +131,7 @@ export class Measurements extends React.PureComponent<IProps, IState> {
 	private renderFooterContent = () => (
 		<ViewerPanelFooter container alignItems="center">
 			<ViewerBottomActions id={this.props.id + '-add-new-container'}>
-				<MeasuringType />
+				<MeasuringType setMeasureMode={this.props.setMeasureMode} measureMode={this.props.measureMode} />
 			</ViewerBottomActions>
 		</ViewerPanelFooter>
 	)

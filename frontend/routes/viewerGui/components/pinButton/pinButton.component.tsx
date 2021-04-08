@@ -19,7 +19,7 @@ import React from 'react';
 
 import Tooltip from '@material-ui/core/Tooltip';
 
-import { VIEWER_EVENTS } from '../../../../constants/viewer';
+import { VIEWER_EVENTS, VIEWER_MEASURING_MODE } from '../../../../constants/viewer';
 import { renderWhenTrueOtherwise } from '../../../../helpers/rendering';
 import { ContainedButton } from '../containedButton/containedButton.component';
 import { Container, PinIcon } from './pinButton.styles';
@@ -32,8 +32,6 @@ interface IProps {
 	pinData: any;
 	onChange: (pin) => void;
 	onSave: () => void;
-	disableMeasure: (isDisabled) => void;
-	setMeasureMode: (mode) => void;
 }
 
 interface IUpdatePinButtonProps {
@@ -76,7 +74,7 @@ export class PinButton extends React.PureComponent<IProps, any> {
 		const { viewer, onSave } = this.props;
 
 		if (active) {
-			viewer.setMeasureMode('PointPin', this.handlePickPoint ).then(
+			viewer.setMeasureMode(VIEWER_MEASURING_MODE.POINT, this.handlePickPoint).then(
 				() => this.togglePinListeners(true)
 			);
 		} else {

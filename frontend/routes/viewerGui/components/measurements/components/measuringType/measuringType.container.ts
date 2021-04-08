@@ -20,22 +20,18 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { selectIsActive, BimActions } from '../../../../../../modules/bim';
-import { selectMeasureMode, MeasurementsActions } from '../../../../../../modules/measurements';
 import { selectIsClipEdit, ViewerGuiActions } from '../../../../../../modules/viewerGui';
 
 import { MeasuringType } from './measuringType.component';
 
 const mapStateToProps = createStructuredSelector({
 	isMetadataActive: selectIsActive,
-	isClipEdit: selectIsClipEdit,
-	measureMode: selectMeasureMode
+	isClipEdit: selectIsClipEdit
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	setPanelVisibility: ViewerGuiActions.setPanelVisibility,
 	setClipEdit: ViewerGuiActions.setClipEdit,
 	setMetadataActive: BimActions.setIsActive,
-	setMeasureMode: MeasurementsActions.setMeasureMode,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(MeasuringType);

@@ -33,6 +33,8 @@ import {
 	ACTIVE, DEFAULT, MEASURING_TYPE
 } from '../../../../../../modules/measurements/measurements.constants';
 
+import { VIEWER_MEASURING_MODE } from '../../../../../../constants/viewer';
+
 const MEASURING_TYPE_ICON = {
 	[MEASURING_TYPE.POINT]: {
 		[DEFAULT]: PointIcon,
