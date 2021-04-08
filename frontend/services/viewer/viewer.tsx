@@ -453,12 +453,12 @@ export class ViewerService {
 
 	public async enableEdgeSnapping() {
 		await this.isViewerReady();
-		UnityUtil.enableMeasureToolSnap();
+		UnityUtil.enableSnapping();
 	}
 
 	public async disableEdgeSnapping() {
 		await this.isViewerReady();
-		UnityUtil.disableMeasureToolSnap();
+		UnityUtil.disableSnapping();
 	}
 
 	public async enableMeasureXYZDisplay() {
@@ -654,11 +654,19 @@ export class ViewerService {
 		UnityUtil.removePin(pin.id);
 	}
 
-	public setPinDropMode(on: boolean) {
+	public setPinDropMode = async (on: boolean, isSnapping: boolean = true) => {
+		await this.isViewerReady();
 		this.pinDropMode = on;
 
 		if (on) {
 			MultiSelect.toggleAreaSelect(false);
+			if (isSnapping) {
+				this.enableEdgeSnapping();
+			} else {
+				this.disableEdgeSnapping();
+			}
+		} else {
+			this.disableEdgeSnapping();
 		}
 	}
 
