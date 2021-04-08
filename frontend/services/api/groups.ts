@@ -27,7 +27,7 @@ import api from './';
 
 export const getGroups = (teamspace, modelId, revision?) => {
 	if (revision) {
-		return api.get(`${teamspace}/${modelId}/revision/${revision}/groups/?noIssues=true&noRisks=true&noViews=true`);
+		return api.get(`${teamspace}/${modelId}/revision/${revision}/groups/?noIssues=true&noRisks=true&noViews=true&noSequences=true`);
 	}
 	return api.get(`${teamspace}/${modelId}/revision/master/head/groups/?noIssues=true&noRisks=true&noViews=true`);
 };
