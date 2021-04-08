@@ -21,15 +21,15 @@ import React from 'react';
 import { IS_DEVELOPMENT } from '../../constants/environment';
 import {
 	VIEWER_EVENTS,
+	VIEWER_MEASURING_MODE,
 	VIEWER_NAV_MODES,
 	VIEWER_PROJECTION_MODES
 } from '../../constants/viewer';
 import { UnityUtil } from '../../globals/unity-util';
-import { asyncTimeout } from '../../helpers/aync';
+import { uuid as UUID } from '../../helpers/uuid';
 import { DialogActions } from '../../modules/dialog';
 import { dispatch, getState } from '../../modules/store';
 import { selectMemory } from '../../modules/viewer';
-import { PIN_COLORS } from '../../styles';
 import { clientConfigService } from '../clientConfig';
 import { MultiSelect } from './multiSelect';
 
@@ -80,6 +80,8 @@ export class ViewerService {
 	public options: any;
 	public plugins: any;
 
+	public mode: string;
+
 	public constructor({ name = 'viewer', ...config}: IViewerConstructor) {
 		this.name = name;
 
@@ -88,6 +90,32 @@ export class ViewerService {
 
 		this.viewer = document.createElement('div');
 		this.viewer.className = 'viewer';
+	}
+
+	public async setMeasureMode(mode: string) {
+		await this.isViewerReady();
+
+		this.mode = mode;
+
+		if (!mode) {
+			UnityUtil.disableMeasuringTool();
+			return;
+		}
+
+		MultiSelect.toggleAreaSelect(false);
+
+		if (mode === VIEWER_MEASURING_MODE.POINT)  {
+			UnityUtil.disableMeasuringTool();
+		} else {
+			UnityUtil.setMeasureToolMode(mode);
+			UnityUtil.enableMeasuringTool();
+		}
+
+		this.measurementModeChanged(mode);
+	}
+
+	public async clearMeasureMode() {
+		return await this.setMeasureMode('');
 	}
 
 	/**
@@ -109,7 +137,7 @@ export class ViewerService {
 		unityHolder.removeAttribute('style');
 		unityHolder.setAttribute('width', '100%');
 		unityHolder.setAttribute('height', '100%');
-		unityHolder.setAttribute('tabindex', '1'); // You need this for unityHolder to register keyboard events
+		unityHolder.setAttribute('tabindex', '1'); // You need this for unityHolder to register keyboard ts
 		unityHolder.setAttribute('oncontextmenu', 'event.preventDefault()');
 
 		unityHolder.onmousedown = () => {
@@ -164,7 +192,7 @@ export class ViewerService {
 	public initUnity(options) {
 		return new Promise((resolve, reject) => {
 			if (this.isInitialised) {
-				resolve();
+				resolve(null);
 			}
 
 			UnityUtil.setAPIHost(options.getAPI);
@@ -191,7 +219,7 @@ export class ViewerService {
 					model: this.modelString,
 					name: this.name
 				});
-				resolve();
+				resolve(null);
 			}).catch((error) => {
 				this.emit(VIEWER_EVENTS.VIEWER_INIT, error);
 				console.error('UnityUtil.onReady failed: ', error);
@@ -210,7 +238,7 @@ export class ViewerService {
 				(async () => {
 					console.debug('Loaded unity.loader.js succesfully');
 					await UnityUtil.loadUnity(this.canvas, undefined);
-					resolve();
+					resolve(null);
 				})();
 			}, false);
 			this.unityLoaderScript.addEventListener ('error', (error) => {
@@ -252,14 +280,21 @@ export class ViewerService {
 	}
 
 	public pickPointEvent(pointInfo) {
+		if (this.mode !== 'PointPin') {
+			return;
+		}
+
 		// User clicked a mesh
-		this.emit(VIEWER_EVENTS.PICK_POINT, {
-			id : pointInfo.id,
-			normal : pointInfo.normal,
-			position: pointInfo.position,
-			screenPos : pointInfo.mousePos,
-			selectColour : PIN_COLORS.YELLOW,
-		});
+		const position  = pointInfo.trans ? pointInfo.trans.inverse().multMatrixPnt(pointInfo.position) : pointInfo.position;
+
+		const measure = {
+			uuid: UUID(),
+			position,
+			type: -1,
+			color: { r: 0, g: 1, b: 1, a: 1},
+		};
+
+		this.measurementAlertEvent(measure);
 	}
 
 	public moveMeshes(teamspace: string, modelId: string, meshes: string[], matrix: number[]) {
@@ -355,8 +390,7 @@ export class ViewerService {
 		UnityUtil.reset();
 		this.isInitialised = false;
 		this.removeAllListeners();
-		this.setPinDropMode(false);
-		await this.disableMeasure();
+		await this.clearMeasureMode();
 	}
 
 	/**
@@ -364,7 +398,7 @@ export class ViewerService {
 	 */
 
 	public get canSelect() {
-		return !this.pinDropMode && !this.measureMode;
+		return !Boolean(this.measureMode);
 	}
 
 	public objectSelected(pointInfo) {
@@ -419,11 +453,6 @@ export class ViewerService {
 		await this.isViewerReady();
 		UnityUtil.disableMeasuringTool();
 		this.measureMode = false;
-	}
-
-	public async setMeasureMode(mode: string) {
-		await this.isViewerReady();
-		UnityUtil.setMeasureToolMode(mode);
 	}
 
 	public async setMeasuringUnits(units) {
@@ -488,12 +517,16 @@ export class ViewerService {
 		this.emit(VIEWER_EVENTS.ALL_MEASUREMENTS_REMOVED);
 	}
 
+	public measurementModeChanged(mode) {
+		this.emit(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, mode);
+	}
+
 	/**
 	 * Highlight
 	 */
 
 	public get canHighlight() {
-		return this.isInitialised && !this.pinDropMode && !this.measureMode;
+		return this.isInitialised && !this.pinDropMode && !this.measureMode && !Boolean(this.mode);
 	}
 
 	public async highlightObjects(

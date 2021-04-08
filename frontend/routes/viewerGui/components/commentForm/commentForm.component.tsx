@@ -313,10 +313,6 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public componentWillUnmount() {
-		this.props.viewer.setPinDropMode(false);
-	}
-
 	public handleSave = (values, form) => {
 		this.props.onSave(values, () => {
 			form.resetForm();

@@ -73,15 +73,15 @@ export class PinButton extends React.PureComponent<IProps, any> {
 	}
 
 	public handleChangeEditMode = (active) => {
-		const { viewer, onSave, setMeasureMode } = this.props;
+		const { viewer, onSave } = this.props;
 
 		if (active) {
-			viewer.setPinDropMode(true);
-			setMeasureMode('');
-			this.togglePinListeners(true);
+			viewer.setMeasureMode('PointPin', this.handlePickPoint ).then(
+				() => this.togglePinListeners(true)
+			);
 		} else {
-			viewer.setPinDropMode(false);
 			this.togglePinListeners(false);
+			viewer.clearMeasureMode();
 
 			if (onSave) {
 				onSave();
@@ -92,7 +92,8 @@ export class PinButton extends React.PureComponent<IProps, any> {
 	public togglePinListeners = (enabled: boolean) => {
 		const resolver = enabled ? 'on' : 'off';
 		const { viewer } = this.props;
-		viewer[resolver](VIEWER_EVENTS.PICK_POINT, this.handlePickPoint);
+		viewer[resolver](VIEWER_EVENTS.MEASUREMENT_CREATED, this.handlePickPoint);
+		viewer[resolver](VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, this.onClickButton);
 		viewer[resolver](VIEWER_EVENTS.BACKGROUND_SELECTED_PIN_MODE, this.handleClickBackground);
 	}
 
@@ -100,12 +101,8 @@ export class PinButton extends React.PureComponent<IProps, any> {
 		this.props.onChange([]);
 	}
 
-	public handlePickPoint = ({ trans, position, normal, selectColour, id }) => {
+	public handlePickPoint = ({ position}) => {
 		this.setState({wasPinDropped: true});
-
-		if (trans) {
-			position = trans.inverse().multMatrixPnt(position);
-		}
 
 		if (this.props.onChange) {
 			this.props.onChange(position);

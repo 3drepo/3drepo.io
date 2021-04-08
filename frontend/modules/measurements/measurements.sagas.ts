@@ -17,7 +17,7 @@
 
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 import { VIEWER_EVENTS } from '../../constants/viewer';
-import { uuid as UUID } from '../../helpers/uuid';
+// import { uuid as UUID } from '../../helpers/uuid';
 
 import { Viewer } from '../../services/viewer/viewer';
 import { BimActions } from '../bim';
@@ -33,45 +33,30 @@ import {
 	MeasurementsActions,
 	MeasurementsTypes,
 } from './';
-import { MEASURE_TYPE, MEASURE_TYPE_NAME, MEASURE_TYPE_STATE_MAP, MEASURING_MODE } from './measurements.constants';
+import { MEASURE_TYPE_NAME, MEASURE_TYPE_STATE_MAP } from './measurements.constants';
 
 const onMeasurementCreated = (measure) => {
 	dispatch(MeasurementsActions.addMeasurement(measure));
 };
 
-const onPointPicked =  ({ trans, position }) => {
-	if (trans) {
-		position = trans.inverse().multMatrixPnt(position);
-	}
-	const measure = {
-		uuid: UUID(),
-		position,
-		type: MEASURE_TYPE.POINT,
-		color: { r: 0, g: 1, b: 1, a: 1},
-	};
-	dispatch(MeasurementsActions.addMeasurement(measure));
+const onMeasurementChanged = () => {
+	dispatch(MeasurementsActions.setMeasureMode(''));
 };
 
 export function* setMeasureMode({ mode }) {
 	try {
 		yield Viewer.off(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
-		yield Viewer.off(VIEWER_EVENTS.PICK_POINT, onPointPicked);
-		yield Viewer.disableMeasure();
-		yield Viewer.setPinDropMode(false);
+		yield Viewer.off(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
 		yield put(MeasurementsActions.setMeasureModeSuccess(mode));
 
 		if (mode === '') {
 			return;
 		}
 
-		if (mode === MEASURING_MODE.POINT) {
-			yield Viewer.setPinDropMode(true);
-			yield Viewer.on(VIEWER_EVENTS.PICK_POINT, onPointPicked);
-		} else if (mode !== '' ) {
-			yield Viewer.setMeasureMode(mode);
-			yield Viewer.activateMeasure();
-			yield Viewer.on(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
-		}
+		yield put(MeasurementsActions.setMeasureModeSuccess(mode));
+		yield Viewer.setMeasureMode(mode);
+		yield Viewer.on(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
+		yield Viewer.on(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
 
 		ViewerGuiActions.setClipEdit(false);
 		BimActions.setIsActive(false);
