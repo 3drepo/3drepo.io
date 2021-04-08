@@ -788,19 +788,19 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Enable the measure tool snap to edges.
-	 * @category Measuring tool
+	 * Enable snapping to snap the cursor to the closest edge
+	 * @category Configurations
 	 */
-	public static enableMeasureToolSnap() {
-		UnityUtil.toUnity('EnableMeasureToolSnap', undefined, undefined);
+	public static enableSnapping() {
+		UnityUtil.toUnity('EnableSnapping', undefined, undefined);
 	}
 
 	/**
-	 * Disable the measure tool snap to edges.
-	 * @category Measuring tool
+	 * Disable Snapping
+	 * @category Configurations
 	 */
-	public static disableMeasureToolSnap() {
-		UnityUtil.toUnity('DisableMeasureToolSnap', undefined, undefined);
+	public static disableSnapping() {
+		UnityUtil.toUnity('DisableSnapping', undefined, undefined);
 	}
 
 	/**
@@ -1322,6 +1322,7 @@ export class UnityUtil {
 		UnityUtil.initialLoad = true;
 
 		UnityUtil.disableMeasuringTool();
+		UnityUtil.disableSnapping();
 		UnityUtil.clearAllMeasurements();
 		UnityUtil.diffToolDisableAndClear();
 		if (resetProjection) {

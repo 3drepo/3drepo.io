@@ -25,8 +25,10 @@ import { dispatch } from '../store';
 import { ViewerGuiActions } from '../viewerGui';
 import {
 	selectAreaMeasurements,
+	selectEdgeSnapping,
 	selectLengthMeasurements,
 	selectMeasurementsDomain,
+	selectMeasureMode,
 	selectMeasureUnits,
 	selectPointMeasurements,
 	MeasurementsActions,
@@ -59,6 +61,14 @@ export function* setMeasureMode({ mode }) {
 
 		ViewerGuiActions.setClipEdit(false);
 		BimActions.setIsActive(false);
+
+		const isSnapping = yield select(selectEdgeSnapping);
+
+		if (isSnapping) {
+			yield Viewer.enableEdgeSnapping();
+		} else {
+			yield Viewer.disableEdgeSnapping();
+		}
 	} catch (error) {
 		DialogActions.showErrorDialog('set', `measure mode to ${mode}`, error);
 	}
@@ -157,10 +167,12 @@ export function* resetMeasurementColors() {
 
 export function* setMeasureEdgeSnapping({ edgeSnapping }) {
 	try {
-		if (edgeSnapping) {
-			yield Viewer.enableEdgeSnapping();
-		} else {
-			yield Viewer.disableEdgeSnapping();
+		if ((yield select(selectMeasureMode)) !==  '') {
+			if (edgeSnapping) {
+				yield Viewer.enableEdgeSnapping();
+			} else {
+				yield Viewer.disableEdgeSnapping();
+			}
 		}
 		yield put(MeasurementsActions.setMeasureEdgeSnappingSuccess(edgeSnapping));
 	} catch (error) {
