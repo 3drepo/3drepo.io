@@ -30,6 +30,7 @@ import { selectHiddenGeometryVisible,  TreeActions } from '../tree';
 
 import { selectCacheSetting } from '../viewer';
 import { selectLeftPanels, ViewerGuiActions } from '../viewerGui';
+import { ViewpointsActions } from '../viewpoints';
 import { getSelectedFrame } from './sequences.helper';
 import {
 	selectActivitiesDefinitions, selectFrames, selectNextKeyFramesDates, selectSelectedDate, selectSelectedSequence,
@@ -110,46 +111,51 @@ export function* fetchFrame({ date }) {
 		const sequenceId =  yield select(selectSelectedSequenceId);
 		const loadedStates = yield select(selectStateDefinitions);
 		const frames = yield select(selectFrames);
-		const { state: stateId } = getSelectedFrame(frames, date);
-		const cacheEnabled = yield select(selectCacheSetting);
-		const IndexedDBKey = `${teamspace}.${model}.${stateId}.3DRepo`;
-		let cachedData;
+		const { state: stateId, viewpoint } = getSelectedFrame(frames, date);
 
-		if (cacheEnabled) {
-			cachedData = yield DataCache.getValue(STORE_NAME.FRAMES, IndexedDBKey);
-			const selectedDate = yield select(selectSelectedDate);
-			if (cachedData) {
-				yield put(SequencesActions.setStateDefinition(stateId, cachedData));
+		if (stateId) {
+			const cacheEnabled = yield select(selectCacheSetting);
+			const IndexedDBKey = `${teamspace}.${model}.${stateId}.3DRepo`;
+			let cachedData;
+
+			if (cacheEnabled) {
+				cachedData = yield DataCache.getValue(STORE_NAME.FRAMES, IndexedDBKey);
+				const selectedDate = yield select(selectSelectedDate);
+				if (cachedData) {
+					yield put(SequencesActions.setStateDefinition(stateId, cachedData));
+					if (selectedDate.valueOf() === date.valueOf()) {
+						yield put(SequencesActions.setLastSelectedDateSuccess(date));
+					}
+				}
+			}
+
+			if (!cachedData && !loadedStates[stateId]) {
+				// Using directly the promise and 'then' to dispatch the rest of the actions
+				// because with yield it would sometimes stop there forever even though the promise resolved
+				API.getSequenceState(teamspace, model, sequenceId, stateId).then((response) => {
+					const selectedDate = selectSelectedDate(getState());
+					if (selectedDate.valueOf() === date.valueOf()) {
+						dispatch(SequencesActions.setLastSelectedDateSuccess(date));
+					}
+
+					if (cacheEnabled) {
+						DataCache.putValue(STORE_NAME.FRAMES, IndexedDBKey, response.data).then(() => {
+							dispatch(SequencesActions.setStateDefinition(stateId, response.data));
+						});
+					} else {
+						dispatch(SequencesActions.setStateDefinition(stateId, response.data));
+					}
+				}).catch((e) => {
+					dispatch(SequencesActions.setStateDefinition(stateId, {}));
+				});
+			} else {
+				const selectedDate =  yield select(selectSelectedDate);
 				if (selectedDate.valueOf() === date.valueOf()) {
 					yield put(SequencesActions.setLastSelectedDateSuccess(date));
 				}
 			}
-		}
-
-		if (!cachedData && !loadedStates[stateId]) {
-			// Using directly the promise and 'then' to dispatch the rest of the actions
-			// because with yield it would sometimes stop there forever even though the promise resolved
-			API.getSequenceState(teamspace, model, sequenceId, stateId).then((response) => {
-				const selectedDate = selectSelectedDate(getState());
-				if (selectedDate.valueOf() === date.valueOf()) {
-					dispatch(SequencesActions.setLastSelectedDateSuccess(date));
-				}
-
-				if (cacheEnabled) {
-					DataCache.putValue(STORE_NAME.FRAMES, IndexedDBKey, response.data).then(() => {
-						dispatch(SequencesActions.setStateDefinition(stateId, response.data));
-					});
-				} else {
-					dispatch(SequencesActions.setStateDefinition(stateId, response.data));
-				}
-			}).catch((e) => {
-				dispatch(SequencesActions.setStateDefinition(stateId, {}));
-			});
 		} else {
-			const selectedDate =  yield select(selectSelectedDate);
-			if (selectedDate.valueOf() === date.valueOf()) {
-				yield put(SequencesActions.setLastSelectedDateSuccess(date));
-			}
+			yield put(ViewpointsActions.showViewpoint(teamspace, model, { viewpoint }));
 		}
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('fetch frame', 'sequences', error));
