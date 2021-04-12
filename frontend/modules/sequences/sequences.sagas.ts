@@ -155,7 +155,10 @@ export function* fetchFrame({ date }) {
 				}
 			}
 		} else {
-			yield put(ViewpointsActions.showViewpoint(teamspace, model, { viewpoint }));
+			const selectedDate = yield select(selectSelectedDate);
+			if (selectedDate.valueOf() === date.valueOf()) {
+				yield put(ViewpointsActions.showViewpoint(teamspace, model, { viewpoint }));
+			}
 		}
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('fetch frame', 'sequences', error));
