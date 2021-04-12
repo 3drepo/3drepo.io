@@ -21,8 +21,10 @@ import { Viewer } from '../../services/viewer/viewer';
 import { DialogActions } from '../dialog';
 import {
 	selectAreaMeasurements,
+	selectEdgeSnapping,
 	selectLengthMeasurements,
 	selectMeasurementsDomain,
+	selectMeasureMode,
 	selectMeasureUnits,
 	selectPointMeasurements,
 	MeasurementsActions,
@@ -54,8 +56,11 @@ export function* deactivateMeasure() {
 
 export function* setMeasureMode({ mode }) {
 	try {
-		if (mode === '' || mode === MEASURING_MODE.POINT) {
-			yield put(MeasurementsActions.setMeasureActive(false));
+
+		const modeReset = mode === '';
+		const pointMode = mode === MEASURING_MODE.POINT;
+
+		if (modeReset || pointMode) {
 			yield put(MeasurementsActions.setMeasureModeSuccess(mode));
 		} else {
 			yield all([
@@ -63,6 +68,18 @@ export function* setMeasureMode({ mode }) {
 				put(MeasurementsActions.setMeasureModeSuccess(mode))
 			]);
 		}
+
+		const isSnapping = yield select(selectEdgeSnapping);
+
+		// NOTE: Order matters here, as setPinDropMode will reset snapping
+		yield Viewer.setPinDropMode(pointMode, isSnapping);
+
+		if (isSnapping && !modeReset) {
+			yield Viewer.enableEdgeSnapping();
+		} else {
+			yield Viewer.disableEdgeSnapping();
+		}
+
 	} catch (error) {
 		DialogActions.showErrorDialog('set', `measure mode to ${mode}`, error);
 	}
@@ -186,10 +203,12 @@ export function* resetMeasurementColors() {
 
 export function* setMeasureEdgeSnapping({ edgeSnapping }) {
 	try {
-		if (edgeSnapping) {
-			yield Viewer.enableEdgeSnapping();
-		} else {
-			yield Viewer.disableEdgeSnapping();
+		if ((yield select(selectMeasureMode)) !==  '') {
+			if (edgeSnapping) {
+				yield Viewer.enableEdgeSnapping();
+			} else {
+				yield Viewer.disableEdgeSnapping();
+			}
 		}
 		yield put(MeasurementsActions.setMeasureEdgeSnappingSuccess(edgeSnapping));
 	} catch (error) {

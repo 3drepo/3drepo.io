@@ -788,19 +788,19 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Enable the measure tool snap to edges.
-	 * @category Measuring tool
+	 * Enable snapping to snap the cursor to the closest edge
+	 * @category Configurations
 	 */
-	public static enableMeasureToolSnap() {
-		UnityUtil.toUnity('EnableMeasureToolSnap', undefined, undefined);
+	public static enableSnapping() {
+		UnityUtil.toUnity('EnableSnapping', undefined, undefined);
 	}
 
 	/**
-	 * Disable the measure tool snap to edges.
-	 * @category Measuring tool
+	 * Disable Snapping
+	 * @category Configurations
 	 */
-	public static disableMeasureToolSnap() {
-		UnityUtil.toUnity('DisableMeasureToolSnap', undefined, undefined);
+	public static disableSnapping() {
+		UnityUtil.toUnity('DisableSnapping', undefined, undefined);
 	}
 
 	/**
@@ -1310,6 +1310,7 @@ export class UnityUtil {
 		UnityUtil.initialLoad = true;
 
 		UnityUtil.disableMeasuringTool();
+		UnityUtil.disableSnapping();
 		UnityUtil.clearAllMeasurements();
 		UnityUtil.diffToolDisableAndClear();
 		if (resetProjection) {
@@ -1587,7 +1588,7 @@ export class UnityUtil {
 	public static multipleCallInChunks(arrLength: number, func: (start: number, end: number) => any, chunkSize = 20000) {
 		let index = 0;
 		while (index < arrLength) {
-			const end = index + chunkSize >= arrLength ? undefined : chunkSize;
+			const end = index + chunkSize >= arrLength ? undefined : index + chunkSize;
 			func(index, end);
 			index += chunkSize;
 		}
