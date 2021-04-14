@@ -24,18 +24,18 @@ import { LinkableField } from '../linkableField/linkableField.component';
 import { MarkdownField } from '../markdownField/markdownField.component';
 
 const containerEditModeStyles = css`
-  align-items: baseline;
+	align-items: baseline;
 `;
 
 const containerNonEditModeStyles = css`
-  align-items: flex-end;
+	align-items: flex-end;
 `;
 
 export const Container = styled.div`
 	position: relative;
-  display: flex;
-  align-items: baseline;
-  ${({ editMode }: { editMode: boolean }) => editMode ? containerEditModeStyles : containerNonEditModeStyles};
+	display: flex;
+	align-items: baseline;
+	${({ editMode }: { editMode: boolean }) => editMode ? containerEditModeStyles : containerNonEditModeStyles};
 `;
 
 export const ActionsLine = styled.div`

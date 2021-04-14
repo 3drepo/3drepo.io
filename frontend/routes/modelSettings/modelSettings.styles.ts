@@ -25,25 +25,37 @@ import ArrowBack from '@material-ui/icons/ArrowBack';
 import { Form } from 'formik';
 
 import { COLOR } from '../../styles';
+import { TextField as TextFieldComponent } from '../components/textField';
 import { ContainedButton } from '../viewerGui/components/containedButton/containedButton.component';
 
 export const StyledTextField = styled(TextField)``;
 
+export const StyledCopyableTextField = styled(TextFieldComponent).attrs({
+	withCopyButton: true,
+})`
+	width: 100%;
+	margin: 16px 12px 8px 0;
+`;
+
 export const FieldsRow = styled(Grid)`
+	${StyledCopyableTextField},
 	${StyledTextField} {
 		width: 100%;
 		margin-left: 12px;
 		margin-right: 12px;
 	}
 
+	${/* sc-selector */ StyledCopyableTextField}:nth-child(2n),
 	${/* sc-selector */ StyledTextField}:nth-child(2n) {
 		margin-left: 12px;
 	}
 
+	${/* sc-selector */ StyledCopyableTextField}:nth-child(2n + 1),
 	${/* sc-selector */ StyledTextField}:nth-child(2n + 1) {
 		margin-left: 0;
 	}
 
+	${/* sc-selector */ StyledCopyableTextField}:last-child,
 	${/* sc-selector */ StyledTextField}:last-child {
 		margin-right: 0;
 	}

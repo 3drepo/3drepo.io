@@ -44,6 +44,7 @@ import {
 	Headline,
 	LoaderContainer,
 	SelectWrapper,
+	StyledCopyableTextField,
 	StyledForm,
 	StyledIcon,
 	StyledTextField,
@@ -263,7 +264,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 						<Grid>
 							<FieldsRow container wrap="nowrap">
 								<Field name="id" render={ ({ field }) => (
-									<StyledTextField
+									<StyledCopyableTextField
 										{...field}
 										label="Model ID"
 										margin="normal"
