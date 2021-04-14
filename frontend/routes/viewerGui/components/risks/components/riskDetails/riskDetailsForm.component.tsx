@@ -80,8 +80,9 @@ interface IState {
 }
 
 export const RiskSchema = Yup.object().shape({
-	description: Yup.string().max(660, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
+	desc: Yup.string().max(LONG_TEXT_CHAR_LIM, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
 	mitigation_desc: Yup.string().max(LONG_TEXT_CHAR_LIM, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
+	mitigation_detail: Yup.string().max(LONG_TEXT_CHAR_LIM, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
 	residual_risk: Yup.string().max(LONG_TEXT_CHAR_LIM, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
 });
 

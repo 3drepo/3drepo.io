@@ -80,7 +80,7 @@ interface IState {
 }
 
 export const IssueSchema = Yup.object().shape({
-	description: Yup.string().max(LONG_TEXT_CHAR_LIM, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
+	desc: Yup.string().max(LONG_TEXT_CHAR_LIM, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
 });
 
 class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
