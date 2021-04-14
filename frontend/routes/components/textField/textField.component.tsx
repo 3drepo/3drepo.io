@@ -21,14 +21,17 @@ import { StandardTextFieldProps } from '@material-ui/core/TextField';
 import CancelIcon from '@material-ui/icons/Cancel';
 import EditIcon from '@material-ui/icons/Edit';
 import SaveIcon from '@material-ui/icons/Save';
+import copy from 'copy-to-clipboard';
 import { Field, Formik } from 'formik';
 
+import CopyIcon from '@material-ui/icons/FileCopy';
 import { ENTER_KEY } from '../../../constants/keys';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { ExpandAction } from '../../viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import {
 	ActionsLine,
 	Container,
+	CopyButton,
 	FieldLabel,
 	FieldWrapper,
 	MutableActionsLine,
@@ -48,7 +51,9 @@ interface IProps extends StandardTextFieldProps {
 	disableShowDefaultUnderline?: boolean;
 	enableMarkdown?: boolean;
 	forceEdit?: boolean;
+	withCopyButton?: boolean;
 	onCancel?: () => void;
+	showSnackbar?: (text: string) => void;
 }
 
 interface IState {
@@ -102,7 +107,7 @@ export class TextField extends React.PureComponent<IProps, IState> {
 	}
 
 	get fieldValue() {
-		return this.props.requiredConfirm ? this.state.currentValue : this.props.value;
+		return this.props.requiredConfirm ? this.state.currentValue : this.props.value as string;
 	}
 
 	private checkIfGotLongContent = () => {
@@ -219,6 +224,17 @@ export class TextField extends React.PureComponent<IProps, IState> {
 		</MutableActionsLine>
 	)
 
+	private handleCopyButtonClick = () => {
+		copy(this.fieldValue);
+		this.props.showSnackbar('Value copied to the clipboard');
+	}
+
+	public renderCopyButton = () => (
+		<CopyButton icon={CopyIcon} onClick={this.handleCopyButtonClick}>
+			Copy
+		</CopyButton>
+	)
+
 	private renderTextField = ({ field, form }) => {
 		const {
 			onBeforeConfirmChange,
@@ -296,6 +312,7 @@ export class TextField extends React.PureComponent<IProps, IState> {
 		const { initialValue } = this.state;
 		const shouldRenderActions = mutable && this.isEditMode;
 		const shouldRenderMutable = !this.isEditMode && !this.props.disabled;
+		const shouldRenderCopyButton = this.props.withCopyButton && !mutable;
 
 		return (
 			<>
@@ -305,7 +322,7 @@ export class TextField extends React.PureComponent<IProps, IState> {
 					validationSchema={validationSchema}
 					onSubmit={this.saveChange}
 				>
-					<Container onBlur={this.onBlur} className={className}>
+					<Container onBlur={this.onBlur} className={className} editMode={this.isEditMode}>
 						{this.isEditMode && <Field name={name} render={this.renderTextField} />}
 						{!this.isEditMode &&
 						<FieldWrapper line={Number(!disableShowDefaultUnderline)} onClick={this.handlePlaceholderClick}>
@@ -324,6 +341,7 @@ export class TextField extends React.PureComponent<IProps, IState> {
 						}
 						{shouldRenderActions && this.renderActionsLine()}
 						{shouldRenderMutable && this.renderMutableButton()}
+						{shouldRenderCopyButton && this.renderCopyButton()}
 					</Container>
 				</Formik>
 				{this.renderExpandableText(this.isExpandable)}
