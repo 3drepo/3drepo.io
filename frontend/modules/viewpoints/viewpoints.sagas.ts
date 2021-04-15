@@ -250,14 +250,15 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 			yield put(GroupsActions.clearColorOverrides());
 		}
 
-		yield put(TreeActions.showAllNodes());
 
 		yield put(TreeActions.clearCurrentlySelected());
 
 		if (viewpoint?.hidden_group?.objects?.length > 0) {
-			yield put(TreeActions.hideNodesBySharedIds(viewpoint.hidden_group.objects));
+			yield put(TreeActions.hideNodesBySharedIds(viewpoint.hidden_group.objects, true));
 		} else if (viewpoint?.shown?.objects?.length > 0) {
 			yield put(TreeActions.isolateNodesBySharedIds(viewpoint.shown.objects));
+		} else {
+			yield put(TreeActions.showAllNodes());
 		}
 
 		if (viewpoint?.highlighted_group?.objects?.length > 0) {
