@@ -250,7 +250,6 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 			yield put(GroupsActions.clearColorOverrides());
 		}
 
-
 		yield put(TreeActions.clearCurrentlySelected());
 
 		if (viewpoint?.hidden_group?.objects?.length > 0) {

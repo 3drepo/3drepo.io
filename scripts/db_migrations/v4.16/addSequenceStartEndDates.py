@@ -44,5 +44,5 @@ for database in db.database_names():
                 print("\t\t\t--end: " +  str(endDate))
 ##### Update entry #####
                 if not dryRun:
-                    db[modelId + ".risks"].update_one({"_id":entryId},{"$set":{"startDate":startDate, "endDate":endDate}})
+                    db[modelId + ".sequences"].update_one({"_id":entryId},{"$set":{"startDate":startDate, "endDate":endDate}})
 
