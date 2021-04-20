@@ -54,6 +54,7 @@ interface IProps extends StandardTextFieldProps {
 	withCopyButton?: boolean;
 	onCancel?: () => void;
 	showSnackbar?: (text: string) => void;
+	value?: string;
 }
 
 interface IState {
@@ -107,7 +108,7 @@ export class TextField extends React.PureComponent<IProps, IState> {
 	}
 
 	get fieldValue() {
-		return this.props.requiredConfirm ? this.state.currentValue : this.props.value as string;
+		return this.props.requiredConfirm ? this.state.currentValue : this.props.value;
 	}
 
 	private checkIfGotLongContent = () => {
