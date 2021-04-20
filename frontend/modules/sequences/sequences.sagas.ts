@@ -97,7 +97,7 @@ export function* fetchFrame({ date }) {
 		const sequenceId =  yield select(selectSelectedSequenceId);
 		const loadedStates = yield select(selectStateDefinitions);
 		const frames = yield select(selectFrames);
-		const { state: stateId } = getSelectedFrame(frames, date);
+		const { state: stateId } = getSelectedFrame(frames, date).frame;
 		const cacheEnabled = yield select(selectCacheSetting);
 		const IndexedDBKey = `${teamspace}.${model}.${stateId}.3DRepo`;
 		let cachedData;
