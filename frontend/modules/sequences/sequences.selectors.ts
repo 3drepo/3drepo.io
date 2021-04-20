@@ -195,7 +195,7 @@ export const selectLastSelectedStateId = createSelector(
 
 export const selectIsLoadingFrame = createSelector(
 	selectSelectedStateId, selectStateDefinitions,
-	(stateId, stateDefinitions) => !(stateDefinitions || {}).hasOwnProperty(stateId);
+	(stateId, stateDefinitions) => !(stateDefinitions || {}).hasOwnProperty(stateId)
 );
 
 export const selectSelectedState = createSelector(
