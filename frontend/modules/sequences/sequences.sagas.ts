@@ -107,7 +107,8 @@ export function* fetchFrame({ date }) {
 			// Using directly the promise and 'then' to dispatch the rest of the actions
 			// because with yield it would sometimes stop there forever even though the promise resolved
 			cachedDataPromise.then((cachedData) => {
-				const fetchPromise = cachedData? Promise.resolve({data: cachedData}) : API.getSequenceState(teamspace, model, revision, sequenceId, stateId);
+				const fetchPromise = cachedData ? Promise.resolve({data: cachedData})
+					: API.getSequenceState(teamspace, model, revision, sequenceId, stateId);
 				fetchPromise.then((response) => {
 					const selectedDate = selectSelectedDate(getState());
 					if (selectedDate.valueOf() === date.valueOf()) {

@@ -158,7 +158,7 @@ export const selectNextKeyFramesDates =  createSelector(
 					lastFrame = nextFrame;
 				}
 			} else {
-				for (let i = frameInfo.index; i < frameInfo.index +3 && i < frames.length; ++i) {
+				for (let i = frameInfo.index; i < frameInfo.index + 3 && i < frames.length; ++i) {
 					keyFrames.push(new Date(frames[i].dateTime));
 				}
 
