@@ -46,7 +46,6 @@ import {
 
 interface IProps {
 	viewer: any;
-	dataCache: IDataCache;
 	className?: string;
 	modelSettings: any;
 	isModelPending: boolean;
