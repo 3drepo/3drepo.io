@@ -19,7 +19,9 @@
 
 const { getGridfsFileStream, getNodeById } = require("../scene");
 const utils = require("../../utils");
+const responseCodes = require("../../response_codes");
 const CombinedStream = require("combined-stream");
+const { text } = require("body-parser");
 
 async function getTextureById(account, model, textureId) {
 
@@ -30,6 +32,10 @@ async function getTextureById(account, model, textureId) {
 	};
 
 	const texture = await getNodeById(account, model, utils.stringToUUID(textureId), projection);
+	if (!texture) {
+		throw responseCodes.RESOURCE_NOT_FOUND;
+	}
+
 	const data = await getGridfsFileStream(account, model, texture._extRef.data);
 
 	const combinedStream = CombinedStream.create();
