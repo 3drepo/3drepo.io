@@ -21,7 +21,6 @@ const { getGridfsFileStream, getNodeById } = require("../scene");
 const utils = require("../../utils");
 const responseCodes = require("../../response_codes");
 const CombinedStream = require("combined-stream");
-const { text } = require("body-parser");
 
 async function getTextureById(account, model, textureId) {
 
