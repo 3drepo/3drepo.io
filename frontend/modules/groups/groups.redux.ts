@@ -46,6 +46,7 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	deleteGroups: ['teamspace', 'modelId', 'groups'],
 	showDeleteInfo: ['groupIds'],
 	deleteGroupsSuccess: ['groupIds'],
+	splitDeleteRequestsIfListIsToLong: ['teamspace', 'modelId', 'groups'],
 	isolateGroup: ['group'],
 	downloadGroups: ['teamspace', 'modelId'],
 	createGroup: ['teamspace', 'modelId', 'revision', 'group'],
