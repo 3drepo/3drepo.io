@@ -115,12 +115,9 @@ export function* fetchFrame({ date }) {
 						dispatch(SequencesActions.setLastSelectedDateSuccess(date));
 					}
 
+					dispatch(SequencesActions.setStateDefinition(stateId, response.data));
 					if (cacheEnabled && !cachedData) {
-						DataCache.putValue(STORE_NAME.FRAMES, iDBKey, response.data).then(() => {
-							dispatch(SequencesActions.setStateDefinition(stateId, response.data));
-						});
-					} else {
-						dispatch(SequencesActions.setStateDefinition(stateId, response.data));
+						DataCache.putValue(STORE_NAME.FRAMES, iDBKey, response.data);
 					}
 				}).catch((e) => {
 					dispatch(SequencesActions.setStateDefinition(stateId, {}));

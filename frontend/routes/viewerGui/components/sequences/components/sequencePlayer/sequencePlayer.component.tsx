@@ -74,6 +74,7 @@ interface IState {
 }
 
 export class SequencePlayer extends React.PureComponent<IProps, IState> {
+	private playInterval = 3000;
 	public state: IState = {
 		value: null,
 		playing: false,
@@ -152,7 +153,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 			setTimeout(() => {
 				this.nextStep();
 				this.play();
-			}, 1000);
+			}, this.playInterval);
 		}
 	}
 
@@ -216,7 +217,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 			}
 
 			this.nextStep();
-		}, 1000) as unknown) as number;
+		}, this.playInterval) as unknown) as number;
 
 		this.setState({
 			playing: true,
