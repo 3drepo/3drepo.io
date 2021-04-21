@@ -1,4 +1,4 @@
-export const MAX_URL_LENGTH = 140;
+export const MAX_URL_LENGTH = 2000;
 
 const normalizeString = (text): string => text.replace(/^,/, '');
 
