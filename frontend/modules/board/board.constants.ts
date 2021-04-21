@@ -88,3 +88,6 @@ export const RISK_FILTER_PROPS = {
 
 export const ISSUE_FILTER_VALUES = values(ISSUE_FILTER_PROPS);
 export const RISK_FILTER_VALUES = values(RISK_FILTER_PROPS);
+
+export const SEARCH_INPUT_HEIGHT = 50;
+export const FILTERS_COMPONENT_HEIGHT = 50;

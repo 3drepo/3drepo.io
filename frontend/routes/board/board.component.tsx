@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import IconButton from '@material-ui/core/IconButton';
 import InputLabel from '@material-ui/core/InputLabel';
@@ -34,7 +34,8 @@ import { filtersValuesMap as issuesFilters, getHeaderMenuItems as getIssueMenuIt
 import { renderWhenTrue } from '../../helpers/rendering';
 import { filtersValuesMap as risksFilters, getHeaderMenuItems as getRisksMenuItems  } from '../../helpers/risks';
 import {
-	ISSUE_FILTER_PROPS, ISSUE_FILTER_VALUES, RISK_FILTER_PROPS, RISK_FILTER_VALUES
+	FILTERS_COMPONENT_HEIGHT,
+	ISSUE_FILTER_PROPS, ISSUE_FILTER_VALUES, RISK_FILTER_PROPS, RISK_FILTER_VALUES, SEARCH_INPUT_HEIGHT
 } from '../../modules/board/board.constants';
 import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
 
@@ -156,6 +157,7 @@ const IssueBoardCard = ({ metadata, onClick }: any) => (
 
 export function Board(props: IProps) {
 	const boardRef = useRef(null);
+	const [filtersOpen, setFiltersOpen] = useState(false);
 	const { type, teamspace, project, modelId } = useParams();
 	const projectParam = `${project ? `/${project}` : ''}`;
 	const modelParam = `${modelId ? `/${modelId}` : ''}`;
@@ -420,8 +422,13 @@ export function Board(props: IProps) {
 		Card:  isIssuesBoard ? IssueBoardCard : RiskBoardCard
 	};
 
-	const renderBoard = renderWhenTrue(() => (
-			<BoardContainer>
+	const renderBoard = renderWhenTrue(() => {
+		const searchOffset = props.searchEnabled ? SEARCH_INPUT_HEIGHT : 0;
+		const filterOffset = props.selectedIssueFilters.length ? FILTERS_COMPONENT_HEIGHT : 0;
+		const openSearchInFilters = filtersOpen ? SEARCH_INPUT_HEIGHT : 0;
+
+		return (
+			<BoardContainer offset={searchOffset + filterOffset - openSearchInFilters}>
 				<div ref={boardRef}>
 					<TrelloBoard
 						data={boardData}
@@ -434,7 +441,8 @@ export function Board(props: IProps) {
 					/>
 				</div>
 			</BoardContainer>
-	));
+		);
+	});
 
 	const renderLoader = renderWhenTrue(() => (
 		<LoaderContainer>
@@ -520,6 +528,7 @@ export function Board(props: IProps) {
 				onChange={props.setFilters}
 				filters={filters}
 				selectedFilters={selectedFilters}
+				setFiltersOpen={setFiltersOpen}
 			/>
 		);
 	});

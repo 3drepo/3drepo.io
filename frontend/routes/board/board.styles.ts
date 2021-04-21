@@ -32,8 +32,8 @@ export const Container = styled.div`
 	flex-direction: column;
 `;
 
-export const BoardContainer = styled.div`
-	height: calc(100% - 50px);
+export const BoardContainer = styled.div<{offset: number}>`
+	height: ${({offset}) => offset ? `calc(100% - ${50 + offset}px)` : 'calc(100% - 50px)'};
 	box-sizing: border-box;
 	border-top: 1px solid ${COLOR.BLACK_6};
 

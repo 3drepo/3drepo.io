@@ -21,7 +21,7 @@ import ExpandIcon from '@material-ui/icons/ChevronRight';
 import CollapseIcon from '@material-ui/icons/ExpandMore';
 import SearchIcon from '@material-ui/icons/Search';
 import { isEqual, isNil, keyBy, omit, uniqBy } from 'lodash';
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import Autosuggest from 'react-autosuggest';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import * as yup from 'yup';
@@ -102,6 +102,7 @@ interface IProps {
 	left?: boolean;
 	onChange: (selectedFilters) => void;
 	onDataTypeChange?: (selectedDataTypes) => void;
+	setFiltersOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 interface IState {
@@ -489,10 +490,12 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 	}
 
 	public collapseFilters = () => {
+		this.props.setFiltersOpen(true);
 		this.setState({ filtersOpen: true });
 	}
 
 	public expandFilters = () => {
+		this.props.setFiltersOpen(false);
 		this.setState({ filtersOpen: false });
 	}
 
