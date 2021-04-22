@@ -17,7 +17,6 @@
 
 import React from 'react';
 import { formatDateTime, formatShortDate, formatShortDateTime } from '../../../../../../services/formatting/formatDate';
-import { Loader } from '../../../../../components/loader/loader.component';
 import { SequenceTasksListContainer, SequenceTasksListItem, TaskListLabel } from '../../sequences.styles';
 import { IActivity, TaskItem } from './sequenceTaskItem.component';
 
@@ -59,10 +58,6 @@ export class TasksList extends React.PureComponent<IProps, IState> {
 	))
 
 	public render = () => {
-		if (!this.props.tasks.length) {
-			return <Loader content="Loading activity list..." />;
-		}
-
 		return (
 			<SequenceTasksListContainer>
 				<TaskListLabel>{this.durationLabel}</TaskListLabel>
