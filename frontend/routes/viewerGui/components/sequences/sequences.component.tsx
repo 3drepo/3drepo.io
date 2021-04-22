@@ -129,14 +129,20 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 	}
 
 	public onPlayStarted = () => {
-		const { selectedSequence, selectedDate, frames } = this.props;
+		const {
+			selectedSequence,
+			selectedDate,
+			frames,
+			showViewpoint,
+			deselectedViewsAndLeaveClipping
+		} = this.props;
 		const { viewpoint } = getSelectedFrame(frames, selectedDate);
 
 
 		if (viewpoint) {
-			this.props.showViewpoint(selectedSequence.teamspace, selectedSequence.model, { viewpoint });
+			showViewpoint(selectedSequence.teamspace, selectedSequence.model, { viewpoint });
 		} else {
-			this.props.deselectViewsAndLeaveClipping();
+			deselectViewsAndLeaveClipping();
 		}
 	}
 
