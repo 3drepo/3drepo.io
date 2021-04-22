@@ -21,6 +21,7 @@ import { IconButton } from '@material-ui/core';
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import { STEP_SCALE } from '../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
+import { getSelectedFrame } from '../../../../modules/sequences/sequences.helper';
 import { EmptyStateInfo } from '../../../components/components.styles';
 import { Loader } from '../../../components/loader/loader.component';
 import { PanelBarActions } from '../panelBarActions';
@@ -127,7 +128,14 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 	}
 
 	public onPlayStarted = () => {
-		this.props.deselectViewsAndLeaveClipping();
+		const { selectedSequence, selectedDate, frames } = this.props;
+		const { viewpoint } = getSelectedFrame(frames, selectedDate);
+
+		if (viewpoint) {
+			this.props.showViewpoint(selectedSequence.teamspace, selectedSequence.model, viewpoint);
+		} else {
+			this.props.deselectViewsAndLeaveClipping();
+		}
 	}
 
 	public render = () => {

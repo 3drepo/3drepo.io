@@ -62,6 +62,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setPanelVisibility: ViewerGuiActions.setPanelVisibility,
 	deselectViewsAndLeaveClipping: ViewpointsActions.deselectViewsAndLeaveClipping,
 	setActiveViewpoint: ViewpointsActions.setActiveViewpoint,
+	showViewpoint: ViewpointsActions.showViewpoint,
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Sequences));
