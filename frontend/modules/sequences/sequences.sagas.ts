@@ -222,7 +222,7 @@ export function* setSelectedSequence({ sequenceId }) {
 
 export function* showSequenceDate({ date }) {
 	// 1 - if sequence panel is closed, open it
-	const sequencePanelVisible = (yield select(selectLeftPanels))[VIEWER_PANELS.SEQUENCES];
+	const sequencePanelVisible = (yield select(selectLeftPanels)).includes[VIEWER_PANELS.SEQUENCES];
 
 	if (!sequencePanelVisible) {
 		yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.SEQUENCES, true));
@@ -230,7 +230,7 @@ export function* showSequenceDate({ date }) {
 
 	// 2 - if there is no sequences loaded, load them
 	let sequences = yield select(selectSequences);
-	if (sequences) {
+	if (!sequences) {
 		yield put(SequencesActions.fetchSequenceList());
 		yield take(SequencesTypes.FETCH_SEQUENCE_LIST_SUCCESS);
 		sequences = yield select(selectSequences);
