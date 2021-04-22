@@ -20,7 +20,6 @@
 const { getGridfsFileStream, getNodeById } = require("../scene");
 const utils = require("../../utils");
 const responseCodes = require("../../response_codes");
-const CombinedStream = require("combined-stream");
 
 async function getTextureById(account, model, textureId) {
 
@@ -37,10 +36,12 @@ async function getTextureById(account, model, textureId) {
 
 	const data = await getGridfsFileStream(account, model, texture._extRef.data);
 
-	const combinedStream = CombinedStream.create();
-	combinedStream.extension = texture.extension; // For the MIME type
-	combinedStream.append(data);
-	return 	combinedStream;
+	const textureInfo = {
+		stream: data,
+		extension: texture.extension
+	};
+
+	return textureInfo;
 }
 
 module.exports = {

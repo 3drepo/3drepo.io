@@ -2106,12 +2106,12 @@ function getMesh(req, res, next) {
 function getTexture(req, res, next) {
 	const {model, account, textureId} = req.params;
 
-	TextureHelpers.getTextureById(account, model, textureId).then((stream) => {
+	TextureHelpers.getTextureById(account, model, textureId).then((textureInfo) => {
 		const headers = {
-			"Content-Type": "image/" + stream.extension + ";"
+			"Content-Type": "image/" + textureInfo.extension + ";"
 		};
 		res.writeHead(200, headers);
-		stream.pipe(res);
+		textureInfo.stream.pipe(res);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
