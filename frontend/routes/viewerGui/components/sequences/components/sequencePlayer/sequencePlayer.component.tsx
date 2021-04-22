@@ -189,6 +189,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 		} else {
 			const { frames } = this.props;
 			const currentFrame = getSelectedFrame(frames, value);
+			// FIXME: once #2562 is merged in, you can get the frame index from getSelectedFrame, hence next line is redundant.
 			const index = findIndex(frames, (f) => f === currentFrame);
 			const newValue = frames[index + stepInterval * direction]?.dateTime;
 			if (newValue) {
