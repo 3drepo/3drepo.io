@@ -20,6 +20,7 @@ import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 import { selectSelectedSequenceId, selectStateDefinitions,
 	SequencesActions, SequencesTypes } from '.';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
+import { delay } from '../../helpers/aync';
 
 import * as API from '../../services/api';
 import { DataCache, STORE_NAME } from '../../services/dataCache';
@@ -37,14 +38,18 @@ import {
 	selectSequences, selectSequenceModel,
 } from './sequences.selectors';
 
+function* getSequenceModel(sequenceId) {
+	const sequences = yield select(selectSequences);
+	return ((sequences || []).find((s) => s._id === sequenceId) || {}).model;
+}
+
 export function* fetchSequence({sequenceId}) {
 	try {
 		const teamspace = yield select(selectCurrentModelTeamspace);
-		const model = yield select(selectSequenceModel);
-
+		const model = yield getSequenceModel(sequenceId);
 		const response = yield API.getSequence(teamspace, model, sequenceId);
-		yield put(SequencesActions.fetchSequenceSuccess(response.data));
 		yield put(SequencesActions.fetchActivitiesDefinitions(sequenceId));
+		yield put(SequencesActions.fetchSequenceSuccess(response.data));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'sequences', error));
 	}
@@ -87,7 +92,7 @@ export function* fetchActivitiesDefinitions({ sequenceId }) {
 		const teamspace = yield select(selectCurrentModelTeamspace);
 		const isFederation = yield select(selectIsFederation);
 		const revision = isFederation ? null : yield select(selectCurrentRevisionId);
-		const model = yield select(selectSequenceModel);
+		const model = yield getSequenceModel(sequenceId);
 		const activitiesDefinitions = yield select(selectActivitiesDefinitions);
 
 		if (!activitiesDefinitions && sequenceId) {
@@ -199,8 +204,9 @@ export function* restoreModelDefaultVisibility() {
 export function* setSelectedSequence({ sequenceId }) {
 	if (sequenceId) {
 		yield put(SequencesActions.initializeSequences());
-		yield put(SequencesActions.setSelectedSequenceSuccess(sequenceId));
 		yield put(SequencesActions.fetchSequence(sequenceId));
+		yield take(SequencesTypes.FETCH_SEQUENCE_SUCCESS);
+		yield put(SequencesActions.setSelectedSequenceSuccess(sequenceId));
 	} else {
 		const selectedSequence = yield select(selectSelectedSequence);
 		if (selectedSequence) {
