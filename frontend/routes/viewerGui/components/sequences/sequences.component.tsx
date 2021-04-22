@@ -56,6 +56,7 @@ interface IProps {
 	toggleActivitiesPanel: () => void;
 	fetchActivityDetails: (id: string) => void;
 	deselectViewsAndLeaveClipping: () => void;
+	showViewpoint: (teamspace: string, model: string, viewpoint: any) => void;
 	id?: string;
 	isActivitiesPending: boolean;
 	draggablePanels: string[];
@@ -131,8 +132,9 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 		const { selectedSequence, selectedDate, frames } = this.props;
 		const { viewpoint } = getSelectedFrame(frames, selectedDate);
 
+
 		if (viewpoint) {
-			this.props.showViewpoint(selectedSequence.teamspace, selectedSequence.model, viewpoint);
+			this.props.showViewpoint(selectedSequence.teamspace, selectedSequence.model, { viewpoint });
 		} else {
 			this.props.deselectViewsAndLeaveClipping();
 		}
