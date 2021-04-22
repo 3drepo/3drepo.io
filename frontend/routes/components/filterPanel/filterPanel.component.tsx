@@ -566,7 +566,11 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		const { hideMenu, filters } = this.props;
 
 		return (
-			<Container ref={this.props.containerRef} filtersOpen={selectedFilters.length && filtersOpen} className={this.props.className}>
+			<Container
+				ref={this.props.containerRef}
+				filtersOpen={selectedFilters.length && filtersOpen}
+				className={this.props.className}
+			>
 				{this.renderSelectedFilters()}
 
 				<InputContainer menuHidden={hideMenu}>

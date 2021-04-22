@@ -19,7 +19,7 @@ import Fab from '@material-ui/core/Fab';
 import FormControlBase from '@material-ui/core/FormControl';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
-import styled from 'styled-components';
+import styled, {css} from 'styled-components';
 import { COLOR } from '../../styles';
 import { PreviewListItem } from '../viewerGui/components/previewListItem/previewListItem.component';
 import { ViewerPanelContent } from '../viewerGui/components/viewerPanel/viewerPanel.styles';
@@ -32,10 +32,18 @@ export const Container = styled.div`
 	flex-direction: column;
 `;
 
+const boardContainerOffsetStyles = css<{offset: number}>`
+	height: ${({offset}) => offset && `calc(100% - ${50 + offset}px)`}
+`;
+
+const boardContainerDefaultStyles = css`
+	height: calc(100% - 50px);
+`;
+
 export const BoardContainer = styled.div<{offset: number}>`
-	height: ${({offset}) => offset ? `calc(100% - ${50 + offset}px)` : 'calc(100% - 50px)'};
 	box-sizing: border-box;
 	border-top: 1px solid ${COLOR.BLACK_6};
+	${({offset}) => offset ? boardContainerOffsetStyles : boardContainerDefaultStyles};
 
 	> div {
 		height: 100%;
