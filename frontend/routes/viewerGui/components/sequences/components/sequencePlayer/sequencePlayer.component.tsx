@@ -188,8 +188,8 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 			this.setValue(getDateByStep(value, stepScale, stepInterval * direction));
 		} else {
 			const { frames } = this.props;
-			const { state } = getSelectedFrame(frames, value);
-			const index = findIndex(frames, (f) => f.state === state);
+			const currentFrame = getSelectedFrame(frames, value);
+			const index = findIndex(frames, (f) => f === currentFrame);
 			const newValue = frames[index + stepInterval * direction]?.dateTime;
 			if (newValue) {
 				this.setValue(newValue);
