@@ -22,7 +22,9 @@ import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import Dropzone from 'react-dropzone';
 import styled from 'styled-components';
+
 import { COLOR } from '../../styles';
+import { TextField as TextFieldComponent } from '../components/textField';
 
 export const FormContainer = styled(Grid)`
 	padding: 24px;
@@ -69,6 +71,12 @@ export const DeleteButton = styled(Button)`
 `;
 
 export const StyledTextField = styled(TextField)``;
+
+export const StyledCopyableTextField = styled(TextFieldComponent).attrs({
+	withCopyButton: true,
+})`
+	width: 100%;
+`;
 
 export const FieldsRow = styled(Grid)`
 	${StyledTextField} {
