@@ -34,8 +34,7 @@ import { filtersValuesMap as issuesFilters, getHeaderMenuItems as getIssueMenuIt
 import { renderWhenTrue } from '../../helpers/rendering';
 import { filtersValuesMap as risksFilters, getHeaderMenuItems as getRisksMenuItems  } from '../../helpers/risks';
 import {
-	FILTERS_COMPONENT_HEIGHT,
-	ISSUE_FILTER_PROPS, ISSUE_FILTER_VALUES, RISK_FILTER_PROPS, RISK_FILTER_VALUES, SEARCH_INPUT_HEIGHT
+	ISSUE_FILTER_PROPS, ISSUE_FILTER_VALUES, RISK_FILTER_PROPS, RISK_FILTER_VALUES
 } from '../../modules/board/board.constants';
 import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
 
@@ -157,7 +156,9 @@ const IssueBoardCard = ({ metadata, onClick }: any) => (
 
 export function Board(props: IProps) {
 	const boardRef = useRef(null);
-	const [filtersOpen, setFiltersOpen] = useState(false);
+	const [filtersOpen, setFiltersOpen] = useState(null);
+	const [filtersHeight, setFiltersHeight] = useState(0);
+	const filterPanel = useRef<HTMLDivElement>(null);
 	const { type, teamspace, project, modelId } = useParams();
 	const projectParam = `${project ? `/${project}` : ''}`;
 	const modelParam = `${modelId ? `/${modelId}` : ''}`;
@@ -216,6 +217,11 @@ export function Board(props: IProps) {
 			resetRisks();
 		};
 	}, []);
+
+	useEffect(
+		() => setFiltersHeight(filterPanel?.current?.clientHeight || 0),
+		[filtersOpen, props.selectedIssueFilters.length, props.searchEnabled]
+	);
 
 	const hasViewerPermissions = isViewer(props.modelSettings.permissions);
 
@@ -422,27 +428,21 @@ export function Board(props: IProps) {
 		Card:  isIssuesBoard ? IssueBoardCard : RiskBoardCard
 	};
 
-	const renderBoard = renderWhenTrue(() => {
-		const searchOffset = props.searchEnabled ? SEARCH_INPUT_HEIGHT : 0;
-		const filterOffset = props.selectedIssueFilters.length ? FILTERS_COMPONENT_HEIGHT : 0;
-		const openSearchInFilters = filtersOpen ? SEARCH_INPUT_HEIGHT : 0;
-
-		return (
-			<BoardContainer offset={searchOffset + filterOffset - openSearchInFilters}>
-				<div ref={boardRef}>
-					<TrelloBoard
-						data={boardData}
-						hideCardDeleteIcon
-						handleDragEnd={handleCardDrop}
-						onCardClick={handleOpenDialog}
-						onCardMoveAcrossLanes={handleCardMove}
-						components={components}
-						cardDraggable
-					/>
-				</div>
-			</BoardContainer>
-		);
-	});
+	const renderBoard = renderWhenTrue(() => (
+		<BoardContainer offset={filtersHeight}>
+			<div ref={boardRef}>
+				<TrelloBoard
+					data={boardData}
+					hideCardDeleteIcon
+					handleDragEnd={handleCardDrop}
+					onCardClick={handleOpenDialog}
+					onCardMoveAcrossLanes={handleCardMove}
+					components={components}
+					cardDraggable
+				/>
+			</div>
+		</BoardContainer>
+	));
 
 	const renderLoader = renderWhenTrue(() => (
 		<LoaderContainer>
@@ -529,6 +529,7 @@ export function Board(props: IProps) {
 				filters={filters}
 				selectedFilters={selectedFilters}
 				setFiltersOpen={setFiltersOpen}
+				containerRef={filterPanel}
 			/>
 		);
 	});
