@@ -21,8 +21,13 @@ import { getState } from '../store';
 import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds } from '../tree';
 
 export const getSelectedFrame = (frames, endingDate) => {
+	const index = getSelectedFrameIndex(frames, endingDate);
+	return index === null ? null : frames[index];
+};
+
+export const getSelectedFrameIndex = (frames, endingDate) => {
 	if (!frames.length) {
-		return {};
+		return null;
 	}
 
 	let leftMargin = 0;
@@ -39,14 +44,14 @@ export const getSelectedFrame = (frames, endingDate) => {
 	}
 
 	if (frames[rightMargin].dateTime <= endingDate) {
-		return { frame: frames[rightMargin], index: rightMargin };
+		return rightMargin;
 	}
 
 	if ( frames[leftMargin].dateTime <= endingDate) {
-		return { frame: frames[leftMargin], index: leftMargin };
+		return leftMargin;
 	}
 
-	return {};
+	return null;
 };
 
 export const getDateByStep = (date, stepScale, step) => {

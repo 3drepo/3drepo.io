@@ -20,7 +20,7 @@ import { createSelector } from 'reselect';
 import { STEP_SCALE } from '../../constants/sequences';
 import { GLToHexColor } from '../../helpers/colors';
 import { selectSettings } from '../model';
-import { getDateByStep, getSelectedFrame } from './sequences.helper';
+import { getDateByStep, getSelectedFrame, getSelectedFrameIndex } from './sequences.helper';
 
 export const selectSequencesDomain = (state) => (state.sequences);
 
@@ -138,27 +138,27 @@ export const selectNextKeyFramesDates =  createSelector(
 		(startingDate, scale, interval, maxDate, frames) => {
 			const keyFrames = [];
 			keyFrames[0] = new Date(Math.min(maxDate, (startingDate || new Date(0)).valueOf()));
-			const frameInfo = getSelectedFrame(frames, keyFrames[0]);
+			const frameIndex = getSelectedFrameIndex(frames, keyFrames[0]);
 
 			if (scale !== STEP_SCALE.FRAME) {
-				let lastFrame = frameInfo.frame;
+				let lastFrame = frames[frameIndex];
 				let nextFrame = null;
 				let date = getDateByStep(startingDate, scale, interval);
 				maxDate = new Date(maxDate);
 				for (let i = 0; i < 3 ; i++) {
 					date = getDateByStep(date, scale, interval);
-					nextFrame = getSelectedFrame(frames, date).frame;
+					nextFrame = getSelectedFrame(frames, date);
 
 					while (lastFrame === nextFrame && date <= maxDate) {
 						date = getDateByStep(date, scale, interval);
-						nextFrame = getSelectedFrame(frames, date).frame;
+						nextFrame = getSelectedFrame(frames, date);
 					}
 
 					keyFrames.push(date);
 					lastFrame = nextFrame;
 				}
 			} else {
-				for (let i = frameInfo.index; i < frameInfo.index + 3 && i < frames.length; ++i) {
+				for (let i = frameIndex; i < frameIndex + 3 && i < frames.length; ++i) {
 					keyFrames.push(new Date(frames[i].dateTime));
 				}
 
@@ -177,13 +177,13 @@ export const selectSelectedEndingDate = createSelector(
 
 export const selectLastSelectedFrame = createSelector(
 	selectFrames, selectSequencesDomain, (frames, state) => {
-		return state.lastSelectedDate ? getSelectedFrame(frames, state.lastSelectedDate).frame : undefined;
+		return state.lastSelectedDate ? getSelectedFrame(frames, state.lastSelectedDate) : undefined;
 	}
 );
 
 export const selectSelectedFrame = createSelector(
-	selectFrames, selectSelectedStartingDate, ( frames, startingDate ) => getSelectedFrame(frames, startingDate).frame
-	);
+	selectFrames, selectSelectedStartingDate, getSelectedFrame
+);
 
 export const selectSelectedStateId = createSelector(
 	selectSelectedFrame, (frame) =>  (frame || {}).state
