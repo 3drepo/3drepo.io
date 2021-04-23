@@ -291,7 +291,7 @@ describe("Sequences", function () {
 		});
 
 		it("name and frame on read only sequence should fail", function(done) {
-			const update = { frames: [], name: "another name"};
+			const update = { frames: [customGoldenData.frames[0]], name: "another name"};
 			agent.patch(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
 				.send(update)
 				.expect(400, function(err, res) {
@@ -301,7 +301,7 @@ describe("Sequences", function () {
 		});
 
 		it("anything but the name on read only sequence should fail", function(done) {
-			const update = { frames: []};
+			const update = { frames: [customGoldenData.frames[0]]};
 			agent.patch(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
 				.send(update)
 				.expect(400, (err, res) => {
@@ -328,7 +328,7 @@ describe("Sequences", function () {
 		});
 
 		it("name and frame on custom sequence should succeed", function(done) {
-			const update = { frames: [], name: "another name"};
+			const update = { frames: [customGoldenData.frames[0]], name: "another name"};
 			async.series([
 				(done) => {
 					agent.patch(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`)
@@ -502,6 +502,17 @@ describe("Sequences", function () {
 					});
 				}
 			], done);
+		});
+
+		it("empty frames on custom sequence should fail", function(done) {
+			const update = { frames: [] };
+
+			agent.patch(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`)
+				.send(update)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					return done(err);
+				});
 		});
 
 		it("frame with transformation on custom sequence should fail", function(done) {

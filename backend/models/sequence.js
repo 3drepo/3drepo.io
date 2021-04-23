@@ -39,13 +39,13 @@ const sequenceSchema = yup.object().shape({
 	startDate: yup.date().required(),
 	endDate: yup.date().required(),
 	rev_id: yup.object(),
-	frames: yup.array().required()
+	frames: yup.array().min(1).required()
 }).noUnknown();
 
 const sequenceEditSchema = yup.object().shape({
 	name: yup.string(),
 	revId: yup.string(),
-	frames: yup.array()
+	frames: yup.array().min(1)
 }).noUnknown();
 
 const clean = (toClean, keys) => {
