@@ -16,6 +16,7 @@
  */
 
 "use strict";
+const C = require("../constants");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
@@ -32,8 +33,8 @@ const keyValueSchema = yup.object().shape({
 
 const activityEditSchema = yup.object().shape({
 	name: yup.string(),
-	startDate: yup.number(),
-	endDate: yup.number(),
+	startDate: yup.number().min(C.MIN_MS_TIMESTAMP),
+	endDate: yup.number().min(C.MIN_MS_TIMESTAMP),
 	parent: yup.string(),
 	resources: yup.object(),
 	data: yup.array().of(keyValueSchema)
@@ -42,8 +43,8 @@ const activityEditSchema = yup.object().shape({
 const activitySchema = yup.object().shape({
 	_id: yup.object(),
 	name: yup.string().required(),
-	startDate: yup.number().required(),
-	endDate: yup.number().required(),
+	startDate: yup.number().min(C.MIN_MS_TIMESTAMP).required(),
+	endDate: yup.number().min(C.MIN_MS_TIMESTAMP).required(),
 	parent: yup.object(),
 	resources: yup.object(),
 	data: yup.array().of(keyValueSchema),

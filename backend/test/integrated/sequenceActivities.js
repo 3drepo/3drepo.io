@@ -257,7 +257,27 @@ describe("Sequences", function () {
 			await agent.post(`/${username}/${model}/sequences/${sequenceId}/activities?key=${noPermissionApiKey}`)
 			   .send(createPayload(activity))
 			   .expect(401);
-	   });
+		});
+
+		it("should fail if startDate in seconds", async() => {
+			const activityWithInvalidStart = {...activity, startDate: 1484045259};
+
+			const { body } = await agent.post(`/${username}/${model}/sequences/${sequenceId}/activities`)
+				.send(createPayload(activityWithInvalidStart))
+				.expect(responseCodes.INVALID_ARGUMENTS.status);
+
+			expect(body.value).to.be.equal(responseCodes.INVALID_ARGUMENTS.value);
+		});
+
+		it("should fail if endDate in seconds", async() => {
+			const activityWithInvalidEnd = {...activity, endDate: 1492795390};
+
+			const { body } = await agent.post(`/${username}/${model}/sequences/${sequenceId}/activities`)
+				.send(createPayload(activityWithInvalidEnd))
+				.expect(responseCodes.INVALID_ARGUMENTS.status);
+
+			expect(body.value).to.be.equal(responseCodes.INVALID_ARGUMENTS.value);
+		});
 
 		it("should be created succesfully", async() => {
 			const { body } = await agent.post(`/${username}/${model}/sequences/${sequenceId}/activities`)

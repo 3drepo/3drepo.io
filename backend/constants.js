@@ -532,6 +532,12 @@
 
 	define("PROJECT_DEFAULT_ID", "default");
 
+	// min timestamp set to 100000000000
+	// this is assumption for smallest millisecond timestamp
+	// making this assumption because this is what https://www.epochconverter.com/ does
+	// 100000000000 = GMT: Saturday, 3 March 1973 09:46:40
+	define("MIN_MS_TIMESTAMP", 100000000000);
+
 	// tickets
 	define("LONG_TEXT_CHAR_LIM", 660);
 
