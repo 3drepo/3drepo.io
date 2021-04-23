@@ -19,7 +19,7 @@ import Fab from '@material-ui/core/Fab';
 import FormControlBase from '@material-ui/core/FormControl';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
-import styled, {css} from 'styled-components';
+import styled from 'styled-components';
 import { COLOR } from '../../styles';
 import { PreviewListItem } from '../viewerGui/components/previewListItem/previewListItem.component';
 import { ViewerPanelContent } from '../viewerGui/components/viewerPanel/viewerPanel.styles';
