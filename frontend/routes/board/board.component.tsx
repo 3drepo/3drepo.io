@@ -218,10 +218,9 @@ export function Board(props: IProps) {
 		};
 	}, []);
 
-	useEffect(
-		() => setFiltersHeight(filterPanel?.current?.clientHeight || 0),
-		[filtersOpen, props.selectedIssueFilters.length, props.searchEnabled]
-	);
+	useEffect(() => {
+		setFiltersHeight(filterPanel?.current?.clientHeight || 0);
+	}, [filtersOpen, props.selectedIssueFilters.length, props.searchEnabled]);
 
 	const hasViewerPermissions = isViewer(props.modelSettings.permissions);
 
