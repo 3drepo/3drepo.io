@@ -220,6 +220,9 @@ export function* showSequenceDate({ date }) {
 
 	// 2 - if there is no sequences loaded, load them
 	let sequences = yield select(selectSequences);
+
+	// If there are is already a selected sequence with a date and frames, this will cause it to crash
+	// because it wipes out the frames definition.
 	if (!sequences) {
 		yield put(SequencesActions.fetchSequenceList());
 		yield take(SequencesTypes.FETCH_SEQUENCE_LIST_SUCCESS);
