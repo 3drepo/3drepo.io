@@ -17,9 +17,11 @@ export interface IDataCache {
 export class DataCacheService {
 	private readonly name: string;
 	private db: IDBPDatabase;
+	private cacheReady: Promise<any>;
 
 	constructor(name: string) {
 		this.name = name;
+		this.cacheReady = this.create([STORE_NAME.FRAMES]);
 	}
 
 	public async create(storeNames: string[]) {
@@ -40,10 +42,12 @@ export class DataCacheService {
 	}
 
 	public async getValue(storeName: string, key: string) {
-		return await this.db.get(storeName, key);
+		await this.cacheReady;
+		return this.db.get(storeName, key);
 	}
 
 	public async putValue(storeName: string, key: string, value: object) {
+		await this.cacheReady;
 		return await this.db.put(storeName, value, key);
 	}
 

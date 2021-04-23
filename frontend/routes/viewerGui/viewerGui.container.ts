@@ -28,7 +28,6 @@ import { selectIsPresentationActive, PresentationActions } from '../../modules/p
 import { RisksActions } from '../../modules/risks';
 import { selectQueryParams } from '../../modules/router/router.selectors';
 import { TreeActions } from '../../modules/tree';
-import { selectCacheSetting } from '../../modules/viewer';
 import {
 	selectDisabledPanelButtons, selectDraggablePanels, selectIsFocusMode, selectLeftPanels, selectRightPanels,
 	ViewerGuiActions,
@@ -48,7 +47,6 @@ const mapStateToProps = createStructuredSelector({
 	isFocusMode: selectIsFocusMode,
 	disabledPanelButtons: selectDisabledPanelButtons,
 	isPresentationActive: selectIsPresentationActive,
-	cacheEnabled: selectCacheSetting,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

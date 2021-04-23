@@ -30,7 +30,7 @@ import { VIEWER_PANELS } from '../../../../../../constants/viewerGui';
 import { isDateOutsideRange, MILLI_PER_HOUR } from '../../../../../../helpers/dateTime';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { IFrame } from '../../../../../../modules/sequences';
-import { getDateByStep, getSelectedFrame } from '../../../../../../modules/sequences/sequences.helper';
+import { getDateByStep, getSelectedFrameIndex } from '../../../../../../modules/sequences/sequences.helper';
 import { LONG_DATE_TIME_FORMAT_NO_MINUTES } from '../../../../../../services/formatting/formatDate';
 import {
 	DatePicker,
@@ -74,6 +74,7 @@ interface IState {
 }
 
 export class SequencePlayer extends React.PureComponent<IProps, IState> {
+	private playInterval = 1000;
 	public state: IState = {
 		value: null,
 		playing: false,
@@ -152,7 +153,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 			setTimeout(() => {
 				this.nextStep();
 				this.play();
-			}, 1000);
+			}, this.playInterval);
 		}
 	}
 
@@ -188,9 +189,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 			this.setValue(getDateByStep(value, stepScale, stepInterval * direction));
 		} else {
 			const { frames } = this.props;
-			const currentFrame = getSelectedFrame(frames, value);
-			// FIXME: once #2562 is merged in, you can get the frame index from getSelectedFrame, hence next line is redundant.
-			const index = findIndex(frames, (f) => f === currentFrame);
+			const index = getSelectedFrameIndex(frames, value);
 			const newValue = frames[index + stepInterval * direction]?.dateTime;
 			if (newValue) {
 				this.setValue(newValue);
@@ -217,7 +216,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 			}
 
 			this.nextStep();
-		}, 1000) as unknown) as number;
+		}, this.playInterval) as unknown) as number;
 
 		this.setState({
 			playing: true,
