@@ -111,7 +111,6 @@ export function* fetchActivitiesDefinitions({ sequenceId }) {
 export function* fetchFrame({ date }) {
 	try {
 		const teamspace = yield select(selectCurrentModelTeamspace);
-		const revision = yield select(selectCurrentRevisionId);
 		const model = yield select(selectSequenceModel);
 		const sequenceId =  yield select(selectSelectedSequenceId);
 		const loadedStates = yield select(selectStateDefinitions);
@@ -129,7 +128,7 @@ export function* fetchFrame({ date }) {
 				// because with yield it would sometimes stop there forever even though the promise resolved
 				cachedDataPromise.then((cachedData) => {
 					const fetchPromise = cachedData ? Promise.resolve({data: cachedData})
-						: API.getSequenceState(teamspace, model, revision, sequenceId, stateId);
+						: API.getSequenceState(teamspace, model, sequenceId, stateId);
 					fetchPromise.then((response) => {
 						const selectedDate = selectSelectedDate(getState());
 						if (selectedDate.valueOf() === date.valueOf()) {

@@ -134,7 +134,7 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 			selectedDate,
 			frames,
 			showViewpoint,
-			deselectedViewsAndLeaveClipping
+			deselectViewsAndLeaveClipping
 		} = this.props;
 		const { viewpoint } = getSelectedFrame(frames, selectedDate);
 
