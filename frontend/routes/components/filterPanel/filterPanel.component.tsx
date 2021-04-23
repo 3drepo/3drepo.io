@@ -103,7 +103,6 @@ interface IProps {
 	onChange: (selectedFilters) => void;
 	onDataTypeChange?: (selectedDataTypes) => void;
 	setFiltersOpen?: Dispatch<SetStateAction<boolean>>;
-	containerRef?: null | React.Ref<HTMLDivElement>;
 }
 
 interface IState {
@@ -566,11 +565,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		const { hideMenu, filters } = this.props;
 
 		return (
-			<Container
-				ref={this.props.containerRef}
-				filtersOpen={selectedFilters.length && filtersOpen}
-				className={this.props.className}
-			>
+			<Container filtersOpen={selectedFilters.length && filtersOpen} className={this.props.className}>
 				{this.renderSelectedFilters()}
 
 				<InputContainer menuHidden={hideMenu}>

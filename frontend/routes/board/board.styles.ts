@@ -32,18 +32,10 @@ export const Container = styled.div`
 	flex-direction: column;
 `;
 
-const boardContainerOffsetStyles = css<{offset: number}>`
-	height: ${({offset}) => offset && `calc(100% - ${50 + offset}px)`}
-`;
-
-const boardContainerDefaultStyles = css`
-	height: calc(100% - 50px);
-`;
-
 export const BoardContainer = styled.div<{offset: number}>`
 	box-sizing: border-box;
 	border-top: 1px solid ${COLOR.BLACK_6};
-	${({offset}) => offset ? boardContainerOffsetStyles : boardContainerDefaultStyles};
+	height: ${({offset}) => offset && `calc(100% - ${offset}px)`};
 
 	> div {
 		height: 100%;

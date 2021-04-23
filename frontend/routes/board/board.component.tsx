@@ -529,7 +529,6 @@ export function Board(props: IProps) {
 				filters={filters}
 				selectedFilters={selectedFilters}
 				setFiltersOpen={setFiltersOpen}
-				containerRef={filterPanel}
 			/>
 		);
 	});
@@ -539,18 +538,20 @@ export function Board(props: IProps) {
 	return (
 		<Panel {...PANEL_PROPS} title={BoardTitle}>
 			<Container>
-				{renderSearchPanel(props.searchEnabled)}
-				<Config>
-					<DataConfig>
-						{renderTeamspacesSelect()}
-						{renderProjectsSelect()}
-						{renderModelsSelect()}
-					</DataConfig>
-					<ViewConfig>
-						{renderFilters()}
-						{renderAddButton()}
-					</ViewConfig>
-				</Config>
+				<div ref={filterPanel}>
+					{renderSearchPanel(props.searchEnabled)}
+					<Config>
+						<DataConfig>
+							{renderTeamspacesSelect()}
+							{renderProjectsSelect()}
+							{renderModelsSelect()}
+						</DataConfig>
+						<ViewConfig>
+							{renderFilters()}
+							{renderAddButton()}
+						</ViewConfig>
+					</Config>
+				</div>
 				{renderLoader(props.isPending)}
 				{renderBoard(!props.isPending && Boolean(props.lanes.length) && modelId && project)}
 				{renderNoData(!props.isPending && !Boolean(props.lanes.length) && teamspace && project && modelId)}
