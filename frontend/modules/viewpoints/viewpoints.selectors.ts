@@ -65,6 +65,10 @@ export const selectSelectedViewpoint = createSelector(
 	selectViewpointsDomain, (state) => state.selectedViewpoint
 );
 
+export const selectIsLoadingViewpoint = createSelector(
+	selectViewpointsDomain, (state) => !Boolean(state.selectedViewpoint)
+);
+
 export const selectTransformations = createSelector(
 	selectSelectedViewpoint, (viewpoint) => {
 		if (!Boolean(viewpoint?.transformation_groups?.length)) {

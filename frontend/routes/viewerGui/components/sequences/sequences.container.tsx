@@ -23,12 +23,12 @@ import { createStructuredSelector } from 'reselect';
 import { ActivitiesActions } from '../../../../modules/activities';
 import { LegendActions } from '../../../../modules/legend';
 import {
-	selectActivitiesPending, selectCurrentActivities, selectEndDate, selectFrames, selectIsLoadingFrame,
+	selectActivitiesPending, selectCurrentActivities, selectEndDate, selectFrames, selectIsLoadingState,
 	selectSelectedEndingDate, selectSelectedFrameColors, selectSelectedSequence, selectSelectedStartingDate,
 	selectSequences, selectStartDate, selectStepInterval, selectStepScale, SequencesActions,
 } from '../../../../modules/sequences';
 import { selectDraggablePanels, selectRightPanels, ViewerGuiActions } from '../../../../modules/viewerGui';
-import { ViewpointsActions } from '../../../../modules/viewpoints';
+import { ViewpointsActions, selectIsLoadingViewpoint } from '../../../../modules/viewpoints';
 import { Sequences } from './sequences.component';
 
 const mapStateToProps = createStructuredSelector({
@@ -42,7 +42,8 @@ const mapStateToProps = createStructuredSelector({
 	stepInterval: selectStepInterval,
 	stepScale: selectStepScale,
 	currentTasks: selectCurrentActivities,
-	loadingFrame: selectIsLoadingFrame,
+	loadingState: selectIsLoadingState,
+	loadingViewpoint: selectIsLoadingViewpoint,
 	selectedSequence: selectSelectedSequence,
 	rightPanels: selectRightPanels,
 	draggablePanels: selectDraggablePanels,
