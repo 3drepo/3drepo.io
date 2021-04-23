@@ -23,7 +23,7 @@ import { createStructuredSelector } from 'reselect';
 import { ActivitiesActions } from '../../../../modules/activities';
 import { LegendActions } from '../../../../modules/legend';
 import {
-	selectActivitiesPending, selectCurrentActivities, selectEndDate, selectFrames, selectIsLoadingState,
+	selectActivitiesPending, selectCurrentActivities, selectEndDate, selectFrames, selectIsLoadingFrameState,
 	selectSelectedEndingDate, selectSelectedFrameColors, selectSelectedSequence, selectSelectedStartingDate,
 	selectSequences, selectStartDate, selectStepInterval, selectStepScale, SequencesActions,
 } from '../../../../modules/sequences';
@@ -42,7 +42,7 @@ const mapStateToProps = createStructuredSelector({
 	stepInterval: selectStepInterval,
 	stepScale: selectStepScale,
 	currentTasks: selectCurrentActivities,
-	loadingState: selectIsLoadingState,
+	loadingFrameState: selectIsLoadingFrameState,
 	loadingViewpoint: selectIsLoadingViewpoint,
 	selectedSequence: selectSelectedSequence,
 	rightPanels: selectRightPanels,

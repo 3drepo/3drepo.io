@@ -188,7 +188,7 @@ export const selectLastSelectedStateId = createSelector(
 	selectLastSelectedFrame, (frame) =>  (frame || {}).state
 );
 
-export const selectIsLoadingState = createSelector(
+export const selectIsLoadingFrameState = createSelector(
 	selectSelectedFrame, selectSelectedStateId, selectStateDefinitions, (frame, stateId, stateDefinitions) => {
 		return !(frame || {}).hasOwnProperty('viewpoint') && !(stateDefinitions || {}).hasOwnProperty(stateId);
 	}

@@ -49,7 +49,7 @@ interface IProps {
 	stepInterval: number;
 	stepScale: STEP_SCALE;
 	currentTasks: any[];
-	loadingState: boolean;
+	loadingFrameState: boolean;
 	loadingViewpoint: boolean;
 	selectedSequence: any;
 	rightPanels: string[];
@@ -69,7 +69,7 @@ const da =  new Date();
 
 const SequenceDetails = ({
 	startDate, endDate, selectedDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
-	setStepScale, currentTasks, loadingState, loadingViewpoint, rightPanels, toggleActivitiesPanel,
+	setStepScale, currentTasks, loadingFrameState, loadingViewpoint, rightPanels, toggleActivitiesPanel,
 	fetchActivityDetails, onPlayStarted, frames, isActivitiesPending, toggleLegend, draggablePanels
 }) => (
 		<>
@@ -84,7 +84,7 @@ const SequenceDetails = ({
 				onChange={setSelectedDate}
 				onChangeStepScale={setStepScale}
 				onChangeStepInterval={setStepInterval}
-				loadingFrame={loadingState || loadingViewpoint}
+				loadingFrame={loadingFrameState || loadingViewpoint}
 				rightPanels={rightPanels}
 				toggleActivitiesPanel={toggleActivitiesPanel}
 				onPlayStarted={onPlayStarted}
