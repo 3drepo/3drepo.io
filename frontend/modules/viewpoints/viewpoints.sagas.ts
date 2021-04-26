@@ -244,7 +244,7 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 		yield Viewer.updateClippingPlanes( clippingPlanes, teamspace, modelId);
 
 		yield waitForTreeToBeReady();
-		yield prepareGroupsIfNecessary(teamspace, modelId, view.viewpoint);
+		yield fetchViewpointGroups({teamspace, modelId, view});
 
 		if (viewpoint?.override_groups) {
 			yield put(GroupsActions.clearColorOverrides());
@@ -291,14 +291,19 @@ export function * deselectViewsAndLeaveClipping() {
 	}
 }
 
-export function* prepareGroupsIfNecessary( teamspace, modelId, viewpoint) {
+export function* fetchViewpointGroups( {teamspace, modelId, view}) {
 	try  {
 		const revision = yield select(selectCurrentRevisionId);
 		const viewpointsGroups = yield select(selectViewpointsGroups);
 
-		if (!viewpoint) {
+		if (!view.viewpoint) {
 			return;
 		}
+
+		// console.log("fetching groups for viewpoint:");
+		// console.log(view.viewpoint);
+
+		const viewpoint = view.viewpoint;
 
 		const groupsProperties = ['override_group_ids', 'transformation_group_ids',
 		'highlighted_group_id', 'hidden_group_id'];
@@ -402,4 +407,5 @@ export default function* ViewpointsSaga() {
 	yield takeLatest(ViewpointsTypes.DESELECT_VIEWS_AND_LEAVE_CLIPPING, deselectViewsAndLeaveClipping);
 	yield takeLatest(ViewpointsTypes.CACHE_GROUPS_FROM_VIEWPOINT, cacheGroupsFromViewpoint);
 	yield takeLatest(ViewpointsTypes.SHOW_PRESET, showPreset);
+	yield takeLatest(ViewpointsTypes.FETCH_VIEWPOINT_GROUPS, fetchViewpointGroups);
 }

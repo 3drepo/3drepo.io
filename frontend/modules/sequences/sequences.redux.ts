@@ -34,7 +34,7 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	setSelectedDateSuccess: ['date'],
 	setLastSelectedDateSuccess: ['date'],
 	fetchFrame: ['date'],
-	fetchSelectedFrame: [],
+	prefetchFrames: [],
 	setStateDefinition: ['stateId', 'stateDefinition'],
 	setStepInterval: ['stepInterval'],
 	setStepScale: ['stepScale'],

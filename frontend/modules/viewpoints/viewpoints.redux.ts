@@ -48,6 +48,7 @@ export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createAct
 	cacheGroupsFromViewpoint: ['viewpoint', 'groupsData'],
 	showPreset: ['preset'],
 	toggleSortOrder: [],
+	fetchViewpointGroups: ['teamspace', 'modelId', 'view']
 }, { prefix: 'VIEWPOINTS/' });
 
 export interface IViewpointsComponentState {

@@ -55,7 +55,6 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setStepInterval: SequencesActions.setStepInterval,
 	setStepScale: SequencesActions.setStepScale,
 	setSelectedSequence: SequencesActions.setSelectedSequence,
-	fetchSelectedFrame: SequencesActions.fetchSelectedFrame,
 	toggleActivitiesPanel: ActivitiesActions.toggleActivitiesPanel,
 	toggleLegend: LegendActions.togglePanel,
 	resetLegendPanel: LegendActions.resetPanel,
@@ -63,7 +62,6 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setPanelVisibility: ViewerGuiActions.setPanelVisibility,
 	deselectViewsAndLeaveClipping: ViewpointsActions.deselectViewsAndLeaveClipping,
 	setActiveViewpoint: ViewpointsActions.setActiveViewpoint,
-	showViewpoint: ViewpointsActions.showViewpoint,
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Sequences));

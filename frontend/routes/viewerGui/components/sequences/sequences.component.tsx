@@ -36,7 +36,6 @@ import {
 interface IProps {
 	sequences: any;
 	setSelectedDate: (date: Date) => void;
-	fetchSelectedFrame: () => void;
 	setStepInterval: (interval: number) => void;
 	setStepScale: (scale: STEP_SCALE) => void;
 	setSelectedSequence: (id: string) => void;
@@ -139,9 +138,7 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 		} = this.props;
 		const { viewpoint } = getSelectedFrame(frames, selectedDate);
 
-		if (viewpoint) {
-			showViewpoint(selectedSequence.teamspace, selectedSequence.model, { viewpoint });
-		} else {
+		if (!viewpoint) {
 			deselectViewsAndLeaveClipping();
 		}
 	}

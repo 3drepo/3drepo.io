@@ -34,8 +34,8 @@ import { selectLeftPanels, ViewerGuiActions } from '../viewerGui';
 import { ViewpointsActions } from '../viewpoints';
 import { getSelectedFrame } from './sequences.helper';
 import {
-	selectActivitiesDefinitions, selectFrames, selectNextKeyFramesDates, selectSelectedDate, selectSelectedSequence,
-	selectSequences, selectSequenceModel,
+	selectActivitiesDefinitions, selectFrames, selectNextKeyFramesDates, selectSelectedDate, selectSelectedFrameViewpoint,
+	selectSelectedSequence, selectSequences, selectSequenceModel,
 } from './sequences.selectors';
 
 function* getSequenceModel(sequenceId) {
@@ -151,8 +151,11 @@ export function* fetchFrame({ date }) {
 			}
 		} else {
 			const selectedDate = yield select(selectSelectedDate);
-			if (selectedDate.valueOf() === date.valueOf()) {
-				yield put(ViewpointsActions.showViewpoint(teamspace, model, { viewpoint }));
+
+			// This is to avoid fetching the groups twice.
+			// When showpoint is called in showFrameViewpoint it fetches the groups
+			if (selectedDate.valueOf() !== date.valueOf()) {
+				yield put(ViewpointsActions.fetchViewpointGroups(teamspace, model, { viewpoint }));
 			}
 		}
 	} catch (error) {
@@ -160,7 +163,16 @@ export function* fetchFrame({ date }) {
 	}
 }
 
-function * fetchSelectedFrame() {
+function * showFrameViewpoint() {
+	const teamspace = yield select(selectCurrentModelTeamspace);
+	const model = yield select(selectSequenceModel);
+	const viewpoint = yield select(selectSelectedFrameViewpoint);
+	if (viewpoint) {
+		yield put(ViewpointsActions.showViewpoint(teamspace, model, { viewpoint }));
+	}
+}
+
+function * prefetchFrames() {
 	const keyframes = yield select(selectNextKeyFramesDates);
 	yield all(keyframes.map((d) => put(SequencesActions.fetchFrame(d))));
 }
@@ -171,7 +183,8 @@ export function* setSelectedDate({ date }) {
 
 		if (selectedSequence) {
 			yield put(SequencesActions.setSelectedDateSuccess(date));
-			yield put(SequencesActions.fetchSelectedFrame());
+			yield put(SequencesActions.prefetchFrames());
+			yield showFrameViewpoint();
 		}
 
 	} catch (error) {
@@ -259,7 +272,7 @@ export default function* SequencesSaga() {
 	yield takeLatest(SequencesTypes.RESTORE_MODEL_DEFAULT_VISIBILITY, restoreModelDefaultVisibility);
 	yield takeLatest(SequencesTypes.FETCH_ACTIVITIES_DEFINITIONS, fetchActivitiesDefinitions);
 	yield takeLatest(SequencesTypes.SET_SELECTED_SEQUENCE, setSelectedSequence);
-	yield takeLatest(SequencesTypes.FETCH_SELECTED_FRAME, fetchSelectedFrame);
+	yield takeLatest(SequencesTypes.PREFETCH_FRAMES, prefetchFrames);
 	yield takeLatest(SequencesTypes.SHOW_SEQUENCE_DATE, showSequenceDate);
 	yield takeLatest(SequencesTypes.HANDLE_TRANSPARENCIES_VISIBILITY, handleTransparenciesVisibility);
 }

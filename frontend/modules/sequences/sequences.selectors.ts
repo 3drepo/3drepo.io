@@ -184,6 +184,10 @@ export const selectSelectedStateId = createSelector(
 	selectSelectedFrame, (frame) =>  (frame || {}).state
 );
 
+export const selectSelectedFrameViewpoint = createSelector(
+	selectSelectedFrame,  (frame) =>  (frame || {}).viewpoint
+);
+
 export const selectLastSelectedStateId = createSelector(
 	selectLastSelectedFrame, (frame) =>  (frame || {}).state
 );
