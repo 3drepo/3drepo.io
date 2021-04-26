@@ -15,18 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { head } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { GROUPS_TYPES } from '../../constants/groups';
-import { splitString, MAX_URL_LENGTH} from '../../constants/requests';
 import { getRandomColor, hexToGLColor } from '../../helpers/colors';
 import { normalizeGroup, prepareGroup } from '../../helpers/groups';
 import { searchByFilters } from '../../helpers/searching';
 import { calculateTotalMeshes } from '../../helpers/tree';
 import * as API from '../../services/api';
-import { clientConfigService } from '../../services/clientConfig';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
@@ -164,27 +161,9 @@ function* toggleColorOverride({ groupId }) {
 	}
 }
 
-function* splitDeleteRequestsIfListIsToLong({ teamspace, modelId, groups }) {
-	try {
-		const firstPartOfRequest = `${head(clientConfigService.apiUrls.all)}/${teamspace}/${modelId}/groups/?ids=`;
-		const requestLength = `${firstPartOfRequest}${groups}`.length;
-
-		if (requestLength > MAX_URL_LENGTH) {
-			const groupsIdsChunks = splitString(groups, ',', MAX_URL_LENGTH - firstPartOfRequest.length);
-
-			yield all(groupsIdsChunks.map((groupIds) => API.deleteGroups(teamspace, modelId, groupIds)));
-		} else {
-			yield API.deleteGroups(teamspace, modelId, groups);
-		}
-
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('delete', 'groups', error));
-	}
-}
-
 function* deleteGroups({ teamspace, modelId, groups }) {
 	try {
-		yield put(GroupsActions.splitDeleteRequestsIfListIsToLong(teamspace, modelId, groups));
+		yield API.deleteGroups(teamspace, modelId, groups);
 
 		const groupsToDelete = groups.split(',');
 		const colorOverrides = yield select(selectColorOverrides);
@@ -443,7 +422,6 @@ export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.CLEAR_SELECTION_HIGHLIGHTS, clearSelectionHighlights);
 	yield takeLatest(GroupsTypes.TOGGLE_COLOR_OVERRIDE, toggleColorOverride);
 	yield takeLatest(GroupsTypes.DELETE_GROUPS, deleteGroups);
-	yield takeLatest(GroupsTypes.SPLIT_DELETE_REQUESTS_IF_LIST_IS_TO_LONG, splitDeleteRequestsIfListIsToLong);
 	yield takeLatest(GroupsTypes.ISOLATE_GROUP, isolateGroup);
 	yield takeLatest(GroupsTypes.DOWNLOAD_GROUPS, downloadGroups);
 	yield takeLatest(GroupsTypes.SHOW_DETAILS, showDetails);

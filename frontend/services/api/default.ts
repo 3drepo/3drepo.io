@@ -1,12 +1,13 @@
 import axios from 'axios';
-import { memoize } from 'lodash';
-import { clientConfigService } from '../clientConfig';
-
 import { push } from 'connected-react-router';
+import { memoize } from 'lodash';
+
+import { splitString, IDS_ARGUMENT_INDICATION, MAX_URL_LENGTH } from '../../constants/requests';
 import { ROUTES } from '../../constants/routes';
 import { AuthActions } from '../../modules/auth';
 import { DialogActions } from '../../modules/dialog';
 import { dispatch } from '../../modules/store';
+import { clientConfigService } from '../clientConfig';
 
 axios.defaults.withCredentials = true;
 
@@ -53,6 +54,18 @@ axios.interceptors.response.use(
 	}
 );
 
+const splitRequestIfNecessary = (request) => {
+	const requestLength = request.length;
+
+	if (requestLength < MAX_URL_LENGTH) { return [request]; }
+
+	const requestParts = request.split(IDS_ARGUMENT_INDICATION);
+	const chunksLimit = MAX_URL_LENGTH - IDS_ARGUMENT_INDICATION.length - requestParts[0].length;
+	const idsChunks = splitString(requestParts[1], chunksLimit);
+
+	return idsChunks.map((ids) => `${requestParts[0]}${IDS_ARGUMENT_INDICATION}${ids}`);
+};
+
 const getRequest = (url, ...options) => {
 	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.GET_API, url));
 	return axios.get(requestUrl, ...options);
@@ -70,7 +83,9 @@ const putRequest = (url, ...options) => {
 
 const deleteRequest = (url, data?) => {
 	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.POST_API, url));
-	return axios.delete(requestUrl, { data });
+	const requests = splitRequestIfNecessary(requestUrl);
+
+	return Promise.all(requests.map((request) => axios.delete(request, { data })));
 };
 
 const patchRequest = (url, ...options) => {
