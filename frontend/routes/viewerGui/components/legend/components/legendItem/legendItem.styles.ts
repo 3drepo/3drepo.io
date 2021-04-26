@@ -33,7 +33,7 @@ export const Container = styled.li`
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	height: 66px;
+	height: 43px;
 	box-sizing: border-box;
 	padding: 0 8px 0 18px;
 
@@ -49,7 +49,7 @@ export const StyledTextField = styled(TextField)`
 	}
 
 	${StyledMarkdownField} {
-		margin-top: 14px;
+		margin-top: 	px;
 	}
 
 	${StyledLinkableField} {
@@ -61,5 +61,5 @@ export const StyledForm = styled(Form)`
 	height: 100%;
 	align-items: flex-start;
 	overflow: hidden;
-	margin-top: 20px;
+	margin-top: 0;
 `;

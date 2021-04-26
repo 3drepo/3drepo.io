@@ -52,14 +52,14 @@ export const getSequenceActivities = (teamspace, modelId, sequenceId): Promise<a
 	return api.get(`${teamspace}/${modelId}/sequences/${sequenceId}/activities`);
 };
 
-export const getSequenceLegend = (teamspace, modelId, revision, sequenceId): Promise<any> => {
-	return api.get(`${teamspace}/${modelId}/revision/${revision || HEAD}/sequences/${sequenceId}/legend`);
+export const getSequenceLegend = (teamspace, modelId, sequenceId): Promise<any> => {
+	return api.get(`${teamspace}/${modelId}/sequences/${sequenceId}/legend`);
 };
 
-export const putSequenceLegend = (teamspace, modelId, revision, sequenceId, legendItems): Promise<any> => {
-	return api.put(`${teamspace}/${modelId}/revision/${revision || HEAD}/sequences/${sequenceId}/legend`, legendItems);
+export const putSequenceLegend = (teamspace, modelId, sequenceId, legendItems): Promise<any> => {
+	return api.put(`${teamspace}/${modelId}/sequences/${sequenceId}/legend`, legendItems);
 };
 
-export const deleteSequenceLegend = (teamspace, modelId, revision, sequenceId): Promise<any> => {
-	return api.delete(`${teamspace}/${modelId}/revision/${revision || HEAD}/sequences/${sequenceId}/legend`);
+export const deleteSequenceLegend = (teamspace, modelId, sequenceId): Promise<any> => {
+	return api.delete(`${teamspace}/${modelId}/sequences/${sequenceId}/legend`);
 };
