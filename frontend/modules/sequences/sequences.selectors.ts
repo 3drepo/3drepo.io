@@ -188,9 +188,13 @@ export const selectLastSelectedStateId = createSelector(
 	selectLastSelectedFrame, (frame) =>  (frame || {}).state
 );
 
+export const selectIsViewpointFrame = createSelector(
+	selectSelectedFrame, (frame) => (frame || {}).hasOwnProperty('viewpoint')
+);
+
 export const selectIsLoadingFrameState = createSelector(
-	selectSelectedFrame, selectSelectedStateId, selectStateDefinitions, (frame, stateId, stateDefinitions) => {
-		return !(frame || {}).hasOwnProperty('viewpoint') && !(stateDefinitions || {}).hasOwnProperty(stateId);
+	selectIsViewpointFrame, selectSelectedStateId, selectStateDefinitions, (isViewpointFrame, stateId, stateDefinitions) => {
+		return !isViewpointFrame && !(stateDefinitions || {}).hasOwnProperty(stateId);
 	}
 );
 

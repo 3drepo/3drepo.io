@@ -21,6 +21,7 @@ import { getTransparency, hasTransparency } from '../../helpers/colors';
 import { selectActiveIssue } from '../issues';
 import { selectDefaultView } from '../model';
 import { selectActiveRisk } from '../risks';
+import { selectIsViewpointFrame } from '../sequences';
 import { selectQueryParams } from '../router/router.selectors';
 
 export const selectViewpointsDomain = (state) => state.viewpoints;
@@ -66,7 +67,9 @@ export const selectSelectedViewpoint = createSelector(
 );
 
 export const selectIsLoadingViewpoint = createSelector(
-	selectViewpointsDomain, (state) => !Boolean(state.selectedViewpoint)
+	selectIsViewpointFrame, selectViewpointsDomain, (isViewpointFrame, state) => {
+		return isViewpointFrame && !Boolean(state.selectedViewpoint);
+	}
 );
 
 export const selectTransformations = createSelector(
