@@ -166,7 +166,7 @@ describe("Sequences", function () {
 		});
 
 		it("from revision should succeed", function(done) {
-			agent.get(`/${username}/${model}/sequences?revId=${oldRevision}&key=${userApiKey}`).expect(200, function(err , res) {
+			agent.get(`/${username}/${model}/sequences?rev_id=${oldRevision}&key=${userApiKey}`).expect(200, function(err , res) {
 				expect(res.body.length).to.equal(2);
 				expect(res.body[0]._id).to.equal(oldGoldenData._id);
 				expect(res.body[0].teamspace).to.equal(oldGoldenData.teamspace);
@@ -238,7 +238,7 @@ describe("Sequences", function () {
 		});
 
 		it("from revision should succeed", function(done) {
-			agent.get(`/${username}/${model}/sequences/${sequenceId}/state/${stateId}?revId=${oldRevision}&key=${userApiKey}`).expect(200, function(err , res) {
+			agent.get(`/${username}/${model}/sequences/${sequenceId}/state/${stateId}?rev_id=${oldRevision}&key=${userApiKey}`).expect(200, function(err , res) {
 				expect(Object.keys(res.body)).to.deep.equal(["transparency", "color"]);
 
 				return done(err);
@@ -272,7 +272,7 @@ describe("Sequences", function () {
 						.expect(200, done);
 				},
 				(done) => {
-					agent.get(`/${username}/${model}/sequences?revId=${oldRevision}&key=${userApiKey}`).expect(200, function(err , res) {
+					agent.get(`/${username}/${model}/sequences?rev_id=${oldRevision}&key=${userApiKey}`).expect(200, function(err , res) {
 						expect(res.body.length).to.equal(2);
 						const updatedData = {...oldGoldenData, ...update};
 
@@ -547,7 +547,7 @@ describe("Sequences", function () {
 		});
 
 		it("revision on custom sequence should succeed", function(done) {
-			const update = {"revId": oldRevision};
+			const update = {"rev_id": oldRevision};
 
 			async.series([
 				(done) => {
@@ -557,7 +557,7 @@ describe("Sequences", function () {
 				},
 				(done) => {
 					agent.get(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`).expect(200, function(err, res) {
-						expect(res.body.rev_id).to.deep.equal(update.revId);
+						expect(res.body.rev_id).to.deep.equal(update.rev_id);
 						done(err);
 					});
 				}
@@ -565,7 +565,7 @@ describe("Sequences", function () {
 		});
 
 		it("invalid revision on custom sequence should fail", function(done) {
-			const update = {"revId": "badRevision"};
+			const update = {"rev_id": "badRevision"};
 
 			agent.patch(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`)
 				.send(update)
@@ -1037,7 +1037,7 @@ describe("Sequences", function () {
 		});
 
 		it("with revision should succeed", function(done) {
-			const sequence = Object.assign({"name":"Sequence test", "revId": oldRevision}, baseCustomSequence);
+			const sequence = Object.assign({"name":"Sequence test", "rev_id": oldRevision}, baseCustomSequence);
 			let sequenceId;
 
 			async.series([
@@ -1063,7 +1063,7 @@ describe("Sequences", function () {
 		});
 
 		it("with invalid revision should fail", function(done) {
-			const sequence = Object.assign({"name":"Sequence test", "revId": "badRevision"}, baseCustomSequence);
+			const sequence = Object.assign({"name":"Sequence test", "rev_id": "badRevision"}, baseCustomSequence);
 
 			agent.post(`/${username}/${model}/sequences?key=${userApiKey}`)
 				.send(sequence)

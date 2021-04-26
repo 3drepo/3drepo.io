@@ -341,13 +341,13 @@ router.post("/sequences", middlewares.issue.canCreate, createSequence);
  *
  * @apiUse Sequences
  *
- * @apiParam (Query) {String} [revId] Revision unique ID
+ * @apiParam (Query) {String} [rev_id] Revision unique ID
  *
  * @apiExample {get} Example usage
  * GET /acme/00000000-0000-0000-0000-000000000000/sequences HTTP/1.1
  *
  * @apiExample {get} Example usage (with revision)
- * GET /acme/00000000-0000-0000-0000-000000000000/sequences?revId=00000000-0000-0000-0000-000000000001 HTTP/1.1
+ * GET /acme/00000000-0000-0000-0000-000000000000/sequences?rev_id=00000000-0000-0000-0000-000000000001 HTTP/1.1
  *
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
@@ -700,9 +700,9 @@ function updateSequence(req, res, next) {
 function listSequences(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model } = req.params;
-	const revId = req.query && req.query.revId ? req.query.revId : req.params.revId;
+	const rev_id = req.query && req.query.rev_id ? req.query.rev_id : req.params.rev_id;
 
-	Sequence.getList(account, model, undefined, revId, true).then(sequences => {
+	Sequence.getList(account, model, undefined, rev_id, true).then(sequences => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, sequences);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

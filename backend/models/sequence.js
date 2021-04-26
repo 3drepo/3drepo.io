@@ -44,7 +44,7 @@ const sequenceSchema = yup.object().shape({
 
 const sequenceEditSchema = yup.object().shape({
 	name: yup.string(),
-	revId: yup.string(),
+	rev_id: yup.string(),
 	frames: yup.array().min(1)
 }).noUnknown();
 
@@ -204,9 +204,8 @@ Sequence.createSequence = async (account, model, data) => {
 		newSequence.name = data.name;
 	}
 
-	if (data.revId) {
-		const history = await History.getHistory(account, model, undefined, data.revId, {_id: 1});
-
+	if (data.rev_id) {
+		const history = await History.getHistory(account, model, undefined, data.rev_id, {_id: 1});
 		newSequence.rev_id = history._id;
 	}
 
@@ -304,7 +303,7 @@ Sequence.updateSequence = async (account, model, sequenceId, data) => {
 		toSet.name = data.name;
 	}
 
-	if (data.revId || data.revId === null || data.frames) {
+	if (data.rev_id || data.rev_id === null || data.frames) {
 		const customSequence = await db.findOne(account, sequenceCol(model),
 			{_id: utils.stringToUUID(sequenceId), customSequence: true});
 
@@ -312,12 +311,12 @@ Sequence.updateSequence = async (account, model, sequenceId, data) => {
 			throw responseCodes.SEQUENCE_READ_ONLY;
 		}
 
-		if (data.revId) {
-			const history = await History.getHistory(account, model, undefined, data.revId, {_id: 1});
+		if (data.rev_id) {
+			const history = await History.getHistory(account, model, undefined, data.rev_id, {_id: 1});
 
 			toSet.rev_id = history._id;
-		} else if (data.revId === null) {
-			toUnset.revId = 1;
+		} else if (data.rev_id === null) {
+			toUnset.rev_id = 1;
 		}
 
 		if (data.frames) {
