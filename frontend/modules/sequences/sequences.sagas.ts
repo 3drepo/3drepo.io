@@ -20,7 +20,6 @@ import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 import { selectSelectedSequenceId, selectStateDefinitions,
 	SequencesActions, SequencesTypes } from '.';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
-import { delay } from '../../helpers/aync';
 
 import * as API from '../../services/api';
 import { DataCache, STORE_NAME } from '../../services/dataCache';

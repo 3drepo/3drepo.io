@@ -21,8 +21,8 @@ import { getTransparency, hasTransparency } from '../../helpers/colors';
 import { selectActiveIssue } from '../issues';
 import { selectDefaultView } from '../model';
 import { selectActiveRisk } from '../risks';
-import { selectIsViewpointFrame } from '../sequences';
 import { selectQueryParams } from '../router/router.selectors';
+import { selectIsViewpointFrame } from '../sequences';
 
 export const selectViewpointsDomain = (state) => state.viewpoints;
 

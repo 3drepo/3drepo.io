@@ -197,7 +197,8 @@ export const selectIsViewpointFrame = createSelector(
 );
 
 export const selectIsLoadingFrameState = createSelector(
-	selectIsViewpointFrame, selectSelectedStateId, selectStateDefinitions, (isViewpointFrame, stateId, stateDefinitions) => {
+	selectIsViewpointFrame, selectSelectedStateId, selectStateDefinitions,
+	(isViewpointFrame, stateId, stateDefinitions) => {
 		return !isViewpointFrame && !(stateDefinitions || {}).hasOwnProperty(stateId);
 	}
 );
