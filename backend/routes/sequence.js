@@ -307,6 +307,54 @@ router.delete("/sequences/:sequenceId", middlewares.issue.canCreate, deleteSeque
  * 		{
  * 			"dateTime":1244246400000,
  *			"viewpoint":{
+ *				"override_groups":[
+ *					{
+ *						"color":[
+ *							0,
+ *							255,
+ *							0
+ *						],
+ *						"rules":[
+ *							{
+ *								"field":"IFC GUID",
+ *								"operator":"IS",
+ *								"values":[
+ *									"0h79Q0rcfC1gOPK50yoFCv",
+ *									"0K5o7g755EZw2RjNI7HcYK",
+ *									"0yuGDtpaPCSBT7QB7wvN5I",
+ *									"2HBVtaIWv07ud53r01WB6q"
+ *								]
+ *							}
+ *						],
+ *						"account":"acme",
+ *						"model":"00000000-0000-0000-0000-000000000000"
+ *					}
+ *				],
+ *				"hidden_group":{
+ *					"rules":[
+ *						{
+ *							"field":"IFC GUID",
+ *							"operator":"IS",
+ *							"values":[
+ *								"2S2omCydz5b9jSgrcLLblk",
+ *								"0_U7q0Dzj6DfPp4VzMmTUt",
+ *								"0iMv$JxRL67v6DoyA3RRwz",
+ *								"1W4yiIKW92qAUdezi70DTY",
+ *								"00ojKm$5f7luRCAjta0hsu",
+ *								"0d2LnELub06glJ9mZh2up$",
+ *								"37gui3POjDQgmIadjhr$ek",
+ *								"3XAjSwznb6PfZG9t_wAFXi"
+ *							]
+ *						}
+ *					],
+ *					"account":"acme",
+ *					"model":"00000000-0000-0000-0000-000000000000"
+ *				}
+ *			}
+ *		},
+ *		{
+ * 			"dateTime":1244246500000,
+ *			"viewpoint":{
  *				"up":[0,1,0],
  *				"position":[38,38 ,125.080119148101],
  *				"look_at":[0,0,-163.080119148101],
@@ -318,9 +366,42 @@ router.delete("/sequences/:sequenceId", middlewares.issue.canCreate, deleteSeque
  *				"near":76.4241101223321
  *			}
  * 		},
+ *		{
+ * 			"dateTime":1244246700000,
+ *			"viewpoint":{
+ *				"override_groups":[
+ *					{
+ *						"color":[
+ *							0,
+ *							255,
+ *							0
+ *						],
+ *						"rules":[
+ *							{
+ *								"field":"IFC GUID",
+ *								"operator":"IS",
+ *								"values":[
+ *									"00ojKm$5f7luRCAjta0hsu"
+ *								]
+ *							}
+ *						],
+ *						"account":"acme",
+ *						"model":"00000000-0000-0000-0000-000000000000"
+ *					}
+ *				]
+ *			}
+ *		},
  * 		{
  * 			"dateTime":1244419200000,
  * 			"viewId":"00000000-0000-0001-0001-000000000001"
+ * 		},
+ * 		{
+ * 			"dateTime":1244458200000,
+ * 			"viewId":"00000000-0000-0001-0001-000000000002"
+ * 		},
+ * 		{
+ * 			"dateTime":1244484300000,
+ * 			"viewpoint": {}
  * 		}
  * 	]
  * }
