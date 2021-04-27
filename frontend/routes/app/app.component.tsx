@@ -23,6 +23,7 @@ import { PUBLIC_ROUTES, ROUTES } from '../../constants/routes';
 import { getCookie, setCookie } from '../../helpers/cookies';
 import { renderWhenTrue } from '../../helpers/rendering';
 import { WebGLChecker } from '../../helpers/webglChecker';
+import {history} from '../../modules/store';
 import { analyticsService } from '../../services/analytics';
 import { clientConfigService } from '../../services/clientConfig';
 import { isStaticRoute, STATIC_ROUTES } from '../../services/staticPages';
@@ -170,7 +171,7 @@ export class App extends React.PureComponent<IProps, IState> {
 					{this.renderStaticRoutes()}
 					<Route component={NotFound} />
 				</Switch>
-				<DialogContainer />
+				<DialogContainer history={this.props.history} />
 				<SnackbarContainer />
 				{!Boolean(clientConfigService.intercomLicense) &&  <LiveChat />}
 				<Intercom />

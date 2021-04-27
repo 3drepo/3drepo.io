@@ -34,6 +34,7 @@ import { DialogActions, DialogTitle, TopDialogActions } from './dialog.styles';
 interface IProps {
 	id: number;
 	config: IDialogConfig;
+	history: any;
 	data?: any;
 	hide: (dialogId) => void;
 	searchEnabled?: boolean;
@@ -131,7 +132,7 @@ export const Dialog: React.FunctionComponent<IProps> = React.forwardRef((props, 
 			handleCallback(props.config.onConfirm.bind(null, ...args));
 		}
 
-		props.config.permissionDenied && window.location.replace(ROUTES.TEAMSPACES);
+		props.config.permissionDenied && props.history.push(ROUTES.TEAMSPACES);
 	};
 
 	return (
