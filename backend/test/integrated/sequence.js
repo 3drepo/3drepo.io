@@ -564,6 +564,24 @@ describe("Sequences", function () {
 			], done);
 		});
 
+		it("remove revision on custom sequence should succeed", function(done) {
+			const update = {"rev_id": null};
+
+			async.series([
+				(done) => {
+					agent.patch(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`)
+						.send(update)
+						.expect(200, done);
+				},
+				(done) => {
+					agent.get(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`).expect(200, function(err, res) {
+						expect(res.body.rev_id).to.not.exist;
+						done(err);
+					});
+				}
+			], done);
+		});
+
 		it("invalid revision on custom sequence should fail", function(done) {
 			const update = {"rev_id": "badRevision"};
 

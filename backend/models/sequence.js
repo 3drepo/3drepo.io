@@ -44,7 +44,7 @@ const sequenceSchema = yup.object().shape({
 
 const sequenceEditSchema = yup.object().shape({
 	name: yup.string(),
-	rev_id: yup.string(),
+	rev_id: yup.string().nullable(),
 	frames: yup.array().min(1)
 }).noUnknown();
 
