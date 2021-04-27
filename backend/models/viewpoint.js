@@ -144,7 +144,7 @@ Viewpoint.cleanViewpoint = function(routePrefix, viewpointToClean, serialise = t
 
 		if (serialise && routePrefix) {
 			setViewpointScreenshotURL(routePrefix, viewpointToClean);
-			viewpointToClean.screenshot_ref = undefined;
+			delete viewpointToClean.screenshot_ref;
 		}
 	}
 
