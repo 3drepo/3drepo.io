@@ -52,6 +52,19 @@ import {
 
 function* fetchData({ teamspace, model }) {
 	try {
+		const {data: metaKeys} = yield API.getMetaKeys(teamspace, model);
+		yield put(ModelActions.fetchMetaKeysSuccess(metaKeys));
+	} catch (e) {
+		if (e?.response.status === 401) {
+			yield put(DialogActions.showEndpointErrorDialog('access', 'model', e));
+		} else {
+			yield put(DialogActions.showEndpointErrorDialog('fetch', 'meta keys', e));
+		}
+
+		return;
+	}
+
+	try {
 		const { username } = yield select(selectCurrentUser);
 		yield all([
 			put(CurrentUserActions.fetchUser(username)),
@@ -61,7 +74,6 @@ function* fetchData({ teamspace, model }) {
 			put(ViewerGuiActions.startListenOnClickPin()),
 			put(ViewerGuiActions.startListenOnModelLoaded()),
 			put(ModelActions.fetchSettings(teamspace, model)),
-			put(ModelActions.fetchMetaKeys(teamspace, model)),
 			put(ModelActions.waitForSettingsAndFetchRevisions(teamspace, model)),
 			put(TreeActions.setIsTreeProcessed(false)),
 			put(ViewpointsActions.fetchViewpoints(teamspace, model)),

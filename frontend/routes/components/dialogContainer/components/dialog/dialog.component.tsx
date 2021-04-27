@@ -23,6 +23,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 
+import { ROUTES } from '../../../../../constants/routes';
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { IDialogConfig } from '../../../../../modules/dialog/dialog.redux';
 import { dispatch } from '../../../../../modules/store';
@@ -129,6 +130,8 @@ export const Dialog: React.FunctionComponent<IProps> = React.forwardRef((props, 
 		if (props.config.onConfirm) {
 			handleCallback(props.config.onConfirm.bind(null, ...args));
 		}
+
+		props.config.permissionDenied && window.location.replace(ROUTES.TEAMSPACES);
 	};
 
 	return (

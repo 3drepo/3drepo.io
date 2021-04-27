@@ -27,6 +27,7 @@ export interface IDialogConfig {
 	template?: () => JSX.Element;
 	content?: string;
 	data?: any;
+	permissionDenied?: boolean;
 	logError?: string;
 	DialogProps?: IDialogProps;
 	buttonVariant?: 'text' | 'outlined' | 'contained';
@@ -79,6 +80,7 @@ const showErrorDialog = (state = INITIAL_STATE, action) => {
 	const config = {
 		title: 'Error',
 		template: Dialogs.ErrorDialog,
+		permissionDenied: action.status === 401,
 		data: {
 			method,
 			dataType,
