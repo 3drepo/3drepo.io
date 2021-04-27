@@ -59,6 +59,7 @@ script:
     - NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" &
     - cd ./frontend
     - unbuffer yarn test
+    - echo hi
 
 notifications:
     email:
