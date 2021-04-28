@@ -564,6 +564,14 @@ describe("Sequences", function () {
 			], done);
 		});
 
+		it("with an unknown field should fail", async () => {
+			const update = {"revId": oldRevision};
+
+			await agent.patch(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`)
+				.send(update)
+				.expect(400);
+		});
+
 		it("remove revision on custom sequence should succeed", function(done) {
 			const update = {"rev_id": null};
 

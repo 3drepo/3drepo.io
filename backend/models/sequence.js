@@ -32,23 +32,6 @@ const { cleanViewpoint, createViewpoint } = require("./viewpoint");
 const sequenceCol = (modelId) => `${modelId}.sequences`;
 const legendCol = (modelId) => `${modelId}.sequences.legends`;
 
-/* for debugging */
-
-function getValidationErrors(err) {
-	const validationErrors = {};
-	validationErrors[err.path] = err.message;
-
-	(err.inner || []).forEach((error) => {
-		if (error.path) {
-			validationErrors[error.path] = error.message;
-		}
-	});
-
-	return validationErrors;
-}
-
-/*************/
-
 const findMinMaxDate =  (frames) => {
 	let min = frames[0].dateTime;
 	let max = frames[0].dateTime;
@@ -358,50 +341,49 @@ Sequence.updateSequence = async (account, model, sequenceId, data) => {
 	const toSet = {};
 	const toUnset = {};
 
-	// sequenceEditSchema.validate(data, { strict: true, abortEarly: false })
-	// 	.catch(function (err) {
-	// 		console.log(JSON.stringify(data));
-	// 		console.log(getValidationErrors(err));
-	// 	});
-
 	if (!sequenceEditSchema.isValidSync(data, { strict: true })) {
 		throw responseCodes.INVALID_ARGUMENTS;
-	}
-
-	const customSequence = await db.findOne(account, sequenceCol(model),
-		{_id: utils.stringToUUID(sequenceId), customSequence: true}, {startDate: 1, endDate: 1});
-
-	if (!customSequence) {
-		throw responseCodes.SEQUENCE_READ_ONLY;
 	}
 
 	if (data.name) {
 		toSet.name = data.name;
 	}
 
-	if (data.rev_id) {
-		const history = await History.getHistory(account, model, undefined, data.rev_id, {_id: 1});
+	// Name field can be updated for any sequence
+	if (data.name && Object.keys(data).length === 1) {
+		await Sequence.sequenceExists(account, model, sequenceId);
+	} else {
+		// Rest of properties can be updated only for custom sequences
+		const customSequence = await db.findOne(account, sequenceCol(model), {_id: utils.stringToUUID(sequenceId), customSequence: true}, {startDate: 1, endDate: 1});
 
-		if (history) {
-			throw responseCodes.INVALID_ARGUMENTS;
+		if (!customSequence) {
+			throw responseCodes.SEQUENCE_READ_ONLY;
 		}
 
-		toSet.rev_id = history._id;
-	} else if (data.rev_id === null) {
-		toUnset.rev_id = 1;
-	}
+		if (data.rev_id) {
+			const history = await History.getHistory(account, model, undefined, data.rev_id, {_id: 1});
 
-	if (data.frames) {
-		toSet.frames = await handleFrames(account, model, sequenceId, data.frames);
-		const framesStartDate = new Date((toSet.frames[0] || {}).dateTime);
-		const framesEndDate = new Date((toSet.frames[toSet.frames.length - 1] || {}).dateTime);
+			if (!history) {
+				throw responseCodes.INVALID_ARGUMENTS;
+			}
 
-		if (framesStartDate < customSequence.startDate) {
-			toSet.startDate = framesStartDate;
+			toSet.rev_id = history._id;
+		} else if (data.rev_id === null) {
+			toUnset.rev_id = 1;
 		}
 
-		if (framesEndDate >  customSequence.endDate) {
-			toSet.endDate = framesEndDate;
+		if (data.frames) {
+			toSet.frames = await handleFrames(account, model, sequenceId, data.frames);
+			const framesStartDate = new Date((toSet.frames[0] || {}).dateTime);
+			const framesEndDate = new Date((toSet.frames[toSet.frames.length - 1] || {}).dateTime);
+
+			if (framesStartDate < customSequence.startDate) {
+				toSet.startDate = framesStartDate;
+			}
+
+			if (framesEndDate >  customSequence.endDate) {
+				toSet.endDate = framesEndDate;
+			}
 		}
 	}
 
