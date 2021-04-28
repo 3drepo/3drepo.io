@@ -135,7 +135,10 @@ const addToActivityTree = (activity, treeFile, treeFileDictionary) => {
 			treeFileDictionary[parentId].subActivities = [];
 		}
 
-		treeFileDictionary[parentId].subActivities.push(treeFileDictionary[id]);
+		const insertIndex = treeFileDictionary[parentId].subActivities.findIndex(subActivity => {
+			return subActivity.startDate > treeFileDictionary[id].startDate;
+		});
+		treeFileDictionary[parentId].subActivities.splice(insertIndex, 0, treeFileDictionary[id]);
 	} else {
 		treeFile.push(treeFileDictionary[id]);
 	}
