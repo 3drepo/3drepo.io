@@ -193,7 +193,7 @@ export const selectLastSelectedStateId = createSelector(
 );
 
 export const selectIsViewpointFrame = createSelector(
-	selectSelectedFrame, (frame) => (frame || {}).hasOwnProperty('viewpoint')
+	selectSelectedFrameViewpoint, (viewpoint) => Boolean(viewpoint)
 );
 
 export const selectIsLoadingFrameState = createSelector(

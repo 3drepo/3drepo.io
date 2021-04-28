@@ -32,21 +32,88 @@ const { cleanViewpoint, createViewpoint } = require("./viewpoint");
 const sequenceCol = (modelId) => `${modelId}.sequences`;
 const legendCol = (modelId) => `${modelId}.sequences.legends`;
 
-const sequenceSchema = yup.object().shape({
-	_id: yup.object().required(),
-	name: yup.string().required(),
-	customSequence: yup.bool(),
-	startDate: yup.date().required(),
-	endDate: yup.date().required(),
-	rev_id: yup.object(),
-	frames: yup.array().min(1).required()
-}).noUnknown();
+const findMinMaxDate =  (frames) => {
+	let min = frames[0].dateTime;
+	let max = frames[0].dateTime;
 
-const sequenceEditSchema = yup.object().shape({
-	name: yup.string(),
+	frames.forEach((frame) => {
+		if (frame.dateTime < min) {
+			min = frame.dateTime;
+		}
+		if (frame.dateTime > max) {
+			max = frame.dateTime;
+		}
+	});
+
+	return {min, max};
+};
+
+const byDateTime = (frameA, frameB) => frameA.dateTime - frameB.dateTime;
+
+const notEmpty = (obj) => Object.keys(obj).length > 0;
+
+// Viewpoint checks
+const viewpointSchema = yup.object().test((viewpoint) => {
+	if (!viewpoint) {
+		return true;
+	}
+
+	const {transformation_group_ids, transformation_groups } = viewpoint;
+
+	// The viewpoints for sequences CANT have transformations groups
+	if (transformation_group_ids || transformation_groups) {
+		return false;
+	}
+
+	return true;
+});
+
+const frameSchema = yup.object().shape({
+	dateTime: yup.number().required(),
+	viewpoint: viewpointSchema,
+	viewId: yup.string()
+}).noUnknown().test(({viewId, viewpoint}) => {
+	// The frame must have either viewpoint or viewId, not both
+	return (viewId && !viewpoint) || (!viewId && viewpoint);
+});
+
+const nameSchema = yup.string().min(1).max(30);
+
+const sequenceSchema = yup.object().shape({
+	name: nameSchema.required(),
+	startDate: yup.number(),
+	endDate: yup.number(),
+	rev_id: yup.string(),
+	frames: yup.array().of(frameSchema).min(1).required()
+}).noUnknown().test(({startDate, endDate, frames}) => {
+	if ((startDate !== undefined || endDate !== undefined) && frames) {
+		const {min, max} = findMinMaxDate(frames);
+
+		// If the min date found in frames is smaller than the passed start date
+		// then the object is inconsistent
+		if(startDate !== undefined && min > startDate) {
+			return false;
+		}
+
+		// If the max date found in frames is larger than the passed end date
+		// then the object is inconsistent
+		if(endDate !== undefined && max < endDate) {
+			return false;
+		}
+	}
+
+	if (startDate !== undefined &&  endDate !== undefined && startDate > endDate) {
+		return false;
+	}
+
+	return true;
+});
+
+const sequenceEditSchema = sequenceSchema.shape({
+	name: nameSchema,
 	rev_id: yup.string().nullable(),
-	frames: yup.array().min(1)
-}).noUnknown();
+	frames: yup.array().of(frameSchema).min(1)
+}).noUnknown().test(notEmpty);
 
 const clean = (toClean, keys) => {
 	keys.forEach((key) => {
@@ -98,11 +165,7 @@ const handleFrames = async (account, model, sequenceId, sequenceFrames) => {
 		const dateTime = new Date(frame.dateTime);
 		let viewpoint;
 
-		if (!utils.isDate(dateTime)) {
-			throw responseCodes.INVALID_ARGUMENTS;
-		}
-
-		if (frame.viewpoint && utils.isObject(frame.viewpoint)) {
+		if (frame.viewpoint) {
 			viewpoint = await createViewpoint(
 				account,
 				model,
@@ -113,7 +176,7 @@ const handleFrames = async (account, model, sequenceId, sequenceFrames) => {
 				false,
 				"sequence"
 			);
-		} else if (frame.viewId && utils.isString(frame.viewId)) {
+		} else {
 			const view = await View.findByUID(account, model, frame.viewId, {});
 
 			if (view) {
@@ -151,17 +214,9 @@ const handleFrames = async (account, model, sequenceId, sequenceFrames) => {
 						);
 					});
 				}
+			} else {
+				throw responseCodes.INVALID_ARGUMENTS;
 			}
-		}
-
-		if (!viewpoint) {
-			// frame missing viewpoint
-			throw responseCodes.INVALID_ARGUMENTS;
-		}
-
-		if (viewpoint.transformation_group_ids || viewpoint.transformation_groups) {
-			// sequence viewpoints do not accept transformations
-			throw responseCodes.INVALID_ARGUMENTS;
 		}
 
 		processedFrames.push({
@@ -169,6 +224,8 @@ const handleFrames = async (account, model, sequenceId, sequenceFrames) => {
 			viewpoint
 		});
 	}
+
+	processedFrames.sort(byDateTime);
 
 	return processedFrames;
 };
@@ -191,36 +248,31 @@ const getDefaultLegend = async (account, model) => {
 
 const Sequence = {};
 
-Sequence.createSequence = async (account, model, data) => {
-	const newSequence = {
-		"_id": utils.generateUUID(),
-		"customSequence": true,
-		"frames": []
-	};
-
-	if (!data || !data.name || !data.frames) {
-		throw responseCodes.INVALID_ARGUMENTS;
-	} else {
-		newSequence.name = data.name;
-	}
-
-	if (data.rev_id) {
-		const history = await History.getHistory(account, model, undefined, data.rev_id, {_id: 1});
-		newSequence.rev_id = history._id;
-	}
-
-	newSequence.frames = await handleFrames(account, model, newSequence._id, data.frames);
-
-	newSequence.startDate = new Date((newSequence.frames[0] || {}).dateTime);
-	newSequence.endDate = new Date((newSequence.frames[newSequence.frames.length - 1] || {}).dateTime);
-
-	if (!sequenceSchema.isValidSync(newSequence, { strict: true })) {
+Sequence.createSequence = async (account, model, sequenceData) => {
+	if (!sequenceSchema.isValidSync(sequenceData, { strict: true })) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	await db.insert(account, sequenceCol(model), newSequence);
+	sequenceData = {...sequenceData, "_id": utils.generateUUID(), "customSequence": true};
 
-	return { _id: utils.uuidToString(newSequence._id) };
+	if (sequenceData.rev_id) {
+		const history = await History.getHistory(account, model, undefined, sequenceData.rev_id, {_id: 1});
+
+		if (!history) {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+
+		sequenceData.rev_id = history._id;
+	}
+
+	sequenceData.frames = await handleFrames(account, model, sequenceData._id, sequenceData.frames);
+
+	sequenceData.startDate = new Date(sequenceData.startDate || sequenceData.frames[0].dateTime);
+	sequenceData.endDate = new Date(sequenceData.endDate || sequenceData.frames[sequenceData.frames.length - 1].dateTime);
+
+	await db.insert(account, sequenceCol(model), sequenceData);
+
+	return { _id: utils.uuidToString(sequenceData._id) };
 };
 
 Sequence.deleteSequence = async (account, model, sequenceId) => {
@@ -289,23 +341,20 @@ Sequence.updateSequence = async (account, model, sequenceId, data) => {
 	const toSet = {};
 	const toUnset = {};
 
-	if (!data || !sequenceEditSchema.isValidSync(data, { strict: true })) {
+	if (!sequenceEditSchema.isValidSync(data, { strict: true })) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	await Sequence.sequenceExists(account, model, sequenceId);
-
 	if (data.name) {
-		if (!utils.isString(data.name) || data.name === "" || data.name.length >= 30) {
-			throw responseCodes.INVALID_ARGUMENTS;
-		}
-
 		toSet.name = data.name;
 	}
 
-	if (data.rev_id || data.rev_id === null || data.frames) {
-		const customSequence = await db.findOne(account, sequenceCol(model),
-			{_id: utils.stringToUUID(sequenceId), customSequence: true});
+	// Name field can be updated for any sequence
+	if (data.name && Object.keys(data).length === 1) {
+		await Sequence.sequenceExists(account, model, sequenceId);
+	} else {
+		// Rest of properties can be updated only for custom sequences
+		const customSequence = await db.findOne(account, sequenceCol(model), {_id: utils.stringToUUID(sequenceId), customSequence: true}, {startDate: 1, endDate: 1});
 
 		if (!customSequence) {
 			throw responseCodes.SEQUENCE_READ_ONLY;
@@ -314,6 +363,10 @@ Sequence.updateSequence = async (account, model, sequenceId, data) => {
 		if (data.rev_id) {
 			const history = await History.getHistory(account, model, undefined, data.rev_id, {_id: 1});
 
+			if (!history) {
+				throw responseCodes.INVALID_ARGUMENTS;
+			}
+
 			toSet.rev_id = history._id;
 		} else if (data.rev_id === null) {
 			toUnset.rev_id = 1;
@@ -321,22 +374,25 @@ Sequence.updateSequence = async (account, model, sequenceId, data) => {
 
 		if (data.frames) {
 			toSet.frames = await handleFrames(account, model, sequenceId, data.frames);
+			const framesStartDate = new Date((toSet.frames[0] || {}).dateTime);
+			const framesEndDate = new Date((toSet.frames[toSet.frames.length - 1] || {}).dateTime);
 
-			toSet.startDate = new Date((toSet.frames[0] || {}).dateTime);
-			toSet.endDate = new Date((toSet.frames[toSet.frames.length - 1] || {}).dateTime);
+			if (framesStartDate < customSequence.startDate) {
+				toSet.startDate = framesStartDate;
+			}
+
+			if (framesEndDate >  customSequence.endDate) {
+				toSet.endDate = framesEndDate;
+			}
 		}
 	}
 
-	if (Object.keys(toSet).length > 0) {
+	if (notEmpty(toSet)) {
 		toUpdate.$set = toSet;
 	}
 
-	if (Object.keys(toUnset).length > 0) {
+	if (notEmpty(toUnset)) {
 		toUpdate.$unset = toUnset;
-	}
-
-	if (Object.keys(toUpdate).length === 0) {
-		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
 	await db.update(account, sequenceCol(model), {_id: utils.stringToUUID(sequenceId)}, toUpdate);
