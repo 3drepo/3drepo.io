@@ -1,5 +1,6 @@
-export const MAX_URL_LENGTH = 240;
-export const IDS_ARGUMENT_INDICATION = '?ids=';
+import { clientConfigService } from '../services/clientConfig';
+
+const MAX_URL_LENGTH = 2000;
 
 const normalizeString = (text): string => text.replace(/^,/, '');
 
@@ -26,4 +27,15 @@ export const splitString = (text: string = '', limit: number = MAX_URL_LENGTH, b
 	}
 
 	return [part, remains];
+};
+
+export const splitValuesIfNecessary = (path, argumentIndication) => {
+	const request = encodeURI(clientConfigService.apiUrl(clientConfigService.POST_API, path));
+	const requestParts = request.split(argumentIndication);
+
+	if (request.length < MAX_URL_LENGTH) { return [requestParts[1]]; }
+
+	const chunksLimit = MAX_URL_LENGTH - argumentIndication.length - requestParts[0].length;
+
+	return splitString(requestParts[1], chunksLimit);
 };
