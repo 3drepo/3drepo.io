@@ -40,7 +40,6 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	fetchActivities: SequencesActions.fetchSequenceList,
 	fetchDetails: ActivitiesActions.fetchDetails,
 	setComponentState: ActivitiesActions.setComponentState,
 }, dispatch);

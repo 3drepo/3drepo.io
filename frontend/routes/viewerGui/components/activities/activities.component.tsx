@@ -56,14 +56,6 @@ export class Activities extends React.PureComponent<IProps, IState> {
 		listCollapsed: true,
 	};
 
-	public componentDidMount() {
-		const { activities, fetchActivities } = this.props;
-
-		if (!activities || !activities.length) {
-			fetchActivities();
-		}
-	}
-
 	public componentDidUpdate(prevProps, prevState) {
 		const { activities, searchQuery } = this.props;
 		const { listCollapsed } = this.state;
