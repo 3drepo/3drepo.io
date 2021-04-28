@@ -152,6 +152,16 @@ describe("Sequences", function () {
 		}).sort((a, b)=> b.name < a.name? 1 : -1)
 	}
 
+	const sortByStartDate = (activities) => {
+		return activities.map(activity => {
+			if (activity.subActivities) {
+				activity.subActivities = sortByStartDate(activity.subActivities);
+			}
+
+			return activity;
+		}).sort((a, b)=> b.startDate < a.startDate ? 1 : -1)
+	}
+
 	const createPayload = (act, overwrite = false) => ({ activities: [act], overwrite });
 
 	describe("get unmodified activities", function() {
@@ -292,7 +302,7 @@ describe("Sequences", function () {
 				.expect(200);
 
 			const activities = res.body.activities;
-			const newActivityReturned = activities[activities.length-1];
+			const newActivityReturned = activities[0];
 			activityId = newActivityReturned.id;
 
 			const newActivity =  {...pick(activity, "endDate", "startDate", "name"), id: activityId};
