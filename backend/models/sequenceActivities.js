@@ -67,6 +67,12 @@ const cleanActivityDetail = (activity) => {
 const clearActivityListCache = async (account, model, sequenceId)  =>
 	await FileRef.removeFile(account, model, "activities", sequenceId);
 
+const findActivityInsertionIndex = (activityList, newActivity) => {
+	return activityList.findIndex(activity => {
+		return activity.startDate > newActivity.startDate;
+	});
+};
+
 const traverseActivities = (activities, callback) => {
 	const stack = [...activities];
 	const generatedIDs = new Set();
@@ -135,12 +141,11 @@ const addToActivityTree = (activity, treeFile, treeFileDictionary) => {
 			treeFileDictionary[parentId].subActivities = [];
 		}
 
-		const insertIndex = treeFileDictionary[parentId].subActivities.findIndex(subActivity => {
-			return subActivity.startDate > treeFileDictionary[id].startDate;
-		});
+		const insertIndex = findActivityInsertionIndex(treeFileDictionary[parentId].subActivities, treeFileDictionary[id]);
 		treeFileDictionary[parentId].subActivities.splice(insertIndex, 0, treeFileDictionary[id]);
 	} else {
-		treeFile.push(treeFileDictionary[id]);
+		const insertIndex = findActivityInsertionIndex(treeFile, treeFileDictionary[id]);
+		treeFile.splice(insertIndex, 0, treeFileDictionary[id]);
 	}
 };
 
