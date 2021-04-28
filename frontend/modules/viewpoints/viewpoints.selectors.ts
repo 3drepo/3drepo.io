@@ -18,16 +18,11 @@ import { isEmpty, orderBy, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { addToGroupDictionary } from '../../helpers/colorOverrides';
 import { getTransparency, hasTransparency } from '../../helpers/colors';
-import { selectActiveIssue } from '../issues'; // TODO: this should be refactored out (?)
+import { selectActiveIssue } from '../issues';
 import { selectDefaultView } from '../model';
-import { selectActiveRisk } from '../risks'; // TODO: this should be refactored out (?)
-// TODO: views/viewpoints are 2 different things
-// views is parent class of issues/risks
-// viewpoints is a data structure that is used by views, issues, risks, and sequence frames
-// need to refactor this and maybe split this file into views and viewpoints
-// also don't want this file to be dependent on issues, risks, sequences
+import { selectActiveRisk } from '../risks';
 import { selectQueryParams } from '../router/router.selectors';
-import { selectIsViewpointFrame } from '../sequences'; // TODO: this should be refactored out (?)
+import { selectIsViewpointFrame } from '../sequences';
 
 export const selectViewpointsDomain = (state) => state.viewpoints;
 

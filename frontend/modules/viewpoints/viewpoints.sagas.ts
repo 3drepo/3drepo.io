@@ -300,9 +300,6 @@ export function* fetchViewpointGroups( {teamspace, modelId, view}) {
 			return;
 		}
 
-		// console.log("fetching groups for viewpoint:");
-		// console.log(view.viewpoint);
-
 		const viewpoint = view.viewpoint;
 
 		const groupsProperties = ['override_group_ids', 'transformation_group_ids',

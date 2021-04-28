@@ -30,7 +30,7 @@ export const getSequence = (teamspace, modelId, sequenceId): Promise<any> => {
  */
 export const getSequenceList = (teamspace, modelId, revision?): Promise<any> => {
 	if (revision) {
-		return api.get(`${teamspace}/${modelId}/sequences/?revId=${revision}`);
+		return api.get(`${teamspace}/${modelId}/sequences/?rev_id=${revision}`);
 	}
 	return api.get(`${teamspace}/${modelId}/sequences`);
 };
