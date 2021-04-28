@@ -302,7 +302,9 @@ describe("Sequences", function () {
 				.expect(200);
 
 			const activities = res.body.activities;
-			const newActivityReturned = activities[0];
+			const newActivityReturned = activities.find(a => {
+				return a.name === activity.name && a.startDate === activity.startDate && a.endDate === activity.endDate;
+			});
 			activityId = newActivityReturned.id;
 
 			const newActivity =  {...pick(activity, "endDate", "startDate", "name"), id: activityId};
