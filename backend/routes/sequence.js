@@ -609,7 +609,7 @@ router.get("/sequences/:sequenceId/activities/:activityId", middlewares.hasReadA
 router.get("/sequences/:sequenceId/activities", middlewares.hasReadAccessToModel, getSequenceActivities);
 
 /**
- * @api {post} /:teamspace/:model/sequences/:sequenceId/activities/ Create one or more activities
+ * @api {post} /:teamspace/:model/sequences/:sequenceId/activities Create one or more activities
  * @apiName createSequenceActivities
  * @apiGroup Sequences
  * @apiDescription Creates a sequence activity tree.
@@ -628,7 +628,7 @@ router.get("/sequences/:sequenceId/activities", middlewares.hasReadAccessToModel
  *   "overwrite": true,
  *   "activities": [
  *     {
- *       "name": "Clinc Construction",
+ *       "name": "Clinic Construction",
  *       "startDate": 1603184400000,
  *       "endDate": 1613062800000,
  *       "data": [
@@ -644,7 +644,7 @@ router.get("/sequences/:sequenceId/activities", middlewares.hasReadAccessToModel
  *           "endDate": 1613062800000,
  *           "data": [
  *             {
- *               "key": "Heigh",
+ *               "key": "Height",
  *               "value": 12
  *             }
  *           ],
