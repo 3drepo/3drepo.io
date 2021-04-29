@@ -298,9 +298,7 @@ Sequence.getSequenceById = async (account, model, sequenceId, projection = {}, n
 };
 
 Sequence.sequenceExists = async (account, model, sequenceId) => {
-	if(!(await Sequence.getSequenceById(account, model, utils.stringToUUID(sequenceId), {_id: 1}))) {
-		throw responseCodes.SEQUENCE_NOT_FOUND;
-	}
+	await Sequence.getSequenceById(account, model, utils.stringToUUID(sequenceId), {_id: 1});
 };
 
 Sequence.getSequenceState = async (account, model, stateId) => {
@@ -309,13 +307,13 @@ Sequence.getSequenceState = async (account, model, stateId) => {
 
 Sequence.getList = async (account, model, branch, revision, cleanResponse = false) => {
 	let submodelBranch;
-	let sequencesQuery = {};
+	const sequencesQuery = {};
 
 	if (branch || revision) {
 		const history = await History.getHistory(account, model, branch, revision, {_id: 1});
 
 		submodelBranch = "master";
-		sequencesQuery = {"$or":[{"rev_id": history._id}, {"rev_id": {"$exists": false}}]};
+		sequencesQuery["$or"] = [{"rev_id": history._id}, {"rev_id": {"$exists": false}}];
 	}
 
 	const refNodesBranch = revision ? undefined : "master";
