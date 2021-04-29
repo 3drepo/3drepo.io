@@ -17,7 +17,6 @@
 "use strict";
 
 const db = require("../handler/db");
-const utils = require("../utils");
 const User = require("./user");
 const Job = require("./job");
 const { changePermissions, findModelSettings } = require("./modelSetting");
@@ -250,10 +249,6 @@ invitations.getInvitationsByTeamspace = async (teamspaceName) => {
 		const teamspaceData =  omit(invitationEntry.teamSpaces.find(({teamspace}) => teamspace === teamspaceName), "teamspace");
 		return { email, ...teamspaceData };
 	});
-};
-
-invitations.isInvitation = (user) => {
-	return await utils.isEmail(user);
 };
 
 module.exports = invitations;
