@@ -21,6 +21,7 @@ const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
 const db = require("../handler/db");
 const crypto = require("crypto");
+const yup = require("yup");
 const zxcvbn = require("zxcvbn");
 const utils = require("../utils");
 const Role = require("./role");
@@ -153,7 +154,11 @@ User.authenticate =  async function (logger, username, password) {
 
 	let user = null;
 
-	if (await utils.isEmail(username)) { // if the submited username is the email
+	const emailSchema = yup.object().shape({
+		username: yup.string().min(3).max(254).email()
+	});
+
+	if (await emailSchema.isValid({username})) { // if the submited username is the email
 		user = await User.findByEmail(username);
 	} else {
 		user = await User.findByUserName(username);
