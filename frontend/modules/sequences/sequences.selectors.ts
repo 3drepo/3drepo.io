@@ -20,7 +20,7 @@ import { createSelector } from 'reselect';
 import { STEP_SCALE } from '../../constants/sequences';
 import { GLToHexColor } from '../../helpers/colors';
 import { selectSettings } from '../model';
-import { getDateByStep, getSelectedFrame } from './sequences.helper';
+import { getDateByStep, getSelectedFrame, getSelectedFrameIndex } from './sequences.helper';
 
 export const selectSequencesDomain = (state) => (state.sequences);
 
@@ -138,24 +138,30 @@ export const selectNextKeyFramesDates =  createSelector(
 		(startingDate, scale, interval, maxDate, frames) => {
 			const keyFrames = [];
 			keyFrames[0] = new Date(Math.min(maxDate, (startingDate || new Date(0)).valueOf()));
-			let lastFrame = getSelectedFrame(frames, keyFrames[0]);
-			let nextFrame = null;
-			let date = getDateByStep(startingDate, scale, interval);
-			maxDate = new Date(maxDate);
+			const frameIndex = getSelectedFrameIndex(frames, keyFrames[0]);
 
-			for (let i = 0; i < 3 ; i++) {
-				date = getDateByStep(date, scale, interval);
-				nextFrame = getSelectedFrame(frames, date);
+			if (scale !== STEP_SCALE.FRAME) {
+				let lastFrame = frames[frameIndex];
+				let nextFrame = null;
+				let date = getDateByStep(startingDate, scale, interval);
+				maxDate = new Date(maxDate);
+				for (let i = 0; i < 3 ; i++) {
+					date = getDateByStep(date, scale, interval);
+					nextFrame = getSelectedFrame(frames, date);
 
-				if (scale !== STEP_SCALE.FRAME) {
 					while (lastFrame === nextFrame && date <= maxDate) {
 						date = getDateByStep(date, scale, interval);
 						nextFrame = getSelectedFrame(frames, date);
 					}
+
+					keyFrames.push(date);
+					lastFrame = nextFrame;
+				}
+			} else {
+				for (let i = frameIndex; i < frameIndex + 3 && i < frames.length; ++i) {
+					keyFrames.push(new Date(frames[i].dateTime));
 				}
 
-				keyFrames.push(date);
-				lastFrame = nextFrame;
 			}
 
 			return keyFrames.filter((d) => d <= maxDate);
@@ -189,7 +195,7 @@ export const selectLastSelectedStateId = createSelector(
 
 export const selectIsLoadingFrame = createSelector(
 	selectSelectedStateId, selectStateDefinitions,
-		(stateId, stateDefinitions) => !(stateDefinitions || {}).hasOwnProperty(stateId)
+	(stateId, stateDefinitions) => !(stateDefinitions || {}).hasOwnProperty(stateId)
 );
 
 export const selectSelectedState = createSelector(

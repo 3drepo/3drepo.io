@@ -99,38 +99,29 @@ export function* fetchFrame({ date }) {
 		const frames = yield select(selectFrames);
 		const { state: stateId } = getSelectedFrame(frames, date);
 		const cacheEnabled = yield select(selectCacheSetting);
-		const IndexedDBKey = `${teamspace}.${model}.${stateId}.3DRepo`;
-		let cachedData;
+		const iDBKey = `${teamspace}.${model}.${stateId}.3DRepo`;
 
-		if (cacheEnabled) {
-			cachedData = yield DataCache.getValue(STORE_NAME.FRAMES, IndexedDBKey);
-			const selectedDate = yield select(selectSelectedDate);
-			if (cachedData) {
-				yield put(SequencesActions.setStateDefinition(stateId, cachedData));
-				if (selectedDate.valueOf() === date.valueOf()) {
-					yield put(SequencesActions.setLastSelectedDateSuccess(date));
-				}
-			}
-		}
+		const cachedDataPromise = cacheEnabled ? DataCache.getValue(STORE_NAME.FRAMES, iDBKey) : Promise.resolve();
 
-		if (!cachedData && !loadedStates[stateId]) {
+		if (!loadedStates[stateId]) {
 			// Using directly the promise and 'then' to dispatch the rest of the actions
 			// because with yield it would sometimes stop there forever even though the promise resolved
-			API.getSequenceState(teamspace, model, revision, sequenceId, stateId).then((response) => {
-				const selectedDate = selectSelectedDate(getState());
-				if (selectedDate.valueOf() === date.valueOf()) {
-					dispatch(SequencesActions.setLastSelectedDateSuccess(date));
-				}
+			cachedDataPromise.then((cachedData) => {
+				const fetchPromise = cachedData ? Promise.resolve({data: cachedData})
+					: API.getSequenceState(teamspace, model, revision, sequenceId, stateId);
+				fetchPromise.then((response) => {
+					const selectedDate = selectSelectedDate(getState());
+					if (selectedDate.valueOf() === date.valueOf()) {
+						dispatch(SequencesActions.setLastSelectedDateSuccess(date));
+					}
 
-				if (cacheEnabled) {
-					DataCache.putValue(STORE_NAME.FRAMES, IndexedDBKey, response.data).then(() => {
-						dispatch(SequencesActions.setStateDefinition(stateId, response.data));
-					});
-				} else {
 					dispatch(SequencesActions.setStateDefinition(stateId, response.data));
-				}
-			}).catch((e) => {
-				dispatch(SequencesActions.setStateDefinition(stateId, {}));
+					if (cacheEnabled && !cachedData) {
+						DataCache.putValue(STORE_NAME.FRAMES, iDBKey, response.data);
+					}
+				}).catch((e) => {
+					dispatch(SequencesActions.setStateDefinition(stateId, {}));
+				});
 			});
 		} else {
 			const selectedDate =  yield select(selectSelectedDate);

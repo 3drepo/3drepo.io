@@ -16,6 +16,9 @@
  */
 "use strict";
 
+const yup = require("yup");
+const C = require("../constants");
+const responseCodes = require("../response_codes.js");
 const ChatEvent = require("./chatEvent");
 const Ticket = require("./ticket");
 const utils = require("../utils");
@@ -58,6 +61,45 @@ const fieldTypes = {
 	"viewpoint": "[object Object]",
 	"viewpoints": "[object Array]"
 };
+
+const riskSchema = yup.object().shape({
+	_id: yup.object(),
+	assigned_roles: yup.array(),
+	associated_activity: yup.string(),
+	category: yup.string(),
+	comment: yup.string(),
+	commentIndex: yup.number(),
+	comments: yup.array(),
+	consequence: yup.number(),
+	created: yup.number(),
+	createdAt: yup.number(),
+	creator_role: yup.string(),
+	desc: yup.string().max(C.LONG_TEXT_CHAR_LIM),
+	element: yup.string(),
+	likelihood: yup.number(),
+	location_desc: yup.string(),
+	mitigation_desc: yup.string().max(C.LONG_TEXT_CHAR_LIM),
+	mitigation_detail: yup.string(),
+	mitigation_stage: yup.string(),
+	mitigation_status: yup.string(),
+	mitigation_type: yup.string(),
+	name: yup.string(),
+	number: yup.number(),
+	owner: yup.string(),
+	position: yup.array(),
+	residual_consequence: yup.number(),
+	residual_likelihood: yup.number(),
+	residual_risk: yup.string().max(C.LONG_TEXT_CHAR_LIM),
+	rev_id: yup.object(),
+	risk_factor: yup.string(),
+	safetibase_id: yup.string(),
+	scope: yup.string(),
+	sequence_start: yup.number().nullable(),
+	sequence_end: yup.number().nullable(),
+	thumbnail: yup.string(),
+	viewpoint: yup.object(),
+	viewpoints: yup.array()
+});
 
 const ownerPrivilegeAttributes = [
 	"desc"
@@ -113,12 +155,20 @@ class Risk extends Ticket {
 	}
 
 	async create(account, model, newRisk, sessionId) {
+		if (!riskSchema.isValidSync(newRisk, { strict: true })) {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+
 		newRisk = await super.create(account, model, newRisk);
 		ChatEvent.newRisks(sessionId, account, model, [newRisk]);
 		return newRisk;
 	}
 
 	async update(user, sessionId, account, model, issueId, data) {
+		if (!data || !riskSchema.isValidSync(data, { strict: true })) {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+
 		// 0. Set the black list for attributes
 		const attributeBlacklist = [
 			"_id",

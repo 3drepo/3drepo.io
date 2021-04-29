@@ -143,6 +143,20 @@ describe("Issues", function () {
 			expect(res.body.viewpoint.near).to.equal(issue.viewpoint.near);
 		});
 
+		it("with long desc should fail", function(done) {
+			const issue = Object.assign({"name":"Issue test"}, {
+				...baseIssue,
+				"desc":"LongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLong"
+			});
+
+			agent.post(`/${username}/${model}/issues`)
+				.send(issue)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
 		it("with screenshot should succeed", async function() {
 			const issue = {"name":"Issue test", ...cloneDeep(baseIssue)};
 			issue.viewpoint.screenshot = pngBase64;
@@ -1874,6 +1888,32 @@ describe("Issues", function () {
 					agent.get(`/${username}/${model}/issues/${issueId}`)
 						.expect(200, function(err, res) {
 							expect(res.body.desc === desc.desc);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("too long desc should fail", function(done) {
+			const issue = Object.assign({"name":"Issue test"}, baseIssue);
+			let issueId;
+
+			const desc = { desc: "LongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLong" };
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200 , function(err, res) {
+							issueId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/issues/${issueId}`)
+						.send(desc)
+						.expect(400, function(err, res) {
+							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 							done(err);
 						});
 				}

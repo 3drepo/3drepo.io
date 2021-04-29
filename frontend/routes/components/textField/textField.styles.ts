@@ -15,14 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import styled, { css } from 'styled-components';
+
 import { IconButton, InputLabel, TextField } from '@material-ui/core';
-import styled from 'styled-components';
+
+import { ContainedButton } from '../../viewerGui/components/containedButton/containedButton.component';
 import { LinkableField } from '../linkableField/linkableField.component';
 import { MarkdownField } from '../markdownField/markdownField.component';
 
+const containerEditModeStyles = css`
+	align-items: baseline;
+`;
+
+const containerNonEditModeStyles = css`
+	align-items: flex-end;
+`;
+
 export const Container = styled.div`
 	position: relative;
-` as any;
+	display: flex;
+	${({ editMode }: { editMode: boolean }) => editMode ? containerEditModeStyles : containerNonEditModeStyles};
+`;
 
 export const ActionsLine = styled.div`
 	position: absolute;
@@ -72,6 +85,9 @@ export const StyledLinkableField = styled(LinkableField)`
 `;
 
 export const FieldWrapper = styled.div`
+	position: relative;
+	width: 100%;
+
 	&:after {
 		left: 0;
 		right: 0;
@@ -96,5 +112,11 @@ export const MutableActionsLine = styled(ActionsLine)`
 export const FieldLabel = styled(InputLabel)`
 	&& {
 		display: block;
+	}
+`;
+
+export const CopyButton = styled(ContainedButton)`
+	&& {
+		margin-left: 8px;
 	}
 `;
