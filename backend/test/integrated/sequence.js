@@ -515,6 +515,42 @@ describe("Sequences", function () {
 				});
 		});
 
+		it("with start date in custom sequence with bigger date than the frames should fail ", async () => {
+			const update = { startDate: 1446710400000 }; //Thu Nov 05 2015 08:00:00
+
+			const res = await agent.patch(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`)
+				.send(update)
+				.expect(400);
+
+			expect(res.body.value).to.equal(responseCodes.SEQUENCE_DATE_INCONSISTENT.value);
+		});
+
+		it("with end date in custom sequence with lesser date than the frames should fail ", async () => {
+			const update = { endDate: 1446364800000 }; //Sun Nov 01 2015 08:00:00 GMT+0000
+
+			const res = await agent.patch(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`)
+				.send(update)
+				.expect(400);
+
+			expect(res.body.value).to.equal(responseCodes.SEQUENCE_DATE_INCONSISTENT.value);
+		});
+
+
+		it("dates in custom sequence should succeed", async () => {
+			// Sun Nov 01 2015 08:00:00 GMT+0000 - Thu Nov 06 2015 08:00:00
+			const update = { startDate: 1446364800000,  endDate:1446796800000 };
+
+			await agent.patch(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`)
+				.send(update)
+				.expect(200);
+
+			const res = await agent.get(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`)
+				.expect(200);
+
+			expect(res.body.startDate).to.equal(update.startDate);
+			expect(res.body.endDate).to.equal(update.endDate);
+		});
+
 		it("frame with transformation on custom sequence should fail", function(done) {
 			const transformation_groups = [
 				{

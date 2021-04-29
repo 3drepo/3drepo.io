@@ -27,6 +27,8 @@ function Utils() {
 
 	const self = this;
 
+	this.notEmpty = (obj) => Object.keys(obj).length > 0;
+
 	this.isDate = (value) => {
 		return "[object Date]" === Object.prototype.toString.call(value);
 	};
