@@ -17,6 +17,7 @@
 "use strict";
 
 const db = require("../handler/db");
+const utils = require("../utils");
 const User = require("./user");
 const Job = require("./job");
 const { changePermissions, findModelSettings } = require("./modelSetting");
