@@ -1,12 +1,12 @@
 import axios from 'axios';
-import { memoize } from 'lodash';
-import { clientConfigService } from '../clientConfig';
-
 import { push } from 'connected-react-router';
+import { memoize } from 'lodash';
+
 import { ROUTES } from '../../constants/routes';
 import { AuthActions } from '../../modules/auth';
 import { DialogActions } from '../../modules/dialog';
 import { dispatch } from '../../modules/store';
+import { clientConfigService } from '../clientConfig';
 
 axios.defaults.withCredentials = true;
 

@@ -18,7 +18,7 @@
 import React from 'react';
 
 import { isEqual } from 'lodash';
-import Draggable from 'react-draggable';
+import { Rnd } from 'react-rnd';
 
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { ILegend, ILegendComponentState } from '../../../../modules/legend/legend.redux';
@@ -33,7 +33,7 @@ import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { LegendFooter } from './components/legendFooter';
 import { LegendItem } from './components/legendItem';
 import { PANEL_DEFAULT_HEIGHT, PANEL_DEFAULT_WIDTH } from './legend.constants';
-import { Container, StyledResizableBox } from './legend.styles';
+import { Container } from './legend.styles';
 
 interface IProps {
 	isPending: boolean;
@@ -137,28 +137,28 @@ export class Legend extends React.PureComponent<IProps, IState> {
 		const { isPending, defaultPosition, height } = this.props;
 
 		return (
-			<Draggable
-				handle=".panelTitle"
+			<Rnd
+				dragHandleClassName="panelTitle"
+				default={{
+					...defaultPosition,
+					width: PANEL_DEFAULT_WIDTH,
+					height,
+				}}
+				minWidth={PANEL_DEFAULT_WIDTH - 40}
+				minHeight={PANEL_DEFAULT_HEIGHT}
 				bounds="#gui-container"
-				disabled={this.state.draggableDisabled}
-				defaultPosition={defaultPosition}
+				disableDragging={this.state.draggableDisabled}
 			>
-				<StyledResizableBox
-					width={PANEL_DEFAULT_WIDTH}
-					minConstraints={[PANEL_DEFAULT_WIDTH - 40, PANEL_DEFAULT_HEIGHT]}
-					height={height}
+				<ViewerPanel
+					title="Sequence Legend"
+					renderActions={() => this.renderActions()}
+					pending={isPending}
 				>
-					<ViewerPanel
-						title="Sequence Legend"
-						renderActions={() => this.renderActions()}
-						pending={isPending}
-					>
-						{this.renderEmptyState(!this.state.legend.length && !this.props.newLegendEditMode)}
-						{this.renderLegendList()}
-						<LegendFooter isPending={isPending} />
-					</ViewerPanel>
-				</StyledResizableBox>
-			</Draggable>
+					{this.renderEmptyState(!this.state.legend.length && !this.props.newLegendEditMode)}
+					{this.renderLegendList()}
+					<LegendFooter isPending={isPending} />
+				</ViewerPanel>
+			</Rnd>
 		);
 	}
 }
