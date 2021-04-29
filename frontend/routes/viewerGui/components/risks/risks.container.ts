@@ -65,6 +65,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	downloadItems: RisksActions.downloadRisks,
 	printItems: RisksActions.printRisks,
 	setActiveRisk: RisksActions.setActiveRisk,
+	deactivateRisk: RisksActions.resetComponentState,
 	showRiskDetails: RisksActions.showDetails,
 	goToRisk: RisksActions.goToRisk,
 	toggleShowPins: RisksActions.toggleShowPins,

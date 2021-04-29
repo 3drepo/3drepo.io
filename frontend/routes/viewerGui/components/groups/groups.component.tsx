@@ -438,6 +438,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 				renderActions={this.renderActions}
 				pending={this.props.isPending}
 				id={this.props.id + (this.props.showDetails ? '-details' : '' )}
+				onDeactivateItem={this.resetActiveGroup}
 			>
 				{this.renderFilterPanel(this.props.searchEnabled && !this.props.showDetails)}
 				{this.renderListView(!this.props.showDetails)}

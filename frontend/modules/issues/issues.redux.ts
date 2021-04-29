@@ -38,6 +38,7 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	showDetails: ['revision', 'issueId'],
 	closeDetails: [],
 	setActiveIssue: ['issue', 'revision', 'ignoreViewer'],
+	resetComponentState: [],
 	togglePendingState: ['isPending'],
 	toggleDetailsPendingState: ['isPending'],
 	togglePostCommentPendingState: ['isPending'],
@@ -105,6 +106,10 @@ const updateIssueProps = (issuesMap, issueId, props = {}) => {
 			...props
 		}
 	};
+};
+
+const resetComponentState = (state = INITIAL_STATE) => {
+	return { ...state, componentState: INITIAL_STATE.componentState };
 };
 
 export const togglePendingState = (state = INITIAL_STATE, { isPending }) => ({ ...state, isPending });
@@ -281,6 +286,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.FETCH_ISSUE_SUCCESS]: fetchIssueSuccess,
 	[IssuesTypes.FETCH_ISSUE_FAILURE]: fetchIssueFailure,
 	[IssuesTypes.SET_COMPONENT_STATE]: setComponentState,
+	[IssuesTypes.RESET_COMPONENT_STATE]: resetComponentState,
 	[IssuesTypes.SAVE_ISSUE_SUCCESS]: saveIssueSuccess,
 	[IssuesTypes.TOGGLE_PENDING_STATE]: togglePendingState,
 	[IssuesTypes.TOGGLE_DETAILS_PENDING_STATE]: toggleDetailsPendingState,
