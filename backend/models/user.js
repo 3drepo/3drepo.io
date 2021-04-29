@@ -24,7 +24,7 @@ const crypto = require("crypto");
 const zxcvbn = require("zxcvbn");
 const utils = require("../utils");
 const Role = require("./role");
-const { addDefaultJobs,  findJobByUser, usersWithJob, removeUserFromAnyJob, addUserToJob } = require("./job");
+const { addDefaultJobs, findJobByUser, usersWithJob, removeUserFromAnyJob, addUserToJob } = require("./job");
 
 const Intercom = require("./intercom");
 
@@ -153,7 +153,7 @@ User.authenticate =  async function (logger, username, password) {
 
 	let user = null;
 
-	if (C.EMAIL_REGEXP.test(username)) { // if the submited username is the email
+	if (await utils.isEmail(username)) { // if the submited username is the email
 		user = await User.findByEmail(username);
 	} else {
 		user = await User.findByUserName(username);

@@ -22,6 +22,7 @@ const sharp = require("sharp");
 const nodeuuid = require("uuid/v1");
 const uuidparse = require("uuid-parse");
 const mongo = require("mongodb");
+const yup = require("yup");
 
 function Utils() {
 
@@ -29,6 +30,13 @@ function Utils() {
 
 	this.isDate = (value) => {
 		return "[object Date]" === Object.prototype.toString.call(value);
+	};
+
+	this.isEmail = (value) => {
+		const emailSchema = yup.object().shape({
+			value: yup.string().min(3).max(254).email()
+		});
+		return emailSchema.isValid({value});
 	};
 
 	this.isString = (value) => {
