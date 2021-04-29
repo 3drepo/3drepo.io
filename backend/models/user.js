@@ -21,7 +21,6 @@ const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
 const db = require("../handler/db");
 const crypto = require("crypto");
-const yup = require("yup");
 const zxcvbn = require("zxcvbn");
 const utils = require("../utils");
 const Role = require("./role");
@@ -154,11 +153,7 @@ User.authenticate =  async function (logger, username, password) {
 
 	let user = null;
 
-	const emailSchema = yup.object().shape({
-		username: yup.string().min(3).max(254).email()
-	});
-
-	if (await emailSchema.isValid({username})) { // if the submited username is the email
+	if (C.EMAIL_REGEXP.test(username)) { // if the submited username is the email
 		user = await User.findByEmail(username);
 	} else {
 		user = await User.findByUserName(username);
@@ -370,8 +365,7 @@ User.checkUserNameAvailableAndValid = async function (username) {
 };
 
 User.checkEmailAvailableAndValid = async function (email, exceptUser) {
-	const emailRegex = /^(['a-zA-Z0-9_\-.]+)@([a-zA-Z0-9_\-.]+)\.([a-zA-Z]{2,})$/;
-	if (!email.match(emailRegex)) {
+	if (!C.EMAIL_REGEXP.test(email)) {
 		throw(responseCodes.EMAIL_INVALID);
 	}
 
