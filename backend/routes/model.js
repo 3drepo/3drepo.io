@@ -1572,6 +1572,32 @@ router.get("/:model/revision/:revId/subModelRevisions", middlewares.hasReadAcces
 router.delete("/:model", middlewares.hasDeleteAccessToModel, deleteModel);
 
 /**
+ * @api {post} /:teamspace/:model/upload/request Upload model request
+ * @apiName uploadModelRequest
+ * @apiGroup Model
+ * @apiDescription Model upload request for Microsoft Logic Apps.
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model id to upload.
+ * @apiParam (Request body) {String} x-ms-transfer-mode Indicates that the content is uploaded in chunks
+ * @apiParam (Request body) {Number} x-ms-content-length The entire content size in bytes before chunking
+ *
+ * @apiSuccess (200) {Number} x-ms-chunk-size The suggested chunk size in bytes
+ * @apiSuccess (200) {String} Location The URL location where to send the HTTP PATCH messages
+ *
+ * @apiExample {post} Example usage:
+ * POST /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/request HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success-Response:
+ * HTTP/1.1 200 OK
+ * {
+ * 	"x-ms-chunk-size": 5000000
+ * 	"Location": /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload
+ * }
+ */
+router.post("/:model/upload/request", middlewares.hasUploadAccessToModel, uploadModelRequest);
+
+/**
  * @api {post} /:teamspace/:model/upload Upload Model.
  * @apiName uploadModel
  * @apiGroup Model
@@ -1907,6 +1933,13 @@ function downloadLatest(req, res, next) {
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
+}
+
+function uploadModelRequest(req, res, next) {
+	const account = req.params.account;
+	const model = req.params.model;
+
+	responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {"Location":`/api/${account}/${model}/upload`});
 }
 
 function uploadModel(req, res, next) {
