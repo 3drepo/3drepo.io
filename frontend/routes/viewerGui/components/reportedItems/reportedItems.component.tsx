@@ -94,11 +94,19 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 	public listViewRef = React.createRef<HTMLElement>();
 	public listContainerRef = React.createRef<any>();
+	public addItemButtonRef = React.createRef<HTMLElement>();
 
-	public handleClickOutside = (e) => {
-		const button = document.getElementById(this.props.id + '-add-new-button');
-		if (this.props?.onDeactivateItem && this.listContainerRef?.current && !this.listContainerRef.current.contains(e.target) && e.target !== button) {
-			this.props.onDeactivateItem();
+	public handleClickOutside = ({ target }) => {
+		const { onDeactivateItem } = this.props;
+
+		if (onDeactivateItem) {
+			const button = this.addItemButtonRef.current;
+			const listContainer = this.listContainerRef.current;
+			const containsButton = target === button || button.contains(target);
+
+			if (!listContainer.contains(target) && !containsButton) {
+				onDeactivateItem();
+			}
 		}
 	}
 
@@ -129,6 +137,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 			<ViewerPanelFooter onClick={this.handleClickOutside} container alignItems="center" justify="space-between">
 				<Summary>{this.listFooterText}</Summary>
 				<ViewerPanelButton
+					ref={this.addItemButtonRef}
 					aria-label="Add item"
 					onClick={this.handleAddNewItem}
 					color="secondary"

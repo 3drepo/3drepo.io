@@ -33,7 +33,7 @@ export const RisksContainer = styled(ReportedItems).attrs({
 	min-height: ${VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.RISKS]}px;
 ` as any;
 
-export const ListContainer = styled.ul<{ deactivate: boolean }>`
+export const ListContainer = styled.ul`
 	height: auto;
 	padding: 0;
 	margin: 0;

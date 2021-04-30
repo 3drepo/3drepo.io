@@ -135,6 +135,17 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	};
 
 	public groupsContainerRef = React.createRef<any>();
+	public addItemButtonRef = React.createRef<HTMLElement>();
+
+	public handleClickOutside = ({ target }) => {
+		const button = this.addItemButtonRef.current;
+		const listContainer = this.groupsContainerRef.current;
+		const containsButton = target === button || button.contains(target);
+
+		if (!listContainer.contains(target) && !containsButton) {
+			this.resetActiveGroup();
+		}
+	}
 
 	public renderHeaderNavigation = () => {
 		const initialIndex = this.state.filteredGroups.findIndex(({ _id }) => this.props.activeGroupId === _id);
@@ -182,16 +193,17 @@ export class Groups extends React.PureComponent<IProps, IState> {
 
 	public renderListView = renderWhenTrue(() => (
 		<>
-			<ViewerPanelContent>
+			<ViewerPanelContent onClick={this.handleClickOutside}>
 				{this.renderEmptyState(!this.props.searchEnabled && !this.state.filteredGroups.length)}
 				{this.renderNotFound(this.props.searchEnabled && !this.state.filteredGroups.length)}
 				{this.renderGroupsList(this.state.filteredGroups.length)}
 			</ViewerPanelContent>
-			<ViewerPanelFooter container alignItems="center" justify="space-between">
+			<ViewerPanelFooter onClick={this.handleClickOutside} container alignItems="center" justify="space-between">
 				<Summary>
 					{`${this.state.filteredGroups.length} groups displayed`}
 				</Summary>
 				<ViewerPanelButton
+					ref={this.addItemButtonRef}
 					aria-label="Add group"
 					onClick={this.props.setNewGroup}
 					color="secondary"
@@ -438,7 +450,6 @@ export class Groups extends React.PureComponent<IProps, IState> {
 				renderActions={this.renderActions}
 				pending={this.props.isPending}
 				id={this.props.id + (this.props.showDetails ? '-details' : '' )}
-				onDeactivateItem={this.resetActiveGroup}
 			>
 				{this.renderFilterPanel(this.props.searchEnabled && !this.props.showDetails)}
 				{this.renderListView(!this.props.showDetails)}
