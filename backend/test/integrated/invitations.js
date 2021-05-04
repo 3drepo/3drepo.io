@@ -237,7 +237,6 @@ describe("Invitations ", function () {
 
 		await User.verify(username, token, {skipImportToyModel : true, skipCreateBasicPlan: true});
 
-
 		const { body: {members}} = await agents.sub_all.get(membersUrl('sub_all'));
 		let invited = members.find(selectInvitedUser);
 		expect(invited.permissions[0],'invited user should be a teamspace admin').to.equal("teamspace_admin");
