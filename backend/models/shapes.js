@@ -51,4 +51,9 @@ Shapes.fetch = async (account, model, subCollectionName, ids) => {
 	await DB.find(account, getCollectionName(model, subCollectionName), query);
 };
 
+Shapes.delete =  async (account, model, subCollectionName, id) => {
+	const query = { _id: utils.stringsToUUIDs(id) };
+	await DB.delete(account, getCollectionName(model, subCollectionName), query);
+};
+
 module.exports = Shapes;
