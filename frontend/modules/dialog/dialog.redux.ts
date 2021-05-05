@@ -169,7 +169,8 @@ const showUnauthorizedModelAccessDialog = (state = INITIAL_STATE, action) => {
 		title: 'Unauthorized Access',
 		content: 'Insufficient permission to access the model',
 		template: Dialogs.UnauthorizedAccessDialog,
-		onCancel: () => push(ROUTES.TEAMSPACES)
+		onCancel: () => push(ROUTES.TEAMSPACES),
+		onConfirm: () => {}
 	};
 
 	return showDialog(state, { config });
