@@ -170,7 +170,7 @@ export class App extends React.PureComponent<IProps, IState> {
 					{this.renderStaticRoutes()}
 					<Route component={NotFound} />
 				</Switch>
-				<DialogContainer history={this.props.history} />
+				<DialogContainer />
 				<SnackbarContainer />
 				{!Boolean(clientConfigService.intercomLicense) &&  <LiveChat />}
 				<Intercom />

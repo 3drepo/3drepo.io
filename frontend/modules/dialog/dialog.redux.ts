@@ -16,9 +16,11 @@
  */
 
 import { DialogProps as IDialogProps } from '@material-ui/core/Dialog';
+import { push } from 'connected-react-router';
 import { get, omit } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 import uuid from 'uuidv4';
+import { ROUTES } from '../../constants/routes';
 import * as Dialogs from '../../routes/components/dialogContainer/components';
 
 export interface IDialogConfig {
@@ -27,7 +29,6 @@ export interface IDialogConfig {
 	template?: () => JSX.Element;
 	content?: string;
 	data?: any;
-	permissionDenied?: boolean;
 	logError?: string;
 	DialogProps?: IDialogProps;
 	buttonVariant?: 'text' | 'outlined' | 'contained';
@@ -55,7 +56,8 @@ export const { Types: DialogTypes, Creators: DialogActions } = createActions({
 	setPendingState: ['isPending'],
 	showScreenshotDialog: ['config'],
 	showNewUpdateDialog: ['config'],
-	showLoggedOutDialog: []
+	showLoggedOutDialog: [],
+	showUnauthorizedModelAccessDialog: ['config'],
 }, { prefix: 'DIALOG/' });
 
 export const INITIAL_STATE = {
@@ -80,7 +82,6 @@ const showErrorDialog = (state = INITIAL_STATE, action) => {
 	const config = {
 		title: 'Error',
 		template: Dialogs.ErrorDialog,
-		permissionDenied: action.status === 401,
 		data: {
 			method,
 			dataType,
@@ -163,6 +164,17 @@ const showLoggedOutDialog = (state = INITIAL_STATE, action) => {
 	return showDialog(state, { config });
 };
 
+const showUnauthorizedModelAccessDialog = (state = INITIAL_STATE, action) => {
+	const config = {
+		title: 'Unauthorized Access',
+		content: 'Insufficient permission to access the model',
+		template: Dialogs.UnauthorizedAccessDialog,
+		onCancel: () => push(ROUTES.TEAMSPACES)
+	};
+
+	return showDialog(state, { config });
+};
+
 export const reducer = createReducer({...INITIAL_STATE}, {
 	[DialogTypes.HIDE_DIALOG]: hideDialog,
 	[DialogTypes.SHOW_DIALOG]: showDialog,
@@ -172,5 +184,6 @@ export const reducer = createReducer({...INITIAL_STATE}, {
 	[DialogTypes.SHOW_REVISIONS_DIALOG]: showRevisionsDialog,
 	[DialogTypes.SHOW_SCREENSHOT_DIALOG]: showScreenshotDialog,
 	[DialogTypes.SHOW_NEW_UPDATE_DIALOG]: showNewUpdateDialog,
-	[DialogTypes.SHOW_LOGGED_OUT_DIALOG]: showLoggedOutDialog
+	[DialogTypes.SHOW_LOGGED_OUT_DIALOG]: showLoggedOutDialog,
+	[DialogTypes.SHOW_UNAUTHORIZED_MODEL_ACCESS_DIALOG]: showUnauthorizedModelAccessDialog,
 });

@@ -52,18 +52,19 @@ import {
 
 function* fetchData({ teamspace, model }) {
 	try {
-		const {data: metaKeys} = yield API.getMetaKeys(teamspace, model);
-		yield put(ModelActions.fetchMetaKeysSuccess(metaKeys));
+		yield put(ModelActions.setPendingState(true));
+		const { data: settings } = yield API.getModelSettings(teamspace, model);
+
+		yield put(ModelActions.fetchSettingsSuccess(settings));
+		yield put(ModelActions.setPendingState(false));
 	} catch (e) {
-		if (e?.response.status === 401) {
-			yield put(DialogActions.showEndpointErrorDialog('access', 'model', e));
-		} else {
-			yield put(DialogActions.showEndpointErrorDialog('fetch', 'meta keys', e));
-		}
-
-		return;
+			if (e.response?.status === 401) {
+				yield put(DialogActions.showUnauthorizedModelAccessDialog());
+			} else {
+				yield put(DialogActions.showEndpointErrorDialog('fetch', 'model settings', e));
+			}
+			return;
 	}
-
 	try {
 		const { username } = yield select(selectCurrentUser);
 		yield all([
@@ -73,7 +74,7 @@ function* fetchData({ teamspace, model }) {
 			put(TreeActions.startListenOnSelections()),
 			put(ViewerGuiActions.startListenOnClickPin()),
 			put(ViewerGuiActions.startListenOnModelLoaded()),
-			put(ModelActions.fetchSettings(teamspace, model)),
+			put(ModelActions.fetchMetaKeys(teamspace, model)),
 			put(ModelActions.waitForSettingsAndFetchRevisions(teamspace, model)),
 			put(TreeActions.setIsTreeProcessed(false)),
 			put(ViewpointsActions.fetchViewpoints(teamspace, model)),
