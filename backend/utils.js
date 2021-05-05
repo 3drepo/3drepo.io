@@ -86,7 +86,7 @@ function Utils() {
 		return value;
 	};
 
-	this.deserialiseQuerryFilters = (queryparams, fields) => {
+	this.deserialiseQueryFilters = (queryparams, fields) => {
 		const keys = _.keys(fields);
 		return keys.reduce((acum, key) => {
 			if (queryparams[key]) {
