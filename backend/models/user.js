@@ -24,7 +24,7 @@ const crypto = require("crypto");
 const zxcvbn = require("zxcvbn");
 const utils = require("../utils");
 const Role = require("./role");
-const { addDefaultJobs,  findJobByUser, usersWithJob, removeUserFromAnyJob, addUserToJob } = require("./job");
+const { addDefaultJobs, findJobByUser, usersWithJob, removeUserFromAnyJob, addUserToJob } = require("./job");
 
 const Intercom = require("./intercom");
 
@@ -365,8 +365,7 @@ User.checkUserNameAvailableAndValid = async function (username) {
 };
 
 User.checkEmailAvailableAndValid = async function (email, exceptUser) {
-	const emailRegex = /^(['a-zA-Z0-9_\-.]+)@([a-zA-Z0-9_\-.]+)\.([a-zA-Z]{2,})$/;
-	if (!email.match(emailRegex)) {
+	if (!C.EMAIL_REGEXP.test(email)) {
 		throw(responseCodes.EMAIL_INVALID);
 	}
 

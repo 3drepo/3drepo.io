@@ -16,14 +16,13 @@
  */
 
 import { all, put, select, takeLatest } from 'redux-saga/effects';
-import { calculateTotalMeshes } from '../../helpers/tree';
-import { dispatch, getState } from '../store';
 
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { GROUPS_TYPES } from '../../constants/groups';
 import { getRandomColor, hexToGLColor } from '../../helpers/colors';
 import { normalizeGroup, prepareGroup } from '../../helpers/groups';
 import { searchByFilters } from '../../helpers/searching';
+import { calculateTotalMeshes } from '../../helpers/tree';
 import * as API from '../../services/api';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { Viewer } from '../../services/viewer/viewer';
@@ -31,6 +30,7 @@ import { ChatActions } from '../chat';
 import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
+import { dispatch, getState } from '../store';
 import { TreeActions } from '../tree';
 import { ViewpointsActions } from '../viewpoints';
 import { GroupsActions, GroupsTypes, INITIAL_CRITERIA_FIELD_STATE } from './groups.redux';
