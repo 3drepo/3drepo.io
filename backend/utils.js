@@ -20,6 +20,7 @@
 const _ = require("lodash");
 const sharp = require("sharp");
 const nodeuuid = require("uuid/v1");
+const yup = require("yup");
 const uuidparse = require("uuid-parse");
 const mongo = require("mongodb");
 
@@ -67,6 +68,8 @@ function Utils() {
 		}
 	};
 
+	this.uuidSchema = yup.object().test((val) => this.isUUIDObject(val));
+
 	this.convertQueryValue = (value, type) => {
 		switch(type) {
 			case "number":
@@ -83,7 +86,7 @@ function Utils() {
 		return value;
 	};
 
-	this.deserialiseQueryFilters = (queryparams, fields) => {
+	this.deserialiseQuerryFilters = (queryparams, fields) => {
 		const keys = _.keys(fields);
 		return keys.reduce((acum, key) => {
 			if (queryparams[key]) {

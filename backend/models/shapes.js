@@ -23,17 +23,24 @@ const responseCodes = require("../response_codes.js");
 const getCollectionName = (model, subCollectionName) => `${model}.${subCollectionName}.shapes`;
 
 const coordinatesSchema = yup.array().of(yup.number()).length(3);
-const colorSchema = yup.array().of(yup.number().min(0).max(1)).length(3);
+const colorSchema = yup.array().of(yup.number().min(0).max(1)).length(4);
 
-const shapesSchema = yup.object.shape({
-	"positions": yup.array().of(coordinatesSchema),
+const shapesSchema = yup.object().shape({
+	"positions": yup.array().of(coordinatesSchema).required(),
 	"normals": yup.array().of(coordinatesSchema),
 	"value": yup.number().min(0),
-	"color": colorSchema,
-	"type": yup.mixed().oneOf([0, 1])
+	"color": colorSchema.required(),
+	"type": yup.mixed().oneOf([0, 1]).required(),
+	"ticket_id": utils.uuidSchema.required()
 }).noUnknown();
 
 const Shapes = {};
+
+Shapes.clean = (shape) => {
+	shape._id = utils.uuidToString(shape._id);
+	delete shape.ticket_id;
+	return shape;
+};
 
 Shapes.create = async (account, model, subCollectionName, shape) => {
 	if (!shapesSchema.isValidSync(shape, { strict: true })) {
@@ -42,13 +49,12 @@ Shapes.create = async (account, model, subCollectionName, shape) => {
 
 	shape._id = utils.generateUUID();
 	await DB.insert(account, getCollectionName(model, subCollectionName), shape);
-
-	return shape;
+	return shape._id;
 };
 
-Shapes.fetch = async (account, model, subCollectionName, ids) => {
+Shapes.get = async (account, model, subCollectionName, ids) => {
 	const query = { _id: { $in: utils.stringsToUUIDs(ids)} };
-	await DB.find(account, getCollectionName(model, subCollectionName), query);
+	return await DB.find(account, getCollectionName(model, subCollectionName), query);
 };
 
 Shapes.delete =  async (account, model, subCollectionName, id) => {

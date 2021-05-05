@@ -24,7 +24,7 @@ const { login } = require("../helpers/users.js");
 const { createIssue } = require("../helpers/issues.js");
 const { deleteNotifications, fetchNotification } = require("../helpers/notifications.js");
 const { createModel } = require("../helpers/models.js");
-const { cloneDeep } = require("lodash");
+const { cloneDeep, omit } = require("lodash");
 
 describe("Shapes", () => {
 	let server;
@@ -37,31 +37,30 @@ describe("Shapes", () => {
 	const model = "project1";
 
 	const pointToPointShape =  {
-		"uuid": "77650b64-3035-4750-9e67-3d4493d61473",
 		"positions": [
-			{
-				"x": -60.000022888183594,
-				"y": -5.104172706604004,
-				"z": 25.35483169555664
-			},
-			{
-				"x": -59.99989318847656,
-				"y": -8.379132270812988,
-				"z": 8.848260879516602
-			}
+			[
+				-60.000022888183594,
+				-5.104172706604004,
+				25.35483169555664
+			],
+			[
+				-59.99989318847656,
+				-8.379132270812988,
+				8.848260879516602
+			]
 		],
 		"normals": [],
 		"value": 16.828317642211914,
-		"color": {
-			"r": 0.04704999923706055,
-			"g": 0.18431000411510468,
-			"b": 0.32940998673439026,
-			"a": 1
-		},
+		"color": [
+			0.04704999923706055,
+			0.18431000411510468,
+			0.32940998673439026,
+			1
+		],
 		"type": 0
 	};
 
-	const polygonShape = {"uuid":"2b76d533-b3fe-42e1-8f14-673599ae6d6a","positions":[{"x":-60.000038146972656,"y":-9.8860445022583,"z":5.308515548706055},{"x":-60.000160217285156,"y":-9.988062858581543,"z":0.5673561096191406},{"x":-59.99986267089844,"y":-3.359354019165039,"z":0.1131591796875},{"x":-50.14781951904297,"y":-8.279975891113281,"z":1.2230510711669922},{"x":-50.822227478027344,"y":-7.942905426025391,"z":11.220046997070312},{"x":-59.99982452392578,"y":-3.374828338623047,"z":5.719915390014648},{"x":-59.99979782104492,"y":-9.81118392944336,"z":8.075897216796875}],"normals":[{"x":-1,"y":0,"z":0},{"x":-1,"y":0,"z":0},{"x":-1,"y":0,"z":0},{"x":0.44721364974975586,"y":0.8944271802902222,"z":0},{"x":0.44721364974975586,"y":0.8944271802902222,"z":0},{"x":-1,"y":0,"z":0},{"x":-1,"y":0,"z":0}],"value":155.05921936035156,"color":{"r":0.7760000228881836,"g":0.32499998807907104,"b":0.5490000247955322,"a":1},"type":1};
+	const polygonShape = {"positions":[[-60.000038146972656,-9.8860445022583,5.308515548706055],[-60.000160217285156,-9.988062858581543,0.5673561096191406],[-59.99986267089844,-3.359354019165039,0.1131591796875],[-50.14781951904297,-8.279975891113281,1.2230510711669922],[-50.822227478027344,-7.942905426025391,11.220046997070312],[-59.99982452392578,-3.374828338623047,5.719915390014648],[-59.99979782104492,-9.81118392944336,8.075897216796875]],"normals":[[-1,0,0],[-1,0,0],[-1,0,0],[0.44721364974975586,0.8944271802902222,0],[0.44721364974975586,0.8944271802902222, 0],[-1,0,0],[-1,0,0]],"value":155.05921936035156,"color":[0.7760000228881836,0.32499998807907104,0.5490000247955322,1],"type":1};
 
 	const baseIssue = {
 		"status": "open",
@@ -108,7 +107,9 @@ describe("Shapes", () => {
 
 	let issueId = null;
 
-	const shapeIssue =  { "name":"shapes issue", ...cloneDeep(baseIssue), shapes : [ polygonShape, pointToPointShape]};
+	const shapeIssue =  { "name":"shapes issue", ...cloneDeep(baseIssue), shapes : [ pointToPointShape, polygonShape]};
+	const chopIds = (objs) => objs.map(obj=> omit(obj, '_id'));
+
 
 	describe("in issue", function() {
 		it("when created should succeed", async () => {
@@ -121,10 +122,14 @@ describe("Shapes", () => {
 
 		it ("should be reflected when fetching the issue", async()=> {
 			const res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
-			const createdIssue = {...cloneDeep(baseIssue), _id: issueId};
-			expect(res.body).to.be.deep.equal(createdIssue);
+			const shapes_ids = res.body.shapes.map((shape) => shape._id);
 
-			// console.log(JSON.stringify(res.body, null, '\t'));
+			expect(shapes_ids).to.be.an('array').and.to.have.lengthOf(shapeIssue.shapes.length);
+			shapes_ids.forEach((id) => {
+				expect(id).to.be.an('string');
+			})
+
+			expect(chopIds(res.body.shapes)).to.be.deep.equal(shapeIssue.shapes);
 		});
 	})
 

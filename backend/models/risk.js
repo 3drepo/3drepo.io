@@ -56,7 +56,8 @@ const fieldTypes = {
 	"sequence_end": "[object Number]",
 	"thumbnail": "[object String]",
 	"viewpoint": "[object Object]",
-	"viewpoints": "[object Array]"
+	"viewpoints": "[object Array]",
+	"shapes": "[object Array]"
 };
 
 const ownerPrivilegeAttributes = [

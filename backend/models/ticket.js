@@ -35,7 +35,7 @@ const { systemLogger } = require("../logger.js");
 
 const nodeuuid = require("uuid/v1");
 const Comment = require("./comment");
-
+const Shapes = require("./shapes");
 const FileRef = require("./fileRef");
 const config = require("../config.js");
 const extensionRe = /\.(\w+)$/;
@@ -131,6 +131,11 @@ class Ticket extends View {
 
 			foundTicket.resources = resources;
 			delete foundTicket.refs;
+		}
+
+		if (!noClean && foundTicket.shapes) {
+			const shapes = await Shapes.get(account, model, this.collName, foundTicket.shapes);
+			foundTicket.shapes = shapes.map(Shapes.clean);
 		}
 
 		if (!noClean) {
@@ -420,6 +425,15 @@ class Ticket extends View {
 		newTicket.assigned_roles = newTicket.assigned_roles || [];
 		newTicket._id = utils.stringToUUID(newTicket._id || nodeuuid());
 		newTicket.created = parseInt(newTicket.created || (new Date()).getTime());
+
+		const shapes = newTicket.shapes;
+
+		if (shapes) {
+			const ticket_id = newTicket._id;
+			const shapeIds = await Promise.all(newTicket.shapes.map(shape => Shapes.create(account, model, this.collName, {...shape, ticket_id })));
+			newTicket.shapes = shapeIds;
+		}
+
 		const ownerJob = await findJobByUser(account, newTicket.owner);
 		if (ownerJob) {
 			newTicket.creator_role = ownerJob._id;
@@ -465,6 +479,11 @@ class Ticket extends View {
 		const settings = await findModelSettingById(account, model);
 
 		await coll.insert(newTicket);
+
+		if (shapes) {
+			newTicket.shapes = shapes;
+		}
+
 		newTicket.typePrefix = newTicket.typePrefix || settings.type || "";
 		newTicket = this.clean(account, model, newTicket);
 		return newTicket;
