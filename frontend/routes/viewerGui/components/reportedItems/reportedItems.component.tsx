@@ -94,19 +94,12 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 	public listViewRef = React.createRef<HTMLElement>();
 	public listContainerRef = React.createRef<any>();
-	public addItemButtonRef = React.createRef<HTMLElement>();
 
-	public handleClickOutside = ({ target }) => {
+	public handleClickOutside = () => {
 		const { onDeactivateItem } = this.props;
 
 		if (onDeactivateItem) {
-			const button = this.addItemButtonRef.current;
-			const listContainer = this.listContainerRef.current;
-			const containsButton = target === button || button.contains(target);
-
-			if (!listContainer.contains(target) && !containsButton) {
-				onDeactivateItem();
-			}
+			onDeactivateItem();
 		}
 	}
 
@@ -130,14 +123,15 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	public renderListView = renderWhenTrue(() => (
 		<>
 			<ViewerPanelContent onClick={this.handleClickOutside} ref={this.listViewRef}>
-				{this.renderEmptyState(!this.props.searchEnabled && !this.props.items.length)}
-				{this.renderNotFound(this.props.searchEnabled && !this.props.items.length)}
-				{this.renderItemsList(this.props.items)}
+				<div onClick={(event: React.MouseEvent<HTMLDivElement>) => event.stopPropagation()}>
+					{this.renderEmptyState(!this.props.searchEnabled && !this.props.items.length)}
+					{this.renderNotFound(this.props.searchEnabled && !this.props.items.length)}
+					{this.renderItemsList(this.props.items)}
+				</div>
 			</ViewerPanelContent>
 			<ViewerPanelFooter onClick={this.handleClickOutside} container alignItems="center" justify="space-between">
 				<Summary>{this.listFooterText}</Summary>
 				<ViewerPanelButton
-					ref={this.addItemButtonRef}
 					aria-label="Add item"
 					onClick={this.handleAddNewItem}
 					color="secondary"

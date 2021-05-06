@@ -66,7 +66,6 @@ interface IProps {
 	downloadItems: (teamspace, model) => void;
 	printItems: (teamspace, model) => void;
 	setActiveIssue: (issue, revision?) => void;
-	deactivateIssue: () => void;
 	showIssueDetails: (revision, issueId ) => void;
 	goToIssue: (issue) => void;
 	closeDetails: () => void;
@@ -149,9 +148,7 @@ export class Issues extends React.PureComponent<IProps, any> {
 		this.props.setActiveIssue(item, this.props.revision);
 	}
 
-	public deactivateIssue = () => {
-		this.props.deactivateIssue();
-	}
+	public deactivateIssue = () => this.setActiveIssue(null);
 
 	public getFilterValues(property) {
 		return property.map(({ value, name, label }) => {

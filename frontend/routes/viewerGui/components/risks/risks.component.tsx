@@ -55,7 +55,6 @@ interface IProps {
 	downloadItems: (teamspace, model) => void;
 	printItems: (teamspace, model) => void;
 	setActiveRisk: (risk, revision?) => void;
-	deactivateRisk: () => void;
 	showRiskDetails: (revision, riskId) => void;
 	goToRisk: (risk) => void;
 	closeDetails: () => void;
@@ -127,9 +126,7 @@ export class Risks extends React.PureComponent<IProps, any> {
 		this.props.setActiveRisk(item, this.props.revision);
 	}
 
-	public deactivateRisk = () => {
-		this.props.deactivateRisk();
-	}
+	public deactivateRisk = () => this.props.setActiveRisk(null);
 
 	public handleToggleFilters = (searchEnabled) => {
 		const changes: any = { searchEnabled };

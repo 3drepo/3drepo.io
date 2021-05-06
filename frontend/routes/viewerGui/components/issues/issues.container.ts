@@ -63,7 +63,6 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	downloadItems: IssuesActions.downloadIssues,
 	printItems: IssuesActions.printIssues,
 	setActiveIssue: IssuesActions.setActiveIssue,
-	deactivateIssue: IssuesActions.resetComponentState,
 	showIssueDetails: IssuesActions.showDetails,
 	goToIssue: IssuesActions.goToIssue,
 	toggleShowPins: IssuesActions.toggleShowPins,
