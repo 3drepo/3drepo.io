@@ -23,7 +23,7 @@ import StepBackIcon from '@material-ui/icons/FastRewind';
 import PlayArrow from '@material-ui/icons/PlayArrow';
 import Replay from '@material-ui/icons/Replay';
 import Stop from '@material-ui/icons/Stop';
-import { findIndex, noop } from 'lodash';
+import { debounce, findIndex, noop } from 'lodash';
 
 import { STEP_SCALE } from '../../../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../../../constants/viewerGui';
@@ -71,6 +71,7 @@ interface IState {
 	stepInterval: number;
 	stepScale: STEP_SCALE;
 	waitingForFrameLoad: boolean;
+	sliderValue: number | null;
 }
 
 export class SequencePlayer extends React.PureComponent<IProps, IState> {
@@ -82,10 +83,15 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 		stepInterval: 1,
 		stepScale: STEP_SCALE.DAY,
 		waitingForFrameLoad: false,
+		sliderValue: null,
 	};
 
 	get currentTime() {
 		return (+this.state.value) - (+this.props.min);
+	}
+
+	get sliderDate() {
+		return  new Date( this.state.sliderValue + this.props.min.valueOf() );
 	}
 
 	get totalTime() {
@@ -117,7 +123,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 			this.props.onChange(newValue);
 		}
 
-		this.setState({value: newValue});
+		this.setState({value: newValue, sliderValue: null});
 	}
 
 	public setTime = (currentTime) => {
@@ -129,6 +135,8 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 		this.stop();
 		this.setTime(val);
 	}
+
+	public debouncedGoto = debounce(this.goTo, 150);
 
 	public gotoDate = (val) => {
 		this.stop();
@@ -289,7 +297,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 								shouldDisableDate={(date) => isDateOutsideRange(this.props.min, this.props.max, date.$d)}
 								name="date"
 								inputId="1"
-								value={value}
+								value={this.sliderDate || value}
 								format={LONG_DATE_TIME_FORMAT_NO_MINUTES}
 								onChange={(e) => this.gotoDate(new Date(Math.floor(e.target.value / MILLI_PER_HOUR) * MILLI_PER_HOUR))}
 								placeholder="date"
@@ -321,8 +329,11 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 							<SequenceSlider
 								max={this.totalTime}
 								step={36000000}
-								value={this.currentTime}
-								onChange={(e, val) => this.goTo(val)}
+								value={this.state.sliderValue || this.currentTime}
+								onChange={(e, val) =>  {
+									this.debouncedGoto(val);
+									this.setState({sliderValue: val});
+								}}
 							/>
 						</Grid>
 					</SliderRow>
