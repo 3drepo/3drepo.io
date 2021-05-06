@@ -36,6 +36,7 @@ before_install:
     - cd backend && mongorestore
     - cd ../../../
     - cp -r ./submodules/tests/frontend/staticPages/legal/ ./resources/legal
+    - echo hi
 
 install:
     - cd ./backend
