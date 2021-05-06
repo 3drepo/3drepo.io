@@ -57,7 +57,7 @@ export const { Types: DialogTypes, Creators: DialogActions } = createActions({
 	showScreenshotDialog: ['config'],
 	showNewUpdateDialog: ['config'],
 	showLoggedOutDialog: [],
-	showUnauthorizedModelAccessDialog: ['config'],
+	showRedirectToTeamspaceDialog: ['error'],
 }, { prefix: 'DIALOG/' });
 
 export const INITIAL_STATE = {
@@ -164,13 +164,20 @@ const showLoggedOutDialog = (state = INITIAL_STATE, action) => {
 	return showDialog(state, { config });
 };
 
-const showUnauthorizedModelAccessDialog = (state = INITIAL_STATE, action) => {
+const showRedirectToTeamspaceDialog = (state = INITIAL_STATE, action) => {
+	const { method, dataType, error } = action;
+	const status = get(error.response, 'status', 'Implementation error');
+	const message = get(error.response, 'data.message', error.message);
 	const config = {
-		title: 'Unauthorized Access',
-		content: 'Insufficient permission to access the model',
-		template: Dialogs.UnauthorizedAccessDialog,
+		title: 'Error',
+		content: 'We cannot load the model due to the following:',
+		template: Dialogs.RedirectToTeamspaceDialog,
 		onCancel: () => push(ROUTES.TEAMSPACES),
-		onConfirm: () => {}
+		onConfirm: () => push(ROUTES.TEAMSPACES),
+		data: {
+			status,
+			message,
+		}
 	};
 
 	return showDialog(state, { config });
@@ -186,5 +193,5 @@ export const reducer = createReducer({...INITIAL_STATE}, {
 	[DialogTypes.SHOW_SCREENSHOT_DIALOG]: showScreenshotDialog,
 	[DialogTypes.SHOW_NEW_UPDATE_DIALOG]: showNewUpdateDialog,
 	[DialogTypes.SHOW_LOGGED_OUT_DIALOG]: showLoggedOutDialog,
-	[DialogTypes.SHOW_UNAUTHORIZED_MODEL_ACCESS_DIALOG]: showUnauthorizedModelAccessDialog,
+	[DialogTypes.SHOW_REDIRECT_TO_TEAMSPACE_DIALOG]: showRedirectToTeamspaceDialog,
 });

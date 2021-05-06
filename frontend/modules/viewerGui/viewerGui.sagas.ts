@@ -57,14 +57,11 @@ function* fetchData({ teamspace, model }) {
 
 		yield put(ModelActions.fetchSettingsSuccess(settings));
 		yield put(ModelActions.setPendingState(false));
-	} catch (e) {
-			if (e.response?.status === 401) {
-				yield put(DialogActions.showUnauthorizedModelAccessDialog());
-			} else {
-				yield put(DialogActions.showEndpointErrorDialog('fetch', 'model settings', e));
-			}
-			return;
+	} catch (error) {
+		yield put(DialogActions.showRedirectToTeamspaceDialog(error));
+		return;
 	}
+
 	try {
 		const { username } = yield select(selectCurrentUser);
 		yield all([
