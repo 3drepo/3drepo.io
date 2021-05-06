@@ -207,7 +207,7 @@ Viewpoint.createViewpoint = async (account, model, collName, routePrefix, hostId
 		if(vpData[group]) {
 			groupPromises.push(
 				Groups.create(account, model, undefined, undefined, null, undefined, {...vpData[group], [groupIdField]: utils.stringToUUID(hostId)}).then((groupResult) => {
-					viewpoint[`${group}_id`] = groupResult._id;
+					viewpoint[`${group}_id`] = utils.stringToUUID(groupResult._id);
 				})
 			);
 		}
@@ -225,7 +225,7 @@ Viewpoint.createViewpoint = async (account, model, collName, routePrefix, hostId
 
 				groupsProms.push(
 					Groups.create(account, model, undefined, undefined, null, undefined, {...group, [groupIdField]: utils.stringToUUID(hostId)}).then((groupResult) => {
-						return groupResult._id;
+						return utils.stringToUUID(groupResult._id);
 					})
 				);
 			});
