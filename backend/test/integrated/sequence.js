@@ -504,6 +504,97 @@ describe("Sequences", function () {
 			], done);
 		});
 
+		it("frame with viewId and groups on custom sequence should succeed", function(done) {
+			const view = {
+				"name":"View test",
+				"viewpoint": customGoldenData.frames[0].viewpoint
+			};
+			const update = {};
+			const highlighted_group = {
+				objects: [{
+					"account": username,
+					model,
+					"shared_ids":["8b9259d2-316d-4295-9591-ae020bfcce48"]
+				}],
+				color: [2555, 255, 0]
+			};
+
+			const hidden_group = {
+				objects: [{
+					"account": username,
+					model,
+					"shared_ids":["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+				}]
+			};
+
+			const override_groups = [
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}],
+					color: [1, 2, 3],
+					totalSavedMeshes: 1
+				},
+				{
+					objects: [{
+						"account": username,
+						model,
+						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
+					}],
+					color: [4, 5, 6],
+					totalSavedMeshes: 1
+				},
+			];
+
+			view.viewpoint = Object.assign(
+				{highlighted_group, hidden_group, override_groups},
+				view.viewpoint
+			);
+
+			let highlightedGroupId;
+			let hiddenGroupId;
+			let overrideGroupIds;
+
+			async.series([
+				(done) => {
+					agent.post(`/${username}/${model}/viewpoints?key=${userApiKey}`)
+						.send(view)
+						.expect(200, function(err, res) {
+							update.frames = [
+								Object.assign({viewId: res.body._id}, customGoldenData.frames[0])
+							];
+							highlightedGroupId = res.body.viewpoint.highlighted_group_id;
+							hiddenGroupId = res.body.viewpoint.hidden_group_id;
+							overrideGroupIds = res.body.viewpoint.override_group_ids;
+							delete update.frames[0].viewpoint;
+							done(err);
+						});
+				},
+				(done) => {
+					agent.patch(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`)
+						.send(update)
+						.expect(200, done);
+				},
+				(done) => {
+					agent.get(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`).expect(200, function(err, res) {
+						delete res.body.frames[0].viewpoint.screenshot_ref;
+						expect(res.body.frames[0]).to.deep.equal({
+							...customGoldenData.frames[0],
+							viewpoint: {
+								...customGoldenData.frames[0].viewpoint,
+								highlighted_group_id: highlightedGroupId,
+								hidden_group_id: hiddenGroupId,
+								override_group_ids: overrideGroupIds
+							}
+						});
+						done(err);
+					});
+				}
+			], done);
+		});
+
 		it("empty frames on custom sequence should fail", function(done) {
 			const update = { frames: [] };
 
