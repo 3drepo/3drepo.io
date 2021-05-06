@@ -186,7 +186,8 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 		const { value, stepInterval, stepScale } = this.state;
 
 		if (stepScale !== STEP_SCALE.FRAME) {
-			this.setValue(getDateByStep(value, stepScale, stepInterval * direction));
+			const nextValue = getDateByStep(value, stepScale, stepInterval * direction);
+			this.setValue(nextValue);
 		} else {
 			const { frames } = this.props;
 			const index = getSelectedFrameIndex(frames, value);
@@ -194,10 +195,6 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 			if (newValue) {
 				this.setValue(newValue);
 			}
-		}
-
-		if (this.isLastDay) {
-			this.stop();
 		}
 	}
 
@@ -208,6 +205,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 	public play = () => {
 		(this.props.onPlayStarted || noop )();
 		this.stop();
+
 		const intervalId = (setInterval(() => {
 			if (this.props.loadingFrame && this.state.playing) {
 				clearInterval(this.state.intervalId);
@@ -216,14 +214,22 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 			}
 
 			this.nextStep();
+
+			// If it reached the end of the timeline, stop playing.
+			if (this.isLastDay) {
+				this.stop();
+			}
 		}, this.playInterval) as unknown) as number;
 
 		this.setState({
 			playing: true,
 			waitingForFrameLoad: false,
-			value: this.isLastDay ? this.props.min : this.state.value,
 			intervalId
 		});
+
+		// This sets the date value back to the start if it reached the end of the timeline
+		const dateValue = this.isLastDay ? this.props.min : this.state.value;
+		this.setValue(dateValue);
 	}
 
 	public stop() {
