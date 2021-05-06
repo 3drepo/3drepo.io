@@ -196,6 +196,11 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 				this.setValue(newValue);
 			}
 		}
+
+		// If it reached the end of the timeline, stop playing.
+		if (this.isLastDay) {
+			this.stop();
+		}
 	}
 
 	public nextStep = this.moveStep.bind(this, 1);
@@ -214,11 +219,6 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 			}
 
 			this.nextStep();
-
-			// If it reached the end of the timeline, stop playing.
-			if (this.isLastDay) {
-				this.stop();
-			}
 		}, this.playInterval) as unknown) as number;
 
 		this.setState({
