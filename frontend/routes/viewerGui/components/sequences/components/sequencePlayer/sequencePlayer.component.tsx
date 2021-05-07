@@ -90,10 +90,6 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 		return (+this.state.value) - (+this.props.min);
 	}
 
-	get sliderDate() {
-		return  new Date( this.state.sliderValue + this.props.min.valueOf() );
-	}
-
 	get totalTime() {
 		return (+this.props.max) - (+this.props.min);
 	}
@@ -297,7 +293,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 								shouldDisableDate={(date) => isDateOutsideRange(this.props.min, this.props.max, date.$d)}
 								name="date"
 								inputId="1"
-								value={this.sliderDate || value}
+								value={value}
 								format={LONG_DATE_TIME_FORMAT_NO_MINUTES}
 								onChange={(e) => this.gotoDate(new Date(Math.floor(e.target.value / MILLI_PER_HOUR) * MILLI_PER_HOUR))}
 								placeholder="date"
