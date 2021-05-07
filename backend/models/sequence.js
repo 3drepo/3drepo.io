@@ -120,7 +120,7 @@ const hasValidDates = ({startDate, endDate, frames}) => {
 		// If the min date found in frames is smaller than the passed start date
 		// or the max date found in frames is bigger than the passed end date,
 		// then the object is inconsistent
-		if((startDate !== undefined && min < startDate) || (endDate !== undefined && max > endDate)) {
+		if((startDate !== undefined && min !== startDate) || (endDate !== undefined && max > endDate)) {
 			return false;
 		}
 	}
@@ -352,13 +352,8 @@ Sequence.updateSequence = async (account, model, sequenceId, data) => {
 			const framesStartDate = new Date((toSet.frames[0] || {}).dateTime);
 			const framesEndDate = new Date((toSet.frames[toSet.frames.length - 1] || {}).dateTime);
 
-			if (framesStartDate < customSequence.startDate) {
-				toSet.startDate = framesStartDate;
-			}
-
-			if (framesEndDate >  customSequence.endDate) {
-				toSet.endDate = framesEndDate;
-			}
+			toSet.startDate = framesStartDate;
+			toSet.endDate = framesEndDate;
 		}
 
 		if (data.startDate) {
