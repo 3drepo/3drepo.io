@@ -16,8 +16,9 @@
  */
 
 import { put, takeLatest } from 'redux-saga/effects';
+
+import { TYPES } from '../../routes/components/dialogContainer/components/revisionsDialog/revisionsDialog.constants';
 import { ModelActions } from '../model';
-import { TYPES } from './../../routes/components/dialogContainer/components/revisionsDialog/revisionsDialog.constants';
 import { DialogActions, DialogTypes } from './dialog.redux';
 
 function* showRevisionsDialog({ config }) {
