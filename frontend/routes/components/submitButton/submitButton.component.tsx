@@ -29,7 +29,7 @@ interface IProps {
 	variant?: string;
 }
 
-export const SubmitButton = ({ pending, disabled, children, ...props}: IProps) => {
+export const SubmitButton = ({ pending, disabled, children, ...props }: IProps) => {
 	const additionalProps = merge({
 		type: 'submit',
 		variant: 'contained',
