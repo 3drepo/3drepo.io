@@ -25,7 +25,6 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	fetchRiskSuccess: ['risk'],
 	fetchRiskFailure: [],
 	setComponentState: ['componentState'],
-	resetComponentState: [],
 	saveRisk: ['teamspace', 'model', 'riskData', 'revision', 'finishSubmitting', 'ignoreViewer'],
 	updateRisk: ['teamspace', 'modelId', 'riskData'],
 	updateBoardRisk: ['teamspace', 'modelId', 'riskData'],
@@ -201,10 +200,6 @@ export const setComponentState = (state = INITIAL_STATE, { componentState = {} }
 	return { ...state, componentState: { ...state.componentState, ...componentState } };
 };
 
-const resetComponentState = (state = INITIAL_STATE) => {
-	return { ...state, componentState: INITIAL_STATE.componentState };
-};
-
 export const createCommentsSuccess = (state = INITIAL_STATE, { comments, riskId }) => {
 	comments = comments.concat(state.risksMap[riskId].comments);
 	comments = comments.map((log, i) => ({ ...log, sealed: (i !== 0) ? true : log.sealed}));
@@ -309,7 +304,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.FETCH_RISK_SUCCESS]: fetchRiskSuccess,
 	[RisksTypes.FETCH_RISK_FAILURE]: fetchRiskFailure,
 	[RisksTypes.SET_COMPONENT_STATE]: setComponentState,
-	[RisksTypes.RESET_COMPONENT_STATE]: resetComponentState,
 	[RisksTypes.SAVE_RISK_SUCCESS]: saveRiskSuccess,
 	[RisksTypes.TOGGLE_PENDING_STATE]: togglePendingState,
 	[RisksTypes.TOGGLE_DETAILS_PENDING_STATE]: toggleDetailsPendingState,
