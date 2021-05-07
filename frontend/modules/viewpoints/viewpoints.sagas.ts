@@ -229,7 +229,7 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 			return;
 		}
 
-		if (viewpoint?.up && !ignoreCamera) {
+		if (viewpoint.up && !ignoreCamera) {
 			yield put(ViewerGuiActions.setCamera(viewpoint));
 		} else {
 			// If we're not moving the camera, ensure the projection mode icon ion the gui matches the viewpoint
@@ -246,21 +246,21 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 		yield waitForTreeToBeReady();
 		yield fetchViewpointGroups({teamspace, modelId, view});
 
-		if (viewpoint?.override_groups) {
+		if (viewpoint.override_groups) {
 			yield put(GroupsActions.clearColorOverrides());
 		}
 
 		yield put(TreeActions.clearCurrentlySelected());
 
-		if (viewpoint?.hidden_group?.objects?.length > 0) {
+		if (viewpoint.hidden_group?.objects?.length > 0) {
 			yield put(TreeActions.hideNodesBySharedIds(viewpoint.hidden_group.objects, true));
-		} else if (viewpoint?.shown?.objects?.length > 0) {
-			yield put(TreeActions.isolateNodesBySharedIds(viewpoint.shown.objects));
+		} else if (viewpoint.shown_group?.objects?.length > 0) {
+			yield put(TreeActions.isolateNodesBySharedIds(viewpoint.shown_group.objects));
 		} else {
 			yield put(TreeActions.showAllNodes());
 		}
 
-		if (viewpoint?.highlighted_group?.objects?.length > 0) {
+		if (viewpoint.highlighted_group?.objects?.length > 0) {
 			yield put(TreeActions.selectNodesBySharedIds(viewpoint.highlighted_group.objects));
 			window.dispatchEvent(new Event('resize'));
 		}
@@ -303,7 +303,7 @@ export function* fetchViewpointGroups( {teamspace, modelId, view}) {
 		const viewpoint = view.viewpoint;
 
 		const groupsProperties = ['override_group_ids', 'transformation_group_ids',
-		'highlighted_group_id', 'hidden_group_id'];
+			'highlighted_group_id', 'hidden_group_id', 'shown_group_id'];
 
 		const groupsToFetch = [];
 

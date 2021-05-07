@@ -21,6 +21,7 @@
 const groupPropNameMap = {
 	highlighted_group_id : 'highlighted_group',
 	hidden_group_id : 'hidden_group',
+	shown_group_id : 'shown_group',
 	override_group_ids : 'override_groups',
 	transformation_group_ids: 'transformation_groups'
 };
