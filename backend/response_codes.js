@@ -122,7 +122,6 @@
 		ACTIVITY_NOT_FOUND: { message: "Activity not found", status: 404 },
 		SEQUENCE_NOT_FOUND: { message: "Sequence not found", status: 404 },
 		SEQUENCE_READ_ONLY: { message: "Sequence not found", status: 400 },
-		SEQUENCE_DATE_INCONSISTENT: { message: "The date is not consistent with the sequence data (either larger than the frames startdate or smaller than the frames endDate)", status: 400 },
 		TASK_NOT_FOUND: { message: "Sequence task not found", status: 404 },
 
 		USER_EXISTS: { message: "User already exists", status: 400 },

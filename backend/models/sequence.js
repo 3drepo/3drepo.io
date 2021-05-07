@@ -57,8 +57,6 @@ const nameSchema = yup.string().min(1).max(30);
 
 const sequenceSchema = yup.object().shape({
 	name: nameSchema.required(),
-	startDate: yup.number(),
-	endDate: yup.number(),
 	rev_id: yup.string(),
 	frames: yup.array().of(frameSchema).min(1).required()
 }).noUnknown();
@@ -109,23 +107,6 @@ const cleanSequenceFrame = (toClean) => {
 	}
 
 	return toClean;
-};
-
-// this relies on frames being ordered properly
-const hasValidDates = ({startDate, endDate, frames}) => {
-	if (frames) {
-		const min = frames[0].dateTime;
-		const max = frames[frames.length - 1].dateTime;
-
-		// If the min date found in frames is smaller than the passed start date
-		// or the max date found in frames is bigger than the passed end date,
-		// then the object is inconsistent
-		if((startDate !== undefined && min !== startDate) || (endDate !== undefined && max > endDate)) {
-			return false;
-		}
-	}
-
-	return !(startDate !== undefined &&  endDate !== undefined && startDate > endDate);
 };
 
 const handleFrames = async (account, model, sequenceId, sequenceFrames) => {
@@ -238,12 +219,8 @@ Sequence.createSequence = async (account, model, sequenceData) => {
 
 	sequenceData.frames = await handleFrames(account, model, sequenceData._id, sequenceData.frames);
 
-	if (!hasValidDates(sequenceData)) {
-		throw responseCodes.SEQUENCE_DATE_INCONSISTENT;
-	}
-
-	sequenceData.startDate = new Date(sequenceData.startDate || sequenceData.frames[0].dateTime);
-	sequenceData.endDate = new Date(sequenceData.endDate ||  sequenceData.frames[sequenceData.frames.length - 1].dateTime);
+	sequenceData.startDate = new Date(sequenceData.frames[0].dateTime);
+	sequenceData.endDate = new Date(sequenceData.frames[sequenceData.frames.length - 1].dateTime);
 
 	await db.insert(account, sequenceCol(model), sequenceData);
 
@@ -326,10 +303,9 @@ Sequence.updateSequence = async (account, model, sequenceId, data) => {
 	if (data.name && Object.keys(data).length === 1) {
 		await Sequence.sequenceExists(account, model, sequenceId);
 	} else {
-		const projectFrames = data.startDate || data.endDate ? { frames:1 } : {};
 
 		// Rest of properties can be updated only for custom sequences
-		const customSequence = await db.findOne(account, sequenceCol(model), {_id: utils.stringToUUID(sequenceId), customSequence: true}, {startDate: 1, endDate: 1, ...projectFrames});
+		const customSequence = await db.findOne(account, sequenceCol(model), {_id: utils.stringToUUID(sequenceId), customSequence: true}, {_id: 1});
 
 		if (!customSequence) {
 			throw responseCodes.SEQUENCE_READ_ONLY;
@@ -355,21 +331,6 @@ Sequence.updateSequence = async (account, model, sequenceId, data) => {
 			toSet.startDate = framesStartDate;
 			toSet.endDate = framesEndDate;
 		}
-
-		if (data.startDate) {
-			toSet.startDate = new Date(data.startDate);
-		}
-
-		if (data.endDate) {
-			toSet.endDate = new Date(data.endDate);
-		}
-
-		const sequenceData = {...data, frames: (toSet.frames || customSequence.frames)};
-
-		if (!hasValidDates(sequenceData)) {
-			throw responseCodes.SEQUENCE_DATE_INCONSISTENT;
-		}
-
 	}
 
 	if (utils.notEmpty(toSet)) {
