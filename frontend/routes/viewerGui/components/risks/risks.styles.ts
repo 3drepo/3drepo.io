@@ -34,7 +34,7 @@ export const RisksContainer = styled(ReportedItems).attrs({
 ` as any;
 
 export const ListContainer = styled.ul`
-	height: 100%;
+	height: auto;
 	padding: 0;
 	margin: 0;
 	cursor: pointer;
