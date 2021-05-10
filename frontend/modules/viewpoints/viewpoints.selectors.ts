@@ -125,3 +125,7 @@ export const selectInitialView =  createSelector(
 export const selectViewpointsGroups = createSelector(
 	selectViewpointsDomain, (state) => state.viewpointsGroups
 );
+
+export const selectViewpointsGroupsBeingLoaded = createSelector(
+	selectViewpointsDomain, (state) => state.viewpointsGroupsBeingLoaded
+);

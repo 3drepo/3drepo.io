@@ -19,7 +19,7 @@ import copy from 'copy-to-clipboard';
 import { get, take } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
-import { selectSelectedViewpoint, selectSortOrder, selectViewpointsGroups } from '.';
+import { selectSelectedViewpoint, selectSortOrder, selectViewpointsGroups, selectViewpointsGroupsBeingLoaded } from '.';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { ROUTES } from '../../constants/routes';
 import { SORT_ORDER_TYPES } from '../../constants/sorting';
@@ -293,12 +293,13 @@ export function * deselectViewsAndLeaveClipping() {
 
 export function* fetchViewpointGroups( {teamspace, modelId, view}) {
 	try  {
-		const revision = yield select(selectCurrentRevisionId);
-		const viewpointsGroups = yield select(selectViewpointsGroups);
-
 		if (!view.viewpoint) {
 			return;
 		}
+
+		const revision = yield select(selectCurrentRevisionId);
+		const viewpointsGroups = yield select(selectViewpointsGroups);
+		const viewpointsGroupsBeingLoaded: Set<string> = yield select(selectViewpointsGroupsBeingLoaded);
 
 		const viewpoint = view.viewpoint;
 
@@ -314,12 +315,12 @@ export function* fetchViewpointGroups( {teamspace, modelId, view}) {
 			if (viewpoint[prop]) {
 				if (Array.isArray(viewpoint[prop])) { // if the property is an array of groupId
 					(viewpoint[prop] as any[]).forEach((id) => {
-						if (!viewpointsGroups[id]) {
+						if (!viewpointsGroups[id] && !viewpointsGroupsBeingLoaded.has(id)) {
 							groupsToFetch.push(id);
 						}
 					});
 				} else {// if the property is just a groupId
-					if (!viewpointsGroups[viewpoint[prop]]) {
+					if (!viewpointsGroups[viewpoint[prop]] && !viewpointsGroupsBeingLoaded.has(viewpoint[prop])) {
 						groupsToFetch.push(viewpoint[prop]);
 					}
 				}
@@ -327,12 +328,15 @@ export function* fetchViewpointGroups( {teamspace, modelId, view}) {
 		}
 
 		if (groupsToFetch.length > 0) {
+			yield put(ViewpointsActions.addViewpointGroupsBeingLoaded(groupsToFetch));
+
+			yield take(ViewpointsTypes.ADD_VIEWPOINT_GROUPS_BEING_LOADED);
+
 			const fetchedGroups =  (yield all(groupsToFetch.map((groupId) =>
 				API.getGroup(teamspace, modelId, groupId, revision))))
 				.map(({data}) => prepareGroup(data));
 
 			yield all(fetchedGroups.map((group) => put(ViewpointsActions.fetchGroupSuccess(group))));
-
 		}
 
 		const groupsMap = yield select(selectViewpointsGroups);
