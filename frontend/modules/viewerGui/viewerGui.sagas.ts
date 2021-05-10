@@ -52,11 +52,7 @@ import {
 
 function* fetchData({ teamspace, model }) {
 	try {
-		yield put(ModelActions.setPendingState(true));
 		const { data: settings } = yield API.getModelSettings(teamspace, model);
-
-		yield put(ModelActions.fetchSettingsSuccess(settings));
-		yield put(ModelActions.setPendingState(false));
 	} catch (error) {
 		yield put(DialogActions.showRedirectToTeamspaceDialog(error));
 		return;
@@ -72,6 +68,7 @@ function* fetchData({ teamspace, model }) {
 			put(ViewerGuiActions.startListenOnClickPin()),
 			put(ViewerGuiActions.startListenOnModelLoaded()),
 			put(ModelActions.fetchMetaKeys(teamspace, model)),
+			put(ModelActions.fetchSettings(teamspace, model)),
 			put(ModelActions.waitForSettingsAndFetchRevisions(teamspace, model)),
 			put(TreeActions.setIsTreeProcessed(false)),
 			put(ViewpointsActions.fetchViewpoints(teamspace, model)),
