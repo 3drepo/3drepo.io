@@ -182,12 +182,14 @@ export class Groups extends React.PureComponent<IProps, IState> {
 
 	public renderListView = renderWhenTrue(() => (
 		<>
-			<ViewerPanelContent>
-				{this.renderEmptyState(!this.props.searchEnabled && !this.state.filteredGroups.length)}
-				{this.renderNotFound(this.props.searchEnabled && !this.state.filteredGroups.length)}
-				{this.renderGroupsList(this.state.filteredGroups.length)}
+			<ViewerPanelContent onClick={this.resetActiveGroup}>
+				<div onClick={(event: React.MouseEvent<HTMLDivElement>) => event.stopPropagation()}>
+					{this.renderEmptyState(!this.props.searchEnabled && !this.state.filteredGroups.length)}
+					{this.renderNotFound(this.props.searchEnabled && !this.state.filteredGroups.length)}
+					{this.renderGroupsList(this.state.filteredGroups.length)}
+				</div>
 			</ViewerPanelContent>
-			<ViewerPanelFooter container alignItems="center" justify="space-between">
+			<ViewerPanelFooter onClick={this.resetActiveGroup} container alignItems="center" justify="space-between">
 				<Summary>
 					{`${this.state.filteredGroups.length} groups displayed`}
 				</Summary>

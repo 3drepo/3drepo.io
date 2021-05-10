@@ -52,6 +52,13 @@ import {
 
 function* fetchData({ teamspace, model }) {
 	try {
+		const { data: settings } = yield API.getModelSettings(teamspace, model);
+	} catch (error) {
+		yield put(DialogActions.showRedirectToTeamspaceDialog(error));
+		return;
+	}
+
+	try {
 		const { username } = yield select(selectCurrentUser);
 		yield all([
 			put(CurrentUserActions.fetchUser(username)),
@@ -60,8 +67,8 @@ function* fetchData({ teamspace, model }) {
 			put(TreeActions.startListenOnSelections()),
 			put(ViewerGuiActions.startListenOnClickPin()),
 			put(ViewerGuiActions.startListenOnModelLoaded()),
-			put(ModelActions.fetchSettings(teamspace, model)),
 			put(ModelActions.fetchMetaKeys(teamspace, model)),
+			put(ModelActions.fetchSettings(teamspace, model)),
 			put(ModelActions.waitForSettingsAndFetchRevisions(teamspace, model)),
 			put(TreeActions.setIsTreeProcessed(false)),
 			put(ViewpointsActions.fetchViewpoints(teamspace, model)),

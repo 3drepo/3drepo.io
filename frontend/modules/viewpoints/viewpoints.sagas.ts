@@ -241,7 +241,7 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 		// The default value for hideIfc if it doesnt exists is 'false'
 		yield put(TreeActions.setHiddenGeometryVisible(viewpoint.hideIfc === false));
 
-		yield Viewer.updateClippingPlanes( clippingPlanes, teamspace, modelId);
+		yield Viewer.updateClippingPlanes(clippingPlanes, teamspace, modelId);
 
 		yield waitForTreeToBeReady();
 		yield fetchViewpointGroups({teamspace, modelId, view});

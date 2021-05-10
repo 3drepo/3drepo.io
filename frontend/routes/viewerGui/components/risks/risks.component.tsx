@@ -126,6 +126,8 @@ export class Risks extends React.PureComponent<IProps, any> {
 		this.props.setActiveRisk(item, this.props.revision);
 	}
 
+	public deactivateRisk = () => this.props.setActiveRisk(null);
+
 	public handleToggleFilters = (searchEnabled) => {
 		const changes: any = { searchEnabled };
 
@@ -169,6 +171,7 @@ export class Risks extends React.PureComponent<IProps, any> {
 				onToggleFilters={this.handleToggleFilters}
 				onChangeFilters={this.props.setFilters}
 				onActiveItem={this.setActiveRisk}
+				onDeactivateItem={this.deactivateRisk}
 				onNewItem={this.props.setNewRisk}
 				onShowDetails={this.props.goToRisk}
 				onCloseDetails={this.closeDetails}

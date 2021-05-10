@@ -148,6 +148,8 @@ export class Issues extends React.PureComponent<IProps, any> {
 		this.props.setActiveIssue(item, this.props.revision);
 	}
 
+	public deactivateIssue = () => this.setActiveIssue(null);
+
 	public getFilterValues(property) {
 		return property.map(({ value, name, label }) => {
 			return {
@@ -202,6 +204,7 @@ export class Issues extends React.PureComponent<IProps, any> {
 				onToggleFilters={this.handleToggleFilters}
 				onChangeFilters={this.props.setFilters}
 				onActiveItem={this.setActiveIssue}
+				onDeactivateItem={this.deactivateIssue}
 				onNewItem={this.props.setNewIssue}
 				onShowDetails={this.props.goToIssue}
 				onCloseDetails={this.closeDetails}
