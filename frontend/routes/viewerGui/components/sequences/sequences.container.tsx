@@ -28,7 +28,7 @@ import {
 	selectSequences, selectStartDate, selectStepInterval, selectStepScale, SequencesActions,
 } from '../../../../modules/sequences';
 import { selectDraggablePanels, selectRightPanels, ViewerGuiActions } from '../../../../modules/viewerGui';
-import { selectIsLoadingViewpoint, ViewpointsActions } from '../../../../modules/viewpoints';
+import { selectIsLoadingSequenceViewpoint, ViewpointsActions } from '../../../../modules/viewpoints';
 import { Sequences } from './sequences.component';
 
 const mapStateToProps = createStructuredSelector({
@@ -43,7 +43,7 @@ const mapStateToProps = createStructuredSelector({
 	stepScale: selectStepScale,
 	currentTasks: selectCurrentActivities,
 	loadingFrameState: selectIsLoadingFrameState,
-	loadingViewpoint: selectIsLoadingViewpoint,
+	loadingViewpoint: selectIsLoadingSequenceViewpoint,
 	selectedSequence: selectSelectedSequence,
 	rightPanels: selectRightPanels,
 	draggablePanels: selectDraggablePanels,

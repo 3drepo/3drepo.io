@@ -18,11 +18,12 @@ import { isEmpty, orderBy, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { addToGroupDictionary } from '../../helpers/colorOverrides';
 import { getTransparency, hasTransparency } from '../../helpers/colors';
+import { groupsOfViewpoint } from '../../helpers/viewpoints';
 import { selectActiveIssue } from '../issues';
 import { selectDefaultView } from '../model';
 import { selectActiveRisk } from '../risks';
 import { selectQueryParams } from '../router/router.selectors';
-import { selectIsViewpointFrame } from '../sequences';
+import { selectIsViewpointFrame, selectSelectedFrameViewpoint } from '../sequences';
 
 export const selectViewpointsDomain = (state) => state.viewpoints;
 
@@ -64,12 +65,6 @@ export const selectSortOrder = createSelector(
 
 export const selectSelectedViewpoint = createSelector(
 	selectViewpointsDomain, (state) => state.selectedViewpoint
-);
-
-export const selectIsLoadingViewpoint = createSelector(
-	selectIsViewpointFrame, selectViewpointsDomain, (isViewpointFrame, state) => {
-		return isViewpointFrame && !Boolean(state.selectedViewpoint);
-	}
 );
 
 export const selectTransformations = createSelector(
@@ -128,4 +123,24 @@ export const selectViewpointsGroups = createSelector(
 
 export const selectViewpointsGroupsBeingLoaded = createSelector(
 	selectViewpointsDomain, (state) => state.viewpointsGroupsBeingLoaded
+);
+
+export const selectIsLoadingSequenceViewpoint = createSelector(
+	selectIsViewpointFrame, selectSelectedFrameViewpoint , selectViewpointsGroups,
+	(isViewpointFrame, viewpoint, groups) => {
+		if (!isViewpointFrame) {
+			return false;
+		}
+
+		let areGroupsLoaded = true;
+
+		for (const id of groupsOfViewpoint(viewpoint)) {
+			if (!groups[id]) {
+				areGroupsLoaded = false;
+				break;
+			}
+		}
+
+		return !areGroupsLoaded;
+	}
 );

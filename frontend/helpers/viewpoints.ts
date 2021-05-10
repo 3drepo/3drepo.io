@@ -95,3 +95,24 @@ export const createGroupsFromViewpoint = (viewpoint, groupsData) => {
 
 	return groups;
 };
+
+export const groupsOfViewpoint = function*(viewpoint) {
+	const groupsProperties = ['override_group_ids', 'transformation_group_ids',
+	'highlighted_group_id', 'hidden_group_id', 'shown_group_id'];
+
+	// This part discriminates which groups hasnt been loaded yet and add their ids to
+	// the groupsToFetch array
+	for (let i = 0; i < groupsProperties.length ; i++) {
+		const prop = groupsProperties[i];
+		if (viewpoint[prop]) {
+			if (Array.isArray(viewpoint[prop])) { // if the property is an array of groupId
+				const groupsIds: string[] = viewpoint[prop];
+				for (let j = 0; j < groupsIds.length; j++ ) {
+					yield groupsIds[i];
+				}
+			} else {// if the property is just a groupId
+				yield viewpoint[prop];
+			}
+		}
+	}
+};
