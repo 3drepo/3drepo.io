@@ -20,7 +20,7 @@ const FileRef = require("./fileRef");
 const History = require("./history");
 const { findModelSettingById } = require("./modelSetting");
 const { getRefNodes } = require("./ref");
-const { findNodesByField, getNodeById } = require("./scene");
+const { findNodesByField, getNodeById, findNodesByType } = require("./scene");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
 const { batchPromises } = require("./helper/promises");
@@ -29,6 +29,7 @@ const {union, intersection, difference} = require("./helper/set");
 const C = require("../constants");
 const utils = require("../utils");
 const systemLogger = require("../logger").systemLogger;
+const Stream = require("stream");
 
 function clean(metadataToClean) {
 	if (metadataToClean._id) {
@@ -363,8 +364,64 @@ class Meta {
 		return this.getAllIdsWithMetadataField(account, model,  branch, rev, settings.fourDSequenceTag);
 	}
 
-	getAllMetadata(account, model, branch, rev) {
-		return this.getAllIdsWithMetadataField(account, model, branch, rev, "");
+	async _getAllMetadata(account, model, branch, rev, stream) {
+		const subModelPromise = getRefNodes(account, model, branch, rev).then((refs) => {
+			const subMetaPromise = [];
+			refs.forEach((ref) => {
+				let refBranch, refRev;
+				if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
+					refBranch = C.MASTER_BRANCH_NAME;
+				} else {
+					refRev = utils.uuidToString(ref._rid);
+				}
+
+				const metaProm = findNodesByType(ref.owner, ref.project, refBranch, refRev,
+					"meta", undefined, {_id: 1, parents: 1, metadata: 1}).then((data) =>
+					({
+						data,
+						account: ref.owner,
+						model: ref.project
+					})
+				).catch(); // doesn't matter if the sub model fails.
+				subMetaPromise.push(metaProm);
+			});
+			return Promise.all(subMetaPromise);
+		});
+
+		const data = await findNodesByType(account, model, branch, rev, "meta", undefined, {_id: 1, parents: 1, metadata: 1});
+
+		stream.write("{\"data\":");
+		stream.write(JSON.stringify(data));
+
+		const subModelMeta = await subModelPromise;
+
+		if (subModelMeta && subModelMeta.length) {
+			stream.write(",\"subModels\":[");
+
+			for(let i = 0; i < subModelMeta.length; ++i) {
+				if (i > 0) {
+					stream.write(",");
+				}
+				stream.write(JSON.stringify(subModelMeta[i]));
+			}
+
+			stream.write("]");
+		}
+		stream.write("}");
+		stream.end();
+
+	}
+
+	async getAllMetadata(account, model, branch, rev) {
+		const stream = Stream.PassThrough();
+		try {
+			this._getAllMetadata(account, model, branch, rev, stream);
+		} catch(err) {
+			stream.emit("error", err);
+			stream.end();
+		}
+
+		return stream;
 	}
 
 	async getMeshIdsByRules(account, model, branch, revId, rules) {
