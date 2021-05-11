@@ -370,7 +370,7 @@ const onUpdateEvent = (updatedIssue) => {
 
 const onCreateEvent = (createdIssue) => {
 	const jobs = selectJobsList(getState());
-	dispatch(IssuesActions.saveIssueSuccess(prepareIssue(createdIssue[0], jobs)));
+	dispatch(IssuesActions.saveIssueSuccess(prepareIssue(createdIssue[0], jobs), false));
 };
 
 const onResourcesCreated = (resources) => {

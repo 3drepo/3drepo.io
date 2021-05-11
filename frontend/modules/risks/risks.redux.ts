@@ -31,7 +31,7 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	cloneRisk: ['dialogId'],
 	postComment: ['teamspace', 'modelId', 'riskData', 'ignoreViewer', 'finishSubmitting'],
 	removeComment: ['teamspace', 'modelId', 'riskData'],
-	saveRiskSuccess: ['risk'],
+	saveRiskSuccess: ['risk', 'resetComponentState'],
 	setNewRisk: [],
 	printRisks: ['teamspace', 'modelId'],
 	downloadRisks: ['teamspace', 'modelId'],
@@ -156,7 +156,7 @@ export const fetchRiskFailure = (state = INITIAL_STATE) => {
 	return { ...state, componentState: { ...state.componentState, failedToLoad: true } };
 };
 
-export const saveRiskSuccess = (state = INITIAL_STATE, { risk }) => {
+export const saveRiskSuccess = (state = INITIAL_STATE, { risk, resetComponentState =  true }) => {
 	const risksMap = updateRiskProps(state.risksMap, risk._id, risk);
 	const oldPosition = state.risksMap[state.componentState.activeRisk]?.position;
 	const newPosition = risksMap[state.componentState.activeRisk]?.position;
@@ -165,10 +165,17 @@ export const saveRiskSuccess = (state = INITIAL_STATE, { risk }) => {
 		risksMap[state.componentState.activeRisk].position = oldPosition;
 	}
 
+	if (resetComponentState) {
+		return {
+			...state,
+			risksMap,
+			componentState: { ...state.componentState, newRisk: {}}
+		};
+	}
+
 	return {
 		...state,
 		risksMap,
-		componentState: { ...state.componentState, newRisk: {}}
 	};
 };
 

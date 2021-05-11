@@ -332,7 +332,7 @@ const onUpdateEvent = (updatedRisk) => {
 };
 
 const onCreateEvent = (createdRisk) => {
-	dispatch(RisksActions.saveRiskSuccess(createdRisk[0]));
+	dispatch(RisksActions.saveRiskSuccess(createdRisk[0], false));
 };
 
 function* subscribeOnRiskChanges({ teamspace, modelId }) {
