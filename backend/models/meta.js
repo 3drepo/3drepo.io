@@ -411,6 +411,8 @@ class Meta {
 	}
 
 	async getAllMetadata(account, model, branch, rev) {
+		// Check revision exists
+		await History.getHistory(account, model, branch, rev);
 		const stream = Stream.PassThrough();
 		try {
 			this._getAllMetadata(account, model, branch, rev, stream);
