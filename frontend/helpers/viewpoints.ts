@@ -116,3 +116,16 @@ export const groupsOfViewpoint = function*(viewpoint) {
 		}
 	}
 };
+
+export const isViewpointLoaded = (viewpoint, groups) => {
+	let areGroupsLoaded = true;
+
+	for (const id of groupsOfViewpoint(viewpoint)) {
+		if (!groups[id]) {
+			areGroupsLoaded = false;
+			break;
+		}
+	}
+
+	return areGroupsLoaded;
+};

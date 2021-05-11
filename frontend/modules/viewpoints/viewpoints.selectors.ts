@@ -18,7 +18,7 @@ import { isEmpty, orderBy, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { addToGroupDictionary } from '../../helpers/colorOverrides';
 import { getTransparency, hasTransparency } from '../../helpers/colors';
-import { groupsOfViewpoint } from '../../helpers/viewpoints';
+import { groupsOfViewpoint, isViewpointLoaded } from '../../helpers/viewpoints';
 import { selectActiveIssue } from '../issues';
 import { selectDefaultView } from '../model';
 import { selectActiveRisk } from '../risks';
@@ -132,15 +132,6 @@ export const selectIsLoadingSequenceViewpoint = createSelector(
 			return false;
 		}
 
-		let areGroupsLoaded = true;
-
-		for (const id of groupsOfViewpoint(viewpoint)) {
-			if (!groups[id]) {
-				areGroupsLoaded = false;
-				break;
-			}
-		}
-
-		return !areGroupsLoaded;
+		return !isViewpointLoaded(viewpoint, groups);
 	}
 );

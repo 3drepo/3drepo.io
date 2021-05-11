@@ -19,13 +19,13 @@ import copy from 'copy-to-clipboard';
 import { get, take } from 'lodash';
 import { all, put, select, takeEvery } from 'redux-saga/effects';
 
-import { selectSelectedViewpoint, selectSortOrder, selectViewpointsGroups, selectViewpointsGroupsBeingLoaded } from '.';
+import { selectSelectedViewpoint, selectViewpointsGroups, selectViewpointsGroupsBeingLoaded } from '.';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { ROUTES } from '../../constants/routes';
-import { SORT_ORDER_TYPES } from '../../constants/sorting';
 import { UnityUtil } from '../../globals/unity-util';
 import { createGroupsByColor, createGroupsByTransformations, prepareGroup } from '../../helpers/groups';
 import { createGroupsFromViewpoint, groupsOfViewpoint,
+	isViewpointLoaded,
 	mergeGroupsDataFromViewpoint, setGroupData } from '../../helpers/viewpoints';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
@@ -247,6 +247,13 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 		yield waitForTreeToBeReady();
 		yield fetchViewpointGroups({teamspace, modelId, view});
 
+		const viewpointsGroups = yield select(selectViewpointsGroups);
+
+		// This means that the viewpoint is being loaded in a previous action
+		if (!isViewpointLoaded(viewpoint, viewpointsGroups)) {
+			return;
+		}
+
 		if (viewpoint.override_groups) {
 			yield put(GroupsActions.clearColorOverrides());
 		}
@@ -292,7 +299,7 @@ export function * deselectViewsAndLeaveClipping() {
 	}
 }
 
-export function* fetchViewpointGroups( {teamspace, modelId, view}) {
+export function* fetchViewpointGroups({teamspace, modelId, view}) {
 	try  {
 		if (!view.viewpoint) {
 			return;
