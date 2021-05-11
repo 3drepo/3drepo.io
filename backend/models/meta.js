@@ -220,7 +220,7 @@ Meta.ifcGuidsToUUIDs = async (account, model, branch, revId, ifcGuids) => {
 	const meshProject = { shared_id: 1, _id: 0 };
 
 	return db.find(account, getSceneCollectionName(model), meshQuery, meshProject);
-}
+};
 
 Meta.uuidsToIfcGuids = async (account, model, ids) => {
 	const query = { type: "meta", parents: { $in: ids }, "metadata.IFC GUID": { $exists: true } };
@@ -347,7 +347,7 @@ Meta.getAllIdsWithMetadataField = async (account, model, branch, rev, fieldName)
 	}
 
 	return parsedObj;
-}
+};
 
 Meta.getAllIdsWith4DSequenceTag = async (account, model, branch, rev) => {
 	// Get sequence tag then call the generic getAllIdsWithMetadataField
