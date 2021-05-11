@@ -365,48 +365,46 @@ class Meta {
 	}
 
 	async _getAllMetadata(account, model, branch, rev, stream) {
-		const subModelPromise = getRefNodes(account, model, branch, rev).then((refs) => {
-			const subMetaPromise = [];
-			refs.forEach((ref) => {
-				let refBranch, refRev;
-				if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
-					refBranch = C.MASTER_BRANCH_NAME;
-				} else {
-					refRev = utils.uuidToString(ref._rid);
-				}
-
-				const metaProm = findNodesByType(ref.owner, ref.project, refBranch, refRev,
-					"meta", undefined, {_id: 1, parents: 1, metadata: 1}).then((data) =>
-					({
-						data,
-						account: ref.owner,
-						model: ref.project
-					})
-				).catch(); // doesn't matter if the sub model fails.
-				subMetaPromise.push(metaProm);
-			});
-			return Promise.all(subMetaPromise);
-		});
+		const subModelPromise = getRefNodes(account, model, branch, rev);
 
 		const data = await findNodesByType(account, model, branch, rev, "meta", undefined, {_id: 1, parents: 1, metadata: 1});
 
 		stream.write("{\"data\":");
 		stream.write(JSON.stringify(data));
 
-		const subModelMeta = await subModelPromise;
-
-		if (subModelMeta && subModelMeta.length) {
+		const refs = await subModelPromise;
+		if(refs.length) {
 			stream.write(",\"subModels\":[");
+			for(let i = 0; i < refs.length; ++i) {
+				try {
+					const ref = refs[i];
+					let refBranch, refRev;
+					if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
+						refBranch = C.MASTER_BRANCH_NAME;
+					} else {
+						refRev = utils.uuidToString(ref._rid);
+					}
 
-			for(let i = 0; i < subModelMeta.length; ++i) {
-				if (i > 0) {
-					stream.write(",");
+					const subModelData = await findNodesByType(ref.owner, ref.project, refBranch, refRev,
+						"meta", undefined, {_id: 1, parents: 1, metadata: 1});
+					const result =
+						{
+							data: subModelData,
+							account: ref.owner,
+							model: ref.project
+						};
+
+					if (i > 0) {
+						stream.write(",");
+					}
+					stream.write(JSON.stringify(result));
+				} catch {
+					// doesn't matter if the sub model fails.
 				}
-				stream.write(JSON.stringify(subModelMeta[i]));
 			}
-
 			stream.write("]");
 		}
+
 		stream.write("}");
 		stream.end();
 
