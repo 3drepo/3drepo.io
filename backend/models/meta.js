@@ -19,14 +19,13 @@
 const FileRef = require("./fileRef");
 const History = require("./history");
 const { findModelSettingById } = require("./modelSetting");
-const { getRefNodes } = require("./ref");
+const { getSubModels } = require("./ref");
 const { findNodesByField, getNodeById, findNodesByType } = require("./scene");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
 const { batchPromises } = require("./helper/promises");
 const { positiveRulesToQueries, negativeRulesToQueries } = require("./helper/rule");
 const {union, intersection, difference} = require("./helper/set");
-const C = require("../constants");
 const utils = require("../utils");
 const systemLogger = require("../logger").systemLogger;
 const Stream = require("stream");
@@ -78,28 +77,18 @@ Meta.getAllMetadataByRules = async (account, model, branch, rev, rules) => {
 	// Get the revision object to find all relevant IDs
 	const history = await  History.getHistory(account, model, branch, rev);
 
-	// Check for submodel references
-	const refs = await getRefNodes(account, model, branch, rev);
-
 	// for all refs get their tree
 	const getMeta = [];
 
-	refs.forEach(ref => {
-		let refBranch, refRev;
-
-		if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
-			refBranch = C.MASTER_BRANCH_NAME;
-		} else {
-			refRev = utils.uuidToString(ref._rid);
-		}
-
+	// Check for submodel references
+	await getSubModels(account, model, branch, rev, (subTS, subModel, subBranch, subRev) => {
 		getMeta.push(
-			Meta.getAllMetadataByRules(ref.owner, ref.project, refBranch, refRev, rules)
-				.then(obj => {
+			Meta.getAllMetadataByRules(subTS, subModel, subBranch, subRev, rules)
+				.then(({data}) => {
 					return {
-						data: obj.data,
-						account: ref.owner,
-						model: ref.project
+						data,
+						account: subTS,
+						model: subModel
 					};
 				})
 				.catch(() => {
@@ -140,12 +129,10 @@ Meta.getAllMetadataByRules = async (account, model, branch, rev, rules) => {
 };
 
 Meta.getMetadataFields = async (account, model) => {
-	const subModelRefs = await getRefNodes(account, model, "master");
 	const subModelMetadataFieldsPromises = [];
-
-	subModelRefs.forEach((ref) => {
+	await getSubModels(account, model, "master", undefined, (subModelTS, subModel) => {
 		subModelMetadataFieldsPromises.push(
-			Meta.getMetadataFields(ref.owner, ref.project).catch(() => {
+			Meta.getMetadataFields(subModelTS, subModel).catch(() => {
 				// Suppress submodel metadata failure
 			})
 		);
@@ -239,11 +226,7 @@ Meta.findObjectIdsByRules = async (account, model, rules, branch, revId, convert
 	models.add(model);
 
 	// Check submodels
-	const refs = await getRefNodes(account, model, branch, revId);
-
-	refs.forEach((ref) => {
-		models.add(ref.project);
-	});
+	await getSubModels(account, model, branch, revId, (ts, subModel) => models.add(subModel));
 
 	const modelsIter = models.values();
 
@@ -299,27 +282,16 @@ Meta.getAllIdsWithMetadataField = async (account, model, branch, rev, fieldName)
 		fullFieldName += "." + fieldName;
 	}
 
-	// Check for submodel references
-	const refs = await getRefNodes(account, model, branch, rev);
-
 	const getMeta = [];
 
-	refs.forEach(ref => {
-		let refBranch, refRev;
-
-		if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
-			refBranch = C.MASTER_BRANCH_NAME;
-		} else {
-			refRev = utils.uuidToString(ref._rid);
-		}
-
+	await getSubModels(account, model, branch, rev, (subModelTS, subModel, subModelBranch, subModelRev) => {
 		getMeta.push(
-			Meta.getAllIdsWithMetadataField(ref.owner, ref.project, refBranch, refRev, fieldName)
-				.then(obj => {
+			Meta.getAllIdsWithMetadataField(subModelTS, subModel, subModelBranch, subModelRev, fieldName)
+				.then(({data}) => {
 					return {
-						data: obj.data,
-						account: ref.owner,
-						model: ref.project
+						data,
+						account: subModelTS,
+						model: subModel
 					};
 				})
 				.catch(() => {
@@ -365,7 +337,7 @@ Meta.getAllIdsWith4DSequenceTag = async (account, model, branch, rev) => {
 };
 
 const _getAllMetadata = async (account, model, branch, rev, stream) => {
-	const subModelPromise = getRefNodes(account, model, branch, rev);
+	const subModelPromise = getSubModels(account, model, branch, rev);
 
 	const data = await findNodesByType(account, model, branch, rev, "meta", undefined, {_id: 1, parents: 1, metadata: 1});
 
@@ -377,21 +349,15 @@ const _getAllMetadata = async (account, model, branch, rev, stream) => {
 		stream.write(",\"subModels\":[");
 		for(let i = 0; i < refs.length; ++i) {
 			try {
-				const ref = refs[i];
-				let refBranch, refRev;
-				if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
-					refBranch = C.MASTER_BRANCH_NAME;
-				} else {
-					refRev = utils.uuidToString(ref._rid);
-				}
+				const {account: subModelTS, model: subModelId, branch: subModelBranch, revision: subModelRev} = refs[i];
 
-				const subModelData = await findNodesByType(ref.owner, ref.project, refBranch, refRev,
+				const subModelData = await findNodesByType(subModelTS, subModelId, subModelBranch, subModelRev,
 					"meta", undefined, {_id: 1, parents: 1, metadata: 1});
 				const result =
 					{
 						data: subModelData,
-						account: ref.owner,
-						model: ref.project
+						account: subModelTS,
+						model: subModelId
 					};
 
 				if (i > 0) {
@@ -433,11 +399,9 @@ Meta.getMeshIdsByRules = async (account, model, branch, revId, rules) => {
 	models.add(model);
 
 	// Check submodels
-	const refs = await getRefNodes(account, model, branch, revId);
-
-	refs.forEach((ref) => {
-		models.add(ref.project);
-	});
+	await getSubModels(account, model, branch, revId, (subModelTS, subModel) =>
+		models.add(subModel)
+	);
 
 	const modelsIter = models.values();
 
