@@ -16,13 +16,14 @@
  */
 
 import copy from 'copy-to-clipboard';
-import { get, take } from 'lodash';
-import { all, put, select, takeEvery } from 'redux-saga/effects';
+import { get } from 'lodash';
+import { all, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 
 import { selectSelectedViewpoint, selectViewpointsGroups, selectViewpointsGroupsBeingLoaded } from '.';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { ROUTES } from '../../constants/routes';
 import { UnityUtil } from '../../globals/unity-util';
+import { delay } from '../../helpers/aync';
 import { createGroupsByColor, createGroupsByTransformations, prepareGroup } from '../../helpers/groups';
 import { createGroupsFromViewpoint, groupsOfViewpoint,
 	isViewpointLoaded,
@@ -245,13 +246,13 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 		yield Viewer.updateClippingPlanes(clippingPlanes, teamspace, modelId);
 
 		yield waitForTreeToBeReady();
-		yield fetchViewpointGroups({teamspace, modelId, view});
+		yield put(ViewpointsActions.fetchViewpointGroups(teamspace, modelId, view));
 
-		const viewpointsGroups = yield select(selectViewpointsGroups);
+		let viewpointsGroups = yield select(selectViewpointsGroups);
 
-		// This means that the viewpoint is being loaded in a previous action
-		if (!isViewpointLoaded(viewpoint, viewpointsGroups)) {
-			return;
+		while (!isViewpointLoaded(viewpoint, viewpointsGroups)) {
+			yield take(ViewpointsTypes.FETCH_GROUP_SUCCESS);
+			viewpointsGroups = yield select(selectViewpointsGroups);
 		}
 
 		if (viewpoint.override_groups) {
@@ -396,7 +397,7 @@ export default function* ViewpointsSaga() {
 	yield takeEvery(ViewpointsTypes.SUBSCRIBE_ON_VIEWPOINT_CHANGES, subscribeOnViewpointChanges);
 	yield takeEvery(ViewpointsTypes.UNSUBSCRIBE_ON_VIEWPOINT_CHANGES, unsubscribeOnViewpointChanges);
 	yield takeEvery(ViewpointsTypes.PREPARE_NEW_VIEWPOINT, prepareNewViewpoint);
-	yield takeEvery(ViewpointsTypes.SHOW_VIEWPOINT, showViewpoint);
+	yield takeLatest(ViewpointsTypes.SHOW_VIEWPOINT, showViewpoint);
 	yield takeEvery(ViewpointsTypes.SHARE_VIEWPOINT_LINK, shareViewpointLink);
 	yield takeEvery(ViewpointsTypes.SET_DEFAULT_VIEWPOINT, setDefaultViewpoint);
 	yield takeEvery(ViewpointsTypes.DESELECT_VIEWS_AND_LEAVE_CLIPPING, deselectViewsAndLeaveClipping);
