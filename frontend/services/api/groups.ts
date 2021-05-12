@@ -27,10 +27,11 @@ import api from './';
  */
 
 export const getGroups = (teamspace, modelId, revision?) => {
+	const query = 'noIssues=true&noRisks=true&noViews=true&noSequences=true';
 	if (revision) {
-		return api.get(`${teamspace}/${modelId}/revision/${revision}/groups/?noIssues=true&noRisks=true&noViews=true`);
+		return api.get(`${teamspace}/${modelId}/revision/${revision}/groups/?${query}`);
 	}
-	return api.get(`${teamspace}/${modelId}/revision/master/head/groups/?noIssues=true&noRisks=true&noViews=true`);
+	return api.get(`${teamspace}/${modelId}/revision/master/head/groups/?${query}`);
 };
 
 /**

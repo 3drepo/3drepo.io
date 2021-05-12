@@ -63,6 +63,14 @@
 		});
 	};
 
+	/**
+	 * @param {string} database
+	 * @param {string} colName
+	 * @param {object} query
+	 * @param {object} projection
+	 * @param {object} sort
+	 * @returns {Promise<Array<Object>}
+	 */
 	Handler.find = async function (database, colName, query, projection = {}, sort = {}) {
 		const collection = await Handler.getCollection(database, colName);
 		// NOTE: v3.6 driver find take sort/projection as 2nd argument like findOne
@@ -83,6 +91,12 @@
 	Handler.findOneAndDelete = async function (database, colName, query, projection = {}) {
 		const collection = await Handler.getCollection(database, colName);
 		const findResult = await collection.findOneAndDelete(query, projection);
+		return findResult.value;
+	};
+
+	Handler.deleteMany = async function (database, colName, query) {
+		const collection = await Handler.getCollection(database, colName);
+		const findResult = await collection.deleteMany(query);
 		return findResult.value;
 	};
 
@@ -170,6 +184,11 @@
 	Handler.insert = async function (database, colName, data) {
 		const collection = await Handler.getCollection(database, colName);
 		return collection.insert(data);
+	};
+
+	Handler.insertMany = async function (database, colName, data) {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.insertMany(data);
 	};
 
 	Handler.getFileFromGridFS = function (database, collection, filename) {

@@ -20,7 +20,7 @@ import { put, select, takeLatest } from 'redux-saga/effects';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
-import { selectCurrentModelTeamspace, selectCurrentRevisionId, ModelActions } from '../model';
+import { selectCurrentModelTeamspace, ModelActions } from '../model';
 import { selectSelectedSequenceId, selectSequenceModel } from '../sequences';
 import { SnackbarActions } from '../snackbar';
 import { ViewerGuiActions} from '../viewerGui';
@@ -32,11 +32,10 @@ function* fetch() {
 	try {
 		yield put(LegendActions.togglePendingState(true));
 		const teamspace = yield select(selectCurrentModelTeamspace);
-		const revision = yield select(selectCurrentRevisionId);
 		const model =  yield select(selectSequenceModel);
 		const sequenceId =  yield select(selectSelectedSequenceId);
 
-		const { data } = yield API.getSequenceLegend(teamspace, model, revision, sequenceId);
+		const { data } = yield API.getSequenceLegend(teamspace, model, sequenceId);
 
 		const legend = transformLegend(data);
 
@@ -59,14 +58,13 @@ function* update({ legend }) {
 	try {
 		yield put(LegendActions.toggleUpdatePendingState(true));
 		const teamspace = yield select(selectCurrentModelTeamspace);
-		const revision = yield select(selectCurrentRevisionId);
 		const model =  yield select(selectSequenceModel);
 		const sequenceId =  yield select(selectSelectedSequenceId);
 
 		const updatedLegend = [...legend];
 		const legendObj = transformToLegendObj(legend);
 
-		const response = yield API.putSequenceLegend(teamspace, model, revision, sequenceId, legendObj);
+		const response = yield API.putSequenceLegend(teamspace, model, sequenceId, legendObj);
 
 		if (response.status === 200) {
 			yield put(LegendActions.toggleUpdatePendingState(false));
@@ -83,11 +81,10 @@ function* reset() {
 	try {
 		yield put(LegendActions.togglePendingState(true));
 		const teamspace = yield select(selectCurrentModelTeamspace);
-		const revision = yield select(selectCurrentRevisionId);
 		const model =  yield select(selectSequenceModel);
 		const sequenceId =  yield select(selectSelectedSequenceId);
 
-		yield API.deleteSequenceLegend(teamspace, model, revision, sequenceId);
+		yield API.deleteSequenceLegend(teamspace, model, sequenceId);
 		yield put(LegendActions.fetch());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'legend', error));

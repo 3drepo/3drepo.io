@@ -18,10 +18,12 @@ import { isEmpty, orderBy, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { addToGroupDictionary } from '../../helpers/colorOverrides';
 import { getTransparency, hasTransparency } from '../../helpers/colors';
+import { groupsOfViewpoint, isViewpointLoaded } from '../../helpers/viewpoints';
 import { selectActiveIssue } from '../issues';
 import { selectDefaultView } from '../model';
 import { selectActiveRisk } from '../risks';
 import { selectQueryParams } from '../router/router.selectors';
+import { selectIsViewpointFrame, selectSelectedFrameViewpoint } from '../sequences';
 
 export const selectViewpointsDomain = (state) => state.viewpoints;
 
@@ -117,4 +119,19 @@ export const selectInitialView =  createSelector(
 
 export const selectViewpointsGroups = createSelector(
 	selectViewpointsDomain, (state) => state.viewpointsGroups
+);
+
+export const selectViewpointsGroupsBeingLoaded = createSelector(
+	selectViewpointsDomain, (state) => state.viewpointsGroupsBeingLoaded
+);
+
+export const selectIsLoadingSequenceViewpoint = createSelector(
+	selectIsViewpointFrame, selectSelectedFrameViewpoint , selectViewpointsGroups,
+	(isViewpointFrame, viewpoint, groups) => {
+		if (!isViewpointFrame) {
+			return false;
+		}
+
+		return !isViewpointLoaded(viewpoint, groups);
+	}
 );
