@@ -143,7 +143,6 @@ describe("Issues", function () {
 			expect(res.body.viewpoint.near).to.equal(issue.viewpoint.near);
 		});
 
-			describe("Creating an issue", function() {
 		it(" with data produced by plugins should succeed", async function() {
 			const issue = {
 				"_id": "",
@@ -156,7 +155,7 @@ describe("Issues", function () {
 				],
 				"account": "",
 				"model": "",
-				"desc": "",
+				"desc": "abc",
 				"thumbnail": null,
 				"resources": [],
 				"comments": [],
