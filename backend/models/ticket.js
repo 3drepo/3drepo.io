@@ -191,6 +191,8 @@ class Ticket extends View {
 		const hasAssignedJob = job === oldTicket.assigned_roles[0];
 		const userPermissions = { hasAdminPrivileges, hasAssignedJob };
 
+		const _id = utils.stringToUUID(id);
+
 		// 2.5 if the user dont have the necessary permissions to update the ticket throw a UPDATE_PERMISSION_DECLINED
 		if (this.ownerPrivilegeAttributes.some(attr => !!data[attr]) && !userPermissions.hasAdminPrivileges) {
 			throw this.response("UPDATE_PERMISSION_DECLINED");
@@ -311,9 +313,13 @@ class Ticket extends View {
 			delete data.viewpoint;
 		}
 
-		// 6. Update the data
-		const _id = utils.stringToUUID(id);
+		// Handle shapes
+		if (data.shapes) {
+			await Shapes.removeByTicketId(account, model, this.collName, _id);
+			data.shapes = await Promise.all(data.shapes.map(shape => Shapes.create(account, model, this.collName, {...shape, ticket_id:_id })));
+		}
 
+		// 6. Update the data
 		const tickets = await this.getCollection(account, model);
 
 		// 7. Return the updated data and the old ticket
@@ -430,8 +436,7 @@ class Ticket extends View {
 
 		if (shapes) {
 			const ticket_id = newTicket._id;
-			const shapeIds = await Promise.all(newTicket.shapes.map(shape => Shapes.create(account, model, this.collName, {...shape, ticket_id })));
-			newTicket.shapes = shapeIds;
+			newTicket.shapes = await Promise.all(newTicket.shapes.map(shape => Shapes.create(account, model, this.collName, {...shape, ticket_id })));
 		}
 
 		const ownerJob = await findJobByUser(account, newTicket.owner);

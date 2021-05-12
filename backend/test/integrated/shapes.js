@@ -151,7 +151,6 @@ describe("Shapes", () => {
 			expect(res.body.value, responseCodes.INVALID_ARGUMENTS.value);
 		});
 
-
 		it("when created should succeed", async () => {
 			let res = await agent.post(`/${username}/${model}/issues`)
 				.send(shapeIssue)
@@ -172,16 +171,26 @@ describe("Shapes", () => {
 			expect(chopIds(res.body.shapes)).to.be.deep.equal(shapeIssue.shapes);
 		});
 
-		it ("when updated should succeed", async()=> {
-			const otherShapes = [anotherPointToPointShape];
-
+		it ("When updating other properties should keep the shapes", async()=> {
 			await agent.patch(`/${username}/${model}/issues/${issueId}`)
-				.send({shapes: otherShapes})
+				.send({desc: "description updated in issue"})
 				.expect(200);
 
 			const res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
 
-			expect(chopIds(res.body.shapes)).to.be.deep.equal(otherShapes);
+			expect(chopIds(res.body.shapes)).to.be.deep.equal(shapeIssue.shapes);
+		});
+
+		it ("When updating shapes should succeed", async()=> {
+			const shapes = [anotherPointToPointShape];
+
+			await agent.patch(`/${username}/${model}/issues/${issueId}`)
+				.send({shapes})
+				.expect(200);
+
+			const res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
+
+			expect(chopIds(res.body.shapes)).to.be.deep.equal(shapes);
 		});
 	})
 
