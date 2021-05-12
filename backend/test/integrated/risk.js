@@ -213,7 +213,6 @@ describe("Risks", function () {
 						expect(res.body.viewpoint.look_at).to.deep.equal(risk.viewpoint.look_at);
 						expect(res.body.viewpoint.view_dir).to.deep.equal(risk.viewpoint.view_dir);
 						expect(res.body.assigned_roles).to.deep.equal(risk.assigned_roles);
-						expect(res.body.category).to.equal(risk.category);
 						expect(res.body.likelihood).to.equal(risk.likelihood);
 						expect(res.body.consequence).to.equal(risk.consequence);
 						expect(res.body.level_of_risk).to.equal(levelOfRisk);
