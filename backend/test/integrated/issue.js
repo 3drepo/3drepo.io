@@ -202,7 +202,6 @@ describe("Issues", function () {
 			expect(res.body.status).to.equal(issue.status);
 			expect(res.body.topic_type).to.equal(issue.topic_type);
 			expect(res.body.priority).to.equal(issue.priority);
-			expect(res.body.creator_role).to.equal(issue.creator_role);
 			expect(res.body.assigned_roles).to.deep.equal(issue.assigned_roles);
 			expect(res.body.viewpoint.up).to.deep.equal(issue.viewpoint.up);
 			expect(res.body.viewpoint.position).to.deep.equal(issue.viewpoint.position);
