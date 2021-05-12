@@ -17,14 +17,13 @@
 
 import React from 'react';
 import { formatDateTime, formatShortDate, formatShortDateTime } from '../../../../../../services/formatting/formatDate';
-import { Loader } from '../../../../../components/loader/loader.component';
 import { SequenceTasksListContainer, SequenceTasksListItem, TaskListLabel } from '../../sequences.styles';
-import { ITask, TaskItem } from './sequenceTaskItem.component';
+import { IActivity, TaskItem } from './sequenceTaskItem.component';
 
 interface IProps {
-	tasks: ITask[];
-	minDate: Date;
-	maxDate: Date;
+	tasks: IActivity[];
+	startDate: Date;
+	endDate: Date;
 	fetchActivityDetails: (id: string) => void;
 }
 
@@ -45,9 +44,9 @@ export class TasksList extends React.PureComponent<IProps, IState> {
 	};
 
 	public get durationLabel() {
-		const  {  minDate, maxDate } = this.props;
+		const  {  startDate, endDate } = this.props;
 
-		return 'Activities from ' + formatShortDateTime(minDate) + ' to ' + formatShortDateTime(maxDate);
+		return 'Activities from ' + formatShortDateTime(startDate) + ' to ' + formatShortDateTime(endDate);
 	}
 
 	private handleItemClick = (task) => this.props.fetchActivityDetails(task.id);
@@ -59,10 +58,6 @@ export class TasksList extends React.PureComponent<IProps, IState> {
 	))
 
 	public render = () => {
-		if (!this.props.tasks.length) {
-			return <Loader content="Loading activity list..." />;
-		}
-
 		return (
 			<SequenceTasksListContainer>
 				<TaskListLabel>{this.durationLabel}</TaskListLabel>

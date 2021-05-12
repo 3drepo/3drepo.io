@@ -63,42 +63,9 @@ const fieldTypes = {
 };
 
 const riskSchema = yup.object().shape({
-	_id: yup.object(),
-	assigned_roles: yup.array(),
-	associated_activity: yup.string(),
-	category: yup.string(),
-	comment: yup.string(),
-	commentIndex: yup.number(),
-	comments: yup.array(),
-	consequence: yup.number(),
-	created: yup.number(),
-	createdAt: yup.number(),
-	creator_role: yup.string(),
 	desc: yup.string().max(C.LONG_TEXT_CHAR_LIM),
-	element: yup.string(),
-	likelihood: yup.number(),
-	location_desc: yup.string(),
 	mitigation_desc: yup.string().max(C.LONG_TEXT_CHAR_LIM),
-	mitigation_detail: yup.string(),
-	mitigation_stage: yup.string(),
-	mitigation_status: yup.string(),
-	mitigation_type: yup.string(),
-	name: yup.string(),
-	number: yup.number(),
-	owner: yup.string(),
-	position: yup.array(),
-	residual_consequence: yup.number(),
-	residual_likelihood: yup.number(),
-	residual_risk: yup.string().max(C.LONG_TEXT_CHAR_LIM),
-	rev_id: yup.object(),
-	risk_factor: yup.string(),
-	safetibase_id: yup.string(),
-	scope: yup.string(),
-	sequence_start: yup.number().nullable(),
-	sequence_end: yup.number().nullable(),
-	thumbnail: yup.string(),
-	viewpoint: yup.object(),
-	viewpoints: yup.array()
+	residual_risk: yup.string().max(C.LONG_TEXT_CHAR_LIM)
 });
 
 const ownerPrivilegeAttributes = [

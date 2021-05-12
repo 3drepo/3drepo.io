@@ -25,7 +25,7 @@ import { selectPins as selectMeasurementPins } from '../../modules/measurements'
 import { selectGISCoordinates, selectHasGISCoordinates } from '../../modules/model';
 import { selectIsPaused, selectIsViewerManipulationEnabled, selectPresentationMode } from '../../modules/presentation';
 import { selectPins as selectRiskPins } from '../../modules/risks';
-import { selectIsLoadingFrame, selectSelectedHiddenNodes,
+import { selectIsLoadingFrameState, selectSelectedHiddenNodes,
 	selectSelectedSequenceId, SequencesActions } from '../../modules/sequences';
 import { TreeActions } from '../../modules/tree';
 import { selectAllTransparencyOverrides, selectColorOverrides, selectTransformations } from '../../modules/viewerGui';
@@ -46,7 +46,7 @@ const mapStateToProps = createStructuredSelector({
 	isPresentationPaused: selectIsPaused,
 	transformations: selectTransformations,
 	selectedSequenceId: selectSelectedSequenceId,
-	isLoadingSequenceFrame: selectIsLoadingFrame,
+	isLoadingSequenceFrame: selectIsLoadingFrameState,
 	sequenceHiddenNodes: selectSelectedHiddenNodes
 });
 

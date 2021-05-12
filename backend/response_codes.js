@@ -121,6 +121,7 @@
 
 		ACTIVITY_NOT_FOUND: { message: "Activity not found", status: 404 },
 		SEQUENCE_NOT_FOUND: { message: "Sequence not found", status: 404 },
+		SEQUENCE_READ_ONLY: { message: "Sequence not found", status: 400 },
 		TASK_NOT_FOUND: { message: "Sequence task not found", status: 404 },
 
 		USER_EXISTS: { message: "User already exists", status: 400 },
