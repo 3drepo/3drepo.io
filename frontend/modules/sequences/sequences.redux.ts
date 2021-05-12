@@ -21,9 +21,11 @@ import { STEP_SCALE } from '../../constants/sequences';
 import { sortByField } from '../../helpers/sorting';
 
 export const { Types: SequencesTypes, Creators: SequencesActions } = createActions({
-	fetchSequences: [],
+	fetchSequence: ['sequenceId'],
+	fetchSequenceList: [],
 	initializeSequences: [],
-	fetchSequencesSuccess: ['sequences'],
+	fetchSequenceSuccess: ['sequence'],
+	fetchSequenceListSuccess: ['sequences'],
 	updateSequence: ['sequenceId', 'newName'],
 	updateSequenceSuccess: ['sequenceId', 'newName'],
 	setSelectedSequence: ['sequenceId'],
@@ -32,7 +34,7 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	setSelectedDateSuccess: ['date'],
 	setLastSelectedDateSuccess: ['date'],
 	fetchFrame: ['date'],
-	fetchSelectedFrame: [],
+	prefetchFrames: [],
 	setStateDefinition: ['stateId', 'stateDefinition'],
 	setStepInterval: ['stepInterval'],
 	setStepScale: ['stepScale'],
@@ -89,7 +91,22 @@ export const INITIAL_STATE: ISequencesState = {
 	activitiesPending: true,
 };
 
-export const fetchSequencesSuccess = (state = INITIAL_STATE, { sequences }) => {
+export const fetchSequenceSuccess = (state = INITIAL_STATE, { sequence }) => {
+	let sequences = state.sequences;
+	if (sequences && sequences.length > 0) {
+		const sequenceIndex = sequences.findIndex((s) => s._id === sequence._id);
+
+		if (sequenceIndex >= 0) {
+			sequences[sequenceIndex] = sequence;
+		}
+	} else {
+		sequences = [ sequence ];
+	}
+
+	return { ...state, sequences };
+};
+
+export const fetchSequenceListSuccess = (state = INITIAL_STATE, { sequences }) => {
 	sequences = sortByField([...sequences], { order: 'asc', config: { field: '_id' } });
 	return { ...state, sequences };
 };
@@ -154,7 +171,8 @@ export const reset = () => {
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
-	[SequencesTypes.FETCH_SEQUENCES_SUCCESS]: fetchSequencesSuccess,
+	[SequencesTypes.FETCH_SEQUENCE_SUCCESS]: fetchSequenceSuccess,
+	[SequencesTypes.FETCH_SEQUENCE_LIST_SUCCESS]: fetchSequenceListSuccess,
 	[SequencesTypes.UPDATE_SEQUENCE_SUCCESS]: updateSequenceSuccess,
 	[SequencesTypes.FETCH_ACTIVITIES_DEFINITIONS_SUCCESS]: fetchActivitiesDefinitionsSuccess,
 	[SequencesTypes.SET_ACTIVITIES_PENDING]: setActivitiesPending,

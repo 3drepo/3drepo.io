@@ -23,18 +23,18 @@ import { createStructuredSelector } from 'reselect';
 import { ActivitiesActions } from '../../../../modules/activities';
 import { LegendActions } from '../../../../modules/legend';
 import {
-	selectActivitiesPending, selectCurrentActivities, selectFrames, selectIsLoadingFrame, selectMaxDate,
-	selectMinDate, selectSelectedEndingDate, selectSelectedFrameColors, selectSelectedSequence,
-	selectSelectedStartingDate, selectSequences, selectStepInterval, selectStepScale, SequencesActions,
+	selectActivitiesPending, selectCurrentActivities, selectEndDate, selectFrames, selectIsLoadingFrameState,
+	selectSelectedEndingDate, selectSelectedFrameColors, selectSelectedSequence, selectSelectedStartingDate,
+	selectSequences, selectStartDate, selectStepInterval, selectStepScale, SequencesActions,
 } from '../../../../modules/sequences';
 import { selectDraggablePanels, selectRightPanels, ViewerGuiActions } from '../../../../modules/viewerGui';
-import { ViewpointsActions } from '../../../../modules/viewpoints';
+import { selectIsLoadingSequenceViewpoint, ViewpointsActions } from '../../../../modules/viewpoints';
 import { Sequences } from './sequences.component';
 
 const mapStateToProps = createStructuredSelector({
 	sequences: selectSequences,
-	minDate: selectMinDate,
-	maxDate: selectMaxDate,
+	startDate: selectStartDate,
+	endDate: selectEndDate,
 	frames: selectFrames,
 	selectedDate: selectSelectedStartingDate,
 	selectedEndingDate: selectSelectedEndingDate,
@@ -42,7 +42,8 @@ const mapStateToProps = createStructuredSelector({
 	stepInterval: selectStepInterval,
 	stepScale: selectStepScale,
 	currentTasks: selectCurrentActivities,
-	loadingFrame: selectIsLoadingFrame,
+	loadingFrameState: selectIsLoadingFrameState,
+	loadingViewpoint: selectIsLoadingSequenceViewpoint,
 	selectedSequence: selectSelectedSequence,
 	rightPanels: selectRightPanels,
 	draggablePanels: selectDraggablePanels,
@@ -54,7 +55,6 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setStepInterval: SequencesActions.setStepInterval,
 	setStepScale: SequencesActions.setStepScale,
 	setSelectedSequence: SequencesActions.setSelectedSequence,
-	fetchSelectedFrame: SequencesActions.fetchSelectedFrame,
 	toggleActivitiesPanel: ActivitiesActions.toggleActivitiesPanel,
 	toggleLegend: LegendActions.togglePanel,
 	resetLegendPanel: LegendActions.resetPanel,

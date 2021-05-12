@@ -19,7 +19,7 @@
 const get = require("lodash").get;
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
-const Viewpoint = require("../models/viewpoint");
+const { cleanViewpoint, createViewpoint } = require("../models/viewpoint");
 const db = require("../handler/db");
 const FileRef = require("./fileRef");
 
@@ -163,7 +163,7 @@ const addComment = async function(account, model, colName, id, user, data, route
 	let viewpoint = null;
 
 	if (data.viewpoint) {
-		viewpoint = await Viewpoint.createViewpoint(account, model, colName, routePrefix, id, data.viewpoint, true, ticketType);
+		viewpoint = await createViewpoint(account, model, colName, routePrefix, id, data.viewpoint, true, ticketType);
 	}
 
 	const references = identifyReferences(data.comment);
@@ -177,7 +177,7 @@ const addComment = async function(account, model, colName, id, user, data, route
 
 	await col.update({ _id }, {...viewpointPush ,$set : {comments}});
 
-	Viewpoint.clean(routePrefix, viewpoint);
+	cleanViewpoint(routePrefix, viewpoint);
 
 	// 6. Return the new comment.
 	return { comment: {...comment, viewpoint, guid: utils.uuidToString(comment.guid)}, ...references };
@@ -252,7 +252,7 @@ const clean = (routePrefix, comment) =>  {
 		}
 	});
 	if(comment.viewpoint) {
-		Viewpoint.clean(routePrefix, comment.viewpoint);
+		cleanViewpoint(routePrefix, comment.viewpoint);
 	}
 };
 

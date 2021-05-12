@@ -21,6 +21,7 @@ import { IconButton } from '@material-ui/core';
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import { STEP_SCALE } from '../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
+import { getSelectedFrame } from '../../../../modules/sequences/sequences.helper';
 import { EmptyStateInfo } from '../../../components/components.styles';
 import { Loader } from '../../../components/loader/loader.component';
 import { PanelBarActions } from '../panelBarActions';
@@ -35,12 +36,11 @@ import {
 interface IProps {
 	sequences: any;
 	setSelectedDate: (date: Date) => void;
-	fetchSelectedFrame: () => void;
 	setStepInterval: (interval: number) => void;
 	setStepScale: (scale: STEP_SCALE) => void;
 	setSelectedSequence: (id: string) => void;
-	maxDate: Date;
-	minDate: Date;
+	endDate: Date;
+	startDate: Date;
 	frames: any[];
 	selectedDate: Date;
 	selectedEndingDate: Date;
@@ -48,13 +48,15 @@ interface IProps {
 	stepInterval: number;
 	stepScale: STEP_SCALE;
 	currentTasks: any[];
-	loadingFrame: boolean;
+	loadingFrameState: boolean;
+	loadingViewpoint: boolean;
 	selectedSequence: any;
 	rightPanels: string[];
 	setPanelVisibility: (panelName, visibility) => void;
 	toggleActivitiesPanel: () => void;
 	fetchActivityDetails: (id: string) => void;
 	deselectViewsAndLeaveClipping: () => void;
+	showViewpoint: (teamspace: string, model: string, viewpoint: any) => void;
 	id?: string;
 	isActivitiesPending: boolean;
 	draggablePanels: string[];
@@ -65,15 +67,15 @@ interface IProps {
 const da =  new Date();
 
 const SequenceDetails = ({
-	minDate, maxDate, selectedDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
-	setStepScale, currentTasks, loadingFrame,  rightPanels, toggleActivitiesPanel, fetchActivityDetails, onPlayStarted,
-	frames, isActivitiesPending, toggleLegend, draggablePanels
+	startDate, endDate, selectedDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
+	setStepScale, currentTasks, loadingFrameState, loadingViewpoint, rightPanels, toggleActivitiesPanel,
+	fetchActivityDetails, onPlayStarted, frames, isActivitiesPending, toggleLegend, draggablePanels
 }) => (
 		<>
 			<SequenceForm />
 			<SequencePlayer
-				min={minDate}
-				max={maxDate}
+				min={startDate}
+				max={endDate}
 				value={selectedDate}
 				endingDate={selectedEndingDate}
 				stepInterval={stepInterval}
@@ -81,7 +83,7 @@ const SequenceDetails = ({
 				onChange={setSelectedDate}
 				onChangeStepScale={setStepScale}
 				onChangeStepInterval={setStepInterval}
-				loadingFrame={loadingFrame}
+				loadingFrame={loadingFrameState || loadingViewpoint}
 				rightPanels={rightPanels}
 				toggleActivitiesPanel={toggleActivitiesPanel}
 				onPlayStarted={onPlayStarted}
@@ -92,8 +94,8 @@ const SequenceDetails = ({
 			/>
 			<TasksList
 				tasks={currentTasks}
-				minDate={selectedDate}
-				maxDate={selectedEndingDate}
+				startDate={selectedDate}
+				endDate={selectedEndingDate}
 				fetchActivityDetails={fetchActivityDetails}
 			/>
 		</>
@@ -127,7 +129,18 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 	}
 
 	public onPlayStarted = () => {
-		this.props.deselectViewsAndLeaveClipping();
+		const {
+			selectedSequence,
+			selectedDate,
+			frames,
+			showViewpoint,
+			deselectViewsAndLeaveClipping
+		} = this.props;
+		const { viewpoint } = getSelectedFrame(frames, selectedDate);
+
+		if (!viewpoint) {
+			deselectViewsAndLeaveClipping();
+		}
 	}
 
 	public render = () => {
