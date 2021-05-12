@@ -46,6 +46,7 @@ import { selectSelectedStartingDate, SequencesActions } from '../sequences';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { selectTopicTypes } from '../teamspace';
+import { TreeActions } from '../tree';
 import { ViewpointsActions } from '../viewpoints';
 import { generateViewpoint } from '../viewpoints/viewpoints.sagas';
 import { IssuesActions, IssuesTypes } from './issues.redux';
@@ -278,19 +279,23 @@ function* setActiveIssue({ issue, revision, ignoreViewer = false }) {
 		const issuesMap = yield select(selectIssuesMap);
 
 		if (issuesMap[activeIssueId]) {
-			const {account , model } = issuesMap[activeIssueId];
+			const { account , model } = issuesMap[activeIssueId];
 			yield put(IssuesActions.unsubscribeOnIssueCommentsChanges(account, model, activeIssueId));
 		}
 
 		if (issue) {
-			const {account , model, _id} = issue;
+			const { account, model, _id } = issue;
 			yield put(IssuesActions.subscribeOnIssueCommentsChanges(account, model, _id));
+
+			yield all([
+				!ignoreViewer ? put(ViewpointsActions.showViewpoint(issue?.account, issue?.model, issue)) : null,
+				put(IssuesActions.setComponentState({ activeIssue: issue._id, expandDetails: true }))
+			]);
+		} else {
+			yield put(IssuesActions.setComponentState({ activeIssue: null }));
+			yield put(TreeActions.clearCurrentlySelected());
 		}
 
-		yield all([
-			!ignoreViewer ? put(ViewpointsActions.showViewpoint(issue?.account, issue?.model, issue)) : null,
-			put(IssuesActions.setComponentState({ activeIssue: issue._id, expandDetails: true }))
-		]);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'issue as active', error));
 	}

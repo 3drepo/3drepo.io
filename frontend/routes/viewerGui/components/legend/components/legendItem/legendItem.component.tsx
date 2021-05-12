@@ -40,6 +40,7 @@ const LegendSchema = (names) => Yup.object().shape({
 interface IProps extends ILegend {
 	updateLegendItem: (legendItem: ILegend & { oldName?: string }) => void;
 	deleteLegendItem: (legendItem: ILegend) => void;
+	setComponentState: (legendItem: ILegend) => void;
 	legendNames: string[];
 	onPickerOpen: () => void;
 	onPickerClose: () => void;
@@ -49,16 +50,19 @@ interface IProps extends ILegend {
 }
 
 export const LegendItem = ({
-	name, color, updateLegendItem, deleteLegendItem, legendNames, editMode, ...props
+	name, color, updateLegendItem, deleteLegendItem, legendNames, editMode, setComponentState, ...props
 }: IProps) => {
 	const textFieldRef = React.useRef(null);
 
 	const getLegendSchema = LegendSchema(legendNames.filter((item) => item !== name));
 
-	const handleColorChange = (colorValue: string) => !editMode && updateLegendItem({
-		name,
-		color: colorValue,
-	});
+	const handleColorChange = (colorValue: string) => {
+		const update = editMode ? setComponentState : updateLegendItem;
+		update({
+			name,
+			color: colorValue,
+		});
+	};
 
 	const handleSave = ({ target: { value: newName }}) => {
 		if (newName) {

@@ -33,9 +33,10 @@ export const Container = styled.div`
 `;
 
 export const BoardContainer = styled.div`
-	height: calc(100% - 50px);
+	height: 100%;
 	box-sizing: border-box;
 	border-top: 1px solid ${COLOR.BLACK_6};
+	overflow: hidden;
 
 	> div {
 		height: 100%;
@@ -95,7 +96,7 @@ export const BoardContainer = styled.div`
 
 export const Config = styled.div`
 	background-color: ${COLOR.WHITE};
-	min-height: 30px;
+	flex-basis: 30px;
 	padding: 10px 15px;
 	display: flex;
 	align-items: center;
