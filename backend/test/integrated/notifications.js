@@ -561,6 +561,7 @@ describe("Notifications", function() {
 		};
 
 		const upload = tag => agents.teamSpace1.post(`/${account}/${model}/upload?tag=${tag}`)
+		.field("tag", tag)
 		.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
 		.expect(200, function(err, res) {
 			if(err) {done(err);}
