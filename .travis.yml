@@ -11,7 +11,7 @@ matrix:
         - cd backend
         - yarn install
         - yarn lint
-        - cd .../frontend
+        - cd ../frontend
         - yarn install
         - yarn lint
         - yarn build:test
