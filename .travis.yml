@@ -1,64 +1,74 @@
-language: node_js
+matrix:
+  include:
+    #linter test
+    - language: node_js
+      git:
+      submodules: false
+      depth: 1
+      node_js:
+        - "10.15.1"
+      script:
+        - cd backend
+        - yarn install
+        - yarn lint
+        - cd .../frontend
+        - yarn install
+        - yarn lint
+        - yarn build:test
+    # tests
+    - language: node_js
+      git:
+      submodules: false
+      depth: 1
+      node_js:
+        - "10.15.1"
+      sudo: true
+      addons:
+        apt:
+         packages:
+            - expect-dev
+            - rabbitmq-server
+      hosts:
+        - test.127.0.0.1
 
-git:
-  submodules: false
-  depth: 1
+      before_install:
+        - echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
+        - sudo apt-get update
+        - sudo apt-get install -y --allow-downgrades --allow-unauthenticated mongodb-org=3.2.22 mongodb-org-server=3.2.22 mongodb-org-shell=3.2.22 mongodb-org-tools=3.2.22
+        - sudo rm -rf /var/lib/mongodb/*
+        - sudo service mongod start
+        - until nc -z localhost 27017; do sudo tail /var/log/mongodb/mongod.log; sleep 5; done
+        - mkdir -p submodules
+        - test_ver=`cat backend/test/testDBVersion`
+        - cd submodules
+        - git clone https://$TESTS_USER:$TESTS_PASSWORD@github.com/3drepo/tests.git
+        - cd tests
+        - git checkout $test_ver
+        - git status
+        - cd backend && mongorestore
+        - cd ../../../
+        - cp -r ./submodules/tests/frontend/staticPages/legal/ ./resources/legal
 
-node_js:
-    - "10.15.1"
+      install:
+        - cd ./backend
+        - yarn install
+        - cd ./../frontend
+        - DETECT_CHROMEDRIVER_VERSION=true yarn install
+        - yarn build
 
-sudo: true
+      cache:
+      yarn: true
+      directories:
+        - node_modules
 
-addons:
-  apt:
-   packages:
-      - expect-dev
-      - rabbitmq-server
-
-  chrome: stable
-  hosts:
-    - test.127.0.0.1
-
-before_install:
-    - echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
-    - sudo apt-get update
-    - sudo apt-get install -y --allow-downgrades --allow-unauthenticated mongodb-org=3.2.22 mongodb-org-server=3.2.22 mongodb-org-shell=3.2.22 mongodb-org-tools=3.2.22
-    - sudo rm -rf /var/lib/mongodb/*
-    - sudo service mongod start
-    - until nc -z localhost 27017; do sudo tail /var/log/mongodb/mongod.log; sleep 5; done
-    - mkdir -p submodules
-    - test_ver=`cat backend/test/testDBVersion`
-    - cd submodules
-    - git clone https://$TESTS_USER:$TESTS_PASSWORD@github.com/3drepo/tests.git
-    - cd tests
-    - git checkout $test_ver
-    - git status
-    - cd backend && mongorestore
-    - cd ../../../
-    - cp -r ./submodules/tests/frontend/staticPages/legal/ ./resources/legal
-
-install:
-    - cd ./backend
-    - yarn install
-    - yarn lint
-    - cd ./../frontend
-    - DETECT_CHROMEDRIVER_VERSION=true yarn install
-    - yarn lint
-    - yarn build:test
-
-cache:
-  yarn: true
-  directories:
-    - node_modules
-
-script:
-    - cd ./../backend
-    - mkdir coverage
-    - unbuffer yarn test:coverall
-    - cd ../
-    - NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" &
-    - cd ./frontend
-      #- unbuffer yarn test
+      script:
+        - cd ../backend
+        - mkdir coverage
+        - unbuffer yarn test:coverall
+        - cd ../
+        - NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" &
+        - cd ./frontend
+       #- unbuffer yarn test
 
 notifications:
     email:
