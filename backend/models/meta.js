@@ -155,7 +155,7 @@ Meta.getMetadataFields = async (account, model) => {
 		return sceneCollection.mapReduce(
 			/* eslint-disable */
 			function() {
-				for (var key in Meta.metadata) {
+				for (var key in this.metadata) {
 					emit(key, null);
 				}
 			},
