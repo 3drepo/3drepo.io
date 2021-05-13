@@ -976,6 +976,7 @@ describe("Sharing/Unsharing a model", function () {
 
 		it("and the collaborator should be able to upload model", function(done) {
 			agent.post(`/${username}/${model}/upload`)
+				.send({"tag":"collab_upload"})
 				.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
 				.expect(200, done);
 		});
