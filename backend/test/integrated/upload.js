@@ -177,6 +177,25 @@ describe("Uploading a model", function () {
 				});
 		});
 
+		it("but without tag should fail", function(done) {
+			agent.post(`/${username}/${modelId}/upload`)
+				.attach("file", __dirname + "/../../statics/3dmodels/empty.ifc")
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
+					done(err);
+				});
+		});
+
+		it("but with invalid tag should fail", function(done) {
+			agent.post(`/${username}/${modelId}/upload`)
+				.field("tag", "bad tag!")
+				.attach("file", __dirname + "/../../statics/3dmodels/empty.ifc")
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
+					done(err);
+				});
+		});
+
 		it("but empty file size should fail", function(done) {
 
 			agent.post(`/${username}/${modelId}/upload`)
