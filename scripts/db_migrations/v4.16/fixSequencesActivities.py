@@ -44,6 +44,7 @@ def getFile(db, fsfolder, collection_name, id):
     if fileContent:
       return fileContent
     else:
+      print ("Warning: file not found in fs, trying gridfs")
       return getFileGridFS(db, collection_name, id)
 
   return getFileGridFS(db, collection_name,entry["link"])
@@ -92,6 +93,7 @@ password = sys.argv[4]
 fsDirectory = sys.argv[5]
 dryRun = True if len(sys.argv) < 7 else sys.argv[6] != "false"
 
+
 if not dryRun:
   print("dryRun = False: Commiting to database")
 else:
@@ -114,20 +116,20 @@ def hasTasksCollection(db, modelId):
   results = db[tasksCollName].find()
   return results != None and results.count() > 0
 
-def testActivitiesFile(db, modelId, sequenceId):
+def testActivitiesFile(db, modelId, sequenceId, fullsequencename):
   activitiesCollName = modelId + ".activities"
-  ref = getRef(db, activitiesCollName, id)
+  ref = getRef(db, activitiesCollName, sequenceId)
   if not ref:
-    print("Warning: file reference for sequence " + str(sequenceId) + " was not found")
+    print("Warning: file reference for sequence " + fullsequencename + " was not found")
     return
   else:
-    print("File reference for sequence " + str(sequenceId) + " was found. Ref type:" + ref["type"] + ", link:" + entry["link"])
+    print("File reference for sequence " + fullsequencename + " was found. Ref type:" + ref["type"] + ", link:" + ref["link"])
 
   fileContents = getFile(db, fsDirectory, activitiesCollName, str(sequenceId))
   if fileContents:
-    print ("File for sequence " + str(sequenceId) + " was found")
+    print ("File for sequence " + fullsequencename + " was found")
   else:
-    print ("Warning: File for sequence " + str(sequenceId) + " was NOT found")
+    print ("Warning: File for sequence " + fullsequencename + " was NOT found")
 
 def updateActivitiesSchema(db, modelId, sequenceId):
   activitiesCollName = modelId + ".activities"
@@ -178,24 +180,22 @@ for database in db.database_names():
             print("\t--model: " +  modelId)
             for entry in db[modelId + ".sequences"].find({}):
                 entryId = entry["_id"]
-                print("\t\t--sequence: " + str(entryId))
-
+                sequencefullname = str(database) + "/" +str(modelId) + "/" + str(entryId)
                 if not dryRun:
-                  if hasTasksCollection(db, modelId) and not hasActivitiesCollection(db, modelId):
-                    print("\t\t\t--Migrating sequence: " + str(entryId) + " from tasks")
-                    migrateTasksCollection(db, modelId, entryId)
-                    db[modelId + ".tasks"].drop()
-                  else:
-                      if not wasMigrated(db, modelId, entryId):
-                        updateActivitiesSchema(db, modelId, entryId)
-                      else:
-                        print("\t\t\t--Skipping sequence: " + str(entryId) + ", sequence already migrated")
-                else:
-                  if hasTasksCollection(db, modelId) and not hasActivitiesCollection(db, modelId):
-                    print("\t\t\t--Sequence: " + str(entryId) + " has old tasks schema (tasks collection)")
-                  else:
-                    testActivitiesFile(db, modelId, entryId)
                   if wasMigrated(db, modelId, entryId):
-                    print("\t\t\t--Sequence: " + str(entryId) + " already migrated")
-
-
+                      print("\t\t\t--Skipping sequence: " + sequencefullname + ", sequence already migrated")
+                  else:
+                    if hasTasksCollection(db, modelId) and not hasActivitiesCollection(db, modelId):
+                      print("\t\t\t--Migrating sequence: " + sequencefullname + " from tasks")
+                      migrateTasksCollection(db, modelId, entryId)
+                      # db[modelId + ".tasks"].drop()
+                    else:
+                      updateActivitiesSchema(db, modelId, entryId)
+                else:
+                  if wasMigrated(db, modelId, entryId):
+                    print("\t\t\t--Sequence: " +sequencefullname + " already migrated")
+                  else:
+                    if hasTasksCollection(db, modelId) and not hasActivitiesCollection(db, modelId):
+                      print("\t\t\t--Sequence: " + sequencefullname + " has old tasks schema (tasks collection)")
+                    else:
+                      testActivitiesFile(db, modelId, str(entryId), sequencefullname)

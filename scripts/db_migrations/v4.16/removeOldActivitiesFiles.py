@@ -60,12 +60,12 @@ def getFile(db, fsfolder, collection_name, id):
 
 def testActivitiesFile(db, modelId, sequenceId):
   activitiesCollName = modelId + ".activities"
-  ref = getRef(db, activitiesCollName, id)
+  ref = getRef(db, activitiesCollName, str(sequenceId))
   if not ref:
     print("Warning: file reference for sequence " + str(sequenceId) + " was not found")
     return
   else:
-    print("File reference for sequence " + str(sequenceId) + " was found. Ref type:" + ref["type"] + ", link:" + (entry["link"]))
+    print("File reference for sequence " + str(sequenceId) + " was found. Ref type:" + ref["type"] + ", link:" + (ref["link"]))
 
   fileContents = getFile(db, fsDirectory, activitiesCollName, str(sequenceId))
   if fileContents:
