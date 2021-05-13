@@ -32,7 +32,6 @@ def sedCmd(pattern, repl, filename):
 
     # Overwrite the original file with the munged temporary file in a
     # manner preserving file attributes (e.g., permissions).
-    shutil.copystat(filename, tmp_file.name)
     shutil.move(tmp_file.name, filename)
 
 
