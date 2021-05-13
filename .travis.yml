@@ -58,7 +58,7 @@ script:
     - cd ../
     - NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" &
     - cd ./frontend
-    - unbuffer yarn test
+      #- unbuffer yarn test
 
 notifications:
     email:
