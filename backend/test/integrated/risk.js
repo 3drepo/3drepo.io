@@ -164,6 +164,74 @@ describe("Risks", function () {
 			], done);
 		});
 
+		it(" with what the plugin passes in should succeed", function(done) {
+			const risk = {"_id":null,"owner":null,"created":0,"account":null,"model":null,"thumbnail":null,"name":"Untitled Risk","creator_role":null,"assigned_roles":[""],"desc":"abc","resources":[],"comments":[],"viewpoint":{"IsPerspective":false,"up":[0.408248290463863,0.816496580927726,-0.408248290463863],"view_dir":[0.577350269189626,-0.577350269189626,-0.577350269189626],"position":[-9945.70490074043,17665.5806569035,21191.2012206323],"right":[0.707106781186548,-8.32667268468868e-17,0.707106781186547],"clippingPlanes":null,"type":"orthographic","orthographicSize":20695.689274863},"rev_id":null,"likelihood":0,"location_desc":"","mitigation_desc":"","mitigation_detail":"","mitigation_stage":"","mitigation_status":"","mitigation_type":"","overall_level_of_risk":-1,"safetibase_id":"","position":null,"norm":null,"category":null,"associated_activity":"","element":"","consequence":0,"residual_consequence":-1,"residual_likelihood":-1,"residual_risk":"","risk_factor":"","scope":""};
+			const levelOfRisk = (0 === risk.likelihood && 0 === risk.consequence) ? 0 : -1;
+			let riskId;
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200, function(err, res) {
+							riskId = res.body._id;
+
+							expect(res.body.name).to.equal(risk.name);
+							expect(res.body.safetibase_id).to.equal(risk.safetibase_id);
+							expect(res.body.associated_activity).to.equal(risk.associated_activity);
+							expect(res.body.desc).to.equal(risk.desc);
+							expect(res.body.viewpoint.up).to.deep.equal(risk.viewpoint.up);
+							expect(res.body.viewpoint.position).to.deep.equal(risk.viewpoint.position);
+							expect(res.body.viewpoint.look_at).to.deep.equal(risk.viewpoint.look_at);
+							expect(res.body.viewpoint.view_dir).to.deep.equal(risk.viewpoint.view_dir);
+							expect(res.body.assigned_roles).to.deep.equal(risk.assigned_roles);
+							expect(res.body.likelihood).to.equal(risk.likelihood);
+							expect(res.body.consequence).to.equal(risk.consequence);
+							expect(res.body.level_of_risk).to.equal(levelOfRisk);
+							expect(res.body.mitigation_status).to.equal(risk.mitigation_status);
+							expect(res.body.mitigation_desc).to.equal(risk.mitigation_desc);
+							expect(res.body.mitigation_detail).to.equal(risk.mitigation_detail);
+							expect(res.body.mitigation_stage).to.equal(risk.mitigation_stage);
+							expect(res.body.mitigation_type).to.equal(risk.mitigation_type);
+							expect(res.body.element).to.equal(risk.element);
+							expect(res.body.risk_factor).to.equal(risk.risk_factor);
+							expect(res.body.scope).to.equal(risk.scope);
+							expect(res.body.location_desc).to.equal(risk.location_desc);
+
+							return done(err);
+						});
+				},
+
+				function(done) {
+					agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function(err, res) {
+						expect(res.body.name).to.equal(risk.name);
+						expect(res.body.safetibase_id).to.equal(risk.safetibase_id);
+						expect(res.body.associated_activity).to.equal(risk.associated_activity);
+						expect(res.body.desc).to.equal(risk.desc);
+						expect(res.body.viewpoint.up).to.deep.equal(risk.viewpoint.up);
+						expect(res.body.viewpoint.position).to.deep.equal(risk.viewpoint.position);
+						expect(res.body.viewpoint.look_at).to.deep.equal(risk.viewpoint.look_at);
+						expect(res.body.viewpoint.view_dir).to.deep.equal(risk.viewpoint.view_dir);
+						expect(res.body.assigned_roles).to.deep.equal(risk.assigned_roles);
+						expect(res.body.likelihood).to.equal(risk.likelihood);
+						expect(res.body.consequence).to.equal(risk.consequence);
+						expect(res.body.level_of_risk).to.equal(levelOfRisk);
+						expect(res.body.mitigation_status).to.equal(risk.mitigation_status);
+						expect(res.body.mitigation_desc).to.equal(risk.mitigation_desc);
+						expect(res.body.mitigation_detail).to.equal(risk.mitigation_detail);
+						expect(res.body.mitigation_stage).to.equal(risk.mitigation_stage);
+						expect(res.body.mitigation_type).to.equal(risk.mitigation_type);
+						expect(res.body.element).to.equal(risk.element);
+						expect(res.body.risk_factor).to.equal(risk.risk_factor);
+						expect(res.body.scope).to.equal(risk.scope);
+						expect(res.body.location_desc).to.equal(risk.location_desc);
+
+						return done(err);
+					});
+				}
+			], done);
+		});
+
 		it("with long desc should fail", function(done) {
 			const risk = Object.assign({"name":"Risk test"}, {
 				...baseRisk,

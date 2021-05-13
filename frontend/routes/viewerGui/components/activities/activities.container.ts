@@ -27,20 +27,19 @@ import {
 	selectShowDetails,
 	ActivitiesActions,
 } from '../../../../modules/activities';
-import { selectIsLoadingFrame, SequencesActions } from '../../../../modules/sequences';
+import { selectIsLoadingFrameState, SequencesActions } from '../../../../modules/sequences';
 import { Activities } from './activities.component';
 
 const mapStateToProps = createStructuredSelector({
 	searchEnabled: selectSearchEnabled,
 	searchQuery: selectSearchQuery,
-	isPending: selectIsLoadingFrame,
+	isPending: selectIsLoadingFrameState,
 	activities: selectFilteredActivities,
 	showDetails: selectShowDetails,
 	isDetailsPending: selectIsDetailsPending,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	fetchActivities: SequencesActions.fetchSequences,
 	fetchDetails: ActivitiesActions.fetchDetails,
 	setComponentState: ActivitiesActions.setComponentState,
 }, dispatch);

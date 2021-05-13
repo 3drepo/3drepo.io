@@ -19,15 +19,53 @@
 const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
+const yup = require("yup");
 
+const { update: updateGroup } = require("./group");
 const History = require("./history");
 const FileRef = require("./fileRef");
 const { getRefNodes } = require("./ref");
 const { getDefaultLegendId } = require("./modelSetting");
+const View = new (require("./view"))();
+const { cleanViewpoint, createViewpoint } = require("./viewpoint");
 
-const activityCol = (modelId) => `${modelId}.activities`;
 const sequenceCol = (modelId) => `${modelId}.sequences`;
 const legendCol = (modelId) => `${modelId}.sequences.legends`;
+
+// Viewpoint checks
+const viewpointSchema = yup.object().test((viewpoint) => {
+	if (!viewpoint) {
+		return true;
+	}
+
+	const {transformation_group_ids, transformation_groups } = viewpoint;
+
+	// The viewpoints for sequences CANT have transformations groups
+	return !(transformation_group_ids || transformation_groups);
+});
+
+const frameSchema = yup.object().shape({
+	dateTime: yup.number().required(),
+	viewpoint: viewpointSchema,
+	viewId: yup.string()
+}).noUnknown().test(({viewId, viewpoint}) => {
+	// The frame must have either viewpoint or viewId, not both
+	return (viewId && !viewpoint) || (!viewId && viewpoint);
+});
+
+const nameSchema = yup.string().min(1).max(30);
+
+const sequenceSchema = yup.object().shape({
+	name: nameSchema.required(),
+	rev_id: yup.string(),
+	frames: yup.array().of(frameSchema).min(1).required()
+}).noUnknown();
+
+const sequenceEditSchema = sequenceSchema.shape({
+	name: nameSchema,
+	rev_id: yup.string().nullable(),
+	frames: yup.array().of(frameSchema).min(1)
+}).noUnknown().test(utils.notEmpty);
 
 const clean = (toClean, keys) => {
 	keys.forEach((key) => {
@@ -43,14 +81,14 @@ const clean = (toClean, keys) => {
 	return toClean;
 };
 
-const cleanActivityDetail = (toClean) => {
-	const keys = ["_id", "parents"];
-
-	return clean(toClean, keys);
-};
-
-const cleanSequenceList = (toClean) => {
+const cleanSequence = (account, model, toClean) => {
 	const keys = ["_id", "rev_id", "model"];
+
+	toClean.teamspace = account;
+	toClean.model = model;
+
+	toClean.startDate = new Date(toClean.startDate).getTime();
+	toClean.endDate = new Date(toClean.endDate).getTime();
 
 	for (let i = 0; toClean["frames"] && i < toClean["frames"].length; i++) {
 		toClean["frames"][i] = cleanSequenceFrame(toClean["frames"][i]);
@@ -60,23 +98,88 @@ const cleanSequenceList = (toClean) => {
 };
 
 const cleanSequenceFrame = (toClean) => {
-	const key = "dateTime";
+	if (toClean.dateTime && utils.isDate(toClean.dateTime)) {
+		toClean.dateTime = new Date(toClean.dateTime).getTime();
+	}
 
-	if (toClean[key] && utils.isDate(toClean[key])) {
-		toClean[key] = new Date(toClean[key]).getTime();
+	if (toClean.viewpoint) {
+		toClean.viewpoint = cleanViewpoint(undefined, toClean.viewpoint);
 	}
 
 	return toClean;
 };
 
-const getSequenceById = async (account, model, sequenceId, projection) => {
-	return db.findOne(account, sequenceCol(model), { _id: sequenceId}, projection);
-};
+const handleFrames = async (account, model, sequenceId, sequenceFrames) => {
+	const processedFrames = [];
 
-const sequenceExists = async (account, model, sequenceId) => {
-	if(!(await getSequenceById(account, model, utils.stringToUUID(sequenceId), {_id: 1}))) {
-		throw responseCodes.SEQUENCE_NOT_FOUND;
+	for (let i = 0; i < sequenceFrames.length; i++) {
+		const frame = sequenceFrames[i];
+		const dateTime = new Date(frame.dateTime);
+		let viewpoint;
+
+		if (frame.viewpoint) {
+			viewpoint = await createViewpoint(
+				account,
+				model,
+				undefined,
+				undefined,
+				sequenceId,
+				frame.viewpoint,
+				false,
+				"sequence"
+			);
+		} else {
+			const view = await View.findByUID(account, model, frame.viewId, {});
+
+			if (view) {
+				viewpoint = view.viewpoint;
+
+				["highlighted_group_id",
+					"hidden_group_id",
+					"shown_group_id"
+				].forEach(async (groupIDName) => {
+					if (viewpoint[groupIDName]) {
+						await updateGroup(
+							account,
+							model,
+							undefined,
+							undefined,
+							undefined,
+							undefined,
+							viewpoint[groupIDName],
+							{ sequence_id: sequenceId }
+						);
+					}
+				});
+
+				if (viewpoint["override_group_ids"]) {
+					viewpoint["override_group_ids"].forEach(async (overrideGroupId) => {
+						await updateGroup(
+							account,
+							model,
+							undefined,
+							undefined,
+							undefined,
+							undefined,
+							overrideGroupId,
+							{ sequence_id: sequenceId }
+						);
+					});
+				}
+			} else {
+				throw responseCodes.INVALID_ARGUMENTS;
+			}
+		}
+
+		processedFrames.push({
+			dateTime,
+			viewpoint
+		});
 	}
+
+	processedFrames.sort((frameA, frameB) => frameA.dateTime - frameB.dateTime);
+
+	return processedFrames;
 };
 
 const getLegendById = (account, model, sequenceId) => {
@@ -97,18 +200,57 @@ const getDefaultLegend = async (account, model) => {
 
 const Sequence = {};
 
-Sequence.getSequenceActivityDetail = async (account, model, activityId) => {
-	const activity = await db.findOne(account, activityCol(model), {"_id": utils.stringToUUID(activityId)});
-
-	if (!activity) {
-		throw responseCodes.ACTIVITY_NOT_FOUND;
+Sequence.createSequence = async (account, model, sequenceData) => {
+	if (!sequenceSchema.isValidSync(sequenceData, { strict: true })) {
+		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	return cleanActivityDetail(activity);
+	sequenceData = {...sequenceData, "_id": utils.generateUUID(), "customSequence": true};
+
+	if (sequenceData.rev_id) {
+		const history = await History.getHistory(account, model, undefined, sequenceData.rev_id, {_id: 1});
+
+		if (!history) {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+
+		sequenceData.rev_id = history._id;
+	}
+
+	sequenceData.frames = await handleFrames(account, model, sequenceData._id, sequenceData.frames);
+
+	sequenceData.startDate = new Date(sequenceData.frames[0].dateTime);
+	sequenceData.endDate = new Date(sequenceData.frames[sequenceData.frames.length - 1].dateTime);
+
+	await db.insert(account, sequenceCol(model), sequenceData);
+
+	return { _id: utils.uuidToString(sequenceData._id) };
 };
 
-Sequence.getSequenceActivities = async (account, model, sequenceId) => {
-	return FileRef.getSequenceActivitiesFile(account, model, utils.uuidToString(sequenceId));
+Sequence.deleteSequence = async (account, model, sequenceId) => {
+	await Sequence.sequenceExists(account, model, sequenceId);
+	const { result } = await db.remove(account, sequenceCol(model), {
+		_id: utils.stringToUUID(sequenceId),
+		customSequence: true
+	});
+
+	if (result.n === 0) {
+		throw responseCodes.SEQUENCE_READ_ONLY;
+	}
+};
+
+Sequence.getSequenceById = async (account, model, sequenceId, projection = {}, noClean = true) => {
+	const sequence = await db.findOne(account, sequenceCol(model), { _id: utils.stringToUUID(sequenceId)}, projection);
+
+	if (!sequence) {
+		throw responseCodes.SEQUENCE_NOT_FOUND;
+	}
+
+	return noClean ? sequence : cleanSequence(account, model, sequence);
+};
+
+Sequence.sequenceExists = async (account, model, sequenceId) => {
+	await Sequence.getSequenceById(account, model, utils.stringToUUID(sequenceId), {_id: 1});
 };
 
 Sequence.getSequenceState = async (account, model, stateId) => {
@@ -116,26 +258,27 @@ Sequence.getSequenceState = async (account, model, stateId) => {
 };
 
 Sequence.getList = async (account, model, branch, revision, cleanResponse = false) => {
-	const history = await History.getHistory(account, model, branch, revision);
+	let submodelBranch;
+	const sequencesQuery = {};
 
-	if(!history) {
-		throw responseCodes.INVALID_TAG_NAME;
+	if (branch || revision) {
+		const history = await History.getHistory(account, model, branch, revision, {_id: 1});
+
+		submodelBranch = "master";
+		sequencesQuery["$or"] = [{"rev_id": history._id}, {"rev_id": {"$exists": false}}];
 	}
 
-	const refNodes = await getRefNodes(account, model, branch, revision, {project:1});
+	const refNodesBranch = revision ? undefined : "master";
+	const refNodes = await getRefNodes(account, model, refNodesBranch, revision, {project:1});
 	const submodels = refNodes.map(r => r.project);
 
-	const submodelSequencesPromises = Promise.all(submodels.map((submodel) => Sequence.getList(account, submodel, "master", null, cleanResponse)));
+	const submodelSequencesPromises = Promise.all(submodels.map((submodel) => Sequence.getList(account, submodel, submodelBranch, undefined, cleanResponse)));
 
-	const sequences = await db.find(account, sequenceCol(model), {"rev_id": history._id});
-	sequences.forEach((sequence) => {
-		sequence.teamspace = account;
-		sequence.model = model;
+	const sequences = await db.find(account, sequenceCol(model), sequencesQuery, {frames: 0});
 
-		if (cleanResponse) {
-			cleanSequenceList(sequence);
-		}
-	});
+	if (cleanResponse) {
+		sequences.forEach((sequence) => cleanSequence(account, model, sequence));
+	}
 
 	const submodelSequences = await submodelSequencesPromises;
 	submodelSequences.forEach((s) => sequences.push(...s));
@@ -144,25 +287,70 @@ Sequence.getList = async (account, model, branch, revision, cleanResponse = fals
 };
 
 Sequence.updateSequence = async (account, model, sequenceId, data) => {
-	if (!data || !data.name || !utils.isString(data.name) || data.name === ""  || data.name.length >= 30) {
+	const toUpdate = {};
+	const toSet = {};
+	const toUnset = {};
+
+	if (!sequenceEditSchema.isValidSync(data, { strict: true })) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	const { result } = await db.update(account, sequenceCol(model),
-		{_id: utils.stringToUUID(sequenceId)}, {$set: {name: data.name}});
-	if (result.nModified === 0) {
-		throw responseCodes.SEQUENCE_NOT_FOUND;
+	if (data.name) {
+		toSet.name = data.name;
 	}
 
+	// Name field can be updated for any sequence
+	if (data.name && Object.keys(data).length === 1) {
+		await Sequence.sequenceExists(account, model, sequenceId);
+	} else {
+
+		// Rest of properties can be updated only for custom sequences
+		const customSequence = await db.findOne(account, sequenceCol(model), {_id: utils.stringToUUID(sequenceId), customSequence: true}, {_id: 1});
+
+		if (!customSequence) {
+			throw responseCodes.SEQUENCE_READ_ONLY;
+		}
+
+		if (data.rev_id) {
+			const history = await History.getHistory(account, model, undefined, data.rev_id, {_id: 1});
+
+			if (!history) {
+				throw responseCodes.INVALID_ARGUMENTS;
+			}
+
+			toSet.rev_id = history._id;
+		} else if (data.rev_id === null) {
+			toUnset.rev_id = 1;
+		}
+
+		if (data.frames) {
+			toSet.frames = await handleFrames(account, model, sequenceId, data.frames);
+			const framesStartDate = new Date((toSet.frames[0] || {}).dateTime);
+			const framesEndDate = new Date((toSet.frames[toSet.frames.length - 1] || {}).dateTime);
+
+			toSet.startDate = framesStartDate;
+			toSet.endDate = framesEndDate;
+		}
+	}
+
+	if (utils.notEmpty(toSet)) {
+		toUpdate.$set = toSet;
+	}
+
+	if (utils.notEmpty(toUnset)) {
+		toUpdate.$unset = toUnset;
+	}
+
+	await db.update(account, sequenceCol(model), {_id: utils.stringToUUID(sequenceId)}, toUpdate);
 };
 
 Sequence.deleteLegend = async (account, model, sequenceId) => {
-	await sequenceExists(account, model, sequenceId);
+	await Sequence.sequenceExists(account, model, sequenceId);
 	await db.remove(account, legendCol(model), { _id: utils.stringToUUID(sequenceId) });
 };
 
 Sequence.getLegend = async (account, model, sequenceId) => {
-	await sequenceExists(account, model, sequenceId);
+	await Sequence.sequenceExists(account, model, sequenceId);
 
 	const legend = await getLegendById(account, model, sequenceId);
 
@@ -171,7 +359,7 @@ Sequence.getLegend = async (account, model, sequenceId) => {
 
 Sequence.updateLegend = async (account, model, sequenceId, data) => {
 	const id = utils.stringToUUID(sequenceId);
-	await sequenceExists(account, model, id);
+	await Sequence.sequenceExists(account, model, id);
 	const prunedData = {};
 	for(const entry in data) {
 		if(utils.hasField(data, entry)) {

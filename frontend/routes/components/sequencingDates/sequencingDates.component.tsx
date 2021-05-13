@@ -39,7 +39,7 @@ interface IProps {
 	selectedDate?: Date;
 	endTimeValue?: Date;
 	startTimeValue?: Date;
-	minDate?: Date;
+	startDate?: Date;
 }
 
 interface IState {
@@ -72,11 +72,11 @@ const SequenceDate = ({ value, name, onChange, showSequenceDate, min, max, initi
 
 export class SequencingDates extends React.PureComponent<IProps, IState> {
 	get additionalProps() {
-		const { endTimeValue, startTimeValue, selectedDate, minDate } = this.props;
+		const { endTimeValue, startTimeValue, selectedDate, startDate } = this.props;
 		const newTime = selectedDate ? selectedDate : endTimeValue;
 
 		return !startTimeValue ? {
-			initialFocusedDate: newTime ? newTime : minDate,
+			initialFocusedDate: newTime ? newTime : startDate,
 		} : {};
 	}
 
