@@ -106,6 +106,11 @@ def wasMigrated(db, modelId, sequenceId):
   results = db[activitiesCollName].find_one({"sequenceId": sequenceId})
   return results != None
 
+def isCustomSequence(db, modelId, sequenceId):
+  sequencesCollName = modelId + ".sequences"
+  results = db[sequencesCollName].find_one({"_id": sequenceId, "customSequence": True})
+  return results != None
+
 def hasActivitiesCollection(db, modelId):
   activitiesCollName =  modelId + ".activities"
   results = db[activitiesCollName].find()
@@ -185,17 +190,24 @@ for database in db.database_names():
                   if wasMigrated(db, modelId, entryId):
                       print("\t\t\t--Skipping sequence: " + sequencefullname + ", sequence already migrated")
                   else:
-                    if hasTasksCollection(db, modelId) and not hasActivitiesCollection(db, modelId):
-                      print("\t\t\t--Migrating sequence: " + sequencefullname + " from tasks")
-                      migrateTasksCollection(db, modelId, entryId)
-                      # db[modelId + ".tasks"].drop()
+                    if isCustomSequence(db, modelId, entryId): 
+                      print("\t\t\t--Skipping sequence: " + sequencefullname + ", sequence is a custom sequence")
                     else:
-                      updateActivitiesSchema(db, modelId, entryId)
+                      if hasTasksCollection(db, modelId) and not hasActivitiesCollection(db, modelId):
+                        print("\t\t\t--Migrating sequence: " + sequencefullname + " from tasks")
+                        migrateTasksCollection(db, modelId, entryId)
+                        # db[modelId + ".tasks"].drop()
+                      else:
+                        print("\t\t\t--Migrating sequence: " + sequencefullname + " from activities")
+                        updateActivitiesSchema(db, modelId, entryId)
                 else:
                   if wasMigrated(db, modelId, entryId):
                     print("\t\t\t--Sequence: " +sequencefullname + " already migrated")
                   else:
-                    if hasTasksCollection(db, modelId) and not hasActivitiesCollection(db, modelId):
-                      print("\t\t\t--Sequence: " + sequencefullname + " has old tasks schema (tasks collection)")
+                    if isCustomSequence(db, modelId, entryId): 
+                      print("\t\t\t-- Sequence: " + sequencefullname + ", sequence is a custom sequence")
                     else:
-                      testActivitiesFile(db, modelId, str(entryId), sequencefullname)
+                      if hasTasksCollection(db, modelId) and not hasActivitiesCollection(db, modelId):
+                        print("\t\t\t--Sequence: " + sequencefullname + " has old tasks schema (tasks collection)")
+                      else:
+                        testActivitiesFile(db, modelId, str(entryId), sequencefullname)

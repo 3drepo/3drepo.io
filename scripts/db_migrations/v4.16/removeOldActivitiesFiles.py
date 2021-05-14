@@ -99,15 +99,21 @@ def removeFile(db, fsfolder, collection_name, id):
   if entry:
     if entry["type"] == "fs":
       if removeFileFs(fsfolder, entry["link"]):
-        print "File succesfully removed from filesystem" + entry["link"]
+        print("File succesfully removed from filesystem" + entry["link"])
       else:
-        print "File unsuccesfully removed from filesystem" + entry["link"]
+        print("File unsuccesfully removed from filesystem" + entry["link"])
 
     removeFileGridFs(db, collection_name, entry["link"])
   else:
-    print "Fileref not found " + id
+    print ("Fileref not found " + id)
 
   db[collection_name + ".ref"].delete_one({"_id": id})
+
+
+def isCustomSequence(db, modelId, sequenceId):
+  sequencesCollName = modelId + ".sequences"
+  results = db[sequencesCollName].find_one({"_id": sequenceId, "customSequence": True})
+  return results != None
 
 ####### /Remove file functions
 
@@ -147,9 +153,13 @@ for database in db.database_names():
             for entry in db[modelId + ".sequences"].find({}):
                 entryId = entry["_id"]
                 print("\t\t--sequence: " + str(entryId))
+                sequencefullname = str(database) + "/" +str(modelId) + "/" + str(entryId)
 
-                if not dryRun:
-                  removeFile(db, fsDirectory , modelId + ".activities",  str(entryId))
+                if isCustomSequence(db, modelId, entryId):
+                  print("\t\t\t--Skipping sequence: " + sequencefullname + ", sequence is a custom sequence")
                 else:
-                  testActivitiesFile(db, modelId, entryId)
+                  if not dryRun:
+                    removeFile(db, fsDirectory , modelId + ".activities",  str(entryId))
+                  else:
+                    testActivitiesFile(db, modelId, entryId)
 
