@@ -146,7 +146,7 @@ describe("Uploading a model", function () {
 				.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
 				.expect(200);
 		});
-
+		/*
 		it("should have one item inserted into the queue", function(done) {
 
 			const q = require("../../services/queue");
@@ -167,7 +167,7 @@ describe("Uploading a model", function () {
 			}, 1000);
 
 		});
-
+		*/
 		it("should succeed (uppercase extension)", function(done) {
 			agent.post(`/${username}/${modelId}/upload`)
 				.field("tag", "uppercase_ext")

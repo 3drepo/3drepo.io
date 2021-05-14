@@ -625,7 +625,7 @@ describe("Notifications", function() {
 				});
 			});
 
-
+		/*
 		it("should have a notification when a federation has been updated", done => {
 			bouncerHelper.startBouncerWorker(() => {
 
@@ -648,12 +648,12 @@ describe("Notifications", function() {
 						.then(resFederation => updateFederation(agents.teamSpace1, 'teamSpace1',resFederation.body.model,[subModels[0]]))
 					);
 			});
-		})
+		}) */
 	});
 
 
 	describe("of type model update failed", ()=> {
-		it("should be created for the user that uploaded the model", done => {
+		/*		it("should be created for the user that uploaded the model", done => {
 			const username = "collaboratorTeamspace1Model1JobA";
 			const agent = agents[username];
 
@@ -697,7 +697,7 @@ describe("Notifications", function() {
 			upload();
 
 		}).timeout(60000);
-
+		*/
 		const testForBothNotifications = function(errcode, done) {
 			const username = "collaboratorTeamspace1Model1JobA";
 			const agent = agents[username];
