@@ -109,12 +109,6 @@ def removeFile(db, fsfolder, collection_name, id):
 
   db[collection_name + ".ref"].delete_one({"_id": id})
 
-
-def isCustomSequence(db, modelId, sequenceId):
-  sequencesCollName = modelId + ".sequences"
-  results = db[sequencesCollName].find_one({"_id": sequenceId, "customSequence": True})
-  return results != None
-
 ####### /Remove file functions
 
 
@@ -150,16 +144,13 @@ for database in db.database_names():
         for setting in db.settings.find(no_cursor_timeout=True):
             modelId = str(setting["_id"])
             print("\t--model: " +  modelId)
-            for entry in db[modelId + ".sequences"].find({}):
+            for entry in db[modelId + ".sequences"].find({"customSequence": {"$ne": True}}):
                 entryId = entry["_id"]
                 print("\t\t--sequence: " + str(entryId))
                 sequencefullname = str(database) + "/" +str(modelId) + "/" + str(entryId)
 
-                if isCustomSequence(db, modelId, entryId):
-                  print("\t\t\t--Skipping sequence: " + sequencefullname + ", sequence is a custom sequence")
+                if not dryRun:
+                  removeFile(db, fsDirectory , modelId + ".activities",  str(entryId))
                 else:
-                  if not dryRun:
-                    removeFile(db, fsDirectory , modelId + ".activities",  str(entryId))
-                  else:
-                    testActivitiesFile(db, modelId, entryId)
+                  testActivitiesFile(db, modelId, entryId)
 
