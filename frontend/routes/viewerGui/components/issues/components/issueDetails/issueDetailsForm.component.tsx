@@ -29,7 +29,7 @@ import {
 	ISSUE_SEQUENCING_TAB,
 	ISSUE_TABS,
 } from '../../../../../../constants/issues';
-import { VIEWER_PANELS_TITLES } from '../../../../../../constants/viewerGui';
+import { LONG_TEXT_CHAR_LIM, VIEWER_PANELS_TITLES } from '../../../../../../constants/viewerGui';
 import { canChangeAssigned, canChangeBasicProperty, canComment } from '../../../../../../helpers/issues';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { AttachmentsFormTab } from '../../../risks/components/attachmentsFormTab/attachmentsFormTab.component';
@@ -80,7 +80,7 @@ interface IState {
 }
 
 export const IssueSchema = Yup.object().shape({
-	description: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
+	desc: Yup.string().max(LONG_TEXT_CHAR_LIM, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
 });
 
 class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {

@@ -16,16 +16,18 @@
  */
 
 import copy from 'copy-to-clipboard';
-import { get, take } from 'lodash';
-import { all, put, select, takeLatest } from 'redux-saga/effects';
+import { get } from 'lodash';
+import { all, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 
-import { selectSelectedViewpoint, selectSortOrder, selectViewpointsGroups } from '.';
+import { selectSelectedViewpoint, selectViewpointsGroups, selectViewpointsGroupsBeingLoaded } from '.';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { ROUTES } from '../../constants/routes';
-import { SORT_ORDER_TYPES } from '../../constants/sorting';
 import { UnityUtil } from '../../globals/unity-util';
+import { delay } from '../../helpers/aync';
 import { createGroupsByColor, createGroupsByTransformations, prepareGroup } from '../../helpers/groups';
-import { createGroupsFromViewpoint, mergeGroupsDataFromViewpoint, setGroupData } from '../../helpers/viewpoints';
+import { createGroupsFromViewpoint, groupsOfViewpoint,
+	isViewpointLoaded,
+	mergeGroupsDataFromViewpoint, setGroupData } from '../../helpers/viewpoints';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { ChatActions } from '../chat';
@@ -229,7 +231,7 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 			return;
 		}
 
-		if (viewpoint?.up && !ignoreCamera) {
+		if (viewpoint.up && !ignoreCamera) {
 			yield put(ViewerGuiActions.setCamera(viewpoint));
 		} else {
 			// If we're not moving the camera, ensure the projection mode icon ion the gui matches the viewpoint
@@ -241,26 +243,33 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 		// The default value for hideIfc if it doesnt exists is 'false'
 		yield put(TreeActions.setHiddenGeometryVisible(viewpoint.hideIfc === false));
 
-		yield Viewer.updateClippingPlanes( clippingPlanes, teamspace, modelId);
+		yield Viewer.updateClippingPlanes(clippingPlanes, teamspace, modelId);
 
 		yield waitForTreeToBeReady();
-		yield prepareGroupsIfNecessary(teamspace, modelId, view.viewpoint);
+		yield put(ViewpointsActions.fetchViewpointGroups(teamspace, modelId, view));
 
-		if (viewpoint?.override_groups) {
+		let viewpointsGroups = yield select(selectViewpointsGroups);
+
+		while (!isViewpointLoaded(viewpoint, viewpointsGroups)) {
+			yield take(ViewpointsTypes.FETCH_GROUP_SUCCESS);
+			viewpointsGroups = yield select(selectViewpointsGroups);
+		}
+
+		if (viewpoint.override_groups) {
 			yield put(GroupsActions.clearColorOverrides());
 		}
 
-		yield put(TreeActions.showAllNodes());
-
 		yield put(TreeActions.clearCurrentlySelected());
 
-		if (viewpoint?.hidden_group?.objects?.length > 0) {
-			yield put(TreeActions.hideNodesBySharedIds(viewpoint.hidden_group.objects));
-		} else if (viewpoint?.shown?.objects?.length > 0) {
-			yield put(TreeActions.isolateNodesBySharedIds(viewpoint.shown.objects));
+		if (viewpoint.hidden_group?.objects?.length > 0) {
+			yield put(TreeActions.hideNodesBySharedIds(viewpoint.hidden_group.objects, true));
+		} else if (viewpoint.shown_group?.objects?.length > 0) {
+			yield put(TreeActions.isolateNodesBySharedIds(viewpoint.shown_group.objects));
+		} else {
+			yield put(TreeActions.showAllNodes());
 		}
 
-		if (viewpoint?.highlighted_group?.objects?.length > 0) {
+		if (viewpoint.highlighted_group?.objects?.length > 0) {
 			yield put(TreeActions.selectNodesBySharedIds(viewpoint.highlighted_group.objects));
 			window.dispatchEvent(new Event('resize'));
 		}
@@ -291,46 +300,38 @@ export function * deselectViewsAndLeaveClipping() {
 	}
 }
 
-export function* prepareGroupsIfNecessary( teamspace, modelId, viewpoint) {
+export function* fetchViewpointGroups({teamspace, modelId, view}) {
 	try  {
-		const revision = yield select(selectCurrentRevisionId);
-		const viewpointsGroups = yield select(selectViewpointsGroups);
-
-		if (!viewpoint) {
+		if (!view.viewpoint) {
 			return;
 		}
 
-		const groupsProperties = ['override_group_ids', 'transformation_group_ids',
-		'highlighted_group_id', 'hidden_group_id'];
+		const revision = yield select(selectCurrentRevisionId);
+		const viewpointsGroups = yield select(selectViewpointsGroups);
+		const viewpointsGroupsBeingLoaded: Set<string> = yield select(selectViewpointsGroupsBeingLoaded);
+
+		const viewpoint = view.viewpoint;
 
 		const groupsToFetch = [];
 
 		// This part discriminates which groups hasnt been loaded yet and add their ids to
 		// the groupsToFetch array
-		for (let i = 0; i < groupsProperties.length ; i++) {
-			const prop = groupsProperties[i];
-			if (viewpoint[prop]) {
-				if (Array.isArray(viewpoint[prop])) { // if the property is an array of groupId
-					(viewpoint[prop] as any[]).forEach((id) => {
-						if (!viewpointsGroups[id]) {
-							groupsToFetch.push(id);
-						}
-					});
-				} else {// if the property is just a groupId
-					if (!viewpointsGroups[viewpoint[prop]]) {
-						groupsToFetch.push(viewpoint[prop]);
-					}
-				}
+		const ids = [];
+		for (const id of groupsOfViewpoint(viewpoint)) {
+			ids.push(id);
+			if (!viewpointsGroups[id] && !viewpointsGroupsBeingLoaded.has(id)) {
+				groupsToFetch.push(id);
 			}
 		}
 
 		if (groupsToFetch.length > 0) {
+
+			yield put(ViewpointsActions.addViewpointGroupsBeingLoaded(groupsToFetch));
 			const fetchedGroups =  (yield all(groupsToFetch.map((groupId) =>
 				API.getGroup(teamspace, modelId, groupId, revision))))
 				.map(({data}) => prepareGroup(data));
 
 			yield all(fetchedGroups.map((group) => put(ViewpointsActions.fetchGroupSuccess(group))));
-
 		}
 
 		const groupsMap = yield select(selectViewpointsGroups);
@@ -388,18 +389,19 @@ export function* setDefaultViewpoint({ teamspace, modelId, view }) {
 }
 
 export default function* ViewpointsSaga() {
-	yield takeLatest(ViewpointsTypes.FETCH_VIEWPOINTS, fetchViewpoints);
-	yield takeLatest(ViewpointsTypes.CREATE_VIEWPOINT, createViewpoint);
-	yield takeLatest(ViewpointsTypes.UPDATE_VIEWPOINT, updateViewpoint);
-	yield takeLatest(ViewpointsTypes.DELETE_VIEWPOINT, deleteViewpoint);
-	yield takeLatest(ViewpointsTypes.SET_ACTIVE_VIEWPOINT, setActiveViewpoint);
-	yield takeLatest(ViewpointsTypes.SUBSCRIBE_ON_VIEWPOINT_CHANGES, subscribeOnViewpointChanges);
-	yield takeLatest(ViewpointsTypes.UNSUBSCRIBE_ON_VIEWPOINT_CHANGES, unsubscribeOnViewpointChanges);
-	yield takeLatest(ViewpointsTypes.PREPARE_NEW_VIEWPOINT, prepareNewViewpoint);
+	yield takeEvery(ViewpointsTypes.FETCH_VIEWPOINTS, fetchViewpoints);
+	yield takeEvery(ViewpointsTypes.CREATE_VIEWPOINT, createViewpoint);
+	yield takeEvery(ViewpointsTypes.UPDATE_VIEWPOINT, updateViewpoint);
+	yield takeEvery(ViewpointsTypes.DELETE_VIEWPOINT, deleteViewpoint);
+	yield takeEvery(ViewpointsTypes.SET_ACTIVE_VIEWPOINT, setActiveViewpoint);
+	yield takeEvery(ViewpointsTypes.SUBSCRIBE_ON_VIEWPOINT_CHANGES, subscribeOnViewpointChanges);
+	yield takeEvery(ViewpointsTypes.UNSUBSCRIBE_ON_VIEWPOINT_CHANGES, unsubscribeOnViewpointChanges);
+	yield takeEvery(ViewpointsTypes.PREPARE_NEW_VIEWPOINT, prepareNewViewpoint);
 	yield takeLatest(ViewpointsTypes.SHOW_VIEWPOINT, showViewpoint);
-	yield takeLatest(ViewpointsTypes.SHARE_VIEWPOINT_LINK, shareViewpointLink);
-	yield takeLatest(ViewpointsTypes.SET_DEFAULT_VIEWPOINT, setDefaultViewpoint);
-	yield takeLatest(ViewpointsTypes.DESELECT_VIEWS_AND_LEAVE_CLIPPING, deselectViewsAndLeaveClipping);
-	yield takeLatest(ViewpointsTypes.CACHE_GROUPS_FROM_VIEWPOINT, cacheGroupsFromViewpoint);
-	yield takeLatest(ViewpointsTypes.SHOW_PRESET, showPreset);
+	yield takeEvery(ViewpointsTypes.SHARE_VIEWPOINT_LINK, shareViewpointLink);
+	yield takeEvery(ViewpointsTypes.SET_DEFAULT_VIEWPOINT, setDefaultViewpoint);
+	yield takeEvery(ViewpointsTypes.DESELECT_VIEWS_AND_LEAVE_CLIPPING, deselectViewsAndLeaveClipping);
+	yield takeEvery(ViewpointsTypes.CACHE_GROUPS_FROM_VIEWPOINT, cacheGroupsFromViewpoint);
+	yield takeEvery(ViewpointsTypes.SHOW_PRESET, showPreset);
+	yield takeEvery(ViewpointsTypes.FETCH_VIEWPOINT_GROUPS, fetchViewpointGroups);
 }

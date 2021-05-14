@@ -16,6 +16,9 @@
  */
 "use strict";
 
+const yup = require("yup");
+const C = require("../constants");
+const responseCodes = require("../response_codes.js");
 const ChatEvent = require("./chatEvent");
 const Ticket = require("./ticket");
 const utils = require("../utils");
@@ -59,6 +62,12 @@ const fieldTypes = {
 	"viewpoints": "[object Array]",
 	"shapes": "[object Array]"
 };
+
+const riskSchema = yup.object().shape({
+	desc: yup.string().max(C.LONG_TEXT_CHAR_LIM),
+	mitigation_desc: yup.string().max(C.LONG_TEXT_CHAR_LIM),
+	residual_risk: yup.string().max(C.LONG_TEXT_CHAR_LIM)
+});
 
 const ownerPrivilegeAttributes = [
 	"desc"
@@ -114,12 +123,20 @@ class Risk extends Ticket {
 	}
 
 	async create(account, model, newRisk, sessionId) {
+		if (!riskSchema.isValidSync(newRisk, { strict: true })) {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+
 		newRisk = await super.create(account, model, newRisk);
 		ChatEvent.newRisks(sessionId, account, model, [newRisk]);
 		return newRisk;
 	}
 
 	async update(user, sessionId, account, model, issueId, data) {
+		if (!data || !riskSchema.isValidSync(data, { strict: true })) {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+
 		// 0. Set the black list for attributes
 		const attributeBlacklist = [
 			"_id",

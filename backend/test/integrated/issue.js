@@ -143,6 +143,112 @@ describe("Issues", function () {
 			expect(res.body.viewpoint.near).to.equal(issue.viewpoint.near);
 		});
 
+		it(" with data produced by plugins should succeed", async function() {
+			const issue = {
+				"_id": "",
+				"name": "Untitled Issue",
+				"owner": "",
+				"creator_role": null,
+				"created": 0,
+				"assigned_roles": [
+					""
+				],
+				"account": "",
+				"model": "",
+				"desc": "abc",
+				"thumbnail": null,
+				"resources": [],
+				"comments": [],
+				"viewpoint": {
+					"IsPerspective": false,
+					"up": [
+						0.408248290463863,
+						0.816496580927726,
+						-0.408248290463863
+					],
+					"view_dir": [
+						0.577350269189626,
+						-0.577350269189626,
+						-0.577350269189626
+					],
+					"position": [
+						-13505.0975047777,
+						24897.311391774,
+						24750.5938246696
+					],
+					"right": [
+						0.707106781186548,
+						-1.66533453693773e-16,
+						0.707106781186547
+					],
+					"clippingPlanes": null,
+					"type": "orthographic",
+					"orthographicSize": 25243.2023026735
+				},
+				"status": "open",
+				"due_date": 0,
+				"number": -1,
+				"topic_type": "For information",
+				"priority": "none"
+			};
+			let res = (await agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200));
+
+			const issueId = res.body._id;
+
+			expect(res.body.name).to.equal(issue.name);
+			expect(res.body.scale).to.equal(issue.scale);
+			expect(res.body.status).to.equal(issue.status);
+			expect(res.body.topic_type).to.equal(issue.topic_type);
+			expect(res.body.priority).to.equal(issue.priority);
+			expect(res.body.assigned_roles).to.deep.equal(issue.assigned_roles);
+			expect(res.body.viewpoint.up).to.deep.equal(issue.viewpoint.up);
+			expect(res.body.viewpoint.position).to.deep.equal(issue.viewpoint.position);
+			expect(res.body.viewpoint.look_at).to.deep.equal(issue.viewpoint.look_at);
+			expect(res.body.viewpoint.view_dir).to.deep.equal(issue.viewpoint.view_dir);
+			expect(res.body.viewpoint.right).to.deep.equal(issue.viewpoint.right);
+			expect(res.body.viewpoint.unityHeight).to.equal(issue.viewpoint.unityHeight);
+			expect(res.body.viewpoint.fov).to.equal(issue.viewpoint.fov);
+			expect(res.body.viewpoint.aspect_ratio).to.equal(issue.viewpoint.aspect_ratio);
+			expect(res.body.viewpoint.far).to.equal(issue.viewpoint.far);
+			expect(res.body.viewpoint.near).to.equal(issue.viewpoint.near);
+
+			res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200)
+
+			expect(res.body.name).to.equal(issue.name);
+			expect(res.body.scale).to.equal(issue.scale);
+			expect(res.body.status).to.equal(issue.status);
+			expect(res.body.topic_type).to.equal(issue.topic_type);
+			expect(res.body.priority).to.equal(issue.priority);
+			expect(res.body.assigned_roles).to.deep.equal(issue.assigned_roles);
+			expect(res.body.viewpoint.up).to.deep.equal(issue.viewpoint.up);
+			expect(res.body.viewpoint.position).to.deep.equal(issue.viewpoint.position);
+			expect(res.body.viewpoint.look_at).to.deep.equal(issue.viewpoint.look_at);
+			expect(res.body.viewpoint.view_dir).to.deep.equal(issue.viewpoint.view_dir);
+			expect(res.body.viewpoint.right).to.deep.equal(issue.viewpoint.right);
+			expect(res.body.viewpoint.unityHeight).to.equal(issue.viewpoint.unityHeight);
+			expect(res.body.viewpoint.fov).to.equal(issue.viewpoint.fov);
+			expect(res.body.viewpoint.aspect_ratio).to.equal(issue.viewpoint.aspect_ratio);
+			expect(res.body.viewpoint.far).to.equal(issue.viewpoint.far);
+			expect(res.body.viewpoint.near).to.equal(issue.viewpoint.near);
+		});
+
+
+		it("with long desc should fail", function(done) {
+			const issue = Object.assign({"name":"Issue test"}, {
+				...baseIssue,
+				"desc":"LongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLong"
+			});
+
+			agent.post(`/${username}/${model}/issues`)
+				.send(issue)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
 		it("with screenshot should succeed", async function() {
 			const issue = {"name":"Issue test", ...cloneDeep(baseIssue)};
 			issue.viewpoint.screenshot = pngBase64;
@@ -1658,7 +1764,7 @@ describe("Issues", function () {
 			expect(commentData.viewpoint.screenshotSmall).to.exist;
 			const commentId = commentData.guid;
 
-			// patch stuff 
+			// patch stuff
 			let res = await agent.patch(`/${username}/${model}/issues/${issueId}`)
 				.send(data)
 				.expect(200);
@@ -1874,6 +1980,32 @@ describe("Issues", function () {
 					agent.get(`/${username}/${model}/issues/${issueId}`)
 						.expect(200, function(err, res) {
 							expect(res.body.desc === desc.desc);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("too long desc should fail", function(done) {
+			const issue = Object.assign({"name":"Issue test"}, baseIssue);
+			let issueId;
+
+			const desc = { desc: "LongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLong" };
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200 , function(err, res) {
+							issueId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.patch(`/${username}/${model}/issues/${issueId}`)
+						.send(desc)
+						.expect(400, function(err, res) {
+							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 							done(err);
 						});
 				}

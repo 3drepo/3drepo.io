@@ -46,6 +46,7 @@ import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
 import { selectSelectedStartingDate, SequencesActions } from '../sequences';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
+import { TreeActions } from '../tree';
 import { ViewpointsActions } from '../viewpoints';
 import { generateViewpoint } from '../viewpoints/viewpoints.sagas';
 import { RisksActions, RisksTypes } from './risks.redux';
@@ -253,10 +254,15 @@ function* printRisks({ teamspace, modelId }) {
 
 function* setActiveRisk({ risk, revision, ignoreViewer = false }) {
 	try {
-		yield all([
-			!ignoreViewer ?  put(ViewpointsActions.showViewpoint(risk?.account, risk?.model, risk)) : null,
-			put(RisksActions.setComponentState({ activeRisk: risk._id, expandDetails: true }))
-		]);
+		if (risk) {
+			yield all([
+				!ignoreViewer ? put(ViewpointsActions.showViewpoint(risk?.account, risk?.model, risk)) : null,
+				put(RisksActions.setComponentState({ activeRisk: risk._id, expandDetails: true }))
+			]);
+		} else {
+			yield put(RisksActions.setComponentState({ activeRisk: null }));
+			yield put(TreeActions.clearCurrentlySelected());
+		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'risk as active', error));
 	}
@@ -315,18 +321,18 @@ const onUpdateEvent = (updatedRisk) => {
 	if (RISK_DEFAULT_HIDDEN_LEVELS.includes(updatedRisk.mitigation_status)) {
 		dispatch(RisksActions.showCloseInfo(updatedRisk._id));
 		setTimeout(() => {
-			dispatch(RisksActions.saveRiskSuccess(updatedRisk));
+			dispatch(RisksActions.saveRiskSuccess(updatedRisk, false));
 		}, 5000);
 		setTimeout(() => {
 			dispatch(RisksActions.hideCloseInfo(updatedRisk._id));
 		}, 6000);
 	} else {
-		dispatch(RisksActions.saveRiskSuccess(updatedRisk));
+		dispatch(RisksActions.saveRiskSuccess(updatedRisk, false));
 	}
 };
 
 const onCreateEvent = (createdRisk) => {
-	dispatch(RisksActions.saveRiskSuccess(createdRisk[0]));
+	dispatch(RisksActions.saveRiskSuccess(createdRisk[0], false));
 };
 
 function* subscribeOnRiskChanges({ teamspace, modelId }) {

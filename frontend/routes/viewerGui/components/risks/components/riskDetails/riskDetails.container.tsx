@@ -38,10 +38,10 @@ import {
 	RisksActions,
 } from '../../../../../../modules/risks';
 import {
-	selectMaxDate,
-	selectMinDate,
+	selectEndDate,
 	selectSelectedStartingDate,
 	selectSequences,
+	selectStartDate,
 	SequencesActions
 } from '../../../../../../modules/sequences';
 import { ViewpointsActions } from '../../../../../../modules/viewpoints';
@@ -63,8 +63,8 @@ const mapStateToProps = createStructuredSelector({
 	modelSettings: selectSettings,
 	failedToLoad: selectFailedToLoad,
 	postCommentIsPending: selectPostCommentIsPending,
-	minSequenceDate: selectMinDate,
-	maxSequenceDate: selectMaxDate,
+	minSequenceDate: selectStartDate,
+	maxSequenceDate: selectEndDate,
 	selectedDate: selectSelectedStartingDate,
 	sequences: selectSequences,
 	units: selectUnit,

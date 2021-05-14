@@ -48,6 +48,8 @@ export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createAct
 	cacheGroupsFromViewpoint: ['viewpoint', 'groupsData'],
 	showPreset: ['preset'],
 	toggleSortOrder: [],
+	fetchViewpointGroups: ['teamspace', 'modelId', 'view'],
+	addViewpointGroupsBeingLoaded: ['ids'],
 }, { prefix: 'VIEWPOINTS/' });
 
 export interface IViewpointsComponentState {
@@ -63,6 +65,7 @@ export interface IViewpointsState {
 	isPending: boolean;
 	viewpointsMap: any[];
 	viewpointsGroups: any;
+	viewpointsGroupsBeingLoaded: Set<string>;
 	componentState: IViewpointsComponentState;
 	selectedViewpoint: any;
 }
@@ -71,6 +74,7 @@ export const INITIAL_STATE: IViewpointsState = {
 	isPending: true,
 	viewpointsMap: [],
 	viewpointsGroups: {},
+	viewpointsGroupsBeingLoaded: new Set(),
 	componentState: {
 		sortOrder: SORT_ORDER_TYPES.ASCENDING,
 	},
@@ -86,6 +90,11 @@ const prepareViewpointGroups = (viewpoint) => {
 		viewpoint.viewpoint.override_groups = viewpoint.viewpoint.override_groups.map(prepareGroup);
 	}
 	return viewpoint;
+};
+
+const addViewpointGroupsBeingLoaded = (state = INITIAL_STATE, { ids }) => {
+	const viewpointsGroupsBeingLoaded = new Set([...state.viewpointsGroupsBeingLoaded, ...ids]);
+	return { ...state, viewpointsGroupsBeingLoaded };
 };
 
 const fetchViewpointsSuccess = (state = INITIAL_STATE, { viewpoints = [] }) => {
@@ -135,7 +144,10 @@ const setSelectedViewpoint = (state = INITIAL_STATE, { selectedViewpoint }) => {
 };
 
 const fetchGroupSuccess = (state = INITIAL_STATE, { group }) => {
-	return { ...state, viewpointsGroups: { ...state.viewpointsGroups, [group._id]: group } };
+	const viewpointsGroupsBeingLoaded = new Set([...state.viewpointsGroupsBeingLoaded]);
+	viewpointsGroupsBeingLoaded.delete(group._id);
+
+	return { ...state, viewpointsGroups: { ...state.viewpointsGroups, [group._id]: group }, viewpointsGroupsBeingLoaded };
 };
 
 const toggleSortOrder = (state = INITIAL_STATE) => {
@@ -160,4 +172,5 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ViewpointsTypes.SET_SELECTED_VIEWPOINT]: setSelectedViewpoint,
 	[ViewpointsTypes.FETCH_GROUP_SUCCESS]: fetchGroupSuccess,
 	[ViewpointsTypes.TOGGLE_SORT_ORDER]: toggleSortOrder,
+	[ViewpointsTypes.ADD_VIEWPOINT_GROUPS_BEING_LOADED]: addViewpointGroupsBeingLoaded,
 });

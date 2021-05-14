@@ -40,6 +40,7 @@ const FileRef = require("./fileRef");
 const config = require("../config.js");
 const extensionRe = /\.(\w+)$/;
 const AccountPermissions = require("./accountPermissions");
+const { cleanViewpoint } = require("./viewpoint");
 
 const getResponse = (responseCodeType) => (type) => responseCodes[responseCodeType + "_" + type];
 
@@ -232,6 +233,7 @@ class Ticket extends View {
 
 		if (data.viewpoint) {
 			newViewpoint = await this.createViewpoint(account, model, id, data.viewpoint, true);
+			cleanViewpoint(undefined, newViewpoint);
 			oldTicket.viewpoint = oldTicket.viewpoints[0] || {};
 			const oldScreenshotRef = oldTicket.viewpoint.screenshot_ref;
 			oldTicket = super.clean(account, model, oldTicket);

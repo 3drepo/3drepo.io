@@ -45,7 +45,7 @@ function* fetchDetails({ activityId }) {
 		const model =  yield select(selectSequenceModel);
 		const sequenceId =  yield select(selectSelectedSequenceId);
 
-		const { data: activity } = yield API.getSequenceActivityDetail(teamspace, model, undefined, sequenceId, activityId);
+		const { data: activity } = yield API.getSequenceActivityDetail(teamspace, model, sequenceId, activityId);
 
 		yield put(ActivitiesActions.setComponentState({ isPending: false, details: activity }));
 	} catch (error) {

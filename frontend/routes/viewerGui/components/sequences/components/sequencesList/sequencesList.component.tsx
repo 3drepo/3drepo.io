@@ -33,7 +33,7 @@ interface IProps {
 	setSelectedSequence: (id: string) => void;
 }
 
-const SequenceItem = ({name, modelName, minDate, maxDate, onClick}) => (
+const SequenceItem = ({name, modelName, startDate, endDate, onClick}) => (
 	<SequenceItemContainer onClick={onClick}>
 		<Grid container direction="row" alignItems="center">
 			<SequenceItemIcon />
@@ -43,8 +43,8 @@ const SequenceItem = ({name, modelName, minDate, maxDate, onClick}) => (
 				</Tooltip>
 				<Grid item>{modelName}</Grid>
 				<SequenceDatesContainer>
-					<Grid item>Start: {formatShortDate(new Date(minDate))} </Grid>
-					<Grid item>End: {formatShortDate(new Date(maxDate))} </Grid>
+					<Grid item>Start: {formatShortDate(new Date(startDate))} </Grid>
+					<Grid item>End: {formatShortDate(new Date(endDate))} </Grid>
 				</SequenceDatesContainer>
 			</Grid>
 		</Grid>

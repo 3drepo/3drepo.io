@@ -360,11 +360,16 @@ function* hideSelectedNodes() {
 	yield hideTreeNodes(fullySelectedNodes);
 }
 
-function* hideNodesBySharedIds({ objects = [] }) {
+function* hideNodesBySharedIds({ objects = [], resetTree = false }) {
 	yield waitForTreeToBeReady();
 
-	const nodesIds = yield select(selectGetNodesIdsFromSharedIds(objects));
-	yield hideTreeNodes(nodesIds, true);
+	const nodesIds: any[] = yield select(selectGetNodesIdsFromSharedIds(objects));
+
+	if (resetTree) {
+		yield showAllExceptMeshIDs(nodesIds);
+	} else {
+		yield hideTreeNodes(nodesIds, true);
+	}
 }
 
 function* hideTreeNodes(nodesIds = [], skipNested = false) {

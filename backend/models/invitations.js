@@ -28,7 +28,6 @@ const { contains: setContains } = require("./helper/set");
 
 const responseCodes = require("../response_codes.js");
 const { omit } = require("lodash");
-const C = require("../constants");
 
 const MODELS_PERMISSION = ["collaborator", "commenter", "viewer"];
 
@@ -250,10 +249,6 @@ invitations.getInvitationsByTeamspace = async (teamspaceName) => {
 		const teamspaceData =  omit(invitationEntry.teamSpaces.find(({teamspace}) => teamspace === teamspaceName), "teamspace");
 		return { email, ...teamspaceData };
 	});
-};
-
-invitations.isInvitation = (user) => {
-	return C.EMAIL_REGEXP.test(user);
 };
 
 module.exports = invitations;

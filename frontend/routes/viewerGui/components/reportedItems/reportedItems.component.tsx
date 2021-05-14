@@ -58,6 +58,7 @@ interface IProps {
 	setState: (componentState: any) => void;
 	onNewItem: () => void;
 	onActiveItem: (item) => void;
+	onDeactivateItem?: () => void;
 	onShowDetails: (item) => void;
 	onCloseDetails: () => void;
 	onToggleFilters: (isActive) => void;
@@ -94,6 +95,14 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	public listViewRef = React.createRef<HTMLElement>();
 	public listContainerRef = React.createRef<any>();
 
+	public handleClickOutside = () => {
+		const { onDeactivateItem } = this.props;
+
+		if (onDeactivateItem) {
+			onDeactivateItem();
+		}
+	}
+
 	public renderItemsList = renderWhenTrue(() => (
 		<ListContainer ref={this.listContainerRef}>
 			{this.props.items.map((item, index) => (
@@ -113,12 +122,14 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 	public renderListView = renderWhenTrue(() => (
 		<>
-			<ViewerPanelContent ref={this.listViewRef}>
-				{this.renderEmptyState(!this.props.searchEnabled && !this.props.items.length)}
-				{this.renderNotFound(this.props.searchEnabled && !this.props.items.length)}
-				{this.renderItemsList(this.props.items)}
+			<ViewerPanelContent onClick={this.handleClickOutside} ref={this.listViewRef}>
+				<div onClick={(event: React.MouseEvent<HTMLDivElement>) => event.stopPropagation()}>
+					{this.renderEmptyState(!this.props.searchEnabled && !this.props.items.length)}
+					{this.renderNotFound(this.props.searchEnabled && !this.props.items.length)}
+					{this.renderItemsList(this.props.items)}
+				</div>
 			</ViewerPanelContent>
-			<ViewerPanelFooter container alignItems="center" justify="space-between">
+			<ViewerPanelFooter onClick={this.handleClickOutside} container alignItems="center" justify="space-between">
 				<Summary>{this.listFooterText}</Summary>
 				<ViewerPanelButton
 					aria-label="Add item"

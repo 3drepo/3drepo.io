@@ -169,7 +169,7 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 				viewer.setNavigationOff();
 			}
 		}
-		if (prevProps.transparencies && prevProps.sequenceHiddenNodes !== sequenceHiddenNodes) {
+		if (prevProps.transparencies && !isEqual(prevProps.sequenceHiddenNodes, sequenceHiddenNodes)) {
 			this.props.handleTransparenciesVisibility(sequenceHiddenNodes);
 		}
 	}
