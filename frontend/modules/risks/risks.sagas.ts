@@ -321,13 +321,13 @@ const onUpdateEvent = (updatedRisk) => {
 	if (RISK_DEFAULT_HIDDEN_LEVELS.includes(updatedRisk.mitigation_status)) {
 		dispatch(RisksActions.showCloseInfo(updatedRisk._id));
 		setTimeout(() => {
-			dispatch(RisksActions.saveRiskSuccess(updatedRisk));
+			dispatch(RisksActions.saveRiskSuccess(updatedRisk, false));
 		}, 5000);
 		setTimeout(() => {
 			dispatch(RisksActions.hideCloseInfo(updatedRisk._id));
 		}, 6000);
 	} else {
-		dispatch(RisksActions.saveRiskSuccess(updatedRisk));
+		dispatch(RisksActions.saveRiskSuccess(updatedRisk, false));
 	}
 };
 
