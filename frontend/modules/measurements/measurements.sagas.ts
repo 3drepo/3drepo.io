@@ -49,13 +49,12 @@ export function* setMeasureMode({ mode }) {
 		yield Viewer.off(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
 		yield Viewer.off(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
 		yield put(MeasurementsActions.setMeasureModeSuccess(mode));
+		yield Viewer.setMeasureMode(mode);
 
 		if (mode === '') {
 			return;
 		}
 
-		yield put(MeasurementsActions.setMeasureModeSuccess(mode));
-		yield Viewer.setMeasureMode(mode);
 		yield Viewer.on(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
 		yield Viewer.on(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
 
@@ -66,8 +65,6 @@ export function* setMeasureMode({ mode }) {
 
 		if (isSnapping) {
 			yield Viewer.enableEdgeSnapping();
-		} else {
-			yield Viewer.disableEdgeSnapping();
 		}
 	} catch (error) {
 		DialogActions.showErrorDialog('set', `measure mode to ${mode}`, error);
