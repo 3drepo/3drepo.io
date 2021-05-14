@@ -147,17 +147,16 @@ export const saveIssueSuccess = (state = INITIAL_STATE, { issue, resetComponentS
 		issuesMap[state.componentState.activeIssue].position = oldPosition;
 	}
 
+	const newComponentState = { ...state.componentState };
+
 	if (resetComponentState) {
-		return {
-			...state,
-			issuesMap,
-			componentState: { ...state.componentState, newIssue: {} }
-		};
+		newComponentState.newIssue = {};
 	}
 
 	return {
 		...state,
 		issuesMap,
+		componentState: newComponentState
 	};
 };
 

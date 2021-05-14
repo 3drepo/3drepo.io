@@ -165,17 +165,16 @@ export const saveRiskSuccess = (state = INITIAL_STATE, { risk, resetComponentSta
 		risksMap[state.componentState.activeRisk].position = oldPosition;
 	}
 
+	const newComponentState = { ...state.componentState };
+
 	if (resetComponentState) {
-		return {
-			...state,
-			risksMap,
-			componentState: { ...state.componentState, newRisk: {}}
-		};
+		newComponentState.newRisk = {};
 	}
 
 	return {
 		...state,
 		risksMap,
+		componentState: newComponentState
 	};
 };
 
