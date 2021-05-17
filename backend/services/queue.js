@@ -164,15 +164,14 @@ class ImportQueue {
 	 * @param {desc} desc - revison description
 	 *******************************************************************************/
 	async importFile(corID, filePath, orgFileName, databaseName, modelName, userName, copy, tag, desc, importAnimations = true) {
-		const newFilePath = await this._moveFileToSharedSpace(corID, filePath, orgFileName, copy);
-
-		await this.writeImportData(corID, newFilePath, databaseName, modelName, userName, tag, desc, importAnimations);
+		await this.writeImportData(corID, filePath, orgFileName, databaseName, modelName, userName, copy, tag, desc, importAnimations);
 
 		const msg = `import -f ${sharedSpacePH}/${corID}.json`;
 		return this._dispatchWork(corID, msg, true);
 	}
 
-	async writeImportData(corID, newFilePath, databaseName, modelName, userName, tag, desc, importAnimations) {
+	async writeImportData(corID, filePath, orgFileName, databaseName, modelName, userName, copy, tag, desc, importAnimations) {
+		const newFilePath = await this._moveFileToSharedSpace(corID, filePath, orgFileName, copy);
 		const jsonFilename = `${this.sharedSpacePath}/${corID}.json`;
 
 		const json = {
