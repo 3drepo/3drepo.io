@@ -191,6 +191,7 @@ describe("Uploading a model", function () {
 				.field("tag", "bad tag!")
 				.attach("file", __dirname + "/../../statics/3dmodels/empty.ifc")
 				.expect(400, function(err, res) {
+					console.log(res.body);
 					expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
 					done(err);
 				});
@@ -202,6 +203,7 @@ describe("Uploading a model", function () {
 				.field("tag", "empty_file")
 				.attach("file", __dirname + "/../../statics/3dmodels/empty.ifc")
 				.expect(400, function(err, res) {
+					console.log(res.body);
 					expect(res.body.value).to.equal(responseCodes.FILE_FORMAT_NOT_SUPPORTED.value);
 					done(err);
 				});
