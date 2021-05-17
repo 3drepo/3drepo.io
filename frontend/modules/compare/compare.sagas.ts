@@ -206,6 +206,25 @@ function* setActiveTab({ activeTab }) {
 	}
 }
 
+function* updateCurrentRevision({ revision }) {
+	try {
+		const compareModels = yield select(selectCompareModels);
+		const revisionModelIndex = compareModels
+			.findIndex((model) => model.revisions.find(({ _id }) => _id === revision._id ));
+		const componentState = {} as ICompareComponentState;
+		compareModels[revisionModelIndex].baseRevision = revision;
+		compareModels[revisionModelIndex].currentRevision = revision;
+
+		componentState.compareModels = [
+			...compareModels
+		];
+
+		yield put(CompareActions.setComponentState(componentState));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('update', 'current revision', error.message));
+	}
+}
+
 function* setTargetModel({ modelId, isTarget, isTypeChange = false }) {
 	try {
 		const activeTab = yield select(selectActiveTab);
@@ -416,4 +435,5 @@ export default function* CompareSaga() {
 	yield takeLatest(CompareTypes.SET_COMPONENT_STATE, setComponentState);
 	yield takeLatest(CompareTypes.RESET_COMPONENT_STATE, resetComponentState);
 	yield takeLatest(CompareTypes.SET_TARGET_REVISION, setTargetRevision);
+	yield takeLatest(CompareTypes.UPDATE_CURRENT_REVISION, updateCurrentRevision);
 }

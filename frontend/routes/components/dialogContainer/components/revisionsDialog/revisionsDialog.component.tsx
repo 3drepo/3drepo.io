@@ -47,6 +47,7 @@ interface IProps {
 	setModelRevisionState: (teamspace, modelId, revision, isVoid) => void;
 	handleSetNewRevision: (revision) => void;
 	handleClose: () => void;
+	updateCurrentRevision: (revision) => void;
 }
 
 export class RevisionsDialog extends React.PureComponent<IProps, any> {
@@ -66,6 +67,7 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 
 	private revisionClickHandler = ({ tag, _id }) => {
 		const { teamspace, modelId, handleClose, history } = this.props;
+
 		handleClose();
 		history.push(`${ROUTES.VIEWER}/${teamspace}/${modelId}/${tag || _id}`);
 
@@ -86,7 +88,8 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 	}
 
 	private onRevisionItemClick = (event, revision) => {
-		const { handleSetNewRevision } = this.props;
+		const { handleSetNewRevision, updateCurrentRevision } = this.props;
+
 		if (this.props.type === TYPES.VIEWER) {
 			const isCurrentRevision = this.currentRevisionId === revision._id;
 			if (!isCurrentRevision) {
@@ -95,6 +98,7 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 		} else {
 			this.revisionClickHandler(revision);
 		}
+		updateCurrentRevision(revision);
 	}
 
 	private renderRevisionItem = (revision) => {

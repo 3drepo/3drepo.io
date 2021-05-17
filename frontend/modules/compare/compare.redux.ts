@@ -39,7 +39,8 @@ export const { Types: CompareTypes, Creators: CompareActions } = createActions({
 	setTargetModel: ['modelId', 'isTarget', 'isTypeChange'],
 	setTargetRevision: ['modelId', 'targetRevision', 'isDiff'],
 	resetComponentState: [],
-	resetComponentStateSuccess: []
+	resetComponentStateSuccess: [],
+	updateCurrentRevision: ['revision'],
 }, { prefix: 'COMPARE/' });
 
 export interface ICompareComponentState {
@@ -49,7 +50,7 @@ export interface ICompareComponentState {
 	selectedFilters: ISelectedFilter[];
 	selectedDiffModelsMap: {};
 	selectedClashModelsMap: {};
-	compareModels: [];
+	compareModels: any[];
 	renderingType: number;
 	isPending: boolean;
 	targetClashModels: {};

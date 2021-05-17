@@ -32,7 +32,7 @@ const mapStateToProps = createStructuredSelector({
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showRevisionsDialog: DialogActions.showRevisionsDialog,
-	hideDialog: DialogActions.hideDialog
+	hideDialog: DialogActions.hideDialog,
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(RevisionsSwitch));
