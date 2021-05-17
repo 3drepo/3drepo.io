@@ -101,6 +101,7 @@ export const MODEL_SUBTYPES = [
 	{ value: 'Mechanical' },
 	{ value: 'Structural' },
 	{ value: 'Survey' },
+	{ value: '2D Sheet', sheetMode: true },
 	{ value: 'Other' }
 ];
 
