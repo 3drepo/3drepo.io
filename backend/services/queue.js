@@ -166,7 +166,7 @@ class ImportQueue {
 	async importFile(corID, filePath, orgFileName, databaseName, modelName, userName, copy, tag, desc, importAnimations = true) {
 		const newFilePath = await this._moveFileToSharedSpace(corID, filePath, orgFileName, copy);
 
-		await writeImportData(corID, newFilePath, databaseName, modelName, userName, tag, desc, importAnimations);
+		await this.writeImportData(corID, newFilePath, databaseName, modelName, userName, tag, desc, importAnimations);
 
 		const msg = `import -f ${sharedSpacePH}/${corID}.json`;
 		return this._dispatchWork(corID, msg, true);
