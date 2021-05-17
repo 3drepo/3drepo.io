@@ -119,6 +119,16 @@ export class ViewerService {
 		return await this.setMeasureMode('');
 	}
 
+	public async addMeasurements(measurements) {
+		await this.isViewerReady();
+		measurements.forEach(UnityUtil.addMeasurement);
+	}
+
+	public async removeMeasurements(measurements) {
+		await this.isViewerReady();
+		measurements.forEach(({uuid}) => this.removeMeasurement(uuid));
+	}
+
 	/**
 	 * Setup Instance
 	 */

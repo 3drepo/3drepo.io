@@ -17,7 +17,7 @@
 
 import React from 'react';
 
-import { difference, isEqual } from 'lodash';
+import { difference, differenceBy, isEqual } from 'lodash';
 
 import { ROUTES } from '../../constants/routes';
 import { addColorOverrides, overridesColorDiff, removeColorOverrides } from '../../helpers/colorOverrides';
@@ -54,6 +54,7 @@ interface IProps {
 	presentationMode: PresentationMode;
 	isPresentationPaused: boolean;
 	handleTransparenciesVisibility: any;
+	lengthMeasurements: any[];
 }
 
 export class ViewerCanvas extends React.PureComponent<IProps, any> {
@@ -121,13 +122,22 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 		if (prev.length === 0 && curr.length > 0) {
 			viewer.mapStart();
 		}
+	}
 
+	public renderMeasurements(prev: any[], curr: any[]) {
+		const { viewer } = this.props;
+		const toAdd = differenceBy(curr, prev, 'uuid');
+		const toRemove = difference(prev, curr, 'uuid');
+
+		viewer.addMeasurements(toAdd);
+		viewer.removeMeasurements(toRemove);
 	}
 
 	public componentDidUpdate(prevProps: IProps) {
 		const { colorOverrides, issuePins, riskPins, measurementPins, hasGisCoordinates,
 			gisCoordinates, gisLayers, transparencies, transformations: transformation,
-			sequenceHiddenNodes, viewerManipulationEnabled, viewer
+			sequenceHiddenNodes, viewerManipulationEnabled, viewer,
+			lengthMeasurements
 		} = this.props;
 
 		if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
@@ -160,6 +170,11 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 
 		if (hasGisCoordinates && !isEqual(prevProps.gisLayers, gisLayers)) {
 			this.renderGisLayers(prevProps.gisLayers, gisLayers);
+		}
+
+		if (!isEqual(prevProps.lengthMeasurements, lengthMeasurements)) {
+			this.renderMeasurements(prevProps.lengthMeasurements, lengthMeasurements);
+			// viewer.addMeasurements(lengthMeasurements);
 		}
 
 		if (prevProps.viewerManipulationEnabled !== viewerManipulationEnabled) {
