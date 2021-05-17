@@ -163,35 +163,38 @@ class ImportQueue {
 	 * @param {tag} tag - revision tag
 	 * @param {desc} desc - revison description
 	 *******************************************************************************/
-	importFile(corID, filePath, orgFileName, databaseName, modelName, userName, copy, tag, desc, importAnimations = true) {
+	async importFile(corID, filePath, orgFileName, databaseName, modelName, userName, copy, tag, desc, importAnimations = true) {
+		const newFilePath = await this._moveFileToSharedSpace(corID, filePath, orgFileName, copy);
+
+		await writeImportData(corID, newFilePath, databaseName, modelName, userName, tag, desc, importAnimations);
+
+		const msg = `import -f ${sharedSpacePH}/${corID}.json`;
+		return this._dispatchWork(corID, msg, true);
+	}
+
+	async writeImportData(corID, newFilePath, databaseName, modelName, userName, tag, desc, importAnimations) {
 		const jsonFilename = `${this.sharedSpacePath}/${corID}.json`;
 
-		return this._moveFileToSharedSpace(corID, filePath, orgFileName, copy).then(newFilePath => {
-			const json = {
-				file: `${sharedSpacePH}/${newFilePath}`,
-				database: databaseName,
-				project: modelName,
-				owner: userName
-			};
+		const json = {
+			file: `${sharedSpacePH}/${newFilePath}`,
+			database: databaseName,
+			project: modelName,
+			owner: userName
+		};
 
-			if (tag) {
-				json.tag = tag;
-			}
+		if (tag) {
+			json.tag = tag;
+		}
 
-			if (desc) {
-				json.desc = desc;
-			}
+		if (desc) {
+			json.desc = desc;
+		}
 
-			if (importAnimations) {
-				json.importAnimations = importAnimations;
-			}
+		if (importAnimations) {
+			json.importAnimations = importAnimations;
+		}
 
-			return this.writeFile(jsonFilename, JSON.stringify(json)).then(() => {
-				const msg = `import -f ${sharedSpacePH}/${corID}.json`;
-				return this._dispatchWork(corID, msg, true);
-			});
-
-		});
+		await this.writeFile(jsonFilename, JSON.stringify(json));
 	}
 
 	/** *****************************************************************************
