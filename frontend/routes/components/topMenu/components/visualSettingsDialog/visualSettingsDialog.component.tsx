@@ -56,6 +56,24 @@ const BasicSettings = (props) => {
 						<MenuItem value="soft">Soft</MenuItem>
 						<MenuItem value="hard">Hard</MenuItem>
 					</SelectField>)} />
+				</FormListItem>
+			<FormListItem>
+				Background Color (3D Mode)
+				<Field name="backgroundColor3d" render={ ({ field }) => (
+					<ColorPicker {...field} onChange={(val) => {
+						// this is because colorpicker doenst use the standard events for inputs
+						field.onChange({target: {name: field.name, value: val}});
+					}} />
+			)} />
+			</FormListItem>
+			<FormListItem>
+				Background Color (2D Sheet Mode)
+				<Field name="backgroundColor2d" render={ ({ field }) => (
+					<ColorPicker {...field} onChange={(val) => {
+						// this is because colorpicker doenst use the standard events for inputs
+						field.onChange({target: {name: field.name, value: val}});
+					}} />
+			)} />
 			</FormListItem>
 			<FormListItem>
 				XRay highlighting
