@@ -152,7 +152,7 @@ export function* resetMeasurementColors() {
 			lengthMeasurements.forEach(setDefaultColor);
 		}
 
-		if (lengthMeasurements.length) {
+		if (pointMeasurements.length) {
 			pointMeasurements.forEach(setDefaultColor);
 		}
 

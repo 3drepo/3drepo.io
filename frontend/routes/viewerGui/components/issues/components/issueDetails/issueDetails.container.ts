@@ -23,16 +23,19 @@ import { DialogActions } from '../../../../../../modules/dialog';
 import {
 	selectActiveIssueComments,
 	selectActiveIssueDetails,
+	selectAreaMeasurements,
 	selectExpandDetails,
 	selectFailedToLoad,
 	selectFetchingDetailsIsPending,
 	selectIssues,
+	selectLengthMeasurements,
+	selectMeasureMode,
 	selectNewComment,
 	selectPostCommentIsPending,
 	IssuesActions,
 } from '../../../../../../modules/issues';
 import { selectJobsList, selectMyJob } from '../../../../../../modules/jobs';
-import { selectPermissions } from '../../../../../../modules/model';
+import { selectPermissions, selectUnit } from '../../../../../../modules/model';
 import {
 	selectEndDate,
 	selectSelectedStartingDate,
@@ -63,6 +66,10 @@ const mapStateToProps = createStructuredSelector({
 	maxSequenceDate: selectEndDate,
 	selectedDate: selectSelectedStartingDate,
 	sequences: selectSequences,
+	units: selectUnit,
+	measureMode: selectMeasureMode,
+	lengthMeasurements: selectLengthMeasurements,
+	areaMeasurements: selectAreaMeasurements
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -86,6 +93,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showConfirmDialog: DialogActions.showConfirmDialog,
 	showViewpoint: ViewpointsActions.showViewpoint,
 	showSequenceDate: SequencesActions.showSequenceDate,
+	setMeasureMode: IssuesActions.setMeasureMode
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(IssueDetails));

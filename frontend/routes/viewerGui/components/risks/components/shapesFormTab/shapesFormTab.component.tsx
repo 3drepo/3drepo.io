@@ -28,18 +28,22 @@ interface IProps {
 	lengthMeasurements: IMeasure[];
 	areaMeasurements: IMeasure[];
 	units: string;
+	measureMode: string;
 	removeMeasurement: (uuid) => void;
 	setMeasurementColor: (uuid, color) => void;
 	setMeasurementName: (uuid, type, name) => void;
+	setMeasureMode: (mode) => void;
 }
 
 export const ShapesFormTab = ({
 	active,
+	measureMode,
+	setMeasureMode,
 	...props
 }: IProps) => {
 	return (
 		<Content active={active}>
-			<MeasuringType basicTypes />
+			<MeasuringType basicTypes setMeasureMode={setMeasureMode} measureMode={measureMode} />
 			<AllMeasurementsList {...props} pointMeasurements={[]} modelUnit={props.units} />
 		</Content>
 		);

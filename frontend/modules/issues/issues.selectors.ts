@@ -23,6 +23,7 @@ import { prepareComments, transformCustomsLinksToMarkdown } from '../../helpers/
 import { hasPin, issueToPin } from '../../helpers/pins';
 import { searchByFilters } from '../../helpers/searching';
 import { sortByDate } from '../../helpers/sorting';
+import { MEASURE_TYPE } from '../measurements/measurements.constants';
 import { selectCurrentModel } from '../model';
 import { selectQueryParams } from '../router/router.selectors';
 import { selectSelectedEndingDate, selectSelectedSequence, selectSelectedStartingDate } from '../sequences';
@@ -181,3 +182,22 @@ export const selectPins = createSelector(
 
 	return pinsToShow;
 });
+
+export const selectMeasureMode = createSelector(
+	selectComponentState, (componentState) => componentState.measureMode
+);
+
+export const selectShapes = createSelector(
+	selectSelectedIssue, (issue) =>
+		issue.shapes || []
+);
+
+export const selectAreaMeasurements = createSelector(
+	selectShapes, (shapes) =>
+		shapes.filter(({type}) => type === MEASURE_TYPE.AREA)
+);
+
+export const selectLengthMeasurements = createSelector(
+	selectShapes, (shapes) =>
+		shapes.filter(({type}) => type === MEASURE_TYPE.LENGTH)
+);

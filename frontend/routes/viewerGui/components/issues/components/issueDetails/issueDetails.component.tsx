@@ -69,6 +69,7 @@ interface IProps {
 	showScreenshotDialog: (config: any) => void;
 	showConfirmDialog: (config: any) => void;
 	updateViewpoint: (screenshot?: string) => void;
+	setMeasureMode: (measureMode) => void;
 	dialogId?: string;
 	postCommentIsPending?: boolean;
 	showSequenceDate: (date) => void;
@@ -76,6 +77,7 @@ interface IProps {
 	maxSequenceDate: Date;
 	selectedDate: Date;
 	sequences: any[];
+	measureMode: string;
 }
 
 interface IState {
@@ -292,6 +294,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				maxSequenceDate={this.props.maxSequenceDate}
 				selectedDate={this.props.selectedDate}
 				sequences={this.props.sequences}
+				measureMode={this.props.measureMode}
+				setMeasureMode={this.props.setMeasureMode}
 			/>
 		);
 	}

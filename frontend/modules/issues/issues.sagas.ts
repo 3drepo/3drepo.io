@@ -17,7 +17,7 @@
 
 import { push } from 'connected-react-router';
 import filesize from 'filesize';
-import { isEmpty, isEqual, map, omit } from 'lodash';
+import { isEmpty, isEqual, map, omit, take } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import * as queryString from 'query-string';
@@ -25,6 +25,7 @@ import { CHAT_CHANNELS } from '../../constants/chat';
 import { DEFAULT_PROPERTIES, ISSUE_DEFAULT_HIDDEN_STATUSES, PRIORITIES, STATUSES } from '../../constants/issues';
 import { EXTENSION_RE } from '../../constants/resources';
 import { ROUTES } from '../../constants/routes';
+import { VIEWER_EVENTS } from '../../constants/viewer';
 import {
 	createAttachResourceComments,
 	createRemoveResourceComment
@@ -35,6 +36,7 @@ import { prepareResources } from '../../helpers/resources';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
+import { Viewer } from '../../services/viewer/viewer';
 import { BoardActions } from '../board';
 import { ChatActions } from '../chat';
 import { selectCurrentUser } from '../currentUser';
@@ -648,6 +650,37 @@ export function * updateActiveIssueViewpoint({screenshot}) {
 	yield put(IssuesActions.updateActiveIssue({viewpoint}));
 }
 
+const onMeasurementChanged = () => {
+	dispatch(IssuesActions.setMeasureMode(''));
+};
+
+export function* setMeasureMode({ measureMode }) {
+	try {
+		// yield Viewer.off(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
+		yield Viewer.off(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
+		yield put(IssuesActions.setMeasureModeSuccess(measureMode));
+		yield Viewer.setMeasureMode(measureMode);
+
+		if (measureMode === '') {
+			return;
+		}
+
+		// yield Viewer.on(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
+		yield Viewer.on(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
+
+		// ViewerGuiActions.setClipEdit(false);
+		// BimActions.setIsActive(false);
+
+		// const isSnapping = yield select(selectEdgeSnapping);
+
+		// if (isSnapping) {
+		// 	yield Viewer.enableEdgeSnapping();
+		// }
+	} catch (error) {
+		DialogActions.showErrorDialog('set', `measure mode in issues to ${measureMode}`, error);
+	}
+}
+
 export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.FETCH_ISSUES, fetchIssues);
 	yield takeLatest(IssuesTypes.FETCH_ISSUE, fetchIssue);
@@ -677,4 +710,5 @@ export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.GO_TO_ISSUE, goToIssue);
 	yield takeLatest(IssuesTypes.UPDATE_BOARD_ISSUE, updateBoardIssue);
 	yield takeLatest(IssuesTypes.UPDATE_ACTIVE_ISSUE_VIEWPOINT, updateActiveIssueViewpoint);
+	yield takeLatest(IssuesTypes.SET_MEASURE_MODE, setMeasureMode);
 }
