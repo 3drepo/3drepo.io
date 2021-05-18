@@ -179,8 +179,9 @@ describe("Uploading a model", function () {
 
 		it("but without tag should fail", function(done) {
 			agent.post(`/${username}/${modelId}/upload`)
-				.attach("file", __dirname + "/../../statics/3dmodels/empty.ifc")
+				.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
 				.expect(400, function(err, res) {
+					console.log(res.body);
 					expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
 					done(err);
 				});
@@ -189,7 +190,7 @@ describe("Uploading a model", function () {
 		it("but with invalid tag should fail", function(done) {
 			agent.post(`/${username}/${modelId}/upload`)
 				.field("tag", "bad tag!")
-				.attach("file", __dirname + "/../../statics/3dmodels/empty.ifc")
+				.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
 				.expect(400, function(err, res) {
 					console.log(res.body);
 					expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
@@ -203,7 +204,6 @@ describe("Uploading a model", function () {
 				.field("tag", "empty_file")
 				.attach("file", __dirname + "/../../statics/3dmodels/empty.ifc")
 				.expect(400, function(err, res) {
-					console.log(res.body);
 					expect(res.body.value).to.equal(responseCodes.FILE_FORMAT_NOT_SUPPORTED.value);
 					done(err);
 				});

@@ -170,7 +170,7 @@ class ImportQueue {
 		return this._dispatchWork(corID, msg, true);
 	}
 
-	async writeImportData(corID, filePath, orgFileName, databaseName, modelName, userName, copy, tag, desc, importAnimations) {
+	async writeImportData(corID, filePath, orgFileName, databaseName, modelName, userName, copy, tag, desc, importAnimations = true) {
 		const newFilePath = await this._moveFileToSharedSpace(corID, filePath, orgFileName, copy);
 		const jsonFilename = `${this.sharedSpacePath}/${corID}.json`;
 
