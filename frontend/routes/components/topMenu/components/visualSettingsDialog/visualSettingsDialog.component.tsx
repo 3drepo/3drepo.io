@@ -66,7 +66,7 @@ const BasicSettings = (props) => {
 			<FormListItem disabled={!props.allowBackgroundColor}>
 				Background Color
 				<Field name="backgroundColor3d" render={ ({ field }) => (
-					<ColorPicker {...field} onChange={(val) => {
+					<ColorPicker {...field} disabled={!props.allowBackgroundColor} onChange={(val) => {
 						// this is because colorpicker doenst use the standard events for inputs
 						field.onChange({target: {name: field.name, value: val}});
 					}} />
@@ -81,7 +81,7 @@ const BasicSettings = (props) => {
 			<FormListItem disabled={!props.allowBackgroundColor2d}>
 				Background Color (2D)
 				<Field name="backgroundColor2d" render={ ({ field }) => (
-					<ColorPicker {...field} onChange={(val) => {
+					<ColorPicker {...field} disabled={!props.allowBackgroundColor2d} onChange={(val) => {
 						// this is because colorpicker doenst use the standard events for inputs
 						field.onChange({target: {name: field.name, value: val}});
 					}} />
