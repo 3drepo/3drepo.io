@@ -661,11 +661,8 @@ const onMeasurementCreated = (measurement) => {
 
 export function* addMeasurement({ measurement }) {
 	const shapes = [...yield select(selectShapes)];
-
-	const {uuid, ...rest} = measurement;
-	shapes.push(rest);
+	shapes.push(measurement);
 	yield put(IssuesActions.updateActiveIssue({shapes}));
-	yield Viewer.removeMeasurement(uuid);
 }
 
 export function* setMeasureMode({ measureMode }) {
