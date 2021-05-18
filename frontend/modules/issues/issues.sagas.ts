@@ -18,7 +18,7 @@
 import { push } from 'connected-react-router';
 import filesize from 'filesize';
 import { isEmpty, isEqual, map, omit, take } from 'lodash';
-import { all, put, select, takeLatest } from 'redux-saga/effects';
+import { all, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 
 import * as queryString from 'query-string';
 import { CHAT_CHANNELS } from '../../constants/chat';
@@ -57,7 +57,8 @@ import {
 	selectActiveIssueId,
 	selectComponentState,
 	selectFilteredIssues,
-	selectIssuesMap
+	selectIssuesMap,
+	selectShapes
 } from './issues.selectors';
 
 function* fetchIssues({teamspace, modelId, revision}) {
@@ -654,9 +655,22 @@ const onMeasurementChanged = () => {
 	dispatch(IssuesActions.setMeasureMode(''));
 };
 
+const onMeasurementCreated = (measurement) => {
+	dispatch(IssuesActions.addMeasurement(measurement));
+};
+
+export function* addMeasurement({ measurement }) {
+	const shapes = [...yield select(selectShapes)];
+
+	const {uuid, ...rest} = measurement;
+	shapes.push(rest);
+	yield put(IssuesActions.updateActiveIssue({shapes}));
+	yield Viewer.removeMeasurement(uuid);
+}
+
 export function* setMeasureMode({ measureMode }) {
 	try {
-		// yield Viewer.off(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
+		yield Viewer.off(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
 		yield Viewer.off(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
 		yield put(IssuesActions.setMeasureModeSuccess(measureMode));
 		yield Viewer.setMeasureMode(measureMode);
@@ -666,7 +680,7 @@ export function* setMeasureMode({ measureMode }) {
 		}
 
 		yield Viewer.setVisibilityOfMeasurementsLabels(false);
-		// yield Viewer.on(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
+		yield Viewer.on(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
 		yield Viewer.on(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
 
 		// ViewerGuiActions.setClipEdit(false);
@@ -712,4 +726,5 @@ export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.UPDATE_BOARD_ISSUE, updateBoardIssue);
 	yield takeLatest(IssuesTypes.UPDATE_ACTIVE_ISSUE_VIEWPOINT, updateActiveIssueViewpoint);
 	yield takeLatest(IssuesTypes.SET_MEASURE_MODE, setMeasureMode);
+	yield takeEvery(IssuesTypes.ADD_MEASUREMENT, addMeasurement);
 }

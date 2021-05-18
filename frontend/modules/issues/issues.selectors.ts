@@ -198,17 +198,5 @@ export const selectAreaMeasurements = createSelector(
 );
 
 export const selectLengthMeasurements = createSelector(
-	selectSelectedIssue, (issue) => {
-		// return shapes.filter(({type}) => type === MEASURE_TYPE.LENGTH)
-
-		// tslint:disable-next-line:max-line-length
-		const measure = { uuid: 'ebe03f68-b76f-451b-9bf3-7ba623038ccb', positions: [[-27.454227447509766, 0.4431486129760742, 30.000534057617188], [-3.2959976196289062, 2.8795652389526367, 30.000267028808594]], value: 24.280777, color: [0.04705, 0.18431, 0.32941, 1], type: 0 };
-
-		if (issue) {
-			return [measure];
-		} else {
-			return [];
-		}
-
-	}
+	selectShapes, (shapes) => shapes.filter(({type}) => type === MEASURE_TYPE.LENGTH)
 );
