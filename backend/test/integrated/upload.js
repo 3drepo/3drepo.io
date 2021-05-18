@@ -181,7 +181,6 @@ describe("Uploading a model", function () {
 			agent.post(`/${username}/${modelId}/upload`)
 				.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
 				.expect(400, function(err, res) {
-					console.log(res.body);
 					expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
 					done(err);
 				});
@@ -192,7 +191,6 @@ describe("Uploading a model", function () {
 				.field("tag", "bad tag!")
 				.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
 				.expect(400, function(err, res) {
-					console.log(res.body);
 					expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
 					done(err);
 				});

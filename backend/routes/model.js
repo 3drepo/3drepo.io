@@ -1573,30 +1573,103 @@ router.get("/:model/revision/:revId/subModelRevisions", middlewares.hasReadAcces
 router.delete("/:model", middlewares.hasDeleteAccessToModel, deleteModel);
 
 /**
- * @api {post} /:teamspace/:model/upload/request Upload model request
+ * @api {post} /:teamspace/:model/upload/ms-chunking Upload model request
  * @apiName uploadModelRequest
  * @apiGroup Model
- * @apiDescription Model upload request for Microsoft Logic Apps.
+ * @apiDescription Model upload request to initiate upload process (for MS Logic Apps).
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model id to upload.
- * @apiParam (Request body) {String} x-ms-transfer-mode Indicates that the content is uploaded in chunks
- * @apiParam (Request body) {Number} x-ms-content-length The entire content size in bytes before chunking
- *
- * @apiSuccess (200) {Number} x-ms-chunk-size The suggested chunk size in bytes
- * @apiSuccess (200) {String} Location The URL location where to send the HTTP PATCH messages
+ * @apiParam (Request body) {String} tag Tag name for new revision
+ * @apiParam (Request body) {String} [desc] Description for new revision
+ * @apiParam (Request body) {Boolean} [importAnimations] Whether to import animations within a sequence
  *
  * @apiExample {post} Example usage:
- * POST /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/request HTTP/1.1
+ * POST /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/ms-chunking HTTP/1.1
+ * {
+ * 	"tag": "rev001",
+ * 	"desc": "Revision 2"
+ * }
  *
  * @apiSuccessExample {json} Success-Response:
  * HTTP/1.1 200 OK
  * {
- * 	"x-ms-chunk-size": 5000000
- * 	"Location": /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload
+ * 	"corID": "00000000-0000-1111-2222-333333333333"
  * }
  */
-router.post("/:model/upload/request", middlewares.hasUploadAccessToModel, uploadModelRequest);
+router.post("/:model/upload/ms-chunking", middlewares.hasUploadAccessToModel, uploadModelRequest);
+
+/**
+ * @api {post} /:teamspace/:model/upload/ms-chunking/:corID Start MS chunk upload
+ * @apiName uploadModelChunksStart
+ * @apiGroup Model
+ * @apiDescription Model upload request for Microsoft Logic Apps.
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID to upload
+ * @apiParam {String} corID Upload correlation ID
+ * @apiParam (Request header) {String} x-ms-transfer-mode Indicates that the content is uploaded in chunks; value="chunked"
+ * @apiParam (Request header) {Number} x-ms-content-length The entire content size in bytes before chunking
+ *
+ * @apiSuccess (200) {Number} [x-ms-chunk-size] Suggested chunk size in bytes
+ * @apiSuccess (200) {String} Location The URL location where to send the HTTP PATCH messages
+ *
+ * @apiExample {post} Example usage:
+ * POST /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/ms-chunking/00000000-0000-1111-2222-333333333333 HTTP/1.1
+ *
+ * header: {
+ * 	"x-ms-transfer-mode": "chunked",
+ * 	"x-ms-content-length": 10100
+ * }
+ *
+ * @apiSuccessExample {json} Success-Response:
+ * HTTP/1.1 200 OK
+ * {
+ * 	"x-ms-chunk-size": 1024,
+ * 	"Location": "/teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/ms-chunking/00000000-0000-1111-2222-333333333333"
+ * }
+ */
+router.post("/:model/upload/ms-chunking/:corID", middlewares.hasUploadAccessToModel, uploadModelChunksStart);
+
+/**
+ * @api {patch} /:teamspace/:model/upload/ms-chunking/:corID Upload model chunk
+ * @apiName uploadModelChunk
+ * @apiGroup Model
+ * @apiDescription Model upload chunk for Microsoft Logic Apps.
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID to upload
+ * @apiParam {String} corID Upload correlation ID
+ * @apiParam (Request header) {String} Content-Range Byte range for the current content chunk, including the starting value, ending value, and the total content size, for example: "bytes=0-1023/10100"
+ * @apiParam (Request header) {String} Content-Type Type of chunked content
+ * @apiParam (Request header) {String} Content-Length Length of size in bytes of the current chunk
+ *
+ * @apiParam (Request body: Attachment) {binary} FILE the file to be uploaded
+ *
+ * @apiSuccess (200) {String} Range Byte range for content that has been received by the endpoint, for example: "bytes=0-1023"
+ * @apiSuccess (200) {Number} [x-ms-chunk-size] Suggested chunk size in bytes
+ *
+ * @apiExample {patch} Example usage:
+ * PATCH /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/ms-chunking/00000000-0000-1111-2222-333333333333 HTTP/1.1
+ *
+ * header: {
+ * 	"Content-Range": "bytes=0-1023/10100",
+ * 	"Content-Type": "application/octet-stream",
+ * 	"Content-Length": "bytes=1024"
+ * }
+ *
+ * body: {
+ * 	"file": <FILE CHUNK CONTENTS>
+ * }
+ *
+ * @apiSuccessExample {json} Success-Response:
+ * HTTP/1.1 200 OK
+ * {
+ * 	"Range": "bytes=0-1023",
+ * 	"x-ms-chunk-size": 1024
+ * }
+ */
+router.patch("/:model/upload/ms-chunking/:corID", middlewares.hasUploadAccessToModel, uploadModelChunk);
 
 /**
  * @api {post} /:teamspace/:model/upload Upload Model.
@@ -1965,11 +2038,73 @@ function downloadLatest(req, res, next) {
 	});
 }
 
-function uploadModelRequest(req, res, next) {
+async function uploadModelRequest(req, res, next) {
+	const responsePlace = utils.APIInfo(req);
+	const account = req.params.account;
+	const model = req.params.model;
+	const username = req.session.user.username;
+
+	try {
+		const corID = await ModelHelpers.uploadRequest(account, model, username, req.body);
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, corID);
+	} catch(err) {
+		const errMsg = err.resCode ? err.resCode : err;
+		responseCodes.respond(responsePlace, req, res, next, errMsg, errMsg);
+	}
+}
+
+async function uploadModelChunksStart(req, res, next) {
+	const responsePlace = utils.APIInfo(req);
 	const account = req.params.account;
 	const model = req.params.model;
 
-	responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {"Location":`/api/${account}/${model}/upload`});
+	try {
+		await ModelHelpers.uploadRequest(account, model, req.headers);
+
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {"Location":`/api/${account}/${model}/upload/ms-chunking`});
+	} catch(err) {
+		const errMsg = err.resCode ? err.resCode : err;
+		responseCodes.respond(responsePlace, req, res, next, errMsg, errMsg);
+	}
+}
+
+function uploadModelChunk(req, res, next) {
+	const responsePlace = utils.APIInfo(req);
+	const account = req.params.account;
+	const model = req.params.model;
+	const username = req.session.user.username;
+
+	let modelSetting;
+
+	// check model exists before upload
+	return ModelSetting.findModelSettingById(account, model).then(_modelSetting => {
+		modelSetting = _modelSetting;
+
+		if (!modelSetting) {
+			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
+		} else {
+			return ModelHelpers.uploadFileChunk(req);
+		}
+	}).then(file => {
+		const data = {
+			tag: req.body.tag,
+			desc: req.body.desc,
+			importAnimation: req.body.importAnimations !== false
+		};
+
+		const source = {
+			type: "upload",
+			file: file
+		};
+
+		return ModelHelpers.importModel(account, model, username, modelSetting, source, data).then(() => {
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "uploaded"});
+		});
+
+	}).catch(err => {
+		err = err.resCode ? err.resCode : err;
+		responseCodes.respond(responsePlace, req, res, next, err, err);
+	});
 }
 
 function uploadModel(req, res, next) {

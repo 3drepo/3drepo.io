@@ -669,6 +669,119 @@ async function uploadFile(req) {
 	return uploadedFile;
 }
 
+async function uploadRequest(teamspace, model, username, data) {
+	// check model exists before upload
+	const modelSetting = await findModelSettingById(teamspace, model);
+
+	if (!modelSetting) {
+		throw responseCodes.MODEL_NOT_FOUND;
+	}
+
+	await History.isValidTag(teamspace, model, data.tag);
+
+	const corID = await createCorrelationId(teamspace, model);
+
+	await importQueue.writeImportData(
+		corID,
+		data.filePath,
+		data.fileName,
+		teamspace,
+		model,
+		username,
+		null,
+		data.tag,
+		data.desc,
+		data.importAnimations
+	);
+
+	return { corID };
+}
+
+async function uploadChunksStart(teamspace, model, headers) {
+	if (!headers["x-ms-transfer-mode"] ||
+		headers["x-ms-transfer-mode"] !== "chunked" ||
+		!headers["x-ms-content-length"] ||
+		isNaN(parseInt(headers["x-ms-content-length"]))) {
+		throw responseCodes.INVALID_ARGUMENTS;
+	}
+
+	// check model exists before upload
+	const modelSetting = await findModelSettingById(teamspace, model);
+
+	if (!modelSetting) {
+		throw responseCodes.MODEL_NOT_FOUND;
+	}
+}
+
+async function uploadFileChunk(req) {
+	if (!config.cn_queue) {
+		return Promise.reject(responseCodes.QUEUE_NO_CONFIG);
+	}
+
+	const account = req.params.account;
+	const model = req.params.model;
+	const user = req.session.user.username;
+
+	ChatEvent.modelStatusChanged(null, account, model, { status: "uploading", user });
+	// upload model with tag
+
+	const uploadedFile = await new Promise((resolve, reject) => {
+		const upload = multer({
+			dest: config.cn_queue.upload_dir,
+			fileFilter: function(fileReq, file, cb) {
+
+				let format = file.originalname.split(".");
+
+				if(format.length <= 1) {
+					return cb({resCode: responseCodes.FILE_NO_EXT});
+				}
+
+				const isIdgn = format[format.length - 1] === "dgn" && format[format.length - 2] === "i";
+
+				format = format[format.length - 1];
+
+				const size = parseInt(fileReq.headers["content-length"]);
+
+				if(isIdgn || acceptedFormat.indexOf(format.toLowerCase()) === -1) {
+					return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
+				}
+
+				if(size > config.uploadSizeLimit) {
+					return cb({ resCode: responseCodes.SIZE_LIMIT });
+				}
+
+				const sizeInMB = size / (1024 * 1024);
+				middlewares.freeSpace(account).then(space => {
+
+					if(sizeInMB > space) {
+						cb({ resCode: responseCodes.SIZE_LIMIT_PAY });
+					} else {
+						cb(null, true);
+					}
+				});
+			}
+		});
+
+		upload.single("file")(req, null, function (err) {
+			if (err) {
+				return reject(err);
+
+			} else if(!req.file.size) {
+				return reject(responseCodes.FILE_FORMAT_NOT_SUPPORTED);
+
+			} else {
+				ChatEvent.modelStatusChanged(null, account, model, { status: "uploaded" });
+				return resolve(req.file);
+			}
+		});
+	});
+
+	// req.body.tag wont be defined after the file has been uploaded
+	await History.isValidTag(account, model, req.body.tag);
+
+	return uploadedFile;
+}
+
 /**
  * Called by importModel to perform model upload
  */
@@ -965,6 +1078,9 @@ module.exports = {
 	fileNameRegExp,
 	acceptedFormat,
 	uploadFile,
+	uploadRequest,
+	uploadChunksStart,
+	uploadFileChunk,
 	importModel,
 	removeModel,
 	getModelPermission,
