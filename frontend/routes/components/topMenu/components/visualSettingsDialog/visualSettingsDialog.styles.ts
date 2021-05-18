@@ -63,7 +63,7 @@ export const VisualSettingsButtonsContainer = styled.div`
 
 export const VisualSettingsDialogContent = styled(DialogContent)`
 	width: 400px;
-	height: 280px;
+	height: 470px;
 	margin-bottom: 68px;
 	&& {
 		padding-top: 0;

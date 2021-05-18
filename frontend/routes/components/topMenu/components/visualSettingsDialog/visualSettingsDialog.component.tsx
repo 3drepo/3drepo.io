@@ -58,7 +58,13 @@ const BasicSettings = (props) => {
 					</SelectField>)} />
 				</FormListItem>
 			<FormListItem>
-				Background Color (3D Mode)
+				Background Skybox
+				<Field name="backgroundSkybox3d" render={ ({ field }) => (
+					<Switch onClick={props.onSkyboxChange} checked={field.value} {...field} value="true" color="secondary" />
+				)} />
+			</FormListItem>
+			<FormListItem disabled={!props.allowBackgroundColor}>
+				Background Color
 				<Field name="backgroundColor3d" render={ ({ field }) => (
 					<ColorPicker {...field} onChange={(val) => {
 						// this is because colorpicker doenst use the standard events for inputs
@@ -67,7 +73,13 @@ const BasicSettings = (props) => {
 			)} />
 			</FormListItem>
 			<FormListItem>
-				Background Color (2D Sheet Mode)
+				Background Skybox (2D)
+				<Field name="backgroundSkybox2d" render={ ({ field }) => (
+					<Switch onClick={props.onSkybox2dChange} checked={field.value} {...field} value="true" color="secondary" />
+				)} />
+			</FormListItem>
+			<FormListItem disabled={!props.allowBackgroundColor2d}>
+				Background Color (2D)
 				<Field name="backgroundColor2d" render={ ({ field }) => (
 					<ColorPicker {...field} onChange={(val) => {
 						// this is because colorpicker doenst use the standard events for inputs
@@ -266,6 +278,8 @@ interface IState {
 	visualSettings: any;
 	flag: boolean;
 	showCacheWarning: boolean;
+	allowBackgroundColor: boolean;
+	allowBackgroundColor2d: boolean;
 }
 
 export class VisualSettingsDialog extends React.PureComponent<IProps, IState> {
@@ -273,7 +287,9 @@ export class VisualSettingsDialog extends React.PureComponent<IProps, IState> {
 		selectedTab: 0,
 		visualSettings: null,
 		flag: false,
-		showCacheWarning: false
+		showCacheWarning: false,
+		allowBackgroundColor:  false,
+		allowBackgroundColor2d: false
 	};
 
 	public handleTabChange = (event, selectedTab) => {
@@ -282,6 +298,14 @@ export class VisualSettingsDialog extends React.PureComponent<IProps, IState> {
 
 	public onCacheChange = (event) => {
 		this.setState({showCacheWarning : event.target.checked});
+	}
+
+	public onSkyboxChange = (event) => {
+		this.setState({allowBackgroundColor : !event.target.checked});
+	}
+
+	public onSkybox2dChange = (event) => {
+		this.setState({allowBackgroundColor2d : !event.target.checked});
 	}
 
 	public onSubmit = (values) => {
@@ -301,12 +325,16 @@ export class VisualSettingsDialog extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		this.setState({visualSettings: this.props.visualSettings});
+		this.setState({
+			visualSettings: this.props.visualSettings,
+			allowBackgroundColor: !this.props.visualSettings.backgroundSkybox3d,
+			allowBackgroundColor2d: !this.props.visualSettings.backgroundSkybox2d,
+		});
 	}
 
 	public render() {
-		const {selectedTab, showCacheWarning} = this.state;
 		const {visualSettings, handleClose} =  this.props;
+		const {selectedTab, showCacheWarning, allowBackgroundColor, allowBackgroundColor2d} = this.state;
 
 		return (
 			<VisualSettingsDialogContent>
@@ -326,7 +354,15 @@ export class VisualSettingsDialog extends React.PureComponent<IProps, IState> {
 					onSubmit={this.onSubmit}
 					>
 					<Form>
-						{selectedTab === 0 && <BasicSettings onCacheChange={this.onCacheChange} />}
+						{selectedTab === 0 &&
+							<BasicSettings
+								onCacheChange={this.onCacheChange}
+								onSkyboxChange={this.onSkyboxChange}
+								onSkybox2dChange={this.onSkybox2dChange}
+								allowBackgroundColor={allowBackgroundColor}
+								allowBackgroundColor2d={allowBackgroundColor2d}
+							/>
+						}
 						{selectedTab === 1 && <AdvancedSettings />}
 						{selectedTab === 0 && showCacheWarning && <CacheWarning />}
 						<Buttons onClickCancel={handleClose} />

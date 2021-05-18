@@ -37,6 +37,10 @@ const updateHandlers = {
 	numCacheThreads: Viewer.setNumCacheThreads,
 	clipPlaneBorderWidth: Viewer.setPlaneBorderWidth,
 	clipPlaneBorderColor: Viewer.setPlaneBorderColor,
+	backgroundSkybox3d: Viewer.backgroundSkybox3d,
+	backgroundSkybox2d: Viewer.backgroundSkybox2d,
+	backgroundColor3d: Viewer.backgroundColor3d,
+	backgroundColor2d: Viewer.backgroundColor2d
 
 };
 
