@@ -55,6 +55,7 @@ export function* setMeasureMode({ mode }) {
 			return;
 		}
 
+		yield Viewer.setVisibilityOfMeasurementsLabels(true);
 		yield Viewer.on(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
 		yield Viewer.on(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
 

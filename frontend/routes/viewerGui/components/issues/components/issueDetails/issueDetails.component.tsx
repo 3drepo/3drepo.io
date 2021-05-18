@@ -78,6 +78,8 @@ interface IProps {
 	selectedDate: Date;
 	sequences: any[];
 	measureMode: string;
+	areaMeasurements: any[];
+	lengthMeasurements: any[];
 }
 
 interface IState {
@@ -296,6 +298,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				sequences={this.props.sequences}
 				measureMode={this.props.measureMode}
 				setMeasureMode={this.props.setMeasureMode}
+				lengthMeasurements={this.props.lengthMeasurements}
+				areaMeasurements={this.props.areaMeasurements}
 			/>
 		);
 	}

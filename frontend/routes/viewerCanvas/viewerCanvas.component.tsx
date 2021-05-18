@@ -129,7 +129,7 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 		const toAdd = differenceBy(curr, prev, 'uuid');
 		const toRemove = difference(prev, curr, 'uuid');
 
-		viewer.addMeasurements(toAdd);
+		viewer.addMeasurements(toAdd, true);
 		viewer.removeMeasurements(toRemove);
 	}
 
@@ -174,7 +174,6 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 
 		if (!isEqual(prevProps.lengthMeasurements, lengthMeasurements)) {
 			this.renderMeasurements(prevProps.lengthMeasurements, lengthMeasurements);
-			// viewer.addMeasurements(lengthMeasurements);
 		}
 
 		if (prevProps.viewerManipulationEnabled !== viewerManipulationEnabled) {

@@ -21,10 +21,8 @@ import Check from '@material-ui/icons/Check';
 import { isEmpty } from 'lodash';
 
 import { MEASURE_ACTIONS_ITEMS, MEASURE_ACTIONS_MENU } from '../../../../constants/measure';
-import { VIEWER_EVENTS } from '../../../../constants/viewer';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../helpers/rendering';
-import { MEASURE_TYPE } from '../../../../modules/measurements/measurements.constants';
 import { Viewer } from '../../../../services/viewer/viewer';
 import { EmptyStateInfo } from '../../../components/components.styles';
 import {

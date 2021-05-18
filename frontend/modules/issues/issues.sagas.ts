@@ -665,6 +665,7 @@ export function* setMeasureMode({ measureMode }) {
 			return;
 		}
 
+		yield Viewer.setVisibilityOfMeasurementsLabels(false);
 		// yield Viewer.on(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
 		yield Viewer.on(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
 

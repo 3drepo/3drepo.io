@@ -119,9 +119,22 @@ export class ViewerService {
 		return await this.setMeasureMode('');
 	}
 
-	public async addMeasurements(measurements) {
+	public async setVisibilityOfMeasurementsLabels(visible) {
 		await this.isViewerReady();
+		if (visible) {
+			UnityUtil.showNewMeasurementsLabels();
+		} else {
+			UnityUtil.hideNewMeasurementsLabels();
+		}
+	}
+
+	public async addMeasurements(measurements, hideLabels) {
+		await this.isViewerReady();
+		await this.isModelLoaded();
+
+		await this.setVisibilityOfMeasurementsLabels(!hideLabels);
 		measurements.forEach(UnityUtil.addMeasurement);
+		this.setVisibilityOfMeasurementsLabels(true);
 	}
 
 	public async removeMeasurements(measurements) {
