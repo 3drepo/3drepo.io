@@ -69,3 +69,20 @@ export const selectClipPlaneBorderWidth = createSelector(
 export const selectClipPlaneBorderColor = createSelector(
 	selectSettings, (state) => state.clipPlaneBorderColor
 );
+
+export const selectUseSkybox3d = createSelector(
+	selectSettings, (state) => state.backgroundSkybox3d
+);
+
+export const selectBackgroundColor3d = createSelector(
+	selectSettings, (state) => state.backgroundColor3d
+);
+
+export const selectUseSkybox2d = createSelector(
+	selectSettings, (state) => state.backgroundSkybox2d
+);
+
+export const selectBackgroundColor2d = createSelector(
+	selectSettings, (state) => state.backgroundColor2d
+);
+

@@ -54,6 +54,11 @@ interface IProps {
 	presentationMode: PresentationMode;
 	isPresentationPaused: boolean;
 	handleTransparenciesVisibility: any;
+	useSkybox3d: boolean;
+	useSkybox2d: boolean;
+	backgroundColor3d: number[],
+	backgroundColor2d: number[]
+
 }
 
 export class ViewerCanvas extends React.PureComponent<IProps, any> {
@@ -127,7 +132,8 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 	public componentDidUpdate(prevProps: IProps) {
 		const { colorOverrides, issuePins, riskPins, measurementPins, hasGisCoordinates,
 			gisCoordinates, gisLayers, transparencies, transformations: transformation,
-			sequenceHiddenNodes, viewerManipulationEnabled, viewer
+			sequenceHiddenNodes, viewerManipulationEnabled, viewer, useSkybox3d, useSkybox2d,
+			backgroundColor3d, backgroundColor2d
 		} = this.props;
 
 		if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
@@ -171,6 +177,15 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 		}
 		if (prevProps.transparencies && !isEqual(prevProps.sequenceHiddenNodes, sequenceHiddenNodes)) {
 			this.props.handleTransparenciesVisibility(sequenceHiddenNodes);
+		}
+
+		if (prevProps.useSkybox3d !== useSkybox3d) {
+			if (useSkybox3d) {
+				viewer.resetBackground();
+
+			} else {
+				viewer.setBackgroundColor(backgroundColor3d);
+			}
 		}
 	}
 

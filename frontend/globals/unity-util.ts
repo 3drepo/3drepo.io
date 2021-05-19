@@ -1691,7 +1691,7 @@ export class UnityUtil {
 	 * Reset viewer background to default
 	 * @category Configurations
 	 */
-	public static ResetBackground() {
+	public static resetBackground() {
 		UnityUtil.toUnity('ResetBackground', UnityUtil.LoadingState.VIEWER_READY);
 	}
 

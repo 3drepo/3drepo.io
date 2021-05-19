@@ -28,6 +28,11 @@ import { selectPins as selectRiskPins } from '../../modules/risks';
 import { selectIsLoadingFrameState, selectSelectedHiddenNodes,
 	selectSelectedSequenceId, SequencesActions } from '../../modules/sequences';
 import { TreeActions } from '../../modules/tree';
+import {
+	selectBackgroundColor2d,
+	selectBackgroundColor3d,
+	selectUseSkybox2d,
+	selectUseSkybox3d } from '../../modules/viewer';
 import { selectAllTransparencyOverrides, selectColorOverrides, selectTransformations } from '../../modules/viewerGui';
 import { withViewer } from '../../services/viewer/viewer';
 import { ViewerCanvas } from './viewerCanvas.component';
@@ -47,7 +52,11 @@ const mapStateToProps = createStructuredSelector({
 	transformations: selectTransformations,
 	selectedSequenceId: selectSelectedSequenceId,
 	isLoadingSequenceFrame: selectIsLoadingFrameState,
-	sequenceHiddenNodes: selectSelectedHiddenNodes
+	sequenceHiddenNodes: selectSelectedHiddenNodes,
+	useSkybox3d: selectUseSkybox3d,
+	useSkybox2d: selectUseSkybox2d,
+	backgroundColor3d: selectBackgroundColor3d,
+	backgroundColor2d: selectBackgroundColor2d
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

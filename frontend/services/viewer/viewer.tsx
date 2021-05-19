@@ -311,6 +311,14 @@ export class ViewerService {
 		return UnityUtil.getObjectsStatus(account, model);
 	}
 
+	public resetBackground() {
+		UnityUtil.resetBackground();
+	}
+
+	public setBackgroundColor(color: number[]) {
+		UnityUtil.setBackgroundColor(color);
+	}
+
 	/**
 	 * Handlers
 	 */
