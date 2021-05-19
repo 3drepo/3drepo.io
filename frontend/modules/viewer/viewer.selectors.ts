@@ -85,4 +85,3 @@ export const selectUseSkybox2d = createSelector(
 export const selectBackgroundColor2d = createSelector(
 	selectSettings, (state) => state.backgroundColor2d
 );
-

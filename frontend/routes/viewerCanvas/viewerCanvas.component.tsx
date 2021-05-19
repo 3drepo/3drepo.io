@@ -56,8 +56,8 @@ interface IProps {
 	handleTransparenciesVisibility: any;
 	useSkybox3d: boolean;
 	useSkybox2d: boolean;
-	backgroundColor3d: number[],
-	backgroundColor2d: number[]
+	backgroundColor3d: number[];
+	backgroundColor2d: number[];
 
 }
 
