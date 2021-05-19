@@ -27,6 +27,7 @@ import Settings from '@material-ui/icons/Settings';
 import SettingsBackupRestore from '@material-ui/icons/SettingsBackupRestore';
 import Share from '@material-ui/icons/Share';
 import Board from '@material-ui/icons/TableChart';
+import { modelTypes } from '../../constants/model-parameters';
 import { DATA_TYPES, FILTER_TYPES } from '../components/filterPanel/filterPanel.component';
 import { SortAmountDown, SortAmountUp } from '../components/fontAwesomeIcon';
 
@@ -90,20 +91,7 @@ export const ROW_ACTIONS = {
 export const MODEL_TYPE = 'model';
 export const FEDERATION_TYPE = 'federation';
 
-export const MODEL_SUBTYPES = [
-	{ value: 'Architectural' },
-	{ value: 'Existing' },
-	{ value: 'GIS' },
-	{ value: 'Infrastructure' },
-	{ value: 'Interior' },
-	{ value: 'Landscape' },
-	{ value: 'MEP' },
-	{ value: 'Mechanical' },
-	{ value: 'Structural' },
-	{ value: 'Survey' },
-	{ value: '2D Sheet', sheetMode: true },
-	{ value: 'Other' }
-];
+export const MODEL_SUBTYPES = modelTypes;
 
 export const TEAMSPACE_FILTER_RELATED_FIELDS = {
 	DATA_TYPE: 'type',
