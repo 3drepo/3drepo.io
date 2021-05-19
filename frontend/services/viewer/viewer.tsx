@@ -319,6 +319,14 @@ export class ViewerService {
 		UnityUtil.setBackgroundColor(color);
 	}
 
+	public enable2DMode() {
+		UnityUtil.enable2DMode();
+	}
+
+	public disable2DMode() {
+		UnityUtil.disable2DMode();
+	}
+
 	/**
 	 * Handlers
 	 */

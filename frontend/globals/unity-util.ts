@@ -1762,6 +1762,22 @@ export class UnityUtil {
 		UnityUtil.toUnity('SetNavigationOff', UnityUtil.LoadingState.VIEWER_READY);
 	}
 
+	/**
+	 * Change the navigation mode to 2D
+	 * @category Model Interactions
+	 */
+	public static enable2DMode(): any {
+		UnityUtil.toUnity('Enable2DMode', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/**
+	 * Change the navigation mode back to 3D
+	 * @category Model Interactions
+	 */
+	public static disable2DMode(): any {
+		UnityUtil.toUnity('Disable2DMode', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
 	/** @hidden */
 	public static setResolutionScaling(scale: number) {
 		UnityUtil.toUnity('SetResolutionScaling', UnityUtil.LoadingState.VIEWER_READY, scale);
