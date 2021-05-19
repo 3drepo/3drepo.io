@@ -22,7 +22,7 @@ import { createStructuredSelector } from 'reselect';
 import { selectGisLayers } from '../../modules/gis';
 import { selectPins as selectIssuePins } from '../../modules/issues';
 import { selectPins as selectMeasurementPins } from '../../modules/measurements';
-import { selectGISCoordinates, selectHasGISCoordinates } from '../../modules/model';
+import { selectGISCoordinates, selectHasGISCoordinates, selectIs2DSheet } from '../../modules/model';
 import { selectIsPaused, selectIsViewerManipulationEnabled, selectPresentationMode } from '../../modules/presentation';
 import { selectPins as selectRiskPins } from '../../modules/risks';
 import { selectIsLoadingFrameState, selectSelectedHiddenNodes,
@@ -56,7 +56,8 @@ const mapStateToProps = createStructuredSelector({
 	useSkybox3d: selectUseSkybox3d,
 	useSkybox2d: selectUseSkybox2d,
 	backgroundColor3d: selectBackgroundColor3d,
-	backgroundColor2d: selectBackgroundColor2d
+	backgroundColor2d: selectBackgroundColor2d,
+	sheetMode: selectIs2DSheet
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

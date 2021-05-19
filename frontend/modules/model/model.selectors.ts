@@ -17,6 +17,7 @@
 
 import { pick } from 'lodash';
 import { createSelector } from 'reselect';
+import { modelTypes } from '../../constants/model-parameters';
 import { getActiveRevisions } from '../../helpers/revisions';
 import { selectUrlParams } from '../router/router.selectors';
 
@@ -24,6 +25,14 @@ export const selectModelDomain = (state) => state.model;
 
 export const selectSettings = createSelector(
 	selectModelDomain, (state) => state.settings
+);
+
+export const selectIs2DSheet = createSelector(
+	selectSettings, (settings) => {
+		const modelType = settings.type;
+		const typeEntry = modelTypes.find((item) => item.value === modelType);
+		return typeEntry && typeEntry.sheetMode;
+	}
 );
 
 export const selectPermissions = createSelector(

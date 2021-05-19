@@ -58,6 +58,7 @@ interface IProps {
 	useSkybox2d: boolean;
 	backgroundColor3d: number[];
 	backgroundColor2d: number[];
+	sheetMode: boolean;
 
 }
 
@@ -133,7 +134,7 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 		const { colorOverrides, issuePins, riskPins, measurementPins, hasGisCoordinates,
 			gisCoordinates, gisLayers, transparencies, transformations: transformation,
 			sequenceHiddenNodes, viewerManipulationEnabled, viewer, useSkybox3d, useSkybox2d,
-			backgroundColor3d, backgroundColor2d
+			backgroundColor3d, backgroundColor2d, sheetMode
 		} = this.props;
 
 		if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
@@ -179,12 +180,25 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 			this.props.handleTransparenciesVisibility(sequenceHiddenNodes);
 		}
 
-		if (prevProps.useSkybox3d !== useSkybox3d) {
-			if (useSkybox3d) {
-				viewer.resetBackground();
+		const sheetModeChanged = prevProps.sheetMode !== sheetMode;
 
-			} else {
-				viewer.setBackgroundColor(backgroundColor3d);
+		if (sheetMode) {
+			if (prevProps.useSkybox2d !== useSkybox2d || sheetModeChanged) {
+				if (useSkybox2d) {
+					viewer.resetBackground();
+
+				} else {
+					viewer.setBackgroundColor(backgroundColor2d);
+				}
+			}
+		} else {
+			if (prevProps.useSkybox3d !== useSkybox3d || sheetModeChanged) {
+				if (useSkybox3d) {
+					viewer.resetBackground();
+
+				} else {
+					viewer.setBackgroundColor(backgroundColor3d);
+				}
 			}
 		}
 	}
