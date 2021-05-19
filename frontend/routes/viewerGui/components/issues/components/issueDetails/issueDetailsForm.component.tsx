@@ -71,6 +71,7 @@ interface IProps {
 	onUploadScreenshot: (image) => void;
 	showSequenceDate: (date) => void;
 	setMeasureMode: (measureMode) => void;
+	removeMeasurement: (uuid) => void;
 	minSequenceDate: number;
 	maxSequenceDate: number;
 	selectedDate: Date;
@@ -183,7 +184,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 			measureMode={this.props.measureMode}
 			lengthMeasurements={this.props.lengthMeasurements}
 			areaMeasurements={this.props.areaMeasurements}
-			removeMeasurement={() => {}}
+			removeMeasurement={this.props.removeMeasurement}
 			setMeasurementColor={() => {}}
 			setMeasurementName={() => {}}
 			setMeasureMode={this.props.setMeasureMode}

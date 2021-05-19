@@ -93,7 +93,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showConfirmDialog: DialogActions.showConfirmDialog,
 	showViewpoint: ViewpointsActions.showViewpoint,
 	showSequenceDate: SequencesActions.showSequenceDate,
-	setMeasureMode: IssuesActions.setMeasureMode
+	setMeasureMode: IssuesActions.setMeasureMode,
+	removeMeasurement: IssuesActions.removeMeasurement
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(IssueDetails));

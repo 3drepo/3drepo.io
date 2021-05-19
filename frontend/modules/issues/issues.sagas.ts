@@ -660,8 +660,12 @@ const onMeasurementCreated = (measurement) => {
 };
 
 export function* addMeasurement({ measurement }) {
-	const shapes = [...yield select(selectShapes)];
-	shapes.push(measurement);
+	const shapes = [...yield select(selectShapes), measurement];
+	yield put(IssuesActions.updateActiveIssue({shapes}));
+}
+
+export function* removeMeasurement({ uuid }) {
+	const shapes = (yield select(selectShapes)).filter((measurement) => measurement.uuid !== uuid);
 	yield put(IssuesActions.updateActiveIssue({shapes}));
 }
 
@@ -724,4 +728,5 @@ export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.UPDATE_ACTIVE_ISSUE_VIEWPOINT, updateActiveIssueViewpoint);
 	yield takeLatest(IssuesTypes.SET_MEASURE_MODE, setMeasureMode);
 	yield takeEvery(IssuesTypes.ADD_MEASUREMENT, addMeasurement);
+	yield takeEvery(IssuesTypes.REMOVE_MEASUREMENT, removeMeasurement);
 }

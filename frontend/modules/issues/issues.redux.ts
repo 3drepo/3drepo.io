@@ -74,7 +74,8 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	updateActiveIssueViewpoint: ['screenshot'],
 	setMeasureMode: ['measureMode'],
 	setMeasureModeSuccess: ['measureMode'],
-	addMeasurement: ['measurement']
+	addMeasurement: ['measurement'],
+	removeMeasurement: ['uuid']
 }, { prefix: 'ISSUES/' });
 
 export const INITIAL_STATE = {

@@ -70,6 +70,7 @@ interface IProps {
 	showConfirmDialog: (config: any) => void;
 	updateViewpoint: (screenshot?: string) => void;
 	setMeasureMode: (measureMode) => void;
+	removeMeasurement: (uuid) => void;
 	dialogId?: string;
 	postCommentIsPending?: boolean;
 	showSequenceDate: (date) => void;
@@ -297,6 +298,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				selectedDate={this.props.selectedDate}
 				sequences={this.props.sequences}
 				measureMode={this.props.measureMode}
+				removeMeasurement={this.props.removeMeasurement}
 				setMeasureMode={this.props.setMeasureMode}
 				lengthMeasurements={this.props.lengthMeasurements}
 				areaMeasurements={this.props.areaMeasurements}
