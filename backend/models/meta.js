@@ -188,7 +188,7 @@ Meta.getIfcGuids = async (account, model) => {
 
 Meta.ifcGuidsToUUIDs = async (account, model, branch, revId, ifcGuids) => {
 	if (!ifcGuids || ifcGuids.length === 0) {
-		return Promise.resolve([]);
+		return [];
 	}
 
 	const query = {"metadata.IFC GUID": { $in: ifcGuids } };
@@ -305,7 +305,7 @@ Meta.getAllIdsWithMetadataField = async (account, model, branch, rev, fieldName)
 	const obj = await findNodesByField(account, model, branch, rev, fullFieldName);
 
 	if (!obj) {
-		return Promise.reject(responseCodes.METADATA_NOT_FOUND);
+		throw responseCodes.METADATA_NOT_FOUND;
 	}
 
 	// rename fieldName to "value"
@@ -326,11 +326,11 @@ Meta.getAllIdsWith4DSequenceTag = async (account, model, branch, rev) => {
 	const settings = await findModelSettingById(account, model);
 
 	if (!settings) {
-		return Promise.reject(responseCodes.MODEL_NOT_FOUND);
+		throw responseCodes.MODEL_NOT_FOUND;
 	}
 
 	if (!settings.fourDSequenceTag) {
-		return Promise.reject(responseCodes.SEQ_TAG_NOT_FOUND);
+		throw responseCodes.SEQ_TAG_NOT_FOUND;
 	}
 
 	return Meta.getAllIdsWithMetadataField(account, model,  branch, rev, settings.fourDSequenceTag);
