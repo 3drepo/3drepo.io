@@ -119,7 +119,7 @@ export class Activities extends React.PureComponent<IProps, IState> {
 
 	private debounceSearchQueryChange = debounce((searchQuery) => {
 		this.props.setComponentState({ searchQuery });
-	}, 500);
+	}, 200);
 
 	public handleSearchQueryChange = ({ currentTarget }: React.ChangeEvent<HTMLInputElement>) => {
 		const searchQuery = currentTarget.value.toLowerCase();
