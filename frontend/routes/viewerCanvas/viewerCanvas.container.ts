@@ -20,7 +20,7 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { selectGisLayers } from '../../modules/gis';
-import { selectLengthMeasurements, selectPins as selectIssuePins } from '../../modules/issues';
+import { selectPins as selectIssuePins, selectShapes as selectIssueShapes } from '../../modules/issues';
 import { selectPins as selectMeasurementPins } from '../../modules/measurements';
 import { selectGISCoordinates, selectHasGISCoordinates } from '../../modules/model';
 import { selectIsPaused, selectIsViewerManipulationEnabled, selectPresentationMode } from '../../modules/presentation';
@@ -48,7 +48,7 @@ const mapStateToProps = createStructuredSelector({
 	selectedSequenceId: selectSelectedSequenceId,
 	isLoadingSequenceFrame: selectIsLoadingFrameState,
 	sequenceHiddenNodes: selectSelectedHiddenNodes,
-	lengthMeasurements: selectLengthMeasurements
+	issueShapes: selectIssueShapes
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
