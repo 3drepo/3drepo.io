@@ -201,6 +201,14 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 				}
 			}
 		}
+
+		if(sheetModeChanged) {
+			if(sheetMode) {
+				viewer.enable2DMode();
+			} else {
+				viewer.disable2DMode();
+			}
+		}
 	}
 
 	public render() {
