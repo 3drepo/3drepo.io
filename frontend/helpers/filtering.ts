@@ -1,4 +1,4 @@
-export const filterNestedData = (data: any[], condition: (i: any) => any[], childrenPath: string = 'subTasks') =>
+export const filterNestedData = (data: any[], condition: (i: any) => any[], childrenPath: string = 'subActivities') =>
 	data.reduce((list, item) => {
 		let result = null;
 
