@@ -25,6 +25,7 @@ import HomeIcon from '@material-ui/icons/Home';
 import MetadataIcon from '@material-ui/icons/Info';
 import InvertColorsOffIcon from '@material-ui/icons/InvertColorsOff';
 import MyLocationIcon from '@material-ui/icons/MyLocation';
+import SheetNavIcon from '@material-ui/icons/OpenWith';
 import TurntableIcon from '@material-ui/icons/Redo';
 import ShowAllIcon from '@material-ui/icons/Visibility';
 import HideIcon from '@material-ui/icons/VisibilityOff';
@@ -115,6 +116,40 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 		activeSubMenu: ''
 	};
 
+	private navigationOptions(currentMode) {
+		const menuOptions = [];
+
+		if (currentMode !== VIEWER_TOOLBAR_ITEMS.TURNTABLE) {
+			const turnTable = {
+				label: VIEWER_TOOLBAR_ITEMS.TURNTABLE,
+				Icon: TurntableIcon,
+				action: () => this.handleNavigationModeClick(VIEWER_NAV_MODES.TURNTABLE)
+			}
+
+			menuOptions.push(turnTable);
+		}
+
+		if (currentMode !== VIEWER_TOOLBAR_ITEMS.HELICOPTER) {
+			const helicopter = {
+				label: VIEWER_TOOLBAR_ITEMS.HELICOPTER,
+				Icon: HelicopterIcon,
+				action: () => this.handleNavigationModeClick(VIEWER_NAV_MODE.HELICOPTER)
+			}
+			menuOptions.push(helicopter);
+		}
+
+		if (currentMode !== VIEWER_TOOLBAR_ITEMS.SHEET_NAV) {
+			const sheet = {
+				label: VIEWER_TOOLBAR_ITEMS.SHEET_NAV,
+				Icon: SheetNavIcon,
+				action: () => this.handleNavigationModeClick(VIEWER_NAV_MODE.SheetNav)
+			}
+			menuOptions.push(sheet);
+		}
+
+		return menuOptions;
+	}
+
 	public get toolbarList() {
 		return [
 			{
@@ -154,11 +189,16 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 				action: () => this.handleShowSubmenu(VIEWER_TOOLBAR_ITEMS.TURNTABLE),
 				show: this.props.navigationMode === VIEWER_NAV_MODES.TURNTABLE,
 				subMenu: [
-					{
-						label: VIEWER_TOOLBAR_ITEMS.HELICOPTER,
-						Icon: HelicopterIcon,
-						action: () => this.handleNavigationModeClick(VIEWER_NAV_MODES.HELICOPTER)
-					}
+					...this.navigationOptions(VIEWER_TOOLBAR_ITEMS.TURNTABLE)
+				]
+			},
+			{
+				label: VIEWER_TOOLBAR_ITEMS.SHEET_NAV,
+				Icon: TurntableIcon,
+				action: () => this.handleShowSubmenu(VIEWER_TOOLBAR_ITEMS.SHEET_NAV),
+				show: this.props.navigationMode === VIEWER_NAV_MODES.SHEET_NAV,
+				subMenu: [
+					...this.navigationOptions(VIEWER_TOOLBAR_ITEMS.SHEET_NAV)
 				]
 			},
 			{
@@ -187,11 +227,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 						specificOption: true,
 						disabled: this.props.helicopterSpeed === MIN_HELICOPTER_SPEED
 					},
-					{
-						label: VIEWER_TOOLBAR_ITEMS.TURNTABLE,
-						Icon: TurntableIcon,
-						action: () => this.handleNavigationModeClick(VIEWER_NAV_MODES.TURNTABLE)
-					}
+					...this.navigationOptions(VIEWER_TOOLBAR_ITEMS.HELICOPTER)
 				]
 			},
 			{
@@ -272,6 +308,10 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 	public componentDidUpdate(prevProps) {
 		if (!this.props.clippingMode && prevProps.clippingMode) {
 			this.setState({ activeSubMenu: '' });
+		}
+
+		if (this.props.isModel2D !== prevProps.isModel2D) {
+			this.handleNavigationModeClick(VIEWER_TOOLBAR_ITEMS.SHEET_NAV);
 		}
 	}
 

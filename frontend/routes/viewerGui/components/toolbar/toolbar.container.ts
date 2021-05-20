@@ -37,7 +37,7 @@ import { TreeActions } from '../../../../modules/tree';
 
 import { selectIsActive, BimActions } from '../../../../modules/bim';
 import { GroupsActions } from '../../../../modules/groups';
-import { selectMetaKeysExist } from '../../../../modules/model';
+import { selectIs2DSheet, selectMetaKeysExist } from '../../../../modules/model';
 
 const mapStateToProps = createStructuredSelector({
 	projectionMode: selectProjectionMode,
@@ -50,7 +50,8 @@ const mapStateToProps = createStructuredSelector({
 	isMetadataVisible: selectIsMetadataVisible,
 	isMetadataActive: selectIsActive,
 	coordViewActive: selectIsCoordViewActive,
-	metaKeysExist: selectMetaKeysExist
+	metaKeysExist: selectMetaKeysExist,
+	isModel2D: selectIs2DSheet
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

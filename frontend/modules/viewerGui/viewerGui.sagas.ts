@@ -19,7 +19,7 @@ import { push } from 'connected-react-router';
 import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
 import { ROUTES } from '../../constants/routes';
-import { INITIAL_HELICOPTER_SPEED, NEW_PIN_ID, VIEWER_CLIP_MODES, VIEWER_EVENTS } from '../../constants/viewer';
+import { INITIAL_HELICOPTER_SPEED, NEW_PIN_ID, VIEWER_CLIP_MODES, VIEWER_EVENTS, VIEWER_TOOLBAR_ITEMS } from '../../constants/viewer';
 import * as API from '../../services/api';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { Viewer } from '../../services/viewer/viewer';
@@ -269,7 +269,9 @@ function* setProjectionMode({mode}) {
 
 function* setNavigationMode({mode}) {
 	try {
-		yield Viewer.setNavigationMode(mode);
+		if	(mode !== VIEWER_TOOLBAR_ITEMS.SHEET_NAV) {
+			yield Viewer.setNavigationMode(mode);
+		}
 		yield put(ViewerGuiActions.setNavigationModeSuccess(mode));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'navigation mode', error));

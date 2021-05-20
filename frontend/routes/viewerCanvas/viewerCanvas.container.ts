@@ -22,7 +22,7 @@ import { createStructuredSelector } from 'reselect';
 import { selectGisLayers } from '../../modules/gis';
 import { selectPins as selectIssuePins } from '../../modules/issues';
 import { selectPins as selectMeasurementPins } from '../../modules/measurements';
-import { selectGISCoordinates, selectHasGISCoordinates, selectIs2DSheet } from '../../modules/model';
+import { selectGISCoordinates, selectHasGISCoordinates } from '../../modules/model';
 import { selectIsPaused, selectIsViewerManipulationEnabled, selectPresentationMode } from '../../modules/presentation';
 import { selectPins as selectRiskPins } from '../../modules/risks';
 import { selectIsLoadingFrameState, selectSelectedHiddenNodes,
@@ -33,7 +33,7 @@ import {
 	selectBackgroundColor3d,
 	selectUseSkybox2d,
 	selectUseSkybox3d } from '../../modules/viewer';
-import { selectAllTransparencyOverrides, selectColorOverrides, selectTransformations } from '../../modules/viewerGui';
+import { selectAllTransparencyOverrides, selectColorOverrides, selectIs2DSheetMode, selectTransformations } from '../../modules/viewerGui';
 import { withViewer } from '../../services/viewer/viewer';
 import { ViewerCanvas } from './viewerCanvas.component';
 
@@ -57,7 +57,7 @@ const mapStateToProps = createStructuredSelector({
 	useSkybox2d: selectUseSkybox2d,
 	backgroundColor3d: selectBackgroundColor3d,
 	backgroundColor2d: selectBackgroundColor2d,
-	sheetMode: selectIs2DSheet
+	sheetMode: selectIs2DSheetMode
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
