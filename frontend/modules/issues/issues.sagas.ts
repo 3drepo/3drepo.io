@@ -359,19 +359,19 @@ const onUpdateEvent = (updatedIssue) => {
 	if (ISSUE_DEFAULT_HIDDEN_STATUSES.includes(updatedIssue.status)) {
 		dispatch(IssuesActions.showCloseInfo(updatedIssue._id));
 		setTimeout(() => {
-			dispatch(IssuesActions.saveIssueSuccess(prepareIssue(updatedIssue, jobs)));
+			dispatch(IssuesActions.saveIssueSuccess(prepareIssue(updatedIssue, jobs), false));
 		}, 5000);
 		setTimeout(() => {
 			dispatch(IssuesActions.hideCloseInfo(updatedIssue._id));
 		}, 6000);
 	} else {
-		dispatch(IssuesActions.saveIssueSuccess(prepareIssue(updatedIssue, jobs)));
+		dispatch(IssuesActions.saveIssueSuccess(prepareIssue(updatedIssue, jobs), false));
 	}
 };
 
 const onCreateEvent = (createdIssue) => {
 	const jobs = selectJobsList(getState());
-	dispatch(IssuesActions.saveIssueSuccess(prepareIssue(createdIssue[0], jobs)));
+	dispatch(IssuesActions.saveIssueSuccess(prepareIssue(createdIssue[0], jobs), false));
 };
 
 const onResourcesCreated = (resources) => {
