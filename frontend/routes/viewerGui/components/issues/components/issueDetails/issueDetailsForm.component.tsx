@@ -50,6 +50,7 @@ interface IProps {
 	myJob: any;
 	isValid: boolean;
 	dirty: boolean;
+	horizontal: boolean;
 	onSubmit: (values) => void;
 	onValueChange: (event) => void;
 	handleChange: (event) => void;
@@ -78,8 +79,6 @@ interface IProps {
 	sequences: any[];
 	units: any;
 	measureMode: string;
-	areaMeasurements: any[];
-	lengthMeasurements: any[];
 }
 
 interface IState {
@@ -182,12 +181,12 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 			active={active}
 			units={this.props.units}
 			measureMode={this.props.measureMode}
-			lengthMeasurements={this.props.lengthMeasurements}
-			areaMeasurements={this.props.areaMeasurements}
 			removeMeasurement={this.props.removeMeasurement}
 			setMeasurementColor={() => {}}
 			setMeasurementName={() => {}}
 			setMeasureMode={this.props.setMeasureMode}
+			shapes={this.props.issue.shapes}
+			addButtonsEnabled={!this.props.horizontal}
 		/>
 	)
 

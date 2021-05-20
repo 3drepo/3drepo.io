@@ -23,12 +23,10 @@ import { DialogActions } from '../../../../../../modules/dialog';
 import {
 	selectActiveIssueComments,
 	selectActiveIssueDetails,
-	selectAreaMeasurements,
 	selectExpandDetails,
 	selectFailedToLoad,
 	selectFetchingDetailsIsPending,
 	selectIssues,
-	selectLengthMeasurements,
 	selectMeasureMode,
 	selectNewComment,
 	selectPostCommentIsPending,
@@ -68,8 +66,6 @@ const mapStateToProps = createStructuredSelector({
 	sequences: selectSequences,
 	units: selectUnit,
 	measureMode: selectMeasureMode,
-	lengthMeasurements: selectLengthMeasurements,
-	areaMeasurements: selectAreaMeasurements
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

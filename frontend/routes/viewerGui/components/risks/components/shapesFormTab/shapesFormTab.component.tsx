@@ -16,6 +16,7 @@
 */
 
 import React from 'react';
+import { MEASURE_TYPE } from '../../../../../../modules/measurements/measurements.constants';
 import { IMeasure } from '../../../measurements/components/measureItem/measureItem.component';
 
 // tslint:disable-next-line:max-line-length
@@ -25,8 +26,8 @@ import { Content } from '../riskDetails/riskDetails.styles';
 
 interface IProps {
 	active: boolean;
-	lengthMeasurements: IMeasure[];
-	areaMeasurements: IMeasure[];
+	addButtonsEnabled: boolean;
+	shapes: IMeasure[];
 	units: string;
 	measureMode: string;
 	removeMeasurement: (uuid) => void;
@@ -37,14 +38,22 @@ interface IProps {
 
 export const ShapesFormTab = ({
 	active,
+	addButtonsEnabled,
 	measureMode,
 	setMeasureMode,
 	...props
 }: IProps) => {
+	const shapes = props.shapes || [];
+	const areaMeasurements = shapes.filter(({type}) => type === MEASURE_TYPE.AREA);
+	const lengthMeasurements = shapes.filter(({type}) => type === MEASURE_TYPE.LENGTH);
 	return (
 		<Content active={active}>
-			<MeasuringType basicTypes setMeasureMode={setMeasureMode} measureMode={measureMode} />
-			<AllMeasurementsList {...props} pointMeasurements={[]} modelUnit={props.units} />
+			{addButtonsEnabled && <MeasuringType basicTypes setMeasureMode={setMeasureMode} measureMode={measureMode} />}
+			<AllMeasurementsList
+				{...props}
+				areaMeasurements={areaMeasurements}
+				lengthMeasurements={lengthMeasurements}
+				pointMeasurements={[]} modelUnit={props.units} />
 		</Content>
 		);
 };
