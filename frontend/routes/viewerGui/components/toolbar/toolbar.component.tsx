@@ -96,6 +96,7 @@ interface IProps {
 	stopListenOnNumClip: () => void;
 	setPanelVisibility: (panelName, visibility) => void;
 	clearColorOverrides: () => void;
+	isModel2D: boolean;
 }
 
 interface IState {

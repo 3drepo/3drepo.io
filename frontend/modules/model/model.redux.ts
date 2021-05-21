@@ -54,8 +54,9 @@ export interface IModelState {
 	settings: {
 		properties: {
 			unit: string;
-		},
+		};
 		permissions: any[];
+		type: string;
 	};
 	metaKeys: any[];
 	revisions: any[];
