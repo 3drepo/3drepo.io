@@ -151,49 +151,23 @@ class ImportQueue {
 		});
 	}
 
+	getSharedSpacePath() {
+		return this.sharedSpacePath;
+	}
+
+	getSharedSpacePH() {
+		return sharedSpacePH;
+	}
+
 	/** *****************************************************************************
 	 * Dispatch work to queue to import a model via a file uploaded by User
 	 * @param {string} corID - correlation ID for this request
-	 * @param {filePath} filePath - Path to uploaded file
-	 * @param {orgFileName} orgFileName - Original file name of the file
-	 * @param {databaseName} databaseName - name of database to commit to
-	 * @param {modelName} modelName - name of model to commit to
-	 * @param {userName} userName - name of user
-	 * @param {copy} copy - use fs.copy or fs.move, default fs.move
-	 * @param {tag} tag - revision tag
-	 * @param {desc} desc - revison description
 	 *******************************************************************************/
-	async importFile(corID, filePath, orgFileName, databaseName, modelName, userName, copy, tag, desc, importAnimations = true) {
-		await this.writeImportData(corID, filePath, orgFileName, databaseName, modelName, userName, copy, tag, desc, importAnimations);
+	async importFile(corID, filePath, orgFileName, copy) {
+		await this._moveFileToSharedSpace(corID, filePath, orgFileName, copy);
 
 		const msg = `import -f ${sharedSpacePH}/${corID}.json`;
 		return this._dispatchWork(corID, msg, true);
-	}
-
-	async writeImportData(corID, filePath, orgFileName, databaseName, modelName, userName, copy, tag, desc, importAnimations = true) {
-		const newFilePath = await this._moveFileToSharedSpace(corID, filePath, orgFileName, copy);
-		const jsonFilename = `${this.sharedSpacePath}/${corID}.json`;
-
-		const json = {
-			file: `${sharedSpacePH}/${newFilePath}`,
-			database: databaseName,
-			project: modelName,
-			owner: userName
-		};
-
-		if (tag) {
-			json.tag = tag;
-		}
-
-		if (desc) {
-			json.desc = desc;
-		}
-
-		if (importAnimations) {
-			json.importAnimations = importAnimations;
-		}
-
-		await this.writeFile(jsonFilename, JSON.stringify(json));
 	}
 
 	/** *****************************************************************************

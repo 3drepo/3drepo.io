@@ -28,6 +28,7 @@ const TextureHelpers = require("../models/helper/texture");
 const UnityAssets = require("../models/unityAssets");
 const SrcAssets = require("../models/srcAssets");
 const JSONAssets = require("../models/jsonAssets");
+const Upload = require("../models/upload");
 const config = require("../config");
 
 function convertProjectToParam(req, res, next) {
@@ -2045,7 +2046,7 @@ async function uploadModelRequest(req, res, next) {
 	const username = req.session.user.username;
 
 	try {
-		const corID = await ModelHelpers.uploadRequest(account, model, username, req.body);
+		const corID = await Upload.uploadRequest(account, model, username, req.body);
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, corID);
 	} catch(err) {
 		const errMsg = err.resCode ? err.resCode : err;
