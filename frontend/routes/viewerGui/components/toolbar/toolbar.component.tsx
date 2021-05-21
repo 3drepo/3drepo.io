@@ -151,6 +151,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 	}
 
 	public get toolbarList() {
+		const sheetMode = this.props.navigationMode === VIEWER_NAV_MODES.SHEET_NAV;
 		return [
 			{
 				label: VIEWER_TOOLBAR_ITEMS.EXTENT,
@@ -161,7 +162,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 				label: VIEWER_TOOLBAR_ITEMS.PERSPECTIVE_VIEW,
 				Icon: PerspectiveIcon,
 				action: () => this.handleShowSubmenu(VIEWER_TOOLBAR_ITEMS.PERSPECTIVE_VIEW),
-				show: this.props.projectionMode !== VIEWER_PROJECTION_MODES.ORTHOGRAPHIC,
+				show: !sheetMode && this.props.projectionMode !== VIEWER_PROJECTION_MODES.ORTHOGRAPHIC,
 				subMenu: [
 					{
 						label: VIEWER_TOOLBAR_ITEMS.ORTHOGRAPHIC_VIEW,
@@ -174,7 +175,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 				label: VIEWER_TOOLBAR_ITEMS.ORTHOGRAPHIC_VIEW,
 				Icon: OrthogonalIcon,
 				action: () => this.handleShowSubmenu(VIEWER_TOOLBAR_ITEMS.ORTHOGRAPHIC_VIEW),
-				show: this.props.projectionMode === VIEWER_PROJECTION_MODES.ORTHOGRAPHIC,
+				show: !sheetMode && this.props.projectionMode === VIEWER_PROJECTION_MODES.ORTHOGRAPHIC,
 				subMenu: [
 					{
 						label: VIEWER_TOOLBAR_ITEMS.PERSPECTIVE_VIEW,
