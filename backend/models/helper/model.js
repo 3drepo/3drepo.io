@@ -43,9 +43,9 @@ const { getRefNodes } = require("../ref");
 const { findNodesByType, getGridfsFileStream, getNodeById, getParentMatrix } = require("../scene");
 const utils = require("../../utils");
 const middlewares = require("../../middlewares/middlewares");
-const multer = require("multer");
 const fs = require("fs");
 const ChatEvent = require("../chatEvent");
+const Upload = require("../upload");
 const { addModelToProject, createProject, findOneProject, removeProjectModel } = require("../project");
 const _ = require("lodash");
 const FileRef = require("../fileRef");
@@ -599,6 +599,27 @@ function downloadLatest(account, model) {
 	});
 }
 
+/**
+ * Called by importModel to perform model upload
+ */
+async function _handleUpload(correlationId, account, model, username, file, data) {
+	await Upload.writeImportData(correlationId,
+		account,
+		model,
+		username,
+		data.tag,
+		data.desc,
+		data.importAnimations
+	);
+
+	return importQueue.importFile(
+		correlationId,
+		file.path,
+		file.originalname,
+		null
+	);
+}
+
 function importModel(account, model, username, modelSetting, source, data) {
 
 	if(!modelSetting) {
@@ -821,16 +842,6 @@ async function getSubModelRevisions(account, model, branch, rev) {
 }
 
 const fileNameRegExp = /[ *"/\\[\]:;|=,<>$]/g;
-const acceptedFormat = [
-	"x","obj","3ds","md3","md2","ply",
-	"mdl","ase","hmp","smd","mdc","md5",
-	"stl","lxo","nff","raw","off","ac",
-	"bvh","irrmesh","irr","q3d","q3s","b3d",
-	"dae","ter","csm","3d","lws","xml","ogex",
-	"ms3d","cob","scn","blend","pk3","ndo",
-	"ifc","xgl","zgl","fbx","assbin", "bim", "dgn",
-	"rvt", "rfa", "spm"
-];
 
 const getModelSetting = async (account, model, username) => {
 	let setting = await findModelSettingById(account, model);
@@ -874,7 +885,6 @@ module.exports = {
 	searchTree,
 	downloadLatest,
 	fileNameRegExp,
-	acceptedFormat,
 	importModel,
 	removeModel,
 	getModelPermission,

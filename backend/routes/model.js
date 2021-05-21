@@ -2124,7 +2124,7 @@ function uploadModel(req, res, next) {
 		if (!modelSetting) {
 			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 		} else {
-			return ModelHelpers.uploadFile(req);
+			return Upload.uploadFile(req);
 		}
 
 	}).then(file => {
