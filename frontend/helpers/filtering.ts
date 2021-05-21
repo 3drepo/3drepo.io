@@ -1,7 +1,7 @@
-export const filterNestedData = (data: any[], condition: (i: any) => any[], childrenPath: string = 'subTasks') =>
-	data.reduce((list, item) => {
-		let result = null;
-
+export const filterNestedData = (data: any[], condition: (i: any) => any[], childrenPath: string = 'subActivities') => {
+	const lists = [];
+	data.forEach((item) => {
+		let result;
 		if (condition(item)) {
 			result = { ...item };
 		} else if (item[childrenPath]) {
@@ -13,8 +13,10 @@ export const filterNestedData = (data: any[], condition: (i: any) => any[], chil
 		}
 
 		if (result) {
-			list.push(result);
+			lists.push(result);
 		}
+	});
 
-		return list;
-	}, []);
+	return lists;
+
+};

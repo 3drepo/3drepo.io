@@ -168,6 +168,14 @@ Viewpoint.createViewpoint = async (account, model, collName, routePrefix, hostId
 		viewpoint.hideIfc = !!vpData.hideIfc;
 	}
 
+	const groupMapping = {
+		highlighted_group_id : "highlighted_group",
+		hidden_group_id : "hidden_group",
+		shown_group_id : "shown_group",
+		override_group_ids : "override_groups",
+		transformation_group_ids : "transformation_groups"
+	};
+
 	["highlighted_group_id",
 		"hidden_group_id",
 		"shown_group_id"
@@ -179,6 +187,9 @@ Viewpoint.createViewpoint = async (account, model, collName, routePrefix, hostId
 			} else if(vpData[groupIDName] !== "") {
 				viewpoint[groupIDName] = vpData[groupIDName];
 			}
+
+			// If the user passes in both an id and a group entry, ignore the group entry.
+			delete vpData[groupMapping[groupIDName]];
 		}
 
 	});
@@ -193,6 +204,9 @@ Viewpoint.createViewpoint = async (account, model, collName, routePrefix, hostId
 				systemLogger.logError("invalid type " + groupIdName);
 				throw responseCodes.INVALID_ARGUMENTS;
 			}
+
+			// If the user passes in both an id and a group entry, ignore the group entry.
+			delete vpData[groupMapping[groupIdName]];
 		}
 	});
 
