@@ -133,7 +133,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 			const helicopter = {
 				label: VIEWER_TOOLBAR_ITEMS.HELICOPTER,
 				Icon: HelicopterIcon,
-				action: () => this.handleNavigationModeClick(VIEWER_NAV_MODE.HELICOPTER)
+				action: () => this.handleNavigationModeClick(VIEWER_NAV_MODES.HELICOPTER)
 			}
 			menuOptions.push(helicopter);
 		}
@@ -142,7 +142,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 			const sheet = {
 				label: VIEWER_TOOLBAR_ITEMS.SHEET_NAV,
 				Icon: SheetNavIcon,
-				action: () => this.handleNavigationModeClick(VIEWER_NAV_MODE.SheetNav)
+				action: () => this.handleNavigationModeClick(VIEWER_NAV_MODES.SHEET_NAV)
 			}
 			menuOptions.push(sheet);
 		}
@@ -194,7 +194,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 			},
 			{
 				label: VIEWER_TOOLBAR_ITEMS.SHEET_NAV,
-				Icon: TurntableIcon,
+				Icon: SheetNavIcon,
 				action: () => this.handleShowSubmenu(VIEWER_TOOLBAR_ITEMS.SHEET_NAV),
 				show: this.props.navigationMode === VIEWER_NAV_MODES.SHEET_NAV,
 				subMenu: [
@@ -311,7 +311,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 		}
 
 		if (this.props.isModel2D !== prevProps.isModel2D) {
-			this.handleNavigationModeClick(VIEWER_TOOLBAR_ITEMS.SHEET_NAV);
+			this.handleNavigationModeClick(VIEWER_NAV_MODES.SHEET_NAV);
 		}
 	}
 

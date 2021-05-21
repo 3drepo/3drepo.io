@@ -72,6 +72,7 @@ export const INITIAL_STATE: IModelState = {
 			unit: 'mm',
 		},
 		permissions: [],
+		type: 'Architectural'
 	},
 	metaKeys: [],
 	revisions: [],

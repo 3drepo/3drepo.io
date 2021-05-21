@@ -139,8 +139,7 @@ export class ViewerService {
 		if (IS_DEVELOPMENT) {
 			console.debug('Initiating Viewer');
 		}
-
-		this.setInitialisePromise();
+			this.setInitialisePromise();
 		UnityUtil.viewer = this;
 
 		try {
@@ -182,8 +181,6 @@ export class ViewerService {
 					}
 				});
 			}
-
-			this.setNavMode(VIEWER_NAV_MODES.TURNTABLE, false);
 
 			UnityUtil.onReady().then(() => {
 				this.isInitialised = true;
@@ -320,6 +317,7 @@ export class ViewerService {
 	}
 
 	public enable2DMode() {
+		console.log("[viewerService]: enabling 2d");
 		UnityUtil.enable2DMode();
 	}
 

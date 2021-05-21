@@ -16,7 +16,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { VIEWER_TOOLBAR_ITEMS } from '../../constants/viewer';
+import { VIEWER_NAV_MODES } from '../../constants/viewer';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
 import * as Bim from '../bim';
 import { selectOverrides as selectGroupsOverrides,
@@ -70,7 +70,7 @@ export const selectNavigationMode = createSelector(
 );
 
 export const selectIs2DSheetMode = createSelector(
-	selectNavigationMode, (mode) => mode === VIEWER_TOOLBAR_ITEMS.SHEET_NAV
+	selectNavigationMode, (mode) => mode === VIEWER_NAV_MODES.SHEET_NAV
 );
 
 export const selectHelicopterSpeed = createSelector(
