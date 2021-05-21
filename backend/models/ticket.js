@@ -116,6 +116,15 @@ class Ticket extends View {
 		return ticketToClean;
 	}
 
+	async fillTicketwithShapes(account, model, ticket) {
+		if (!ticket || !ticket.shapes || !ticket.shapes.length) {
+			return;
+		}
+
+		const shapes = await Shapes.get(account, model, this.collName, ticket.shapes);
+		ticket.shapes = shapes.map(Shapes.clean);
+	}
+
 	async findByUID(account, model, uid, projection, noClean = false) {
 		const foundTicket = await super.findByUID(account, model, uid, projection, true);
 
@@ -134,9 +143,8 @@ class Ticket extends View {
 			delete foundTicket.refs;
 		}
 
-		if (!noClean && foundTicket.shapes) {
-			const shapes = await Shapes.get(account, model, this.collName, foundTicket.shapes);
-			foundTicket.shapes = shapes.map(Shapes.clean);
+		if (!noClean) {
+			await this.fillTicketwithShapes(account, model, foundTicket);
 		}
 
 		if (!noClean) {
@@ -650,7 +658,7 @@ class Ticket extends View {
 			convertCoords
 		);
 
-		tickets.forEach((ticket) => {
+		await Promise.all(tickets.map(async (ticket) => {
 			ticket.lastUpdated = ticket.created;
 			ticket.comments && ticket.comments.forEach((comment) => {
 				if (comment.created > ticket.lastUpdated) {
@@ -658,8 +666,9 @@ class Ticket extends View {
 				}
 			});
 
+			await this.fillTicketwithShapes(account, model,ticket);
 			ticket.comments = undefined;
-		});
+		}));
 
 		return tickets;
 	}

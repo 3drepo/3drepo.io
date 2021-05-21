@@ -139,7 +139,7 @@ describe("Shapes", () => {
 	const wrongShapeIssue =  { "name":"wrong shapes issue", ...cloneDeep(baseIssue), shapes : [ wrongShape ]};
 
 
-	const chopIds = (objs) => objs.map(obj=> omit(obj, '_id'));
+	const chopUuIds = (objs) => objs.map(obj=> omit(obj, 'uuid'));
 
 
 	describe("in issue", function() {
@@ -161,15 +161,23 @@ describe("Shapes", () => {
 
 		it ("should be reflected when fetching the issue", async()=> {
 			const res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
-			const shapes_ids = res.body.shapes.map((shape) => shape._id);
+			const shapes_ids = res.body.shapes.map((shape) => shape.uuid);
 
 			expect(shapes_ids).to.be.an('array').and.to.have.lengthOf(shapeIssue.shapes.length);
 			shapes_ids.forEach((id) => {
 				expect(id).to.be.an('string');
 			})
 
-			expect(chopIds(res.body.shapes)).to.be.deep.equal(shapeIssue.shapes);
+			expect(chopUuIds(res.body.shapes)).to.be.deep.equal(shapeIssue.shapes);
 		});
+
+		it ("should be reflected when fetching all the issues", async()=> {
+			const res = await agent.get(`/${username}/${model}/issues/`).expect(200);
+
+			const theIssue = (res.body.filter(({_id})=>_id === issueId))[0];
+			expect(chopUuIds(theIssue.shapes)).to.be.deep.equal(shapeIssue.shapes);
+		});
+
 
 		it ("When updating other properties should keep the shapes", async()=> {
 			await agent.patch(`/${username}/${model}/issues/${issueId}`)
@@ -177,8 +185,7 @@ describe("Shapes", () => {
 				.expect(200);
 
 			const res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
-
-			expect(chopIds(res.body.shapes)).to.be.deep.equal(shapeIssue.shapes);
+			expect(chopUuIds(res.body.shapes)).to.be.deep.equal(shapeIssue.shapes);
 		});
 
 		it ("When updating shapes should succeed", async()=> {
@@ -189,9 +196,10 @@ describe("Shapes", () => {
 				.expect(200);
 
 			const res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
-
-			expect(chopIds(res.body.shapes)).to.be.deep.equal(shapes);
+			expect(chopUuIds(res.body.shapes)).to.be.deep.equal(shapes);
 		});
+
+
 	})
 
 });

@@ -188,13 +188,16 @@ export const selectMeasureMode = createSelector(
 );
 
 export const selectShapes = createSelector(
-	selectSelectedIssue, (issue) => (issue || {}).shapes || []
+	selectActiveIssueDetails, (issue) => {
+		return (issue || {}).shapes || [];
+	}
 );
 
-// export const selectAreaMeasurements = createSelector(
-// 	selectShapes, (shapes) =>
-// 		shapes.filter(({type}) => type === MEASURE_TYPE.AREA)
-// );
-// export const selectLengthMeasurements = createSelector(
-// 	selectShapes, (shapes) => shapes.filter(({type}) => type === MEASURE_TYPE.LENGTH)
-// );
+export const selectAreaMeasurements = createSelector(
+	selectShapes, (shapes) => {
+		return shapes.filter(({type}) => type === MEASURE_TYPE.AREA);
+	}
+);
+export const selectLengthMeasurements = createSelector(
+	selectShapes, (shapes) => shapes.filter(({type}) => type === MEASURE_TYPE.LENGTH)
+);
