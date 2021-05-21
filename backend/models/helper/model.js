@@ -45,7 +45,7 @@ const utils = require("../../utils");
 const middlewares = require("../../middlewares/middlewares");
 const fs = require("fs");
 const ChatEvent = require("../chatEvent");
-const Upload = require("../upload");
+const { writeImportData } = require("../upload");
 const { addModelToProject, createProject, findOneProject, removeProjectModel } = require("../project");
 const _ = require("lodash");
 const FileRef = require("../fileRef");
@@ -603,7 +603,7 @@ function downloadLatest(account, model) {
  * Called by importModel to perform model upload
  */
 async function _handleUpload(correlationId, account, model, username, file, data) {
-	await Upload.writeImportData(correlationId,
+	await writeImportData(correlationId,
 		account,
 		model,
 		username,
