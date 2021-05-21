@@ -212,14 +212,18 @@ function* updateCurrentRevision({ revision }) {
 		const revisionModelIndex = compareModels
 			.findIndex((model) => model.revisions.find(({ _id }) => _id === revision._id ));
 		const componentState = {} as ICompareComponentState;
-		compareModels[revisionModelIndex].baseRevision = revision;
-		compareModels[revisionModelIndex].currentRevision = revision;
+		const comparedModel = compareModels[revisionModelIndex];
 
-		componentState.compareModels = [
-			...compareModels
-		];
+		if (comparedModel) {
+			comparedModel.baseRevision = revision;
+			comparedModel.currentRevision = revision;
 
-		yield put(CompareActions.setComponentState(componentState));
+			componentState.compareModels = [
+				...compareModels
+			];
+
+			yield put(CompareActions.setComponentState(componentState));
+		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'current revision', error.message));
 	}

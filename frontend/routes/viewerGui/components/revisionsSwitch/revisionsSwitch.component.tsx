@@ -33,9 +33,19 @@ interface IProps {
 	hideDialog: () => void;
 	showRevisionsDialog: (config) => void;
 	currentRevision: any;
+	updateCurrentRevision: (revision) => void;
 }
 
 export class RevisionsSwitch extends React.PureComponent<IProps, any> {
+
+	public componentDidUpdate(prevProps: IProps) {
+		const { currentRevision, updateCurrentRevision } = this.props;
+
+		if (currentRevision !== prevProps.currentRevision) {
+			updateCurrentRevision(currentRevision);
+		}
+	}
+
 	public renderCurrentSwitchState = renderWhenTrue(() => (
 		<DisplayedText>
 			{`${this.props.modelSettings.name} - ${this.revisionName}`}

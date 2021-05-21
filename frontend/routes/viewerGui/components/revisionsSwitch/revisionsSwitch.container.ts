@@ -20,6 +20,7 @@ import { withRouter } from 'react-router';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
+import { CompareActions } from '../../../../modules/compare';
 import { DialogActions } from '../../../../modules/dialog';
 import { selectCurrentRevision, selectRevisions, selectSettings } from '../../../../modules/model';
 import { RevisionsSwitch } from './revisionsSwitch.component';
@@ -33,6 +34,7 @@ const mapStateToProps = createStructuredSelector({
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showRevisionsDialog: DialogActions.showRevisionsDialog,
 	hideDialog: DialogActions.hideDialog,
+	updateCurrentRevision: CompareActions.updateCurrentRevision
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(RevisionsSwitch));

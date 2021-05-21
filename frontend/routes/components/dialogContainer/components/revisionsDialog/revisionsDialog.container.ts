@@ -19,7 +19,7 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { CompareActions } from '../../../../../modules/compare';
+
 import {
 	selectIsPending,
 	selectPendingRevision,
@@ -37,7 +37,6 @@ const mapStateToProps = createStructuredSelector({
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	resetModelRevisions: ModelActions.resetRevisions,
 	setModelRevisionState: ModelActions.setModelRevisionState,
-	updateCurrentRevision: CompareActions.updateCurrentRevision
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(RevisionsDialog));
