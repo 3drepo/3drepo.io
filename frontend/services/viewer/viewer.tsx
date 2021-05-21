@@ -317,7 +317,6 @@ export class ViewerService {
 	}
 
 	public enable2DMode() {
-		console.log("[viewerService]: enabling 2d");
 		UnityUtil.enable2DMode();
 	}
 
