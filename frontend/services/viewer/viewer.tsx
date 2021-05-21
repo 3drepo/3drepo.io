@@ -58,7 +58,6 @@ export class ViewerService {
 	public units = 'm';
 	public convertToM = 1.0;
 	public isInitialised = false;
-	public measureMode = false;
 	public measuringUnits = '';
 	public modelString = null;
 	public divId = 'unityViewer';
@@ -80,8 +79,8 @@ export class ViewerService {
 	public options: any;
 	public plugins: any;
 
-	public mode: string;
-
+	public measureMode: string;
+	public measureModeLabels: boolean;
 	public addedMeasurements: Set<string> = new Set();
 
 	public constructor({ name = 'viewer', ...config}: IViewerConstructor) {
@@ -92,56 +91,6 @@ export class ViewerService {
 
 		this.viewer = document.createElement('div');
 		this.viewer.className = 'viewer';
-	}
-
-	public async setMeasureMode(mode: string) {
-		await this.isViewerReady();
-
-		this.mode = mode;
-
-		if (!mode) {
-			UnityUtil.disableMeasuringTool();
-			UnityUtil.disableSnapping();
-			return;
-		}
-
-		MultiSelect.toggleAreaSelect(false);
-
-		if (mode === VIEWER_MEASURING_MODE.POINT)  {
-			UnityUtil.disableMeasuringTool();
-		} else {
-			UnityUtil.setMeasureToolMode(mode);
-			UnityUtil.enableMeasuringTool();
-		}
-
-		this.measurementModeChanged(mode);
-	}
-
-	public async clearMeasureMode() {
-		return await this.setMeasureMode('');
-	}
-
-	public async setVisibilityOfMeasurementsLabels(visible) {
-		await this.isViewerReady();
-		if (visible) {
-			UnityUtil.showNewMeasurementsLabels();
-		} else {
-			UnityUtil.hideNewMeasurementsLabels();
-		}
-	}
-
-	public async addMeasurements(measurements, hideLabels) {
-		await this.isViewerReady();
-		await this.isModelLoaded();
-
-		await this.setVisibilityOfMeasurementsLabels(!hideLabels);
-		measurements.forEach(UnityUtil.addMeasurement);
-		this.setVisibilityOfMeasurementsLabels(true);
-	}
-
-	public async removeMeasurements(measurements) {
-		await this.isViewerReady();
-		measurements.forEach(({uuid}) => this.removeMeasurement(uuid));
 	}
 
 	/**
@@ -306,7 +255,7 @@ export class ViewerService {
 	}
 
 	public pickPointEvent(pointInfo) {
-		if (this.mode !== 'PointPin') {
+		if (this.measureMode !== 'PointPin') {
 			return;
 		}
 
@@ -466,21 +415,6 @@ export class ViewerService {
 	/**
 	 * Measure
 	 */
-
-	public async activateMeasure() {
-		this.measureMode = true;
-		await this.isViewerReady();
-		UnityUtil.enableMeasuringTool();
-		this.measureMode = true;
-	}
-
-	public async disableMeasure() {
-		this.measureMode = false;
-		await this.isViewerReady();
-		UnityUtil.disableMeasuringTool();
-		this.measureMode = false;
-	}
-
 	public async setMeasuringUnits(units) {
 		this.measuringUnits = units;
 		await this.isViewerReady();
@@ -555,12 +489,64 @@ export class ViewerService {
 		this.emit(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, mode);
 	}
 
+	public async setMeasureMode(mode: string, labels: boolean = true) {
+		await this.isViewerReady();
+
+		this.measureMode = mode;
+		this.measureModeLabels = labels;
+
+		if (!mode) {
+			UnityUtil.disableMeasuringTool();
+			UnityUtil.disableSnapping();
+			return;
+		}
+
+		this.setVisibilityOfMeasurementsLabels(labels);
+		MultiSelect.toggleAreaSelect(false);
+
+		if (mode === VIEWER_MEASURING_MODE.POINT)  {
+			UnityUtil.disableMeasuringTool();
+		} else {
+			UnityUtil.setMeasureToolMode(mode);
+			UnityUtil.enableMeasuringTool();
+		}
+
+		this.measurementModeChanged(mode);
+	}
+
+	public async clearMeasureMode() {
+		return await this.setMeasureMode('');
+	}
+
+	public async setVisibilityOfMeasurementsLabels(visible) {
+		await this.isViewerReady();
+		if (visible) {
+			UnityUtil.showNewMeasurementsLabels();
+		} else {
+			UnityUtil.hideNewMeasurementsLabels();
+		}
+	}
+
+	public async addMeasurements(measurements, hideLabels) {
+		await this.isViewerReady();
+		await this.isModelLoaded();
+
+		await this.setVisibilityOfMeasurementsLabels(!hideLabels);
+		measurements.forEach(UnityUtil.addMeasurement);
+		this.setVisibilityOfMeasurementsLabels(this.measureModeLabels);
+	}
+
+	public async removeMeasurements(measurements) {
+		await this.isViewerReady();
+		measurements.forEach(({uuid}) => this.removeMeasurement(uuid));
+	}
+
 	/**
 	 * Highlight
 	 */
 
 	public get canHighlight() {
-		return this.isInitialised && !this.pinDropMode && !this.measureMode && !Boolean(this.mode);
+		return this.isInitialised && !this.pinDropMode && !Boolean(this.measureMode);
 	}
 
 	public async highlightObjects(

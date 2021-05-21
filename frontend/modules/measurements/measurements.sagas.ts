@@ -41,7 +41,9 @@ const onMeasurementCreated = (measure) => {
 };
 
 const onMeasurementChanged = () => {
-	dispatch(MeasurementsActions.setMeasureMode(''));
+	Viewer.off(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
+	Viewer.off(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
+	dispatch(MeasurementsActions.setMeasureModeSuccess(''));
 };
 
 export function* setMeasureMode({ mode }) {

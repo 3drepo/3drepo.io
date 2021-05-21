@@ -652,7 +652,9 @@ export function * updateActiveIssueViewpoint({screenshot}) {
 }
 
 const onMeasurementChanged = () => {
-	dispatch(IssuesActions.setMeasureMode(''));
+	Viewer.off(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
+	Viewer.off(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
+	dispatch(IssuesActions.setMeasureModeSuccess(''));
 };
 
 const onMeasurementCreated = (measurement) => {
@@ -674,13 +676,12 @@ export function* setMeasureMode({ measureMode }) {
 		yield Viewer.off(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
 		yield Viewer.off(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
 		yield put(IssuesActions.setMeasureModeSuccess(measureMode));
-		yield Viewer.setMeasureMode(measureMode);
+		yield Viewer.setMeasureMode(measureMode, false);
 
 		if (measureMode === '') {
 			return;
 		}
 
-		yield Viewer.setVisibilityOfMeasurementsLabels(false);
 		yield Viewer.on(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
 		yield Viewer.on(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
 
