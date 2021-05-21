@@ -139,7 +139,7 @@ export class ViewerService {
 		if (IS_DEVELOPMENT) {
 			console.debug('Initiating Viewer');
 		}
-			this.setInitialisePromise();
+		this.setInitialisePromise();
 		UnityUtil.viewer = this;
 
 		try {

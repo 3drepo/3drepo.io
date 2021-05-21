@@ -186,7 +186,7 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 			const backgroundConfUpdated =
 				prevProps.useSkybox2d !== useSkybox2d ||
 				prevProps.backgroundColor2d !== backgroundColor2d ||
-				sheetModeChanged
+				sheetModeChanged;
 			if (backgroundConfUpdated) {
 				if (useSkybox2d) {
 					viewer.resetBackground();
@@ -199,7 +199,7 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 			const backgroundConfUpdated =
 				prevProps.useSkybox3d !== useSkybox3d ||
 				prevProps.backgroundColor3d !== backgroundColor3d ||
-				sheetModeChanged
+				sheetModeChanged;
 			if (backgroundConfUpdated) {
 				if (useSkybox3d) {
 					viewer.resetBackground();
@@ -210,8 +210,8 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 			}
 		}
 
-		if(sheetModeChanged) {
-			if(sheetMode) {
+		if (sheetModeChanged) {
+			if (sheetMode) {
 				viewer.enable2DMode();
 			} else {
 				viewer.disable2DMode();

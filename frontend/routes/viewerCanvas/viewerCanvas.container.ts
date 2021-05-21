@@ -33,7 +33,12 @@ import {
 	selectBackgroundColor3d,
 	selectUseSkybox2d,
 	selectUseSkybox3d } from '../../modules/viewer';
-import { selectAllTransparencyOverrides, selectColorOverrides, selectIs2DSheetMode, selectTransformations } from '../../modules/viewerGui';
+import {
+	selectAllTransparencyOverrides,
+	selectColorOverrides,
+	selectIs2DSheetMode,
+	selectTransformations
+} from '../../modules/viewerGui';
 import { withViewer } from '../../services/viewer/viewer';
 import { ViewerCanvas } from './viewerCanvas.component';
 

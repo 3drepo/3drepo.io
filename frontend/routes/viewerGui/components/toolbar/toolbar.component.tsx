@@ -124,7 +124,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 				label: VIEWER_TOOLBAR_ITEMS.TURNTABLE,
 				Icon: TurntableIcon,
 				action: () => this.handleNavigationModeClick(VIEWER_NAV_MODES.TURNTABLE)
-			}
+			};
 
 			menuOptions.push(turnTable);
 		}
@@ -134,7 +134,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 				label: VIEWER_TOOLBAR_ITEMS.HELICOPTER,
 				Icon: HelicopterIcon,
 				action: () => this.handleNavigationModeClick(VIEWER_NAV_MODES.HELICOPTER)
-			}
+			};
 			menuOptions.push(helicopter);
 		}
 
@@ -143,7 +143,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 				label: VIEWER_TOOLBAR_ITEMS.SHEET_NAV,
 				Icon: SheetNavIcon,
 				action: () => this.handleNavigationModeClick(VIEWER_NAV_MODES.SHEET_NAV)
-			}
+			};
 			menuOptions.push(sheet);
 		}
 
