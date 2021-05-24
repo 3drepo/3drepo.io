@@ -663,12 +663,26 @@ const onMeasurementCreated = (measurement) => {
 
 export function* addMeasurement({ measurement }) {
 	const shapes = [...yield select(selectShapes), measurement];
-	yield put(IssuesActions.updateActiveIssue({shapes}));
+	const activeIssue = yield select(selectActiveIssueDetails);
+	const isNewIssue = !Boolean(activeIssue._id);
+
+	if (isNewIssue) {
+		yield put(IssuesActions.updateNewIssue({...activeIssue, shapes}));
+	} else {
+		yield put(IssuesActions.updateActiveIssue({shapes}));
+	}
 }
 
 export function* removeMeasurement({ uuid }) {
 	const shapes = (yield select(selectShapes)).filter((measurement) => measurement.uuid !== uuid);
-	yield put(IssuesActions.updateActiveIssue({shapes}));
+	const activeIssue = yield select(selectActiveIssueDetails);
+	const isNewIssue = !Boolean(activeIssue._id);
+
+	if (isNewIssue) {
+		yield put(IssuesActions.updateNewIssue({...activeIssue, shapes}));
+	} else {
+		yield put(IssuesActions.updateActiveIssue({shapes}));
+	}
 }
 
 export function* setMeasureMode({ measureMode }) {
