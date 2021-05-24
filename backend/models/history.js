@@ -170,11 +170,11 @@ History.isValidTag = async function(account, model, tag) {
 	if (!tag) {
 		throw responseCodes.INVALID_TAG_NAME;
 	} else {
-		if (!tag.match(this.tagRegExp)) {
+		if (!tag.match(History.tagRegExp)) {
 			throw responseCodes.INVALID_TAG_NAME;
 		}
 
-		const _tag = await this.findByTag(account, model, tag, {_id: 1});
+		const _tag = await History.findByTag(account, model, tag, {_id: 1});
 
 		if (!_tag) {
 			return null;

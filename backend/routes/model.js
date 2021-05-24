@@ -1581,9 +1581,9 @@ router.delete("/:model", middlewares.hasDeleteAccessToModel, deleteModel);
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model id to upload.
- * @apiParam (Request body) {String} tag Tag name for new revision
- * @apiParam (Request body) {String} [desc] Description for new revision
- * @apiParam (Request body) {Boolean} [importAnimations] Whether to import animations within a sequence
+ * @apiParam (Query) {String} tag Tag name for new revision
+ * @apiParam (Query) {String} [desc] Description for new revision
+ * @apiParam (Query) {Boolean} [importAnimations] Whether to import animations within a sequence
  *
  * @apiExample {post} Example usage:
  * POST /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/ms-chunking HTTP/1.1
@@ -2046,7 +2046,7 @@ async function uploadModelRequest(req, res, next) {
 	const username = req.session.user.username;
 
 	try {
-		const corID = await Upload.uploadRequest(account, model, username, req.body);
+		const corID = await Upload.uploadRequest(account, model, username, req.query);
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, corID);
 	} catch(err) {
 		const errMsg = err.resCode ? err.resCode : err;
