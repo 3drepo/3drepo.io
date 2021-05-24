@@ -143,9 +143,7 @@ class Ticket extends View {
 			delete foundTicket.refs;
 		}
 
-		if (!noClean) {
-			await this.fillTicketwithShapes(account, model, foundTicket);
-		}
+		await this.fillTicketwithShapes(account, model, foundTicket);
 
 		if (!noClean) {
 			return this.clean(account, model, foundTicket);
@@ -323,10 +321,11 @@ class Ticket extends View {
 			delete data.viewpoint;
 		}
 
+		const shapes = data.shapes;
 		// Handle shapes
 		if (data.shapes) {
 			await Shapes.removeByTicketId(account, model, this.collName, _id);
-			data.shapes = await Promise.all(data.shapes.map(shape => Shapes.create(account, model, this.collName, {...shape, ticket_id:_id })));
+			data.shapes = await Promise.all(shapes.map(shape => Shapes.create(account, model, this.collName, {...shape, ticket_id:_id })));
 		}
 
 		// 6. Update the data
@@ -345,6 +344,11 @@ class Ticket extends View {
 		if (Object.keys(data).length > 0) {
 			updateData["$set"] = data;
 			await tickets.update({ _id }, updateData);
+		}
+
+		if (shapes) {
+			updatedTicket.shapes = shapes;
+			data.shapes = shapes;
 		}
 
 		this.clean(account, model, updatedTicket);
