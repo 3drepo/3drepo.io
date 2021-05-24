@@ -66,9 +66,17 @@ export const selectActiveIssue = createSelector(
 	selectIssuesMap, selectActiveIssueId, (issuesMap, activeIssueId) => issuesMap[activeIssueId]
 );
 
+export const selectShowDetails = createSelector(
+	selectComponentState, (state) => state.showDetails
+);
+
+export const selectNewIssueDetails = createSelector(
+	selectComponentState, selectShowDetails, (state, showDetails) => showDetails ? state.newIssue : {}
+);
+
 export const selectActiveIssueDetails = createSelector(
-	selectActiveIssue, selectComponentState, (activeIssue, componentState) => {
-		return activeIssue || componentState.newIssue;
+	selectActiveIssue, selectNewIssueDetails, (activeIssue, newIssue) => {
+		return activeIssue || newIssue;
 	}
 );
 
@@ -84,16 +92,8 @@ export const selectActiveIssueComments = createSelector(
 		}))
 );
 
-export const selectShowDetails = createSelector(
-	selectComponentState, (state) => state.showDetails
-);
-
 export const selectExpandDetails = createSelector(
 	selectComponentState, (state) => state.expandDetails
-);
-
-export const selectNewIssueDetails = createSelector(
-	selectComponentState, (state) => state.newIssue
 );
 
 export const selectNewComment = createSelector(

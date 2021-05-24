@@ -58,6 +58,7 @@ import {
 	selectComponentState,
 	selectFilteredIssues,
 	selectIssuesMap,
+	selectMeasureMode,
 	selectShapes
 } from './issues.selectors';
 
@@ -342,6 +343,12 @@ function* closeDetails() {
 	try {
 		const activeIssue = yield select(selectActiveIssueDetails);
 		const componentState = yield select(selectComponentState);
+		const measureMode = yield select(selectMeasureMode);
+
+		if (measureMode) {
+			yield put(IssuesActions.setMeasureMode(''));
+			yield take(IssuesTypes.SET_MEASURE_MODE_SUCCESS);
+		}
 
 		if (componentState.showDetails) {
 			if (!isEqual(activeIssue.position, componentState.savedPin)) {
