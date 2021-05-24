@@ -20,7 +20,12 @@ import { Viewer } from '../../services/viewer/viewer';
 import { getState } from '../store';
 import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds } from '../tree';
 
-export const  getSelectedFrame = (frames, endingDate) => {
+export const getSelectedFrame = (frames, endingDate) => {
+	const index = getSelectedFrameIndex(frames, endingDate);
+	return index === null ? null : frames[index];
+};
+
+export const getSelectedFrameIndex = (frames, endingDate) => {
 	if (!frames.length) {
 		return null;
 	}
@@ -39,11 +44,11 @@ export const  getSelectedFrame = (frames, endingDate) => {
 	}
 
 	if (frames[rightMargin].dateTime <= endingDate) {
-		return frames[rightMargin];
+		return rightMargin;
 	}
 
 	if ( frames[leftMargin].dateTime <= endingDate) {
-		return frames[leftMargin];
+		return leftMargin;
 	}
 
 	return null;

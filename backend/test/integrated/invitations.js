@@ -22,6 +22,7 @@ const { expect, AssertionError } = require("chai");
 const { USER_ALREADY_EXISTS, JOB_NOT_FOUND, INVALID_PROJECT_ID,
 	INVALID_MODEL_ID, NOT_AUTHORIZED, INVALID_MODEL_PERMISSION,
 	LICENCE_LIMIT_REACHED } = require("../../response_codes.js");
+const STRONG_PASSWORD = "Str0ngPassword!";
 
 const inviteUrl = (account) => `/${account}/invitations`;
 const membersUrl = (account) => `/${account}/members`;
@@ -232,10 +233,9 @@ describe("Invitations ", function () {
 			.expect(200);
 
 		const User = require("../../models/user");
-		const { token } = await User.createUser(null, username, 'password', {email}, 200000);
+		const { token } = await User.createUser(null, username, STRONG_PASSWORD, {email}, 200000);
 
 		await User.verify(username, token, {skipImportToyModel : true, skipCreateBasicPlan: true});
-
 
 		const { body: {members}} = await agents.sub_all.get(membersUrl('sub_all'));
 		let invited = members.find(selectInvitedUser);
@@ -276,7 +276,7 @@ describe("Invitations ", function () {
 			.expect(200);
 
 		const User = require("../../models/user");
-		const { token } = await User.createUser(null, username, 'password', {email}, 200000);
+		const { token } = await User.createUser(null, username, STRONG_PASSWORD, {email}, 200000);
 		await User.verify(username, token, {skipImportToyModel : true, skipCreateBasicPlan: true});
 
 
@@ -295,7 +295,6 @@ describe("Invitations ", function () {
 		expect(permsForModel.permission, 'should be a commenter for this model').to.equal('commenter');
 	});
 
-	// FIXME
 	it("that are unpacked with a project_admin should have the correct permission", async function() {
 		AssertionError.includeStack = true;
 		const username = 'projectAdminInvited';
@@ -319,7 +318,7 @@ describe("Invitations ", function () {
 			.expect(200);
 
 		const User = require("../../models/user");
-		const { token } = await User.createUser(null, username, 'password', {email}, 200000);
+		const { token } = await User.createUser(null, username, STRONG_PASSWORD, {email}, 200000);
 		await User.verify(username, token, {skipImportToyModel : true, skipCreateBasicPlan: true});
 
 		const { body: { permissions } } = await agents.teamSpace1.get('/teamSpace1/projects/project1').expect(200);

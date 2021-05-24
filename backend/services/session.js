@@ -63,8 +63,16 @@ module.exports.regenerateAuthSession = (req, config, user) => {
 						some(browserType => ua[browserType]); // If any of these browser types matches then is a websession
 				}
 
+				if (req.headers.referer) {
+					// Only store the `protocol://domain` part of the referrer
+					// e.g. If referrer is `https://3drepo.org/abc/xyz` we only store `https://3drepo.org`
+					const refererDomain = req.headers.referer.match(/^(\w)*:\/\/.*?\//);
+					user.referer = refererDomain ? refererDomain[0].slice(0, -1) : req.headers.referer;
+				}
+
 				req.session[C.REPO_SESSION_USER] = user;
 				req.session.cookie.domain = config.cookie_domain;
+
 				if (config.cookie.maxAge) {
 					req.session.cookie.maxAge = config.cookie.maxAge;
 				}

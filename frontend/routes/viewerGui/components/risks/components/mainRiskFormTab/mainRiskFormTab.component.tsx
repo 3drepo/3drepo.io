@@ -47,6 +47,7 @@ interface IProps {
 	isNewRisk: boolean;
 	canComment: boolean;
 	canEditBasicProperty: boolean;
+	canEditViewpoint: boolean;
 	jobs: any[];
 	disableViewer?: boolean;
 	values?: any;
@@ -62,7 +63,7 @@ interface IProps {
 
 export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 	active, isNewRisk, risk, disableViewer, jobs, canComment, canEditBasicProperty,
-	values, criteria, ...props
+	canEditViewpoint, values, criteria, ...props
 }) => {
 	const getCategories = () => {
 		const { category = [] } = criteria;
@@ -98,7 +99,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 				<UpdateButtons
 					isNew={isNewRisk}
 					disableViewer={disableViewer}
-					canEditBasicProperty={canEditBasicProperty}
+					canEditViewpoint={canEditViewpoint}
 					onChangePin={props.onChangePin}
 					onSavePin={props.onSavePin}
 					onUpdateViewpoint={props.onUpdateViewpoint}

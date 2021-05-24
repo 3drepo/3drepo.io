@@ -97,6 +97,7 @@
 		FILE_IMPORT_SYNCHRO_NOT_SUPPORTED: { message: "SPM import is currently not supported", status: 400 },
 		FILE_IMPORT_NO_3D_VIEW: { message: "Cannot find a 3D View within the model.", status: 400 },
 		FILE_IMPORT_TIMED_OUT: { message: "Process timed out. Consider splitting up the model", status: 500 },
+		FILE_IMPORT_GEOMETRY_ERR: { message: "File contains geometry that are not polylines/triangles", status: 400 },
 
 		QUEUE_CONN_ERR: { message: "Failed to queue your request. Please try again later.", status: 500},
 		QUEUE_NO_CONFIG: { message: "Server has no queue configuration", status: 500 },
@@ -120,11 +121,14 @@
 
 		ACTIVITY_NOT_FOUND: { message: "Activity not found", status: 404 },
 		SEQUENCE_NOT_FOUND: { message: "Sequence not found", status: 404 },
+		SEQUENCE_READ_ONLY: { message: "Sequence not found", status: 400 },
 		TASK_NOT_FOUND: { message: "Sequence task not found", status: 404 },
 
 		USER_EXISTS: { message: "User already exists", status: 400 },
 		OWNER_MUST_BE_ADMIN: {message: "Cannot alter permissions of teamspace owner", status: 400},
 		SIGN_UP_PASSWORD_MISSING: { message: "Password is missing", status: 400 },
+		PASSWORD_TOO_SHORT: { message: "Password is too short", status: 400 },
+		PASSWORD_TOO_WEAK: { message: "Password is too weak", status: 400 },
 		TOKEN_INVALID: { message: "Token is invalid or expired", status: 400 },
 		ALREADY_VERIFIED: { message: "Already verified", status: 400 },
 		USER_NOT_VERIFIED: { message: "Account not yet verified. Please check your email.", status: 400 },
@@ -133,6 +137,8 @@
 		MODEL_EXIST: { message: "Model already exists with that name", status: 400 },
 		PROJECT_EXIST: { message: "Project already exists", status: 400 },
 		DATABASE_EXIST: { message: "Database already exists", status: 400 },
+		TOO_MANY_LOGIN_ATTEMPTS: { message: "Too many unsuccessful login attempts! Account locked", status: 400 },
+		ACCOUNT_LOGIN_LOCKED: { message: "Account locked. Please try again later", status: 400 },
 
 		SIZE_LIMIT_PAY: { message: "Teamspace quota exceeded.", status: 400 },
 		INVALID_SUBSCRIPTION_PLAN: { message: "Invalid subscription plan", status: 400 },
@@ -442,7 +448,7 @@
 				res.setHeader("Cache-Control", `private, max-age=${cache.maxAge || config.cachePolicy.maxAge}`);
 			}
 
-			if (Buffer.isBuffer(extraInfo)) {
+			if (extraInfo && Buffer.isBuffer(extraInfo)) {
 
 				res.status(resCode.status);
 
@@ -464,10 +470,12 @@
 
 			} else {
 
-				meta.contentLength = typeof extraInfo === "string" ? extraInfo.length : JSON.stringify(extraInfo)
-					.length;
-				res.status(resCode.status)
-					.send(extraInfo);
+				if(extraInfo) {
+					meta.contentLength = typeof extraInfo === "string" ? extraInfo.length : JSON.stringify(extraInfo)
+						.length;
+
+				}
+				res.status(resCode.status).send(extraInfo);
 			}
 
 			// log bandwidth and http status code

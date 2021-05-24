@@ -80,17 +80,14 @@ export const MeasuringType = ({
 			deactivateMeasure();
 
 			if (measureMode === MEASURING_MODE.POINT) {
-				viewer.setPinDropMode(true);
 				togglePinListeners(true);
 			}
 		} else {
 			activateMeasure();
-			viewer.setPinDropMode(false);
 			togglePinListeners(false);
 		}
 		return () => {
 			deactivateMeasure();
-			viewer.setPinDropMode(false);
 			togglePinListeners(false);
 		};
 	}, [measureMode]);

@@ -20,7 +20,7 @@ import React from 'react';
 
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import { VIEWER_LEFT_PANELS, VIEWER_PANELS } from '../../constants/viewerGui';
-import { renderWhenTrue } from '../../helpers/rendering';
+import { getWindowHeight, getWindowWidth, renderWhenTrue } from '../../helpers/rendering';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { Activities } from './components/activities/';
 import { Bim } from './components/bim';
@@ -29,6 +29,8 @@ import { Compare } from './components/compare';
 import Gis from './components/gis/gis.container';
 import { Groups } from './components/groups';
 import { Issues } from './components/issues';
+import { Legend } from './components/legend';
+import { PANEL_DEFAULT_WIDTH } from './components/legend/legend.constants';
 import { Measurements } from './components/measurements';
 import { PanelButton } from './components/panelButton/panelButton.component';
 import RevisionsSwitch from './components/revisionsSwitch/revisionsSwitch.container';
@@ -38,7 +40,9 @@ import Toolbar from './components/toolbar/toolbar.container';
 import { Tree } from './components/tree';
 import { ViewerLoader } from './components/viewerLoader';
 import { Views } from './components/views';
-import { Container, GuiContainer, LeftPanels, LeftPanelsButtons, RightPanels } from './viewerGui.styles';
+import {
+	Container, DraggablePanels, GuiContainer, LeftPanels, LeftPanelsButtons, RightPanels,
+} from './viewerGui.styles';
 
 interface IProps {
 	viewer: any;
@@ -61,6 +65,7 @@ interface IProps {
 	};
 	leftPanels: string[];
 	rightPanels: string[];
+	draggablePanels: string[];
 	disabledPanelButtons: Set<string>;
 	stopListenOnSelections: () => void;
 	stopListenOnModelLoaded: () => void;
@@ -91,6 +96,12 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	private get urlParams() {
 		return this.props.match.params;
 	}
+
+	private get minPanelHeight() {
+		const height = getWindowHeight() * 0.3;
+		return height < 300 ? 300 : height;
+	}
+
 	public state = {
 		loadedModelId: null,
 		showLoader: false,
@@ -101,7 +112,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	public renderViewerLoader = renderWhenTrue(() => <ViewerLoader />);
 
 	public componentDidMount() {
-		const { queryParams: { issueId, riskId, presenter}, match: { params }, viewer, leftPanels } = this.props;
+		const { queryParams: { issueId, riskId, presenter }, match: { params }, viewer, leftPanels } = this.props;
 
 		viewer.init();
 
@@ -185,17 +196,18 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	private handleMeasureRemoved = (measurementId) => this.props.removeMeasurement(measurementId);
 
 	public render() {
-		const { leftPanels, rightPanels, isFocusMode, viewer } = this.props;
+		const { leftPanels, rightPanels, draggablePanels, isFocusMode, viewer } = this.props;
 
 		return (
 			<GuiContainer>
 				<CloseFocusModeButton isFocusMode={isFocusMode} />
-				<Container className={this.props.className} hidden={isFocusMode}>
+				<Container id="gui-container" className={this.props.className} hidden={isFocusMode}>
 					<RevisionsSwitch />
 					<Toolbar {...this.urlParams} />
 					{this.renderLeftPanelsButtons()}
 					{this.renderLeftPanels(leftPanels)}
 					{this.renderRightPanels(rightPanels)}
+					{this.renderDraggablePanels(draggablePanels)}
 					{this.renderViewerLoader(viewer.hasInstance)}
 				</Container>
 			</GuiContainer>
@@ -238,7 +250,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		<LeftPanels>
 			{panels.map((panel) => {
 				const PanelComponent = this.panelsMap[panel];
-				return PanelComponent && <PanelComponent key={panel} id={panel + '-card'}{...this.urlParams} />;
+				return PanelComponent && <PanelComponent key={panel} id={panel + '-card'} {...this.urlParams} />;
 			})}
 		</LeftPanels>
 	)
@@ -248,5 +260,17 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 			{panels.includes(VIEWER_PANELS.BIM) && <Bim {...this.urlParams} />}
 			{panels.includes(VIEWER_PANELS.ACTIVITIES) && <Activities {...this.urlParams} />}
 		</RightPanels>
+	)
+
+	private renderDraggablePanels = (panels) => (
+		<DraggablePanels>
+			{panels.includes(VIEWER_PANELS.LEGEND) && <Legend
+				defaultPosition={{
+					x: getWindowWidth() - PANEL_DEFAULT_WIDTH - 20,
+					y: getWindowHeight() - this.minPanelHeight - 170,
+				}}
+				height={this.minPanelHeight}
+			/>}
+		</DraggablePanels>
 	)
 }

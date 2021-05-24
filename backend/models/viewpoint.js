@@ -23,41 +23,8 @@ const FileRef = require("./fileRef");
 const Groups = require("./group");
 const responseCodes = require("../response_codes.js");
 const { systemLogger } = require("../logger.js");
-
-const clean = function(routePrefix, viewpointToClean, serialise = true) {
-	const viewpointFields = [
-		"group_id",
-		"guid",
-		"highlighted_group_id",
-		"hidden_group_id",
-		"override_group_ids",
-		"shown_group_id",
-		"transformation_group_ids"
-	];
-
-	if (viewpointToClean) {
-		viewpointFields.forEach((field) => {
-			if (_.get(viewpointToClean, field)) {
-				if (serialise) {
-					if (Array.isArray(_.get(viewpointToClean, field))) {
-						viewpointToClean[field] = viewpointToClean[field].map(utils.uuidToString);
-					} else {
-						viewpointToClean[field] = utils.uuidToString(viewpointToClean[field]);
-					}
-				} else {
-					viewpointToClean[field] = utils.stringToUUID(viewpointToClean[field]);
-				}
-			}
-		});
-
-		if (serialise) {
-			setViewpointScreenshotURL(routePrefix, viewpointToClean);
-			viewpointToClean.screenshot_ref = undefined;
-		}
-	}
-
-	return viewpointToClean;
-};
+const C = require("../constants");
+const FileType = require("file-type");
 
 const checkCameraValues = (output, input) => {
 	// Check vectors/points
@@ -125,7 +92,66 @@ const checkCameraValues = (output, input) => {
 
 };
 
-const createViewpoint = async (account, model, collName, routePrefix, hostId, vpData, addGUID, viewpointType, createThumbnail = false) => {
+const setViewpointScreenshotURL = function(routePrefix, viewpoint) {
+	if (!viewpoint || !viewpoint.guid || (!viewpoint.screenshot && !viewpoint.screenshot_ref)) {
+		return viewpoint;
+	}
+
+	const viewpointId = utils.uuidToString(viewpoint.guid);
+
+	viewpoint.screenshot = `${routePrefix}/viewpoints/${viewpointId}/screenshot.png`;
+
+	// ===============================
+	// DEPRECATED LEGACY SUPPORT START
+	// ===============================
+	if (!viewpoint.screenshotSmall) {
+		viewpoint.screenshotSmall = viewpoint.screenshot;
+	}
+	// =============================
+	// DEPRECATED LEGACY SUPPORT END
+	// =============================
+
+	return viewpoint;
+};
+
+const Viewpoint = {};
+
+Viewpoint.cleanViewpoint = function(routePrefix, viewpointToClean, serialise = true) {
+	const viewpointFields = [
+		"group_id",
+		"guid",
+		"highlighted_group_id",
+		"hidden_group_id",
+		"override_group_ids",
+		"shown_group_id",
+		"transformation_group_ids"
+	];
+
+	if (viewpointToClean) {
+		viewpointFields.forEach((field) => {
+			if (_.get(viewpointToClean, field)) {
+				if (serialise) {
+					if (Array.isArray(_.get(viewpointToClean, field))) {
+						viewpointToClean[field] = viewpointToClean[field].map(utils.uuidToString);
+					} else {
+						viewpointToClean[field] = utils.uuidToString(viewpointToClean[field]);
+					}
+				} else {
+					viewpointToClean[field] = utils.stringToUUID(viewpointToClean[field]);
+				}
+			}
+		});
+
+		if (serialise && routePrefix) {
+			setViewpointScreenshotURL(routePrefix, viewpointToClean);
+			delete viewpointToClean.screenshot_ref;
+		}
+	}
+
+	return viewpointToClean;
+};
+
+Viewpoint.createViewpoint = async (account, model, collName, routePrefix, hostId, vpData, addGUID, viewpointType, createThumbnail = false) => {
 	if (!vpData) {
 		return;
 	}
@@ -142,6 +168,14 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 		viewpoint.hideIfc = !!vpData.hideIfc;
 	}
 
+	const groupMapping = {
+		highlighted_group_id : "highlighted_group",
+		hidden_group_id : "hidden_group",
+		shown_group_id : "shown_group",
+		override_group_ids : "override_groups",
+		transformation_group_ids : "transformation_groups"
+	};
+
 	["highlighted_group_id",
 		"hidden_group_id",
 		"shown_group_id"
@@ -153,6 +187,9 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 			} else if(vpData[groupIDName] !== "") {
 				viewpoint[groupIDName] = vpData[groupIDName];
 			}
+
+			// If the user passes in both an id and a group entry, ignore the group entry.
+			delete vpData[groupMapping[groupIDName]];
 		}
 
 	});
@@ -167,6 +204,9 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 				systemLogger.logError("invalid type " + groupIdName);
 				throw responseCodes.INVALID_ARGUMENTS;
 			}
+
+			// If the user passes in both an id and a group entry, ignore the group entry.
+			delete vpData[groupMapping[groupIdName]];
 		}
 	});
 
@@ -181,7 +221,7 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 		if(vpData[group]) {
 			groupPromises.push(
 				Groups.create(account, model, undefined, undefined, null, undefined, {...vpData[group], [groupIdField]: utils.stringToUUID(hostId)}).then((groupResult) => {
-					viewpoint[`${group}_id`] = groupResult._id;
+					viewpoint[`${group}_id`] = utils.stringToUUID(groupResult._id);
 				})
 			);
 		}
@@ -199,7 +239,7 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 
 				groupsProms.push(
 					Groups.create(account, model, undefined, undefined, null, undefined, {...group, [groupIdField]: utils.stringToUUID(hostId)}).then((groupResult) => {
-						return groupResult._id;
+						return utils.stringToUUID(groupResult._id);
 					})
 				);
 			});
@@ -223,6 +263,7 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 	});
 
 	await Promise.all(groupPromises);
+
 	if (vpData.screenshot && vpData.screenshot !== "") {
 		if (!utils.isString(vpData.screenshot)) {
 			throw responseCodes.INVALID_ARGUMENTS;
@@ -232,6 +273,16 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 			"base64"
 		);
 
+		try {
+			const type = await FileType.fromBuffer(imageBuffer);
+
+			if (!C.ACCEPTED_IMAGE_FORMATS.includes(type.ext)) {
+				throw responseCodes.FILE_FORMAT_NOT_SUPPORTED;
+			}
+		} catch(e) {
+			throw responseCodes.FILE_FORMAT_NOT_SUPPORTED;
+		}
+
 		viewpoint.screenshot = imageBuffer;
 
 		if (createThumbnail) {
@@ -239,20 +290,22 @@ const createViewpoint = async (account, model, collName, routePrefix, hostId, vp
 				systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
 					account,
 					model,
-					type: this.collName,
+					type: collName,
 					id: hostId,
 					err
 				});
 			});
 		}
 
-		await setExternalScreenshotRef(viewpoint, account, model, collName);
+		if (collName) {
+			await Viewpoint.setExternalScreenshotRef(viewpoint, account, model, collName);
+		}
 	}
 
-	return clean(routePrefix, viewpoint, false);
+	return Viewpoint.cleanViewpoint(routePrefix, viewpoint, false);
 };
 
-const setExternalScreenshotRef = async function(viewpoint, account, model, collName) {
+Viewpoint.setExternalScreenshotRef = async function(viewpoint, account, model, collName) {
 	const screenshot = viewpoint.screenshot;
 	const ref = await FileRef.storeFile(account, model + "." + collName + ".ref", null, null, screenshot);
 	delete viewpoint.screenshot;
@@ -260,30 +313,4 @@ const setExternalScreenshotRef = async function(viewpoint, account, model, collN
 	return viewpoint;
 };
 
-const setViewpointScreenshotURL = function(routePrefix, viewpoint) {
-	if (!viewpoint || !viewpoint.guid || (!viewpoint.screenshot && !viewpoint.screenshot_ref)) {
-		return viewpoint;
-	}
-
-	const viewpointId = utils.uuidToString(viewpoint.guid);
-
-	viewpoint.screenshot = `${routePrefix}/viewpoints/${viewpointId}/screenshot.png`;
-
-	// ===============================
-	// DEPRECATED LEGACY SUPPORT START
-	// ===============================
-	if (!viewpoint.screenshotSmall) {
-		viewpoint.screenshotSmall = viewpoint.screenshot;
-	}
-	// =============================
-	// DEPRECATED LEGACY SUPPORT END
-	// =============================
-
-	return viewpoint;
-};
-
-module.exports = {
-	clean,
-	createViewpoint,
-	setExternalScreenshotRef
-};
+module.exports = Viewpoint;

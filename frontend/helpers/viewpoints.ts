@@ -21,6 +21,7 @@
 const groupPropNameMap = {
 	highlighted_group_id : 'highlighted_group',
 	hidden_group_id : 'hidden_group',
+	shown_group_id : 'shown_group',
 	override_group_ids : 'override_groups',
 	transformation_group_ids: 'transformation_groups'
 };
@@ -93,4 +94,38 @@ export const createGroupsFromViewpoint = (viewpoint, groupsData) => {
 	});
 
 	return groups;
+};
+
+export const groupsOfViewpoint = function*(viewpoint) {
+	const groupsProperties = ['override_group_ids', 'transformation_group_ids',
+	'highlighted_group_id', 'hidden_group_id', 'shown_group_id'];
+
+	// This part discriminates which groups hasnt been loaded yet and add their ids to
+	// the groupsToFetch array
+	for (let i = 0; i < groupsProperties.length ; i++) {
+		const prop = groupsProperties[i];
+		if (viewpoint[prop]) {
+			if (Array.isArray(viewpoint[prop])) { // if the property is an array of groupId
+				const groupsIds: string[] = viewpoint[prop];
+				for (let j = 0; j < groupsIds.length; j++ ) {
+					yield groupsIds[i];
+				}
+			} else {// if the property is just a groupId
+				yield viewpoint[prop];
+			}
+		}
+	}
+};
+
+export const isViewpointLoaded = (viewpoint, groups) => {
+	let areGroupsLoaded = true;
+
+	for (const id of groupsOfViewpoint(viewpoint)) {
+		if (!groups[id]) {
+			areGroupsLoaded = false;
+			break;
+		}
+	}
+
+	return areGroupsLoaded;
 };

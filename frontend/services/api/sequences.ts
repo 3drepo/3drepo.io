@@ -18,25 +18,48 @@
 import api from './';
 const HEAD = 'master/head';
 
+export const getSequence = (teamspace, modelId, sequenceId): Promise<any> => {
+	return api.get(`${teamspace}/${modelId}/sequences/${sequenceId}`);
+};
+
 /**
  * Get sequences list
  *
  * @param teamspace
  * @returns {*|promise}
  */
-export const getSequences = (teamspace, modelId, revision): Promise<any> => {
-	return api.get(`${teamspace}/${modelId}/revision/${revision || HEAD}/sequences`);
+export const getSequenceList = (teamspace, modelId, revision?): Promise<any> => {
+	if (revision) {
+		return api.get(`${teamspace}/${modelId}/sequences/?rev_id=${revision}`);
+	}
+	return api.get(`${teamspace}/${modelId}/sequences`);
 };
 
-export const getSequenceState = (teamspace, modelId, revision, sequenceId, stateId): Promise<any> => {
-	return api.get(`${teamspace}/${modelId}/revision/${revision || HEAD}/sequences/${sequenceId}/state/${stateId}`);
+export const patchSequence = (teamspace, modelId, sequenceId, newName): Promise<any> => {
+	return api.patch(`${teamspace}/${modelId}/sequences/${sequenceId}`, { name: newName });
 };
 
-export const getSequenceActivityDetail = (teamspace, modelId, revision, sequenceId, activityId): Promise<any> => {
+export const getSequenceState = (teamspace, modelId, sequenceId, stateId): Promise<any> => {
+	return api.get(`${teamspace}/${modelId}/sequences/${sequenceId}/state/${stateId}`);
+};
+
+export const getSequenceActivityDetail = (teamspace, modelId, sequenceId, activityId): Promise<any> => {
 	// tslint:disable-next-line:max-line-length
-	return api.get(`${teamspace}/${modelId}/revision/${revision || HEAD}/sequences/${sequenceId}/activities/${activityId}`);
+	return api.get(`${teamspace}/${modelId}/sequences/${sequenceId}/activities/${activityId}`);
 };
 
-export const getSequenceActivities = (teamspace, modelId, revision, sequenceId): Promise<any> => {
-	return api.get(`${teamspace}/${modelId}/revision/${revision || HEAD}/sequences/${sequenceId}/activities`);
+export const getSequenceActivities = (teamspace, modelId, sequenceId): Promise<any> => {
+	return api.get(`${teamspace}/${modelId}/sequences/${sequenceId}/activities`);
+};
+
+export const getSequenceLegend = (teamspace, modelId, sequenceId): Promise<any> => {
+	return api.get(`${teamspace}/${modelId}/sequences/${sequenceId}/legend`);
+};
+
+export const putSequenceLegend = (teamspace, modelId, sequenceId, legendItems): Promise<any> => {
+	return api.put(`${teamspace}/${modelId}/sequences/${sequenceId}/legend`, legendItems);
+};
+
+export const deleteSequenceLegend = (teamspace, modelId, sequenceId): Promise<any> => {
+	return api.delete(`${teamspace}/${modelId}/sequences/${sequenceId}/legend`);
 };

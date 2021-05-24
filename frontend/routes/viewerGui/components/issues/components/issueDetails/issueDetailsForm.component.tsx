@@ -17,12 +17,10 @@
 
 import React from 'react';
 
-import DayJsUtils from '@date-io/dayjs';
 import Tabs from '@material-ui/core/Tabs';
 import Tooltip from '@material-ui/core/Tooltip';
 import { withFormik, Form } from 'formik';
 import { debounce, get, isEmpty, isEqual } from 'lodash';
-import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 import * as Yup from 'yup';
 
 import {
@@ -31,8 +29,8 @@ import {
 	ISSUE_SEQUENCING_TAB,
 	ISSUE_TABS,
 } from '../../../../../../constants/issues';
-import { VIEWER_PANELS_TITLES } from '../../../../../../constants/viewerGui';
-import { canChangeAssigned, canChangeBasicProperty } from '../../../../../../helpers/issues';
+import { LONG_TEXT_CHAR_LIM, VIEWER_PANELS_TITLES } from '../../../../../../constants/viewerGui';
+import { canChangeAssigned, canChangeBasicProperty, canComment } from '../../../../../../helpers/issues';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { AttachmentsFormTab } from '../../../risks/components/attachmentsFormTab/attachmentsFormTab.component';
 import { SequencingFormTab } from '../../../risks/components/sequencingFormTab/sequencingFormTab.component';
@@ -72,7 +70,8 @@ interface IProps {
 	showSequenceDate: (date) => void;
 	minSequenceDate: number;
 	maxSequenceDate: number;
-
+	selectedDate: Date;
+	sequences: any[];
 }
 
 interface IState {
@@ -81,7 +80,7 @@ interface IState {
 }
 
 export const IssueSchema = Yup.object().shape({
-	description: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
+	desc: Yup.string().max(LONG_TEXT_CHAR_LIM, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
 });
 
 class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
@@ -92,6 +91,11 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	get canEditBasicProperty() {
 		const { issue, myJob, permissions, currentUser } = this.props;
 		return this.isNewIssue || canChangeBasicProperty(issue, myJob, permissions, currentUser);
+	}
+
+	get canEditViewpoint() {
+		const { issue, myJob, permissions, currentUser } = this.props;
+		return this.isNewIssue || canComment(issue, myJob, permissions, currentUser);
 	}
 
 	get canChangeAssigned() {
@@ -145,6 +149,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 			active={active}
 			isNew={this.isNewIssue}
 			canEditBasicProperty={this.canEditBasicProperty}
+			canEditViewpoint={this.canEditViewpoint}
 			canChangeAssigned={this.canChangeAssigned}
 			{...this.props}
 		/>
@@ -158,6 +163,9 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 			showSequenceDate={this.props.showSequenceDate}
 			min={this.props.minSequenceDate}
 			max={this.props.maxSequenceDate}
+			startTimeValue={this.props.values.sequence_start}
+			endTimeValue={this.props.values.sequence_end}
+			sequences={this.props.sequences}
 		/>
 	)
 
@@ -186,25 +194,23 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		const { activeTab } = this.state;
 
 		return (
-			<MuiPickersUtilsProvider utils={DayJsUtils}>
-				<Form>
-					<Tabs
-						value={activeTab}
-						indicatorColor="secondary"
-						textColor="primary"
-						onChange={this.handleChange}
-					>
-						<StyledTab label={ISSUE_TABS.ISSUE} value={ISSUE_PROPERTIES_TAB} />
-						<StyledTab label={ISSUE_TABS.SEQUENCING} value={ISSUE_SEQUENCING_TAB} />
-						<StyledTab {...this.attachmentsProps} value={ATTACHMENTS_ISSUE_TAB} />
-					</Tabs>
-					<TabContent>
-						{this.showIssueContent(activeTab === ISSUE_PROPERTIES_TAB)}
-						{this.showSequencingContent(activeTab === ISSUE_SEQUENCING_TAB)}
-						{this.showAttachmentsContent(activeTab === ATTACHMENTS_ISSUE_TAB)}
-					</TabContent>
-				</Form>
-			</MuiPickersUtilsProvider>
+			<Form>
+				<Tabs
+					value={activeTab}
+					indicatorColor="secondary"
+					textColor="primary"
+					onChange={this.handleChange}
+				>
+					<StyledTab label={ISSUE_TABS.ISSUE} value={ISSUE_PROPERTIES_TAB} />
+					<StyledTab label={ISSUE_TABS.SEQUENCING} value={ISSUE_SEQUENCING_TAB} />
+					<StyledTab {...this.attachmentsProps} value={ATTACHMENTS_ISSUE_TAB} />
+				</Tabs>
+				<TabContent>
+					{this.showIssueContent(activeTab === ISSUE_PROPERTIES_TAB)}
+					{this.showSequencingContent(activeTab === ISSUE_SEQUENCING_TAB)}
+					{this.showAttachmentsContent(activeTab === ATTACHMENTS_ISSUE_TAB)}
+				</TabContent>
+			</Form>
 		);
 	}
 }

@@ -21,13 +21,17 @@ import { StandardTextFieldProps } from '@material-ui/core/TextField';
 import CancelIcon from '@material-ui/icons/Cancel';
 import EditIcon from '@material-ui/icons/Edit';
 import SaveIcon from '@material-ui/icons/Save';
+import copy from 'copy-to-clipboard';
 import { Field, Formik } from 'formik';
 
+import CopyIcon from '@material-ui/icons/FileCopy';
+import { ENTER_KEY } from '../../../constants/keys';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { ExpandAction } from '../../viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import {
 	ActionsLine,
 	Container,
+	CopyButton,
 	FieldLabel,
 	FieldWrapper,
 	MutableActionsLine,
@@ -46,6 +50,11 @@ interface IProps extends StandardTextFieldProps {
 	expandable?: boolean;
 	disableShowDefaultUnderline?: boolean;
 	enableMarkdown?: boolean;
+	forceEdit?: boolean;
+	withCopyButton?: boolean;
+	onCancel?: () => void;
+	showSnackbar?: (text: string) => void;
+	value?: string;
 }
 
 interface IState {
@@ -54,6 +63,7 @@ interface IState {
 	edit: boolean;
 	isExpanded: boolean;
 	isLongContent: boolean;
+	hasError: boolean;
 }
 
 const SmallButton = ({ onClick, children}) => (
@@ -67,6 +77,7 @@ export class TextField extends React.PureComponent<IProps, IState> {
 		edit: false,
 		isExpanded: false,
 		isLongContent: false,
+		hasError: false,
 	};
 
 	private inputLocalRef = React.createRef();
@@ -124,9 +135,13 @@ export class TextField extends React.PureComponent<IProps, IState> {
 	));
 
 	public componentDidMount() {
-		const { value, requiredConfirm } = this.props;
+		const { value, requiredConfirm, forceEdit } = this.props;
 		if (requiredConfirm && value) {
 			this.setState({ initialValue: value, currentValue: value } as IState);
+		}
+
+		if (forceEdit) {
+			this.setEditable();
 		}
 	}
 
@@ -162,8 +177,18 @@ export class TextField extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	public handleEnterPress = (event) => {
+		if (event.key === ENTER_KEY) {
+			this.saveChange();
+		}
+	}
+
 	public saveChange = () => {
-		if (this.props.onChange && this.hasValueChanged) {
+		if (this.state.hasError) {
+			return;
+		}
+
+		if ((this.props.onChange && this.hasValueChanged) || this.props.forceEdit) {
 			this.props.onChange({ target: this.inputElement } as any);
 		} else {
 			this.declineChange();
@@ -176,6 +201,9 @@ export class TextField extends React.PureComponent<IProps, IState> {
 
 	public declineChange = () => {
 		this.setState((prevState) => ({ currentValue: prevState.initialValue, edit: false }));
+		if (this.props.onCancel) {
+			this.props.onCancel();
+		}
 	}
 
 	public renderActionsLine = () => (
@@ -197,14 +225,62 @@ export class TextField extends React.PureComponent<IProps, IState> {
 		</MutableActionsLine>
 	)
 
+	private handleCopyButtonClick = () => {
+		copy(this.fieldValue);
+		this.props.showSnackbar('Value copied to the clipboard');
+	}
+
+	public renderCopyButton = () => (
+		<CopyButton icon={CopyIcon} onClick={this.handleCopyButtonClick}>
+			Copy
+		</CopyButton>
+	)
+
+	private renderTextField = ({ field, form }) => {
+		const {
+			onBeforeConfirmChange,
+			requiredConfirm,
+			value,
+			onChange,
+			validationSchema,
+			name,
+			className,
+			mutable,
+			disableShowDefaultUnderline,
+			enableMarkdown,
+			forceEdit,
+			...props
+		} = this.props;
+
+		this.setState({
+			hasError: Boolean(form.errors[name])
+		});
+
+		return (
+			<StyledTextField
+				{...props}
+				{...field}
+				value={this.fieldValue}
+				inputRef={this.textFieldRef}
+				fullWidth
+				onChange={this.onChange(field)}
+				onKeyPress={this.handleEnterPress}
+				error={Boolean(form.errors[name] || props.error)}
+				helperText={form.errors[name] || props.helperText}
+			/>
+		);
+	}
+
 	public onBlur = (e) => {
 		const currentTarget = e.currentTarget;
 
-		setTimeout(() => {
-			if (!currentTarget.contains(document.activeElement)) {
-				this.declineChange();
-			}
-		}, 0);
+		if (!this.props.forceEdit) {
+			setTimeout(() => {
+				if (!currentTarget.contains(document.activeElement)) {
+					this.declineChange();
+				}
+			}, 0);
+		}
 	}
 
 	private additionalProps = () => {
@@ -227,68 +303,50 @@ export class TextField extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const {
-			onBeforeConfirmChange,
-			requiredConfirm,
-			value,
-			onChange,
 			validationSchema,
 			name,
 			className,
 			mutable,
 			disableShowDefaultUnderline,
 			enableMarkdown,
-			...props
 		} = this.props;
 		const { initialValue } = this.state;
 		const shouldRenderActions = mutable && this.isEditMode;
 		const shouldRenderMutable = !this.isEditMode && !this.props.disabled;
+		const shouldRenderCopyButton = this.props.withCopyButton && !mutable;
 
 		return (
-				<>
-					<Formik
-						enableReinitialize
-						initialValues={{ [name]: initialValue }}
-						validationSchema={validationSchema}
-						onSubmit={this.saveChange}
-					>
-						<Container onBlur={this.onBlur} className={className}>
-							{this.isEditMode &&
-							<Field name={name} render={({ field, form }) =>
-								(
-									<StyledTextField
-										{...props}
-										{...field}
-										value={this.fieldValue}
-										inputRef={this.textFieldRef}
-										fullWidth
-										onChange={this.onChange(field)}
-										error={Boolean(form.errors[name] || props.error)}
-										helperText={form.errors[name] || props.helperText}
-									/>
-								)}
-							/>
+			<>
+				<Formik
+					enableReinitialize
+					initialValues={{ [name]: initialValue }}
+					validationSchema={validationSchema}
+					onSubmit={this.saveChange}
+				>
+					<Container onBlur={this.onBlur} className={className} editMode={this.isEditMode}>
+						{this.isEditMode && <Field name={name} render={this.renderTextField} />}
+						{!this.isEditMode &&
+						<FieldWrapper line={Number(!disableShowDefaultUnderline)} onClick={this.handlePlaceholderClick}>
+							<FieldLabel shrink>{this.props.label}</FieldLabel>
+							{enableMarkdown &&
+							<StyledMarkdownField ref={this.markdownFieldRef} {...this.additionalProps()}>
+								{this.fieldValue}
+							</StyledMarkdownField>
 							}
-							{!this.isEditMode &&
-							<FieldWrapper line={Number(!disableShowDefaultUnderline)} onClick={this.handlePlaceholderClick}>
-								<FieldLabel shrink>{this.props.label}</FieldLabel>
-								{enableMarkdown &&
-								<StyledMarkdownField ref={this.markdownFieldRef} {...this.additionalProps()}>
-									{this.fieldValue}
-								</StyledMarkdownField>
-								}
-								{!enableMarkdown &&
-								<StyledLinkableField ref={this.markdownFieldRef}>
-									{this.fieldValue}
-								</StyledLinkableField>
-								}
-							</FieldWrapper>
+							{!enableMarkdown &&
+							<StyledLinkableField ref={this.markdownFieldRef}>
+								{this.fieldValue}
+							</StyledLinkableField>
 							}
-							{shouldRenderActions && this.renderActionsLine()}
-							{shouldRenderMutable && this.renderMutableButton()}
-						</Container>
-					</Formik>
-					{this.renderExpandableText(this.isExpandable)}
-				</>
+						</FieldWrapper>
+						}
+						{shouldRenderActions && this.renderActionsLine()}
+						{shouldRenderMutable && this.renderMutableButton()}
+						{shouldRenderCopyButton && this.renderCopyButton()}
+					</Container>
+				</Formik>
+				{this.renderExpandableText(this.isExpandable)}
+			</>
 		);
 	}
 }

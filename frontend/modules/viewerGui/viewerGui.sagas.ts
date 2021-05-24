@@ -52,17 +52,28 @@ import {
 
 function* fetchData({ teamspace, model }) {
 	try {
+		yield put(ModelActions.setPendingState(true));
+		const { data: settings } = yield API.getModelSettings(teamspace, model);
+
+		yield put(ModelActions.fetchSettingsSuccess(settings));
+		yield put(ModelActions.setPendingState(false));
+	} catch (error) {
+		yield put(DialogActions.showRedirectToTeamspaceDialog(error));
+		return;
+	}
+
+	try {
 		const { username } = yield select(selectCurrentUser);
+
 		yield all([
+			put(ModelActions.fetchRevisions(teamspace, model, false)),
 			put(CurrentUserActions.fetchUser(username)),
 			put(JobsActions.fetchJobs(teamspace)),
 			put(JobsActions.getMyJob(teamspace)),
 			put(TreeActions.startListenOnSelections()),
 			put(ViewerGuiActions.startListenOnClickPin()),
 			put(ViewerGuiActions.startListenOnModelLoaded()),
-			put(ModelActions.fetchSettings(teamspace, model)),
 			put(ModelActions.fetchMetaKeys(teamspace, model)),
-			put(ModelActions.waitForSettingsAndFetchRevisions(teamspace, model)),
 			put(TreeActions.setIsTreeProcessed(false)),
 			put(ViewpointsActions.fetchViewpoints(teamspace, model)),
 			put(CommentsActions.fetchUsers(teamspace))
@@ -71,7 +82,6 @@ function* fetchData({ teamspace, model }) {
 		yield all([
 			take(ModelTypes.FETCH_REVISIONS_SUCCESS),
 			take(ViewpointsTypes.FETCH_VIEWPOINTS_SUCCESS),
-			take(ModelTypes.FETCH_SETTINGS_SUCCESS)
 		]);
 
 		const revision = yield select(selectCurrentRevisionId);
@@ -83,7 +93,7 @@ function* fetchData({ teamspace, model }) {
 			put(RisksActions.fetchRisks(teamspace, model, revision)),
 			put(GroupsActions.fetchGroups(teamspace, model, revision)),
 			put(ViewerGuiActions.getHelicopterSpeed(teamspace, model)),
-			put(SequencesActions.fetchSequences()),
+			put(SequencesActions.fetchSequenceList()),
 			put(StarredActions.fetchStarredMeta())
 		]);
 	} catch (error) {

@@ -27,12 +27,18 @@ function Utils() {
 
 	const self = this;
 
+	this.notEmpty = (obj) => Object.keys(obj).length > 0;
+
 	this.isDate = (value) => {
 		return "[object Date]" === Object.prototype.toString.call(value);
 	};
 
 	this.isString = (value) => {
 		return "[object String]" === Object.prototype.toString.call(value);
+	};
+
+	this.isHexColor = (value) => {
+		return this.isString(value) && value.match(/^#(?:(?:[\da-f]{3}){1,2}|(?:[\da-f]{4}){1,2})$/i);
 	};
 
 	this.isNumber = (value) => {

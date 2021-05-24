@@ -50,6 +50,23 @@ export const RightPanels = styled.div`
 	right: 20px;
 `;
 
+export const DraggablePanels = styled.div`
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 2;
+	height: 100%;
+	width: 100%;
+
+	.panelTitle {
+		cursor: pointer;
+	}
+
+	& > * {
+		pointer-events: all;
+	}
+`;
+
 export const LeftPanelsButtons = styled.div`
 	pointer-events: all;
 	display: flex;

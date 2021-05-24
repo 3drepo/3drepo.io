@@ -46,6 +46,7 @@ import { selectSelectedStartingDate, SequencesActions } from '../sequences';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { selectTopicTypes } from '../teamspace';
+import { TreeActions } from '../tree';
 import { ViewpointsActions } from '../viewpoints';
 import { generateViewpoint } from '../viewpoints/viewpoints.sagas';
 import { IssuesActions, IssuesTypes } from './issues.redux';
@@ -134,6 +135,7 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 		} else {
 			yield put(DialogActions.hideDialog());
 		}
+
 		yield put(IssuesActions.saveIssueSuccess(preparedIssue));
 		yield put(SnackbarActions.show('Issue created'));
 	} catch (error) {
@@ -278,19 +280,23 @@ function* setActiveIssue({ issue, revision, ignoreViewer = false }) {
 		const issuesMap = yield select(selectIssuesMap);
 
 		if (issuesMap[activeIssueId]) {
-			const {account , model } = issuesMap[activeIssueId];
+			const { account , model } = issuesMap[activeIssueId];
 			yield put(IssuesActions.unsubscribeOnIssueCommentsChanges(account, model, activeIssueId));
 		}
 
 		if (issue) {
-			const {account , model, _id} = issue;
+			const { account, model, _id } = issue;
 			yield put(IssuesActions.subscribeOnIssueCommentsChanges(account, model, _id));
+
+			yield all([
+				!ignoreViewer ? put(ViewpointsActions.showViewpoint(issue?.account, issue?.model, issue)) : null,
+				put(IssuesActions.setComponentState({ activeIssue: issue._id, expandDetails: true }))
+			]);
+		} else {
+			yield put(IssuesActions.setComponentState({ activeIssue: null }));
+			yield put(TreeActions.clearCurrentlySelected());
 		}
 
-		yield all([
-			!ignoreViewer ? put(ViewpointsActions.showViewpoint(issue?.account, issue?.model, issue)) : null,
-			put(IssuesActions.setComponentState({ activeIssue: issue._id, expandDetails: true }))
-		]);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'issue as active', error));
 	}
@@ -353,19 +359,19 @@ const onUpdateEvent = (updatedIssue) => {
 	if (ISSUE_DEFAULT_HIDDEN_STATUSES.includes(updatedIssue.status)) {
 		dispatch(IssuesActions.showCloseInfo(updatedIssue._id));
 		setTimeout(() => {
-			dispatch(IssuesActions.saveIssueSuccess(prepareIssue(updatedIssue, jobs)));
+			dispatch(IssuesActions.saveIssueSuccess(prepareIssue(updatedIssue, jobs), false));
 		}, 5000);
 		setTimeout(() => {
 			dispatch(IssuesActions.hideCloseInfo(updatedIssue._id));
 		}, 6000);
 	} else {
-		dispatch(IssuesActions.saveIssueSuccess(prepareIssue(updatedIssue, jobs)));
+		dispatch(IssuesActions.saveIssueSuccess(prepareIssue(updatedIssue, jobs), false));
 	}
 };
 
 const onCreateEvent = (createdIssue) => {
 	const jobs = selectJobsList(getState());
-	dispatch(IssuesActions.saveIssueSuccess(prepareIssue(createdIssue[0], jobs)));
+	dispatch(IssuesActions.saveIssueSuccess(prepareIssue(createdIssue[0], jobs), false));
 };
 
 const onResourcesCreated = (resources) => {

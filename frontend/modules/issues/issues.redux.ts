@@ -31,7 +31,7 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	cloneIssue: ['dialogId'],
 	postComment: ['teamspace', 'modelId', 'issueData', 'ignoreViewer', 'finishSubmitting'],
 	removeComment: ['teamspace', 'modelId', 'issueData'],
-	saveIssueSuccess: ['issue'],
+	saveIssueSuccess: ['issue', 'resetComponentState'],
 	setNewIssue: [],
 	printIssues: ['teamspace', 'modelId'],
 	downloadIssues: ['teamspace', 'modelId'],
@@ -138,7 +138,7 @@ export const fetchIssueFailure = (state = INITIAL_STATE) => {
 	return { ...state, componentState: { ...state.componentState, failedToLoad: true } };
 };
 
-export const saveIssueSuccess = (state = INITIAL_STATE, { issue }) => {
+export const saveIssueSuccess = (state = INITIAL_STATE, { issue, resetComponentState = true }) => {
 	const issuesMap = updateIssueProps(state.issuesMap, issue._id, issue);
 	const oldPosition = state.issuesMap[state.componentState.activeIssue]?.position;
 	const newPosition = issuesMap[state.componentState.activeIssue]?.position;
@@ -147,10 +147,16 @@ export const saveIssueSuccess = (state = INITIAL_STATE, { issue }) => {
 		issuesMap[state.componentState.activeIssue].position = oldPosition;
 	}
 
+	const newComponentState = { ...state.componentState };
+
+	if (resetComponentState) {
+		newComponentState.newIssue = {};
+	}
+
 	return {
 		...state,
 		issuesMap,
-		componentState: { ...state.componentState, newIssue: {} }
+		componentState: newComponentState
 	};
 };
 

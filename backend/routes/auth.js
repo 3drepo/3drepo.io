@@ -30,6 +30,7 @@ const Mailer = require("../mailer/mailer");
 const httpsPost = require("../libs/httpsReq").post;
 
 const chatEvent = require("../models/chatEvent");
+const FileType = require("file-type");
 
 const multer = require("multer");
 
@@ -689,7 +690,6 @@ function signUp(req, res, next) {
 
 				}, config.tokenExpiry.emailVerify);
 			} else {
-				// console.log(resBody);
 				return Promise.reject({ resCode: responseCodes.INVALID_CAPTCHA_RES});
 			}
 
@@ -782,18 +782,14 @@ function getAvatar(req, res, next) {
 
 function uploadAvatar(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
-
 	// check space and format
 	function fileFilter(fileReq, file, cb) {
-
-		const acceptedFormat = ["png", "jpg", "gif"];
-
 		let format = file.originalname.split(".");
 		format = format.length <= 1 ? "" : format.splice(-1)[0];
 
 		const size = parseInt(fileReq.headers["content-length"]);
 
-		if(acceptedFormat.indexOf(format.toLowerCase()) === -1) {
+		if(!C.ACCEPTED_IMAGE_FORMATS.includes(format.toLowerCase())) {
 			return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
 		}
 
@@ -813,8 +809,14 @@ function uploadAvatar(req, res, next) {
 		if (err) {
 			return responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err , err.resCode ?  err.resCode : err);
 		} else {
-			User.updateAvatar(req.params[C.REPO_REST_API_ACCOUNT], req.file.buffer).then(() => {
-				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "success" });
+			FileType.fromBuffer(req.file.buffer).then(type => {
+				if (!C.ACCEPTED_IMAGE_FORMATS.includes(type.ext)) {
+					throw(responseCodes.FILE_FORMAT_NOT_SUPPORTED);
+				}
+			}).then(() => {
+				return User.updateAvatar(req.params[C.REPO_REST_API_ACCOUNT], req.file.buffer).then(() => {
+					responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "success" });
+				});
 			}).catch(error => {
 				responseCodes.respond(responsePlace, req, res, next, error.resCode ? error.resCode : error, error.resCode ? error.resCode : error);
 			});

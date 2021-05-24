@@ -17,6 +17,8 @@
 
 import React from 'react';
 
+import { debounce } from 'lodash';
+
 import IconButton from '@material-ui/core/IconButton';
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import ActivitiesIcon from '@material-ui/icons/Movie';
@@ -55,14 +57,6 @@ export class Activities extends React.PureComponent<IProps, IState> {
 	public state = {
 		listCollapsed: true,
 	};
-
-	public componentDidMount() {
-		const { activities, fetchActivities } = this.props;
-
-		if (!activities || !activities.length) {
-			fetchActivities();
-		}
-	}
 
 	public componentDidUpdate(prevProps, prevState) {
 		const { activities, searchQuery } = this.props;
@@ -123,9 +117,13 @@ export class Activities extends React.PureComponent<IProps, IState> {
 		/>
 	));
 
+	private debounceSearchQueryChange = debounce((searchQuery) => {
+		this.props.setComponentState({ searchQuery });
+	}, 200);
+
 	public handleSearchQueryChange = ({ currentTarget }: React.ChangeEvent<HTMLInputElement>) => {
 		const searchQuery = currentTarget.value.toLowerCase();
-		this.props.setComponentState({ searchQuery });
+		this.debounceSearchQueryChange(searchQuery);
 	}
 
 	public renderSearch = renderWhenTrue(() => (

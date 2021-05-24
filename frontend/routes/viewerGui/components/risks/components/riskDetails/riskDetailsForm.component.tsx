@@ -25,9 +25,9 @@ import * as Yup from 'yup';
 import {
 	ATTACHMENTS_RISK_TYPE, MAIN_RISK_TYPE, RISK_TABS, SEQUENCING_RISK_TYPE, TREATMENT_RISK_TYPE,
 } from '../../../../../../constants/risks';
-import { VIEWER_PANELS_TITLES } from '../../../../../../constants/viewerGui';
+import { LONG_TEXT_CHAR_LIM, VIEWER_PANELS_TITLES } from '../../../../../../constants/viewerGui';
 import { calculateLevelOfRisk } from '../../../../../../helpers/risks';
-import { canChangeBasicProperty } from '../../../../../../helpers/risks';
+import { canChangeBasicProperty, canComment } from '../../../../../../helpers/risks';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { AttachmentsFormTab } from '../attachmentsFormTab/attachmentsFormTab.component';
 import { MainRiskFormTab } from '../mainRiskFormTab/mainRiskFormTab.component';
@@ -70,6 +70,8 @@ interface IProps {
 	showSequenceDate: (date) => void;
 	minSequenceDate: number;
 	maxSequenceDate: number;
+	selectedDate: Date;
+	sequences: any[];
 }
 
 interface IState {
@@ -78,9 +80,10 @@ interface IState {
 }
 
 export const RiskSchema = Yup.object().shape({
-	description: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
-	mitigation_desc: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
-	residual_risk: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
+	desc: Yup.string().max(LONG_TEXT_CHAR_LIM, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
+	mitigation_desc: Yup.string().max(LONG_TEXT_CHAR_LIM, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
+	mitigation_detail: Yup.string().max(LONG_TEXT_CHAR_LIM, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
+	residual_risk: Yup.string().max(LONG_TEXT_CHAR_LIM, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
 });
 
 class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
@@ -91,6 +94,11 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	get canEditBasicProperty() {
 		const { risk, myJob, permissions, currentUser } = this.props;
 		return this.isNewRisk || canChangeBasicProperty(risk, myJob, permissions, currentUser);
+	}
+
+	get canEditViewpoint() {
+		const { risk, myJob, permissions, currentUser } = this.props;
+		return this.isNewRisk || canComment(risk, myJob, permissions, currentUser);
 	}
 
 	public state = {
@@ -169,6 +177,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 			active={active}
 			isNewRisk={this.isNewRisk}
 			canEditBasicProperty={this.canEditBasicProperty}
+			canEditViewpoint={this.canEditViewpoint}
 			{...this.props}
 		/>
 	)
@@ -189,6 +198,9 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 			showSequenceDate={this.props.showSequenceDate}
 			min={this.props.minSequenceDate}
 			max={this.props.maxSequenceDate}
+			startTimeValue={this.props.values.sequence_start}
+			endTimeValue={this.props.values.sequence_end}
+			sequences={this.props.sequences}
 		/>
 	)
 

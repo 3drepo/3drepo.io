@@ -20,16 +20,16 @@ import ExpandedIcon from '@material-ui/icons/ExpandMore';
 import React from 'react';
 import { SubTasksItemContainer, Task, TaskButton, TaskItemLabel, TaskSmallDot } from '../../sequences.styles';
 
-export interface ITask {
+export interface IActivity {
 	id: string;
 	name: string;
-	subTasks?: ITask[];
+	subActivities?: IActivity[];
 	startDate: Date;
 	endDate: Date;
 }
 
 interface IProps {
-	task: ITask;
+	task: IActivity;
 	nested?: boolean;
 	defaultCollapsed?: boolean;
 	onItemClick?: (value?: any) => void;
@@ -70,8 +70,8 @@ export class TaskItem extends React.PureComponent<IProps, IState> {
 	public render = () => {
 		const { task: task, nested, defaultCollapsed, onItemClick } = this.props;
 		const { collapsed } = this.state;
-		const subtasks = task.subTasks || [];
-		const hasSubtasks = subtasks.length > 0;
+		const subActivities = task.subActivities || [];
+		const hasSubtasks = subActivities.length > 0;
 
 		return (
 			<>
@@ -83,7 +83,7 @@ export class TaskItem extends React.PureComponent<IProps, IState> {
 					</TaskItemLabel>
 				</Task>
 				<SubTasksItemContainer>
-					{!collapsed && subtasks.map((t) => (
+					{!collapsed && subActivities.map((t) => (
 						<TaskItem key={t.id} task={t} defaultCollapsed={defaultCollapsed} onItemClick={onItemClick} />
 					))}
 				</SubTasksItemContainer>

@@ -21,30 +21,33 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { ActivitiesActions } from '../../../../modules/activities';
-import { IssuesActions } from '../../../../modules/issues';
-import { RisksActions } from '../../../../modules/risks';
-import { selectCurrentActivities, selectIsLoadingFrame, selectMaxDate, selectMinDate,
-	selectSelectedEndingDate, selectSelectedFrameColors,
-	selectSelectedSequence, selectSelectedStartingDate, selectSequences, selectStepInterval,
-	selectStepScale,
-	SequencesActions} from '../../../../modules/sequences';
-import { selectRightPanels, ViewerGuiActions } from '../../../../modules/viewerGui';
-import { ViewpointsActions } from '../../../../modules/viewpoints';
+import { LegendActions } from '../../../../modules/legend';
+import {
+	selectActivitiesPending, selectCurrentActivities, selectEndDate, selectFrames, selectIsLoadingFrameState,
+	selectSelectedEndingDate, selectSelectedFrameColors, selectSelectedSequence, selectSelectedStartingDate,
+	selectSequences, selectStartDate, selectStepInterval, selectStepScale, SequencesActions,
+} from '../../../../modules/sequences';
+import { selectDraggablePanels, selectRightPanels, ViewerGuiActions } from '../../../../modules/viewerGui';
+import { selectIsLoadingSequenceViewpoint, ViewpointsActions } from '../../../../modules/viewpoints';
 import { Sequences } from './sequences.component';
 
 const mapStateToProps = createStructuredSelector({
 	sequences: selectSequences,
-	minDate: selectMinDate,
-	maxDate: selectMaxDate,
+	startDate: selectStartDate,
+	endDate: selectEndDate,
+	frames: selectFrames,
 	selectedDate: selectSelectedStartingDate,
 	selectedEndingDate: selectSelectedEndingDate,
 	colorOverrides: selectSelectedFrameColors,
 	stepInterval: selectStepInterval,
 	stepScale: selectStepScale,
 	currentTasks: selectCurrentActivities,
-	loadingFrame: selectIsLoadingFrame,
+	loadingFrameState: selectIsLoadingFrameState,
+	loadingViewpoint: selectIsLoadingSequenceViewpoint,
 	selectedSequence: selectSelectedSequence,
 	rightPanels: selectRightPanels,
+	draggablePanels: selectDraggablePanels,
+	isActivitiesPending: selectActivitiesPending,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -52,8 +55,9 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setStepInterval: SequencesActions.setStepInterval,
 	setStepScale: SequencesActions.setStepScale,
 	setSelectedSequence: SequencesActions.setSelectedSequence,
-	fetchSelectedFrame: SequencesActions.fetchSelectedFrame,
 	toggleActivitiesPanel: ActivitiesActions.toggleActivitiesPanel,
+	toggleLegend: LegendActions.togglePanel,
+	resetLegendPanel: LegendActions.resetPanel,
 	fetchActivityDetails: ActivitiesActions.fetchDetails,
 	setPanelVisibility: ViewerGuiActions.setPanelVisibility,
 	deselectViewsAndLeaveClipping: ViewpointsActions.deselectViewsAndLeaveClipping,

@@ -31,6 +31,22 @@
 
 	let db;
 
+	Handler.authenticate = async function (database, password) {
+		const authDB = await Handler.getAuthDB();
+
+		try {
+			await authDB.authenticate(database, password);
+		} catch (err) {
+			if (authDB) {
+				authDB.close();
+			}
+
+			throw err;
+		}
+
+		authDB.close();
+	};
+
 	Handler.disconnect = function () {
 		if(db) {
 			db.close();
@@ -47,6 +63,14 @@
 		});
 	};
 
+	/**
+	 * @param {string} database
+	 * @param {string} colName
+	 * @param {object} query
+	 * @param {object} projection
+	 * @param {object} sort
+	 * @returns {Promise<Array<Object>}
+	 */
 	Handler.find = async function (database, colName, query, projection = {}, sort = {}) {
 		const collection = await Handler.getCollection(database, colName);
 		// NOTE: v3.6 driver find take sort/projection as 2nd argument like findOne
@@ -60,12 +84,19 @@
 		if(sort) {
 			projection.sort = sort;
 		}
+
 		return collection.findOne(query, projection);
 	};
 
 	Handler.findOneAndDelete = async function (database, colName, query, projection = {}) {
 		const collection = await Handler.getCollection(database, colName);
 		const findResult = await collection.findOneAndDelete(query, projection);
+		return findResult.value;
+	};
+
+	Handler.deleteMany = async function (database, colName, query) {
+		const collection = await Handler.getCollection(database, colName);
+		const findResult = await collection.deleteMany(query);
 		return findResult.value;
 	};
 
@@ -155,6 +186,11 @@
 		return collection.insert(data);
 	};
 
+	Handler.insertMany = async function (database, colName, data) {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.insertMany(data);
+	};
+
 	Handler.getFileFromGridFS = function (database, collection, filename) {
 		return Handler.getFileStreamFromGridFS(database, collection, filename).then((file) => {
 			const fileStream = file.stream;
@@ -226,9 +262,16 @@
 		});
 	};
 
-	Handler.update = async function (database, colName, query, data) {
+	Handler.update = async function (database, colName, query, data, upsert = false) {
 		const collection = await Handler.getCollection(database, colName);
-		return collection.update(query, data);
+		const options = upsert ? { upsert } : undefined;
+		return collection.update(query, data, options);
+	};
+
+	Handler.updateOne = async function (database, colName, query, data, upsert = false) {
+		const collection = await Handler.getCollection(database, colName);
+		const options = upsert ? { upsert } : undefined;
+		return collection.updateOne(query, data, options);
 	};
 
 	Handler.count = async function (database, colName, query, data) {

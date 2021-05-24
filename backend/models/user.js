@@ -19,11 +19,12 @@
 
 const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
-const DB = require("../handler/db");
+const db = require("../handler/db");
 const crypto = require("crypto");
+const zxcvbn = require("zxcvbn");
 const utils = require("../utils");
 const Role = require("./role");
-const { addDefaultJobs,  findJobByUser, usersWithJob, removeUserFromAnyJob, addUserToJob } = require("./job");
+const { addDefaultJobs, findJobByUser, usersWithJob, removeUserFromAnyJob, addUserToJob } = require("./job");
 
 const Intercom = require("./intercom");
 
@@ -48,8 +49,37 @@ const FileRef = require("./fileRef");
 const PermissionTemplates = require("./permissionTemplates");
 const { get } = require("lodash");
 
+const COLL_NAME = "system.users";
+
+const appendRemainingLoginsInfo = function (resCode, remaining) {
+	return {
+		...resCode,
+		message: `${resCode.message} (Remaining attempts: ${remaining})`
+	};
+};
+
+const checkPasswordStrength = function (password) {
+	if (utils.isString(password) && password.length < C.MIN_PASSWORD_LENGTH) {
+		throw responseCodes.PASSWORD_TOO_SHORT;
+	}
+
+	const passwordScore = zxcvbn(password).score;
+	if (passwordScore < C.MIN_PASSWORD_STRENGTH) {
+		throw responseCodes.PASSWORD_TOO_WEAK;
+	}
+};
+
 const isMemberOfTeamspace = function (user, teamspace) {
 	return user.roles.filter(role => role.db === teamspace && role.role === C.DEFAULT_MEMBER_ROLE).length > 0;
+};
+
+const isAccountLocked = function (user) {
+	const currentTime = new Date();
+
+	return user && user.customData && user.customData.loginInfo &&
+		user.customData.loginInfo.failedLoginCount && user.customData.loginInfo.lastFailedLoginAt &&
+		user.customData.loginInfo.failedLoginCount >= config.loginPolicy.maxUnsuccessfulLoginAttempts &&
+		currentTime - user.customData.loginInfo.lastFailedLoginAt < config.loginPolicy.lockoutDuration;
 };
 
 const hasReachedLicenceLimit = async function (teamspace) {
@@ -75,19 +105,39 @@ const hasReadLatestTerms = function (user) {
 
 // Find functions
 const findOne = async function (query, projection) {
-	return await DB.findOne("admin", COLL_NAME, query, projection);
+	return await db.findOne("admin", COLL_NAME, query, projection);
 };
 
-const COLL_NAME = "system.users";
+const handleAuthenticateFail = async function (user, username) {
+	const currentTime = new Date();
+
+	const elapsedTime = user.customData.loginInfo && user.customData.loginInfo.lastFailedLoginAt ?
+		currentTime - user.customData.loginInfo.lastFailedLoginAt : undefined;
+
+	const failedLoginCount = user.customData.loginInfo && user.customData.loginInfo.failedLoginCount &&
+		elapsedTime && elapsedTime < config.loginPolicy.lockoutDuration ?
+		user.customData.loginInfo.failedLoginCount + 1 : 1;
+
+	await db.update("admin", COLL_NAME, {user: username}, {$set: {
+		"customData.loginInfo.lastFailedLoginAt": currentTime,
+		"customData.loginInfo.failedLoginCount": failedLoginCount
+	}});
+
+	if (failedLoginCount >= config.loginPolicy.maxUnsuccessfulLoginAttempts) {
+		try {
+			await Intercom.submitLoginLockoutEvent(user.customData.email);
+		} catch (err) {
+			systemLogger.logError("Failed to submit login lockout event in intercom", username, err);
+		}
+	}
+
+	return Math.max(config.loginPolicy.maxUnsuccessfulLoginAttempts - failedLoginCount, 0);
+};
 
 const User = {};
 
-User.update = async function (username, data) {
-	return DB.update("admin", COLL_NAME, {user: username}, {$set: data});
-};
-
 User.getTeamspaceSpaceUsed = async function (dbName) {
-	const settings = await DB.find(dbName, "setting", {}, {_id: 1});
+	const settings = await db.find(dbName, "setting", {}, {_id: 1});
 
 	const spacePerModel = await Promise.all(settings.map(async (setting) =>
 		await FileRef.getTotalModelFileSize(dbName, setting._id))
@@ -102,49 +152,56 @@ User.authenticate =  async function (logger, username, password) {
 	}
 
 	let user = null;
-	let authDB = null;
-	try {
-		if (C.EMAIL_REGEXP.test(username)) { // if the submited username is the email
-			user = await User.findByEmail(username);
-			if (!user) {
-				throw ({ resCode: responseCodes.INCORRECT_USERNAME_OR_PASSWORD });
-			}
 
-			username = user.user;
-		}
-
-		authDB = await DB.getAuthDB();
-		await authDB.authenticate(username, password);
-		authDB.close();
-
-		if (!user)  {
-			user = await User.findByUserName(username);
-		}
-
-		if (user.customData && user.customData.inactive) {
-			throw ({ resCode: responseCodes.USER_NOT_VERIFIED });
-		}
-
-		if (!user.customData) {
-			user.customData = {};
-		}
-
-		const termsPrompt = !hasReadLatestTerms(user);
-
-		user.customData.lastLoginAt = new Date();
-
-		await User.update(username, {"customData.lastLoginAt": user.customData.lastLoginAt});
-
-		logger.logInfo("User has logged in", {username});
-
-		return { username: user.user, flags:{ termsPrompt } };
-	} catch(err) {
-		if (authDB) {
-			authDB.close();
-		}
-
-		throw (err.resCode ? err : { resCode: utils.mongoErrorToResCode(err) });
+	if (C.EMAIL_REGEXP.test(username)) { // if the submited username is the email
+		user = await User.findByEmail(username);
+	} else {
+		user = await User.findByUserName(username);
 	}
+
+	if (!user) {
+		throw responseCodes.INCORRECT_USERNAME_OR_PASSWORD;
+	}
+
+	if (isAccountLocked(user)) {
+		throw responseCodes.TOO_MANY_LOGIN_ATTEMPTS;
+	}
+
+	try {
+		await db.authenticate(user.user, password);
+	} catch (err) {
+		const resCode = utils.mongoErrorToResCode(err);
+
+		const remainingLoginAttempts = await handleAuthenticateFail(user, user.user);
+
+		if (resCode.value === responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value &&
+			remainingLoginAttempts <= config.loginPolicy.remainingLoginAttemptsPromptThreshold) {
+			throw appendRemainingLoginsInfo(resCode, remainingLoginAttempts);
+		}
+
+		throw { resCode };
+	}
+
+	if (user.customData && user.customData.inactive) {
+		throw responseCodes.USER_NOT_VERIFIED;
+	}
+
+	if (!user.customData) {
+		user.customData = {};
+	}
+
+	const termsPrompt = !hasReadLatestTerms(user);
+
+	user.customData.lastLoginAt = new Date();
+
+	await db.update("admin", COLL_NAME, {user: username}, {
+		$set: {"customData.lastLoginAt": user.customData.lastLoginAt},
+		$unset: {"customData.loginInfo.failedLoginCount":""}
+	});
+
+	logger.logInfo("User has logged in", {username});
+
+	return { username: user.user, flags:{ termsPrompt } };
 };
 
 User.getProfileByUsername = async function (username) {
@@ -173,7 +230,7 @@ User.getProfileByUsername = async function (username) {
 };
 
 User.getAddOnsForTeamspace = async (user) => {
-	const { customData } = await DB.findOne("admin", COLL_NAME, { user }, {
+	const { customData } = await db.findOne("admin", COLL_NAME, { user }, {
 		"customData.addOns" : 1,
 		"customData.vrEnabled": 1,
 		"customData.hereEnabled": 1,
@@ -194,27 +251,23 @@ User.getStarredMetadataTags = async function (username) {
 };
 
 User.appendStarredMetadataTag = async function (username, tag) {
-	const dbCol = await DB.getCollection("admin", COLL_NAME);
-	await dbCol.update({user: username}, {$addToSet: { "customData.StarredMetadataTags" : tag } });
+	await db.update("admin", COLL_NAME, {user: username}, {$addToSet: { "customData.StarredMetadataTags" : tag } });
 	return {};
 };
 
 User.setStarredMetadataTags = async function (username, tags) {
-	const dbCol = await DB.getCollection("admin", COLL_NAME);
 	tags = _.uniq(tags);
-	await dbCol.update({user: username}, {$set: { "customData.StarredMetadataTags" : tags}});
+	await db.update("admin", COLL_NAME, {user: username}, {$set: { "customData.StarredMetadataTags" : tags}});
 	return {};
 };
 
 User.deleteStarredMetadataTag = async function (username, tag) {
-	const dbCol = await DB.getCollection("admin", COLL_NAME);
-	await dbCol.update({user: username}, {$pull: { "customData.StarredMetadataTags" : tag } });
+	await db.update("admin", COLL_NAME, {user: username}, {$pull: { "customData.StarredMetadataTags" : tag } });
 	return {};
 };
 
 User.getStarredModels = async function (username) {
-	const dbCol = await DB.getCollection("admin", COLL_NAME);
-	const userProfile = await dbCol.findOne({user: username}, {user: 1,
+	const userProfile = await db.findOne("admin", COLL_NAME, {user: username}, {user: 1,
 		"customData.starredModels" : 1
 	});
 
@@ -222,8 +275,7 @@ User.getStarredModels = async function (username) {
 };
 
 User.appendStarredModels = async function (username, ts, modelID) {
-	const dbCol = await DB.getCollection("admin", COLL_NAME);
-	const userProfile = await dbCol.findOne({user: username}, {user: 1,
+	const userProfile = await db.findOne("admin", COLL_NAME, {user: username}, {user: 1,
 		"customData.starredModels" : 1
 	});
 
@@ -234,20 +286,18 @@ User.appendStarredModels = async function (username, ts, modelID) {
 
 	if(starredModels[ts].indexOf(modelID) === -1) {
 		starredModels[ts].push(modelID);
-		await dbCol.update({user: username}, {$set: { "customData.starredModels" : starredModels } });
+		await db.update("admin", COLL_NAME, {user: username}, {$set: { "customData.starredModels" : starredModels } });
 	}
 	return {};
 };
 
 User.setStarredModels = async function (username, models) {
-	const dbCol = await DB.getCollection("admin", COLL_NAME);
-	await dbCol.update({user: username}, {$set: { "customData.starredModels" : models}});
+	await db.update("admin", COLL_NAME, {user: username}, {$set: { "customData.starredModels" : models}});
 	return {};
 };
 
 User.deleteStarredModel = async function (username, ts, modelID) {
-	const dbCol = await DB.getCollection("admin", COLL_NAME);
-	const userProfile = await dbCol.findOne({user: username}, {user: 1,
+	const userProfile = await db.findOne("admin", COLL_NAME, {user: username}, {user: 1,
 		"customData.starredModels" : 1
 	});
 
@@ -256,12 +306,12 @@ User.deleteStarredModel = async function (username, ts, modelID) {
 			userProfile.customData.starredModels[ts][0] === modelID) {
 			const action = {$unset: {}};
 			action.$unset[`customData.starredModels.${ts}`] = "";
-			await dbCol.update({user: username}, action);
+			await db.update("admin", COLL_NAME, {user: username}, action);
 
 		} else {
 			const action = {$pull: {}};
 			action.$pull[`customData.starredModels.${ts}`] = modelID;
-			await dbCol.update({user: username}, action);
+			await db.update("admin", COLL_NAME, {user: username}, action);
 		}
 	}
 	return {};
@@ -269,17 +319,17 @@ User.deleteStarredModel = async function (username, ts, modelID) {
 
 User.generateApiKey = async function (username) {
 	const apiKey = crypto.randomBytes(16).toString("hex");
-	await User.update(username, {"customData.apiKey" : apiKey});
+	await db.update("admin", COLL_NAME, {user: username}, {$set: {"customData.apiKey" : apiKey}});
 	return apiKey;
 };
 
 User.deleteApiKey = async function (username) {
-	await DB.update("admin", { user: username}, {$unset: {"customData.apiKey" : 1}});
+	await db.update("admin", COLL_NAME, {user: username}, {$unset: {"customData.apiKey" : 1}});
 };
 
 User.findUsersWithoutMembership = async function (teamspace, searchString) {
 	const regex = new RegExp(`^${searchString}$`, "i");
-	const notMembers = await DB.find("admin", COLL_NAME, {
+	const notMembers = await db.find("admin", COLL_NAME, {
 		$or: [
 			{"customData.email": regex},
 			{"user": regex}
@@ -301,14 +351,13 @@ User.findUsersWithoutMembership = async function (teamspace, searchString) {
 
 // case insenstive
 User.checkUserNameAvailableAndValid = async function (username) {
-
 	if (!User.usernameRegExp.test(username) ||
 		-1 !== C.REPO_BLACKLIST_USERNAME.indexOf(username.toLowerCase())
 	) {
 		throw (responseCodes.INVALID_USERNAME);
 	}
 
-	const count = await DB.count("admin", COLL_NAME, { user: new RegExp(`^${username}$`, "i")});
+	const count = await db.count("admin", COLL_NAME, { user: new RegExp(`^${username}$`, "i")});
 
 	if(count > 0) {
 		throw (responseCodes.USER_EXISTS);
@@ -316,15 +365,14 @@ User.checkUserNameAvailableAndValid = async function (username) {
 };
 
 User.checkEmailAvailableAndValid = async function (email, exceptUser) {
-	const emailRegex = /^(['a-zA-Z0-9_\-.]+)@([a-zA-Z0-9_\-.]+)\.([a-zA-Z]{2,})$/;
-	if (!email.match(emailRegex)) {
+	if (!C.EMAIL_REGEXP.test(email)) {
 		throw(responseCodes.EMAIL_INVALID);
 	}
 
 	const query =  exceptUser ? { "customData.email": email, "user": { "$ne": exceptUser } }
 		: { "customData.email": email };
 
-	const count = await DB.count("admin", COLL_NAME, query);
+	const count = await db.count("admin", COLL_NAME, query);
 
 	if(count > 0) {
 		throw (responseCodes.EMAIL_EXISTS);
@@ -332,15 +380,15 @@ User.checkEmailAvailableAndValid = async function (email, exceptUser) {
 };
 
 User.updatePassword = async function (logger, username, oldPassword, token, newPassword) {
-
 	if (!((oldPassword || token) && newPassword)) {
 		throw ({ resCode: responseCodes.INVALID_INPUTS_TO_PASSWORD_UPDATE });
 	}
 
+	checkPasswordStrength(newPassword);
+
 	let user;
 
 	if (oldPassword) {
-
 		if (oldPassword === newPassword) {
 			throw (responseCodes.NEW_OLD_PASSWORD_SAME);
 		}
@@ -361,10 +409,10 @@ User.updatePassword = async function (logger, username, oldPassword, token, newP
 		"pwd": newPassword
 	};
 	try {
-		await DB.runCommand("admin", updateUserCmd);
+		await db.runCommand("admin", updateUserCmd);
 
 		if (user) {
-			await User.update(username, {"customData.resetPasswordToken" : undefined });
+			await db.update("admin", COLL_NAME, {user: username}, {$set: {"customData.resetPasswordToken" : undefined }});
 		}
 
 	} catch(err) {
@@ -380,12 +428,14 @@ User.createUser = async function (logger, username, password, customData, tokenE
 		throw ({ resCode: responseCodes.EMAIL_INVALID });
 	}
 
+	checkPasswordStrength(password);
+
 	await Promise.all([
 		User.checkUserNameAvailableAndValid(username),
 		User.checkEmailAvailableAndValid(customData.email)
 	]);
 
-	const adminDB = await DB.getAuthDB();
+	const adminDB = await db.getAuthDB();
 
 	const cleanedCustomData = {
 		createdAt: new Date(),
@@ -480,7 +530,7 @@ User.verify = async function (username, token, options) {
 
 	} else if (tokenData.token === token && tokenData.expiredAt > new Date()) {
 
-		await DB.update("admin", COLL_NAME, { user: username },
+		await db.update("admin", COLL_NAME, { user: username },
 			{ $unset: {"customData.inactive": "", "customData.emailVerifyToken": "" }});
 
 	} else {
@@ -555,7 +605,7 @@ User.updateInfo = async function(username, updateObj) {
 		await User.checkEmailAvailableAndValid(updateObj.email, username);
 	}
 
-	await User.update(username, updateData);
+	await db.update("admin", COLL_NAME, {user: username}, {$set: updateData});
 };
 
 User.getForgotPasswordToken = async function (userNameOrEmail) {
@@ -573,6 +623,10 @@ User.getForgotPasswordToken = async function (userNameOrEmail) {
 
 	// set token only if username is found.
 	if (user) {
+		if (isAccountLocked(user)) {
+			throw responseCodes.ACCOUNT_LOGIN_LOCKED;
+		}
+
 		user.customData.resetPasswordToken = resetPasswordToken;
 		resetPasswordUserInfo = {
 			token: resetPasswordToken.token,
@@ -581,7 +635,7 @@ User.getForgotPasswordToken = async function (userNameOrEmail) {
 			firstName:user.customData.firstName
 		};
 
-		await User.update(user.user, { "customData.resetPasswordToken": resetPasswordToken });
+		await db.update("admin", COLL_NAME, {user: user.user}, {$set: { "customData.resetPasswordToken": resetPasswordToken }});
 
 		return resetPasswordUserInfo;
 	}
@@ -983,7 +1037,7 @@ User.getAllUsersInTeamspace = async function (teamspace) {
 
 User.findUsersInTeamspace =  async function (teamspace, fields) {
 	const query = { "roles.db": teamspace, "roles.role" : C.DEFAULT_MEMBER_ROLE };
-	return await DB.find("admin", COLL_NAME, query, fields);
+	return await db.find("admin", COLL_NAME, query, fields);
 };
 
 User.teamspaceMemberCheck = async function (user, teamspace) {
@@ -1056,7 +1110,19 @@ User.findUserByBillingId = async function (billingAgreementId) {
 };
 
 User.updateAvatar = async function(username, avatarBuffer) {
-	await User.update(username, {"customData.avatar" : {data: avatarBuffer}});
+	await db.update("admin", COLL_NAME, {user: username}, {$set: {"customData.avatar" : {data: avatarBuffer}}});
+};
+
+User.updatePermissions = async function(username, updatedPermissions) {
+	await db.update("admin", COLL_NAME, {user: username}, {$set: {"customData.permissions": updatedPermissions}});
+};
+
+User.updatePermissionTemplates = async function(username, updatedPermissions) {
+	await db.update("admin", COLL_NAME, {user: username}, {$set: {"customData.permissionTemplates": updatedPermissions}});
+};
+
+User.updateSubscriptions = async function(username, subscriptions) {
+	await db.update("admin", COLL_NAME, {user: username}, {$set: {"customData.billing.subscriptions": subscriptions}});
 };
 
 /*

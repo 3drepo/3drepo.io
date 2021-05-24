@@ -44,7 +44,7 @@ describe("Sign up", function() {
 
 	const username = "signup_helloworld";
 	const uppercase_username = "Signup_helloworld";
-	const password = "password";
+	const password = "Str0ngPassword!";
 	const email = "test3drepo_signup@mailinator.com";
 	const firstName = "Hello";
 	const lastName = "World";
@@ -74,6 +74,42 @@ describe("Sign up", function() {
 			}).expect(200);
 
 		expect(body.account).to.equal(username);
+	});
+
+	it("with short password should fail", async function() {
+		const {body} = await request(server)
+			.post(`/${username}`)
+			.send({
+
+				"email": email,
+				"password": "Sh0rt!",
+				"firstName": firstName,
+				"lastName": lastName,
+				"countryCode": countryCode,
+				"company": company,
+				"mailListAgreed": mailListAgreed
+
+			}).expect(400);
+
+		expect(body.value).to.equal(responseCodes.PASSWORD_TOO_SHORT.value);
+	});
+
+	it("with weak password should fail", async function() {
+		const {body} = await request(server)
+			.post(`/${username}`)
+			.send({
+
+				"email": email,
+				"password": "password",
+				"firstName": firstName,
+				"lastName": lastName,
+				"countryCode": countryCode,
+				"company": company,
+				"mailListAgreed": mailListAgreed
+
+			}).expect(400);
+
+		expect(body.value).to.equal(responseCodes.PASSWORD_TOO_WEAK.value);
 	});
 
 	it("with same username but different case should fail", async function() {
@@ -422,5 +458,4 @@ describe("Sign up", function() {
 				done(err);
 			});
 	});
-
 });

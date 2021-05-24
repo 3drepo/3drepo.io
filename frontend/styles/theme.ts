@@ -118,6 +118,11 @@ export const MuiTheme = createMuiTheme({
 				borderRadius: '4px'
 			}
 		},
+		MuiPickersModal: {
+			dialog: {
+				maxHeight: 'inherit',
+			}
+		},
 		MuiSelect: {
 			root: {
 				fontSize: '14px',

@@ -32,7 +32,7 @@ describe("Verify", function () {
 	const username_double_verified = "v_name_db_verified";
 	const username_expired_token = "v_name_expired";
 
-	const password = "password";
+	const password = "Str0ngPassword!";
 	const email = suf => `test3drepo_verification_${suf}@mailinator.com`;
 	const async = require("async");
 

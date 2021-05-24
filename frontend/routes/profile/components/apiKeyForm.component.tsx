@@ -25,7 +25,7 @@ import {
 	FormContainer,
 	Headline,
 	StyledButtonContainer,
-	StyledTextField
+	StyledCopyableTextField
 } from '../profile.styles';
 
 interface IProps {
@@ -42,7 +42,7 @@ export class APIKeyForm extends React.PureComponent<IProps> {
 				<FormContainer container direction="column">
 					<Headline color="primary" variant="subtitle1">Api Key</Headline>
 					<FieldsRow container wrap="nowrap">
-						<StyledTextField
+						<StyledCopyableTextField
 							value={apiKey}
 							inputProps={{
 								readOnly: true

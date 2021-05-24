@@ -29,6 +29,8 @@ import {
 } from '../../../../constants/viewerGui';
 import { COLOR, FONT_WEIGHT } from '../../../../styles';
 import { DateField } from '../../../components/dateField/dateField.component';
+import { Loader } from '../../../components/loader/loader.component';
+import { Content as ContentComponent } from '../../../components/loader/loader.styles';
 import { MenuItemContainer } from '../previewListItem/previewListItem.styles';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
@@ -101,6 +103,7 @@ export const SequencePlayerColumn = styled(Grid).attrs({
 })`
 	&& {
 		overflow: hidden;
+		position: relative;
 	}
 `;
 
@@ -158,7 +161,7 @@ export const IntervalRow = styled(SequenceRow)`
 export const DatePicker = styled(DateField)`
 	&& {
 		width: 160px;
-		margin-top: 0;
+		margin: 0 9px 12px;
 	}
 
 	input {
@@ -202,6 +205,10 @@ export const SequenceName = styled(Grid).attrs({
 	&& {
 		font-size: 18px;
 		font-weight: 500;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		white-space: nowrap;
+		max-width: 250px;
 	}
 `;
 
@@ -219,11 +226,15 @@ export const LoaderContainer = styled.div`
 	padding-top: 30px;
 `;
 
-export const SwitchItem = styled(ListItem)`
-	display: flex;
-	font-size: 14px;
-	&& {
-		justify-content: flex-end;
-		height: 35px;
+export const StyledLoader = styled(Loader)`
+	flex-direction: row;
+	position: absolute;
+	bottom: 36px;
+	pointer-events: none;
+
+	${ContentComponent} {
+		margin-left: 10px;
+		margin-right: 0;
+		font-size: 13px;
 	}
 `;

@@ -474,7 +474,16 @@
 	// -----------------------------------------------------------------------------
 
 	define("USERNAME_REGEXP",  /^[a-zA-Z][\w]{1,19}$/);
-	define("EMAIL_REGEXP", /^([a-zA-Z0-9_\-.]+)@([a-zA-Z0-9_\-.]+)\.([a-zA-Z]{2,5})$/);
+	define("EMAIL_REGEXP", /^(?:[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-zA-Z0-9-]*[a-zA-Z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/);
+
+	// -----------------------------------------------------------------------------
+	//
+	// Password requirements
+	//
+	// -----------------------------------------------------------------------------
+
+	define("MIN_PASSWORD_LENGTH", 8);
+	define("MIN_PASSWORD_STRENGTH", 2);
 
 	// -----------------------------------------------------------------------------
 	//
@@ -486,7 +495,7 @@
 
 	// -----------------------------------------------------------------------------
 	//
-	// Invocie state
+	// Invoice state
 	//
 	// -----------------------------------------------------------------------------
 	define("INV_INIT", "init");
@@ -522,6 +531,15 @@
 	define("HEADER_SOCKET_ID", "x-socket-id");
 
 	define("PROJECT_DEFAULT_ID", "default");
+
+	// min timestamp set to 100000000000
+	// this is assumption for smallest millisecond timestamp
+	// making this assumption because this is what https://www.epochconverter.com/ does
+	// 100000000000 = GMT: Saturday, 3 March 1973 09:46:40
+	define("MIN_MS_TIMESTAMP", 100000000000);
+
+	// tickets
+	define("LONG_TEXT_CHAR_LIM", 660);
 
 	// risks
 	define("RISK_FILTERS",{
@@ -619,5 +637,7 @@
 		{ _id: "Main Contractor", "color": "#b15928"},
 		{ _id: "Supplier", "color": "#6a3d9a"}
 	]);
+
+	define("ACCEPTED_IMAGE_FORMATS",  ["png", "jpg", "gif"]);
 
 })();

@@ -33,7 +33,13 @@ import {
 } from '../../../../../../modules/issues';
 import { selectJobsList, selectMyJob } from '../../../../../../modules/jobs';
 import { selectPermissions } from '../../../../../../modules/model';
-import { selectMaxDate, selectMinDate, SequencesActions } from '../../../../../../modules/sequences';
+import {
+	selectEndDate,
+	selectSelectedStartingDate,
+	selectSequences,
+	selectStartDate,
+	SequencesActions
+} from '../../../../../../modules/sequences';
 import { selectTopicTypes } from '../../../../../../modules/teamspace';
 import { ViewpointsActions } from '../../../../../../modules/viewpoints';
 import { withViewer } from '../../../../../../services/viewer/viewer';
@@ -53,8 +59,10 @@ const mapStateToProps = createStructuredSelector({
 	failedToLoad: selectFailedToLoad,
 	postCommentIsPending: selectPostCommentIsPending,
 	issues: selectIssues,
-	minSequenceDate: selectMinDate,
-	maxSequenceDate: selectMaxDate
+	minSequenceDate: selectStartDate,
+	maxSequenceDate: selectEndDate,
+	selectedDate: selectSelectedStartingDate,
+	sequences: selectSequences,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

@@ -15,26 +15,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Grid, IconButton, MenuItem, Select, Switch } from '@material-ui/core';
+import React from 'react';
+
+import { FormControlLabel, FormGroup, Grid, IconButton, MenuItem, Select, Switch } from '@material-ui/core';
 import StepForwardIcon from '@material-ui/icons/FastForward';
 import StepBackIcon from '@material-ui/icons/FastRewind';
 import PlayArrow from '@material-ui/icons/PlayArrow';
 import Replay from '@material-ui/icons/Replay';
 import Stop from '@material-ui/icons/Stop';
+import { debounce, findIndex, noop } from 'lodash';
 
-import DayJsUtils from '@date-io/dayjs';
-
-import { noop } from 'lodash';
-import { MuiPickersUtilsProvider } from 'material-ui-pickers';
-import React from 'react';
 import { STEP_SCALE } from '../../../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../../../constants/viewerGui';
-import { isDateOusideRange } from '../../../../../../helpers/dateTime';
-import { getDateByStep } from '../../../../../../modules/sequences/sequences.helper';
+import { isDateOutsideRange, MILLI_PER_HOUR } from '../../../../../../helpers/dateTime';
+import { renderWhenTrue } from '../../../../../../helpers/rendering';
+import { IFrame } from '../../../../../../modules/sequences';
+import { getDateByStep, getSelectedFrameIndex } from '../../../../../../modules/sequences/sequences.helper';
 import { LONG_DATE_TIME_FORMAT_NO_MINUTES } from '../../../../../../services/formatting/formatDate';
-import { DatePicker, IntervalRow, SequencePlayerColumn,
-	SequencePlayerContainer, SequenceRow, SequenceSlider,
-	SliderRow, StepInput, SwitchItem } from '../../sequences.styles';
+import {
+	DatePicker,
+	IntervalRow,
+	SequencePlayerColumn,
+	SequencePlayerContainer,
+	SequenceRow,
+	SequenceSlider,
+	SliderRow,
+	StepInput,
+	StyledLoader,
+} from '../../sequences.styles';
 
 interface IProps {
 	max: Date;
@@ -50,6 +58,10 @@ interface IProps {
 	rightPanels: string[];
 	toggleActivitiesPanel: () => void;
 	onPlayStarted?: () => void;
+	frames: IFrame[];
+	isActivitiesPending: boolean;
+	draggablePanels: string[];
+	toggleLegend: () => void;
 }
 
 interface IState {
@@ -59,9 +71,11 @@ interface IState {
 	stepInterval: number;
 	stepScale: STEP_SCALE;
 	waitingForFrameLoad: boolean;
+	sliderValue: number | null;
 }
 
 export class SequencePlayer extends React.PureComponent<IProps, IState> {
+	private playInterval = 1000;
 	public state: IState = {
 		value: null,
 		playing: false,
@@ -69,6 +83,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 		stepInterval: 1,
 		stepScale: STEP_SCALE.DAY,
 		waitingForFrameLoad: false,
+		sliderValue: null,
 	};
 
 	get currentTime() {
@@ -89,22 +104,22 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 
 	get PlayButtonIcon() {
 		return this.state.playing ?
-					Stop :
-				this.isLastDay ?
-					Replay :
-					PlayArrow;
+				Stop :
+			this.isLastDay ?
+				Replay :
+				PlayArrow;
 	}
 
 	public setValue = (newValue: Date) => {
-		const maxDate = this.props.max.valueOf();
-		const minDate = this.props.min.valueOf();
-		newValue = new Date(Math.min(maxDate, Math.max(minDate, newValue.valueOf())));
+		const endDate = this.props.max.valueOf();
+		const startDate = this.props.min.valueOf();
+		newValue = new Date(Math.min(endDate, Math.max(startDate, newValue.valueOf())));
 
 		if (this.props.onChange) {
 			this.props.onChange(newValue);
 		}
 
-		this.setState({value: newValue});
+		this.setState({value: newValue, sliderValue: null});
 	}
 
 	public setTime = (currentTime) => {
@@ -116,6 +131,8 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 		this.stop();
 		this.setTime(val);
 	}
+
+	public debouncedGoto = debounce(this.goTo, 150);
 
 	public gotoDate = (val) => {
 		this.stop();
@@ -140,7 +157,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 			setTimeout(() => {
 				this.nextStep();
 				this.play();
-			}, 1000);
+			}, this.playInterval);
 		}
 	}
 
@@ -170,11 +187,21 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 	}
 
 	public moveStep = (direction) => {
-		const {value, stepInterval, stepScale} = this.state;
-		const newValue = getDateByStep(value, stepScale, stepInterval * direction);
+		const { value, stepInterval, stepScale } = this.state;
 
-		this.setValue(newValue);
+		if (stepScale !== STEP_SCALE.FRAME) {
+			const nextValue = getDateByStep(value, stepScale, stepInterval * direction);
+			this.setValue(nextValue);
+		} else {
+			const { frames } = this.props;
+			const index = getSelectedFrameIndex(frames, value);
+			const newValue = frames[index + stepInterval * direction]?.dateTime;
+			if (newValue) {
+				this.setValue(newValue);
+			}
+		}
 
+		// If it reached the end of the timeline, stop playing.
 		if (this.isLastDay) {
 			this.stop();
 		}
@@ -187,6 +214,7 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 	public play = () => {
 		(this.props.onPlayStarted || noop )();
 		this.stop();
+
 		const intervalId = (setInterval(() => {
 			if (this.props.loadingFrame && this.state.playing) {
 				clearInterval(this.state.intervalId);
@@ -195,14 +223,17 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 			}
 
 			this.nextStep();
-		}, 1000) as unknown) as number;
+		}, this.playInterval) as unknown) as number;
 
 		this.setState({
 			playing: true,
 			waitingForFrameLoad: false,
-			value: this.isLastDay ? this.props.min : this.state.value,
 			intervalId
 		});
+
+		// This sets the date value back to the start if it reached the end of the timeline
+		const dateValue = this.isLastDay ? this.props.min : this.state.value;
+		this.setValue(dateValue);
 	}
 
 	public stop() {
@@ -241,65 +272,86 @@ export class SequencePlayer extends React.PureComponent<IProps, IState> {
 		this.nextStep();
 	}
 
+	private renderLoader = renderWhenTrue(() => (
+		<StyledLoader horizontal size={14} content="Loading frame..." />
+	));
+
 	public render() {
-		const {value, playing, stepScale , stepInterval} = this.state;
+		const { value, stepScale , stepInterval } = this.state;
 
 		return (
 			<SequencePlayerContainer>
 				<SequencePlayerColumn>
-					<MuiPickersUtilsProvider utils={DayJsUtils}>
-						<SequenceRow>
-							<Grid item>
-								<IconButton disabled={this.isFirstDay} onClick={this.rewind}><StepBackIcon fontSize="large" /></IconButton>
-							</Grid>
-							<Grid item>
-								<DatePicker
-									shouldDisableDate={(date) => isDateOusideRange(this.props.min, this.props.max, date.$d)}
-									name="date"
-									inputId="1"
-									value={value}
-									format={LONG_DATE_TIME_FORMAT_NO_MINUTES}
-									onChange={(e) => this.gotoDate(new Date(Math.floor(e.target.value / 3600000) * 3600000))}
-									placeholder="date"
-									dateTime
-								/>
-							</Grid>
-							<Grid item>
-								<IconButton disabled={this.isLastDay} onClick={this.forward}><StepForwardIcon fontSize="large" /></IconButton>
-							</Grid>
-						</SequenceRow>
-						<IntervalRow>
-							Step interval: <StepInput value={stepInterval} onChange={this.onChangeStepInterval} />
-							&nbsp;
-							<Select value={stepScale} onChange={this.onChangeStepScale} >
-								<MenuItem value={STEP_SCALE.HOUR}>hour(s)</MenuItem>
-								<MenuItem value={STEP_SCALE.DAY}>day(s)</MenuItem>
-								<MenuItem value={STEP_SCALE.MONTH}>month(s)</MenuItem>
-								<MenuItem value={STEP_SCALE.YEAR}>year(s)</MenuItem>
-							</Select>
-						</IntervalRow>
-						<SliderRow>
-							<Grid item>
-								<IconButton onClick={this.onClickPlayStop} ><this.PlayButtonIcon /></IconButton>
-							</Grid>
-							<Grid item>
-								<SequenceSlider
-									max={this.totalTime}
-									step={36000000}
-									value={this.currentTime}
-									onChange={(e, val) => this.goTo(val)}
-								/>
-							</Grid>
-						</SliderRow>
-					</MuiPickersUtilsProvider>
-					<SwitchItem>
-						<Switch
-							checked={this.props.rightPanels.includes(VIEWER_PANELS.ACTIVITIES)}
-							onChange={this.props.toggleActivitiesPanel}
-							color="primary"
+					<SequenceRow>
+						<Grid item>
+							<IconButton disabled={this.isFirstDay} onClick={this.rewind} size="small">
+								<StepBackIcon fontSize="large" />
+							</IconButton>
+						</Grid>
+						<Grid item>
+							<DatePicker
+								shouldDisableDate={(date) => isDateOutsideRange(this.props.min, this.props.max, date.$d)}
+								name="date"
+								inputId="1"
+								value={value}
+								format={LONG_DATE_TIME_FORMAT_NO_MINUTES}
+								onChange={(e) => this.gotoDate(new Date(Math.floor(e.target.value / MILLI_PER_HOUR) * MILLI_PER_HOUR))}
+								placeholder="date"
+								dateTime
+							/>
+						</Grid>
+						<Grid item>
+							<IconButton disabled={this.isLastDay} onClick={this.forward} size="small">
+								<StepForwardIcon fontSize="large" />
+							</IconButton>
+						</Grid>
+					</SequenceRow>
+					<IntervalRow>
+						Step interval: <StepInput value={stepInterval} onChange={this.onChangeStepInterval} />
+						&nbsp;
+						<Select value={stepScale} onChange={this.onChangeStepScale} >
+							<MenuItem value={STEP_SCALE.HOUR}>hour(s)</MenuItem>
+							<MenuItem value={STEP_SCALE.DAY}>day(s)</MenuItem>
+							<MenuItem value={STEP_SCALE.MONTH}>month(s)</MenuItem>
+							<MenuItem value={STEP_SCALE.YEAR}>year(s)</MenuItem>
+							<MenuItem value={STEP_SCALE.FRAME}>frame(s)</MenuItem>
+						</Select>
+					</IntervalRow>
+					<SliderRow>
+						<Grid item>
+							<IconButton onClick={this.onClickPlayStop} ><this.PlayButtonIcon /></IconButton>
+						</Grid>
+						<Grid item>
+							<SequenceSlider
+								max={this.totalTime}
+								step={36000000}
+								value={this.state.sliderValue || this.currentTime}
+								onChange={(e, val) =>  {
+									this.debouncedGoto(val);
+									this.setState({sliderValue: val});
+								}}
+							/>
+						</Grid>
+					</SliderRow>
+					<FormGroup row>
+						<FormControlLabel
+							control={<Switch
+								checked={this.props.draggablePanels.includes(VIEWER_PANELS.LEGEND)}
+								onChange={this.props.toggleLegend}
+								color="primary"
+							/>}
+							label="Show Legend"
 						/>
-						Full Activity List
-					</SwitchItem>
+						<FormControlLabel
+							control={<Switch
+								checked={this.props.rightPanels.includes(VIEWER_PANELS.ACTIVITIES)}
+								onChange={this.props.toggleActivitiesPanel}
+								color="primary"
+							/>}
+							label="Full Activity List"
+						/>
+					</FormGroup>
+					{this.renderLoader(this.props.loadingFrame && !this.props.isActivitiesPending)}
 				</SequencePlayerColumn>
 			</SequencePlayerContainer>
 		);

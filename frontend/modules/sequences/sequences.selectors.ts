@@ -16,16 +16,13 @@
  */
 
 import { createSelector } from 'reselect';
+
+import { STEP_SCALE } from '../../constants/sequences';
 import { GLToHexColor } from '../../helpers/colors';
 import { selectSettings } from '../model';
-import { getDateByStep, getSelectedFrame } from './sequences.helper';
+import { getDateByStep, getSelectedFrame, getSelectedFrameIndex } from './sequences.helper';
 
 export const selectSequencesDomain = (state) => (state.sequences);
-
-const getMinMaxDates = ({frames}) => ({
-	minDate: (frames[0] || {}).dateTime,
-	maxDate: (frames[frames.length - 1] || {}).dateTime
-});
 
 const getModelName = (sequence, settings) => {
 	let modelName = '';
@@ -43,7 +40,7 @@ const getModelName = (sequence, settings) => {
 export const selectSequences = createSelector(
 	selectSequencesDomain, selectSettings,
 		(state, settings) => !state.sequences ? null :
-			state.sequences.map((sequence) =>  ({...sequence, ...getModelName(sequence, settings), ...getMinMaxDates(sequence)}))
+			state.sequences.map((sequence) =>  ({...sequence, ...getModelName(sequence, settings)}))
 );
 
 export const selectInitialised = createSelector(
@@ -66,6 +63,10 @@ export const selectActivitiesDefinitions = createSelector(
 	selectSequencesDomain, selectSelectedSequenceId, (state, sequenceId) => (state.activities || {}) [sequenceId]
 );
 
+export const selectActivitiesPending = createSelector(
+	selectSequencesDomain, (state) => state.activitiesPending
+);
+
 export const selectSelectedSequence = createSelector(
 	selectSequences, selectSelectedSequenceId,
 		(sequences, id) => !sequences ? null :
@@ -86,12 +87,20 @@ export const selectFrames = createSelector(
 	}
 );
 
-export const selectMinDate = createSelector(
-	selectSelectedSequence, (sequence) => (sequence || {}).minDate
+export const selectStartDate = createSelector(
+	selectSelectedSequence, (sequence) => (sequence || {}).startDate
 );
 
-export const selectMaxDate = createSelector(
-	selectSelectedSequence, (sequence) => (sequence || {}).maxDate
+export const selectEndDate = createSelector(
+	selectSelectedSequence, (sequence) => (sequence || {}).endDate
+);
+
+export const selectSelectedSequenceName = createSelector(
+	selectSelectedSequence, (sequence) => sequence?.name
+);
+
+export const selectSelectedSequenceID = createSelector(
+	selectSelectedSequence, (sequence) => sequence?._id
 );
 
 export const selectStepInterval = createSelector(
@@ -107,8 +116,8 @@ export const selectSelectedDate = createSelector(
 );
 
 export const selectSelectedStartingDate = createSelector(
-	selectSelectedDate, selectMinDate, (selectedDate, minDate) => {
-		let date = selectedDate || minDate;
+	selectSelectedDate, selectStartDate, (selectedDate, startDate) => {
+		let date = selectedDate || startDate;
 
 		if (!date) {
 			return null;
@@ -120,29 +129,37 @@ export const selectSelectedStartingDate = createSelector(
 );
 
 export const selectNextKeyFramesDates =  createSelector(
-	selectSelectedStartingDate, selectStepScale, selectStepInterval , selectMaxDate, selectFrames,
-		(startingDate, scale, interval, maxDate, frames) => {
+	selectSelectedStartingDate, selectStepScale, selectStepInterval , selectEndDate, selectFrames,
+		(startingDate, scale, interval, endDate, frames) => {
 			const keyFrames = [];
-			keyFrames[0] = new Date(Math.min(maxDate, (startingDate || new Date(0)).valueOf()));
-			let lastFrame = getSelectedFrame(frames, keyFrames[0]);
-			let nextFrame = null;
-			let date = getDateByStep(startingDate, scale, interval);
-			maxDate = new Date(maxDate);
+			keyFrames[0] = new Date(Math.min(endDate, (startingDate || new Date(0)).valueOf()));
+			const frameIndex = getSelectedFrameIndex(frames, keyFrames[0]);
 
-			for (let i = 0; i < 3 ; i++) {
-				date = getDateByStep(date, scale, interval);
-				nextFrame = getSelectedFrame(frames, date);
-
-				while (lastFrame === nextFrame && date <= maxDate) {
+			if (scale !== STEP_SCALE.FRAME) {
+				let lastFrame = frames[frameIndex];
+				let nextFrame = null;
+				let date = getDateByStep(startingDate, scale, interval);
+				endDate = new Date(endDate);
+				for (let i = 0; i < 3 ; i++) {
 					date = getDateByStep(date, scale, interval);
 					nextFrame = getSelectedFrame(frames, date);
+
+					while (lastFrame === nextFrame && date <= endDate) {
+						date = getDateByStep(date, scale, interval);
+						nextFrame = getSelectedFrame(frames, date);
+					}
+
+					keyFrames.push(date);
+					lastFrame = nextFrame;
+				}
+			} else {
+				for (let i = frameIndex; i < frameIndex + 3 && i < frames.length; ++i) {
+					keyFrames.push(new Date(frames[i].dateTime));
 				}
 
-				keyFrames.push(date);
-				lastFrame = nextFrame;
 			}
 
-			return keyFrames.filter((d) => d <= maxDate);
+			return keyFrames.filter((d) => d <= endDate);
 		}
 );
 
@@ -167,13 +184,22 @@ export const selectSelectedStateId = createSelector(
 	selectSelectedFrame, (frame) =>  (frame || {}).state
 );
 
+export const selectSelectedFrameViewpoint = createSelector(
+	selectSelectedFrame,  (frame) =>  (frame || {}).viewpoint
+);
+
 export const selectLastSelectedStateId = createSelector(
 	selectLastSelectedFrame, (frame) =>  (frame || {}).state
 );
 
-export const selectIsLoadingFrame = createSelector(
-	selectSelectedStateId, selectStateDefinitions,
-		(stateId, stateDefinitions) => !(stateDefinitions || {}).hasOwnProperty(stateId)
+export const selectIsViewpointFrame = createSelector(
+	selectSelectedFrameViewpoint, (viewpoint) => Boolean(viewpoint)
+);
+
+export const selectIsLoadingFrameState = createSelector(
+	selectSelectedStateId, selectStateDefinitions, (stateId, stateDefinitions) => {
+		return stateId && !(stateDefinitions || {}).hasOwnProperty(stateId);
+	}
 );
 
 export const selectSelectedState = createSelector(
@@ -237,13 +263,13 @@ export const selectSelectedFrameTransformations = createSelector(
 	}
 );
 
-// Filters the activities by range as well as it's subtasks
-const getActivitiesByRange = (activities, minDate, maxDate) => {
+// Filters the activities by range as well as it's subActivities
+const getActivitiesByRange = (activities, startDate, endDate) => {
 	return activities.reduce((filteredActivities, activity) => {
-			if (! (activity.startDate > maxDate || activity.endDate < minDate)) {
+			if (! (activity.startDate > endDate || activity.endDate < startDate)) {
 				activity = {...activity};
-				if ( activity.subTasks ) {
-					activity.subTasks = getActivitiesByRange(activity.subTasks, minDate, maxDate);
+				if ( activity.subActivities ) {
+					activity.subActivities = getActivitiesByRange(activity.subActivities, startDate, endDate);
 				}
 
 				filteredActivities.push(activity);
@@ -257,8 +283,8 @@ const replaceDates = (activities) => {
 	return activities.map((t) => {
 		t.startDate = new Date(t.startDate);
 		t.endDate = new Date(t.endDate);
-		if (t.subTasks) {
-			t.subTasks = replaceDates(t.subTasks);
+		if (t.subActivities) {
+			t.subActivities = replaceDates(t.subActivities);
 		}
 
 		return t;
