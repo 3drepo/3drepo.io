@@ -90,6 +90,11 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 			}
 		});
 	}
+	public handleBlur = () => {
+		setTimeout(() => {
+			this.onSuggestionsClearRequested();
+		}, 50);
+	}
 
 	public renderSuggestion = (suggestion, { isHighlighted, query }) => (
 		<MenuItem selected={isHighlighted} component="div">
@@ -126,6 +131,7 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 					}
 				}}
 				{...other}
+				onBlur={this.handleBlur}
 			/>
 		);
 	}
