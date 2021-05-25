@@ -71,6 +71,8 @@ interface IProps {
 	updateViewpoint: (screenshot?: string) => void;
 	setMeasureMode: (measureMode) => void;
 	removeMeasurement: (uuid) => void;
+	setMeasurementColor: (uuid, color) => void;
+	setMeasurementName: (uuid, type, name) => void;
 	dialogId?: string;
 	postCommentIsPending?: boolean;
 	showSequenceDate: (date) => void;
@@ -298,6 +300,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				measureMode={this.props.measureMode}
 				removeMeasurement={this.props.removeMeasurement}
 				setMeasureMode={this.props.setMeasureMode}
+				setMeasurementColor={this.props.setMeasurementColor}
 				horizontal={this.props.horizontal}
 			/>
 		);

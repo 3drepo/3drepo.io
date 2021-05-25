@@ -17,7 +17,8 @@
 
 import { isEmpty } from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { getColor, MEASURE_TYPE } from '../../../../../../modules/measurements/measurements.constants';
+import { GLToHexColor } from '../../../../../../helpers/colors';
+import { MEASURE_TYPE } from '../../../../../../modules/measurements/measurements.constants';
 import { IMeasure } from '../measureItem/measureItem.component';
 import { MeasurementsList } from './measurementsList.component';
 
@@ -41,7 +42,7 @@ export const AllMeasurementsList = ({areaMeasurements, lengthMeasurements, point
 			...(areaMeasurements || []),
 			...(lengthMeasurements || []),
 			...(pointMeasurements || [])
-		].map(({customColor, color}) => getColor(customColor || color));
+		].map(({customColor, color}) => GLToHexColor(customColor || color));
 
 		setColors(Array.from(new Set(addColors)));
 	}, [pointMeasurements, lengthMeasurements, areaMeasurements]);

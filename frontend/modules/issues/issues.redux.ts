@@ -75,6 +75,7 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	setMeasureMode: ['measureMode'],
 	setMeasureModeSuccess: ['measureMode'],
 	addMeasurement: ['measurement'],
+	setMeasurementColor: ['uuid', 'color'],
 	removeMeasurement: ['uuid']
 }, { prefix: 'ISSUES/' });
 

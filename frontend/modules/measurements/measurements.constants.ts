@@ -46,6 +46,3 @@ export const MEASURING_TYPE = {
 	POINT_TO_POINT: 'Point to Point',
 	RAY_CAST: 'Ray Cast',
 };
-
-export const getColor = ({r, g, b}) => `#${[r, g, b].map((color) =>
-		componentToHex(Math.trunc(color))).join('')}`;

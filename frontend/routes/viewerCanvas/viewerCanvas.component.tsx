@@ -127,16 +127,8 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 	public renderMeasurements(prev: any[], curr: any[]) {
 		const { viewer } = this.props;
 
-		const toAdd = differenceBy(curr, prev, 'uuid');
-		const toRemove = differenceBy(prev, curr, 'uuid');
-
-		// console.log()
-
-		// console.log("TO add:")
-		// console.log(JSON.stringify(toAdd));
-
-		// console.log("TO toRemove:")
-		// console.log(JSON.stringify(toRemove));
+		const toAdd = differenceBy(curr, prev, 'uuid', 'color');
+		const toRemove = differenceBy(prev, curr, 'uuid', 'color');
 
 		viewer.addMeasurements(toAdd, true);
 		viewer.removeMeasurements(toRemove);

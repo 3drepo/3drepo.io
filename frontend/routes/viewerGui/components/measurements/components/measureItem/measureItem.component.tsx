@@ -22,8 +22,8 @@ import RemoveIcon from '@material-ui/icons/Close';
 import { Formik } from 'formik';
 import { cond, matches, stubTrue } from 'lodash';
 
-import { parseHex } from '../../../../../../helpers/colors';
-import { getColor, MEASURE_TYPE } from '../../../../../../modules/measurements/measurements.constants';
+import { hexToGLColor, GLToHexColor } from '../../../../../../helpers/colors';
+import { MEASURE_TYPE } from '../../../../../../modules/measurements/measurements.constants';
 import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
 import { SmallIconButton } from '../../../../../components/smallIconButon/smallIconButton.component';
 import {
@@ -37,27 +37,14 @@ import {
 	StyledTextField
 } from './measureItem.styles';
 
-export interface IColor {
-	r: number;
-	g: number;
-	b: number;
-	a: number;
-}
-
-interface IPosition {
-	x: number;
-	y: number;
-	z: number;
-}
-
 export interface IMeasure {
 	uuid: string;
 	name: string;
-	positions?: IPosition[];
+	positions?: number[];
 	position?: number[];
 	value: number;
-	color: IColor;
-	customColor: IColor;
+	color: number[];
+	customColor: number[];
 	type: number;
 }
 
@@ -117,14 +104,7 @@ export const MeasureItem = ({
 	};
 
 	const handleColorChange = (hexColor) => {
-		const { red, green, blue } = parseHex(hexColor);
-
-		props.setMeasurementColor(uuid, {
-			r: red,
-			g: green,
-			b: blue,
-			a: 1,
-		});
+		props.setMeasurementColor(uuid, hexToGLColor(hexColor));
 	};
 
 	const handleSave = ({ target: { value: newName }}) => props.setMeasurementName(uuid, newName, type);
@@ -177,10 +157,11 @@ export const MeasureItem = ({
 					: <MeasurementValue>{getValue(value, units, type, props.modelUnit)} {getUnits(units, type)}</MeasurementValue>
 				}
 				<ColorPicker
-					value={getColor(customColor || color)}
+					value={GLToHexColor(customColor || color)}
 					onChange={handleColorChange}
 					disableUnderline
 					predefinedColors={props.colors}
+					opacityEnabled
 				/>
 				<SmallIconButton
 					Icon={RemoveIcon}

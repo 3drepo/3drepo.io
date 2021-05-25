@@ -719,6 +719,24 @@ export function* setMeasureMode({ measureMode }) {
 	}
 }
 
+export function* setMeasurementColor({uuid, color}) {
+	const shapes = (yield select(selectShapes)).map((measurement) => {
+		if (measurement.uuid === uuid) {
+			measurement = {...measurement, color};
+		}
+		return measurement;
+	});
+
+	const activeIssue = yield select(selectActiveIssueDetails);
+	const isNewIssue = !Boolean(activeIssue._id);
+
+	if (isNewIssue) {
+		yield put(IssuesActions.updateNewIssue({...activeIssue, shapes}));
+	} else {
+		yield put(IssuesActions.updateActiveIssue({shapes}));
+	}
+}
+
 export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.FETCH_ISSUES, fetchIssues);
 	yield takeLatest(IssuesTypes.FETCH_ISSUE, fetchIssue);
@@ -751,4 +769,5 @@ export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.SET_MEASURE_MODE, setMeasureMode);
 	yield takeEvery(IssuesTypes.ADD_MEASUREMENT, addMeasurement);
 	yield takeEvery(IssuesTypes.REMOVE_MEASUREMENT, removeMeasurement);
+	yield takeEvery(IssuesTypes.SET_MEASUREMENT_COLOR, setMeasurementColor);
 }
