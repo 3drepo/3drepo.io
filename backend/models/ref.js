@@ -18,10 +18,12 @@
 "use strict";
 const { findModelSettingById } = require("./modelSetting");
 const { findNodesByType } = require("./scene");
+const C = require("../constants");
+const utils = require("../utils");
 
 const Ref = {};
 
-Ref.getRefNodes = async function(account, model, branch, revision, projection) {
+Ref.getRefNodes = async (account, model, branch, revision, projection) => {
 	const settings = await findModelSettingById(account, model);
 
 	if (settings.federate) {
@@ -29,6 +31,32 @@ Ref.getRefNodes = async function(account, model, branch, revision, projection) {
 	}
 
 	return [];
+};
+
+Ref.getSubModels = async (account, model, branch, revision, callbackProm) => {
+	const refs = await Ref.getRefNodes(account, model, branch, revision, {owner: 1, project: 1, _rid: 1});
+	const subModelArr = [];
+	for(let i = 0; i < refs.length; ++i) {
+		const {owner, project, _rid} = refs[i];
+		let refBranch, refRev;
+		if (utils.uuidToString(_rid) === C.MASTER_BRANCH) {
+			refBranch = C.MASTER_BRANCH_NAME;
+		} else {
+			refRev = utils.uuidToString(_rid);
+		}
+		subModelArr.push({
+			account: owner,
+			model: project,
+			branch: refBranch,
+			revision: refRev
+		});
+		if (callbackProm) {
+			await callbackProm(owner, project, refBranch, refRev);
+		}
+
+	}
+
+	return subModelArr;
 };
 
 module.exports = Ref;
