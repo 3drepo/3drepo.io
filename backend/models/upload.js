@@ -147,9 +147,10 @@ Upload.uploadChunksStart = async (teamspace, model, username, corID, headers) =>
 	// upload model with tag
 	modelStatusChanged(null, teamspace, model, { status: "uploading", username });
 
+	// FIXME hardcoded URL for testing
 	return {
 		"x-ms-chunk-size": chunkSize,
-		"Location":`/api/${teamspace}/${model}/upload/ms-chunking/${corID}`
+		"Location":`https://issue-2489.dev.3drepo.io/api/${teamspace}/${model}/upload/ms-chunking/${corID}`
 	};
 };
 
