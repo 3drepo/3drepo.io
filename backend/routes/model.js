@@ -2064,7 +2064,8 @@ async function uploadModelChunksStart(req, res, next) {
 	const user = req.session.user.username;
 
 	try {
-		const initHeader = await Upload.uploadChunksStart(account, model, user, corID, req.headers);
+		const url = responsePlace.split(" ")[1];
+		const initHeader = await Upload.uploadChunksStart(account, model, user, corID, req.headers, url);
 		res.writeHead(200, initHeader);
 		res.end();
 	} catch(err) {

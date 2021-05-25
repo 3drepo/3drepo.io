@@ -132,7 +132,7 @@ Upload.uploadFile = async (req) => {
 	return uploadedFile;
 };
 
-Upload.uploadChunksStart = async (teamspace, model, username, corID, headers) => {
+Upload.uploadChunksStart = async (teamspace, model, username, corID, headers, url) => {
 	if (!headers["x-ms-transfer-mode"] ||
 		headers["x-ms-transfer-mode"] !== "chunked" ||
 		!headers["x-ms-content-length"] ||
@@ -148,9 +148,10 @@ Upload.uploadChunksStart = async (teamspace, model, username, corID, headers) =>
 	modelStatusChanged(null, teamspace, model, { status: "uploading", username });
 
 	// FIXME hardcoded URL for testing
+	// "Location":`https://issue-2489.dev.3drepo.io/api/${teamspace}/${model}/upload/ms-chunking/${corID}`
 	return {
 		"x-ms-chunk-size": chunkSize,
-		"Location":`https://issue-2489.dev.3drepo.io/api/${teamspace}/${model}/upload/ms-chunking/${corID}`
+		"Location":`https://issue-2489.dev.3drepo.io${url}`
 	};
 };
 
