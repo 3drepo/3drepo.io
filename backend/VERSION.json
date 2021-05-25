@@ -21,7 +21,7 @@
   },
   "unreal" : {
     "current" : "1.2.0",
-    "supported": ["1.0.2"]
+    "supported": ["1.0.1"]
   },
   "powerbi" : {
 	  "current": "0.0.1",
