@@ -132,7 +132,7 @@ Upload.uploadFile = async (req) => {
 	return uploadedFile;
 };
 
-Upload.uploadChunksStart = async (teamspace, model, headers) => {
+Upload.uploadChunksStart = async (teamspace, model, username, corID, headers) => {
 	if (!headers["x-ms-transfer-mode"] ||
 		headers["x-ms-transfer-mode"] !== "chunked" ||
 		!headers["x-ms-content-length"] ||
@@ -140,26 +140,41 @@ Upload.uploadChunksStart = async (teamspace, model, headers) => {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	// check model exists before upload
-	const modelSetting = await findModelSettingById(teamspace, model);
+	// await Upload.writeChunkData(corID, headers["x-ms-content-length"]);
 
-	if (!modelSetting) {
-		throw responseCodes.MODEL_NOT_FOUND;
-	}
+	const chunkSize = Math.min(52428800, headers["x-ms-content-length"]);
+
+	// upload model with tag
+	modelStatusChanged(null, teamspace, model, { status: "uploading", username });
+
+	return {
+		"x-ms-chunk-size": chunkSize,
+		"Location":`/api/${teamspace}/${model}/upload/ms-chunking/${corID}`
+	};
 };
 
-Upload.uploadFileChunk = async (req) => {
+Upload.uploadFileChunk = async (teamspace, model, corID, req) => {
 	if (!config.cn_queue) {
 		return Promise.reject(responseCodes.QUEUE_NO_CONFIG);
 	}
 
-	const account = req.params.account;
-	const model = req.params.model;
-	const user = req.session.user.username;
+	if (!req.headers["content-range"]) {
+		throw responseCodes.INVALID_ARGUMENTS;
+	}
 
-	modelStatusChanged(null, account, model, { status: "uploading", user });
-	// upload model with tag
+	const [contentRange, contentSize] = req.headers["content-range"].split("/");
+	const [sizeUnit, contentRangeValue] = contentRange.split("=");
 
+	if (sizeUnit !== "bytes") {
+		throw responseCodes.INVALID_ARGUMENTS;
+	}
+
+	const contentMax = contentRangeValue.split("-")[1];
+
+	const sizeRemaining = contentSize - contentMax;
+	const chunkSize = Math.min(52428800, sizeRemaining);
+
+	/*
 	const uploadedFile = await new Promise((resolve, reject) => {
 		const upload = multer({
 			dest: config.cn_queue.upload_dir,
@@ -210,11 +225,16 @@ Upload.uploadFileChunk = async (req) => {
 			}
 		});
 	});
+	*/
 
-	// req.body.tag wont be defined after the file has been uploaded
-	await isValidTag(account, model, req.body.tag);
+	if (chunkSize === 0) {
+		modelStatusChanged(null, teamspace, model, { status: "uploaded" });
+	}
 
-	return uploadedFile;
+	return {
+		"Range": contentRange,
+		"x-ms-chunk-size": chunkSize
+	};
 };
 
 /** *****************************************************************************

@@ -1605,6 +1605,8 @@ router.post("/:model/upload/ms-chunking", middlewares.hasUploadAccessToModel, up
  * @apiName uploadModelChunksStart
  * @apiGroup Model
  * @apiDescription Model upload request for Microsoft Logic Apps.
+ * Max chunk size defined as 52,428,800 bytes (52 MB) based on
+ * https://docs.microsoft.com/en-us/azure/logic-apps/logic-apps-limits-and-config?tabs=azure-portal
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID to upload
@@ -2058,23 +2060,35 @@ async function uploadModelChunksStart(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 	const account = req.params.account;
 	const model = req.params.model;
+	const corID = req.params.corID;
+	const user = req.session.user.username;
 
 	try {
-		await ModelHelpers.uploadRequest(account, model, req.headers);
+		const uploadInfo = await Upload.uploadChunksStart(account, model, user, corID, req.headers);
 
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {"Location":`/api/${account}/${model}/upload/ms-chunking`});
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, uploadInfo);
 	} catch(err) {
 		const errMsg = err.resCode ? err.resCode : err;
 		responseCodes.respond(responsePlace, req, res, next, errMsg, errMsg);
 	}
 }
 
-function uploadModelChunk(req, res, next) {
+async function uploadModelChunk(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 	const account = req.params.account;
 	const model = req.params.model;
-	const username = req.session.user.username;
+	const corID = req.params.corID;
+	// const username = req.session.user.username;
 
+	try {
+		const uploadResult = await Upload.uploadFileChunk(account, model, corID, req);
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, uploadResult);
+	} catch(err) {
+		const errMsg = err.resCode ? err.resCode : err;
+		responseCodes.respond(responsePlace, req, res, next, errMsg, errMsg);
+	}
+
+	/*
 	let modelSetting;
 
 	// check model exists before upload
@@ -2084,7 +2098,7 @@ function uploadModelChunk(req, res, next) {
 		if (!modelSetting) {
 			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 		} else {
-			return ModelHelpers.uploadFileChunk(req);
+			return Upload.uploadFileChunk(req);
 		}
 	}).then(file => {
 		const data = {
@@ -2106,6 +2120,7 @@ function uploadModelChunk(req, res, next) {
 		err = err.resCode ? err.resCode : err;
 		responseCodes.respond(responsePlace, req, res, next, err, err);
 	});
+	*/
 }
 
 function uploadModel(req, res, next) {
