@@ -454,8 +454,15 @@
 		}
 
 		Meta.getAllMetadata(req.params.account, req.params.model, branch, req.params.rev)
-			.then(obj => {
-				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined, req.param.rev ? config.cachePolicy : undefined);
+			.then(stream => {
+				const headers = {
+					"Content-Type" : "application/json"
+				};
+
+				if(req.params.rev) {
+					headers["Cache-Control"] = "private, max-age=" + config.cachePolicy.maxAge;
+				}
+				responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, stream, headers);
 			})
 			.catch(err => {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
