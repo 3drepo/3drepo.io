@@ -70,6 +70,11 @@ export class PinButton extends React.PureComponent<IProps, any> {
 
 	public componentWillUnmount = () => {
 		this.togglePinListeners(false);
+		const { disableMeasure, viewer } = this.props;
+		if (this.state.active) {
+			viewer.setPinDropMode(false);
+			disableMeasure(false);
+		}
 	}
 
 	public handleChangeEditMode = (active) => {
