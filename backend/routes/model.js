@@ -2064,9 +2064,9 @@ async function uploadModelChunksStart(req, res, next) {
 	const user = req.session.user.username;
 
 	try {
-		const uploadInfo = await Upload.uploadChunksStart(account, model, user, corID, req.headers);
-
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, uploadInfo);
+		const initHeader = await Upload.uploadChunksStart(account, model, user, corID, req.headers);
+		res.writeHead(200, initHeader);
+		res.end();
 	} catch(err) {
 		const errMsg = err.resCode ? err.resCode : err;
 		responseCodes.respond(responsePlace, req, res, next, errMsg, errMsg);
@@ -2081,8 +2081,9 @@ async function uploadModelChunk(req, res, next) {
 	// const username = req.session.user.username;
 
 	try {
-		const uploadResult = await Upload.uploadFileChunk(account, model, corID, req);
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, uploadResult);
+		const chunkingHeader = await Upload.uploadFileChunk(account, model, corID, req);
+		res.writeHead(200, chunkingHeader);
+		res.end();
 	} catch(err) {
 		const errMsg = err.resCode ? err.resCode : err;
 		responseCodes.respond(responsePlace, req, res, next, errMsg, errMsg);
