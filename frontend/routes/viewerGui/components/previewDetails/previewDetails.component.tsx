@@ -85,6 +85,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	};
 
 	public headerRef = React.createRef<any>();
+	public textFieldRef = React.createRef<any>();
 	public scrollableContainerRef = React.createRef<HTMLDivElement>();
 
 	public renderNameWithCounter = renderWhenTrue(() => (
@@ -111,6 +112,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 					return (
 						<TextField
 							{...field}
+							inputRef={this.textFieldRef}
 							fullWidth
 							placeholder={placeholder}
 							onChange={this.handleNameChange(field)}
@@ -164,7 +166,10 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	}
 
 	public componentDidMount() {
-		const { editable, defaultExpanded } = this.props;
+		const { editable, defaultExpanded, isNew } = this.props;
+		if (isNew && this.textFieldRef.current) {
+			this.textFieldRef.current.select();
+		}
 
 		this.setState({
 			expanded: editable || defaultExpanded
