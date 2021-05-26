@@ -32,6 +32,7 @@ import {
 } from '../../helpers/comments';
 import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
 import { prepareIssue } from '../../helpers/issues';
+import { generateName } from '../../helpers/measurements';
 import { prepareResources } from '../../helpers/resources';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
 import * as API from '../../services/api';
@@ -669,7 +670,9 @@ const onMeasurementCreated = (measurement) => {
 };
 
 export function* addMeasurement({ measurement }) {
-	const shapes = [...yield select(selectShapes), measurement];
+	let shapes = yield select(selectShapes);
+	measurement.name = generateName(measurement, shapes);
+	shapes = [...shapes, measurement];
 	const activeIssue = yield select(selectActiveIssueDetails);
 	const isNewIssue = !Boolean(activeIssue._id);
 
