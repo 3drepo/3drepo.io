@@ -60,12 +60,12 @@ def getFile(db, fsfolder, collection_name, id):
 
 def testActivitiesFile(db, modelId, sequenceId):
   activitiesCollName = modelId + ".activities"
-  ref = getRef(db, activitiesCollName, id)
+  ref = getRef(db, activitiesCollName, str(sequenceId))
   if not ref:
     print("Warning: file reference for sequence " + str(sequenceId) + " was not found")
     return
   else:
-    print("File reference for sequence " + str(sequenceId) + " was found. Ref type:" + ref["type"] + ", link:" + (entry["link"]))
+    print("File reference for sequence " + str(sequenceId) + " was found. Ref type:" + ref["type"] + ", link:" + (ref["link"]))
 
   fileContents = getFile(db, fsDirectory, activitiesCollName, str(sequenceId))
   if fileContents:
@@ -99,13 +99,13 @@ def removeFile(db, fsfolder, collection_name, id):
   if entry:
     if entry["type"] == "fs":
       if removeFileFs(fsfolder, entry["link"]):
-        print "File succesfully removed from filesystem" + entry["link"]
+        print("File succesfully removed from filesystem" + entry["link"])
       else:
-        print "File unsuccesfully removed from filesystem" + entry["link"]
+        print("File unsuccesfully removed from filesystem" + entry["link"])
 
     removeFileGridFs(db, collection_name, entry["link"])
   else:
-    print "Fileref not found " + id
+    print ("Fileref not found " + id)
 
   db[collection_name + ".ref"].delete_one({"_id": id})
 
@@ -144,9 +144,10 @@ for database in db.database_names():
         for setting in db.settings.find(no_cursor_timeout=True):
             modelId = str(setting["_id"])
             print("\t--model: " +  modelId)
-            for entry in db[modelId + ".sequences"].find({}):
+            for entry in db[modelId + ".sequences"].find({"customSequence": {"$ne": True}}):
                 entryId = entry["_id"]
                 print("\t\t--sequence: " + str(entryId))
+                sequencefullname = str(database) + "/" +str(modelId) + "/" + str(entryId)
 
                 if not dryRun:
                   removeFile(db, fsDirectory , modelId + ".activities",  str(entryId))
