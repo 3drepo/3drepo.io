@@ -63,6 +63,7 @@ describe("Shapes", () => {
 	const polygonShape = {"positions":[[-60.000038146972656,-9.8860445022583,5.308515548706055],[-60.000160217285156,-9.988062858581543,0.5673561096191406],[-59.99986267089844,-3.359354019165039,0.1131591796875],[-50.14781951904297,-8.279975891113281,1.2230510711669922],[-50.822227478027344,-7.942905426025391,11.220046997070312],[-59.99982452392578,-3.374828338623047,5.719915390014648],[-59.99979782104492,-9.81118392944336,8.075897216796875]],"normals":[[-1,0,0],[-1,0,0],[-1,0,0],[0.44721364974975586,0.8944271802902222,0],[0.44721364974975586,0.8944271802902222, 0],[-1,0,0],[-1,0,0]],"value":155.05921936035156,"color":[0.7760000228881836,0.32499998807907104,0.5490000247955322,1],"type":1};
 
 	const anotherPointToPointShape =  {
+		"name": "anotherPointToPointShape",
 		"positions": [
 			[
 				0.0,
@@ -178,8 +179,7 @@ describe("Shapes", () => {
 			expect(chopUuIds(theIssue.shapes)).to.be.deep.equal(shapeIssue.shapes);
 		});
 
-
-		it ("When updating other properties should keep the shapes", async()=> {
+		it ("when updating other properties should keep the shapes", async()=> {
 			await agent.patch(`/${username}/${model}/issues/${issueId}`)
 				.send({desc: "description updated in issue"})
 				.expect(200);
@@ -188,7 +188,17 @@ describe("Shapes", () => {
 			expect(chopUuIds(res.body.shapes)).to.be.deep.equal(shapeIssue.shapes);
 		});
 
-		it ("When updating shapes should succeed", async()=> {
+		it ("when updating with wrong schema shape shouldnt affect the shapes", async()=> {
+			const shapes = [{...pointToPointShape, unknownField: "wrong stuff"}];
+			await agent.patch(`/${username}/${model}/issues/${issueId}`)
+				.send({shapes})
+				.expect(responseCodes.INVALID_ARGUMENTS.status);
+
+			const res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
+			expect(chopUuIds(res.body.shapes)).to.be.deep.equal(shapeIssue.shapes);
+		});
+
+		it ("when updating shapes should succeed", async()=> {
 			const shapes = [anotherPointToPointShape];
 
 			await agent.patch(`/${username}/${model}/issues/${issueId}`)

@@ -70,7 +70,7 @@ function Utils() {
 		}
 	};
 
-	this.uuidSchema = yup.object().test((val) => this.isUUIDObject(val));
+	this.uuidSchema = yup.object().test((val) => val === undefined  || this.isUUIDObject(val));
 
 	this.convertQueryValue = (value, type) => {
 		switch(type) {

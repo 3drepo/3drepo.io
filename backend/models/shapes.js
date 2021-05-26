@@ -31,7 +31,7 @@ const shapesSchema = yup.object().shape({
 	"value": yup.number().min(0),
 	"color": colorSchema.required(),
 	"type": yup.mixed().oneOf([0, 1]).required(),
-	"ticket_id": utils.uuidSchema.required(),
+	"ticket_id": utils.uuidSchema,
 	"name": yup.string(),
 	// this is for convenience only, because the shape has this field in unity we allow it
 	// to be posted in this form, even though it will be replaced with _id when fetching
@@ -47,8 +47,8 @@ Shapes.clean = (shape) => {
 	return shape;
 };
 
-Shapes.create = async (account, model, subCollectionName, shape) => {
-	if (!shapesSchema.isValidSync(shape, { strict: true })) {
+Shapes.create = async (account, model, subCollectionName, shape, skipValidation = false) => {
+	if (!skipValidation && !shapesSchema.isValidSync(shape, { strict: true })) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
@@ -67,5 +67,7 @@ Shapes.removeByTicketId = async (account, model, subCollectionName, ticket_id) =
 	const query = { ticket_id: utils.stringToUUID(ticket_id) };
 	return await DB.remove(account, getCollectionName(model, subCollectionName), query);
 };
+
+Shapes.schema = shapesSchema;
 
 module.exports = Shapes;

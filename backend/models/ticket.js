@@ -324,8 +324,12 @@ class Ticket extends View {
 		const shapes = data.shapes;
 		// Handle shapes
 		if (data.shapes) {
+			if (!(data.shapes.every(shape => Shapes.schema.isValidSync(shape, { strict: true })))) {
+				throw responseCodes.INVALID_ARGUMENTS;
+			}
+
 			await Shapes.removeByTicketId(account, model, this.collName, _id);
-			data.shapes = await Promise.all(shapes.map(shape => Shapes.create(account, model, this.collName, {...shape, ticket_id:_id })));
+			data.shapes = await Promise.all(shapes.map(shape => Shapes.create(account, model, this.collName, {...shape, ticket_id:_id }, true)));
 		}
 
 		// 6. Update the data
