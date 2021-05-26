@@ -22,6 +22,7 @@ import { ISSUE_DEFAULT_HIDDEN_STATUSES } from '../../constants/issues';
 import { prepareComments, transformCustomsLinksToMarkdown } from '../../helpers/comments';
 import { hasPin, issueToPin } from '../../helpers/pins';
 import { searchByFilters } from '../../helpers/searching';
+import { hasShapes } from '../../helpers/shapes';
 import { sortByDate } from '../../helpers/sorting';
 import { MEASURE_TYPE } from '../measurements/measurements.constants';
 import { selectCurrentModel } from '../model';
@@ -188,10 +189,24 @@ export const selectMeasureMode = createSelector(
 );
 
 export const selectShapes = createSelector(
-	selectActiveIssueDetails, (issue) => {
-		return (issue || {}).shapes || [];
+	selectFilteredIssues, selectActiveIssueDetails, selectShowDetails, selectActiveIssueId,
+	selectSelectedSequence, selectSelectedStartingDate, selectSelectedEndingDate,
+	(issues: any, detailedIssue, showDetails, activeIssueId,
+		selectedSequence, sequenceStartDate, sequenceEndDate) => {
+
+	if (showDetails) {
+		return (detailedIssue.shapes || []);
 	}
-);
+
+	return issues.reduce((shapes, issue) => {
+		if (!hasShapes(issue, selectedSequence, sequenceStartDate, sequenceEndDate)) {
+			return shapes;
+		}
+
+		shapes.push.apply(shapes, issue.shapes);
+		return shapes;
+	} , []);
+});
 
 export const selectAreaMeasurements = createSelector(
 	selectShapes, (shapes) => {

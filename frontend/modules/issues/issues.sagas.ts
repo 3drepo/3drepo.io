@@ -670,10 +670,10 @@ const onMeasurementCreated = (measurement) => {
 };
 
 export function* addMeasurement({ measurement }) {
-	let shapes = yield select(selectShapes);
+	const activeIssue = yield select(selectActiveIssueDetails);
+	let shapes = activeIssue.shapes || [];
 	measurement.name = generateName(measurement, shapes);
 	shapes = [...shapes, measurement];
-	const activeIssue = yield select(selectActiveIssueDetails);
 	const isNewIssue = !Boolean(activeIssue._id);
 
 	if (isNewIssue) {
@@ -684,8 +684,8 @@ export function* addMeasurement({ measurement }) {
 }
 
 export function* removeMeasurement({ uuid }) {
-	const shapes = (yield select(selectShapes)).filter((measurement) => measurement.uuid !== uuid);
 	const activeIssue = yield select(selectActiveIssueDetails);
+	const shapes = (activeIssue.shapes || []).filter((measurement) => measurement.uuid !== uuid);
 	const isNewIssue = !Boolean(activeIssue._id);
 
 	if (isNewIssue) {
@@ -726,14 +726,14 @@ export function* setMeasureMode({ measureMode }) {
 }
 
 export function* setMeasurementColor({uuid, color}) {
-	const shapes = (yield select(selectShapes)).map((measurement) => {
+	const activeIssue = yield select(selectActiveIssueDetails);
+	const shapes = (activeIssue.shapes || []).map((measurement) => {
 		if (measurement.uuid === uuid) {
 			measurement = {...measurement, color};
 		}
 		return measurement;
 	});
 
-	const activeIssue = yield select(selectActiveIssueDetails);
 	const isNewIssue = !Boolean(activeIssue._id);
 
 	if (isNewIssue) {
@@ -744,14 +744,14 @@ export function* setMeasurementColor({uuid, color}) {
 }
 
 export function* setMeasurementName({uuid, name}) {
-	const shapes = (yield select(selectShapes)).map((measurement) => {
+	const activeIssue = yield select(selectActiveIssueDetails);
+	const shapes = (activeIssue.shapes || []).map((measurement) => {
 		if (measurement.uuid === uuid) {
 			measurement = {...measurement, name};
 		}
 		return measurement;
 	});
 
-	const activeIssue = yield select(selectActiveIssueDetails);
 	const isNewIssue = !Boolean(activeIssue._id);
 
 	if (isNewIssue) {
