@@ -19,7 +19,7 @@ import { push } from 'connected-react-router';
 import filesize from 'filesize';
 import { isEmpty, isEqual, map, omit } from 'lodash';
 import * as queryString from 'query-string';
-import { all, put, select, takeLatest } from 'redux-saga/effects';
+import { all, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { RISK_DEFAULT_HIDDEN_LEVELS } from '../../constants/risks';
@@ -30,12 +30,16 @@ import {
 } from '../../helpers/comments';
 
 import { EXTENSION_RE } from '../../constants/resources';
+import { VIEWER_EVENTS } from '../../constants/viewer';
 import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
+import { generateName } from '../../helpers/measurements';
 import { prepareResources } from '../../helpers/resources';
 import { SuggestedTreatmentsDialog } from '../../routes/components/dialogContainer/components';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
+import { Viewer } from '../../services/viewer/viewer';
+import { BimActions } from '../bim';
 import { BoardActions } from '../board';
 import { ChatActions } from '../chat';
 import { selectCurrentUser } from '../currentUser';
@@ -47,6 +51,7 @@ import { selectSelectedStartingDate, SequencesActions } from '../sequences';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { TreeActions } from '../tree';
+import { ViewerGuiActions } from '../viewerGui';
 import { ViewpointsActions } from '../viewpoints';
 import { generateViewpoint } from '../viewpoints/viewpoints.sagas';
 import { RisksActions, RisksTypes } from './risks.redux';
@@ -154,11 +159,11 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 	yield put(RisksActions.toggleDetailsPendingState(false));
 }
 
-function* updateRisk({ teamspace, modelId, riskData }) {
+function* updateRisk({riskData}) {
 	try {
-		const { _id, rev_id, position } = yield select(selectActiveRiskDetails);
-		let { data: updatedRisk } = yield API.updateRisk(teamspace, modelId, _id, rev_id, riskData);
-		updatedRisk.resources = prepareResources(teamspace, modelId, updatedRisk.resources);
+		const { _id, rev_id, model, account, position } = yield select(selectActiveRiskDetails);
+		let { data: updatedRisk } = yield API.updateRisk(account, model, _id, rev_id, riskData);
+		updatedRisk.resources = prepareResources(account, model, updatedRisk.resources);
 
 		analyticsService.sendEvent(EVENT_CATEGORIES.RISK, EVENT_ACTIONS.EDIT);
 		updatedRisk = {...updatedRisk, ...riskData};
@@ -614,6 +619,54 @@ export function * updateActiveRiskViewpoint({screenshot}) {
 	yield put(RisksActions.updateRisk(account, model, {viewpoint}));
 }
 
+/** shapes **/
+
+export function* setMeasureMode({ measureMode }) {
+	try {
+		yield Viewer.off(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
+		yield Viewer.off(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
+		yield put(RisksActions.setMeasureModeSuccess(measureMode));
+		yield Viewer.setMeasureMode(measureMode, false);
+
+		if (measureMode === '') {
+			return;
+		}
+
+		yield Viewer.on(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
+		yield Viewer.on(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
+
+		ViewerGuiActions.setClipEdit(false);
+		BimActions.setIsActive(false);
+		yield Viewer.disableEdgeSnapping();
+	} catch (error) {
+		DialogActions.showErrorDialog('set', `measure mode in issues to ${measureMode}`, error);
+	}
+}
+
+const onMeasurementChanged = () => {
+	Viewer.off(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
+	Viewer.off(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
+	dispatch(RisksActions.setMeasureModeSuccess(''));
+};
+
+const onMeasurementCreated = (measurement) => {
+	dispatch(RisksActions.addMeasurement(measurement));
+};
+
+export function* addMeasurement({ measurement }) {
+	const activeRisk = yield select(selectActiveRiskDetails);
+	let shapes = activeRisk.shapes || [];
+	measurement.name = generateName(measurement, shapes);
+	shapes = [...shapes, measurement];
+	const isNewIssue = !Boolean(activeRisk._id);
+
+	if (isNewIssue) {
+		yield put(RisksActions.updateNewRisk({...activeRisk, shapes}));
+	} else {
+		yield put(RisksActions.updateRisk({shapes}));
+	}
+}
+
 export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.FETCH_RISKS, fetchRisks);
 	yield takeLatest(RisksTypes.FETCH_RISK, fetchRisk);
@@ -642,4 +695,10 @@ export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.FETCH_MITIGATION_CRITERIA, fetchMitigationCriteria);
 	yield takeLatest(RisksTypes.SHOW_MITIGATION_SUGGESTIONS, showMitigationSuggestions);
 	yield takeLatest(RisksTypes.UPDATE_ACTIVE_RISK_VIEWPOINT, updateActiveRiskViewpoint);
+	yield takeLatest(RisksTypes.SET_MEASURE_MODE, setMeasureMode);
+	yield takeEvery(RisksTypes.ADD_MEASUREMENT, addMeasurement);
+	// yield takeEvery(RisksTypes.REMOVE_MEASUREMENT, removeMeasurement);
+	// yield takeEvery(RisksTypes.SET_MEASUREMENT_COLOR, setMeasurementColor);
+	// yield takeEvery(RisksTypes.SET_MEASUREMENT_NAME, setMeasurementName);
+
 }

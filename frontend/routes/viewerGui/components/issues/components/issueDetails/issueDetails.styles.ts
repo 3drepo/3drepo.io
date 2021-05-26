@@ -111,11 +111,10 @@ export const StyledTabs = styled(Tabs)`
 		width: 15px;
 	}
 
-	&&  {
+	&& {
 		position: relative;
-		width: 352px;
+		width: 345px;
 	}
-}
 `;
 
 export const Content = styled.div`

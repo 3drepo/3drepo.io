@@ -54,7 +54,8 @@ interface IProps {
 	presentationMode: PresentationMode;
 	isPresentationPaused: boolean;
 	handleTransparenciesVisibility: any;
-	issueShapes: any[];
+	issuesShapes: any[];
+	risksShapes: any[];
 }
 
 export class ViewerCanvas extends React.PureComponent<IProps, any> {
@@ -138,7 +139,7 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 		const { colorOverrides, issuePins, riskPins, measurementPins, hasGisCoordinates,
 			gisCoordinates, gisLayers, transparencies, transformations: transformation,
 			sequenceHiddenNodes, viewerManipulationEnabled, viewer,
-			issueShapes
+			issuesShapes, risksShapes
 		} = this.props;
 
 		if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
@@ -173,8 +174,12 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 			this.renderGisLayers(prevProps.gisLayers, gisLayers);
 		}
 
-		if (!isEqual(prevProps.issueShapes, issueShapes)) {
-			this.renderMeasurements(prevProps.issueShapes, issueShapes);
+		if (!isEqual(prevProps.issuesShapes, issuesShapes)) {
+			this.renderMeasurements(prevProps.issuesShapes, issuesShapes);
+		}
+
+		if (!isEqual(prevProps.risksShapes, risksShapes)) {
+			this.renderMeasurements(prevProps.risksShapes, risksShapes);
 		}
 
 		if (prevProps.viewerManipulationEnabled !== viewerManipulationEnabled) {

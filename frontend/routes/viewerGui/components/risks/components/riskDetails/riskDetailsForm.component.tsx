@@ -47,6 +47,7 @@ interface IProps {
 	myJob: any;
 	isValid: boolean;
 	dirty: boolean;
+	horizontal: boolean;
 	onSubmit: (values) => void;
 	onValueChange: (event) => void;
 	handleChange: (event) => void;
@@ -69,13 +70,16 @@ interface IProps {
 	onTakeScreenshot: () => void;
 	onUploadScreenshot: (image) => void;
 	showSequenceDate: (date) => void;
+	setMeasureMode: (measureMode) => void;
+	removeMeasurement: (uuid) => void;
+	setMeasurementColor: (uuid, color) => void;
+	setMeasurementName: (uuid, type, name) => void;
 	minSequenceDate: number;
 	maxSequenceDate: number;
 	selectedDate: Date;
 	sequences: any[];
-	units: string;
-	lengthMeasurements: any;
-	areaMeasurements: any;
+	units: any;
+	measureMode: string;
 }
 
 interface IState {
@@ -212,11 +216,13 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		<ShapesFormTab
 			active={active}
 			units={this.props.units}
-			lengthMeasurements={this.props.lengthMeasurements}
-			areaMeasurements={this.props.areaMeasurements}
-			removeMeasurement={() => {}}
-			setMeasurementColor={() => {}}
-			setMeasurementName={() => {}}
+			measureMode={this.props.measureMode}
+			removeMeasurement={this.props.removeMeasurement}
+			setMeasurementColor={this.props.setMeasurementColor}
+			setMeasurementName={this.props.setMeasurementName}
+			setMeasureMode={this.props.setMeasureMode}
+			shapes={this.props.risk.shapes}
+			addButtonsEnabled={!this.props.horizontal}
 		/>
 	)
 

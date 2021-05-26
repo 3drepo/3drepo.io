@@ -26,7 +26,7 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	fetchRiskFailure: [],
 	setComponentState: ['componentState'],
 	saveRisk: ['teamspace', 'model', 'riskData', 'revision', 'finishSubmitting', 'ignoreViewer'],
-	updateRisk: ['teamspace', 'modelId', 'riskData'],
+	updateRisk: [ 'riskData'],
 	updateBoardRisk: ['teamspace', 'modelId', 'riskData'],
 	cloneRisk: ['dialogId'],
 	postComment: ['teamspace', 'modelId', 'riskData', 'ignoreViewer', 'finishSubmitting'],
@@ -69,6 +69,12 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	fetchMitigationCriteriaFailure: [],
 	showMitigationSuggestions: ['conditions', 'setFieldValue'],
 	updateActiveRiskViewpoint: ['screenshot'],
+	setMeasureMode: ['measureMode'],
+	setMeasureModeSuccess: ['measureMode'],
+	addMeasurement: ['measurement'],
+	removeMeasurement: ['uuid'],
+	setMeasurementColor: ['uuid', 'color'],
+	setMeasurementName: ['uuid', 'name'],
 	reset: []
 }, { prefix: 'RISKS/' });
 
@@ -81,15 +87,23 @@ export interface IRisksComponentState {
 	newComment: any;
 	selectedFilters: any[];
 	associatedActivities: any[];
+	fetchingDetailsIsPending: boolean;
+	postCommentIsPending: boolean;
+	failedToLoad: boolean;
+	filteredRisks: any[];
+	measureMode: string;
+	sortOrder: string;
+	sortBy: string;
 }
 
 export interface IRisksState {
 	risksMap: any;
 	isPending: boolean;
 	componentState: IRisksComponentState;
+	mitigationCriteria: any;
 }
 
-export const INITIAL_STATE = {
+export const INITIAL_STATE: IRisksState = {
 	risksMap: {},
 	isPending: true,
 	componentState: {
@@ -106,7 +120,8 @@ export const INITIAL_STATE = {
 		associatedActivities: [],
 		sortOrder: 'desc',
 		failedToLoad: false,
-		sortBy: 'created'
+		sortBy: 'created',
+		measureMode: ''
 	},
 	mitigationCriteria: {},
 };
@@ -303,6 +318,10 @@ export const fetchMitigationCriteriaSuccess = (state = INITIAL_STATE,  { criteri
 	return { ...state, mitigationCriteria: { ...criteria, teamspace } };
 };
 
+const setMeasureModeSuccess = (state = INITIAL_STATE, { measureMode }) => {
+	return setComponentState(state, { componentState: { measureMode } });
+};
+
 const reset = () => cloneDeep(INITIAL_STATE);
 
 export const reducer = createReducer(INITIAL_STATE, {
@@ -330,4 +349,5 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.FETCH_MITIGATION_CRITERIA_SUCCESS]: fetchMitigationCriteriaSuccess,
 	[RisksTypes.FETCH_MITIGATION_CRITERIA_FAILURE]: fetchRiskFailure,
 	[RisksTypes.RESET]: reset,
+	[RisksTypes.SET_MEASURE_MODE_SUCCESS]: setMeasureModeSuccess,
 });

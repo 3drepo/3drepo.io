@@ -23,6 +23,7 @@ import { prepareComments, transformCustomsLinksToMarkdown } from '../../helpers/
 import { hasPin, riskToPin } from '../../helpers/pins';
 import { prepareRisk } from '../../helpers/risks';
 import { searchByFilters } from '../../helpers/searching';
+import { hasShapes } from '../../helpers/shapes';
 import { sortByDate } from '../../helpers/sorting';
 import { selectJobsList } from '../jobs';
 import { selectQueryParams } from '../router/router.selectors';
@@ -79,20 +80,6 @@ export const selectActiveRisk = createSelector(
 
 export const selectNewRiskDetails = createSelector(
 	selectComponentState, selectJobsList, (state, jobs) => prepareRisk(state.newRisk, jobs)
-);
-
-export const selectLengthMeasurements = createSelector(
-	selectRisksDomain, (state) => {
-		// tslint:disable-next-line:max-line-length
-		return [{uuid: '054b576e-6f54-499d-9d67-b6fa0aa5b1f1', positions: [{x: -59.25340270996094, y: -13.999282836914062, z: 29.996967315673828}, {x: -0.05361175537109375, y: -12.080501556396484, z: -0.0009403228759765625}], value: 66.39405822753906, color: {r: 11.99774980545044, g: 46.99905104935169, b: 83.99954661726952, a: 1}, type: 0, name: 'Length 1'}];
-	}
-);
-
-export const selectAreaMeasurements = createSelector(
-	selectRisksDomain, (state) => {
-		// tslint:disable-next-line:max-line-length
-		return [{uuid: 'd6571708-5ab0-4fcb-b8dd-1f53bfeb8ab7', positions: [{x: -59.50435256958008, y: -13.999637603759766, z: 29.960800170898438}, {x: -59.48398971557617, y: -12.075416564941406, z: -0.00049591064453125}, {x: -0.05361175537109375, y: -12.080501556396484, z: -0.0009403228759765625}, {x: -59.50435256958008, y: -13.999637603759766, z: 29.960800170898438}, {x: -0.05361175537109375, y: -12.080501556396484, z: -0.0009403228759765625}, {x: -27.99907684326172, y: -0.1439056396484375, z: 23.5274658203125}, {x: -59.50435256958008, y: -13.999637603759766, z: 29.960800170898438}, {x: -27.99907684326172, y: -0.1439056396484375, z: 23.5274658203125}, {x: -27.999160766601562, y: -0.16939926147460938, z: 23.72183609008789}, {x: -27.999160766601562, y: -0.16939926147460938, z: 23.72183609008789}, {x: -59.50435256958008, y: -13.999637603759766, z: 29.960800170898438}, {x: -27.999160766601562, y: -0.16939926147460938, z: 23.72183609008789}, {x: -27.999160766601562, y: -0.16939926147460938, z: 23.72183609008789}, {x: -27.999160766601562, y: -0.16939926147460938, z: 23.72183609008789}, {x: -27.999160766601562, y: -0.16939926147460938, z: 23.72183609008789}, {x: -27.999160766601562, y: -0.16939926147460938, z: 23.72183609008789}, {x: -27.999160766601562, y: -0.16939926147460938, z: 23.72183609008789}, {x: -27.999160766601562, y: -0.16939926147460938, z: 23.72183609008789}], value: 1410.280517578125, color: {r: 197.88000583648682, g: 82.87499696016312, b: 139.99500632286072, a: 1}, type: 1, name: 'Area 1', checked: true}];
-	}
 );
 
 export const selectActiveRiskDetails = createSelector(
@@ -207,3 +194,28 @@ export const selectMitigationCriteria = createSelector(
 export const selectRiskCategories = createSelector(
 	selectMitigationCriteria, (mitigation) => mitigation?.category || []
 );
+
+export const selectMeasureMode = createSelector(
+	selectComponentState, (componentState) => componentState.measureMode
+);
+
+export const selectShapes = createSelector(
+	selectFilteredRisks, selectActiveRiskDetails,
+	selectShowDetails,
+	selectSelectedSequence, selectSelectedStartingDate, selectSelectedEndingDate,
+	(risks: any[], detailedRisk, showDetails,
+		selectedSequence, sequenceStartDate, sequenceEndDate) => {
+
+	if (showDetails) {
+		return (detailedRisk.shapes || []);
+	}
+
+	return risks.reduce((shapes, issue) => {
+		if (!hasShapes(issue, selectedSequence, sequenceStartDate, sequenceEndDate)) {
+			return shapes;
+		}
+
+		shapes.push.apply(shapes, issue.shapes);
+		return shapes;
+	} , []);
+});

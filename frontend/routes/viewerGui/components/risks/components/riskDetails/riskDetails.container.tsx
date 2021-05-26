@@ -25,12 +25,11 @@ import { selectSettings, selectUnit } from '../../../../../../modules/model';
 import {
 	selectActiveRiskComments,
 	selectActiveRiskDetails,
-	selectAreaMeasurements,
 	selectAssociatedActivities,
 	selectExpandDetails,
 	selectFailedToLoad,
 	selectFetchingDetailsIsPending,
-	selectLengthMeasurements,
+	selectMeasureMode,
 	selectMitigationCriteria,
 	selectNewComment,
 	selectPostCommentIsPending,
@@ -68,8 +67,7 @@ const mapStateToProps = createStructuredSelector({
 	selectedDate: selectSelectedStartingDate,
 	sequences: selectSequences,
 	units: selectUnit,
-	lengthMeasurements: selectLengthMeasurements,
-	areaMeasurements: selectAreaMeasurements
+	measureMode: selectMeasureMode
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -94,6 +92,10 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showDialog: DialogActions.showDialog,
 	showMitigationSuggestions: RisksActions.showMitigationSuggestions,
 	showSequenceDate: SequencesActions.showSequenceDate,
+	setMeasureMode: RisksActions.setMeasureMode,
+	removeMeasurement: RisksActions.removeMeasurement,
+	setMeasurementColor: RisksActions.setMeasurementColor,
+	setMeasurementName: RisksActions.setMeasurementName,
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(RiskDetails));
