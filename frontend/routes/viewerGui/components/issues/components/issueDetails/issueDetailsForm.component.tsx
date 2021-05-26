@@ -37,7 +37,7 @@ import { AttachmentsFormTab } from '../../../risks/components/attachmentsFormTab
 import { SequencingFormTab } from '../../../risks/components/sequencingFormTab/sequencingFormTab.component';
 import { ShapesFormTab } from '../../../risks/components/shapesFormTab/shapesFormTab.component';
 import { MainIssueFormTab } from '../mainIssueFormTab/mainIssueFormTab.component';
-import { StyledTab, TabContent } from './issueDetails.styles';
+import { StyledTab, StyledTabs, TabContent } from './issueDetails.styles';
 
 interface IProps {
 	issue: any;
@@ -218,17 +218,19 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 
 		return (
 			<Form>
-				<Tabs
+				<StyledTabs
 					value={activeTab}
 					indicatorColor="secondary"
 					textColor="primary"
 					onChange={this.handleChange}
+					variant="scrollable"
+					scrollButtons="auto"
 				>
 					<StyledTab label={ISSUE_TABS.ISSUE} value={ISSUE_PROPERTIES_TAB} />
 					<StyledTab label={ISSUE_TABS.SEQUENCING} value={ISSUE_SEQUENCING_TAB} />
 					<StyledTab label={ISSUE_TABS.SHAPES} value={ISSUE_SHAPES_TAB} />
 					<StyledTab {...this.attachmentsProps} value={ATTACHMENTS_ISSUE_TAB} />
-				</Tabs>
+				</StyledTabs>
 				<TabContent>
 					{this.showIssueContent(activeTab === ISSUE_PROPERTIES_TAB)}
 					{this.showSequencingContent(activeTab === ISSUE_SEQUENCING_TAB)}

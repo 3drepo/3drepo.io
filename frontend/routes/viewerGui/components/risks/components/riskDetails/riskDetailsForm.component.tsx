@@ -250,7 +250,8 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					indicatorColor="secondary"
 					textColor="primary"
 					onChange={this.handleChange}
-					variant="fullWidth"
+					variant="scrollable"
+					scrollButtons="auto"
 				>
 					<StyledTab label={RISK_TABS.RISK} value={MAIN_RISK_TYPE} />
 					<StyledTab label={RISK_TABS.TREATMENT} value={TREATMENT_RISK_TYPE} />
