@@ -75,8 +75,9 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	setMeasureMode: ['measureMode'],
 	setMeasureModeSuccess: ['measureMode'],
 	addMeasurement: ['measurement'],
+	removeMeasurement: ['uuid'],
 	setMeasurementColor: ['uuid', 'color'],
-	removeMeasurement: ['uuid']
+	setMeasurementName: ['uuid', 'name'],
 }, { prefix: 'ISSUES/' });
 
 export const INITIAL_STATE = {

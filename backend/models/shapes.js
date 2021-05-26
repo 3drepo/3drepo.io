@@ -32,6 +32,7 @@ const shapesSchema = yup.object().shape({
 	"color": colorSchema.required(),
 	"type": yup.mixed().oneOf([0, 1]).required(),
 	"ticket_id": utils.uuidSchema.required(),
+	"name": yup.string(),
 	// this is for convenience only, because the shape has this field in unity we allow it
 	// to be posted in this form, even though it will be replaced with _id when fetching
 	"uuid": yup.string()

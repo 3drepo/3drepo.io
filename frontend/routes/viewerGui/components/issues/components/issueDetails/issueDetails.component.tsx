@@ -301,6 +301,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				removeMeasurement={this.props.removeMeasurement}
 				setMeasureMode={this.props.setMeasureMode}
 				setMeasurementColor={this.props.setMeasurementColor}
+				setMeasurementName={this.props.setMeasurementName}
 				horizontal={this.props.horizontal}
 			/>
 		);
