@@ -63,6 +63,8 @@ import {
 	selectShapes
 } from './issues.selectors';
 
+
+
 function* fetchIssues({teamspace, modelId, revision}) {
 	yield put(IssuesActions.togglePendingState(true));
 	try {
@@ -325,6 +327,8 @@ function* goToIssue({ issue }) {
 
 function* showDetails({ revision, issueId }) {
 	try {
+		yield cancelMeasureModeIfNeeded();
+
 		const issuesMap = yield select(selectIssuesMap);
 		const issue = issuesMap[issueId];
 
@@ -344,12 +348,8 @@ function* closeDetails() {
 	try {
 		const activeIssue = yield select(selectActiveIssueDetails);
 		const componentState = yield select(selectComponentState);
-		const measureMode = yield select(selectMeasureMode);
 
-		if (measureMode) {
-			yield put(IssuesActions.setMeasureMode(''));
-			yield take(IssuesTypes.SET_MEASURE_MODE_SUCCESS);
-		}
+		yield cancelMeasureModeIfNeeded();
 
 		if (componentState.showDetails) {
 			if (!isEqual(activeIssue.position, componentState.savedPin)) {
@@ -692,6 +692,14 @@ export function* removeMeasurement({ uuid }) {
 		yield put(IssuesActions.updateNewIssue({...activeIssue, shapes}));
 	} else {
 		yield put(IssuesActions.updateActiveIssue({shapes}));
+	}
+}
+
+function* cancelMeasureModeIfNeeded() {
+	const measureMode = yield select(selectMeasureMode);
+	if (measureMode) {
+		yield put(IssuesActions.setMeasureMode(''));
+		yield take(IssuesTypes.SET_MEASURE_MODE_SUCCESS);
 	}
 }
 
