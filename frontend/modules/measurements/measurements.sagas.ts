@@ -93,9 +93,6 @@ export function* addMeasurement({ measurement }) {
 		if (measurementStateName) {
 			const measurementsState = yield select(selectMeasurementsDomain);
 			measurement.name =  generateName(measurement,  measurementsState[measurementStateName]);
-			measurement.color.r = measurement.color.r * 255;
-			measurement.color.g = measurement.color.g * 255;
-			measurement.color.b = measurement.color.b * 255;
 
 			yield Viewer.setMeasurementName(measurement.uuid, measurement.name);
 			yield put(MeasurementsActions.addMeasurementSuccess(measurement));
@@ -117,9 +114,8 @@ export function* removeMeasurement({ uuid }) {
 }
 
 export function* setMeasurementColor({ uuid, color }) {
-	const colorToSet = [color.r / 255, color.g / 255, color.b / 255, color.a];
 	try {
-		yield Viewer.setMeasurementColor(uuid, colorToSet);
+		yield Viewer.setMeasurementColor(uuid, color);
 		yield put(MeasurementsActions.setMeasurementColorSuccess(uuid, color));
 	} catch (error) {
 		DialogActions.showErrorDialog('set color', 'measure', error);
@@ -142,8 +138,7 @@ export function* resetMeasurementColors() {
 		const pointMeasurements = yield select(selectPointMeasurements);
 
 		const setDefaultColor = async ({ uuid, color }) => {
-			const colorToSet = [color.r / 255, color.g / 255, color.b / 255, color.a];
-			await Viewer.setMeasurementColor(uuid, colorToSet);
+			await Viewer.setMeasurementColor(uuid, color);
 		};
 
 		if (areaMeasurements.length) {

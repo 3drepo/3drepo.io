@@ -104,7 +104,7 @@ export const MeasureItem = ({
 	};
 
 	const handleColorChange = (hexColor) => {
-		props.setMeasurementColor(uuid, hexToGLColor(hexColor));
+		props.setMeasurementColor(uuid, hexColor);
 	};
 
 	const handleSave = ({ target: { value: newName }}) => props.setMeasurementName(uuid, newName, type);
@@ -157,7 +157,7 @@ export const MeasureItem = ({
 					: <MeasurementValue>{getValue(value, units, type, props.modelUnit)} {getUnits(units, type)}</MeasurementValue>
 				}
 				<ColorPicker
-					value={GLToHexColor(customColor || color)}
+					value={(customColor || color)}
 					onChange={handleColorChange}
 					disableUnderline
 					predefinedColors={props.colors}

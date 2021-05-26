@@ -38,6 +38,7 @@ import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../service
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
 import { Viewer } from '../../services/viewer/viewer';
+import { BimActions } from '../bim';
 import { BoardActions } from '../board';
 import { ChatActions } from '../chat';
 import { selectCurrentUser } from '../currentUser';
@@ -50,6 +51,7 @@ import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { selectTopicTypes } from '../teamspace';
 import { TreeActions } from '../tree';
+import { ViewerGuiActions } from '../viewerGui';
 import { ViewpointsActions } from '../viewpoints';
 import { generateViewpoint } from '../viewpoints/viewpoints.sagas';
 import { IssuesActions, IssuesTypes } from './issues.redux';
@@ -62,8 +64,6 @@ import {
 	selectMeasureMode,
 	selectShapes
 } from './issues.selectors';
-
-
 
 function* fetchIssues({teamspace, modelId, revision}) {
 	yield put(IssuesActions.togglePendingState(true));
@@ -717,14 +717,9 @@ export function* setMeasureMode({ measureMode }) {
 		yield Viewer.on(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
 		yield Viewer.on(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
 
-		// ViewerGuiActions.setClipEdit(false);
-		// BimActions.setIsActive(false);
-
-		// const isSnapping = yield select(selectEdgeSnapping);
-
-		// if (isSnapping) {
-		// 	yield Viewer.enableEdgeSnapping();
-		// }
+		ViewerGuiActions.setClipEdit(false);
+		BimActions.setIsActive(false);
+		yield Viewer.disableEdgeSnapping();
 	} catch (error) {
 		DialogActions.showErrorDialog('set', `measure mode in issues to ${measureMode}`, error);
 	}
