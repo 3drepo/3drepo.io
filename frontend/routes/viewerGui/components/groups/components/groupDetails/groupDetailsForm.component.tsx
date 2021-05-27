@@ -49,6 +49,10 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 
 	public componentDidMount() {
 		this.props.setIsFormValid(this.isNewGroup);
+
+		if (this.props.selectedNodes.length) {
+			this.props.setIsFormDirty(this.isNewGroup);
+		}
 	}
 
 	public componentDidUpdate(prevProps) {
@@ -58,9 +62,10 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 		const groupChanged = !isEqual(this.props.group, prevProps.group);
 		const isNormalGroup = this.props.group.type === GROUPS_TYPES.NORMAL;
 		const sharedIdsChanged = isNormalGroup ? this.areSharedIdsChanged(this.props.selectedNodes, objects) : false;
+		const isAnyNodeSelected = !!this.props.selectedNodes.length;
 
 		const isFormDirtyAndValid = (!isEqual(initialValues, currentValues) && groupChanged) || sharedIdsChanged;
-		this.props.setIsFormValid(isFormDirtyAndValid);
+		this.props.setIsFormValid(isFormDirtyAndValid && isAnyNodeSelected);
 		this.props.setIsFormDirty(isFormDirtyAndValid);
 	}
 

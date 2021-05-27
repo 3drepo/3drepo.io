@@ -29,7 +29,8 @@ interface IProps {
 	variant?: string;
 }
 
-export const SubmitButton = ({ pending, disabled, children, ...props }: IProps) => {
+export const SubmitButton = React.forwardRef(
+		({ pending, disabled, children, ...props}: IProps, ref: React.Ref<HTMLElement>) => {
 	const additionalProps = merge({
 		type: 'submit',
 		variant: 'contained',
@@ -46,6 +47,7 @@ export const SubmitButton = ({ pending, disabled, children, ...props }: IProps) 
 
 	return (
 		<Button
+			ref={ref}
 			disabled={pending || disabled}
 			{...additionalProps}
 		>
@@ -57,4 +59,4 @@ export const SubmitButton = ({ pending, disabled, children, ...props }: IProps) 
 			)}
 		</Button>
 	);
-};
+});
