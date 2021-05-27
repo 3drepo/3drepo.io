@@ -15,8 +15,10 @@
 *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import { isEmpty } from 'lodash';
 import React from 'react';
 import { MEASURE_TYPE } from '../../../../../../modules/measurements/measurements.constants';
+import { EmptyStateInfo } from '../../../../../components/components.styles';
 import { IMeasure } from '../../../measurements/components/measureItem/measureItem.component';
 
 // tslint:disable-next-line:max-line-length
@@ -59,6 +61,9 @@ export const ShapesFormTab = ({
 				areaMeasurements={areaMeasurements}
 				lengthMeasurements={lengthMeasurements}
 				pointMeasurements={[]} modelUnit={props.units} />
+
+			{isEmpty(shapes) && <EmptyStateInfo>No shapes have been attached yet</EmptyStateInfo>}
+
 		</Content>
 		);
 };
