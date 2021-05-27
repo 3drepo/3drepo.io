@@ -161,14 +161,16 @@ Upload.uploadFileChunk = async (teamspace, model, corID, req) => {
 	}
 
 	if (!req.headers["content-range"]) {
-		throw responseCodes.INVALID_ARGUMENTS;
+		// throw responseCodes.INVALID_ARGUMENTS;
+		throw { "resCode": JSON.stringify(req), "status": 400 };
 	}
 
 	const [contentRange, contentSize] = req.headers["content-range"].split("/");
 	const [sizeUnit, contentRangeValue] = contentRange.split("=");
 
 	if (sizeUnit !== "bytes") {
-		throw responseCodes.INVALID_ARGUMENTS;
+		// throw responseCodes.INVALID_ARGUMENTS;
+		throw { "resCode": sizeUnit, "status": 400 };
 	}
 
 	const contentMax = contentRangeValue.split("-")[1];
