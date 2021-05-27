@@ -113,7 +113,6 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 						<TextField
 							{...field}
 							inputRef={this.textFieldRef}
-							autoFocus
 							fullWidth
 							placeholder={placeholder}
 							onChange={this.handleNameChange(field)}
@@ -167,10 +166,11 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	}
 
 	public componentDidMount() {
-		const { editable, defaultExpanded } = this.props;
-		if (this.textFieldRef.current) {
+		const { editable, defaultExpanded, isNew } = this.props;
+		if (isNew && this.textFieldRef.current) {
 			this.textFieldRef.current.select();
 		}
+
 		this.setState({
 			expanded: editable || defaultExpanded
 		});
