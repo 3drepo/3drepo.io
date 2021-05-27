@@ -667,6 +667,54 @@ export function* addMeasurement({ measurement }) {
 	}
 }
 
+export function* removeMeasurement({ uuid }) {
+	const activeRisk = yield select(selectActiveRiskDetails);
+	const shapes = (activeRisk.shapes || []).filter((measurement) => measurement.uuid !== uuid);
+	const isNewIssue = !Boolean(activeRisk._id);
+
+	if (isNewIssue) {
+		yield put(RisksActions.updateNewRisk({...activeRisk, shapes}));
+	} else {
+		yield put(RisksActions.updateRisk({shapes}));
+	}
+}
+
+export function* setMeasurementColor({uuid, color}) {
+	const activeRisk = yield select(selectActiveRiskDetails);
+	const shapes = (activeRisk.shapes || []).map((measurement) => {
+		if (measurement.uuid === uuid) {
+			measurement = {...measurement, color};
+		}
+		return measurement;
+	});
+
+	const isNewIssue = !Boolean(activeRisk._id);
+
+	if (isNewIssue) {
+		yield put(RisksActions.updateNewRisk({...activeRisk, shapes}));
+	} else {
+		yield put(RisksActions.updateRisk({shapes}));
+	}
+}
+
+export function* setMeasurementName({uuid, name}) {
+	const activeRisk = yield select(selectActiveRiskDetails);
+	const shapes = (activeRisk.shapes || []).map((measurement) => {
+		if (measurement.uuid === uuid) {
+			measurement = {...measurement, name};
+		}
+		return measurement;
+	});
+
+	const isNewIssue = !Boolean(activeRisk._id);
+
+	if (isNewIssue) {
+		yield put(RisksActions.updateNewRisk({...activeRisk, shapes}));
+	} else {
+		yield put(RisksActions.updateRisk({shapes}));
+	}
+}
+
 export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.FETCH_RISKS, fetchRisks);
 	yield takeLatest(RisksTypes.FETCH_RISK, fetchRisk);
@@ -697,8 +745,8 @@ export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.UPDATE_ACTIVE_RISK_VIEWPOINT, updateActiveRiskViewpoint);
 	yield takeLatest(RisksTypes.SET_MEASURE_MODE, setMeasureMode);
 	yield takeEvery(RisksTypes.ADD_MEASUREMENT, addMeasurement);
-	// yield takeEvery(RisksTypes.REMOVE_MEASUREMENT, removeMeasurement);
-	// yield takeEvery(RisksTypes.SET_MEASUREMENT_COLOR, setMeasurementColor);
-	// yield takeEvery(RisksTypes.SET_MEASUREMENT_NAME, setMeasurementName);
+	yield takeEvery(RisksTypes.REMOVE_MEASUREMENT, removeMeasurement);
+	yield takeEvery(RisksTypes.SET_MEASUREMENT_COLOR, setMeasurementColor);
+	yield takeEvery(RisksTypes.SET_MEASUREMENT_NAME, setMeasurementName);
 
 }
