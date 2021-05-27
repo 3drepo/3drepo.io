@@ -175,8 +175,8 @@ export const StyledTabs = styled(Tabs)`
 			}
 		}
 		position: relative;
-		width: 355px;
-		left: -10px;
+		width: 362px;
+		left: -14px;
 	}
 
 	& .MuiTabScrollButton-root {
