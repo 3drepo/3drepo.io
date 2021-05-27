@@ -24,7 +24,6 @@ import { hasPin, issueToPin } from '../../helpers/pins';
 import { searchByFilters } from '../../helpers/searching';
 import { hasShapes } from '../../helpers/shapes';
 import { sortByDate } from '../../helpers/sorting';
-import { MEASURE_TYPE } from '../measurements/measurements.constants';
 import { selectCurrentModel } from '../model';
 import { selectQueryParams } from '../router/router.selectors';
 import { selectSelectedEndingDate, selectSelectedSequence, selectSelectedStartingDate } from '../sequences';

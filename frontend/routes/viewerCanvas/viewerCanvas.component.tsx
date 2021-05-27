@@ -17,7 +17,7 @@
 
 import React from 'react';
 
-import { difference, differenceBy, isEqual } from 'lodash';
+import { debounce, difference, differenceBy, isEqual } from 'lodash';
 
 import { ROUTES } from '../../constants/routes';
 import { addColorOverrides, overridesColorDiff, removeColorOverrides } from '../../helpers/colorOverrides';
@@ -60,6 +60,12 @@ interface IProps {
 
 export class ViewerCanvas extends React.PureComponent<IProps, any> {
 	private containerRef = React.createRef<HTMLElement>();
+
+	constructor(props) {
+		super(props);
+
+		this.renderMeasurements = debounce(this.renderMeasurements, 50);
+	}
 
 	public get shouldBeVisible() {
 		return this.props.location.pathname.includes(ROUTES.VIEWER);
