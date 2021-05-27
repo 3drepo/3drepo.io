@@ -19,7 +19,7 @@ import { push } from 'connected-react-router';
 import filesize from 'filesize';
 import { isEmpty, isEqual, map, omit } from 'lodash';
 import * as queryString from 'query-string';
-import { all, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
+import { all, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { RISK_DEFAULT_HIDDEN_LEVELS } from '../../constants/risks';
@@ -60,6 +60,7 @@ import {
 	selectActiveRiskId,
 	selectComponentState,
 	selectFilteredRisks,
+	selectMeasureMode,
 	selectRisksMap
 } from './risks.selectors';
 
@@ -293,6 +294,7 @@ function* showDetails({ revision, riskId }) {
 	try {
 		const risksMap = yield select(selectRisksMap);
 		const risk = risksMap[riskId];
+		yield cancelMeasureModeIfNeeded();
 
 		yield put(RisksActions.setActiveRisk(risk, revision));
 		yield put(RisksActions.setComponentState({ showDetails: true, savedPin: risk.position }));
@@ -309,6 +311,7 @@ function* closeDetails() {
 	try {
 		const activeRisk = yield select(selectActiveRiskDetails);
 		const componentState = yield select(selectComponentState);
+		yield cancelMeasureModeIfNeeded();
 
 		if (componentState.showDetails) {
 			if (!isEqual(activeRisk.position, componentState.savedPin)) {
@@ -712,6 +715,14 @@ export function* setMeasurementName({uuid, name}) {
 		yield put(RisksActions.updateNewRisk({...activeRisk, shapes}));
 	} else {
 		yield put(RisksActions.updateRisk({shapes}));
+	}
+}
+
+function* cancelMeasureModeIfNeeded() {
+	const measureMode = yield select(selectMeasureMode);
+	if (measureMode) {
+		yield put(RisksActions.setMeasureMode(''));
+		yield take(RisksTypes.SET_MEASURE_MODE_SUCCESS);
 	}
 }
 
