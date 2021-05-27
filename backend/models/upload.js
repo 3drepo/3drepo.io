@@ -235,8 +235,10 @@ Upload.uploadFileChunk = async (teamspace, model, corID, req) => {
 		modelStatusChanged(null, teamspace, model, { status: "uploaded" });
 	}
 
+	const range = "bytes=" + contentRangeValue;
+
 	return {
-		"Range": contentRange,
+		"Range": range,
 		"x-ms-chunk-size": chunkSize
 	};
 };
