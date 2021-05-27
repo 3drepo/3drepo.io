@@ -37,7 +37,7 @@ export const ToolsContainer = styled.div`
 	bottom: 35px;
 	left: 50%;
 	transform: translate(-50%, 0);
-	display: flex;
+	display: ${(props: any) => props.disabled ? 'none' : 'flex'};
 	align-items: center;
 	background: ${COLOR.WHITE_87};
 	padding: 5px 10px 5px 20px;
