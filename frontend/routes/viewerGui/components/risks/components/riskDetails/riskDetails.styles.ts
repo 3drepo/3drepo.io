@@ -161,7 +161,9 @@ export const TabContent = styled.div`
 
 export const StyledTab = styled(Tab)`
 	&& {
-		font-size: 13px;
+		padding-left: 0;
+		padding-right: 0;
+		margin-right: 10px;
 	}
 `;
 
@@ -172,6 +174,13 @@ export const StyledTabs = styled(Tabs)`
 				max-width: 52px;
 			}
 		}
+		position: relative;
+		width: 355px;
+		left: -10px;
+	}
+
+	& .MuiTabScrollButton-root {
+		width: 15px;
 	}
 `;
 

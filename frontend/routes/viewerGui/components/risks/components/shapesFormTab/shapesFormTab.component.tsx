@@ -23,6 +23,7 @@ import { IMeasure } from '../../../measurements/components/measureItem/measureIt
 import { AllMeasurementsList } from '../../../measurements/components/measurementsList/allMeasurementsList.component';
 import { MeasuringType } from '../../../measurements/components/measuringType';
 import { Content } from '../riskDetails/riskDetails.styles';
+import {MeasuringTypeContainer} from './shapesFormTab.styles';
 
 interface IProps {
 	active: boolean;
@@ -48,7 +49,11 @@ export const ShapesFormTab = ({
 	const lengthMeasurements = shapes.filter(({type}) => type === MEASURE_TYPE.LENGTH);
 	return (
 		<Content active={active}>
-			{addButtonsEnabled && <MeasuringType basicTypes setMeasureMode={setMeasureMode} measureMode={measureMode} />}
+			{addButtonsEnabled &&
+				<MeasuringTypeContainer>
+					<MeasuringType basicTypes setMeasureMode={setMeasureMode} measureMode={measureMode} />
+				</MeasuringTypeContainer>
+			}
 			<AllMeasurementsList
 				{...props}
 				areaMeasurements={areaMeasurements}
