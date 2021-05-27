@@ -1602,7 +1602,7 @@ router.post("/:model/upload/ms-chunking", middlewares.hasUploadAccessToModel, up
 
 /**
  * @api {post} /:teamspace/:model/upload/ms-chunking/:corID Start MS chunk upload
- * @apiName uploadModelChunksStart
+ * @apiName initUploadChunks
  * @apiGroup Model
  * @apiDescription Model upload request for Microsoft Logic Apps.
  * Max chunk size defined as 52,428,800 bytes (52 MB) based on
@@ -1632,11 +1632,11 @@ router.post("/:model/upload/ms-chunking", middlewares.hasUploadAccessToModel, up
  * 	"Location": "/teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/ms-chunking/00000000-0000-1111-2222-333333333333"
  * }
  */
-router.post("/:model/upload/ms-chunking/:corID", middlewares.hasUploadAccessToModel, uploadModelChunksStart);
+router.post("/:model/upload/ms-chunking/:corID", middlewares.hasUploadAccessToModel, initUploadChunks);
 
 /**
  * @api {patch} /:teamspace/:model/upload/ms-chunking/:corID Upload model chunk
- * @apiName uploadModelChunk
+ * @apiName uploadChunk
  * @apiGroup Model
  * @apiDescription Model upload chunk for Microsoft Logic Apps.
  *
@@ -1672,7 +1672,7 @@ router.post("/:model/upload/ms-chunking/:corID", middlewares.hasUploadAccessToMo
  * 	"x-ms-chunk-size": 1024
  * }
  */
-router.patch("/:model/upload/ms-chunking/:corID", middlewares.hasUploadAccessToModel, uploadModelChunk);
+router.patch("/:model/upload/ms-chunking/:corID", middlewares.hasUploadAccessToModel, uploadChunk);
 
 /**
  * @api {post} /:teamspace/:model/upload Upload Model.
@@ -2056,16 +2056,15 @@ async function uploadModelRequest(req, res, next) {
 	}
 }
 
-async function uploadModelChunksStart(req, res, next) {
+async function initUploadChunks(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 	const account = req.params.account;
 	const model = req.params.model;
-	const corID = req.params.corID;
 	const user = req.session.user.username;
 
 	try {
-		const url = responsePlace.split(" ")[1];
-		const initHeader = await Upload.uploadChunksStart(account, model, user, corID, req.headers, url);
+		const initHeader = await Upload.initUploadChunks(account, model, user, req.headers);
+		initHeader.Location = `${config.public_protocol}://${req.headers.host}${req.originalUrl}`;
 		res.writeHead(200, initHeader);
 		res.end();
 	} catch(err) {
@@ -2074,7 +2073,7 @@ async function uploadModelChunksStart(req, res, next) {
 	}
 }
 
-async function uploadModelChunk(req, res, next) {
+async function uploadChunk(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 	const account = req.params.account;
 	const model = req.params.model;
@@ -2082,7 +2081,7 @@ async function uploadModelChunk(req, res, next) {
 	// const username = req.session.user.username;
 
 	try {
-		const chunkingHeader = await Upload.uploadFileChunk(account, model, corID, req);
+		const chunkingHeader = await Upload.uploadChunk(account, model, corID, req);
 		res.writeHead(200, chunkingHeader);
 		res.end();
 	} catch(err) {
@@ -2100,7 +2099,7 @@ async function uploadModelChunk(req, res, next) {
 		if (!modelSetting) {
 			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 		} else {
-			return Upload.uploadFileChunk(req);
+			return Upload.uploadChunk(req);
 		}
 	}).then(file => {
 		const data = {

@@ -18,6 +18,7 @@
 
 const multer = require("multer");
 const config = require("../config");
+const C = require("../constants");
 const middlewares = require("../middlewares/middlewares");
 const responseCodes = require("../response_codes");
 const importQueue = require("../services/queue");
@@ -132,7 +133,7 @@ Upload.uploadFile = async (req) => {
 	return uploadedFile;
 };
 
-Upload.uploadChunksStart = async (teamspace, model, username, corID, headers, url) => {
+Upload.initUploadChunks = async (teamspace, model, username, headers) => {
 	if (!headers["x-ms-transfer-mode"] ||
 		headers["x-ms-transfer-mode"] !== "chunked" ||
 		!headers["x-ms-content-length"] ||
@@ -140,43 +141,34 @@ Upload.uploadChunksStart = async (teamspace, model, username, corID, headers, ur
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	// await Upload.writeChunkData(corID, headers["x-ms-content-length"]);
-
-	const chunkSize = Math.min(52428800, headers["x-ms-content-length"]);
+	const chunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, headers["x-ms-content-length"]);
 
 	// upload model with tag
 	modelStatusChanged(null, teamspace, model, { status: "uploading", username });
 
-	// FIXME hardcoded URL for testing
-	// "Location":`https://issue-2489.dev.3drepo.io/api/${teamspace}/${model}/upload/ms-chunking/${corID}`
-	return {
-		"x-ms-chunk-size": chunkSize,
-		"Location":`https://issue-2489.dev.3drepo.io${url}`
-	};
+	return { "x-ms-chunk-size": chunkSize };
 };
 
-Upload.uploadFileChunk = async (teamspace, model, corID, req) => {
+Upload.uploadChunk = async (teamspace, model, corID, req) => {
 	if (!config.cn_queue) {
 		return Promise.reject(responseCodes.QUEUE_NO_CONFIG);
 	}
 
 	if (!req.headers["content-range"]) {
-		// throw responseCodes.INVALID_ARGUMENTS;
-		throw { "resCode": JSON.stringify(req), "status": 400 };
+		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
 	const [contentRange, contentSize] = req.headers["content-range"].split("/");
 	const [sizeUnit, contentRangeValue] = contentRange.split(" ");
 
 	if (sizeUnit !== "bytes") {
-		// throw responseCodes.INVALID_ARGUMENTS;
-		throw { "resCode": sizeUnit, "status": 400 };
+		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
 	const contentMax = contentRangeValue.split("-")[1];
 
 	const sizeRemaining = contentSize - contentMax;
-	const chunkSize = Math.min(52428800, sizeRemaining);
+	const chunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, sizeRemaining);
 
 	/*
 	const uploadedFile = await new Promise((resolve, reject) => {
@@ -235,10 +227,8 @@ Upload.uploadFileChunk = async (teamspace, model, corID, req) => {
 		modelStatusChanged(null, teamspace, model, { status: "uploaded" });
 	}
 
-	const range = `bytes=0-${contentMax}`;
-
 	return {
-		"Range": range,
+		"Range": `bytes=0-${contentMax}`,
 		"x-ms-chunk-size": chunkSize
 	};
 };
