@@ -166,7 +166,7 @@ Upload.uploadFileChunk = async (teamspace, model, corID, req) => {
 	}
 
 	const [contentRange, contentSize] = req.headers["content-range"].split("/");
-	const [sizeUnit, contentRangeValue] = contentRange.split("=");
+	const [sizeUnit, contentRangeValue] = contentRange.split(" ");
 
 	if (sizeUnit !== "bytes") {
 		// throw responseCodes.INVALID_ARGUMENTS;

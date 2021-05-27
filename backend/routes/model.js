@@ -1643,7 +1643,7 @@ router.post("/:model/upload/ms-chunking/:corID", middlewares.hasUploadAccessToMo
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID to upload
  * @apiParam {String} corID Upload correlation ID
- * @apiParam (Request header) {String} Content-Range Byte range for the current content chunk, including the starting value, ending value, and the total content size, for example: "bytes=0-1023/10100"
+ * @apiParam (Request header) {String} Content-Range Byte range for the current content chunk, including the starting value, ending value, and the total content size, for example: "bytes 0-1023/10100"
  * @apiParam (Request header) {String} Content-Type Type of chunked content
  * @apiParam (Request header) {String} Content-Length Length of size in bytes of the current chunk
  *
