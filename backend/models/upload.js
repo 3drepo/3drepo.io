@@ -170,6 +170,13 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
 	const sizeRemaining = contentSize - contentMax;
 	const chunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, sizeRemaining);
 
+	console.log(req);
+	if (req.file) {
+		throw { "resCode": "req.file exists", "status": 400 };
+	} else {
+		throw { "resCode": "req.file doesn't exist", "status": 400 };
+	}
+
 	/*
 	const uploadedFile = await new Promise((resolve, reject) => {
 		const upload = multer({
