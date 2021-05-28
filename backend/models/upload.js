@@ -170,14 +170,15 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
 	const sizeRemaining = contentSize - contentMax;
 	const chunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, sizeRemaining);
 
+	/*
 	console.log(req);
 	if (req.file) {
 		throw { "resCode": "req.file exists", "status": 400 };
 	} else {
 		throw { "resCode": "req.file doesn't exist", "status": 400 };
 	}
+	*/
 
-	/*
 	const uploadedFile = await new Promise((resolve, reject) => {
 		const upload = multer({
 			dest: config.cn_queue.upload_dir,
@@ -204,7 +205,7 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
 				}
 
 				const sizeInMB = size / (1024 * 1024);
-				middlewares.freeSpace(account).then(space => {
+				middlewares.freeSpace(teamspace).then(space => {
 
 					if(sizeInMB > space) {
 						cb({ resCode: responseCodes.SIZE_LIMIT_PAY });
@@ -218,17 +219,15 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
 		upload.single("file")(req, null, function (err) {
 			if (err) {
 				return reject(err);
-
 			} else if(!req.file.size) {
 				return reject(responseCodes.FILE_FORMAT_NOT_SUPPORTED);
-
 			} else {
-				modelStatusChanged(null, account, model, { status: "uploaded" });
-				return resolve(req.file);
+				// modelStatusChanged(null, account, model, { status: "uploaded" });
+				return reject({ "resCode": "Success!!!", "status": 400 });
+				// return resolve(req.file);
 			}
 		});
 	});
-	*/
 
 	if (chunkSize === 0) {
 		modelStatusChanged(null, teamspace, model, { status: "uploaded" });
