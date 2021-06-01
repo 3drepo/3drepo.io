@@ -16,9 +16,13 @@
  */
 
 import styled from 'styled-components';
+import { COLOR } from '../../../../../../styles';
 
 export const MeasuringTypeContainer = styled.div`
 	display: flex;
 	margin-top: 10px;
 	margin-bottom: 10px;
+	color: ${COLOR.BLACK_60};
+	font-size: 14px;
+    line-height: 2.1;
 `;

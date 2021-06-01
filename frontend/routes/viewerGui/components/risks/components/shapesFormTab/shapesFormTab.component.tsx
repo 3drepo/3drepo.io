@@ -53,7 +53,7 @@ export const ShapesFormTab = ({
 		<Content active={active}>
 			{addButtonsEnabled &&
 				<MeasuringTypeContainer>
-					<MeasuringType basicTypes setMeasureMode={setMeasureMode} measureMode={measureMode} />
+					Create Markup: &nbsp; &nbsp;<MeasuringType basicTypes setMeasureMode={setMeasureMode} measureMode={measureMode} />
 				</MeasuringTypeContainer>
 			}
 			<AllMeasurementsList
