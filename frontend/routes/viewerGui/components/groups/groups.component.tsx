@@ -134,7 +134,6 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		filteredGroups: []
 	};
 
-	public addGroupButtonRef = React.createRef<any>();
 	public groupsContainerRef = React.createRef<any>();
 
 	public renderHeaderNavigation = () => {
@@ -196,7 +195,6 @@ export class Groups extends React.PureComponent<IProps, IState> {
 				</Summary>
 				<ViewerPanelButton
 					aria-label="Add group"
-					ref={this.addGroupButtonRef}
 					onClick={this.props.setNewGroup}
 					color="secondary"
 					variant="fab"
@@ -272,17 +270,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		this.toggleViewerEvents(false);
 	}
 
-	public resetActiveGroup = (event?: React.MouseEvent) => {
-		const addButton = this.addGroupButtonRef?.current;
-
-		if (!event) {
-			this.props.resetActiveGroup();
-		}
-
-		if (addButton && !addButton.contains(event?.target)) {
-			this.props.resetActiveGroup();
-		}
-	}
+	public resetActiveGroup = () => this.props.resetActiveGroup();
 
 	public toggleViewerEvents = (enabled = true) => {
 		const eventHandler = enabled ? 'on' : 'off';
