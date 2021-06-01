@@ -195,7 +195,10 @@ export class Groups extends React.PureComponent<IProps, IState> {
 				</Summary>
 				<ViewerPanelButton
 					aria-label="Add group"
-					onClick={this.props.setNewGroup}
+					onClick={(e) => {
+						e.stopPropagation();
+						this.props.setNewGroup();
+					}}
 					color="secondary"
 					variant="fab"
 					disabled={!this.canAddOrUpdate}
