@@ -939,7 +939,12 @@ User.addTeamMember = async function(teamspace, userToAdd, job, permissions) {
 
 	await hasReachedLicenceLimit(teamspaceUser);
 
-	const userEntry = await User.findByUserName(userToAdd);
+	let userEntry = null;
+	if (C.EMAIL_REGEXP.test(userToAdd)) { // if the submited username is the email
+		userEntry = await User.findByEmail(userToAdd);
+	} else {
+		userEntry = await User.findByUserName(userToAdd);
+	}
 
 	if (!userEntry) {
 		throw (responseCodes.USER_NOT_FOUND);
@@ -953,13 +958,13 @@ User.addTeamMember = async function(teamspace, userToAdd, job, permissions) {
 		throw (responseCodes.USER_ALREADY_ASSIGNED);
 	}
 
-	await Role.grantTeamSpaceRoleToUser(userToAdd, teamspace);
+	await Role.grantTeamSpaceRoleToUser(userEntry.user, teamspace);
 
 	const promises = [];
-	promises.push(addUserToJob(teamspace, job, userToAdd));
+	promises.push(addUserToJob(teamspace, job, userEntry.user));
 
 	if (permissions && permissions.length) {
-		promises.push(AccountPermissions.updateOrCreate(teamspaceUser, userToAdd, permissions));
+		promises.push(AccountPermissions.updateOrCreate(teamspaceUser, userEntry.user, permissions));
 	}
 
 	await Promise.all(promises);
