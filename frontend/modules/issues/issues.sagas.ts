@@ -719,7 +719,7 @@ export function* setMeasureMode({ measureMode }) {
 
 		ViewerGuiActions.setClipEdit(false);
 		BimActions.setIsActive(false);
-		yield Viewer.disableEdgeSnapping();
+		yield Viewer.enableEdgeSnapping();
 	} catch (error) {
 		DialogActions.showErrorDialog('set', `measure mode in issues to ${measureMode}`, error);
 	}
