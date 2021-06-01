@@ -312,7 +312,7 @@ export const transformCustomsLinksToMarkdown = ( details: IDetails, comment: ICo
 
 	if (viewpointReferences) {
 		const { account: teamspace, model: projectId, _id: ticketId } = details;
-		const referenceType = type === 'risk' ? 'risk' : 'issues';
+		const referenceType = type === 'risk' ? 'risks' : 'issues';
 
 		const uniqViewpointReferences = uniqBy([...viewpointReferences], 0);
 		uniqViewpointReferences.forEach(({ 0: viewpointReference }) => {
