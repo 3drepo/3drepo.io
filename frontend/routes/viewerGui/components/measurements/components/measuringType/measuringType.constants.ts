@@ -1,6 +1,5 @@
-// @ts-nocheck
 /**
- *  Copyright (C) 2020 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// @ts-nocheck
 import CSAMIcon from '../../../../../../icons/measure/custom_surface_area_measurement.svg';
 import CSAMActiveIcon from '../../../../../../icons/measure/custom_surface_area_measurement_selected.svg';
 import MinimumDistanceIcon from '../../../../../../icons/measure/minimum_distance.svg';

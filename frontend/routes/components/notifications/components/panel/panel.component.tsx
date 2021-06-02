@@ -1,6 +1,5 @@
-
 /**
- *  Copyright (C) 2018 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 import React from 'react';
 
 import { NotificationsPanelItem } from '../../notifications.styles';
