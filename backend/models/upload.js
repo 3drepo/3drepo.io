@@ -170,67 +170,11 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
 	const sizeRemaining = contentSize - contentMax;
 	const chunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, sizeRemaining);
 
-	/*
-	console.log(req);
-	if (req.file) {
-		throw { "resCode": "req.file exists", "status": 400 };
-	} else {
-		throw { "resCode": "req.file doesn't exist", "status": 400 };
-	}
-	*/
-
-	const uploadedFile = await new Promise((resolve, reject) => {
-		const upload = multer({
-			dest: config.cn_queue.upload_dir,
-			fileFilter: function(fileReq, file, cb) {
-
-				let format = file.originalname.split(".");
-
-				if(format.length <= 1) {
-					return cb({resCode: responseCodes.FILE_NO_EXT});
-				}
-
-				const isIdgn = format[format.length - 1] === "dgn" && format[format.length - 2] === "i";
-
-				format = format[format.length - 1];
-
-				const size = parseInt(fileReq.headers["content-length"]);
-
-				if(isIdgn || Upload.acceptedFormat.indexOf(format.toLowerCase()) === -1) {
-					return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
-				}
-
-				if(size > config.uploadSizeLimit) {
-					return cb({ resCode: responseCodes.SIZE_LIMIT });
-				}
-
-				const sizeInMB = size / (1024 * 1024);
-				middlewares.freeSpace(teamspace).then(space => {
-
-					if(sizeInMB > space) {
-						cb({ resCode: responseCodes.SIZE_LIMIT_PAY });
-					} else {
-						cb(null, true);
-					}
-				});
-			}
-		});
-
-		upload.single("file")(req, null, function (err) {
-			if (err) {
-				return reject(err);
-			} else if(!req.file.size) {
-				return reject(responseCodes.FILE_FORMAT_NOT_SUPPORTED);
-			} else {
-				// modelStatusChanged(null, account, model, { status: "uploaded" });
-				return reject({ "resCode": "Success!!!", "status": 400 });
-				// return resolve(req.file);
-			}
-		});
-	});
+	// TODO: handle upload here
 
 	if (chunkSize === 0) {
 		modelStatusChanged(null, teamspace, model, { status: "uploaded" });
+		// TODO: handle file stitching here
 	}
 
 	return {
