@@ -16,6 +16,7 @@
  */
 "use strict";
 
+const fs = require("fs");
 const multer = require("multer");
 const config = require("../config");
 const C = require("../constants");
@@ -25,6 +26,42 @@ const importQueue = require("../services/queue");
 const { modelStatusChanged } = require("./chatEvent");
 const { isValidTag } = require("./history");
 const { findModelSettingById, createCorrelationId } = require("./modelSetting");
+
+const stitchChunks = (corID, newFilename) => {
+	const sharedSpacePath = importQueue.getSharedSpacePath();
+	const filePath = sharedSpacePath + "/" + corID + "/chunks";
+
+	return new Promise((resolve, reject) => {
+		fs.readdir(filePath, (dirErr, files) => {
+			if (dirErr) {
+				return reject(dirErr);
+			}
+
+			(function next() {
+				const file = files.shift();
+				if (!file) {
+					return resolve();
+				}
+
+				console.log("FILE=" + filePath + "/" + file);
+
+				fs.readFile(filePath + "/" + file, (readFileErr, content) => {
+					if (readFileErr) {
+						return reject(readFileErr);
+					}
+
+					fs.appendFile(`${sharedSpacePath}/${corID}/${newFilename}`, content, (writeErr) => {
+						if (writeErr) {
+							return reject(writeErr);
+						}
+
+						return next();
+					});
+				});
+			})();
+		});
+	});
+};
 
 const Upload = {};
 
@@ -170,11 +207,19 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
 	const sizeRemaining = contentSize - contentMax;
 	const chunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, sizeRemaining);
 
-	// TODO: handle upload here
+	const sharedSpacePath = importQueue.getSharedSpacePath();
+	const timestamp = Date.now();
+
+	const writeStream = fs.createWriteStream(`${sharedSpacePath}/${corID}/chunks/${timestamp}`, {encoding: "binary"});
+	req.on("data", (chunk) => writeStream.write(chunk, "binary"));
+	req.on("end", () => {
+		writeStream.end();
+	});
 
 	if (chunkSize === 0) {
 		modelStatusChanged(null, teamspace, model, { status: "uploaded" });
 		// TODO: handle file stitching here
+		await stitchChunks(corID, "upload");
 	}
 
 	return {
