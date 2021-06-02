@@ -1,6 +1,7 @@
 {   
     "configPath": "./",
     "extends": ["tslint:recommended", "tslint-react"],
+    "rulesDirectory": ["ts-rules"],
     "rules": {
         "indent": [true, "tabs"],
         "jsdoc-format": false,
@@ -50,6 +51,7 @@
         "no-irregular-whitespace": true,
         "no-empty-interface": true,
         "curly": true,
-        "no-async-without-await": true
+        "no-async-without-await": true,
+        "license-header": true
     }
 }

@@ -24,6 +24,7 @@
     "node_modules",
     "tests",
     "internals",
-    "components"
+    "components",
+    "ts-rules"
   ],
 }
