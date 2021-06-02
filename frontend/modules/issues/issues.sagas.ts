@@ -677,10 +677,12 @@ export function* addMeasurement({ measurement }) {
 	const isNewIssue = !Boolean(activeIssue._id);
 
 	if (isNewIssue) {
-		yield put(IssuesActions.updateNewIssue({...activeIssue, shapes}));
+		yield updateNewIssue({newIssue: {...activeIssue, shapes}});
 	} else {
-		yield put(IssuesActions.updateActiveIssue({shapes}));
+		yield updateActiveIssue({issueData: { shapes}});
 	}
+
+	Viewer.removeMeasurement(measurement.uuid);
 }
 
 export function* removeMeasurement({ uuid }) {

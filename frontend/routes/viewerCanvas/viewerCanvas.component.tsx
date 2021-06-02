@@ -17,7 +17,7 @@
 
 import React from 'react';
 
-import { debounce, difference, differenceBy, isEqual } from 'lodash';
+import { difference, differenceBy, isEqual } from 'lodash';
 
 import { ROUTES } from '../../constants/routes';
 import { addColorOverrides, overridesColorDiff, removeColorOverrides } from '../../helpers/colorOverrides';
@@ -64,7 +64,7 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 	constructor(props) {
 		super(props);
 
-		this.renderMeasurements = debounce(this.renderMeasurements, 50);
+		// this.renderMeasurements = debounce(this.renderMeasurements, 50);
 	}
 
 	public get shouldBeVisible() {

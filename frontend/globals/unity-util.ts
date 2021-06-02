@@ -336,6 +336,8 @@ export class UnityUtil {
 
 	/** @hidden*/
 	public static toUnity(methodName, requireStatus?, params?) {
+		// console.log('methodName:' + methodName + " params:"+ JSON.stringify(params, null, '\t'));
+
 		if (requireStatus === UnityUtil.LoadingState.MODEL_LOADED) {
 			// Requires model to be loaded
 			UnityUtil.onLoaded().then(() => {

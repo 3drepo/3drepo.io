@@ -24,5 +24,5 @@ export const MeasuringTypeContainer = styled.div`
 	margin-bottom: 10px;
 	color: ${COLOR.BLACK_60};
 	font-size: 14px;
-    line-height: 2.1;
+	line-height: 2.1;
 `;

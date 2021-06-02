@@ -530,7 +530,6 @@ export class ViewerService {
 	public async addMeasurements(measurements, hideLabels) {
 		await this.isViewerReady();
 		await this.isModelLoaded();
-
 		await this.setVisibilityOfMeasurementsLabels(!hideLabels);
 		measurements.forEach(UnityUtil.addMeasurement);
 		this.setVisibilityOfMeasurementsLabels(this.measureModeLabels);
@@ -538,6 +537,7 @@ export class ViewerService {
 
 	public async removeMeasurements(measurements) {
 		await this.isViewerReady();
+		await this.isModelLoaded();
 		measurements.forEach(({uuid}) => this.removeMeasurement(uuid));
 	}
 
