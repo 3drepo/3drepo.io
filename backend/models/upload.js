@@ -243,7 +243,8 @@ Upload.writeImportData = async (corID, databaseName, modelName, userName, tag, d
 	// const newFilePath = await this._moveFileToSharedSpace(corID, filePath, orgFileName, copy);
 	const newFilePath = sharedSpacePath + "/" + corID + "/";
 
-	// await importQueue.mkdir(newFilePath);
+	await importQueue.mkdir(newFilePath);
+	await importQueue.mkdir(`${newFilePath}/chunks/`);
 
 	const jsonFilename = `${sharedSpacePath}/${corID}.json`;
 
