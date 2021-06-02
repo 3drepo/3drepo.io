@@ -66,6 +66,7 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 
 	private revisionClickHandler = ({ tag, _id }) => {
 		const { teamspace, modelId, handleClose, history } = this.props;
+
 		handleClose();
 		history.push(`${ROUTES.VIEWER}/${teamspace}/${modelId}/${tag || _id}`);
 
@@ -87,6 +88,7 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 
 	private onRevisionItemClick = (event, revision) => {
 		const { handleSetNewRevision } = this.props;
+
 		if (this.props.type === TYPES.VIEWER) {
 			const isCurrentRevision = this.currentRevisionId === revision._id;
 			if (!isCurrentRevision) {
