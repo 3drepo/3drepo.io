@@ -94,6 +94,10 @@ export const getUnits = (units: string, type: number) => {
 	return units;
 };
 
+const chopGLAlpha = (color) => color.slice(0, 3);
+const chopHexAlphaColor = (color) => color.substr(0, 7);
+const unChopGlAlpha = (color) => [...color.slice(0, 3), 1];
+
 export const MeasureItem = ({
 	uuid, index, name, typeName, value, units, color, removeMeasurement, type, position, customColor, ...props
 }: IProps) => {
@@ -103,8 +107,8 @@ export const MeasureItem = ({
 		removeMeasurement(uuid);
 	};
 
-	const handleColorChange = (hexColor) => {
-		props.setMeasurementColor(uuid, hexColor);
+	const handleColorChange = (pickerColor) => {
+		props.setMeasurementColor(uuid, unChopGlAlpha(pickerColor));
 	};
 
 	const handleSave = ({ target: { value: newName }}) => props.setMeasurementName(uuid, newName, type);
@@ -157,11 +161,10 @@ export const MeasureItem = ({
 					: <MeasurementValue>{getValue(value, units, type, props.modelUnit)} {getUnits(units, type)}</MeasurementValue>
 				}
 				<ColorPicker
-					value={(customColor || color)}
+					value={chopGLAlpha(customColor || color)}
 					onChange={handleColorChange}
 					disableUnderline
-					predefinedColors={props.colors}
-					opacityEnabled
+					predefinedColors={props.colors.map(chopHexAlphaColor)}
 				/>
 				<SmallIconButton
 					Icon={RemoveIcon}
