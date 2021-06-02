@@ -22,6 +22,7 @@ const config = require("../config");
 const C = require("../constants");
 const middlewares = require("../middlewares/middlewares");
 const responseCodes = require("../response_codes");
+const systemLogger = require("../logger.js").systemLogger;
 const importQueue = require("../services/queue");
 const { modelStatusChanged } = require("./chatEvent");
 const { isValidTag } = require("./history");
@@ -43,7 +44,7 @@ const stitchChunks = (corID, newFilename) => {
 					return resolve();
 				}
 
-				console.log("FILE=" + filePath + "/" + file);
+				systemLogger.logInfo(`FILE=${filePath}/${file}`);
 
 				fs.readFile(filePath + "/" + file, (readFileErr, content) => {
 					if (readFileErr) {
