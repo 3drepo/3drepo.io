@@ -217,6 +217,8 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
 		writeStream.end();
 	});
 
+	systemLogger.logInfo(`CONTENT-RANGE=${req.headers["content-range"]}`);
+	systemLogger.logInfo(`CHUNKSIZE=${chunkSize}`);
 	if (chunkSize === 0) {
 		modelStatusChanged(null, teamspace, model, { status: "uploaded" });
 		// TODO: handle file stitching here
