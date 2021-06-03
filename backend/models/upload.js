@@ -108,6 +108,7 @@ Upload.uploadRequest = async (teamspace, model, username, data) => {
 		teamspace,
 		model,
 		username,
+		"uploaded",
 		data.tag,
 		data.desc,
 		data.importAnimations
@@ -193,10 +194,14 @@ Upload.initUploadChunks = async (teamspace, model, username, headers) => {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
+	const sharedSpacePath = importQueue.getSharedSpacePath();
 	const chunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, headers["x-ms-content-length"]);
 
 	// upload model with tag
 	modelStatusChanged(null, teamspace, model, { status: "uploading", username });
+
+	await importQueue.mkdir(`${sharedSpacePath}/${corID}/`);
+	await importQueue.mkdir(`${sharedSpacePath}/${corID}/chunks/`);
 
 	return { "x-ms-chunk-size": chunkSize };
 };
@@ -249,20 +254,16 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
  * @param {tag} tag - revision tag
  * @param {desc} desc - revison description
  *******************************************************************************/
-Upload.writeImportData = async (corID, databaseName, modelName, userName, tag, desc, importAnimations = true) => {
+Upload.writeImportData = async (corID, databaseName, modelName, userName, newFileName, tag, desc, importAnimations = true) => {
 	const sharedSpacePath = importQueue.getSharedSpacePath();
 	const sharedSpacePH = importQueue.getSharedSpacePH();
 
 	// const newFilePath = await this._moveFileToSharedSpace(corID, filePath, orgFileName, copy);
-	const newFilePath = sharedSpacePath + "/" + corID + "/";
-
-	await importQueue.mkdir(newFilePath);
-	await importQueue.mkdir(`${newFilePath}/chunks/`);
 
 	const jsonFilename = `${sharedSpacePath}/${corID}.json`;
 
 	const json = {
-		file: `${sharedSpacePH}/${newFilePath}`,
+		file: `${sharedSpacePH}/${corID}/${newFileName}`,
 		database: databaseName,
 		project: modelName,
 		owner: userName
