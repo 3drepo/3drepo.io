@@ -34,10 +34,16 @@ export const asyncTimeout = (time, func, ...args) => {
 
 export const queuableFunction = (func: (...arg) => Promise<any>, context) => {
 	let lastWait = Promise.resolve(true);
+	let lastCallNumber = 0;
 
 	return async (...args) => {
+		const currentCall = lastCallNumber;
 		lastWait = lastWait.then(() => func.apply(context, args));
+		lastCallNumber++;
 		await lastWait;
-		lastWait = Promise.resolve(true);
+		if (currentCall === lastCallNumber) {
+			lastWait = Promise.resolve(true);
+			lastCallNumber = 0;
+		}
 	};
 };

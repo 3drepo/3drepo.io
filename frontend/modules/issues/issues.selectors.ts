@@ -188,17 +188,17 @@ export const selectMeasureMode = createSelector(
 );
 
 export const selectShapes = createSelector(
-	selectFilteredIssues, selectActiveIssueDetails, selectShowDetails,
+	selectFilteredIssues, selectActiveIssueDetails,
 	selectSelectedSequence, selectSelectedStartingDate, selectSelectedEndingDate,
-	(issues: any, detailedIssue, showDetails,
+	(issues: any, detailedIssue,
 		selectedSequence, sequenceStartDate, sequenceEndDate) => {
 
-	if (showDetails) {
+	if (!selectedSequence) {
 		return (detailedIssue.shapes || []);
 	}
 
 	return issues.reduce((shapes, issue) => {
-		if (!hasShapes(issue, selectedSequence, sequenceStartDate, sequenceEndDate)) {
+		if (!hasShapes(issue, selectedSequence, sequenceStartDate, sequenceEndDate) && issue._id !== detailedIssue._id) {
 			return shapes;
 		}
 
