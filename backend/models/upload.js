@@ -28,6 +28,17 @@ const { modelStatusChanged } = require("./chatEvent");
 const { isValidTag } = require("./history");
 const { findModelSettingById, createCorrelationId } = require("./modelSetting");
 
+const handleChunkStream = async (req, filename) => {
+	return new Promise(resolve => {
+		const writeStream = fs.createWriteStream(filename, {encoding: "binary"});
+		req.on("data", (chunk) => writeStream.write(chunk, "binary"));
+		req.on("end", () => {
+			writeStream.end();
+			return resolve();
+		});
+	});
+};
+
 const stitchChunks = (corID, newFilename) => {
 	const sharedSpacePath = importQueue.getSharedSpacePath();
 	const filePath = sharedSpacePath + "/" + corID + "/chunks";
@@ -44,7 +55,10 @@ const stitchChunks = (corID, newFilename) => {
 					return resolve();
 				}
 
-				systemLogger.logInfo(`FILE=${filePath}/${file}`);
+				// for debugging
+				const stats = fs.statSync(`${filePath}/${file}`);
+				systemLogger.logInfo(`FILE=${filePath}/${file}, SIZE=${stats.size} bytes`);
+				// end debugging
 
 				fs.readFile(filePath + "/" + file, (readFileErr, content) => {
 					if (readFileErr) {
@@ -211,11 +225,7 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
 	const sharedSpacePath = importQueue.getSharedSpacePath();
 	const timestamp = Date.now();
 
-	const writeStream = fs.createWriteStream(`${sharedSpacePath}/${corID}/chunks/${timestamp}`, {encoding: "binary"});
-	req.on("data", (chunk) => writeStream.write(chunk, "binary"));
-	req.on("end", () => {
-		writeStream.end();
-	});
+	await handleChunkStream(req, `${sharedSpacePath}/${corID}/chunks/${timestamp}`);
 
 	systemLogger.logInfo(`CONTENT-RANGE=${req.headers["content-range"]}`);
 	systemLogger.logInfo(`CHUNKSIZE=${chunkSize}`);
