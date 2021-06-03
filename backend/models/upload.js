@@ -231,8 +231,8 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
 	systemLogger.logInfo(`CHUNKSIZE=${chunkSize}`);
 	if (chunkSize === 0) {
 		modelStatusChanged(null, teamspace, model, { status: "uploaded" });
-		// TODO: handle file stitching here
 		await stitchChunks(corID, "upload");
+		importQueue.importFile(corID, `${sharedSpacePath}/${corID}/upload`, "uploaded", null);
 	}
 
 	return {
