@@ -618,7 +618,7 @@ async function _handleUpload(correlationId, account, model, username, file, data
 	return importQueue.importFile(
 		correlationId,
 		file.path,
-		file.originalname,
+		newFileName,
 		null
 	);
 }
