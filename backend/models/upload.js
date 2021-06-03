@@ -205,7 +205,7 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
 
 	const contentMax = contentRangeValue.split("-")[1];
 
-	const sizeRemaining = contentSize - contentMax;
+	const sizeRemaining = contentSize - contentMax - 1;
 	const chunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, sizeRemaining);
 
 	const sharedSpacePath = importQueue.getSharedSpacePath();
