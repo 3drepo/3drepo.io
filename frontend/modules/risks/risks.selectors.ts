@@ -208,11 +208,15 @@ export const selectShapes = createSelector(
 		return (activeRisk.shapes || []);
 	}
 
-	const isDetailedIssue = (issue) => issue._id === activeRisk._id && showDetails;
+	return risks.reduce((shapes, risk) => {
+		if (hasShapes(risk, selectedSequence, sequenceStartDate, sequenceEndDate)
+			|| (risk._id === activeRisk._id && showDetails)) {
 
-	return risks.reduce((shapes, issue) => {
-		if (hasShapes(issue, selectedSequence, sequenceStartDate, sequenceEndDate) || isDetailedIssue(issue)) {
-			shapes.push.apply(shapes,  issue.shapes);
+			const riskShapes = risk._id === activeRisk._id ?
+				risk.shapes.map((shape) => ({...shape, selected: true})) : // If this is the selected risk, mark it
+				risk.shapes;
+
+			shapes.push.apply(shapes, riskShapes);
 		}
 
 		return shapes;
