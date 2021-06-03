@@ -603,7 +603,7 @@ function downloadLatest(account, model) {
  * Called by importModel to perform model upload
  */
 async function _handleUpload(correlationId, account, model, username, file, data) {
-	const newFileName = file.originalname.replace(ModelHelper.fileNameRegExp, "_");
+	const newFileName = file.originalname.replace(fileNameRegExp, "_");
 
 	await writeImportData(correlationId,
 		account,
