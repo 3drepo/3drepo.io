@@ -531,7 +531,14 @@ export class ViewerService {
 		await this.isViewerReady();
 		await this.isModelLoaded();
 		await this.setVisibilityOfMeasurementsLabels(!hideLabels);
-		measurements.forEach(UnityUtil.addMeasurement);
+
+		measurements.forEach((measurement) => {
+			UnityUtil.addMeasurement(measurement);
+			if (measurement.selected) {
+				UnityUtil.selectMeasurement(measurement.uuid);
+			}
+		});
+
 		this.setVisibilityOfMeasurementsLabels(this.measureModeLabels);
 	}
 

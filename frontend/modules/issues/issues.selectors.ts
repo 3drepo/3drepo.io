@@ -197,11 +197,17 @@ export const selectShapes = createSelector(
 		return (activeIssue.shapes || []);
 	}
 
-	const isDetailedIssue = (issue) => issue._id === activeIssue._id && showDetails;
+	const isDetailedIssue = (issue) => issue._id === activeIssue._id;
 
 	return issues.reduce((shapes, issue) => {
-		if (hasShapes(issue, selectedSequence, sequenceStartDate, sequenceEndDate) || isDetailedIssue(issue)) {
-			shapes.push.apply(shapes,  issue.shapes);
+		if (hasShapes(issue, selectedSequence, sequenceStartDate, sequenceEndDate)
+			|| (isDetailedIssue(issue)  && showDetails)) {
+
+			const issueShapes = isDetailedIssue(issue) ?
+				issue.shapes.map((shape) => ({...shape, selected: true})) :
+				issue.shapes;
+
+			shapes.push.apply(shapes, issueShapes);
 		}
 
 		return shapes;

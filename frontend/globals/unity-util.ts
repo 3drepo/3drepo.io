@@ -865,6 +865,14 @@ export class UnityUtil {
 		UnityUtil.toUnity('ShowNewMeasurementsLabels');
 	}
 
+	public static selectMeasurement(id: string) {
+		// TODO: missing unity counterpart for this function
+	}
+
+	public static deselectMeasurement(id: string) {
+		// TODO: missing unity counterpart for this function
+	}
+
 	/**
 	 * Add a Risk pin
 	 * @category Pins
