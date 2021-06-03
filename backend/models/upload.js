@@ -186,7 +186,7 @@ Upload.uploadFile = async (req) => {
 	return uploadedFile;
 };
 
-Upload.initUploadChunks = async (teamspace, model, username, headers) => {
+Upload.initUploadChunks = async (teamspace, model, corID, username, headers) => {
 	if (!headers["x-ms-transfer-mode"] ||
 		headers["x-ms-transfer-mode"] !== "chunked" ||
 		!headers["x-ms-content-length"] ||

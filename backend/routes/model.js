@@ -2060,10 +2060,11 @@ async function initUploadChunks(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 	const account = req.params.account;
 	const model = req.params.model;
+	const corID = req.params.corID;
 	const user = req.session.user.username;
 
 	try {
-		const initHeader = await Upload.initUploadChunks(account, model, user, req.headers);
+		const initHeader = await Upload.initUploadChunks(account, model, corID, user, req.headers);
 		initHeader.Location = `${config.public_protocol}://${req.headers.host}${req.originalUrl}`;
 		res.writeHead(200, initHeader);
 		res.end();
