@@ -668,6 +668,8 @@ export function* addMeasurement({ measurement }) {
 	} else {
 		yield put(RisksActions.updateRisk({shapes}));
 	}
+
+	Viewer.removeMeasurement(measurement.uuid);
 }
 
 export function* removeMeasurement({ uuid }) {

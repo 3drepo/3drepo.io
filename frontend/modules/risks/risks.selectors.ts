@@ -200,20 +200,21 @@ export const selectMeasureMode = createSelector(
 );
 
 export const selectShapes = createSelector(
-	selectFilteredRisks, selectActiveRiskDetails,
+	selectFilteredRisks, selectActiveRiskDetails, selectShowDetails,
 	selectSelectedSequence, selectSelectedStartingDate, selectSelectedEndingDate,
-	(risks: any[], detailedRisk, selectedSequence, sequenceStartDate, sequenceEndDate) => {
+	(risks: any[], activeRisk, showDetails, selectedSequence, sequenceStartDate, sequenceEndDate) => {
 
 	if (!selectedSequence) {
-		return (detailedRisk.shapes || []);
+		return (activeRisk.shapes || []);
 	}
 
-	return risks.reduce((shapes, risk) => {
-		if (!hasShapes(risk, selectedSequence, sequenceStartDate, sequenceEndDate) && detailedRisk._id !== risk._id) {
-			return shapes;
+	const isDetailedIssue = (issue) => issue._id === activeRisk._id && showDetails;
+
+	return risks.reduce((shapes, issue) => {
+		if (hasShapes(issue, selectedSequence, sequenceStartDate, sequenceEndDate) || isDetailedIssue(issue)) {
+			shapes.push.apply(shapes,  issue.shapes);
 		}
 
-		shapes.push.apply(shapes, risk.shapes);
 		return shapes;
 	} , []);
 });

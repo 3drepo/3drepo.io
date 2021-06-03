@@ -188,21 +188,22 @@ export const selectMeasureMode = createSelector(
 );
 
 export const selectShapes = createSelector(
-	selectFilteredIssues, selectActiveIssueDetails,
+	selectFilteredIssues, selectActiveIssueDetails, selectShowDetails,
 	selectSelectedSequence, selectSelectedStartingDate, selectSelectedEndingDate,
-	(issues: any, detailedIssue,
+	(issues, activeIssue: any, showDetails,
 		selectedSequence, sequenceStartDate, sequenceEndDate) => {
 
 	if (!selectedSequence) {
-		return (detailedIssue.shapes || []);
+		return (activeIssue.shapes || []);
 	}
 
+	const isDetailedIssue = (issue) => issue._id === activeIssue._id && showDetails;
+
 	return issues.reduce((shapes, issue) => {
-		if (!hasShapes(issue, selectedSequence, sequenceStartDate, sequenceEndDate) && issue._id !== detailedIssue._id) {
-			return shapes;
+		if (hasShapes(issue, selectedSequence, sequenceStartDate, sequenceEndDate) || isDetailedIssue(issue)) {
+			shapes.push.apply(shapes,  issue.shapes);
 		}
 
-		shapes.push.apply(shapes, issue.shapes);
 		return shapes;
 	} , []);
 });
