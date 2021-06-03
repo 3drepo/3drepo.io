@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const delay =  async (time, val) =>  new Promise((resolve) => setTimeout(() => resolve(val), time));
+export const delay = async (time, val) => new Promise((resolve) => setTimeout(() => resolve(val), time));
 
 export const asyncTimeout = (time, func, ...args) => {
 	return new Promise(async (resolve, reject) => {
@@ -30,4 +30,14 @@ export const asyncTimeout = (time, func, ...args) => {
 			resolve(result);
 		}
 	});
+};
+
+export const queuableFunction = (func: (...arg) => Promise<any>, context) => {
+	let lastWait = Promise.resolve(true);
+
+	return async (...args) => {
+		lastWait = lastWait.then(() => func.apply(context, args));
+		await lastWait;
+		lastWait = Promise.resolve(true);
+	};
 };

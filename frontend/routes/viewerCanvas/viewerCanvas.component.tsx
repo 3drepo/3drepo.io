@@ -18,6 +18,7 @@
 import React from 'react';
 
 import { difference, differenceBy, isEqual } from 'lodash';
+import {queuableFunction} from '../../helpers/async';
 
 import { ROUTES } from '../../constants/routes';
 import { addColorOverrides, overridesColorDiff, removeColorOverrides } from '../../helpers/colorOverrides';
@@ -63,8 +64,7 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 
 	constructor(props) {
 		super(props);
-
-		// this.renderMeasurements = debounce(this.renderMeasurements, 50);
+		this.renderMeasurements = queuableFunction(this.renderMeasurements, this);
 	}
 
 	public get shouldBeVisible() {
@@ -131,14 +131,14 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 		}
 	}
 
-	public renderMeasurements(prev: any[], curr: any[]) {
+	public async renderMeasurements(prev: any[], curr: any[]) {
 		const { viewer } = this.props;
 
 		const toAdd = differenceBy(curr, prev, 'uuid', 'color');
 		const toRemove = differenceBy(prev, curr, 'uuid', 'color');
 
-		viewer.addMeasurements(toAdd, true);
-		viewer.removeMeasurements(toRemove);
+		await viewer.addMeasurements(toAdd, true);
+		await viewer.removeMeasurements(toRemove);
 	}
 
 	public componentDidUpdate(prevProps: IProps) {
