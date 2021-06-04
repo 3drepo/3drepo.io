@@ -2431,6 +2431,90 @@ define({ "api": [
     "groupTitle": "Issues"
   },
   {
+    "type": "delete",
+    "url": "/:teamspace/:model/issues/:issueId/comments",
+    "title": "Deletes an comment from an issue",
+    "name": "commentIssue",
+    "group": "Issues",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Json",
+            "optional": false,
+            "field": "PAYLOAD",
+            "description": "<p>The data with the comment guid to be deleted.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "issueId",
+            "description": "<p>Issue ID</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "PAYLOAD",
+          "content": "{\n   guid: \"096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success",
+          "content": " HTTP/1.1 200 OK\n{\n    guid: \"096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "404",
+            "description": "<p>Issue not found</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "401",
+            "description": "<p>Not authorized, when the user is not the owner</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "400",
+            "description": "<p>Issue comment sealed, when the user is trying to delete a comment that is sealed</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/issue.js",
+    "groupTitle": "Issues"
+  },
+  {
     "type": "post",
     "url": "/:teamspace/:model/issues/:issueId/comments",
     "title": "Add comment to issue",
@@ -2720,90 +2804,6 @@ define({ "api": [
             "optional": false,
             "field": "400",
             "description": "<p>Comment with no text</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/issue.js",
-    "groupTitle": "Issues"
-  },
-  {
-    "type": "delete",
-    "url": "/:teamspace/:model/issues/:issueId/comments",
-    "title": "Deletes an comment from an issue",
-    "name": "commentIssue",
-    "group": "Issues",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "Json",
-            "optional": false,
-            "field": "PAYLOAD",
-            "description": "<p>The data with the comment guid to be deleted.</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "issueId",
-            "description": "<p>Issue ID</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "PAYLOAD",
-          "content": "{\n   guid: \"096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "success": {
-      "examples": [
-        {
-          "title": "Success",
-          "content": " HTTP/1.1 200 OK\n{\n    guid: \"096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "error": {
-      "fields": {
-        "Error 4xx": [
-          {
-            "group": "Error 4xx",
-            "optional": false,
-            "field": "404",
-            "description": "<p>Issue not found</p>"
-          },
-          {
-            "group": "Error 4xx",
-            "optional": false,
-            "field": "401",
-            "description": "<p>Not authorized, when the user is not the owner</p>"
-          },
-          {
-            "group": "Error 4xx",
-            "optional": false,
-            "field": "400",
-            "description": "<p>Issue comment sealed, when the user is trying to delete a comment that is sealed</p>"
           }
         ]
       }
@@ -11837,8 +11837,555 @@ define({ "api": [
     "groupTitle": "SafetiBase Risks"
   },
   {
+    "type": "post",
+    "url": "/:teamspace/:model/sequences",
+    "title": "Create custom sequence",
+    "name": "createSequence",
+    "group": "Sequences",
+    "description": "<p>Create custom sequence for model.</p>",
+    "examples": [
+      {
+        "title": "Example usage",
+        "content": "POST /acme/00000000-0000-0000-0000-000000000000/sequences HTTP/1.1\n{\n\t\"name\":\"Custom Sequence 1\",\n\t\"frames\":[\n\t\t{\n\t\t\t\"dateTime\":1244246400000,\n\t\t\t\"viewpoint\":{\n\t\t\t\t\"override_groups\":[\n\t\t\t\t\t{\n\t\t\t\t\t\t\"color\":[\n\t\t\t\t\t\t\t0,\n\t\t\t\t\t\t\t255,\n\t\t\t\t\t\t\t0\n\t\t\t\t\t\t],\n\t\t\t\t\t\t\"rules\":[\n\t\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\t\"field\":\"IFC GUID\",\n\t\t\t\t\t\t\t\t\"operator\":\"IS\",\n\t\t\t\t\t\t\t\t\"values\":[\n\t\t\t\t\t\t\t\t\t\"0h79Q0rcfC1gOPK50yoFCv\",\n\t\t\t\t\t\t\t\t\t\"0K5o7g755EZw2RjNI7HcYK\",\n\t\t\t\t\t\t\t\t\t\"0yuGDtpaPCSBT7QB7wvN5I\",\n\t\t\t\t\t\t\t\t\t\"2HBVtaIWv07ud53r01WB6q\"\n\t\t\t\t\t\t\t\t]\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t],\n\t\t\t\t\t\t\"account\":\"acme\",\n\t\t\t\t\t\t\"model\":\"00000000-0000-0000-0000-000000000000\"\n\t\t\t\t\t}\n\t\t\t\t],\n\t\t\t\t\"hidden_group\":{\n\t\t\t\t\t\"rules\":[\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"field\":\"IFC GUID\",\n\t\t\t\t\t\t\t\"operator\":\"IS\",\n\t\t\t\t\t\t\t\"values\":[\n\t\t\t\t\t\t\t\t\"2S2omCydz5b9jSgrcLLblk\",\n\t\t\t\t\t\t\t\t\"0_U7q0Dzj6DfPp4VzMmTUt\",\n\t\t\t\t\t\t\t\t\"0iMv$JxRL67v6DoyA3RRwz\",\n\t\t\t\t\t\t\t\t\"1W4yiIKW92qAUdezi70DTY\",\n\t\t\t\t\t\t\t\t\"00ojKm$5f7luRCAjta0hsu\",\n\t\t\t\t\t\t\t\t\"0d2LnELub06glJ9mZh2up$\",\n\t\t\t\t\t\t\t\t\"37gui3POjDQgmIadjhr$ek\",\n\t\t\t\t\t\t\t\t\"3XAjSwznb6PfZG9t_wAFXi\"\n\t\t\t\t\t\t\t]\n\t\t\t\t\t\t}\n\t\t\t\t\t],\n\t\t\t\t\t\"account\":\"acme\",\n\t\t\t\t\t\"model\":\"00000000-0000-0000-0000-000000000000\"\n\t\t\t\t}\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"dateTime\":1244246500000,\n\t\t\t\"viewpoint\":{\n\t\t\t\t\"up\":[0,1,0],\n\t\t\t\t\"position\":[38,38 ,125.080119148101],\n\t\t\t\t\"look_at\":[0,0,-163.080119148101],\n\t\t\t\t\"view_dir\":[0,0,-1],\n\t\t\t\t\"right\":[1,0,0],\n\t\t\t\t\"fov\":2.11248306530104,\n\t\t\t\t\"aspect_ratio\":0.875018933732738,\n\t\t\t\t\"far\":276.756120771945,\n\t\t\t\t\"near\":76.4241101223321\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"dateTime\":1244246700000,\n\t\t\t\"viewpoint\":{\n\t\t\t\t\"override_groups\":[\n\t\t\t\t\t{\n\t\t\t\t\t\t\"color\":[\n\t\t\t\t\t\t\t0,\n\t\t\t\t\t\t\t255,\n\t\t\t\t\t\t\t0\n\t\t\t\t\t\t],\n\t\t\t\t\t\t\"rules\":[\n\t\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\t\"field\":\"IFC GUID\",\n\t\t\t\t\t\t\t\t\"operator\":\"IS\",\n\t\t\t\t\t\t\t\t\"values\":[\n\t\t\t\t\t\t\t\t\t\"00ojKm$5f7luRCAjta0hsu\"\n\t\t\t\t\t\t\t\t]\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t],\n\t\t\t\t\t\t\"account\":\"acme\",\n\t\t\t\t\t\t\"model\":\"00000000-0000-0000-0000-000000000000\"\n\t\t\t\t\t}\n\t\t\t\t]\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"dateTime\":1244419200000,\n\t\t\t\"viewId\":\"00000000-0000-0001-0001-000000000001\"\n\t\t},\n\t\t{\n\t\t\t\"dateTime\":1244458200000,\n\t\t\t\"viewId\":\"00000000-0000-0001-0001-000000000002\"\n\t\t},\n\t\t{\n\t\t\t\"dateTime\":1244484300000,\n\t\t\t\"viewpoint\": {}\n\t\t}\n\t]\n}",
+        "type": "post"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "HTTP/1.1 200 OK\n{\n\t\"_id\":\"00000000-0000-0000-0000-000000000002\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/sequence.js",
+    "groupTitle": "Sequences",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "post",
+    "url": "/:teamspace/:model/sequences/:sequenceId/activities",
+    "title": "Create one or more activities",
+    "name": "createSequenceActivities",
+    "group": "Sequences",
+    "description": "<p>Creates a sequence activity tree.</p>",
+    "parameter": {
+      "fields": {
+        "Request body": [
+          {
+            "group": "Request body",
+            "type": "Activity[]",
+            "optional": false,
+            "field": "activity",
+            "description": "<p>An array of the activity tree that will be created</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "Boolean",
+            "optional": true,
+            "field": "overwrite",
+            "description": "<p>This flag indicates whether the request will replace the currently stored activities or just added at the end of the currently stored activities array. If not present it will be considered as false.</p>"
+          }
+        ],
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "sequenceId",
+            "description": "<p>Sequence unique ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          }
+        ],
+        "Type: Activity": [
+          {
+            "group": "Type: Activity",
+            "type": "String",
+            "optional": false,
+            "field": "name",
+            "description": "<p>The name of the activity</p>"
+          },
+          {
+            "group": "Type: Activity",
+            "type": "Number",
+            "optional": false,
+            "field": "startDate",
+            "description": "<p>The starting timestamp date of the activity</p>"
+          },
+          {
+            "group": "Type: Activity",
+            "type": "Number",
+            "optional": false,
+            "field": "endDate",
+            "description": "<p>The ending timestamp date of the activity</p>"
+          },
+          {
+            "group": "Type: Activity",
+            "type": "Object",
+            "optional": true,
+            "field": "resources",
+            "description": "<p>The resources asoociated with the activity</p>"
+          },
+          {
+            "group": "Type: Activity",
+            "type": "KeyValue[]",
+            "optional": true,
+            "field": "data",
+            "description": "<p>An array of key value pairs with metadata for the activity</p>"
+          },
+          {
+            "group": "Type: Activity",
+            "type": "Activity[]",
+            "optional": true,
+            "field": "subActivities",
+            "description": "<p>An array of activities that will be children of the activity</p>"
+          }
+        ],
+        "Type: KeyValue": [
+          {
+            "group": "Type: KeyValue",
+            "type": "String",
+            "optional": false,
+            "field": "key",
+            "description": "<p>The key of the pair</p>"
+          },
+          {
+            "group": "Type: KeyValue",
+            "type": "Any",
+            "optional": false,
+            "field": "value",
+            "description": "<p>The value of the pair</p>"
+          }
+        ]
+      }
+    },
+    "examples": [
+      {
+        "title": "Example usage",
+        "content": "POST /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0001-000000000001/activities HTTP/1.1\n{\n  \"overwrite\": true,\n  \"activities\": [\n    {\n      \"name\": \"Clinic Construction\",\n      \"startDate\": 1603184400000,\n      \"endDate\": 1613062800000,\n      \"data\": [\n        {\n          \"key\": \"Color\",\n          \"value\": \"green\"\n        }\n      ],\n      \"subActivities\": [\n        {\n          \"name\": \"Site Work & Logistics\",\n          \"startDate\": 1603184400000,\n          \"endDate\": 1613062800000,\n          \"data\": [\n            {\n              \"key\": \"Height\",\n              \"value\": 12\n            }\n          ],\n          \"subActivities\": [\n            {\n              \"name\": \"Site Office Installation\",\n              \"startDate\": 1603184400000,\n              \"endDate\": 1603213200000,\n              \"data\": [\n                {\n                  \"key\": \"Size\",\n                  \"value\": \"Big\"\n                }\n              ]\n            },\n            {\n              \"name\": \"Excavation\",\n              \"startDate\": 1603270800000,\n              \"endDate\": 1603299600000\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}",
+        "type": "post"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "HTTP/1.1 200 OK",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/sequence.js",
+    "groupTitle": "Sequences"
+  },
+  {
+    "type": "delete",
+    "url": "/:teamspace/:model/sequences/:sequenceID/legend",
+    "title": "Delete legend",
+    "name": "deleteLegend",
+    "group": "Sequences",
+    "description": "<p>Delete the legend associated to this sequence</p>",
+    "examples": [
+      {
+        "title": "Example usage",
+        "content": "DELETE /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0000-000000000002/legend HTTP/1.1",
+        "type": "delete"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "HTTP/1.1 200 OK\n{}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/sequence.js",
+    "groupTitle": "Sequences",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "delete",
+    "url": "/:teamspace/:model/sequences/:sequenceID",
+    "title": "Delete sequence",
+    "name": "deleteSequence",
+    "group": "Sequences",
+    "description": "<p>Delete the custom sequence by ID</p>",
+    "examples": [
+      {
+        "title": "Example usage",
+        "content": "DELETE /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0000-000000000002 HTTP/1.1",
+        "type": "delete"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "HTTP/1.1 200 OK\n{}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/sequence.js",
+    "groupTitle": "Sequences",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "delete",
+    "url": "/:teamspace/:model/sequences/:sequenceId/activities/:activityId",
+    "title": "Edit an activity",
+    "name": "deleteSequenceActivity",
+    "group": "Sequences",
+    "description": "<p>Delete a sequence activity.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "sequenceId",
+            "description": "<p>Sequence unique ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "activityId",
+            "description": "<p>The activity unique ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          }
+        ]
+      }
+    },
+    "examples": [
+      {
+        "title": "Example usage",
+        "content": "DELETE /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0001-000000000001/activities/fe94be44-5cd8-4aaf-b020-afc1456680d3 HTTP/1.1",
+        "type": "delete"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "HTTP/1.1 200 OK",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/sequence.js",
+    "groupTitle": "Sequences"
+  },
+  {
+    "type": "put",
+    "url": "/:teamspace/:model/sequences/:sequenceId/activities/:activityId",
+    "title": "Edit an activity",
+    "name": "editSequenceActivity",
+    "group": "Sequences",
+    "description": "<p>Edits a sequence activity.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "sequenceId",
+            "description": "<p>Sequence unique ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "activityId",
+            "description": "<p>The activity unique ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          }
+        ],
+        "Request body": [
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": true,
+            "field": "name",
+            "description": "<p>The name of the activity</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "Number",
+            "optional": true,
+            "field": "startDate",
+            "description": "<p>The starting timestamp date of the activity</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "Number",
+            "optional": true,
+            "field": "endDate",
+            "description": "<p>The ending timestamp date of the activity</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": true,
+            "field": "parent",
+            "description": "<p>The parent id if it has one. This parent must exist previously</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "Object",
+            "optional": true,
+            "field": "resources",
+            "description": "<p>The resources asoociated with the activity</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "KeyValue[]",
+            "optional": true,
+            "field": "data",
+            "description": "<p>An array of key value pairs with metadata for the activity</p>"
+          }
+        ],
+        "Type: KeyValue": [
+          {
+            "group": "Type: KeyValue",
+            "type": "String",
+            "optional": false,
+            "field": "key",
+            "description": "<p>The key of the pair</p>"
+          },
+          {
+            "group": "Type: KeyValue",
+            "type": "Any",
+            "optional": false,
+            "field": "value",
+            "description": "<p>The value of the pair</p>"
+          }
+        ]
+      }
+    },
+    "examples": [
+      {
+        "title": "Example usage",
+        "content": "PATCH /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0001-000000000001/activities/fe94be44-5cd8-4aaf-b020-afc1456680d3 HTTP/1.1\n{\n   \"name\":\"Renamed activity\"\n}",
+        "type": "patch"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "HTTP/1.1 200 OK",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/sequence.js",
+    "groupTitle": "Sequences"
+  },
+  {
     "type": "get",
-    "url": "/:teamspace/:model/revision(/master/head/|/:revId)/sequences/:sequenceId/activities",
+    "url": "/:teamspace/:model/sequences/:sequenceID/legend",
+    "title": "get the legend",
+    "name": "getLegend",
+    "group": "Sequences",
+    "description": "<p>Get the legend for this sequence</p>",
+    "examples": [
+      {
+        "title": "Example usage",
+        "content": "GET /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0000-000000000002/legend HTTP/1.1",
+        "type": "get"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "HTTP/1.1 200 OK\n{\n\t  \"Building works\": \"#aabbcc\"\n\t  \"Temporary works\": \"#ffffff66\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/sequence.js",
+    "groupTitle": "Sequences",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "get",
+    "url": "/:teamspace/:model/sequences/:sequenceID",
+    "title": "Get sequence",
+    "name": "getSequence",
+    "group": "Sequences",
+    "description": "<p>Get sequence by ID</p>",
+    "examples": [
+      {
+        "title": "GET /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0000-000000000002 HTTP/1.1",
+        "content": "GET /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0000-000000000002 HTTP/1.1",
+        "type": "get"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "HTTP/1.1 200 OK\n{\n\t\"teamspace\":\"alice\",\n\t\"model\":\"00000000-0000-0000-0000-000000000000\",\n\t\"rev_id\":\"00000000-0000-0000-0000-000000000001\",\n\t\"name\":\"Sequence 1\",\n\t\"frames\":[\n\t\t{\n\t\t\t\"dateTime\":1244246400000,\n\t\t\t\"state\":\"00000000-0000-0000-0001-000000000002\"\n\t\t},\n\t\t{\n\t\t\t\"dateTime\":1244419200000,\n\t\t\t\"state\":\"00000000-0000-0000-0002-000000000002\"\n\t\t}\n\t],\n\t\"_id\":\"00000000-0000-0000-0000-000000000002\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/sequence.js",
+    "groupTitle": "Sequences",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "get",
+    "url": "/:teamspace/:model/sequences/:sequenceId/activities",
     "title": "Get all activities",
     "name": "getSequenceActivities",
     "group": "Sequences",
@@ -11866,26 +12413,14 @@ define({ "api": [
             "optional": false,
             "field": "model",
             "description": "<p>Model ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": true,
-            "field": "revId",
-            "description": "<p>Revision unique ID</p>"
           }
         ]
       }
     },
     "examples": [
       {
-        "title": "Example usage (/master/head)",
-        "content": "GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences/00000000-0000-0000-0001-000000000001/activities HTTP/1.1",
-        "type": "get"
-      },
-      {
-        "title": "Example usage (/:revId)",
-        "content": "GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/sequences/00000000-0000-0000-0001-000000000001/activities HTTP/1.1",
+        "title": "Example usage",
+        "content": "GET /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0001-000000000001/activities HTTP/1.1\n*",
         "type": "get"
       }
     ],
@@ -11893,7 +12428,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response",
-          "content": "HTTP/1.1 200 OK\n{\n\t\"tasks\":[\n\t\t{\n\t\t\t\"id\":\"00000000-0000-0001-0001-000000000001\",\n\t\t\t\"name\":\"Construction\",\n\t\t\t\"startDate\":1244246400000,\n\t\t\t\"endDate\":1244246450000,\n\t\t\t\"subTasks\":[\n\t\t\t\t{\n\t\t\t\t\t\"id\":\"00000000-0001-0001-0001-000000000001\",\n\t\t\t\t\t\"name\":\"Prepare site\",\n\t\t\t\t\t\"startDate\":1244246400000,\n\t\t\t\t\t\"endDate\":1244246430000,\n\t\t\t\t\t\"subTasks\":[\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"id\":\"00000001-0001-0001-0001-000000000001\",\n\t\t\t\t\t\t\t\"name\":\"Erect site hoarding\",\n\t\t\t\t\t\t\t\"startDate\":1244246400000,\n\t\t\t\t\t\t\t\"endDate\":1244246410000\n\t\t\t\t\t\t},\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"id\":\"00000002-0001-0001-0001-000000000001\",\n\t\t\t\t\t\t\t\"name\":\"Clear existing structures\",\n\t\t\t\t\t\t\t\"startDate\":1244246410000,\n\t\t\t\t\t\t\t\"endDate\":1244246420000\n\t\t\t\t\t\t},\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"id\":\"00000003-0001-0001-0001-000000000001\",\n\t\t\t\t\t\t\t\"name\":\"Smooth work surfaces\",\n\t\t\t\t\t\t\t\"startDate\":1244246420000,\n\t\t\t\t\t\t\t\"endDate\":1244246430000\n\t\t\t\t\t\t}\n\t\t\t\t\t]\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"id\":\"00000001-0002-0001-0001-000000000001\",\n\t\t\t\t\t\"name\":\"Construct tunnel\",\n\t\t\t\t\t\"startDate\":1244246430000,\n\t\t\t\t\t\"endDate\":1244246450000,\n\t\t\t\t\t\"subTasks\":[\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"id\":\"00000001-0002-0001-0001-000000000001\",\n\t\t\t\t\t\t\t\"name\":\"Deploy instant tunnel\",\n\t\t\t\t\t\t\t\"startDate\":1244246430000,\n\t\t\t\t\t\t\t\"endDate\":1244246440000\n\t\t\t\t\t\t},\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"id\":\"00000002-0002-0001-0001-000000000001\",\n\t\t\t\t\t\t\t\"name\":\"Add road markings\",\n\t\t\t\t\t\t\t\"startDate\":1244246440000,\n\t\t\t\t\t\t\t\"endDate\":1244246450000\n\t\t\t\t\t\t}\n\t\t\t\t\t]\n\t\t\t\t}\n\t\t\t]\n\t\t}\n\t]\n}",
+          "content": "HTTP/1.1 200 OK\n{\n\t\"activities\":[\n\t\t{\n\t\t\t\"id\":\"00000000-0000-0001-0001-000000000001\",\n\t\t\t\"name\":\"Construction\",\n\t\t\t\"startDate\":1244246400000,\n\t\t\t\"endDate\":1244246450000,\n\t\t\t\"subActivities\":[\n\t\t\t\t{\n\t\t\t\t\t\"id\":\"00000000-0001-0001-0001-000000000001\",\n\t\t\t\t\t\"name\":\"Prepare site\",\n\t\t\t\t\t\"startDate\":1244246400000,\n\t\t\t\t\t\"endDate\":1244246430000,\n\t\t\t\t\t\"subActivities\":[\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"id\":\"00000001-0001-0001-0001-000000000001\",\n\t\t\t\t\t\t\t\"name\":\"Erect site hoarding\",\n\t\t\t\t\t\t\t\"startDate\":1244246400000,\n\t\t\t\t\t\t\t\"endDate\":1244246410000\n\t\t\t\t\t\t},\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"id\":\"00000002-0001-0001-0001-000000000001\",\n\t\t\t\t\t\t\t\"name\":\"Clear existing structures\",\n\t\t\t\t\t\t\t\"startDate\":1244246410000,\n\t\t\t\t\t\t\t\"endDate\":1244246420000\n\t\t\t\t\t\t},\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"id\":\"00000003-0001-0001-0001-000000000001\",\n\t\t\t\t\t\t\t\"name\":\"Smooth work surfaces\",\n\t\t\t\t\t\t\t\"startDate\":1244246420000,\n\t\t\t\t\t\t\t\"endDate\":1244246430000\n\t\t\t\t\t\t}\n\t\t\t\t\t]\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"id\":\"00000001-0002-0001-0001-000000000001\",\n\t\t\t\t\t\"name\":\"Construct tunnel\",\n\t\t\t\t\t\"startDate\":1244246430000,\n\t\t\t\t\t\"endDate\":1244246450000,\n\t\t\t\t\t\"subActivities\":[\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"id\":\"00000001-0002-0001-0001-000000000001\",\n\t\t\t\t\t\t\t\"name\":\"Deploy instant tunnel\",\n\t\t\t\t\t\t\t\"startDate\":1244246430000,\n\t\t\t\t\t\t\t\"endDate\":1244246440000\n\t\t\t\t\t\t},\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"id\":\"00000002-0002-0001-0001-000000000001\",\n\t\t\t\t\t\t\t\"name\":\"Add road markings\",\n\t\t\t\t\t\t\t\"startDate\":1244246440000,\n\t\t\t\t\t\t\t\"endDate\":1244246450000\n\t\t\t\t\t\t}\n\t\t\t\t\t]\n\t\t\t\t}\n\t\t\t]\n\t\t}\n\t]\n}",
           "type": "json"
         }
       ]
@@ -11904,7 +12439,7 @@ define({ "api": [
   },
   {
     "type": "get",
-    "url": "/:teamspace/:model/revision(/master/head/|/:revId)/sequences/:sequenceId/activities/:activityId",
+    "url": "/:teamspace/:model/sequences/:sequenceId/activities/:activityId",
     "title": "Get activity",
     "name": "getSequenceActivityDetail",
     "group": "Sequences",
@@ -11939,26 +12474,14 @@ define({ "api": [
             "optional": false,
             "field": "model",
             "description": "<p>Model ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": true,
-            "field": "revId",
-            "description": "<p>Revision unique ID</p>"
           }
         ]
       }
     },
     "examples": [
       {
-        "title": "Example usage (/master/head)",
-        "content": "GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences/00000000-0000-0000-0001-000000000001/activities/00000000-0000-0002-0001-000000000001 HTTP/1.1",
-        "type": "get"
-      },
-      {
-        "title": "Example usage (/:revId)",
-        "content": "GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/sequences/00000000-0000-0000-0001-000000000001/activities/00000000-0000-0002-0001-000000000001 HTTP/1.1",
+        "title": "Example usage",
+        "content": "GET /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0001-000000000001/activities/00000000-0000-0002-0001-000000000001 HTTP/1.1",
         "type": "get"
       }
     ],
@@ -11966,7 +12489,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response",
-          "content": "HTTP/1.1 200 OK\n{\n\t\"id\":\"00000000-0000-0002-0001-000000000001\",\n\t\"name\":\"Construct tunnel\",\n\t\"data\":{\n\t\t\"Name\":\"Construction\",\n\t\t\"Status\":\"Planned\",\n\t\t\"Is Compound Task\":\"Yes\",\n\t\t\"Code\":\"ST00020\",\n\t\t\"Planned Start\":\"15 Apr 2020 10:00:00\",\n\t\t\"Type\":\"Work\",\n\t\t\"Constraint\":\"No Constraint\",\n\t\t\"Planned Finish\":\"11 Sep 2020 18:00:00\",\n\t\t\"Percentage Complete\":0,\n\t\t\"Physical Volume Unity\":\"Unknown\",\n\t\t\"Estimated Rate\":0.0,\n\t\t\"Planned Physical Volume\":6.6,\n\t\t\"Actual Physical Volume\":0.9,\n\t\t\"Remaining Physical Volume\":5.7,\n\t\t\"Budgeted Cost\":30.0,\n\t\t\"Actual Cost\":9999.99,\n\t}\n}",
+          "content": "HTTP/1.1 200 OK\n{\n \"id\":\"00000000-0000-0002-0001-000000000001\",\n \"name\":\"Construct tunnel\",\n \"sequenceId\": \"00000000-0000-0000-0001-000000000001\",\n \"parent\": \"00000130-2300-0002-0001-000567000001\"\n \"startDate\": 1610000000000,\n \"endDate\": 1615483938124,\n \"data\":[\n   {\"key\":\"Name\",\"value\":\"Construction\"},\n   {\"key\":\"Status\",\"value\":\"Planned\"},\n   {\"key\":\"Is Compound Task\",\"value\":\"Yes\"},\n   {\"key\":\"Code\",\"value\":\"ST00020\"},\n   {\"key\":\"Planned Start\",\"value\":\"15 Apr 2020 10:00:00\"},\n   {\"key\":\"Type\",\"value\":\"Work\"},\n   {\"key\":\"Constraint\",\"value\":\"No Constraint\"},\n   {\"key\":\"Planned Finish\",\"value\":\"11 Sep 2020 18:00:00\"},\n   {\"key\":\"Percentage Complete\",\"value\":0},\n   {\"key\":\"Physical Volume Unity\",\"value\":\"Unknown\"},\n   {\"key\":\"Estimated Rate\",\"value\":0},\n   {\"key\":\"Planned Physical Volume\",\"value\":6.6},\n   {\"key\":\"Actual Physical Volume\",\"value\":0.9},\n   {\"key\":\"Remaining Physical Volume\",\"value\":5.7},\n   {\"key\":\"Budgeted Cost\",\"value\":30},\n   {\"key\":\"Actual Cost\",\"value\":9999.99}\n ]\n}",
           "type": "json"
         }
       ]
@@ -11977,7 +12500,7 @@ define({ "api": [
   },
   {
     "type": "get",
-    "url": "/:teamspace/:model/revision(/master/head/|/:revId)/sequences/:sequenceId/state/:stateId",
+    "url": "/:teamspace/:model/sequences/:sequenceId/state/:stateId",
     "title": "Get state",
     "name": "getSequenceState",
     "group": "Sequences",
@@ -12012,26 +12535,14 @@ define({ "api": [
             "optional": false,
             "field": "model",
             "description": "<p>Model ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": true,
-            "field": "revId",
-            "description": "<p>Revision unique ID</p>"
           }
         ]
       }
     },
     "examples": [
       {
-        "title": "Example usage (/master/head)",
-        "content": "GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences/00000000-0000-0000-0001-000000000001/state/00000000-0000-0000-0001-000000000002 HTTP/1.1",
-        "type": "get"
-      },
-      {
-        "title": "Example usage (/:revId)",
-        "content": "GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/sequences/00000000-0000-0000-0001-000000000001/state/00000000-0000-0000-0001-000000000002 HTTP/1.1",
+        "title": "Example usage",
+        "content": "GET /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0001-000000000001/state/00000000-0000-0000-0001-000000000002 HTTP/1.1",
         "type": "get"
       }
     ],
@@ -12050,20 +12561,49 @@ define({ "api": [
   },
   {
     "type": "get",
-    "url": "/:teamspace/:model/revision(/master/head/|/:revId)/sequences",
+    "url": "/:teamspace/:model/sequences",
     "title": "List all sequences",
     "name": "listSequences",
     "group": "Sequences",
     "description": "<p>List all sequences associated with the model.</p>",
+    "parameter": {
+      "fields": {
+        "Query": [
+          {
+            "group": "Query",
+            "type": "String",
+            "optional": true,
+            "field": "rev_id",
+            "description": "<p>Revision unique ID</p>"
+          }
+        ],
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          }
+        ]
+      }
+    },
     "examples": [
       {
-        "title": "Example usage (/master/head)",
-        "content": "GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/sequences HTTP/1.1",
+        "title": "Example usage",
+        "content": "GET /acme/00000000-0000-0000-0000-000000000000/sequences HTTP/1.1",
         "type": "get"
       },
       {
-        "title": "Example usage (/:revId)",
-        "content": "GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/sequences HTTP/1.1",
+        "title": "Example usage (with revision)",
+        "content": "GET /acme/00000000-0000-0000-0000-000000000000/sequences?rev_id=00000000-0000-0000-0000-000000000001 HTTP/1.1",
         "type": "get"
       }
     ],
@@ -12072,6 +12612,38 @@ define({ "api": [
         {
           "title": "Success-Response",
           "content": "HTTP/1.1 200 OK\n[\n\t{\n\t\t\"teamspace\":\"alice\",\n\t\t\"model\":\"00000000-0000-0000-0000-000000000000\",\n\t\t\"rev_id\":\"00000000-0000-0000-0000-000000000001\",\n\t\t\"name\":\"Sequence 1\",\n\t\t\"frames\":[\n\t\t\t{\n\t\t\t\t\"dateTime\":1244246400000,\n\t\t\t\t\"state\":\"00000000-0000-0000-0001-000000000002\"\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"dateTime\":1244419200000,\n\t\t\t\t\"state\":\"00000000-0000-0000-0002-000000000002\"\n\t\t\t}\n\t\t],\n\t\t\"_id\":\"00000000-0000-0000-0000-000000000002\"\n\t}\n]",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/sequence.js",
+    "groupTitle": "Sequences"
+  },
+  {
+    "type": "put",
+    "url": "/:teamspace/:model/sequences/:sequenceID/legend",
+    "title": "Add/Update legend",
+    "name": "updateLegend",
+    "group": "Sequences",
+    "description": "<p>Update/add a legend to this sequence</p>",
+    "examples": [
+      {
+        "title": "Example usage",
+        "content": "PUT /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0000-000000000002/legend HTTP/1.1",
+        "type": "put"
+      },
+      {
+        "title": "Example usage:",
+        "content": "{\n\t  \"Building works\": \"#aabbcc\"\n\t  \"Temporary works\": \"#ffffff66\"\n}",
+        "type": "put"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "HTTP/1.1 200 OK\n{}",
           "type": "json"
         }
       ]
@@ -12095,17 +12667,71 @@ define({ "api": [
             "optional": false,
             "field": "model",
             "description": "<p>Model ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": true,
-            "field": "revId",
-            "description": "<p>Revision unique ID</p>"
           }
         ]
       }
     }
+  },
+  {
+    "type": "patch",
+    "url": "/:teamspace/:model/sequences/:sequenceID",
+    "title": "Update a sequence",
+    "name": "updateSequence",
+    "group": "Sequences",
+    "description": "<p>Update a sequence (note: currently only name chance is supported</p>",
+    "examples": [
+      {
+        "title": "Example usage",
+        "content": "PATCH /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0000-000000000002 HTTP/1.1",
+        "type": "patch"
+      },
+      {
+        "title": "Example usage:",
+        "content": "{\n\t  \"name\": \"Building works\"\n}",
+        "type": "patch"
+      }
+    ],
+    "parameter": {
+      "fields": {
+        "Request body": [
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "name",
+            "description": "<p>The new name of the sequence</p>"
+          }
+        ],
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "HTTP/1.1 200 OK\n{}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/sequence.js",
+    "groupTitle": "Sequences"
   },
   {
     "type": "get",
@@ -12768,6 +13394,60 @@ define({ "api": [
         ]
       }
     }
+  },
+  {
+    "type": "get",
+    "url": "/:teamspace/:model/textures/:textureId",
+    "title": "Get texture map",
+    "name": "getTexture",
+    "group": "Texture",
+    "description": "<p>Returns the texture map with the given UID</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Name of the model containing the texture</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "UID",
+            "description": "<p>of the texture to download</p>"
+          }
+        ]
+      }
+    },
+    "examples": [
+      {
+        "title": "Example usage:",
+        "content": "GET /teamSpace1/84b5f0e0-a27d-11eb-ac9d-a531015f5294/textures/c9df3159-295c-4714-8b54-63dc715b1125 HTTP/1.1",
+        "type": "get"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success (with headers):",
+          "content": "\nHTTP/1.1 200 OK\nX-Powered-By: Express\nVary: Origin\nAccess-Control-Allow-Credentials: true\nContent-Type: image/png;\nDate: Wed, 21 Apr 2021 10:59:54 GMT\nConnection: keep-alive\nTransfer-Encoding: chunked\n\n/***** FILE CONTENTS ******\\",
+          "type": "png"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/model.js",
+    "groupTitle": "Texture"
   },
   {
     "type": "get",
