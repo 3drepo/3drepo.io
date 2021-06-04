@@ -190,7 +190,8 @@ Upload.initUploadChunks = async (teamspace, model, corID, username, headers) => 
 	if (!headers["x-ms-transfer-mode"] ||
 		headers["x-ms-transfer-mode"] !== "chunked" ||
 		!headers["x-ms-content-length"] ||
-		isNaN(parseInt(headers["x-ms-content-length"]))) {
+		isNaN(parseInt(headers["x-ms-content-length"])) ||
+		!headers["filename"]) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
@@ -203,7 +204,7 @@ Upload.initUploadChunks = async (teamspace, model, corID, username, headers) => 
 	await importQueue.mkdir(`${sharedSpacePath}/${corID}/`);
 	await importQueue.mkdir(`${sharedSpacePath}/${corID}/chunks/`);
 
-	return { "x-ms-chunk-size": chunkSize };
+	return { "x-ms-chunk-size": chunkSize, "filename": headers["filename"] };
 };
 
 Upload.uploadChunk = async (teamspace, model, corID, req) => {
@@ -232,6 +233,7 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
 
 	await handleChunkStream(req, `${sharedSpacePath}/${corID}/chunks/${timestamp}`);
 
+	systemLogger.logInfo(`FILENAME=${req.headers["filename"]}`);
 	systemLogger.logInfo(`CONTENT-RANGE=${req.headers["content-range"]}`);
 	systemLogger.logInfo(`CHUNKSIZE=${chunkSize}`);
 	if (chunkSize === 0) {
