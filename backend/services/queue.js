@@ -214,6 +214,9 @@ class ImportQueue {
 	 * @param {copy} copy - use fs.copy instead of fs.move if set to true
 	 *******************************************************************************/
 	_moveFileToSharedSpace(corID, orgFilePath, newFileName, copy) {
+		const { fileNameRegExp } = require("../models/helper/model");
+		newFileName = newFileName.replace(fileNameRegExp, "_");
+
 		const newFileDir = this.sharedSpacePath + "/" + corID + "/";
 		const filePath = newFileDir + newFileName;
 
