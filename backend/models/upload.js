@@ -187,6 +187,8 @@ Upload.uploadFile = async (req) => {
 };
 
 Upload.initUploadChunks = async (teamspace, model, corID, username, headers) => {
+	systemLogger.logInfo(`(POST) FILENAME=${headers["filename"]}`);
+	systemLogger.logInfo(`(POST) FILENAME=${Object.keys(headers)}`);
 	if (!headers["x-ms-transfer-mode"] ||
 		headers["x-ms-transfer-mode"] !== "chunked" ||
 		!headers["x-ms-content-length"] ||
