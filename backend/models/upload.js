@@ -187,8 +187,6 @@ Upload.uploadFile = async (req) => {
 };
 
 Upload.initUploadChunks = async (teamspace, model, corID, username, headers) => {
-	systemLogger.logInfo(`(POST) FILENAME=${headers["filename"]}`);
-	systemLogger.logInfo(`(POST) FILENAME=${Object.keys(headers)}`);
 	if (!headers["x-ms-transfer-mode"] ||
 		headers["x-ms-transfer-mode"] !== "chunked" ||
 		!headers["x-ms-content-length"] ||
@@ -206,7 +204,7 @@ Upload.initUploadChunks = async (teamspace, model, corID, username, headers) => 
 	await importQueue.mkdir(`${sharedSpacePath}/${corID}/`);
 	await importQueue.mkdir(`${sharedSpacePath}/${corID}/chunks/`);
 
-	return { "x-ms-chunk-size": chunkSize, "filename": headers["filename"] };
+	return { "x-ms-chunk-size": chunkSize };
 };
 
 Upload.uploadChunk = async (teamspace, model, corID, req) => {
@@ -241,7 +239,7 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
 	if (chunkSize === 0) {
 		modelStatusChanged(null, teamspace, model, { status: "uploaded" });
 		await stitchChunks(corID, "upload");
-		importQueue.importFile(corID, `${sharedSpacePath}/${corID}/upload`, "uploaded", null);
+		importQueue.importFile(corID, `${sharedSpacePath}/${corID}/upload`, req.headers["filename"], null);
 	}
 
 	return {
