@@ -532,12 +532,7 @@ export class ViewerService {
 		await this.isModelLoaded();
 		await this.setVisibilityOfMeasurementsLabels(!hideLabels);
 
-		measurements.forEach((measurement) => {
-			UnityUtil.addMeasurement(measurement);
-			if (measurement.selected) {
-				UnityUtil.selectMeasurement(measurement.uuid);
-			}
-		});
+		measurements.forEach(UnityUtil.addMeasurement);
 
 		this.setVisibilityOfMeasurementsLabels(this.measureModeLabels);
 	}
@@ -546,6 +541,18 @@ export class ViewerService {
 		await this.isViewerReady();
 		await this.isModelLoaded();
 		measurements.forEach(({uuid}) => this.removeMeasurement(uuid));
+	}
+
+	public async selectMeasurements(measurements) {
+		await this.isViewerReady();
+		await this.isModelLoaded();
+		measurements.forEach(({uuid}) => UnityUtil.selectMeasurement(uuid));
+	}
+
+	public async deselectMeasurements(measurements) {
+		await this.isViewerReady();
+		await this.isModelLoaded();
+		measurements.forEach(({uuid}) => UnityUtil.deselectMeasurement(uuid));
 	}
 
 	/**

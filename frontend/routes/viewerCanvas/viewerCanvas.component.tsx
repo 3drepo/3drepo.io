@@ -57,6 +57,8 @@ interface IProps {
 	handleTransparenciesVisibility: any;
 	issuesShapes: any[];
 	risksShapes: any[];
+	issuesHighlightedShapes: any[];
+	risksHighlightedShapes: any[];
 }
 
 export class ViewerCanvas extends React.PureComponent<IProps, any> {
@@ -131,21 +133,32 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 		}
 	}
 
-	public async renderMeasurements(prev: any[], curr: any[]) {
+	public async renderMeasurements(prev: any[], curr: any[], highlighted: any[] = []) {
 		const { viewer } = this.props;
 
-		const toAdd = differenceBy(curr, prev, 'uuid', 'color', 'selected');
-		const toRemove = differenceBy(prev, curr, 'uuid', 'color', 'selected');
+		const toAdd = differenceBy(curr, prev, 'uuid', 'color');
+		const toRemove = differenceBy(prev, curr, 'uuid', 'color');
 
 		await viewer.removeMeasurements(toRemove);
 		await viewer.addMeasurements(toAdd, true);
+		await viewer.selectMeasurements(highlighted);
+	}
+
+	public async renderMeasurementsHighlights(prev: any[], curr: any[]) {
+		const { viewer } = this.props;
+
+		const toAdd = difference(curr, prev);
+		const toRemove = difference(prev, curr);
+
+		await viewer.deselectMeasurements(toRemove);
+		await viewer.selectMeasurements(toAdd);
 	}
 
 	public componentDidUpdate(prevProps: IProps) {
 		const { colorOverrides, issuePins, riskPins, measurementPins, hasGisCoordinates,
 			gisCoordinates, gisLayers, transparencies, transformations: transformation,
 			sequenceHiddenNodes, viewerManipulationEnabled, viewer,
-			issuesShapes, risksShapes
+			issuesShapes, issuesHighlightedShapes, risksShapes, risksHighlightedShapes
 		} = this.props;
 
 		if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
@@ -181,11 +194,19 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 		}
 
 		if (!isEqual(prevProps.issuesShapes, issuesShapes)) {
-			this.renderMeasurements(prevProps.issuesShapes, issuesShapes);
+			this.renderMeasurements(prevProps.issuesShapes, issuesShapes, issuesHighlightedShapes);
+		}
+
+		if (!isEqual(prevProps.issuesHighlightedShapes, issuesHighlightedShapes)) {
+			this.renderMeasurementsHighlights(prevProps.issuesHighlightedShapes, issuesHighlightedShapes);
 		}
 
 		if (!isEqual(prevProps.risksShapes, risksShapes)) {
-			this.renderMeasurements(prevProps.risksShapes, risksShapes);
+			this.renderMeasurements(prevProps.risksShapes, risksShapes, risksHighlightedShapes);
+		}
+
+		if (!isEqual(prevProps.risksHighlightedShapes, risksHighlightedShapes)) {
+			this.renderMeasurementsHighlights(prevProps.risksHighlightedShapes, risksHighlightedShapes);
 		}
 
 		if (prevProps.viewerManipulationEnabled !== viewerManipulationEnabled) {

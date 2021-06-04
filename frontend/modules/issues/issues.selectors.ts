@@ -200,14 +200,19 @@ export const selectShapes = createSelector(
 	return issues.reduce((shapes, issue) => {
 		if (hasShapes(issue, selectedSequence, sequenceStartDate, sequenceEndDate)
 			|| (issue._id === activeIssue._id  && showDetails)) {
-
-			const issueShapes = issue._id === activeIssue._id ?
-				issue.shapes.map((shape) => ({...shape, selected: true})) : // If this is the selected issue, mark it
-				issue.shapes;
-
-			shapes.push.apply(shapes, issueShapes);
+			shapes.push.apply(shapes, issue.shapes);
 		}
 
 		return shapes;
 	} , []);
+});
+
+export const selectHighlightedShapes =  createSelector(
+	selectActiveIssueDetails, selectSelectedSequence, (activeIssue, sequence) => {
+
+	if (!sequence) {
+		return [];
+	}
+
+	return activeIssue.shapes || [];
 });

@@ -212,13 +212,19 @@ export const selectShapes = createSelector(
 		if (hasShapes(risk, selectedSequence, sequenceStartDate, sequenceEndDate)
 			|| (risk._id === activeRisk._id && showDetails)) {
 
-			const riskShapes = risk._id === activeRisk._id ?
-				risk.shapes.map((shape) => ({...shape, selected: true})) : // If this is the selected risk, mark it
-				risk.shapes;
-
-			shapes.push.apply(shapes, riskShapes);
+			shapes.push.apply(shapes, risk.shapes);
 		}
 
 		return shapes;
 	} , []);
+});
+
+export const selectHighlightedShapes =  createSelector(
+	selectActiveRiskDetails, selectSelectedSequence, (activeRisk, sequence) => {
+
+	if (!sequence) {
+		return [];
+	}
+
+	return activeRisk.shapes || [];
 });

@@ -20,11 +20,13 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { selectGisLayers } from '../../modules/gis';
-import { selectPins as selectIssuePins, selectShapes as selectIssuesShapes } from '../../modules/issues';
+import { selectHighlightedShapes as selectIssuesHighlightedShapes,
+	selectPins as selectIssuePins, selectShapes as selectIssuesShapes } from '../../modules/issues';
 import { selectPins as selectMeasurementPins } from '../../modules/measurements';
 import { selectGISCoordinates, selectHasGISCoordinates } from '../../modules/model';
 import { selectIsPaused, selectIsViewerManipulationEnabled, selectPresentationMode } from '../../modules/presentation';
-import { selectPins as selectRiskPins, selectShapes as selectRisksShapes  } from '../../modules/risks';
+import { selectHighlightedShapes as selectRisksHighlightedShapes,
+	selectPins as selectRiskPins, selectShapes as selectRisksShapes  } from '../../modules/risks';
 import { selectIsLoadingFrameState, selectSelectedHiddenNodes,
 	selectSelectedSequenceId, SequencesActions } from '../../modules/sequences';
 import { TreeActions } from '../../modules/tree';
@@ -49,7 +51,9 @@ const mapStateToProps = createStructuredSelector({
 	isLoadingSequenceFrame: selectIsLoadingFrameState,
 	sequenceHiddenNodes: selectSelectedHiddenNodes,
 	issuesShapes: selectIssuesShapes,
+	issuesHighlightedShapes: selectIssuesHighlightedShapes,
 	risksShapes: selectRisksShapes,
+	risksHighlightedShapes: selectRisksHighlightedShapes
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
