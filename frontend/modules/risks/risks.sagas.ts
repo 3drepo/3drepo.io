@@ -664,9 +664,9 @@ export function* addMeasurement({ measurement }) {
 	const isNewIssue = !Boolean(activeRisk._id);
 
 	if (isNewIssue) {
-		yield put(RisksActions.updateNewRisk({...activeRisk, shapes}));
+		yield updateNewRisk({newRisk: {...activeRisk, shapes}});
 	} else {
-		yield put(RisksActions.updateRisk({shapes}));
+		yield updateRisk({riskData: {shapes}});
 	}
 
 	Viewer.removeMeasurement(measurement.uuid);
