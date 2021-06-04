@@ -1581,6 +1581,7 @@ router.delete("/:model", middlewares.hasDeleteAccessToModel, deleteModel);
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model id to upload.
+ * @apiParam (Request body) {String} filename Filename of content to upload
  * @apiParam (Request body) {String} tag Tag name for new revision
  * @apiParam (Request body) {String} [desc] Description for new revision
  * @apiParam (Request body) {Boolean} [importAnimations] Whether to import animations within a sequence
@@ -1588,6 +1589,7 @@ router.delete("/:model", middlewares.hasDeleteAccessToModel, deleteModel);
  * @apiExample {post} Example usage:
  * POST /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/ms-chunking HTTP/1.1
  * {
+ * 	"filename": "structure.ifc",
  * 	"tag": "rev001",
  * 	"desc": "Revision 2"
  * }
@@ -1623,7 +1625,8 @@ router.post("/:model/upload/ms-chunking", middlewares.hasUploadAccessToModel, up
  *
  * header: {
  * 	"x-ms-transfer-mode": "chunked",
- * 	"x-ms-content-length": 10100
+ * 	"x-ms-content-length": 10100,
+ * 	"filename": "structure.ifc"
  * }
  *
  * @apiSuccessExample {json} Success-Response:
@@ -1660,7 +1663,8 @@ router.post("/:model/upload/ms-chunking/:corID", middlewares.hasUploadAccessToMo
  * header: {
  * 	"Content-Range": "bytes=0-1023/10100",
  * 	"Content-Type": "application/octet-stream",
- * 	"Content-Length": "bytes=1024"
+ * 	"Content-Length": "bytes=1024",
+ * 	"filename": "structure.ifc"
  * }
  *
  * body: {

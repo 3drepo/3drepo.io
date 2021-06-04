@@ -99,6 +99,9 @@ Upload.uploadRequest = async (teamspace, model, username, data) => {
 		throw responseCodes.MODEL_NOT_FOUND;
 	}
 
+	const { fileNameRegExp } = require("../models/helper/model");
+	const newFileName = data.filename.replace(fileNameRegExp, "_");
+
 	await isValidTag(teamspace, model, data.tag);
 
 	const corID = await createCorrelationId(teamspace, model);
@@ -108,7 +111,7 @@ Upload.uploadRequest = async (teamspace, model, username, data) => {
 		teamspace,
 		model,
 		username,
-		"uploaded",
+		newFileName,
 		data.tag,
 		data.desc,
 		data.importAnimations
