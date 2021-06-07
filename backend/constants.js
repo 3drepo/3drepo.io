@@ -645,8 +645,6 @@
 	// Upload
 	//
 	// -----------------------------------------------------------------------------
-	// define("MS_CHUNK_BYTES_LIMIT", 52428800);
-	// limit reduced for debugging
-	define("MS_CHUNK_BYTES_LIMIT", 1000000);
+	define("MS_CHUNK_BYTES_LIMIT", 52428800);
 
 })();
