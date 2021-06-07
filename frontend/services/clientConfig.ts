@@ -20,6 +20,7 @@ export class ClientConfigService {
 	// tslint:disable-next-line
 	public login_check_interval;
 	public ga;
+	public gtm;
 	public userId;
 	public development;
 	public sequencesEnabled;
