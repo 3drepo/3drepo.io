@@ -7,7 +7,7 @@ matrix:
       submodules: false
       depth: 1
       node_js:
-        - "10.15.1"
+        - "14.0.0"
       script:
         - cd backend
         - yarn install
@@ -23,7 +23,7 @@ matrix:
       submodules: false
       depth: 1
       node_js:
-        - "10.15.1"
+        - "14.0.0"
       sudo: true
       addons:
         apt:

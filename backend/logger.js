@@ -66,14 +66,6 @@ function createLogger() {
 			info: 3,
 			debug: 4,
 			trace: 5
-		},
-		colors: {
-			trace: "magenta",
-			debug: "white",
-			info: "green",
-			warn: "orange",
-			error: "red",
-			fatal: "grey"
 		}
 	};
 
@@ -106,9 +98,8 @@ function createLogger() {
 	// Creates logger which outputs to both the console
 	// and a log file simultaneously
 	// Levels are set separately in the config.
-	return new(winston.Logger)({
+	return winston.createLogger({
 		levels: customLevels.levels,
-		colors: customLevels.colors,
 		transports: transports
 	});
 }
@@ -128,12 +119,20 @@ repoLogger.prototype.logMessage = function (type, msg, meta) {
 
 	const metadata = Object.assign({}, meta);
 
-	this.session && this.session.user && (metadata.username = this.session.user.username);
-	this.req && this.req.method && (metadata.method = this.req.method);
-	this.req && this.req.originalUrl && (metadata.url = this.req.originalUrl);
+	if (this.session && this.session.user) {
+		metadata.username = this.session.user.username;
+	}
+
+	if (this.req && this.req.method) {
+		metadata.method = this.req.method;
+	}
+
+	if (this.req && this.req.originalUrl) {
+		metadata.url = this.req.originalUrl;
+	}
 
 	this.logger.log(type, (new Date())
-		.toISOString() + "\t" + this.uid + "\t" + msg + " [" + timeDiff + " ms]", metadata);
+		.toISOString() + "\t" + this.uid + "\t" + msg + " [" + timeDiff + " ms]", {message: JSON.stringify(metadata)});
 };
 
 /**
