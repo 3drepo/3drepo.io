@@ -4,7 +4,7 @@ import * as TS from 'typescript';
 const LICENSE_FIRST_PART = `/**
  *  Copyright (C) `;
 
-const YEAR = '2021';
+const YEAR = new Date().getFullYear();
 
 const LICENSE_SECOND_TWO = ` 3D Repo Ltd
  *
