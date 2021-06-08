@@ -60,7 +60,10 @@ export const ShapesFormTab = ({
 				{...props}
 				areaMeasurements={areaMeasurements}
 				lengthMeasurements={lengthMeasurements}
-				pointMeasurements={[]} modelUnit={props.units} />
+				pointMeasurements={[]}
+				modelUnit={props.units}
+				units={props.units === 'ft' ? props.units : 'm'}
+				/>
 
 			{isEmpty(shapes) && <EmptyStateInfo>No shapes have been attached yet</EmptyStateInfo>}
 

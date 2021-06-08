@@ -81,6 +81,7 @@ interface IProps {
 	selectedDate: Date;
 	sequences: any[];
 	measureMode: string;
+	units: string;
 }
 
 interface IState {
@@ -292,17 +293,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				canComment={this.userCanComment}
 				onThumbnailUpdate={this.handleNewScreenshot}
 				formRef={this.formRef}
-				showSequenceDate={this.props.showSequenceDate}
-				minSequenceDate={this.props.minSequenceDate}
-				maxSequenceDate={this.props.maxSequenceDate}
-				selectedDate={this.props.selectedDate}
-				sequences={this.props.sequences}
-				measureMode={this.props.measureMode}
-				removeMeasurement={this.props.removeMeasurement}
-				setMeasureMode={this.props.setMeasureMode}
-				setMeasurementColor={this.props.setMeasurementColor}
-				setMeasurementName={this.props.setMeasurementName}
-				horizontal={this.props.horizontal}
+				{...this.props}
 			/>
 		);
 	}
