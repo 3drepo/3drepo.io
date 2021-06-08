@@ -70,13 +70,13 @@ export class PinButton extends React.PureComponent<IProps, any> {
 		this.togglePinListeners(false);
 	}
 
-	public handleChangeEditMode = (active) => {
+	public handleChangeEditMode = async (active) => {
 		const { viewer, onSave } = this.props;
 
 		if (active) {
-			viewer.setMeasureMode(VIEWER_MEASURING_MODE.POINT, this.handlePickPoint).then(
-				() => this.togglePinListeners(true)
-			);
+			await viewer.setMeasureMode(VIEWER_MEASURING_MODE.POINT, this.handlePickPoint);
+			await viewer.enableEdgeSnapping();
+			this.togglePinListeners(true);
 		} else {
 			this.togglePinListeners(false);
 			viewer.clearMeasureMode();
