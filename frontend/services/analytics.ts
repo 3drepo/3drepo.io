@@ -7,10 +7,11 @@ class AnalyticsService {
 		const { development, gtm } = clientConfigService;
 
 		if (development) {
-			console.debug('Development - Not loading Google Analyitics or remarketing');
+			console.debug('Development - Not loading Google Analytics or remarketing');
 		}
 
-		if (clientConfigService && !development) {
+		console.debug('Google Tag Manager - data: ', gtm);
+		if (!development) {
 			if (gtm && gtm.gtmId) {
 				console.debug('Adding Google Tag Manager');
 				TagManager.initialize(gtm);
