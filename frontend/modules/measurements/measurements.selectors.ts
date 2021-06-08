@@ -50,14 +50,13 @@ export const selectPointMeasurements = createSelector(
 export const selectPins = createSelector(
 	selectPointMeasurements, (state) =>
 		state.map(({ customColor, ...measure }) => {
-			const color = customColor || measure.color;
-			const colorToSet = [color.r / 255, color.g / 255, color.b / 255];
+			const colour = customColor || measure.color;
 			return ({
 				id: measure.uuid,
 				type: 'point',
 				isSelected: false,
 				position: measure.position,
-				colour: colorToSet,
+				colour,
 			});
 		})
 );

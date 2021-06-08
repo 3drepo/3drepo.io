@@ -266,7 +266,7 @@ export class ViewerService {
 			uuid: UUID(),
 			position,
 			type: -1,
-			color: { r: 0, g: 1, b: 1, a: 1},
+			color: [0, 1, 1, 1],
 		};
 
 		this.measurementAlertEvent(measure);
