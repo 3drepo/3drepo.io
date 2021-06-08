@@ -866,11 +866,11 @@ export class UnityUtil {
 	}
 
 	public static selectMeasurement(id: string) {
-		// TODO: missing unity counterpart for this function
+		UnityUtil.toUnity('SelectMeasurement', UnityUtil.LoadingState.MODEL_LOADING, id);
 	}
 
 	public static deselectMeasurement(id: string) {
-		// TODO: missing unity counterpart for this function
+		UnityUtil.toUnity('DeselectMeasurement', UnityUtil.LoadingState.MODEL_LOADING, id);
 	}
 
 	/**
