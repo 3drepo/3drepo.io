@@ -198,12 +198,12 @@ Upload.initUploadChunks = async (teamspace, model, corID, username, headers) => 
 	if (!headers["x-ms-transfer-mode"] ||
 		headers["x-ms-transfer-mode"] !== "chunked" ||
 		!headers["x-ms-content-length"] ||
-		isNaN(parseInt(headers["x-ms-content-length"]))) {
+		isNaN(headers["x-ms-content-length"])) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
 	const sharedSpacePath = importQueue.getSharedSpacePath();
-	const chunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, headers["x-ms-content-length"]);
+	const chunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, parseInt(headers["x-ms-content-length"]));
 
 	// upload model with tag
 	modelStatusChanged(null, teamspace, model, { status: "uploading", username });

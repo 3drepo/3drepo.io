@@ -22,6 +22,7 @@ const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp();
 const logger = require("../../logger.js");
 const systemLogger = logger.systemLogger;
+const C = require("../../constants");
 const responseCodes = require("../../response_codes.js");
 const helpers = require("../helpers/signUp");
 const moment = require("moment");
@@ -251,7 +252,7 @@ describe("Uploading a model", function () {
 		let corID2;
 
 		describe("Upload model request", function() {
-			it("without invalid model should fail", function(done) {
+			it("with invalid model should fail", function(done) {
 				agent.post(`/${username}/invalidModel/upload/ms-chunking`)
 					.send({
 						"filename": "file.ifc",
@@ -297,9 +298,10 @@ describe("Uploading a model", function () {
 				agent.post(`/${username}/${modelId}/upload/ms-chunking`)
 					.send({
 						"filename": "file.ifc",
-						"tag": "with_quota",
+						"tag": "with_quota"
 					})
 					.expect(400, function(err, res) {
+						console.log(res.body);
 						expect(res.body.value).to.equal(responseCodes.DUPLICATE_TAG.value);
 						done(err);
 					});
@@ -326,6 +328,89 @@ describe("Uploading a model", function () {
 					})
 					.expect(200, function(err, res) {
 						corID2 = res.body.corID;
+						done(err);
+					});
+			});
+		});
+
+		describe("Start MS chunk upload", function() {
+			it("with invalid model should fail", function(done) {
+				agent.post(`/${username}/invalidModel/upload/ms-chunking/${corID1}`)
+					.set("x-ms-transfer-mode", "chunked")
+					.set("x-ms-content-length", 118832273)
+					.expect(404, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+						done(err);
+					});
+			});
+
+			it("with invalid correlation ID should fail", function(done) {
+				agent.post(`/${username}/${modelId}/upload/ms-chunking/invalidCorID`)
+					.set("x-ms-transfer-mode", "chunked")
+					.set("x-ms-content-length", 118832273)
+					.expect(404, function(err, res) {
+						console.log(res.body);
+						expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+						done(err);
+					});
+			});
+
+			it("without transfer mode header should fail", function(done) {
+				agent.post(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
+					.set("x-ms-content-length", 118832273)
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+						done(err);
+					});
+			});
+
+			it("should fail if transfer mode not chunked", function(done) {
+				agent.post(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
+					.set("x-ms-transfer-mode", "normal")
+					.set("x-ms-content-length", 118832273)
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+						done(err);
+					});
+			});
+
+			it("without content length header should fail", function(done) {
+				agent.post(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
+					.set("x-ms-transfer-mode", "chunked")
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+						done(err);
+					});
+			});
+
+			it("with NaN content length header should fail", function(done) {
+				agent.post(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
+					.set("x-ms-transfer-mode", "chunked")
+					.set("x-ms-content-length", "100MB")
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+						done(err);
+					});
+			});
+
+			it("should succeed", function(done) {
+				agent.post(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
+					.set("x-ms-transfer-mode", "chunked")
+					.set("x-ms-content-length", 118832273)
+					.expect(200, function(err, res) {
+						expect(res.headers["x-ms-chunk-size"]).to.equal(C.MS_CHUNK_BYTES_LIMIT);
+						expect(res.headers["Location"]).to.exist;
+						done(err);
+					});
+			});
+
+			it("should succeed if string is number", function(done) {
+				agent.post(`/${username}/${modelId}/upload/ms-chunking/${corID2}`)
+					.set("x-ms-transfer-mode", "chunked")
+					.set("x-ms-content-length", "118832273")
+					.expect(200, function(err, res) {
+						expect(res.headers["x-ms-chunk-size"]).to.equal(C.MS_CHUNK_BYTES_LIMIT);
+						expect(res.headers["Location"]).to.exist;
 						done(err);
 					});
 			});
