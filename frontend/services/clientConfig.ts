@@ -27,6 +27,7 @@ export class ClientConfigService {
 	// tslint:disable-next-line
 	public captcha_client_key;
 	public legalTemplates;
+	public liveChatLicense;
 	public intercomLicense;
 	public tagRegExp;
 	public uploadSizeLimit;
