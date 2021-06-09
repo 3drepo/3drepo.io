@@ -39,6 +39,7 @@ function createClientConfig(serverConfig, req) {
 		"ga" : config.ga,
 		"development" : config.development,
 		"googleConversionId": config.googleConversionId,
+		"gtm": config.gtm,
 		"userNotice" : config.userNotice,
 		"customLogins" : config.customLogins,
 		"liveChatLicense" : config.liveChatLicense,
