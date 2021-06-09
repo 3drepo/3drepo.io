@@ -33,7 +33,6 @@ import { EXTENSION_RE } from '../../constants/resources';
 import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
 import { prepareResources } from '../../helpers/resources';
 import { SuggestedTreatmentsDialog } from '../../routes/components/dialogContainer/components';
-import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
 import { BoardActions } from '../board';
@@ -132,8 +131,6 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 
 		const { data: savedRisk } = yield API.saveRisk(teamspace, model, risk);
 
-		analyticsService.sendEvent(EVENT_CATEGORIES.RISK, EVENT_ACTIONS.CREATE);
-
 		yield put(ViewpointsActions.cacheGroupsFromViewpoint(savedRisk.viewpoint, risk.viewpoint));
 
 		finishSubmitting();
@@ -160,7 +157,6 @@ function* updateRisk({ teamspace, modelId, riskData }) {
 		let { data: updatedRisk } = yield API.updateRisk(teamspace, modelId, _id, rev_id, riskData);
 		updatedRisk.resources = prepareResources(teamspace, modelId, updatedRisk.resources);
 
-		analyticsService.sendEvent(EVENT_CATEGORIES.RISK, EVENT_ACTIONS.EDIT);
 		updatedRisk = {...updatedRisk, ...riskData};
 
 		yield put(RisksActions.setComponentState({ savedPin: position }));
