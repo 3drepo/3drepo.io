@@ -100,6 +100,11 @@ Upload.uploadRequest = async (teamspace, model, username, data) => {
 	}
 
 	const { fileNameRegExp } = require("../models/helper/model");
+
+	if (!data.filename) {
+		throw responseCodes.INVALID_ARGUMENTS;
+	}
+
 	const newFileName = data.filename.replace(fileNameRegExp, "_");
 
 	await isValidTag(teamspace, model, data.tag);
@@ -193,8 +198,7 @@ Upload.initUploadChunks = async (teamspace, model, corID, username, headers) => 
 	if (!headers["x-ms-transfer-mode"] ||
 		headers["x-ms-transfer-mode"] !== "chunked" ||
 		!headers["x-ms-content-length"] ||
-		isNaN(parseInt(headers["x-ms-content-length"])) ||
-		!headers["filename"]) {
+		isNaN(parseInt(headers["x-ms-content-length"]))) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
@@ -236,13 +240,13 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
 
 	await handleChunkStream(req, `${sharedSpacePath}/${corID}/chunks/${timestamp}`);
 
-	systemLogger.logInfo(`FILENAME=${req.headers["filename"]}`);
 	systemLogger.logInfo(`CONTENT-RANGE=${req.headers["content-range"]}`);
 	systemLogger.logInfo(`CHUNKSIZE=${chunkSize}`);
 	if (chunkSize === 0) {
 		modelStatusChanged(null, teamspace, model, { status: "uploaded" });
 		await stitchChunks(corID, "upload");
-		importQueue.importFile(corID, `${sharedSpacePath}/${corID}/upload`, req.headers["filename"], null);
+		const { filename } = JSON.parse(fs.readFileSync(`${sharedSpacePath}/${corID}.json`, "utf8"));
+		importQueue.importFile(corID, `${sharedSpacePath}/${corID}/upload`, filename, null);
 	}
 
 	return {
@@ -269,6 +273,7 @@ Upload.writeImportData = async (corID, databaseName, modelName, userName, newFil
 
 	const json = {
 		file: `${sharedSpacePH}/${corID}/${newFileName}`,
+		filename: newFileName,
 		database: databaseName,
 		project: modelName,
 		owner: userName
