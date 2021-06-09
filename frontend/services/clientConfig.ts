@@ -19,7 +19,6 @@ export class ClientConfigService {
 	public resourceUploadSizeLimit;
 	// tslint:disable-next-line
 	public login_check_interval;
-	public ga;
 	public gtm;
 	public userId;
 	public development;
@@ -28,7 +27,6 @@ export class ClientConfigService {
 	// tslint:disable-next-line
 	public captcha_client_key;
 	public legalTemplates;
-	public liveChatLicense;
 	public intercomLicense;
 	public tagRegExp;
 	public uploadSizeLimit;
