@@ -8,9 +8,7 @@ class AnalyticsService {
 
 		if (development) {
 			console.debug('Development - Not loading Google Analytics or remarketing');
-		}
-
-		if (!development) {
+		} else {
 			if (gtm && gtm.gtmId) {
 				console.debug('Adding Google Tag Manager');
 				TagManager.initialize(gtm);
