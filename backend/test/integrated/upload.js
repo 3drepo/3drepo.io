@@ -246,4 +246,89 @@ describe("Uploading a model", function () {
 
 	});
 
+	describe("MS Logic Apps chunking", function() {
+		let corID1;
+		let corID2;
+
+		describe("Upload model request", function() {
+			it("without invalid model should fail", async function() {
+				await agent.post(`/${username}/invalidModel/upload/ms-chunking`)
+					.send({
+						"filename": "file.ifc",
+						"tag": "rev0"
+					})
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.value);
+						done(err);
+					});
+			});
+
+			it("without filename should fail", async function() {
+				await agent.post(`/${username}/${modelId}/upload/ms-chunking`)
+					.send({"tag": "no_filename"})
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+						done(err);
+					});
+			});
+
+			it("without tag should fail", async function() {
+				await agent.post(`/${username}/${modelId}/upload/ms-chunking`)
+					.send({"filename": "no_tag.ifc"})
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
+						done(err);
+					});
+			});
+
+			it("with invalid tag should fail", async function() {
+				await agent.post(`/${username}/${modelId}/upload/ms-chunking`)
+					.send({
+						"filename": "file.ifc",
+						"tag": "bad tag!"
+					})
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
+						done(err);
+					});
+			});
+
+			it("without description should succeed", async function() {
+				await agent.post(`/${username}/${modelId}/upload/ms-chunking`)
+					.send({
+						"filename": "MEP Core.ifc",
+						"tag": "id1"
+					})
+					.expect(200, function(err, res) {
+						corID1 = res.body.corID;
+						done(err);
+					});
+			});
+
+			it("should succeed", async function() {
+				await agent.post(`/${username}/${modelId}/upload/ms-chunking`)
+					.send({
+						"filename": "MEP Core.ifc",
+						"tag": "id2",
+						"desc": "Revision 2"
+					})
+					.expect(200, function(err, res) {
+						corID2 = res.body.corID;
+						done(err);
+					});
+			});
+
+			it("duplicate tag should fail", async function() {
+				await agent.post(`/${username}/${modelId}/upload/ms-chunking`)
+					.send({
+						"filename": "file.ifc",
+						"tag": "id2",
+					})
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.DUPLICATE_TAG.value);
+						done(err);
+					});
+			});
+		});
+	});
 });

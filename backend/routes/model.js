@@ -1615,7 +1615,6 @@ router.post("/:model/upload/ms-chunking", middlewares.hasUploadAccessToModel, up
  * @apiParam {String} corID Upload correlation ID
  * @apiParam (Request header) {String} x-ms-transfer-mode Indicates that the content is uploaded in chunks; value="chunked"
  * @apiParam (Request header) {Number} x-ms-content-length The entire content size in bytes before chunking
- * @apiParam (Request header) {String} filename Filename of uploaded content
  *
  * @apiSuccess (200) {Number} [x-ms-chunk-size] Suggested chunk size in bytes
  * @apiSuccess (200) {String} Location The URL location where to send the HTTP PATCH messages
@@ -1625,8 +1624,7 @@ router.post("/:model/upload/ms-chunking", middlewares.hasUploadAccessToModel, up
  *
  * header: {
  * 	"x-ms-transfer-mode": "chunked",
- * 	"x-ms-content-length": 10100,
- * 	"filename": "structure.ifc"
+ * 	"x-ms-content-length": 10100
  * }
  *
  * @apiSuccessExample {json} Success-Response:
@@ -1650,7 +1648,6 @@ router.post("/:model/upload/ms-chunking/:corID", middlewares.hasUploadAccessToMo
  * @apiParam (Request header) {String} Content-Range Byte range for the current content chunk, including the starting value, ending value, and the total content size, for example: "bytes 0-1023/10100"
  * @apiParam (Request header) {String} Content-Type Type of chunked content
  * @apiParam (Request header) {String} Content-Length Length of size in bytes of the current chunk
- * @apiParam (Request header) {String} filename Filename of uploaded content
  *
  * @apiParam (Request body: Attachment) {binary} FILE the file to be uploaded
  *
@@ -1663,8 +1660,7 @@ router.post("/:model/upload/ms-chunking/:corID", middlewares.hasUploadAccessToMo
  * header: {
  * 	"Content-Range": "bytes=0-1023/10100",
  * 	"Content-Type": "application/octet-stream",
- * 	"Content-Length": "bytes=1024",
- * 	"filename": "structure.ifc"
+ * 	"Content-Length": "bytes=1024"
  * }
  *
  * body: {
