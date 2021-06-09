@@ -251,20 +251,20 @@ describe("Uploading a model", function () {
 		let corID2;
 
 		describe("Upload model request", function() {
-			it("without invalid model should fail", async function() {
-				await agent.post(`/${username}/invalidModel/upload/ms-chunking`)
+			it("without invalid model should fail", function(done) {
+				agent.post(`/${username}/invalidModel/upload/ms-chunking`)
 					.send({
 						"filename": "file.ifc",
 						"tag": "rev0"
 					})
-					.expect(400, function(err, res) {
-						expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.value);
+					.expect(404, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
 						done(err);
 					});
 			});
 
-			it("without filename should fail", async function() {
-				await agent.post(`/${username}/${modelId}/upload/ms-chunking`)
+			it("without filename should fail", function(done) {
+				agent.post(`/${username}/${modelId}/upload/ms-chunking`)
 					.send({"tag": "no_filename"})
 					.expect(400, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -272,8 +272,8 @@ describe("Uploading a model", function () {
 					});
 			});
 
-			it("without tag should fail", async function() {
-				await agent.post(`/${username}/${modelId}/upload/ms-chunking`)
+			it("without tag should fail", function(done) {
+				agent.post(`/${username}/${modelId}/upload/ms-chunking`)
 					.send({"filename": "no_tag.ifc"})
 					.expect(400, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
@@ -281,8 +281,8 @@ describe("Uploading a model", function () {
 					});
 			});
 
-			it("with invalid tag should fail", async function() {
-				await agent.post(`/${username}/${modelId}/upload/ms-chunking`)
+			it("with invalid tag should fail", function(done) {
+				agent.post(`/${username}/${modelId}/upload/ms-chunking`)
 					.send({
 						"filename": "file.ifc",
 						"tag": "bad tag!"
@@ -293,8 +293,20 @@ describe("Uploading a model", function () {
 					});
 			});
 
-			it("without description should succeed", async function() {
-				await agent.post(`/${username}/${modelId}/upload/ms-chunking`)
+			it("duplicate tag should fail", function(done) {
+				agent.post(`/${username}/${modelId}/upload/ms-chunking`)
+					.send({
+						"filename": "file.ifc",
+						"tag": "with_quota",
+					})
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.DUPLICATE_TAG.value);
+						done(err);
+					});
+			});
+
+			it("without description should succeed", function(done) {
+				agent.post(`/${username}/${modelId}/upload/ms-chunking`)
 					.send({
 						"filename": "MEP Core.ifc",
 						"tag": "id1"
@@ -305,8 +317,8 @@ describe("Uploading a model", function () {
 					});
 			});
 
-			it("should succeed", async function() {
-				await agent.post(`/${username}/${modelId}/upload/ms-chunking`)
+			it("should succeed", function(done) {
+				agent.post(`/${username}/${modelId}/upload/ms-chunking`)
 					.send({
 						"filename": "MEP Core.ifc",
 						"tag": "id2",
@@ -314,18 +326,6 @@ describe("Uploading a model", function () {
 					})
 					.expect(200, function(err, res) {
 						corID2 = res.body.corID;
-						done(err);
-					});
-			});
-
-			it("duplicate tag should fail", async function() {
-				await agent.post(`/${username}/${modelId}/upload/ms-chunking`)
-					.send({
-						"filename": "file.ifc",
-						"tag": "id2",
-					})
-					.expect(400, function(err, res) {
-						expect(res.body.value).to.equal(responseCodes.DUPLICATE_TAG.value);
 						done(err);
 					});
 			});
