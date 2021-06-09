@@ -32,18 +32,14 @@ const shapesSchema = yup.object().shape({
 	"color": colorSchema.required(),
 	"type": yup.mixed().oneOf([0, 1]).required(),
 	"ticket_id": utils.uuidSchema,
-	"name": yup.string(),
-	// this is for convenience only, because the shape has this field in unity we allow it
-	// to be posted in this form, even though it will be replaced with _id when fetching
-	"uuid": yup.string()
+	"name": yup.string()
 }).noUnknown();
 
 const Shapes = {};
 
 Shapes.clean = (shape) => {
-	shape.uuid = utils.uuidToString(shape._id);
+	shape._id = utils.uuidToString(shape._id);
 	delete shape.ticket_id;
-	delete shape._id;
 	return shape;
 };
 
@@ -52,7 +48,6 @@ Shapes.create = async (account, model, subCollectionName, shape, skipValidation 
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	delete shape.uuid;
 	shape._id = utils.generateUUID();
 	await DB.insert(account, getCollectionName(model, subCollectionName), shape);
 	return shape._id;

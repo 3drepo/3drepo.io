@@ -140,7 +140,7 @@ describe("Shapes", () => {
 	const wrongShapeIssue =  { "name":"wrong shapes issue", ...cloneDeep(baseIssue), shapes : [ wrongShape ]};
 
 
-	const chopUuIds = (objs) => objs.map(obj=> omit(obj, 'uuid'));
+	const chopIds = (objs) => objs.map(obj=> omit(obj, '_id'));
 
 
 	describe("in issue", function() {
@@ -162,21 +162,21 @@ describe("Shapes", () => {
 
 		it ("should be reflected when fetching the issue", async()=> {
 			const res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
-			const shapes_ids = res.body.shapes.map((shape) => shape.uuid);
+			const shapes_ids = res.body.shapes.map((shape) => shape._id);
 
 			expect(shapes_ids).to.be.an('array').and.to.have.lengthOf(shapeIssue.shapes.length);
 			shapes_ids.forEach((id) => {
 				expect(id).to.be.an('string');
 			})
 
-			expect(chopUuIds(res.body.shapes)).to.be.deep.equal(shapeIssue.shapes);
+			expect(chopIds(res.body.shapes)).to.be.deep.equal(shapeIssue.shapes);
 		});
 
 		it ("should be reflected when fetching all the issues", async()=> {
 			const res = await agent.get(`/${username}/${model}/issues/`).expect(200);
 
 			const theIssue = (res.body.filter(({_id})=>_id === issueId))[0];
-			expect(chopUuIds(theIssue.shapes)).to.be.deep.equal(shapeIssue.shapes);
+			expect(chopIds(theIssue.shapes)).to.be.deep.equal(shapeIssue.shapes);
 		});
 
 		it ("when updating other properties should keep the shapes", async()=> {
@@ -185,7 +185,7 @@ describe("Shapes", () => {
 				.expect(200);
 
 			const res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
-			expect(chopUuIds(res.body.shapes)).to.be.deep.equal(shapeIssue.shapes);
+			expect(chopIds(res.body.shapes)).to.be.deep.equal(shapeIssue.shapes);
 		});
 
 		it ("when updating with wrong schema shape shouldnt affect the shapes", async()=> {
@@ -195,7 +195,7 @@ describe("Shapes", () => {
 				.expect(responseCodes.INVALID_ARGUMENTS.status);
 
 			const res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
-			expect(chopUuIds(res.body.shapes)).to.be.deep.equal(shapeIssue.shapes);
+			expect(chopIds(res.body.shapes)).to.be.deep.equal(shapeIssue.shapes);
 		});
 
 		it ("when updating shapes should succeed", async()=> {
@@ -206,7 +206,7 @@ describe("Shapes", () => {
 				.expect(200);
 
 			const res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
-			expect(chopUuIds(res.body.shapes)).to.be.deep.equal(shapes);
+			expect(chopIds(res.body.shapes)).to.be.deep.equal(shapes);
 		});
 
 
