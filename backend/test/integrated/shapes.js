@@ -144,6 +144,13 @@ describe("Shapes", () => {
 
 
 	describe("in issue", function() {
+		const testShapesIds = (shapes) => {
+			shapes.forEach(({_id}) => {
+				expect(_id).to.be.an('string');
+			})
+		}
+
+
 		it("should fail with a wrong shape schema", async () => {
 			const res = await agent.post(`/${username}/${model}/issues`)
 				.send(wrongShapeIssue)
@@ -158,24 +165,22 @@ describe("Shapes", () => {
 				.expect(200);
 
 			issueId = res.body._id;
+
+			testShapesIds(res.body.shapes);
 		});
 
 		it ("should be reflected when fetching the issue", async()=> {
 			const res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
-			const shapes_ids = res.body.shapes.map((shape) => shape._id);
 
-			expect(shapes_ids).to.be.an('array').and.to.have.lengthOf(shapeIssue.shapes.length);
-			shapes_ids.forEach((id) => {
-				expect(id).to.be.an('string');
-			})
-
+			testShapesIds(res.body.shapes);
 			expect(chopIds(res.body.shapes)).to.be.deep.equal(shapeIssue.shapes);
 		});
 
 		it ("should be reflected when fetching all the issues", async()=> {
 			const res = await agent.get(`/${username}/${model}/issues/`).expect(200);
-
 			const theIssue = (res.body.filter(({_id})=>_id === issueId))[0];
+
+			testShapesIds(theIssue.shapes);
 			expect(chopIds(theIssue.shapes)).to.be.deep.equal(shapeIssue.shapes);
 		});
 
@@ -185,6 +190,8 @@ describe("Shapes", () => {
 				.expect(200);
 
 			const res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
+
+			testShapesIds(res.body.shapes);
 			expect(chopIds(res.body.shapes)).to.be.deep.equal(shapeIssue.shapes);
 		});
 
@@ -195,6 +202,8 @@ describe("Shapes", () => {
 				.expect(responseCodes.INVALID_ARGUMENTS.status);
 
 			const res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
+
+			testShapesIds(res.body.shapes);
 			expect(chopIds(res.body.shapes)).to.be.deep.equal(shapeIssue.shapes);
 		});
 
@@ -206,6 +215,8 @@ describe("Shapes", () => {
 				.expect(200);
 
 			const res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
+
+			testShapesIds(res.body.shapes);
 			expect(chopIds(res.body.shapes)).to.be.deep.equal(shapes);
 		});
 
