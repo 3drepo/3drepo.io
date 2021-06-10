@@ -205,6 +205,10 @@ Upload.initUploadChunks = async (teamspace, model, corID, username, headers) => 
 	const sharedSpacePath = importQueue.getSharedSpacePath();
 	const chunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, parseInt(headers["x-ms-content-length"]));
 
+	if (!fs.existsSync(`${sharedSpacePath}/${corID}.json`)) {
+		throw responseCodes.CORRELATION_ID_NOT_FOUND;
+	}
+
 	// upload model with tag
 	modelStatusChanged(null, teamspace, model, { status: "uploading", username });
 
