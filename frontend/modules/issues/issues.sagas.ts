@@ -673,22 +673,24 @@ const onMeasurementCreated = (measurement) => {
 	dispatch(IssuesActions.addMeasurement(measurement));
 };
 
-export function* addMeasurement({ measurement }) {
+function* updateIssueShapes(shapes) {
 	const activeIssue = yield select(selectActiveIssueDetails);
-	let shapes = activeIssue.shapes || [];
-	measurement.name = generateName(measurement, shapes);
-	shapes = [...shapes, measurement];
 	const isNewIssue = !Boolean(activeIssue._id);
 
-	// Here is calling directly to the functions because it needs to finish the request and update the
-	// issue before removing the measurement. Otherwise if the action is dispatched and non blocking
-	// there will be a period of time between hiding the measurement and displaying it again
 	if (isNewIssue) {
 		yield updateNewIssue({newIssue: {...activeIssue, shapes}});
 	} else {
 		yield updateActiveIssue({issueData: { shapes}});
 	}
+}
 
+export function* addMeasurement({ measurement }) {
+	const activeIssue = yield select(selectActiveIssueDetails);
+	let shapes = activeIssue.shapes || [];
+	measurement.name = generateName(measurement, shapes);
+	shapes = [...shapes, measurement];
+
+	yield updateIssueShapes(shapes);
 	// Because the shape is going to be displayed when the issue changes,
 	// the previous measurement will be removed in order to not display the same measurement twice
 	Viewer.removeMeasurement(measurement.uuid);
@@ -697,13 +699,7 @@ export function* addMeasurement({ measurement }) {
 export function* removeMeasurement({ uuid }) {
 	const activeIssue = yield select(selectActiveIssueDetails);
 	const shapes = (activeIssue.shapes || []).filter((measurement) => measurement.uuid !== uuid);
-	const isNewIssue = !Boolean(activeIssue._id);
-
-	if (isNewIssue) {
-		yield put(IssuesActions.updateNewIssue({...activeIssue, shapes}));
-	} else {
-		yield put(IssuesActions.updateActiveIssue({shapes}));
-	}
+	yield updateIssueShapes(shapes);
 }
 
 function* cancelMeasureModeIfNeeded() {
@@ -745,13 +741,7 @@ export function* setMeasurementColor({uuid, color}) {
 		return measurement;
 	});
 
-	const isNewIssue = !Boolean(activeIssue._id);
-
-	if (isNewIssue) {
-		yield put(IssuesActions.updateNewIssue({...activeIssue, shapes}));
-	} else {
-		yield put(IssuesActions.updateActiveIssue({shapes}));
-	}
+	yield updateIssueShapes(shapes);
 }
 
 export function* setMeasurementName({uuid, name}) {
@@ -763,13 +753,7 @@ export function* setMeasurementName({uuid, name}) {
 		return measurement;
 	});
 
-	const isNewIssue = !Boolean(activeIssue._id);
-
-	if (isNewIssue) {
-		yield put(IssuesActions.updateNewIssue({...activeIssue, shapes}));
-	} else {
-		yield put(IssuesActions.updateActiveIssue({shapes}));
-	}
+	yield updateIssueShapes(shapes);
 }
 
 export default function* IssuesSaga() {

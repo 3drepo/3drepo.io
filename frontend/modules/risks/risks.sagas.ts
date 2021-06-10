@@ -659,11 +659,8 @@ const onMeasurementCreated = (measurement) => {
 	dispatch(RisksActions.addMeasurement(measurement));
 };
 
-export function* addMeasurement({ measurement }) {
+function* updateRiskShapes(shapes) {
 	const activeRisk = yield select(selectActiveRiskDetails);
-	let shapes = activeRisk.shapes || [];
-	measurement.name = generateName(measurement, shapes);
-	shapes = [...shapes, measurement];
 	const isNewRisk = !Boolean(activeRisk._id);
 
 	// Here is calling directly to the functions because it needs to finish the request and update the
@@ -675,6 +672,16 @@ export function* addMeasurement({ measurement }) {
 		yield updateRisk({riskData: {shapes}});
 	}
 
+}
+
+export function* addMeasurement({ measurement }) {
+	const activeRisk = yield select(selectActiveRiskDetails);
+	let shapes = activeRisk.shapes || [];
+	measurement.name = generateName(measurement, shapes);
+	shapes = [...shapes, measurement];
+
+	yield updateRiskShapes(shapes);
+
 	// Because the shape is going to be displayed when the risk changes,
 	// the previous measurement will be removed in order to not display the same measurement twice
 	Viewer.removeMeasurement(measurement.uuid);
@@ -683,13 +690,7 @@ export function* addMeasurement({ measurement }) {
 export function* removeMeasurement({ uuid }) {
 	const activeRisk = yield select(selectActiveRiskDetails);
 	const shapes = (activeRisk.shapes || []).filter((measurement) => measurement.uuid !== uuid);
-	const isNewRisk = !Boolean(activeRisk._id);
-
-	if (isNewRisk) {
-		yield put(RisksActions.updateNewRisk({...activeRisk, shapes}));
-	} else {
-		yield put(RisksActions.updateRisk({shapes}));
-	}
+	yield updateRiskShapes(shapes);
 }
 
 export function* setMeasurementColor({uuid, color}) {
@@ -701,13 +702,7 @@ export function* setMeasurementColor({uuid, color}) {
 		return measurement;
 	});
 
-	const isNewRisk = !Boolean(activeRisk._id);
-
-	if (isNewRisk) {
-		yield put(RisksActions.updateNewRisk({...activeRisk, shapes}));
-	} else {
-		yield put(RisksActions.updateRisk({shapes}));
-	}
+	yield updateRiskShapes(shapes);
 }
 
 export function* setMeasurementName({uuid, name}) {
@@ -719,13 +714,7 @@ export function* setMeasurementName({uuid, name}) {
 		return measurement;
 	});
 
-	const isNewRisk = !Boolean(activeRisk._id);
-
-	if (isNewRisk) {
-		yield put(RisksActions.updateNewRisk({...activeRisk, shapes}));
-	} else {
-		yield put(RisksActions.updateRisk({shapes}));
-	}
+	yield updateRiskShapes(shapes);
 }
 
 function* cancelMeasureModeIfNeeded() {
