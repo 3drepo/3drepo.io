@@ -29,6 +29,7 @@ import {
 import { getFilterValues, UNASSIGNED_JOB } from '../constants/reportedItems';
 import { getAPIUrl } from '../services/api';
 import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
+import { prepareResources } from './resources';
 
 export const getStatusIcon = (priority, status) => {
 	const statusIcon = {
@@ -68,6 +69,14 @@ export const prepareIssue = (issue, jobs = []) => {
 
 	if (issue.status) {
 		preparedIssue.defaultHidden = ISSUE_DEFAULT_HIDDEN_STATUSES.includes(issue.status);
+	}
+
+	if (issue.shapes) {
+		preparedIssue.shapes = preparedIssue.shapes.map(({uuid, _id, ...rest}) => ({ uuid: _id || uuid, ...rest }));
+	}
+
+	if (issue.resources) {
+		issue.resources = prepareResources(issue.account, issue.model, issue.resources);
 	}
 
 	return preparedIssue;

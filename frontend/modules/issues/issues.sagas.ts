@@ -34,6 +34,7 @@ import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
 import { prepareIssue } from '../../helpers/issues';
 import { generateName } from '../../helpers/measurements';
 import { prepareResources } from '../../helpers/resources';
+import { chopShapesUuids } from '../../helpers/shapes';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
@@ -62,7 +63,6 @@ import {
 	selectFilteredIssues,
 	selectIssuesMap,
 	selectMeasureMode,
-	selectShapes
 } from './issues.selectors';
 
 function* fetchIssues({teamspace, modelId, revision}) {
@@ -85,9 +85,11 @@ function* fetchIssue({teamspace, modelId, issueId}) {
 
 	try {
 		const {data} = yield API.getIssue(teamspace, modelId, issueId);
-		data.resources = prepareResources(teamspace, modelId, data.resources);
 
-		yield put(IssuesActions.fetchIssueSuccess(data));
+		const jobs = yield select(selectJobsList);
+		const preparedIssue = prepareIssue(data, jobs);
+
+		yield put(IssuesActions.fetchIssueSuccess(preparedIssue));
 	} catch (error) {
 		yield put(IssuesActions.fetchIssueFailure());
 		yield put(DialogActions.showEndpointErrorDialog('get', 'issue', error));
@@ -126,6 +128,8 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 			creator_role: userJob._id,
 		};
 
+		issue = chopShapesUuids(issue);
+
 		const { data: savedIssue } = yield API.saveIssue(teamspace, model, issue);
 
 		analyticsService.sendEvent(EVENT_CATEGORIES.ISSUE, EVENT_ACTIONS.CREATE);
@@ -154,7 +158,7 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 function* updateActiveIssue({ issueData }) {
 	try {
 		const { _id, rev_id, model, account, position } = yield select(selectActiveIssueDetails);
-		let { data: updatedIssue } = yield API.updateIssue(account, model, _id, rev_id, issueData);
+		let { data: updatedIssue } = yield API.updateIssue(account, model, _id, rev_id, chopShapesUuids(issueData));
 		yield analyticsService.sendEvent(EVENT_CATEGORIES.ISSUE, EVENT_ACTIONS.EDIT);
 
 		updatedIssue = {...updatedIssue, ...issueData};
@@ -173,7 +177,7 @@ function* updateActiveIssue({ issueData }) {
 function* updateBoardIssue({ teamspace, modelId, issueData }) {
 	try {
 		const { _id, ...changedData } = issueData;
-		const { data: updatedIssue } = yield API.updateIssue(teamspace, modelId, _id, null, changedData);
+		const { data: updatedIssue } = yield API.updateIssue(teamspace, modelId, _id, null,  chopShapesUuids(changedData));
 		const jobs = yield select(selectJobsList);
 		const preparedIssue = prepareIssue(updatedIssue, jobs);
 

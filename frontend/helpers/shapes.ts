@@ -30,3 +30,11 @@ export const hasShapes = (ticket, sequence?, min?, max?) => {
 
 	return ticketHasShapes;
 };
+
+export const chopShapesUuids = ({shapes, ...ticket}) => {
+	if (shapes) {
+		ticket = { shapes: shapes.map(({uuid, _id, ...rest}) => rest), ...ticket};
+	}
+
+	return ticket;
+};
