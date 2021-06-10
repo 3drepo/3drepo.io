@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -20,10 +20,6 @@ const request = require("supertest");
 const {should, assert, expect, Assertion } = require("chai");
 const app = require("../../services/api.js").createApp();
 const responseCodes = require("../../response_codes.js");
-const { login } = require("../helpers/users.js");
-const { createIssue } = require("../helpers/issues.js");
-const { deleteNotifications, fetchNotification } = require("../helpers/notifications.js");
-const { createModel } = require("../helpers/models.js");
 const { cloneDeep, omit } = require("lodash");
 
 describe("Shapes", () => {

@@ -108,6 +108,10 @@ class Ticket extends View {
 			ticketToClean.comments = [];
 		}
 
+		if (ticketToClean.shapes) {
+			ticketToClean.shapes = Shapes.cleanCollection(ticketToClean.shapes);
+		}
+
 		delete ticketToClean.viewpoints;
 		delete ticketToClean.viewCount;
 
@@ -117,12 +121,11 @@ class Ticket extends View {
 	}
 
 	async fillTicketwithShapes(account, model, ticket) {
-		if (!ticket || !ticket.shapes || !ticket.shapes.length) {
-			return;
-		}
+		const shapes = await Shapes.getByTicketId(account, model, this.collName, utils.stringToUUID(ticket._id));
 
-		const shapes = await Shapes.get(account, model, this.collName, ticket.shapes);
-		ticket.shapes = shapes.map(Shapes.clean);
+		if (shapes.length) {
+			ticket.shapes = shapes;
+		}
 	}
 
 	async findByUID(account, model, uid, projection, noClean = false) {
@@ -321,17 +324,6 @@ class Ticket extends View {
 			delete data.viewpoint;
 		}
 
-		const shapes = data.shapes;
-		// Handle shapes
-		if (data.shapes) {
-			if (!(data.shapes.every(shape => Shapes.schema.isValidSync(shape, { strict: true })))) {
-				throw responseCodes.INVALID_ARGUMENTS;
-			}
-
-			await Shapes.removeByTicketId(account, model, this.collName, _id);
-			data.shapes = await Promise.all(shapes.map(shape => Shapes.create(account, model, this.collName, {...shape, ticket_id:_id }, true)));
-		}
-
 		// 6. Update the data
 		const tickets = await this.getCollection(account, model);
 
@@ -343,6 +335,12 @@ class Ticket extends View {
 		// 8. Check sequence dates in correct order
 		if (!verifySequenceDatePrecedence(updatedTicket)) {
 			throw responseCodes.INVALID_DATE_ORDER;
+		}
+
+		let shapes = null;
+		// Handle shapes
+		if (data.shapes) {
+			shapes = await Shapes.createMany(account, model, this.collName, _id, data.shapes);
 		}
 
 		if (Object.keys(data).length > 0) {
@@ -450,11 +448,11 @@ class Ticket extends View {
 		newTicket._id = utils.stringToUUID(newTicket._id || nodeuuid());
 		newTicket.created = parseInt(newTicket.created || (new Date()).getTime());
 
-		const shapes = newTicket.shapes;
+		let shapes = newTicket.shapes;
 
 		if (shapes) {
-			const ticket_id = newTicket._id;
-			newTicket.shapes = await Promise.all(newTicket.shapes.map(shape => Shapes.create(account, model, this.collName, {...shape, ticket_id })));
+			shapes = await Shapes.createMany(account, model, this.collName, newTicket._id, shapes);
+			delete newTicket.shapes; // In order to not get inserted in the ticket definition
 		}
 
 		const ownerJob = await findJobByUser(account, newTicket.owner);
@@ -579,7 +577,8 @@ class Ticket extends View {
 
 		const coll = await this.getCollection(account, model);
 		const tickets = await coll.find(fullQuery, projection).toArray();
-		return tickets.reduce((filteredTickets,  foundTicket) => {
+		const filteredTickets = [];
+		await Promise.all(tickets.map(async (foundTicket) => {
 			if (filterTicket &&  !filterTicket(foundTicket, filters)) {
 				return filteredTickets;
 			}
@@ -588,14 +587,16 @@ class Ticket extends View {
 				this.toDirectXCoords(foundTicket);
 			}
 
+			await this.fillTicketwithShapes(account, model, foundTicket);
+
 			if (!noClean) {
 				filteredTickets.push(this.clean(account, model, foundTicket));
 			} else {
 				filteredTickets.push(foundTicket);
 			}
+		}));
 
-			return filteredTickets;
-		}, []);
+		return filteredTickets;
 	}
 
 	toDirectXCoords(entry) {
@@ -673,8 +674,6 @@ class Ticket extends View {
 					ticket.lastUpdated = comment.created;
 				}
 			});
-
-			await this.fillTicketwithShapes(account, model,ticket);
 			ticket.comments = undefined;
 		}));
 

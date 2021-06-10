@@ -25,15 +25,16 @@ const getCollectionName = (model, subCollectionName) => `${model}.${subCollectio
 const coordinatesSchema = yup.array().of(yup.number()).length(3);
 const colorSchema = yup.array().of(yup.number().min(0).max(1)).length(4);
 
-const shapesSchema = yup.object().shape({
+const shapeSchema = yup.object().shape({
 	"positions": yup.array().of(coordinatesSchema).required(),
 	"normals": yup.array().of(coordinatesSchema),
 	"value": yup.number().min(0),
 	"color": colorSchema.required(),
 	"type": yup.mixed().oneOf([0, 1]).required(),
-	"ticket_id": utils.uuidSchema,
 	"name": yup.string()
 }).noUnknown();
+
+const shapesSchema = yup.array().of(shapeSchema);
 
 const Shapes = {};
 
@@ -43,18 +44,24 @@ Shapes.clean = (shape) => {
 	return shape;
 };
 
-Shapes.create = async (account, model, subCollectionName, shape, skipValidation = false) => {
-	if (!skipValidation && !shapesSchema.isValidSync(shape, { strict: true })) {
+Shapes.cleanCollection = shapes => shapes.map(Shapes.clean);
+
+Shapes.createMany = async (account, model, subCollectionName, ticket_id, shapes) => {
+	if (!utils.uuidSchema.isValidSync(ticket_id, { strict: true }) || !shapesSchema.isValidSync(shapes, { strict: true })) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	shape._id = utils.generateUUID();
-	await DB.insert(account, getCollectionName(model, subCollectionName), shape);
-	return shape._id;
+	const uuids = utils.generateUUIDs(shapes.length);
+	shapes = shapes.map(shape=> ({_id: uuids.pop(), ticket_id, ...shape}));
+
+	await Shapes.removeByTicketId(account, model, subCollectionName, ticket_id); // remove old collection of shapes
+	await DB.insertMany(account, getCollectionName(model, subCollectionName), shapes);
+
+	return  shapes;
 };
 
-Shapes.get = async (account, model, subCollectionName, ids) => {
-	const query = { _id: { $in: utils.stringsToUUIDs(ids)} };
+Shapes.getByTicketId = async (account, model, subCollectionName, ticket_id) => {
+	const query = { ticket_id };
 	return await DB.find(account, getCollectionName(model, subCollectionName), query);
 };
 
@@ -62,7 +69,5 @@ Shapes.removeByTicketId = async (account, model, subCollectionName, ticket_id) =
 	const query = { ticket_id: utils.stringToUUID(ticket_id) };
 	return await DB.remove(account, getCollectionName(model, subCollectionName), query);
 };
-
-Shapes.schema = shapesSchema;
 
 module.exports = Shapes;
