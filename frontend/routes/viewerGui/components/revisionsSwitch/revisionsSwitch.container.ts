@@ -34,7 +34,7 @@ const mapStateToProps = createStructuredSelector({
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showRevisionsDialog: DialogActions.showRevisionsDialog,
 	hideDialog: DialogActions.hideDialog,
-	updateCurrentRevision: CompareActions.updateCurrentRevision
+	getCompareModels: CompareActions.getCompareModels
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(RevisionsSwitch));

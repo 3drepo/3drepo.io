@@ -21,7 +21,6 @@ import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from '
 import { ROUTES } from '../../../../constants/routes';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { IViewpointsComponentState } from '../../../../modules/viewpoints/viewpoints.redux';
-import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../../../services/analytics';
 import { formatDate, LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
 import { TYPES } from '../../../components/dialogContainer/components/revisionsDialog/revisionsDialog.constants';
 import { Loader } from '../../../components/loader/loader.component';
@@ -211,7 +210,6 @@ export const ModelGridItem = memo((props: IProps) => {
 		const { history, teamspace, timestamp, nRevisions, model } = props;
 		if (timestamp || nRevisions > 0 ) {
 			history.push(`${ROUTES.VIEWER}/${teamspace}/${model}`);
-			analyticsService.sendEvent(EVENT_CATEGORIES.MODEL, EVENT_ACTIONS.VIEW);
 		} else {
 			handleUploadModelFile();
 		}

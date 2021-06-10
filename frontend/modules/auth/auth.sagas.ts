@@ -19,7 +19,6 @@ import { push } from 'connected-react-router';
 import { put, take, takeLatest } from 'redux-saga/effects';
 
 import { NewTermsDialog } from '../../routes/components/newTermsDialog/newTermsDialog.component';
-import { analyticsService } from '../../services/analytics';
 import * as API from '../../services/api';
 import { CurrentUserActions } from '../currentUser';
 import { DialogActions } from '../dialog';
@@ -34,8 +33,6 @@ function* login({ username, password }) {
 		const {data} = yield API.login(username, password);
 		const flags = data.flags;
 		username = data.username;
-
-		yield analyticsService.setUserId(username);
 
 		yield put(CurrentUserActions.fetchUserSuccess({
 			username,

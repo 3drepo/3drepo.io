@@ -33,16 +33,16 @@ interface IProps {
 	hideDialog: () => void;
 	showRevisionsDialog: (config) => void;
 	currentRevision: any;
-	updateCurrentRevision: (revision) => void;
+	getCompareModels: (revisionId) => void;
 }
 
 export class RevisionsSwitch extends React.PureComponent<IProps, any> {
 
 	public componentDidUpdate(prevProps: IProps) {
-		const { currentRevision, updateCurrentRevision } = this.props;
+		const { currentRevision, getCompareModels } = this.props;
 
 		if (currentRevision !== prevProps.currentRevision) {
-			updateCurrentRevision(currentRevision);
+			getCompareModels(currentRevision._id);
 		}
 	}
 
