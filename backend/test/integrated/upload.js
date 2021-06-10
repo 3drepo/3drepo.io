@@ -352,7 +352,7 @@ describe("Uploading a model", function () {
 					.set("x-ms-content-length", 118832273)
 					.expect(404, function(err, res) {
 						console.log(res.body);
-						expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+						expect(res.body.value).to.equal(responseCodes.CORRELATION_ID_NOT_FOUND.value);
 						done(err);
 					});
 			});
