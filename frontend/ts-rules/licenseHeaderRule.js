@@ -17,24 +17,33 @@ exports.Rule = void 0;
 var Lint = require("tslint");
 var LICENSE_FIRST_PART = "/**\n *  Copyright (C) ";
 var YEAR = new Date().getFullYear();
-var LICENSE_SECOND_TWO = " 3D Repo Ltd\n *\n *  This program is free software: you can redistribute it and/or modify\n *  it under the terms of the GNU Affero General Public License as\n *  published by the Free Software Foundation, either version 3 of the\n *  License, or (at your option) any later version.\n *\n *  This program is distributed in the hope that it will be useful,\n *  but WITHOUT ANY WARRANTY; without even the implied warranty of\n *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n *  GNU Affero General Public License for more details.\n *\n *  You should have received a copy of the GNU Affero General Public License\n *  along with this program.  If not, see <http://www.gnu.org/licenses/>.\n */";
-var gotLicenseHeader = function (str) {
-    var licenseFirstPartLength = LICENSE_FIRST_PART.length;
-    var hasFirstPart = str.indexOf(LICENSE_FIRST_PART) === 0;
-    var hasYear = hasFirstPart && /[0-9]{4}/.test(str.slice(licenseFirstPartLength, licenseFirstPartLength + 4));
-    var hasSecondPart = hasYear && str.slice(licenseFirstPartLength + 4).indexOf(LICENSE_SECOND_TWO) === 0;
-    return hasFirstPart && hasYear && hasSecondPart;
-};
+var LICENSE_SECOND_PART = "\n *\n *  This program is free software: you can redistribute it and/or modify\n *  it under the terms of the GNU Affero General Public License as\n *  published by the Free Software Foundation, either version 3 of the\n *  License, or (at your option) any later version.\n *\n *  This program is distributed in the hope that it will be useful,\n *  but WITHOUT ANY WARRANTY; without even the implied warranty of\n *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n *  GNU Affero General Public License for more details.\n *\n *  You should have received a copy of the GNU Affero General Public License\n *  along with this program.  If not, see <http://www.gnu.org/licenses/>.\n */";
 var Rule = /** @class */ (function (_super) {
     __extends(Rule, _super);
     function Rule() {
-        return _super !== null && _super.apply(this, arguments) || this;
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.gotLicenseHeader = function (str) {
+            var licenseFirstPartLength = LICENSE_FIRST_PART.length;
+            var hasFirstPart = str.indexOf(LICENSE_FIRST_PART) === 0;
+            var hasYear = hasFirstPart && /[0-9]{4}/.test(str.slice(licenseFirstPartLength, licenseFirstPartLength + 4));
+            var secoundPart = " " + _this.owner + LICENSE_SECOND_PART;
+            var hasSecondPart = hasYear && str.slice(licenseFirstPartLength + 4).indexOf(secoundPart) === 0;
+            return hasFirstPart && hasYear && hasSecondPart;
+        };
+        return _this;
     }
+    Object.defineProperty(Rule.prototype, "owner", {
+        get: function () {
+            return this.ruleArguments[0] || '';
+        },
+        enumerable: false,
+        configurable: true
+    });
     Rule.prototype.apply = function (sourceFile) {
-        if (gotLicenseHeader(sourceFile.text)) {
+        if (this.gotLicenseHeader(sourceFile.text)) {
             return [];
         }
-        var fix = Lint.Replacement.appendText(0, "" + LICENSE_FIRST_PART + YEAR + LICENSE_SECOND_TWO + "\n\n");
+        var fix = Lint.Replacement.appendText(0, "" + LICENSE_FIRST_PART + YEAR + this.owner + LICENSE_SECOND_PART + "\n\n");
         return [
             new Lint.RuleFailure(sourceFile, 0, 1, Rule.FAILURE_MESSAGE, this.ruleName, fix),
         ];
@@ -43,7 +52,10 @@ var Rule = /** @class */ (function (_super) {
         ruleName: 'license-header',
         description: 'Ensures the file starts with a license copy.',
         optionsDescription: 'Not configurable.',
-        options: null,
+        options: {
+            type: "array",
+            items: { owner: "string" },
+        },
         hasFix: true,
         type: 'formatting',
         typescriptOnly: false,

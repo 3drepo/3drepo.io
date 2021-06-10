@@ -6,7 +6,7 @@ const LICENSE_FIRST_PART = `/**
 
 const YEAR = new Date().getFullYear();
 
-const LICENSE_SECOND_TWO = ` 3D Repo Ltd
+const LICENSE_SECOND_PART = `
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -22,36 +22,44 @@ const LICENSE_SECOND_TWO = ` 3D Repo Ltd
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */`;
 
-const gotLicenseHeader = (str: string) => {
-	const licenseFirstPartLength = LICENSE_FIRST_PART.length;
-	const hasFirstPart = str.indexOf(LICENSE_FIRST_PART) === 0;
-	const hasYear = hasFirstPart && /[0-9]{4}/.test(str.slice(licenseFirstPartLength, licenseFirstPartLength + 4));
-	const hasSecondPart = hasYear && str.slice(licenseFirstPartLength + 4).indexOf(LICENSE_SECOND_TWO) === 0;
-
-	return hasFirstPart && hasYear && hasSecondPart;
-};
-
 export class Rule extends Lint.Rules.AbstractRule {
 	public static metadata: Lint.IRuleMetadata = {
 		ruleName: 'license-header',
 		description: 'Ensures the file starts with a license copy.',
 		optionsDescription: 'Not configurable.',
-		options: null,
+		options: {
+            type: "array",
+            items: { owner: "string" },
+        },
 		hasFix: true,
 		type: 'formatting',
 		typescriptOnly: false,
 	};
 
+	get owner() {
+		return this.ruleArguments[0] || '';
+	}
+
 	public static FAILURE_MESSAGE = 'License header is missing';
 
+	public gotLicenseHeader = (str: string) => {
+		const licenseFirstPartLength = LICENSE_FIRST_PART.length;
+		const hasFirstPart = str.indexOf(LICENSE_FIRST_PART) === 0;
+		const hasYear = hasFirstPart && /[0-9]{4}/.test(str.slice(licenseFirstPartLength, licenseFirstPartLength + 4));
+		const secoundPart = ` ${this.owner}${LICENSE_SECOND_PART}`;
+		const hasSecondPart = hasYear && str.slice(licenseFirstPartLength + 4).indexOf(secoundPart) === 0;
+	
+		return hasFirstPart && hasYear && hasSecondPart;
+	};
+
 	public apply(sourceFile: TS.SourceFile): Lint.RuleFailure[] {
-		if (gotLicenseHeader(sourceFile.text)) {
+		if (this.gotLicenseHeader(sourceFile.text)) {
 			return [];
 		}
 
 		const fix: Lint.Fix | undefined = Lint.Replacement.appendText(
 				0,
-				`${LICENSE_FIRST_PART}${YEAR}${LICENSE_SECOND_TWO}\n\n`,
+				`${LICENSE_FIRST_PART}${YEAR}${this.owner}${LICENSE_SECOND_PART}\n\n`,
 		);
 
 		return [

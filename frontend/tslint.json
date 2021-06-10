@@ -52,6 +52,6 @@
         "no-empty-interface": true,
         "curly": true,
         "no-async-without-await": true,
-        "license-header": true
+        "license-header": [true, "3D Repo Ltd"],
     }
 }
