@@ -61,7 +61,6 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setSortType: CompareActions.setSortType,
 	setTargetModel: CompareActions.setTargetModel,
 	setTargetRevision: CompareActions.setTargetRevision,
-	getCompareModels: CompareActions.getCompareModels,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Compare);
