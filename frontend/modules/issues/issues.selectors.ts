@@ -22,7 +22,7 @@ import { ISSUE_DEFAULT_HIDDEN_STATUSES } from '../../constants/issues';
 import { prepareComments, transformCustomsLinksToMarkdown } from '../../helpers/comments';
 import { hasPin, issueToPin } from '../../helpers/pins';
 import { searchByFilters } from '../../helpers/searching';
-import { hasShapes } from '../../helpers/shapes';
+import { shouldDisplayShapes } from '../../helpers/shapes';
 import { sortByDate } from '../../helpers/sorting';
 import { selectCurrentModel } from '../model';
 import { selectQueryParams } from '../router/router.selectors';
@@ -198,7 +198,7 @@ export const selectShapes = createSelector(
 	}
 
 	return issues.reduce((shapes, issue) => {
-		if (hasShapes(issue, selectedSequence, sequenceStartDate, sequenceEndDate)
+		if (shouldDisplayShapes(issue, selectedSequence, sequenceStartDate, sequenceEndDate)
 			|| (issue._id === activeIssue._id  && showDetails)) {
 			shapes.push.apply(shapes, issue.shapes);
 		}

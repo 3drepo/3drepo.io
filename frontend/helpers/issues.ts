@@ -30,6 +30,7 @@ import { getFilterValues, UNASSIGNED_JOB } from '../constants/reportedItems';
 import { getAPIUrl } from '../services/api';
 import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
 import { prepareResources } from './resources';
+import { setShapesUuids } from './shapes';
 
 export const getStatusIcon = (priority, status) => {
 	const statusIcon = {
@@ -72,7 +73,7 @@ export const prepareIssue = (issue, jobs = []) => {
 	}
 
 	if (issue.shapes) {
-		preparedIssue.shapes = preparedIssue.shapes.map(({uuid, _id, ...rest}) => ({ uuid: _id || uuid, ...rest }));
+		preparedIssue.shapes = setShapesUuids(preparedIssue.shapes);
 	}
 
 	if (issue.resources) {

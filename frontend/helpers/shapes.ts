@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const hasShapes = (ticket, sequence?, min?, max?) => {
+export const shouldDisplayShapes = (ticket, sequence?, min?, max?) => {
 	let ticketHasShapes = Boolean(ticket.shapes?.length);
 
 	if (sequence) {
@@ -38,3 +38,5 @@ export const chopShapesUuids = ({shapes, ...ticket}) => {
 
 	return ticket;
 };
+
+export const setShapesUuids = (shapes) => shapes.map(({uuid, _id, ...rest}) => ({ uuid: _id || uuid, ...rest }));

@@ -680,12 +680,17 @@ export function* addMeasurement({ measurement }) {
 	shapes = [...shapes, measurement];
 	const isNewIssue = !Boolean(activeIssue._id);
 
+	// Here is calling directly to the functions because it needs to finish the request and update the
+	// issue before removing the measurement. Otherwise if the action is dispatched and non blocking
+	// there will be a period of time between hiding the measurement and displaying it again
 	if (isNewIssue) {
 		yield updateNewIssue({newIssue: {...activeIssue, shapes}});
 	} else {
 		yield updateActiveIssue({issueData: { shapes}});
 	}
 
+	// Because the shape is going to be displayed when the issue changes,
+	// the previous measurement will be removed in order to not display the same measurement twice
 	Viewer.removeMeasurement(measurement.uuid);
 }
 

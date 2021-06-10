@@ -34,6 +34,7 @@ import { VIEWER_EVENTS } from '../../constants/viewer';
 import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
 import { generateName } from '../../helpers/measurements';
 import { prepareResources } from '../../helpers/resources';
+import { chopShapesUuids } from '../../helpers/shapes';
 import { SuggestedTreatmentsDialog } from '../../routes/components/dialogContainer/components';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
 import * as API from '../../services/api';
@@ -136,6 +137,8 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 			creator_role: userJob._id
 		};
 
+		risk = chopShapesUuids(risk);
+
 		const { data: savedRisk } = yield API.saveRisk(teamspace, model, risk);
 
 		analyticsService.sendEvent(EVENT_CATEGORIES.RISK, EVENT_ACTIONS.CREATE);
@@ -163,7 +166,7 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 function* updateRisk({riskData}) {
 	try {
 		const { _id, rev_id, model, account, position } = yield select(selectActiveRiskDetails);
-		let { data: updatedRisk } = yield API.updateRisk(account, model, _id, rev_id, riskData);
+		let { data: updatedRisk } = yield API.updateRisk(account, model, _id, rev_id, chopShapesUuids(riskData));
 		updatedRisk.resources = prepareResources(account, model, updatedRisk.resources);
 
 		analyticsService.sendEvent(EVENT_CATEGORIES.RISK, EVENT_ACTIONS.EDIT);
@@ -180,7 +183,7 @@ function* updateRisk({riskData}) {
 function* updateBoardRisk({ teamspace, modelId, riskData }) {
 	try {
 		const { _id, ...changedData } = riskData;
-		const { data: updatedRisk } = yield API.updateRisk(teamspace, modelId, _id, null, changedData);
+		const { data: updatedRisk } = yield API.updateRisk(teamspace, modelId, _id, null,  chopShapesUuids(changedData));
 		yield put(RisksActions.saveRiskSuccess(updatedRisk));
 		yield put(SnackbarActions.show('Risk updated'));
 	} catch (error) {
@@ -661,23 +664,28 @@ export function* addMeasurement({ measurement }) {
 	let shapes = activeRisk.shapes || [];
 	measurement.name = generateName(measurement, shapes);
 	shapes = [...shapes, measurement];
-	const isNewIssue = !Boolean(activeRisk._id);
+	const isNewRisk = !Boolean(activeRisk._id);
 
-	if (isNewIssue) {
+	// Here is calling directly to the functions because it needs to finish the request and update the
+	// risk before removing the measurement. Otherwise if the action is dispatched and non blocking
+	// there will be a period of time between hiding the measurement and displaying it again
+	if (isNewRisk) {
 		yield updateNewRisk({newRisk: {...activeRisk, shapes}});
 	} else {
 		yield updateRisk({riskData: {shapes}});
 	}
 
+	// Because the shape is going to be displayed when the risk changes,
+	// the previous measurement will be removed in order to not display the same measurement twice
 	Viewer.removeMeasurement(measurement.uuid);
 }
 
 export function* removeMeasurement({ uuid }) {
 	const activeRisk = yield select(selectActiveRiskDetails);
 	const shapes = (activeRisk.shapes || []).filter((measurement) => measurement.uuid !== uuid);
-	const isNewIssue = !Boolean(activeRisk._id);
+	const isNewRisk = !Boolean(activeRisk._id);
 
-	if (isNewIssue) {
+	if (isNewRisk) {
 		yield put(RisksActions.updateNewRisk({...activeRisk, shapes}));
 	} else {
 		yield put(RisksActions.updateRisk({shapes}));
@@ -693,9 +701,9 @@ export function* setMeasurementColor({uuid, color}) {
 		return measurement;
 	});
 
-	const isNewIssue = !Boolean(activeRisk._id);
+	const isNewRisk = !Boolean(activeRisk._id);
 
-	if (isNewIssue) {
+	if (isNewRisk) {
 		yield put(RisksActions.updateNewRisk({...activeRisk, shapes}));
 	} else {
 		yield put(RisksActions.updateRisk({shapes}));
@@ -711,9 +719,9 @@ export function* setMeasurementName({uuid, name}) {
 		return measurement;
 	});
 
-	const isNewIssue = !Boolean(activeRisk._id);
+	const isNewRisk = !Boolean(activeRisk._id);
 
-	if (isNewIssue) {
+	if (isNewRisk) {
 		yield put(RisksActions.updateNewRisk({...activeRisk, shapes}));
 	} else {
 		yield put(RisksActions.updateRisk({shapes}));
