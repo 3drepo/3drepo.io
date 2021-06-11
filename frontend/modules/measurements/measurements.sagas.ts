@@ -69,7 +69,10 @@ export function* setMeasureMode({ mode }) {
 
 		if (isSnapping) {
 			yield Viewer.enableEdgeSnapping();
+		} else {
+			yield Viewer.disableEdgeSnapping();
 		}
+
 	} catch (error) {
 		DialogActions.showErrorDialog('set', `measure mode to ${mode}`, error);
 	}
