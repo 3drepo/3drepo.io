@@ -72,7 +72,6 @@ export class ViewerService {
 	};
 
 	public fullscreen: boolean;
-	public pinDropMode: boolean;
 	public unityLoaderReady: boolean;
 	public unityLoaderScript: HTMLScriptElement;
 	public settings: any;
@@ -86,7 +85,6 @@ export class ViewerService {
 		this.name = name;
 
 		this.unityLoaderReady = false;
-		this.pinDropMode = false;
 
 		this.viewer = document.createElement('div');
 		this.viewer.className = 'viewer';
@@ -551,7 +549,7 @@ export class ViewerService {
 	 */
 
 	public get canHighlight() {
-		return this.isInitialised && !this.pinDropMode && !Boolean(this.measureMode);
+		return this.isInitialised && !Boolean(this.measureMode);
 	}
 
 	public async highlightObjects(
@@ -710,22 +708,6 @@ export class ViewerService {
 
 	public removePin(pin: IPin) {
 		UnityUtil.removePin(pin.id);
-	}
-
-	public setPinDropMode = async (on: boolean, isSnapping: boolean = true) => {
-		await this.isViewerReady();
-		this.pinDropMode = on;
-
-		if (on) {
-			MultiSelect.toggleAreaSelect(false);
-			if (isSnapping) {
-				this.enableEdgeSnapping();
-			} else {
-				this.disableEdgeSnapping();
-			}
-		} else {
-			this.disableEdgeSnapping();
-		}
 	}
 
 	/**
