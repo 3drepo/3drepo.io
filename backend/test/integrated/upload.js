@@ -351,7 +351,6 @@ describe("Uploading a model", function () {
 					.set("x-ms-transfer-mode", "chunked")
 					.set("x-ms-content-length", 118832273)
 					.expect(404, function(err, res) {
-						console.log(res.body);
 						expect(res.body.value).to.equal(responseCodes.CORRELATION_ID_NOT_FOUND.value);
 						done(err);
 					});
@@ -411,9 +410,148 @@ describe("Uploading a model", function () {
 					.set("x-ms-transfer-mode", "chunked")
 					.set("x-ms-content-length", "118832273")
 					.expect(200, function(err, res) {
-						console.log(res.body);
 						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(C.MS_CHUNK_BYTES_LIMIT);
 						expect(res.headers["location"]).to.exist;
+						done(err);
+					});
+			});
+		});
+
+		describe("Handle MS chunked uploads", function() {
+			it("with invalid model should fail", function(done) {
+				agent.patch(`/${username}/invalidModel/upload/ms-chunking/${corID1}`)
+					.set("Content-Range", "bytes 0-52428799/118832273")
+					.set("Content-Type", "application/octet-stream")
+					.set("Content-Length", "bytes=52428800")
+					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.ifc")
+					.expect(404, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+						done(err);
+					});
+			});
+
+			it("with invalid correlation ID should fail", function(done) {
+				agent.patch(`/${username}/${modelId}/upload/ms-chunking/invalidCorID`)
+					.set("Content-Range", "bytes 0-52428799/118832273")
+					.set("Content-Type", "application/octet-stream")
+					.set("Content-Length", "bytes=52428800")
+					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.ifc")
+					.expect(404, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.CORRELATION_ID_NOT_FOUND.value);
+						done(err);
+					});
+			});
+
+			it("without content-range header should fail", function(done) {
+				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
+					.set("Content-Type", "application/octet-stream")
+					.set("Content-Length", "bytes=52428800")
+					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.ifc")
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+						done(err);
+					});
+			});
+
+			/*
+			it("without content-type header should fail", function(done) {
+				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
+					.set("Content-Range", "bytes 0-52428799/118832273")
+					.set("Content-Length", "bytes=52428800")
+					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.ifc")
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+						done(err);
+					});
+			});
+			*/
+
+			/*
+			it("without content-length header should fail", function(done) {
+				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
+					.set("Content-Range", "bytes 0-52428799/118832273")
+					.set("Content-Type", "application/octet-stream")
+					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.ifc")
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+						done(err);
+					});
+			});
+			*/
+
+			it("content-range header not in bytes should fail", function(done) {
+				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
+					.set("Content-Range", "kilobytes 0-52428799/118832273")
+					.set("Content-Type", "application/octet-stream")
+					.set("Content-Length", "bytes=52428800")
+					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.ifc")
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+						done(err);
+					});
+			});
+
+			it("content-range header not separated by space should fail", function(done) {
+				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
+					.set("Content-Range", "bytes=0-52428799/118832273")
+					.set("Content-Type", "application/octet-stream")
+					.set("Content-Length", "bytes=52428800")
+					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.ifc")
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+						done(err);
+					});
+			});
+
+			it("should succeed", function(done) {
+				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
+					.set("Content-Range", "bytes 0-52428799/118832273")
+					.set("Content-Type", "application/octet-stream")
+					.set("Content-Length", "bytes=52428800")
+					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.ifc")
+					.expect(200, function(err, res) {
+						expect(parseInt(res.headers["range"])).to.equal("bytes=0-52428799");
+						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(C.MS_CHUNK_BYTES_LIMIT);
+						done(err);
+					});
+			});
+
+			it("with other valid correlation IDs should succeed", function(done) {
+				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID2}`)
+					.set("Content-Range", "bytes 0-52428799/118832273")
+					.set("Content-Type", "application/octet-stream")
+					.set("Content-Length", "bytes=52428800")
+					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.ifc")
+					.expect(200, function(err, res) {
+						expect(parseInt(res.headers["range"])).to.equal("bytes=0-52428799");
+						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(C.MS_CHUNK_BYTES_LIMIT);
+						done(err);
+					});
+			});
+
+			it("second chunk should succeed", function(done) {
+				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
+					.set("Content-Range", "bytes 52428800-104857599/118832273")
+					.set("Content-Type", "application/octet-stream")
+					.set("Content-Length", "bytes=52428800")
+					.attach("file", __dirname + "/../../statics/3dmodels/chunk1.ifc")
+					.expect(200, function(err, res) {
+						const nextChunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, 13974673);
+						expect(parseInt(res.headers["range"])).to.equal("bytes=0-104857599");
+						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(nexChunkSize);
+						done(err);
+					});
+			});
+
+			it("final chunk should succeed", function(done) {
+				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
+					.set("Content-Range", "bytes 104857600-118832272/118832273")
+					.set("Content-Type", "application/octet-stream")
+					.set("Content-Length", "bytes=13974673")
+					.attach("file", __dirname + "/../../statics/3dmodels/chunk2.ifc")
+					.expect(200, function(err, res) {
+						expect(parseInt(res.headers["range"])).to.equal("bytes=0-118832272");
+						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(0);
 						done(err);
 					});
 			});
