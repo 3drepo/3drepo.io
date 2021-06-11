@@ -1658,7 +1658,7 @@ router.post("/:model/upload/ms-chunking/:corID", middlewares.hasUploadAccessToMo
  * PATCH /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/ms-chunking/00000000-0000-1111-2222-333333333333 HTTP/1.1
  *
  * header: {
- * 	"Content-Range": "bytes=0-1023/10100",
+ * 	"Content-Range": "bytes 0-1023/10100",
  * 	"Content-Type": "application/octet-stream",
  * 	"Content-Length": "bytes=1024"
  * }
