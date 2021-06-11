@@ -488,7 +488,7 @@ describe("Uploading a model", function () {
 					.expect(200, function(err, res) {
 						const nextChunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, 13974673);
 						expect(res.headers["range"]).to.equal("bytes=0-104857599");
-						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(nexChunkSize);
+						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(nextChunkSize);
 						done(err);
 					});
 			});
