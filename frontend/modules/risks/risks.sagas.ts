@@ -626,11 +626,19 @@ export function * updateActiveRiskViewpoint({screenshot}) {
 }
 
 /** shapes **/
+function toggleMeasurementListeners(enabled) {
+	if (enabled) {
+		Viewer.on(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
+		Viewer.on(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
+	} else {
+		Viewer.off(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
+		Viewer.off(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
+	}
+}
 
 export function* setMeasureMode({ measureMode }) {
 	try {
-		yield Viewer.off(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
-		yield Viewer.off(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
+		toggleMeasurementListeners(false);
 		yield put(RisksActions.setMeasureModeSuccess(measureMode));
 		yield Viewer.setMeasureMode(measureMode, false);
 
@@ -638,9 +646,7 @@ export function* setMeasureMode({ measureMode }) {
 			return;
 		}
 
-		yield Viewer.on(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
-		yield Viewer.on(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
-
+		toggleMeasurementListeners(true);
 		ViewerGuiActions.setClipEdit(false);
 		BimActions.setIsActive(false);
 		yield Viewer.enableEdgeSnapping();
@@ -650,8 +656,7 @@ export function* setMeasureMode({ measureMode }) {
 }
 
 const onMeasurementChanged = () => {
-	Viewer.off(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
-	Viewer.off(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
+	toggleMeasurementListeners(false);
 	dispatch(RisksActions.setMeasureModeSuccess(''));
 };
 

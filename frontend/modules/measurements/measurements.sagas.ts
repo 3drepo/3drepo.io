@@ -41,16 +41,24 @@ const onMeasurementCreated = (measure) => {
 	dispatch(MeasurementsActions.addMeasurement(measure));
 };
 
+function toggleMeasurementListeners(enabled) {
+	if (enabled) {
+		Viewer.on(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
+		Viewer.on(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
+	} else {
+		Viewer.off(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
+		Viewer.off(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
+	}
+}
+
 const onMeasurementChanged = () => {
-	Viewer.off(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
-	Viewer.off(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
+	toggleMeasurementListeners(false);
 	dispatch(MeasurementsActions.setMeasureModeSuccess(''));
 };
 
 export function* setMeasureMode({ mode }) {
 	try {
-		yield Viewer.off(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
-		yield Viewer.off(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
+		toggleMeasurementListeners(false);
 		yield put(MeasurementsActions.setMeasureModeSuccess(mode));
 		yield Viewer.setMeasureMode(mode);
 
@@ -59,8 +67,7 @@ export function* setMeasureMode({ mode }) {
 		}
 
 		yield Viewer.setVisibilityOfMeasurementsLabels(true);
-		yield Viewer.on(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
-		yield Viewer.on(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
+		toggleMeasurementListeners(true);
 
 		ViewerGuiActions.setClipEdit(false);
 		BimActions.setIsActive(false);
