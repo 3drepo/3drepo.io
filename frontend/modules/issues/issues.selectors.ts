@@ -208,11 +208,12 @@ export const selectShapes = createSelector(
 });
 
 export const selectHighlightedShapes =  createSelector(
-	selectActiveIssueDetails, selectSelectedSequence, (activeIssue, sequence) => {
+	selectActiveIssueDetails, selectSelectedSequence, selectShapes, (activeIssue, sequence, shapesBeingShowed) => {
 
 	if (!sequence) {
 		return [];
 	}
 
-	return activeIssue.shapes || [];
+	const shapesSet = new Set(shapesBeingShowed);
+	return (activeIssue.shapes || []).filter((shape) => shapesSet.has(shape));
 });

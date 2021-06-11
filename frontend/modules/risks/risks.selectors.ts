@@ -220,11 +220,12 @@ export const selectShapes = createSelector(
 });
 
 export const selectHighlightedShapes =  createSelector(
-	selectActiveRiskDetails, selectSelectedSequence, (activeRisk, sequence) => {
+	selectActiveRiskDetails, selectSelectedSequence, selectShapes, (activeRisk, sequence, shapesBeingShowed) => {
 
 	if (!sequence) {
 		return [];
 	}
 
-	return activeRisk.shapes || [];
+	const shapesSet = new Set(shapesBeingShowed);
+	return (activeRisk.shapes || []).filter((shape) => shapesSet.has(shape));
 });

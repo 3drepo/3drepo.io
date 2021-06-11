@@ -133,7 +133,7 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 		}
 	}
 
-	public async renderMeasurements(prev: any[], curr: any[], highlighted: any[] = []) {
+	public async renderMeasurements(prev: any[], curr: any[]) {
 		const { viewer } = this.props;
 
 		const toAdd = differenceBy(curr, prev, 'uuid', 'color');
@@ -141,7 +141,6 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 
 		await viewer.removeMeasurements(toRemove);
 		await viewer.addMeasurements(toAdd, true);
-		await viewer.selectMeasurements(highlighted);
 	}
 
 	public async renderMeasurementsHighlights(prev: any[], curr: any[]) {
@@ -154,7 +153,7 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 		await viewer.selectMeasurements(toAdd);
 	}
 
-	public componentDidUpdate(prevProps: IProps) {
+	public async componentDidUpdate(prevProps: IProps) {
 		const { colorOverrides, issuePins, riskPins, measurementPins, hasGisCoordinates,
 			gisCoordinates, gisLayers, transparencies, transformations: transformation,
 			sequenceHiddenNodes, viewerManipulationEnabled, viewer,
@@ -194,19 +193,19 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 		}
 
 		if (!isEqual(prevProps.issuesShapes, issuesShapes)) {
-			this.renderMeasurements(prevProps.issuesShapes, issuesShapes, issuesHighlightedShapes);
+			await this.renderMeasurements(prevProps.issuesShapes, issuesShapes);
 		}
 
 		if (!isEqual(prevProps.issuesHighlightedShapes, issuesHighlightedShapes)) {
-			this.renderMeasurementsHighlights(prevProps.issuesHighlightedShapes, issuesHighlightedShapes);
+			await this.renderMeasurementsHighlights(prevProps.issuesHighlightedShapes, issuesHighlightedShapes);
 		}
 
 		if (!isEqual(prevProps.risksShapes, risksShapes)) {
-			this.renderMeasurements(prevProps.risksShapes, risksShapes, risksHighlightedShapes);
+			await this.renderMeasurements(prevProps.risksShapes, risksShapes);
 		}
 
 		if (!isEqual(prevProps.risksHighlightedShapes, risksHighlightedShapes)) {
-			this.renderMeasurementsHighlights(prevProps.risksHighlightedShapes, risksHighlightedShapes);
+			await this.renderMeasurementsHighlights(prevProps.risksHighlightedShapes, risksHighlightedShapes);
 		}
 
 		if (prevProps.viewerManipulationEnabled !== viewerManipulationEnabled) {
