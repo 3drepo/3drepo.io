@@ -418,30 +418,6 @@ describe("Uploading a model", function () {
 		});
 
 		describe("Handle MS chunked uploads", function() {
-			it("with invalid model should fail", function(done) {
-				agent.patch(`/${username}/invalidModel/upload/ms-chunking/${corID1}`)
-					.set("Content-Range", "bytes 0-52428799/118832273")
-					.set("Content-Type", "application/octet-stream")
-					.set("Content-Length", "bytes=52428800")
-					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.ifc")
-					.expect(404, function(err, res) {
-						expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
-						done(err);
-					});
-			});
-
-			it("with invalid correlation ID should fail", function(done) {
-				agent.patch(`/${username}/${modelId}/upload/ms-chunking/invalidCorID`)
-					.set("Content-Range", "bytes 0-52428799/118832273")
-					.set("Content-Type", "application/octet-stream")
-					.set("Content-Length", "bytes=52428800")
-					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.ifc")
-					.expect(404, function(err, res) {
-						expect(res.body.value).to.equal(responseCodes.CORRELATION_ID_NOT_FOUND.value);
-						done(err);
-					});
-			});
-
 			it("without content-range header should fail", function(done) {
 				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
 					.set("Content-Type", "application/octet-stream")
@@ -452,32 +428,6 @@ describe("Uploading a model", function () {
 						done(err);
 					});
 			});
-
-			/*
-			it("without content-type header should fail", function(done) {
-				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
-					.set("Content-Range", "bytes 0-52428799/118832273")
-					.set("Content-Length", "bytes=52428800")
-					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.ifc")
-					.expect(400, function(err, res) {
-						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
-						done(err);
-					});
-			});
-			*/
-
-			/*
-			it("without content-length header should fail", function(done) {
-				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
-					.set("Content-Range", "bytes 0-52428799/118832273")
-					.set("Content-Type", "application/octet-stream")
-					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.ifc")
-					.expect(400, function(err, res) {
-						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
-						done(err);
-					});
-			});
-			*/
 
 			it("content-range header not in bytes should fail", function(done) {
 				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
