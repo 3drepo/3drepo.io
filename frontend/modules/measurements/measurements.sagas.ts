@@ -17,7 +17,7 @@
 
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 import { VIEWER_EVENTS } from '../../constants/viewer';
-import { generateName } from '../../helpers/measurements';
+import { disableConflictingMeasurementActions, generateName } from '../../helpers/measurements';
 
 import { Viewer } from '../../services/viewer/viewer';
 import { BimActions } from '../bim';
@@ -68,9 +68,7 @@ export function* setMeasureMode({ mode }) {
 
 		yield Viewer.setVisibilityOfMeasurementsLabels(true);
 		toggleMeasurementListeners(true);
-
-		ViewerGuiActions.setClipEdit(false);
-		BimActions.setIsActive(false);
+		disableConflictingMeasurementActions();
 
 		const isSnapping = yield select(selectEdgeSnapping);
 

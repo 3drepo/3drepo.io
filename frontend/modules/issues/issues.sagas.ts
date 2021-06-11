@@ -32,7 +32,7 @@ import {
 } from '../../helpers/comments';
 import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
 import { prepareIssue } from '../../helpers/issues';
-import { generateName } from '../../helpers/measurements';
+import { disableConflictingMeasurementActions, generateName } from '../../helpers/measurements';
 import { prepareResources } from '../../helpers/resources';
 import { chopShapesUuids } from '../../helpers/shapes';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
@@ -730,9 +730,8 @@ export function* setMeasureMode({ measureMode }) {
 		}
 
 		toggleMeasurementListeners(true);
+		disableConflictingMeasurementActions();
 
-		ViewerGuiActions.setClipEdit(false);
-		BimActions.setIsActive(false);
 		yield Viewer.enableEdgeSnapping();
 	} catch (error) {
 		DialogActions.showErrorDialog('set', `measure mode in issues to ${measureMode}`, error);

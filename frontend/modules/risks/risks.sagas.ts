@@ -32,7 +32,7 @@ import {
 import { EXTENSION_RE } from '../../constants/resources';
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
-import { generateName } from '../../helpers/measurements';
+import { disableConflictingMeasurementActions, generateName } from '../../helpers/measurements';
 import { prepareResources } from '../../helpers/resources';
 import { chopShapesUuids } from '../../helpers/shapes';
 import { SuggestedTreatmentsDialog } from '../../routes/components/dialogContainer/components';
@@ -647,8 +647,7 @@ export function* setMeasureMode({ measureMode }) {
 		}
 
 		toggleMeasurementListeners(true);
-		ViewerGuiActions.setClipEdit(false);
-		BimActions.setIsActive(false);
+		disableConflictingMeasurementActions();
 		yield Viewer.enableEdgeSnapping();
 	} catch (error) {
 		DialogActions.showErrorDialog('set', `measure mode in issues to ${measureMode}`, error);
