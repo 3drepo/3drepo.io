@@ -197,7 +197,10 @@ export function* setMeasureXyzDisplay({ xyzDisplay }) {
 
 export function* clearMeasurements() {
 	try {
-		yield Viewer.clearMeasurements();
+		const areaMeasurements = yield select(selectAreaMeasurements);
+		const lengthMeasurements = yield select(selectLengthMeasurements);
+
+		[...areaMeasurements, ...lengthMeasurements].forEach(({uuid}) => Viewer.removeMeasurement(uuid));
 		yield put(MeasurementsActions.clearMeasurementsSuccess());
 	} catch (error) {
 		DialogActions.showErrorDialog('clear', 'measurements', error);
