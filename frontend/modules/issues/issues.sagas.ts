@@ -34,8 +34,11 @@ import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
 import { prepareIssue } from '../../helpers/issues';
 import { disableConflictingMeasurementActions, generateName } from '../../helpers/measurements';
 import { prepareResources } from '../../helpers/resources';
+<<<<<<< HEAD
 import { chopShapesUuids } from '../../helpers/shapes';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
+=======
+>>>>>>> a6d5837dac193760413674c50c3f98eeff4eee72
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
 import { Viewer } from '../../services/viewer/viewer';
@@ -132,8 +135,6 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 
 		const { data: savedIssue } = yield API.saveIssue(teamspace, model, issue);
 
-		analyticsService.sendEvent(EVENT_CATEGORIES.ISSUE, EVENT_ACTIONS.CREATE);
-
 		const jobs = yield select(selectJobsList);
 		const preparedIssue = prepareIssue(savedIssue, jobs);
 
@@ -159,7 +160,6 @@ function* updateActiveIssue({ issueData }) {
 	try {
 		const { _id, rev_id, model, account, position } = yield select(selectActiveIssueDetails);
 		let { data: updatedIssue } = yield API.updateIssue(account, model, _id, rev_id, chopShapesUuids(issueData));
-		yield analyticsService.sendEvent(EVENT_CATEGORIES.ISSUE, EVENT_ACTIONS.EDIT);
 
 		updatedIssue = {...updatedIssue, ...issueData};
 

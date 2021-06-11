@@ -36,7 +36,6 @@ import { disableConflictingMeasurementActions, generateName } from '../../helper
 import { prepareResources } from '../../helpers/resources';
 import { chopShapesUuids } from '../../helpers/shapes';
 import { SuggestedTreatmentsDialog } from '../../routes/components/dialogContainer/components';
-import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
 import { Viewer } from '../../services/viewer/viewer';
@@ -141,8 +140,6 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 
 		const { data: savedRisk } = yield API.saveRisk(teamspace, model, risk);
 
-		analyticsService.sendEvent(EVENT_CATEGORIES.RISK, EVENT_ACTIONS.CREATE);
-
 		yield put(ViewpointsActions.cacheGroupsFromViewpoint(savedRisk.viewpoint, risk.viewpoint));
 
 		finishSubmitting();
@@ -169,7 +166,6 @@ function* updateRisk({riskData}) {
 		let { data: updatedRisk } = yield API.updateRisk(account, model, _id, rev_id, chopShapesUuids(riskData));
 		updatedRisk.resources = prepareResources(account, model, updatedRisk.resources);
 
-		analyticsService.sendEvent(EVENT_CATEGORIES.RISK, EVENT_ACTIONS.EDIT);
 		updatedRisk = {...updatedRisk, ...riskData};
 
 		yield put(RisksActions.setComponentState({ savedPin: position }));
