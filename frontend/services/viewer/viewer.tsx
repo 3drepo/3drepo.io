@@ -81,7 +81,6 @@ export class ViewerService {
 
 	public measureMode: string;
 	public measureModeLabels: boolean;
-	public addedMeasurements: Set<string> = new Set();
 
 	public constructor({ name = 'viewer', ...config}: IViewerConstructor) {
 		this.name = name;
@@ -466,22 +465,14 @@ export class ViewerService {
 	}
 
 	public measurementAlertEvent(measurement) {
-		if (this.addedMeasurements.has(measurement.uuid)) {
-			return;
-		}
-
-		this.addedMeasurements.add(measurement.uuid);
-
 		this.emit(VIEWER_EVENTS.MEASUREMENT_CREATED, measurement);
 	}
 
 	public measurementRemoved(measurementId) {
-		this.addedMeasurements.delete(measurementId);
 		this.emit(VIEWER_EVENTS.MEASUREMENT_REMOVED, measurementId);
 	}
 
 	public measurementsCleared() {
-		this.addedMeasurements.clear();
 		this.emit(VIEWER_EVENTS.ALL_MEASUREMENTS_REMOVED);
 	}
 
