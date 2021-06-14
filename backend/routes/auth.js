@@ -26,6 +26,8 @@ const config = require("../config");
 const utils = require("../utils");
 // const ChatEvent = require("../models/chatEvent");
 const User = require("../models/user");
+
+const LoginRecord = require("../models/loginRecord");
 const Mailer = require("../mailer/mailer");
 const httpsPost = require("../libs/httpsReq").post;
 
@@ -570,6 +572,8 @@ function createSession(place, req, res, next, user) {
 			return removeSessions(ids);
 		}).then(() => {
 			responseCodes.respond(place, req, res, next, responseCodes.OK, user);
+		}).then(()=>{
+			LoginRecord.saveLoginRecord(req);
 		}).catch((err) => {
 			responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {username: user.username});
 		});
