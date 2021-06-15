@@ -44,14 +44,8 @@ const ip2location = require('ip-to-location');
          };  
        
          const userAgentString = req.headers['user-agent'];
-         let uaInfo = {};
-
-         if(isUserAgentFromPlugin(userAgentString)){
-                uaInfo = getUserAgentInfoFromPlugin(userAgentString);
-         }
-         else{
-                uaInfo = getUserAgentInfoFromBrowser(userAgentString);
-         }
+         const uaInfo = isUserAgentFromPlugin(userAgentString) ?
+            getUserAgentInfoFromPlugin(userAgentString) : getUserAgentInfoFromBrowser(userAgentString);
 
          loginRecord.application = uaInfo.application;
          loginRecord.engine = uaInfo.engine;
