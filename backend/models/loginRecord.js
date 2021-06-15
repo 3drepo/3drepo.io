@@ -52,8 +52,8 @@ const ip2location = require('ip-to-location');
          loginRecord.os = uaInfo.os;
          loginRecord.device = uaInfo.device;          
 
-         const col = await db.getCollection("loginRecords", req.body.username);
-         await col.insertOne(loginRecord);
+         await db.insert("loginRecords", req.body.username, loginRecord);
+
  }
  
  //Format: 
