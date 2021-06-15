@@ -37,11 +37,11 @@ const ip2location = require('ip-to-location');
                 loginRecord.referrer = referrer;
         }
 
-        const location = await getLocationFromIPAddress(loginRecord.ipAddr);   
-        loginRecord.location = {
-                country: location.country_name,
-                city: location.city
-        };    
+         const { country_name, city } = await getLocationFromIPAddress(loginRecord.ipAddr);
+         loginRecord.location = {
+             country: country_name,
+             city
+         };  
        
          const userAgentString = req.headers['user-agent'];
          let uaInfo = {};
