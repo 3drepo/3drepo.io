@@ -32,7 +32,6 @@ import {
 import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
 import { prepareIssue } from '../../helpers/issues';
 import { prepareResources } from '../../helpers/resources';
-import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
 import { BoardActions } from '../board';
@@ -121,8 +120,6 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 
 		const { data: savedIssue } = yield API.saveIssue(teamspace, model, issue);
 
-		analyticsService.sendEvent(EVENT_CATEGORIES.ISSUE, EVENT_ACTIONS.CREATE);
-
 		const jobs = yield select(selectJobsList);
 		const preparedIssue = prepareIssue(savedIssue, jobs);
 
@@ -148,7 +145,6 @@ function* updateActiveIssue({ issueData }) {
 	try {
 		const { _id, rev_id, model, account, position } = yield select(selectActiveIssueDetails);
 		let { data: updatedIssue } = yield API.updateIssue(account, model, _id, rev_id, issueData);
-		yield analyticsService.sendEvent(EVENT_CATEGORIES.ISSUE, EVENT_ACTIONS.EDIT);
 
 		updatedIssue = {...updatedIssue, ...issueData};
 
