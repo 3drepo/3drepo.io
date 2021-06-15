@@ -91,7 +91,7 @@ const getUserAgentInfoFromBrowser = (userAgentString) => {
 
     const { browser, engine, os } = uaParserJs(userAgentString);
     const userAgentInfo = {
-        application: { ...browser, type: "browser" },
+        application: { ...browser, type: browser == null ? null : "browser"},
         engine,
         os,
         device: device(userAgentString).type
@@ -104,7 +104,7 @@ const getLocationFromIPAddress = async (ipAddress) => {
     return await ip2location.fetch(ipAddress);
 }
 
-const isUserAgentFromPlugin = async (userAgent) => {
+const isUserAgentFromPlugin = (userAgent) => {
     return userAgent.split(" ")[0] === "PLUGIN:";
 }
 
