@@ -19,9 +19,9 @@
 const db = require("../handler/db");
 
 //detects edge as browser but not device
-const uaParserJs = require('ua-parser-js');
-const device = require('device');
-const ip2location = require('ip-to-location');
+const UaParserJs = require('ua-parser-js');
+const Device = require('device');
+const Ip2location = require('ip-to-location');
 
 const LoginRecord = {};
 
@@ -89,19 +89,19 @@ const getUserAgentInfoFromPlugin = (userAgentString) => {
 
 const getUserAgentInfoFromBrowser = (userAgentString) => {
 
-    const { browser, engine, os } = uaParserJs(userAgentString);
+    const { browser, engine, os } = UaParserJs(userAgentString);
     const userAgentInfo = {
         application: { ...browser, type: browser == null ? null : "browser"},
         engine,
         os,
-        device: device(userAgentString).type
+        device: Device(userAgentString).type
     }    
   
     return userAgentInfo;
 }
 
 const getLocationFromIPAddress = async (ipAddress) => {
-    return await ip2location.fetch(ipAddress);
+    return await Ip2location.fetch(ipAddress);
 }
 
 const isUserAgentFromPlugin = (userAgent) => {
