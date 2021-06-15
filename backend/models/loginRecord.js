@@ -78,8 +78,8 @@ const getUserAgentInfoFromPlugin = (userAgentString) => {
             version: engineInfoComponents[1]
         },
         os: {
-            osName: osInfoComponents[0],
-            osVersion: osInfoComponents[1]
+            name: osInfoComponents[0],
+            version: osInfoComponents[1]
         },
         device: "desktop"
     };
@@ -88,24 +88,14 @@ const getUserAgentInfoFromPlugin = (userAgentString) => {
 }
 
 const getUserAgentInfoFromBrowser = (userAgentString) => {
-    const userAgentObject = uaParserJs(userAgentString);
 
+    const { browser, engine, os } = uaParserJs(userAgentString);
     const userAgentInfo = {
-        application: {
-            name: userAgentObject.browser.name,
-            version: userAgentObject.browser.version,
-            type: "browser"
-        },
-        engine: {
-            name: userAgentObject.engine.name,
-            version: userAgentObject.engine.version
-        },
-        os: {
-            osName: userAgentObject.os.name,
-            osVersion: userAgentObject.os.version
-        },
+        application: { ...browser, type: "browser" },
+        engine,
+        os,
         device: device(userAgentString).type
-    };
+    }    
   
     return userAgentInfo;
 }
@@ -115,7 +105,7 @@ const getLocationFromIPAddress = async (ipAddress) => {
 }
 
 const isUserAgentFromPlugin = async (userAgent) => {
-    return userAgent.split(" ")[0] == "PLUGIN:";
+    return userAgent.split(" ")[0] === "PLUGIN:";
 }
 
 module.exports = LoginRecord;
