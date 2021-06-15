@@ -60,7 +60,7 @@ const ip2location = require('ip-to-location');
  //PLUGIN: {OS Name}/{OS Version} {Host Software Name}/{Host Software Version} {Plugin Type}/{Plugin Version}
  //Example:
  //PLUGIN: Windows/10.0.19042.0 REVIT/2021.1 PUBLISH/4.15.0
- function getUserAgentInfoFromPlugin(userAgentString){
+ const getUserAgentInfoFromPlugin = (userAgentString) => {
         const userAgentInfo = {};        
         const userAgentComponents = userAgentString.replace("PLUGIN: ", "").split(' ');                  
 
@@ -85,7 +85,7 @@ const ip2location = require('ip-to-location');
         return userAgentInfo;
  }
 
- function getUserAgentInfoFromBrowser(userAgentString){
+ const getUserAgentInfoFromBrowser = (userAgentString) => {
         const userAgentInfo = {};        
         const userAgentObject = uaParserJs(userAgentString);       
 
@@ -110,11 +110,11 @@ const ip2location = require('ip-to-location');
         return userAgentInfo;
 }
 
-async function getLocationFromIPAddress(ipAddress){
+const getLocationFromIPAddress = async (ipAddress) => {
         return await ip2location.fetch(ipAddress);
 }
 
-function isUserAgentFromPlugin(userAgent){        
+const isUserAgentFromPlugin = async (userAgent) => {        
         return userAgent.split(" ")[0] == "PLUGIN:";
 }
 
