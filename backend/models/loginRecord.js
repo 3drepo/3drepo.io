@@ -15,107 +15,103 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- "use strict";
- const db = require("../handler/db");
- 
- //detects edge as browser but not device
+"use strict";
+const db = require("../handler/db");
+
+//detects edge as browser but not device
 const uaParserJs = require('ua-parser-js');
 const device = require('device');
 const ip2location = require('ip-to-location');
 
- const LoginRecord = {};
- 
- LoginRecord.saveLoginRecord = async (req) => {
-        const loginRecord = {
-                _id : req.sessionID,
-                loginTime : new Date(),
-                ipAddr: req.ips[0] || req.ip                    
-        }
+const LoginRecord = {};
 
-        const referrer = req.header('Referer');
-        if(referrer != null){
-                loginRecord.referrer = referrer;
-        }
+LoginRecord.saveLoginRecord = async (req) => {
+    const loginRecord = {
+        _id: req.sessionID,
+        loginTime: new Date(),
+        ipAddr: req.ips[0] || req.ip
+    }
 
-         const { country_name, city } = await getLocationFromIPAddress(loginRecord.ipAddr);
-         loginRecord.location = {
-             country: country_name,
-             city
-         };  
-       
-         const userAgentString = req.headers['user-agent'];
-         const uaInfo = isUserAgentFromPlugin(userAgentString) ?
-            getUserAgentInfoFromPlugin(userAgentString) : getUserAgentInfoFromBrowser(userAgentString);
+    const referrer = req.header('Referer');
+    if (referrer != null) {
+        loginRecord.referrer = referrer;
+    }
 
-         loginRecord.application = uaInfo.application;
-         loginRecord.engine = uaInfo.engine;
-         loginRecord.os = uaInfo.os;
-         loginRecord.device = uaInfo.device;          
+    const { country_name, city } = await getLocationFromIPAddress(loginRecord.ipAddr);
+    loginRecord.location = {
+        country: country_name,
+        city
+    };
 
-         await db.insert("loginRecords", req.body.username, loginRecord);
+    const userAgentString = req.headers['user-agent'];
+    const uaInfo = isUserAgentFromPlugin(userAgentString) ?
+        getUserAgentInfoFromPlugin(userAgentString) : getUserAgentInfoFromBrowser(userAgentString);
 
- }
- 
- //Format: 
- //PLUGIN: {OS Name}/{OS Version} {Host Software Name}/{Host Software Version} {Plugin Type}/{Plugin Version}
- //Example:
- //PLUGIN: Windows/10.0.19042.0 REVIT/2021.1 PUBLISH/4.15.0
- const getUserAgentInfoFromPlugin = (userAgentString) => {
-        const userAgentInfo = {};        
-        const userAgentComponents = userAgentString.replace("PLUGIN: ", "").split(' ');                  
+    loginRecord.application = uaInfo.application;
+    loginRecord.engine = uaInfo.engine;
+    loginRecord.os = uaInfo.os;
+    loginRecord.device = uaInfo.device;
 
-        userAgentInfo.application = {
-                name: userAgentComponents[1].split('/')[0],
-                version: userAgentComponents[1].split('/')[1],
-                type: "plugin"        
-        }
-        
-        userAgentInfo.engine = {
-                name: "3drepoplugin",
-                version: userAgentComponents[2].split('/')[1]
-        }
+    await db.insert("loginRecords", req.body.username, loginRecord);
 
-        userAgentInfo.os = {
-                osName: userAgentComponents[0].split('/')[0],
-                osVersion: userAgentComponents[0].split('/')[1]
-        }
+}
 
-        userAgentInfo.device = "desktop";
+//Format: 
+//PLUGIN: {OS Name}/{OS Version} {Host Software Name}/{Host Software Version} {Plugin Type}/{Plugin Version}
+//Example:
+//PLUGIN: Windows/10.0.19042.0 REVIT/2021.1 PUBLISH/4.15.0
+const getUserAgentInfoFromPlugin = (userAgentString) => {
+    const userAgentComponents = userAgentString.replace("PLUGIN: ", "").split(' ');
 
-        return userAgentInfo;
- }
+    const userAgentInfo = {
+        application: {
+            name: userAgentComponents[1].split('/')[0],
+            version: userAgentComponents[1].split('/')[1],
+            type: "plugin"
+        },
+        engine: {
+            name: "3drepoplugin",
+            version: userAgentComponents[2].split('/')[1]
+        },
+        os: {
+            osName: userAgentComponents[0].split('/')[0],
+            osVersion: userAgentComponents[0].split('/')[1]
+        },
+        device: "desktop"
+    };
 
- const getUserAgentInfoFromBrowser = (userAgentString) => {
-        const userAgentInfo = {};        
-        const userAgentObject = uaParserJs(userAgentString);       
+    return userAgentInfo;
+}
 
-        userAgentInfo.application = {
-                name: userAgentObject.browser.name,
-                version: userAgentObject.browser.version,
-                type: "browser"        
-        }
-        
-        userAgentInfo.engine = {
-                name: userAgentObject.engine.name,
-                version: userAgentObject.engine.version
-        }
+const getUserAgentInfoFromBrowser = (userAgentString) => {
+    const userAgentObject = uaParserJs(userAgentString);
 
-        userAgentInfo.os = {
-                osName: userAgentObject.os.name,
-                osVersion: userAgentObject.os.version
-        }
-
-        userAgentInfo.device = device(userAgentString).type;
-
-        return userAgentInfo;
+    const userAgentInfo = {
+        application: {
+            name: userAgentObject.browser.name,
+            version: userAgentObject.browser.version,
+            type: "browser"
+        },
+        engine: {
+            name: userAgentObject.engine.name,
+            version: userAgentObject.engine.version
+        },
+        os: {
+            osName: userAgentObject.os.name,
+            osVersion: userAgentObject.os.version
+        },
+        device: device(userAgentString).type
+    };
+  
+    return userAgentInfo;
 }
 
 const getLocationFromIPAddress = async (ipAddress) => {
-        return await ip2location.fetch(ipAddress);
+    return await ip2location.fetch(ipAddress);
 }
 
-const isUserAgentFromPlugin = async (userAgent) => {        
-        return userAgent.split(" ")[0] == "PLUGIN:";
+const isUserAgentFromPlugin = async (userAgent) => {
+    return userAgent.split(" ")[0] == "PLUGIN:";
 }
 
- module.exports = LoginRecord;
+module.exports = LoginRecord;
