@@ -1,5 +1,5 @@
 /**
- *	Copyright (C) 2014 3D Repo Ltd
+ *	Copyright (C) 2021 3D Repo Ltd
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU Affero General Public License as
@@ -19,14 +19,14 @@
  const db = require("../handler/db");
  
  //detects edge as browser but not device
- var uaParserJs = require('ua-parser-js');
- var device = require('device');
- var ip2location = require('ip-to-location');
+const uaParserJs = require('ua-parser-js');
+const device = require('device');
+const ip2location = require('ip-to-location');
 
  const LoginRecord = {};
  
  LoginRecord.saveLoginRecord = async (req) => {
-        var loginRecord = {
+        const loginRecord = {
                 _id : req.sessionID,
                 loginTime : new Date(),
                 ipAddr: req.ips[0] || req.ip                    
@@ -44,7 +44,7 @@
         };    
        
          const userAgentString = req.headers['user-agent'];
-         var uaInfo = {};
+         let uaInfo = {};
 
          if(isUserAgentFromPlugin(userAgentString)){
                 uaInfo = getUserAgentInfoFromPlugin(userAgentString);
