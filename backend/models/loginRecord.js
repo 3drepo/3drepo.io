@@ -61,21 +61,25 @@ LoginRecord.saveLoginRecord = async (req) => {
 //Example:
 //PLUGIN: Windows/10.0.19042.0 REVIT/2021.1 PUBLISH/4.15.0
 const getUserAgentInfoFromPlugin = (userAgentString) => {
-    const userAgentComponents = userAgentString.replace("PLUGIN: ", "").split(' ');
+    const [osInfo, appInfo, engineInfo] = userAgentString.replace("PLUGIN: ", "").split(' ');
+
+    const osInfoComponents = osInfo.split('/');
+    const appInfoComponents = appInfo.split('/');
+    const engineInfoComponents = engineInfo.split('/');
 
     const userAgentInfo = {
         application: {
-            name: userAgentComponents[1].split('/')[0],
-            version: userAgentComponents[1].split('/')[1],
+            name: appInfoComponents[0],
+            version: appInfoComponents[1],
             type: "plugin"
         },
         engine: {
             name: "3drepoplugin",
-            version: userAgentComponents[2].split('/')[1]
+            version: engineInfoComponents[1]
         },
         os: {
-            osName: userAgentComponents[0].split('/')[0],
-            osVersion: userAgentComponents[0].split('/')[1]
+            osName: osInfoComponents[0],
+            osVersion: osInfoComponents[1]
         },
         device: "desktop"
     };
