@@ -257,6 +257,7 @@ function* setActiveRisk({ risk, revision, ignoreViewer = false }) {
 			]);
 		} else {
 			yield put(RisksActions.setComponentState({ activeRisk: null }));
+			yield put(ViewpointsActions.setSelectedViewpoint(null));
 			yield put(TreeActions.clearCurrentlySelected());
 		}
 	} catch (error) {
