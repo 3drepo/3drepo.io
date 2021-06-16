@@ -290,6 +290,7 @@ function* setActiveIssue({ issue, revision, ignoreViewer = false }) {
 			]);
 		} else {
 			yield put(IssuesActions.setComponentState({ activeIssue: null }));
+			yield put(ViewpointsActions.setSelectedViewpoint(null));
 			yield put(TreeActions.clearCurrentlySelected());
 		}
 
