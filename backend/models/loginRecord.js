@@ -18,94 +18,94 @@
 "use strict";
 const db = require("../handler/db");
 
-//detects edge as browser but not device
-const UaParserJs = require('ua-parser-js');
-const Device = require('device');
-const Ip2location = require('ip-to-location');
+// detects edge as browser but not device
+const UaParserJs = require("ua-parser-js");
+const Device = require("device");
+const Ip2location = require("ip-to-location");
 
 const LoginRecord = {};
 
 LoginRecord.saveLoginRecord = async (req) => {
-    const loginRecord = {
-        _id: req.sessionID,
-        loginTime: new Date(),
-        ipAddr: req.ips[0] || req.ip
-    }
+	const loginRecord = {
+		_id: req.sessionID,
+		loginTime: new Date(),
+		ipAddr: req.ips[0] || req.ip
+	};
 
-    const referrer = req.header('Referer');
-    if (referrer) {
-        loginRecord.referrer = referrer;
-    }
+	const referrer = req.header("Referer");
+	if (referrer) {
+		loginRecord.referrer = referrer;
+	}
 
-    const { country_name, city } = await getLocationFromIPAddress(loginRecord.ipAddr);
-    loginRecord.location = {
-        country: country_name,
-        city
-    };
+	const { country_name, city } = await getLocationFromIPAddress(loginRecord.ipAddr);
+	loginRecord.location = {
+		country: country_name,
+		city
+	};
 
-    const userAgentString = req.headers['user-agent'];
-    const uaInfo = isUserAgentFromPlugin(userAgentString) ?
-        getUserAgentInfoFromPlugin(userAgentString) : getUserAgentInfoFromBrowser(userAgentString);
+	const userAgentString = req.headers["user-agent"];
+	const uaInfo = isUserAgentFromPlugin(userAgentString) ?
+		getUserAgentInfoFromPlugin(userAgentString) : getUserAgentInfoFromBrowser(userAgentString);
 
-    loginRecord.application = uaInfo.application;
-    loginRecord.engine = uaInfo.engine;
-    loginRecord.os = uaInfo.os;
-    loginRecord.device = uaInfo.device;
+	loginRecord.application = uaInfo.application;
+	loginRecord.engine = uaInfo.engine;
+	loginRecord.os = uaInfo.os;
+	loginRecord.device = uaInfo.device;
 
-    await db.insert("loginRecords", req.body.username, loginRecord);
+	await db.insert("loginRecords", req.body.username, loginRecord);
 
-}
+};
 
-//Format: 
-//PLUGIN: {OS Name}/{OS Version} {Host Software Name}/{Host Software Version} {Plugin Type}/{Plugin Version}
-//Example:
-//PLUGIN: Windows/10.0.19042.0 REVIT/2021.1 PUBLISH/4.15.0
+// Format:
+// PLUGIN: {OS Name}/{OS Version} {Host Software Name}/{Host Software Version} {Plugin Type}/{Plugin Version}
+// Example:
+// PLUGIN: Windows/10.0.19042.0 REVIT/2021.1 PUBLISH/4.15.0
 const getUserAgentInfoFromPlugin = (userAgentString) => {
-    const [osInfo, appInfo, engineInfo] = userAgentString.replace("PLUGIN: ", "").split(' ');
+	const [osInfo, appInfo, engineInfo] = userAgentString.replace("PLUGIN: ", "").split(" ");
 
-    const osInfoComponents = osInfo.split('/');
-    const appInfoComponents = appInfo.split('/');
-    const engineInfoComponents = engineInfo.split('/');
+	const osInfoComponents = osInfo.split("/");
+	const appInfoComponents = appInfo.split("/");
+	const engineInfoComponents = engineInfo.split("/");
 
-    const userAgentInfo = {
-        application: {
-            name: appInfoComponents[0],
-            version: appInfoComponents[1],
-            type: "plugin"
-        },
-        engine: {
-            name: "3drepoplugin",
-            version: engineInfoComponents[1]
-        },
-        os: {
-            name: osInfoComponents[0],
-            version: osInfoComponents[1]
-        },
-        device: "desktop"
-    };
+	const userAgentInfo = {
+		application: {
+			name: appInfoComponents[0],
+			version: appInfoComponents[1],
+			type: "plugin"
+		},
+		engine: {
+			name: "3drepoplugin",
+			version: engineInfoComponents[1]
+		},
+		os: {
+			name: osInfoComponents[0],
+			version: osInfoComponents[1]
+		},
+		device: "desktop"
+	};
 
-    return userAgentInfo;
-}
+	return userAgentInfo;
+};
 
 const getUserAgentInfoFromBrowser = (userAgentString) => {
 
-    const { browser, engine, os } = UaParserJs(userAgentString);
-    const userAgentInfo = {
-        application: { ...browser, type: browser == null ? null : "browser"},
-        engine,
-        os,
-        device: Device(userAgentString).type
-    }    
-  
-    return userAgentInfo;
-}
+	const { browser, engine, os } = UaParserJs(userAgentString);
+	const userAgentInfo = {
+		application: { ...browser, type: browser === null ? null : "browser"},
+		engine,
+		os,
+		device: Device(userAgentString).type
+	};
+
+	return userAgentInfo;
+};
 
 const getLocationFromIPAddress = async (ipAddress) => {
-    return await Ip2location.fetch(ipAddress);
-}
+	return await Ip2location.fetch(ipAddress);
+};
 
 const isUserAgentFromPlugin = (userAgent) => {
-    return userAgent.split(" ")[0] === "PLUGIN:";
-}
+	return userAgent.split(" ")[0] === "PLUGIN:";
+};
 
 module.exports = LoginRecord;
