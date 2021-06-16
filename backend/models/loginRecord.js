@@ -33,7 +33,7 @@ LoginRecord.saveLoginRecord = async (req) => {
     }
 
     const referrer = req.header('Referer');
-    if (referrer != null) {
+    if (referrer) {
         loginRecord.referrer = referrer;
     }
 
