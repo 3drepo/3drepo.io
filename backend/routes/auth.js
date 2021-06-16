@@ -553,7 +553,10 @@ function createSession(place, req, res, next, user) {
 	req.body.username = user.username;
 
 	regenerateAuthSession(req, config, user)
-		.then(() => getSessionsByUsername(user.username))
+		.then(() => {
+			LoginRecord.saveLoginRecord(req);
+			return getSessionsByUsername(user.username);
+		})
 		.then(sessions => { // Remove other sessions with the same username
 			if (!req.session.user.webSession) {
 				return null;
@@ -572,8 +575,6 @@ function createSession(place, req, res, next, user) {
 			return removeSessions(ids);
 		}).then(() => {
 			responseCodes.respond(place, req, res, next, responseCodes.OK, user);
-		}).then(()=>{
-			LoginRecord.saveLoginRecord(req);
 		}).catch((err) => {
 			responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {username: user.username});
 		});
