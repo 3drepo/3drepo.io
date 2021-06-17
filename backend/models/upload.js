@@ -34,14 +34,13 @@ const handleChunkStream = async (req, filename) => {
 		req.on("data", (chunk) => writeStream.write(chunk, "binary"));
 		req.on("end", () => {
 			writeStream.end();
-			return resolve();
+			resolve();
 		});
 	});
 };
 
 const stitchChunks = (corID, newFilename) => {
-	const sharedSpacePath = importQueue.getSharedSpacePath();
-	const filePath = sharedSpacePath + "/" + corID + "/chunks";
+	const filePath = `${importQueue.getTaskPath(corID)}/chunks`;
 
 	return new Promise((resolve, reject) => {
 		fs.readdir(filePath, (dirErr, files) => {
@@ -65,7 +64,7 @@ const stitchChunks = (corID, newFilename) => {
 						return reject(readFileErr);
 					}
 
-					fs.appendFile(`${sharedSpacePath}/${corID}/${newFilename}`, content, (writeErr) => {
+					fs.appendFile(`${importQueue.getTaskPath(corID)}/${newFilename}`, content, (writeErr) => {
 						if (writeErr) {
 							return reject(writeErr);
 						}
@@ -130,8 +129,7 @@ Upload.uploadFile = async (req) => {
 		return Promise.reject(responseCodes.QUEUE_NO_CONFIG);
 	}
 
-	const account = req.params.account;
-	const model = req.params.model;
+	const { account, model } = req.params;
 	const user = req.session.user.username;
 
 	modelStatusChanged(null, account, model, { status: "uploading", user });
@@ -204,18 +202,17 @@ Upload.initUploadChunks = async (teamspace, model, corID, username, headers) => 
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	const sharedSpacePath = importQueue.getSharedSpacePath();
 	const chunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, parseInt(headers["x-ms-content-length"]));
 
-	if (!fs.existsSync(`${sharedSpacePath}/${corID}.json`)) {
+	if (!fs.existsSync(`${importQueue.getTaskPath(corID)}.json`)) {
 		throw responseCodes.CORRELATION_ID_NOT_FOUND;
 	}
 
 	// upload model with tag
 	modelStatusChanged(null, teamspace, model, { status: "uploading", username });
 
-	await importQueue.mkdir(`${sharedSpacePath}/${corID}/`);
-	await importQueue.mkdir(`${sharedSpacePath}/${corID}/chunks/`);
+	await importQueue.mkdir(`${importQueue.getTaskPath(corID)}/`);
+	await importQueue.mkdir(`${importQueue.getTaskPath(corID)}/chunks/`);
 
 	return { "x-ms-chunk-size": chunkSize };
 };
@@ -241,18 +238,15 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
 	const sizeRemaining = contentSize - contentMax - 1;
 	const chunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, sizeRemaining);
 
-	const sharedSpacePath = importQueue.getSharedSpacePath();
-	const timestamp = Date.now();
-
-	await handleChunkStream(req, `${sharedSpacePath}/${corID}/chunks/${timestamp}`);
+	await handleChunkStream(req, `${importQueue.getTaskPath(corID)}/chunks/${Date.now()}`);
 
 	systemLogger.logInfo(`CONTENT-RANGE=${req.headers["content-range"]}`);
 	systemLogger.logInfo(`CHUNKSIZE=${chunkSize}`);
 	if (chunkSize === 0) {
 		modelStatusChanged(null, teamspace, model, { status: "uploaded" });
 		await stitchChunks(corID, "upload");
-		const { filename } = JSON.parse(fs.readFileSync(`${sharedSpacePath}/${corID}.json`, "utf8"));
-		importQueue.importFile(corID, `${sharedSpacePath}/${corID}/upload`, filename, null);
+		const { filename } = JSON.parse(fs.readFileSync(`${importQueue.getTaskPath(corID)}.json`, "utf8"));
+		importQueue.importFile(corID, `${importQueue.getTaskPath(corID)}/upload`, filename, null);
 	}
 
 	return {
@@ -270,12 +264,8 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
  * @param {desc} desc - revison description
  *******************************************************************************/
 Upload.writeImportData = async (corID, databaseName, modelName, userName, newFileName, tag, desc, importAnimations = true) => {
-	const sharedSpacePath = importQueue.getSharedSpacePath();
 	const sharedSpacePH = importQueue.getSharedSpacePH();
-
-	// const newFilePath = await this._moveFileToSharedSpace(corID, filePath, orgFileName, copy);
-
-	const jsonFilename = `${sharedSpacePath}/${corID}.json`;
+	const jsonFilename = `${importQueue.getTaskPath(corID)}.json`;
 
 	const json = {
 		file: `${sharedSpacePH}/${corID}/${newFileName}`,

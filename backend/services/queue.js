@@ -159,6 +159,10 @@ class ImportQueue {
 		return sharedSpacePH;
 	}
 
+	getTaskPath(corID) {
+		return `${this.sharedSpacePath}/${corID}`;
+	}
+
 	/** *****************************************************************************
 	 * Dispatch work to queue to import a model via a file uploaded by User
 	 * @param {string} corID - correlation ID for this request
