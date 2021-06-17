@@ -199,6 +199,8 @@ Upload.initUploadChunks = async (teamspace, model, corID, username, headers) => 
 		headers["x-ms-transfer-mode"] !== "chunked" ||
 		!headers["x-ms-content-length"] ||
 		isNaN(headers["x-ms-content-length"])) {
+		systemLogger.logInfo(`transfer mode=${req.headers["x-ms-transfer-mode"]}`);
+		systemLogger.logInfo(`content length=${req.headers["x-ms-content-length"]}`);
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
@@ -280,7 +282,8 @@ Upload.writeImportData = async (corID, databaseName, modelName, userName, newFil
 		filename: newFileName,
 		database: databaseName,
 		project: modelName,
-		owner: userName
+		owner: userName,
+		revId: corID
 	};
 
 	if (tag) {
