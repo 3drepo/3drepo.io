@@ -199,8 +199,8 @@ Upload.initUploadChunks = async (teamspace, model, corID, username, headers) => 
 		headers["x-ms-transfer-mode"] !== "chunked" ||
 		!headers["x-ms-content-length"] ||
 		isNaN(headers["x-ms-content-length"])) {
-		systemLogger.logInfo(`transfer mode=${req.headers["x-ms-transfer-mode"]}`);
-		systemLogger.logInfo(`content length=${req.headers["x-ms-content-length"]}`);
+		systemLogger.logInfo(`transfer mode=${headers["x-ms-transfer-mode"]}`);
+		systemLogger.logInfo(`content length=${headers["x-ms-content-length"]}`);
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
