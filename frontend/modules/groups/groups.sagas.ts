@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { cloneDeep } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import { CHAT_CHANNELS } from '../../constants/chat';
@@ -228,7 +229,7 @@ function* showDetails({ group, revision }) {
 		yield put(GroupsActions.highlightGroup(group));
 		yield put(GroupsActions.setComponentState({
 			showDetails: true,
-			newGroup: {...group},
+			newGroup: cloneDeep(group),
 			criteriaFieldState: INITIAL_CRITERIA_FIELD_STATE
 		}));
 	} catch (error) {
@@ -407,8 +408,9 @@ function* resetToSavedSelection({ groupId }) {
 	activeGroup.rules = (activeGroup || { rules: [] }).rules;
 
 	yield all([
-		put(GroupsActions.selectGroup(activeGroup)),
-		put(GroupsActions.setComponentState({ newGroup: activeGroup }))
+		put(GroupsActions.selectGroup(activeGroup))
+		// TODO: has to restore highlighted groups
+		// put(GroupsActions.setComponentState({ newGroup: activeGroup }))
 	]);
 }
 

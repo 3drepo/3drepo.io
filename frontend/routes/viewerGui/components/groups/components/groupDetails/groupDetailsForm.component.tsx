@@ -34,44 +34,12 @@ interface IProps {
 	canUpdate: boolean;
 	fieldNames: any[];
 	selectedNodes: any[];
-	onSubmit: () => void;
 	handleChange: (event) => void;
 }
 
 export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 	get isNewGroup() {
 		return !this.props.group._id;
-	}
-
-	public formikRef = React.createRef<HTMLElement>() as any;
-
-	public componentDidUpdate(prevProps) {
-		// const { name, desc, color, rules, type, objects, _id } = this.props.group;
-		// const currentValues = { name, desc, color, rules, type };
-		// const initialValues = this.formikRef.current.initialValues;
-		// const groupChanged = !isEqual(this.props.group, prevProps.group);
-		// const isNormalGroup = this.props.group.type === GROUPS_TYPES.NORMAL;
-		// const sharedIdsChanged = isNormalGroup ? this.areSharedIdsChanged(this.props.selectedNodes, objects) : false;
-
-		// const isFormDirtyAndValid = (!isEqual(initialValues, currentValues) && groupChanged) || sharedIdsChanged;
-		// this.props(isFormDirtyAndValid);
-
-		// if the group is a new group is always dirty.
-		// if (_id) {
-		// 	this.props.setIsFormDirty(!isEqual(initialValues, currentValues));
-		// }
-	}
-
-	public areSharedIdsChanged = (selectedNodes = [], groupObjects = []) => {
-		const toFullIdsDict = (dict, val) => {
-			val.shared_ids.forEach((e) => dict[val.account + '.' + val.model + '.' + e] = true);
-			return dict;
-		};
-
-		selectedNodes = selectedNodes.reduce(toFullIdsDict, {});
-		groupObjects = groupObjects.reduce(toFullIdsDict, {});
-
-		return !isEqual(selectedNodes, groupObjects);
 	}
 
 	public handleFieldChange = (onChange, form) => (event) => {
@@ -98,8 +66,8 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 				validateOnBlur={false}
 				validateOnChange={false}
 				validationSchema={GroupSchema}
-				onSubmit={this.props.onSubmit}
-				ref={this.formikRef}
+				onSubmit={() => null}
+				enableReinitialize
 			>
 				<Form>
 					<FieldsRow>

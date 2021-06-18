@@ -141,11 +141,8 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		if (!this.isNewGroup) {
-			// Sets the editing group CHANGE to editing group for clarity
-			this.props.setState({ newGroup: cloneDeep(this.props.originalGroup) });
-		}
-
+		// We are setting isFormValid to false when is a new group because for
+		// some reason we set the name to empty ¯\_(ツ)_/¯
 		this.setState({ isFormDirty: this.isNewGroup, isFormValid: !this.isNewGroup });
 	}
 
@@ -155,6 +152,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 		}
 
 		if (!this.isNewGroup) {
+			// We ignore the setDirty in newgroup because is always dirty, just needs to be valid.
 			const wasUpdated = !isEqual(this.editingGroup, this.props.originalGroup);
 			const selectionChanged = this.areSharedIdsChanged(this.props.selectedNodes, this.editingGroup.objects);
 			this.setIsFormDirty(wasUpdated || selectionChanged);
@@ -166,9 +164,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 
 	public handleGroupFormSubmit = () => {
 		const { teamspace, model, revision, updateGroup, createGroup } = this.props;
-		const { name, desc, type, color, rules } = this.editingGroup;
 
-		this.formRef.current.formikRef.current.resetForm({name, desc, type, color, rules});
 		if (this.isNewGroup) {
 			createGroup(teamspace, model, revision);
 		} else {
@@ -198,7 +194,6 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 			ref={this.formRef}
 			key={`${this.editingGroup._id}.${this.editingGroup.updatedAt}`}
 			group={this.editingGroup}
-			onSubmit={this.handleGroupFormSubmit}
 			currentUser={this.props.currentUser}
 			totalMeshes={this.props.totalMeshes}
 			canUpdate={this.props.canUpdate}
