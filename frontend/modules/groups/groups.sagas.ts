@@ -38,14 +38,14 @@ import {
 	selectActiveGroupDetails,
 	selectActiveGroupId,
 	selectColorOverrides,
+	selectEditingGroupDetails,
 	selectFilteredGroups,
 	selectGroups,
 	selectGroupsMap,
 	selectIsAllOverridden,
 	selectNewGroupDetails,
 	selectSelectedFilters,
-	selectShowDetails,
-	selectUnalteredActiveGroupDetails
+	selectShowDetails
 } from './groups.selectors';
 
 function* fetchGroups({teamspace, modelId, revision}) {
@@ -189,7 +189,7 @@ function* deleteGroups({ teamspace, modelId, groups }) {
 
 		if (isShowDetails && groupsToDelete.includes(activeGroupId)) {
 			yield put(GroupsActions.setComponentState({ activeGroup: null, showDetails: false }));
-			const { name } = yield select(selectActiveGroupDetails);
+			const { name } = yield select(selectEditingGroupDetails);
 			yield put(SnackbarActions.show(`Group ${name} removed.`));
 		}
 	} catch (error) {
@@ -238,7 +238,7 @@ function* showDetails({ group, revision }) {
 
 function* closeDetails() {
 	try {
-		const activeGroup = yield select(selectUnalteredActiveGroupDetails);
+		const activeGroup = yield select(selectActiveGroupDetails);
 		yield put(GroupsActions.highlightGroup(activeGroup));
 		yield put(GroupsActions.setComponentState({ showDetails: false }));
 
@@ -290,7 +290,7 @@ function* createGroup({ teamspace, modelId, revision }) {
 function* updateGroup({ teamspace, modelId, revision, groupId }) {
 	yield put(GroupsActions.toggleDetailsPendingState(true));
 	try {
-		const groupDetails = yield select(selectActiveGroupDetails);
+		const groupDetails = yield select(selectEditingGroupDetails);
 
 		const groupToSave = {
 			...normalizeGroup(groupDetails)
@@ -403,7 +403,7 @@ function* unsubscribeFromChanges({ teamspace, modelId }) {
 }
 
 function* resetToSavedSelection({ groupId }) {
-	const activeGroup = yield select(selectUnalteredActiveGroupDetails);
+	const activeGroup = yield select(selectActiveGroupDetails);
 	activeGroup.rules = (activeGroup || { rules: [] }).rules;
 
 	yield all([

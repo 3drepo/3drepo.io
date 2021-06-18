@@ -36,8 +36,6 @@ interface IProps {
 	selectedNodes: any[];
 	onSubmit: () => void;
 	handleChange: (event) => void;
-	setIsFormValid: (isFormValid) => void;
-	setIsFormDirty: (isFormDirty) => void;
 }
 
 export class GroupDetailsForm extends React.PureComponent<IProps, any> {
@@ -47,21 +45,21 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 
 	public formikRef = React.createRef<HTMLElement>() as any;
 
-	public componentDidMount() {
-		this.props.setIsFormValid(this.isNewGroup);
-	}
-
 	public componentDidUpdate(prevProps) {
-		const { name, desc, color, rules, type, objects } = this.props.group;
-		const currentValues = { name, desc, color, rules, type };
-		const initialValues = this.formikRef.current.initialValues;
-		const groupChanged = !isEqual(this.props.group, prevProps.group);
-		const isNormalGroup = this.props.group.type === GROUPS_TYPES.NORMAL;
-		const sharedIdsChanged = isNormalGroup ? this.areSharedIdsChanged(this.props.selectedNodes, objects) : false;
+		// const { name, desc, color, rules, type, objects, _id } = this.props.group;
+		// const currentValues = { name, desc, color, rules, type };
+		// const initialValues = this.formikRef.current.initialValues;
+		// const groupChanged = !isEqual(this.props.group, prevProps.group);
+		// const isNormalGroup = this.props.group.type === GROUPS_TYPES.NORMAL;
+		// const sharedIdsChanged = isNormalGroup ? this.areSharedIdsChanged(this.props.selectedNodes, objects) : false;
 
-		const isFormDirtyAndValid = (!isEqual(initialValues, currentValues) && groupChanged) || sharedIdsChanged;
-		this.props.setIsFormValid(isFormDirtyAndValid);
-		this.props.setIsFormDirty(isFormDirtyAndValid);
+		// const isFormDirtyAndValid = (!isEqual(initialValues, currentValues) && groupChanged) || sharedIdsChanged;
+		// this.props(isFormDirtyAndValid);
+
+		// if the group is a new group is always dirty.
+		// if (_id) {
+		// 	this.props.setIsFormDirty(!isEqual(initialValues, currentValues));
+		// }
 	}
 
 	public areSharedIdsChanged = (selectedNodes = [], groupObjects = []) => {
@@ -78,22 +76,8 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 
 	public handleFieldChange = (onChange, form) => (event) => {
 		event.persist();
-		const newValues = {
-			...form.values,
-			[event.target.name]: event.target.value
-		};
-
 		onChange(event);
-		const isDirty = !isEqual(newValues, form.initialValues);
-		this.props.setIsFormDirty(isDirty);
-		form.validateForm(newValues)
-			.then(() => {
-				this.props.handleChange(event);
-				this.props.setIsFormValid(true);
-			})
-			.catch(() => {
-				this.props.setIsFormValid(false);
-			});
+		this.props.handleChange(event);
 	}
 
 	public renderTypeSelectItems = () => {

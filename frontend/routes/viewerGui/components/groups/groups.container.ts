@@ -21,7 +21,6 @@ import { createStructuredSelector } from 'reselect';
 
 import { DialogActions } from '../../../../modules/dialog';
 import {
-	selectActiveGroupDetails,
 	selectActiveGroupId,
 	selectColorOverrides,
 	selectGroups,
@@ -44,7 +43,6 @@ const mapStateToProps = createStructuredSelector({
 	groupsMap: selectGroupsMap,
 	isPending: selectIsPending,
 	activeGroupId: selectActiveGroupId,
-	activeGroupDetails: selectActiveGroupDetails,
 	showDetails: selectShowDetails,
 	highlightedGroups: selectHighlightedGroups,
 	searchEnabled: selectSearchEnabled,
