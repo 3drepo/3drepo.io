@@ -187,7 +187,7 @@ export class HandleCalloutDrawing
 					stroke: this.props.color,
 					strokeWidth: this.props.size,
 					draggable: false,
-					fill: COLOR.WHITE_20,
+					fill: COLOR.WHITE,
 				};
 
 				this.lastShape = createShape(SHAPE_TYPES.RECTANGLE, commonProps, initialPositionProps);

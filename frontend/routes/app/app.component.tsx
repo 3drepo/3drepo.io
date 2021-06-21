@@ -23,12 +23,10 @@ import { PUBLIC_ROUTES, ROUTES } from '../../constants/routes';
 import { getCookie, setCookie } from '../../helpers/cookies';
 import { renderWhenTrue } from '../../helpers/rendering';
 import { WebGLChecker } from '../../helpers/webglChecker';
-import { analyticsService } from '../../services/analytics';
 import { clientConfigService } from '../../services/clientConfig';
 import { isStaticRoute, STATIC_ROUTES } from '../../services/staticPages';
 import { DialogContainer } from '../components/dialogContainer';
 import { Intercom } from '../components/intercom';
-import { LiveChat } from '../components/liveChat';
 import { PrivateRoute } from '../components/privateRoute';
 import { SnackbarContainer } from '../components/snackbarContainer';
 import StaticPageRoute from '../components/staticPageRoute/staticPageRoute.component';
@@ -69,11 +67,6 @@ interface IState {
 
 const DEFAULT_REDIRECT = ROUTES.TEAMSPACES;
 
-const ANALYTICS_REFERER_ROUTES = [
-	'sign-up',
-	'register-request'
-] as any;
-
 export class App extends React.PureComponent<IProps, IState> {
 
 	get WebGLVersion() {
@@ -102,23 +95,16 @@ export class App extends React.PureComponent<IProps, IState> {
 		props.startup();
 	}
 
-	public isRefererRoute(path) {
-		return ANALYTICS_REFERER_ROUTES.includes(path.replace('/', ''));
-	}
-
 	public componentDidMount() {
 		if (!PUBLIC_ROUTES.includes(location.pathname)) {
 			this.props.authenticate();
 		}
-
-		this.sendAnalyticsPageView(location);
 
 		this.props.subscribeToDm('loggedOut', this.props.onLoggedOut);
 	}
 
 	public componentDidUpdate(prevProps) {
 		if (decodeURIComponent(location.pathname) !== decodeURIComponent(prevProps.location.pathname)) {
-			this.sendAnalyticsPageView(location);
 			if (this.props.dialogs.length) {
 				this.props.hideDialog();
 			}
@@ -143,15 +129,6 @@ export class App extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public sendAnalyticsPageView(location) {
-		const isAnalyticsRefererRoute = this.isRefererRoute(location.pathname);
-		analyticsService.sendPageView(location);
-
-		if (isAnalyticsRefererRoute) {
-			analyticsService.sendPageViewReferer(location);
-		}
-	}
-
 	public render() {
 		return (
 			<AppContainer>
@@ -172,7 +149,6 @@ export class App extends React.PureComponent<IProps, IState> {
 				</Switch>
 				<DialogContainer />
 				<SnackbarContainer />
-				{!Boolean(clientConfigService.intercomLicense) &&  <LiveChat />}
 				<Intercom />
 			</AppContainer>
 		);
