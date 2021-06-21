@@ -26,16 +26,17 @@ const Ip2location = require("ip-to-location");
 const LoginRecord = {};
 
 LoginRecord.saveLoginRecord = async (req) => {
+
+	const userAgentString = req.headers["user-agent"];
+	const uaInfo = isUserAgentFromPlugin(userAgentString) ?
+		getUserAgentInfoFromPlugin(userAgentString) : getUserAgentInfoFromBrowser(userAgentString);
+
 	const loginRecord = {
 		_id: req.sessionID,
 		loginTime: new Date(),
-		ipAddr: req.ips[0] || req.ip
+		ipAddr: req.ips[0] || req.ip,
+		...uaInfo,
 	};
-
-	const referrer = req.header("Referer");
-	if (referrer) {
-		loginRecord.referrer = referrer;
-	}
 
 	const { country_name, city } = await getLocationFromIPAddress(loginRecord.ipAddr);
 	loginRecord.location = {
@@ -43,17 +44,13 @@ LoginRecord.saveLoginRecord = async (req) => {
 		city
 	};
 
-	const userAgentString = req.headers["user-agent"];
-	const uaInfo = isUserAgentFromPlugin(userAgentString) ?
-		getUserAgentInfoFromPlugin(userAgentString) : getUserAgentInfoFromBrowser(userAgentString);
+	const referrer = req.header("Referer");
+	if (referrer) {
+		loginRecord.referrer = referrer;
+	}
 
-	loginRecord.application = uaInfo.application;
-	loginRecord.engine = uaInfo.engine;
-	loginRecord.os = uaInfo.os;
-	loginRecord.device = uaInfo.device;
 
 	await db.insert("loginRecords", req.body.username, loginRecord);
-
 };
 
 // Format:
@@ -91,7 +88,7 @@ const getUserAgentInfoFromBrowser = (userAgentString) => {
 
 	const { browser, engine, os } = UaParserJs(userAgentString);
 	const userAgentInfo = {
-		application: { ...browser, type: browser === null ? null : "browser"},
+		application: browser.name ? { ...browser, type: "browser" } : { type: "unknown" },
 		engine,
 		os,
 		device: Device(userAgentString).type

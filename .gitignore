@@ -98,3 +98,4 @@ scripts/reporting/statsGenElastic/*/*/*.csv
 scripts/reporting/statsGenElastic/*/*/*.txt
 scripts/reporting/statsGenElastic/*.log
 package-lock.json
+.vs/
