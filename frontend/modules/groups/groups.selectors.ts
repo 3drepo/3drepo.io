@@ -45,7 +45,7 @@ export const selectActiveGroupId = createSelector(
 );
 
 export const selectEditingGroupDetails = createSelector(
-	selectComponentState, (state) => state.newGroup
+	selectComponentState, (state) => state.editingGroup
 );
 
 export const selectActiveGroupDetails = createSelector(
@@ -63,10 +63,6 @@ export const selectShowDetails = createSelector(
 
 export const selectExpandDetails = createSelector(
 	selectComponentState, (state) => state.expandDetails
-);
-
-export const selectNewGroupDetails = createSelector(
-	selectComponentState, (state) => state.newGroup
 );
 
 export const selectHighlightedGroups = createSelector(

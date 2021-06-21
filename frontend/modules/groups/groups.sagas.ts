@@ -44,7 +44,6 @@ import {
 	selectGroups,
 	selectGroupsMap,
 	selectIsAllOverridden,
-	selectNewGroupDetails,
 	selectSelectedFilters,
 	selectShowDetails
 } from './groups.selectors';
@@ -229,7 +228,7 @@ function* showDetails({ group, revision }) {
 		yield put(GroupsActions.highlightGroup(group));
 		yield put(GroupsActions.setComponentState({
 			showDetails: true,
-			newGroup: cloneDeep(group),
+			editingGroup: cloneDeep(group),
 			criteriaFieldState: INITIAL_CRITERIA_FIELD_STATE
 		}));
 	} catch (error) {
@@ -253,13 +252,13 @@ function* createGroup({ teamspace, modelId, revision }) {
 	try {
 		const isAllOverridden = yield select(selectIsAllOverridden);
 		const currentUser = yield select(selectCurrentUser);
-		const newGroupDetails = yield select(selectNewGroupDetails);
+		const editingGroupDetails = yield select(selectEditingGroupDetails);
 		const objectsStatus = yield Viewer.getObjectsStatus();
 
 		const date = new Date();
 		const timestamp = date.getTime();
 		const group = {
-			...normalizeGroup(newGroupDetails),
+			...normalizeGroup(editingGroupDetails),
 			createdAt: timestamp,
 			updatedAt: timestamp,
 			updatedBy: currentUser.username
@@ -279,8 +278,8 @@ function* createGroup({ teamspace, modelId, revision }) {
 		}
 
 		yield put(GroupsActions.updateGroupSuccess(preparedGroup));
-		yield put(GroupsActions.highlightGroup(preparedGroup));
 		yield put(GroupsActions.showDetails(preparedGroup));
+		yield put(GroupsActions.setActiveGroup(preparedGroup));
 		yield put(SnackbarActions.show('Group created'));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('create', 'group', error));
@@ -308,7 +307,7 @@ function* updateGroup({ teamspace, modelId, revision, groupId }) {
 		const preparedGroup = prepareGroup(data);
 
 		yield put(GroupsActions.updateGroupSuccess(preparedGroup));
-		yield put(GroupsActions.highlightGroup(preparedGroup));
+		yield put(GroupsActions.showDetails(preparedGroup));
 		yield put(SnackbarActions.show('Group updated'));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('update', 'group', error));
@@ -322,7 +321,7 @@ function* setNewGroup() {
 	const groupNumber = groups.length + 1;
 
 	try {
-		const newGroup = prepareGroup({
+		const editingGroup = prepareGroup({
 			author: currentUser.username,
 			name: `Untitled group ${groupNumber}`,
 			color: getRandomColor(),
@@ -333,7 +332,7 @@ function* setNewGroup() {
 			showDetails: true,
 			activeGroup: null,
 			totalMeshes: 0,
-			newGroup,
+			editingGroup,
 			criteriaFieldState: INITIAL_CRITERIA_FIELD_STATE
 		}));
 	} catch (error) {

@@ -51,7 +51,7 @@ interface IProps {
 	criteriaFieldState: ICriteriaFieldState;
 	createGroup: (teamspace: any, modelId: any, revision: any) => void;
 	updateGroup: (teamspace: any, modelId: any, revision: any, groupId: any) => void;
-	setState: (componentState: any) => void;
+	updateEditingGroup: (fields: any) => void;
 	setCriteriaState: (criteriaState: any) => void;
 	resetToSavedSelection: () => void;
 	isPending: boolean;
@@ -173,20 +173,11 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleFieldChange = (event: { target: { name: any; value: any; }; }) => {
-		this.props.setState({
-			newGroup: {
-				...this.editingGroup,
-				[event.target.name]: event.target.value
-			}
-		});
+		this.props.updateEditingGroup({[event.target.name]: event.target.value});
 	}
 
 	public handleColorChange = (color: any) => {
-		this.props.setState({
-			newGroup: {
-				...this.editingGroup, color
-			}
-		});
+		this.props.updateEditingGroup({color});
 	}
 
 	public renderGroupForm = () => (

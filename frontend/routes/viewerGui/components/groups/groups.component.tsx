@@ -150,9 +150,10 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderGroupsList = renderWhenTrue(() => {
-		const Items = this.state.filteredGroups.map(({ created, ...group} ) => (
+		const Items = this.state.filteredGroups.map((group) => (
 				<GroupListItem
 					{...group}
+					created=""
 					key={group._id}
 					hideThumbnail
 					statusColor={this.getOverriddenColor(group._id, group.color)}
