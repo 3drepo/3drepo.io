@@ -10,7 +10,6 @@ const addressMeta = require("../models/addressMeta");
 const units = require("../models/unit");
 const History = require("../models/history");
 const ModelHelper = require("../models/helper/model");
-const Upload = require("../models/upload");
 const User = require("../models/user");
 const DEFAULT_PLUGIN_STRUCTURE = require("../plugin/plugin-structure.js").DEFAULT_PLUGIN_STRUCTURE;
 const path = require("path");

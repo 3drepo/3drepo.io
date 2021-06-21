@@ -42,44 +42,26 @@ const handleChunkStream = async (req, filename) => {
 const stitchChunks = (corID, newFilename) => {
 	const filePath = `${importQueue.getTaskPath(corID)}/chunks`;
 
-	return new Promise((resolve, reject) => {
-		fs.readdir(filePath, (dirErr, files) => {
-			if (dirErr) {
-				return reject(dirErr);
-			}
+	const files = fs.readdirSync(filePath);
 
-			(function next() {
-				const file = files.shift();
-				if (!file) {
-					return resolve();
-				}
+	// sort timestamps into ascending order
+	files.sort((a, b) => a - b);
 
-				// for debugging
-				const stats = fs.statSync(`${filePath}/${file}`);
-				systemLogger.logInfo(`FILE=${filePath}/${file}, SIZE=${stats.size} bytes`);
-				// end debugging
+	files.forEach((file) => {
+		// for debugging
+		const stats = fs.statSync(`${filePath}/${file}`);
+		systemLogger.logInfo(`FILE=${filePath}/${file}, SIZE=${stats.size} bytes`);
+		// end debugging
 
-				fs.readFile(filePath + "/" + file, (readFileErr, content) => {
-					if (readFileErr) {
-						return reject(readFileErr);
-					}
+		const content = fs.readFileSync(`${filePath}/${file}`);
 
-					fs.appendFile(`${importQueue.getTaskPath(corID)}/${newFilename}`, content, (writeErr) => {
-						if (writeErr) {
-							return reject(writeErr);
-						}
-
-						return next();
-					});
-				});
-			})();
-		});
+		fs.appendFileSync(`${importQueue.getTaskPath(corID)}/${newFilename}`, content);
 	});
 };
 
 const Upload = {};
 
-Upload.uploadRequest = async (teamspace, model, username, data) => {
+Upload.initChunking = async (teamspace, model, username, data) => {
 	// check model exists before upload
 	const modelSetting = await findModelSettingById(teamspace, model);
 
@@ -179,7 +161,7 @@ Upload.uploadFile = async (req) => {
 	return uploadedFile;
 };
 
-Upload.initUploadChunks = async (teamspace, model, corID, username, headers) => {
+Upload.uploadChunksStart = async (teamspace, model, corID, username, headers) => {
 	if (!headers["x-ms-transfer-mode"] ||
 		headers["x-ms-transfer-mode"] !== "chunked" ||
 		!headers["x-ms-content-length"] ||

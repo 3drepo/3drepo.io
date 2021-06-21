@@ -1574,10 +1574,10 @@ router.get("/:model/revision/:revId/subModelRevisions", middlewares.hasReadAcces
 router.delete("/:model", middlewares.hasDeleteAccessToModel, deleteModel);
 
 /**
- * @api {post} /:teamspace/:model/upload/ms-chunking Upload model request
- * @apiName uploadModelRequest
+ * @api {post} /:teamspace/:model/upload/ms-chunking Initialise MS chunking request
+ * @apiName initChunking
  * @apiGroup Model
- * @apiDescription Model upload request to initiate upload process (for MS Logic Apps).
+ * @apiDescription Initiate model revision data for MS Logic Apps chunked upload.
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model id to upload.
@@ -1600,13 +1600,13 @@ router.delete("/:model", middlewares.hasDeleteAccessToModel, deleteModel);
  * 	"corID": "00000000-0000-1111-2222-333333333333"
  * }
  */
-router.post("/:model/upload/ms-chunking", middlewares.hasUploadAccessToModel, uploadModelRequest);
+router.post("/:model/upload/ms-chunking", middlewares.hasUploadAccessToModel, initChunking);
 
 /**
- * @api {post} /:teamspace/:model/upload/ms-chunking/:corID Start MS chunk upload
- * @apiName initUploadChunks
+ * @api {post} /:teamspace/:model/upload/ms-chunking/:corID Start MS chunking upload
+ * @apiName uploadChunksStart
  * @apiGroup Model
- * @apiDescription Model upload request for Microsoft Logic Apps.
+ * @apiDescription Start chunked model upload for Microsoft Logic Apps.
  * Max chunk size defined as 52,428,800 bytes (52 MB) based on
  * https://docs.microsoft.com/en-us/azure/logic-apps/logic-apps-limits-and-config?tabs=azure-portal
  *
@@ -1634,13 +1634,13 @@ router.post("/:model/upload/ms-chunking", middlewares.hasUploadAccessToModel, up
  * 	"Location": "/teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/ms-chunking/00000000-0000-1111-2222-333333333333"
  * }
  */
-router.post("/:model/upload/ms-chunking/:corID", middlewares.hasUploadAccessToModel, initUploadChunks);
+router.post("/:model/upload/ms-chunking/:corID", middlewares.hasUploadAccessToModel, uploadChunksStart);
 
 /**
  * @api {patch} /:teamspace/:model/upload/ms-chunking/:corID Upload model chunk
  * @apiName uploadChunk
  * @apiGroup Model
- * @apiDescription Model upload chunk for Microsoft Logic Apps.
+ * @apiDescription Upload model chunk for Microsoft Logic Apps.
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID to upload
@@ -2042,13 +2042,13 @@ function downloadLatest(req, res, next) {
 	});
 }
 
-async function uploadModelRequest(req, res, next) {
+async function initChunking(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 	const {account, model} = req.params;
 	const username = req.session.user.username;
 
 	try {
-		const corID = await Upload.uploadRequest(account, model, username, req.body);
+		const corID = await Upload.initChunking(account, model, username, req.body);
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, corID);
 	} catch(err) {
 		const errMsg = err.resCode ? err.resCode : err;
@@ -2056,13 +2056,13 @@ async function uploadModelRequest(req, res, next) {
 	}
 }
 
-async function initUploadChunks(req, res, next) {
+async function uploadChunksStart(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 	const { account, model, corID } = req.params;
 	const user = req.session.user.username;
 
 	try {
-		const initHeader = await Upload.initUploadChunks(account, model, corID, user, req.headers);
+		const initHeader = await Upload.uploadChunksStart(account, model, corID, user, req.headers);
 		initHeader.Location = `${config.public_protocol}://${req.headers.host}${req.originalUrl}`;
 		res.writeHead(200, initHeader);
 		res.end();
