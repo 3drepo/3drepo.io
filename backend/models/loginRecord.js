@@ -91,7 +91,7 @@ const getUserAgentInfoFromBrowser = (userAgentString) => {
 		application: browser.name ? { ...browser, type: "browser" } : { type: "unknown" },
 		engine,
 		os,
-		device: Device(userAgentString).type
+		device: userAgentString ?  Device(userAgentString).type : "unknown"
 	};
 
 	return userAgentInfo;
