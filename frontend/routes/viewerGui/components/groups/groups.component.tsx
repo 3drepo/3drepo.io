@@ -379,9 +379,13 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		return this.props.activeGroupId === group._id;
 	}
 
-	public handleGroupDelete = () => {
-		const { teamspace, model, deleteGroups } = this.props;
-		deleteGroups(teamspace, model, this.props.activeGroupId);
+	public handleGroupDelete = (id) => {
+		const { teamspace, model, deleteGroups, closeDetails } = this.props;
+		if (id) {
+			deleteGroups(teamspace, model, id);
+		} else {
+			closeDetails();
+		}
 	}
 
 	public handleColorOverride = (group) => (e: React.SyntheticEvent) => {

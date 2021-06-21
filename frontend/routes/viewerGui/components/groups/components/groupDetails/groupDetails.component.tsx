@@ -55,7 +55,7 @@ interface IProps {
 	setCriteriaState: (criteriaState: any) => void;
 	resetToSavedSelection: () => void;
 	isPending: boolean;
-	deleteGroup: () => void;
+	deleteGroup: (id: string | null) => void;
 }
 
 interface IState {
@@ -221,6 +221,10 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 		this.setState({ isFormDirty });
 	}
 
+	public handleDelete = () => {
+		this.props.deleteGroup(this.editingGroup._id);
+	}
+
 	public renderFooter = () => {
 		return (
 			<ViewerPanelFooter container alignItems="center">
@@ -240,7 +244,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 					/>
 					<TooltipButton
 						label="Delete"
-						action={this.props.deleteGroup}
+						action={this.handleDelete}
 						Icon={Delete}
 						disabled={!this.props.canUpdate}
 					/>
