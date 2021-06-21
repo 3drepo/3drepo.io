@@ -1774,8 +1774,9 @@ router.get("/:model/textures/:textureId", middlewares.hasReadAccessToModel, getT
 
 function updateSettings(req, res, next) {
 	const place = utils.APIInfo(req);
+	const {account, model} = req.params;
 
-	return ModelSetting.updateModelSetting(req.params.account, req.params.model, req.body).then(modelSetting => {
+	return ModelSetting.updateModelSetting(account, model, req.body).then(modelSetting => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, modelSetting.properties);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -1784,8 +1785,9 @@ function updateSettings(req, res, next) {
 
 function getHeliSpeed(req, res, next) {
 	const place = utils.APIInfo(req);
+	const {account, model} = req.params;
 
-	return ModelSetting.getHeliSpeed(req.params.account, req.params.model).then(heliSpeed => {
+	return ModelSetting.getHeliSpeed(account, model).then(heliSpeed => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, heliSpeed);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -1794,8 +1796,9 @@ function getHeliSpeed(req, res, next) {
 
 function updateHeliSpeed(req, res, next) {
 	const place = utils.APIInfo(req);
+	const {account, model} = req.params;
 
-	return ModelSetting.updateHeliSpeed(req.params.account, req.params.model, req.body.heliSpeed).then(() => {
+	return ModelSetting.updateHeliSpeed(account, model, req.body.heliSpeed).then(() => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, {});
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -1815,7 +1818,6 @@ function getModelSetting(req, res, next) {
 }
 
 function createModel(req, res, next) {
-
 	const responsePlace = utils.APIInfo(req);
 
 	if (Object.keys(req.body).length >= 1 &&
@@ -1921,13 +1923,13 @@ function getHeaders(cache = false) {
 }
 
 function getIdMap(req, res, next) {
-	const revId = req.params.rev;
+	const {account, model, rev} = req.params;
 
 	JSONAssets.getIdMap(
-		req.params.account,
-		req.params.model,
-		revId ? undefined : C.MASTER_BRANCH_NAME,
-		revId,
+		account,
+		model,
+		rev ? undefined : C.MASTER_BRANCH_NAME,
+		rev,
 		req.session.user.username
 	).then(file => {
 		const headers = getHeaders(false);
@@ -1938,12 +1940,13 @@ function getIdMap(req, res, next) {
 }
 
 function getIdToMeshes(req, res, next) {
-	const revId = req.params.rev;
+	const {account, model, rev} = req.params;
+
 	JSONAssets.getIdToMeshes(
-		req.params.account,
-		req.params.model,
-		revId ? undefined : C.MASTER_BRANCH_NAME,
-		revId,
+		account,
+		model,
+		rev ? undefined : C.MASTER_BRANCH_NAME,
+		rev,
 		req.session.user.username
 	).then(file => {
 		const headers = getHeaders(false);
@@ -1955,29 +1958,29 @@ function getIdToMeshes(req, res, next) {
 }
 
 function getModelTree(req, res, next) {
-	const revId = req.params.rev;
+	const {account, model, rev} = req.params;
 
 	JSONAssets.getTree(
-		req.params.account,
-		req.params.model,
-		revId ? undefined : C.MASTER_BRANCH_NAME,
-		revId
+		account,
+		model,
+		rev ? undefined : C.MASTER_BRANCH_NAME,
+		rev
 	).then(({ file, isFed }) => {
-		const headers = getHeaders(revId && !isFed);
+		const headers = getHeaders(rev && !isFed);
 		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
-
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
 }
 
 function getModelProperties(req, res, next) {
-	const revId = req.params.rev;
+	const {account, model, rev} = req.params;
+
 	JSONAssets.getModelProperties(
-		req.params.account,
-		req.params.model,
-		revId ? undefined : C.MASTER_BRANCH_NAME,
-		revId,
+		account,
+		model,
+		rev ? undefined : C.MASTER_BRANCH_NAME,
+		rev,
 		req.session.user.username
 	).then(file => {
 		const headers = getHeaders(false);
@@ -1989,12 +1992,13 @@ function getModelProperties(req, res, next) {
 }
 
 function getTreePath(req, res, next) {
-	const revId = req.params.rev;
+	const {account, model, rev} = req.params;
+
 	JSONAssets.getTreePath(
-		req.params.account,
-		req.params.model,
-		revId ? undefined : C.MASTER_BRANCH_NAME,
-		revId,
+		account,
+		model,
+		rev ? undefined : C.MASTER_BRANCH_NAME,
+		rev,
 		req.session.user.username
 	).then(file => {
 		const headers = getHeaders(false);
@@ -2006,38 +2010,33 @@ function getTreePath(req, res, next) {
 }
 
 function searchModelTree(req, res, next) {
-
-	const model = req.params.model;
-	const account = req.params.account;
+	const {account, model, rev} = req.params;
 	const username = req.session.user.username;
 	const searchString = req.query.searchString;
 
 	let branch;
 
-	if (!req.params.rev) {
+	if (!rev) {
 		branch = C.MASTER_BRANCH_NAME;
 	}
 
-	ModelHelpers.searchTree(account, model, branch, req.params.rev, searchString, username).then(items => {
-
+	ModelHelpers.searchTree(account, model, branch, rev, searchString, username).then(items => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, items);
-
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
 }
 
 function downloadLatest(req, res, next) {
+	const {account, model} = req.params;
 
-	ModelHelpers.downloadLatest(req.params.account, req.params.model).then(file => {
-
+	ModelHelpers.downloadLatest(account, model).then(file => {
 		const headers = {
 			"Content-Length": file.size,
 			"Content-Disposition": "attachment;filename=" + file.fileName
 		};
 
 		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
-
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
@@ -2045,8 +2044,7 @@ function downloadLatest(req, res, next) {
 
 async function uploadModelRequest(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
-	const account = req.params.account;
-	const model = req.params.model;
+	const {account, model} = req.params;
 	const username = req.session.user.username;
 
 	try {
@@ -2060,9 +2058,7 @@ async function uploadModelRequest(req, res, next) {
 
 async function initUploadChunks(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
-	const account = req.params.account;
-	const model = req.params.model;
-	const corID = req.params.corID;
+	const { account, model, corID } = req.params;
 	const user = req.session.user.username;
 
 	try {
@@ -2078,10 +2074,7 @@ async function initUploadChunks(req, res, next) {
 
 async function uploadChunk(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
-	const account = req.params.account;
-	const model = req.params.model;
-	const corID = req.params.corID;
-	// const username = req.session.user.username;
+	const { account, model, corID } = req.params;
 
 	try {
 		const chunkingHeader = await Upload.uploadChunk(account, model, corID, req);
@@ -2091,53 +2084,17 @@ async function uploadChunk(req, res, next) {
 		const errMsg = err.resCode ? err.resCode : err;
 		responseCodes.respond(responsePlace, req, res, next, errMsg, errMsg);
 	}
-
-	/*
-	let modelSetting;
-
-	// check model exists before upload
-	return ModelSetting.findModelSettingById(account, model).then(_modelSetting => {
-		modelSetting = _modelSetting;
-
-		if (!modelSetting) {
-			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
-		} else {
-			return Upload.uploadChunk(req);
-		}
-	}).then(file => {
-		const data = {
-			tag: req.body.tag,
-			desc: req.body.desc,
-			importAnimation: req.body.importAnimations !== false
-		};
-
-		const source = {
-			type: "upload",
-			file: file
-		};
-
-		return ModelHelpers.importModel(account, model, username, modelSetting, source, data).then(() => {
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "uploaded"});
-		});
-
-	}).catch(err => {
-		err = err.resCode ? err.resCode : err;
-		responseCodes.respond(responsePlace, req, res, next, err, err);
-	});
-	*/
 }
 
 function uploadModel(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
-	const account = req.params.account;
-	const model = req.params.model;
+	const { account, model } = req.params;
 	const username = req.session.user.username;
 
 	let modelSetting;
 
 	// check model exists before upload
 	return ModelSetting.findModelSettingById(account, model).then(_modelSetting => {
-
 		modelSetting = _modelSetting;
 
 		if (!modelSetting) {
@@ -2145,7 +2102,6 @@ function uploadModel(req, res, next) {
 		} else {
 			return Upload.uploadFile(req);
 		}
-
 	}).then(file => {
 		const data = {
 			tag: req.body.tag,
@@ -2161,7 +2117,6 @@ function uploadModel(req, res, next) {
 		return ModelHelpers.importModel(account, model, username, modelSetting, source, data).then(() => {
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "uploaded"});
 		});
-
 	}).catch(err => {
 		err = err.resCode ? err.resCode : err;
 		responseCodes.respond(responsePlace, req, res, next, err, err);
@@ -2169,7 +2124,9 @@ function uploadModel(req, res, next) {
 }
 
 function updatePermissions(req, res, next) {
-	return ModelSetting.updatePermissions(req.params.account, req.params.model, req.body).then(response => {
+	const { account, model } = req.params;
+
+	return ModelSetting.updatePermissions(account, model, req.body).then(response => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, response);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -2177,7 +2134,9 @@ function updatePermissions(req, res, next) {
 }
 
 function changePermissions(req, res, next) {
-	return ModelSetting.changePermissions(req.params.account, req.params.model, req.body).then(permission => {
+	const { account, model } = req.params;
+
+	return ModelSetting.changePermissions(account, model, req.body).then(permission => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -2203,7 +2162,9 @@ function updateMultiplePermissions(req, res, next) {
 }
 
 function getSingleModelPermissions(req, res, next) {
-	return ModelSetting.getSingleModelPermissions(req.params.account, req.params.model).then(permissions => {
+	const { account, model } = req.params;
+
+	return ModelSetting.getSingleModelPermissions(account, model).then(permissions => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permissions);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -2223,7 +2184,7 @@ function getUnityAssets(req, res, next) {
 	const username = req.session.user.username;
 	const branch = rev ? undefined : C.MASTER_BRANCH_NAME;
 
-	UnityAssets.getAssetList(account, model, branch, req.params.rev, username).then(obj => {
+	UnityAssets.getAssetList(account, model, branch, rev, username).then(obj => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -2235,7 +2196,7 @@ function getSrcAssets(req, res, next) {
 	const username = req.session.user.username;
 	const branch = rev ? undefined : C.MASTER_BRANCH_NAME;
 
-	SrcAssets.getAssetList(account, model, branch, req.params.rev, username).then(obj => {
+	SrcAssets.getAssetList(account, model, branch, rev, username).then(obj => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -2243,7 +2204,9 @@ function getSrcAssets(req, res, next) {
 }
 
 function getJsonMpc(req, res, next) {
-	JSONAssets.getSuperMeshMapping(req.params.account, req.params.model, req.params.uid).then(file => {
+	const {account, model, uid} = req.params;
+
+	JSONAssets.getSuperMeshMapping(account, model, uid).then(file => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file, undefined, config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -2262,7 +2225,9 @@ function getSubModelRevisions(req, res, next) {
 }
 
 function getUnityBundle(req, res, next) {
-	UnityAssets.getUnityBundle(req.params.account, req.params.model, req.params.uid).then(file => {
+	const {account, model, uid} = req.params;
+
+	UnityAssets.getUnityBundle(account, model, uid).then(file => {
 		req.params.format = "unity3d";
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file, undefined, config.cachePolicy);
 	}).catch(err => {
@@ -2271,8 +2236,10 @@ function getUnityBundle(req, res, next) {
 }
 
 function getSRC(req, res, next) {
+	const {account, model, uid} = req.params;
+
 	// FIXME: We should probably generalise this and have a model assets object.
-	SrcAssets.getSRC(req.params.account, req.params.model, req.params.uid).then(file => {
+	SrcAssets.getSRC(account, model, uid).then(file => {
 		req.params.format = "src";
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file.file, undefined, config.cachePolicy);
 	}).catch(err => {

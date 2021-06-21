@@ -18,6 +18,7 @@
 
 "use strict";
 const _ = require("lodash");
+const fs = require("fs.extra");
 const sharp = require("sharp");
 const nodeuuid = require("uuid/v1");
 const uuidparse = require("uuid-parse");
@@ -332,6 +333,19 @@ function Utils() {
 	this.webGLtoDirectX = function(point) {
 		return point.length === 3 ? [point[0], -point[2], point[1]] : [];
 
+	};
+
+	this.writeFile = function(fileName, content) {
+		// FIXME: v10 has native support of promise for fs. can remove when we upgrade.
+		return new Promise((resolve, reject) => {
+			fs.writeFile(fileName, content, { flag: "a+" }, err => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve();
+				}
+			});
+		});
 	};
 }
 

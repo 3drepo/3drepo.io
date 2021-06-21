@@ -28,6 +28,7 @@ const shortid = require("shortid");
 const systemLogger = require("../logger").systemLogger;
 const Mailer = require("../mailer/mailer");
 const config = require("../config");
+const C = require("../constants");
 const responseCodes = require("../response_codes");
 const Utils = require("../utils");
 
@@ -54,19 +55,6 @@ class ImportQueue {
 		this.uid = shortid.generate();
 		this.channel = null;
 		this.initialised = this.connect();
-	}
-
-	writeFile(fileName, content) {
-		// FIXME: v10 has native support of promise for fs. can remove when we upgrade.
-		return new Promise((resolve, reject) => {
-			fs.writeFile(fileName, content, { flag: "a+" }, err => {
-				if (err) {
-					reject(err);
-				} else {
-					resolve();
-				}
-			});
-		});
 	}
 
 	mkdir(newDir) {
@@ -151,14 +139,6 @@ class ImportQueue {
 		});
 	}
 
-	getSharedSpacePath() {
-		return this.sharedSpacePath;
-	}
-
-	getSharedSpacePH() {
-		return sharedSpacePH;
-	}
-
 	getTaskPath(corID) {
 		return `${this.sharedSpacePath}/${corID}`;
 	}
@@ -186,7 +166,7 @@ class ImportQueue {
 
 		return this.mkdir(this.sharedSpacePath).then(() => {
 			return this.mkdir(newFileDir).then(() => {
-				return this.writeFile(filename, JSON.stringify(defObj)).then(() => {
+				return Utils.writeFile(filename, JSON.stringify(defObj)).then(() => {
 					const msg = `genFed ${sharedSpacePH}/${corID}/obj.json ${account}`;
 					return this._dispatchWork(corID, msg);
 				});
@@ -218,8 +198,7 @@ class ImportQueue {
 	 * @param {copy} copy - use fs.copy instead of fs.move if set to true
 	 *******************************************************************************/
 	_moveFileToSharedSpace(corID, orgFilePath, newFileName, copy) {
-		const { fileNameRegExp } = require("../models/helper/model");
-		newFileName = newFileName.replace(fileNameRegExp, "_");
+		newFileName = newFileName.replace(C.FILENAME_REGEXP, "_");
 
 		const newFileDir = this.sharedSpacePath + "/" + corID + "/";
 		const filePath = newFileDir + newFileName;
@@ -236,6 +215,41 @@ class ImportQueue {
 				});
 			});
 		});
+	}
+
+	/** *****************************************************************************
+	 * @param {corID} corID - correlation ID of upload
+	 * @param {databaseName} databaseName - name of database to commit to
+	 * @param {modelName} modelName - name of model to commit to
+	 * @param {userName} userName - name of user
+	 * @param {tag} tag - revision tag
+	 * @param {desc} desc - revison description
+	 *******************************************************************************/
+	async writeImportData(corID, databaseName, modelName, userName, newFileName, tag, desc, importAnimations = true) {
+		const jsonFilename = `${this.getTaskPath(corID)}.json`;
+
+		const json = {
+			file: `${sharedSpacePH}/${corID}/${newFileName}`,
+			filename: newFileName,
+			database: databaseName,
+			project: modelName,
+			owner: userName,
+			revId: corID
+		};
+
+		if (tag) {
+			json.tag = tag;
+		}
+
+		if (desc) {
+			json.desc = desc;
+		}
+
+		if (importAnimations) {
+			json.importAnimations = importAnimations;
+		}
+
+		await Utils.writeFile(jsonFilename, JSON.stringify(json));
 	}
 
 	/** *****************************************************************************

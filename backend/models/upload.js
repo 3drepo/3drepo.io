@@ -79,17 +79,6 @@ const stitchChunks = (corID, newFilename) => {
 
 const Upload = {};
 
-Upload.acceptedFormat = [
-	"x","obj","3ds","md3","md2","ply",
-	"mdl","ase","hmp","smd","mdc","md5",
-	"stl","lxo","nff","raw","off","ac",
-	"bvh","irrmesh","irr","q3d","q3s","b3d",
-	"dae","ter","csm","3d","lws","xml","ogex",
-	"ms3d","cob","scn","blend","pk3","ndo",
-	"ifc","xgl","zgl","fbx","assbin", "bim", "dgn",
-	"rvt", "rfa", "spm"
-];
-
 Upload.uploadRequest = async (teamspace, model, username, data) => {
 	// check model exists before upload
 	const modelSetting = await findModelSettingById(teamspace, model);
@@ -98,19 +87,17 @@ Upload.uploadRequest = async (teamspace, model, username, data) => {
 		throw responseCodes.MODEL_NOT_FOUND;
 	}
 
-	const { fileNameRegExp } = require("../models/helper/model");
-
 	if (!data.filename) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	const newFileName = data.filename.replace(fileNameRegExp, "_");
+	const newFileName = data.filename.replace(C.FILENAME_REGEXP, "_");
 
 	await isValidTag(teamspace, model, data.tag);
 
 	const corID = await createCorrelationId(teamspace, model);
 
-	await Upload.writeImportData(
+	await importQueue.writeImportData(
 		corID,
 		teamspace,
 		model,
@@ -152,7 +139,7 @@ Upload.uploadFile = async (req) => {
 
 				const size = parseInt(fileReq.headers["content-length"]);
 
-				if(isIdgn || Upload.acceptedFormat.indexOf(format.toLowerCase()) === -1) {
+				if(isIdgn || C.ACCEPTED_FILE_FORMATS.indexOf(format.toLowerCase()) === -1) {
 					return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
 				}
 
@@ -253,42 +240,6 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
 		"Range": `bytes=0-${contentMax}`,
 		"x-ms-chunk-size": chunkSize
 	};
-};
-
-/** *****************************************************************************
- * @param {corID} corID - correlation ID of upload
- * @param {databaseName} databaseName - name of database to commit to
- * @param {modelName} modelName - name of model to commit to
- * @param {userName} userName - name of user
- * @param {tag} tag - revision tag
- * @param {desc} desc - revison description
- *******************************************************************************/
-Upload.writeImportData = async (corID, databaseName, modelName, userName, newFileName, tag, desc, importAnimations = true) => {
-	const sharedSpacePH = importQueue.getSharedSpacePH();
-	const jsonFilename = `${importQueue.getTaskPath(corID)}.json`;
-
-	const json = {
-		file: `${sharedSpacePH}/${corID}/${newFileName}`,
-		filename: newFileName,
-		database: databaseName,
-		project: modelName,
-		owner: userName,
-		revId: corID
-	};
-
-	if (tag) {
-		json.tag = tag;
-	}
-
-	if (desc) {
-		json.desc = desc;
-	}
-
-	if (importAnimations) {
-		json.importAnimations = importAnimations;
-	}
-
-	await importQueue.writeFile(jsonFilename, JSON.stringify(json));
 };
 
 module.exports = Upload;

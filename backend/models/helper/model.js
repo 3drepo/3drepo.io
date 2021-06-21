@@ -45,7 +45,6 @@ const utils = require("../../utils");
 const middlewares = require("../../middlewares/middlewares");
 const fs = require("fs");
 const ChatEvent = require("../chatEvent");
-const { writeImportData } = require("../upload");
 const { addModelToProject, createProject, findOneProject, removeProjectModel } = require("../project");
 const _ = require("lodash");
 const FileRef = require("../fileRef");
@@ -603,9 +602,9 @@ function downloadLatest(account, model) {
  * Called by importModel to perform model upload
  */
 async function _handleUpload(correlationId, account, model, username, file, data) {
-	const newFileName = file.originalname.replace(fileNameRegExp, "_");
+	const newFileName = file.originalname.replace(C.FILENAME_REGEXP, "_");
 
-	await writeImportData(correlationId,
+	await importQueue.writeImportData(correlationId,
 		account,
 		model,
 		username,
@@ -844,8 +843,6 @@ async function getSubModelRevisions(account, model, branch, rev) {
 	return Promise.all(promises).then(() => results);
 }
 
-const fileNameRegExp = /[ *"/\\[\]:;|=,<>$]/g;
-
 const getModelSetting = async (account, model, username) => {
 	let setting = await findModelSettingById(account, model);
 
@@ -887,7 +884,6 @@ module.exports = {
 	listSubModels,
 	searchTree,
 	downloadLatest,
-	fileNameRegExp,
 	importModel,
 	removeModel,
 	getModelPermission,
