@@ -35,7 +35,7 @@ LoginRecord.saveLoginRecord = async (req) => {
 		_id: req.sessionID,
 		loginTime: new Date(),
 		ipAddr: req.ips[0] || req.ip,
-		...uaInfo,
+		...uaInfo
 	};
 
 	const { country_name, city } = await getLocationFromIPAddress(loginRecord.ipAddr);
@@ -48,7 +48,6 @@ LoginRecord.saveLoginRecord = async (req) => {
 	if (referrer) {
 		loginRecord.referrer = referrer;
 	}
-
 
 	await db.insert("loginRecords", req.body.username, loginRecord);
 };
