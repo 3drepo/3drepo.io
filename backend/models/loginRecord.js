@@ -33,7 +33,6 @@ LoginRecord.saveLoginRecord = async (req) => {
 		ipAddr: req.ips[0] || req.ip
 	};
 
-
 	const userAgentString = req.headers["user-agent"];
 	const uaInfo = isUserAgentFromPlugin(userAgentString) ?
 		getUserAgentInfoFromPlugin(userAgentString) : getUserAgentInfoFromBrowser(userAgentString);
