@@ -27,14 +27,19 @@ const LoginRecord = {};
 
 LoginRecord.saveLoginRecord = async (req) => {
 
+	let loginRecord = {
+		_id: req.sessionID,
+		loginTime: new Date(),
+		ipAddr: req.ips[0] || req.ip
+	};
+
+
 	const userAgentString = req.headers["user-agent"];
 	const uaInfo = isUserAgentFromPlugin(userAgentString) ?
 		getUserAgentInfoFromPlugin(userAgentString) : getUserAgentInfoFromBrowser(userAgentString);
 
-	const loginRecord = {
-		_id: req.sessionID,
-		loginTime: new Date(),
-		ipAddr: req.ips[0] || req.ip,
+	loginRecord = {
+		...loginRecord,
 		...uaInfo
 	};
 
