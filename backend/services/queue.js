@@ -171,7 +171,8 @@ class ImportQueue {
 				file: `${sharedSpacePH}/${newFilePath}`,
 				database: databaseName,
 				project: modelName,
-				owner: userName
+				owner: userName,
+				revId: corID
 			};
 
 			if (tag) {
