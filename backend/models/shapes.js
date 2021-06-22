@@ -55,7 +55,10 @@ Shapes.createMany = async (account, model, subCollectionName, ticket_id, shapes)
 	shapes = shapes.map(shape=> ({_id: uuids.pop(), ticket_id, ...shape}));
 
 	await Shapes.removeByTicketId(account, model, subCollectionName, ticket_id); // remove old collection of shapes
-	await DB.insertMany(account, getCollectionName(model, subCollectionName), shapes);
+
+	if (shapes.length) {
+		await DB.insertMany(account, getCollectionName(model, subCollectionName), shapes);
+	}
 
 	return  shapes;
 };

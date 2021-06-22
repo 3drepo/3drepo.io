@@ -341,6 +341,7 @@ class Ticket extends View {
 		// Handle shapes
 		if (data.shapes) {
 			shapes = await Shapes.createMany(account, model, this.collName, _id, data.shapes);
+			delete data.shapes;
 		}
 
 		if (Object.keys(data).length > 0) {
