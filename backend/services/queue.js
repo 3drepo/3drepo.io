@@ -57,18 +57,6 @@ class ImportQueue {
 		this.initialised = this.connect();
 	}
 
-	mkdir(newDir) {
-		return new Promise((resolve, reject) => {
-			fs.mkdir(newDir, (err) => {
-				if (!err || err && err.code === "EEXIST") {
-					resolve();
-				} else {
-					reject(err);
-				}
-			});
-		});
-	}
-
 	connect() {
 		if (this.channel) {
 			return Promise.resolve(this.channel);
@@ -164,8 +152,8 @@ class ImportQueue {
 		const newFileDir = this.sharedSpacePath + "/" + corID;
 		const filename = `${newFileDir}/obj.json`;
 
-		return this.mkdir(this.sharedSpacePath).then(() => {
-			return this.mkdir(newFileDir).then(() => {
+		return Utils.mkdir(this.sharedSpacePath).then(() => {
+			return Utils.mkdir(newFileDir).then(() => {
 				return Utils.writeFile(filename, JSON.stringify(defObj)).then(() => {
 					const msg = `genFed ${sharedSpacePH}/${corID}/obj.json ${account}`;
 					return this._dispatchWork(corID, msg);
@@ -203,7 +191,7 @@ class ImportQueue {
 		const newFileDir = this.sharedSpacePath + "/" + corID + "/";
 		const filePath = newFileDir + newFileName;
 
-		return this.mkdir(newFileDir).then(() => {
+		return Utils.mkdir(newFileDir).then(() => {
 			const move = copy ? fs.copy : fs.move;
 			return new Promise((resolve, reject) => {
 				move(orgFilePath, filePath, (moveErr) => {

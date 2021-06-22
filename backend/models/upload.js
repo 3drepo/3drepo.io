@@ -20,6 +20,7 @@ const fs = require("fs");
 const multer = require("multer");
 const config = require("../config");
 const C = require("../constants");
+const utils = require("../utils");
 const middlewares = require("../middlewares/middlewares");
 const responseCodes = require("../response_codes");
 const systemLogger = require("../logger.js").systemLogger;
@@ -180,8 +181,7 @@ Upload.uploadChunksStart = async (teamspace, model, corID, username, headers) =>
 	// upload model with tag
 	modelStatusChanged(null, teamspace, model, { status: "uploading", username });
 
-	await importQueue.mkdir(`${importQueue.getTaskPath(corID)}/`);
-	await importQueue.mkdir(`${importQueue.getTaskPath(corID)}/chunks/`);
+	await utils.mkdir(`${importQueue.getTaskPath(corID)}/chunks/`);
 
 	return { "x-ms-chunk-size": chunkSize };
 };

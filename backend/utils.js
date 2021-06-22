@@ -335,6 +335,18 @@ function Utils() {
 
 	};
 
+	this.mkdir = function(newDir) {
+		return new Promise((resolve, reject) => {
+			fs.mkdir(newDir, { recursive: true }, (err) => {
+				if (!err || err && err.code === "EEXIST") {
+					resolve();
+				} else {
+					reject(err);
+				}
+			});
+		});
+	};
+
 	this.writeFile = function(fileName, content) {
 		// FIXME: v10 has native support of promise for fs. can remove when we upgrade.
 		return new Promise((resolve, reject) => {
