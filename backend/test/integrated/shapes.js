@@ -174,7 +174,7 @@ describe("Shapes", () => {
 
 		it ("should be reflected when fetching all the issues", async()=> {
 			const res = await agent.get(`/${username}/${model}/issues/`).expect(200);
-			const theIssue = (res.body.filter(({_id})=>_id === issueId))[0];
+			const theIssue = res.body.find(({_id})=>_id === issueId);
 
 			testShapesIds(theIssue.shapes);
 			expect(chopIds(theIssue.shapes)).to.be.deep.equal(shapeIssue.shapes);
@@ -214,6 +214,38 @@ describe("Shapes", () => {
 
 			testShapesIds(res.body.shapes);
 			expect(chopIds(res.body.shapes)).to.be.deep.equal(shapes);
+		});
+
+		it ("when updating shapes to empty should succeed", async()=> {
+			const shapes = [];
+
+			await agent.patch(`/${username}/${model}/issues/${issueId}`)
+				.send({shapes})
+				.expect(200);
+
+			const res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
+
+			testShapesIds(res.body.shapes);
+			expect(chopIds(res.body.shapes)).to.be.deep.equal(shapes);
+		});
+
+		it ("when updating a previously empty shape should succeed", async()=> {
+			let res = await agent.post(`/${username}/${model}/issues`)
+				.send({ "name":"empty shape", ...cloneDeep(baseIssue) })
+				.expect(200);
+
+			const emptyIssueId = res.body._id;
+			const shapes =  [ pointToPointShape];
+
+			await agent.patch(`/${username}/${model}/issues/${emptyIssueId}`)
+				.send({shapes})
+				.expect(200);
+
+			res = await agent.get(`/${username}/${model}/issues/`).expect(200);
+			const theIssue = res.body.find(({_id})=>_id === emptyIssueId);
+
+			testShapesIds(theIssue.shapes);
+			expect(chopIds(theIssue.shapes)).to.be.deep.equal(shapes);
 		});
 
 
