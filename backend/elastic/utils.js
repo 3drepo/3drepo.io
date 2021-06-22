@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
+"use strict";
 const Utils = {};
 
 const CryptoJS = require("crypto-js");
@@ -22,7 +23,7 @@ const CryptoJS = require("crypto-js");
 Utils.hashCode = (s) => CryptoJS.MD5(s).toString();
 
 Utils.exitApplication = (errCode = -1) => {
-	process.exit(errCode);
+	throw new Error("Error code: " + errCode);
 };
 
 module.exports = Utils;
