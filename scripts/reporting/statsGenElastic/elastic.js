@@ -143,6 +143,23 @@ Elastic.createMissingIndicies = async (elasticClient) => {
 	};
 	await Elastic.createElasticIndex(elasticClient, Utils.statsIndexPrefix, statsMapping);
 
+
+	const loginRecordMapping = {
+		"loginTime" : { "type": "date" },
+		"ipAddr" : { "type": "ip" },
+		"location.country" : { "type": "text" },
+		"location.city" : { "type": "text" },
+		"referrer" : { "type": "text" },
+		"application.name": { "type": "text" },
+		"application.version": { "type": "text" },
+		"application.type": { "type": "text" },
+		"engine.version": { "type": "text" },
+		"engine.type": { "type": "text" },
+		"os.name": { "type": "text" },
+		"os.version": { "type": "text" },
+		"device": { "type": "text" }
+	};
+	await Elastic.createElasticIndex(elasticClient, Utils.teamspaceIndexPrefix + "-loginRecord", loginRecordMapping);
 };
 
 module.exports = Elastic;

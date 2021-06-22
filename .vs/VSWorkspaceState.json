@@ -3,8 +3,11 @@
     "",
     "\\backend",
     "\\backend\\models",
-    "\\backend\\routes"
+    "\\backend\\statics",
+    "\\scripts",
+    "\\scripts\\reporting",
+    "\\scripts\\reporting\\statsGenElastic"
   ],
-  "SelectedNode": "\\backend\\models\\loginRecord.js",
+  "SelectedNode": "\\scripts\\reporting\\statsGenElastic\\package.json",
   "PreviewInSolutionExplorer": false
 }

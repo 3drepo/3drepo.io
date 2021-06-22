@@ -22,6 +22,8 @@ const db = require("../handler/db");
 const UaParserJs = require("ua-parser-js");
 const Device = require("device");
 const Ip2location = require("ip-to-location");
+const Elastic = require("../../scripts/reporting/statsGenElastic/elastic");
+const Utils = require("../../scripts/reporting/statsGenElastic/utils");
 
 const LoginRecord = {};
 
@@ -54,6 +56,7 @@ LoginRecord.saveLoginRecord = async (req) => {
 	}
 
 	await db.insert("loginRecords", req.body.username, loginRecord);
+	await writeNewElasticDocument(loginRecord);
 };
 
 // Format:
@@ -106,6 +109,27 @@ const getLocationFromIPAddress = async (ipAddress) => {
 
 const isUserAgentFromPlugin = (userAgent) => {
 	return userAgent.split(" ")[0] === "PLUGIN:";
+};
+
+const writeNewElasticDocument = async (loginRecord) => {
+	const elasticBody = {
+		"LoginTime" : Date(loginRecord.loginTime),
+		"IpAddress" : String(loginRecord.ipAddr),
+		"Location.Country" : String(loginRecord.location.country),
+		"Location.City" : String(loginRecord.location.city),
+		"Referrer" : new String(loginRecord.referrer),
+		"Application.Name" : new String(loginRecord.application.name),
+		"Application.Version" : new String(loginRecord.application.version),
+		"Application.Type" : new String(loginRecord.application.type),
+		"Engine.Version" : new String(loginRecord.engine.version),
+		"Engine.Type" : new String(loginRecord.engine.type),
+		"OS.Name" : new String(loginRecord.os.name),
+		"OS.Version" : new String(loginRecord.os.version),
+		"Device" : new String(loginRecord.device)
+	};
+
+	const elasticClient = Elastic.createElasticClient();
+	await Elastic.createElasticRecord(elasticClient, Utils.teamspaceIndexPrefix + "-loginRecord", elasticBody) ;
 };
 
 module.exports = LoginRecord;
