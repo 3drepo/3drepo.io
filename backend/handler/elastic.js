@@ -19,7 +19,7 @@
 const { Client } = require("@elastic/elasticsearch");
 const logger = require("../logger");
 const systemLogger = logger.systemLogger;
-const Utils = require("./utils");
+const Utils = require("../utils");
 const { cloudId, cloudAuth } = require("../config").elastic;
 const Elastic = {};
 

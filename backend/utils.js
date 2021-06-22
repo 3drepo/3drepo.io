@@ -22,6 +22,7 @@ const sharp = require("sharp");
 const nodeuuid = require("uuid/v1");
 const uuidparse = require("uuid-parse");
 const mongo = require("mongodb");
+const CryptoJS = require("crypto-js");
 
 function Utils() {
 
@@ -332,6 +333,12 @@ function Utils() {
 	this.webGLtoDirectX = function(point) {
 		return point.length === 3 ? [point[0], -point[2], point[1]] : [];
 
+	};
+
+	this.hashCode = (s) => CryptoJS.MD5(s).toString();
+
+	this.exitApplication = (errCode = -1) => {
+		throw new Error("Error code: " + errCode);
 	};
 }
 

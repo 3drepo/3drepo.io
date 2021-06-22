@@ -22,7 +22,7 @@ const db = require("../handler/db");
 const UaParserJs = require("ua-parser-js");
 const Device = require("device");
 const Ip2location = require("ip-to-location");
-const Elastic = require("../elastic/elastic");
+const Elastic = require("../handler/elastic");
 
 const LoginRecord = {};
 
