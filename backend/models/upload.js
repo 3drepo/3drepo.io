@@ -83,6 +83,8 @@ Upload.initChunking = async (teamspace, model, username, data) => {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
+	await checkFileFormat(data.filename);
+
 	// check model exists before upload
 	const modelSetting = await findModelSettingById(teamspace, model);
 
@@ -169,6 +171,7 @@ Upload.uploadChunksStart = async (teamspace, model, corID, username, headers) =>
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
+	await middlewares.checkSufficientSpace(account, parseInt(headers["x-ms-content-length"]));
 	const chunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, parseInt(headers["x-ms-content-length"]));
 
 	if (!fs.existsSync(`${importQueue.getTaskPath(corID)}.json`)) {

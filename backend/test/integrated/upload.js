@@ -251,7 +251,7 @@ describe("Uploading a model", function () {
 		let corID1;
 		let corID2;
 
-		describe("Upload model request", function() {
+		describe("Initialise chunking request", function() {
 			it("with invalid model should fail", function(done) {
 				agent.post(`/${username}/invalidModel/upload/ms-chunking`)
 					.send({
@@ -308,6 +308,30 @@ describe("Uploading a model", function () {
 					});
 			});
 			*/
+
+			it("with no file extension should fail", function(done) {
+				agent.post(`/${username}/${modelId}/upload/ms-chunking`)
+					.send({
+						"filename": "MEP Core",
+						"tag": "id1"
+					})
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.FILE_NO_EXT.value);
+						done(err);
+					});
+			});
+
+			it("with unsupported file should fail", function(done) {
+				agent.post(`/${username}/${modelId}/upload/ms-chunking`)
+					.send({
+						"filename": "MEP Core.pdf",
+						"tag": "id1"
+					})
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.FILE_FORMAT_NOT_SUPPORTED.value);
+						done(err);
+					});
+			});
 
 			it("without description should succeed", function(done) {
 				agent.post(`/${username}/${modelId}/upload/ms-chunking`)
@@ -417,7 +441,19 @@ describe("Uploading a model", function () {
 			});
 		});
 
-		describe("Handle MS chunked uploads", function() {
+		describe("Upload model chunk", function() {
+			it("with invalid correlation ID should fail", function(done) {
+				agent.patch(`/${username}/${modelId}/upload/ms-chunking/invalidCorID`)
+					.set("Content-Range", "bytes 0-52428799/118832273")
+					.set("Content-Type", "application/octet-stream")
+					.set("Content-Length", "bytes=52428800")
+					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.ifc")
+					.expect(404, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.CORRELATION_ID_NOT_FOUND.value);
+						done(err);
+					});
+			});
+
 			it("without content-range header should fail", function(done) {
 				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
 					.set("Content-Type", "application/octet-stream")
