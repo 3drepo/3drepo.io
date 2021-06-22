@@ -15,16 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
- const Utils = {};
- 
- const CryptoJS = require('crypto-js');
- 
- Utils.hashCode = (s) => CryptoJS.MD5(s).toString();
- 
- Utils.exitApplication = (errCode = -1) => {
-     process.exit(errCode);
- };
- 
-  
- module.exports = Utils;
- 
+const Utils = {};
+
+const CryptoJS = require("crypto-js");
+
+Utils.hashCode = (s) => CryptoJS.MD5(s).toString();
+
+Utils.exitApplication = (errCode = -1) => {
+	process.exit(errCode);
+};
+
+module.exports = Utils;

@@ -15,11 +15,11 @@
 *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-const { Client } = require('@elastic/elasticsearch');
-const logger = require('../logger');
+const { Client } = require("@elastic/elasticsearch");
+const logger = require("../logger");
 const systemLogger = logger.systemLogger;
-const Utils = require('./utils');
-const { cloudId, cloudAuth } = require('../config').elastic;
+const Utils = require("./utils");
+const { cloudId, cloudAuth } = require("../config").elastic;
 const Elastic = {};
 
 Elastic.teamspaceIndexPrefix = "io-teamspace";
@@ -45,7 +45,7 @@ const createElasticClient = async () => {
 	const elasticCredentials = cloudAuth.split(":");
 	const config = {
 		cloud: {
-			id: cloudId,
+			id: cloudId
 		},
 		auth: {
 			username: elasticCredentials[0],
@@ -53,14 +53,14 @@ const createElasticClient = async () => {
 		},
 		reload_connections: true,
 		maxRetries: 5,
-		request_timeout: 60,
+		request_timeout: 60
 	};
 	const internalElastic = new Client(config);
 	try {
 		await internalElastic.cluster.health();
 		systemLogger.logInfo(`Succesfully connected to ${cloudId.trim()}`);
 	} catch (err) {
-		systemLogger.logError('Health check failed on elastic connection, please check settings.');
+		systemLogger.logError("Health check failed on elastic connection, please check settings.");
 		Utils.exitApplication();
 	}
 	return internalElastic;
@@ -80,13 +80,13 @@ const createElasticRecord = async (elasticIndex, elasticBody, id, mapping) => {
 		const { body } = await elasticClient.indices.exists({ index: indexName });
 		if (!body) {
 			await elasticClient.indices.create({
-				index: indexName,
+				index: indexName
 			});
 			systemLogger.logInfo(`Created index ${indexName}`);
 			if (mapping) {
 				await elasticClient.indices.putMapping({
 					index: indexName,
-					body: { properties: mapping },
+					body: { properties: mapping }
 				});
 			}
 			systemLogger.logInfo(`Created mapping ${indexName}`);
@@ -97,7 +97,7 @@ const createElasticRecord = async (elasticIndex, elasticBody, id, mapping) => {
 				index: indexName,
 				id: internalID,
 				refresh: true,
-				body: elasticBody,
+				body: elasticBody
 			});
 			systemLogger.logInfo(`created doc ${indexName} ${Object.values(elasticBody).toString()}`);
 		}
