@@ -2064,8 +2064,7 @@ async function uploadChunksStart(req, res, next) {
 	try {
 		const initHeader = await Upload.uploadChunksStart(account, model, corID, user, req.headers);
 		initHeader.Location = `${config.public_protocol}://${req.headers.host}${req.originalUrl}`;
-		res.writeHead(200, initHeader);
-		res.end();
+		responseCodes.writeHead(responsePlace, req, res, next, initHeader);
 	} catch(err) {
 		const errMsg = err.resCode ? err.resCode : err;
 		responseCodes.respond(responsePlace, req, res, next, errMsg, errMsg);
@@ -2078,8 +2077,7 @@ async function uploadChunk(req, res, next) {
 
 	try {
 		const chunkingHeader = await Upload.uploadChunk(account, model, corID, req);
-		res.writeHead(200, chunkingHeader);
-		res.end();
+		responseCodes.writeHead(responsePlace, req, res, next, chunkingHeader);
 	} catch(err) {
 		const errMsg = err.resCode ? err.resCode : err;
 		responseCodes.respond(responsePlace, req, res, next, errMsg, errMsg);

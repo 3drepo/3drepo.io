@@ -486,6 +486,13 @@
 		// next();
 	};
 
+	responseCodes.writeHead =  function (place, req, res, next, customHeaders) {
+		const response = responseCodes.OK;
+		res.writeHead(response.status, customHeaders);
+		res.end();
+		req[C.REQ_REPO].logger.logInfo(response.status, {place});
+	};
+
 	responseCodes.writeStreamRespond =  function (place, req, res, next, readStream, customHeaders) {
 
 		let length = 0;
