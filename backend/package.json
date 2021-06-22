@@ -19,6 +19,7 @@
     "lint:fix": "eslint --fix ./"
   },
   "dependencies": {
+    "@elastic/elasticsearch": "7.13.0",
     "amqplib": "0.5.3",
     "apidoc": "0.17.7",
     "app-config": "1.0.0",
@@ -30,6 +31,7 @@
     "compression": "1.7.3",
     "connect-mongodb-session": "2.1.0",
     "cors": "2.8.5",
+    "crypto-js": "4.0.0",
     "csv-parse": "4.8.5",
     "device": "0.3.12",
     "elastic-apm-node": "3.7.0",
