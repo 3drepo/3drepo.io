@@ -130,6 +130,7 @@ Upload.uploadFile = async (req) => {
 				try {
 					await checkFileFormat(file.originalname);
 					await middlewares.checkSufficientSpace(account, size);
+					cb(null, true);
 				} catch (err) {
 					cb(err);
 				}
