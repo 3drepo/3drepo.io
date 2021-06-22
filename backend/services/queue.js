@@ -136,7 +136,9 @@ class ImportQueue {
 	 * @param {string} corID - correlation ID for this request
 	 *******************************************************************************/
 	async importFile(corID, filePath, orgFileName, copy) {
-		await this._moveFileToSharedSpace(corID, filePath, orgFileName, copy);
+		if (orgFileName) {
+			await this._moveFileToSharedSpace(corID, filePath, orgFileName, copy);
+		}
 
 		const msg = `import -f ${sharedSpacePH}/${corID}.json`;
 		return this._dispatchWork(corID, msg, true);

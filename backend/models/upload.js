@@ -29,6 +29,22 @@ const { modelStatusChanged } = require("./chatEvent");
 const { isValidTag } = require("./history");
 const { findModelSettingById, createCorrelationId } = require("./modelSetting");
 
+const checkFileFormat = async (filename) => {
+	let format = filename.split(".");
+
+	if (format.length <= 1) {
+		throw responseCodes.FILE_NO_EXT;
+	}
+
+	const isIdgn = format[format.length - 1] === "dgn" && format[format.length - 2] === "i";
+
+	format = format[format.length - 1];
+
+	if (isIdgn || C.ACCEPTED_FILE_FORMATS.indexOf(format.toLowerCase()) === -1) {
+		throw responseCodes.FILE_FORMAT_NOT_SUPPORTED;
+	}
+};
+
 const handleChunkStream = async (req, filename) => {
 	return new Promise(resolve => {
 		const writeStream = fs.createWriteStream(filename, {encoding: "binary"});
@@ -63,15 +79,15 @@ const stitchChunks = (corID, newFilename) => {
 const Upload = {};
 
 Upload.initChunking = async (teamspace, model, username, data) => {
+	if (!data.filename) {
+		throw responseCodes.INVALID_ARGUMENTS;
+	}
+
 	// check model exists before upload
 	const modelSetting = await findModelSettingById(teamspace, model);
 
 	if (!modelSetting) {
 		throw responseCodes.MODEL_NOT_FOUND;
-	}
-
-	if (!data.filename) {
-		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
 	const newFileName = data.filename.replace(C.FILENAME_REGEXP, "_");
@@ -108,37 +124,15 @@ Upload.uploadFile = async (req) => {
 	const uploadedFile = await new Promise((resolve, reject) => {
 		const upload = multer({
 			dest: config.cn_queue.upload_dir,
-			fileFilter: function(fileReq, file, cb) {
-
-				let format = file.originalname.split(".");
-
-				if(format.length <= 1) {
-					return cb({resCode: responseCodes.FILE_NO_EXT});
-				}
-
-				const isIdgn = format[format.length - 1] === "dgn" && format[format.length - 2] === "i";
-
-				format = format[format.length - 1];
-
+			fileFilter: async function(fileReq, file, cb) {
 				const size = parseInt(fileReq.headers["content-length"]);
 
-				if(isIdgn || C.ACCEPTED_FILE_FORMATS.indexOf(format.toLowerCase()) === -1) {
-					return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
+				try {
+					await checkFileFormat(file.originalname);
+					await middlewares.checkSufficientSpace(account, size);
+				} catch (err) {
+					cb(err);
 				}
-
-				if(size > config.uploadSizeLimit) {
-					return cb({ resCode: responseCodes.SIZE_LIMIT });
-				}
-
-				const sizeInMB = size / (1024 * 1024);
-				middlewares.freeSpace(account).then(space => {
-
-					if(sizeInMB > space) {
-						cb({ resCode: responseCodes.SIZE_LIMIT_PAY });
-					} else {
-						cb(null, true);
-					}
-				});
 			}
 		});
 
@@ -167,8 +161,10 @@ Upload.uploadChunksStart = async (teamspace, model, corID, username, headers) =>
 		headers["x-ms-transfer-mode"] !== "chunked" ||
 		!headers["x-ms-content-length"] ||
 		isNaN(headers["x-ms-content-length"])) {
+		// for debugging
 		systemLogger.logInfo(`transfer mode=${headers["x-ms-transfer-mode"]}`);
 		systemLogger.logInfo(`content length=${headers["x-ms-content-length"]}`);
+		// end debugging
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
@@ -187,6 +183,10 @@ Upload.uploadChunksStart = async (teamspace, model, corID, username, headers) =>
 };
 
 Upload.uploadChunk = async (teamspace, model, corID, req) => {
+	if (!fs.existsSync(`${importQueue.getTaskPath(corID)}.json`)) {
+		throw responseCodes.CORRELATION_ID_NOT_FOUND;
+	}
+
 	if (!config.cn_queue) {
 		return Promise.reject(responseCodes.QUEUE_NO_CONFIG);
 	}
@@ -209,13 +209,16 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
 
 	await handleChunkStream(req, `${importQueue.getTaskPath(corID)}/chunks/${Date.now()}`);
 
+	// for debugging
 	systemLogger.logInfo(`CONTENT-RANGE=${req.headers["content-range"]}`);
 	systemLogger.logInfo(`CHUNKSIZE=${chunkSize}`);
+	// end debugging
+
 	if (chunkSize === 0) {
 		modelStatusChanged(null, teamspace, model, { status: "uploaded" });
-		await stitchChunks(corID, "upload");
 		const { filename } = JSON.parse(fs.readFileSync(`${importQueue.getTaskPath(corID)}.json`, "utf8"));
-		importQueue.importFile(corID, `${importQueue.getTaskPath(corID)}/upload`, filename, null);
+		await stitchChunks(corID, filename);
+		importQueue.importFile(corID, `${importQueue.getTaskPath(corID)}/${filename}`);
 	}
 
 	return {
