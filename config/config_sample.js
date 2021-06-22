@@ -129,6 +129,10 @@ module.exports = {
 		secretKey: "",  // This is for validating the user identity in intercom
 		accessToken: "" // This is for the api request to intercom in the backend
 	},
-
+    elastic: {
+        enabled: false,
+        cloudId: "username:base64string",
+        cloudAuth: "username:password"
+    },
 	termsUpdatedAt: 1520592720000,
 }
