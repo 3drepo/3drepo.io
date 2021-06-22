@@ -23,7 +23,7 @@ import { prepareComments, transformCustomsLinksToMarkdown } from '../../helpers/
 import { hasPin, riskToPin } from '../../helpers/pins';
 import { prepareRisk } from '../../helpers/risks';
 import { searchByFilters } from '../../helpers/searching';
-import { shouldDisplayShapes } from '../../helpers/shapes';
+import { getHighlightedTicketShapes, getTicketsShapes, shouldDisplayShapes } from '../../helpers/shapes';
 import { sortByDate } from '../../helpers/sorting';
 import { selectJobsList } from '../jobs';
 import { selectQueryParams } from '../router/router.selectors';
@@ -202,30 +202,10 @@ export const selectMeasureMode = createSelector(
 export const selectShapes = createSelector(
 	selectFilteredRisks, selectActiveRiskDetails, selectShowDetails,
 	selectSelectedSequence, selectSelectedStartingDate, selectSelectedEndingDate,
-	(risks: any[], activeRisk, showDetails, selectedSequence, sequenceStartDate, sequenceEndDate) => {
-
-	if (!selectedSequence) {
-		return (activeRisk.shapes || []);
-	}
-
-	return risks.reduce((shapes, risk) => {
-		if (shouldDisplayShapes(risk, selectedSequence, sequenceStartDate, sequenceEndDate)
-			|| (risk._id === activeRisk._id && showDetails)) {
-
-			shapes.push.apply(shapes, risk.shapes);
-		}
-
-		return shapes;
-	} , []);
-});
+	getTicketsShapes
+);
 
 export const selectHighlightedShapes =  createSelector(
-	selectActiveRiskDetails, selectSelectedSequence, selectShapes, (activeRisk, sequence, shapesBeingShowed) => {
-
-	if (!sequence) {
-		return [];
-	}
-
-	const shapesSet = new Set(shapesBeingShowed);
-	return (activeRisk.shapes || []).filter((shape) => shapesSet.has(shape));
-});
+	selectActiveRiskDetails, selectSelectedSequence, selectShapes, selectShowDetails,
+	getHighlightedTicketShapes
+);

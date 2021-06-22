@@ -22,7 +22,7 @@ import { ISSUE_DEFAULT_HIDDEN_STATUSES } from '../../constants/issues';
 import { prepareComments, transformCustomsLinksToMarkdown } from '../../helpers/comments';
 import { hasPin, issueToPin } from '../../helpers/pins';
 import { searchByFilters } from '../../helpers/searching';
-import { shouldDisplayShapes } from '../../helpers/shapes';
+import { getHighlightedTicketShapes, getTicketsShapes, shouldDisplayShapes } from '../../helpers/shapes';
 import { sortByDate } from '../../helpers/sorting';
 import { selectCurrentModel } from '../model';
 import { selectQueryParams } from '../router/router.selectors';
@@ -190,30 +190,10 @@ export const selectMeasureMode = createSelector(
 export const selectShapes = createSelector(
 	selectFilteredIssues, selectActiveIssueDetails, selectShowDetails,
 	selectSelectedSequence, selectSelectedStartingDate, selectSelectedEndingDate,
-	(issues, activeIssue: any, showDetails,
-		selectedSequence, sequenceStartDate, sequenceEndDate) => {
-
-	if (!selectedSequence) {
-		return (activeIssue.shapes || []);
-	}
-
-	return issues.reduce((shapes, issue) => {
-		if (shouldDisplayShapes(issue, selectedSequence, sequenceStartDate, sequenceEndDate)
-			|| (issue._id === activeIssue._id  && showDetails)) {
-			shapes.push.apply(shapes, issue.shapes);
-		}
-
-		return shapes;
-	} , []);
-});
+	getTicketsShapes
+);
 
 export const selectHighlightedShapes =  createSelector(
-	selectActiveIssueDetails, selectSelectedSequence, selectShapes, (activeIssue, sequence, shapesBeingShowed) => {
-
-	if (!sequence) {
-		return [];
-	}
-
-	const shapesSet = new Set(shapesBeingShowed);
-	return (activeIssue.shapes || []).filter((shape) => shapesSet.has(shape));
-});
+	selectActiveIssueDetails, selectSelectedSequence, selectShapes, selectShowDetails,
+	getHighlightedTicketShapes
+);

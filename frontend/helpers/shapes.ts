@@ -40,3 +40,36 @@ export const chopShapesUuids = ({shapes, ...ticket}) => {
 };
 
 export const setShapesUuids = (shapes) => shapes.map(({uuid, _id, ...rest}) => ({ uuid: _id || uuid, ...rest }));
+
+export const getTicketsShapes =
+	(tickets, activeTicket: any, showDetails, selectedSequence, sequenceStartDate, sequenceEndDate) => {
+
+	if (!selectedSequence) {
+		return (activeTicket.shapes || []);
+	}
+
+	const shapes =  tickets.reduce((accumShapes, ticket) => {
+		if (shouldDisplayShapes(ticket, selectedSequence, sequenceStartDate, sequenceEndDate)
+			|| (ticket._id === activeTicket._id  && showDetails)) {
+			accumShapes.push.apply(accumShapes, ticket.shapes);
+		}
+
+		return accumShapes;
+	} , []);
+
+	// If it is a new ticket is not in the ticket list , so I have to add it manually
+	if (!activeTicket._id && showDetails) {
+		shapes.push.apply(shapes, activeTicket.shapes || []);
+	}
+
+	return shapes;
+};
+
+export const getHighlightedTicketShapes = (activeTicket, sequence, shapesBeingShowed, showDetails) => {
+	if (!sequence || showDetails) {
+		return [];
+	}
+
+	const shapesSet = new Set(shapesBeingShowed);
+	return (activeTicket.shapes || []).filter((shape) => shapesSet.has(shape));
+};
