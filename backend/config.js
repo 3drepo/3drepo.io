@@ -299,8 +299,4 @@ config.loginPolicy.maxUnsuccessfulLoginAttempts = config.loginPolicy.maxUnsucces
 config.loginPolicy.remainingLoginAttemptsPromptThreshold = config.loginPolicy.remainingLoginAttemptsPromptThreshold || 5;
 config.loginPolicy.lockoutDuration = config.loginPolicy.lockoutDuration || 900000; // milliseconds
 
-// elastic configuration
-config.elastic.cloudId = coalesce(config.elastic.cloudId,"");
-config.elastic.cloudAuth = coalesce(config.elastic.cloudAuth, "");
-
 module.exports = config;

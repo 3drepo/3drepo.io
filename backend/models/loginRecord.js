@@ -56,7 +56,7 @@ LoginRecord.saveLoginRecord = async (req) => {
 
 	return Promise.all([
 		db.insert("loginRecords", req.body.username, loginRecord),
-		writeNewElasticDocument(loginRecord, req.body.username) ]);		
+		writeNewElasticDocument(req.body.username, loginRecord) ]);		
 };
 
 // Format:
@@ -111,25 +111,8 @@ const isUserAgentFromPlugin = (userAgent) => {
 	return userAgent.split(" ")[0] === "PLUGIN:";
 };
 
-const writeNewElasticDocument = async (loginRecord, username) => {
-	const elasticBody = {
-		"Username" : String(username),
-		"LoginTime" : Date(loginRecord.loginTime),
-		"IpAddress" : String(loginRecord.ipAddr),
-		"Location.Country" : String(loginRecord.location.country),
-		"Location.City" : String(loginRecord.location.city),
-		"Referrer" : new String(loginRecord.referrer),
-		"Application.Name" : new String(loginRecord.application.name),
-		"Application.Version" : new String(loginRecord.application.version),
-		"Application.Type" : new String(loginRecord.application.type),
-		"Engine.Name" : new String(loginRecord.engine.name),
-		"Engine.Version" : new String(loginRecord.engine.version),
-		"OS.Name" : new String(loginRecord.os.name),
-		"OS.Version" : new String(loginRecord.os.version),
-		"Device" : new String(loginRecord.device)
-	};
-
-	await Elastic.createRecord(Elastic.teamspaceIndexPrefix + "-loginRecord", elasticBody) ;
+const writeNewElasticDocument = async (username, loginRecord) => {
+	await Elastic.createLoginRecord(username, loginRecord) ;
 };
 
 module.exports = LoginRecord;

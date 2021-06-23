@@ -20,10 +20,10 @@ const { Client } = require("@elastic/elasticsearch");
 const logger = require("../logger");
 const systemLogger = logger.systemLogger;
 const Utils = require("../utils");
-const { cloudId, cloudAuth } = require("../config").elastic;
+const elasticConfig = require("../config").elastic;
 const Elastic = {};
 
-Elastic.teamspaceIndexPrefix = "io-teamspace";
+const teamspaceIndexPrefix = "io-teamspace";
 
 const loginRecordMapping = {
 	"username" : { "type": "text" },
@@ -43,27 +43,33 @@ const loginRecordMapping = {
 };
 
 const createElasticClient = async () => {
-	const elasticCredentials = cloudAuth.split(":");
+	if(!elasticConfig){
+		return;
+	}
+
+	const elasticCredentials = elasticConfig.cloudAuth.split(":");
 	const config = {
 		cloud: {
-			id: cloudId
+			id: elasticConfig.cloudId
 		},
 		auth: {
 			username: elasticCredentials[0],
 			password: elasticCredentials[1]
 		},
-		reload_connections: true,
-		maxRetries: 5,
-		request_timeout: 60
+		reload_connections: elasticConfig.reload_connections,
+		maxRetries: elasticConfig.maxRetries,
+		request_timeout: elasticConfig.request_timeout
 	};
+
 	const internalElastic = new Client(config);
 	try {
 		await internalElastic.cluster.health();
-		systemLogger.logInfo(`Succesfully connected to ${cloudId.trim()}`);
+		systemLogger.logInfo(`Succesfully connected to ${elasticConfig.cloudId.trim()}`);
 	} catch (err) {
 		systemLogger.logError("Health check failed on elastic connection, please check settings.");
-		Utils.exitApplication();
+		return;
 	}
+
 	return internalElastic;
 };
 
@@ -71,9 +77,7 @@ const elasticClientPromise = createElasticClient();
 
 const createElasticRecord = async (elasticIndex, elasticBody, id, mapping) => {
 	try {
-		const elasticClient = await elasticClientPromise;
-		
-
+		const elasticClient = await elasticClientPromise;	
 		const indexName = elasticIndex.toLowerCase(); // requirement of elastic that indexs be lowercase
 		const { body } = await elasticClient.indices.exists({ index: indexName });
 		if (!body) {
@@ -104,11 +108,26 @@ const createElasticRecord = async (elasticIndex, elasticBody, id, mapping) => {
 	}
 };
 
-Elastic.createRecord = async (index, elasticBody) => {
-	if (elasticBody) {
-		const id = Utils.hashCode(Object.values(elasticBody).toString());
-		await createElasticRecord(index, elasticBody, id, loginRecordMapping);
-	}
+Elastic.createLoginRecord = async (username, loginRecord) => {
+	const elasticBody = {
+		"Id" : loginRecord._id,
+		"Username" : username,
+		"LoginTime" : Date(loginRecord.loginTime),
+		"IpAddress" : loginRecord.ipAddr,
+		"Location.Country" : loginRecord.location.country,
+		"Location.City" : loginRecord.location.city,
+		"Referrer" : loginRecord.referrer,
+		"Application.Name" : loginRecord.application.name,
+		"Application.Version" : loginRecord.application.version,
+		"Application.Type" : loginRecord.application.type,
+		"Engine.Name" : loginRecord.engine.name,
+		"Engine.Version" : loginRecord.engine.version,
+		"OS.Name" : loginRecord.os.name,
+		"OS.Version" : loginRecord.os.version,
+		"Device" : loginRecord.device
+	};
+
+	await createElasticRecord(teamspaceIndexPrefix + "-loginRecord", elasticBody, elasticBody.Id, loginRecordMapping);
 };
 
 module.exports = Elastic;
