@@ -656,6 +656,7 @@
 		"ifc","xgl","zgl","fbx","assbin", "bim", "dgn",
 		"rvt", "rfa", "spm"
 	]);
-	define("MS_CHUNK_BYTES_LIMIT", 52428800);
+	// define("MS_CHUNK_BYTES_LIMIT", 52428800);
+	define("MS_CHUNK_BYTES_LIMIT", 8388608); // 8MB in test env
 
 })();
