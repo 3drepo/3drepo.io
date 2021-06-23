@@ -19,7 +19,7 @@
     "lint:fix": "eslint --fix ./"
   },
   "dependencies": {
-    "@elastic/elasticsearch": "7.13.0",
+    "@elastic/elasticsearch": "7.12.0",
     "amqplib": "0.5.3",
     "apidoc": "0.17.7",
     "app-config": "1.0.0",
