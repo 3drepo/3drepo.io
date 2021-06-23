@@ -22,7 +22,6 @@ const sharp = require("sharp");
 const nodeuuid = require("uuid/v1");
 const uuidparse = require("uuid-parse");
 const mongo = require("mongodb");
-const CryptoJS = require("crypto-js");
 
 function Utils() {
 
