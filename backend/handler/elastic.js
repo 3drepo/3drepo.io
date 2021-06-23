@@ -19,12 +19,10 @@
 const { Client } = require("@elastic/elasticsearch");
 const logger = require("../logger");
 const systemLogger = logger.systemLogger;
-const Utils = require("../utils");
 const elasticConfig = require("../config").elastic;
 const Elastic = {};
 
-const teamspaceIndexPrefix = "io-teamspace";
-
+const loginRecordIndex = "io-teamspace-loginrecord";
 const loginRecordMapping = {
 	"username" : { "type": "text" },
 	"loginTime" : { "type": "date" },
@@ -41,6 +39,13 @@ const loginRecordMapping = {
 	"os.version": { "type": "text" },
 	"device": { "type": "text" }
 };
+
+const indicesMappings = [
+	{
+		index: loginRecordIndex,
+		mapping: loginRecordMapping
+	}
+];
 
 const createElasticClient = async () => {
 	if(!elasticConfig){
@@ -61,47 +66,50 @@ const createElasticClient = async () => {
 		request_timeout: elasticConfig.request_timeout
 	};
 
-	const internalElastic = new Client(config);
+	const client = new Client(config);
 	try {
-		await internalElastic.cluster.health();
+		await client.cluster.health();
 		systemLogger.logInfo(`Succesfully connected to ${elasticConfig.cloudId.trim()}`);
+		await establishIndices(client);
 	} catch (err) {
 		systemLogger.logError("Health check failed on elastic connection, please check settings.");
 		return;
 	}
 
-	return internalElastic;
+	return client;
 };
+
+const establishIndices = async (elasticClient)=>{
+	indicesMappings.forEach(async (indexMapping) => {
+		const { body } = await elasticClient.indices.exists({ index: indexMapping.index });
+		if (!body) {
+			await elasticClient.indices.create({index: indexMapping.index });
+			systemLogger.logInfo(`Created index ${indexMapping.index}`);
+			if (indexMapping.mapping) {
+				await elasticClient.indices.putMapping({
+					index: indexMapping.index,
+					body: { properties: indexMapping.mapping }
+				});
+			}
+			systemLogger.logInfo(`Created mapping ${indexMapping.index}`);
+		}
+	}); 
+}
 
 const elasticClientPromise = createElasticClient();
 
-const createElasticRecord = async (elasticIndex, elasticBody, id, mapping) => {
+const createElasticRecord = async (elasticIndex, elasticBody, id) => {
 	try {
 		const elasticClient = await elasticClientPromise;	
-		const indexName = elasticIndex.toLowerCase(); // requirement of elastic that indexs be lowercase
-		const { body } = await elasticClient.indices.exists({ index: indexName });
-		if (!body) {
-			await elasticClient.indices.create({
-				index: indexName
-			});
-			systemLogger.logInfo(`Created index ${indexName}`);
-			if (mapping) {
-				await elasticClient.indices.putMapping({
-					index: indexName,
-					body: { properties: mapping }
-				});
-			}
-			systemLogger.logInfo(`Created mapping ${indexName}`);
-		}
-
+		
 		if (elasticBody) {
 			await elasticClient.index({
-				index: indexName,
+				index: elasticIndex,
 				id: id,
 				refresh: true,
 				body: elasticBody
 			});
-			systemLogger.logInfo(`created doc ${indexName} ${Object.values(elasticBody).toString()}`);
+			systemLogger.logInfo(`created doc ${elasticIndex} ${Object.values(elasticBody).toString()}`);
 		}
 	} catch (error) {
 		systemLogger.logError(`createElasticRecord ${error} ${elasticIndex}`);
@@ -127,7 +135,7 @@ Elastic.createLoginRecord = async (username, loginRecord) => {
 		"Device" : loginRecord.device
 	};
 
-	await createElasticRecord(teamspaceIndexPrefix + "-loginRecord", elasticBody, elasticBody.Id, loginRecordMapping);
+	await createElasticRecord(loginRecordIndex, elasticBody, elasticBody.Id);
 };
 
 module.exports = Elastic;
