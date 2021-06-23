@@ -335,17 +335,6 @@ function Utils() {
 
 	};
 
-	this.dirSize = function(dirPath) {
-		const files = fs.readdirSync(dirPath);
-		// return files.map((file) => fs.statSync(`${dirPath}/${file}`).size).reduce((acc, val) => acc + val);
-		let size = 0;
-		files.forEach(async (file) => {
-			const stats = await fs.statSync(`${dirPath}/${file}`);
-			size += stats.size;
-		});
-		return size;
-	};
-
 	this.mkdir = function(newDir) {
 		return new Promise((resolve, reject) => {
 			fs.mkdir(newDir, { recursive: true }, (err) => {
