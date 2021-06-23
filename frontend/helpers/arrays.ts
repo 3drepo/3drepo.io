@@ -28,7 +28,7 @@ export const mergeArrays = (arr1, arr2) => {
 };
 
 export const hasSameElements = (arrayA: any[], arrayB: any[]) => {
-	if (arrayA.length > arrayB.length) {
+	if (arrayA.length !== arrayB.length) {
 		return false;
 	}
 
