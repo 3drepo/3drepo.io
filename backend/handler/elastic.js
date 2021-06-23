@@ -48,7 +48,7 @@ const indicesMappings = [
 ];
 
 const createElasticClient = async () => {
-	if(!elasticConfig){
+	if(!elasticConfig) {
 		return;
 	}
 
@@ -93,15 +93,15 @@ const establishIndices = async (elasticClient)=>{
 			}
 			systemLogger.logInfo(`Created mapping ${indexMapping.index}`);
 		}
-	}); 
-}
+	});
+};
 
 const elasticClientPromise = createElasticClient();
 
 const createElasticRecord = async (elasticIndex, elasticBody, id) => {
 	try {
-		const elasticClient = await elasticClientPromise;	
-		
+		const elasticClient = await elasticClientPromise;
+
 		if (elasticBody) {
 			await elasticClient.index({
 				index: elasticIndex,

@@ -56,7 +56,7 @@ LoginRecord.saveLoginRecord = async (req) => {
 
 	return Promise.all([
 		db.insert("loginRecords", req.body.username, loginRecord),
-		writeNewElasticDocument(req.body.username, loginRecord) ]);		
+		writeNewElasticDocument(req.body.username, loginRecord)]);
 };
 
 // Format:
