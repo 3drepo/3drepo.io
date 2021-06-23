@@ -141,9 +141,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		// We are setting isFormValid to false when is a new group because for
-		// some reason we set the name to empty ¯\_(ツ)_/¯
-		this.setState({ isFormDirty: this.isNewGroup, isFormValid: !this.isNewGroup });
+		this.setState({ isFormDirty: this.isNewGroup, isFormValid: true });
 	}
 
 	public componentDidUpdate(prevProps: Readonly<React.PropsWithChildren<IProps>>) {
