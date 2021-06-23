@@ -235,11 +235,13 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 							opacityEnabled
 						/>
 					</ColorPickerWrapper>
-					<TooltipButton
-						label="Reset to saved selection"
-						action={this.props.resetToSavedSelection}
-						Icon={AutorenewIcon}
-					/>
+					{ !this.isNewGroup &&
+						<TooltipButton
+							label="Reset to saved selection"
+							action={this.props.resetToSavedSelection}
+							Icon={AutorenewIcon}
+						/>
+					}
 					<TooltipButton
 						label="Delete"
 						action={this.handleDelete}
