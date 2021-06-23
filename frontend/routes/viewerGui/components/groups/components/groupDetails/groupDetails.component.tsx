@@ -21,10 +21,11 @@ import AutorenewIcon from '@material-ui/icons/Autorenew';
 import Delete from '@material-ui/icons/Delete';
 import SaveIcon from '@material-ui/icons/Save';
 
-import { cloneDeep, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import * as Yup from 'yup';
 import { GROUP_PANEL_NAME, GROUP_TYPES_ICONS, GROUPS_TYPES } from '../../../../../../constants/groups';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
+import { hasSameSharedIds } from '../../../../../../helpers/tree';
 import { ICriteriaFieldState } from '../../../../../../modules/groups/groups.redux';
 import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
 import { CriteriaField } from '../../../../../components/criteriaField/criteriaField.component';
@@ -128,18 +129,6 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 		/>
 	));
 
-	public areSharedIdsChanged = (selectedNodes = [], groupObjects = []) => {
-		const toFullIdsDict = (dict, val) => {
-			val.shared_ids.forEach((e) => dict[val.account + '.' + val.model + '.' + e] = true);
-			return dict;
-		};
-
-		selectedNodes = selectedNodes.reduce(toFullIdsDict, {});
-		groupObjects = groupObjects.reduce(toFullIdsDict, {});
-
-		return !isEqual(selectedNodes, groupObjects);
-	}
-
 	public componentDidMount() {
 		this.setState({ isFormDirty: this.isNewGroup, isFormValid: true });
 	}
@@ -152,7 +141,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 		if (!this.isNewGroup) {
 			// We ignore the setDirty in newgroup because is always dirty, just needs to be valid.
 			const wasUpdated = !isEqual(this.editingGroup, this.props.originalGroup);
-			const selectionChanged = this.areSharedIdsChanged(this.props.selectedNodes, this.editingGroup.objects);
+			const selectionChanged = !hasSameSharedIds(this.props.selectedNodes, this.editingGroup.objects);
 			this.setIsFormDirty(wasUpdated || selectionChanged);
 		}
 

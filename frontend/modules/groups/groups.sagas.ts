@@ -407,8 +407,6 @@ function* resetToSavedSelection({ groupId }) {
 
 	yield all([
 		put(GroupsActions.selectGroup(activeGroup))
-		// TODO: has to restore highlighted groups
-		// put(GroupsActions.setComponentState({ newGroup: activeGroup }))
 	]);
 }
 
