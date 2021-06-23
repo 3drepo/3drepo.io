@@ -218,6 +218,7 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
 	systemLogger.logInfo(`CHUNKSIZE=${chunkSize}`);
 	// end debugging
 
+	console.log(utils.dirSize(`${importQueue.getTaskPath(corID)}/chunks`));
 	if (chunkSize === 0) {
 		modelStatusChanged(null, teamspace, model, { status: "uploaded" });
 		const { filename } = JSON.parse(fs.readFileSync(`${importQueue.getTaskPath(corID)}.json`, "utf8"));
