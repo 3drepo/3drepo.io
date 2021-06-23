@@ -41,10 +41,6 @@ export const hasSameSharedIds = (meshesA: IMeshesObject[], meshesB: IMeshesObjec
 
 	return meshesA.every((modelMeshesA) => {
 		const modelMeshesB = meshesBCacheDict[modelMeshesA.account + '.' + modelMeshesA.model];
-
-		if (!modelMeshesB) {
-			return false;
-		}
-		return hasSameElements(modelMeshesA.shared_ids, modelMeshesB.shared_ids);
+		return modelMeshesB && hasSameElements(modelMeshesA.shared_ids, modelMeshesB.shared_ids);
 	});
 };
