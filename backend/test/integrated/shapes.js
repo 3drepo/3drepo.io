@@ -225,8 +225,7 @@ describe("Shapes", () => {
 
 			const res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
 
-			testShapesIds(res.body.shapes);
-			expect(chopIds(res.body.shapes)).to.be.deep.equal(shapes);
+			expect(res.body.shapes).to.be.undefined;
 		});
 
 		it ("when updating a previously empty shape should succeed", async()=> {
