@@ -54,8 +54,9 @@ LoginRecord.saveLoginRecord = async (req) => {
 		loginRecord.referrer = referrer;
 	}
 
-	await db.insert("loginRecords", req.body.username, loginRecord);
-	await writeNewElasticDocument(loginRecord, req.body.username);
+	return Promise.all([
+		db.insert("loginRecords", req.body.username, loginRecord),
+		writeNewElasticDocument(loginRecord, req.body.username) ]);		
 };
 
 // Format:

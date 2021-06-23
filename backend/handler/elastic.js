@@ -72,10 +72,7 @@ const elasticClientPromise = createElasticClient();
 const createElasticRecord = async (elasticIndex, elasticBody, id, mapping) => {
 	try {
 		const elasticClient = await elasticClientPromise;
-		let internalID = id;
-		if (internalID === undefined) {
-			internalID = Utils.hashCode(Object.values(elasticBody || {}).toString());
-		}
+		
 
 		const indexName = elasticIndex.toLowerCase(); // requirement of elastic that indexs be lowercase
 		const { body } = await elasticClient.indices.exists({ index: indexName });
@@ -96,7 +93,7 @@ const createElasticRecord = async (elasticIndex, elasticBody, id, mapping) => {
 		if (elasticBody) {
 			await elasticClient.index({
 				index: indexName,
-				id: internalID,
+				id: id,
 				refresh: true,
 				body: elasticBody
 			});
@@ -109,7 +106,8 @@ const createElasticRecord = async (elasticIndex, elasticBody, id, mapping) => {
 
 Elastic.createRecord = async (index, elasticBody) => {
 	if (elasticBody) {
-		await createElasticRecord(index, elasticBody, undefined, loginRecordMapping);
+		const id = Utils.hashCode(Object.values(elasticBody).toString());
+		await createElasticRecord(index, elasticBody, id, loginRecordMapping);
 	}
 };
 
