@@ -171,7 +171,7 @@ Upload.uploadChunksStart = async (teamspace, model, corID, username, headers) =>
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	await middlewares.checkSufficientSpace(account, parseInt(headers["x-ms-content-length"]));
+	await middlewares.checkSufficientSpace(teamspace, parseInt(headers["x-ms-content-length"]));
 	const chunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, parseInt(headers["x-ms-content-length"]));
 
 	if (!fs.existsSync(`${importQueue.getTaskPath(corID)}.json`)) {
