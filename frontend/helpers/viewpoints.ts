@@ -108,7 +108,7 @@ export const groupsOfViewpoint = function*(viewpoint) {
 			if (Array.isArray(viewpoint[prop])) { // if the property is an array of groupId
 				const groupsIds: string[] = viewpoint[prop];
 				for (let j = 0; j < groupsIds.length; j++ ) {
-					yield groupsIds[i];
+					yield groupsIds[j];
 				}
 			} else {// if the property is just a groupId
 				yield viewpoint[prop];

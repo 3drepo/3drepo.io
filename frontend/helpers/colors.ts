@@ -66,38 +66,6 @@ export const getRandomColor = () => {
 	];
 };
 
-export const hasTransparency = (hex) => hex.length === 9;
+export const hasTransparency = (color) => Array.isArray(color) ? color.length > 3 : color.length === 9;
 
-export const getTransparency = (hex) => parseInt(hex.slice(7), 16) / 255;
-
-export enum COLOR_FORMAT {
-	GL,
-	HEX,
-	RGBA,
-}
-
-export const toHex = (value, format) => {
-	switch (format) {
-		case COLOR_FORMAT.GL:
-			return GLToHexColor(value);
-			break;
-		case COLOR_FORMAT.RGBA:
-			return rgbaToHex(value);
-			break;
-	}
-
-	return value;
-};
-
-export const fromHex = (value, format) => {
-	switch (format) {
-		case COLOR_FORMAT.GL:
-			return hexToGLColor(value);
-			break;
-		case COLOR_FORMAT.RGBA:
-			return hexToRgba(value);
-			break;
-	}
-
-	return value;
-};
+export const getTransparency = (color) => (Array.isArray(color) ? color[3] : parseInt(color.slice(7), 16) ) / 255;
