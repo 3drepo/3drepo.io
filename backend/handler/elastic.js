@@ -95,7 +95,7 @@ const createElasticRecord = async (index, body, id) => {
 				refresh: true,
 				body
 			});
-			systemLogger.logInfo(`created doc ${index} ${JSON.stringify(elasticBody)}`);
+			systemLogger.logInfo(`created doc ${index} ${JSON.stringify(body)}`);
 		}
 	} catch (error) {
 		systemLogger.logError(`createElasticRecord ${error} ${index}`);
