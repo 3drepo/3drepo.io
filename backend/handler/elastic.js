@@ -58,21 +58,21 @@ const createElasticClient = async () => {
 		await client.cluster.health();
 		systemLogger.logInfo(`Succesfully connected to ${elasticConfig.cloud.id.trim()}`);
 		await establishIndices(client);
+		return client;
 	} catch (err) {
 		throw "Health check failed on elastic connection, please check settings.";
 	}
 
-	return client;
 };
 
-const establishIndices = async (elasticClient)=>{
+const establishIndices = async (client)=>{
 	return Promise.all(indicesMappings.map(async ({index, mapping}) => {
-		const { body } = await elasticClient.indices.exists({ index: index });
+		const { body } = await client.indices.exists({ index: index });
 		if (!body) {
-			await elasticClient.indices.create({index: index });
+			await client.indices.create({index: index });
 			systemLogger.logInfo(`Created index ${index}`);
 			if (mapping) {
-				await elasticClient.indices.putMapping({
+				await client.indices.putMapping({
 					index: index,
 					body: { properties: mapping }
 				});
@@ -85,7 +85,7 @@ const establishIndices = async (elasticClient)=>{
 const init = () => {
 	let wait = true;
 	let errMessage;
-	//need to make this call synchronised so it will fail and exit the application if init failed.
+	// need to make this call synchronised so it will fail and exit the application if init failed.
 	createElasticClient().then((client) => {
 		elasticClient = client;
 	}).catch((err) => {
@@ -94,11 +94,13 @@ const init = () => {
 		wait = false;
 	});
 
-	while(wait) { require('deasync').sleep(100); }
+	while(wait) {
+		require("deasync").sleep(100);
+	}
 	if (errMessage) {
 		throw errMessage;
 	}
-}
+};
 
 const createElasticRecord = async (index, body, id) => {
 	try {
