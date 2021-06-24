@@ -102,7 +102,7 @@ const init = () => {
 
 const createElasticRecord = async (index, body, id) => {
 	try {
-		if (body) {
+		if (elasticClient && body) {
 			await elasticClient.index({
 				index,
 				id,
