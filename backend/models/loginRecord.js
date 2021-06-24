@@ -26,17 +26,16 @@ const Elastic = require("../handler/elastic");
 
 const LoginRecord = {};
 
-LoginRecord.saveLoginRecord = async (req) => {
+LoginRecord.saveLoginRecord = async (id, username, ipAddr, userAgent, referer) => {
 
 	let loginRecord = {
-		_id: req.sessionID,
+		_id: id,
 		loginTime: new Date(),
-		ipAddr: req.ips[0] || req.ip
+		ipAddr: ipAddr
 	};
 
-	const userAgentString = req.headers["user-agent"];
-	const uaInfo = isUserAgentFromPlugin(userAgentString) ?
-		getUserAgentInfoFromPlugin(userAgentString) : getUserAgentInfoFromBrowser(userAgentString);
+	const uaInfo = isUserAgentFromPlugin(userAgent) ?
+		getUserAgentInfoFromPlugin(userAgent) : getUserAgentInfoFromBrowser(userAgent);
 
 	loginRecord = {
 		...loginRecord,
@@ -49,14 +48,13 @@ LoginRecord.saveLoginRecord = async (req) => {
 		city
 	};
 
-	const referrer = req.header("Referer");
-	if (referrer) {
-		loginRecord.referrer = referrer;
+	if (referer) {
+		loginRecord.referrer = referer;
 	}
 
 	return Promise.all([
-		db.insert("loginRecords", req.body.username, loginRecord),
-		writeNewElasticDocument(req.body.username, loginRecord)]);
+		db.insert("loginRecords", username, loginRecord),
+		writeNewElasticDocument(username, loginRecord)]);
 };
 
 // Format:
