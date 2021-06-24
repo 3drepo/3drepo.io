@@ -40,6 +40,7 @@ const loginRecordMapping = {
 	"device": { "type": "text" }
 };
 
+let elasticClient;
 const indicesMappings = [
 	{
 		index: loginRecordIndex,
@@ -52,13 +53,12 @@ const createElasticClient = async () => {
 		return;
 	}
 
-	const client = new Client(elasticConfig);
 	try {
+		const client = new Client(elasticConfig);
 		await client.cluster.health();
 		systemLogger.logInfo(`Succesfully connected to ${elasticConfig.cloud.id.trim()}`);
 		await establishIndices(client);
 	} catch (err) {
-		systemLogger.logError("Health check failed on elastic connection, please check settings.");
 		throw "Health check failed on elastic connection, please check settings.";
 	}
 
@@ -82,12 +82,26 @@ const establishIndices = async (elasticClient)=>{
 	}));
 };
 
-const elasticClientPromise = createElasticClient();
+const init = () => {
+	let wait = true;
+	let errMessage;
+	//need to make this call synchronised so it will fail and exit the application if init failed.
+	createElasticClient().then((client) => {
+		elasticClient = client;
+	}).catch((err) => {
+		errMessage = err;
+	}).finally(() => {
+		wait = false;
+	});
+
+	while(wait) { require('deasync').sleep(100); }
+	if (errMessage) {
+		throw errMessage;
+	}
+}
 
 const createElasticRecord = async (index, body, id) => {
 	try {
-		const elasticClient = await elasticClientPromise;
-
 		if (body) {
 			await elasticClient.index({
 				index,
@@ -124,4 +138,5 @@ Elastic.createLoginRecord = async (username, loginRecord) => {
 	await createElasticRecord(loginRecordIndex, elasticBody, elasticBody.Id);
 };
 
+init();
 module.exports = Elastic;
