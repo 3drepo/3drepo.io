@@ -51,15 +51,15 @@ const createElasticClient = async () => {
 	if(!elasticConfig) {
 		return;
 	}
-	
+
 	const client = new Client(elasticConfig);
 	try {
 		await client.cluster.health();
-		systemLogger.logInfo(`Succesfully connected to ${elasticConfig.cloudId.trim()}`);
+		systemLogger.logInfo(`Succesfully connected to ${elasticConfig.cloud.id.trim()}`);
 		await establishIndices(client);
 	} catch (err) {
 		systemLogger.logError("Health check failed on elastic connection, please check settings.");
-		return;
+		throw "Health check failed on elastic connection, please check settings.";
 	}
 
 	return client;
@@ -84,21 +84,21 @@ const establishIndices = async (elasticClient)=>{
 
 const elasticClientPromise = createElasticClient();
 
-const createElasticRecord = async (elasticIndex, elasticBody, id) => {
+const createElasticRecord = async (index, body, id) => {
 	try {
 		const elasticClient = await elasticClientPromise;
 
-		if (elasticBody) {
+		if (body) {
 			await elasticClient.index({
-				index: elasticIndex,
-				id: id,
+				index,
+				id,
 				refresh: true,
-				body: elasticBody
+				body
 			});
-			systemLogger.logInfo(`created doc ${elasticIndex} ${Object.values(elasticBody).toString()}`);
+			systemLogger.logInfo(`created doc ${index} ${JSON.stringify(elasticBody)}`);
 		}
 	} catch (error) {
-		systemLogger.logError(`createElasticRecord ${error} ${elasticIndex}`);
+		systemLogger.logError(`createElasticRecord ${error} ${index}`);
 	}
 };
 
