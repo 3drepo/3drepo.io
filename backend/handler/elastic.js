@@ -66,20 +66,20 @@ const createElasticClient = async () => {
 };
 
 const establishIndices = async (elasticClient)=>{
-	indicesMappings.forEach(async (indexMapping) => {
-		const { body } = await elasticClient.indices.exists({ index: indexMapping.index });
+	return Promise.all(indicesMappings.map(async ({index, mapping}) => {
+		const { body } = await elasticClient.indices.exists({ index: index });
 		if (!body) {
-			await elasticClient.indices.create({index: indexMapping.index });
-			systemLogger.logInfo(`Created index ${indexMapping.index}`);
-			if (indexMapping.mapping) {
+			await elasticClient.indices.create({index: index });
+			systemLogger.logInfo(`Created index ${index}`);
+			if (mapping) {
 				await elasticClient.indices.putMapping({
-					index: indexMapping.index,
-					body: { properties: indexMapping.mapping }
+					index: index,
+					body: { properties: mapping }
 				});
 			}
-			systemLogger.logInfo(`Created mapping ${indexMapping.index}`);
+			systemLogger.logInfo(`Created mapping ${index}`);
 		}
-	});
+	}));
 };
 
 const elasticClientPromise = createElasticClient();
