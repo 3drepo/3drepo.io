@@ -51,22 +51,8 @@ const createElasticClient = async () => {
 	if(!elasticConfig) {
 		return;
 	}
-
-	const elasticCredentials = elasticConfig.cloudAuth.split(":");
-	const config = {
-		cloud: {
-			id: elasticConfig.cloudId
-		},
-		auth: {
-			username: elasticCredentials[0],
-			password: elasticCredentials[1]
-		},
-		reload_connections: elasticConfig.reload_connections,
-		maxRetries: elasticConfig.maxRetries,
-		request_timeout: elasticConfig.request_timeout
-	};
-
-	const client = new Client(config);
+	
+	const client = new Client(elasticConfig);
 	try {
 		await client.cluster.health();
 		systemLogger.logInfo(`Succesfully connected to ${elasticConfig.cloudId.trim()}`);
