@@ -553,7 +553,7 @@ function createSession(place, req, res, next, user) {
 	req.body.username = user.username;
 
 	regenerateAuthSession(req, config, user)
-		.then(() => {	
+		.then(() => {
 			LoginRecord.saveLoginRecord(req.sessionID, user.username, req.ips[0] || req.ip, req.headers["user-agent"] ,req.header("Referer"));
 			return getSessionsByUsername(user.username);
 		})
