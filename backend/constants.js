@@ -658,6 +658,6 @@
 		"rvt", "rfa", "spm"
 	]);
 	// define("MS_CHUNK_BYTES_LIMIT", Math.min(52428800, uploadSizeLimit));
-	define("MS_CHUNK_BYTES_LIMIT", 10000000);
+	define("MS_CHUNK_BYTES_LIMIT", 3000000);
 
 })();
