@@ -129,11 +129,11 @@ Upload.uploadFile = async (req) => {
 			fileFilter: async function(fileReq, file, cb) {
 				const size = parseInt(fileReq.headers["content-length"]);
 
-				if (size > config.uploadSizeLimit) {
-					throw responseCodes.SIZE_LIMIT;
-				}
-
 				try {
+					if (size > config.uploadSizeLimit) {
+						throw responseCodes.SIZE_LIMIT;
+					}
+
 					await checkFileFormat(file.originalname);
 					await middlewares.checkSufficientSpace(account, size);
 					cb(null, true);
