@@ -129,6 +129,10 @@ Upload.uploadFile = async (req) => {
 			fileFilter: async function(fileReq, file, cb) {
 				const size = parseInt(fileReq.headers["content-length"]);
 
+				if (size > config.uploadSizeLimit) {
+					throw responseCodes.SIZE_LIMIT;
+				}
+
 				try {
 					await checkFileFormat(file.originalname);
 					await middlewares.checkSufficientSpace(account, size);
@@ -199,26 +203,31 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	const [contentRange, contentSize] = req.headers["content-range"].split("/");
+	const [contentRange, totalContentSize] = req.headers["content-range"].split("/");
 	const [sizeUnit, contentRangeValue] = contentRange.split(" ");
+	const [lengthUnit, chunkSize] = req.headers["content-length"].split("=");
 
-	if (sizeUnit !== "bytes") {
+	if (sizeUnit !== "bytes" || lengthUnit !== "bytes") {
 		throw responseCodes.INVALID_ARGUMENTS;
+	}
+
+	if (chunkSize > config.uploadSizeLimit) {
+		throw responseCodes.SIZE_LIMIT;
 	}
 
 	const contentMax = contentRangeValue.split("-")[1];
 
-	const sizeRemaining = contentSize - contentMax - 1;
-	const chunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, sizeRemaining);
+	const sizeRemaining = totalContentSize - contentMax - 1;
+	const nextChunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, sizeRemaining);
 
 	await handleChunkStream(req, `${importQueue.getTaskPath(corID)}/chunks/${Date.now()}`);
 
 	// for debugging
 	systemLogger.logInfo(`CONTENT-RANGE=${req.headers["content-range"]}`);
-	systemLogger.logInfo(`CHUNKSIZE=${chunkSize}`);
+	systemLogger.logInfo(`CHUNKSIZE=${nextChunkSize}`);
 	// end debugging
 
-	if (chunkSize === 0) {
+	if (nextChunkSize === 0) {
 		modelStatusChanged(null, teamspace, model, { status: "uploaded" });
 		const { filename } = JSON.parse(fs.readFileSync(`${importQueue.getTaskPath(corID)}.json`, "utf8"));
 		await stitchChunks(corID, filename);
@@ -227,7 +236,7 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
 
 	return {
 		"Range": `bytes=0-${contentMax}`,
-		"x-ms-chunk-size": chunkSize
+		"x-ms-chunk-size": nextChunkSize
 	};
 };
 
