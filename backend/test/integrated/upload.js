@@ -496,6 +496,7 @@ describe("Uploading a model", function () {
 					.set("Content-Length", "bytes=52428800")
 					.attach("file", __dirname + "/../../statics/3dmodels/big0.ifc")
 					.expect(400, function(err, res) {
+						console.log(res.body);
 						expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT.value);
 						done(err);
 					});

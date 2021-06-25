@@ -206,6 +206,8 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
+	await middlewares.checkSufficientSpace(teamspace, totalContentSize);
+
 	const contentMax = contentRangeValue.split("-")[1];
 
 	const sizeRemaining = totalContentSize - contentMax - 1;
@@ -222,6 +224,8 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
 		modelStatusChanged(null, teamspace, model, { status: "uploaded" });
 		const { filename } = JSON.parse(fs.readFileSync(`${importQueue.getTaskPath(corID)}.json`, "utf8"));
 		await stitchChunks(corID, filename);
+		const stats = fs.statSync(`${importQueue.getTaskPath(corID)}/${filename}`);
+		await middlewares.checkSufficientSpace(teamspace, stats.size);
 		importQueue.importFile(corID, `${importQueue.getTaskPath(corID)}/${filename}`);
 	}
 
