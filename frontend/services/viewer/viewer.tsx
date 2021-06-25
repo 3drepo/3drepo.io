@@ -756,6 +756,11 @@ export class ViewerService {
 			initialised.resolve = resolve;
 			initialised.reject = reject;
 		});
+
+		if (this.initialisedPromise) {
+			this.initialisedPromise.reject();
+		}
+
 		this.initialisedPromise = initialised;
 	}
 

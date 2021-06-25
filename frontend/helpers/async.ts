@@ -36,14 +36,18 @@ export const queuableFunction = (func: (...arg) => Promise<any>, context) => {
 	let lastWait = Promise.resolve(true);
 	let lastCallNumber = 0;
 
+	const resetQueue = () => {
+		lastWait = Promise.resolve(true);
+		lastCallNumber = 0;
+	};
+
 	return async (...args) => {
 		const currentCall = lastCallNumber;
-		lastWait = lastWait.then(() => func.apply(context, args));
+		lastWait = lastWait.then(() => func.apply(context, args), resetQueue); // if there is a problem, reset the queue
 		lastCallNumber++;
 		await lastWait;
 		if (currentCall === lastCallNumber) {
-			lastWait = Promise.resolve(true);
-			lastCallNumber = 0;
+			resetQueue();
 		}
 	};
 };
