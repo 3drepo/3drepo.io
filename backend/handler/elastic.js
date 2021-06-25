@@ -40,6 +40,7 @@ const loginRecordMapping = {
 	"device": { "type": "text" }
 };
 
+let elasticClient;
 const indicesMappings = [
 	{
 		index: loginRecordIndex,
@@ -52,67 +53,68 @@ const createElasticClient = async () => {
 		return;
 	}
 
-	const elasticCredentials = elasticConfig.cloudAuth.split(":");
-	const config = {
-		cloud: {
-			id: elasticConfig.cloudId
-		},
-		auth: {
-			username: elasticCredentials[0],
-			password: elasticCredentials[1]
-		},
-		reload_connections: elasticConfig.reload_connections,
-		maxRetries: elasticConfig.maxRetries,
-		request_timeout: elasticConfig.request_timeout
-	};
-
-	const client = new Client(config);
 	try {
+		const client = new Client(elasticConfig);
 		await client.cluster.health();
-		systemLogger.logInfo(`Succesfully connected to ${elasticConfig.cloudId.trim()}`);
+		systemLogger.logInfo(`Succesfully connected to ${elasticConfig.cloud.id.trim()}`);
 		await establishIndices(client);
+		return client;
 	} catch (err) {
-		systemLogger.logError("Health check failed on elastic connection, please check settings.");
-		return;
+		throw "Health check failed on elastic connection, please check settings.";
 	}
 
-	return client;
 };
 
-const establishIndices = async (elasticClient)=>{
-	indicesMappings.forEach(async (indexMapping) => {
-		const { body } = await elasticClient.indices.exists({ index: indexMapping.index });
+const establishIndices = async (client)=>{
+	return Promise.all(indicesMappings.map(async ({index, mapping}) => {
+		const { body } = await client.indices.exists({ index: index });
 		if (!body) {
-			await elasticClient.indices.create({index: indexMapping.index });
-			systemLogger.logInfo(`Created index ${indexMapping.index}`);
-			if (indexMapping.mapping) {
-				await elasticClient.indices.putMapping({
-					index: indexMapping.index,
-					body: { properties: indexMapping.mapping }
+			await client.indices.create({index: index });
+			systemLogger.logInfo(`Created index ${index}`);
+			if (mapping) {
+				await client.indices.putMapping({
+					index: index,
+					body: { properties: mapping }
 				});
 			}
-			systemLogger.logInfo(`Created mapping ${indexMapping.index}`);
+			systemLogger.logInfo(`Created mapping ${index}`);
 		}
-	});
+	}));
 };
 
-const elasticClientPromise = createElasticClient();
+const init = () => {
+	let wait = true;
+	let errMessage;
+	// need to make this call synchronised so it will fail and exit the application if init failed.
+	createElasticClient().then((client) => {
+		elasticClient = client;
+	}).catch((err) => {
+		errMessage = err;
+	}).finally(() => {
+		wait = false;
+	});
 
-const createElasticRecord = async (elasticIndex, elasticBody, id) => {
+	while(wait) {
+		require("deasync").sleep(100);
+	}
+	if (errMessage) {
+		throw errMessage;
+	}
+};
+
+const createElasticRecord = async (index, body, id) => {
 	try {
-		const elasticClient = await elasticClientPromise;
-
-		if (elasticBody) {
+		if (elasticClient && body) {
 			await elasticClient.index({
-				index: elasticIndex,
-				id: id,
+				index,
+				id,
 				refresh: true,
-				body: elasticBody
+				body
 			});
-			systemLogger.logInfo(`created doc ${elasticIndex} ${Object.values(elasticBody).toString()}`);
+			systemLogger.logInfo(`created doc ${index} ${JSON.stringify(body)}`);
 		}
 	} catch (error) {
-		systemLogger.logError(`createElasticRecord ${error} ${elasticIndex}`);
+		systemLogger.logError(`createElasticRecord ${error} ${index}`);
 	}
 };
 
@@ -138,4 +140,5 @@ Elastic.createLoginRecord = async (username, loginRecord) => {
 	await createElasticRecord(loginRecordIndex, elasticBody, elasticBody.Id);
 };
 
+init();
 module.exports = Elastic;
