@@ -73,6 +73,10 @@
 	}
 
 	async function checkSufficientSpace(account, size) {
+		if (size > config.uploadSizeLimit) {
+			throw responseCodes.SIZE_LIMIT;
+		}
+
 		const sizeInMB = size / (1024 * 1024);
 		const space = await freeSpace(account);
 

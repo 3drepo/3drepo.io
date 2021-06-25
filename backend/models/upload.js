@@ -130,10 +130,6 @@ Upload.uploadFile = async (req) => {
 				const size = parseInt(fileReq.headers["content-length"]);
 
 				try {
-					if (size > config.uploadSizeLimit) {
-						throw responseCodes.SIZE_LIMIT;
-					}
-
 					await checkFileFormat(file.originalname);
 					await middlewares.checkSufficientSpace(account, size);
 					cb(null, true);
@@ -210,12 +206,7 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	const [contentMin, contentMax] = contentRangeValue.split("-");
-	const chunkSize = contentMax - contentMin + 1;
-
-	if (chunkSize > config.uploadSizeLimit) {
-		throw responseCodes.SIZE_LIMIT;
-	}
+	const contentMax = contentRangeValue.split("-")[1];
 
 	const sizeRemaining = totalContentSize - contentMax - 1;
 	const nextChunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, sizeRemaining);

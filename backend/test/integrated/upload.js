@@ -312,7 +312,7 @@ describe("Uploading a model", function () {
 			it("with no file extension should fail", function(done) {
 				agent.post(`/${username}/${modelId}/upload/ms-chunking`)
 					.send({
-						"filename": "Clinic_A",
+						"filename": "cubes",
 						"tag": "id1"
 					})
 					.expect(400, function(err, res) {
@@ -324,7 +324,7 @@ describe("Uploading a model", function () {
 			it("with unsupported file should fail", function(done) {
 				agent.post(`/${username}/${modelId}/upload/ms-chunking`)
 					.send({
-						"filename": "Clinic_A.pdf",
+						"filename": "cubes.pdf",
 						"tag": "id1"
 					})
 					.expect(400, function(err, res) {
@@ -336,7 +336,7 @@ describe("Uploading a model", function () {
 			it("without description should succeed", function(done) {
 				agent.post(`/${username}/${modelId}/upload/ms-chunking`)
 					.send({
-						"filename": "Clinic_A.ifc",
+						"filename": "cubes.obj",
 						"tag": "id1"
 					})
 					.expect(200, function(err, res) {
@@ -348,7 +348,7 @@ describe("Uploading a model", function () {
 			it("should succeed", function(done) {
 				agent.post(`/${username}/${modelId}/upload/ms-chunking`)
 					.send({
-						"filename": "Clinic_A.ifc",
+						"filename": "cubes.obj",
 						"tag": "id2",
 						"desc": "Revision 2"
 					})
@@ -363,7 +363,7 @@ describe("Uploading a model", function () {
 			it("with invalid model should fail", function(done) {
 				agent.post(`/${username}/invalidModel/upload/ms-chunking/${corID1}`)
 					.set("x-ms-transfer-mode", "chunked")
-					.set("x-ms-content-length", 30904888)
+					.set("x-ms-content-length", 6425218)
 					.expect(404, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
 						done(err);
@@ -373,7 +373,7 @@ describe("Uploading a model", function () {
 			it("with invalid correlation ID should fail", function(done) {
 				agent.post(`/${username}/${modelId}/upload/ms-chunking/invalidCorID`)
 					.set("x-ms-transfer-mode", "chunked")
-					.set("x-ms-content-length", 30904888)
+					.set("x-ms-content-length", 6425218)
 					.expect(404, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.CORRELATION_ID_NOT_FOUND.value);
 						done(err);
@@ -382,7 +382,7 @@ describe("Uploading a model", function () {
 
 			it("without transfer mode header should fail", function(done) {
 				agent.post(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
-					.set("x-ms-content-length", 30904888)
+					.set("x-ms-content-length", 6425218)
 					.expect(400, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 						done(err);
@@ -392,7 +392,7 @@ describe("Uploading a model", function () {
 			it("should fail if transfer mode not chunked", function(done) {
 				agent.post(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
 					.set("x-ms-transfer-mode", "normal")
-					.set("x-ms-content-length", 30904888)
+					.set("x-ms-content-length", 6425218)
 					.expect(400, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 						done(err);
@@ -421,7 +421,7 @@ describe("Uploading a model", function () {
 			it("should succeed", function(done) {
 				agent.post(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
 					.set("x-ms-transfer-mode", "chunked")
-					.set("x-ms-content-length", 30904888)
+					.set("x-ms-content-length", 6425218)
 					.expect(200, function(err, res) {
 						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(C.MS_CHUNK_BYTES_LIMIT);
 						expect(res.headers["location"]).to.exist;
@@ -432,7 +432,7 @@ describe("Uploading a model", function () {
 			it("should succeed if string is number", function(done) {
 				agent.post(`/${username}/${modelId}/upload/ms-chunking/${corID2}`)
 					.set("x-ms-transfer-mode", "chunked")
-					.set("x-ms-content-length", "30904888")
+					.set("x-ms-content-length", "6425218")
 					.expect(200, function(err, res) {
 						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(C.MS_CHUNK_BYTES_LIMIT);
 						expect(res.headers["location"]).to.exist;
@@ -444,10 +444,10 @@ describe("Uploading a model", function () {
 		describe("Upload model chunk", function() {
 			it("with invalid correlation ID should fail", function(done) {
 				agent.patch(`/${username}/${modelId}/upload/ms-chunking/invalidCorID`)
-					.set("Content-Range", "bytes 0-8388607/30904888")
+					.set("Content-Range", "bytes 0-2999999/6425218")
 					.set("Content-Type", "application/octet-stream")
-					.set("Content-Length", "bytes=8388608")
-					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.ifc")
+					.set("Content-Length", "bytes=3000000")
+					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.obj")
 					.expect(404, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.CORRELATION_ID_NOT_FOUND.value);
 						done(err);
@@ -457,8 +457,8 @@ describe("Uploading a model", function () {
 			it("without content-range header should fail", function(done) {
 				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
 					.set("Content-Type", "application/octet-stream")
-					.set("Content-Length", "bytes=8388608")
-					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.ifc")
+					.set("Content-Length", "bytes=3000000")
+					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.obj")
 					.expect(400, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 						done(err);
@@ -467,10 +467,10 @@ describe("Uploading a model", function () {
 
 			it("content-range header not in bytes should fail", function(done) {
 				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
-					.set("Content-Range", "kilobytes 0-8388607/30904888")
+					.set("Content-Range", "kilobytes 0-2999999/6425218")
 					.set("Content-Type", "application/octet-stream")
-					.set("Content-Length", "bytes=8388608")
-					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.ifc")
+					.set("Content-Length", "bytes=3000000")
+					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.obj")
 					.expect(400, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 						done(err);
@@ -479,10 +479,10 @@ describe("Uploading a model", function () {
 
 			it("content-range header not separated by space should fail", function(done) {
 				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
-					.set("Content-Range", "bytes=0-8388607/30904888")
+					.set("Content-Range", "bytes=0-2999999/6425218")
 					.set("Content-Type", "application/octet-stream")
-					.set("Content-Length", "bytes=8388608")
-					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.ifc")
+					.set("Content-Length", "bytes=3000000")
+					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.obj")
 					.expect(400, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 						done(err);
@@ -491,10 +491,10 @@ describe("Uploading a model", function () {
 
 			it("chunk too large should fail", function(done) {
 				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
-					.set("Content-Range", "bytes 0-52428799/30904888")
+					.set("Content-Range", "bytes 0-52428799/6425218")
 					.set("Content-Type", "application/octet-stream")
 					.set("Content-Length", "bytes=52428800")
-					.attach("file", __dirname + "/../../statics/3dmodels/big0.ifc")
+					.attach("file", __dirname + "/../../statics/3dmodels/big0.obj")
 					.expect(400, function(err, res) {
 						console.log(res.body);
 						expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT.value);
@@ -504,14 +504,14 @@ describe("Uploading a model", function () {
 
 			it("should succeed", function(done) {
 				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
-					.set("Content-Range", "bytes 0-8388607/30904888")
+					.set("Content-Range", "bytes 0-2999999/6425218")
 					.set("Content-Type", "application/octet-stream")
-					.set("Content-Length", "bytes=8388608")
-					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.ifc")
+					.set("Content-Length", "bytes=3000000")
+					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.obj")
 					.expect(200, function(err, res) {
 						console.log(res.body);
 						console.log(res.headers);
-						expect(res.headers["range"]).to.equal("bytes=0-8388607");
+						expect(res.headers["range"]).to.equal("bytes=0-2999999");
 						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(C.MS_CHUNK_BYTES_LIMIT);
 						done(err);
 					});
@@ -519,14 +519,14 @@ describe("Uploading a model", function () {
 
 			it("with other valid correlation IDs should succeed", function(done) {
 				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID2}`)
-					.set("Content-Range", "bytes 0-8388607/30904888")
+					.set("Content-Range", "bytes 0-2999999/6425218")
 					.set("Content-Type", "application/octet-stream")
-					.set("Content-Length", "bytes=8388608")
-					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.ifc")
+					.set("Content-Length", "bytes=3000000")
+					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.obj")
 					.expect(200, function(err, res) {
 						console.log(res.body);
 						console.log(res.headers);
-						expect(res.headers["range"]).to.equal("bytes=0-8388607");
+						expect(res.headers["range"]).to.equal("bytes=0-2999999");
 						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(C.MS_CHUNK_BYTES_LIMIT);
 						done(err);
 					});
@@ -534,31 +534,15 @@ describe("Uploading a model", function () {
 
 			it("second chunk should succeed", function(done) {
 				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
-					.set("Content-Range", "bytes 8388608-16777215/30904888")
+					.set("Content-Range", "bytes 3000000-5999999/6425218")
 					.set("Content-Type", "application/octet-stream")
-					.set("Content-Length", "bytes=8388608")
-					.attach("file", __dirname + "/../../statics/3dmodels/chunk1.ifc")
+					.set("Content-Length", "bytes=3000000")
+					.attach("file", __dirname + "/../../statics/3dmodels/chunk1.obj")
 					.expect(200, function(err, res) {
 						console.log(res.body);
 						console.log(res.headers);
-						const nextChunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, 13974673);
-						expect(res.headers["range"]).to.equal("bytes=0-16777215");
-						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(nextChunkSize);
-						done(err);
-					});
-			});
-
-			it("third chunk should succeed", function(done) {
-				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
-					.set("Content-Range", "bytes 16777216-25165823/30904888")
-					.set("Content-Type", "application/octet-stream")
-					.set("Content-Length", "bytes=8388608")
-					.attach("file", __dirname + "/../../statics/3dmodels/chunk1.ifc")
-					.expect(200, function(err, res) {
-						console.log(res.body);
-						console.log(res.headers);
-						const nextChunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, 5739064);
-						expect(res.headers["range"]).to.equal("bytes=0-25165823");
+						const nextChunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, 425218);
+						expect(res.headers["range"]).to.equal("bytes=0-5999999");
 						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(nextChunkSize);
 						done(err);
 					});
@@ -566,14 +550,14 @@ describe("Uploading a model", function () {
 
 			it("final chunk should succeed", function(done) {
 				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
-					.set("Content-Range", "bytes 25165824-30904887/30904888")
+					.set("Content-Range", "bytes 6000000-6425217/6425218")
 					.set("Content-Type", "application/octet-stream")
-					.set("Content-Length", "bytes=5739064")
-					.attach("file", __dirname + "/../../statics/3dmodels/chunk2.ifc")
+					.set("Content-Length", "bytes=425218")
+					.attach("file", __dirname + "/../../statics/3dmodels/chunk2.obj")
 					.expect(200, function(err, res) {
 						console.log(res.body);
 						console.log(res.headers);
-						expect(res.headers["range"]).to.equal("bytes=0-30904887");
+						expect(res.headers["range"]).to.equal("bytes=0-6425217");
 						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(0);
 						done(err);
 					});

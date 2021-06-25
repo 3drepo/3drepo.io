@@ -657,7 +657,6 @@
 		"ifc","xgl","zgl","fbx","assbin", "bim", "dgn",
 		"rvt", "rfa", "spm"
 	]);
-	// define("MS_CHUNK_BYTES_LIMIT", Math.min(52428800, uploadSizeLimit));
-	define("MS_CHUNK_BYTES_LIMIT", 3000000);
+	define("MS_CHUNK_BYTES_LIMIT", Math.min(52428800, uploadSizeLimit));
 
 })();
