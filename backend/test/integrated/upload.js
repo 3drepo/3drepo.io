@@ -423,7 +423,7 @@ describe("Uploading a model", function () {
 					.set("x-ms-transfer-mode", "chunked")
 					.set("x-ms-content-length", 6425218)
 					.expect(200, function(err, res) {
-						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(C.MS_CHUNK_BYTES_LIMIT);
+						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(6425218);
 						expect(res.headers["location"]).to.exist;
 						done(err);
 					});
@@ -434,7 +434,7 @@ describe("Uploading a model", function () {
 					.set("x-ms-transfer-mode", "chunked")
 					.set("x-ms-content-length", "6425218")
 					.expect(200, function(err, res) {
-						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(C.MS_CHUNK_BYTES_LIMIT);
+						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(6425218);
 						expect(res.headers["location"]).to.exist;
 						done(err);
 					});
@@ -494,9 +494,8 @@ describe("Uploading a model", function () {
 					.set("Content-Range", "bytes 0-52428799/6425218")
 					.set("Content-Type", "application/octet-stream")
 					.set("Content-Length", "bytes=52428800")
-					.attach("file", __dirname + "/../../statics/3dmodels/big0.obj")
+					.attach("file", __dirname + "/../../statics/3dmodels/big0.ifc")
 					.expect(400, function(err, res) {
-						console.log(res.body);
 						expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT.value);
 						done(err);
 					});
@@ -509,10 +508,8 @@ describe("Uploading a model", function () {
 					.set("Content-Length", "bytes=3000000")
 					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.obj")
 					.expect(200, function(err, res) {
-						console.log(res.body);
-						console.log(res.headers);
 						expect(res.headers["range"]).to.equal("bytes=0-2999999");
-						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(C.MS_CHUNK_BYTES_LIMIT);
+						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(3425218);
 						done(err);
 					});
 			});
@@ -524,10 +521,8 @@ describe("Uploading a model", function () {
 					.set("Content-Length", "bytes=3000000")
 					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.obj")
 					.expect(200, function(err, res) {
-						console.log(res.body);
-						console.log(res.headers);
 						expect(res.headers["range"]).to.equal("bytes=0-2999999");
-						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(C.MS_CHUNK_BYTES_LIMIT);
+						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(3425218);
 						done(err);
 					});
 			});
@@ -539,8 +534,6 @@ describe("Uploading a model", function () {
 					.set("Content-Length", "bytes=3000000")
 					.attach("file", __dirname + "/../../statics/3dmodels/chunk1.obj")
 					.expect(200, function(err, res) {
-						console.log(res.body);
-						console.log(res.headers);
 						const nextChunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, 425218);
 						expect(res.headers["range"]).to.equal("bytes=0-5999999");
 						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(nextChunkSize);
@@ -555,8 +548,6 @@ describe("Uploading a model", function () {
 					.set("Content-Length", "bytes=425218")
 					.attach("file", __dirname + "/../../statics/3dmodels/chunk2.obj")
 					.expect(200, function(err, res) {
-						console.log(res.body);
-						console.log(res.headers);
 						expect(res.headers["range"]).to.equal("bytes=0-6425217");
 						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(0);
 						done(err);
