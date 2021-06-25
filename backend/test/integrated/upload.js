@@ -491,7 +491,7 @@ describe("Uploading a model", function () {
 
 			it("chunk too large should fail", function(done) {
 				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
-					.set("Content-Range", "bytes 0-52428799/6425218")
+					.set("Content-Range", "bytes 0-52428799/52428800")
 					.set("Content-Type", "application/octet-stream")
 					.set("Content-Length", "bytes=52428800")
 					.attach("file", __dirname + "/../../statics/3dmodels/big0.ifc")
