@@ -294,20 +294,17 @@ describe("Uploading a model", function () {
 					});
 			});
 
-			/*
 			it("duplicate tag should fail", function(done) {
-				agent.post(`/${username}/${modelId}/upload/ms-chunking`)
+				agent.post(`/${username}/${model}/upload/ms-chunking`)
 					.send({
 						"filename": "file.ifc",
-						"tag": "with_quota"
+						"tag": "tag_exists"
 					})
 					.expect(400, function(err, res) {
-						console.log(res.body);
 						expect(res.body.value).to.equal(responseCodes.DUPLICATE_TAG.value);
 						done(err);
 					});
 			});
-			*/
 
 			it("with no file extension should fail", function(done) {
 				agent.post(`/${username}/${modelId}/upload/ms-chunking`)
@@ -496,7 +493,6 @@ describe("Uploading a model", function () {
 					.set("Content-Length", "bytes=52428800")
 					.attach("file", __dirname + "/../../statics/3dmodels/big0.ifc")
 					.expect(400, function(err, res) {
-						console.log(res.body);
 						expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT.value);
 						done(err);
 					});
@@ -553,6 +549,35 @@ describe("Uploading a model", function () {
 						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(0);
 						done(err);
 					});
+			});
+
+			it("file larger than expected should fail", function(done) {
+				async.series([
+					function(done) {
+						agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID2}`)
+							.set("Content-Range", "bytes 3000000-5999999/6425218")
+							.set("Content-Type", "application/octet-stream")
+							.set("Content-Length", "bytes=3000000")
+							.attach("file", __dirname + "/../../statics/3dmodels/big1.obj")
+							.expect(200, function(err, res) {
+								const nextChunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, 425218);
+								expect(res.headers["range"]).to.equal("bytes=0-5999999");
+								expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(nextChunkSize);
+								done(err);
+							});
+					},
+					function(done) {
+						agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID2}`)
+							.set("Content-Range", "bytes 6000000-6425217/6425218")
+							.set("Content-Type", "application/octet-stream")
+							.set("Content-Length", "bytes=425218")
+							.attach("file", __dirname + "/../../statics/3dmodels/big2.obj")
+							.expect(400, function(err, res) {
+								expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT.value);
+								done(err);
+							});
+					}
+				], done);
 			});
 		});
 	});
