@@ -558,7 +558,7 @@ describe("Uploading a model", function () {
 							.set("Content-Range", "bytes 3000000-5999999/6425218")
 							.set("Content-Type", "application/octet-stream")
 							.set("Content-Length", "bytes=3000000")
-							.attach("file", __dirname + "/../../statics/3dmodels/big1.obj")
+							.attach("file", __dirname + "/../../statics/3dmodels/big1.ifc")
 							.expect(200, function(err, res) {
 								const nextChunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, 425218);
 								expect(res.headers["range"]).to.equal("bytes=0-5999999");
@@ -571,7 +571,7 @@ describe("Uploading a model", function () {
 							.set("Content-Range", "bytes 6000000-6425217/6425218")
 							.set("Content-Type", "application/octet-stream")
 							.set("Content-Length", "bytes=425218")
-							.attach("file", __dirname + "/../../statics/3dmodels/big2.obj")
+							.attach("file", __dirname + "/../../statics/3dmodels/big2.ifc")
 							.expect(400, function(err, res) {
 								expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT.value);
 								done(err);
