@@ -18,6 +18,7 @@
 
 const fs = require("fs");
 const multer = require("multer");
+const nodeuuid = require("uuid/v1");
 const config = require("../config");
 const C = require("../constants");
 const utils = require("../utils");
@@ -27,7 +28,7 @@ const systemLogger = require("../logger.js").systemLogger;
 const importQueue = require("../services/queue");
 const { modelStatusChanged } = require("./chatEvent");
 const { isValidTag } = require("./history");
-const { findModelSettingById, createCorrelationId } = require("./modelSetting");
+const { findModelSettingById, setCorrelationId } = require("./modelSetting");
 
 const checkFileFormat = async (filename) => {
 	let format = filename.split(".");
@@ -96,7 +97,7 @@ Upload.initChunking = async (teamspace, model, username, data) => {
 
 	await isValidTag(teamspace, model, data.tag);
 
-	const corID = await createCorrelationId(teamspace, model);
+	const corID = nodeuuid();
 
 	await importQueue.writeImportData(
 		corID,
@@ -226,6 +227,7 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
 		await stitchChunks(corID, filename);
 		const stats = fs.statSync(`${importQueue.getTaskPath(corID)}/${filename}`);
 		await middlewares.checkSufficientSpace(teamspace, stats.size);
+		await setCorrelationId(teamspace, model, corID);
 		importQueue.importFile(corID, `${importQueue.getTaskPath(corID)}/${filename}`);
 	}
 

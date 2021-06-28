@@ -380,6 +380,10 @@ ModelSetting.setModelStatus = async function(account, model, status) {
  */
 ModelSetting.createCorrelationId = async function(account, model, addTimestamp = false) {
 	const correlationId = nodeuuid();
+	return ModelSetting.setCorrelationId(account, model, correlationId, addTimestamp);
+};
+
+ModelSetting.setCorrelationId = async function(account, model, correlationId, addTimestamp = false) {
 	const data = { corID: correlationId };
 
 	if (addTimestamp) {
