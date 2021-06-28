@@ -208,8 +208,8 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	systemLogger.logInfo(`uploadChunk - checking space, FILE SIZE=${totalContentSize}`);
-	await middlewares.checkSufficientSpace(teamspace, totalContentSize);
+	systemLogger.logInfo(`uploadChunk - checking space, FILE SIZE=${parseInt(totalContentSize)}`);
+	await middlewares.checkSufficientSpace(teamspace, parseInt(totalContentSize));
 
 	const contentMax = contentRangeValue.split("-")[1];
 
