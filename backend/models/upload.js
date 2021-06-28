@@ -172,6 +172,7 @@ Upload.uploadChunksStart = async (teamspace, model, corID, username, headers) =>
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
+	systemLogger.logInfo(`uploadChunksStart - checking space, FILE SIZE=${parseInt(headers["x-ms-content-length"])}`);
 	await middlewares.checkSufficientSpace(teamspace, parseInt(headers["x-ms-content-length"]));
 	const chunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, parseInt(headers["x-ms-content-length"]));
 
@@ -207,6 +208,7 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
+	systemLogger.logInfo(`uploadChunk - checking space, FILE SIZE=${totalContentSize}`);
 	await middlewares.checkSufficientSpace(teamspace, totalContentSize);
 
 	const contentMax = contentRangeValue.split("-")[1];
@@ -226,6 +228,7 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
 		const { filename } = JSON.parse(fs.readFileSync(`${importQueue.getTaskPath(corID)}.json`, "utf8"));
 		await stitchChunks(corID, filename);
 		const stats = fs.statSync(`${importQueue.getTaskPath(corID)}/${filename}`);
+		systemLogger.logInfo(`uploadChunk - final checking space, FILE SIZE=${stats.size}`);
 		await middlewares.checkSufficientSpace(teamspace, stats.size);
 		await setCorrelationId(teamspace, model, corID);
 		importQueue.importFile(corID, `${importQueue.getTaskPath(corID)}/${filename}`);
