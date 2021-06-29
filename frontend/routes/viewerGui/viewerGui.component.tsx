@@ -17,6 +17,7 @@
 
 import { isEmpty } from 'lodash';
 import React from 'react';
+import { Rnd } from 'react-rnd';
 
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import { VIEWER_LEFT_PANELS, VIEWER_PANELS } from '../../constants/viewerGui';
@@ -38,6 +39,7 @@ import { Risks } from './components/risks';
 import Sequences from './components/sequences/sequences.container';
 import Toolbar from './components/toolbar/toolbar.container';
 import { Tree } from './components/tree';
+import { FloatingPanel } from './components/viewerFloatingPanel/viewerFloatingPanel.component';
 import { ViewerLoader } from './components/viewerLoader';
 import { Views } from './components/views';
 import {
@@ -248,9 +250,12 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 
 	private renderLeftPanels = (panels) => (
 		<LeftPanels>
-			{panels.map((panel) => {
+			{panels.map((panel, index) => {
 				const PanelComponent = this.panelsMap[panel];
-				return PanelComponent && <PanelComponent key={panel} id={panel + '-card'} {...this.urlParams} />;
+				return PanelComponent &&
+					<FloatingPanel index={index} key={panel} panel={panel}>
+						<PanelComponent id={panel + '-card'} {...this.urlParams} />
+					</FloatingPanel>;
 			})}
 		</LeftPanels>
 	)
