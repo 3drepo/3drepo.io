@@ -176,9 +176,7 @@ History.isValidTag = async function(account, model, tag) {
 
 		const _tag = await History.findByTag(account, model, tag, {_id: 1});
 
-		if (!_tag) {
-			return null;
-		} else {
+		if (_tag) {
 			throw responseCodes.DUPLICATE_TAG;
 		}
 	}
