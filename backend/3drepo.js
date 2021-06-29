@@ -46,7 +46,7 @@ function initAPM() {
 		// Use if APM Server requires a token
 		secretToken: config.apm.secretToken || "",
 		// Set custom APM Server URL (default: http://localhost:8200)
-		serverUrl: config.apm.serverUrl || "",	
+		serverUrl: config.apm.serverUrl || "",
 		logLevel: config.apm.logLevel || ""
 	});
 }
