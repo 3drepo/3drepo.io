@@ -98,6 +98,7 @@ export class PasswordChangeForm extends React.PureComponent<IProps, IState> {
 									margin="normal"
 									required
 									type="password"
+									autoComplete="current-password"
 								/>
 							)} />
 
@@ -110,6 +111,7 @@ export class PasswordChangeForm extends React.PureComponent<IProps, IState> {
 									margin="normal"
 									required
 									type="password"
+									autoComplete="new-password"
 									onChange={this.handleNewPasswordChange(field.onChange)}
 								/>
 							)} />
@@ -122,6 +124,7 @@ export class PasswordChangeForm extends React.PureComponent<IProps, IState> {
 									margin="normal"
 									required
 									type="password"
+									autoComplete="new-password"
 									onChange={this.handleNewPasswordChange(field.onChange)}
 								/>
 							)} />
