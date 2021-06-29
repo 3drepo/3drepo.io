@@ -19,7 +19,6 @@
 (() => {
 
 	const responseCodes = require("../response_codes");
-	const systemLogger = require("../logger.js").systemLogger;
 	const C				= require("../constants");
 	const { findModelSettingById } = require("../models/modelSetting");
 	// var History = require('../models/history');
@@ -75,7 +74,6 @@
 
 	async function checkSufficientSpace(account, size) {
 		if (size > config.uploadSizeLimit) {
-			systemLogger.logInfo(`FILE TOO LARGE=${size}, LIMIT=${config.uploadSizeLimit}`);
 			throw responseCodes.SIZE_LIMIT;
 		}
 
