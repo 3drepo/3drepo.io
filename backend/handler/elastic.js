@@ -40,7 +40,6 @@ const loginRecordMapping = {
 	"device": { "type": "text" }
 };
 
-let elasticClient;
 const indicesMappings = [
 	{
 		index: loginRecordIndex,
@@ -60,7 +59,9 @@ const createElasticClient = async () => {
 		await establishIndices(client);
 		return client;
 	} catch (err) {
-		throw "Health check failed on elastic connection, please check settings.";
+		systemLogger.logError("Health check failed on elastic connection, please check settings.");
+		// eslint-disable-next-line
+		process.exit(1);
 	}
 
 };
@@ -82,28 +83,11 @@ const establishIndices = async (client)=>{
 	}));
 };
 
-const init = () => {
-	let wait = true;
-	let errMessage;
-	// need to make this call synchronised so it will fail and exit the application if init failed.
-	createElasticClient().then((client) => {
-		elasticClient = client;
-	}).catch((err) => {
-		errMessage = err;
-	}).finally(() => {
-		wait = false;
-	});
-
-	while(wait) {
-		require("deasync").sleep(100);
-	}
-	if (errMessage) {
-		throw errMessage;
-	}
-};
+const elasticClientPromise = createElasticClient();
 
 const createElasticRecord = async (index, body, id) => {
 	try {
+		const elasticClient = await elasticClientPromise;
 		if (elasticClient && body) {
 			await elasticClient.index({
 				index,
@@ -140,5 +124,4 @@ Elastic.createLoginRecord = async (username, loginRecord) => {
 	await createElasticRecord(loginRecordIndex, elasticBody, elasticBody.Id);
 };
 
-init();
 module.exports = Elastic;
