@@ -23,7 +23,7 @@ matrix:
       submodules: false
       depth: 1
       node_js:
-        - "14.0.0"
+        - "14.17.1"
       sudo: true
       addons:
         apt:
