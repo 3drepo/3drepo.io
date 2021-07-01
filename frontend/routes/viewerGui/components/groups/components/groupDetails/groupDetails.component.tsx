@@ -24,6 +24,7 @@ import SaveIcon from '@material-ui/icons/Save';
 import { isEqual } from 'lodash';
 import * as Yup from 'yup';
 import { GROUP_PANEL_NAME, GROUP_TYPES_ICONS, GROUPS_TYPES } from '../../../../../../constants/groups';
+import { rulesAreEqual , stripGroupRules } from '../../../../../../helpers/groups';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { hasSameSharedIds } from '../../../../../../helpers/tree';
 import { ICriteriaFieldState } from '../../../../../../modules/groups/groups.redux';
@@ -144,15 +145,19 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 
 		if (!this.isNewGroup) {
 			// We ignore the setDirty in newgroup because is always dirty, just needs to be valid.
-			const wasUpdated = !isEqual(this.editingGroup, this.props.originalGroup);
+			const wasUpdated = !isEqual(stripGroupRules(this.editingGroup), stripGroupRules(this.props.originalGroup));
+
+			// We check only for smartgroups if the rules changed
+			const rulesChanged = this.isSmartGroup && !rulesAreEqual(this.editingGroup, this.props.originalGroup);
 
 			// if it is a smart group, we ignore the manual selection because it depends on the rules
 			const selectionChanged = !this.isSmartGroup &&
 				!hasSameSharedIds(this.props.selectedNodes, this.editingGroup.objects);
 
-			this.setIsFormDirty(wasUpdated || selectionChanged);
+			this.setIsFormDirty(wasUpdated || selectionChanged || rulesChanged);
 		}
 
+		// if it is a smart group, we ignore the manual selection because it depends on the rules
 		const groupHasValidSelection = this.isSmartGroup || this.props.selectedNodes.length > 0;
 		this.setIsFormValid(GroupSchema.isValidSync(this.editingGroup) && groupHasValidSelection);
 	}
