@@ -18,7 +18,7 @@
 import React, { Fragment } from 'react';
 
 import { diffData, mergeData } from '../../../../../../helpers/forms';
-import { canComment, canChangeBasicProperty } from '../../../../../../helpers/issues';
+import { canChangeBasicProperty, canComment } from '../../../../../../helpers/issues';
 import { isViewer } from '../../../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { EmptyStateInfo } from '../../../../../components/components.styles';
@@ -250,9 +250,9 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public handleNameChange = (event, name) => {
 		const newIssue = { ...this.issueData, name };
-		this.props.setState({ newIssue });	
-		
-		if (!this.isNewIssue){
+		this.props.setState({ newIssue });
+
+		if (!this.isNewIssue) {
 			this.props.updateIssue({name});
 		}
 	}

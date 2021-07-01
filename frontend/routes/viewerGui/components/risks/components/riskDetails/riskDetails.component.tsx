@@ -22,7 +22,7 @@ import { size } from 'lodash';
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { isViewer } from '../../../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { canComment, canChangeBasicProperty } from '../../../../../../helpers/risks';
+import { canChangeBasicProperty, canComment } from '../../../../../../helpers/risks';
 import { EmptyStateInfo } from '../../../../../components/components.styles';
 import { Copy } from '../../../../../components/fontAwesomeIcon';
 import { ScreenshotDialog } from '../../../../../components/screenshotDialog';
@@ -165,7 +165,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 					type="risk"
 					key={`${this.riskData._id}${size(this.criteria)}`}
 					defaultExpanded={horizontal || expandDetails}
-					editable={this.canEditBasicProperty}					
+					editable={this.canEditBasicProperty}
 					onNameChange={this.handleNameChange}
 					onExpandChange={this.handleExpandChange}
 					renderCollapsable={this.renderDetailsForm}
@@ -255,8 +255,8 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	public handleNameChange = (event, name) => {
 		const newRisk = { ...this.riskData, name };
 		this.props.setState({ newRisk });
-		
-		if (!this.isNewRisk){
+
+		if (!this.isNewRisk) {
 			const { teamspace, model, updateRisk } = this.props;
 			updateRisk(teamspace, model, {name});
 		}

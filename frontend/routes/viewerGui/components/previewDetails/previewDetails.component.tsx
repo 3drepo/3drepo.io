@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TextField } from '../../../components/textField/textField.component';
 import { Field, Formik } from 'formik';
 import React from 'react';
 import * as Yup from 'yup';
+import { TextField } from '../../../components/textField/textField.component';
 
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { schema } from '../../../../services/validation';
@@ -123,8 +123,8 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 								onFocus: () => this.handleFocusName(field, form),
 								onBlur: () => this.handleBlurName(field, form)
 							}}
-							mutable = {!this.props.isNew}		
-							requiredConfirm = {!this.props.isNew}					
+							mutable={!this.props.isNew}
+							requiredConfirm={!this.props.isNew}
 						/>
 					);
 				}} />
