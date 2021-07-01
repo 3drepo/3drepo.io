@@ -18,7 +18,7 @@
 import React, { Fragment } from 'react';
 
 import { diffData, mergeData } from '../../../../../../helpers/forms';
-import { canComment } from '../../../../../../helpers/issues';
+import { canComment, canChangeBasicProperty } from '../../../../../../helpers/issues';
 import { isViewer } from '../../../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { EmptyStateInfo } from '../../../../../components/components.styles';
@@ -112,6 +112,11 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		return [...this.props.jobs, UNASSIGNED_JOB];
 	}
 
+	get canEditBasicProperty() {
+		const { issue, myJob, permissions, currentUser } = this.props;
+		return this.isNewIssue || canChangeBasicProperty(issue, myJob, permissions, currentUser);
+	}
+
 	get actionButton() {
 		const hasViewerPermissions = isViewer(this.props.permissions);
 
@@ -158,7 +163,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 					type="issue"
 					key={this.issueData._id}
 					defaultExpanded={horizontal || expandDetails}
-					editable={!this.issueData._id}
+					editable={this.canEditBasicProperty}
 					onNameChange={this.handleNameChange}
 					onExpandChange={this.handleExpandChange}
 					renderCollapsable={this.renderDetailsForm}
@@ -245,7 +250,11 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public handleNameChange = (event, name) => {
 		const newIssue = { ...this.issueData, name };
-		this.props.setState({ newIssue });
+		this.props.setState({ newIssue });	
+		
+		if (!this.isNewIssue){
+			this.props.updateIssue({name});
+		}
 	}
 
 	public handleIssueFormSubmit = (values) => {
@@ -285,6 +294,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				attachLinkResources={attachLinkResources}
 				showDialog={showDialog}
 				canComment={this.userCanComment}
+				canEditBasicProperty={this.canEditBasicProperty}
 				onThumbnailUpdate={this.handleNewScreenshot}
 				formRef={this.formRef}
 				showSequenceDate={this.props.showSequenceDate}

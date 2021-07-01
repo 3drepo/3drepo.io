@@ -142,7 +142,6 @@ class Risk extends Ticket {
 			"comments",
 			"created",
 			"creator_role",
-			"name",
 			"number",
 			"owner",
 			"rev_id",
