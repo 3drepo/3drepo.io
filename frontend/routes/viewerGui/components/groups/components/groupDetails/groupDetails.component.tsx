@@ -79,6 +79,10 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 		return !this.props.editingGroup._id;
 	}
 
+	get isSmartGroup() {
+		return this.editingGroup.type === GROUPS_TYPES.SMART;
+	}
+
 	get editingGroup() {
 		return this.props.editingGroup;
 	}
@@ -120,9 +124,9 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 			editable={this.props.canUpdate}
 			onNameChange={this.handleFieldChange}
 			renderCollapsable={this.renderGroupForm}
-			renderNotCollapsable={() => this.renderRulesField(this.editingGroup.type === GROUPS_TYPES.SMART)}
+			renderNotCollapsable={() => this.renderRulesField(this.isSmartGroup)}
 			panelName={GROUP_PANEL_NAME}
-			isSmartGroup={this.editingGroup.type === GROUPS_TYPES.SMART}
+			isSmartGroup={this.isSmartGroup}
 			StatusIconComponent={GROUP_TYPES_ICONS[this.editingGroup.type]}
 			scrolled={this.state.scrolled}
 			isNew={this.isNewGroup}
@@ -141,11 +145,15 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 		if (!this.isNewGroup) {
 			// We ignore the setDirty in newgroup because is always dirty, just needs to be valid.
 			const wasUpdated = !isEqual(this.editingGroup, this.props.originalGroup);
-			const selectionChanged = !hasSameSharedIds(this.props.selectedNodes, this.editingGroup.objects);
+
+			// if it is a smart group, we ignore the manual selection because it depends on the rules
+			const selectionChanged = !this.isSmartGroup &&
+				!hasSameSharedIds(this.props.selectedNodes, this.editingGroup.objects);
+
 			this.setIsFormDirty(wasUpdated || selectionChanged);
 		}
 
-		const groupHasValidSelection = this.editingGroup.type === GROUPS_TYPES.SMART || this.props.selectedNodes.length > 0;
+		const groupHasValidSelection = this.isSmartGroup || this.props.selectedNodes.length > 0;
 		this.setIsFormValid(GroupSchema.isValidSync(this.editingGroup) && groupHasValidSelection);
 	}
 
