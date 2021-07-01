@@ -132,8 +132,6 @@ repoLogger.prototype.logMessage = function (type, msg, meta) {
 		}
 	}
 
-
-
 	this.logger.log(type, (new Date())
 		.toISOString() + "\t" + this.uid + "\t" + msg + " [" + timeDiff + " ms]", {message: JSON.stringify(metadata)});
 };
