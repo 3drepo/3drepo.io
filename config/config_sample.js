@@ -129,6 +129,11 @@ module.exports = {
 		secretKey: "",  // This is for validating the user identity in intercom
 		accessToken: "" // This is for the api request to intercom in the backend
 	},
-
+    elastic: {
+		/*
+		 * Please refer to elastic documentation for configuration settings
+		 * https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/client-configuration.html
+		*/
+    },
 	termsUpdatedAt: 1520592720000,
 }

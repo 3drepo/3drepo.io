@@ -91,7 +91,7 @@ function* getCompareModelData({ isFederation, revision }) {
 			yield put(CompareActions.setComponentState({ compareModels: [model], isPending: false }));
 		} else {
 			const { data: submodelsRevisionsMap } = yield API.getSubModelsRevisions(teamspace, settings._id, revision);
-			const compareModels = settings.subModels.map(({ model }) => {
+			const compareModels = Object.keys(submodelsRevisionsMap).map((model) => {
 				const subModelData = submodelsRevisionsMap[model];
 				return prepareModelToCompare(teamspace, model, subModelData.name, false, subModelData.revisions);
 			});
@@ -203,29 +203,6 @@ function* setActiveTab({ activeTab }) {
 		yield put(CompareActions.setComponentState(componentStateUpdate));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'sort type', error.message));
-	}
-}
-
-function* updateCurrentRevision({ revision }) {
-	try {
-		const compareModels = yield select(selectCompareModels);
-		const revisionModelIndex = compareModels
-			.findIndex((model) => model.revisions.find(({ _id }) => _id === revision._id ));
-		const componentState = {} as ICompareComponentState;
-		const comparedModel = compareModels[revisionModelIndex];
-
-		if (comparedModel) {
-			comparedModel.baseRevision = revision;
-			comparedModel.currentRevision = revision;
-
-			componentState.compareModels = [
-				...compareModels
-			];
-
-			yield put(CompareActions.setComponentState(componentState));
-		}
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('update', 'current revision', error.message));
 	}
 }
 
@@ -439,5 +416,4 @@ export default function* CompareSaga() {
 	yield takeLatest(CompareTypes.SET_COMPONENT_STATE, setComponentState);
 	yield takeLatest(CompareTypes.RESET_COMPONENT_STATE, resetComponentState);
 	yield takeLatest(CompareTypes.SET_TARGET_REVISION, setTargetRevision);
-	yield takeLatest(CompareTypes.UPDATE_CURRENT_REVISION, updateCurrentRevision);
 }
