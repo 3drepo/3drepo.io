@@ -123,13 +123,16 @@ repoLogger.prototype.logMessage = function (type, msg, meta) {
 		metadata.username = this.session.user.username;
 	}
 
-	if (this.req && this.req.method) {
-		metadata.method = this.req.method;
+	if (this.req) {
+		if (this.req.method) {
+			metadata.method = this.req.method;
+		}
+		if (this.req.originalUrl) {
+			metadata.url = this.req.originalUrl;
+		}
 	}
 
-	if (this.req && this.req.originalUrl) {
-		metadata.url = this.req.originalUrl;
-	}
+
 
 	this.logger.log(type, (new Date())
 		.toISOString() + "\t" + this.uid + "\t" + msg + " [" + timeDiff + " ms]", {message: JSON.stringify(metadata)});
