@@ -348,7 +348,6 @@ function Utils() {
 			}
 
 			return image
-				.crop(sharp.gravity.centre)
 				.resize(destWidth, destHeight)
 				.png()
 				.toBuffer();
