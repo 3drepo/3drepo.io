@@ -128,6 +128,7 @@
 
 		await db.insert(teamspace, PROJECTS_COLLECTION_NAME, project);
 
+		project._id = utils.uuidToString(project._id);
 		project.permissions = C.IMPLIED_PERM[C.PERM_PROJECT_ADMIN].project;
 
 		return project;
