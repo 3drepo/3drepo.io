@@ -22,6 +22,7 @@ const sharp = require("sharp");
 const nodeuuid = require("uuid/v1");
 const uuidparse = require("uuid-parse");
 const mongo = require("mongodb");
+const crypto = require("crypto");
 
 function Utils() {
 
@@ -95,6 +96,10 @@ function Utils() {
 			return acum;
 		} , {});
 	};
+
+	this.getRandomBytesToHexString = (length = 16) => {
+		return crypto.randomBytes(length).toString("hex");
+	}
 
 	/** *****************************************************************************
 	* Convert a string to a UUID
