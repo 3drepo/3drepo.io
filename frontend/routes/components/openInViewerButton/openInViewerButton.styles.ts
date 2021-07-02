@@ -25,8 +25,8 @@ export const ShowModelButtonContainer = styled.div`
 	&& {
 		position: absolute;
 		z-index: 10;
-		top: 3px;
-		right: 3px;
+		top: 45px;
+		right: 71px;
 		padding: 0 !important;
 
 		${({ preview }: { preview: boolean }) => preview ? css`
