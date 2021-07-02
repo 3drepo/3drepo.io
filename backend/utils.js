@@ -99,7 +99,7 @@ function Utils() {
 
 	this.getRandomBytesToHexString = (length = 16) => {
 		return crypto.randomBytes(length).toString("hex");
-	}
+	};
 
 	/** *****************************************************************************
 	* Convert a string to a UUID

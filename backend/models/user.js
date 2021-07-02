@@ -317,7 +317,7 @@ User.deleteStarredModel = async function (username, ts, modelID) {
 };
 
 User.generateApiKey = async function (username) {
-	const apiKey = utils.getRandomBytesToHexString();	
+	const apiKey = utils.getRandomBytesToHexString();
 	await db.update("admin", COLL_NAME, {user: username}, {$set: {"customData.apiKey" : apiKey}});
 	return apiKey;
 };
