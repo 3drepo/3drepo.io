@@ -1,8 +1,8 @@
 {
   "name": "3drepo.io",
-  "version": "4.16.1",
+  "version": "4.16.2",
   "engines": {
-    "node": "10.x.x"
+    "node": "14.x.x"
   },
   "private": true,
   "scripts": {
@@ -27,9 +27,9 @@
     "async": "2.6.1",
     "axios": "0.21.1",
     "body-parser": "1.18.3",
-    "combined-stream": "^1.0.8",
+    "combined-stream": "1.0.8",
     "compression": "1.7.3",
-    "connect-mongodb-session": "2.1.0",
+    "connect-mongodb-session": "2.4.1",
     "cors": "2.8.5",
     "crypto-js": "4.0.0",
     "csv-parse": "4.8.5",
@@ -57,7 +57,7 @@
     "pug": "2.0.3",
     "serialize-javascript": "4.0.0",
     "serve-favicon": "2.5.0",
-    "sharp": "0.21.3",
+    "sharp": "0.28.3",
     "shortid": "2.2.14",
     "soap": "0.25.0",
     "socket.io": "2.2.0",
@@ -68,7 +68,7 @@
     "uuid": "3.3.3",
     "uuid-parse": "1.1.0",
     "vhost": "3.0.2",
-    "winston": "2.2.0",
+    "winston": "3.3.3",
     "winston-daily-rotate-file": "3.6.0",
     "xml2js": "0.4.19",
     "xmlbuilder": "10.1.1",
