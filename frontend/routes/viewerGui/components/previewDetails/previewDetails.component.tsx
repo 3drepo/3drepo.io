@@ -15,14 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Tooltip } from '@material-ui/core';
+import Grid from '@material-ui/core/Grid';
 import { Field, Formik } from 'formik';
 import React from 'react';
 import * as Yup from 'yup';
-import { TextField } from '../../../components/textField/textField.component';
-import { Tooltip } from '@material-ui/core';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { schema } from '../../../../services/validation';
 import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';
+import { TextField } from '../../../components/textField/textField.component';
 import { PreviewItemInfo } from '../previewItemInfo/previewItemInfo.component';
 import { RoleIndicator } from '../previewListItem/previewListItem.styles';
 import {
@@ -36,10 +37,11 @@ import {
 	ScrollableContainer,
 	StyledForm,
 	Summary,
+	TitleNumber,
 	ToggleButton,
 	ToggleButtonContainer,
 	ToggleIcon,
-	Typography,
+	Typography
 } from './previewDetails.styles';
 
 interface IProps {
@@ -107,6 +109,8 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	));
 
 	public renderNameField = renderWhenTrue(() => (
+	<Grid container alignItems="center" justify="space-between" >
+		<TitleNumber>{this.props.number}.</TitleNumber>
 		<Formik
 			initialValues={{name: this.props.name}}
 			validationSchema={ValidationSchema}
@@ -136,6 +140,9 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 				}} />
 			</StyledForm>
 		</Formik>
+
+		</Grid>
+
 	));
 
 	public renderExpandIcon = renderWhenTrue(() => (
