@@ -19,7 +19,7 @@ import { Field, Formik } from 'formik';
 import React from 'react';
 import * as Yup from 'yup';
 import { TextField } from '../../../components/textField/textField.component';
-
+import { Tooltip } from '@material-ui/core';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { schema } from '../../../../services/validation';
 import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';
@@ -87,16 +87,23 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	public textFieldRef = React.createRef<any>();
 	public scrollableContainerRef = React.createRef<HTMLDivElement>();
 
-	public renderNameWithCounter = renderWhenTrue(() => (
-		<Typography paragraph>
-			{`${this.props.number}. ${this.props.name}`}
-		</Typography>
-	));
+	public renderNameWithCounter = renderWhenTrue(() => {
+		const title = `${this.props.number}. ${this.props.name}`;
+		return (
+			<Tooltip title={title}>
+				<Typography paragraph>
+					{title}
+				</Typography>
+			</Tooltip>
+		);
+	});
 
 	public renderName = renderWhenTrue(() => (
-		<Typography paragraph>
-			{this.props.name}
-		</Typography>
+		<Tooltip title={this.props.name}>
+			<Typography paragraph>
+				{this.props.name}
+			</Typography>
+		</Tooltip>
 	));
 
 	public renderNameField = renderWhenTrue(() => (
