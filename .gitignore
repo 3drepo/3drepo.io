@@ -102,3 +102,7 @@ package-lock.json
 .vs/VSWorkspaceState.json
 .vs/ProjectSettings.json
 .vs/3drepo.io/v16/Browse.VC.db
+.vs/slnx.sqlite-journal
+.vs/3drepo.io/v16/Browse.VC.db-shm
+.vs/3drepo.io/v16/Browse.VC.db-wal
+.vs/3drepo.io/v16/Browse.VC.opendb

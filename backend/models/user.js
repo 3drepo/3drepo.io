@@ -439,13 +439,21 @@ User.createUser = async function (logger, username, password, customData, tokenE
 
 	const cleanedCustomData = {
 		createdAt: new Date(),
-		inactive: true
+		inactive: true,
+		extras: {}
 	};
 
-	["firstName", "lastName", "email", "mailListOptOut", "jobTitle", "industry", "phoneNumber", "howDidYouFindUs"]
+	["firstName", "lastName", "email", "mailListOptOut"]
 		.forEach(key => {
 			if (customData[key]) {
 				cleanedCustomData[key] = customData[key];
+			}
+		});
+
+	["jobTitle", "industry", "phoneNumber", "howDidYouFindUs"]
+		.forEach(key => {
+			if (customData[key]) {
+				cleanedCustomData.extras[key] = customData[key];
 			}
 		});
 

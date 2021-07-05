@@ -26,6 +26,7 @@ import { Field, Form, Formik } from 'formik';
 import { omit } from 'lodash';
 import * as Yup from 'yup';
 
+import { industries, howDidYouFindUsOptions } from '../../constants/signup';
 import { clientConfigService } from '../../services/clientConfig';
 import { COOKIES_PAGE, PRIVACY_PAGE, TERMS_PAGE } from '../../services/staticPages';
 import { getPasswordStrength, getPasswordStrengthMessage, schema } from '../../services/validation';
@@ -180,49 +181,18 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 		))
 
 	public renderIndustries = () =>
-		this.industries.map((industry) => (
+		industries.map((industry) => (
 			<MenuItem key={industry} value={industry}>
 				{industry}
 			</MenuItem>
 		))
 
 	public renderHowDidYouFindUsOptions = () =>
-		this.howDidYouFindUsOptions.map((howDidYouFindUsOption) => (
+		howDidYouFindUsOptions.map((howDidYouFindUsOption) => (
 			<MenuItem key={howDidYouFindUsOption} value={howDidYouFindUsOption}>
 				{howDidYouFindUsOption}
 			</MenuItem>
-		))
-
-	public industries = [
-		'Architecture',
-		'Construction',
-		'Consulting',
-		'Developer',
-		'Education',
-		'Electronics',
-		'Engineering',
-		'Environmental',
-		'Government',
-		'Manufacturing',
-		'Not-for-profit',
-		'Technology',
-		'Transport',
-		'Other'
-	];
-
-	public howDidYouFindUsOptions = [
-		'Recommended from a colleague or partner',
-		'Someone from 3D Repo reached out to me',
-		'Google search',
-		'Twitter',
-		'LinkedIn',
-		'Facebook',
-		'Webinar',
-		'Email',
-		'Industry event',
-		'Magazine article',
-		'Other'
-	];
+		))	
 
 	public render() {
 		const {isPending} = this.props;
