@@ -442,7 +442,8 @@ User.createUser = async function (logger, username, password, customData, tokenE
 		inactive: true
 	};
 
-	["firstName", "lastName", "email", "mailListOptOut"].forEach(key => {
+	["firstName", "lastName", "email", "mailListOptOut", "jobTitle", "industry", "phoneNumber", "howDidYouFindUs"]
+	.forEach(key => {
 		if (customData[key]) {
 			cleanedCustomData[key] = customData[key];
 		}
@@ -538,11 +539,13 @@ User.verify = async function (username, token, options) {
 	}
 
 	try {
-		const { customData: {firstName, lastName, email, billing, mailListOptOut} } = user;
+		const { customData: {firstName, lastName, email, billing, mailListOptOut, jobTitle, phoneNumber,
+			industry, howDidYouFindUs } } = user;
 		const subscribed = !mailListOptOut;
 		const company = get(billing, "billingInfo.company");
 
-		await Intercom.createContact(username, formatPronouns(firstName + " " + lastName), email, subscribed, company);
+		await Intercom.createContact(username, formatPronouns(firstName + " " + lastName), email, 
+		subscribed, company, jobTitle, phoneNumber, industry, howDidYouFindUs);
 	} catch (err) {
 		systemLogger.logError("Failed to create contact in intercom when verifying user", username, err);
 	}

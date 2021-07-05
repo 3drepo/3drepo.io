@@ -89,6 +89,13 @@ export const StyledFormControl = styled(FormControl)`
 	}
 `;
 
+export const FirstColumnFormControl = styled(StyledFormControl)`	
+	&& {
+		margin-left: 0px;
+	}
+`;
+
+
 export const ButtonContainer = styled.div`
 	display: flex;
 	justify-content: flex-end;

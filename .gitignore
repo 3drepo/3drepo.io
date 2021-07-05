@@ -100,3 +100,5 @@ scripts/reporting/statsGenElastic/*.log
 package-lock.json
 .vs/slnx.sqlite
 .vs/VSWorkspaceState.json
+.vs/ProjectSettings.json
+.vs/3drepo.io/v16/Browse.VC.db

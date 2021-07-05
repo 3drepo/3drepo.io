@@ -40,6 +40,7 @@ import {
 	Container,
 	Headline,
 	StyledFormControl,
+	FirstColumnFormControl,
 	StyledGrid,
 	TermLink
 } from './signUp.styles';
@@ -66,7 +67,11 @@ const RegistrationInitialValues = {
 	password: '',
 	passwordConfirm: '',
 	termsAgreed: false,
-	mailListAgreed: true
+	mailListAgreed: true,
+	jobTitle: '',
+	phoneNumber: '',
+	industry: '',
+	howDidYouFindUs: ''
 };
 
 const RegistrationSchema = Yup.object().shape({
@@ -88,7 +93,11 @@ const RegistrationSchema = Yup.object().shape({
 		),
 	countryCode: schema.required,
 	captcha: clientConfigService.captcha_client_key ? schema.required : Yup.string(),
-	termsAgreed: Yup.boolean().oneOf([true])
+	termsAgreed: Yup.boolean().oneOf([true]),
+	jobTitle: schema.jobTitle,
+	phoneNumber: schema.phoneNumber,
+	industry: schema.industry,
+	howDidYouFindUs: schema.howDIdYouFindUs
 });
 
 const DEFAULT_INPUT_PROPS = {
@@ -169,6 +178,51 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 				{country.name}
 			</MenuItem>
 		))
+
+	public renderIndustries = () =>
+		this.industries.map((industry) => (
+			<MenuItem key={industry} value={industry}>
+				{industry}
+			</MenuItem>
+		))
+
+	public renderHowDidYouFindUsOptions = () =>
+		this.howDidYouFindUsOptions.map((howDidYouFindUsOption) => (
+			<MenuItem key={howDidYouFindUsOption} value={howDidYouFindUsOption}>
+				{howDidYouFindUsOption}
+			</MenuItem>
+		))
+
+	public industries = [
+		"Architecture",
+		"Construction",
+		"Consulting",
+		"Developer",
+		"Education",
+		"Electronics",
+		"Engineering",
+		"Environmental",
+		"Government",
+		"Manufacturing",
+		"Not-for-profit",
+		"Technology",
+		"Transport",
+		"Other"	
+	];
+
+	public howDidYouFindUsOptions = [
+		"Recommended from a colleague or partner",
+		"Someone from 3D Repo reached out to me",
+		"Google search",
+		"Twitter",
+		"LinkedIn",
+		"Facebook",
+		"Webinar",
+		"Email",
+		"Industry event",
+		"Magazine article",
+		"Other"
+	];
 
 	public render() {
 		const {isPending} = this.props;
@@ -291,6 +345,50 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 												MenuProps={{ PaperProps: {style: PaperPropsStyle}, disabled: isPending}}
 											>
 												{this.renderCountries()}
+											</SelectField>
+										)} />
+									</StyledFormControl>
+								</FieldsRow>
+								<FieldsRow container wrap="nowrap">
+									<Field name="jobTitle" render={({ field, form }) => (
+										<StyledTextField
+											{...DEFAULT_INPUT_PROPS}
+											{...field}
+											error={Boolean(form.touched.jobTitle && form.errors.jobTitle)}
+											helperText={form.touched.jobTitle && (form.errors.jobTitle || '')}
+											label="Job Title"
+											disabled={isPending}
+										/>
+									)} />
+									<Field name="phoneNumber" render={({ field }) => (
+										<StyledTextField
+											{...field}
+											label="Phone Number"
+											margin="normal"
+											disabled={isPending}
+										/>
+									)} />
+								</FieldsRow>
+								<FieldsRow container wrap="nowrap">
+									<FirstColumnFormControl>
+										<InputLabel>Industry *</InputLabel>
+										<Field name="industry" render={({ field }) => (
+											<SelectField
+												{...field}
+												MenuProps={{ PaperProps: {style: PaperPropsStyle}, disabled: isPending}}
+											>
+												{this.renderIndustries()}
+											</SelectField>
+										)} />
+									</FirstColumnFormControl>
+									<StyledFormControl>
+										<InputLabel>How did you find us? *</InputLabel>
+										<Field name="howDidYouFindUs" render={({ field }) => (
+											<SelectField
+												{...field}
+												MenuProps={{ PaperProps: {style: PaperPropsStyle}, disabled: isPending}}
+											>
+												{this.renderHowDidYouFindUsOptions()}
 											</SelectField>
 										)} />
 									</StyledFormControl>

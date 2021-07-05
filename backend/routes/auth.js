@@ -670,7 +670,11 @@ function signUp(req, res, next) {
 		&& Object.prototype.toString.call(req.body.lastName) === "[object String]"
 		&& Object.prototype.toString.call(req.body.countryCode) === "[object String]"
 		&& (!req.body.company || Object.prototype.toString.call(req.body.company) === "[object String]")
-		&& Object.prototype.toString.call(req.body.mailListAgreed) === "[object Boolean]") {
+		&& Object.prototype.toString.call(req.body.mailListAgreed) === "[object Boolean]"
+		&& Object.prototype.toString.call(req.body.jobTitle) === "[object String]"
+		&& Object.prototype.toString.call(req.body.industry) === "[object String]"
+		&& Object.prototype.toString.call(req.body.howDidYouFindUs) === "[object String]"
+		&& (!req.body.phoneNumber || Object.prototype.toString.call(req.body.phoneNumber) === "[object String]")) {
 
 		// check if captcha is enabled
 		const checkCaptcha = config.auth.captcha ? httpsPost(config.captcha.validateUrl, {
@@ -691,8 +695,11 @@ function signUp(req, res, next) {
 					lastName: req.body.lastName,
 					countryCode: req.body.countryCode,
 					company: req.body.company,
-					mailListOptOut: !req.body.mailListAgreed
-
+					mailListOptOut: !req.body.mailListAgreed,
+					industry: req.body.industry,
+					jobTitle: req.body.jobTitle,
+					howDidYouFindUs: req.body.howDidYouFindUs,
+					phoneNumber: req.body.phoneNumber,
 				}, config.tokenExpiry.emailVerify);
 			} else {
 				return Promise.reject({ resCode: responseCodes.INVALID_CAPTCHA_RES});
