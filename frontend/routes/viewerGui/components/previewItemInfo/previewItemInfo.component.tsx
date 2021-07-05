@@ -72,8 +72,7 @@ export class PreviewItemInfo extends React.PureComponent<IProps, any> {
 				preview
 				teamspace={teamspace}
 				model={modelId}
-				query={`${type}Id=${id}`}
-				color="primary"
+				query={`${type}Id=${id}`}				
 			/>
 		);
 	});

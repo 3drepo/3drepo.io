@@ -29,7 +29,6 @@ interface IProps {
 	query?: string;
 	history: any;
 	preview?: boolean;
-	color?: string;
 }
 
 export const OpenInViewerButton = memo((props: IProps) => {
@@ -44,8 +43,7 @@ export const OpenInViewerButton = memo((props: IProps) => {
 			<TooltipButton
 				Icon={OpenInBrowser}
 				label="View on model"
-				action={handleGoToModel}
-				color={props.color}			
+				action={handleGoToModel}	
 			/>
 		</ShowModelButtonContainer>
 	);

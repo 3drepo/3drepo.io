@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-
+import {COLOR} from '../../../styles'
 import { StyledIconButton } from '../../teamspaces/components/tooltipButton/tooltipButton.styles';
 
 export const Container = styled.div``;
@@ -32,6 +32,7 @@ export const ShowModelButtonContainer = styled.div`
 		${({ preview }: { preview: boolean }) => preview ? css`
 			${StyledIconButton} {
 				padding: 6px;
+				color: ${COLOR.SOFT_BLUE};
 			}
 		` : ''};
 	}
