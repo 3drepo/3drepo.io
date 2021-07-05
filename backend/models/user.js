@@ -317,7 +317,7 @@ User.deleteStarredModel = async function (username, ts, modelID) {
 };
 
 User.generateApiKey = async function (username) {
-	const apiKey = utils.getRandomBytesToHexString();
+	const apiKey = utils.generateHashString();
 	await db.update("admin", COLL_NAME, {user: username}, {$set: {"customData.apiKey" : apiKey}});
 	return apiKey;
 };
@@ -485,7 +485,7 @@ User.createUser = async function (logger, username, password, customData, tokenE
 	];
 
 	cleanedCustomData.emailVerifyToken = {
-		token: utils.getRandomBytesToHexString(),
+		token: utils.generateHashString(),
 		expiredAt: expiryAt
 	};
 
@@ -612,7 +612,7 @@ User.getForgotPasswordToken = async function (userNameOrEmail) {
 	expiryAt.setHours(expiryAt.getHours() + config.tokenExpiry.forgotPassword);
 
 	const resetPasswordToken = {
-		token: utils.getRandomBytesToHexString(32),
+		token: utils.generateHashString(64),
 		expiredAt: expiryAt
 	};
 

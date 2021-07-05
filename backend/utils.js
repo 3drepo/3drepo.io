@@ -97,8 +97,8 @@ function Utils() {
 		} , {});
 	};
 
-	this.getRandomBytesToHexString = (length = 16) => {
-		return crypto.randomBytes(length).toString("hex");
+	this.generateHashString = (length = 32) => {
+		return crypto.randomBytes(length / 2).toString("hex");
 	};
 
 	/** *****************************************************************************
