@@ -38,9 +38,9 @@ import { ReCaptcha } from './components/reCaptcha/reCaptcha.component';
 import {
 	ButtonContainer,
 	Container,
+	FirstColumnFormControl,
 	Headline,
 	StyledFormControl,
-	FirstColumnFormControl,
 	StyledGrid,
 	TermLink
 } from './signUp.styles';
@@ -194,34 +194,34 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 		))
 
 	public industries = [
-		"Architecture",
-		"Construction",
-		"Consulting",
-		"Developer",
-		"Education",
-		"Electronics",
-		"Engineering",
-		"Environmental",
-		"Government",
-		"Manufacturing",
-		"Not-for-profit",
-		"Technology",
-		"Transport",
-		"Other"	
+		'Architecture',
+		'Construction',
+		'Consulting',
+		'Developer',
+		'Education',
+		'Electronics',
+		'Engineering',
+		'Environmental',
+		'Government',
+		'Manufacturing',
+		'Not-for-profit',
+		'Technology',
+		'Transport',
+		'Other'
 	];
 
 	public howDidYouFindUsOptions = [
-		"Recommended from a colleague or partner",
-		"Someone from 3D Repo reached out to me",
-		"Google search",
-		"Twitter",
-		"LinkedIn",
-		"Facebook",
-		"Webinar",
-		"Email",
-		"Industry event",
-		"Magazine article",
-		"Other"
+		'Recommended from a colleague or partner',
+		'Someone from 3D Repo reached out to me',
+		'Google search',
+		'Twitter',
+		'LinkedIn',
+		'Facebook',
+		'Webinar',
+		'Email',
+		'Industry event',
+		'Magazine article',
+		'Other'
 	];
 
 	public render() {

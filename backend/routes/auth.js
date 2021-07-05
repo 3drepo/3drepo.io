@@ -699,7 +699,7 @@ function signUp(req, res, next) {
 					industry: req.body.industry,
 					jobTitle: req.body.jobTitle,
 					howDidYouFindUs: req.body.howDidYouFindUs,
-					phoneNumber: req.body.phoneNumber,
+					phoneNumber: req.body.phoneNumber
 				}, config.tokenExpiry.emailVerify);
 			} else {
 				return Promise.reject({ resCode: responseCodes.INVALID_CAPTCHA_RES});

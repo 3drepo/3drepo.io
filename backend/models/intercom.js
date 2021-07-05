@@ -51,11 +51,10 @@ Intercom.createContact = async (external_id, name, email, subscribed, company, j
 	if (company) {
 		custom_attributes.company_entered = company;
 	}
-	
-	if (phone_number) {
-		custom_attributes.phoneNumber = phoneNumber;
-	}
 
+	if (phone_number) {
+		custom_attributes.phone_number = phone_number;
+	}
 
 	return await axios.post(getEndpoint("contacts"),
 		{
