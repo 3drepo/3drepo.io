@@ -360,9 +360,11 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 											disabled={isPending}
 										/>
 									)} />
-									<Field name="phoneNumber" render={({ field }) => (
+									<Field name="phoneNumber" render={({ field, form }) => (
 										<StyledTextField
 											{...field}
+											error={Boolean(form.touched.phoneNumber && form.errors.phoneNumber)}
+											helperText={form.touched.phoneNumber && (form.errors.phoneNumber || '')}
 											label="Phone Number"
 											margin="normal"
 											disabled={isPending}
