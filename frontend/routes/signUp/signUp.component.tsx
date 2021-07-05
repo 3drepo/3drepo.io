@@ -26,7 +26,7 @@ import { Field, Form, Formik } from 'formik';
 import { omit } from 'lodash';
 import * as Yup from 'yup';
 
-import { industries, howDidYouFindUsOptions } from '../../constants/signup';
+import { howDidYouFindUsOptions, industries } from '../../constants/signup';
 import { clientConfigService } from '../../services/clientConfig';
 import { COOKIES_PAGE, PRIVACY_PAGE, TERMS_PAGE } from '../../services/staticPages';
 import { getPasswordStrength, getPasswordStrengthMessage, schema } from '../../services/validation';
@@ -192,7 +192,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 			<MenuItem key={howDidYouFindUsOption} value={howDidYouFindUsOption}>
 				{howDidYouFindUsOption}
 			</MenuItem>
-		))	
+		))
 
 	public render() {
 		const {isPending} = this.props;

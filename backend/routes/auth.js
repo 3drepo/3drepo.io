@@ -664,17 +664,17 @@ function signUp(req, res, next) {
 		return responseCodes.respond(responsePlace, req, res, next, err, err);
 	}
 
-	if (Object.prototype.toString.call(req.body.email) === "[object String]"
-		&& Object.prototype.toString.call(req.body.password) === "[object String]"
-		&& Object.prototype.toString.call(req.body.firstName) === "[object String]"
-		&& Object.prototype.toString.call(req.body.lastName) === "[object String]"
-		&& Object.prototype.toString.call(req.body.countryCode) === "[object String]"
-		&& (!req.body.company || Object.prototype.toString.call(req.body.company) === "[object String]")
-		&& Object.prototype.toString.call(req.body.mailListAgreed) === "[object Boolean]"
-		&& Object.prototype.toString.call(req.body.jobTitle) === "[object String]"
-		&& Object.prototype.toString.call(req.body.industry) === "[object String]"
-		&& Object.prototype.toString.call(req.body.howDidYouFindUs) === "[object String]"
-		&& (!req.body.phoneNumber || Object.prototype.toString.call(req.body.phoneNumber) === "[object String]")) {
+	if (utils.isString(req.body.email)
+		&& utils.isString(req.body.password)
+		&& utils.isString(req.body.firstName)
+		&& utils.isString(req.body.lastName)
+		&& utils.isString(req.body.countryCode)
+		&& (!req.body.company || utils.isString(req.body.company))
+		&& utils.isBoolean(req.body.mailListAgreed)
+		&& utils.isString(req.body.jobTitle)
+		&& utils.isString(req.body.industry)
+		&& utils.isString(req.body.howDidYouFindUs)
+		&& (!req.body.phoneNumber || utils.isString(req.body.phoneNumber))) {
 
 		// check if captcha is enabled
 		const checkCaptcha = config.auth.captcha ? httpsPost(config.captcha.validateUrl, {
