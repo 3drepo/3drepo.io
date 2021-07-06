@@ -17,7 +17,8 @@
 
 import React from 'react';
 
-import { difference, isEqual } from 'lodash';
+import { difference, differenceBy, isEqual } from 'lodash';
+import {queuableFunction} from '../../helpers/async';
 
 import { ROUTES } from '../../constants/routes';
 import { addColorOverrides, overridesColorDiff, removeColorOverrides } from '../../helpers/colorOverrides';
@@ -54,10 +55,19 @@ interface IProps {
 	presentationMode: PresentationMode;
 	isPresentationPaused: boolean;
 	handleTransparenciesVisibility: any;
+	issuesShapes: any[];
+	risksShapes: any[];
+	issuesHighlightedShapes: any[];
+	risksHighlightedShapes: any[];
 }
 
 export class ViewerCanvas extends React.PureComponent<IProps, any> {
 	private containerRef = React.createRef<HTMLElement>();
+
+	constructor(props) {
+		super(props);
+		this.renderMeasurements = queuableFunction(this.renderMeasurements, this);
+	}
 
 	public get shouldBeVisible() {
 		return this.props.location.pathname.includes(ROUTES.VIEWER);
@@ -121,13 +131,33 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 		if (prev.length === 0 && curr.length > 0) {
 			viewer.mapStart();
 		}
-
 	}
 
-	public componentDidUpdate(prevProps: IProps) {
+	public async renderMeasurements(prev: any[], curr: any[]) {
+		const { viewer } = this.props;
+
+		const toAdd = differenceBy(curr, prev, 'uuid', 'color');
+		const toRemove = differenceBy(prev, curr, 'uuid', 'color');
+
+		await viewer.removeMeasurements(toRemove);
+		await viewer.addMeasurements(toAdd, true);
+	}
+
+	public async renderMeasurementsHighlights(prev: any[], curr: any[]) {
+		const { viewer } = this.props;
+
+		const toAdd = difference(curr, prev);
+		const toRemove = difference(prev, curr);
+
+		await viewer.deselectMeasurements(toRemove);
+		await viewer.selectMeasurements(toAdd);
+	}
+
+	public async componentDidUpdate(prevProps: IProps) {
 		const { colorOverrides, issuePins, riskPins, measurementPins, hasGisCoordinates,
 			gisCoordinates, gisLayers, transparencies, transformations: transformation,
-			sequenceHiddenNodes, viewerManipulationEnabled, viewer
+			sequenceHiddenNodes, viewerManipulationEnabled, viewer,
+			issuesShapes, issuesHighlightedShapes, risksShapes, risksHighlightedShapes
 		} = this.props;
 
 		if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
@@ -160,6 +190,22 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 
 		if (hasGisCoordinates && !isEqual(prevProps.gisLayers, gisLayers)) {
 			this.renderGisLayers(prevProps.gisLayers, gisLayers);
+		}
+
+		if (!isEqual(prevProps.issuesShapes, issuesShapes)) {
+			await this.renderMeasurements(prevProps.issuesShapes, issuesShapes);
+		}
+
+		if (!isEqual(prevProps.issuesHighlightedShapes, issuesHighlightedShapes)) {
+			await this.renderMeasurementsHighlights(prevProps.issuesHighlightedShapes, issuesHighlightedShapes);
+		}
+
+		if (!isEqual(prevProps.risksShapes, risksShapes)) {
+			await this.renderMeasurements(prevProps.risksShapes, risksShapes);
+		}
+
+		if (!isEqual(prevProps.risksHighlightedShapes, risksHighlightedShapes)) {
+			await this.renderMeasurementsHighlights(prevProps.risksHighlightedShapes, risksHighlightedShapes);
 		}
 
 		if (prevProps.viewerManipulationEnabled !== viewerManipulationEnabled) {
