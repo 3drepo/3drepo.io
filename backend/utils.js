@@ -23,6 +23,7 @@ const nodeuuid = require("uuid/v1");
 const yup = require("yup");
 const uuidparse = require("uuid-parse");
 const mongo = require("mongodb");
+const crypto = require("crypto");
 
 function Utils() {
 
@@ -97,6 +98,10 @@ function Utils() {
 
 			return acum;
 		} , {});
+	};
+
+	this.generateHashString = (length = 32) => {
+		return crypto.randomBytes(length / 2).toString("hex");
 	};
 
 	/** *****************************************************************************
