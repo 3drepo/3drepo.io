@@ -43,7 +43,7 @@ export const OpenInViewerButton = memo((props: IProps) => {
 			<TooltipButton
 				Icon={OpenInBrowser}
 				label="View on model"
-				action={handleGoToModel}	
+				action={handleGoToModel}
 			/>
 		</ShowModelButtonContainer>
 	);

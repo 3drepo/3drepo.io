@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import {COLOR} from '../../../styles'
+import {COLOR} from '../../../styles';
 import { StyledIconButton } from '../../teamspaces/components/tooltipButton/tooltipButton.styles';
 
 export const Container = styled.div``;
