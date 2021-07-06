@@ -91,7 +91,7 @@ export const StyledFormControl = styled(FormControl)`
 
 export const FirstColumnFormControl = styled(StyledFormControl)`
 	&& {
-		margin-left: 0px;
+		margin-left: 0;
 	}
 `;
 
