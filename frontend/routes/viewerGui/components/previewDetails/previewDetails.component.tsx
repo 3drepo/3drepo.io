@@ -212,7 +212,6 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	public handleFocusName = (field, form) => {
 		if (this.props.isNew && !this.props.clone) {
 			const nameChanged = form.initialValues.name !== field.value;
-
 			form.setFieldValue('name', nameChanged ? field.value : '');
 		}
 	}
