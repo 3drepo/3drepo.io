@@ -35,7 +35,7 @@ interface IProps {
 	showModelButton?: boolean;
 	type?: string;
 	id?: string;
-	urlParams: any;
+	urlParams?: any;
 }
 
 export class PreviewItemInfo extends React.PureComponent<IProps, any> {
