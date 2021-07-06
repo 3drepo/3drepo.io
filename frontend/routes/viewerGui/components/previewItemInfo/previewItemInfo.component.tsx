@@ -21,7 +21,6 @@ import { renderWhenTrue } from '../../../../helpers/rendering';
 import { NAMED_MONTH_DATE_FORMAT } from '../../../../services/formatting/formatDate';
 import { DateTime } from '../../../components/dateTime/dateTime.component';
 import { UserMarker } from '../../../components/messagesList/components/message/components/userMarker';
-import OpenInViewerButton from '../../../components/openInViewerButton/openInViewerButton.container';
 import { Author, Container, Date, Details, ExtraInfo, Icon, Status } from './previewItemInfo.styles';
 
 interface IProps {
@@ -32,10 +31,6 @@ interface IProps {
 	extraInfo?: string;
 	actionButton?: React.ReactNode;
 	panelType?: string;
-	showModelButton?: boolean;
-	type?: string;
-	id?: string;
-	urlParams?: any;
 }
 
 export class PreviewItemInfo extends React.PureComponent<IProps, any> {
@@ -64,19 +59,6 @@ export class PreviewItemInfo extends React.PureComponent<IProps, any> {
 		return <>{this.props.actionButton}</>;
 	});
 
-	public renderViewModel = renderWhenTrue(() => {
-		const { type, id } = this.props;
-		const { teamspace, modelId } = this.props.urlParams;
-		return (
-			<OpenInViewerButton
-				preview
-				teamspace={teamspace}
-				model={modelId}
-				query={`${type}Id=${id}`}
-			/>
-		);
-	});
-
 	public render() {
 		const {
 			author,
@@ -85,8 +67,7 @@ export class PreviewItemInfo extends React.PureComponent<IProps, any> {
 			StatusIconComponent,
 			extraInfo,
 			actionButton,
-			panelType,
-			showModelButton
+			panelType
 			} = this.props;
 
 		return(
@@ -100,7 +81,6 @@ export class PreviewItemInfo extends React.PureComponent<IProps, any> {
 					</UserMarker>
 					{this.renderExtraInfo(extraInfo)}
 					{this.renderDateTime(createdAt)}
-					{this.renderViewModel(showModelButton)}
 					{this.renderActionButton(actionButton)}
 				</Details>
 			</Container>
