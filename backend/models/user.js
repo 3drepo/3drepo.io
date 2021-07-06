@@ -20,7 +20,6 @@
 const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
 const db = require("../handler/db");
-const crypto = require("crypto");
 const zxcvbn = require("zxcvbn");
 const utils = require("../utils");
 const Role = require("./role");
@@ -318,7 +317,7 @@ User.deleteStarredModel = async function (username, ts, modelID) {
 };
 
 User.generateApiKey = async function (username) {
-	const apiKey = crypto.randomBytes(16).toString("hex");
+	const apiKey = utils.generateHashString();
 	await db.update("admin", COLL_NAME, {user: username}, {$set: {"customData.apiKey" : apiKey}});
 	return apiKey;
 };
@@ -486,7 +485,7 @@ User.createUser = async function (logger, username, password, customData, tokenE
 	];
 
 	cleanedCustomData.emailVerifyToken = {
-		token: crypto.randomBytes(64).toString("hex"),
+		token: utils.generateHashString(),
 		expiredAt: expiryAt
 	};
 
@@ -613,7 +612,7 @@ User.getForgotPasswordToken = async function (userNameOrEmail) {
 	expiryAt.setHours(expiryAt.getHours() + config.tokenExpiry.forgotPassword);
 
 	const resetPasswordToken = {
-		token: crypto.randomBytes(64).toString("hex"),
+		token: utils.generateHashString(64),
 		expiredAt: expiryAt
 	};
 

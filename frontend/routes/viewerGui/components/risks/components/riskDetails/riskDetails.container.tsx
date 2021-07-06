@@ -21,7 +21,7 @@ import { createStructuredSelector } from 'reselect';
 import { selectCurrentUser } from '../../../../../../modules/currentUser';
 import { DialogActions } from '../../../../../../modules/dialog';
 import { selectJobsList, selectMyJob } from '../../../../../../modules/jobs';
-import { selectSettings } from '../../../../../../modules/model';
+import { selectSettings, selectUnit } from '../../../../../../modules/model';
 import {
 	selectActiveRiskComments,
 	selectActiveRiskDetails,
@@ -29,6 +29,7 @@ import {
 	selectExpandDetails,
 	selectFailedToLoad,
 	selectFetchingDetailsIsPending,
+	selectMeasureMode,
 	selectMitigationCriteria,
 	selectNewComment,
 	selectPostCommentIsPending,
@@ -65,6 +66,8 @@ const mapStateToProps = createStructuredSelector({
 	maxSequenceDate: selectEndDate,
 	selectedDate: selectSelectedStartingDate,
 	sequences: selectSequences,
+	units: selectUnit,
+	measureMode: selectMeasureMode
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -89,6 +92,10 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showDialog: DialogActions.showDialog,
 	showMitigationSuggestions: RisksActions.showMitigationSuggestions,
 	showSequenceDate: SequencesActions.showSequenceDate,
+	setMeasureMode: RisksActions.setMeasureMode,
+	removeMeasurement: RisksActions.removeMeasurement,
+	setMeasurementColor: RisksActions.setMeasurementColor,
+	setMeasurementName: RisksActions.setMeasurementName,
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(RiskDetails));

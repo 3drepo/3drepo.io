@@ -17,23 +17,27 @@
 
 import { push } from 'connected-react-router';
 import filesize from 'filesize';
-import { isEmpty, isEqual, map, omit } from 'lodash';
-import { all, put, select, takeLatest } from 'redux-saga/effects';
+import { isEmpty, isEqual, map, omit, take } from 'lodash';
+import { all, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 
 import * as queryString from 'query-string';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { DEFAULT_PROPERTIES, ISSUE_DEFAULT_HIDDEN_STATUSES, PRIORITIES, STATUSES } from '../../constants/issues';
 import { EXTENSION_RE } from '../../constants/resources';
 import { ROUTES } from '../../constants/routes';
+import { VIEWER_EVENTS } from '../../constants/viewer';
 import {
 	createAttachResourceComments,
 	createRemoveResourceComment
 } from '../../helpers/comments';
 import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
 import { prepareIssue } from '../../helpers/issues';
+import { disableConflictingMeasurementActions, generateName } from '../../helpers/measurements';
 import { prepareResources } from '../../helpers/resources';
+import { chopShapesUuids } from '../../helpers/shapes';
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
+import { Viewer } from '../../services/viewer/viewer';
 import { BoardActions } from '../board';
 import { ChatActions } from '../chat';
 import { selectCurrentUser } from '../currentUser';
@@ -46,6 +50,7 @@ import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { selectTopicTypes } from '../teamspace';
 import { TreeActions } from '../tree';
+import { ViewerGuiActions } from '../viewerGui';
 import { ViewpointsActions } from '../viewpoints';
 import { generateViewpoint } from '../viewpoints/viewpoints.sagas';
 import { IssuesActions, IssuesTypes } from './issues.redux';
@@ -54,7 +59,8 @@ import {
 	selectActiveIssueId,
 	selectComponentState,
 	selectFilteredIssues,
-	selectIssuesMap
+	selectIssuesMap,
+	selectMeasureMode,
 } from './issues.selectors';
 
 function* fetchIssues({teamspace, modelId, revision}) {
@@ -77,9 +83,11 @@ function* fetchIssue({teamspace, modelId, issueId}) {
 
 	try {
 		const {data} = yield API.getIssue(teamspace, modelId, issueId);
-		data.resources = prepareResources(teamspace, modelId, data.resources);
 
-		yield put(IssuesActions.fetchIssueSuccess(data));
+		const jobs = yield select(selectJobsList);
+		const preparedIssue = prepareIssue(data, jobs);
+
+		yield put(IssuesActions.fetchIssueSuccess(preparedIssue));
 	} catch (error) {
 		yield put(IssuesActions.fetchIssueFailure());
 		yield put(DialogActions.showEndpointErrorDialog('get', 'issue', error));
@@ -118,6 +126,8 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 			creator_role: userJob._id,
 		};
 
+		issue = chopShapesUuids(issue);
+
 		const { data: savedIssue } = yield API.saveIssue(teamspace, model, issue);
 
 		const jobs = yield select(selectJobsList);
@@ -144,7 +154,7 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 function* updateActiveIssue({ issueData }) {
 	try {
 		const { _id, rev_id, model, account, position } = yield select(selectActiveIssueDetails);
-		let { data: updatedIssue } = yield API.updateIssue(account, model, _id, rev_id, issueData);
+		let { data: updatedIssue } = yield API.updateIssue(account, model, _id, rev_id, chopShapesUuids(issueData));
 
 		updatedIssue = {...updatedIssue, ...issueData};
 
@@ -162,7 +172,7 @@ function* updateActiveIssue({ issueData }) {
 function* updateBoardIssue({ teamspace, modelId, issueData }) {
 	try {
 		const { _id, ...changedData } = issueData;
-		const { data: updatedIssue } = yield API.updateIssue(teamspace, modelId, _id, null, changedData);
+		const { data: updatedIssue } = yield API.updateIssue(teamspace, modelId, _id, null,  chopShapesUuids(changedData));
 		const jobs = yield select(selectJobsList);
 		const preparedIssue = prepareIssue(updatedIssue, jobs);
 
@@ -316,6 +326,8 @@ function* goToIssue({ issue }) {
 
 function* showDetails({ revision, issueId }) {
 	try {
+		yield cancelMeasureModeIfNeeded();
+
 		const issuesMap = yield select(selectIssuesMap);
 		const issue = issuesMap[issueId];
 
@@ -335,6 +347,8 @@ function* closeDetails() {
 	try {
 		const activeIssue = yield select(selectActiveIssueDetails);
 		const componentState = yield select(selectComponentState);
+
+		yield cancelMeasureModeIfNeeded();
 
 		if (componentState.showDetails) {
 			if (!isEqual(activeIssue.position, componentState.savedPin)) {
@@ -644,6 +658,105 @@ export function * updateActiveIssueViewpoint({screenshot}) {
 	yield put(IssuesActions.updateActiveIssue({viewpoint}));
 }
 
+const onMeasurementChanged = () => {
+	toggleMeasurementListeners(false);
+	dispatch(IssuesActions.setMeasureModeSuccess(''));
+};
+
+const onMeasurementCreated = (measurement) => {
+	dispatch(IssuesActions.addMeasurement(measurement));
+};
+
+function* updateIssueShapes(shapes) {
+	const activeIssue = yield select(selectActiveIssueDetails);
+	const isNewIssue = !Boolean(activeIssue._id);
+
+	if (isNewIssue) {
+		yield updateNewIssue({newIssue: {...activeIssue, shapes}});
+	} else {
+		yield updateActiveIssue({issueData: { shapes}});
+	}
+}
+
+export function* addMeasurement({ measurement }) {
+	const activeIssue = yield select(selectActiveIssueDetails);
+	let shapes = activeIssue.shapes || [];
+	measurement.name = generateName(measurement, shapes);
+	shapes = [...shapes, measurement];
+
+	yield updateIssueShapes(shapes);
+	// Because the shape is going to be displayed when the issue changes,
+	// the previous measurement will be removed in order to not display the same measurement twice
+	Viewer.removeMeasurement(measurement.uuid);
+}
+
+export function* removeMeasurement({ uuid }) {
+	const activeIssue = yield select(selectActiveIssueDetails);
+	const shapes = (activeIssue.shapes || []).filter((measurement) => measurement.uuid !== uuid);
+	yield updateIssueShapes(shapes);
+}
+
+function* cancelMeasureModeIfNeeded() {
+	const measureMode = yield select(selectMeasureMode);
+	if (measureMode) {
+		yield put(IssuesActions.setMeasureMode(''));
+		yield take(IssuesTypes.SET_MEASURE_MODE_SUCCESS);
+	}
+}
+
+function toggleMeasurementListeners(enabled) {
+	if (enabled) {
+		Viewer.on(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
+		Viewer.on(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
+	} else {
+		Viewer.off(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
+		Viewer.off(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
+	}
+}
+
+export function* setMeasureMode({ measureMode }) {
+	try {
+		toggleMeasurementListeners(false);
+		yield put(IssuesActions.setMeasureModeSuccess(measureMode));
+		yield Viewer.setMeasureMode(measureMode, false);
+
+		if (measureMode === '') {
+			return;
+		}
+
+		toggleMeasurementListeners(true);
+		disableConflictingMeasurementActions();
+
+		yield Viewer.enableEdgeSnapping();
+	} catch (error) {
+		DialogActions.showErrorDialog('set', `measure mode in issues to ${measureMode}`, error);
+	}
+}
+
+export function* setMeasurementColor({uuid, color}) {
+	const activeIssue = yield select(selectActiveIssueDetails);
+	const shapes = (activeIssue.shapes || []).map((measurement) => {
+		if (measurement.uuid === uuid) {
+			measurement = {...measurement, color};
+		}
+		return measurement;
+	});
+
+	yield updateIssueShapes(shapes);
+}
+
+export function* setMeasurementName({uuid, name}) {
+	const activeIssue = yield select(selectActiveIssueDetails);
+	const shapes = (activeIssue.shapes || []).map((measurement) => {
+		if (measurement.uuid === uuid) {
+			measurement = {...measurement, name};
+		}
+		return measurement;
+	});
+
+	yield updateIssueShapes(shapes);
+}
+
 export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.FETCH_ISSUES, fetchIssues);
 	yield takeLatest(IssuesTypes.FETCH_ISSUE, fetchIssue);
@@ -673,4 +786,9 @@ export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.GO_TO_ISSUE, goToIssue);
 	yield takeLatest(IssuesTypes.UPDATE_BOARD_ISSUE, updateBoardIssue);
 	yield takeLatest(IssuesTypes.UPDATE_ACTIVE_ISSUE_VIEWPOINT, updateActiveIssueViewpoint);
+	yield takeLatest(IssuesTypes.SET_MEASURE_MODE, setMeasureMode);
+	yield takeEvery(IssuesTypes.ADD_MEASUREMENT, addMeasurement);
+	yield takeEvery(IssuesTypes.REMOVE_MEASUREMENT, removeMeasurement);
+	yield takeEvery(IssuesTypes.SET_MEASUREMENT_COLOR, setMeasurementColor);
+	yield takeEvery(IssuesTypes.SET_MEASUREMENT_NAME, setMeasurementName);
 }
