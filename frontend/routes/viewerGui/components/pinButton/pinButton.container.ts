@@ -14,19 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
-import { createStructuredSelector } from 'reselect';
-import { MeasurementsActions } from '../../../../modules/measurements';
 import { withViewer } from '../../../../services/viewer/viewer';
 import { PinButton } from './pinButton.component';
 
-const mapStateToProps = createStructuredSelector({});
-
-export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	disableMeasure: MeasurementsActions.setDisabled,
-	deactivateMeasure: MeasurementsActions.deactivateMeasure,
-}, dispatch);
-
-export default withViewer(connect(mapStateToProps, mapDispatchToProps)(PinButton));
+export default withViewer(PinButton);

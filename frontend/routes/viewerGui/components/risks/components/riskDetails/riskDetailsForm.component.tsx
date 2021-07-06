@@ -23,7 +23,7 @@ import { debounce, get, isEmpty, isEqual } from 'lodash';
 import * as Yup from 'yup';
 
 import {
-	ATTACHMENTS_RISK_TYPE, MAIN_RISK_TYPE, RISK_TABS, SEQUENCING_RISK_TYPE, TREATMENT_RISK_TYPE,
+	ATTACHMENTS_RISK_TYPE, MAIN_RISK_TYPE, RISK_TABS, SEQUENCING_RISK_TYPE, SHAPES_RISK_TYPE, TREATMENT_RISK_TYPE,
 } from '../../../../../../constants/risks';
 import { LONG_TEXT_CHAR_LIM, VIEWER_PANELS_TITLES } from '../../../../../../constants/viewerGui';
 import { calculateLevelOfRisk } from '../../../../../../helpers/risks';
@@ -32,6 +32,7 @@ import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { AttachmentsFormTab } from '../attachmentsFormTab/attachmentsFormTab.component';
 import { MainRiskFormTab } from '../mainRiskFormTab/mainRiskFormTab.component';
 import { SequencingFormTab } from '../sequencingFormTab/sequencingFormTab.component';
+import { ShapesFormTab } from '../shapesFormTab/shapesFormTab.component';
 import { TreatmentRiskFormTab } from '../treatmentFormTab/treatmentFormTab.component';
 import { StyledTab, StyledTabs, TabContent } from './riskDetails.styles';
 
@@ -46,6 +47,7 @@ interface IProps {
 	myJob: any;
 	isValid: boolean;
 	dirty: boolean;
+	horizontal: boolean;
 	onSubmit: (values) => void;
 	onValueChange: (event) => void;
 	handleChange: (event) => void;
@@ -69,10 +71,16 @@ interface IProps {
 	onTakeScreenshot: () => void;
 	onUploadScreenshot: (image) => void;
 	showSequenceDate: (date) => void;
+	setMeasureMode: (measureMode) => void;
+	removeMeasurement: (uuid) => void;
+	setMeasurementColor: (uuid, color) => void;
+	setMeasurementName: (uuid, type, name) => void;
 	minSequenceDate: number;
 	maxSequenceDate: number;
 	selectedDate: Date;
 	sequences: any[];
+	units: any;
+	measureMode: string;
 }
 
 interface IState {
@@ -200,6 +208,20 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		/>
 	)
 
+	public showShapesContent = (active) => (
+		<ShapesFormTab
+			active={active}
+			units={this.props.units}
+			measureMode={this.props.measureMode}
+			removeMeasurement={this.props.removeMeasurement}
+			setMeasurementColor={this.props.setMeasurementColor}
+			setMeasurementName={this.props.setMeasurementName}
+			setMeasureMode={this.props.setMeasureMode}
+			shapes={this.props.risk.shapes}
+			addButtonsEnabled={!this.props.horizontal}
+		/>
+	)
+
 	public showAttachmentsContent = (active) => (
 		<AttachmentsFormTab active={active} resources={this.props.risk.resources} {...this.props} />
 	)
@@ -230,17 +252,20 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					indicatorColor="secondary"
 					textColor="primary"
 					onChange={this.handleChange}
-					variant="fullWidth"
+					variant="scrollable"
+					scrollButtons="auto"
 				>
 					<StyledTab label={RISK_TABS.RISK} value={MAIN_RISK_TYPE} />
 					<StyledTab label={RISK_TABS.TREATMENT} value={TREATMENT_RISK_TYPE} />
 					<StyledTab label={RISK_TABS.SEQUENCING} value={SEQUENCING_RISK_TYPE} />
+					<StyledTab label={RISK_TABS.SHAPES} value={SHAPES_RISK_TYPE} />
 					<StyledTab {...this.attachmentsProps} value={ATTACHMENTS_RISK_TYPE} />
 				</StyledTabs>
 				<TabContent>
 					{this.showRiskContent(activeTab === MAIN_RISK_TYPE)}
 					{this.showTreatmentContent(activeTab === TREATMENT_RISK_TYPE)}
 					{this.showSequencingContent(activeTab === SEQUENCING_RISK_TYPE)}
+					{this.showShapesContent(activeTab === SHAPES_RISK_TYPE)}
 					{this.showAttachmentsContent(activeTab === ATTACHMENTS_RISK_TYPE)}
 				</TabContent>
 			</Form>

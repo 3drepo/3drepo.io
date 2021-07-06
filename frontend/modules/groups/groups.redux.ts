@@ -57,6 +57,7 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	setCriteriaFieldState: ['criteriaFieldState'],
 	resetToSavedSelection: ['groupId'],
 	resetComponentState: [],
+	updateEditingGroup: ['properties']
 }, { prefix: 'GROUPS/' });
 
 export interface ICriteriaFieldState {
@@ -74,7 +75,7 @@ export interface IGroupComponentState {
 	activeGroup: any;
 	showDetails: boolean;
 	expandDetails: boolean;
-	newGroup: any;
+	editingGroup: any;
 	updatedGroup: any;
 	selectedFilters: any[];
 	highlightedGroups: any;
@@ -112,7 +113,7 @@ export const INITIAL_STATE: IGroupState = {
 		highlightedGroups: {},
 		showDetails: false,
 		expandDetails: true,
-		newGroup: {},
+		editingGroup: {},
 		updatedGroup: {},
 		selectedFilters: [],
 		totalMeshes: 0,
@@ -185,29 +186,29 @@ export const setColorOverrides = (state = INITIAL_STATE, { groupIds }) => {
 
 export const updateGroupSuccess = (state = INITIAL_STATE, { group }) => {
 	const groupsMap = { ...state.groupsMap };
-	const newGroup = { ...state.componentState.newGroup };
+	const editingGroup = { ...state.componentState.editingGroup };
 
 	groupsMap[group._id] = group;
 
-	if (newGroup) {
-		newGroup.willBeUpdated = false;
-		newGroup.objects = group.objects;
-		newGroup.totalSavedMeshes = group.totalSavedMeshes;
+	if (editingGroup) {
+		editingGroup.willBeUpdated = false;
+		editingGroup.objects = group.objects;
+		editingGroup.totalSavedMeshes = group.totalSavedMeshes;
 	}
 
 	if (state.componentState.allOverridden) {
 		state = addColorOverride(state, { groupId: group._id});
 	}
 
-	return { ...state, groupsMap, componentState: { ...state.componentState, newGroup } };
+	return { ...state, groupsMap, componentState: { ...state.componentState, editingGroup } };
 };
 
 export const deleteGroupsSuccess = (state = INITIAL_STATE, { groupIds }) => {
 	const groupsMap = { ...state.groupsMap };
-	const newGroup = { ...state.componentState.newGroup };
+	const editingGroup = { ...state.componentState.editingGroup };
 
-	if (newGroup) {
-		newGroup.willBeRemoved = false;
+	if (editingGroup) {
+		editingGroup.willBeRemoved = false;
 	}
 
 	groupIds.forEach((groupId) => {
@@ -215,30 +216,30 @@ export const deleteGroupsSuccess = (state = INITIAL_STATE, { groupIds }) => {
 		delete groupsMap[groupId];
 	});
 
-	return { ...state, groupsMap, componentState: { ...state.componentState, newGroup } };
+	return { ...state, groupsMap, componentState: { ...state.componentState, editingGroup } };
 };
 
 export const showUpdateInfo = (state = INITIAL_STATE, {}) => {
-	const newGroup = { ...state.componentState.newGroup };
+	const editingGroup = { ...state.componentState.editingGroup };
 
-	if (newGroup) {
-		newGroup.willBeUpdated = true;
+	if (editingGroup) {
+		editingGroup.willBeUpdated = true;
 	}
-	return { ...state, componentState: { ...state.componentState, newGroup } };
+	return { ...state, componentState: { ...state.componentState, editingGroup } };
 };
 
 export const showDeleteInfo = (state = INITIAL_STATE, { groupIds }) => {
 	const groupsMap = { ...state.groupsMap };
-	const newGroup = { ...state.componentState.newGroup };
-	if (newGroup) {
-		newGroup.willBeRemoved = true;
+	const editingGroup = { ...state.componentState.editingGroup };
+	if (editingGroup) {
+		editingGroup.willBeRemoved = true;
 	}
 
 	groupIds.forEach((groupId) => {
 		groupsMap[groupId].willBeRemoved = true;
 	});
 
-	return { ...state, groupsMap, componentState: { ...state.componentState, newGroup } };
+	return { ...state, groupsMap, componentState: { ...state.componentState, editingGroup } };
 };
 
 const resetComponentState = (state = INITIAL_STATE) => {
@@ -258,6 +259,13 @@ const clearColorOverridesSuccess = (state = INITIAL_STATE) => {
 	return { ...state, colorOverrides: [], componentState};
 };
 
+const updateEditingGroup = (state = INITIAL_STATE, {properties}) => {
+	let { editingGroup } = state.componentState;
+	editingGroup = {...editingGroup, ...properties};
+	const componentState = { ...state.componentState, editingGroup };
+
+	return { ...state, componentState};
+};
 export const reducer = createReducer(INITIAL_STATE, {
 	[GroupsTypes.FETCH_GROUPS_SUCCESS]: fetchGroupsSuccess,
 	[GroupsTypes.TOGGLE_PENDING_STATE]: togglePendingState,
@@ -274,5 +282,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[GroupsTypes.SHOW_UPDATE_INFO]: showUpdateInfo,
 	[GroupsTypes.RESET_COMPONENT_STATE]: resetComponentState,
 	[GroupsTypes.CLEAR_COLOR_OVERRIDES_SUCCESS]: clearColorOverridesSuccess,
-	[GroupsTypes.SET_OVERRIDE_ALL_SUCCESS]: setOverrideAllSuccess
+	[GroupsTypes.SET_OVERRIDE_ALL_SUCCESS]: setOverrideAllSuccess,
+	[GroupsTypes.UPDATE_EDITING_GROUP]: updateEditingGroup,
 });
