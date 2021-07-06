@@ -22,6 +22,7 @@ import { ISSUE_DEFAULT_HIDDEN_STATUSES } from '../../constants/issues';
 import { prepareComments, transformCustomsLinksToMarkdown } from '../../helpers/comments';
 import { hasPin, issueToPin } from '../../helpers/pins';
 import { searchByFilters } from '../../helpers/searching';
+import { getHighlightedTicketShapes, getTicketsShapes, shouldDisplayShapes } from '../../helpers/shapes';
 import { sortByDate } from '../../helpers/sorting';
 import { selectCurrentModel } from '../model';
 import { selectQueryParams } from '../router/router.selectors';
@@ -65,9 +66,17 @@ export const selectActiveIssue = createSelector(
 	selectIssuesMap, selectActiveIssueId, (issuesMap, activeIssueId) => issuesMap[activeIssueId]
 );
 
+export const selectShowDetails = createSelector(
+	selectComponentState, (state) => state.showDetails
+);
+
+export const selectNewIssueDetails = createSelector(
+	selectComponentState, selectShowDetails, (state, showDetails) => showDetails ? state.newIssue : {}
+);
+
 export const selectActiveIssueDetails = createSelector(
-	selectActiveIssue, selectComponentState, (activeIssue, componentState) => {
-		return activeIssue || componentState.newIssue;
+	selectActiveIssue, selectNewIssueDetails, (activeIssue, newIssue) => {
+		return activeIssue || newIssue;
 	}
 );
 
@@ -83,16 +92,8 @@ export const selectActiveIssueComments = createSelector(
 		}))
 );
 
-export const selectShowDetails = createSelector(
-	selectComponentState, (state) => state.showDetails
-);
-
 export const selectExpandDetails = createSelector(
 	selectComponentState, (state) => state.expandDetails
-);
-
-export const selectNewIssueDetails = createSelector(
-	selectComponentState, (state) => state.newIssue
 );
 
 export const selectNewComment = createSelector(
@@ -181,3 +182,18 @@ export const selectPins = createSelector(
 
 	return pinsToShow;
 });
+
+export const selectMeasureMode = createSelector(
+	selectComponentState, (componentState) => componentState.measureMode
+);
+
+export const selectShapes = createSelector(
+	selectFilteredIssues, selectActiveIssueDetails, selectShowDetails,
+	selectSelectedSequence, selectSelectedStartingDate, selectSelectedEndingDate,
+	getTicketsShapes
+);
+
+export const selectHighlightedShapes =  createSelector(
+	selectActiveIssueDetails, selectSelectedSequence, selectShapes, selectShowDetails,
+	getHighlightedTicketShapes
+);

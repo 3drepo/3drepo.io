@@ -16,9 +16,14 @@
  */
 
 import { all, put, select, takeLatest } from 'redux-saga/effects';
+import { VIEWER_EVENTS } from '../../constants/viewer';
+import { disableConflictingMeasurementActions, generateName } from '../../helpers/measurements';
 
 import { Viewer } from '../../services/viewer/viewer';
+import { BimActions } from '../bim';
 import { DialogActions } from '../dialog';
+import { dispatch } from '../store';
+import { ViewerGuiActions } from '../viewerGui';
 import {
 	selectAreaMeasurements,
 	selectEdgeSnapping,
@@ -30,51 +35,44 @@ import {
 	MeasurementsActions,
 	MeasurementsTypes,
 } from './';
-import { MEASURE_TYPE_NAME, MEASURE_TYPE_STATE_MAP, MEASURING_MODE } from './measurements.constants';
+import { MEASURE_TYPE_NAME, MEASURE_TYPE_STATE_MAP } from './measurements.constants';
 
-export function* activateMeasure() {
-	try {
-		yield all([
-			Viewer.activateMeasure(),
-			put(MeasurementsActions.setActiveSuccess(true))
-		]);
-	} catch (error) {
-		DialogActions.showErrorDialog('activate', 'measure', error);
+const onMeasurementCreated = (measure) => {
+	dispatch(MeasurementsActions.addMeasurement(measure));
+};
+
+function toggleMeasurementListeners(enabled) {
+	if (enabled) {
+		Viewer.on(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
+		Viewer.on(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
+	} else {
+		Viewer.off(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
+		Viewer.off(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
 	}
 }
 
-export function* deactivateMeasure() {
-	try {
-		yield all([
-			Viewer.disableMeasure(),
-			put(MeasurementsActions.setActiveSuccess(false))
-		]);
-	} catch (error) {
-		DialogActions.showErrorDialog('deactivate', 'measure', error);
-	}
-}
+const onMeasurementChanged = () => {
+	toggleMeasurementListeners(false);
+	dispatch(MeasurementsActions.setMeasureModeSuccess(''));
+};
 
 export function* setMeasureMode({ mode }) {
 	try {
+		toggleMeasurementListeners(false);
+		yield put(MeasurementsActions.setMeasureModeSuccess(mode));
+		yield Viewer.setMeasureMode(mode);
 
-		const modeReset = mode === '';
-		const pointMode = mode === MEASURING_MODE.POINT;
-
-		if (modeReset || pointMode) {
-			yield put(MeasurementsActions.setMeasureModeSuccess(mode));
-		} else {
-			yield all([
-				Viewer.setMeasureMode(mode),
-				put(MeasurementsActions.setMeasureModeSuccess(mode))
-			]);
+		if (mode === '') {
+			return;
 		}
+
+		yield Viewer.setVisibilityOfMeasurementsLabels(true);
+		toggleMeasurementListeners(true);
+		disableConflictingMeasurementActions();
 
 		const isSnapping = yield select(selectEdgeSnapping);
 
-		// NOTE: Order matters here, as setPinDropMode will reset snapping
-		yield Viewer.setPinDropMode(pointMode, isSnapping);
-
-		if (isSnapping && !modeReset) {
+		if (isSnapping) {
 			yield Viewer.enableEdgeSnapping();
 		} else {
 			yield Viewer.disableEdgeSnapping();
@@ -102,13 +100,7 @@ export function* addMeasurement({ measurement }) {
 
 		if (measurementStateName) {
 			const measurementsState = yield select(selectMeasurementsDomain);
-			const index = measurementsState[measurementStateName].length + 1;
-
-			measurement.name = `${MEASURE_TYPE_NAME[measurement.type]} ${index}`;
-			measurement.checked = true;
-			measurement.color.r = measurement.color.r * 255;
-			measurement.color.g = measurement.color.g * 255;
-			measurement.color.b = measurement.color.b * 255;
+			measurement.name =  generateName(measurement,  measurementsState[measurementStateName]);
 
 			yield Viewer.setMeasurementName(measurement.uuid, measurement.name);
 			yield put(MeasurementsActions.addMeasurementSuccess(measurement));
@@ -129,34 +121,9 @@ export function* removeMeasurement({ uuid }) {
 	}
 }
 
-export function* setMeasureActive({ isActive }) {
-	try {
-		if (isActive) {
-			yield put(MeasurementsActions.activateMeasure());
-		} else {
-			yield put(MeasurementsActions.deactivateMeasure());
-		}
-	} catch (error) {
-		DialogActions.showErrorDialog('toggle', 'measure', error);
-	}
-}
-
-export function* setDisabled({ isDisabled }) {
-	try {
-		yield put(MeasurementsActions.setDisabledSuccess(isDisabled));
-
-		if (isDisabled) {
-			yield put(MeasurementsActions.setActiveSuccess(false));
-		}
-	} catch (error) {
-		DialogActions.showErrorDialog('deactivate', 'measure', error);
-	}
-}
-
 export function* setMeasurementColor({ uuid, color }) {
-	const colorToSet = [color.r / 255, color.g / 255, color.b / 255, color.a];
 	try {
-		yield Viewer.setMeasurementColor(uuid, colorToSet);
+		yield Viewer.setMeasurementColor(uuid, color);
 		yield put(MeasurementsActions.setMeasurementColorSuccess(uuid, color));
 	} catch (error) {
 		DialogActions.showErrorDialog('set color', 'measure', error);
@@ -179,8 +146,7 @@ export function* resetMeasurementColors() {
 		const pointMeasurements = yield select(selectPointMeasurements);
 
 		const setDefaultColor = async ({ uuid, color }) => {
-			const colorToSet = [color.r / 255, color.g / 255, color.b / 255, color.a];
-			await Viewer.setMeasurementColor(uuid, colorToSet);
+			await Viewer.setMeasurementColor(uuid, color);
 		};
 
 		if (areaMeasurements.length) {
@@ -191,7 +157,7 @@ export function* resetMeasurementColors() {
 			lengthMeasurements.forEach(setDefaultColor);
 		}
 
-		if (lengthMeasurements.length) {
+		if (pointMeasurements.length) {
 			pointMeasurements.forEach(setDefaultColor);
 		}
 
@@ -231,7 +197,10 @@ export function* setMeasureXyzDisplay({ xyzDisplay }) {
 
 export function* clearMeasurements() {
 	try {
-		yield Viewer.clearMeasurements();
+		const areaMeasurements = yield select(selectAreaMeasurements);
+		const lengthMeasurements = yield select(selectLengthMeasurements);
+
+		[...areaMeasurements, ...lengthMeasurements].forEach(({uuid}) => Viewer.removeMeasurement(uuid));
 		yield put(MeasurementsActions.clearMeasurementsSuccess());
 	} catch (error) {
 		DialogActions.showErrorDialog('clear', 'measurements', error);
@@ -249,10 +218,6 @@ export function* resetMeasurementTool() {
 }
 
 export default function* MeasurementsSaga() {
-	yield takeLatest(MeasurementsTypes.ACTIVATE_MEASURE, activateMeasure);
-	yield takeLatest(MeasurementsTypes.DEACTIVATE_MEASURE, deactivateMeasure);
-	yield takeLatest(MeasurementsTypes.SET_MEASURE_ACTIVE, setMeasureActive);
-	yield takeLatest(MeasurementsTypes.SET_DISABLED, setDisabled);
 	yield takeLatest(MeasurementsTypes.SET_MEASURE_MODE, setMeasureMode);
 	yield takeLatest(MeasurementsTypes.SET_MEASURE_UNITS, setMeasureUnits);
 	yield takeLatest(MeasurementsTypes.ADD_MEASUREMENT, addMeasurement);

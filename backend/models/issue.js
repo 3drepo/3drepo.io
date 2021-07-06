@@ -55,6 +55,7 @@ const fieldTypes = {
 	"viewCount": "[object Number]",
 	"viewpoint": "[object Object]",
 	"viewpoints": "[object Array]",
+	"shapes": "[object Array]",
 	"extras": "[object Object]"
 };
 

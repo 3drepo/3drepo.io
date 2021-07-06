@@ -20,6 +20,7 @@
 const _ = require("lodash");
 const sharp = require("sharp");
 const nodeuuid = require("uuid/v1");
+const yup = require("yup");
 const uuidparse = require("uuid-parse");
 const mongo = require("mongodb");
 
@@ -68,6 +69,8 @@ function Utils() {
 			return false;
 		}
 	};
+
+	this.uuidSchema = yup.object().test((val) => val === undefined  || this.isUUIDObject(val));
 
 	this.convertQueryValue = (value, type) => {
 		switch(type) {
@@ -174,6 +177,36 @@ function Utils() {
 		}
 
 		return self.stringToUUID(nodeuuid());
+	};
+
+	/** *****************************************************************************
+	* Generate a set of unique UUIDs
+	* @returns Array{Buffer} - Binary representation of a UUID
+	*******************************************************************************/
+	this.generateUUIDs = function(length = 0, options) {
+		const generatedUUIDs = new Set();
+
+		let _id = nodeuuid();
+		for (let i = 0; i < length; i++) {
+
+			while (generatedUUIDs.has(_id)) { // guarantee uniqueness
+				_id = nodeuuid();
+			}
+
+			generatedUUIDs.add(_id);
+		}
+
+		let ids = [];
+
+		if(options && options.string) {
+			ids = Array.from(generatedUUIDs);
+		} else {
+			for (const id of generatedUUIDs) {
+				ids.push(self.stringToUUID(id));
+			}
+		}
+
+		return ids;
 	};
 
 	/** *****************************************************************************
