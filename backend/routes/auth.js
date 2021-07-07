@@ -21,6 +21,7 @@ const express = require("express");
 const router = express.Router({mergeParams: true});
 const responseCodes = require("../response_codes.js");
 const C = require("../constants");
+const sessionCheck = require("../middlewares/sessionCheck");
 const middlewares = require("../middlewares/middlewares");
 const config = require("../config");
 const utils = require("../utils");
@@ -110,7 +111,7 @@ router.post("/logout", logout);
  *	"username": "alice"
  * }
  */
-router.get("/login", checkLogin);
+router.get("/login", middlewares.loggedIn, checkLogin);
 
 /**
  * @api {post} /forgot-password Forgot password
@@ -587,7 +588,7 @@ function login(req, res, next) {
 
 		req[C.REQ_REPO].logger.logInfo("Authenticating user", { username: req.body.username});
 
-		if(req.session.user) {
+		if(sessionCheck(req)) {
 			return responseCodes.respond(responsePlace, req, res, next, responseCodes.ALREADY_LOGGED_IN, responseCodes.ALREADY_LOGGED_IN);
 		}
 
@@ -603,15 +604,11 @@ function login(req, res, next) {
 }
 
 function checkLogin(req, res, next) {
-	if (!req.session || !req.session.user) {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.NOT_LOGGED_IN, {});
-	} else {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {username: req.session.user.username});
-	}
+	responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {username: req.session.user.username});
 }
 
 function logout(req, res, next) {
-	if(!req.session || !req.session.user) {
+	if(!sessionCheck(req)) {
 		return responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.NOT_LOGGED_IN, {});
 	}
 
