@@ -208,8 +208,8 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Load an Unreal PixelStreaming Viewer into the provided Canvas. The Pixel Streaming Viewer is a js class
-	 * that manages a WebRtc PeerConnection to a remote Unreal instance via a video stream & data channel
+	 * Load an Unreal PixelStreaming Viewer into the provided Div. The PixelStreaming Viewer is a class
+	 * that manages a WebRtc PeerConnection to a remote Unreal instance via a video stream & data channel.
  	 * @category Configurations
 	 * @param div - the html dom element that the viewer should be created under
 	 * @param config - an object describing the configuration of the viewer
@@ -218,7 +218,9 @@ export class UnityUtil {
 	 */
 	public static loadUnreal(div: any, config: UnrealConfig) : Promise<void> {
 		// The client must load the PixelStreaming dependencies before beginning if they wish to use PixelStreaming
-		// todo: test whether the pixel streaming functionality is available here/update this to load the pixel streaming functionality
+		if(typeof createPixelStreamingInstance != "function"){
+			console.error("An application must load the Unreal PixelStreaming dependencies before attemping to load the viewer");
+		}
 
 		if (Object.prototype.toString.call(div) === '[object String]') {
 			// tslint:disable-next-line
