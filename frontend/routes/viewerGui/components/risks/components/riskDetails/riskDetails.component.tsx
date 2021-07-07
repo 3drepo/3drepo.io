@@ -263,8 +263,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		this.props.setState({ newRisk });
 
 		if (!this.isNewRisk) {
-			const { teamspace, model, updateRisk } = this.props;
-			updateRisk(teamspace, model, {name});
+			this.props.updateRisk({name});
 		}
 	}
 
