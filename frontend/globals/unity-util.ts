@@ -14,10 +14,19 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-declare var SendMessage;
-declare var createUnityInstance;
 
-import { IS_FIREFOX } from '../helpers/browser';
+declare var createUnityInstance;
+declare var createPixelStreamingInstance;
+
+/**
+ * The required properties of the Pixel Streaming configuration for the loadUnreal method.
+ */
+interface UnrealConfig {
+	/** The fully qualified address of the matchmaking server */
+	serverUri: string,
+	/** Whether to attempt to connect as soon as createUnrealInstance is called; be aware that many browsers will not allow the session to start without explicit interaction from the user. */
+	autoConnect: boolean
+}
 
 export class UnityUtil {
 	/** @hidden */
@@ -100,6 +109,8 @@ export class UnityUtil {
 	/** @hidden */
 	public static defaultHighlightColor = [1, 1, 0];
 
+	private static chunkSize: number = 20000;
+
 	/**
 	* Initialise Unity.
 	* @category Configurations
@@ -124,7 +135,7 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Launch the Unity Game.
+	 * Load the Unity Viewer into the provided Canvas. The Unity Viewer is a WebGL based native game
  	 * @category Configurations
 	 * @param canvas - the html dom of the unity canvas
 	 * @param host - host server URL (e.g. https://www.3drepo.io)
@@ -195,6 +206,36 @@ export class UnityUtil {
 
 		return UnityUtil.onReady();
 	}
+
+	/**
+	 * Load an Unreal PixelStreaming Viewer into the provided Canvas. The Pixel Streaming Viewer is a js class
+	 * that manages a WebRtc PeerConnection to a remote Unreal instance via a video stream & data channel
+ 	 * @category Configurations
+	 * @param div - the html dom element that the viewer should be created under
+	 * @param config - an object describing the configuration of the viewer
+	 * @return returns a promise which resolves when the game is loaded.
+	 *
+	 */
+	public static loadUnreal(div: any, config: UnrealConfig) : Promise<void> {
+		// The client must load the PixelStreaming dependencies before beginning if they wish to use PixelStreaming
+		// todo: test whether the pixel streaming functionality is available here/update this to load the pixel streaming functionality
+
+		if (Object.prototype.toString.call(div) === '[object String]') {
+			// tslint:disable-next-line
+			div = document.getElementById(div);
+		}
+
+		// Reduce the chunk size to a value that won't exceed the webrtc data channels 65k limit
+		UnityUtil.chunkSize = 100;
+
+		createPixelStreamingInstance(div, config)
+		.then((instance) => {
+			UnityUtil.unityInstance = instance;
+		}).catch(UnityUtil.onUnityError);
+
+		return UnityUtil.onReady();
+	}
+
 
 	/**
 	 * @category Configurations
@@ -1585,8 +1626,9 @@ export class UnityUtil {
 	 * @hidden
 	 * A helper function to split the calls into multiple calls when the array is too large for SendMessage to handle
 	 */
-	public static multipleCallInChunks(arrLength: number, func: (start: number, end: number) => any, chunkSize = 20000) {
+	public static multipleCallInChunks(arrLength: number, func: (start: number, end: number) => any) {
 		let index = 0;
+		let chunkSize = UnityUtil.chunkSize;
 		while (index < arrLength) {
 			const end = index + chunkSize >= arrLength ? undefined : index + chunkSize;
 			func(index, end);
