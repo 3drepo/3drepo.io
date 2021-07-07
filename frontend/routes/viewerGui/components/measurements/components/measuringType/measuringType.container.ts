@@ -26,11 +26,10 @@ import { MeasuringType } from './measuringType.component';
 
 const mapStateToProps = createStructuredSelector({
 	isMetadataActive: selectIsActive,
-	isClipEdit: selectIsClipEdit,
+	isClipEdit: selectIsClipEdit
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	setPanelVisibility: ViewerGuiActions.setPanelVisibility,
 	setClipEdit: ViewerGuiActions.setClipEdit,
 	setMetadataActive: BimActions.setIsActive,
 }, dispatch);

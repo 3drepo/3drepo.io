@@ -21,7 +21,6 @@ import { createStructuredSelector } from 'reselect';
 
 import { selectTeamspaceUsers } from '../../../../modules/comments';
 import { DialogActions } from '../../../../modules/dialog';
-import { MeasurementsActions } from '../../../../modules/measurements';
 import { selectIsModelLoaded } from '../../../../modules/viewerGui';
 import { withViewer } from '../../../../services/viewer/viewer';
 import { CommentForm } from './commentForm.component';
@@ -33,8 +32,6 @@ const mapStateToProps = createStructuredSelector({
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showScreenshotDialog: DialogActions.showScreenshotDialog,
-	setDisabled: MeasurementsActions.setDisabled,
-	deactivateMeasure: MeasurementsActions.deactivateMeasure,
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(CommentForm));

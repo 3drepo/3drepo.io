@@ -27,6 +27,7 @@ import {
 	ATTACHMENTS_ISSUE_TAB,
 	ISSUE_PROPERTIES_TAB,
 	ISSUE_SEQUENCING_TAB,
+	ISSUE_SHAPES_TAB,
 	ISSUE_TABS,
 } from '../../../../../../constants/issues';
 import { LONG_TEXT_CHAR_LIM, VIEWER_PANELS_TITLES } from '../../../../../../constants/viewerGui';
@@ -34,8 +35,9 @@ import { canChangeAssigned, canChangeBasicProperty, canComment } from '../../../
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { AttachmentsFormTab } from '../../../risks/components/attachmentsFormTab/attachmentsFormTab.component';
 import { SequencingFormTab } from '../../../risks/components/sequencingFormTab/sequencingFormTab.component';
+import { ShapesFormTab } from '../../../risks/components/shapesFormTab/shapesFormTab.component';
 import { MainIssueFormTab } from '../mainIssueFormTab/mainIssueFormTab.component';
-import { StyledTab, TabContent } from './issueDetails.styles';
+import { StyledTab, StyledTabs, TabContent } from './issueDetails.styles';
 
 interface IProps {
 	issue: any;
@@ -48,6 +50,7 @@ interface IProps {
 	myJob: any;
 	isValid: boolean;
 	dirty: boolean;
+	horizontal: boolean;
 	onSubmit: (values) => void;
 	onValueChange: (event) => void;
 	handleChange: (event) => void;
@@ -68,10 +71,16 @@ interface IProps {
 	onTakeScreenshot: () => void;
 	onUploadScreenshot: (image) => void;
 	showSequenceDate: (date) => void;
+	setMeasureMode: (measureMode) => void;
+	removeMeasurement: (uuid) => void;
+	setMeasurementColor: (uuid, color) => void;
+	setMeasurementName: (uuid, type, name) => void;
 	minSequenceDate: number;
 	maxSequenceDate: number;
 	selectedDate: Date;
 	sequences: any[];
+	units: any;
+	measureMode: string;
 }
 
 interface IState {
@@ -169,6 +178,20 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		/>
 	)
 
+	public showShapesContent = (active) => (
+		<ShapesFormTab
+			active={active}
+			units={this.props.units}
+			measureMode={this.props.measureMode}
+			removeMeasurement={this.props.removeMeasurement}
+			setMeasurementColor={this.props.setMeasurementColor}
+			setMeasurementName={this.props.setMeasurementName}
+			setMeasureMode={this.props.setMeasureMode}
+			shapes={this.props.issue.shapes}
+			addButtonsEnabled={!this.props.horizontal}
+		/>
+	)
+
 	public showAttachmentsContent = (active) => (
 		<AttachmentsFormTab active={active} resources={this.props.issue.resources} {...this.props} />
 	)
@@ -195,19 +218,23 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 
 		return (
 			<Form>
-				<Tabs
+				<StyledTabs
 					value={activeTab}
 					indicatorColor="secondary"
 					textColor="primary"
 					onChange={this.handleChange}
+					variant="scrollable"
+					scrollButtons="auto"
 				>
 					<StyledTab label={ISSUE_TABS.ISSUE} value={ISSUE_PROPERTIES_TAB} />
 					<StyledTab label={ISSUE_TABS.SEQUENCING} value={ISSUE_SEQUENCING_TAB} />
+					<StyledTab label={ISSUE_TABS.SHAPES} value={ISSUE_SHAPES_TAB} />
 					<StyledTab {...this.attachmentsProps} value={ATTACHMENTS_ISSUE_TAB} />
-				</Tabs>
+				</StyledTabs>
 				<TabContent>
 					{this.showIssueContent(activeTab === ISSUE_PROPERTIES_TAB)}
 					{this.showSequencingContent(activeTab === ISSUE_SEQUENCING_TAB)}
+					{this.showShapesContent(activeTab === ISSUE_SHAPES_TAB)}
 					{this.showAttachmentsContent(activeTab === ATTACHMENTS_ISSUE_TAB)}
 				</TabContent>
 			</Form>

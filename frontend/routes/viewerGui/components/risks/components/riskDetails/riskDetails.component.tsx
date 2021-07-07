@@ -54,7 +54,7 @@ interface IProps {
 	setState: (componentState) => void;
 	fetchRisk: (teamspace, model, riskId) => void;
 	saveRisk: (teamspace, modelId, risk, revision, finishSubmitting, disableViewer) => void;
-	updateRisk: (teamspace, modelId, risk) => void;
+	updateRisk: (risk) => void;
 	cloneRisk: (dialogId?: string) => void;
 	postComment: (teamspace, modelId, riskData, ignoreViewer, finishSubmitting) => void;
 	removeComment: (teamspace, modelId, riskData) => void;
@@ -76,10 +76,16 @@ interface IProps {
 	postCommentIsPending?: boolean;
 	updateViewpoint: (screenshot?: string) => void;
 	showSequenceDate: (date) => void;
+	setMeasureMode: (measureMode) => void;
+	removeMeasurement: (uuid) => void;
+	setMeasurementColor: (uuid, color) => void;
+	setMeasurementName: (uuid, type, name) => void;
 	minSequenceDate: Date;
 	maxSequenceDate: Date;
 	selectedDate: Date;
 	sequences: any[];
+	units: string;
+	measureMode: string;
 }
 
 interface IState {
@@ -253,12 +259,12 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleRiskFormSubmit = (values) => {
-		const { teamspace, model, updateRisk, updateNewRisk } = this.props;
+		const { updateRisk, updateNewRisk } = this.props;
 
 		if (this.isNewRisk) {
 			updateNewRisk(mergeData(this.riskData, values));
 		} else {
-			updateRisk(teamspace, model, diffData(values, this.riskData));
+			updateRisk(diffData(values, this.riskData));
 		}
 	}
 
@@ -292,11 +298,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				canComment={this.userCanComment()}
 				showMitigationSuggestions={this.props.showMitigationSuggestions}
 				formRef={this.formRef}
-				showSequenceDate={this.props.showSequenceDate}
-				minSequenceDate={this.props.minSequenceDate}
-				maxSequenceDate={this.props.maxSequenceDate}
-				selectedDate={this.props.selectedDate}
-				sequences={this.props.sequences}
+				{...this.props}
 			/>
 		);
 	}
@@ -372,16 +374,16 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public onPositionSave = () => {
-		const { teamspace, model, risk, updateRisk } = this.props;
+		const {risk, updateRisk } = this.props;
 
 		if (risk._id) {
-			updateRisk(teamspace, model, { position: risk.position });
+			updateRisk({ position: risk.position });
 		}
 	}
 
 	public handleUpdateScreenshot =
 		(screenshot, disableViewpointSuggestion = false, forceViewpointUpdate = false) => {
-		const { teamspace, model, updateRisk, disableViewer } = this.props;
+		const { updateRisk, disableViewer } = this.props;
 
 		if (this.isNewRisk) {
 			this.props.setState({ newRisk: {
@@ -399,7 +401,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 					if (forceViewpointUpdate) {
 						this.handleViewpointUpdate(viewpoint);
 					} else {
-						updateRisk(teamspace, model, { viewpoint });
+						updateRisk({ viewpoint });
 					}
 				}
 			}
@@ -418,7 +420,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleViewpointUpdateSuggest = (viewpoint) => {
-		const { showConfirmDialog, teamspace, model, updateRisk } = this.props;
+		const { showConfirmDialog, updateRisk } = this.props;
 		showConfirmDialog({
 			title: 'Save Viewpoint?',
 			content: `
@@ -427,7 +429,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 			onConfirm: async () => {
 				await this.handleViewpointUpdate(viewpoint);
 			},
-			onCancel: () => updateRisk(teamspace, model, { viewpoint }),
+			onCancel: () => updateRisk({ viewpoint }),
 		});
 	}
 

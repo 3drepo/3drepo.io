@@ -26,3 +26,15 @@ export const mergeArrays = (arr1, arr2) => {
 		arr1[arr1Length + i] = arr2[i];
 	}
 };
+
+export const hasSameElements = (arrayA: any[] = [], arrayB: any[] = []) => {
+	if (arrayA.length !== arrayB.length) {
+		return false;
+	}
+
+	// Performance improvement
+	const cacheDict: any = {};
+	arrayA.forEach((e) => cacheDict[e] = true);
+
+	return arrayB.every((elem) => cacheDict[elem]);
+};

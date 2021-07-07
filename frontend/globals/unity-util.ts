@@ -94,9 +94,6 @@ export class UnityUtil {
 	public static unityHasErrored = false;
 
 	/** @hidden */
-	public static initialLoad = true;
-
-	/** @hidden */
 	public static screenshotPromises = [];
 	/** @hidden */
 	public static viewpointsPromises = [];
@@ -258,10 +255,6 @@ export class UnityUtil {
 	 * Cancels any model that is currently loading. This will reject any model promises with "cancel" as the message
 	 */
 	public static cancelLoadModel() {
-		if (UnityUtil.initialLoad) {
-			return;
-		}
-
 		if (!UnityUtil.loadedFlag && UnityUtil.loadedResolve) {
 			// If the previous model is being loaded but hasn't finished yet
 			UnityUtil.loadedResolve.reject('cancel');
@@ -464,7 +457,6 @@ export class UnityUtil {
 		};
 		UnityUtil.loadedResolve.resolve(res);
 		UnityUtil.loadedFlag = true;
-		UnityUtil.initialLoad = false;
 	}
 
 	/** @hidden */
@@ -892,6 +884,26 @@ export class UnityUtil {
 	 */
 	public static disableMeasureToolXYZDisplay() {
 		UnityUtil.toUnity('DisableMeasureToolXYZDisplay');
+	}
+
+	public static addMeasurement(measurement) {
+		UnityUtil.toUnity('AddMeasurement', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(measurement));
+	}
+
+	public static hideNewMeasurementsLabels() {
+		UnityUtil.toUnity('HideNewMeasurementsLabels');
+	}
+
+	public static showNewMeasurementsLabels() {
+		UnityUtil.toUnity('ShowNewMeasurementsLabels');
+	}
+
+	public static selectMeasurement(id: string) {
+		UnityUtil.toUnity('SelectMeasurement', UnityUtil.LoadingState.MODEL_LOADING, id);
+	}
+
+	public static deselectMeasurement(id: string) {
+		UnityUtil.toUnity('DeselectMeasurement', UnityUtil.LoadingState.MODEL_LOADING, id);
 	}
 
 	/**
@@ -1350,7 +1362,6 @@ export class UnityUtil {
 		UnityUtil.loadingPromise = null;
 		UnityUtil.loadingResolve = null;
 		UnityUtil.loadedFlag = false;
-		UnityUtil.initialLoad = true;
 
 		UnityUtil.disableMeasuringTool();
 		UnityUtil.disableSnapping();

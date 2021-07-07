@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { cloneDeep } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import { CHAT_CHANNELS } from '../../constants/chat';
@@ -38,14 +39,13 @@ import {
 	selectActiveGroupDetails,
 	selectActiveGroupId,
 	selectColorOverrides,
+	selectEditingGroupDetails,
 	selectFilteredGroups,
 	selectGroups,
 	selectGroupsMap,
 	selectIsAllOverridden,
-	selectNewGroupDetails,
 	selectSelectedFilters,
-	selectShowDetails,
-	selectUnalteredActiveGroupDetails
+	selectShowDetails
 } from './groups.selectors';
 
 function* fetchGroups({teamspace, modelId, revision}) {
@@ -189,7 +189,7 @@ function* deleteGroups({ teamspace, modelId, groups }) {
 
 		if (isShowDetails && groupsToDelete.includes(activeGroupId)) {
 			yield put(GroupsActions.setComponentState({ activeGroup: null, showDetails: false }));
-			const { name } = yield select(selectActiveGroupDetails);
+			const { name } = yield select(selectEditingGroupDetails);
 			yield put(SnackbarActions.show(`Group ${name} removed.`));
 		}
 	} catch (error) {
@@ -228,7 +228,7 @@ function* showDetails({ group, revision }) {
 		yield put(GroupsActions.highlightGroup(group));
 		yield put(GroupsActions.setComponentState({
 			showDetails: true,
-			newGroup: {...group},
+			editingGroup: cloneDeep(group),
 			criteriaFieldState: INITIAL_CRITERIA_FIELD_STATE
 		}));
 	} catch (error) {
@@ -238,7 +238,7 @@ function* showDetails({ group, revision }) {
 
 function* closeDetails() {
 	try {
-		const activeGroup = yield select(selectUnalteredActiveGroupDetails);
+		const activeGroup = yield select(selectActiveGroupDetails);
 		yield put(GroupsActions.highlightGroup(activeGroup));
 		yield put(GroupsActions.setComponentState({ showDetails: false }));
 
@@ -252,13 +252,13 @@ function* createGroup({ teamspace, modelId, revision }) {
 	try {
 		const isAllOverridden = yield select(selectIsAllOverridden);
 		const currentUser = yield select(selectCurrentUser);
-		const newGroupDetails = yield select(selectNewGroupDetails);
+		const editingGroupDetails = yield select(selectEditingGroupDetails);
 		const objectsStatus = yield Viewer.getObjectsStatus();
 
 		const date = new Date();
 		const timestamp = date.getTime();
 		const group = {
-			...normalizeGroup(newGroupDetails),
+			...normalizeGroup(editingGroupDetails),
 			createdAt: timestamp,
 			updatedAt: timestamp,
 			updatedBy: currentUser.username
@@ -278,8 +278,8 @@ function* createGroup({ teamspace, modelId, revision }) {
 		}
 
 		yield put(GroupsActions.updateGroupSuccess(preparedGroup));
-		yield put(GroupsActions.highlightGroup(preparedGroup));
 		yield put(GroupsActions.showDetails(preparedGroup));
+		yield put(GroupsActions.setActiveGroup(preparedGroup));
 		yield put(SnackbarActions.show('Group created'));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('create', 'group', error));
@@ -290,7 +290,7 @@ function* createGroup({ teamspace, modelId, revision }) {
 function* updateGroup({ teamspace, modelId, revision, groupId }) {
 	yield put(GroupsActions.toggleDetailsPendingState(true));
 	try {
-		const groupDetails = yield select(selectActiveGroupDetails);
+		const groupDetails = yield select(selectEditingGroupDetails);
 
 		const groupToSave = {
 			...normalizeGroup(groupDetails)
@@ -307,7 +307,7 @@ function* updateGroup({ teamspace, modelId, revision, groupId }) {
 		const preparedGroup = prepareGroup(data);
 
 		yield put(GroupsActions.updateGroupSuccess(preparedGroup));
-		yield put(GroupsActions.highlightGroup(preparedGroup));
+		yield put(GroupsActions.showDetails(preparedGroup));
 		yield put(SnackbarActions.show('Group updated'));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('update', 'group', error));
@@ -321,7 +321,7 @@ function* setNewGroup() {
 	const groupNumber = groups.length + 1;
 
 	try {
-		const newGroup = prepareGroup({
+		const editingGroup = prepareGroup({
 			author: currentUser.username,
 			name: `Untitled group ${groupNumber}`,
 			color: getRandomColor(),
@@ -330,9 +330,8 @@ function* setNewGroup() {
 
 		yield put(GroupsActions.setComponentState({
 			showDetails: true,
-			activeGroup: null,
 			totalMeshes: 0,
-			newGroup,
+			editingGroup,
 			criteriaFieldState: INITIAL_CRITERIA_FIELD_STATE
 		}));
 	} catch (error) {
@@ -403,12 +402,11 @@ function* unsubscribeFromChanges({ teamspace, modelId }) {
 }
 
 function* resetToSavedSelection({ groupId }) {
-	const activeGroup = yield select(selectUnalteredActiveGroupDetails);
+	const activeGroup = yield select(selectActiveGroupDetails);
 	activeGroup.rules = (activeGroup || { rules: [] }).rules;
 
 	yield all([
-		put(GroupsActions.selectGroup(activeGroup)),
-		put(GroupsActions.setComponentState({ newGroup: activeGroup }))
+		put(GroupsActions.selectGroup(activeGroup))
 	]);
 }
 
