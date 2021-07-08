@@ -47,16 +47,25 @@ function createLogger() {
 		}));
 	}
 
+	let format = winston.format.combine(
+		winston.format.timestamp(),
+		winston.format.align(),
+		winston.format.printf(stringFormat)
+	);
+
+	if (!config.logfile.noColors) {
+		format = winston.format.combine(
+			winston.format.colorize(),
+			format
+		);
+	}
+
 	// Creates logger which outputs to both the console
 	// and a log file simultaneously
 	// Levels are set separately in the config.
 	return winston.createLogger({
 		transports: transporters,
-		format: winston.format.combine(
-			winston.format.colorize(),
-			winston.format.timestamp(),
-			winston.format.align(),
-			winston.format.printf(stringFormat))
+		format
 	});
 }
 

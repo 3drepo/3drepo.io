@@ -393,7 +393,7 @@
 	const genResponseLogging = (resCode, {place, contentLength}, {session} = {}) => {
 		const user = session && session.user ? session.user.username : "unknown";
 		return `${place} - ${resCode.code}(${resCode.status}) [user: ${user}, resp size: ${contentLength}]`;
-	}
+	};
 
 	/**
 	 *
