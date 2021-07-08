@@ -60,7 +60,15 @@ export class PreviewItemInfo extends React.PureComponent<IProps, any> {
 	});
 
 	public render() {
-		const { author, createdAt, statusColor, StatusIconComponent, extraInfo, actionButton, panelType } = this.props;
+		const {
+			author,
+			createdAt,
+			statusColor,
+			StatusIconComponent,
+			extraInfo,
+			actionButton,
+			panelType
+			} = this.props;
 
 		return(
 			<Container>
