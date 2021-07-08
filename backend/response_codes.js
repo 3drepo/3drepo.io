@@ -19,7 +19,7 @@
 
 	const _ = require("lodash");
 	const config = require("./config");
-	const systemLogger = require("./logger.js").systemLogger;
+	const { systemLogger, logLabels} = require("./logger.js");
 	const utils = require("./utils");
 
 	/**
@@ -414,11 +414,11 @@
 
 		if (!resCode || valid_values.indexOf(resCode.value) === -1) {
 			if (resCode && resCode.stack) {
-				systemLogger.logError(resCode.stack);
+				systemLogger.logError(resCode.stack, undefined, logLabels.network);
 			} else if (resCode && resCode.message) {
-				systemLogger.logError(resCode.message);
+				systemLogger.logError(resCode.message, undefined, logLabels.network);
 			} else {
-				systemLogger.logError(JSON.stringify(resCode));
+				systemLogger.logError(JSON.stringify(resCode), undefined, logLabels.network);
 			}
 
 			if(!resCode.value) {
@@ -440,7 +440,7 @@
 
 			meta.contentLength = JSON.stringify(responseObject)
 				.length;
-			systemLogger.logInfo(genResponseLogging(resCode, meta, req));
+			systemLogger.logInfo(genResponseLogging(resCode, meta, req), undefined, logLabels.network);
 
 			res.status(resCode.status)
 				.send(responseObject);
@@ -482,7 +482,7 @@
 			}
 
 			// log bandwidth and http status code
-			systemLogger.logInfo(genResponseLogging(resCode, meta, req));
+			systemLogger.logInfo(genResponseLogging(resCode, meta, req), undefined, logLabels.network);
 		}
 	};
 
@@ -493,7 +493,7 @@
 		let response = responseCodes.OK;
 
 		readStream.on("error", error => {
-			systemLogger.logError(`Stream failed: [${error.code} - ${error.message}] @ ${place}`);
+			systemLogger.logError(`Stream failed: [${error.code} - ${error.message}] @ ${place}`, undefined, logLabels.network);
 			response = responseCodes.NO_FILE_FOUND;
 			res.status(response.status);
 			res.end();
@@ -512,7 +512,7 @@
 				place,
 				httpCode: response.status,
 				contentLength: length
-			}));
+			}), undefined, logLabels.network);
 		});
 	};
 

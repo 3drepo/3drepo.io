@@ -77,7 +77,7 @@ function createLogger() {
  * @param {string} msg - Message to log
  * @param {Object} meta - Extra data to put into the log file
  */
-const logMessage = (msg, meta) => `${msg} ${meta ? JSON.stringify(meta) : ""}`;
+const logMessage = (msg, meta, label) => `${msg} ${meta ? JSON.stringify(meta, label) : ""}`;
 
 /**
  * Function to log an info message
@@ -85,8 +85,8 @@ const logMessage = (msg, meta) => `${msg} ${meta ? JSON.stringify(meta) : ""}`;
  * @param {string} msg - Information message
  * @param {Object} meta - Extra informative metadata
  */
-SystemLogger.logInfo = (msg, meta) => {
-	logger.info(logMessage(msg, meta));
+SystemLogger.logInfo = (msg, meta, label) => {
+	logger.info(logMessage(msg, meta, label), {label});
 };
 
 /**
@@ -95,8 +95,8 @@ SystemLogger.logInfo = (msg, meta) => {
  * @param {string} msg - Error message
  * @param {Object} meta - Extra informative metadata
  */
-SystemLogger.logError = (msg, meta) => {
-	logger.error(logMessage(msg, meta));
+SystemLogger.logError = (msg, meta, label) => {
+	logger.error(logMessage(msg, meta, label), {label});
 };
 
 /**
@@ -105,8 +105,8 @@ SystemLogger.logError = (msg, meta) => {
  * @param {string} msg - Debug message
  * @param {Object} meta - Extra informative metadata
  */
-SystemLogger.logDebug = (msg, meta) => {
-	logger.debug(logMessage(msg, meta));
+SystemLogger.logDebug = (msg, meta, label) => {
+	logger.debug(logMessage(msg, meta, label), {label});
 };
 
 /**
@@ -115,8 +115,8 @@ SystemLogger.logDebug = (msg, meta) => {
  * @param {string} msg - Warning message
  * @param {Object} meta - Extra informative metadata
  */
-SystemLogger.logWarning = (msg, meta) => {
-	logger.warning(logMessage(msg, meta));
+SystemLogger.logWarning = (msg, meta, label) => {
+	logger.warning(logMessage(msg, meta, label), {label});
 };
 
 /**
@@ -125,8 +125,8 @@ SystemLogger.logWarning = (msg, meta) => {
  * @param {string} msg - Warning message
  * @param {Object} meta - Extra informative metadata
  */
-SystemLogger.logTrace = (msg, meta) => {
-	logger.trace(logMessage(msg, meta));
+SystemLogger.logTrace = (msg, meta, label) => {
+	logger.trace(logMessage(msg, meta, label), {label});
 };
 
 /**
@@ -135,8 +135,11 @@ SystemLogger.logTrace = (msg, meta) => {
  * @param {string} msg - Fatal message
  * @param {Object} meta - Extra informative metadata
  */
-SystemLogger.logFatal = (msg, meta) => {
-	logger.fatal(logMessage(msg, meta));
+SystemLogger.logFatal = (msg, meta, label) => {
+	logger.fatal(logMessage(msg, meta, label), {label});
 };
 
 module.exports.systemLogger = SystemLogger;
+module.exports.logLabels = {
+	network: "NETWORK"
+};
