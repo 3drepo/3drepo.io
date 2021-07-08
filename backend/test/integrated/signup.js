@@ -620,4 +620,53 @@ describe("Sign up", function() {
 				done(err);
 			});
 	});
+
+	it("too long jobTitle should fail", function(done) {
+		request(server)
+			.post("/signup_somebaduser")
+			.send({
+
+				"email": email,
+				"password": password,
+				"firstName": firstName,
+				"lastName": lastName,
+				"countryCode": countryCode,
+				"company": company,
+				"mailListAgreed": mailListAgreed,
+				"jobTitle":"this is a very long job title that should make the test fail",
+				"industry": industry,
+				"howDidYouFindUs": howDidYouFindUs,
+				"phoneNumber": phoneNumber
+
+			}).expect(400, function(err, res) {
+
+				expect(res.body.value).to.equal(responseCodes.JOB_TITLE_TOO_LONG.value);
+				done(err);
+			});
+	});
+
+	it("too long phoneNumber should fail", function(done) {
+		request(server)
+			.post("/signup_somebaduser")
+			.send({
+
+				"email": email,
+				"password": password,
+				"firstName": firstName,
+				"lastName": lastName,
+				"countryCode": countryCode,
+				"company": company,
+				"mailListAgreed": mailListAgreed,
+				"jobTitle": jobTitle,
+				"industry": industry,
+				"howDidYouFindUs": howDidYouFindUs,
+				"phoneNumber": "01234567890123456789012345"
+
+			}).expect(400, function(err, res) {
+
+				expect(res.body.value).to.equal(responseCodes.PHONE_NUMBER_TOO_LONG.value);
+				done(err);
+			});
+	});
+	
 });

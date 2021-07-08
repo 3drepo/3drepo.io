@@ -242,6 +242,8 @@
 		GROUP_ID_NOT_FOUND_IN_MESH: { message: "Group ID not found in mesh", status: 400 },
 
 		MODEL_NAME_TOO_LONG: { message: "Model name cannot be longer than 60 characters", status: 400 },
+		JOB_TITLE_TOO_LONG: { message: "Job Title cannot be longer than 50 characters", status: 400 },
+		PHONE_NUMBER_TOO_LONG: { message: "Phone Number cannot be longer than 20 characters", status: 400 },
 		ISSUE_SYSTEM_COMMENT: { message: "Can't edit or remove system comment", status: 400 },
 		ISSUE_UPDATE_PERMISSION_DECLINED: { message: "No permission to update issue", status: 400 },
 		ISSUE_UPDATE_FAILED: { message: "Failed updating issue", status: 500 },
