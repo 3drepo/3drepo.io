@@ -25,7 +25,6 @@ export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActio
 	resetPanelsStates: [],
 	setPanelVisibility: ['panelName', 'visibility'],
 	setPanelLock: ['panelName'],
-	setMeasureVisibility: ['visible'],
 	setCoordView: ['visible'],
 	setCoordViewSuccess: ['coordViewActive'],
 	startListenOnModelLoaded: [],

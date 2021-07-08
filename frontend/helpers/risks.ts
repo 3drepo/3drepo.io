@@ -33,6 +33,7 @@ import {
 import { getAPIUrl } from '../services/api';
 import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
 import { IHeaderMenuItem } from './reportedItems';
+import { setShapesUuids } from './shapes';
 
 export const prepareRisk = (risk, jobs = []) => {
 	const preparedRisk = {...risk};
@@ -87,6 +88,10 @@ export const prepareRisk = (risk, jobs = []) => {
 
 	preparedRisk.defaultHidden = RISK_DEFAULT_HIDDEN_LEVELS.includes(preparedRisk.mitigation_status);
 	preparedRisk.color = getRiskColor(risk.residual_level_of_risk);
+
+	if (preparedRisk.shapes) {
+		preparedRisk.shapes = setShapesUuids(preparedRisk.shapes);
+	}
 
 	return preparedRisk;
 };

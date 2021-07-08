@@ -46,15 +46,3 @@ export const MEASURING_TYPE = {
 	POINT_TO_POINT: 'Point to Point',
 	RAY_CAST: 'Ray Cast',
 };
-
-export const MEASURING_MODE = {
-	POINT: 'PointPin',
-	RAY_CAST: 'Raycast',
-	MINIMUM_DISTANCE: 'MinimumDistance',
-	SAM: 'SurfaceArea',
-	CSAM: 'PolygonArea',
-	POINT_TO_POINT: 'Point',
-};
-
-export const getColor = ({r, g, b}) => `#${[r, g, b].map((color) =>
-		componentToHex(Math.trunc(color))).join('')}`;

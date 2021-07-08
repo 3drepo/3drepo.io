@@ -19,7 +19,7 @@ import { push } from 'connected-react-router';
 import filesize from 'filesize';
 import { isEmpty, isEqual, map, omit } from 'lodash';
 import * as queryString from 'query-string';
-import { all, put, select, takeLatest } from 'redux-saga/effects';
+import { all, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { RISK_DEFAULT_HIDDEN_LEVELS } from '../../constants/risks';
@@ -30,11 +30,16 @@ import {
 } from '../../helpers/comments';
 
 import { EXTENSION_RE } from '../../constants/resources';
+import { VIEWER_EVENTS } from '../../constants/viewer';
 import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
+import { disableConflictingMeasurementActions, generateName } from '../../helpers/measurements';
 import { prepareResources } from '../../helpers/resources';
+import { chopShapesUuids } from '../../helpers/shapes';
 import { SuggestedTreatmentsDialog } from '../../routes/components/dialogContainer/components';
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
+import { Viewer } from '../../services/viewer/viewer';
+import { BimActions } from '../bim';
 import { BoardActions } from '../board';
 import { ChatActions } from '../chat';
 import { selectCurrentUser } from '../currentUser';
@@ -46,6 +51,7 @@ import { selectSelectedStartingDate, SequencesActions } from '../sequences';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { TreeActions } from '../tree';
+import { ViewerGuiActions } from '../viewerGui';
 import { ViewpointsActions } from '../viewpoints';
 import { generateViewpoint } from '../viewpoints/viewpoints.sagas';
 import { RisksActions, RisksTypes } from './risks.redux';
@@ -54,6 +60,7 @@ import {
 	selectActiveRiskId,
 	selectComponentState,
 	selectFilteredRisks,
+	selectMeasureMode,
 	selectRisksMap
 } from './risks.selectors';
 
@@ -129,6 +136,8 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 			creator_role: userJob._id
 		};
 
+		risk = chopShapesUuids(risk);
+
 		const { data: savedRisk } = yield API.saveRisk(teamspace, model, risk);
 
 		yield put(ViewpointsActions.cacheGroupsFromViewpoint(savedRisk.viewpoint, risk.viewpoint));
@@ -151,11 +160,11 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 	yield put(RisksActions.toggleDetailsPendingState(false));
 }
 
-function* updateRisk({ teamspace, modelId, riskData }) {
+function* updateRisk({riskData}) {
 	try {
-		const { _id, rev_id, position } = yield select(selectActiveRiskDetails);
-		let { data: updatedRisk } = yield API.updateRisk(teamspace, modelId, _id, rev_id, riskData);
-		updatedRisk.resources = prepareResources(teamspace, modelId, updatedRisk.resources);
+		const { _id, rev_id, model, account, position } = yield select(selectActiveRiskDetails);
+		let { data: updatedRisk } = yield API.updateRisk(account, model, _id, rev_id, chopShapesUuids(riskData));
+		updatedRisk.resources = prepareResources(account, model, updatedRisk.resources);
 
 		updatedRisk = {...updatedRisk, ...riskData};
 
@@ -170,7 +179,7 @@ function* updateRisk({ teamspace, modelId, riskData }) {
 function* updateBoardRisk({ teamspace, modelId, riskData }) {
 	try {
 		const { _id, ...changedData } = riskData;
-		const { data: updatedRisk } = yield API.updateRisk(teamspace, modelId, _id, null, changedData);
+		const { data: updatedRisk } = yield API.updateRisk(teamspace, modelId, _id, null,  chopShapesUuids(changedData));
 		yield put(RisksActions.saveRiskSuccess(updatedRisk));
 		yield put(SnackbarActions.show('Risk updated'));
 	} catch (error) {
@@ -284,6 +293,7 @@ function* showDetails({ revision, riskId }) {
 	try {
 		const risksMap = yield select(selectRisksMap);
 		const risk = risksMap[riskId];
+		yield cancelMeasureModeIfNeeded();
 
 		yield put(RisksActions.setActiveRisk(risk, revision));
 		yield put(RisksActions.setComponentState({ showDetails: true, savedPin: risk.position }));
@@ -300,6 +310,7 @@ function* closeDetails() {
 	try {
 		const activeRisk = yield select(selectActiveRiskDetails);
 		const componentState = yield select(selectComponentState);
+		yield cancelMeasureModeIfNeeded();
 
 		if (componentState.showDetails) {
 			if (!isEqual(activeRisk.position, componentState.savedPin)) {
@@ -610,6 +621,110 @@ export function * updateActiveRiskViewpoint({screenshot}) {
 	yield put(RisksActions.updateRisk(account, model, {viewpoint}));
 }
 
+/** shapes **/
+function toggleMeasurementListeners(enabled) {
+	if (enabled) {
+		Viewer.on(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
+		Viewer.on(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
+	} else {
+		Viewer.off(VIEWER_EVENTS.MEASUREMENT_CREATED, onMeasurementCreated);
+		Viewer.off(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onMeasurementChanged);
+	}
+}
+
+export function* setMeasureMode({ measureMode }) {
+	try {
+		toggleMeasurementListeners(false);
+		yield put(RisksActions.setMeasureModeSuccess(measureMode));
+		yield Viewer.setMeasureMode(measureMode, false);
+
+		if (measureMode === '') {
+			return;
+		}
+
+		toggleMeasurementListeners(true);
+		disableConflictingMeasurementActions();
+		yield Viewer.enableEdgeSnapping();
+	} catch (error) {
+		DialogActions.showErrorDialog('set', `measure mode in issues to ${measureMode}`, error);
+	}
+}
+
+const onMeasurementChanged = () => {
+	toggleMeasurementListeners(false);
+	dispatch(RisksActions.setMeasureModeSuccess(''));
+};
+
+const onMeasurementCreated = (measurement) => {
+	dispatch(RisksActions.addMeasurement(measurement));
+};
+
+function* updateRiskShapes(shapes) {
+	const activeRisk = yield select(selectActiveRiskDetails);
+	const isNewRisk = !Boolean(activeRisk._id);
+
+	// Here is calling directly to the functions because it needs to finish the request and update the
+	// risk before removing the measurement. Otherwise if the action is dispatched and non blocking
+	// there will be a period of time between hiding the measurement and displaying it again
+	if (isNewRisk) {
+		yield updateNewRisk({newRisk: {...activeRisk, shapes}});
+	} else {
+		yield updateRisk({riskData: {shapes}});
+	}
+
+}
+
+export function* addMeasurement({ measurement }) {
+	const activeRisk = yield select(selectActiveRiskDetails);
+	let shapes = activeRisk.shapes || [];
+	measurement.name = generateName(measurement, shapes);
+	shapes = [...shapes, measurement];
+
+	yield updateRiskShapes(shapes);
+
+	// Because the shape is going to be displayed when the risk changes,
+	// the previous measurement will be removed in order to not display the same measurement twice
+	Viewer.removeMeasurement(measurement.uuid);
+}
+
+export function* removeMeasurement({ uuid }) {
+	const activeRisk = yield select(selectActiveRiskDetails);
+	const shapes = (activeRisk.shapes || []).filter((measurement) => measurement.uuid !== uuid);
+	yield updateRiskShapes(shapes);
+}
+
+export function* setMeasurementColor({uuid, color}) {
+	const activeRisk = yield select(selectActiveRiskDetails);
+	const shapes = (activeRisk.shapes || []).map((measurement) => {
+		if (measurement.uuid === uuid) {
+			measurement = {...measurement, color};
+		}
+		return measurement;
+	});
+
+	yield updateRiskShapes(shapes);
+}
+
+export function* setMeasurementName({uuid, name}) {
+	const activeRisk = yield select(selectActiveRiskDetails);
+	const shapes = (activeRisk.shapes || []).map((measurement) => {
+		if (measurement.uuid === uuid) {
+			measurement = {...measurement, name};
+		}
+		return measurement;
+	});
+
+	yield updateRiskShapes(shapes);
+}
+
+function* cancelMeasureModeIfNeeded() {
+	const measureMode = yield select(selectMeasureMode);
+	if (measureMode) {
+		yield put(RisksActions.setMeasureMode(''));
+		yield take(RisksTypes.SET_MEASURE_MODE_SUCCESS);
+	}
+}
+
 export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.FETCH_RISKS, fetchRisks);
 	yield takeLatest(RisksTypes.FETCH_RISK, fetchRisk);
@@ -638,4 +753,10 @@ export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.FETCH_MITIGATION_CRITERIA, fetchMitigationCriteria);
 	yield takeLatest(RisksTypes.SHOW_MITIGATION_SUGGESTIONS, showMitigationSuggestions);
 	yield takeLatest(RisksTypes.UPDATE_ACTIVE_RISK_VIEWPOINT, updateActiveRiskViewpoint);
+	yield takeLatest(RisksTypes.SET_MEASURE_MODE, setMeasureMode);
+	yield takeEvery(RisksTypes.ADD_MEASUREMENT, addMeasurement);
+	yield takeEvery(RisksTypes.REMOVE_MEASUREMENT, removeMeasurement);
+	yield takeEvery(RisksTypes.SET_MEASUREMENT_COLOR, setMeasurementColor);
+	yield takeEvery(RisksTypes.SET_MEASUREMENT_NAME, setMeasurementName);
+
 }

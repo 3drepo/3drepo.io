@@ -69,6 +69,10 @@ interface IProps {
 	showScreenshotDialog: (config: any) => void;
 	showConfirmDialog: (config: any) => void;
 	updateViewpoint: (screenshot?: string) => void;
+	setMeasureMode: (measureMode) => void;
+	removeMeasurement: (uuid) => void;
+	setMeasurementColor: (uuid, color) => void;
+	setMeasurementName: (uuid, type, name) => void;
 	dialogId?: string;
 	postCommentIsPending?: boolean;
 	showSequenceDate: (date) => void;
@@ -76,6 +80,8 @@ interface IProps {
 	maxSequenceDate: Date;
 	selectedDate: Date;
 	sequences: any[];
+	measureMode: string;
+	units: string;
 }
 
 interface IState {
@@ -287,11 +293,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				canComment={this.userCanComment}
 				onThumbnailUpdate={this.handleNewScreenshot}
 				formRef={this.formRef}
-				showSequenceDate={this.props.showSequenceDate}
-				minSequenceDate={this.props.minSequenceDate}
-				maxSequenceDate={this.props.maxSequenceDate}
-				selectedDate={this.props.selectedDate}
-				sequences={this.props.sequences}
+				{...this.props}
 			/>
 		);
 	}
