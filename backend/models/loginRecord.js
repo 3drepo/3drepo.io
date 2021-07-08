@@ -21,7 +21,7 @@ const db = require("../handler/db");
 // detects edge as browser but not device
 const UaParserJs = require("ua-parser-js");
 const Device = require("device");
-const Ip2location = require("ip-to-location");
+const IPCheck = require("geoip-lite");
 const Elastic = require("../handler/elastic");
 
 const LoginRecord = {};
@@ -42,9 +42,9 @@ LoginRecord.saveLoginRecord = async (id, username, ipAddr, userAgent, referer) =
 		...uaInfo
 	};
 
-	const { country_name, city } = await getLocationFromIPAddress(loginRecord.ipAddr);
+	const { country, city } = getLocationFromIPAddress(loginRecord.ipAddr);
 	loginRecord.location = {
-		country: country_name,
+		country,
 		city
 	};
 
@@ -102,7 +102,7 @@ const getUserAgentInfoFromBrowser = (userAgentString) => {
 };
 
 const getLocationFromIPAddress = async (ipAddress) => {
-	return await Ip2location.fetch(ipAddress);
+	return IPCheck.lookup(ipAddress);
 };
 
 const isUserAgentFromPlugin = (userAgent) => {

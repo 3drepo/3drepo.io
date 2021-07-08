@@ -19,7 +19,6 @@
 const addressMeta = require("./addressMeta");
 const moment = require("moment");
 const pug = require("pug");
-const pdfGen = require("html-pdf");
 const config = require("../config");
 
 const utils = require("../utils");
@@ -173,15 +172,16 @@ Invoice.findPendingInvoice = async function(account, billingAgreementId) {
 	return await this.findOne(account, { billingAgreementId, state: C.INV_PENDING });
 };
 
-function printPDF(html) {
+function printPDF(/*html*/) {
 	return new Promise((resolve, reject) => {
-		pdfGen.create(html, {width: "210mm", height: "297mm"}).toBuffer((err, buffer) => {
+		/*pdfGen.create(html, {width: "210mm", height: "297mm"}).toBuffer((err, buffer) => {
 			if(err) {
 				reject(err);
 			} else {
 				resolve(buffer);
 			}
-		});
+		});*/
+		reject("pdf generation is currently unsupported.");
 	});
 }
 
