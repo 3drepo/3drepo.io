@@ -141,5 +141,5 @@ SystemLogger.logFatal = (msg, meta, label) => {
 
 module.exports.systemLogger = SystemLogger;
 module.exports.logLabels = {
-	network: "NETWORK"
+	network: "NET"
 };
