@@ -172,9 +172,9 @@ Invoice.findPendingInvoice = async function(account, billingAgreementId) {
 	return await this.findOne(account, { billingAgreementId, state: C.INV_PENDING });
 };
 
-function printPDF(/*html*/) {
+function printPDF(/* html*/) {
 	return new Promise((resolve, reject) => {
-		/*pdfGen.create(html, {width: "210mm", height: "297mm"}).toBuffer((err, buffer) => {
+		/* pdfGen.create(html, {width: "210mm", height: "297mm"}).toBuffer((err, buffer) => {
 			if(err) {
 				reject(err);
 			} else {

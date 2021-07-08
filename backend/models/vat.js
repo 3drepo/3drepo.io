@@ -1,6 +1,6 @@
 "use strict";
 
-//const soap = require("soap");
+// const soap = require("soap");
 const config = require("../config");
 const vatValidationUrl = config.vat.checkUrl;
 const addressMeta = require("./addressMeta");
@@ -66,9 +66,9 @@ function getByCountryCode(code, isBusiness) {
 
 }
 
-//const soapClient = soap.createClientAsync(vatValidationUrl);
+// const soapClient = soap.createClientAsync(vatValidationUrl);
 
-function checkVAT(code, vatNum) {
+function checkVAT(code/* , vatNum*/) {
 
 	const isDebug = config.vat && config.vat.debug && config.vat.debug.skipChecking;
 	const isOutsideEU = addressMeta.euCountriesCode.indexOf(code) === -1;
@@ -87,7 +87,7 @@ function checkVAT(code, vatNum) {
 
 		// console.log("checkVAT Slow Path hit")
 
-			/*		soapClient.then((client) => {
+		/*		soapClient.then((client) => {
 			return client.checkVatAsync({
 				countryCode: code,
 				vatNumber: vatNum
