@@ -20,76 +20,28 @@ const config = require("./config.js");
 const winston = require("winston");
 require("winston-daily-rotate-file");
 
-let log;
+const stringFormat = ({ level, message, label, timestamp }) => `${timestamp} [${level}] [${label || "APP"}] ${message}`;
 
-/**
- * The repoLogger init and factory
- *
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {string} id - Unique logger ID
- * @returns
- */
-const repoLogger = function (req, res, id) {
-
-	const self = this instanceof repoLogger ? this : Object.create(repoLogger.prototype);
-
-	self.uid = id;
-
-	if (req) {
-		self.session = req.session;
-		self.req = req;
-	}
-
-	self.res = res;
-
-	if (!log) {
-		log = createLogger();
-	}
-
-	self.logger = log;
-	self.startTime = (new Date())
-		.getTime();
-
-	return self;
-};
+const logger = createLogger();
+const SystemLogger = {};
 
 function createLogger() {
-
-	// Custom logging levels for logger
-	const customLevels = {
-		levels: {
-			nothing: -1,
-			fatal: 0,
-			error: 1,
-			warn: 2,
-			info: 3,
-			debug: 4,
-			trace: 5
-		}
-	};
-
-	let fileOutTransport;
+	const transporters = [];
 
 	if (config.logfile.logDirectory) {
-		fileOutTransport = new winston.transports.DailyRotateFile({
-			filename: config.logfile.logDirectory + "/3drepo",
-			datePattern: "-yyyy-MM-dd.log",
-			level: config.logfile.file_level
-		});
-	} else {
-		fileOutTransport = new winston.transports.File({
-			level: config.logfile.file_level,
-			filename: config.logfile.filename
-		});
+		transporters.push(
+			new winston.transports.DailyRotateFile({
+				filename: config.logfile.logDirectory + "/3drepo",
+				datePattern: "-yyyy-MM-dd.log",
+				timestamp: true,
+				level: config.logfile.file_level
+			})
+		);
 	}
 
-	const transports = [
-		fileOutTransport
-	];
-
 	if (config.logfile.silent === undefined || config.logfile.silent === false) {
-		transports.push(new winston.transports.Console({
+		transporters.push(new winston.transports.Console({
+			timestamp: true,
 			colorize: true,
 			level: config.logfile.console_level
 		}));
@@ -99,8 +51,12 @@ function createLogger() {
 	// and a log file simultaneously
 	// Levels are set separately in the config.
 	return winston.createLogger({
-		levels: customLevels.levels,
-		transports: transports
+		transports: transporters,
+		format: winston.format.combine(
+			winston.format.colorize(),
+			winston.format.timestamp(),
+			winston.format.align(),
+			winston.format.printf(stringFormat))
 	});
 }
 
@@ -112,29 +68,7 @@ function createLogger() {
  * @param {string} msg - Message to log
  * @param {Object} meta - Extra data to put into the log file
  */
-repoLogger.prototype.logMessage = function (type, msg, meta) {
-	const currentTime = (new Date())
-		.getTime();
-	const timeDiff = currentTime - this.startTime;
-
-	const metadata = Object.assign({}, meta);
-
-	if (this.session && this.session.user) {
-		metadata.username = this.session.user.username;
-	}
-
-	if (this.req) {
-		if (this.req.method) {
-			metadata.method = this.req.method;
-		}
-		if (this.req.originalUrl) {
-			metadata.url = this.req.originalUrl;
-		}
-	}
-
-	this.logger.log(type, (new Date())
-		.toISOString() + "\t" + this.uid + "\t" + msg + " [" + timeDiff + " ms]", {message: JSON.stringify(metadata)});
-};
+const logMessage = (msg, meta) => `${msg} ${meta ? JSON.stringify(meta) : ""}`;
 
 /**
  * Function to log an info message
@@ -142,8 +76,8 @@ repoLogger.prototype.logMessage = function (type, msg, meta) {
  * @param {string} msg - Information message
  * @param {Object} meta - Extra informative metadata
  */
-repoLogger.prototype.logInfo = function (msg, meta) {
-	this.logMessage("info", msg, meta);
+SystemLogger.logInfo = (msg, meta) => {
+	logger.info(logMessage(msg, meta));
 };
 
 /**
@@ -152,8 +86,8 @@ repoLogger.prototype.logInfo = function (msg, meta) {
  * @param {string} msg - Error message
  * @param {Object} meta - Extra informative metadata
  */
-repoLogger.prototype.logError = function (msg, meta) {
-	this.logMessage("error", msg, meta);
+SystemLogger.logError = (msg, meta) => {
+	logger.error(logMessage(msg, meta));
 };
 
 /**
@@ -162,8 +96,8 @@ repoLogger.prototype.logError = function (msg, meta) {
  * @param {string} msg - Debug message
  * @param {Object} meta - Extra informative metadata
  */
-repoLogger.prototype.logDebug = function (msg, meta) {
-	this.logMessage("debug", msg, meta);
+SystemLogger.logDebug = (msg, meta) => {
+	logger.debug(logMessage(msg, meta));
 };
 
 /**
@@ -172,8 +106,8 @@ repoLogger.prototype.logDebug = function (msg, meta) {
  * @param {string} msg - Warning message
  * @param {Object} meta - Extra informative metadata
  */
-repoLogger.prototype.logWarning = function (msg, meta) {
-	this.logMessage("warn", msg, meta);
+SystemLogger.logWarning = (msg, meta) => {
+	logger.warning(logMessage(msg, meta));
 };
 
 /**
@@ -182,8 +116,8 @@ repoLogger.prototype.logWarning = function (msg, meta) {
  * @param {string} msg - Warning message
  * @param {Object} meta - Extra informative metadata
  */
-repoLogger.prototype.logTrace = function (msg, meta) {
-	this.logMessage("trace", msg, meta);
+SystemLogger.logTrace = (msg, meta) => {
+	logger.trace(logMessage(msg, meta));
 };
 
 /**
@@ -192,31 +126,8 @@ repoLogger.prototype.logTrace = function (msg, meta) {
  * @param {string} msg - Fatal message
  * @param {Object} meta - Extra informative metadata
  */
-repoLogger.prototype.logFatal = function (msg, meta) {
-	this.logMessage("fatal", msg, meta);
+SystemLogger.logFatal = (msg, meta) => {
+	logger.fatal(logMessage(msg, meta));
 };
 
-const systemLogger = new repoLogger(null, null, "system");
-
-/**
- * Middleware to call at the start of every request to
- * initialize logger
- *
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {function} next - Next middleware
- * @returns
- */
-module.exports.startRequest = function (req, res, next) {
-
-	const C = require("./constants");
-
-	req[C.REQ_REPO] = {};
-	req[C.REQ_REPO].logger = systemLogger;
-
-	// req[C.REQ_REPO].logger = new repoLogger(req, res, shortid.generate()); // Create logger for this request
-
-	next();
-};
-
-module.exports.systemLogger = systemLogger;
+module.exports.systemLogger = SystemLogger;

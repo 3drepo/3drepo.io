@@ -17,7 +17,6 @@
 "use strict";
 (() => {
 
-	const C = require("./constants");
 	const _ = require("lodash");
 	const config = require("./config");
 	const systemLogger = require("./logger.js").systemLogger;
@@ -391,6 +390,9 @@
 		"jpg": "image/jpg"
 	};
 
+	const genResponseLogging = (resCode, {place, contentLength}) =>
+		`${place} - ${resCode.code}(${resCode.status}) (content Length: ${contentLength})`;
+
 	/**
 	 *
 	 *
@@ -408,11 +410,11 @@
 
 		if (!resCode || valid_values.indexOf(resCode.value) === -1) {
 			if (resCode && resCode.stack) {
-				req[C.REQ_REPO].logger.logError(resCode.stack);
+				systemLogger.logError(resCode.stack);
 			} else if (resCode && resCode.message) {
-				req[C.REQ_REPO].logger.logError(resCode.message);
+				systemLogger.logError(resCode.message);
 			} else {
-				req[C.REQ_REPO].logger.logError(JSON.stringify(resCode));
+				systemLogger.logError(JSON.stringify(resCode));
 			}
 
 			if(!resCode.value) {
@@ -434,10 +436,7 @@
 
 			meta.contentLength = JSON.stringify(responseObject)
 				.length;
-			req[C.REQ_REPO].logger.logError(
-				resCode.code + " (" + resCode.value + ")",
-				meta
-			);
+			systemLogger.logError(genResponseLogging(resCode, meta));
 
 			res.status(resCode.status)
 				.send(responseObject);
@@ -479,10 +478,8 @@
 			}
 
 			// log bandwidth and http status code
-			req[C.REQ_REPO].logger.logInfo(resCode.code, meta);
+			systemLogger.logInfo(genResponseLogging(resCode, meta));
 		}
-
-		// next();
 	};
 
 	responseCodes.writeStreamRespond =  function (place, req, res, next, readStream, customHeaders) {
@@ -492,7 +489,7 @@
 		let response = responseCodes.OK;
 
 		readStream.on("error", error => {
-			req[C.REQ_REPO].logger.logInfo(`Stream failed: [${error.code} - ${error.message}]`, {place});
+			systemLogger.logError(`Stream failed: [${error.code} - ${error.message}] @ ${place}`);
 			response = responseCodes.NO_FILE_FOUND;
 			res.status(response.status);
 			res.end();
@@ -507,11 +504,11 @@
 			length += data.length;
 		}).on("end", () => {
 			res.end();
-			req[C.REQ_REPO].logger.logInfo(response.status, {
+			systemLogger.logInfo(genResponseLogging(response, {
 				place,
 				httpCode: response.status,
 				contentLength: length
-			});
+			}));
 		});
 	};
 

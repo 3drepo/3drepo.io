@@ -25,6 +25,7 @@ const sessionCheck = require("../middlewares/sessionCheck");
 const middlewares = require("../middlewares/middlewares");
 const config = require("../config");
 const utils = require("../utils");
+const systemLogger = require("../logger.js").systemLogger;
 // const ChatEvent = require("../models/chatEvent");
 const User = require("../models/user");
 
@@ -584,18 +585,19 @@ function createSession(place, req, res, next, user) {
 function login(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 
-	if (utils.isString(req.body.username) && utils.isString(req.body.password)) {
+	const { username, password} = req.body;
+	if (utils.isString(username) && utils.isString(password)) {
 
-		req[C.REQ_REPO].logger.logInfo("Authenticating user", { username: req.body.username});
+		systemLogger.logInfo(`Authenticating ${username}...`);
 
 		if(sessionCheck(req)) {
 			return responseCodes.respond(responsePlace, req, res, next, responseCodes.ALREADY_LOGGED_IN, responseCodes.ALREADY_LOGGED_IN);
 		}
 
-		User.authenticate(req[C.REQ_REPO].logger, req.body.username, req.body.password).then(user => {
+		User.authenticate(username, password).then(user => {
 			createSession(responsePlace, req, res, next, user);
 		}).catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode || err);
 		});
 	} else {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
@@ -615,7 +617,7 @@ function logout(req, res, next) {
 	const username = req.session.user.username;
 
 	req.session.destroy(function() {
-		req[C.REQ_REPO].logger.logDebug("User has logged out.");
+		systemLogger.logDebug("User has logged out.");
 		res.clearCookie("connect.sid", { domain: config.cookie_domain, path: "/" });
 		responseCodes.respond("Logout POST", req, res, next, responseCodes.OK, {username: username});
 	});
@@ -628,7 +630,7 @@ function updateUser(req, res, next) {
 		if(Object.prototype.toString.call(req.body.oldPassword) === "[object String]" &&
 			Object.prototype.toString.call(req.body.newPassword) === "[object String]") {
 			// Update password
-			User.updatePassword(req[C.REQ_REPO].logger, req.params[C.REPO_REST_API_ACCOUNT], req.body.oldPassword, null, req.body.newPassword).then(() => {
+			User.updatePassword(req.params[C.REPO_REST_API_ACCOUNT], req.body.oldPassword, null, req.body.newPassword).then(() => {
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
 			}).catch(err => {
 				responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
@@ -681,7 +683,7 @@ function signUp(req, res, next) {
 		checkCaptcha.then(resBody => {
 
 			if(resBody.success) {
-				return User.createUser(req[C.REQ_REPO].logger, req.params.account, req.body.password, {
+				return User.createUser(req.params.account, req.body.password, {
 
 					email: req.body.email,
 					firstName: req.body.firstName,
@@ -705,13 +707,13 @@ function signUp(req, res, next) {
 				pay: req.body.pay
 			}).catch(err => {
 				// catch email error instead of returning to client
-				req[C.REQ_REPO].logger.logError(`Email error - ${err.message}`);
+				systemLogger.logError(`Email error - ${err.message}`);
 				return Promise.resolve(err);
 			});
 
 		}).then(emailRes => {
 
-			req[C.REQ_REPO].logger.logInfo("Email info - " + JSON.stringify(emailRes));
+			systemLogger.logInfo("Email info - " + JSON.stringify(emailRes));
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
@@ -747,12 +749,12 @@ function forgotPassword(req, res, next) {
 					firstName:data.firstName
 				}).catch(err => {
 					// catch email error instead of returning to client
-					req[C.REQ_REPO].logger.logDebug(`Email error - ${err.message}`);
+					systemLogger.logDebug(`Email error - ${err.message}`);
 					return Promise.reject(responseCodes.PROCESS_ERROR("Internal Email Error"));
 				});
 			}
 		}).then(emailRes => {
-			req[C.REQ_REPO].logger.logInfo("Email info - " + JSON.stringify(emailRes));
+			systemLogger.logInfo("Email info - " + JSON.stringify(emailRes));
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || err , err.resCode ? err.resCode : err);
@@ -831,7 +833,7 @@ function resetPassword(req, res, next) {
 
 	if (Object.prototype.toString.call(req.body.token) === "[object String]" &&
 		Object.prototype.toString.call(req.body.newPassword) === "[object String]") {
-		User.updatePassword(req[C.REQ_REPO].logger, req.params[C.REPO_REST_API_ACCOUNT], null, req.body.token, req.body.newPassword).then(() => {
+		User.updatePassword(req.params[C.REPO_REST_API_ACCOUNT], null, req.body.token, req.body.newPassword).then(() => {
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
