@@ -21,11 +21,12 @@ declare var createPixelStreamingInstance;
 /**
  * The required properties of the Pixel Streaming configuration for the loadUnreal method.
  */
-interface UnrealConfig {
+class UnrealConfig {
 	/** The fully qualified address of the matchmaking server */
-	serverUri: string,
-	/** Whether to attempt to connect as soon as createUnrealInstance is called; be aware that many browsers will not allow the session to start without explicit interaction from the user. */
-	autoConnect: boolean
+	public serverUri: string;
+	/** Whether to attempt to connect as soon as createUnrealInstance is called;
+	 * be aware that many browsers will not allow the session to start without explicit interaction from the user. */
+	public autoConnect: boolean;
 }
 
 export class UnityUtil {
@@ -214,12 +215,11 @@ export class UnityUtil {
 	 * @param div - the html dom element that the viewer should be created under
 	 * @param config - an object describing the configuration of the viewer
 	 * @return returns a promise which resolves when the game is loaded.
-	 *
 	 */
-	public static loadUnreal(div: any, config: UnrealConfig) : Promise<void> {
+	public static loadUnreal(div: any, config: UnrealConfig): Promise<void> {
 		// The client must load the PixelStreaming dependencies before beginning if they wish to use PixelStreaming
-		if(typeof createPixelStreamingInstance != "function"){
-			console.error("An application must load the Unreal PixelStreaming dependencies before attemping to load the viewer");
+		if (typeof createPixelStreamingInstance !== 'function') {
+			console.error('An application must load the Unreal PixelStreaming dependencies before attemping to load the viewer');
 		}
 
 		if (Object.prototype.toString.call(div) === '[object String]') {
@@ -237,7 +237,6 @@ export class UnityUtil {
 
 		return UnityUtil.onReady();
 	}
-
 
 	/**
 	 * @category Configurations
@@ -1630,7 +1629,7 @@ export class UnityUtil {
 	 */
 	public static multipleCallInChunks(arrLength: number, func: (start: number, end: number) => any) {
 		let index = 0;
-		let chunkSize = UnityUtil.chunkSize;
+		const chunkSize = UnityUtil.chunkSize;
 		while (index < arrLength) {
 			const end = index + chunkSize >= arrLength ? undefined : index + chunkSize;
 			func(index, end);
