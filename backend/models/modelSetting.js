@@ -19,7 +19,6 @@
 
 const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
-const nodeuuid = require("uuid/v1");
 const utils = require("../utils");
 const db = require("../handler/db");
 const systemLogger = require("../logger.js").systemLogger;
@@ -379,7 +378,7 @@ ModelSetting.setModelStatus = async function(account, model, status) {
  * @param {addTimestamp} - add a timestamp to the model settings while you're at it
  */
 ModelSetting.createCorrelationId = async function(account, model, addTimestamp = false) {
-	const correlationId = nodeuuid();
+	const correlationId = utils.generateUUID({string: true});
 	const data = { corID: correlationId };
 
 	if (addTimestamp) {
