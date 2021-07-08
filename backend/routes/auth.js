@@ -610,8 +610,9 @@ function checkLogin(req, res, next) {
 }
 
 function logout(req, res, next) {
+	const responsePlace = utils.APIInfo(req);
 	if(!sessionCheck(req)) {
-		return responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.NOT_LOGGED_IN, {});
+		return responseCodes.respond(responsePlace, req, res, next, responseCodes.NOT_LOGGED_IN, {});
 	}
 
 	const username = req.session.user.username;
@@ -619,7 +620,7 @@ function logout(req, res, next) {
 	req.session.destroy(function() {
 		systemLogger.logDebug("User has logged out.");
 		res.clearCookie("connect.sid", { domain: config.cookie_domain, path: "/" });
-		responseCodes.respond("Logout POST", req, res, next, responseCodes.OK, {username: username});
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {username: username});
 	});
 }
 

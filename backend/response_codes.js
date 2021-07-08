@@ -390,8 +390,10 @@
 		"jpg": "image/jpg"
 	};
 
-	const genResponseLogging = (resCode, {place, contentLength}) =>
-		`${place} - ${resCode.code}(${resCode.status}) (content Length: ${contentLength})`;
+	const genResponseLogging = (resCode, {place, contentLength}, {session} = {}) => {
+		const user = session && session.user ? session.user.username : "unknown";
+		return `${place} - ${resCode.code}(${resCode.status}) [user: ${user}, resp size: ${contentLength}]`;
+	}
 
 	/**
 	 *
@@ -436,7 +438,7 @@
 
 			meta.contentLength = JSON.stringify(responseObject)
 				.length;
-			systemLogger.logError(genResponseLogging(resCode, meta));
+			systemLogger.logInfo(genResponseLogging(resCode, meta, req));
 
 			res.status(resCode.status)
 				.send(responseObject);
@@ -478,7 +480,7 @@
 			}
 
 			// log bandwidth and http status code
-			systemLogger.logInfo(genResponseLogging(resCode, meta));
+			systemLogger.logInfo(genResponseLogging(resCode, meta, req));
 		}
 	};
 
