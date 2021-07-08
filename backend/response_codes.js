@@ -390,9 +390,11 @@
 		"jpg": "image/jpg"
 	};
 
-	const genResponseLogging = (resCode, {place, contentLength}, {session} = {}) => {
+	const genResponseLogging = (resCode, {place, contentLength}, {session, startTime} = {}) => {
 		const user = session && session.user ? session.user.username : "unknown";
-		return `${place} - ${resCode.code}(${resCode.status}) [user: ${user}, resp size: ${contentLength}]`;
+		const currentTime = Date.now();
+		const latency = startTime ? `${currentTime - startTime}ms` : "???ms";
+		return `${resCode.status}\t${user}\t${latency}\t${contentLength}B\t${place}\t${resCode.code}`;
 	};
 
 	/**

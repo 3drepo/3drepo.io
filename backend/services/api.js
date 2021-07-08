@@ -57,6 +57,8 @@ module.exports.createApp = function (config) {
 	app.use(compress({ level: 9 }));
 
 	app.use(function (req, res, next) {
+		// record start time of the request
+		req.startTime = Date.now();
 		// intercept OPTIONS method
 		if ("OPTIONS" === req.method) {
 			res.sendStatus(200);
