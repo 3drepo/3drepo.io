@@ -227,8 +227,9 @@ export class UnityUtil {
 		// Reduce the chunk size to a value that won't exceed the webrtc data channels 65k limit
 		UnityUtil.chunkSize = 100;
 
-		createPixelStreamingInstance(div, config)
-		.then((instance) => {
+		createPixelStreamingInstance(div, config, (progress) => {
+			this.onProgress(progress);
+		}).then((instance) => {
 			UnityUtil.unityInstance = instance;
 		}).catch(UnityUtil.onUnityError);
 
