@@ -11,10 +11,10 @@
     "test:cover": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config nyc yarn test ",
     "test:cover-one": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config nyc --reporter none mocha ",
     "test:coverall": "yarn test:cover && nyc report --reporter=text-lcov | coveralls",
-    "test:unit": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config mocha test/unit --recursive",
-    "test:one": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config mocha",
+    "test:unit": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config mocha test/unit --recursive --exit",
+    "test:one": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config mocha --exit",
     "test:int-clean": "./test/cleanup/cleanup.sh",
-    "test:int": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config mocha test/integrated --recursive",
+    "test:int": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config mocha test/integrated --recursive --exit",
     "lint": "eslint ./",
     "lint:fix": "eslint --fix ./"
   },

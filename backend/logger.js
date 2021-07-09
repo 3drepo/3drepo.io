@@ -63,10 +63,12 @@ function createLogger() {
 	// Creates logger which outputs to both the console
 	// and a log file simultaneously
 	// Levels are set separately in the config.
-	return winston.createLogger({
-		transports: transporters,
-		format
-	});
+	if (transporters.length > 0) {
+		return winston.createLogger({
+			transports: transporters,
+			format
+		});
+	}
 }
 
 /**
@@ -86,7 +88,7 @@ const logMessage = (msg, meta, label) => `${msg} ${meta ? JSON.stringify(meta, l
  * @param {Object} meta - Extra informative metadata
  */
 SystemLogger.logInfo = (msg, meta, label) => {
-	logger.info(logMessage(msg, meta, label), {label});
+	logger && logger.info(logMessage(msg, meta, label), {label});
 };
 
 /**
@@ -96,7 +98,7 @@ SystemLogger.logInfo = (msg, meta, label) => {
  * @param {Object} meta - Extra informative metadata
  */
 SystemLogger.logError = (msg, meta, label) => {
-	logger.error(logMessage(msg, meta, label), {label});
+	logger && logger.error(logMessage(msg, meta, label), {label});
 };
 
 /**
@@ -106,7 +108,7 @@ SystemLogger.logError = (msg, meta, label) => {
  * @param {Object} meta - Extra informative metadata
  */
 SystemLogger.logDebug = (msg, meta, label) => {
-	logger.debug(logMessage(msg, meta, label), {label});
+	logger && logger.debug(logMessage(msg, meta, label), {label});
 };
 
 /**
@@ -116,7 +118,7 @@ SystemLogger.logDebug = (msg, meta, label) => {
  * @param {Object} meta - Extra informative metadata
  */
 SystemLogger.logWarning = (msg, meta, label) => {
-	logger.warning(logMessage(msg, meta, label), {label});
+	logger && logger.warning(logMessage(msg, meta, label), {label});
 };
 
 /**
@@ -126,7 +128,7 @@ SystemLogger.logWarning = (msg, meta, label) => {
  * @param {Object} meta - Extra informative metadata
  */
 SystemLogger.logTrace = (msg, meta, label) => {
-	logger.trace(logMessage(msg, meta, label), {label});
+	logger && logger.trace(logMessage(msg, meta, label), {label});
 };
 
 /**
@@ -136,10 +138,11 @@ SystemLogger.logTrace = (msg, meta, label) => {
  * @param {Object} meta - Extra informative metadata
  */
 SystemLogger.logFatal = (msg, meta, label) => {
-	logger.fatal(logMessage(msg, meta, label), {label});
+	logger && logger.fatal(logMessage(msg, meta, label), {label});
 };
 
 module.exports.systemLogger = SystemLogger;
 module.exports.logLabels = {
 	network: "NET"
 };
+
