@@ -20,8 +20,6 @@
 const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp();
-const logger = require("../../logger.js");
-const systemLogger = logger.systemLogger;
 const responseCodes = require("../../response_codes.js");
 
 describe("Login", function () {
@@ -57,7 +55,7 @@ describe("Login", function () {
 	it("with correct password and username and verified should login successfully", function () {
 
 		// create a user
-		return User.createUser(systemLogger, username, password, {
+		return User.createUser(username, password, {
 			email: email("success")
 		}, 200000).then(emailVerifyToken => {
 			return User.verify(username, emailVerifyToken.token, true);
@@ -81,7 +79,7 @@ describe("Login", function () {
 		const username = "email_user"
 
 		// create a user
-		return User.createUser(systemLogger, username, password, {
+		return User.createUser(username, password, {
 			email: email("mail_success")
 		}, 200000).then(emailVerifyToken => {
 			return User.verify(username, emailVerifyToken.token, true);
@@ -104,7 +102,7 @@ describe("Login", function () {
 	it("with correct password and username but not yet verified should fail", function () {
 
 		// create a user
-		return User.createUser(systemLogger, username_not_verified, password, {
+		return User.createUser(username_not_verified, password, {
 			email: email("notyetverf")
 		}, 200000).then(user => {
 
