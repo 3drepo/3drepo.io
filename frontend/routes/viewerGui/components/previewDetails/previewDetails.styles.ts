@@ -114,7 +114,7 @@ export const CollapsableContent = styled.div`
 
 export const StyledForm = styled(Form)`
 	&& {
-		width: 100%;
+		width: 94%;
 		padding-right: 4px !important;
 	}
 `;
@@ -169,6 +169,12 @@ export const Typography = styled(TypographyComponent)`
 		overflow: hidden;
 		margin-right: 24px;
 		margin-bottom: 0;
+	}
+`;
+
+export const TitleNumber = styled(Typography)`
+	&& {
+		margin-right: 3px;
 	}
 `;
 

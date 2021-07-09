@@ -918,7 +918,7 @@ const acceptedFormat = [
 	"dae","ter","csm","3d","lws","xml","ogex",
 	"ms3d","cob","scn","blend","pk3","ndo",
 	"ifc","xgl","zgl","fbx","assbin", "bim", "dgn",
-	"rvt", "rfa", "spm"
+	"rvt", "rfa", "spm", "dwg", "dxf"
 ];
 
 const getModelSetting = async (account, model, username) => {
