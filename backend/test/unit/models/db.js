@@ -119,6 +119,83 @@ describe("Check DB handler", function() {
 		});
 	});
 
+	describe("getDB", function () {
+		it("get DB should succeed", async function() {
+			const database = await db.getDB(account);
+			expect(database).to.exist;
+			const coll = await database.collection("jobs");
+			expect(coll).to.exist;
+			const findResults = await coll.find({}).toArray();
+			expect(findResults).to.deep.equal(goldenJobs);
+		});
+
+		it("get DB with incorrect username to be empty", async function() {
+			const database = await db.getDB("nope");
+			expect(database).to.exist;
+			const coll = await database.collection("jobs");
+			expect(coll).to.exist;
+			const findResults = await coll.find({}).toArray();
+			expect(findResults).to.be.empty;
+		});
+	});
+
+	describe("getAuthDB", function () {
+		it("get auth DB should succeed", async function() {
+			const database = await db.getAuthDB();
+			expect(database).to.exist;
+			const coll = await database.collection("system.users");
+			expect(coll).to.exist;
+			const findResults = await coll.find({}).toArray();
+			expect(findResults).to.have.lengthOf(61)
+		});
+	});
+
+	describe("getCollection", function () {
+		it("get collection should succeed", async function() {
+			const coll = await db.getCollection(account, "jobs");
+			expect(coll).to.exist;
+			const findResults = await coll.find({}).toArray();
+			expect(findResults).to.deep.equal(goldenJobs);
+		});
+
+		it("get collection with incorrect username should be empty", async function() {
+			const coll = await db.getCollection("wrong", "jobs");
+			expect(coll).to.exist;
+			const findResults = await coll.find({}).toArray();
+			expect(findResults).to.be.empty;
+		});
+	});
+
+	describe("geCollectionStats", function () {
+		it("get collection stats should succeed", async function() {
+			const stats = await db.getCollectionStats(account, "jobs");
+			expect(stats).to.exist;
+			expect(stats.ok).to.equal(1);
+		});
+
+		it("get collection stats with incorrect username should fail", async function() {
+			try {
+				await db.getCollectionStats("notexist", "jobs");
+				throw {}; // should've failed at previous line
+			} catch (err) {
+				expect(err.name).to.equal("MongoError");
+				expect(err.message).to.equal("Database [notexist] not found.");
+			}
+		});
+	});
+
+	describe("listCollections", function () {
+		it("list collection with valid username should succeed", async function() {
+			const colls = await db.listCollections(account);
+			expect(colls).to.deep.equal(goldenColls);
+		});
+
+		it("list collection with incorrect username should be empty", async function() {
+			const colls = await db.listCollections("wrong");
+			expect(colls).to.be.empty;
+		});
+	});
+
 	describe("find", function () {
 		it("find jobs should succeed", async function() {
 			const jobs = await db.find(account, "jobs", {});
@@ -210,71 +287,6 @@ describe("Check DB handler", function() {
 		});
 	});
 
-	describe("getDB", function () {
-		it("get DB should succeed", async function() {
-			const database = await db.getDB(account);
-			expect(database).to.exist;
-			const coll = await database.collection("jobs");
-			expect(coll).to.exist;
-			const findResults = await coll.find({}).toArray();
-			expect(findResults).to.deep.equal(goldenJobs);
-		});
-
-		it("get DB with incorrect username to be empty", async function() {
-			const database = await db.getDB("nope");
-			expect(database).to.exist;
-			const coll = await database.collection("jobs");
-			expect(coll).to.exist;
-			const findResults = await coll.find({}).toArray();
-			expect(findResults).to.be.empty;
-		});
-	});
-
-	describe("getAuthDB", function () {
-		it("get auth DB should succeed", async function() {
-			const database = await db.getAuthDB();
-			expect(database).to.exist;
-			const coll = await database.collection("system.users");
-			expect(coll).to.exist;
-			const findResults = await coll.find({}).toArray();
-			expect(findResults).to.have.lengthOf(61)
-		});
-	});
-
-	describe("getCollection", function () {
-		it("get collection should succeed", async function() {
-			const coll = await db.getCollection(account, "jobs");
-			expect(coll).to.exist;
-			const findResults = await coll.find({}).toArray();
-			expect(findResults).to.deep.equal(goldenJobs);
-		});
-
-		it("get collection with incorrect username should be empty", async function() {
-			const coll = await db.getCollection("wrong", "jobs");
-			expect(coll).to.exist;
-			const findResults = await coll.find({}).toArray();
-			expect(findResults).to.be.empty;
-		});
-	});
-
-	describe("geCollectionStats", function () {
-		it("get collection stats should succeed", async function() {
-			const stats = await db.getCollectionStats(account, "jobs");
-			expect(stats).to.exist;
-			expect(stats.ok).to.equal(1);
-		});
-
-		it("get collection stats with incorrect username should fail", async function() {
-			try {
-				await db.getCollectionStats("notexist", "jobs");
-				throw {}; // should've failed at previous line
-			} catch (err) {
-				expect(err.name).to.equal("MongoError");
-				expect(err.message).to.equal("Database [notexist] not found.");
-			}
-		});
-	});
-
 	describe("getFileStreamFromGridFS", function () {
 		/*
 		it("get file stream should succeed", async function() {
@@ -298,26 +310,66 @@ describe("Check DB handler", function() {
 	});
 
 	describe("storeFileInGridFS", function () {
-		/*
-		it("store file in Grid FS should succeed", async function() {
-			const buffer = {};
-			const file = await db.storeFileInGridFS(account, `${model}.history`, "f0fd8f0c-06e2-479b-b41a-a8873bc74dc9LegoRoundTree_ifc", buffer);
-			console.log(file);
+		it("store file buffer in Grid FS should succeed", async function() {
+			const buffer = Buffer.alloc(8);
+			const filename = "test_file";
+			const file = await db.storeFileInGridFS(account, `${model}.history`, filename, buffer);
 			expect(file).to.exist;
-			// expect(stats.ok).to.equal(1);
-		});
-		*/
-	});
-
-	describe("listCollections", function () {
-		it("list collection with valid username should succeed", async function() {
-			const colls = await db.listCollections(account);
-			expect(colls).to.deep.equal(goldenColls);
+			expect(file).to.equal(filename);
 		});
 
-		it("list collection with incorrect username should be empty", async function() {
-			const colls = await db.listCollections("wrong");
-			expect(colls).to.be.empty;
+		it("store file string in Grid FS should succeed", async function() {
+			const data = "test data";
+			const filename = "test_string";
+			const file = await db.storeFileInGridFS(account, `${model}.history`, filename, data);
+			expect(file).to.exist;
+			expect(file).to.equal(filename);
+		});
+
+		it("store file string in Grid FS should succeed", async function() {
+			const data = "test data";
+			const filename = "test_string";
+			const file = await db.storeFileInGridFS(account, `${model}.history`, filename, data);
+			expect(file).to.exist;
+			expect(file).to.equal(filename);
+		});
+
+		it("store file number in Grid FS should succeed", async function() {
+			const data = 123456789;
+			const filename = "test_number";
+			try {
+				await db.storeFileInGridFS(account, `${model}.history`, filename, data);
+				throw {}; // should've failed at previous line
+			} catch (err) {
+				expect(err.code).to.equal("ERR_INVALID_ARG_TYPE");
+			}
+		});
+
+		it("store file that is not a buffer should fail", async function() {
+			const data = { "badData": true };
+			const filename = "bad_file";
+			try {
+				await db.storeFileInGridFS(account, `${model}.history`, filename, data);
+				throw {}; // should've failed at previous line
+			} catch (err) {
+				expect(err.code).to.equal("ERR_INVALID_ARG_TYPE");
+			}
+		});
+
+		it("store file in wrong collection should succeed", async function() {
+			const buffer = Buffer.alloc(8);
+			const filename = "bad_test_file";
+			const file = await db.storeFileInGridFS(account, "wrong.history", filename, buffer);
+			expect(file).to.exist;
+			expect(file).to.equal(filename);
+		});
+
+		it("store file in wrong DB should succeed", async function() {
+			const buffer = Buffer.alloc(8);
+			const filename = "test_file";
+			const file = await db.storeFileInGridFS("wrong", `${model}.history`, filename, buffer);
+			expect(file).to.exist;
+			expect(file).to.equal(filename);
 		});
 	});
 
