@@ -182,7 +182,7 @@ async function importSuccess(account, model, sharedSpacePath, user) {
 		]);
 
 		if (setting) {
-			systemLogger.logInfo(`Model status changed to ${setting.status} and correlation ID reset`);
+			systemLogger.logDebug(`Model status changed to ${setting.status} and correlation ID reset`);
 
 			const updatedSetting = await setModelImportSuccess(account, model, setting.type === "toy" || setting.type === "sample");
 
@@ -271,7 +271,7 @@ function importFail(account, model, sharedSpacePath, user, errCode, errMsg) {
 async function setStatus(account, model, status, user) {
 	try {
 		const setting = await setModelStatus(account, model, status);
-		systemLogger.logInfo(`Model status changed to ${status}`);
+		systemLogger.logDebug(`Model status changed to ${status}`);
 		ChatEvent.modelStatusChanged(null, account, model, { status, user });
 
 		return setting;
