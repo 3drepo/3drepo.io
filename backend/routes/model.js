@@ -18,11 +18,14 @@
 
 const express = require("express");
 const router = express.Router({mergeParams: true});
+const multer = require("multer");
 const utils = require("../utils");
 const middlewares = require("../middlewares/middlewares");
 const ModelSetting = require("../models/modelSetting");
 const responseCodes = require("../response_codes");
 const C = require("../constants");
+const { modelStatusChanged } = require("../models/chatEvent");
+const { isValidTag } = require("../models/history");
 const ModelHelpers = require("../models/helper/model");
 const TextureHelpers = require("../models/helper/texture");
 const UnityAssets = require("../models/unityAssets");
@@ -2084,6 +2087,50 @@ async function uploadChunk(req, res, next) {
 	}
 }
 
+async function uploadFile(teamspace, model, username, req) {
+	if (!config.cn_queue) {
+		throw responseCodes.QUEUE_NO_CONFIG;
+	}
+
+	modelStatusChanged(null, teamspace, model, { status: "uploading", username });
+	// upload model with tag
+
+	const uploadedFile = await new Promise((resolve, reject) => {
+		const upload = multer({
+			dest: config.cn_queue.upload_dir,
+			fileFilter: async function(fileReq, file, cb) {
+				const size = parseInt(fileReq.headers[C.CONTENT_LENGTH_HEADER]);
+
+				try {
+					await Upload.checkFileFormat(file.originalname);
+					await middlewares.checkSufficientSpace(teamspace, size);
+					cb(null, true);
+				} catch (err) {
+					cb(err);
+				}
+			}
+		});
+
+		upload.single("file")(req, null, function (err) {
+			if (err) {
+				return reject(err);
+
+			} else if(!req.file.size) {
+				return reject(responseCodes.FILE_FORMAT_NOT_SUPPORTED);
+
+			} else {
+				modelStatusChanged(null, teamspace, model, { status: "uploaded" });
+				return resolve(req.file);
+			}
+		});
+	});
+
+	// req.body.tag wont be defined after the file has been uploaded
+	await isValidTag(teamspace, model, req.body.tag);
+
+	return uploadedFile;
+}
+
 function uploadModel(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 	const { account, model } = req.params;
@@ -2098,7 +2145,7 @@ function uploadModel(req, res, next) {
 		if (!modelSetting) {
 			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 		} else {
-			return Upload.uploadFile(req);
+			return uploadFile(account, model, username, req);
 		}
 	}).then(file => {
 		const data = {

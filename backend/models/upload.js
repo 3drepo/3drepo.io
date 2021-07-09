@@ -17,7 +17,6 @@
 "use strict";
 
 const fs = require("fs");
-const multer = require("multer");
 const config = require("../config");
 const C = require("../constants");
 const utils = require("../utils");
@@ -27,22 +26,6 @@ const importQueue = require("../services/queue");
 const { modelStatusChanged } = require("./chatEvent");
 const { isValidTag } = require("./history");
 const { findModelSettingById, setCorrelationId } = require("./modelSetting");
-
-const checkFileFormat = async (filename) => {
-	let format = filename.split(".");
-
-	if (format.length <= 1) {
-		throw responseCodes.FILE_NO_EXT;
-	}
-
-	const isIdgn = format[format.length - 1] === "dgn" && format[format.length - 2] === "i";
-
-	format = format[format.length - 1];
-
-	if (isIdgn || C.ACCEPTED_FILE_FORMATS.indexOf(format.toLowerCase()) === -1) {
-		throw responseCodes.FILE_FORMAT_NOT_SUPPORTED;
-	}
-};
 
 const handleChunkStream = async (req, filename) => {
 	return new Promise(resolve => {
@@ -71,12 +54,28 @@ const stitchChunks = (corID, newFilename) => {
 
 const Upload = {};
 
+Upload.checkFileFormat = async (filename) => {
+	let format = filename.split(".");
+
+	if (format.length <= 1) {
+		throw responseCodes.FILE_NO_EXT;
+	}
+
+	const isIdgn = format[format.length - 1] === "dgn" && format[format.length - 2] === "i";
+
+	format = format[format.length - 1];
+
+	if (isIdgn || C.ACCEPTED_FILE_FORMATS.indexOf(format.toLowerCase()) === -1) {
+		throw responseCodes.FILE_FORMAT_NOT_SUPPORTED;
+	}
+};
+
 Upload.initChunking = async (teamspace, model, username, data) => {
 	if (!data.filename) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	await checkFileFormat(data.filename);
+	await Upload.checkFileFormat(data.filename);
 
 	// check model exists before upload
 	const modelSetting = await findModelSettingById(teamspace, model);
@@ -103,53 +102,6 @@ Upload.initChunking = async (teamspace, model, username, data) => {
 	);
 
 	return { corID };
-};
-
-Upload.uploadFile = async (req) => {
-	if (!config.cn_queue) {
-		throw responseCodes.QUEUE_NO_CONFIG;
-	}
-
-	const { account, model } = req.params;
-	const user = req.session.user.username;
-
-	modelStatusChanged(null, account, model, { status: "uploading", user });
-	// upload model with tag
-
-	const uploadedFile = await new Promise((resolve, reject) => {
-		const upload = multer({
-			dest: config.cn_queue.upload_dir,
-			fileFilter: async function(fileReq, file, cb) {
-				const size = parseInt(fileReq.headers[C.CONTENT_LENGTH_HEADER]);
-
-				try {
-					await checkFileFormat(file.originalname);
-					await middlewares.checkSufficientSpace(account, size);
-					cb(null, true);
-				} catch (err) {
-					cb(err);
-				}
-			}
-		});
-
-		upload.single("file")(req, null, function (err) {
-			if (err) {
-				return reject(err);
-
-			} else if(!req.file.size) {
-				return reject(responseCodes.FILE_FORMAT_NOT_SUPPORTED);
-
-			} else {
-				modelStatusChanged(null, account, model, { status: "uploaded" });
-				return resolve(req.file);
-			}
-		});
-	});
-
-	// req.body.tag wont be defined after the file has been uploaded
-	await isValidTag(account, model, req.body.tag);
-
-	return uploadedFile;
 };
 
 Upload.uploadChunksStart = async (teamspace, model, corID, username, headers) => {
