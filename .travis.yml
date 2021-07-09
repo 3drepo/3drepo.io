@@ -1,5 +1,21 @@
 matrix:
   include:
+    #linter test
+    - language: node_js
+      name: Linter check
+      git:
+      submodules: false
+      depth: 1
+      node_js:
+        - "14.17.1"
+      script:
+        - cd backend
+        - yarn install
+        - yarn lint
+        - cd ../frontend
+        - yarn install
+        - yarn lint
+        - yarn build:test
     # tests
     - language: node_js
       name: Backend tests
@@ -50,7 +66,7 @@ matrix:
       script:
         - cd ../backend
         - mkdir coverage
-        - unbuffer yarn test:one ./test/integrated/meta.js
+        - unbuffer yarn test:coverall
         - cd ../
         - NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" &
         - cd ./frontend
