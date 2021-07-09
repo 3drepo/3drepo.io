@@ -640,7 +640,7 @@ describe("Sign up", function() {
 
 			}).expect(400, function(err, res) {
 
-				expect(res.body.value).to.equal(responseCodes.JOB_TITLE_TOO_LONG.value);
+				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 				done(err);
 			});
 	});
@@ -664,7 +664,7 @@ describe("Sign up", function() {
 
 			}).expect(400, function(err, res) {
 
-				expect(res.body.value).to.equal(responseCodes.PHONE_NUMBER_TOO_LONG.value);
+				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 				done(err);
 			});
 	});
