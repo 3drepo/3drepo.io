@@ -18,13 +18,11 @@
 
 const fs = require("fs");
 const multer = require("multer");
-const nodeuuid = require("uuid/v1");
 const config = require("../config");
 const C = require("../constants");
 const utils = require("../utils");
 const middlewares = require("../middlewares/middlewares");
 const responseCodes = require("../response_codes");
-const systemLogger = require("../logger.js").systemLogger;
 const importQueue = require("../services/queue");
 const { modelStatusChanged } = require("./chatEvent");
 const { isValidTag } = require("./history");
@@ -66,13 +64,7 @@ const stitchChunks = (corID, newFilename) => {
 	files.sort((a, b) => a - b);
 
 	files.forEach((file) => {
-		// for debugging
-		const stats = fs.statSync(`${filePath}/${file}`);
-		systemLogger.logInfo(`FILE=${filePath}/${file}, SIZE=${stats.size} bytes`);
-		// end debugging
-
 		const content = fs.readFileSync(`${filePath}/${file}`);
-
 		fs.appendFileSync(`${importQueue.getTaskPath(corID)}/${newFilename}`, content);
 	});
 };
@@ -97,7 +89,7 @@ Upload.initChunking = async (teamspace, model, username, data) => {
 
 	await isValidTag(teamspace, model, data.tag);
 
-	const corID = nodeuuid();
+	const corID = utils.generateUUID({string: true});
 
 	await importQueue.writeImportData(
 		corID,
@@ -115,7 +107,7 @@ Upload.initChunking = async (teamspace, model, username, data) => {
 
 Upload.uploadFile = async (req) => {
 	if (!config.cn_queue) {
-		return Promise.reject(responseCodes.QUEUE_NO_CONFIG);
+		throw responseCodes.QUEUE_NO_CONFIG;
 	}
 
 	const { account, model } = req.params;
@@ -128,7 +120,7 @@ Upload.uploadFile = async (req) => {
 		const upload = multer({
 			dest: config.cn_queue.upload_dir,
 			fileFilter: async function(fileReq, file, cb) {
-				const size = parseInt(fileReq.headers["content-length"]);
+				const size = parseInt(fileReq.headers[C.CONTENT_LENGTH_HEADER]);
 
 				try {
 					await checkFileFormat(file.originalname);
@@ -161,19 +153,15 @@ Upload.uploadFile = async (req) => {
 };
 
 Upload.uploadChunksStart = async (teamspace, model, corID, username, headers) => {
-	if (!headers["x-ms-transfer-mode"] ||
-		headers["x-ms-transfer-mode"] !== "chunked" ||
-		!headers["x-ms-content-length"] ||
-		isNaN(headers["x-ms-content-length"])) {
-		// for debugging
-		systemLogger.logInfo(`transfer mode=${headers["x-ms-transfer-mode"]}`);
-		systemLogger.logInfo(`content length=${headers["x-ms-content-length"]}`);
-		// end debugging
+	if (!headers[C.MS_TRANSFER_MODE_HEADER] ||
+		headers[C.MS_TRANSFER_MODE_HEADER] !== "chunked" ||
+		!headers[C.MS_CONTENT_LENGTH_HEADER] ||
+		isNaN(headers[C.MS_CONTENT_LENGTH_HEADER])) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	await middlewares.checkSufficientSpace(teamspace, parseInt(headers["x-ms-content-length"]));
-	const chunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, parseInt(headers["x-ms-content-length"]));
+	await middlewares.checkSufficientSpace(teamspace, parseInt(headers[C.MS_CONTENT_LENGTH_HEADER]));
+	const chunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, parseInt(headers[C.MS_CONTENT_LENGTH_HEADER]));
 
 	if (!fs.existsSync(`${importQueue.getTaskPath(corID)}.json`)) {
 		throw responseCodes.CORRELATION_ID_NOT_FOUND;
@@ -196,18 +184,16 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
 		return Promise.reject(responseCodes.QUEUE_NO_CONFIG);
 	}
 
-	if (!req.headers["content-range"]) {
+	if (!req.headers[C.CONTENT_RANGE_HEADER]) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	const [contentRange, totalContentSize] = req.headers["content-range"].split("/");
+	const [contentRange, totalContentSize] = req.headers[C.CONTENT_RANGE_HEADER].split("/");
 	const [sizeUnit, contentRangeValue] = contentRange.split(" ");
 
 	if (sizeUnit !== "bytes") {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
-
-	await middlewares.checkSufficientSpace(teamspace, parseInt(totalContentSize));
 
 	const contentMax = contentRangeValue.split("-")[1];
 
@@ -215,11 +201,6 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
 	const nextChunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, sizeRemaining);
 
 	await handleChunkStream(req, `${importQueue.getTaskPath(corID)}/chunks/${Date.now()}`);
-
-	// for debugging
-	systemLogger.logInfo(`CONTENT-RANGE=${req.headers["content-range"]}`);
-	systemLogger.logInfo(`CHUNKSIZE=${nextChunkSize}`);
-	// end debugging
 
 	if (nextChunkSize === 0) {
 		modelStatusChanged(null, teamspace, model, { status: "uploaded" });
