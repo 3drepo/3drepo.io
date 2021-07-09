@@ -393,8 +393,8 @@
 	const genResponseLogging = (resCode, {place, contentLength}, {session, startTime} = {}) => {
 		const user = session && session.user ? session.user.username : "unknown";
 		const currentTime = Date.now();
-		const latency = startTime ? `${currentTime - startTime}ms` : "???ms";
-		return `${resCode.status}\t${user}\t${latency}\t${contentLength}B\t${place}\t${resCode.code}`;
+		const latency = startTime ? `${currentTime - startTime}` : "???";
+		return `${resCode.status}\t${resCode.code}\t${latency}\t${contentLength}\t${user}\t${place}`;
 	};
 
 	/**
@@ -512,7 +512,7 @@
 				place,
 				httpCode: response.status,
 				contentLength: length
-			}), undefined, logLabels.network);
+			}, req), undefined, logLabels.network);
 		});
 	};
 
