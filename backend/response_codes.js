@@ -403,7 +403,7 @@
 	 * @param {any} extraInfo
 	 * @param {any} format
 	 */
-	responseCodes.respond = function (place, req, res, next, resCode, extraInfo, format, cache) {
+	responseCodes.respond = function (place, req, res, next, resCode, extraInfo, format, cache, customHeaders) {
 
 		resCode = utils.mongoErrorToResCode(resCode);
 
@@ -449,6 +449,10 @@
 				res.setHeader("Cache-Control", `private, max-age=${cache.maxAge || config.cachePolicy.maxAge}`);
 			}
 
+			if (customHeaders) {
+				res.writeHead(resCode.status, customHeaders);
+			}
+
 			if (extraInfo && Buffer.isBuffer(extraInfo)) {
 
 				res.status(resCode.status);
@@ -484,13 +488,6 @@
 		}
 
 		// next();
-	};
-
-	responseCodes.writeHead =  function (place, req, res, next, customHeaders) {
-		const response = responseCodes.OK;
-		res.writeHead(response.status, customHeaders);
-		res.end();
-		req[C.REQ_REPO].logger.logInfo(response.status, {place});
 	};
 
 	responseCodes.writeStreamRespond =  function (place, req, res, next, readStream, customHeaders) {
