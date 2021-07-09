@@ -64,7 +64,7 @@ Meta.getMetadataById = async (account, model, id) => {
 		parents: 0
 	};
 
-	console.log("getting metadata by Id", account, modell, id);
+	console.log("getting metadata by Id", account, model, id);
 	const metadata = await getNodeById(account, model, utils.stringToUUID(id), projection);
 
 	if (!metadata) {
