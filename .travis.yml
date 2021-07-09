@@ -1,6 +1,5 @@
 matrix:
   include:
-    - if: tag IS blank
     #linter test
     - language: node_js
       name: Linter check
