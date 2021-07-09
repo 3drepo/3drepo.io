@@ -430,6 +430,7 @@
 	function getMetadataById(req, res, next) {
 		Meta.getMetadataById(req.params.account, req.params.model, req.params.id)
 			.then(meta => {
+				console.log("fetch metadata by ID", meta);
 				responseCodes.respond(
 					utils.APIInfo(req),
 					req,
