@@ -71,7 +71,13 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	saveNewScreenshot: ['teamspace', 'model', 'isNewIssue'],
 	updateSelectedIssuePin: ['position'],
 	toggleShowPins: ['showPins'],
-	updateActiveIssueViewpoint: ['screenshot']
+	updateActiveIssueViewpoint: ['screenshot'],
+	setMeasureMode: ['measureMode'],
+	setMeasureModeSuccess: ['measureMode'],
+	addMeasurement: ['measurement'],
+	removeMeasurement: ['uuid'],
+	setMeasurementColor: ['uuid', 'color'],
+	setMeasurementName: ['uuid', 'name'],
 }, { prefix: 'ISSUES/' });
 
 export const INITIAL_STATE = {
@@ -93,8 +99,9 @@ export const INITIAL_STATE = {
 		sortOrder: 'desc',
 		sortBy: 'created',
 		failedToLoad: false,
-		savedPin: null
-	}
+		savedPin: null,
+		measureMode: ''
+	},
 };
 
 const updateIssueProps = (issuesMap, issueId, props = {}) => {
@@ -128,8 +135,8 @@ export const fetchIssuesSuccess = (state = INITIAL_STATE, { issues = [] }) => {
 	};
 };
 
-export const fetchIssueSuccess = (state = INITIAL_STATE, { issue: {_id, comments, resources} }) => {
-	const issuesMap = updateIssueProps(state.issuesMap, _id, { comments, resources });
+export const fetchIssueSuccess = (state = INITIAL_STATE, { issue: {_id, comments, resources, shapes} }) => {
+	const issuesMap = updateIssueProps(state.issuesMap, _id, { comments, resources, shapes });
 
 	return { ...state, issuesMap, componentState: { ...state.componentState, failedToLoad: false } };
 };
@@ -282,6 +289,10 @@ const toggleShowPins = (state = INITIAL_STATE, { showPins }) => {
 	return setComponentState(state, { componentState: { showPins } });
 };
 
+const setMeasureModeSuccess = (state = INITIAL_STATE, { measureMode }) => {
+	return setComponentState(state, { componentState: { measureMode } });
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.FETCH_ISSUES_SUCCESS]: fetchIssuesSuccess,
 	[IssuesTypes.FETCH_ISSUE_SUCCESS]: fetchIssueSuccess,
@@ -305,5 +316,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.ATTACH_RESOURCES_SUCCESS]: attachResourcesSuccess,
 	[IssuesTypes.UPDATE_RESOURCES_SUCCESS]: updateResourcesSuccess,
 	[IssuesTypes.UPDATE_SELECTED_ISSUE_PIN]: updateSelectedIssuePin,
-	[IssuesTypes.TOGGLE_SHOW_PINS]: toggleShowPins
+	[IssuesTypes.TOGGLE_SHOW_PINS]: toggleShowPins,
+	[IssuesTypes.SET_MEASURE_MODE_SUCCESS]: setMeasureModeSuccess
 });

@@ -19,6 +19,7 @@ import styled from 'styled-components';
 
 import Tab from '@material-ui/core/Tab';
 
+import { Tabs } from '@material-ui/core';
 import { COLOR } from '../../../../../../styles';
 import { Image as ImageComponent } from '../../../../../components/image';
 import { MessagesList as MessagesListComponent } from '../../../../../components/messagesList/';
@@ -99,6 +100,20 @@ export const TabContent = styled.div`
 export const StyledTab = styled(Tab)`
 	&& {
 		font-size: 13px;
+		padding-left: 0;
+		padding-right: 0;
+		margin-right: 10px;
+	}
+`;
+
+export const StyledTabs = styled(Tabs)`
+	& .MuiTabScrollButton-root {
+		width: 15px;
+	}
+
+	&& {
+		position: relative;
+		width: 345px;
 	}
 `;
 
