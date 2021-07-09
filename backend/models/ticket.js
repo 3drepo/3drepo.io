@@ -35,7 +35,7 @@ const { systemLogger } = require("../logger.js");
 
 const nodeuuid = require("uuid/v1");
 const Comment = require("./comment");
-
+const Shapes = require("./shapes");
 const FileRef = require("./fileRef");
 const config = require("../config.js");
 const extensionRe = /\.(\w+)$/;
@@ -108,12 +108,24 @@ class Ticket extends View {
 			ticketToClean.comments = [];
 		}
 
+		if (ticketToClean.shapes) {
+			ticketToClean.shapes = Shapes.cleanCollection(ticketToClean.shapes);
+		}
+
 		delete ticketToClean.viewpoints;
 		delete ticketToClean.viewCount;
 
 		ticketToClean = super.clean(account, model, ticketToClean);
 
 		return ticketToClean;
+	}
+
+	async fillTicketwithShapes(account, model, ticket) {
+		const shapes = await Shapes.getByTicketId(account, model, this.collName, utils.stringToUUID(ticket._id));
+
+		if (shapes.length) {
+			ticket.shapes = shapes;
+		}
 	}
 
 	async findByUID(account, model, uid, projection, noClean = false) {
@@ -133,6 +145,8 @@ class Ticket extends View {
 			foundTicket.resources = resources;
 			delete foundTicket.refs;
 		}
+
+		await this.fillTicketwithShapes(account, model, foundTicket);
 
 		if (!noClean) {
 			return this.clean(account, model, foundTicket);
@@ -186,6 +200,8 @@ class Ticket extends View {
 		const hasAdminPrivileges = isAdmin || hasOwnerJob;
 		const hasAssignedJob = job === oldTicket.assigned_roles[0];
 		const userPermissions = { hasAdminPrivileges, hasAssignedJob };
+
+		const _id = utils.stringToUUID(id);
 
 		// 2.5 if the user dont have the necessary permissions to update the ticket throw a UPDATE_PERMISSION_DECLINED
 		if (this.ownerPrivilegeAttributes.some(attr => !!data[attr]) && !userPermissions.hasAdminPrivileges) {
@@ -309,8 +325,6 @@ class Ticket extends View {
 		}
 
 		// 6. Update the data
-		const _id = utils.stringToUUID(id);
-
 		const tickets = await this.getCollection(account, model);
 
 		// 7. Return the updated data and the old ticket
@@ -323,9 +337,21 @@ class Ticket extends View {
 			throw responseCodes.INVALID_DATE_ORDER;
 		}
 
+		let shapes = null;
+		// Handle shapes
+		if (data.shapes) {
+			shapes = await Shapes.createMany(account, model, this.collName, _id, data.shapes);
+			delete data.shapes;
+		}
+
 		if (Object.keys(data).length > 0) {
 			updateData["$set"] = data;
 			await tickets.update({ _id }, updateData);
+		}
+
+		if (shapes) {
+			updatedTicket.shapes = shapes;
+			data.shapes = shapes;
 		}
 
 		this.clean(account, model, updatedTicket);
@@ -422,6 +448,14 @@ class Ticket extends View {
 		newTicket.assigned_roles = newTicket.assigned_roles || [];
 		newTicket._id = utils.stringToUUID(newTicket._id || nodeuuid());
 		newTicket.created = parseInt(newTicket.created || (new Date()).getTime());
+
+		let shapes = newTicket.shapes;
+
+		if (shapes) {
+			shapes = await Shapes.createMany(account, model, this.collName, newTicket._id, shapes);
+			delete newTicket.shapes; // In order to not get inserted in the ticket definition
+		}
+
 		const ownerJob = await findJobByUser(account, newTicket.owner);
 		if (ownerJob) {
 			newTicket.creator_role = ownerJob._id;
@@ -467,6 +501,11 @@ class Ticket extends View {
 		const settings = await findModelSettingById(account, model);
 
 		await coll.insert(newTicket);
+
+		if (shapes) {
+			newTicket.shapes = shapes;
+		}
+
 		newTicket.typePrefix = newTicket.typePrefix || settings.type || "";
 		newTicket = this.clean(account, model, newTicket);
 		return newTicket;
@@ -539,7 +578,8 @@ class Ticket extends View {
 
 		const coll = await this.getCollection(account, model);
 		const tickets = await coll.find(fullQuery, projection).toArray();
-		return tickets.reduce((filteredTickets,  foundTicket) => {
+		const filteredTickets = [];
+		await Promise.all(tickets.map(async (foundTicket) => {
 			if (filterTicket &&  !filterTicket(foundTicket, filters)) {
 				return filteredTickets;
 			}
@@ -548,14 +588,16 @@ class Ticket extends View {
 				this.toDirectXCoords(foundTicket);
 			}
 
+			await this.fillTicketwithShapes(account, model, foundTicket);
+
 			if (!noClean) {
 				filteredTickets.push(this.clean(account, model, foundTicket));
 			} else {
 				filteredTickets.push(foundTicket);
 			}
+		}));
 
-			return filteredTickets;
-		}, []);
+		return filteredTickets;
 	}
 
 	toDirectXCoords(entry) {
@@ -626,16 +668,15 @@ class Ticket extends View {
 			convertCoords
 		);
 
-		tickets.forEach((ticket) => {
+		await Promise.all(tickets.map(async (ticket) => {
 			ticket.lastUpdated = ticket.created;
 			ticket.comments && ticket.comments.forEach((comment) => {
 				if (comment.created > ticket.lastUpdated) {
 					ticket.lastUpdated = comment.created;
 				}
 			});
-
 			ticket.comments = undefined;
-		});
+		}));
 
 		return tickets;
 	}

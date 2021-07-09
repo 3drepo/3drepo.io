@@ -141,8 +141,7 @@ Elastic.createMissingIndicies = async (elasticClient) => {
 		"Total" :{ "type": "double" },
 		"DateTime" : { "type": "date" }
 	};
-	await Elastic.createElasticIndex(elasticClient, Utils.statsIndexPrefix, statsMapping);
-
+	await Elastic.createElasticIndex(elasticClient, Utils.statsIndexPrefix, statsMapping);	
 };
 
 module.exports = Elastic;

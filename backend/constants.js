@@ -464,7 +464,8 @@
 		"false",
 		"admin",
 		"root",
-		"notifications"
+		"notifications",
+		"loginRecord"
 	]);
 
 	// -----------------------------------------------------------------------------

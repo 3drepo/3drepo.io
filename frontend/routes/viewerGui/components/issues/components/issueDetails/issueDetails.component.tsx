@@ -18,7 +18,7 @@
 import React, { Fragment } from 'react';
 
 import { diffData, mergeData } from '../../../../../../helpers/forms';
-import { canComment } from '../../../../../../helpers/issues';
+import { canChangeBasicProperty, canComment } from '../../../../../../helpers/issues';
 import { isViewer } from '../../../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { EmptyStateInfo } from '../../../../../components/components.styles';
@@ -69,6 +69,10 @@ interface IProps {
 	showScreenshotDialog: (config: any) => void;
 	showConfirmDialog: (config: any) => void;
 	updateViewpoint: (screenshot?: string) => void;
+	setMeasureMode: (measureMode) => void;
+	removeMeasurement: (uuid) => void;
+	setMeasurementColor: (uuid, color) => void;
+	setMeasurementName: (uuid, type, name) => void;
 	dialogId?: string;
 	postCommentIsPending?: boolean;
 	showSequenceDate: (date) => void;
@@ -76,6 +80,8 @@ interface IProps {
 	maxSequenceDate: Date;
 	selectedDate: Date;
 	sequences: any[];
+	measureMode: string;
+	units: string;
 }
 
 interface IState {
@@ -110,6 +116,11 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	get jobsList() {
 		return [...this.props.jobs, UNASSIGNED_JOB];
+	}
+
+	get canEditBasicProperty() {
+		const { issue, myJob, permissions, currentUser } = this.props;
+		return this.isNewIssue || canChangeBasicProperty(issue, myJob, permissions, currentUser);
 	}
 
 	get actionButton() {
@@ -158,7 +169,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 					type="issue"
 					key={this.issueData._id}
 					defaultExpanded={horizontal || expandDetails}
-					editable={!this.issueData._id}
+					editable={this.canEditBasicProperty}
 					onNameChange={this.handleNameChange}
 					onExpandChange={this.handleExpandChange}
 					renderCollapsable={this.renderDetailsForm}
@@ -246,6 +257,10 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	public handleNameChange = (event, name) => {
 		const newIssue = { ...this.issueData, name };
 		this.props.setState({ newIssue });
+
+		if (!this.isNewIssue) {
+			this.props.updateIssue({name});
+		}
 	}
 
 	public handleIssueFormSubmit = (values) => {
@@ -285,13 +300,10 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				attachLinkResources={attachLinkResources}
 				showDialog={showDialog}
 				canComment={this.userCanComment}
+				canEditBasicProperty={this.canEditBasicProperty}
 				onThumbnailUpdate={this.handleNewScreenshot}
 				formRef={this.formRef}
-				showSequenceDate={this.props.showSequenceDate}
-				minSequenceDate={this.props.minSequenceDate}
-				maxSequenceDate={this.props.maxSequenceDate}
-				selectedDate={this.props.selectedDate}
-				sequences={this.props.sequences}
+				{...this.props}
 			/>
 		);
 	}

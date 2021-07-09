@@ -145,7 +145,7 @@ export class Login extends React.PureComponent<IProps, IState> {
 										label="Password"
 										type="password"
 										placeholder="Type password..."
-										autoComplete="password"
+										autoComplete="current-password"
 									/>
 								)} />
 

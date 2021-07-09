@@ -37,6 +37,7 @@ import { TreeActions } from '../../../../modules/tree';
 
 import { selectIsActive, BimActions } from '../../../../modules/bim';
 import { GroupsActions } from '../../../../modules/groups';
+import { MeasurementsActions } from '../../../../modules/measurements';
 import { selectMetaKeysExist } from '../../../../modules/model';
 
 const mapStateToProps = createStructuredSelector({
@@ -63,8 +64,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setIsFocusMode: ViewerGuiActions.setIsFocusMode,
 	setClippingMode: ViewerGuiActions.setClippingMode,
 	setClipEdit: ViewerGuiActions.setClipEdit,
+	setMeasureMode: MeasurementsActions.setMeasureMode,
 	stopListenOnNumClip: ViewerGuiActions.stopListenOnNumClip,
-	setMeasureVisibility: ViewerGuiActions.setMeasureVisibility,
 	setCoordView: ViewerGuiActions.setCoordView,
 	setPanelVisibility: ViewerGuiActions.setPanelVisibility,
 	setProjectionMode: ViewerGuiActions.setProjectionMode,
