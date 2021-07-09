@@ -66,6 +66,7 @@ interface IProps {
 	disableViewer?: boolean;
 	hasPin: boolean;
 	canComment: boolean;
+	canEditBasicProperty: boolean;
 	formRef: any;
 	onUpdateViewpoint: () => void;
 	onTakeScreenshot: () => void;
@@ -95,11 +96,6 @@ export const IssueSchema = Yup.object().shape({
 class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	get isNewIssue() {
 		return !this.props.issue._id;
-	}
-
-	get canEditBasicProperty() {
-		const { issue, myJob, permissions, currentUser } = this.props;
-		return this.isNewIssue || canChangeBasicProperty(issue, myJob, permissions, currentUser);
 	}
 
 	get canEditViewpoint() {
@@ -157,7 +153,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		<MainIssueFormTab
 			active={active}
 			isNew={this.isNewIssue}
-			canEditBasicProperty={this.canEditBasicProperty}
+			canEditBasicProperty={this.props.canEditBasicProperty}
 			canEditViewpoint={this.canEditViewpoint}
 			canChangeAssigned={this.canChangeAssigned}
 			{...this.props}
