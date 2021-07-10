@@ -129,7 +129,6 @@ Meta.getAllMetadataByRules = async (account, model, branch, rev, rules) => {
 };
 
 Meta.getMetadataFields = async (account, model) => {
-	console.log("!!!getting metadata fields", account, model);
 	const subModelMetadataFieldsPromises = [];
 	await getSubModels(account, model, "master", undefined, (subModelTS, subModel) => {
 		subModelMetadataFieldsPromises.push(
@@ -170,7 +169,6 @@ Meta.getMetadataFields = async (account, model) => {
 			}
 			/* eslint-enable */
 		).then((uniqueKeys) => {
-			console.log("!!!fields in ", account, model, uniqueKeys);
 			uniqueKeys.forEach((key) => {
 				metaKeys.add(key._id);
 			});
@@ -180,7 +178,6 @@ Meta.getMetadataFields = async (account, model) => {
 	}).catch((err) => {
 		// We may fail to get the scene collection if the collection doesn't exist yet.
 		systemLogger.logError("Failed to fetch metaKeys: ", err);
-		console.log("Failed - ", err);
 		return Array.from(metaKeys);
 	});
 };
