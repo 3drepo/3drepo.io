@@ -316,7 +316,6 @@ describe("Metadata", function () {
 				}
 			]
 		};
-		console.log("!!!! testing here.", username, model);
 		agent.get(`/${username}/${model}/meta/60fa0851-2fc1-4906-b50d-b9bb9db98db8.json`)
 			.expect(200, function(err, res) {
 				console.log("!!!", err, res.body);
@@ -392,6 +391,7 @@ describe("Metadata", function () {
 			"WallCovering",
 			"WarrantyStartDate"
 		];
+		console.log("!!!! testing here.", username, model);
 
 		agent.get(`/${username}/${model}/meta/keys`)
 			.expect(200, function(err, res) {
