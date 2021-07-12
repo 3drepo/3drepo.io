@@ -156,9 +156,9 @@ Upload.uploadChunk = async (teamspace, model, corID, req) => {
 		await handleChunkStream(req, `${importQueue.getTaskPath(corID)}/chunks/${Date.now()}`);
 
 		if (nextChunkSize === 0) {
+			modelStatusChanged(null, teamspace, model, { status: "uploaded" });
+			const { filename } = JSON.parse(fs.readFileSync(`${importQueue.getTaskPath(corID)}.json`, "utf8"));
 			try {
-				modelStatusChanged(null, teamspace, model, { status: "uploaded" });
-				const { filename } = JSON.parse(fs.readFileSync(`${importQueue.getTaskPath(corID)}.json`, "utf8"));
 				await stitchChunks(corID, filename);
 				const stats = fs.statSync(`${importQueue.getTaskPath(corID)}/${filename}`);
 				await middlewares.checkSufficientSpace(teamspace, stats.size);
