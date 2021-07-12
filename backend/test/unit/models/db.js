@@ -185,6 +185,7 @@ describe("Check DB handler", function() {
 		});
 	});
 
+	/*
 	describe("listCollections", function () {
 		it("list collection with valid username should succeed", async function() {
 			const colls = await db.listCollections(account);
@@ -196,6 +197,7 @@ describe("Check DB handler", function() {
 			expect(colls).to.be.empty;
 		});
 	});
+	*/
 
 	describe("find", function () {
 		it("find jobs should succeed", async function() {
@@ -429,77 +431,107 @@ describe("Check DB handler", function() {
 	});
 
 	describe("runCommand", function () {
-		/*
-		it("create role command should succeed", async function() {
-			const roleName = C.DEFAULT_MEMBER_ROLE;
-			const createRoleCmd = {
-				"createRole": roleName,
-				"privileges":[{
-					"resource":{
-						"db": account,
-						"collection": "settings"
-					},
-					"actions": ["find"]}
-				],
-				"roles": []
-			};
+		const roleName = C.DEFAULT_MEMBER_ROLE;
+		const createRoleCmd = {
+			"createRole": roleName,
+			"privileges":[{
+				"resource":{
+					"db": account,
+					"collection": "settings"
+				},
+				"actions": ["find"]}
+			],
+			"roles": []
+		};
+		const grantRoleCmd = {
+			grantRolesToUser: account,
+			roles: [{role: C.DEFAULT_MEMBER_ROLE, db: account}]
+		};
+		const revokeRoleCmd = {
+			revokeRolesFromUser: account,
+			roles: [{role: C.DEFAULT_MEMBER_ROLE, db: account}]
+		};
+		const newPasswordUserCmd = {
+			"updateUser": account,
+			"pwd": newPassword
+		};
+		const revertPasswordUserCmd = {
+			"updateUser": account,
+			"pwd": password
+		};
 
-			const colls = await db.runCommand(account, cmd);
-			expect(colls).to.deep.equal(goldenColls);
+		it("create role command should succeed", async function() {
+			const result = await db.runCommand(account, createRoleCmd);
+			expect(result.ok).to.equal(1);
+		});
+
+		it("create duplicate role command should fail", async function() {
+			try {
+				await db.runCommand(account, createRoleCmd);
+				throw {}; // should've failed at previous line
+			} catch (err) {
+				expect(err.code).to.equal(11000);
+				expect(err.codeName).to.equal("DuplicateKey");
+			}
 		});
 
 		it("grant role command should succeed", async function() {
-			const grantRoleCmd = {
-				grantRolesToUser: username,
-				roles: [{role: C.DEFAULT_MEMBER_ROLE, db: account}]
-			};
+			const result = await db.runCommand("admin", grantRoleCmd);
+			expect(result.ok).to.equal(1);
+		});
 
-			const colls = await db.runCommand(account, cmd);
-			expect(colls).to.deep.equal(goldenColls);
+		it("grant role command to user DB should fail", async function() {
+			try {
+				await db.runCommand(account, grantRoleCmd);
+			} catch (err) {
+				expect(err.code).to.equal(11);
+				expect(err.codeName).to.equal("UserNotFound");
+			}
 		});
 
 		it("revoke role command should succeed", async function() {
-			const revokeRoleCmd = {
-				revokeRolesFromUser: username,
-				roles: [{role: C.DEFAULT_MEMBER_ROLE, db: account}]
-			};
-
-			const colls = await db.runCommand(account, cmd);
-			expect(colls).to.deep.equal(goldenColls);
-		});
-		*/
-
-		/*
-		it("update user password command should succeed", async function() {
-			console.log("========= account =========");
-			console.log(account);
-
-			const updateUserCmd = {
-				"updateUser": account,
-				"pwd": newPassword
-			};
-
-			const colls = await db.runCommand(account, updateUserCmd);
-			expect(colls).to.deep.equal(goldenColls);
+			const result = await db.runCommand("admin", revokeRoleCmd);
+			expect(result.ok).to.equal(1);
 		});
 
-		it("update user password command should succeed", async function() {
-			const updateUserCmd = {
-				"updateUser": account,
-				"pwd": password
-			};
-
-			const colls = await db.runCommand(account, updateUserCmd);
-			expect(colls).to.deep.equal(goldenColls);
+		it("revoke role command should succeed", async function() {
+			try {
+				await db.runCommand(account, revokeRoleCmd);
+			} catch (err) {
+				expect(err.code).to.equal(11);
+				expect(err.codeName).to.equal("UserNotFound");
+			}
 		});
-		*/
 
-		/*
-		it("run command with incorrect username should be empty", async function() {
-			const colls = await db.listCollections("wrong", cmd);
-			expect(colls).to.be.empty;
+		it("update user password command on admin should succeed", async function() {
+			const result = await db.runCommand("admin", newPasswordUserCmd);
+			expect(result.ok).to.equal(1);
 		});
-		*/
+
+		it("update user password command on admin should succeed", async function() {
+			const result = await db.runCommand("admin", revertPasswordUserCmd);
+			expect(result.ok).to.equal(1);
+		});
+
+		it("update user command on user DB should fail", async function() {
+			try {
+				await db.runCommand(account, revertPasswordUserCmd);
+				throw {}; // should've failed at previous line
+			} catch (err) {
+				expect(err.code).to.equal(11);
+				expect(err.codeName).to.equal("UserNotFound");
+			}
+		});
+
+		it("run command with incorrect username should fail", async function() {
+			try {
+				await db.runCommand("badDB", revertPasswordUserCmd);
+				throw {}; // should've failed at previous line
+			} catch (err) {
+				expect(err.code).to.equal(11);
+				expect(err.codeName).to.equal("UserNotFound");
+			}
+		});
 	});
 
 	describe("getSessionStore", function () {
