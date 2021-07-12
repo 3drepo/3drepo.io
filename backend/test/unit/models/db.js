@@ -29,6 +29,7 @@ const account = "testuser";
 const password = "testuser";
 const newPassword = "newtestuser";
 const model = "af1ccf84-71c3-490e-9e5a-cb80e30ee519";
+const gridFsFilename = "cd561c86-de1a-482e-8f5d-89cfc49562e8LAB-BBD-00-ZZ-M3-A-0005_IFC2x3_FM_Handover_ifc";
 
 const goldenColls = [
 	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.history.files', options: {} },
@@ -288,25 +289,79 @@ describe("Check DB handler", function() {
 	});
 
 	describe("getFileStreamFromGridFS", function () {
-		/*
 		it("get file stream should succeed", async function() {
-			const file = await db.getFileStreamFromGridFS(account, `${model}.history`, "f0fd8f0c-06e2-479b-b41a-a8873bc74dc9LegoRoundTree_ifc");
-			console.log(file);
+			const file = await db.getFileStreamFromGridFS(account, `${model}.history`, gridFsFilename);
 			expect(file).to.exist;
-			// expect(stats.ok).to.equal(1);
+			expect(file.stream).to.exist;
 		});
-		*/
+
+		it("get file stream with incorrect filename should fail", async function() {
+			try {
+				await db.getFileStreamFromGridFS(account, `${model}.history`, "badFilename");
+				throw {}; // should've failed at previous line
+			} catch (err) {
+				expect(err.code).to.equal("NO_FILE_FOUND");
+				expect(err.status).to.equal(404);
+			}
+		});
+
+		it("get file stream with incorrect collection should fail", async function() {
+			try {
+				await db.getFileStreamFromGridFS(account, "badCollection", gridFsFilename);
+				throw {}; // should've failed at previous line
+			} catch (err) {
+				expect(err.code).to.equal("NO_FILE_FOUND");
+				expect(err.status).to.equal(404);
+			}
+		});
+
+		it("get file stream with incorrect DB should fail", async function() {
+			try {
+				await db.getFileStreamFromGridFS("wrong", `${model}.history`, gridFsFilename);
+				throw {}; // should've failed at previous line
+			} catch (err) {
+				expect(err.code).to.equal("NO_FILE_FOUND");
+				expect(err.status).to.equal(404);
+			}
+		});
 	});
 
 	describe("getFileFromGridFS", function () {
-		/*
 		it("get file should succeed", async function() {
-			const file = await db.getFileFromGridFS(account, `${model}.history`, "f0fd8f0c-06e2-479b-b41a-a8873bc74dc9LegoRoundTree_ifc");
-			console.log(file);
+			const file = await db.getFileFromGridFS(account, `${model}.history`, gridFsFilename);
 			expect(file).to.exist;
-			// expect(stats.ok).to.equal(1);
+			expect(file).to.be.instanceof(Buffer);
 		});
-		*/
+
+		it("get file with incorrect filename should fail", async function() {
+			try {
+				await db.getFileFromGridFS(account, `${model}.history`, "badFilename");
+				throw {}; // should've failed at previous line
+			} catch (err) {
+				expect(err.code).to.equal("NO_FILE_FOUND");
+				expect(err.status).to.equal(404);
+			}
+		});
+
+		it("get file from incorrect collection should fail", async function() {
+			try {
+				await db.getFileFromGridFS(account, "badCollection", gridFsFilename);
+				throw {}; // should've failed at previous line
+			} catch (err) {
+				expect(err.code).to.equal("NO_FILE_FOUND");
+				expect(err.status).to.equal(404);
+			}
+		});
+
+		it("get file from incorrect DB should fail", async function() {
+			try {
+				await db.getFileFromGridFS("wrong", `${model}.history`, gridFsFilename);
+				throw {}; // should've failed at previous line
+			} catch (err) {
+				expect(err.code).to.equal("NO_FILE_FOUND");
+				expect(err.status).to.equal(404);
+			}
+		});
 	});
 
 	describe("storeFileInGridFS", function () {
