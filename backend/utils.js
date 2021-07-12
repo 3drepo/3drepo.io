@@ -372,6 +372,11 @@ function Utils() {
 
 	};
 
+	this.emptyDir = async function(dir) {
+		await fs.rmrfSync(dir);
+		return this.mkdir(dir);
+	};
+
 	this.mkdir = function(newDir) {
 		return new Promise((resolve, reject) => {
 			fs.mkdir(newDir, { recursive: true }, (err) => {

@@ -128,46 +128,56 @@ Upload.uploadChunksStart = async (teamspace, model, corID, username, headers) =>
 };
 
 Upload.uploadChunk = async (teamspace, model, corID, req) => {
-	if (!fs.existsSync(`${importQueue.getTaskPath(corID)}.json`)) {
-		throw responseCodes.CORRELATION_ID_NOT_FOUND;
+	try {
+		if (!fs.existsSync(`${importQueue.getTaskPath(corID)}.json`)) {
+			throw responseCodes.CORRELATION_ID_NOT_FOUND;
+		}
+
+		if (!config.cn_queue) {
+			return Promise.reject(responseCodes.QUEUE_NO_CONFIG);
+		}
+
+		if (!req.headers[C.CONTENT_RANGE_HEADER]) {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+
+		const [contentRange, totalContentSize] = req.headers[C.CONTENT_RANGE_HEADER].split("/");
+		const [sizeUnit, contentRangeValue] = contentRange.split(" ");
+
+		if (sizeUnit !== "bytes") {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+
+		const contentMax = contentRangeValue.split("-")[1];
+
+		const sizeRemaining = totalContentSize - contentMax - 1;
+		const nextChunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, sizeRemaining);
+
+		await handleChunkStream(req, `${importQueue.getTaskPath(corID)}/chunks/${Date.now()}`);
+
+		if (nextChunkSize === 0) {
+			try {
+				modelStatusChanged(null, teamspace, model, { status: "uploaded" });
+				const { filename } = JSON.parse(fs.readFileSync(`${importQueue.getTaskPath(corID)}.json`, "utf8"));
+				await stitchChunks(corID, filename);
+				const stats = fs.statSync(`${importQueue.getTaskPath(corID)}/${filename}`);
+				await middlewares.checkSufficientSpace(teamspace, stats.size);
+				await setCorrelationId(teamspace, model, corID);
+				importQueue.importFile(corID, `${importQueue.getTaskPath(corID)}/${filename}`);
+			} catch (err) {
+				await fs.rmSync(`${importQueue.getTaskPath(corID)}/${filename}`);
+				throw err;
+			}
+		}
+
+		return {
+			"Range": `bytes=0-${contentMax}`,
+			"x-ms-chunk-size": nextChunkSize
+		};
+	} catch (err) {
+		await utils.emptyDir(`${importQueue.getTaskPath(corID)}/chunks/`);
+		throw err;
 	}
-
-	if (!config.cn_queue) {
-		return Promise.reject(responseCodes.QUEUE_NO_CONFIG);
-	}
-
-	if (!req.headers[C.CONTENT_RANGE_HEADER]) {
-		throw responseCodes.INVALID_ARGUMENTS;
-	}
-
-	const [contentRange, totalContentSize] = req.headers[C.CONTENT_RANGE_HEADER].split("/");
-	const [sizeUnit, contentRangeValue] = contentRange.split(" ");
-
-	if (sizeUnit !== "bytes") {
-		throw responseCodes.INVALID_ARGUMENTS;
-	}
-
-	const contentMax = contentRangeValue.split("-")[1];
-
-	const sizeRemaining = totalContentSize - contentMax - 1;
-	const nextChunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, sizeRemaining);
-
-	await handleChunkStream(req, `${importQueue.getTaskPath(corID)}/chunks/${Date.now()}`);
-
-	if (nextChunkSize === 0) {
-		modelStatusChanged(null, teamspace, model, { status: "uploaded" });
-		const { filename } = JSON.parse(fs.readFileSync(`${importQueue.getTaskPath(corID)}.json`, "utf8"));
-		await stitchChunks(corID, filename);
-		const stats = fs.statSync(`${importQueue.getTaskPath(corID)}/${filename}`);
-		await middlewares.checkSufficientSpace(teamspace, stats.size);
-		await setCorrelationId(teamspace, model, corID);
-		importQueue.importFile(corID, `${importQueue.getTaskPath(corID)}/${filename}`);
-	}
-
-	return {
-		"Range": `bytes=0-${contentMax}`,
-		"x-ms-chunk-size": nextChunkSize
-	};
 };
 
 module.exports = Upload;
