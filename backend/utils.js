@@ -378,7 +378,7 @@ function Utils() {
 
 	this.mkdir = async (newDir) => {
 		try {
-			await fs.mkdir(newDir);
+			await fs.mkdir(newDir, { recursive: true });
 		} catch(err) {
 			if (err.code !== "EEXIST") {
 				throw err;
