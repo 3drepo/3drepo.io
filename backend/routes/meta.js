@@ -424,7 +424,7 @@
 	router.get("/revision/:rev/meta/findObjsWith/:metaKey.json", middlewares.hasReadAccessToModel, getAllIdsWithMetadataField);
 
 	const getDbColOptions = function (req) {
-		return { account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger };
+		return { account: req.params.account, model: req.params.model};
 	};
 
 	function getMetadataById(req, res, next) {

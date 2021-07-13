@@ -21,7 +21,6 @@ const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp();
 const logger = require("../../logger.js");
-const systemLogger = logger.systemLogger;
 const responseCodes = require("../../response_codes.js");
 
 describe("Verify", function () {
@@ -61,7 +60,7 @@ describe("Verify", function () {
 		// create a user
 		this.timeout(15000);
 
-		User.createUser(systemLogger, username, password, {
+		User.createUser(username, password, {
 			email: email("success")
 		}, 200000).then(emailVerifyToken => {
 
@@ -110,7 +109,7 @@ describe("Verify", function () {
 
 	it("user should fail if verify more than once", function(done) {
 		// create a user
-		User.createUser(systemLogger, username_double_verified, password, {
+		User.createUser(username_double_verified, password, {
 			email: email("double")
 		}, 200000).then(emailVerifyToken => {
 
@@ -144,7 +143,7 @@ describe("Verify", function () {
 		let token;
 
 		before(function() {
-			return User.createUser(systemLogger, username_not_verified, password, {
+			return User.createUser(username_not_verified, password, {
 				email: email("invalid")
 			}, 200000).then(emailVerifyToken => {
 				token = emailVerifyToken.token;
@@ -185,7 +184,7 @@ describe("Verify", function () {
 
 			const expiryTime = -1;
 
-			User.createUser(systemLogger, username_expired_token, password, {
+			User.createUser(username_expired_token, password, {
 				email: email("expired")
 			}, expiryTime).then(emailVerifyToken => {
 

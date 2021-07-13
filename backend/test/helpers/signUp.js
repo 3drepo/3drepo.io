@@ -22,7 +22,6 @@ function signUpAndLogin(params) {
 	const server = params.server;
 	const request = params.request;
 	const User = params.User;
-	const systemLogger = params.systemLogger;
 	const username = params.username;
 	const password = params.password;
 	const email = params.email;
@@ -37,7 +36,7 @@ function signUpAndLogin(params) {
 		agent = request.agent(server);
 
 		// create a user
-		return User.createUser(systemLogger, username, password, {
+		return User.createUser(username, password, {
 			email: email
 		}, 200000).then(emailVerifyToken => {
 			return User.verify(username, emailVerifyToken.token, {skipImportToyModel : true, skipCreateBasicPlan: noBasicPlan});
@@ -66,7 +65,6 @@ function signUpAndLoginAndCreateModel(params) {
 	const server = params.server;
 	const request = params.request;
 	const User = params.User;
-	const systemLogger = params.systemLogger;
 	const username = params.username;
 	const password = params.password;
 	const email = params.email;
@@ -80,7 +78,7 @@ function signUpAndLoginAndCreateModel(params) {
 	const unit = params.unit;
 
 	signUpAndLogin({
-		server, request, agent, expect, User, systemLogger,
+		server, request, agent, expect, User,
 		username, password, email, noBasicPlan,
 		done: function(err, _agent) {
 
