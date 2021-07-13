@@ -245,7 +245,6 @@ if (!config.logfile.filename) {
 
 config.logfile.console_level = coalesce(config.logfile.console_level, "info");
 config.logfile.file_level = coalesce(config.logfile.file_level, "info");
-config.logfile.jsonOutput = config.logfile.jsonOutput || false;
 
 // Token expiry length
 config.tokenExpiry = coalesce(config.tokenExpiry, {});
