@@ -847,25 +847,20 @@ describe("Check DB handler", function() {
 	});
 
 	describe("disconnect", function () {
-		/*
 		it("should succeed", async function() {
 			try {
+				const database = await db.getDB(account);
+				expect(database).to.exist;
 				await db.disconnect();
-				throw {}; // should've failed at previous line
+				await database.collection("jobs");
 			} catch (err) {
-				expect(err).to.be.null;
+				// Error [MongoError]: Topology was destroyed
+				expect(err).to.exist;
 			}
 		});
 
-		it("should succeed", async function() {
-			try {
-				await db.disconnect();
-				throw {}; // should've failed at previous line
-			} catch (err) {
-				console.log(err);
-				expect(err).to.be.null;
-			}
+		it("dsconnect again should succeed", async function() {
+			await db.disconnect();
 		});
-		*/
 	});
 });
