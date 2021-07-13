@@ -374,6 +374,7 @@ function Utils() {
 
 	this.emptyDir = async function(dir) {
 		await fs.rm(dir, { recursive: true, force: true });
+		return this.mkdir(dir);
 	};
 
 	this.mkdir = async (newDir) => {
