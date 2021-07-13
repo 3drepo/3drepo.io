@@ -30,7 +30,7 @@ export const getStaticRoutes = memoize(() => {
 	});
 });
 
-export const STATIC_ROUTES = getStaticRoutes() as any;
+export const STATIC_ROUTES = getStaticRoutes() ;
 
 export const LANDING_ROUTES = [
 	{ title: 'Pricing', icon: PricingIcon, path: 'http://3drepo.org/pricing/' },
@@ -38,7 +38,7 @@ export const LANDING_ROUTES = [
 	{ title: 'Contact Us', icon: ContactIcon, path: 'http://3drepo.org/contact/' }
 ];
 
-export const STATIC_ROUTES_PATHS = STATIC_ROUTES.map(({ path }) => path) as any;
+export const STATIC_ROUTES_PATHS = STATIC_ROUTES.map(({ path }) => path);
 
 const getPage = (pageName) => STATIC_ROUTES.find((route) => route.page === pageName);
 

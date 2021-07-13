@@ -15,8 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* eslint-disable no-var */
 declare var SendMessage;
 declare var createUnityInstance;
+/* eslint-enable no-var */
 
 import { IS_FIREFOX } from '../helpers/browser';
 
@@ -137,7 +139,6 @@ export class UnityUtil {
 		let domainURL = host;
 		if (Object.prototype.toString.call(canvas) === '[object String]') {
 			// The user is calling it like Unity 2019. Convert it to a dom an create a canvas
-			// tslint:disable-next-line
 			console.warn('[DEPRECATED WARNING] loadUnity() no longer takes in a string and a URL to the unity config. Please check the API documentation and update your function.');
 			const divDom = document.getElementById(canvas);
 			canvasDom = document.createElement('canvas');
@@ -164,6 +165,7 @@ export class UnityUtil {
 			// as of Unity 2019.1
 			(XMLHttpRequest.prototype as any).originalOpen = XMLHttpRequest.prototype.open;
 			const newOpen = function(_, url) {
+				// eslint-disable-next-line
 				const original = this.originalOpen.apply(this, arguments);
 				this.withCredentials = true;
 				return original;
@@ -415,7 +417,7 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static loaded(bboxStr) {
-		// tslint:disable-next-line
+		// eslint-disable-next-line no-console
 		console.log(`[${new Date()}]Loading model done. `);
 		const res = {
 			bbox: JSON.parse(bboxStr)
@@ -1139,7 +1141,7 @@ export class UnityUtil {
 			params.initView = initView;
 		}
 		UnityUtil.onLoaded();
-		// tslint:disable-next-line
+		// eslint-disable-next-line no-console
 		console.log(`[${new Date()}]Loading model: `, params);
 		UnityUtil.toUnity('LoadModel', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(params));
 

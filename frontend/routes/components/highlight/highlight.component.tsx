@@ -29,7 +29,7 @@ interface IProps {
 	caseSensitive?: boolean;
 }
 
-const HighlightTag = (props) => <Mark {...props as any} />;
+const HighlightTag = (props) => <Mark {...props } />;
 
 export const Highlight = memo(({splitQueryToWords, search, text, caseSensitive, className}: IProps) => {
 	const searchWords = splitQueryToWords ? search.split(' ') : [trim(search)];

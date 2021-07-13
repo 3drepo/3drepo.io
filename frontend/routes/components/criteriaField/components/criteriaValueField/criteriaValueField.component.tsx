@@ -19,6 +19,14 @@ import React from 'react';
 
 import AddIcon from '@material-ui/icons/AddCircleOutline';
 import RemoveIcon from '@material-ui/icons/RemoveCircleOutline';
+
+import { InputLabel } from '@material-ui/core';
+import {
+	VALUE_FIELD_MAP,
+	VALUE_FIELD_TYPES
+} from '../../../../../constants/criteria';
+import { renderWhenTrue } from '../../../../../helpers/rendering';
+import { SmallIconButton } from '../../../smallIconButon/smallIconButton.component';
 import {
 	AddButton,
 	InputWrapper,
@@ -31,14 +39,6 @@ import {
 	RemoveButton,
 	SingleInput
 } from './criteriaValueField.styles';
-
-import { InputLabel } from '@material-ui/core';
-import {
-	VALUE_FIELD_MAP,
-	VALUE_FIELD_TYPES
-} from '../../../../../constants/criteria';
-import { renderWhenTrue } from '../../../../../helpers/rendering';
-import { SmallIconButton } from '../../../smallIconButon/smallIconButton.component';
 
 interface IProps {
 	name: string;

@@ -29,14 +29,22 @@ import TurntableIcon from '@material-ui/icons/Redo';
 import ShowAllIcon from '@material-ui/icons/Visibility';
 import HideIcon from '@material-ui/icons/VisibilityOff';
 import IsolateIcon from '@material-ui/icons/VisibilityOutlined';
-
 import IncreaseIcon from '@material-ui/icons/Add';
 import DecreaseIcon from '@material-ui/icons/Remove';
 import ResetIcon from '@material-ui/icons/Replay';
 
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { Helicopter } from '../../../components/fontAwesomeIcon';
-
+import {
+	INITIAL_HELICOPTER_SPEED,
+	MAX_HELICOPTER_SPEED,
+	MIN_HELICOPTER_SPEED,
+	VIEWER_CLIP_MODES,
+	VIEWER_NAV_MODES,
+	VIEWER_PROJECTION_MODES,
+	VIEWER_TOOLBAR_ITEMS
+} from '../../../../constants/viewer';
+import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import {
 	ButtonWrapper,
 	ClipIconWrapper,
@@ -48,17 +56,6 @@ import {
 	SubmenuDot,
 	ToolbarButton
 } from './toolbar.styles';
-
-import {
-	INITIAL_HELICOPTER_SPEED,
-	MAX_HELICOPTER_SPEED,
-	MIN_HELICOPTER_SPEED,
-	VIEWER_CLIP_MODES,
-	VIEWER_NAV_MODES,
-	VIEWER_PROJECTION_MODES,
-	VIEWER_TOOLBAR_ITEMS
-} from '../../../../constants/viewer';
-import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 
 const HelicopterIcon = () => <Helicopter className="fontSizeSmall" />;
 

@@ -53,7 +53,7 @@ export const hexToRgba = (hex, alpha = 1) => {
 };
 
 export const rgbaToHex = memoize((rgbaColor): string => {
-	// tslint:disable-next-line:prefer-const
+	// eslint-disable-next-line prefer-const
 	let [r, g, b, a] = rgbaColor.match(/[.\d]+/g).map(Number);
 	a = Math.round(a * 255);
 	return '#' + componentToHex(r) + componentToHex(g) + componentToHex(b) + componentToHex(a);

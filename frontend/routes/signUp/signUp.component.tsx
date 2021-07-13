@@ -25,6 +25,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import { Field, Form, Formik } from 'formik';
 import { omit } from 'lodash';
 import * as Yup from 'yup';
+import * as queryString from 'query-string';
 
 import { clientConfigService } from '../../services/clientConfig';
 import { COOKIES_PAGE, PRIVACY_PAGE, TERMS_PAGE } from '../../services/staticPages';
@@ -44,7 +45,6 @@ import {
 	TermLink
 } from './signUp.styles';
 
-import * as queryString from 'query-string';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;

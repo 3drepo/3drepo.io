@@ -63,7 +63,7 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	attachFileResources: ['files'],
 	attachLinkResources: ['links'],
 	attachResourcesSuccess: ['resources', 'riskId'],
-	updateResourcesSuccess: ['resourcesIds', 'updates', 'riskId' ],
+	updateResourcesSuccess: ['resourcesIds', 'updates', 'riskId'],
 	fetchMitigationCriteria: ['teamspace'],
 	fetchMitigationCriteriaSuccess: ['criteria', 'teamspace'],
 	fetchMitigationCriteriaFailure: [],

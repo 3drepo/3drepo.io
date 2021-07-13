@@ -24,10 +24,9 @@ import LensIcon from '@material-ui/icons/Lens';
 import PanoramaFishEyeIcon from '@material-ui/icons/PanoramaFishEye';
 import Pins from '@material-ui/icons/PinDrop';
 import Print from '@material-ui/icons/Print';
-import { SortAmountDown, SortAmountUp } from '../routes/components/fontAwesomeIcon';
-
 import ViewModule from '@material-ui/icons/ViewModule';
 
+import { SortAmountDown, SortAmountUp } from '../routes/components/fontAwesomeIcon';
 import { FILTER_TYPES } from '../routes/components/filterPanel/filterPanel.component';
 import { COLOR, PIN_COLORS } from '../styles';
 

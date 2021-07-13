@@ -507,7 +507,7 @@ export class ViewerService {
 				if (ids) {
 					const uniqueIds = Array.from(new Set(ids));
 					if (uniqueIds.length) {
-						// @ts-ignore
+						// eslint-disable-next-line @typescript-eslint/await-thenable
 						await UnityUtil.highlightObjects(account, model, uniqueIds, colour, multi, forceReHighlight);
 						this.emit(VIEWER_EVENTS.HIGHLIGHT_OBJECTS, {account, model, uniqueIds });
 						return;
@@ -527,7 +527,6 @@ export class ViewerService {
 		if (ids) {
 			const uniqueIds = Array.from(new Set(ids));
 			if (uniqueIds.length) {
-				// @ts-ignore
 				UnityUtil.unhighlightObjects(account, model, uniqueIds);
 				this.emit(VIEWER_EVENTS.UNHIGHLIGHT_OBJECTS, {account, model, uniqueIds });
 				return;
@@ -827,22 +826,30 @@ export class ViewerService {
 	}
 
 	public setMaxShadowDistance(value: number) {
-		if (value === undefined) { return; }
+		if (value === undefined) {
+ 			return;
+		}
 		UnityUtil.setMaxShadowDistance(value);
 	}
 
 	public setNumCacheThreads(value: number) {
-		if (value === undefined) { return; }
+		if (value === undefined) {
+ 			return;
+		}
 		UnityUtil.setNumCacheThreads(value);
 	}
 
 	public setNearPlane = (nearplane: number) => {
-		if (nearplane === undefined) { return; }
+		if (nearplane === undefined) {
+ 			return;
+		}
 		UnityUtil.setDefaultNearPlane(nearplane);
 	}
 
 	public setFarPlaneSamplingPoints = (farplaneSample: number) => {
-		if (farplaneSample === undefined) { return; }
+		if (farplaneSample === undefined) {
+ 			return;
+		}
 		UnityUtil.setFarPlaneSampleSize(farplaneSample);
 	}
 
@@ -854,12 +861,16 @@ export class ViewerService {
 	}
 
 	public setPlaneBorderWidth = (width: number) => {
-		if (width === undefined) { return; }
+		if (width === undefined) {
+ 			return;
+		}
 		UnityUtil.setPlaneBorderWidth(width);
 	}
 
 	public setPlaneBorderColor = (color: number[]) => {
-		if (color === undefined) { return; }
+		if (color === undefined) {
+ 			return;
+		}
 		UnityUtil.setPlaneBorderColor(color);
 	}
 

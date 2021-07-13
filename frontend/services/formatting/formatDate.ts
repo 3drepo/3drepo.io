@@ -26,9 +26,8 @@ export const NAMED_MONTH_DATETIME_FORMAT = 'DD MMM YYYY HH:mm';
 
 export const invoiceDate = (input) => {
 	const date: Date = new Date(input);
-	let invoiceDateStr: string;
 
-	invoiceDateStr =
+	const invoiceDateStr =
 		(date.getDate() < 10 ? '0' : '') +
 		date.getDate() +
 		'-' +

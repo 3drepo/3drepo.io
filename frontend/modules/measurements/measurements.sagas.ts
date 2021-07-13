@@ -19,6 +19,7 @@ import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import { Viewer } from '../../services/viewer/viewer';
 import { DialogActions } from '../dialog';
+import { MEASURE_TYPE_NAME, MEASURE_TYPE_STATE_MAP, MEASURING_MODE } from './measurements.constants';
 import {
 	selectAreaMeasurements,
 	selectEdgeSnapping,
@@ -30,7 +31,6 @@ import {
 	MeasurementsActions,
 	MeasurementsTypes,
 } from './';
-import { MEASURE_TYPE_NAME, MEASURE_TYPE_STATE_MAP, MEASURING_MODE } from './measurements.constants';
 
 export function* activateMeasure() {
 	try {

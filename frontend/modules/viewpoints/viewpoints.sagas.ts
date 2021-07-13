@@ -19,7 +19,6 @@ import copy from 'copy-to-clipboard';
 import { get } from 'lodash';
 import { all, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 
-import { selectSelectedViewpoint, selectViewpointsGroups, selectViewpointsGroupsBeingLoaded } from '.';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { ROUTES } from '../../constants/routes';
 import { UnityUtil } from '../../globals/unity-util';
@@ -45,6 +44,7 @@ import { waitForTreeToBeReady } from '../tree/tree.sagas';
 import { selectColorOverrides, selectTransformations, ViewerGuiActions } from '../viewerGui';
 import { PRESET_VIEW } from './viewpoints.constants';
 import { ViewpointsActions, ViewpointsTypes } from './viewpoints.redux';
+import { selectSelectedViewpoint, selectViewpointsGroups, selectViewpointsGroupsBeingLoaded } from '.';
 
 export const getThumbnailUrl = (thumbnail) => API.getAPIUrl(thumbnail);
 

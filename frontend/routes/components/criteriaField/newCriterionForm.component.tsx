@@ -134,6 +134,7 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, IState> {
 
 	public renderOperators = () => {
 		const operatorsItems = CRITERIA_LIST.map(({ name, operators }) => [
+				// eslint-disable-next-line react/jsx-key
 				(<OperatorSubheader>{name}</OperatorSubheader>),
 				operators.map(this.renderOperator)
 			]

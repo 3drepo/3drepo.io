@@ -312,6 +312,7 @@ export class Processing {
 		const meshesToHide = [];
 		const parentNodesByLevel = [];
 
+		// eslint-disable-next-line @typescript-eslint/no-for-in-array
 		for (const ns in meshesToCheck) {
 			const toShowEntry = {...meshesToCheck[ns]};
 			const toHideEntry = {...meshesToCheck[ns]};
@@ -391,6 +392,7 @@ export class Processing {
 	private handleSelection = (toSelect, desiredState) => {
 		const meshes = this.getMeshesByNodes(toSelect);
 		const parentNodesByLevel = [];
+		// eslint-disable-next-line @typescript-eslint/no-for-in-array
 		for (const ns in meshes) {
 			meshes[ns].meshes.forEach((meshId) => {
 				const meshNode = this.nodesList[this.nodesIndexesMap[meshId]];

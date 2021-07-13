@@ -173,9 +173,8 @@ export class ClientConfigService {
 
 	public logAppVersion() {
 		if (this.VERSION) {
-			/* tslint:disable */
+			// eslint-disable-next-line no-console
 			console.log(`===== 3D REPO - Version ${this.VERSION} =====`);
-			/* tslint:enable */
 		} else {
 			console.error('No version number in config...');
 		}

@@ -26,7 +26,9 @@ const getPartLength = (text: string, by: string = ',') => text.split(by)[0]?.len
 const getSplitPoint = (text: string, limit: number, by: string = ',') => {
 	const splitPoint = text.indexOf(by, limit);
 
-	if (splitPoint > -1) { return splitPoint; }
+	if (splitPoint > -1) {
+ 		return splitPoint;
+	}
 
 	const partLength = getPartLength(text);
 
@@ -50,7 +52,9 @@ export const splitValuesIfNecessary = (path, argumentIndication) => {
 	const request = encodeURI(clientConfigService.apiUrl(clientConfigService.POST_API, path));
 	const requestParts = request.split(argumentIndication);
 
-	if (request.length < MAX_URL_LENGTH) { return [requestParts[1]]; }
+	if (request.length < MAX_URL_LENGTH) {
+ 		return [requestParts[1]];
+	}
 
 	const chunksLimit = MAX_URL_LENGTH - argumentIndication.length - requestParts[0].length;
 
