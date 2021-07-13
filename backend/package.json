@@ -15,7 +15,7 @@
     "test:one": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config mocha",
     "test:int-clean": "./test/cleanup/cleanup.sh",
     "test:int": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config mocha test/integrated",
-    "lint": "eslint ./",
+    "lint": "eslint ./ --rulesdir eslint-rules/",
     "lint:fix": "eslint --fix ./"
   },
   "dependencies": {
