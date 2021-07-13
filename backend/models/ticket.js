@@ -34,7 +34,6 @@ const db = require("../handler/db");
 const ChatEvent = require("./chatEvent");
 const { systemLogger } = require("../logger.js");
 
-const nodeuuid = require("uuid/v1");
 const Comment = require("./comment");
 const Shapes = require("./shapes");
 const FileRef = require("./fileRef");
@@ -447,7 +446,7 @@ class Ticket extends View {
 
 		const branch = newTicket.revId || "master";
 		newTicket.assigned_roles = newTicket.assigned_roles || [];
-		newTicket._id = utils.stringToUUID(newTicket._id || nodeuuid());
+		newTicket._id = utils.stringToUUID(newTicket._id || utils.generateUUID());
 		newTicket.created = parseInt(newTicket.created || (new Date()).getTime());
 
 		let shapes = newTicket.shapes;

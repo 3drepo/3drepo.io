@@ -23,7 +23,6 @@
 	const responseCodes = require("../response_codes.js");
 	const utils = require("../utils");
 	const _ = require("lodash");
-	const nodeuuid = require("uuid/v1");
 	const { changePermissions, prepareDefaultView, findModelSettings, findPermissionByUser } = require("./modelSetting");
 	const PermissionTemplates = require("./permissionTemplates");
 
@@ -111,7 +110,7 @@
 		checkProjectNameValid(name);
 
 		const project = {
-			_id: utils.stringToUUID(nodeuuid()),
+			_id: utils.generateUUID(),
 			name,
 			models: [],
 			permissions: []

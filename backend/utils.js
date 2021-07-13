@@ -18,7 +18,7 @@
 "use strict";
 const _ = require("lodash");
 const sharp = require("sharp");
-const nodeuuid = require("uuid/v1");
+const nodeuuid = require("uuid").v1;
 const yup = require("yup");
 const uuidparse = require("uuid-parse");
 const mongo = require("mongodb");

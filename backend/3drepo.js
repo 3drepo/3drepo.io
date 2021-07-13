@@ -212,8 +212,7 @@ function logCreateService(serverConfig) {
 		"Loading " +
 		serverConfig.service +
 		" on " + serverConfig.hostname + ":" +
-		serverConfig.port,
-		serverConfig.host_dir
+		serverConfig.port
 	);
 }
 

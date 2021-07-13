@@ -18,7 +18,7 @@
 "use strict";
 
 const DB = require("./db");
-const nodeuuid = require("uuid/v1");
+const utils = require("../utils");
 
 class GridFSHandler {
 	constructor() {
@@ -40,7 +40,7 @@ class GridFSHandler {
 	}
 
 	storeFile(account, col, data) {
-		const _id = nodeuuid();
+		const _id = utils.generateUUID({string: true});
 		return DB.storeFileInGridFS(account, this.cleanColName(col), _id, data).then(() => (
 			{_id, link: _id, size: data.length, type: "gridfs"}
 		));

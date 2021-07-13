@@ -23,7 +23,7 @@
 "use strict";
 
 const amqp = require("amqplib");
-const fs = require("fs.extra");
+const fs = require("fs").promises;
 const shortid = require("shortid");
 const systemLogger = require("../logger").systemLogger;
 const Mailer = require("../mailer/mailer");
@@ -57,28 +57,17 @@ class ImportQueue {
 	}
 
 	writeFile(fileName, content) {
-		// FIXME: v10 has native support of promise for fs. can remove when we upgrade.
-		return new Promise((resolve, reject) => {
-			fs.writeFile(fileName, content, { flag: "a+" }, err => {
-				if (err) {
-					reject(err);
-				} else {
-					resolve();
-				}
-			});
-		});
+		return fs.writeFile(fileName, content, { flag: "a+" });
 	}
 
-	mkdir(newDir) {
-		return new Promise((resolve, reject) => {
-			fs.mkdir(newDir, (err) => {
-				if (!err || err && err.code === "EEXIST") {
-					resolve();
-				} else {
-					reject(err);
-				}
-			});
-		});
+	async mkdir(newDir) {
+		try {
+			await fs.mkdir(newDir);
+		} catch(err) {
+			if (err.code !== "EEXIST") {
+				throw err;
+			}
+		}
 	}
 
 	connect() {
@@ -238,25 +227,19 @@ class ImportQueue {
 	 * @param {newFileName} newFileName - New file name to rename to
 	 * @param {copy} copy - use fs.copy instead of fs.move if set to true
 	 *******************************************************************************/
-	_moveFileToSharedSpace(corID, orgFilePath, newFileName, copy) {
+	async _moveFileToSharedSpace(corID, orgFilePath, newFileName, copy) {
 		const ModelHelper = require("../models/helper/model");
 		newFileName = newFileName.replace(ModelHelper.fileNameRegExp, "_");
 
-		const newFileDir = this.sharedSpacePath + "/" + corID + "/";
+		const newFileDir = `${this.sharedSpacePath}/${corID}/`;
 		const filePath = newFileDir + newFileName;
 
-		return this.mkdir(newFileDir).then(() => {
-			const move = copy ? fs.copy : fs.move;
-			return new Promise((resolve, reject) => {
-				move(orgFilePath, filePath, (moveErr) => {
-					if (moveErr) {
-						reject(moveErr);
-					} else {
-						resolve(`${corID}/${newFileName}`);
-					}
-				});
-			});
-		});
+		await this.mkdir(newFileDir);
+		await fs.copyFile(orgFilePath, filePath);
+		if (!copy) {
+			await fs.rm(orgFilePath);
+		}
+		return `${corID}/${newFileName}`;
 	}
 
 	/** *****************************************************************************

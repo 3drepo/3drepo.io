@@ -3169,6 +3169,7 @@ describe("Issues", function () {
 					function(done) {
 						agent.get(`/${bcfusername}/${bcfmodel}/issues`)
 							.expect(200, function(err, res) {
+								console.log("@2");
 								const issue1 = res.body.find(issue => issue._id === bcf.issue1);
 								const issue2 = res.body.find(issue => issue._id === bcf.issue2);
 
@@ -3180,6 +3181,7 @@ describe("Issues", function () {
 					function(done) {
 						agent.get(`/${bcfusername}/${bcfmodel}/issues/${bcf.issue1}`)
 							.expect(200, function(err, res) {
+								console.log("@3");
 
 								const issue1 = res.body;
 
