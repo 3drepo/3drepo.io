@@ -468,6 +468,7 @@ describe("Check DB handler", function() {
 				await db.runCommand(account, createRoleCmd);
 				throw {}; // should've failed at previous line
 			} catch (err) {
+				console.log(err);
 				expect(err.code).to.equal(11000);
 				expect(err.codeName).to.equal("DuplicateKey");
 			}
@@ -482,6 +483,7 @@ describe("Check DB handler", function() {
 			try {
 				await db.runCommand(account, grantRoleCmd);
 			} catch (err) {
+				console.log(err);
 				expect(err.code).to.equal(11);
 				expect(err.codeName).to.equal("UserNotFound");
 			}
@@ -492,10 +494,11 @@ describe("Check DB handler", function() {
 			expect(result.ok).to.equal(1);
 		});
 
-		it("revoke role command should succeed", async function() {
+		it("revoke role command on user DB should fail", async function() {
 			try {
 				await db.runCommand(account, revokeRoleCmd);
 			} catch (err) {
+				console.log(err);
 				expect(err.code).to.equal(11);
 				expect(err.codeName).to.equal("UserNotFound");
 			}
@@ -516,6 +519,7 @@ describe("Check DB handler", function() {
 				await db.runCommand(account, revertPasswordUserCmd);
 				throw {}; // should've failed at previous line
 			} catch (err) {
+				console.log(err);
 				expect(err.code).to.equal(11);
 				expect(err.codeName).to.equal("UserNotFound");
 			}
@@ -526,6 +530,7 @@ describe("Check DB handler", function() {
 				await db.runCommand("badDB", revertPasswordUserCmd);
 				throw {}; // should've failed at previous line
 			} catch (err) {
+				console.log(err);
 				expect(err.code).to.equal(11);
 				expect(err.codeName).to.equal("UserNotFound");
 			}
