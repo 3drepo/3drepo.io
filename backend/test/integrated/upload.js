@@ -21,6 +21,7 @@ const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp();
 const logger = require("../../logger.js");
+const C = require("../../constants");
 const responseCodes = require("../../response_codes.js");
 const helpers = require("../helpers/signUp");
 const moment = require("moment");
