@@ -46,17 +46,24 @@ function createLogger() {
 			level: config.logfile.console_level
 		}));
 	}
-
-	let format = winston.format.combine(
-		winston.format.timestamp(),
-		winston.format.align(),
-		winston.format.printf(stringFormat)
-	);
-
-	if (!config.logfile.noColors) {
+	
+	let format
+	if (!config.logfile.jsonOutput) {
 		format = winston.format.combine(
-			winston.format.colorize(),
-			format
+			winston.format.timestamp(),
+			winston.format.align(),
+			winston.format.printf(stringFormat)
+		);
+		if (!config.logfile.noColors) {
+			format = winston.format.combine(
+				winston.format.colorize(),
+				format
+			);
+		}
+	} else {
+		format = winston.format.combine(
+			winston.format.timestamp(),
+			winston.format.json()
 		);
 	}
 
