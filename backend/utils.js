@@ -18,7 +18,7 @@
 
 "use strict";
 const _ = require("lodash");
-const fs = require("fs.extra");
+const fs = require("fs").promises;
 const sharp = require("sharp");
 const nodeuuid = require("uuid").v1;
 const yup = require("yup");
@@ -373,34 +373,21 @@ function Utils() {
 	};
 
 	this.emptyDir = async function(dir) {
-		await fs.rmrfSync(dir);
-		return this.mkdir(dir);
+		await fs.rm(dir, { recursive: true, force: true });
 	};
 
-	this.mkdir = function(newDir) {
-		return new Promise((resolve, reject) => {
-			fs.mkdir(newDir, { recursive: true }, (err) => {
-				if (!err || err && err.code === "EEXIST") {
-					resolve();
-				} else {
-					reject(err);
-				}
-			});
-		});
+	this.mkdir = async (newDir) => {
+		try {
+			await fs.mkdir(newDir);
+		} catch(err) {
+			if (err.code !== "EEXIST") {
+				throw err;
+			}
+		}
 	};
 
-	this.writeFile = function(fileName, content) {
-		// FIXME: v10 has native support of promise for fs. can remove when we upgrade.
-		return new Promise((resolve, reject) => {
-			fs.writeFile(fileName, content, { flag: "a+" }, err => {
-				if (err) {
-					reject(err);
-				} else {
-					resolve();
-				}
-			});
-		});
-	};
+	this.writeFile = (fileName, content) => fs.writeFile(fileName, content, { flag: "a+" });
+
 }
 
 module.exports = new Utils();
