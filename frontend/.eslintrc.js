@@ -22,6 +22,7 @@ module.exports = {
 		'@typescript-eslint/tslint'
 	],
 	rules: {
+		'license-header': 'error',
 		'@typescript-eslint/array-type': [
 			'error',
 			{

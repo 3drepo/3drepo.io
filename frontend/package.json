@@ -21,7 +21,7 @@
 		"test": "mocha --inspect=127.0.0.1:9200",
 		"test:one": "mocha --inspect=127.0.0.1:9200 -g ",
 		"unity-util": "webpack --config ./internals/webpack/webpack.unityutil.config.js",
-		"lint:ts": "eslint . --quiet",
+		"lint:ts": "eslint . --quiet --rulesdir eslint-rules/",
 		"lint:css": "stylelint ./**/*.styles.ts",
 		"lint": "yarn lint:ts && yarn lint:css",
 		"lint:fix": "yarn lint:ts --fix",

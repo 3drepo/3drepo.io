@@ -5,3 +5,5 @@ ts-rules/
 node_modules/
 serviceWorkerExtras.js
 plopfile.js
+eslint-rules/
+globals/globals.d.ts
