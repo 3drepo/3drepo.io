@@ -44,7 +44,7 @@ export const getSequenceState = (teamspace, modelId, sequenceId, stateId): Promi
 };
 
 export const getSequenceActivityDetail = (teamspace, modelId, sequenceId, activityId): Promise<any> => {
-	// tslint:disable-next-line:max-line-length
+	// eslint-disable-next-line max-len
 	return api.get(`${teamspace}/${modelId}/sequences/${sequenceId}/activities/${activityId}`);
 };
 

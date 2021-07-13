@@ -47,7 +47,6 @@ function configureStore() {
 		}
 	}
 
-	// tslint:disable-next-line: no-shadowed-variable
 	const store = createStore(
 		(state, action) => {
 			if (action.type === 'RESET_APP') {

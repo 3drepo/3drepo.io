@@ -21,7 +21,7 @@ import { MEASURE_TYPE } from '../../../../../../modules/measurements/measurement
 import { EmptyStateInfo } from '../../../../../components/components.styles';
 import { IMeasure } from '../../../measurements/components/measureItem/measureItem.component';
 
-// tslint:disable-next-line:max-line-length
+// eslint-disable-next-line max-len
 import { AllMeasurementsList } from '../../../measurements/components/measurementsList/allMeasurementsList.component';
 import { MeasuringType } from '../../../measurements/components/measuringType';
 import { Content } from '../riskDetails/riskDetails.styles';

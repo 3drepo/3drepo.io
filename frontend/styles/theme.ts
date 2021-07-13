@@ -131,13 +131,11 @@ export const MuiTheme = createMuiTheme({
 		},
 		MuiTab: {
 			root: {
-				/* tslint:disable */
 				minWidth: '0 !important',
 				letterSpacing: 'normal',
 				'@media (min-width: 960px)': {
 					fontSize: '13px',
 				}
-				/* tslint:enable */
 			}
 		},
 		MuiMenuItem: {
@@ -181,13 +179,11 @@ export const MuiTheme = createMuiTheme({
 				padding: '0 16px !important'
 			},
 			regular: {
-				/* tslint:disable */
 				height: 40,
 				minHeight: 40,
 				'@media (min-width: 600px)': {
 					minHeight: 0
 				}
-				/* tslint:enable */
 			}
 		},
 		MuiDrawer: {
@@ -224,13 +220,11 @@ export const MuiTheme = createMuiTheme({
 		},
 		MuiListItemText: {
 			root: {
-				/* tslint:disable */
 				minWidth: 10,
 				padding: '0 16px',
 				'&:first-child': {
 					paddingLeft: 0,
 				},
-				/* tslint:enable */
 			},
 			primary: {
 				overflow: 'hidden',

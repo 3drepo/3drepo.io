@@ -167,7 +167,6 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 		</NameRow>
 	));
 
-	// tslint:disable-next-line: variable-name
 	public _handleDelete = debounce((event) => {
 		if (!this.state.isDeletePending) {
 			event.stopPropagation();

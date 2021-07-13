@@ -90,7 +90,7 @@ module.exports = {
 		'max-len': [
 			'warn',
 			{
-				code: 125
+				code: 120
 			}
 		],
 		'no-bitwise': 'off',

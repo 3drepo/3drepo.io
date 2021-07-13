@@ -34,14 +34,12 @@ export class ClientConfigService {
 	public VERSION;
 	public userNotice;
 	public resourceUploadSizeLimit;
-	// tslint:disable-next-line
 	public login_check_interval;
 	public gtm;
 	public userId;
 	public development;
 	public sequencesEnabled;
 	public presenterEnabled;
-	// tslint:disable-next-line
 	public captcha_client_key;
 	public legalTemplates;
 	public liveChatLicense;

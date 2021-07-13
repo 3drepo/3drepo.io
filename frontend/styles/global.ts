@@ -21,7 +21,6 @@ import { COLOR } from './colors';
 
 const appBackgroundImage = clientConfigService.getCustomBackgroundImagePath() || '/images/viewer_background.png';
 
-// tslint:disable-next-line: no-unused-expression
 export const GlobalStyle = createGlobalStyle`
 	* {
 		font-family: Roboto, 'Helvetica Neue', sans-serif;

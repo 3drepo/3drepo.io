@@ -38,7 +38,6 @@ Yup.addMethod(Yup.string, 'equalTo', equalTo);
 Yup.addMethod(Yup.string, 'strength', strength );
 
 declare module 'yup' {
-	// tslint:disable-next-line:interface-name
 	interface StringSchema {
 		differentThan: (ref: any, message: any) => StringSchema;
 		equalTo: (ref: any, message: any) => StringSchema;

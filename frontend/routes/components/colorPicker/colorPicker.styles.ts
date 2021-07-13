@@ -119,7 +119,7 @@ export const SelectedColor = styled(({ color, ...rest}) =>
 	border: ${(props) => props.color && props.color !== COLOR.WHITE ? 0 : 1 }px solid ${COLOR.BLACK_6};
 `;
 
-// tslint:disable-next-line:max-line-length
+// eslint-disable-next-line max-len
 export const SelectedColorBackground = styled.div` background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect x="0" width="5" height="5" y="0" fill="rgb(158, 158, 158)"/><rect x="5" width="5" height="5" y="5" fill="rgb(158, 158, 158)"/></svg>');
 	width: 55px;
 	height: 20px;
