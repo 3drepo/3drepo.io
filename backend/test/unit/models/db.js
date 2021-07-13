@@ -185,7 +185,6 @@ describe("Check DB handler", function() {
 		});
 	});
 
-	/*
 	describe("listCollections", function () {
 		it("list collection with valid username should succeed", async function() {
 			const colls = await db.listCollections(account);
@@ -197,7 +196,6 @@ describe("Check DB handler", function() {
 			expect(colls).to.be.empty;
 		});
 	});
-	*/
 
 	describe("find", function () {
 		it("find jobs should succeed", async function() {
@@ -535,18 +533,21 @@ describe("Check DB handler", function() {
 	});
 
 	describe("getSessionStore", function () {
-		/*
+		const expressSession = require("express-session");
+
 		it("get session store with valid session should succeed", async function() {
-			const colls = await db.getSessionStore(session);
-			expect(colls).to.deep.equal(goldenColls);
+			const store = await db.getSessionStore(expressSession);
+			expect(store).to.be.instanceof(Object);
 		});
 
-		it("get session store with invalid session should be empty", async function() {
-			const colls = await db.getSessionStore("wrong");
-			console.log(colls);
-			expect(colls).to.be.empty;
+		it("get session store with invalid session should fail", async function() {
+			try {
+				await db.getSessionStore("wrong");
+				throw {}; // should've failed at previous line
+			} catch (err) {
+				expect(err).to.be.empty;
+			}
 		});
-		*/
 	});
 
 	describe("count", function () {
