@@ -89,6 +89,11 @@
 	};
 
 	Handler.findOneAndDelete = async function (database, colName, query, projection = {}) {
+		console.log("=========== findOneAndDelete =========");
+		console.log(database);
+		console.log(colName);
+		console.log(query);
+		console.log(projection);
 		const collection = await Handler.getCollection(database, colName);
 		const findResult = await collection.findOneAndDelete(query, projection);
 		return findResult.value;
