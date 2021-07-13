@@ -28,6 +28,7 @@ const shortid = require("shortid");
 const systemLogger = require("../logger").systemLogger;
 const Mailer = require("../mailer/mailer");
 const config = require("../config");
+const C = require("../constants");
 const responseCodes = require("../response_codes");
 const Utils = require("../utils");
 
@@ -54,20 +55,6 @@ class ImportQueue {
 		this.uid = shortid.generate();
 		this.channel = null;
 		this.initialised = this.connect();
-	}
-
-	writeFile(fileName, content) {
-		return fs.writeFile(fileName, content, { flag: "a+" });
-	}
-
-	async mkdir(newDir) {
-		try {
-			await fs.mkdir(newDir);
-		} catch(err) {
-			if (err.code !== "EEXIST") {
-				throw err;
-			}
-		}
 	}
 
 	connect() {
@@ -140,48 +127,21 @@ class ImportQueue {
 		});
 	}
 
+	getTaskPath(corID) {
+		return `${this.sharedSpacePath}/${corID}`;
+	}
+
 	/** *****************************************************************************
 	 * Dispatch work to queue to import a model via a file uploaded by User
 	 * @param {string} corID - correlation ID for this request
-	 * @param {filePath} filePath - Path to uploaded file
-	 * @param {orgFileName} orgFileName - Original file name of the file
-	 * @param {databaseName} databaseName - name of database to commit to
-	 * @param {modelName} modelName - name of model to commit to
-	 * @param {userName} userName - name of user
-	 * @param {copy} copy - use fs.copy or fs.move, default fs.move
-	 * @param {tag} tag - revision tag
-	 * @param {desc} desc - revison description
 	 *******************************************************************************/
-	importFile(corID, filePath, orgFileName, databaseName, modelName, userName, copy, tag, desc, importAnimations = true) {
-		const jsonFilename = `${this.sharedSpacePath}/${corID}.json`;
+	async importFile(corID, filePath, orgFileName, copy) {
+		if (orgFileName) {
+			await this._moveFileToSharedSpace(corID, filePath, orgFileName, copy);
+		}
 
-		return this._moveFileToSharedSpace(corID, filePath, orgFileName, copy).then(newFilePath => {
-			const json = {
-				file: `${sharedSpacePH}/${newFilePath}`,
-				database: databaseName,
-				project: modelName,
-				owner: userName,
-				revId: corID
-			};
-
-			if (tag) {
-				json.tag = tag;
-			}
-
-			if (desc) {
-				json.desc = desc;
-			}
-
-			if (importAnimations) {
-				json.importAnimations = importAnimations;
-			}
-
-			return this.writeFile(jsonFilename, JSON.stringify(json)).then(() => {
-				const msg = `import -f ${sharedSpacePH}/${corID}.json`;
-				return this._dispatchWork(corID, msg, true);
-			});
-
-		});
+		const msg = `import -f ${sharedSpacePH}/${corID}.json`;
+		return this._dispatchWork(corID, msg, true);
 	}
 
 	/** *****************************************************************************
@@ -194,9 +154,9 @@ class ImportQueue {
 		const newFileDir = this.sharedSpacePath + "/" + corID;
 		const filename = `${newFileDir}/obj.json`;
 
-		return this.mkdir(this.sharedSpacePath).then(() => {
-			return this.mkdir(newFileDir).then(() => {
-				return this.writeFile(filename, JSON.stringify(defObj)).then(() => {
+		return Utils.mkdir(this.sharedSpacePath).then(() => {
+			return Utils.mkdir(newFileDir).then(() => {
+				return Utils.writeFile(filename, JSON.stringify(defObj)).then(() => {
 					const msg = `genFed ${sharedSpacePH}/${corID}/obj.json ${account}`;
 					return this._dispatchWork(corID, msg);
 				});
@@ -228,18 +188,52 @@ class ImportQueue {
 	 * @param {copy} copy - use fs.copy instead of fs.move if set to true
 	 *******************************************************************************/
 	async _moveFileToSharedSpace(corID, orgFilePath, newFileName, copy) {
-		const ModelHelper = require("../models/helper/model");
-		newFileName = newFileName.replace(ModelHelper.fileNameRegExp, "_");
+		newFileName = newFileName.replace(C.FILENAME_REGEXP, "_");
 
 		const newFileDir = `${this.sharedSpacePath}/${corID}/`;
 		const filePath = newFileDir + newFileName;
 
-		await this.mkdir(newFileDir);
+		await Utils.mkdir(newFileDir);
 		await fs.copyFile(orgFilePath, filePath);
 		if (!copy) {
 			await fs.rm(orgFilePath);
 		}
 		return `${corID}/${newFileName}`;
+	}
+
+	/** *****************************************************************************
+	 * @param {corID} corID - correlation ID of upload
+	 * @param {databaseName} databaseName - name of database to commit to
+	 * @param {modelName} modelName - name of model to commit to
+	 * @param {userName} userName - name of user
+	 * @param {tag} tag - revision tag
+	 * @param {desc} desc - revison description
+	 *******************************************************************************/
+	async writeImportData(corID, databaseName, modelName, userName, newFileName, tag, desc, importAnimations = true) {
+		const jsonFilename = `${this.getTaskPath(corID)}.json`;
+
+		const json = {
+			file: `${sharedSpacePH}/${corID}/${newFileName}`,
+			filename: newFileName,
+			database: databaseName,
+			project: modelName,
+			owner: userName,
+			revId: corID
+		};
+
+		if (tag) {
+			json.tag = tag;
+		}
+
+		if (desc) {
+			json.desc = desc;
+		}
+
+		if (importAnimations) {
+			json.importAnimations = importAnimations;
+		}
+
+		await Utils.writeFile(jsonFilename, JSON.stringify(json));
 	}
 
 	/** *****************************************************************************
