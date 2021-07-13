@@ -46,8 +46,8 @@ function createLogger() {
 			level: config.logfile.console_level
 		}));
 	}
-	
-	let format
+
+	let format;
 	if (!config.logfile.jsonOutput) {
 		format = winston.format.combine(
 			winston.format.timestamp(),
