@@ -664,13 +664,17 @@ function signUp(req, res, next) {
 		return responseCodes.respond(responsePlace, req, res, next, err, err);
 	}
 
-	if (Object.prototype.toString.call(req.body.email) === "[object String]"
-		&& Object.prototype.toString.call(req.body.password) === "[object String]"
-		&& Object.prototype.toString.call(req.body.firstName) === "[object String]"
-		&& Object.prototype.toString.call(req.body.lastName) === "[object String]"
-		&& Object.prototype.toString.call(req.body.countryCode) === "[object String]"
-		&& (!req.body.company || Object.prototype.toString.call(req.body.company) === "[object String]")
-		&& Object.prototype.toString.call(req.body.mailListAgreed) === "[object Boolean]") {
+	if (utils.isString(req.body.email)
+		&& utils.isString(req.body.password)
+		&& utils.isString(req.body.firstName)
+		&& utils.isString(req.body.lastName)
+		&& utils.isString(req.body.countryCode)
+		&& (!req.body.company || utils.isString(req.body.company))
+		&& utils.isBoolean(req.body.mailListAgreed)
+		&& utils.isString(req.body.jobTitle)
+		&& utils.isString(req.body.industry)
+		&& utils.isString(req.body.howDidYouFindUs)
+		&& (!req.body.phoneNumber || utils.isString(req.body.phoneNumber))) {
 
 		// check if captcha is enabled
 		const checkCaptcha = config.auth.captcha ? httpsPost(config.captcha.validateUrl, {
@@ -691,8 +695,11 @@ function signUp(req, res, next) {
 					lastName: req.body.lastName,
 					countryCode: req.body.countryCode,
 					company: req.body.company,
-					mailListOptOut: !req.body.mailListAgreed
-
+					mailListOptOut: !req.body.mailListAgreed,
+					industry: req.body.industry,
+					jobTitle: req.body.jobTitle,
+					howDidYouFindUs: req.body.howDidYouFindUs,
+					phoneNumber: req.body.phoneNumber
 				}, config.tokenExpiry.emailVerify);
 			} else {
 				return Promise.reject({ resCode: responseCodes.INVALID_CAPTCHA_RES});
