@@ -546,8 +546,9 @@ User.verify = async function (username, token, options) {
 	}
 
 	try {
-		const { customData: {firstName, lastName, email, billing, mailListOptOut, jobTitle, phoneNumber,
-			industry, howDidYouFindUs } } = user;
+		const { customData: {firstName, lastName, email, billing, mailListOptOut, extras } } = user;
+		const { jobTitle, phoneNumber, industry, howDidYouFindUs } = extras;
+
 		const subscribed = !mailListOptOut;
 		const company = get(billing, "billingInfo.company");
 
