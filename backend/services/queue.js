@@ -23,7 +23,7 @@
 "use strict";
 
 const amqp = require("amqplib");
-const fs = require("fs.extra");
+const fs = require("fs").promises;
 const shortid = require("shortid");
 const systemLogger = require("../logger").systemLogger;
 const Mailer = require("../mailer/mailer");
@@ -187,24 +187,18 @@ class ImportQueue {
 	 * @param {newFileName} newFileName - New file name to rename to
 	 * @param {copy} copy - use fs.copy instead of fs.move if set to true
 	 *******************************************************************************/
-	_moveFileToSharedSpace(corID, orgFilePath, newFileName, copy) {
+	async _moveFileToSharedSpace(corID, orgFilePath, newFileName, copy) {
 		newFileName = newFileName.replace(C.FILENAME_REGEXP, "_");
 
-		const newFileDir = this.sharedSpacePath + "/" + corID + "/";
+		const newFileDir = `${this.sharedSpacePath}/${corID}/`;
 		const filePath = newFileDir + newFileName;
 
-		return Utils.mkdir(newFileDir).then(() => {
-			const move = copy ? fs.copy : fs.move;
-			return new Promise((resolve, reject) => {
-				move(orgFilePath, filePath, (moveErr) => {
-					if (moveErr) {
-						reject(moveErr);
-					} else {
-						resolve(`${corID}/${newFileName}`);
-					}
-				});
-			});
-		});
+		await Utils.mkdir(newFileDir);
+		await fs.copyFile(orgFilePath, filePath);
+		if (!copy) {
+			await fs.rm(orgFilePath);
+		}
+		return `${corID}/${newFileName}`;
 	}
 
 	/** *****************************************************************************

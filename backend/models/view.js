@@ -19,7 +19,6 @@
 const _ = require("lodash");
 
 const utils = require("../utils");
-const nodeuuid = require("uuid/v1");
 const responseCodes = require("../response_codes.js");
 const db = require("../handler/db");
 const ChatEvent = require("./chatEvent");
@@ -197,7 +196,7 @@ class View {
 		// DEPRECATED LEGACY SUPPORT END
 		// =============================
 
-		newView._id = utils.stringToUUID(newView._id || nodeuuid());
+		newView._id = utils.stringToUUID(newView._id || utils.generateUUID());
 
 		if (newView.viewpoint) {
 			newView.viewpoint = await this.createViewpoint(account, model, newView._id, newView.viewpoint, true);

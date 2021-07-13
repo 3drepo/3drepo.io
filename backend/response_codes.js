@@ -17,10 +17,9 @@
 "use strict";
 (() => {
 
-	const C = require("./constants");
 	const _ = require("lodash");
 	const config = require("./config");
-	const systemLogger = require("./logger.js").systemLogger;
+	const { systemLogger, logLabels} = require("./logger.js");
 	const utils = require("./utils");
 
 	/**
@@ -392,6 +391,13 @@
 		"jpg": "image/jpg"
 	};
 
+	const genResponseLogging = (resCode, {place, contentLength}, {session, startTime} = {}) => {
+		const user = session && session.user ? session.user.username : "unknown";
+		const currentTime = Date.now();
+		const latency = startTime ? `${currentTime - startTime}` : "???";
+		return `${resCode.status}\t${resCode.code}\t${latency}\t${contentLength}\t${user}\t${place}`;
+	};
+
 	/**
 	 *
 	 *
@@ -409,11 +415,11 @@
 
 		if (!resCode || valid_values.indexOf(resCode.value) === -1) {
 			if (resCode && resCode.stack) {
-				req[C.REQ_REPO].logger.logError(resCode.stack);
+				systemLogger.logError(resCode.stack, undefined, logLabels.network);
 			} else if (resCode && resCode.message) {
-				req[C.REQ_REPO].logger.logError(resCode.message);
+				systemLogger.logError(resCode.message, undefined, logLabels.network);
 			} else {
-				req[C.REQ_REPO].logger.logError(JSON.stringify(resCode));
+				systemLogger.logError(JSON.stringify(resCode), undefined, logLabels.network);
 			}
 
 			if(!resCode.value) {
@@ -435,10 +441,7 @@
 
 			meta.contentLength = JSON.stringify(responseObject)
 				.length;
-			req[C.REQ_REPO].logger.logError(
-				resCode.code + " (" + resCode.value + ")",
-				meta
-			);
+			systemLogger.logInfo(genResponseLogging(resCode, meta, req), undefined, logLabels.network);
 
 			res.status(resCode.status)
 				.send(responseObject);
@@ -484,10 +487,8 @@
 			}
 
 			// log bandwidth and http status code
-			req[C.REQ_REPO].logger.logInfo(resCode.code, meta);
+			systemLogger.logInfo(genResponseLogging(resCode, meta, req), undefined, logLabels.network);
 		}
-
-		// next();
 	};
 
 	responseCodes.writeStreamRespond =  function (place, req, res, next, readStream, customHeaders) {
@@ -497,7 +498,7 @@
 		let response = responseCodes.OK;
 
 		readStream.on("error", error => {
-			req[C.REQ_REPO].logger.logInfo(`Stream failed: [${error.code} - ${error.message}]`, {place});
+			systemLogger.logError(`Stream failed: [${error.code} - ${error.message}] @ ${place}`, undefined, logLabels.network);
 			response = responseCodes.NO_FILE_FOUND;
 			res.status(response.status);
 			res.end();
@@ -512,11 +513,11 @@
 			length += data.length;
 		}).on("end", () => {
 			res.end();
-			req[C.REQ_REPO].logger.logInfo(response.status, {
+			systemLogger.logInfo(genResponseLogging(response, {
 				place,
 				httpCode: response.status,
 				contentLength: length
-			});
+			}, req), undefined, logLabels.network);
 		});
 	};
 
