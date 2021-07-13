@@ -1069,7 +1069,7 @@ export class UnityUtil {
 	public static highlightObjects(
 		account: string,
 		model: string,
-		idArr: [string],
+		idArr: string[],
 		color: [number],
 		toggleMode: boolean,
 		forceReHighlight: boolean
@@ -1095,7 +1095,7 @@ export class UnityUtil {
 	 * @param model - name of model
 	 * @param idArr - array of unique IDs associated with the objects to highlight
 	 */
-	public static unhighlightObjects(account: string, model: string, idArr: [string]) {
+	public static unhighlightObjects(account: string, model: string, idArr: string[]) {
 		UnityUtil.multipleCallInChunks(idArr.length, (start, end) => {
 			const arr = idArr.slice(start, end);
 			const params: any = {

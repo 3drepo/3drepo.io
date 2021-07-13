@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// @ts-nocheck
 import CSAMIcon from '../../../../../../icons/measure/custom_surface_area_measurement.svg';
 import CSAMActiveIcon from '../../../../../../icons/measure/custom_surface_area_measurement_selected.svg';
 import MinimumDistanceIcon from '../../../../../../icons/measure/minimum_distance.svg';

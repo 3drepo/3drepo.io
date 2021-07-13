@@ -25,7 +25,7 @@ export const getWindowHeight = () =>
 
 export const renderWhenTrue = (
 	Component: JSX.Element | JSX.Element[] | (() => JSX.Element | JSX.Element[])
-) => (trueStatement) => {
+) => (trueStatement): JSX.Element => {
 	return (trueStatement ? result({ Component }, 'Component') : null);
 };
 
@@ -33,7 +33,7 @@ export const renderWhenTrueOtherwise =
 	(
 		ComponentTrue: JSX.Element | (() => JSX.Element),
 		ComponentFalse: JSX.Element | (() => JSX.Element)
-	) => (trueStatement) => {
+	) => (trueStatement): JSX.Element => {
 		return (
 			trueStatement ?
 			result({ ComponentTrue }, 'ComponentTrue') :

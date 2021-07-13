@@ -579,7 +579,7 @@ export class ViewerService {
 		this.emit(VIEWER_EVENTS.CLEAR_HIGHLIGHT_OBJECTS, {});
 	}
 
-	public unhighlightObjects(account, model, ids) {
+	public unhighlightObjects(account, model, ids: string[]) {
 		if (ids) {
 			const uniqueIds = Array.from(new Set(ids));
 			if (uniqueIds.length) {
