@@ -18,7 +18,6 @@
 "use strict";
 
 const utils = require("../utils");
-const nodeuuid = require("uuid/v1");
 const responseCodes = require("../response_codes.js");
 const Meta = require("./meta");
 const { checkRulesValidity } = require("./helper/rule");
@@ -282,7 +281,7 @@ Group.create = async function (account, model, branch = "master", rid = null, se
 	});
 
 	if (typeCorrect) {
-		newGroup._id = utils.stringToUUID(nodeuuid());
+		newGroup._id = utils.generateUUID();
 		newGroup.author = creator;
 		newGroup.createdAt = Date.now();
 

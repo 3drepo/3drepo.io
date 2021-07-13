@@ -18,6 +18,7 @@
 "use strict";
 (() => {
 
+	const { uploadSizeLimit } = require("./config.js");
 	const utils = require("./utils.js");
 
 	function define(name, value) {
@@ -476,6 +477,7 @@
 
 	define("USERNAME_REGEXP",  /^[a-zA-Z][\w]{1,19}$/);
 	define("EMAIL_REGEXP", /^(?:[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-zA-Z0-9-]*[a-zA-Z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/);
+	define("FILENAME_REGEXP",  /[ *"/\\[\]:;|=,<>$]/g);
 
 	// -----------------------------------------------------------------------------
 	//
@@ -640,5 +642,26 @@
 	]);
 
 	define("ACCEPTED_IMAGE_FORMATS",  ["png", "jpg", "gif"]);
+
+	// -----------------------------------------------------------------------------
+	//
+	// Upload
+	//
+	// -----------------------------------------------------------------------------
+	define("ACCEPTED_FILE_FORMATS", [
+		"x","obj","3ds","md3","md2","ply",
+		"mdl","ase","hmp","smd","mdc","md5",
+		"stl","lxo","nff","raw","off","ac",
+		"bvh","irrmesh","irr","q3d","q3s","b3d",
+		"dae","ter","csm","3d","lws","xml","ogex",
+		"ms3d","cob","scn","blend","pk3","ndo",
+		"ifc","xgl","zgl","fbx","assbin", "bim", "dgn",
+		"rvt", "rfa", "spm", "dwg", "dxf"
+	]);
+	define("MS_CHUNK_BYTES_LIMIT", Math.min(52428800, uploadSizeLimit));
+	define("CONTENT_LENGTH_HEADER", "content-length");
+	define("MS_TRANSFER_MODE_HEADER", "x-ms-transfer-mode");
+	define("MS_CONTENT_LENGTH_HEADER", "x-ms-content-length");
+	define("CONTENT_RANGE_HEADER", "content-range");
 
 })();

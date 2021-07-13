@@ -167,18 +167,16 @@ History.clean = function(histories, branch) { // or history
 };
 
 History.isValidTag = async function(account, model, tag) {
-	if(!tag) {
-		return null;
+	if (!tag) {
+		throw responseCodes.INVALID_TAG_NAME;
 	} else {
-
-		if (!tag.match(this.tagRegExp)) {
+		if (!tag.match(History.tagRegExp)) {
 			throw responseCodes.INVALID_TAG_NAME;
 		}
-		const _tag = await this.findByTag(account, model, tag, {_id: 1});
 
-		if (!_tag) {
-			return null;
-		} else {
+		const _tag = await History.findByTag(account, model, tag, {_id: 1});
+
+		if (_tag) {
 			throw responseCodes.DUPLICATE_TAG;
 		}
 	}

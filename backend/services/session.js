@@ -24,6 +24,7 @@
 const expressSession = require("express-session");
 const { getCollection, getSessionStore } = require("../handler/db");
 const C = require("../constants");
+const { systemLogger } = require("../logger");
 const store = getSessionStore(expressSession);
 const useragent = require("useragent");
 
@@ -49,12 +50,12 @@ module.exports.session = function(config) {
 
 module.exports.regenerateAuthSession = (req, config, user) => {
 	return new Promise((resolve, reject) => {
-		req.session.regenerate(function(err) {
-			req[C.REQ_REPO].logger.logInfo("Creating session for " + " " + user.username);
+		req.session.regenerate((err) => {
+			systemLogger.logDebug(`Creating session for ${user.username}`);
 			if(err) {
 				reject(err);
 			} else {
-				req[C.REQ_REPO].logger.logDebug("Authenticated user and signed token.");
+				systemLogger.logDebug("Authenticated user and signed token.");
 				user = {...user, socketId: req.headers[C.HEADER_SOCKET_ID], webSession: false};
 
 				if (req.headers && req.headers["user-agent"]) {

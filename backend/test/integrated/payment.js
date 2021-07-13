@@ -21,7 +21,6 @@ const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp();
 const logger = require("../../logger.js");
-const systemLogger = logger.systemLogger;
 const responseCodes = require("../../response_codes.js");
 const helpers = require("../helpers/signUp");
 const async = require("async");
@@ -73,7 +72,7 @@ describe("Enrolling to a subscription", function () {
 
 				function(done) {
 					helpers.signUpAndLogin({
-						server, request, agent, expect, User, systemLogger,
+						server, request, agent, expect, User,
 						username: username2, password: password2, email: email2,
 						done
 					});
@@ -81,7 +80,7 @@ describe("Enrolling to a subscription", function () {
 
 				function(done) {
 					helpers.signUpAndLogin({
-						server, request, agent, expect, User, systemLogger,
+						server, request, agent, expect, User,
 						username: username3, password: password3, email: email3,
 						done
 					});
@@ -89,7 +88,7 @@ describe("Enrolling to a subscription", function () {
 
 				function(done) {
 					helpers.signUpAndLogin({
-						server, request, agent, expect, User, systemLogger,
+						server, request, agent, expect, User,
 						username, password, email,
 						done: function(err, _agent) {
 							agent = _agent;
@@ -110,7 +109,7 @@ describe("Enrolling to a subscription", function () {
 
 				function(done) {
 					helpers.signUpAndLogin({
-						server, request, agent, expect, User, systemLogger,
+						server, request, agent, expect, User,
 						username: username5, password: password5, email: email5,
 						done
 					});

@@ -22,11 +22,10 @@
  * @returns
  */
 module.exports.createApp = function (config) {
-	const logger = require("../logger.js");
 	const express = require("express");
 	const compress = require("compression");
 	const responseCodes = require("../response_codes");
-	const C = require("../constants");
+	const { systemLogger } = require("../logger");
 	const cors = require("cors");
 	const bodyParser = require("body-parser");
 	const utils = require("../utils");
@@ -41,9 +40,6 @@ module.exports.createApp = function (config) {
 	}
 
 	app.disable("etag");
-
-	// put logger in req object
-	app.use(logger.startRequest);
 
 	// Session middlewares
 	app.use(keyAuthentication, sessionManager);
@@ -61,6 +57,8 @@ module.exports.createApp = function (config) {
 	app.use(compress({ level: 9 }));
 
 	app.use(function (req, res, next) {
+		// record start time of the request
+		req.startTime = Date.now();
 		// intercept OPTIONS method
 		if ("OPTIONS" === req.method) {
 			res.sendStatus(200);
@@ -136,7 +134,7 @@ module.exports.createApp = function (config) {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		}
 
-		err.stack && req[C.REQ_REPO].logger.logError(err.stack);
+		err.stack && systemLogger.logError(err.stack);
 		// next(err);
 	});
 

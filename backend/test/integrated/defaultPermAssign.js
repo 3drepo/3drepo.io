@@ -21,7 +21,6 @@ const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp();
 const logger = require("../../logger.js");
-const systemLogger = logger.systemLogger;
 const responseCodes = require("../../response_codes.js");
 const async = require("async");
 const _ = require("lodash");
@@ -41,7 +40,7 @@ describe("Default permission assignment", function () {
 		server = app.listen(8080, function () {
 			console.log("API test server is listening on port 8080!");
 			helpers.signUpAndLogin({
-				server, request, agent, expect, User, systemLogger,
+				server, request, agent, expect, User,
 				username, password, email,
 				done: function(err, _agent) {
 					agent = _agent;
