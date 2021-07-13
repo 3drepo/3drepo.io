@@ -125,9 +125,9 @@ function createClientConfig(serverConfig, req) {
 	clientConfig.legal = config.legal;
 	clientConfig.tagRegExp = History.tagRegExp;
 	clientConfig.modelNameRegExp = ModelHelper.modelNameRegExp;
-	clientConfig.fileNameRegExp = ModelHelper.fileNameRegExp;
+	clientConfig.fileNameRegExp = C.FILENAME_REGEXP;
 	clientConfig.usernameRegExp = User.usernameRegExp;
-	clientConfig.acceptedFormat = ModelHelper.acceptedFormat;
+	clientConfig.acceptedFormat = C.ACCEPTED_FILE_FORMATS;
 	clientConfig.login_check_interval = config.login_check_interval;
 
 	clientConfig.responseCodes = _.each(responseCodes.codesMap);

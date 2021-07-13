@@ -181,6 +181,7 @@
 		NOT_IN_ROLE: { message: "User or role not found", status: 400 },
 		RESOURCE_NOT_FOUND: { message: "Resource not found", status: 404 },
 		MODEL_NOT_FOUND: { message: "Model not found", status: 404 },
+		CORRELATION_ID_NOT_FOUND: { message: "Correlation ID not found", status: 404 },
 		INVALID_ROLE: { message: "Invalid role name", status: 400 },
 		ALREADY_IN_ROLE: { message: "User already assigned with this role", status: 400 },
 
@@ -409,7 +410,7 @@
 	 * @param {any} extraInfo
 	 * @param {any} format
 	 */
-	responseCodes.respond = function (place, req, res, next, resCode, extraInfo, format, cache) {
+	responseCodes.respond = function (place, req, res, next, resCode, extraInfo, format, cache, customHeaders) {
 
 		resCode = utils.mongoErrorToResCode(resCode);
 
@@ -450,6 +451,10 @@
 
 			if(cache) {
 				res.setHeader("Cache-Control", `private, max-age=${cache.maxAge || config.cachePolicy.maxAge}`);
+			}
+
+			if (customHeaders) {
+				res.writeHead(resCode.status, customHeaders);
 			}
 
 			if (extraInfo && Buffer.isBuffer(extraInfo)) {

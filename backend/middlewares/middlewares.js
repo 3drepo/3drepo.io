@@ -72,6 +72,19 @@
 
 	}
 
+	async function checkSufficientSpace(account, size) {
+		if (size > config.uploadSizeLimit) {
+			throw responseCodes.SIZE_LIMIT;
+		}
+
+		const sizeInMB = size / (1024 * 1024);
+		const space = await freeSpace(account);
+
+		if (sizeInMB > space) {
+			throw responseCodes.SIZE_LIMIT_PAY;
+		}
+	}
+
 	function isTeamspaceMember(req, res, next) {
 		return validateUserSession(req).then(() => {
 			const teamspace = req.params.account;
@@ -178,6 +191,7 @@
 		// Helpers
 		// checkPermissions,
 		freeSpace,
+		checkSufficientSpace,
 		hasReadAccessToModelHelper,
 		isAccountAdminHelper,
 		checkPermissionsHelper
