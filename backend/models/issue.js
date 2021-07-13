@@ -56,6 +56,7 @@ const fieldTypes = {
 	"viewCount": "[object Number]",
 	"viewpoint": "[object Object]",
 	"viewpoints": "[object Array]",
+	"shapes": "[object Array]",
 	"extras": "[object Object]"
 };
 
@@ -136,7 +137,6 @@ class Issue extends Ticket {
 			"comments",
 			"created",
 			"creator_role",
-			"name",
 			"number",
 			"owner",
 			"rev_id",

@@ -129,6 +129,7 @@ export class PasswordChange extends React.PureComponent<IProps, IState> {
 							margin="normal"
 							required
 							type="password"
+							autoComplete="new-password"
 							onChange={this.handleNewPasswordChange(field.onChange)}
 							fullWidth
 						/>
@@ -142,6 +143,7 @@ export class PasswordChange extends React.PureComponent<IProps, IState> {
 							margin="normal"
 							required
 							type="password"
+							autoComplete="new-password"
 							fullWidth
 						/>
 					)} />

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { values } from 'lodash';
+import { create, values } from 'lodash';
 import { createSelector } from 'reselect';
 
 import { RISK_DEFAULT_HIDDEN_LEVELS } from '../../constants/risks';
@@ -23,6 +23,7 @@ import { prepareComments, transformCustomsLinksToMarkdown } from '../../helpers/
 import { hasPin, riskToPin } from '../../helpers/pins';
 import { prepareRisk } from '../../helpers/risks';
 import { searchByFilters } from '../../helpers/searching';
+import { getHighlightedTicketShapes, getTicketsShapes, shouldDisplayShapes } from '../../helpers/shapes';
 import { sortByDate } from '../../helpers/sorting';
 import { selectJobsList } from '../jobs';
 import { selectQueryParams } from '../router/router.selectors';
@@ -192,4 +193,19 @@ export const selectMitigationCriteria = createSelector(
 
 export const selectRiskCategories = createSelector(
 	selectMitigationCriteria, (mitigation) => mitigation?.category || []
+);
+
+export const selectMeasureMode = createSelector(
+	selectComponentState, (componentState) => componentState.measureMode
+);
+
+export const selectShapes = createSelector(
+	selectFilteredRisks, selectActiveRiskDetails, selectShowDetails,
+	selectSelectedSequence, selectSelectedStartingDate, selectSelectedEndingDate,
+	getTicketsShapes
+);
+
+export const selectHighlightedShapes =  createSelector(
+	selectActiveRiskDetails, selectSelectedSequence, selectShapes, selectShowDetails,
+	getHighlightedTicketShapes
 );

@@ -21,11 +21,14 @@ const express = require("express");
 const router = express.Router({mergeParams: true});
 const responseCodes = require("../response_codes.js");
 const C = require("../constants");
+const sessionCheck = require("../middlewares/sessionCheck");
 const middlewares = require("../middlewares/middlewares");
 const config = require("../config");
 const utils = require("../utils");
 // const ChatEvent = require("../models/chatEvent");
 const User = require("../models/user");
+
+const LoginRecord = require("../models/loginRecord");
 const Mailer = require("../mailer/mailer");
 const httpsPost = require("../libs/httpsReq").post;
 
@@ -108,7 +111,7 @@ router.post("/logout", logout);
  *	"username": "alice"
  * }
  */
-router.get("/login", checkLogin);
+router.get("/login", middlewares.loggedIn, checkLogin);
 
 /**
  * @api {post} /forgot-password Forgot password
@@ -551,7 +554,10 @@ function createSession(place, req, res, next, user) {
 	req.body.username = user.username;
 
 	regenerateAuthSession(req, config, user)
-		.then(() => getSessionsByUsername(user.username))
+		.then(() => {
+			LoginRecord.saveLoginRecord(req.sessionID, user.username, req.ips[0] || req.ip, req.headers["user-agent"] ,req.header("Referer"));
+			return getSessionsByUsername(user.username);
+		})
 		.then(sessions => { // Remove other sessions with the same username
 			if (!req.session.user.webSession) {
 				return null;
@@ -582,7 +588,7 @@ function login(req, res, next) {
 
 		req[C.REQ_REPO].logger.logInfo("Authenticating user", { username: req.body.username});
 
-		if(req.session.user) {
+		if(sessionCheck(req)) {
 			return responseCodes.respond(responsePlace, req, res, next, responseCodes.ALREADY_LOGGED_IN, responseCodes.ALREADY_LOGGED_IN);
 		}
 
@@ -598,15 +604,11 @@ function login(req, res, next) {
 }
 
 function checkLogin(req, res, next) {
-	if (!req.session || !req.session.user) {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.NOT_LOGGED_IN, {});
-	} else {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {username: req.session.user.username});
-	}
+	responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {username: req.session.user.username});
 }
 
 function logout(req, res, next) {
-	if(!req.session || !req.session.user) {
+	if(!sessionCheck(req)) {
 		return responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.NOT_LOGGED_IN, {});
 	}
 

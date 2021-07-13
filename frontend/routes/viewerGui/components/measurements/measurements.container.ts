@@ -20,7 +20,7 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import {
-	selectAreaMeasurements, selectEdgeSnapping, selectIsMeasureActive, selectLengthMeasurements,
+	selectAreaMeasurements, selectEdgeSnapping, selectLengthMeasurements,
 	selectMeasureMode, selectMeasureUnits, selectPointMeasurements, selectXyzDisplay, MeasurementsActions
 } from '../../../../modules/measurements';
 import { selectUnit } from '../../../../modules/model';
@@ -29,32 +29,25 @@ import { withViewer } from '../../../../services/viewer/viewer';
 import { Measurements } from './measurements.component';
 
 const mapStateToProps = createStructuredSelector({
-	isMeasureActive: selectIsMeasureActive,
 	areaMeasurements: selectAreaMeasurements,
 	lengthMeasurements: selectLengthMeasurements,
 	pointMeasurements: selectPointMeasurements,
-	measureMode: selectMeasureMode,
 	measureUnits: selectMeasureUnits,
 	edgeSnappingEnabled: selectEdgeSnapping,
 	XYZdisplay: selectXyzDisplay,
 	modelUnit: selectUnit,
+	measureMode: selectMeasureMode
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	disableMeasure: MeasurementsActions.setDisabled,
-	activateMeasure: MeasurementsActions.activateMeasure,
-	deactivateMeasure: MeasurementsActions.deactivateMeasure,
 	setMeasureMode: MeasurementsActions.setMeasureMode,
 	removeMeasurement: MeasurementsActions.removeMeasurement,
 	clearMeasurements: MeasurementsActions.clearMeasurements,
-	addMeasurement: MeasurementsActions.addMeasurement,
 	setMeasurementColor: MeasurementsActions.setMeasurementColor,
 	resetMeasurementColors: MeasurementsActions.resetMeasurementColors,
 	setMeasureUnits: MeasurementsActions.setMeasureUnits,
 	setMeasureEdgeSnapping: MeasurementsActions.setMeasureEdgeSnapping,
 	setMeasureXYZDisplay: MeasurementsActions.setMeasureXyzDisplay,
-	setMeasurementCheck: MeasurementsActions.setMeasurementCheck,
-	setMeasurementCheckAll: MeasurementsActions.setMeasurementCheckAll,
 	setMeasurementName: MeasurementsActions.setMeasurementName,
 	resetMeasurementTool: MeasurementsActions.resetMeasurementTool,
 }, dispatch);

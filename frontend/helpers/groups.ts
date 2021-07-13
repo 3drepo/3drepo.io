@@ -20,6 +20,7 @@ import { select } from 'redux-saga/effects';
 import { GROUP_TYPES_ICONS, GROUPS_TYPES } from '../constants/groups';
 import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds } from '../modules/tree';
 import { COLOR } from '../styles';
+import { hasSameElements } from './arrays';
 import { getGroupHexColor, hexToArray } from './colors';
 import { prepareCriterion } from './criteria';
 import { calculateTotalMeshes } from './tree';
@@ -191,3 +192,31 @@ export function* createGroupsByTransformations(transformations) {
 	}, []);
 
 }
+
+export const stripGroupRules = ({rules, ...restGroupFields}) => restGroupFields;
+
+const ruleIsEqual = (ruleA, ruleB) => {
+	return hasSameElements(ruleA.value, ruleB.value) && ruleA.field === ruleB.field && ruleA.operator === ruleB.operator;
+};
+
+export const rulesAreEqual = (groupA, groupB) => {
+	const rulesA: any[] = groupA.rules || [];
+	const rulesB: any[] = groupB.rules || [];
+
+	if (rulesA.length !== rulesB.length) {
+		return false;
+	}
+
+	const rulesADict = rulesA.reduce((dict, rule) => {
+		dict[rule.field] = rule;
+		return dict;
+	}, {});
+
+	return rulesB.every((ruleB) => {
+		const ruleA = rulesADict[ruleB.field];
+		if (!ruleA) {
+			return false;
+		}
+		return ruleIsEqual(ruleA, ruleB);
+	});
+};

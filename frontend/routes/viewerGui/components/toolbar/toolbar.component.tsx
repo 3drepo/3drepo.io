@@ -87,7 +87,7 @@ interface IProps {
 	setClippingMode: (clippingMode) => void;
 	setClipEdit: (isClipEdit) => void;
 	setMetadataActive: (isActive) => void;
-	setMeasureVisibility: (visible) => void;
+	setMeasureMode: (mode) => void;
 	setCoordView: (visible) => void;
 	stopListenOnNumClip: () => void;
 	setPanelVisibility: (panelName, visibility) => void;
@@ -273,10 +273,10 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentWillUnmount() {
-		this.props.setMeasureVisibility(false);
 		if (this.props.isMetadataActive) {
 			this.toggleMetadataPanel();
 		}
+
 		this.props.stopListenOnNumClip();
 	}
 
@@ -357,15 +357,15 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 		const {
 			isMetadataActive,
 			setMetadataActive,
-			setMeasureVisibility,
 			setPanelVisibility,
+			setMeasureMode,
 		} = this.props;
 		setMetadataActive(!isMetadataActive);
 		setPanelVisibility(VIEWER_PANELS.BIM, !isMetadataActive);
 		setPanelVisibility(VIEWER_PANELS.ACTIVITIES, false);
 
 		if (!isMetadataActive) {
-			setMeasureVisibility(false);
+			setMeasureMode('');
 		}
 	}
 

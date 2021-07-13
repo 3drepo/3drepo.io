@@ -58,12 +58,14 @@ export const LEVELS_OF_RISK = [...LEVELS_LIST];
 export const MAIN_RISK_TYPE = 'risk';
 export const TREATMENT_RISK_TYPE = 'treatment';
 export const SEQUENCING_RISK_TYPE = 'sequencing';
+export const SHAPES_RISK_TYPE = 'shapes';
 export const ATTACHMENTS_RISK_TYPE = 'attachments';
 
 export const RISK_TABS = {
 	RISK: 'Risk',
 	TREATMENT: 'Treatment',
 	SEQUENCING: 'Sequencing',
+	SHAPES: 'Shapes',
 	ATTACHMENTS: 'Attachments',
 };
 

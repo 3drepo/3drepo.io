@@ -82,7 +82,6 @@ interface IProps {
 	setTargetModel: (modelId, isTarget, isTypeChange?) => void;
 	setComponentState: (state) => void;
 	setTargetRevision: (modelId, targetRevision, isDiff) => void;
-	getCompareModels: (revision) => void;
 	id?: string;
 }
 
@@ -136,9 +135,9 @@ export class Compare extends React.PureComponent<IProps, any> {
 	));
 
 	public componentDidMount() {
-		if (!this.props.compareModels.length) {
-			this.props.getCompareModels(this.props.revision);
-		}
+		// if (!this.props.compareModels.length) {
+		// 	this.props.getCompareModels(this.props.revision);
+		// }
 	}
 
 	public renderClashTabLabel = () => {

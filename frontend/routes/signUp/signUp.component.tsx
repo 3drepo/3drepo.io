@@ -211,6 +211,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 											helperText={form.touched.password && (form.errors.password || '')}
 											label={`Password${this.state.passwordStrengthMessage}`}
 											type="password"
+											autoComplete="new-password"
 											disabled={isPending}
 											onChange={this.handlePasswordChange(field.onChange)}
 										/>
@@ -223,6 +224,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 											helperText={form.touched.passwordConfirm && (form.errors.passwordConfirm || '')}
 											label="Password confirmation"
 											type="password"
+											autoComplete="new-password"
 											disabled={isPending}
 											onChange={this.handlePasswordChange(field.onChange)}
 										/>

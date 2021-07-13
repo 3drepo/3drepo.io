@@ -31,6 +31,8 @@ const DEFAULT_SUPPORTED_BROWSERS_CONFIG = {
 		os: 'mac os', minos: '10.12.0', browser: 'safari', minversion: 10.1,
 	}, {
 		browser: 'opera', minversion: 38,
+	}, {
+		browser: 'electron'
 	}],
 	tablet: [{
 		os: 'ios', minos: '9', browser: 'mobile safari',
@@ -124,7 +126,6 @@ export default class UnsupportedBrowserDetection {
 					minversion: this.compareVersions(minversion, browserVersion),
 					versions: versions ? versions.indexOf(parsedVersion) >= 0 : false,
 				};
-
 				return Object.keys(options).map((key) => checked[key]).indexOf(false) !== -1;
 			});
 		return isSupported;

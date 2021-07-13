@@ -47,7 +47,7 @@ export const SectionHeader = styled.div`
 export const Title = styled.h3`
 	align-self: center;
 	font-size: 14px;
-	margin-left: ${(props) => props.left ? '36px' : '6px'};
+	margin-left: 6px;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;

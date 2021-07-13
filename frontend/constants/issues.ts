@@ -35,10 +35,12 @@ export const ISSUE_PANEL_NAME = 'issue';
 export const ISSUE_PROPERTIES_TAB = 'issue';
 export const ISSUE_SEQUENCING_TAB = 'sequencing';
 export const ATTACHMENTS_ISSUE_TAB = 'attachments';
+export const ISSUE_SHAPES_TAB = 'shapes';
 
 export const ISSUE_TABS = {
 	ISSUE: 'Properties',
 	SEQUENCING: 'Sequencing',
+	SHAPES: 'Shapes',
 	ATTACHMENTS: 'Attachments',
 };
 

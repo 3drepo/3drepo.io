@@ -15,15 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TextField } from '@material-ui/core';
+import { Tooltip } from '@material-ui/core';
+import Grid from '@material-ui/core/Grid';
 import { Field, Formik } from 'formik';
 import React from 'react';
 import * as Yup from 'yup';
-
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { schema } from '../../../../services/validation';
 import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';
 import OpenInViewerButton from '../../../components/openInViewerButton/openInViewerButton.container';
+import { TextField } from '../../../components/textField/textField.component';
 import { PreviewItemInfo } from '../previewItemInfo/previewItemInfo.component';
 import { RoleIndicator } from '../previewListItem/previewListItem.styles';
 import {
@@ -37,10 +38,11 @@ import {
 	ScrollableContainer,
 	StyledForm,
 	Summary,
+	TitleNumber,
 	ToggleButton,
 	ToggleButtonContainer,
 	ToggleIcon,
-	Typography,
+	Typography
 } from './previewDetails.styles';
 
 interface IProps {
@@ -88,19 +90,28 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	public textFieldRef = React.createRef<any>();
 	public scrollableContainerRef = React.createRef<HTMLDivElement>();
 
-	public renderNameWithCounter = renderWhenTrue(() => (
-		<Typography paragraph>
-			{`${this.props.number}. ${this.props.name}`}
-		</Typography>
-	));
+	public renderNameWithCounter = renderWhenTrue(() => {
+		const title = `${this.props.number}. ${this.props.name}`;
+		return (
+			<Tooltip title={title}>
+				<Typography paragraph>
+					{title}
+				</Typography>
+			</Tooltip>
+		);
+	});
 
 	public renderName = renderWhenTrue(() => (
-		<Typography paragraph>
-			{this.props.name}
-		</Typography>
+		<Tooltip title={this.props.name}>
+			<Typography paragraph>
+				{this.props.name}
+			</Typography>
+		</Tooltip>
 	));
 
 	public renderNameField = renderWhenTrue(() => (
+	<Grid container alignItems="center" justify="space-between" >
+		<TitleNumber>{this.props.number}.</TitleNumber>
 		<Formik
 			initialValues={{name: this.props.name}}
 			validationSchema={ValidationSchema}
@@ -123,11 +134,16 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 								onFocus: () => this.handleFocusName(field, form),
 								onBlur: () => this.handleBlurName(field, form)
 							}}
+							mutable={!this.props.isNew}
+							requiredConfirm={!this.props.isNew}
 						/>
 					);
 				}} />
 			</StyledForm>
 		</Formik>
+
+		</Grid>
+
 	));
 
 	public renderExpandIcon = renderWhenTrue(() => (
@@ -205,7 +221,6 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	public handleFocusName = (field, form) => {
 		if (this.props.isNew && !this.props.clone) {
 			const nameChanged = form.initialValues.name !== field.value;
-
 			form.setFieldValue('name', nameChanged ? field.value : '');
 		}
 	}

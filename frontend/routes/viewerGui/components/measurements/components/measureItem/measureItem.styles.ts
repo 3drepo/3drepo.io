@@ -112,7 +112,7 @@ export const StyledForm = styled(StyledFormComponent)`
 export const StyledTextField = styled(TextField)`
 	width: 100%;
 	overflow: hidden;
-	margin-left: ${(props) => props.left ? '66px' : '6px'};
+	margin-left: 36px !important;
 
 	input {
 		margin-right: 60px;

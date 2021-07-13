@@ -15,8 +15,32 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { hasSameElements } from './arrays';
+
 export const calculateTotalMeshes = (nodes) => {
 	return nodes && nodes.length ? nodes
 		.map((node) => node.shared_ids ? node.shared_ids.length : 0)
 		.reduce((acc, val) => acc + val, 0) : 0;
+};
+
+interface IMeshesObject {
+	shared_ids: string[];
+	account: string;
+	model: string;
+}
+
+// This function is assuming have only one element by account/model combination,
+// and that the share_ids array in each IMeshesObject is unique also
+export const hasSameSharedIds = (meshesA: IMeshesObject[], meshesB: IMeshesObject[]): boolean => {
+	if (meshesA.length !== meshesB.length) {
+		return false;
+	}
+
+	const meshesBCacheDict: any = {};
+	meshesB.forEach((meshes) => meshesBCacheDict[meshes.account + '.' + meshes.model] = meshes);
+
+	return meshesA.every((modelMeshesA) => {
+		const modelMeshesB = meshesBCacheDict[modelMeshesA.account + '.' + modelMeshesA.model];
+		return modelMeshesB && hasSameElements(modelMeshesA.shared_ids, modelMeshesB.shared_ids);
+	});
 };

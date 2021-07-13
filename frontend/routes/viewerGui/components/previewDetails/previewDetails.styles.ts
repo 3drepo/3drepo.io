@@ -32,7 +32,7 @@ import {GROUP_PANEL_NAME, GROUPS_TYPES} from '../../../../constants/groups';
 import { COLOR } from '../../../../styles';
 import { Container as MessageListContainer, FilterWrapper } from '../../../components/messagesList/messagesList.styles';
 
-const SUMMARY_HEIGHT = 70;
+const SUMMARY_HEIGHT = 78;
 
 const containerStyle = (edit: boolean, panelName: string = '', isSmartGroup: boolean) => {
 	if (panelName === GROUP_PANEL_NAME) {
@@ -114,7 +114,7 @@ export const CollapsableContent = styled.div`
 
 export const StyledForm = styled(Form)`
 	&& {
-		width: 100%;
+		width: 94%;
 		padding-right: 4px !important;
 	}
 `;
@@ -165,10 +165,16 @@ export const ToggleIcon = styled(ExpandMoreIcon)`
 
 export const Typography = styled(TypographyComponent)`
 	&& {
-		max-height: 40px;
+		max-height: 45px;
 		overflow: hidden;
 		margin-right: 24px;
 		margin-bottom: 0;
+	}
+`;
+
+export const TitleNumber = styled(Typography)`
+	&& {
+		margin-right: 3px;
 	}
 `;
 
@@ -180,7 +186,7 @@ export const MainInfoContainer = styled.div`
 `;
 
 const unexpandedStyles  = css`
-	height: calc(100% - 70px);
+	height: calc(100% - ${SUMMARY_HEIGHT}px);
 
 	${NotCollapsableContent} {
 		height: calc(100% - 40px);

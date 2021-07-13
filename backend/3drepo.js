@@ -42,12 +42,12 @@ function initAPM() {
 	apm.start({
 		// Override service name from package.json
 		// Allowed characters: a-z, A-Z, 0-9, -, _, and space
-		serviceName: config.elastic.serviceName || "",
+		serviceName: config.apm.serviceName || "",
 		// Use if APM Server requires a token
-		secretToken: config.elastic.secretToken || "",
+		secretToken: config.apm.secretToken || "",
 		// Set custom APM Server URL (default: http://localhost:8200)
-		serverUrl: config.elastic.serverUrl || "",
-		logLevel: config.elastic.logLevel || ""
+		serverUrl: config.apm.serverUrl || "",
+		logLevel: config.apm.logLevel || ""
 	});
 }
 
@@ -127,7 +127,7 @@ function handleHTTPSRedirect() {
 
 function runServer() {
 
-	if (config.elastic) {
+	if (config.apm) {
 		initAPM();
 	}
 

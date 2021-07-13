@@ -15,19 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const delay =  async (time, val) =>  new Promise((resolve) => setTimeout(() => resolve(val), time));
+import styled from 'styled-components';
+import { COLOR } from '../../../../../../styles';
 
-export const asyncTimeout = (time, func, ...args) => {
-	return new Promise(async (resolve, reject) => {
-		const result = await Promise.race([
-			delay(time, new Error('timeout')),
-			func(...args)
-		]);
-
-		if (result instanceof Error) {
-			reject(result);
-		} else {
-			resolve(result);
-		}
-	});
-};
+export const MeasuringTypeContainer = styled.div`
+	display: flex;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	color: ${COLOR.BLACK_60};
+	font-size: 14px;
+	line-height: 2.1;
+`;

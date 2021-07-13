@@ -255,6 +255,10 @@ const convertActionCommentToText = (comment: IComment) => {
 				text = 'Issue referenced in #' + comment.action.to  + ' by ' + comment.owner;
 				break;
 
+			case 'name':
+				comment.action.propertyText = 'Title';
+				text = comment.action.propertyText + ' updated by ' + comment.owner;
+				break;
 		}
 	}
 
