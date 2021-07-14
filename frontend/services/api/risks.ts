@@ -117,7 +117,7 @@ export const removeResourceFromRisk = (teamspace, modelId, riskId, resourceId ) 
  * @param names
  * @param files
  */
-// tslint:disable-next-line:max-line-length
+// eslint-disable-next-line max-len
 export const attachFileResourcesToRisk = (teamspace, modelId, riskId, names: any[], files: any[], percentageCallback ) => {
 	const headers = { headers: { 'Content-Type': 'multipart/form-data' }};
 	const formData = new FormData();

@@ -250,7 +250,6 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		const {
 			className,
 			roleColor,
-			// tslint:disable-next-line
 			number,
 			owner,
 			created,

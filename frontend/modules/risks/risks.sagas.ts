@@ -435,8 +435,6 @@ function* cloneRisk({ dialogId }) {
 
 function* setNewRisk() {
 	const currentUser = yield select(selectCurrentUser);
-
-	// tslint:disable-next-line: variable-name
 	let sequence_start = yield select(selectSelectedStartingDate);
 
 	if (sequence_start) {

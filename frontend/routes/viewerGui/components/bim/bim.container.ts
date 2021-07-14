@@ -28,11 +28,10 @@ import {
 	selectShowStarred,
 	BimActions
 } from '../../../../modules/bim';
-import { Bim } from './bim.component';
-
 import { DialogActions } from '../../../../modules/dialog';
 import { selectMetaKeys } from '../../../../modules/model';
 import { selectStarredMeta, StarredActions } from '../../../../modules/starred';
+import { Bim } from './bim.component';
 
 const mapStateToProps = createStructuredSelector({
 	metadata: selectFilteredMetadata,

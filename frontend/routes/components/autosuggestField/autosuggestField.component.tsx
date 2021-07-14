@@ -126,7 +126,7 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 	public handleKeyUp = () => {
 		const list = document.querySelector('.react-autosuggest__suggestions-list');
 		if (list) {
-			const item = list.querySelector('[aria-selected="true"]') as any;
+			const item = list.querySelector<HTMLElement>('[aria-selected="true"]') ;
 			if (item) {
 				list.scrollTo({
 					top: item.offsetTop + item.clientHeight - list.clientHeight,

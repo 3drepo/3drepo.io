@@ -20,7 +20,7 @@ import {PROJECT_ROLES_TYPES} from '../../constants/project-permissions';
 
 export const { Types: UserManagementTypes, Creators: UserManagementActions } = createActions({
 	fetchQuotaAndInvitations: [],
-	fetchQuotaAndInvitationsSuccess: [ 'invitations', 'collaboratorLimit'],
+	fetchQuotaAndInvitationsSuccess: ['invitations', 'collaboratorLimit'],
 	fetchTeamspaceUsers: [],
 	fetchTeamspaceUsersSuccess: ['users'],
 	setUsersPending: ['isPending'],
@@ -109,7 +109,7 @@ export const setProjectsPending = (state = INITIAL_STATE, { isPending }) => {
 };
 
 export const addUserSuccess = (state = INITIAL_STATE, { user, currentUser }) => {
-	return {...state, users: [ ...state.users, user ] };
+	return {...state, users: [...state.users, user] };
 };
 
 export const removeUserSuccess = (state = INITIAL_STATE, { username }) => {

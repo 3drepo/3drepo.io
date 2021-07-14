@@ -18,29 +18,26 @@ import * as Yup from 'yup';
 import { differentThan, equalTo, strength } from './customValidators';
 import { getPasswordStrength } from './customValidators';
 
+/* eslint-disable no-template-curly-in-string */
 export const VALIDATIONS_MESSAGES = {
 	REQUIRED: 'This field is required',
-	// tslint:disable-next-line: no-invalid-template-strings
 	TOO_SHORT_STRING: 'Must be at least ${min} characters',
-	// tslint:disable-next-line: no-invalid-template-strings
 	TOO_LONG_STRING: 'This field is limited to ${max} characters',
 	NOT_ALPHANUMERIC: 'Must use alphanumeric characters',
 	DECIMAL: 'Must be a decimal number or integer',
 	INTEGER: 'Must be an integer',
 	USERNAME_CHARS: 'Must use only letters, numbers or underscores',
 	NOT_NUMBER: 'Must be a number',
-	// tslint:disable-next-line: no-invalid-template-strings
 	MUST_BE_GREATER: 'Must be greater than or equal to ${min}',
-	// tslint:disable-next-line: no-invalid-template-strings
 	MUST_BE_LOWER: 'Must be lower than or equal to ${max}'
 };
+/* eslint-enable no-template-curly-in-string */
 
 Yup.addMethod(Yup.string, 'differentThan', differentThan );
 Yup.addMethod(Yup.string, 'equalTo', equalTo);
 Yup.addMethod(Yup.string, 'strength', strength );
 
 declare module 'yup' {
-	// tslint:disable-next-line:interface-name
 	interface StringSchema {
 		differentThan: (ref: any, message: any) => StringSchema;
 		equalTo: (ref: any, message: any) => StringSchema;

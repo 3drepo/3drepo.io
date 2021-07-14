@@ -86,7 +86,7 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 		const { licencesInfo: { planId }, teamspace, changeSubscription } = this.props;
 		const subscriptionData = {
 			billingAddress: { ...addressData },
-			plans: [ { plan: planId, quantity: this.state.numLicences } ]
+			plans: [{ plan: planId, quantity: this.state.numLicences }]
 		};
 
 		changeSubscription(teamspace, subscriptionData);
@@ -367,7 +367,7 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 								</ConfirmContainer>
 								<PayPalWarning>
 									Paypal payment is currently unavailable
-									please <a target="_blank" href="https://3drepo.com/contact/">contact us</a> if you
+									please <a target="_blank" href="https://3drepo.com/contact/" rel="noreferrer">contact us</a> if you
 									would like to purchase a license.
 								</PayPalWarning>
 							</PayPalInfoContainer>

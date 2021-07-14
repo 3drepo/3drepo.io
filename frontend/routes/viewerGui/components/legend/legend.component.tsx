@@ -99,7 +99,7 @@ export class Legend extends React.PureComponent<IProps, IState> {
 		</MenuList>
 	)
 
-	private renderActions = () =>    (
+	private renderActions = () => (
 		<PanelBarActions
 			menuLabel="Show groups menu"
 			menuActions={this.renderActionsMenu}

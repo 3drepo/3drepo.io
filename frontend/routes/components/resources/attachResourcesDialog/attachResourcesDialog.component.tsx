@@ -52,8 +52,7 @@ const schema = Yup.object().shape({
 				.trim()
 				.required('Name is required')
 			})
-		)
-		,
+		),
 	links: Yup.array()
 		.of(
 			Yup.object().shape({

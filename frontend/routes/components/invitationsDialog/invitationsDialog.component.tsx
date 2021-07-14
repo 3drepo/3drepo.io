@@ -1,7 +1,7 @@
 /**
- *	Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
- *	This program is free software: you can redistribute it and/or modify
+ *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
  *  published by the Free Software Foundation, either version 3 of the
  *  License, or (at your option) any later version.

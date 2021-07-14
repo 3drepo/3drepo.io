@@ -19,8 +19,6 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { Jobs } from './jobs.component';
-
 import {
 	selectJobs,
 	selectJobsColors,
@@ -28,6 +26,7 @@ import {
 	JobsActions,
 } from '../../modules/jobs';
 import { selectCurrentTeamspace } from '../../modules/userManagement';
+import { Jobs } from './jobs.component';
 
 const mapStateToProps = createStructuredSelector({
 	currentTeamspace: selectCurrentTeamspace,

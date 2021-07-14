@@ -510,7 +510,6 @@ export function* setNewIssue() {
 	const topicType =  topicTypes.length > 0 ? (topicTypes.find((t) => t === DEFAULT_PROPERTIES.TOPIC_TYPE) ?
 		DEFAULT_PROPERTIES.TOPIC_TYPE : topicTypes[0]) : undefined;
 
-	// tslint:disable-next-line: variable-name
 	let sequence_start = yield select(selectSelectedStartingDate);
 
 	if (sequence_start) {

@@ -324,7 +324,7 @@ export const transformCustomsLinksToMarkdown = ( details: IDetails, comment: ICo
 			const referenceRegExp = RegExp(viewpointReference);
 			text = text
 				.replace(referenceRegExp,
-				// tslint:disable-next-line:max-line-length
+				// eslint-disable-next-line max-len
 				`![](${INTERNAL_IMAGE_PATH_PREFIX}${teamspace}/${projectId}/${referenceType}/${ticketId}/viewpoints/${viewpointId}/screenshot.png)`);
 		});
 	}
