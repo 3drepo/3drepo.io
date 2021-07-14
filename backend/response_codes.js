@@ -180,7 +180,6 @@
 		NOT_IN_ROLE: { message: "User or role not found", status: 400 },
 		RESOURCE_NOT_FOUND: { message: "Resource not found", status: 404 },
 		MODEL_NOT_FOUND: { message: "Model not found", status: 404 },
-		CORRELATION_ID_NOT_FOUND: { message: "Correlation ID not found", status: 404 },
 		INVALID_ROLE: { message: "Invalid role name", status: 400 },
 		ALREADY_IN_ROLE: { message: "User already assigned with this role", status: 400 },
 
@@ -391,11 +390,19 @@
 		"jpg": "image/jpg"
 	};
 
+	const formatReponseLogging = (status,code,latency,contentLength,user,place) => {
+		if (config.logfile.jsonOutput) {
+			return `{"status":"${status}","code":"${code}","latency":"${latency}","contentLength":"${contentLength}","user":"${user}","place":"${place}"}`;
+		} else {
+			return `${status}\t${code}\t${latency}\t${contentLength}\t${user}\t${place}`;
+		}
+	};
+
 	const genResponseLogging = (resCode, {place, contentLength}, {session, startTime} = {}) => {
 		const user = session && session.user ? session.user.username : "unknown";
 		const currentTime = Date.now();
 		const latency = startTime ? `${currentTime - startTime}` : "???";
-		return `${resCode.status}\t${resCode.code}\t${latency}\t${contentLength}\t${user}\t${place}`;
+		return formatReponseLogging(resCode.status,resCode.code,latency,contentLength,user,place);
 	};
 
 	/**
@@ -409,7 +416,7 @@
 	 * @param {any} extraInfo
 	 * @param {any} format
 	 */
-	responseCodes.respond = function (place, req, res, next, resCode, extraInfo, format, cache, customHeaders) {
+	responseCodes.respond = function (place, req, res, next, resCode, extraInfo, format, cache) {
 
 		resCode = utils.mongoErrorToResCode(resCode);
 
@@ -450,10 +457,6 @@
 
 			if(cache) {
 				res.setHeader("Cache-Control", `private, max-age=${cache.maxAge || config.cachePolicy.maxAge}`);
-			}
-
-			if (customHeaders) {
-				res.writeHead(resCode.status, customHeaders);
 			}
 
 			if (extraInfo && Buffer.isBuffer(extraInfo)) {
