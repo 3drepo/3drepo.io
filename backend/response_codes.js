@@ -392,12 +392,12 @@
 
 	const formatReponseLogging = (status,code,latency,contentLength,user,place) => {
 		if (config.logfile.jsonOutput) {
-			const placeArr = place.split("/")
-			let teamspace 
+			const placeArr = place.split("/");
+			let teamspace;
 			if (placeArr.length > 2) {
-				teamspace = placeArr[1] 
+				teamspace = placeArr[1];
 			} else {
-				teamspace = user
+				teamspace = user;
 			}
 			return `{"status":"${status}","code":"${code}","latency":"${latency}","contentLength":"${contentLength}","user":"${user}","teamspace":"${teamspace}","place":"${place}"}`;
 		} else {
