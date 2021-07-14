@@ -399,7 +399,16 @@
 			} else {
 				teamspace = user;
 			}
-			return `{"status":"${status}","code":"${code}","latency":"${latency}","contentLength":"${contentLength}","user":"${user}","teamspace":"${teamspace}","place":"${place}"}`;
+			const outputObject = {
+				status,
+				code,
+				latency,
+				contentLength,
+				user,
+				teamspace,
+				place
+			}
+			return JSON.stringify(outputObject)
 		} else {
 			return `${status}\t${code}\t${latency}\t${contentLength}\t${user}\t${place}`;
 		}
