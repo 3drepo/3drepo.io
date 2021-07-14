@@ -44,13 +44,13 @@ export const selectActiveGroupId = createSelector(
 	selectComponentState, (state) => state.activeGroup
 );
 
-export const selectActiveGroupDetails = createSelector(
-	selectComponentState, (state) => state.newGroup
+export const selectEditingGroupDetails = createSelector(
+	selectComponentState, (state) => state.editingGroup
 );
 
-export const selectUnalteredActiveGroupDetails = createSelector(
-	selectActiveGroupId, selectGroupsMap, selectActiveGroupDetails,
-		(groupId, groupMap, defaultGroup) => groupMap[groupId] || defaultGroup
+export const selectActiveGroupDetails = createSelector(
+	selectActiveGroupId, selectGroupsMap,
+		(groupId, groupMap) => groupMap[groupId] || {}
 );
 
 export const selectFetchingDetailsIsPending = createSelector(
@@ -63,10 +63,6 @@ export const selectShowDetails = createSelector(
 
 export const selectExpandDetails = createSelector(
 	selectComponentState, (state) => state.expandDetails
-);
-
-export const selectNewGroupDetails = createSelector(
-	selectComponentState, (state) => state.newGroup
 );
 
 export const selectHighlightedGroups = createSelector(
