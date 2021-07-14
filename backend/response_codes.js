@@ -395,7 +395,7 @@
 			const placeArr = place.split("/");
 			let teamspace;
 			if (placeArr.length > 2) {
-				teamspace = placeArr[1];
+				teamspace = placeArr[2];
 			} else {
 				teamspace = user;
 			}
