@@ -18,6 +18,7 @@
 
 "use strict";
 const _ = require("lodash");
+const fs = require("fs").promises;
 const sharp = require("sharp");
 const nodeuuid = require("uuid").v1;
 const yup = require("yup");
@@ -370,6 +371,24 @@ function Utils() {
 		return point.length === 3 ? [point[0], -point[2], point[1]] : [];
 
 	};
+
+	this.emptyDir = async function(dir) {
+		await fs.rm(dir, { recursive: true, force: true });
+		return this.mkdir(dir);
+	};
+
+	this.mkdir = async (newDir) => {
+		try {
+			await fs.mkdir(newDir, { recursive: true });
+		} catch(err) {
+			if (err.code !== "EEXIST") {
+				throw err;
+			}
+		}
+	};
+
+	this.writeFile = (fileName, content) => fs.writeFile(fileName, content, { flag: "a+" });
+
 }
 
 module.exports = new Utils();
