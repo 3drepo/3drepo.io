@@ -77,6 +77,8 @@
 		try {
 			authDB = await MongoClient.connect(connString, connConfig);
 		} catch (err) {
+			console.log("catch here");
+			console.log(err);
 			if (authDB) {
 				authDB.close();
 			}

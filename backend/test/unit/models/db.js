@@ -104,6 +104,12 @@ describe("Check DB handler", function() {
 				await db.authenticate(account.toUpperCase(), password);
 				throw {}; // should've failed at previous line
 			} catch (err) {
+				console.log(err);
+				/*
+				  ok: 0,
+  code: 18,
+  codeName: 'AuthenticationFailed'
+*/
 				expect(err.code).to.equal(18);
 				expect(err.message).to.equal("Authentication failed.");
 			}
@@ -114,6 +120,7 @@ describe("Check DB handler", function() {
 				await db.authenticate(account, "badPassword");
 				throw {}; // should've failed at previous line
 			} catch (err) {
+				console.log(err);
 				expect(err.code).to.equal(18);
 				expect(err.message).to.equal("Authentication failed.");
 			}
