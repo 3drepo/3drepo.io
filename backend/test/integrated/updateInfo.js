@@ -21,7 +21,6 @@ const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp();
 const logger = require("../../logger.js");
-const systemLogger = logger.systemLogger;
 const responseCodes = require("../../response_codes.js");
 const helpers = require("../helpers/signUp");
 const async = require("async");
@@ -42,7 +41,7 @@ describe("Updating user info", function () {
 			console.log("API test server is listening on port 8080!");
 
 			helpers.signUpAndLogin({
-				server, request, agent, expect, User, systemLogger,
+				server, request, agent, expect, User,
 				username, password, email,
 				done: function(err, _agent) {
 					agent = _agent;

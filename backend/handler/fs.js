@@ -20,7 +20,6 @@ const fs = require("fs");
 const path = require("path");
 const ResponseCodes = require("../response_codes");
 const systemLogger = require("../logger").systemLogger;
-const nodeuuid = require("uuid/v1");
 const farmhash = require("farmhash");
 const utils = require("../utils");
 
@@ -72,7 +71,7 @@ class FSHandler {
 	}
 
 	storeFile(data) {
-		const _id = nodeuuid();
+		const _id = utils.generateUUID({string: true});
 		const folderNames = generateFoldernames(_id, config.fs.levels);
 		const link = path.posix.join(folderNames, _id);
 

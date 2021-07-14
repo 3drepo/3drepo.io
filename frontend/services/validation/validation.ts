@@ -83,6 +83,19 @@ export const schema = {
 		.matches(/^[a-zA-Z][\w]{1,63}$/, VALIDATIONS_MESSAGES.USERNAME_CHARS)
 		.required(VALIDATIONS_MESSAGES.REQUIRED),
 
+	jobTitle: Yup.string()
+		.max(50, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
+		.required(VALIDATIONS_MESSAGES.REQUIRED),
+
+	phoneNumber: Yup.string()
+		.max(20, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
+
+	industry: Yup.string()
+		.required(VALIDATIONS_MESSAGES.REQUIRED),
+
+	howDIdYouFindUs: Yup.string()
+		.required(VALIDATIONS_MESSAGES.REQUIRED),
+
 	required: Yup.string()
 		.required(VALIDATIONS_MESSAGES.REQUIRED),
 
