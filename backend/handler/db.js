@@ -27,15 +27,55 @@
 		autoReconnect: true
 	};
 
+	function getGridFSBucket(database, collection, chunksize = null) {
+		return Handler.getDB(database).then(dbConn => {
+			const options = {bucketName: collection};
+			if (chunksize) {
+				options.chunksize =  chunksize;
+			}
+
+			return new GridFSBucket(dbConn, options);
+		}).catch(err => {
+			Handler.disconnect();
+			return Promise.reject(err);
+		});
+	}
+
+	function getHostPorts() {
+		const hostPorts = [];
+
+		for (const host in config.db.host) {
+			hostPorts.push(`${config.db.host[host]}:${config.db.port[host]}`);
+		}
+
+		return hostPorts.join(",");
+	}
+
+	function getURL(database) {
+		// Generate connection string that could include multiple hosts that
+		// represent a replica set.
+		let connectString = `mongodb://${config.db.username}:${config.db.password}@${getHostPorts()}/${database}?authSource=admin`;
+
+		connectString += config.db.replicaSet ? "&replicaSet=" + config.db.replicaSet : "";
+
+		if (Number.isInteger(config.db.timeout)) {
+			connectString += "&socketTimeoutMS=" + config.db.timeout;
+		}
+
+		return connectString;
+	}
+
 	const Handler = {};
 
 	let db;
 
 	Handler.authenticate = async function (database, password) {
-		const authDB = await Handler.getAuthDB();
+		const connString = `mongodb://${database}:${password}@${getHostPorts()}/`;
+
+		let authDB;
 
 		try {
-			await authDB.authenticate(database, password);
+			authDB = await MongoClient.connect(connString, connConfig);
 		} catch (err) {
 			if (authDB) {
 				authDB.close();
@@ -105,27 +145,6 @@
 		return findResult.value;
 	};
 
-	function getURL(database) {
-		// Generate connection string that could include multiple hosts that
-		// represent a replica set.
-		let connectString = "mongodb://" + config.db.username + ":" + config.db.password + "@";
-		const hostPorts = [];
-
-		for(const host in config.db.host) {
-			hostPorts.push(config.db.host[host] + ":" + config.db.port[host]);
-		}
-
-		connectString += hostPorts.join(",");
-		connectString += "/" + database + "?authSource=admin";
-		connectString += config.db.replicaSet ? "&replicaSet=" + config.db.replicaSet : "";
-
-		if(Number.isInteger(config.db.timeout)) {
-			connectString += "&socketTimeoutMS=" + config.db.timeout;
-		}
-
-		return connectString;
-	}
-
 	Handler.getDB = function (database) {
 		if(db) {
 			return Promise.resolve(db.db(database));
@@ -160,20 +179,6 @@
 			return Promise.reject(err);
 		});
 	};
-
-	function getGridFSBucket(database, collection, chunksize = null) {
-		return Handler.getDB(database).then(dbConn => {
-			const options = {bucketName: collection};
-			if (chunksize) {
-				options.chunksize =  chunksize;
-			}
-
-			return new GridFSBucket(dbConn, options);
-		}).catch(err => {
-			Handler.disconnect();
-			return Promise.reject(err);
-		});
-	}
 
 	Handler.getFileStreamFromGridFS = function (database, collection, filename) {
 		return getGridFSBucket(database,collection).then((bucket) => {
