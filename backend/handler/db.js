@@ -77,8 +77,6 @@
 		try {
 			authDB = await MongoClient.connect(connString, connConfig);
 		} catch (err) {
-			console.log("catch here");
-			console.log(err);
 			if (authDB) {
 				authDB.close();
 			}
@@ -123,11 +121,13 @@
 		const collection = await Handler.getCollection(database, colName);
 		// NOTE: documentation states it should be { projection, sort } so when we upgrade we may have to change.
 		//       Also: projection stops working if you pass in a sort with empty obj.
-		if(sort) {
-			projection.sort = sort;
+		const options = { projection };
+
+		if (sort) {
+			options.sort = sort;
 		}
 
-		return collection.findOne(query, projection);
+		return collection.findOne(query, options);
 	};
 
 	Handler.findOneAndDelete = async function (database, colName, query, projection = {}) {
@@ -148,19 +148,19 @@
 	};
 
 	Handler.getDB = function (database) {
-		if(db) {
+		if (db) {
 			return Promise.resolve(db.db(database));
 		} else {
 			return MongoClient.connect(getURL(database), connConfig).then(_db => {
 				db = _db;
-				return db;
+				return db.db(database);
 			});
 		}
 	};
 
 	Handler.getAuthDB = function () {
 		return MongoClient.connect(getURL("admin"), connConfig).then(_db => {
-			return _db;
+			return _db.db("admin");
 		});
 	};
 
