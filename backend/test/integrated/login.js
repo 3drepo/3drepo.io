@@ -136,8 +136,6 @@ describe("Login", function () {
 			.post("/login")
 			.send({ username, password: password + "123" })
 			.expect(400, function(err, res) {
-				console.log(err);
-				console.log(res.body);
 				expect(res.body.value).to.equal(responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value);
 				done(err);
 			});
@@ -289,6 +287,15 @@ describe("Login", function () {
 		it("few incorrect login attempts should not lock account", async function() {
 			const attempts = 3;
 
+			console.log(attempts);
+			await request(server)
+				.post("/login")
+				.send({ username, password: "wrongPassword" })
+				.expect(400, function(err, res) {
+					console.log(err);
+					console.log(res.body);
+				});
+			/*
 			for (let i = 0; i < attempts; i++) {
 				await request(server)
 					.post("/login")
@@ -298,6 +305,7 @@ describe("Login", function () {
 						console.log(res.body);
 					});
 			}
+			*/
 
 			const {body} = await request(server)
 				.post("/login")
