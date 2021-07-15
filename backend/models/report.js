@@ -190,7 +190,7 @@ class ReportGenerator {
 						if(!comment.action.propertyText) {
 							comment.action.propertyText = this.getPropertyLabel(comment.action.property);
 						}
-						if(comment.action.property === "position") {
+						if(comment.action.property === "position" || comment.action.property === "viewpoint" || comment.action.property === "screenshot") {
 							comment.action.to = comment.action.from = "";
 						} else if(!comment.action.to || comment.action.to === "") {
 							comment.action.to = "(empty)";
