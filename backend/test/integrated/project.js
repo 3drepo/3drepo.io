@@ -668,18 +668,12 @@ describe("Projects", function () {
 			callback => {
 				agent.delete(`/${username}/projects/${project.name}`)
 					.expect(200, function(err, res) {
-						console.log("1");
-						console.log(err);
-						console.log(res.body);
 						callback(err);
 					});
 			},
 			callback => {
 				agent.get(`/${username}.json`)
 					.expect(200, function(err, res) {
-						console.log("2");
-						console.log(err);
-						console.log(res.body);
 						const account = res.body.accounts.find(account => account.account === username);
 						expect(account).to.exist;
 

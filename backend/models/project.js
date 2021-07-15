@@ -364,7 +364,7 @@
 	};
 
 	Project.removeProjectModel = async function(teamspace, model) {
-		return db.update(teamspace, PROJECTS_COLLECTION_NAME, { models: model }, { "$pull" : { "models": model}}, {"multi": true});
+		return db.update(teamspace, PROJECTS_COLLECTION_NAME, { models: model }, { "$pull" : { "models": model}});
 	};
 
 	Project.removeUserFromProjects = async function(teamspace, userToRemove) {

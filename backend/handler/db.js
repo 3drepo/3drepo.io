@@ -277,7 +277,7 @@
 	Handler.update = async function (database, colName, query, data, upsert = false) {
 		const collection = await Handler.getCollection(database, colName);
 		const options = upsert ? { upsert } : undefined;
-		return collection.update(query, data, options);
+		return collection.updateMany(query, data, options);
 	};
 
 	Handler.updateOne = async function (database, colName, query, data, upsert = false) {
