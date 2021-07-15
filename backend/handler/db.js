@@ -131,11 +131,6 @@
 	};
 
 	Handler.findOneAndDelete = async function (database, colName, query, projection = {}) {
-		console.log("=========== findOneAndDelete =========");
-		console.log(database);
-		console.log(colName);
-		console.log(query);
-		console.log(projection);
 		const collection = await Handler.getCollection(database, colName);
 		const findResult = await collection.findOneAndDelete(query, projection);
 		return findResult.value;
@@ -275,6 +270,12 @@
 	};
 
 	Handler.update = async function (database, colName, query, data, upsert = false) {
+		const collection = await Handler.getCollection(database, colName);
+		const options = upsert ? { upsert } : undefined;
+		return collection.update(query, data, options);
+	};
+
+	Handler.updateMany = async function (database, colName, query, data, upsert = false) {
 		const collection = await Handler.getCollection(database, colName);
 		const options = upsert ? { upsert } : undefined;
 		return collection.updateMany(query, data, options);
