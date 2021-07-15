@@ -121,7 +121,6 @@ describe("Check DB handler", function() {
 	describe("getDB", function () {
 		it("get DB should succeed", async function() {
 			const database = await db.getDB(account);
-			console.log(database);
 			expect(database).to.exist;
 			const coll = await database.collection("jobs");
 			expect(coll).to.exist;

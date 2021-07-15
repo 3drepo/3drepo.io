@@ -136,10 +136,10 @@ describe("Login", function () {
 			.post("/login")
 			.send({ username, password: password + "123" })
 			.expect(400, function(err, res) {
-
+				console.log(err);
+				console.log(res.body);
 				expect(res.body.value).to.equal(responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value);
 				done(err);
-
 			});
 	});
 
@@ -293,7 +293,10 @@ describe("Login", function () {
 				await request(server)
 					.post("/login")
 					.send({ username, password: "wrongPassword" })
-					.expect(400);
+					.expect(400, function(err, res) {
+						console.log(err);
+						console.log(res.body);
+					});
 			}
 
 			const {body} = await request(server)
@@ -310,7 +313,10 @@ describe("Login", function () {
 				const {body} = await request(server)
 					.post("/login")
 					.send({ username, password: "wrongPassword" })
-					.expect(400);
+					.expect(400, function(err, res) {
+						console.log(err);
+						console.log(res.body);
+					});
 
 				expect(body.value).to.equal(responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value);
 
@@ -332,7 +338,10 @@ describe("Login", function () {
 				await request(server)
 					.post("/login")
 					.send({ username, password: "wrongPassword" })
-					.expect(400);
+					.expect(400, function(err, res) {
+						console.log(err);
+						console.log(res.body);
+					});
 			}
 
 			const {body} = await request(server)
