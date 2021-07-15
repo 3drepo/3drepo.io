@@ -81,7 +81,7 @@
 				authDB.close();
 			}
 
-			throw err;
+			throw responseCodes.INCORRECT_USERNAME_OR_PASSWORD;
 		}
 
 		authDB.close();
