@@ -181,6 +181,7 @@
 		NOT_IN_ROLE: { message: "User or role not found", status: 400 },
 		RESOURCE_NOT_FOUND: { message: "Resource not found", status: 404 },
 		MODEL_NOT_FOUND: { message: "Model not found", status: 404 },
+		CORRELATION_ID_NOT_FOUND: { message: "Correlation ID not found", status: 404 },
 		INVALID_ROLE: { message: "Invalid role name", status: 400 },
 		ALREADY_IN_ROLE: { message: "User already assigned with this role", status: 400 },
 
