@@ -2,6 +2,7 @@ matrix:
   include:
     #linter test
     - language: node_js
+      dist: focal
       name: Linter check
       git:
       submodules: false
@@ -18,6 +19,7 @@ matrix:
         - yarn build:test
     # tests
     - language: node_js
+      dist: focal
       name: Backend tests
       git:
       submodules: false
