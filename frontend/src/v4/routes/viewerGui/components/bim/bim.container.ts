@@ -53,4 +53,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showConfirmDialog: DialogActions.showConfirmDialog,
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(Bim);
+export default connect(mapStateToProps, mapDispatchToProps)(Bim as any);

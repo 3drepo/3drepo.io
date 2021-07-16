@@ -33,4 +33,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	hide: DialogActions.hideDialog
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(DialogContainer);
+export default connect(mapStateToProps, mapDispatchToProps)(DialogContainer as any);

@@ -24,12 +24,12 @@ import { UserIndicator } from './userMarker.styles';
 
 interface IProps {
 	name: string;
-	children?: React.ReactNode;
+	children?: JSX.Element;
 	currentUser: IUser;
 	urlParams: { teamspace: string };
 }
 
-export const UserMarker = ({ name, children, currentUser, urlParams }: IProps) => {
+export const UserMarker = ({ name, children, currentUser, urlParams }: IProps): JSX.Element => {
 	const teamspace = urlParams ? urlParams.teamspace : '';
 	const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
 	const open = Boolean(anchorEl);

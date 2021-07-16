@@ -30,4 +30,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	onPermissionsChange: UserManagementActions.updateProjectPermissions
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(ProjectsPermissions);
+export default connect(mapStateToProps, mapDispatchToProps)(ProjectsPermissions as any);

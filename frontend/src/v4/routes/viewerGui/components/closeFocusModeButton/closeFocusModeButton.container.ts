@@ -30,4 +30,6 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setIsFocusMode: ViewerGuiActions.setIsFocusMode
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(CloseFocusModeButton);
+type CloseFocusModeButtonType = ({isFocusMode}) => JSX.Element;
+
+export default connect(mapStateToProps, mapDispatchToProps)(CloseFocusModeButton) as CloseFocusModeButtonType;

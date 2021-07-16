@@ -29,4 +29,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showSnackbar: SnackbarActions.show,
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(TextField);
+export default connect(mapStateToProps, mapDispatchToProps)(TextField as any);

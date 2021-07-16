@@ -30,7 +30,7 @@ export function* fetchUser({ username }) {
 		yield put(CurrentUserActions.setPendingState(true));
 		yield put(CurrentUserActions.setAvatarPendingState(true));
 
-		const { data } = yield call(API.fetchProfile, [username]);
+		const { data } = yield API.fetchProfile();
 		const avatarUrl = data.hasAvatar ? API.getAvatarUrl(username) : '';
 
 		yield all([

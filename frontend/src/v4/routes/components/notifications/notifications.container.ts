@@ -55,4 +55,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setDrawerPanelState: NotificationsActions.setDrawerPanelState
 }, dispatch);
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Notifications));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Notifications as any));

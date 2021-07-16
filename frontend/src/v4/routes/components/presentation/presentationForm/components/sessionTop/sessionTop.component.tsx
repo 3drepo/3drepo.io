@@ -27,11 +27,11 @@ import { CopyButton, FieldContainer, Paragraph, StyledDivider, StyledTextfield }
 interface IProps {
 	sessionCode: string;
 	presentationUrl: string;
-	stopPresenting: () => void;
+	stopPresenting?: () => void;
 	showSnackbar: (text: string) => void;
 }
 
-export const SessionTop: React.FC<IProps> = ({ sessionCode, showSnackbar, presentationUrl }) => {
+export const SessionTop = ({ sessionCode, showSnackbar, presentationUrl }: IProps): JSX.Element => {
 	const handleCopyButtonClick = React.useCallback(() => {
 		copy(sessionCode);
 		showSnackbar('Invitation code copied to the clipboard');

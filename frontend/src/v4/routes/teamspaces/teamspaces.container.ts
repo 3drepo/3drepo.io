@@ -80,4 +80,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	unsubscribeFromChanges: TeamspacesActions.unsubscribeFromChanges
 }, dispatch);
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Teamspaces));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Teamspaces as any));

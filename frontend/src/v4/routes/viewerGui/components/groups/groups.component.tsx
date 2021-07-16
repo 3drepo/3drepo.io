@@ -226,7 +226,6 @@ export class Groups extends React.PureComponent<IProps, IState> {
 			teamspace={this.props.teamspace}
 			model={this.props.model}
 			revision={this.props.revision}
-			saveGroup={this.props.saveGroup}
 			resetToSavedSelection={this.handleResetToSavedSelection}
 			canUpdate={this.canAddOrUpdate}
 			deleteGroup={this.handleGroupDelete}

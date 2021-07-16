@@ -68,14 +68,14 @@ interface IProps {
 	resetCardData: () => void;
 }
 
-export const TicketReference = ({ id, text, issuesMap, risksMap, urlParams, ...props }: IProps) => {
+export const TicketReference = ({ id, text, issuesMap, risksMap, urlParams, ...props }: IProps): JSX.Element => {
 	const [anchorEl, setAnchorEl] = React.useState<PopoverType | null>(null);
 	const ticketData = issuesMap[id] ? issuesMap[id] : risksMap[id];
 	const { teamspace, type } = urlParams;
 	const isBoardView = Boolean(type);
 
 	if (!ticketData) {
-		return text;
+		return <>text</>;
 	}
 
 	const { _id: ticketId, model, number: ticketNumber, name, desc, statusColor, StatusIconComponent } = ticketData;

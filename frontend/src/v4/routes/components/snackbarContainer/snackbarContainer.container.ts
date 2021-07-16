@@ -31,4 +31,4 @@ const mapStateToProps = createStructuredSelector({
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(SnackbarContainer);
+export default connect(mapStateToProps, mapDispatchToProps)(SnackbarContainer as any);

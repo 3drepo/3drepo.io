@@ -14,8 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { delay } from 'redux-saga';
-import { all, call, put, select, take, takeLatest } from 'redux-saga/effects';
+import { all, call, put, select, take, takeLatest, delay } from 'redux-saga/effects';
 
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import * as API from '../../services/api';

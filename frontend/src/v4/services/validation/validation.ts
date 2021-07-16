@@ -37,14 +37,6 @@ Yup.addMethod(Yup.string, 'differentThan', differentThan );
 Yup.addMethod(Yup.string, 'equalTo', equalTo);
 Yup.addMethod(Yup.string, 'strength', strength );
 
-declare module 'yup' {
-	interface StringSchema {
-		differentThan: (ref: any, message: any) => StringSchema;
-		equalTo: (ref: any, message: any) => StringSchema;
-		strength: (requiredValue: any, message: any) => StringSchema;
-	}
-}
-
 /*
 	Validation schemas
 */
