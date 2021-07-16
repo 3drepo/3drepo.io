@@ -171,7 +171,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			<>
 				<ToggleButtonContainer onClick={this.handleToggle}>
 					<ToggleButton>
-						{this.renderExpandIcon(!this.props.editable)}
+						{this.renderExpandIcon(!this.props.isNew)}
 					</ToggleButton>
 				</ToggleButtonContainer>
 				<NotCollapsableContent>
@@ -182,13 +182,13 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	}
 
 	public componentDidMount() {
-		const { editable, defaultExpanded, isNew } = this.props;
+		const { defaultExpanded, isNew } = this.props;
 		if (isNew && this.textFieldRef.current) {
 			this.textFieldRef.current.select();
 		}
 
 		this.setState({
-			expanded: editable || defaultExpanded
+			expanded: isNew || defaultExpanded
 		});
 	}
 
