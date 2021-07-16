@@ -48,7 +48,7 @@
     "moment-timezone": "0.5.23",
     "mongodb": "2.2.21",
     "multer": "1.4.1",
-    "nodemailer": "5.1.1",
+    "nodemailer": "6.6.3",
     "paypal-rest-sdk": "1.8.1",
 	"pug": "3.0.2",
     "serialize-javascript": "4.0.0",
