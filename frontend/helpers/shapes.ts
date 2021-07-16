@@ -51,6 +51,7 @@ export const getTicketsShapes =
 	const shapes =  tickets.reduce((accumShapes, ticket) => {
 		if (shouldDisplayShapes(ticket, selectedSequence, sequenceStartDate, sequenceEndDate)
 			|| (ticket._id === activeTicket._id  && showDetails)) {
+			// eslint-disable-next-line prefer-spread
 			accumShapes.push.apply(accumShapes, ticket.shapes);
 		}
 
@@ -59,6 +60,7 @@ export const getTicketsShapes =
 
 	// If it is a new ticket is not in the ticket list , so I have to add it manually
 	if (!activeTicket._id && showDetails) {
+		// eslint-disable-next-line prefer-spread
 		shapes.push.apply(shapes, activeTicket.shapes || []);
 	}
 

@@ -29,8 +29,7 @@ function* login({ username, password }) {
 	yield put(AuthActions.setPendingStatus(true));
 
 	try {
-		// tslint:disable-next-line:no-shadowed-variable
-		const {data} = yield API.login(username, password);
+		const { data } = yield API.login(username, password);
 		const flags = data.flags;
 		username = data.username;
 

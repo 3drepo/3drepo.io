@@ -17,7 +17,6 @@
 
 import React from 'react';
 
-// @ts-ignore
 import DEFAULT_LOGO from '../../../images/3drepo-logo-white.png';
 import { clientConfigService } from '../../../services/clientConfig';
 import { Image } from './logo.styles';

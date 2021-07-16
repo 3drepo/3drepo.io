@@ -1,4 +1,3 @@
-
 /**
  *  Copyright (C) 2018 3D Repo Ltd
  *
@@ -15,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 import { Tooltip } from '@material-ui/core';
 import Avatar from '@material-ui/core/Avatar';
 import Place from '@material-ui/icons/Place';

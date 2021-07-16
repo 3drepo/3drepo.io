@@ -262,7 +262,7 @@ function* createGroup({ teamspace, modelId, revision }) {
 			createdAt: timestamp,
 			updatedAt: timestamp,
 			updatedBy: currentUser.username
-		} as any;
+		};
 
 		if (group.objects && objectsStatus.highlightedNodes && objectsStatus.highlightedNodes.length) {
 			group.totalSavedMeshes = calculateTotalMeshes(objectsStatus.highlightedNodes);
@@ -294,7 +294,7 @@ function* updateGroup({ teamspace, modelId, revision, groupId }) {
 
 		const groupToSave = {
 			...normalizeGroup(groupDetails)
-		} as any;
+		};
 
 		const isNormalGroup = groupDetails.type === GROUPS_TYPES.NORMAL;
 		const objectsStatus = yield Viewer.getObjectsStatus();

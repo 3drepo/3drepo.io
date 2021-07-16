@@ -31,11 +31,10 @@ import {
 	selectUserNotExists,
 	UserManagementActions
 } from '../../modules/userManagement';
-import { Users } from './users.component';
-
 import { DialogActions } from '../../modules/dialog';
 import { selectJobs } from '../../modules/jobs';
 import { selectModels, selectProjects, TeamspacesActions } from '../../modules/teamspaces';
+import { Users } from './users.component';
 
 const mapStateToProps = createStructuredSelector({
 	usersSuggestions: selectUsersSuggestions,

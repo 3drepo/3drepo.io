@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  *  Copyright (C) 2020 3D Repo Ltd
  *

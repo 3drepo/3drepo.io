@@ -114,7 +114,7 @@ export const Shape = ({ element, isSelected, handleChange }: IProps) => {
 
 	const handleTransformerMouseOver = (e) => {
 		if (e.target.attrs.name === 'rotater _anchor') {
-			const konvaContent = document.querySelector('.konvajs-content') as any;
+			const konvaContent = document.querySelector<HTMLElement>('.konvajs-content');
 			konvaContent.style.cursor = 'url("/images/rotate-cursor.png"), auto';
 		}
 	};

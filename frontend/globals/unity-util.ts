@@ -1,21 +1,24 @@
-/*
-* Copyright (C) 2017 3D Repo Ltd
-*
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU Affero General Public License as
-* published by the Free Software Foundation, either version 3 of the
-* License, or (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU Affero General Public License for more details.
-*
-* You should have received a copy of the GNU Affero General Public License
-* along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+/**
+ *  Copyright (C) 2017 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* eslint-disable no-var */
 declare var SendMessage;
 declare var createUnityInstance;
+/* eslint-enable no-var */
 
 import { IS_FIREFOX } from '../helpers/browser';
 
@@ -133,7 +136,6 @@ export class UnityUtil {
 		let domainURL = host;
 		if (Object.prototype.toString.call(canvas) === '[object String]') {
 			// The user is calling it like Unity 2019. Convert it to a dom an create a canvas
-			// tslint:disable-next-line
 			console.warn('[DEPRECATED WARNING] loadUnity() no longer takes in a string and a URL to the unity config. Please check the API documentation and update your function.');
 			const divDom = document.getElementById(canvas);
 			canvasDom = document.createElement('canvas');
@@ -160,6 +162,7 @@ export class UnityUtil {
 			// as of Unity 2019.1
 			(XMLHttpRequest.prototype as any).originalOpen = XMLHttpRequest.prototype.open;
 			const newOpen = function(_, url) {
+				// eslint-disable-next-line
 				const original = this.originalOpen.apply(this, arguments);
 				this.withCredentials = true;
 				return original;
@@ -407,7 +410,7 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static loaded(bboxStr) {
-		// tslint:disable-next-line
+		// eslint-disable-next-line no-console
 		console.log(`[${new Date()}]Loading model done. `);
 		const res = {
 			bbox: JSON.parse(bboxStr)
@@ -1066,7 +1069,7 @@ export class UnityUtil {
 	public static highlightObjects(
 		account: string,
 		model: string,
-		idArr: [string],
+		idArr: string[],
 		color: [number],
 		toggleMode: boolean,
 		forceReHighlight: boolean
@@ -1092,7 +1095,7 @@ export class UnityUtil {
 	 * @param model - name of model
 	 * @param idArr - array of unique IDs associated with the objects to highlight
 	 */
-	public static unhighlightObjects(account: string, model: string, idArr: [string]) {
+	public static unhighlightObjects(account: string, model: string, idArr: string[]) {
 		UnityUtil.multipleCallInChunks(idArr.length, (start, end) => {
 			const arr = idArr.slice(start, end);
 			const params: any = {
@@ -1150,7 +1153,7 @@ export class UnityUtil {
 			params.initView = initView;
 		}
 		UnityUtil.onLoaded();
-		// tslint:disable-next-line
+		// eslint-disable-next-line no-console
 		console.log(`[${new Date()}]Loading model: `, params);
 		UnityUtil.toUnity('LoadModel', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(params));
 

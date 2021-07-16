@@ -24,7 +24,7 @@ import ArrowBack from '@material-ui/icons/ArrowBack';
 import ActivitiesIcon from '@material-ui/icons/Movie';
 import { isEqual } from 'lodash';
 
-import { renderWhenTrue } from '../../../../helpers/rendering';
+import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../../helpers/rendering';
 import { IActivitiesComponentState } from '../../../../modules/activities/activities.redux';
 import { EmptyStateInfo } from '../../../components/components.styles';
 import { PanelBarActions } from '../panelBarActions';
@@ -107,7 +107,7 @@ export class Activities extends React.PureComponent<IProps, IState> {
 
 	private handleItemClick = (task) => this.props.fetchDetails(task.id);
 
-	private renderActions = renderWhenTrue(() => (
+	private renderActions = () => renderWhenTrue(() => (
 		<PanelBarActions
 			hideLock
 			hideMenu
@@ -115,7 +115,7 @@ export class Activities extends React.PureComponent<IProps, IState> {
 			onSearchOpen={this.handleOpenSearchMode}
 			onSearchClose={this.handleCloseSearchMode}
 		/>
-	));
+	))(!this.props.showDetails);
 
 	private debounceSearchQueryChange = debounce((searchQuery) => {
 		this.props.setComponentState({ searchQuery });
@@ -162,7 +162,7 @@ export class Activities extends React.PureComponent<IProps, IState> {
 			<ViewerPanel
 				title="Activities"
 				Icon={this.renderTitleIcon()}
-				renderActions={() => this.renderActions(!showDetails)}
+				renderActions={() => this.renderActions()}
 				pending={isPending && !showDetails}
 			>
 				{this.renderSearch(searchEnabled && !showDetails)}

@@ -16,14 +16,14 @@
  */
 
 import styled from 'styled-components';
-import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 
+import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { COLOR, FONT_WEIGHT } from '../../../../styles';
 
-// tslint:disable-next-line:no-var-requires
+/* eslint-disable @typescript-eslint/no-var-requires */
 const OrthogonalIconSVG = require('../../../../icons/orthogonal.svg');
-// tslint:disable-next-line:no-var-requires
 const PerspectiveIconSVG = require('../../../../icons/perspective.svg');
+/* eslint-enable @typescript-eslint/no-var-requires */
 
 export const Container = styled.div`
 	background-color: ${COLOR.REGENT_GRAY};

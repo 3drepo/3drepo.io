@@ -1,19 +1,19 @@
 /**
- **  Copyright (C) 2020 3D Repo Ltd
- **
- **  This program is free software= you can redistribute it and/or modify
- **  it under the terms of the GNU Affero General Public License as
- **  published by the Free Software Foundation, either version 3 of the
- **  License, or (at your option) any later version.
- **
- **  This program is distributed in the hope that it will be useful,
- **  but WITHOUT ANY WARRANTY; without even the implied warranty of
- **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- **  GNU Affero General Public License for more details.
- **
- **  You should have received a copy of the GNU Affero General Public License
- **  along with this program.  If not, see <http=//www.gnu.org/licenses/>.
- **/
+ *  Copyright (C) 2020 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import EventEmitter from 'eventemitter3';
 import React from 'react';
@@ -563,7 +563,7 @@ export class ViewerService {
 				if (ids) {
 					const uniqueIds = Array.from(new Set(ids));
 					if (uniqueIds.length) {
-						// @ts-ignore
+						// eslint-disable-next-line @typescript-eslint/await-thenable
 						await UnityUtil.highlightObjects(account, model, uniqueIds, colour, multi, forceReHighlight);
 						this.emit(VIEWER_EVENTS.HIGHLIGHT_OBJECTS, {account, model, uniqueIds });
 						return;
@@ -579,11 +579,10 @@ export class ViewerService {
 		this.emit(VIEWER_EVENTS.CLEAR_HIGHLIGHT_OBJECTS, {});
 	}
 
-	public unhighlightObjects(account, model, ids) {
+	public unhighlightObjects(account, model, ids: string[]) {
 		if (ids) {
 			const uniqueIds = Array.from(new Set(ids));
 			if (uniqueIds.length) {
-				// @ts-ignore
 				UnityUtil.unhighlightObjects(account, model, uniqueIds);
 				this.emit(VIEWER_EVENTS.UNHIGHLIGHT_OBJECTS, {account, model, uniqueIds });
 				return;
@@ -868,22 +867,30 @@ export class ViewerService {
 	}
 
 	public setMaxShadowDistance(value: number) {
-		if (value === undefined) { return; }
+		if (value === undefined) {
+ 			return;
+		}
 		UnityUtil.setMaxShadowDistance(value);
 	}
 
 	public setNumCacheThreads(value: number) {
-		if (value === undefined) { return; }
+		if (value === undefined) {
+ 			return;
+		}
 		UnityUtil.setNumCacheThreads(value);
 	}
 
 	public setNearPlane = (nearplane: number) => {
-		if (nearplane === undefined) { return; }
+		if (nearplane === undefined) {
+ 			return;
+		}
 		UnityUtil.setDefaultNearPlane(nearplane);
 	}
 
 	public setFarPlaneSamplingPoints = (farplaneSample: number) => {
-		if (farplaneSample === undefined) { return; }
+		if (farplaneSample === undefined) {
+ 			return;
+		}
 		UnityUtil.setFarPlaneSampleSize(farplaneSample);
 	}
 
@@ -895,12 +902,16 @@ export class ViewerService {
 	}
 
 	public setPlaneBorderWidth = (width: number) => {
-		if (width === undefined) { return; }
+		if (width === undefined) {
+ 			return;
+		}
 		UnityUtil.setPlaneBorderWidth(width);
 	}
 
 	public setPlaneBorderColor = (color: number[]) => {
-		if (color === undefined) { return; }
+		if (color === undefined) {
+ 			return;
+		}
 		UnityUtil.setPlaneBorderColor(color);
 	}
 

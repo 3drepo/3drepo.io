@@ -25,20 +25,19 @@ import { Field, Form, Formik } from 'formik';
 import { differenceBy, includes, isEmpty, values } from 'lodash';
 import React from 'react';
 import * as Yup from 'yup';
+
+import { clientConfigService } from '../../../../services/clientConfig';
+import { schema } from '../../../../services/validation';
+import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
+import { LoadingDialog } from '../../../components/dialogContainer/components';
+import { getTeamspacesList, getTeamspaceProjects } from '../../../../helpers/model';
+import { SubModelsField } from './components/subModelsField/subModelsField.component';
 import {
 	getAvailableModels,
 	getFederatedModels,
 	getModelsMap,
 	getNewSelectedModels,
 } from './federationDialog.helpers';
-
-import { clientConfigService } from '../../../../services/clientConfig';
-import { schema } from '../../../../services/validation';
-import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
-import { LoadingDialog } from '../../../components/dialogContainer/components';
-import { SubModelsField } from './components/subModelsField/subModelsField.component';
-
-import { getTeamspacesList, getTeamspaceProjects } from '../../../../helpers/model';
 import { FieldWrapper, Row, SelectWrapper, StyledDialogContent } from './federationDialog.styles';
 
 const FederationSchema = Yup.object().shape({

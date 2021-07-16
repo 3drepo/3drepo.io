@@ -436,16 +436,14 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 			content: `
 				Would you like to update the viewpoint to your current position?
 			`,
-			onConfirm: async () => {
-				await this.handleViewpointUpdate(viewpoint);
-			},
-			onCancel: () => updateRisk({ viewpoint }),
+			onConfirm: () => this.handleViewpointUpdate(viewpoint),
+			onCancel: () => updateRisk({ viewpoint })
 		});
 	}
 
 	public handleViewpointUpdate = (viewpoint?) => {
 		const { updateViewpoint } = this.props;
-		updateViewpoint(viewpoint?.screenshot);
+		return updateViewpoint(viewpoint?.screenshot);
 	}
 
 	public onUpdateRiskViewpoint = () => {
@@ -457,7 +455,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 			onConfirm: () => {
 				this.handleTakeScreenshot(true, true);
 			},
-			onCancel: async () => await this.handleViewpointUpdate()
+			onCancel: () => this.handleViewpointUpdate()
 		});
 	}
 
