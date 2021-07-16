@@ -408,8 +408,8 @@
 				user,
 				teamspace,
 				place
-			}
-			return JSON.stringify(outputObject)
+			};
+			return JSON.stringify(outputObject);
 		} else {
 			return `${status}\t${code}\t${latency}\t${contentLength}\t${user}\t${place}`;
 		}

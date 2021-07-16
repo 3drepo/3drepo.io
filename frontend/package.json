@@ -24,7 +24,7 @@
 		"lint:ts": "eslint . --quiet --rulesdir eslint-rules/",
 		"lint:css": "stylelint ./**/*.styles.ts",
 		"lint": "yarn lint:ts && yarn lint:css",
-		"lint:fix": "yarn lint:ts --fix",
+		"lint:fix": "yarn lint:ts --fix  --rulesdir eslint-rules/",
 		"docs": "typedoc --out ./docs ./globals --options ./internals/typedoc.js --logger none"
 	},
 	"keywords": [
