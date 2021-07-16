@@ -146,7 +146,6 @@ User.getTeamspaceSpaceUsed = async function (dbName) {
 };
 
 User.authenticate =  async function (username, password) {
-	console.log("User.authenticate");
 	if (!username || !password) {
 		throw({ resCode: responseCodes.INCORRECT_USERNAME_OR_PASSWORD });
 	}
@@ -171,21 +170,14 @@ User.authenticate =  async function (username, password) {
 		await db.authenticate(user.user, password);
 	} catch (err) {
 		const resCode = err;
-		console.log("resCode");
-		console.log(resCode);
 
 		const remainingLoginAttempts = await handleAuthenticateFail(user, user.user);
-		console.log("remainingLoginAttempts");
-		console.log(remainingLoginAttempts);
 
 		if (resCode.value === responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value &&
 			remainingLoginAttempts <= config.loginPolicy.remainingLoginAttemptsPromptThreshold) {
-			console.log("throwing remaining message");
 			throw appendRemainingLoginsInfo(resCode, remainingLoginAttempts);
 		}
 
-		console.log("throwing resCode");
-		console.log(resCode);
 		throw { resCode };
 	}
 
