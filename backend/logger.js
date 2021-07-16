@@ -20,11 +20,28 @@ const config = require("./config.js");
 const winston = require("winston");
 require("winston-daily-rotate-file");
 
-const stringFormat = ({ level, message, label, timestamp }) => `${timestamp} [${level}] [${label || "APP"}] ${message}`;
-
-const logger = createLogger();
 const SystemLogger = {};
 
+const stringFormat = ({ level, message, label, timestamp }) => `${timestamp} [${level}] [${label || "APP"}] ${message}`;
+const logger = createLogger();
+SystemLogger.formatResponseMsg = (
+	resData
+) => {
+	if (config.logfile.jsonOutput) {
+		return JSON.stringify(resData);
+	} else {
+		const {
+			status,
+			code,
+			latency,
+			contentLength,
+			user,
+			method,
+			originalUrl
+		} = resData;
+		return `${status}\t${code}\t${latency}\t${contentLength}\t${user}\t${method}\t${originalUrl}`;
+	}
+};
 function createLogger() {
 	const transporters = [];
 

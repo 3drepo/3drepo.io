@@ -392,40 +392,14 @@
 		"jpg": "image/jpg"
 	};
 
-	const formatReponseLogging = (status,code,latency,contentLength,user,place) => {
-		if (config.logfile.jsonOutput) {
-			const placeArr = place.split("/");
-			let teamspace;
-			if (placeArr.length > 2) {
-				teamspace = placeArr[2];
-			} else {
-				teamspace = user;
-			}
-			const outputObject = {
-				status,
-				code,
-				latency,
-				contentLength,
-				user,
-				teamspace,
-				place
-			};
-			return JSON.stringify(outputObject);
-		} else {
-			return `${status}\t${code}\t${latency}\t${contentLength}\t${user}\t${place}`;
-		}
-	};
-
-	const genResponseLogging = (resCode, {place, contentLength}, {session, startTime} = {}) => {
+	const genResponseLogging = ({status, code}, {contentLength}, {session, startTime, method, originalUrl} = {}) => {
 		const user = session && session.user ? session.user.username : "unknown";
 		const currentTime = Date.now();
 		const latency = startTime ? `${currentTime - startTime}` : "???";
-		return formatReponseLogging(resCode.status,resCode.code,latency,contentLength,user,place);
+		return systemLogger.formatResponseMsg({status,code,latency,contentLength,user,method, originalUrl});
 	};
 
 	/**
-	 *
-	 *
 	 * @param {any} place
 	 * @param {any} req
 	 * @param {any} res
@@ -434,7 +408,7 @@
 	 * @param {any} extraInfo
 	 * @param {any} format
 	 */
-	responseCodes.respond = function (place, req, res, next, resCode, extraInfo, format, cache) {
+	responseCodes.respond = function (place, req, res, next, resCode, extraInfo, format, cache, customHeaders) {
 
 		resCode = utils.mongoErrorToResCode(resCode);
 
@@ -475,6 +449,10 @@
 
 			if(cache) {
 				res.setHeader("Cache-Control", `private, max-age=${cache.maxAge || config.cachePolicy.maxAge}`);
+			}
+
+			if (customHeaders) {
+				res.writeHead(resCode.status, customHeaders);
 			}
 
 			if (extraInfo && Buffer.isBuffer(extraInfo)) {
