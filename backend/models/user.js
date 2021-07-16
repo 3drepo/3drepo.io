@@ -146,6 +146,7 @@ User.getTeamspaceSpaceUsed = async function (dbName) {
 };
 
 User.authenticate =  async function (username, password) {
+	console.log("User.authenticate");
 	if (!username || !password) {
 		throw({ resCode: responseCodes.INCORRECT_USERNAME_OR_PASSWORD });
 	}

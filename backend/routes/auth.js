@@ -583,17 +583,22 @@ function createSession(place, req, res, next, user) {
 }
 
 function login(req, res, next) {
+	console.log("routes auth.login");
 	const responsePlace = utils.APIInfo(req);
 
 	const { username, password} = req.body;
 	if (utils.isString(username) && utils.isString(password)) {
-
+		console.log(`Authenticating ${username}...`);
 		systemLogger.logInfo(`Authenticating ${username}...`);
 
 		if(sessionCheck(req)) {
 			return responseCodes.respond(responsePlace, req, res, next, responseCodes.ALREADY_LOGGED_IN, responseCodes.ALREADY_LOGGED_IN);
 		}
 
+		console.log("username");
+		console.log(username);
+		console.log("password");
+		console.log(password);
 		User.authenticate(username, password).then(user => {
 			createSession(responsePlace, req, res, next, user);
 		}).catch(err => {
