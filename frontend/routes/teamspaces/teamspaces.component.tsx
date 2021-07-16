@@ -21,7 +21,6 @@ import { cond, matches, stubTrue } from 'lodash';
 import memoizeOne from 'memoize-one';
 import React from 'react';
 import SimpleBar from 'simplebar-react';
-
 import { IconButton, MenuItem, Tabs } from '@material-ui/core';
 import Add from '@material-ui/icons/Add';
 import Check from '@material-ui/icons/Check';
@@ -142,7 +141,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		return {
 			[TEAMSPACE_FILTER_RELATED_FIELDS.DATA_TYPE]: [],
 			[TEAMSPACE_FILTER_RELATED_FIELDS.MODEL_TYPE]: MODEL_SUBTYPES.map(({ value }) => ({ value, label: value })),
-			[TEAMSPACE_FILTER_RELATED_FIELDS .MODEL_CODE]: modelCodes.map((code) => ({ value: code, label: code })),
+			[TEAMSPACE_FILTER_RELATED_FIELDS.MODEL_CODE]: modelCodes.map((code) => ({ value: code, label: code })),
 		};
 	}
 
@@ -400,7 +399,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		const visibleItemsMap = {};
 
 		Object.keys(this.props.starredModelsMap).forEach((starredKey) => {
-			const [ teamspace, modelId ] = starredKey.split('/');
+			const [teamspace, modelId] = starredKey.split('/');
 			visibleItemsMap[teamspace] = true;
 
 			if (this.props.modelsMap[modelId]) {

@@ -18,7 +18,9 @@ import { isEqual } from 'lodash';
 import { getIssuePinColor } from './issues';
 import { getRiskPinColor } from './risks';
 
-const pinsById = (pins) => pins.reduce((map, pin) =>  { map[pin.id] = pin; return map; } , {});
+const pinsById = (pins) => pins.reduce((map, pin) =>  {
+ map[pin.id] = pin; return map;
+} , {});
 
 export const pinsDiff = (pinsA: any[], pinsB: any[]): any[] => {
 	const pinsMap = pinsById(pinsB);

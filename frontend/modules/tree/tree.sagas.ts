@@ -23,6 +23,20 @@ import { Viewer } from '../../services/viewer/viewer';
 import { DialogActions } from '../dialog';
 import { GroupsActions } from '../groups';
 import { dispatch } from '../store';
+
+import { SELECTION_STATES, VISIBILITY_STATES } from '../../constants/tree';
+import { VIEWER_PANELS } from '../../constants/viewerGui';
+
+import {
+	addTransparencyOverrides,
+	overridesTransparencyDiff,
+	removeTransparencyOverrides,
+} from '../../helpers/colorOverrides';
+import { MultiSelect } from '../../services/viewer/multiSelect';
+import { selectActiveMeta, selectIsActive, BimActions } from '../bim';
+import { selectSettings, ModelTypes } from '../model';
+import { selectIsMetadataVisible, ViewerGuiActions } from '../viewerGui';
+import TreeProcessing from './treeProcessing/treeProcessing';
 import {
 	selectActiveNode,
 	selectDefaultHiddenNodesIds,
@@ -38,20 +52,6 @@ import {
 	selectTreeNodesList,
 	selectVisibilityMap
 } from './tree.selectors';
-import TreeProcessing from './treeProcessing/treeProcessing';
-
-import { SELECTION_STATES, VISIBILITY_STATES } from '../../constants/tree';
-import { VIEWER_PANELS } from '../../constants/viewerGui';
-
-import {
-	addTransparencyOverrides,
-	overridesTransparencyDiff,
-	removeTransparencyOverrides,
-} from '../../helpers/colorOverrides';
-import { MultiSelect } from '../../services/viewer/multiSelect';
-import { selectActiveMeta, selectIsActive, BimActions } from '../bim';
-import { selectSettings, ModelTypes } from '../model';
-import { selectIsMetadataVisible, ViewerGuiActions } from '../viewerGui';
 import { TreeActions, TreeTypes } from './tree.redux';
 
 const unhighlightObjects = (objects = []) => {
@@ -170,7 +170,7 @@ function* fetchFullTree({ teamspace, modelId, revision }) {
 		modelsWithMeshes.mainTree.model = modelId;
 
 		const meshMap = modelsWithMeshes.subModels.length ? modelsWithMeshes.subModels :
-			[ modelsWithMeshes.mainTree];
+			[modelsWithMeshes.mainTree];
 
 		const dataToProcessed = {
 			mainTree: fullTree.mainTree.nodes,
@@ -669,7 +669,6 @@ function* handleTransparencyOverridesChange({ currentOverrides, previousOverride
 
 function* handleTransparenciesVisibility({ transparencies }) {
 	// 1. get node ids for the hidden nodes
-	// tslint:disable-next-line:variable-name
 	const meshesToHide: any[] = yield select(selectGetNodesIdsFromSharedIds(([{shared_ids: transparencies}])));
 
 	// This function is used by sequences, it will always want to show all hidden geometry.

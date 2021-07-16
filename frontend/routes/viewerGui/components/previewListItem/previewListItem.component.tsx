@@ -128,7 +128,6 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 	public render() {
 		const {
 			roleColor,
-			// tslint:disable-next-line
 			number,
 			owner,
 			hideThumbnail,

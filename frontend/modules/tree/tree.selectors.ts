@@ -52,7 +52,7 @@ export const selectActiveNode = createSelector(
 	selectTreeDomain, (state) => state.activeNode
 );
 
-const selectTreeProccessing = () => TreeProcessing.data as ITreeProcessingData;
+const selectTreeProccessing = () => TreeProcessing.data ;
 
 export const selectTreeNodesList = createSelector(
 	selectTreeProccessing, selectDataRevision,

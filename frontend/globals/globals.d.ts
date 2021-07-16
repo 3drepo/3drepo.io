@@ -1,4 +1,3 @@
-// tslint:disable:interface-name
 declare global {
 	interface Window {
 		Module: any;

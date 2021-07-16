@@ -22,7 +22,7 @@ import TextField from '@material-ui/core/Input';
 import { Form } from 'formik';
 
 import { COLOR } from '../../../../styles';
-// tslint:disable-next-line:max-line-length
+// eslint-disable-next-line max-len
 import { TicketPopover } from '../../../components/messagesList/components/message/components/markdownMessage/ticketReference/ticketPopover/ticketPopover.component';
 import {
 	UserPopover

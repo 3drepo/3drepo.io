@@ -15,9 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import React, { useEffect } from 'react';
-
-// @ts-ignore
 import { useIntercom, IntercomProvider } from 'react-use-intercom';
+
 import { clientConfigService } from '../../../services/clientConfig';
 
 interface IProps {
@@ -33,7 +32,6 @@ const IntercomPage = (props: IProps) => {
 			const {firstName, lastName, email, intercomHash } = props.currentUser;
 
 			const name = `${firstName || ''} ${lastName || ''}`.trim();
-			// @ts-ignore
 			boot( {
 					name, // Full name
 					email, // Email address

@@ -434,9 +434,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 			content: `
 				Would you like to update the viewpoint to your current position?
 			`,
-			onConfirm: async () => {
-				await this.handleViewpointUpdate(viewpoint);
-			},
+			onConfirm: () => this.handleViewpointUpdate(viewpoint),
 			onCancel: () => updateIssue({ viewpoint }),
 		});
 	}
@@ -452,9 +450,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 			content: `
 				Would you like to create a new screenshot?
 			`,
-			onConfirm: () => {
-				this.handleTakeScreenshot(true, true);
-			},
+			onConfirm: () => this.handleTakeScreenshot(true, true),
 			onCancel: () => this.handleViewpointUpdate()
 		});
 	}

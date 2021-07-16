@@ -108,6 +108,7 @@ export function* uploadAvatar({ file }) {
 			yield put(SnackbarActions.show('Avatar updated'));
 		} else {
 			const message = `File is too big! Must be smaller than ${maxSizeUser}.`;
+			// eslint-disable-next-line no-throw-literal
 			throw {response: { data: { message }}};
 		}
 	} catch (e) {
