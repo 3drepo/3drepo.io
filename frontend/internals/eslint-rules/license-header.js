@@ -37,7 +37,6 @@ module.exports = {
             description: "Ensures the file starts with a license copy.",
             category: "Stylistic Issues",
         },
-
         fixable: "code",
         schema: [],
         messages: {
@@ -62,7 +61,7 @@ module.exports = {
                         node,
                         loc: location,
                         messageId: "missing",
-                        fix(fixer) {
+                        fix: function(fixer) {
                             return fixer.insertTextBeforeRange([0, 1], `${LICENSE_FIRST_PART}${YEAR}${LICENSE_SECOND_PART}\n\n`,);
                         }
                     });

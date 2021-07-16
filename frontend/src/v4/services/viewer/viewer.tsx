@@ -18,6 +18,7 @@
 import EventEmitter from 'eventemitter3';
 import React from 'react';
 
+import { UnityUtil } from '@/globals/unity-util';
 import { IS_DEVELOPMENT } from '../../constants/environment';
 import {
 	VIEWER_EVENTS,
@@ -25,7 +26,6 @@ import {
 	VIEWER_NAV_MODES,
 	VIEWER_PROJECTION_MODES
 } from '../../constants/viewer';
-import { UnityUtil } from '@/globals/unity-util';
 import { uuid as UUID } from '../../helpers/uuid';
 import { DialogActions } from '../../modules/dialog';
 import { dispatch, getState } from '../../modules/store';

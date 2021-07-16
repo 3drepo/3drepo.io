@@ -32,10 +32,18 @@ export const VALIDATIONS_MESSAGES = {
 	MUST_BE_LOWER: 'Must be lower than or equal to ${max}'
 };
 /* eslint-enable no-template-curly-in-string */
-
-Yup.addMethod(Yup.string, 'differentThan', differentThan );
+Yup.addMethod(Yup.string, 'differentThan', differentThan);
 Yup.addMethod(Yup.string, 'equalTo', equalTo);
-Yup.addMethod(Yup.string, 'strength', strength );
+Yup.addMethod(Yup.string, 'strength', strength);
+
+
+declare module 'yup' {
+	interface StringSchema {
+		differentThan: (ref: unknown, message: unknown) => StringSchema;
+		equalTo: (ref: unknown, message: unknown) => StringSchema;
+		strength: (requiredValue: unknown, message: unknown) => StringSchema;
+	}
+}
 
 /*
 	Validation schemas

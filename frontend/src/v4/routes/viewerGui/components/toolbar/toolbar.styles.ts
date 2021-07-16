@@ -16,10 +16,10 @@
  */
 
 import styled from 'styled-components';
-import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
-import { COLOR, FONT_WEIGHT } from '../../../../styles';
 import OrthogonalIconSVG from '@assets/icons/orthogonal.svg';
 import PerspectiveIconSVG from '@assets/icons/perspective.svg';
+import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
+import { COLOR, FONT_WEIGHT } from '../../../../styles';
 
 export const Container = styled.div`
 	background-color: ${COLOR.REGENT_GRAY};

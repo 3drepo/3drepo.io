@@ -21,9 +21,10 @@ import 'normalize.css/normalize.css';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import 'simplebar';
+import '@/v4/services/fontAwesome';
 import 'simplebar/dist/simplebar.min.css';
 
+import 'simplebar';
 import { history, store } from '@/v4/modules/store';
 import Root from '@/v4/routes/index';
 import '@/v4/styles/global';
@@ -31,13 +32,12 @@ import '@/v4/styles/global';
 import { IS_DEVELOPMENT } from '@/v4/constants/environment';
 import { UnityUtil } from '@/globals/unity-util';
 import { clientConfigService } from '@/v4/services/clientConfig';
-import '@/v4/services/fontAwesome';
 
 window.UnityUtil = UnityUtil;
 
 const render = () => {
 	ReactDOM.render(
-		<Provider store={store} >
+		<Provider store={store as any} >
 			<ConnectedRouter history={history}>
 				<Root />
 			</ConnectedRouter>
@@ -58,5 +58,6 @@ const initApp = () => {
 initApp();
 
 if (!IS_DEVELOPMENT) {
+	// eslint-disable-next-line @typescript-eslint/no-var-requires
 	require('offline-plugin/runtime').install();
 }
