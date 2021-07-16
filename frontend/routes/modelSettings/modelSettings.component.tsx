@@ -315,7 +315,6 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 											{...field}
 											items={clientConfigService.units}
 											inputId="unit-select"
-											value="m"
 										/>
 									)} />
 								</SelectWrapper>
