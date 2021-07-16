@@ -18,7 +18,12 @@
     ],
     "jsx": "react",
     "removeComments": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "baseUrl": "./",
+    "paths": {
+      "@assets/*": ["./assets/*"],
+      "@/*": ["./src/*"],
+    }
   },
   "exclude": [
     "node_modules",
