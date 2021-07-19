@@ -44,6 +44,7 @@ matrix:
         - cd tests
         - git checkout $test_ver
         - git status
+        - sudo apt install mongo-tools -y
         - cd backend && mongorestore
         - cd ../../../
         - cp -r ./submodules/tests/frontend/staticPages/legal/ ./resources/legal
@@ -54,11 +55,6 @@ matrix:
         - cd ./../frontend
         - DETECT_CHROMEDRIVER_VERSION=true yarn install
         - yarn build
-
-      cache:
-      yarn: true
-      directories:
-        - node_modules
 
       script:
         - cd ../backend
