@@ -17,7 +17,8 @@
 
 import linkify from 'markdown-linkify';
 import React from 'react';
-// tslint:disable-next-line:max-line-length
+
+// eslint-disable-next-line max-len
 import { MarkdownMessage } from '../messagesList/components/message/components/markdownMessage/markdownMessage.component';
 
 interface IProps {

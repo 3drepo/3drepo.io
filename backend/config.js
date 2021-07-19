@@ -235,7 +235,7 @@ config.default_format = coalesce(config.default_format, "html");
 // config.external = (config.js_debug_level === "debug") ? frontend_scripts.debug_scripts : frontend_scripts.prod_scripts;
 
 // Log file options
-config.logfile = coalesce(config.logfile, {});
+config.logfile = config.logfile || {};
 
 if (!config.logfile.filename) {
 	config.logfile.logDirectory = coalesce(config.logfile.logDirectory, "/var/log");

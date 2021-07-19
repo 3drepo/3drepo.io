@@ -425,7 +425,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 					}
 					{
 						row.data.map((cellData, cellIndex) => {
-							const {CellProps = {}, CellComponent, type} = (cells[cellIndex] || {}) as any;
+							const {CellProps = {}, CellComponent, type} = (cells[cellIndex] || {});
 							const {root = {}, component = {}} = CellProps;
 
 							const cellRootProps = {

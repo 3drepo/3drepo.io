@@ -22,7 +22,7 @@ import { size } from 'lodash';
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { isViewer } from '../../../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { canComment } from '../../../../../../helpers/risks';
+import { canChangeBasicProperty, canComment } from '../../../../../../helpers/risks';
 import { EmptyStateInfo } from '../../../../../components/components.styles';
 import { Copy } from '../../../../../components/fontAwesomeIcon';
 import { ScreenshotDialog } from '../../../../../components/screenshotDialog';
@@ -126,6 +126,11 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		return [...this.props.jobs, UNASSIGNED_JOB];
 	}
 
+	get canEditBasicProperty() {
+		const { risk, myJob, currentUser } = this.props;
+		return this.isNewRisk || canChangeBasicProperty(risk, myJob, this.props.modelSettings.permissions, currentUser);
+	}
+
 	get actionButton() {
 		const hasViewerPermissions = isViewer(this.props.modelSettings.permissions);
 
@@ -166,7 +171,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 					type="risk"
 					key={`${this.riskData._id}${size(this.criteria)}`}
 					defaultExpanded={horizontal || expandDetails}
-					editable={!this.riskData._id}
+					editable={this.canEditBasicProperty}
 					onNameChange={this.handleNameChange}
 					onExpandChange={this.handleExpandChange}
 					renderCollapsable={this.renderDetailsForm}
@@ -256,6 +261,10 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	public handleNameChange = (event, name) => {
 		const newRisk = { ...this.riskData, name };
 		this.props.setState({ newRisk });
+
+		if (!this.isNewRisk) {
+			this.props.updateRisk({name});
+		}
 	}
 
 	public handleRiskFormSubmit = (values) => {
@@ -296,6 +305,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				attachLinkResources={attachLinkResources}
 				showDialog={showDialog}
 				canComment={this.userCanComment()}
+				canEditBasicProperty={this.canEditBasicProperty}
 				showMitigationSuggestions={this.props.showMitigationSuggestions}
 				formRef={this.formRef}
 				{...this.props}
@@ -426,16 +436,14 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 			content: `
 				Would you like to update the viewpoint to your current position?
 			`,
-			onConfirm: async () => {
-				await this.handleViewpointUpdate(viewpoint);
-			},
-			onCancel: () => updateRisk({ viewpoint }),
+			onConfirm: () => this.handleViewpointUpdate(viewpoint),
+			onCancel: () => updateRisk({ viewpoint })
 		});
 	}
 
 	public handleViewpointUpdate = (viewpoint?) => {
 		const { updateViewpoint } = this.props;
-		updateViewpoint(viewpoint?.screenshot);
+		return updateViewpoint(viewpoint?.screenshot);
 	}
 
 	public onUpdateRiskViewpoint = () => {
@@ -447,7 +455,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 			onConfirm: () => {
 				this.handleTakeScreenshot(true, true);
 			},
-			onCancel: async () => await this.handleViewpointUpdate()
+			onCancel: () => this.handleViewpointUpdate()
 		});
 	}
 

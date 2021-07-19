@@ -20,15 +20,12 @@ import Tooltip from '@material-ui/core/Tooltip';
 import { isEmpty, isEqual, memoize, pick } from 'lodash';
 import React from 'react';
 
-// @ts-ignore
 import AdminIconSrc from '../../../icons/how_to_reg.svg';
-
 import { MODEL_ROLES_TYPES } from '../../../constants/model-permissions';
 import { CellUserSearch } from '../customTable/components/cellUserSearch/cellUserSearch.component';
 import { TableHeadingRadio } from '../customTable/components/tableHeadingRadio/tableHeadingRadio.component';
 import { CheckboxField, CustomTable, CELL_TYPES } from '../customTable/customTable.component';
 import { UserItem } from '../userItem/userItem.component';
-
 import { ModelItem } from '../modelItem/modelItem.component';
 import {
 	DisabledCheckbox,

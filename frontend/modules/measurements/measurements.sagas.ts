@@ -15,27 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, select, takeLatest } from 'redux-saga/effects';
-import { VIEWER_EVENTS } from '../../constants/viewer';
-import { disableConflictingMeasurementActions, generateName } from '../../helpers/measurements';
+ import { all, put, select, takeLatest } from 'redux-saga/effects';
 
-import { Viewer } from '../../services/viewer/viewer';
-import { BimActions } from '../bim';
-import { DialogActions } from '../dialog';
-import { dispatch } from '../store';
-import { ViewerGuiActions } from '../viewerGui';
-import {
-	selectAreaMeasurements,
-	selectEdgeSnapping,
-	selectLengthMeasurements,
-	selectMeasurementsDomain,
-	selectMeasureMode,
-	selectMeasureUnits,
-	selectPointMeasurements,
-	MeasurementsActions,
-	MeasurementsTypes,
-} from './';
-import { MEASURE_TYPE_NAME, MEASURE_TYPE_STATE_MAP } from './measurements.constants';
+ import { VIEWER_EVENTS } from '../../constants/viewer';
+ import { disableConflictingMeasurementActions, generateName } from '../../helpers/measurements';
+ import { Viewer } from '../../services/viewer/viewer';
+ import { DialogActions } from '../dialog';
+ import { dispatch } from '../store';
+ import { MEASURE_TYPE_STATE_MAP } from './measurements.constants';
+ import {
+	 selectAreaMeasurements,
+	 selectEdgeSnapping,
+	 selectLengthMeasurements,
+	 selectMeasurementsDomain,
+	 selectMeasureMode,
+	 selectMeasureUnits,
+	 selectPointMeasurements,
+	 MeasurementsActions,
+	 MeasurementsTypes,
+ } from './';
 
 const onMeasurementCreated = (measure) => {
 	dispatch(MeasurementsActions.addMeasurement(measure));

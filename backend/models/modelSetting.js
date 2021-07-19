@@ -1,25 +1,24 @@
 /**
- *	Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 "use strict";
 
 const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
-const nodeuuid = require("uuid/v1");
 const utils = require("../utils");
 const db = require("../handler/db");
 const systemLogger = require("../logger.js").systemLogger;
@@ -379,7 +378,11 @@ ModelSetting.setModelStatus = async function(account, model, status) {
  * @param {addTimestamp} - add a timestamp to the model settings while you're at it
  */
 ModelSetting.createCorrelationId = async function(account, model, addTimestamp = false) {
-	const correlationId = nodeuuid();
+	const correlationId = utils.generateUUID({string: true});
+	return ModelSetting.setCorrelationId(account, model, correlationId, addTimestamp);
+};
+
+ModelSetting.setCorrelationId = async function(account, model, correlationId, addTimestamp = false) {
 	const data = { corID: correlationId };
 
 	if (addTimestamp) {

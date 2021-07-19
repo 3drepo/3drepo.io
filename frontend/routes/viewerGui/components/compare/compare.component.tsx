@@ -309,4 +309,5 @@ export class Compare extends React.PureComponent<IProps, any> {
 				</SliderLabels>
 			</SliderContainer>
 		);
-	}}
+	}
+}

@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 import { css } from 'styled-components';
 
 const breakpoints = {
@@ -34,7 +35,6 @@ export const media = Object.keys(breakpoints).reduce((accumulator, label) => {
 	const emSize = breakpoints[label] / 16;
 	accumulator[label] = (...args: any) => css`
 		@media (max-width: ${emSize}em) {
-			// @ts-ignore
 			${css(...args)};
 		}
 	`;

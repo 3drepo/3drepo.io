@@ -17,11 +17,11 @@
 
 import { Field } from 'formik';
 import React from 'react';
+import SaveIcon from '@material-ui/icons/Save';
 
 import { ViewerPanelButton, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { Container, Header, Headline, StyledForm, StyledTextField } from './settingsForm.styles';
 
-import SaveIcon from '@material-ui/icons/Save';
 
 const defaultFieldProps = {
 	required: true,

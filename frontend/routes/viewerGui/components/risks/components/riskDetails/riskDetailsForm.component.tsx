@@ -61,6 +61,7 @@ interface IProps {
 	showScreenshotDialog: (config: any) => void;
 	showDialog: (config: any) => void;
 	canComment: boolean;
+	canEditBasicProperty: boolean;
 	hasPin: boolean;
 	disableViewer?: boolean;
 	criteria: any;
@@ -97,11 +98,6 @@ export const RiskSchema = Yup.object().shape({
 class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	get isNewRisk() {
 		return !this.props.risk._id;
-	}
-
-	get canEditBasicProperty() {
-		const { risk, myJob, permissions, currentUser } = this.props;
-		return this.isNewRisk || canChangeBasicProperty(risk, myJob, permissions, currentUser);
 	}
 
 	get canEditViewpoint() {
@@ -184,7 +180,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		<MainRiskFormTab
 			active={active}
 			isNewRisk={this.isNewRisk}
-			canEditBasicProperty={this.canEditBasicProperty}
+			canEditBasicProperty={this.props.canEditBasicProperty}
 			canEditViewpoint={this.canEditViewpoint}
 			{...this.props}
 		/>

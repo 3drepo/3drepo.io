@@ -20,7 +20,6 @@ const C = require("../constants");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
-const nodeuuid = require("uuid/v1");
 const FileRef = require("./fileRef");
 const yup = require("yup");
 const {pick} = require("lodash");
@@ -79,10 +78,10 @@ const traverseActivities = (activities, callback) => {
 
 	while (stack.length > 0) {
 		const currentActivity = stack.pop();
-		let _id = nodeuuid();
+		let _id = utils.generateUUID({string: true});
 
 		while (generatedIDs.has(_id)) { // guarantee uniqueness
-			_id = nodeuuid();
+			_id = utils.generateUUID({string: true});
 		}
 
 		generatedIDs.add(_id);
@@ -242,7 +241,7 @@ SequenceActivities.get = async (account, model, sequenceId) => {
 		activities = await FileRef.getSequenceActivitiesFile(account, model, utils.uuidToString(sequenceId));
 	} catch(e) {
 		activities = await createActivitiesTree(account, model, sequenceId);
-		FileRef.storeFile(account, activityCol(model) + ".ref", account, utils.uuidToString(nodeuuid()), JSON.stringify(activities),  {"_id": sequenceId});
+		FileRef.storeFile(account, activityCol(model) + ".ref", account, utils.generateUUID({string: true}), JSON.stringify(activities),  {"_id": sequenceId});
 	}
 
 	return activities;
@@ -266,7 +265,7 @@ SequenceActivities.createActivities = async (account, model, sequenceId, activit
 
 		await Promise.all([
 			db.deleteMany(account, activityCol(model),{}),
-			FileRef.storeFile(account, activityCol(model) + ".ref", account, utils.uuidToString(nodeuuid()), activityTreeFile, {"_id": sequenceId})
+			FileRef.storeFile(account, activityCol(model) + ".ref", account, utils.generateUUID({string: true}), activityTreeFile, {"_id": sequenceId})
 		]);
 	}
 

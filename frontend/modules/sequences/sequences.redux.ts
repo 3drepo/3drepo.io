@@ -100,7 +100,7 @@ export const fetchSequenceSuccess = (state = INITIAL_STATE, { sequence }) => {
 			sequences[sequenceIndex] = sequence;
 		}
 	} else {
-		sequences = [ sequence ];
+		sequences = [sequence];
 	}
 
 	return { ...state, sequences };

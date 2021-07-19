@@ -1,26 +1,26 @@
 /**
- *	Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2014 3D Repo Ltd
  *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 "use strict";
 (() => {
 
-	const C = require("./constants");
 	const _ = require("lodash");
 	const config = require("./config");
-	const systemLogger = require("./logger.js").systemLogger;
+	const { systemLogger, logLabels} = require("./logger.js");
 	const utils = require("./utils");
 
 	/**
@@ -181,6 +181,7 @@
 		NOT_IN_ROLE: { message: "User or role not found", status: 400 },
 		RESOURCE_NOT_FOUND: { message: "Resource not found", status: 404 },
 		MODEL_NOT_FOUND: { message: "Model not found", status: 404 },
+		CORRELATION_ID_NOT_FOUND: { message: "Correlation ID not found", status: 404 },
 		INVALID_ROLE: { message: "Invalid role name", status: 400 },
 		ALREADY_IN_ROLE: { message: "User already assigned with this role", status: 400 },
 
@@ -391,6 +392,13 @@
 		"jpg": "image/jpg"
 	};
 
+	const genResponseLogging = (resCode, {place, contentLength}, {session, startTime} = {}) => {
+		const user = session && session.user ? session.user.username : "unknown";
+		const currentTime = Date.now();
+		const latency = startTime ? `${currentTime - startTime}` : "???";
+		return `${resCode.status}\t${resCode.code}\t${latency}\t${contentLength}\t${user}\t${place}`;
+	};
+
 	/**
 	 *
 	 *
@@ -402,17 +410,17 @@
 	 * @param {any} extraInfo
 	 * @param {any} format
 	 */
-	responseCodes.respond = function (place, req, res, next, resCode, extraInfo, format, cache) {
+	responseCodes.respond = function (place, req, res, next, resCode, extraInfo, format, cache, customHeaders) {
 
 		resCode = utils.mongoErrorToResCode(resCode);
 
 		if (!resCode || valid_values.indexOf(resCode.value) === -1) {
 			if (resCode && resCode.stack) {
-				req[C.REQ_REPO].logger.logError(resCode.stack);
+				systemLogger.logError(resCode.stack, undefined, logLabels.network);
 			} else if (resCode && resCode.message) {
-				req[C.REQ_REPO].logger.logError(resCode.message);
+				systemLogger.logError(resCode.message, undefined, logLabels.network);
 			} else {
-				req[C.REQ_REPO].logger.logError(JSON.stringify(resCode));
+				systemLogger.logError(JSON.stringify(resCode), undefined, logLabels.network);
 			}
 
 			if(!resCode.value) {
@@ -434,10 +442,7 @@
 
 			meta.contentLength = JSON.stringify(responseObject)
 				.length;
-			req[C.REQ_REPO].logger.logError(
-				resCode.code + " (" + resCode.value + ")",
-				meta
-			);
+			systemLogger.logInfo(genResponseLogging(resCode, meta, req), undefined, logLabels.network);
 
 			res.status(resCode.status)
 				.send(responseObject);
@@ -446,6 +451,10 @@
 
 			if(cache) {
 				res.setHeader("Cache-Control", `private, max-age=${cache.maxAge || config.cachePolicy.maxAge}`);
+			}
+
+			if (customHeaders) {
+				res.writeHead(resCode.status, customHeaders);
 			}
 
 			if (extraInfo && Buffer.isBuffer(extraInfo)) {
@@ -479,10 +488,8 @@
 			}
 
 			// log bandwidth and http status code
-			req[C.REQ_REPO].logger.logInfo(resCode.code, meta);
+			systemLogger.logInfo(genResponseLogging(resCode, meta, req), undefined, logLabels.network);
 		}
-
-		// next();
 	};
 
 	responseCodes.writeStreamRespond =  function (place, req, res, next, readStream, customHeaders) {
@@ -492,7 +499,7 @@
 		let response = responseCodes.OK;
 
 		readStream.on("error", error => {
-			req[C.REQ_REPO].logger.logInfo(`Stream failed: [${error.code} - ${error.message}]`, {place});
+			systemLogger.logError(`Stream failed: [${error.code} - ${error.message}] @ ${place}`, undefined, logLabels.network);
 			response = responseCodes.NO_FILE_FOUND;
 			res.status(response.status);
 			res.end();
@@ -507,11 +514,11 @@
 			length += data.length;
 		}).on("end", () => {
 			res.end();
-			req[C.REQ_REPO].logger.logInfo(response.status, {
+			systemLogger.logInfo(genResponseLogging(response, {
 				place,
 				httpCode: response.status,
 				contentLength: length
-			});
+			}, req), undefined, logLabels.network);
 		});
 	};
 

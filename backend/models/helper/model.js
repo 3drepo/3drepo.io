@@ -38,13 +38,11 @@ const importQueue = require("../../services/queue");
 const C = require("../../constants");
 const Mailer = require("../../mailer/mailer");
 const systemLogger = require("../../logger.js").systemLogger;
-const config = require("../../config");
 const History = require("../history");
 const { getRefNodes } = require("../ref");
 const { findNodesByType, getGridfsFileStream, getNodeById, getParentMatrix } = require("../scene");
 const utils = require("../../utils");
 const middlewares = require("../../middlewares/middlewares");
-const multer = require("multer");
 const fs = require("fs");
 const ChatEvent = require("../chatEvent");
 const { addModelToProject, createProject, findOneProject, removeProjectModel } = require("../project");
@@ -182,7 +180,7 @@ async function importSuccess(account, model, sharedSpacePath, user) {
 		]);
 
 		if (setting) {
-			systemLogger.logInfo(`Model status changed to ${setting.status} and correlation ID reset`);
+			systemLogger.logDebug(`Model status changed to ${setting.status} and correlation ID reset`);
 
 			const updatedSetting = await setModelImportSuccess(account, model, setting.type === "toy" || setting.type === "sample");
 
@@ -271,7 +269,7 @@ function importFail(account, model, sharedSpacePath, user, errCode, errMsg) {
 async function setStatus(account, model, status, user) {
 	try {
 		const setting = await setModelStatus(account, model, status);
-		systemLogger.logInfo(`Model status changed to ${status}`);
+		systemLogger.logDebug(`Model status changed to ${status}`);
 		ChatEvent.modelStatusChanged(null, account, model, { status, user });
 
 		return setting;
@@ -600,91 +598,27 @@ function downloadLatest(account, model) {
 	});
 }
 
-async function uploadFile(req) {
-	if (!config.cn_queue) {
-		return Promise.reject(responseCodes.QUEUE_NO_CONFIG);
-	}
-
-	const account = req.params.account;
-	const model = req.params.model;
-	const user = req.session.user.username;
-
-	ChatEvent.modelStatusChanged(null, account, model, { status: "uploading", user });
-	// upload model with tag
-
-	const uploadedFile = await new Promise((resolve, reject) => {
-		const upload = multer({
-			dest: config.cn_queue.upload_dir,
-			fileFilter: function(fileReq, file, cb) {
-
-				let format = file.originalname.split(".");
-
-				if(format.length <= 1) {
-					return cb({resCode: responseCodes.FILE_NO_EXT});
-				}
-
-				const isIdgn = format[format.length - 1] === "dgn" && format[format.length - 2] === "i";
-
-				format = format[format.length - 1];
-
-				const size = parseInt(fileReq.headers["content-length"]);
-
-				if(isIdgn || acceptedFormat.indexOf(format.toLowerCase()) === -1) {
-					return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
-				}
-
-				if(size > config.uploadSizeLimit) {
-					return cb({ resCode: responseCodes.SIZE_LIMIT });
-				}
-
-				const sizeInMB = size / (1024 * 1024);
-				middlewares.freeSpace(account).then(space => {
-
-					if(sizeInMB > space) {
-						cb({ resCode: responseCodes.SIZE_LIMIT_PAY });
-					} else {
-						cb(null, true);
-					}
-				});
-			}
-		});
-
-		upload.single("file")(req, null, function (err) {
-			if (err) {
-				return reject(err);
-
-			} else if(!req.file.size) {
-				return reject(responseCodes.FILE_FORMAT_NOT_SUPPORTED);
-
-			} else {
-				ChatEvent.modelStatusChanged(null, account, model, { status: "uploaded" });
-				return resolve(req.file);
-			}
-		});
-	});
-
-	// req.body.tag wont be defined after the file has been uploaded
-	await History.isValidTag(account, model, req.body.tag);
-
-	return uploadedFile;
-}
-
 /**
  * Called by importModel to perform model upload
  */
-function _handleUpload(correlationId, account, model, username, file, data) {
+async function _handleUpload(correlationId, account, model, username, file, data) {
+	const newFileName = file.originalname.replace(C.FILENAME_REGEXP, "_");
+
+	await importQueue.writeImportData(correlationId,
+		account,
+		model,
+		username,
+		newFileName,
+		data.tag,
+		data.desc,
+		data.importAnimations
+	);
 
 	return importQueue.importFile(
 		correlationId,
 		file.path,
-		file.originalname,
-		account,
-		model,
-		username,
-		null,
-		data.tag,
-		data.desc,
-		data.importAnimations
+		newFileName,
+		null
 	);
 }
 
@@ -909,18 +843,6 @@ async function getSubModelRevisions(account, model, branch, rev) {
 	return Promise.all(promises).then(() => results);
 }
 
-const fileNameRegExp = /[ *"/\\[\]:;|=,<>$]/g;
-const acceptedFormat = [
-	"x","obj","3ds","md3","md2","ply",
-	"mdl","ase","hmp","smd","mdc","md5",
-	"stl","lxo","nff","raw","off","ac",
-	"bvh","irrmesh","irr","q3d","q3s","b3d",
-	"dae","ter","csm","3d","lws","xml","ogex",
-	"ms3d","cob","scn","blend","pk3","ndo",
-	"ifc","xgl","zgl","fbx","assbin", "bim", "dgn",
-	"rvt", "rfa", "spm"
-];
-
 const getModelSetting = async (account, model, username) => {
 	let setting = await findModelSettingById(account, model);
 
@@ -962,9 +884,6 @@ module.exports = {
 	listSubModels,
 	searchTree,
 	downloadLatest,
-	fileNameRegExp,
-	acceptedFormat,
-	uploadFile,
 	importModel,
 	removeModel,
 	getModelPermission,

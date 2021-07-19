@@ -31,14 +31,12 @@ import {
 	selectProjectionMode,
 	ViewerGuiActions
 } from '../../../../modules/viewerGui';
-import { Toolbar } from './toolbar.component';
-
 import { TreeActions } from '../../../../modules/tree';
-
 import { selectIsActive, BimActions } from '../../../../modules/bim';
 import { GroupsActions } from '../../../../modules/groups';
 import { MeasurementsActions } from '../../../../modules/measurements';
 import { selectMetaKeysExist } from '../../../../modules/model';
+import { Toolbar } from './toolbar.component';
 
 const mapStateToProps = createStructuredSelector({
 	projectionMode: selectProjectionMode,

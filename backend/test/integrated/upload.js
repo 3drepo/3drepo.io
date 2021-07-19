@@ -21,7 +21,7 @@ const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp();
 const logger = require("../../logger.js");
-const systemLogger = logger.systemLogger;
+const C = require("../../constants");
 const responseCodes = require("../../response_codes.js");
 const helpers = require("../helpers/signUp");
 const moment = require("moment");
@@ -49,7 +49,7 @@ describe("Uploading a model", function () {
 			async.series([
 				function(done) {
 					helpers.signUpAndLogin({
-						server, request, agent, expect, User, systemLogger,
+						server, request, agent, expect, User,
 						username, password, email, model, desc, type, noBasicPlan: true, unit,
 						done: function(err, _agent) {
 							agent = _agent;
@@ -88,6 +88,7 @@ describe("Uploading a model", function () {
 
 		it("should return error (no subscriptions)", function(done) {
 			agent.post(`/${username}/${modelId}/upload`)
+				.field("tag", "no_quota")
 				.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
 				.expect(400, function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT_PAY.value);
@@ -114,6 +115,7 @@ describe("Uploading a model", function () {
 
 		it("should return error (has a subscription but ran out of space)", function(done) {
 			agent.post(`/${username}/${modelId}/upload`)
+				.field("tag", "no_space")
 				.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
 				.expect(400, function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT_PAY.value);
@@ -140,6 +142,7 @@ describe("Uploading a model", function () {
 
 		it("should succeed", async function() {
 			await agent.post(`/${username}/${modelId}/upload`)
+				.field("tag", "with_quota")
 				.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
 				.expect(200);
 		});
@@ -167,8 +170,28 @@ describe("Uploading a model", function () {
 		*/
 		it("should succeed (uppercase extension)", function(done) {
 			agent.post(`/${username}/${modelId}/upload`)
+				.field("tag", "uppercase_ext")
 				.attach("file", __dirname + "/../../statics/3dmodels/upper.OBJ")
 				.expect(200, function(err, res) {
+					done(err);
+				});
+		});
+
+		it("but without tag should fail", function(done) {
+			agent.post(`/${username}/${modelId}/upload`)
+				.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
+					done(err);
+				});
+		});
+
+		it("but with invalid tag should fail", function(done) {
+			agent.post(`/${username}/${modelId}/upload`)
+				.field("tag", "bad tag!")
+				.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
 					done(err);
 				});
 		});
@@ -176,6 +199,7 @@ describe("Uploading a model", function () {
 		it("but empty file size should fail", function(done) {
 
 			agent.post(`/${username}/${modelId}/upload`)
+				.field("tag", "empty_file")
 				.attach("file", __dirname + "/../../statics/3dmodels/empty.ifc")
 				.expect(400, function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.FILE_FORMAT_NOT_SUPPORTED.value);
@@ -187,6 +211,7 @@ describe("Uploading a model", function () {
 		it("but unaccepted extension should failed", function(done) {
 
 			agent.post(`/${username}/${modelId}/upload`)
+				.field("tag", "unsupported_ext")
 				.attach("file", __dirname + "/../../statics/3dmodels/toy.abc")
 				.expect(400, function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.FILE_FORMAT_NOT_SUPPORTED.value);
@@ -198,6 +223,7 @@ describe("Uploading a model", function () {
 		it("but no extension should failed", function(done) {
 
 			agent.post(`/${username}/${modelId}/upload`)
+				.field("tag", "no_ext")
 				.attach("file", __dirname + "/../../statics/3dmodels/toy")
 				.expect(400, function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.FILE_NO_EXT.value);
@@ -209,6 +235,7 @@ describe("Uploading a model", function () {
 		it("but file size exceeded fixed single file size limit should fail", function(done) {
 
 			agent.post(`/${username}/${modelId}/upload`)
+				.field("tag", "too_big")
 				.attach("file", __dirname + "/../../statics/3dmodels/toy.ifc")
 				.expect(400, function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT.value);
@@ -219,4 +246,338 @@ describe("Uploading a model", function () {
 
 	});
 
+	describe("MS Logic Apps chunking", function() {
+		let corID1;
+		let corID2;
+
+		describe("Initialise chunking request", function() {
+			it("with invalid model should fail", function(done) {
+				agent.post(`/${username}/invalidModel/upload/ms-chunking`)
+					.send({
+						"filename": "file.ifc",
+						"tag": "rev0"
+					})
+					.expect(404, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+						done(err);
+					});
+			});
+
+			it("without filename should fail", function(done) {
+				agent.post(`/${username}/${modelId}/upload/ms-chunking`)
+					.send({"tag": "no_filename"})
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+						done(err);
+					});
+			});
+
+			it("without tag should fail", function(done) {
+				agent.post(`/${username}/${modelId}/upload/ms-chunking`)
+					.send({"filename": "no_tag.ifc"})
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
+						done(err);
+					});
+			});
+
+			it("with invalid tag should fail", function(done) {
+				agent.post(`/${username}/${modelId}/upload/ms-chunking`)
+					.send({
+						"filename": "file.ifc",
+						"tag": "bad tag!"
+					})
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
+						done(err);
+					});
+			});
+
+			it("duplicate tag should fail", function(done) {
+				agent.post(`/${username}/${model}/upload/ms-chunking`)
+					.send({
+						"filename": "file.ifc",
+						"tag": "tag_exists"
+					})
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.DUPLICATE_TAG.value);
+						done(err);
+					});
+			});
+
+			it("with no file extension should fail", function(done) {
+				agent.post(`/${username}/${modelId}/upload/ms-chunking`)
+					.send({
+						"filename": "cubes",
+						"tag": "id1"
+					})
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.FILE_NO_EXT.value);
+						done(err);
+					});
+			});
+
+			it("with unsupported file should fail", function(done) {
+				agent.post(`/${username}/${modelId}/upload/ms-chunking`)
+					.send({
+						"filename": "cubes.pdf",
+						"tag": "id1"
+					})
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.FILE_FORMAT_NOT_SUPPORTED.value);
+						done(err);
+					});
+			});
+
+			it("without description should succeed", function(done) {
+				agent.post(`/${username}/${modelId}/upload/ms-chunking`)
+					.send({
+						"filename": "cubes.obj",
+						"tag": "id1"
+					})
+					.expect(200, function(err, res) {
+						corID1 = res.body.corID;
+						done(err);
+					});
+			});
+
+			it("should succeed", function(done) {
+				agent.post(`/${username}/${modelId}/upload/ms-chunking`)
+					.send({
+						"filename": "cubes.obj",
+						"tag": "id2",
+						"desc": "Revision 2"
+					})
+					.expect(200, function(err, res) {
+						corID2 = res.body.corID;
+						done(err);
+					});
+			});
+		});
+
+		describe("Start MS chunk upload", function() {
+			it("with invalid model should fail", function(done) {
+				agent.post(`/${username}/invalidModel/upload/ms-chunking/${corID1}`)
+					.set("x-ms-transfer-mode", "chunked")
+					.set("x-ms-content-length", 6425218)
+					.expect(404, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+						done(err);
+					});
+			});
+
+			it("with invalid correlation ID should fail", function(done) {
+				agent.post(`/${username}/${modelId}/upload/ms-chunking/invalidCorID`)
+					.set("x-ms-transfer-mode", "chunked")
+					.set("x-ms-content-length", 6425218)
+					.expect(404, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.CORRELATION_ID_NOT_FOUND.value);
+						done(err);
+					});
+			});
+
+			it("without transfer mode header should fail", function(done) {
+				agent.post(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
+					.set("x-ms-content-length", 6425218)
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+						done(err);
+					});
+			});
+
+			it("should fail if transfer mode not chunked", function(done) {
+				agent.post(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
+					.set("x-ms-transfer-mode", "normal")
+					.set("x-ms-content-length", 6425218)
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+						done(err);
+					});
+			});
+
+			it("without content length header should fail", function(done) {
+				agent.post(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
+					.set("x-ms-transfer-mode", "chunked")
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+						done(err);
+					});
+			});
+
+			it("with NaN content length header should fail", function(done) {
+				agent.post(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
+					.set("x-ms-transfer-mode", "chunked")
+					.set("x-ms-content-length", "100MB")
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+						done(err);
+					});
+			});
+
+			it("should succeed", function(done) {
+				agent.post(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
+					.set("x-ms-transfer-mode", "chunked")
+					.set("x-ms-content-length", 6425218)
+					.expect(200, function(err, res) {
+						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(6425218);
+						expect(res.headers["location"]).to.exist;
+						done(err);
+					});
+			});
+
+			it("should succeed if string is number", function(done) {
+				agent.post(`/${username}/${modelId}/upload/ms-chunking/${corID2}`)
+					.set("x-ms-transfer-mode", "chunked")
+					.set("x-ms-content-length", "6425218")
+					.expect(200, function(err, res) {
+						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(6425218);
+						expect(res.headers["location"]).to.exist;
+						done(err);
+					});
+			});
+		});
+
+		describe("Upload model chunk", function() {
+			it("with invalid correlation ID should fail", function(done) {
+				agent.patch(`/${username}/${modelId}/upload/ms-chunking/invalidCorID`)
+					.set("Content-Range", "bytes 0-2999999/6425218")
+					.set("Content-Type", "application/octet-stream")
+					.set("Content-Length", "bytes=3000000")
+					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.obj")
+					.expect(404, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.CORRELATION_ID_NOT_FOUND.value);
+						done(err);
+					});
+			});
+
+			it("without content-range header should fail", function(done) {
+				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
+					.set("Content-Type", "application/octet-stream")
+					.set("Content-Length", "bytes=3000000")
+					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.obj")
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+						done(err);
+					});
+			});
+
+			it("content-range header not in bytes should fail", function(done) {
+				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
+					.set("Content-Range", "kilobytes 0-2999999/6425218")
+					.set("Content-Type", "application/octet-stream")
+					.set("Content-Length", "bytes=3000000")
+					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.obj")
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+						done(err);
+					});
+			});
+
+			it("content-range header not separated by space should fail", function(done) {
+				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
+					.set("Content-Range", "bytes=0-2999999/6425218")
+					.set("Content-Type", "application/octet-stream")
+					.set("Content-Length", "bytes=3000000")
+					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.obj")
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+						done(err);
+					});
+			});
+
+			it("chunk too large should fail", function(done) {
+				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
+					.set("Content-Range", "bytes 0-52428799/52428800")
+					.set("Content-Type", "application/octet-stream")
+					.set("Content-Length", "bytes=52428800")
+					.attach("file", __dirname + "/../../statics/3dmodels/big0.ifc")
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT.value);
+						done(err);
+					});
+			});
+
+			it("should succeed", function(done) {
+				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
+					.set("Content-Range", "bytes 0-2999999/6425218")
+					.set("Content-Type", "application/octet-stream")
+					.set("Content-Length", "bytes=3000000")
+					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.obj")
+					.expect(200, function(err, res) {
+						expect(res.headers["range"]).to.equal("bytes=0-2999999");
+						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(3425218);
+						done(err);
+					});
+			});
+
+			it("with other valid correlation IDs should succeed", function(done) {
+				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID2}`)
+					.set("Content-Range", "bytes 0-2999999/6425218")
+					.set("Content-Type", "application/octet-stream")
+					.set("Content-Length", "bytes=3000000")
+					.attach("file", __dirname + "/../../statics/3dmodels/chunk0.obj")
+					.expect(200, function(err, res) {
+						expect(res.headers["range"]).to.equal("bytes=0-2999999");
+						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(3425218);
+						done(err);
+					});
+			});
+
+			it("second chunk should succeed", function(done) {
+				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
+					.set("Content-Range", "bytes 3000000-5999999/6425218")
+					.set("Content-Type", "application/octet-stream")
+					.set("Content-Length", "bytes=3000000")
+					.attach("file", __dirname + "/../../statics/3dmodels/chunk1.obj")
+					.expect(200, function(err, res) {
+						const nextChunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, 425218);
+						expect(res.headers["range"]).to.equal("bytes=0-5999999");
+						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(nextChunkSize);
+						done(err);
+					});
+			});
+
+			it("final chunk should succeed", function(done) {
+				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
+					.set("Content-Range", "bytes 6000000-6425217/6425218")
+					.set("Content-Type", "application/octet-stream")
+					.set("Content-Length", "bytes=425218")
+					.attach("file", __dirname + "/../../statics/3dmodels/chunk2.obj")
+					.expect(200, function(err, res) {
+						expect(res.headers["range"]).to.equal("bytes=0-6425217");
+						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(0);
+						done(err);
+					});
+			});
+
+			it("file larger than expected should fail", function(done) {
+				async.series([
+					function(done) {
+						agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID2}`)
+							.set("Content-Range", "bytes 3000000-5999999/6425218")
+							.set("Content-Type", "application/octet-stream")
+							.set("Content-Length", "bytes=3000000")
+							.attach("file", __dirname + "/../../statics/3dmodels/big1.ifc")
+							.expect(200, function(err, res) {
+								const nextChunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, 425218);
+								expect(res.headers["range"]).to.equal("bytes=0-5999999");
+								expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(nextChunkSize);
+								done(err);
+							});
+					},
+					function(done) {
+						agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID2}`)
+							.set("Content-Range", "bytes 6000000-6425217/6425218")
+							.set("Content-Type", "application/octet-stream")
+							.set("Content-Length", "bytes=425218")
+							.attach("file", __dirname + "/../../statics/3dmodels/big2.ifc")
+							.expect(400, function(err, res) {
+								expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT.value);
+								done(err);
+							});
+					}
+				], done);
+			});
+		});
+	});
 });

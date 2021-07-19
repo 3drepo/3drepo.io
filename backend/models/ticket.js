@@ -1,19 +1,20 @@
 /**
- * Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 "use strict";
 const _ = require("lodash");
 
@@ -33,7 +34,6 @@ const db = require("../handler/db");
 const ChatEvent = require("./chatEvent");
 const { systemLogger } = require("../logger.js");
 
-const nodeuuid = require("uuid/v1");
 const Comment = require("./comment");
 const Shapes = require("./shapes");
 const FileRef = require("./fileRef");
@@ -446,7 +446,7 @@ class Ticket extends View {
 
 		const branch = newTicket.revId || "master";
 		newTicket.assigned_roles = newTicket.assigned_roles || [];
-		newTicket._id = utils.stringToUUID(newTicket._id || nodeuuid());
+		newTicket._id = utils.stringToUUID(newTicket._id || utils.generateUUID());
 		newTicket.created = parseInt(newTicket.created || (new Date()).getTime());
 
 		let shapes = newTicket.shapes;

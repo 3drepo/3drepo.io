@@ -19,11 +19,10 @@ import { Field, Formik } from 'formik';
 import { debounce } from 'lodash';
 import React, { useState } from 'react';
 import * as Yup from 'yup';
-
-import { renderWhenTrue } from '../../../../../../helpers/rendering';
-
 import { Menu, MenuItem, Tooltip } from '@material-ui/core';
 import MoreVert from '@material-ui/icons/MoreVert';
+
+import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { getViewNameFieldErrorMsg } from '../../../../../../helpers/views';
 import { ActionMessage } from '../../../../../components/actionMessage/actionMessage.component';
 import {
@@ -168,7 +167,6 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 		</NameRow>
 	));
 
-	// tslint:disable-next-line: variable-name
 	public _handleDelete = debounce((event) => {
 		if (!this.state.isDeletePending) {
 			event.stopPropagation();

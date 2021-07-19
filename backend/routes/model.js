@@ -1,33 +1,38 @@
 /**
- *	Copyright (C) 2018 3D Repo Ltd
+ *  Copyright (C) 2018 3D Repo Ltd
  *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 "use strict";
 
 const express = require("express");
 const router = express.Router({mergeParams: true});
+const multer = require("multer");
 const utils = require("../utils");
 const middlewares = require("../middlewares/middlewares");
 const ModelSetting = require("../models/modelSetting");
 const responseCodes = require("../response_codes");
 const C = require("../constants");
+const { modelStatusChanged } = require("../models/chatEvent");
+const { isValidTag } = require("../models/history");
 const ModelHelpers = require("../models/helper/model");
 const TextureHelpers = require("../models/helper/texture");
 const UnityAssets = require("../models/unityAssets");
 const SrcAssets = require("../models/srcAssets");
 const JSONAssets = require("../models/jsonAssets");
+const Upload = require("../models/upload");
 const config = require("../config");
 
 function convertProjectToParam(req, res, next) {
@@ -1573,6 +1578,109 @@ router.get("/:model/revision/:revId/subModelRevisions", middlewares.hasReadAcces
 router.delete("/:model", middlewares.hasDeleteAccessToModel, deleteModel);
 
 /**
+ * @api {post} /:teamspace/:model/upload/ms-chunking Initialise MS chunking request
+ * @apiName initChunking
+ * @apiGroup Model
+ * @apiDescription Initiate model revision data for MS Logic Apps chunked upload.
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model id to upload.
+ * @apiParam (Request body) {String} filename Filename of content to upload
+ * @apiParam (Request body) {String} tag Tag name for new revision
+ * @apiParam (Request body) {String} [desc] Description for new revision
+ * @apiParam (Request body) {Boolean} [importAnimations] Whether to import animations within a sequence
+ *
+ * @apiExample {post} Example usage:
+ * POST /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/ms-chunking HTTP/1.1
+ * {
+ * 	"filename": "structure.ifc",
+ * 	"tag": "rev001",
+ * 	"desc": "Revision 2"
+ * }
+ *
+ * @apiSuccessExample {json} Success-Response:
+ * HTTP/1.1 200 OK
+ * {
+ * 	"corID": "00000000-0000-1111-2222-333333333333"
+ * }
+ */
+router.post("/:model/upload/ms-chunking", middlewares.hasUploadAccessToModel, initChunking);
+
+/**
+ * @api {post} /:teamspace/:model/upload/ms-chunking/:corID Start MS chunking upload
+ * @apiName uploadChunksStart
+ * @apiGroup Model
+ * @apiDescription Start chunked model upload for Microsoft Logic Apps.
+ * Max chunk size defined as 52,428,800 bytes (52 MB) based on
+ * https://docs.microsoft.com/en-us/azure/logic-apps/logic-apps-limits-and-config?tabs=azure-portal
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID to upload
+ * @apiParam {String} corID Upload correlation ID
+ * @apiParam (Request header) {String} x-ms-transfer-mode Indicates that the content is uploaded in chunks; value="chunked"
+ * @apiParam (Request header) {Number} x-ms-content-length The entire content size in bytes before chunking
+ *
+ * @apiSuccess (200) {Number} [x-ms-chunk-size] Suggested chunk size in bytes
+ * @apiSuccess (200) {String} Location The URL location where to send the HTTP PATCH messages
+ *
+ * @apiExample {post} Example usage:
+ * POST /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/ms-chunking/00000000-0000-1111-2222-333333333333 HTTP/1.1
+ *
+ * header: {
+ * 	"x-ms-transfer-mode": "chunked",
+ * 	"x-ms-content-length": 10100
+ * }
+ *
+ * @apiSuccessExample {json} Success-Response:
+ * HTTP/1.1 200 OK
+ * {
+ * 	"x-ms-chunk-size": 1024,
+ * 	"Location": "/teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/ms-chunking/00000000-0000-1111-2222-333333333333"
+ * }
+ */
+router.post("/:model/upload/ms-chunking/:corID", middlewares.hasUploadAccessToModel, uploadChunksStart);
+
+/**
+ * @api {patch} /:teamspace/:model/upload/ms-chunking/:corID Upload model chunk
+ * @apiName uploadChunk
+ * @apiGroup Model
+ * @apiDescription Upload model chunk for Microsoft Logic Apps.
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID to upload
+ * @apiParam {String} corID Upload correlation ID
+ * @apiParam (Request header) {String} Content-Range Byte range for the current content chunk, including the starting value, ending value, and the total content size, for example: "bytes 0-1023/10100"
+ * @apiParam (Request header) {String} Content-Type Type of chunked content
+ * @apiParam (Request header) {String} Content-Length Length of size in bytes of the current chunk
+ *
+ * @apiParam (Request body: Attachment) {binary} FILE the file to be uploaded
+ *
+ * @apiSuccess (200) {String} Range Byte range for content that has been received by the endpoint, for example: "bytes=0-1023"
+ * @apiSuccess (200) {Number} [x-ms-chunk-size] Suggested chunk size in bytes
+ *
+ * @apiExample {patch} Example usage:
+ * PATCH /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/ms-chunking/00000000-0000-1111-2222-333333333333 HTTP/1.1
+ *
+ * header: {
+ * 	"Content-Range": "bytes 0-1023/10100",
+ * 	"Content-Type": "application/octet-stream",
+ * 	"Content-Length": "bytes=1024"
+ * }
+ *
+ * body: {
+ * 	"file": <FILE CHUNK CONTENTS>
+ * }
+ *
+ * @apiSuccessExample {json} Success-Response:
+ * HTTP/1.1 200 OK
+ * {
+ * 	"Range": "bytes=0-1023",
+ * 	"x-ms-chunk-size": 1024
+ * }
+ */
+router.patch("/:model/upload/ms-chunking/:corID", middlewares.hasUploadAccessToModel, uploadChunk);
+
+/**
  * @api {post} /:teamspace/:model/upload Upload Model.
  * @apiName uploadModel
  * @apiGroup Model
@@ -1670,8 +1778,9 @@ router.get("/:model/textures/:textureId", middlewares.hasReadAccessToModel, getT
 
 function updateSettings(req, res, next) {
 	const place = utils.APIInfo(req);
+	const {account, model} = req.params;
 
-	return ModelSetting.updateModelSetting(req.params.account, req.params.model, req.body).then(modelSetting => {
+	return ModelSetting.updateModelSetting(account, model, req.body).then(modelSetting => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, modelSetting.properties);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -1680,8 +1789,9 @@ function updateSettings(req, res, next) {
 
 function getHeliSpeed(req, res, next) {
 	const place = utils.APIInfo(req);
+	const {account, model} = req.params;
 
-	return ModelSetting.getHeliSpeed(req.params.account, req.params.model).then(heliSpeed => {
+	return ModelSetting.getHeliSpeed(account, model).then(heliSpeed => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, heliSpeed);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -1690,8 +1800,9 @@ function getHeliSpeed(req, res, next) {
 
 function updateHeliSpeed(req, res, next) {
 	const place = utils.APIInfo(req);
+	const {account, model} = req.params;
 
-	return ModelSetting.updateHeliSpeed(req.params.account, req.params.model, req.body.heliSpeed).then(() => {
+	return ModelSetting.updateHeliSpeed(account, model, req.body.heliSpeed).then(() => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, {});
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -1711,7 +1822,6 @@ function getModelSetting(req, res, next) {
 }
 
 function createModel(req, res, next) {
-
 	const responsePlace = utils.APIInfo(req);
 
 	if (Object.keys(req.body).length >= 1 &&
@@ -1817,13 +1927,13 @@ function getHeaders(cache = false) {
 }
 
 function getIdMap(req, res, next) {
-	const revId = req.params.rev;
+	const {account, model, rev} = req.params;
 
 	JSONAssets.getIdMap(
-		req.params.account,
-		req.params.model,
-		revId ? undefined : C.MASTER_BRANCH_NAME,
-		revId,
+		account,
+		model,
+		rev ? undefined : C.MASTER_BRANCH_NAME,
+		rev,
 		req.session.user.username
 	).then(file => {
 		const headers = getHeaders(false);
@@ -1834,12 +1944,13 @@ function getIdMap(req, res, next) {
 }
 
 function getIdToMeshes(req, res, next) {
-	const revId = req.params.rev;
+	const {account, model, rev} = req.params;
+
 	JSONAssets.getIdToMeshes(
-		req.params.account,
-		req.params.model,
-		revId ? undefined : C.MASTER_BRANCH_NAME,
-		revId,
+		account,
+		model,
+		rev ? undefined : C.MASTER_BRANCH_NAME,
+		rev,
 		req.session.user.username
 	).then(file => {
 		const headers = getHeaders(false);
@@ -1851,29 +1962,29 @@ function getIdToMeshes(req, res, next) {
 }
 
 function getModelTree(req, res, next) {
-	const revId = req.params.rev;
+	const {account, model, rev} = req.params;
 
 	JSONAssets.getTree(
-		req.params.account,
-		req.params.model,
-		revId ? undefined : C.MASTER_BRANCH_NAME,
-		revId
+		account,
+		model,
+		rev ? undefined : C.MASTER_BRANCH_NAME,
+		rev
 	).then(({ file, isFed }) => {
-		const headers = getHeaders(revId && !isFed);
+		const headers = getHeaders(rev && !isFed);
 		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
-
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
 }
 
 function getModelProperties(req, res, next) {
-	const revId = req.params.rev;
+	const {account, model, rev} = req.params;
+
 	JSONAssets.getModelProperties(
-		req.params.account,
-		req.params.model,
-		revId ? undefined : C.MASTER_BRANCH_NAME,
-		revId,
+		account,
+		model,
+		rev ? undefined : C.MASTER_BRANCH_NAME,
+		rev,
 		req.session.user.username
 	).then(file => {
 		const headers = getHeaders(false);
@@ -1885,12 +1996,13 @@ function getModelProperties(req, res, next) {
 }
 
 function getTreePath(req, res, next) {
-	const revId = req.params.rev;
+	const {account, model, rev} = req.params;
+
 	JSONAssets.getTreePath(
-		req.params.account,
-		req.params.model,
-		revId ? undefined : C.MASTER_BRANCH_NAME,
-		revId,
+		account,
+		model,
+		rev ? undefined : C.MASTER_BRANCH_NAME,
+		rev,
 		req.session.user.username
 	).then(file => {
 		const headers = getHeaders(false);
@@ -1902,62 +2014,140 @@ function getTreePath(req, res, next) {
 }
 
 function searchModelTree(req, res, next) {
-
-	const model = req.params.model;
-	const account = req.params.account;
+	const {account, model, rev} = req.params;
 	const username = req.session.user.username;
 	const searchString = req.query.searchString;
 
 	let branch;
 
-	if (!req.params.rev) {
+	if (!rev) {
 		branch = C.MASTER_BRANCH_NAME;
 	}
 
-	ModelHelpers.searchTree(account, model, branch, req.params.rev, searchString, username).then(items => {
-
+	ModelHelpers.searchTree(account, model, branch, rev, searchString, username).then(items => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, items);
-
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
 }
 
 function downloadLatest(req, res, next) {
+	const {account, model} = req.params;
 
-	ModelHelpers.downloadLatest(req.params.account, req.params.model).then(file => {
-
+	ModelHelpers.downloadLatest(account, model).then(file => {
 		const headers = {
 			"Content-Length": file.size,
 			"Content-Disposition": "attachment;filename=" + file.fileName
 		};
 
 		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
-
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
 }
 
+async function initChunking(req, res, next) {
+	const responsePlace = utils.APIInfo(req);
+	const {account, model} = req.params;
+	const username = req.session.user.username;
+
+	try {
+		const corID = await Upload.initChunking(account, model, username, req.body);
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, corID);
+	} catch(err) {
+		const errMsg = err.resCode ? err.resCode : err;
+		responseCodes.respond(responsePlace, req, res, next, errMsg, errMsg);
+	}
+}
+
+async function uploadChunksStart(req, res, next) {
+	const responsePlace = utils.APIInfo(req);
+	const { account, model, corID } = req.params;
+	const user = req.session.user.username;
+
+	try {
+		const initHeader = await Upload.uploadChunksStart(account, model, corID, user, req.headers);
+		initHeader.Location = `${config.public_protocol}://${req.headers.host}${req.originalUrl}`;
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, undefined, undefined, undefined, initHeader);
+	} catch(err) {
+		const errMsg = err.resCode ? err.resCode : err;
+		responseCodes.respond(responsePlace, req, res, next, errMsg, errMsg);
+	}
+}
+
+async function uploadChunk(req, res, next) {
+	const responsePlace = utils.APIInfo(req);
+	const { account, model, corID } = req.params;
+
+	try {
+		const chunkingHeader = await Upload.uploadChunk(account, model, corID, req);
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, undefined, undefined, undefined, chunkingHeader);
+	} catch(err) {
+		const errMsg = err.resCode ? err.resCode : err;
+		responseCodes.respond(responsePlace, req, res, next, errMsg, errMsg);
+	}
+}
+
+async function uploadFile(teamspace, model, username, req) {
+	if (!config.cn_queue) {
+		throw responseCodes.QUEUE_NO_CONFIG;
+	}
+
+	modelStatusChanged(null, teamspace, model, { status: "uploading", username });
+	// upload model with tag
+
+	const uploadedFile = await new Promise((resolve, reject) => {
+		const upload = multer({
+			dest: config.cn_queue.upload_dir,
+			fileFilter: async function(fileReq, file, cb) {
+				const size = parseInt(fileReq.headers[C.CONTENT_LENGTH_HEADER]);
+
+				try {
+					await Upload.checkFileFormat(file.originalname);
+					await middlewares.checkSufficientSpace(teamspace, size);
+					cb(null, true);
+				} catch (err) {
+					cb(err);
+				}
+			}
+		});
+
+		upload.single("file")(req, null, function (err) {
+			if (err) {
+				return reject(err);
+
+			} else if(!req.file.size) {
+				return reject(responseCodes.FILE_FORMAT_NOT_SUPPORTED);
+
+			} else {
+				modelStatusChanged(null, teamspace, model, { status: "uploaded" });
+				return resolve(req.file);
+			}
+		});
+	});
+
+	// req.body.tag wont be defined after the file has been uploaded
+	await isValidTag(teamspace, model, req.body.tag);
+
+	return uploadedFile;
+}
+
 function uploadModel(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
-	const account = req.params.account;
-	const model = req.params.model;
+	const { account, model } = req.params;
 	const username = req.session.user.username;
 
 	let modelSetting;
 
 	// check model exists before upload
 	return ModelSetting.findModelSettingById(account, model).then(_modelSetting => {
-
 		modelSetting = _modelSetting;
 
 		if (!modelSetting) {
 			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 		} else {
-			return ModelHelpers.uploadFile(req);
+			return uploadFile(account, model, username, req);
 		}
-
 	}).then(file => {
 		const data = {
 			tag: req.body.tag,
@@ -1973,7 +2163,6 @@ function uploadModel(req, res, next) {
 		return ModelHelpers.importModel(account, model, username, modelSetting, source, data).then(() => {
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "uploaded"});
 		});
-
 	}).catch(err => {
 		err = err.resCode ? err.resCode : err;
 		responseCodes.respond(responsePlace, req, res, next, err, err);
@@ -1981,7 +2170,9 @@ function uploadModel(req, res, next) {
 }
 
 function updatePermissions(req, res, next) {
-	return ModelSetting.updatePermissions(req.params.account, req.params.model, req.body).then(response => {
+	const { account, model } = req.params;
+
+	return ModelSetting.updatePermissions(account, model, req.body).then(response => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, response);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -1989,7 +2180,9 @@ function updatePermissions(req, res, next) {
 }
 
 function changePermissions(req, res, next) {
-	return ModelSetting.changePermissions(req.params.account, req.params.model, req.body).then(permission => {
+	const { account, model } = req.params;
+
+	return ModelSetting.changePermissions(account, model, req.body).then(permission => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -2015,7 +2208,9 @@ function updateMultiplePermissions(req, res, next) {
 }
 
 function getSingleModelPermissions(req, res, next) {
-	return ModelSetting.getSingleModelPermissions(req.params.account, req.params.model).then(permissions => {
+	const { account, model } = req.params;
+
+	return ModelSetting.getSingleModelPermissions(account, model).then(permissions => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permissions);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -2035,7 +2230,7 @@ function getUnityAssets(req, res, next) {
 	const username = req.session.user.username;
 	const branch = rev ? undefined : C.MASTER_BRANCH_NAME;
 
-	UnityAssets.getAssetList(account, model, branch, req.params.rev, username).then(obj => {
+	UnityAssets.getAssetList(account, model, branch, rev, username).then(obj => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -2047,7 +2242,7 @@ function getSrcAssets(req, res, next) {
 	const username = req.session.user.username;
 	const branch = rev ? undefined : C.MASTER_BRANCH_NAME;
 
-	SrcAssets.getAssetList(account, model, branch, req.params.rev, username).then(obj => {
+	SrcAssets.getAssetList(account, model, branch, rev, username).then(obj => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -2055,7 +2250,9 @@ function getSrcAssets(req, res, next) {
 }
 
 function getJsonMpc(req, res, next) {
-	JSONAssets.getSuperMeshMapping(req.params.account, req.params.model, req.params.uid).then(file => {
+	const {account, model, uid} = req.params;
+
+	JSONAssets.getSuperMeshMapping(account, model, uid).then(file => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file, undefined, config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -2074,7 +2271,9 @@ function getSubModelRevisions(req, res, next) {
 }
 
 function getUnityBundle(req, res, next) {
-	UnityAssets.getUnityBundle(req.params.account, req.params.model, req.params.uid).then(file => {
+	const {account, model, uid} = req.params;
+
+	UnityAssets.getUnityBundle(account, model, uid).then(file => {
 		req.params.format = "unity3d";
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file, undefined, config.cachePolicy);
 	}).catch(err => {
@@ -2083,8 +2282,10 @@ function getUnityBundle(req, res, next) {
 }
 
 function getSRC(req, res, next) {
+	const {account, model, uid} = req.params;
+
 	// FIXME: We should probably generalise this and have a model assets object.
-	SrcAssets.getSRC(req.params.account, req.params.model, req.params.uid).then(file => {
+	SrcAssets.getSRC(account, model, uid).then(file => {
 		req.params.format = "src";
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file.file, undefined, config.cachePolicy);
 	}).catch(err => {

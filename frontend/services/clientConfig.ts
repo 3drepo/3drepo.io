@@ -1,3 +1,20 @@
+/**
+ *  Copyright (C) 2021 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 const getSubdomain = () => {
 	const {host} = location;
 	if (host.indexOf('.') < 0) {
@@ -17,14 +34,12 @@ export class ClientConfigService {
 	public VERSION;
 	public userNotice;
 	public resourceUploadSizeLimit;
-	// tslint:disable-next-line
 	public login_check_interval;
 	public gtm;
 	public userId;
 	public development;
 	public sequencesEnabled;
 	public presenterEnabled;
-	// tslint:disable-next-line
 	public captcha_client_key;
 	public legalTemplates;
 	public liveChatLicense;
@@ -156,9 +171,8 @@ export class ClientConfigService {
 
 	public logAppVersion() {
 		if (this.VERSION) {
-			/* tslint:disable */
+			// eslint-disable-next-line no-console
 			console.log(`===== 3D REPO - Version ${this.VERSION} =====`);
-			/* tslint:enable */
 		} else {
 			console.error('No version number in config...');
 		}

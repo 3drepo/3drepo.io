@@ -1,5 +1,4 @@
 /**
- *
  *  Copyright (C) 2014 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -15,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 "use strict";
 
 const responseCodes = require("../response_codes.js");
@@ -145,7 +145,7 @@ User.getTeamspaceSpaceUsed = async function (dbName) {
 	return spacePerModel.reduce((total, value) => total + value, 0);
 };
 
-User.authenticate =  async function (logger, username, password) {
+User.authenticate =  async function (username, password) {
 	if (!username || !password) {
 		throw({ resCode: responseCodes.INCORRECT_USERNAME_OR_PASSWORD });
 	}
@@ -197,8 +197,6 @@ User.authenticate =  async function (logger, username, password) {
 		$set: {"customData.lastLoginAt": user.customData.lastLoginAt},
 		$unset: {"customData.loginInfo.failedLoginCount":""}
 	});
-
-	logger.logInfo("User has logged in", {username});
 
 	return { username: user.user, flags:{ termsPrompt } };
 };
@@ -378,7 +376,7 @@ User.checkEmailAvailableAndValid = async function (email, exceptUser) {
 	}
 };
 
-User.updatePassword = async function (logger, username, oldPassword, token, newPassword) {
+User.updatePassword = async function (username, oldPassword, token, newPassword) {
 	if (!((oldPassword || token) && newPassword)) {
 		throw ({ resCode: responseCodes.INVALID_INPUTS_TO_PASSWORD_UPDATE });
 	}
@@ -392,7 +390,7 @@ User.updatePassword = async function (logger, username, oldPassword, token, newP
 			throw (responseCodes.NEW_OLD_PASSWORD_SAME);
 		}
 
-		await User.authenticate(logger, username, oldPassword);
+		await User.authenticate(username, oldPassword);
 	} else if (token) {
 		user = await User.findByUserName(username);
 
@@ -421,7 +419,7 @@ User.updatePassword = async function (logger, username, oldPassword, token, newP
 
 User.usernameRegExp = /^[a-zA-Z][\w]{1,63}$/;
 
-User.createUser = async function (logger, username, password, customData, tokenExpiryTime) {
+User.createUser = async function (username, password, customData, tokenExpiryTime) {
 	const Invitations =  require("./invitations");
 	if (!customData) {
 		throw ({ resCode: responseCodes.EMAIL_INVALID });
@@ -438,14 +436,23 @@ User.createUser = async function (logger, username, password, customData, tokenE
 
 	const cleanedCustomData = {
 		createdAt: new Date(),
-		inactive: true
+		inactive: true,
+		extras: {}
 	};
 
-	["firstName", "lastName", "email", "mailListOptOut"].forEach(key => {
-		if (customData[key]) {
-			cleanedCustomData[key] = customData[key];
-		}
-	});
+	["firstName", "lastName", "email", "mailListOptOut"]
+		.forEach(key => {
+			if (customData[key]) {
+				cleanedCustomData[key] = customData[key];
+			}
+		});
+
+	["jobTitle", "industry", "phoneNumber", "howDidYouFindUs"]
+		.forEach(key => {
+			if (customData[key]) {
+				cleanedCustomData.extras[key] = customData[key];
+			}
+		});
 
 	const billingInfo = {};
 
@@ -537,11 +544,14 @@ User.verify = async function (username, token, options) {
 	}
 
 	try {
-		const { customData: {firstName, lastName, email, billing, mailListOptOut} } = user;
+		const { customData: {firstName, lastName, email, billing, mailListOptOut, extras } } = user;
+		const { jobTitle, phoneNumber, industry, howDidYouFindUs } = extras;
+
 		const subscribed = !mailListOptOut;
 		const company = get(billing, "billingInfo.company");
 
-		await Intercom.createContact(username, formatPronouns(firstName + " " + lastName), email, subscribed, company);
+		await Intercom.createContact(username, formatPronouns(firstName + " " + lastName), email,
+			subscribed, company, jobTitle, phoneNumber, industry, howDidYouFindUs);
 	} catch (err) {
 		systemLogger.logError("Failed to create contact in intercom when verifying user", username, err);
 	}

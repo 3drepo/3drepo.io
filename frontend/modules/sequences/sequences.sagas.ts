@@ -17,8 +17,6 @@
 
 import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
-import { selectSelectedSequenceId, selectStateDefinitions,
-	SequencesActions, SequencesTypes } from '.';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
 
 import * as API from '../../services/api';
@@ -36,6 +34,8 @@ import {
 	selectActivitiesDefinitions, selectFrames, selectNextKeyFramesDates, selectSelectedDate, selectSelectedFrameViewpoint,
 	selectSelectedSequence, selectSequences, selectSequenceModel,
 } from './sequences.selectors';
+import { selectSelectedSequenceId, selectStateDefinitions,
+	SequencesActions, SequencesTypes } from '.';
 
 function* getSequenceModel(sequenceId) {
 	const sequences = yield select(selectSequences);

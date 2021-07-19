@@ -1,16 +1,18 @@
-/*
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
+/**
+ *  Copyright (C) 2021 3D Repo Ltd
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 "use strict";
@@ -20,7 +22,6 @@ const fs = require("fs");
 const path = require("path");
 const ResponseCodes = require("../response_codes");
 const systemLogger = require("../logger").systemLogger;
-const nodeuuid = require("uuid/v1");
 const farmhash = require("farmhash");
 const utils = require("../utils");
 
@@ -72,7 +73,7 @@ class FSHandler {
 	}
 
 	storeFile(data) {
-		const _id = nodeuuid();
+		const _id = utils.generateUUID({string: true});
 		const folderNames = generateFoldernames(_id, config.fs.levels);
 		const link = path.posix.join(folderNames, _id);
 

@@ -1,18 +1,18 @@
 /**
- *	Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 "use strict";
@@ -21,7 +21,7 @@ const db = require("../handler/db");
 // detects edge as browser but not device
 const UaParserJs = require("ua-parser-js");
 const Device = require("device");
-const Ip2location = require("ip-to-location");
+const IPCheck = require("geoip-lite");
 const Elastic = require("../handler/elastic");
 
 const LoginRecord = {};
@@ -42,9 +42,9 @@ LoginRecord.saveLoginRecord = async (id, username, ipAddr, userAgent, referer) =
 		...uaInfo
 	};
 
-	const { country_name, city } = await getLocationFromIPAddress(loginRecord.ipAddr);
+	const { country, city } = getLocationFromIPAddress(loginRecord.ipAddr);
 	loginRecord.location = {
-		country: country_name,
+		country,
 		city
 	};
 
@@ -102,7 +102,7 @@ const getUserAgentInfoFromBrowser = (userAgentString) => {
 };
 
 const getLocationFromIPAddress = async (ipAddress) => {
-	return await Ip2location.fetch(ipAddress);
+	return IPCheck.lookup(ipAddress);
 };
 
 const isUserAgentFromPlugin = (userAgent) => {

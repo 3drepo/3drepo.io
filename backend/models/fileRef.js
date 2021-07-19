@@ -21,7 +21,7 @@ const Mailer = require("../mailer/mailer");
 const ExternalServices = require("../handler/externalServices");
 const ResponseCodes = require("../response_codes");
 const systemLogger = require("../logger.js").systemLogger;
-const nodeuuid = require("uuid/v1");
+const utils = require("../utils");
 
 const ORIGINAL_FILE_REF_EXT = ".history.ref";
 const UNITY_BUNDLE_REF_EXT = ".stash.unity3d.ref";
@@ -302,7 +302,7 @@ FileRef.storeFile = async function(account, collection, user, name, data, extraF
 
 FileRef.storeUrlAsResource = async function(account, model, user, name, link, extraFields = null) {
 	const collName = model + RESOURCES_FILE_REF_EXT;
-	const refInfo = {_id: nodeuuid(), link, type: "http", ...extraFields  };
+	const refInfo = {_id: utils.generateUUID({string: true}), link, type: "http", ...extraFields  };
 	const ref = await insertRef(account, collName, user, name, refInfo);
 	return ref;
 };

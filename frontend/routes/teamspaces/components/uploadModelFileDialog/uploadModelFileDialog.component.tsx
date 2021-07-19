@@ -19,20 +19,18 @@ import { Field, Form, Formik } from 'formik';
 import { snakeCase } from 'lodash';
 import React from 'react';
 import * as Yup from 'yup';
-
 import Button from '@material-ui/core/Button';
 import DialogContent from '@material-ui/core/DialogContent';
 import TextField from '@material-ui/core/TextField';
 import FileIcon from '@material-ui/icons/InsertDriveFileOutlined';
+import Checkbox from '@material-ui/core/Checkbox';
 
 import { unitsMap } from '../../../../constants/model-parameters';
 import { schema } from '../../../../services/validation';
 import { LoadingDialog } from '../../../components/dialogContainer/components';
-import { FileInputField } from './components/fileInputField.component';
-
-import Checkbox from '@material-ui/core/Checkbox';
 import { renderWhenTrue, renderWhenTrueOtherwise} from '../../../../helpers/rendering';
 import { formatNamedMonthDate } from '../../../../services/formatting/formatDate';
+import { FileInputField } from './components/fileInputField.component';
 import {
 	Additional,
 	CancelButton,

@@ -184,7 +184,9 @@ const ColorSquareSelector = ({value, onChange}) => {
 	}, [value]);
 
 	const setColor = ({nativeEvent}) => {
-		if (!dragging)  { return; }
+		if (!dragging)  {
+ 			return;
+		}
 		const blockCanvas = canvasRef.current as HTMLCanvasElement;
 		const ctx = blockCanvas.getContext('2d');
 		onChange(getCanvasColor(nativeEvent, ctx));
@@ -461,7 +463,9 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 	}
 
 	public withOpacity = ({selectedColor, opacitySliderVisibility, opacity}) => {
-		if (!this.props.opacityEnabled) { return selectedColor; }
+		if (!this.props.opacityEnabled) {
+ 			return selectedColor;
+		}
 		return stripAlpha(selectedColor) + (opacitySliderVisibility ? alphaToHex(opacity) : '');
 	}
 
