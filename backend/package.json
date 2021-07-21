@@ -16,7 +16,7 @@
     "test:int-clean": "./test/cleanup/cleanup.sh",
     "test:int": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config mocha test/integrated --recursive --exit",
     "lint": "eslint ./ --rulesdir eslint-rules/",
-    "lint:fix": "eslint --fix ./"
+    "lint:fix": "eslint --fix ./ --rulesdir eslint-rules/"
   },
   "dependencies": {
     "@elastic/elasticsearch": "7.12.0",
