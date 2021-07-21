@@ -25,6 +25,8 @@ const referrerMatch = (sessionReferrer, headerReferrer) => {
 		apiUrls.some((api) => api.match(domain));
 };
 
-module.exports = ({session, headers}) =>
-	!headers.referer || session && session.user && referrerMatch(session.user.referer, headers.referer);
+module.exports = ({session, headers}) => session && (
+		!headers.referer ||
+		session.user && referrerMatch(session.user.referer, headers.referer)
+	);
 
