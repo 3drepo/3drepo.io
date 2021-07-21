@@ -21,8 +21,9 @@
     "sourceMap": true,
     "baseUrl": "./",
     "paths": {
+      "@components/*": ["./src/v5/ui/components/*"],
       "@assets/*": ["./assets/*"],
-      "@/*": ["./src/*"],
+      "@/*": ["./src/*"]
     }
   },
   "exclude": [

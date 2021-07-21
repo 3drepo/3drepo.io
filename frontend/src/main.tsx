@@ -16,6 +16,7 @@
  */
 
 import { ConnectedRouter } from 'connected-react-router';
+import { Route, Switch } from 'react-router-dom';
 import 'font-awesome/css/font-awesome.min.css';
 import 'normalize.css/normalize.css';
 import React from 'react';
@@ -26,12 +27,13 @@ import 'simplebar/dist/simplebar.min.css';
 
 import 'simplebar';
 import { history, store } from '@/v4/modules/store';
-import Root from '@/v4/routes/index';
+import V4Root from '@/v4/routes/index';
 import '@/v4/styles/global';
 
 import { IS_DEVELOPMENT } from '@/v4/constants/environment';
 import { UnityUtil } from '@/globals/unity-util';
 import { clientConfigService } from '@/v4/services/clientConfig';
+import { MainLayout } from '@components/mainLayout/mainLayout';
 
 window.UnityUtil = UnityUtil;
 
@@ -39,7 +41,10 @@ const render = () => {
 	ReactDOM.render(
 		<Provider store={store as any} >
 			<ConnectedRouter history={history}>
-				<Root />
+				<Switch >
+					<Route path="/v5"><MainLayout /></Route>
+					<Route><V4Root /></Route>
+				</Switch>
 			</ConnectedRouter>
 		</Provider>,
 		document.getElementById('app')
