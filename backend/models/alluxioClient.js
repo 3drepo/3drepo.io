@@ -117,7 +117,7 @@ class AlluxioClient {
 		return (await axios.get(`http://${this.hostname}/api/v1/proxy/info`)).data;
 	}
 
-	async uploadFile(path, data,) {
+	async uploadFile(path, data) {
 		if (await this.exists(path)) {
 			throw new Error(`Couldn't create file "${path}":file already exists.`);
 		}
