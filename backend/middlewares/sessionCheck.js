@@ -26,7 +26,7 @@ const referrerMatch = (sessionReferrer, headerReferrer) => {
 };
 
 module.exports = ({session, headers}) => session && session.user && (
-		!headers.referer ||
+	!headers.referer ||
 		referrerMatch(session.user.referer, headers.referer)
-	);
+);
 
