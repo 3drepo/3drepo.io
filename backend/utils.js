@@ -388,6 +388,13 @@ function Utils() {
 
 	this.writeFile = (fileName, content) => fs.writeFile(fileName, content, { flag: "a+" });
 
+	// e.g. URL `https://3drepo.org/abc/xyz` this returns `https://3drepo.org`
+	// returns the whole string if the regex is not matched.
+	this.getURLDomain = (url) => {
+		const domainRegexMatch = url.match(/^(\w)*:\/\/.*?(\/|$)/);
+		return domainRegexMatch ?  domainRegexMatch[0].replace(/\/\s*$/, "") : url;
+	};
+
 }
 
 module.exports = new Utils();

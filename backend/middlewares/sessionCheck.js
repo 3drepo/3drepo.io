@@ -16,11 +16,15 @@
  */
 
 "use strict";
-const C = require("../constants");
+const apiUrls = require("../config").apiUrls["all"];
 const utils = require("../utils");
 
-module.exports = (req) => {
-	return req.session &&
-		utils.hasField(req.session, C.REPO_SESSION_USER) &&
-		!(req.headers.referer && req.session.user && req.session.user.referer && !req.headers.referer.match(req.session.user.referer));
+const referrerMatch = (sessionReferrer, headerReferrer) => {
+	const domain = utils.getURLDomain(headerReferrer);
+	return domain === sessionReferrer ||
+		apiUrls.some((api) => api.match(domain));
 };
+
+module.exports = ({session, headers}) =>
+	!headers.referer || session && session.user && referrerMatch(session.user.referer, headers.referer);
+
